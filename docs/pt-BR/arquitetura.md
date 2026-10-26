@@ -68,7 +68,9 @@ Regra: **somente recursos do free tier do Google Cloud** (decisão 020).
 
 ## Segurança (requisitos)
 - Proteções nativas do Django ativas (CSRF, escape de XSS, ORM parametrizado, cabeçalhos de segurança). `manage.py check --deploy` sem alertas.
-- Senhas com hash Argon2 e limite de tentativas de login.
+- Senhas com hash Argon2 e limite de tentativas de login (django-axes: 5 erros por usuário + IP bloqueiam por 1 hora).
+- Registro de auditoria de alterações, consultas a fichas e entradas no sistema (`apps/auditoria`).
+- **No deploy:** atrás do Caddy, configurar o IP real do cliente (`X-Forwarded-For`) para o django-axes e a auditoria.
 - **Isolamento por clínica** em todas as consultas, com testes automatizados que tentam acessar dados de outra clínica.
 - Segredos só em `.env` (fora do Git) e nos *Secrets* do GitHub. Push protection ativo.
 - Postgres sem porta exposta. VM com firewall (80, 443, SSH só por chave).

@@ -12,6 +12,10 @@ class Usuario(AbstractUser):
     migrations. Access to clinics comes from Vinculo rows.
     """
 
+    ultima_versao_vista = models.CharField(
+        "última versão vista nas novidades", max_length=20, blank=True, editable=False
+    )
+
     class Meta:
         verbose_name = "usuário"
         verbose_name_plural = "usuários"

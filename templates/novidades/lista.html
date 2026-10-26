@@ -3,7 +3,15 @@
 {% block titulo %}Novidades · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">Novidades</h1>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+  <h1 class="h3 mb-0">Novidades</h1>
+  <form method="get">
+    <select name="modulo" class="form-select" aria-label="Filtrar por módulo" onchange="this.form.submit()">
+      <option value="">Todos os módulos</option>
+      {% for item in modulos %}<option value="{{ item }}"{% if item == modulo %} selected{% endif %}>{{ item }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
 
 {% for release, itens in versoes %}
 <section class="mb-4">

@@ -37,3 +37,6 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 029 | 2026-10-26 | Schedule with FullCalendar 6 (MIT, free plugins only) and modal forms via HTMX | Ready-made, responsive week grid, no Node build | Accepted |
 | 030 | 2026-10-26 | Overlap prevention also in the database: exclusion constraint with `btree_gist` | Enforces the rule even with simultaneous writes | Accepted |
 | 031 | 2026-10-26 | Isolation filter decided when the query runs (`FiltroClinicaAtual` expression), not when it is built | Django builds form field querysets at import time; still fails closed on execution | Accepted (complements 021) |
+| 032 | 2026-10-26 | Automatic audit via Django signals, with per-field before/after, patient record views and logins; passwords never stored | Accountability required by the LGPD for health data | Accepted |
+| 033 | 2026-10-26 | django-axes (MIT): 5 wrong attempts per user + IP lock for 1 hour | Protection against password guessing | Accepted |
+| 034 | 2026-10-26 | Test coverage measured in CI, minimum 90% | Keeps coverage from silently dropping | Accepted |

@@ -64,6 +64,13 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 - Rules: times aligned to the clinic's slot length and within opening hours; no overlap for the same practitioner (back-to-back slots are allowed).
 - Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time.
 
+## Audit log (LGPD)
+- `RegistroAuditoria` (`apps/auditoria`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
+- Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
+- **Never** stores passwords or their hash (a password change only shows as "changed").
+- Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin).
+- **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Logins do not belong to a clinic and are shown only to superusers, in the admin.
+
 ## Documents and formats
 - CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).
 - CNPJ accepts the Receita Federal **alphanumeric format** (in force since July 2026: letters in the first 12 positions, numeric check digits). Validation in `apps/core/validadores.py`.

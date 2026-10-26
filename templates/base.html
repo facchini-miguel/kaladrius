@@ -31,7 +31,7 @@
           {% if pode.aniversariantes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">Aniversariantes</a></li>
           {% endif %}
-          {% if pode.profissionais.ver or pode.cadastros.ver %}
+          {% if pode.profissionais.ver or pode.cadastros.ver or pode.auditoria.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</a>
             <ul class="dropdown-menu">
@@ -44,6 +44,10 @@
               <li><h6 class="dropdown-header">Tabelas de referência</h6></li>
               <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">Cidades</a></li>
               <li><a class="dropdown-item" href="{% url 'referencias:bancos' %}">Bancos</a></li>
+              {% endif %}
+              {% if pode.auditoria.ver %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'auditoria:lista' %}">Auditoria</a></li>
               {% endif %}
             </ul>
           </li>
@@ -85,6 +89,12 @@
   {% endif %}
 
   <main class="container py-4">
+    {% if versao_nova %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center" role="status">
+      <span>O sistema foi atualizado para a versão {{ versao_sistema }}.</span>
+      <a class="btn btn-sm btn-info" href="{% url 'novidades' %}">Veja o que mudou</a>
+    </div>
+    {% endif %}
     {% for mensagem in messages %}
     <div class="alert alert-{{ mensagem.tags|default:'info' }}" role="alert">{{ mensagem }}</div>
     {% endfor %}

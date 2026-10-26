@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português
 
-> Status: **em andamento**. Etapas 1 a 6 concluídas (versões 0.1.0 a 0.6.0).
+> Status: **concluída** na versão 0.7.0 (26/10/2026).
 
 ## Objetivo
 Ter, rodando em **Docker local**, a web da equipe com **as mesmas funções do sistema antigo**, já multi-clínica, segura, com dados fictícios para teste e a página de Novidades. Versão alvo: **0.7.0** (cada etapa com recursos novos sobe o número do meio). A 1.0.0 fica para o primeiro uso real.
@@ -44,9 +44,9 @@ medical-system/
 | 4 ✅ | **Pacientes** | Lista paginada, busca (nome, código, CPF/CNPJ), formulário único PF/PJ com validação de CPF/CNPJ, UF → cidade encadeado (HTMX), ficha com idade, exclusão com confirmação. CNPJ alfanumérico (julho/2026) aceito. Pacientes fictícios no `popular_dados_teste` (Faker) | 0.4.0 |
 | 5 ✅ | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional (busca enquanto digita), aniversariantes do dia, exclusão de um ou da série. Restrição no banco (PostgreSQL) contra sobreposição. As **rechamadas do dia** entram com o módulo de rechamadas (etapa 6) | 0.5.0 |
 | 6 ✅ | **Rechamadas e aniversariantes** | Rechamadas (cadastro, filtros, concluir, na ficha do paciente e no cabeçalho dos dias da agenda). Aniversariantes por mês com idade a completar e link para a ficha | 0.6.0 |
-| 7 | **Novidades** (restante) | Aviso "versão nova: veja o que mudou" até o usuário abrir, filtro por módulo | 0.7.0 |
-| 8 | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~5.000 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
-| 9 | **Qualidade** | Cobertura dos testes nas regras críticas (isolamento, conflito, permissões), `check --deploy` sem alertas, auditoria de alterações | 0.7.0 |
+| 7 ✅ | **Novidades** (restante) | Aviso "versão nova: veja o que mudou" até o usuário abrir, filtro por módulo | 0.7.0 |
+| 8 ✅ | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~5.000 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
+| 9 ✅ | **Qualidade** | Cobertura dos testes nas regras críticas (isolamento, conflito, permissões), `check --deploy` sem alertas, auditoria de alterações (LGPD), limite de tentativas de login (django-axes), cobertura medida no CI (mínimo 90%; atual 96%) | 0.7.0 |
 
 ## Regras de negócio (testadas automaticamente)
 - Um usuário só vê e altera dados das clínicas às quais está vinculado.

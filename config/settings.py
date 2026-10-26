@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "apps.agenda",
     "apps.pacientes",
     "apps.rechamadas",
+    "apps.auditoria",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -57,8 +59,11 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.ClinicaAtualMiddleware",
+    "apps.auditoria.middleware.AuditoriaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Must be the last middleware (django-axes).
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -95,6 +100,20 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "core.Usuario"
+
+# django-axes must be the first backend so it can block locked-out logins.
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Brute-force protection: 5 wrong passwords for the same user from the same IP
+# locks that combination for 1 hour. A successful login resets the counter.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = "registration/bloqueado.html"
 
 # Argon2 first: new passwords use Argon2; others are upgraded on the next login.
 PASSWORD_HASHERS = [

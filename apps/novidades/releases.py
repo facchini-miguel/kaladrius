@@ -124,6 +124,14 @@ def versao_atual():
     return todas()[0].versao
 
 
+def tem_novidade_para(ultima_vista, publico="equipe"):
+    """Whether there are release notes for the audience newer than the last version seen."""
+    try:
+        return bool(para_publico(publico, desde=ultima_vista or None))
+    except ReleasesInvalidas:
+        return True
+
+
 def para_publico(publico, desde=None):
     """Versions with items for the audience, newest first, optionally only after `desde`."""
     minimo = versao_para_tupla(desde) if desde else None

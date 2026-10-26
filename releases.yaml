@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.7.0
+  data: 2026-10-26
+  titulo: Auditoria e segurança (fim da fase 1)
+  itens:
+    - tipo: novo
+      modulo: Auditoria
+      publico: [equipe]
+      texto: >
+        O administrador da clínica consulta quem criou, alterou, excluiu ou abriu cada
+        registro, quando e o que mudou (Cadastros > Auditoria). Os registros não podem ser
+        alterados.
+    - tipo: seguranca
+      modulo: Acesso
+      publico: [equipe]
+      texto: >
+        Depois de 5 tentativas com senha errada, o acesso daquele usuário fica bloqueado
+        por 1 hora.
+    - tipo: melhoria
+      modulo: Novidades
+      publico: [equipe]
+      texto: >
+        Aviso de versão nova no topo das telas até você abrir as Novidades, e filtro das
+        novidades por módulo.
+
 - versao: 0.6.0
   data: 2026-10-26
   titulo: Rechamadas e aniversariantes

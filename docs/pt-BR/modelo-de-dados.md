@@ -62,6 +62,13 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 - Regras: horários alinhados à duração configurada da clínica e dentro do expediente; sem sobreposição para o mesmo profissional (horários encostados são permitidos).
 - A sobreposição é verificada no formulário (com mensagem de quem conflita) **e** por uma *exclusion constraint* do PostgreSQL (`btree_gist`), que vale mesmo com duas pessoas gravando ao mesmo tempo.
 
+## Auditoria (LGPD)
+- `RegistroAuditoria` (`apps/auditoria`) guarda **quem**, **quando**, **de qual IP**, **qual ação** e, nas alterações, o **antes e depois** de cada campo.
+- Registrado automaticamente (sinais do Django): criar, alterar e excluir Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo e Usuário. Também: abrir a ficha de um paciente, entrar, sair e tentativas de entrada recusadas.
+- **Nunca** grava senhas nem o hash delas (a troca de senha aparece só como "alterada").
+- Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura).
+- Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
+
 ## Documentos e formatos
 - CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`).
 - O CNPJ aceita o **formato alfanumérico** da Receita Federal (em vigor desde julho de 2026: letras nas 12 primeiras posições, dígitos verificadores numéricos). Validação em `apps/core/validadores.py`.

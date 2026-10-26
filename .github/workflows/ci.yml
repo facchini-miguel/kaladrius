@@ -42,4 +42,4 @@ jobs:
       - name: Django checks
         run: python manage.py check && python manage.py makemigrations --check --dry-run
       - name: Tests
-        run: python manage.py collectstatic --noinput && pytest
+        run: python manage.py collectstatic --noinput && pytest --cov --cov-report=term-missing

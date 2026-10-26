@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Auditoria · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">Auditoria</h1>
+<p class="text-body-secondary">Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros não podem ser alterados.</p>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="Usuário, registro ou código" aria-label="Buscar"></div>
+  <div class="col-6 col-md-2">
+    <select name="acao" class="form-select" aria-label="Ação">
+      <option value="">Todas as ações</option>
+      {% for valor, rotulo in acoes %}<option value="{{ valor }}"{% if filtros.acao == valor %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <select name="modelo" class="form-select" aria-label="Tipo de registro">
+      <option value="">Todos os tipos</option>
+      {% for item in modelos %}<option value="{{ item }}"{% if filtros.modelo == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="De" title="De"></div>
+  <div class="col-6 col-md-2"><input type="date" name="ate" value="{{ filtros.ate }}" class="form-control" aria-label="Até" title="Até"></div>
+  <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">Filtrar</button></div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-sm align-middle bg-white">
+    <thead><tr><th>Quando</th><th>Usuário</th><th>Ação</th><th>Registro</th><th>Detalhes</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for registro in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ registro.momento|date:"d/m/Y H:i:s" }}</td>
+        <td>{{ registro.usuario_nome|default:"sistema" }}</td>
+        <td>{{ registro.get_acao_display }}</td>
+        <td>{% if registro.modelo %}<span class="text-body-secondary">{{ registro.modelo }} {{ registro.objeto_id }}:</span> {% endif %}{{ registro.objeto_descricao }}</td>
+        <td>
+          {% if registro.alteracoes %}
+          <details>
+            <summary>{{ registro.alteracoes|length }} campo{{ registro.alteracoes|length|pluralize }}</summary>
+            <ul class="small mb-0">
+              {% for campo, valores in registro.alteracoes.items %}
+              <li><strong>{{ campo }}</strong>: {{ valores.0|default_if_none:"—" }} → {{ valores.1|default_if_none:"—" }}</li>
+              {% endfor %}
+            </ul>
+          </details>
+          {% endif %}
+        </td>
+        <td class="small text-body-secondary">{{ registro.ip|default:"" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">Nenhum registro encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/paginacao.html" %}
+{% endblock %}

@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import urlencode
 
+from apps.auditoria.models import RegistroAuditoria
+from apps.auditoria.registro import registrar
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 from apps.core.validadores import normalizar_cnpj
 from apps.rechamadas.models import Rechamada
@@ -57,6 +59,8 @@ def ficha(request, pk):
     paciente = get_object_or_404(
         Paciente.objects.select_related("cidade__uf", "estado_civil"), pk=pk
     )
+    # LGPD: access to a patient's record (health data) is logged.
+    registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)
     rechamadas = Rechamada.objects.filter(paciente=paciente).order_by("-data")[:20]
     return render(request, "pacientes/ficha.html", {"paciente": paciente, "rechamadas": rechamadas})
 

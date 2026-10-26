@@ -26,6 +26,7 @@ class Modulo(models.TextChoices):
     CADASTROS = "cadastros", "Tabelas base"
     USUARIOS = "usuarios", "Usuários da clínica"
     CLINICA = "clinica", "Configurações da clínica"
+    AUDITORIA = "auditoria", "Auditoria"
 
 
 class Acao(models.TextChoices):

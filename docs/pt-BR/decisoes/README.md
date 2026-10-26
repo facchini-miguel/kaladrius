@@ -37,3 +37,6 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 029 | 2026-10-26 | Agenda com FullCalendar 6 (MIT, só plugins gratuitos) e formulários em modal via HTMX | Grade semanal pronta, responsiva, sem build de Node | Aceita |
 | 030 | 2026-10-26 | Anti-sobreposição também no banco: *exclusion constraint* com `btree_gist` | Garante a regra mesmo com gravações simultâneas | Aceita |
 | 031 | 2026-10-26 | Filtro de isolamento decidido na execução da consulta (expressão `FiltroClinicaAtual`), não na montagem | O Django monta consultas de campos de formulário ao carregar o código; continua falhando fechado na execução | Aceita (complementa a 021) |
+| 032 | 2026-10-26 | Auditoria automática por sinais do Django, com antes/depois por campo, registro de acesso às fichas e de logins; nunca grava senhas | Responsabilização exigida pela LGPD para dados de saúde | Aceita |
+| 033 | 2026-10-26 | django-axes (MIT): 5 tentativas erradas por usuário + IP bloqueiam por 1 hora | Proteção contra adivinhação de senha | Aceita |
+| 034 | 2026-10-26 | Cobertura de testes medida no CI, mínimo de 90% | Evita que a cobertura caia sem ninguém perceber | Aceita |
