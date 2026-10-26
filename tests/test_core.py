@@ -41,7 +41,7 @@ def test_criar_admin(monkeypatch):
     assert admin.is_superuser and admin.is_staff
     assert admin.check_password("senha-forte-de-teste-123")
 
-    # Rodar de novo não altera nada
+    # Running it again changes nothing
     call_command("criar_admin")
     assert get_user_model().objects.filter(username="admin").count() == 1
 

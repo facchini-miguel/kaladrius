@@ -2,10 +2,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Usuario(AbstractUser):
-    """Usuário do sistema.
+    """System user.
 
-    Modelo próprio desde o início para permitir novos campos (ex.: vínculo com
-    clínicas na etapa 2) sem migrações difíceis depois.
+    Custom model from day one so new fields (e.g., clinic memberships in step 2)
+    can be added later without painful migrations.
     """
 
     class Meta:

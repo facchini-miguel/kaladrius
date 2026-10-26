@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# DEV=1 instala também as ferramentas de teste e lint
+# DEV=1 also installs the test and lint tools
 ARG DEV=0
 
 WORKDIR /app

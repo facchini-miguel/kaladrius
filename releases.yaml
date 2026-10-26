@@ -1,7 +1,8 @@
-# Histórico de versões do Medical System.
-# Fonte única para a página "Novidades" (web), a API do app e o rodapé.
-# Formato e regras: docs/pt-BR/versionamento-e-releases.md
-# A entrada mais nova fica sempre no topo.
+# Medical System version history.
+# Single source for the "Novidades" (What's new) web page, the app API and the footer.
+# Format and rules: docs/en/versioning-and-releases.md
+# The newest entry always goes at the top.
+# Release note texts stay in Portuguese: they are shown to users.
 
 - versao: 0.1.0
   data: 2026-10-26

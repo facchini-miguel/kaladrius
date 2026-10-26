@@ -27,9 +27,9 @@ class ReleaseOut(Schema):
 def listar_releases(
     request, publico: Literal["equipe", "paciente"] = "paciente", desde: str | None = None
 ):
-    """Novidades por versão, da mais nova para a mais antiga.
+    """Release notes per version, newest first.
 
-    Use `desde` para receber só as versões posteriores à que o app já mostrou.
+    Use `desde` to receive only the versions after the one the app already showed.
     """
     try:
         versoes = releases.para_publico(publico, desde=desde)

@@ -24,3 +24,4 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 016 | 2026-10-26 | Django 6.1 (atual), migrar para a 6.2 LTS em abr/2027; Python 3.13 | Versão estável mais recente; LTS com suporte até 2030 | Aceita |
 | 017 | 2026-10-26 | Front sem build de Node: Bootstrap 5.3 e HTMX 2 servidos como arquivos estáticos | Menos ferramentas para manter | Aceita |
 | 018 | 2026-10-26 | Documentação bilíngue: `docs/pt-BR/` (principal) e `docs/en/` (tradução); `README.md` em inglês e `README.pt-BR.md` em português | Arquivos separados por idioma evitam texto misturado; inglês amplia o público se o projeto for aberto | Aceita |
+| 019 | 2026-10-26 | Comentários e docstrings do código em inglês; textos para o usuário em português | Padrão internacional para o código, sem perder o idioma do público | Aceita |

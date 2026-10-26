@@ -6,8 +6,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 class Command(BaseCommand):
     help = (
-        "Cria o superusuário a partir de DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_PASSWORD e "
-        "DJANGO_ADMIN_EMAIL. Não faz nada se o usuário já existir."
+        "Creates the superuser from DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_PASSWORD and "
+        "DJANGO_ADMIN_EMAIL. Does nothing if the user already exists."
     )
 
     def handle(self, *args, **options):

@@ -1,6 +1,6 @@
-"""Leitura e validação do histórico de versões (releases.yaml).
+"""Loading and validation of the version history (releases.yaml).
 
-Formato e regras de escrita: docs/pt-BR/versionamento-e-releases.md
+Format and writing rules: docs/en/versioning-and-releases.md
 """
 
 import datetime
@@ -98,7 +98,7 @@ def _validar_release(bruto):
 
 
 def ler_releases(caminho):
-    """Lê e valida o arquivo. As versões devem estar da mais nova para a mais antiga."""
+    """Read and validate the file. Versions must be ordered from newest to oldest."""
     conteudo = yaml.safe_load(Path(caminho).read_text(encoding="utf-8"))
     if not isinstance(conteudo, list) or not conteudo:
         raise ReleasesInvalidas("O arquivo deve conter uma lista com pelo menos uma versão.")
@@ -125,7 +125,7 @@ def versao_atual():
 
 
 def para_publico(publico, desde=None):
-    """Versões que têm itens para o público, mais novas primeiro, opcionalmente após `desde`."""
+    """Versions with items for the audience, newest first, optionally only after `desde`."""
     minimo = versao_para_tupla(desde) if desde else None
     resultado = []
     for release in todas():

@@ -1,6 +1,6 @@
-"""Configuração do Medical System.
+"""Medical System settings.
 
-Todos os valores sensíveis ou que mudam por ambiente vêm de variáveis de ambiente (.env).
+All sensitive or per-environment values come from environment variables (.env).
 """
 
 import os
@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 def env(nome, padrao=None):
     valor = os.environ.get(nome, padrao)
     if valor is None:
-        raise ImproperlyConfigured(f"Variável de ambiente obrigatória ausente: {nome}")
+        raise ImproperlyConfigured(f"Missing required environment variable: {nome}")
     return valor
 
 
@@ -87,7 +87,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = "core.Usuario"
 
-# Argon2 primeiro: senhas novas usam Argon2; as demais são convertidas no próximo login.
+# Argon2 first: new passwords use Argon2; others are upgraded on the next login.
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -126,21 +126,21 @@ STORAGES = {
     },
 }
 
-# Em desenvolvimento os estáticos são servidos direto das pastas, sem collectstatic
+# In development, static files are served straight from the source folders (no collectstatic)
 WHITENOISE_USE_FINDERS = DEBUG
 WHITENOISE_AUTOREFRESH = DEBUG
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Arquivo com o histórico de versões (página Novidades, API e rodapé)
+# Version history file (What's new page, API and footer)
 RELEASES_ARQUIVO = BASE_DIR / "releases.yaml"
 
-# Sessão: expira em 8 horas e ao fechar o navegador
+# Session: expires after 8 hours and when the browser closes
 SESSION_COOKIE_AGE = 8 * 60 * 60
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True
 
-# Proteções que exigem HTTPS: ligadas em produção com DJANGO_SECURE=1
+# Protections that require HTTPS: enabled in production with DJANGO_SECURE=1
 if env_bool("DJANGO_SECURE"):
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

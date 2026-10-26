@@ -41,7 +41,7 @@ EXEMPLO = """
 
 
 def test_arquivo_do_projeto_e_valido():
-    """Garante que o releases.yaml do repositório está sempre correto (roda no CI)."""
+    """Ensures the repository's releases.yaml is always valid (runs in CI)."""
     versoes = releases.ler_releases(settings.RELEASES_ARQUIVO)
     assert versoes
 
@@ -101,7 +101,7 @@ def test_pagina_novidades(client, django_user_model):
     client.force_login(usuario)
     conteudo = client.get(reverse("novidades")).content.decode()
     assert f"Versão {releases.versao_atual()}" in conteudo
-    # Itens com publico vazio não aparecem para ninguém
+    # Items with an empty publico are hidden from everyone
     assert "Estrutura do projeto, Docker" not in conteudo
 
 
@@ -116,7 +116,7 @@ def test_api_releases(client):
     assert resposta.status_code == 200
     dados = resposta.json()
     assert dados[0]["versao"] == releases.versao_atual()
-    assert all(item["modulo"] != "Acesso" for item in dados[0]["itens"])  # item só da equipe
+    assert all(item["modulo"] != "Acesso" for item in dados[0]["itens"])  # staff-only item
 
 
 @pytest.mark.django_db

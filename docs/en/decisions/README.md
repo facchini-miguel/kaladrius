@@ -24,3 +24,4 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 016 | 2026-10-26 | Django 6.1 (current), move to 6.2 LTS in Apr/2027; Python 3.13 | Latest stable; LTS supported until 2030 | Accepted |
 | 017 | 2026-10-26 | No Node build on the front end: Bootstrap 5.3 and HTMX 2 served as static files | Fewer tools to maintain | Accepted |
 | 018 | 2026-10-26 | Bilingual docs: `docs/pt-BR/` (primary) and `docs/en/` (translation); `README.md` in English and `README.pt-BR.md` in Portuguese | Separate files per language avoid mixed text; English widens the audience if the project is opened | Accepted |
+| 019 | 2026-10-26 | Code comments and docstrings in English; user-facing text in Portuguese | International standard for code, while keeping the users' language | Accepted |

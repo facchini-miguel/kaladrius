@@ -1,5 +1,5 @@
-# Ambiente local de desenvolvimento.
-# Uso: docker compose up --build   →   http://localhost:8000
+# Local development environment.
+# Usage: docker compose up --build   →   http://localhost:8000
 services:
   db:
     image: postgres:16-alpine
@@ -12,7 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    # Sem "ports": o banco só é acessível pela rede interna do Docker.
+    # No "ports": the database is only reachable on the internal Docker network.
 
   app:
     build:
@@ -28,7 +28,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - .:/app
-    # Em desenvolvimento usa o servidor do Django, que recarrega ao salvar arquivos.
+    # In development, use Django's server, which reloads when files are saved.
     command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
 
 volumes:

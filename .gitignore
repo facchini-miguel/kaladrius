@@ -1,9 +1,9 @@
-# Segredos e configuração local
+# Secrets and local configuration
 .env
 .env.*
 !.env.example
 
-# Dados reais nunca entram no repositório (LGPD)
+# Real data never goes into the repository (LGPD)
 old_data/
 *.sql
 *.sql.gz
@@ -30,7 +30,7 @@ htmlcov/
 /media/
 *.sqlite3
 
-# Editores e sistema
+# Editors and OS
 .idea/
 .vscode/
 *.swp

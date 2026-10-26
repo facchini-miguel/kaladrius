@@ -14,5 +14,6 @@
 
 ## Convenções
 - A documentação é escrita primeiro em **português** (`docs/pt-BR/`) e traduzida para o **inglês** (`docs/en/`), com a mesma estrutura. Toda mudança atualiza os dois idiomas no mesmo commit. O código usa nomes em **português para o domínio** (Paciente, Agendamento) e em inglês só no que é do framework.
+- **Comentários e docstrings do código são escritos em inglês.** Os textos exibidos ao usuário (telas, mensagens, novidades) ficam em português.
 - Toda decisão importante vira um registro em `decisoes/`.
 - Toda versão publicada ganha uma entrada em [`../../releases.yaml`](../../releases.yaml).
