@@ -32,7 +32,7 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 | Network | VPC `medical-system`, subnet `medical-system-us-east1` (internal IPv4 + external IPv6, Private Google Access) | Free |
 | Static IPv6 | `medical-system-ipv6` (`2600:1900:4020:f0b::`, reserved) | Free |
 | Domain | `medical-system.duckdns.org` (DuckDNS) | Free |
-| Firewall | `medical-system-web-ipv6` (80/443 from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
+| Firewall | `medical-system-web-ipv6` (TCP 80/443 and UDP 443 for HTTP/3, from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
 | Images | Artifact Registry `medical-system` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
 | Backups | `gs://medical-system-facchini-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |
 | Service accounts | `medical-system-vm` (reads images, writes backups), `github-ci` (publishes images) | Free |
