@@ -15,6 +15,7 @@ from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
+from apps.rechamadas.models import Rechamada
 from apps.referencias.models import Cidade, EstadoCivil
 
 # Fake data only. Names, registrations and e-mails are invented.
@@ -118,10 +119,12 @@ class Command(BaseCommand):
             total_agendamentos = 0
             if not sem_agenda:
                 total_agendamentos = sum(self._agendamentos(clinica) for clinica in clinicas)
+            total_rechamadas = sum(self._rechamadas(clinica) for clinica in clinicas)
 
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
         self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
         self.stdout.write(f"Agendamentos fictícios criados: {total_agendamentos}")
+        self.stdout.write(f"Rechamadas fictícias criadas: {total_rechamadas}")
         if criados:
             self.stdout.write(
                 f"Usuários criados (senha em DJANGO_SEED_PASSWORD): {', '.join(criados)}"
@@ -237,3 +240,28 @@ class Command(BaseCommand):
                     atual += duracao
         Agendamento.objects.bulk_create(novos, batch_size=1000)
         return len(novos)
+
+    def _rechamadas(self, clinica):
+        """About 80 recalls from 30 days ago to 60 days ahead; past ones mostly done."""
+        if Rechamada.objects.filter(clinica=clinica).exists():
+            return 0
+        sorteio = random.Random(clinica.pk + 1000)  # noqa: S311 (fake data, not security)
+        pacientes = list(Paciente.objects.filter(clinica=clinica, ativo=True))
+        if not pacientes:
+            return 0
+        hoje = timezone.localdate()
+        motivos = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
+        novas = []
+        for _ in range(80):
+            data = hoje + datetime.timedelta(days=sorteio.randint(-30, 60))
+            novas.append(
+                Rechamada(
+                    clinica=clinica,
+                    paciente=sorteio.choice(pacientes),
+                    data=data,
+                    descricao=sorteio.choice(motivos),
+                    concluida=data < hoje and sorteio.random() < 0.7,
+                )
+            )
+        Rechamada.objects.bulk_create(novas)
+        return len(novas)

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Rechamadas · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 mb-0">Rechamadas</h1>
+  {% if pode.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'rechamadas:novo' %}">Nova rechamada</a>{% endif %}
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-4"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="Nome do paciente" aria-label="Nome do paciente"></div>
+  <div class="col-6 col-md-2">
+    <select name="situacao" class="form-select" aria-label="Situação">
+      <option value="pendentes"{% if filtros.situacao == "pendentes" %} selected{% endif %}>Pendentes</option>
+      <option value="concluidas"{% if filtros.situacao == "concluidas" %} selected{% endif %}>Concluídas</option>
+      <option value="todas"{% if filtros.situacao == "todas" %} selected{% endif %}>Todas</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="De" title="De"></div>
+  <div class="col-6 col-md-2"><input type="date" name="ate" value="{{ filtros.ate }}" class="form-control" aria-label="Até" title="Até"></div>
+  <div class="col-6 col-md-2"><button type="submit" class="btn btn-primary w-100">Filtrar</button></div>
+</form>
+
+<p class="text-body-secondary small">{{ pagina.paginator.count }} rechamada{{ pagina.paginator.count|pluralize }}</p>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>Data</th><th>Paciente</th><th>Descrição</th><th>Situação</th><th class="text-end">Ações</th></tr></thead>
+    <tbody>
+      {% for rechamada in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ rechamada.data|date:"d/m/Y" }}</td>
+        <td><a href="{% url 'pacientes:ficha' rechamada.paciente_id %}">{{ rechamada.paciente.nome }}</a></td>
+        <td>{{ rechamada.descricao }}</td>
+        <td>
+          {% if rechamada.concluida %}<span class="badge text-bg-success">Concluída</span>
+          {% elif rechamada.data < hoje %}<span class="badge text-bg-danger">Atrasada</span>
+          {% elif rechamada.data == hoje %}<span class="badge text-bg-warning">Hoje</span>
+          {% else %}<span class="badge text-bg-secondary">Pendente</span>{% endif %}
+        </td>
+        <td class="text-end text-nowrap">
+          {% if pode.rechamadas.alterar %}
+          <form method="post" action="{% url 'rechamadas:concluir' rechamada.pk %}" class="d-inline">
+            {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-sm btn-outline-success">{% if rechamada.concluida %}Reabrir{% else %}Concluir{% endif %}</button>
+          </form>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'rechamadas:editar' rechamada.pk %}">Editar</a>
+          {% endif %}
+          {% if pode.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'rechamadas:excluir' rechamada.pk %}">Excluir</a>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-body-secondary">Nenhuma rechamada encontrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/paginacao.html" %}
+{% endblock %}

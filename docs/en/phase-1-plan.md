@@ -2,7 +2,7 @@
 
 🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-fase-1.md)
 
-> Status: **in progress**. Steps 1 to 5 completed (versions 0.1.0 to 0.5.0).
+> Status: **in progress**. Steps 1 to 6 completed (versions 0.1.0 to 0.6.0).
 
 ## Goal
 Have the staff web app running on **local Docker** with **the same features as the legacy system**, already multi-tenant and secure, with fake test data and the What's new page. Target version: **0.7.0** (each step with new features bumps the minor number). 1.0.0 is reserved for the first real-world use.
@@ -43,7 +43,7 @@ medical-system/
 | 3 ✅ | **Reference data and simple records** | States and cities (official IBGE list), banks (Banco Central), marital status, loaded by migration with accent-insensitive search. Per-clinic appointment types, with the 10 original types and colors created automatically for every new clinic. Records menu. State → city endpoint for the patient form | 0.3.0 |
 | 4 ✅ | **Patients** | Paginated list, search (name, ID, CPF/CNPJ), single individual/company form with CPF/CNPJ validation, chained state → city (HTMX), record with age, delete with confirmation. Alphanumeric CNPJ (July 2026) supported. Fake patients in `popular_dados_teste` (Faker) | 0.4.0 |
 | 5 ✅ | **Schedule** | Weekly grid per practitioner (FullCalendar), hours and slot length configurable per clinic, colors and legend, create/edit/delete in a modal, weekly recurrence N times, conflict blocking (server validation + database constraint), optional patient (search as you type), the day's birthdays, delete one or the series. Database (PostgreSQL) constraint against overlaps. The **day's recalls** come with the recalls module (step 6) | 0.5.0 |
-| 6 | **Recalls and birthdays** | Recall CRUD. Birthdays by month with a link to the patient record | 0.6.0 |
+| 6 ✅ | **Recalls and birthdays** | Recalls (create, filters, mark as done, on the patient record and in the schedule day headers). Birthdays by month with the age to be reached and a link to the record | 0.6.0 |
 | 7 | **What's new** (remaining) | "New version: see what changed" notice until the user opens it, filter by module | 0.7.0 |
 | 8 | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~5,000 appointments around the current date, recalls, one user per role | 0.7.0 |
 | 9 | **Quality** | Test coverage of critical rules (isolation, conflicts, permissions), `check --deploy` with no warnings, change auditing | 0.7.0 |

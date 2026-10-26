@@ -1,0 +1,12 @@
+{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None).{% endcomment %}
+<div class="mb-3 position-relative busca-paciente">
+  <label class="form-label" for="busca-paciente">Paciente{% if campo.field.required %} *{% endif %}</label>
+  <input type="search" id="busca-paciente" class="form-control busca-paciente-texto{% if campo.errors %} is-invalid{% endif %}" autocomplete="off"
+         placeholder="Digite o nome, código ou CPF" value="{{ paciente.nome|default:'' }}"
+         name="q" hx-get="{% url 'pacientes:sugestoes' %}" hx-trigger="input changed delay:300ms"
+         hx-target="next .busca-paciente-sugestoes">
+  {{ campo }}
+  <div class="list-group position-absolute w-100 shadow-sm busca-paciente-sugestoes" style="z-index: 10;"></div>
+  {% if ajuda %}<div class="form-text">{{ ajuda }}</div>{% endif %}
+  {% for erro in campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+</div>

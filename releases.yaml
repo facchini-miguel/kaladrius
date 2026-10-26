@@ -4,6 +4,29 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.6.0
+  data: 2026-10-26
+  titulo: Rechamadas e aniversariantes
+  itens:
+    - tipo: novo
+      modulo: Rechamadas
+      publico: [equipe]
+      texto: >
+        Cadastro de rechamadas (retornos) por paciente, com lista de pendentes, atrasadas e
+        concluídas, filtros por período e botão para concluir. Também aparecem na ficha do paciente.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto: >
+        As rechamadas pendentes aparecem no cabeçalho de cada dia da agenda (📞), ao lado
+        dos aniversariantes (🎂). Clique para ver a lista.
+    - tipo: novo
+      modulo: Aniversariantes
+      publico: [equipe]
+      texto: >
+        Consulta dos aniversariantes por mês, com a idade que cada paciente completa,
+        telefone e e-mail. Os de hoje ficam destacados.
+
 - versao: 0.5.0
   data: 2026-10-26
   titulo: Agenda

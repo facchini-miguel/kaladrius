@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h2 class="modal-title h5">Rechamadas de {{ dia|date:"d/m" }}</h2>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+</div>
+<div class="modal-body">
+  <ul class="list-group">
+    {% for rechamada in rechamadas %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <span><a href="{% url 'pacientes:ficha' rechamada.paciente_id %}">{{ rechamada.paciente.nome }}</a> · {{ rechamada.descricao }}</span>
+      {% if rechamada.concluida %}<span class="badge text-bg-success">Concluída</span>{% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">Nenhuma rechamada neste dia.</li>
+    {% endfor %}
+  </ul>
+</div>
+<div class="modal-footer">
+  <a class="btn btn-outline-primary" href="{% url 'rechamadas:lista' %}?situacao=todas&amp;de={{ dia|date:'Y-m-d' }}&amp;ate={{ dia|date:'Y-m-d' }}">Abrir em Rechamadas</a>
+</div>

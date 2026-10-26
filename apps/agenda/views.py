@@ -97,6 +97,7 @@ def calendario(request):
     if profissional is not None:
         request.session[SESSAO_PROFISSIONAL] = profissional.pk
     clinica = request.clinica
+    ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
     configuracao = {
         "profissional": profissional.pk if profissional else None,
         "inicio": clinica.agenda_inicio.strftime("%H:%M:%S"),
@@ -109,6 +110,8 @@ def calendario(request):
             "novo": reverse("agenda:novo"),
             "aniversariantes": reverse("agenda:aniversariantes"),
             "aniversariantes_dia": reverse("agenda:aniversariantes_dia"),
+            "rechamadas": reverse("rechamadas:resumo") if ver_rechamadas else None,
+            "rechamadas_dia": reverse("rechamadas:do_dia") if ver_rechamadas else None,
         },
     }
     return render(

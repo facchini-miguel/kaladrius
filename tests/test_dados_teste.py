@@ -9,6 +9,7 @@ from apps.core.models import Clinica, Vinculo
 from apps.core.validadores import cnpj_valido, cpf_valido
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
+from apps.rechamadas.models import Rechamada
 
 pytestmark = pytest.mark.django_db
 
@@ -34,6 +35,7 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
             assert valido(paciente.cpf_cnpj), paciente.cpf_cnpj
         assert not Paciente.objects.exclude(email__endswith="@example.com").exists()
         assert Agendamento.objects.count() > 0  # created once, not duplicated
+        assert Rechamada.objects.count() == 160  # 80 per clinic, not duplicated
         assert Agendamento.objects.filter(profissional__clinica=F("clinica")).count() == (
             Agendamento.objects.count()
         )

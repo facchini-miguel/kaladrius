@@ -25,24 +25,31 @@
     mostrarAviso.timer = setTimeout(() => { aviso.hidden = true; }, 5000);
   }
 
-  // Birthday badges in the day headers.
-  function marcarAniversariantes(info) {
+  // Badges in the day headers (birthdays and pending recalls), each opening a list.
+  const MARCADORES = [
+    { classe: "aniversariantes", icone: "🎂", titulo: "aniversariante(s)", resumo: config.urls.aniversariantes, dia: config.urls.aniversariantes_dia },
+    { classe: "rechamadas", icone: "📞", titulo: "rechamada(s) pendente(s)", resumo: config.urls.rechamadas, dia: config.urls.rechamadas_dia },
+  ];
+
+  function marcarDias(info) {
     const params = new URLSearchParams({ start: info.startStr, end: info.endStr });
-    fetch(`${config.urls.aniversariantes}?${params}`)
-      .then((resposta) => (resposta.ok ? resposta.json() : {}))
-      .then((dias) => {
-        Object.entries(dias).forEach(([dia, total]) => {
-          const cabecalho = elementoCalendario.querySelector(`.fc-col-header-cell[data-date="${dia}"] .fc-col-header-cell-cushion`);
-          if (!cabecalho || cabecalho.parentElement.querySelector(".aniversariantes")) return;
-          const botao = document.createElement("button");
-          botao.type = "button";
-          botao.className = "btn btn-sm btn-link aniversariantes p-0 ms-1";
-          botao.title = `${total} aniversariante(s)`;
-          botao.textContent = `🎂 ${total}`;
-          botao.addEventListener("click", () => abrirModal(`${config.urls.aniversariantes_dia}?data=${dia}`));
-          cabecalho.after(botao);
+    MARCADORES.filter((m) => m.resumo).forEach((marcador) => {
+      fetch(`${marcador.resumo}?${params}`)
+        .then((resposta) => (resposta.ok ? resposta.json() : {}))
+        .then((dias) => {
+          Object.entries(dias).forEach(([dia, total]) => {
+            const celula = elementoCalendario.querySelector(`.fc-col-header-cell[data-date="${dia}"] .fc-scrollgrid-sync-inner`);
+            if (!celula || celula.querySelector(`.${marcador.classe}`)) return;
+            const botao = document.createElement("button");
+            botao.type = "button";
+            botao.className = `btn btn-sm btn-link ${marcador.classe} p-0 ms-1`;
+            botao.title = `${total} ${marcador.titulo}`;
+            botao.textContent = `${marcador.icone} ${total}`;
+            botao.addEventListener("click", () => abrirModal(`${marcador.dia}?data=${dia}`));
+            celula.appendChild(botao);
+          });
         });
-      });
+    });
   }
 
   const calendario = new FullCalendar.Calendar(elementoCalendario, {
@@ -66,7 +73,7 @@
     selectMirror: true,
     selectOverlap: false,
     events: { url: config.urls.eventos, extraParams: () => ({ profissional: config.profissional }) },
-    datesSet: marcarAniversariantes,
+    datesSet: marcarDias,
     select(info) {
       calendario.unselect();
       const params = new URLSearchParams({
@@ -97,18 +104,4 @@
     if (evento.detail && evento.detail.mensagem) mostrarAviso(evento.detail.mensagem);
   });
 
-  // Patient search-as-you-type inside the modal form.
-  modalEl.addEventListener("click", (evento) => {
-    const opcao = evento.target.closest("[data-paciente-id]");
-    if (!opcao) return;
-    evento.preventDefault();
-    modalEl.querySelector("#id_paciente").value = opcao.dataset.pacienteId;
-    modalEl.querySelector("#busca-paciente").value = opcao.dataset.pacienteNome;
-    modalEl.querySelector("#sugestoes-paciente").innerHTML = "";
-  });
-  modalEl.addEventListener("input", (evento) => {
-    if (evento.target.id === "busca-paciente" && !evento.target.value) {
-      modalEl.querySelector("#id_paciente").value = "";
-    }
-  });
 })();

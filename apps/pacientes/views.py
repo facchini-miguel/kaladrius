@@ -2,10 +2,12 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.http import urlencode
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 from apps.core.validadores import normalizar_cnpj
+from apps.rechamadas.models import Rechamada
 
 from .forms import PacienteForm
 from .models import Paciente
@@ -55,7 +57,8 @@ def ficha(request, pk):
     paciente = get_object_or_404(
         Paciente.objects.select_related("cidade__uf", "estado_civil"), pk=pk
     )
-    return render(request, "pacientes/ficha.html", {"paciente": paciente})
+    rechamadas = Rechamada.objects.filter(paciente=paciente).order_by("-data")[:20]
+    return render(request, "pacientes/ficha.html", {"paciente": paciente, "rechamadas": rechamadas})
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.CRIAR)
@@ -101,3 +104,36 @@ def sugestoes(request):
     busca = request.GET.get("q", "").strip()
     pacientes = filtrar(Paciente.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
     return render(request, "pacientes/_sugestoes.html", {"pacientes": pacientes})
+
+
+MESES = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+]
+
+
+@exige_permissao(Modulo.ANIVERSARIANTES, Acao.VER)
+def aniversariantes(request):
+    hoje = timezone.localdate()
+    mes = request.GET.get("mes", "")
+    mes = int(mes) if mes.isdigit() and 1 <= int(mes) <= 12 else hoje.month
+    pacientes = Paciente.objects.filter(ativo=True, data_nascimento__month=mes).order_by(
+        "data_nascimento__day", "nome"
+    )
+    ano = hoje.year if mes >= hoje.month else hoje.year + 1  # next birthday's year
+    linhas = [(paciente, ano - paciente.data_nascimento.year) for paciente in pacientes]
+    return render(
+        request,
+        "pacientes/aniversariantes.html",
+        {"mes": mes, "meses": list(enumerate(MESES, start=1)), "linhas": linhas, "hoje": hoje},
+    )

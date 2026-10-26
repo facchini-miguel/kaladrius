@@ -13,15 +13,8 @@
       <div class="col-md-4">{% with campo=form.data %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-6 col-md-4">{% with campo=form.hora_inicio %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-6 col-md-4">{% with campo=form.hora_fim %}{% include "includes/campo.html" %}{% endwith %}</div>
-      <div class="col-12 mb-3 position-relative">
-        <label class="form-label" for="busca-paciente">Paciente</label>
-        <input type="search" id="busca-paciente" class="form-control{% if form.paciente.errors %} is-invalid{% endif %}" autocomplete="off"
-               placeholder="Digite o nome, código ou CPF" value="{{ agendamento.paciente.nome|default:'' }}"
-               name="q" hx-get="{% url 'pacientes:sugestoes' %}" hx-trigger="input changed delay:300ms" hx-target="#sugestoes-paciente">
-        {{ form.paciente }}
-        <div id="sugestoes-paciente" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
-        <div class="form-text">Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”).</div>
-        {% for erro in form.paciente.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      <div class="col-12">
+        {% include "includes/busca_paciente.html" with campo=form.paciente paciente=agendamento.paciente ajuda="Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." %}
       </div>
       <div class="col-12">{% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
       {% if form.repeticoes %}
