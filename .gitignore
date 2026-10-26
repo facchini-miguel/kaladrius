@@ -1,0 +1,37 @@
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+
+# Dados reais nunca entram no repositório (LGPD)
+old_data/
+*.sql
+*.sql.gz
+*.dump
+*.csv
+*.pdf
+*.rar
+*.zip
+*.7z
+backups/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Django
+/staticfiles/
+/media/
+*.sqlite3
+
+# Editores e sistema
+.idea/
+.vscode/
+*.swp
+.DS_Store

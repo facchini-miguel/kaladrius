@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">Bem-vindo(a), {{ user.get_full_name|default:user.username }}</h1>
+<p class="text-body-secondary">
+  Esta é a primeira versão do novo sistema. Os módulos (pacientes, agenda, rechamadas,
+  aniversariantes) serão adicionados nas próximas versões.
+</p>
+<p>
+  <a href="{% url 'novidades' %}">Veja o que há de novo na versão {{ versao_sistema }}</a>.
+</p>
+{% endblock %}

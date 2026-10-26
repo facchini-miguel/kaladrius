@@ -1,0 +1,7 @@
+Django==6.1.2
+django-ninja==1.7.1
+psycopg[binary]==3.3.6
+argon2-cffi==25.1.0
+gunicorn==23.0.0
+whitenoise==6.9.0
+PyYAML==6.0.2

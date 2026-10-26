@@ -1,0 +1,16 @@
+# Documentação do Medical System
+
+| Documento | Conteúdo |
+|---|---|
+| [visao-geral.md](visao-geral.md) | O que o sistema faz, para quem, módulos e fases |
+| [arquitetura.md](arquitetura.md) | Stack, repositórios, infraestrutura, segurança |
+| [modelo-de-dados.md](modelo-de-dados.md) | Entidades, multi-clínica, relação com o sistema antigo |
+| [plano-fase-1.md](plano-fase-1.md) | Plano detalhado da fase 1 (web + dados de teste) |
+| [versionamento-e-releases.md](versionamento-e-releases.md) | Como numeramos versões e registramos as novidades |
+| [sistema-legado.md](sistema-legado.md) | Resumo do sistema PHP antigo usado como referência |
+| [decisoes/](decisoes/README.md) | Registro das decisões técnicas e de produto, com data e motivo |
+
+## Convenções
+- A documentação é escrita em **português**. O código usa nomes em **português para o domínio** (Paciente, Agendamento) e em inglês só no que é do framework.
+- Toda decisão importante vira um registro em `decisoes/`.
+- Toda versão publicada ganha uma entrada em [`../releases.yaml`](../releases.yaml).

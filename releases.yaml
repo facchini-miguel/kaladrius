@@ -1,0 +1,26 @@
+# Histórico de versões do Medical System.
+# Fonte única para a página "Novidades" (web), a API do app e o rodapé.
+# Formato e regras: docs/versionamento-e-releases.md
+# A entrada mais nova fica sempre no topo.
+
+- versao: 0.1.0
+  data: 2026-10-26
+  titulo: Primeira versão do novo sistema
+  itens:
+    - tipo: novo
+      modulo: Acesso
+      publico: [equipe]
+      texto: >
+        Entrada no sistema com usuário e senha. As senhas são guardadas com criptografia
+        moderna e a sessão expira após 8 horas ou ao fechar o navegador.
+    - tipo: novo
+      modulo: Novidades
+      publico: [equipe, paciente]
+      texto: >
+        Página de Novidades com o que mudou em cada versão. A versão atual aparece no
+        rodapé; clique nela para ver os detalhes.
+    - tipo: novo
+      modulo: Documentação
+      publico: []
+      texto: >
+        Estrutura do projeto, Docker, documentação, decisões de arquitetura e plano da fase 1.

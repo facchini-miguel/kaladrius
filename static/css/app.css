@@ -1,0 +1,16 @@
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+}
+
+main {
+  flex: 1;
+}
+
+/* Cores dos tipos de item na página Novidades */
+.tipo-novo { background-color: #198754; }
+.tipo-melhoria { background-color: #0d6efd; }
+.tipo-correcao { background-color: #fd7e14; }
+.tipo-seguranca { background-color: #dc3545; }
