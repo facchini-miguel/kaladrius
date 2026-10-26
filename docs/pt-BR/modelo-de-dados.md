@@ -57,6 +57,11 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Releases | Lidas do arquivo `releases.yaml` (não ficam no banco). Veja [versionamento-e-releases.md](versionamento-e-releases.md) |
 | `RegistroAuditoria` | Quem criou, alterou ou excluiu o quê e quando (LGPD) |
 
+## Documentos e formatos
+- CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`).
+- O CNPJ aceita o **formato alfanumérico** da Receita Federal (em vigor desde julho de 2026: letras nas 12 primeiras posições, dígitos verificadores numéricos). Validação em `apps/core/validadores.py`.
+- O CPF/CNPJ é opcional (crianças, por exemplo), mas **único dentro da clínica** quando informado.
+
 ## Diferenças intencionais em relação ao sistema antigo
 | Antes | Agora | Motivo |
 |---|---|---|

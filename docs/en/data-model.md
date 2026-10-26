@@ -59,6 +59,11 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 | Releases | Read from `releases.yaml` (not stored in the database). See [versioning-and-releases.md](versioning-and-releases.md) |
 | `RegistroAuditoria` (audit log) | Who created, changed or deleted what and when (LGPD) |
 
+## Documents and formats
+- CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).
+- CNPJ accepts the Receita Federal **alphanumeric format** (in force since July 2026: letters in the first 12 positions, numeric check digits). Validation in `apps/core/validadores.py`.
+- CPF/CNPJ is optional (e.g., children), but **unique within the clinic** when given.
+
 ## Intentional differences from the legacy system
 | Before | Now | Reason |
 |---|---|---|

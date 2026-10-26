@@ -7,7 +7,10 @@ from django.db import transaction
 
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
+from apps.core.validadores import somente_digitos
+from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
+from apps.referencias.models import Cidade, EstadoCivil
 
 # Fake data only. Names, registrations and e-mails are invented.
 CLINICAS = [
@@ -54,8 +57,14 @@ class Command(BaseCommand):
         parser.add_argument(
             "--forcar", action="store_true", help="Run even when DJANGO_DEBUG is off."
         )
+        parser.add_argument(
+            "--pacientes",
+            type=int,
+            default=600,
+            help="Fake patients per clinic (only for clinics without patients).",
+        )
 
-    def handle(self, *args, forcar=False, **options):
+    def handle(self, *args, forcar=False, pacientes=600, **options):
         if not settings.DEBUG and not forcar:
             raise CommandError(
                 "Dados de teste só podem ser criados com DJANGO_DEBUG=1 "
@@ -95,7 +104,10 @@ class Command(BaseCommand):
                     usuario=usuario, clinica=clinica, defaults={"papel": papel}
                 )
 
+            total_pacientes = sum(self._pacientes(clinica, pacientes) for clinica in clinicas)
+
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
+        self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
         if criados:
             self.stdout.write(
                 f"Usuários criados (senha em DJANGO_SEED_PASSWORD): {', '.join(criados)}"
@@ -117,3 +129,54 @@ class Command(BaseCommand):
             usuario.save(update_fields=["password"])
             criados.append(username)
         return usuario
+
+    def _pacientes(self, clinica, quantidade):
+        """Create fake patients for a clinic that has none. Returns how many were created."""
+        if quantidade <= 0 or Paciente.objects.filter(clinica=clinica).exists():
+            return 0
+        from faker import Faker  # dev-only dependency (requirements-dev.txt)
+
+        fake = Faker("pt_BR")
+        fake.seed_instance(clinica.pk)  # same data every time for the same clinic
+        cidades = list(Cidade.objects.filter(uf__sigla="SC"))
+        estados_civis = list(EstadoCivil.objects.all())
+        documentos = set()
+        novos = []
+        for numero in range(1, quantidade + 1):
+            juridica = numero % 25 == 0  # about 4% companies
+            if juridica:
+                nome = fake.company()
+                documento = somente_digitos(fake.cnpj())
+            else:
+                sexo = fake.random_element(["F", "M"])
+                nome = fake.name_female() if sexo == "F" else fake.name_male()
+                documento = somente_digitos(fake.cpf()) if fake.boolean(85) else ""
+            if documento in documentos:
+                documento = ""
+            documentos.add(documento)
+            cidade = fake.random_element(cidades)
+            paciente = Paciente(
+                clinica=clinica,
+                tipo=Paciente.Tipo.JURIDICA if juridica else Paciente.Tipo.FISICA,
+                nome=nome,
+                cpf_cnpj=documento,
+                telefone_celular=f"489{fake.numerify('########')}",
+                email=f"paciente{clinica.pk}.{numero}@example.com",
+                cep=f"88{fake.numerify('######')}",
+                uf_id=cidade.uf_id,
+                cidade=cidade,
+                bairro=fake.bairro(),
+                logradouro=fake.street_name(),
+                numero=fake.building_number(),
+                ativo=fake.boolean(95),
+            )
+            if juridica:
+                paciente.razao_social = f"{nome} Ltda."
+            else:
+                paciente.sexo = sexo
+                paciente.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
+                paciente.estado_civil = fake.random_element(estados_civis)
+                paciente.profissao = fake.job()[:100]
+            novos.append(paciente)
+        Paciente.objects.bulk_create(novos, batch_size=500)
+        return len(novos)

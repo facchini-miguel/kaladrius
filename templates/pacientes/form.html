@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if paciente.pk %}Editar{% else %}Novo{% endif %} paciente · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">{% if paciente.pk %}Editar {{ paciente.nome }}{% else %}Novo paciente{% endif %}</h1>
+
+<form method="post" novalidate id="form-paciente">
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+
+  <div class="card mb-3">
+    <div class="card-header">Identificação</div>
+    <div class="card-body row">
+      <div class="col-12">{% with campo=form.tipo %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.nome %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6 so-pj">{% with campo=form.razao_social %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with campo=form.cpf_cnpj %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3 so-pj">{% with campo=form.inscricao_estadual %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3 so-pf">{% with campo=form.rg %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3 so-pf">{% with campo=form.data_nascimento %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3 so-pf">{% with campo=form.sexo %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3 so-pf">{% with campo=form.estado_civil %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6 so-pf">{% with campo=form.profissao %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6 so-pf">{% with campo=form.responsavel %}{% include "includes/campo.html" %}{% endwith %}</div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Contato</div>
+    <div class="card-body row">
+      <div class="col-md-3">{% with campo=form.telefone_celular %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with campo=form.telefone_residencial %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with campo=form.telefone_comercial %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with campo=form.email %}{% include "includes/campo.html" %}{% endwith %}</div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Endereço</div>
+    <div class="card-body row">
+      <div class="col-md-2">{% with campo=form.cep %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.uf %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.cidade %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.logradouro %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-2">{% with campo=form.numero %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.complemento %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.bairro %}{% include "includes/campo.html" %}{% endwith %}</div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Observações</div>
+    <div class="card-body">
+      {% with campo=form.observacoes %}{% include "includes/campo.html" %}{% endwith %}
+      {% with campo=form.ativo %}{% include "includes/campo.html" %}{% endwith %}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Salvar</button>
+  <a class="btn btn-link" href="{% if paciente.pk %}{% url 'pacientes:ficha' paciente.pk %}{% else %}{% url 'pacientes:lista' %}{% endif %}">Cancelar</a>
+</form>
+
+<script>
+  // Show only the fields that apply to the chosen person type (individual or company).
+  (function () {
+    const form = document.getElementById("form-paciente");
+    function atualizar() {
+      const tipo = form.querySelector("input[name=tipo]:checked")?.value || "PF";
+      form.querySelectorAll(".so-pf").forEach((el) => { el.hidden = tipo !== "PF"; });
+      form.querySelectorAll(".so-pj").forEach((el) => { el.hidden = tipo !== "PJ"; });
+    }
+    form.querySelectorAll("input[name=tipo]").forEach((el) => el.addEventListener("change", atualizar));
+    atualizar();
+  })();
+</script>
+{% endblock %}

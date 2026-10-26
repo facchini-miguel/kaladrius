@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.profissionais",
     "apps.referencias",
     "apps.agenda",
+    "apps.pacientes",
 ]
 
 MIDDLEWARE = [

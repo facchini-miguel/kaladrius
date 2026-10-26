@@ -6,7 +6,9 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 É a reescrita do antigo *Odonto System* (PHP 5, 2009–2019), agora genérico para qualquer tipo de clínica.
 
-**Versão atual: 0.3.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
+[![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
+
+**Versão atual: 0.4.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **fase 1 em andamento**.
 
@@ -24,7 +26,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 | Tarefa | Comando |
 |---|---|
-| Dados de teste (clínicas, usuários e profissionais fictícios) | `docker compose exec app python manage.py popular_dados_teste` |
+| Dados de teste (clínicas, usuários, profissionais e 600 pacientes fictícios por clínica) | `docker compose exec app python manage.py popular_dados_teste` |
 | Testes | `docker compose exec app pytest` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatar código | `docker compose exec app ruff format .` |

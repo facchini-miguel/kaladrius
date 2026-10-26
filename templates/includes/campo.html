@@ -1,0 +1,23 @@
+<div class="mb-3">
+  {% if campo.widget_type == "checkbox" %}
+  <div class="form-check">
+    {{ campo }}
+    <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+  </div>
+  {% elif campo.widget_type == "radioselect" %}
+  <div class="form-label">{{ campo.label }}</div>
+  <div>
+    {% for opcao in campo %}
+    <div class="form-check form-check-inline">
+      {{ opcao.tag }}
+      <label class="form-check-label" for="{{ opcao.id_for_label }}">{{ opcao.choice_label }}</label>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} *{% endif %}</label>
+  {{ campo }}
+  {% endif %}
+  {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+  {% for erro in campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+</div>

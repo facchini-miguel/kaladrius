@@ -6,7 +6,9 @@ Clinic management system: per-professional scheduling, patient records, recalls 
 
 It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic for any kind of clinic.
 
-**Current version: 0.3.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+[![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
+
+**Current version: 0.4.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **phase 1 in progress**.
 
@@ -24,7 +26,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 
 | Task | Command |
 |---|---|
-| Test data (fake clinics, users and practitioners) | `docker compose exec app python manage.py popular_dados_teste` |
+| Test data (fake clinics, users, practitioners and 600 patients per clinic) | `docker compose exec app python manage.py popular_dados_teste` |
 | Tests | `docker compose exec app pytest` |
 | Lint | `docker compose exec app ruff check .` |
 | Format code | `docker compose exec app ruff format .` |

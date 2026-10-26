@@ -4,6 +4,29 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.4.0
+  data: 2026-10-26
+  titulo: Cadastro de pacientes
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto: >
+        Cadastro de pacientes pessoa física ou jurídica, com documentos, contatos, endereço
+        (escolha a UF e a cidade é filtrada) e observações. A ficha mostra a idade.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto: >
+        Busca por nome (sem precisar de acentos), código ou CPF/CNPJ, com filtros por tipo
+        e situação. CPF e CNPJ podem ser digitados com ou sem pontuação.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto: >
+        Validação de CPF e CNPJ, inclusive do novo CNPJ com letras, e aviso de CPF/CNPJ
+        já cadastrado na clínica.
+
 - versao: 0.3.0
   data: 2026-10-26
   titulo: Tabelas base e tipos de atendimento

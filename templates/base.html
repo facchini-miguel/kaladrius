@@ -19,6 +19,9 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">Início</a></li>
+          {% if pode.pacientes.ver %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:lista' %}">Pacientes</a></li>
+          {% endif %}
           {% if pode.profissionais.ver or pode.cadastros.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</a>
