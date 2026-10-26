@@ -19,8 +19,22 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">Início</a></li>
-          {% if pode.profissionais.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'profissionais:lista' %}">Profissionais</a></li>
+          {% if pode.profissionais.ver or pode.cadastros.ver %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</a>
+            <ul class="dropdown-menu">
+              {% if pode.profissionais.ver %}
+              <li><a class="dropdown-item" href="{% url 'profissionais:lista' %}">Profissionais</a></li>
+              {% endif %}
+              {% if pode.cadastros.ver %}
+              <li><a class="dropdown-item" href="{% url 'agenda:tipos' %}">Tipos de atendimento</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Tabelas de referência</h6></li>
+              <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">Cidades</a></li>
+              <li><a class="dropdown-item" href="{% url 'referencias:bancos' %}">Bancos</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'novidades' %}">Novidades</a></li>
           {% if user.is_superuser %}

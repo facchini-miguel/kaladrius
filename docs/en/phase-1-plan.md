@@ -2,10 +2,10 @@
 
 🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-fase-1.md)
 
-> Status: **in progress**. Step 1 completed in version 0.1.0; step 2 in 0.2.0.
+> Status: **in progress**. Steps 1, 2 and 3 completed (versions 0.1.0, 0.2.0 and 0.3.0).
 
 ## Goal
-Have the staff web app running on **local Docker** with **the same features as the legacy system**, already multi-tenant and secure, with fake test data and the What's new page. Target version: **0.5.0**. 1.0.0 is reserved for the first real-world use.
+Have the staff web app running on **local Docker** with **the same features as the legacy system**, already multi-tenant and secure, with fake test data and the What's new page. Target version: **0.7.0** (each step with new features bumps the minor number). 1.0.0 is reserved for the first real-world use.
 
 ## Out of scope for phase 1
 API and app (phase 2), patient login (phase 3), plans and billing (phase 4), cloud deploy (right after phase 1), finance, clinical records.
@@ -40,13 +40,13 @@ medical-system/
 |---|---|---|---|
 | 1 ✅ | **Skeleton** | Django project, Docker Compose (Postgres + app), settings via `.env`, Ruff, pytest, GitHub CI, login, home page, `admin` user. Pulled forward from step 7: What's new page, version in the footer and `/api/v1/releases` API | 0.1.0 |
 | 2 ✅ | **Multi-tenancy and permissions** | Clinica, Vinculo, roles (clinic admin, front desk, practitioner), fail-closed per-clinic isolation, permission matrix, clinic switcher, admin restricted to superusers, isolation tests. Pulled forward from step 3: **Practitioners** (the first clinic data, used to test isolation end to end) and the first part of the `popular_dados_teste` command | 0.2.0 |
-| 3 | **Reference data and simple records** | States and cities (IBGE), banks, marital status. Appointment types with the 10 original colors as defaults | 0.2.x |
-| 4 | **Patients** | Paginated list, search (name, ID, CPF/CNPJ), single individual/company form with CPF/CNPJ validation, chained state → city (HTMX), record with age, delete with confirmation | 0.3.0 |
-| 5 | **Schedule** | Weekly grid per practitioner (FullCalendar), hours and slot length configurable per clinic, colors and legend, create/edit/delete in a modal, weekly recurrence N times, conflict blocking (server validation + database constraint), optional patient, the day's recalls and birthdays | 0.4.0 |
-| 6 | **Recalls and birthdays** | Recall CRUD. Birthdays by month with a link to the patient record | 0.4.x |
-| 7 | **What's new** (remaining) | "New version: see what changed" notice until the user opens it, filter by module | 0.5.0 |
-| 8 | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~5,000 appointments around the current date, recalls, one user per role | 0.5.0 |
-| 9 | **Quality** | Test coverage of critical rules (isolation, conflicts, permissions), `check --deploy` with no warnings, change auditing | 0.5.0 |
+| 3 ✅ | **Reference data and simple records** | States and cities (official IBGE list), banks (Banco Central), marital status, loaded by migration with accent-insensitive search. Per-clinic appointment types, with the 10 original types and colors created automatically for every new clinic. Records menu. State → city endpoint for the patient form | 0.3.0 |
+| 4 | **Patients** | Paginated list, search (name, ID, CPF/CNPJ), single individual/company form with CPF/CNPJ validation, chained state → city (HTMX), record with age, delete with confirmation | 0.4.0 |
+| 5 | **Schedule** | Weekly grid per practitioner (FullCalendar), hours and slot length configurable per clinic, colors and legend, create/edit/delete in a modal, weekly recurrence N times, conflict blocking (server validation + database constraint), optional patient, the day's recalls and birthdays | 0.5.0 |
+| 6 | **Recalls and birthdays** | Recall CRUD. Birthdays by month with a link to the patient record | 0.6.0 |
+| 7 | **What's new** (remaining) | "New version: see what changed" notice until the user opens it, filter by module | 0.7.0 |
+| 8 | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~5,000 appointments around the current date, recalls, one user per role | 0.7.0 |
+| 9 | **Quality** | Test coverage of critical rules (isolation, conflicts, permissions), `check --deploy` with no warnings, change auditing | 0.7.0 |
 
 ## Business rules (automatically tested)
 - A user only sees and changes data from the clinics they are linked to.

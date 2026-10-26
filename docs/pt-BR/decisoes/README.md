@@ -30,3 +30,6 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 022 | 2026-10-26 | Matriz de permissões por papel definida no código (`apps/core/permissoes.py`) | Simples e testável; revisão com o titular após a fase 1 | Aceita |
 | 023 | 2026-10-26 | Admin do Django restrito aos superusuários da plataforma | O admin enxerga todas as clínicas | Aceita |
 | 024 | 2026-10-26 | Cadastro de Profissionais antecipado para a etapa 2 | Primeiro dado da clínica; permite testar o isolamento de ponta a ponta | Aceita |
+| 025 | 2026-10-26 | Tabelas de referência (UFs, municípios do IBGE, bancos do Banco Central) guardadas em JSON no repositório e carregadas por migração; busca sem acentos com a extensão `unaccent` do PostgreSQL | Dados oficiais, versionados e reproduzíveis em qualquer ambiente, sem depender de API externa | Aceita |
+| 026 | 2026-10-26 | Tipos de atendimento por clínica, com os 10 tipos e cores do sistema antigo criados automaticamente em toda clínica nova | Paridade com o sistema antigo, mas editável por clínica | Aceita |
+| 027 | 2026-10-26 | Cada etapa da fase 1 sobe a versão MENOR (0.3.0, 0.4.0…); a fase 1 termina na 0.7.0 | Etapas trazem recursos novos (regra do versionamento semântico) | Aceita |

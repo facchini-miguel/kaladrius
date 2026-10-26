@@ -30,3 +30,6 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 022 | 2026-10-26 | Per-role permission matrix defined in code (`apps/core/permissoes.py`) | Simple and testable; review with the owner after phase 1 | Accepted |
 | 023 | 2026-10-26 | Django admin restricted to platform superusers | The admin sees every clinic | Accepted |
 | 024 | 2026-10-26 | Practitioners moved forward to step 2 | First clinic data; allows end-to-end isolation tests | Accepted |
+| 025 | 2026-10-26 | Reference tables (states, IBGE municipalities, Banco Central banks) stored as JSON in the repository and loaded by migration; accent-insensitive search with PostgreSQL's `unaccent` extension | Official, versioned data reproducible in any environment, with no external API dependency | Accepted |
+| 026 | 2026-10-26 | Per-clinic appointment types, with the 10 legacy types and colors created automatically for every new clinic | Parity with the legacy system, but editable per clinic | Accepted |
+| 027 | 2026-10-26 | Each phase 1 step bumps the MINOR version (0.3.0, 0.4.0…); phase 1 ends at 0.7.0 | Steps add new features (semantic versioning rule) | Accepted |

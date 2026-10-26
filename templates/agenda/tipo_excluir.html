@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %}Excluir tipo de atendimento · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">Excluir {{ tipo.nome }}?</h1>
+<p>Esta ação não pode ser desfeita. Se quiser apenas esconder o tipo, edite e desmarque “ativo”.</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Excluir</button>
+  <a class="btn btn-link" href="{% url 'agenda:tipos' %}">Cancelar</a>
+</form>
+{% endblock %}

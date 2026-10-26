@@ -1,10 +1,8 @@
 from django.conf import settings
-from django.core.validators import RegexValidator
 from django.db import models
 
 from apps.core.isolamento import ModeloDaClinica
-
-validar_cor = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
+from apps.core.validadores import validar_cor
 
 
 class Profissional(ModeloDaClinica):

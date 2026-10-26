@@ -70,3 +70,5 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 2. Atualizar a versão do projeto (`pyproject.toml`).
 3. Criar a tag Git `vX.Y.Z` e a *Release* no GitHub, com o mesmo texto.
 4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data) antes do deploy.
+
+O servidor lê o `releases.yaml` uma vez e guarda em memória. Em desenvolvimento, depois de editá-lo, reinicie o app (`docker compose restart app`).
