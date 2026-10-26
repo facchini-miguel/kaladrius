@@ -46,17 +46,23 @@ Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
 | `db` | postgres:16-alpine | Database, with a persistent volume |
 | `app` | project image | Django + Gunicorn |
 | `caddy` | caddy:2-alpine | Automatic HTTPS (production only) |
-| `backup` | (deploy phase) | Daily encrypted pg_dump → Cloud Storage |
+| `backup` | (deploy phase) | Daily encrypted pg_dump → Cloud Storage (US bucket, free tier) |
 
 The same `docker-compose.yml` serves the local environment and the VM; only `.env` differs.
 
 ## Infrastructure
 
+Rule: **Google Cloud free tier resources only** (decision 020).
+
 | Environment | Where | Cost |
 |---|---|---|
 | Local | Docker on the developer's machine | — |
-| Testing | e2-micro VM (free tier, US) | Free |
-| Production | e2-small VM, São Paulo region (`southamerica-east1`) | ~US$ 13–15/month |
+| Cloud (testing and production) | **e2-micro** VM in a free US region (`us-central1`, `us-west1` or `us-east1`), standard disk up to 30 GB | Free |
+| Backup | Cloud Storage, US regional bucket, up to 5 GB | Free |
+
+**Google Cloud project:** `medical-system-facchini`, with the Compute Engine API enabled and a **R$ 5 budget alert** (notifications at R$ 0.50, R$ 2.50 and R$ 5) to catch any charge.
+
+**Free tier limits to respect:** 1 e2-micro VM, 30 GB standard disk, 5 GB in Cloud Storage, 1 GB/month egress. Disk snapshots are paid, so they are not used. The cost of the VM's external IP must be confirmed on the first billing report.
 
 **CI/CD:** GitHub Actions runs lint and tests, builds the image into GitHub Container Registry and deploys to the VM over SSH (`docker compose pull && up -d`).
 
@@ -66,4 +72,4 @@ The same `docker-compose.yml` serves the local environment and the VM; only `.en
 - **Per-clinic isolation** in every query, with automated tests that try to access another clinic's data.
 - Secrets only in `.env` (outside Git) and in GitHub *Secrets*. Push protection enabled.
 - Postgres port not exposed. VM firewall (80, 443, key-only SSH).
-- LGPD (Brazilian data protection law): access and change logging (audit), data hosted in Brazil in production, encrypted backups.
+- LGPD (Brazilian data protection law): access and change logging (audit), encrypted backups. Data is hosted in the US (free tier requirement). Before real use with patients, review international data transfer rules (LGPD, art. 33) or move to a Brazilian region.

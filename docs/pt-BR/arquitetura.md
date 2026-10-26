@@ -46,17 +46,23 @@ Regra: **não usar dependências GPL/AGPL**, para manter livre a escolha de lice
 | `db` | postgres:16-alpine | Banco, com volume persistente |
 | `app` | imagem do projeto | Django + Gunicorn |
 | `caddy` | caddy:2-alpine | HTTPS automático (só em produção) |
-| `backup` | (fase de deploy) | pg_dump diário criptografado → Cloud Storage |
+| `backup` | (fase de deploy) | pg_dump diário criptografado → Cloud Storage (bucket nos EUA, free tier) |
 
 O mesmo `docker-compose.yml` serve para o ambiente local e para a VM, com diferenças apenas em `.env`.
 
 ## Infraestrutura
 
+Regra: **somente recursos do free tier do Google Cloud** (decisão 020).
+
 | Ambiente | Onde | Custo |
 |---|---|---|
 | Local | Docker no computador do desenvolvedor | — |
-| Testes | VM e2-micro (free tier, EUA) | Grátis |
-| Produção | VM e2-small, região São Paulo (`southamerica-east1`) | ~US$ 13–15/mês |
+| Nuvem (testes e produção) | VM **e2-micro** numa região gratuita dos EUA (`us-central1`, `us-west1` ou `us-east1`), disco padrão de até 30 GB | Grátis |
+| Backup | Cloud Storage, bucket regional nos EUA, até 5 GB | Grátis |
+
+**Projeto no Google Cloud:** `medical-system-facchini`, com a API do Compute Engine ativa e um **alerta de orçamento de R$ 5** (avisos em R$ 0,50, R$ 2,50 e R$ 5) para detectar qualquer cobrança.
+
+**Limites do free tier a respeitar:** 1 VM e2-micro, 30 GB de disco padrão, 5 GB no Cloud Storage, 1 GB/mês de tráfego de saída. Snapshots de disco são pagos, por isso não são usados. O custo do IP externo da VM deve ser confirmado no primeiro relatório de faturamento.
 
 **CI/CD:** GitHub Actions roda lint e testes, gera a imagem no GitHub Container Registry e publica na VM por SSH (`docker compose pull && up -d`).
 
@@ -66,4 +72,4 @@ O mesmo `docker-compose.yml` serve para o ambiente local e para a VM, com difere
 - **Isolamento por clínica** em todas as consultas, com testes automatizados que tentam acessar dados de outra clínica.
 - Segredos só em `.env` (fora do Git) e nos *Secrets* do GitHub. Push protection ativo.
 - Postgres sem porta exposta. VM com firewall (80, 443, SSH só por chave).
-- LGPD: registro de acessos e alterações (auditoria), dados no Brasil em produção, backups criptografados.
+- LGPD: registro de acessos e alterações (auditoria), backups criptografados. Os dados ficam em servidores nos EUA (exigência do free tier). Antes de uso real com pacientes, revisar a transferência internacional de dados (LGPD, art. 33) ou migrar para uma região no Brasil.

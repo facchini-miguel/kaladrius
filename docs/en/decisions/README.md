@@ -25,3 +25,4 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 017 | 2026-10-26 | No Node build on the front end: Bootstrap 5.3 and HTMX 2 served as static files | Fewer tools to maintain | Accepted |
 | 018 | 2026-10-26 | Bilingual docs: `docs/pt-BR/` (primary) and `docs/en/` (translation); `README.md` in English and `README.pt-BR.md` in Portuguese | Separate files per language avoid mixed text; English widens the audience if the project is opened | Accepted |
 | 019 | 2026-10-26 | Code comments and docstrings in English; user-facing text in Portuguese | International standard for code, while keeping the users' language | Accepted |
+| 020 | 2026-10-26 | Use **Google Cloud free tier resources only**: e2-micro in the US for production too, backups in US Cloud Storage, no snapshots; R$ 5 budget alert | Owner's request: zero cost | Accepted (supersedes the production part of 006: e2-small in São Paulo) |

@@ -25,3 +25,4 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 017 | 2026-10-26 | Front sem build de Node: Bootstrap 5.3 e HTMX 2 servidos como arquivos estáticos | Menos ferramentas para manter | Aceita |
 | 018 | 2026-10-26 | Documentação bilíngue: `docs/pt-BR/` (principal) e `docs/en/` (tradução); `README.md` em inglês e `README.pt-BR.md` em português | Arquivos separados por idioma evitam texto misturado; inglês amplia o público se o projeto for aberto | Aceita |
 | 019 | 2026-10-26 | Comentários e docstrings do código em inglês; textos para o usuário em português | Padrão internacional para o código, sem perder o idioma do público | Aceita |
+| 020 | 2026-10-26 | Usar **somente recursos do free tier** do Google Cloud: e2-micro nos EUA também em produção, backup no Cloud Storage dos EUA, sem snapshots; alerta de orçamento de R$ 5 | Pedido do titular: custo zero | Aceita (substitui a parte de produção da 006: e2-small em São Paulo) |
