@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block titulo %}Profissionais · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 mb-0">Profissionais</h1>
+  {% if pode.profissionais.criar %}
+  <a class="btn btn-primary" href="{% url 'profissionais:novo' %}">Novo profissional</a>
+  {% endif %}
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Registro</th>
+        <th>Cor</th>
+        <th>Usuário de acesso</th>
+        <th>Situação</th>
+        <th class="text-end">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for profissional in profissionais %}
+      <tr>
+        <td>{{ profissional.nome }}</td>
+        <td>{{ profissional.registro|default:"—" }}</td>
+        <td><span class="amostra-cor" style="background-color: {{ profissional.cor }}" title="{{ profissional.cor }}"></span></td>
+        <td>{{ profissional.usuario.username|default:"—" }}</td>
+        <td>
+          {% if profissional.ativo %}<span class="badge text-bg-success">Ativo</span>
+          {% else %}<span class="badge text-bg-secondary">Inativo</span>{% endif %}
+        </td>
+        <td class="text-end text-nowrap">
+          {% if pode.profissionais.alterar %}
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'profissionais:editar' profissional.pk %}">Editar</a>
+          {% endif %}
+          {% if pode.profissionais.excluir %}
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'profissionais:excluir' profissional.pk %}">Excluir</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">Nenhum profissional cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

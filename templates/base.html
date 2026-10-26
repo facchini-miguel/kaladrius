@@ -19,9 +19,33 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">Início</a></li>
+          {% if pode.profissionais.ver %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'profissionais:lista' %}">Profissionais</a></li>
+          {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'novidades' %}">Novidades</a></li>
-          {% if user.is_staff %}
+          {% if user.is_superuser %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Administração</a></li>
+          {% endif %}
+        </ul>
+        <ul class="navbar-nav me-3">
+          {% if clinicas_do_usuario|length > 1 %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+               title="Trocar de clínica">{{ clinica_atual.nome|default:"Escolha a clínica" }}</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              {% for clinica in clinicas_do_usuario %}
+              <li>
+                <form method="post" action="{% url 'trocar_clinica' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="clinica" value="{{ clinica.pk }}">
+                  <button type="submit" class="dropdown-item{% if clinica.pk == clinica_atual.pk %} active{% endif %}">{{ clinica.nome }}</button>
+                </form>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% elif clinica_atual %}
+          <li class="nav-item"><span class="navbar-text">{{ clinica_atual.nome }}</span></li>
           {% endif %}
         </ul>
         <span class="navbar-text me-3">{{ user.get_full_name|default:user.username }}</span>

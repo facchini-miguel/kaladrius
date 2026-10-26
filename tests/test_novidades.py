@@ -115,8 +115,11 @@ def test_api_releases(client):
     resposta = client.get("/api/v1/releases?publico=paciente")
     assert resposta.status_code == 200
     dados = resposta.json()
-    assert dados[0]["versao"] == releases.versao_atual()
-    assert all(item["modulo"] != "Acesso" for item in dados[0]["itens"])  # staff-only item
+    # Only versions with patient-facing items are returned, newest first.
+    esperadas = [release.versao for release, _ in releases.para_publico("paciente")]
+    assert [versao["versao"] for versao in dados] == esperadas
+    modulos = {item["modulo"] for versao in dados for item in versao["itens"]}
+    assert "Acesso" not in modulos  # staff-only items never reach patients
 
 
 @pytest.mark.django_db

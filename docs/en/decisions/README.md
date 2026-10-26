@@ -26,3 +26,7 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 018 | 2026-10-26 | Bilingual docs: `docs/pt-BR/` (primary) and `docs/en/` (translation); `README.md` in English and `README.pt-BR.md` in Portuguese | Separate files per language avoid mixed text; English widens the audience if the project is opened | Accepted |
 | 019 | 2026-10-26 | Code comments and docstrings in English; user-facing text in Portuguese | International standard for code, while keeping the users' language | Accepted |
 | 020 | 2026-10-26 | Use **Google Cloud free tier resources only**: e2-micro in the US for production too, backups in US Cloud Storage, no snapshots; R$ 5 budget alert | Owner's request: zero cost | Accepted (supersedes the production part of 006: e2-small in São Paulo) |
+| 021 | 2026-10-26 | **Fail-closed** per-clinic isolation: the default manager filters by the current clinic and raises without one; explicit `sem_isolamento()` for platform code | A forgotten filter can never leak another clinic's data | Accepted |
+| 022 | 2026-10-26 | Per-role permission matrix defined in code (`apps/core/permissoes.py`) | Simple and testable; review with the owner after phase 1 | Accepted |
+| 023 | 2026-10-26 | Django admin restricted to platform superusers | The admin sees every clinic | Accepted |
+| 024 | 2026-10-26 | Practitioners moved forward to step 2 | First clinic data; allows end-to-end isolation tests | Accepted |

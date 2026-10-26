@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português
 
-> Status: **em andamento**. Etapa 1 concluída na versão 0.1.0.
+> Status: **em andamento**. Etapa 1 concluída na versão 0.1.0; etapa 2 na 0.2.0.
 
 ## Objetivo
 Ter, rodando em **Docker local**, a web da equipe com **as mesmas funções do sistema antigo**, já multi-clínica, segura, com dados fictícios para teste e a página de Novidades. Versão alvo: **0.5.0**. A 1.0.0 fica para o primeiro uso real.
@@ -39,8 +39,8 @@ medical-system/
 | # | Etapa | Entrega | Versão |
 |---|---|---|---|
 | 1 ✅ | **Esqueleto** | Projeto Django, Docker Compose (Postgres + app), settings via `.env`, Ruff, pytest, CI no GitHub, login, página inicial, usuário `admin`. Adiantado da etapa 7: página Novidades, versão no rodapé e API `/api/v1/releases` | 0.1.0 |
-| 2 | **Multi-clínica e permissões** | Clinica, Vinculo, papéis (admin da clínica, recepção, profissional), middleware, seletor de clínica, testes de isolamento | 0.2.0 |
-| 3 | **Referências e cadastros simples** | UF e cidades (IBGE), bancos, estado civil. Profissionais. Tipos de atendimento com as 10 cores originais como padrão | 0.2.x |
+| 2 ✅ | **Multi-clínica e permissões** | Clinica, Vinculo, papéis (admin da clínica, recepção, profissional), isolamento por clínica que falha fechado, matriz de permissões, seletor de clínica, admin restrito ao superusuário, testes de isolamento. Adiantado da etapa 3: cadastro de **Profissionais** (primeiro dado da clínica, usado para testar o isolamento de ponta a ponta) e a primeira parte do comando `popular_dados_teste` | 0.2.0 |
+| 3 | **Referências e cadastros simples** | UF e cidades (IBGE), bancos, estado civil. Tipos de atendimento com as 10 cores originais como padrão | 0.2.x |
 | 4 | **Pacientes** | Lista paginada, busca (nome, código, CPF/CNPJ), formulário único PF/PJ com validação de CPF/CNPJ, UF → cidade encadeado (HTMX), ficha com idade, exclusão com confirmação | 0.3.0 |
 | 5 | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional, rechamadas e aniversariantes do dia | 0.4.0 |
 | 6 | **Rechamadas e aniversariantes** | CRUD de rechamadas. Aniversariantes por mês com link para a ficha | 0.4.x |

@@ -22,6 +22,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 
 | Task | Command |
 |---|---|
+| Test data (fake clinics, users and practitioners) | `docker compose exec app python manage.py popular_dados_teste` |
 | Tests | `docker compose exec app pytest` |
 | Lint | `docker compose exec app ruff check .` |
 | Format code | `docker compose exec app ruff format .` |

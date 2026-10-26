@@ -26,3 +26,7 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 018 | 2026-10-26 | Documentação bilíngue: `docs/pt-BR/` (principal) e `docs/en/` (tradução); `README.md` em inglês e `README.pt-BR.md` em português | Arquivos separados por idioma evitam texto misturado; inglês amplia o público se o projeto for aberto | Aceita |
 | 019 | 2026-10-26 | Comentários e docstrings do código em inglês; textos para o usuário em português | Padrão internacional para o código, sem perder o idioma do público | Aceita |
 | 020 | 2026-10-26 | Usar **somente recursos do free tier** do Google Cloud: e2-micro nos EUA também em produção, backup no Cloud Storage dos EUA, sem snapshots; alerta de orçamento de R$ 5 | Pedido do titular: custo zero | Aceita (substitui a parte de produção da 006: e2-small em São Paulo) |
+| 021 | 2026-10-26 | Isolamento por clínica **que falha fechado**: gerenciador padrão filtra pela clínica atual e dá erro sem clínica; `sem_isolamento()` explícito para código da plataforma | Esquecer um filtro nunca vaza dados de outra clínica | Aceita |
+| 022 | 2026-10-26 | Matriz de permissões por papel definida no código (`apps/core/permissoes.py`) | Simples e testável; revisão com o titular após a fase 1 | Aceita |
+| 023 | 2026-10-26 | Admin do Django restrito aos superusuários da plataforma | O admin enxerga todas as clínicas | Aceita |
+| 024 | 2026-10-26 | Cadastro de Profissionais antecipado para a etapa 2 | Primeiro dado da clínica; permite testar o isolamento de ponta a ponta | Aceita |

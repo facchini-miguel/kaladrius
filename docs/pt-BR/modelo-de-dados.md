@@ -5,6 +5,8 @@
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
 - O filtro é aplicado de forma centralizada (middleware + managers), não manualmente em cada tela.
+- **Falha fechada:** todo modelo da clínica herda de `ModeloDaClinica` (`apps/core/isolamento.py`). O gerenciador padrão filtra pela clínica atual e, se não houver clínica definida, **dá erro em vez de mostrar dados**. Gravar ou excluir um registro de outra clínica também dá erro. Código da plataforma que precisa ver todas as clínicas (admin do Django, comandos) usa `sem_isolamento()` explicitamente.
+- A clínica atual vem da sessão e só é aceita se o usuário tiver vínculo ativo com ela (ou for superusuário). O admin do Django é restrito aos superusuários da plataforma.
 - Tabelas de referência públicas (UF, cidade, banco, estado civil) são **globais**, compartilhadas entre as clínicas.
 
 ## Entidades
@@ -24,7 +26,18 @@
 | Recepção | — | Agenda, pacientes, rechamadas, aniversariantes |
 | Profissional | — | A própria agenda e os pacientes |
 
-Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módulo. A revisão detalhada dessas permissões fica para depois da fase 1, como combinado.
+Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módulo. A matriz fica em `apps/core/permissoes.py` e vale tanto no servidor (a requisição é bloqueada) quanto na tela (botões e menus somem). A revisão detalhada fica para depois da fase 1, como combinado.
+
+| Módulo | Administrador | Recepção | Profissional |
+|---|---|---|---|
+| Pacientes | tudo | ver, criar, alterar | ver, criar, alterar |
+| Agenda | tudo | tudo | ver, criar, alterar |
+| Rechamadas | tudo | tudo | ver, criar, alterar |
+| Aniversariantes | tudo | ver | ver |
+| Profissionais | tudo | ver | ver |
+| Tabelas base | tudo | ver | ver |
+| Usuários da clínica | tudo | — | — |
+| Configurações da clínica | tudo | — | — |
 
 ### Clínica
 | Entidade | Campos principais | Sistema antigo |

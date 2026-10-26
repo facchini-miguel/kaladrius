@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if profissional.pk %}Editar{% else %}Novo{% endif %} profissional · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">{% if profissional.pk %}Editar {{ profissional.nome }}{% else %}Novo profissional{% endif %}</h1>
+
+<form method="post" style="max-width: 36rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <button type="submit" class="btn btn-primary">Salvar</button>
+  <a class="btn btn-link" href="{% url 'profissionais:lista' %}">Cancelar</a>
+</form>
+{% endblock %}

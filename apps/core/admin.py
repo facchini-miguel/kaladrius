@@ -1,9 +1,45 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Usuario
+from .models import Clinica, Usuario, Vinculo
+
+
+def _somente_superusuario(request):
+    # The admin works across every clinic, so only platform superusers may use it.
+    return request.user.is_active and request.user.is_superuser
+
+
+admin.site.has_permission = _somente_superusuario
+
+
+class VinculoNaClinicaInline(admin.TabularInline):
+    model = Vinculo
+    fk_name = "clinica"
+    extra = 0
+    autocomplete_fields = ["usuario"]
+
+
+class VinculoDoUsuarioInline(admin.TabularInline):
+    model = Vinculo
+    fk_name = "usuario"
+    extra = 0
+
+
+@admin.register(Clinica)
+class ClinicaAdmin(admin.ModelAdmin):
+    list_display = ["nome", "documento", "ativa", "agenda_inicio", "agenda_fim", "agenda_intervalo"]
+    list_filter = ["ativa"]
+    search_fields = ["nome", "documento"]
+    inlines = [VinculoNaClinicaInline]
 
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    pass
+    inlines = [VinculoDoUsuarioInline]
+
+
+@admin.register(Vinculo)
+class VinculoAdmin(admin.ModelAdmin):
+    list_display = ["usuario", "clinica", "papel", "ativo"]
+    list_filter = ["papel", "ativo", "clinica"]
+    search_fields = ["usuario__username", "clinica__nome"]

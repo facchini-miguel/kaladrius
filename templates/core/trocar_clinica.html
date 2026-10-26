@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Escolher clínica · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">Escolha a clínica</h1>
+
+<div class="list-group" style="max-width: 32rem;">
+  {% for clinica in clinicas %}
+  <form method="post" action="{% url 'trocar_clinica' %}">
+    {% csrf_token %}
+    <input type="hidden" name="clinica" value="{{ clinica.pk }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="list-group-item list-group-item-action{% if clinica.pk == clinica_atual.pk %} active{% endif %}">
+      {{ clinica.nome }}
+    </button>
+  </form>
+  {% empty %}
+  <p class="text-body-secondary">Nenhuma clínica ativa disponível para você.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -2,9 +2,28 @@
 
 {% block conteudo %}
 <h1 class="h3 mb-3">Bem-vindo(a), {{ user.get_full_name|default:user.username }}</h1>
+
+{% if clinica_atual %}
+<div class="card mb-4">
+  <div class="card-body">
+    <p class="mb-1"><strong>Clínica:</strong> {{ clinica_atual.nome }}</p>
+    <p class="mb-0"><strong>Perfil:</strong>
+      {% if vinculo_atual %}{{ vinculo_atual.get_papel_display }}{% else %}Administrador da plataforma{% endif %}
+    </p>
+  </div>
+</div>
+{% elif user.is_superuser %}
+<div class="alert alert-info">
+  Você é administrador da plataforma. <a href="{% url 'trocar_clinica' %}">Escolha uma clínica</a> para trabalhar.
+</div>
+{% else %}
+<div class="alert alert-warning">
+  Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica.
+</div>
+{% endif %}
+
 <p class="text-body-secondary">
-  Esta é a primeira versão do novo sistema. Os módulos (pacientes, agenda, rechamadas,
-  aniversariantes) serão adicionados nas próximas versões.
+  Os módulos de pacientes, agenda, rechamadas e aniversariantes serão adicionados nas próximas versões.
 </p>
 <p>
   <a href="{% url 'novidades' %}">Veja o que há de novo na versão {{ versao_sistema }}</a>.

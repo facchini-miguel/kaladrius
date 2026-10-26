@@ -6,6 +6,7 @@ All sensitive or per-environment values come from environment variables (.env).
 import os
 from pathlib import Path
 
+from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.core",
     "apps.novidades",
+    "apps.profissionais",
 ]
 
 MIDDLEWARE = [
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core.middleware.ClinicaAtualMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -66,6 +69,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.novidades.context_processors.versao",
+                "apps.core.context_processors.clinica",
             ],
         },
     },
@@ -131,6 +135,9 @@ WHITENOISE_USE_FINDERS = DEBUG
 WHITENOISE_AUTOREFRESH = DEBUG
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Django's "error" message level maps to Bootstrap's "danger" alert style
+MESSAGE_TAGS = {messages.ERROR: "danger"}
 
 # Version history file (What's new page, API and footer)
 RELEASES_ARQUIVO = BASE_DIR / "releases.yaml"

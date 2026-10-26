@@ -4,6 +4,34 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.2.0
+  data: 2026-10-26
+  titulo: Várias clínicas, perfis de acesso e cadastro de profissionais
+  itens:
+    - tipo: novo
+      modulo: Clínicas
+      publico: [equipe]
+      texto: >
+        O sistema agora atende várias clínicas. Cada pessoa vê somente os dados das clínicas
+        em que trabalha; quem atende em mais de uma troca de clínica pelo menu superior.
+    - tipo: novo
+      modulo: Permissões
+      publico: [equipe]
+      texto: >
+        Perfis de acesso por clínica: administrador, recepção e profissional. Cada perfil
+        vê apenas as telas e os botões que pode usar.
+    - tipo: novo
+      modulo: Profissionais
+      publico: [equipe]
+      texto: >
+        Cadastro dos profissionais da clínica, com registro (CRO, CRM…), cor usada na agenda
+        e usuário de acesso. Profissionais inativos ficam escondidos sem perder o histórico.
+    - tipo: seguranca
+      modulo: Acesso
+      publico: [equipe]
+      texto: >
+        Reforço na separação dos dados entre clínicas.
+
 - versao: 0.1.0
   data: 2026-10-26
   titulo: Primeira versão do novo sistema

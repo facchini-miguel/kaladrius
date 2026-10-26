@@ -22,6 +22,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 | Tarefa | Comando |
 |---|---|
+| Dados de teste (clínicas, usuários e profissionais fictícios) | `docker compose exec app python manage.py popular_dados_teste` |
 | Testes | `docker compose exec app pytest` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatar código | `docker compose exec app ruff format .` |

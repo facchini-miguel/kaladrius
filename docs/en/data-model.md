@@ -7,6 +7,8 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
 - The filter is applied centrally (middleware + managers), not by hand in each screen.
+- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolamento.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
+- The current clinic comes from the session and is only honored if the user has an active membership in it (or is a superuser). The Django admin is restricted to platform superusers.
 - Public reference tables (state, city, bank, marital status) are **global**, shared by all clinics.
 
 ## Entities
@@ -26,7 +28,18 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 | Front desk | — | Schedule, patients, recalls, birthdays |
 | Practitioner | — | Own schedule and patients |
 
-Each role gets `view`, `create`, `change` and `delete` permissions per module. A detailed review of these permissions is planned after phase 1, as agreed.
+Each role gets `view`, `create`, `change` and `delete` permissions per module. The matrix lives in `apps/core/permissoes.py` and applies both on the server (the request is blocked) and on screen (buttons and menus are hidden). A detailed review is planned after phase 1, as agreed.
+
+| Module | Administrator | Front desk | Practitioner |
+|---|---|---|---|
+| Patients | all | view, create, change | view, create, change |
+| Schedule | all | all | view, create, change |
+| Recalls | all | all | view, create, change |
+| Birthdays | all | view | view |
+| Practitioners | all | view | view |
+| Reference tables | all | view | view |
+| Clinic users | all | — | — |
+| Clinic settings | all | — | — |
 
 ### Clinic
 | Entity | Main fields | Legacy table |

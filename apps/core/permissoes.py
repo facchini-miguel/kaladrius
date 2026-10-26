@@ -1,0 +1,103 @@
+"""Role-based permissions per clinic.
+
+Each role (Papel) gets a set of actions (Acao) per module (Modulo). The same check
+guards the views (server side) and decides which menus and buttons the templates show.
+Platform superusers can do everything in any clinic.
+"""
+
+from functools import wraps
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db import models
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.http import urlencode
+
+from .models import Papel
+
+
+class Modulo(models.TextChoices):
+    PACIENTES = "pacientes", "Pacientes"
+    AGENDA = "agenda", "Agenda"
+    RECHAMADAS = "rechamadas", "Rechamadas"
+    ANIVERSARIANTES = "aniversariantes", "Aniversariantes"
+    PROFISSIONAIS = "profissionais", "Profissionais"
+    CADASTROS = "cadastros", "Tabelas base"
+    USUARIOS = "usuarios", "Usuários da clínica"
+    CLINICA = "clinica", "Configurações da clínica"
+
+
+class Acao(models.TextChoices):
+    VER = "ver", "Ver"
+    CRIAR = "criar", "Criar"
+    ALTERAR = "alterar", "Alterar"
+    EXCLUIR = "excluir", "Excluir"
+
+
+_TODAS = frozenset(Acao)
+_VER = frozenset({Acao.VER})
+_SEM_EXCLUIR = frozenset({Acao.VER, Acao.CRIAR, Acao.ALTERAR})
+
+# Default permission matrix. To be reviewed with the owner after phase 1.
+MATRIZ = {
+    Papel.ADMIN: {modulo: _TODAS for modulo in Modulo},
+    Papel.RECEPCAO: {
+        Modulo.PACIENTES: _SEM_EXCLUIR,
+        Modulo.AGENDA: _TODAS,
+        Modulo.RECHAMADAS: _TODAS,
+        Modulo.ANIVERSARIANTES: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+    },
+    Papel.PROFISSIONAL: {
+        Modulo.PACIENTES: _SEM_EXCLUIR,
+        Modulo.AGENDA: _SEM_EXCLUIR,
+        Modulo.RECHAMADAS: _SEM_EXCLUIR,
+        Modulo.ANIVERSARIANTES: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+    },
+}
+
+
+def pode(request, modulo, acao):
+    """Whether the current user may perform `acao` on `modulo` in the current clinic."""
+    usuario = request.user
+    if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+        return False
+    if usuario.is_superuser:
+        return True
+    vinculo = getattr(request, "vinculo", None)
+    if vinculo is None:
+        return False
+    return acao in MATRIZ.get(vinculo.papel, {}).get(modulo, frozenset())
+
+
+def tabela_permissoes(request):
+    """All permissions as {modulo: {acao: bool}}, for use in templates."""
+    return {
+        modulo.value: {acao.value: pode(request, modulo, acao) for acao in Acao}
+        for modulo in Modulo
+    }
+
+
+def exige_permissao(modulo, acao):
+    """View decorator: requires login, a current clinic and the given permission."""
+
+    def decorador(view):
+        @wraps(view)
+        @login_required
+        def protegida(request, *args, **kwargs):
+            if request.clinica is None:
+                if request.user.is_superuser:
+                    destino = reverse("trocar_clinica")
+                    return redirect(f"{destino}?{urlencode({'next': request.get_full_path()})}")
+                return render(request, "core/sem_clinica.html", status=403)
+            if not pode(request, modulo, acao):
+                raise PermissionDenied
+            return view(request, *args, **kwargs)
+
+        return protegida
+
+    return decorador
