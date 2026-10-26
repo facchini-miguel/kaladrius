@@ -1,0 +1,40 @@
+<form hx-post="{% if agendamento.pk %}{% url 'agenda:editar' agendamento.pk %}{% else %}{% url 'agenda:novo' %}{% endif %}"
+      hx-target="#modal-conteudo" novalidate>
+  {% csrf_token %}
+  <div class="modal-header">
+    <h2 class="modal-title h5">{% if agendamento.pk %}Editar agendamento{% else %}Novo agendamento{% endif %}</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+  </div>
+  <div class="modal-body">
+    {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+    <div class="row">
+      <div class="col-md-6">{% with campo=form.profissional %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.tipo %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.data %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-6 col-md-4">{% with campo=form.hora_inicio %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-6 col-md-4">{% with campo=form.hora_fim %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-12 mb-3 position-relative">
+        <label class="form-label" for="busca-paciente">Paciente</label>
+        <input type="search" id="busca-paciente" class="form-control{% if form.paciente.errors %} is-invalid{% endif %}" autocomplete="off"
+               placeholder="Digite o nome, código ou CPF" value="{{ agendamento.paciente.nome|default:'' }}"
+               name="q" hx-get="{% url 'pacientes:sugestoes' %}" hx-trigger="input changed delay:300ms" hx-target="#sugestoes-paciente">
+        {{ form.paciente }}
+        <div id="sugestoes-paciente" class="list-group position-absolute w-100 shadow-sm" style="z-index: 10;"></div>
+        <div class="form-text">Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”).</div>
+        {% for erro in form.paciente.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+      <div class="col-12">{% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% if form.repeticoes %}
+      <div class="col-md-6">{% with campo=form.repeticoes %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="modal-footer">
+    {% if agendamento.pk and pode.agenda.excluir %}
+    <button type="button" class="btn btn-outline-danger me-auto"
+            hx-get="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">Excluir</button>
+    {% endif %}
+    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancelar</button>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+  </div>
+</form>

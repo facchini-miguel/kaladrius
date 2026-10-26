@@ -1,0 +1,26 @@
+<form hx-post="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">
+  {% csrf_token %}
+  <div class="modal-header">
+    <h2 class="modal-title h5">Excluir agendamento?</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-2"><strong>{{ agendamento.titulo }}</strong> · {{ agendamento.inicio|date:"d/m/Y H:i" }} às {{ agendamento.fim|date:"H:i" }}</p>
+    {% if proximos %}
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="escopo" id="escopo-este" value="este" checked>
+      <label class="form-check-label" for="escopo-este">Somente este</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="escopo" id="escopo-serie" value="serie">
+      <label class="form-check-label" for="escopo-serie">Este e os próximos {{ proximos }} da mesma repetição</label>
+    </div>
+    {% else %}
+    <p class="mb-0">Esta ação não pode ser desfeita.</p>
+    {% endif %}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-link" hx-get="{% url 'agenda:editar' agendamento.pk %}" hx-target="#modal-conteudo">Voltar</button>
+    <button type="submit" class="btn btn-danger">Excluir</button>
+  </div>
+</form>

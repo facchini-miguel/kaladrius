@@ -7,7 +7,7 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
 - The filter is applied centrally (middleware + managers), not by hand in each screen.
-- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolamento.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
+- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolamento.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
 - The current clinic comes from the session and is only honored if the user has an active membership in it (or is a superuser). The Django admin is restricted to platform superusers.
 - Public reference tables (state, city, bank, marital status) are **global**, shared by all clinics.
 
@@ -58,6 +58,11 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 |---|---|
 | Releases | Read from `releases.yaml` (not stored in the database). See [versioning-and-releases.md](versioning-and-releases.md) |
 | `RegistroAuditoria` (audit log) | Who created, changed or deleted what and when (LGPD) |
+
+## Schedule
+- `Agendamento` stores start and end as timezone-aware datetimes. Appointments of the same weekly recurrence share the `serie` field.
+- Rules: times aligned to the clinic's slot length and within opening hours; no overlap for the same practitioner (back-to-back slots are allowed).
+- Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time.
 
 ## Documents and formats
 - CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).

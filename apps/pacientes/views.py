@@ -93,3 +93,11 @@ def excluir(request, pk):
         messages.success(request, f"Paciente {paciente.nome} excluído.")
         return redirect("pacientes:lista")
     return render(request, "pacientes/excluir.html", {"paciente": paciente})
+
+
+@exige_permissao(Modulo.PACIENTES, Acao.VER)
+def sugestoes(request):
+    """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
+    busca = request.GET.get("q", "").strip()
+    pacientes = filtrar(Paciente.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
+    return render(request, "pacientes/_sugestoes.html", {"pacientes": pacientes})

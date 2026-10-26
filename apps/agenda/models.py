@@ -1,4 +1,8 @@
+from django.conf import settings
+from django.contrib.postgres.constraints import ExclusionConstraint
+from django.contrib.postgres.fields import DateTimeRangeField, RangeBoundary, RangeOperators
 from django.db import models
+from django.utils import timezone
 
 from apps.core.isolamento import ModeloDaClinica, sem_isolamento
 from apps.core.validadores import validar_cor
@@ -36,6 +40,85 @@ class TipoAtendimento(ModeloDaClinica):
 
     def __str__(self):
         return self.nome
+
+
+class TsTzRange(models.Func):
+    function = "TSTZRANGE"
+    output_field = DateTimeRangeField()
+
+
+class Agendamento(ModeloDaClinica):
+    """An appointment in a practitioner's schedule."""
+
+    profissional = models.ForeignKey(
+        "profissionais.Profissional",
+        on_delete=models.PROTECT,
+        related_name="agendamentos",
+        verbose_name="profissional",
+    )
+    tipo = models.ForeignKey(
+        TipoAtendimento,
+        on_delete=models.PROTECT,
+        related_name="agendamentos",
+        verbose_name="tipo de atendimento",
+    )
+    inicio = models.DateTimeField("início")
+    fim = models.DateTimeField("fim")
+    paciente = models.ForeignKey(
+        "pacientes.Paciente",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="agendamentos",
+        verbose_name="paciente",
+    )
+    descricao = models.TextField("descrição", blank=True)
+    # Appointments created together by "repeat N weeks" share the same series id.
+    serie = models.UUIDField("série", null=True, blank=True, editable=False)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="criado por",
+    )
+    criado_em = models.DateTimeField("criado em", auto_now_add=True)
+    alterado_em = models.DateTimeField("alterado em", auto_now=True)
+
+    class Meta:
+        verbose_name = "agendamento"
+        verbose_name_plural = "agendamentos"
+        ordering = ["inicio"]
+        indexes = [
+            models.Index(
+                fields=["clinica", "profissional", "inicio"], name="agendamento_prof_inicio"
+            ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(inicio__lt=models.F("fim")),
+                name="agendamento_inicio_antes_do_fim",
+            ),
+            # Last line of defense against double booking, even under concurrent requests.
+            ExclusionConstraint(
+                name="agendamento_sem_sobreposicao",
+                expressions=[
+                    (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
+                    ("profissional", RangeOperators.EQUAL),
+                ],
+                violation_error_message="O profissional já tem um agendamento neste horário.",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.titulo} ({timezone.localtime(self.inicio):%d/%m/%Y %H:%M})"
+
+    @property
+    def titulo(self):
+        if self.paciente_id:
+            return self.paciente.nome
+        return (self.descricao.strip().splitlines() or ["Horário reservado"])[0]
 
 
 def criar_tipos_padrao(clinica):

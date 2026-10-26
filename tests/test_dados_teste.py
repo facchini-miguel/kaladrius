@@ -1,7 +1,9 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
+from django.db.models import F
 
+from apps.agenda.models import Agendamento
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Vinculo
 from apps.core.validadores import cnpj_valido, cpf_valido
@@ -31,6 +33,10 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
             valido = cpf_valido if paciente.tipo == Paciente.Tipo.FISICA else cnpj_valido
             assert valido(paciente.cpf_cnpj), paciente.cpf_cnpj
         assert not Paciente.objects.exclude(email__endswith="@example.com").exists()
+        assert Agendamento.objects.count() > 0  # created once, not duplicated
+        assert Agendamento.objects.filter(profissional__clinica=F("clinica")).count() == (
+            Agendamento.objects.count()
+        )
 
 
 def test_popular_dados_teste_exige_debug(settings, monkeypatch):

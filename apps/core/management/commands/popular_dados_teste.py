@@ -1,10 +1,15 @@
+import datetime
 import os
+import random
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
+from apps.agenda.models import Agendamento, TipoAtendimento
+from apps.agenda.servicos import momento
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
@@ -58,13 +63,18 @@ class Command(BaseCommand):
             "--forcar", action="store_true", help="Run even when DJANGO_DEBUG is off."
         )
         parser.add_argument(
+            "--sem-agenda",
+            action="store_true",
+            help="Do not create fake appointments.",
+        )
+        parser.add_argument(
             "--pacientes",
             type=int,
             default=600,
             help="Fake patients per clinic (only for clinics without patients).",
         )
 
-    def handle(self, *args, forcar=False, pacientes=600, **options):
+    def handle(self, *args, forcar=False, pacientes=600, sem_agenda=False, **options):
         if not settings.DEBUG and not forcar:
             raise CommandError(
                 "Dados de teste só podem ser criados com DJANGO_DEBUG=1 "
@@ -105,9 +115,13 @@ class Command(BaseCommand):
                 )
 
             total_pacientes = sum(self._pacientes(clinica, pacientes) for clinica in clinicas)
+            total_agendamentos = 0
+            if not sem_agenda:
+                total_agendamentos = sum(self._agendamentos(clinica) for clinica in clinicas)
 
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
         self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
+        self.stdout.write(f"Agendamentos fictícios criados: {total_agendamentos}")
         if criados:
             self.stdout.write(
                 f"Usuários criados (senha em DJANGO_SEED_PASSWORD): {', '.join(criados)}"
@@ -179,4 +193,47 @@ class Command(BaseCommand):
                 paciente.profissao = fake.job()[:100]
             novos.append(paciente)
         Paciente.objects.bulk_create(novos, batch_size=500)
+        return len(novos)
+
+    def _agendamentos(self, clinica):
+        """Fill ~60% of the weekday slots from 2 weeks ago to 4 weeks ahead."""
+        if Agendamento.objects.filter(clinica=clinica).exists():
+            return 0
+        sorteio = random.Random(clinica.pk)  # noqa: S311 (fake data, not security)
+        profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+        tipos = list(
+            TipoAtendimento.objects.filter(clinica=clinica, ativo=True).exclude(nome="Liberado")
+        )
+        pacientes = list(Paciente.objects.filter(clinica=clinica, ativo=True))
+        if not (profissionais and tipos and pacientes):
+            return 0
+        passo = datetime.timedelta(minutes=clinica.agenda_intervalo)
+        hoje = timezone.localdate()
+        segunda = hoje - datetime.timedelta(days=hoje.weekday() + 14)
+        novos = []
+        for dia in (segunda + datetime.timedelta(days=n) for n in range(42)):
+            if dia.weekday() >= 5:
+                continue
+            for profissional in profissionais:
+                atual = momento(dia, clinica.agenda_inicio)
+                fim_do_dia = momento(dia, clinica.agenda_fim)
+                while atual < fim_do_dia:
+                    duracao = passo * sorteio.choice([1, 1, 2])
+                    if atual + duracao > fim_do_dia or sorteio.random() > 0.6:
+                        atual += passo
+                        continue
+                    com_paciente = sorteio.random() < 0.9
+                    novos.append(
+                        Agendamento(
+                            clinica=clinica,
+                            profissional=profissional,
+                            tipo=sorteio.choice(tipos),
+                            paciente=sorteio.choice(pacientes) if com_paciente else None,
+                            descricao="" if com_paciente else "Horário bloqueado",
+                            inicio=atual,
+                            fim=atual + duracao,
+                        )
+                    )
+                    atual += duracao
+        Agendamento.objects.bulk_create(novos, batch_size=1000)
         return len(novos)

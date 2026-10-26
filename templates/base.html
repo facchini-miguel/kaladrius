@@ -19,6 +19,9 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">Início</a></li>
+          {% if pode.agenda.ver %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'agenda:calendario' %}">Agenda</a></li>
+          {% endif %}
           {% if pode.pacientes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:lista' %}">Pacientes</a></li>
           {% endif %}
@@ -89,5 +92,6 @@
 
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

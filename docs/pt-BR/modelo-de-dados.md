@@ -5,7 +5,7 @@
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
 - O filtro é aplicado de forma centralizada (middleware + managers), não manualmente em cada tela.
-- **Falha fechada:** todo modelo da clínica herda de `ModeloDaClinica` (`apps/core/isolamento.py`). O gerenciador padrão filtra pela clínica atual e, se não houver clínica definida, **dá erro em vez de mostrar dados**. Gravar ou excluir um registro de outra clínica também dá erro. Código da plataforma que precisa ver todas as clínicas (admin do Django, comandos) usa `sem_isolamento()` explicitamente.
+- **Falha fechada:** todo modelo da clínica herda de `ModeloDaClinica` (`apps/core/isolamento.py`). O gerenciador padrão filtra pela clínica atual e, se não houver clínica definida, **dá erro em vez de mostrar dados**. O filtro é decidido **quando a consulta é executada** (não quando é montada), o que permite declarar campos de formulário com dados da clínica. Gravar ou excluir um registro de outra clínica também dá erro. Código da plataforma que precisa ver todas as clínicas (admin do Django, comandos) usa `sem_isolamento()` explicitamente.
 - A clínica atual vem da sessão e só é aceita se o usuário tiver vínculo ativo com ela (ou for superusuário). O admin do Django é restrito aos superusuários da plataforma.
 - Tabelas de referência públicas (UF, cidade, banco, estado civil) são **globais**, compartilhadas entre as clínicas.
 
@@ -56,6 +56,11 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 |---|---|
 | Releases | Lidas do arquivo `releases.yaml` (não ficam no banco). Veja [versionamento-e-releases.md](versionamento-e-releases.md) |
 | `RegistroAuditoria` | Quem criou, alterou ou excluiu o quê e quando (LGPD) |
+
+## Agenda
+- `Agendamento` guarda início e fim como data e hora com fuso. Os agendamentos de uma mesma repetição semanal compartilham o campo `serie`.
+- Regras: horários alinhados à duração configurada da clínica e dentro do expediente; sem sobreposição para o mesmo profissional (horários encostados são permitidos).
+- A sobreposição é verificada no formulário (com mensagem de quem conflita) **e** por uma *exclusion constraint* do PostgreSQL (`btree_gist`), que vale mesmo com duas pessoas gravando ao mesmo tempo.
 
 ## Documentos e formatos
 - CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`).

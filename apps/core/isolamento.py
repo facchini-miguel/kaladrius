@@ -54,17 +54,51 @@ def sem_isolamento():
         _isolamento_desligado.reset(token)
 
 
-class ClinicaManager(models.Manager):
-    """Default manager that only sees rows from the current clinic."""
+class FiltroClinicaAtual(models.Expression):
+    """WHERE condition "clinica_id = <current clinic>", resolved when the SQL is compiled.
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
+    Deciding at execution time (not when the queryset is built) lets Django build
+    querysets at import time, e.g. the choices of a form field, while every query
+    that actually runs is still filtered by the clinic current at that moment.
+    """
+
+    output_field = models.BooleanField()
+    conditional = True
+
+    def __init__(self, coluna=None):
+        super().__init__()
+        self.coluna = coluna
+
+    def get_source_expressions(self):
+        return [self.coluna] if self.coluna is not None else []
+
+    def set_source_expressions(self, expressoes):
+        self.coluna = expressoes[0] if expressoes else None
+
+    def resolve_expression(
+        self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
+    ):
+        copia = self.copy()
+        copia.coluna = models.F("clinica_id").resolve_expression(
+            query, allow_joins, reuse, summarize, for_save
+        )
+        return copia
+
+    def as_sql(self, compiler, connection):
         if not isolamento_ativo():
-            return queryset
+            return "(1 = 1)", []
         clinica = clinica_atual()
         if clinica is None:
-            raise SemClinicaAtual(f"{self.model.__name__}: no current clinic is set.")
-        return queryset.filter(clinica=clinica)
+            raise SemClinicaAtual("Clinic data queried with no current clinic set.")
+        coluna, parametros = compiler.compile(self.coluna)
+        return f"({coluna} = %s)", [*parametros, clinica.pk]
+
+
+class ClinicaManager(models.Manager):
+    """Default manager that only sees rows from the current clinic (checked on execution)."""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(FiltroClinicaAtual())
 
 
 class ModeloDaClinica(models.Model):

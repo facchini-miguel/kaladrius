@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português
 
-> Status: **em andamento**. Etapas 1 a 4 concluídas (versões 0.1.0 a 0.4.0).
+> Status: **em andamento**. Etapas 1 a 5 concluídas (versões 0.1.0 a 0.5.0).
 
 ## Objetivo
 Ter, rodando em **Docker local**, a web da equipe com **as mesmas funções do sistema antigo**, já multi-clínica, segura, com dados fictícios para teste e a página de Novidades. Versão alvo: **0.7.0** (cada etapa com recursos novos sobe o número do meio). A 1.0.0 fica para o primeiro uso real.
@@ -42,7 +42,7 @@ medical-system/
 | 2 ✅ | **Multi-clínica e permissões** | Clinica, Vinculo, papéis (admin da clínica, recepção, profissional), isolamento por clínica que falha fechado, matriz de permissões, seletor de clínica, admin restrito ao superusuário, testes de isolamento. Adiantado da etapa 3: cadastro de **Profissionais** (primeiro dado da clínica, usado para testar o isolamento de ponta a ponta) e a primeira parte do comando `popular_dados_teste` | 0.2.0 |
 | 3 ✅ | **Referências e cadastros simples** | UF e cidades (lista oficial do IBGE), bancos (Banco Central), estado civil, carregados por migração e com busca sem acentos. Tipos de atendimento por clínica, com os 10 tipos e cores originais criados automaticamente em toda clínica nova. Menu Cadastros. Endpoint UF → cidades para o formulário de pacientes | 0.3.0 |
 | 4 ✅ | **Pacientes** | Lista paginada, busca (nome, código, CPF/CNPJ), formulário único PF/PJ com validação de CPF/CNPJ, UF → cidade encadeado (HTMX), ficha com idade, exclusão com confirmação. CNPJ alfanumérico (julho/2026) aceito. Pacientes fictícios no `popular_dados_teste` (Faker) | 0.4.0 |
-| 5 | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional, rechamadas e aniversariantes do dia | 0.5.0 |
+| 5 ✅ | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional (busca enquanto digita), aniversariantes do dia, exclusão de um ou da série. Restrição no banco (PostgreSQL) contra sobreposição. As **rechamadas do dia** entram com o módulo de rechamadas (etapa 6) | 0.5.0 |
 | 6 | **Rechamadas e aniversariantes** | CRUD de rechamadas. Aniversariantes por mês com link para a ficha | 0.6.0 |
 | 7 | **Novidades** (restante) | Aviso "versão nova: veja o que mudou" até o usuário abrir, filtro por módulo | 0.7.0 |
 | 8 | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~5.000 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |

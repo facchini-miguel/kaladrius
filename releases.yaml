@@ -4,6 +4,36 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.5.0
+  data: 2026-10-26
+  titulo: Agenda
+  itens:
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto: >
+        Agenda semanal por profissional, com as cores dos tipos de atendimento. Clique em um
+        horário livre (ou arraste sobre vários) para agendar; clique em um agendamento para
+        editar. No celular, a agenda abre na visão do dia.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto: >
+        Repetição semanal ("repetir por N semanas") e exclusão de um agendamento ou dele e
+        dos próximos da mesma repetição.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto: >
+        O sistema impede dois agendamentos no mesmo horário para o mesmo profissional e
+        mostra com quem é o conflito. Se uma das repetições conflitar, nada é gravado.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto: >
+        Busca do paciente enquanto você digita e aniversariantes do dia (🎂) no cabeçalho de
+        cada dia da agenda.
+
 - versao: 0.4.0
   data: 2026-10-26
   titulo: Cadastro de pacientes

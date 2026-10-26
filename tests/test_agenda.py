@@ -1,0 +1,319 @@
+import datetime
+import json
+
+import pytest
+from django.db import IntegrityError, transaction
+from django.urls import reverse
+
+from apps.agenda import servicos
+from apps.agenda.forms import AgendamentoForm
+from apps.agenda.models import Agendamento, TipoAtendimento
+from apps.core.isolamento import SemClinicaAtual, usar_clinica
+from apps.core.models import Papel
+from apps.pacientes.models import Paciente
+
+pytestmark = pytest.mark.django_db
+
+# A Monday well in the future, so tests never depend on today's date.
+SEGUNDA = datetime.date(2031, 3, 3)
+
+
+@pytest.fixture
+def cenario(clinica_a, criar_profissional, criar_usuario, cliente_de):
+    """Clinic A with two practitioners, a type, a patient and a front desk user."""
+    with usar_clinica(clinica_a):
+        tipo = TipoAtendimento.objects.get(nome="Cirurgia")
+        paciente = Paciente.objects.create(nome="Maria Paciente")
+    return {
+        "clinica": clinica_a,
+        "ana": criar_profissional(clinica_a, "Dra. Ana"),
+        "bruno": criar_profissional(clinica_a, "Dr. Bruno"),
+        "tipo": tipo,
+        "paciente": paciente,
+        "cliente": cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO)),
+    }
+
+
+def dados(cenario, **extra):
+    return {
+        "profissional": cenario["ana"].pk,
+        "tipo": cenario["tipo"].pk,
+        "paciente": cenario["paciente"].pk,
+        "descricao": "",
+        "data": SEGUNDA.isoformat(),
+        "hora_inicio": "09:00",
+        "hora_fim": "10:00",
+        "repeticoes": 1,
+        **extra,
+    }
+
+
+def agendar(cenario, **extra):
+    return cenario["cliente"].post(reverse("agenda:novo"), dados(cenario, **extra))
+
+
+def agendamentos(cenario):
+    with usar_clinica(cenario["clinica"]):
+        return list(Agendamento.objects.order_by("inicio"))
+
+
+def erros(resposta):
+    form = resposta.context["form"]
+    return " ".join(str(e) for lista in form.errors.values() for e in lista)
+
+
+# --- Creating ----------------------------------------------------------------------
+
+
+def test_cria_agendamento_e_avisa_a_tela(cenario):
+    resposta = agendar(cenario)
+    assert resposta.status_code == 204
+    assert json.loads(resposta["HX-Trigger"]) == {
+        "agendaAtualizada": {"mensagem": "Agendamento criado."}
+    }
+    [agendamento] = agendamentos(cenario)
+    assert agendamento.paciente == cenario["paciente"]
+    assert agendamento.criado_por.username == "recepcao"
+    assert agendamento.serie is None
+
+
+def test_repeticao_semanal_cria_a_serie(cenario):
+    assert agendar(cenario, repeticoes=4).status_code == 204
+    criados = agendamentos(cenario)
+    assert len(criados) == 4
+    assert len({a.serie for a in criados}) == 1 and criados[0].serie is not None
+    datas = [a.inicio.date() for a in criados]
+    assert datas == [SEGUNDA + datetime.timedelta(weeks=n) for n in range(4)]
+
+
+def test_sem_paciente_exige_descricao(cenario):
+    resposta = agendar(cenario, paciente="", descricao="")
+    assert "Informe o paciente ou uma descrição" in erros(resposta)
+    assert agendar(cenario, paciente="", descricao="Reunião de equipe").status_code == 204
+    assert agendamentos(cenario)[0].titulo == "Reunião de equipe"
+
+
+# --- Time rules --------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("inicio", "fim", "mensagem"),
+    [
+        ("09:15", "10:00", "de 30 em 30 minutos"),
+        ("09:00", "09:00", "O fim deve ser depois do início"),
+        ("10:00", "09:00", "O fim deve ser depois do início"),
+        ("06:00", "07:00", "Fora do horário de atendimento"),
+        ("19:30", "20:30", "Fora do horário de atendimento"),
+    ],
+)
+def test_regras_de_horario(cenario, inicio, fim, mensagem):
+    resposta = agendar(cenario, hora_inicio=inicio, hora_fim=fim)
+    assert resposta.status_code == 200
+    assert mensagem in erros(resposta)
+    assert agendamentos(cenario) == []
+
+
+def test_intervalo_configurado_pela_clinica(cenario):
+    clinica = cenario["clinica"]
+    clinica.agenda_intervalo = 15
+    clinica.save()
+    assert agendar(cenario, hora_inicio="09:15", hora_fim="09:45").status_code == 204
+
+
+# --- Conflicts ---------------------------------------------------------------------
+
+
+def test_conflito_com_o_mesmo_profissional(cenario):
+    agendar(cenario)
+    resposta = agendar(cenario, hora_inicio="09:30", hora_fim="10:30")
+    assert resposta.status_code == 200
+    assert "Conflito de horário" in erros(resposta)
+    assert "Maria Paciente" in erros(resposta)
+    assert len(agendamentos(cenario)) == 1
+
+
+def test_horarios_encostados_e_outro_profissional_nao_conflitam(cenario):
+    agendar(cenario)
+    assert agendar(cenario, hora_inicio="10:00", hora_fim="10:30").status_code == 204
+    assert agendar(cenario, hora_inicio="08:30", hora_fim="09:00").status_code == 204
+    assert agendar(cenario, profissional=cenario["bruno"].pk).status_code == 204
+    assert len(agendamentos(cenario)) == 4
+
+
+def test_repeticao_com_conflito_nao_grava_nenhuma(cenario):
+    terceira_semana = SEGUNDA + datetime.timedelta(weeks=2)
+    agendar(cenario, data=terceira_semana.isoformat())
+    resposta = agendar(cenario, repeticoes=4)
+    assert resposta.status_code == 200
+    assert terceira_semana.strftime("%d/%m") in erros(resposta)
+    assert "Nada foi gravado" in erros(resposta)
+    assert len(agendamentos(cenario)) == 1
+
+
+def test_banco_de_dados_impede_sobreposicao(cenario):
+    """Even bypassing the form (e.g. two simultaneous requests), the database refuses."""
+    with usar_clinica(cenario["clinica"]):
+        intervalos = servicos.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10))
+        modelo = Agendamento(
+            profissional=cenario["ana"], tipo=cenario["tipo"], descricao="Primeiro"
+        )
+        servicos.criar(modelo, intervalos, None)
+        sobreposto = servicos.ocorrencias(SEGUNDA, datetime.time(9, 30), datetime.time(10, 30))
+        with pytest.raises(IntegrityError), transaction.atomic():
+            servicos.criar(modelo, sobreposto, None)
+
+
+# --- Editing and deleting ----------------------------------------------------------
+
+
+def test_editar_muda_o_horario_sem_conflitar_consigo_mesmo(cenario):
+    agendar(cenario)
+    [agendamento] = agendamentos(cenario)
+    url = reverse("agenda:editar", args=[agendamento.pk])
+    formulario = cenario["cliente"].get(url)
+    assert formulario.context["form"].initial["hora_inicio"] == datetime.time(9)
+    assert "repeticoes" not in formulario.context["form"].fields
+    resposta = cenario["cliente"].post(url, dados(cenario, hora_inicio="09:30", hora_fim="10:30"))
+    assert resposta.status_code == 204
+    agendamento.refresh_from_db()
+    assert agendamento.inicio.astimezone().time() == datetime.time(9, 30)
+
+
+def test_excluir_um_ou_a_serie_dali_em_diante(cenario, criar_usuario, cliente_de):
+    agendar(cenario, repeticoes=4)
+    criados = agendamentos(cenario)
+    admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
+
+    admin.post(reverse("agenda:excluir", args=[criados[0].pk]), {"escopo": "este"})
+    assert len(agendamentos(cenario)) == 3
+
+    pagina = admin.get(reverse("agenda:excluir", args=[criados[1].pk])).content.decode()
+    assert "os próximos 2" in pagina
+    resposta = admin.post(reverse("agenda:excluir", args=[criados[1].pk]), {"escopo": "serie"})
+    assert json.loads(resposta["HX-Trigger"])["agendaAtualizada"]["mensagem"] == (
+        "3 agendamentos excluídos."
+    )
+    assert agendamentos(cenario) == []
+
+
+def test_paciente_com_agendamento_nao_pode_ser_excluido(cenario, criar_usuario, cliente_de):
+    agendar(cenario)
+    admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
+    resposta = admin.post(reverse("pacientes:excluir", args=[cenario["paciente"].pk]), follow=True)
+    assert "tem registros ligados" in resposta.content.decode()
+    with usar_clinica(cenario["clinica"]):
+        assert Paciente.objects.filter(pk=cenario["paciente"].pk).exists()
+
+
+# --- Calendar feeds ----------------------------------------------------------------
+
+
+def test_eventos_do_periodo_em_json(cenario):
+    agendar(cenario)
+    agendar(cenario, data=(SEGUNDA + datetime.timedelta(weeks=1)).isoformat())
+    resposta = cenario["cliente"].get(
+        reverse("agenda:eventos"),
+        {
+            "profissional": cenario["ana"].pk,
+            "start": f"{SEGUNDA}T00:00:00-03:00",
+            "end": f"{SEGUNDA + datetime.timedelta(days=7)}T00:00:00-03:00",
+        },
+    )
+    [evento] = resposta.json()
+    assert evento["title"] == "Maria Paciente"
+    assert evento["start"].startswith(f"{SEGUNDA}T09:00:00")
+    assert evento["backgroundColor"] == "#f7a5a5"
+    assert evento["extendedProps"]["tipo"] == "Cirurgia"
+
+
+def test_eventos_com_parametros_invalidos(cenario):
+    url = reverse("agenda:eventos")
+    assert cenario["cliente"].get(url, {"profissional": "x"}).status_code == 400
+    longo = {"profissional": 1, "start": "2031-01-01", "end": "2031-12-31"}
+    assert cenario["cliente"].get(url, longo).status_code == 400
+
+
+def test_aniversariantes_no_periodo(cenario):
+    with usar_clinica(cenario["clinica"]):
+        Paciente.objects.create(nome="Aniversariante", data_nascimento=datetime.date(1990, 3, 5))
+        Paciente.objects.create(
+            nome="Inativo", data_nascimento=datetime.date(1990, 3, 5), ativo=False
+        )
+    resposta = cenario["cliente"].get(
+        reverse("agenda:aniversariantes"),
+        {"start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA + datetime.timedelta(days=7)}T00:00:00"},
+    )
+    assert resposta.json() == {"2031-03-05": 1}
+    lista = cenario["cliente"].get(reverse("agenda:aniversariantes_dia"), {"data": "2031-03-05"})
+    assert "Aniversariante" in lista.content.decode()
+    assert "completa 41 anos" in lista.content.decode()
+
+
+def test_calendario_abre_no_profissional_escolhido(cenario):
+    pagina = cenario["cliente"].get(
+        reverse("agenda:calendario"), {"profissional": cenario["bruno"].pk}
+    )
+    assert pagina.context["profissional"] == cenario["bruno"]
+    config = pagina.context["configuracao"]
+    assert config["intervalo"] == 30 and config["inicio"] == "07:30:00"
+    assert config["pode"] == {"criar": True, "alterar": True}
+    # The choice is remembered for the next visit.
+    assert (
+        cenario["cliente"].get(reverse("agenda:calendario")).context["profissional"]
+        == cenario["bruno"]
+    )
+
+
+# --- Isolation and permissions -----------------------------------------------------
+
+
+def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissional):
+    de_b = criar_profissional(clinica_b, "Dr. B")
+    with usar_clinica(clinica_b):
+        tipo_b = TipoAtendimento.objects.get(nome="Cirurgia")
+        paciente_b = Paciente.objects.create(nome="Paciente B")
+        [agendamento_b] = servicos.criar(
+            Agendamento(profissional=de_b, tipo=tipo_b, paciente=paciente_b),
+            servicos.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10)),
+            None,
+        )
+    cliente = cenario["cliente"]
+    eventos = cliente.get(
+        reverse("agenda:eventos"),
+        {"profissional": de_b.pk, "start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA}T23:00:00"},
+    ).json()
+    assert eventos == []
+    assert cliente.get(reverse("agenda:editar", args=[agendamento_b.pk])).status_code == 404
+    # Ids from another clinic are not accepted in the form either.
+    resposta = agendar(cenario, profissional=de_b.pk, tipo=tipo_b.pk, paciente=paciente_b.pk)
+    assert set(resposta.context["form"].errors) >= {"profissional", "tipo", "paciente"}
+
+
+def test_profissional_agenda_mas_nao_exclui(cenario, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("dra", cenario["clinica"], Papel.PROFISSIONAL))
+    assert cliente.post(reverse("agenda:novo"), dados(cenario)).status_code == 204
+    [agendamento] = agendamentos(cenario)
+    assert cliente.post(reverse("agenda:excluir", args=[agendamento.pk])).status_code == 403
+    formulario = cliente.get(reverse("agenda:editar", args=[agendamento.pk])).content.decode()
+    assert "Excluir" not in formulario
+
+
+def test_sugestoes_de_pacientes_so_da_clinica(cenario, clinica_b):
+    with usar_clinica(clinica_b):
+        Paciente.objects.create(nome="Maria de Outra Clínica")
+    conteudo = (
+        cenario["cliente"].get(reverse("pacientes:sugestoes"), {"q": "maria"}).content.decode()
+    )
+    assert "Maria Paciente" in conteudo
+    assert "Outra Clínica" not in conteudo
+
+
+def test_filtro_da_clinica_e_decidido_na_execucao(clinica_a):
+    # Building a queryset (e.g. form field choices at import time) must not fail...
+    consulta = Agendamento.objects.filter(descricao="x")
+    assert AgendamentoForm.base_fields["profissional"].queryset is not None
+    # ...but running it without a current clinic must.
+    with pytest.raises(SemClinicaAtual):
+        list(consulta)
+    with usar_clinica(clinica_a):
+        assert list(consulta) == []

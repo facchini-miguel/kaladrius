@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Agenda · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0 me-3">Agenda</h1>
+  {% if profissionais %}
+  <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+    <label for="profissional" class="visually-hidden">Profissional</label>
+    <select name="profissional" id="profissional" class="form-select" onchange="this.form.submit()">
+      {% for item in profissionais %}
+      <option value="{{ item.pk }}"{% if item.pk == profissional.pk %} selected{% endif %}>{{ item.nome }}</option>
+      {% endfor %}
+    </select>
+    <label for="ir-para-data" class="visually-hidden">Ir para a data</label>
+    <input type="date" id="ir-para-data" class="form-control" style="width: auto;" title="Ir para a data">
+  </form>
+  {% endif %}
+</div>
+
+{% if not profissionais %}
+<div class="alert alert-info">
+  Nenhum profissional ativo nesta clínica.
+  {% if pode.profissionais.criar %}<a href="{% url 'profissionais:novo' %}">Cadastre um profissional</a> para usar a agenda.{% endif %}
+</div>
+{% else %}
+<div class="d-flex flex-wrap gap-1 mb-2 small" aria-label="Legenda dos tipos de atendimento">
+  {% for tipo in tipos %}
+  <span class="legenda-tipo" style="background-color: {{ tipo.cor }}">{{ tipo.nome }}</span>
+  {% endfor %}
+</div>
+
+<div id="aviso-agenda" class="alert alert-success py-2" role="status" hidden></div>
+<div id="calendario" class="bg-white p-2 rounded border"></div>
+{% if pode.agenda.criar %}
+<p class="text-body-secondary small mt-2">Clique em um horário livre (ou arraste sobre vários) para agendar.</p>
+{% endif %}
+{% endif %}
+
+<div class="modal fade" id="modal-agenda" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content" id="modal-conteudo"></div>
+  </div>
+</div>
+
+{{ configuracao|json_script:"configuracao-agenda" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'vendor/fullcalendar/index.global.min.js' %}"></script>
+<script src="{% static 'vendor/fullcalendar/pt-br.global.min.js' %}"></script>
+<script src="{% static 'js/agenda.js' %}"></script>
+{% endblock %}

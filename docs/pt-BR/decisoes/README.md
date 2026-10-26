@@ -34,3 +34,6 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 026 | 2026-10-26 | Tipos de atendimento por clínica, com os 10 tipos e cores do sistema antigo criados automaticamente em toda clínica nova | Paridade com o sistema antigo, mas editável por clínica | Aceita |
 | 027 | 2026-10-26 | Cada etapa da fase 1 sobe a versão MENOR (0.3.0, 0.4.0…); a fase 1 termina na 0.7.0 | Etapas trazem recursos novos (regra do versionamento semântico) | Aceita |
 | 028 | 2026-10-26 | Aceitar o CNPJ alfanumérico (IN RFB 2.229/2024) além do numérico; documentos e telefones guardados sem pontuação | Novos CNPJs com letras já são emitidos desde julho de 2026 | Aceita |
+| 029 | 2026-10-26 | Agenda com FullCalendar 6 (MIT, só plugins gratuitos) e formulários em modal via HTMX | Grade semanal pronta, responsiva, sem build de Node | Aceita |
+| 030 | 2026-10-26 | Anti-sobreposição também no banco: *exclusion constraint* com `btree_gist` | Garante a regra mesmo com gravações simultâneas | Aceita |
+| 031 | 2026-10-26 | Filtro de isolamento decidido na execução da consulta (expressão `FiltroClinicaAtual`), não na montagem | O Django monta consultas de campos de formulário ao carregar o código; continua falhando fechado na execução | Aceita (complementa a 021) |
