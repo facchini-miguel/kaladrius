@@ -62,3 +62,21 @@ class ClinicaAtualMiddleware:
             request.clinica, request.vinculo = resolver_clinica(request)
         with usar_clinica(request.clinica):
             return self.get_response(request)
+
+
+class ProxyReversoMiddleware:
+    """Use the client IP reported by the reverse proxy (Caddy) as REMOTE_ADDR.
+
+    Only enabled with DJANGO_PROXY_REVERSO=1, where the app port is reachable solely
+    by the proxy; otherwise anyone could forge the header. The proxy sets the client
+    address as the last X-Forwarded-For entry.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        encaminhado = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if encaminhado:
+            request.META["REMOTE_ADDR"] = encaminhado.split(",")[-1].strip()
+        return self.get_response(request)

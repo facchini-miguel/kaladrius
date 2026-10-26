@@ -151,7 +151,7 @@ class Command(BaseCommand):
         """Create fake patients for a clinic that has none. Returns how many were created."""
         if quantidade <= 0 or Paciente.objects.filter(clinica=clinica).exists():
             return 0
-        from faker import Faker  # dev-only dependency (requirements-dev.txt)
+        from faker import Faker
 
         fake = Faker("pt_BR")
         fake.seed_instance(clinica.pk)  # same data every time for the same clinic

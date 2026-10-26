@@ -1,0 +1,7 @@
+[Unit]
+Description=Medical System: backup do banco no Cloud Storage
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/medical-system/bin/backup.sh

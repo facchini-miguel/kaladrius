@@ -49,3 +49,11 @@ def test_novidades_filtradas_por_modulo(client, criar_usuario):
     modulos = {item.modulo for _, itens in resposta.context["versoes"] for item in itens}
     assert modulos == {"Agenda"}
     assert "Pacientes" in resposta.context["modulos"]
+
+
+def test_ip_real_atras_do_proxy(rf):
+    from apps.core.middleware import ProxyReversoMiddleware
+
+    request = rf.get("/", HTTP_X_FORWARDED_FOR="2804:abcd::1, 2001:db8::7", REMOTE_ADDR="::1")
+    ProxyReversoMiddleware(lambda r: None)(request)
+    assert request.META["REMOTE_ADDR"] == "2001:db8::7"

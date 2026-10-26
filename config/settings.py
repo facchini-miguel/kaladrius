@@ -66,6 +66,10 @@ MIDDLEWARE = [
     "axes.middleware.AxesMiddleware",
 ]
 
+# Behind Caddy in production: take the client IP from X-Forwarded-For (must run first).
+if env_bool("DJANGO_PROXY_REVERSO"):
+    MIDDLEWARE.insert(0, "apps.core.middleware.ProxyReversoMiddleware")
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
