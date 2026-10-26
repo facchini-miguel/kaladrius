@@ -1,5 +1,6 @@
 # Local development environment.
 # Usage: docker compose up --build   →   http://localhost:8000
+name: medical-system
 services:
   db:
     image: postgres:16-alpine

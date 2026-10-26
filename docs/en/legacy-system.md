@@ -2,9 +2,9 @@
 
 🇺🇸 English | [🇧🇷 Português](../pt-BR/sistema-legado.md)
 
-Reference for the rewrite. The old code lives outside this repository, at `~/public_html/medical system/www/`. The full analysis (in Portuguese) is at `~/public_html/medical system/ANALISE_SISTEMA.md`.
+Reference for the rewrite. The old (PHP) code lives in the local folder `old_data/legado-php/www/`, which is ignored by Git and Docker. The full analysis (in Portuguese) is at `old_data/legado-php/ANALISE_SISTEMA.md`.
 
-> Backups with real patient data are in `~/public_html/medical system/old_data/`. **Never** copy anything from there into this repository. This project uses **fake data** only.
+> Backups with real patient data are in `old_data/` (local machine only). **Never** remove it from `.gitignore` or copy anything from there into versioned code. This project uses **fake data** only.
 
 ## Summary
 - PHP 5.3 with no framework, MySQL 5.5 (MyISAM, latin1), jQuery 1.x. Written in 2009–2010, used until Nov/2019.

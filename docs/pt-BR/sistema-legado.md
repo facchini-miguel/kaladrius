@@ -2,9 +2,9 @@
 
 [🇺🇸 English](../en/legacy-system.md) | 🇧🇷 Português
 
-Referência para a reescrita. O código antigo fica fora deste repositório, em `~/public_html/medical system/www/`. A análise completa está em `~/public_html/medical system/ANALISE_SISTEMA.md`.
+Referência para a reescrita. O código antigo (PHP) fica na pasta local `old_data/legado-php/www/`, que é ignorada pelo Git e pelo Docker. A análise completa está em `old_data/legado-php/ANALISE_SISTEMA.md`.
 
-> Os backups com dados reais de pacientes ficam em `~/public_html/medical system/old_data/`. **Nunca** copiar nada de lá para este repositório. Este projeto usa apenas **dados fictícios**.
+> Os backups com dados reais de pacientes ficam em `old_data/` (só na máquina local). **Nunca** tirar nada de lá do `.gitignore` nem copiar para o código versionado. Este projeto usa apenas **dados fictícios**.
 
 ## Resumo
 - PHP 5.3 sem framework, MySQL 5.5 (MyISAM, latin1), jQuery 1.x. Escrito em 2009–2010, usado até nov/2019.
