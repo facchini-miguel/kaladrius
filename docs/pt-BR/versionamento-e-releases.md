@@ -1,5 +1,7 @@
 # Versionamento e releases
 
+[🇺🇸 English](../en/versioning-and-releases.md) | 🇧🇷 Português
+
 ## Número da versão: `MAIOR.MENOR.CORREÇÃO`
 
 Seguimos o [Versionamento Semântico](https://semver.org/lang/pt-BR/):
@@ -16,7 +18,7 @@ Seguimos o [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 ## Onde ficam as novidades: `releases.yaml`
 
-O arquivo [`../releases.yaml`](../releases.yaml) é a **única fonte** do histórico. Dele saem:
+O arquivo [`../../releases.yaml`](../../releases.yaml) é a **única fonte** do histórico. Dele saem:
 - a página **Novidades** dentro do sistema web;
 - o endpoint da API que o app usa para mostrar "O que há de novo";
 - o número da versão exibido no rodapé do sistema.

@@ -1,5 +1,7 @@
 # Modelo de dados (proposta da fase 1)
 
+[🇺🇸 English](../en/data-model.md) | 🇧🇷 Português
+
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
 - O filtro é aplicado de forma centralizada (middleware + managers), não manualmente em cada tela.

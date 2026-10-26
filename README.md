@@ -1,51 +1,53 @@
 # Medical System
 
-Sistema de gestão para clínicas: agenda por profissional, cadastro de pacientes, rechamadas (retornos), aniversariantes, usuários e permissões. Atende várias clínicas no mesmo servidor (multi-clínica).
+🇺🇸 English | [🇧🇷 Português](README.pt-BR.md)
 
-É a reescrita do antigo *Odonto System* (PHP 5, 2009–2019), agora genérico para qualquer tipo de clínica.
+Clinic management system: per-professional scheduling, patient records, recalls (follow-up reminders), birthdays, users and permissions. Serves multiple clinics from the same server (multi-tenant).
 
-> Status: **fase 1 em andamento**. Versão atual: veja [`releases.yaml`](releases.yaml).
+It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic for any kind of clinic.
 
-## Como rodar (local)
+> Status: **phase 1 in progress**. Current version: see [`releases.yaml`](releases.yaml).
 
-Pré-requisito: Docker com Docker Compose.
+## Running locally
+
+Requirement: Docker with Docker Compose.
 
 ```bash
-cp .env.example .env          # preencha as senhas e a SECRET_KEY (valores aleatórios)
-docker compose up --build -d  # sobe o banco e a aplicação
-docker compose exec app python manage.py criar_admin   # cria o admin definido no .env
+cp .env.example .env          # fill in the passwords and SECRET_KEY (random values)
+docker compose up --build -d  # starts the database and the application
+docker compose exec app python manage.py criar_admin   # creates the admin defined in .env
 ```
 
-Acesse http://localhost:8000. A documentação da API fica em http://localhost:8000/api/v1/docs.
+Open http://localhost:8000. The API documentation is at http://localhost:8000/api/v1/docs.
 
-| Tarefa | Comando |
+| Task | Command |
 |---|---|
-| Testes | `docker compose exec app pytest` |
+| Tests | `docker compose exec app pytest` |
 | Lint | `docker compose exec app ruff check .` |
-| Formatar código | `docker compose exec app ruff format .` |
-| Nova migração | `docker compose exec app python manage.py makemigrations` |
+| Format code | `docker compose exec app ruff format .` |
+| New migration | `docker compose exec app python manage.py makemigrations` |
 | Logs | `docker compose logs -f app` |
-| Parar | `docker compose down` (os dados do banco ficam no volume `pgdata`) |
+| Stop | `docker compose down` (database data stays in the `pgdata` volume) |
 
 ## Stack
 
-| Camada | Ferramenta |
+| Layer | Tool |
 |---|---|
-| Servidor e web da equipe | Python + Django |
-| API (para o app) | Django Ninja |
-| Banco | PostgreSQL 16 |
-| Execução | Docker + Docker Compose |
-| Produção | VM do Google Compute Engine |
-| App mobile | React Native + Expo, no repositório separado `medical-system-app` |
+| Server and staff web app | Python + Django |
+| API (for the mobile app) | Django Ninja |
+| Database | PostgreSQL 16 |
+| Runtime | Docker + Docker Compose |
+| Production | Google Compute Engine VM |
+| Mobile app | React Native + Expo, in the separate `medical-system-app` repository |
 
-## Documentação
+## Documentation
 
-Toda a documentação fica em [`docs/`](docs/README.md).
+All documentation lives in [`docs/`](docs/README.md), in English ([`docs/en`](docs/en/README.md)) and Portuguese ([`docs/pt-BR`](docs/pt-BR/README.md)). Portuguese is the primary language; English is a translation.
 
-## Versões
+## Versions
 
-O histórico de versões fica em [`releases.yaml`](releases.yaml) e também pode ser consultado dentro do sistema e no app. Veja [docs/versionamento-e-releases.md](docs/versionamento-e-releases.md).
+The version history lives in [`releases.yaml`](releases.yaml) and can also be viewed inside the system and in the app. See [docs/en/versioning-and-releases.md](docs/en/versioning-and-releases.md).
 
-## Licença
+## License
 
-Software proprietário. Todos os direitos reservados. Veja [LICENSE](LICENSE).
+Proprietary software. All rights reserved. See [LICENSE](LICENSE).

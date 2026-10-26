@@ -1,5 +1,7 @@
 # Visão geral
 
+[🇺🇸 English](../en/overview.md) | 🇧🇷 Português
+
 ## O que é
 Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psicologia etc.) com:
 - uma **web** para a equipe da clínica (recepção, gestão, profissionais);

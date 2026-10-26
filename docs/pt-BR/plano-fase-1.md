@@ -1,5 +1,7 @@
 # Plano da fase 1: web da equipe + dados de teste
 
+[🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português
+
 > Status: **em andamento**. Etapa 1 concluída na versão 0.1.0.
 
 ## Objetivo

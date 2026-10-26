@@ -1,5 +1,7 @@
 # Sistema legado (Odonto System)
 
+[🇺🇸 English](../en/legacy-system.md) | 🇧🇷 Português
+
 Referência para a reescrita. O código antigo fica fora deste repositório, em `~/public_html/medical system/www/`. A análise completa está em `~/public_html/medical system/ANALISE_SISTEMA.md`.
 
 > Os backups com dados reais de pacientes ficam em `~/public_html/medical system/old_data/`. **Nunca** copiar nada de lá para este repositório. Este projeto usa apenas **dados fictícios**.

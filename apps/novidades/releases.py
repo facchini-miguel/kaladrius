@@ -1,6 +1,6 @@
 """Leitura e validação do histórico de versões (releases.yaml).
 
-Formato e regras de escrita: docs/versionamento-e-releases.md
+Formato e regras de escrita: docs/pt-BR/versionamento-e-releases.md
 """
 
 import datetime
