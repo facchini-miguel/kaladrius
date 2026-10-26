@@ -43,3 +43,4 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 035 | 2026-10-26 | VM **somente com IPv6 público** (sem IPv4) | O IPv4 de VMs é cobrado (US$ 0,005/h, free tier só 1 h/mês); o IPv6 é gratuito. Exige redes com IPv6 | Aceita (titular) |
 | 036 | 2026-10-26 | Imagens no Artifact Registry e atualização puxada pela VM a cada 5 min; CI autenticado por Workload Identity Federation | GitHub/GHCR não têm IPv6; nenhuma chave guardada | Aceita |
 | 037 | 2026-10-26 | HTTPS pelo Caddy com Let's Encrypt e nome do sslip.io | Certificado válido sem precisar comprar domínio | Aceita |
+| 038 | 2026-10-26 | Domínio gratuito `medical-system.duckdns.org` (só AAAA) e IPv6 da VM reservado como fixo | Nome amigável sem custo; o endereço não muda | Aceita (titular) |

@@ -43,3 +43,4 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 035 | 2026-10-26 | VM with **public IPv6 only** (no IPv4) | VM IPv4 is billed (US$ 0.005/h, free tier only 1 h/month); IPv6 is free. Requires IPv6 networks | Accepted (owner) |
 | 036 | 2026-10-26 | Images in Artifact Registry, updates pulled by the VM every 5 min; CI authenticated with Workload Identity Federation | GitHub/GHCR have no IPv6; no stored keys | Accepted |
 | 037 | 2026-10-26 | HTTPS by Caddy with Let's Encrypt and an sslip.io name | Valid certificate without buying a domain | Accepted |
+| 038 | 2026-10-26 | Free domain `medical-system.duckdns.org` (AAAA only) and the VM's IPv6 reserved as static | Friendly name at no cost; the address never changes | Accepted (owner) |

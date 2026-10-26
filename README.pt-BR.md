@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 **Versão atual: 0.7.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
 
-> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada no Google Cloud (free tier, IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
+> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://medical-system.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
 ## Como rodar (local)
 

@@ -2,7 +2,10 @@
 
 🇺🇸 English | [🇧🇷 Português](../pt-BR/deploy.md)
 
-Published at **https://2600-1900-4020-f0b-0-0-0-0.sslip.io** (**IPv6-only** access).
+Published at **https://medical-system.duckdns.org** (**IPv6-only** access). Fallback address: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
+
+- **DNS:** `medical-system.duckdns.org` (DuckDNS, free) has only an AAAA record for the VM's IPv6. The token is in `DUCKDNS_TOKEN` in the server `.env` and the local `.env.producao`. To repoint: `https://www.duckdns.org/update?domains=medical-system&token=<token>&ipv6=<ipv6>` (when `ipv6` is given, DuckDNS does not fill in IPv4).
+- **Static IPv6:** reserved address `medical-system-ipv6` (`2600:1900:4020:f0b::`), free; it does not change when the VM restarts.
 
 ## Architecture
 
@@ -27,6 +30,8 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 |---|---|---|
 | VM | `medical-system` (e2-micro, us-east1-b, 30 GB standard disk, Debian 13) | Free tier |
 | Network | VPC `medical-system`, subnet `medical-system-us-east1` (internal IPv4 + external IPv6, Private Google Access) | Free |
+| Static IPv6 | `medical-system-ipv6` (`2600:1900:4020:f0b::`, reserved) | Free |
+| Domain | `medical-system.duckdns.org` (DuckDNS) | Free |
 | Firewall | `medical-system-web-ipv6` (80/443 from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
 | Images | Artifact Registry `medical-system` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
 | Backups | `gs://medical-system-facchini-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |
