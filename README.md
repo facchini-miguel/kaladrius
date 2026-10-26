@@ -10,7 +10,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 **Current version: 0.7.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
-> Status: **phase 1 complete** (feature parity with the legacy system). Next: deploy to Google Cloud.
+> Status: **phase 1 complete** (feature parity with the legacy system), running on Google Cloud (free tier, IPv6). See [docs/en/deploy.md](docs/en/deploy.md).
 
 ## Running locally
 

@@ -57,20 +57,20 @@ Rule: **Google Cloud free tier resources only** (decision 020).
 | Environment | Where | Cost |
 |---|---|---|
 | Local | Docker on the developer's machine | — |
-| Cloud (testing and production) | **e2-micro** VM in a free US region (`us-central1`, `us-west1` or `us-east1`), standard disk up to 30 GB | Free |
+| Cloud (testing and production) | **e2-micro** VM in `us-east1-b`, 30 GB standard disk, **public IPv6 only** (IPv4 is billed). Details in [deploy.md](deploy.md) | Free |
 | Backup | Cloud Storage, US regional bucket, up to 5 GB | Free |
 
 **Google Cloud project:** `medical-system-facchini`, with the Compute Engine API enabled and a **R$ 5 budget alert** (notifications at R$ 0.50, R$ 2.50 and R$ 5) to catch any charge.
 
 **Free tier limits to respect:** 1 e2-micro VM, 30 GB standard disk, 5 GB in Cloud Storage, 1 GB/month egress. Disk snapshots are paid, so they are not used. The cost of the VM's external IP must be confirmed on the first billing report.
 
-**CI/CD:** GitHub Actions runs lint and tests, builds the image into GitHub Container Registry and deploys to the VM over SSH (`docker compose pull && up -d`).
+**CI/CD:** GitHub Actions runs lint and tests and publishes the image to Google **Artifact Registry** (keyless auth). The VM checks every 5 minutes and updates itself (GitHub has no IPv6, so the VM could not reach GHCR, nor could CI reach the VM over SSH).
 
 ## Security (requirements)
 - Django's built-in protections enabled (CSRF, XSS escaping, parameterized ORM, security headers). `manage.py check --deploy` with no warnings.
 - Argon2 password hashing and login attempt limiting (django-axes: 5 failures per user + IP lock for 1 hour).
 - Audit log of changes, patient record views and logins (`apps/auditoria`).
-- **At deploy time:** behind Caddy, configure the real client IP (`X-Forwarded-For`) for django-axes and the audit log.
+- Behind Caddy, the real client IP comes from `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), used by django-axes and the audit log.
 - **Per-clinic isolation** in every query, with automated tests that try to access another clinic's data.
 - Secrets only in `.env` (outside Git) and in GitHub *Secrets*. Push protection enabled.
 - Postgres port not exposed. VM firewall (80, 443, key-only SSH).

@@ -1,0 +1,75 @@
+# Deploy (Google Cloud, free tier)
+
+🇺🇸 English | [🇧🇷 Português](../pt-BR/deploy.md)
+
+Published at **https://2600-1900-4020-f0b-0-0-0-0.sslip.io** (**IPv6-only** access).
+
+## Architecture
+
+```
+git push (main) ─> GitHub Actions: tests ─> build ─> Artifact Registry (us-east1)
+                                                        │ the VM checks every 5 min
+                                                        ▼
+Browser ──IPv6/HTTPS──> e2-micro VM "medical-system" (us-east1-b, no public IPv4)
+                         ├─ caddy  (automatic Let's Encrypt HTTPS, host network)
+                         ├─ app    (Django + Gunicorn, only on 127.0.0.1:8000)
+                         ├─ db     (PostgreSQL 16, pgdata volume)
+                         └─ daily backup 06:00 UTC ─> gs://medical-system-facchini-backups
+Maintenance: SSH only through Google's IAP tunnel
+```
+
+## Why IPv6
+Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the free tier covers only 1 hour/month). External IPv6 is free. As a result, the system only opens on IPv6-capable networks (most mobile and many fixed networks in Brazil). To serve any network, add an IPv4 to the VM (cost above). See the [pricing page](https://cloud.google.com/vpc/network-pricing).
+
+## Resources (project `medical-system-facchini`)
+
+| Resource | Name | Cost |
+|---|---|---|
+| VM | `medical-system` (e2-micro, us-east1-b, 30 GB standard disk, Debian 13) | Free tier |
+| Network | VPC `medical-system`, subnet `medical-system-us-east1` (internal IPv4 + external IPv6, Private Google Access) | Free |
+| Firewall | `medical-system-web-ipv6` (80/443 from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
+| Images | Artifact Registry `medical-system` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
+| Backups | `gs://medical-system-facchini-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |
+| Service accounts | `medical-system-vm` (reads images, writes backups), `github-ci` (publishes images) | Free |
+| GitHub → Google | Workload Identity Federation (pool `github`), this repository and `main` only | Free |
+| Budget alert | R$ 5 (notifications at 10%, 50% and 100%) | Free |
+
+## How the server works
+- `deploy/servidor/instalar.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
+- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it changed, extracts the `deploy/` files from the image and restarts the containers. Migrations run when the app starts.
+- `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage.
+- Settings and passwords: `/opt/medical-system/.env` (root only). Local copy in `.env.producao`, ignored by Git.
+- No stored keys: the VM and CI use short-lived Google tokens.
+
+## Common tasks
+
+```bash
+# Log into the server (IAP tunnel)
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap
+
+# On the VM: status, logs and Django commands
+cd /opt/medical-system/release
+sudo docker compose -f docker-compose.prod.yml ps
+sudo docker compose -f docker-compose.prod.yml logs -f app
+sudo docker compose -f docker-compose.prod.yml exec app python manage.py <command>
+
+# Update now / back up now
+sudo /opt/medical-system/bin/atualizar.sh --forcar
+sudo /opt/medical-system/bin/backup.sh
+
+# List backups (on your machine)
+gcloud storage ls -l gs://medical-system-facchini-backups/
+```
+
+### Restoring a backup
+```bash
+# On the VM (replaces the current database!)
+gcloud storage cp gs://medical-system-facchini-backups/<file>.dump /tmp/restore.dump  # or download on your machine and copy with gcloud compute scp --tunnel-through-iap
+cd /opt/medical-system/release
+sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restore.dump
+```
+
+## Cautions
+- **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).
+- The **standard** disk is the free one; the console suggests "balanced", which is billed.
+- The server currently holds **fake** data (`popular_dados_teste --forcar`).

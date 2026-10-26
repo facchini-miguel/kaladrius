@@ -57,20 +57,20 @@ Regra: **somente recursos do free tier do Google Cloud** (decisão 020).
 | Ambiente | Onde | Custo |
 |---|---|---|
 | Local | Docker no computador do desenvolvedor | — |
-| Nuvem (testes e produção) | VM **e2-micro** numa região gratuita dos EUA (`us-central1`, `us-west1` ou `us-east1`), disco padrão de até 30 GB | Grátis |
+| Nuvem (testes e produção) | VM **e2-micro** em `us-east1-b`, disco standard de 30 GB, **somente IPv6 público** (o IPv4 é cobrado). Detalhes em [deploy.md](deploy.md) | Grátis |
 | Backup | Cloud Storage, bucket regional nos EUA, até 5 GB | Grátis |
 
 **Projeto no Google Cloud:** `medical-system-facchini`, com a API do Compute Engine ativa e um **alerta de orçamento de R$ 5** (avisos em R$ 0,50, R$ 2,50 e R$ 5) para detectar qualquer cobrança.
 
 **Limites do free tier a respeitar:** 1 VM e2-micro, 30 GB de disco padrão, 5 GB no Cloud Storage, 1 GB/mês de tráfego de saída. Snapshots de disco são pagos, por isso não são usados. O custo do IP externo da VM deve ser confirmado no primeiro relatório de faturamento.
 
-**CI/CD:** GitHub Actions roda lint e testes, gera a imagem no GitHub Container Registry e publica na VM por SSH (`docker compose pull && up -d`).
+**CI/CD:** GitHub Actions roda lint e testes e publica a imagem no **Artifact Registry** do Google (autenticação sem chave). A VM verifica a cada 5 minutos e se atualiza sozinha (o GitHub não tem IPv6, então a VM não acessaria o GHCR, e o CI não alcançaria a VM por SSH).
 
 ## Segurança (requisitos)
 - Proteções nativas do Django ativas (CSRF, escape de XSS, ORM parametrizado, cabeçalhos de segurança). `manage.py check --deploy` sem alertas.
 - Senhas com hash Argon2 e limite de tentativas de login (django-axes: 5 erros por usuário + IP bloqueiam por 1 hora).
 - Registro de auditoria de alterações, consultas a fichas e entradas no sistema (`apps/auditoria`).
-- **No deploy:** atrás do Caddy, configurar o IP real do cliente (`X-Forwarded-For`) para o django-axes e a auditoria.
+- Atrás do Caddy, o IP real do cliente vem do `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), usado pelo django-axes e pela auditoria.
 - **Isolamento por clínica** em todas as consultas, com testes automatizados que tentam acessar dados de outra clínica.
 - Segredos só em `.env` (fora do Git) e nos *Secrets* do GitHub. Push protection ativo.
 - Postgres sem porta exposta. VM com firewall (80, 443, SSH só por chave).
