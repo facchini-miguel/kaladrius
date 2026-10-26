@@ -69,7 +69,7 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 
 ## Publishing a version
 1. Add the entry at the top of `releases.yaml` in the same pull request as the change.
-2. Update the project version (`pyproject.toml`).
+2. Update the project version (`pyproject.toml`) and the "Current version" line in both READMEs. Tests fail if any of them differs from `releases.yaml`.
 3. Create the Git tag `vX.Y.Z` and the GitHub *Release* with the same text.
 4. CI validates `releases.yaml` (format, version greater than the previous one, date) before deploying.
 

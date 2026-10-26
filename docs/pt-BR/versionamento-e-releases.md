@@ -67,7 +67,7 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 
 ## Processo para publicar uma versão
 1. Adicionar a entrada no topo de `releases.yaml` no mesmo pull request da mudança.
-2. Atualizar a versão do projeto (`pyproject.toml`).
+2. Atualizar a versão do projeto (`pyproject.toml`) e a linha "Versão atual" dos dois READMEs. Os testes falham se algum deles ficar diferente do `releases.yaml`.
 3. Criar a tag Git `vX.Y.Z` e a *Release* no GitHub, com o mesmo texto.
 4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data) antes do deploy.
 

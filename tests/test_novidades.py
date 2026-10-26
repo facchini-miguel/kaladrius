@@ -46,6 +46,15 @@ def test_arquivo_do_projeto_e_valido():
     assert versoes
 
 
+@pytest.mark.parametrize(
+    ("arquivo", "texto"),
+    [("README.md", "Current version: {}"), ("README.pt-BR.md", "Versão atual: {}")],
+)
+def test_readme_mostra_a_versao_atual(arquivo, texto):
+    readme = (settings.BASE_DIR / arquivo).read_text(encoding="utf-8")
+    assert texto.format(releases.versao_atual()) in readme, f"update the version in {arquivo}"
+
+
 def test_versao_do_pyproject_igual_a_do_releases():
     import tomllib
 

@@ -6,7 +6,9 @@ Clinic management system: per-professional scheduling, patient records, recalls 
 
 It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic for any kind of clinic.
 
-> Status: **phase 1 in progress**. Current version: see [`releases.yaml`](releases.yaml).
+**Current version: 0.3.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+
+> Status: **phase 1 in progress**.
 
 ## Running locally
 

@@ -6,7 +6,9 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 É a reescrita do antigo *Odonto System* (PHP 5, 2009–2019), agora genérico para qualquer tipo de clínica.
 
-> Status: **fase 1 em andamento**. Versão atual: veja [`releases.yaml`](releases.yaml).
+**Versão atual: 0.3.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
+
+> Status: **fase 1 em andamento**.
 
 ## Como rodar (local)
 
