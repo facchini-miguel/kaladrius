@@ -51,3 +51,5 @@ O histórico de versões fica em [`releases.yaml`](releases.yaml) e também pode
 ## Licença
 
 Software proprietário. Todos os direitos reservados. Veja [LICENSE](LICENSE).
+
+Desenvolvido por **Miguel Facchini**.

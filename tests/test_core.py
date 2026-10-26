@@ -21,6 +21,12 @@ def test_login_e_inicio(client, django_user_model):
     assert "Bem-vindo(a), maria" in resposta.content.decode()
 
 
+def test_rodape_mostra_autor_e_versao(client):
+    conteudo = client.get(reverse("login")).content.decode()
+    assert "Desenvolvido por Miguel Facchini" in conteudo
+    assert "versão" in conteudo
+
+
 def test_login_com_senha_errada(client, django_user_model):
     django_user_model.objects.create_user(username="maria", password="senha-de-teste-123")
     resposta = client.post(reverse("login"), {"username": "maria", "password": "errada"})

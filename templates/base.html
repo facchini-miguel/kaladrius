@@ -43,6 +43,7 @@
 
   <footer class="rodape text-center text-body-secondary small py-3">
     Medical System · versão <a href="{% if user.is_authenticated %}{% url 'novidades' %}{% else %}#{% endif %}">{{ versao_sistema }}</a>
+    · Desenvolvido por Miguel Facchini
   </footer>
 
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>

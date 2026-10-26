@@ -51,3 +51,5 @@ The version history lives in [`releases.yaml`](releases.yaml) and can also be vi
 ## License
 
 Proprietary software. All rights reserved. See [LICENSE](LICENSE).
+
+Developed by **Miguel Facchini**.
