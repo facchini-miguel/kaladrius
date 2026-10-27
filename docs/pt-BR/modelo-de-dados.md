@@ -49,7 +49,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | Entidade | Campos principais | Sistema antigo |
 |---|---|---|
 | `Paciente` | clinica, tipo (PF/PJ), nome, razão social, CPF/CNPJ, RG, inscrição estadual, sexo, estado civil, nascimento, profissão, responsável, telefones (residencial, comercial, celular), e-mail, endereço (CEP, UF, cidade, bairro, logradouro, número, complemento), observações, ativo, arquivado (com data e quem arquivou), datas de criação e alteração | `pessoas` |
-| `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, ativo, usuario (opcional) | `dentistas` |
+| `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, comissão (%, desde a 0.19), ativo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clinica, nome, cor, ativo | `agenda_cor` (Cirurgia, Prótese…) |
 | `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, série (repetição), criado por | `agendax` |
 | `Rechamada` | clinica, paciente, data, descrição, concluída, criado por | `agenda` (is_rechamada) |
@@ -68,6 +68,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 
 | `Caixa` | clinica, conta, aberto em/por, valor contado na abertura, fechado em/por, valor esperado e contado no fechamento, observação | Caixa do dia (0.17.0). Um aberto por conta; o esperado é gravado ao fechar, para estornos posteriores não mudarem um caixa fechado |
 | `MovimentoCaixa` | clinica, caixa, tipo (retirada, reforço), valor, outra conta (opcional), motivo, criado por | Retirada para outra conta (depósito no banco) move o saldo entre as contas; sem outra conta, o dinheiro sai ou entra no sistema e aparece no fluxo de caixa |
+| `Comissao` | clinica, profissional, recebimentos até, percentual, valor recebido, comissão de estornos descontada, valor, lançamento a pagar, cancelada, criado por | Desde a 0.19. Os pagamentos cobertos apontam para ela (`Pagamento.comissao`), e o estorno de um deles, descontado depois, aponta para a comissão que o descontou (`Pagamento.comissao_estorno`); assim nenhum recebimento é comissionado duas vezes. Cancelar o lançamento a pagar cancela a comissão e solta os pagamentos |
 
 As contas a pagar (0.16.0) usam as mesmas entidades, com o fornecedor no campo do pagador. O saldo de cada conta é o saldo inicial mais o que entrou menos o que saiu (pagamentos não estornados). Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
 

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Comissões" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Comissões" %}</h1>
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-6 col-md-3">
+    <label class="form-label small" for="ate">{% translate "Recebimentos até" %}</label>
+    <input type="date" id="ate" name="ate" value="{{ ate|date:'Y-m-d' }}" class="form-control">
+  </div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Percentual" %}</th><th class="text-end">{% translate "Recebido ainda não comissionado" %}</th><th class="text-end">{% translate "Estornos a descontar" %}</th><th class="text-end">{% translate "Comissão a pagar" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <tbody>
+      {% for linha in linhas %}
+      <tr>
+        <td>{{ linha.profissional.nome }}{% if not linha.profissional.ativo %} <span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td class="text-end">{{ linha.profissional.comissao_percentual|floatformat:"-2" }}%</td>
+        <td class="text-end text-nowrap">{{ linha.recebido|moeda }}</td>
+        <td class="text-end text-nowrap">{% if linha.estornos %}− {{ linha.estornos|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold">{{ linha.valor|moeda }}</td>
+        <td class="text-end text-nowrap">
+          {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:comissao_percentual' linha.profissional.pk %}">{% translate "Percentual" %}</a>{% endif %}
+          {% if pode.financeiro.criar and linha.valor > 0 %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:comissao_pagar' linha.profissional.pk %}?ate={{ ate|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum profissional com comissão." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if sem_percentual and pode.financeiro.alterar %}
+<p class="small">{% translate "Sem percentual definido:" %}
+  {% for profissional in sem_percentual %}<a href="{% url 'financeiro:comissao_percentual' profissional.pk %}">{{ profissional.nome }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+</p>
+{% endif %}
+<p class="text-body-secondary small">{% translate "A comissão é o percentual do profissional sobre o valor recebido dos lançamentos a receber em que ele aparece. Lançamentos sem profissional não entram. Cada recebimento é comissionado uma vez só; se for estornado depois de pago ao profissional, a comissão dele é descontada no próximo pagamento." %}</p>
+
+<h2 class="h5 mt-4">{% translate "Comissões lançadas" %}</h2>
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Lançada em" %}</th><th>{% translate "Profissional" %}</th><th>{% translate "Recebimentos até" %}</th><th class="text-end">{% translate "Valor" %}</th><th></th></tr></thead>
+    <tbody>
+      {% for comissao in historico %}
+      <tr>
+        <td class="text-nowrap">{{ comissao.criado_em|date:"SHORT_DATE_FORMAT" }}</td>
+        <td>{{ comissao.profissional.nome }}</td>
+        <td class="text-nowrap">{{ comissao.ate|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-end text-nowrap">{% if comissao.cancelada %}<s>{{ comissao.valor|moeda }}</s> <span class="badge text-bg-secondary">{% translate "Cancelada" %}</span>{% else %}{{ comissao.valor|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap"><a href="{% url 'financeiro:comissao' comissao.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'financeiro:lancamento' comissao.lancamento_id %}">{% translate "A pagar" %}</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma comissão lançada ainda." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

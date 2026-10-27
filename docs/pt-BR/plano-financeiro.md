@@ -73,7 +73,7 @@ Cancelar lançamentos e estornar pagamentos é só do administrador. Assim a rec
 | 3 ✅ | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.17.0 |
 
 ### Depois (sem data)
-Tabela de procedimentos e **orçamento** que vira lançamento a receber; **comissão dos dentistas**; resultado do período (DRE); taxas e datas de crédito da maquininha; importação do extrato bancário (OFX). E, se decidido: nota fiscal, Pix/boleto integrados, convênios.
+Tabela de procedimentos e **orçamento** que vira lançamento a receber (feito na 0.18.0); **comissão dos dentistas** (feita na 0.19.0, decisão 053); resultado do período (DRE); taxas e datas de crédito da maquininha; importação do extrato bancário (OFX). E, se decidido: nota fiscal, Pix/boleto integrados, convênios.
 
 ## Premissas adotadas (podem ser revistas)
 1. O financeiro vem **antes** da fase 2 (API e app).

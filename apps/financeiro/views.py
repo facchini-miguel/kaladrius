@@ -1,4 +1,4 @@
-"""Finance: receivables (0.15.0), payables, cash flow and reports (0.16.0).
+"""Finance: receivables (0.15.0), payables, cash flow and reports (0.16.0), commission (0.19.0).
 
 Receivables belong to the Recebimentos module (administrators and the front desk, which
 cannot cancel, reverse or discount). Payables, accounts, categories, cash flow and reports
@@ -14,14 +14,16 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.pacientes.models import Paciente
+from apps.profissionais.models import Profissional
 
-from . import servicos
+from . import comissoes, servicos
 from .forms import (
     AbrirCaixaForm,
     CategoriaForm,
@@ -31,9 +33,20 @@ from .forms import (
     LancamentoReceberForm,
     MotivoForm,
     MovimentoCaixaForm,
+    PagarComissaoForm,
+    PercentualComissaoForm,
     ReceberForm,
 )
-from .models import Caixa, Categoria, Conta, Lancamento, MovimentoCaixa, Pagamento, Parcela
+from .models import (
+    Caixa,
+    Categoria,
+    Comissao,
+    Conta,
+    Lancamento,
+    MovimentoCaixa,
+    Pagamento,
+    Parcela,
+)
 
 POR_PAGINA = 50
 SITUACOES = {
@@ -202,6 +215,7 @@ def lancamento(request, pk):
             "parcelas": parcelas,
             "total_pago": sum(p.pago for p in parcelas),
             "total_saldo": sum(p.saldo for p in parcelas) if not lancamento.cancelado else 0,
+            "comissao": Comissao.objects.filter(lancamento=lancamento).first(),
         },
     )
 
@@ -510,4 +524,93 @@ def cadastro_form(request, cadastro, pk=None):
         request,
         "financeiro/cadastro_form.html",
         {"form": form, "cadastro": cadastro, "instancia": instancia, "modelo": modelo._meta},
+    )
+
+
+# --- Practitioner commission (0.19.0) --------------------------------------------------
+
+
+def _ate(request):
+    hoje = timezone.localdate()
+    try:
+        return min(datetime.date.fromisoformat(request.GET.get("ate", "")), hoje)
+    except ValueError:
+        return hoje
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def comissoes_lista(request):
+    ate = _ate(request)
+    return render(
+        request,
+        "financeiro/comissoes.html",
+        {
+            "ate": ate,
+            "linhas": comissoes.resumo(ate),
+            "sem_percentual": Profissional.objects.filter(ativo=True, comissao_percentual=0),
+            "historico": Comissao.objects.select_related("profissional", "lancamento")[:30],
+        },
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+def comissao_percentual(request, pk):
+    profissional = get_object_or_404(Profissional.objects, pk=pk)
+    form = PercentualComissaoForm(request.POST or None, instance=profissional)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": profissional.nome})
+        return redirect("financeiro:comissoes")
+    return render(
+        request,
+        "financeiro/comissao_percentual.html",
+        {"form": form, "profissional": profissional},
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
+def comissao_pagar(request, pk):
+    profissional = get_object_or_404(Profissional.objects, pk=pk)
+    ate = _ate(request)
+    padrao = (
+        Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA, nome="Comissões", ativa=True).first()
+        or Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA, ativa=True).first()
+    )
+    form = PagarComissaoForm(request.POST or None, initial={"categoria": padrao})
+    if request.method == "POST" and form.is_valid():
+        try:
+            comissao = comissoes.pagar(
+                profissional, ate=ate, usuario=request.user, **form.cleaned_data
+            )
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+            return redirect(f"{reverse('financeiro:comissoes')}?ate={ate.isoformat()}")
+        messages.success(request, _("Comissão lançada em A pagar."))
+        return redirect("financeiro:lancamento", pk=comissao.lancamento_id)
+    return render(
+        request,
+        "financeiro/comissao_pagar.html",
+        {"form": form, "calculo": comissoes.pendente(profissional, ate), "ate": ate},
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def comissao(request, pk):
+    comissao = get_object_or_404(
+        Comissao.objects.select_related("profissional", "lancamento"), pk=pk
+    )
+    pagamentos = comissao.pagamentos.select_related("parcela__lancamento__paciente").order_by(
+        "data", "pk"
+    )
+    estornos = comissao.pagamentos_estornados.select_related(
+        "parcela__lancamento__paciente", "comissao"
+    ).order_by("data", "pk")
+    for estorno in estornos:
+        estorno.comissao_devolvida = comissoes.percentual_de(
+            estorno.valor, estorno.comissao.percentual
+        )
+    return render(
+        request,
+        "financeiro/comissao.html",
+        {"comissao": comissao, "pagamentos": pagamentos, "estornos": estornos},
     )

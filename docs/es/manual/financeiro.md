@@ -60,5 +60,14 @@ Abajo aparece el **saldo actual de cada cuenta**. Para que coincida con el banco
 ## Informes (administrador)
 En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría. Los pagos revertidos y las cuentas canceladas quedan fuera.
 
+## Comisiones (administrador)
+En **Financiero > Comisiones**, cada profesional tiene un **porcentaje** sobre el valor cobrado de las cuentas por cobrar en que aparece (el presupuesto aprobado ya lleva el profesional; en un registro nuevo, elija el profesional). Los registros sin profesional no generan comisión. La base es el dinero que entró, ya con descuentos y con intereses, si los hubo.
+
+1. Haga clic en **Porcentaje** para definir el de cada profesional.
+2. Elija la fecha en **Cobros hasta** (por ejemplo, el último día del mes) y haga clic en **Ver**: la tabla muestra lo cobrado aún no comisionado y la comisión por pagar.
+3. Haga clic en **Pagar**, revise los cobros y el vencimiento y haga clic en **Registrar en Por pagar**. La comisión pasa a ser un gasto en **Por pagar**, a nombre del profesional, donde usted registra el pago.
+
+Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **revierte**, su comisión se descuenta en el próximo pago al profesional (con el porcentaje de la época). Si el gasto de la comisión se **cancela**, la comisión se deshace y los cobros vuelven a quedar pendientes. El **Extracto** de cada comisión lista los cobros y los descuentos y puede imprimirse para el profesional.
+
 ## Categorías y cuentas
 En **Registros > Categorías** y **Registros > Cuentas**, el administrador crea nuevas categorías (ingresos y gastos) y cuentas (caja, banco, terminal de tarjetas). Para dejar de usar una sin perder el historial, desmarque **activa**.

@@ -11,6 +11,7 @@ from apps.core.models import Clinica
 from apps.financeiro.models import (
     Caixa,
     Categoria,
+    Comissao,
     Conta,
     Lancamento,
     MovimentoCaixa,
@@ -63,6 +64,7 @@ class Command(BaseCommand):
                 MovimentoCaixa,
                 Caixa,
                 Pagamento,
+                Comissao,
                 Parcela,
                 Lancamento,
                 Agendamento,

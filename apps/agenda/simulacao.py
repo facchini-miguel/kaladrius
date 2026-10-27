@@ -298,3 +298,35 @@ def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
         elif sorte < 0.6:
             servicos.recusar(orcamento, usuario=usuario)
     return quantidade
+
+
+def simular_comissoes(clinica, sorteio, usuario=None):
+    """Give practitioners without one a commission percentage and pay out what each had
+    pending up to the end of last month (test clinics only). Returns how many were paid."""
+    from decimal import Decimal
+
+    from apps.financeiro import comissoes
+    from apps.financeiro.models import Categoria
+
+    categoria = Categoria.objects.filter(
+        clinica=clinica, tipo=Categoria.Tipo.DESPESA, nome="Comissões"
+    ).first()
+    if categoria is None:
+        return 0
+    fim_do_mes_passado = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
+    pagas = 0
+    for profissional in Profissional.objects.filter(clinica=clinica, ativo=True):
+        if not profissional.comissao_percentual:
+            profissional.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
+            profissional.save(update_fields=["comissao_percentual"])
+        # Runs without isolation (like the command); the practitioner pins the clinic.
+        if comissoes.pendente(profissional, fim_do_mes_passado)["valor"] > 0:
+            comissoes.pagar(
+                profissional,
+                ate=fim_do_mes_passado,
+                vencimento=fim_do_mes_passado + datetime.timedelta(days=5),
+                categoria=categoria,
+                usuario=usuario,
+            )
+            pagas += 1
+    return pagas

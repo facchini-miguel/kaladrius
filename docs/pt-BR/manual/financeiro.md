@@ -60,5 +60,14 @@ Embaixo aparece o **saldo atual de cada conta**. Para ele bater com o banco e a 
 ## Relatórios (administrador)
 Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria. Os pagamentos estornados e os lançamentos cancelados ficam de fora.
 
+## Comissões (administrador)
+Em **Financeiro > Comissões**, cada profissional tem um **percentual** sobre o valor recebido dos lançamentos a receber em que ele aparece (o orçamento aprovado já leva o profissional; num lançamento novo, escolha o profissional). Lançamentos sem profissional não geram comissão. A base é o valor que entrou, já com descontos e com juros, se houve.
+
+1. Clique em **Percentual** para definir o de cada profissional.
+2. Escolha a data em **Recebimentos até** (por exemplo, o último dia do mês) e clique em **Ver**: a tabela mostra o recebido ainda não comissionado e a comissão a pagar.
+3. Clique em **Pagar**, confira os recebimentos e o vencimento e clique em **Lançar em A pagar**. A comissão vira uma despesa em **A pagar**, em nome do profissional, onde você registra o pagamento.
+
+Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissionado for **estornado**, a comissão dele é descontada no próximo pagamento ao profissional (pelo percentual da época). Se a despesa da comissão for **cancelada**, a comissão é desfeita e os recebimentos voltam a ficar pendentes. O **Extrato** de cada comissão lista os recebimentos e os descontos e pode ser impresso para o profissional.
+
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

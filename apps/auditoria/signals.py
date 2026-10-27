@@ -9,6 +9,7 @@ from apps.core.models import Clinica, Vinculo
 from apps.financeiro.models import (
     Caixa,
     Categoria,
+    Comissao,
     Conta,
     Lancamento,
     MovimentoCaixa,
@@ -42,6 +43,7 @@ AUDITADOS = [
     Categoria,
     Caixa,
     MovimentoCaixa,
+    Comissao,
     Procedimento,
     Orcamento,
     ItemOrcamento,

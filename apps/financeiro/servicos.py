@@ -10,7 +10,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .models import ZERO, Caixa, Lancamento, MovimentoCaixa, Pagamento, Parcela
+from . import comissoes
+from .models import ZERO, Caixa, Comissao, Lancamento, MovimentoCaixa, Pagamento, Parcela
 
 CENTAVO = Decimal("0.01")
 # Days overdue for the debtors report: up to 30, 31-60, 61-90, over 90.
@@ -77,7 +78,8 @@ def estornar(pagamento, *, motivo, usuario):
     pagamento.estornado_em = timezone.now()
     pagamento.estornado_por = usuario
     pagamento.motivo_estorno = motivo
-    pagamento.save()
+    # Only these fields: the commission links are set elsewhere and must not be overwritten.
+    pagamento.save(update_fields=["estornado", "estornado_em", "estornado_por", "motivo_estorno"])
 
 
 @transaction.atomic
@@ -92,6 +94,9 @@ def cancelar(lancamento, *, motivo, usuario):
     lancamento.cancelado_por = usuario
     lancamento.motivo_cancelamento = motivo
     lancamento.save()
+    comissao = Comissao.objects.filter(lancamento=lancamento, cancelada=False).first()
+    if comissao is not None:
+        comissoes.liberar(comissao)
 
 
 def situacao(parcela, hoje=None):

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Percentual de comissão" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">{% blocktranslate with nome=profissional.nome %}Comissão de {{ nome }}{% endblocktranslate %}</h1>
+<form method="post" style="max-width: 24rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <p class="text-body-secondary small">{% translate "O novo percentual vale para os recebimentos ainda não comissionados." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:comissoes' %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

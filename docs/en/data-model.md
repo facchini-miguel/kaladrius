@@ -51,7 +51,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | Entity | Main fields | Legacy table |
 |---|---|---|
 | `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
-| `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, active, user (optional) | `dentistas` |
+| `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
 | `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
 | `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, series (recurrence), created by | `agendax` |
 | `Rechamada` (recall) | clinic, patient, date, description, done, created by | `agenda` (is_rechamada) |
@@ -70,6 +70,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 
 | `Caixa` (cash drawer) | clinic, account, opened at/by, amount counted at opening, closed at/by, expected and counted amounts at closing, note | Daily cash (0.17.0). One open per account; the expected amount is stored at closing, so later reversals do not change a closed drawer |
 | `MovimentoCaixa` (drawer movement) | clinic, drawer, type (withdrawal, top-up), amount, other account (optional), reason, created by | A withdrawal to another account (bank deposit) moves the balance between accounts; without another account, the money leaves or enters the system and shows in the cash flow |
+| `Comissao` (commission) | clinic, practitioner, receipts up to, percentage, amount received, commission of reversals deducted, amount, payable, cancelled, created by | Since 0.19. The payments covered point to it (`Pagamento.comissao`), and the reversal of one of them, deducted later, points to the commission that deducted it (`Pagamento.comissao_estorno`); so no receipt is paid out twice. Cancelling the payable cancels the commission and frees the payments |
 
 Payables (0.16.0) use the same entities, with the supplier in the payer field. Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
 

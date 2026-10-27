@@ -4,6 +4,45 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.19.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Comissão dos profissionais
+    en: Practitioner commission
+    es: Comisión de los profesionales
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo em Financeiro > Comissões: defina o percentual de cada profissional sobre o valor
+          recebido, veja quanto há a pagar até a data escolhida e lance a comissão em A pagar.
+          Cada recebimento é comissionado uma vez só, e um estorno depois de pago é descontado
+          na próxima comissão. O extrato de cada comissão pode ser impresso para o profissional.
+        en: >
+          New in Finance > Commissions: set each practitioner's percentage of the amount
+          received, see how much is due up to the chosen date and add the commission to
+          Payables. Each receipt is paid out only once, and a reversal after payout is deducted
+          from the next commission. Each commission's statement can be printed for the
+          practitioner.
+        es: >
+          Nuevo en Financiero > Comisiones: defina el porcentaje de cada profesional sobre el
+          valor cobrado, vea cuánto hay por pagar hasta la fecha elegida y registre la comisión
+          en Por pagar. Cada cobro se comisiona una sola vez, y una reversión después de pagada
+          se descuenta en la próxima comisión. El extracto de cada comisión puede imprimirse
+          para el profesional.
+    - tipo: novo
+      modulo: Cadastros
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Nova categoria de despesa padrão "Comissões".
+        en: >
+          New default expense category "Comissões" (commissions).
+        es: >
+          Nueva categoría de gasto por defecto "Comissões" (comisiones).
+
 - versao: 0.18.0
   data: 2026-10-27
   titulo:

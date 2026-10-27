@@ -60,5 +60,14 @@ Below it you see the **current balance of each account**. For it to match the ba
 ## Reports (administrator)
 In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category. Reversed payments and cancelled entries are left out.
 
+## Commissions (administrator)
+In **Finance > Commissions**, each practitioner has a **percentage** of the amount received on the receivables that name them (an approved estimate already carries the practitioner; on a new entry, choose the practitioner). Entries without a practitioner do not generate commission. The base is the money that came in, after discounts and including late fees, if any.
+
+1. Click **Percentage** to set each practitioner's.
+2. Choose the date in **Receipts up to** (for example, the last day of the month) and click **View**: the table shows what was received and not yet paid out, and the commission to pay.
+3. Click **Pay**, check the receipts and the due date and click **Add to Payables**. The commission becomes an expense in **Payables**, in the practitioner's name, where you record the payment.
+
+Each receipt enters a commission only once. If a receipt already paid out is **reversed**, its commission is deducted from the next payment to the practitioner (at the percentage of the time). If the commission expense is **cancelled**, the commission is undone and the receipts become pending again. Each commission's **Statement** lists the receipts and deductions and can be printed for the practitioner.
+
 ## Categories and accounts
 In **Records > Categories** and **Records > Accounts**, the administrator creates new categories (income and expenses) and accounts (cash drawer, bank, card machine). To stop using one without losing the history, uncheck **active**.

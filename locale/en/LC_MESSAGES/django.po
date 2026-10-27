@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 15:56-0300\n"
+"POT-Creation-Date: 2026-10-27 16:13-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: English\n"
@@ -35,9 +35,7 @@ msgstr "Repeat for how many weeks"
 
 msgid ""
 "1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
-msgstr ""
-"1 = only on this date. E.g.: 4 creates the same time slot for 4 weeks in a "
-"row."
+msgstr "1 = only on this date. E.g.: 4 creates the same time slot for 4 weeks in a row."
 
 msgid "Informe o paciente ou uma descrição."
 msgstr "Enter the patient or a description."
@@ -123,9 +121,7 @@ msgstr "Appointment type %(nome)s saved."
 msgid ""
 "%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
 "“ativo” para escondê-lo."
-msgstr ""
-"%(nome)s has been used in appointments and cannot be deleted. Uncheck "
-"“active” to hide it."
+msgstr "%(nome)s has been used in appointments and cannot be deleted. Uncheck “active” to hide it."
 
 #, python-format
 msgid "Tipo de atendimento %(nome)s excluído."
@@ -243,9 +239,7 @@ msgstr "The schedule end must be after its start."
 msgid ""
 "O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
 "intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
-msgstr ""
-"The appointment on %(momento)s would fall outside the new hours or slot "
-"length. Adjust future appointments before changing the schedule."
+msgstr "The appointment on %(momento)s would fall outside the new hours or slot length. Adjust future appointments before changing the schedule."
 
 msgid "idioma"
 msgstr "language"
@@ -287,8 +281,7 @@ msgid "endereço"
 msgstr "address"
 
 msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
-msgstr ""
-"Street, number, district, city/state and postal code, as printed on receipts."
+msgstr "Street, number, district, city/state and postal code, as printed on receipts."
 
 msgid "ativa"
 msgstr "active"
@@ -432,13 +425,18 @@ msgstr "%(nome)s's details saved."
 msgid ""
 "%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
 "ser trocada pelo próprio usuário ou pelo suporte."
-msgstr ""
-"%(nome)s also has access to another clinic or to the platform: the password "
-"can only be changed by the user or by support."
+msgstr "%(nome)s also has access to another clinic or to the platform: the password can only be changed by the user or by support."
 
 #, python-format
 msgid "Nova senha de %(nome)s definida."
 msgstr "New password set for %(nome)s."
+
+msgid "Não há comissão a pagar até esta data."
+msgstr "There is no commission to pay up to this date."
+
+#, python-format
+msgid "Comissão de %(nome)s até %(data)s"
+msgstr "Commission of %(nome)s up to %(data)s"
 
 msgid "Valor total"
 msgstr "Total amount"
@@ -447,9 +445,7 @@ msgid "Número de parcelas"
 msgstr "Number of installments"
 
 msgid "Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."
-msgstr ""
-"Monthly installments of the same amount. Card installments count as 1 "
-"installment here."
+msgstr "Monthly installments of the same amount. Card installments count as 1 installment here."
 
 msgid "Vencimento da 1ª parcela"
 msgstr "Due date of the 1st installment"
@@ -534,15 +530,19 @@ msgstr "Other account"
 
 msgid ""
 "Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."
-msgstr ""
-"E.g.: deposit into the Bank. Empty: the money leaves the system or comes "
-"from outside."
+msgstr "E.g.: deposit into the Bank. Empty: the money leaves the system or comes from outside."
 
 msgid "Observação"
 msgstr "Note"
 
 msgid "Explique a diferença, se houver."
 msgstr "Explain the difference, if any."
+
+msgid "Vencimento"
+msgstr "Due date"
+
+msgid "Categoria"
+msgstr "Category"
 
 msgid "Dinheiro (caixa)"
 msgstr "Cash (drawer)"
@@ -688,6 +688,12 @@ msgstr "reversed by"
 msgid "motivo do estorno"
 msgstr "reversal reason"
 
+msgid "comissão"
+msgstr "commission"
+
+msgid "comissão que descontou o estorno"
+msgstr "commission that deducted the reversal"
+
 msgid "recebido por"
 msgstr "received by"
 
@@ -735,9 +741,7 @@ msgstr "other account"
 
 msgid ""
 "Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."
-msgstr ""
-"Where the withdrawal goes or the top-up comes from (empty: outside the "
-"system)."
+msgstr "Where the withdrawal goes or the top-up comes from (empty: outside the system)."
 
 msgid "motivo"
 msgstr "reason"
@@ -748,6 +752,27 @@ msgstr "drawer movement"
 msgid "movimentos de caixa"
 msgstr "drawer movements"
 
+msgid "recebimentos até"
+msgstr "receipts up to"
+
+msgid "percentual"
+msgstr "percentage"
+
+msgid "comissão de estornos descontada"
+msgstr "commission of reversals deducted"
+
+msgid "valor da comissão"
+msgstr "commission amount"
+
+msgid "lançamento a pagar"
+msgstr "payable"
+
+msgid "cancelada"
+msgstr "cancelled"
+
+msgid "comissões"
+msgstr "commissions"
+
 msgid "Este lançamento foi cancelado."
 msgstr "This entry was cancelled."
 
@@ -757,9 +782,7 @@ msgstr "The amount deducted from the installment must be greater than zero."
 #, python-format
 msgid ""
 "O valor abatido (%(abatido)s) passa do que falta na parcela (%(saldo)s)."
-msgstr ""
-"The amount deducted (%(abatido)s) exceeds what is left of the installment "
-"(%(saldo)s)."
+msgstr "The amount deducted (%(abatido)s) exceeds what is left of the installment (%(saldo)s)."
 
 msgid ""
 "Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar."
@@ -841,6 +864,13 @@ msgstr "Close drawer"
 msgid "%(nome)s salvo."
 msgstr "%(nome)s saved."
 
+#, python-format
+msgid "Percentual de %(nome)s salvo."
+msgstr "Percentage of %(nome)s saved."
+
+msgid "Comissão lançada em A pagar."
+msgstr "Commission added to Payables."
+
 msgid "Importação do sistema antigo"
 msgstr "Legacy system import"
 
@@ -909,9 +939,6 @@ msgstr "Enter the price."
 
 msgid "Desconto no total"
 msgstr "Discount on the total"
-
-msgid "Categoria"
-msgstr "Category"
 
 msgid "Categoria de receita usada quando o orçamento é aprovado."
 msgstr "Income category used when the estimate is approved."
@@ -1044,9 +1071,7 @@ msgstr "The birth date cannot be in the future."
 msgid ""
 "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da clínica "
 "para restaurá-lo."
-msgstr ""
-"This CPF/CNPJ belongs to an archived patient. Ask the clinic administrator "
-"to restore them."
+msgstr "This CPF/CNPJ belongs to an archived patient. Ask the clinic administrator to restore them."
 
 msgid "Já existe um paciente com este CPF/CNPJ nesta clínica."
 msgstr "A patient with this CPF/CNPJ already exists in this clinic."
@@ -1146,9 +1171,7 @@ msgstr "Patient %(nome)s saved."
 msgid ""
 "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
 "restaurado na lista de pacientes, em Situação: Arquivados."
-msgstr ""
-"Patient %(nome)s archived. The history is kept, and the patient can be "
-"restored from the patient list, under Status: Archived."
+msgstr "Patient %(nome)s archived. The history is kept, and the patient can be restored from the patient list, under Status: Archived."
 
 #, python-format
 msgid "Paciente %(nome)s restaurado."
@@ -1176,6 +1199,12 @@ msgstr "login user"
 msgid "Conta usada por este profissional para entrar no sistema (opcional)."
 msgstr "Account this practitioner uses to log in (optional)."
 
+msgid "comissão (%)"
+msgstr "commission (%)"
+
+msgid "Percentual sobre o valor recebido dos lançamentos deste profissional."
+msgstr "Percentage of the amount received on this practitioner's entries."
+
 msgid "profissionais"
 msgstr "practitioners"
 
@@ -1187,9 +1216,7 @@ msgstr "Practitioner %(nome)s saved."
 msgid ""
 "%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
 "para escondê-lo."
-msgstr ""
-"%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide "
-"it."
+msgstr "%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide it."
 
 #, python-format
 msgid "Profissional %(nome)s excluído."
@@ -1268,9 +1295,7 @@ msgstr "Access denied"
 msgid ""
 "Você não tem permissão para acessar esta página. Se precisar desse acesso, "
 "fale com o administrador da clínica."
-msgstr ""
-"You do not have permission to access this page. If you need this access, "
-"talk to the clinic administrator."
+msgstr "You do not have permission to access this page. If you need this access, talk to the clinic administrator."
 
 msgid "Voltar ao início"
 msgstr "Back to home"
@@ -1279,9 +1304,7 @@ msgid "Página não encontrada"
 msgstr "Page not found"
 
 msgid "O endereço não existe ou o registro não pertence à clínica atual."
-msgstr ""
-"The address does not exist or the record does not belong to the current "
-"clinic."
+msgstr "The address does not exist or the record does not belong to the current clinic."
 
 #, python-format
 msgid "Aniversariantes de %(dia)s"
@@ -1326,9 +1349,7 @@ msgid "Novo agendamento"
 msgstr "New appointment"
 
 msgid "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)."
-msgstr ""
-"Optional. Without a patient, use the description (e.g.: “Meeting”, "
-"“Blocked”)."
+msgstr "Optional. Without a patient, use the description (e.g.: “Meeting”, “Blocked”)."
 
 msgid "Cancelar"
 msgstr "Cancel"
@@ -1343,10 +1364,7 @@ msgid ""
 "Seu usuário ainda não está ligado a um cadastro de profissional ativo, então "
 "não há agenda para mostrar. Peça ao administrador da clínica para ligá-lo em "
 "Cadastros > Profissionais."
-msgstr ""
-"Your user is not linked to an active practitioner record yet, so there is no "
-"schedule to show. Ask the clinic administrator to link it in Records > "
-"Practitioners."
+msgstr "Your user is not linked to an active practitioner record yet, so there is no schedule to show. Ask the clinic administrator to link it in Records > Practitioners."
 
 msgid "Nenhum profissional ativo nesta clínica."
 msgstr "No active practitioners in this clinic."
@@ -1373,9 +1391,7 @@ msgstr "Delete %(nome)s?"
 msgid ""
 "Esta ação não pode ser desfeita. Se quiser apenas esconder o tipo, edite e "
 "desmarque “ativo”."
-msgstr ""
-"This action cannot be undone. To just hide the type, edit it and uncheck "
-"“active”."
+msgstr "This action cannot be undone. To just hide the type, edit it and uncheck “active”."
 
 msgid "Editar tipo de atendimento"
 msgstr "Edit appointment type"
@@ -1426,9 +1442,7 @@ msgstr "Technical documentation"
 msgid ""
 "Documentação técnica: visível só para o superusuário, porque descreve a "
 "infraestrutura do servidor."
-msgstr ""
-"Technical documentation: visible only to the superuser, since it describes "
-"the server infrastructure."
+msgstr "Technical documentation: visible only to the superuser, since it describes the server infrastructure."
 
 msgid "Índice"
 msgstr "Index"
@@ -1436,9 +1450,7 @@ msgstr "Index"
 msgid ""
 "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros "
 "não podem ser alterados."
-msgstr ""
-"Who created, changed, deleted or viewed data in this clinic. Entries cannot "
-"be changed."
+msgstr "Who created, changed, deleted or viewed data in this clinic. Entries cannot be changed."
 
 msgid "Usuário, registro ou código"
 msgstr "User, record or code"
@@ -1515,6 +1527,9 @@ msgstr "New expense"
 msgid "Fluxo de caixa"
 msgstr "Cash flow"
 
+msgid "Comissões"
+msgstr "Commissions"
+
 msgid "Relatórios"
 msgstr "Reports"
 
@@ -1551,9 +1566,7 @@ msgstr "Log out"
 msgid ""
 "Nenhum backup do banco foi registrado neste servidor: confira se os backups "
 "diários estão funcionando."
-msgstr ""
-"No database backup was recorded on this server: check that the daily backups "
-"are working."
+msgstr "No database backup was recorded on this server: check that the daily backups are working."
 
 msgid "Veja no servidor:"
 msgstr "Check on the server:"
@@ -1561,8 +1574,7 @@ msgstr "Check on the server:"
 #, python-format
 msgid ""
 "O último backup do banco foi em %(momento)s: os backups diários pararam."
-msgstr ""
-"The last database backup was on %(momento)s: the daily backups have stopped."
+msgstr "The last database backup was on %(momento)s: the daily backups have stopped."
 
 #, python-format
 msgid "O sistema foi atualizado para a versão %(versao_sistema)s."
@@ -1581,10 +1593,7 @@ msgid ""
 "O horário e o intervalo valem para a grade da agenda e para os novos "
 "agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é "
 "recusada e a tela mostra qual."
-msgstr ""
-"The hours and slot length apply to the schedule grid and to new "
-"appointments. If a future appointment would fall outside them, the change is "
-"refused and the screen shows which one."
+msgstr "The hours and slot length apply to the schedule grid and to new appointments. If a future appointment would fall outside them, the change is refused and the screen shows which one."
 
 #, python-format
 msgid "Bem-vindo(a), %(nome)s"
@@ -1608,9 +1617,7 @@ msgstr "Choose a clinic to work in."
 msgid ""
 "Você ainda não está vinculado a nenhuma clínica ativa. Procure o "
 "administrador da sua clínica."
-msgstr ""
-"You are not linked to any active clinic yet. Talk to your clinic's "
-"administrator."
+msgstr "You are not linked to any active clinic yet. Talk to your clinic's administrator."
 
 #, python-format
 msgid "Veja o que há de novo na versão %(versao_sistema)s"
@@ -1640,9 +1647,7 @@ msgstr "Account details"
 msgid ""
 "Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail "
 "e senha só podem ser alterados por ela mesma ou pelo suporte."
-msgstr ""
-"This person also has access to another clinic or to the platform. Name, e-"
-"mail and password can only be changed by them or by support."
+msgstr "This person also has access to another clinic or to the platform. Name, e-mail and password can only be changed by them or by support."
 
 msgid "Definir nova senha"
 msgstr "Set new password"
@@ -1674,9 +1679,7 @@ msgstr "No team members."
 msgid ""
 "Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem "
 "fez o quê é mantido."
-msgstr ""
-"To remove someone from the team, edit them and uncheck the access: the "
-"history of who did what is kept."
+msgstr "To remove someone from the team, edit them and uncheck the access: the history of who did what is kept."
 
 msgid "Novo membro da equipe"
 msgstr "New team member"
@@ -1684,15 +1687,39 @@ msgstr "New team member"
 msgid ""
 "Passe a senha à pessoa e peça que ela a troque no primeiro acesso (menu com "
 "o nome dela › Trocar senha)."
-msgstr ""
-"Give the password to the person and ask them to change it on first login "
-"(menu with their name › Change password)."
+msgstr "Give the password to the person and ask them to change it on first login (menu with their name › Change password)."
 
 msgid "Nova senha"
 msgstr "New password"
 
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "The person is logged out on the devices where they are signed in."
+
+msgid "Pagador"
+msgstr "Payer"
+
+msgid "Lançamento"
+msgstr "Entry"
+
+msgid "Nenhum recebimento."
+msgstr "No receipts."
+
+msgid "Total recebido"
+msgstr "Total received"
+
+#, python-format
+msgid "Comissão (%(percentual)s%%)"
+msgstr "Commission (%(percentual)s%%)"
+
+msgid ""
+"Estornos descontados (recebimentos já comissionados e depois estornados)"
+msgstr "Reversals deducted (receipts already paid out and later reversed)"
+
+msgid "Comissão descontada"
+msgstr "Commission deducted"
+
+msgid "Comissão a pagar"
+msgstr "Commission to pay"
 
 msgid "Sem profissional"
 msgstr "No practitioner"
@@ -1719,15 +1746,12 @@ msgid "Inativa"
 msgstr "Inactive"
 
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
-msgstr ""
-"To stop using it without losing the history, edit it and uncheck “active”."
+msgstr "To stop using it without losing the history, edit it and uncheck “active”."
 
 msgid ""
 "Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > "
 "Contas, com o tipo “Dinheiro (caixa)”."
-msgstr ""
-"No active cash account. The administrator adds one in Records > Accounts, "
-"with the type “Cash (drawer)”."
+msgstr "No active cash account. The administrator adds one in Records > Accounts, with the type “Cash (drawer)”."
 
 #, python-format
 msgid "O caixa “%(conta)s” está fechado"
@@ -1805,16 +1829,97 @@ msgstr "No movements since opening."
 msgid ""
 "Entram aqui os pagamentos registrados nesta conta enquanto o caixa está "
 "aberto, pela hora do registro."
-msgstr ""
-"Payments registered into this account while the drawer is open come in here, "
-"by the time they were registered."
+msgstr "Payments registered into this account while the drawer is open come in here, by the time they were registered."
+
+msgid "Extrato da comissão"
+msgstr "Commission statement"
+
+msgid "Imprimir ou salvar em PDF"
+msgstr "Print or save as PDF"
+
+msgid "CANCELADA"
+msgstr "CANCELLED"
+
+msgid "EXTRATO DE COMISSÃO"
+msgstr "COMMISSION STATEMENT"
+
+#, python-format
+msgid "recebimentos até %(data)s"
+msgstr "receipts up to %(data)s"
+
+#, python-format
+msgid "lançada em %(data)s"
+msgstr "added on %(data)s"
+
+msgid "Pagar comissão"
+msgstr "Pay commission"
+
+#, python-format
+msgid "%(nome)s · recebimentos até %(data)s"
+msgstr "%(nome)s · receipts up to %(data)s"
+
+msgid ""
+"A comissão vira uma despesa em A pagar, em nome do profissional; registre o "
+"pagamento lá. Cancelar essa despesa desfaz a comissão."
+msgstr "The commission becomes an expense in Payables, in the practitioner's name; record the payment there. Cancelling that expense undoes the commission."
+
+msgid "Lançar em A pagar"
+msgstr "Add to Payables"
+
+msgid "Percentual de comissão"
+msgstr "Commission percentage"
+
+#, python-format
+msgid "Comissão de %(nome)s"
+msgstr "Commission of %(nome)s"
+
+msgid "O novo percentual vale para os recebimentos ainda não comissionados."
+msgstr "The new percentage applies to receipts not yet paid out."
+
+msgid "Recebimentos até"
+msgstr "Receipts up to"
+
+msgid "Percentual"
+msgstr "Percentage"
+
+msgid "Recebido ainda não comissionado"
+msgstr "Received, not yet paid out"
+
+msgid "Estornos a descontar"
+msgstr "Reversals to deduct"
+
+msgid "Pagar"
+msgstr "Pay"
+
+msgid "Nenhum profissional com comissão."
+msgstr "No practitioner with commission."
+
+msgid "Sem percentual definido:"
+msgstr "No percentage set:"
+
+msgid ""
+"A comissão é o percentual do profissional sobre o valor recebido dos "
+"lançamentos a receber em que ele aparece. Lançamentos sem profissional não "
+"entram. Cada recebimento é comissionado uma vez só; se for estornado depois "
+"de pago ao profissional, a comissão dele é descontada no próximo pagamento."
+msgstr "The commission is the practitioner's percentage of the amount received on the receivables that name them. Entries without a practitioner do not count. Each receipt is paid out only once; if it is reversed after being paid to the practitioner, its commission is deducted from the next payment."
+
+msgid "Comissões lançadas"
+msgstr "Commissions added"
+
+msgid "Lançada em"
+msgstr "Added on"
+
+msgid "Extrato"
+msgstr "Statement"
+
+msgid "Nenhuma comissão lançada ainda."
+msgstr "No commission added yet."
 
 msgid ""
 "Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
 "Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
-msgstr ""
-"Example: rent of R$ 3,000 for 12 months → amount 3,000, “per month”, 12. A "
-"R$ 900 purchase in 3 installments → amount 900, “the total”, 3."
+msgstr "Example: rent of R$ 3,000 for 12 months → amount 3,000, “per month”, 12. A R$ 900 purchase in 3 installments → amount 900, “the total”, 3."
 
 msgid "Total vencido"
 msgstr "Total overdue"
@@ -1884,10 +1989,7 @@ msgid ""
 "falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em "
 "atraso”). O saldo soma os dois a partir do saldo das contas no início do "
 "período."
-msgstr ""
-"Actual: recorded payments, by payment date. Expected: what is left of open "
-"installments, by due date (overdue ones are flagged “overdue”). The balance "
-"adds both to the accounts' balance at the start of the period."
+msgstr "Actual: recorded payments, by payment date. Expected: what is left of open installments, by due date (overdue ones are flagged “overdue”). The balance adds both to the accounts' balance at the start of the period."
 
 msgid "Saldo atual por conta"
 msgstr "Current balance per account"
@@ -1911,9 +2013,6 @@ msgstr "Due"
 msgid "Parcela"
 msgstr "Installment"
 
-msgid "Vencimento"
-msgstr "Due date"
-
 msgid "Pagamentos"
 msgstr "Payments"
 
@@ -1922,9 +2021,6 @@ msgstr "receipt"
 
 msgid "estornar"
 msgstr "reverse"
-
-msgid "Pagar"
-msgstr "Pay"
 
 msgid "Receber"
 msgstr "Receive"
@@ -1935,9 +2031,7 @@ msgstr "New receivable"
 msgid ""
 "Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre "
 "em seguida."
-msgstr ""
-"For payment on the spot: the 1st installment is recorded as paid and the "
-"receipt opens next."
+msgstr "For payment on the spot: the 1st installment is recorded as paid and the receipt opens next."
 
 msgid "Fornecedor ou descrição"
 msgstr "Supplier or description"
@@ -1960,9 +2054,7 @@ msgstr "No installments found."
 msgid ""
 "Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
 "auditoria."
-msgstr ""
-"Nothing is deleted: the record is marked, with the reason, and shows in the "
-"audit log."
+msgstr "Nothing is deleted: the record is marked, with the reason, and shows in the audit log."
 
 #, python-format
 msgid "parcela %(numero)s de %(total)s"
@@ -1984,9 +2076,7 @@ msgstr "Cards only"
 msgid ""
 "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a "
 "parcela fica paga. Nunca anote o número do cartão."
-msgstr ""
-"Card installments: enter the number of installments here; for the clinic, "
-"the installment is paid. Never write down the card number."
+msgstr "Card installments: enter the number of installments here; for the clinic, the installment is paid. Never write down the card number."
 
 msgid "Descontos só podem ser dados pelo administrador da clínica."
 msgstr "Only the clinic administrator can give discounts."
@@ -1996,9 +2086,6 @@ msgstr "Record payment"
 
 msgid "Recibo"
 msgstr "Receipt"
-
-msgid "Imprimir ou salvar em PDF"
-msgstr "Print or save as PDF"
 
 msgid "Voltar ao lançamento"
 msgstr "Back to the entry"
@@ -2016,17 +2103,13 @@ msgstr "No."
 msgid ""
 "Recebemos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) a quantia de "
 "<strong>%(valor)s</strong>,"
-msgstr ""
-"We received from <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) the "
-"amount of <strong>%(valor)s</strong>,"
+msgstr "We received from <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) the amount of <strong>%(valor)s</strong>,"
 
 #, python-format
 msgid ""
 "Recebemos de <strong>%(nome)s</strong> a quantia de <strong>%(valor)s</"
 "strong>,"
-msgstr ""
-"We received from <strong>%(nome)s</strong> the amount of <strong>%(valor)s</"
-"strong>,"
+msgstr "We received from <strong>%(nome)s</strong> the amount of <strong>%(valor)s</strong>,"
 
 #, python-format
 msgid "referente a %(descricao)s (parcela %(numero)s de %(total)s)"
@@ -2113,9 +2196,7 @@ msgstr "Dental chart"
 msgid ""
 "Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas "
 "do meio. Direita do paciente à esquerda."
-msgstr ""
-"FDI numbering. Upper teeth on top, lower below; baby teeth in the middle "
-"rows. Patient's right on the left."
+msgstr "FDI numbering. Upper teeth on top, lower below; baby teeth in the middle rows. Patient's right on the left."
 
 msgid "Aprovar orçamento"
 msgstr "Approve estimate"
@@ -2127,9 +2208,7 @@ msgstr "Estimate no. %(numero)s · %(nome)s · %(total)s"
 msgid ""
 "O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não "
 "pode mais ser alterado."
-msgstr ""
-"The estimate becomes a receivable, in the chosen installments, and can no "
-"longer be changed."
+msgstr "The estimate becomes a receivable, in the chosen installments, and can no longer be changed."
 
 msgid "Aprovar"
 msgstr "Approve"
@@ -2177,9 +2256,7 @@ msgstr "Add procedure"
 msgid ""
 "Clique nos dentes do procedimento (a quantidade acompanha). Sem descrição ou "
 "valor, valem os da tabela de procedimentos."
-msgstr ""
-"Click the procedure's teeth (the quantity follows). Without description or "
-"price, those of the price list are used."
+msgstr "Click the procedure's teeth (the quantity follows). Without description or price, those of the price list are used."
 
 msgid "Incluir"
 msgstr "Add"
@@ -2252,16 +2329,12 @@ msgid ""
 "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das "
 "rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o "
 "histórico continuam guardados."
-msgstr ""
-"The patient leaves the team's lists, search, schedule, birthdays and "
-"recalls. Nothing is deleted: appointments, recalls and history are kept."
+msgstr "The patient leaves the team's lists, search, schedule, birthdays and recalls. Nothing is deleted: appointments, recalls and history are kept."
 
 msgid ""
 "Só administradores da clínica veem os pacientes arquivados (na lista de "
 "pacientes, em Situação: Arquivados) e podem restaurá-los."
-msgstr ""
-"Only clinic administrators see archived patients (in the patient list, under "
-"Status: Archived) and can restore them."
+msgstr "Only clinic administrators see archived patients (in the patient list, under Status: Archived) and can restore them."
 
 msgid "Arquivar"
 msgstr "Archive"
@@ -2278,11 +2351,7 @@ msgid ""
 "18). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a "
 "clínica não é obrigada a guardar os registros de atendimento (a Lei "
 "13.787/2018 manda guardar o prontuário por 20 anos)."
-msgstr ""
-"Use only when the patient asks for their data to be erased (LGPD, art. 18). "
-"To take them out of daily use, keep them archived. First, check whether the "
-"clinic must keep the treatment records (Law 13.787/2018 requires keeping "
-"clinical records for 20 years)."
+msgstr "Use only when the patient asks for their data to be erased (LGPD, art. 18). To take them out of daily use, keep them archived. First, check whether the clinic must keep the treatment records (Law 13.787/2018 requires keeping clinical records for 20 years)."
 
 msgid "Esta ação não pode ser desfeita:"
 msgstr "This action cannot be undone:"
@@ -2299,14 +2368,11 @@ msgstr "the patient's recalls are deleted;"
 msgid ""
 "a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
 "pessoais do paciente;"
-msgstr ""
-"the audit log still says who did what and when, without the patient's "
-"personal data;"
+msgstr "the audit log still says who did what and when, without the patient's personal data;"
 
 msgid ""
 "os backups com os dados atuais são apagados automaticamente em até 30 dias."
-msgstr ""
-"backups with the current data are deleted automatically within 30 days."
+msgstr "backups with the current data are deleted automatically within 30 days."
 
 msgid "Excluir definitivamente"
 msgstr "Delete permanently"
@@ -2331,9 +2397,7 @@ msgstr "By %(nome)s."
 msgid ""
 "Só administradores da clínica veem este paciente. Restaure para voltar a usá-"
 "lo na agenda e nas rechamadas."
-msgstr ""
-"Only clinic administrators see this patient. Restore them to use them again "
-"in the schedule and recalls."
+msgstr "Only clinic administrators see this patient. Restore them to use them again in the schedule and recalls."
 
 msgid "Identificação"
 msgstr "Identification"
@@ -2466,9 +2530,7 @@ msgstr "Delete practitioner"
 msgid ""
 "Esta ação não pode ser desfeita. Se quiser apenas esconder o profissional, "
 "edite e desmarque “ativo”."
-msgstr ""
-"This action cannot be undone. To just hide the practitioner, edit and "
-"uncheck “active”."
+msgstr "This action cannot be undone. To just hide the practitioner, edit and uncheck “active”."
 
 msgid "Editar profissional"
 msgstr "Edit practitioner"
@@ -2572,10 +2634,7 @@ msgid ""
 "Foram feitas muitas tentativas de entrada com senha errada. Por segurança, "
 "este acesso ficará bloqueado por 1 hora. Se esqueceu a senha, fale com o "
 "administrador da clínica."
-msgstr ""
-"Too many login attempts with a wrong password. For security, this access "
-"will be blocked for 1 hour. If you forgot your password, talk to the clinic "
-"administrator."
+msgstr "Too many login attempts with a wrong password. For security, this access will be blocked for 1 hour. If you forgot your password, talk to the clinic administrator."
 
 msgid "Você saiu do sistema."
 msgstr "You have logged out."

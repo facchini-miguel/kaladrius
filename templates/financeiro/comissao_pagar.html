@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Pagar comissão" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% translate "Pagar comissão" %}</h1>
+<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculo.profissional.nome data=ate|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
+{% include "financeiro/_comissao_itens.html" with pagamentos=calculo.creditos estornos=calculo.debitos recebido=calculo.recebido bruta=calculo.bruta valor=calculo.valor percentual=calculo.profissional.comissao_percentual %}
+<form method="post" class="row g-2 align-items-end" style="max-width: 40rem;" novalidate>
+  {% csrf_token %}
+  <div class="col-md-5">{% with campo=form.vencimento %}{% include "includes/campo.html" %}{% endwith %}</div>
+  <div class="col-md-7">{% with campo=form.categoria %}{% include "includes/campo.html" %}{% endwith %}</div>
+  <p class="text-body-secondary small">{% translate "A comissão vira uma despesa em A pagar, em nome do profissional; registre o pagamento lá. Cancelar essa despesa desfaz a comissão." %}</p>
+  <div><button type="submit" class="btn btn-success"{% if calculo.valor <= 0 %} disabled{% endif %}>{% translate "Lançar em A pagar" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:comissoes' %}?ate={{ ate|date:'Y-m-d' }}">{% translate "Cancelar" %}</a></div>
+</form>
+{% endblock %}

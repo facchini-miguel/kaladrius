@@ -95,7 +95,7 @@ def test_clinica_nova_recebe_contas_e_categorias_padrao():
     with usar_clinica(clinica):
         assert set(Conta.objects.values_list("nome", flat=True)) == {"Caixa", "Banco"}
         assert Categoria.objects.filter(tipo=Categoria.Tipo.RECEITA).count() == 3
-        assert Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).count() == 8
+        assert Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).count() == 9
 
 
 def test_moeda_no_formato_do_idioma():

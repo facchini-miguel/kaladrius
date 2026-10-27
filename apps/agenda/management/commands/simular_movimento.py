@@ -5,6 +5,7 @@ from django.db import transaction
 
 from apps.agenda.simulacao import (
     simular_agendamentos,
+    simular_comissoes,
     simular_financeiro,
     simular_orcamentos,
     simular_rechamadas,
@@ -62,9 +63,11 @@ class Command(BaseCommand):
             receber, pagar = (
                 simular_financeiro(alvo, sorteio, quantidade=lancamentos) if lancamentos else (0, 0)
             )
+            comissoes = simular_comissoes(alvo, sorteio)
         self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinica}”:"))
         self.stdout.write(f"  Agendamentos fictícios: {agendamentos}")
         self.stdout.write(f"  Rechamadas fictícias: {criadas}")
         self.stdout.write(f"  Lançamentos a receber fictícios: {receber}")
         self.stdout.write(f"  Despesas fictícias: {pagar}")
         self.stdout.write(f"  Orçamentos fictícios: {criados}")
+        self.stdout.write(f"  Comissões lançadas (até o fim do mês passado): {comissoes}")

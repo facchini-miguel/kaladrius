@@ -31,6 +31,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 11. **Help:** user manual in the three languages inside the system; technical documentation for superusers only (0.14.0).
 12. **Finance:** receivables in installments, payments with method and account, receipts, debtors (0.15.0); payables, cash flow and reports (0.16.0); daily cash (0.17.0).
 13. **Estimates:** procedure price list and estimates with a dental chart, which become receivables when approved (0.18.0).
+14. **Commission:** percentage per practitioner of what is received, added to Payables without paying the same receipt twice (0.19.0).
 
 ## Business model (under study)
 - **Free** app in the stores.

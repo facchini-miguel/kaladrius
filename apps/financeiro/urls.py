@@ -21,6 +21,10 @@ urlpatterns = [
     path("caixa/<int:pk>/fechar/", views.caixa_fechar, name="caixa_fechar"),
     path("caixa/<int:pk>/<str:tipo>/", views.caixa_movimento, name="caixa_movimento"),
     path("relatorios/", views.relatorios, name="relatorios"),
+    path("comissoes/", views.comissoes_lista, name="comissoes"),
+    path("comissoes/<int:pk>/", views.comissao, name="comissao"),
+    path("comissoes/profissional/<int:pk>/", views.comissao_percentual, name="comissao_percentual"),
+    path("comissoes/profissional/<int:pk>/pagar/", views.comissao_pagar, name="comissao_pagar"),
     re_path(r"^(?P<cadastro>categorias|contas)/$", views.cadastro_lista, name="cadastro"),
     re_path(r"^(?P<cadastro>categorias|contas)/novo/$", views.cadastro_form, name="cadastro_novo"),
     re_path(

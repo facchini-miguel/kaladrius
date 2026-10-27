@@ -82,6 +82,7 @@ CATEGORIAS_PADRAO = [
     ("Material odontológico", Categoria.Tipo.DESPESA),
     ("Laboratório de prótese", Categoria.Tipo.DESPESA),
     ("Salários e encargos", Categoria.Tipo.DESPESA),
+    ("Comissões", Categoria.Tipo.DESPESA),
     ("Impostos", Categoria.Tipo.DESPESA),
     ("Água, luz e internet", Categoria.Tipo.DESPESA),
     ("Manutenção", Categoria.Tipo.DESPESA),
@@ -281,6 +282,24 @@ class Pagamento(ModeloDaClinica):
         verbose_name=_("estornado por"),
     )
     motivo_estorno = models.CharField(_("motivo do estorno"), max_length=200, blank=True)
+    # Practitioner commission (0.19.0): the commission that paid this receipt out, and the
+    # one that deducted it again after it was reversed.
+    comissao = models.ForeignKey(
+        "Comissao",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="pagamentos",
+        verbose_name=_("comissão"),
+    )
+    comissao_estorno = models.ForeignKey(
+        "Comissao",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="pagamentos_estornados",
+        verbose_name=_("comissão que descontou o estorno"),
+    )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -416,3 +435,56 @@ class MovimentoCaixa(ModeloDaClinica):
 
     def __str__(self):
         return f"{self.get_tipo_display()} {self.valor}"
+
+
+class Comissao(ModeloDaClinica):
+    """A practitioner commission paid out (0.19.0, decision 053).
+
+    It covers every receipt of the practitioner's receivables up to `ate` not covered
+    before, minus the commission of receipts reversed after being paid out. Paying it
+    creates a payable; cancelling that payable cancels the commission and frees the receipts.
+    """
+
+    profissional = models.ForeignKey(
+        "profissionais.Profissional",
+        on_delete=models.PROTECT,
+        related_name="comissoes",
+        verbose_name=_("profissional"),
+    )
+    ate = models.DateField(_("recebimentos até"))
+    percentual = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
+    recebido = models.DecimalField(_("valor recebido"), **DINHEIRO)
+    estornos = models.DecimalField(_("comissão de estornos descontada"), default=ZERO, **DINHEIRO)
+    valor = models.DecimalField(_("valor da comissão"), **DINHEIRO)
+    lancamento = models.OneToOneField(
+        Lancamento,
+        on_delete=models.PROTECT,
+        related_name="comissao",
+        verbose_name=_("lançamento a pagar"),
+    )
+    cancelada = models.BooleanField(_("cancelada"), default=False)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("criado por"),
+    )
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("comissão")
+        verbose_name_plural = _("comissões")
+        ordering = ["-criado_em"]
+        constraints = [
+            models.CheckConstraint(condition=Q(valor__gt=0), name="comissao_valor_positivo"),
+        ]
+
+    def __str__(self):
+        return f"{self.profissional} {self.ate:%d/%m/%Y}"
+
+    @property
+    def bruta(self):
+        """Commission on the receipts, before deducting reversals."""
+        return self.valor + self.estornos

@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -27,6 +30,15 @@ class Profissional(ModeloDaClinica):
         related_name="profissionais",
         verbose_name=_("usuário de acesso"),
         help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
+    )
+    # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
+    comissao_percentual = models.DecimalField(
+        _("comissão (%)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0"),
+        validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
+        help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
     )
     ativo = models.BooleanField(_("ativo"), default=True)
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)

@@ -260,3 +260,21 @@ class FecharCaixaForm(FormularioBootstrap, forms.Form):
         required=False,
         help_text=_("Explique a diferença, se houver."),
     )
+
+
+class PercentualComissaoForm(FormularioBootstrap, forms.ModelForm):
+    class Meta:
+        model = Profissional
+        fields = ["comissao_percentual"]
+        localized_fields = ["comissao_percentual"]
+
+
+class PagarComissaoForm(FormularioBootstrap, forms.Form):
+    vencimento = forms.DateField(label=_("Vencimento"), widget=DATA, initial=timezone.localdate)
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["categoria"].queryset = Categoria.objects.filter(
+            tipo=Categoria.Tipo.DESPESA, ativa=True
+        )

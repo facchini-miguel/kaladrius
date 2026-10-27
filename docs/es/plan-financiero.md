@@ -73,7 +73,7 @@ Cancelar cuentas y revertir pagos es solo del administrador. Así la recepción 
 | 3 ✅ | **Caja del día** | Apertura, retiros, refuerzos y cierre con conteo | 0.17.0 |
 
 ### Después (sin fecha)
-Tabla de procedimientos y **presupuesto** que se vuelve cuenta por cobrar; **comisión de los profesionales**; resultado del período; tasas y fechas de acreditación del terminal de tarjetas; importación del extracto bancario (OFX). Y, si se decide: factura, Pix/boleto integrados, convenios.
+Tabla de procedimientos y **presupuesto** que se vuelve cuenta por cobrar (hecho en la 0.18.0); **comisión de los profesionales** (hecha en la 0.19.0, decisión 053); resultado del período; tasas y fechas de acreditación del terminal de tarjetas; importación del extracto bancario (OFX). Y, si se decide: factura, Pix/boleto integrados, convenios.
 
 ## Supuestos adoptados (pueden revisarse)
 1. El financiero viene **antes** de la fase 2 (API y app).
