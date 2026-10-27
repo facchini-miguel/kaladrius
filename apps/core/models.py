@@ -46,6 +46,12 @@ class Clinica(models.Model):
     )
     email = models.EmailField(_("e-mail"), blank=True)
     telefone = models.CharField(_("telefone"), max_length=20, blank=True)
+    endereco = models.CharField(
+        _("endereço"),
+        max_length=250,
+        blank=True,
+        help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
+    )
     ativa = models.BooleanField(_("ativa"), default=True)
     agenda_inicio = models.TimeField(_("início da agenda"), default=datetime.time(7, 30))
     agenda_fim = models.TimeField(_("fim da agenda"), default=datetime.time(20, 0))

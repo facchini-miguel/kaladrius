@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{{ titulo }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{{ titulo }}</h1>
+<p class="text-body-secondary mb-4">{{ objeto }}</p>
+<form method="post" style="max-width: 36rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <p class="text-body-secondary small">{% translate "Nada é apagado: o registro fica marcado, com o motivo, e aparece na auditoria." %}</p>
+  <button type="submit" class="btn btn-danger">{{ titulo }}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:lancamento' voltar %}">{% translate "Voltar" %}</a>
+</form>
+{% endblock %}

@@ -39,6 +39,8 @@ Cada perfil recibe los permisos `ver`, `crear`, `modificar` y `eliminar` por mó
 | Usuarios de la clínica | todo | — | — |
 | Configuración de la clínica | todo | — | — |
 | Auditoría | ver | — | — |
+| Cobros (por cobrar, cobrar, recibo, deudores) | todo | ver, crear, modificar | — |
+| Financiero (categorías, cuentas; por pagar y flujo de caja en la 0.16) | todo | — | — |
 
 El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (versión 0.8.0): el administrador crea cuentas ya vinculadas a la clínica, cambia el perfil, define contraseñas y quita el acceso (el vínculo queda inactivo; las cuentas nunca se eliminan, por la auditoría). Nadie cambia su propio perfil, y la clínica nunca queda sin un administrador activo. El nombre, el correo y la contraseña solo pueden cambiarse cuando la cuenta se usa **solo** en esta clínica y no es de superusuario: así, una clínica no puede quitarle a alguien el acceso a las otras. "Configuración de la clínica" es la pantalla **Registros > Configuración de la clínica** (versión 0.10.0): nombre, CPF/CNPJ, correo, teléfono, horario e intervalo de la agenda. Un cambio de horario o intervalo que dejaría alguna cita **futura** fuera de la grilla o del intervalo se rechaza, y la pantalla muestra cuál (el historial puede tener otros horarios).
 
@@ -53,6 +55,17 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 
 ### Referencia (globales)
 `UF`, `Cidade` (fuente: IBGE), `Banco` (fuente: lista pública del Banco Central de Brasil), `EstadoCivil`.
+
+### Financiero (versión 0.15.0)
+| Entidad | Campos principales | Observación |
+|---|---|---|
+| `Conta` (cuenta) | clínica, nombre, tipo (efectivo, banco, terminal de tarjetas), activa | Dónde entra el dinero. Toda clínica empieza con Caixa (caja) y Banco |
+| `Categoria` (categoría) | clínica, nombre, tipo (ingreso, gasto), activa | Toda clínica empieza con 3 de ingresos y 8 de gastos; el administrador registra otras |
+| `Lancamento` (cuenta por cobrar o por pagar) | clínica, tipo (por cobrar, por pagar), descripción, categoría, paciente (opcional) o pagador como texto, profesional (opcional), valor total, fecha, observaciones, cancelado (con motivo, cuándo y quién), creado por | Nunca se elimina: se cancela |
+| `Parcela` (cuota) | clínica, cuenta, número, vencimiento, valor | Lo pagado y el saldo se calculan a partir de los pagos |
+| `Pagamento` (pago) | clínica, cuota, fecha, valor cobrado, intereses y multa (incluidos en el valor), descuento (solo administrador), forma (efectivo, Pix, débito, crédito, transferencia, boleto, cheque), cuenta, marca, cuotas y código de la transacción de la tarjeta, observación, revertido (con motivo, cuándo y quién), cobrado por | Se descuenta de la cuota: valor − intereses + descuento. Nunca guarda el número de la tarjeta |
+
+Valores en `Decimal` con 2 decimales. La cuota se bloquea en la base al cobrar, para que dos personas no paguen la misma cuota por encima del saldo. En la eliminación definitiva de un paciente, sus cuentas quedan (historial contable) con el pagador "Paciente excluído (código N)", y su auditoría pierde los datos personales.
 
 ### Sistema
 | Entidad | Uso |

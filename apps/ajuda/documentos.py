@@ -20,7 +20,7 @@ REPOSITORIO = "https://github.com/facchini-miguel/medical-system/blob/main/"
 # Interface language -> docs folder.
 PASTAS = {"pt-br": "pt-BR", "en": "en", "es": "es"}
 # Manual pages in reading order (file names, the same in every language).
-MANUAL = ["inicio", "agenda", "pacientes", "rechamadas", "equipe", "clinica"]
+MANUAL = ["inicio", "agenda", "pacientes", "rechamadas", "financeiro", "equipe", "clinica"]
 
 _LINK = re.compile(r'(<a\s+href=")([^"]+)(")')
 _ITEM_DE_LISTA = re.compile(r"^\s*(?:[-*+] |\d+\. )")

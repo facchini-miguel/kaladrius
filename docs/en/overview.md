@@ -29,6 +29,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 9. **Audit:** who created, changed, deleted or viewed what, and when (LGPD).
 10. **Languages:** Portuguese, English and Spanish, chosen by each user (0.13.0).
 11. **Help:** user manual in the three languages inside the system; technical documentation for superusers only (0.14.0).
+12. **Finance:** receivables in installments, payments with method and account, receipts, debtors (0.15.0). Payables, cash flow and daily cash in the next versions.
 
 ## Business model (under study)
 - **Free** app in the stores.

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Recibo" %} {{ pagamento.pk }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex gap-2 mb-3 d-print-none">
+  <button type="button" class="btn btn-primary" onclick="window.print()">{% translate "Imprimir ou salvar em PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:lancamento' lancamento.pk %}">{% translate "Voltar ao lançamento" %}</a>
+</div>
+
+<div class="recibo bg-white border rounded p-4 position-relative">
+  {% if pagamento.estornado %}<div class="recibo-estornado">{% translate "ESTORNADO" %}</div>{% endif %}
+  <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+    <div>
+      <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
+      {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
+      {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
+    </div>
+    <div class="text-end">
+      <div class="fs-4 fw-semibold">{% translate "RECIBO" %}</div>
+      <div class="small">{% translate "Nº" %} {{ pagamento.pk }}</div>
+      <div class="fs-5 mt-1">{{ pagamento.valor|moeda }}</div>
+    </div>
+  </div>
+  <p class="fs-6">
+    {% if lancamento.paciente.cpf_cnpj %}
+    {% blocktranslate with nome=lancamento.nome_pessoa documento=lancamento.paciente.cpf_cnpj|cpf_cnpj valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> (CPF/CNPJ {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% else %}
+    {% blocktranslate with nome=lancamento.nome_pessoa valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% endif %}
+    {% blocktranslate with descricao=lancamento.descricao numero=pagamento.parcela.numero total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
+  </p>
+  <ul class="list-unstyled small mb-4">
+    <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
+    {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
+    {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
+    {% if pagamento.observacao %}<li>{{ pagamento.observacao }}</li>{% endif %}
+  </ul>
+  <div class="d-flex justify-content-between align-items-end">
+    <div>{{ pagamento.data|date:"DATE_FORMAT" }}</div>
+    <div class="text-center" style="min-width: 18rem;">
+      <div class="border-top pt-1">{{ clinica_atual.nome }}</div>
+      {% if pagamento.criado_por %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.criado_por.get_full_name|default:pagamento.criado_por.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

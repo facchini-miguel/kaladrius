@@ -41,6 +41,8 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 | Clinic users | all | — | — |
 | Clinic settings | all | — | — |
 | Audit | view | — | — |
+| Receipts (receivables, receive, receipt, debtors) | all | view, create, change | — |
+| Finance (categories, accounts; payables and cash flow in 0.16) | all | — | — |
 
 The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the administrator creates accounts already linked to the clinic, changes roles, sets passwords and removes access (the membership becomes inactive; accounts are never deleted, because of the audit log). Nobody changes their own role, and the clinic never ends up without an active administrator. Name, e-mail and password can only be changed when the account is used **only** in this clinic and is not a superuser: this way a clinic cannot take over someone's access to other clinics. "Clinic settings" is the **Records > Clinic settings** screen (version 0.10.0): name, CPF/CNPJ, e-mail, phone, schedule hours and slot length. A change of hours or slot length that would leave a **future** appointment outside the grid or off the slots is refused, and the screen says which one (past appointments may have other hours).
 
@@ -55,6 +57,17 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 
 ### Reference (global)
 `UF` (state), `Cidade` (city; source: IBGE), `Banco` (bank; source: Central Bank public list), `EstadoCivil` (marital status).
+
+### Finance (version 0.15.0)
+| Entity | Main fields | Notes |
+|---|---|---|
+| `Conta` (account) | clinic, name, type (cash, bank, card machine), active | Where the money goes. Every clinic starts with Caixa (cash) and Banco (bank) |
+| `Categoria` (category) | clinic, name, type (income, expense), active | Every clinic starts with 3 income and 8 expense categories; administrators add others |
+| `Lancamento` (entry) | clinic, type (receivable, payable), description, category, patient (optional) or payer as text, practitioner (optional), total, date, notes, cancelled (with reason, when and who), created by | Never deleted: cancelled |
+| `Parcela` (installment) | clinic, entry, number, due date, amount | Paid amount and balance are computed from the payments |
+| `Pagamento` (payment) | clinic, installment, date, amount received, interest and late fee (included in the amount), discount (administrators only), method (cash, Pix, debit, credit, transfer, boleto, check), account, card brand, installments and transaction code, note, reversed (with reason, when and who), received by | Deducted from the installment: amount − interest + discount. Never stores the card number |
+
+Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
 
 ### System
 | Entity | Purpose |

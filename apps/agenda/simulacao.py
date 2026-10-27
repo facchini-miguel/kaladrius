@@ -105,3 +105,64 @@ def simular_rechamadas(clinica, sorteio, quantidade=80, dias_antes=30, dias_depo
         )
     Rechamada.objects.bulk_create(novas)
     return len(novas)
+
+
+DESCRICOES_FINANCEIRAS = [
+    "Limpeza",
+    "Restauração",
+    "Tratamento de canal",
+    "Prótese",
+    "Clareamento",
+    "Aparelho ortodôntico",
+    "Extração",
+    "Consulta",
+]
+
+
+def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
+    """Fake receivables from 90 days ago to today, in 1 to 6 installments.
+
+    Installments due in the past are mostly paid (some are left overdue, for the debtors
+    report); the first one of some entries is paid on the spot.
+    """
+    from decimal import Decimal
+
+    from apps.financeiro import servicos
+    from apps.financeiro.models import Categoria, Conta, Lancamento, Pagamento
+
+    pacientes = _pacientes(clinica)
+    categorias = list(Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.RECEITA))
+    contas = list(Conta.objects.filter(clinica=clinica, ativa=True))
+    profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+    if not (pacientes and categorias and contas):
+        return 0
+    hoje = timezone.localdate()
+    formas = [forma for forma, _rotulo in Pagamento.Forma.choices]
+    criados = 0
+    for _ in range(quantidade):
+        data = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
+        lancamento = servicos.criar_lancamento(
+            clinica=clinica,
+            tipo=Lancamento.Tipo.RECEBER,
+            paciente=sorteio.choice(pacientes),
+            descricao=sorteio.choice(DESCRICOES_FINANCEIRAS),
+            categoria=sorteio.choice(categorias),
+            profissional=sorteio.choice(profissionais) if profissionais else None,
+            valor_total=Decimal(sorteio.randrange(150, 3000, 10)),
+            data=data,
+            parcelas=sorteio.choice([1, 1, 2, 3, 4, 6]),
+            primeiro_vencimento=data,
+            usuario=usuario,
+        )
+        for parcela in lancamento.parcelas.all():
+            if parcela.vencimento <= hoje and sorteio.random() < 0.8:
+                servicos.receber(
+                    parcela,
+                    usuario=usuario,
+                    valor=parcela.valor,
+                    data=parcela.vencimento,
+                    forma=sorteio.choice(formas),
+                    conta=sorteio.choice(contas),
+                )
+        criados += 1
+    return criados

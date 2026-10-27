@@ -20,6 +20,7 @@ from apps.auditoria.registro import nome_do_modelo, registrar
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
+from apps.financeiro.models import Lancamento, Pagamento, Parcela
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -177,9 +178,34 @@ class _Anonimizador:
         Profissional.objects.bulk_update(profissionais, ["nome", "registro"])
         self.resultado.profissionais = len(profissionais)
 
+    def financeiro(self):
+        """Free text of financial entries (payer, description, notes) may name people."""
+        lancamentos = list(
+            Lancamento.objects.filter(clinica=self.clinica).select_related("categoria")
+        )
+        for lancamento in lancamentos:
+            lancamento.descricao = lancamento.categoria.nome
+            lancamento.pessoa = self._nome(self.sorte.choice("FM")) if lancamento.pessoa else ""
+            lancamento.observacoes = ""
+        Lancamento.objects.bulk_update(
+            lancamentos, ["descricao", "pessoa", "observacoes"], batch_size=500
+        )
+        Pagamento.objects.filter(clinica=self.clinica).update(observacao="", cartao_codigo="")
+
     def auditoria(self):
         """Entries about these records held the original values: they go."""
-        modelos = [nome_do_modelo(m) for m in (Paciente, Agendamento, Rechamada, Profissional)]
+        modelos = [
+            nome_do_modelo(m)
+            for m in (
+                Paciente,
+                Agendamento,
+                Rechamada,
+                Profissional,
+                Lancamento,
+                Parcela,
+                Pagamento,
+            )
+        ]
         apagados, _ = RegistroAuditoria.objects.filter(
             clinica=self.clinica, modelo__in=modelos
         ).delete()
@@ -193,6 +219,7 @@ class _Anonimizador:
         with transaction.atomic(), sem_isolamento():
             nomes = self.pacientes()
             self.agendamentos(nomes)
+            self.financeiro()
             self.rechamadas()
             self.profissionais()
             self.auditoria()

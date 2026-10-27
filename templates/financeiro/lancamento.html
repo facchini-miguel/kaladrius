@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{{ lancamento.descricao }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">{{ lancamento.descricao }}</h1>
+    <span class="text-body-secondary">
+      {% if lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' lancamento.paciente_id %}">{{ lancamento.paciente.nome }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
+      · {{ lancamento.categoria }}{% if lancamento.profissional %} · {{ lancamento.profissional.nome }}{% endif %}
+      · {{ lancamento.data|date:"SHORT_DATE_FORMAT" }}
+    </span>
+    {% if lancamento.cancelado %}<span class="badge text-bg-dark ms-1">{% translate "Cancelado" %}</span>{% endif %}
+  </div>
+  <div>
+    {% if pode.recebimentos.excluir and not lancamento.cancelado %}
+    <a class="btn btn-outline-danger" href="{% url 'financeiro:cancelar' lancamento.pk %}">{% translate "Cancelar lançamento" %}</a>
+    {% endif %}
+    <a class="btn btn-link" href="{% url 'financeiro:receber' %}">{% translate "Voltar à lista" %}</a>
+  </div>
+</div>
+
+{% if lancamento.cancelado %}
+<div class="alert alert-secondary">
+  {% blocktranslate with momento=lancamento.cancelado_em|date:"SHORT_DATETIME_FORMAT" motivo=lancamento.motivo_cancelamento %}Cancelado em {{ momento }}. Motivo: {{ motivo }}{% endblocktranslate %}
+</div>
+{% endif %}
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Valor total" %}</div><div class="fs-5">{{ lancamento.valor_total|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-success">{{ total_pago|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_saldo > 0 %} text-danger{% endif %}">{{ total_saldo|moeda }}</div></div></div></div>
+</div>
+
+{% if lancamento.observacoes %}<p class="text-body-secondary">{{ lancamento.observacoes|linebreaksbr }}</p>{% endif %}
+
+<div class="table-responsive">
+  <table class="table align-middle bg-white">
+    <thead>
+      <tr>
+        <th>{% translate "Parcela" %}</th>
+        <th>{% translate "Vencimento" %}</th>
+        <th class="text-end">{% translate "Valor" %}</th>
+        <th class="text-end">{% translate "Falta" %}</th>
+        <th>{% translate "Situação" %}</th>
+        <th>{% translate "Pagamentos" %}</th>
+        <th class="text-end">{% translate "Ações" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for parcela in parcelas %}
+      <tr>
+        <td>{{ parcela.numero }}/{{ parcelas|length }}</td>
+        <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
+        <td class="text-end text-nowrap">{% if parcela.saldo > 0 and not lancamento.cancelado %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
+        <td>{% include "financeiro/_situacao.html" with situacao=parcela.situacao %}</td>
+        <td class="small">
+          {% for pagamento in parcela.lista_pagamentos %}
+          <div{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>
+            {{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }}
+            <a href="{% url 'financeiro:recibo' pagamento.pk %}">{% translate "recibo" %}</a>
+            {% if pode.recebimentos.excluir and not pagamento.estornado %}· <a class="text-danger" href="{% url 'financeiro:estornar' pagamento.pk %}">{% translate "estornar" %}</a>{% endif %}
+          </div>
+          {% empty %}—{% endfor %}
+        </td>
+        <td class="text-end">
+          {% if pode.recebimentos.criar and parcela.saldo > 0 and not lancamento.cancelado %}
+          <a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

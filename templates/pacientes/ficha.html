@@ -124,6 +124,39 @@
 </div>
 {% endif %}
 
+{% if financeiro %}
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    {% translate "Financeiro" %}
+    {% if pode.recebimentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:lancamento_novo' %}?paciente={{ paciente.pk }}">{% translate "Novo lançamento" %}</a>{% endif %}
+  </div>
+  <div class="card-body">
+    <p class="mb-2">
+      {% translate "Vencido" %}: <strong class="{% if financeiro.vencido %}text-danger{% endif %}">{{ financeiro.vencido|moeda }}</strong> ·
+      {% translate "A vencer" %}: <strong>{{ financeiro.a_vencer|moeda }}</strong>
+    </p>
+    {% if financeiro.abertas %}
+    <ul class="list-unstyled small mb-2">
+      {% for parcela in financeiro.abertas %}
+      <li>
+        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> ({{ parcela.numero }}) · {{ parcela.saldo|moeda }}
+        {% if pode.recebimentos.criar %}· <a href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% if financeiro.pagamentos %}
+    <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
+    <ul class="list-unstyled small mb-0">
+      {% for pagamento in financeiro.pagamentos %}
+      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'financeiro:recibo' pagamento.pk %}">{% translate "recibo" %}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 {% if pode.rechamadas.ver %}
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">

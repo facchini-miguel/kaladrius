@@ -39,6 +39,8 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Usuários da clínica | tudo | — | — |
 | Configurações da clínica | tudo | — | — |
 | Auditoria | ver | — | — |
+| Recebimentos (a receber, receber, recibo, devedores) | tudo | ver, criar, alterar | — |
+| Financeiro (categorias, contas; a pagar e fluxo de caixa na 0.16) | tudo | — | — |
 
 O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.0): o administrador cria contas já vinculadas à clínica, muda o perfil, define senhas e tira o acesso (o vínculo fica inativo; contas nunca são excluídas, por causa da auditoria). Ninguém altera o próprio perfil, e a clínica nunca fica sem um administrador ativo. Nome, e-mail e senha só podem ser alterados quando a conta é usada **somente** nesta clínica e não é de superusuário: assim, uma clínica não consegue tomar o acesso de alguém às outras. "Configurações da clínica" é a tela **Cadastros > Configurações da clínica** (versão 0.10.0): nome, CPF/CNPJ, e-mail, telefone, horário e intervalo da agenda. Uma mudança de horário ou intervalo que deixaria algum agendamento **futuro** fora da grade ou fora do intervalo é recusada, e a tela mostra qual (o histórico pode ter outros horários).
 
@@ -53,6 +55,17 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 
 ### Referência (globais)
 `UF`, `Cidade` (fonte: IBGE), `Banco` (fonte: lista pública do Banco Central), `EstadoCivil`.
+
+### Financeiro (versão 0.15.0)
+| Entidade | Campos principais | Observação |
+|---|---|---|
+| `Conta` | clinica, nome, tipo (dinheiro, banco, maquininha), ativa | Onde o dinheiro entra. Toda clínica começa com Caixa e Banco |
+| `Categoria` | clinica, nome, tipo (receita, despesa), ativa | Toda clínica começa com 3 de receita e 8 de despesa; o administrador cadastra outras |
+| `Lancamento` | clinica, tipo (a receber, a pagar), descrição, categoria, paciente (opcional) ou pagador em texto, profissional (opcional), valor total, data, observações, cancelado (com motivo, quando e quem), criado por | Nunca é excluído: é cancelado |
+| `Parcela` | clinica, lançamento, número, vencimento, valor | O pago e o saldo são calculados a partir dos pagamentos |
+| `Pagamento` | clinica, parcela, data, valor recebido, juros e multa (incluídos no valor), desconto (só administrador), forma (dinheiro, Pix, débito, crédito, transferência, boleto, cheque), conta, bandeira, parcelas e código da transação do cartão, observação, estornado (com motivo, quando e quem), recebido por | Abate da parcela: valor − juros + desconto. Nunca guarda o número do cartão |
+
+Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
 
 ### Sistema
 | Entidade | Uso |

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{{ modelo.verbose_name_plural|capfirst }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 mb-0">{{ modelo.verbose_name_plural|capfirst }}</h1>
+  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:cadastro_novo' cadastro %}">{% translate "Novo" %}</a>{% endif %}
+</div>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Nome" %}</th><th>{% translate "Tipo" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <tbody>
+      {% for item in itens %}
+      <tr>
+        <td>{{ item.nome }}</td>
+        <td>{{ item.get_tipo_display }}</td>
+        <td>{% if item.ativa %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
+        <td class="text-end">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:cadastro_editar' cadastro item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”." %}</p>
+{% endblock %}

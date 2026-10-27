@@ -48,7 +48,7 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Clinica
-        fields = ["nome", "documento", "email", "telefone"] + [
+        fields = ["nome", "documento", "email", "telefone", "endereco"] + [
             "agenda_inicio",
             "agenda_fim",
             "agenda_intervalo",

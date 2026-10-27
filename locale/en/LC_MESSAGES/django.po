@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 12:19-0300\n"
+"POT-Creation-Date: 2026-10-27 12:53-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: English\n"
@@ -283,6 +283,13 @@ msgstr "e-mail"
 msgid "telefone"
 msgstr "phone"
 
+msgid "endereço"
+msgstr "address"
+
+msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
+msgstr ""
+"Street, number, district, city/state and postal code, as printed on receipts."
+
 msgid "ativa"
 msgstr "active"
 
@@ -361,6 +368,12 @@ msgstr "Clinic users"
 msgid "Configurações da clínica"
 msgstr "Clinic settings"
 
+msgid "Recebimentos"
+msgstr "Receipts"
+
+msgid "Financeiro"
+msgstr "Finance"
+
 msgid "Ver"
 msgstr "View"
 
@@ -423,6 +436,272 @@ msgstr ""
 #, python-format
 msgid "Nova senha de %(nome)s definida."
 msgstr "New password set for %(nome)s."
+
+msgid "Valor total"
+msgstr "Total amount"
+
+msgid "Número de parcelas"
+msgstr "Number of installments"
+
+msgid "Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."
+msgstr ""
+"Monthly installments of the same amount. Card installments count as 1 "
+"installment here."
+
+msgid "Vencimento da 1ª parcela"
+msgstr "Due date of the 1st installment"
+
+msgid "A 1ª parcela já foi paga agora"
+msgstr "The 1st installment has just been paid"
+
+msgid "Forma de pagamento"
+msgstr "Payment method"
+
+msgid "Conta"
+msgstr "Account"
+
+msgid "Só se quem paga não for um paciente cadastrado."
+msgstr "Only if the payer is not a registered patient."
+
+msgid "Escolha o paciente ou informe quem paga."
+msgstr "Choose the patient or enter who pays."
+
+msgid "Informe um valor maior que zero."
+msgstr "Enter an amount greater than zero."
+
+msgid "Informe para registrar o pagamento."
+msgstr "Required to record the payment."
+
+msgid "Valor recebido"
+msgstr "Amount received"
+
+msgid "Juros e multa"
+msgstr "Interest and late fee"
+
+msgid "Já incluídos no valor recebido."
+msgstr "Already included in the amount received."
+
+msgid "Desconto"
+msgstr "Discount"
+
+msgid "Motivo"
+msgstr "Reason"
+
+msgid "Já existe uma categoria com este nome."
+msgstr "A category with this name already exists."
+
+msgid "Já existe uma conta com este nome."
+msgstr "An account with this name already exists."
+
+msgid "Dinheiro (caixa)"
+msgstr "Cash (drawer)"
+
+msgid "Banco"
+msgstr "Bank"
+
+msgid "Maquininha de cartão"
+msgstr "Card machine"
+
+msgid "tipo"
+msgstr "type"
+
+msgid "conta"
+msgstr "account"
+
+msgid "contas"
+msgstr "accounts"
+
+msgid "Receita"
+msgstr "Income"
+
+msgid "Despesa"
+msgstr "Expense"
+
+msgid "categoria"
+msgstr "category"
+
+msgid "categorias"
+msgstr "categories"
+
+msgid "A receber"
+msgstr "Receivables"
+
+msgid "A pagar"
+msgstr "Payables"
+
+msgid "pagador"
+msgstr "payer"
+
+msgid "Quem fez o atendimento (opcional)."
+msgstr "Who saw the patient (optional)."
+
+msgid "valor total"
+msgstr "total amount"
+
+msgid "data"
+msgstr "date"
+
+msgid "observações"
+msgstr "notes"
+
+msgid "cancelado"
+msgstr "cancelled"
+
+msgid "cancelado em"
+msgstr "cancelled at"
+
+msgid "cancelado por"
+msgstr "cancelled by"
+
+msgid "motivo do cancelamento"
+msgstr "cancellation reason"
+
+msgid "lançamento"
+msgstr "entry"
+
+msgid "lançamentos"
+msgstr "entries"
+
+msgid "número"
+msgstr "number"
+
+msgid "vencimento"
+msgstr "due date"
+
+msgid "valor"
+msgstr "amount"
+
+msgid "parcela"
+msgstr "installment"
+
+msgid "parcelas"
+msgstr "installments"
+
+msgid "Dinheiro"
+msgstr "Cash"
+
+msgid "Pix"
+msgstr "Pix"
+
+msgid "Cartão de débito"
+msgstr "Debit card"
+
+msgid "Cartão de crédito"
+msgstr "Credit card"
+
+msgid "Transferência"
+msgstr "Bank transfer"
+
+msgid "Boleto"
+msgstr "Boleto (bank slip)"
+
+msgid "Cheque"
+msgstr "Check"
+
+msgid "valor recebido"
+msgstr "amount received"
+
+msgid "juros e multa"
+msgstr "interest and late fee"
+
+msgid "desconto"
+msgstr "discount"
+
+msgid "forma de pagamento"
+msgstr "payment method"
+
+msgid "bandeira do cartão"
+msgstr "card brand"
+
+msgid "parcelas no cartão"
+msgstr "card installments"
+
+msgid "código da transação (NSU)"
+msgstr "transaction code (NSU)"
+
+msgid "observação"
+msgstr "note"
+
+msgid "estornado"
+msgstr "reversed"
+
+msgid "estornado em"
+msgstr "reversed at"
+
+msgid "estornado por"
+msgstr "reversed by"
+
+msgid "motivo do estorno"
+msgstr "reversal reason"
+
+msgid "recebido por"
+msgstr "received by"
+
+msgid "pagamento"
+msgstr "payment"
+
+msgid "pagamentos"
+msgstr "payments"
+
+msgid "Este lançamento foi cancelado."
+msgstr "This entry was cancelled."
+
+msgid "O valor abatido da parcela precisa ser maior que zero."
+msgstr "The amount deducted from the installment must be greater than zero."
+
+#, python-format
+msgid ""
+"O valor abatido (%(abatido)s) passa do que falta na parcela (%(saldo)s)."
+msgstr ""
+"The amount deducted (%(abatido)s) exceeds what is left of the installment "
+"(%(saldo)s)."
+
+msgid ""
+"Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar."
+msgstr "This entry has payments. Reverse the payments before cancelling."
+
+msgid "Cancelada"
+msgstr "Cancelled"
+
+msgid "Paga"
+msgstr "Paid"
+
+msgid "Vencida"
+msgstr "Overdue"
+
+msgid "Paga em parte"
+msgstr "Partly paid"
+
+msgid "Em aberto"
+msgstr "Open"
+
+msgid "Lançamento criado e 1ª parcela recebida."
+msgstr "Entry created and 1st installment received."
+
+msgid "Lançamento criado."
+msgstr "Entry created."
+
+msgid "Lançamento cancelado."
+msgstr "Entry cancelled."
+
+msgid "Cancelar lançamento"
+msgstr "Cancel entry"
+
+msgid "Esta parcela já está paga."
+msgstr "This installment is already paid."
+
+msgid "Pagamento registrado."
+msgstr "Payment recorded."
+
+msgid "Pagamento estornado."
+msgstr "Payment reversed."
+
+msgid "Estornar pagamento"
+msgstr "Reverse payment"
+
+#, python-format
+msgid "%(nome)s salvo."
+msgstr "%(nome)s saved."
 
 msgid "Importação do sistema antigo"
 msgstr "Legacy system import"
@@ -524,9 +803,6 @@ msgstr "Male"
 msgid "Outro"
 msgstr "Other"
 
-msgid "tipo"
-msgstr "type"
-
 msgid "Para pessoa jurídica, o nome fantasia."
 msgstr "For companies, the trade name."
 
@@ -575,20 +851,11 @@ msgstr "city"
 msgid "bairro"
 msgstr "district"
 
-msgid "endereço"
-msgstr "address"
-
 msgid "Rua, avenida…"
 msgstr "Street, avenue…"
 
-msgid "número"
-msgstr "number"
-
 msgid "complemento"
 msgstr "complement"
-
-msgid "observações"
-msgstr "notes"
 
 msgid "arquivado"
 msgstr "archived"
@@ -664,9 +931,6 @@ msgstr "Practitioner %(nome)s deleted."
 
 msgid "Escolha o paciente."
 msgstr "Choose the patient."
-
-msgid "data"
-msgstr "date"
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "E.g.: 6-month check-up."
@@ -970,11 +1234,23 @@ msgstr "Open menu"
 msgid "Início"
 msgstr "Home"
 
+msgid "Devedores"
+msgstr "Debtors"
+
+msgid "Novo lançamento"
+msgstr "New entry"
+
 msgid "Cidades"
 msgstr "Cities"
 
 msgid "Bancos"
 msgstr "Banks"
+
+msgid "Categorias"
+msgstr "Categories"
+
+msgid "Contas"
+msgstr "Accounts"
 
 msgid "Administração"
 msgstr "Administration"
@@ -1130,6 +1406,202 @@ msgstr "New password"
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "The person is logged out on the devices where they are signed in."
 
+msgid "Tipo"
+msgstr "Type"
+
+msgid "Ativa"
+msgstr "Active"
+
+msgid "Inativa"
+msgstr "Inactive"
+
+msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
+msgstr ""
+"To stop using it without losing the history, edit it and uncheck “active”."
+
+msgid "Total vencido"
+msgstr "Total overdue"
+
+msgid "A vencer"
+msgstr "Not yet due"
+
+msgid "Paciente ou pagador"
+msgstr "Patient or payer"
+
+msgid "Vencido"
+msgstr "Overdue"
+
+msgid "Até 30 dias"
+msgstr "Up to 30 days"
+
+msgid "31 a 60"
+msgstr "31 to 60"
+
+msgid "61 a 90"
+msgstr "61 to 90"
+
+msgid "Mais de 90"
+msgstr "Over 90"
+
+msgid "Mais antigo"
+msgstr "Oldest"
+
+msgid "Ninguém está devendo."
+msgstr "Nobody owes anything."
+
+msgid "Cancelado"
+msgstr "Cancelled"
+
+msgid "Voltar à lista"
+msgstr "Back to the list"
+
+#, python-format
+msgid "Cancelado em %(momento)s. Motivo: %(motivo)s"
+msgstr "Cancelled on %(momento)s. Reason: %(motivo)s"
+
+msgid "Pago"
+msgstr "Paid"
+
+msgid "Falta"
+msgstr "Due"
+
+msgid "Parcela"
+msgstr "Installment"
+
+msgid "Vencimento"
+msgstr "Due date"
+
+msgid "Valor"
+msgstr "Amount"
+
+msgid "Pagamentos"
+msgstr "Payments"
+
+msgid "recibo"
+msgstr "receipt"
+
+msgid "estornar"
+msgstr "reverse"
+
+msgid "Receber"
+msgstr "Receive"
+
+msgid "Novo lançamento a receber"
+msgstr "New receivable"
+
+msgid ""
+"Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre "
+"em seguida."
+msgstr ""
+"For payment on the spot: the 1st installment is recorded as paid and the "
+"receipt opens next."
+
+msgid ""
+"Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
+"auditoria."
+msgstr ""
+"Nothing is deleted: the record is marked, with the reason, and shows in the "
+"audit log."
+
+#, python-format
+msgid "parcela %(numero)s de %(total)s"
+msgstr "installment %(numero)s of %(total)s"
+
+#, python-format
+msgid "vence em %(vencimento)s"
+msgstr "due on %(vencimento)s"
+
+msgid "Valor da parcela"
+msgstr "Installment amount"
+
+msgid "Já pago"
+msgstr "Already paid"
+
+msgid "Só para cartão"
+msgstr "Cards only"
+
+msgid ""
+"Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a "
+"parcela fica paga. Nunca anote o número do cartão."
+msgstr ""
+"Card installments: enter the number of installments here; for the clinic, "
+"the installment is paid. Never write down the card number."
+
+msgid "Descontos só podem ser dados pelo administrador da clínica."
+msgstr "Only the clinic administrator can give discounts."
+
+msgid "Registrar pagamento"
+msgstr "Record payment"
+
+msgid "Paciente, pagador ou descrição"
+msgstr "Patient, payer or description"
+
+msgid "Vencidas"
+msgstr "Overdue"
+
+msgid "Pagas"
+msgstr "Paid"
+
+msgid "Todas"
+msgstr "All"
+
+msgid "Descrição"
+msgstr "Description"
+
+msgid "Nenhuma parcela encontrada."
+msgstr "No installments found."
+
+msgid "Recibo"
+msgstr "Receipt"
+
+msgid "Imprimir ou salvar em PDF"
+msgstr "Print or save as PDF"
+
+msgid "Voltar ao lançamento"
+msgstr "Back to the entry"
+
+msgid "ESTORNADO"
+msgstr "REVERSED"
+
+msgid "RECIBO"
+msgstr "RECEIPT"
+
+msgid "Nº"
+msgstr "No."
+
+#, python-format
+msgid ""
+"Recebemos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) a quantia de "
+"<strong>%(valor)s</strong>,"
+msgstr ""
+"We received from <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) the "
+"amount of <strong>%(valor)s</strong>,"
+
+#, python-format
+msgid ""
+"Recebemos de <strong>%(nome)s</strong> a quantia de <strong>%(valor)s</"
+"strong>,"
+msgstr ""
+"We received from <strong>%(nome)s</strong> the amount of <strong>%(valor)s</"
+"strong>,"
+
+#, python-format
+msgid "referente a %(descricao)s (parcela %(numero)s de %(total)s)"
+msgstr "for %(descricao)s (installment %(numero)s of %(total)s)"
+
+#, python-format
+msgid "%(n)s parcela no cartão"
+msgid_plural "%(n)s parcelas no cartão"
+msgstr[0] "%(n)s card installment"
+msgstr[1] "%(n)s card installments"
+
+msgid "Juros e multa incluídos"
+msgstr "Interest and late fee included"
+
+#, python-format
+msgid "Recebido por %(nome)s"
+msgstr "Received by %(nome)s"
+
 msgid "Paciente"
 msgstr "Patient"
 
@@ -1271,9 +1743,6 @@ msgstr "Archived"
 msgid "Restaurar"
 msgstr "Restore"
 
-msgid "Voltar à lista"
-msgstr "Back to the list"
-
 #, python-format
 msgid "Arquivado em %(momento)s."
 msgstr "Archived on %(momento)s."
@@ -1353,6 +1822,12 @@ msgstr "Past (most recent first)"
 msgid "Nenhum agendamento anterior."
 msgstr "No past appointments."
 
+msgid "receber"
+msgstr "receive"
+
+msgid "Últimos pagamentos"
+msgstr "Latest payments"
+
 msgid "Nova rechamada"
 msgstr "New recall"
 
@@ -1383,9 +1858,6 @@ msgstr "Name, code or CPF/CNPJ"
 
 msgid "Buscar paciente"
 msgstr "Search patient"
-
-msgid "Tipo"
-msgstr "Type"
 
 msgid "Ativos"
 msgstr "Active"
@@ -1462,17 +1934,11 @@ msgstr "Pending"
 msgid "Concluídas"
 msgstr "Done"
 
-msgid "Todas"
-msgstr "All"
-
 #, python-format
 msgid "%(total)s rechamada"
 msgid_plural "%(total)s rechamadas"
 msgstr[0] "%(total)s recall"
 msgstr[1] "%(total)s recalls"
-
-msgid "Descrição"
-msgstr "Description"
 
 msgid "Atrasada"
 msgstr "Overdue"

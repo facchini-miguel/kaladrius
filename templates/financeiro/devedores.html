@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Devedores" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "Devedores" %}</h1>
+  <a class="btn btn-outline-primary" href="{% url 'financeiro:receber' %}">{% translate "A receber" %}</a>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_vencido|moeda }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_a_vencer|moeda }}</div></div></div></div>
+</div>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead>
+      <tr>
+        <th>{% translate "Paciente ou pagador" %}</th>
+        <th class="text-end">{% translate "Vencido" %}</th>
+        <th class="text-end">{% translate "Até 30 dias" %}</th>
+        <th class="text-end">{% translate "31 a 60" %}</th>
+        <th class="text-end">{% translate "61 a 90" %}</th>
+        <th class="text-end">{% translate "Mais de 90" %}</th>
+        <th class="text-end">{% translate "A vencer" %}</th>
+        <th>{% translate "Mais antigo" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linha in linhas %}
+      <tr>
+        <td>{% if linha.paciente %}<a href="{% url 'pacientes:ficha' linha.paciente.pk %}">{{ linha.nome }}</a>{% else %}{{ linha.nome }}{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|moeda }}</td>
+        {% for valor in linha.faixas %}<td class="text-end text-nowrap">{% if valor %}{{ valor|moeda }}{% else %}—{% endif %}</td>{% endfor %}
+        <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{{ linha.mais_antigo|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="text-body-secondary">{% translate "Ninguém está devendo." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

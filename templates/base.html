@@ -9,7 +9,7 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% if user.is_authenticated %}
-  <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+  <nav class="navbar navbar-expand-lg bg-primary sticky-top d-print-none" data-bs-theme="dark">
     <div class="container-fluid">
       <a class="navbar-brand fw-semibold" href="{% url 'inicio' %}">Medical System</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
@@ -31,6 +31,19 @@
           {% if pode.aniversariantes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">{% translate "Aniversariantes" %}</a></li>
           {% endif %}
+          {% if pode.recebimentos.ver %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'financeiro:receber' %}">{% translate "A receber" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a></li>
+              {% if pode.recebimentos.criar %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          {% endif %}
           {% if pode.profissionais.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinica.alterar %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Cadastros" %}</a>
@@ -47,6 +60,12 @@
               <li><h6 class="dropdown-header">{% translate "Tabelas de referência" %}</h6></li>
               <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">{% translate "Cidades" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'referencias:bancos' %}">{% translate "Bancos" %}</a></li>
+              {% endif %}
+              {% if pode.financeiro.ver %}
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">{% translate "Financeiro" %}</h6></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'categorias' %}">{% translate "Categorias" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'contas' %}">{% translate "Contas" %}</a></li>
               {% endif %}
               {% if pode.clinica.alterar or pode.auditoria.ver %}
               <li><hr class="dropdown-divider"></li>
@@ -160,7 +179,7 @@
     {% block conteudo %}{% endblock %}
   </main>
 
-  <footer class="rodape text-center text-body-secondary small py-3">
+  <footer class="rodape text-center text-body-secondary small py-3 d-print-none">
     Medical System · {% translate "versão" %} <a href="{% if user.is_authenticated %}{% url 'novidades' %}{% else %}#{% endif %}">{{ versao_sistema }}</a>
     · {% translate "Desenvolvido por" %} Miguel Facchini
   </footer>

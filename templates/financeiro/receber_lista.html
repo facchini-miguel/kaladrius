@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "A receber" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "A receber" %}</h1>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-primary" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a>
+    {% if pode.recebimentos.criar %}<a class="btn btn-primary" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a>{% endif %}
+  </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-6">
+    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Paciente, pagador ou descrição' %}" aria-label="{% translate 'Buscar' %}">
+  </div>
+  <div class="col-6 col-md-3">
+    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
+      <option value="abertas"{% if situacao == "abertas" %} selected{% endif %}>{% translate "Em aberto" %}</option>
+      <option value="vencidas"{% if situacao == "vencidas" %} selected{% endif %}>{% translate "Vencidas" %}</option>
+      <option value="pagas"{% if situacao == "pagas" %} selected{% endif %}>{% translate "Pagas" %}</option>
+      <option value="todas"{% if situacao == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead>
+      <tr>
+        <th>{% translate "Vencimento" %}</th>
+        <th>{% translate "Paciente ou pagador" %}</th>
+        <th>{% translate "Descrição" %}</th>
+        <th class="text-end">{% translate "Valor" %}</th>
+        <th class="text-end">{% translate "Falta" %}</th>
+        <th>{% translate "Situação" %}</th>
+        <th class="text-end">{% translate "Ações" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for parcela in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
+        <td>
+          {% if parcela.lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' parcela.lancamento.paciente_id %}">{{ parcela.lancamento.paciente.nome }}</a>
+          {% else %}{{ parcela.lancamento.pessoa }}{% endif %}
+        </td>
+        <td><a href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">({{ parcela.numero }})</span></td>
+        <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
+        <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
+        <td>{% include "financeiro/_situacao.html" with situacao=parcela.situacao %}</td>
+        <td class="text-end text-nowrap">
+          {% if pode.recebimentos.criar and parcela.saldo > 0 and not parcela.lancamento.cancelado %}
+          <a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhuma parcela encontrada." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/paginacao.html" %}
+{% endblock %}

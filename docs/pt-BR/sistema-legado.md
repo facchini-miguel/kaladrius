@@ -59,12 +59,13 @@ Os dados importados são de uma clínica que não é mais cliente. Por isso, o t
 - **agendamentos:** a descrição vira "nome fictício - tipo de atendimento". Os horários bloqueados (descrição igual ao tipo, como "Ocupado") ficam como estão;
 - **rechamadas:** a descrição vira um texto genérico ("Retorno", "Limpeza"…);
 - **profissionais:** nome e registro;
+- **financeiro** (desde a 0.15.0): a descrição dos lançamentos vira o nome da categoria, o pagador em texto vira um nome fictício, e observações e códigos de transação são apagados;
 - **auditoria:** os registros da clínica sobre esses dados, que guardavam os valores originais, são apagados.
 
 Ficam: as quantidades, as datas e horários da agenda, os profissionais de cada agendamento, os tipos de atendimento, as cidades, PF/PJ, sexo, estado civil, situação (ativo, arquivado) e as datas de cadastro. Conferido no ambiente local, cruzando com o dump original: nenhum nome completo, CPF/CNPJ, telefone ou descrição de agendamento original restou.
 
 ### Movimento simulado (versão 0.12.0)
-A agenda importada termina em 2020, e as 41 rechamadas antigas entraram como concluídas. Para a clínica de teste ter movimento atual, o comando `simular_movimento --clinica "Nome" --confirmar` cria agendamentos fictícios com pacientes, de 2 semanas atrás até 4 semanas à frente (cerca de 60% dos horários livres dos dias úteis), e 80 rechamadas de 30 dias atrás até 60 dias à frente. Usa só pacientes ativos e não arquivados, e pula os horários já ocupados. `--sem-agenda` cria só as rechamadas. **Nunca** usar numa clínica real.
+A agenda importada termina em 2020, e as 41 rechamadas antigas entraram como concluídas. Para a clínica de teste ter movimento atual, o comando `simular_movimento --clinica "Nome" --confirmar` cria agendamentos fictícios com pacientes, de 2 semanas atrás até 4 semanas à frente (cerca de 60% dos horários livres dos dias úteis), 80 rechamadas de 30 dias atrás até 60 dias à frente e, desde a 0.15.0, 60 lançamentos a receber dos últimos 90 dias (a maioria das parcelas vencidas paga, algumas em atraso; `--lancamentos 0` para nenhum). Usa só pacientes ativos e não arquivados, e pula os horários já ocupados. `--sem-agenda` cria só as rechamadas. **Nunca** usar numa clínica real.
 
 ## Tipos de atendimento originais (seed de teste)
 Liberado `#b9f1a7` · Cirurgia `#f7a5a5` · Dentística `#f6f7a5` · Periodontia `#7b88cb` · Consulta Inicial `#e7a5f7` · Prótese `#fed27d` · Endodontia `#e96cd9` · Ortodontia `#a7eef1` · Atendimento de 15 em 15 `#d5dae6` · Ocupado `#a7bef1`

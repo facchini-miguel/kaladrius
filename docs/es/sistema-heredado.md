@@ -59,12 +59,13 @@ Los datos importados son de una clínica que ya no es cliente. Por eso, el titul
 - **citas:** la descripción pasa a "nombre ficticio - tipo de atención". Los horarios bloqueados (descripción igual al tipo, como "Ocupado") quedan como están;
 - **recordatorios:** la descripción pasa a un texto genérico ("Retorno", "Limpeza"…);
 - **profesionales:** nombre y registro;
+- **financiero** (desde la 0.15.0): la descripción de las cuentas pasa a ser el nombre de la categoría, el pagador como texto pasa a un nombre ficticio, y se borran las observaciones y los códigos de transacción;
 - **auditoría:** se eliminan los registros de la clínica sobre esos datos, que guardaban los valores originales.
 
 Se mantienen: las cantidades, las fechas y horarios de la agenda, el profesional de cada cita, los tipos de atención, las ciudades, PF/PJ, sexo, estado civil, situación (activo, archivado) y las fechas de registro. Verificado en el entorno local, cruzando con el dump original: no quedó ningún nombre completo, CPF/CNPJ, teléfono ni descripción de cita original.
 
 ### Movimiento simulado (versión 0.12.0)
-La agenda importada termina en 2020, y los 41 recordatorios antiguos entraron como completados. Para que la clínica de prueba tenga movimiento actual, el comando `simular_movimento --clinica "Nombre" --confirmar` crea citas ficticias con pacientes, de 2 semanas atrás a 4 semanas adelante (cerca del 60 % de los horarios libres de los días hábiles), y 80 recordatorios de 30 días atrás a 60 días adelante. Usa solo pacientes activos y no archivados, y salta los horarios ya ocupados. `--sem-agenda` crea solo los recordatorios. **Nunca** usarlo en una clínica real.
+La agenda importada termina en 2020, y los 41 recordatorios antiguos entraron como completados. Para que la clínica de prueba tenga movimiento actual, el comando `simular_movimento --clinica "Nombre" --confirmar` crea citas ficticias con pacientes, de 2 semanas atrás a 4 semanas adelante (cerca del 60 % de los horarios libres de los días hábiles), 80 recordatorios de 30 días atrás a 60 días adelante y, desde la 0.15.0, 60 cuentas por cobrar de los últimos 90 días (la mayoría de las cuotas vencidas pagadas, algunas atrasadas; `--lancamentos 0` para ninguna). Usa solo pacientes activos y no archivados, y salta los horarios ya ocupados. `--sem-agenda` crea solo los recordatorios. **Nunca** usarlo en una clínica real.
 
 ## Tipos de atención originales (datos de prueba)
 Liberado `#b9f1a7` · Cirurgia `#f7a5a5` · Dentística `#f6f7a5` · Periodontia `#7b88cb` · Consulta Inicial `#e7a5f7` · Prótese `#fed27d` · Endodontia `#e96cd9` · Ortodontia `#a7eef1` · Atendimento de 15 em 15 `#d5dae6` · Ocupado `#a7bef1`

@@ -15,6 +15,8 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import anonimizar, registrar
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.validadores import normalizar_cnpj
+from apps.financeiro.models import Lancamento, Pagamento, Parcela
+from apps.financeiro.servicos import resumo_do_paciente
 from apps.rechamadas.models import Rechamada
 
 from .forms import PacienteForm
@@ -89,6 +91,8 @@ def ficha(request, pk):
     contexto = {"paciente": paciente, "rechamadas": rechamadas}
     if pode(request, Modulo.AGENDA, Acao.VER):
         contexto["agendamentos"] = _historico(request, paciente)
+    if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
+        contexto["financeiro"] = resumo_do_paciente(paciente)
     return render(request, "pacientes/ficha.html", contexto)
 
 
@@ -165,8 +169,9 @@ def restaurar(request, pk):
 def excluir(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
-    The appointments stay in the schedule without the patient, the recalls go, and the
-    patient's personal data is removed from the audit log as well.
+    The appointments stay in the schedule without the patient, the recalls go, financial
+    entries are kept (accounting history) without the patient, and the patient's personal
+    data is removed from the audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
     if request.method == "POST":
@@ -175,13 +180,26 @@ def excluir(request, pk):
         ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
         rechamadas = Rechamada.objects.filter(paciente=paciente)
         ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
+        lancamentos = Lancamento.objects.filter(paciente=paciente)
+        ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
+        ids_parcelas = list(
+            Parcela.objects.filter(lancamento__in=ids_lancamentos).values_list("pk", flat=True)
+        )
+        ids_pagamentos = list(
+            Pagamento.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)
+        )
         with transaction.atomic():
             agendamentos.update(paciente=None)
+            # Stored in Portuguese, like the rest of the data.
+            lancamentos.update(paciente=None, pessoa=f"Paciente excluído (código {codigo})")
             rechamadas.delete()
             paciente.delete()
             anonimizar(Paciente, [codigo])
             anonimizar(Agendamento, ids_agendamentos)
             anonimizar(Rechamada, ids_rechamadas)
+            anonimizar(Lancamento, ids_lancamentos)
+            anonimizar(Parcela, ids_parcelas)
+            anonimizar(Pagamento, ids_pagamentos)
             registrar(
                 RegistroAuditoria.Acao.EXCLUIR,
                 descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",

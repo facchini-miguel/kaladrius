@@ -1,0 +1,1 @@
+{% with codigo=situacao.0 nome=situacao.1 %}<span class="badge {% if codigo == 'paga' %}text-bg-success{% elif codigo == 'vencida' %}text-bg-danger{% elif codigo == 'parcial' %}text-bg-warning{% elif codigo == 'cancelada' %}text-bg-dark{% else %}text-bg-secondary{% endif %}">{{ nome }}</span>{% endwith %}

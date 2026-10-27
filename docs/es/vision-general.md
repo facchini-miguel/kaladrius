@@ -29,6 +29,7 @@ Sistema de gestión de clínicas (odontológicas, médicas, de fisioterapia, psi
 9. **Auditoría:** quién creó, modificó, eliminó o consultó qué y cuándo (LGPD, la ley brasileña de protección de datos).
 10. **Idiomas:** portugués, inglés y español, a elección de cada usuario (0.13.0).
 11. **Ayuda:** manual del usuario en los tres idiomas dentro del sistema; documentación técnica solo para el superusuario (0.14.0).
+12. **Financiero:** cuentas por cobrar en cuotas, pagos con forma y cuenta, recibo, deudores (0.15.0). Por pagar, flujo de caja y caja del día en las próximas versiones.
 
 ## Modelo de negocio (en estudio)
 - App **gratuita** en las tiendas.

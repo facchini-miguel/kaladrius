@@ -58,13 +58,14 @@ The imported data belongs to a clinic that is no longer a client. So the owner d
 - **patients:** name, company name, CPF/CNPJ (new, valid and fake), ID card, state registration, occupation, guardian, phones (area code kept), e-mail (`@example.com`), postal code (first 2 digits kept), district, street, number, complement and notes (generic sentences). The birth date is shifted up to 180 days, keeping ages;
 - **appointments:** the description becomes "fake name - appointment type". Blocked slots (description equal to the type, such as "Ocupado") stay as they are;
 - **recalls:** the description becomes generic text ("Retorno", "Limpeza"…);
+- **finance** (since 0.15.0): entry descriptions become the category name, the payer as text becomes a fake name, and notes and transaction codes are cleared;
 - **practitioners:** name and license;
 - **audit log:** the clinic's entries about these records, which held the original values, are deleted.
 
 Kept: counts, schedule dates and times, each appointment's practitioner, appointment types, cities, PF/PJ, sex, marital status, status (active, archived) and registration dates. Checked locally against the original dump: no original full name, CPF/CNPJ, phone or appointment description remained.
 
 ### Simulated activity (version 0.12.0)
-The imported schedule ends in 2020, and the 41 legacy recalls came in as done. To give the test clinic current activity, `simular_movimento --clinica "Name" --confirmar` creates fake appointments with patients, from 2 weeks ago to 4 weeks ahead (about 60% of the free weekday slots), and 80 recalls from 30 days ago to 60 days ahead. It uses only active, non-archived patients and skips slots already taken. `--sem-agenda` creates only the recalls. **Never** use it on a real clinic.
+The imported schedule ends in 2020, and the 41 legacy recalls came in as done. To give the test clinic current activity, `simular_movimento --clinica "Name" --confirmar` creates fake appointments with patients, from 2 weeks ago to 4 weeks ahead (about 60% of the free weekday slots), 80 recalls from 30 days ago to 60 days ahead and, since 0.15.0, 60 receivables from the last 90 days (most past installments paid, some overdue; `--lancamentos 0` for none). It uses only active, non-archived patients and skips slots already taken. `--sem-agenda` creates only the recalls. **Never** use it on a real clinic.
 
 ## Original appointment types (test seed)
 Liberado (free) `#b9f1a7` · Cirurgia (surgery) `#f7a5a5` · Dentística (restorative) `#f6f7a5` · Periodontia (periodontics) `#7b88cb` · Consulta Inicial (first visit) `#e7a5f7` · Prótese (prosthetics) `#fed27d` · Endodontia (endodontics) `#e96cd9` · Ortodontia (orthodontics) `#a7eef1` · Atendimento de 15 em 15 (15-minute visits) `#d5dae6` · Ocupado (busy) `#a7bef1`

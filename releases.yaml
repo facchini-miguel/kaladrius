@@ -4,6 +4,66 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.15.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Financeiro, etapa 1 — contas a receber
+    en: Finance, step 1 — receivables
+    es: Financiero, etapa 1 — cuentas por cobrar
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo menu Financeiro: lance valores a receber em parcelas mensais, receba (dinheiro,
+          Pix, cartão, transferência, boleto ou cheque, inclusive em parte) e imprima o recibo.
+          Em Devedores, veja quem deve e há quanto tempo.
+        en: >
+          New Finance menu: record amounts to receive in monthly installments, receive them
+          (cash, Pix, card, transfer, boleto or check, partly too) and print the receipt. In
+          Debtors, see who owes and for how long.
+        es: >
+          Nuevo menú Financiero: registre valores por cobrar en cuotas mensuales, cóbrelos
+          (efectivo, Pix, tarjeta, transferencia, boleto o cheque, también en parte) e imprima el
+          recibo. En Deudores, vea quién debe y desde hace cuánto.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A ficha do paciente mostra o que ele deve, as parcelas em aberto e os últimos
+          pagamentos.
+        en: >
+          The patient record shows what the patient owes, the open installments and the latest
+          payments.
+        es: >
+          La ficha del paciente muestra lo que debe, las cuotas abiertas y los últimos pagos.
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O administrador cadastra categorias e contas do financeiro e o endereço da clínica,
+          que sai no recibo. Só ele dá descontos, estorna pagamentos e cancela lançamentos.
+        en: >
+          The administrator manages finance categories and accounts and the clinic address,
+          printed on receipts. Only they give discounts, reverse payments and cancel entries.
+        es: >
+          El administrador registra las categorías y cuentas del financiero y la dirección de
+          la clínica, que sale en el recibo. Solo él da descuentos, revierte pagos y cancela
+          cuentas.
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A barra de menus fica fixa no topo da tela ao rolar a página.
+        en: >
+          The menu bar stays at the top of the screen while you scroll.
+        es: >
+          La barra de menús queda fija en la parte superior al desplazar la página.
+
 - versao: 0.14.0
   data: 2026-10-27
   titulo:

@@ -8,6 +8,7 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
+from apps.financeiro.models import Categoria, Conta, Lancamento, Pagamento, Parcela
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -46,7 +47,18 @@ class Command(BaseCommand):
             )
             pacientes = Paciente.objects.filter(clinica__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first.
-            for modelo in (Agendamento, Rechamada, Paciente, Profissional, TipoAtendimento):
+            for modelo in (
+                Pagamento,
+                Parcela,
+                Lancamento,
+                Agendamento,
+                Rechamada,
+                Paciente,
+                Profissional,
+                TipoAtendimento,
+                Conta,
+                Categoria,
+            ):
                 modelo.objects.filter(clinica__in=clinicas).delete()
             # Collected now: delete() clears the instances' pk.
             ids_usuarios = [u.pk for u in usuarios]

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Receber" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% translate "Receber" %}</h1>
+<p class="text-body-secondary mb-4">
+  {{ parcela.lancamento.nome_pessoa }} · {{ parcela.lancamento.descricao }} ·
+  {% blocktranslate with numero=parcela.numero total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
+  {% blocktranslate with vencimento=parcela.vencimento|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
+</p>
+<div class="alert alert-light border">
+  {% translate "Valor da parcela" %}: <strong>{{ parcela.valor|moeda }}</strong> ·
+  {% translate "Já pago" %}: {{ parcela.pago|moeda }} ·
+  {% translate "Falta" %}: <strong>{{ parcela.saldo|moeda }}</strong>
+</div>
+
+<form method="post" style="max-width: 44rem;" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  <div class="row">
+    <div class="col-md-4">{% with campo=form.data %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.valor %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.juros %}{% include "includes/campo.html" %}{% endwith %}</div>
+    {% if pode_desconto %}<div class="col-md-4">{% with campo=form.desconto %}{% include "includes/campo.html" %}{% endwith %}</div>{% endif %}
+    <div class="col-md-4">{% with campo=form.forma %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.conta %}{% include "includes/campo.html" %}{% endwith %}</div>
+  </div>
+  <fieldset class="border rounded p-3 mb-3">
+    <legend class="fs-6 float-none w-auto px-2 mb-0">{% translate "Só para cartão" %}</legend>
+    <div class="row">
+      <div class="col-md-4">{% with campo=form.cartao_bandeira %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.cartao_parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.cartao_codigo %}{% include "includes/campo.html" %}{% endwith %}</div>
+    </div>
+    <p class="text-body-secondary small mb-0">{% translate "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a parcela fica paga. Nunca anote o número do cartão." %}</p>
+  </fieldset>
+  {% with campo=form.observacao %}{% include "includes/campo.html" %}{% endwith %}
+  {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
+  <button type="submit" class="btn btn-success">{% translate "Registrar pagamento" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

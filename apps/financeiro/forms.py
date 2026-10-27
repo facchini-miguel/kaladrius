@@ -1,0 +1,152 @@
+from django import forms
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from apps.core.forms import FormularioBootstrap
+from apps.pacientes.models import Paciente
+from apps.profissionais.models import Profissional
+
+from .models import Categoria, Conta, Lancamento, Pagamento
+
+
+def _campo_dinheiro(rotulo, obrigatorio=True, **extra):
+    """Amount typed in the user's format (150,50 in Portuguese and Spanish)."""
+    return forms.DecimalField(
+        label=rotulo,
+        max_digits=12,
+        decimal_places=2,
+        min_value=0,
+        required=obrigatorio,
+        localize=True,
+        widget=forms.TextInput(attrs={"inputmode": "decimal"}),
+        **extra,
+    )
+
+
+DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+
+
+class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
+    """New receivable, split into equal monthly installments (optionally paid now)."""
+
+    valor_total = _campo_dinheiro(_("Valor total"))
+    parcelas = forms.IntegerField(
+        label=_("Número de parcelas"),
+        min_value=1,
+        max_value=48,
+        initial=1,
+        help_text=_("Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."),
+    )
+    primeiro_vencimento = forms.DateField(
+        label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
+    )
+    recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
+    forma = forms.ChoiceField(
+        label=_("Forma de pagamento"), choices=[("", "—"), *Pagamento.Forma.choices], required=False
+    )
+    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
+
+    class Meta:
+        model = Lancamento
+        fields = ["paciente", "pessoa", "descricao", "categoria", "profissional", "observacoes"]
+        widgets = {
+            "paciente": forms.HiddenInput,
+            "observacoes": forms.Textarea(attrs={"rows": 2}),
+        }
+        help_texts = {"pessoa": _("Só se quem paga não for um paciente cadastrado.")}
+
+    def __init__(self, *args, clinica, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.clinica = clinica
+        self.instance.tipo = Lancamento.Tipo.RECEBER
+        self.fields["paciente"].queryset = Paciente.objects.filter(arquivado=False)
+        self.fields["categoria"].queryset = Categoria.objects.filter(
+            tipo=Categoria.Tipo.RECEITA, ativa=True
+        )
+        self.fields["profissional"].queryset = Profissional.objects.filter(ativo=True)
+        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+
+    def clean(self):
+        dados = super().clean()
+        if not dados.get("paciente") and not (dados.get("pessoa") or "").strip():
+            self.add_error("pessoa", _("Escolha o paciente ou informe quem paga."))
+        if dados.get("valor_total") is not None and dados["valor_total"] <= 0:
+            self.add_error("valor_total", _("Informe um valor maior que zero."))
+        if dados.get("recebido_agora"):
+            for campo in ("forma", "conta"):
+                if not dados.get(campo):
+                    self.add_error(campo, _("Informe para registrar o pagamento."))
+        return dados
+
+
+class ReceberForm(FormularioBootstrap, forms.ModelForm):
+    """Payment of an installment. Discounts only for those allowed (administrators)."""
+
+    valor = _campo_dinheiro(_("Valor recebido"))
+    juros = _campo_dinheiro(
+        _("Juros e multa"), obrigatorio=False, help_text=_("Já incluídos no valor recebido.")
+    )
+    desconto = _campo_dinheiro(_("Desconto"), obrigatorio=False)
+
+    class Meta:
+        model = Pagamento
+        fields = [
+            "data",
+            "valor",
+            "juros",
+            "desconto",
+            "forma",
+            "conta",
+            "cartao_bandeira",
+            "cartao_parcelas",
+            "cartao_codigo",
+            "observacao",
+        ]
+        widgets = {"data": DATA}
+
+    def __init__(self, *args, pode_dar_desconto, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        if not pode_dar_desconto:
+            del self.fields["desconto"]
+
+    def clean(self):
+        dados = super().clean()
+        dados["juros"] = dados.get("juros") or 0
+        if "desconto" in self.fields:  # removed for those who may not give discounts
+            dados["desconto"] = dados.get("desconto") or 0
+        if dados.get("valor") is not None and dados["valor"] <= 0:
+            self.add_error("valor", _("Informe um valor maior que zero."))
+        if dados.get("forma") not in (Pagamento.Forma.CREDITO, Pagamento.Forma.DEBITO):
+            for campo in ("cartao_bandeira", "cartao_parcelas", "cartao_codigo"):
+                dados[campo] = None if campo == "cartao_parcelas" else ""
+        return dados
+
+
+class MotivoForm(FormularioBootstrap, forms.Form):
+    motivo = forms.CharField(label=_("Motivo"), max_length=200)
+
+
+class CategoriaForm(FormularioBootstrap, forms.ModelForm):
+    class Meta:
+        model = Categoria
+        fields = ["nome", "tipo", "ativa"]
+
+    def clean(self):
+        dados = super().clean()
+        repetida = Categoria.objects.filter(nome=dados.get("nome"), tipo=dados.get("tipo"))
+        if repetida.exclude(pk=self.instance.pk).exists():
+            self.add_error("nome", _("Já existe uma categoria com este nome."))
+        return dados
+
+
+class ContaForm(FormularioBootstrap, forms.ModelForm):
+    class Meta:
+        model = Conta
+        fields = ["nome", "tipo", "ativa"]
+
+    def clean_nome(self):
+        nome = self.cleaned_data["nome"]
+        if Conta.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_("Já existe uma conta com este nome."))
+        return nome

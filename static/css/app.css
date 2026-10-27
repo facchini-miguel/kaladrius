@@ -69,3 +69,21 @@ main {
   padding-left: 1rem;
   color: #495057;
 }
+
+/* Receipt: printable on its own (the top bar, footer and alerts are hidden in print). */
+.recibo { max-width: 48rem; }
+.recibo-estornado {
+  position: absolute;
+  inset: 40% 0 auto;
+  text-align: center;
+  font-size: 4rem;
+  font-weight: 700;
+  color: rgba(220, 53, 69, 0.25);
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+@media print {
+  body { background: #fff; }
+  main > .alert { display: none; }
+  .recibo { border: 0 !important; }
+}
