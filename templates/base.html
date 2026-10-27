@@ -69,7 +69,7 @@
           {% if clinicas_do_usuario|length > 1 %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-               title="{% translate 'Trocar de clínica' %}">{% if clinica_atual %}{{ clinica_atual.nome }}{% else %}{% translate "Escolha a clínica" %}{% endif %}</a>
+               title="{% translate 'Trocar de clínica' %}{% if clinica_atual %}: {{ clinica_atual.nome }}{% endif %}"><span class="nome-clinica">{% if clinica_atual %}{{ clinica_atual.nome }}{% else %}{% translate "Escolha a clínica" %}{% endif %}</span></a>
             <ul class="dropdown-menu dropdown-menu-end">
               {% for clinica in clinicas_do_usuario %}
               <li>
@@ -83,27 +83,39 @@
             </ul>
           </li>
           {% elif clinica_atual %}
-          <li class="nav-item"><span class="navbar-text">{{ clinica_atual.nome }}</span></li>
+          <li class="nav-item"><span class="navbar-text nome-clinica" title="{{ clinica_atual.nome }}">{{ clinica_atual.nome }}</span></li>
           {% endif %}
         </ul>
-        <ul class="navbar-nav">
+        <ul class="navbar-nav me-3">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
+            <a class="nav-link dropdown-toggle seletor-idioma" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+               title="{% translate 'Idioma' %}: {{ idioma_nome }}">
+              <img class="bandeira" src="{% static 'img/bandeiras/'|add:idioma_atual|add:'.svg' %}" alt="" width="24" height="17">
+              <span class="d-lg-none">{{ idioma_nome }}</span>
+            </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">{% translate "Trocar senha" %}</a></li>
-              <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Idioma" %}</h6></li>
-              {% get_available_languages as idiomas %}
               {% for codigo, nome in idiomas %}
               <li>
                 <form method="post" action="{% url 'trocar_idioma' %}">
                   {% csrf_token %}
                   <input type="hidden" name="idioma" value="{{ codigo }}">
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                  <button type="submit" class="dropdown-item{% if codigo == idioma_atual %} active{% endif %}" lang="{{ codigo }}">{{ nome }}</button>
+                  <button type="submit" class="dropdown-item d-flex align-items-center gap-2{% if codigo == idioma_atual %} active{% endif %}" lang="{{ codigo }}">
+                    <img class="bandeira" src="{% static 'img/bandeiras/'|add:codigo|add:'.svg' %}" alt="" width="24" height="17">
+                    {{ nome }}
+                  </button>
                 </form>
               </li>
               {% endfor %}
+            </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">{% translate "Trocar senha" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <form method="post" action="{% url 'logout' %}">

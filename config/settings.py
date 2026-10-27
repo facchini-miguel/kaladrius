@@ -90,6 +90,7 @@ TEMPLATES = [
                 "apps.novidades.context_processors.versao",
                 "apps.core.context_processors.clinica",
                 "apps.core.context_processors.backup",
+                "apps.core.context_processors.idiomas",
             ],
         },
     },

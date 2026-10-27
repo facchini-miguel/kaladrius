@@ -44,7 +44,7 @@ Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
 
 ## Languages (version 0.13.0, decision 049)
 - The interface exists in **Portuguese** (source text, written in the code), **English** and **Spanish**. Translations live in `locale/en/` and `locale/es/` (`django.po`); compiled files (`.mo`) are not in Git: they are built in the image and in CI.
-- Each user chooses the language in the menu with their name; the choice is stored in the profile (`Usuario.idioma`) and in a cookie (for the login page). Without a choice, the browser's language is used.
+- Each user chooses the language in the flag menu of the top bar (between the clinic and the user name; 0.13.1); the choice is stored in the profile (`Usuario.idioma`) and in a cookie (for the login page). Without a choice, the browser's language is used.
 - Dates use the language's formats (`SHORT_DATE_FORMAT`); the schedule uses the matching FullCalendar locale; What's new has each text in the three languages.
 - Kept in Portuguese: data (appointment type names, descriptions, cities), the audit log and the messages of terminal commands.
 - CI fails if a new text was not extracted (`makemessages`) and a test fails if a translation is missing.

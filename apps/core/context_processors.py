@@ -1,6 +1,7 @@
 import datetime
 
-from django.utils import timezone
+from django.conf import settings
+from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
 from .middleware import clinicas_do_usuario
@@ -20,6 +21,16 @@ def clinica(request):
         "vinculo_atual": getattr(request, "vinculo", None),
         "pode": SimpleLazyObject(lambda: tabela_permissoes(request)),
         "clinicas_do_usuario": SimpleLazyObject(lambda: list(clinicas_do_usuario(usuario))),
+    }
+
+
+def idiomas(request):
+    """Languages for the top bar menu, each one named in itself ("English", "Español"):
+    get_available_languages would translate the names into the current language."""
+    atual = translation.get_language()
+    return {
+        "idiomas": settings.LANGUAGES,
+        "idioma_nome": dict(settings.LANGUAGES).get(atual, atual),
     }
 
 

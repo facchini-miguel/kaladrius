@@ -41,6 +41,14 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
     assert django_user_model.objects.get(username="maria").idioma == ""
 
 
+def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
+    pagina = cliente.get(reverse("inicio")).content.decode()
+    for codigo in ("pt-br", "en", "es"):
+        assert f"img/bandeiras/{codigo}.svg" in pagina
+    # Its own menu, before the user's menu (between the clinic and the user name).
+    assert pagina.index("seletor-idioma") < pagina.index(reverse("trocar_senha"))
+
+
 def test_escolha_do_usuario_vale_mais_que_o_navegador(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(idioma="es")
     pagina = cliente.get(reverse("inicio"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
