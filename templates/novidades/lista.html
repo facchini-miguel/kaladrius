@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Novidades · Medical System{% endblock %}
+{% block titulo %}{% translate "Novidades" %} · Medical System{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-  <h1 class="h3 mb-0">Novidades</h1>
+  <h1 class="h3 mb-0">{% translate "Novidades" %}</h1>
   <form method="get">
-    <select name="modulo" class="form-select" aria-label="Filtrar por módulo" onchange="this.form.submit()">
-      <option value="">Todos os módulos</option>
-      {% for item in modulos %}<option value="{{ item }}"{% if item == modulo %} selected{% endif %}>{{ item }}</option>{% endfor %}
+    <select name="modulo" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" onchange="this.form.submit()">
+      <option value="">{% translate "Todos os módulos" %}</option>
+      {% for valor, nome in modulos %}<option value="{{ valor }}"{% if valor == modulo %} selected{% endif %}>{{ nome }}</option>{% endfor %}
     </select>
   </form>
 </div>
@@ -16,20 +17,20 @@
 {% for release, itens in versoes %}
 <section class="mb-4">
   <h2 class="h5 mb-1">
-    Versão {{ release.versao }}
-    <small class="text-body-secondary fw-normal">· {{ release.data|date:"d/m/Y" }}</small>
+    {% blocktranslate with versao=release.versao %}Versão {{ versao }}{% endblocktranslate %}
+    <small class="text-body-secondary fw-normal">· {{ release.data|date:"SHORT_DATE_FORMAT" }}</small>
   </h2>
   {% if release.titulo %}<p class="text-body-secondary mb-2">{{ release.titulo }}</p>{% endif %}
   <ul class="list-group">
     {% for item in itens %}
     <li class="list-group-item">
       <span class="badge tipo-{{ item.tipo }} me-2">{{ item.tipo_nome }}</span>
-      <strong>{{ item.modulo }}:</strong> {{ item.texto }}
+      <strong>{{ item.modulo_nome }}:</strong> {{ item.texto }}
     </li>
     {% endfor %}
   </ul>
 </section>
 {% empty %}
-<p class="text-body-secondary">Nenhuma novidade registrada ainda.</p>
+<p class="text-body-secondary">{% translate "Nenhuma novidade registrada ainda." %}</p>
 {% endfor %}
 {% endblock %}

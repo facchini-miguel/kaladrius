@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Excluir rechamada · Medical System{% endblock %}
+{% block titulo %}{% translate "Excluir rechamada" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">Excluir a rechamada de {{ rechamada.paciente.nome }} ({{ rechamada.data|date:"d/m/Y" }})?</h1>
-<p>Esta ação não pode ser desfeita.</p>
+<h1 class="h3 mb-3">{% blocktranslate with nome=rechamada.paciente.nome data=rechamada.data|date:"SHORT_DATE_FORMAT" %}Excluir a rechamada de {{ nome }} ({{ data }})?{% endblocktranslate %}</h1>
+<p>{% translate "Esta ação não pode ser desfeita." %}</p>
 <form method="post">
   {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Excluir</button>
-  <a class="btn btn-link" href="{% url 'rechamadas:lista' %}">Cancelar</a>
+  <button type="submit" class="btn btn-danger">{% translate "Excluir" %}</button>
+  <a class="btn btn-link" href="{% url 'rechamadas:lista' %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

@@ -13,6 +13,7 @@ import contextlib
 from contextvars import ContextVar
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 _clinica_atual = ContextVar("clinica_atual", default=None)
 _isolamento_desligado = ContextVar("isolamento_desligado", default=False)
@@ -108,7 +109,7 @@ class ModeloDaClinica(models.Model):
         "core.Clinica",
         on_delete=models.PROTECT,
         related_name="+",
-        verbose_name="clínica",
+        verbose_name=_("clínica"),
     )
 
     # The first manager declared is Django's default manager, so the isolated one must

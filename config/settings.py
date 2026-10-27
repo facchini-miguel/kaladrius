@@ -57,9 +57,12 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Language: the browser's (Accept-Language) before login; the user's choice after.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core.middleware.IdiomaDoUsuarioMiddleware",
     "apps.core.middleware.ClinicaAtualMiddleware",
     "apps.auditoria.middleware.AuditoriaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -145,7 +148,15 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "inicio"
 LOGOUT_REDIRECT_URL = "login"
 
+# The source texts are written in Portuguese; locale/ holds the English and Spanish
+# translations (decision 049).
 LANGUAGE_CODE = "pt-br"
+LANGUAGES = [
+    ("pt-br", "Português"),
+    ("en", "English"),
+    ("es", "Español"),
+]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True

@@ -2,6 +2,7 @@ import re
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 
 validar_cor = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
 
@@ -46,9 +47,9 @@ def cnpj_valido(cnpj):
 
 def validar_cpf(valor):
     if not cpf_valido(valor):
-        raise ValidationError("CPF inválido.")
+        raise ValidationError(_("CPF inválido."))
 
 
 def validar_cnpj(valor):
     if not cnpj_valido(valor):
-        raise ValidationError("CNPJ inválido.")
+        raise ValidationError(_("CNPJ inválido."))

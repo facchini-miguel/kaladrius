@@ -13,27 +13,28 @@ from django.db import models
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.http import urlencode
+from django.utils.translation import gettext_lazy as _
 
 from .models import Papel
 
 
 class Modulo(models.TextChoices):
-    PACIENTES = "pacientes", "Pacientes"
-    AGENDA = "agenda", "Agenda"
-    RECHAMADAS = "rechamadas", "Rechamadas"
-    ANIVERSARIANTES = "aniversariantes", "Aniversariantes"
-    PROFISSIONAIS = "profissionais", "Profissionais"
-    CADASTROS = "cadastros", "Tabelas base"
-    USUARIOS = "usuarios", "Usuários da clínica"
-    CLINICA = "clinica", "Configurações da clínica"
-    AUDITORIA = "auditoria", "Auditoria"
+    PACIENTES = "pacientes", _("Pacientes")
+    AGENDA = "agenda", _("Agenda")
+    RECHAMADAS = "rechamadas", _("Rechamadas")
+    ANIVERSARIANTES = "aniversariantes", _("Aniversariantes")
+    PROFISSIONAIS = "profissionais", _("Profissionais")
+    CADASTROS = "cadastros", _("Tabelas base")
+    USUARIOS = "usuarios", _("Usuários da clínica")
+    CLINICA = "clinica", _("Configurações da clínica")
+    AUDITORIA = "auditoria", _("Auditoria")
 
 
 class Acao(models.TextChoices):
-    VER = "ver", "Ver"
-    CRIAR = "criar", "Criar"
-    ALTERAR = "alterar", "Alterar"
-    EXCLUIR = "excluir", "Excluir"
+    VER = "ver", _("Ver")
+    CRIAR = "criar", _("Criar")
+    ALTERAR = "alterar", _("Alterar")
+    EXCLUIR = "excluir", _("Excluir")
 
 
 _TODAS = frozenset(Acao)

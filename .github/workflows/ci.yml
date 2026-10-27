@@ -37,12 +37,18 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-dev.txt
       - run: pip install -r requirements-dev.txt
+      - name: GNU gettext (compiles the translations)
+        run: sudo apt-get install -y --no-install-recommends gettext
       - name: Lint
         run: ruff check . && ruff format --check .
       - name: Django checks
         run: python manage.py check && python manage.py makemigrations --check --dry-run
+      - name: Translations up to date (every text marked and extracted)
+        run: |
+          python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests
+          git diff --exit-code -I 'POT-Creation-Date' locale/
       - name: Tests
-        run: python manage.py collectstatic --noinput && pytest --cov --cov-report=term-missing
+        run: python manage.py compilemessages && python manage.py collectstatic --noinput && pytest --cov --cov-report=term-missing
 
   # Publishes the image to Google Artifact Registry; the VM picks it up within 5 minutes.
   publicar:

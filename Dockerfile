@@ -10,6 +10,11 @@ ARG DEV=0
 
 WORKDIR /app
 
+# GNU gettext compiles the translations (locale/*.po) at build time.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt requirements-dev.txt ./
 RUN if [ "$DEV" = "1" ]; then pip install -r requirements-dev.txt; else pip install -r requirements.txt; fi
 
@@ -17,6 +22,7 @@ COPY . .
 
 RUN useradd --create-home --uid 1000 app \
     && DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput \
+    && DJANGO_SECRET_KEY=build-only python manage.py compilemessages --ignore=".venv" \
     && chown -R app:app /app
 USER app
 

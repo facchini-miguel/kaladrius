@@ -1,0 +1,1480 @@
+# Medical System — English translation (source: Portuguese).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Medical System\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-27 11:42-0300\n"
+"PO-Revision-Date: 2026-10-27 12:00-0300\n"
+"Last-Translator: Medical System\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Agenda"
+msgstr "Schedule"
+
+msgid "Já existe um tipo de atendimento com este nome."
+msgstr "An appointment type with this name already exists."
+
+msgid "Data"
+msgstr "Date"
+
+msgctxt "hora"
+msgid "Início"
+msgstr "Start"
+
+msgid "Fim"
+msgstr "End"
+
+msgid "Repetir por quantas semanas"
+msgstr "Repeat for how many weeks"
+
+msgid ""
+"1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
+msgstr "1 = only on this date. E.g.: 4 creates the same time slot for 4 weeks in a row."
+
+msgid "Informe o paciente ou uma descrição."
+msgstr "Enter the patient or a description."
+
+msgid "O fim deve ser depois do início."
+msgstr "The end must be after the start."
+
+#, python-format
+msgid "Use horários de %(n)s em %(n)s minutos."
+msgstr "Use times in steps of %(n)s minutes."
+
+#, python-format
+msgid "Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s)."
+msgstr "Outside the clinic's opening hours (%(inicio)s to %(fim)s)."
+
+#, python-format
+msgid "e mais %(n)s"
+msgstr "and %(n)s more"
+
+#, python-format
+msgid "Conflito de horário com: %(lista)s. Nada foi gravado."
+msgstr "Time conflict with: %(lista)s. Nothing was saved."
+
+msgid "nome"
+msgstr "name"
+
+msgid "cor"
+msgstr "color"
+
+msgid "ativo"
+msgstr "active"
+
+msgid "tipo de atendimento"
+msgstr "appointment type"
+
+msgid "tipos de atendimento"
+msgstr "appointment types"
+
+msgid "profissional"
+msgstr "practitioner"
+
+msgid "início"
+msgstr "start"
+
+msgid "fim"
+msgstr "end"
+
+msgid "paciente"
+msgstr "patient"
+
+msgid "descrição"
+msgstr "description"
+
+msgid "série"
+msgstr "series"
+
+msgid "criado por"
+msgstr "created by"
+
+msgid "criado em"
+msgstr "created at"
+
+msgid "alterado em"
+msgstr "changed at"
+
+msgid "agendamento"
+msgstr "appointment"
+
+msgid "agendamentos"
+msgstr "appointments"
+
+msgid "O profissional já tem um agendamento neste horário."
+msgstr "The practitioner already has an appointment at this time."
+
+msgid "Horário reservado"
+msgstr "Reserved slot"
+
+#, python-format
+msgid "Tipo de atendimento %(nome)s salvo."
+msgstr "Appointment type %(nome)s saved."
+
+#, python-format
+msgid ""
+"%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
+"“ativo” para escondê-lo."
+msgstr "%(nome)s has been used in appointments and cannot be deleted. Uncheck “active” to hide it."
+
+#, python-format
+msgid "Tipo de atendimento %(nome)s excluído."
+msgstr "Appointment type %(nome)s deleted."
+
+msgid "aniversariante(s)"
+msgstr "birthday(s)"
+
+msgid "rechamada(s) pendente(s)"
+msgstr "pending recall(s)"
+
+msgid "Parâmetros inválidos."
+msgstr "Invalid parameters."
+
+msgid "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
+msgstr "Another appointment has just taken this time slot. Nothing was saved."
+
+#, python-format
+msgid "Agendamento criado."
+msgid_plural "%(n)s agendamentos criados."
+msgstr[0] "Appointment created."
+msgstr[1] "%(n)s appointments created."
+
+msgid "Agendamento alterado."
+msgstr "Appointment changed."
+
+#, python-format
+msgid "Agendamento excluído."
+msgid_plural "%(n)s agendamentos excluídos."
+msgstr[0] "Appointment deleted."
+msgstr[1] "%(n)s appointments deleted."
+
+msgid "Data inválida."
+msgstr "Invalid date."
+
+msgid "Auditoria"
+msgstr "Audit log"
+
+msgid "Criou"
+msgstr "Created"
+
+msgid "Alterou"
+msgstr "Changed"
+
+msgid "Excluiu"
+msgstr "Deleted"
+
+msgid "Visualizou"
+msgstr "Viewed"
+
+msgid "Entrou no sistema"
+msgstr "Logged in"
+
+msgid "Tentativa de entrada recusada"
+msgstr "Login attempt refused"
+
+msgid "Saiu do sistema"
+msgstr "Logged out"
+
+msgid "quando"
+msgstr "when"
+
+msgid "clínica"
+msgstr "clinic"
+
+msgid "usuário"
+msgstr "user"
+
+msgid "usuário (texto)"
+msgstr "user (text)"
+
+msgid "ação"
+msgstr "action"
+
+msgid "tipo de registro"
+msgstr "record type"
+
+msgid "código do registro"
+msgstr "record code"
+
+msgid "registro"
+msgstr "record"
+
+msgid "alterações"
+msgstr "changes"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "registro de auditoria"
+msgstr "audit entry"
+
+msgid "registros de auditoria"
+msgstr "audit entries"
+
+msgid "Núcleo"
+msgstr "Core"
+
+msgid "CPF/CNPJ"
+msgstr "CPF/CNPJ (tax ID)"
+
+msgid "Os agendamentos começam e terminam em múltiplos deste tempo."
+msgstr "Appointments start and end at multiples of this time."
+
+msgid "CPF/CNPJ inválido."
+msgstr "Invalid CPF/CNPJ."
+
+msgid "O fim da agenda deve ser depois do início."
+msgstr "The schedule end must be after its start."
+
+#, python-format
+msgid ""
+"O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
+"intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
+msgstr "The appointment on %(momento)s would fall outside the new hours or slot length. Adjust future appointments before changing the schedule."
+
+msgid "idioma"
+msgstr "language"
+
+msgid "Vazio: o idioma do navegador."
+msgstr "Empty: the browser's language."
+
+msgid "última versão vista nas novidades"
+msgstr "last version seen in What's new"
+
+msgid "usuários"
+msgstr "users"
+
+msgid "10 minutos"
+msgstr "10 minutes"
+
+msgid "15 minutos"
+msgstr "15 minutes"
+
+msgid "20 minutos"
+msgstr "20 minutes"
+
+msgid "30 minutos"
+msgstr "30 minutes"
+
+msgid "1 hora"
+msgstr "1 hour"
+
+msgid "Somente números."
+msgstr "Numbers only."
+
+msgid "e-mail"
+msgstr "e-mail"
+
+msgid "telefone"
+msgstr "phone"
+
+msgid "ativa"
+msgstr "active"
+
+msgid "início da agenda"
+msgstr "schedule start"
+
+msgid "fim da agenda"
+msgstr "schedule end"
+
+msgid "duração de cada horário"
+msgstr "length of each slot"
+
+msgid "criada em"
+msgstr "created at"
+
+msgid "alterada em"
+msgstr "changed at"
+
+msgid "clínicas"
+msgstr "clinics"
+
+msgid "O início da agenda deve ser antes do fim."
+msgstr "The schedule start must be before its end."
+
+msgid "Administrador da clínica"
+msgstr "Clinic administrator"
+
+msgid "Recepção"
+msgstr "Front desk"
+
+msgid "Profissional"
+msgstr "Practitioner"
+
+msgid "perfil"
+msgstr "role"
+
+msgid "vínculo com clínica"
+msgstr "clinic membership"
+
+msgid "vínculos com clínicas"
+msgstr "clinic memberships"
+
+msgid "Este usuário já está vinculado a esta clínica."
+msgstr "This user is already a member of this clinic."
+
+msgid "arquivo"
+msgstr "file"
+
+msgid "tamanho (bytes)"
+msgstr "size (bytes)"
+
+msgid "backup"
+msgstr "backup"
+
+msgid "backups"
+msgstr "backups"
+
+msgid "Pacientes"
+msgstr "Patients"
+
+msgid "Rechamadas"
+msgstr "Recalls"
+
+msgid "Aniversariantes"
+msgstr "Birthdays"
+
+msgid "Profissionais"
+msgstr "Practitioners"
+
+msgid "Tabelas base"
+msgstr "Base tables"
+
+msgid "Usuários da clínica"
+msgstr "Clinic users"
+
+msgid "Configurações da clínica"
+msgstr "Clinic settings"
+
+msgid "Ver"
+msgstr "View"
+
+msgid "Criar"
+msgstr "Create"
+
+msgid "Alterar"
+msgstr "Change"
+
+msgid "Excluir"
+msgstr "Delete"
+
+msgid "CPF inválido."
+msgstr "Invalid CPF."
+
+msgid "CNPJ inválido."
+msgstr "Invalid CNPJ."
+
+#, python-format
+msgid "Você está trabalhando na clínica %(nome)s."
+msgstr "You are working in the clinic %(nome)s."
+
+msgid "Senha alterada."
+msgstr "Password changed."
+
+msgid "Configurações da clínica salvas."
+msgstr "Clinic settings saved."
+
+msgid "Equipe"
+msgstr "Team"
+
+msgid "Perfil"
+msgstr "Role"
+
+msgid "Acesso a esta clínica liberado"
+msgstr "Access to this clinic allowed"
+
+msgid "Você não pode alterar o próprio perfil."
+msgstr "You cannot change your own role."
+
+msgid "A clínica precisa de pelo menos um administrador ativo."
+msgstr "The clinic needs at least one active administrator."
+
+#, python-format
+msgid "%(nome)s agora faz parte da equipe."
+msgstr "%(nome)s is now part of the team."
+
+#, python-format
+msgid "Dados de %(nome)s salvos."
+msgstr "%(nome)s's details saved."
+
+#, python-format
+msgid ""
+"%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
+"ser trocada pelo próprio usuário ou pelo suporte."
+msgstr "%(nome)s also has access to another clinic or to the platform: the password can only be changed by the user or by support."
+
+#, python-format
+msgid "Nova senha de %(nome)s definida."
+msgstr "New password set for %(nome)s."
+
+msgid "Importação do sistema antigo"
+msgstr "Legacy system import"
+
+msgid "Novidades"
+msgstr "What's new"
+
+msgid "Novo"
+msgstr "New"
+
+msgid "Melhoria"
+msgstr "Improvement"
+
+msgid "Correção"
+msgstr "Fix"
+
+msgid "Segurança"
+msgstr "Security"
+
+msgid "Acesso"
+msgstr "Access"
+
+msgid "Cadastros"
+msgstr "Records"
+
+msgid "Clínica"
+msgstr "Clinic"
+
+msgid "Clínicas"
+msgstr "Clinics"
+
+msgid "Documentação"
+msgstr "Documentation"
+
+msgid "Geral"
+msgstr "General"
+
+msgid "Idioma"
+msgstr "Language"
+
+msgid "Permissões"
+msgstr "Permissions"
+
+msgid "Tipos de atendimento"
+msgstr "Appointment types"
+
+msgid "UF"
+msgstr "State"
+
+msgid "Cidade"
+msgstr "City"
+
+msgid "CEP"
+msgstr "Postal code (CEP)"
+
+msgid "Celular"
+msgstr "Mobile"
+
+msgid "Telefone residencial"
+msgstr "Home phone"
+
+msgid "Telefone comercial"
+msgstr "Work phone"
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr "The postal code (CEP) must have 8 digits."
+
+msgid "Informe o DDD e o número (10 ou 11 dígitos)."
+msgstr "Enter the area code and number (10 or 11 digits)."
+
+msgid "A data de nascimento não pode estar no futuro."
+msgstr "The birth date cannot be in the future."
+
+msgid ""
+"Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da clínica "
+"para restaurá-lo."
+msgstr "This CPF/CNPJ belongs to an archived patient. Ask the clinic administrator to restore them."
+
+msgid "Já existe um paciente com este CPF/CNPJ nesta clínica."
+msgstr "A patient with this CPF/CNPJ already exists in this clinic."
+
+msgid "A cidade não pertence à UF escolhida."
+msgstr "The city is not in the chosen state."
+
+msgid "Pessoa física"
+msgstr "Individual"
+
+msgid "Pessoa jurídica"
+msgstr "Company"
+
+msgid "Feminino"
+msgstr "Female"
+
+msgid "Masculino"
+msgstr "Male"
+
+msgid "Outro"
+msgstr "Other"
+
+msgid "tipo"
+msgstr "type"
+
+msgid "Para pessoa jurídica, o nome fantasia."
+msgstr "For companies, the trade name."
+
+msgid "razão social"
+msgstr "company name"
+
+msgid "Pode ser digitado com ou sem pontuação."
+msgstr "May be typed with or without punctuation."
+
+msgid "RG"
+msgstr "ID card (RG)"
+
+msgid "inscrição estadual"
+msgstr "state registration"
+
+msgid "sexo"
+msgstr "sex"
+
+msgid "data de nascimento"
+msgstr "birth date"
+
+msgid "estado civil"
+msgstr "marital status"
+
+msgid "profissão"
+msgstr "occupation"
+
+msgid "responsável"
+msgstr "guardian"
+
+msgid "Para menores de idade, por exemplo."
+msgstr "For minors, for example."
+
+msgid "celular"
+msgstr "mobile"
+
+msgid "telefone residencial"
+msgstr "home phone"
+
+msgid "telefone comercial"
+msgstr "work phone"
+
+msgid "cidade"
+msgstr "city"
+
+msgid "bairro"
+msgstr "district"
+
+msgid "endereço"
+msgstr "address"
+
+msgid "Rua, avenida…"
+msgstr "Street, avenue…"
+
+msgid "número"
+msgstr "number"
+
+msgid "complemento"
+msgstr "complement"
+
+msgid "observações"
+msgstr "notes"
+
+msgid "arquivado"
+msgstr "archived"
+
+msgid "arquivado em"
+msgstr "archived at"
+
+msgid "arquivado por"
+msgstr "archived by"
+
+msgid "cadastrado em"
+msgstr "registered at"
+
+msgid "pacientes"
+msgstr "patients"
+
+#, python-format
+msgid "Paciente %(nome)s salvo."
+msgstr "Patient %(nome)s saved."
+
+#, python-format
+msgid ""
+"Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
+"restaurado na lista de pacientes, em Situação: Arquivados."
+msgstr "Patient %(nome)s archived. The history is kept, and the patient can be restored from the patient list, under Status: Archived."
+
+#, python-format
+msgid "Paciente %(nome)s restaurado."
+msgstr "Patient %(nome)s restored."
+
+#, python-format
+msgid "Os dados do paciente de código %(codigo)s foram excluídos."
+msgstr "The data of patient code %(codigo)s was deleted."
+
+msgid "Este usuário já está ligado a outro profissional desta clínica."
+msgstr "This user is already linked to another practitioner in this clinic."
+
+msgid "registro profissional"
+msgstr "professional license"
+
+msgid "CRO, CRM, CREFITO, CRP…"
+msgstr "CRO, CRM, CREFITO, CRP…"
+
+msgid "cor na agenda"
+msgstr "schedule color"
+
+msgid "usuário de acesso"
+msgstr "login user"
+
+msgid "Conta usada por este profissional para entrar no sistema (opcional)."
+msgstr "Account this practitioner uses to log in (optional)."
+
+msgid "profissionais"
+msgstr "practitioners"
+
+#, python-format
+msgid "Profissional %(nome)s salvo."
+msgstr "Practitioner %(nome)s saved."
+
+#, python-format
+msgid ""
+"%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
+"para escondê-lo."
+msgstr "%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide it."
+
+#, python-format
+msgid "Profissional %(nome)s excluído."
+msgstr "Practitioner %(nome)s deleted."
+
+msgid "Escolha o paciente."
+msgstr "Choose the patient."
+
+msgid "data"
+msgstr "date"
+
+msgid "Ex.: revisão de 6 meses."
+msgstr "E.g.: 6-month check-up."
+
+msgid "concluída"
+msgstr "done"
+
+msgid "rechamada"
+msgstr "recall"
+
+msgid "rechamadas"
+msgstr "recalls"
+
+#, python-format
+msgid "Rechamada de %(nome)s salva."
+msgstr "Recall for %(nome)s saved."
+
+#, python-format
+msgid "Rechamada de %(nome)s concluída."
+msgstr "Recall for %(nome)s marked as done."
+
+#, python-format
+msgid "Rechamada de %(nome)s reaberta."
+msgstr "Recall for %(nome)s reopened."
+
+#, python-format
+msgid "Rechamada de %(nome)s excluída."
+msgstr "Recall for %(nome)s deleted."
+
+msgid "Tabelas de referência"
+msgstr "Reference tables"
+
+msgid "código IBGE"
+msgstr "IBGE code"
+
+msgid "sigla"
+msgstr "abbreviation"
+
+msgid "região"
+msgstr "region"
+
+msgid "UFs"
+msgstr "states"
+
+msgid "cidades"
+msgstr "cities"
+
+msgid "ISPB"
+msgstr "ISPB"
+
+msgid "código"
+msgstr "code"
+
+msgid "nome curto"
+msgstr "short name"
+
+msgid "banco"
+msgstr "bank"
+
+msgid "bancos"
+msgstr "banks"
+
+msgid "ordem"
+msgstr "order"
+
+msgid "estados civis"
+msgstr "marital statuses"
+
+msgid "Acesso negado"
+msgstr "Access denied"
+
+msgid ""
+"Você não tem permissão para acessar esta página. Se precisar desse acesso, "
+"fale com o administrador da clínica."
+msgstr "You do not have permission to access this page. If you need this access, talk to the clinic administrator."
+
+msgid "Voltar ao início"
+msgstr "Back to home"
+
+msgid "Página não encontrada"
+msgstr "Page not found"
+
+msgid "O endereço não existe ou o registro não pertence à clínica atual."
+msgstr "The address does not exist or the record does not belong to the current clinic."
+
+#, python-format
+msgid "Aniversariantes de %(dia)s"
+msgstr "Birthdays on %(dia)s"
+
+msgid "Fechar"
+msgstr "Close"
+
+#, python-format
+msgid "completa %(idade)s ano"
+msgid_plural "completa %(idade)s anos"
+msgstr[0] "turns %(idade)s"
+msgstr[1] "turns %(idade)s"
+
+msgid "Nenhum aniversariante neste dia."
+msgstr "No birthdays on this day."
+
+msgid "Excluir agendamento?"
+msgstr "Delete appointment?"
+
+#, python-format
+msgid "%(inicio)s às %(fim)s"
+msgstr "%(inicio)s to %(fim)s"
+
+msgid "Somente este"
+msgstr "Only this one"
+
+#, python-format
+msgid "Este e os próximos %(proximos)s da mesma repetição"
+msgstr "This one and the next %(proximos)s of the same series"
+
+msgid "Esta ação não pode ser desfeita."
+msgstr "This action cannot be undone."
+
+msgid "Voltar"
+msgstr "Back"
+
+msgid "Editar agendamento"
+msgstr "Edit appointment"
+
+msgid "Novo agendamento"
+msgstr "New appointment"
+
+msgid "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)."
+msgstr "Optional. Without a patient, use the description (e.g.: “Meeting”, “Blocked”)."
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Salvar"
+msgstr "Save"
+
+msgid "Ir para a data"
+msgstr "Go to date"
+
+msgid ""
+"Seu usuário ainda não está ligado a um cadastro de profissional ativo, então "
+"não há agenda para mostrar. Peça ao administrador da clínica para ligá-lo em "
+"Cadastros > Profissionais."
+msgstr "Your user is not linked to an active practitioner record yet, so there is no schedule to show. Ask the clinic administrator to link it in Records > Practitioners."
+
+msgid "Nenhum profissional ativo nesta clínica."
+msgstr "No active practitioners in this clinic."
+
+msgid "Cadastre um profissional"
+msgstr "Add a practitioner"
+
+msgid "para usar a agenda."
+msgstr "to use the schedule."
+
+msgid "Legenda dos tipos de atendimento"
+msgstr "Appointment type legend"
+
+msgid "Clique em um horário livre (ou arraste sobre vários) para agendar."
+msgstr "Click a free slot (or drag over several) to book."
+
+msgid "Excluir tipo de atendimento"
+msgstr "Delete appointment type"
+
+#, python-format
+msgid "Excluir %(nome)s?"
+msgstr "Delete %(nome)s?"
+
+msgid ""
+"Esta ação não pode ser desfeita. Se quiser apenas esconder o tipo, edite e "
+"desmarque “ativo”."
+msgstr "This action cannot be undone. To just hide the type, edit it and uncheck “active”."
+
+msgid "Editar tipo de atendimento"
+msgstr "Edit appointment type"
+
+msgid "Novo tipo de atendimento"
+msgstr "New appointment type"
+
+#, python-format
+msgid "Editar %(nome)s"
+msgstr "Edit %(nome)s"
+
+msgid "Novo tipo"
+msgstr "New type"
+
+msgid "A cor de cada tipo pinta os horários na agenda."
+msgstr "Each type's color paints its slots in the schedule."
+
+msgid "Cor"
+msgstr "Color"
+
+msgid "Nome"
+msgstr "Name"
+
+msgid "Situação"
+msgstr "Status"
+
+msgid "Ações"
+msgstr "Actions"
+
+msgid "Ativo"
+msgstr "Active"
+
+msgid "Inativo"
+msgstr "Inactive"
+
+msgid "Editar"
+msgstr "Edit"
+
+msgid "Nenhum tipo de atendimento cadastrado."
+msgstr "No appointment types yet."
+
+msgid ""
+"Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros "
+"não podem ser alterados."
+msgstr "Who created, changed, deleted or viewed data in this clinic. Entries cannot be changed."
+
+msgid "Usuário, registro ou código"
+msgstr "User, record or code"
+
+msgid "Buscar"
+msgstr "Search"
+
+msgid "Ação"
+msgstr "Action"
+
+msgid "Todas as ações"
+msgstr "All actions"
+
+msgid "Tipo de registro"
+msgstr "Record type"
+
+msgid "Todos os tipos"
+msgstr "All types"
+
+msgid "De"
+msgstr "From"
+
+msgid "Até"
+msgstr "To"
+
+msgid "Filtrar"
+msgstr "Filter"
+
+msgid "Quando"
+msgstr "When"
+
+msgid "Usuário"
+msgstr "User"
+
+msgid "Registro"
+msgstr "Record"
+
+msgid "Detalhes"
+msgstr "Details"
+
+msgid "sistema"
+msgstr "system"
+
+#, python-format
+msgid "%(total)s campo"
+msgid_plural "%(total)s campos"
+msgstr[0] "%(total)s field"
+msgstr[1] "%(total)s fields"
+
+msgid "Nenhum registro encontrado."
+msgstr "No entries found."
+
+msgid "Abrir menu"
+msgstr "Open menu"
+
+msgid "Início"
+msgstr "Home"
+
+msgid "Cidades"
+msgstr "Cities"
+
+msgid "Bancos"
+msgstr "Banks"
+
+msgid "Administração"
+msgstr "Administration"
+
+msgid "Trocar de clínica"
+msgstr "Switch clinic"
+
+msgid "Escolha a clínica"
+msgstr "Choose the clinic"
+
+msgid "Trocar senha"
+msgstr "Change password"
+
+msgid "Sair"
+msgstr "Log out"
+
+#, python-format
+msgid ""
+"O último backup do banco foi em %(momento)s: os backups diários pararam."
+msgstr "The last database backup was on %(momento)s: the daily backups have stopped."
+
+msgid "Veja no servidor:"
+msgstr "Check on the server:"
+
+#, python-format
+msgid "O sistema foi atualizado para a versão %(versao_sistema)s."
+msgstr "The system was updated to version %(versao_sistema)s."
+
+msgid "Veja o que mudou"
+msgstr "See what changed"
+
+msgid "versão"
+msgstr "version"
+
+msgid "Desenvolvido por"
+msgstr "Developed by"
+
+msgid ""
+"O horário e o intervalo valem para a grade da agenda e para os novos "
+"agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é "
+"recusada e a tela mostra qual."
+msgstr "The hours and slot length apply to the schedule grid and to new appointments. If a future appointment would fall outside them, the change is refused and the screen shows which one."
+
+#, python-format
+msgid "Bem-vindo(a), %(nome)s"
+msgstr "Welcome, %(nome)s"
+
+msgid "Clínica:"
+msgstr "Clinic:"
+
+msgid "Perfil:"
+msgstr "Role:"
+
+msgid "Administrador da plataforma"
+msgstr "Platform administrator"
+
+msgid "Você é administrador da plataforma."
+msgstr "You are a platform administrator."
+
+msgid "Escolha uma clínica para trabalhar."
+msgstr "Choose a clinic to work in."
+
+msgid ""
+"Você ainda não está vinculado a nenhuma clínica ativa. Procure o "
+"administrador da sua clínica."
+msgstr "You are not linked to any active clinic yet. Talk to your clinic's administrator."
+
+#, python-format
+msgid "Veja o que há de novo na versão %(versao_sistema)s"
+msgstr "See what's new in version %(versao_sistema)s"
+
+msgid "Sem clínica"
+msgstr "No clinic"
+
+msgid "Nenhuma clínica disponível"
+msgstr "No clinic available"
+
+msgid "Escolher clínica"
+msgstr "Choose clinic"
+
+msgid "Nenhuma clínica ativa disponível para você."
+msgstr "No active clinic available to you."
+
+msgid "Usuário:"
+msgstr "User:"
+
+msgid "Nesta clínica"
+msgstr "In this clinic"
+
+msgid "Dados da conta"
+msgstr "Account details"
+
+msgid ""
+"Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail "
+"e senha só podem ser alterados por ela mesma ou pelo suporte."
+msgstr "This person also has access to another clinic or to the platform. Name, e-mail and password can only be changed by them or by support."
+
+msgid "Definir nova senha"
+msgstr "Set new password"
+
+msgid "Novo membro"
+msgstr "New member"
+
+msgid "Último acesso"
+msgstr "Last login"
+
+msgid "você"
+msgstr "you"
+
+msgid "Também tem acesso a outra clínica"
+msgstr "Also has access to another clinic"
+
+msgid "outras clínicas"
+msgstr "other clinics"
+
+msgid "nunca"
+msgstr "never"
+
+msgid "Sem acesso"
+msgstr "No access"
+
+msgid "Nenhum membro na equipe."
+msgstr "No team members."
+
+msgid ""
+"Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem "
+"fez o quê é mantido."
+msgstr "To remove someone from the team, edit them and uncheck the access: the history of who did what is kept."
+
+msgid "Novo membro da equipe"
+msgstr "New team member"
+
+msgid ""
+"Passe a senha à pessoa e peça que ela a troque no primeiro acesso (menu com "
+"o nome dela › Trocar senha)."
+msgstr "Give the password to the person and ask them to change it on first login (menu with their name › Change password)."
+
+msgid "Nova senha"
+msgstr "New password"
+
+msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
+msgstr "The person is logged out on the devices where they are signed in."
+
+msgid "Paciente"
+msgstr "Patient"
+
+msgid "Digite o nome, código ou CPF"
+msgstr "Type the name, code or CPF"
+
+msgid "Paginação"
+msgstr "Pagination"
+
+msgid "Anterior"
+msgstr "Previous"
+
+#, python-format
+msgid "Página %(numero)s de %(total)s"
+msgstr "Page %(numero)s of %(total)s"
+
+msgid "Próxima"
+msgstr "Next"
+
+msgid "Filtrar por módulo"
+msgstr "Filter by module"
+
+msgid "Todos os módulos"
+msgstr "All modules"
+
+#, python-format
+msgid "Versão %(versao)s"
+msgstr "Version %(versao)s"
+
+msgid "Nenhuma novidade registrada ainda."
+msgstr "No release notes yet."
+
+msgid "Mês"
+msgstr "Month"
+
+#, python-format
+msgid "%(total)s aniversariante (pacientes ativos)"
+msgid_plural "%(total)s aniversariantes (pacientes ativos)"
+msgstr[0] "%(total)s birthday (active patients)"
+msgstr[1] "%(total)s birthdays (active patients)"
+
+msgid "Dia"
+msgstr "Day"
+
+msgid "Completa"
+msgstr "Turns"
+
+msgid "Telefone"
+msgstr "Phone"
+
+msgid "E-mail"
+msgstr "E-mail"
+
+#, python-format
+msgid "%(idade)s ano"
+msgid_plural "%(idade)s anos"
+msgstr[0] "%(idade)s year"
+msgstr[1] "%(idade)s years"
+
+msgid "Nenhum aniversariante neste mês."
+msgstr "No birthdays this month."
+
+msgid "Arquivar paciente"
+msgstr "Archive patient"
+
+#, python-format
+msgid "Arquivar %(nome)s?"
+msgstr "Archive %(nome)s?"
+
+msgid ""
+"O paciente sai das listas, da busca, da agenda, dos aniversariantes e das "
+"rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o "
+"histórico continuam guardados."
+msgstr "The patient leaves the team's lists, search, schedule, birthdays and recalls. Nothing is deleted: appointments, recalls and history are kept."
+
+msgid ""
+"Só administradores da clínica veem os pacientes arquivados (na lista de "
+"pacientes, em Situação: Arquivados) e podem restaurá-los."
+msgstr "Only clinic administrators see archived patients (in the patient list, under Status: Archived) and can restore them."
+
+msgid "Arquivar"
+msgstr "Archive"
+
+msgid "Excluir paciente"
+msgstr "Delete patient"
+
+#, python-format
+msgid "Excluir definitivamente %(nome)s?"
+msgstr "Permanently delete %(nome)s?"
+
+msgid ""
+"Use só quando o próprio paciente pedir a exclusão dos seus dados (LGPD, art. "
+"18). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a "
+"clínica não é obrigada a guardar os registros de atendimento (a Lei "
+"13.787/2018 manda guardar o prontuário por 20 anos)."
+msgstr "Use only when the patient asks for their data to be erased (LGPD, art. 18). To take them out of daily use, keep them archived. First, check whether the clinic must keep the treatment records (Law 13.787/2018 requires keeping clinical records for 20 years)."
+
+msgid "Esta ação não pode ser desfeita:"
+msgstr "This action cannot be undone:"
+
+msgid "o cadastro do paciente é apagado;"
+msgstr "the patient's record is deleted;"
+
+msgid "os agendamentos continuam na agenda, mas sem o paciente;"
+msgstr "appointments stay in the schedule, without the patient;"
+
+msgid "as rechamadas do paciente são apagadas;"
+msgstr "the patient's recalls are deleted;"
+
+msgid ""
+"a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
+"pessoais do paciente;"
+msgstr "the audit log still says who did what and when, without the patient's personal data;"
+
+msgid ""
+"os backups com os dados atuais são apagados automaticamente em até 30 dias."
+msgstr "backups with the current data are deleted automatically within 30 days."
+
+msgid "Excluir definitivamente"
+msgstr "Delete permanently"
+
+msgid "Código"
+msgstr "Code"
+
+msgid "Arquivado"
+msgstr "Archived"
+
+msgid "Restaurar"
+msgstr "Restore"
+
+msgid "Voltar à lista"
+msgstr "Back to the list"
+
+#, python-format
+msgid "Arquivado em %(momento)s."
+msgstr "Archived on %(momento)s."
+
+#, python-format
+msgid "Por %(nome)s."
+msgstr "By %(nome)s."
+
+msgid ""
+"Só administradores da clínica veem este paciente. Restaure para voltar a usá-"
+"lo na agenda e nas rechamadas."
+msgstr "Only clinic administrators see this patient. Restore them to use them again in the schedule and recalls."
+
+msgid "Identificação"
+msgstr "Identification"
+
+msgid "Razão social"
+msgstr "Company name"
+
+msgid "CNPJ"
+msgstr "CNPJ"
+
+msgid "Inscrição estadual"
+msgstr "State registration"
+
+msgid "CPF"
+msgstr "CPF"
+
+msgid "Nascimento"
+msgstr "Birth date"
+
+msgid "Sexo"
+msgstr "Sex"
+
+msgid "Estado civil"
+msgstr "Marital status"
+
+msgid "Profissão"
+msgstr "Occupation"
+
+msgid "Responsável"
+msgstr "Guardian"
+
+msgid "Contato e endereço"
+msgstr "Contact and address"
+
+msgid "Residencial"
+msgstr "Home"
+
+msgid "Comercial"
+msgstr "Work"
+
+msgid "Endereço"
+msgstr "Address"
+
+msgid "Observações"
+msgstr "Notes"
+
+msgid "Agendamentos"
+msgstr "Appointments"
+
+#, python-format
+msgid "%(total)s no total"
+msgstr "%(total)s in total"
+
+msgid "Próximos"
+msgstr "Upcoming"
+
+msgid "Nenhum agendamento futuro."
+msgstr "No upcoming appointments."
+
+msgid "Anteriores (mais recentes primeiro)"
+msgstr "Past (most recent first)"
+
+msgid "Nenhum agendamento anterior."
+msgstr "No past appointments."
+
+msgid "Nova rechamada"
+msgstr "New recall"
+
+msgid "Concluída"
+msgstr "Done"
+
+msgid "Pendente"
+msgstr "Pending"
+
+msgid "Nenhuma rechamada."
+msgstr "No recalls."
+
+#, python-format
+msgid "Cadastrado em %(criado)s · alterado em %(alterado)s"
+msgstr "Registered on %(criado)s · changed on %(alterado)s"
+
+msgid "Editar paciente"
+msgstr "Edit patient"
+
+msgid "Novo paciente"
+msgstr "New patient"
+
+msgid "Contato"
+msgstr "Contact"
+
+msgid "Nome, código ou CPF/CNPJ"
+msgstr "Name, code or CPF/CNPJ"
+
+msgid "Buscar paciente"
+msgstr "Search patient"
+
+msgid "Tipo"
+msgstr "Type"
+
+msgid "Ativos"
+msgstr "Active"
+
+msgid "Inativos"
+msgstr "Inactive"
+
+msgid "Todos"
+msgstr "All"
+
+msgid "Arquivados"
+msgstr "Archived"
+
+#, python-format
+msgid "%(total)s paciente"
+msgid_plural "%(total)s pacientes"
+msgstr[0] "%(total)s patient"
+msgstr[1] "%(total)s patients"
+
+msgid "Idade"
+msgstr "Age"
+
+msgid "Nenhum paciente encontrado."
+msgstr "No patients found."
+
+msgid "Excluir profissional"
+msgstr "Delete practitioner"
+
+msgid ""
+"Esta ação não pode ser desfeita. Se quiser apenas esconder o profissional, "
+"edite e desmarque “ativo”."
+msgstr "This action cannot be undone. To just hide the practitioner, edit and uncheck “active”."
+
+msgid "Editar profissional"
+msgstr "Edit practitioner"
+
+msgid "Novo profissional"
+msgstr "New practitioner"
+
+msgid "Usuário de acesso"
+msgstr "Login user"
+
+msgid "Nenhum profissional cadastrado."
+msgstr "No practitioners yet."
+
+#, python-format
+msgid "Rechamadas de %(dia)s"
+msgstr "Recalls on %(dia)s"
+
+msgid "Nenhuma rechamada neste dia."
+msgstr "No recalls on this day."
+
+msgid "Abrir em Rechamadas"
+msgstr "Open in Recalls"
+
+msgid "Excluir rechamada"
+msgstr "Delete recall"
+
+#, python-format
+msgid "Excluir a rechamada de %(nome)s (%(data)s)?"
+msgstr "Delete the recall for %(nome)s (%(data)s)?"
+
+msgid "Editar rechamada"
+msgstr "Edit recall"
+
+msgid "Nome do paciente"
+msgstr "Patient name"
+
+msgid "Pendentes"
+msgstr "Pending"
+
+msgid "Concluídas"
+msgstr "Done"
+
+msgid "Todas"
+msgstr "All"
+
+#, python-format
+msgid "%(total)s rechamada"
+msgid_plural "%(total)s rechamadas"
+msgstr[0] "%(total)s recall"
+msgstr[1] "%(total)s recalls"
+
+msgid "Descrição"
+msgstr "Description"
+
+msgid "Atrasada"
+msgstr "Overdue"
+
+msgid "Hoje"
+msgstr "Today"
+
+msgid "Reabrir"
+msgstr "Reopen"
+
+msgid "Concluir"
+msgstr "Mark as done"
+
+msgid "Nenhuma rechamada encontrada."
+msgstr "No recalls found."
+
+msgid "Instituições financeiras conforme a lista pública do Banco Central."
+msgstr "Financial institutions from the Central Bank of Brazil's public list."
+
+msgid "Nome ou código do banco"
+msgstr "Bank name or code"
+
+msgid "Nenhum banco encontrado."
+msgstr "No banks found."
+
+msgid "Municípios brasileiros conforme o IBGE."
+msgstr "Brazilian municipalities according to IBGE."
+
+msgid "Todas as UFs"
+msgstr "All states"
+
+msgid "Nome da cidade"
+msgstr "City name"
+
+#, python-format
+msgid "%(total)s cidade"
+msgid_plural "%(total)s cidades"
+msgstr[0] "%(total)s city"
+msgstr[1] "%(total)s cities"
+
+msgid "Código IBGE"
+msgstr "IBGE code"
+
+msgid "Nenhuma cidade encontrada."
+msgstr "No cities found."
+
+msgid "Selecione a cidade"
+msgstr "Select the city"
+
+msgid "Acesso bloqueado"
+msgstr "Access blocked"
+
+msgid "Acesso bloqueado temporariamente"
+msgstr "Access temporarily blocked"
+
+msgid ""
+"Foram feitas muitas tentativas de entrada com senha errada. Por segurança, "
+"este acesso ficará bloqueado por 1 hora. Se esqueceu a senha, fale com o "
+"administrador da clínica."
+msgstr "Too many login attempts with a wrong password. For security, this access will be blocked for 1 hour. If you forgot your password, talk to the clinic administrator."
+
+msgid "Você saiu do sistema."
+msgstr "You have logged out."
+
+msgid "Entrar novamente"
+msgstr "Log in again"
+
+msgid "Entrar"
+msgstr "Log in"
+
+msgid "Usuário ou senha incorretos."
+msgstr "Incorrect username or password."
+
+msgid "Você não tem permissão para acessar esta página."
+msgstr "You do not have permission to access this page."
+
+msgid "Senha"
+msgstr "Password"

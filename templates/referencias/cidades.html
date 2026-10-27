@@ -1,37 +1,38 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Cidades · Medical System{% endblock %}
+{% block titulo %}{% translate "Cidades" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">Cidades</h1>
-<p class="text-body-secondary">Municípios brasileiros conforme o IBGE.</p>
+<h1 class="h3 mb-3">{% translate "Cidades" %}</h1>
+<p class="text-body-secondary">{% translate "Municípios brasileiros conforme o IBGE." %}</p>
 
 <form method="get" class="row g-2 mb-3">
   <div class="col-sm-3">
     <select name="uf" class="form-select" aria-label="UF">
-      <option value="">Todas as UFs</option>
+      <option value="">{% translate "Todas as UFs" %}</option>
       {% for item in ufs %}
       <option value="{{ item.codigo }}"{% if uf == item.codigo|stringformat:"d" %} selected{% endif %}>{{ item.sigla }} - {{ item.nome }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-sm-6">
-    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="Nome da cidade" aria-label="Nome da cidade">
+    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Nome da cidade' %}" aria-label="{% translate 'Nome da cidade' %}">
   </div>
   <div class="col-sm-3">
-    <button type="submit" class="btn btn-primary w-100">Buscar</button>
+    <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
   </div>
 </form>
 
-<p class="text-body-secondary small">{{ pagina.paginator.count }} cidade{{ pagina.paginator.count|pluralize }}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=pagina.paginator.count %}{{ total }} cidade{% plural %}{{ total }} cidades{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-sm table-hover bg-white">
-    <thead><tr><th>Cidade</th><th>UF</th><th>Código IBGE</th></tr></thead>
+    <thead><tr><th>{% translate "Cidade" %}</th><th>{% translate "UF" %}</th><th>{% translate "Código IBGE" %}</th></tr></thead>
     <tbody>
       {% for cidade in pagina %}
       <tr><td>{{ cidade.nome }}</td><td>{{ cidade.uf.sigla }}</td><td>{{ cidade.codigo }}</td></tr>
       {% empty %}
-      <tr><td colspan="3" class="text-body-secondary">Nenhuma cidade encontrada.</td></tr>
+      <tr><td colspan="3" class="text-body-secondary">{% translate "Nenhuma cidade encontrada." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -1,5 +1,5 @@
-{% load formatos %}{% for paciente in pacientes %}
+{% load formatos i18n %}{% for paciente in pacientes %}
 <a href="#" class="list-group-item list-group-item-action" data-paciente-id="{{ paciente.pk }}" data-paciente-nome="{{ paciente.nome }}">
-  {{ paciente.nome }} <small class="text-body-secondary">· código {{ paciente.pk }}{% if paciente.cpf_cnpj %} · {{ paciente.cpf_cnpj|cpf_cnpj }}{% endif %}</small>
+  {{ paciente.nome }} <small class="text-body-secondary">· {% translate "código" %} {{ paciente.pk }}{% if paciente.cpf_cnpj %} · {{ paciente.cpf_cnpj|cpf_cnpj }}{% endif %}</small>
 </a>
 {% endfor %}

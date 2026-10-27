@@ -1,9 +1,9 @@
-<form hx-post="{% if agendamento.pk %}{% url 'agenda:editar' agendamento.pk %}{% else %}{% url 'agenda:novo' %}{% endif %}"
+{% load i18n %}<form hx-post="{% if agendamento.pk %}{% url 'agenda:editar' agendamento.pk %}{% else %}{% url 'agenda:novo' %}{% endif %}"
       hx-target="#modal-conteudo" novalidate>
   {% csrf_token %}
   <div class="modal-header">
-    <h2 class="modal-title h5">{% if agendamento.pk %}Editar agendamento{% else %}Novo agendamento{% endif %}</h2>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    <h2 class="modal-title h5">{% if agendamento.pk %}{% translate "Editar agendamento" %}{% else %}{% translate "Novo agendamento" %}{% endif %}</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
   </div>
   <div class="modal-body">
     {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
@@ -14,7 +14,8 @@
       <div class="col-6 col-md-4">{% with campo=form.hora_inicio %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-6 col-md-4">{% with campo=form.hora_fim %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-12">
-        {% include "includes/busca_paciente.html" with campo=form.paciente paciente=agendamento.paciente ajuda="Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." %}
+        {% translate "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." as ajuda_paciente %}
+        {% include "includes/busca_paciente.html" with campo=form.paciente paciente=agendamento.paciente ajuda=ajuda_paciente %}
       </div>
       <div class="col-12">{% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
       {% if form.repeticoes %}
@@ -25,9 +26,9 @@
   <div class="modal-footer">
     {% if agendamento.pk and pode.agenda.excluir %}
     <button type="button" class="btn btn-outline-danger me-auto"
-            hx-get="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">Excluir</button>
+            hx-get="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Excluir" %}</button>
     {% endif %}
-    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancelar</button>
-    <button type="submit" class="btn btn-primary">Salvar</button>
+    <button type="button" class="btn btn-link" data-bs-dismiss="modal">{% translate "Cancelar" %}</button>
+    <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   </div>
 </form>

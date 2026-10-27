@@ -11,13 +11,37 @@ from pathlib import Path
 
 import yaml
 from django.conf import settings
+from django.utils.translation import get_language, gettext, gettext_noop
+from django.utils.translation import gettext_lazy as _
 
 TIPOS = {
-    "novo": "Novo",
-    "melhoria": "Melhoria",
-    "correcao": "Correção",
-    "seguranca": "Segurança",
+    "novo": _("Novo"),
+    "melhoria": _("Melhoria"),
+    "correcao": _("Correção"),
+    "seguranca": _("Segurança"),
 }
+# Modules named in releases.yaml, translated when shown (tests check every one is here).
+MODULOS = [
+    gettext_noop("Acesso"),
+    gettext_noop("Agenda"),
+    gettext_noop("Aniversariantes"),
+    gettext_noop("Auditoria"),
+    gettext_noop("Cadastros"),
+    gettext_noop("Clínica"),
+    gettext_noop("Clínicas"),
+    gettext_noop("Documentação"),
+    gettext_noop("Equipe"),
+    gettext_noop("Geral"),
+    gettext_noop("Idioma"),
+    gettext_noop("Novidades"),
+    gettext_noop("Pacientes"),
+    gettext_noop("Permissões"),
+    gettext_noop("Profissionais"),
+    gettext_noop("Rechamadas"),
+    gettext_noop("Tabelas base"),
+    gettext_noop("Tipos de atendimento"),
+]
+IDIOMA_ORIGEM = "pt-br"
 PUBLICOS = {"equipe", "paciente"}
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
@@ -26,24 +50,42 @@ class ReleasesInvalidas(ValueError):
     pass
 
 
+def _no_idioma(textos):
+    """The text in the active language, falling back to Portuguese."""
+    por_idioma = dict(textos)
+    return por_idioma.get(get_language()) or por_idioma.get(IDIOMA_ORIGEM, "")
+
+
 @dataclass(frozen=True)
 class Item:
     tipo: str
     modulo: str
     publico: tuple[str, ...]
-    texto: str
+    textos: tuple[tuple[str, str], ...]  # (language, text)
 
     @property
     def tipo_nome(self):
-        return TIPOS[self.tipo]
+        return str(TIPOS[self.tipo])
+
+    @property
+    def modulo_nome(self):
+        return gettext(self.modulo)
+
+    @property
+    def texto(self):
+        return _no_idioma(self.textos)
 
 
 @dataclass(frozen=True)
 class Release:
     versao: str
     data: datetime.date
-    titulo: str
+    titulos: tuple[tuple[str, str], ...]
     itens: tuple[Item, ...]
+
+    @property
+    def titulo(self):
+        return _no_idioma(self.titulos)
 
     @property
     def chave(self):
@@ -60,6 +102,24 @@ def versao_para_tupla(versao):
     return tuple(int(parte) for parte in encontrado.groups())
 
 
+def _textos(valor, versao, campo):
+    """A text as ((language, text), ...): a plain string is Portuguese; a mapping holds
+    one text per language and must include Portuguese."""
+    if valor is None or isinstance(valor, str):
+        valor = {IDIOMA_ORIGEM: valor or ""}
+    if not isinstance(valor, dict):
+        raise ReleasesInvalidas(f"{versao}: '{campo}' deve ser um texto ou um texto por idioma.")
+    idiomas = dict(settings.LANGUAGES)
+    textos = []
+    for idioma, texto in valor.items():
+        if idioma not in idiomas:
+            raise ReleasesInvalidas(f"{versao}: idioma '{idioma}' desconhecido em '{campo}'.")
+        textos.append((idioma, " ".join(str(texto or "").split())))
+    if not dict(textos).get(IDIOMA_ORIGEM) and any(t for _i, t in textos):
+        raise ReleasesInvalidas(f"{versao}: '{campo}' precisa do texto em português.")
+    return tuple(textos)
+
+
 def _validar_item(bruto, versao):
     if not isinstance(bruto, dict):
         raise ReleasesInvalidas(f"{versao}: cada item deve ser um objeto.")
@@ -67,15 +127,15 @@ def _validar_item(bruto, versao):
     if tipo not in TIPOS:
         raise ReleasesInvalidas(f"{versao}: tipo '{tipo}' inválido. Use: {', '.join(TIPOS)}.")
     modulo = str(bruto.get("modulo") or "").strip()
-    texto = " ".join(str(bruto.get("texto") or "").split())
-    if not modulo or not texto:
+    textos = _textos(bruto.get("texto"), versao, "texto")
+    if not modulo or not dict(textos).get(IDIOMA_ORIGEM):
         raise ReleasesInvalidas(f"{versao}: todo item precisa de 'modulo' e 'texto'.")
     publico = bruto.get("publico")
     if not isinstance(publico, list) or not set(publico) <= PUBLICOS:
         raise ReleasesInvalidas(
             f"{versao}: 'publico' deve ser uma lista com {sorted(PUBLICOS)} (ou vazia)."
         )
-    return Item(tipo=tipo, modulo=modulo, publico=tuple(publico), texto=texto)
+    return Item(tipo=tipo, modulo=modulo, publico=tuple(publico), textos=textos)
 
 
 def _validar_release(bruto):
@@ -92,7 +152,7 @@ def _validar_release(bruto):
     return Release(
         versao=versao,
         data=data,
-        titulo=str(bruto.get("titulo") or "").strip(),
+        titulos=_textos(bruto.get("titulo"), versao, "titulo"),
         itens=tuple(_validar_item(item, versao) for item in itens),
     )
 

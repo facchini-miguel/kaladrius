@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.utils import translation
 
 from .isolamento import sem_isolamento, usar_clinica
 from .models import Clinica, Vinculo
@@ -79,4 +80,18 @@ class ProxyReversoMiddleware:
         encaminhado = request.META.get("HTTP_X_FORWARDED_FOR", "")
         if encaminhado:
             request.META["REMOTE_ADDR"] = encaminhado.split(",")[-1].strip()
+        return self.get_response(request)
+
+
+class IdiomaDoUsuarioMiddleware:
+    """Activate the language chosen by the logged-in user (after LocaleMiddleware)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        idioma = getattr(getattr(request, "user", None), "idioma", "")
+        if idioma:
+            translation.activate(idioma)
+            request.LANGUAGE_CODE = idioma
         return self.get_response(request)

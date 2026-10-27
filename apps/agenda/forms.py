@@ -1,6 +1,9 @@
 from django import forms
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.formats import date_format
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.core.forms import FormularioBootstrap
 from apps.pacientes.models import Paciente
@@ -26,26 +29,27 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
         nome = self.cleaned_data["nome"].strip()
         repetido = TipoAtendimento.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk)
         if repetido.exists():
-            raise forms.ValidationError("Já existe um tipo de atendimento com este nome.")
+            raise forms.ValidationError(_("Já existe um tipo de atendimento com este nome."))
         return nome
 
 
 class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
     data = forms.DateField(
-        label="Data", widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+        label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )
     hora_inicio = forms.TimeField(
-        label="Início", widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
+        label=pgettext_lazy("hora", "Início"),
+        widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
     )
     hora_fim = forms.TimeField(
-        label="Fim", widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
+        label=_("Fim"), widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
     )
     repeticoes = forms.IntegerField(
-        label="Repetir por quantas semanas",
+        label=_("Repetir por quantas semanas"),
         min_value=1,
         max_value=52,
         initial=1,
-        help_text="1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas.",
+        help_text=_("1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."),
     )
 
     class Meta:
@@ -105,23 +109,28 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             dados.get("hora_fim"),
         )
         if not dados.get("paciente") and not dados.get("descricao", "").strip():
-            self.add_error("descricao", "Informe o paciente ou uma descrição.")
+            self.add_error("descricao", _("Informe o paciente ou uma descrição."))
         if None in (data, hora_inicio, hora_fim) or self.errors:
             return dados
 
         clinica = self.clinica
         if hora_fim <= hora_inicio:
-            self.add_error("hora_fim", "O fim deve ser depois do início.")
+            self.add_error("hora_fim", _("O fim deve ser depois do início."))
             return dados
         intervalo = clinica.agenda_intervalo
         for campo, hora in (("hora_inicio", hora_inicio), ("hora_fim", hora_fim)):
             if not self._alinhado(hora):
-                self.add_error(campo, f"Use horários de {intervalo} em {intervalo} minutos.")
+                self.add_error(
+                    campo, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
+                )
         if hora_inicio < clinica.agenda_inicio or hora_fim > clinica.agenda_fim:
             self.add_error(
                 None,
-                f"Fora do horário de atendimento da clínica "
-                f"({clinica.agenda_inicio:%H:%M} às {clinica.agenda_fim:%H:%M}).",
+                _("Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s).")
+                % {
+                    "inicio": f"{clinica.agenda_inicio:%H:%M}",
+                    "fim": f"{clinica.agenda_fim:%H:%M}",
+                },
             )
         if self.errors:
             return dados
@@ -135,11 +144,12 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         )
         if encontrados:
             lista = "; ".join(
-                f"{timezone.localtime(a.inicio):%d/%m às %H:%M} ({a.titulo})"
+                f"{date_format(timezone.localtime(a.inicio), 'SHORT_DATETIME_FORMAT')} ({a.titulo})"
                 for a in encontrados[:5]
             )
-            extra = f" e mais {len(encontrados) - 5}" if len(encontrados) > 5 else ""
+            if len(encontrados) > 5:
+                lista += " " + _("e mais %(n)s") % {"n": len(encontrados) - 5}
             raise forms.ValidationError(
-                f"Conflito de horário com: {lista}{extra}. Nada foi gravado."
+                _("Conflito de horário com: %(lista)s. Nada foi gravado.") % {"lista": lista}
             )
         return dados

@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao
@@ -83,7 +84,9 @@ def _formulario(request, rechamada, inicial):
     )
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"Rechamada de {rechamada.paciente.nome} salva.")
+        messages.success(
+            request, _("Rechamada de %(nome)s salva.") % {"nome": rechamada.paciente.nome}
+        )
         return _voltar(request)
     paciente = rechamada.paciente if rechamada.paciente_id else form["paciente"].value()
     if paciente and not hasattr(paciente, "nome"):
@@ -109,8 +112,11 @@ def concluir(request, pk):
     rechamada = get_object_or_404(Rechamada.objects.select_related("paciente"), pk=pk)
     rechamada.concluida = not rechamada.concluida
     rechamada.save(update_fields=["concluida", "alterado_em"])
-    estado = "concluída" if rechamada.concluida else "reaberta"
-    messages.success(request, f"Rechamada de {rechamada.paciente.nome} {estado}.")
+    if rechamada.concluida:
+        mensagem = _("Rechamada de %(nome)s concluída.")
+    else:
+        mensagem = _("Rechamada de %(nome)s reaberta.")
+    messages.success(request, mensagem % {"nome": rechamada.paciente.nome})
     return _voltar(request)
 
 
@@ -119,7 +125,9 @@ def excluir(request, pk):
     rechamada = get_object_or_404(Rechamada.objects.select_related("paciente"), pk=pk)
     if request.method == "POST":
         rechamada.delete()
-        messages.success(request, f"Rechamada de {rechamada.paciente.nome} excluída.")
+        messages.success(
+            request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.paciente.nome}
+        )
         return _voltar(request)
     return render(request, "rechamadas/excluir.html", {"rechamada": rechamada})
 
@@ -132,7 +140,7 @@ def resumo(request):
     """Number of pending recalls per day, for the schedule day headers."""
     de, ate = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
     if de is None or ate is None or not 0 < (ate - de).days <= 62:
-        return JsonResponse({"erro": "Parâmetros inválidos."}, status=400)
+        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Rechamada.objects.filter(
         concluida=False, data__gte=de, data__lt=ate, paciente__arquivado=False
@@ -146,7 +154,7 @@ def resumo(request):
 def do_dia(request):
     dia = _data(request.GET.get("data"))
     if dia is None:
-        return HttpResponse("Data inválida.", status=400)
+        return HttpResponse(_("Data inválida."), status=400)
     rechamadas = Rechamada.objects.filter(data=dia, paciente__arquivado=False).select_related(
         "paciente"
     )

@@ -27,6 +27,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 7. **Users and permissions:** per-clinic roles with view, create, change and delete permissions per module. The clinic administrator manages the team in Records > Team (0.8.0).
 8. **What's new:** version history viewable in the system and in the app.
 9. **Audit:** who created, changed, deleted or viewed what, and when (LGPD).
+10. **Languages:** Portuguese, English and Spanish, chosen by each user (0.13.0).
 
 ## Business model (under study)
 - **Free** app in the stores.

@@ -8,6 +8,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language, ngettext
+from django.utils.translation import gettext as _
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode, so_a_propria_agenda
 from apps.pacientes.models import Paciente
@@ -36,7 +38,7 @@ def _formulario(request, tipo):
     form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinica=request.clinica)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"Tipo de atendimento {tipo.nome} salvo.")
+        messages.success(request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome})
         return redirect("agenda:tipos")
     return render(request, "agenda/tipo_form.html", {"form": form, "tipo": tipo})
 
@@ -50,11 +52,16 @@ def tipo_excluir(request, pk):
         except ProtectedError:
             messages.error(
                 request,
-                f"{tipo.nome} já foi usado em agendamentos e não pode ser excluído. "
-                "Desmarque “ativo” para escondê-lo.",
+                _(
+                    "%(nome)s já foi usado em agendamentos e não pode ser excluído. "
+                    "Desmarque “ativo” para escondê-lo."
+                )
+                % {"nome": tipo.nome},
             )
         else:
-            messages.success(request, f"Tipo de atendimento {tipo.nome} excluído.")
+            messages.success(
+                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome}
+            )
         return redirect("agenda:tipos")
     return render(request, "agenda/tipo_excluir.html", {"tipo": tipo})
 
@@ -106,6 +113,12 @@ def calendario(request):
         "fim": clinica.agenda_fim.strftime("%H:%M:%S"),
         "intervalo": clinica.agenda_intervalo,
         "data": request.GET.get("data") or "",
+        # FullCalendar locale and the texts its script shows (badges in the day headers).
+        "idioma": get_language(),
+        "textos": {
+            "aniversariantes": _("aniversariante(s)"),
+            "rechamadas": _("rechamada(s) pendente(s)"),
+        },
         "pode": {acao: pode(request, Modulo.AGENDA, acao) for acao in ("criar", "alterar")},
         "urls": {
             "eventos": reverse("agenda:eventos"),
@@ -134,7 +147,7 @@ def eventos(request):
     periodo = _periodo(request)
     profissional = request.GET.get("profissional", "")
     if periodo is None or not profissional.isdecimal():
-        return JsonResponse({"erro": "Parâmetros inválidos."}, status=400)
+        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     inicio, fim = periodo
     agendamentos = (
         servicos.agendamentos_visiveis(request)
@@ -187,12 +200,12 @@ def novo(request):
             criados = servicos.criar(form.instance, form.intervalos, request.user)
         except IntegrityError:
             form.add_error(
-                None, "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
+                None, _("Outro agendamento acabou de ocupar este horário. Nada foi gravado.")
             )
         else:
             total = len(criados)
             return _resposta_sucesso(
-                "Agendamento criado." if total == 1 else f"{total} agendamentos criados."
+                ngettext("Agendamento criado.", "%(n)s agendamentos criados.", total) % {"n": total}
             )
     return render(request, "agenda/_form.html", {"form": form, "agendamento": form.instance})
 
@@ -214,10 +227,10 @@ def editar(request, pk):
                 form.save()
         except IntegrityError:
             form.add_error(
-                None, "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
+                None, _("Outro agendamento acabou de ocupar este horário. Nada foi gravado.")
             )
         else:
-            return _resposta_sucesso("Agendamento alterado.")
+            return _resposta_sucesso(_("Agendamento alterado."))
     return render(request, "agenda/_form.html", {"form": form, "agendamento": agendamento})
 
 
@@ -235,7 +248,7 @@ def excluir(request, pk):
             )
         total, _ = excluidos.delete()
         return _resposta_sucesso(
-            "Agendamento excluído." if total == 1 else f"{total} agendamentos excluídos."
+            ngettext("Agendamento excluído.", "%(n)s agendamentos excluídos.", total) % {"n": total}
         )
     proximos = 0
     if agendamento.serie:
@@ -268,7 +281,7 @@ def aniversariantes(request):
     """Number of birthdays per day in the period shown by the calendar."""
     periodo = _periodo(request)
     if periodo is None:
-        return JsonResponse({"erro": "Parâmetros inválidos."}, status=400)
+        return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     inicio = timezone.localdate(periodo[0])
     total_dias = (timezone.localdate(periodo[1]) - inicio).days
     dias = [inicio + datetime.timedelta(days=n) for n in range(total_dias)]
@@ -282,7 +295,7 @@ def aniversariantes_dia(request):
     try:
         dia = datetime.date.fromisoformat(request.GET.get("data", ""))
     except ValueError:
-        return HttpResponse("Data inválida.", status=400)
+        return HttpResponse(_("Data inválida."), status=400)
     aniversariantes = [
         (paciente, dia.year - paciente.data_nascimento.year)
         for paciente in _aniversariantes_em([dia])[dia]

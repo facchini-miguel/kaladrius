@@ -27,6 +27,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 7. **Usuários e permissões:** papéis por clínica com permissões de ver, criar, alterar e excluir por módulo. O administrador da clínica gerencia a equipe em Cadastros > Equipe (0.8.0).
 8. **Novidades:** histórico de versões consultável no sistema e no app.
 9. **Auditoria:** quem criou, alterou, excluiu ou consultou o quê e quando (LGPD).
+10. **Idiomas:** português, inglês e espanhol, à escolha de cada usuário (0.13.0).
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.

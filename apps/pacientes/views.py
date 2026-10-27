@@ -5,7 +5,9 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dates import MONTHS
 from django.utils.http import urlencode
+from django.utils.translation import gettext as _
 
 from apps.agenda.models import Agendamento
 from apps.agenda.servicos import agendamentos_visiveis
@@ -123,7 +125,7 @@ def _formulario(request, paciente):
     form = PacienteForm(request.POST or None, instance=paciente, clinica=request.clinica)
     if request.method == "POST" and form.is_valid():
         paciente = form.save()
-        messages.success(request, f"Paciente {paciente.nome} salvo.")
+        messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": paciente.nome})
         return redirect("pacientes:ficha", pk=paciente.pk)
     return render(request, "pacientes/form.html", {"form": form, "paciente": paciente})
 
@@ -138,8 +140,11 @@ def arquivar(request, pk):
         paciente.save()
         messages.success(
             request,
-            f"Paciente {paciente.nome} arquivado. O histórico continua guardado e ele pode ser "
-            "restaurado na lista de pacientes, em Situação: Arquivados.",
+            _(
+                "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
+                "restaurado na lista de pacientes, em Situação: Arquivados."
+            )
+            % {"nome": paciente.nome},
         )
         return redirect("pacientes:lista")
     return render(request, "pacientes/arquivar.html", {"paciente": paciente})
@@ -152,7 +157,7 @@ def restaurar(request, pk):
         paciente.arquivado = False
         paciente.arquivado_em = paciente.arquivado_por = None
         paciente.save()
-        messages.success(request, f"Paciente {paciente.nome} restaurado.")
+        messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": paciente.nome})
     return redirect("pacientes:ficha", pk=paciente.pk)
 
 
@@ -181,7 +186,10 @@ def excluir(request, pk):
                 RegistroAuditoria.Acao.EXCLUIR,
                 descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",
             )
-        messages.success(request, f"Os dados do paciente de código {codigo} foram excluídos.")
+        messages.success(
+            request,
+            _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": codigo},
+        )
         return redirect(f"{reverse('pacientes:lista')}?situacao=arquivados")
     return render(request, "pacientes/excluir.html", {"paciente": paciente})
 
@@ -194,20 +202,7 @@ def sugestoes(request):
     return render(request, "pacientes/_sugestoes.html", {"pacientes": pacientes})
 
 
-MESES = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-]
+MESES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
 
 
 @exige_permissao(Modulo.ANIVERSARIANTES, Acao.VER)

@@ -73,6 +73,9 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 - Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura), com uma exceção: as tentativas de entrada recusadas, que guardam o usuário digitado, são apagadas depois de 30 dias pelo comando `aplicar_retencao`, que o servidor roda todo dia junto com o backup (decisão 045). Nos backups, elas duram mais 30 dias. Na exclusão definitiva de um paciente, os registros dele perdem os dados pessoais (ver abaixo).
 - Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Alterações em contas de usuário (que não pertencem a uma clínica) ficam registradas na clínica em que foram feitas. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
 
+## Idioma do usuário
+`Usuario.idioma` guarda o idioma escolhido (`pt-br`, `en`, `es` ou vazio para seguir o navegador). Não entra na auditoria, como a última versão vista.
+
 ## Ficha do paciente
 Mostra identificação, contato, observações, os próximos e os últimos 10 agendamentos (versão 0.12.0; para o profissional, só os da própria agenda, com link para a semana na agenda) e as rechamadas.
 

@@ -1,26 +1,26 @@
-<form hx-post="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">
+{% load i18n %}<form hx-post="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">
   {% csrf_token %}
   <div class="modal-header">
-    <h2 class="modal-title h5">Excluir agendamento?</h2>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    <h2 class="modal-title h5">{% translate "Excluir agendamento?" %}</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
   </div>
   <div class="modal-body">
-    <p class="mb-2"><strong>{{ agendamento.titulo }}</strong> · {{ agendamento.inicio|date:"d/m/Y H:i" }} às {{ agendamento.fim|date:"H:i" }}</p>
+    <p class="mb-2"><strong>{{ agendamento.titulo }}</strong> · {% blocktranslate with inicio=agendamento.inicio|date:"SHORT_DATETIME_FORMAT" fim=agendamento.fim|date:"TIME_FORMAT" %}{{ inicio }} às {{ fim }}{% endblocktranslate %}</p>
     {% if proximos %}
     <div class="form-check">
       <input class="form-check-input" type="radio" name="escopo" id="escopo-este" value="este" checked>
-      <label class="form-check-label" for="escopo-este">Somente este</label>
+      <label class="form-check-label" for="escopo-este">{% translate "Somente este" %}</label>
     </div>
     <div class="form-check">
       <input class="form-check-input" type="radio" name="escopo" id="escopo-serie" value="serie">
-      <label class="form-check-label" for="escopo-serie">Este e os próximos {{ proximos }} da mesma repetição</label>
+      <label class="form-check-label" for="escopo-serie">{% blocktranslate %}Este e os próximos {{ proximos }} da mesma repetição{% endblocktranslate %}</label>
     </div>
     {% else %}
-    <p class="mb-0">Esta ação não pode ser desfeita.</p>
+    <p class="mb-0">{% translate "Esta ação não pode ser desfeita." %}</p>
     {% endif %}
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-link" hx-get="{% url 'agenda:editar' agendamento.pk %}" hx-target="#modal-conteudo">Voltar</button>
-    <button type="submit" class="btn btn-danger">Excluir</button>
+    <button type="button" class="btn btn-link" hx-get="{% url 'agenda:editar' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Voltar" %}</button>
+    <button type="submit" class="btn btn-danger">{% translate "Excluir" %}</button>
   </div>
 </form>

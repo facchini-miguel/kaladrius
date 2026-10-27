@@ -1,6 +1,6 @@
-<li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+{% load i18n %}<li class="list-group-item d-flex justify-content-between align-items-center gap-2">
   <span>
-    <a href="{% url 'agenda:calendario' %}?profissional={{ agendamento.profissional_id }}&amp;data={{ agendamento.inicio|date:'Y-m-d' }}">{{ agendamento.inicio|date:"d/m/Y H:i" }}</a>
+    <a href="{% url 'agenda:calendario' %}?profissional={{ agendamento.profissional_id }}&amp;data={{ agendamento.inicio|date:'Y-m-d' }}">{{ agendamento.inicio|date:"SHORT_DATETIME_FORMAT" }}</a>
     · {{ agendamento.profissional.nome }}
   </span>
   <span class="legenda-tipo small" style="background-color: {{ agendamento.tipo.cor }}">{{ agendamento.tipo.nome }}</span>

@@ -3,6 +3,8 @@ import datetime
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.utils import timezone
+from django.utils.formats import date_format
+from django.utils.translation import gettext_lazy as _
 
 from .models import Clinica
 from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
@@ -42,7 +44,7 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
     """Clinic details and schedule settings, changed by the clinic administrator."""
 
     # Typed with punctuation (up to 18 characters), stored as 11 or 14.
-    documento = forms.CharField(label="CPF/CNPJ", max_length=18, required=False)
+    documento = forms.CharField(label=_("CPF/CNPJ"), max_length=18, required=False)
 
     class Meta:
         model = Clinica
@@ -56,7 +58,7 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
             "agenda_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
         }
         help_texts = {
-            "agenda_intervalo": "Os agendamentos começam e terminam em múltiplos deste tempo.",
+            "agenda_intervalo": _("Os agendamentos começam e terminam em múltiplos deste tempo."),
         }
 
     def clean_documento(self):
@@ -64,7 +66,7 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
         if documento and not (
             cpf_valido(documento) if len(documento) == 11 else cnpj_valido(documento)
         ):
-            raise forms.ValidationError("CPF/CNPJ inválido.")
+            raise forms.ValidationError(_("CPF/CNPJ inválido."))
         return documento
 
     def clean(self):
@@ -74,13 +76,16 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
         if None in (inicio, fim, intervalo):
             return dados
         if inicio >= fim:
-            self.add_error("agenda_fim", "O fim da agenda deve ser depois do início.")
+            self.add_error("agenda_fim", _("O fim da agenda deve ser depois do início."))
             return dados
         problema = self._agendamento_fora(inicio, fim, intervalo)
         if problema is not None:
             raise forms.ValidationError(
-                f"O agendamento de {problema:%d/%m/%Y às %H:%M} ficaria fora do novo horário "
-                "ou do novo intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
+                _(
+                    "O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
+                    "intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
+                )
+                % {"momento": date_format(problema, "SHORT_DATETIME_FORMAT")}
             )
         return dados
 

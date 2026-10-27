@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Equipe · Medical System{% endblock %}
+{% block titulo %}{% translate "Equipe" %} · Medical System{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">Equipe</h1>
+  <h1 class="h3 mb-0">{% translate "Equipe" %}</h1>
   {% if pode.usuarios.criar %}
-  <a class="btn btn-primary" href="{% url 'equipe:novo' %}">Novo membro</a>
+  <a class="btn btn-primary" href="{% url 'equipe:novo' %}">{% translate "Novo membro" %}</a>
   {% endif %}
 </div>
 
@@ -14,12 +15,12 @@
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>Nome</th>
-        <th>Usuário</th>
-        <th>Perfil</th>
-        <th>Último acesso</th>
-        <th>Situação</th>
-        <th class="text-end">Ações</th>
+        <th>{% translate "Nome" %}</th>
+        <th>{% translate "Usuário" %}</th>
+        <th>{% translate "Perfil" %}</th>
+        <th>{% translate "Último acesso" %}</th>
+        <th>{% translate "Situação" %}</th>
+        <th class="text-end">{% translate "Ações" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -27,29 +28,29 @@
       <tr>
         <td>
           {{ vinculo.usuario.get_full_name|default:"—" }}
-          {% if vinculo.usuario == user %}<span class="badge text-bg-light">você</span>{% endif %}
-          {% if vinculo.outras_clinicas %}<span class="badge text-bg-light" title="Também tem acesso a outra clínica">outras clínicas</span>{% endif %}
+          {% if vinculo.usuario == user %}<span class="badge text-bg-light">{% translate "você" %}</span>{% endif %}
+          {% if vinculo.outras_clinicas %}<span class="badge text-bg-light" title="{% translate 'Também tem acesso a outra clínica' %}">{% translate "outras clínicas" %}</span>{% endif %}
         </td>
         <td>{{ vinculo.usuario.username }}</td>
         <td>{{ vinculo.get_papel_display }}</td>
-        <td>{{ vinculo.usuario.last_login|date:"d/m/Y H:i"|default:"nunca" }}</td>
+        <td>{% if vinculo.usuario.last_login %}{{ vinculo.usuario.last_login|date:"SHORT_DATETIME_FORMAT" }}{% else %}{% translate "nunca" %}{% endif %}</td>
         <td>
-          {% if vinculo.ativo and vinculo.usuario.is_active %}<span class="badge text-bg-success">Ativo</span>
-          {% else %}<span class="badge text-bg-secondary">Sem acesso</span>{% endif %}
+          {% if vinculo.ativo and vinculo.usuario.is_active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% else %}<span class="badge text-bg-secondary">{% translate "Sem acesso" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if pode.usuarios.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'equipe:editar' vinculo.pk %}">Editar</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'equipe:editar' vinculo.pk %}">{% translate "Editar" %}</a>
           {% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">Nenhum membro na equipe.</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum membro na equipe." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 <p class="text-body-secondary small">
-  Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem fez o quê é mantido.
+  {% translate "Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem fez o quê é mantido." %}
 </p>
 {% endblock %}

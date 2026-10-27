@@ -35,6 +35,7 @@ IGNORADOS = {
     "alterado_em",
     "alterada_em",
     "ultima_versao_vista",
+    "idioma",
 }
 
 

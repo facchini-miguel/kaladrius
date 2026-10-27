@@ -17,7 +17,7 @@
 ## Conventions
 - Documentation is written first in **Portuguese** (`docs/pt-BR/`) and translated into **English** (`docs/en/`), with the same structure. Every change updates both languages in the same commit.
 - Code uses **Portuguese names for the domain** (Paciente, Agendamento) and English only for framework concepts.
-- **Code comments and docstrings are written in English.** User-facing text (screens, messages, release notes) stays in Portuguese.
+- **Code comments and docstrings are written in English.** User-facing text (screens, messages, release notes) is written in Portuguese in the code and translated into English and Spanish in `locale/` (see [architecture.md](architecture.md#languages-version-0130-decision-049)).
 - Every important decision gets an entry in `decisions/`.
 - Every published version gets an entry in [`../../releases.yaml`](../../releases.yaml).
 

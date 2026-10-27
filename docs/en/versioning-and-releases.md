@@ -23,32 +23,39 @@ We follow [Semantic Versioning](https://semver.org/):
 - the API endpoint the app uses to show "What's new";
 - the version number shown in the footer.
 
-Release note texts are written in **Portuguese**, since they are shown to Brazilian users. Field names stay in Portuguese, as in the file.
+Release note texts are written in the **three interface languages** (`pt-br`, `en`, `es`; decision 049). Field names stay in Portuguese, as in the file.
 
 ### Format
 
 ```yaml
 - versao: 1.5.0
   data: 2027-03-10
-  titulo: Lembretes de retorno no app
+  titulo:
+    pt-br: Lembretes de retorno no app
+    en: Recall reminders in the app
+    es: Recordatorios de regreso en la app
   itens:
     - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas
+      modulo: Rechamadas    # one of the MODULOS names in apps/novidades/releases.py
       publico: [equipe, paciente]
-      texto: >
-        O paciente recebe no celular um aviso 7 dias antes da data de retorno.
-        A clínica escolhe a mensagem em Configurações > Rechamadas.
+      texto:
+        pt-br: >
+          O paciente recebe no celular um aviso 7 dias antes da data de retorno.
+        en: >
+          Patients get a notice on their phone 7 days before the recall date.
+        es: >
+          El paciente recibe en el celular un aviso 7 días antes de la fecha de regreso.
 ```
 
 | Field | Required | Description |
 |---|---|---|
 | `versao` | yes | Version in `MAJOR.MINOR.PATCH` format |
 | `data` | yes | Release date (YYYY-MM-DD) |
-| `titulo` | no | One-sentence highlight of the version |
+| `titulo` | no | One-sentence highlight of the version, in the three languages |
 | `itens[].tipo` | yes | `novo` (new), `melhoria` (improvement), `correcao` (fix) or `seguranca` (security) |
-| `itens[].modulo` | yes | Area of the system (Agenda, Pacientes…) |
+| `itens[].modulo` | yes | Area of the system (Agenda, Pacientes…), in Portuguese; the page shows the translation |
 | `itens[].publico` | yes | Who sees the item: `equipe` (staff), `paciente` (patient) or both |
-| `itens[].texto` | yes | **A few lines**, in user language: what changed and how to use it |
+| `itens[].texto` | yes | **A few lines**, in user language: what changed and how to use it. One text per language (`pt-br`, `en`, `es`); a test requires all three |
 
 ### Writing rules
 - Write for the **user**, not the developer. For example, "The schedule now shows…", not "Refactored component X".

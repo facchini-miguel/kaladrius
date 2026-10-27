@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
 from apps.core.models import Vinculo
 from apps.core.permissoes import Acao, Modulo, exige_permissao
@@ -43,7 +44,9 @@ def novo(request):
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             usuario = form.save()
-        messages.success(request, f"{usuario.get_full_name()} agora faz parte da equipe.")
+        messages.success(
+            request, _("%(nome)s agora faz parte da equipe.") % {"nome": usuario.get_full_name()}
+        )
         return redirect("equipe:lista")
     return render(request, "equipe/novo.html", {"form": form})
 
@@ -61,7 +64,9 @@ def editar(request, pk):
             form.save()
             if conta is not None:
                 conta.save()
-        messages.success(request, f"Dados de {usuario.get_full_name() or usuario} salvos.")
+        messages.success(
+            request, _("Dados de %(nome)s salvos.") % {"nome": usuario.get_full_name() or usuario}
+        )
         return redirect("equipe:lista")
     return render(
         request,
@@ -79,13 +84,19 @@ def senha(request, pk):
     if not conta_exclusiva(usuario, request.clinica):
         messages.error(
             request,
-            f"{usuario} também tem acesso a outra clínica ou à plataforma: "
-            "a senha só pode ser trocada pelo próprio usuário ou pelo suporte.",
+            _(
+                "%(nome)s também tem acesso a outra clínica ou à plataforma: "
+                "a senha só pode ser trocada pelo próprio usuário ou pelo suporte."
+            )
+            % {"nome": usuario},
         )
         return redirect("equipe:editar", pk=vinculo.pk)
     form = SenhaForm(usuario, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"Nova senha de {usuario.get_full_name() or usuario} definida.")
+        messages.success(
+            request,
+            _("Nova senha de %(nome)s definida.") % {"nome": usuario.get_full_name() or usuario},
+        )
         return redirect("equipe:lista")
     return render(request, "equipe/senha.html", {"vinculo": vinculo, "form": form})

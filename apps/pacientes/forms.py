@@ -2,6 +2,7 @@ import datetime
 
 from django import forms
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
@@ -33,14 +34,14 @@ def _campo_texto(label, max_length, **attrs):
 
 
 class PacienteForm(FormularioBootstrap, forms.ModelForm):
-    uf = UFField(queryset=UF.objects.all(), required=False, label="UF")
-    cidade = CidadeField(queryset=Cidade.objects.none(), required=False, label="Cidade")
+    uf = UFField(queryset=UF.objects.all(), required=False, label=_("UF"))
+    cidade = CidadeField(queryset=Cidade.objects.none(), required=False, label=_("Cidade"))
     # Typed with punctuation (up to 18 characters), stored as digits/letters only.
-    cpf_cnpj = _campo_texto("CPF/CNPJ", 18)
-    cep = _campo_texto("CEP", 9, inputmode="numeric")
-    telefone_celular = _campo_texto("Celular", 16, inputmode="tel")
-    telefone_residencial = _campo_texto("Telefone residencial", 16, inputmode="tel")
-    telefone_comercial = _campo_texto("Telefone comercial", 16, inputmode="tel")
+    cpf_cnpj = _campo_texto(_("CPF/CNPJ"), 18)
+    cep = _campo_texto(_("CEP"), 9, inputmode="numeric")
+    telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
+    telefone_residencial = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
+    telefone_comercial = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
 
     class Meta:
         model = Paciente
@@ -103,13 +104,13 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     def clean_cep(self):
         cep = somente_digitos(self.cleaned_data.get("cep"))
         if cep and len(cep) != 8:
-            raise forms.ValidationError("O CEP deve ter 8 dígitos.")
+            raise forms.ValidationError(_("O CEP deve ter 8 dígitos."))
         return cep
 
     def _limpar_telefone(self, nome):
         telefone = somente_digitos(self.cleaned_data.get(nome))
         if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError("Informe o DDD e o número (10 ou 11 dígitos).")
+            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
         return telefone
 
     def clean_telefone_celular(self):
@@ -124,7 +125,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     def clean_data_nascimento(self):
         data = self.cleaned_data.get("data_nascimento")
         if data and data > datetime.date.today():
-            raise forms.ValidationError("A data de nascimento não pode estar no futuro.")
+            raise forms.ValidationError(_("A data de nascimento não pode estar no futuro."))
         return data
 
     def clean(self):
@@ -134,9 +135,9 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
         if documento:
             if tipo == Paciente.Tipo.FISICA and not cpf_valido(documento):
-                self.add_error("cpf_cnpj", "CPF inválido.")
+                self.add_error("cpf_cnpj", _("CPF inválido."))
             elif tipo == Paciente.Tipo.JURIDICA and not cnpj_valido(documento):
-                self.add_error("cpf_cnpj", "CNPJ inválido.")
+                self.add_error("cpf_cnpj", _("CNPJ inválido."))
             else:
                 # The clinic is not a form field, so the unique constraint is checked here.
                 outro = (
@@ -145,12 +146,14 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 if outro is not None and outro.arquivado:
                     self.add_error(
                         "cpf_cnpj",
-                        "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da "
-                        "clínica para restaurá-lo.",
+                        _(
+                            "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador "
+                            "da clínica para restaurá-lo."
+                        ),
                     )
                 elif outro is not None:
                     self.add_error(
-                        "cpf_cnpj", "Já existe um paciente com este CPF/CNPJ nesta clínica."
+                        "cpf_cnpj", _("Já existe um paciente com este CPF/CNPJ nesta clínica.")
                     )
 
         # Fields that only make sense for one person type are cleared for the other.
@@ -164,5 +167,5 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
         cidade, uf = dados.get("cidade"), dados.get("uf")
         if cidade is not None and cidade.uf_id != getattr(uf, "pk", None):
-            self.add_error("cidade", "A cidade não pertence à UF escolhida.")
+            self.add_error("cidade", _("A cidade não pertence à UF escolhida."))
         return dados

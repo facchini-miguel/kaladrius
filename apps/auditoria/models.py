@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class RegistroAuditoria(models.Model):
@@ -13,15 +14,15 @@ class RegistroAuditoria(models.Model):
     """
 
     class Acao(models.TextChoices):
-        CRIAR = "criar", "Criou"
-        ALTERAR = "alterar", "Alterou"
-        EXCLUIR = "excluir", "Excluiu"
-        VISUALIZAR = "visualizar", "Visualizou"
-        LOGIN = "login", "Entrou no sistema"
-        LOGIN_FALHOU = "login_falhou", "Tentativa de entrada recusada"
-        LOGOUT = "logout", "Saiu do sistema"
+        CRIAR = "criar", _("Criou")
+        ALTERAR = "alterar", _("Alterou")
+        EXCLUIR = "excluir", _("Excluiu")
+        VISUALIZAR = "visualizar", _("Visualizou")
+        LOGIN = "login", _("Entrou no sistema")
+        LOGIN_FALHOU = "login_falhou", _("Tentativa de entrada recusada")
+        LOGOUT = "logout", _("Saiu do sistema")
 
-    momento = models.DateTimeField("quando", auto_now_add=True, db_index=True)
+    momento = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
     clinica = models.ForeignKey(
@@ -31,7 +32,7 @@ class RegistroAuditoria(models.Model):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name="clínica",
+        verbose_name=_("clínica"),
     )
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -40,20 +41,20 @@ class RegistroAuditoria(models.Model):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name="usuário",
+        verbose_name=_("usuário"),
     )
     # Kept as text so the entry still says who it was if the user is deleted.
-    usuario_nome = models.CharField("usuário (texto)", max_length=150, blank=True)
-    acao = models.CharField("ação", max_length=20, choices=Acao.choices)
-    modelo = models.CharField("tipo de registro", max_length=50, blank=True)
-    objeto_id = models.CharField("código do registro", max_length=40, blank=True)
-    objeto_descricao = models.CharField("registro", max_length=200, blank=True)
-    alteracoes = models.JSONField("alterações", default=dict, blank=True)
-    ip = models.GenericIPAddressField("IP", null=True, blank=True)
+    usuario_nome = models.CharField(_("usuário (texto)"), max_length=150, blank=True)
+    acao = models.CharField(_("ação"), max_length=20, choices=Acao.choices)
+    modelo = models.CharField(_("tipo de registro"), max_length=50, blank=True)
+    objeto_id = models.CharField(_("código do registro"), max_length=40, blank=True)
+    objeto_descricao = models.CharField(_("registro"), max_length=200, blank=True)
+    alteracoes = models.JSONField(_("alterações"), default=dict, blank=True)
+    ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
-        verbose_name = "registro de auditoria"
-        verbose_name_plural = "registros de auditoria"
+        verbose_name = _("registro de auditoria")
+        verbose_name_plural = _("registros de auditoria")
         ordering = ["-momento", "-pk"]
         indexes = [
             models.Index(fields=["clinica", "-momento"], name="auditoria_clinica_momento"),

@@ -1,28 +1,29 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">Bem-vindo(a), {{ user.get_full_name|default:user.username }}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with nome=user.get_full_name|default:user.username %}Bem-vindo(a), {{ nome }}{% endblocktranslate %}</h1>
 
 {% if clinica_atual %}
 <div class="card mb-4">
   <div class="card-body">
-    <p class="mb-1"><strong>Clínica:</strong> {{ clinica_atual.nome }}</p>
-    <p class="mb-0"><strong>Perfil:</strong>
-      {% if vinculo_atual %}{{ vinculo_atual.get_papel_display }}{% else %}Administrador da plataforma{% endif %}
+    <p class="mb-1"><strong>{% translate "Clínica:" %}</strong> {{ clinica_atual.nome }}</p>
+    <p class="mb-0"><strong>{% translate "Perfil:" %}</strong>
+      {% if vinculo_atual %}{{ vinculo_atual.get_papel_display }}{% else %}{% translate "Administrador da plataforma" %}{% endif %}
     </p>
   </div>
 </div>
 {% elif user.is_superuser %}
 <div class="alert alert-info">
-  Você é administrador da plataforma. <a href="{% url 'trocar_clinica' %}">Escolha uma clínica</a> para trabalhar.
+  {% translate "Você é administrador da plataforma." %} <a href="{% url 'trocar_clinica' %}">{% translate "Escolha uma clínica para trabalhar." %}</a>
 </div>
 {% else %}
 <div class="alert alert-warning">
-  Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica.
+  {% translate "Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica." %}
 </div>
 {% endif %}
 
 <p>
-  <a href="{% url 'novidades' %}">Veja o que há de novo na versão {{ versao_sistema }}</a>.
+  <a href="{% url 'novidades' %}">{% blocktranslate %}Veja o que há de novo na versão {{ versao_sistema }}{% endblocktranslate %}</a>.
 </p>
 {% endblock %}

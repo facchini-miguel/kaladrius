@@ -27,7 +27,7 @@ class ReleaseOut(Schema):
 def listar_releases(
     request, publico: Literal["equipe", "paciente"] = "paciente", desde: str | None = None
 ):
-    """Release notes per version, newest first.
+    """Release notes per version, newest first, in the language of Accept-Language.
 
     Use `desde` to receive only the versions after the one the app already showed.
     """
@@ -41,7 +41,7 @@ def listar_releases(
             data=release.data,
             titulo=release.titulo,
             itens=[
-                ItemOut(tipo=i.tipo, tipo_nome=i.tipo_nome, modulo=i.modulo, texto=i.texto)
+                ItemOut(tipo=i.tipo, tipo_nome=i.tipo_nome, modulo=i.modulo_nome, texto=i.texto)
                 for i in itens
             ],
         )

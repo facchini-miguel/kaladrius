@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 from apps.pacientes.models import Paciente
@@ -20,4 +21,4 @@ class RechamadaForm(FormularioBootstrap, forms.ModelForm):
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
         self.fields["paciente"].queryset = Paciente.objects.all()
-        self.fields["paciente"].error_messages["required"] = "Escolha o paciente."
+        self.fields["paciente"].error_messages["required"] = _("Escolha o paciente.")

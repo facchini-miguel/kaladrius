@@ -3,6 +3,9 @@
 import contextlib
 from contextvars import ContextVar
 
+from django.conf import settings
+from django.utils import translation
+
 from apps.core.isolamento import clinica_atual, isolamento_ativo
 
 from .models import RegistroAuditoria
@@ -49,8 +52,13 @@ def registrar(
 
 
 def nome_do_modelo(modelo):
-    """How entries name the kind of record ("Paciente", "Agendamento"...)."""
-    return modelo._meta.verbose_name.capitalize()
+    """How entries name the kind of record ("Paciente", "Agendamento"...).
+
+    Always in the source language, whatever the user's language: entries are filtered
+    and anonymized by this name.
+    """
+    with translation.override(settings.LANGUAGE_CODE):
+        return str(modelo._meta.verbose_name).capitalize()
 
 
 REMOVIDO = "(removido)"

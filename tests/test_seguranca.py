@@ -87,7 +87,7 @@ def test_novidades_filtradas_por_modulo(client, criar_usuario):
     resposta = client.get(reverse("novidades"), {"modulo": "Agenda"})
     modulos = {item.modulo for _, itens in resposta.context["versoes"] for item in itens}
     assert modulos == {"Agenda"}
-    assert "Pacientes" in resposta.context["modulos"]
+    assert ("Pacientes", "Pacientes") in resposta.context["modulos"]
 
 
 def test_ip_real_atras_do_proxy(rf):

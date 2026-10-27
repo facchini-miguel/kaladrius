@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 
@@ -29,7 +30,7 @@ def _formulario(request, profissional):
     form = ProfissionalForm(request.POST or None, instance=profissional, clinica=request.clinica)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"Profissional {profissional.nome} salvo.")
+        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": profissional.nome})
         return redirect("profissionais:lista")
     return render(request, "profissionais/form.html", {"form": form, "profissional": profissional})
 
@@ -43,10 +44,15 @@ def excluir(request, pk):
         except ProtectedError:
             messages.error(
                 request,
-                f"{profissional.nome} tem registros ligados e não pode ser excluído. "
-                "Desmarque “ativo” para escondê-lo.",
+                _(
+                    "%(nome)s tem registros ligados e não pode ser excluído. "
+                    "Desmarque “ativo” para escondê-lo."
+                )
+                % {"nome": profissional.nome},
             )
         else:
-            messages.success(request, f"Profissional {profissional.nome} excluído.")
+            messages.success(
+                request, _("Profissional %(nome)s excluído.") % {"nome": profissional.nome}
+            )
         return redirect("profissionais:lista")
     return render(request, "profissionais/excluir.html", {"profissional": profissional})

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block conteudo %}
-<p>Você saiu do sistema. <a href="{% url 'login' %}">Entrar novamente</a>.</p>
+<p>{% translate "Você saiu do sistema." %} <a href="{% url 'login' %}">{% translate "Entrar novamente" %}</a>.</p>
 {% endblock %}

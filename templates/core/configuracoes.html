@@ -1,18 +1,18 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Configurações da clínica · Medical System{% endblock %}
+{% block titulo %}{% translate "Configurações da clínica" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">Configurações da clínica</h1>
+<h1 class="h3 mb-4">{% translate "Configurações da clínica" %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/formulario.html" %}
   <p class="text-body-secondary small">
-    O horário e o intervalo valem para a grade da agenda e para os novos agendamentos. Se algum
-    agendamento futuro ficar fora deles, a mudança é recusada e a tela mostra qual.
+    {% translate "O horário e o intervalo valem para a grade da agenda e para os novos agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é recusada e a tela mostra qual." %}
   </p>
-  <button type="submit" class="btn btn-primary">Salvar</button>
-  <a class="btn btn-link" href="{% url 'inicio' %}">Cancelar</a>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'inicio' %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

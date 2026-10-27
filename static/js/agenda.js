@@ -27,8 +27,8 @@
 
   // Badges in the day headers (birthdays and pending recalls), each opening a list.
   const MARCADORES = [
-    { classe: "aniversariantes", icone: "🎂", titulo: "aniversariante(s)", resumo: config.urls.aniversariantes, dia: config.urls.aniversariantes_dia },
-    { classe: "rechamadas", icone: "📞", titulo: "rechamada(s) pendente(s)", resumo: config.urls.rechamadas, dia: config.urls.rechamadas_dia },
+    { classe: "aniversariantes", icone: "🎂", titulo: config.textos.aniversariantes, resumo: config.urls.aniversariantes, dia: config.urls.aniversariantes_dia },
+    { classe: "rechamadas", icone: "📞", titulo: config.textos.rechamadas, resumo: config.urls.rechamadas, dia: config.urls.rechamadas_dia },
   ];
 
   function marcarDias(info) {
@@ -53,7 +53,7 @@
   }
 
   const calendario = new FullCalendar.Calendar(elementoCalendario, {
-    locale: "pt-br",
+    locale: config.idioma,
     initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
     initialDate: config.data || undefined,
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },

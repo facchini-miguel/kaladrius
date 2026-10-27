@@ -2,294 +2,630 @@
 # Single source for the "Novidades" (What's new) web page, the app API and the footer.
 # Format and rules: docs/en/versioning-and-releases.md
 # The newest entry always goes at the top.
-# Release note texts stay in Portuguese: they are shown to users.
+# Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
+
+- versao: 0.13.0
+  data: 2026-10-27
+  titulo:
+    pt-br: O sistema em português, inglês e espanhol
+    en: The system in Portuguese, English and Spanish
+    es: El sistema en portugués, inglés y español
+  itens:
+    - tipo: novo
+      modulo: Idioma
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cada pessoa escolhe o idioma do sistema no menu com o seu nome: português, inglês ou
+          espanhol. Menus, telas, mensagens, a agenda, as datas e as Novidades mudam na hora,
+          e a escolha fica salva. Antes de entrar, vale o idioma do navegador.
+        en: >
+          Each person chooses the system language in the menu with their name: Portuguese,
+          English or Spanish. Menus, screens, messages, the schedule, dates and What's new
+          change right away, and the choice is saved. Before logging in, the browser's
+          language is used.
+        es: >
+          Cada persona elige el idioma del sistema en el menú con su nombre: portugués, inglés
+          o español. Los menús, las pantallas, los mensajes, la agenda, las fechas y las
+          Novedades cambian al instante, y la elección queda guardada. Antes de entrar, se usa
+          el idioma del navegador.
 
 - versao: 0.12.0
   data: 2026-10-27
-  titulo: Agendamentos na ficha do paciente
+  titulo:
+    pt-br: Agendamentos na ficha do paciente
+    en: Appointments in the patient record
+    es: Citas en la ficha del paciente
   itens:
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        A ficha do paciente mostra os próximos e os últimos agendamentos, com link para a
-        semana na agenda. O profissional vê só os da própria agenda.
+      texto:
+        pt-br: >
+          A ficha do paciente mostra os próximos e os últimos agendamentos, com link para a
+          semana na agenda. O profissional vê só os da própria agenda.
+        en: >
+          The patient record shows the upcoming and the latest appointments, linking to the
+          week in the schedule. Practitioners see only those in their own schedule.
+        es: >
+          La ficha del paciente muestra las próximas y las últimas citas, con enlace a la
+          semana en la agenda. El profesional ve solo las de su propia agenda.
     - tipo: novo
       modulo: Agenda
       publico: []
-      texto: >
-        Comando simular_movimento para criar agenda e rechamadas fictícias atuais numa clínica
-        de teste.
+      texto:
+        pt-br: >
+          Comando simular_movimento para criar agenda e rechamadas fictícias atuais numa clínica
+          de teste.
+        en: >
+          simular_movimento command to create current fake appointments and recalls in a test
+          clinic.
+        es: >
+          Comando simular_movimento para crear citas y recordatorios ficticios actuales en una
+          clínica de prueba.
 
 - versao: 0.11.0
   data: 2026-10-27
-  titulo: Anonimização de dados para testes
+  titulo:
+    pt-br: Anonimização de dados para testes
+    en: Data anonymization for testing
+    es: Anonimización de datos para pruebas
   itens:
     - tipo: seguranca
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Os dados de uma clínica podem ser anonimizados pelo suporte: nomes, documentos,
-        contatos e endereços dos pacientes são trocados por dados fictícios, de forma
-        definitiva, para que possam ser usados em testes.
+      texto:
+        pt-br: >
+          Os dados de uma clínica podem ser anonimizados pelo suporte: nomes, documentos,
+          contatos e endereços dos pacientes são trocados por dados fictícios, de forma
+          definitiva, para que possam ser usados em testes.
+        en: >
+          Support can anonymize a clinic's data: patients' names, documents, contacts and
+          addresses are permanently replaced with fake data, so they can be used for testing.
+        es: >
+          El soporte puede anonimizar los datos de una clínica: los nombres, documentos,
+          contactos y direcciones de los pacientes se reemplazan de forma definitiva por datos
+          ficticios, para poder usarlos en pruebas.
 
 - versao: 0.10.0
   data: 2026-10-27
-  titulo: Configurações da clínica
+  titulo:
+    pt-br: Configurações da clínica
+    en: Clinic settings
+    es: Configuración de la clínica
   itens:
     - tipo: novo
       modulo: Clínica
       publico: [equipe]
-      texto: >
-        O administrador da clínica altera os dados da clínica e o horário e o intervalo da
-        agenda em Cadastros > Configurações da clínica. Se algum agendamento futuro ficar fora
-        do novo horário, a tela avisa qual antes de salvar.
+      texto:
+        pt-br: >
+          O administrador da clínica altera os dados da clínica e o horário e o intervalo da
+          agenda em Cadastros > Configurações da clínica. Se algum agendamento futuro ficar fora
+          do novo horário, a tela avisa qual antes de salvar.
+        en: >
+          The clinic administrator changes the clinic's details and the schedule hours and slot
+          length in Records > Clinic settings. If a future appointment would fall outside the
+          new hours, the screen says which one before saving.
+        es: >
+          El administrador de la clínica modifica los datos de la clínica y el horario y el
+          intervalo de la agenda en Registros > Configuración de la clínica. Si alguna cita
+          futura quedara fuera del nuevo horario, la pantalla indica cuál antes de guardar.
 
 - versao: 0.9.0
   data: 2026-10-27
-  titulo: Pacientes arquivados e agenda própria do profissional
+  titulo:
+    pt-br: Pacientes arquivados e agenda própria do profissional
+    en: Archived patients and the practitioner's own schedule
+    es: Pacientes archivados y agenda propia del profesional
   itens:
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        O administrador da clínica arquiva pacientes em vez de excluí-los: eles saem das listas,
-        da agenda, dos aniversariantes e das rechamadas, mas todo o histórico fica guardado. Os
-        arquivados aparecem para o administrador na lista de pacientes (Situação: Arquivados) e
-        podem ser restaurados.
+      texto:
+        pt-br: >
+          O administrador da clínica arquiva pacientes em vez de excluí-los: eles saem das listas,
+          da agenda, dos aniversariantes e das rechamadas, mas todo o histórico fica guardado. Os
+          arquivados aparecem para o administrador na lista de pacientes (Situação: Arquivados) e
+          podem ser restaurados.
+        en: >
+          The clinic administrator archives patients instead of deleting them: they leave the
+          lists, the schedule, birthdays and recalls, but the whole history is kept. Archived
+          patients show up for the administrator in the patient list (Status: Archived) and can
+          be restored.
+        es: >
+          El administrador de la clínica archiva pacientes en lugar de eliminarlos: salen de las
+          listas, la agenda, los cumpleaños y los recordatorios, pero todo el historial se
+          conserva. Los archivados aparecen para el administrador en la lista de pacientes
+          (Situación: Archivados) y pueden restaurarse.
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Quando o próprio paciente pedir a exclusão dos seus dados (LGPD), o administrador pode
-        excluir definitivamente um paciente arquivado. Os dados pessoais saem também do registro
-        de auditoria.
+      texto:
+        pt-br: >
+          Quando o próprio paciente pedir a exclusão dos seus dados (LGPD), o administrador pode
+          excluir definitivamente um paciente arquivado. Os dados pessoais saem também do registro
+          de auditoria.
+        en: >
+          When the patient asks for their data to be erased (LGPD), the administrator can
+          permanently delete an archived patient. The personal data also leaves the audit log.
+        es: >
+          Cuando el propio paciente pida la eliminación de sus datos (LGPD), el administrador
+          puede eliminar definitivamente un paciente archivado. Los datos personales también
+          salen del registro de auditoría.
     - tipo: melhoria
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        O profissional vê e altera só a própria agenda. Para isso, o cadastro do profissional
-        precisa estar ligado ao usuário dele (Cadastros > Profissionais). Recepção e
-        administradores continuam vendo todas as agendas.
+      texto:
+        pt-br: >
+          O profissional vê e altera só a própria agenda. Para isso, o cadastro do profissional
+          precisa estar ligado ao usuário dele (Cadastros > Profissionais). Recepção e
+          administradores continuam vendo todas as agendas.
+        en: >
+          Practitioners see and change only their own schedule. For that, the practitioner
+          record must be linked to their user (Records > Practitioners). Front desk and
+          administrators still see every schedule.
+        es: >
+          El profesional ve y modifica solo su propia agenda. Para eso, su registro de
+          profesional debe estar vinculado a su usuario (Registros > Profesionales). La
+          recepción y los administradores siguen viendo todas las agendas.
     - tipo: seguranca
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Tentativas de entrada recusadas ficam registradas por 30 dias e depois são apagadas.
+      texto:
+        pt-br: >
+          Tentativas de entrada recusadas ficam registradas por 30 dias e depois são apagadas.
+        en: >
+          Refused login attempts are kept for 30 days and then deleted.
+        es: >
+          Los intentos de acceso rechazados se registran durante 30 días y luego se eliminan.
 
 - versao: 0.8.1
   data: 2026-10-27
-  titulo: Ajustes na equipe e na importação
+  titulo:
+    pt-br: Ajustes na equipe e na importação
+    en: Team and import fixes
+    es: Ajustes en el equipo y en la importación
   itens:
     - tipo: correcao
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        Os horários bloqueados trazidos do sistema antigo (como "Ocupado") podem ser
-        editados normalmente.
+      texto:
+        pt-br: >
+          Os horários bloqueados trazidos do sistema antigo (como "Ocupado") podem ser
+          editados normalmente.
+        en: >
+          Blocked slots brought from the legacy system (such as "Ocupado") can be edited
+          normally.
+        es: >
+          Los horarios bloqueados traídos del sistema antiguo (como "Ocupado") pueden editarse
+          con normalidad.
     - tipo: correcao
       modulo: Equipe
       publico: [equipe]
-      texto: >
-        Um administrador com a conta desativada não conta mais como o administrador que a
-        clínica precisa ter.
+      texto:
+        pt-br: >
+          Um administrador com a conta desativada não conta mais como o administrador que a
+          clínica precisa ter.
+        en: >
+          An administrator with a disabled account no longer counts as the administrator the
+          clinic must have.
+        es: >
+          Un administrador con la cuenta desactivada ya no cuenta como el administrador que la
+          clínica necesita tener.
 
 - versao: 0.8.0
   data: 2026-10-27
-  titulo: Equipe, troca de senha e importação do sistema antigo
+  titulo:
+    pt-br: Equipe, troca de senha e importação do sistema antigo
+    en: Team, password change and legacy system import
+    es: Equipo, cambio de contraseña e importación del sistema antiguo
   itens:
     - tipo: novo
       modulo: Equipe
       publico: [equipe]
-      texto: >
-        O administrador da clínica cadastra a equipe, escolhe o perfil de cada pessoa
-        (recepção, profissional ou administrador), define senhas e tira o acesso de quem
-        sai (Cadastros > Equipe).
+      texto:
+        pt-br: >
+          O administrador da clínica cadastra a equipe, escolhe o perfil de cada pessoa
+          (recepção, profissional ou administrador), define senhas e tira o acesso de quem
+          sai (Cadastros > Equipe).
+        en: >
+          The clinic administrator registers the team, chooses each person's role (front desk,
+          practitioner or administrator), sets passwords and removes access for those who
+          leave (Records > Team).
+        es: >
+          El administrador de la clínica registra al equipo, elige el perfil de cada persona
+          (recepción, profesional o administrador), define contraseñas y quita el acceso de
+          quien se va (Registros > Equipo).
     - tipo: novo
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Cada pessoa pode trocar a própria senha no menu com o seu nome, no canto da tela.
+      texto:
+        pt-br: >
+          Cada pessoa pode trocar a própria senha no menu com o seu nome, no canto da tela.
+        en: >
+          Everyone can change their own password in the menu with their name, in the corner of
+          the screen.
+        es: >
+          Cada persona puede cambiar su propia contraseña en el menú con su nombre, en la
+          esquina de la pantalla.
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Os pacientes, a agenda e as rechamadas do Odonto System antigo podem ser trazidos
-        para o sistema. O que não tem campo próprio fica nas observações do paciente.
+      texto:
+        pt-br: >
+          Os pacientes, a agenda e as rechamadas do Odonto System antigo podem ser trazidos
+          para o sistema. O que não tem campo próprio fica nas observações do paciente.
+        en: >
+          Patients, the schedule and recalls from the old Odonto System can be brought into the
+          system. Anything without a field of its own goes to the patient's notes.
+        es: >
+          Los pacientes, la agenda y los recordatorios del antiguo Odonto System pueden traerse
+          al sistema. Lo que no tiene un campo propio queda en las observaciones del paciente.
     - tipo: seguranca
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Proteção contra tentativas de adivinhar senhas reforçada.
+      texto:
+        pt-br: >
+          Proteção contra tentativas de adivinhar senhas reforçada.
+        en: >
+          Stronger protection against password-guessing attempts.
+        es: >
+          Protección reforzada contra los intentos de adivinar contraseñas.
     - tipo: correcao
       modulo: Geral
       publico: [equipe]
-      texto: >
-        Algumas buscas e formulários com dados incomuns mostravam uma página de erro.
+      texto:
+        pt-br: >
+          Algumas buscas e formulários com dados incomuns mostravam uma página de erro.
+        en: >
+          Some searches and forms with unusual data showed an error page.
+        es: >
+          Algunas búsquedas y formularios con datos poco comunes mostraban una página de error.
 
 - versao: 0.7.0
   data: 2026-10-26
-  titulo: Auditoria e segurança (fim da fase 1)
+  titulo:
+    pt-br: Auditoria e segurança (fim da fase 1)
+    en: Audit log and security (end of phase 1)
+    es: Auditoría y seguridad (fin de la fase 1)
   itens:
     - tipo: novo
       modulo: Auditoria
       publico: [equipe]
-      texto: >
-        O administrador da clínica consulta quem criou, alterou, excluiu ou abriu cada
-        registro, quando e o que mudou (Cadastros > Auditoria). Os registros não podem ser
-        alterados.
+      texto:
+        pt-br: >
+          O administrador da clínica consulta quem criou, alterou, excluiu ou abriu cada
+          registro, quando e o que mudou (Cadastros > Auditoria). Os registros não podem ser
+          alterados.
+        en: >
+          The clinic administrator sees who created, changed, deleted or opened each record,
+          when and what changed (Records > Audit log). Entries cannot be changed.
+        es: >
+          El administrador de la clínica consulta quién creó, modificó, eliminó o abrió cada
+          registro, cuándo y qué cambió (Registros > Auditoría). Los registros no se pueden
+          modificar.
     - tipo: seguranca
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Depois de 5 tentativas com senha errada, o acesso daquele usuário fica bloqueado
-        por 1 hora.
+      texto:
+        pt-br: >
+          Depois de 5 tentativas com senha errada, o acesso daquele usuário fica bloqueado
+          por 1 hora.
+        en: >
+          After 5 attempts with a wrong password, that user's access is blocked for 1 hour.
+        es: >
+          Después de 5 intentos con una contraseña incorrecta, el acceso de ese usuario queda
+          bloqueado durante 1 hora.
     - tipo: melhoria
       modulo: Novidades
       publico: [equipe]
-      texto: >
-        Aviso de versão nova no topo das telas até você abrir as Novidades, e filtro das
-        novidades por módulo.
+      texto:
+        pt-br: >
+          Aviso de versão nova no topo das telas até você abrir as Novidades, e filtro das
+          novidades por módulo.
+        en: >
+          New version notice at the top of the screens until you open What's new, and a filter
+          of the release notes by module.
+        es: >
+          Aviso de versión nueva en la parte superior de las pantallas hasta que abra las
+          Novedades, y filtro de las novedades por módulo.
 
 - versao: 0.6.0
   data: 2026-10-26
-  titulo: Rechamadas e aniversariantes
+  titulo:
+    pt-br: Rechamadas e aniversariantes
+    en: Recalls and birthdays
+    es: Recordatorios y cumpleaños
   itens:
     - tipo: novo
       modulo: Rechamadas
       publico: [equipe]
-      texto: >
-        Cadastro de rechamadas (retornos) por paciente, com lista de pendentes, atrasadas e
-        concluídas, filtros por período e botão para concluir. Também aparecem na ficha do paciente.
+      texto:
+        pt-br: >
+          Cadastro de rechamadas (retornos) por paciente, com lista de pendentes, atrasadas e
+          concluídas, filtros por período e botão para concluir. Também aparecem na ficha do
+          paciente.
+        en: >
+          Recalls (follow-up visits) per patient, with lists of pending, overdue and done ones,
+          period filters and a button to mark them done. They also show in the patient record.
+        es: >
+          Registro de recordatorios (regresos) por paciente, con lista de pendientes, atrasados
+          y completados, filtros por período y botón para completarlos. También aparecen en la
+          ficha del paciente.
     - tipo: novo
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        As rechamadas pendentes aparecem no cabeçalho de cada dia da agenda (📞), ao lado
-        dos aniversariantes (🎂). Clique para ver a lista.
+      texto:
+        pt-br: >
+          As rechamadas pendentes aparecem no cabeçalho de cada dia da agenda (📞), ao lado
+          dos aniversariantes (🎂). Clique para ver a lista.
+        en: >
+          Pending recalls show in the header of each day in the schedule (📞), next to the
+          birthdays (🎂). Click to see the list.
+        es: >
+          Los recordatorios pendientes aparecen en el encabezado de cada día de la agenda (📞),
+          junto a los cumpleaños (🎂). Haga clic para ver la lista.
     - tipo: novo
       modulo: Aniversariantes
       publico: [equipe]
-      texto: >
-        Consulta dos aniversariantes por mês, com a idade que cada paciente completa,
-        telefone e e-mail. Os de hoje ficam destacados.
+      texto:
+        pt-br: >
+          Consulta dos aniversariantes por mês, com a idade que cada paciente completa,
+          telefone e e-mail. Os de hoje ficam destacados.
+        en: >
+          Birthdays by month, with the age each patient turns, phone and e-mail. Today's are
+          highlighted.
+        es: >
+          Consulta de los cumpleaños por mes, con la edad que cumple cada paciente, teléfono y
+          correo electrónico. Los de hoy aparecen destacados.
 
 - versao: 0.5.0
   data: 2026-10-26
-  titulo: Agenda
+  titulo:
+    pt-br: Agenda
+    en: Schedule
+    es: Agenda
   itens:
     - tipo: novo
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        Agenda semanal por profissional, com as cores dos tipos de atendimento. Clique em um
-        horário livre (ou arraste sobre vários) para agendar; clique em um agendamento para
-        editar. No celular, a agenda abre na visão do dia.
+      texto:
+        pt-br: >
+          Agenda semanal por profissional, com as cores dos tipos de atendimento. Clique em um
+          horário livre (ou arraste sobre vários) para agendar; clique em um agendamento para
+          editar. No celular, a agenda abre na visão do dia.
+        en: >
+          Weekly schedule per practitioner, with the appointment type colors. Click a free slot
+          (or drag over several) to book; click an appointment to edit it. On mobile phones the
+          schedule opens in the day view.
+        es: >
+          Agenda semanal por profesional, con los colores de los tipos de atención. Haga clic
+          en un horario libre (o arrastre sobre varios) para agendar; haga clic en una cita
+          para editarla. En el celular, la agenda se abre en la vista del día.
     - tipo: novo
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        Repetição semanal ("repetir por N semanas") e exclusão de um agendamento ou dele e
-        dos próximos da mesma repetição.
+      texto:
+        pt-br: >
+          Repetição semanal ("repetir por N semanas") e exclusão de um agendamento ou dele e
+          dos próximos da mesma repetição.
+        en: >
+          Weekly repetition ("repeat for N weeks") and deleting one appointment or it and the
+          next ones of the same series.
+        es: >
+          Repetición semanal ("repetir durante N semanas") y eliminación de una cita o de ella
+          y las próximas de la misma repetición.
     - tipo: novo
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        O sistema impede dois agendamentos no mesmo horário para o mesmo profissional e
-        mostra com quem é o conflito. Se uma das repetições conflitar, nada é gravado.
+      texto:
+        pt-br: >
+          O sistema impede dois agendamentos no mesmo horário para o mesmo profissional e
+          mostra com quem é o conflito. Se uma das repetições conflitar, nada é gravado.
+        en: >
+          The system prevents two appointments at the same time for the same practitioner and
+          shows who the conflict is with. If one of the repetitions conflicts, nothing is saved.
+        es: >
+          El sistema impide dos citas en el mismo horario para el mismo profesional y muestra
+          con quién es el conflicto. Si una de las repeticiones entra en conflicto, no se
+          guarda nada.
     - tipo: novo
       modulo: Agenda
       publico: [equipe]
-      texto: >
-        Busca do paciente enquanto você digita e aniversariantes do dia (🎂) no cabeçalho de
-        cada dia da agenda.
+      texto:
+        pt-br: >
+          Busca do paciente enquanto você digita e aniversariantes do dia (🎂) no cabeçalho de
+          cada dia da agenda.
+        en: >
+          Patient search as you type, and the day's birthdays (🎂) in the header of each day in
+          the schedule.
+        es: >
+          Búsqueda del paciente mientras escribe y cumpleaños del día (🎂) en el encabezado de
+          cada día de la agenda.
 
 - versao: 0.4.0
   data: 2026-10-26
-  titulo: Cadastro de pacientes
+  titulo:
+    pt-br: Cadastro de pacientes
+    en: Patient records
+    es: Registro de pacientes
   itens:
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Cadastro de pacientes pessoa física ou jurídica, com documentos, contatos, endereço
-        (escolha a UF e a cidade é filtrada) e observações. A ficha mostra a idade.
+      texto:
+        pt-br: >
+          Cadastro de pacientes pessoa física ou jurídica, com documentos, contatos, endereço
+          (escolha a UF e a cidade é filtrada) e observações. A ficha mostra a idade.
+        en: >
+          Patient records for individuals or companies, with documents, contacts, address
+          (choose the state and the city list is filtered) and notes. The record shows the age.
+        es: >
+          Registro de pacientes, personas físicas o jurídicas, con documentos, contactos,
+          dirección (elija el estado y la ciudad se filtra) y observaciones. La ficha muestra
+          la edad.
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Busca por nome (sem precisar de acentos), código ou CPF/CNPJ, com filtros por tipo
-        e situação. CPF e CNPJ podem ser digitados com ou sem pontuação.
+      texto:
+        pt-br: >
+          Busca por nome (sem precisar de acentos), código ou CPF/CNPJ, com filtros por tipo
+          e situação. CPF e CNPJ podem ser digitados com ou sem pontuação.
+        en: >
+          Search by name (accents not needed), code or CPF/CNPJ, with filters by type and
+          status. CPF and CNPJ can be typed with or without punctuation.
+        es: >
+          Búsqueda por nombre (sin necesidad de acentos), código o CPF/CNPJ, con filtros por
+          tipo y situación. El CPF y el CNPJ pueden escribirse con o sin puntuación.
     - tipo: novo
       modulo: Pacientes
       publico: [equipe]
-      texto: >
-        Validação de CPF e CNPJ, inclusive do novo CNPJ com letras, e aviso de CPF/CNPJ
-        já cadastrado na clínica.
+      texto:
+        pt-br: >
+          Validação de CPF e CNPJ, inclusive do novo CNPJ com letras, e aviso de CPF/CNPJ
+          já cadastrado na clínica.
+        en: >
+          CPF and CNPJ validation, including the new CNPJ with letters, and a warning when the
+          CPF/CNPJ is already registered in the clinic.
+        es: >
+          Validación de CPF y CNPJ, incluido el nuevo CNPJ con letras, y aviso de CPF/CNPJ ya
+          registrado en la clínica.
 
 - versao: 0.3.0
   data: 2026-10-26
-  titulo: Tabelas base e tipos de atendimento
+  titulo:
+    pt-br: Tabelas base e tipos de atendimento
+    en: Base tables and appointment types
+    es: Tablas base y tipos de atención
   itens:
     - tipo: novo
       modulo: Tipos de atendimento
       publico: [equipe]
-      texto: >
-        Cada clínica tem seus tipos de atendimento (cirurgia, consulta inicial…) com a cor que
-        aparecerá na agenda. Clínicas novas já começam com os 10 tipos do sistema antigo.
+      texto:
+        pt-br: >
+          Cada clínica tem seus tipos de atendimento (cirurgia, consulta inicial…) com a cor que
+          aparecerá na agenda. Clínicas novas já começam com os 10 tipos do sistema antigo.
+        en: >
+          Each clinic has its own appointment types (surgery, first visit…) with the color shown
+          in the schedule. New clinics start with the 10 types of the legacy system.
+        es: >
+          Cada clínica tiene sus tipos de atención (cirugía, consulta inicial…) con el color que
+          aparecerá en la agenda. Las clínicas nuevas comienzan con los 10 tipos del sistema
+          antiguo.
     - tipo: novo
       modulo: Tabelas base
       publico: [equipe]
-      texto: >
-        Consulta das cidades brasileiras (lista oficial do IBGE) e dos bancos (lista do Banco
-        Central), com busca que ignora acentos. Ficam no novo menu Cadastros.
+      texto:
+        pt-br: >
+          Consulta das cidades brasileiras (lista oficial do IBGE) e dos bancos (lista do Banco
+          Central), com busca que ignora acentos. Ficam no novo menu Cadastros.
+        en: >
+          Brazilian cities (official IBGE list) and banks (Central Bank list), with a search
+          that ignores accents. They are in the new Records menu.
+        es: >
+          Consulta de las ciudades brasileñas (lista oficial del IBGE) y de los bancos (lista del
+          Banco Central), con búsqueda que ignora los acentos. Están en el nuevo menú Registros.
 
 - versao: 0.2.0
   data: 2026-10-26
-  titulo: Várias clínicas, perfis de acesso e cadastro de profissionais
+  titulo:
+    pt-br: Várias clínicas, perfis de acesso e cadastro de profissionais
+    en: Several clinics, access roles and practitioner records
+    es: Varias clínicas, perfiles de acceso y registro de profesionales
   itens:
     - tipo: novo
       modulo: Clínicas
       publico: [equipe]
-      texto: >
-        O sistema agora atende várias clínicas. Cada pessoa vê somente os dados das clínicas
-        em que trabalha; quem atende em mais de uma troca de clínica pelo menu superior.
+      texto:
+        pt-br: >
+          O sistema agora atende várias clínicas. Cada pessoa vê somente os dados das clínicas
+          em que trabalha; quem atende em mais de uma troca de clínica pelo menu superior.
+        en: >
+          The system now serves several clinics. Each person sees only the data of the clinics
+          they work in; those who work in more than one switch clinics in the top menu.
+        es: >
+          El sistema ahora atiende a varias clínicas. Cada persona ve solo los datos de las
+          clínicas en las que trabaja; quien atiende en más de una cambia de clínica en el menú
+          superior.
     - tipo: novo
       modulo: Permissões
       publico: [equipe]
-      texto: >
-        Perfis de acesso por clínica: administrador, recepção e profissional. Cada perfil
-        vê apenas as telas e os botões que pode usar.
+      texto:
+        pt-br: >
+          Perfis de acesso por clínica: administrador, recepção e profissional. Cada perfil
+          vê apenas as telas e os botões que pode usar.
+        en: >
+          Access roles per clinic: administrator, front desk and practitioner. Each role sees
+          only the screens and buttons it may use.
+        es: >
+          Perfiles de acceso por clínica: administrador, recepción y profesional. Cada perfil
+          ve solo las pantallas y los botones que puede usar.
     - tipo: novo
       modulo: Profissionais
       publico: [equipe]
-      texto: >
-        Cadastro dos profissionais da clínica, com registro (CRO, CRM…), cor usada na agenda
-        e usuário de acesso. Profissionais inativos ficam escondidos sem perder o histórico.
+      texto:
+        pt-br: >
+          Cadastro dos profissionais da clínica, com registro (CRO, CRM…), cor usada na agenda
+          e usuário de acesso. Profissionais inativos ficam escondidos sem perder o histórico.
+        en: >
+          The clinic's practitioners, with professional license (CRO, CRM…), schedule color and
+          login user. Inactive practitioners are hidden without losing their history.
+        es: >
+          Registro de los profesionales de la clínica, con registro profesional (CRO, CRM…),
+          color usado en la agenda y usuario de acceso. Los profesionales inactivos quedan
+          ocultos sin perder el historial.
     - tipo: seguranca
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Reforço na separação dos dados entre clínicas.
+      texto:
+        pt-br: >
+          Reforço na separação dos dados entre clínicas.
+        en: >
+          Stronger separation of data between clinics.
+        es: >
+          Refuerzo en la separación de los datos entre clínicas.
 
 - versao: 0.1.0
   data: 2026-10-26
-  titulo: Primeira versão do novo sistema
+  titulo:
+    pt-br: Primeira versão do novo sistema
+    en: First version of the new system
+    es: Primera versión del nuevo sistema
   itens:
     - tipo: novo
       modulo: Acesso
       publico: [equipe]
-      texto: >
-        Entrada no sistema com usuário e senha. As senhas são guardadas com criptografia
-        moderna e a sessão expira após 8 horas ou ao fechar o navegador.
+      texto:
+        pt-br: >
+          Entrada no sistema com usuário e senha. As senhas são guardadas com criptografia
+          moderna e a sessão expira após 8 horas ou ao fechar o navegador.
+        en: >
+          Login with username and password. Passwords are stored with modern encryption and
+          the session expires after 8 hours or when the browser is closed.
+        es: >
+          Acceso al sistema con usuario y contraseña. Las contraseñas se guardan con cifrado
+          moderno y la sesión expira después de 8 horas o al cerrar el navegador.
     - tipo: novo
       modulo: Novidades
       publico: [equipe, paciente]
-      texto: >
-        Página de Novidades com o que mudou em cada versão. A versão atual aparece no
-        rodapé; clique nela para ver os detalhes.
+      texto:
+        pt-br: >
+          Página de Novidades com o que mudou em cada versão. A versão atual aparece no
+          rodapé; clique nela para ver os detalhes.
+        en: >
+          What's new page with the changes in each version. The current version shows in the
+          footer; click it to see the details.
+        es: >
+          Página de Novedades con lo que cambió en cada versión. La versión actual aparece en el
+          pie de página; haga clic en ella para ver los detalles.
     - tipo: novo
       modulo: Documentação
       publico: []
-      texto: >
-        Estrutura do projeto, Docker, documentação, decisões de arquitetura e plano da fase 1.
+      texto:
+        pt-br: >
+          Estrutura do projeto, Docker, documentação, decisões de arquitetura e plano da fase 1.
+        en: >
+          Project structure, Docker, documentation, architecture decisions and the phase 1 plan.
+        es: >
+          Estructura del proyecto, Docker, documentación, decisiones de arquitectura y plan de
+          la fase 1.

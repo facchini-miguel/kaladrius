@@ -3,6 +3,8 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeBoundary, RangeOperators
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ModeloDaClinica, sem_isolamento
 from apps.core.validadores import validar_cor
@@ -26,13 +28,13 @@ TIPOS_PADRAO = [
 class TipoAtendimento(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    nome = models.CharField("nome", max_length=60)
-    cor = models.CharField("cor", max_length=7, default="#0d6efd", validators=[validar_cor])
-    ativo = models.BooleanField("ativo", default=True)
+    nome = models.CharField(_("nome"), max_length=60)
+    cor = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validar_cor])
+    ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
-        verbose_name = "tipo de atendimento"
-        verbose_name_plural = "tipos de atendimento"
+        verbose_name = _("tipo de atendimento")
+        verbose_name_plural = _("tipos de atendimento")
         ordering = ["nome"]
         constraints = [
             models.UniqueConstraint(fields=["clinica", "nome"], name="tipo_atendimento_unico"),
@@ -54,41 +56,41 @@ class Agendamento(ModeloDaClinica):
         "profissionais.Profissional",
         on_delete=models.PROTECT,
         related_name="agendamentos",
-        verbose_name="profissional",
+        verbose_name=_("profissional"),
     )
     tipo = models.ForeignKey(
         TipoAtendimento,
         on_delete=models.PROTECT,
         related_name="agendamentos",
-        verbose_name="tipo de atendimento",
+        verbose_name=_("tipo de atendimento"),
     )
-    inicio = models.DateTimeField("início")
-    fim = models.DateTimeField("fim")
+    inicio = models.DateTimeField(_("início"))
+    fim = models.DateTimeField(_("fim"))
     paciente = models.ForeignKey(
         "pacientes.Paciente",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="agendamentos",
-        verbose_name="paciente",
+        verbose_name=_("paciente"),
     )
-    descricao = models.TextField("descrição", blank=True)
+    descricao = models.TextField(_("descrição"), blank=True)
     # Appointments created together by "repeat N weeks" share the same series id.
-    serie = models.UUIDField("série", null=True, blank=True, editable=False)
+    serie = models.UUIDField(_("série"), null=True, blank=True, editable=False)
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name="criado por",
+        verbose_name=_("criado por"),
     )
-    criado_em = models.DateTimeField("criado em", auto_now_add=True)
-    alterado_em = models.DateTimeField("alterado em", auto_now=True)
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        verbose_name = "agendamento"
-        verbose_name_plural = "agendamentos"
+        verbose_name = _("agendamento")
+        verbose_name_plural = _("agendamentos")
         ordering = ["inicio"]
         indexes = [
             models.Index(
@@ -107,7 +109,7 @@ class Agendamento(ModeloDaClinica):
                     (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
                     ("profissional", RangeOperators.EQUAL),
                 ],
-                violation_error_message="O profissional já tem um agendamento neste horário.",
+                violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),
         ]
 
@@ -118,7 +120,7 @@ class Agendamento(ModeloDaClinica):
     def titulo(self):
         if self.paciente_id:
             return self.paciente.nome
-        return (self.descricao.strip().splitlines() or ["Horário reservado"])[0]
+        return (self.descricao.strip().splitlines() or [gettext("Horário reservado")])[0]
 
 
 def criar_tipos_padrao(clinica):

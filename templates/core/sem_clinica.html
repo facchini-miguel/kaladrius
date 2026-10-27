@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Sem clínica · Medical System{% endblock %}
+{% block titulo %}{% translate "Sem clínica" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">Nenhuma clínica disponível</h1>
-<p>Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica.</p>
-<p><a href="{% url 'inicio' %}">Voltar ao início</a></p>
+<h1 class="h3 mb-3">{% translate "Nenhuma clínica disponível" %}</h1>
+<p>{% translate "Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica." %}</p>
+<p><a href="{% url 'inicio' %}">{% translate "Voltar ao início" %}</a></p>
 {% endblock %}

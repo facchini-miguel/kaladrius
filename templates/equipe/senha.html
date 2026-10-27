@@ -1,16 +1,17 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Nova senha · Equipe · Medical System{% endblock %}
+{% block titulo %}{% translate "Nova senha" %} · {% translate "Equipe" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-1">Nova senha</h1>
+<h1 class="h3 mb-1">{% translate "Nova senha" %}</h1>
 <p class="text-body-secondary mb-4">{{ vinculo.usuario.get_full_name|default:vinculo.usuario.username }} ({{ vinculo.usuario.username }})</p>
 
 <form method="post" style="max-width: 28rem;" novalidate>
   {% csrf_token %}
   {% include "includes/formulario.html" %}
-  <p class="text-body-secondary small">A pessoa sai do sistema nos aparelhos em que estiver conectada.</p>
-  <button type="submit" class="btn btn-primary">Salvar</button>
-  <a class="btn btn-link" href="{% url 'equipe:editar' vinculo.pk %}">Cancelar</a>
+  <p class="text-body-secondary small">{% translate "A pessoa sai do sistema nos aparelhos em que estiver conectada." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'equipe:editar' vinculo.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

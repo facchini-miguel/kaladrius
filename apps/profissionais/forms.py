@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 
@@ -30,6 +31,6 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
             outros = Profissional.objects.filter(usuario=usuario).exclude(pk=self.instance.pk)
             if outros.exists():
                 raise forms.ValidationError(
-                    "Este usuário já está ligado a outro profissional desta clínica."
+                    _("Este usuário já está ligado a outro profissional desta clínica.")
                 )
         return usuario

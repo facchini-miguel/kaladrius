@@ -32,6 +32,7 @@ The two communicate **only through the API**.
 | Web interactivity | HTMX | BSD |
 | Schedule calendar | FullCalendar (free plugins only) | MIT |
 | Styling | Bootstrap 5 | MIT |
+| Languages | Django translation (gettext); files compiled with GNU gettext, as a build tool only | BSD (Django); GPL (tool, not a code dependency) |
 | Application server | Gunicorn | MIT |
 | Static files | WhiteNoise | MIT |
 | Login attempt limiting | django-axes | MIT |
@@ -40,6 +41,13 @@ The two communicate **only through the API**.
 | Lint and formatting | Ruff | MIT |
 
 Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
+
+## Languages (version 0.13.0, decision 049)
+- The interface exists in **Portuguese** (source text, written in the code), **English** and **Spanish**. Translations live in `locale/en/` and `locale/es/` (`django.po`); compiled files (`.mo`) are not in Git: they are built in the image and in CI.
+- Each user chooses the language in the menu with their name; the choice is stored in the profile (`Usuario.idioma`) and in a cookie (for the login page). Without a choice, the browser's language is used.
+- Dates use the language's formats (`SHORT_DATE_FORMAT`); the schedule uses the matching FullCalendar locale; What's new has each text in the three languages.
+- Kept in Portuguese: data (appointment type names, descriptions, cities), the audit log and the messages of terminal commands.
+- CI fails if a new text was not extracted (`makemessages`) and a test fails if a translation is missing.
 
 ## Runtime (Docker Compose)
 

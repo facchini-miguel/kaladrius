@@ -28,25 +28,32 @@ O arquivo [`../../releases.yaml`](../../releases.yaml) é a **única fonte** do 
 ```yaml
 - versao: 1.5.0
   data: 2027-03-10
-  titulo: Lembretes de retorno no app
+  titulo:
+    pt-br: Lembretes de retorno no app
+    en: Recall reminders in the app
+    es: Recordatorios de regreso en la app
   itens:
     - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas
+      modulo: Rechamadas    # um dos nomes de MODULOS em apps/novidades/releases.py
       publico: [equipe, paciente]
-      texto: >
-        O paciente recebe no celular um aviso 7 dias antes da data de retorno.
-        A clínica escolhe a mensagem em Configurações > Rechamadas.
+      texto:
+        pt-br: >
+          O paciente recebe no celular um aviso 7 dias antes da data de retorno.
+        en: >
+          Patients get a notice on their phone 7 days before the recall date.
+        es: >
+          El paciente recibe en el celular un aviso 7 días antes de la fecha de regreso.
 ```
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
 | `versao` | sim | Número no formato `MAIOR.MENOR.CORREÇÃO` |
 | `data` | sim | Data da publicação (AAAA-MM-DD) |
-| `titulo` | não | Destaque da versão, numa frase |
+| `titulo` | não | Destaque da versão, numa frase, nos três idiomas |
 | `itens[].tipo` | sim | `novo`, `melhoria`, `correcao` ou `seguranca` |
-| `itens[].modulo` | sim | Área do sistema (Agenda, Pacientes…) |
+| `itens[].modulo` | sim | Área do sistema (Agenda, Pacientes…), em português; a tela mostra a tradução |
 | `itens[].publico` | sim | Quem vê o item: `equipe`, `paciente` ou ambos |
-| `itens[].texto` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar |
+| `itens[].texto` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar. Um texto por idioma (`pt-br`, `en`, `es`); um teste exige os três |
 
 ### Regras de escrita
 - Escrever para o **usuário**, não para o programador. Por exemplo, "A agenda agora mostra…", e não "Refatorado o componente X".

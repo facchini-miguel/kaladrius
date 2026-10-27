@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}{% if rechamada.pk %}Editar{% else %}Nova{% endif %} rechamada · Medical System{% endblock %}
+{% block titulo %}{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">{% if rechamada.pk %}Editar rechamada{% else %}Nova rechamada{% endif %}</h1>
+<h1 class="h3 mb-4">{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %}</h1>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   <input type="hidden" name="next" value="{{ next }}">
@@ -12,7 +13,7 @@
   {% with campo=form.data %}{% include "includes/campo.html" %}{% endwith %}
   {% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}
   {% if rechamada.pk %}{% with campo=form.concluida %}{% include "includes/campo.html" %}{% endwith %}{% endif %}
-  <button type="submit" class="btn btn-primary">Salvar</button>
-  <a class="btn btn-link" href="{{ next|default:'/rechamadas/' }}">Cancelar</a>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{{ next|default:'/rechamadas/' }}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

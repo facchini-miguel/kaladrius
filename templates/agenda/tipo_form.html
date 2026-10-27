@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}{% if tipo.pk %}Editar{% else %}Novo{% endif %} tipo de atendimento · Medical System{% endblock %}
+{% block titulo %}{% if tipo.pk %}{% translate "Editar tipo de atendimento" %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">{% if tipo.pk %}Editar {{ tipo.nome }}{% else %}Novo tipo de atendimento{% endif %}</h1>
+<h1 class="h3 mb-4">{% if tipo.pk %}{% blocktranslate with nome=tipo.nome %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/formulario.html" %}
-  <button type="submit" class="btn btn-primary">Salvar</button>
-  <a class="btn btn-link" href="{% url 'agenda:tipos' %}">Cancelar</a>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'agenda:tipos' %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

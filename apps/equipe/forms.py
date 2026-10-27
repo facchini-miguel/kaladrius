@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 from apps.core.models import Papel, Usuario, Vinculo
@@ -22,7 +23,7 @@ def conta_exclusiva(usuario, clinica):
 class NovoMembroForm(FormularioBootstrap, UserCreationForm):
     """A new user account, created already linked to the current clinic with a role."""
 
-    papel = forms.ChoiceField(label="Perfil", choices=Papel.choices, initial=Papel.RECEPCAO)
+    papel = forms.ChoiceField(label=_("Perfil"), choices=Papel.choices, initial=Papel.RECEPCAO)
 
     class Meta(UserCreationForm.Meta):
         model = Usuario
@@ -48,7 +49,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Vinculo
         fields = ["papel", "ativo"]
-        labels = {"ativo": "Acesso a esta clínica liberado"}
+        labels = {"ativo": _("Acesso a esta clínica liberado")}
 
     def __init__(self, *args, editor, **kwargs):
         super().__init__(*args, **kwargs)
@@ -57,7 +58,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
             # Nobody removes their own administrator role or access by accident.
             for campo in self.fields.values():
                 campo.disabled = True
-                campo.help_text = "Você não pode alterar o próprio perfil."
+                campo.help_text = _("Você não pode alterar o próprio perfil.")
 
     def clean(self):
         dados = super().clean()
@@ -73,7 +74,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
             ).exclude(pk=self.instance.pk)
             if not outros.exists():
                 raise forms.ValidationError(
-                    "A clínica precisa de pelo menos um administrador ativo."
+                    _("A clínica precisa de pelo menos um administrador ativo.")
                 )
         return dados
 

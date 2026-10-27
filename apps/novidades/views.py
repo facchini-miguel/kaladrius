@@ -7,7 +7,7 @@ from . import releases
 @login_required
 def lista(request):
     versoes = releases.para_publico("equipe")
-    modulos = sorted({item.modulo for _, itens in versoes for item in itens})
+    modulos = sorted({(item.modulo, item.modulo_nome) for _, itens in versoes for item in itens})
     modulo = request.GET.get("modulo", "")
     if modulo:
         versoes = [

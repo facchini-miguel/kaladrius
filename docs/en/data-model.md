@@ -75,6 +75,9 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).
 - **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
 
+## User language
+`Usuario.idioma` stores the chosen language (`pt-br`, `en`, `es` or empty to follow the browser). It is not audited, like the last version seen.
+
 ## Patient record
 Shows identification, contact, notes, the next and the latest 10 appointments (version 0.12.0; for practitioners, only those in their own schedule, linking to the week in the schedule) and the recalls.
 

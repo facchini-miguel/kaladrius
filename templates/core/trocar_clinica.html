@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block titulo %}Escolher clínica · Medical System{% endblock %}
+{% block titulo %}{% translate "Escolher clínica" %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">Escolha a clínica</h1>
+<h1 class="h3 mb-4">{% translate "Escolha a clínica" %}</h1>
 
 <div class="list-group" style="max-width: 32rem;">
   {% for clinica in clinicas %}
@@ -16,7 +17,7 @@
     </button>
   </form>
   {% empty %}
-  <p class="text-body-secondary">Nenhuma clínica ativa disponível para você.</p>
+  <p class="text-body-secondary">{% translate "Nenhuma clínica ativa disponível para você." %}</p>
   {% endfor %}
 </div>
 {% endblock %}

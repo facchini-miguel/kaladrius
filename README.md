@@ -8,7 +8,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Current version: 0.12.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+**Current version: 0.13.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **phase 1 complete** (feature parity with the legacy system), running at https://medical-system.duckdns.org (Google Cloud free tier, IPv6 only). See [docs/en/deploy.md](docs/en/deploy.md).
 
@@ -27,6 +27,8 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 | Task | Command |
 |---|---|
 | Test data (fake clinics, users, practitioners, 600 patients per clinic, 6 weeks of appointments and recalls) | `docker compose exec app python manage.py popular_dados_teste` |
+| Compile the translations (after `git pull` or changing texts; the image does it at build time) | `docker compose exec app python manage.py compilemessages` |
+| Extract new texts for translation (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
 | Delete the test data (never touches real clinics or users) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |
 | Import the legacy Odonto System data into a new clinic (see [docs/en/legacy-system.md](docs/en/legacy-system.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Name" < dump.sql` |
 | Anonymize a clinic's data to use it for testing (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Name" --confirmar` |
