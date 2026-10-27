@@ -94,6 +94,15 @@ gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --comma
 ```
 Depois, vincule o administrador da clínica no admin do Django (Vínculos) e cadastre a equipe em Cadastros > Equipe. O superusuário já acessa a clínica pelo seletor de clínicas.
 
+### Anonimizar os dados importados
+Os dados da Clínica Sorriso servem só como dados de teste (decisão 047). Para anonimizá-los (irreversível; ver [sistema-legado.md](sistema-legado.md)):
+
+```bash
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py anonimizar_clinica --clinica "Clínica Sorriso" --confirmar'
+```
+Rodar antes do backup diário seguinte à importação (06:00 UTC) evita que algum backup guarde os dados reais.
+
 ### Restaurar um backup
 ```bash
 # Na VM (substitui o banco atual!)

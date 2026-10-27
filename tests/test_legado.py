@@ -10,6 +10,7 @@ from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.auditoria.models import RegistroAuditoria
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Clinica
+from apps.legado.anonimizacao import RECHAMADAS
 from apps.legado.dump import DumpInvalido, ler_tabelas
 from apps.legado.importacao import ImportacaoRecusada, _documento, importar
 from apps.pacientes.models import Paciente
@@ -265,3 +266,72 @@ def test_comando(db, tmp_path, capsys):
         call_command("importar_legado", str(arquivo), clinica="Pelo Comando")
     with pytest.raises(CommandError):
         call_command("importar_legado", str(tmp_path / "nao-existe.sql"), clinica="X")
+
+
+# --- Anonymization -----------------------------------------------------------------
+
+
+def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
+    _, clinica = importado
+    antes = {
+        "pacientes": dados(clinica, Paciente),
+        "agendamentos": dados(clinica, Agendamento),
+        "profissionais": dados(clinica, Profissional),
+    }
+    with pytest.raises(CommandError):
+        call_command("anonimizar_clinica", clinica=clinica.nome)
+    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+
+    pacientes = dados(clinica, Paciente)
+    assert [p.pk for p in pacientes] == [p.pk for p in antes["pacientes"]]
+    originais = [
+        "Ávila",
+        "Duplicada",
+        "Bia CPF",
+        "Empresa Teste",
+        "01234567890",
+        "11222333000181",
+        "4830001111",
+        "joao@example.com",
+        "Beira-Mar",
+        "Trindade",
+        "Sistema antigo",
+    ]
+    texto = str([vars(p) for p in pacientes])
+    assert not [trecho for trecho in originais if trecho in texto]
+    for velho, novo in zip(antes["pacientes"], pacientes, strict=True):
+        assert (novo.tipo, novo.sexo, novo.ativo, novo.cidade_id) == (
+            velho.tipo,
+            velho.sexo,
+            velho.ativo,
+            velho.cidade_id,
+        )
+        assert bool(novo.cpf_cnpj) == bool(velho.cpf_cnpj)
+        assert bool(novo.telefone_residencial) == bool(velho.telefone_residencial)
+        if velho.data_nascimento:
+            assert abs((novo.data_nascimento - velho.data_nascimento).days) <= 180
+    joao = next(p for p in pacientes if p.pk == antes["pacientes"][0].pk)
+    assert joao.telefone_residencial.startswith("48")  # area code kept
+    assert len(joao.cpf_cnpj) == 11
+
+    agendamentos = dados(clinica, Agendamento)
+    assert [(a.inicio, a.fim, a.profissional_id) for a in agendamentos] == [
+        (a.inicio, a.fim, a.profissional_id) for a in antes["agendamentos"]
+    ]
+    descricoes = [a.descricao for a in agendamentos]
+    assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
+    assert not [d for d in descricoes if "Fulano" in d or "Até tarde" in d]
+    assert {r.descricao for r in dados(clinica, Rechamada)} <= set(RECHAMADAS)
+    nomes = [p.nome for p in dados(clinica, Profissional)]
+    assert "Dr Teste" not in nomes and len(nomes) == len(antes["profissionais"])
+
+    # The audit no longer holds the original values; the anonymization is recorded.
+    registros = RegistroAuditoria.objects.filter(clinica=clinica)
+    assert not registros.filter(modelo="Paciente").exists()
+    assert not registros.filter(objeto_descricao__startswith="Importação").exists()
+    assert registros.filter(objeto_descricao__startswith="Dados anonimizados: 4 pacientes").exists()
+
+
+def test_anonimizar_clinica_inexistente(db):
+    with pytest.raises(CommandError, match="não encontrada"):
+        call_command("anonimizar_clinica", clinica="Não existe", confirmar=True)

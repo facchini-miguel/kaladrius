@@ -53,6 +53,16 @@ docker compose exec -T app python manage.py importar_legado - --clinica "Nome da
 
 Resultado com o dump de 06/11/2019, no ambiente **local** (27/10/2026): 1.093 pacientes, 18.590 agendamentos (2010–2020), 41 rechamadas e 2 profissionais. Ficaram de fora 1 agendamento sem profissional e 1 rechamada de paciente apagado; 37 CPF/CNPJ inválidos ou repetidos foram para as observações; a agenda passou a ir até 22:00. **Produção:** importado em 27/10/2026 na "Clínica Sorriso", com o mesmo resultado, depois de apagar os dados fictícios (`remover_dados_teste`). Os dados ficam nos EUA, por decisão do titular (ver LGPD em [arquitetura.md](arquitetura.md)); o procedimento está em [deploy.md](deploy.md).
 
+## Anonimização (versão 0.11.0)
+Os dados importados são de uma clínica que não é mais cliente. Por isso, o titular decidiu usá-los só como **dados de teste**, anonimizados (decisão 047). O comando `anonimizar_clinica --clinica "Nome" --confirmar` troca, de forma aleatória e irreversível (sem semente e sem tabela de correspondência; LGPD, art. 12):
+- **pacientes:** nome, razão social, CPF/CNPJ (novos, válidos e falsos), RG, inscrição estadual, profissão, responsável, telefones (o DDD é mantido), e-mail (`@example.com`), CEP (mantém os 2 primeiros dígitos), bairro, endereço, número, complemento e observações (frases genéricas). A data de nascimento é deslocada até 180 dias, para manter as idades;
+- **agendamentos:** a descrição vira "nome fictício - tipo de atendimento". Os horários bloqueados (descrição igual ao tipo, como "Ocupado") ficam como estão;
+- **rechamadas:** a descrição vira um texto genérico ("Retorno", "Limpeza"…);
+- **profissionais:** nome e registro;
+- **auditoria:** os registros da clínica sobre esses dados, que guardavam os valores originais, são apagados.
+
+Ficam: as quantidades, as datas e horários da agenda, os profissionais de cada agendamento, os tipos de atendimento, as cidades, PF/PJ, sexo, estado civil, situação (ativo, arquivado) e as datas de cadastro. Conferido no ambiente local, cruzando com o dump original: nenhum nome completo, CPF/CNPJ, telefone ou descrição de agendamento original restou.
+
 ## Tipos de atendimento originais (seed de teste)
 Liberado `#b9f1a7` · Cirurgia `#f7a5a5` · Dentística `#f6f7a5` · Periodontia `#7b88cb` · Consulta Inicial `#e7a5f7` · Prótese `#fed27d` · Endodontia `#e96cd9` · Ortodontia `#a7eef1` · Atendimento de 15 em 15 `#d5dae6` · Ocupado `#a7bef1`
 
