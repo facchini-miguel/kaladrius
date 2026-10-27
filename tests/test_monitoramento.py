@@ -140,3 +140,17 @@ def test_comando_resume_as_24_horas(pasta):
     texto = saida.getvalue()
     assert "Amostras: 2" in texto and "pico 8.0%" in texto
     assert "disco: critico" in texto and "Último backup: nenhum registrado" in texto
+
+
+def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
+    pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
+    lista = saude.com_rede(saude.amostras())
+    # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
+    assert saude.topo_da_escala(lista, [("cpu", "linha-1")], piso=10) == 10
+    assert saude.topo_da_escala(lista, [("cpu", "linha-1")], maximo=100) == 100
+    # Only the second sample has a network rate: one point, drawn as a dot.
+    svg = saude.grafico(lista, [("rede_entrada", "linha-1")])
+    assert "<circle" in svg and "<polyline" not in svg
+    # The main series (first) is drawn last, on top.
+    svg = saude.grafico(lista, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
+    assert svg.rindex("linha-1") > svg.rindex("linha-2")

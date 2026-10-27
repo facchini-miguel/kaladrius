@@ -12,7 +12,8 @@ from apps.core.models import Backup
 from . import saude
 
 PERIODOS = {"24h": datetime.timedelta(hours=24), "7d": datetime.timedelta(days=7)}
-# (title, [(key, css class, legend)], top of scale, unit): percentages use 0-100.
+# (title, [(key, css class, legend)], fixed top of scale, unit). Memory and disk use 0-100%;
+# the processor follows the data (at least 10%), or 0.5% would be a flat line.
 GRAFICOS = [
     (
         _("Processador"),
@@ -20,7 +21,7 @@ GRAFICOS = [
             ("cpu", "linha-1", _("em uso")),
             ("cpu_roubada", "linha-2", _("tomado por outras máquinas")),
         ],
-        100,
+        None,
         "%",
     ),
     (
@@ -76,11 +77,13 @@ def painel(request):
     graficos = []
     for titulo, series, maximo, unidade in GRAFICOS:
         linhas = [(chave, classe) for chave, classe, _legenda in series]
+        piso, teto = (10, 100) if unidade == "%" else (None, None)
+        topo = saude.topo_da_escala(lista, linhas, maximo, piso)
         graficos.append(
             {
                 "titulo": titulo,
-                "svg": saude.grafico(lista, linhas, maximo=maximo),
-                "topo": saude.topo_da_escala(lista, linhas, maximo),
+                "svg": saude.grafico(lista, linhas, maximo=maximo, piso=piso, teto=teto),
+                "topo": min(topo, teto) if teto else topo,
                 "unidade": unidade,
                 "legendas": [(classe, legenda) for _chave, classe, legenda in series],
             }

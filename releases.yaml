@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.22.1
+  data: 2026-10-27
+  titulo:
+    pt-br: Gráficos da saúde do sistema
+    en: System health charts
+    es: Gráficos de la salud del sistema
+  itens:
+    - tipo: correcao
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O gráfico do processador acompanha o uso real (escala a partir de 10%), as linhas
+          em zero ficam visíveis e um ponto isolado da rede aparece como uma bolinha.
+        en: >
+          The processor chart follows the actual use (scale from 10%), lines at zero stay
+          visible and an isolated network point shows as a dot.
+        es: >
+          El gráfico del procesador acompaña el uso real (escala desde 10%), las líneas en
+          cero quedan visibles y un punto aislado de la red aparece como un punto.
+
 - versao: 0.22.0
   data: 2026-10-27
   titulo:

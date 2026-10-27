@@ -139,24 +139,39 @@ def resumo(lista):
     }
 
 
-def grafico(lista, series, *, maximo=None, largura=720, altura=140):
-    """Line chart as inline SVG: `series` = [(key, css class)], over time.
-
-    Long gaps (collection down) break the lines. `maximo` fixes the top of the scale
-    (100 for percentages); otherwise it follows the data.
-    """
-    if len(lista) < 2:
-        return ""
-    inicio, fim = lista[0]["momento"], lista[-1]["momento"]
-    duracao = max((fim - inicio).total_seconds(), 1)
+def topo_da_escala(lista, series, maximo=None, piso=None):
+    """The value at the top of a chart: fixed (`maximo`), or following the data, at least
+    `piso` and never above the `teto` of percentages (so 0.5% of CPU is still visible)."""
+    if maximo:
+        return maximo
     valores = [a[chave] for a in lista for chave, _ in series if a.get(chave) is not None]
-    topo = maximo or max(valores, default=0) * 1.1 or 1
+    topo = max(max(valores, default=0) * 1.2, piso or 0)
+    return topo or 1
+
+
+def grafico(lista, series, *, maximo=None, piso=None, teto=None, largura=720, altura=140):
+    """Line chart as inline SVG: `series` = [(key, css class)], the main one first.
+
+    Long gaps (collection down) break the lines; an isolated point becomes a dot. The
+    scale is fixed with `maximo`, or follows the data (at least `piso`, at most `teto`).
+    """
+    pontos = [a for a in lista if any(a.get(chave) is not None for chave, _ in series)]
+    if not pontos:
+        return ""
+    inicio, fim = pontos[0]["momento"], pontos[-1]["momento"]
+    duracao = max((fim - inicio).total_seconds(), 1)
+    topo = topo_da_escala(lista, series, maximo, piso)
+    if teto:
+        topo = min(topo, teto)
+    margem = 4  # lines at 0 or at the top stay visible
 
     def x(momento):
+        if fim == inicio:
+            return largura / 2
         return (momento - inicio).total_seconds() / duracao * largura
 
     def y(valor):
-        return altura - min(valor, topo) / topo * altura
+        return altura - margem - min(valor, topo) / topo * (altura - 2 * margem)
 
     partes = [
         f'<svg viewBox="0 0 {largura} {altura}" preserveAspectRatio="none" class="grafico" '
@@ -167,7 +182,8 @@ def grafico(lista, series, *, maximo=None, largura=720, altura=140):
             for f in (0.25, 0.5, 0.75)
         ),
     ]
-    for chave, classe in series:
+    # The main series is drawn last, on top of the others.
+    for chave, classe in reversed(series):
         trechos, atual, anterior = [], [], None
         for amostra in lista:
             valor = amostra.get(chave)
@@ -180,16 +196,14 @@ def grafico(lista, series, *, maximo=None, largura=720, altura=140):
             anterior = amostra["momento"]
         if atual:
             trechos.append(atual)
-        partes.extend(
-            f'<polyline points="{" ".join(trecho)}" class="{classe}" '
-            'vector-effect="non-scaling-stroke"/>'
-            for trecho in trechos
-        )
+        for trecho in trechos:
+            if len(trecho) == 1:
+                px, py = trecho[0].split(",")
+                partes.append(f'<circle cx="{px}" cy="{py}" r="3" class="{classe}"/>')
+            else:
+                partes.append(
+                    f'<polyline points="{" ".join(trecho)}" class="{classe}" '
+                    'vector-effect="non-scaling-stroke"/>'
+                )
     partes.append("</svg>")
     return mark_safe("".join(partes))  # noqa: S308 (only numbers and fixed class names)
-
-
-def topo_da_escala(lista, series, maximo=None):
-    """The value at the top of a chart (to label it)."""
-    valores = [a[chave] for a in lista for chave, _ in series if a.get(chave) is not None]
-    return maximo or max(valores, default=0) * 1.1

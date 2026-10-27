@@ -8,7 +8,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Versión actual: 0.22.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/medical-system/releases)
+**Versión actual: 0.22.1** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/medical-system/releases)
 
 > Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://medical-system.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
 

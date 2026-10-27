@@ -117,3 +117,5 @@ main {
 .legenda { display: inline-block; width: 0.8rem; height: 3px; vertical-align: middle; }
 .legenda.linha-1 { background: #0d6efd; }
 .legenda.linha-2 { background: #fd7e14; }
+.grafico circle.linha-1 { fill: #0d6efd; }
+.grafico circle.linha-2 { fill: #fd7e14; }
