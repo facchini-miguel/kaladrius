@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Extrato bancário" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Extrato bancário" %}</h1>
+{% if pode.financeiro.criar %}
+<div class="card mb-4" style="max-width: 44rem;">
+  <div class="card-header">{% translate "Importar extrato (OFX)" %}</div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-5">{% with campo=form.conta %}{% include "includes/campo.html" %}{% endwith %}</div>
+        <div class="col-md-7">{% with campo=form.arquivo %}{% include "includes/campo.html" %}{% endwith %}</div>
+      </div>
+      <p class="text-body-secondary small">{% translate "Transações já importadas antes são puladas, então pode importar períodos que se sobrepõem." %}</p>
+      <button type="submit" class="btn btn-primary">{% translate "Importar" %}</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<h2 class="h5">{% translate "Importações" %}</h2>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Importado em" %}</th><th>{% translate "Conta" %}</th><th>{% translate "Período" %}</th><th>{% translate "Arquivo" %}</th><th class="text-end">{% translate "Novas" %}</th><th class="text-end">{% translate "Pendentes" %}</th></tr></thead>
+    <tbody>
+      {% for importacao in pagina %}
+      <tr>
+        <td class="text-nowrap"><a href="{% url 'financeiro:extrato' importacao.pk %}">{{ importacao.criado_em|date:"SHORT_DATETIME_FORMAT" }}</a></td>
+        <td>{{ importacao.conta }}</td>
+        <td class="text-nowrap">{{ importacao.inicio|date:"SHORT_DATE_FORMAT" }} – {{ importacao.fim|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-break">{{ importacao.arquivo }}</td>
+        <td class="text-end">{{ importacao.novas }}</td>
+        <td class="text-end">{% if importacao.pendentes %}<span class="badge text-bg-warning">{{ importacao.pendentes }}</span>{% else %}<span class="badge text-bg-success">0</span>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum extrato importado ainda." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/paginacao.html" %}
+{% endblock %}

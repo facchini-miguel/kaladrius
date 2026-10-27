@@ -1,4 +1,5 @@
-"""Finance: receivables (0.15.0), payables, cash flow and reports (0.16.0), commission (0.19.0).
+"""Finance: receivables (0.15.0), payables, cash flow and reports (0.16.0), commission (0.19.0),
+bank statement import (0.20.0).
 
 Receivables belong to the Recebimentos module (administrators and the front desk, which
 cannot cancel, reverse or discount). Payables, accounts, categories, cash flow and reports
@@ -11,24 +12,27 @@ import datetime
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
-from . import comissoes, servicos
+from . import comissoes, conciliacao, servicos
 from .forms import (
     AbrirCaixaForm,
     CategoriaForm,
     ContaForm,
     FecharCaixaForm,
+    ImportarExtratoForm,
+    LancamentoDaTransacaoForm,
     LancamentoPagarForm,
     LancamentoReceberForm,
     MotivoForm,
@@ -42,11 +46,14 @@ from .models import (
     Categoria,
     Comissao,
     Conta,
+    ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    TransacaoBancaria,
 )
+from .ofx import ArquivoInvalido
 
 POR_PAGINA = 50
 SITUACOES = {
@@ -613,4 +620,139 @@ def comissao(request, pk):
         request,
         "financeiro/comissao.html",
         {"comissao": comissao, "pagamentos": pagamentos, "estornos": estornos},
+    )
+
+
+# --- Bank statement (0.20.0) ------------------------------------------------------------
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def extratos(request):
+    form = ImportarExtratoForm(request.POST or None, request.FILES or None)
+    if request.method == "POST":
+        if not pode(request, Modulo.FINANCEIRO, Acao.CRIAR):
+            raise PermissionDenied
+        if form.is_valid():
+            arquivo = form.cleaned_data["arquivo"]
+            try:
+                importacao = conciliacao.importar(
+                    form.cleaned_data["conta"],
+                    nome_arquivo=arquivo.name,
+                    conteudo=arquivo.read(),
+                    usuario=request.user,
+                )
+            except ArquivoInvalido as erro:
+                form.add_error("arquivo", str(erro))
+            else:
+                messages.success(
+                    request,
+                    _("Extrato importado: %(novas)s transações novas, %(repetidas)s já importadas.")
+                    % {"novas": importacao.novas, "repetidas": importacao.repetidas},
+                )
+                outra = conciliacao.outra_conta_no_banco(importacao)
+                if outra:
+                    messages.warning(
+                        request,
+                        _(
+                            "Atenção: este arquivo é da conta %(nova)s no banco, mas a anterior "
+                            "importada em %(conta)s era da conta %(antiga)s."
+                        )
+                        % {
+                            "nova": importacao.conta_no_banco,
+                            "conta": importacao.conta,
+                            "antiga": outra,
+                        },
+                    )
+                return redirect("financeiro:extrato", pk=importacao.pk)
+    importacoes = ImportacaoExtrato.objects.select_related("conta", "criado_por")
+    pendentes = dict(
+        TransacaoBancaria.objects.filter(situacao=TransacaoBancaria.Situacao.PENDENTE)
+        .values("importacao")
+        .annotate(n=Count("pk"))
+        .values_list("importacao", "n")
+    )
+    pagina = Paginator(importacoes, 30).get_page(request.GET.get("pagina"))
+    for importacao in pagina:
+        importacao.pendentes = pendentes.get(importacao.pk, 0)
+    return render(request, "financeiro/extratos.html", {"form": form, "pagina": pagina})
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def extrato(request, pk):
+    importacao = get_object_or_404(ImportacaoExtrato.objects.select_related("conta"), pk=pk)
+    transacoes = list(
+        importacao.transacoes.select_related(
+            "pagamento__parcela__lancamento__paciente", "movimento__caixa__conta"
+        )
+    )
+    por_transacao = conciliacao.candidatos(transacoes)
+    for transacao in transacoes:
+        transacao.candidatos = por_transacao.get(transacao.pk, [])
+    saldo_sistema = conciliacao.saldo_no_sistema(importacao)
+    return render(
+        request,
+        "financeiro/extrato.html",
+        {
+            "importacao": importacao,
+            "transacoes": transacoes,
+            "pendentes": sum(t.situacao == TransacaoBancaria.Situacao.PENDENTE for t in transacoes),
+            "unicos": sum(len(t.candidatos) == 1 for t in transacoes),
+            "saldo_sistema": saldo_sistema,
+            "diferenca": importacao.saldo - saldo_sistema if saldo_sistema is not None else None,
+        },
+    )
+
+
+def _voltar_ao_extrato(transacao):
+    return redirect(
+        f"{reverse('financeiro:extrato', args=[transacao.importacao_id])}#t{transacao.pk}"
+    )
+
+
+@require_POST
+@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+def extrato_conciliar_unicos(request, pk):
+    importacao = get_object_or_404(ImportacaoExtrato.objects, pk=pk)
+    feitas = conciliacao.conciliar_unicos(importacao, usuario=request.user)
+    messages.success(request, _("%(n)s transações conciliadas.") % {"n": feitas})
+    return redirect("financeiro:extrato", pk=importacao.pk)
+
+
+@require_POST
+@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+def transacao_acao(request, pk, acao):
+    transacao = get_object_or_404(TransacaoBancaria.objects, pk=pk)
+    try:
+        if acao == "conciliar":
+            conciliacao.conciliar(transacao, request.POST.get("chave", ""), usuario=request.user)
+        elif acao == "ignorar":
+            motivo = request.POST.get("motivo", "").strip()[:200]
+            if not motivo:
+                raise ValidationError(_("Informe o motivo para ignorar a transação."))
+            conciliacao.ignorar(transacao, motivo=motivo, usuario=request.user)
+        else:
+            conciliacao.desfazer(transacao)
+    except ValidationError as erro:
+        messages.error(request, erro.messages[0])
+    return _voltar_ao_extrato(transacao)
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
+def transacao_lancamento(request, pk):
+    transacao = get_object_or_404(TransacaoBancaria.objects.select_related("conta"), pk=pk)
+    form = LancamentoDaTransacaoForm(
+        request.POST or None,
+        entrada=transacao.entrada,
+        initial={"descricao": transacao.descricao},
+    )
+    if request.method == "POST" and form.is_valid():
+        try:
+            conciliacao.criar_lancamento(transacao, usuario=request.user, **form.cleaned_data)
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+        else:
+            messages.success(request, _("Lançamento criado e conciliado."))
+        return _voltar_ao_extrato(transacao)
+    return render(
+        request, "financeiro/transacao_lancamento.html", {"form": form, "transacao": transacao}
     )

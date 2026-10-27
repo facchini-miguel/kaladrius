@@ -278,3 +278,51 @@ class PagarComissaoForm(FormularioBootstrap, forms.Form):
         self.fields["categoria"].queryset = Categoria.objects.filter(
             tipo=Categoria.Tipo.DESPESA, ativa=True
         )
+
+
+TAMANHO_MAXIMO_OFX = 5 * 1024 * 1024
+
+
+class ImportarExtratoForm(FormularioBootstrap, forms.Form):
+    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none())
+    arquivo = forms.FileField(
+        label=_("Arquivo OFX"),
+        help_text=_("Exporte no site ou aplicativo do banco, no formato OFX (Money)."),
+        widget=forms.ClearableFileInput(attrs={"accept": ".ofx,.OFX"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        banco = Conta.objects.filter(ativa=True, tipo=Conta.Tipo.BANCO).first()
+        if banco is not None:
+            self.fields["conta"].initial = banco.pk
+
+    def clean_arquivo(self):
+        arquivo = self.cleaned_data["arquivo"]
+        if arquivo.size > TAMANHO_MAXIMO_OFX:
+            raise forms.ValidationError(_("O arquivo passa de 5 MB."))
+        return arquivo
+
+
+class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
+    """A new entry, already paid, for a statement line (a bank fee, an unrecorded Pix)."""
+
+    descricao = forms.CharField(label=_("Descrição"), max_length=200)
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+    pessoa = forms.CharField(
+        label=_("Pagador ou fornecedor"),
+        max_length=200,
+        required=False,
+        help_text=_("Se ficar em branco, vale a descrição."),
+    )
+    forma = forms.ChoiceField(
+        label=_("Forma de pagamento"),
+        choices=Pagamento.Forma.choices,
+        initial=Pagamento.Forma.TRANSFERENCIA,
+    )
+
+    def __init__(self, *args, entrada, **kwargs):
+        super().__init__(*args, **kwargs)
+        tipo = Categoria.Tipo.RECEITA if entrada else Categoria.Tipo.DESPESA
+        self.fields["categoria"].queryset = Categoria.objects.filter(tipo=tipo, ativa=True)

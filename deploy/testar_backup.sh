@@ -36,7 +36,7 @@ SELECT t, (xpath('/row/c/text()', query_to_xml('SELECT count(*) AS c FROM ' || t
 FROM unnest(ARRAY[
   'core_clinica', 'core_usuario', 'core_vinculo', 'pacientes_paciente', 'profissionais_profissional',
   'agenda_agendamento', 'rechamadas_rechamada', 'financeiro_lancamento', 'financeiro_pagamento',
-  'financeiro_caixa', 'financeiro_comissao', 'orcamentos_orcamento', 'auditoria_registroauditoria', 'core_backup'
+  'financeiro_caixa', 'financeiro_comissao', 'financeiro_transacaobancaria', 'orcamentos_orcamento', 'auditoria_registroauditoria', 'core_backup'
 ]) AS t
 WHERE to_regclass(t) IS NOT NULL;
 \echo

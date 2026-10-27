@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Extrato bancário" %} · {{ importacao.conta }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">{% translate "Extrato bancário" %} · {{ importacao.conta }}</h1>
+    <span class="text-body-secondary">{{ importacao.inicio|date:"SHORT_DATE_FORMAT" }} – {{ importacao.fim|date:"SHORT_DATE_FORMAT" }} · {{ importacao.arquivo }}{% if importacao.conta_no_banco %} · {% blocktranslate with conta=importacao.conta_no_banco %}conta {{ conta }} no banco{% endblocktranslate %}{% endif %}</span>
+  </div>
+  <a class="btn btn-link" href="{% url 'financeiro:extratos' %}">{% translate "Voltar" %}</a>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pendentes" %}</div><div class="fs-5">{{ pendentes }} / {{ transacoes|length }}</div></div></div></div>
+  {% if importacao.saldo is not None %}
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with data=importacao.saldo_em|date:"SHORT_DATE_FORMAT" %}Saldo no banco em {{ data }}{% endblocktranslate %}</div><div class="fs-5">{{ importacao.saldo|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no sistema na mesma data" %}</div><div class="fs-5">{{ saldo_sistema|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if diferenca %} text-danger{% else %} text-success{% endif %}">{{ diferenca|moeda }}</div></div></div></div>
+  {% endif %}
+</div>
+{% if pendentes and unicos and pode.financeiro.alterar %}
+<form method="post" action="{% url 'financeiro:extrato_conciliar' importacao.pk %}" class="mb-3">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-success">{% blocktranslate count n=unicos %}Conciliar {{ n }} transação com correspondência única{% plural %}Conciliar {{ n }} transações com correspondência única{% endblocktranslate %}</button>
+</form>
+{% endif %}
+
+<div class="table-responsive">
+  <table class="table align-middle bg-white">
+    <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Descrição no banco" %}</th><th class="text-end">{% translate "Valor" %}</th><th>{% translate "No sistema" %}</th></tr></thead>
+    <tbody>
+      {% for t in transacoes %}
+      <tr id="t{{ t.pk }}">
+        <td class="text-nowrap">{{ t.data|date:"SHORT_DATE_FORMAT" }}</td>
+        <td>{{ t.descricao }}</td>
+        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.valor|moeda }}</td>
+        <td>
+          {% if t.situacao == "conciliada" %}
+            <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
+            {% if t.pagamento %}<a href="{% url 'financeiro:lancamento' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.descricao }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
+            {% elif t.movimento %}<a href="{% url 'financeiro:caixa_detalhe' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_tipo_display }}</a>{% endif %}
+          {% elif t.situacao == "ignorada" %}
+            <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.motivo }}
+          {% else %}
+            {% if pode.financeiro.alterar %}
+            {% if t.candidatos %}
+            <form method="post" action="{% url 'financeiro:transacao' t.pk 'conciliar' %}" class="d-flex gap-2 mb-1">
+              {% csrf_token %}
+              <select name="chave" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
+                {% for c in t.candidatos %}<option value="{{ c.chave }}">{{ c.data|date:"SHORT_DATE_FORMAT" }} · {{ c.descricao }}</option>{% endfor %}
+              </select>
+              <button type="submit" class="btn btn-sm btn-success text-nowrap">{% translate "Conciliar" %}</button>
+            </form>
+            {% else %}
+            <span class="badge text-bg-warning">{% translate "Nada correspondente no sistema" %}</span>
+            {% endif %}
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              {% if pode.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:transacao_lancamento' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
+              <form method="post" action="{% url 'financeiro:transacao' t.pk 'ignorar' %}" class="d-flex gap-1">
+                {% csrf_token %}
+                <input type="text" name="motivo" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">{% translate "Ignorar" %}</button>
+              </form>
+            </div>
+            {% else %}
+            <span class="badge text-bg-warning">{% translate "Pendente" %}</span>
+            {% endif %}
+          {% endif %}
+          {% if t.situacao != "pendente" and pode.financeiro.alterar %}
+          <form method="post" action="{% url 'financeiro:transacao' t.pk 'desfazer' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-body-secondary small">{% translate "Correspondência: pagamento ou recebimento nesta conta, com o mesmo valor, até 10 dias antes ou depois; ou depósito e retirada do caixa para esta conta. Repasses da maquininha, transferências entre contas e outros acertos podem ser ignorados com um motivo." %}</p>
+{% endblock %}

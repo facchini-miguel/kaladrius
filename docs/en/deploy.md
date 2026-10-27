@@ -109,6 +109,12 @@ gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --comma
   'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
 ```
 
+To try the statement import, a fake OFX file, built from the payments in the test clinic's Banco account (plus bank fees and an unrecorded Pix), is saved on your computer:
+```bash
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_extrato --clinica "Clínica Sorriso"' > extrato-teste.ofx
+```
+
 ### Restoring a backup
 ```bash
 # On the VM (replaces the current database!)

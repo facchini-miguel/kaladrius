@@ -60,6 +60,18 @@ Abajo aparece el **saldo actual de cada cuenta**. Para que coincida con el banco
 ## Informes (administrador)
 En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría. Los pagos revertidos y las cuentas canceladas quedan fuera.
 
+## Extracto bancario (administrador)
+En **Financiero > Extracto bancario**, importe el extracto de la cuenta, descargado del sitio o la aplicación del banco en formato **OFX** (a veces llamado "Money"). Elija la cuenta del sistema (por ejemplo, Banco) y el archivo. Las transacciones ya importadas se omiten, así que puede importar períodos que se superponen.
+
+Cada transacción del banco se compara con lo que el sistema ya tiene en esa cuenta: un cobro o pago **con el mismo valor, hasta 10 días antes o después**, o un depósito o retiro de la **caja del día** hacia esa cuenta.
+- **Conciliar … con correspondencia única** concilia de una vez todas las transacciones que tienen un solo registro posible.
+- Cuando hay más de uno posible, elíjalo en la lista y haga clic en **Conciliar**.
+- Sin nada en el sistema (tasa, rendimiento, Pix que nadie registró), haga clic en **Crear registro**: el sistema crea el ingreso o el gasto ya pagado en esa fecha y cuenta, y lo concilia.
+- Lo que no debe convertirse en registro (liquidación del terminal de tarjetas, transferencia entre cuentas de la clínica) puede **ignorarse** con un motivo.
+- **deshacer** vuelve la transacción a pendiente. Si un pago conciliado se revierte, la transacción vuelve a quedar pendiente.
+
+Arriba, el **saldo en el banco** informado en el archivo se compara con el **saldo en el sistema** en la misma fecha; con todo registrado, la diferencia queda en cero.
+
 ## Comisiones (administrador)
 En **Financiero > Comisiones**, cada profesional tiene un **porcentaje** sobre el valor cobrado de las cuentas por cobrar en que aparece (el presupuesto aprobado ya lleva el profesional; en un registro nuevo, elija el profesional). Los registros sin profesional no generan comisión. La base es el dinero que entró, ya con descuentos y con intereses, si los hubo.
 

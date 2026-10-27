@@ -73,7 +73,7 @@ Cancelling entries and reversing payments is for administrators only. So the fro
 | 3 ✅ | **Daily cash** | Opening, withdrawals, top-ups and closing with counting | 0.17.0 |
 
 ### Later (no date)
-Procedure price list and **treatment estimate** that becomes a receivable (done in 0.18.0); **practitioner commission** (done in 0.19.0, decision 053); period result (income statement); card machine fees and settlement dates; bank statement import (OFX). And, if decided: invoices, integrated Pix/boleto, insurance plans.
+Procedure price list and **treatment estimate** that becomes a receivable (done in 0.18.0); **practitioner commission** (done in 0.19.0, decision 053); period result (income statement); card machine fees and settlement dates; bank statement import (OFX, done in 0.20.0, decision 054). And, if decided: invoices, integrated Pix/boleto, insurance plans.
 
 ## Assumptions (may be revisited)
 1. Finance comes **before** phase 2 (API and app).

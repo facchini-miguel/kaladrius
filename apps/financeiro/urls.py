@@ -21,6 +21,23 @@ urlpatterns = [
     path("caixa/<int:pk>/fechar/", views.caixa_fechar, name="caixa_fechar"),
     path("caixa/<int:pk>/<str:tipo>/", views.caixa_movimento, name="caixa_movimento"),
     path("relatorios/", views.relatorios, name="relatorios"),
+    path("extratos/", views.extratos, name="extratos"),
+    path("extratos/<int:pk>/", views.extrato, name="extrato"),
+    path(
+        "extratos/<int:pk>/conciliar/",
+        views.extrato_conciliar_unicos,
+        name="extrato_conciliar",
+    ),
+    path(
+        "transacoes/<int:pk>/lancamento/",
+        views.transacao_lancamento,
+        name="transacao_lancamento",
+    ),
+    re_path(
+        r"^transacoes/(?P<pk>[0-9]+)/(?P<acao>conciliar|ignorar|desfazer)/$",
+        views.transacao_acao,
+        name="transacao",
+    ),
     path("comissoes/", views.comissoes_lista, name="comissoes"),
     path("comissoes/<int:pk>/", views.comissao, name="comissao"),
     path("comissoes/profissional/<int:pk>/", views.comissao_percentual, name="comissao_percentual"),

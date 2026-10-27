@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Criar lançamento" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% translate "Criar lançamento" %}</h1>
+<p class="text-body-secondary mb-4">{{ transacao.data|date:"SHORT_DATE_FORMAT" }} · {{ transacao.descricao }} · <span class="{% if transacao.entrada %}text-success{% else %}text-danger{% endif %}">{{ transacao.valor|moeda }}</span> · {{ transacao.conta }}</p>
+<form method="post" style="max-width: 36rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <p class="text-body-secondary small">{% if transacao.entrada %}{% translate "Cria um lançamento a receber já recebido nesta data e nesta conta, conciliado com a transação." %}{% else %}{% translate "Cria uma despesa já paga nesta data e nesta conta, conciliada com a transação." %}{% endif %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Criar e conciliar" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:extrato' transacao.importacao_id %}#t{{ transacao.pk }}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

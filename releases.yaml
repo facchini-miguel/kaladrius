@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.20.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Importação do extrato bancário
+    en: Bank statement import
+    es: Importación del extracto bancario
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo em Financeiro > Extrato bancário: importe o extrato OFX do banco e concilie cada
+          transação com os pagamentos e recebimentos já lançados (de uma vez, quando só há um
+          possível), crie o lançamento do que faltava, como tarifas, ou ignore com um motivo. O
+          saldo do banco é comparado com o do sistema.
+        en: >
+          New in Finance > Bank statement: import the bank's OFX statement and reconcile each
+          transaction with the payments and receipts already recorded (all at once, when there
+          is only one possible), create the entry for what was missing, such as fees, or ignore
+          it with a reason. The bank balance is compared with the system's.
+        es: >
+          Nuevo en Financiero > Extracto bancario: importe el extracto OFX del banco y concilie
+          cada transacción con los pagos y cobros ya registrados (de una vez, cuando hay uno
+          solo posible), cree el registro de lo que faltaba, como tasas, o ignórelo con un
+          motivo. El saldo del banco se compara con el del sistema.
+
 - versao: 0.19.0
   data: 2026-10-27
   titulo:

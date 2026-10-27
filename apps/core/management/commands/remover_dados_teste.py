@@ -13,10 +13,12 @@ from apps.financeiro.models import (
     Categoria,
     Comissao,
     Conta,
+    ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    TransacaoBancaria,
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
@@ -58,6 +60,8 @@ class Command(BaseCommand):
             pacientes = Paciente.objects.filter(clinica__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first.
             for modelo in (
+                TransacaoBancaria,
+                ImportacaoExtrato,
                 ItemOrcamento,
                 Orcamento,
                 Procedimento,

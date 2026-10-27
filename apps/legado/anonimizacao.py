@@ -11,6 +11,7 @@ import random
 from dataclasses import dataclass
 
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from faker import Faker
 
@@ -20,7 +21,14 @@ from apps.auditoria.registro import nome_do_modelo, registrar
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
-from apps.financeiro.models import Caixa, Lancamento, MovimentoCaixa, Pagamento, Parcela
+from apps.financeiro.models import (
+    Caixa,
+    Lancamento,
+    MovimentoCaixa,
+    Pagamento,
+    Parcela,
+    TransacaoBancaria,
+)
 from apps.orcamentos.models import Orcamento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
@@ -195,6 +203,10 @@ class _Anonimizador:
         Caixa.objects.filter(clinica=self.clinica).update(observacao="")
         Orcamento.objects.filter(clinica=self.clinica).update(observacoes="")
         MovimentoCaixa.objects.filter(clinica=self.clinica).update(motivo="-")
+        # Bank lines name who paid (Pix): keep only the bank's transaction type.
+        TransacaoBancaria.objects.filter(clinica=self.clinica).update(
+            descricao=F("tipo"), motivo=""
+        )
 
     def auditoria(self):
         """Entries about these records held the original values: they go."""
@@ -209,6 +221,7 @@ class _Anonimizador:
                 Parcela,
                 Pagamento,
                 Orcamento,
+                TransacaoBancaria,
             )
         ]
         apagados, _ = RegistroAuditoria.objects.filter(

@@ -11,7 +11,16 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from . import comissoes
-from .models import ZERO, Caixa, Comissao, Lancamento, MovimentoCaixa, Pagamento, Parcela
+from .models import (
+    ZERO,
+    Caixa,
+    Comissao,
+    Lancamento,
+    MovimentoCaixa,
+    Pagamento,
+    Parcela,
+    TransacaoBancaria,
+)
 
 CENTAVO = Decimal("0.01")
 # Days overdue for the debtors report: up to 30, 31-60, 61-90, over 90.
@@ -80,6 +89,13 @@ def estornar(pagamento, *, motivo, usuario):
     pagamento.motivo_estorno = motivo
     # Only these fields: the commission links are set elsewhere and must not be overwritten.
     pagamento.save(update_fields=["estornado", "estornado_em", "estornado_por", "motivo_estorno"])
+    # A reversed payment no longer explains its bank statement line.
+    TransacaoBancaria.objects.filter(pagamento=pagamento).update(
+        pagamento=None,
+        situacao=TransacaoBancaria.Situacao.PENDENTE,
+        conciliado_por=None,
+        conciliado_em=None,
+    )
 
 
 @transaction.atomic

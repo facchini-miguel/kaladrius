@@ -60,6 +60,18 @@ Embaixo aparece o **saldo atual de cada conta**. Para ele bater com o banco e a 
 ## Relatórios (administrador)
 Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria. Os pagamentos estornados e os lançamentos cancelados ficam de fora.
 
+## Extrato bancário (administrador)
+Em **Financeiro > Extrato bancário**, importe o extrato da conta, baixado do site ou aplicativo do banco no formato **OFX** (às vezes chamado "Money"). Escolha a conta do sistema (por exemplo, Banco) e o arquivo. Transações já importadas são puladas, então pode importar períodos que se sobrepõem.
+
+Cada transação do banco é comparada com o que o sistema já tem nessa conta: um recebimento ou pagamento **com o mesmo valor, até 10 dias antes ou depois**, ou um depósito ou retirada do **caixa do dia** para essa conta.
+- **Conciliar … com correspondência única** concilia de uma vez todas as transações que têm um só lançamento possível.
+- Quando há mais de um possível, escolha na lista e clique em **Conciliar**.
+- Sem nada no sistema (tarifa, rendimento, Pix que ninguém lançou), clique em **Criar lançamento**: o sistema cria a receita ou a despesa já paga nessa data e conta, e concilia.
+- O que não deve virar lançamento (repasse da maquininha, transferência entre contas da clínica) pode ser **ignorado** com um motivo.
+- **desfazer** volta a transação para pendente. Se um pagamento conciliado for estornado, a transação volta a ficar pendente.
+
+No alto da tela, o **saldo no banco** informado no arquivo é comparado com o **saldo no sistema** na mesma data; com tudo lançado, a diferença fica em zero.
+
 ## Comissões (administrador)
 Em **Financeiro > Comissões**, cada profissional tem um **percentual** sobre o valor recebido dos lançamentos a receber em que ele aparece (o orçamento aprovado já leva o profissional; num lançamento novo, escolha o profissional). Lançamentos sem profissional não geram comissão. A base é o valor que entrou, já com descontos e com juros, se houve.
 

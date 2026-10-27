@@ -109,6 +109,12 @@ gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --comma
   'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
 ```
 
+Para testar a importação de extrato, um arquivo OFX fictício, montado com os pagamentos da conta Banco da clínica de teste (mais tarifas e um Pix não registrado), é gravado no seu computador:
+```bash
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_extrato --clinica "Clínica Sorriso"' > extrato-teste.ofx
+```
+
 ### Restaurar um backup
 ```bash
 # Na VM (substitui o banco atual!)

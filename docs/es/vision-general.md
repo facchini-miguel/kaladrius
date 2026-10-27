@@ -32,6 +32,7 @@ Sistema de gestión de clínicas (odontológicas, médicas, de fisioterapia, psi
 12. **Financiero:** cuentas por cobrar en cuotas, pagos con forma y cuenta, recibo, deudores (0.15.0); cuentas por pagar, flujo de caja e informes (0.16.0); caja del día (0.17.0).
 13. **Presupuestos:** tabla de procedimientos y presupuesto con odontograma, que pasa a cuenta por cobrar al aprobarse (0.18.0).
 14. **Comisión:** porcentaje por profesional sobre lo cobrado, registrada en Por pagar sin pagar dos veces el mismo cobro (0.19.0).
+15. **Extracto bancario:** importación de OFX y conciliación con los pagos, la caja y registros nuevos (0.20.0).
 
 ## Modelo de negocio (en estudio)
 - App **gratuita** en las tiendas.

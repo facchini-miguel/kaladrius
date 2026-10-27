@@ -11,10 +11,12 @@ from apps.financeiro.models import (
     Categoria,
     Comissao,
     Conta,
+    ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    TransacaoBancaria,
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
@@ -44,6 +46,8 @@ AUDITADOS = [
     Caixa,
     MovimentoCaixa,
     Comissao,
+    ImportacaoExtrato,
+    TransacaoBancaria,
     Procedimento,
     Orcamento,
     ItemOrcamento,

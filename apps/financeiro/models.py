@@ -488,3 +488,111 @@ class Comissao(ModeloDaClinica):
     def bruta(self):
         """Commission on the receipts, before deducting reversals."""
         return self.valor + self.estornos
+
+
+class ImportacaoExtrato(ModeloDaClinica):
+    """One OFX file imported into a bank account (0.20.0, decision 054)."""
+
+    conta = models.ForeignKey(
+        Conta, on_delete=models.PROTECT, related_name="importacoes", verbose_name=_("conta")
+    )
+    arquivo = models.CharField(_("arquivo"), max_length=200)
+    banco = models.CharField(_("código do banco"), max_length=20, blank=True)
+    conta_no_banco = models.CharField(_("conta no banco"), max_length=40, blank=True)
+    inicio = models.DateField(_("início"), null=True, blank=True)
+    fim = models.DateField(_("fim"), null=True, blank=True)
+    saldo = models.DecimalField(_("saldo no banco"), null=True, blank=True, **DINHEIRO)
+    saldo_em = models.DateField(_("saldo em"), null=True, blank=True)
+    novas = models.PositiveIntegerField(_("transações novas"), default=0)
+    repetidas = models.PositiveIntegerField(_("transações já importadas"), default=0)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("importado por"),
+    )
+    criado_em = models.DateTimeField(_("importado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("importação de extrato")
+        verbose_name_plural = _("importações de extrato")
+        ordering = ["-criado_em"]
+
+    def __str__(self):
+        return f"{self.conta} {self.arquivo}"
+
+
+class TransacaoBancaria(ModeloDaClinica):
+    """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
+
+    class Situacao(models.TextChoices):
+        PENDENTE = "pendente", _("Pendente")
+        CONCILIADA = "conciliada", _("Conciliada")
+        IGNORADA = "ignorada", _("Ignorada")
+
+    conta = models.ForeignKey(
+        Conta, on_delete=models.PROTECT, related_name="transacoes", verbose_name=_("conta")
+    )
+    importacao = models.ForeignKey(
+        ImportacaoExtrato,
+        on_delete=models.PROTECT,
+        related_name="transacoes",
+        verbose_name=_("importação"),
+    )
+    fitid = models.CharField(_("identificador no banco"), max_length=120)
+    data = models.DateField(_("data"))
+    valor = models.DecimalField(
+        _("valor"), help_text=_("Positivo: entrada; negativo: saída."), **DINHEIRO
+    )
+    descricao = models.CharField(_("descrição"), max_length=200, blank=True)
+    tipo = models.CharField(_("tipo no banco"), max_length=20, blank=True)
+    situacao = models.CharField(
+        _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.PENDENTE
+    )
+    pagamento = models.OneToOneField(
+        Pagamento,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="transacao",
+        verbose_name=_("pagamento"),
+    )
+    movimento = models.OneToOneField(
+        MovimentoCaixa,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="transacao",
+        verbose_name=_("movimento do caixa"),
+    )
+    motivo = models.CharField(_("motivo"), max_length=200, blank=True)
+    conciliado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("conciliado por"),
+    )
+    conciliado_em = models.DateTimeField(_("conciliado em"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("transação bancária")
+        verbose_name_plural = _("transações bancárias")
+        ordering = ["data", "pk"]
+        constraints = [
+            models.UniqueConstraint(fields=["conta", "fitid"], name="transacao_unica_por_conta"),
+            models.CheckConstraint(
+                condition=~Q(pagamento__isnull=False, movimento__isnull=False),
+                name="transacao_um_vinculo",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.data:%d/%m/%Y} {self.valor} {self.descricao}"
+
+    @property
+    def entrada(self):
+        return self.valor > 0

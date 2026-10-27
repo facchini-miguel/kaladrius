@@ -60,6 +60,18 @@ Below it you see the **current balance of each account**. For it to match the ba
 ## Reports (administrator)
 In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category. Reversed payments and cancelled entries are left out.
 
+## Bank statement (administrator)
+In **Finance > Bank statement**, import the account's statement, downloaded from the bank's website or app in **OFX** format (sometimes called "Money"). Choose the system account (for example, Banco) and the file. Transactions imported before are skipped, so overlapping periods can be imported.
+
+Each bank transaction is compared with what the system already has in that account: a receipt or payment **with the same amount, up to 10 days before or after**, or a **daily cash** drawer deposit or withdrawal to that account.
+- **Reconcile … with a single match** reconciles at once every transaction with only one possible entry.
+- When there is more than one, pick it from the list and click **Reconcile**.
+- With nothing in the system (a fee, interest, a Pix nobody recorded), click **Create entry**: the system creates the income or expense already paid on that date and account, and reconciles it.
+- What should not become an entry (card machine settlement, transfer between the clinic's accounts) can be **ignored** with a reason.
+- **undo** takes the transaction back to pending. If a reconciled payment is reversed, the transaction becomes pending again.
+
+At the top, the **bank balance** stated in the file is compared with the **system balance** on the same date; with everything recorded, the difference is zero.
+
 ## Commissions (administrator)
 In **Finance > Commissions**, each practitioner has a **percentage** of the amount received on the receivables that name them (an approved estimate already carries the practitioner; on a new entry, choose the practitioner). Entries without a practitioner do not generate commission. The base is the money that came in, after discounts and including late fees, if any.
 
