@@ -99,12 +99,13 @@ def test_tela_so_para_superusuario(pasta, client, clinica_a, criar_usuario, clie
 
 def test_tela_com_amostras(pasta, superusuario):
     pasta(*(amostra(m, rede=m * 1000) for m in range(60, -1, -5)))
-    for periodo in ("24h", "7d", "outro"):
+    for periodo in ("1h", "24h", "7d", "outro"):
         pagina = superusuario.get(reverse("monitoramento:saude"), {"periodo": periodo})
         assert pagina.status_code == 200
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "app" in conteudo and "Maiores tabelas" in conteudo
-    assert pagina.context["periodo"] == "24h"
+    assert pagina.context["periodo"] == "1h"  # the default
+    assert pagina.context["fim"] - pagina.context["inicio"] == datetime.timedelta(hours=1)
 
 
 def test_tela_sem_amostras(settings, tmp_path, superusuario):
@@ -154,3 +155,18 @@ def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
     # The main series (first) is drawn last, on top.
     svg = saude.grafico(lista, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
     assert svg.rindex("linha-1") > svg.rindex("linha-2")
+
+
+def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
+    pasta(amostra(10), amostra(5))
+    agora = timezone.now()
+    svg = saude.grafico(
+        saude.amostras(),
+        [("cpu", "linha-1")],
+        inicio=agora - datetime.timedelta(hours=1),
+        fim=agora,
+        maximo=100,
+    )
+    # 10 minutes of samples on a 1-hour axis: the line starts near the right end.
+    primeiro_x = float(svg.split('points="')[1].split(",")[0])
+    assert 580 < primeiro_x < 620

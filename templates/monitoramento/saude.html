@@ -7,6 +7,7 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Saúde do sistema" %}</h1>
   <div class="btn-group" role="group" aria-label="{% translate 'Período' %}">
+    <a class="btn btn-outline-primary{% if periodo == '1h' %} active{% endif %}" href="?periodo=1h">{% translate "1 hora" %}</a>
     <a class="btn btn-outline-primary{% if periodo == '24h' %} active{% endif %}" href="?periodo=24h">{% translate "24 horas" %}</a>
     <a class="btn btn-outline-primary{% if periodo == '7d' %} active{% endif %}" href="?periodo=7d">{% translate "7 dias" %}</a>
   </div>
@@ -41,9 +42,9 @@
         </div>
         {% if grafico.svg %}{{ grafico.svg }}{% else %}<p class="text-body-secondary small">{% translate "Poucas amostras para o gráfico." %}</p>{% endif %}
         <div class="d-flex justify-content-between small text-body-secondary">
-          <span>{{ resumo.inicio|date:"SHORT_DATETIME_FORMAT" }}</span>
+          <span>{% if periodo == "7d" %}{{ inicio|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ inicio|time:"H:i" }}{% endif %}</span>
           <span>{% for classe, legenda in grafico.legendas %}<span class="legenda {{ classe }}"></span> {{ legenda }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
-          <span>{{ resumo.fim|date:"SHORT_DATETIME_FORMAT" }}</span>
+          <span>{% if periodo == "7d" %}{{ fim|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ fim|time:"H:i" }}{% endif %}</span>
         </div>
       </div>
     </div>

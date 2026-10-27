@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.22.2
+  data: 2026-10-27
+  titulo:
+    pt-br: Saúde do sistema na última hora
+    en: System health in the last hour
+    es: Salud del sistema en la última hora
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Os gráficos da saúde do sistema ganharam o período de 1 hora, que abre por padrão, e
+          o eixo do tempo passou a cobrir sempre o período escolhido (1 hora, 24 horas ou 7
+          dias), mesmo quando ainda há poucas amostras.
+        en: >
+          The system health charts gained a 1-hour period, shown by default, and the time
+          axis now always covers the chosen period (1 hour, 24 hours or 7 days), even while
+          there are few samples.
+        es: >
+          Los gráficos de la salud del sistema ganaron el período de 1 hora, que se abre por
+          defecto, y el eje del tiempo pasó a cubrir siempre el período elegido (1 hora, 24
+          horas o 7 días), aunque todavía haya pocas muestras.
+
 - versao: 0.22.1
   data: 2026-10-27
   titulo:

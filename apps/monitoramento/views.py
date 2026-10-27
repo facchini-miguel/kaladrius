@@ -11,7 +11,11 @@ from apps.core.models import Backup
 
 from . import saude
 
-PERIODOS = {"24h": datetime.timedelta(hours=24), "7d": datetime.timedelta(days=7)}
+PERIODOS = {
+    "1h": datetime.timedelta(hours=1),
+    "24h": datetime.timedelta(hours=24),
+    "7d": datetime.timedelta(days=7),
+}
 # (title, [(key, css class, legend)], fixed top of scale, unit). Memory and disk use 0-100%;
 # the processor follows the data (at least 10%), or 0.5% would be a flat line.
 GRAFICOS = [
@@ -69,10 +73,13 @@ def painel(request):
     """Server health for superusers (other users get "not found", like the technical docs)."""
     if not request.user.is_superuser:
         raise Http404
-    periodo = request.GET.get("periodo", "24h")
+    periodo = request.GET.get("periodo", "1h")
     if periodo not in PERIODOS:
-        periodo = "24h"
-    lista = saude.com_rede(saude.amostras(desde=timezone.now() - PERIODOS[periodo]))
+        periodo = "1h"
+    # The time axis is the whole period, even while there are fewer samples.
+    fim = timezone.now()
+    inicio = fim - PERIODOS[periodo]
+    lista = saude.com_rede(saude.amostras(desde=inicio))
     ultima = lista[-1] if lista else saude.ultima()
     graficos = []
     for titulo, series, maximo, unidade in GRAFICOS:
@@ -82,7 +89,9 @@ def painel(request):
         graficos.append(
             {
                 "titulo": titulo,
-                "svg": saude.grafico(lista, linhas, maximo=maximo, piso=piso, teto=teto),
+                "svg": saude.grafico(
+                    lista, linhas, inicio=inicio, fim=fim, maximo=maximo, piso=piso, teto=teto
+                ),
                 "topo": min(topo, teto) if teto else topo,
                 "unidade": unidade,
                 "legendas": [(classe, legenda) for _chave, classe, legenda in series],
@@ -93,6 +102,8 @@ def painel(request):
         "monitoramento/saude.html",
         {
             "periodo": periodo,
+            "inicio": inicio,
+            "fim": fim,
             "ultima": ultima,
             "niveis": saude.niveis(ultima) if ultima else {},
             "parada": saude.parada(ultima) if ultima else False,

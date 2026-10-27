@@ -149,16 +149,29 @@ def topo_da_escala(lista, series, maximo=None, piso=None):
     return topo or 1
 
 
-def grafico(lista, series, *, maximo=None, piso=None, teto=None, largura=720, altura=140):
+def grafico(
+    lista,
+    series,
+    *,
+    inicio=None,
+    fim=None,
+    maximo=None,
+    piso=None,
+    teto=None,
+    largura=720,
+    altura=140,
+):
     """Line chart as inline SVG: `series` = [(key, css class)], the main one first.
 
+    The time axis goes from `inicio` to `fim` (the chosen period), or spans the samples.
     Long gaps (collection down) break the lines; an isolated point becomes a dot. The
     scale is fixed with `maximo`, or follows the data (at least `piso`, at most `teto`).
     """
     pontos = [a for a in lista if any(a.get(chave) is not None for chave, _ in series)]
     if not pontos:
         return ""
-    inicio, fim = pontos[0]["momento"], pontos[-1]["momento"]
+    inicio = inicio or pontos[0]["momento"]
+    fim = fim or pontos[-1]["momento"]
     duracao = max((fim - inicio).total_seconds(), 1)
     topo = topo_da_escala(lista, series, maximo, piso)
     if teto:
