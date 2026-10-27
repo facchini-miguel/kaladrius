@@ -1,7 +1,15 @@
+import datetime
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
 from django.urls import reverse
+from django.utils import timezone
+
+from apps.agenda.models import Agendamento, TipoAtendimento
+from apps.core.isolamento import usar_clinica
+from apps.core.models import Papel
+from apps.profissionais.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -128,3 +136,65 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     assert "backups diários pararam" in client.get(reverse("inicio")).content.decode()
     client.force_login(comum)
     assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
+
+
+# --- Clinic settings ---------------------------------------------------------------
+
+
+def dados_clinica(**extra):
+    return {
+        "nome": "Clínica Atualizada",
+        "documento": "",
+        "email": "",
+        "telefone": "",
+        "agenda_inicio": "08:00",
+        "agenda_fim": "18:00",
+        "agenda_intervalo": 30,
+        **extra,
+    }
+
+
+def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    assert "Configurações da clínica" in cliente.get(reverse("inicio")).content.decode()
+    assert 'value="07:30"' in cliente.get(reverse("configuracoes")).content.decode()
+    resposta = cliente.post(
+        reverse("configuracoes"), dados_clinica(documento="11.222.333/0001-81", agenda_intervalo=15)
+    )
+    assert resposta.status_code == 302
+    clinica_a.refresh_from_db()
+    assert (clinica_a.nome, clinica_a.documento) == ("Clínica Atualizada", "11222333000181")
+    assert (clinica_a.agenda_inicio, clinica_a.agenda_intervalo) == (datetime.time(8), 15)
+
+
+@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+    assert cliente.get(reverse("configuracoes")).status_code == 403
+
+
+@pytest.mark.parametrize(
+    ("extra", "erro"),
+    [
+        ({"agenda_inicio": "18:00", "agenda_fim": "08:00"}, "depois do início"),
+        ({"documento": "123"}, "CPF/CNPJ inválido"),
+        ({"agenda_inicio": "10:00"}, "ficaria fora do novo horário"),  # 09:00 appointment
+        ({"agenda_intervalo": 60, "agenda_inicio": "08:30"}, "ficaria fora"),  # misaligned
+    ],
+)
+def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
+    with usar_clinica(clinica_a):
+        profissional = Profissional.objects.create(nome="Dra. Teste")
+        tipo = TipoAtendimento.objects.first()
+        amanha = timezone.localdate() + datetime.timedelta(days=1)
+        inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
+        Agendamento.objects.create(
+            profissional=profissional,
+            tipo=tipo,
+            inicio=inicio,
+            fim=inicio + datetime.timedelta(hours=1),
+        )
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    resposta = cliente.post(reverse("configuracoes"), dados_clinica(**extra))
+    assert resposta.status_code == 200
+    assert erro in resposta.content.decode()

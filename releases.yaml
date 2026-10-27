@@ -4,6 +4,18 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.10.0
+  data: 2026-10-27
+  titulo: Configurações da clínica
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto: >
+        O administrador da clínica altera os dados da clínica e o horário e o intervalo da
+        agenda em Cadastros > Configurações da clínica. Se algum agendamento futuro ficar fora
+        do novo horário, a tela avisa qual antes de salvar.
+
 - versao: 0.9.0
   data: 2026-10-27
   titulo: Pacientes arquivados e agenda própria do profissional

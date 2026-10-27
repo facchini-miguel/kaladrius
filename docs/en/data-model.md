@@ -42,7 +42,7 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 | Clinic settings | all | — | — |
 | Audit | view | — | — |
 
-The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the administrator creates accounts already linked to the clinic, changes roles, sets passwords and removes access (the membership becomes inactive; accounts are never deleted, because of the audit log). Nobody changes their own role, and the clinic never ends up without an active administrator. Name, e-mail and password can only be changed when the account is used **only** in this clinic and is not a superuser: this way a clinic cannot take over someone's access to other clinics. "Clinic settings" has no screen yet (see the open items in [phase-1-plan.md](phase-1-plan.md)).
+The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the administrator creates accounts already linked to the clinic, changes roles, sets passwords and removes access (the membership becomes inactive; accounts are never deleted, because of the audit log). Nobody changes their own role, and the clinic never ends up without an active administrator. Name, e-mail and password can only be changed when the account is used **only** in this clinic and is not a superuser: this way a clinic cannot take over someone's access to other clinics. "Clinic settings" is the **Records > Clinic settings** screen (version 0.10.0): name, CPF/CNPJ, e-mail, phone, schedule hours and slot length. A change of hours or slot length that would leave a **future** appointment outside the grid or off the slots is refused, and the screen says which one (past appointments may have other hours).
 
 ### Clinic
 | Entity | Main fields | Legacy table |

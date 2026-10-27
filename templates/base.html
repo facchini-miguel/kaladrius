@@ -31,7 +31,7 @@
           {% if pode.aniversariantes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">Aniversariantes</a></li>
           {% endif %}
-          {% if pode.profissionais.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver %}
+          {% if pode.profissionais.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinica.alterar %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</a>
             <ul class="dropdown-menu">
@@ -48,8 +48,13 @@
               <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">Cidades</a></li>
               <li><a class="dropdown-item" href="{% url 'referencias:bancos' %}">Bancos</a></li>
               {% endif %}
-              {% if pode.auditoria.ver %}
+              {% if pode.clinica.alterar or pode.auditoria.ver %}
               <li><hr class="dropdown-divider"></li>
+              {% endif %}
+              {% if pode.clinica.alterar %}
+              <li><a class="dropdown-item" href="{% url 'configuracoes' %}">Configurações da clínica</a></li>
+              {% endif %}
+              {% if pode.auditoria.ver %}
               <li><a class="dropdown-item" href="{% url 'auditoria:lista' %}">Auditoria</a></li>
               {% endif %}
             </ul>

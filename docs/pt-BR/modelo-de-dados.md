@@ -40,7 +40,7 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Configurações da clínica | tudo | — | — |
 | Auditoria | ver | — | — |
 
-O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.0): o administrador cria contas já vinculadas à clínica, muda o perfil, define senhas e tira o acesso (o vínculo fica inativo; contas nunca são excluídas, por causa da auditoria). Ninguém altera o próprio perfil, e a clínica nunca fica sem um administrador ativo. Nome, e-mail e senha só podem ser alterados quando a conta é usada **somente** nesta clínica e não é de superusuário: assim, uma clínica não consegue tomar o acesso de alguém às outras. "Configurações da clínica" ainda não tem tela (ver as pendências em [plano-fase-1.md](plano-fase-1.md)).
+O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.0): o administrador cria contas já vinculadas à clínica, muda o perfil, define senhas e tira o acesso (o vínculo fica inativo; contas nunca são excluídas, por causa da auditoria). Ninguém altera o próprio perfil, e a clínica nunca fica sem um administrador ativo. Nome, e-mail e senha só podem ser alterados quando a conta é usada **somente** nesta clínica e não é de superusuário: assim, uma clínica não consegue tomar o acesso de alguém às outras. "Configurações da clínica" é a tela **Cadastros > Configurações da clínica** (versão 0.10.0): nome, CPF/CNPJ, e-mail, telefone, horário e intervalo da agenda. Uma mudança de horário ou intervalo que deixaria algum agendamento **futuro** fora da grade ou fora do intervalo é recusada, e a tela mostra qual (o histórico pode ter outros horários).
 
 ### Clínica
 | Entidade | Campos principais | Sistema antigo |

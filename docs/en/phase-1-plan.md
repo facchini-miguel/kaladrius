@@ -85,7 +85,7 @@ The parity review against the legacy system (see [legacy-system.md](legacy-syste
 |---|---|
 | Team management screen for the clinic administrator | ✅ 0.8.0: **Records > Team**, with fixed roles (decision 040) |
 | Import real data from the legacy system | ✅ 0.8.0: `importar_legado` command (decision 039), already tested locally. Imported in production on 2026-10-27 (Clínica Sorriso) |
-| Clinic settings screen (schedule hours and slot length) | Only through the Django admin for now |
+| Clinic settings screen (schedule hours and slot length) | ✅ 0.10.0: **Records > Clinic settings** |
 | Permission matrix review (`apps/core/permissoes.py`) | Practitioners limited to their own schedule (decision 044). The rest of the matrix stays as is |
 | Browser test of the schedule and recalls | With the owner |
 | Logo (SVG) | With the owner |

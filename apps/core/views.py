@@ -6,8 +6,9 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from .forms import TrocaSenhaForm
+from .forms import ClinicaForm, TrocaSenhaForm
 from .middleware import SESSAO_CLINICA, clinicas_do_usuario
+from .permissoes import Acao, Modulo, exige_permissao
 
 
 @login_required
@@ -48,3 +49,13 @@ class TrocarSenhaView(PasswordChangeView):
     def form_valid(self, form):
         messages.success(self.request, "Senha alterada.")
         return super().form_valid(form)
+
+
+@exige_permissao(Modulo.CLINICA, Acao.ALTERAR)
+def configuracoes(request):
+    form = ClinicaForm(request.POST or None, instance=request.clinica)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Configurações da clínica salvas.")
+        return redirect("configuracoes")
+    return render(request, "core/configuracoes.html", {"form": form})
