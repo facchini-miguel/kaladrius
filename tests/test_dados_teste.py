@@ -4,6 +4,7 @@ from django.core.management import CommandError, call_command
 from django.db.models import F
 
 from apps.agenda.models import Agendamento
+from apps.auditoria.models import RegistroAuditoria
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Vinculo
 from apps.core.validadores import cnpj_valido, cpf_valido
@@ -46,3 +47,31 @@ def test_popular_dados_teste_exige_debug(settings, monkeypatch):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     with pytest.raises(CommandError):
         call_command("popular_dados_teste")
+
+
+def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, criar_usuario):
+    settings.DEBUG = True
+    monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
+    call_command("popular_dados_teste", pacientes=5)
+    real = Clinica.objects.create(nome="Clínica Real")
+    criar_usuario("pessoa.real", real)
+    # A test username that also works in a real clinic is kept.
+    Vinculo.objects.create(usuario=get_user_model().objects.get(username="dra.ana"), clinica=real)
+    with sem_isolamento():
+        Paciente.objects.create(clinica=real, nome="Paciente Real")
+
+    with pytest.raises(CommandError):
+        call_command("remover_dados_teste")
+    call_command("remover_dados_teste", confirmar=True)
+
+    assert list(Clinica.objects.values_list("nome", flat=True)) == ["Clínica Real"]
+    restantes = set(get_user_model().objects.values_list("username", flat=True))
+    assert restantes == {"pessoa.real", "dra.ana"}
+    with sem_isolamento():
+        assert list(Paciente.objects.values_list("nome", flat=True)) == ["Paciente Real"]
+        assert not Agendamento.objects.exists() and not Rechamada.objects.exists()
+        assert set(Profissional.objects.values_list("clinica", flat=True)) <= {real.pk}
+    assert not RegistroAuditoria.objects.filter(objeto_descricao__contains="(teste)").exists()
+    assert RegistroAuditoria.objects.filter(
+        objeto_descricao__startswith="Dados de teste removidos: 2 clínicas"
+    ).exists()

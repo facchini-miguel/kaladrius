@@ -8,7 +8,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Versão atual: 0.8.1** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
+**Versão atual: 0.9.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://medical-system.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
@@ -27,6 +27,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 | Tarefa | Comando |
 |---|---|
 | Dados de teste (clínicas, usuários, profissionais, 600 pacientes fictícios por clínica, 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py popular_dados_teste` |
+| Apagar os dados de teste (nunca toca em clínicas e usuários reais) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |
 | Importar os dados do Odonto System antigo numa clínica nova (ver [docs/pt-BR/sistema-legado.md](docs/pt-BR/sistema-legado.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Nome" < dump.sql` |
 | Testes (com cobertura, mínimo de 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |

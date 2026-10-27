@@ -80,15 +80,19 @@ sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/medical-system/a
 As migrações não são desfeitas: uma versão antiga só funciona se as migrações novas forem compatíveis com ela (só acrescentar tabelas e campos, por exemplo).
 
 ### Importar os dados do sistema antigo
-Só depois da confirmação do titular (LGPD: os dados ficam nos EUA, e os backups também passam a ter dados reais). Veja [sistema-legado.md](sistema-legado.md).
+Confirmado pelo titular em 27/10/2026, na clínica "Clínica Sorriso" (LGPD: os dados ficam nos EUA, e os backups também passam a ter dados reais). Veja [sistema-legado.md](sistema-legado.md).
 
 ```bash
-# Na sua máquina: o dump vai pelo túnel IAP direto para o comando, sem ficar gravado na VM
+# 1. Apagar os dados fictícios (clínicas "(teste)", seus dados e usuários de teste)
 gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Nome da clínica"' \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py remover_dados_teste --confirmar'
+
+# 2. Na sua máquina: o dump vai pelo túnel IAP direto para o comando, sem ficar gravado na VM
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clínica Sorriso"' \
   < ~/medical-system-old_data/backup_20191106/facchini07_20191106.sql
 ```
-Depois, vincule o administrador da clínica no admin do Django (Vínculos) e cadastre a equipe em Cadastros > Equipe.
+Depois, vincule o administrador da clínica no admin do Django (Vínculos) e cadastre a equipe em Cadastros > Equipe. O superusuário já acessa a clínica pelo seletor de clínicas.
 
 ### Restaurar um backup
 ```bash
@@ -101,4 +105,4 @@ sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --cl
 ## Cuidados
 - **Dados reais de pacientes:** os dados ficam nos EUA (exigência do free tier). Antes de uso real, rever a LGPD (transferência internacional, art. 33) ou migrar para a região de São Paulo (paga).
 - O disco **standard** é o gratuito; o console sugere "balanced", que é cobrado.
-- Os dados atuais do servidor são **fictícios** (`popular_dados_teste --forcar`). Antes de importar dados reais, revise os usuários de teste (todos usam a mesma senha, `DJANGO_SEED_PASSWORD`).
+- Com dados reais no servidor, **não rode** `popular_dados_teste` em produção: ele cria usuários que compartilham a mesma senha (`DJANGO_SEED_PASSWORD`). Para apagá-los, `remover_dados_teste --confirmar`, que nunca toca em clínicas e usuários reais.

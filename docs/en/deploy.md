@@ -80,15 +80,19 @@ sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/medical-system/a
 Migrations are not undone: an old version only works if the new migrations are compatible with it (only adding tables and fields, for example).
 
 ### Importing the legacy system data
-Only after the owner's confirmation (LGPD: the data is stored in the US, and backups will then hold real data too). See [legacy-system.md](legacy-system.md).
+Confirmed by the owner on 2026-10-27, into the clinic "Clínica Sorriso" (LGPD: the data is stored in the US, and backups will then hold real data too). See [legacy-system.md](legacy-system.md).
 
 ```bash
-# On your machine: the dump goes through the IAP tunnel straight into the command, never stored on the VM
+# 1. Delete the fake data ("(teste)" clinics, their data and the test users)
 gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clinic name"' \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py remover_dados_teste --confirmar'
+
+# 2. On your machine: the dump goes through the IAP tunnel straight into the command, never stored on the VM
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clínica Sorriso"' \
   < ~/medical-system-old_data/backup_20191106/facchini07_20191106.sql
 ```
-Then link the clinic administrator in the Django admin (Memberships) and create the team in Records > Team.
+Then link the clinic administrator in the Django admin (Memberships) and create the team in Records > Team. The superuser already reaches the clinic through the clinic switcher.
 
 ### Restoring a backup
 ```bash
@@ -101,4 +105,4 @@ sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --cl
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).
 - The **standard** disk is the free one; the console suggests "balanced", which is billed.
-- The server currently holds **fake** data (`popular_dados_teste --forcar`). Before importing real data, review the test users (they all share one password, `DJANGO_SEED_PASSWORD`).
+- With real data on the server, **do not run** `popular_dados_teste` in production: it creates users that share one password (`DJANGO_SEED_PASSWORD`). To delete them, `remover_dados_teste --confirmar`, which never touches real clinics or users.
