@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block titulo %}Arquivar paciente · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">Arquivar {{ paciente.nome }}?</h1>
+<p>
+  O paciente sai das listas, da busca, da agenda, dos aniversariantes e das rechamadas da equipe.
+  Nada é apagado: os agendamentos, as rechamadas e o histórico continuam guardados.
+</p>
+<p>
+  Só administradores da clínica veem os pacientes arquivados (na lista de pacientes, em Situação: Arquivados)
+  e podem restaurá-los.
+</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-secondary">Arquivar</button>
+  <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">Cancelar</a>
+</form>
+{% endblock %}

@@ -232,16 +232,43 @@ def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     assert cliente.post(reverse("pacientes:novo"), dados_formulario()).status_code == 302
     assert cliente.get(reverse("pacientes:editar", args=[paciente.pk])).status_code == 200
+    assert cliente.post(reverse("pacientes:arquivar", args=[paciente.pk])).status_code == 403
     assert cliente.post(reverse("pacientes:excluir", args=[paciente.pk])).status_code == 403
-    assert ">Excluir<" not in cliente.get(reverse("pacientes:lista")).content.decode()
+    assert ">Arquivar<" not in cliente.get(reverse("pacientes:lista")).content.decode()
 
 
-def test_admin_exclui(admin_a, clinica_a):
-    paciente = criar_paciente(clinica_a, nome="Paciente")
-    resposta = admin_a.post(reverse("pacientes:excluir", args=[paciente.pk]))
-    assert resposta.status_code == 302
-    with usar_clinica(clinica_a):
-        assert not Paciente.objects.exists()
+def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de):
+    paciente = criar_paciente(clinica_a, nome="Paciente Arquivável")
+    # Not archived yet: permanent deletion is not available.
+    assert admin_a.post(reverse("pacientes:excluir", args=[paciente.pk])).status_code == 404
+    assert admin_a.post(reverse("pacientes:arquivar", args=[paciente.pk])).status_code == 302
+    paciente.refresh_from_db()
+    assert paciente.arquivado and paciente.arquivado_por.username == "admin_a"
+
+    lista = reverse("pacientes:lista")
+    for situacao, esperado in (("todos", []), ("arquivados", [paciente])):
+        assert list(admin_a.get(lista, {"situacao": situacao}).context["pagina"]) == esperado
+    ficha = admin_a.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    assert "Restaurar" in ficha and "Excluir definitivamente" in ficha
+    assert admin_a.get(reverse("pacientes:editar", args=[paciente.pk])).status_code == 404
+
+    admin_a.post(reverse("pacientes:restaurar", args=[paciente.pk]))
+    paciente.refresh_from_db()
+    assert not paciente.arquivado and paciente.arquivado_por is None
+
+
+def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
+    paciente = criar_paciente(
+        clinica_a, nome="Fulano Escondido", cpf_cnpj="52998224725", arquivado=True
+    )
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    lista = reverse("pacientes:lista")
+    for situacao in ("ativos", "todos", "arquivados"):
+        assert "Escondido" not in cliente.get(lista, {"situacao": situacao}).content.decode()
+    assert cliente.get(reverse("pacientes:ficha", args=[paciente.pk])).status_code == 404
+    # The same CPF cannot be registered again: the message points to the administrator.
+    resposta = cliente.post(reverse("pacientes:novo"), dados_formulario(cpf_cnpj="529.982.247-25"))
+    assert "paciente arquivado" in resposta.content.decode()
 
 
 def test_ficha_mostra_dados_formatados(admin_a, clinica_a):

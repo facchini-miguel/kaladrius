@@ -45,9 +45,30 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
         "profissao": ["", "Professora"],
     }
 
+    admin_a.post(reverse("pacientes:arquivar", args=[paciente.pk]))
+    [arquivamento] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")[1:]
+    assert arquivamento.alteracoes["arquivado"] == [False, True]
+
+
+def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
+    admin_a.post(
+        reverse("pacientes:novo"),
+        {"tipo": "PF", "nome": "Maria Sigilosa", "ativo": "on", "cpf_cnpj": "52998224725"},
+    )
+    with usar_clinica(clinica_a):
+        paciente = Paciente.objects.get(nome="Maria Sigilosa")
+    admin_a.get(reverse("pacientes:ficha", args=[paciente.pk]))
+    admin_a.post(reverse("pacientes:arquivar", args=[paciente.pk]))
     admin_a.post(reverse("pacientes:excluir", args=[paciente.pk]))
-    [exclusao] = ultimos(acao=Acao.EXCLUIR, modelo="Paciente")
-    assert exclusao.alteracoes["nome"] == ["Maria Souza", None]
+
+    registros = ultimos(modelo="Paciente", objeto_id=str(paciente.pk))
+    assert {r.acao for r in registros} == {Acao.CRIAR, Acao.VISUALIZAR, Acao.ALTERAR, Acao.EXCLUIR}
+    texto = str([(r.objeto_descricao, r.alteracoes, r.usuario_nome) for r in registros])
+    assert "Sigilosa" not in texto and "52998224725" not in texto
+    assert "admin_a" in texto  # who did it stays
+    criacao = next(r for r in registros if r.acao == Acao.CRIAR)
+    assert criacao.alteracoes["nome"] == ["(removido)", "(removido)"]
+    assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
 
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):

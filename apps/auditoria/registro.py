@@ -40,12 +40,34 @@ def registrar(
         clinica_id=getattr(clinica, "pk", clinica),
         usuario=usuario,
         usuario_nome=usuario.get_username() if usuario else "",
-        modelo=type(objeto)._meta.verbose_name.capitalize() if objeto is not None else "",
+        modelo=nome_do_modelo(type(objeto)) if objeto is not None else "",
         objeto_id=str(objeto.pk) if objeto is not None and objeto.pk is not None else "",
         objeto_descricao=(descricao or (str(objeto) if objeto is not None else ""))[:200],
         alteracoes=alteracoes or {},
         ip=ip if ip is not None else _ip.get(),
     )
+
+
+def nome_do_modelo(modelo):
+    """How entries name the kind of record ("Paciente", "Agendamento"...)."""
+    return modelo._meta.verbose_name.capitalize()
+
+
+REMOVIDO = "(removido)"
+
+
+def anonimizar(modelo, ids):
+    """Remove the personal data from the audit entries of these records (LGPD erasure).
+
+    Who did what and when, the record code and the names of the changed fields stay;
+    the values and the record description go.
+    """
+    nome = nome_do_modelo(modelo)
+    registros = RegistroAuditoria.objects.filter(modelo=nome, objeto_id__in=[str(i) for i in ids])
+    for registro in registros:
+        registro.objeto_descricao = f"{nome} {registro.objeto_id} (dados removidos)"
+        registro.alteracoes = {campo: [REMOVIDO, REMOVIDO] for campo in registro.alteracoes}
+        registro.save(update_fields=["objeto_descricao", "alteracoes"])
 
 
 def _clinica_de(objeto):

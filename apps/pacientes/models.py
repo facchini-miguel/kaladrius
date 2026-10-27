@@ -1,5 +1,6 @@
 import datetime
 
+from django.conf import settings
 from django.db import models
 
 from apps.core.isolamento import ModeloDaClinica
@@ -71,6 +72,19 @@ class Paciente(ModeloDaClinica):
 
     observacoes = models.TextField("observações", blank=True)
     ativo = models.BooleanField("ativo", default=True)
+    # Archiving replaces deleting: the patient leaves every screen of the team but keeps
+    # their history (schedule, recalls, audit). Only clinic administrators see archived
+    # patients, and can restore them (decision 046).
+    arquivado = models.BooleanField("arquivado", default=False)
+    arquivado_em = models.DateTimeField("arquivado em", null=True, blank=True)
+    arquivado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="arquivado por",
+    )
     criado_em = models.DateTimeField("cadastrado em", auto_now_add=True)
     alterado_em = models.DateTimeField("alterado em", auto_now=True)
 

@@ -160,11 +160,18 @@ def test_permissao_de_excluir(papel, exclui, cenario, criar_usuario, cliente_de)
     assert resposta.status_code == (302 if exclui else 403)
 
 
-def test_paciente_com_rechamada_nao_pode_ser_excluido(cenario, criar_usuario, cliente_de):
-    criar(cenario["clinica"], cenario["paciente"])
+def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario, cliente_de):
+    rechamada = criar(cenario["clinica"], cenario["paciente"])
     admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
-    resposta = admin.post(reverse("pacientes:excluir", args=[cenario["paciente"].pk]), follow=True)
-    assert "tem registros ligados" in resposta.content.decode()
+    admin.post(reverse("pacientes:arquivar", args=[cenario["paciente"].pk]))
+    assert "Maria" not in admin.get(reverse("rechamadas:lista")).content.decode()
+    dia = admin.get(reverse("rechamadas:do_dia"), {"data": rechamada.data.isoformat()})
+    assert "Maria" not in dia.content.decode()
+
+    # Permanent deletion takes the recalls with it.
+    admin.post(reverse("pacientes:excluir", args=[cenario["paciente"].pk]))
+    with usar_clinica(cenario["clinica"]):
+        assert not Rechamada.objects.exists()
 
 
 # --- Birthdays ---------------------------------------------------------------------

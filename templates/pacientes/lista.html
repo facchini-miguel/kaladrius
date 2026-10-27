@@ -29,6 +29,9 @@
       <option value="ativos"{% if situacao == "ativos" %} selected{% endif %}>Ativos</option>
       <option value="inativos"{% if situacao == "inativos" %} selected{% endif %}>Inativos</option>
       <option value="todos"{% if situacao == "todos" %} selected{% endif %}>Todos</option>
+      {% if pode.pacientes.excluir %}
+      <option value="arquivados"{% if situacao == "arquivados" %} selected{% endif %}>Arquivados</option>
+      {% endif %}
     </select>
   </div>
   <div class="col-md-2">
@@ -58,17 +61,22 @@
           <a href="{% url 'pacientes:ficha' paciente.pk %}">{{ paciente.nome }}</a>
           {% if paciente.tipo == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
           {% if not paciente.ativo %}<span class="badge text-bg-secondary ms-1">Inativo</span>{% endif %}
+          {% if paciente.arquivado %}<span class="badge text-bg-dark ms-1">Arquivado</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</td>
         <td class="text-nowrap">{{ paciente.telefone_principal|telefone|default:"—" }}</td>
         <td>{% if paciente.cidade %}{{ paciente.cidade.nome }}/{{ paciente.cidade.uf.sigla }}{% else %}—{% endif %}</td>
         <td>{% if paciente.idade is not None %}{{ paciente.idade }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
+          {% if paciente.arquivado %}
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:ficha' paciente.pk %}">Ver</a>
+          {% else %}
           {% if pode.pacientes.alterar %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:editar' paciente.pk %}">Editar</a>
           {% endif %}
           {% if pode.pacientes.excluir %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'pacientes:excluir' paciente.pk %}">Excluir</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'pacientes:arquivar' paciente.pk %}">Arquivar</a>
+          {% endif %}
           {% endif %}
         </td>
       </tr>

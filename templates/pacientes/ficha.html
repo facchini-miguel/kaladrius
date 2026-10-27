@@ -9,13 +9,31 @@
     <h1 class="h3 mb-0">{{ paciente.nome }}</h1>
     <span class="text-body-secondary">Código {{ paciente.pk }} · {{ paciente.get_tipo_display }}</span>
     {% if not paciente.ativo %}<span class="badge text-bg-secondary ms-1">Inativo</span>{% endif %}
+    {% if paciente.arquivado %}<span class="badge text-bg-dark ms-1">Arquivado</span>{% endif %}
   </div>
   <div>
+    {% if paciente.arquivado %}
+    {% if pode.pacientes.excluir %}
+    <form method="post" action="{% url 'pacientes:restaurar' paciente.pk %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Restaurar</button>
+    </form>
+    <a class="btn btn-outline-danger" href="{% url 'pacientes:excluir' paciente.pk %}">Excluir definitivamente</a>
+    {% endif %}
+    {% else %}
     {% if pode.pacientes.alterar %}<a class="btn btn-primary" href="{% url 'pacientes:editar' paciente.pk %}">Editar</a>{% endif %}
-    {% if pode.pacientes.excluir %}<a class="btn btn-outline-danger" href="{% url 'pacientes:excluir' paciente.pk %}">Excluir</a>{% endif %}
+    {% if pode.pacientes.excluir %}<a class="btn btn-outline-secondary" href="{% url 'pacientes:arquivar' paciente.pk %}">Arquivar</a>{% endif %}
+    {% endif %}
     <a class="btn btn-link" href="{% url 'pacientes:lista' %}">Voltar à lista</a>
   </div>
 </div>
+
+{% if paciente.arquivado %}
+<div class="alert alert-secondary">
+  Arquivado em {{ paciente.arquivado_em|date:"d/m/Y H:i" }}{% if paciente.arquivado_por %} por {{ paciente.arquivado_por.get_full_name|default:paciente.arquivado_por.username }}{% endif %}.
+  Só administradores da clínica veem este paciente. Restaure para voltar a usá-lo na agenda e nas rechamadas.
+</div>
+{% endif %}
 
 <div class="row g-3">
   <div class="col-lg-6">

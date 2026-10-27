@@ -4,7 +4,8 @@ from django.db import models
 
 class RegistroAuditoria(models.Model):
     """Who did what, when and from where (LGPD accountability). Never edited or deleted,
-    except failed logins, deleted after 30 days by the aplicar_retencao command.
+    except failed logins, deleted after 30 days by the aplicar_retencao command, and the
+    personal data of a patient deleted at their request (registro.anonimizar).
 
     Not a ModeloDaClinica: entries must be written in every context (including
     platform code running with sem_isolamento), and some have no clinic (logins).

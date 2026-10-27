@@ -197,13 +197,31 @@ def test_excluir_um_ou_a_serie_dali_em_diante(cenario, criar_usuario, cliente_de
     assert agendamentos(cenario) == []
 
 
-def test_paciente_com_agendamento_nao_pode_ser_excluido(cenario, criar_usuario, cliente_de):
+def test_paciente_arquivado_some_das_sugestoes_mas_fica_na_agenda(
+    cenario, criar_usuario, cliente_de
+):
+    agendar(cenario)
+    with usar_clinica(cenario["clinica"]):
+        Paciente.objects.filter(pk=cenario["paciente"].pk).update(arquivado=True)
+    sugestoes = cenario["cliente"].get(reverse("pacientes:sugestoes"), {"q": "maria"})
+    assert "Maria Paciente" not in sugestoes.content.decode()
+    periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
+    eventos = cenario["cliente"].get(
+        reverse("agenda:eventos"), {**periodo, "profissional": cenario["ana"].pk}
+    )
+    assert [e["title"] for e in eventos.json()] == ["Maria Paciente"]  # history kept
+
+
+def test_exclusao_definitiva_tira_o_paciente_dos_agendamentos(cenario, criar_usuario, cliente_de):
     agendar(cenario)
     admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
-    resposta = admin.post(reverse("pacientes:excluir", args=[cenario["paciente"].pk]), follow=True)
-    assert "tem registros ligados" in resposta.content.decode()
+    paciente = cenario["paciente"]
+    admin.post(reverse("pacientes:arquivar", args=[paciente.pk]))
+    assert admin.post(reverse("pacientes:excluir", args=[paciente.pk])).status_code == 302
+    [agendamento] = agendamentos(cenario)
+    assert agendamento.paciente is None
     with usar_clinica(cenario["clinica"]):
-        assert Paciente.objects.filter(pk=cenario["paciente"].pk).exists()
+        assert not Paciente.objects.filter(pk=paciente.pk).exists()
 
 
 # --- Calendar feeds ----------------------------------------------------------------

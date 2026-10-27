@@ -263,7 +263,7 @@ def _aniversariantes_em(dias):
     resultado = {dia: [] for dia in dias}
     if not dias:
         return resultado
-    pacientes = Paciente.objects.filter(filtro, ativo=True).order_by("nome")
+    pacientes = Paciente.objects.filter(filtro, ativo=True, arquivado=False).order_by("nome")
     por_mes_dia = {(dia.month, dia.day): dia for dia in dias}
     for paciente in pacientes:
         nascimento = paciente.data_nascimento

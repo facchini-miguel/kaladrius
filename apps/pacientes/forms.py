@@ -137,9 +137,21 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 self.add_error("cpf_cnpj", "CPF inválido.")
             elif tipo == Paciente.Tipo.JURIDICA and not cnpj_valido(documento):
                 self.add_error("cpf_cnpj", "CNPJ inválido.")
-            elif Paciente.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists():
+            else:
                 # The clinic is not a form field, so the unique constraint is checked here.
-                self.add_error("cpf_cnpj", "Já existe um paciente com este CPF/CNPJ nesta clínica.")
+                outro = (
+                    Paciente.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
+                )
+                if outro is not None and outro.arquivado:
+                    self.add_error(
+                        "cpf_cnpj",
+                        "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da "
+                        "clínica para restaurá-lo.",
+                    )
+                elif outro is not None:
+                    self.add_error(
+                        "cpf_cnpj", "Já existe um paciente com este CPF/CNPJ nesta clínica."
+                    )
 
         # Fields that only make sense for one person type are cleared for the other.
         if tipo == Paciente.Tipo.JURIDICA:

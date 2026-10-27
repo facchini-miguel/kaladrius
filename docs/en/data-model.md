@@ -47,7 +47,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 ### Clinic
 | Entity | Main fields | Legacy table |
 |---|---|---|
-| `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), email, address (postal code, state, city, district, street, number, complement), notes, active, created/updated timestamps | `pessoas` |
+| `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
 | `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, active, user (optional) | `dentistas` |
 | `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
 | `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, series (recurrence), created by | `agendax` |
@@ -72,8 +72,13 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 - `RegistroAuditoria` (`apps/auditoria`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
-- Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days.
+- Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).
 - **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
+
+## Inactive, archived and deleted patients (version 0.9.0)
+- **Inactive:** stopped coming, but still visible to the whole team ("Inactive" filter). Not shown in birthdays.
+- **Archived** (replaces the everyday "delete", decision 046): the patient leaves the team's lists, search, schedule (suggestions), birthdays and recalls. Nothing is deleted: appointments, recalls and audit entries stay, and past appointments still show the name. Only the clinic administrator archives, sees archived patients (patient list, Status: Archived) and restores them. An archived patient's CPF/CNPJ stays reserved; the screen says to ask for the restore.
+- **Permanently deleted:** only from an archived patient, by the administrator, when the patient asks for their data to be erased (LGPD, art. 18). The record and recalls are deleted, appointments lose the patient, and the audit entries of the patient and of their appointments and recalls lose the personal data (`apps/auditoria/registro.py`, `anonimizar`): who, what, when, the code and the field names remain. The screen reminds that the clinic may be required to keep clinical records (Law 13.787/2018).
 
 ## Documents and formats
 - CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).

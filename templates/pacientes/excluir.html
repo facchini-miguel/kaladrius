@@ -3,11 +3,23 @@
 {% block titulo %}Excluir paciente · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">Excluir {{ paciente.nome }}?</h1>
-<p>Esta ação não pode ser desfeita. Se quiser apenas esconder o paciente, edite e desmarque “ativo”.</p>
+<h1 class="h3 mb-3">Excluir definitivamente {{ paciente.nome }}?</h1>
+<div class="alert alert-warning">
+  Use só quando o próprio paciente pedir a exclusão dos seus dados (LGPD, art. 18). Para tirá-lo
+  do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os
+  registros de atendimento (a Lei 13.787/2018 manda guardar o prontuário por 20 anos).
+</div>
+<p>Esta ação <strong>não pode ser desfeita</strong>:</p>
+<ul>
+  <li>o cadastro do paciente é apagado;</li>
+  <li>os agendamentos continuam na agenda, mas sem o paciente;</li>
+  <li>as rechamadas do paciente são apagadas;</li>
+  <li>a auditoria continua dizendo quem fez o quê e quando, mas sem os dados pessoais do paciente;</li>
+  <li>os backups com os dados atuais são apagados automaticamente em até 30 dias.</li>
+</ul>
 <form method="post">
   {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Excluir</button>
+  <button type="submit" class="btn btn-danger">Excluir definitivamente</button>
   <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">Cancelar</a>
 </form>
 {% endblock %}
