@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>Medical System</title>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#0d6efd" stroke-width="5"/>
+  <polyline points="11,33 22,33 27,21 33,45 38,27 42,33 53,33" fill="none" stroke="#0d6efd" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

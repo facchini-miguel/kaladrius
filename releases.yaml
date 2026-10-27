@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.23.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Novo logo
+    en: New logo
+    es: Nuevo logo
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          O Medical System ganhou um logo: um círculo com uma linha de batimento. Ele aparece na
+          barra superior, na tela de entrada e no ícone da aba do navegador.
+        en: >
+          Medical System has a logo: a circle with a heartbeat line. It shows on the top bar,
+          the login page and the browser tab icon.
+        es: >
+          Medical System tiene un logo: un círculo con una línea de latido. Aparece en la barra
+          superior, en la pantalla de entrada y en el ícono de la pestaña del navegador.
+
 - versao: 0.22.2
   data: 2026-10-27
   titulo:

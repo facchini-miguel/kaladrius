@@ -157,3 +157,11 @@ def test_politica_com_varias_clinicas_e_usuario_logado(client, clinica_a, clinic
 def test_politica_nos_tres_idiomas(client, idioma, titulo):
     pagina = client.get(reverse("privacidade"), HTTP_ACCEPT_LANGUAGE=idioma).content.decode()
     assert f"<h1>{titulo}</h1>" in pagina
+
+
+def test_logo_na_barra_na_entrada_e_na_aba(client, recepcao):
+    entrada = client.get(reverse("login")).content.decode()
+    assert "logo-entrada" in entrada and "img/favicon" in entrada
+    assert "logo-barra" in recepcao.get(reverse("inicio")).content.decode()
+    for arquivo in ("logo.svg", "favicon.svg"):
+        assert (documentos.DOCS.parent / "static" / "img" / arquivo).is_file()
