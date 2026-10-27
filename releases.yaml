@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.21.1
+  data: 2026-10-27
+  titulo:
+    pt-br: Política de privacidade revisada
+    en: Privacy policy revised
+    es: Política de privacidad revisada
+  itens:
+    - tipo: melhoria
+      modulo: Ajuda
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          A política de privacidade foi revisada: termos explicados, base legal de cada uso,
+          dados de crianças e adolescentes, sigilo profissional, prazo de comunicação de
+          incidentes, como pedir seus direitos e lei aplicável.
+        en: >
+          The privacy policy was revised: terms explained, the legal basis of each use,
+          children's and teenagers' data, professional secrecy, the deadline to report
+          incidents, how to exercise your rights and the applicable law.
+        es: >
+          La política de privacidad fue revisada: términos explicados, base legal de cada uso,
+          datos de niños y adolescentes, secreto profesional, plazo de comunicación de
+          incidentes, cómo ejercer sus derechos y ley aplicable.
+
 - versao: 0.21.0
   data: 2026-10-27
   titulo:
