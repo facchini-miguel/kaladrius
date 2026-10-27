@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{{ titulo }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="mx-auto" style="max-width: 52rem;">
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
+      {% if clinica %}
+      <div class="fs-5 fw-semibold">{{ clinica.nome }}</div>
+      {% if clinica.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica.email %}<div><a href="mailto:{{ clinica.email }}">{{ clinica.email }}</a></div>{% endif %}
+      {% if clinica.telefone %}<div>{{ clinica.telefone }}</div>{% endif %}
+      {% if clinica.endereco %}<div class="small">{{ clinica.endereco }}</div>{% endif %}
+      {% else %}
+      <div>{% translate "Fale com a clínica que atende você." %}</div>
+      {% endif %}
+    </div>
+  </div>
+  <article class="documento">
+    {{ html|safe }}
+  </article>
+</div>
+{% endblock %}

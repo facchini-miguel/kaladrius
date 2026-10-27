@@ -33,6 +33,7 @@ Sistema de gestión de clínicas (odontológicas, médicas, de fisioterapia, psi
 13. **Presupuestos:** tabla de procedimientos y presupuesto con odontograma, que pasa a cuenta por cobrar al aprobarse (0.18.0).
 14. **Comisión:** porcentaje por profesional sobre lo cobrado, registrada en Por pagar sin pagar dos veces el mismo cobro (0.19.0).
 15. **Extracto bancario:** importación de OFX y conciliación con los pagos, la caja y registros nuevos (0.20.0).
+16. **Política de privacidad:** página pública con el contacto de la clínica (0.21.0).
 
 ## Modelo de negocio (en estudio)
 - App **gratuita** en las tiendas.

@@ -126,3 +126,34 @@ def test_notas_da_release_do_github_em_ingles():
     assert saida.getvalue().startswith("- **New · Audit log:** The clinic administrator")
     with pytest.raises(CommandError):
         call_command("notas_release", "9.9.9")
+
+
+def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinica_a):
+    clinica_a.email = "privacidade@sorriso.com.br"
+    clinica_a.save()
+    login = client.get(reverse("login")).content.decode()
+    assert reverse("privacidade") in login
+    resposta = client.get(reverse("privacidade"))  # no login: patients do not log in
+    pagina = resposta.content.decode()
+    assert resposta.status_code == 200
+    assert "Política de privacidade" in pagina and "20 anos" in pagina
+    assert clinica_a.nome in pagina and "privacidade@sorriso.com.br" in pagina
+
+
+def test_politica_com_varias_clinicas_e_usuario_logado(client, clinica_a, clinica_b, recepcao):
+    # Logged in: the user's clinic.
+    assert recepcao.get(reverse("privacidade")).context["clinica"] == clinica_a
+    assert recepcao.get(reverse("ajuda:manual", args=["privacidade"])).url == reverse("privacidade")
+    # Anonymous with two clinics: no way to know which one.
+    recepcao.logout()
+    pagina = recepcao.get(reverse("privacidade"))
+    assert pagina.context["clinica"] is None
+    assert "Fale com a clínica que atende você." in pagina.content.decode()
+
+
+@pytest.mark.parametrize(
+    ("idioma", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
+)
+def test_politica_nos_tres_idiomas(client, idioma, titulo):
+    pagina = client.get(reverse("privacidade"), HTTP_ACCEPT_LANGUAGE=idioma).content.decode()
+    assert f"<h1>{titulo}</h1>" in pagina

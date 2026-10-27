@@ -29,6 +29,7 @@ MANUAL = [
     "financeiro",
     "equipe",
     "clinica",
+    "privacidade",
 ]
 
 _LINK = re.compile(r'(<a\s+href=")([^"]+)(")')

@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect, render
 
+from apps.core.models import Clinica
+
 from . import documentos
 
 
@@ -12,6 +14,8 @@ def indice(request):
 
 @login_required
 def manual(request, pagina):
+    if pagina == "privacidade":
+        return redirect("privacidade")  # the public page, with the clinic's contact
     try:
         titulo, html = documentos.manual(pagina)
     except documentos.DocumentoNaoEncontrado as erro:
@@ -44,4 +48,21 @@ def tecnica(request, caminho=None):
         raise Http404 from erro
     return render(
         request, "ajuda/tecnica.html", {"titulo": titulo, "html": html, "caminho": caminho}
+    )
+
+
+def privacidade(request):
+    """Privacy policy (0.21.0, decision 055): public, since patients do not log in.
+
+    The privacy contact is the clinic's: the current one for a logged-in user, or the
+    only active clinic when there is just one (otherwise the page asks to contact the
+    clinic that treats you).
+    """
+    clinica = getattr(request, "clinica", None)
+    if clinica is None:
+        ativas = list(Clinica.objects.filter(ativa=True)[:2])
+        clinica = ativas[0] if len(ativas) == 1 else None
+    titulo, html = documentos.manual("privacidade")
+    return render(
+        request, "ajuda/privacidade.html", {"titulo": titulo, "html": html, "clinica": clinica}
     )

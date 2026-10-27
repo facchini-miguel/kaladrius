@@ -4,6 +4,31 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.21.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Política de privacidade
+    en: Privacy policy
+    es: Política de privacidad
+  itens:
+    - tipo: novo
+      modulo: Ajuda
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          Política de privacidade (LGPD) com o contato da clínica: quais dados são guardados,
+          para quê, quem acessa, onde ficam, por quanto tempo e como pedir acesso, correção ou
+          exclusão. Aberta sem login, com link na tela de entrada e no rodapé.
+        en: >
+          Privacy policy (LGPD) with the clinic's contact: what data is kept, what for, who
+          has access, where it is stored, for how long and how to ask for access, correction
+          or deletion. Open without login, linked from the login page and the footer.
+        es: >
+          Política de privacidad (LGPD) con el contacto de la clínica: qué datos se guardan,
+          para qué, quién accede, dónde se guardan, por cuánto tiempo y cómo pedir acceso,
+          corrección o eliminación. Abierta sin login, con enlace en la pantalla de entrada y
+          en el pie de página.
+
 - versao: 0.20.0
   data: 2026-10-27
   titulo:

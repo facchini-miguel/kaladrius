@@ -208,6 +208,7 @@
   <footer class="rodape text-center text-body-secondary small py-3 d-print-none">
     Medical System · {% translate "versão" %} <a href="{% if user.is_authenticated %}{% url 'novidades' %}{% else %}#{% endif %}">{{ versao_sistema }}</a>
     · {% translate "Desenvolvido por" %} Miguel Facchini
+    · <a href="{% url 'privacidade' %}">{% translate "Política de privacidade" %}</a>
   </footer>
 
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>

@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
+from apps.ajuda import views as ajuda_views
+
 from .api import api
 
 admin.site.site_header = "Medical System: administração"
@@ -24,6 +26,7 @@ urlpatterns = [
     path("auditoria/", include("apps.auditoria.urls")),
     path("equipe/", include("apps.equipe.urls")),
     path("ajuda/", include("apps.ajuda.urls")),
+    path("privacidade/", ajuda_views.privacidade, name="privacidade"),
     path("financeiro/", include("apps.financeiro.urls")),
     path("orcamentos/", include("apps.orcamentos.urls")),
     path("", include("apps.core.urls")),

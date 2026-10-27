@@ -33,6 +33,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 13. **Orçamentos:** tabela de procedimentos e orçamento com odontograma, que vira lançamento a receber ao ser aprovado (0.18.0).
 14. **Comissão:** percentual por profissional sobre o recebido, lançada em A pagar sem pagar duas vezes o mesmo recebimento (0.19.0).
 15. **Extrato bancário:** importação de OFX e conciliação com os pagamentos, o caixa e lançamentos novos (0.20.0).
+16. **Política de privacidade:** página pública com o contato da clínica (0.21.0).
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.
