@@ -1,6 +1,7 @@
 """Financial rules: installments, receiving, reversing, cancelling and debtors."""
 
 import calendar
+import datetime
 from collections import defaultdict
 from decimal import ROUND_DOWN, Decimal
 
@@ -176,4 +177,132 @@ def resumo_do_paciente(paciente, hoje=None):
             .select_related("parcela__lancamento", "conta")
             .order_by("-data", "-pk")[:5]
         ),
+    }
+
+
+# --- Cash flow and reports (0.16.0) ------------------------------------------------------
+
+
+def _sinal(tipo):
+    """Receivables bring money in (+), payables take it out (-)."""
+    return 1 if tipo == Lancamento.Tipo.RECEBER else -1
+
+
+def pagamentos_validos():
+    return Pagamento.objects.filter(estornado=False, parcela__lancamento__cancelado=False)
+
+
+def saldos_das_contas(ate=None):
+    """[(account, balance)] = initial balance + money in - money out (payments up to `ate`)."""
+    from .models import Conta
+
+    pagamentos = pagamentos_validos()
+    if ate is not None:
+        pagamentos = pagamentos.filter(data__lte=ate)
+    movimento = defaultdict(lambda: ZERO)
+    for conta_id, tipo, valor in pagamentos.values_list(
+        "conta_id", "parcela__lancamento__tipo", "valor"
+    ):
+        movimento[conta_id] += _sinal(tipo) * valor
+    return [
+        (conta, conta.saldo_inicial + movimento[conta.pk])
+        for conta in Conta.objects.all().order_by("nome")
+    ]
+
+
+def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
+    """Rows per day (or month) from `de` to `ate`.
+
+    Actual = payments made (by payment date); expected = what is still open in the
+    installments due in the period (overdue ones included, flagged by the date). The
+    running balance starts from the accounts' balance on the day before `de` and adds both.
+    """
+    hoje = hoje or timezone.localdate()
+
+    def chave(data):
+        return data.replace(day=1) if por_mes else data
+
+    linhas = defaultdict(
+        lambda: {
+            "entradas": ZERO,
+            "saidas": ZERO,
+            "entradas_previstas": ZERO,
+            "saidas_previstas": ZERO,
+        }
+    )
+    for data, tipo, valor in (
+        pagamentos_validos()
+        .filter(data__gte=de, data__lte=ate)
+        .values_list("data", "parcela__lancamento__tipo", "valor")
+    ):
+        linhas[chave(data)]["entradas" if tipo == Lancamento.Tipo.RECEBER else "saidas"] += valor
+    for parcela in (
+        Parcela.objects.abertas()
+        .filter(vencimento__gte=de, vencimento__lte=ate)
+        .select_related("lancamento")
+    ):
+        campo = (
+            "entradas_previstas"
+            if parcela.lancamento.tipo == Lancamento.Tipo.RECEBER
+            else "saidas_previstas"
+        )
+        linhas[chave(parcela.vencimento)][campo] += parcela.saldo
+
+    anterior = de - datetime.timedelta(days=1)
+    saldo = sum((valor for _conta, valor in saldos_das_contas(ate=anterior)), start=ZERO)
+    resultado = []
+    for data in sorted(linhas):
+        linha = linhas[data]
+        linha["data"] = data
+        linha["atrasado"] = (
+            not por_mes
+            and data < hoje
+            and (linha["entradas_previstas"] or linha["saidas_previstas"])
+        )
+        saldo += (
+            linha["entradas"]
+            - linha["saidas"]
+            + linha["entradas_previstas"]
+            - linha["saidas_previstas"]
+        )
+        linha["saldo"] = saldo
+        resultado.append(linha)
+    totais = {
+        campo: sum((linha[campo] for linha in resultado), start=ZERO)
+        for campo in ("entradas", "saidas", "entradas_previstas", "saidas_previstas")
+    }
+    return {
+        "linhas": resultado,
+        "totais": totais,
+        "saldo_inicial": sum((v for _c, v in saldos_das_contas(ate=anterior)), start=ZERO),
+        "saldo_final": saldo,
+    }
+
+
+def relatorio(de, ate):
+    """Money received and paid in the period, grouped for the reports page."""
+    pagamentos = pagamentos_validos().filter(data__gte=de, data__lte=ate)
+    recebidos = pagamentos.filter(parcela__lancamento__tipo=Lancamento.Tipo.RECEBER)
+    pagos = pagamentos.filter(parcela__lancamento__tipo=Lancamento.Tipo.PAGAR)
+
+    def agrupar(consulta, campo, rotulo=None):
+        grupos = defaultdict(lambda: ZERO)
+        for chave, valor in consulta.values_list(campo, "valor"):
+            grupos[chave] += valor
+        linhas = [((rotulo or {}).get(chave, chave), valor) for chave, valor in grupos.items()]
+        return sorted(linhas, key=lambda linha: -linha[1])
+
+    formas = dict(Pagamento.Forma.choices)
+    total_recebido = sum((v for v in recebidos.values_list("valor", flat=True)), start=ZERO)
+    total_pago = sum((v for v in pagos.values_list("valor", flat=True)), start=ZERO)
+    return {
+        "por_forma": agrupar(recebidos, "forma", formas),
+        "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__nome"),
+        "por_profissional": agrupar(recebidos, "parcela__lancamento__profissional__nome"),
+        "despesas_por_categoria": agrupar(pagos, "parcela__lancamento__categoria__nome"),
+        "total_recebido": total_recebido,
+        "total_pago": total_pago,
+        "resultado": total_recebido - total_pago,
+        "descontos": sum((v for v in recebidos.values_list("desconto", flat=True)), start=ZERO),
+        "juros": sum((v for v in recebidos.values_list("juros", flat=True)), start=ZERO),
     }

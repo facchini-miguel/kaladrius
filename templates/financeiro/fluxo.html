@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Fluxo de caixa" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Fluxo de caixa" %}</h1>
+{% include "financeiro/_periodo.html" with agrupar=True %}
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no início" %}</div><div class="fs-5">{{ fluxo.saldo_inicial|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Entradas (realizadas + previstas)" %}</div><div class="fs-5 text-success">{{ fluxo.totais.entradas|moeda }} + {{ fluxo.totais.entradas_previstas|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saídas (realizadas + previstas)" %}</div><div class="fs-5 text-danger">{{ fluxo.totais.saidas|moeda }} + {{ fluxo.totais.saidas_previstas|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo previsto no fim" %}</div><div class="fs-5{% if fluxo.saldo_final < 0 %} text-danger{% endif %}">{{ fluxo.saldo_final|moeda }}</div></div></div></div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle bg-white">
+    <thead>
+      <tr>
+        <th>{% if por_mes %}{% translate "Mês" %}{% else %}{% translate "Dia" %}{% endif %}</th>
+        <th class="text-end">{% translate "Entradas" %}</th>
+        <th class="text-end">{% translate "Saídas" %}</th>
+        <th class="text-end">{% translate "Entradas previstas" %}</th>
+        <th class="text-end">{% translate "Saídas previstas" %}</th>
+        <th class="text-end">{% translate "Saldo" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linha in fluxo.linhas %}
+      <tr>
+        <td class="text-nowrap">{% if por_mes %}{{ linha.data|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.data|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
+        <td class="text-end text-nowrap text-success">{% if linha.entradas %}{{ linha.entradas|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap text-danger">{% if linha.saidas %}{{ linha.saidas|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap text-body-secondary">{% if linha.entradas_previstas %}{{ linha.entradas_previstas|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap text-body-secondary">{% if linha.saidas_previstas %}{{ linha.saidas_previstas|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold{% if linha.saldo < 0 %} text-danger{% endif %}">{{ linha.saldo|moeda }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma movimentação no período." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-body-secondary small">{% translate "Realizado: pagamentos registrados, pela data do pagamento. Previsto: o que falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em atraso”). O saldo soma os dois a partir do saldo das contas no início do período." %}</p>
+
+<h2 class="h5 mt-4">{% translate "Saldo atual por conta" %}</h2>
+<div class="table-responsive" style="max-width: 32rem;">
+  <table class="table table-sm bg-white">
+    <tbody>
+      {% for conta, saldo in contas %}
+      <tr><td>{{ conta.nome }}{% if not conta.ativa %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if saldo < 0 %} text-danger{% endif %}">{{ saldo|moeda }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -31,15 +31,26 @@
           {% if pode.aniversariantes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">{% translate "Aniversariantes" %}</a></li>
           {% endif %}
-          {% if pode.recebimentos.ver %}
+          {% if pode.recebimentos.ver or pode.financeiro.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}</a>
             <ul class="dropdown-menu">
+              {% if pode.recebimentos.ver %}
               <li><a class="dropdown-item" href="{% url 'financeiro:receber' %}">{% translate "A receber" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a></li>
               {% if pode.recebimentos.criar %}
-              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a></li>
+              {% endif %}
+              {% endif %}
+              {% if pode.financeiro.ver %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:pagar' %}">{% translate "A pagar" %}</a></li>
+              {% if pode.financeiro.criar %}
+              <li><a class="dropdown-item" href="{% url 'financeiro:despesa_nova' %}">{% translate "Nova despesa" %}</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:fluxo' %}">{% translate "Fluxo de caixa" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:relatorios' %}">{% translate "Relatórios" %}</a></li>
               {% endif %}
             </ul>
           </li>

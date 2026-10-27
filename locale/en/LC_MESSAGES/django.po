@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 12:53-0300\n"
+"POT-Creation-Date: 2026-10-27 14:48-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: English\n"
@@ -472,6 +472,27 @@ msgstr "Enter an amount greater than zero."
 msgid "Informe para registrar o pagamento."
 msgstr "Required to record the payment."
 
+msgid "Valor"
+msgstr "Amount"
+
+msgid "O valor é"
+msgstr "The amount is"
+
+msgid "o total, dividido nas parcelas"
+msgstr "the total, split into the installments"
+
+msgid "de cada mês (conta fixa, como o aluguel)"
+msgstr "per month (fixed bill, like rent)"
+
+msgid "Número de parcelas ou de meses"
+msgstr "Number of installments or months"
+
+msgid "A 1ª parcela já foi paga"
+msgstr "The 1st installment is already paid"
+
+msgid "Fornecedor"
+msgstr "Supplier"
+
 msgid "Valor recebido"
 msgstr "Amount received"
 
@@ -490,6 +511,12 @@ msgstr "Reason"
 msgid "Já existe uma categoria com este nome."
 msgstr "A category with this name already exists."
 
+msgid "Saldo inicial"
+msgstr "Initial balance"
+
+msgid "Quanto havia na conta antes do primeiro lançamento no sistema."
+msgstr "How much the account had before the first entry in the system."
+
 msgid "Já existe uma conta com este nome."
 msgstr "An account with this name already exists."
 
@@ -504,6 +531,9 @@ msgstr "Card machine"
 
 msgid "tipo"
 msgstr "type"
+
+msgid "saldo inicial"
+msgstr "initial balance"
 
 msgid "conta"
 msgstr "account"
@@ -681,6 +711,9 @@ msgstr "Entry created and 1st installment received."
 msgid "Lançamento criado."
 msgstr "Entry created."
 
+msgid "Despesa lançada."
+msgstr "Expense recorded."
+
 msgid "Lançamento cancelado."
 msgstr "Entry cancelled."
 
@@ -689,6 +722,12 @@ msgstr "Cancel entry"
 
 msgid "Esta parcela já está paga."
 msgstr "This installment is already paid."
+
+msgid "Valor pago"
+msgstr "Amount paid"
+
+msgid "Já incluídos no valor pago."
+msgstr "Already included in the amount paid."
 
 msgid "Pagamento registrado."
 msgstr "Payment recorded."
@@ -1240,6 +1279,15 @@ msgstr "Debtors"
 msgid "Novo lançamento"
 msgstr "New entry"
 
+msgid "Nova despesa"
+msgstr "New expense"
+
+msgid "Fluxo de caixa"
+msgstr "Cash flow"
+
+msgid "Relatórios"
+msgstr "Reports"
+
 msgid "Cidades"
 msgstr "Cities"
 
@@ -1406,6 +1454,21 @@ msgstr "New password"
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "The person is logged out on the devices where they are signed in."
 
+msgid "Sem profissional"
+msgstr "No practitioner"
+
+msgid "Nada no período."
+msgstr "Nothing in the period."
+
+msgid "Agrupar por"
+msgstr "Group by"
+
+msgid "Dia"
+msgstr "Day"
+
+msgid "Mês"
+msgstr "Month"
+
 msgid "Tipo"
 msgstr "Type"
 
@@ -1418,6 +1481,13 @@ msgstr "Inactive"
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
 msgstr ""
 "To stop using it without losing the history, edit it and uncheck “active”."
+
+msgid ""
+"Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
+"Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
+msgstr ""
+"Example: rent of R$ 3,000 for 12 months → amount 3,000, “per month”, 12. A "
+"R$ 900 purchase in 3 installments → amount 900, “the total”, 3."
 
 msgid "Total vencido"
 msgstr "Total overdue"
@@ -1449,6 +1519,52 @@ msgstr "Oldest"
 msgid "Ninguém está devendo."
 msgstr "Nobody owes anything."
 
+msgid "Saldo no início"
+msgstr "Balance at the start"
+
+msgid "Entradas (realizadas + previstas)"
+msgstr "Money in (actual + expected)"
+
+msgid "Saídas (realizadas + previstas)"
+msgstr "Money out (actual + expected)"
+
+msgid "Saldo previsto no fim"
+msgstr "Expected balance at the end"
+
+msgid "Entradas"
+msgstr "Money in"
+
+msgid "Saídas"
+msgstr "Money out"
+
+msgid "Entradas previstas"
+msgstr "Expected in"
+
+msgid "Saídas previstas"
+msgstr "Expected out"
+
+msgid "Saldo"
+msgstr "Balance"
+
+msgid "em atraso"
+msgstr "overdue"
+
+msgid "Nenhuma movimentação no período."
+msgstr "No movement in the period."
+
+msgid ""
+"Realizado: pagamentos registrados, pela data do pagamento. Previsto: o que "
+"falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em "
+"atraso”). O saldo soma os dois a partir do saldo das contas no início do "
+"período."
+msgstr ""
+"Actual: recorded payments, by payment date. Expected: what is left of open "
+"installments, by due date (overdue ones are flagged “overdue”). The balance "
+"adds both to the accounts' balance at the start of the period."
+
+msgid "Saldo atual por conta"
+msgstr "Current balance per account"
+
 msgid "Cancelado"
 msgstr "Cancelled"
 
@@ -1471,9 +1587,6 @@ msgstr "Installment"
 msgid "Vencimento"
 msgstr "Due date"
 
-msgid "Valor"
-msgstr "Amount"
-
 msgid "Pagamentos"
 msgstr "Payments"
 
@@ -1482,6 +1595,9 @@ msgstr "receipt"
 
 msgid "estornar"
 msgstr "reverse"
+
+msgid "Pagar"
+msgstr "Pay"
 
 msgid "Receber"
 msgstr "Receive"
@@ -1495,6 +1611,27 @@ msgid ""
 msgstr ""
 "For payment on the spot: the 1st installment is recorded as paid and the "
 "receipt opens next."
+
+msgid "Fornecedor ou descrição"
+msgstr "Supplier or description"
+
+msgid "Paciente, pagador ou descrição"
+msgstr "Patient, payer or description"
+
+msgid "Vencidas"
+msgstr "Overdue"
+
+msgid "Pagas"
+msgstr "Paid"
+
+msgid "Todas"
+msgstr "All"
+
+msgid "Descrição"
+msgstr "Description"
+
+msgid "Nenhuma parcela encontrada."
+msgstr "No installments found."
 
 msgid ""
 "Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
@@ -1532,24 +1669,6 @@ msgstr "Only the clinic administrator can give discounts."
 
 msgid "Registrar pagamento"
 msgstr "Record payment"
-
-msgid "Paciente, pagador ou descrição"
-msgstr "Patient, payer or description"
-
-msgid "Vencidas"
-msgstr "Overdue"
-
-msgid "Pagas"
-msgstr "Paid"
-
-msgid "Todas"
-msgstr "All"
-
-msgid "Descrição"
-msgstr "Description"
-
-msgid "Nenhuma parcela encontrada."
-msgstr "No installments found."
 
 msgid "Recibo"
 msgstr "Receipt"
@@ -1602,6 +1721,36 @@ msgstr "Interest and late fee included"
 msgid "Recebido por %(nome)s"
 msgstr "Received by %(nome)s"
 
+msgid "Relatórios financeiros"
+msgstr "Financial reports"
+
+msgid "Recebido"
+msgstr "Received"
+
+msgid "Resultado"
+msgstr "Result"
+
+msgid "Recebido por forma de pagamento"
+msgstr "Received by payment method"
+
+msgid "Recebido por categoria"
+msgstr "Received by category"
+
+msgid "Recebido por profissional"
+msgstr "Received by practitioner"
+
+msgid "Despesas pagas por categoria"
+msgstr "Expenses paid by category"
+
+msgid "Pela data do pagamento, sem os estornados e os cancelados."
+msgstr "By payment date, without reversed and cancelled ones."
+
+msgid "Juros e multa recebidos"
+msgstr "Interest and late fees received"
+
+msgid "Descontos dados"
+msgstr "Discounts given"
+
 msgid "Paciente"
 msgstr "Patient"
 
@@ -1634,17 +1783,11 @@ msgstr "Version %(versao)s"
 msgid "Nenhuma novidade registrada ainda."
 msgstr "No release notes yet."
 
-msgid "Mês"
-msgstr "Month"
-
 #, python-format
 msgid "%(total)s aniversariante (pacientes ativos)"
 msgid_plural "%(total)s aniversariantes (pacientes ativos)"
 msgstr[0] "%(total)s birthday (active patients)"
 msgstr[1] "%(total)s birthdays (active patients)"
-
-msgid "Dia"
-msgstr "Day"
 
 msgid "Completa"
 msgstr "Turns"

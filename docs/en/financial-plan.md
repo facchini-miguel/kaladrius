@@ -2,7 +2,7 @@
 
 🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-financeiro.md) | [🇪🇸 Español](../es/plan-financiero.md)
 
-> Status: **step 1 (receivables) done in 0.15.0** (2026-10-27). Decisions 048 and 051. Interest and late fees are entered by hand, discounts by administrators only, and the clinic address is printed on receipts.
+> Status: **steps 1 (receivables, 0.15.0) and 2 (payables, cash flow and reports, 0.16.0) done** (2026-10-27). Decisions 048 and 051. Interest and late fees are entered by hand, discounts by administrators only, and the clinic address is printed on receipts.
 
 ## Goal
 Know **who owes what**, **how each person paid** (cash, Pix, card, installments) and **how much comes in and goes out** of the clinic, with entries made by hand by the staff.
@@ -69,7 +69,7 @@ Cancelling entries and reversing payments is for administrators only. So the fro
 | # | Step | Deliverable | Version |
 |---|---|---|---|
 | 1 ✅ | **Receivables** | Models, default accounts and categories, receivable with installments, receive (all methods, partial), receipt, debtors, panel in the patient record, permissions | 0.15.0 |
-| 2 | **Payables and cash flow** | Payable with monthly repetition, actual and expected cash flow, balance per account, reports | 0.16.0 |
+| 2 ✅ | **Payables and cash flow** | Payable with monthly repetition, actual and expected cash flow, balance per account, reports | 0.16.0 |
 | 3 | **Daily cash** | Opening, withdrawals, top-ups and closing with counting | 0.17.0 |
 
 ### Later (no date)

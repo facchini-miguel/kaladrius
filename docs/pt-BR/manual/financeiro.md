@@ -32,5 +32,23 @@ Nada é apagado. O **administrador** pode:
 
 Tudo fica registrado na auditoria.
 
+## Contas a pagar (administrador)
+Em **Financeiro > Nova despesa**, informe o **fornecedor**, a categoria, a descrição e o valor. Em **O valor é**, escolha:
+- **o total, dividido nas parcelas**: uma compra de R$ 900 em 3 vezes vira 3 parcelas de R$ 300;
+- **de cada mês**: uma conta fixa, como o aluguel de R$ 3.000 por 12 meses, vira 12 parcelas de R$ 3.000.
+
+Em **Financeiro > A pagar**, clique em **Pagar** quando pagar uma parcela. Estornar e cancelar funcionam como nas contas a receber.
+
+## Fluxo de caixa (administrador)
+Em **Financeiro > Fluxo de caixa**, escolha o período e se quer ver por **dia** ou por **mês**:
+- **Entradas** e **Saídas**: o que foi recebido e pago de fato, pela data do pagamento;
+- **Entradas previstas** e **Saídas previstas**: o que falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como "em atraso");
+- **Saldo**: começa no saldo das contas no início do período e soma tudo, dia a dia (ou mês a mês).
+
+Embaixo aparece o **saldo atual de cada conta**. Para ele bater com o banco e a gaveta, informe o **saldo inicial** de cada conta em **Cadastros > Contas** (quanto havia antes do primeiro lançamento no sistema).
+
+## Relatórios (administrador)
+Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria. Os pagamentos estornados e os lançamentos cancelados ficam de fora.
+
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

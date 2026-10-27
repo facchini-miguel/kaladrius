@@ -9,13 +9,13 @@ from apps.profissionais.models import Profissional
 from .models import Categoria, Conta, Lancamento, Pagamento
 
 
-def _campo_dinheiro(rotulo, obrigatorio=True, **extra):
+def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
     """Amount typed in the user's format (150,50 in Portuguese and Spanish)."""
     return forms.DecimalField(
         label=rotulo,
         max_digits=12,
         decimal_places=2,
-        min_value=0,
+        min_value=minimo,
         required=obrigatorio,
         localize=True,
         widget=forms.TextInput(attrs={"inputmode": "decimal"}),
@@ -77,6 +77,67 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
                 if not dados.get(campo):
                     self.add_error(campo, _("Informe para registrar o pagamento."))
         return dados
+
+
+class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
+    """New payable: one bill split into installments, or the same amount every month."""
+
+    DIVIDIR = "dividir"
+    REPETIR = "repetir"
+
+    valor = _campo_dinheiro(_("Valor"))
+    modo = forms.ChoiceField(
+        label=_("O valor é"),
+        choices=[
+            (DIVIDIR, _("o total, dividido nas parcelas")),
+            (REPETIR, _("de cada mês (conta fixa, como o aluguel)")),
+        ],
+        initial=DIVIDIR,
+        widget=forms.RadioSelect,
+    )
+    parcelas = forms.IntegerField(
+        label=_("Número de parcelas ou de meses"), min_value=1, max_value=48, initial=1
+    )
+    primeiro_vencimento = forms.DateField(
+        label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
+    )
+    pago_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
+    forma = forms.ChoiceField(
+        label=_("Forma de pagamento"), choices=[("", "—"), *Pagamento.Forma.choices], required=False
+    )
+    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
+
+    class Meta:
+        model = Lancamento
+        fields = ["pessoa", "descricao", "categoria", "observacoes"]
+        labels = {"pessoa": _("Fornecedor")}
+        widgets = {"observacoes": forms.Textarea(attrs={"rows": 2})}
+
+    def __init__(self, *args, clinica, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.clinica = clinica
+        self.instance.tipo = Lancamento.Tipo.PAGAR
+        self.fields["pessoa"].required = True
+        self.fields["categoria"].queryset = Categoria.objects.filter(
+            tipo=Categoria.Tipo.DESPESA, ativa=True
+        )
+        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get("valor") is not None and dados["valor"] <= 0:
+            self.add_error("valor", _("Informe um valor maior que zero."))
+        if dados.get("pago_agora"):
+            for campo in ("forma", "conta"):
+                if not dados.get(campo):
+                    self.add_error(campo, _("Informe para registrar o pagamento."))
+        return dados
+
+    def valor_total(self):
+        dados = self.cleaned_data
+        if dados["modo"] == self.REPETIR:
+            return dados["valor"] * dados["parcelas"]
+        return dados["valor"]
 
 
 class ReceberForm(FormularioBootstrap, forms.ModelForm):
@@ -141,9 +202,19 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
 
 
 class ContaForm(FormularioBootstrap, forms.ModelForm):
+    saldo_inicial = _campo_dinheiro(
+        _("Saldo inicial"),
+        obrigatorio=False,
+        minimo=None,  # an overdrawn bank account starts negative
+        help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
+    )
+
     class Meta:
         model = Conta
-        fields = ["nome", "tipo", "ativa"]
+        fields = ["nome", "tipo", "saldo_inicial", "ativa"]
+
+    def clean_saldo_inicial(self):
+        return self.cleaned_data.get("saldo_inicial") or 0
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"]

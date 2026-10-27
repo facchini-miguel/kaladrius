@@ -8,17 +8,17 @@
   <div>
     <h1 class="h3 mb-0">{{ lancamento.descricao }}</h1>
     <span class="text-body-secondary">
-      {% if lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' lancamento.paciente_id %}">{{ lancamento.paciente.nome }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
+      {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' lancamento.paciente_id %}">{{ lancamento.paciente.nome }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
       · {{ lancamento.categoria }}{% if lancamento.profissional %} · {{ lancamento.profissional.nome }}{% endif %}
       · {{ lancamento.data|date:"SHORT_DATE_FORMAT" }}
     </span>
     {% if lancamento.cancelado %}<span class="badge text-bg-dark ms-1">{% translate "Cancelado" %}</span>{% endif %}
   </div>
   <div>
-    {% if pode.recebimentos.excluir and not lancamento.cancelado %}
+    {% if pode_excluir and not lancamento.cancelado %}
     <a class="btn btn-outline-danger" href="{% url 'financeiro:cancelar' lancamento.pk %}">{% translate "Cancelar lançamento" %}</a>
     {% endif %}
-    <a class="btn btn-link" href="{% url 'financeiro:receber' %}">{% translate "Voltar à lista" %}</a>
+    <a class="btn btn-link" href="{% if pagar %}{% url 'financeiro:pagar' %}{% else %}{% url 'financeiro:receber' %}{% endif %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>
 
@@ -61,14 +61,14 @@
           {% for pagamento in parcela.lista_pagamentos %}
           <div{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>
             {{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }}
-            <a href="{% url 'financeiro:recibo' pagamento.pk %}">{% translate "recibo" %}</a>
-            {% if pode.recebimentos.excluir and not pagamento.estornado %}· <a class="text-danger" href="{% url 'financeiro:estornar' pagamento.pk %}">{% translate "estornar" %}</a>{% endif %}
+            {% if not pagar %}<a href="{% url 'financeiro:recibo' pagamento.pk %}">{% translate "recibo" %}</a>{% endif %}
+            {% if pode_excluir and not pagamento.estornado %}· <a class="text-danger" href="{% url 'financeiro:estornar' pagamento.pk %}">{% translate "estornar" %}</a>{% endif %}
           </div>
           {% empty %}—{% endfor %}
         </td>
         <td class="text-end">
-          {% if pode.recebimentos.criar and parcela.saldo > 0 and not lancamento.cancelado %}
-          <a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>
+          {% if pode_alterar and parcela.saldo > 0 and not lancamento.cancelado %}
+          <a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</a>
           {% endif %}
         </td>
       </tr>

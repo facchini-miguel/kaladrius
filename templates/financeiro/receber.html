@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n formatos %}
 
-{% block titulo %}{% translate "Receber" %} · Medical System{% endblock %}
+{% block titulo %}{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %} · Medical System{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-1">{% translate "Receber" %}</h1>
+<h1 class="h3 mb-1">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
   {{ parcela.lancamento.nome_pessoa }} · {{ parcela.lancamento.descricao }} ·
   {% blocktranslate with numero=parcela.numero total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·

@@ -1,11 +1,15 @@
-"""Receivables (0.15.0): entries, receiving payments, receipts and debtors.
+"""Finance: receivables (0.15.0), payables, cash flow and reports (0.16.0).
 
-Accounts and categories are managed by administrators (Financeiro module); the front desk
-records entries and payments (Recebimentos module) but cannot cancel, reverse or discount.
+Receivables belong to the Recebimentos module (administrators and the front desk, which
+cannot cancel, reverse or discount). Payables, accounts, categories, cash flow and reports
+belong to the Financeiro module (administrators). Entries and payments of both kinds share
+the same screens; each view checks the module of the entry's kind.
 """
 
+import datetime
+
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,7 +21,14 @@ from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.pacientes.models import Paciente
 
 from . import servicos
-from .forms import CategoriaForm, ContaForm, LancamentoReceberForm, MotivoForm, ReceberForm
+from .forms import (
+    CategoriaForm,
+    ContaForm,
+    LancamentoPagarForm,
+    LancamentoReceberForm,
+    MotivoForm,
+    ReceberForm,
+)
 from .models import Categoria, Conta, Lancamento, Pagamento, Parcela
 
 POR_PAGINA = 50
@@ -29,21 +40,36 @@ SITUACOES = {
 }
 
 
-def _receber(request):
-    """Installments of receivables, with paid amount and balance."""
-    return (
-        Parcela.objects.com_saldo()
-        .filter(lancamento__tipo=Lancamento.Tipo.RECEBER)
-        .select_related("lancamento__paciente", "lancamento")
-    )
+def _modulo(tipo):
+    return Modulo.RECEBIMENTOS if tipo == Lancamento.Tipo.RECEBER else Modulo.FINANCEIRO
+
+
+def _exigir(request, tipo, acao):
+    """Payables need the Financeiro module (administrators) for the same action."""
+    if not pode(request, _modulo(tipo), acao):
+        raise PermissionDenied
 
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def receber_lista(request):
+    return _lista(request, Lancamento.Tipo.RECEBER)
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def pagar_lista(request):
+    return _lista(request, Lancamento.Tipo.PAGAR)
+
+
+def _lista(request, tipo):
     hoje = timezone.localdate()
     situacao = request.GET.get("situacao", "abertas")
     busca = request.GET.get("q", "").strip()
-    parcelas = _receber(request).filter(SITUACOES.get(situacao, SITUACOES["abertas"]))
+    parcelas = (
+        Parcela.objects.com_saldo()
+        .filter(lancamento__tipo=tipo)
+        .select_related("lancamento__paciente", "lancamento")
+        .filter(SITUACOES.get(situacao, SITUACOES["abertas"]))
+    )
     if situacao == "vencidas":
         parcelas = parcelas.filter(vencimento__lt=hoje)
     if busca:
@@ -58,8 +84,10 @@ def receber_lista(request):
         parcela.situacao = servicos.situacao(parcela, hoje)
     return render(
         request,
-        "financeiro/receber_lista.html",
+        "financeiro/lista.html",
         {
+            "tipo": tipo,
+            "pagar": tipo == Lancamento.Tipo.PAGAR,
             "pagina": pagina,
             "situacao": situacao,
             "busca": busca,
@@ -112,13 +140,43 @@ def lancamento_novo(request):
     return render(request, "financeiro/lancamento_form.html", {"form": form, "paciente": paciente})
 
 
+@exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
+def despesa_nova(request):
+    form = LancamentoPagarForm(request.POST or None, clinica=request.clinica)
+    if request.method == "POST" and form.is_valid():
+        dados = form.cleaned_data
+        lancamento = servicos.criar_lancamento(
+            clinica=request.clinica,
+            tipo=Lancamento.Tipo.PAGAR,
+            pessoa=dados["pessoa"].strip(),
+            descricao=dados["descricao"],
+            categoria=dados["categoria"],
+            observacoes=dados["observacoes"],
+            valor_total=form.valor_total(),
+            parcelas=dados["parcelas"],
+            primeiro_vencimento=dados["primeiro_vencimento"],
+            usuario=request.user,
+        )
+        if dados["pago_agora"]:
+            primeira = lancamento.parcelas.order_by("numero").first()
+            servicos.receber(
+                primeira,
+                usuario=request.user,
+                valor=primeira.valor,
+                forma=dados["forma"],
+                conta=dados["conta"],
+            )
+        messages.success(request, _("Despesa lançada."))
+        return redirect("financeiro:lancamento", pk=lancamento.pk)
+    return render(request, "financeiro/despesa_form.html", {"form": form})
+
+
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def lancamento(request, pk):
     lancamento = get_object_or_404(
-        Lancamento.objects.select_related("paciente", "categoria", "profissional"),
-        pk=pk,
-        tipo=Lancamento.Tipo.RECEBER,
+        Lancamento.objects.select_related("paciente", "categoria", "profissional"), pk=pk
     )
+    _exigir(request, lancamento.tipo, Acao.VER)
     hoje = timezone.localdate()
     parcelas = list(
         Parcela.objects.com_saldo().filter(lancamento=lancamento).select_related("lancamento")
@@ -134,6 +192,9 @@ def lancamento(request, pk):
         "financeiro/lancamento.html",
         {
             "lancamento": lancamento,
+            "pagar": lancamento.tipo == Lancamento.Tipo.PAGAR,
+            "pode_alterar": pode(request, _modulo(lancamento.tipo), Acao.CRIAR),
+            "pode_excluir": pode(request, _modulo(lancamento.tipo), Acao.EXCLUIR),
             "parcelas": parcelas,
             "total_pago": sum(p.pago for p in parcelas),
             "total_saldo": sum(p.saldo for p in parcelas) if not lancamento.cancelado else 0,
@@ -144,6 +205,7 @@ def lancamento(request, pk):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.EXCLUIR)
 def lancamento_cancelar(request, pk):
     lancamento = get_object_or_404(Lancamento.objects, pk=pk, cancelado=False)
+    _exigir(request, lancamento.tipo, Acao.EXCLUIR)
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -172,6 +234,8 @@ def receber(request, pk):
         pk=pk,
         lancamento__cancelado=False,
     )
+    _exigir(request, parcela.lancamento.tipo, Acao.CRIAR)
+    pagar = parcela.lancamento.tipo == Lancamento.Tipo.PAGAR
     if parcela.saldo <= 0:
         messages.info(request, _("Esta parcela já está paga."))
         return redirect("financeiro:lancamento", pk=parcela.lancamento_id)
@@ -182,6 +246,9 @@ def receber(request, pk):
         initial={"valor": parcela.saldo, "data": timezone.localdate(), "conta": conta_padrao},
         pode_dar_desconto=pode_desconto,
     )
+    if pagar:
+        form.fields["valor"].label = _("Valor pago")
+        form.fields["juros"].help_text = _("Já incluídos no valor pago.")
     if request.method == "POST" and form.is_valid():
         dados = {campo: valor for campo, valor in form.cleaned_data.items() if campo in form.fields}
         dados.setdefault("desconto", 0)
@@ -192,6 +259,8 @@ def receber(request, pk):
             form.add_error(None, erro.messages[0])
         else:
             messages.success(request, _("Pagamento registrado."))
+            if pagar:
+                return redirect("financeiro:lancamento", pk=parcela.lancamento_id)
             return redirect("financeiro:recibo", pk=pagamento.pk)
     return render(
         request,
@@ -201,6 +270,7 @@ def receber(request, pk):
             "parcela": parcela,
             "total_parcelas": parcela.lancamento.parcelas.count(),
             "pode_desconto": pode_desconto,
+            "pagar": pagar,
         },
     )
 
@@ -228,6 +298,7 @@ def estornar(request, pk):
     pagamento = get_object_or_404(
         Pagamento.objects.select_related("parcela__lancamento"), pk=pk, estornado=False
     )
+    _exigir(request, pagamento.parcela.lancamento.tipo, Acao.EXCLUIR)
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         servicos.estornar(pagamento, motivo=form.cleaned_data["motivo"], usuario=request.user)
@@ -256,6 +327,54 @@ def devedores(request):
             "total_vencido": sum(linha["vencido"] for linha in linhas),
             "total_a_vencer": sum(linha["a_vencer"] for linha in linhas),
         },
+    )
+
+
+# --- Cash flow and reports (administrators) ---------------------------------------------
+
+
+def _periodo(request):
+    """(de, ate) from the query string; the current month by default (at most 2 years)."""
+    hoje = timezone.localdate()
+    inicio_do_mes = hoje.replace(day=1)
+    fim_do_mes = servicos.somar_meses(inicio_do_mes, 1) - datetime.timedelta(days=1)
+    try:
+        de = datetime.date.fromisoformat(request.GET.get("de", ""))
+    except ValueError:
+        de = inicio_do_mes
+    try:
+        ate = datetime.date.fromisoformat(request.GET.get("ate", ""))
+    except ValueError:
+        ate = fim_do_mes
+    if ate < de or (ate - de).days > 731:
+        de, ate = inicio_do_mes, fim_do_mes
+    return de, ate
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def fluxo_de_caixa(request):
+    de, ate = _periodo(request)
+    por_mes = request.GET.get("agrupar") == "mes"
+    return render(
+        request,
+        "financeiro/fluxo.html",
+        {
+            "de": de,
+            "ate": ate,
+            "por_mes": por_mes,
+            "fluxo": servicos.fluxo_de_caixa(de, ate, por_mes=por_mes),
+            "contas": servicos.saldos_das_contas(),
+        },
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def relatorios(request):
+    de, ate = _periodo(request)
+    return render(
+        request,
+        "financeiro/relatorios.html",
+        {"de": de, "ate": ate, "relatorio": servicos.relatorio(de, ate)},
     )
 
 

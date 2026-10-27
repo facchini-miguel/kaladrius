@@ -135,7 +135,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
     contas = list(Conta.objects.filter(clinica=clinica, ativa=True))
     profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
     if not (pacientes and categorias and contas):
-        return 0
+        return 0, 0
     hoje = timezone.localdate()
     formas = [forma for forma, _rotulo in Pagamento.Forma.choices]
     criados = 0
@@ -165,4 +165,58 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
                     conta=sorteio.choice(contas),
                 )
         criados += 1
-    return criados
+    return criados, _simular_despesas(clinica, sorteio, contas, usuario)
+
+
+# Fake payables: (supplier, description, category, amount, monthly repetitions or None).
+DESPESAS_SIMULADAS = [
+    ("Imobiliária Central", "Aluguel", "Aluguel", 3000, 6),
+    ("Companhia de energia", "Água, luz e internet", "Água, luz e internet", 450, 6),
+    ("Dental Suprimentos", "Material odontológico", "Material odontológico", 1350, None),
+    ("Laboratório Sorriso", "Prótese", "Laboratório de prótese", 980, None),
+    ("Contabilidade Ágil", "Honorários contábeis", "Outras despesas", 600, 6),
+]
+
+
+def _simular_despesas(clinica, sorteio, contas, usuario):
+    """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
+    from decimal import Decimal
+
+    from apps.financeiro import servicos
+    from apps.financeiro.models import Categoria, Lancamento
+
+    categorias = {
+        c.nome: c for c in Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.DESPESA)
+    }
+    hoje = timezone.localdate()
+    inicio = servicos.somar_meses(hoje.replace(day=10), -2)
+    criadas = 0
+    for fornecedor, descricao, categoria, valor, meses in DESPESAS_SIMULADAS:
+        if categoria not in categorias:
+            continue
+        parcelas = meses or sorteio.choice([1, 2, 3])
+        valor = Decimal(valor)
+        lancamento = servicos.criar_lancamento(
+            clinica=clinica,
+            tipo=Lancamento.Tipo.PAGAR,
+            pessoa=fornecedor,
+            descricao=descricao,
+            categoria=categorias[categoria],
+            valor_total=valor * parcelas if meses else valor,
+            data=inicio,
+            parcelas=parcelas,
+            primeiro_vencimento=inicio if meses else hoje - datetime.timedelta(days=20),
+            usuario=usuario,
+        )
+        for parcela in lancamento.parcelas.all():
+            if parcela.vencimento <= hoje and sorteio.random() < 0.9:
+                servicos.receber(
+                    parcela,
+                    usuario=usuario,
+                    valor=parcela.valor,
+                    data=parcela.vencimento,
+                    forma=sorteio.choice(["pix", "boleto", "transferencia"]),
+                    conta=sorteio.choice(contas),
+                )
+        criadas += 1
+    return criadas

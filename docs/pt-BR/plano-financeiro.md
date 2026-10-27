@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/financial-plan.md) | 🇧🇷 Português | [🇪🇸 Español](../es/plan-financiero.md)
 
-> Status: **etapa 1 (a receber) concluída na 0.15.0** (27/10/2026). Decisões 048 e 051. Juros e multa são lançados à mão, desconto só pelo administrador, e o endereço da clínica sai no recibo.
+> Status: **etapas 1 (a receber, 0.15.0) e 2 (a pagar, fluxo de caixa e relatórios, 0.16.0) concluídas** (27/10/2026). Decisões 048 e 051. Juros e multa são lançados à mão, desconto só pelo administrador, e o endereço da clínica sai no recibo.
 
 ## Objetivo
 Saber **quem deve o quê**, **como cada pessoa pagou** (dinheiro, Pix, cartão, parcelado) e **quanto entra e sai** da clínica, com lançamentos feitos à mão pela equipe.
@@ -69,7 +69,7 @@ Cancelar lançamentos e estornar pagamentos é só do administrador. Assim a rec
 | # | Etapa | Entrega | Versão |
 |---|---|---|---|
 | 1 ✅ | **A receber** | Modelos, contas e categorias padrão, lançamento a receber com parcelas, receber (todas as formas, parcial), recibo, devedores, quadro na ficha do paciente, permissões | 0.15.0 |
-| 2 | **A pagar e fluxo de caixa** | Lançamento a pagar com repetição mensal, fluxo de caixa realizado e previsto, saldo por conta, relatórios | 0.16.0 |
+| 2 ✅ | **A pagar e fluxo de caixa** | Lançamento a pagar com repetição mensal, fluxo de caixa realizado e previsto, saldo por conta, relatórios | 0.16.0 |
 | 3 | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.17.0 |
 
 ### Depois (sem data)

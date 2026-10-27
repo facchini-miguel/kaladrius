@@ -16,6 +16,9 @@ class FormularioBootstrap:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for campo in self.fields.values():
+            if isinstance(campo, forms.ModelChoiceField) and campo.empty_label is not None:
+                # Django 6.1's "- Select an option -" has no Portuguese translation yet.
+                campo.empty_label = "—"
             widget = campo.widget
             if isinstance(widget, forms.CheckboxInput | forms.RadioSelect):
                 classe = "form-check-input"

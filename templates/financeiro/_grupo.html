@@ -1,0 +1,16 @@
+{% load i18n formatos %}<div class="col-lg-6">
+  <h2 class="h6">{{ titulo }}</h2>
+  <table class="table table-sm bg-white">
+    <tbody>
+      {% for nome, valor in linhas %}
+      <tr>
+        <td>{{ nome|default:_("Sem profissional") }}</td>
+        <td class="text-end text-nowrap">{{ valor|moeda }}</td>
+        <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio valor total 100 %}%</td>
+      </tr>
+      {% empty %}
+      <tr><td class="text-body-secondary">{% translate "Nada no período." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

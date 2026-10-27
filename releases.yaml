@@ -4,6 +4,63 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.16.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Financeiro, etapa 2 — contas a pagar, fluxo de caixa e relatórios
+    en: Finance, step 2 — payables, cash flow and reports
+    es: Financiero, etapa 2 — cuentas por pagar, flujo de caja e informes
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O administrador lança as despesas da clínica (compras parceladas ou contas fixas de
+          todo mês, como o aluguel) e as paga em Financeiro > A pagar.
+        en: >
+          The administrator records the clinic's expenses (purchases in installments or fixed
+          monthly bills, like rent) and pays them in Finance > Payables.
+        es: >
+          El administrador registra los gastos de la clínica (compras en cuotas o cuentas fijas
+          de cada mes, como el alquiler) y los paga en Financiero > Por pagar.
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Fluxo de caixa por dia ou por mês, com o que entrou e saiu, o que está previsto e o
+          saldo; saldo atual de cada conta, a partir do saldo inicial informado em Contas.
+        en: >
+          Cash flow by day or by month, with money in and out, what is expected and the
+          balance; current balance of each account, from the initial balance set in Accounts.
+        es: >
+          Flujo de caja por día o por mes, con lo que entró y salió, lo previsto y el saldo;
+          saldo actual de cada cuenta, a partir del saldo inicial indicado en Cuentas.
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Relatórios do período: recebido por forma de pagamento, por categoria e por
+          profissional, despesas por categoria e o resultado.
+        en: >
+          Period reports: received by payment method, by category and by practitioner, expenses
+          by category and the result.
+        es: >
+          Informes del período: cobrado por forma de pago, por categoría y por profesional,
+          gastos por categoría y el resultado.
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          As listas de escolha mostravam "Select an option" em inglês; agora mostram "—".
+        en: >
+          Choice lists showed "Select an option" in English even in Portuguese; they now show "—".
+        es: >
+          Las listas de opciones mostraban "Select an option" en inglés; ahora muestran "—".
+
 - versao: 0.15.0
   data: 2026-10-27
   titulo:

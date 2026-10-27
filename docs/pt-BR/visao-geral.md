@@ -29,7 +29,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 9. **Auditoria:** quem criou, alterou, excluiu ou consultou o quê e quando (LGPD).
 10. **Idiomas:** português, inglês e espanhol, à escolha de cada usuário (0.13.0).
 11. **Ajuda:** manual do usuário nos três idiomas dentro do sistema; documentação técnica só para o superusuário (0.14.0).
-12. **Financeiro:** lançamentos a receber com parcelas, pagamentos com forma e conta, recibo, devedores (0.15.0). A pagar, fluxo de caixa e caixa do dia nas próximas versões.
+12. **Financeiro:** lançamentos a receber com parcelas, pagamentos com forma e conta, recibo, devedores (0.15.0); contas a pagar, fluxo de caixa e relatórios (0.16.0). Caixa do dia na próxima versão.
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.

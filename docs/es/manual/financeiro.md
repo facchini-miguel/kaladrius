@@ -32,5 +32,23 @@ No se borra nada. El **administrador** puede:
 
 Todo queda registrado en la auditoría.
 
+## Cuentas por pagar (administrador)
+En **Financiero > Nuevo gasto**, indique el **proveedor**, la categoría, la descripción y el valor. En **El valor es**, elija:
+- **el total, dividido en las cuotas**: una compra de R$ 900 en 3 cuotas pasa a 3 cuotas de R$ 300;
+- **de cada mes**: una cuenta fija, como el alquiler de R$ 3.000 durante 12 meses, pasa a 12 cuotas de R$ 3.000.
+
+En **Financiero > Por pagar**, haga clic en **Pagar** cuando pague una cuota. Revertir y cancelar funcionan igual que en las cuentas por cobrar.
+
+## Flujo de caja (administrador)
+En **Financiero > Flujo de caja**, elija el período y si quiere verlo por **día** o por **mes**:
+- **Ingresos** y **Egresos**: lo que se cobró y se pagó de verdad, por la fecha del pago;
+- **Ingresos previstos** y **Egresos previstos**: lo que falta de las cuotas abiertas, por el vencimiento (las vencidas aparecen como "atrasado");
+- **Saldo**: empieza en el saldo de las cuentas al inicio del período y suma todo, día a día (o mes a mes).
+
+Abajo aparece el **saldo actual de cada cuenta**. Para que coincida con el banco y la caja, indique el **saldo inicial** de cada cuenta en **Registros > Cuentas** (cuánto había antes del primer registro en el sistema).
+
+## Informes (administrador)
+En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría. Los pagos revertidos y las cuentas canceladas quedan fuera.
+
 ## Categorías y cuentas
 En **Registros > Categorías** y **Registros > Cuentas**, el administrador crea nuevas categorías (ingresos y gastos) y cuentas (caja, banco, terminal de tarjetas). Para dejar de usar una sin perder el historial, desmarque **activa**.

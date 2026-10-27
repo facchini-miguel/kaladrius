@@ -31,6 +31,12 @@ class Conta(ModeloDaClinica):
 
     nome = models.CharField(_("nome"), max_length=60)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    saldo_inicial = models.DecimalField(
+        _("saldo inicial"),
+        default=ZERO,
+        help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
+        **DINHEIRO,
+    )
     ativa = models.BooleanField(_("ativa"), default=True)
 
     class Meta:

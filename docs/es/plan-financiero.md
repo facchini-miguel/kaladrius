@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/financial-plan.md) | [🇧🇷 Português](../pt-BR/plano-financeiro.md) | 🇪🇸 Español
 
-> Estado: **etapa 1 (por cobrar) concluida en la 0.15.0** (27/10/2026). Decisiones 048 y 051. Los intereses y la multa se registran a mano, el descuento solo lo da el administrador, y la dirección de la clínica sale en el recibo.
+> Estado: **etapas 1 (por cobrar, 0.15.0) y 2 (por pagar, flujo de caja e informes, 0.16.0) concluidas** (27/10/2026). Decisiones 048 y 051. Los intereses y la multa se registran a mano, el descuento solo lo da el administrador, y la dirección de la clínica sale en el recibo.
 
 ## Objetivo
 Saber **quién debe qué**, **cómo pagó cada persona** (efectivo, Pix, tarjeta, en cuotas) y **cuánto entra y sale** de la clínica, con registros hechos a mano por el equipo.
@@ -69,7 +69,7 @@ Cancelar cuentas y revertir pagos es solo del administrador. Así la recepción 
 | # | Etapa | Entrega | Versión |
 |---|---|---|---|
 | 1 ✅ | **Por cobrar** | Modelos, cuentas y categorías estándar, cuenta por cobrar con cuotas, cobrar (todas las formas, parcial), recibo, deudores, cuadro en la ficha del paciente, permisos | 0.15.0 |
-| 2 | **Por pagar y flujo de caja** | Cuenta por pagar con repetición mensual, flujo de caja realizado y previsto, saldo por cuenta, informes | 0.16.0 |
+| 2 ✅ | **Por pagar y flujo de caja** | Cuenta por pagar con repetición mensual, flujo de caja realizado y previsto, saldo por cuenta, informes | 0.16.0 |
 | 3 | **Caja del día** | Apertura, retiros, refuerzos y cierre con conteo | 0.17.0 |
 
 ### Después (sin fecha)

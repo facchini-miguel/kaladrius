@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Relatórios" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Relatórios financeiros" %}</h1>
+{% include "financeiro/_periodo.html" %}
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ relatorio.total_recebido|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ relatorio.total_pago|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if relatorio.resultado < 0 %} text-danger{% endif %}">{{ relatorio.resultado|moeda }}</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  {% translate "Recebido por forma de pagamento" as titulo1 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo1 linhas=relatorio.por_forma total=relatorio.total_recebido %}
+  {% translate "Recebido por categoria" as titulo2 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo2 linhas=relatorio.por_categoria total=relatorio.total_recebido %}
+  {% translate "Recebido por profissional" as titulo3 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo3 linhas=relatorio.por_profissional total=relatorio.total_recebido %}
+  {% translate "Despesas pagas por categoria" as titulo4 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo4 linhas=relatorio.despesas_por_categoria total=relatorio.total_pago %}
+</div>
+<p class="text-body-secondary small mt-3">
+  {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
+  {% if relatorio.juros %}{% translate "Juros e multa recebidos" %}: {{ relatorio.juros|moeda }}.{% endif %}
+  {% if relatorio.descontos %}{% translate "Descontos dados" %}: {{ relatorio.descontos|moeda }}.{% endif %}
+</p>
+{% endblock %}

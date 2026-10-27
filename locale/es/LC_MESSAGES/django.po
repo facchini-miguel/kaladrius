@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 12:53-0300\n"
+"POT-Creation-Date: 2026-10-27 14:48-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: Español\n"
@@ -472,6 +472,27 @@ msgstr "Indique un valor mayor que cero."
 msgid "Informe para registrar o pagamento."
 msgstr "Indíquelo para registrar el pago."
 
+msgid "Valor"
+msgstr "Valor"
+
+msgid "O valor é"
+msgstr "El valor es"
+
+msgid "o total, dividido nas parcelas"
+msgstr "el total, dividido en las cuotas"
+
+msgid "de cada mês (conta fixa, como o aluguel)"
+msgstr "de cada mes (cuenta fija, como el alquiler)"
+
+msgid "Número de parcelas ou de meses"
+msgstr "Número de cuotas o de meses"
+
+msgid "A 1ª parcela já foi paga"
+msgstr "La 1.ª cuota ya se pagó"
+
+msgid "Fornecedor"
+msgstr "Proveedor"
+
 msgid "Valor recebido"
 msgstr "Valor cobrado"
 
@@ -490,6 +511,12 @@ msgstr "Motivo"
 msgid "Já existe uma categoria com este nome."
 msgstr "Ya existe una categoría con este nombre."
 
+msgid "Saldo inicial"
+msgstr "Saldo inicial"
+
+msgid "Quanto havia na conta antes do primeiro lançamento no sistema."
+msgstr "Cuánto había en la cuenta antes del primer registro en el sistema."
+
 msgid "Já existe uma conta com este nome."
 msgstr "Ya existe una cuenta con este nombre."
 
@@ -504,6 +531,9 @@ msgstr "Terminal de tarjetas"
 
 msgid "tipo"
 msgstr "tipo"
+
+msgid "saldo inicial"
+msgstr "saldo inicial"
 
 msgid "conta"
 msgstr "cuenta"
@@ -681,6 +711,9 @@ msgstr "Cuenta creada y 1.ª cuota cobrada."
 msgid "Lançamento criado."
 msgstr "Cuenta creada."
 
+msgid "Despesa lançada."
+msgstr "Gasto registrado."
+
 msgid "Lançamento cancelado."
 msgstr "Cuenta cancelada."
 
@@ -689,6 +722,12 @@ msgstr "Cancelar cuenta"
 
 msgid "Esta parcela já está paga."
 msgstr "Esta cuota ya está pagada."
+
+msgid "Valor pago"
+msgstr "Valor pagado"
+
+msgid "Já incluídos no valor pago."
+msgstr "Ya incluidos en el valor pagado."
 
 msgid "Pagamento registrado."
 msgstr "Pago registrado."
@@ -1237,6 +1276,15 @@ msgstr "Deudores"
 msgid "Novo lançamento"
 msgstr "Nueva cuenta"
 
+msgid "Nova despesa"
+msgstr "Nuevo gasto"
+
+msgid "Fluxo de caixa"
+msgstr "Flujo de caja"
+
+msgid "Relatórios"
+msgstr "Informes"
+
 msgid "Cidades"
 msgstr "Ciudades"
 
@@ -1405,6 +1453,21 @@ msgstr "Nueva contraseña"
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "La persona sale del sistema en los dispositivos donde esté conectada."
 
+msgid "Sem profissional"
+msgstr "Sin profesional"
+
+msgid "Nada no período."
+msgstr "Nada en el período."
+
+msgid "Agrupar por"
+msgstr "Agrupar por"
+
+msgid "Dia"
+msgstr "Día"
+
+msgid "Mês"
+msgstr "Mes"
+
 msgid "Tipo"
 msgstr "Tipo"
 
@@ -1417,6 +1480,13 @@ msgstr "Inactiva"
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
 msgstr ""
 "Para dejar de usarla sin perder el historial, edítela y desmarque “activa”."
+
+msgid ""
+"Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
+"Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
+msgstr ""
+"Ejemplo: alquiler de R$ 3.000 durante 12 meses → valor 3.000, “de cada mes”, "
+"12. Compra de R$ 900 en 3 cuotas → valor 900, “el total”, 3."
 
 msgid "Total vencido"
 msgstr "Total vencido"
@@ -1448,6 +1518,53 @@ msgstr "Más antiguo"
 msgid "Ninguém está devendo."
 msgstr "Nadie está debiendo."
 
+msgid "Saldo no início"
+msgstr "Saldo al inicio"
+
+msgid "Entradas (realizadas + previstas)"
+msgstr "Ingresos (realizados + previstos)"
+
+msgid "Saídas (realizadas + previstas)"
+msgstr "Egresos (realizados + previstos)"
+
+msgid "Saldo previsto no fim"
+msgstr "Saldo previsto al final"
+
+msgid "Entradas"
+msgstr "Ingresos"
+
+msgid "Saídas"
+msgstr "Egresos"
+
+msgid "Entradas previstas"
+msgstr "Ingresos previstos"
+
+msgid "Saídas previstas"
+msgstr "Egresos previstos"
+
+msgid "Saldo"
+msgstr "Saldo"
+
+msgid "em atraso"
+msgstr "atrasado"
+
+msgid "Nenhuma movimentação no período."
+msgstr "Ningún movimiento en el período."
+
+msgid ""
+"Realizado: pagamentos registrados, pela data do pagamento. Previsto: o que "
+"falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em "
+"atraso”). O saldo soma os dois a partir do saldo das contas no início do "
+"período."
+msgstr ""
+"Realizado: pagos registrados, por la fecha del pago. Previsto: lo que falta "
+"de las cuotas abiertas, por el vencimiento (las vencidas aparecen como "
+"“atrasado”). El saldo suma ambos a partir del saldo de las cuentas al inicio "
+"del período."
+
+msgid "Saldo atual por conta"
+msgstr "Saldo actual por cuenta"
+
 msgid "Cancelado"
 msgstr "Cancelada"
 
@@ -1470,9 +1587,6 @@ msgstr "Cuota"
 msgid "Vencimento"
 msgstr "Vencimiento"
 
-msgid "Valor"
-msgstr "Valor"
-
 msgid "Pagamentos"
 msgstr "Pagos"
 
@@ -1481,6 +1595,9 @@ msgstr "recibo"
 
 msgid "estornar"
 msgstr "revertir"
+
+msgid "Pagar"
+msgstr "Pagar"
 
 msgid "Receber"
 msgstr "Cobrar"
@@ -1494,6 +1611,27 @@ msgid ""
 msgstr ""
 "Para pago en el momento: la 1.ª cuota se registra como pagada y el recibo se "
 "abre a continuación."
+
+msgid "Fornecedor ou descrição"
+msgstr "Proveedor o descripción"
+
+msgid "Paciente, pagador ou descrição"
+msgstr "Paciente, pagador o descripción"
+
+msgid "Vencidas"
+msgstr "Vencidas"
+
+msgid "Pagas"
+msgstr "Pagadas"
+
+msgid "Todas"
+msgstr "Todos"
+
+msgid "Descrição"
+msgstr "Descripción"
+
+msgid "Nenhuma parcela encontrada."
+msgstr "Ninguna cuota encontrada."
 
 msgid ""
 "Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
@@ -1531,24 +1669,6 @@ msgstr "Solo el administrador de la clínica puede dar descuentos."
 
 msgid "Registrar pagamento"
 msgstr "Registrar pago"
-
-msgid "Paciente, pagador ou descrição"
-msgstr "Paciente, pagador o descripción"
-
-msgid "Vencidas"
-msgstr "Vencidas"
-
-msgid "Pagas"
-msgstr "Pagadas"
-
-msgid "Todas"
-msgstr "Todos"
-
-msgid "Descrição"
-msgstr "Descripción"
-
-msgid "Nenhuma parcela encontrada."
-msgstr "Ninguna cuota encontrada."
 
 msgid "Recibo"
 msgstr "Recibo"
@@ -1600,6 +1720,36 @@ msgstr "Intereses y multa incluidos"
 msgid "Recebido por %(nome)s"
 msgstr "Cobrado por %(nome)s"
 
+msgid "Relatórios financeiros"
+msgstr "Informes financieros"
+
+msgid "Recebido"
+msgstr "Cobrado"
+
+msgid "Resultado"
+msgstr "Resultado"
+
+msgid "Recebido por forma de pagamento"
+msgstr "Cobrado por forma de pago"
+
+msgid "Recebido por categoria"
+msgstr "Cobrado por categoría"
+
+msgid "Recebido por profissional"
+msgstr "Cobrado por profesional"
+
+msgid "Despesas pagas por categoria"
+msgstr "Gastos pagados por categoría"
+
+msgid "Pela data do pagamento, sem os estornados e os cancelados."
+msgstr "Por la fecha del pago, sin los revertidos ni los cancelados."
+
+msgid "Juros e multa recebidos"
+msgstr "Intereses y multas cobrados"
+
+msgid "Descontos dados"
+msgstr "Descuentos dados"
+
 msgid "Paciente"
 msgstr "Paciente"
 
@@ -1632,17 +1782,11 @@ msgstr "Versión %(versao)s"
 msgid "Nenhuma novidade registrada ainda."
 msgstr "Todavía no hay novedades registradas."
 
-msgid "Mês"
-msgstr "Mes"
-
 #, python-format
 msgid "%(total)s aniversariante (pacientes ativos)"
 msgid_plural "%(total)s aniversariantes (pacientes ativos)"
 msgstr[0] "%(total)s cumpleaños (pacientes activos)"
 msgstr[1] "%(total)s cumpleaños (pacientes activos)"
-
-msgid "Dia"
-msgstr "Día"
 
 msgid "Completa"
 msgstr "Cumple"

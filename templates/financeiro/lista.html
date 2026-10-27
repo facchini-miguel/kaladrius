@@ -1,20 +1,24 @@
 {% extends "base.html" %}
 {% load i18n formatos %}
 
-{% block titulo %}{% translate "A receber" %} · Medical System{% endblock %}
+{% block titulo %}{% if pagar %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %} · Medical System{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% translate "A receber" %}</h1>
+  <h1 class="h3 mb-0">{% if pagar %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %}</h1>
   <div class="d-flex gap-2">
+    {% if pagar %}
+    {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:despesa_nova' %}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% else %}
     <a class="btn btn-outline-primary" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a>
     {% if pode.recebimentos.criar %}<a class="btn btn-primary" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a>{% endif %}
+    {% endif %}
   </div>
 </div>
 
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
-    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Paciente, pagador ou descrição' %}" aria-label="{% translate 'Buscar' %}">
+    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% if pagar %}{% translate 'Fornecedor ou descrição' %}{% else %}{% translate 'Paciente, pagador ou descrição' %}{% endif %}" aria-label="{% translate 'Buscar' %}">
   </div>
   <div class="col-6 col-md-3">
     <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
@@ -32,7 +36,7 @@
     <thead>
       <tr>
         <th>{% translate "Vencimento" %}</th>
-        <th>{% translate "Paciente ou pagador" %}</th>
+        <th>{% if pagar %}{% translate "Fornecedor" %}{% else %}{% translate "Paciente ou pagador" %}{% endif %}</th>
         <th>{% translate "Descrição" %}</th>
         <th class="text-end">{% translate "Valor" %}</th>
         <th class="text-end">{% translate "Falta" %}</th>
@@ -53,8 +57,9 @@
         <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
         <td>{% include "financeiro/_situacao.html" with situacao=parcela.situacao %}</td>
         <td class="text-end text-nowrap">
-          {% if pode.recebimentos.criar and parcela.saldo > 0 and not parcela.lancamento.cancelado %}
-          <a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>
+          {% if parcela.saldo > 0 and not parcela.lancamento.cancelado %}
+          {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Pagar" %}</a>
+          {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>{% endif %}
           {% endif %}
         </td>
       </tr>

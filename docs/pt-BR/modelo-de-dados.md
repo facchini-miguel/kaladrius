@@ -59,13 +59,13 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 ### Financeiro (versão 0.15.0)
 | Entidade | Campos principais | Observação |
 |---|---|---|
-| `Conta` | clinica, nome, tipo (dinheiro, banco, maquininha), ativa | Onde o dinheiro entra. Toda clínica começa com Caixa e Banco |
+| `Conta` | clinica, nome, tipo (dinheiro, banco, maquininha), saldo inicial (0.16.0), ativa | Onde o dinheiro entra. Toda clínica começa com Caixa e Banco |
 | `Categoria` | clinica, nome, tipo (receita, despesa), ativa | Toda clínica começa com 3 de receita e 8 de despesa; o administrador cadastra outras |
 | `Lancamento` | clinica, tipo (a receber, a pagar), descrição, categoria, paciente (opcional) ou pagador em texto, profissional (opcional), valor total, data, observações, cancelado (com motivo, quando e quem), criado por | Nunca é excluído: é cancelado |
 | `Parcela` | clinica, lançamento, número, vencimento, valor | O pago e o saldo são calculados a partir dos pagamentos |
 | `Pagamento` | clinica, parcela, data, valor recebido, juros e multa (incluídos no valor), desconto (só administrador), forma (dinheiro, Pix, débito, crédito, transferência, boleto, cheque), conta, bandeira, parcelas e código da transação do cartão, observação, estornado (com motivo, quando e quem), recebido por | Abate da parcela: valor − juros + desconto. Nunca guarda o número do cartão |
 
-Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
+As contas a pagar (0.16.0) usam as mesmas entidades, com o fornecedor no campo do pagador. O saldo de cada conta é o saldo inicial mais o que entrou menos o que saiu (pagamentos não estornados). Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
 
 ### Sistema
 | Entidade | Uso |

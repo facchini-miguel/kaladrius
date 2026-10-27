@@ -25,7 +25,7 @@ class Command(BaseCommand):
             "--lancamentos",
             type=int,
             default=60,
-            help="Fake receivables of the last 90 days (0 for none).",
+            help="Fake receivables of the last 90 days, plus fake bills (0 for none).",
         )
         parser.add_argument(
             "--confirmar",
@@ -45,8 +45,11 @@ class Command(BaseCommand):
                 raise CommandError(f"Clínica “{clinica}” não encontrada.")
             agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)
             criadas = simular_rechamadas(alvo, sorteio, quantidade=rechamadas)
-            financeiro = simular_financeiro(alvo, sorteio, quantidade=lancamentos)
+            receber, pagar = (
+                simular_financeiro(alvo, sorteio, quantidade=lancamentos) if lancamentos else (0, 0)
+            )
         self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinica}”:"))
         self.stdout.write(f"  Agendamentos fictícios: {agendamentos}")
         self.stdout.write(f"  Rechamadas fictícias: {criadas}")
-        self.stdout.write(f"  Lançamentos a receber fictícios: {financeiro}")
+        self.stdout.write(f"  Lançamentos a receber fictícios: {receber}")
+        self.stdout.write(f"  Despesas fictícias: {pagar}")

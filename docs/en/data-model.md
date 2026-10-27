@@ -61,13 +61,13 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 ### Finance (version 0.15.0)
 | Entity | Main fields | Notes |
 |---|---|---|
-| `Conta` (account) | clinic, name, type (cash, bank, card machine), active | Where the money goes. Every clinic starts with Caixa (cash) and Banco (bank) |
+| `Conta` (account) | clinic, name, type (cash, bank, card machine), initial balance (0.16.0), active | Where the money goes. Every clinic starts with Caixa (cash) and Banco (bank) |
 | `Categoria` (category) | clinic, name, type (income, expense), active | Every clinic starts with 3 income and 8 expense categories; administrators add others |
 | `Lancamento` (entry) | clinic, type (receivable, payable), description, category, patient (optional) or payer as text, practitioner (optional), total, date, notes, cancelled (with reason, when and who), created by | Never deleted: cancelled |
 | `Parcela` (installment) | clinic, entry, number, due date, amount | Paid amount and balance are computed from the payments |
 | `Pagamento` (payment) | clinic, installment, date, amount received, interest and late fee (included in the amount), discount (administrators only), method (cash, Pix, debit, credit, transfer, boleto, check), account, card brand, installments and transaction code, note, reversed (with reason, when and who), received by | Deducted from the installment: amount − interest + discount. Never stores the card number |
 
-Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
+Payables (0.16.0) use the same entities, with the supplier in the payer field. Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
 
 ### System
 | Entity | Purpose |

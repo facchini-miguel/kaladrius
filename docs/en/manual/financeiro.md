@@ -32,5 +32,23 @@ Nothing is deleted. The **administrator** can:
 
 Everything is recorded in the audit log.
 
+## Payables (administrator)
+In **Finance > New expense**, enter the **supplier**, the category, the description and the amount. In **The amount is**, choose:
+- **the total, split into the installments**: a R$ 900 purchase in 3 installments becomes 3 installments of R$ 300;
+- **per month**: a fixed bill, like rent of R$ 3,000 for 12 months, becomes 12 installments of R$ 3,000.
+
+In **Finance > Payables**, click **Pay** when you pay an installment. Reversing and cancelling work as for receivables.
+
+## Cash flow (administrator)
+In **Finance > Cash flow**, choose the period and whether to see it by **day** or by **month**:
+- **Money in** and **Money out**: what was actually received and paid, by payment date;
+- **Expected in** and **Expected out**: what is left of the open installments, by due date (overdue ones are flagged "overdue");
+- **Balance**: starts from the accounts' balance at the start of the period and adds everything, day by day (or month by month).
+
+Below it you see the **current balance of each account**. For it to match the bank and the drawer, enter each account's **initial balance** in **Records > Accounts** (how much it had before the first entry in the system).
+
+## Reports (administrator)
+In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category. Reversed payments and cancelled entries are left out.
+
 ## Categories and accounts
 In **Records > Categories** and **Records > Accounts**, the administrator creates new categories (income and expenses) and accounts (cash drawer, bank, card machine). To stop using one without losing the history, uncheck **active**.
