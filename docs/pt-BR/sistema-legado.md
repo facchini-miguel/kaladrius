@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/legacy-system.md) | 🇧🇷 Português
 
-Referência para a reescrita. O código antigo (PHP) fica na pasta local `old_data/legado-php/www/`, que é ignorada pelo Git e pelo Docker. A análise completa está em `old_data/legado-php/ANALISE_SISTEMA.md`.
+Referência para a reescrita. O código antigo (PHP) fica na pasta local `old_data/legado-php/www/`, que é ignorada pelo Git e fica fora da imagem Docker (mas é visível dentro do container de desenvolvimento, que monta a pasta do projeto). **Cuidado:** `git clean -x` ou `-X` apaga pastas ignoradas, inclusive `old_data/`. A análise completa está em `old_data/legado-php/ANALISE_SISTEMA.md`.
 
 > Os backups com dados reais de pacientes ficam em `old_data/` (só na máquina local). **Nunca** tirar nada de lá do `.gitignore` nem copiar para o código versionado. Este projeto usa apenas **dados fictícios**.
 
@@ -23,6 +23,12 @@ Referência para a reescrita. O código antigo (PHP) fica na pasta local `old_da
 | Dentistas | CRUD (nome) |
 | Tabelas base | UF, cidade, bairro, logradouro, banco, tipo de endereço, estado civil |
 | Sistema | CRUD de usuários e grupos, regeneração de permissões padrão |
+
+## Revisão de paridade (26/10/2026)
+Os 185 arquivos PHP foram comparados com o sistema novo.
+- **Reproduzido:** tudo da tabela acima, exceto o CRUD de usuários e grupos (pendente, ver [plano-fase-1.md](plano-fase-1.md)). Bairro, logradouro e tipo de endereço viraram campos de texto (ver [modelo-de-dados.md](modelo-de-dados.md)).
+- **Não havia módulo financeiro:** nada de caixa, contas a receber ou orçamentos. Só os campos saldo, data de pagamento e banco/agência/conta em `pessoas`, mais observações livres. Confirmado em todos os dumps (2011–2019, sempre as mesmas 17 tabelas) e nos arquivos compactados (`www*.rar` têm os mesmos 185 arquivos PHP). Um financeiro, se vier, será feito do zero.
+- **Não portado de propósito** (código morto no sistema antigo): pessoas relacionadas (a página de destino nunca existiu), `config_imp.php` (sem link em nenhuma tela) e o campo `rg_obs`.
 
 ## Tipos de atendimento originais (seed de teste)
 Liberado `#b9f1a7` · Cirurgia `#f7a5a5` · Dentística `#f6f7a5` · Periodontia `#7b88cb` · Consulta Inicial `#e7a5f7` · Prótese `#fed27d` · Endodontia `#e96cd9` · Ortodontia `#a7eef1` · Atendimento de 15 em 15 `#d5dae6` · Ocupado `#a7bef1`

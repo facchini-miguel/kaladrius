@@ -8,28 +8,31 @@
 Have the staff web app running on **local Docker** with **the same features as the legacy system**, already multi-tenant and secure, with fake test data and the What's new page. Target version: **0.7.0** (each step with new features bumps the minor number). 1.0.0 is reserved for the first real-world use.
 
 ## Out of scope for phase 1
-API and app (phase 2), patient login (phase 3), plans and billing (phase 4), cloud deploy (right after phase 1), finance, clinical records.
+API and app (phase 2), patient login (phase 3), plans and billing (phase 4), cloud deploy (done right after phase 1, see [deploy.md](deploy.md)), finance, clinical records.
 
 ## Project structure
 
 ```
 medical-system/
-├── docker-compose.yml        db (postgres:16) + app
+├── docker-compose.yml        local environment: db (postgres:16) + app
 ├── Dockerfile
 ├── .env.example
-├── pyproject.toml            dependencies, version, ruff and pytest config
+├── pyproject.toml            version, ruff, pytest and coverage config
+├── requirements*.txt         dependencies (pinned)
 ├── releases.yaml
 ├── config/                   settings (single file, configured via .env), urls, api, wsgi
 ├── apps/
-│   ├── core/                 Clinica, Usuario, Vinculo, roles, current-clinic middleware, audit
+│   ├── core/                 Clinica, Usuario, Vinculo, roles and permissions, per-clinic isolation, commands
 │   ├── referencias/          UF, Cidade, Banco, EstadoCivil (global) + initial load
 │   ├── pacientes/            Paciente (individual/company), search, record
 │   ├── profissionais/        Profissional
-│   ├── agenda/               TipoAtendimento, Agendamento, weekly grid, recurrence, conflicts
+│   ├── agenda/               TipoAtendimento, Agendamento, weekly grid, recurrence, conflicts, birthdays
 │   ├── rechamadas/           Rechamada
-│   ├── aniversariantes/      lookup by month
+│   ├── auditoria/            RegistroAuditoria, signals, audit screen
 │   └── novidades/            reads releases.yaml, What's new page, version in the footer
 ├── templates/                base layout (Bootstrap 5 + HTMX), permission-aware menu
+├── static/                   CSS, schedule JS and libraries (Bootstrap, HTMX, FullCalendar)
+├── deploy/                   production compose, Caddyfile, VM scripts and timers
 ├── tests/
 └── docs/
 ```
@@ -56,7 +59,7 @@ medical-system/
 - Permissions control both the screen (buttons) and the server (the request is blocked).
 
 ## New tools (all permissively licensed)
-Django, Django Ninja (installed in phase 1 for the releases endpoint), psycopg, argon2-cffi, django-axes (login attempt limiting), django-htmx, PyYAML, Faker (test data), pytest-django, Ruff. Front end: Bootstrap 5, HTMX and FullCalendar as static files (no Node build).
+Django, Django Ninja (installed in phase 1 for the releases endpoint), psycopg, argon2-cffi, django-axes (login attempt limiting), Gunicorn, WhiteNoise (static files), PyYAML, Faker (test data), pytest-django, pytest-cov, Ruff. Front end: Bootstrap 5, HTMX and FullCalendar as static files (no Node build).
 
 ## Verification
 1. `docker compose up` → system at `http://localhost:8000`.
@@ -74,3 +77,15 @@ Django, Django Ninja (installed in phase 1 for the releases endpoint), psycopg, 
 4. Optional patient on appointments, keeping the free-text description.
 
 Any of these can be revisited; record the change in `decisions/`.
+
+## Open items after phase 1
+The parity review against the legacy system (see [legacy-system.md](legacy-system.md)) found everything reproduced except user and group management.
+
+| Item | Status |
+|---|---|
+| Team management screen for the clinic administrator (users, roles, enable/disable) | **Owner's decision:** fixed roles (front desk, practitioner, administrator) or configurable groups with a permission matrix, as in the legacy system. Until then, the superuser manages users and memberships in the Django admin |
+| Clinic settings screen (schedule hours and slot length) | Only through the Django admin for now |
+| Permission matrix review (`apps/core/permissoes.py`) | With the owner |
+| Import real data from the legacy system (patients, schedule) | **Owner's decision.** Not planned (decision 008); involves LGPD, since the server is in the US |
+| Browser test of the schedule and recalls | With the owner |
+| Logo (SVG) | With the owner |

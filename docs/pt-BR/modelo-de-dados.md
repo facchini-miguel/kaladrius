@@ -1,4 +1,4 @@
-# Modelo de dados (proposta da fase 1)
+# Modelo de dados
 
 [🇺🇸 English](../en/data-model.md) | 🇧🇷 Português
 
@@ -24,7 +24,7 @@
 | Superusuário da plataforma | MASTER | Tudo, em todas as clínicas |
 | Administrador da clínica | ADMINISTRADOR | Tudo dentro da própria clínica |
 | Recepção | — | Agenda, pacientes, rechamadas, aniversariantes |
-| Profissional | — | A própria agenda e os pacientes |
+| Profissional | — | Agenda e pacientes. Hoje vê e altera a agenda de **todos** os profissionais da clínica; limitar à própria agenda faz parte da revisão da matriz |
 
 Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módulo. A matriz fica em `apps/core/permissoes.py` e vale tanto no servidor (a requisição é bloqueada) quanto na tela (botões e menus somem). A revisão detalhada fica para depois da fase 1, como combinado.
 
@@ -38,15 +38,18 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Tabelas base | tudo | ver | ver |
 | Usuários da clínica | tudo | — | — |
 | Configurações da clínica | tudo | — | — |
+| Auditoria | ver | — | — |
+
+Os módulos "Usuários da clínica" e "Configurações da clínica" já existem na matriz, mas ainda não têm tela: por enquanto o superusuário faz isso no admin do Django (ver as pendências em [plano-fase-1.md](plano-fase-1.md)).
 
 ### Clínica
 | Entidade | Campos principais | Sistema antigo |
 |---|---|---|
 | `Paciente` | clinica, tipo (PF/PJ), nome, razão social, CPF/CNPJ, RG, inscrição estadual, sexo, estado civil, nascimento, profissão, responsável, telefones (residencial, comercial, celular), e-mail, endereço (CEP, UF, cidade, bairro, logradouro, número, complemento), observações, ativo, datas de criação e alteração | `pessoas` |
 | `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, ativo, usuario (opcional) | `dentistas` |
-| `TipoAtendimento` | clinica, nome, cor | `agenda_cor` (Cirurgia, Prótese…) |
-| `Agendamento` | clinica, profissional, tipo, data, início, fim, paciente (opcional), descrição, série (repetição), criado por | `agendax` |
-| `Rechamada` | clinica, paciente, data, descrição, concluída | `agenda` (is_rechamada) |
+| `TipoAtendimento` | clinica, nome, cor, ativo | `agenda_cor` (Cirurgia, Prótese…) |
+| `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, série (repetição), criado por | `agendax` |
+| `Rechamada` | clinica, paciente, data, descrição, concluída, criado por | `agenda` (is_rechamada) |
 
 ### Referência (globais)
 `UF`, `Cidade` (fonte: IBGE), `Banco` (fonte: lista pública do Banco Central), `EstadoCivil`.

@@ -11,7 +11,7 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 003 | 2026-10-26 | API with **Django Ninja** | Modern (FastAPI-like) syntax inside Django, reusing models and permissions | Accepted |
 | 004 | 2026-10-26 | App in **React Native + Expo** | One codebase for Android and iOS | Accepted |
 | 005 | 2026-10-26 | **PostgreSQL 16** database in Docker | — | Accepted |
-| 006 | 2026-10-26 | Everything in **Docker Compose on a Compute Engine VM**; no Cloud Run or Cloud SQL | Same environment locally and in production, no managed-service lock-in. Free tier (e2-micro) for testing | Accepted |
+| 006 | 2026-10-26 | Everything in **Docker Compose on a Compute Engine VM**; no Cloud Run or Cloud SQL | Same environment locally and in production, no managed-service lock-in. Free tier (e2-micro) for testing | Accepted (production part superseded by 020) |
 | 007 | 2026-10-26 | PHP and .NET ruled out | Owner's preference | Accepted |
 | 008 | 2026-10-26 | **No migration of legacy data**; use fake test data | The old system is no longer in use | Accepted |
 | 009 | 2026-10-26 | **Generic** system ("Practitioner" instead of "Dentist") | Serve any kind of clinic | Accepted |
@@ -42,5 +42,5 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 034 | 2026-10-26 | Test coverage measured in CI, minimum 90% | Keeps coverage from silently dropping | Accepted |
 | 035 | 2026-10-26 | VM with **public IPv6 only** (no IPv4) | VM IPv4 is billed (US$ 0.005/h, free tier only 1 h/month); IPv6 is free. Requires IPv6 networks | Accepted (owner) |
 | 036 | 2026-10-26 | Images in Artifact Registry, updates pulled by the VM every 5 min; CI authenticated with Workload Identity Federation | GitHub/GHCR have no IPv6; no stored keys | Accepted |
-| 037 | 2026-10-26 | HTTPS by Caddy with Let's Encrypt and an sslip.io name | Valid certificate without buying a domain | Accepted |
+| 037 | 2026-10-26 | HTTPS by Caddy with Let's Encrypt and an sslip.io name | Valid certificate without buying a domain | Accepted (sslip.io became the fallback address with 038) |
 | 038 | 2026-10-26 | Free domain `medical-system.duckdns.org` (AAAA only) and the VM's IPv6 reserved as static | Friendly name at no cost; the address never changes | Accepted (owner) |

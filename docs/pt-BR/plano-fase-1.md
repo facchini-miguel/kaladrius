@@ -8,28 +8,31 @@
 Ter, rodando em **Docker local**, a web da equipe com **as mesmas funções do sistema antigo**, já multi-clínica, segura, com dados fictícios para teste e a página de Novidades. Versão alvo: **0.7.0** (cada etapa com recursos novos sobe o número do meio). A 1.0.0 fica para o primeiro uso real.
 
 ## Fora do escopo da fase 1
-API e app (fase 2), login de paciente (fase 3), planos e cobrança (fase 4), deploy na nuvem (logo após a fase 1), financeiro, prontuário.
+API e app (fase 2), login de paciente (fase 3), planos e cobrança (fase 4), deploy na nuvem (feito logo após a fase 1, ver [deploy.md](deploy.md)), financeiro, prontuário.
 
 ## Estrutura do projeto
 
 ```
 medical-system/
-├── docker-compose.yml        db (postgres:16) + app
+├── docker-compose.yml        ambiente local: db (postgres:16) + app
 ├── Dockerfile
 ├── .env.example
-├── pyproject.toml            dependências, versão, configuração do ruff e do pytest
+├── pyproject.toml            versão, configuração do ruff, do pytest e da cobertura
+├── requirements*.txt         dependências (fixadas)
 ├── releases.yaml
 ├── config/                   settings (um arquivo, configurado por .env), urls, api, wsgi
 ├── apps/
-│   ├── core/                 Clinica, Usuario, Vinculo, papéis, middleware da clínica atual, auditoria
+│   ├── core/                 Clinica, Usuario, Vinculo, papéis e permissões, isolamento por clínica, comandos
 │   ├── referencias/          UF, Cidade, Banco, EstadoCivil (globais) + carga inicial
 │   ├── pacientes/            Paciente (PF/PJ), busca, ficha
 │   ├── profissionais/        Profissional
-│   ├── agenda/               TipoAtendimento, Agendamento, grade semanal, repetição, conflito
+│   ├── agenda/               TipoAtendimento, Agendamento, grade semanal, repetição, conflito, aniversariantes
 │   ├── rechamadas/           Rechamada
-│   ├── aniversariantes/      consulta por mês
+│   ├── auditoria/            RegistroAuditoria, sinais, tela de auditoria
 │   └── novidades/            leitura do releases.yaml, página Novidades, versão no rodapé
 ├── templates/                layout base (Bootstrap 5 + HTMX), menu conforme as permissões
+├── static/                   CSS, JS da agenda e bibliotecas (Bootstrap, HTMX, FullCalendar)
+├── deploy/                   compose de produção, Caddyfile, scripts e timers da VM
 ├── tests/
 └── docs/
 ```
@@ -56,7 +59,7 @@ medical-system/
 - As permissões controlam tanto a tela (botões) quanto o servidor (a requisição é bloqueada).
 
 ## Ferramentas novas (todas com licenças permissivas)
-Django, Django Ninja (instalado já na fase 1 para o endpoint de releases), psycopg, argon2-cffi, django-axes (limite de tentativas de login), django-htmx, PyYAML, Faker (dados de teste), pytest-django, Ruff. No front: Bootstrap 5, HTMX e FullCalendar via arquivos estáticos (sem build de Node).
+Django, Django Ninja (instalado já na fase 1 para o endpoint de releases), psycopg, argon2-cffi, django-axes (limite de tentativas de login), Gunicorn, WhiteNoise (arquivos estáticos), PyYAML, Faker (dados de teste), pytest-django, pytest-cov, Ruff. No front: Bootstrap 5, HTMX e FullCalendar via arquivos estáticos (sem build de Node).
 
 ## Verificação
 1. `docker compose up` → sistema em `http://localhost:8000`.
@@ -74,3 +77,15 @@ Django, Django Ninja (instalado já na fase 1 para o endpoint de releases), psyc
 4. Paciente opcional no agendamento, mantendo a descrição livre.
 
 Qualquer uma pode ser revista; registrar a mudança em `decisoes/`.
+
+## Pendências após a fase 1
+A revisão de paridade com o sistema antigo (ver [sistema-legado.md](sistema-legado.md)) mostrou que tudo foi reproduzido, exceto a gestão de usuários e grupos.
+
+| Pendência | Situação |
+|---|---|
+| Tela de gestão da equipe pelo administrador da clínica (usuários, papéis, ativar/desativar) | **Decisão do titular:** papéis fixos (recepção, profissional, administrador) ou grupos configuráveis com matriz de permissões, como no sistema antigo. Até lá, o superusuário gerencia usuários e vínculos no admin do Django |
+| Tela de configurações da clínica (horário e slot da agenda) | Hoje só pelo admin do Django |
+| Revisão da matriz de permissões (`apps/core/permissoes.py`) | Com o titular |
+| Importar dados reais do sistema antigo (pacientes, agenda) | **Decisão do titular.** Fora do plano (decisão 008); envolve LGPD, pois o servidor fica nos EUA |
+| Teste da agenda e das rechamadas no navegador | Com o titular |
+| Logotipo (SVG) | Com o titular |

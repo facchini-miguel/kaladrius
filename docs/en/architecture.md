@@ -33,6 +33,8 @@ The two communicate **only through the API**.
 | Schedule calendar | FullCalendar (free plugins only) | MIT |
 | Styling | Bootstrap 5 | MIT |
 | Application server | Gunicorn | MIT |
+| Static files | WhiteNoise | MIT |
+| Login attempt limiting | django-axes | MIT |
 | HTTPS / proxy | Caddy | Apache 2.0 |
 | Tests | pytest + pytest-django | MIT |
 | Lint and formatting | Ruff | MIT |
@@ -41,14 +43,13 @@ Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
 
 ## Runtime (Docker Compose)
 
-| Service | Image | Role |
+| Service | Local (`docker-compose.yml`) | Production (`deploy/docker-compose.prod.yml`) |
 |---|---|---|
-| `db` | postgres:16-alpine | Database, with a persistent volume |
-| `app` | project image | Django + Gunicorn |
-| `caddy` | caddy:2-alpine | Automatic HTTPS (production only) |
-| `backup` | (deploy phase) | Daily encrypted pg_dump → Cloud Storage (US bucket, free tier) |
+| `db` | postgres:16-alpine, persistent volume, no exposed port | Same, with memory tuned for the e2-micro |
+| `app` | Image built on the machine, code mounted as a volume, Django's development server (reloads on save) | Artifact Registry image with Gunicorn, reachable only on `127.0.0.1:8000` |
+| `caddy` | — | caddy:2-alpine on the host network: automatic HTTPS (Let's Encrypt) and proxy to the app |
 
-The same `docker-compose.yml` serves the local environment and the VM; only `.env` differs.
+In both cases the app runs the migrations on startup and reads its configuration from `.env`. Backup is not a Compose service: a systemd timer on the VM runs `deploy/servidor/backup.sh` daily (`pg_dump` → Cloud Storage). Details in [deploy.md](deploy.md).
 
 ## Infrastructure
 
@@ -62,7 +63,7 @@ Rule: **Google Cloud free tier resources only** (decision 020).
 
 **Google Cloud project:** `medical-system-facchini`, with the Compute Engine API enabled and a **R$ 5 budget alert** (notifications at R$ 0.50, R$ 2.50 and R$ 5) to catch any charge.
 
-**Free tier limits to respect:** 1 e2-micro VM, 30 GB standard disk, 5 GB in Cloud Storage, 1 GB/month egress. Disk snapshots are paid, so they are not used. The cost of the VM's external IP must be confirmed on the first billing report.
+**Free tier limits to respect:** 1 e2-micro VM, 30 GB standard disk, 5 GB in Cloud Storage, 1 GB/month egress. Disk snapshots are paid, so they are not used. A VM's public IPv4 is billed, so the VM only has a public IPv6 (decision 035).
 
 **CI/CD:** GitHub Actions runs lint and tests and publishes the image to Google **Artifact Registry** (keyless auth). The VM checks every 5 minutes and updates itself (GitHub has no IPv6, so the VM could not reach GHCR, nor could CI reach the VM over SSH).
 
@@ -73,5 +74,5 @@ Rule: **Google Cloud free tier resources only** (decision 020).
 - Behind Caddy, the real client IP comes from `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), used by django-axes and the audit log.
 - **Per-clinic isolation** in every query, with automated tests that try to access another clinic's data.
 - Secrets only in `.env` (outside Git) and in GitHub *Secrets*. Push protection enabled.
-- Postgres port not exposed. VM firewall (80, 443, key-only SSH).
-- LGPD (Brazilian data protection law): access and change logging (audit), encrypted backups. Data is hosted in the US (free tier requirement). Before real use with patients, review international data transfer rules (LGPD, art. 33) or move to a Brazilian region.
+- Postgres port not exposed. VM firewall: only TCP 80/443 and UDP 443 (HTTP/3) from the internet; SSH only through Google's IAP tunnel.
+- LGPD (Brazilian data protection law): access and change logging (audit), backups in a private bucket, encrypted at rest by Google (no encryption of our own) and deleted after 30 days. Data is hosted in the US (free tier requirement). Before real use with patients, review international data transfer rules (LGPD, art. 33) or move to a Brazilian region.

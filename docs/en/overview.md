@@ -24,8 +24,9 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 4. **Birthdays:** lookup by month.
 5. **Practitioners:** the professionals who see patients (formerly "Dentists").
 6. **Reference tables:** states, cities, banks, marital status, appointment types and colors.
-7. **Users and permissions:** per-clinic roles with view, create, change and delete permissions per module.
+7. **Users and permissions:** per-clinic roles with view, create, change and delete permissions per module. The screen for a clinic to manage its own team is still missing; for now this is done in the admin.
 8. **What's new:** version history viewable in the system and in the app.
+9. **Audit:** who created, changed, deleted or viewed what, and when (LGPD).
 
 ## Business model (under study)
 - **Free** app in the stores.
@@ -36,7 +37,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 
 | Phase | Deliverable |
 |---|---|
-| **1** | Staff web app with feature parity + fake test data + local Docker |
+| **1** ✅ | Staff web app with feature parity + fake test data + local Docker. Completed in 0.7.0 and deployed on Google Cloud |
 | 2 | API + app for practitioners and staff |
 | 3 | App for patients (own login, appointments, slot requests, push) |
 | 4 | Plans, billing, clinic self-service signup, terms (commercial launch) |

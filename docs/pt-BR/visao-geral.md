@@ -24,8 +24,9 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 4. **Aniversariantes:** consulta por mês.
 5. **Profissionais:** cadastro dos profissionais que atendem (antes "Dentistas").
 6. **Tabelas base:** UF, cidades, bancos, estado civil, tipos de atendimento e cores.
-7. **Usuários e permissões:** papéis por clínica com permissões de ver, criar, alterar e excluir por módulo.
+7. **Usuários e permissões:** papéis por clínica com permissões de ver, criar, alterar e excluir por módulo. A tela para a clínica gerenciar a própria equipe ainda falta; hoje isso é feito no admin.
 8. **Novidades:** histórico de versões consultável no sistema e no app.
+9. **Auditoria:** quem criou, alterou, excluiu ou consultou o quê e quando (LGPD).
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.
@@ -36,7 +37,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 
 | Fase | Entrega |
 |---|---|
-| **1** | Web da equipe com paridade de funções + dados fictícios de teste + Docker local |
+| **1** ✅ | Web da equipe com paridade de funções + dados fictícios de teste + Docker local. Concluída na 0.7.0 e publicada no Google Cloud |
 | 2 | API + app para profissionais e equipe |
 | 3 | App para pacientes (login próprio, consultas, solicitação de horário, push) |
 | 4 | Planos, cobrança, cadastro self-service da clínica, termos (lançamento comercial) |

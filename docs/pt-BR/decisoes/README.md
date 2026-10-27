@@ -11,7 +11,7 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 003 | 2026-10-26 | API com **Django Ninja** | Sintaxe moderna (tipo FastAPI) dentro do Django, reaproveitando models e permissões | Aceita |
 | 004 | 2026-10-26 | App em **React Native + Expo** | Um código para Android e iOS | Aceita |
 | 005 | 2026-10-26 | Banco **PostgreSQL 16** em Docker | — | Aceita |
-| 006 | 2026-10-26 | Tudo em **Docker Compose numa VM do Compute Engine**; sem Cloud Run e sem Cloud SQL | Mesmo ambiente local e em produção, sem dependência de serviço gerenciado. Free tier (e2-micro) para testes | Aceita |
+| 006 | 2026-10-26 | Tudo em **Docker Compose numa VM do Compute Engine**; sem Cloud Run e sem Cloud SQL | Mesmo ambiente local e em produção, sem dependência de serviço gerenciado. Free tier (e2-micro) para testes | Aceita (a parte de produção foi substituída pela 020) |
 | 007 | 2026-10-26 | PHP e .NET descartados | Preferência do titular | Aceita |
 | 008 | 2026-10-26 | **Sem migração dos dados antigos**; usar dados fictícios de teste | O sistema antigo não é mais usado | Aceita |
 | 009 | 2026-10-26 | Sistema **genérico** ("Profissional" no lugar de "Dentista") | Atender qualquer tipo de clínica | Aceita |
@@ -42,5 +42,5 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 034 | 2026-10-26 | Cobertura de testes medida no CI, mínimo de 90% | Evita que a cobertura caia sem ninguém perceber | Aceita |
 | 035 | 2026-10-26 | VM **somente com IPv6 público** (sem IPv4) | O IPv4 de VMs é cobrado (US$ 0,005/h, free tier só 1 h/mês); o IPv6 é gratuito. Exige redes com IPv6 | Aceita (titular) |
 | 036 | 2026-10-26 | Imagens no Artifact Registry e atualização puxada pela VM a cada 5 min; CI autenticado por Workload Identity Federation | GitHub/GHCR não têm IPv6; nenhuma chave guardada | Aceita |
-| 037 | 2026-10-26 | HTTPS pelo Caddy com Let's Encrypt e nome do sslip.io | Certificado válido sem precisar comprar domínio | Aceita |
+| 037 | 2026-10-26 | HTTPS pelo Caddy com Let's Encrypt e nome do sslip.io | Certificado válido sem precisar comprar domínio | Aceita (o sslip.io virou endereço reserva com a 038) |
 | 038 | 2026-10-26 | Domínio gratuito `medical-system.duckdns.org` (só AAAA) e IPv6 da VM reservado como fixo | Nome amigável sem custo; o endereço não muda | Aceita (titular) |

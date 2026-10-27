@@ -14,7 +14,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 ## Como rodar (local)
 
-Pré-requisito: Docker com Docker Compose.
+Pré-requisito: Docker com Docker Compose v2 (comando `docker compose`).
 
 ```bash
 cp .env.example .env          # preencha as senhas e a SECRET_KEY (valores aleatórios)
@@ -26,7 +26,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 | Tarefa | Comando |
 |---|---|
-| Dados de teste (clínicas, usuários, profissionais, 600 pacientes fictícios por clínica 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py popular_dados_teste` |
+| Dados de teste (clínicas, usuários, profissionais, 600 pacientes fictícios por clínica, 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py popular_dados_teste` |
 | Testes (com cobertura, mínimo de 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatar código | `docker compose exec app ruff format .` |
