@@ -84,7 +84,7 @@ A revisão de paridade com o sistema antigo (ver [sistema-legado.md](sistema-leg
 | Pendência | Situação |
 |---|---|
 | Tela de gestão da equipe pelo administrador da clínica | ✅ 0.8.0: **Cadastros > Equipe**, com papéis fixos (decisão 040) |
-| Importar dados reais do sistema antigo | ✅ 0.8.0: comando `importar_legado` (decisão 039), já testado no ambiente local. Em produção, aguarda a confirmação do titular (LGPD: o servidor fica nos EUA) |
+| Importar dados reais do sistema antigo | ✅ 0.8.0: comando `importar_legado` (decisão 039), já testado no ambiente local. Importado em produção em 27/10/2026 (Clínica Sorriso) |
 | Tela de configurações da clínica (horário e slot da agenda) | Hoje só pelo admin do Django |
 | Revisão da matriz de permissões (`apps/core/permissoes.py`) | Profissional limitado à própria agenda (decisão 044). O resto da matriz segue como está |
 | Teste da agenda e das rechamadas no navegador | Com o titular |
