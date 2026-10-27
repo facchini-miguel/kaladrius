@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.17.1
+  data: 2026-10-27
+  titulo:
+    pt-br: Aviso de backup mais completo
+    en: More complete backup warning
+    es: Aviso de copia de seguridad más completo
+  itens:
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O superusuário agora também é avisado quando o servidor nunca registrou um backup,
+          e não só quando o último está atrasado.
+        en: >
+          Superusers are now also warned when the server never recorded a backup, not only
+          when the latest one is overdue.
+        es: >
+          El superusuario ahora también recibe un aviso cuando el servidor nunca registró una
+          copia de seguridad, y no solo cuando la última está atrasada.
+
 - versao: 0.17.0
   data: 2026-10-27
   titulo:

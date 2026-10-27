@@ -28,6 +28,9 @@ def env_lista(nome, padrao=""):
 
 
 DEBUG = env_bool("DJANGO_DEBUG")
+# Production servers run daily backups (deploy/servidor/backup.sh): superusers are warned
+# when none was recorded recently, or none at all. Development has no backups.
+BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env_lista("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_lista("DJANGO_CSRF_TRUSTED_ORIGINS")

@@ -117,6 +117,15 @@ cd /opt/medical-system/release
 sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restaurar.dump
 ```
 
+### Testar a recuperação de um backup
+Um backup só vale se voltar. O teste roda na sua máquina, num PostgreSQL temporário: baixa o backup, restaura (falha em qualquer erro), mostra quantos registros há em cada tabela e a última migração, e apaga tudo no fim. Não toca no servidor nem no banco de desenvolvimento.
+
+```bash
+deploy/testar_backup.sh                 # o backup mais recente
+deploy/testar_backup.sh <arquivo>.dump  # um específico
+```
+Feito em 27/10/2026 com o backup de 26/10 (dados fictícios da época): restaurado sem erros em 9 segundos. O mesmo teste mostrou que o backup automático daquele dia tinha falhado (o servidor estava entre a 0.7.0 e a 0.8.0, sem o link do `.env`) e que o aviso na web não aparecia quando **nenhum** backup tinha sido registrado; desde a 0.17.1 os superusuários também veem esse caso (`DJANGO_BACKUP_MONITORADO`, ligado por padrão quando `DJANGO_DEBUG` está desligado).
+
 ## Cuidados
 - **Dados reais de pacientes:** os dados ficam nos EUA (exigência do free tier). Antes de uso real, rever a LGPD (transferência internacional, art. 33) ou migrar para a região de São Paulo (paga).
 - O disco **standard** é o gratuito; o console sugere "balanced", que é cobrado.

@@ -8,7 +8,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Current version: 0.17.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+**Current version: 0.17.1** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **phase 1 complete** (feature parity with the legacy system), running at https://medical-system.duckdns.org (Google Cloud free tier, IPv6 only). See [docs/en/deploy.md](docs/en/deploy.md).
 
@@ -34,6 +34,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 | Anonymize a clinic's data to use it for testing (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Name" --confirmar` |
 | Simulate current appointments and recalls in a **test** clinic | `docker compose exec app python manage.py simular_movimento --clinica "Name" --confirmar` |
 | GitHub *Release* title and text (in English) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
+| Test restoring a backup (downloads it and restores into a throwaway PostgreSQL) | `deploy/testar_backup.sh [file.dump]` |
 | Tests (with coverage, minimum 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Format code | `docker compose exec app ruff format .` |

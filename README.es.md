@@ -8,7 +8,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Versión actual: 0.17.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/medical-system/releases)
+**Versión actual: 0.17.1** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/medical-system/releases)
 
 > Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://medical-system.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
 
@@ -34,6 +34,7 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 | Anonimizar los datos de una clínica para usarlos en pruebas (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Nombre" --confirmar` |
 | Simular agenda y recordatorios actuales en una clínica de **prueba** | `docker compose exec app python manage.py simular_movimento --clinica "Nombre" --confirmar` |
 | Título y texto de la *Release* de GitHub (en inglés) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
+| Probar la restauración de una copia (la descarga y la restaura en un PostgreSQL temporal) | `deploy/testar_backup.sh [archivo.dump]` |
 | Pruebas (con cobertura, mínimo 90 %) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatear el código | `docker compose exec app ruff format .` |

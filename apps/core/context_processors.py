@@ -35,14 +35,14 @@ def idiomas(request):
 
 
 def backup(request):
-    """For superusers: the newest backup, when it is overdue (backups stopped working).
-
-    Environments that never recorded a backup (development) show nothing.
-    """
+    """For superusers on servers with backups: a warning when the newest one is overdue
+    or when no backup was ever recorded (backups never worked)."""
     usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_superuser:
+    if usuario is None or not usuario.is_superuser or not settings.BACKUP_MONITORADO:
         return {}
     ultimo = Backup.objects.first()
-    if ultimo is None or timezone.now() - ultimo.momento <= BACKUP_ATRASADO_APOS:
+    if ultimo is None:
+        return {"backup_nenhum": True}
+    if timezone.now() - ultimo.momento <= BACKUP_ATRASADO_APOS:
         return {}
     return {"backup_atrasado": ultimo}

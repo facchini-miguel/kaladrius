@@ -115,7 +115,7 @@ def test_sem_recuperacao_de_senha_por_email(client):
     assert client.get("/conta/password_reset/").status_code == 404
 
 
-def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model):
+def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model, settings):
     import datetime
 
     from django.utils import timezone
@@ -125,8 +125,12 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     admin = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     comum = django_user_model.objects.create_user("ana", password="senha-de-teste-123")
     client.force_login(admin)
-    # Development never records backups: no warning.
-    assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
+    # Development has no backups: no warning.
+    settings.BACKUP_MONITORADO = False
+    assert "backup" not in client.get(reverse("inicio")).content.decode()
+    # A server where no backup was ever recorded warns too.
+    settings.BACKUP_MONITORADO = True
+    assert "Nenhum backup do banco foi registrado" in client.get(reverse("inicio")).content.decode()
 
     call_command("registrar_backup", "medical-system-x.dump", "1024")
     assert Backup.objects.get().tamanho == 1024
