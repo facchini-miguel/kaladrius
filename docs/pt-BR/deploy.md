@@ -103,6 +103,12 @@ gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --comma
 ```
 Rodar antes do backup diário seguinte à importação (06:00 UTC) evita que algum backup guarde os dados reais.
 
+Para a clínica de teste ter agenda e rechamadas atuais (ver [sistema-legado.md](sistema-legado.md)):
+```bash
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
+```
+
 ### Restaurar um backup
 ```bash
 # Na VM (substitui o banco atual!)

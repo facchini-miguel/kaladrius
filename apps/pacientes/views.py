@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.http import urlencode
 
 from apps.agenda.models import Agendamento
+from apps.agenda.servicos import agendamentos_visiveis
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import anonimizar, registrar
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
@@ -83,7 +84,28 @@ def ficha(request, pk):
     # LGPD: access to a patient's record (health data) is logged.
     registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)
     rechamadas = Rechamada.objects.filter(paciente=paciente).order_by("-data")[:20]
-    return render(request, "pacientes/ficha.html", {"paciente": paciente, "rechamadas": rechamadas})
+    contexto = {"paciente": paciente, "rechamadas": rechamadas}
+    if pode(request, Modulo.AGENDA, Acao.VER):
+        contexto["agendamentos"] = _historico(request, paciente)
+    return render(request, "pacientes/ficha.html", contexto)
+
+
+HISTORICO = 10  # appointments shown in each list of the patient record
+
+
+def _historico(request, paciente):
+    """The patient's next and latest appointments (practitioners: only their own)."""
+    deste = (
+        agendamentos_visiveis(request)
+        .filter(paciente=paciente)
+        .select_related("profissional", "tipo")
+    )
+    agora = timezone.now()
+    return {
+        "proximos": list(deste.filter(fim__gt=agora).order_by("inicio")[:HISTORICO]),
+        "anteriores": list(deste.filter(fim__lte=agora).order_by("-inicio")[:HISTORICO]),
+        "total": deste.count(),
+    }
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.CRIAR)

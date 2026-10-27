@@ -7,7 +7,21 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.core.permissoes import so_a_propria_agenda
+from apps.profissionais.models import Profissional
+
 from .models import Agendamento
+
+
+def profissionais_visiveis(request):
+    """Practitioners whose schedule the user may see and change (decision 044)."""
+    if so_a_propria_agenda(request):
+        return Profissional.objects.filter(usuario=request.user)
+    return Profissional.objects.all()
+
+
+def agendamentos_visiveis(request):
+    return Agendamento.objects.filter(profissional__in=profissionais_visiveis(request))
 
 
 def momento(data, hora):

@@ -92,6 +92,37 @@
   </div>
 </div>
 
+{% if agendamentos %}
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    Agendamentos
+    <span class="text-body-secondary small">{{ agendamentos.total }} no total</span>
+  </div>
+  <div class="row g-0">
+    <div class="col-md-6">
+      <div class="px-3 pt-2 small fw-semibold">Próximos</div>
+      <ul class="list-group list-group-flush">
+        {% for agendamento in agendamentos.proximos %}
+        {% include "pacientes/_agendamento.html" %}
+        {% empty %}
+        <li class="list-group-item text-body-secondary">Nenhum agendamento futuro.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-6 border-start">
+      <div class="px-3 pt-2 small fw-semibold">Anteriores (mais recentes primeiro)</div>
+      <ul class="list-group list-group-flush">
+        {% for agendamento in agendamentos.anteriores %}
+        {% include "pacientes/_agendamento.html" %}
+        {% empty %}
+        <li class="list-group-item text-body-secondary">Nenhum agendamento anterior.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% if pode.rechamadas.ver %}
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">

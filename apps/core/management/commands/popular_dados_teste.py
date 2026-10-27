@@ -1,4 +1,3 @@
-import datetime
 import os
 import random
 
@@ -6,10 +5,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.utils import timezone
 
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.agenda.servicos import momento
+from apps.agenda.models import Agendamento
+from apps.agenda.simulacao import simular_agendamentos, simular_rechamadas
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
@@ -203,65 +201,11 @@ class Command(BaseCommand):
         if Agendamento.objects.filter(clinica=clinica).exists():
             return 0
         sorteio = random.Random(clinica.pk)  # noqa: S311 (fake data, not security)
-        profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
-        tipos = list(
-            TipoAtendimento.objects.filter(clinica=clinica, ativo=True).exclude(nome="Liberado")
-        )
-        pacientes = list(Paciente.objects.filter(clinica=clinica, ativo=True))
-        if not (profissionais and tipos and pacientes):
-            return 0
-        passo = datetime.timedelta(minutes=clinica.agenda_intervalo)
-        hoje = timezone.localdate()
-        segunda = hoje - datetime.timedelta(days=hoje.weekday() + 14)
-        novos = []
-        for dia in (segunda + datetime.timedelta(days=n) for n in range(42)):
-            if dia.weekday() >= 5:
-                continue
-            for profissional in profissionais:
-                atual = momento(dia, clinica.agenda_inicio)
-                fim_do_dia = momento(dia, clinica.agenda_fim)
-                while atual < fim_do_dia:
-                    duracao = passo * sorteio.choice([1, 1, 2])
-                    if atual + duracao > fim_do_dia or sorteio.random() > 0.6:
-                        atual += passo
-                        continue
-                    com_paciente = sorteio.random() < 0.9
-                    novos.append(
-                        Agendamento(
-                            clinica=clinica,
-                            profissional=profissional,
-                            tipo=sorteio.choice(tipos),
-                            paciente=sorteio.choice(pacientes) if com_paciente else None,
-                            descricao="" if com_paciente else "Horário bloqueado",
-                            inicio=atual,
-                            fim=atual + duracao,
-                        )
-                    )
-                    atual += duracao
-        Agendamento.objects.bulk_create(novos, batch_size=1000)
-        return len(novos)
+        return simular_agendamentos(clinica, sorteio)
 
     def _rechamadas(self, clinica):
         """About 80 recalls from 30 days ago to 60 days ahead; past ones mostly done."""
         if Rechamada.objects.filter(clinica=clinica).exists():
             return 0
         sorteio = random.Random(clinica.pk + 1000)  # noqa: S311 (fake data, not security)
-        pacientes = list(Paciente.objects.filter(clinica=clinica, ativo=True))
-        if not pacientes:
-            return 0
-        hoje = timezone.localdate()
-        motivos = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
-        novas = []
-        for _ in range(80):
-            data = hoje + datetime.timedelta(days=sorteio.randint(-30, 60))
-            novas.append(
-                Rechamada(
-                    clinica=clinica,
-                    paciente=sorteio.choice(pacientes),
-                    data=data,
-                    descricao=sorteio.choice(motivos),
-                    concluida=data < hoje and sorteio.random() < 0.7,
-                )
-            )
-        Rechamada.objects.bulk_create(novas)
-        return len(novas)
+        return simular_rechamadas(clinica, sorteio)

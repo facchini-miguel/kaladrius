@@ -75,6 +75,9 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).
 - **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
 
+## Patient record
+Shows identification, contact, notes, the next and the latest 10 appointments (version 0.12.0; for practitioners, only those in their own schedule, linking to the week in the schedule) and the recalls.
+
 ## Inactive, archived and deleted patients (version 0.9.0)
 - **Inactive:** stopped coming, but still visible to the whole team ("Inactive" filter). Not shown in birthdays.
 - **Archived** (replaces the everyday "delete", decision 046): the patient leaves the team's lists, search, schedule (suggestions), birthdays and recalls. Nothing is deleted: appointments, recalls and audit entries stay, and past appointments still show the name. Only the clinic administrator archives, sees archived patients (patient list, Status: Archived) and restores them. An archived patient's CPF/CNPJ stays reserved; the screen says to ask for the restore.

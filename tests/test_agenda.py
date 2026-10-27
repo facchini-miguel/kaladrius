@@ -2,8 +2,10 @@ import datetime
 import json
 
 import pytest
+from django.core.management import CommandError, call_command
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.agenda import servicos
 from apps.agenda.forms import AgendamentoForm
@@ -12,6 +14,7 @@ from apps.core.isolamento import SemClinicaAtual, usar_clinica
 from apps.core.models import Papel
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
+from apps.rechamadas.models import Rechamada
 
 pytestmark = pytest.mark.django_db
 
@@ -389,3 +392,79 @@ def test_periodo_com_e_sem_fuso_misturados(cenario):
         },
     )
     assert resposta.status_code == 200
+
+
+# --- Patient record history --------------------------------------------------------
+
+
+def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
+    agora = timezone.localtime()
+    passado = agora.date() - datetime.timedelta(days=7)
+    with usar_clinica(cenario["clinica"]):
+        Agendamento.objects.create(
+            profissional=cenario["ana"],
+            tipo=cenario["tipo"],
+            paciente=cenario["paciente"],
+            inicio=servicos.momento(passado, datetime.time(9)),
+            fim=servicos.momento(passado, datetime.time(10)),
+        )
+    agendar(cenario)  # 2031, Dra. Ana
+    agendar(cenario, profissional=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00")
+    url = reverse("pacientes:ficha", args=[cenario["paciente"].pk])
+
+    historico = cenario["cliente"].get(url).context["agendamentos"]
+    assert historico["total"] == 3
+    assert [a.profissional.nome for a in historico["proximos"]] == ["Dra. Ana", "Dr. Bruno"]
+    assert [a.inicio.date() for a in historico["anteriores"]] == [passado]
+
+    # Practitioners see only their own appointments in the record too.
+    cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
+    resposta = cliente.get(url)
+    historico = resposta.context["agendamentos"]
+    assert historico["total"] == 2
+    assert {a.profissional.nome for a in historico["proximos"]} == {"Dra. Ana"}
+    assert "?profissional=" in resposta.content.decode()
+
+
+# --- Simulated activity --------------------------------------------------------------
+
+
+def test_simular_movimento_respeita_horarios_ocupados(cenario):
+    # A real appointment today at 09:00 for Dra. Ana must stay untouched.
+    hoje = timezone.localdate()
+    with usar_clinica(cenario["clinica"]):
+        Paciente.objects.create(nome="Arquivado", arquivado=True)
+        existente = Agendamento.objects.create(
+            profissional=cenario["ana"],
+            tipo=cenario["tipo"],
+            inicio=servicos.momento(hoje, datetime.time(9)),
+            fim=servicos.momento(hoje, datetime.time(10)),
+            descricao="Real",
+        )
+    with pytest.raises(CommandError):
+        call_command("simular_movimento", clinica=cenario["clinica"].nome)
+    call_command("simular_movimento", clinica=cenario["clinica"].nome, confirmar=True)
+
+    with usar_clinica(cenario["clinica"]):
+        novos = Agendamento.objects.exclude(pk=existente.pk)
+        assert novos.count() > 0
+        assert not novos.filter(
+            profissional=cenario["ana"], inicio__lt=existente.fim, fim__gt=existente.inicio
+        ).exists()
+        assert not novos.filter(paciente__arquivado=True).exists()
+        assert novos.filter(tipo__nome="Ocupado").count() == 0
+        assert Rechamada.objects.count() == 80
+        assert not Rechamada.objects.filter(paciente__arquivado=True).exists()
+
+
+def test_simular_so_rechamadas(cenario):
+    call_command(
+        "simular_movimento",
+        clinica=cenario["clinica"].nome,
+        sem_agenda=True,
+        rechamadas=5,
+        confirmar=True,
+    )
+    with usar_clinica(cenario["clinica"]):
+        assert not Agendamento.objects.exists()
+        assert Rechamada.objects.count() == 5

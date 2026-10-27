@@ -103,6 +103,12 @@ gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --comma
 ```
 Running it before the first daily backup after the import (06:00 UTC) keeps the real data out of every backup.
 
+To give the test clinic current appointments and recalls (see [legacy-system.md](legacy-system.md)):
+```bash
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
+```
+
 ### Restoring a backup
 ```bash
 # On the VM (replaces the current database!)

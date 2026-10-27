@@ -4,6 +4,23 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.12.0
+  data: 2026-10-27
+  titulo: Agendamentos na ficha do paciente
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto: >
+        A ficha do paciente mostra os próximos e os últimos agendamentos, com link para a
+        semana na agenda. O profissional vê só os da própria agenda.
+    - tipo: novo
+      modulo: Agenda
+      publico: []
+      texto: >
+        Comando simular_movimento para criar agenda e rechamadas fictícias atuais numa clínica
+        de teste.
+
 - versao: 0.11.0
   data: 2026-10-27
   titulo: Anonimização de dados para testes

@@ -73,6 +73,9 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 - Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura), com uma exceção: as tentativas de entrada recusadas, que guardam o usuário digitado, são apagadas depois de 30 dias pelo comando `aplicar_retencao`, que o servidor roda todo dia junto com o backup (decisão 045). Nos backups, elas duram mais 30 dias. Na exclusão definitiva de um paciente, os registros dele perdem os dados pessoais (ver abaixo).
 - Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Alterações em contas de usuário (que não pertencem a uma clínica) ficam registradas na clínica em que foram feitas. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
 
+## Ficha do paciente
+Mostra identificação, contato, observações, os próximos e os últimos 10 agendamentos (versão 0.12.0; para o profissional, só os da própria agenda, com link para a semana na agenda) e as rechamadas.
+
 ## Pacientes inativos, arquivados e excluídos (versão 0.9.0)
 - **Inativo:** parou de vir, mas continua visível para toda a equipe (filtro "Inativos"). Não aparece nos aniversariantes.
 - **Arquivado** (substitui o "excluir" do dia a dia, decisão 046): o paciente sai das listas, da busca, da agenda (sugestões), dos aniversariantes e das rechamadas da equipe. Nada é apagado: agendamentos, rechamadas e auditoria continuam, e os agendamentos antigos seguem mostrando o nome. Só o administrador da clínica arquiva, vê os arquivados (lista de pacientes, Situação: Arquivados) e restaura. O CPF/CNPJ de um arquivado continua reservado; a tela avisa para pedir a restauração.
