@@ -43,6 +43,7 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 - `deploy/servidor/instalar.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
 - `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it differs from the last one installed successfully (`/opt/medical-system/imagem-instalada`), extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. If anything fails, the next run tries again. Migrations run when the app starts.
 - `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system; then deletes refused login attempts older than 30 days (`aplicar_retencao`). If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
+- `deploy/servidor/saude.sh --coletar` (every 5 min, since 0.22.0): reads processor, memory, swap, disk, network and load with Linux tools (`/proc`, `df`) and each container's memory and processor (`docker stats`), and appends a line to `/opt/medical-system/saude/amostras.jsonl` (7 days kept, about 1.5 MB). The app reads that file, read-only, and shows **Administration > System health** to superusers, with a warning at the top of every screen if collection stops or memory, swap or disk reach the critical level. The app has no access to Docker. Without arguments, `saude.sh` prints a report in the terminal.
 - The production compose file reads its `${...}` variables from `.env`, linked next to it (`/opt/medical-system/release/.env` → `../.env`). Only the app receives the whole file.
 - Settings and passwords: `/opt/medical-system/.env` (root only). Local copy in `.env.producao`, ignored by Git.
 - No stored keys: the VM and CI use short-lived Google tokens.
@@ -62,6 +63,9 @@ sudo docker compose -f docker-compose.prod.yml exec app python manage.py <comman
 # Update now / back up now
 sudo /opt/medical-system/bin/atualizar.sh --forcar
 sudo /opt/medical-system/bin/backup.sh
+
+# Server health: now, last 24 hours, containers and timers
+sudo /opt/medical-system/bin/saude.sh
 
 # List backups (on your machine)
 gcloud storage ls -l gs://medical-system-facchini-backups/

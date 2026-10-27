@@ -43,6 +43,7 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 - `deploy/servidor/instalar.sh` é o *startup script* da VM: instala Docker, cria 1 GB de swap, instala os agendamentos do systemd e sobe o sistema. Pode rodar de novo sem problema.
 - `deploy/servidor/atualizar.sh` (a cada 5 min): baixa a imagem `latest`; se ela for diferente da última instalada com sucesso (`/opt/medical-system/imagem-instalada`), extrai os arquivos de `deploy/` de dentro da imagem, atualiza os agendamentos do systemd e reinicia os containers. Se algo falhar, tenta de novo na rodada seguinte. As migrações rodam na subida do app.
 - `deploy/servidor/backup.sh` (diário): `pg_dump` enviado ao Cloud Storage e registrado no sistema; depois, apaga as tentativas de entrada recusadas com mais de 30 dias (`aplicar_retencao`). Se falhar, o systemd tenta de novo a cada 20 minutos (até 4 tentativas em 3 horas). Se o último backup registrado tiver mais de 26 horas, os superusuários veem um aviso no topo das telas.
+- `deploy/servidor/saude.sh --coletar` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/medical-system/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `saude.sh` mostra um relatório no terminal.
 - O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/medical-system/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
 - Configuração e senhas: `/opt/medical-system/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
 - Sem chaves guardadas: a VM e o CI usam tokens temporários do Google.
@@ -62,6 +63,9 @@ sudo docker compose -f docker-compose.prod.yml exec app python manage.py <comand
 # Forçar atualização agora / backup agora
 sudo /opt/medical-system/bin/atualizar.sh --forcar
 sudo /opt/medical-system/bin/backup.sh
+
+# Saúde do servidor: agora, últimas 24 horas, containers e agendamentos
+sudo /opt/medical-system/bin/saude.sh
 
 # Listar backups (na sua máquina)
 gcloud storage ls -l gs://medical-system-facchini-backups/

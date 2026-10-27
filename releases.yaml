@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.22.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Saúde do sistema
+    en: System health
+    es: Salud del sistema
+  itens:
+    - tipo: novo
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Para superusuários, em Administração > Saúde do sistema: processador, memória, swap,
+          disco, rede e containers do servidor, com gráficos de 24 horas e 7 dias, o tamanho
+          do banco e o último backup. Um aviso aparece no topo das telas se algum recurso
+          chegar ao limite.
+        en: >
+          For superusers, in Administration > System health: the server's processor, memory,
+          swap, disk, network and containers, with 24-hour and 7-day charts, the database size
+          and the last backup. A warning shows at the top of every screen if a resource
+          reaches its limit.
+        es: >
+          Para superusuarios, en Administración > Salud del sistema: procesador, memoria, swap,
+          disco, red y contenedores del servidor, con gráficos de 24 horas y 7 días, el tamaño
+          de la base y la última copia de seguridad. Un aviso aparece arriba de las pantallas
+          si algún recurso llega al límite.
+
 - versao: 0.21.1
   data: 2026-10-27
   titulo:

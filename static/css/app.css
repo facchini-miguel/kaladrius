@@ -107,3 +107,13 @@ main {
 .odontograma-interativo .dente:hover { border-color: #0d6efd; }
 .odontograma .dente:disabled { opacity: 1; cursor: default; }
 @media print { .odontograma .dente.selecionado { background: #0d6efd !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* Server health charts (Administração > Saúde do sistema). */
+.grafico { width: 100%; height: 140px; display: block; margin: 0.25rem 0; }
+.grafico .grade { stroke: #dee2e6; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grafico polyline { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.grafico .linha-1 { stroke: #0d6efd; }
+.grafico .linha-2 { stroke: #fd7e14; }
+.legenda { display: inline-block; width: 0.8rem; height: 3px; vertical-align: middle; }
+.legenda.linha-1 { background: #0d6efd; }
+.legenda.linha-2 { background: #fd7e14; }

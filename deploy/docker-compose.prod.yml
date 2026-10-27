@@ -31,6 +31,9 @@ services:
     # Only reachable from the VM itself (Caddy); never published to the internet.
     ports:
       - "127.0.0.1:8000:8000"
+    # Server health samples written by deploy/servidor/saude.sh (read-only for the app).
+    volumes:
+      - ../saude:/saude:ro
 
   caddy:
     image: caddy:2-alpine

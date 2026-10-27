@@ -41,6 +41,7 @@ MODULOS = [
     gettext_noop("Permissões"),
     gettext_noop("Profissionais"),
     gettext_noop("Rechamadas"),
+    gettext_noop("Sistema"),
     gettext_noop("Tabelas base"),
     gettext_noop("Tipos de atendimento"),
 ]

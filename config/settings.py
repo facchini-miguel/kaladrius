@@ -31,6 +31,10 @@ DEBUG = env_bool("DJANGO_DEBUG")
 # Production servers run daily backups (deploy/servidor/backup.sh): superusers are warned
 # when none was recorded recently, or none at all. Development has no backups.
 BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
+# Health samples written every 5 minutes by deploy/servidor/saude.sh (decision 056):
+# superusers are warned when they stop or a resource is critical.
+SAUDE_MONITORADA = env_bool("DJANGO_SAUDE_MONITORADA", padrao=not DEBUG)
+SAUDE_DIR = env("DJANGO_SAUDE_DIR", "/saude")
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env_lista("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_lista("DJANGO_CSRF_TRUSTED_ORIGINS")
@@ -56,6 +60,7 @@ INSTALLED_APPS = [
     "apps.ajuda",
     "apps.financeiro",
     "apps.orcamentos",
+    "apps.monitoramento",
     "axes",
 ]
 
@@ -96,6 +101,7 @@ TEMPLATES = [
                 "apps.novidades.context_processors.versao",
                 "apps.core.context_processors.clinica",
                 "apps.core.context_processors.backup",
+                "apps.monitoramento.context_processors.alerta",
                 "apps.core.context_processors.idiomas",
             ],
         },

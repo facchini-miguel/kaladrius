@@ -34,6 +34,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 14. **Comissão:** percentual por profissional sobre o recebido, lançada em A pagar sem pagar duas vezes o mesmo recebimento (0.19.0).
 15. **Extrato bancário:** importação de OFX e conciliação com os pagamentos, o caixa e lançamentos novos (0.20.0).
 16. **Política de privacidade:** página pública com o contato da clínica (0.21.0).
+17. **Saúde do sistema:** processador, memória, disco, rede e containers do servidor, com 7 dias de histórico, para superusuários (0.22.0).
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.

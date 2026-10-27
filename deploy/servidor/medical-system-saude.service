@@ -1,0 +1,7 @@
+[Unit]
+Description=Medical System: amostra da saúde do servidor (processador, memória, disco, rede)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/medical-system/bin/saude.sh --coletar

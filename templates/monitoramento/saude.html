@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Saúde do sistema" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "Saúde do sistema" %}</h1>
+  <div class="btn-group" role="group" aria-label="{% translate 'Período' %}">
+    <a class="btn btn-outline-primary{% if periodo == '24h' %} active{% endif %}" href="?periodo=24h">{% translate "24 horas" %}</a>
+    <a class="btn btn-outline-primary{% if periodo == '7d' %} active{% endif %}" href="?periodo=7d">{% translate "7 dias" %}</a>
+  </div>
+</div>
+
+{% if not ultima %}
+<div class="alert alert-warning">{% translate "Ainda não há amostras. No servidor, a coleta roda a cada 5 minutos (medical-system-saude.timer); em desenvolvimento, não há coleta." %}</div>
+{% else %}
+{% if parada %}<div class="alert alert-danger">{% blocktranslate with momento=ultima.momento|date:"SHORT_DATETIME_FORMAT" %}A coleta parou: a última amostra é de {{ momento }}.{% endblocktranslate %}</div>{% endif %}
+
+<div class="row g-3 mb-4">
+  {% include "monitoramento/_cartao.html" with titulo=_("Processador") nivel=niveis.cpu valor=ultima.cpu detalhe=ultima.carga.0 tipo="cpu" %}
+  {% include "monitoramento/_cartao.html" with titulo=_("Memória") nivel=niveis.memoria valor=ultima.memoria_pct usado=ultima.memoria_usada total=ultima.memoria_total tipo="bytes" %}
+  {% include "monitoramento/_cartao.html" with titulo=_("Swap") nivel=niveis.swap valor=ultima.swap_pct usado=ultima.swap_usado total=ultima.swap_total tipo="bytes" %}
+  {% include "monitoramento/_cartao.html" with titulo=_("Disco") nivel=niveis.disco valor=ultima.disco_pct usado=ultima.disco_usado total=ultima.disco_total tipo="bytes" %}
+</div>
+<p class="text-body-secondary small">
+  {% blocktranslate with momento=ultima.momento|date:"SHORT_DATETIME_FORMAT" %}Última amostra: {{ momento }}.{% endblocktranslate %}
+  {% blocktranslate with tempo=ligado_desde|timesince %}Servidor ligado há {{ tempo }}.{% endblocktranslate %}
+  {% if resumo %}{% blocktranslate with recebido=resumo.recebido|filesizeformat enviado=resumo.enviado|filesizeformat %}Rede no período: {{ recebido }} recebidos, {{ enviado }} enviados.{% endblocktranslate %}{% endif %}
+</p>
+
+{% if resumo %}
+<div class="row g-3 mb-4">
+  {% for grafico in graficos %}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-baseline">
+          <h2 class="h6 mb-1">{{ grafico.titulo }}</h2>
+          <span class="small text-body-secondary">{% translate "topo" %}: {% if grafico.unidade == "%" %}{{ grafico.topo|floatformat:0 }}%{% else %}{{ grafico.topo|filesizeformat }}/s{% endif %}</span>
+        </div>
+        {% if grafico.svg %}{{ grafico.svg }}{% else %}<p class="text-body-secondary small">{% translate "Poucas amostras para o gráfico." %}</p>{% endif %}
+        <div class="d-flex justify-content-between small text-body-secondary">
+          <span>{{ resumo.inicio|date:"SHORT_DATETIME_FORMAT" }}</span>
+          <span>{% for classe, legenda in grafico.legendas %}<span class="legenda {{ classe }}"></span> {{ legenda }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
+          <span>{{ resumo.fim|date:"SHORT_DATETIME_FORMAT" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<p class="small">
+  {% blocktranslate with media=resumo.cpu_media|floatformat:1 pico=resumo.cpu_maxima|floatformat:1 memoria=resumo.memoria_maxima|floatformat:0 swap=resumo.swap_maximo|floatformat:0 %}No período: processador com média de {{ media }}% e pico de {{ pico }}%; memória com pico de {{ memoria }}% em uso; swap com pico de {{ swap }}%.{% endblocktranslate %}
+</p>
+{% endif %}
+
+{% endif %}
+
+<div class="row g-3 mb-4">
+  {% if ultima %}
+  <div class="col-lg-6">
+    <h2 class="h5">{% translate "Containers" %}</h2>
+    <table class="table table-sm bg-white">
+      <thead><tr><th>{% translate "Nome" %}</th><th class="text-end">{% translate "Processador" %}</th><th class="text-end">{% translate "Memória" %}</th></tr></thead>
+      <tbody>
+        {% for container in ultima.containers %}
+        <tr><td>{{ container.nome }}</td><td class="text-end">{{ container.cpu }}</td><td class="text-end">{{ container.memoria }} ({{ container.memoria_pct }})</td></tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-body-secondary">—</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  <div class="col-lg-6">
+    <h2 class="h5">{% blocktranslate with tamanho=banco.tamanho|filesizeformat %}Banco de dados · {{ tamanho }}{% endblocktranslate %}</h2>
+    <table class="table table-sm bg-white">
+      <thead><tr><th>{% translate "Maiores tabelas" %}</th><th class="text-end">{% translate "Registros" %}</th><th class="text-end">{% translate "Tamanho" %}</th></tr></thead>
+      <tbody>
+        {% for tabela in banco.tabelas %}
+        <tr><td><code>{{ tabela.nome }}</code></td><td class="text-end">{{ tabela.registros }}</td><td class="text-end">{{ tabela.tamanho|filesizeformat }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="small">{% if backup %}{% blocktranslate with momento=backup.momento|date:"SHORT_DATETIME_FORMAT" tamanho=backup.tamanho|filesizeformat %}Último backup: {{ momento }} ({{ tamanho }}).{% endblocktranslate %}{% else %}{% translate "Nenhum backup registrado." %}{% endif %}</p>
+  </div>
+</div>
+
+<p class="text-body-secondary small">{% translate "Os números vêm de comandos do Linux no servidor, a cada 5 minutos, e ficam guardados por 7 dias. Para ver o relatório no terminal:" %} <code>sudo /opt/medical-system/bin/saude.sh</code></p>
+{% endblock %}

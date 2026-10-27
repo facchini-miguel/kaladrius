@@ -31,18 +31,29 @@ extrair_arquivos_de_deploy() {
   cp -r "$tmp"/. "$DIR/release/"
   # Compose reads the ${VAR} values of docker-compose.prod.yml from .env beside it.
   ln -sfn ../.env "$DIR/release/.env"
-  # Replace the scripts atomically (mv), so a running script is never overwritten in place.
-  for script in comum.sh atualizar.sh backup.sh instalar.sh; do
-    cp "$tmp/servidor/$script" "$DIR/bin/$script.novo"
-    chmod 755 "$DIR/bin/$script.novo"
-    mv -f "$DIR/bin/$script.novo" "$DIR/bin/$script"
-  done
+  instalar_scripts
   rm -r "$tmp"
+}
+
+# Copy every server script from the release to $DIR/bin. Replaced atomically (mv), so a
+# running script is never overwritten in place.
+instalar_scripts() {
+  local script
+  for script in "$DIR"/release/servidor/*.sh; do
+    cp "$script" "$DIR/bin/$(basename "$script").novo"
+    chmod 755 "$DIR/bin/$(basename "$script").novo"
+    mv -f "$DIR/bin/$(basename "$script").novo" "$DIR/bin/$(basename "$script")"
+  done
 }
 
 # Install (or update) the systemd units shipped with the deploy files.
 instalar_agendamentos() {
+  # Also here: a server updating from an older version copied only the scripts it knew.
+  instalar_scripts
+  # Health samples, read by the app through a read-only mount (docker-compose.prod.yml).
+  mkdir -p "$DIR/saude"
   cp "$DIR"/release/servidor/*.service "$DIR"/release/servidor/*.timer /etc/systemd/system/
   systemctl daemon-reload
-  systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer
+  systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer \
+    medical-system-saude.timer
 }

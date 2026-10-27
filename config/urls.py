@@ -27,6 +27,7 @@ urlpatterns = [
     path("equipe/", include("apps.equipe.urls")),
     path("ajuda/", include("apps.ajuda.urls")),
     path("privacidade/", ajuda_views.privacidade, name="privacidade"),
+    path("sistema/saude/", include("apps.monitoramento.urls")),
     path("financeiro/", include("apps.financeiro.urls")),
     path("orcamentos/", include("apps.orcamentos.urls")),
     path("", include("apps.core.urls")),

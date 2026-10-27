@@ -111,7 +111,13 @@
             </ul>
           </li>
           {% if user.is_superuser %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% translate "Administração" %}</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Administração" %}</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'monitoramento:saude' %}">{% translate "Saúde do sistema" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% translate "Painel do Django" %}</a></li>
+            </ul>
+          </li>
           {% endif %}
         </ul>
         <ul class="navbar-nav me-3">
@@ -191,6 +197,14 @@
     <div class="alert alert-danger" role="alert">
       {% blocktranslate with momento=backup_atrasado.momento|date:"SHORT_DATETIME_FORMAT" %}O último backup do banco foi em {{ momento }}: os backups diários pararam.{% endblocktranslate %}
       {% translate "Veja no servidor:" %} <code>sudo systemctl status medical-system-backup</code>
+    </div>
+    {% endif %}
+    {% if saude_alerta %}
+    <div class="alert alert-danger" role="alert">
+      {% if saude_alerta.sem_coleta %}{% translate "A saúde do servidor não está sendo coletada." %}
+      {% elif saude_alerta.parada %}{% blocktranslate with momento=saude_alerta.parada|date:"SHORT_DATETIME_FORMAT" %}A coleta da saúde do servidor parou em {{ momento }}.{% endblocktranslate %}
+      {% else %}{% translate "O servidor está com recursos no limite:" %} {% for item in saude_alerta.criticos %}{% if item == "memoria" %}{% translate "memória" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disco" %}{% translate "disco" %}{% else %}{% translate "processador" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
+      <a href="{% url 'monitoramento:saude' %}">{% translate "Ver a saúde do sistema" %}</a>
     </div>
     {% endif %}
     {% if versao_nova %}

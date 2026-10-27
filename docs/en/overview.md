@@ -34,6 +34,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 14. **Commission:** percentage per practitioner of what is received, added to Payables without paying the same receipt twice (0.19.0).
 15. **Bank statement:** OFX import and reconciliation with payments, the cash drawer and new entries (0.20.0).
 16. **Privacy policy:** public page with the clinic's contact (0.21.0).
+17. **System health:** the server's processor, memory, disk, network and containers, with 7 days of history, for superusers (0.22.0).
 
 ## Business model (under study)
 - **Free** app in the stores.
