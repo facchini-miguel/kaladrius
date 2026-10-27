@@ -1,6 +1,6 @@
 # Medical System
 
-[🇺🇸 English](README.md) | 🇧🇷 Português
+[🇺🇸 English](README.md) | 🇧🇷 Português | [🇪🇸 Español](README.es.md)
 
 Sistema de gestão para clínicas: agenda por profissional, cadastro de pacientes, rechamadas (retornos), aniversariantes, usuários e permissões. Atende várias clínicas no mesmo servidor (multi-clínica).
 
@@ -8,7 +8,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Versão atual: 0.13.1** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
+**Versão atual: 0.14.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://medical-system.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
@@ -33,6 +33,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 | Importar os dados do Odonto System antigo numa clínica nova (ver [docs/pt-BR/sistema-legado.md](docs/pt-BR/sistema-legado.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Nome" < dump.sql` |
 | Anonimizar os dados de uma clínica para usá-los como teste (irreversível) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Nome" --confirmar` |
 | Simular agenda e rechamadas atuais numa clínica de **teste** | `docker compose exec app python manage.py simular_movimento --clinica "Nome" --confirmar` |
+| Título e texto da *Release* do GitHub (em inglês) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
 | Testes (com cobertura, mínimo de 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatar código | `docker compose exec app ruff format .` |
@@ -53,7 +54,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 ## Documentação
 
-Toda a documentação fica em [`docs/`](docs/README.md), em português ([`docs/pt-BR`](docs/pt-BR/README.md)) e em inglês ([`docs/en`](docs/en/README.md)). O português é o idioma principal; o inglês é tradução.
+Toda a documentação fica em [`docs/`](docs/README.md), em português ([`docs/pt-BR`](docs/pt-BR/README.md)), inglês ([`docs/en`](docs/en/README.md)) e espanhol ([`docs/es`](docs/es/README.md)). O português é o idioma principal; inglês e espanhol são traduções. O manual do usuário também está dentro do sistema, em **Ajuda > Manual do usuário**.
 
 ## Versões
 

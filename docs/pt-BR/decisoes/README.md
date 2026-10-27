@@ -1,6 +1,6 @@
 # Registro de decisões
 
-[🇺🇸 English](../../en/decisions/README.md) | 🇧🇷 Português
+[🇺🇸 English](../../en/decisions/README.md) | 🇧🇷 Português | [🇪🇸 Español](../../es/decisiones/README.md)
 
 Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a linha antiga fica marcada como **substituída** e uma nova é adicionada, para manter o histórico.
 
@@ -23,8 +23,8 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 015 | 2026-10-26 | Não usar dependências GPL/AGPL | Manter livre a escolha de licença | Aceita |
 | 016 | 2026-10-26 | Django 6.1 (atual), migrar para a 6.2 LTS em abr/2027; Python 3.13 | Versão estável mais recente; LTS com suporte até 2030 | Aceita |
 | 017 | 2026-10-26 | Front sem build de Node: Bootstrap 5.3 e HTMX 2 servidos como arquivos estáticos | Menos ferramentas para manter | Aceita |
-| 018 | 2026-10-26 | Documentação bilíngue: `docs/pt-BR/` (principal) e `docs/en/` (tradução); `README.md` em inglês e `README.pt-BR.md` em português | Arquivos separados por idioma evitam texto misturado; inglês amplia o público se o projeto for aberto | Aceita |
-| 019 | 2026-10-26 | Comentários e docstrings do código em inglês; textos para o usuário em português | Padrão internacional para o código, sem perder o idioma do público | Aceita |
+| 018 | 2026-10-26 | Documentação bilíngue: `docs/pt-BR/` (principal) e `docs/en/` (tradução); `README.md` em inglês e `README.pt-BR.md` em português | Arquivos separados por idioma evitam texto misturado; inglês amplia o público se o projeto for aberto | Ampliada pela 050 (três idiomas) |
+| 019 | 2026-10-26 | Comentários e docstrings do código em inglês; textos para o usuário em português | Padrão internacional para o código, sem perder o idioma do público | Aceita (os textos para o usuário são traduzidos desde a 049) |
 | 020 | 2026-10-26 | Usar **somente recursos do free tier** do Google Cloud: e2-micro nos EUA também em produção, backup no Cloud Storage dos EUA, sem snapshots; alerta de orçamento de R$ 5 | Pedido do titular: custo zero | Aceita (substitui a parte de produção da 006: e2-small em São Paulo) |
 | 021 | 2026-10-26 | Isolamento por clínica **que falha fechado**: gerenciador padrão filtra pela clínica atual e dá erro sem clínica; `sem_isolamento()` explícito para código da plataforma | Esquecer um filtro nunca vaza dados de outra clínica | Aceita |
 | 022 | 2026-10-26 | Matriz de permissões por papel definida no código (`apps/core/permissoes.py`) | Simples e testável; revisão com o titular após a fase 1 | Aceita |
@@ -55,3 +55,4 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 047 | 2026-10-27 | Os dados importados (de uma clínica que não é mais cliente) são **anonimizados** e usados só como dados de teste, com o comando `anonimizar_clinica` | Não há mais finalidade para os dados reais; anonimizados, deixam de ser dados pessoais (LGPD, art. 12) e mantêm o volume e a distribuição reais para testes | Aceita (titular) |
 | 048 | 2026-10-27 | **Módulo financeiro com lançamentos manuais** (a receber com parcelas, pagamentos com forma, a pagar, fluxo de caixa, caixa do dia), antes da fase 2. Sem nota fiscal, sem integração com Pix, boleto ou maquininha e sem convênios por enquanto | Pedido do titular: saber quem deve, como pagou e o fluxo de caixa; integrações e obrigações fiscais ficam para quando forem necessárias | Aceita (titular) |
 | 049 | 2026-10-27 | **Interface em português, inglês e espanhol** (tradução do Django). O texto de origem continua em português no código; cada usuário escolhe o idioma no menu, salvo no perfil; antes do login vale o navegador. As regras continuam brasileiras (CPF/CNPJ, CEP, cidades do IBGE, real); espanhol neutro | Pedido do titular. Escolha por usuário permite equipes mistas; adaptar a outros países seria outro projeto | Aceita (titular) |
+| 050 | 2026-10-27 | Menu **Ajuda** dentro do sistema: manual do usuário nos três idiomas para toda a equipe e documentação técnica (`docs/`) só para o superusuário. Documentação em **três idiomas** (`docs/es/` e `README.es.md`). As *Releases* do GitHub são escritas em **inglês**, geradas a partir do `releases.yaml` | Pedido do titular. A documentação técnica descreve a infraestrutura, então não é mostrada à equipe da clínica; o inglês é o padrão no GitHub | Aceita (titular) |

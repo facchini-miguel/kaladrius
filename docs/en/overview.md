@@ -1,6 +1,6 @@
 # Overview
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/visao-geral.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/visao-geral.md) | [🇪🇸 Español](../es/vision-general.md)
 
 ## What it is
 A management system for clinics (dental, medical, physiotherapy, psychology, etc.) with:
@@ -28,6 +28,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 8. **What's new:** version history viewable in the system and in the app.
 9. **Audit:** who created, changed, deleted or viewed what, and when (LGPD).
 10. **Languages:** Portuguese, English and Spanish, chosen by each user (0.13.0).
+11. **Help:** user manual in the three languages inside the system; technical documentation for superusers only (0.14.0).
 
 ## Business model (under study)
 - **Free** app in the stores.

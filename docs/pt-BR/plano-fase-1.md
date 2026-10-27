@@ -1,6 +1,6 @@
 # Plano da fase 1: web da equipe + dados de teste
 
-[🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português
+[🇺🇸 English](../en/phase-1-plan.md) | 🇧🇷 Português | [🇪🇸 Español](../es/plan-fase-1.md)
 
 > Status: **concluída** na versão 0.7.0 (26/10/2026).
 

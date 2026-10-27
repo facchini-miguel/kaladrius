@@ -1,6 +1,6 @@
 # Versioning and releases
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/versionamento-e-releases.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/versionamento-e-releases.md) | [🇪🇸 Español](../es/versionado-y-versiones.md)
 
 ## Version number: `MAJOR.MINOR.PATCH`
 
@@ -21,7 +21,8 @@ We follow [Semantic Versioning](https://semver.org/):
 [`../../releases.yaml`](../../releases.yaml) is the **single source** of the history. It feeds:
 - the **What's new** page in the web app;
 - the API endpoint the app uses to show "What's new";
-- the version number shown in the footer.
+- the version number shown in the footer;
+- the GitHub *Releases*, in English (`notas_release` command).
 
 Release note texts are written in the **three interface languages** (`pt-br`, `en`, `es`; decision 049). Field names stay in Portuguese, as in the file.
 
@@ -76,8 +77,12 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 
 ## Publishing a version
 1. Add the entry at the top of `releases.yaml` in the same pull request as the change.
-2. Update the project version (`pyproject.toml`) and the "Current version" line in both READMEs. Tests fail if any of them differs from `releases.yaml`.
-3. Create the Git tag `vX.Y.Z` and the GitHub *Release* with the same text.
-4. CI validates `releases.yaml` (format, version greater than the previous one, date) before deploying.
+2. Update the project version (`pyproject.toml`) and the "Current version" line in the three READMEs. Tests fail if any of them differs from `releases.yaml`.
+3. Create the Git tag `vX.Y.Z` and the GitHub *Release* **in English**, with the title and text produced by the command:
+   ```bash
+   docker compose exec app python manage.py notas_release X.Y.Z --titulo   # title
+   docker compose exec app python manage.py notas_release X.Y.Z            # text
+   ```
+4. CI validates `releases.yaml` (format, version greater than the previous one, date, the three languages) before deploying.
 
 The server reads `releases.yaml` once and keeps it in memory. In development, restart the app after editing it (`docker compose restart app`).

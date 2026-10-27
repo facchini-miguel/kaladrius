@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{{ titulo }} · {% translate "Documentação técnica" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="alert alert-secondary small">
+  {% translate "Documentação técnica: visível só para o superusuário, porque descreve a infraestrutura do servidor." %}
+  <a href="{% url 'ajuda:tecnica_indice' %}">{% translate "Índice" %}</a>
+</div>
+<article class="documento">
+  {{ html|safe }}
+</article>
+{% endblock %}

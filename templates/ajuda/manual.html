@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{{ titulo }} · {% translate "Manual do usuário" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="row g-4">
+  <nav class="col-lg-3" aria-label="{% translate 'Manual do usuário' %}">
+    <h2 class="h6 text-body-secondary text-uppercase">{% translate "Manual do usuário" %}</h2>
+    <div class="list-group">
+      {% for slug, nome in paginas %}
+      <a class="list-group-item list-group-item-action{% if slug == pagina %} active{% endif %}" href="{% url 'ajuda:manual' slug %}"{% if slug == pagina %} aria-current="page"{% endif %}>{{ nome }}</a>
+      {% endfor %}
+    </div>
+  </nav>
+  <article class="col-lg-9 documento">
+    {{ html|safe }}
+  </article>
+</div>
+{% endblock %}

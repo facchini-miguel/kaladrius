@@ -1,6 +1,6 @@
 # Deploy (Google Cloud, free tier)
 
-[🇺🇸 English](../en/deploy.md) | 🇧🇷 Português
+[🇺🇸 English](../en/deploy.md) | 🇧🇷 Português | [🇪🇸 Español](../es/despliegue.md)
 
 Ambiente publicado em **https://medical-system.duckdns.org** (acesso somente por **IPv6**). Endereço reserva: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
 

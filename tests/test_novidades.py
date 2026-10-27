@@ -48,7 +48,11 @@ def test_arquivo_do_projeto_e_valido():
 
 @pytest.mark.parametrize(
     ("arquivo", "texto"),
-    [("README.md", "Current version: {}"), ("README.pt-BR.md", "Versão atual: {}")],
+    [
+        ("README.md", "Current version: {}"),
+        ("README.pt-BR.md", "Versão atual: {}"),
+        ("README.es.md", "Versión actual: {}"),
+    ],
 )
 def test_readme_mostra_a_versao_atual(arquivo, texto):
     readme = (settings.BASE_DIR / arquivo).read_text(encoding="utf-8")

@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.14.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Menu Ajuda com o manual do usuário
+    en: Help menu with the user manual
+    es: Menú Ayuda con el manual del usuario
+  itens:
+    - tipo: novo
+      modulo: Ajuda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo menu Ajuda, com o manual do usuário no seu idioma (primeiros passos, agenda,
+          pacientes, rechamadas, equipe e configurações da clínica) e as Novidades.
+        en: >
+          New Help menu, with the user manual in your language (getting started, schedule,
+          patients, recalls, team and clinic settings) and What's new.
+        es: >
+          Nuevo menú Ayuda, con el manual del usuario en su idioma (primeros pasos, agenda,
+          pacientes, recordatorios, equipo y configuración de la clínica) y las Novedades.
+    - tipo: novo
+      modulo: Documentação
+      publico: []
+      texto:
+        pt-br: >
+          Documentação técnica dentro do sistema, só para o superusuário, e documentação em
+          espanhol.
+        en: >
+          Technical documentation inside the system, for superusers only, and documentation in
+          Spanish.
+        es: >
+          Documentación técnica dentro del sistema, solo para el superusuario, y documentación
+          en español.
+
 - versao: 0.13.1
   data: 2026-10-27
   titulo:

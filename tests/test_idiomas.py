@@ -80,7 +80,13 @@ def test_trocar_idioma_exige_post_e_login(client):
 def test_todos_os_textos_estao_traduzidos(idioma):
     po = (LOCALE / idioma / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
     blocos = po.split("\n\n")[1:]
-    sem_traducao = [b for b in blocos if re.search(r'^msgstr(\[\d\])? ""$', b, re.M)]
+    # Long translations are wrapped: msgstr "" followed by "..." lines, so join them first.
+    sem_traducao = [
+        bloco
+        for bloco in blocos
+        for traducao in re.findall(r'^msgstr(?:\[\d\])? ((?:".*"\n?)+)', bloco, re.M)
+        if not "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', traducao))
+    ]
     assert not sem_traducao, sem_traducao[:3]
     assert "#, fuzzy" not in po
 

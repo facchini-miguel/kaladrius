@@ -1,6 +1,6 @@
 # Medical System
 
-🇺🇸 English | [🇧🇷 Português](README.pt-BR.md)
+🇺🇸 English | [🇧🇷 Português](README.pt-BR.md) | [🇪🇸 Español](README.es.md)
 
 Clinic management system: per-professional scheduling, patient records, recalls (follow-up reminders), birthdays, users and permissions. Serves multiple clinics from the same server (multi-tenant).
 
@@ -8,7 +8,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Current version: 0.13.1** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+**Current version: 0.14.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **phase 1 complete** (feature parity with the legacy system), running at https://medical-system.duckdns.org (Google Cloud free tier, IPv6 only). See [docs/en/deploy.md](docs/en/deploy.md).
 
@@ -33,6 +33,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 | Import the legacy Odonto System data into a new clinic (see [docs/en/legacy-system.md](docs/en/legacy-system.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Name" < dump.sql` |
 | Anonymize a clinic's data to use it for testing (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Name" --confirmar` |
 | Simulate current appointments and recalls in a **test** clinic | `docker compose exec app python manage.py simular_movimento --clinica "Name" --confirmar` |
+| GitHub *Release* title and text (in English) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
 | Tests (with coverage, minimum 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Format code | `docker compose exec app ruff format .` |
@@ -53,7 +54,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 
 ## Documentation
 
-All documentation lives in [`docs/`](docs/README.md), in English ([`docs/en`](docs/en/README.md)) and Portuguese ([`docs/pt-BR`](docs/pt-BR/README.md)). Portuguese is the primary language; English is a translation.
+All documentation lives in [`docs/`](docs/README.md), in Portuguese ([`docs/pt-BR`](docs/pt-BR/README.md)), English ([`docs/en`](docs/en/README.md)) and Spanish ([`docs/es`](docs/es/README.md)). Portuguese is the primary language; English and Spanish are translations. The user manual is also inside the system, in **Help > User manual**.
 
 ## Versions
 

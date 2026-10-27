@@ -1,6 +1,6 @@
 # Modelo de dados
 
-[🇺🇸 English](../en/data-model.md) | 🇧🇷 Português
+[🇺🇸 English](../en/data-model.md) | 🇧🇷 Português | [🇪🇸 Español](../es/modelo-de-datos.md)
 
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
@@ -15,7 +15,7 @@
 | Entidade | Campos principais | Observação |
 |---|---|---|
 | `Clinica` | nome, documento (CPF/CNPJ), contato, ativa, configurações da agenda (início, fim, duração do slot) | O "tenant" |
-| `Usuario` | login, nome, e-mail, senha (Argon2), ativo | Usuário do Django |
+| `Usuario` | login, nome, e-mail, senha (Argon2), ativo, idioma | Usuário do Django |
 | `Vinculo` | usuario, clinica, papel, ativo | Um usuário pode atuar em mais de uma clínica |
 
 ### Papéis e permissões (substitui `sist_pessoasgrupos` / `sist_modulosperm`)
@@ -71,6 +71,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 - Registrado automaticamente (sinais do Django): criar, alterar e excluir Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo e Usuário. Também: abrir a ficha de um paciente, entrar, sair e tentativas de entrada recusadas.
 - **Nunca** grava senhas nem o hash delas (a troca de senha aparece só como "alterada").
 - Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura), com uma exceção: as tentativas de entrada recusadas, que guardam o usuário digitado, são apagadas depois de 30 dias pelo comando `aplicar_retencao`, que o servidor roda todo dia junto com o backup (decisão 045). Nos backups, elas duram mais 30 dias. Na exclusão definitiva de um paciente, os registros dele perdem os dados pessoais (ver abaixo).
+- O nome do tipo de registro é gravado sempre em português, qualquer que seja o idioma do usuário: os filtros e a anonimização dependem dele.
 - Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Alterações em contas de usuário (que não pertencem a uma clínica) ficam registradas na clínica em que foram feitas. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
 
 ## Idioma do usuário

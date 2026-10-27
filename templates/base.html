@@ -60,7 +60,17 @@
             </ul>
           </li>
           {% endif %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'novidades' %}">{% translate "Novidades" %}</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Ajuda" %}</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'ajuda:indice' %}">{% translate "Manual do usuário" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'novidades' %}">{% translate "Novidades" %}</a></li>
+              {% if user.is_superuser %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'ajuda:tecnica_indice' %}">{% translate "Documentação técnica" %}</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% if user.is_superuser %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% translate "Administração" %}</a></li>
           {% endif %}

@@ -1,6 +1,6 @@
 # Financial module plan
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-financeiro.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-financeiro.md) | [🇪🇸 Español](../es/plan-financiero.md)
 
 > Status: **planned** (2026-10-27). Decision 048.
 
@@ -68,9 +68,9 @@ Cancelling entries and reversing payments is for administrators only. So the fro
 
 | # | Step | Deliverable | Version |
 |---|---|---|---|
-| 1 | **Receivables** | Models, default accounts and categories, receivable with installments, receive (all methods, partial), receipt, debtors, panel in the patient record, permissions | 0.13.0 |
-| 2 | **Payables and cash flow** | Payable with monthly repetition, actual and expected cash flow, balance per account, reports | 0.14.0 |
-| 3 | **Daily cash** | Opening, withdrawals, top-ups and closing with counting | 0.15.0 |
+| 1 | **Receivables** | Models, default accounts and categories, receivable with installments, receive (all methods, partial), receipt, debtors, panel in the patient record, permissions | 0.15.0 |
+| 2 | **Payables and cash flow** | Payable with monthly repetition, actual and expected cash flow, balance per account, reports | 0.16.0 |
+| 3 | **Daily cash** | Opening, withdrawals, top-ups and closing with counting | 0.17.0 |
 
 ### Later (no date)
 Procedure price list and **treatment estimate** that becomes a receivable; **practitioner commission**; period result (income statement); card machine fees and settlement dates; bank statement import (OFX). And, if decided: invoices, integrated Pix/boleto, insurance plans.
@@ -80,3 +80,4 @@ Procedure price list and **treatment estimate** that becomes a receivable; **pra
 2. Estimates and commission come after the 3 steps.
 3. A receivable may have no registered patient (payer's name as text).
 4. A receivable may name the practitioner, for the future commission.
+5. The whole module is born in the three interface languages (versions 0.13 and 0.14 brought the languages and Help before it).

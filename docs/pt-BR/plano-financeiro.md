@@ -1,6 +1,6 @@
 # Plano do módulo financeiro
 
-[🇺🇸 English](../en/financial-plan.md) | 🇧🇷 Português
+[🇺🇸 English](../en/financial-plan.md) | 🇧🇷 Português | [🇪🇸 Español](../es/plan-financiero.md)
 
 > Status: **planejado** (27/10/2026). Decisão 048.
 
@@ -68,9 +68,9 @@ Cancelar lançamentos e estornar pagamentos é só do administrador. Assim a rec
 
 | # | Etapa | Entrega | Versão |
 |---|---|---|---|
-| 1 | **A receber** | Modelos, contas e categorias padrão, lançamento a receber com parcelas, receber (todas as formas, parcial), recibo, devedores, quadro na ficha do paciente, permissões | 0.13.0 |
-| 2 | **A pagar e fluxo de caixa** | Lançamento a pagar com repetição mensal, fluxo de caixa realizado e previsto, saldo por conta, relatórios | 0.14.0 |
-| 3 | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.15.0 |
+| 1 | **A receber** | Modelos, contas e categorias padrão, lançamento a receber com parcelas, receber (todas as formas, parcial), recibo, devedores, quadro na ficha do paciente, permissões | 0.15.0 |
+| 2 | **A pagar e fluxo de caixa** | Lançamento a pagar com repetição mensal, fluxo de caixa realizado e previsto, saldo por conta, relatórios | 0.16.0 |
+| 3 | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.17.0 |
 
 ### Depois (sem data)
 Tabela de procedimentos e **orçamento** que vira lançamento a receber; **comissão dos dentistas**; resultado do período (DRE); taxas e datas de crédito da maquininha; importação do extrato bancário (OFX). E, se decidido: nota fiscal, Pix/boleto integrados, convênios.
@@ -80,3 +80,4 @@ Tabela de procedimentos e **orçamento** que vira lançamento a receber; **comis
 2. Orçamento e comissão ficam para depois das 3 etapas.
 3. Um lançamento a receber pode não ter paciente cadastrado (nome do pagador em texto).
 4. Um lançamento a receber pode indicar o profissional, para a futura comissão.
+5. Todo o módulo já nasce nos três idiomas da interface (as versões 0.13 e 0.14 trouxeram os idiomas e a Ajuda antes dele).

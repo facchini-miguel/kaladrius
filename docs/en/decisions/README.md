@@ -1,6 +1,6 @@
 # Decision log
 
-🇺🇸 English | [🇧🇷 Português](../../pt-BR/decisoes/README.md)
+🇺🇸 English | [🇧🇷 Português](../../pt-BR/decisoes/README.md) | [🇪🇸 Español](../../es/decisiones/README.md)
 
 Each row is a decision, with date and reason. If a decision changes, the old row is marked **superseded** and a new one is added, preserving the history.
 
@@ -23,8 +23,8 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 015 | 2026-10-26 | No GPL/AGPL dependencies | Keep the license choice open | Accepted |
 | 016 | 2026-10-26 | Django 6.1 (current), move to 6.2 LTS in Apr/2027; Python 3.13 | Latest stable; LTS supported until 2030 | Accepted |
 | 017 | 2026-10-26 | No Node build on the front end: Bootstrap 5.3 and HTMX 2 served as static files | Fewer tools to maintain | Accepted |
-| 018 | 2026-10-26 | Bilingual docs: `docs/pt-BR/` (primary) and `docs/en/` (translation); `README.md` in English and `README.pt-BR.md` in Portuguese | Separate files per language avoid mixed text; English widens the audience if the project is opened | Accepted |
-| 019 | 2026-10-26 | Code comments and docstrings in English; user-facing text in Portuguese | International standard for code, while keeping the users' language | Accepted |
+| 018 | 2026-10-26 | Bilingual docs: `docs/pt-BR/` (primary) and `docs/en/` (translation); `README.md` in English and `README.pt-BR.md` in Portuguese | Separate files per language avoid mixed text; English widens the audience if the project is opened | Extended by 050 (three languages) |
+| 019 | 2026-10-26 | Code comments and docstrings in English; user-facing text in Portuguese | International standard for code, while keeping the users' language | Accepted (user-facing texts are translated since 049) |
 | 020 | 2026-10-26 | Use **Google Cloud free tier resources only**: e2-micro in the US for production too, backups in US Cloud Storage, no snapshots; R$ 5 budget alert | Owner's request: zero cost | Accepted (supersedes the production part of 006: e2-small in São Paulo) |
 | 021 | 2026-10-26 | **Fail-closed** per-clinic isolation: the default manager filters by the current clinic and raises without one; explicit `sem_isolamento()` for platform code | A forgotten filter can never leak another clinic's data | Accepted |
 | 022 | 2026-10-26 | Per-role permission matrix defined in code (`apps/core/permissoes.py`) | Simple and testable; review with the owner after phase 1 | Accepted |
@@ -55,3 +55,4 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 047 | 2026-10-27 | The imported data (from a clinic that is no longer a client) is **anonymized** and used only as test data, with the `anonimizar_clinica` command | The real data no longer has a purpose; anonymized, it is no longer personal data (LGPD, art. 12) and keeps the real volume and distribution for testing | Accepted (owner) |
 | 048 | 2026-10-27 | **Financial module with manual entries** (receivables with installments, payments with method, payables, cash flow, daily cash), before phase 2. No invoices, no Pix, boleto or card machine integration and no insurance plans for now | Owner's request: know who owes, how they paid and the cash flow; integrations and tax obligations come when needed | Accepted (owner) |
 | 049 | 2026-10-27 | **Interface in Portuguese, English and Spanish** (Django translation). The source text stays in Portuguese in the code; each user picks the language in the menu, stored in the profile; before login the browser's language is used. Rules stay Brazilian (CPF/CNPJ, CEP, IBGE cities, real); neutral Spanish | Owner's request. A per-user choice allows mixed teams; adapting to other countries would be a separate project | Accepted (owner) |
+| 050 | 2026-10-27 | **Help** menu inside the system: user manual in the three languages for the whole team and technical documentation (`docs/`) for superusers only. Documentation in **three languages** (`docs/es/` and `README.es.md`). GitHub *Releases* are written in **English**, generated from `releases.yaml` | Owner's request. The technical documentation describes the infrastructure, so it is not shown to the clinic team; English is the GitHub standard | Accepted (owner) |

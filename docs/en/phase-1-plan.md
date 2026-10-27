@@ -1,6 +1,6 @@
 # Phase 1 plan: staff web app + test data
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-fase-1.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/plano-fase-1.md) | [🇪🇸 Español](../es/plan-fase-1.md)
 
 > Status: **completed** in version 0.7.0 (2026-10-26).
 

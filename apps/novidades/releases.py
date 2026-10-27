@@ -23,6 +23,7 @@ TIPOS = {
 # Modules named in releases.yaml, translated when shown (tests check every one is here).
 MODULOS = [
     gettext_noop("Acesso"),
+    gettext_noop("Ajuda"),
     gettext_noop("Agenda"),
     gettext_noop("Aniversariantes"),
     gettext_noop("Auditoria"),

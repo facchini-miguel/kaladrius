@@ -1,6 +1,6 @@
 # Medical System documentation
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/README.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/README.md) | [🇪🇸 Español](../es/README.md)
 
 | Document | Contents |
 |---|---|
@@ -13,9 +13,10 @@
 | [deploy.md](deploy.md) | Google Cloud deployment (free tier, IPv6), operations and backups |
 | [legacy-system.md](legacy-system.md) | Summary of the old PHP system used as reference |
 | [decisions/](decisions/README.md) | Log of technical and product decisions, with date and reason |
+| [manual/](manual/inicio.md) | User manual (also in the system: **Help > User manual**) |
 
 ## Conventions
-- Documentation is written first in **Portuguese** (`docs/pt-BR/`) and translated into **English** (`docs/en/`), with the same structure. Every change updates both languages in the same commit.
+- Documentation is written first in **Portuguese** (`docs/pt-BR/`) and translated into **English** (`docs/en/`) and **Spanish** (`docs/es/`), with the same structure. Every change updates the three languages in the same commit.
 - Code uses **Portuguese names for the domain** (Paciente, Agendamento) and English only for framework concepts.
 - **Code comments and docstrings are written in English.** User-facing text (screens, messages, release notes) is written in Portuguese in the code and translated into English and Spanish in `locale/` (see [architecture.md](architecture.md#languages-version-0130-decision-049)).
 - Every important decision gets an entry in `decisions/`.

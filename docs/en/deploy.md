@@ -1,6 +1,6 @@
 # Deploy (Google Cloud, free tier)
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/deploy.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/deploy.md) | [🇪🇸 Español](../es/despliegue.md)
 
 Published at **https://medical-system.duckdns.org** (**IPv6-only** access). Fallback address: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
 

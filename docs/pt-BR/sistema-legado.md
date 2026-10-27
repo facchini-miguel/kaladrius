@@ -1,6 +1,6 @@
 # Sistema legado (Odonto System)
 
-[🇺🇸 English](../en/legacy-system.md) | 🇧🇷 Português
+[🇺🇸 English](../en/legacy-system.md) | 🇧🇷 Português | [🇪🇸 Español](../es/sistema-heredado.md)
 
 Referência para a reescrita. O código antigo (PHP) e os backups ficam **fora do repositório**, na pasta local `~/medical-system-old_data/` (acesso só do dono). A análise completa está em `~/medical-system-old_data/legado-php/ANALISE_SISTEMA.md`.
 

@@ -49,3 +49,23 @@ main {
   white-space: nowrap;
   vertical-align: bottom;
 }
+
+/* Markdown documents (user manual and technical docs). */
+.documento {
+  max-width: 52rem;
+  line-height: 1.6;
+}
+.documento h1 { font-size: 1.75rem; margin-bottom: 1rem; }
+.documento h2 { font-size: 1.35rem; margin-top: 2rem; }
+.documento h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+.documento pre {
+  background: #f1f3f5;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+}
+.documento blockquote {
+  border-left: 4px solid #0d6efd;
+  padding-left: 1rem;
+  color: #495057;
+}

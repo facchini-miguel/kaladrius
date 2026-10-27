@@ -1,6 +1,6 @@
 # Data model
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/modelo-de-dados.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/modelo-de-dados.md) | [🇪🇸 Español](../es/modelo-de-datos.md)
 
 Entity and field names are kept in Portuguese, as in the code. See the glossary in [README.md](README.md).
 
@@ -17,7 +17,7 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 | Entity | Main fields | Notes |
 |---|---|---|
 | `Clinica` | name, document (CPF/CNPJ), contact, active, schedule settings (start, end, slot length) | The tenant |
-| `Usuario` | login, name, email, password (Argon2), active | Django user |
+| `Usuario` | login, name, email, password (Argon2), active, language | Django user |
 | `Vinculo` | user, clinic, role, active | A user can work at more than one clinic |
 
 ### Roles and permissions (replaces `sist_pessoasgrupos` / `sist_modulosperm`)
@@ -73,6 +73,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).
+- The record type name is always stored in Portuguese, whatever the user's language: filters and anonymization rely on it.
 - **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
 
 ## User language

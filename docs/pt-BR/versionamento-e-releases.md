@@ -1,6 +1,6 @@
 # Versionamento e releases
 
-[🇺🇸 English](../en/versioning-and-releases.md) | 🇧🇷 Português
+[🇺🇸 English](../en/versioning-and-releases.md) | 🇧🇷 Português | [🇪🇸 Español](../es/versionado-y-versiones.md)
 
 ## Número da versão: `MAIOR.MENOR.CORREÇÃO`
 
@@ -21,7 +21,8 @@ Seguimos o [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 O arquivo [`../../releases.yaml`](../../releases.yaml) é a **única fonte** do histórico. Dele saem:
 - a página **Novidades** dentro do sistema web;
 - o endpoint da API que o app usa para mostrar "O que há de novo";
-- o número da versão exibido no rodapé do sistema.
+- o número da versão exibido no rodapé do sistema;
+- as *Releases* do GitHub, em inglês (comando `notas_release`).
 
 ### Formato
 
@@ -74,8 +75,12 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 
 ## Processo para publicar uma versão
 1. Adicionar a entrada no topo de `releases.yaml` no mesmo pull request da mudança.
-2. Atualizar a versão do projeto (`pyproject.toml`) e a linha "Versão atual" dos dois READMEs. Os testes falham se algum deles ficar diferente do `releases.yaml`.
-3. Criar a tag Git `vX.Y.Z` e a *Release* no GitHub, com o mesmo texto.
-4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data) antes do deploy.
+2. Atualizar a versão do projeto (`pyproject.toml`) e a linha "Versão atual" dos três READMEs. Os testes falham se algum deles ficar diferente do `releases.yaml`.
+3. Criar a tag Git `vX.Y.Z` e a *Release* no GitHub **em inglês**, com o título e o texto gerados pelo comando:
+   ```bash
+   docker compose exec app python manage.py notas_release X.Y.Z --titulo   # título
+   docker compose exec app python manage.py notas_release X.Y.Z            # texto
+   ```
+4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data, os três idiomas) antes do deploy.
 
 O servidor lê o `releases.yaml` uma vez e guarda em memória. Em desenvolvimento, depois de editá-lo, reinicie o app (`docker compose restart app`).

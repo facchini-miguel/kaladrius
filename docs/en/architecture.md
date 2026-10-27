@@ -1,6 +1,6 @@
 # Architecture
 
-🇺🇸 English | [🇧🇷 Português](../pt-BR/arquitetura.md)
+🇺🇸 English | [🇧🇷 Português](../pt-BR/arquitetura.md) | [🇪🇸 Español](../es/arquitectura.md)
 
 ## Overview
 
@@ -33,6 +33,7 @@ The two communicate **only through the API**.
 | Schedule calendar | FullCalendar (free plugins only) | MIT |
 | Styling | Bootstrap 5 | MIT |
 | Languages | Django translation (gettext); files compiled with GNU gettext, as a build tool only | BSD (Django); GPL (tool, not a code dependency) |
+| Documents in the system | Python-Markdown | BSD |
 | Application server | Gunicorn | MIT |
 | Static files | WhiteNoise | MIT |
 | Login attempt limiting | django-axes | MIT |
@@ -48,6 +49,10 @@ Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
 - Dates use the language's formats (`SHORT_DATE_FORMAT`); the schedule uses the matching FullCalendar locale; What's new has each text in the three languages.
 - Kept in Portuguese: data (appointment type names, descriptions, cities), the audit log and the messages of terminal commands.
 - CI fails if a new text was not extracted (`makemessages`) and a test fails if a translation is missing.
+
+## Help (version 0.14.0, decision 050)
+- **Help** menu with the **user manual** (`docs/<language>/manual/`, for the whole team, in the user's language), **What's new** and, for superusers only, the **technical documentation** (the rest of `docs/`, which describes the infrastructure).
+- Markdown files become HTML on the server (`apps/ajuda`). Links between documents become links inside the system; other repository files point to GitHub. Only `.md` files inside `docs/` are opened.
 
 ## Runtime (Docker Compose)
 

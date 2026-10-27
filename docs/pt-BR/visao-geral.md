@@ -1,6 +1,6 @@
 # Visão geral
 
-[🇺🇸 English](../en/overview.md) | 🇧🇷 Português
+[🇺🇸 English](../en/overview.md) | 🇧🇷 Português | [🇪🇸 Español](../es/vision-general.md)
 
 ## O que é
 Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psicologia etc.) com:
@@ -28,6 +28,7 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 8. **Novidades:** histórico de versões consultável no sistema e no app.
 9. **Auditoria:** quem criou, alterou, excluiu ou consultou o quê e quando (LGPD).
 10. **Idiomas:** português, inglês e espanhol, à escolha de cada usuário (0.13.0).
+11. **Ajuda:** manual do usuário nos três idiomas dentro do sistema; documentação técnica só para o superusuário (0.14.0).
 
 ## Modelo de negócio (em estudo)
 - App **gratuito** nas lojas.

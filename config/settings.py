@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.auditoria",
     "apps.equipe",
     "apps.legado",
+    "apps.ajuda",
     "axes",
 ]
 
