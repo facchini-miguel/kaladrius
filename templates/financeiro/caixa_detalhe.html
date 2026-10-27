@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Caixa do dia" %} · {{ caixa.conta.nome }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">{% translate "Caixa do dia" %} · {{ caixa.conta.nome }}</h1>
+    <span class="text-body-secondary">
+      {% blocktranslate with momento=caixa.aberto_em|date:"SHORT_DATETIME_FORMAT" nome=caixa.aberto_por.get_full_name|default:caixa.aberto_por.username %}Aberto em {{ momento }} por {{ nome }}{% endblocktranslate %}
+      {% if not caixa.aberto %} · {% blocktranslate with momento=caixa.fechado_em|date:"SHORT_DATETIME_FORMAT" nome=caixa.fechado_por.get_full_name|default:caixa.fechado_por.username %}fechado em {{ momento }} por {{ nome }}{% endblocktranslate %}{% endif %}
+    </span>
+    {% if caixa.aberto %}<span class="badge text-bg-success ms-1">{% translate "Aberto" %}</span>{% else %}<span class="badge text-bg-secondary ms-1">{% translate "Fechado" %}</span>{% endif %}
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    {% if caixa.aberto and pode.recebimentos.criar %}
+    <a class="btn btn-outline-danger" href="{% url 'financeiro:caixa_movimento' caixa.pk 'retirada' %}">{% translate "Retirada (sangria)" %}</a>
+    <a class="btn btn-outline-success" href="{% url 'financeiro:caixa_movimento' caixa.pk 'reforco' %}">{% translate "Reforço" %}</a>
+    <a class="btn btn-primary" href="{% url 'financeiro:caixa_fechar' caixa.pk %}">{% translate "Fechar caixa" %}</a>
+    {% endif %}
+    <a class="btn btn-link" href="{% url 'financeiro:caixa' %}?conta={{ caixa.conta_id }}">{% translate "Caixas anteriores" %}</a>
+  </div>
+</div>
+
+<div class="table-responsive mb-4" style="max-width: 36rem;">
+  <table class="table table-sm bg-white mb-0">
+    <tbody>
+      <tr><td>{% translate "Valor contado na abertura" %}</td><td class="text-end">{{ caixa.valor_abertura|moeda }}</td></tr>
+      <tr><td>{% translate "+ Recebimentos nesta conta" %}</td><td class="text-end text-success">{{ resumo.entradas|moeda }}</td></tr>
+      <tr><td>{% translate "− Despesas pagas por esta conta" %}</td><td class="text-end text-danger">{{ resumo.saidas|moeda }}</td></tr>
+      <tr><td>{% translate "+ Reforços" %}</td><td class="text-end text-success">{{ resumo.reforcos|moeda }}</td></tr>
+      <tr><td>{% translate "− Retiradas" %}</td><td class="text-end text-danger">{{ resumo.retiradas|moeda }}</td></tr>
+      <tr class="fw-semibold"><td>{% translate "Deve haver na gaveta" %}</td><td class="text-end">{% if caixa.aberto %}{{ resumo.esperado|moeda }}{% else %}{{ caixa.valor_esperado|moeda }}{% endif %}</td></tr>
+      {% if not caixa.aberto %}
+      <tr><td>{% translate "Contado no fechamento" %}</td><td class="text-end">{{ caixa.valor_contado|moeda }}</td></tr>
+      <tr class="fw-semibold{% if caixa.diferenca %} text-danger{% endif %}"><td>{% translate "Diferença" %}</td><td class="text-end">{{ caixa.diferenca|moeda }}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% if caixa.observacao %}<p><strong>{% translate "Observação" %}:</strong> {{ caixa.observacao }}</p>{% endif %}
+
+<h2 class="h5">{% translate "Movimentação" %}</h2>
+<div class="table-responsive">
+  <table class="table table-sm align-middle bg-white">
+    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Descrição" %}</th><th>{% translate "Forma de pagamento" %}</th><th class="text-end">{% translate "Valor" %}</th></tr></thead>
+    <tbody>
+      {% for pagamento in resumo.pagamentos %}
+      <tr>
+        <td class="text-nowrap">{{ pagamento.criado_em|date:"TIME_FORMAT" }}</td>
+        <td><a href="{% url 'financeiro:lancamento' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.descricao }}</a></td>
+        <td>{{ pagamento.get_forma_display }}</td>
+        <td class="text-end text-nowrap {% if pagamento.parcela.lancamento.tipo == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.valor|moeda }}</td>
+      </tr>
+      {% endfor %}
+      {% for movimento in resumo.movimentos %}
+      <tr>
+        <td class="text-nowrap">{{ movimento.criado_em|date:"TIME_FORMAT" }}</td>
+        <td>{{ movimento.get_tipo_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.nome }}){% endif %}</td>
+        <td>—</td>
+        <td class="text-end text-nowrap {% if movimento.tipo == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.valor|moeda }}</td>
+      </tr>
+      {% endfor %}
+      {% if not resumo.pagamentos and not resumo.movimentos %}
+      <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhuma movimentação desde a abertura." %}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+<p class="text-body-secondary small">{% translate "Entram aqui os pagamentos registrados nesta conta enquanto o caixa está aberto, pela hora do registro." %}</p>
+{% endblock %}

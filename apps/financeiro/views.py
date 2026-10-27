@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import urlencode
@@ -22,14 +23,17 @@ from apps.pacientes.models import Paciente
 
 from . import servicos
 from .forms import (
+    AbrirCaixaForm,
     CategoriaForm,
     ContaForm,
+    FecharCaixaForm,
     LancamentoPagarForm,
     LancamentoReceberForm,
     MotivoForm,
+    MovimentoCaixaForm,
     ReceberForm,
 )
-from .models import Categoria, Conta, Lancamento, Pagamento, Parcela
+from .models import Caixa, Categoria, Conta, Lancamento, MovimentoCaixa, Pagamento, Parcela
 
 POR_PAGINA = 50
 SITUACOES = {
@@ -326,6 +330,102 @@ def devedores(request):
             "linhas": linhas,
             "total_vencido": sum(linha["vencido"] for linha in linhas),
             "total_a_vencer": sum(linha["a_vencer"] for linha in linhas),
+        },
+    )
+
+
+# --- Daily cash drawer (0.17.0) ---------------------------------------------------------
+
+
+@exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
+def caixa(request):
+    """The drawer of a cash account: its open session, or the form to open it."""
+    contas = list(Conta.objects.filter(tipo=Conta.Tipo.DINHEIRO, ativa=True))
+    escolhida = request.GET.get("conta", "")
+    conta = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
+    if conta is not None:
+        aberto = servicos.caixa_aberto(conta)
+        if aberto is not None:
+            return redirect("financeiro:caixa_detalhe", pk=aberto.pk)
+    saldo = dict(servicos.saldos_das_contas()).get(conta) if conta else None
+    # Empty on purpose: the opening amount is what is counted, not the system balance.
+    form = AbrirCaixaForm(request.POST or None)
+    if request.method == "POST" and conta is not None:
+        if not pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR):
+            raise PermissionDenied
+        if form.is_valid():
+            try:
+                novo = servicos.abrir_caixa(
+                    conta, valor=form.cleaned_data["valor"], usuario=request.user
+                )
+            except ValidationError as erro:
+                messages.error(request, erro.messages[0])
+                return redirect(f"{request.path}?conta={conta.pk}")
+            messages.success(request, _("Caixa aberto."))
+            return redirect("financeiro:caixa_detalhe", pk=novo.pk)
+    historico = Caixa.objects.filter(conta=conta).select_related("aberto_por", "fechado_por")[:30]
+    return render(
+        request,
+        "financeiro/caixa.html",
+        {
+            "contas": contas,
+            "conta": conta,
+            "form": form,
+            "saldo_sistema": saldo,
+            "historico": historico,
+        },
+    )
+
+
+@exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
+def caixa_detalhe(request, pk):
+    sessao = get_object_or_404(
+        Caixa.objects.select_related("conta", "aberto_por", "fechado_por"), pk=pk
+    )
+    return render(
+        request,
+        "financeiro/caixa_detalhe.html",
+        {"caixa": sessao, "resumo": servicos.resumo_do_caixa(sessao)},
+    )
+
+
+@exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
+def caixa_movimento(request, pk, tipo):
+    sessao = get_object_or_404(Caixa.objects.select_related("conta"), pk=pk, fechado_em=None)
+    if tipo not in MovimentoCaixa.Tipo.values:
+        raise Http404
+    form = MovimentoCaixaForm(request.POST or None, caixa=sessao)
+    if request.method == "POST" and form.is_valid():
+        try:
+            servicos.movimentar_caixa(sessao, tipo=tipo, usuario=request.user, **form.cleaned_data)
+        except ValidationError as erro:
+            form.add_error(None, erro.messages[0])
+        else:
+            messages.success(request, _("Movimento registrado."))
+            return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
+    return render(
+        request,
+        "financeiro/caixa_form.html",
+        {"caixa": sessao, "form": form, "titulo": MovimentoCaixa.Tipo(tipo).label},
+    )
+
+
+@exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
+def caixa_fechar(request, pk):
+    sessao = get_object_or_404(Caixa.objects.select_related("conta"), pk=pk, fechado_em=None)
+    form = FecharCaixaForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        servicos.fechar_caixa(sessao, usuario=request.user, **form.cleaned_data)
+        messages.success(request, _("Caixa fechado."))
+        return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
+    return render(
+        request,
+        "financeiro/caixa_form.html",
+        {
+            "caixa": sessao,
+            "form": form,
+            "titulo": _("Fechar caixa"),
+            "esperado": servicos.resumo_do_caixa(sessao)["esperado"],
         },
     )
 

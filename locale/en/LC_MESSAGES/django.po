@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 14:48-0300\n"
+"POT-Creation-Date: 2026-10-27 15:29-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: English\n"
@@ -520,6 +520,27 @@ msgstr "How much the account had before the first entry in the system."
 msgid "Já existe uma conta com este nome."
 msgstr "An account with this name already exists."
 
+msgid "Valor contado na gaveta"
+msgstr "Amount counted in the drawer"
+
+msgid "Conte o dinheiro antes de abrir o caixa."
+msgstr "Count the money before opening the drawer."
+
+msgid "Outra conta"
+msgstr "Other account"
+
+msgid ""
+"Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."
+msgstr ""
+"E.g.: deposit into the Bank. Empty: the money leaves the system or comes "
+"from outside."
+
+msgid "Observação"
+msgstr "Note"
+
+msgid "Explique a diferença, se houver."
+msgstr "Explain the difference, if any."
+
 msgid "Dinheiro (caixa)"
 msgstr "Cash (drawer)"
 
@@ -673,6 +694,57 @@ msgstr "payment"
 msgid "pagamentos"
 msgstr "payments"
 
+msgid "aberto em"
+msgstr "opened at"
+
+msgid "aberto por"
+msgstr "opened by"
+
+msgid "valor contado na abertura"
+msgstr "amount counted at opening"
+
+msgid "fechado em"
+msgstr "closed at"
+
+msgid "fechado por"
+msgstr "closed by"
+
+msgid "valor esperado"
+msgstr "expected amount"
+
+msgid "valor contado no fechamento"
+msgstr "amount counted at closing"
+
+msgid "caixa"
+msgstr "cash drawer"
+
+msgid "caixas"
+msgstr "cash drawers"
+
+msgid "Retirada (sangria)"
+msgstr "Withdrawal"
+
+msgid "Reforço"
+msgstr "Top-up"
+
+msgid "outra conta"
+msgstr "other account"
+
+msgid ""
+"Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."
+msgstr ""
+"Where the withdrawal goes or the top-up comes from (empty: outside the "
+"system)."
+
+msgid "motivo"
+msgstr "reason"
+
+msgid "movimento de caixa"
+msgstr "drawer movement"
+
+msgid "movimentos de caixa"
+msgstr "drawer movements"
+
 msgid "Este lançamento foi cancelado."
 msgstr "This entry was cancelled."
 
@@ -704,6 +776,18 @@ msgstr "Partly paid"
 
 msgid "Em aberto"
 msgstr "Open"
+
+msgid "O caixa desta conta já está aberto."
+msgstr "This account's drawer is already open."
+
+msgid "Este caixa já foi fechado."
+msgstr "This drawer is already closed."
+
+msgid "Escolha uma conta diferente da do caixa."
+msgstr "Choose an account other than the drawer's."
+
+msgid "A retirada passa do valor que deveria estar no caixa."
+msgstr "The withdrawal exceeds what should be in the drawer."
 
 msgid "Lançamento criado e 1ª parcela recebida."
 msgstr "Entry created and 1st installment received."
@@ -737,6 +821,18 @@ msgstr "Payment reversed."
 
 msgid "Estornar pagamento"
 msgstr "Reverse payment"
+
+msgid "Caixa aberto."
+msgstr "Drawer opened."
+
+msgid "Movimento registrado."
+msgstr "Movement recorded."
+
+msgid "Caixa fechado."
+msgstr "Drawer closed."
+
+msgid "Fechar caixa"
+msgstr "Close drawer"
 
 #, python-format
 msgid "%(nome)s salvo."
@@ -1279,6 +1375,9 @@ msgstr "Debtors"
 msgid "Novo lançamento"
 msgstr "New entry"
 
+msgid "Caixa do dia"
+msgstr "Daily cash"
+
 msgid "Nova despesa"
 msgstr "New expense"
 
@@ -1483,6 +1582,93 @@ msgstr ""
 "To stop using it without losing the history, edit it and uncheck “active”."
 
 msgid ""
+"Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > "
+"Contas, com o tipo “Dinheiro (caixa)”."
+msgstr ""
+"No active cash account. The administrator adds one in Records > Accounts, "
+"with the type “Cash (drawer)”."
+
+#, python-format
+msgid "O caixa “%(conta)s” está fechado"
+msgstr "The “%(conta)s” drawer is closed"
+
+#, python-format
+msgid "Pelo sistema, a conta tem %(saldo)s."
+msgstr "According to the system, the account has %(saldo)s."
+
+msgid "Abrir caixa"
+msgstr "Open drawer"
+
+msgid "Caixas anteriores"
+msgstr "Previous drawers"
+
+msgid "Aberto em"
+msgstr "Opened at"
+
+msgid "Fechado em"
+msgstr "Closed at"
+
+msgid "Esperado"
+msgstr "Expected"
+
+msgid "Contado"
+msgstr "Counted"
+
+msgid "Diferença"
+msgstr "Difference"
+
+#, python-format
+msgid "Aberto em %(momento)s por %(nome)s"
+msgstr "Opened on %(momento)s by %(nome)s"
+
+#, python-format
+msgid "fechado em %(momento)s por %(nome)s"
+msgstr "closed on %(momento)s by %(nome)s"
+
+msgid "Aberto"
+msgstr "Open"
+
+msgid "Fechado"
+msgstr "Closed"
+
+msgid "Valor contado na abertura"
+msgstr "Amount counted at opening"
+
+msgid "+ Recebimentos nesta conta"
+msgstr "+ Received into this account"
+
+msgid "− Despesas pagas por esta conta"
+msgstr "− Expenses paid from this account"
+
+msgid "+ Reforços"
+msgstr "+ Top-ups"
+
+msgid "− Retiradas"
+msgstr "− Withdrawals"
+
+msgid "Deve haver na gaveta"
+msgstr "Should be in the drawer"
+
+msgid "Contado no fechamento"
+msgstr "Counted at closing"
+
+msgid "Movimentação"
+msgstr "Movements"
+
+msgid "Descrição"
+msgstr "Description"
+
+msgid "Nenhuma movimentação desde a abertura."
+msgstr "No movements since opening."
+
+msgid ""
+"Entram aqui os pagamentos registrados nesta conta enquanto o caixa está "
+"aberto, pela hora do registro."
+msgstr ""
+"Payments registered into this account while the drawer is open come in here, "
+"by the time they were registered."
+
+msgid ""
 "Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
 "Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
 msgstr ""
@@ -1626,9 +1812,6 @@ msgstr "Paid"
 
 msgid "Todas"
 msgstr "All"
-
-msgid "Descrição"
-msgstr "Description"
 
 msgid "Nenhuma parcela encontrada."
 msgstr "No installments found."

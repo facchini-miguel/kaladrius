@@ -2,7 +2,7 @@
 
 [🇺🇸 English](../en/financial-plan.md) | 🇧🇷 Português | [🇪🇸 Español](../es/plan-financiero.md)
 
-> Status: **etapas 1 (a receber, 0.15.0) e 2 (a pagar, fluxo de caixa e relatórios, 0.16.0) concluídas** (27/10/2026). Decisões 048 e 051. Juros e multa são lançados à mão, desconto só pelo administrador, e o endereço da clínica sai no recibo.
+> Status: **concluído**: etapas 1 (a receber, 0.15.0), 2 (a pagar, fluxo de caixa e relatórios, 0.16.0) e 3 (caixa do dia, 0.17.0) (27/10/2026). Decisões 048 e 051. Juros e multa são lançados à mão, desconto só pelo administrador, e o endereço da clínica sai no recibo.
 
 ## Objetivo
 Saber **quem deve o quê**, **como cada pessoa pagou** (dinheiro, Pix, cartão, parcelado) e **quanto entra e sai** da clínica, com lançamentos feitos à mão pela equipe.
@@ -70,7 +70,7 @@ Cancelar lançamentos e estornar pagamentos é só do administrador. Assim a rec
 |---|---|---|---|
 | 1 ✅ | **A receber** | Modelos, contas e categorias padrão, lançamento a receber com parcelas, receber (todas as formas, parcial), recibo, devedores, quadro na ficha do paciente, permissões | 0.15.0 |
 | 2 ✅ | **A pagar e fluxo de caixa** | Lançamento a pagar com repetição mensal, fluxo de caixa realizado e previsto, saldo por conta, relatórios | 0.16.0 |
-| 3 | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.17.0 |
+| 3 ✅ | **Caixa do dia** | Abertura, sangria, reforço e fechamento com conferência | 0.17.0 |
 
 ### Depois (sem data)
 Tabela de procedimentos e **orçamento** que vira lançamento a receber; **comissão dos dentistas**; resultado do período (DRE); taxas e datas de crédito da maquininha; importação do extrato bancário (OFX). E, se decidido: nota fiscal, Pix/boleto integrados, convênios.

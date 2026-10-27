@@ -221,3 +221,42 @@ class ContaForm(FormularioBootstrap, forms.ModelForm):
         if Conta.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe uma conta com este nome."))
         return nome
+
+
+class AbrirCaixaForm(FormularioBootstrap, forms.Form):
+    valor = _campo_dinheiro(
+        _("Valor contado na gaveta"), help_text=_("Conte o dinheiro antes de abrir o caixa.")
+    )
+
+
+class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
+    valor = _campo_dinheiro(_("Valor"))
+    outra_conta = forms.ModelChoiceField(
+        label=_("Outra conta"),
+        queryset=Conta.objects.none(),
+        required=False,
+        help_text=_("Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."),
+    )
+    motivo = forms.CharField(label=_("Motivo"), max_length=200)
+
+    def __init__(self, *args, caixa, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["outra_conta"].queryset = Conta.objects.filter(ativa=True).exclude(
+            pk=caixa.conta_id
+        )
+
+    def clean_valor(self):
+        valor = self.cleaned_data["valor"]
+        if valor <= 0:
+            raise forms.ValidationError(_("Informe um valor maior que zero."))
+        return valor
+
+
+class FecharCaixaForm(FormularioBootstrap, forms.Form):
+    valor_contado = _campo_dinheiro(_("Valor contado na gaveta"))
+    observacao = forms.CharField(
+        label=_("Observação"),
+        max_length=200,
+        required=False,
+        help_text=_("Explique a diferença, se houver."),
+    )

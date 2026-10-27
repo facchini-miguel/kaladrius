@@ -32,6 +32,16 @@ No se borra nada. El **administrador** puede:
 
 Todo queda registrado en la auditoría.
 
+## Caja del día
+En **Financiero > Caja del día**, la recepción controla el dinero de la caja:
+1. **Abrir caja:** cuente el dinero e indique el valor. El sistema muestra cuánto debería tener la cuenta, solo como referencia.
+2. Durante el día, los pagos registrados en la cuenta **Caixa** (caja) entran automáticamente.
+3. **Retiro:** dinero que sale de la caja, con el motivo. Si se deposita en el banco, elija la cuenta **Banco** en **Otra cuenta**; vacío, el dinero sale del sistema (por ejemplo, un retiro del dueño).
+4. **Refuerzo:** dinero que entra en la caja, como cambio.
+5. **Cerrar caja:** cuente de nuevo e indique el valor. El sistema muestra cuánto debería haber y registra la **diferencia**; explíquela en la observación, si la hay.
+
+Solo puede haber una caja abierta por cuenta. Las cajas cerradas quedan en **Cajas anteriores**, con lo esperado, lo contado y la diferencia.
+
 ## Cuentas por pagar (administrador)
 En **Financiero > Nuevo gasto**, indique el **proveedor**, la categoría, la descripción y el valor. En **El valor es**, elija:
 - **el total, dividido en las cuotas**: una compra de R$ 900 en 3 cuotas pasa a 3 cuotas de R$ 300;

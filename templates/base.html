@@ -41,6 +41,7 @@
               {% if pode.recebimentos.criar %}
               <li><a class="dropdown-item" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a></li>
               {% endif %}
+              <li><a class="dropdown-item" href="{% url 'financeiro:caixa' %}">{% translate "Caixa do dia" %}</a></li>
               {% endif %}
               {% if pode.financeiro.ver %}
               <li><hr class="dropdown-divider"></li>

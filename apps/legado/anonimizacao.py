@@ -20,7 +20,7 @@ from apps.auditoria.registro import nome_do_modelo, registrar
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
-from apps.financeiro.models import Lancamento, Pagamento, Parcela
+from apps.financeiro.models import Caixa, Lancamento, MovimentoCaixa, Pagamento, Parcela
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -191,6 +191,8 @@ class _Anonimizador:
             lancamentos, ["descricao", "pessoa", "observacoes"], batch_size=500
         )
         Pagamento.objects.filter(clinica=self.clinica).update(observacao="", cartao_codigo="")
+        Caixa.objects.filter(clinica=self.clinica).update(observacao="")
+        MovimentoCaixa.objects.filter(clinica=self.clinica).update(motivo="-")
 
     def auditoria(self):
         """Entries about these records held the original values: they go."""

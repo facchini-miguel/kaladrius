@@ -65,6 +65,9 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | `Parcela` | clinica, lançamento, número, vencimento, valor | O pago e o saldo são calculados a partir dos pagamentos |
 | `Pagamento` | clinica, parcela, data, valor recebido, juros e multa (incluídos no valor), desconto (só administrador), forma (dinheiro, Pix, débito, crédito, transferência, boleto, cheque), conta, bandeira, parcelas e código da transação do cartão, observação, estornado (com motivo, quando e quem), recebido por | Abate da parcela: valor − juros + desconto. Nunca guarda o número do cartão |
 
+| `Caixa` | clinica, conta, aberto em/por, valor contado na abertura, fechado em/por, valor esperado e contado no fechamento, observação | Caixa do dia (0.17.0). Um aberto por conta; o esperado é gravado ao fechar, para estornos posteriores não mudarem um caixa fechado |
+| `MovimentoCaixa` | clinica, caixa, tipo (retirada, reforço), valor, outra conta (opcional), motivo, criado por | Retirada para outra conta (depósito no banco) move o saldo entre as contas; sem outra conta, o dinheiro sai ou entra no sistema e aparece no fluxo de caixa |
+
 As contas a pagar (0.16.0) usam as mesmas entidades, com o fornecedor no campo do pagador. O saldo de cada conta é o saldo inicial mais o que entrou menos o que saiu (pagamentos não estornados). Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
 
 ### Sistema

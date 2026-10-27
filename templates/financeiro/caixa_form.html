@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{{ titulo }} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{{ titulo }}</h1>
+<p class="text-body-secondary mb-4">{% translate "Caixa do dia" %} · {{ caixa.conta.nome }}</p>
+{% if esperado is not None %}<div class="alert alert-light border" style="max-width: 32rem;">{% translate "Deve haver na gaveta" %}: <strong>{{ esperado|moeda }}</strong></div>{% endif %}
+<form method="post" style="max-width: 32rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'financeiro:caixa_detalhe' caixa.pk %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

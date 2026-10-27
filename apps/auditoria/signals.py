@@ -6,7 +6,15 @@ from django.db.models.signals import post_delete, post_save, pre_save
 
 from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.core.models import Clinica, Vinculo
-from apps.financeiro.models import Categoria, Conta, Lancamento, Pagamento, Parcela
+from apps.financeiro.models import (
+    Caixa,
+    Categoria,
+    Conta,
+    Lancamento,
+    MovimentoCaixa,
+    Pagamento,
+    Parcela,
+)
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -31,6 +39,8 @@ AUDITADOS = [
     Pagamento,
     Conta,
     Categoria,
+    Caixa,
+    MovimentoCaixa,
 ]
 # Never stored (secrets) or not worth storing (bookkeeping timestamps).
 IGNORADOS = {

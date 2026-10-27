@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .models import ZERO, Lancamento, Pagamento, Parcela
+from .models import ZERO, Caixa, Lancamento, MovimentoCaixa, Pagamento, Parcela
 
 CENTAVO = Decimal("0.01")
 # Days overdue for the debtors report: up to 30, 31-60, 61-90, over 90.
@@ -204,6 +204,17 @@ def saldos_das_contas(ate=None):
         "conta_id", "parcela__lancamento__tipo", "valor"
     ):
         movimento[conta_id] += _sinal(tipo) * valor
+    movimentos = MovimentoCaixa.objects.all()
+    if ate is not None:
+        movimentos = movimentos.filter(criado_em__date__lte=ate)
+    for conta_id, outra_id, tipo, valor in movimentos.values_list(
+        "caixa__conta_id", "outra_conta_id", "tipo", "valor"
+    ):
+        # A withdrawal leaves the drawer (into the other account, if any); a top-up enters it.
+        sinal = -1 if tipo == MovimentoCaixa.Tipo.RETIRADA else 1
+        movimento[conta_id] += sinal * valor
+        if outra_id:
+            movimento[outra_id] -= sinal * valor
     return [
         (conta, conta.saldo_inicial + movimento[conta.pk])
         for conta in Conta.objects.all().order_by("nome")
@@ -236,6 +247,14 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
         .values_list("data", "parcela__lancamento__tipo", "valor")
     ):
         linhas[chave(data)]["entradas" if tipo == Lancamento.Tipo.RECEBER else "saidas"] += valor
+    # Drawer movements to or from outside the system (moves between accounts net to zero).
+    for momento, tipo, valor in MovimentoCaixa.objects.filter(
+        outra_conta__isnull=True, criado_em__date__gte=de, criado_em__date__lte=ate
+    ).values_list("criado_em", "tipo", "valor"):
+        data = timezone.localtime(momento).date()
+        linhas[chave(data)]["saidas" if tipo == MovimentoCaixa.Tipo.RETIRADA else "entradas"] += (
+            valor
+        )
     for parcela in (
         Parcela.objects.abertas()
         .filter(vencimento__gte=de, vencimento__lte=ate)
@@ -306,3 +325,92 @@ def relatorio(de, ate):
         "descontos": sum((v for v in recebidos.values_list("desconto", flat=True)), start=ZERO),
         "juros": sum((v for v in recebidos.values_list("juros", flat=True)), start=ZERO),
     }
+
+
+# --- Daily cash drawer (0.17.0) ----------------------------------------------------------
+
+
+def caixa_aberto(conta):
+    return Caixa.objects.filter(conta=conta, fechado_em__isnull=True).first()
+
+
+@transaction.atomic
+def abrir_caixa(conta, *, valor, usuario):
+    if caixa_aberto(conta) is not None:
+        raise ValidationError(_("O caixa desta conta já está aberto."))
+    return Caixa.objects.create(
+        clinica=conta.clinica, conta=conta, valor_abertura=valor, aberto_por=usuario
+    )
+
+
+def resumo_do_caixa(caixa):
+    """Money that went through the drawer since it was opened, and the expected amount.
+
+    Payments count by the moment they were registered (not their date), so a payment
+    typed in today for last week still lands in today's drawer.
+    """
+    fim = caixa.fechado_em or timezone.now()
+    pagamentos = list(
+        pagamentos_validos()
+        .filter(conta=caixa.conta, criado_em__gte=caixa.aberto_em, criado_em__lte=fim)
+        .select_related("parcela__lancamento__paciente")
+        .order_by("criado_em")
+    )
+    movimentos = list(caixa.movimentos.select_related("outra_conta", "criado_por"))
+    entradas = sum(
+        (p.valor for p in pagamentos if p.parcela.lancamento.tipo == Lancamento.Tipo.RECEBER),
+        start=ZERO,
+    )
+    saidas = sum(
+        (p.valor for p in pagamentos if p.parcela.lancamento.tipo == Lancamento.Tipo.PAGAR),
+        start=ZERO,
+    )
+    reforcos = sum(
+        (m.valor for m in movimentos if m.tipo == MovimentoCaixa.Tipo.REFORCO), start=ZERO
+    )
+    retiradas = sum(
+        (m.valor for m in movimentos if m.tipo == MovimentoCaixa.Tipo.RETIRADA), start=ZERO
+    )
+    return {
+        "pagamentos": pagamentos,
+        "movimentos": movimentos,
+        "entradas": entradas,
+        "saidas": saidas,
+        "reforcos": reforcos,
+        "retiradas": retiradas,
+        "esperado": caixa.valor_abertura + entradas - saidas + reforcos - retiradas,
+    }
+
+
+@transaction.atomic
+def movimentar_caixa(caixa, *, tipo, valor, motivo, usuario, outra_conta=None):
+    caixa = Caixa.objects.select_for_update().get(pk=caixa.pk)
+    if not caixa.aberto:
+        raise ValidationError(_("Este caixa já foi fechado."))
+    if outra_conta is not None and outra_conta.pk == caixa.conta_id:
+        raise ValidationError(_("Escolha uma conta diferente da do caixa."))
+    if tipo == MovimentoCaixa.Tipo.RETIRADA and valor > resumo_do_caixa(caixa)["esperado"]:
+        raise ValidationError(_("A retirada passa do valor que deveria estar no caixa."))
+    return MovimentoCaixa.objects.create(
+        clinica=caixa.clinica,
+        caixa=caixa,
+        tipo=tipo,
+        valor=valor,
+        motivo=motivo,
+        outra_conta=outra_conta,
+        criado_por=usuario,
+    )
+
+
+@transaction.atomic
+def fechar_caixa(caixa, *, valor_contado, observacao, usuario):
+    caixa = Caixa.objects.select_for_update().get(pk=caixa.pk)
+    if not caixa.aberto:
+        raise ValidationError(_("Este caixa já foi fechado."))
+    caixa.valor_esperado = resumo_do_caixa(caixa)["esperado"]
+    caixa.valor_contado = valor_contado
+    caixa.observacao = observacao
+    caixa.fechado_em = timezone.now()
+    caixa.fechado_por = usuario
+    caixa.save()
+    return caixa

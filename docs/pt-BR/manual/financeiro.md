@@ -32,6 +32,16 @@ Nada é apagado. O **administrador** pode:
 
 Tudo fica registrado na auditoria.
 
+## Caixa do dia
+Em **Financeiro > Caixa do dia**, a recepção controla o dinheiro da gaveta:
+1. **Abrir caixa:** conte o dinheiro e informe o valor. O sistema mostra quanto a conta deveria ter, só como referência.
+2. Durante o dia, os pagamentos registrados na conta **Caixa** entram automaticamente.
+3. **Retirada (sangria):** dinheiro que sai da gaveta, com o motivo. Se for depositado no banco, escolha a conta **Banco** em **Outra conta**; vazio, o dinheiro sai do sistema (por exemplo, uma retirada do dono).
+4. **Reforço:** dinheiro que entra na gaveta, como troco.
+5. **Fechar caixa:** conte de novo e informe o valor. O sistema mostra quanto deveria haver e registra a **diferença**; explique-a na observação, se houver.
+
+Só pode haver um caixa aberto por conta. Os caixas fechados ficam em **Caixas anteriores**, com o esperado, o contado e a diferença.
+
 ## Contas a pagar (administrador)
 Em **Financeiro > Nova despesa**, informe o **fornecedor**, a categoria, a descrição e o valor. Em **O valor é**, escolha:
 - **o total, dividido nas parcelas**: uma compra de R$ 900 em 3 vezes vira 3 parcelas de R$ 300;

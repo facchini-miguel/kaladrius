@@ -500,3 +500,98 @@ def test_relatorio_por_forma_categoria_e_profissional(cenario):
 def test_listas_de_escolha_sem_texto_em_ingles(cenario):
     pagina = entrar(cenario, "admin").get(reverse("financeiro:despesa_nova")).content.decode()
     assert "Select an option" not in pagina
+
+
+# --- Daily cash drawer (0.17.0) -----------------------------------------------------------
+
+
+def test_caixa_do_dia_completo(cenario):
+    from apps.financeiro.models import Caixa, MovimentoCaixa
+
+    with usar_clinica(cenario["clinica"]):
+        banco = Conta.objects.get(nome="Banco")
+    recepcao = entrar(cenario, "recepcao")
+    assert recepcao.get(reverse("financeiro:caixa")).status_code == 200
+    resposta = recepcao.post(reverse("financeiro:caixa"), {"valor": "100,00"})
+    with usar_clinica(cenario["clinica"]):
+        caixa = Caixa.objects.get()
+    assert resposta.url == reverse("financeiro:caixa_detalhe", args=[caixa.pk])
+    # Only one open drawer per account: the page goes straight to it.
+    assert recepcao.get(reverse("financeiro:caixa")).url == resposta.url
+
+    # A cash payment while the drawer is open enters it; a Pix into the bank does not.
+    lancamento = lancamento_com(cenario, valor="80.00", parcelas=2)
+    primeira, segunda = parcelas_de(cenario, lancamento)
+    with usar_clinica(cenario["clinica"]):
+        servicos.receber(
+            primeira,
+            usuario=cenario["recepcao"],
+            valor=Decimal("40"),
+            forma="dinheiro",
+            conta=cenario["caixa"],
+        )
+        servicos.receber(
+            segunda, usuario=cenario["recepcao"], valor=Decimal("40"), forma="pix", conta=banco
+        )
+
+    url = lambda nome, *args: reverse(f"financeiro:{nome}", args=[caixa.pk, *args])  # noqa: E731
+    recepcao.post(url("caixa_movimento", "reforco"), {"valor": "10", "motivo": "Troco"})
+    recepcao.post(
+        url("caixa_movimento", "retirada"),
+        {"valor": "120", "motivo": "Depósito", "outra_conta": banco.pk},
+    )
+    # A withdrawal larger than what should be in the drawer is refused.
+    resposta = recepcao.post(url("caixa_movimento", "retirada"), {"valor": "999", "motivo": "x"})
+    assert "passa do valor" in resposta.content.decode()
+
+    with usar_clinica(cenario["clinica"]):
+        resumo = servicos.resumo_do_caixa(caixa)
+        saldos = dict((c.nome, s) for c, s in servicos.saldos_das_contas())
+    assert (resumo["entradas"], resumo["reforcos"], resumo["retiradas"]) == (
+        Decimal("40.00"),
+        Decimal("10.00"),
+        Decimal("120.00"),
+    )
+    assert resumo["esperado"] == Decimal("30.00")  # 100 + 40 + 10 - 120
+    # The deposit moved money from the drawer account to the bank.
+    assert saldos == {"Caixa": Decimal("-70.00"), "Banco": Decimal("160.00")}
+
+    recepcao.post(url("caixa_fechar"), {"valor_contado": "28,50", "observacao": "Faltou troco"})
+    caixa.refresh_from_db()
+    assert not caixa.aberto and caixa.fechado_por == cenario["recepcao"]
+    assert (caixa.valor_esperado, caixa.valor_contado, caixa.diferenca) == (
+        Decimal("30.00"),
+        Decimal("28.50"),
+        Decimal("-1.50"),
+    )
+    # Closed: no more movements, and a new drawer can be opened.
+    assert recepcao.get(url("caixa_fechar")).status_code == 404
+    assert recepcao.get(url("caixa_movimento", "outro")).status_code == 404
+    recepcao.post(reverse("financeiro:caixa"), {"valor": "28,50"})
+    with usar_clinica(cenario["clinica"]):
+        assert Caixa.objects.filter(fechado_em__isnull=True).count() == 1
+        assert MovimentoCaixa.objects.count() == 2
+
+
+def test_profissional_nao_opera_o_caixa(cenario):
+    assert entrar(cenario, "profissional").get(reverse("financeiro:caixa")).status_code == 403
+
+
+def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
+    with usar_clinica(cenario["clinica"]):
+        caixa = servicos.abrir_caixa(cenario["caixa"], valor=Decimal("0"), usuario=cenario["admin"])
+    lancamento = lancamento_com(cenario, valor="50.00", parcelas=1)
+    with usar_clinica(cenario["clinica"]):
+        pagamento = servicos.receber(
+            parcelas_de(cenario, lancamento)[0],
+            usuario=cenario["admin"],
+            valor=Decimal("50"),
+            forma="dinheiro",
+            conta=cenario["caixa"],
+        )
+        servicos.fechar_caixa(
+            caixa, valor_contado=Decimal("50"), observacao="", usuario=cenario["admin"]
+        )
+        servicos.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
+        caixa.refresh_from_db()
+    assert (caixa.valor_esperado, caixa.diferenca) == (Decimal("50.00"), 0)

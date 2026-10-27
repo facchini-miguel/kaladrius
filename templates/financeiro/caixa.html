@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Caixa do dia" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "Caixa do dia" %}</h1>
+  {% if contas|length > 1 %}
+  <form method="get">
+    <select name="conta" class="form-select" aria-label="{% translate 'Conta' %}" onchange="this.form.submit()">
+      {% for item in contas %}<option value="{{ item.pk }}"{% if item.pk == conta.pk %} selected{% endif %}>{{ item.nome }}</option>{% endfor %}
+    </select>
+  </form>
+  {% endif %}
+</div>
+
+{% if not conta %}
+<div class="alert alert-info">{% translate "Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > Contas, com o tipo “Dinheiro (caixa)”." %}</div>
+{% else %}
+<div class="card mb-4" style="max-width: 32rem;">
+  <div class="card-body">
+    <h2 class="h5">{% blocktranslate with conta=conta.nome %}O caixa “{{ conta }}” está fechado{% endblocktranslate %}</h2>
+    {% if pode.recebimentos.criar %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "includes/formulario.html" %}
+      {% if saldo_sistema is not None %}<p class="text-body-secondary small">{% blocktranslate with saldo=saldo_sistema|moeda %}Pelo sistema, a conta tem {{ saldo }}.{% endblocktranslate %}</p>{% endif %}
+      <button type="submit" class="btn btn-primary">{% translate "Abrir caixa" %}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if historico %}
+<h2 class="h5">{% translate "Caixas anteriores" %}</h2>
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle bg-white">
+    <thead>
+      <tr>
+        <th>{% translate "Aberto em" %}</th>
+        <th>{% translate "Fechado em" %}</th>
+        <th class="text-end">{% translate "Esperado" %}</th>
+        <th class="text-end">{% translate "Contado" %}</th>
+        <th class="text-end">{% translate "Diferença" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in historico %}
+      <tr>
+        <td><a href="{% url 'financeiro:caixa_detalhe' item.pk %}">{{ item.aberto_em|date:"SHORT_DATETIME_FORMAT" }}</a></td>
+        <td>{{ item.fechado_em|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
+        <td class="text-end">{{ item.valor_esperado|moeda|default:"—" }}</td>
+        <td class="text-end">{{ item.valor_contado|moeda|default:"—" }}</td>
+        <td class="text-end{% if item.diferenca %} text-danger fw-semibold{% endif %}">{% if item.diferenca is not None %}{{ item.diferenca|moeda }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -32,6 +32,16 @@ Nothing is deleted. The **administrator** can:
 
 Everything is recorded in the audit log.
 
+## Daily cash
+In **Finance > Daily cash**, the front desk controls the money in the drawer:
+1. **Open drawer:** count the money and enter the amount. The system shows how much the account should have, only as a reference.
+2. During the day, payments registered into the **Caixa** (cash) account come in automatically.
+3. **Withdrawal:** money that leaves the drawer, with the reason. If it is deposited in the bank, choose the **Banco** account in **Other account**; empty, the money leaves the system (for example, an owner's withdrawal).
+4. **Top-up:** money that enters the drawer, like change.
+5. **Close drawer:** count again and enter the amount. The system shows how much there should be and records the **difference**; explain it in the note, if any.
+
+Each account can have only one open drawer. Closed drawers are listed in **Previous drawers**, with the expected and counted amounts and the difference.
+
 ## Payables (administrator)
 In **Finance > New expense**, enter the **supplier**, the category, the description and the amount. In **The amount is**, choose:
 - **the total, split into the installments**: a R$ 900 purchase in 3 installments becomes 3 installments of R$ 300;

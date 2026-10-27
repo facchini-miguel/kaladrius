@@ -309,3 +309,110 @@ class Pagamento(ModeloDaClinica):
     @property
     def principal(self):
         return self.valor - self.juros + self.desconto
+
+
+class Caixa(ModeloDaClinica):
+    """A cash drawer session (0.17.0): opened with a counted amount, closed with another.
+
+    While open, payments registered into its account, withdrawals and top-ups make up the
+    expected amount; at closing the expected and counted amounts are stored, so later
+    reversals do not change a closed session.
+    """
+
+    conta = models.ForeignKey(
+        Conta, on_delete=models.PROTECT, related_name="caixas", verbose_name=_("conta")
+    )
+    aberto_em = models.DateTimeField(_("aberto em"), default=timezone.now)
+    aberto_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="+",
+        verbose_name=_("aberto por"),
+    )
+    valor_abertura = models.DecimalField(_("valor contado na abertura"), **DINHEIRO)
+    fechado_em = models.DateTimeField(_("fechado em"), null=True, blank=True)
+    fechado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("fechado por"),
+    )
+    valor_esperado = models.DecimalField(_("valor esperado"), null=True, blank=True, **DINHEIRO)
+    valor_contado = models.DecimalField(
+        _("valor contado no fechamento"), null=True, blank=True, **DINHEIRO
+    )
+    observacao = models.CharField(_("observação"), max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = _("caixa")
+        verbose_name_plural = _("caixas")
+        ordering = ["-aberto_em"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["conta"],
+                condition=Q(fechado_em__isnull=True),
+                name="um_caixa_aberto_por_conta",
+            ),
+            models.CheckConstraint(
+                condition=Q(valor_abertura__gte=0), name="caixa_abertura_positiva"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.conta} {timezone.localtime(self.aberto_em):%d/%m/%Y %H:%M}"
+
+    @property
+    def aberto(self):
+        return self.fechado_em is None
+
+    @property
+    def diferenca(self):
+        if self.valor_contado is None or self.valor_esperado is None:
+            return None
+        return self.valor_contado - self.valor_esperado
+
+
+class MovimentoCaixa(ModeloDaClinica):
+    """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
+
+    class Tipo(models.TextChoices):
+        RETIRADA = "retirada", _("Retirada (sangria)")
+        REFORCO = "reforco", _("Reforço")
+
+    caixa = models.ForeignKey(
+        Caixa, on_delete=models.PROTECT, related_name="movimentos", verbose_name=_("caixa")
+    )
+    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    valor = models.DecimalField(_("valor"), **DINHEIRO)
+    outra_conta = models.ForeignKey(
+        Conta,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("outra conta"),
+        help_text=_("Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."),
+    )
+    motivo = models.CharField(_("motivo"), max_length=200)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="+",
+        verbose_name=_("criado por"),
+    )
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("movimento de caixa")
+        verbose_name_plural = _("movimentos de caixa")
+        ordering = ["criado_em"]
+        constraints = [
+            models.CheckConstraint(condition=Q(valor__gt=0), name="movimento_valor_positivo"),
+        ]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} {self.valor}"

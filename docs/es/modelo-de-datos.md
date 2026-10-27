@@ -65,6 +65,9 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 | `Parcela` (cuota) | clínica, cuenta, número, vencimiento, valor | Lo pagado y el saldo se calculan a partir de los pagos |
 | `Pagamento` (pago) | clínica, cuota, fecha, valor cobrado, intereses y multa (incluidos en el valor), descuento (solo administrador), forma (efectivo, Pix, débito, crédito, transferencia, boleto, cheque), cuenta, marca, cuotas y código de la transacción de la tarjeta, observación, revertido (con motivo, cuándo y quién), cobrado por | Se descuenta de la cuota: valor − intereses + descuento. Nunca guarda el número de la tarjeta |
 
+| `Caixa` (caja) | clínica, cuenta, abierta el/por, valor contado en la apertura, cerrada el/por, valor esperado y contado en el cierre, observación | Caja del día (0.17.0). Una abierta por cuenta; lo esperado se guarda al cerrar, para que reversiones posteriores no cambien una caja cerrada |
+| `MovimentoCaixa` (movimiento de caja) | clínica, caja, tipo (retiro, refuerzo), valor, otra cuenta (opcional), motivo, creado por | Un retiro a otra cuenta (depósito en el banco) mueve el saldo entre las cuentas; sin otra cuenta, el dinero sale o entra al sistema y aparece en el flujo de caja |
+
 Las cuentas por pagar (0.16.0) usan las mismas entidades, con el proveedor en el campo del pagador. El saldo de cada cuenta es el saldo inicial más lo que entró menos lo que salió (pagos no revertidos). Valores en `Decimal` con 2 decimales. La cuota se bloquea en la base al cobrar, para que dos personas no paguen la misma cuota por encima del saldo. En la eliminación definitiva de un paciente, sus cuentas quedan (historial contable) con el pagador "Paciente excluído (código N)", y su auditoría pierde los datos personales.
 
 ### Sistema

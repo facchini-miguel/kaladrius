@@ -67,6 +67,9 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | `Parcela` (installment) | clinic, entry, number, due date, amount | Paid amount and balance are computed from the payments |
 | `Pagamento` (payment) | clinic, installment, date, amount received, interest and late fee (included in the amount), discount (administrators only), method (cash, Pix, debit, credit, transfer, boleto, check), account, card brand, installments and transaction code, note, reversed (with reason, when and who), received by | Deducted from the installment: amount − interest + discount. Never stores the card number |
 
+| `Caixa` (cash drawer) | clinic, account, opened at/by, amount counted at opening, closed at/by, expected and counted amounts at closing, note | Daily cash (0.17.0). One open per account; the expected amount is stored at closing, so later reversals do not change a closed drawer |
+| `MovimentoCaixa` (drawer movement) | clinic, drawer, type (withdrawal, top-up), amount, other account (optional), reason, created by | A withdrawal to another account (bank deposit) moves the balance between accounts; without another account, the money leaves or enters the system and shows in the cash flow |
+
 Payables (0.16.0) use the same entities, with the supplier in the payer field. Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
 
 ### System

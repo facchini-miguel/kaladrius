@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.17.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Financeiro, etapa 3 — caixa do dia
+    en: Finance, step 3 — daily cash
+    es: Financiero, etapa 3 — caja del día
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Caixa do dia: abra o caixa com o dinheiro contado, registre retiradas (sangria) e
+          reforços e feche com uma nova contagem. O sistema mostra quanto deveria haver na gaveta
+          e guarda a diferença.
+        en: >
+          Daily cash: open the drawer with the counted money, record withdrawals and top-ups and
+          close it with a new count. The system shows how much should be in the drawer and keeps
+          the difference.
+        es: >
+          Caja del día: abra la caja con el dinero contado, registre retiros y refuerzos y
+          ciérrela con un nuevo conteo. El sistema muestra cuánto debería haber en la caja y
+          guarda la diferencia.
+
 - versao: 0.16.0
   data: 2026-10-27
   titulo:
