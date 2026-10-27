@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Clinica, Usuario, Vinculo
+from .models import Backup, Clinica, Usuario, Vinculo
 
 
 def _somente_superusuario(request):
@@ -43,3 +43,16 @@ class VinculoAdmin(admin.ModelAdmin):
     list_display = ["usuario", "clinica", "papel", "ativo"]
     list_filter = ["papel", "ativo", "clinica"]
     search_fields = ["usuario__username", "clinica__nome"]
+
+
+@admin.register(Backup)
+class BackupAdmin(admin.ModelAdmin):
+    """Read-only list of the backups recorded by the server."""
+
+    list_display = ["momento", "arquivo", "tamanho"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

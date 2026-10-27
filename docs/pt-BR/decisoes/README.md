@@ -13,7 +13,7 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 005 | 2026-10-26 | Banco **PostgreSQL 16** em Docker | — | Aceita |
 | 006 | 2026-10-26 | Tudo em **Docker Compose numa VM do Compute Engine**; sem Cloud Run e sem Cloud SQL | Mesmo ambiente local e em produção, sem dependência de serviço gerenciado. Free tier (e2-micro) para testes | Aceita (a parte de produção foi substituída pela 020) |
 | 007 | 2026-10-26 | PHP e .NET descartados | Preferência do titular | Aceita |
-| 008 | 2026-10-26 | **Sem migração dos dados antigos**; usar dados fictícios de teste | O sistema antigo não é mais usado | Aceita |
+| 008 | 2026-10-26 | **Sem migração dos dados antigos**; usar dados fictícios de teste | O sistema antigo não é mais usado | Substituída pela 039 |
 | 009 | 2026-10-26 | Sistema **genérico** ("Profissional" no lugar de "Dentista") | Atender qualquer tipo de clínica | Aceita |
 | 010 | 2026-10-26 | Dois repositórios **privados**: `medical-system` e `medical-system-app` | Ciclos de vida e licenças independentes | Aceita |
 | 011 | 2026-10-26 | Licença **proprietária** (todos os direitos reservados), em nome de Miguel Facchini (pessoa física) | Preserva todas as opções futuras (AGPL, MIT, comercial) | Aceita |
@@ -44,3 +44,8 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 036 | 2026-10-26 | Imagens no Artifact Registry e atualização puxada pela VM a cada 5 min; CI autenticado por Workload Identity Federation | GitHub/GHCR não têm IPv6; nenhuma chave guardada | Aceita |
 | 037 | 2026-10-26 | HTTPS pelo Caddy com Let's Encrypt e nome do sslip.io | Certificado válido sem precisar comprar domínio | Aceita (o sslip.io virou endereço reserva com a 038) |
 | 038 | 2026-10-26 | Domínio gratuito `medical-system.duckdns.org` (só AAAA) e IPv6 da VM reservado como fixo | Nome amigável sem custo; o endereço não muda | Aceita (titular) |
+| 039 | 2026-10-27 | **Importar os dados do sistema antigo** (pacientes, agenda, rechamadas) com o comando `importar_legado`, lendo o dump do MySQL diretamente; o que não tem campo próprio vai para as observações; usuários não são importados. Em produção, só depois de nova confirmação | Pedido do titular; nada se perde e não é preciso subir um MySQL | Aceita (titular) |
+| 040 | 2026-10-27 | Tela de equipe com **papéis fixos** (recepção, profissional, administrador), sem grupos configuráveis. O administrador da clínica só altera nome, e-mail e senha de contas usadas somente na própria clínica | Usa a matriz que já existe e é testada; grupos configuráveis podem vir depois. A restrição impede que uma clínica tome o acesso de alguém às outras | Aceita (titular pediu a tela; papéis fixos por padrão) |
+| 041 | 2026-10-27 | Limite de tentativas de login conta a **rede /48** em IPv6 (e o endereço em IPv4) | Num servidor só IPv6, contar por endereço deixava o atacante trocar de endereço à vontade | Aceita |
+| 042 | 2026-10-27 | Sem recuperação de senha por e-mail; troca pelo próprio usuário (menu com o nome) ou pelo administrador da clínica | O servidor não envia e-mails; as páginas de recuperação nunca entregariam nada | Aceita |
+| 043 | 2026-10-27 | Backups com novas tentativas automáticas (systemd) e aviso na web para superusuários quando o último tiver mais de 26 horas | Alertas do Cloud Monitoring são pagos e o servidor não envia e-mails | Aceita |

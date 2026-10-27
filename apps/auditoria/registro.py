@@ -3,6 +3,8 @@
 import contextlib
 from contextvars import ContextVar
 
+from apps.core.isolamento import clinica_atual, isolamento_ativo
+
 from .models import RegistroAuditoria
 
 _usuario = ContextVar("auditoria_usuario", default=None)
@@ -30,7 +32,9 @@ def registrar(
     if usuario is not None and not getattr(usuario, "is_authenticated", False):
         usuario = None
     if clinica is None and objeto is not None:
-        clinica = _clinica_de(objeto)
+        # Rows without a clinic of their own (user accounts) are filed under the clinic
+        # where the change was made, so the clinic administrator sees it in the audit log.
+        clinica = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
     return RegistroAuditoria.objects.create(
         acao=acao,
         clinica_id=getattr(clinica, "pk", clinica),

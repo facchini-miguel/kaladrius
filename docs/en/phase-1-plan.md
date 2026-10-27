@@ -48,7 +48,7 @@ medical-system/
 | 5 ✅ | **Schedule** | Weekly grid per practitioner (FullCalendar), hours and slot length configurable per clinic, colors and legend, create/edit/delete in a modal, weekly recurrence N times, conflict blocking (server validation + database constraint), optional patient (search as you type), the day's birthdays, delete one or the series. Database (PostgreSQL) constraint against overlaps. The **day's recalls** come with the recalls module (step 6) | 0.5.0 |
 | 6 ✅ | **Recalls and birthdays** | Recalls (create, filters, mark as done, on the patient record and in the schedule day headers). Birthdays by month with the age to be reached and a link to the record | 0.6.0 |
 | 7 ✅ | **What's new** (remaining) | "New version: see what changed" notice until the user opens it, filter by module | 0.7.0 |
-| 8 ✅ | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~5,000 appointments around the current date, recalls, one user per role | 0.7.0 |
+| 8 ✅ | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~1,500 appointments around the current date, recalls, one user per role | 0.7.0 |
 | 9 ✅ | **Quality** | Test coverage of critical rules (isolation, conflicts, permissions), `check --deploy` with no warnings, change auditing (LGPD), login attempt limiting (django-axes), coverage measured in CI (minimum 90%; currently 96%) | 0.7.0 |
 
 ## Business rules (automatically tested)
@@ -79,13 +79,13 @@ Django, Django Ninja (installed in phase 1 for the releases endpoint), psycopg, 
 Any of these can be revisited; record the change in `decisions/`.
 
 ## Open items after phase 1
-The parity review against the legacy system (see [legacy-system.md](legacy-system.md)) found everything reproduced except user and group management.
+The parity review against the legacy system (see [legacy-system.md](legacy-system.md)) found everything reproduced except user and group management, which arrived in 0.8.0.
 
 | Item | Status |
 |---|---|
-| Team management screen for the clinic administrator (users, roles, enable/disable) | **Owner's decision:** fixed roles (front desk, practitioner, administrator) or configurable groups with a permission matrix, as in the legacy system. Until then, the superuser manages users and memberships in the Django admin |
+| Team management screen for the clinic administrator | ✅ 0.8.0: **Records > Team**, with fixed roles (decision 040) |
+| Import real data from the legacy system | ✅ 0.8.0: `importar_legado` command (decision 039), already tested locally. In production it awaits the owner's confirmation (LGPD: the server is in the US) |
 | Clinic settings screen (schedule hours and slot length) | Only through the Django admin for now |
-| Permission matrix review (`apps/core/permissoes.py`) | With the owner |
-| Import real data from the legacy system (patients, schedule) | **Owner's decision.** Not planned (decision 008); involves LGPD, since the server is in the US |
+| Permission matrix review (`apps/core/permissoes.py`), including limiting practitioners to their own schedule | With the owner |
 | Browser test of the schedule and recalls | With the owner |
 | Logo (SVG) | With the owner |

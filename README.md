@@ -8,7 +8,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/medical-system/actions/workflows/ci.yml)
 
-**Current version: 0.7.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
+**Current version: 0.8.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/medical-system/releases)
 
 > Status: **phase 1 complete** (feature parity with the legacy system), running at https://medical-system.duckdns.org (Google Cloud free tier, IPv6 only). See [docs/en/deploy.md](docs/en/deploy.md).
 
@@ -27,12 +27,13 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 | Task | Command |
 |---|---|
 | Test data (fake clinics, users, practitioners, 600 patients per clinic, 6 weeks of appointments and recalls) | `docker compose exec app python manage.py popular_dados_teste` |
+| Import the legacy Odonto System data into a new clinic (see [docs/en/legacy-system.md](docs/en/legacy-system.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Name" < dump.sql` |
 | Tests (with coverage, minimum 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Format code | `docker compose exec app ruff format .` |
 | New migration | `docker compose exec app python manage.py makemigrations` |
 | Logs | `docker compose logs -f app` |
-| Stop | `docker compose down` (database data stays in the `pgdata` volume) |
+| Stop | `docker compose down` (database data stays in the `medical-system-dev_pgdata` volume) |
 
 ## Stack
 

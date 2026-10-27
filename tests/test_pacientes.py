@@ -257,3 +257,11 @@ def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
     assert "529.982.247-25" in conteudo
     assert "(48) 99999-0000" in conteudo
     assert "Florianópolis/SC" in conteudo
+
+
+@pytest.mark.parametrize("busca", ["²", "¹²³", "١٢"])
+def test_busca_com_digitos_nao_ascii_nao_quebra(admin_a, clinica_a, busca):
+    criar_paciente(clinica_a, nome="Maria")
+    assert admin_a.get(reverse("pacientes:lista"), {"q": busca}).status_code == 200
+    assert admin_a.get(reverse("pacientes:aniversariantes"), {"mes": busca}).status_code == 200
+    assert admin_a.get(reverse("referencias:opcoes_cidades"), {"uf": busca}).status_code == 200

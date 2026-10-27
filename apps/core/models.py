@@ -101,3 +101,23 @@ class Vinculo(models.Model):
 
     def __str__(self):
         return f"{self.usuario} em {self.clinica} ({self.get_papel_display()})"
+
+
+class Backup(models.Model):
+    """A database backup sent to Cloud Storage, recorded by deploy/servidor/backup.sh.
+
+    Superusers see a warning in the web app when the newest one is too old, which is
+    how a failing backup gets noticed (the server has no e-mail or paid alerting).
+    """
+
+    momento = models.DateTimeField("quando", auto_now_add=True, db_index=True)
+    arquivo = models.CharField("arquivo", max_length=200)
+    tamanho = models.PositiveBigIntegerField("tamanho (bytes)")
+
+    class Meta:
+        verbose_name = "backup"
+        verbose_name_plural = "backups"
+        ordering = ["-momento"]
+
+    def __str__(self):
+        return self.arquivo

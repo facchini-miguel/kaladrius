@@ -24,7 +24,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 4. **Birthdays:** lookup by month.
 5. **Practitioners:** the professionals who see patients (formerly "Dentists").
 6. **Reference tables:** states, cities, banks, marital status, appointment types and colors.
-7. **Users and permissions:** per-clinic roles with view, create, change and delete permissions per module. The screen for a clinic to manage its own team is still missing; for now this is done in the admin.
+7. **Users and permissions:** per-clinic roles with view, create, change and delete permissions per module. The clinic administrator manages the team in Records > Team (0.8.0).
 8. **What's new:** version history viewable in the system and in the app.
 9. **Audit:** who created, changed, deleted or viewed what, and when (LGPD).
 

@@ -4,6 +4,39 @@
 # The newest entry always goes at the top.
 # Release note texts stay in Portuguese: they are shown to users.
 
+- versao: 0.8.0
+  data: 2026-10-27
+  titulo: Equipe, troca de senha e importação do sistema antigo
+  itens:
+    - tipo: novo
+      modulo: Equipe
+      publico: [equipe]
+      texto: >
+        O administrador da clínica cadastra a equipe, escolhe o perfil de cada pessoa
+        (recepção, profissional ou administrador), define senhas e tira o acesso de quem
+        sai (Cadastros > Equipe).
+    - tipo: novo
+      modulo: Acesso
+      publico: [equipe]
+      texto: >
+        Cada pessoa pode trocar a própria senha no menu com o seu nome, no canto da tela.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto: >
+        Os pacientes, a agenda e as rechamadas do Odonto System antigo podem ser trazidos
+        para o sistema. O que não tem campo próprio fica nas observações do paciente.
+    - tipo: seguranca
+      modulo: Acesso
+      publico: [equipe]
+      texto: >
+        Proteção contra tentativas de adivinhar senhas reforçada.
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto: >
+        Algumas buscas e formulários com dados incomuns mostravam uma página de erro.
+
 - versao: 0.7.0
   data: 2026-10-26
   titulo: Auditoria e segurança (fim da fase 1)

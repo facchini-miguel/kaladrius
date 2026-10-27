@@ -48,7 +48,7 @@ medical-system/
 | 5 ✅ | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional (busca enquanto digita), aniversariantes do dia, exclusão de um ou da série. Restrição no banco (PostgreSQL) contra sobreposição. As **rechamadas do dia** entram com o módulo de rechamadas (etapa 6) | 0.5.0 |
 | 6 ✅ | **Rechamadas e aniversariantes** | Rechamadas (cadastro, filtros, concluir, na ficha do paciente e no cabeçalho dos dias da agenda). Aniversariantes por mês com idade a completar e link para a ficha | 0.6.0 |
 | 7 ✅ | **Novidades** (restante) | Aviso "versão nova: veja o que mudou" até o usuário abrir, filtro por módulo | 0.7.0 |
-| 8 ✅ | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~5.000 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
+| 8 ✅ | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~1.500 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
 | 9 ✅ | **Qualidade** | Cobertura dos testes nas regras críticas (isolamento, conflito, permissões), `check --deploy` sem alertas, auditoria de alterações (LGPD), limite de tentativas de login (django-axes), cobertura medida no CI (mínimo 90%; atual 96%) | 0.7.0 |
 
 ## Regras de negócio (testadas automaticamente)
@@ -79,13 +79,13 @@ Django, Django Ninja (instalado já na fase 1 para o endpoint de releases), psyc
 Qualquer uma pode ser revista; registrar a mudança em `decisoes/`.
 
 ## Pendências após a fase 1
-A revisão de paridade com o sistema antigo (ver [sistema-legado.md](sistema-legado.md)) mostrou que tudo foi reproduzido, exceto a gestão de usuários e grupos.
+A revisão de paridade com o sistema antigo (ver [sistema-legado.md](sistema-legado.md)) mostrou que tudo foi reproduzido, exceto a gestão de usuários e grupos, que chegou na 0.8.0.
 
 | Pendência | Situação |
 |---|---|
-| Tela de gestão da equipe pelo administrador da clínica (usuários, papéis, ativar/desativar) | **Decisão do titular:** papéis fixos (recepção, profissional, administrador) ou grupos configuráveis com matriz de permissões, como no sistema antigo. Até lá, o superusuário gerencia usuários e vínculos no admin do Django |
+| Tela de gestão da equipe pelo administrador da clínica | ✅ 0.8.0: **Cadastros > Equipe**, com papéis fixos (decisão 040) |
+| Importar dados reais do sistema antigo | ✅ 0.8.0: comando `importar_legado` (decisão 039), já testado no ambiente local. Em produção, aguarda a confirmação do titular (LGPD: o servidor fica nos EUA) |
 | Tela de configurações da clínica (horário e slot da agenda) | Hoje só pelo admin do Django |
-| Revisão da matriz de permissões (`apps/core/permissoes.py`) | Com o titular |
-| Importar dados reais do sistema antigo (pacientes, agenda) | **Decisão do titular.** Fora do plano (decisão 008); envolve LGPD, pois o servidor fica nos EUA |
+| Revisão da matriz de permissões (`apps/core/permissoes.py`), inclusive limitar o profissional à própria agenda | Com o titular |
 | Teste da agenda e das rechamadas no navegador | Com o titular |
 | Logotipo (SVG) | Com o titular |

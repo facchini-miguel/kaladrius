@@ -31,12 +31,15 @@
           {% if pode.aniversariantes.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">Aniversariantes</a></li>
           {% endif %}
-          {% if pode.profissionais.ver or pode.cadastros.ver or pode.auditoria.ver %}
+          {% if pode.profissionais.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cadastros</a>
             <ul class="dropdown-menu">
               {% if pode.profissionais.ver %}
               <li><a class="dropdown-item" href="{% url 'profissionais:lista' %}">Profissionais</a></li>
+              {% endif %}
+              {% if pode.usuarios.ver %}
+              <li><a class="dropdown-item" href="{% url 'equipe:lista' %}">Equipe</a></li>
               {% endif %}
               {% if pode.cadastros.ver %}
               <li><a class="dropdown-item" href="{% url 'agenda:tipos' %}">Tipos de atendimento</a></li>
@@ -78,17 +81,33 @@
           <li class="nav-item"><span class="navbar-text">{{ clinica_atual.nome }}</span></li>
           {% endif %}
         </ul>
-        <span class="navbar-text me-3">{{ user.get_full_name|default:user.username }}</span>
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-light btn-sm">Sair</button>
-        </form>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">Trocar senha</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item">Sair</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
   {% endif %}
 
   <main class="container py-4">
+    {% if backup_atrasado %}
+    <div class="alert alert-danger" role="alert">
+      O último backup do banco foi em {{ backup_atrasado.momento|date:"d/m/Y H:i" }}: os backups diários pararam.
+      Veja <code>sudo systemctl status medical-system-backup</code> no servidor.
+    </div>
+    {% endif %}
     {% if versao_nova %}
     <div class="alert alert-info d-flex justify-content-between align-items-center" role="status">
       <span>O sistema foi atualizado para a versão {{ versao_sistema }}.</span>

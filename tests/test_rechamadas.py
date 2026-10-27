@@ -190,3 +190,12 @@ def test_aniversariantes_do_mes(cenario):
 def test_aniversariantes_exige_permissao_e_clinica(criar_usuario, cliente_de):
     resposta = cliente_de(criar_usuario("solto")).get(reverse("pacientes:aniversariantes"))
     assert resposta.status_code == 403
+
+
+def test_paciente_adulterado_no_formulario_mostra_erro(cenario):
+    resposta = cenario["cliente"].post(
+        reverse("rechamadas:novo"), {"paciente": "abc", "data": "2031-03-05", "descricao": "x"}
+    )
+    assert resposta.status_code == 200
+    assert resposta.context["form"].errors["paciente"]
+    assert rechamadas(cenario["clinica"]) == []

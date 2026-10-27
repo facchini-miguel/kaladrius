@@ -40,7 +40,7 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Configurações da clínica | tudo | — | — |
 | Auditoria | ver | — | — |
 
-Os módulos "Usuários da clínica" e "Configurações da clínica" já existem na matriz, mas ainda não têm tela: por enquanto o superusuário faz isso no admin do Django (ver as pendências em [plano-fase-1.md](plano-fase-1.md)).
+O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.0): o administrador cria contas já vinculadas à clínica, muda o perfil, define senhas e tira o acesso (o vínculo fica inativo; contas nunca são excluídas, por causa da auditoria). Ninguém altera o próprio perfil, e a clínica nunca fica sem um administrador ativo. Nome, e-mail e senha só podem ser alterados quando a conta é usada **somente** nesta clínica e não é de superusuário: assim, uma clínica não consegue tomar o acesso de alguém às outras. "Configurações da clínica" ainda não tem tela (ver as pendências em [plano-fase-1.md](plano-fase-1.md)).
 
 ### Clínica
 | Entidade | Campos principais | Sistema antigo |
@@ -59,6 +59,7 @@ Os módulos "Usuários da clínica" e "Configurações da clínica" já existem 
 |---|---|
 | Releases | Lidas do arquivo `releases.yaml` (não ficam no banco). Veja [versionamento-e-releases.md](versionamento-e-releases.md) |
 | `RegistroAuditoria` | Quem criou, alterou ou excluiu o quê e quando (LGPD) |
+| `Backup` | Cada backup diário enviado ao Cloud Storage, registrado pelo servidor. Se o último tiver mais de 26 horas, os superusuários veem um aviso no topo das telas |
 
 ## Agenda
 - `Agendamento` guarda início e fim como data e hora com fuso. Os agendamentos de uma mesma repetição semanal compartilham o campo `serie`.
@@ -70,7 +71,7 @@ Os módulos "Usuários da clínica" e "Configurações da clínica" já existem 
 - Registrado automaticamente (sinais do Django): criar, alterar e excluir Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo e Usuário. Também: abrir a ficha de um paciente, entrar, sair e tentativas de entrada recusadas.
 - **Nunca** grava senhas nem o hash delas (a troca de senha aparece só como "alterada").
 - Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura).
-- Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
+- Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Alterações em contas de usuário (que não pertencem a uma clínica) ficam registradas na clínica em que foram feitas. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
 
 ## Documentos e formatos
 - CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`).

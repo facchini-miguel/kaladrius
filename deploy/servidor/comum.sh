@@ -27,6 +27,8 @@ extrair_arquivos_de_deploy() {
   docker run --rm --entrypoint sh "$IMAGEM_APP" -c 'tar -C /app/deploy -cf - .' | tar -C "$tmp" -xf -
   mkdir -p "$DIR/release" "$DIR/bin"
   cp -r "$tmp"/. "$DIR/release/"
+  # Compose reads the ${VAR} values of docker-compose.prod.yml from .env beside it.
+  ln -sfn ../.env "$DIR/release/.env"
   # Replace the scripts atomically (mv), so a running script is never overwritten in place.
   for script in comum.sh atualizar.sh backup.sh instalar.sh; do
     cp "$tmp/servidor/$script" "$DIR/bin/$script.novo"
@@ -34,4 +36,11 @@ extrair_arquivos_de_deploy() {
     mv -f "$DIR/bin/$script.novo" "$DIR/bin/$script"
   done
   rm -r "$tmp"
+}
+
+# Install (or update) the systemd units shipped with the deploy files.
+instalar_agendamentos() {
+  cp "$DIR"/release/servidor/*.service "$DIR"/release/servidor/*.timer /etc/systemd/system/
+  systemctl daemon-reload
+  systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer
 }

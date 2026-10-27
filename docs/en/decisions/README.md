@@ -13,7 +13,7 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 005 | 2026-10-26 | **PostgreSQL 16** database in Docker | — | Accepted |
 | 006 | 2026-10-26 | Everything in **Docker Compose on a Compute Engine VM**; no Cloud Run or Cloud SQL | Same environment locally and in production, no managed-service lock-in. Free tier (e2-micro) for testing | Accepted (production part superseded by 020) |
 | 007 | 2026-10-26 | PHP and .NET ruled out | Owner's preference | Accepted |
-| 008 | 2026-10-26 | **No migration of legacy data**; use fake test data | The old system is no longer in use | Accepted |
+| 008 | 2026-10-26 | **No migration of legacy data**; use fake test data | The old system is no longer in use | Superseded by 039 |
 | 009 | 2026-10-26 | **Generic** system ("Practitioner" instead of "Dentist") | Serve any kind of clinic | Accepted |
 | 010 | 2026-10-26 | Two **private** repositories: `medical-system` and `medical-system-app` | Independent life cycles and licenses | Accepted |
 | 011 | 2026-10-26 | **Proprietary** license (all rights reserved), owned by Miguel Facchini (individual) | Keeps all future options open (AGPL, MIT, commercial) | Accepted |
@@ -44,3 +44,8 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 036 | 2026-10-26 | Images in Artifact Registry, updates pulled by the VM every 5 min; CI authenticated with Workload Identity Federation | GitHub/GHCR have no IPv6; no stored keys | Accepted |
 | 037 | 2026-10-26 | HTTPS by Caddy with Let's Encrypt and an sslip.io name | Valid certificate without buying a domain | Accepted (sslip.io became the fallback address with 038) |
 | 038 | 2026-10-26 | Free domain `medical-system.duckdns.org` (AAAA only) and the VM's IPv6 reserved as static | Friendly name at no cost; the address never changes | Accepted (owner) |
+| 039 | 2026-10-27 | **Import the legacy system data** (patients, schedule, recalls) with the `importar_legado` command, reading the MySQL dump directly; anything without a field of its own goes to the notes; users are not imported. In production, only after a new confirmation | Owner's request; nothing is lost and no MySQL server is needed | Accepted (owner) |
+| 040 | 2026-10-27 | Team screen with **fixed roles** (front desk, practitioner, administrator), no configurable groups. The clinic administrator only changes name, e-mail and password of accounts used solely in their clinic | Reuses the existing, tested matrix; configurable groups can come later. The restriction stops one clinic from taking over someone's access to the others | Accepted (owner asked for the screen; fixed roles by default) |
+| 041 | 2026-10-27 | Login attempt limiting counts the **/48 network** for IPv6 (and the address for IPv4) | On an IPv6-only server, counting per address let an attacker switch addresses at will | Accepted |
+| 042 | 2026-10-27 | No password recovery by e-mail; changed by the user (menu with their name) or by the clinic administrator | The server sends no e-mail; the recovery pages would never deliver anything | Accepted |
+| 043 | 2026-10-27 | Backups retried automatically (systemd) and a web warning for superusers when the newest is older than 26 hours | Cloud Monitoring alerts are paid and the server sends no e-mail | Accepted |

@@ -11,6 +11,8 @@ depois=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP")
 
 if [ "$antes" != "$depois" ] || [ "${1:-}" = "--forcar" ]; then
   extrair_arquivos_de_deploy
+  source "$DIR/bin/comum.sh"  # the helpers may have changed with the new image
+  instalar_agendamentos
   if [ ! -f "$DIR/.env" ]; then
     echo "Sem $DIR/.env: configure o servidor antes de subir o sistema."
     exit 0

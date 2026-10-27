@@ -23,6 +23,45 @@ def test_bloqueia_apos_5_senhas_erradas(client, criar_usuario):
     assert tentar(client, "senha-de-teste-123").status_code == 429
 
 
+def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario):
+    criar_usuario("maria")
+    for final in range(1, 5):
+        resposta = client.post(
+            reverse("login"),
+            {"username": "maria", "password": "errada"},
+            REMOTE_ADDR=f"2001:db8:1:{final}::{final}",
+        )
+        assert resposta.status_code == 200
+    resposta = client.post(
+        reverse("login"),
+        {"username": "maria", "password": "errada"},
+        REMOTE_ADDR="2001:db8:1:ffff::9",
+    )
+    assert resposta.status_code == 429
+    # Another /48 network is not affected.
+    resposta = client.post(
+        reverse("login"),
+        {"username": "maria", "password": "senha-de-teste-123"},
+        REMOTE_ADDR="2001:db8:2::1",
+    )
+    assert resposta.status_code == 302
+
+
+@pytest.mark.parametrize(
+    ("endereco", "esperado"),
+    [
+        ("203.0.113.7", "203.0.113.7"),
+        ("2001:db8:abcd:12:34::1", "2001:db8:abcd::"),
+        ("::ffff:203.0.113.7", "203.0.113.7"),
+        ("", None),
+    ],
+)
+def test_ip_para_bloqueio(rf, endereco, esperado):
+    from apps.core.seguranca import ip_para_bloqueio
+
+    assert ip_para_bloqueio(rf.get("/", REMOTE_ADDR=endereco)) == esperado
+
+
 def test_login_certo_zera_o_contador(client, criar_usuario):
     criar_usuario("maria")
     for _ in range(4):

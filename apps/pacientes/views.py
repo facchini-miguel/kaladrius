@@ -25,7 +25,7 @@ def filtrar(pacientes, busca, tipo, situacao):
         documento = normalizar_cnpj(busca)
         if len(documento) >= 3 and not any(c.isspace() for c in busca.strip()):
             filtro |= Q(cpf_cnpj__startswith=documento)
-        if busca.isdigit() and len(busca) <= 9:
+        if busca.isdecimal() and len(busca) <= 9:
             filtro |= Q(pk=int(busca))
         pacientes = pacientes.filter(filtro)
     if tipo in Paciente.Tipo.values:
@@ -130,7 +130,7 @@ MESES = [
 def aniversariantes(request):
     hoje = timezone.localdate()
     mes = request.GET.get("mes", "")
-    mes = int(mes) if mes.isdigit() and 1 <= int(mes) <= 12 else hoje.month
+    mes = int(mes) if mes.isdecimal() and 1 <= int(mes) <= 12 else hoje.month
     pacientes = Paciente.objects.filter(ativo=True, data_nascimento__month=mes).order_by(
         "data_nascimento__day", "nome"
     )

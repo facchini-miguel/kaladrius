@@ -35,7 +35,5 @@ fi
 source /dev/stdin <<<"$(docker run --rm --entrypoint cat "$IMAGEM_APP" /app/deploy/servidor/comum.sh)"
 extrair_arquivos_de_deploy
 
-cp "$DIR"/release/servidor/*.service "$DIR"/release/servidor/*.timer /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer
+instalar_agendamentos
 "$DIR/bin/atualizar.sh" --forcar

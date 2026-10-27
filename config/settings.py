@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "apps.pacientes",
     "apps.rechamadas",
     "apps.auditoria",
+    "apps.equipe",
+    "apps.legado",
     "axes",
 ]
 
@@ -84,6 +86,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.novidades.context_processors.versao",
                 "apps.core.context_processors.clinica",
+                "apps.core.context_processors.backup",
             ],
         },
     },
@@ -111,11 +114,14 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-# Brute-force protection: 5 wrong passwords for the same user from the same IP
-# locks that combination for 1 hour. A successful login resets the counter.
+# Brute-force protection: 5 wrong passwords for the same user from the same IP (for IPv6,
+# the same /48 network) lock that combination for 1 hour. A successful login resets the
+# counter.
 AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = 1  # hours
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+# IPv6 clients are grouped by /48 network, so rotating addresses does not reset the count.
+AXES_CLIENT_IP_CALLABLE = "apps.core.seguranca.ip_para_bloqueio"
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = "registration/bloqueado.html"
 

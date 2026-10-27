@@ -67,5 +67,10 @@ jobs:
       - name: Build e publicação da imagem
         run: |
           VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          docker build -t "$IMAGEM:latest" -t "$IMAGEM:$VERSAO" -t "$IMAGEM:${GITHUB_SHA::12}" .
+          TAGS=(-t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}")
+          # The version tag points to the first image of that version and is never moved.
+          if ! docker manifest inspect "$IMAGEM:$VERSAO" >/dev/null 2>&1; then
+            TAGS+=(-t "$IMAGEM:$VERSAO")
+          fi
+          docker build "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"

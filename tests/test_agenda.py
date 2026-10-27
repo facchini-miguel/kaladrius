@@ -317,3 +317,15 @@ def test_filtro_da_clinica_e_decidido_na_execucao(clinica_a):
         list(consulta)
     with usar_clinica(clinica_a):
         assert list(consulta) == []
+
+
+def test_periodo_com_e_sem_fuso_misturados(cenario):
+    resposta = cenario["cliente"].get(
+        reverse("agenda:eventos"),
+        {
+            "start": "2031-03-03T00:00:00",
+            "end": "2031-03-10T00:00:00-03:00",
+            "profissional": cenario["ana"].pk,
+        },
+    )
+    assert resposta.status_code == 200

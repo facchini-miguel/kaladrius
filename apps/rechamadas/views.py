@@ -67,7 +67,7 @@ def lista(request):
 @exige_permissao(Modulo.RECHAMADAS, Acao.CRIAR)
 def novo(request):
     inicial = {"data": request.GET.get("data") or ""}
-    if request.GET.get("paciente", "").isdigit():
+    if request.GET.get("paciente", "").isdecimal():
         inicial["paciente"] = request.GET["paciente"]
     return _formulario(request, Rechamada(criado_por=request.user), inicial)
 
@@ -87,7 +87,10 @@ def _formulario(request, rechamada, inicial):
         return _voltar(request)
     paciente = rechamada.paciente if rechamada.paciente_id else form["paciente"].value()
     if paciente and not hasattr(paciente, "nome"):
-        paciente = form.fields["paciente"].queryset.filter(pk=paciente).first()
+        # Raw value from the hidden field: may be anything when the request is tampered with.
+        codigo = str(paciente)
+        consulta = form.fields["paciente"].queryset
+        paciente = consulta.filter(pk=int(codigo)).first() if codigo.isdecimal() else None
     return render(
         request,
         "rechamadas/form.html",

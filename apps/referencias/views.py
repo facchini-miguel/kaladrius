@@ -17,7 +17,7 @@ def cidades(request):
     uf = request.GET.get("uf", "")
     busca = request.GET.get("q", "").strip()
     cidades = Cidade.objects.select_related("uf")
-    if uf.isdigit():
+    if uf.isdecimal():
         cidades = cidades.filter(uf_id=int(uf))
     if busca:
         cidades = cidades.filter(nome__unaccent__icontains=busca)
@@ -41,7 +41,7 @@ def bancos(request):
     bancos = Banco.objects.all()
     if busca:
         filtro = Q(nome__unaccent__icontains=busca) | Q(nome_curto__unaccent__icontains=busca)
-        if busca.isdigit():
+        if busca.isdecimal():
             filtro |= Q(codigo=int(busca))
         bancos = bancos.filter(filtro)
     pagina = Paginator(bancos, POR_PAGINA).get_page(request.GET.get("pagina"))
@@ -53,5 +53,5 @@ def bancos(request):
 def opcoes_cidades(request):
     """<option> list of a state's cities, for chained UF → city selects (HTMX)."""
     uf = request.GET.get("uf", "")
-    cidades = Cidade.objects.filter(uf_id=int(uf)) if uf.isdigit() else Cidade.objects.none()
+    cidades = Cidade.objects.filter(uf_id=int(uf)) if uf.isdecimal() else Cidade.objects.none()
     return render(request, "referencias/opcoes_cidades.html", {"cidades": cidades})

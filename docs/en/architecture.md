@@ -49,7 +49,7 @@ Rule: **no GPL/AGPL dependencies**, to keep the project's license choice open.
 | `app` | Image built on the machine, code mounted as a volume, Django's development server (reloads on save) | Artifact Registry image with Gunicorn, reachable only on `127.0.0.1:8000` |
 | `caddy` | — | caddy:2-alpine on the host network: automatic HTTPS (Let's Encrypt) and proxy to the app |
 
-In both cases the app runs the migrations on startup and reads its configuration from `.env`. Backup is not a Compose service: a systemd timer on the VM runs `deploy/servidor/backup.sh` daily (`pg_dump` → Cloud Storage). Details in [deploy.md](deploy.md).
+In production only the app receives the whole `.env`; the database gets just the Postgres variables and Caddy just the site name. The project names differ (`medical-system-dev` locally, `medical-system` on the VM), so the two never share containers or volumes on the same machine. In both cases the app runs the migrations on startup and reads its configuration from `.env`. Backup is not a Compose service: a systemd timer on the VM runs `deploy/servidor/backup.sh` daily (`pg_dump` → Cloud Storage). Details in [deploy.md](deploy.md).
 
 ## Infrastructure
 
@@ -69,10 +69,11 @@ Rule: **Google Cloud free tier resources only** (decision 020).
 
 ## Security (requirements)
 - Django's built-in protections enabled (CSRF, XSS escaping, parameterized ORM, security headers). `manage.py check --deploy` with no warnings.
-- Argon2 password hashing and login attempt limiting (django-axes: 5 failures per user + IP lock for 1 hour).
+- Argon2 password hashing and login attempt limiting (django-axes: 5 failures per user + IP lock for 1 hour). For IPv6 the /48 network counts, not the address, since switching addresses inside one's own network is trivial (decision 041).
+- No password recovery by e-mail (the server sends no e-mail): each person changes their own password in the menu with their name, and the clinic administrator sets a new one in Records > Team (decision 042).
 - Audit log of changes, patient record views and logins (`apps/auditoria`).
 - Behind Caddy, the real client IP comes from `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), used by django-axes and the audit log.
 - **Per-clinic isolation** in every query, with automated tests that try to access another clinic's data.
 - Secrets only in `.env` (outside Git) and in GitHub *Secrets*. Push protection enabled.
 - Postgres port not exposed. VM firewall: only TCP 80/443 and UDP 443 (HTTP/3) from the internet; SSH only through Google's IAP tunnel.
-- LGPD (Brazilian data protection law): access and change logging (audit), backups in a private bucket, encrypted at rest by Google (no encryption of our own) and deleted after 30 days. Data is hosted in the US (free tier requirement). Before real use with patients, review international data transfer rules (LGPD, art. 33) or move to a Brazilian region.
+- LGPD (Brazilian data protection law): access and change logging (audit), backups in a private bucket, encrypted at rest by Google (no encryption of our own) and deleted after 30 days. If a backup fails the server retries; if the newest one is older than 26 hours, superusers see a warning in the web app (decision 043). Data is hosted in the US (free tier requirement). Before real use with patients, review international data transfer rules (LGPD, art. 33) or move to a Brazilian region.

@@ -1,11 +1,16 @@
 # Production stack on the Compute Engine VM. Managed by deploy/servidor/atualizar.sh.
+# ${VAR} values come from /opt/medical-system/.env (linked as .env next to this file).
+# Only the app receives the whole file; the other services get just what they need.
 name: medical-system
 
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file: ../.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
     # Sized for the e2-micro (1 GB RAM).
     command: postgres -c shared_buffers=64MB -c max_connections=30 -c work_mem=4MB
     volumes:
@@ -30,7 +35,8 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
-    env_file: ../.env
+    environment:
+      SITE_HOSTNAME: ${SITE_HOSTNAME:?}
     # Host network: listens on the VM's public IPv6 and sees the real client IP.
     network_mode: host
     volumes:

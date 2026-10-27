@@ -9,11 +9,17 @@ old_data
 venv
 .pytest_cache
 .ruff_cache
+.coverage
+htmlcov
 staticfiles
 media
-*.sql
-*.csv
-*.pdf
-*.rar
-*.zip
-*.7z
+# Real data never goes into an image (LGPD), at any folder depth.
+backups
+**/*.sql
+**/*.sql.gz
+**/*.dump
+**/*.csv
+**/*.pdf
+**/*.rar
+**/*.zip
+**/*.7z

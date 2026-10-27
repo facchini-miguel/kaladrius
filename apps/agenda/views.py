@@ -79,8 +79,11 @@ def _periodo(request):
         fim = datetime.datetime.fromisoformat(request.GET["end"])
     except (KeyError, ValueError):
         return None
-    if timezone.is_naive(inicio):
-        inicio, fim = timezone.make_aware(inicio), timezone.make_aware(fim)
+    # Each bound may come with or without a UTC offset; naive ones are local time.
+    inicio, fim = (
+        timezone.make_aware(momento) if timezone.is_naive(momento) else momento
+        for momento in (inicio, fim)
+    )
     if fim <= inicio or fim - inicio > datetime.timedelta(days=62):
         return None
     return inicio, fim
@@ -130,7 +133,7 @@ def calendario(request):
 def eventos(request):
     periodo = _periodo(request)
     profissional = request.GET.get("profissional", "")
-    if periodo is None or not profissional.isdigit():
+    if periodo is None or not profissional.isdecimal():
         return JsonResponse({"erro": "Parâmetros inválidos."}, status=400)
     inicio, fim = periodo
     agendamentos = Agendamento.objects.filter(

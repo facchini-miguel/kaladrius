@@ -42,7 +42,7 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 | Clinic settings | all | — | — |
 | Audit | view | — | — |
 
-The "Clinic users" and "Clinic settings" modules are already in the matrix but have no screen yet: for now the superuser handles them in the Django admin (see the open items in [phase-1-plan.md](phase-1-plan.md)).
+The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the administrator creates accounts already linked to the clinic, changes roles, sets passwords and removes access (the membership becomes inactive; accounts are never deleted, because of the audit log). Nobody changes their own role, and the clinic never ends up without an active administrator. Name, e-mail and password can only be changed when the account is used **only** in this clinic and is not a superuser: this way a clinic cannot take over someone's access to other clinics. "Clinic settings" has no screen yet (see the open items in [phase-1-plan.md](phase-1-plan.md)).
 
 ### Clinic
 | Entity | Main fields | Legacy table |
@@ -61,6 +61,7 @@ The "Clinic users" and "Clinic settings" modules are already in the matrix but h
 |---|---|
 | Releases | Read from `releases.yaml` (not stored in the database). See [versioning-and-releases.md](versioning-and-releases.md) |
 | `RegistroAuditoria` (audit log) | Who created, changed or deleted what and when (LGPD) |
+| `Backup` | Each daily backup sent to Cloud Storage, recorded by the server. If the newest is older than 26 hours, superusers see a warning at the top of every screen |
 
 ## Schedule
 - `Agendamento` stores start and end as timezone-aware datetimes. Appointments of the same weekly recurrence share the `serie` field.
@@ -72,7 +73,7 @@ The "Clinic users" and "Clinic settings" modules are already in the matrix but h
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin).
-- **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Logins do not belong to a clinic and are shown only to superusers, in the admin.
+- **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
 
 ## Documents and formats
 - CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).

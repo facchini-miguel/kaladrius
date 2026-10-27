@@ -1,6 +1,8 @@
 # Local development environment.
 # Usage: docker compose up --build   →   http://localhost:8000
-name: medical-system
+# Fixed name (the folder name has a space), different from production's "medical-system"
+# so the two stacks never share containers or volumes on the same machine.
+name: medical-system-dev
 services:
   db:
     image: postgres:16-alpine

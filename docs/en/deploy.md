@@ -41,8 +41,9 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 
 ## How the server works
 - `deploy/servidor/instalar.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
-- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it changed, extracts the `deploy/` files from the image and restarts the containers. Migrations run when the app starts.
-- `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage.
+- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it changed, extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. Migrations run when the app starts.
+- `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system. If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
+- The production compose file reads its `${...}` variables from `.env`, linked next to it (`/opt/medical-system/release/.env` → `../.env`). Only the app receives the whole file.
 - Settings and passwords: `/opt/medical-system/.env` (root only). Local copy in `.env.producao`, ignored by Git.
 - No stored keys: the VM and CI use short-lived Google tokens.
 
@@ -66,6 +67,29 @@ sudo /opt/medical-system/bin/backup.sh
 gcloud storage ls -l gs://medical-system-facchini-backups/
 ```
 
+### Rolling back to a previous version
+The normal way is to revert the commit (`git revert`) and push to `main`: CI publishes a new image and the VM installs it within 5 minutes. In an emergency, an old image can be pinned on the VM (each version has an `X.Y.Z` tag that never moves, and each commit a tag with the first 12 characters of its SHA):
+
+```bash
+sudo systemctl stop medical-system-atualizar.timer   # otherwise the VM goes back to latest in 5 min
+cd /opt/medical-system/release
+sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/medical-system/app:0.7.0 \
+  docker compose -f docker-compose.prod.yml up -d app
+# After fixing and publishing: sudo systemctl start medical-system-atualizar.timer
+```
+Migrations are not undone: an old version only works if the new migrations are compatible with it (only adding tables and fields, for example).
+
+### Importing the legacy system data
+Only after the owner's confirmation (LGPD: the data is stored in the US, and backups will then hold real data too). See [legacy-system.md](legacy-system.md).
+
+```bash
+# On your machine: the dump goes through the IAP tunnel straight into the command, never stored on the VM
+gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clinic name"' \
+  < ~/medical-system-old_data/backup_20191106/facchini07_20191106.sql
+```
+Then link the clinic administrator in the Django admin (Memberships) and create the team in Records > Team.
+
 ### Restoring a backup
 ```bash
 # On the VM (replaces the current database!)
@@ -77,4 +101,4 @@ sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --cl
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).
 - The **standard** disk is the free one; the console suggests "balanced", which is billed.
-- The server currently holds **fake** data (`popular_dados_teste --forcar`).
+- The server currently holds **fake** data (`popular_dados_teste --forcar`). Before importing real data, review the test users (they all share one password, `DJANGO_SEED_PASSWORD`).

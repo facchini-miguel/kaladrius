@@ -92,7 +92,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         uf_id = self.data.get(self.add_prefix("uf")) if self.is_bound else self.instance.uf_id
         self.fields["cidade"].queryset = (
             Cidade.objects.filter(uf_id=int(uf_id))
-            if str(uf_id or "").isdigit()
+            if str(uf_id or "").isdecimal()
             else Cidade.objects.none()
         )
 

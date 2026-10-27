@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 class FormularioBootstrap:
@@ -25,3 +26,7 @@ class FormularioBootstrap:
             if nome in self.fields:
                 widget = self.fields[nome].widget
                 widget.attrs["class"] = f"{widget.attrs.get('class', '')} is-invalid".strip()
+
+
+class TrocaSenhaForm(FormularioBootstrap, PasswordChangeForm):
+    """The user's own password change, with Bootstrap styling."""

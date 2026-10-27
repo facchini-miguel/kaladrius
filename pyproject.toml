@@ -1,6 +1,6 @@
 [project]
 name = "medical-system"
-version = "0.7.0"
+version = "0.8.0"
 description = "Clinic management system"
 requires-python = ">=3.13"
 license = { file = "LICENSE" }
@@ -15,7 +15,7 @@ select = ["E", "F", "W", "I", "B", "UP", "DJ", "S"]
 ignore = ["S101"]  # assert is allowed in tests
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S105", "S106"]  # hard-coded passwords are fine in tests
+"tests/*" = ["S105", "S106", "S608"]  # hard-coded passwords and SQL text in tests
 
 [tool.coverage.run]
 source = ["apps", "config"]
