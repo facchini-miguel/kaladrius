@@ -10,10 +10,11 @@
   itens:
     - tipo: seguranca
       modulo: Pacientes
-      publico: []
+      publico: [equipe]
       texto: >
-        Comando para anonimizar os dados de uma clínica (pacientes, descrições da agenda e das
-        rechamadas, profissionais), permitindo usar dados importados como dados de teste.
+        Os dados de uma clínica podem ser anonimizados pelo suporte: nomes, documentos,
+        contatos e endereços dos pacientes são trocados por dados fictícios, de forma
+        definitiva, para que possam ser usados em testes.
 
 - versao: 0.10.0
   data: 2026-10-27
