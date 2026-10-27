@@ -84,7 +84,7 @@ The parity review against the legacy system (see [legacy-system.md](legacy-syste
 | Item | Status |
 |---|---|
 | Team management screen for the clinic administrator | ✅ 0.8.0: **Records > Team**, with fixed roles (decision 040) |
-| Import real data from the legacy system | ✅ 0.8.0: `importar_legado` command (decision 039), already tested locally. Imported in production on 2026-10-27 (Clínica Sorriso) |
+| Import real data from the legacy system | ✅ 0.8.0: `importar_legado` command (decision 039), already tested locally. Imported in production on 2026-10-27 (Clínica Sorriso) and anonymized the same day, for use as test data (decision 047) |
 | Clinic settings screen (schedule hours and slot length) | ✅ 0.10.0: **Records > Clinic settings** |
 | Permission matrix review (`apps/core/permissoes.py`) | Practitioners limited to their own schedule (decision 044). The rest of the matrix stays as is |
 | Browser test of the schedule and recalls | With the owner |
