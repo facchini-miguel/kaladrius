@@ -17,6 +17,7 @@ from apps.financeiro.models import (
     Pagamento,
     Parcela,
 )
+from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -56,6 +57,9 @@ class Command(BaseCommand):
             pacientes = Paciente.objects.filter(clinica__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first.
             for modelo in (
+                ItemOrcamento,
+                Orcamento,
+                Procedimento,
                 MovimentoCaixa,
                 Caixa,
                 Pagamento,

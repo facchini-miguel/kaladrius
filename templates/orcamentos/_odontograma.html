@@ -1,0 +1,16 @@
+{% load i18n %}{% comment %}Dental chart (FDI). Expects permanentes, deciduos, selecionados and interativo.{% endcomment %}
+<div class="odontograma{% if interativo %} odontograma-interativo{% endif %}" role="group" aria-label="{% translate 'Odontograma' %}">
+  {% for linha in permanentes %}
+  {% if forloop.last %}
+  {% for decidua in deciduos %}
+  <div class="odontograma-linha deciduos">
+    {% for dente in decidua %}<button type="button" class="dente{% if dente in selecionados %} selecionado{% endif %}{% if forloop.counter == 5 %} meio{% endif %}" data-dente="{{ dente }}" aria-pressed="{% if dente in selecionados %}true{% else %}false{% endif %}"{% if not interativo %} disabled{% endif %}>{{ dente }}</button>{% endfor %}
+  </div>
+  {% endfor %}
+  {% endif %}
+  <div class="odontograma-linha">
+    {% for dente in linha %}<button type="button" class="dente{% if dente in selecionados %} selecionado{% endif %}{% if forloop.counter == 8 %} meio{% endif %}" data-dente="{{ dente }}" aria-pressed="{% if dente in selecionados %}true{% else %}false{% endif %}"{% if not interativo %} disabled{% endif %}>{{ dente }}</button>{% endfor %}
+  </div>
+  {% endfor %}
+  <div class="small text-body-secondary mt-1">{% translate "Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas do meio. Direita do paciente à esquerda." %}</div>
+</div>

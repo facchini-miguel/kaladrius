@@ -17,6 +17,7 @@ from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.validadores import normalizar_cnpj
 from apps.financeiro.models import Lancamento, Pagamento, Parcela
 from apps.financeiro.servicos import resumo_do_paciente
+from apps.orcamentos.models import ItemOrcamento, Orcamento
 from apps.rechamadas.models import Rechamada
 
 from .forms import PacienteForm
@@ -93,6 +94,10 @@ def ficha(request, pk):
         contexto["agendamentos"] = _historico(request, paciente)
     if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
         contexto["financeiro"] = resumo_do_paciente(paciente)
+    if pode(request, Modulo.ORCAMENTOS, Acao.VER):
+        contexto["orcamentos"] = list(
+            Orcamento.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
+        )
     return render(request, "pacientes/ficha.html", contexto)
 
 
@@ -188,7 +193,13 @@ def excluir(request, pk):
         ids_pagamentos = list(
             Pagamento.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)
         )
+        orcamentos = Orcamento.objects.filter(paciente=paciente)
+        ids_orcamentos = list(orcamentos.values_list("pk", flat=True))
+        ids_itens = list(
+            ItemOrcamento.objects.filter(orcamento__in=ids_orcamentos).values_list("pk", flat=True)
+        )
         with transaction.atomic():
+            orcamentos.delete()  # items go with them (cascade)
             agendamentos.update(paciente=None)
             # Stored in Portuguese, like the rest of the data.
             lancamentos.update(paciente=None, pessoa=f"Paciente excluído (código {codigo})")
@@ -200,6 +211,8 @@ def excluir(request, pk):
             anonimizar(Lancamento, ids_lancamentos)
             anonimizar(Parcela, ids_parcelas)
             anonimizar(Pagamento, ids_pagamentos)
+            anonimizar(Orcamento, ids_orcamentos)
+            anonimizar(ItemOrcamento, ids_itens)
             registrar(
                 RegistroAuditoria.Acao.EXCLUIR,
                 descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",

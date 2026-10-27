@@ -22,15 +22,20 @@
           {% if pode.agenda.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'agenda:calendario' %}">{% translate "Agenda" %}</a></li>
           {% endif %}
-          {% if pode.pacientes.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:lista' %}">{% translate "Pacientes" %}</a></li>
+          {% if pode.pacientes.ver or pode.orcamentos.ver or pode.aniversariantes.ver %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Pacientes" %}</a>
+            <ul class="dropdown-menu">
+              {% if pode.pacientes.ver %}<li><a class="dropdown-item" href="{% url 'pacientes:lista' %}">{% translate "Lista de pacientes" %}</a></li>{% endif %}
+              {% if pode.orcamentos.ver %}<li><a class="dropdown-item" href="{% url 'orcamentos:lista' %}">{% translate "Orçamentos" %}</a></li>{% endif %}
+              {% if pode.aniversariantes.ver %}<li><a class="dropdown-item" href="{% url 'pacientes:aniversariantes' %}">{% translate "Aniversariantes" %}</a></li>{% endif %}
+            </ul>
+          </li>
           {% endif %}
           {% if pode.rechamadas.ver %}
           <li class="nav-item"><a class="nav-link" href="{% url 'rechamadas:lista' %}">{% translate "Rechamadas" %}</a></li>
           {% endif %}
-          {% if pode.aniversariantes.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'pacientes:aniversariantes' %}">{% translate "Aniversariantes" %}</a></li>
-          {% endif %}
+
           {% if pode.recebimentos.ver or pode.financeiro.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}</a>
@@ -68,6 +73,7 @@
               {% endif %}
               {% if pode.cadastros.ver %}
               <li><a class="dropdown-item" href="{% url 'agenda:tipos' %}">{% translate "Tipos de atendimento" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'orcamentos:procedimentos' %}">{% translate "Tabela de procedimentos" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Tabelas de referência" %}</h6></li>
               <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">{% translate "Cidades" %}</a></li>

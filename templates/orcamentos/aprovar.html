@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Aprovar orçamento" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% translate "Aprovar orçamento" %}</h1>
+<p class="text-body-secondary mb-4">{% blocktranslate with numero=orcamento.pk nome=orcamento.paciente.nome total=orcamento.total|moeda %}Orçamento nº {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
+<form method="post" style="max-width: 40rem;" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  <div class="row">
+    <div class="col-md-6">{% with campo=form.parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with campo=form.primeiro_vencimento %}{% include "includes/campo.html" %}{% endwith %}</div>
+  </div>
+  {% with campo=form.categoria %}{% include "includes/campo.html" %}{% endwith %}
+  <div class="card mb-3"><div class="card-body">
+    {% with campo=form.recebido_agora %}{% include "includes/campo.html" %}{% endwith %}
+    <div class="row">
+      <div class="col-md-6">{% with campo=form.forma %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.conta %}{% include "includes/campo.html" %}{% endwith %}</div>
+    </div>
+  </div></div>
+  <p class="text-body-secondary small">{% translate "O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não pode mais ser alterado." %}</p>
+  <button type="submit" class="btn btn-success">{% translate "Aprovar" %}</button>
+  <a class="btn btn-link" href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

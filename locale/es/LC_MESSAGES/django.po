@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 15:42-0300\n"
+"POT-Creation-Date: 2026-10-27 15:56-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: Español\n"
@@ -35,7 +35,9 @@ msgstr "Repetir durante cuántas semanas"
 
 msgid ""
 "1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
-msgstr "1 = solo en esta fecha. Ej.: 4 crea el mismo horario durante 4 semanas seguidas."
+msgstr ""
+"1 = solo en esta fecha. Ej.: 4 crea el mismo horario durante 4 semanas "
+"seguidas."
 
 msgid "Informe o paciente ou uma descrição."
 msgstr "Indique el paciente o una descripción."
@@ -121,7 +123,9 @@ msgstr "Tipo de atención %(nome)s guardado."
 msgid ""
 "%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
 "“ativo” para escondê-lo."
-msgstr "%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para ocultarlo."
+msgstr ""
+"%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
+"ocultarlo."
 
 #, python-format
 msgid "Tipo de atendimento %(nome)s excluído."
@@ -239,7 +243,9 @@ msgstr "El fin de la agenda debe ser posterior al inicio."
 msgid ""
 "O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
 "intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
-msgstr "La cita del %(momento)s quedaría fuera del nuevo horario o del nuevo intervalo. Ajuste las citas futuras antes de cambiar la agenda."
+msgstr ""
+"La cita del %(momento)s quedaría fuera del nuevo horario o del nuevo "
+"intervalo. Ajuste las citas futuras antes de cambiar la agenda."
 
 msgid "idioma"
 msgstr "idioma"
@@ -281,7 +287,8 @@ msgid "endereço"
 msgstr "dirección"
 
 msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
-msgstr "Calle, número, barrio, ciudad/estado y código postal, como sale en el recibo."
+msgstr ""
+"Calle, número, barrio, ciudad/estado y código postal, como sale en el recibo."
 
 msgid "ativa"
 msgstr "activa"
@@ -367,6 +374,9 @@ msgstr "Cobros"
 msgid "Financeiro"
 msgstr "Financiero"
 
+msgid "Orçamentos"
+msgstr "Presupuestos"
+
 msgid "Ver"
 msgstr "Ver"
 
@@ -422,7 +432,9 @@ msgstr "Datos de %(nome)s guardados."
 msgid ""
 "%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
 "ser trocada pelo próprio usuário ou pelo suporte."
-msgstr "%(nome)s también tiene acceso a otra clínica o a la plataforma: la contraseña solo puede cambiarla el propio usuario o el soporte."
+msgstr ""
+"%(nome)s también tiene acceso a otra clínica o a la plataforma: la "
+"contraseña solo puede cambiarla el propio usuario o el soporte."
 
 #, python-format
 msgid "Nova senha de %(nome)s definida."
@@ -435,7 +447,9 @@ msgid "Número de parcelas"
 msgstr "Número de cuotas"
 
 msgid "Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."
-msgstr "Cuotas mensuales del mismo valor. Las cuotas con tarjeta cuentan como 1 cuota aquí."
+msgstr ""
+"Cuotas mensuales del mismo valor. Las cuotas con tarjeta cuentan como 1 "
+"cuota aquí."
 
 msgid "Vencimento da 1ª parcela"
 msgstr "Vencimiento de la 1.ª cuota"
@@ -520,7 +534,9 @@ msgstr "Otra cuenta"
 
 msgid ""
 "Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."
-msgstr "Ej.: depósito en el Banco. Vacío: el dinero sale del sistema o viene de afuera."
+msgstr ""
+"Ej.: depósito en el Banco. Vacío: el dinero sale del sistema o viene de "
+"afuera."
 
 msgid "Observação"
 msgstr "Observación"
@@ -719,7 +735,8 @@ msgstr "otra cuenta"
 
 msgid ""
 "Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."
-msgstr "Adónde va el retiro o de dónde viene el refuerzo (vacío: fuera del sistema)."
+msgstr ""
+"Adónde va el retiro o de dónde viene el refuerzo (vacío: fuera del sistema)."
 
 msgid "motivo"
 msgstr "motivo"
@@ -739,7 +756,9 @@ msgstr "El valor descontado de la cuota debe ser mayor que cero."
 #, python-format
 msgid ""
 "O valor abatido (%(abatido)s) passa do que falta na parcela (%(saldo)s)."
-msgstr "El valor descontado (%(abatido)s) supera lo que falta de la cuota (%(saldo)s)."
+msgstr ""
+"El valor descontado (%(abatido)s) supera lo que falta de la cuota "
+"(%(saldo)s)."
 
 msgid ""
 "Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar."
@@ -866,6 +885,134 @@ msgstr "Permisos"
 msgid "Tipos de atendimento"
 msgstr "Tipos de atención"
 
+msgid "Já existe um procedimento com este nome."
+msgstr "Ya existe un procedimiento con este nombre."
+
+msgid "Escolha o paciente."
+msgstr "Elija el paciente."
+
+msgid "A validade não pode ser antes da data do orçamento."
+msgstr "La validez no puede ser anterior a la fecha del presupuesto."
+
+msgid "Valor unitário"
+msgstr "Valor unitario"
+
+msgid "Dente inválido."
+msgstr "Diente no válido."
+
+msgid "Escolha um procedimento ou descreva o item."
+msgstr "Elija un procedimiento o describa el ítem."
+
+msgid "Informe o valor."
+msgstr "Indique el valor."
+
+msgid "Desconto no total"
+msgstr "Descuento sobre el total"
+
+msgid "Categoria"
+msgstr "Categoría"
+
+msgid "Categoria de receita usada quando o orçamento é aprovado."
+msgstr "Categoría de ingreso usada cuando se aprueba el presupuesto."
+
+msgid "procedimento"
+msgstr "procedimiento"
+
+msgid "procedimentos"
+msgstr "procedimientos"
+
+msgid "Aprovado"
+msgstr "Aprobado"
+
+msgid "Recusado"
+msgstr "Rechazado"
+
+msgid "válido até"
+msgstr "válido hasta"
+
+msgid "situação"
+msgstr "situación"
+
+msgid "lançamento a receber"
+msgstr "cuenta por cobrar"
+
+msgid "aprovado ou recusado em"
+msgstr "aprobado o rechazado el"
+
+msgid "aprovado ou recusado por"
+msgstr "aprobado o rechazado por"
+
+msgid "orçamento"
+msgstr "presupuesto"
+
+msgid "orçamentos"
+msgstr "presupuestos"
+
+msgid "dentes"
+msgstr "dientes"
+
+msgid "faces ou região"
+msgstr "caras o región"
+
+msgid "Ex.: MOD, vestibular, arcada superior."
+msgstr "Ej.: MOD, vestibular, arcada superior."
+
+msgid "quantidade"
+msgstr "cantidad"
+
+msgid "valor unitário"
+msgstr "valor unitario"
+
+msgid "item do orçamento"
+msgstr "ítem del presupuesto"
+
+msgid "itens do orçamento"
+msgstr "ítems del presupuesto"
+
+msgid "Só um orçamento em aberto pode ser aprovado."
+msgstr "Solo un presupuesto abierto puede aprobarse."
+
+msgid "O orçamento não tem valor a receber."
+msgstr "El presupuesto no tiene valor por cobrar."
+
+#, python-format
+msgid "Orçamento nº %(numero)s"
+msgstr "Presupuesto n.º %(numero)s"
+
+msgid "Só um orçamento em aberto pode ser recusado."
+msgstr "Solo un presupuesto abierto puede rechazarse."
+
+msgid "Este orçamento já foi aprovado ou recusado."
+msgstr "Este presupuesto ya fue aprobado o rechazado."
+
+msgid "Orçamento criado. Agora inclua os procedimentos."
+msgstr "Presupuesto creado. Ahora agregue los procedimientos."
+
+msgid "Orçamento salvo."
+msgstr "Presupuesto guardado."
+
+msgid "Item incluído."
+msgstr "Ítem agregado."
+
+msgid "Item removido."
+msgstr "Ítem eliminado."
+
+msgid "O desconto passa do total do orçamento."
+msgstr "El descuento supera el total del presupuesto."
+
+msgid "Desconto aplicado."
+msgstr "Descuento aplicado."
+
+msgid "Orçamento aprovado e lançado em A receber."
+msgstr "Presupuesto aprobado y registrado en Por cobrar."
+
+msgid "Orçamento marcado como recusado."
+msgstr "Presupuesto marcado como rechazado."
+
+#, python-format
+msgid "Procedimento %(nome)s salvo."
+msgstr "Procedimiento %(nome)s guardado."
+
 msgid "UF"
 msgstr "Estado"
 
@@ -896,7 +1043,9 @@ msgstr "La fecha de nacimiento no puede estar en el futuro."
 msgid ""
 "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da clínica "
 "para restaurá-lo."
-msgstr "Este CPF/CNPJ es de un paciente archivado. Pida al administrador de la clínica que lo restaure."
+msgstr ""
+"Este CPF/CNPJ es de un paciente archivado. Pida al administrador de la "
+"clínica que lo restaure."
 
 msgid "Já existe um paciente com este CPF/CNPJ nesta clínica."
 msgstr "Ya existe un paciente con este CPF/CNPJ en esta clínica."
@@ -996,7 +1145,9 @@ msgstr "Paciente %(nome)s guardado."
 msgid ""
 "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
 "restaurado na lista de pacientes, em Situação: Arquivados."
-msgstr "Paciente %(nome)s archivado. El historial sigue guardado y puede restaurarse en la lista de pacientes, en Situación: Archivados."
+msgstr ""
+"Paciente %(nome)s archivado. El historial sigue guardado y puede restaurarse "
+"en la lista de pacientes, en Situación: Archivados."
 
 #, python-format
 msgid "Paciente %(nome)s restaurado."
@@ -1035,14 +1186,13 @@ msgstr "Profesional %(nome)s guardado."
 msgid ""
 "%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
 "para escondê-lo."
-msgstr "%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque “activo” para ocultarlo."
+msgstr ""
+"%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque "
+"“activo” para ocultarlo."
 
 #, python-format
 msgid "Profissional %(nome)s excluído."
 msgstr "Profesional %(nome)s eliminado."
-
-msgid "Escolha o paciente."
-msgstr "Elija el paciente."
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "Ej.: revisión de 6 meses."
@@ -1117,7 +1267,9 @@ msgstr "Acceso denegado"
 msgid ""
 "Você não tem permissão para acessar esta página. Se precisar desse acesso, "
 "fale com o administrador da clínica."
-msgstr "No tiene permiso para acceder a esta página. Si necesita este acceso, hable con el administrador de la clínica."
+msgstr ""
+"No tiene permiso para acceder a esta página. Si necesita este acceso, hable "
+"con el administrador de la clínica."
 
 msgid "Voltar ao início"
 msgstr "Volver al inicio"
@@ -1171,7 +1323,8 @@ msgid "Novo agendamento"
 msgstr "Nueva cita"
 
 msgid "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)."
-msgstr "Opcional. Sin paciente, use la descripción (ej.: “Reunión”, “Bloqueado”)."
+msgstr ""
+"Opcional. Sin paciente, use la descripción (ej.: “Reunión”, “Bloqueado”)."
 
 msgid "Cancelar"
 msgstr "Cancelar"
@@ -1186,7 +1339,10 @@ msgid ""
 "Seu usuário ainda não está ligado a um cadastro de profissional ativo, então "
 "não há agenda para mostrar. Peça ao administrador da clínica para ligá-lo em "
 "Cadastros > Profissionais."
-msgstr "Su usuario aún no está vinculado a un registro de profesional activo, así que no hay agenda para mostrar. Pida al administrador de la clínica que lo vincule en Registros > Profesionales."
+msgstr ""
+"Su usuario aún no está vinculado a un registro de profesional activo, así "
+"que no hay agenda para mostrar. Pida al administrador de la clínica que lo "
+"vincule en Registros > Profesionales."
 
 msgid "Nenhum profissional ativo nesta clínica."
 msgstr "Ningún profesional activo en esta clínica."
@@ -1213,7 +1369,9 @@ msgstr "¿Eliminar %(nome)s?"
 msgid ""
 "Esta ação não pode ser desfeita. Se quiser apenas esconder o tipo, edite e "
 "desmarque “ativo”."
-msgstr "Esta acción no se puede deshacer. Si solo quiere ocultar el tipo, edítelo y desmarque “activo”."
+msgstr ""
+"Esta acción no se puede deshacer. Si solo quiere ocultar el tipo, edítelo y "
+"desmarque “activo”."
 
 msgid "Editar tipo de atendimento"
 msgstr "Editar tipo de atención"
@@ -1264,7 +1422,9 @@ msgstr "Documentación técnica"
 msgid ""
 "Documentação técnica: visível só para o superusuário, porque descreve a "
 "infraestrutura do servidor."
-msgstr "Documentación técnica: visible solo para el superusuario, porque describe la infraestructura del servidor."
+msgstr ""
+"Documentación técnica: visible solo para el superusuario, porque describe la "
+"infraestructura del servidor."
 
 msgid "Índice"
 msgstr "Índice"
@@ -1272,7 +1432,9 @@ msgstr "Índice"
 msgid ""
 "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros "
 "não podem ser alterados."
-msgstr "Quién creó, modificó, eliminó o consultó datos de esta clínica. Los registros no se pueden modificar."
+msgstr ""
+"Quién creó, modificó, eliminó o consultó datos de esta clínica. Los "
+"registros no se pueden modificar."
 
 msgid "Usuário, registro ou código"
 msgstr "Usuario, registro o código"
@@ -1331,6 +1493,9 @@ msgstr "Abrir menú"
 msgid "Início"
 msgstr "Inicio"
 
+msgid "Lista de pacientes"
+msgstr "Lista de pacientes"
+
 msgid "Devedores"
 msgstr "Deudores"
 
@@ -1348,6 +1513,9 @@ msgstr "Flujo de caja"
 
 msgid "Relatórios"
 msgstr "Informes"
+
+msgid "Tabela de procedimentos"
+msgstr "Tabla de procedimientos"
 
 msgid "Cidades"
 msgstr "Ciudades"
@@ -1379,7 +1547,9 @@ msgstr "Salir"
 msgid ""
 "Nenhum backup do banco foi registrado neste servidor: confira se os backups "
 "diários estão funcionando."
-msgstr "No se registró ninguna copia de seguridad de la base en este servidor: verifique que las copias diarias estén funcionando."
+msgstr ""
+"No se registró ninguna copia de seguridad de la base en este servidor: "
+"verifique que las copias diarias estén funcionando."
 
 msgid "Veja no servidor:"
 msgstr "Revise en el servidor:"
@@ -1387,7 +1557,9 @@ msgstr "Revise en el servidor:"
 #, python-format
 msgid ""
 "O último backup do banco foi em %(momento)s: os backups diários pararam."
-msgstr "La última copia de seguridad de la base de datos fue el %(momento)s: las copias diarias se detuvieron."
+msgstr ""
+"La última copia de seguridad de la base de datos fue el %(momento)s: las "
+"copias diarias se detuvieron."
 
 #, python-format
 msgid "O sistema foi atualizado para a versão %(versao_sistema)s."
@@ -1406,7 +1578,10 @@ msgid ""
 "O horário e o intervalo valem para a grade da agenda e para os novos "
 "agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é "
 "recusada e a tela mostra qual."
-msgstr "El horario y el intervalo valen para la grilla de la agenda y para las nuevas citas. Si alguna cita futura quedara fuera, el cambio se rechaza y la pantalla muestra cuál."
+msgstr ""
+"El horario y el intervalo valen para la grilla de la agenda y para las "
+"nuevas citas. Si alguna cita futura quedara fuera, el cambio se rechaza y la "
+"pantalla muestra cuál."
 
 #, python-format
 msgid "Bem-vindo(a), %(nome)s"
@@ -1430,7 +1605,9 @@ msgstr "Elija una clínica para trabajar."
 msgid ""
 "Você ainda não está vinculado a nenhuma clínica ativa. Procure o "
 "administrador da sua clínica."
-msgstr "Aún no está vinculado a ninguna clínica activa. Hable con el administrador de su clínica."
+msgstr ""
+"Aún no está vinculado a ninguna clínica activa. Hable con el administrador "
+"de su clínica."
 
 #, python-format
 msgid "Veja o que há de novo na versão %(versao_sistema)s"
@@ -1460,7 +1637,10 @@ msgstr "Datos de la cuenta"
 msgid ""
 "Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail "
 "e senha só podem ser alterados por ela mesma ou pelo suporte."
-msgstr "Esta persona también tiene acceso a otra clínica o a la plataforma. El nombre, el correo y la contraseña solo pueden cambiarlos ella misma o el soporte."
+msgstr ""
+"Esta persona también tiene acceso a otra clínica o a la plataforma. El "
+"nombre, el correo y la contraseña solo pueden cambiarlos ella misma o el "
+"soporte."
 
 msgid "Definir nova senha"
 msgstr "Definir nueva contraseña"
@@ -1492,7 +1672,9 @@ msgstr "Ningún miembro en el equipo."
 msgid ""
 "Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem "
 "fez o quê é mantido."
-msgstr "Para quitar a alguien del equipo, edítelo y desmarque el acceso: el historial de quién hizo qué se conserva."
+msgstr ""
+"Para quitar a alguien del equipo, edítelo y desmarque el acceso: el "
+"historial de quién hizo qué se conserva."
 
 msgid "Novo membro da equipe"
 msgstr "Nuevo miembro del equipo"
@@ -1500,7 +1682,9 @@ msgstr "Nuevo miembro del equipo"
 msgid ""
 "Passe a senha à pessoa e peça que ela a troque no primeiro acesso (menu com "
 "o nome dela › Trocar senha)."
-msgstr "Entregue la contraseña a la persona y pídale que la cambie en el primer acceso (menú con su nombre › Cambiar contraseña)."
+msgstr ""
+"Entregue la contraseña a la persona y pídale que la cambie en el primer "
+"acceso (menú con su nombre › Cambiar contraseña)."
 
 msgid "Nova senha"
 msgstr "Nueva contraseña"
@@ -1533,12 +1717,15 @@ msgid "Inativa"
 msgstr "Inactiva"
 
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
-msgstr "Para dejar de usarla sin perder el historial, edítela y desmarque “activa”."
+msgstr ""
+"Para dejar de usarla sin perder el historial, edítela y desmarque “activa”."
 
 msgid ""
 "Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > "
 "Contas, com o tipo “Dinheiro (caixa)”."
-msgstr "Ninguna cuenta de efectivo activa. El administrador registra una en Registros > Cuentas, con el tipo “Efectivo (caja)”."
+msgstr ""
+"Ninguna cuenta de efectivo activa. El administrador registra una en "
+"Registros > Cuentas, con el tipo “Efectivo (caja)”."
 
 #, python-format
 msgid "O caixa “%(conta)s” está fechado"
@@ -1616,12 +1803,16 @@ msgstr "Ningún movimiento desde la apertura."
 msgid ""
 "Entram aqui os pagamentos registrados nesta conta enquanto o caixa está "
 "aberto, pela hora do registro."
-msgstr "Aquí entran los pagos registrados en esta cuenta mientras la caja está abierta, por la hora del registro."
+msgstr ""
+"Aquí entran los pagos registrados en esta cuenta mientras la caja está "
+"abierta, por la hora del registro."
 
 msgid ""
 "Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
 "Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
-msgstr "Ejemplo: alquiler de R$ 3.000 durante 12 meses → valor 3.000, “de cada mes”, 12. Compra de R$ 900 en 3 cuotas → valor 900, “el total”, 3."
+msgstr ""
+"Ejemplo: alquiler de R$ 3.000 durante 12 meses → valor 3.000, “de cada mes”, "
+"12. Compra de R$ 900 en 3 cuotas → valor 900, “el total”, 3."
 
 msgid "Total vencido"
 msgstr "Total vencido"
@@ -1691,7 +1882,11 @@ msgid ""
 "falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em "
 "atraso”). O saldo soma os dois a partir do saldo das contas no início do "
 "período."
-msgstr "Realizado: pagos registrados, por la fecha del pago. Previsto: lo que falta de las cuotas abiertas, por el vencimiento (las vencidas aparecen como “atrasado”). El saldo suma ambos a partir del saldo de las cuentas al inicio del período."
+msgstr ""
+"Realizado: pagos registrados, por la fecha del pago. Previsto: lo que falta "
+"de las cuotas abiertas, por el vencimiento (las vencidas aparecen como "
+"“atrasado”). El saldo suma ambos a partir del saldo de las cuentas al inicio "
+"del período."
 
 msgid "Saldo atual por conta"
 msgstr "Saldo actual por cuenta"
@@ -1739,7 +1934,9 @@ msgstr "Nueva cuenta por cobrar"
 msgid ""
 "Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre "
 "em seguida."
-msgstr "Para pago en el momento: la 1.ª cuota se registra como pagada y el recibo se abre a continuación."
+msgstr ""
+"Para pago en el momento: la 1.ª cuota se registra como pagada y el recibo se "
+"abre a continuación."
 
 msgid "Fornecedor ou descrição"
 msgstr "Proveedor o descripción"
@@ -1762,7 +1959,9 @@ msgstr "Ninguna cuota encontrada."
 msgid ""
 "Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
 "auditoria."
-msgstr "No se borra nada: el registro queda marcado, con el motivo, y aparece en la auditoría."
+msgstr ""
+"No se borra nada: el registro queda marcado, con el motivo, y aparece en la "
+"auditoría."
 
 #, python-format
 msgid "parcela %(numero)s de %(total)s"
@@ -1784,7 +1983,9 @@ msgstr "Solo para tarjeta"
 msgid ""
 "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a "
 "parcela fica paga. Nunca anote o número do cartão."
-msgstr "Cuotas con tarjeta: indique aquí el número de cuotas; para la clínica, la cuota queda pagada. Nunca anote el número de la tarjeta."
+msgstr ""
+"Cuotas con tarjeta: indique aquí el número de cuotas; para la clínica, la "
+"cuota queda pagada. Nunca anote el número de la tarjeta."
 
 msgid "Descontos só podem ser dados pelo administrador da clínica."
 msgstr "Solo el administrador de la clínica puede dar descuentos."
@@ -1814,13 +2015,16 @@ msgstr "N.º"
 msgid ""
 "Recebemos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) a quantia de "
 "<strong>%(valor)s</strong>,"
-msgstr "Recibimos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) la suma de <strong>%(valor)s</strong>,"
+msgstr ""
+"Recibimos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) la suma de "
+"<strong>%(valor)s</strong>,"
 
 #, python-format
 msgid ""
 "Recebemos de <strong>%(nome)s</strong> a quantia de <strong>%(valor)s</"
 "strong>,"
-msgstr "Recibimos de <strong>%(nome)s</strong> la suma de <strong>%(valor)s</strong>,"
+msgstr ""
+"Recibimos de <strong>%(nome)s</strong> la suma de <strong>%(valor)s</strong>,"
 
 #, python-format
 msgid "referente a %(descricao)s (parcela %(numero)s de %(total)s)"
@@ -1901,6 +2105,116 @@ msgstr "Versión %(versao)s"
 msgid "Nenhuma novidade registrada ainda."
 msgstr "Todavía no hay novedades registradas."
 
+msgid "Odontograma"
+msgstr "Odontograma"
+
+msgid ""
+"Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas "
+"do meio. Direita do paciente à esquerda."
+msgstr ""
+"Numeración FDI. Superiores arriba, inferiores abajo; dientes de leche en las "
+"filas del medio. Derecha del paciente a la izquierda."
+
+msgid "Aprovar orçamento"
+msgstr "Aprobar presupuesto"
+
+#, python-format
+msgid "Orçamento nº %(numero)s · %(nome)s · %(total)s"
+msgstr "Presupuesto n.º %(numero)s · %(nome)s · %(total)s"
+
+msgid ""
+"O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não "
+"pode mais ser alterado."
+msgstr ""
+"El presupuesto pasa a ser una cuenta por cobrar, en las cuotas elegidas, y "
+"ya no puede modificarse."
+
+msgid "Aprovar"
+msgstr "Aprobar"
+
+#, python-format
+msgid "válido até %(validade)s"
+msgstr "válido hasta el %(validade)s"
+
+msgid "Imprimir"
+msgstr "Imprimir"
+
+msgid "Recusar"
+msgstr "Rechazar"
+
+msgid "Ver em A receber"
+msgstr "Ver en Por cobrar"
+
+msgid "Procedimento"
+msgstr "Procedimiento"
+
+msgid "Dentes"
+msgstr "Dientes"
+
+msgid "Faces ou região"
+msgstr "Caras o región"
+
+msgid "Qtd."
+msgstr "Cant."
+
+msgid "Total"
+msgstr "Total"
+
+msgid "remover"
+msgstr "quitar"
+
+msgid "Nenhum procedimento ainda."
+msgstr "Ningún procedimiento todavía."
+
+msgid "Subtotal"
+msgstr "Subtotal"
+
+msgid "Incluir procedimento"
+msgstr "Agregar procedimiento"
+
+msgid ""
+"Clique nos dentes do procedimento (a quantidade acompanha). Sem descrição ou "
+"valor, valem os da tabela de procedimentos."
+msgstr ""
+"Haga clic en los dientes del procedimiento (la cantidad acompaña). Sin "
+"descripción ni valor, valen los de la tabla de procedimientos."
+
+msgid "Incluir"
+msgstr "Agregar"
+
+msgid "Dentes do orçamento"
+msgstr "Dientes del presupuesto"
+
+msgid "Aplicar"
+msgstr "Aplicar"
+
+msgid "Editar orçamento"
+msgstr "Editar presupuesto"
+
+msgid "Novo orçamento"
+msgstr "Nuevo presupuesto"
+
+msgid "ORÇAMENTO"
+msgstr "PRESUPUESTO"
+
+msgid "Nome do paciente"
+msgstr "Nombre del paciente"
+
+msgid "Todos"
+msgstr "Todos"
+
+msgid "Nenhum orçamento encontrado."
+msgstr "Ningún presupuesto encontrado."
+
+msgid "Novo procedimento"
+msgstr "Nuevo procedimiento"
+
+msgid "Nenhum procedimento cadastrado."
+msgstr "Ningún procedimiento registrado."
+
+msgid "Mudar o valor aqui não altera orçamentos já feitos."
+msgstr "Cambiar el valor aquí no modifica los presupuestos ya hechos."
+
 #, python-format
 msgid "%(total)s aniversariante (pacientes ativos)"
 msgid_plural "%(total)s aniversariantes (pacientes ativos)"
@@ -1936,12 +2250,17 @@ msgid ""
 "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das "
 "rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o "
 "histórico continuam guardados."
-msgstr "El paciente sale de las listas, la búsqueda, la agenda, los cumpleaños y los recordatorios del equipo. No se borra nada: las citas, los recordatorios y el historial se conservan."
+msgstr ""
+"El paciente sale de las listas, la búsqueda, la agenda, los cumpleaños y los "
+"recordatorios del equipo. No se borra nada: las citas, los recordatorios y "
+"el historial se conservan."
 
 msgid ""
 "Só administradores da clínica veem os pacientes arquivados (na lista de "
 "pacientes, em Situação: Arquivados) e podem restaurá-los."
-msgstr "Solo los administradores de la clínica ven los pacientes archivados (en la lista de pacientes, en Situación: Archivados) y pueden restaurarlos."
+msgstr ""
+"Solo los administradores de la clínica ven los pacientes archivados (en la "
+"lista de pacientes, en Situación: Archivados) y pueden restaurarlos."
 
 msgid "Arquivar"
 msgstr "Archivar"
@@ -1958,7 +2277,11 @@ msgid ""
 "18). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a "
 "clínica não é obrigada a guardar os registros de atendimento (a Lei "
 "13.787/2018 manda guardar o prontuário por 20 anos)."
-msgstr "Úselo solo cuando el propio paciente pida la eliminación de sus datos (LGPD, art. 18). Para sacarlo del día a día, manténgalo archivado. Antes, verifique si la clínica está obligada a guardar los registros de atención (la Ley 13.787/2018 exige guardar la historia clínica durante 20 años)."
+msgstr ""
+"Úselo solo cuando el propio paciente pida la eliminación de sus datos (LGPD, "
+"art. 18). Para sacarlo del día a día, manténgalo archivado. Antes, verifique "
+"si la clínica está obligada a guardar los registros de atención (la Ley "
+"13.787/2018 exige guardar la historia clínica durante 20 años)."
 
 msgid "Esta ação não pode ser desfeita:"
 msgstr "Esta acción no se puede deshacer:"
@@ -1975,11 +2298,15 @@ msgstr "los recordatorios del paciente se eliminan;"
 msgid ""
 "a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
 "pessoais do paciente;"
-msgstr "la auditoría sigue indicando quién hizo qué y cuándo, pero sin los datos personales del paciente;"
+msgstr ""
+"la auditoría sigue indicando quién hizo qué y cuándo, pero sin los datos "
+"personales del paciente;"
 
 msgid ""
 "os backups com os dados atuais são apagados automaticamente em até 30 dias."
-msgstr "las copias de seguridad con los datos actuales se eliminan automáticamente en hasta 30 días."
+msgstr ""
+"las copias de seguridad con los datos actuales se eliminan automáticamente "
+"en hasta 30 días."
 
 msgid "Excluir definitivamente"
 msgstr "Eliminar definitivamente"
@@ -2004,7 +2331,9 @@ msgstr "Por %(nome)s."
 msgid ""
 "Só administradores da clínica veem este paciente. Restaure para voltar a usá-"
 "lo na agenda e nas rechamadas."
-msgstr "Solo los administradores de la clínica ven este paciente. Restáurelo para volver a usarlo en la agenda y en los recordatorios."
+msgstr ""
+"Solo los administradores de la clínica ven este paciente. Restáurelo para "
+"volver a usarlo en la agenda y en los recordatorios."
 
 msgid "Identificação"
 msgstr "Identificación"
@@ -2070,6 +2399,9 @@ msgstr "Anteriores (las más recientes primero)"
 msgid "Nenhum agendamento anterior."
 msgstr "Ninguna cita anterior."
 
+msgid "Nenhum orçamento."
+msgstr "Ningún presupuesto."
+
 msgid "receber"
 msgstr "cobrar"
 
@@ -2113,9 +2445,6 @@ msgstr "Activos"
 msgid "Inativos"
 msgstr "Inactivos"
 
-msgid "Todos"
-msgstr "Todos"
-
 msgid "Arquivados"
 msgstr "Archivados"
 
@@ -2137,7 +2466,9 @@ msgstr "Eliminar profesional"
 msgid ""
 "Esta ação não pode ser desfeita. Se quiser apenas esconder o profissional, "
 "edite e desmarque “ativo”."
-msgstr "Esta acción no se puede deshacer. Si solo quiere ocultar al profesional, edítelo y desmarque “activo”."
+msgstr ""
+"Esta acción no se puede deshacer. Si solo quiere ocultar al profesional, "
+"edítelo y desmarque “activo”."
 
 msgid "Editar profissional"
 msgstr "Editar profesional"
@@ -2171,9 +2502,6 @@ msgstr "¿Eliminar el recordatorio de %(nome)s (%(data)s)?"
 msgid "Editar rechamada"
 msgstr "Editar recordatorio"
 
-msgid "Nome do paciente"
-msgstr "Nombre del paciente"
-
 msgid "Pendentes"
 msgstr "Pendientes"
 
@@ -2202,7 +2530,8 @@ msgid "Nenhuma rechamada encontrada."
 msgstr "Ningún recordatorio encontrado."
 
 msgid "Instituições financeiras conforme a lista pública do Banco Central."
-msgstr "Instituciones financieras según la lista pública del Banco Central de Brasil."
+msgstr ""
+"Instituciones financieras según la lista pública del Banco Central de Brasil."
 
 msgid "Nome ou código do banco"
 msgstr "Nombre o código del banco"
@@ -2244,7 +2573,10 @@ msgid ""
 "Foram feitas muitas tentativas de entrada com senha errada. Por segurança, "
 "este acesso ficará bloqueado por 1 hora. Se esqueceu a senha, fale com o "
 "administrador da clínica."
-msgstr "Se hicieron demasiados intentos de acceso con una contraseña incorrecta. Por seguridad, este acceso quedará bloqueado durante 1 hora. Si olvidó su contraseña, hable con el administrador de la clínica."
+msgstr ""
+"Se hicieron demasiados intentos de acceso con una contraseña incorrecta. Por "
+"seguridad, este acceso quedará bloqueado durante 1 hora. Si olvidó su "
+"contraseña, hable con el administrador de la clínica."
 
 msgid "Você saiu do sistema."
 msgstr "Ha salido del sistema."

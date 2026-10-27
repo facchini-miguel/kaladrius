@@ -30,6 +30,7 @@ Sistema de gestión de clínicas (odontológicas, médicas, de fisioterapia, psi
 10. **Idiomas:** portugués, inglés y español, a elección de cada usuario (0.13.0).
 11. **Ayuda:** manual del usuario en los tres idiomas dentro del sistema; documentación técnica solo para el superusuario (0.14.0).
 12. **Financiero:** cuentas por cobrar en cuotas, pagos con forma y cuenta, recibo, deudores (0.15.0); cuentas por pagar, flujo de caja e informes (0.16.0); caja del día (0.17.0).
+13. **Presupuestos:** tabla de procedimientos y presupuesto con odontograma, que pasa a cuenta por cobrar al aprobarse (0.18.0).
 
 ## Modelo de negocio (en estudio)
 - App **gratuita** en las tiendas.

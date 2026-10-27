@@ -9,4 +9,4 @@ A recall is a reminder for a patient's follow-up: "6-month check-up", "remove st
 - Pending recalls show in the schedule, in the header of each day (📞).
 
 ## Birthdays
-In **Birthdays**, choose the month to see the active patients with birthdays, with the age they will turn, phone and e-mail. Today's are highlighted. In the schedule, each day's birthdays show in the header (🎂).
+In **Patients > Birthdays**, choose the month to see the active patients with birthdays, with the age they will turn, phone and e-mail. Today's are highlighted. In the schedule, each day's birthdays show in the header (🎂).

@@ -41,6 +41,7 @@ Cada perfil recibe los permisos `ver`, `crear`, `modificar` y `eliminar` por mó
 | Auditoría | ver | — | — |
 | Cobros (por cobrar, cobrar, recibo, deudores) | todo | ver, crear, modificar | — |
 | Financiero (categorías, cuentas; por pagar y flujo de caja en la 0.16) | todo | — | — |
+| Presupuestos (aprobar exige también Cobros) | todo | ver, crear, modificar | ver, crear, modificar |
 
 El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (versión 0.8.0): el administrador crea cuentas ya vinculadas a la clínica, cambia el perfil, define contraseñas y quita el acceso (el vínculo queda inactivo; las cuentas nunca se eliminan, por la auditoría). Nadie cambia su propio perfil, y la clínica nunca queda sin un administrador activo. El nombre, el correo y la contraseña solo pueden cambiarse cuando la cuenta se usa **solo** en esta clínica y no es de superusuario: así, una clínica no puede quitarle a alguien el acceso a las otras. "Configuración de la clínica" es la pantalla **Registros > Configuración de la clínica** (versión 0.10.0): nombre, CPF/CNPJ, correo, teléfono, horario e intervalo de la agenda. Un cambio de horario o intervalo que dejaría alguna cita **futura** fuera de la grilla o del intervalo se rechaza, y la pantalla muestra cuál (el historial puede tener otros horarios).
 
@@ -69,6 +70,15 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 | `MovimentoCaixa` (movimiento de caja) | clínica, caja, tipo (retiro, refuerzo), valor, otra cuenta (opcional), motivo, creado por | Un retiro a otra cuenta (depósito en el banco) mueve el saldo entre las cuentas; sin otra cuenta, el dinero sale o entra al sistema y aparece en el flujo de caja |
 
 Las cuentas por pagar (0.16.0) usan las mismas entidades, con el proveedor en el campo del pagador. El saldo de cada cuenta es el saldo inicial más lo que entró menos lo que salió (pagos no revertidos). Valores en `Decimal` con 2 decimales. La cuota se bloquea en la base al cobrar, para que dos personas no paguen la misma cuota por encima del saldo. En la eliminación definitiva de un paciente, sus cuentas quedan (historial contable) con el pagador "Paciente excluído (código N)", y su auditoría pierde los datos personales.
+
+### Presupuestos (versión 0.18.0)
+| Entidad | Campos principales | Observación |
+|---|---|---|
+| `Procedimento` (procedimiento) | clínica, nombre, valor, categoría de ingreso, activo | Tabla de precios de la clínica |
+| `Orcamento` (presupuesto) | clínica, paciente, profesional, fecha, validez, situación (abierto, aprobado, rechazado), descuento (solo administrador), observaciones, cuenta por cobrar, aprobado o rechazado el/por, creado por | Al aprobarse, pasa a ser un `Lancamento` por cobrar y ya no cambia |
+| `ItemOrcamento` (ítem del presupuesto) | clínica, presupuesto, procedimiento (opcional), descripción, dientes (FDI, separados por coma), caras o región, cantidad, valor unitario | Descripción y valor copiados de la tabla en el momento; cambiar la tabla no modifica los presupuestos |
+
+En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los dientes son datos de salud) y su auditoría pierde los datos personales.
 
 ### Sistema
 | Entidad | Uso |

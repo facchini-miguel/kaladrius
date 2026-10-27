@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load i18n static formatos %}
+
+{% block titulo %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-0">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "orcamentos/_situacao.html" %}</span></h1>
+    <span class="text-body-secondary">
+      <a href="{% url 'pacientes:ficha' orcamento.paciente_id %}">{{ orcamento.paciente.nome }}</a>
+      {% if orcamento.profissional %} · {{ orcamento.profissional.nome }}{% endif %}
+      · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }}
+      · {% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
+    </span>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'orcamentos:imprimir' orcamento.pk %}">{% translate "Imprimir" %}</a>
+    {% if aberto and pode.orcamentos.alterar %}
+    <a class="btn btn-outline-primary" href="{% url 'orcamentos:editar' orcamento.pk %}">{% translate "Editar" %}</a>
+    <form method="post" action="{% url 'orcamentos:recusar' orcamento.pk %}">{% csrf_token %}<button type="submit" class="btn btn-outline-danger">{% translate "Recusar" %}</button></form>
+    {% endif %}
+    {% if pode_aprovar %}<a class="btn btn-success" href="{% url 'orcamentos:aprovar' orcamento.pk %}">{% translate "Aprovar" %}</a>{% endif %}
+    {% if orcamento.lancamento_id and pode.recebimentos.ver %}<a class="btn btn-outline-success" href="{% url 'financeiro:lancamento' orcamento.lancamento_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table align-middle bg-white">
+    <thead><tr><th>{% translate "Procedimento" %}</th><th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th><th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
+    <tbody>
+      {% for item in orcamento.itens.all %}
+      <tr>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.dentes_exibicao|default:"—" }}</td>
+        <td>{{ item.faces|default:"—" }}</td>
+        <td class="text-end">{{ item.quantidade }}</td>
+        <td class="text-end text-nowrap">{{ item.valor_unitario|moeda }}</td>
+        <td class="text-end text-nowrap">{{ item.total|moeda }}</td>
+        <td class="text-end">{% if aberto and pode.orcamentos.alterar %}<form method="post" action="{% url 'orcamentos:item_remover' orcamento.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum procedimento ainda." %}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      {% if orcamento.desconto %}
+      <tr><td colspan="5" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ orcamento.subtotal|moeda }}</td><td></td></tr>
+      <tr><td colspan="5" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ orcamento.desconto|moeda }}</td><td></td></tr>
+      {% endif %}
+      <tr class="fw-semibold"><td colspan="5" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td><td></td></tr>
+    </tfoot>
+  </table>
+</div>
+{% if orcamento.observacoes %}<p class="text-body-secondary">{{ orcamento.observacoes|linebreaksbr }}</p>{% endif %}
+
+{% if aberto and pode.orcamentos.alterar %}
+<div class="card mb-3">
+  <div class="card-header">{% translate "Incluir procedimento" %}</div>
+  <div class="card-body">
+    <form method="post" action="{% url 'orcamentos:item_adicionar' orcamento.pk %}" novalidate>
+      {% csrf_token %}
+      {% include "orcamentos/_odontograma.html" with selecionados=None interativo=True %}
+      {{ item_form.dentes }}
+      <div class="row mt-3">
+        <div class="col-md-4">{% with campo=item_form.procedimento %}{% include "includes/campo.html" %}{% endwith %}</div>
+        <div class="col-md-4">{% with campo=item_form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
+        <div class="col-md-4">{% with campo=item_form.faces %}{% include "includes/campo.html" %}{% endwith %}</div>
+        <div class="col-6 col-md-2">{% with campo=item_form.quantidade %}{% include "includes/campo.html" %}{% endwith %}</div>
+        <div class="col-6 col-md-3">{% with campo=item_form.valor_unitario %}{% include "includes/campo.html" %}{% endwith %}</div>
+      </div>
+      <p class="text-body-secondary small">{% translate "Clique nos dentes do procedimento (a quantidade acompanha). Sem descrição ou valor, valem os da tabela de procedimentos." %}</p>
+      <button type="submit" class="btn btn-primary">{% translate "Incluir" %}</button>
+    </form>
+  </div>
+</div>
+{% else %}
+<h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
+{% include "orcamentos/_odontograma.html" with interativo=False %}
+{% endif %}
+
+{% if desconto_form %}
+<form method="post" action="{% url 'orcamentos:desconto' orcamento.pk %}" class="row g-2 align-items-end mb-3" style="max-width: 28rem;" novalidate>
+  {% csrf_token %}
+  <div class="col-8">{% with campo=desconto_form.desconto %}{% include "includes/campo.html" %}{% endwith %}</div>
+  <div class="col-4 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Aplicar" %}</button></div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/odontograma.js' %}"></script>{% endblock %}

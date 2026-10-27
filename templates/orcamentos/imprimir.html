@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex gap-2 mb-3 d-print-none">
+  <button type="button" class="btn btn-primary" onclick="window.print()">{% translate "Imprimir ou salvar em PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% translate "Voltar" %}</a>
+</div>
+<div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">
+  <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+    <div>
+      <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
+      {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
+      {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
+    </div>
+    <div class="text-end">
+      <div class="fs-4 fw-semibold">{% translate "ORÇAMENTO" %}</div>
+      <div class="small">{% translate "Nº" %} {{ orcamento.pk }} · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }}</div>
+      <div class="small">{% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}</div>
+    </div>
+  </div>
+  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ orcamento.paciente.nome }}</p>
+  {% if orcamento.profissional %}<p><strong>{% translate "Profissional" %}:</strong> {{ orcamento.profissional.nome }}{% if orcamento.profissional.registro %} ({{ orcamento.profissional.registro }}){% endif %}</p>{% endif %}
+  {% if selecionados %}<div class="mb-3">{% include "orcamentos/_odontograma.html" with interativo=False %}</div>{% endif %}
+  <table class="table table-sm">
+    <thead><tr><th>{% translate "Procedimento" %}</th><th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th><th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
+    <tbody>
+      {% for item in orcamento.itens.all %}
+      <tr><td>{{ item.descricao }}</td><td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td><td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.valor_unitario|moeda }}</td><td class="text-end">{{ item.total|moeda }}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      {% if orcamento.desconto %}
+      <tr><td colspan="5" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|moeda }}</td></tr>
+      <tr><td colspan="5" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.desconto|moeda }}</td></tr>
+      {% endif %}
+      <tr class="fw-semibold"><td colspan="5" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
+    </tfoot>
+  </table>
+  {% if orcamento.observacoes %}<p class="small">{{ orcamento.observacoes|linebreaksbr }}</p>{% endif %}
+  <div class="d-flex justify-content-around mt-5 pt-4">
+    <div class="text-center border-top pt-1" style="min-width: 16rem;">{{ orcamento.paciente.nome }}</div>
+    <div class="text-center border-top pt-1" style="min-width: 16rem;">{{ orcamento.profissional.nome|default:clinica_atual.nome }}</div>
+  </div>
+</div>
+{% endblock %}

@@ -36,11 +36,11 @@ SELECT t, (xpath('/row/c/text()', query_to_xml('SELECT count(*) AS c FROM ' || t
 FROM unnest(ARRAY[
   'core_clinica', 'core_usuario', 'core_vinculo', 'pacientes_paciente', 'profissionais_profissional',
   'agenda_agendamento', 'rechamadas_rechamada', 'financeiro_lancamento', 'financeiro_pagamento',
-  'financeiro_caixa', 'auditoria_registroauditoria', 'core_backup'
+  'financeiro_caixa', 'orcamentos_orcamento', 'auditoria_registroauditoria', 'core_backup'
 ]) AS t
 WHERE to_regclass(t) IS NOT NULL;
 \echo
 \echo 'Última migração de cada app'
 SELECT app || ' | ' || max(name) FROM django_migrations
-WHERE app IN ('core', 'pacientes', 'agenda', 'financeiro') GROUP BY app ORDER BY app;
+WHERE app IN ('core', 'pacientes', 'agenda', 'financeiro', 'orcamentos') GROUP BY app ORDER BY app;
 SQL

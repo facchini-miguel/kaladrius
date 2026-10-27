@@ -15,6 +15,7 @@ from apps.financeiro.models import (
     Pagamento,
     Parcela,
 )
+from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -41,6 +42,9 @@ AUDITADOS = [
     Categoria,
     Caixa,
     MovimentoCaixa,
+    Procedimento,
+    Orcamento,
+    ItemOrcamento,
 ]
 # Never stored (secrets) or not worth storing (bookkeeping timestamps).
 IGNORADOS = {

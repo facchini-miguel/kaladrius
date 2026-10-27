@@ -36,6 +36,7 @@ MODULOS = [
     gettext_noop("Geral"),
     gettext_noop("Idioma"),
     gettext_noop("Novidades"),
+    gettext_noop("Orçamentos"),
     gettext_noop("Pacientes"),
     gettext_noop("Permissões"),
     gettext_noop("Profissionais"),

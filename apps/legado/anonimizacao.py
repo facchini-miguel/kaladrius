@@ -21,6 +21,7 @@ from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
 from apps.financeiro.models import Caixa, Lancamento, MovimentoCaixa, Pagamento, Parcela
+from apps.orcamentos.models import Orcamento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -192,6 +193,7 @@ class _Anonimizador:
         )
         Pagamento.objects.filter(clinica=self.clinica).update(observacao="", cartao_codigo="")
         Caixa.objects.filter(clinica=self.clinica).update(observacao="")
+        Orcamento.objects.filter(clinica=self.clinica).update(observacoes="")
         MovimentoCaixa.objects.filter(clinica=self.clinica).update(motivo="-")
 
     def auditoria(self):
@@ -206,6 +208,7 @@ class _Anonimizador:
                 Lancamento,
                 Parcela,
                 Pagamento,
+                Orcamento,
             )
         ]
         apagados, _ = RegistroAuditoria.objects.filter(

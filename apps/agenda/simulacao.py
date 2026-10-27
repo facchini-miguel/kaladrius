@@ -220,3 +220,81 @@ def _simular_despesas(clinica, sorteio, contas, usuario):
                 )
         criadas += 1
     return criadas
+
+
+# Example price list for a test clinic without one: (name, price).
+PROCEDIMENTOS_EXEMPLO = [
+    ("Consulta de avaliação", 150),
+    ("Limpeza (profilaxia)", 200),
+    ("Restauração em resina", 250),
+    ("Extração simples", 300),
+    ("Tratamento de canal", 1200),
+    ("Clareamento", 900),
+    ("Coroa de porcelana", 1800),
+    ("Aplicação de flúor", 80),
+]
+
+
+def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
+    """Fake estimates of the last 60 days: some approved (they become receivables), some
+    refused, the rest open. Creates an example price list if the clinic has none."""
+    from decimal import Decimal
+
+    from apps.financeiro.models import Categoria
+    from apps.orcamentos import servicos
+    from apps.orcamentos.models import (
+        DENTES_PERMANENTES,
+        ItemOrcamento,
+        Orcamento,
+        Procedimento,
+    )
+
+    tratamento = Categoria.objects.filter(clinica=clinica, nome="Tratamento").first()
+    if not Procedimento.objects.filter(clinica=clinica).exists():
+        Procedimento.objects.bulk_create(
+            Procedimento(clinica=clinica, nome=nome, valor=Decimal(valor), categoria=tratamento)
+            for nome, valor in PROCEDIMENTOS_EXEMPLO
+        )
+    procedimentos = list(Procedimento.objects.filter(clinica=clinica, ativo=True))
+    pacientes = _pacientes(clinica)
+    profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+    categoria = (
+        tratamento or Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.RECEITA).first()
+    )
+    if not (procedimentos and pacientes and categoria):
+        return 0
+    dentes = [d for linha in DENTES_PERMANENTES for d in linha]
+    hoje = timezone.localdate()
+    for _ in range(quantidade):
+        data = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
+        orcamento = Orcamento.objects.create(
+            clinica=clinica,
+            paciente=sorteio.choice(pacientes),
+            profissional=sorteio.choice(profissionais) if profissionais else None,
+            data=data,
+            validade=data + datetime.timedelta(days=30),
+            criado_por=usuario,
+        )
+        for procedimento in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
+            escolhidos = sorted(sorteio.sample(dentes, sorteio.randint(0, 3)))
+            ItemOrcamento.objects.create(
+                clinica=clinica,
+                orcamento=orcamento,
+                procedimento=procedimento,
+                descricao=procedimento.nome,
+                dentes=",".join(str(d) for d in escolhidos),
+                quantidade=max(len(escolhidos), 1),
+                valor_unitario=procedimento.valor,
+            )
+        sorte = sorteio.random()
+        if sorte < 0.4:
+            servicos.aprovar(
+                orcamento,
+                parcelas=sorteio.choice([1, 2, 3, 4]),
+                primeiro_vencimento=data + datetime.timedelta(days=7),
+                categoria=categoria,
+                usuario=usuario,
+            )
+        elif sorte < 0.6:
+            servicos.recusar(orcamento, usuario=usuario)
+    return quantidade

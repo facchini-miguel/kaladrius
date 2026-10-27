@@ -1,7 +1,7 @@
 # Pacientes
 
 ## Buscar
-Em **Pacientes**, digite parte do **nome** (não precisa de acentos), o **código** ou o início do **CPF/CNPJ**. Os filtros escolhem o tipo (pessoa física ou jurídica) e a situação.
+Em **Pacientes > Lista de pacientes**, digite parte do **nome** (não precisa de acentos), o **código** ou o início do **CPF/CNPJ**. Os filtros escolhem o tipo (pessoa física ou jurídica) e a situação.
 
 ## Cadastrar e alterar
 Clique em **Novo paciente**. Escolha **pessoa física** ou **jurídica**: os campos mudam conforme o tipo.

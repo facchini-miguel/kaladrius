@@ -1,7 +1,7 @@
 # Patients
 
 ## Searching
-In **Patients**, type part of the **name** (accents not needed), the **code** or the beginning of the **CPF/CNPJ**. The filters choose the type (individual or company) and the status.
+In **Patients > Patient list**, type part of the **name** (accents not needed), the **code** or the beginning of the **CPF/CNPJ**. The filters choose the type (individual or company) and the status.
 
 ## Adding and changing
 Click **New patient**. Choose **individual** or **company**: the fields change with the type.

@@ -4,6 +4,53 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.18.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Orçamentos com odontograma
+    en: Estimates with a dental chart
+    es: Presupuestos con odontograma
+  itens:
+    - tipo: novo
+      modulo: Orçamentos
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo em Pacientes > Orçamentos: monte o orçamento clicando nos dentes do odontograma e
+          escolhendo os procedimentos da tabela, imprima para o paciente assinar e, quando ele
+          aprovar, o orçamento vira um lançamento a receber nas parcelas combinadas.
+        en: >
+          New in Patients > Estimates: write the estimate by clicking the teeth on the dental
+          chart and choosing procedures from the price list, print it for the patient to sign
+          and, once approved, it becomes a receivable in the agreed installments.
+        es: >
+          Nuevo en Pacientes > Presupuestos: arme el presupuesto haciendo clic en los dientes del
+          odontograma y eligiendo los procedimientos de la tabla, imprímalo para que el paciente
+          lo firme y, cuando lo apruebe, pasa a ser una cuenta por cobrar en las cuotas acordadas.
+    - tipo: novo
+      modulo: Cadastros
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Tabela de procedimentos com valores e categorias, em Cadastros.
+        en: >
+          Procedure price list with prices and categories, in Records.
+        es: >
+          Tabla de procedimientos con valores y categorías, en Registros.
+    - tipo: melhoria
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O menu Pacientes agora reúne a lista de pacientes, os orçamentos e os aniversariantes,
+          e a ficha do paciente mostra os orçamentos dele.
+        en: >
+          The Patients menu now groups the patient list, estimates and birthdays, and the patient
+          record shows their estimates.
+        es: >
+          El menú Pacientes ahora reúne la lista de pacientes, los presupuestos y los cumpleaños,
+          y la ficha del paciente muestra sus presupuestos.
+
 - versao: 0.17.1
   data: 2026-10-27
   titulo:

@@ -9,4 +9,4 @@ Rechamada é o lembrete de retorno de um paciente: "revisão de 6 meses", "remov
 - As rechamadas pendentes aparecem na agenda, no cabeçalho de cada dia (📞).
 
 ## Aniversariantes
-Em **Aniversariantes**, escolha o mês para ver os pacientes ativos que fazem aniversário, com a idade que vão completar, telefone e e-mail. Os de hoje ficam destacados. Na agenda, os aniversariantes de cada dia aparecem no cabeçalho (🎂).
+Em **Pacientes > Aniversariantes**, escolha o mês para ver os pacientes ativos que fazem aniversário, com a idade que vão completar, telefone e e-mail. Os de hoje ficam destacados. Na agenda, os aniversariantes de cada dia aparecem no cabeçalho (🎂).

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Tabela de procedimentos" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 mb-0">{% translate "Tabela de procedimentos" %}</h1>
+  {% if pode.cadastros.criar %}<a class="btn btn-primary" href="{% url 'orcamentos:procedimento_novo' %}">{% translate "Novo procedimento" %}</a>{% endif %}
+</div>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Nome" %}</th><th class="text-end">{% translate "Valor" %}</th><th>{% translate "Categoria" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <tbody>
+      {% for procedimento in procedimentos %}
+      <tr>
+        <td>{{ procedimento.nome }}</td>
+        <td class="text-end text-nowrap">{{ procedimento.valor|moeda }}</td>
+        <td>{{ procedimento.categoria|default:"—" }}</td>
+        <td>{% if procedimento.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td class="text-end">{% if pode.cadastros.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'orcamentos:procedimento_editar' procedimento.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum procedimento cadastrado." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-body-secondary small">{% translate "Mudar o valor aqui não altera orçamentos já feitos." %}</p>
+{% endblock %}

@@ -41,6 +41,7 @@ Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módu
 | Auditoria | ver | — | — |
 | Recebimentos (a receber, receber, recibo, devedores) | tudo | ver, criar, alterar | — |
 | Financeiro (categorias, contas; a pagar e fluxo de caixa na 0.16) | tudo | — | — |
+| Orçamentos (aprovar exige também Recebimentos) | tudo | ver, criar, alterar | ver, criar, alterar |
 
 O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.0): o administrador cria contas já vinculadas à clínica, muda o perfil, define senhas e tira o acesso (o vínculo fica inativo; contas nunca são excluídas, por causa da auditoria). Ninguém altera o próprio perfil, e a clínica nunca fica sem um administrador ativo. Nome, e-mail e senha só podem ser alterados quando a conta é usada **somente** nesta clínica e não é de superusuário: assim, uma clínica não consegue tomar o acesso de alguém às outras. "Configurações da clínica" é a tela **Cadastros > Configurações da clínica** (versão 0.10.0): nome, CPF/CNPJ, e-mail, telefone, horário e intervalo da agenda. Uma mudança de horário ou intervalo que deixaria algum agendamento **futuro** fora da grade ou fora do intervalo é recusada, e a tela mostra qual (o histórico pode ter outros horários).
 
@@ -69,6 +70,15 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | `MovimentoCaixa` | clinica, caixa, tipo (retirada, reforço), valor, outra conta (opcional), motivo, criado por | Retirada para outra conta (depósito no banco) move o saldo entre as contas; sem outra conta, o dinheiro sai ou entra no sistema e aparece no fluxo de caixa |
 
 As contas a pagar (0.16.0) usam as mesmas entidades, com o fornecedor no campo do pagador. O saldo de cada conta é o saldo inicial mais o que entrou menos o que saiu (pagamentos não estornados). Valores em `Decimal` com 2 casas. A parcela é travada no banco ao receber, para duas pessoas não pagarem a mesma parcela além do saldo. Na exclusão definitiva de um paciente, os lançamentos dele ficam (histórico contábil) com o pagador "Paciente excluído (código N)", e a auditoria deles perde os dados pessoais.
+
+### Orçamentos (versão 0.18.0)
+| Entidade | Campos principais | Observação |
+|---|---|---|
+| `Procedimento` | clinica, nome, valor, categoria de receita, ativo | Tabela de preços da clínica |
+| `Orcamento` | clinica, paciente, profissional, data, validade, situação (em aberto, aprovado, recusado), desconto (só administrador), observações, lançamento a receber, aprovado ou recusado em/por, criado por | Aprovado, vira um `Lancamento` a receber e não muda mais |
+| `ItemOrcamento` | clinica, orçamento, procedimento (opcional), descrição, dentes (FDI, separados por vírgula), faces ou região, quantidade, valor unitário | Descrição e valor copiados da tabela no momento; mudar a tabela não altera orçamentos |
+
+Na exclusão definitiva de um paciente, os orçamentos dele são apagados (os dentes são dado de saúde) e a auditoria deles perde os dados pessoais.
 
 ### Sistema
 | Entidade | Uso |

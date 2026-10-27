@@ -9,4 +9,4 @@ Un recordatorio es el aviso de regreso de un paciente: "revisión de 6 meses", "
 - Los recordatorios pendientes aparecen en la agenda, en el encabezado de cada día (📞).
 
 ## Cumpleaños
-En **Cumpleaños**, elija el mes para ver los pacientes activos que cumplen años, con la edad que cumplirán, teléfono y correo electrónico. Los de hoy aparecen destacados. En la agenda, los cumpleaños de cada día aparecen en el encabezado (🎂).
+En **Pacientes > Cumpleaños**, elija el mes para ver los pacientes activos que cumplen años, con la edad que cumplirán, teléfono y correo electrónico. Los de hoy aparecen destacados. En la agenda, los cumpleaños de cada día aparecen en el encabezado (🎂).

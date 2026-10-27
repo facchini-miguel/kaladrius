@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "apps.legado",
     "apps.ajuda",
     "apps.financeiro",
+    "apps.orcamentos",
     "axes",
 ]
 

@@ -43,6 +43,7 @@ Each role gets `view`, `create`, `change` and `delete` permissions per module. T
 | Audit | view | — | — |
 | Receipts (receivables, receive, receipt, debtors) | all | view, create, change | — |
 | Finance (categories, accounts; payables and cash flow in 0.16) | all | — | — |
+| Estimates (approving also needs Receipts) | all | view, create, change | view, create, change |
 
 The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the administrator creates accounts already linked to the clinic, changes roles, sets passwords and removes access (the membership becomes inactive; accounts are never deleted, because of the audit log). Nobody changes their own role, and the clinic never ends up without an active administrator. Name, e-mail and password can only be changed when the account is used **only** in this clinic and is not a superuser: this way a clinic cannot take over someone's access to other clinics. "Clinic settings" is the **Records > Clinic settings** screen (version 0.10.0): name, CPF/CNPJ, e-mail, phone, schedule hours and slot length. A change of hours or slot length that would leave a **future** appointment outside the grid or off the slots is refused, and the screen says which one (past appointments may have other hours).
 
@@ -71,6 +72,15 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | `MovimentoCaixa` (drawer movement) | clinic, drawer, type (withdrawal, top-up), amount, other account (optional), reason, created by | A withdrawal to another account (bank deposit) moves the balance between accounts; without another account, the money leaves or enters the system and shows in the cash flow |
 
 Payables (0.16.0) use the same entities, with the supplier in the payer field. Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
+
+### Estimates (version 0.18.0)
+| Entity | Main fields | Notes |
+|---|---|---|
+| `Procedimento` (procedure) | clinic, name, price, income category, active | The clinic's price list |
+| `Orcamento` (estimate) | clinic, patient, practitioner, date, validity, status (open, approved, refused), discount (administrators only), notes, receivable, approved or refused at/by, created by | Once approved, it becomes a receivable `Lancamento` and no longer changes |
+| `ItemOrcamento` (estimate item) | clinic, estimate, procedure (optional), description, teeth (FDI, comma-separated), surfaces or region, quantity, unit price | Description and price copied from the list at the time; changing the list does not change estimates |
+
+When a patient is permanently deleted, their estimates are deleted (teeth are health data) and their audit entries lose the personal data.
 
 ### System
 | Entity | Purpose |

@@ -124,6 +124,25 @@
 </div>
 {% endif %}
 
+{% if orcamentos is not None %}
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    {% translate "Orçamentos" %}
+    {% if pode.orcamentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'orcamentos:novo' %}?paciente={{ paciente.pk }}">{% translate "Novo orçamento" %}</a>{% endif %}
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for orcamento in orcamentos %}
+    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+      <span><a href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
+      {% include "orcamentos/_situacao.html" %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">{% translate "Nenhum orçamento." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 {% if financeiro %}
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">

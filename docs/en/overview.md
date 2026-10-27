@@ -30,6 +30,7 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 10. **Languages:** Portuguese, English and Spanish, chosen by each user (0.13.0).
 11. **Help:** user manual in the three languages inside the system; technical documentation for superusers only (0.14.0).
 12. **Finance:** receivables in installments, payments with method and account, receipts, debtors (0.15.0); payables, cash flow and reports (0.16.0); daily cash (0.17.0).
+13. **Estimates:** procedure price list and estimates with a dental chart, which become receivables when approved (0.18.0).
 
 ## Business model (under study)
 - **Free** app in the stores.

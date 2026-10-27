@@ -32,6 +32,8 @@ class Modulo(models.TextChoices):
     RECEBIMENTOS = "recebimentos", _("Recebimentos")
     # Accounts, categories and (0.16) payables and cash flow: administrators only.
     FINANCEIRO = "financeiro", _("Financeiro")
+    # Treatment estimates (0.18.0): written by practitioners and the front desk.
+    ORCAMENTOS = "orcamentos", _("Orçamentos")
 
 
 class Acao(models.TextChoices):
@@ -57,6 +59,7 @@ MATRIZ = {
         Modulo.CADASTROS: _VER,
         # Cancelling entries, reversing payments and discounts stay with administrators.
         Modulo.RECEBIMENTOS: _SEM_EXCLUIR,
+        Modulo.ORCAMENTOS: _SEM_EXCLUIR,
     },
     Papel.PROFISSIONAL: {
         Modulo.PACIENTES: _SEM_EXCLUIR,
@@ -65,6 +68,7 @@ MATRIZ = {
         Modulo.ANIVERSARIANTES: _VER,
         Modulo.PROFISSIONAIS: _VER,
         Modulo.CADASTROS: _VER,
+        Modulo.ORCAMENTOS: _SEM_EXCLUIR,
     },
 }
 

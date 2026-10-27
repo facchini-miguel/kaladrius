@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% if orcamento %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">{% if orcamento %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}{% else %}{% translate "Novo orçamento" %}{% endif %}</h1>
+<form method="post" style="max-width: 40rem;" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  {% include "includes/busca_paciente.html" with campo=form.paciente paciente=paciente %}
+  {% with campo=form.profissional %}{% include "includes/campo.html" %}{% endwith %}
+  <div class="row">
+    <div class="col-md-6">{% with campo=form.data %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with campo=form.validade %}{% include "includes/campo.html" %}{% endwith %}</div>
+  </div>
+  {% with campo=form.observacoes %}{% include "includes/campo.html" %}{% endwith %}
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% if orcamento %}{% url 'orcamentos:detalhe' orcamento.pk %}{% else %}{% url 'orcamentos:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

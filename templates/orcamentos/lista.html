@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Orçamentos" %} · Medical System{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "Orçamentos" %}</h1>
+  <div class="d-flex gap-2">
+    {% if pode.cadastros.ver %}<a class="btn btn-outline-primary" href="{% url 'orcamentos:procedimentos' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
+    {% if pode.orcamentos.criar %}<a class="btn btn-primary" href="{% url 'orcamentos:novo' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+  </div>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-6 col-md-3">
+    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
+      {% for valor, nome in situacoes %}<option value="{{ valor }}"{% if valor == situacao %} selected{% endif %}>{{ nome }}</option>{% endfor %}
+      <option value="todos"{% if situacao == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+</form>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead><tr><th>{% translate "Nº" %}</th><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
+    <tbody>
+      {% for orcamento in pagina %}
+      <tr>
+        <td><a href="{% url 'orcamentos:detalhe' orcamento.pk %}">{{ orcamento.pk }}</a></td>
+        <td class="text-nowrap">{{ orcamento.data|date:"SHORT_DATE_FORMAT" }}</td>
+        <td><a href="{% url 'orcamentos:detalhe' orcamento.pk %}">{{ orcamento.paciente.nome }}</a></td>
+        <td>{{ orcamento.profissional.nome|default:"—" }}</td>
+        <td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td>
+        <td>{% include "orcamentos/_situacao.html" %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum orçamento encontrado." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/paginacao.html" %}
+{% endblock %}
