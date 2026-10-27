@@ -44,7 +44,7 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
 def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
     pagina = cliente.get(reverse("inicio")).content.decode()
     for codigo in ("pt-br", "en", "es"):
-        assert f"img/bandeiras/{codigo}.svg" in pagina
+        assert f"img/bandeiras/{codigo}." in pagina  # CI serves hashed names (x.1a2b.svg)
     # Its own menu, before the user's menu (between the clinic and the user name).
     assert pagina.index("seletor-idioma") < pagina.index(reverse("trocar_senha"))
 
