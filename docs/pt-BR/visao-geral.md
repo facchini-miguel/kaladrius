@@ -38,7 +38,8 @@ Sistema de gestão de clínicas (odontológicas, médicas, de fisioterapia, psic
 | Fase | Entrega |
 |---|---|
 | **1** ✅ | Web da equipe com paridade de funções + dados fictícios de teste + Docker local. Concluída na 0.7.0 e publicada no Google Cloud |
+| Financeiro | Lançamentos a receber e a pagar, pagamentos, devedores, fluxo de caixa e caixa do dia (ver [plano-financeiro.md](plano-financeiro.md)) |
 | 2 | API + app para profissionais e equipe |
 | 3 | App para pacientes (login próprio, consultas, solicitação de horário, push) |
 | 4 | Planos, cobrança, cadastro self-service da clínica, termos (lançamento comercial) |
-| Futuro | Lembrete por WhatsApp, prontuário, financeiro, busca de endereço pelo CEP |
+| Futuro | Lembrete por WhatsApp, prontuário, orçamento e comissão, busca de endereço pelo CEP |

@@ -8,6 +8,7 @@
 | [arquitetura.md](arquitetura.md) | Stack, repositórios, infraestrutura, segurança |
 | [modelo-de-dados.md](modelo-de-dados.md) | Entidades, multi-clínica, relação com o sistema antigo |
 | [plano-fase-1.md](plano-fase-1.md) | Plano detalhado da fase 1 (web + dados de teste) |
+| [plano-financeiro.md](plano-financeiro.md) | Plano do módulo financeiro (a receber, a pagar, fluxo de caixa) |
 | [versionamento-e-releases.md](versionamento-e-releases.md) | Como numeramos versões e registramos as novidades |
 | [deploy.md](deploy.md) | Publicação no Google Cloud (free tier, IPv6), operação e backups |
 | [sistema-legado.md](sistema-legado.md) | Resumo do sistema PHP antigo usado como referência |

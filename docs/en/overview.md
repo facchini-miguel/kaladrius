@@ -38,7 +38,8 @@ A management system for clinics (dental, medical, physiotherapy, psychology, etc
 | Phase | Deliverable |
 |---|---|
 | **1** ✅ | Staff web app with feature parity + fake test data + local Docker. Completed in 0.7.0 and deployed on Google Cloud |
+| Finance | Receivables and payables, payments, debtors, cash flow and daily cash (see [financial-plan.md](financial-plan.md)) |
 | 2 | API + app for practitioners and staff |
 | 3 | App for patients (own login, appointments, slot requests, push) |
 | 4 | Plans, billing, clinic self-service signup, terms (commercial launch) |
-| Future | WhatsApp reminders, clinical records, finance, address lookup by postal code |
+| Future | WhatsApp reminders, clinical records, estimates and commission, address lookup by postal code |

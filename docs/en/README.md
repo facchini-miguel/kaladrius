@@ -8,6 +8,7 @@
 | [architecture.md](architecture.md) | Stack, repositories, infrastructure, security |
 | [data-model.md](data-model.md) | Entities, multi-tenancy, mapping from the legacy system |
 | [phase-1-plan.md](phase-1-plan.md) | Detailed plan for phase 1 (web app + test data) |
+| [financial-plan.md](financial-plan.md) | Financial module plan (receivables, payables, cash flow) |
 | [versioning-and-releases.md](versioning-and-releases.md) | How versions are numbered and release notes are recorded |
 | [deploy.md](deploy.md) | Google Cloud deployment (free tier, IPv6), operations and backups |
 | [legacy-system.md](legacy-system.md) | Summary of the old PHP system used as reference |
