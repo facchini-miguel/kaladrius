@@ -26,7 +26,7 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 | Platform superuser | MASTER | Everything, in every clinic |
 | Clinic administrator | ADMINISTRADOR | Everything within their own clinic |
 | Front desk | — | Schedule, patients, recalls, birthdays |
-| Practitioner | — | Schedule and patients. Currently sees and changes the schedule of **every** practitioner in the clinic; limiting it to their own schedule is part of the matrix review |
+| Practitioner | — | Schedule and patients. Sees and changes **only their own schedule**: that of the practitioner record linked to their user in Records > Practitioners (decision 044). Without a linked record the schedule is empty, with a notice |
 
 Each role gets `view`, `create`, `change` and `delete` permissions per module. The matrix lives in `apps/core/permissoes.py` and applies both on the server (the request is blocked) and on screen (buttons and menus are hidden). A detailed review is planned after phase 1, as agreed.
 
@@ -72,7 +72,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 - `RegistroAuditoria` (`apps/auditoria`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
-- Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin).
+- Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days.
 - **Records > Audit** screen, clinic administrator only, filtered by the current clinic. Changes to user accounts (which do not belong to a clinic) are filed under the clinic where they were made. Logins do not belong to a clinic and are shown only to superusers, in the admin.
 
 ## Documents and formats

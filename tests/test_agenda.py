@@ -11,6 +11,7 @@ from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.core.isolamento import SemClinicaAtual, usar_clinica
 from apps.core.models import Papel
 from apps.pacientes.models import Paciente
+from apps.profissionais.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -289,13 +290,54 @@ def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissio
     assert set(resposta.context["form"].errors) >= {"profissional", "tipo", "paciente"}
 
 
+def cliente_da_dra_ana(cenario, criar_usuario, cliente_de):
+    """A practitioner user linked to Dra. Ana's record."""
+    usuario = criar_usuario("dra", cenario["clinica"], Papel.PROFISSIONAL)
+    with usar_clinica(cenario["clinica"]):
+        Profissional.objects.filter(pk=cenario["ana"].pk).update(usuario=usuario)
+    return cliente_de(usuario)
+
+
 def test_profissional_agenda_mas_nao_exclui(cenario, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("dra", cenario["clinica"], Papel.PROFISSIONAL))
+    cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
     assert cliente.post(reverse("agenda:novo"), dados(cenario)).status_code == 204
     [agendamento] = agendamentos(cenario)
     assert cliente.post(reverse("agenda:excluir", args=[agendamento.pk])).status_code == 403
     formulario = cliente.get(reverse("agenda:editar", args=[agendamento.pk])).content.decode()
     assert "Excluir" not in formulario
+
+
+def test_profissional_so_ve_a_propria_agenda(cenario, criar_usuario, cliente_de):
+    assert agendar(cenario, profissional=cenario["bruno"].pk).status_code == 204
+    [do_bruno] = agendamentos(cenario)
+    # The front desk sees every practitioner (checked first: the test client is shared).
+    resposta = cenario["cliente"].get(reverse("agenda:calendario"))
+    assert len(resposta.context["profissionais"]) == 2
+    cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
+
+    resposta = cliente.get(reverse("agenda:calendario"), {"profissional": cenario["bruno"].pk})
+    assert [p.nome for p in resposta.context["profissionais"]] == ["Dra. Ana"]
+    assert resposta.context["profissional"] == cenario["ana"]
+    periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
+    eventos = cliente.get(
+        reverse("agenda:eventos"), {**periodo, "profissional": cenario["bruno"].pk}
+    )
+    assert eventos.json() == []
+    assert cliente.get(reverse("agenda:editar", args=[do_bruno.pk])).status_code == 404
+
+    resposta = cliente.post(
+        reverse("agenda:novo"),
+        dados(cenario, profissional=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00"),
+    )
+    assert resposta.status_code == 200
+    assert "profissional" in resposta.context["form"].errors
+
+
+def test_profissional_sem_cadastro_ligado_nao_ve_agenda(cenario, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("sem_cadastro", cenario["clinica"], Papel.PROFISSIONAL))
+    resposta = cliente.get(reverse("agenda:calendario"))
+    assert resposta.context["profissionais"] == []
+    assert "não está ligado a um cadastro de profissional" in resposta.content.decode()
 
 
 def test_sugestoes_de_pacientes_so_da_clinica(cenario, clinica_b):

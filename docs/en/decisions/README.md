@@ -49,3 +49,5 @@ Each row is a decision, with date and reason. If a decision changes, the old row
 | 041 | 2026-10-27 | Login attempt limiting counts the **/48 network** for IPv6 (and the address for IPv4) | On an IPv6-only server, counting per address let an attacker switch addresses at will | Accepted |
 | 042 | 2026-10-27 | No password recovery by e-mail; changed by the user (menu with their name) or by the clinic administrator | The server sends no e-mail; the recovery pages would never deliver anything | Accepted |
 | 043 | 2026-10-27 | Backups retried automatically (systemd) and a web warning for superusers when the newest is older than 26 hours | Cloud Monitoring alerts are paid and the server sends no e-mail | Accepted |
+| 044 | 2026-10-27 | **Practitioners see and change only their own schedule** (the practitioner record linked to their user); front desk and administrators see all | Owner's request | Accepted (owner) |
+| 045 | 2026-10-27 | Refused login attempts (they hold the username typed) are **deleted after 30 days**, daily | Personal data kept only as long as useful to investigate an attack (LGPD, necessity) | Accepted (owner) |

@@ -24,7 +24,7 @@
 | Superusuário da plataforma | MASTER | Tudo, em todas as clínicas |
 | Administrador da clínica | ADMINISTRADOR | Tudo dentro da própria clínica |
 | Recepção | — | Agenda, pacientes, rechamadas, aniversariantes |
-| Profissional | — | Agenda e pacientes. Hoje vê e altera a agenda de **todos** os profissionais da clínica; limitar à própria agenda faz parte da revisão da matriz |
+| Profissional | — | Agenda e pacientes. Vê e altera **só a própria agenda**: a do cadastro de profissional ligado ao seu usuário em Cadastros > Profissionais (decisão 044). Sem cadastro ligado, a agenda fica vazia, com um aviso |
 
 Cada papel recebe as permissões `ver`, `criar`, `alterar` e `excluir` por módulo. A matriz fica em `apps/core/permissoes.py` e vale tanto no servidor (a requisição é bloqueada) quanto na tela (botões e menus somem). A revisão detalhada fica para depois da fase 1, como combinado.
 
@@ -70,7 +70,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 - `RegistroAuditoria` (`apps/auditoria`) guarda **quem**, **quando**, **de qual IP**, **qual ação** e, nas alterações, o **antes e depois** de cada campo.
 - Registrado automaticamente (sinais do Django): criar, alterar e excluir Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo e Usuário. Também: abrir a ficha de um paciente, entrar, sair e tentativas de entrada recusadas.
 - **Nunca** grava senhas nem o hash delas (a troca de senha aparece só como "alterada").
-- Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura).
+- Os registros guardam os códigos de clínica e usuário sem chave estrangeira rígida: o histórico sobrevive à exclusão de um usuário ou clínica. Não podem ser editados nem excluídos (admin somente leitura), com uma exceção: as tentativas de entrada recusadas, que guardam o usuário digitado, são apagadas depois de 30 dias pelo comando `aplicar_retencao`, que o servidor roda todo dia junto com o backup (decisão 045). Nos backups, elas duram mais 30 dias.
 - Tela **Cadastros > Auditoria**, só para o administrador da clínica, filtrada pela clínica atual. Alterações em contas de usuário (que não pertencem a uma clínica) ficam registradas na clínica em que foram feitas. Entradas no sistema (login) não pertencem a uma clínica e aparecem só para o superusuário, no admin.
 
 ## Documentos e formatos

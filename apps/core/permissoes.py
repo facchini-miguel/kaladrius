@@ -75,6 +75,19 @@ def pode(request, modulo, acao):
     return acao in MATRIZ.get(vinculo.papel, {}).get(modulo, frozenset())
 
 
+def so_a_propria_agenda(request):
+    """Practitioners see and change only their own schedule; the rest of the team sees all.
+
+    "Own" means the Profissional record linked to the user (Cadastros > Profissionais).
+    """
+    vinculo = getattr(request, "vinculo", None)
+    return (
+        not request.user.is_superuser
+        and vinculo is not None
+        and vinculo.papel == Papel.PROFISSIONAL
+    )
+
+
 def tabela_permissoes(request):
     """All permissions as {modulo: {acao: bool}}, for use in templates."""
     return {

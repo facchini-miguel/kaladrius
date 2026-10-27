@@ -1,5 +1,10 @@
+import datetime
+
 import pytest
+from axes.models import AccessAttempt
+from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.auditoria.models import RegistroAuditoria
 from apps.core.isolamento import usar_clinica
@@ -112,3 +117,21 @@ def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
     usuario = criar_usuario("temporario")
     usuario.delete()
     assert RegistroAuditoria.objects.filter(objeto_descricao="temporario").exists()
+
+
+def test_retencao_apaga_so_tentativas_recusadas_antigas():
+    antigo = timezone.now() - datetime.timedelta(days=31)
+    recente = timezone.now() - datetime.timedelta(days=29)
+    for momento in (antigo, recente):
+        for acao in (Acao.LOGIN_FALHOU, Acao.LOGIN):
+            registro = RegistroAuditoria.objects.create(acao=acao)
+            RegistroAuditoria.objects.filter(pk=registro.pk).update(momento=momento)
+        tentativa = AccessAttempt.objects.create(username="quem", failures_since_start=1)
+        AccessAttempt.objects.filter(pk=tentativa.pk).update(attempt_time=momento)
+
+    call_command("aplicar_retencao")
+
+    restantes = RegistroAuditoria.objects.values_list("acao", "momento")
+    assert sorted(acao for acao, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]
+    assert all(m == recente for acao, m in restantes if acao == Acao.LOGIN_FALHOU)
+    assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]

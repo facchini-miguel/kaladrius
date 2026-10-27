@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
+from apps.core.permissoes import Acao, Modulo, exige_permissao, pode, so_a_propria_agenda
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
@@ -65,6 +65,17 @@ def tipo_excluir(request, pk):
 SESSAO_PROFISSIONAL = "agenda_profissional"
 
 
+def _profissionais(request):
+    """Practitioners whose schedule the user may see and change."""
+    if so_a_propria_agenda(request):
+        return Profissional.objects.filter(usuario=request.user)
+    return Profissional.objects.all()
+
+
+def _agendamentos(request):
+    return Agendamento.objects.filter(profissional__in=_profissionais(request))
+
+
 def _resposta_sucesso(mensagem):
     """Empty HTMX response that tells the page to close the modal and reload events."""
     resposta = HttpResponse(status=204)
@@ -91,7 +102,7 @@ def _periodo(request):
 
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def calendario(request):
-    profissionais = list(Profissional.objects.filter(ativo=True))
+    profissionais = list(_profissionais(request).filter(ativo=True))
     escolhido = request.GET.get("profissional") or request.session.get(SESSAO_PROFISSIONAL)
     profissional = next(
         (p for p in profissionais if str(p.pk) == str(escolhido)),
@@ -125,6 +136,7 @@ def calendario(request):
             "profissional": profissional,
             "tipos": TipoAtendimento.objects.filter(ativo=True),
             "configuracao": configuracao,
+            "so_a_propria": so_a_propria_agenda(request),
         },
     )
 
@@ -136,9 +148,11 @@ def eventos(request):
     if periodo is None or not profissional.isdecimal():
         return JsonResponse({"erro": "Parâmetros inválidos."}, status=400)
     inicio, fim = periodo
-    agendamentos = Agendamento.objects.filter(
-        profissional_id=int(profissional), inicio__lt=fim, fim__gt=inicio
-    ).select_related("tipo", "paciente")
+    agendamentos = (
+        _agendamentos(request)
+        .filter(profissional_id=int(profissional), inicio__lt=fim, fim__gt=inicio)
+        .select_related("tipo", "paciente")
+    )
     return JsonResponse(
         [
             {
@@ -174,7 +188,11 @@ def novo(request):
         if request.GET.get(parametro)
     }
     form = AgendamentoForm(
-        request.POST or None, initial=inicial, instance=Agendamento(), clinica=request.clinica
+        request.POST or None,
+        initial=inicial,
+        instance=Agendamento(),
+        clinica=request.clinica,
+        profissionais=_profissionais(request),
     )
     if request.method == "POST" and form.is_valid():
         try:
@@ -193,8 +211,13 @@ def novo(request):
 
 @exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
 def editar(request, pk):
-    agendamento = get_object_or_404(Agendamento.objects.select_related("paciente"), pk=pk)
-    form = AgendamentoForm(request.POST or None, instance=agendamento, clinica=request.clinica)
+    agendamento = get_object_or_404(_agendamentos(request).select_related("paciente"), pk=pk)
+    form = AgendamentoForm(
+        request.POST or None,
+        instance=agendamento,
+        clinica=request.clinica,
+        profissionais=_profissionais(request),
+    )
     if request.method == "POST" and form.is_valid():
         try:
             with transaction.atomic():
@@ -210,7 +233,7 @@ def editar(request, pk):
 
 @exige_permissao(Modulo.AGENDA, Acao.EXCLUIR)
 def excluir(request, pk):
-    agendamento = get_object_or_404(Agendamento.objects.select_related("paciente"), pk=pk)
+    agendamento = get_object_or_404(_agendamentos(request).select_related("paciente"), pk=pk)
     if request.method == "POST":
         excluidos = Agendamento.objects.filter(pk=agendamento.pk)
         if request.POST.get("escopo") == "serie" and agendamento.serie:

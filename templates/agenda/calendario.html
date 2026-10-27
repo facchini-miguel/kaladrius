@@ -22,7 +22,12 @@
 
 {% if not profissionais %}
 <div class="alert alert-info">
+  {% if so_a_propria %}
+  Seu usuário ainda não está ligado a um cadastro de profissional ativo, então não há agenda para mostrar.
+  Peça ao administrador da clínica para ligá-lo em Cadastros &gt; Profissionais.
+  {% else %}
   Nenhum profissional ativo nesta clínica.
+  {% endif %}
   {% if pode.profissionais.criar %}<a href="{% url 'profissionais:novo' %}">Cadastre um profissional</a> para usar a agenda.{% endif %}
 </div>
 {% else %}

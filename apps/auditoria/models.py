@@ -3,7 +3,8 @@ from django.db import models
 
 
 class RegistroAuditoria(models.Model):
-    """Who did what, when and from where (LGPD accountability). Never edited or deleted.
+    """Who did what, when and from where (LGPD accountability). Never edited or deleted,
+    except failed logins, deleted after 30 days by the aplicar_retencao command.
 
     Not a ModeloDaClinica: entries must be written in every context (including
     platform code running with sem_isolamento), and some have no clinic (logins).

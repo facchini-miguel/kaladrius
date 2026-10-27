@@ -56,7 +56,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             "descricao": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinica, profissionais=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.clinica = clinica
         self.intervalos = []
@@ -65,7 +65,9 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             agendamento.clinica = clinica
 
         # Inactive practitioners/types are hidden, except the ones already in use here.
-        self.fields["profissional"].queryset = Profissional.objects.filter(
+        if profissionais is None:
+            profissionais = Profissional.objects.all()
+        self.fields["profissional"].queryset = profissionais.filter(
             Q(ativo=True) | Q(pk=agendamento.profissional_id)
         )
         self.fields["tipo"].queryset = TipoAtendimento.objects.filter(

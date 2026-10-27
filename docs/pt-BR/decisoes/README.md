@@ -49,3 +49,5 @@ Cada linha é uma decisão tomada, com data e motivo. Se uma decisão mudar, a l
 | 041 | 2026-10-27 | Limite de tentativas de login conta a **rede /48** em IPv6 (e o endereço em IPv4) | Num servidor só IPv6, contar por endereço deixava o atacante trocar de endereço à vontade | Aceita |
 | 042 | 2026-10-27 | Sem recuperação de senha por e-mail; troca pelo próprio usuário (menu com o nome) ou pelo administrador da clínica | O servidor não envia e-mails; as páginas de recuperação nunca entregariam nada | Aceita |
 | 043 | 2026-10-27 | Backups com novas tentativas automáticas (systemd) e aviso na web para superusuários quando o último tiver mais de 26 horas | Alertas do Cloud Monitoring são pagos e o servidor não envia e-mails | Aceita |
+| 044 | 2026-10-27 | O **profissional vê e altera só a própria agenda** (o cadastro de profissional ligado ao seu usuário); recepção e administrador veem todas | Pedido do titular | Aceita (titular) |
+| 045 | 2026-10-27 | Tentativas de entrada recusadas (guardam o usuário digitado) são **apagadas após 30 dias**, diariamente | Dado pessoal guardado só pelo tempo útil para investigar um ataque (LGPD, necessidade) | Aceita (titular) |

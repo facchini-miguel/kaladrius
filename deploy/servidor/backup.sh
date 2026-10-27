@@ -19,3 +19,7 @@ echo "Backup enviado: gs://$BUCKET_BACKUP/$nome ($(du -h "$arquivo" | cut -f1))"
 # Recorded in the database: superusers see a warning in the web app when backups stop.
 compose exec -T app python manage.py registrar_backup "$nome" "$(stat -c %s "$arquivo")" \
   || echo "Aviso: backup enviado, mas não foi possível registrá-lo no sistema."
+
+# Daily retention: failed login records older than 30 days are deleted (decision 045).
+compose exec -T app python manage.py aplicar_retencao \
+  || echo "Aviso: não foi possível apagar os registros antigos."
