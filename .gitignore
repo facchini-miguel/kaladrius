@@ -36,3 +36,7 @@ htmlcov/
 *.swp
 .DS_Store
 *.mo
+
+# Bank statements (real ones hold financial data; fake ones are generated on demand)
+*.ofx
+*.OFX

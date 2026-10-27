@@ -23,3 +23,6 @@ backups
 **/*.rar
 **/*.zip
 **/*.7z
+
+*.ofx
+*.OFX
