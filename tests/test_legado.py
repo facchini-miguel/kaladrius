@@ -11,7 +11,7 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Clinica
 from apps.legado.dump import DumpInvalido, ler_tabelas
-from apps.legado.importacao import ImportacaoRecusada, importar
+from apps.legado.importacao import ImportacaoRecusada, _documento, importar
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -190,13 +190,29 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
     assert (empresa.razao_social, empresa.inscricao_estadual) == ("Empresa Teste Ltda", "123")
 
 
+@pytest.mark.parametrize(
+    ("bruto", "tipo", "esperado"),
+    [
+        ("012.345.678-90", Paciente.Tipo.FISICA, ("01234567890", None)),
+        ("12345678-90", Paciente.Tipo.FISICA, ("01234567890", None)),
+        # cpf_valido ignores letters: a CPF with junk is not taken as valid.
+        ("012.345.678-90X", Paciente.Tipo.FISICA, ("", "012.345.678-90X")),
+        ("isento", Paciente.Tipo.FISICA, ("", "isento")),
+        ("", Paciente.Tipo.FISICA, ("", None)),
+        ("1222333000128", Paciente.Tipo.JURIDICA, ("01222333000128", None)),
+    ],
+)
+def test_documento(bruto, tipo, esperado):
+    assert _documento(bruto, tipo) == esperado
+
+
 def test_agenda_e_rechamadas(importado):
     _, clinica = importado
     agendamentos = dados(clinica, Agendamento)
-    assert [a.descricao.splitlines()[0] if a.descricao else "" for a in agendamentos] == [
+    assert [a.descricao.splitlines()[0] for a in agendamentos] == [
         "Fulano - extração",
         "Término igual ao início",
-        "",
+        "Cor Nova",  # no legacy description: the type name, so the slot stays editable
         "Até tarde",
     ]
     corrigido = agendamentos[1]

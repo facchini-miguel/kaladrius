@@ -43,7 +43,7 @@ docker compose exec -T app python manage.py importar_legado - --clinica "Nome da
 | `dentistas` | Profissionais (sem o `_` que o sistema antigo usava no início do nome para ordenar) |
 | `agenda_cor` | Tipos de atendimento da clínica, associados pelo nome (sem acentos) |
 | `pessoas` | Pacientes. A cidade é associada à lista do IBGE pelo nome; bairro e logradouro viram texto; o zero à esquerda perdido do CPF é recuperado; a data de cadastro é mantida |
-| `agendax` | Agendamentos, só com a descrição, como no sistema antigo (sem paciente vinculado) |
+| `agendax` | Agendamentos, só com a descrição, como no sistema antigo (sem paciente vinculado). Os sem descrição (horários bloqueados, como "Ocupado") recebem o nome do tipo, porque a agenda exige paciente ou descrição |
 | `agenda` (rechamadas) | Rechamadas. As de datas passadas entram como concluídas, porque o sistema antigo não marcava conclusão |
 | Usuários e grupos | Não importados: a equipe é cadastrada em **Cadastros > Equipe** |
 

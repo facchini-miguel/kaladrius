@@ -1,15 +1,16 @@
 #!/bin/bash
-# Pull the latest app image and restart the stack when it changed. Runs every 5 minutes
-# (systemd timer). Use --forcar to restart even without a new image.
+# Pull the latest app image and restart the stack when it differs from the one last
+# installed successfully. Runs every 5 minutes (systemd timer), so a failed update is
+# retried on the next run. Use --forcar to restart even without a new image.
 set -euo pipefail
 source "$(dirname "$0")/comum.sh"
 
 entrar_no_registro
-antes=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP" 2>/dev/null || true)
 docker pull -q "$IMAGEM_APP" >/dev/null
-depois=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP")
+atual=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP")
+instalada=$(cat "$IMAGEM_INSTALADA" 2>/dev/null || true)
 
-if [ "$antes" != "$depois" ] || [ "${1:-}" = "--forcar" ]; then
+if [ "$atual" != "$instalada" ] || [ "${1:-}" = "--forcar" ]; then
   extrair_arquivos_de_deploy
   source "$DIR/bin/comum.sh"  # the helpers may have changed with the new image
   instalar_agendamentos
@@ -18,6 +19,8 @@ if [ "$antes" != "$depois" ] || [ "${1:-}" = "--forcar" ]; then
     exit 0
   fi
   compose up -d --remove-orphans
+  # Recorded only after a successful start: until then every run tries again.
+  echo "$atual" > "$IMAGEM_INSTALADA"
   docker image prune -f >/dev/null
   echo "Sistema atualizado: $(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGEM_APP")"
 fi

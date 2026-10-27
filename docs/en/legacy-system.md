@@ -43,7 +43,7 @@ docker compose exec -T app python manage.py importar_legado - --clinica "Clinic 
 | `dentistas` | Practitioners (without the leading `_` the legacy system used for sorting) |
 | `agenda_cor` | The clinic's appointment types, matched by name (accent-insensitive) |
 | `pessoas` | Patients. The city is matched to the IBGE list by name; district and street become text; the lost leading zero of CPFs is restored; the registration date is kept |
-| `agendax` | Appointments, with the description only, as in the legacy system (no linked patient) |
+| `agendax` | Appointments, with the description only, as in the legacy system (no linked patient). Those without a description (blocked slots such as "Ocupado") get the type name, since the schedule requires a patient or a description |
 | `agenda` (recalls) | Recalls. Past ones are imported as done, since the legacy system had no "done" flag |
 | Users and groups | Not imported: the team is created in **Records > Team** |
 

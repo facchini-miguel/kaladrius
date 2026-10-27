@@ -64,8 +64,12 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
         era_admin_ativo = self.initial.get("papel") == Papel.ADMIN and self.initial.get("ativo")
         continua_admin = dados.get("papel") == Papel.ADMIN and dados.get("ativo")
         if era_admin_ativo and not continua_admin:
+            # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Vinculo.objects.filter(
-                clinica_id=self.instance.clinica_id, papel=Papel.ADMIN, ativo=True
+                clinica_id=self.instance.clinica_id,
+                papel=Papel.ADMIN,
+                ativo=True,
+                usuario__is_active=True,
             ).exclude(pk=self.instance.pk)
             if not outros.exists():
                 raise forms.ValidationError(

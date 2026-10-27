@@ -112,11 +112,13 @@ def _documento(bruto, tipo):
     documento = normalizar_cnpj(original)
     if not documento:
         return "", None
+    so_digitos = documento.isascii() and documento.isdigit()
     if tipo == Paciente.Tipo.FISICA:
-        if documento.isdigit() and 8 <= len(documento) <= 11:
+        if so_digitos and 8 <= len(documento) <= 11:
             documento = documento.zfill(11)  # leading zeros lost in the legacy system
-        return (documento, None) if cpf_valido(documento) else ("", original)
-    if documento.isdigit() and 12 <= len(documento) <= 14:
+        # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
+        return (documento, None) if so_digitos and cpf_valido(documento) else ("", original)
+    if so_digitos and 12 <= len(documento) <= 14:
         documento = documento.zfill(14)
     return (documento, None) if cnpj_valido(documento) else ("", original)
 
@@ -351,7 +353,9 @@ class _Importador:
             if None in (profissional, tipo, dia, inicio, fim):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
-            descricao = _texto(linha["descricao"])
+            # Blocked slots ("Ocupado") had no description; the schedule form requires a
+            # patient or a description, so the type name keeps them editable.
+            descricao = _texto(linha["descricao"]) or tipo.nome
             inicio = timezone.make_aware(datetime.datetime.combine(dia, inicio))
             fim = timezone.make_aware(datetime.datetime.combine(dia, fim))
             if fim <= inicio:

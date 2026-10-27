@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from apps.auditoria.models import RegistroAuditoria
 from apps.core.models import Papel, Vinculo
+from apps.equipe.forms import VinculoForm
 
 pytestmark = pytest.mark.django_db
 
@@ -125,6 +126,25 @@ def test_clinica_nao_fica_sem_administrador(
     assert "pelo menos um administrador ativo" in resposta.content.decode()
     vinculo.refresh_from_db()
     assert vinculo.papel == Papel.ADMIN
+
+
+def test_administrador_com_conta_desativada_nao_conta(
+    cliente_admin, admin_a, clinica_a, criar_usuario
+):
+    desativado = criar_usuario("desativado", clinica_a, Papel.ADMIN, first_name="Desativado")
+    desativado.is_active = False
+    desativado.save()
+    outro = criar_usuario("outro_admin", clinica_a, Papel.ADMIN, first_name="Outro")
+    # With "outro_admin" demoted, admin_a is still an active administrator.
+    url = reverse("equipe:editar", args=[outro.vinculos.get().pk])
+    assert cliente_admin.post(url, dados_edicao(first_name="Outro")).status_code == 302
+
+    # Now admin_a cannot be demoted: the only other administrator cannot log in.
+    form = VinculoForm(
+        {"papel": Papel.RECEPCAO, "ativo": "on"}, instance=admin_a.vinculos.get(), editor=outro
+    )
+    assert not form.is_valid()
+    assert "pelo menos um administrador ativo" in str(form.errors)
 
 
 def test_vinculo_de_outra_clinica_da_404(cliente_admin, clinica_b, criar_usuario):

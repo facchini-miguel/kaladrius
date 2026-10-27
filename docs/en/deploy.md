@@ -41,7 +41,7 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 
 ## How the server works
 - `deploy/servidor/instalar.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
-- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it changed, extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. Migrations run when the app starts.
+- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it differs from the last one installed successfully (`/opt/medical-system/imagem-instalada`), extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. If anything fails, the next run tries again. Migrations run when the app starts.
 - `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system. If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
 - The production compose file reads its `${...}` variables from `.env`, linked next to it (`/opt/medical-system/release/.env` → `../.env`). Only the app receives the whole file.
 - Settings and passwords: `/opt/medical-system/.env` (root only). Local copy in `.env.producao`, ignored by Git.
