@@ -13,7 +13,7 @@ En **Pacientes > Presupuestos**, el profesional, la recepción y el administrado
 
 El **odontograma** usa la numeración FDI: dientes superiores arriba, inferiores abajo y dientes de leche en las filas del medio, con la derecha del paciente a la izquierda de la pantalla. Un presupuesto sin dientes vale para toda la boca.
 
-Solo el administrador puede dar **descuento** sobre el total.
+Quien escribe el presupuesto (recepción, profesional o administrador) puede dar **descuento** sobre el total.
 
 ## Imprimir
 **Imprimir** abre el presupuesto listo para imprimir o guardar como PDF, con los datos de la clínica, el odontograma con los dientes marcados, los ítems, el total, la validez y las líneas de firma.

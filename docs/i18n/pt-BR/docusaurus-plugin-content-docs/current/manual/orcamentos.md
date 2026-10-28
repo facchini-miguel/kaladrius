@@ -13,7 +13,7 @@ Em **Pacientes > Orçamentos**, o profissional, a recepção e o administrador m
 
 O **odontograma** usa a numeração FDI: dentes superiores em cima, inferiores embaixo e dentes de leite nas linhas do meio, com a direita do paciente à esquerda da tela. Um orçamento sem dentes vale para a boca toda.
 
-O **desconto** no total só pode ser dado pelo administrador.
+Quem escreve o orçamento (recepção, profissional ou administrador) pode dar **desconto** no total.
 
 ## Imprimir
 **Imprimir** abre o orçamento pronto para imprimir ou salvar em PDF, com os dados da clínica, o odontograma com os dentes marcados, os itens, o total, a validade e as linhas de assinatura.

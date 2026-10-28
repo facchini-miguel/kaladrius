@@ -13,7 +13,7 @@ In **Patients > Estimates**, practitioners, the front desk and the administrator
 
 The **dental chart** uses FDI numbering: upper teeth on top, lower teeth below and baby teeth in the middle rows, with the patient's right on the left of the screen. An estimate without teeth applies to the whole mouth.
 
-Only the administrator can give a **discount** on the total.
+Whoever writes the estimate (front desk, practitioner or administrator) can give a **discount** on the total.
 
 ## Printing
 **Print** opens the estimate ready to print or save as PDF, with the clinic's details, the dental chart with the marked teeth, the items, the total, the validity and signature lines.

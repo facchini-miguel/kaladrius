@@ -110,7 +110,8 @@ def editar(request, pk):
 def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     aberto = orcamento.situacao == Orcamento.Situacao.ABERTO
-    pode_desconto = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
+    # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
+    pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
     return render(
         request,
         "orcamentos/detalhe.html",
@@ -169,7 +170,7 @@ def item_remover(request, pk, item):
 
 
 @require_POST
-@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def desconto(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:

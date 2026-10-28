@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.27.1
+  data: 2026-10-28
+  titulo:
+    pt-br: Desconto no orçamento para toda a equipe
+    en: Estimate discount for the whole team
+    es: Descuento en el presupuesto para todo el equipo
+  itens:
+    - tipo: melhoria
+      modulo: Orçamentos
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Quem escreve o orçamento (recepção, profissional ou administrador) agora também pode
+          dar desconto no total. Antes, só o administrador podia.
+        en: >
+          Whoever writes the estimate (front desk, practitioner or administrator) can now also
+          give a discount on its total. Before, only the administrator could.
+        es: >
+          Quien escribe el presupuesto (recepción, profesional o administrador) ahora también
+          puede dar descuento sobre el total. Antes, solo el administrador podía.
+
 - versao: 0.27.0
   data: 2026-10-28
   titulo:

@@ -112,25 +112,23 @@ def test_itens_invalidos(cenario, dados):
         assert not orcamento.itens.exists()
 
 
-def test_desconto_so_do_administrador(cenario):
+def test_quem_escreve_o_orcamento_da_desconto(cenario):
+    # Front desk, practitioner and administrator (0.27.1, decision 074).
     recepcao = entrar(cenario, "recepcao")
     orcamento = criar_orcamento(cenario, recepcao)
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk)
-    assert (
-        recepcao.get(reverse("orcamentos:detalhe", args=[orcamento.pk])).context["desconto_form"]
-        is None
-    )
-    assert (
-        recepcao.post(
-            reverse("orcamentos:desconto", args=[orcamento.pk]), {"desconto": "100"}
-        ).status_code
-        == 403
-    )
-    admin = entrar(cenario, "admin")
-    admin.post(reverse("orcamentos:desconto", args=[orcamento.pk]), {"desconto": "5000"})  # > total
-    admin.post(reverse("orcamentos:desconto", args=[orcamento.pk]), {"desconto": "200"})
+    url = reverse("orcamentos:desconto", args=[orcamento.pk])
+    assert recepcao.get(reverse("orcamentos:detalhe", args=[orcamento.pk])).context["desconto_form"]
+    recepcao.post(url, {"desconto": "5000"})  # more than the total: refused
+    orcamento.refresh_from_db()
+    assert orcamento.desconto == 0
+    recepcao.post(url, {"desconto": "200"})
     orcamento.refresh_from_db()
     assert orcamento.desconto == Decimal("200.00")
+    for quem, valor in [("profissional", "150"), ("admin", "100")]:
+        entrar(cenario, quem).post(url, {"desconto": valor})
+        orcamento.refresh_from_db()
+        assert orcamento.desconto == Decimal(valor)
 
 
 def test_aprovar_vira_lancamento_a_receber(cenario):
