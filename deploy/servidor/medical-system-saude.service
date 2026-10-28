@@ -1,5 +1,5 @@
 [Unit]
-Description=Medical System: amostra da saúde do servidor (processador, memória, disco, rede)
+Description=Kaladrius: amostra da saúde do servidor (processador, memória, disco, rede)
 After=docker.service
 
 [Service]

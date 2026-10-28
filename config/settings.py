@@ -1,4 +1,4 @@
-"""Medical System settings.
+"""Kaladrius settings.
 
 All sensitive or per-environment values come from environment variables (.env).
 """
@@ -9,6 +9,10 @@ from pathlib import Path
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.csp import CSP
+
+# Name shown to users (decisions 060 and 068). Infrastructure names (database, Compose project,
+# server services, Google Cloud) keep "medical-system" on purpose.
+NOME_SISTEMA = "Kaladrius"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

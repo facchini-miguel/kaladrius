@@ -2,7 +2,7 @@
 
 Versión 1 · 27/10/2026
 
-Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Medical System**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
+Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
 ## 1. Términos usados
 - **Titular:** la persona a quien se refieren los datos (por ejemplo, el paciente).
@@ -13,7 +13,7 @@ Esta política explica cómo se tratan los datos personales de pacientes, respon
 - **Anonimización:** retirada de los datos que permiten identificar a la persona.
 
 ## 2. Quién es responsable de sus datos
-La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y para qué se usan los datos y responde por ello ante usted y ante la Autoridad Nacional de Protección de Datos de Brasil (ANPD). Quien desarrolla y mantiene Medical System actúa como **encargado del tratamiento**, guardando los datos en nombre de la clínica, sin usarlos para ningún otro fin.
+La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y para qué se usan los datos y responde por ello ante usted y ante la Autoridad Nacional de Protección de Datos de Brasil (ANPD). Quien desarrolla y mantiene Kaladrius actúa como **encargado del tratamiento**, guardando los datos en nombre de la clínica, sin usarlos para ningún otro fin.
 
 **Canal de atención al titular (delegado de protección de datos):** el de la propia clínica. En el sistema, su nombre, correo y teléfono aparecen al inicio de esta página. Las clínicas pequeñas pueden mantener este canal de atención en lugar de designar un delegado (Resolución CD/ANPD n.º 2/2022).
 

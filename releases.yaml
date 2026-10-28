@@ -1,8 +1,36 @@
-# Medical System version history.
+# Kaladrius version history.
 # Single source for the "Novidades" (What's new) web page, the app API and the footer.
 # Format and rules: docs/en/versioning-and-releases.md
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
+
+- versao: 0.25.0
+  data: 2026-10-28
+  titulo:
+    pt-br: O sistema agora se chama Kaladrius
+    en: The system is now called Kaladrius
+    es: El sistema ahora se llama Kaladrius
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          O Medical System passou a se chamar Kaladrius, o nome da ave das lendas medievais
+          que cura os doentes com o olhar (a do logo). O nome novo aparece na barra superior,
+          na tela de entrada, nas abas do navegador e na política de privacidade. O endereço
+          também mudou: agora é https://kaladrius.duckdns.org. Nada muda nos seus dados.
+        en: >
+          Medical System is now called Kaladrius, the name of the bird of medieval legends that
+          cures the sick by looking at them (the one in the logo). The new name shows on the
+          top bar, the login page, the browser tabs and the privacy policy. The address changed
+          too: it is now https://kaladrius.duckdns.org. Nothing changes in your data.
+        es: >
+          Medical System pasó a llamarse Kaladrius, el nombre del ave de las leyendas medievales
+          que cura a los enfermos con la mirada (la del logo). El nombre nuevo aparece en la
+          barra superior, en la pantalla de entrada, en las pestañas del navegador y en la
+          política de privacidad. La dirección también cambió: ahora es
+          https://kaladrius.duckdns.org. Nada cambia en sus datos.
 
 - versao: 0.24.2
   data: 2026-10-28

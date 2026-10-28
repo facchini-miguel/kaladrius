@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
@@ -6,8 +7,8 @@ from apps.ajuda import views as ajuda_views
 
 from .api import api
 
-admin.site.site_header = "Medical System: administração"
-admin.site.site_title = "Medical System"
+admin.site.site_header = f"{settings.NOME_SISTEMA}: administração"
+admin.site.site_title = settings.NOME_SISTEMA
 admin.site.index_title = "Administração"
 
 urlpatterns = [

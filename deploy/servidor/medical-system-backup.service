@@ -1,5 +1,5 @@
 [Unit]
-Description=Medical System: backup do banco no Cloud Storage
+Description=Kaladrius: backup do banco no Cloud Storage
 After=docker.service
 # Up to 4 attempts in 3 hours; after that the unit stays failed and the web app warns.
 StartLimitIntervalSec=3h

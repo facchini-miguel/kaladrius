@@ -1,6 +1,6 @@
 <img src="static/img/logo.svg" alt="" width="72">
 
-# Medical System
+# Kaladrius
 
 [🇺🇸 English](README.md) | 🇧🇷 Português | [🇪🇸 Español](README.es.md)
 
@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.24.2** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.25.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Excluir rechamada" %} · Medical System{% endblock %}
+{% block titulo %}{% translate "Excluir rechamada" %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <h1 class="h3 mb-3">{% blocktranslate with nome=rechamada.paciente.nome data=rechamada.data|date:"SHORT_DATE_FORMAT" %}Excluir a rechamada de {{ nome }} ({{ data }})?{% endblocktranslate %}</h1>

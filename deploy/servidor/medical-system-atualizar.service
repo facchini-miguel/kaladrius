@@ -1,5 +1,5 @@
 [Unit]
-Description=Medical System: atualiza para a imagem mais recente
+Description=Kaladrius: atualiza para a imagem mais recente
 After=docker.service network-online.target
 Wants=network-online.target
 

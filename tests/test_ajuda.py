@@ -165,3 +165,13 @@ def test_logo_na_barra_na_entrada_e_na_aba(client, recepcao):
     assert "logo-barra" in recepcao.get(reverse("inicio")).content.decode()
     for arquivo in ("logo.svg", "favicon.svg"):
         assert (documentos.DOCS.parent / "static" / "img" / arquivo).is_file()
+
+
+def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, recepcao):
+    entrada = client.get(reverse("login")).content.decode()
+    assert "<title>Entrar · Kaladrius</title>" in entrada
+    assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entrada
+    inicio = recepcao.get(reverse("inicio")).content.decode()
+    assert "Kaladrius · versão" in inicio
+    for pagina in (entrada, inicio):
+        assert "Medical System" not in pagina

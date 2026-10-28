@@ -1,4 +1,4 @@
-# Medical System — Documentation / Documentação / Documentación
+# Kaladrius — Documentation / Documentação / Documentación
 
 | Language / Idioma | |
 |---|---|

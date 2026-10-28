@@ -1,4 +1,4 @@
-# Documentação do Medical System
+# Documentação do Kaladrius
 
 [🇺🇸 English](../en/README.md) | 🇧🇷 Português | [🇪🇸 Español](../es/README.md)
 

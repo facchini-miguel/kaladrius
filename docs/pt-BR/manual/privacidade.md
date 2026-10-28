@@ -2,7 +2,7 @@
 
 Versão 1 · 27/10/2026
 
-Esta política explica como os dados pessoais de pacientes, responsáveis, equipe e fornecedores são tratados no **Medical System**, o sistema de gestão que a clínica usa: quais dados, para quê, com que base legal, quem tem acesso, onde ficam, por quanto tempo e como exercer seus direitos. Ela segue a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018) e a lei sobre prontuários eletrônicos (Lei 13.787/2018).
+Esta política explica como os dados pessoais de pacientes, responsáveis, equipe e fornecedores são tratados no **Kaladrius**, o sistema de gestão que a clínica usa: quais dados, para quê, com que base legal, quem tem acesso, onde ficam, por quanto tempo e como exercer seus direitos. Ela segue a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018) e a lei sobre prontuários eletrônicos (Lei 13.787/2018).
 
 ## 1. Termos usados
 - **Titular:** a pessoa a quem os dados se referem (por exemplo, o paciente).
@@ -13,7 +13,7 @@ Esta política explica como os dados pessoais de pacientes, responsáveis, equip
 - **Anonimização:** retirada dos dados que permitem identificar a pessoa.
 
 ## 2. Quem é responsável pelos seus dados
-A **clínica que atende você** é a controladora: decide como e para que os dados são usados e responde por isso perante você e a Autoridade Nacional de Proteção de Dados (ANPD). Quem desenvolve e mantém o Medical System atua como **operador**, guardando os dados por conta da clínica, sem usá-los para nenhum outro fim.
+A **clínica que atende você** é a controladora: decide como e para que os dados são usados e responde por isso perante você e a Autoridade Nacional de Proteção de Dados (ANPD). Quem desenvolve e mantém o Kaladrius atua como **operador**, guardando os dados por conta da clínica, sem usá-los para nenhum outro fim.
 
 **Canal de atendimento ao titular (encarregado):** o da própria clínica. No sistema, o nome, o e-mail e o telefone dela aparecem no início desta página. Clínicas de pequeno porte podem, em vez de indicar um encarregado, manter este canal de atendimento (Resolução CD/ANPD nº 2/2022).
 

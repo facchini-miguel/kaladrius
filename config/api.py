@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from ninja import NinjaAPI
 
@@ -5,7 +6,7 @@ from apps.novidades.api import router as novidades_router
 from apps.novidades.releases import versao_atual
 
 api = NinjaAPI(
-    title="Medical System API",
+    title=f"{settings.NOME_SISTEMA} API",
     version="1",
     description="API used by the mobile app (medical-system-app).",
     urls_namespace="api-v1",

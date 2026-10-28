@@ -2,7 +2,7 @@
 
 Version 1 · 10/27/2026
 
-This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Medical System**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
+This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
 ## 1. Terms used
 - **Data subject:** the person the data refers to (for example, the patient).
@@ -13,7 +13,7 @@ This policy explains how the personal data of patients, guardians, staff and sup
 - **Anonymization:** removing the data that makes it possible to identify the person.
 
 ## 2. Who is responsible for your data
-The **clinic that treats you** is the controller: it decides how and why the data is used and answers for it to you and to Brazil's National Data Protection Authority (ANPD). Whoever develops and maintains Medical System acts as a **processor**, keeping the data on the clinic's behalf and never using it for any other purpose.
+The **clinic that treats you** is the controller: it decides how and why the data is used and answers for it to you and to Brazil's National Data Protection Authority (ANPD). Whoever develops and maintains Kaladrius acts as a **processor**, keeping the data on the clinic's behalf and never using it for any other purpose.
 
 **Data subject contact channel (data protection officer):** the clinic's own. In the system, its name, e-mail and phone number appear at the top of this page. Small clinics may keep this contact channel instead of appointing a data protection officer (Resolution CD/ANPD No. 2/2022).
 
