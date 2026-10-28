@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
+from django.db import DatabaseError, connection
 from ninja import NinjaAPI
 
 from apps.novidades.api import router as novidades_router
@@ -22,3 +23,14 @@ api.add_router("/", novidades_router)
 def versao(request):
     """Current server version. The app uses it to check compatibility."""
     return {"versao": versao_atual()}
+
+
+@api.get("/saude", auth=None, tags=["Sistema"])
+def saude(request):
+    """For uptime monitors: 200 only when the database answers too (decision 079)."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except DatabaseError:
+        return api.create_response(request, {"banco": False}, status=503)
+    return {"banco": True, "versao": versao_atual()}

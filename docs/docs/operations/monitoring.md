@@ -20,15 +20,20 @@ Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be w
 
 The server can warn you by itself through [Healthchecks.io](https://healthchecks.io) (free plan: 20 checks), which works with the IPv6-only server:
 
-1. Create an account and two checks: **system up** (period 5 minutes, grace 10 minutes) and **daily backup** (period 1 day, grace 2 hours). Choose how to be warned: e-mail, Telegram, Signal, a phone notification…
-2. Add their addresses to the server `.env` and you are done (the scripts read them on the next run):
+1. Create an account and one check for each line below (all with the **Simple** schedule). Choose how to be warned: e-mail, Telegram, Signal, a phone notification…
+2. Add their addresses to the server `.env` and you are done (the scripts read them on the next run). Any line can be left out.
 
-   ```bash
-   MONITOR_SISTEMA_URL=https://hc-ping.com/<uuid of "system up">
-   MONITOR_BACKUP_URL=https://hc-ping.com/<uuid of "daily backup">
-   ```
+| Variable in `.env` | Check | Period / grace | Warns when |
+|---|---|---|---|
+| `MONITOR_SISTEMA_URL` | System up | 5 min / 10 min | The system, opened through the internet by its address (the first name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/saude`) |
+| `MONITOR_BACKUP_URL` | Daily backup | 1 day / 2 h | The daily backup fails or does not run |
+| `MONITOR_RESTAURACAO_URL` | Backup restore | 7 days / 1 day | The weekly restore test (Sundays, 07:00 UTC: the newest backup restored into a throwaway database) fails |
+| `MONITOR_ATUALIZACAO_URL` | Automatic update | 5 min / 15 min | The automatic updates fail or stop running |
+| `MONITOR_RECURSOS_URL` | Disk and memory | 5 min / 15 min | Memory, swap or disk reach the critical level |
+| `MONITOR_CERTIFICADO_URL` | HTTPS certificate | 1 day / 2 h | The certificate has less than 14 days left (Caddy renews it about 30 days before) |
+| `MONITOR_DOCS_URL` | Documentation up | 5 min / 10 min | This documentation site, when the server runs it (`DOCS_HOSTNAME`), does not answer |
 
-Every 5 minutes, the health timer opens the system **through the internet, by its address** (the first name in `SITE_HOSTNAME`) and signals the result; the backup signals each daily backup, or its failure. You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
+You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
 
 ## Warnings inside the system
 

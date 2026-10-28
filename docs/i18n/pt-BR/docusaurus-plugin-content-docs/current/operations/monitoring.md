@@ -20,15 +20,20 @@ Use em qualquer monitor de disponibilidade (UptimeRobot, Healthchecks, Uptime Ku
 
 O próprio servidor pode avisar você pelo [Healthchecks.io](https://healthchecks.io) (plano grátis: 20 verificações), que funciona com o servidor só IPv6:
 
-1. Crie uma conta e duas verificações: **sistema no ar** (período de 5 minutos, tolerância de 10 minutos) e **backup diário** (período de 1 dia, tolerância de 2 horas). Escolha como quer ser avisado: e-mail, Telegram, Signal, notificação no celular…
-2. Coloque os endereços delas no `.env` do servidor e pronto (os scripts leem na próxima execução):
+1. Crie uma conta e uma verificação para cada linha abaixo (todas com o agendamento **Simple**). Escolha como quer ser avisado: e-mail, Telegram, Signal, notificação no celular…
+2. Coloque os endereços delas no `.env` do servidor e pronto (os scripts leem na próxima execução). Qualquer linha pode ficar de fora.
 
-   ```bash
-   MONITOR_SISTEMA_URL=https://hc-ping.com/<uuid de "sistema no ar">
-   MONITOR_BACKUP_URL=https://hc-ping.com/<uuid de "backup diário">
-   ```
+| Variável no `.env` | Verificação | Período / tolerância | Avisa quando |
+|---|---|---|---|
+| `MONITOR_SISTEMA_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet pelo endereço dele (o primeiro nome de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/saude`) |
+| `MONITOR_BACKUP_URL` | Backup diário | 1 dia / 2 h | O backup diário falha ou não roda |
+| `MONITOR_RESTAURACAO_URL` | Restauração do backup | 7 dias / 1 dia | O teste semanal de restauração (domingos, 07:00 UTC: o backup mais novo restaurado num banco descartável) falha |
+| `MONITOR_ATUALIZACAO_URL` | Atualização automática | 5 min / 15 min | As atualizações automáticas falham ou param de rodar |
+| `MONITOR_RECURSOS_URL` | Disco e memória | 5 min / 15 min | Memória, swap ou disco chegam ao nível crítico |
+| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 dia / 2 h | Faltam menos de 14 dias para o certificado vencer (o Caddy renova uns 30 dias antes) |
+| `MONITOR_DOCS_URL` | Documentação no ar | 5 min / 10 min | Este site de documentação, quando o servidor roda ele (`DOCS_HOSTNAME`), não responde |
 
-A cada 5 minutos, o agendamento de saúde abre o sistema **pela internet, pelo endereço dele** (o primeiro nome de `SITE_HOSTNAME`) e manda o resultado; o backup manda um sinal a cada backup diário, ou a falha dele. Você é avisado quando um sinal informa falha ou **para de chegar**, o que também cobre o servidor inteiro desligado. Sem essas variáveis, nada é enviado.
+Você é avisado quando um sinal informa falha ou **para de chegar**, o que também cobre o servidor inteiro desligado. Sem essas variáveis, nada é enviado.
 
 ## Avisos dentro do sistema
 

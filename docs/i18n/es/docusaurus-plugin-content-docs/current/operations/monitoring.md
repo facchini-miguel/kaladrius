@@ -20,15 +20,20 @@ curl https://clinica.ejemplo.com/api/v1/versao
 
 El propio servidor puede avisarle mediante [Healthchecks.io](https://healthchecks.io) (plan gratis: 20 verificaciones), que funciona con el servidor solo IPv6:
 
-1. Cree una cuenta y dos verificaciones: **sistema funcionando** (período de 5 minutos, tolerancia de 10 minutos) y **respaldo diario** (período de 1 día, tolerancia de 2 horas). Elija cómo quiere que le avisen: correo, Telegram, Signal, notificación en el celular…
-2. Ponga sus direcciones en el `.env` del servidor y listo (los scripts las leen en la próxima ejecución):
+1. Cree una cuenta y una verificación para cada línea de abajo (todas con el horario **Simple**). Elija cómo quiere que le avisen: correo, Telegram, Signal, notificación en el celular…
+2. Ponga sus direcciones en el `.env` del servidor y listo (los scripts las leen en la próxima ejecución). Cualquier línea puede quedar afuera.
 
-   ```bash
-   MONITOR_SISTEMA_URL=https://hc-ping.com/<uuid de "sistema funcionando">
-   MONITOR_BACKUP_URL=https://hc-ping.com/<uuid de "respaldo diario">
-   ```
+| Variable en el `.env` | Verificación | Período / tolerancia | Avisa cuando |
+|---|---|---|---|
+| `MONITOR_SISTEMA_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por su dirección (el primer nombre de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
+| `MONITOR_BACKUP_URL` | Respaldo diario | 1 día / 2 h | El respaldo diario falla o no corre |
+| `MONITOR_RESTAURACAO_URL` | Restauración del respaldo | 7 días / 1 día | La prueba semanal de restauración (domingos, 07:00 UTC: el respaldo más nuevo restaurado en una base descartable) falla |
+| `MONITOR_ATUALIZACAO_URL` | Actualización automática | 5 min / 15 min | Las actualizaciones automáticas fallan o dejan de correr |
+| `MONITOR_RECURSOS_URL` | Disco y memoria | 5 min / 15 min | La memoria, el swap o el disco llegan al nivel crítico |
+| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 día / 2 h | Faltan menos de 14 días para que venza el certificado (Caddy lo renueva unos 30 días antes) |
+| `MONITOR_DOCS_URL` | Documentación funcionando | 5 min / 10 min | Este sitio de documentación, cuando el servidor lo corre (`DOCS_HOSTNAME`), no responde |
 
-Cada 5 minutos, el temporizador de salud abre el sistema **por internet, por su dirección** (el primer nombre de `SITE_HOSTNAME`) y envía el resultado; el respaldo envía una señal en cada respaldo diario, o su falla. Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
+Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
 
 ## Avisos dentro del sistema
 

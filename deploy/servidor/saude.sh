@@ -95,16 +95,52 @@ relatorio() {
   fi
 }
 
-if [ "${1:-}" = "--coletar" ]; then
-  # First the system as anyone sees it: through the internet, by its address. The external
-  # monitor warns when this signal fails or stops arriving (decision 078).
+# Signal $1 with success when the rest of the arguments (a command) succeeds, failure if not.
+sinal_de() {
+  local monitor=$1
+  shift
+  if "$@"; then avisar_monitor "$monitor"; else avisar_monitor "$monitor" fail; fi
+}
+
+# Days until the HTTPS certificate of $1 expires (0 when it cannot be read).
+dias_do_certificado() {
+  local validade fim
+  validade=$(curl -sv -m 20 -o /dev/null "https://$1/" 2>&1 | sed -n 's/^\*[[:space:]]*expire date: //p' | head -1)
+  fim=$(date -d "$validade" +%s 2>/dev/null || echo 0)
+  echo $(((fim - $(date +%s)) / 86400))
+}
+
+# What anyone sees, through the internet and by the server's addresses, for the external
+# monitor (decisions 078 and 079). Each check is independent and never stops the others.
+verificar() {
+  local site docs
   site=$(valor_do_env SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
-  if [ -n "$site" ] && curl -fsS -m 20 -o /dev/null "https://$site/api/v1/versao"; then
-    avisar_monitor MONITOR_SISTEMA_URL
-  else
-    avisar_monitor MONITOR_SISTEMA_URL fail
+  docs=$(valor_do_env DOCS_HOSTNAME)
+  # The system, with its database (/api/v1/saude answers 503 when the database does not).
+  sinal_de MONITOR_SISTEMA_URL curl -fsS -m 20 -o /dev/null "https://$site/api/v1/saude"
+  # The certificate: Caddy renews it about 30 days before it expires; 14 days left means
+  # renewing is failing.
+  sinal_de MONITOR_CERTIFICADO_URL test "$(dias_do_certificado "$site")" -ge 14
+  if [ -n "$docs" ]; then
+    sinal_de MONITOR_DOCS_URL curl -fsS -m 20 -o /dev/null "https://$docs/"
   fi
+}
+
+# After a sample: failure when memory, swap or disk is critical (the same limits as the web
+# app's health page, apps/monitoramento/saude.py LIMITES; not the processor, whose peaks are
+# normal).
+recursos_ok() {
+  local memoria swap disco
+  memoria=$((100 * (mem_total - mem_disp) / (mem_total > 0 ? mem_total : 1)))
+  swap=$((swap_total > 0 ? 100 * (swap_total - swap_livre) / swap_total : 0))
+  disco=$((100 * disco_usado / (disco_total > 0 ? disco_total : 1)))
+  [ "$memoria" -lt 95 ] && [ "$swap" -lt 80 ] && [ "$disco" -lt 90 ]
+}
+
+if [ "${1:-}" = "--coletar" ]; then
+  verificar
   coletar
+  sinal_de MONITOR_RECURSOS_URL recursos_ok
 else
   relatorio
 fi

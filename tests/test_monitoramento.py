@@ -175,3 +175,24 @@ def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     # 10 minutes of samples on a 1-hour axis: the line starts near the right end.
     primeiro_x = float(svg.split('points="')[1].split(",")[0])
     assert 580 < primeiro_x < 620
+
+
+def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
+    # Decision 079: the external monitor needs the database to answer, not only Django.
+    from django.db import OperationalError
+
+    resposta = client.get("/api/v1/saude")
+    assert resposta.status_code == 200 and resposta.json()["banco"] is True
+
+    import config.api
+
+    class CursorQuebrado:
+        def __enter__(self):
+            raise OperationalError("banco fora")
+
+        def __exit__(self, *erro):
+            return False
+
+    monkeypatch.setattr(config.api.connection, "cursor", lambda: CursorQuebrado())
+    resposta = client.get("/api/v1/saude")
+    assert resposta.status_code == 503 and resposta.json() == {"banco": False}

@@ -1,0 +1,7 @@
+[Unit]
+Description=Kaladrius: restaura o backup mais novo numa cópia descartável e confere
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/testar_restauracao.sh

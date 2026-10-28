@@ -7,6 +7,8 @@ source "$(dirname "$0")/comum.sh"
 # One run at a time: a manual --forcar waits for the timer's run instead of racing it.
 exec 9>"$DIR/atualizar.lock"
 flock 9
+# The external monitor warns when updates fail or stop running (decision 079).
+trap 'avisar_monitor MONITOR_ATUALIZACAO_URL fail' ERR
 
 entrar_no_registro
 docker pull -q "$IMAGEM_APP" >/dev/null
@@ -29,3 +31,4 @@ if [ "$atual" != "$instalada" ] || [ "${1:-}" = "--forcar" ]; then
   docker image prune -f >/dev/null
   echo "Sistema atualizado: $(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGEM_APP")"
 fi
+avisar_monitor MONITOR_ATUALIZACAO_URL
