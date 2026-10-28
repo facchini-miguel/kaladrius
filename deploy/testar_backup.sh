@@ -7,7 +7,7 @@
 #   deploy/testar_backup.sh <object name>   # a specific one
 set -euo pipefail
 
-BUCKET=medical-system-facchini-backups
+BUCKET=kaladrius-backups
 CONTAINER=kaladrius-teste-backup
 pasta=$(mktemp -d)
 trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT

@@ -18,7 +18,7 @@ Browser ──IPv6/HTTPS──> e2-micro VM "medical-system" (us-east1-b, no pub
                          ├─ caddy  (automatic Let's Encrypt HTTPS, host network)
                          ├─ app    (Django + Gunicorn, only on 127.0.0.1:8000)
                          ├─ db     (PostgreSQL 16, pgdata volume)
-                         └─ daily backup 06:00 UTC ─> gs://medical-system-facchini-backups
+                         └─ daily backup 06:00 UTC ─> gs://kaladrius-backups
 Maintenance: SSH only through Google's IAP tunnel
 ```
 
@@ -35,8 +35,8 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 | Domain | `kaladrius.duckdns.org` (DuckDNS) | Free |
 | Firewall | `medical-system-web-ipv6` (TCP 80/443 and UDP 443 for HTTP/3, from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
 | Images | Artifact Registry `kaladrius` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
-| Backups | `gs://medical-system-facchini-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |
-| Service accounts | `medical-system-vm` (reads images, writes backups), `github-ci` (publishes images) | Free |
+| Backups | `gs://kaladrius-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |
+| Service accounts | `kaladrius-vm` (reads images, writes backups), `github-ci` (publishes images) | Free |
 | GitHub → Google | Workload Identity Federation (pool `github`), this repository and `main` only | Free |
 | Budget alert | R$ 5 (notifications at 10%, 50% and 100%) | Free |
 
@@ -69,7 +69,7 @@ sudo /opt/kaladrius/bin/backup.sh
 sudo /opt/kaladrius/bin/saude.sh
 
 # List backups (on your machine)
-gcloud storage ls -l gs://medical-system-facchini-backups/
+gcloud storage ls -l gs://kaladrius-backups/
 ```
 
 ### Rolling back to a previous version
@@ -123,7 +123,7 @@ gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
 ### Restoring a backup
 ```bash
 # On the VM (replaces the current database!)
-gcloud storage cp gs://medical-system-facchini-backups/<file>.dump /tmp/restore.dump  # or download on your machine and copy with gcloud compute scp --tunnel-through-iap
+gcloud storage cp gs://kaladrius-backups/<file>.dump /tmp/restore.dump  # or download on your machine and copy with gcloud compute scp --tunnel-through-iap
 cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restore.dump
 ```
