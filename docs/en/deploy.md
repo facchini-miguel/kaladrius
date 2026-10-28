@@ -6,7 +6,7 @@ Published at **https://kaladrius.duckdns.org** (**IPv6-only** access). Fallback 
 
 - **DNS:** `kaladrius.duckdns.org` (DuckDNS, free) has only an AAAA record for the VM's IPv6. The token is in `DUCKDNS_TOKEN` in the server `.env` and the local `.env.producao`. To repoint: `https://www.duckdns.org/update?domains=kaladrius&token=<token>&ipv6=<ipv6>` (when `ipv6` is given, DuckDNS does not fill in IPv4). Watch out: when a subdomain is **created** on the website, DuckDNS fills in the IPv4 of whoever created it (your home); clear it with `&clear=true` and point only the `ipv6` again.
 - **Documentation:** the site in `website/` runs on the same server, at https://docs.kaladrius.duckdns.org (DuckDNS answers any `*.kaladrius.duckdns.org` with the same IPv6, nothing to create). CI publishes the `docs` image next to `app`; it only starts with `COMPOSE_PROFILES=docs` and `DOCS_HOSTNAME` in the server `.env`. Until the code is opened, Caddy asks search engines not to index it (decision 067). To view it on your computer: `docker compose --profile docs up --build docs` → http://localhost:3000.
-- **Static IPv6:** reserved address `medical-system-ipv6` (`2600:1900:4020:f0b::`), free; it does not change when the VM restarts.
+- **Static IPv6:** reserved address `kaladrius-ipv6` (`2600:1900:4020:f0b::`), free; it does not change when the VM restarts.
 
 ## Architecture
 
@@ -25,13 +25,13 @@ Maintenance: SSH only through Google's IAP tunnel
 ## Why IPv6
 Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the free tier covers only 1 hour/month). External IPv6 is free. As a result, the system only opens on IPv6-capable networks (most mobile and many fixed networks in Brazil). To serve any network, add an IPv4 to the VM (cost above). See the [pricing page](https://cloud.google.com/vpc/network-pricing).
 
-## Resources (project `medical-system-facchini`)
+## Resources (project `medical-system-facchini`, display name "Kaladrius")
 
 | Resource | Name | Cost |
 |---|---|---|
 | VM | `kaladrius` (e2-micro, us-east1-b, 30 GB standard disk, Debian 13) | Free tier |
 | Network | VPC `medical-system`, subnet `medical-system-us-east1` (internal IPv4 + external IPv6, Private Google Access) | Free |
-| Static IPv6 | `medical-system-ipv6` (`2600:1900:4020:f0b::`, reserved) | Free |
+| Static IPv6 | `kaladrius-ipv6` (`2600:1900:4020:f0b::`, reserved) | Free |
 | Domain | `kaladrius.duckdns.org` (DuckDNS) | Free |
 | Firewall | `medical-system-web-ipv6` (TCP 80/443 and UDP 443 for HTTP/3, from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
 | Images | Artifact Registry `kaladrius` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
