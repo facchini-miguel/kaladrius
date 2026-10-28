@@ -360,5 +360,37 @@
   "theme.tags.tagsPageTitle": {
     "message": "Etiquetas",
     "description": "The title of the tag list page"
+  },
+  "marca.logo": {
+    "message": "Logo",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.logoBranco": {
+    "message": "Logo, branco",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.logoPreto": {
+    "message": "Logo, preto",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.simbolo": {
+    "message": "Símbolo",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.simboloBranco": {
+    "message": "Símbolo, branco",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.simboloPreto": {
+    "message": "Símbolo, preto",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.icone": {
+    "message": "Ícone do aplicativo",
+    "description": "Brand kit download card (KitDeMarca component)"
+  },
+  "marca.baixarTudo": {
+    "message": "Baixar tudo (.zip)",
+    "description": "Brand kit download card (KitDeMarca component)"
   }
 }

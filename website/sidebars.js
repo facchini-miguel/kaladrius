@@ -27,5 +27,6 @@ export default {
     "architecture",
     "faq",
     "contributing",
+    "brand",
   ],
 };

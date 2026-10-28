@@ -1,0 +1,53 @@
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.cartao {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-card-border-radius);
+  overflow: hidden;
+}
+.previa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8rem;
+  padding: 1.25rem;
+}
+.previa img {
+  max-height: 100%;
+  max-width: 100%;
+}
+/* Fixed backgrounds, so each file is shown on the background it was made for in both themes. */
+.claro {
+  background: #fff;
+}
+.escuro {
+  background: #212529;
+}
+.rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+.botoes {
+  display: flex;
+  gap: 0.4rem;
+}
+.cor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 1.5rem 1rem 0;
+}
+.amostra {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--ifm-color-emphasis-300);
+}

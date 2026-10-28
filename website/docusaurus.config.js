@@ -85,6 +85,7 @@ export default {
               { label: "GitHub", href: REPOSITORIO },
               { label: "Issues", href: `${REPOSITORIO}/issues` },
               { label: "Contributing", to: "/contributing" },
+              { label: "Brand and press", to: "/brand" },
             ],
           },
         ],

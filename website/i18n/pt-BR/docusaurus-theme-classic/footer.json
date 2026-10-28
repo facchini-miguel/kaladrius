@@ -34,5 +34,9 @@
   "copyright": {
     "message": "Kaladrius — Licença Apache 2.0",
     "description": "The footer copyright"
+  },
+  "link.item.label.Brand and press": {
+    "message": "Marca e imprensa",
+    "description": "The label of footer link with label=Brand and press linking to /brand"
   }
 }
