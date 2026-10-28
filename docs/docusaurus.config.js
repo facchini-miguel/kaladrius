@@ -10,7 +10,8 @@ export default {
   title: "Kaladrius",
   tagline: "Open-source clinic management for dentists and physicians",
   favicon: "img/favicon.svg",
-  url: "https://kaladrius.dev",
+  // Canonical address of the pages and the sitemap (kaladrius.dev once registered).
+  url: "https://docs.kaladrius.duckdns.org",
   baseUrl: "/",
   onBrokenLinks: "throw",
   markdown: {

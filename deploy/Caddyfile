@@ -27,12 +27,7 @@
 # only docs.localhost, with Caddy's local certificate, and never reaches the internet.
 {$DOCS_HOSTNAME:docs.localhost} {
 	encode zstd gzip
-	# Until the code is opened: anyone with the link can read it, but search engines are
-	# asked not to index it.
-	header X-Robots-Tag "noindex, nofollow"
-	respond /robots.txt `User-agent: *
-Disallow: /
-` 200
+	# Public and indexed since the code was opened (decision 077).
 	reverse_proxy 127.0.0.1:8080
 	header -Server
 }
