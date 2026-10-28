@@ -1,5 +1,12 @@
 FROM python:3.13-slim
 
+# Shown on the package page and used by GitHub to link the image to the repository.
+LABEL org.opencontainers.image.title="Kaladrius" \
+      org.opencontainers.image.description="Open-source clinic management" \
+      org.opencontainers.image.source="https://github.com/facchini-miguel/kaladrius" \
+      org.opencontainers.image.documentation="https://docs.kaladrius.duckdns.org" \
+      org.opencontainers.image.licenses="Apache-2.0"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \

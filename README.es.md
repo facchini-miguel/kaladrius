@@ -65,6 +65,6 @@ El historial de versiones está en [`releases.yaml`](releases.yaml) y también p
 
 ## Licencia
 
-Software propietario. Todos los derechos reservados. Ver [LICENSE](LICENSE).
+Código abierto bajo la [Licencia Apache 2.0](LICENSE). El nombre y el logo de Kaladrius no forman parte de la licencia (ver [NOTICE](NOTICE)). Las contribuciones son bienvenidas: ver [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) y el [Código de Conducta](CODE_OF_CONDUCT.md).
 
 Desarrollado por **Miguel Facchini**.

@@ -79,6 +79,10 @@ Keep `DJANGO_BACKUP_MONITORADO` on (the default): superusers see a warning at th
 sudo docker build -t kaladrius:latest .
 ```
 
+:::tip Or use the published image
+Every version is also published at `ghcr.io/facchini-miguel/kaladrius` (tags `latest` and the version number, such as `0.27.2`). Put it in `IMAGEM_APP` in `.env` and skip this step; to upgrade, `kaladrius pull app` then `kaladrius up -d`.
+:::
+
 ## 5. Start
 
 The commands below use the production file `deploy/docker-compose.prod.yml` with your `.env`. To type less, create a shortcut:

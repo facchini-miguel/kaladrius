@@ -79,6 +79,10 @@ Deixe o `DJANGO_BACKUP_MONITORADO` ligado (o padrão): os superusuários veem um
 sudo docker build -t kaladrius:latest .
 ```
 
+:::tip Ou use a imagem publicada
+Toda versão também é publicada em `ghcr.io/facchini-miguel/kaladrius` (tags `latest` e o número da versão, como `0.27.2`). Coloque-a em `IMAGEM_APP` no `.env` e pule este passo; para atualizar, `kaladrius pull app` e depois `kaladrius up -d`.
+:::
+
 ## 5. Suba o sistema
 
 Os comandos abaixo usam o arquivo de produção `deploy/docker-compose.prod.yml` com o seu `.env`. Para digitar menos, crie um atalho:
