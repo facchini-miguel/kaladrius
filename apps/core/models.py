@@ -76,6 +76,11 @@ class Clinica(models.Model):
     def __str__(self):
         return self.nome
 
+    @classmethod
+    def unica(cls):
+        """The clinic of this installation (decision 069: one installation, one clinic)."""
+        return cls.objects.filter(ativa=True).order_by("pk").first()
+
 
 class Papel(models.TextChoices):
     """A user's role inside one clinic. Permissions per role live in permissoes.py."""

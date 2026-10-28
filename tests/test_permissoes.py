@@ -102,20 +102,37 @@ def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cl
     assert "Profissionais</a>" in com_clinica.get(reverse("inicio")).content.decode()
 
 
-def test_superusuario_pode_tudo_na_clinica_escolhida(
+def test_superusuario_entra_direto_na_clinica_da_instalacao(
     clinica_a, criar_profissional, cliente_de, django_user_model
 ):
     profissional = criar_profissional(clinica_a, "Dra. A")
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
-
-    # Without a chosen clinic, the superuser is sent to the clinic picker.
-    resposta = cliente.get(reverse("profissionais:lista"))
-    assert resposta.status_code == 302
-    assert reverse("trocar_clinica") in resposta.url
-
-    cliente.post(reverse("trocar_clinica"), {"clinica": clinica_a.pk})
     assert cliente.get(reverse("profissionais:editar", args=[profissional.pk])).status_code == 200
+    inicio = cliente.get(reverse("inicio")).content.decode()
+    assert "Clínica A" in inicio and "Escolha" not in inicio
+
+
+def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_user_model):
+    from apps.core.models import Clinica
+
+    root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
+    cliente = cliente_de(root)
+    # Without a clinic, the superuser is sent to register it.
+    resposta = cliente.get(reverse("profissionais:lista"))
+    assert resposta.url == reverse("cadastrar_clinica")
+
+    resposta = cliente.post(reverse("cadastrar_clinica"), {"nome": "Clínica Nova"})
+    assert resposta.url == reverse("inicio")
+    assert list(Clinica.objects.values_list("nome", flat=True)) == ["Clínica Nova"]
+    assert cliente.get(reverse("profissionais:lista")).status_code == 200
+    # Only one: the page and the Django admin no longer add clinics.
+    assert cliente.get(reverse("cadastrar_clinica")).url == reverse("inicio")
+    cliente.post(reverse("cadastrar_clinica"), {"nome": "Outra"})
+    assert Clinica.objects.count() == 1
+    assert cliente.get(reverse("admin:core_clinica_add")).status_code == 403
+    # Other users may not register it (cliente_de logs this one in on the same client).
+    assert cliente_de(criar_usuario("ana")).get(reverse("cadastrar_clinica")).status_code == 403
 
 
 def test_admin_do_django_so_para_superusuario(

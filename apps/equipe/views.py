@@ -7,7 +7,6 @@ someone from the clinic means turning their access off.
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
@@ -26,13 +25,9 @@ def _vinculo(request, pk):
 
 @exige_permissao(Modulo.USUARIOS, Acao.VER)
 def lista(request):
-    em_outras_clinicas = Vinculo.objects.filter(usuario=OuterRef("usuario")).exclude(
-        clinica=request.clinica
-    )
     vinculos = (
         Vinculo.objects.filter(clinica=request.clinica)
         .select_related("usuario")
-        .annotate(outras_clinicas=Exists(em_outras_clinicas))
         .order_by("-ativo", "usuario__first_name", "usuario__username")
     )
     return render(request, "equipe/lista.html", {"vinculos": vinculos})

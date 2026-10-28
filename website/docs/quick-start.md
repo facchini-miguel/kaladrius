@@ -48,11 +48,11 @@ docker compose exec app python manage.py popular_dados_teste
 ```
 
 - `criar_admin` creates the **superuser** from `DJANGO_ADMIN_USERNAME` and `DJANGO_ADMIN_PASSWORD`.
-- `popular_dados_teste` creates fictitious clinics (marked "(teste)") with patients, schedule, estimates and finance, and test users for each role, all with the password `DJANGO_SEED_PASSWORD`.
+- `popular_dados_teste` creates a fictitious clinic (marked "(teste)") with patients, schedule, estimates and finance, and test users for each role, all with the password `DJANGO_SEED_PASSWORD`.
 
 ## 5. Open it
 
-Go to **http://localhost:8000** and log in with the administrator. Use the clinic name in the top bar to switch between the sample clinics, and the flag to change the language.
+Go to **http://localhost:8000** and log in with the administrator. Use the flag in the top bar to change the language.
 
 ## Stop and clean up
 

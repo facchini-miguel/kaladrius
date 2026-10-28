@@ -142,7 +142,9 @@ msgstr "Came or missed can only be marked from the day of the appointment on."
 
 msgid ""
 "Este horário já foi ocupado por outro agendamento. Desmarque aquele antes."
-msgstr "This time slot has already been taken by another appointment. Cancel that one first."
+msgstr ""
+"This time slot has already been taken by another appointment. Cancel that "
+"one first."
 
 #, python-format
 msgid "Tipo de atendimento %(nome)s salvo."
@@ -449,9 +451,8 @@ msgstr "Good afternoon"
 msgid "Boa noite"
 msgstr "Good evening"
 
-#, python-format
-msgid "Você está trabalhando na clínica %(nome)s."
-msgstr "You are working in the clinic %(nome)s."
+msgid "Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe."
+msgstr "Clinic registered. Now add the team in Records > Team."
 
 msgid "Senha alterada."
 msgstr "Password changed."
@@ -1848,20 +1849,14 @@ msgstr "Categories"
 msgid "Contas"
 msgstr "Accounts"
 
-msgid "Administração"
-msgstr "Administration"
-
 msgid "Saúde do sistema"
 msgstr "System health"
 
+msgid "Administração"
+msgstr "Administration"
+
 msgid "Painel do Django"
 msgstr "Django admin"
-
-msgid "Trocar de clínica"
-msgstr "Switch clinic"
-
-msgid "Escolha a clínica"
-msgstr "Choose the clinic"
 
 msgid "Trocar senha"
 msgstr "Change password"
@@ -1926,6 +1921,21 @@ msgstr "Developed by"
 msgid "Política de privacidade"
 msgstr "Privacy policy"
 
+msgid "Cadastre sua clínica"
+msgstr "Register your clinic"
+
+msgid ""
+"Este sistema atende uma clínica. Informe os dados dela: eles aparecem na "
+"política de privacidade, nos recibos e nos orçamentos. O horário da agenda e "
+"o restante ficam em Configurações da clínica."
+msgstr ""
+"This system serves one clinic. Enter its details: they appear on the privacy "
+"policy, receipts and estimates. The schedule hours and the rest are in "
+"Clinic settings."
+
+msgid "Cadastrar"
+msgstr "Register"
+
 msgid ""
 "O horário e o intervalo valem para a grade da agenda e para os novos "
 "agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é "
@@ -1950,11 +1960,11 @@ msgstr "New estimate"
 msgid "Receber"
 msgstr "Receive"
 
-msgid "Você é administrador da plataforma."
-msgstr "You are a platform administrator."
+msgid "Ainda não há clínica cadastrada."
+msgstr "No clinic has been registered yet."
 
-msgid "Escolha uma clínica para trabalhar."
-msgstr "Choose a clinic to work in."
+msgid "Cadastre a sua clínica."
+msgstr "Register your clinic."
 
 msgid ""
 "Você ainda não está vinculado a nenhuma clínica ativa. Procure o "
@@ -1970,7 +1980,8 @@ msgid "Pacientes agendados hoje"
 msgstr "Patients booked today"
 
 #, python-format
-msgid "Compareceram: %(vieram)s · faltaram: %(faltaram)s · a seguir: %(seguir)s"
+msgid ""
+"Compareceram: %(vieram)s · faltaram: %(faltaram)s · a seguir: %(seguir)s"
 msgstr "Came: %(vieram)s · missed: %(faltaram)s · still to come: %(seguir)s"
 
 #, python-format
@@ -2139,12 +2150,6 @@ msgstr "No clinic"
 msgid "Nenhuma clínica disponível"
 msgstr "No clinic available"
 
-msgid "Escolher clínica"
-msgstr "Choose clinic"
-
-msgid "Nenhuma clínica ativa disponível para você."
-msgstr "No active clinic available to you."
-
 msgid "Usuário:"
 msgstr "User:"
 
@@ -2172,12 +2177,6 @@ msgstr "Last login"
 
 msgid "você"
 msgstr "you"
-
-msgid "Também tem acesso a outra clínica"
-msgstr "Also has access to another clinic"
-
-msgid "outras clínicas"
-msgstr "other clinics"
 
 msgid "nunca"
 msgstr "never"
@@ -2897,10 +2896,11 @@ msgstr "No backup recorded."
 
 msgid ""
 "Os números vêm de comandos do Linux no servidor, a cada 5 minutos, e ficam "
-"guardados por 7 dias. Para ver o relatório no terminal:"
-msgstr ""
-"The numbers come from Linux commands on the server, every 5 minutes, and are "
-"kept for 7 days. To see the report in the terminal:"
+"guardados por 7 dias."
+msgstr "The numbers come from Linux commands on the server, every 5 minutes, and are kept for 7 days."
+
+msgid "Para ver o relatório no terminal:"
+msgstr "To see the report in the terminal:"
 
 msgid "Filtrar por módulo"
 msgstr "Filter by module"
@@ -3381,6 +3381,34 @@ msgstr "You do not have permission to access this page."
 
 msgid "Senha"
 msgstr "Password"
+
+#, python-format
+#~ msgid "Você está trabalhando na clínica %(nome)s."
+#~ msgstr "You are working in the clinic %(nome)s."
+
+#~ msgid "Trocar de clínica"
+#~ msgstr "Switch clinic"
+
+#~ msgid "Escolha a clínica"
+#~ msgstr "Choose the clinic"
+
+#~ msgid "Você é administrador da plataforma."
+#~ msgstr "You are a platform administrator."
+
+#~ msgid "Escolha uma clínica para trabalhar."
+#~ msgstr "Choose a clinic to work in."
+
+#~ msgid "Escolher clínica"
+#~ msgstr "Choose clinic"
+
+#~ msgid "Nenhuma clínica ativa disponível para você."
+#~ msgstr "No active clinic available to you."
+
+#~ msgid "Também tem acesso a outra clínica"
+#~ msgstr "Also has access to another clinic"
+
+#~ msgid "outras clínicas"
+#~ msgstr "other clinics"
 
 #, python-format
 #~ msgid "Bem-vindo(a), %(nome)s"

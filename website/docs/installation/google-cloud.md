@@ -19,7 +19,7 @@ On top of the [own server](docker-compose.md) setup, this installation adds:
 
 - **Automatic updates:** every 5 minutes the VM checks for a new image; when there is one, it installs it and restarts (`deploy/servidor/atualizar.sh`).
 - **Daily backup** at 06:00 UTC to Cloud Storage, recorded in the system, with retries (`deploy/servidor/backup.sh`).
-- **Server health** every 5 minutes (CPU, memory, swap, disk, network, containers), shown to superusers in **Administration > System health** (`deploy/servidor/saude.sh`).
+- **Server health** every 5 minutes (CPU, memory, swap, disk, network, containers), shown to everyone in **Help > System health** (`deploy/servidor/saude.sh`).
 - **1 GB of swap**, needed with 1 GB of RAM.
 - No passwords or keys stored for Google: the VM and the CI use short-lived tokens.
 

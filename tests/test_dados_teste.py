@@ -21,22 +21,21 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     call_command("popular_dados_teste", pacientes=30)
     call_command("popular_dados_teste", pacientes=30)
 
-    assert Clinica.objects.count() == 2
-    multi = get_user_model().objects.get(username="recepcao.multi")
-    assert multi.vinculos.count() == 2
-    assert multi.check_password("senha-de-teste-123")
+    # One installation, one clinic (decision 069).
+    assert Clinica.objects.count() == 1
+    assert get_user_model().objects.get(username="dr.carlos").check_password("senha-de-teste-123")
     assert Vinculo.objects.filter(usuario__username="dra.ana").count() == 1
     with sem_isolamento():
         assert Profissional.objects.count() == 5
         assert Profissional.objects.get(nome="Dra. Ana Souza").usuario.username == "dra.ana"
-        assert Paciente.objects.count() == 60  # 30 per clinic, not duplicated on the 2nd run
-        assert Paciente.objects.filter(tipo=Paciente.Tipo.JURIDICA).count() == 2
+        assert Paciente.objects.count() == 30  # not duplicated on the 2nd run
+        assert Paciente.objects.filter(tipo=Paciente.Tipo.JURIDICA).count() == 1
         for paciente in Paciente.objects.exclude(cpf_cnpj=""):
             valido = cpf_valido if paciente.tipo == Paciente.Tipo.FISICA else cnpj_valido
             assert valido(paciente.cpf_cnpj), paciente.cpf_cnpj
         assert not Paciente.objects.exclude(email__endswith="@example.com").exists()
         assert Agendamento.objects.count() > 0  # created once, not duplicated
-        assert Rechamada.objects.count() == 160  # 80 per clinic, not duplicated
+        assert Rechamada.objects.count() == 80  # not duplicated
         assert Agendamento.objects.filter(profissional__clinica=F("clinica")).count() == (
             Agendamento.objects.count()
         )
@@ -73,5 +72,5 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
         assert set(Profissional.objects.values_list("clinica", flat=True)) <= {real.pk}
     assert not RegistroAuditoria.objects.filter(objeto_descricao__contains="(teste)").exists()
     assert RegistroAuditoria.objects.filter(
-        objeto_descricao__startswith="Dados de teste removidos: 2 clínicas"
+        objeto_descricao__startswith="Dados de teste removidos: 1 clínicas"
     ).exists()

@@ -48,11 +48,11 @@ docker compose exec app python manage.py popular_dados_teste
 ```
 
 - `criar_admin` crea el **superusuario** con `DJANGO_ADMIN_USERNAME` y `DJANGO_ADMIN_PASSWORD`.
-- `popular_dados_teste` crea clínicas ficticias (marcadas "(teste)") con pacientes, agenda, presupuestos y finanzas, y usuarios de prueba para cada perfil, todos con la contraseña `DJANGO_SEED_PASSWORD`.
+- `popular_dados_teste` crea una clínica ficticia (marcada "(teste)") con pacientes, agenda, presupuestos y finanzas, y usuarios de prueba para cada perfil, todos con la contraseña `DJANGO_SEED_PASSWORD`.
 
 ## 5. Ábralo
 
-Vaya a **http://localhost:8000** e ingrese con el administrador. Use el nombre de la clínica en la barra superior para cambiar entre las clínicas de ejemplo, y la bandera para cambiar el idioma.
+Vaya a **http://localhost:8000** e ingrese con el administrador. Use la bandera en la barra superior para cambiar el idioma.
 
 ## Detener y limpiar
 

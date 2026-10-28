@@ -4,13 +4,13 @@
 
 🇺🇸 English | [🇧🇷 Português](README.pt-BR.md) | [🇪🇸 Español](README.es.md)
 
-Clinic management system: per-professional scheduling, patient records, recalls (follow-up reminders), birthdays, users and permissions. Serves multiple clinics from the same server (multi-tenant).
+Clinic management system: per-professional scheduling, patient records, recalls (follow-up reminders), birthdays, users and permissions. One installation serves one clinic.
 
 It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic for any kind of clinic.
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Current version: 0.25.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
+**Current version: 0.26.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: **phase 1 complete** (feature parity with the legacy system), running at https://kaladrius.duckdns.org (Google Cloud free tier, IPv6 only). See [docs/en/deploy.md](docs/en/deploy.md).
 
@@ -28,7 +28,7 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 
 | Task | Command |
 |---|---|
-| Test data (fake clinics, users, practitioners, 600 patients per clinic, 6 weeks of appointments and recalls) | `docker compose exec app python manage.py popular_dados_teste` |
+| Test data (a fake clinic, users, practitioners, 600 patients, 6 weeks of appointments and recalls) | `docker compose exec app python manage.py popular_dados_teste` |
 | Compile the translations (after `git pull` or changing texts; the image does it at build time) | `docker compose exec app python manage.py compilemessages` |
 | Extract new texts for translation (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
 | Delete the test data (never touches real clinics or users) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |

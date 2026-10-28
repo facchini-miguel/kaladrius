@@ -4,13 +4,13 @@
 
 [🇺🇸 English](README.md) | 🇧🇷 Português | [🇪🇸 Español](README.es.md)
 
-Sistema de gestão para clínicas: agenda por profissional, cadastro de pacientes, rechamadas (retornos), aniversariantes, usuários e permissões. Atende várias clínicas no mesmo servidor (multi-clínica).
+Sistema de gestão para clínicas: agenda por profissional, cadastro de pacientes, rechamadas (retornos), aniversariantes, usuários e permissões. Uma instalação atende uma clínica.
 
 É a reescrita do antigo *Odonto System* (PHP 5, 2009–2019), agora genérico para qualquer tipo de clínica.
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.25.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.26.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
@@ -28,7 +28,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 | Tarefa | Comando |
 |---|---|
-| Dados de teste (clínicas, usuários, profissionais, 600 pacientes fictícios por clínica, 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py popular_dados_teste` |
+| Dados de teste (uma clínica, usuários, profissionais, 600 pacientes fictícios, 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py popular_dados_teste` |
 | Compilar as traduções (depois de `git pull` ou de mudar textos; a imagem já faz isso no build) | `docker compose exec app python manage.py compilemessages` |
 | Extrair textos novos para tradução (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
 | Apagar os dados de teste (nunca toca em clínicas e usuários reais) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |

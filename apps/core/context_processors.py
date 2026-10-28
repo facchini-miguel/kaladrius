@@ -4,7 +4,6 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
-from .middleware import clinicas_do_usuario
 from .models import Backup
 from .permissoes import tabela_permissoes
 
@@ -20,7 +19,6 @@ def clinica(request):
         "clinica_atual": getattr(request, "clinica", None),
         "vinculo_atual": getattr(request, "vinculo", None),
         "pode": SimpleLazyObject(lambda: tabela_permissoes(request)),
-        "clinicas_do_usuario": SimpleLazyObject(lambda: list(clinicas_do_usuario(usuario))),
     }
 
 

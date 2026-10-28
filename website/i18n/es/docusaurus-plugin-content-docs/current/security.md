@@ -11,7 +11,7 @@ Kaladrius guarda datos de salud, el tipo más sensible de dato personal. Esta p�
 
 | Protección | Cómo |
 |---|---|
-| **Clínicas separadas** | Toda consulta a la base se limita a la clínica en uso; la persona solo llega a las clínicas a las que está vinculada |
+| **Solo los datos de la clínica** | Toda consulta a la base se limita a la clínica de la instalación, y la persona necesita un vínculo activo para ingresar |
 | **Perfiles** | Administrador, recepción y profesional; el profesional ve solo su propia agenda y ningún valor de la clínica |
 | **Contraseñas** | Guardadas con Argon2; mínimo 10 caracteres, no comunes, no solo números, no parecidas al nombre de usuario |
 | **Bloqueo de ingreso** | 5 contraseñas erróneas para el mismo usuario desde la misma dirección lo bloquean por 1 hora |

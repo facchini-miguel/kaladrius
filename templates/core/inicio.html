@@ -31,7 +31,7 @@
 {% if not clinica_atual %}
 {% if user.is_superuser %}
 <div class="alert alert-info">
-  {% translate "Você é administrador da plataforma." %} <a href="{% url 'trocar_clinica' %}">{% translate "Escolha uma clínica para trabalhar." %}</a>
+  {% translate "Ainda não há clínica cadastrada." %} <a href="{% url 'cadastrar_clinica' %}">{% translate "Cadastre a sua clínica." %}</a>
 </div>
 {% else %}
 <div class="alert alert-warning">

@@ -118,7 +118,6 @@ def test_clinica_nao_fica_sem_administrador(
     unico_admin = criar_usuario("unico", clinica_a, Papel.ADMIN, first_name="Único")
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(superusuario)
-    cliente.post(reverse("trocar_clinica"), {"clinica": clinica_a.pk})
     vinculo = unico_admin.vinculos.get()
     resposta = cliente.post(
         reverse("equipe:editar", args=[vinculo.pk]), dados_edicao(Papel.RECEPCAO)

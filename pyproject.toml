@@ -1,6 +1,6 @@
 [project]
 name = "kaladrius"
-version = "0.25.0"
+version = "0.26.0"
 description = "Clinic management system"
 requires-python = ">=3.13"
 license = { file = "LICENSE" }

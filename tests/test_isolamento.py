@@ -9,7 +9,6 @@ from apps.core.isolamento import (
     sem_isolamento,
     usar_clinica,
 )
-from apps.core.middleware import SESSAO_CLINICA
 from apps.core.models import Papel
 from apps.profissionais.models import Profissional
 
@@ -121,42 +120,18 @@ def test_url_com_id_de_outra_clinica_da_404(
         assert Profissional.objects.get(pk=de_b.pk).nome == "Dr. B"
 
 
-def test_sessao_adulterada_nao_da_acesso_a_outra_clinica(
+def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
     clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
-    criar_profissional(clinica_b, "Dr. Bruno da Clínica B")
-    cliente = cliente_de(criar_usuario("ana", clinica_a))
-    sessao = cliente.session
-    sessao[SESSAO_CLINICA] = clinica_b.pk
-    sessao.save()
-    conteudo = cliente.get(reverse("profissionais:lista")).content.decode()
-    assert "Dr. Bruno da Clínica B" not in conteudo
-    assert cliente.session[SESSAO_CLINICA] == clinica_a.pk
-
-
-def test_nao_troca_para_clinica_sem_vinculo(clinica_a, clinica_b, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("ana", clinica_a))
-    resposta = cliente.post(reverse("trocar_clinica"), {"clinica": clinica_b.pk})
-    assert resposta.status_code == 403
-    assert cliente.session[SESSAO_CLINICA] == clinica_a.pk
-
-
-def test_usuario_de_varias_clinicas_troca_de_clinica(
-    clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
-):
-    from apps.core.models import Vinculo
-
+    # One installation serves one clinic (decision 069); the isolation still holds if the
+    # database ever has another one: nobody chooses, each user gets their own clinic.
     criar_profissional(clinica_a, "Profissional A")
     criar_profissional(clinica_b, "Profissional B")
-    usuario = criar_usuario("multi", clinica_a)
-    Vinculo.objects.create(usuario=usuario, clinica=clinica_b, papel=Papel.RECEPCAO)
-    cliente = cliente_de(usuario)
-
-    conteudo = cliente.get(reverse("profissionais:lista")).content.decode()
+    conteudo = cliente_de(criar_usuario("ana", clinica_a)).get(reverse("profissionais:lista"))
+    conteudo = conteudo.content.decode()
     assert "Profissional A" in conteudo and "Profissional B" not in conteudo
-
-    cliente.post(reverse("trocar_clinica"), {"clinica": clinica_b.pk})
-    conteudo = cliente.get(reverse("profissionais:lista")).content.decode()
+    conteudo = cliente_de(criar_usuario("bia", clinica_b)).get(reverse("profissionais:lista"))
+    conteudo = conteudo.content.decode()
     assert "Profissional B" in conteudo and "Profissional A" not in conteudo
 
 

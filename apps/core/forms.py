@@ -114,3 +114,12 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
             if fora or desalinhado:
                 return comeca
         return None
+
+
+class NovaClinicaForm(FormularioBootstrap, forms.ModelForm):
+    """The installation's clinic, registered on the first access (decision 069). The
+    schedule and the rest are set later in the clinic settings."""
+
+    class Meta:
+        model = Clinica
+        fields = ["nome", "documento", "email", "telefone", "endereco"]

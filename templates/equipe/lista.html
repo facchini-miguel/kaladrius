@@ -29,7 +29,6 @@
         <td>
           {{ vinculo.usuario.get_full_name|default:"—" }}
           {% if vinculo.usuario == user %}<span class="badge text-bg-light">{% translate "você" %}</span>{% endif %}
-          {% if vinculo.outras_clinicas %}<span class="badge text-bg-light" title="{% translate 'Também tem acesso a outra clínica' %}">{% translate "outras clínicas" %}</span>{% endif %}
         </td>
         <td>{{ vinculo.usuario.username }}</td>
         <td>{{ vinculo.get_papel_display }}</td>

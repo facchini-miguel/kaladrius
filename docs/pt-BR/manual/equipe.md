@@ -8,7 +8,6 @@ Em **Cadastros > Equipe**, cada pessoa que usa o sistema na clínica.
 - **Editar:** muda o perfil e o acesso. Para tirar alguém da equipe, desmarque **Acesso a esta clínica liberado**: o histórico de quem fez o quê é mantido.
 - **Definir nova senha:** para quem esqueceu a senha.
 - Ninguém altera o próprio perfil, e a clínica precisa ter sempre um administrador ativo.
-- Se a pessoa também trabalha em outra clínica, nome, e-mail e senha só podem ser alterados por ela mesma ou pelo suporte.
 
 ## Profissionais
 Em **Cadastros > Profissionais**, quem atende: nome, registro (CRO, CRM…), cor na agenda e **usuário de acesso**.

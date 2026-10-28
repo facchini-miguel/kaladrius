@@ -15,7 +15,7 @@ The software is free and open source (Apache 2.0). You pay only for where it run
 
 ## Can one installation serve several clinics?
 
-Yes. Each clinic has its own patients, schedule, team, finance and settings. A person linked to several clinics switches between them in the top bar.
+No: one installation serves one clinic, and nobody chooses a clinic when logging in. To serve another clinic, install the system again (another server, or another Compose project on the same one).
 
 ## The page does not open or the certificate fails
 
@@ -50,7 +50,7 @@ kaladrius exec app python manage.py changepassword <user name>
 
 ## The server is slow or ran out of memory
 
-On 1 GB of RAM, keep the swap on. Superusers see the memory, swap and disk in **Administration > System health** (Google Cloud installation). With more clinics or more users, use 2 GB.
+On 1 GB of RAM, keep the swap on. Everyone sees the memory, swap and disk in **Help > System health** (Google Cloud installation). With more users, use 2 GB.
 
 ## Where are the files of the system?
 

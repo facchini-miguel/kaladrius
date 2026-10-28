@@ -19,7 +19,7 @@ Además de lo que tiene el [servidor propio](docker-compose.md), esta instalaci�
 
 - **Actualización automática:** cada 5 minutos la VM busca una imagen nueva; si la hay, la instala y reinicia (`deploy/servidor/atualizar.sh`).
 - **Backup diario** a las 06:00 UTC en Cloud Storage, registrado en el sistema, con reintentos (`deploy/servidor/backup.sh`).
-- **Salud del servidor** cada 5 minutos (procesador, memoria, swap, disco, red, contenedores), mostrada a los superusuarios en **Administración > Salud del sistema** (`deploy/servidor/saude.sh`).
+- **Salud del servidor** cada 5 minutos (procesador, memoria, swap, disco, red, contenedores), mostrada a todos en **Ayuda > Salud del sistema** (`deploy/servidor/saude.sh`).
 - **1 GB de swap**, necesario con 1 GB de RAM.
 - Ninguna contraseña ni clave de Google guardada: la VM y el CI usan tokens temporales.
 

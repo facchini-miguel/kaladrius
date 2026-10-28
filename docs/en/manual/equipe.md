@@ -8,7 +8,6 @@ In **Records > Team**, everyone who uses the system in the clinic.
 - **Edit:** changes the role and the access. To remove someone from the team, uncheck **Access to this clinic allowed**: the history of who did what is kept.
 - **Set new password:** for those who forgot their password.
 - Nobody changes their own role, and the clinic must always have an active administrator.
-- If the person also works in another clinic, name, e-mail and password can only be changed by them or by support.
 
 ## Practitioners
 In **Records > Practitioners**, those who see patients: name, professional license (CRO, CRM…), schedule color and **login user**.

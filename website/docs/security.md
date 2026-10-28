@@ -11,7 +11,7 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 
 | Protection | How |
 |---|---|
-| **Separate clinics** | Every query is limited to the clinic in use; a person only reaches the clinics they are linked to |
+| **Data of the clinic only** | Every query is limited to the installation's clinic, and a person needs an active membership to enter |
 | **Roles** | Administrator, front desk and practitioner; a practitioner sees only their own schedule and no clinic money |
 | **Passwords** | Stored with Argon2; at least 10 characters, not common, not only numbers, not similar to the user name |
 | **Login lockout** | 5 wrong passwords for the same user from the same address block it for 1 hour |

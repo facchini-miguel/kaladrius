@@ -91,10 +91,15 @@ def test_grafico_quebra_a_linha_na_lacuna(pasta):
     assert svg.count("<polyline") == 2
 
 
-def test_tela_so_para_superusuario(pasta, client, clinica_a, criar_usuario, cliente_de):
+def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, cliente_de):
     pasta(amostra(5))
-    admin = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    assert admin.get(reverse("monitoramento:saude")).status_code == 404
+    recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    assert 'href="/sistema/saude/"' in recepcao.get(reverse("inicio")).content.decode()
+    pagina = recepcao.get(reverse("monitoramento:saude"))
+    assert pagina.status_code == 200
+    conteudo = pagina.content.decode()
+    assert "<svg" in conteudo and "Nenhum backup registrado" in conteudo
+    assert "Maiores tabelas" not in conteudo and "saude.sh" not in conteudo
 
 
 def test_tela_com_amostras(pasta, superusuario):

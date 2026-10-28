@@ -4,13 +4,13 @@
 
 [🇺🇸 English](README.md) | [🇧🇷 Português](README.pt-BR.md) | 🇪🇸 Español
 
-Sistema de gestión para clínicas: agenda por profesional, registro de pacientes, recordatorios de regreso, cumpleaños, usuarios y permisos. Atiende varias clínicas en el mismo servidor (multiclínica). Interfaz en portugués, inglés y español.
+Sistema de gestión para clínicas: agenda por profesional, registro de pacientes, recordatorios de regreso, cumpleaños, usuarios y permisos. Una instalación atiende a una clínica. Interfaz en portugués, inglés y español.
 
 Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genérico para cualquier tipo de clínica.
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versión actual: 0.25.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
+**Versión actual: 0.26.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
 
@@ -28,7 +28,7 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 
 | Tarea | Comando |
 |---|---|
-| Datos de prueba (clínicas, usuarios y profesionales ficticios, 600 pacientes por clínica, 6 semanas de agenda y recordatorios) | `docker compose exec app python manage.py popular_dados_teste` |
+| Datos de prueba (una clínica, usuarios y profesionales ficticios, 600 pacientes, 6 semanas de agenda y recordatorios) | `docker compose exec app python manage.py popular_dados_teste` |
 | Compilar las traducciones (después de `git pull` o de cambiar textos; la imagen lo hace en el build) | `docker compose exec app python manage.py compilemessages` |
 | Extraer textos nuevos para traducir (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
 | Eliminar los datos de prueba (nunca toca clínicas ni usuarios reales) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |

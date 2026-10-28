@@ -4,44 +4,25 @@ from django.utils import translation
 from .isolamento import sem_isolamento, usar_clinica
 from .models import Clinica, Vinculo
 
-SESSAO_CLINICA = "clinica_id"
-
-
-def clinicas_do_usuario(usuario):
-    """Active clinics the user may work in. Superusers may work in any clinic."""
-    if usuario.is_superuser:
-        return Clinica.objects.filter(ativa=True)
-    return Clinica.objects.filter(
-        ativa=True, vinculos__usuario=usuario, vinculos__ativo=True
-    ).distinct()
-
 
 def resolver_clinica(request):
-    """Return (clinic, membership) for the request, validating the session choice.
+    """Return (clinic, membership) for the request.
 
-    The clinic stored in the session is only honored if the user still has an
-    active membership in it (or is a superuser). Otherwise the first available
-    clinic is used. Returns (None, None) when the user has no clinic at all.
+    One installation serves one clinic (decision 069), so nobody chooses: a user works in
+    the clinic of their active membership, and a superuser without one in the clinic of
+    the installation. Returns (None, None) when there is no clinic for the user.
     """
     usuario = request.user
-    vinculos = list(
+    vinculo = (
         Vinculo.objects.filter(usuario=usuario, ativo=True, clinica__ativa=True)
         .select_related("clinica")
-        .order_by("clinica__nome")
+        .order_by("clinica_id")
+        .first()
     )
-    escolhida = request.session.get(SESSAO_CLINICA)
-    if escolhida is not None:
-        for vinculo in vinculos:
-            if vinculo.clinica_id == escolhida:
-                return vinculo.clinica, vinculo
-        if usuario.is_superuser:
-            clinica = Clinica.objects.filter(pk=escolhida, ativa=True).first()
-            if clinica is not None:
-                return clinica, None
-        del request.session[SESSAO_CLINICA]
-    if vinculos:
-        request.session[SESSAO_CLINICA] = vinculos[0].clinica_id
-        return vinculos[0].clinica, vinculos[0]
+    if vinculo is not None:
+        return vinculo.clinica, vinculo
+    if usuario.is_superuser:
+        return Clinica.unica(), None
     return None, None
 
 

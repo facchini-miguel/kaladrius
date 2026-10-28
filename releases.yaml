@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.26.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Uma clínica por instalação e saúde do sistema para todos
+    en: One clinic per installation and system health for everyone
+    es: Una clínica por instalación y salud del sistema para todos
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O sistema atende uma clínica: ninguém precisa mais escolher a clínica ao entrar, e o
+          seletor de clínicas saiu da barra superior. Numa instalação nova, o primeiro acesso
+          pede os dados da clínica.
+        en: >
+          The system serves one clinic: nobody has to choose the clinic when logging in any
+          more, and the clinic picker left the top bar. On a new installation, the first access
+          asks for the clinic's details.
+        es: >
+          El sistema atiende a una clínica: ya nadie tiene que elegir la clínica al ingresar, y
+          el selector de clínicas salió de la barra superior. En una instalación nueva, el
+          primer acceso pide los datos de la clínica.
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A tela Saúde do sistema (processador, memória, disco, rede e último backup do
+          servidor) agora fica em Ajuda e está disponível para todos os usuários.
+        en: >
+          The System health page (the server's processor, memory, disk, network and last
+          backup) is now under Help and available to every user.
+        es: >
+          La pantalla Salud del sistema (procesador, memoria, disco, red y último respaldo del
+          servidor) ahora está en Ayuda y disponible para todos los usuarios.
+
 - versao: 0.25.0
   data: 2026-10-28
   titulo:

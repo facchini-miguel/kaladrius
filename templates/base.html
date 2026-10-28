@@ -105,6 +105,7 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'ajuda:indice' %}">{% translate "Manual do usuário" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'novidades' %}">{% translate "Novidades" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'monitoramento:saude' %}">{% translate "Saúde do sistema" %}</a></li>
               {% if user.is_superuser %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'ajuda:tecnica_indice' %}">{% translate "Documentação técnica" %}</a></li>
@@ -115,30 +116,13 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Administração" %}</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'monitoramento:saude' %}">{% translate "Saúde do sistema" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% translate "Painel do Django" %}</a></li>
             </ul>
           </li>
           {% endif %}
         </ul>
         <ul class="navbar-nav me-3">
-          {% if clinicas_do_usuario|length > 1 %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-               title="{% translate 'Trocar de clínica' %}{% if clinica_atual %}: {{ clinica_atual.nome }}{% endif %}"><span class="nome-clinica">{% if clinica_atual %}{{ clinica_atual.nome }}{% else %}{% translate "Escolha a clínica" %}{% endif %}</span></a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              {% for clinica in clinicas_do_usuario %}
-              <li>
-                <form method="post" action="{% url 'trocar_clinica' %}">
-                  {% csrf_token %}
-                  <input type="hidden" name="clinica" value="{{ clinica.pk }}">
-                  <button type="submit" class="dropdown-item{% if clinica.pk == clinica_atual.pk %} active{% endif %}">{{ clinica.nome }}</button>
-                </form>
-              </li>
-              {% endfor %}
-            </ul>
-          </li>
-          {% elif clinica_atual %}
+          {% if clinica_atual %}
           <li class="nav-item"><span class="navbar-text nome-clinica" title="{{ clinica_atual.nome }}">{{ clinica_atual.nome }}</span></li>
           {% endif %}
         </ul>

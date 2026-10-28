@@ -11,8 +11,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from . import painel
-from .forms import ClinicaForm, TrocaSenhaForm
-from .middleware import SESSAO_CLINICA, clinicas_do_usuario
+from .forms import ClinicaForm, NovaClinicaForm, TrocaSenhaForm
+from .models import Clinica
 from .permissoes import Acao, Modulo, exige_permissao
 
 
@@ -42,20 +42,21 @@ def _destino_seguro(request, destino):
 
 
 @login_required
-def trocar_clinica(request):
-    clinicas = clinicas_do_usuario(request.user)
-    destino = _destino_seguro(request, request.POST.get("next") or request.GET.get("next"))
-    if request.method == "POST":
-        escolhida = request.POST.get("clinica", "")
-        clinica = clinicas.filter(pk=escolhida).first() if escolhida.isdecimal() else None
-        if clinica is None:
-            raise PermissionDenied
-        request.session[SESSAO_CLINICA] = clinica.pk
+def cadastrar_clinica(request):
+    """First access of a new installation: the superuser registers the clinic. There is
+    only one (decision 069), so once it exists this page sends to the home page."""
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    if Clinica.objects.exists():
+        return redirect("inicio")
+    form = NovaClinicaForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
         messages.success(
-            request, _("Você está trabalhando na clínica %(nome)s.") % {"nome": clinica.nome}
+            request, _("Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe.")
         )
-        return redirect(destino)
-    return render(request, "core/trocar_clinica.html", {"clinicas": clinicas, "next": destino})
+        return redirect("inicio")
+    return render(request, "core/cadastrar_clinica.html", {"form": form})
 
 
 class TrocarSenhaView(PasswordChangeView):

@@ -2,7 +2,6 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.http import Http404
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -70,9 +69,8 @@ def _banco():
 
 @login_required
 def painel(request):
-    """Server health for superusers (other users get "not found", like the technical docs)."""
-    if not request.user.is_superuser:
-        raise Http404
+    """Server health for every logged-in user (0.26.0). The database tables and the server
+    command are shown to superusers only."""
     periodo = request.GET.get("periodo", "1h")
     if periodo not in PERIODOS:
         periodo = "1h"

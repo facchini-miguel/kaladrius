@@ -32,6 +32,11 @@ class ClinicaAdmin(admin.ModelAdmin):
     search_fields = ["nome", "documento"]
     inlines = [VinculoNaClinicaInline]
 
+    def has_add_permission(self, request):
+        # One installation, one clinic (decision 069): the first one is registered on the
+        # first access (core:cadastrar_clinica).
+        return super().has_add_permission(request) and not Clinica.objects.exists()
+
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):

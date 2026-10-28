@@ -5,22 +5,7 @@ title: Primeiros passos
 
 # Primeiros passos
 
-Depois de instalar, o sistema tem só o **superusuário** criado pelo `criar_admin`. O superusuário é a conta de suporte da instalação: vê todas as clínicas e as páginas técnicas. Cada clínica é administrada pelo seu próprio **administrador**.
-
-## 1. Crie a clínica
-
-1. Entre com o superusuário e abra **`/admin/`** (administração do Django).
-2. **Clínicas > Adicionar**: nome e, se quiser, CPF/CNPJ, e-mail, telefone e endereço. O horário da agenda (início, fim e duração de cada horário) pode ser mudado depois pela própria clínica.
-3. Salve. A clínica já começa com **tipos de atendimento** e **categorias e contas** do financeiro padrão, que a clínica pode alterar.
-
-## 2. Crie o administrador da clínica
-
-1. **Usuários > Adicionar**: nome de usuário e senha.
-2. Na página do usuário, em **Vínculos com clínicas**, adicione a clínica com o perfil **Administrador** e deixe **ativo** marcado.
-
-Uma pessoa pode trabalhar em mais de uma clínica: adicione um vínculo para cada. No sistema, ela troca de clínica clicando no nome da clínica na barra superior.
-
-## 3. Entregue para a clínica
+D## 3. Entregue para a clínica
 
 Daqui em diante, o administrador da clínica faz tudo dentro do sistema, sem o `/admin/`:
 

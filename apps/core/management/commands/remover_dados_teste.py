@@ -25,7 +25,11 @@ from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
 
-from .popular_dados_teste import CLINICAS, USUARIO_MULTICLINICA
+from .popular_dados_teste import CLINICAS
+
+# Test data created before 0.26.0 (two clinics and a user in both): removed too.
+CLINICAS_ANTIGAS = ["Clínica Bem Estar (teste)"]
+USUARIOS_ANTIGOS = ["admin.bemestar", "recepcao.bemestar", "recepcao.multi"]
 
 
 class Command(BaseCommand):
@@ -43,9 +47,8 @@ class Command(BaseCommand):
     def handle(self, *args, confirmar=False, **options):
         if not confirmar:
             raise CommandError("Nada foi apagado: rode de novo com --confirmar.")
-        nomes = [dados["nome"] for dados in CLINICAS]
-        usernames = [u[0] for dados in CLINICAS for u in dados["usuarios"]]
-        usernames.append(USUARIO_MULTICLINICA[0])
+        nomes = [dados["nome"] for dados in CLINICAS] + CLINICAS_ANTIGAS
+        usernames = [u[0] for dados in CLINICAS for u in dados["usuarios"]] + USUARIOS_ANTIGOS
 
         with transaction.atomic(), sem_isolamento():
             clinicas = list(Clinica.objects.filter(nome__in=nomes))

@@ -15,7 +15,7 @@ O programa é gratuito e de código aberto (Apache 2.0). Você paga só por onde
 
 ## Uma instalação atende várias clínicas?
 
-Sim. Cada clínica tem os seus pacientes, agenda, equipe, financeiro e configurações. Quem está vinculado a várias clínicas troca entre elas na barra superior.
+Não: uma instalação atende uma clínica, e ninguém escolhe clínica ao entrar. Para atender outra clínica, instale o sistema de novo (outro servidor, ou outro projeto do Compose no mesmo servidor).
 
 ## A página não abre ou o certificado falha
 
@@ -50,7 +50,7 @@ kaladrius exec app python manage.py changepassword <usuário>
 
 ## O servidor está lento ou ficou sem memória
 
-Com 1 GB de RAM, mantenha o swap ligado. Os superusuários veem memória, swap e disco em **Administração > Saúde do sistema** (instalação no Google Cloud). Com mais clínicas ou mais usuários, use 2 GB.
+Com 1 GB de RAM, mantenha o swap ligado. Todos veem memória, swap e disco em **Ajuda > Saúde do sistema** (instalação no Google Cloud). Com mais usuários, use 2 GB.
 
 ## Onde ficam os arquivos do sistema?
 

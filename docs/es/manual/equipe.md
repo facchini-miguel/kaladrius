@@ -8,7 +8,6 @@ En **Registros > Equipo**, cada persona que usa el sistema en la clínica.
 - **Editar:** cambia el perfil y el acceso. Para quitar a alguien del equipo, desmarque **Acceso a esta clínica habilitado**: el historial de quién hizo qué se conserva.
 - **Definir nueva contraseña:** para quien olvidó su contraseña.
 - Nadie cambia su propio perfil, y la clínica debe tener siempre un administrador activo.
-- Si la persona también trabaja en otra clínica, el nombre, el correo y la contraseña solo pueden cambiarlos ella misma o el soporte.
 
 ## Profesionales
 En **Registros > Profesionales**, quienes atienden: nombre, registro profesional (CRO, CRM…), color en la agenda y **usuario de acceso**.

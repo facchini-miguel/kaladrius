@@ -11,8 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.shortcuts import redirect, render
-from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
 from .models import Papel
@@ -116,8 +114,7 @@ def exige_permissao(modulo, acao):
         def protegida(request, *args, **kwargs):
             if request.clinica is None:
                 if request.user.is_superuser:
-                    destino = reverse("trocar_clinica")
-                    return redirect(f"{destino}?{urlencode({'next': request.get_full_path()})}")
+                    return redirect("cadastrar_clinica")
                 return render(request, "core/sem_clinica.html", status=403)
             if not pode(request, modulo, acao):
                 raise PermissionDenied

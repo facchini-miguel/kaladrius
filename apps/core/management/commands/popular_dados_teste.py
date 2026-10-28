@@ -25,35 +25,22 @@ CLINICAS = [
             ("admin.sorriso", "Beatriz", "Lima", Papel.ADMIN),
             ("recepcao.sorriso", "Carla", "Mendes", Papel.RECEPCAO),
             ("dra.ana", "Ana", "Souza", Papel.PROFISSIONAL),
+            ("dr.carlos", "Carlos", "Pereira", Papel.PROFISSIONAL),
         ],
         "profissionais": [
             ("Dra. Ana Souza", "CRO-SC 10001", "#0d6efd", "dra.ana"),
             ("Dr. Bruno Alves", "CRO-SC 10002", "#198754", None),
-            ("Consultório 2", "", "#6f42c1", None),
-        ],
-    },
-    {
-        "nome": "Clínica Bem Estar (teste)",
-        "dados": {"telefone": "(48) 3000-0002", "agenda_intervalo": 60},
-        "usuarios": [
-            ("admin.bemestar", "Eduardo", "Ramos", Papel.ADMIN),
-            ("recepcao.bemestar", "Fernanda", "Dias", Papel.RECEPCAO),
-            ("dr.carlos", "Carlos", "Pereira", Papel.PROFISSIONAL),
-        ],
-        "profissionais": [
             ("Dr. Carlos Pereira", "CRM-SC 20001", "#dc3545", "dr.carlos"),
             ("Júlia Rocha (fisioterapia)", "CREFITO-10 20002", "#fd7e14", None),
+            ("Consultório 2", "", "#6f42c1", None),
         ],
     },
 ]
 
-# A front desk user that works in both clinics, to test the clinic switcher.
-USUARIO_MULTICLINICA = ("recepcao.multi", "Diego", "Costa", Papel.RECEPCAO)
-
 
 class Command(BaseCommand):
     help = (
-        "Creates fake test data (clinics, users and practitioners). "
+        "Creates fake test data (one clinic, users and practitioners). "
         "Development only: never run it in production."
     )
 
@@ -105,13 +92,6 @@ class Command(BaseCommand):
                         nome=nome,
                         defaults={"registro": registro, "cor": cor, "usuario": usuario},
                     )
-
-            username, nome, sobrenome, papel = USUARIO_MULTICLINICA
-            usuario = self._usuario(username, nome, sobrenome, senha, criados)
-            for clinica in clinicas:
-                Vinculo.objects.get_or_create(
-                    usuario=usuario, clinica=clinica, defaults={"papel": papel}
-                )
 
             total_pacientes = sum(self._pacientes(clinica, pacientes) for clinica in clinicas)
             total_agendamentos = 0
