@@ -16,6 +16,22 @@ if [ -d /opt/medical-system ] && [ ! -e "$DIR" ] && [ -z "${MIGRANDO:-}" ]; then
   exit 1
 fi
 
+# Value of one variable of the server .env (empty when missing). The scripts never source
+# the whole file: it holds the app's passwords.
+valor_do_env() {
+  grep -m1 "^$1=" "$DIR/.env" 2>/dev/null | cut -d= -f2- || true
+}
+
+# Signal to an external monitor such as Healthchecks.io (decision 078). $1 names the .env
+# variable with the check's address (MONITOR_SISTEMA_URL, MONITOR_BACKUP_URL); $2 "fail"
+# reports a failure. Does nothing when the variable is not set, and never fails the caller.
+avisar_monitor() {
+  local url
+  url=$(valor_do_env "$1")
+  [ -n "$url" ] || return 0
+  curl -fsS -m 10 --retry 3 -o /dev/null "$url${2:+/$2}" || echo "Aviso: o monitor $1 não respondeu." >&2
+}
+
 # Access token of the VM's service account (no keys stored on the server).
 token_google() {
   curl -sf -H "Metadata-Flavor: Google" \

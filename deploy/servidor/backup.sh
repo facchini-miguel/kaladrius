@@ -3,6 +3,9 @@
 # encrypted at rest by Google and deleted automatically after 30 days).
 set -euo pipefail
 source "$(dirname "$0")/comum.sh"
+# The external monitor hears about a failed backup at once, and about a missing one when
+# today's signal does not arrive (decision 078).
+trap 'avisar_monitor MONITOR_BACKUP_URL fail' ERR
 
 nome="kaladrius-$(date -u +%Y%m%d-%H%M%S).dump"
 arquivo=$(mktemp)
@@ -23,3 +26,5 @@ compose exec -T app python manage.py registrar_backup "$nome" "$(stat -c %s "$ar
 # Daily retention: failed login records older than 30 days are deleted (decision 045).
 compose exec -T app python manage.py aplicar_retencao \
   || echo "Aviso: não foi possível apagar os registros antigos."
+
+avisar_monitor MONITOR_BACKUP_URL

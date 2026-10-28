@@ -4,7 +4,8 @@
 #   saude.sh            report in the terminal: now, the last 24 hours, containers, timers
 #   saude.sh --coletar  append one sample to $DIR/saude/amostras.jsonl (systemd timer, every
 #                       5 minutes; 7 days kept). The web app reads that file, mounted
-#                       read-only, and never gets access to Docker itself.
+#                       read-only, and never gets access to Docker itself. Also checks the
+#                       site through the internet and signals the external monitor.
 set -euo pipefail
 export LC_ALL=C  # numbers with a dot, whatever the server's language
 source "$(dirname "$0")/comum.sh"
@@ -95,6 +96,14 @@ relatorio() {
 }
 
 if [ "${1:-}" = "--coletar" ]; then
+  # First the system as anyone sees it: through the internet, by its address. The external
+  # monitor warns when this signal fails or stops arriving (decision 078).
+  site=$(valor_do_env SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
+  if [ -n "$site" ] && curl -fsS -m 20 -o /dev/null "https://$site/api/v1/versao"; then
+    avisar_monitor MONITOR_SISTEMA_URL
+  else
+    avisar_monitor MONITOR_SISTEMA_URL fail
+  fi
   coletar
 else
   relatorio

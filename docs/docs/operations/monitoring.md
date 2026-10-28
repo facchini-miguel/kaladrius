@@ -16,6 +16,20 @@ curl https://clinic.example.com/api/v1/versao
 
 Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be warned when the system stops answering.
 
+## Alerts by e-mail or phone (Google Cloud installation)
+
+The server can warn you by itself through [Healthchecks.io](https://healthchecks.io) (free plan: 20 checks), which works with the IPv6-only server:
+
+1. Create an account and two checks: **system up** (period 5 minutes, grace 10 minutes) and **daily backup** (period 1 day, grace 2 hours). Choose how to be warned: e-mail, Telegram, Signal, a phone notification…
+2. Add their addresses to the server `.env` and you are done (the scripts read them on the next run):
+
+   ```bash
+   MONITOR_SISTEMA_URL=https://hc-ping.com/<uuid of "system up">
+   MONITOR_BACKUP_URL=https://hc-ping.com/<uuid of "daily backup">
+   ```
+
+Every 5 minutes, the health timer opens the system **through the internet, by its address** (the first name in `SITE_HOSTNAME`) and signals the result; the backup signals each daily backup, or its failure. You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
+
 ## Warnings inside the system
 
 Superusers see a warning at the top of every page when:

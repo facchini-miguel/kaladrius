@@ -16,6 +16,20 @@ curl https://clinica.ejemplo.com/api/v1/versao
 
 Úselo en cualquier monitor de disponibilidad (UptimeRobot, Healthchecks, Uptime Kuma…) para recibir un aviso cuando el sistema deje de responder.
 
+## Avisos por correo o celular (instalación en Google Cloud)
+
+El propio servidor puede avisarle mediante [Healthchecks.io](https://healthchecks.io) (plan gratis: 20 verificaciones), que funciona con el servidor solo IPv6:
+
+1. Cree una cuenta y dos verificaciones: **sistema funcionando** (período de 5 minutos, tolerancia de 10 minutos) y **respaldo diario** (período de 1 día, tolerancia de 2 horas). Elija cómo quiere que le avisen: correo, Telegram, Signal, notificación en el celular…
+2. Ponga sus direcciones en el `.env` del servidor y listo (los scripts las leen en la próxima ejecución):
+
+   ```bash
+   MONITOR_SISTEMA_URL=https://hc-ping.com/<uuid de "sistema funcionando">
+   MONITOR_BACKUP_URL=https://hc-ping.com/<uuid de "respaldo diario">
+   ```
+
+Cada 5 minutos, el temporizador de salud abre el sistema **por internet, por su dirección** (el primer nombre de `SITE_HOSTNAME`) y envía el resultado; el respaldo envía una señal en cada respaldo diario, o su falla. Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
+
 ## Avisos dentro del sistema
 
 Los superusuarios ven un aviso arriba de las pantallas cuando:
