@@ -320,6 +320,23 @@ msgstr "30 minutos"
 msgid "1 hora"
 msgstr "1 hora"
 
+msgid "Odontologia"
+msgstr "Odontología"
+
+msgid "Medicina"
+msgstr "Medicina"
+
+msgid "Outra área da saúde"
+msgstr "Otra área de la salud"
+
+msgid "área"
+msgstr "área"
+
+msgid ""
+"Mostra as partes de cada área, como o odontograma nos orçamentos da "
+"Odontologia. Trocar a área não apaga nada."
+msgstr "Muestra las partes de cada área, como el odontograma en los presupuestos de Odontología. Cambiar el área no borra nada."
+
 msgid "Somente números."
 msgstr "Solo números."
 
@@ -2973,12 +2990,11 @@ msgstr "Subtotal"
 msgid "Incluir procedimento"
 msgstr "Agregar procedimiento"
 
-msgid ""
-"Clique nos dentes do procedimento (a quantidade acompanha). Sem descrição ou "
-"valor, valem os da tabela de procedimentos."
-msgstr ""
-"Haga clic en los dientes del procedimiento (la cantidad acompaña). Sin "
-"descripción ni valor, valen los de la tabla de procedimientos."
+msgid "Clique nos dentes do procedimento (a quantidade acompanha)."
+msgstr "Haga clic en los dientes del procedimiento (la cantidad acompaña)."
+
+msgid "Sem descrição ou valor, valem os da tabela de procedimentos."
+msgstr "Sin descripción ni valor, valen los de la tabla de procedimientos."
 
 msgid "Incluir"
 msgstr "Agregar"
@@ -3057,7 +3073,9 @@ msgstr ""
 msgid ""
 "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no "
 "financeiro e depois volte para arquivar."
-msgstr "Este paciente todavía tiene cuentas pendientes. Cobre o anule cada una en Finanzas y después vuelva para archivar."
+msgstr ""
+"Este paciente todavía tiene cuentas pendientes. Cobre o anule cada una en "
+"Finanzas y después vuelva para archivar."
 
 msgid "Voltar para a ficha"
 msgstr "Volver a la ficha"

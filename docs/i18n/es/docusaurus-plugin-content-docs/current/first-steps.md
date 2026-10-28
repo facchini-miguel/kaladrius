@@ -5,7 +5,20 @@ title: Primeros pasos
 
 # Primeros pasos
 
-D## 3. Entréguelo a la clínica
+Después de instalar, el sistema tiene solo el **superusuario** creado por `criar_admin`. El superusuario es la cuenta de soporte de la instalación: ve todo de la clínica y las páginas técnicas. La clínica la administra su propio **administrador**.
+
+Una instalación atiende a **una clínica**. Para atender a otra clínica, instale el sistema de nuevo (otro servidor, u otro proyecto de Compose en el mismo servidor).
+
+## 1. Registre la clínica
+
+1. Ingrese con el superusuario. En el primer acceso, el sistema pide los datos de la clínica: nombre, **área** (Odontología, Medicina u otra área de la salud) y, si quiere, CPF/CNPJ, e-mail, teléfono y dirección.
+2. Guarde. La clínica empieza con **tipos de atención** (de odontología en Odontología, generales en las otras áreas) y **categorías y cuentas** de finanzas predeterminados, que la clínica puede cambiar. El horario de la agenda (inicio, fin y duración de cada turno) y el área están en **Registros > Configuración de la clínica**.
+
+## 2. Cree el administrador de la clínica
+
+En **Registros > Equipo > Nuevo miembro**, cree a la persona con el perfil **Administrador**. Vea [Equipo](manual/equipe.md).
+
+## 3. Entréguelo a la clínica
 
 De aquí en adelante, el administrador de la clínica hace todo dentro del sistema, sin `/admin/`:
 

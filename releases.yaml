@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.28.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Área da clínica (Odontologia, Medicina e outras)
+    en: Clinic area (Dentistry, Medicine and others)
+    es: Área de la clínica (Odontología, Medicina y otras)
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em Configurações da clínica, escolha a área: Odontologia, Medicina ou outra área da
+          saúde. O odontograma e os dentes e faces dos orçamentos aparecem só na Odontologia; nas
+          outras áreas, o orçamento fica com procedimento, descrição, quantidade e valor. Trocar
+          a área não apaga nada.
+        en: >
+          In Clinic settings, choose the area: Dentistry, Medicine or another health area. The
+          dental chart and the teeth and surfaces of estimates only appear in Dentistry; in the
+          other areas, an estimate has the procedure, description, quantity and price. Changing
+          the area deletes nothing.
+        es: >
+          En Configuración de la clínica, elija el área: Odontología, Medicina u otra área de la
+          salud. El odontograma y los dientes y caras de los presupuestos aparecen solo en
+          Odontología; en las otras áreas, el presupuesto tiene procedimiento, descripción,
+          cantidad y valor. Cambiar el área no borra nada.
+
 - versao: 0.27.2
   data: 2026-10-28
   titulo:

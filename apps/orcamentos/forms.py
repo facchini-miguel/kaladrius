@@ -5,10 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.forms import FormularioBootstrap
 from apps.financeiro.forms import DATA, _campo_dinheiro
 from apps.financeiro.models import Categoria, Conta, Pagamento
+from apps.odontologia.dentes import DENTES_VALIDOS
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
-from .models import DENTES_VALIDOS, ItemOrcamento, Orcamento, Procedimento
+from .models import ItemOrcamento, Orcamento, Procedimento
 
 
 class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
@@ -65,10 +66,13 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
         fields = ["procedimento", "descricao", "dentes", "faces", "quantidade", "valor_unitario"]
         widgets = {"dentes": forms.HiddenInput}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, odontologia=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["procedimento"].queryset = Procedimento.objects.filter(ativo=True)
         self.fields["descricao"].required = False
+        if not odontologia:
+            # Teeth and faces belong to the dental module (decision 080).
+            del self.fields["dentes"], self.fields["faces"]
 
     def clean_dentes(self):
         partes = [p.strip() for p in (self.cleaned_data.get("dentes") or "").split(",")]

@@ -254,9 +254,9 @@ def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
     from decimal import Decimal
 
     from apps.financeiro.models import Categoria
+    from apps.odontologia.dentes import DENTES_PERMANENTES
     from apps.orcamentos import servicos
     from apps.orcamentos.models import (
-        DENTES_PERMANENTES,
         ItemOrcamento,
         Orcamento,
         Procedimento,

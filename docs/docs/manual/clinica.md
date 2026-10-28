@@ -9,6 +9,8 @@ These screens belong to the **clinic administrator**, in the **Records** menu.
 ## Clinic settings
 In **Records > Clinic settings**: the clinic's name, CPF/CNPJ, e-mail and phone, and the **schedule hours** (start, end and length of each slot).
 
+The **area** (Dentistry, Medicine or another health area) shows the parts of each one: in Dentistry, the **dental chart** and the teeth and surfaces of estimates. Changing the area deletes nothing: an estimate that already has teeth keeps showing them.
+
 If a future appointment would fall outside the new hours or slot length, the change is refused and the screen shows which one. Adjust that appointment first.
 
 ## Appointment types

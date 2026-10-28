@@ -35,6 +35,7 @@ apps/
   agenda/         agenda e presença
   pacientes/      pacientes
   orcamentos/     orçamentos e tabela de procedimentos
+  odontologia/    módulo de odontologia (odontograma), só na área Odontologia
   rechamadas/     rechamadas e aniversariantes
   financeiro/     contas a receber e a pagar, caixa, bancos, comissões
   equipe/         gestão da equipe

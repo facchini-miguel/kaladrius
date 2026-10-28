@@ -5,7 +5,20 @@ title: First steps
 
 # First steps
 
-A## 3. Hand it over to the clinic
+After installing, the system has only the **superuser** created by `criar_admin`. The superuser is the support account of the installation: it sees everything in the clinic and the technical pages. The clinic is then run by its own **administrator**.
+
+One installation serves **one clinic**. To serve another clinic, install the system again (another server, or another Compose project on the same one).
+
+## 1. Register the clinic
+
+1. Log in with the superuser. On the first access, the system asks for the clinic: name, **area** (Dentistry, Medicine or another health area) and, if you want, CPF/CNPJ, e-mail, phone and address.
+2. Save. The clinic starts with default **appointment types** (dental ones in Dentistry, general ones in the other areas) and finance **categories and accounts**, which the clinic can change. The schedule hours (start, end, length of each slot) and the area are in **Records > Clinic settings**.
+
+## 2. Create the clinic's administrator
+
+In **Records > Team > New member**, create the person with the role **Administrator**. See [Team](manual/equipe.md).
+
+## 3. Hand it over to the clinic
 
 From here on, the clinic's administrator does everything inside the system, without `/admin/`:
 

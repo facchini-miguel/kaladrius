@@ -148,6 +148,7 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
 def dados_clinica(**extra):
     return {
         "nome": "Clínica Atualizada",
+        "area": "odontologia",
         "documento": "",
         "email": "",
         "telefone": "",

@@ -8,18 +8,17 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ModeloDaClinica, sem_isolamento
 from apps.core.validadores import validar_cor
+from apps.odontologia.dentes import TIPOS_DE_ATENDIMENTO
 
-# Appointment types every new clinic starts with: the ones from the legacy system,
-# with the same colors. Each clinic can rename, recolor, deactivate or add types.
+# Appointment types a new clinic starts with (decision 080): the dental module's for the
+# Odontologia area, these for the others. Each clinic can rename, recolor, deactivate or
+# add types.
 TIPOS_PADRAO = [
     ("Liberado", "#b9f1a7"),
-    ("Cirurgia", "#f7a5a5"),
-    ("Dentística", "#f6f7a5"),
-    ("Periodontia", "#7b88cb"),
-    ("Consulta inicial", "#e7a5f7"),
-    ("Prótese", "#fed27d"),
-    ("Endodontia", "#e96cd9"),
-    ("Ortodontia", "#a7eef1"),
+    ("Consulta", "#e7a5f7"),
+    ("Retorno", "#a7eef1"),
+    ("Exame", "#f6f7a5"),
+    ("Procedimento", "#f7a5a5"),
     ("Atendimento de 15 em 15", "#d5dae6"),
     ("Ocupado", "#a7bef1"),
 ]
@@ -151,6 +150,7 @@ def criar_tipos_padrao(clinica):
     with sem_isolamento():
         if TipoAtendimento.objects.filter(clinica=clinica).exists():
             return
+        tipos = TIPOS_DE_ATENDIMENTO if clinica.odontologia else TIPOS_PADRAO
         TipoAtendimento.objects.bulk_create(
-            TipoAtendimento(clinica=clinica, nome=nome, cor=cor) for nome, cor in TIPOS_PADRAO
+            TipoAtendimento(clinica=clinica, nome=nome, cor=cor) for nome, cor in tipos
         )

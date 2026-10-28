@@ -122,9 +122,11 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     resposta = cliente.get(reverse("profissionais:lista"))
     assert resposta.url == reverse("cadastrar_clinica")
 
-    resposta = cliente.post(reverse("cadastrar_clinica"), {"nome": "Clínica Nova"})
+    resposta = cliente.post(
+        reverse("cadastrar_clinica"), {"nome": "Clínica Nova", "area": "medicina"}
+    )
     assert resposta.url == reverse("inicio")
-    assert list(Clinica.objects.values_list("nome", flat=True)) == ["Clínica Nova"]
+    assert list(Clinica.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
     assert cliente.get(reverse("profissionais:lista")).status_code == 200
     # Only one: the page and the Django admin no longer add clinics.
     assert cliente.get(reverse("cadastrar_clinica")).url == reverse("inicio")

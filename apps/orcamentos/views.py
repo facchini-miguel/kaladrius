@@ -16,12 +16,13 @@ from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.financeiro.models import Categoria
+from apps.odontologia.dentes import odontograma
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
 from . import servicos
 from .forms import AprovarForm, DescontoForm, ItemForm, OrcamentoForm, ProcedimentoForm
-from .models import DENTES_DECIDUOS, DENTES_PERMANENTES, Orcamento, Procedimento
+from .models import Orcamento, Procedimento
 
 POR_PAGINA = 50
 
@@ -118,24 +119,24 @@ def detalhe(request, pk):
         {
             "orcamento": orcamento,
             "aberto": aberto,
-            "item_form": ItemForm(),
+            "item_form": ItemForm(odontologia=request.clinica.odontologia),
             "desconto_form": DescontoForm(initial={"desconto": orcamento.desconto})
             if pode_desconto and aberto
             else None,
             "pode_aprovar": aberto
             and pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR)
             and pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR),
-            **_odontograma(orcamento.dentes),
+            **_dentes(request, orcamento),
         },
     )
 
 
-def _odontograma(selecionados):
-    return {
-        "permanentes": DENTES_PERMANENTES,
-        "deciduos": DENTES_DECIDUOS,
-        "selecionados": selecionados,
-    }
+def _dentes(request, orcamento):
+    """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
+    area for an estimate that already has teeth (changing the area hides nothing written)."""
+    if not (request.clinica.odontologia or orcamento.dentes):
+        return {"mostrar_dentes": False}
+    return {"mostrar_dentes": True, **odontograma(orcamento.dentes)}
 
 
 @require_POST
@@ -144,7 +145,7 @@ def item_adicionar(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    form = ItemForm(request.POST)
+    form = ItemForm(request.POST, odontologia=request.clinica.odontologia)
     if form.is_valid():
         item = form.save(commit=False)
         item.orcamento = orcamento
@@ -244,7 +245,7 @@ def imprimir(request, pk):
     return render(
         request,
         "orcamentos/imprimir.html",
-        {"orcamento": orcamento, **_odontograma(orcamento.dentes)},
+        {"orcamento": orcamento, **_dentes(request, orcamento)},
     )
 
 

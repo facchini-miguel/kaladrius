@@ -4,16 +4,25 @@ from django.urls import reverse
 from apps.agenda.models import TIPOS_PADRAO, TipoAtendimento
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Clinica, Papel
+from apps.odontologia.dentes import TIPOS_DE_ATENDIMENTO
 
 pytestmark = pytest.mark.django_db
 
 
-def test_clinica_nova_recebe_os_tipos_padrao():
-    clinica = Clinica.objects.create(nome="Nova")
+@pytest.mark.parametrize(
+    ("area", "esperados"),
+    [
+        (Clinica.Area.ODONTOLOGIA, TIPOS_DE_ATENDIMENTO),
+        (Clinica.Area.MEDICINA, TIPOS_PADRAO),
+        (Clinica.Area.OUTRA, TIPOS_PADRAO),
+    ],
+)
+def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
+    # Decision 080: dental types for the Odontologia area, general ones for the others.
+    clinica = Clinica.objects.create(nome="Nova", area=area)
     with usar_clinica(clinica):
         tipos = {t.nome: t.cor for t in TipoAtendimento.objects.all()}
-    assert tipos == dict(TIPOS_PADRAO)
-    assert tipos["Cirurgia"] == "#f7a5a5"
+    assert tipos == dict(esperados)
 
 
 def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):

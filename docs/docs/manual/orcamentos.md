@@ -11,7 +11,7 @@ In **Patients > Estimates**, practitioners, the front desk and the administrator
 2. In **Add procedure**, click the **teeth** on the dental chart (the quantity follows the number of teeth), choose the **procedure** from the price list and, if you want, the **surfaces or region** (for example, MOD or "upper arch"). Without description or price, those of the price list are used; for an item not in the list, type the description and the price.
 3. Repeat for each procedure. To take an item out, click **remove**.
 
-The **dental chart** uses FDI numbering: upper teeth on top, lower teeth below and baby teeth in the middle rows, with the patient's right on the left of the screen. An estimate without teeth applies to the whole mouth.
+The dental chart, teeth and surfaces only appear when the clinic's area is **Dentistry** ([Clinic settings](clinica.md)); in the other areas, an item is the procedure, description, quantity and price. The **dental chart** uses FDI numbering: upper teeth on top, lower teeth below and baby teeth in the middle rows, with the patient's right on the left of the screen. An estimate without teeth applies to the whole mouth.
 
 Whoever writes the estimate (front desk, practitioner or administrator) can give a **discount** on the total.
 

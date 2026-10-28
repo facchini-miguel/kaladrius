@@ -7,7 +7,7 @@ title: Perguntas frequentes e problemas
 
 ## É só para dentistas?
 
-Não. Agenda, pacientes, rechamadas, orçamentos e financeiro servem para qualquer clínica. Algumas partes hoje são de odontologia (como o odontograma nos orçamentos); o plano é levá-las para um módulo odontológico, para os médicos terem um sistema sem elas.
+Não. Agenda, pacientes, rechamadas, orçamentos e financeiro servem para qualquer clínica. A clínica escolhe a sua **área** (Odontologia, Medicina ou outra área da saúde) nas Configurações da clínica: as partes de dentista, como o odontograma nos orçamentos, são um módulo que só aparece na Odontologia.
 
 ## Quanto custa?
 

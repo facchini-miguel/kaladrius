@@ -40,7 +40,24 @@ class Clinica(models.Model):
         (60, _("1 hora")),
     ]
 
+    class Area(models.TextChoices):
+        """Health area (decision 080): shows or hides the parts of each area's module."""
+
+        ODONTOLOGIA = "odontologia", _("Odontologia")
+        MEDICINA = "medicina", _("Medicina")
+        OUTRA = "outra", _("Outra área da saúde")
+
     nome = models.CharField(_("nome"), max_length=200)
+    area = models.CharField(
+        _("área"),
+        max_length=20,
+        choices=Area.choices,
+        default=Area.ODONTOLOGIA,
+        help_text=_(
+            "Mostra as partes de cada área, como o odontograma nos orçamentos da Odontologia. "
+            "Trocar a área não apaga nada."
+        ),
+    )
     documento = models.CharField(
         _("CPF/CNPJ"), max_length=14, blank=True, help_text=_("Somente números.")
     )
@@ -75,6 +92,10 @@ class Clinica(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def odontologia(self):
+        return self.area == self.Area.ODONTOLOGIA
 
     @classmethod
     def unica(cls):

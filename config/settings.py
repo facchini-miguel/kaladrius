@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "apps.ajuda",
     "apps.financeiro",
     "apps.orcamentos",
+    "apps.odontologia",
     "apps.monitoramento",
     # Serves the API docs page's own files (no CDN, which the CSP would block).
     "ninja",

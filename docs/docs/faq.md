@@ -7,7 +7,7 @@ title: FAQ and troubleshooting
 
 ## Is it only for dentists?
 
-No. Schedule, patients, recalls, estimates and finance serve any clinic. Some parts are dental today (such as the dental chart in estimates); the plan is to move them into a dental module, so physicians get a system without them.
+No. Schedule, patients, recalls, estimates and finance serve any clinic. The clinic chooses its **area** (Dentistry, Medicine or another health area) in Clinic settings: the dental parts, such as the dental chart in estimates, are a module that only appears in Dentistry.
 
 ## How much does it cost?
 

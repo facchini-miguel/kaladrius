@@ -9,6 +9,8 @@ Estas telas são do **administrador da clínica**, no menu **Cadastros**.
 ## Configurações da clínica
 Em **Cadastros > Configurações da clínica**: nome, CPF/CNPJ, e-mail e telefone da clínica, e o **horário da agenda** (início, fim e duração de cada horário).
 
+A **área** (Odontologia, Medicina ou outra área da saúde) mostra as partes de cada uma: na Odontologia, o **odontograma** e os dentes e faces dos orçamentos. Trocar a área não apaga nada: um orçamento que já tem dentes continua mostrando.
+
 Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a mudança é recusada e a tela mostra qual. Ajuste esse agendamento antes.
 
 ## Tipos de atendimento

@@ -24,20 +24,20 @@
   </div>
   <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ orcamento.paciente.nome }}</p>
   {% if orcamento.profissional %}<p><strong>{% translate "Profissional" %}:</strong> {{ orcamento.profissional.nome }}{% if orcamento.profissional.registro %} ({{ orcamento.profissional.registro }}){% endif %}</p>{% endif %}
-  {% if selecionados %}<div class="mb-3">{% include "orcamentos/_odontograma.html" with interativo=False %}</div>{% endif %}
+  {% if selecionados %}<div class="mb-3">{% include "odontologia/_odontograma.html" with interativo=False %}</div>{% endif %}
   <table class="table table-sm">
-    <thead><tr><th>{% translate "Procedimento" %}</th><th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th><th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Procedimento" %}</th>{% if mostrar_dentes %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
     <tbody>
       {% for item in orcamento.itens.all %}
-      <tr><td>{{ item.descricao }}</td><td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td><td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.valor_unitario|moeda }}</td><td class="text-end">{{ item.total|moeda }}</td></tr>
+      <tr><td>{{ item.descricao }}</td>{% if mostrar_dentes %}<td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td>{% endif %}<td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.valor_unitario|moeda }}</td><td class="text-end">{{ item.total|moeda }}</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>
       {% if orcamento.desconto %}
-      <tr><td colspan="5" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|moeda }}</td></tr>
-      <tr><td colspan="5" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.desconto|moeda }}</td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|moeda }}</td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.desconto|moeda }}</td></tr>
       {% endif %}
-      <tr class="fw-semibold"><td colspan="5" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
+      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
     </tfoot>
   </table>
   {% if orcamento.observacoes %}<p class="small">{{ orcamento.observacoes|linebreaksbr }}</p>{% endif %}

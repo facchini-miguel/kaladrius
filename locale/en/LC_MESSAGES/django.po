@@ -321,6 +321,23 @@ msgstr "30 minutes"
 msgid "1 hora"
 msgstr "1 hour"
 
+msgid "Odontologia"
+msgstr "Dentistry"
+
+msgid "Medicina"
+msgstr "Medicine"
+
+msgid "Outra área da saúde"
+msgstr "Other health area"
+
+msgid "área"
+msgstr "area"
+
+msgid ""
+"Mostra as partes de cada área, como o odontograma nos orçamentos da "
+"Odontologia. Trocar a área não apaga nada."
+msgstr "Shows the parts of each area, such as the dental chart in Dentistry estimates. Changing the area deletes nothing."
+
 msgid "Somente números."
 msgstr "Numbers only."
 
@@ -2974,12 +2991,11 @@ msgstr "Subtotal"
 msgid "Incluir procedimento"
 msgstr "Add procedure"
 
-msgid ""
-"Clique nos dentes do procedimento (a quantidade acompanha). Sem descrição ou "
-"valor, valem os da tabela de procedimentos."
-msgstr ""
-"Click the procedure's teeth (the quantity follows). Without description or "
-"price, those of the price list are used."
+msgid "Clique nos dentes do procedimento (a quantidade acompanha)."
+msgstr "Click the procedure's teeth (the quantity follows)."
+
+msgid "Sem descrição ou valor, valem os da tabela de procedimentos."
+msgstr "Without a description or price, the procedure price list's apply."
 
 msgid "Incluir"
 msgstr "Add"
@@ -3057,7 +3073,9 @@ msgstr ""
 msgid ""
 "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no "
 "financeiro e depois volte para arquivar."
-msgstr "This patient still has open entries. Receive or cancel each one in Finance, then come back to archive."
+msgstr ""
+"This patient still has open entries. Receive or cancel each one in Finance, "
+"then come back to archive."
 
 msgid "Voltar para a ficha"
 msgstr "Back to the patient record"

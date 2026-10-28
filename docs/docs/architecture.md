@@ -35,6 +35,7 @@ apps/
   agenda/         schedule and attendance
   pacientes/      patients
   orcamentos/     estimates and price list
+  odontologia/    dental module (dental chart), shown in the Dentistry area
   rechamadas/     recalls and birthdays
   financeiro/     receivables, payables, cash, banks, commissions
   equipe/         team management

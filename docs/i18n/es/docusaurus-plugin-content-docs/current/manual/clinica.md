@@ -9,6 +9,8 @@ Estas pantallas son del **administrador de la clínica**, en el menú **Registro
 ## Configuración de la clínica
 En **Registros > Configuración de la clínica**: nombre, CPF/CNPJ, correo electrónico y teléfono de la clínica, y el **horario de la agenda** (inicio, fin y duración de cada horario).
 
+El **área** (Odontología, Medicina u otra área de la salud) muestra las partes de cada una: en Odontología, el **odontograma** y los dientes y caras de los presupuestos. Cambiar el área no borra nada: un presupuesto que ya tiene dientes los sigue mostrando.
+
 Si alguna cita futura quedara fuera del nuevo horario o del nuevo intervalo, el cambio se rechaza y la pantalla muestra cuál. Ajuste esa cita antes.
 
 ## Tipos de atención

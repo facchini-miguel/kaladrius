@@ -11,7 +11,7 @@ Em **Pacientes > Orçamentos**, o profissional, a recepção e o administrador m
 2. Em **Incluir procedimento**, clique nos **dentes** no odontograma (a quantidade acompanha o número de dentes), escolha o **procedimento** da tabela e, se quiser, as **faces ou região** (por exemplo, MOD ou "arcada superior"). Sem descrição ou valor, valem os da tabela; para um item fora da tabela, escreva a descrição e o valor.
 3. Repita para cada procedimento. Para tirar um item, clique em **remover**.
 
-O **odontograma** usa a numeração FDI: dentes superiores em cima, inferiores embaixo e dentes de leite nas linhas do meio, com a direita do paciente à esquerda da tela. Um orçamento sem dentes vale para a boca toda.
+O odontograma, os dentes e as faces só aparecem quando a área da clínica é **Odontologia** ([Configurações da clínica](clinica.md)); nas outras áreas, o item é procedimento, descrição, quantidade e valor. O **odontograma** usa a numeração FDI: dentes superiores em cima, inferiores embaixo e dentes de leite nas linhas do meio, com a direita do paciente à esquerda da tela. Um orçamento sem dentes vale para a boca toda.
 
 Quem escreve o orçamento (recepção, profissional ou administrador) pode dar **desconto** no total.
 
