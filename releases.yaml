@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.24.2
+  data: 2026-10-28
+  titulo:
+    pt-br: Logo novo
+    en: New logo
+    es: Logo nuevo
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          O logo do sistema mudou: agora é a cabeça de uma ave, o caladrius, dentro do círculo
+          azul. Na lenda, essa ave cura os doentes com o olhar. Ele aparece na barra superior,
+          na tela de entrada e no ícone da aba do navegador.
+        en: >
+          The system has a new logo: the head of a bird, the caladrius, inside the blue circle.
+          In the legend, this bird cures the sick by looking at them. It appears on the top bar,
+          on the login page and as the browser tab icon.
+        es: >
+          El sistema tiene un logo nuevo: la cabeza de un ave, el caladrius, dentro del círculo
+          azul. En la leyenda, esta ave cura a los enfermos con la mirada. Aparece en la barra
+          superior, en la pantalla de entrada y en el ícono de la pestaña del navegador.
+
 - versao: 0.24.1
   data: 2026-10-28
   titulo:

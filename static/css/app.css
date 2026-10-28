@@ -136,6 +136,6 @@ a.indicador:hover { border-color: #0d6efd; }
 .grafico circle.linha-1 { fill: #0d6efd; }
 .grafico circle.linha-2 { fill: #fd7e14; }
 
-/* Logo (decision 057): inline SVG in the current text color. */
+/* Logo (decision 063): inline SVG in the current text color. */
 .logo-barra { width: 1.6rem; height: 1.6rem; }
 .logo-entrada { width: 4rem; height: 4rem; }
