@@ -76,6 +76,7 @@ def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, oc
                         tipo=sorteio.choice(tipos),
                         paciente=sorteio.choice(pacientes) if com_paciente else None,
                         descricao="" if com_paciente else "Horário bloqueado",
+                        situacao=_situacao(sorteio, atual) if com_paciente else "agendado",
                         inicio=atual,
                         fim=fim,
                     )
@@ -83,6 +84,18 @@ def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, oc
                 atual = fim
     Agendamento.objects.bulk_create(novos, batch_size=1000)
     return len(novos)
+
+
+def _situacao(sorteio, inicio):
+    """Past appointments: most patients came, some missed or cancelled (0.24.0)."""
+    if inicio > timezone.now():
+        return Agendamento.Situacao.AGENDADO
+    sorteado = sorteio.random()
+    if sorteado < 0.82:
+        return Agendamento.Situacao.COMPARECEU
+    if sorteado < 0.92:
+        return Agendamento.Situacao.FALTOU
+    return Agendamento.Situacao.DESMARCOU
 
 
 def simular_rechamadas(clinica, sorteio, quantidade=80, dias_antes=30, dias_depois=60):

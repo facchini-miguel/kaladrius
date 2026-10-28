@@ -1,0 +1,10 @@
+{% load i18n %}<div class="d-flex flex-wrap align-items-center gap-2 mb-3 pb-3 border-bottom">
+  <span class="me-1">{% translate "Situação:" %} <strong>{{ agendamento.get_situacao_display }}</strong></span>
+  {% url 'agenda:situacao' agendamento.pk as url_situacao %}
+  {% if agendamento.presenca_marcavel %}
+  {% if agendamento.situacao != "compareceu" %}<button type="button" class="btn btn-sm btn-outline-success" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "compareceu"}' hx-target="#modal-conteudo">✓ {% translate "Compareceu" %}</button>{% endif %}
+  {% if agendamento.situacao != "faltou" %}<button type="button" class="btn btn-sm btn-outline-danger" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "faltou"}' hx-target="#modal-conteudo">✗ {% translate "Faltou" %}</button>{% endif %}
+  {% endif %}
+  {% if agendamento.situacao != "desmarcou" %}<button type="button" class="btn btn-sm btn-outline-secondary" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "desmarcou"}' hx-target="#modal-conteudo">{% translate "Desmarcou" %}</button>{% endif %}
+  {% if agendamento.situacao != "agendado" %}<button type="button" class="btn btn-sm btn-link" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "agendado"}' hx-target="#modal-conteudo">{% translate "Desfazer marcação" %}</button>{% endif %}
+</div>

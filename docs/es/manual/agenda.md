@@ -21,5 +21,13 @@ Los horarios siguen el intervalo de la clínica (por ejemplo, de 30 en 30 minuto
 ## Conflictos
 El sistema no permite dos citas en el mismo horario para el mismo profesional. La pantalla muestra con quién es el conflicto. En una repetición, si una de las fechas entra en conflicto, no se guarda nada.
 
+## Asistencia
+Abra la cita para marcar la **situación** del paciente (también se puede marcar en la pantalla de inicio):
+- **✓ Asistió** y **✗ Faltó:** a partir del día de la cita.
+- **Canceló:** en cualquier momento. La cita sigue en la agenda, atenuada y tachada, para el historial y el cálculo de faltas, pero el **horario queda libre** para otro paciente.
+- **Deshacer marca:** vuelve a "agendada". Una cita cancelada solo vuelve si nadie ocupó el horario.
+
+En la grilla, ✓ marca quién asistió y ✗ quién faltó. Si la cita se pasa a otro día futuro, o queda sin paciente, la marca se deshace.
+
 ## Modificar y eliminar
 Haga clic en la cita para abrirla. Modifíquela y guarde, o haga clic en **Eliminar**. Si forma parte de una repetición, elija eliminar **solo esta** o **esta y las próximas**. Solo el administrador y la recepción pueden eliminar.

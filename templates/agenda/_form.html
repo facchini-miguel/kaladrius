@@ -7,6 +7,10 @@
   </div>
   <div class="modal-body">
     {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+    {% if erro_situacao %}<div class="alert alert-danger">{{ erro_situacao }}</div>{% endif %}
+    {% if agendamento.pk and agendamento.paciente_id %}
+    {% include "agenda/_situacao.html" %}
+    {% endif %}
     <div class="row">
       <div class="col-md-6">{% with campo=form.profissional %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.tipo %}{% include "includes/campo.html" %}{% endwith %}</div>

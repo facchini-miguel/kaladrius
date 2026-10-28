@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Medical System\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 21:17-0300\n"
+"POT-Creation-Date: 2026-10-27 23:38-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Medical System\n"
 "Language-Team: Español\n"
@@ -76,6 +76,18 @@ msgstr "tipo de atención"
 msgid "tipos de atendimento"
 msgstr "tipos de atención"
 
+msgid "Agendado"
+msgstr "Agendada"
+
+msgid "Compareceu"
+msgstr "Asistió"
+
+msgid "Faltou"
+msgstr "Faltó"
+
+msgid "Desmarcou"
+msgstr "Canceló"
+
 msgid "profissional"
 msgstr "profesional"
 
@@ -90,6 +102,9 @@ msgstr "paciente"
 
 msgid "descrição"
 msgstr "descripción"
+
+msgid "situação"
+msgstr "situación"
 
 msgid "série"
 msgstr "serie"
@@ -114,6 +129,20 @@ msgstr "El profesional ya tiene una cita en este horario."
 
 msgid "Horário reservado"
 msgstr "Horario reservado"
+
+msgid "Situação inválida."
+msgstr "Situación inválida."
+
+msgid "Só agendamentos com paciente têm situação."
+msgstr "Solo las citas con paciente tienen situación."
+
+msgid ""
+"Comparecimento e falta só podem ser marcados a partir do dia do atendimento."
+msgstr "La asistencia y la falta solo se pueden marcar a partir del día de la cita."
+
+msgid ""
+"Este horário já foi ocupado por outro agendamento. Desmarque aquele antes."
+msgstr "Este horario ya fue ocupado por otra cita. Cancele aquella antes."
 
 #, python-format
 msgid "Tipo de atendimento %(nome)s salvo."
@@ -151,6 +180,22 @@ msgstr[1] "%(n)s citas creadas."
 
 msgid "Agendamento alterado."
 msgstr "Cita modificada."
+
+#, python-format
+msgid "%(nome)s: marcação de presença desfeita."
+msgstr "%(nome)s: marca de asistencia deshecha."
+
+#, python-format
+msgid "%(nome)s compareceu."
+msgstr "%(nome)s asistió."
+
+#, python-format
+msgid "%(nome)s faltou."
+msgstr "%(nome)s faltó."
+
+#, python-format
+msgid "%(nome)s desmarcou. O horário ficou livre."
+msgstr "%(nome)s canceló. El horario quedó libre."
 
 #, python-format
 msgid "Agendamento excluído."
@@ -395,6 +440,15 @@ msgstr "CPF no válido."
 msgid "CNPJ inválido."
 msgstr "CNPJ no válido."
 
+msgid "Bom dia"
+msgstr "Buenos días"
+
+msgid "Boa tarde"
+msgstr "Buenas tardes"
+
+msgid "Boa noite"
+msgstr "Buenas noches"
+
 #, python-format
 msgid "Você está trabalhando na clínica %(nome)s."
 msgstr "Está trabajando en la clínica %(nome)s."
@@ -451,7 +505,9 @@ msgstr "Comisión de %(nome)s hasta el %(data)s"
 msgid ""
 "Esta comissão não pode ser cancelada: o estorno de um recebimento dela já "
 "foi descontado na comissão até %(data)s. Cancele aquela antes."
-msgstr "Esta comisión no se puede cancelar: el reverso de uno de sus cobros ya se descontó en la comisión hasta %(data)s. Cancele aquella antes."
+msgstr ""
+"Esta comisión no se puede cancelar: el reverso de uno de sus cobros ya se "
+"descontó en la comisión hasta %(data)s. Cancele aquella antes."
 
 msgid "O extrato não tem transações."
 msgstr "El extracto no tiene transacciones."
@@ -882,9 +938,6 @@ msgstr "Positivo: entrada; negativo: salida."
 msgid "tipo no banco"
 msgstr "tipo en el banco"
 
-msgid "situação"
-msgstr "situación"
-
 msgid "movimento do caixa"
 msgstr "movimiento de caja"
 
@@ -1023,8 +1076,12 @@ msgid ""
 msgid_plural ""
 "%(n)s linhas do arquivo não tinham data ou valor legível e não foram "
 "importadas. Confira no extrato do banco."
-msgstr[0] "%(n)s línea del archivo no tenía fecha o importe legible y no se importó. Revísela en el extracto del banco."
-msgstr[1] "%(n)s líneas del archivo no tenían fecha o importe legible y no se importaron. Revíselas en el extracto del banco."
+msgstr[0] ""
+"%(n)s línea del archivo no tenía fecha o importe legible y no se importó. "
+"Revísela en el extracto del banco."
+msgstr[1] ""
+"%(n)s líneas del archivo no tenían fecha o importe legible y no se "
+"importaron. Revíselas en el extracto del banco."
 
 #, python-format
 msgid ""
@@ -1570,6 +1627,12 @@ msgstr "Cancelar"
 msgid "Salvar"
 msgstr "Guardar"
 
+msgid "Situação:"
+msgstr "Situación:"
+
+msgid "Desfazer marcação"
+msgstr "Deshacer marca"
+
 msgid "Ir para a data"
 msgstr "Ir a la fecha"
 
@@ -1593,6 +1656,9 @@ msgstr "para usar la agenda."
 
 msgid "Legenda dos tipos de atendimento"
 msgstr "Leyenda de los tipos de atención"
+
+msgid "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)"
+msgstr "✓ asistió · ✗ faltó · tachado: canceló (horario libre)"
 
 msgid "Clique em um horário livre (ou arraste sobre vários) para agendar."
 msgstr "Haga clic en un horario libre (o arrastre sobre varios) para agendar."
@@ -1867,18 +1933,20 @@ msgstr ""
 "nuevas citas. Si alguna cita futura quedara fuera, el cambio se rechaza y la "
 "pantalla muestra cuál."
 
-#, python-format
-msgid "Bem-vindo(a), %(nome)s"
-msgstr "Bienvenido(a), %(nome)s"
-
-msgid "Clínica:"
-msgstr "Clínica:"
-
-msgid "Perfil:"
-msgstr "Perfil:"
-
 msgid "Administrador da plataforma"
 msgstr "Administrador de la plataforma"
+
+msgid "Buscar paciente"
+msgstr "Buscar paciente"
+
+msgid "Novo paciente"
+msgstr "Nuevo paciente"
+
+msgid "Novo orçamento"
+msgstr "Nuevo presupuesto"
+
+msgid "Receber"
+msgstr "Cobrar"
 
 msgid "Você é administrador da plataforma."
 msgstr "Usted es administrador de la plataforma."
@@ -1892,6 +1960,172 @@ msgid ""
 msgstr ""
 "Aún no está vinculado a ninguna clínica activa. Hable con el administrador "
 "de su clínica."
+
+msgid "Resumo do dia"
+msgstr "Resumen del día"
+
+msgid "Pacientes agendados hoje"
+msgstr "Pacientes con cita hoy"
+
+#, python-format
+msgid "Compareceram: %(vieram)s · faltaram: %(faltaram)s · a seguir: %(seguir)s"
+msgstr "Asistieron: %(vieram)s · faltaron: %(faltaram)s · por venir: %(seguir)s"
+
+#, python-format
+msgid "%(n)s já passou sem marcar presença"
+msgid_plural "%(n)s já passaram sem marcar presença"
+msgstr[0] "%(n)s ya empezó sin marcar asistencia"
+msgstr[1] "%(n)s ya empezaron sin marcar asistencia"
+
+msgid "Faltas no mês"
+msgstr "Faltas del mes"
+
+#, python-format
+msgid "de %(n)s atendimento com presença marcada"
+msgid_plural "de %(n)s atendimentos com presença marcada"
+msgstr[0] "de %(n)s cita con asistencia marcada"
+msgstr[1] "de %(n)s citas con asistencia marcada"
+
+msgid "Marque quem compareceu ou faltou na agenda."
+msgstr "Marque en la agenda quién asistió o faltó."
+
+#, python-format
+msgid "%(n)s desmarcou hoje"
+msgid_plural "%(n)s desmarcaram hoje"
+msgstr[0] "%(n)s canceló hoy"
+msgstr[1] "%(n)s cancelaron hoy"
+
+msgid "Recebido hoje"
+msgstr "Cobrado hoy"
+
+#, python-format
+msgid "Falta receber hoje: %(valor)s (%(n)s parcela)"
+msgid_plural "Falta receber hoje: %(valor)s (%(n)s parcelas)"
+msgstr[0] "Falta cobrar hoy: %(valor)s (%(n)s cuota)"
+msgstr[1] "Falta cobrar hoy: %(valor)s (%(n)s cuotas)"
+
+msgid "Nenhuma parcela em aberto vence hoje."
+msgstr "Ninguna cuota pendiente vence hoy."
+
+msgid "Pago hoje"
+msgstr "Pagado hoy"
+
+msgid "Resultado do dia:"
+msgstr "Resultado del día:"
+
+msgid "Resultado do mês até hoje"
+msgstr "Resultado del mes hasta hoy"
+
+#, python-format
+msgid "Recebido %(recebido)s − pago %(pago)s"
+msgstr "Cobrado %(recebido)s − pagado %(pago)s"
+
+msgid "Mesmo período do mês passado:"
+msgstr "Mismo período del mes pasado:"
+
+msgid "Melhor que no mês passado"
+msgstr "Mejor que el mes pasado"
+
+msgid "Pior que no mês passado"
+msgstr "Peor que el mes pasado"
+
+msgid "Vencido a receber"
+msgstr "Vencido por cobrar"
+
+#, python-format
+msgid "%(n)s parcela em atraso · ver devedores"
+msgid_plural "%(n)s parcelas em atraso · ver devedores"
+msgstr[0] "%(n)s cuota atrasada · ver deudores"
+msgstr[1] "%(n)s cuotas atrasadas · ver deudores"
+
+msgid "A pagar em 7 dias"
+msgstr "Por pagar en 7 días"
+
+#, python-format
+msgid "%(n)s conta, contando as atrasadas"
+msgid_plural "%(n)s contas, contando as atrasadas"
+msgstr[0] "%(n)s cuenta, contando las atrasadas"
+msgstr[1] "%(n)s cuentas, contando las atrasadas"
+
+msgid "Saldo nas contas"
+msgstr "Saldo en las cuentas"
+
+msgid "Caixa, bancos e demais contas"
+msgstr "Caja, bancos y demás cuentas"
+
+msgid "Agenda de hoje"
+msgstr "Agenda de hoy"
+
+msgid "Abrir na agenda"
+msgstr "Abrir en la agenda"
+
+msgid "Horário"
+msgstr "Horario"
+
+msgid "Paciente"
+msgstr "Paciente"
+
+msgid "agora"
+msgstr "ahora"
+
+msgid "próximo"
+msgstr "siguiente"
+
+msgid "desfazer"
+msgstr "deshacer"
+
+msgid "Nenhum agendamento para hoje."
+msgstr "No hay citas para hoy."
+
+msgid "Abrir"
+msgstr "Abrir"
+
+msgid "aberto"
+msgstr "abierta"
+
+#, python-format
+msgid "desde %(hora)s"
+msgstr "desde las %(hora)s"
+
+msgid "fechado"
+msgstr "cerrada"
+
+msgid "Nenhum caixa aberto."
+msgstr "Ninguna caja abierta."
+
+msgid "Rechamadas para fazer"
+msgstr "Recordatorios pendientes"
+
+msgid "Ver todas"
+msgstr "Ver todos"
+
+#, python-format
+msgid "desde %(data)s"
+msgstr "desde el %(data)s"
+
+msgid "Marcar como concluída"
+msgstr "Marcar como completado"
+
+msgid "Nenhuma rechamada pendente para hoje."
+msgstr "Ningún recordatorio pendiente para hoy."
+
+msgid "Aniversariantes de hoje"
+msgstr "Cumpleaños de hoy"
+
+#, python-format
+msgid "%(idade)s ano"
+msgid_plural "%(idade)s anos"
+msgstr[0] "%(idade)s año"
+msgstr[1] "%(idade)s años"
+
+msgid "Orçamentos que vencem em 7 dias"
+msgstr "Presupuestos que vencen en 7 días"
+
+msgid "Ver todos"
+msgstr "Ver todos"
+
+msgid "vence hoje"
+msgstr "vence hoy"
 
 #, python-format
 msgid "Veja o que há de novo na versão %(versao_sistema)s"
@@ -2286,9 +2520,6 @@ msgstr "Motivo para ignorar"
 msgid "Ignorar"
 msgstr "Ignorar"
 
-msgid "desfazer"
-msgstr "deshacer"
-
 msgid ""
 "Correspondência: pagamento ou recebimento nesta conta, com o mesmo valor, "
 "até 10 dias antes ou depois; ou depósito e retirada do caixa para esta "
@@ -2405,9 +2636,6 @@ msgstr "recibo"
 
 msgid "estornar"
 msgstr "revertir"
-
-msgid "Receber"
-msgstr "Cobrar"
 
 msgid "Novo lançamento a receber"
 msgstr "Nueva cuenta por cobrar"
@@ -2567,9 +2795,6 @@ msgstr ""
 
 msgid "Criar e conciliar"
 msgstr "Crear y conciliar"
-
-msgid "Paciente"
-msgstr "Paciente"
 
 msgid "Digite o nome, código ou CPF"
 msgstr "Escriba el nombre, código o CPF"
@@ -2775,9 +3000,6 @@ msgstr "Aplicar"
 msgid "Editar orçamento"
 msgstr "Editar presupuesto"
 
-msgid "Novo orçamento"
-msgstr "Nuevo presupuesto"
-
 msgid "ORÇAMENTO"
 msgstr "PRESUPUESTO"
 
@@ -2813,12 +3035,6 @@ msgstr "Teléfono"
 
 msgid "E-mail"
 msgstr "Correo electrónico"
-
-#, python-format
-msgid "%(idade)s ano"
-msgid_plural "%(idade)s anos"
-msgstr[0] "%(idade)s año"
-msgstr[1] "%(idade)s años"
 
 msgid "Nenhum aniversariante neste mês."
 msgstr "Ningún cumpleaños en este mes."
@@ -3008,17 +3224,11 @@ msgstr "Registrado el %(criado)s · modificado el %(alterado)s"
 msgid "Editar paciente"
 msgstr "Editar paciente"
 
-msgid "Novo paciente"
-msgstr "Nuevo paciente"
-
 msgid "Contato"
 msgstr "Contacto"
 
 msgid "Nome, código ou CPF/CNPJ"
 msgstr "Nombre, código o CPF/CNPJ"
-
-msgid "Buscar paciente"
-msgstr "Buscar paciente"
 
 msgid "Ativos"
 msgstr "Activos"
@@ -3173,3 +3383,13 @@ msgstr "No tiene permiso para acceder a esta página."
 
 msgid "Senha"
 msgstr "Contraseña"
+
+#, python-format
+#~ msgid "Bem-vindo(a), %(nome)s"
+#~ msgstr "Bienvenido(a), %(nome)s"
+
+#~ msgid "Clínica:"
+#~ msgstr "Clínica:"
+
+#~ msgid "Perfil:"
+#~ msgstr "Perfil:"

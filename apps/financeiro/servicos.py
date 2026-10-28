@@ -342,6 +342,18 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
     }
 
 
+def recebido_e_pago(de, ate):
+    """(money received, money paid) from `de` to `ate`, in one query (home page, 0.24.0)."""
+    totais = dict(
+        pagamentos_validos()
+        .filter(data__gte=de, data__lte=ate)
+        .order_by()
+        .values_list("parcela__lancamento__tipo")
+        .annotate(total=Sum("valor"))
+    )
+    return totais.get(Lancamento.Tipo.RECEBER, ZERO), totais.get(Lancamento.Tipo.PAGAR, ZERO)
+
+
 def relatorio(de, ate):
     """Money received and paid in the period, grouped for the reports page."""
     pagamentos = pagamentos_validos().filter(data__gte=de, data__lte=ate)

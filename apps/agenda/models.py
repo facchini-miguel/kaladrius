@@ -52,6 +52,15 @@ class TsTzRange(models.Func):
 class Agendamento(ModeloDaClinica):
     """An appointment in a practitioner's schedule."""
 
+    class Situacao(models.TextChoices):
+        """Whether the patient came (0.24.0). Only appointments with a patient are marked."""
+
+        AGENDADO = "agendado", _("Agendado")
+        COMPARECEU = "compareceu", _("Compareceu")
+        FALTOU = "faltou", _("Faltou")
+        # Kept for the history and the no-show figures, but frees the time slot.
+        DESMARCOU = "desmarcou", _("Desmarcou")
+
     profissional = models.ForeignKey(
         "profissionais.Profissional",
         on_delete=models.PROTECT,
@@ -75,6 +84,9 @@ class Agendamento(ModeloDaClinica):
         verbose_name=_("paciente"),
     )
     descricao = models.TextField(_("descrição"), blank=True)
+    situacao = models.CharField(
+        _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.AGENDADO
+    )
     # Appointments created together by "repeat N weeks" share the same series id.
     serie = models.UUIDField(_("série"), null=True, blank=True, editable=False)
     criado_por = models.ForeignKey(
@@ -109,6 +121,8 @@ class Agendamento(ModeloDaClinica):
                     (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
                     ("profissional", RangeOperators.EQUAL),
                 ],
+                # A cancelled appointment does not hold the slot.
+                condition=~models.Q(situacao="desmarcou"),
                 violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),
         ]
@@ -121,6 +135,15 @@ class Agendamento(ModeloDaClinica):
         if self.paciente_id:
             return self.paciente.nome
         return (self.descricao.strip().splitlines() or [gettext("Horário reservado")])[0]
+
+    @property
+    def desmarcado(self):
+        return self.situacao == self.Situacao.DESMARCOU
+
+    @property
+    def presenca_marcavel(self):
+        """Came or missed can be marked from the day of the appointment on."""
+        return timezone.localdate(self.inicio) <= timezone.localdate()
 
 
 def criar_tipos_padrao(clinica):

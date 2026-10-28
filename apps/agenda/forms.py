@@ -139,6 +139,16 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             data, hora_inicio, hora_fim, dados.get("repeticoes") or 1
         )
         self.instance.inicio, self.instance.fim = self.intervalos[0]
+        marcado = (Agendamento.Situacao.COMPARECEU, Agendamento.Situacao.FALTOU)
+        if not dados.get("paciente") or (
+            self.instance.situacao in marcado and data > timezone.localdate()
+        ):
+            # Without a patient there is nothing to mark; moved to a future day, nobody
+            # came or missed it yet.
+            self.instance.situacao = Agendamento.Situacao.AGENDADO
+        if self.instance.desmarcado:
+            # A cancelled appointment does not hold the slot, so it conflicts with nothing.
+            return dados
         encontrados = servicos.conflitos(
             dados["profissional"], self.intervalos, ignorar=self.instance.pk
         )

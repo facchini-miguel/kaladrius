@@ -2,14 +2,16 @@ import datetime
 import json
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import ProtectedError, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import get_language, ngettext
+from django.utils.translation import get_language, gettext_lazy, ngettext
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode, so_a_propria_agenda
 from apps.pacientes.models import Paciente
@@ -164,9 +166,12 @@ def eventos(request):
                 "backgroundColor": agendamento.tipo.cor,
                 "borderColor": agendamento.tipo.cor,
                 "textColor": "#212529",
+                "classNames": [f"situacao-{agendamento.situacao}"],
                 "extendedProps": {
                     "tipo": agendamento.tipo.nome,
                     "descricao": agendamento.descricao,
+                    "situacao": agendamento.situacao,
+                    "situacao_nome": agendamento.get_situacao_display(),
                     "url": reverse("agenda:editar", args=[agendamento.pk]),
                 },
             }
@@ -232,6 +237,43 @@ def editar(request, pk):
         else:
             return _resposta_sucesso(_("Agendamento alterado."))
     return render(request, "agenda/_form.html", {"form": form, "agendamento": agendamento})
+
+
+MENSAGENS_SITUACAO = {
+    Agendamento.Situacao.AGENDADO: gettext_lazy("%(nome)s: marcação de presença desfeita."),
+    Agendamento.Situacao.COMPARECEU: gettext_lazy("%(nome)s compareceu."),
+    Agendamento.Situacao.FALTOU: gettext_lazy("%(nome)s faltou."),
+    Agendamento.Situacao.DESMARCOU: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
+}
+
+
+@require_POST
+@exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
+def situacao(request, pk):
+    """Came / missed / cancelled, from the appointment window or the home page."""
+    agendamento = get_object_or_404(
+        servicos.agendamentos_visiveis(request).select_related("paciente", "profissional"), pk=pk
+    )
+    try:
+        servicos.marcar(agendamento, request.POST.get("situacao", ""))
+    except ValidationError as erro:
+        if request.headers.get("HX-Request"):
+            # Back to the appointment window, with the reason.
+            agendamento.refresh_from_db()
+            form = AgendamentoForm(
+                instance=agendamento,
+                clinica=request.clinica,
+                profissionais=servicos.profissionais_visiveis(request),
+            )
+            contexto = {"form": form, "agendamento": agendamento, "erro_situacao": erro.messages[0]}
+            return render(request, "agenda/_form.html", contexto)
+        messages.error(request, erro.messages[0])
+        return redirect("inicio")
+    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.paciente.nome}
+    if request.headers.get("HX-Request"):
+        return _resposta_sucesso(mensagem)
+    messages.success(request, mensagem)
+    return redirect("inicio")
 
 
 @exige_permissao(Modulo.AGENDA, Acao.EXCLUIR)

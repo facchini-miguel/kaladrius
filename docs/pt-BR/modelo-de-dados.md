@@ -51,7 +51,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | `Paciente` | clinica, tipo (PF/PJ), nome, razão social, CPF/CNPJ, RG, inscrição estadual, sexo, estado civil, nascimento, profissão, responsável, telefones (residencial, comercial, celular), e-mail, endereço (CEP, UF, cidade, bairro, logradouro, número, complemento), observações, ativo, arquivado (com data e quem arquivou), datas de criação e alteração | `pessoas` |
 | `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, comissão (%, desde a 0.19), ativo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clinica, nome, cor, ativo | `agenda_cor` (Cirurgia, Prótese…) |
-| `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, série (repetição), criado por | `agendax` |
+| `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, situação (agendado, compareceu, faltou, desmarcou; desde a 0.24), série (repetição), criado por | `agendax` |
 | `Rechamada` | clinica, paciente, data, descrição, concluída, criado por | `agenda` (is_rechamada) |
 
 ### Referência (globais)
@@ -93,7 +93,7 @@ Na exclusão definitiva de um paciente, os orçamentos dele são apagados (os de
 ## Agenda
 - `Agendamento` guarda início e fim como data e hora com fuso. Os agendamentos de uma mesma repetição semanal compartilham o campo `serie`.
 - Regras: horários alinhados à duração configurada da clínica e dentro do expediente; sem sobreposição para o mesmo profissional (horários encostados são permitidos).
-- A sobreposição é verificada no formulário (com mensagem de quem conflita) **e** por uma *exclusion constraint* do PostgreSQL (`btree_gist`), que vale mesmo com duas pessoas gravando ao mesmo tempo.
+- A sobreposição é verificada no formulário (com mensagem de quem conflita) **e** por uma *exclusion constraint* do PostgreSQL (`btree_gist`), que vale mesmo com duas pessoas gravando ao mesmo tempo. Agendamentos **desmarcados** (0.24) ficam fora das duas verificações: continuam no histórico, mas liberam o horário.
 
 ## Auditoria (LGPD)
 - `RegistroAuditoria` (`apps/auditoria`) guarda **quem**, **quando**, **de qual IP**, **qual ação** e, nas alterações, o **antes e depois** de cada campo.

@@ -51,7 +51,7 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 | `Paciente` | clínica, tipo (PF/PJ), nombre, razón social, CPF/CNPJ, RG, inscripción estatal, sexo, estado civil, nacimiento, profesión, responsable, teléfonos (casa, trabajo, celular), correo, dirección (CEP, estado, ciudad, barrio, calle, número, complemento), observaciones, activo, archivado (con fecha y quién archivó), fechas de creación y modificación | `pessoas` |
 | `Profissional` | clínica, nombre, registro profesional (CRO/CRM…), color, comisión (%, desde la 0.19), activo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clínica, nombre, color, activo | `agenda_cor` (Cirugía, Prótesis…) |
-| `Agendamento` | clínica, profesional, tipo, inicio y fin (fecha y hora), paciente (opcional), descripción, serie (repetición), creado por | `agendax` |
+| `Agendamento` | clínica, profesional, tipo, inicio y fin (fecha y hora), paciente (opcional), descripción, situación (agendada, asistió, faltó, canceló; desde la 0.24), serie (repetición), creado por | `agendax` |
 | `Rechamada` | clínica, paciente, fecha, descripción, completado, creado por | `agenda` (is_rechamada) |
 
 ### Referencia (globales)
@@ -93,7 +93,7 @@ En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los 
 ## Agenda
 - `Agendamento` guarda el inicio y el fin como fecha y hora con huso horario. Las citas de una misma repetición semanal comparten el campo `serie`.
 - Reglas: horarios alineados con la duración configurada de la clínica y dentro del horario de atención; sin superposición para el mismo profesional (los horarios contiguos están permitidos).
-- La superposición se verifica en el formulario (con un mensaje que dice con quién es el conflicto) **y** por una *exclusion constraint* de PostgreSQL (`btree_gist`), que vale incluso con dos personas guardando al mismo tiempo.
+- La superposición se verifica en el formulario (con un mensaje que dice con quién es el conflicto) **y** por una *exclusion constraint* de PostgreSQL (`btree_gist`), que vale incluso con dos personas guardando al mismo tiempo. Las citas **canceladas** (0.24) quedan fuera de ambas verificaciones: siguen en el historial, pero liberan el horario.
 
 ## Auditoría (LGPD)
 - `RegistroAuditoria` (`apps/auditoria`) guarda **quién**, **cuándo**, **desde qué IP**, **qué acción** y, en los cambios, el **antes y después** de cada campo.

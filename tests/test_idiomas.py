@@ -52,7 +52,7 @@ def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
 def test_escolha_do_usuario_vale_mais_que_o_navegador(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(idioma="es")
     pagina = cliente.get(reverse("inicio"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
-    assert "Bienvenido(a)" in pagina
+    assert any(saludo in pagina for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
 
 
 def test_login_segue_o_idioma_do_navegador(client):

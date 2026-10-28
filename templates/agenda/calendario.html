@@ -34,6 +34,7 @@
   {% for tipo in tipos %}
   <span class="legenda-tipo" style="background-color: {{ tipo.cor }}">{{ tipo.nome }}</span>
   {% endfor %}
+  <span class="text-body-secondary ms-2">{% translate "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)" %}</span>
 </div>
 
 <div id="aviso-agenda" class="alert alert-success py-2" role="status" hidden></div>

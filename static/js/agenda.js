@@ -71,7 +71,8 @@
     nowIndicator: true,
     selectable: config.pode.criar,
     selectMirror: true,
-    selectOverlap: false,
+    // A cancelled appointment (desmarcado) stays visible but does not hold the slot.
+    selectOverlap: (evento) => evento.extendedProps.situacao === "desmarcou",
     events: { url: config.urls.eventos, extraParams: () => ({ profissional: config.profissional }) },
     datesSet: marcarDias,
     select(info) {
@@ -88,8 +89,9 @@
       if (config.pode.alterar) abrirModal(info.event.extendedProps.url);
     },
     eventDidMount(info) {
-      const { tipo, descricao } = info.event.extendedProps;
-      info.el.title = [tipo, descricao].filter(Boolean).join(" · ");
+      const { tipo, descricao, situacao, situacao_nome } = info.event.extendedProps;
+      const marcada = situacao && situacao !== "agendado" ? situacao_nome : "";
+      info.el.title = [tipo, marcada, descricao].filter(Boolean).join(" · ");
     },
   });
   calendario.render();

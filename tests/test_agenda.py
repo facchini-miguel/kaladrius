@@ -470,3 +470,136 @@ def test_simular_so_rechamadas(cenario):
     with usar_clinica(cenario["clinica"]):
         assert not Agendamento.objects.exists()
         assert Rechamada.objects.count() == 5
+
+
+# --- Came / missed / cancelled (0.24.0) ---------------------------------------------------
+
+
+def agendamento_em(cenario, dia, hora=9, paciente=True, profissional="ana"):
+    with usar_clinica(cenario["clinica"]):
+        return Agendamento.objects.create(
+            profissional=cenario[profissional],
+            tipo=cenario["tipo"],
+            paciente=cenario["paciente"] if paciente else None,
+            descricao="" if paciente else "Bloqueado",
+            inicio=servicos.momento(dia, datetime.time(hora)),
+            fim=servicos.momento(dia, datetime.time(hora + 1)),
+        )
+
+
+def marcar(cenario, agendamento, situacao, htmx=True, cliente=None):
+    cabecalhos = {"HTTP_HX_REQUEST": "true"} if htmx else {}
+    return (cliente or cenario["cliente"]).post(
+        reverse("agenda:situacao", args=[agendamento.pk]), {"situacao": situacao}, **cabecalhos
+    )
+
+
+def situacao_de(cenario, agendamento):
+    with usar_clinica(cenario["clinica"]):
+        return Agendamento.objects.get(pk=agendamento.pk).situacao
+
+
+def test_marca_comparecimento_e_falta_a_partir_do_dia(cenario):
+    hoje = timezone.localdate()
+    agendamento = agendamento_em(cenario, hoje)
+    resposta = marcar(cenario, agendamento, "compareceu")
+    assert resposta.status_code == 204
+    assert json.loads(resposta["HX-Trigger"]) == {
+        "agendaAtualizada": {"mensagem": "Maria Paciente compareceu."}
+    }
+    assert situacao_de(cenario, agendamento) == "compareceu"
+    assert marcar(cenario, agendamento, "agendado").status_code == 204
+    assert situacao_de(cenario, agendamento) == "agendado"
+
+    # The appointment window shows the buttons; a future one only offers "cancelled".
+    janela = cenario["cliente"].get(reverse("agenda:editar", args=[agendamento.pk]))
+    assert "Compareceu" in janela.content.decode()
+    futuro = agendamento_em(cenario, SEGUNDA)
+    janela = cenario["cliente"].get(reverse("agenda:editar", args=[futuro.pk])).content.decode()
+    assert '"situacao": "faltou"' not in janela and '"situacao": "desmarcou"' in janela
+    resposta = marcar(cenario, futuro, "faltou")
+    assert resposta.status_code == 200
+    assert "a partir do dia do atendimento" in resposta.context["erro_situacao"]
+    assert situacao_de(cenario, futuro) == "agendado"
+
+
+def test_situacao_invalida_e_horario_sem_paciente_sao_recusados(cenario):
+    hoje = timezone.localdate()
+    bloqueio = agendamento_em(cenario, hoje, paciente=False)
+    resposta = marcar(cenario, bloqueio, "compareceu", htmx=False)
+    assert resposta.status_code == 302 and resposta.url == reverse("inicio")
+    assert situacao_de(cenario, bloqueio) == "agendado"
+    agendamento = agendamento_em(cenario, hoje, hora=11)
+    marcar(cenario, agendamento, "chegou")
+    assert situacao_de(cenario, agendamento) == "agendado"
+    assert (
+        cenario["cliente"].get(reverse("agenda:situacao", args=[agendamento.pk])).status_code == 405
+    )
+
+
+def test_desmarcado_libera_o_horario(cenario):
+    agendar(cenario)
+    [primeiro] = agendamentos(cenario)
+    assert marcar(cenario, primeiro, "desmarcou").status_code == 204
+    # The slot is free again for another patient, also for the database constraint.
+    assert agendar(cenario).status_code == 204
+    assert len(agendamentos(cenario)) == 2
+    # Undoing the cancellation would double-book: refused.
+    resposta = marcar(cenario, primeiro, "agendado")
+    assert "já foi ocupado" in resposta.context["erro_situacao"]
+    assert situacao_de(cenario, primeiro) == "desmarcou"
+    # Editing the cancelled one does not conflict with the new one either.
+    resposta = cenario["cliente"].post(
+        reverse("agenda:editar", args=[primeiro.pk]), dados(cenario, descricao="Remarcar")
+    )
+    assert resposta.status_code == 204
+
+
+def test_remarcar_para_o_futuro_ou_tirar_o_paciente_limpa_a_presenca(cenario):
+    hoje = timezone.localdate()
+    agendamento = agendamento_em(cenario, hoje)
+    marcar(cenario, agendamento, "faltou")
+    resposta = cenario["cliente"].post(
+        reverse("agenda:editar", args=[agendamento.pk]), dados(cenario)
+    )
+    assert resposta.status_code == 204
+    assert situacao_de(cenario, agendamento) == "agendado"
+
+    outro = agendamento_em(cenario, hoje, hora=11)
+    marcar(cenario, outro, "compareceu")
+    sem_paciente = dados(
+        cenario,
+        paciente="",
+        descricao="Bloqueado",
+        data=hoje.isoformat(),
+        hora_inicio="11:00",
+        hora_fim="12:00",
+    )
+    cenario["cliente"].post(reverse("agenda:editar", args=[outro.pk]), sem_paciente)
+    assert situacao_de(cenario, outro) == "agendado"
+
+
+def test_profissional_so_marca_a_propria_agenda(cenario, criar_usuario, cliente_de):
+    hoje = timezone.localdate()
+    do_bruno = agendamento_em(cenario, hoje, profissional="bruno")
+    da_ana = agendamento_em(cenario, hoje)
+    cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
+    assert marcar(cenario, do_bruno, "compareceu", cliente=cliente).status_code == 404
+    assert marcar(cenario, da_ana, "compareceu", cliente=cliente).status_code == 204
+
+
+def test_eventos_trazem_a_situacao(cenario):
+    agendamento = agendamento_em(cenario, timezone.localdate())
+    marcar(cenario, agendamento, "faltou")
+    hoje = timezone.localdate()
+    resposta = cenario["cliente"].get(
+        reverse("agenda:eventos"),
+        {
+            "profissional": cenario["ana"].pk,
+            "start": hoje.isoformat(),
+            "end": (hoje + datetime.timedelta(days=1)).isoformat(),
+        },
+    )
+    [evento] = resposta.json()
+    assert evento["classNames"] == ["situacao-faltou"]
+    assert evento["extendedProps"]["situacao_nome"] == "Faltou"

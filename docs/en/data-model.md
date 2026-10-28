@@ -53,7 +53,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
 | `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
 | `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
-| `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, series (recurrence), created by | `agendax` |
+| `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, status (booked, came, missed, cancelled; since 0.24), series (recurrence), created by | `agendax` |
 | `Rechamada` (recall) | clinic, patient, date, description, done, created by | `agenda` (is_rechamada) |
 
 ### Reference (global)
@@ -95,7 +95,7 @@ When a patient is permanently deleted, their estimates are deleted (teeth are he
 ## Schedule
 - `Agendamento` stores start and end as timezone-aware datetimes. Appointments of the same weekly recurrence share the `serie` field.
 - Rules: times aligned to the clinic's slot length and within opening hours; no overlap for the same practitioner (back-to-back slots are allowed).
-- Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time.
+- Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time. **Cancelled** appointments (0.24) are left out of both checks: they stay in the history but free the slot.
 
 ## Audit log (LGPD)
 - `RegistroAuditoria` (`apps/auditoria`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.

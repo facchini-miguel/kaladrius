@@ -4,6 +4,60 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.24.0
+  data: 2026-10-27
+  titulo:
+    pt-br: Resumo do dia na tela de início e presença na agenda
+    en: Summary of the day on the home page and attendance on the schedule
+    es: Resumen del día en la pantalla de inicio y asistencia en la agenda
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A tela de início virou um resumo do dia: atalhos e busca de paciente, pacientes
+          agendados hoje (quantos compareceram, faltaram e ainda vão chegar), faltas no mês,
+          a agenda de hoje com o próximo atendimento em destaque, rechamadas para fazer,
+          aniversariantes e orçamentos que vencem em 7 dias. A recepção vê também o caixa do
+          dia, o recebido hoje e o que falta receber hoje. O administrador vê ainda o pago
+          hoje, o resultado do dia e do mês (comparado com o mês passado), o vencido, as
+          contas a pagar em 7 dias e o saldo nas contas.
+        en: >
+          The home page is now a summary of the day: shortcuts and patient search, patients
+          booked today (how many came, missed and are still to come), no-shows this month,
+          today's schedule with the next appointment highlighted, recalls to make, birthdays
+          and estimates expiring within 7 days. The front desk also sees the daily cash
+          drawer, what was received today and what is still to receive today. The
+          administrator also sees what was paid today, the result of the day and of the month
+          (compared with last month), overdue receivables, bills payable within 7 days and
+          the account balances.
+        es: >
+          La pantalla de inicio ahora es un resumen del día: accesos directos y búsqueda de
+          paciente, pacientes con cita hoy (cuántos asistieron, faltaron y todavía van a
+          llegar), faltas del mes, la agenda de hoy con la próxima cita destacada,
+          recordatorios pendientes, cumpleaños y presupuestos que vencen en 7 días. La
+          recepción ve también la caja del día, lo cobrado hoy y lo que falta cobrar hoy. El
+          administrador ve además lo pagado hoy, el resultado del día y del mes (comparado con
+          el mes pasado), lo vencido, las cuentas por pagar en 7 días y el saldo en las
+          cuentas.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Marque se o paciente compareceu, faltou ou desmarcou, na janela do agendamento ou
+          na tela de início. O desmarcado continua na agenda, riscado, mas libera o horário
+          para outro paciente.
+        en: >
+          Mark whether the patient came, missed or cancelled, in the appointment window or on
+          the home page. A cancelled appointment stays on the schedule, struck through, but
+          frees the slot for another patient.
+        es: >
+          Marque si el paciente asistió, faltó o canceló, en la ventana de la cita o en la
+          pantalla de inicio. La cita cancelada sigue en la agenda, tachada, pero libera el
+          horario para otro paciente.
+
 - versao: 0.23.1
   data: 2026-10-27
   titulo:

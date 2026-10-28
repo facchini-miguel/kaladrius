@@ -8,6 +8,20 @@
 ## Cambiar la contraseña
 En el menú con su nombre, haga clic en **Cambiar contraseña**. Indique la contraseña actual y la nueva dos veces. Hágalo en el primer acceso si el administrador creó la contraseña para usted.
 
+## Pantalla de inicio
+Al entrar, la pantalla de inicio muestra el **resumen del día**:
+- **Accesos directos:** buscar paciente (nombre, código o CPF), abrir la agenda, nuevo paciente, nuevo presupuesto y cobrar.
+- **Pacientes con cita hoy:** cuántos asistieron, faltaron y todavía van a llegar, y cuántos ya empezaron sin la asistencia marcada.
+- **Faltas del mes:** el porcentaje de faltas entre las citas del mes con asistencia marcada.
+- **Agenda de hoy:** las citas del día en orden de horario, con la siguiente destacada. Marque **✓ Asistió** o **✗ Faltó** allí mismo.
+- **Recordatorios pendientes:** los de hoy y los atrasados, con el celular del paciente. El botón **✓** completa el recordatorio.
+- **Cumpleaños de hoy** y **presupuestos pendientes que vencen en 7 días**.
+
+Cada persona ve solo lo que su perfil permite:
+- **Recepción:** también ve la **caja del día** (abierta o cerrada), lo **cobrado hoy** por forma de pago y lo que **falta cobrar hoy**.
+- **Administrador:** ve además lo **pagado hoy**, el **resultado** (cobrado menos pagado) del día y del mes hasta hoy, comparado con los mismos días del mes pasado, lo **vencido por cobrar**, las cuentas **por pagar en 7 días** y el **saldo en las cuentas**. Haga clic en un cuadro para abrir la pantalla correspondiente.
+- **Profesional:** ve solo su propia agenda, sin importes de la clínica.
+
 ## Idioma
 El sistema funciona en **portugués, inglés y español**. Haga clic en la **bandera** de la barra superior, entre el nombre de la clínica y su nombre, y elija el idioma. Todo cambia al instante, y la elección queda guardada para los próximos accesos.
 

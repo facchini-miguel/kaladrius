@@ -26,7 +26,7 @@ def test_login_e_inicio(client, django_user_model):
         reverse("login"), {"username": "maria", "password": "senha-de-teste-123"}, follow=True
     )
     assert resposta.status_code == 200
-    assert "Bem-vindo(a), maria" in resposta.content.decode()
+    assert ", maria" in resposta.content.decode()
 
 
 def test_rodape_mostra_autor_e_versao(client):

@@ -5,18 +5,32 @@ from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from . import painel
 from .forms import ClinicaForm, TrocaSenhaForm
 from .middleware import SESSAO_CLINICA, clinicas_do_usuario
 from .permissoes import Acao, Modulo, exige_permissao
 
 
+def _saudacao():
+    hora = timezone.localtime().hour
+    if hora < 12:
+        return _("Bom dia")
+    if hora < 18:
+        return _("Boa tarde")
+    return _("Boa noite")
+
+
 @login_required
 def inicio(request):
-    return render(request, "core/inicio.html")
+    contexto = {"saudacao": _saudacao()}
+    if request.clinica is not None:
+        contexto["painel"] = painel.montar(request)
+    return render(request, "core/inicio.html", contexto)
 
 
 def _destino_seguro(request, destino):
