@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.24.1
+  data: 2026-10-28
+  titulo:
+    pt-br: Agenda mais fácil de ler
+    en: Easier-to-read schedule
+    es: Agenda más fácil de leer
+  itens:
+    - tipo: melhoria
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          As linhas de horário da agenda ficaram com o dobro da altura, para o nome do
+          paciente e o horário ficarem mais fáceis de ler.
+        en: >
+          The time rows of the schedule are now twice as tall, so the patient's name and the
+          time are easier to read.
+        es: >
+          Las filas de horario de la agenda ahora tienen el doble de altura, para que el
+          nombre del paciente y el horario se lean más fácilmente.
+
 - versao: 0.24.0
   data: 2026-10-27
   titulo:
