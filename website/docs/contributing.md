@@ -9,7 +9,7 @@ Kaladrius is open source under the **Apache License 2.0**. Bug reports, translat
 
 ## Reporting a bug or asking for a feature
 
-Open an [issue](https://github.com/facchini-miguel/medical-system/issues) with what you did, what you expected and what happened, the version (bottom of the page or `/api/v1/versao`) and, if possible, a screenshot. **Never attach real patient data.** Security problems go privately, see [Security](security.md#reporting-a-vulnerability).
+Open an [issue](https://github.com/facchini-miguel/kaladrius/issues) with what you did, what you expected and what happened, the version (bottom of the page or `/api/v1/versao`) and, if possible, a screenshot. **Never attach real patient data.** Security problems go privately, see [Security](security.md#reporting-a-vulnerability).
 
 ## Development environment
 

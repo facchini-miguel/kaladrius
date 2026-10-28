@@ -42,4 +42,4 @@ Kaladrius guarda datos de salud, el tipo más sensible de dato personal. Esta p�
 
 ## Cómo informar una vulnerabilidad
 
-Por favor, **no** abra un issue público. Infórmela en privado por [GitHub Security Advisories](https://github.com/facchini-miguel/medical-system/security/advisories/new), con los pasos para reproducirla. Recibirá respuesta en pocos días.
+Por favor, **no** abra un issue público. Infórmela en privado por [GitHub Security Advisories](https://github.com/facchini-miguel/kaladrius/security/advisories/new), con los pasos para reproducirla. Recibirá respuesta en pocos días.

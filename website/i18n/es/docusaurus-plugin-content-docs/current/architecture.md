@@ -55,4 +55,4 @@ Los nombres en el código siguen el dominio en **portugués** (`Paciente`, `Agen
 
 ## Decisiones
 
-Cada decisión técnica y de producto importante queda registrada, con fecha y motivo, en [docs/es/decisiones](https://github.com/facchini-miguel/medical-system/blob/main/docs/es/decisiones/README.md).
+Cada decisión técnica y de producto importante queda registrada, con fecha y motivo, en [docs/es/decisiones](https://github.com/facchini-miguel/kaladrius/blob/main/docs/es/decisiones/README.md).

@@ -14,7 +14,7 @@ This setup is for **evaluation and development only**: debug mode, no HTTPS, fak
 ## 1. Get the code
 
 ```bash
-git clone https://github.com/facchini-miguel/medical-system.git kaladrius
+git clone https://github.com/facchini-miguel/kaladrius.git kaladrius
 cd kaladrius
 ```
 

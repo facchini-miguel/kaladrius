@@ -5,7 +5,7 @@ title: Atualização
 
 # Atualização
 
-O Kaladrius segue o [versionamento semântico](https://semver.org/lang/pt-BR/): `MAIOR.MENOR.CORREÇÃO`. Cada versão aparece, com o que mudou, em **Novidades** dentro do sistema e nas [releases do GitHub](https://github.com/facchini-miguel/medical-system/releases). As migrações do banco rodam sozinhas quando o app sobe.
+O Kaladrius segue o [versionamento semântico](https://semver.org/lang/pt-BR/): `MAIOR.MENOR.CORREÇÃO`. Cada versão aparece, com o que mudou, em **Novidades** dentro do sistema e nas [releases do GitHub](https://github.com/facchini-miguel/kaladrius/releases). As migrações do banco rodam sozinhas quando o app sobe.
 
 ## Servidor próprio
 

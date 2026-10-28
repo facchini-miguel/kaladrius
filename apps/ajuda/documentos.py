@@ -16,7 +16,7 @@ from django.urls import reverse
 from django.utils.translation import get_language
 
 DOCS = Path(settings.BASE_DIR) / "docs"
-REPOSITORIO = "https://github.com/facchini-miguel/medical-system/blob/main/"
+REPOSITORIO = "https://github.com/facchini-miguel/kaladrius/blob/main/"
 # Interface language -> docs folder.
 PASTAS = {"pt-br": "pt-BR", "en": "en", "es": "es"}
 # Manual pages in reading order (file names, the same in every language).

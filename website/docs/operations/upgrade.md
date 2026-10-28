@@ -5,7 +5,7 @@ title: Upgrade
 
 # Upgrade
 
-Kaladrius follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`. Each version is listed, with what changed, in **What's new** inside the system and in the [releases on GitHub](https://github.com/facchini-miguel/medical-system/releases). Database migrations run by themselves when the app starts.
+Kaladrius follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`. Each version is listed, with what changed, in **What's new** inside the system and in the [releases on GitHub](https://github.com/facchini-miguel/kaladrius/releases). Database migrations run by themselves when the app starts.
 
 ## Own server
 

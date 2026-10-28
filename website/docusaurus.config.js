@@ -4,7 +4,7 @@
 // site share one source.
 import { themes as prismThemes } from "prism-react-renderer";
 
-const REPOSITORIO = "https://github.com/facchini-miguel/medical-system";
+const REPOSITORIO = "https://github.com/facchini-miguel/kaladrius";
 
 /** @type {import('@docusaurus/types').Config} */
 export default {

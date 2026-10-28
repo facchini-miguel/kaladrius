@@ -21,11 +21,11 @@
   },
   "link.item.label.GitHub": {
     "message": "GitHub",
-    "description": "The label of footer link with label=GitHub linking to https://github.com/facchini-miguel/medical-system"
+    "description": "The label of footer link with label=GitHub linking to https://github.com/facchini-miguel/kaladrius"
   },
   "link.item.label.Issues": {
     "message": "Issues",
-    "description": "The label of footer link with label=Issues linking to https://github.com/facchini-miguel/medical-system/issues"
+    "description": "The label of footer link with label=Issues linking to https://github.com/facchini-miguel/kaladrius/issues"
   },
   "link.item.label.Contributing": {
     "message": "Como contribuir",

@@ -9,7 +9,7 @@ O Kaladrius é código aberto, sob a **Licença Apache 2.0**. Relatos de erros, 
 
 ## Relatar um erro ou pedir uma funcionalidade
 
-Abra uma [issue](https://github.com/facchini-miguel/medical-system/issues) com o que você fez, o que esperava e o que aconteceu, a versão (no rodapé da página ou em `/api/v1/versao`) e, se possível, uma captura de tela. **Nunca anexe dados reais de pacientes.** Problemas de segurança vão em particular, veja [Segurança](security.md#como-relatar-uma-vulnerabilidade).
+Abra uma [issue](https://github.com/facchini-miguel/kaladrius/issues) com o que você fez, o que esperava e o que aconteceu, a versão (no rodapé da página ou em `/api/v1/versao`) e, se possível, uma captura de tela. **Nunca anexe dados reais de pacientes.** Problemas de segurança vão em particular, veja [Segurança](security.md#como-relatar-uma-vulnerabilidade).
 
 ## Ambiente de desenvolvimento
 

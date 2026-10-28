@@ -39,7 +39,7 @@ Mantenimiento: SSH solo por el túnel IAP de Google
 
 ## Pasos
 
-La [guía de despliegue](https://github.com/facchini-miguel/medical-system/blob/main/docs/es/despliegue.md) del proyecto registra cada recurso de la instalación de referencia. En resumen:
+La [guía de despliegue](https://github.com/facchini-miguel/kaladrius/blob/main/docs/es/despliegue.md) del proyecto registra cada recurso de la instalación de referencia. En resumen:
 
 1. **Proyecto y presupuesto.** Cree un proyecto en Google Cloud y una alerta de presupuesto (por ejemplo, R$ 5) para notar cualquier cobro inesperado.
 2. **Red.** Una VPC con subred en la región del free tier e **IPv6 externa**; reserve la IPv6 como fija (gratis). Firewall: TCP 80/443 y UDP 443 desde `::/0`, ICMPv6, y SSH (22) solo desde el rango de IAP `35.235.240.0/20`.

@@ -39,7 +39,7 @@ Maintenance: SSH only through Google's IAP tunnel
 
 ## Steps
 
-The project's [deploy guide](https://github.com/facchini-miguel/medical-system/blob/main/docs/en/deploy.md) records every resource of the reference installation. In short:
+The project's [deploy guide](https://github.com/facchini-miguel/kaladrius/blob/main/docs/en/deploy.md) records every resource of the reference installation. In short:
 
 1. **Project and budget.** Create a Google Cloud project and a budget alert (for example, R$ 5) so any unexpected charge is noticed.
 2. **Network.** A VPC with a subnet in the free-tier region with **external IPv6**; reserve the IPv6 address as static (free). Firewall: TCP 80/443 and UDP 443 from `::/0`, ICMPv6, and SSH (22) only from the IAP range `35.235.240.0/20`.

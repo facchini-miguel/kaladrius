@@ -42,4 +42,4 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 
 ## Reporting a vulnerability
 
-Please do **not** open a public issue. Report it privately through [GitHub Security Advisories](https://github.com/facchini-miguel/medical-system/security/advisories/new), with the steps to reproduce it. You will get an answer within a few days.
+Please do **not** open a public issue. Report it privately through [GitHub Security Advisories](https://github.com/facchini-miguel/kaladrius/security/advisories/new), with the steps to reproduce it. You will get an answer within a few days.

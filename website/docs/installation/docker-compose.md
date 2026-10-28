@@ -32,7 +32,7 @@ For other distributions, see the [Docker documentation](https://docs.docker.com/
 ## 2. Get the code
 
 ```bash
-sudo git clone https://github.com/facchini-miguel/medical-system.git /opt/kaladrius
+sudo git clone https://github.com/facchini-miguel/kaladrius.git /opt/kaladrius
 cd /opt/kaladrius
 ```
 

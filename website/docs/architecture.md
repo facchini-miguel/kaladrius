@@ -55,4 +55,4 @@ Code names follow the domain in **Portuguese** (`Paciente`, `Agendamento`), with
 
 ## Decisions
 
-Every important technical and product decision is recorded, with date and reason, in [docs/en/decisions](https://github.com/facchini-miguel/medical-system/blob/main/docs/en/decisions/README.md).
+Every important technical and product decision is recorded, with date and reason, in [docs/en/decisions](https://github.com/facchini-miguel/kaladrius/blob/main/docs/en/decisions/README.md).

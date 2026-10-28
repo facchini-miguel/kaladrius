@@ -14,7 +14,7 @@ Esta instalación es **solo para evaluación y desarrollo**: modo de depuración
 ## 1. Descargue el código
 
 ```bash
-git clone https://github.com/facchini-miguel/medical-system.git kaladrius
+git clone https://github.com/facchini-miguel/kaladrius.git kaladrius
 cd kaladrius
 ```
 

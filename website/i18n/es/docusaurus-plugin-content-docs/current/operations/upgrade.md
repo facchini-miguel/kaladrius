@@ -5,7 +5,7 @@ title: Actualización
 
 # Actualización
 
-Kaladrius sigue el [versionado semántico](https://semver.org/lang/es/): `MAYOR.MENOR.CORRECCIÓN`. Cada versión aparece, con lo que cambió, en **Novedades** dentro del sistema y en las [releases de GitHub](https://github.com/facchini-miguel/medical-system/releases). Las migraciones de la base se ejecutan solas cuando la app inicia.
+Kaladrius sigue el [versionado semántico](https://semver.org/lang/es/): `MAYOR.MENOR.CORRECCIÓN`. Cada versión aparece, con lo que cambió, en **Novedades** dentro del sistema y en las [releases de GitHub](https://github.com/facchini-miguel/kaladrius/releases). Las migraciones de la base se ejecutan solas cuando la app inicia.
 
 ## Servidor propio
 
