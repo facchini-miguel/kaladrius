@@ -22,3 +22,17 @@
 	}
 	header -Server
 }
+
+# Documentation site (decision 067), when DOCS_HOSTNAME is set; otherwise this block answers
+# only docs.localhost, with Caddy's local certificate, and never reaches the internet.
+{$DOCS_HOSTNAME:docs.localhost} {
+	encode zstd gzip
+	# Until the code is opened: anyone with the link can read it, but search engines are
+	# asked not to index it.
+	header X-Robots-Tag "noindex, nofollow"
+	respond /robots.txt `User-agent: *
+Disallow: /
+` 200
+	reverse_proxy 127.0.0.1:8080
+	header -Server
+}

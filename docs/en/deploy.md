@@ -5,6 +5,7 @@
 Published at **https://kaladrius.duckdns.org** (**IPv6-only** access). Fallback address: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
 
 - **DNS:** `kaladrius.duckdns.org` (DuckDNS, free) has only an AAAA record for the VM's IPv6. The token is in `DUCKDNS_TOKEN` in the server `.env` and the local `.env.producao`. To repoint: `https://www.duckdns.org/update?domains=kaladrius&token=<token>&ipv6=<ipv6>` (when `ipv6` is given, DuckDNS does not fill in IPv4). Watch out: when a subdomain is **created** on the website, DuckDNS fills in the IPv4 of whoever created it (your home); clear it with `&clear=true` and point only the `ipv6` again.
+- **Documentation:** the site in `website/` runs on the same server, at https://docs.kaladrius.duckdns.org (DuckDNS answers any `*.kaladrius.duckdns.org` with the same IPv6, nothing to create). CI publishes the `docs` image next to `app`; it only starts with `COMPOSE_PROFILES=docs` and `DOCS_HOSTNAME` in the server `.env`. Until the code is opened, Caddy asks search engines not to index it (decision 067). To view it on your computer: `docker compose --profile docs up --build docs` → http://localhost:3000.
 - **Static IPv6:** reserved address `medical-system-ipv6` (`2600:1900:4020:f0b::`), free; it does not change when the VM restarts.
 
 ## Architecture

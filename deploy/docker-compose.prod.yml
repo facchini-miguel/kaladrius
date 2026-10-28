@@ -35,11 +35,21 @@ services:
     volumes:
       - ../saude:/saude:ro
 
+  # Documentation site (website/, decision 067). Optional: runs only with COMPOSE_PROFILES=docs
+  # and DOCS_HOSTNAME in .env.
+  docs:
+    image: ${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/medical-system/docs:latest}
+    profiles: [docs]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     environment:
       SITE_HOSTNAME: ${SITE_HOSTNAME:?}
+      DOCS_HOSTNAME: ${DOCS_HOSTNAME:-}
     # Host network: listens on the VM's public IPv6 and sees the real client IP.
     network_mode: host
     volumes:

@@ -1,13 +1,15 @@
 #!/bin/bash
-# Pull the latest app image and restart the stack when it differs from the one last
-# installed successfully. Runs every 5 minutes (systemd timer), so a failed update is
+# Pull the latest app and docs images and restart the stack when they differ from the ones
+# last installed successfully. Runs every 5 minutes (systemd timer), so a failed update is
 # retried on the next run. Use --forcar to restart even without a new image.
 set -euo pipefail
 source "$(dirname "$0")/comum.sh"
 
 entrar_no_registro
 docker pull -q "$IMAGEM_APP" >/dev/null
-atual=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP")
+# The documentation site (decision 067) never blocks an update of the system.
+docker pull -q "$IMAGEM_DOCS" >/dev/null 2>&1 || true
+atual=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP" "$IMAGEM_DOCS" 2>/dev/null || true)
 instalada=$(cat "$IMAGEM_INSTALADA" 2>/dev/null || true)
 
 if [ "$atual" != "$instalada" ] || [ "${1:-}" = "--forcar" ]; then

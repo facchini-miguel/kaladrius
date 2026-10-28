@@ -1,0 +1,16 @@
+# Serves the built documentation site on port 80; HTTPS is left to the proxy in front of it.
+:80 {
+	root * /srv
+	encode gzip
+	# Docusaurus links have no trailing slash: serve the folder's index.html without a redirect.
+	try_files {path} {path}/index.html
+	file_server
+	handle_errors 404 {
+		@pt path /pt-BR/*
+		rewrite @pt /pt-BR/404.html
+		@es path /es/*
+		rewrite @es /es/404.html
+		rewrite * /404.html
+		file_server
+	}
+}

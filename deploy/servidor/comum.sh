@@ -2,10 +2,11 @@
 DIR=/opt/medical-system
 REGISTRO=us-east1-docker.pkg.dev
 IMAGEM_APP="$REGISTRO/medical-system-facchini/medical-system/app:latest"
+IMAGEM_DOCS="$REGISTRO/medical-system-facchini/medical-system/docs:latest"
 BUCKET_BACKUP=medical-system-facchini-backups
 # Id of the image running since the last successful update (written by atualizar.sh).
 IMAGEM_INSTALADA="$DIR/imagem-instalada"
-export IMAGEM_APP
+export IMAGEM_APP IMAGEM_DOCS
 
 # Access token of the VM's service account (no keys stored on the server).
 token_google() {
