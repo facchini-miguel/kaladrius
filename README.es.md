@@ -10,9 +10,9 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versión actual: 0.26.1** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
+**Versión actual: 0.27.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
+> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [Producción de referencia](https://docs.kaladrius.duckdns.org/es/project/production).
 
 ## Ejecutar en local
 
@@ -32,7 +32,7 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 | Compilar las traducciones (después de `git pull` o de cambiar textos; la imagen lo hace en el build) | `docker compose exec app python manage.py compilemessages` |
 | Extraer textos nuevos para traducir (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
 | Eliminar los datos de prueba (nunca toca clínicas ni usuarios reales) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |
-| Importar los datos del antiguo Odonto System en una clínica nueva (ver [docs/es/sistema-heredado.md](docs/es/sistema-heredado.md)) | `docker compose exec -T app python manage.py importar_legado - --clinica "Nombre" < dump.sql` |
+| Importar los datos del antiguo Odonto System en una clínica nueva | `docker compose exec -T app python manage.py importar_legado - --clinica "Nombre" < dump.sql` |
 | Anonimizar los datos de una clínica para usarlos en pruebas (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Nombre" --confirmar` |
 | Simular agenda y recordatorios actuales en una clínica de **prueba** | `docker compose exec app python manage.py simular_movimento --clinica "Nombre" --confirmar` |
 | Título y texto de la *Release* de GitHub (en inglés) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
@@ -57,11 +57,11 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 
 ## Documentación
 
-Toda la documentación está en [`docs/`](docs/README.md), en portugués ([`docs/pt-BR`](docs/pt-BR/README.md)), inglés ([`docs/en`](docs/en/README.md)) y español ([`docs/es`](docs/es/README.md)). El portugués es el idioma principal; el inglés y el español son traducciones. El manual del usuario también está dentro del sistema, en **Ayuda > Manual del usuario**.
+Toda la documentación está en el sitio **https://docs.kaladrius.duckdns.org/es/** (fuente en [`docs/`](docs/), Docusaurus): instalación, configuración, manual del usuario y las decisiones del proyecto, en español, inglés y portugués.
 
 ## Versiones
 
-El historial de versiones está en [`releases.yaml`](releases.yaml) y también puede verse dentro del sistema y en la app. Ver [docs/es/versionado-y-versiones.md](docs/es/versionado-y-versiones.md).
+El historial de versiones está en [`releases.yaml`](releases.yaml) y también puede verse dentro del sistema y en la app. Ver [Versiones](https://docs.kaladrius.duckdns.org/es/project/versioning).
 
 ## Licencia
 

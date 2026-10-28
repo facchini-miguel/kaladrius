@@ -47,12 +47,12 @@ jobs:
         run: python manage.py check && python manage.py makemigrations --check --dry-run
       - name: Translations up to date (every text marked and extracted)
         run: |
-          python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests
+          python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs
           git diff --exit-code -I 'POT-Creation-Date' locale/
       - name: Tests
         run: python manage.py compilemessages && python manage.py collectstatic --noinput && pytest --cov --cov-report=term-missing
 
-  # Documentation site (website/, decision 067): built on every push and pull request (broken
+  # Documentation site (docs/, decisions 067 and 073): built on every push and pull request (broken
   # links fail the build); on main, published next to the app image.
   documentacao:
     runs-on: ubuntu-24.04
@@ -64,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
       - name: Build do site
-        run: docker build -f website/Dockerfile -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" .
+        run: docker build -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" docs
       - id: google
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0

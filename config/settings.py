@@ -40,6 +40,9 @@ BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
 # superusers are warned when they stop or a resource is critical.
 SAUDE_MONITORADA = env_bool("DJANGO_SAUDE_MONITORADA", padrao=not DEBUG)
 SAUDE_DIR = env("DJANGO_SAUDE_DIR", "/saude")
+# The documentation site (docs/, decision 073): the Help menu links to it, in the user's
+# language. Every installation links to the official site, which documents the newest version.
+DOCS_URL = env("DJANGO_DOCS_URL", "https://docs.kaladrius.duckdns.org")
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env_lista("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_lista("DJANGO_CSRF_TRUSTED_ORIGINS")
@@ -111,6 +114,7 @@ TEMPLATES = [
                 "apps.core.context_processors.backup",
                 "apps.monitoramento.context_processors.alerta",
                 "apps.core.context_processors.idiomas",
+                "apps.ajuda.context_processors.documentacao",
             ],
         },
     },

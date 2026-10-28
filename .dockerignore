@@ -26,4 +26,18 @@ backups
 
 **/*.ofx
 **/*.OFX
-website/
+# The documentation site (docs/) is its own image; the system only shows the privacy policy.
+docs/*
+!docs/docs/
+docs/docs/*
+!docs/docs/manual/
+docs/docs/manual/*
+!docs/docs/manual/privacidade.md
+!docs/i18n/
+docs/i18n/*/*.json
+docs/i18n/*/docusaurus-theme-classic/
+docs/i18n/*/docusaurus-plugin-content-docs/*.json
+docs/i18n/*/docusaurus-plugin-content-docs/current/*
+!docs/i18n/*/docusaurus-plugin-content-docs/current/manual/
+docs/i18n/*/docusaurus-plugin-content-docs/current/manual/*
+!docs/i18n/*/docusaurus-plugin-content-docs/current/manual/privacidade.md

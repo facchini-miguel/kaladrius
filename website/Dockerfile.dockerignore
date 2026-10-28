@@ -1,9 +1,0 @@
-# Used instead of the root .dockerignore for website/Dockerfile: only what the docs need.
-*
-!docs/
-!website/
-website/node_modules
-website/build
-website/.docusaurus
-website/docs/manual
-website/i18n/*/docusaurus-plugin-content-docs/current/manual

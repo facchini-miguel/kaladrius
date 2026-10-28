@@ -1,6 +1,6 @@
 """Loading and validation of the version history (releases.yaml).
 
-Format and writing rules: docs/en/versioning-and-releases.md
+Format and writing rules: docs/docs/project/versioning.md
 """
 
 import datetime

@@ -1721,27 +1721,11 @@ msgstr "Edit"
 msgid "Nenhum tipo de atendimento cadastrado."
 msgstr "No appointment types yet."
 
-msgid "Manual do usuário"
-msgstr "User manual"
-
 msgid "Contato para assuntos de privacidade"
 msgstr "Privacy contact"
 
 msgid "Fale com a clínica que atende você."
 msgstr "Contact the clinic that treats you."
-
-msgid "Documentação técnica"
-msgstr "Technical documentation"
-
-msgid ""
-"Documentação técnica: visível só para o superusuário, porque descreve a "
-"infraestrutura do servidor."
-msgstr ""
-"Technical documentation: visible only to the superuser, since it describes "
-"the server infrastructure."
-
-msgid "Índice"
-msgstr "Index"
 
 msgid ""
 "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros "
@@ -1848,6 +1832,9 @@ msgstr "Categories"
 
 msgid "Contas"
 msgstr "Accounts"
+
+msgid "Manual do usuário"
+msgstr "User manual"
 
 msgid "Saúde do sistema"
 msgstr "System health"
@@ -3383,6 +3370,19 @@ msgstr "You do not have permission to access this page."
 
 msgid "Senha"
 msgstr "Password"
+
+#~ msgid "Documentação técnica"
+#~ msgstr "Technical documentation"
+
+#~ msgid ""
+#~ "Documentação técnica: visível só para o superusuário, porque descreve a "
+#~ "infraestrutura do servidor."
+#~ msgstr ""
+#~ "Technical documentation: visible only to the superuser, since it "
+#~ "describes the server infrastructure."
+
+#~ msgid "Índice"
+#~ msgstr "Index"
 
 #, python-format
 #~ msgid "Você está trabalhando na clínica %(nome)s."

@@ -1,8 +1,32 @@
 # Kaladrius version history.
 # Single source for the "Novidades" (What's new) web page, the app API and the footer.
-# Format and rules: docs/en/versioning-and-releases.md
+# Format and rules: docs/docs/project/versioning.md
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
+
+- versao: 0.27.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Ajuda no site de documentação
+    en: Help on the documentation site
+    es: Ayuda en el sitio de documentación
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O manual do usuário e toda a documentação do Kaladrius agora ficam no site
+          https://docs.kaladrius.duckdns.org, com busca e no seu idioma. O menu Ajuda abre o
+          site. A política de privacidade continua dentro do sistema, com os dados da clínica.
+        en: >
+          The user manual and all of Kaladrius's documentation now live on the site
+          https://docs.kaladrius.duckdns.org, with search and in your language. The Help menu
+          opens the site. The privacy policy stays inside the system, with the clinic's details.
+        es: >
+          El manual del usuario y toda la documentación de Kaladrius ahora están en el sitio
+          https://docs.kaladrius.duckdns.org, con búsqueda y en su idioma. El menú Ayuda abre el
+          sitio. La política de privacidad sigue dentro del sistema, con los datos de la clínica.
 
 - versao: 0.26.1
   data: 2026-10-28

@@ -1,6 +1,5 @@
 """Help menu: user manual for everyone, technical documentation for superusers only."""
 
-import re
 from io import StringIO
 
 import pytest
@@ -24,32 +23,33 @@ def superusuario(client, django_user_model):
     return client
 
 
-@pytest.mark.parametrize("pasta", ["pt-BR", "en", "es"])
-def test_manual_completo_em_cada_idioma(pasta):
-    for pagina in documentos.MANUAL:
-        assert (documentos.DOCS / pasta / "manual" / f"{pagina}.md").is_file(), (pasta, pagina)
+@pytest.mark.parametrize("pasta", documentos.PASTAS.values())
+def test_manual_e_politica_do_site_em_cada_idioma(pasta):
+    manual = documentos.DOCS / pasta / "manual"
+    paginas = {arquivo.stem for arquivo in manual.glob("*.md")}
+    assert {"inicio", "agenda", "pacientes", "privacidade"} <= paginas, pasta
 
 
-def test_manual_para_toda_a_equipe(recepcao):
-    resposta = recepcao.get(reverse("ajuda:indice"), follow=True)
-    assert resposta.redirect_chain[-1][0] == reverse("ajuda:manual", args=["inicio"])
-    pagina = resposta.content.decode()
-    assert "<h1>Primeiros passos</h1>" in pagina
-    assert [nome for _slug, nome in resposta.context["paginas"]][:2] == [
-        "Primeiros passos",
-        "Agenda",
-    ]
-    assert "<table" in pagina  # Markdown tables rendered
-    assert reverse("ajuda:manual", args=["agenda"]) in pagina
+def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_user_model):
+    settings.DOCS_URL = "https://docs.exemplo.test/"
+    pagina = recepcao.get(reverse("inicio")).content.decode()
+    assert 'href="https://docs.exemplo.test/pt-BR/manual/inicio"' in pagina
+    assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
+    usuario = django_user_model.objects.get(username="recepcao")
+    usuario.idioma = "en"
+    usuario.save()
+    pagina = recepcao.get(reverse("inicio")).content.decode()
+    assert 'href="https://docs.exemplo.test/manual/inicio"' in pagina
 
 
-def test_manual_no_idioma_do_usuario(recepcao, django_user_model):
-    django_user_model.objects.filter(username="recepcao").update(idioma="es")
-    pagina = recepcao.get(reverse("ajuda:manual", args=["pacientes"])).content.decode()
-    assert "<h1>Pacientes</h1>" in pagina and "Eliminación definitiva" in pagina
-    django_user_model.objects.filter(username="recepcao").update(idioma="en")
-    pagina = recepcao.get(reverse("ajuda:manual", args=["inicio"])).content.decode()
-    assert "<h1>Getting started</h1>" in pagina
+def test_enderecos_antigos_da_ajuda_levam_ao_site(recepcao, settings):
+    settings.DOCS_URL = "https://docs.exemplo.test"
+    site = "https://docs.exemplo.test/pt-BR/"
+    assert recepcao.get(reverse("ajuda:indice")).url == site + "manual/inicio"
+    assert recepcao.get(reverse("ajuda:manual", args=["agenda"])).url == site + "manual/agenda"
+    assert recepcao.get(reverse("ajuda:tecnica_indice")).url == site
+    assert recepcao.get(reverse("ajuda:tecnica", args=["pt-BR/deploy.md"])).url == site
+    assert recepcao.get(reverse("ajuda:manual", args=["privacidade"])).url == reverse("privacidade")
 
 
 def test_lista_logo_depois_de_um_paragrafo_vira_lista():
@@ -57,64 +57,6 @@ def test_lista_logo_depois_de_um_paragrafo_vira_lista():
     resultado = documentos._separar_listas(texto)
     assert resultado.startswith("Texto:\n\n- um\n- dois")
     assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
-
-
-def test_pagina_inexistente_do_manual(recepcao):
-    assert recepcao.get(reverse("ajuda:manual", args=["nao-existe"])).status_code == 404
-
-
-def test_documentacao_tecnica_so_para_superusuario(recepcao):
-    assert recepcao.get(reverse("ajuda:tecnica_indice")).status_code == 404
-    url = reverse("ajuda:tecnica", args=["pt-BR/deploy.md"])
-    assert recepcao.get(url).status_code == 404
-    assert "Documentação técnica" not in recepcao.get(reverse("inicio")).content.decode()
-
-
-def test_superusuario_le_a_documentacao_tecnica(superusuario):
-    resposta = superusuario.get(reverse("ajuda:tecnica_indice"), follow=True)
-    assert resposta.redirect_chain[-1][0] == reverse("ajuda:tecnica", args=["pt-BR/README.md"])
-    pagina = resposta.content.decode()
-    # Links between documents stay inside the system; other files go to GitHub.
-    assert reverse("ajuda:tecnica", args=["pt-BR/visao-geral.md"]) in pagina
-    assert reverse("ajuda:tecnica", args=["en/README.md"]) in pagina
-    assert documentos.REPOSITORIO + "releases.yaml" in pagina
-    assert reverse("ajuda:tecnica", args=["pt-BR/decisoes/README.md"]) in pagina
-
-
-@pytest.mark.parametrize(
-    "caminho",
-    ["pt-BR/../../README.md", "../config/settings.py", "pt-BR/nao-existe.md", "pt-BR/manual"],
-)
-def test_documentacao_tecnica_nao_sai_da_pasta_docs(superusuario, caminho):
-    assert superusuario.get(reverse("ajuda:tecnica", args=[caminho])).status_code == 404
-
-
-def test_menu_ajuda(recepcao):
-    pagina = recepcao.get(reverse("inicio")).content.decode()
-    assert reverse("ajuda:indice") in pagina and reverse("novidades") in pagina
-
-
-def test_links_entre_documentos_apontam_para_arquivos_existentes():
-    """Every relative link in docs/ (three languages) and in the READMEs resolves."""
-    raiz = documentos.DOCS.parent
-    arquivos = [*documentos.DOCS.rglob("*.md"), *raiz.glob("README*.md")]
-    quebrados = []
-    for arquivo in arquivos:
-        for alvo in re.findall(r"\]\(([^)#\s]+)(?:#[^)]*)?\)", arquivo.read_text(encoding="utf-8")):
-            if alvo.startswith(("http://", "https://", "mailto:")):
-                continue
-            if not (arquivo.parent / alvo).exists():
-                quebrados.append(f"{arquivo.relative_to(raiz)} -> {alvo}")
-    assert not quebrados, quebrados
-
-
-def test_documentacao_tecnica_nos_tres_idiomas():
-    """Each technical document has its English and Spanish versions (linked at the top)."""
-    for documento in (documentos.DOCS / "pt-BR").rglob("*.md"):
-        if "manual" in documento.parts:
-            continue
-        cabecalho = documento.read_text(encoding="utf-8").split("\n")[2]
-        assert "🇺🇸 English" in cabecalho and "🇪🇸 Español" in cabecalho, documento
 
 
 def test_notas_da_release_do_github_em_ingles():
@@ -140,13 +82,14 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
     assert clinica_a.nome in pagina and "privacidade@sorriso.com.br" in pagina
 
 
-def test_politica_com_varias_clinicas_e_usuario_logado(client, clinica_a, clinica_b, recepcao):
-    # Logged in: the user's clinic.
+def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, recepcao):
     assert recepcao.get(reverse("privacidade")).context["clinica"] == clinica_a
-    assert recepcao.get(reverse("ajuda:manual", args=["privacidade"])).url == reverse("privacidade")
-    # Anonymous with two clinics: no way to know which one.
     recepcao.logout()
-    pagina = recepcao.get(reverse("privacidade"))
+    assert recepcao.get(reverse("privacidade")).context["clinica"] == clinica_a
+
+
+def test_politica_sem_clinica_cadastrada(client):
+    pagina = client.get(reverse("privacidade"))
     assert pagina.context["clinica"] is None
     assert "Fale com a clínica que atende você." in pagina.content.decode()
 

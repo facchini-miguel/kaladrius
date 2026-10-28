@@ -1,6 +1,6 @@
 """Import of the legacy Odonto System data (MySQL dump) into a new clinic.
 
-Mapping (see docs/pt-BR/sistema-legado.md):
+Mapping (the legacy system's notes are kept outside the repository, decision 073):
 - dentistas → Profissional; agenda_cor → TipoAtendimento (matched by name);
 - pessoas → Paciente; agendax → Agendamento (free text, no patient link, as in the legacy
   system); agenda (is_rechamada = 1) → Rechamada.

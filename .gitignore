@@ -13,7 +13,7 @@ old_data/
 *.rar
 *.zip
 # Exception: the brand kit of the documentation site holds only the logo files.
-!website/static/brand/kaladrius-brand-kit.zip
+!docs/static/brand/kaladrius-brand-kit.zip
 *.7z
 backups/
 

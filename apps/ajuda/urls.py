@@ -4,9 +4,10 @@ from . import views
 
 app_name = "ajuda"
 
+# The help moved to the documentation site (decision 073); these addresses only redirect.
 urlpatterns = [
-    path("", views.indice, name="indice"),
-    path("tecnica/", views.tecnica, name="tecnica_indice"),
-    path("tecnica/<path:caminho>", views.tecnica, name="tecnica"),
-    path("<slug:pagina>/", views.manual, name="manual"),
+    path("", views.para_o_site, name="indice"),
+    path("tecnica/", views.para_o_site, {"caminho": ""}, name="tecnica_indice"),
+    path("tecnica/<path:caminho>", views.para_o_site, name="tecnica"),
+    path("<slug:pagina>/", views.para_o_site, name="manual"),
 ]

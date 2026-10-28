@@ -103,13 +103,11 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Ajuda" %}</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="{% url 'ajuda:indice' %}">{% translate "Manual do usuário" %}</a></li>
+              <li><a class="dropdown-item" href="{{ url_manual }}" target="_blank" rel="noopener">{% translate "Manual do usuário" %}</a></li>
+              <li><a class="dropdown-item" href="{{ url_documentacao }}" target="_blank" rel="noopener">{% translate "Documentação" %}</a></li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'novidades' %}">{% translate "Novidades" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'monitoramento:saude' %}">{% translate "Saúde do sistema" %}</a></li>
-              {% if user.is_superuser %}
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'ajuda:tecnica_indice' %}">{% translate "Documentação técnica" %}</a></li>
-              {% endif %}
             </ul>
           </li>
           {% if user.is_superuser %}

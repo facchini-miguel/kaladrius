@@ -35,7 +35,7 @@ services:
     volumes:
       - ../saude:/saude:ro
 
-  # Documentation site (website/, decision 067). Optional: runs only with COMPOSE_PROFILES=docs
+  # Documentation site (docs/, decisions 067 and 073). Optional: runs only with COMPOSE_PROFILES=docs
   # and DOCS_HOSTNAME in .env.
   docs:
     image: ${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs:latest}

@@ -34,12 +34,10 @@ services:
     # In development, use Django's server, which reloads when files are saved.
     command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
 
-  # Documentation site (website/), only when asked for:
+  # Documentation site (docs/), only when asked for:
   # docker compose --profile docs up --build docs   →   http://localhost:3000
   docs:
-    build:
-      context: .
-      dockerfile: website/Dockerfile
+    build: docs
     profiles: [docs]
     ports:
       - "127.0.0.1:3000:80"
