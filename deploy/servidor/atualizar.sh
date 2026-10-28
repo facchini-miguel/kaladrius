@@ -4,6 +4,9 @@
 # retried on the next run. Use --forcar to restart even without a new image.
 set -euo pipefail
 source "$(dirname "$0")/comum.sh"
+# One run at a time: a manual --forcar waits for the timer's run instead of racing it.
+exec 9>"$DIR/atualizar.lock"
+flock 9
 
 entrar_no_registro
 docker pull -q "$IMAGEM_APP" >/dev/null
