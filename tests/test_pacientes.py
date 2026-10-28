@@ -292,3 +292,56 @@ def test_busca_com_digitos_nao_ascii_nao_quebra(admin_a, clinica_a, busca):
     assert admin_a.get(reverse("pacientes:lista"), {"q": busca}).status_code == 200
     assert admin_a.get(reverse("pacientes:aniversariantes"), {"mes": busca}).status_code == 200
     assert admin_a.get(reverse("referencias:opcoes_cidades"), {"uf": busca}).status_code == 200
+
+
+def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
+    # Decision 075: the administrator first receives or cancels the open entries.
+    from decimal import Decimal
+
+    from apps.financeiro import servicos
+    from apps.financeiro.models import Categoria, Conta, Lancamento
+
+    paciente = criar_paciente(clinica_a, nome="Paciente Devedor")
+    usuario = django_user_model.objects.get(username="admin_a")
+    with usar_clinica(clinica_a):
+        lancamento = servicos.criar_lancamento(
+            clinica=clinica_a,
+            tipo=Lancamento.Tipo.RECEBER,
+            descricao="Tratamento",
+            categoria=Categoria.objects.get(nome="Tratamento"),
+            valor_total=Decimal("300"),
+            parcelas=2,
+            primeiro_vencimento=datetime.date(2031, 3, 5),
+            usuario=usuario,
+            paciente=paciente,
+        )
+    url = reverse("pacientes:arquivar", args=[paciente.pk])
+    pagina = admin_a.get(url)
+    assert [p.numero for p in pagina.context["abertas"]] == [1, 2]
+    conteudo = pagina.content.decode()
+    assert reverse("financeiro:lancamento", args=[lancamento.pk]) in conteudo
+    assert 'btn btn-secondary">Arquivar<' not in conteudo
+    resposta = admin_a.post(url, follow=True)
+    assert "Resolva as contas em aberto" in resposta.content.decode()
+    paciente.refresh_from_db()
+    assert not paciente.arquivado
+
+    def receber(parcela):
+        with usar_clinica(clinica_a):
+            servicos.receber(
+                parcela,
+                usuario=usuario,
+                valor=Decimal("150"),
+                data=datetime.date(2031, 3, 5),
+                forma="pix",
+                conta=Conta.objects.get(nome="Caixa"),
+            )
+
+    with usar_clinica(clinica_a):
+        primeira, segunda = lancamento.parcelas.order_by("numero")
+    receber(primeira)
+    assert [p.numero for p in admin_a.get(url).context["abertas"]] == [2]
+    receber(segunda)
+    assert admin_a.post(url).status_code == 302
+    paciente.refresh_from_db()
+    assert paciente.arquivado

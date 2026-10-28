@@ -142,6 +142,22 @@ def _formulario(request, paciente):
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
 def arquivar(request, pk):
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=False)
+    # Not while the patient still owes or is owed money: the administrator first receives or
+    # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
+    abertas = list(
+        Parcela.objects.abertas()
+        .filter(lancamento__paciente=paciente)
+        .select_related("lancamento")
+        .order_by("vencimento", "pk")
+    )
+    if abertas:
+        if request.method == "POST":
+            messages.error(
+                request, _("Resolva as contas em aberto do paciente antes de arquivá-lo.")
+            )
+        return render(
+            request, "pacientes/arquivar.html", {"paciente": paciente, "abertas": abertas}
+        )
     if request.method == "POST":
         paciente.arquivado = True
         paciente.arquivado_em = timezone.now()

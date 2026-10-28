@@ -25,7 +25,7 @@ Clique no nome para abrir a ficha: dados, contato, endereço, observações, **p
 | **Inativo** | Parou de vir, mas continua sendo paciente. Desmarque "ativo" no cadastro | Toda a equipe, no filtro "Inativos". Não aparece nos aniversariantes |
 | **Arquivado** | Tirar do dia a dia: cadastro duplicado, feito por engano, quem nunca foi paciente | Só o administrador, no filtro "Arquivados" |
 
-O **administrador** arquiva pelo botão **Arquivar** da ficha e pode **restaurar** depois. Nada se perde: agendamentos, rechamadas e histórico continuam guardados. Um paciente arquivado não aparece na busca, na agenda, nos aniversariantes nem nas rechamadas.
+O **administrador** arquiva pelo botão **Arquivar** da ficha e pode **restaurar** depois. Nada se perde: agendamentos, rechamadas e histórico continuam guardados. Um paciente arquivado não aparece na busca, na agenda, nos aniversariantes nem nas rechamadas. Um paciente com contas em aberto no financeiro (a receber ou a pagar) só pode ser arquivado depois que cada uma for recebida ou cancelada; a tela **Arquivar** mostra essas contas, com link para cada uma.
 
 ## Exclusão definitiva
 Só para quando o **próprio paciente pedir a exclusão dos seus dados** (LGPD). O administrador arquiva o paciente e, na ficha dele, clica em **Excluir definitivamente**. O cadastro e as rechamadas são apagados, os agendamentos ficam na agenda sem o paciente e os lançamentos financeiros ficam sem o nome dele; as observações desses agendamentos, lançamentos e pagamentos também são apagadas. Antes, confira se a clínica não é obrigada a guardar o prontuário (a lei manda guardar por 20 anos). Não tem volta.

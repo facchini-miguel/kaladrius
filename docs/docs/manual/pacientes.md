@@ -25,7 +25,7 @@ Click the name to open the record: details, contact, address, notes, **upcoming 
 | **Inactive** | Stopped coming, but is still a patient. Uncheck "active" in the record | The whole team, in the "Inactive" filter. Not shown in birthdays |
 | **Archived** | Out of daily use: duplicate record, created by mistake, someone who was never a patient | Only the administrator, in the "Archived" filter |
 
-The **administrator** archives with the **Archive** button of the record and can **restore** later. Nothing is lost: appointments, recalls and history are kept. An archived patient does not show in search, the schedule, birthdays or recalls.
+The **administrator** archives with the **Archive** button of the record and can **restore** later. Nothing is lost: appointments, recalls and history are kept. An archived patient does not show in search, the schedule, birthdays or recalls. A patient with open entries in Finance (to receive or to pay) can only be archived after each one is received or cancelled; the **Archive** page lists them, with a link to each.
 
 ## Permanent deletion
 Only for when the **patient asks for their data to be erased** (LGPD, the Brazilian data protection law). The administrator archives the patient and, in their record, clicks **Delete permanently**. The record and recalls are deleted, appointments stay in the schedule without the patient and financial entries stay without their name; the notes of those appointments, entries and payments are erased too. First, check whether the clinic must keep the clinical records (the law requires 20 years). It cannot be undone.

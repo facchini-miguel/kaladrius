@@ -1431,6 +1431,9 @@ msgstr "patients"
 msgid "Paciente %(nome)s salvo."
 msgstr "Patient %(nome)s saved."
 
+msgid "Resolva as contas em aberto do paciente antes de arquivá-lo."
+msgstr "Settle the patient's open entries before archiving them."
+
 #, python-format
 msgid ""
 "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
@@ -3050,6 +3053,14 @@ msgid ""
 msgstr ""
 "Only clinic administrators see archived patients (in the patient list, under "
 "Status: Archived) and can restore them."
+
+msgid ""
+"Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no "
+"financeiro e depois volte para arquivar."
+msgstr "This patient still has open entries. Receive or cancel each one in Finance, then come back to archive."
+
+msgid "Voltar para a ficha"
+msgstr "Back to the patient record"
 
 msgid "Arquivar"
 msgstr "Archive"

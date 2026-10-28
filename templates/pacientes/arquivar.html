@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n formatos %}
 
 {% block titulo %}{% translate "Arquivar paciente" %} · {{ nome_sistema }}{% endblock %}
 
@@ -7,9 +7,28 @@
 <h1 class="h3 mb-3">{% blocktranslate with nome=paciente.nome %}Arquivar {{ nome }}?{% endblocktranslate %}</h1>
 <p>{% translate "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o histórico continuam guardados." %}</p>
 <p>{% translate "Só administradores da clínica veem os pacientes arquivados (na lista de pacientes, em Situação: Arquivados) e podem restaurá-los." %}</p>
+{% if abertas %}
+<div class="alert alert-warning">
+  {% translate "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no financeiro e depois volte para arquivar." %}
+</div>
+<table class="table table-sm bg-white" style="max-width: 44rem;">
+  <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" %}</th></tr></thead>
+  <tbody>
+    {% for parcela in abertas %}
+    <tr>
+      <td><a href="{% url 'financeiro:lancamento' parcela.lancamento.pk %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">{{ parcela.numero }}/{{ parcela.lancamento.parcelas.count }}</span></td>
+      <td>{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
+      <td class="text-end">{{ parcela.saldo|moeda }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a class="btn btn-link px-0" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
+{% else %}
 <form method="post">
   {% csrf_token %}
   <button type="submit" class="btn btn-secondary">{% translate "Arquivar" %}</button>
   <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Cancelar" %}</a>
 </form>
+{% endif %}
 {% endblock %}

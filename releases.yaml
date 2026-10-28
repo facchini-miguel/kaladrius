@@ -4,6 +4,28 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.27.2
+  data: 2026-10-28
+  titulo:
+    pt-br: Arquivar paciente só com as contas resolvidas
+    en: Archive a patient only with their entries settled
+    es: Archivar al paciente solo con las cuentas resueltas
+  itens:
+    - tipo: melhoria
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Um paciente com contas em aberto no financeiro só pode ser arquivado depois que elas
+          forem recebidas ou canceladas. A tela Arquivar mostra essas contas, com link para
+          cada uma.
+        en: >
+          A patient with open entries in Finance can only be archived after they are received or
+          cancelled. The Archive page lists those entries, with a link to each one.
+        es: >
+          Un paciente con cuentas pendientes en Finanzas solo puede archivarse después de que se
+          cobren o anulen. La pantalla Archivar muestra esas cuentas, con un enlace a cada una.
+
 - versao: 0.27.1
   data: 2026-10-28
   titulo:
