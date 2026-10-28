@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.26.1
+  data: 2026-10-28
+  titulo:
+    pt-br: Nomes do servidor
+    en: Server names
+    es: Nombres del servidor
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Por dentro, o servidor também passou a usar o nome Kaladrius. Nada muda no uso do
+          sistema nem nos seus dados.
+        en: >
+          Behind the scenes, the server now uses the Kaladrius name too. Nothing changes in how
+          you use the system or in your data.
+        es: >
+          Por dentro, el servidor también pasó a usar el nombre Kaladrius. Nada cambia en el
+          uso del sistema ni en sus datos.
+
 - versao: 0.26.0
   data: 2026-10-28
   titulo:

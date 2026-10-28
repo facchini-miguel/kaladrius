@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.26.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.26.1** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
@@ -42,7 +42,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 | Formatar código | `docker compose exec app ruff format .` |
 | Nova migração | `docker compose exec app python manage.py makemigrations` |
 | Logs | `docker compose logs -f app` |
-| Parar | `docker compose down` (os dados do banco ficam no volume `medical-system-dev_pgdata`) |
+| Parar | `docker compose down` (os dados do banco ficam no volume `kaladrius-dev_pgdata`) |
 
 ## Stack
 
@@ -53,7 +53,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 | Banco | PostgreSQL 16 |
 | Execução | Docker + Docker Compose |
 | Produção | VM do Google Compute Engine |
-| App mobile | React Native + Expo, no repositório separado `medical-system-app` |
+| App mobile | React Native + Expo, no repositório separado `kaladrius-app` |
 
 ## Documentação
 

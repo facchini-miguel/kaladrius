@@ -10,8 +10,8 @@ from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.csp import CSP
 
-# Name shown to users (decisions 060 and 068). Infrastructure names (database, Compose project,
-# server services, Google Cloud) keep "medical-system" on purpose.
+# Name shown to users (decisions 060 and 068). Google Cloud names that cannot be renamed
+# (project, backup bucket, network, identity provider) keep "medical-system" (decision 071).
 NOME_SISTEMA = "Kaladrius"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -121,8 +121,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB", "medical_system"),
-        "USER": env("POSTGRES_USER", "medical_system"),
+        "NAME": env("POSTGRES_DB", "kaladrius"),
+        "USER": env("POSTGRES_USER", "kaladrius"),
         "PASSWORD": env("POSTGRES_PASSWORD", ""),
         "HOST": env("POSTGRES_HOST", "localhost"),
         "PORT": env("POSTGRES_PORT", "5432"),

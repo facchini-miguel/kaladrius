@@ -1,8 +1,8 @@
 # Local development environment.
 # Usage: docker compose up --build   →   http://localhost:8000
-# Fixed name (the folder name has a space), different from production's "medical-system"
-# so the two stacks never share containers or volumes on the same machine.
-name: medical-system-dev
+# Fixed name, different from production's, so the two stacks never share containers or
+# volumes on the same machine.
+name: kaladrius-dev
 services:
   db:
     image: postgres:16-alpine

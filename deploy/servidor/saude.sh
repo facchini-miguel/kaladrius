@@ -86,11 +86,11 @@ relatorio() {
     || echo "(o sistema está fora do ar: sem o resumo das 24 horas)"
   echo
   echo "== Tarefas agendadas"
-  systemctl list-timers 'medical-system-*' --no-pager | head -n -3
-  if systemctl --failed --no-legend 'medical-system-*' | grep -q .; then
+  systemctl list-timers 'kaladrius-*' --no-pager | head -n -3
+  if systemctl --failed --no-legend 'kaladrius-*' | grep -q .; then
     echo
     echo "!! Com falha:"
-    systemctl --failed --no-legend 'medical-system-*'
+    systemctl --failed --no-legend 'kaladrius-*'
   fi
 }
 

@@ -7,6 +7,6 @@ StartLimitBurst=4
 
 [Service]
 Type=oneshot
-ExecStart=/opt/medical-system/bin/backup.sh
+ExecStart=/opt/kaladrius/bin/backup.sh
 Restart=on-failure
 RestartSec=20min

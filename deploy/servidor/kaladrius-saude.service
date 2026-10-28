@@ -4,4 +4,4 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/opt/medical-system/bin/saude.sh --coletar
+ExecStart=/opt/kaladrius/bin/saude.sh --coletar

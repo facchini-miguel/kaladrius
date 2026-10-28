@@ -46,7 +46,7 @@ The project's [deploy guide](https://github.com/facchini-miguel/kaladrius/blob/m
 3. **Registry and bucket.** An Artifact Registry repository for the image and a private Cloud Storage bucket with a 30-day deletion rule.
 4. **Service accounts.** One for the VM (reads images, writes backups) and one for GitHub Actions through Workload Identity Federation (publishes images), limited to your repository and the `main` branch.
 5. **VM.** `e2-micro`, standard disk, no external IPv4, with `deploy/servidor/instalar.sh` as the **startup script**. It installs Docker, creates the swap, installs the systemd timers and starts the system.
-6. **Configuration.** Create `/opt/medical-system/.env` (root only) with the values of [Configuration](../configuration.md), including `SITE_HOSTNAME` and `DUCKDNS_TOKEN`.
+6. **Configuration.** Create `/opt/kaladrius/.env` (root only) with the values of [Configuration](../configuration.md), including `SITE_HOSTNAME` and `DUCKDNS_TOKEN`.
 7. **Domain.** Create the DuckDNS subdomain and point it to the IPv6:
    ```bash
    curl "https://www.duckdns.org/update?domains=<name>&token=<token>&ipv6=<IPv6 of the VM>"
@@ -54,7 +54,7 @@ The project's [deploy guide](https://github.com/facchini-miguel/kaladrius/blob/m
 8. **First administrator.** Through the IAP tunnel:
    ```bash
    gcloud compute ssh <vm> --zone=<zone> --tunnel-through-iap --command \
-     'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
+     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
    ```
 
 ## Day to day
@@ -64,12 +64,12 @@ The project's [deploy guide](https://github.com/facchini-miguel/kaladrius/blob/m
 gcloud compute ssh <vm> --zone=<zone> --tunnel-through-iap
 
 # On the VM
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml ps
 sudo docker compose -f docker-compose.prod.yml logs -f app
-sudo /opt/medical-system/bin/atualizar.sh --forcar   # update now
-sudo /opt/medical-system/bin/backup.sh               # backup now
-sudo /opt/medical-system/bin/saude.sh                # server health report
+sudo /opt/kaladrius/bin/atualizar.sh --forcar   # update now
+sudo /opt/kaladrius/bin/backup.sh               # backup now
+sudo /opt/kaladrius/bin/saude.sh                # server health report
 ```
 
 ## Cautions

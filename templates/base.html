@@ -175,13 +175,13 @@
     {% if backup_nenhum %}
     <div class="alert alert-danger" role="alert">
       {% translate "Nenhum backup do banco foi registrado neste servidor: confira se os backups diários estão funcionando." %}
-      {% translate "Veja no servidor:" %} <code>sudo systemctl status medical-system-backup</code>
+      {% translate "Veja no servidor:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}
     {% if backup_atrasado %}
     <div class="alert alert-danger" role="alert">
       {% blocktranslate with momento=backup_atrasado.momento|date:"SHORT_DATETIME_FORMAT" %}O último backup do banco foi em {{ momento }}: os backups diários pararam.{% endblocktranslate %}
-      {% translate "Veja no servidor:" %} <code>sudo systemctl status medical-system-backup</code>
+      {% translate "Veja no servidor:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}
     {% if saude_alerta %}

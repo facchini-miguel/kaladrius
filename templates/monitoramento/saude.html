@@ -14,7 +14,7 @@
 </div>
 
 {% if not ultima %}
-<div class="alert alert-warning">{% translate "Ainda não há amostras. No servidor, a coleta roda a cada 5 minutos (medical-system-saude.timer); em desenvolvimento, não há coleta." %}</div>
+<div class="alert alert-warning">{% translate "Ainda não há amostras. No servidor, a coleta roda a cada 5 minutos (kaladrius-saude.timer); em desenvolvimento, não há coleta." %}</div>
 {% else %}
 {% if parada %}<div class="alert alert-danger">{% blocktranslate with momento=ultima.momento|date:"SHORT_DATETIME_FORMAT" %}A coleta parou: a última amostra é de {{ momento }}.{% endblocktranslate %}</div>{% endif %}
 
@@ -90,5 +90,5 @@
   </div>
 </div>
 
-<p class="text-body-secondary small">{% translate "Os números vêm de comandos do Linux no servidor, a cada 5 minutos, e ficam guardados por 7 dias." %}{% if user.is_superuser %} {% translate "Para ver o relatório no terminal:" %} <code>sudo /opt/medical-system/bin/saude.sh</code>{% endif %}</p>
+<p class="text-body-secondary small">{% translate "Os números vêm de comandos do Linux no servidor, a cada 5 minutos, e ficam guardados por 7 dias." %}{% if user.is_superuser %} {% translate "Para ver o relatório no terminal:" %} <code>sudo /opt/kaladrius/bin/saude.sh</code>{% endif %}</p>
 {% endblock %}

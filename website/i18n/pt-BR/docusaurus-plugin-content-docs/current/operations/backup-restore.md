@@ -12,7 +12,7 @@ O sistema inteiro está no banco PostgreSQL: pacientes, agenda, financeiro, usu�
 Já vem pronto: todo dia às 06:00 UTC o dump vai para o bucket do Cloud Storage, e cada arquivo é apagado depois de 30 dias. Se falhar, tenta de novo a cada 20 minutos (até 4 vezes em 3 horas). Cada backup bem-sucedido é registrado no sistema; quando o último tem mais de 26 horas, os superusuários veem um aviso no topo das telas.
 
 ```bash
-sudo /opt/medical-system/bin/backup.sh                       # na VM: backup agora
+sudo /opt/kaladrius/bin/backup.sh                       # na VM: backup agora
 gcloud storage ls -l gs://<bucket>/                         # no seu computador: listar
 ```
 
@@ -62,7 +62,7 @@ kaladrius restart app
 
 # Google Cloud, na VM
 gcloud storage cp gs://<bucket>/<arquivo>.dump /tmp/restaurar.dump
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml exec -T db \
   sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restaurar.dump
 ```

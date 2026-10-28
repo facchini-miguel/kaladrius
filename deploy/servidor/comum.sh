@@ -1,5 +1,5 @@
 # Shared settings and helpers for the server scripts (sourced, not executed).
-DIR=/opt/medical-system
+DIR=/opt/kaladrius
 REGISTRO=us-east1-docker.pkg.dev
 IMAGEM_APP="$REGISTRO/medical-system-facchini/kaladrius/app:latest"
 IMAGEM_DOCS="$REGISTRO/medical-system-facchini/kaladrius/docs:latest"
@@ -7,6 +7,14 @@ BUCKET_BACKUP=medical-system-facchini-backups
 # Id of the image running since the last successful update (written by atualizar.sh).
 IMAGEM_INSTALADA="$DIR/imagem-instalada"
 export IMAGEM_APP IMAGEM_DOCS
+
+# A server installed before 0.26.1 keeps everything in /opt/medical-system. Until
+# migrar_para_kaladrius.sh moves it, the new scripts do nothing: starting the "kaladrius"
+# Compose project there would bring up an empty database next to the real one.
+if [ -d /opt/medical-system ] && [ ! -e "$DIR" ] && [ -z "${MIGRANDO:-}" ]; then
+  echo "Servidor com os nomes antigos: rode migrar_para_kaladrius.sh (decisão 071)." >&2
+  exit 1
+fi
 
 # Access token of the VM's service account (no keys stored on the server).
 token_google() {
@@ -55,8 +63,8 @@ instalar_agendamentos() {
   mkdir -p "$DIR/saude"
   cp "$DIR"/release/servidor/*.service "$DIR"/release/servidor/*.timer /etc/systemd/system/
   systemctl daemon-reload
-  systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer \
-    medical-system-saude.timer
+  systemctl enable --now kaladrius-atualizar.timer kaladrius-backup.timer \
+    kaladrius-saude.timer
   # Also here, not only in atualizar.sh: an update is run by the previous version of
   # atualizar.sh, which only calls the helpers of the new version.
   recarregar_caddy

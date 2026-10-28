@@ -10,7 +10,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versión actual: 0.26.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
+**Versión actual: 0.26.1** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
 
@@ -42,7 +42,7 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 | Formatear el código | `docker compose exec app ruff format .` |
 | Nueva migración | `docker compose exec app python manage.py makemigrations` |
 | Logs | `docker compose logs -f app` |
-| Detener | `docker compose down` (los datos de la base quedan en el volumen `medical-system-dev_pgdata`) |
+| Detener | `docker compose down` (los datos de la base quedan en el volumen `kaladrius-dev_pgdata`) |
 
 ## Stack
 
@@ -53,7 +53,7 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 | Base de datos | PostgreSQL 16 |
 | Ejecución | Docker + Docker Compose |
 | Producción | VM de Google Compute Engine |
-| App | React Native + Expo, en el repositorio separado `medical-system-app` |
+| App | React Native + Expo, en el repositorio separado `kaladrius-app` |
 
 ## Documentación
 

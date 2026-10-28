@@ -12,7 +12,7 @@ The whole system is in the PostgreSQL database: patients, schedule, finance, use
 Already set up: every day at 06:00 UTC the dump goes to the Cloud Storage bucket, and each object is deleted after 30 days. If it fails, it is retried every 20 minutes (up to 4 times in 3 hours). Each successful backup is recorded in the system; when the last one is older than 26 hours, superusers see a warning at the top of every page.
 
 ```bash
-sudo /opt/medical-system/bin/backup.sh                       # on the VM: back up now
+sudo /opt/kaladrius/bin/backup.sh                       # on the VM: back up now
 gcloud storage ls -l gs://<bucket>/                         # on your computer: list
 ```
 
@@ -62,7 +62,7 @@ kaladrius restart app
 
 # Google Cloud, on the VM
 gcloud storage cp gs://<bucket>/<file>.dump /tmp/restaurar.dump
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml exec -T db \
   sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restaurar.dump
 ```

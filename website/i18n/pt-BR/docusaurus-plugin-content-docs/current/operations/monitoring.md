@@ -27,9 +27,9 @@ Os superusuários veem um aviso no topo das telas quando:
 
 ## Saúde do sistema (instalação no Google Cloud)
 
-A cada 5 minutos, `deploy/servidor/saude.sh --coletar` lê processador, memória, swap, disco, rede, carga e a memória e o processador de cada container, e acrescenta uma linha em `/opt/medical-system/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). Todos veem em **Ajuda > Saúde do sistema**, com gráficos das últimas horas e dias; as tabelas do banco e o comando do servidor aparecem só para superusuários. O app só lê o arquivo; não tem acesso ao Docker.
+A cada 5 minutos, `deploy/servidor/saude.sh --coletar` lê processador, memória, swap, disco, rede, carga e a memória e o processador de cada container, e acrescenta uma linha em `/opt/kaladrius/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). Todos veem em **Ajuda > Saúde do sistema**, com gráficos das últimas horas e dias; as tabelas do banco e o comando do servidor aparecem só para superusuários. O app só lê o arquivo; não tem acesso ao Docker.
 
-No servidor, `sudo /opt/medical-system/bin/saude.sh` mostra um relatório: agora, últimas 24 horas, containers e agendamentos.
+No servidor, `sudo /opt/kaladrius/bin/saude.sh` mostra um relatório: agora, últimas 24 horas, containers e agendamentos.
 
 ## Logs
 

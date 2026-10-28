@@ -14,7 +14,7 @@ Ambiente publicado em **https://kaladrius.duckdns.org** (acesso somente por **IP
 git push (main) ─> GitHub Actions: testes ─> build ─> Artifact Registry (us-east1)
                                                           │ a VM verifica a cada 5 min
                                                           ▼
-Navegador ──IPv6/HTTPS──> VM e2-micro "medical-system" (us-east1-b, sem IPv4 público)
+Navegador ──IPv6/HTTPS──> VM e2-micro "kaladrius" (us-east1-b, sem IPv4 público)
                            ├─ caddy  (HTTPS automático Let's Encrypt, rede do host)
                            ├─ app    (Django + Gunicorn, só em 127.0.0.1:8000)
                            ├─ db     (PostgreSQL 16, volume pgdata)
@@ -29,12 +29,12 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 
 | Recurso | Nome | Custo |
 |---|---|---|
-| VM | `medical-system` (e2-micro, us-east1-b, disco standard 30 GB, Debian 13) | Free tier |
+| VM | `kaladrius` (e2-micro, us-east1-b, disco standard 30 GB, Debian 13) | Free tier |
 | Rede | VPC `medical-system`, sub-rede `medical-system-us-east1` (IPv4 interno + IPv6 externo, Private Google Access) | Grátis |
 | IPv6 fixo | `medical-system-ipv6` (`2600:1900:4020:f0b::`, reservado) | Grátis |
 | Domínio | `kaladrius.duckdns.org` (DuckDNS) | Grátis |
 | Firewall | `medical-system-web-ipv6` (TCP 80/443 e UDP 443 para HTTP/3, de ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 só do IAP) | Grátis |
-| Imagens | Artifact Registry `medical-system` (us-east1), limpeza automática (mantém 5 versões) | Free tier (0,5 GB) |
+| Imagens | Artifact Registry `kaladrius` (us-east1), limpeza automática (mantém 5 versões) | Free tier (0,5 GB) |
 | Backups | `gs://medical-system-facchini-backups` (us-east1, privado, apaga após 30 dias) | Free tier (5 GB) |
 | Contas de serviço | `medical-system-vm` (lê imagens, grava backups), `github-ci` (publica imagens) | Grátis |
 | GitHub → Google | Workload Identity Federation (pool `github`), só o repositório e a branch `main` | Grátis |
@@ -42,31 +42,31 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 
 ## Como o servidor funciona
 - `deploy/servidor/instalar.sh` é o *startup script* da VM: instala Docker, cria 1 GB de swap, instala os agendamentos do systemd e sobe o sistema. Pode rodar de novo sem problema.
-- `deploy/servidor/atualizar.sh` (a cada 5 min): baixa a imagem `latest`; se ela for diferente da última instalada com sucesso (`/opt/medical-system/imagem-instalada`), extrai os arquivos de `deploy/` de dentro da imagem, atualiza os agendamentos do systemd e reinicia os containers. Se algo falhar, tenta de novo na rodada seguinte. As migrações rodam na subida do app.
+- `deploy/servidor/atualizar.sh` (a cada 5 min): baixa a imagem `latest`; se ela for diferente da última instalada com sucesso (`/opt/kaladrius/imagem-instalada`), extrai os arquivos de `deploy/` de dentro da imagem, atualiza os agendamentos do systemd e reinicia os containers. Se algo falhar, tenta de novo na rodada seguinte. As migrações rodam na subida do app.
 - `deploy/servidor/backup.sh` (diário): `pg_dump` enviado ao Cloud Storage e registrado no sistema; depois, apaga as tentativas de entrada recusadas com mais de 30 dias (`aplicar_retencao`). Se falhar, o systemd tenta de novo a cada 20 minutos (até 4 tentativas em 3 horas). Se o último backup registrado tiver mais de 26 horas, os superusuários veem um aviso no topo das telas.
-- `deploy/servidor/saude.sh --coletar` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/medical-system/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `saude.sh` mostra um relatório no terminal.
-- O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/medical-system/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
-- Configuração e senhas: `/opt/medical-system/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
+- `deploy/servidor/saude.sh --coletar` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/kaladrius/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `saude.sh` mostra um relatório no terminal.
+- O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/kaladrius/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
+- Configuração e senhas: `/opt/kaladrius/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
 - Sem chaves guardadas: a VM e o CI usam tokens temporários do Google.
 
 ## Tarefas comuns
 
 ```bash
 # Entrar no servidor (túnel IAP)
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap
 
 # Na VM: estado, logs e comandos do Django
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml ps
 sudo docker compose -f docker-compose.prod.yml logs -f app
 sudo docker compose -f docker-compose.prod.yml exec app python manage.py <comando>
 
 # Forçar atualização agora / backup agora
-sudo /opt/medical-system/bin/atualizar.sh --forcar
-sudo /opt/medical-system/bin/backup.sh
+sudo /opt/kaladrius/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/backup.sh
 
 # Saúde do servidor: agora, últimas 24 horas, containers e agendamentos
-sudo /opt/medical-system/bin/saude.sh
+sudo /opt/kaladrius/bin/saude.sh
 
 # Listar backups (na sua máquina)
 gcloud storage ls -l gs://medical-system-facchini-backups/
@@ -76,11 +76,11 @@ gcloud storage ls -l gs://medical-system-facchini-backups/
 O normal é desfazer o commit (`git revert`) e enviar para a `main`: o CI publica uma imagem nova e a VM a instala em até 5 minutos. Numa emergência, dá para fixar uma imagem antiga na VM (cada versão tem a tag `X.Y.Z`, que nunca muda, e cada commit tem a tag com os 12 primeiros caracteres do SHA):
 
 ```bash
-sudo systemctl stop medical-system-atualizar.timer   # senão a VM volta para a latest em 5 min
-cd /opt/medical-system/release
+sudo systemctl stop kaladrius-atualizar.timer   # senão a VM volta para a latest em 5 min
+cd /opt/kaladrius/release
 sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
   docker compose -f docker-compose.prod.yml up -d app
-# Depois de corrigir e publicar: sudo systemctl start medical-system-atualizar.timer
+# Depois de corrigir e publicar: sudo systemctl start kaladrius-atualizar.timer
 ```
 As migrações não são desfeitas: uma versão antiga só funciona se as migrações novas forem compatíveis com ela (só acrescentar tabelas e campos, por exemplo).
 
@@ -89,12 +89,12 @@ Confirmado pelo titular em 27/10/2026, na clínica "Clínica Sorriso" (LGPD: os 
 
 ```bash
 # 1. Apagar os dados fictícios (clínicas "(teste)", seus dados e usuários de teste)
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py remover_dados_teste --confirmar'
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py remover_dados_teste --confirmar'
 
 # 2. Na sua máquina: o dump vai pelo túnel IAP direto para o comando, sem ficar gravado na VM
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clínica Sorriso"' \
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py importar_legado - --clinica "Clínica Sorriso"' \
   < ~/medical-system-old_data/backup_20191106/facchini07_20191106.sql
 ```
 Depois, vincule o administrador da clínica no admin do Django (Vínculos) e cadastre a equipe em Cadastros > Equipe. O superusuário já acessa a clínica pelo seletor de clínicas.
@@ -103,28 +103,28 @@ Depois, vincule o administrador da clínica no admin do Django (Vínculos) e cad
 Os dados da Clínica Sorriso servem só como dados de teste (decisão 047). Para anonimizá-los (irreversível; ver [sistema-legado.md](sistema-legado.md)):
 
 ```bash
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py anonimizar_clinica --clinica "Clínica Sorriso" --confirmar'
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py anonimizar_clinica --clinica "Clínica Sorriso" --confirmar'
 ```
 Rodar antes do backup diário seguinte à importação (06:00 UTC) evita que algum backup guarde os dados reais.
 
 Para a clínica de teste ter agenda e rechamadas atuais (ver [sistema-legado.md](sistema-legado.md)):
 ```bash
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_movimento --clinica "Clínica Sorriso" --confirmar'
 ```
 
 Para testar a importação de extrato, um arquivo OFX fictício, montado com os pagamentos da conta Banco da clínica de teste (mais tarifas e um Pix não registrado), é gravado no seu computador:
 ```bash
-gcloud compute ssh medical-system --zone=us-east1-b --tunnel-through-iap --command \
-  'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_extrato --clinica "Clínica Sorriso"' > extrato-teste.ofx
+gcloud compute ssh kaladrius --zone=us-east1-b --tunnel-through-iap --command \
+  'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec -T app python manage.py simular_extrato --clinica "Clínica Sorriso"' > extrato-teste.ofx
 ```
 
 ### Restaurar um backup
 ```bash
 # Na VM (substitui o banco atual!)
 gcloud storage cp gs://medical-system-facchini-backups/<arquivo>.dump /tmp/restaurar.dump  # ou baixe pela sua máquina e copie com gcloud compute scp --tunnel-through-iap
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < /tmp/restaurar.dump
 ```
 

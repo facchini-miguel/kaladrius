@@ -14,7 +14,7 @@ Seguimos o [Versionamento Semântico](https://semver.org/lang/pt-BR/):
 
 - Durante o desenvolvimento usamos `0.x.y`. A versão **1.0.0** é a primeira usada por uma clínica real.
 - Quando o MENOR sobe, a CORREÇÃO volta a zero. Quando o MAIOR sobe, os dois voltam a zero.
-- O app (`medical-system-app`) tem numeração própria e indica a versão mínima do servidor de que precisa.
+- O app (`kaladrius-app`) tem numeração própria e indica a versão mínima do servidor de que precisa.
 
 ## Onde ficam as novidades: `releases.yaml`
 

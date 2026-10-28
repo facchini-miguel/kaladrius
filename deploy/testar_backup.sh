@@ -8,11 +8,12 @@
 set -euo pipefail
 
 BUCKET=medical-system-facchini-backups
-CONTAINER=medical-system-teste-backup
+CONTAINER=kaladrius-teste-backup
 pasta=$(mktemp -d)
 trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
 
-objeto=${1:-$(gcloud storage ls "gs://$BUCKET/" | sort | tail -1)}
+# Newest by the timestamp in the name (older backups start with medical-system-, newer with kaladrius-).
+objeto=${1:-$(gcloud storage ls "gs://$BUCKET/" | sed -E 's/.*-([0-9]{8}-[0-9]{6})\.dump$/\1 &/' | sort | tail -1 | cut -d' ' -f2)}
 objeto=${objeto#gs://$BUCKET/}
 echo "Backup: gs://$BUCKET/$objeto"
 gcloud storage cp --quiet "gs://$BUCKET/$objeto" "$pasta/backup.dump"

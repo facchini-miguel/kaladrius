@@ -8,7 +8,7 @@ from apps.novidades.releases import versao_atual
 api = NinjaAPI(
     title=f"{settings.NOME_SISTEMA} API",
     version="1",
-    description="API used by the mobile app (medical-system-app).",
+    description="API used by the mobile app (kaladrius-app).",
     urls_namespace="api-v1",
     # The interactive docs (/api/v1/docs) describe the API: superusers only. The app only
     # calls the endpoints, which keep their own access rules.

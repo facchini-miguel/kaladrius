@@ -14,7 +14,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 - During development we use `0.x.y`. Version **1.0.0** is the first one used by a real clinic.
 - When MINOR goes up, PATCH resets to zero. When MAJOR goes up, both reset to zero.
-- The app (`medical-system-app`) has its own numbering and declares the minimum server version it needs.
+- The app (`kaladrius-app`) has its own numbering and declares the minimum server version it needs.
 
 ## Where release notes live: `releases.yaml`
 

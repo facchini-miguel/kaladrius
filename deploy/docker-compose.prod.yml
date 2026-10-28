@@ -1,7 +1,7 @@
 # Production stack on the Compute Engine VM. Managed by deploy/servidor/atualizar.sh.
-# ${VAR} values come from /opt/medical-system/.env (linked as .env next to this file).
+# ${VAR} values come from /opt/kaladrius/.env (linked as .env next to this file).
 # Only the app receives the whole file; the other services get just what they need.
-name: medical-system
+name: kaladrius
 
 services:
   db:

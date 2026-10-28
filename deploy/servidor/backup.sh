@@ -4,7 +4,7 @@
 set -euo pipefail
 source "$(dirname "$0")/comum.sh"
 
-nome="medical-system-$(date -u +%Y%m%d-%H%M%S).dump"
+nome="kaladrius-$(date -u +%Y%m%d-%H%M%S).dump"
 arquivo=$(mktemp)
 trap 'rm -f "$arquivo"' EXIT
 compose exec -T db sh -c 'pg_dump -Fc -U "$POSTGRES_USER" "$POSTGRES_DB"' > "$arquivo"

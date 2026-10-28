@@ -17,18 +17,18 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: medical_system
-          POSTGRES_USER: medical_system
+          POSTGRES_DB: kaladrius
+          POSTGRES_USER: kaladrius
           POSTGRES_PASSWORD: ci-only
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U medical_system"
+          --health-cmd "pg_isready -U kaladrius"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DJANGO_SECRET_KEY: ci-only-never-use-in-production
       DJANGO_DEBUG: "0"
-      POSTGRES_DB: medical_system
-      POSTGRES_USER: medical_system
+      POSTGRES_DB: kaladrius
+      POSTGRES_USER: kaladrius
       POSTGRES_PASSWORD: ci-only
       POSTGRES_HOST: localhost
     steps:

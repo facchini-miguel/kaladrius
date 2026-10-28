@@ -46,7 +46,7 @@ La [guía de despliegue](https://github.com/facchini-miguel/kaladrius/blob/main/
 3. **Registro y bucket.** Un repositorio en Artifact Registry para la imagen y un bucket privado en Cloud Storage con regla de borrado a los 30 días.
 4. **Cuentas de servicio.** Una para la VM (lee imágenes, escribe backups) y una para GitHub Actions mediante Workload Identity Federation (publica imágenes), limitada a su repositorio y a la rama `main`.
 5. **VM.** `e2-micro`, disco standard, sin IPv4 externa, con `deploy/servidor/instalar.sh` como **startup script**. Instala Docker, crea el swap, instala las tareas programadas de systemd e inicia el sistema.
-6. **Configuración.** Cree `/opt/medical-system/.env` (solo root) con los valores de [Configuración](../configuration.md), incluidos `SITE_HOSTNAME` y `DUCKDNS_TOKEN`.
+6. **Configuración.** Cree `/opt/kaladrius/.env` (solo root) con los valores de [Configuración](../configuration.md), incluidos `SITE_HOSTNAME` y `DUCKDNS_TOKEN`.
 7. **Dominio.** Cree el subdominio en DuckDNS y apúntelo a la IPv6:
    ```bash
    curl "https://www.duckdns.org/update?domains=<nombre>&token=<token>&ipv6=<IPv6 de la VM>"
@@ -54,7 +54,7 @@ La [guía de despliegue](https://github.com/facchini-miguel/kaladrius/blob/main/
 8. **Primer administrador.** Por el túnel IAP:
    ```bash
    gcloud compute ssh <vm> --zone=<zona> --tunnel-through-iap --command \
-     'cd /opt/medical-system/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
+     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
    ```
 
 ## En el día a día
@@ -64,12 +64,12 @@ La [guía de despliegue](https://github.com/facchini-miguel/kaladrius/blob/main/
 gcloud compute ssh <vm> --zone=<zona> --tunnel-through-iap
 
 # En la VM
-cd /opt/medical-system/release
+cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml ps
 sudo docker compose -f docker-compose.prod.yml logs -f app
-sudo /opt/medical-system/bin/atualizar.sh --forcar   # actualizar ahora
-sudo /opt/medical-system/bin/backup.sh               # backup ahora
-sudo /opt/medical-system/bin/saude.sh                # informe de la salud del servidor
+sudo /opt/kaladrius/bin/atualizar.sh --forcar   # actualizar ahora
+sudo /opt/kaladrius/bin/backup.sh               # backup ahora
+sudo /opt/kaladrius/bin/saude.sh                # informe de la salud del servidor
 ```
 
 ## Cuidados

@@ -17,7 +17,7 @@ Django + PostgreSQL ──────┤
 | Repository | Contents | Phase |
 |---|---|---|
 | `kaladrius` (this one) | Django, staff web app, API, Docker, documentation | 1 |
-| `medical-system-app` | React Native + Expo (Android and iOS) | 2 |
+| `kaladrius-app` | React Native + Expo (Android and iOS) | 2 |
 
 The two communicate **only through the API**.
 

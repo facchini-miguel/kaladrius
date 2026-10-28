@@ -2,7 +2,7 @@
 # VM startup script (runs as root on every boot; safe to run again).
 # Installs Docker, adds swap, installs the systemd timers and starts the stack.
 set -euo pipefail
-exec > >(tee -a /var/log/medical-system-instalar.log) 2>&1
+exec > >(tee -a /var/log/kaladrius-instalar.log) 2>&1
 echo "== $(date -u) instalar.sh"
 
 # 1 GB of swap: the e2-micro has only 1 GB of RAM.
@@ -18,9 +18,14 @@ if ! command -v docker >/dev/null || ! docker compose version >/dev/null 2>&1; t
 fi
 systemctl enable --now docker
 
-DIR=/opt/medical-system
+DIR=/opt/kaladrius
 REGISTRO=us-east1-docker.pkg.dev
 IMAGEM_APP="$REGISTRO/medical-system-facchini/kaladrius/app:latest"
+# A server installed before 0.26.1 must be migrated first (see comum.sh).
+if [ -d /opt/medical-system ] && [ ! -e "$DIR" ]; then
+  echo "Servidor com os nomes antigos: rode migrar_para_kaladrius.sh (decisão 071)."
+  exit 0
+fi
 mkdir -p "$DIR"
 token=$(curl -sf -H "Metadata-Flavor: Google" \
   "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \

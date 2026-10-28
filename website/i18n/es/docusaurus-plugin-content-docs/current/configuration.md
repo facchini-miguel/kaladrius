@@ -5,7 +5,7 @@ title: Configuración
 
 # Configuración
 
-Todo lo que cambia de una instalación a otra está en el archivo **`.env`**, junto al código (servidor propio) o en `/opt/medical-system/.env` (Google Cloud). Contiene contraseñas: déjelo legible solo por root (`chmod 600`) y nunca lo ponga en Git.
+Todo lo que cambia de una instalación a otra está en el archivo **`.env`**, junto al código (servidor propio) o en `/opt/kaladrius/.env` (Google Cloud). Contiene contraseñas: déjelo legible solo por root (`chmod 600`) y nunca lo ponga en Git.
 
 Después de cambiarlo, reinicie: `kaladrius up -d` (se recrean los contenedores cuya configuración cambió).
 
@@ -27,8 +27,8 @@ Después de cambiarlo, reinicie: `kaladrius up -d` (se recrean los contenedores 
 
 | Variable | Predeterminado | Qué hace |
 |---|---|---|
-| `POSTGRES_DB` | `medical_system` | Nombre de la base |
-| `POSTGRES_USER` | `medical_system` | Usuario de la base |
+| `POSTGRES_DB` | `kaladrius` | Nombre de la base |
+| `POSTGRES_USER` | `kaladrius` | Usuario de la base |
 | `POSTGRES_PASSWORD` | vacío | Contraseña de la base. Use una fuerte |
 | `POSTGRES_HOST` | `localhost` | `db` con Docker Compose |
 | `POSTGRES_PORT` | `5432` | |

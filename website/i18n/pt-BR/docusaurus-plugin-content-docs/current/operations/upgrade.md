@@ -24,7 +24,7 @@ Faça um [backup](backup-restore.md) antes de atualizar; é o único caminho de 
 Nada a fazer: a VM instala cada imagem nova publicada pelo CI em até 5 minutos. Para instalar agora:
 
 ```bash
-sudo /opt/medical-system/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/atualizar.sh --forcar
 ```
 
 ## Voltar para uma versão anterior
@@ -43,11 +43,11 @@ kaladrius up -d
 No Google Cloud, pare antes a atualização automática, senão a VM volta para a imagem mais nova em 5 minutos:
 
 ```bash
-sudo systemctl stop medical-system-atualizar.timer
-cd /opt/medical-system/release
+sudo systemctl stop kaladrius-atualizar.timer
+cd /opt/kaladrius/release
 sudo IMAGEM_APP=<registro>/app:0.24.1 docker compose -f docker-compose.prod.yml up -d app
 # depois de publicar a correção:
-sudo systemctl start medical-system-atualizar.timer
+sudo systemctl start kaladrius-atualizar.timer
 ```
 
 Cada versão tem uma tag de imagem `X.Y.Z` que nunca muda.

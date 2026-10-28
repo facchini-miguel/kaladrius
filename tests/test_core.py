@@ -132,7 +132,7 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     settings.BACKUP_MONITORADO = True
     assert "Nenhum backup do banco foi registrado" in client.get(reverse("inicio")).content.decode()
 
-    call_command("registrar_backup", "medical-system-x.dump", "1024")
+    call_command("registrar_backup", "kaladrius-x.dump", "1024")
     assert Backup.objects.get().tamanho == 1024
     assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
 
