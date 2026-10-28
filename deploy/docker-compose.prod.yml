@@ -22,7 +22,7 @@ services:
       retries: 10
 
   app:
-    image: ${IMAGEM_APP:-us-east1-docker.pkg.dev/medical-system-facchini/medical-system/app:latest}
+    image: ${IMAGEM_APP:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:latest}
     restart: unless-stopped
     env_file: ../.env
     depends_on:
@@ -38,7 +38,7 @@ services:
   # Documentation site (website/, decision 067). Optional: runs only with COMPOSE_PROFILES=docs
   # and DOCS_HOSTNAME in .env.
   docs:
-    image: ${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/medical-system/docs:latest}
+    image: ${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs:latest}
     profiles: [docs]
     restart: unless-stopped
     ports:

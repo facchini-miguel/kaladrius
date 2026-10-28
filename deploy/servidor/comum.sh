@@ -1,8 +1,8 @@
 # Shared settings and helpers for the server scripts (sourced, not executed).
 DIR=/opt/medical-system
 REGISTRO=us-east1-docker.pkg.dev
-IMAGEM_APP="$REGISTRO/medical-system-facchini/medical-system/app:latest"
-IMAGEM_DOCS="$REGISTRO/medical-system-facchini/medical-system/docs:latest"
+IMAGEM_APP="$REGISTRO/medical-system-facchini/kaladrius/app:latest"
+IMAGEM_DOCS="$REGISTRO/medical-system-facchini/kaladrius/docs:latest"
 BUCKET_BACKUP=medical-system-facchini-backups
 # Id of the image running since the last successful update (written by atualizar.sh).
 IMAGEM_INSTALADA="$DIR/imagem-instalada"

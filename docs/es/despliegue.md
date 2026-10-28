@@ -78,7 +78,7 @@ Lo normal es deshacer el commit (`git revert`) y enviarlo a `main`: el CI public
 ```bash
 sudo systemctl stop medical-system-atualizar.timer   # si no, la VM vuelve a latest en 5 min
 cd /opt/medical-system/release
-sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/medical-system/app:0.7.0 \
+sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
   docker compose -f docker-compose.prod.yml up -d app
 # Después de corregir y publicar: sudo systemctl start medical-system-atualizar.timer
 ```

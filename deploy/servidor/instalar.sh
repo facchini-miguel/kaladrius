@@ -20,7 +20,7 @@ systemctl enable --now docker
 
 DIR=/opt/medical-system
 REGISTRO=us-east1-docker.pkg.dev
-IMAGEM_APP="$REGISTRO/medical-system-facchini/medical-system/app:latest"
+IMAGEM_APP="$REGISTRO/medical-system-facchini/kaladrius/app:latest"
 mkdir -p "$DIR"
 token=$(curl -sf -H "Metadata-Flavor: Google" \
   "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" \

@@ -60,11 +60,14 @@ jobs:
       contents: read
       id-token: write  # keyless login to Google Cloud (Workload Identity Federation)
     env:
-      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/medical-system/docs
+      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs
+      # Transition (decision 070): also published to the old repository until the VM reads
+      # the new one. Remove together with the same line of the "publicar" job.
+      IMAGEM_ANTIGA: us-east1-docker.pkg.dev/medical-system-facchini/medical-system/docs
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
       - name: Build do site
-        run: docker build -f website/Dockerfile -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" .
+        run: docker build -f website/Dockerfile -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" -t "$IMAGEM_ANTIGA:latest" .
       - id: google
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
@@ -77,6 +80,7 @@ jobs:
         run: |
           echo "${{ steps.google.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://us-east1-docker.pkg.dev
           docker push --all-tags "$IMAGEM"
+          docker push "$IMAGEM_ANTIGA:latest"
 
   # Publishes the image to Google Artifact Registry; the VM picks it up within 5 minutes.
   # After the docs image, so the VM never starts a stack whose docs image is missing.
@@ -88,7 +92,9 @@ jobs:
       contents: read
       id-token: write  # keyless login to Google Cloud (Workload Identity Federation)
     env:
-      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/medical-system/app
+      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app
+      # Transition (decision 070): see the "documentacao" job.
+      IMAGEM_ANTIGA: us-east1-docker.pkg.dev/medical-system-facchini/medical-system/app
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
       - id: google
@@ -102,10 +108,11 @@ jobs:
       - name: Build e publicação da imagem
         run: |
           VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          TAGS=(-t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}")
+          TAGS=(-t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" -t "$IMAGEM_ANTIGA:latest")
           # The version tag points to the first image of that version and is never moved.
           if ! docker manifest inspect "$IMAGEM:$VERSAO" >/dev/null 2>&1; then
             TAGS+=(-t "$IMAGEM:$VERSAO")
           fi
           docker build "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"
+          docker push "$IMAGEM_ANTIGA:latest"
