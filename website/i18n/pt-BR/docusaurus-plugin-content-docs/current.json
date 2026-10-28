@@ -1,0 +1,18 @@
+{
+  "version.label": {
+    "message": "Próxima",
+    "description": "The label for version current"
+  },
+  "sidebar.docs.category.Installation": {
+    "message": "Instalação",
+    "description": "The label for category 'Installation' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Operations": {
+    "message": "Operação",
+    "description": "The label for category 'Operations' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.User manual": {
+    "message": "Manual do usuário",
+    "description": "The label for category 'User manual' in sidebar 'docs'"
+  }
+}

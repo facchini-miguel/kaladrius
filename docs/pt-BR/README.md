@@ -14,6 +14,7 @@
 | [sistema-legado.md](sistema-legado.md) | Resumo do sistema PHP antigo usado como referência |
 | [decisoes/](decisoes/README.md) | Registro das decisões técnicas e de produto, com data e motivo |
 | [manual/](manual/inicio.md) | Manual do usuário (também no sistema: **Ajuda > Manual do usuário**) |
+| [website/](../../website/) | Site de documentação público do Kaladrius (Docusaurus, 3 idiomas): instalação, configuração, operação e o manual. `cd website && npm install && npm start` |
 
 ## Convenções
 - A documentação é escrita primeiro em **português** (`docs/pt-BR/`) e traduzida para o **inglês** (`docs/en/`) e o **espanhol** (`docs/es/`), com a mesma estrutura. Toda mudança atualiza os três idiomas no mesmo commit. O código usa nomes em **português para o domínio** (Paciente, Agendamento) e em inglês só no que é do framework.

@@ -1,0 +1,20 @@
+/* Kaladrius colors: the system's blue (Bootstrap primary). */
+:root {
+  --ifm-color-primary: #0d6efd;
+  --ifm-color-primary-dark: #0b5ed7;
+  --ifm-color-primary-darker: #0a58ca;
+  --ifm-color-primary-darkest: #084298;
+  --ifm-color-primary-light: #3d8bfd;
+  --ifm-color-primary-lighter: #6ea8fe;
+  --ifm-color-primary-lightest: #9ec5fe;
+  --ifm-code-font-size: 95%;
+}
+[data-theme="dark"] {
+  --ifm-color-primary: #6ea8fe;
+  --ifm-color-primary-dark: #4d94fe;
+  --ifm-color-primary-darker: #3d8bfd;
+  --ifm-color-primary-darkest: #0d6efd;
+  --ifm-color-primary-light: #8fbcfe;
+  --ifm-color-primary-lighter: #9ec5fe;
+  --ifm-color-primary-lightest: #cfe2ff;
+}

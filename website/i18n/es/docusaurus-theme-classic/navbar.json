@@ -1,0 +1,22 @@
+{
+  "title": {
+    "message": "Kaladrius",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "Kaladrius",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Docs": {
+    "message": "Documentación",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.User manual": {
+    "message": "Manual del usuario",
+    "description": "Navbar item with label User manual"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}
