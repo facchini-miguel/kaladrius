@@ -3,12 +3,14 @@
 from decimal import Decimal
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Papel
 from apps.financeiro.models import Categoria, Conta, Lancamento
+from apps.orcamentos import servicos
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
 
@@ -190,6 +192,9 @@ def test_recusar_e_imprimir(cenario):
     cliente.post(reverse("orcamentos:recusar", args=[orcamento.pk]))
     orcamento.refresh_from_db()
     assert orcamento.situacao == Orcamento.Situacao.RECUSADO
+    # Deciding again (e.g. a stale page approving it meanwhile) is refused.
+    with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
+        servicos.recusar(orcamento, usuario=None)
     lista = cliente.get(reverse("orcamentos:lista"), {"situacao": "recusado"})
     assert list(lista.context["pagina"]) == [orcamento]
 

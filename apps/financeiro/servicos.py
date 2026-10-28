@@ -7,6 +7,8 @@ from decimal import ROUND_DOWN, Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import DecimalField, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -23,6 +25,7 @@ from .models import (
 )
 
 CENTAVO = Decimal("0.01")
+DINHEIRO = DecimalField(max_digits=12, decimal_places=2)
 # Days overdue for the debtors report: up to 30, 31-60, 61-90, over 90.
 FAIXAS_DE_ATRASO = [30, 60, 90]
 
@@ -46,16 +49,15 @@ def somar_meses(data, meses):
 def criar_lancamento(*, parcelas, primeiro_vencimento, usuario, **campos):
     """Create an entry with `parcelas` monthly installments from `primeiro_vencimento`."""
     lancamento = Lancamento.objects.create(criado_por=usuario, **campos)
-    Parcela.objects.bulk_create(
-        Parcela(
+    # One by one (at most 48), not bulk_create, so the audit log records each installment.
+    for numero, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1):
+        Parcela.objects.create(
             clinica=lancamento.clinica,
             lancamento=lancamento,
             numero=numero,
             vencimento=somar_meses(primeiro_vencimento, numero - 1),
             valor=valor,
         )
-        for numero, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1)
-    )
     return lancamento
 
 
@@ -83,36 +85,49 @@ def receber(parcela, *, usuario, **campos):
 
 @transaction.atomic
 def estornar(pagamento, *, motivo, usuario):
+    pagamento = Pagamento.objects.select_for_update().get(pk=pagamento.pk)
+    if pagamento.estornado:
+        raise ValidationError(_("Este pagamento já foi estornado."))
     pagamento.estornado = True
     pagamento.estornado_em = timezone.now()
     pagamento.estornado_por = usuario
     pagamento.motivo_estorno = motivo
     # Only these fields: the commission links are set elsewhere and must not be overwritten.
     pagamento.save(update_fields=["estornado", "estornado_em", "estornado_por", "motivo_estorno"])
-    # A reversed payment no longer explains its bank statement line.
-    TransacaoBancaria.objects.filter(pagamento=pagamento).update(
-        pagamento=None,
-        situacao=TransacaoBancaria.Situacao.PENDENTE,
-        conciliado_por=None,
-        conciliado_em=None,
-    )
+    # A reversed payment no longer explains its bank statement line (saved, not .update(),
+    # so the audit log records it).
+    for transacao in TransacaoBancaria.objects.filter(pagamento=pagamento):
+        transacao.pagamento = None
+        transacao.situacao = TransacaoBancaria.Situacao.PENDENTE
+        transacao.conciliado_por = None
+        transacao.conciliado_em = None
+        transacao.save()
+    return pagamento
 
 
 @transaction.atomic
 def cancelar(lancamento, *, motivo, usuario):
-    """Cancel an entry. Payments must be reversed first (they are real money)."""
+    """Cancel an entry. Payments must be reversed first (they are real money).
+
+    The entry row is locked: receber() locks it too (through its installment), so a
+    payment cannot be recorded while the entry is being cancelled.
+    """
+    lancamento = Lancamento.objects.select_for_update().get(pk=lancamento.pk)
+    if lancamento.cancelado:
+        raise ValidationError(_("Este lançamento já foi cancelado."))
     if Pagamento.objects.filter(parcela__lancamento=lancamento, estornado=False).exists():
         raise ValidationError(
             _("Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar.")
         )
+    comissao = Comissao.objects.filter(lancamento=lancamento, cancelada=False).first()
+    if comissao is not None:
+        comissoes.liberar(comissao)  # raises ValidationError when it cannot be undone
     lancamento.cancelado = True
     lancamento.cancelado_em = timezone.now()
     lancamento.cancelado_por = usuario
     lancamento.motivo_cancelamento = motivo
     lancamento.save()
-    comissao = Comissao.objects.filter(lancamento=lancamento, cancelada=False).first()
-    if comissao is not None:
-        comissoes.liberar(comissao)
+    return lancamento
 
 
 def situacao(parcela, hoje=None):
@@ -214,28 +229,35 @@ def pagamentos_validos():
 
 
 def saldos_das_contas(ate=None):
-    """[(account, balance)] = initial balance + money in - money out (payments up to `ate`)."""
+    """[(account, balance)] = initial balance + money in - money out (payments up to `ate`).
+
+    Summed in the database, grouped by account, so it does not grow with the history.
+    """
     from .models import Conta
 
     pagamentos = pagamentos_validos()
     if ate is not None:
         pagamentos = pagamentos.filter(data__lte=ate)
     movimento = defaultdict(lambda: ZERO)
-    for conta_id, tipo, valor in pagamentos.values_list(
-        "conta_id", "parcela__lancamento__tipo", "valor"
+    for conta_id, tipo, total in (
+        pagamentos.order_by()
+        .values_list("conta_id", "parcela__lancamento__tipo")
+        .annotate(total=Sum("valor"))
     ):
-        movimento[conta_id] += _sinal(tipo) * valor
+        movimento[conta_id] += _sinal(tipo) * total
     movimentos = MovimentoCaixa.objects.all()
     if ate is not None:
         movimentos = movimentos.filter(criado_em__date__lte=ate)
-    for conta_id, outra_id, tipo, valor in movimentos.values_list(
-        "caixa__conta_id", "outra_conta_id", "tipo", "valor"
+    for conta_id, outra_id, tipo, total in (
+        movimentos.order_by()
+        .values_list("caixa__conta_id", "outra_conta_id", "tipo")
+        .annotate(total=Sum("valor"))
     ):
         # A withdrawal leaves the drawer (into the other account, if any); a top-up enters it.
         sinal = -1 if tipo == MovimentoCaixa.Tipo.RETIRADA else 1
-        movimento[conta_id] += sinal * valor
+        movimento[conta_id] += sinal * total
         if outra_id:
-            movimento[outra_id] -= sinal * valor
+            movimento[outra_id] -= sinal * total
     return [
         (conta, conta.saldo_inicial + movimento[conta.pk])
         for conta in Conta.objects.all().order_by("nome")
@@ -289,7 +311,8 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
         linhas[chave(parcela.vencimento)][campo] += parcela.saldo
 
     anterior = de - datetime.timedelta(days=1)
-    saldo = sum((valor for _conta, valor in saldos_das_contas(ate=anterior)), start=ZERO)
+    saldo_inicial = sum((valor for _conta, valor in saldos_das_contas(ate=anterior)), start=ZERO)
+    saldo = saldo_inicial
     resultado = []
     for data in sorted(linhas):
         linha = linhas[data]
@@ -314,7 +337,7 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
     return {
         "linhas": resultado,
         "totais": totais,
-        "saldo_inicial": sum((v for _c, v in saldos_das_contas(ate=anterior)), start=ZERO),
+        "saldo_inicial": saldo_inicial,
         "saldo_final": saldo,
     }
 
@@ -326,15 +349,16 @@ def relatorio(de, ate):
     pagos = pagamentos.filter(parcela__lancamento__tipo=Lancamento.Tipo.PAGAR)
 
     def agrupar(consulta, campo, rotulo=None):
-        grupos = defaultdict(lambda: ZERO)
-        for chave, valor in consulta.values_list(campo, "valor"):
-            grupos[chave] += valor
-        linhas = [((rotulo or {}).get(chave, chave), valor) for chave, valor in grupos.items()]
+        grupos = consulta.order_by().values_list(campo).annotate(total=Sum("valor"))
+        linhas = [((rotulo or {}).get(chave, chave), total) for chave, total in grupos]
         return sorted(linhas, key=lambda linha: -linha[1])
 
+    def somar(consulta, campo):
+        return consulta.aggregate(total=Coalesce(Sum(campo), ZERO, output_field=DINHEIRO))["total"]
+
     formas = dict(Pagamento.Forma.choices)
-    total_recebido = sum((v for v in recebidos.values_list("valor", flat=True)), start=ZERO)
-    total_pago = sum((v for v in pagos.values_list("valor", flat=True)), start=ZERO)
+    total_recebido = somar(recebidos, "valor")
+    total_pago = somar(pagos, "valor")
     return {
         "por_forma": agrupar(recebidos, "forma", formas),
         "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__nome"),
@@ -343,8 +367,8 @@ def relatorio(de, ate):
         "total_recebido": total_recebido,
         "total_pago": total_pago,
         "resultado": total_recebido - total_pago,
-        "descontos": sum((v for v in recebidos.values_list("desconto", flat=True)), start=ZERO),
-        "juros": sum((v for v in recebidos.values_list("juros", flat=True)), start=ZERO),
+        "descontos": somar(recebidos, "desconto"),
+        "juros": somar(recebidos, "juros"),
     }
 
 

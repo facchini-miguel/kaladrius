@@ -505,6 +505,11 @@ class ImportacaoExtrato(ModeloDaClinica):
     saldo_em = models.DateField(_("saldo em"), null=True, blank=True)
     novas = models.PositiveIntegerField(_("transações novas"), default=0)
     repetidas = models.PositiveIntegerField(_("transações já importadas"), default=0)
+    ignoradas = models.PositiveIntegerField(
+        _("transações ilegíveis"),
+        default=0,
+        help_text=_("Linhas do arquivo sem data ou valor que dê para ler: não foram importadas."),
+    )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

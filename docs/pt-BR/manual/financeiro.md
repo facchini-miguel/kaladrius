@@ -61,7 +61,7 @@ Embaixo aparece o **saldo atual de cada conta**. Para ele bater com o banco e a 
 Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria. Os pagamentos estornados e os lançamentos cancelados ficam de fora.
 
 ## Extrato bancário (administrador)
-Em **Financeiro > Extrato bancário**, importe o extrato da conta, baixado do site ou aplicativo do banco no formato **OFX** (às vezes chamado "Money"). Escolha a conta do sistema (por exemplo, Banco) e o arquivo. Transações já importadas são puladas, então pode importar períodos que se sobrepõem.
+Em **Financeiro > Extrato bancário**, importe o extrato da conta, baixado do site ou aplicativo do banco no formato **OFX** (às vezes chamado "Money"). Escolha a conta do sistema (por exemplo, Banco) e o arquivo. Transações já importadas são puladas, então pode importar períodos que se sobrepõem. Se alguma linha do arquivo vier sem data ou valor que dê para ler, o sistema avisa quantas ficaram de fora: confira essas no extrato do banco.
 
 Cada transação do banco é comparada com o que o sistema já tem nessa conta: um recebimento ou pagamento **com o mesmo valor, até 10 dias antes ou depois**, ou um depósito ou retirada do **caixa do dia** para essa conta.
 - **Conciliar … com correspondência única** concilia de uma vez todas as transações que têm um só lançamento possível.
@@ -79,7 +79,7 @@ Em **Financeiro > Comissões**, cada profissional tem um **percentual** sobre o 
 2. Escolha a data em **Recebimentos até** (por exemplo, o último dia do mês) e clique em **Ver**: a tabela mostra o recebido ainda não comissionado e a comissão a pagar.
 3. Clique em **Pagar**, confira os recebimentos e o vencimento e clique em **Lançar em A pagar**. A comissão vira uma despesa em **A pagar**, em nome do profissional, onde você registra o pagamento.
 
-Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissionado for **estornado**, a comissão dele é descontada no próximo pagamento ao profissional (pelo percentual da época). Se a despesa da comissão for **cancelada**, a comissão é desfeita e os recebimentos voltam a ficar pendentes. O **Extrato** de cada comissão lista os recebimentos e os descontos e pode ser impresso para o profissional.
+Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissionado for **estornado**, a comissão dele é descontada no próximo pagamento ao profissional (pelo percentual da época). Se a despesa da comissão for **cancelada**, a comissão é desfeita e os recebimentos voltam a ficar pendentes. Se uma comissão posterior já descontou o estorno de um recebimento dela, cancele primeiro a posterior. O **Extrato** de cada comissão lista os recebimentos e os descontos e pode ser impresso para o profissional.
 
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

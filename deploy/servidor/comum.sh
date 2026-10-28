@@ -56,4 +56,16 @@ instalar_agendamentos() {
   systemctl daemon-reload
   systemctl enable --now medical-system-atualizar.timer medical-system-backup.timer \
     medical-system-saude.timer
+  # Also here, not only in atualizar.sh: an update is run by the previous version of
+  # atualizar.sh, which only calls the helpers of the new version.
+  recarregar_caddy
+}
+
+# `compose up` does not restart Caddy when only the content of the Caddyfile changed, so
+# apply it (a no-op when unchanged). Caddy keeps the old configuration if the new one fails.
+recarregar_caddy() {
+  if compose ps --status running --services 2>/dev/null | grep -qx caddy; then
+    compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile \
+      || echo "Aviso: o Caddy não aceitou o novo Caddyfile e continua com o anterior."
+  fi
 }

@@ -61,7 +61,7 @@ Below it you see the **current balance of each account**. For it to match the ba
 In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category. Reversed payments and cancelled entries are left out.
 
 ## Bank statement (administrator)
-In **Finance > Bank statement**, import the account's statement, downloaded from the bank's website or app in **OFX** format (sometimes called "Money"). Choose the system account (for example, Banco) and the file. Transactions imported before are skipped, so overlapping periods can be imported.
+In **Finance > Bank statement**, import the account's statement, downloaded from the bank's website or app in **OFX** format (sometimes called "Money"). Choose the system account (for example, Banco) and the file. Transactions imported before are skipped, so overlapping periods can be imported. If a line of the file has no readable date or amount, the system tells how many were left out: check those on the bank statement.
 
 Each bank transaction is compared with what the system already has in that account: a receipt or payment **with the same amount, up to 10 days before or after**, or a **daily cash** drawer deposit or withdrawal to that account.
 - **Reconcile … with a single match** reconciles at once every transaction with only one possible entry.
@@ -79,7 +79,7 @@ In **Finance > Commissions**, each practitioner has a **percentage** of the amou
 2. Choose the date in **Receipts up to** (for example, the last day of the month) and click **View**: the table shows what was received and not yet paid out, and the commission to pay.
 3. Click **Pay**, check the receipts and the due date and click **Add to Payables**. The commission becomes an expense in **Payables**, in the practitioner's name, where you record the payment.
 
-Each receipt enters a commission only once. If a receipt already paid out is **reversed**, its commission is deducted from the next payment to the practitioner (at the percentage of the time). If the commission expense is **cancelled**, the commission is undone and the receipts become pending again. Each commission's **Statement** lists the receipts and deductions and can be printed for the practitioner.
+Each receipt enters a commission only once. If a receipt already paid out is **reversed**, its commission is deducted from the next payment to the practitioner (at the percentage of the time). If the commission expense is **cancelled**, the commission is undone and the receipts become pending again. If a later commission already deducted the reversal of one of its receipts, cancel the later one first. Each commission's **Statement** lists the receipts and deductions and can be printed for the practitioner.
 
 ## Categories and accounts
 In **Records > Categories** and **Records > Accounts**, the administrator creates new categories (income and expenses) and accounts (cash drawer, bank, card machine). To stop using one without losing the history, uncheck **active**.

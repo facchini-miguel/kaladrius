@@ -103,16 +103,45 @@ def pagar(profissional, *, ate, vencimento, categoria, usuario):
         lancamento=lancamento,
         criado_por=usuario,
     )
-    Pagamento.objects.filter(pk__in=[p.pk for p in calculo["creditos"]]).update(comissao=comissao)
-    Pagamento.objects.filter(pk__in=[p.pk for p in calculo["debitos"]]).update(
-        comissao_estorno=comissao
-    )
+    # One by one (not .update()), so the audit log records which receipts it covered.
+    for pagamento in calculo["creditos"]:
+        pagamento.comissao = comissao
+        pagamento.save(update_fields=["comissao"])
+    for pagamento in calculo["debitos"]:
+        pagamento.comissao_estorno = comissao
+        pagamento.save(update_fields=["comissao_estorno"])
     return comissao
 
 
 def liberar(comissao):
-    """Undo a commission whose payable was cancelled: its receipts become pending again."""
-    Pagamento.objects.filter(comissao=comissao).update(comissao=None)
-    Pagamento.objects.filter(comissao_estorno=comissao).update(comissao_estorno=None)
+    """Undo a commission whose payable was cancelled: its receipts become pending again.
+
+    Refused while a later commission deducted the reversal of one of its receipts: that
+    deduction only makes sense if this one was paid, so the later one is cancelled first.
+    """
+    descontou = (
+        Comissao.objects.filter(
+            cancelada=False,
+            pagamentos_estornados__comissao=comissao,
+        )
+        .exclude(pk=comissao.pk)
+        .order_by("ate")
+        .first()
+    )
+    if descontou is not None:
+        raise ValidationError(
+            _(
+                "Esta comissão não pode ser cancelada: o estorno de um recebimento dela já foi "
+                "descontado na comissão até %(data)s. Cancele aquela antes."
+            )
+            % {"data": date_format(descontou.ate, "SHORT_DATE_FORMAT")}
+        )
+    # One by one (not .update()), so the audit log records each change.
+    for pagamento in Pagamento.objects.filter(comissao=comissao):
+        pagamento.comissao = None
+        pagamento.save(update_fields=["comissao"])
+    for pagamento in Pagamento.objects.filter(comissao_estorno=comissao):
+        pagamento.comissao_estorno = None
+        pagamento.save(update_fields=["comissao_estorno"])
     comissao.cancelada = True
     comissao.save(update_fields=["cancelada"])

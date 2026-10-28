@@ -1,6 +1,24 @@
+{
+	servers {
+		# A client sending a request very slowly cannot hold a connection forever.
+		timeouts {
+			read_header 10s
+			read_body 60s
+		}
+	}
+}
+
 # HTTPS with an automatic Let's Encrypt certificate for SITE_HOSTNAME.
 {$SITE_HOSTNAME} {
 	encode zstd gzip
-	reverse_proxy 127.0.0.1:8000
+	# The largest legitimate upload is an OFX bank statement (5 MB, apps/financeiro/forms.py).
+	request_body {
+		max_size 6MB
+	}
+	reverse_proxy 127.0.0.1:8000 {
+		# Ordinary form posts are read whole by Caddy before reaching the app, so a slow
+		# client does not tie up one of its few workers.
+		request_buffers 256KB
+	}
 	header -Server
 }

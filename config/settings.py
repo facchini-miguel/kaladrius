@@ -8,6 +8,7 @@ from pathlib import Path
 
 from django.contrib.messages import constants as messages
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.csp import CSP
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -61,11 +62,14 @@ INSTALLED_APPS = [
     "apps.financeiro",
     "apps.orcamentos",
     "apps.monitoramento",
+    # Serves the API docs page's own files (no CDN, which the CSP would block).
+    "ninja",
     "axes",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Language: the browser's (Accept-Language) before login; the user's choice after.
@@ -214,6 +218,22 @@ if env_bool("DJANGO_SECURE"):
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    LANGUAGE_COOKIE_SECURE = True
+
+# Content-Security-Policy: scripts only from our own files (no inline scripts or event
+# handlers in the templates; a test checks it), so injected HTML cannot run code. Inline
+# styles stay allowed: FullCalendar and HTMX add them, and they cannot run code.
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "script-src": [CSP.SELF],
+    "style-src": [CSP.SELF, CSP.UNSAFE_INLINE],
+    "img-src": [CSP.SELF, "data:"],  # Bootstrap draws some icons as data: SVGs
+    "font-src": [CSP.SELF, "data:"],  # FullCalendar's arrow icons are a data: font
+    "object-src": [CSP.NONE],
+    "base-uri": [CSP.SELF],
+    "form-action": [CSP.SELF],
+    "frame-ancestors": [CSP.NONE],
+}
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"

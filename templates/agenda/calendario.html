@@ -9,7 +9,7 @@
   {% if profissionais %}
   <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
     <label for="profissional" class="visually-hidden">{% translate "Profissional" %}</label>
-    <select name="profissional" id="profissional" class="form-select" onchange="this.form.submit()">
+    <select name="profissional" id="profissional" class="form-select" data-enviar-ao-mudar>
       {% for item in profissionais %}
       <option value="{{ item.pk }}"{% if item.pk == profissional.pk %} selected{% endif %}>{{ item.nome }}</option>
       {% endfor %}

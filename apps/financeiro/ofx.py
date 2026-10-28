@@ -37,6 +37,8 @@ class Extrato:
     saldo: Decimal | None
     saldo_em: datetime.date | None
     transacoes: list
+    # Transaction blocks whose date or amount could not be read (reported to the user).
+    ignoradas: int = 0
 
 
 def _texto(conteudo: bytes) -> str:
@@ -68,8 +70,11 @@ def _data(valor):
 
 def _valor(valor):
     valor = valor.replace(" ", "")
-    if "," in valor and "." not in valor:  # some banks write 1234,56
-        valor = valor.replace(",", ".")
+    if "," in valor and ("." not in valor or valor.rfind(",") > valor.rfind(".")):
+        # Some banks write 1234,56 or even 1.234,56 (the OFX standard has no thousands).
+        valor = valor.replace(".", "").replace(",", ".")
+    elif "," in valor:  # 1,234.56
+        valor = valor.replace(",", "")
     try:
         return Decimal(valor).quantize(Decimal("0.01"))
     except InvalidOperation:
@@ -82,10 +87,14 @@ def ler(conteudo: bytes) -> Extrato:
         raise ArquivoInvalido(_("O arquivo não é um extrato OFX."))
     transacoes = []
     vistos = {}
+    ignoradas = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", texto, re.IGNORECASE | re.DOTALL):
         data = _data(_campo(bloco, "DTPOSTED"))
         valor = _valor(_campo(bloco, "TRNAMT"))
-        if data is None or valor is None or valor == 0:
+        if data is None or valor is None:
+            ignoradas += 1
+            continue
+        if valor == 0:  # nothing moved (some banks list balance lines this way)
             continue
         memo = _campo(bloco, "MEMO")
         nome = _campo(bloco, "NAME")
@@ -121,4 +130,5 @@ def ler(conteudo: bytes) -> Extrato:
         saldo=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
         saldo_em=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,
+        ignoradas=ignoradas,
     )

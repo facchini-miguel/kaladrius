@@ -228,8 +228,12 @@ def recusar(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    servicos.recusar(orcamento, usuario=request.user)
-    messages.success(request, _("Orçamento marcado como recusado."))
+    try:
+        servicos.recusar(orcamento, usuario=request.user)
+    except ValidationError as erro:  # approved or refused by someone else a moment ago
+        messages.error(request, erro.messages[0])
+    else:
+        messages.success(request, _("Orçamento marcado como recusado."))
     return redirect("orcamentos:detalhe", pk=orcamento.pk)
 
 

@@ -5,7 +5,7 @@
 
 {% block conteudo %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" onclick="window.print()">{% translate "Imprimir ou salvar em PDF" %}</button>
+  <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% translate "Voltar" %}</a>
 </div>
 <div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">

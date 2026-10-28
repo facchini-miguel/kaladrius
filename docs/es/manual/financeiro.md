@@ -61,7 +61,7 @@ Abajo aparece el **saldo actual de cada cuenta**. Para que coincida con el banco
 En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría. Los pagos revertidos y las cuentas canceladas quedan fuera.
 
 ## Extracto bancario (administrador)
-En **Financiero > Extracto bancario**, importe el extracto de la cuenta, descargado del sitio o la aplicación del banco en formato **OFX** (a veces llamado "Money"). Elija la cuenta del sistema (por ejemplo, Banco) y el archivo. Las transacciones ya importadas se omiten, así que puede importar períodos que se superponen.
+En **Financiero > Extracto bancario**, importe el extracto de la cuenta, descargado del sitio o la aplicación del banco en formato **OFX** (a veces llamado "Money"). Elija la cuenta del sistema (por ejemplo, Banco) y el archivo. Las transacciones ya importadas se omiten, así que puede importar períodos que se superponen. Si alguna línea del archivo no tiene fecha o importe legible, el sistema avisa cuántas quedaron fuera: revíselas en el extracto del banco.
 
 Cada transacción del banco se compara con lo que el sistema ya tiene en esa cuenta: un cobro o pago **con el mismo valor, hasta 10 días antes o después**, o un depósito o retiro de la **caja del día** hacia esa cuenta.
 - **Conciliar … con correspondencia única** concilia de una vez todas las transacciones que tienen un solo registro posible.
@@ -79,7 +79,7 @@ En **Financiero > Comisiones**, cada profesional tiene un **porcentaje** sobre e
 2. Elija la fecha en **Cobros hasta** (por ejemplo, el último día del mes) y haga clic en **Ver**: la tabla muestra lo cobrado aún no comisionado y la comisión por pagar.
 3. Haga clic en **Pagar**, revise los cobros y el vencimiento y haga clic en **Registrar en Por pagar**. La comisión pasa a ser un gasto en **Por pagar**, a nombre del profesional, donde usted registra el pago.
 
-Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **revierte**, su comisión se descuenta en el próximo pago al profesional (con el porcentaje de la época). Si el gasto de la comisión se **cancela**, la comisión se deshace y los cobros vuelven a quedar pendientes. El **Extracto** de cada comisión lista los cobros y los descuentos y puede imprimirse para el profesional.
+Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **revierte**, su comisión se descuenta en el próximo pago al profesional (con el porcentaje de la época). Si el gasto de la comisión se **cancela**, la comisión se deshace y los cobros vuelven a quedar pendientes. Si una comisión posterior ya descontó el reverso de uno de sus cobros, cancele primero la posterior. El **Extracto** de cada comisión lista los cobros y los descuentos y puede imprimirse para el profesional.
 
 ## Categorías y cuentas
 En **Registros > Categorías** y **Registros > Cuentas**, el administrador crea nuevas categorías (ingresos y gastos) y cuentas (caja, banco, terminal de tarjetas). Para dejar de usar una sin perder el historial, desmarque **activa**.

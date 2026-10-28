@@ -1,4 +1,7 @@
-"""Login brute-force protection (django-axes) and the "new version" notice."""
+"""Login brute-force protection (django-axes), the "new version" notice and the CSP."""
+
+import re
+from pathlib import Path
 
 import pytest
 from django.urls import reverse
@@ -96,3 +99,42 @@ def test_ip_real_atras_do_proxy(rf):
     request = rf.get("/", HTTP_X_FORWARDED_FOR="2804:abcd::1, 2001:db8::7", REMOTE_ADDR="::1")
     ProxyReversoMiddleware(lambda r: None)(request)
     assert request.META["REMOTE_ADDR"] == "2001:db8::7"
+
+
+# --- Content-Security-Policy (0.23.1) -------------------------------------------------
+
+PASTA_TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
+
+
+def test_paginas_saem_com_csp_sem_script_inline(client):
+    politica = client.get(reverse("login"))["Content-Security-Policy"]
+    assert "script-src 'self'" in politica
+    assert "unsafe-inline" not in politica.split("script-src")[1].split(";")[0]
+    assert "frame-ancestors 'none'" in politica
+
+
+def test_templates_sem_script_inline_nem_eventos():
+    """The CSP blocks inline scripts and onclick-style attributes: behaviour goes in static/js."""
+    proibidos = re.compile(
+        r"<script(?![^>]*\b(src=|type=\"application/json\"))|\son[a-z]+=|\bhx-on", re.I
+    )
+    problemas = [
+        f"{arquivo.relative_to(PASTA_TEMPLATES)}: {achado.group(0)}"
+        for arquivo in PASTA_TEMPLATES.rglob("*.html")
+        for achado in proibidos.finditer(arquivo.read_text(encoding="utf-8"))
+    ]
+    assert problemas == []
+
+
+def test_documentacao_da_api_so_para_superusuario(client, criar_usuario):
+    docs = reverse("api-v1:openapi-view")
+    assert client.get(docs).status_code == 302  # to the login page
+    client.force_login(criar_usuario("maria"))
+    assert client.get(docs).status_code == 302
+    client.force_login(criar_usuario("dono", is_superuser=True, is_staff=True))
+    resposta = client.get(docs)
+    assert resposta.status_code == 200
+    assert "cdn" not in resposta.content.decode().lower()  # local files, allowed by the CSP
+    # The endpoints themselves stay open to the app.
+    client.logout()
+    assert client.get(reverse("api-v1:versao")).status_code == 200

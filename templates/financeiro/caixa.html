@@ -8,7 +8,7 @@
   <h1 class="h3 mb-0">{% translate "Caixa do dia" %}</h1>
   {% if contas|length > 1 %}
   <form method="get">
-    <select name="conta" class="form-select" aria-label="{% translate 'Conta' %}" onchange="this.form.submit()">
+    <select name="conta" class="form-select" aria-label="{% translate 'Conta' %}" data-enviar-ao-mudar>
       {% for item in contas %}<option value="{{ item.pk }}"{% if item.pk == conta.pk %} selected{% endif %}>{{ item.nome }}</option>{% endfor %}
     </select>
   </form>

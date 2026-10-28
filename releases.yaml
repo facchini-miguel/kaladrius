@@ -4,6 +4,83 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.23.1
+  data: 2026-10-27
+  titulo:
+    pt-br: Correções da revisão de código
+    en: Fixes from the code review
+    es: Correcciones de la revisión de código
+  itens:
+    - tipo: correcao
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cancelar uma comissão depois que uma comissão posterior já descontou o estorno de um
+          recebimento dela fazia o profissional perder esse valor. Agora o sistema pede para
+          cancelar primeiro a comissão posterior. Cancelar um lançamento, estornar um pagamento
+          ou recusar um orçamento duas vezes seguidas (ou ao mesmo tempo que outra pessoa
+          recebe ou aprova) também ficou seguro.
+        en: >
+          Cancelling a commission after a later commission had already deducted the reversal
+          of one of its receipts made the practitioner lose that amount. Now the system asks
+          to cancel the later commission first. Cancelling an entry, reversing a payment or
+          refusing an estimate twice in a row (or while someone else receives or approves it)
+          is also safe now.
+        es: >
+          Cancelar una comisión después de que una comisión posterior ya había descontado el
+          reverso de uno de sus cobros hacía que el profesional perdiera ese valor. Ahora el
+          sistema pide cancelar primero la comisión posterior. Cancelar un asiento, revertir
+          un pago o rechazar un presupuesto dos veces seguidas (o mientras otra persona cobra
+          o aprueba) también quedó seguro.
+    - tipo: correcao
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Na importação do extrato OFX, linhas sem data ou valor legível eram puladas sem
+          aviso. Agora o sistema diz quantas ficaram de fora, e valores escritos como 1.234,56
+          passaram a ser lidos.
+        en: >
+          When importing an OFX statement, lines without a readable date or amount were
+          skipped silently. Now the system tells how many were left out, and amounts written
+          as 1.234,56 are read.
+        es: >
+          Al importar el extracto OFX, las líneas sin fecha o importe legible se omitían sin
+          aviso. Ahora el sistema indica cuántas quedaron fuera, y los importes escritos como
+          1.234,56 se leen.
+    - tipo: seguranca
+      modulo: Pacientes
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          A exclusão definitiva dos dados de um paciente, a pedido dele, agora também apaga as
+          observações dos agendamentos, lançamentos e pagamentos dele.
+        en: >
+          Permanently deleting a patient's data, at their request, now also erases the notes
+          of their appointments, entries and payments.
+        es: >
+          La eliminación definitiva de los datos de un paciente, a su pedido, ahora también
+          borra las observaciones de sus citas, asientos y pagos.
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Proteções extras no servidor: as páginas só executam scripts do próprio sistema
+          (Content-Security-Policy), envios grandes ou muito lentos são recusados antes de
+          chegar ao sistema, e a documentação técnica da API ficou restrita aos
+          superusuários.
+        en: >
+          Extra server protections: pages only run the system's own scripts
+          (Content-Security-Policy), very large or very slow requests are refused before they
+          reach the system, and the API's technical documentation is now for superusers only.
+        es: >
+          Protecciones extra en el servidor: las páginas solo ejecutan scripts del propio
+          sistema (Content-Security-Policy), los envíos muy grandes o muy lentos se rechazan
+          antes de llegar al sistema, y la documentación técnica de la API quedó restringida a
+          los superusuarios.
+
 - versao: 0.23.0
   data: 2026-10-27
   titulo:

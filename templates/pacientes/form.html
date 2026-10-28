@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block titulo %}{% if paciente.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · Medical System{% endblock %}
 
@@ -61,18 +61,6 @@
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{% if paciente.pk %}{% url 'pacientes:ficha' paciente.pk %}{% else %}{% url 'pacientes:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
-
-<script>
-  // Show only the fields that apply to the chosen person type (individual or company).
-  (function () {
-    const form = document.getElementById("form-paciente");
-    function atualizar() {
-      const tipo = form.querySelector("input[name=tipo]:checked")?.value || "PF";
-      form.querySelectorAll(".so-pf").forEach((el) => { el.hidden = tipo !== "PF"; });
-      form.querySelectorAll(".so-pj").forEach((el) => { el.hidden = tipo !== "PJ"; });
-    }
-    form.querySelectorAll("input[name=tipo]").forEach((el) => el.addEventListener("change", atualizar));
-    atualizar();
-  })();
-</script>
 {% endblock %}
+
+{% block scripts %}<script src="{% static 'js/paciente-form.js' %}"></script>{% endblock %}

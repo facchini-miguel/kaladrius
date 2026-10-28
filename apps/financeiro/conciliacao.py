@@ -44,6 +44,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         fim=extrato.fim or max(t.data for t in extrato.transacoes),
         saldo=extrato.saldo,
         saldo_em=extrato.saldo_em or extrato.fim,
+        ignoradas=extrato.ignoradas,
         criado_por=usuario,
     )
     existentes = set(
@@ -51,7 +52,8 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
             conta=conta, fitid__in=[t.fitid for t in extrato.transacoes]
         ).values_list("fitid", flat=True)
     )
-    novas = TransacaoBancaria.objects.bulk_create(
+    # In bulk (a statement can have hundreds of lines): the audit log records the import.
+    TransacaoBancaria.objects.bulk_create(
         [
             TransacaoBancaria(
                 clinica=conta.clinica,
@@ -68,8 +70,9 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         ],
         ignore_conflicts=True,  # another import of the same file at the same moment
     )
-    importacao.novas = len(novas)
-    importacao.repetidas = len(extrato.transacoes) - len(novas)
+    # Counted in the database: with ignore_conflicts, bulk_create returns skipped rows too.
+    importacao.novas = TransacaoBancaria.objects.filter(importacao=importacao).count()
+    importacao.repetidas = len(extrato.transacoes) - importacao.novas
     importacao.save(update_fields=["novas", "repetidas"])
     return importacao
 

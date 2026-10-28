@@ -204,3 +204,32 @@ def test_profissional_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario,
     assert (
         outro.get(reverse("financeiro:comissao_pagar", args=[cenario["dra"].pk])).status_code == 404
     )
+
+
+def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
+    """Cancelling C1 after C2 deducted a reversal of C1 would lose that amount for good."""
+    pagamento = receber(cenario, "100.00", cenario["dra"])  # 40.00 in C1
+    pagar_comissao(cenario, cenario["dra"])
+    with usar_clinica(cenario["clinica"]):
+        primeira = Comissao.objects.get()
+        servicos.estornar(pagamento, motivo="Pix devolvido", usuario=cenario["admin"])
+    receber(cenario, "300.00", cenario["dra"], data=HOJE)  # 120.00 - 40.00 in C2
+    pagar_comissao(cenario, cenario["dra"])
+    with usar_clinica(cenario["clinica"]):
+        segunda = Comissao.objects.exclude(pk=primeira.pk).get()
+    cancelar = reverse("financeiro:cancelar", args=[primeira.lancamento_id])
+    resposta = cenario["cliente"].post(cancelar, {"motivo": "Errado"}, follow=True)
+    assert "Cancele aquela antes" in resposta.content.decode()
+    primeira.refresh_from_db()
+    pagamento.refresh_from_db()
+    assert not primeira.cancelada and not primeira.lancamento.cancelado
+    assert (pagamento.comissao, pagamento.comissao_estorno) == (primeira, segunda)
+    # In the right order both go, and everything is pending again.
+    cenario["cliente"].post(
+        reverse("financeiro:cancelar", args=[segunda.lancamento_id]), {"motivo": "Errado"}
+    )
+    cenario["cliente"].post(cancelar, {"motivo": "Errado"})
+    primeira.refresh_from_db()
+    assert primeira.cancelada
+    with usar_clinica(cenario["clinica"]):
+        assert comissoes.pendente(cenario["dra"], HOJE)["valor"] == Decimal("120.00")

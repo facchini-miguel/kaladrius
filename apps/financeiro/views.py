@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
@@ -326,8 +327,12 @@ def estornar(request, pk):
     _exigir(request, pagamento.parcela.lancamento.tipo, Acao.EXCLUIR)
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        servicos.estornar(pagamento, motivo=form.cleaned_data["motivo"], usuario=request.user)
-        messages.success(request, _("Pagamento estornado."))
+        try:
+            servicos.estornar(pagamento, motivo=form.cleaned_data["motivo"], usuario=request.user)
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+        else:
+            messages.success(request, _("Pagamento estornado."))
         return redirect("financeiro:lancamento", pk=pagamento.parcela.lancamento_id)
     return render(
         request,
@@ -649,6 +654,18 @@ def extratos(request):
                     _("Extrato importado: %(novas)s transações novas, %(repetidas)s já importadas.")
                     % {"novas": importacao.novas, "repetidas": importacao.repetidas},
                 )
+                if importacao.ignoradas:
+                    messages.warning(
+                        request,
+                        ngettext(
+                            "%(n)s linha do arquivo não tinha data ou valor legível e não foi "
+                            "importada. Confira no extrato do banco.",
+                            "%(n)s linhas do arquivo não tinham data ou valor legível e não "
+                            "foram importadas. Confira no extrato do banco.",
+                            importacao.ignoradas,
+                        )
+                        % {"n": importacao.ignoradas},
+                    )
                 outra = conciliacao.outra_conta_no_banco(importacao)
                 if outra:
                     messages.warning(

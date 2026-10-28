@@ -46,6 +46,8 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, usuario, pag
 
 @transaction.atomic
 def recusar(orcamento, *, usuario):
+    # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
+    orcamento = Orcamento.objects.select_for_update().get(pk=orcamento.pk)
     if orcamento.situacao != Orcamento.Situacao.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
     orcamento.situacao = Orcamento.Situacao.RECUSADO

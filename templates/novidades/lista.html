@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
   <h1 class="h3 mb-0">{% translate "Novidades" %}</h1>
   <form method="get">
-    <select name="modulo" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" onchange="this.form.submit()">
+    <select name="modulo" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" data-enviar-ao-mudar>
       <option value="">{% translate "Todos os módulos" %}</option>
       {% for valor, nome in modulos %}<option value="{{ valor }}"{% if valor == modulo %} selected{% endif %}>{{ nome }}</option>{% endfor %}
     </select>

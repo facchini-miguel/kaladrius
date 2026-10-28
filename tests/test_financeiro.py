@@ -4,6 +4,7 @@ import datetime
 from decimal import Decimal
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils import timezone, translation
@@ -229,6 +230,15 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
     admin.post(cancelar, {"motivo": "Desistiu do tratamento"})
     lancamento.refresh_from_db()
     assert lancamento.cancelado and lancamento.motivo_cancelamento == "Desistiu do tratamento"
+    # A second click (or a stale page) changes nothing.
+    with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
+        servicos.cancelar(lancamento, motivo="De novo", usuario=cenario["admin"])
+    with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
+        servicos.estornar(pagamento, motivo="De novo", usuario=cenario["admin"])
+    lancamento.refresh_from_db()
+    pagamento.refresh_from_db()
+    assert lancamento.motivo_cancelamento == "Desistiu do tratamento"
+    assert pagamento.motivo_estorno == "Pix devolvido"
     with usar_clinica(cenario["clinica"]):
         assert not Parcela.objects.abertas().exists()
 
@@ -323,12 +333,25 @@ def test_lancamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, c
 def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
     lancamento = lancamento_com(cenario)
     with usar_clinica(cenario["clinica"]):
+        Lancamento.objects.filter(pk=lancamento.pk).update(observacoes="Mãe: Joana, 9999-0000")
+        pagamento = servicos.receber(
+            lancamento.parcelas.first(),
+            usuario=cenario["admin"],
+            valor=Decimal("10.00"),
+            forma="pix",
+            conta=Conta.objects.get(nome="Caixa"),
+            observacao="Pago pela Joana",
+        )
         Paciente.objects.filter(pk=cenario["paciente"].pk).update(arquivado=True)
     admin = entrar(cenario, "admin")
     admin.post(reverse("pacientes:excluir", args=[cenario["paciente"].pk]))
     lancamento.refresh_from_db()
+    pagamento.refresh_from_db()
     assert lancamento.paciente is None
     assert lancamento.pessoa == f"Paciente excluído (código {cenario['paciente'].pk})"
+    # Notes may hold personal data; amounts stay.
+    assert (lancamento.observacoes, pagamento.observacao) == ("", "")
+    assert pagamento.valor == Decimal("10.00")
 
 
 # --- Payables, cash flow and reports (0.16.0) ---------------------------------------------

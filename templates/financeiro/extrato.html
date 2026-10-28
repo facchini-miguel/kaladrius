@@ -20,6 +20,9 @@
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if diferenca %} text-danger{% else %} text-success{% endif %}">{{ diferenca|moeda }}</div></div></div></div>
   {% endif %}
 </div>
+{% if importacao.ignoradas %}
+<div class="alert alert-warning">{% blocktranslate count n=importacao.ignoradas %}{{ n }} linha do arquivo não tinha data ou valor legível e não foi importada. Confira no extrato do banco.{% plural %}{{ n }} linhas do arquivo não tinham data ou valor legível e não foram importadas. Confira no extrato do banco.{% endblocktranslate %}</div>
+{% endif %}
 {% if pendentes and unicos and pode.financeiro.alterar %}
 <form method="post" action="{% url 'financeiro:extrato_conciliar' importacao.pk %}" class="mb-3">
   {% csrf_token %}

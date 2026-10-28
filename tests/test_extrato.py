@@ -308,3 +308,28 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
     assert extrato.saldo is not None
     if len(extrato.transacoes) == 5:
         assert f"P{recebido.pk}" in [t.fitid for t in extrato.transacoes]
+
+
+def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
+    conteudo = OFX_SGML.replace(
+        b"</BANKTRANLIST>",
+        b"<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261009<TRNAMT>1.234,56<FITID>B1</STMTTRN>\n"
+        b"<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261009<TRNAMT>2,345.67<FITID>B2</STMTTRN>\n"
+        b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>2026<TRNAMT>-1.00<FITID>B3</STMTTRN>\n"
+        b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261009<TRNAMT>abc<FITID>B4</STMTTRN>\n"
+        b"</BANKTRANLIST>",
+    )
+    extrato = ofx.ler(conteudo)
+    valores = {t.fitid: t.valor for t in extrato.transacoes}
+    assert (valores["B1"], valores["B2"]) == (Decimal("1234.56"), Decimal("2345.67"))
+    assert extrato.ignoradas == 2  # bad date, bad amount (zero amounts are not counted)
+    resposta = cenario["cliente"].post(
+        reverse("financeiro:extratos"),
+        {"conta": cenario["banco"].pk, "arquivo": SimpleUploadedFile("extrato.ofx", conteudo)},
+        follow=True,
+    )
+    pagina = resposta.content.decode()
+    assert "2 linhas do arquivo não tinham data ou valor legível" in pagina
+    with usar_clinica(cenario["clinica"]):
+        importacao = ImportacaoExtrato.objects.get()
+    assert (importacao.novas, importacao.ignoradas) == (6, 2)

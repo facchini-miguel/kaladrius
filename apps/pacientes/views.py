@@ -174,9 +174,9 @@ def restaurar(request, pk):
 def excluir(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
-    The appointments stay in the schedule without the patient, the recalls go, financial
-    entries are kept (accounting history) without the patient, and the patient's personal
-    data is removed from the audit log as well.
+    The appointments stay in the schedule without the patient (and without their notes),
+    the recalls go, financial entries are kept (accounting history) without the patient
+    and the notes, and the patient's personal data is removed from the audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
     if request.method == "POST":
@@ -198,11 +198,14 @@ def excluir(request, pk):
         ids_itens = list(
             ItemOrcamento.objects.filter(orcamento__in=ids_orcamentos).values_list("pk", flat=True)
         )
+        # Stored in Portuguese, like the rest of the data. Free-text notes may hold
+        # personal data, so they go too; the amounts and dates stay (accounting history).
+        excluido = f"Paciente excluído (código {codigo})"
         with transaction.atomic():
             orcamentos.delete()  # items go with them (cascade)
-            agendamentos.update(paciente=None)
-            # Stored in Portuguese, like the rest of the data.
-            lancamentos.update(paciente=None, pessoa=f"Paciente excluído (código {codigo})")
+            agendamentos.update(paciente=None, descricao=excluido)
+            lancamentos.update(paciente=None, pessoa=excluido, observacoes="")
+            Pagamento.objects.filter(pk__in=ids_pagamentos).update(observacao="")
             rechamadas.delete()
             paciente.delete()
             anonimizar(Paciente, [codigo])

@@ -223,6 +223,8 @@ def test_exclusao_definitiva_tira_o_paciente_dos_agendamentos(cenario, criar_usu
     assert admin.post(reverse("pacientes:excluir", args=[paciente.pk])).status_code == 302
     [agendamento] = agendamentos(cenario)
     assert agendamento.paciente is None
+    # The slot stays taken, without the notes (they may hold personal data).
+    assert agendamento.descricao == f"Paciente excluído (código {paciente.pk})"
     with usar_clinica(cenario["clinica"]):
         assert not Paciente.objects.filter(pk=paciente.pk).exists()
 
