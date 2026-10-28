@@ -12,7 +12,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 **Versão atual: 0.24.2** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://medical-system.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
+> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.duckdns.org (Google Cloud free tier, somente IPv6). Veja [docs/pt-BR/deploy.md](docs/pt-BR/deploy.md).
 
 ## Como rodar (local)
 

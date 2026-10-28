@@ -2,9 +2,9 @@
 
 [🇺🇸 English](../en/deploy.md) | 🇧🇷 Português | [🇪🇸 Español](../es/despliegue.md)
 
-Ambiente publicado em **https://medical-system.duckdns.org** (acesso somente por **IPv6**). Endereço reserva: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
+Ambiente publicado em **https://kaladrius.duckdns.org** (acesso somente por **IPv6**). Endereço reserva: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
 
-- **DNS:** `medical-system.duckdns.org` (DuckDNS, gratuito) tem só registro AAAA para o IPv6 da VM. O token fica em `DUCKDNS_TOKEN` no `.env` do servidor e no `.env.producao` local. Para reapontar: `https://www.duckdns.org/update?domains=medical-system&token=<token>&ipv6=<ipv6>` (com `ipv6` informado, o DuckDNS não preenche o IPv4).
+- **DNS:** `kaladrius.duckdns.org` (DuckDNS, gratuito) tem só registro AAAA para o IPv6 da VM. O token fica em `DUCKDNS_TOKEN` no `.env` do servidor e no `.env.producao` local. Para reapontar: `https://www.duckdns.org/update?domains=kaladrius&token=<token>&ipv6=<ipv6>` (com `ipv6` informado, o DuckDNS não preenche o IPv4). Atenção: ao **criar** um subdomínio pelo site, o DuckDNS preenche o IPv4 de quem criou (a sua casa); limpe com `&clear=true` e reaponte só o `ipv6`.
 - **IPv6 fixo:** endereço reservado `medical-system-ipv6` (`2600:1900:4020:f0b::`), gratuito; não muda ao reiniciar a VM.
 
 ## Arquitetura
@@ -31,7 +31,7 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 | VM | `medical-system` (e2-micro, us-east1-b, disco standard 30 GB, Debian 13) | Free tier |
 | Rede | VPC `medical-system`, sub-rede `medical-system-us-east1` (IPv4 interno + IPv6 externo, Private Google Access) | Grátis |
 | IPv6 fixo | `medical-system-ipv6` (`2600:1900:4020:f0b::`, reservado) | Grátis |
-| Domínio | `medical-system.duckdns.org` (DuckDNS) | Grátis |
+| Domínio | `kaladrius.duckdns.org` (DuckDNS) | Grátis |
 | Firewall | `medical-system-web-ipv6` (TCP 80/443 e UDP 443 para HTTP/3, de ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 só do IAP) | Grátis |
 | Imagens | Artifact Registry `medical-system` (us-east1), limpeza automática (mantém 5 versões) | Free tier (0,5 GB) |
 | Backups | `gs://medical-system-facchini-backups` (us-east1, privado, apaga após 30 dias) | Free tier (5 GB) |

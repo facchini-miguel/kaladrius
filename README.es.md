@@ -12,7 +12,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 **Versión actual: 0.24.2** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://medical-system.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
+> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [docs/es/despliegue.md](docs/es/despliegue.md).
 
 ## Ejecutar en local
 
