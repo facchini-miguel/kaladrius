@@ -10,6 +10,8 @@ from apps.profissionais.models import Profissional
 
 RECEPCAO = "demo.recepcao"
 PROFISSIONAL = "demo.profissional"
+FINANCEIRO = "demo.financeiro"
+ADMIN = "demo.admin"
 
 
 class Command(BaseCommand):
@@ -33,12 +35,20 @@ class Command(BaseCommand):
         )
         parser.add_argument("--senha-recepcao", required=True)
         parser.add_argument("--senha-profissional", required=True)
+        # Optional (decision 089); as demo logins, they only look at the team and settings.
+        parser.add_argument("--senha-financeiro", help="Also create demo.financeiro.")
+        parser.add_argument("--senha-admin", help="Also create demo.admin (clinic administrator).")
 
     @transaction.atomic
     def handle(self, *args, **options):
         semente = os.environ.get("DJANGO_SEED_PASSWORD")
         senhas = (options["senha_recepcao"], options["senha_profissional"])
-        if semente and semente in senhas:
+        extras = [
+            (FINANCEIRO, "Financeiro", options.get("senha_financeiro"), Papel.FINANCEIRO),
+            (ADMIN, "Administrador", options.get("senha_admin"), Papel.ADMIN),
+        ]
+        extras = [extra for extra in extras if extra[2]]
+        if semente and semente in (*senhas, *(extra[2] for extra in extras)):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
@@ -50,6 +60,7 @@ class Command(BaseCommand):
         profissional = self._conta(
             PROFISSIONAL, "Profissional", senhas[1], clinica, Papel.PROFISSIONAL
         )
+        outras = [self._conta(u, nome, senha, clinica, papel) for u, nome, senha, papel in extras]
         with usar_clinica(clinica):
             cadastro = Profissional.objects.filter(nome=options["profissional"]).first()
             if cadastro is None:
@@ -67,8 +78,10 @@ class Command(BaseCommand):
             cadastro.save(update_fields=["usuario"])
         self.stdout.write(
             self.style.SUCCESS(
-                f"Contas prontas: {recepcao.username} (recepção) e {profissional.username} "
-                f"(profissional, agenda de {cadastro.nome})."
+                f"Contas prontas: {recepcao.username} (recepção), {profissional.username} "
+                f"(profissional, agenda de {cadastro.nome})"
+                + "".join(f", {conta.username}" for conta in outras)
+                + "."
             )
         )
 

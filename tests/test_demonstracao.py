@@ -129,3 +129,34 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     assert "Contas de demonstração não enviam anexos." in resposta.content.decode()
     with usar_clinica(demonstracao["clinica"]):
         assert not Anexo.objects.exists()
+
+
+def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
+    clinica_a, criar_profissional, monkeypatch
+):
+    monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
+    criar_profissional(clinica_a, "Dr. Bruno")
+    call_command(
+        "contas_demonstracao",
+        clinica="Clínica A",
+        profissional="Dr. Bruno",
+        senha_financeiro="demo-financeiro-1",
+        senha_admin="demo-admin-1",
+        **SENHAS,
+    )
+    assert Vinculo.objects.get(usuario__username="demo.financeiro").papel == Papel.FINANCEIRO
+    admin = entrar("demo.admin", "demo-admin-1")
+    recepcao = get_user_model().objects.get(username="demo.recepcao")
+    vinculo = Vinculo.objects.get(usuario=recepcao)
+    # Sees the team, but cannot add members, edit them or reset their passwords.
+    lista = admin.get(reverse("equipe:lista"))
+    assert lista.status_code == 200 and "Novo membro" not in lista.content.decode()
+    assert admin.get(reverse("equipe:novo")).status_code == 403
+    assert admin.post(reverse("equipe:senha", args=[vinculo.pk]), {}).status_code == 403
+    assert admin.get(reverse("configuracoes")).status_code == 403
+    # The audit log is there, without the visitors' IP addresses.
+    auditoria = admin.get(reverse("auditoria:lista")).content.decode()
+    assert ">IP<" not in auditoria
+    # Everything else of an administrator still works (finance, for example).
+    assert admin.get(reverse("financeiro:pagar")).status_code == 200
+    entrar("demo.financeiro", "demo-financeiro-1").get(reverse("financeiro:fluxo"))

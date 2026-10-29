@@ -105,12 +105,13 @@ deploy/testar_backup.sh <arquivo>.dump  # um específico
 Feito em 27/10/2026 com o backup de 26/10 (dados fictícios da época): restaurado sem erros em 9 segundos. O mesmo teste mostrou que o backup automático daquele dia tinha falhado (o servidor estava entre a 0.7.0 e a 0.8.0, sem o link do `.env`) e que o aviso na web não aparecia quando **nenhum** backup tinha sido registrado; desde a 0.17.1 os superusuários também veem esse caso (`DJANGO_BACKUP_MONITORADO`, ligado por padrão quando `DJANGO_DEBUG` está desligado).
 
 ## Contas públicas de demonstração
-A demonstração publica duas contas no site do titular, `demo.recepcao` e `demo.profissional` (decisão 085). Para criá-las, ou para reiniciar as senhas:
+A demonstração publica uma conta de cada perfil no site do titular: `demo.recepcao`, `demo.profissional`, `demo.financeiro` e `demo.admin` (decisões 085 e 089). Por serem de demonstração, elas nunca trocam a senha, enviam anexos, mudam a equipe ou as configurações da clínica, nem veem os IPs na auditoria. Para criá-las, ou para reiniciar as senhas:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
   --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
-  --senha-recepcao <senha publicada> --senha-profissional <senha publicada>
+  --senha-recepcao <senha publicada> --senha-profissional <senha publicada> \
+  --senha-financeiro <senha publicada> --senha-admin <senha publicada>
 ```
 
 Nunca use ali a senha de `DJANGO_SEED_PASSWORD`: os usuários de teste, inclusive o administrador de teste, usam essa senha.

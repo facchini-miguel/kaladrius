@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.36.0
+  data: 2026-10-29
+  titulo:
+    pt-br: Uma conta de demonstração para cada perfil
+    en: One demo login per role
+    es: Una cuenta de demostración por perfil
+  itens:
+    - tipo: novo
+      modulo: Equipe
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A demonstração ganhou contas públicas de financeiro e de administrador da clínica.
+          Como todas as contas de demonstração, elas só consultam a equipe e as configurações
+          da clínica e não veem os endereços IP na auditoria.
+        en: >
+          The demo now has public finance and clinic administrator logins. Like every demo
+          login, they only look at the team and the clinic settings and do not see IP
+          addresses in the audit log.
+        es: >
+          La demostración tiene ahora cuentas públicas de financiero y de administrador de la
+          clínica. Como todas las cuentas de demostración, solo consultan el equipo y la
+          configuración de la clínica y no ven las direcciones IP en la auditoría.
+
 - versao: 0.35.0
   data: 2026-10-29
   titulo:

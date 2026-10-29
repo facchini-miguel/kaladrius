@@ -105,12 +105,13 @@ deploy/testar_backup.sh <file>.dump     # a specific one
 Done on 2026-10-27 with the 10/26 backup (fake data of that time): restored without errors in 9 seconds. The same test showed that that day's automatic backup had failed (the server was between 0.7.0 and 0.8.0, without the `.env` link) and that the web warning did not show when **no** backup had ever been recorded; since 0.17.1 superusers see that case too (`DJANGO_BACKUP_MONITORADO`, on by default when `DJANGO_DEBUG` is off).
 
 ## Public demo logins
-The demo publishes two logins on the owner's website, `demo.recepcao` and `demo.profissional` (decision 085). To create them, or to reset their passwords:
+The demo publishes one login per role on the owner's website: `demo.recepcao`, `demo.profissional`, `demo.financeiro` and `demo.admin` (decisions 085 and 089). As demo logins, they never change their password, upload attachments, change the team or the clinic settings, nor see IP addresses in the audit log. To create them, or to reset their passwords:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
   --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
-  --senha-recepcao <published password> --senha-profissional <published password>
+  --senha-recepcao <published password> --senha-profissional <published password> \
+  --senha-financeiro <published password> --senha-admin <published password>
 ```
 
 Never use the `DJANGO_SEED_PASSWORD` password there: the seed users, the seed administrator included, share it.
