@@ -39,6 +39,7 @@ O que você vê depende do seu perfil na clínica:
 |---|---|
 | **Recepção** | Agenda de todos os profissionais, pacientes (sem arquivar), rechamadas e aniversariantes |
 | **Profissional** | Só a própria agenda, pacientes (sem arquivar), rechamadas, aniversariantes e o [prontuário](prontuario.md) |
+| **Financeiro** | Todo o [financeiro](financeiro.md): contas a receber e a pagar, recebimentos e recibos, caixa, fluxo de caixa, relatórios, comissões e extrato bancário; pacientes, orçamentos e profissionais só para consulta. Sem agenda, rechamadas ou prontuário |
 | **Administrador da clínica** | Tudo, inclusive financeiro, equipe, profissionais, tipos de atendimento, configurações da clínica, auditoria e pacientes arquivados; o prontuário só quando também é profissional |
 | **Administrador do sistema** | Tudo, em todas as clínicas, inclusive o prontuário |
 

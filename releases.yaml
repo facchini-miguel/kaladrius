@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.35.0
+  data: 2026-10-29
+  titulo:
+    pt-br: Perfil Financeiro
+    en: Finance role
+    es: Perfil financiero
+  itens:
+    - tipo: novo
+      modulo: Equipe
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo perfil Financeiro na equipe: todo o financeiro (contas a receber e a pagar,
+          recebimentos, caixa, fluxo de caixa, relatórios, comissões e extrato) e só consulta
+          de pacientes, orçamentos e profissionais. Sem agenda nem prontuário.
+        en: >
+          New Finance role in the team: all of finance (receivables and payables, payments,
+          cash desk, cash flow, reports, commissions and bank statements), and patients,
+          estimates and practitioners only to look at. No schedule or medical record.
+        es: >
+          Nuevo perfil Financiero en el equipo: todas las finanzas (cuentas por cobrar y por
+          pagar, cobros, caja, flujo de caja, informes, comisiones y extracto) y solo consulta
+          de pacientes, presupuestos y profesionales. Sin agenda ni historia clínica.
+
 - versao: 0.34.0
   data: 2026-10-29
   titulo:

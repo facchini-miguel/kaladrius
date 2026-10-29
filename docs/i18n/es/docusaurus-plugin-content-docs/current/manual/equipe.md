@@ -8,7 +8,7 @@ Estas pantallas son del **administrador de la clínica**, en el menú **Registro
 
 ## Equipo
 En **Registros > Equipo**, cada persona que usa el sistema en la clínica.
-- **Nuevo miembro:** usuario, nombre, correo electrónico, perfil (recepción, profesional o administrador) y una contraseña inicial. Entregue la contraseña a la persona y pídale que la cambie en el primer acceso.
+- **Nuevo miembro:** usuario, nombre, correo electrónico, perfil (recepción, profesional, financiero o administrador) y una contraseña inicial. Entregue la contraseña a la persona y pídale que la cambie en el primer acceso.
 - **Editar:** cambia el perfil y el acceso. Para quitar a alguien del equipo, desmarque **Acceso a esta clínica habilitado**: el historial de quién hizo qué se conserva.
 - **Definir nueva contraseña:** para quien olvidó su contraseña.
 - Nadie cambia su propio perfil, y la clínica debe tener siempre un administrador activo.

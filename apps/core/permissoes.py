@@ -59,6 +59,15 @@ MATRIZ = {
         Modulo.RECEBIMENTOS: _SEM_EXCLUIR,
         Modulo.ORCAMENTOS: _SEM_EXCLUIR,
     },
+    # All of finance, and only a look at who the money is about (decision 088).
+    Papel.FINANCEIRO: {
+        Modulo.RECEBIMENTOS: _TODAS,
+        Modulo.FINANCEIRO: _TODAS,
+        Modulo.PACIENTES: _VER,
+        Modulo.ORCAMENTOS: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+    },
     Papel.PROFISSIONAL: {
         Modulo.PACIENTES: _SEM_EXCLUIR,
         Modulo.AGENDA: _SEM_EXCLUIR,

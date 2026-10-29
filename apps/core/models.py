@@ -112,6 +112,8 @@ class Papel(models.TextChoices):
     ADMIN = "admin", _("Administrador da clínica")
     RECEPCAO = "recepcao", _("Recepção")
     PROFISSIONAL = "profissional", _("Profissional")
+    # Finance only (0.35.0, decision 088): accounts, entries, cash desk, reports.
+    FINANCEIRO = "financeiro", _("Financeiro")
 
 
 class Vinculo(models.Model):

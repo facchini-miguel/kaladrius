@@ -8,7 +8,7 @@ These screens belong to the **clinic administrator**, in the **Records** menu.
 
 ## Team
 In **Records > Team**, everyone who uses the system in the clinic.
-- **New member:** username, name, e-mail, role (front desk, practitioner or administrator) and a first password. Give the password to the person and ask them to change it on first login.
+- **New member:** username, name, e-mail, role (front desk, practitioner, finance or administrator) and a first password. Give the password to the person and ask them to change it on first login.
 - **Edit:** changes the role and the access. To remove someone from the team, uncheck **Access to this clinic allowed**: the history of who did what is kept.
 - **Set new password:** for those who forgot their password.
 - Nobody changes their own role, and the clinic must always have an active administrator.

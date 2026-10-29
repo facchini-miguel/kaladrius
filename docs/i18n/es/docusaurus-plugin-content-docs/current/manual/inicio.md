@@ -39,6 +39,7 @@ Lo que ve depende de su perfil en la clínica:
 |---|---|
 | **Recepción** | Agenda de todos los profesionales, pacientes (sin archivar), recordatorios y cumpleaños |
 | **Profesional** | Solo su propia agenda, pacientes (sin archivar), recordatorios, cumpleaños y la [historia clínica](prontuario.md) |
+| **Financiero** | Todas las [finanzas](financeiro.md): cuentas por cobrar y por pagar, cobros y recibos, caja, flujo de caja, informes, comisiones y extracto bancario; pacientes, presupuestos y profesionales solo para consultar. Sin agenda, recordatorios ni historia clínica |
 | **Administrador de la clínica** | Todo, incluidas finanzas, equipo, profesionales, tipos de atención, configuración de la clínica, auditoría y pacientes archivados; la historia clínica solo cuando también es profesional |
 | **Administrador del sistema** | Todo, en todas las clínicas, incluida la historia clínica |
 

@@ -8,7 +8,7 @@ Estas telas são do **administrador da clínica**, no menu **Cadastros**.
 
 ## Equipe
 Em **Cadastros > Equipe**, cada pessoa que usa o sistema na clínica.
-- **Novo membro:** usuário, nome, e-mail, perfil (recepção, profissional ou administrador) e uma senha inicial. Passe a senha à pessoa e peça que ela a troque no primeiro acesso.
+- **Novo membro:** usuário, nome, e-mail, perfil (recepção, profissional, financeiro ou administrador) e uma senha inicial. Passe a senha à pessoa e peça que ela a troque no primeiro acesso.
 - **Editar:** muda o perfil e o acesso. Para tirar alguém da equipe, desmarque **Acesso a esta clínica liberado**: o histórico de quem fez o quê é mantido.
 - **Definir nova senha:** para quem esqueceu a senha.
 - Ninguém altera o próprio perfil, e a clínica precisa ter sempre um administrador ativo.

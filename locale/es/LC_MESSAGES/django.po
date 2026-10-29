@@ -391,6 +391,9 @@ msgstr "Recepción"
 msgid "Profissional"
 msgstr "Profesional"
 
+msgid "Financeiro"
+msgstr "Financiero"
+
 msgid "perfil"
 msgstr "perfil"
 
@@ -438,9 +441,6 @@ msgstr "Configuración de la clínica"
 
 msgid "Recebimentos"
 msgstr "Cobros"
-
-msgid "Financeiro"
-msgstr "Financiero"
 
 msgid "Orçamentos"
 msgstr "Presupuestos"

@@ -392,6 +392,9 @@ msgstr "Front desk"
 msgid "Profissional"
 msgstr "Practitioner"
 
+msgid "Financeiro"
+msgstr "Finance"
+
 msgid "perfil"
 msgstr "role"
 
@@ -439,9 +442,6 @@ msgstr "Clinic settings"
 
 msgid "Recebimentos"
 msgstr "Receipts"
-
-msgid "Financeiro"
-msgstr "Finance"
 
 msgid "Orçamentos"
 msgstr "Estimates"

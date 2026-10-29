@@ -160,3 +160,24 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
         .content.decode()
     )
     assert "Dra. A" in conteudo and "Dr. B" in conteudo
+
+
+def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario, cliente_de):
+    """Decision 088: all of finance; patients, estimates and records only to look at."""
+    cliente = cliente_de(criar_usuario("financeiro", clinica_a, Papel.FINANCEIRO))
+    for nome in ("receber", "pagar", "fluxo", "caixa", "relatorios", "devedores", "comissoes"):
+        assert cliente.get(reverse(f"financeiro:{nome}")).status_code == 200, nome
+    for nome in ("pacientes:lista", "orcamentos:lista", "profissionais:lista"):
+        assert cliente.get(reverse(nome)).status_code == 200, nome
+    for nome in (
+        "agenda:calendario",
+        "rechamadas:lista",
+        "equipe:lista",
+        "auditoria:lista",
+        "configuracoes",
+        "pacientes:novo",
+        "orcamentos:novo",
+    ):
+        assert cliente.get(reverse(nome)).status_code in (302, 403), nome
+    inicio = cliente.get(reverse("inicio"))
+    assert inicio.status_code == 200
