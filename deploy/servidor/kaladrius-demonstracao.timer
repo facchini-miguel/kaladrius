@@ -1,0 +1,9 @@
+[Unit]
+Description=Kaladrius: reinício da demonstração todo dia, 07:30 UTC (04:30 em Brasília, depois do backup)
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -10,7 +10,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versión actual: 0.32.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
+**Versión actual: 0.33.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.facchini.eti.br (free tier de Google Cloud, solo IPv6). Ver [Producción de referencia](https://kaladrius-docs.facchini.eti.br/es/project/production).
 

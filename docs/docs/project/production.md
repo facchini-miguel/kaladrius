@@ -115,6 +115,16 @@ docker compose -f docker-compose.prod.yml exec app python manage.py contas_demon
 
 Never use the `DJANGO_SEED_PASSWORD` password there: the seed users, the seed administrator included, share it.
 
+### Nightly reset (decision 086)
+Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restores a saved **base** of the demo, dropping what visitors changed, and moves every date forward by the whole weeks since the base was saved, so the schedule always looks current and each appointment keeps its weekday (birth dates do not move). The list of backups is kept. It only runs with `DJANGO_DEMONSTRACAO=1` in the server `.env`. To turn it on, once:
+
+```bash
+echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
+sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
+```
+
+The reset also brings back **the owner's** account and settings as they were in the base: after changing a password or a setting that should stay, save the base again (`--salvar-base`). To reset right away: `sudo systemctl start kaladrius-demonstracao.service`.
+
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).
 - The **standard** disk is the free one; the console suggests "balanced", which is billed.

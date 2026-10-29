@@ -1,0 +1,7 @@
+[Unit]
+Description=Kaladrius: reinicia a demonstração pública (só com DJANGO_DEMONSTRACAO=1)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/reiniciar_demonstracao.sh

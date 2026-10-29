@@ -115,6 +115,16 @@ docker compose -f docker-compose.prod.yml exec app python manage.py contas_demon
 
 Nunca use allí la contraseña de `DJANGO_SEED_PASSWORD`: los usuarios de prueba, incluido el administrador de prueba, la usan.
 
+### Reinicio diario (decisión 086)
+Todos los días a las 07:30 UTC (04:30 en Brasilia, después del respaldo) el servidor restaura una **base** guardada de la demostración, deshaciendo lo que cambiaron los visitantes, y adelanta todas las fechas por las semanas enteras desde que se guardó la base, para que la agenda siempre parezca actual y cada consulta quede en el mismo día de la semana (las fechas de nacimiento no cambian). La lista de respaldos se mantiene. Solo corre con `DJANGO_DEMONSTRACAO=1` en el `.env` del servidor. Para activarlo, una vez:
+
+```bash
+echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
+sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
+```
+
+El reinicio también devuelve **la cuenta y la configuración del titular** a como estaban en la base: después de cambiar una contraseña o una configuración que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demonstracao.service`.
+
 ## Cuidados
 - **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).
 - El disco **estándar** es el gratuito; la consola sugiere "balanced", que se cobra.

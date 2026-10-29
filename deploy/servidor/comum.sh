@@ -80,7 +80,7 @@ instalar_agendamentos() {
   cp "$DIR"/release/servidor/*.service "$DIR"/release/servidor/*.timer /etc/systemd/system/
   systemctl daemon-reload
   systemctl enable --now kaladrius-atualizar.timer kaladrius-backup.timer \
-    kaladrius-saude.timer kaladrius-restauracao.timer
+    kaladrius-saude.timer kaladrius-restauracao.timer kaladrius-demonstracao.timer
   # Also here, not only in atualizar.sh: an update is run by the previous version of
   # atualizar.sh, which only calls the helpers of the new version.
   recarregar_caddy

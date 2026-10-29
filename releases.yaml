@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.33.0
+  data: 2026-10-29
+  titulo:
+    pt-br: Demonstração reiniciada todo dia
+    en: The demo resets every day
+    es: La demostración se reinicia todos los días
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A demonstração pública volta todo dia, de madrugada, aos dados fictícios originais,
+          com a agenda e as outras datas trazidas para a semana atual. O que os visitantes
+          mudaram no dia anterior some.
+        en: >
+          The public demo goes back to its original fake data every night, with the schedule
+          and the other dates brought to the current week. What visitors changed the day
+          before is gone.
+        es: >
+          La demostración pública vuelve cada madrugada a sus datos ficticios originales, con
+          la agenda y las demás fechas traídas a la semana actual. Lo que los visitantes
+          cambiaron el día anterior desaparece.
+
 - versao: 0.32.0
   data: 2026-10-29
   titulo:

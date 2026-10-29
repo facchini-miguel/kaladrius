@@ -19,6 +19,7 @@ Depois de alterar, reinicie: `kaladrius up -d` (os containers com configuração
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | vazio | Os mesmos domínios com `https://`, separados por vírgula |
 | `DJANGO_SECURE` | `0` | `1` liga as proteções de HTTPS: redireciona para HTTPS, cookies seguros, HSTS de um ano. Use `1` num servidor |
 | `DJANGO_PROXY_REVERSO` | `0` | `1` quando atrás do Caddy (ou outro proxy): pega o IP do visitante do `X-Forwarded-For`, para a auditoria e o bloqueio de login |
+| `DJANGO_DEMONSTRACAO` | desligado | Só no servidor da demonstração pública: liga o reinício diário da demonstração (decisão 086). Nunca no servidor de uma clínica |
 | `DJANGO_BACKUP_MONITORADO` | ligado quando `DJANGO_DEBUG=0` | Avisa os superusuários quando nenhum backup foi registrado nas últimas 26 horas |
 | `DJANGO_SAUDE_MONITORADA` | ligado quando `DJANGO_DEBUG=0` | Avisa os superusuários quando a coleta da saúde do servidor para ou um recurso fica crítico. Use `0` fora da instalação do Google Cloud |
 | `DJANGO_SAUDE_DIR` | `/saude` | Pasta, dentro do container, com as amostras de saúde |

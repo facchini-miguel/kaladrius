@@ -19,6 +19,7 @@ After changing it, restart: `kaladrius up -d` (the containers whose settings cha
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | empty | The same domains with `https://`, separated by commas |
 | `DJANGO_SECURE` | `0` | `1` turns on the HTTPS protections: redirect to HTTPS, secure cookies, HSTS for one year. Use `1` on a server |
 | `DJANGO_PROXY_REVERSO` | `0` | `1` when behind Caddy (or another proxy): takes the visitor's IP from `X-Forwarded-For`, for the audit log and the login lockout |
+| `DJANGO_DEMONSTRACAO` | off | Public demo server only: enables the nightly reset of the demo (decision 086). Never on a clinic's server |
 | `DJANGO_BACKUP_MONITORADO` | on when `DJANGO_DEBUG=0` | Warns superusers when no backup was recorded in the last 26 hours |
 | `DJANGO_SAUDE_MONITORADA` | on when `DJANGO_DEBUG=0` | Warns superusers when the server health samples stop or a resource is critical. Set `0` outside the Google Cloud installation |
 | `DJANGO_SAUDE_DIR` | `/saude` | Folder, inside the container, with the health samples |

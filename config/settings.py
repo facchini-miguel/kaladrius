@@ -40,6 +40,8 @@ BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
 # superusers are warned when they stop or a resource is critical.
 SAUDE_MONITORADA = env_bool("DJANGO_SAUDE_MONITORADA", padrao=not DEBUG)
 SAUDE_DIR = env("DJANGO_SAUDE_DIR", "/saude")
+# Public demo server (decision 086): enables the nightly reset and avancar_datas.
+DEMONSTRACAO = env_bool("DJANGO_DEMONSTRACAO")
 # The documentation site (docs/, decision 073): the Help menu links to it, in the user's
 # language. Every installation links to the official site, which documents the newest version.
 DOCS_URL = env("DJANGO_DOCS_URL", "https://kaladrius-docs.facchini.eti.br")

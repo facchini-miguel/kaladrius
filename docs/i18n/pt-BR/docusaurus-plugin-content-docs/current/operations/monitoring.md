@@ -27,6 +27,7 @@ O próprio servidor pode avisar você pelo [Healthchecks.io](https://healthcheck
 |---|---|---|---|
 | `MONITOR_SISTEMA_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet pelo endereço dele (o primeiro nome de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Backup diário | 1 dia / 2 h | O backup diário falha ou não roda |
+| `MONITOR_DEMONSTRACAO_URL` | Reinício da demonstração (só no servidor da demonstração) | 1 dia / 2 horas | O reinício diário da demonstração (07:30 UTC) falha ou não roda |
 | `MONITOR_RESTAURACAO_URL` | Restauração do backup | 7 dias / 1 dia | O teste semanal de restauração (domingos, 07:00 UTC: o backup mais novo restaurado num banco descartável) falha |
 | `MONITOR_ATUALIZACAO_URL` | Atualização automática | 5 min / 15 min | As atualizações automáticas falham ou param de rodar |
 | `MONITOR_RECURSOS_URL` | Disco e memória | 5 min / 15 min | Memória, swap ou disco chegam ao nível crítico |

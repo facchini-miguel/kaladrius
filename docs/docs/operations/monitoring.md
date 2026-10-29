@@ -27,6 +27,7 @@ The server can warn you by itself through [Healthchecks.io](https://healthchecks
 |---|---|---|---|
 | `MONITOR_SISTEMA_URL` | System up | 5 min / 10 min | The system, opened through the internet by its address (the first name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Daily backup | 1 day / 2 h | The daily backup fails or does not run |
+| `MONITOR_DEMONSTRACAO_URL` | Demo reset (demo server only) | 1 day / 2 hours | The nightly demo reset (07:30 UTC) fails or does not run |
 | `MONITOR_RESTAURACAO_URL` | Backup restore | 7 days / 1 day | The weekly restore test (Sundays, 07:00 UTC: the newest backup restored into a throwaway database) fails |
 | `MONITOR_ATUALIZACAO_URL` | Automatic update | 5 min / 15 min | The automatic updates fail or stop running |
 | `MONITOR_RECURSOS_URL` | Disk and memory | 5 min / 15 min | Memory, swap or disk reach the critical level |
