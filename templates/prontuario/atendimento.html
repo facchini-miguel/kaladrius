@@ -75,11 +75,12 @@
 {% if atendimento %}
 <div class="card mt-4" style="max-width: 52rem;">
   <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-    {% translate "Atestados e receitas" %}
+    {% translate "Documentos" %}
     {% if emite_documentos %}
     <span class="d-flex gap-2">
       <a class="btn btn-sm btn-outline-primary" href="{% url 'prontuario:atestado_novo' atendimento.pk %}">{% translate "Emitir atestado" %}</a>
       <a class="btn btn-sm btn-outline-primary" href="{% url 'prontuario:receita_nova' atendimento.pk %}">{% translate "Emitir receita" %}</a>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'prontuario:pedido_de_exames_novo' atendimento.pk %}">{% translate "Pedir exames" %}</a>
     </span>
     {% endif %}
   </div>
@@ -90,8 +91,38 @@
     {% for receita in receitas %}
     <li class="list-group-item"><a href="{% url 'prontuario:receita' receita.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ receita.criado_em|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
-    {% if not atestados and not receitas %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
+    {% for pedido in pedidos %}
+    <li class="list-group-item"><a href="{% url 'prontuario:pedido_de_exames' pedido.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ pedido.criado_em|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    {% endfor %}
+    {% if not atestados and not receitas and not pedidos %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
   </ul>
+</div>
+
+<div class="card mt-3" style="max-width: 52rem;">
+  <div class="card-header">{% translate "Anexos" %}</div>
+  <ul class="list-group list-group-flush">
+    {% for anexo in anexos %}
+    <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span>
+        <a href="{% url 'prontuario:anexo' anexo.pk %}" target="_blank" rel="noopener">{{ anexo.descricao|default:anexo.nome }}</a>
+        <span class="text-body-secondary small">{{ anexo.tamanho|filesizeformat }} · {{ anexo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ anexo.profissional.nome }}</span>
+      </span>
+      {% if remove_anexos and anexo.criado_por_id == user.pk %}
+      <form method="post" action="{% url 'prontuario:anexo_remover' anexo.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
+      {% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">{% translate "Nenhum anexo." %}</li>
+    {% endfor %}
+  </ul>
+  <div class="card-body border-top">
+    <form method="post" action="{% url 'prontuario:anexo_enviar' atendimento.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end" novalidate>
+      {% csrf_token %}
+      <div class="col-md-5">{% with campo=anexo_form.arquivo %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-5">{% with campo=anexo_form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-2 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Anexar" %}</button></div>
+    </form>
+  </div>
 </div>
 {% endif %}
 {% endblock %}

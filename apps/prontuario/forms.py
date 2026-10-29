@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 
-from .models import CAMPOS_DA_ANAMNESE, Adendo, Atendimento, Atestado, Receita
+from .models import CAMPOS_DA_ANAMNESE, Adendo, Atendimento, Atestado, PedidoDeExames, Receita
 
 
 class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
@@ -53,3 +53,47 @@ class ReceitaForm(FormularioBootstrap, forms.ModelForm):
         model = Receita
         fields = ["prescricao"]
         widgets = {"prescricao": forms.Textarea(attrs={"rows": 8})}
+
+
+class PedidoDeExamesForm(FormularioBootstrap, forms.ModelForm):
+    class Meta:
+        model = PedidoDeExames
+        fields = ["exames", "indicacao"]
+        widgets = {
+            "exames": forms.Textarea(attrs={"rows": 8}),
+            "indicacao": forms.Textarea(attrs={"rows": 2}),
+        }
+
+
+# Attachments (decision 083): checked by their first bytes, not by the name or the type the
+# browser sends, so nothing else (HTML, scripts) is ever stored or served back.
+TAMANHO_MAXIMO_DO_ANEXO = 10 * 1024 * 1024
+ASSINATURAS = [
+    (b"%PDF-", "application/pdf"),
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+]
+
+
+class AnexoForm(FormularioBootstrap, forms.Form):
+    arquivo = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
+    descricao = forms.CharField(
+        label=_("Descrição"),
+        max_length=200,
+        required=False,
+        help_text=_("Por exemplo: hemograma de março."),
+    )
+
+    def clean_arquivo(self):
+        arquivo = self.cleaned_data["arquivo"]
+        if arquivo.size > TAMANHO_MAXIMO_DO_ANEXO:
+            raise forms.ValidationError(_("O arquivo passa de 10 MB."))
+        inicio = arquivo.read(8)
+        arquivo.seek(0)
+        tipo = next(
+            (tipo for assinatura, tipo in ASSINATURAS if inicio.startswith(assinatura)), None
+        )
+        if tipo is None:
+            raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
+        arquivo.tipo_conferido = tipo
+        return arquivo

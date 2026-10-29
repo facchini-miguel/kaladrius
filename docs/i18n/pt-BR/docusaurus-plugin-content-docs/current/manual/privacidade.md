@@ -26,7 +26,7 @@ A **clínica que atende você** é a controladora: decide como e para que os dad
 **Pacientes**
 - Identificação: nome, CPF ou CNPJ, RG, data de nascimento, sexo e profissão.
 - Contato: telefones, e-mail e endereço.
-- Atendimento: consultas marcadas (data, profissional, tipo de atendimento e observações), retornos a lembrar, orçamentos, com os procedimentos e os dentes envolvidos, e o **prontuário** (a anamnese de cada atendimento: queixas, histórico de saúde, exame e conduta), que só os profissionais da clínica podem ver. São **dados de saúde**, que a lei trata como sensíveis.
+- Atendimento: consultas marcadas (data, profissional, tipo de atendimento e observações), retornos a lembrar, orçamentos, com os procedimentos e os dentes envolvidos, e o **prontuário** (a anamnese de cada atendimento: queixas, histórico de saúde, exame e conduta, com atestados, receitas, pedidos de exames e arquivos anexados, como resultados de exames e fotos), que só os profissionais da clínica podem ver. São **dados de saúde**, que a lei trata como sensíveis.
 - Financeiro: valores, parcelas, pagamentos (data, forma e conta; no cartão, só a bandeira, o número de parcelas e o código da transação, **nunca o número do cartão**) e recibos.
 - Observações anotadas pela equipe durante o atendimento.
 

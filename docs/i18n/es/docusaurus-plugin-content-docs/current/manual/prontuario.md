@@ -19,10 +19,14 @@ La anamnesis tiene cinco campos, todos opcionales: **motivo de consulta**, **enf
 
 ## Impresión, certificados y recetas
 - **Imprimir consulta** (en una consulta finalizada) la abre lista para imprimir o guardar en PDF, con el encabezado de la clínica, la anamnesis, las adendas y la línea de firma. Sin firma digital, la copia impresa y firmada es el registro legal.
-- En el cuadro **Certificados y recetas**, quien hizo la consulta emite:
+- En el cuadro **Documentos**, quien hizo la consulta emite:
   - un **certificado** de **asistencia** (fecha y horarios, completados a partir de la cita) o de **reposo** (cantidad de días), con observaciones opcionales;
   - una **receta** simple, un ítem por línea (medicamento, dosis y cómo usarlo). Los medicamentos controlados requieren los recetarios oficiales, que el sistema no emite.
+  - una **solicitud de exámenes**, un examen por línea, con la indicación clínica opcional.
 - Un documento emitido ya no cambia; queda guardado en la historia clínica y cualquier profesional puede imprimirlo de nuevo.
+
+## Adjuntos
+En el cuadro **Adjuntos**, cualquier profesional agrega archivos a la consulta: resultados de exámenes, fotos, informes. Solo archivos **PDF, JPG y PNG** de hasta **10 MB** (verificados por su contenido, no por el nombre). Se abren en una pestaña nueva, solo para profesionales. Los resultados que llegan después también pueden adjuntarse a una consulta finalizada. Quien envió un archivo puede eliminarlo mientras la consulta es un borrador; después de finalizada, queda. Los adjuntos se guardan en la base de datos, así que el respaldo diario los incluye.
 
 ## Privacidad y conservación
 - La **auditoría** registra quién creó, modificó, finalizó o **abrió** cada consulta, pero nunca copia el texto clínico.

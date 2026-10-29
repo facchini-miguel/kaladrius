@@ -26,7 +26,7 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 **Patients**
 - Identification: name, CPF or CNPJ (Brazilian tax numbers), RG (ID card), date of birth, sex and occupation.
 - Contact: phone numbers, e-mail and address.
-- Care: appointments (date, practitioner, type of appointment and notes), recalls, treatment estimates, with the procedures and teeth involved, and the **medical record** (the anamnesis of each visit: complaints, health history, examination and plan), which only the clinic's practitioners can see. These are **health data**, which the law treats as sensitive.
+- Care: appointments (date, practitioner, type of appointment and notes), recalls, treatment estimates, with the procedures and teeth involved, and the **medical record** (the anamnesis of each visit: complaints, health history, examination and plan, with certificates, prescriptions, exam requests and attached files such as exam results and photos), which only the clinic's practitioners can see. These are **health data**, which the law treats as sensitive.
 - Finance: amounts, installments, payments (date, method and account; for cards, only the brand, number of installments and transaction code, **never the card number**) and receipts.
 - Notes written by the team during care.
 

@@ -19,10 +19,14 @@ The anamnesis has five fields, all optional: **chief complaint**, **history of p
 
 ## Printing, certificates and prescriptions
 - **Print visit** (on a finalized visit) opens it ready to print or save as PDF, with the clinic's header, the anamnesis, the addenda and a signature line. Without a digital signature, the printed and signed copy is the legal record.
-- In the **Certificates and prescriptions** card, the visit's author issues:
+- In the **Documents** card, the visit's author issues:
   - a **certificate** of **attendance** (date and times, filled in from the appointment) or of **leave** (number of days), with optional notes;
   - a simple **prescription**, one item per line (medicine, dose and how to use it). Controlled drugs need the official forms, which the system does not issue.
+  - an **exam request**, one exam per line, with an optional clinical indication.
 - An issued document never changes; it is kept in the medical record and can be printed again by any practitioner.
+
+## Attachments
+In the **Attachments** card, any practitioner adds files to the visit: exam results, photos, reports. Only **PDF, JPG and PNG** files up to **10 MB** (checked by their content, not by the name). They open in a new tab, only for practitioners. Results that arrive later can be attached to a finalized visit too. Whoever sent a file can remove it while the visit is a draft; after it is finalized, it stays. Attachments are kept in the database, so the daily backup includes them.
 
 ## Privacy and retention
 - The **audit log** records who created, changed, finalized or **opened** each visit, but never copies the clinical text.

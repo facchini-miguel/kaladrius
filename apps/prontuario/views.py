@@ -3,6 +3,7 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -13,8 +14,15 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
 from apps.pacientes.models import Paciente
 
-from .forms import AdendoForm, AtendimentoForm, AtestadoForm, ReceitaForm
-from .models import CAMPOS_DA_ANAMNESE, Atendimento, Atestado, Receita
+from .forms import (
+    AdendoForm,
+    AnexoForm,
+    AtendimentoForm,
+    AtestadoForm,
+    PedidoDeExamesForm,
+    ReceitaForm,
+)
+from .models import CAMPOS_DA_ANAMNESE, Anexo, Atendimento, Atestado, PedidoDeExames, Receita
 from .permissoes import profissional_do_usuario
 
 Acao = RegistroAuditoria.Acao
@@ -123,6 +131,11 @@ def atendimento(request, profissional, pk):
             "emite_documentos": atendimento.profissional_id == profissional.pk,
             "atestados": atendimento.atestados.all(),
             "receitas": atendimento.receitas.all(),
+            "pedidos": atendimento.pedidos_de_exames.all(),
+            # Never the file contents in a list.
+            "anexos": atendimento.anexos.defer("conteudo").select_related("profissional"),
+            "anexo_form": AnexoForm(),
+            "remove_anexos": not atendimento.finalizado,
         },
     )
 
@@ -253,4 +266,102 @@ def adendo(request, profissional, pk):
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
+    return redirect("prontuario:atendimento", pk=atendimento.pk)
+
+
+@exige_profissional
+def pedido_de_exames_novo(request, profissional, pk):
+    atendimento = _do_autor(profissional, pk)
+    form = PedidoDeExamesForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        pedido = form.save(commit=False)
+        pedido.atendimento = atendimento
+        pedido.profissional = profissional
+        pedido.criado_por = request.user
+        pedido.save()
+        registrar(
+            Acao.CRIAR,
+            pedido,
+            alteracoes={
+                "exames": [None, SIGILO],
+                **({"indicacao": [None, SIGILO]} if pedido.indicacao else {}),
+            },
+        )
+        messages.success(request, _("Pedido de exames emitido."))
+        return redirect("prontuario:pedido_de_exames", pk=pedido.pk)
+    return render(
+        request,
+        "prontuario/documento_form.html",
+        {"form": form, "atendimento": atendimento, "titulo": _("Pedir exames")},
+    )
+
+
+@exige_profissional
+def pedido_de_exames(request, profissional, pk):
+    pedido = get_object_or_404(
+        PedidoDeExames.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+    )
+    registrar(Acao.VISUALIZAR, pedido)
+    linhas = [linha for linha in pedido.exames.splitlines() if linha.strip()]
+    return render(request, "prontuario/pedido_de_exames.html", {"pedido": pedido, "linhas": linhas})
+
+
+@require_POST
+@exige_profissional
+def anexo_enviar(request, profissional, pk):
+    """Any practitioner adds files to a visit, even a finalized one (results arrive later)."""
+    atendimento = get_object_or_404(Atendimento.objects, pk=pk)
+    form = AnexoForm(request.POST, request.FILES)
+    if form.is_valid():
+        arquivo = form.cleaned_data["arquivo"]
+        anexo = Anexo.objects.create(
+            atendimento=atendimento,
+            descricao=form.cleaned_data["descricao"],
+            nome=arquivo.name[:255],
+            tipo=arquivo.tipo_conferido,
+            tamanho=arquivo.size,
+            conteudo=arquivo.read(),
+            profissional=profissional,
+            criado_por=request.user,
+        )
+        registrar(
+            Acao.CRIAR,
+            anexo,
+            descricao=f"{atendimento} – {_('anexo')}",
+            alteracoes={"arquivo": [None, SIGILO]},
+        )
+        messages.success(request, _("Anexo incluído."))
+    else:
+        messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
+    return redirect("prontuario:atendimento", pk=atendimento.pk)
+
+
+@exige_profissional
+def anexo(request, profissional, pk):
+    anexo = get_object_or_404(Anexo.objects.select_related("atendimento"), pk=pk)
+    registrar(Acao.VISUALIZAR, anexo, descricao=f"{anexo.atendimento} – {_('anexo')}")
+    resposta = HttpResponse(bytes(anexo.conteudo), content_type=anexo.tipo)
+    # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
+    nome = "".join(c for c in anexo.nome if c.isalnum() or c in "._- ") or "anexo"
+    resposta["Content-Disposition"] = f'inline; filename="{nome}"'
+    resposta["Cache-Control"] = "private, no-store"
+    return resposta
+
+
+@require_POST
+@exige_profissional
+def anexo_remover(request, profissional, pk):
+    """Who sent a file removes it while the visit is still a draft; afterwards it stays."""
+    anexo = get_object_or_404(Anexo.objects.select_related("atendimento").defer("conteudo"), pk=pk)
+    if anexo.atendimento.finalizado or anexo.criado_por_id != request.user.pk:
+        raise PermissionDenied
+    atendimento = anexo.atendimento
+    registrar(
+        Acao.EXCLUIR,
+        anexo,
+        descricao=f"{atendimento} – {_('anexo')}",
+        alteracoes={"arquivo": [SIGILO, None]},
+    )
+    anexo.delete()
+    messages.success(request, _("Anexo removido."))
     return redirect("prontuario:atendimento", pk=atendimento.pk)

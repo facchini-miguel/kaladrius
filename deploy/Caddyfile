@@ -11,9 +11,10 @@
 # HTTPS with an automatic Let's Encrypt certificate for SITE_HOSTNAME.
 {$SITE_HOSTNAME} {
 	encode zstd gzip
-	# The largest legitimate upload is an OFX bank statement (5 MB, apps/financeiro/forms.py).
+	# The largest legitimate upload is a medical record attachment (10 MB,
+	# apps/prontuario/forms.py); a bank statement is up to 5 MB.
 	request_body {
-		max_size 6MB
+		max_size 11MB
 	}
 	reverse_proxy 127.0.0.1:8000 {
 		# Ordinary form posts are read whole by Caddy before reaching the app, so a slow

@@ -238,3 +238,85 @@ def test_receita_uma_linha_por_item(cenario):
     assert resposta.url in ficha.content.decode()
     registro = RegistroAuditoria.objects.filter(modelo="Receita").latest("pk")
     assert "Paracetamol" not in str(registro.alteracoes)
+
+
+def test_pedido_de_exames(cenario):
+    atendimento = registrar(cenario)
+    url = reverse("prontuario:pedido_de_exames_novo", args=[atendimento.pk])
+    resposta = cenario["dra"].post(
+        url, {"exames": "Hemograma completo\nGlicemia de jejum", "indicacao": "Rotina"}
+    )
+    pagina = cenario["dr"].get(resposta.url)
+    assert pagina.context["linhas"] == ["Hemograma completo", "Glicemia de jejum"]
+    assert "PEDIDO DE EXAMES" in pagina.content.decode() and "Rotina" in pagina.content.decode()
+    assert cenario["dr"].get(url).status_code == 403  # only the visit's author issues
+    registro = RegistroAuditoria.objects.filter(modelo="Pedido de exames").latest("pk")
+    assert "Hemograma" not in str(registro.alteracoes)
+
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
+
+
+def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.prontuario.models import Anexo
+
+    atendimento = registrar(cenario)
+    url = reverse("prontuario:anexo_enviar", args=[atendimento.pk])
+    enviar = lambda quem, nome, conteudo: cenario[quem].post(  # noqa: E731
+        url, {"arquivo": SimpleUploadedFile(nome, conteudo), "descricao": "Raio-X"}, follow=True
+    )
+    # Checked by the content, not the name: an HTML page named .png is refused.
+    assert (
+        "Envie um arquivo PDF, JPG ou PNG" in enviar("dra", "foto.png", b"<html>").content.decode()
+    )
+    grande = b"%PDF-" + b"0" * (10 * 1024 * 1024)
+    assert "passa de 10 MB" in enviar("dra", "laudo.pdf", grande).content.decode()
+    assert (
+        cenario["recepcao"].post(url, {"arquivo": SimpleUploadedFile("x.png", PNG)}).status_code
+        == 403
+    )
+
+    enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
+    with usar_clinica(cenario["clinica"]):
+        anexo = Anexo.objects.get()
+    assert (anexo.tipo, anexo.tamanho, anexo.profissional.nome) == (
+        "image/png",
+        len(PNG),
+        "Dr. Bruno",
+    )
+
+    arquivo = cenario["dra"].get(reverse("prontuario:anexo", args=[anexo.pk]))
+    assert arquivo.content == PNG and arquivo["Content-Type"] == "image/png"
+    assert arquivo["Cache-Control"] == "private, no-store"
+    assert cenario["recepcao"].get(reverse("prontuario:anexo", args=[anexo.pk])).status_code == 403
+    assert "raio-x" not in str(
+        list(
+            RegistroAuditoria.objects.filter(modelo="Anexo").values_list(
+                "objeto_descricao", "alteracoes"
+            )
+        )
+    )
+
+
+def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.prontuario.models import Anexo
+
+    atendimento = registrar(cenario)
+    url = reverse("prontuario:anexo_enviar", args=[atendimento.pk])
+    cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("a.png", PNG)})
+    cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("b.png", PNG)})
+    with usar_clinica(cenario["clinica"]):
+        primeiro, segundo = Anexo.objects.order_by("pk")
+    remover = lambda anexo: reverse("prontuario:anexo_remover", args=[anexo.pk])  # noqa: E731
+    assert cenario["dr"].post(remover(primeiro)).status_code == 403
+    cenario["dra"].post(remover(primeiro))
+    cenario["dra"].post(
+        reverse("prontuario:atendimento", args=[atendimento.pk]), {**ANAMNESE, "acao": "finalizar"}
+    )
+    assert cenario["dra"].post(remover(segundo)).status_code == 403
+    with usar_clinica(cenario["clinica"]):
+        assert list(Anexo.objects.values_list("pk", flat=True)) == [segundo.pk]

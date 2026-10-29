@@ -1523,6 +1523,21 @@ msgstr "Indique cuántos días de reposo."
 msgid "O horário final precisa ser depois do inicial."
 msgstr "La hora final debe ser posterior a la inicial."
 
+msgid "Arquivo"
+msgstr "Archivo"
+
+msgid "PDF, JPG ou PNG, até 10 MB."
+msgstr "PDF, JPG o PNG, hasta 10 MB."
+
+msgid "Por exemplo: hemograma de março."
+msgstr "Por ejemplo: hemograma de marzo."
+
+msgid "O arquivo passa de 10 MB."
+msgstr "El archivo supera los 10 MB."
+
+msgid "Envie um arquivo PDF, JPG ou PNG."
+msgstr "Envíe un archivo PDF, JPG o PNG."
+
 msgid "data do atendimento"
 msgstr "fecha de la consulta"
 
@@ -1600,6 +1615,30 @@ msgctxt "prescrição"
 msgid "receitas"
 msgstr "recetas"
 
+msgid "exames"
+msgstr "exámenes"
+
+msgid "Um exame por linha."
+msgstr "Un examen por línea."
+
+msgid "indicação clínica"
+msgstr "indicación clínica"
+
+msgid "Aparece no pedido."
+msgstr "Aparece en la solicitud."
+
+msgid "pedido de exames"
+msgstr "solicitud de exámenes"
+
+msgid "pedidos de exames"
+msgstr "solicitudes de exámenes"
+
+msgid "anexo"
+msgstr "adjunto"
+
+msgid "anexos"
+msgstr "adjuntos"
+
 msgid ""
 "Atendimento finalizado. A partir de agora, correções são feitas por adendo."
 msgstr ""
@@ -1625,6 +1664,18 @@ msgstr "Adenda agregada."
 
 msgid "Escreva o adendo."
 msgstr "Escriba la adenda."
+
+msgid "Pedido de exames emitido."
+msgstr "Solicitud de exámenes emitida."
+
+msgid "Pedir exames"
+msgstr "Solicitar exámenes"
+
+msgid "Anexo incluído."
+msgstr "Adjunto agregado."
+
+msgid "Anexo removido."
+msgstr "Adjunto eliminado."
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "Ej.: revisión de 6 meses."
@@ -2682,9 +2733,6 @@ msgstr "Importado el"
 msgid "Período"
 msgstr "Período"
 
-msgid "Arquivo"
-msgstr "Archivo"
-
 msgid "Novas"
 msgstr "Nuevas"
 
@@ -3453,14 +3501,20 @@ msgid_plural ""
 "Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
 "%(data)s e necessita de %(dias)s dias de afastamento das suas atividades, a "
 "partir dessa data."
-msgstr[0] "Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita %(dias)s día de reposo de sus actividades, a partir de esa fecha."
-msgstr[1] "Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita %(dias)s días de reposo de sus actividades, a partir de esa fecha."
+msgstr[0] ""
+"Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita "
+"%(dias)s día de reposo de sus actividades, a partir de esa fecha."
+msgstr[1] ""
+"Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita "
+"%(dias)s días de reposo de sus actividades, a partir de esa fecha."
 
 #, python-format
 msgid ""
 "Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
 "clínica em %(data)s, das %(inicio)s às %(fim)s."
-msgstr "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s, de las %(inicio)s a las %(fim)s."
+msgstr ""
+"Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s, de las "
+"%(inicio)s a las %(fim)s."
 
 #, python-format
 msgid ""
@@ -3508,8 +3562,8 @@ msgstr "Adendas"
 msgid "Incluir adendo"
 msgstr "Agregar adenda"
 
-msgid "Atestados e receitas"
-msgstr "Certificados y recetas"
+msgid "Documentos"
+msgstr "Documentos"
 
 msgid "Atestado"
 msgstr "Certificado"
@@ -3524,8 +3578,20 @@ msgctxt "prescrição"
 msgid "Receita"
 msgstr "Receta"
 
+msgid "Pedido de exames"
+msgstr "Solicitud de exámenes"
+
 msgid "Nenhum documento emitido."
 msgstr "Ningún documento emitido."
+
+msgid "Anexos"
+msgstr "Adjuntos"
+
+msgid "Nenhum anexo."
+msgstr "Ningún adjunto."
+
+msgid "Anexar"
+msgstr "Adjuntar"
 
 msgid "ATESTADO"
 msgstr "CERTIFICADO MÉDICO"
@@ -3533,7 +3599,9 @@ msgstr "CERTIFICADO MÉDICO"
 msgid ""
 "Depois de emitido, o documento não muda; ele fica guardado no prontuário e "
 "pode ser impresso de novo."
-msgstr "Una vez emitido, el documento no cambia; queda guardado en la historia clínica y puede imprimirse de nuevo."
+msgstr ""
+"Una vez emitido, el documento no cambia; queda guardado en la historia "
+"clínica y puede imprimirse de nuevo."
 
 msgid "Emitir"
 msgstr "Emitir"
@@ -3550,6 +3618,15 @@ msgstr "Adenda"
 #, python-format
 msgid "Finalizado no sistema em %(momento)s."
 msgstr "Finalizada en el sistema el %(momento)s."
+
+msgid "PEDIDO DE EXAMES"
+msgstr "SOLICITUD DE EXÁMENES"
+
+msgid "Solicito:"
+msgstr "Solicito:"
+
+msgid "Indicação clínica"
+msgstr "Indicación clínica"
 
 msgid "RECEITUÁRIO"
 msgstr "RECETA"
@@ -3664,6 +3741,9 @@ msgstr "No tiene permiso para acceder a esta página."
 
 msgid "Senha"
 msgstr "Contraseña"
+
+#~ msgid "Atestados e receitas"
+#~ msgstr "Certificados y recetas"
 
 #~ msgid "Documentação técnica"
 #~ msgstr "Documentación técnica"

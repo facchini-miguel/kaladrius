@@ -174,3 +174,67 @@ class Receita(ModeloDaClinica):
 
     def __str__(self):
         return f"{self.atendimento} – {pgettext_lazy('prescrição', 'receita')}"
+
+
+class PedidoDeExames(ModeloDaClinica):
+    """An exam request issued in a visit (0.31.0, decision 083): one exam per line."""
+
+    atendimento = models.ForeignKey(
+        Atendimento,
+        on_delete=models.PROTECT,
+        related_name="pedidos_de_exames",
+        verbose_name=_("atendimento"),
+    )
+    exames = models.TextField(_("exames"), help_text=_("Um exame por linha."))
+    indicacao = models.TextField(
+        _("indicação clínica"), blank=True, help_text=_("Aparece no pedido.")
+    )
+    profissional = models.ForeignKey(
+        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("pedido de exames")
+        verbose_name_plural = _("pedidos de exames")
+        ordering = ["criado_em", "pk"]
+
+    def __str__(self):
+        return f"{self.atendimento} – {_('pedido de exames')}"
+
+
+class Anexo(ModeloDaClinica):
+    """A file kept in a visit: exam results, photos, reports (0.31.0, decision 083).
+
+    Stored in the database, so the daily backup and the weekly restore test cover it, and
+    only ever served through a view that checks the user is a practitioner.
+    """
+
+    atendimento = models.ForeignKey(
+        Atendimento, on_delete=models.PROTECT, related_name="anexos", verbose_name=_("atendimento")
+    )
+    descricao = models.CharField(
+        _("descrição"), max_length=200, blank=True, help_text=_("Por exemplo: hemograma de março.")
+    )
+    nome = models.CharField(_("arquivo"), max_length=255)
+    tipo = models.CharField(max_length=50)
+    tamanho = models.PositiveIntegerField()
+    conteudo = models.BinaryField()
+    profissional = models.ForeignKey(
+        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("anexo")
+        verbose_name_plural = _("anexos")
+        ordering = ["criado_em", "pk"]
+
+    def __str__(self):
+        return f"{self.atendimento} – {self.descricao or self.nome}"

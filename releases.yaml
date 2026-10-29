@@ -4,6 +4,31 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.31.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Pedido de exames e anexos no prontuário
+    en: Exam requests and attachments in the medical record
+    es: Solicitud de exámenes y adjuntos en la historia clínica
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No atendimento, quem atendeu emite o pedido de exames, impresso como o atestado e a
+          receita. E qualquer profissional anexa arquivos (resultados de exames, fotos, laudos)
+          em PDF, JPG ou PNG de até 10 MB, que ficam guardados no prontuário.
+        en: >
+          In a visit, its author issues exam requests, printed like certificates and
+          prescriptions. And any practitioner attaches files (exam results, photos, reports) as
+          PDF, JPG or PNG up to 10 MB, kept in the medical record.
+        es: >
+          En la consulta, quien atendió emite la solicitud de exámenes, impresa como el
+          certificado y la receta. Y cualquier profesional adjunta archivos (resultados de
+          exámenes, fotos, informes) en PDF, JPG o PNG de hasta 10 MB, que quedan guardados en
+          la historia clínica.
+
 - versao: 0.30.0
   data: 2026-10-28
   titulo:

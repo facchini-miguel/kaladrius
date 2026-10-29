@@ -1524,6 +1524,21 @@ msgstr "Enter how many days of leave."
 msgid "O horário final precisa ser depois do inicial."
 msgstr "The end time must be after the start time."
 
+msgid "Arquivo"
+msgstr "File"
+
+msgid "PDF, JPG ou PNG, até 10 MB."
+msgstr "PDF, JPG or PNG, up to 10 MB."
+
+msgid "Por exemplo: hemograma de março."
+msgstr "For example: March blood count."
+
+msgid "O arquivo passa de 10 MB."
+msgstr "The file is larger than 10 MB."
+
+msgid "Envie um arquivo PDF, JPG ou PNG."
+msgstr "Send a PDF, JPG or PNG file."
+
 msgid "data do atendimento"
 msgstr "visit date"
 
@@ -1601,6 +1616,30 @@ msgctxt "prescrição"
 msgid "receitas"
 msgstr "prescriptions"
 
+msgid "exames"
+msgstr "exams"
+
+msgid "Um exame por linha."
+msgstr "One exam per line."
+
+msgid "indicação clínica"
+msgstr "clinical indication"
+
+msgid "Aparece no pedido."
+msgstr "Appears on the request."
+
+msgid "pedido de exames"
+msgstr "exam request"
+
+msgid "pedidos de exames"
+msgstr "exam requests"
+
+msgid "anexo"
+msgstr "attachment"
+
+msgid "anexos"
+msgstr "attachments"
+
 msgid ""
 "Atendimento finalizado. A partir de agora, correções são feitas por adendo."
 msgstr "Visit finalized. From now on, corrections are made by addendum."
@@ -1625,6 +1664,18 @@ msgstr "Addendum added."
 
 msgid "Escreva o adendo."
 msgstr "Write the addendum."
+
+msgid "Pedido de exames emitido."
+msgstr "Exam request issued."
+
+msgid "Pedir exames"
+msgstr "Request exams"
+
+msgid "Anexo incluído."
+msgstr "Attachment added."
+
+msgid "Anexo removido."
+msgstr "Attachment removed."
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "E.g.: 6-month check-up."
@@ -2682,9 +2733,6 @@ msgstr "Imported at"
 msgid "Período"
 msgstr "Period"
 
-msgid "Arquivo"
-msgstr "File"
-
 msgid "Novas"
 msgstr "New"
 
@@ -3451,14 +3499,20 @@ msgid_plural ""
 "Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
 "%(data)s e necessita de %(dias)s dias de afastamento das suas atividades, a "
 "partir dessa data."
-msgstr[0] "I certify that %(nome)s was under my care on %(data)s and needs %(dias)s day of leave from their activities, starting on that date."
-msgstr[1] "I certify that %(nome)s was under my care on %(data)s and needs %(dias)s days of leave from their activities, starting on that date."
+msgstr[0] ""
+"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s day "
+"of leave from their activities, starting on that date."
+msgstr[1] ""
+"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s "
+"days of leave from their activities, starting on that date."
 
 #, python-format
 msgid ""
 "Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
 "clínica em %(data)s, das %(inicio)s às %(fim)s."
-msgstr "I certify that %(nome)s was seen at this clinic on %(data)s, from %(inicio)s to %(fim)s."
+msgstr ""
+"I certify that %(nome)s was seen at this clinic on %(data)s, from %(inicio)s "
+"to %(fim)s."
 
 #, python-format
 msgid ""
@@ -3505,8 +3559,8 @@ msgstr "Addenda"
 msgid "Incluir adendo"
 msgstr "Add addendum"
 
-msgid "Atestados e receitas"
-msgstr "Certificates and prescriptions"
+msgid "Documentos"
+msgstr "Documents"
 
 msgid "Atestado"
 msgstr "Certificate"
@@ -3521,8 +3575,20 @@ msgctxt "prescrição"
 msgid "Receita"
 msgstr "Prescription"
 
+msgid "Pedido de exames"
+msgstr "Exam request"
+
 msgid "Nenhum documento emitido."
 msgstr "No document issued."
+
+msgid "Anexos"
+msgstr "Attachments"
+
+msgid "Nenhum anexo."
+msgstr "No attachment."
+
+msgid "Anexar"
+msgstr "Attach"
 
 msgid "ATESTADO"
 msgstr "MEDICAL CERTIFICATE"
@@ -3530,7 +3596,9 @@ msgstr "MEDICAL CERTIFICATE"
 msgid ""
 "Depois de emitido, o documento não muda; ele fica guardado no prontuário e "
 "pode ser impresso de novo."
-msgstr "Once issued, the document does not change; it is kept in the medical record and can be printed again."
+msgstr ""
+"Once issued, the document does not change; it is kept in the medical record "
+"and can be printed again."
 
 msgid "Emitir"
 msgstr "Issue"
@@ -3547,6 +3615,15 @@ msgstr "Addendum"
 #, python-format
 msgid "Finalizado no sistema em %(momento)s."
 msgstr "Finalized in the system on %(momento)s."
+
+msgid "PEDIDO DE EXAMES"
+msgstr "EXAM REQUEST"
+
+msgid "Solicito:"
+msgstr "Please perform:"
+
+msgid "Indicação clínica"
+msgstr "Clinical indication"
 
 msgid "RECEITUÁRIO"
 msgstr "PRESCRIPTION"
@@ -3660,6 +3737,9 @@ msgstr "You do not have permission to access this page."
 
 msgid "Senha"
 msgstr "Password"
+
+#~ msgid "Atestados e receitas"
+#~ msgstr "Certificates and prescriptions"
 
 #~ msgid "Documentação técnica"
 #~ msgstr "Technical documentation"
