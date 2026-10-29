@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.agenda.models import Agendamento
 from apps.core.isolamento import ModeloDaClinica
@@ -96,3 +97,80 @@ class Adendo(ModeloDaClinica):
 
     def __str__(self):
         return f"{self.atendimento} – {_('adendo')}"
+
+
+class Atestado(ModeloDaClinica):
+    """A medical certificate issued in a visit (0.30.0, decision 082). Never changed or
+    deleted after issued; it can be printed again."""
+
+    class Tipo(models.TextChoices):
+        COMPARECIMENTO = "comparecimento", _("Comparecimento")
+        AFASTAMENTO = "afastamento", _("Afastamento")
+
+    atendimento = models.ForeignKey(
+        Atendimento,
+        on_delete=models.PROTECT,
+        related_name="atestados",
+        verbose_name=_("atendimento"),
+    )
+    tipo = models.CharField(
+        _("tipo"), max_length=20, choices=Tipo.choices, default=Tipo.COMPARECIMENTO
+    )
+    data = models.DateField(_("data do atendimento"), default=timezone.localdate)
+    hora_inicio = models.TimeField(_("das"), null=True, blank=True)
+    hora_fim = models.TimeField(_("às"), null=True, blank=True)
+    dias = models.PositiveSmallIntegerField(
+        _("dias de afastamento"), null=True, blank=True, help_text=_("Só para afastamento.")
+    )
+    observacao = models.TextField(
+        _("observações"),
+        blank=True,
+        help_text=_("Aparece no atestado. Por exemplo: deve permanecer em repouso."),
+    )
+    profissional = models.ForeignKey(
+        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("atestado")
+        verbose_name_plural = _("atestados")
+        ordering = ["criado_em", "pk"]
+
+    def __str__(self):
+        return f"{self.atendimento} – {self.get_tipo_display()}"
+
+
+class Receita(ModeloDaClinica):
+    """A simple prescription issued in a visit (0.30.0, decision 082): free text, one item
+    per line. Controlled drugs need the official forms, which the system does not issue."""
+
+    atendimento = models.ForeignKey(
+        Atendimento,
+        on_delete=models.PROTECT,
+        related_name="receitas",
+        verbose_name=_("atendimento"),
+    )
+    prescricao = models.TextField(
+        _("medicamentos e como usar"),
+        help_text=_("Um item por linha: medicamento, dose e como usar."),
+    )
+    profissional = models.ForeignKey(
+        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    )
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # "Receita" is also revenue in Finance: a context keeps the translations apart.
+        verbose_name = pgettext_lazy("prescrição", "receita")
+        verbose_name_plural = pgettext_lazy("prescrição", "receitas")
+        ordering = ["criado_em", "pk"]
+
+    def __str__(self):
+        return f"{self.atendimento} – {pgettext_lazy('prescrição', 'receita')}"

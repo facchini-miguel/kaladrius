@@ -17,7 +17,14 @@ La anamnesis tiene cinco campos, todos opcionales: **motivo de consulta**, **enf
 - **Guardar y finalizar** la cierra definitivamente: desde entonces, nadie la modifica. Las correcciones y notas posteriores son **adendas**, cada una con su fecha y profesional; cualquier profesional de la clínica puede agregar una.
 - El cuadro **Historia clínica** de la ficha lista las consultas, de la más reciente a la más antigua, marcadas como borrador o finalizada.
 
+## Impresión, certificados y recetas
+- **Imprimir consulta** (en una consulta finalizada) la abre lista para imprimir o guardar en PDF, con el encabezado de la clínica, la anamnesis, las adendas y la línea de firma. Sin firma digital, la copia impresa y firmada es el registro legal.
+- En el cuadro **Certificados y recetas**, quien hizo la consulta emite:
+  - un **certificado** de **asistencia** (fecha y horarios, completados a partir de la cita) o de **reposo** (cantidad de días), con observaciones opcionales;
+  - una **receta** simple, un ítem por línea (medicamento, dosis y cómo usarlo). Los medicamentos controlados requieren los recetarios oficiales, que el sistema no emite.
+- Un documento emitido ya no cambia; queda guardado en la historia clínica y cualquier profesional puede imprimirlo de nuevo.
+
 ## Privacidad y conservación
 - La **auditoría** registra quién creó, modificó, finalizó o **abrió** cada consulta, pero nunca copia el texto clínico.
 - La historia clínica se guarda por **20 años** (Ley 13.787/2018 de Brasil): archivar al paciente la conserva, y un paciente con historia clínica no puede eliminarse definitivamente.
-- La impresión, las recetas, los certificados y la CIE todavía no están disponibles.
+- La CIE todavía no está disponible.

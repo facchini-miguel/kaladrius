@@ -23,7 +23,7 @@ from apps.financeiro.models import (
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
-from apps.prontuario.models import Adendo, Atendimento
+from apps.prontuario.models import Adendo, Atendimento, Atestado, Receita
 from apps.rechamadas.models import Rechamada
 
 from .popular_dados_teste import CLINICAS
@@ -75,6 +75,8 @@ class Command(BaseCommand):
                 Comissao,
                 Parcela,
                 Adendo,
+                Atestado,
+                Receita,
                 Atendimento,
                 Lancamento,
                 Agendamento,

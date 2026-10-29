@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.30.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Impressão do prontuário, atestados e receitas
+    en: Medical record printing, certificates and prescriptions
+    es: Impresión de la historia clínica, certificados y recetas
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O atendimento finalizado pode ser impresso ou salvo em PDF, com o cabeçalho da
+          clínica e a linha de assinatura. Quem fez o atendimento emite atestados (de
+          comparecimento ou de afastamento) e receitas simples, que ficam guardados no
+          prontuário e podem ser impressos de novo.
+        en: >
+          A finalized visit can be printed or saved as PDF, with the clinic's header and a
+          signature line. The visit's author issues certificates (of attendance or of leave)
+          and simple prescriptions, which are kept in the medical record and can be printed
+          again.
+        es: >
+          La consulta finalizada puede imprimirse o guardarse en PDF, con el encabezado de la
+          clínica y la línea de firma. Quien hizo la consulta emite certificados (de asistencia
+          o de reposo) y recetas simples, que quedan guardados en la historia clínica y pueden
+          imprimirse de nuevo.
+
 - versao: 0.29.0
   data: 2026-10-28
   titulo:

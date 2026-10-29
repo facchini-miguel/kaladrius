@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{{ titulo }} · {{ atendimento.paciente.nome }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{{ titulo }}</h1>
+<p class="text-body-secondary"><a href="{% url 'prontuario:atendimento' atendimento.pk %}">{{ atendimento.paciente.nome }} · {{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }}</a></p>
+<p class="text-body-secondary small">{% translate "Depois de emitido, o documento não muda; ele fica guardado no prontuário e pode ser impresso de novo." %}</p>
+<form method="post" style="max-width: 40rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <button type="submit" class="btn btn-primary">{% translate "Emitir" %}</button>
+  <a class="btn btn-link" href="{% url 'prontuario:atendimento' atendimento.pk %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

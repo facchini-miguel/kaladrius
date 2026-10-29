@@ -1517,6 +1517,12 @@ msgstr "Profesional %(nome)s eliminado."
 msgid "Prontuário"
 msgstr "Historia clínica"
 
+msgid "Informe quantos dias de afastamento."
+msgstr "Indique cuántos días de reposo."
+
+msgid "O horário final precisa ser depois do inicial."
+msgstr "La hora final debe ser posterior a la inicial."
+
 msgid "data do atendimento"
 msgstr "fecha de la consulta"
 
@@ -1553,12 +1559,66 @@ msgstr "adenda"
 msgid "adendos"
 msgstr "adendas"
 
+msgid "Comparecimento"
+msgstr "Asistencia"
+
+msgid "Afastamento"
+msgstr "Reposo"
+
+msgid "das"
+msgstr "de las"
+
+msgid "às"
+msgstr "a las"
+
+msgid "dias de afastamento"
+msgstr "días de reposo"
+
+msgid "Só para afastamento."
+msgstr "Solo para reposo."
+
+msgid "Aparece no atestado. Por exemplo: deve permanecer em repouso."
+msgstr "Aparece en el certificado. Por ejemplo: debe guardar reposo."
+
+msgid "atestado"
+msgstr "certificado"
+
+msgid "atestados"
+msgstr "certificados"
+
+msgid "medicamentos e como usar"
+msgstr "medicamentos y cómo usarlos"
+
+msgid "Um item por linha: medicamento, dose e como usar."
+msgstr "Un ítem por línea: medicamento, dosis y cómo usarlo."
+
+msgctxt "prescrição"
+msgid "receita"
+msgstr "receta"
+
+msgctxt "prescrição"
+msgid "receitas"
+msgstr "recetas"
+
 msgid ""
 "Atendimento finalizado. A partir de agora, correções são feitas por adendo."
-msgstr "Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
+msgstr ""
+"Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
 
 msgid "Atendimento salvo."
 msgstr "Consulta guardada."
+
+msgid "Atestado emitido."
+msgstr "Certificado emitido."
+
+msgid "Emitir atestado"
+msgstr "Emitir certificado"
+
+msgid "Receita emitida."
+msgstr "Receta emitida."
+
+msgid "Emitir receita"
+msgstr "Emitir receta"
 
 msgid "Adendo incluído."
 msgstr "Adenda agregada."
@@ -3173,8 +3233,14 @@ msgid_plural ""
 "Este paciente tem prontuário (%(total)s atendimentos). O prontuário precisa "
 "ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
 "excluído definitivamente: mantenha-o arquivado."
-msgstr[0] "Este paciente tiene historia clínica (%(total)s consulta). La historia clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el paciente no puede eliminarse definitivamente: manténgalo archivado."
-msgstr[1] "Este paciente tiene historia clínica (%(total)s consultas). La historia clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el paciente no puede eliminarse definitivamente: manténgalo archivado."
+msgstr[0] ""
+"Este paciente tiene historia clínica (%(total)s consulta). La historia "
+"clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el "
+"paciente no puede eliminarse definitivamente: manténgalo archivado."
+msgstr[1] ""
+"Este paciente tiene historia clínica (%(total)s consultas). La historia "
+"clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el "
+"paciente no puede eliminarse definitivamente: manténgalo archivado."
 
 msgid "Esta ação não pode ser desfeita:"
 msgstr "Esta acción no se puede deshacer:"
@@ -3378,6 +3444,30 @@ msgstr "Usuario de acceso"
 msgid "Nenhum profissional cadastrado."
 msgstr "Ningún profesional registrado."
 
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
+"%(data)s e necessita de %(dias)s dia de afastamento das suas atividades, a "
+"partir dessa data."
+msgid_plural ""
+"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
+"%(data)s e necessita de %(dias)s dias de afastamento das suas atividades, a "
+"partir dessa data."
+msgstr[0] "Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita %(dias)s día de reposo de sus actividades, a partir de esa fecha."
+msgstr[1] "Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita %(dias)s días de reposo de sus actividades, a partir de esa fecha."
+
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
+"clínica em %(data)s, das %(inicio)s às %(fim)s."
+msgstr "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s, de las %(inicio)s a las %(fim)s."
+
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
+"clínica em %(data)s."
+msgstr "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s."
+
 msgid "Atendimento"
 msgstr "Consulta"
 
@@ -3392,7 +3482,10 @@ msgid ""
 "Prontuário: visível só para os profissionais da clínica e guardado por 20 "
 "anos. Depois de finalizado, o atendimento não muda mais; correções são "
 "feitas por adendo."
-msgstr "Historia clínica: visible solo para los profesionales de la clínica y guardada por 20 años. Una vez finalizada, la consulta ya no cambia; las correcciones se hacen por adenda."
+msgstr ""
+"Historia clínica: visible solo para los profesionales de la clínica y "
+"guardada por 20 años. Una vez finalizada, la consulta ya no cambia; las "
+"correcciones se hacen por adenda."
 
 msgid "Salvar rascunho"
 msgstr "Guardar borrador"
@@ -3400,15 +3493,66 @@ msgstr "Guardar borrador"
 msgid "Salvar e finalizar"
 msgstr "Guardar y finalizar"
 
+msgid "Imprimir atendimento"
+msgstr "Imprimir consulta"
+
 msgid ""
 "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar."
-msgstr "Borrador de otro profesional: solo quien lo escribió puede modificarlo y finalizarlo."
+msgstr ""
+"Borrador de otro profesional: solo quien lo escribió puede modificarlo y "
+"finalizarlo."
 
 msgid "Adendos"
 msgstr "Adendas"
 
 msgid "Incluir adendo"
 msgstr "Agregar adenda"
+
+msgid "Atestados e receitas"
+msgstr "Certificados y recetas"
+
+msgid "Atestado"
+msgstr "Certificado"
+
+#, python-format
+msgid "%(dias)s dia"
+msgid_plural "%(dias)s dias"
+msgstr[0] "%(dias)s día"
+msgstr[1] "%(dias)s días"
+
+msgctxt "prescrição"
+msgid "Receita"
+msgstr "Receta"
+
+msgid "Nenhum documento emitido."
+msgstr "Ningún documento emitido."
+
+msgid "ATESTADO"
+msgstr "CERTIFICADO MÉDICO"
+
+msgid ""
+"Depois de emitido, o documento não muda; ele fica guardado no prontuário e "
+"pode ser impresso de novo."
+msgstr "Una vez emitido, el documento no cambia; queda guardado en la historia clínica y puede imprimirse de nuevo."
+
+msgid "Emitir"
+msgstr "Emitir"
+
+msgid "PRONTUÁRIO"
+msgstr "HISTORIA CLÍNICA"
+
+msgid "nascido(a) em"
+msgstr "nacido(a) el"
+
+msgid "Adendo"
+msgstr "Adenda"
+
+#, python-format
+msgid "Finalizado no sistema em %(momento)s."
+msgstr "Finalizada en el sistema el %(momento)s."
+
+msgid "RECEITUÁRIO"
+msgstr "RECETA"
 
 #, python-format
 msgid "Rechamadas de %(dia)s"

@@ -1518,6 +1518,12 @@ msgstr "Practitioner %(nome)s deleted."
 msgid "Prontuário"
 msgstr "Medical record"
 
+msgid "Informe quantos dias de afastamento."
+msgstr "Enter how many days of leave."
+
+msgid "O horário final precisa ser depois do inicial."
+msgstr "The end time must be after the start time."
+
 msgid "data do atendimento"
 msgstr "visit date"
 
@@ -1554,12 +1560,65 @@ msgstr "addendum"
 msgid "adendos"
 msgstr "addenda"
 
+msgid "Comparecimento"
+msgstr "Attendance"
+
+msgid "Afastamento"
+msgstr "Leave from activities"
+
+msgid "das"
+msgstr "from"
+
+msgid "às"
+msgstr "to"
+
+msgid "dias de afastamento"
+msgstr "days of leave"
+
+msgid "Só para afastamento."
+msgstr "Only for leave."
+
+msgid "Aparece no atestado. Por exemplo: deve permanecer em repouso."
+msgstr "Appears on the certificate. For example: must stay at rest."
+
+msgid "atestado"
+msgstr "certificate"
+
+msgid "atestados"
+msgstr "certificates"
+
+msgid "medicamentos e como usar"
+msgstr "medicines and how to use them"
+
+msgid "Um item por linha: medicamento, dose e como usar."
+msgstr "One item per line: medicine, dose and how to use it."
+
+msgctxt "prescrição"
+msgid "receita"
+msgstr "prescription"
+
+msgctxt "prescrição"
+msgid "receitas"
+msgstr "prescriptions"
+
 msgid ""
 "Atendimento finalizado. A partir de agora, correções são feitas por adendo."
 msgstr "Visit finalized. From now on, corrections are made by addendum."
 
 msgid "Atendimento salvo."
 msgstr "Visit saved."
+
+msgid "Atestado emitido."
+msgstr "Certificate issued."
+
+msgid "Emitir atestado"
+msgstr "Issue certificate"
+
+msgid "Receita emitida."
+msgstr "Prescription issued."
+
+msgid "Emitir receita"
+msgstr "Issue prescription"
 
 msgid "Adendo incluído."
 msgstr "Addendum added."
@@ -3173,8 +3232,14 @@ msgid_plural ""
 "Este paciente tem prontuário (%(total)s atendimentos). O prontuário precisa "
 "ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
 "excluído definitivamente: mantenha-o arquivado."
-msgstr[0] "This patient has a medical record (%(total)s visit). The record must be kept for 20 years (Law 13.787/2018), so the patient cannot be permanently deleted: keep them archived."
-msgstr[1] "This patient has a medical record (%(total)s visits). The record must be kept for 20 years (Law 13.787/2018), so the patient cannot be permanently deleted: keep them archived."
+msgstr[0] ""
+"This patient has a medical record (%(total)s visit). The record must be kept "
+"for 20 years (Law 13.787/2018), so the patient cannot be permanently "
+"deleted: keep them archived."
+msgstr[1] ""
+"This patient has a medical record (%(total)s visits). The record must be "
+"kept for 20 years (Law 13.787/2018), so the patient cannot be permanently "
+"deleted: keep them archived."
 
 msgid "Esta ação não pode ser desfeita:"
 msgstr "This action cannot be undone:"
@@ -3377,6 +3442,30 @@ msgstr "Login user"
 msgid "Nenhum profissional cadastrado."
 msgstr "No practitioners yet."
 
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
+"%(data)s e necessita de %(dias)s dia de afastamento das suas atividades, a "
+"partir dessa data."
+msgid_plural ""
+"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
+"%(data)s e necessita de %(dias)s dias de afastamento das suas atividades, a "
+"partir dessa data."
+msgstr[0] "I certify that %(nome)s was under my care on %(data)s and needs %(dias)s day of leave from their activities, starting on that date."
+msgstr[1] "I certify that %(nome)s was under my care on %(data)s and needs %(dias)s days of leave from their activities, starting on that date."
+
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
+"clínica em %(data)s, das %(inicio)s às %(fim)s."
+msgstr "I certify that %(nome)s was seen at this clinic on %(data)s, from %(inicio)s to %(fim)s."
+
+#, python-format
+msgid ""
+"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
+"clínica em %(data)s."
+msgstr "I certify that %(nome)s was seen at this clinic on %(data)s."
+
 msgid "Atendimento"
 msgstr "Visit"
 
@@ -3391,7 +3480,10 @@ msgid ""
 "Prontuário: visível só para os profissionais da clínica e guardado por 20 "
 "anos. Depois de finalizado, o atendimento não muda mais; correções são "
 "feitas por adendo."
-msgstr "Medical record: visible only to the clinic's practitioners and kept for 20 years. Once finalized, the visit no longer changes; corrections are made by addendum."
+msgstr ""
+"Medical record: visible only to the clinic's practitioners and kept for 20 "
+"years. Once finalized, the visit no longer changes; corrections are made by "
+"addendum."
 
 msgid "Salvar rascunho"
 msgstr "Save draft"
@@ -3399,15 +3491,65 @@ msgstr "Save draft"
 msgid "Salvar e finalizar"
 msgstr "Save and finalize"
 
+msgid "Imprimir atendimento"
+msgstr "Print visit"
+
 msgid ""
 "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar."
-msgstr "Draft by another practitioner: only its author can change and finalize it."
+msgstr ""
+"Draft by another practitioner: only its author can change and finalize it."
 
 msgid "Adendos"
 msgstr "Addenda"
 
 msgid "Incluir adendo"
 msgstr "Add addendum"
+
+msgid "Atestados e receitas"
+msgstr "Certificates and prescriptions"
+
+msgid "Atestado"
+msgstr "Certificate"
+
+#, python-format
+msgid "%(dias)s dia"
+msgid_plural "%(dias)s dias"
+msgstr[0] "%(dias)s day"
+msgstr[1] "%(dias)s days"
+
+msgctxt "prescrição"
+msgid "Receita"
+msgstr "Prescription"
+
+msgid "Nenhum documento emitido."
+msgstr "No document issued."
+
+msgid "ATESTADO"
+msgstr "MEDICAL CERTIFICATE"
+
+msgid ""
+"Depois de emitido, o documento não muda; ele fica guardado no prontuário e "
+"pode ser impresso de novo."
+msgstr "Once issued, the document does not change; it is kept in the medical record and can be printed again."
+
+msgid "Emitir"
+msgstr "Issue"
+
+msgid "PRONTUÁRIO"
+msgstr "MEDICAL RECORD"
+
+msgid "nascido(a) em"
+msgstr "born on"
+
+msgid "Adendo"
+msgstr "Addendum"
+
+#, python-format
+msgid "Finalizado no sistema em %(momento)s."
+msgstr "Finalized in the system on %(momento)s."
+
+msgid "RECEITUÁRIO"
+msgstr "PRESCRIPTION"
 
 #, python-format
 msgid "Rechamadas de %(dia)s"

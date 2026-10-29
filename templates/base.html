@@ -171,19 +171,19 @@
 
   <main class="container py-4">
     {% if backup_nenhum %}
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger d-print-none" role="alert">
       {% translate "Nenhum backup do banco foi registrado neste servidor: confira se os backups diários estão funcionando." %}
       {% translate "Veja no servidor:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}
     {% if backup_atrasado %}
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger d-print-none" role="alert">
       {% blocktranslate with momento=backup_atrasado.momento|date:"SHORT_DATETIME_FORMAT" %}O último backup do banco foi em {{ momento }}: os backups diários pararam.{% endblocktranslate %}
       {% translate "Veja no servidor:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}
     {% if saude_alerta %}
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger d-print-none" role="alert">
       {% if saude_alerta.sem_coleta %}{% translate "A saúde do servidor não está sendo coletada." %}
       {% elif saude_alerta.parada %}{% blocktranslate with momento=saude_alerta.parada|date:"SHORT_DATETIME_FORMAT" %}A coleta da saúde do servidor parou em {{ momento }}.{% endblocktranslate %}
       {% else %}{% translate "O servidor está com recursos no limite:" %} {% for item in saude_alerta.criticos %}{% if item == "memoria" %}{% translate "memória" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disco" %}{% translate "disco" %}{% else %}{% translate "processador" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
@@ -191,13 +191,13 @@
     </div>
     {% endif %}
     {% if versao_nova %}
-    <div class="alert alert-info d-flex justify-content-between align-items-center" role="status">
+    <div class="alert alert-info d-flex justify-content-between align-items-center d-print-none" role="status">
       <span>{% blocktranslate %}O sistema foi atualizado para a versão {{ versao_sistema }}.{% endblocktranslate %}</span>
       <a class="btn btn-sm btn-info" href="{% url 'novidades' %}">{% translate "Veja o que mudou" %}</a>
     </div>
     {% endif %}
     {% for mensagem in messages %}
-    <div class="alert alert-{{ mensagem.tags|default:'info' }}" role="alert">{{ mensagem }}</div>
+    <div class="alert alert-{{ mensagem.tags|default:'info' }} d-print-none" role="alert">{{ mensagem }}</div>
     {% endfor %}
     {% block conteudo %}{% endblock %}
   </main>

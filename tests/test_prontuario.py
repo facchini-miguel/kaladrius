@@ -162,3 +162,79 @@ def test_agenda_leva_ao_atendimento_so_para_profissionais(cenario):
     atendimento = registrar(cenario, agendamento=cenario["agendamento"].pk)
     pagina = cenario["dra"].get(editar).content.decode()
     assert reverse("prontuario:atendimento", args=[atendimento.pk]) in pagina
+
+
+def test_imprimir_so_depois_de_finalizado(cenario):
+    atendimento = registrar(cenario)
+    url = reverse("prontuario:imprimir", args=[atendimento.pk])
+    assert cenario["dra"].get(url).status_code == 403
+    pagina = cenario["dra"].get(reverse("prontuario:atendimento", args=[atendimento.pk]))
+    assert url not in pagina.content.decode()
+    cenario["dra"].post(
+        reverse("prontuario:atendimento", args=[atendimento.pk]),
+        {**ANAMNESE, "acao": "finalizar"},
+    )
+    impressao = cenario["dr"].get(url)
+    conteudo = impressao.content.decode()
+    assert impressao.status_code == 200
+    assert ANAMNESE["queixa_principal"] in conteudo and "Dra. Ana" in conteudo
+    assert RegistroAuditoria.objects.filter(
+        objeto_id=atendimento.pk, acao="visualizar", objeto_descricao__endswith="(impressão)"
+    ).exists()
+    assert cenario["recepcao"].get(url).status_code == 403
+
+
+def test_atestado_de_comparecimento_e_de_afastamento(cenario):
+    atendimento = registrar(cenario, agendamento=cenario["agendamento"].pk)
+    url = reverse("prontuario:atestado_novo", args=[atendimento.pk])
+    # The appointment's times come filled in.
+    formulario = cenario["dra"].get(url).context["form"]
+    assert formulario.initial["hora_inicio"] == datetime.time(10)
+    assert formulario.initial["hora_fim"] == datetime.time(11)
+
+    resposta = cenario["dra"].post(
+        url,
+        {
+            "tipo": "comparecimento",
+            "data": "2031-03-05",
+            "hora_inicio": "10:00",
+            "hora_fim": "11:00",
+        },
+    )
+    pagina = cenario["dra"].get(resposta.url).content.decode()
+    assert "Maria Paciente" in pagina and "das 10:00 às 11:00" in pagina
+
+    sem_dias = cenario["dra"].post(url, {"tipo": "afastamento", "data": "2031-03-05"})
+    assert "Informe quantos dias" in sem_dias.content.decode()
+    resposta = cenario["dra"].post(
+        url, {"tipo": "afastamento", "data": "2031-03-05", "dias": "3", "observacao": "Repouso"}
+    )
+    pagina = cenario["dra"].get(resposta.url).content.decode()
+    assert "3 dias de afastamento" in pagina and "Repouso" in pagina
+    assert "5 de março de 2031" in pagina  # month in lower case, as in running text
+    with usar_clinica(cenario["clinica"]):
+        assert atendimento.atestados.count() == 2
+    registro = RegistroAuditoria.objects.filter(modelo="Atestado").latest("pk")
+    assert "Repouso" not in str(registro.alteracoes)
+
+    # Only the visit's author issues documents; other practitioners print them.
+    assert cenario["dr"].get(url).status_code == 403
+    assert cenario["dr"].get(resposta.url).status_code == 200
+    assert cenario["recepcao"].get(resposta.url).status_code == 403
+
+
+def test_receita_uma_linha_por_item(cenario):
+    atendimento = registrar(cenario)
+    url = reverse("prontuario:receita_nova", args=[atendimento.pk])
+    prescricao = "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas\n\nSoro fisiológico nasal"
+    resposta = cenario["dra"].post(url, {"prescricao": prescricao})
+    pagina = cenario["dra"].get(resposta.url)
+    assert pagina.context["linhas"] == [
+        "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas",
+        "Soro fisiológico nasal",
+    ]
+    assert "RECEITUÁRIO" in pagina.content.decode()
+    ficha = cenario["dra"].get(reverse("prontuario:atendimento", args=[atendimento.pk]))
+    assert resposta.url in ficha.content.decode()
+    registro = RegistroAuditoria.objects.filter(modelo="Receita").latest("pk")
+    assert "Paracetamol" not in str(registro.alteracoes)

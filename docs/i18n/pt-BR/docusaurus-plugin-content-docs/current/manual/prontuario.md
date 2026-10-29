@@ -17,7 +17,14 @@ A anamnese tem cinco campos, todos opcionais: **queixa principal**, **história 
 - **Salvar e finalizar** fecha de vez: a partir daí, ninguém altera. Correções e anotações posteriores são **adendos**, cada um com data e profissional; qualquer profissional da clínica pode incluir.
 - O quadro **Prontuário** da ficha lista os atendimentos, do mais recente para o mais antigo, marcados como rascunho ou finalizado.
 
+## Impressão, atestados e receitas
+- **Imprimir atendimento** (num atendimento finalizado) abre o atendimento pronto para imprimir ou salvar em PDF, com o cabeçalho da clínica, a anamnese, os adendos e a linha de assinatura. Sem assinatura digital, a via impressa e assinada é o registro legal.
+- No quadro **Atestados e receitas**, quem fez o atendimento emite:
+  - **atestado** de **comparecimento** (data e horários, preenchidos a partir do agendamento) ou de **afastamento** (número de dias), com observações opcionais;
+  - **receita** simples, um item por linha (medicamento, dose e como usar). Medicamentos controlados exigem os receituários oficiais, que o sistema não emite.
+- Um documento emitido não muda mais; ele fica guardado no prontuário e qualquer profissional pode imprimir de novo.
+
 ## Privacidade e guarda
 - A **auditoria** registra quem criou, alterou, finalizou ou **abriu** cada atendimento, mas nunca copia o texto clínico.
 - O prontuário é guardado por **20 anos** (Lei 13.787/2018): arquivar o paciente mantém o prontuário, e um paciente com prontuário não pode ser excluído definitivamente.
-- Impressão, receitas, atestados e CID ainda não estão disponíveis.
+- A CID ainda não está disponível.

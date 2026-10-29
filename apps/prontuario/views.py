@@ -13,8 +13,8 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
 from apps.pacientes.models import Paciente
 
-from .forms import AdendoForm, AtendimentoForm
-from .models import CAMPOS_DA_ANAMNESE, Atendimento
+from .forms import AdendoForm, AtendimentoForm, AtestadoForm, ReceitaForm
+from .models import CAMPOS_DA_ANAMNESE, Atendimento, Atestado, Receita
 from .permissoes import profissional_do_usuario
 
 Acao = RegistroAuditoria.Acao
@@ -107,10 +107,6 @@ def atendimento(request, profissional, pk):
             return redirect("prontuario:atendimento", pk=atendimento.pk)
     else:
         registrar(Acao.VISUALIZAR, atendimento)
-    campos = [
-        (atendimento._meta.get_field(campo).verbose_name, getattr(atendimento, campo))
-        for campo in CAMPOS_DA_ANAMNESE
-    ]
     return render(
         request,
         "prontuario/atendimento.html",
@@ -120,11 +116,124 @@ def atendimento(request, profissional, pk):
             "agendamento": atendimento.agendamento,
             "form": form,
             "editavel": editavel,
-            "campos": campos,
+            "campos": _campos(atendimento),
             "adendos": atendimento.adendos.select_related("profissional"),
             "adendo_form": AdendoForm() if atendimento.finalizado else None,
+            # Certificates and prescriptions are issued by the visit's author (decision 082).
+            "emite_documentos": atendimento.profissional_id == profissional.pk,
+            "atestados": atendimento.atestados.all(),
+            "receitas": atendimento.receitas.all(),
         },
     )
+
+
+def _campos(atendimento):
+    return [
+        (atendimento._meta.get_field(campo).verbose_name, getattr(atendimento, campo))
+        for campo in CAMPOS_DA_ANAMNESE
+    ]
+
+
+def _do_autor(profissional, pk):
+    atendimento = get_object_or_404(Atendimento.objects.select_related("paciente"), pk=pk)
+    if atendimento.profissional_id != profissional.pk:
+        raise PermissionDenied
+    return atendimento
+
+
+@exige_profissional
+def imprimir(request, profissional, pk):
+    """The finalized visit, ready to print and sign (without a digital signature, the
+    printed and signed copy is the legal record)."""
+    atendimento = get_object_or_404(
+        Atendimento.objects.select_related("paciente", "profissional"), pk=pk
+    )
+    if not atendimento.finalizado:
+        raise PermissionDenied
+    registrar(Acao.VISUALIZAR, atendimento, descricao=f"{atendimento} (impressão)")
+    return render(
+        request,
+        "prontuario/imprimir.html",
+        {
+            "atendimento": atendimento,
+            "campos": _campos(atendimento),
+            "adendos": atendimento.adendos.select_related("profissional"),
+        },
+    )
+
+
+@exige_profissional
+def atestado_novo(request, profissional, pk):
+    atendimento = _do_autor(profissional, pk)
+    agendamento = atendimento.agendamento
+    momento = timezone.localtime(agendamento.inicio if agendamento else atendimento.data)
+    inicial = {
+        "data": momento.date(),
+        "hora_inicio": momento.time().replace(second=0, microsecond=0),
+        "hora_fim": timezone.localtime(agendamento.fim).time() if agendamento else None,
+    }
+    form = AtestadoForm(request.POST or None, initial=inicial)
+    if request.method == "POST" and form.is_valid():
+        atestado = form.save(commit=False)
+        atestado.atendimento = atendimento
+        atestado.profissional = profissional
+        atestado.criado_por = request.user
+        atestado.save()
+        registrar(
+            Acao.CRIAR,
+            atestado,
+            alteracoes={
+                "tipo": [None, atestado.tipo],
+                "dias": [None, atestado.dias],
+                **({"observacao": [None, SIGILO]} if atestado.observacao else {}),
+            },
+        )
+        messages.success(request, _("Atestado emitido."))
+        return redirect("prontuario:atestado", pk=atestado.pk)
+    return render(
+        request,
+        "prontuario/documento_form.html",
+        {"form": form, "atendimento": atendimento, "titulo": _("Emitir atestado")},
+    )
+
+
+@exige_profissional
+def receita_nova(request, profissional, pk):
+    atendimento = _do_autor(profissional, pk)
+    form = ReceitaForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        receita = form.save(commit=False)
+        receita.atendimento = atendimento
+        receita.profissional = profissional
+        receita.criado_por = request.user
+        receita.save()
+        registrar(Acao.CRIAR, receita, alteracoes={"prescricao": [None, SIGILO]})
+        messages.success(request, _("Receita emitida."))
+        return redirect("prontuario:receita", pk=receita.pk)
+    return render(
+        request,
+        "prontuario/documento_form.html",
+        {"form": form, "atendimento": atendimento, "titulo": _("Emitir receita")},
+    )
+
+
+@exige_profissional
+def atestado(request, profissional, pk):
+    atestado = get_object_or_404(
+        Atestado.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+    )
+    registrar(Acao.VISUALIZAR, atestado)
+    return render(request, "prontuario/atestado.html", {"atestado": atestado})
+
+
+@exige_profissional
+def receita(request, profissional, pk):
+    receita = get_object_or_404(
+        Receita.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+    )
+    registrar(Acao.VISUALIZAR, receita)
+    linhas = [linha for linha in receita.prescricao.splitlines() if linha.strip()]
+    return render(request, "prontuario/receita.html", {"receita": receita, "linhas": linhas})
 
 
 @require_POST
