@@ -302,6 +302,9 @@ msgstr "Vacío: el idioma del navegador."
 msgid "última versão vista nas novidades"
 msgstr "última versión vista en Novedades"
 
+msgid "conta de demonstração"
+msgstr "cuenta de demostración"
+
 msgid "usuários"
 msgstr "usuarios"
 
@@ -471,6 +474,9 @@ msgstr "Buenas noches"
 
 msgid "Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe."
 msgstr "Clínica registrada. Ahora registre al equipo en Registros > Equipo."
+
+msgid "Contas de demonstração não trocam a senha."
+msgstr "Las cuentas de demostración no cambian la contraseña."
 
 msgid "Senha alterada."
 msgstr "Contraseña cambiada."
@@ -1670,6 +1676,9 @@ msgstr "Solicitud de exámenes emitida."
 
 msgid "Pedir exames"
 msgstr "Solicitar exámenes"
+
+msgid "Contas de demonstração não enviam anexos."
+msgstr "Las cuentas de demostración no envían adjuntos."
 
 msgid "Anexo incluído."
 msgstr "Adjunto agregado."

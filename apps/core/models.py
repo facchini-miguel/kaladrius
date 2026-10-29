@@ -23,6 +23,9 @@ class Usuario(AbstractUser):
     ultima_versao_vista = models.CharField(
         _("última versão vista nas novidades"), max_length=20, blank=True, editable=False
     )
+    # Public demo login (0.32.0, decision 085): its password is published, so it cannot
+    # change it (nobody locks the others out) nor upload attachments (no file hosting).
+    demonstracao = models.BooleanField(_("conta de demonstração"), default=False, editable=False)
 
     class Meta:
         verbose_name = _("usuário")

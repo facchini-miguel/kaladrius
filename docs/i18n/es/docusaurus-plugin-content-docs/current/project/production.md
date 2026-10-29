@@ -104,6 +104,17 @@ deploy/testar_backup.sh <archivo>.dump    # una específica
 ```
 Hecho el 27/10/2026 con la copia del 26/10 (datos ficticios de esa época): restaurada sin errores en 9 segundos. La misma prueba mostró que la copia automática de ese día había fallado (el servidor estaba entre la 0.7.0 y la 0.8.0, sin el enlace del `.env`) y que el aviso en la web no aparecía cuando **nunca** se había registrado una copia; desde la 0.17.1 los superusuarios también ven ese caso (`DJANGO_BACKUP_MONITORADO`, activado por defecto cuando `DJANGO_DEBUG` está desactivado).
 
+## Cuentas públicas de demostración
+La demostración publica dos cuentas en el sitio del titular, `demo.recepcao` y `demo.profissional` (decisión 085). Para crearlas, o para reiniciar las contraseñas:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
+  --clinica "Clínica Sorriso" --profissional "Dr. Bruno Alves" \
+  --senha-recepcao <contraseña publicada> --senha-profissional <contraseña publicada>
+```
+
+Nunca use allí la contraseña de `DJANGO_SEED_PASSWORD`: los usuarios de prueba, incluido el administrador de prueba, la usan.
+
 ## Cuidados
 - **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).
 - El disco **estándar** es el gratuito; la consola sugiere "balanced", que se cobra.

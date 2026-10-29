@@ -104,6 +104,17 @@ deploy/testar_backup.sh <file>.dump     # a specific one
 ```
 Done on 2026-10-27 with the 10/26 backup (fake data of that time): restored without errors in 9 seconds. The same test showed that that day's automatic backup had failed (the server was between 0.7.0 and 0.8.0, without the `.env` link) and that the web warning did not show when **no** backup had ever been recorded; since 0.17.1 superusers see that case too (`DJANGO_BACKUP_MONITORADO`, on by default when `DJANGO_DEBUG` is off).
 
+## Public demo logins
+The demo publishes two logins on the owner's website, `demo.recepcao` and `demo.profissional` (decision 085). To create them, or to reset their passwords:
+
+```bash
+docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
+  --clinica "Clínica Sorriso" --profissional "Dr. Bruno Alves" \
+  --senha-recepcao <published password> --senha-profissional <published password>
+```
+
+Never use the `DJANGO_SEED_PASSWORD` password there: the seed users, the seed administrator included, share it.
+
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).
 - The **standard** disk is the free one; the console suggests "balanced", which is billed.

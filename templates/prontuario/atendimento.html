@@ -116,12 +116,16 @@
     {% endfor %}
   </ul>
   <div class="card-body border-top">
+    {% if user.demonstracao %}
+    <p class="text-body-secondary mb-0">{% translate "Contas de demonstração não enviam anexos." %}</p>
+    {% else %}
     <form method="post" action="{% url 'prontuario:anexo_enviar' atendimento.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end" novalidate>
       {% csrf_token %}
       <div class="col-md-5">{% with campo=anexo_form.arquivo %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-5">{% with campo=anexo_form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-2 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Anexar" %}</button></div>
     </form>
+    {% endif %}
   </div>
 </div>
 {% endif %}

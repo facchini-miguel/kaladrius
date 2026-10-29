@@ -311,6 +311,9 @@ def pedido_de_exames(request, profissional, pk):
 def anexo_enviar(request, profissional, pk):
     """Any practitioner adds files to a visit, even a finalized one (results arrive later)."""
     atendimento = get_object_or_404(Atendimento.objects, pk=pk)
+    if request.user.demonstracao:
+        messages.error(request, _("Contas de demonstração não enviam anexos."))
+        return redirect("prontuario:atendimento", pk=atendimento.pk)
     form = AnexoForm(request.POST, request.FILES)
     if form.is_valid():
         arquivo = form.cleaned_data["arquivo"]

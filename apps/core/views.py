@@ -66,6 +66,12 @@ class TrocarSenhaView(PasswordChangeView):
     template_name = "core/trocar_senha.html"
     success_url = reverse_lazy("inicio")
 
+    def dispatch(self, request, *args, **kwargs):
+        if getattr(request.user, "demonstracao", False):
+            messages.info(request, _("Contas de demonstração não trocam a senha."))
+            return redirect("inicio")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         messages.success(self.request, _("Senha alterada."))
         return super().form_valid(form)

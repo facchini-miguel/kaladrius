@@ -303,6 +303,9 @@ msgstr "Empty: the browser's language."
 msgid "última versão vista nas novidades"
 msgstr "last version seen in What's new"
 
+msgid "conta de demonstração"
+msgstr "demo account"
+
 msgid "usuários"
 msgstr "users"
 
@@ -472,6 +475,9 @@ msgstr "Good evening"
 
 msgid "Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe."
 msgstr "Clinic registered. Now add the team in Records > Team."
+
+msgid "Contas de demonstração não trocam a senha."
+msgstr "Demo accounts cannot change their password."
 
 msgid "Senha alterada."
 msgstr "Password changed."
@@ -1670,6 +1676,9 @@ msgstr "Exam request issued."
 
 msgid "Pedir exames"
 msgstr "Request exams"
+
+msgid "Contas de demonstração não enviam anexos."
+msgstr "Demo accounts cannot upload attachments."
 
 msgid "Anexo incluído."
 msgstr "Attachment added."

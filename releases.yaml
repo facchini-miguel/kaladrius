@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.32.0
+  data: 2026-10-29
+  titulo:
+    pt-br: Contas de demonstração
+    en: Demo accounts
+    es: Cuentas de demostración
+  itens:
+    - tipo: novo
+      modulo: Equipe
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A demonstração tem contas públicas de recepção e de profissional, com a senha
+          publicada no site. Elas não trocam a senha nem enviam anexos, para que ninguém tranque
+          os outros visitantes nem use o servidor para guardar arquivos.
+        en: >
+          The demo has public front desk and practitioner logins, with the password published
+          on the website. They cannot change the password nor upload attachments, so nobody
+          locks the other visitors out or uses the server to store files.
+        es: >
+          La demostración tiene cuentas públicas de recepción y de profesional, con la
+          contraseña publicada en el sitio. No cambian la contraseña ni envían adjuntos, para
+          que nadie deje afuera a los otros visitantes ni use el servidor para guardar archivos.
+
 - versao: 0.31.0
   data: 2026-10-28
   titulo:

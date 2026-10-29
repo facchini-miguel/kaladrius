@@ -153,8 +153,10 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
             <ul class="dropdown-menu dropdown-menu-end">
+              {% if not user.demonstracao %}
               <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">{% translate "Trocar senha" %}</a></li>
               <li><hr class="dropdown-divider"></li>
+              {% endif %}
               <li>
                 <form method="post" action="{% url 'logout' %}">
                   {% csrf_token %}
