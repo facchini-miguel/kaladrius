@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "apps.financeiro",
     "apps.orcamentos",
     "apps.odontologia",
+    "apps.prontuario",
     "apps.monitoramento",
     # Serves the API docs page's own files (no CDN, which the CSP would block).
     "ninja",
@@ -116,6 +117,7 @@ TEMPLATES = [
                 "apps.monitoramento.context_processors.alerta",
                 "apps.core.context_processors.idiomas",
                 "apps.ajuda.context_processors.documentacao",
+                "apps.prontuario.context_processors.prontuario",
             ],
         },
     },

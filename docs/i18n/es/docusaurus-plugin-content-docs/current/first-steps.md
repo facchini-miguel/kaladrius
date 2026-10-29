@@ -37,7 +37,7 @@ De aquí en adelante, el administrador de la clínica hace todo dentro del siste
 |---|---|
 | **Administrador** | Todo en la clínica: equipo, profesionales, configuración, cuentas por pagar, flujo de caja, informes, auditoría y pacientes archivados |
 | **Recepción** | Agenda de todos los profesionales, pacientes, presupuestos, recordatorios, cobros y caja del día |
-| **Profesional** | Solo su propia agenda, pacientes, presupuestos y recordatorios; ningún valor de la clínica |
+| **Profesional** | Solo su propia agenda, pacientes, presupuestos, recordatorios y la [historia clínica](manual/prontuario.md); ningún valor de la clínica |
 
 Los botones que la persona no puede usar no aparecen. Vea [Primeros pasos del manual](manual/inicio.md#perfiles).
 

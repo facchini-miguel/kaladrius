@@ -36,6 +36,7 @@ apps/
   pacientes/      pacientes
   orcamentos/     orçamentos e tabela de procedimentos
   odontologia/    módulo de odontologia (odontograma), só na área Odontologia
+  prontuario/     prontuário: anamnese de cada atendimento e adendos (só profissionais)
   rechamadas/     rechamadas e aniversariantes
   financeiro/     contas a receber e a pagar, caixa, bancos, comissões
   equipe/         gestão da equipe

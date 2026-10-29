@@ -93,6 +93,25 @@
   </div>
 </div>
 
+{% if prontuario is not None %}
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    {% translate "Prontuário" %}
+    {% if not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'prontuario:novo' paciente.pk %}">{% translate "Novo atendimento" %}</a>{% endif %}
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for atendimento in prontuario %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <a href="{% url 'prontuario:atendimento' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.profissional.nome }}</a>
+      {% if atendimento.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">{% translate "Nenhum atendimento registrado." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 {% if agendamentos %}
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">

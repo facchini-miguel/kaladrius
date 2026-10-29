@@ -7,4 +7,8 @@
   {% endif %}
   {% if agendamento.situacao != "desmarcou" %}<button type="button" class="btn btn-sm btn-outline-secondary" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "desmarcou"}' hx-target="#modal-conteudo">{% translate "Desmarcou" %}</button>{% endif %}
   {% if agendamento.situacao != "agendado" %}<button type="button" class="btn btn-sm btn-link" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "agendado"}' hx-target="#modal-conteudo">{% translate "Desfazer marcação" %}</button>{% endif %}
+  {% if agendamento.paciente_id and pode_prontuario %}
+  {% if agendamento.atendimento %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'prontuario:atendimento' agendamento.atendimento.pk %}">{% translate "Abrir atendimento" %}</a>
+  {% else %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'prontuario:novo' agendamento.paciente_id %}?agendamento={{ agendamento.pk }}">{% translate "Registrar atendimento" %}</a>{% endif %}
+  {% endif %}
 </div>

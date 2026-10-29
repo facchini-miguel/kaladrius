@@ -8,6 +8,12 @@
 <div class="alert alert-warning">
   {% translate "Use só quando o próprio paciente pedir a exclusão dos seus dados (LGPD, art. 18). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento (a Lei 13.787/2018 manda guardar o prontuário por 20 anos)." %}
 </div>
+{% if atendimentos %}
+<div class="alert alert-danger">
+  {% blocktranslate count total=atendimentos %}Este paciente tem prontuário ({{ total }} atendimento). O prontuário precisa ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser excluído definitivamente: mantenha-o arquivado.{% plural %}Este paciente tem prontuário ({{ total }} atendimentos). O prontuário precisa ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser excluído definitivamente: mantenha-o arquivado.{% endblocktranslate %}
+</div>
+<a class="btn btn-link px-0" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
+{% else %}
 <p>{% translate "Esta ação não pode ser desfeita:" %}</p>
 <ul>
   <li>{% translate "o cadastro do paciente é apagado;" %}</li>
@@ -21,4 +27,5 @@
   <button type="submit" class="btn btn-danger">{% translate "Excluir definitivamente" %}</button>
   <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Cancelar" %}</a>
 </form>
+{% endif %}
 {% endblock %}

@@ -31,5 +31,6 @@ urlpatterns = [
     path("sistema/saude/", include("apps.monitoramento.urls")),
     path("financeiro/", include("apps.financeiro.urls")),
     path("orcamentos/", include("apps.orcamentos.urls")),
+    path("prontuario/", include("apps.prontuario.urls")),
     path("", include("apps.core.urls")),
 ]

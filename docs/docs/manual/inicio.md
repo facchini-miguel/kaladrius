@@ -38,7 +38,7 @@ What you see depends on your role in the clinic:
 | Role | Can |
 |---|---|
 | **Front desk** | Every practitioner's schedule, patients (no archiving), recalls and birthdays |
-| **Practitioner** | Only their own schedule, patients (no archiving), recalls and birthdays |
+| **Practitioner** | Only their own schedule, patients (no archiving), recalls, birthdays and the [medical record](prontuario.md) |
 | **Clinic administrator** | Everything, including team, practitioners, appointment types, clinic settings, audit log and archived patients |
 
 Buttons you cannot use are not shown.

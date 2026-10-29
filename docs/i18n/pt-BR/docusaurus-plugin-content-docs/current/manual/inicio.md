@@ -38,7 +38,7 @@ O que você vê depende do seu perfil na clínica:
 | Perfil | Pode |
 |---|---|
 | **Recepção** | Agenda de todos os profissionais, pacientes (sem arquivar), rechamadas e aniversariantes |
-| **Profissional** | Só a própria agenda, pacientes (sem arquivar), rechamadas e aniversariantes |
+| **Profissional** | Só a própria agenda, pacientes (sem arquivar), rechamadas, aniversariantes e o [prontuário](prontuario.md) |
 | **Administrador da clínica** | Tudo, inclusive equipe, profissionais, tipos de atendimento, configurações da clínica, auditoria e pacientes arquivados |
 
 Botões que você não pode usar não aparecem.

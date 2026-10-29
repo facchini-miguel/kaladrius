@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Atendimento" %} · {{ paciente.nome }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1">{% translate "Atendimento" %}</h1>
+    <div class="text-body-secondary">
+      <a href="{% url 'pacientes:ficha' paciente.pk %}">{{ paciente.nome }}</a>
+      {% if atendimento %} · {{ atendimento.profissional.nome }}{% endif %}
+      {% if agendamento %} · {% translate "agendamento de" %} {{ agendamento.inicio|date:"SHORT_DATETIME_FORMAT" }}{% endif %}
+    </div>
+  </div>
+  {% if atendimento %}
+  {% if atendimento.finalizado %}
+  <span class="badge text-bg-success">{% blocktranslate with momento=atendimento.finalizado_em|date:"SHORT_DATETIME_FORMAT" %}Finalizado em {{ momento }}{% endblocktranslate %}</span>
+  {% else %}
+  <span class="badge text-bg-warning">{% translate "Rascunho" %}</span>
+  {% endif %}
+  {% endif %}
+</div>
+
+<p class="text-body-secondary small">{% translate "Prontuário: visível só para os profissionais da clínica e guardado por 20 anos. Depois de finalizado, o atendimento não muda mais; correções são feitas por adendo." %}</p>
+
+{% if editavel %}
+<form method="post" style="max-width: 52rem;" novalidate>
+  {% csrf_token %}
+  {% if agendamento and not atendimento %}<input type="hidden" name="agendamento" value="{{ agendamento.pk }}">{% endif %}
+  {% include "includes/formulario.html" %}
+  <div class="d-flex flex-wrap gap-2">
+    <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% translate "Salvar rascunho" %}</button>
+    <button type="submit" name="acao" value="finalizar" class="btn btn-outline-success">{% translate "Salvar e finalizar" %}</button>
+    <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
+  </div>
+</form>
+{% else %}
+<div class="card mb-3" style="max-width: 52rem;">
+  <div class="card-body">
+    <div class="small text-body-secondary mb-2">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }}</div>
+    {% for rotulo, valor in campos %}
+    <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>
+    <div class="texto-clinico">{{ valor|default:"—"|linebreaksbr }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% if not atendimento.finalizado %}
+<p class="text-body-secondary small">{% translate "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar." %}</p>
+{% endif %}
+
+{% if adendos %}
+<h2 class="h5 mt-4">{% translate "Adendos" %}</h2>
+{% for adendo in adendos %}
+<div class="card mb-2" style="max-width: 52rem;">
+  <div class="card-body py-2">
+    <div class="small text-body-secondary">{{ adendo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</div>
+    <div class="texto-clinico">{{ adendo.texto|linebreaksbr }}</div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if adendo_form %}
+<form method="post" action="{% url 'prontuario:adendo' atendimento.pk %}" class="mt-3" style="max-width: 52rem;" novalidate>
+  {% csrf_token %}
+  {% with campo=adendo_form.texto %}{% include "includes/campo.html" %}{% endwith %}
+  <button type="submit" class="btn btn-outline-primary">{% translate "Incluir adendo" %}</button>
+</form>
+{% endif %}
+<p class="mt-3"><a href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a></p>
+{% endif %}
+{% endblock %}

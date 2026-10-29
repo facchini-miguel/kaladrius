@@ -4,6 +4,34 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.29.0
+  data: 2026-10-28
+  titulo:
+    pt-br: Prontuário
+    en: Medical record
+    es: Historia clínica
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Os profissionais registram a anamnese de cada atendimento (queixa principal, história
+          da doença atual, antecedentes, exame físico e conduta), pela agenda ou pela ficha do
+          paciente. Depois de finalizado, o atendimento não muda mais, e correções viram
+          adendos. Só os profissionais veem o prontuário, que é guardado por 20 anos.
+        en: >
+          Practitioners record the anamnesis of each visit (chief complaint, history of present
+          illness, history, physical examination and plan), from the schedule or the patient
+          record. Once finalized, a visit no longer changes, and corrections become addenda.
+          Only practitioners see the medical record, which is kept for 20 years.
+        es: >
+          Los profesionales registran la anamnesis de cada consulta (motivo de consulta,
+          enfermedad actual, antecedentes, examen físico y conducta), desde la agenda o la ficha
+          del paciente. Una vez finalizada, la consulta ya no cambia, y las correcciones se
+          vuelven adendas. Solo los profesionales ven la historia clínica, que se guarda por 20
+          años.
+
 - versao: 0.28.0
   data: 2026-10-28
   titulo:

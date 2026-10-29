@@ -38,7 +38,7 @@ Lo que ve depende de su perfil en la clínica:
 | Perfil | Puede |
 |---|---|
 | **Recepción** | Agenda de todos los profesionales, pacientes (sin archivar), recordatorios y cumpleaños |
-| **Profesional** | Solo su propia agenda, pacientes (sin archivar), recordatorios y cumpleaños |
+| **Profesional** | Solo su propia agenda, pacientes (sin archivar), recordatorios, cumpleaños y la [historia clínica](prontuario.md) |
 | **Administrador de la clínica** | Todo, incluidos equipo, profesionales, tipos de atención, configuración de la clínica, auditoría y pacientes archivados |
 
 Los botones que no puede usar no aparecen.

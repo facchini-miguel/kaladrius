@@ -37,7 +37,7 @@ From here on, the clinic's administrator does everything inside the system, with
 |---|---|
 | **Administrator** | Everything in the clinic: team, practitioners, settings, payables, cash flow, reports, audit log and archived patients |
 | **Front desk** | Every practitioner's schedule, patients, estimates, recalls, receiving and the daily cash |
-| **Practitioner** | Only their own schedule, patients, estimates and recalls; no clinic money |
+| **Practitioner** | Only their own schedule, patients, estimates, recalls and the [medical record](manual/prontuario.md); no clinic money |
 
 Buttons a person cannot use are not shown. See [Getting started](manual/inicio.md#roles).
 

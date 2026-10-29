@@ -335,7 +335,9 @@ msgstr "área"
 msgid ""
 "Mostra as partes de cada área, como o odontograma nos orçamentos da "
 "Odontologia. Trocar a área não apaga nada."
-msgstr "Muestra las partes de cada área, como el odontograma en los presupuestos de Odontología. Cambiar el área no borra nada."
+msgstr ""
+"Muestra las partes de cada área, como el odontograma en los presupuestos de "
+"Odontología. Cambiar el área no borra nada."
 
 msgid "Somente números."
 msgstr "Solo números."
@@ -1461,6 +1463,9 @@ msgstr ""
 msgid "Paciente %(nome)s restaurado."
 msgstr "Paciente %(nome)s restaurado."
 
+msgid "Paciente com prontuário não pode ser excluído."
+msgstr "Un paciente con historia clínica no puede eliminarse."
+
 #, python-format
 msgid "Os dados do paciente de código %(codigo)s foram excluídos."
 msgstr "Los datos del paciente de código %(codigo)s fueron eliminados."
@@ -1508,6 +1513,58 @@ msgstr ""
 #, python-format
 msgid "Profissional %(nome)s excluído."
 msgstr "Profesional %(nome)s eliminado."
+
+msgid "Prontuário"
+msgstr "Historia clínica"
+
+msgid "data do atendimento"
+msgstr "fecha de la consulta"
+
+msgid "queixa principal"
+msgstr "motivo de consulta"
+
+msgid "história da doença atual"
+msgstr "enfermedad actual"
+
+msgid "antecedentes"
+msgstr "antecedentes"
+
+msgid "Pessoais e familiares, medicamentos em uso, alergias."
+msgstr "Personales y familiares, medicamentos en uso, alergias."
+
+msgid "exame físico"
+msgstr "examen físico"
+
+msgid "conduta e plano"
+msgstr "conducta y plan"
+
+msgid "finalizado em"
+msgstr "finalizada el"
+
+msgid "atendimento"
+msgstr "consulta"
+
+msgid "atendimentos"
+msgstr "consultas"
+
+msgid "adendo"
+msgstr "adenda"
+
+msgid "adendos"
+msgstr "adendas"
+
+msgid ""
+"Atendimento finalizado. A partir de agora, correções são feitas por adendo."
+msgstr "Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
+
+msgid "Atendimento salvo."
+msgstr "Consulta guardada."
+
+msgid "Adendo incluído."
+msgstr "Adenda agregada."
+
+msgid "Escreva o adendo."
+msgstr "Escriba la adenda."
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "Ej.: revisión de 6 meses."
@@ -1652,6 +1709,12 @@ msgstr "Situación:"
 
 msgid "Desfazer marcação"
 msgstr "Deshacer marca"
+
+msgid "Abrir atendimento"
+msgstr "Abrir consulta"
+
+msgid "Registrar atendimento"
+msgstr "Registrar consulta"
 
 msgid "Ir para a data"
 msgstr "Ir a la fecha"
@@ -3101,6 +3164,18 @@ msgstr ""
 "si la clínica está obligada a guardar los registros de atención (la Ley "
 "13.787/2018 exige guardar la historia clínica durante 20 años)."
 
+#, python-format
+msgid ""
+"Este paciente tem prontuário (%(total)s atendimento). O prontuário precisa "
+"ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
+"excluído definitivamente: mantenha-o arquivado."
+msgid_plural ""
+"Este paciente tem prontuário (%(total)s atendimentos). O prontuário precisa "
+"ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
+"excluído definitivamente: mantenha-o arquivado."
+msgstr[0] "Este paciente tiene historia clínica (%(total)s consulta). La historia clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el paciente no puede eliminarse definitivamente: manténgalo archivado."
+msgstr[1] "Este paciente tiene historia clínica (%(total)s consultas). La historia clínica debe guardarse por 20 años (Ley 13.787/2018 de Brasil), así que el paciente no puede eliminarse definitivamente: manténgalo archivado."
+
 msgid "Esta ação não pode ser desfeita:"
 msgstr "Esta acción no se puede deshacer:"
 
@@ -3198,6 +3273,18 @@ msgstr "Dirección"
 msgid "Observações"
 msgstr "Observaciones"
 
+msgid "Novo atendimento"
+msgstr "Nueva consulta"
+
+msgid "Finalizado"
+msgstr "Finalizada"
+
+msgid "Rascunho"
+msgstr "Borrador"
+
+msgid "Nenhum atendimento registrado."
+msgstr "Ninguna consulta registrada."
+
 msgid "Agendamentos"
 msgstr "Citas"
 
@@ -3290,6 +3377,38 @@ msgstr "Usuario de acceso"
 
 msgid "Nenhum profissional cadastrado."
 msgstr "Ningún profesional registrado."
+
+msgid "Atendimento"
+msgstr "Consulta"
+
+msgid "agendamento de"
+msgstr "cita del"
+
+#, python-format
+msgid "Finalizado em %(momento)s"
+msgstr "Finalizada el %(momento)s"
+
+msgid ""
+"Prontuário: visível só para os profissionais da clínica e guardado por 20 "
+"anos. Depois de finalizado, o atendimento não muda mais; correções são "
+"feitas por adendo."
+msgstr "Historia clínica: visible solo para los profesionales de la clínica y guardada por 20 años. Una vez finalizada, la consulta ya no cambia; las correcciones se hacen por adenda."
+
+msgid "Salvar rascunho"
+msgstr "Guardar borrador"
+
+msgid "Salvar e finalizar"
+msgstr "Guardar y finalizar"
+
+msgid ""
+"Rascunho de outro profissional: só quem escreveu pode alterar e finalizar."
+msgstr "Borrador de otro profesional: solo quien lo escribió puede modificarlo y finalizarlo."
+
+msgid "Adendos"
+msgstr "Adendas"
+
+msgid "Incluir adendo"
+msgstr "Agregar adenda"
 
 #, python-format
 msgid "Rechamadas de %(dia)s"

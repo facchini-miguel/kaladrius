@@ -36,6 +36,7 @@ apps/
   pacientes/      patients
   orcamentos/     estimates and price list
   odontologia/    dental module (dental chart), shown in the Dentistry area
+  prontuario/     medical record: anamnesis per visit, addenda (practitioners only)
   rechamadas/     recalls and birthdays
   financeiro/     receivables, payables, cash, banks, commissions
   equipe/         team management

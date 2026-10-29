@@ -336,7 +336,9 @@ msgstr "area"
 msgid ""
 "Mostra as partes de cada área, como o odontograma nos orçamentos da "
 "Odontologia. Trocar a área não apaga nada."
-msgstr "Shows the parts of each area, such as the dental chart in Dentistry estimates. Changing the area deletes nothing."
+msgstr ""
+"Shows the parts of each area, such as the dental chart in Dentistry "
+"estimates. Changing the area deletes nothing."
 
 msgid "Somente números."
 msgstr "Numbers only."
@@ -1463,6 +1465,9 @@ msgstr ""
 msgid "Paciente %(nome)s restaurado."
 msgstr "Patient %(nome)s restored."
 
+msgid "Paciente com prontuário não pode ser excluído."
+msgstr "A patient with a medical record cannot be deleted."
+
 #, python-format
 msgid "Os dados do paciente de código %(codigo)s foram excluídos."
 msgstr "The data of patient code %(codigo)s was deleted."
@@ -1509,6 +1514,58 @@ msgstr ""
 #, python-format
 msgid "Profissional %(nome)s excluído."
 msgstr "Practitioner %(nome)s deleted."
+
+msgid "Prontuário"
+msgstr "Medical record"
+
+msgid "data do atendimento"
+msgstr "visit date"
+
+msgid "queixa principal"
+msgstr "chief complaint"
+
+msgid "história da doença atual"
+msgstr "history of present illness"
+
+msgid "antecedentes"
+msgstr "history"
+
+msgid "Pessoais e familiares, medicamentos em uso, alergias."
+msgstr "Personal and family, current medications, allergies."
+
+msgid "exame físico"
+msgstr "physical examination"
+
+msgid "conduta e plano"
+msgstr "management and plan"
+
+msgid "finalizado em"
+msgstr "finalized on"
+
+msgid "atendimento"
+msgstr "visit"
+
+msgid "atendimentos"
+msgstr "visits"
+
+msgid "adendo"
+msgstr "addendum"
+
+msgid "adendos"
+msgstr "addenda"
+
+msgid ""
+"Atendimento finalizado. A partir de agora, correções são feitas por adendo."
+msgstr "Visit finalized. From now on, corrections are made by addendum."
+
+msgid "Atendimento salvo."
+msgstr "Visit saved."
+
+msgid "Adendo incluído."
+msgstr "Addendum added."
+
+msgid "Escreva o adendo."
+msgstr "Write the addendum."
 
 msgid "Ex.: revisão de 6 meses."
 msgstr "E.g.: 6-month check-up."
@@ -1656,6 +1713,12 @@ msgstr "Status:"
 
 msgid "Desfazer marcação"
 msgstr "Undo mark"
+
+msgid "Abrir atendimento"
+msgstr "Open visit"
+
+msgid "Registrar atendimento"
+msgstr "Record visit"
 
 msgid "Ir para a data"
 msgstr "Go to date"
@@ -3101,6 +3164,18 @@ msgstr ""
 "clinic must keep the treatment records (Law 13.787/2018 requires keeping "
 "clinical records for 20 years)."
 
+#, python-format
+msgid ""
+"Este paciente tem prontuário (%(total)s atendimento). O prontuário precisa "
+"ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
+"excluído definitivamente: mantenha-o arquivado."
+msgid_plural ""
+"Este paciente tem prontuário (%(total)s atendimentos). O prontuário precisa "
+"ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser "
+"excluído definitivamente: mantenha-o arquivado."
+msgstr[0] "This patient has a medical record (%(total)s visit). The record must be kept for 20 years (Law 13.787/2018), so the patient cannot be permanently deleted: keep them archived."
+msgstr[1] "This patient has a medical record (%(total)s visits). The record must be kept for 20 years (Law 13.787/2018), so the patient cannot be permanently deleted: keep them archived."
+
 msgid "Esta ação não pode ser desfeita:"
 msgstr "This action cannot be undone:"
 
@@ -3197,6 +3272,18 @@ msgstr "Address"
 msgid "Observações"
 msgstr "Notes"
 
+msgid "Novo atendimento"
+msgstr "New visit"
+
+msgid "Finalizado"
+msgstr "Finalized"
+
+msgid "Rascunho"
+msgstr "Draft"
+
+msgid "Nenhum atendimento registrado."
+msgstr "No visit recorded."
+
 msgid "Agendamentos"
 msgstr "Appointments"
 
@@ -3289,6 +3376,38 @@ msgstr "Login user"
 
 msgid "Nenhum profissional cadastrado."
 msgstr "No practitioners yet."
+
+msgid "Atendimento"
+msgstr "Visit"
+
+msgid "agendamento de"
+msgstr "appointment on"
+
+#, python-format
+msgid "Finalizado em %(momento)s"
+msgstr "Finalized on %(momento)s"
+
+msgid ""
+"Prontuário: visível só para os profissionais da clínica e guardado por 20 "
+"anos. Depois de finalizado, o atendimento não muda mais; correções são "
+"feitas por adendo."
+msgstr "Medical record: visible only to the clinic's practitioners and kept for 20 years. Once finalized, the visit no longer changes; corrections are made by addendum."
+
+msgid "Salvar rascunho"
+msgstr "Save draft"
+
+msgid "Salvar e finalizar"
+msgstr "Save and finalize"
+
+msgid ""
+"Rascunho de outro profissional: só quem escreveu pode alterar e finalizar."
+msgstr "Draft by another practitioner: only its author can change and finalize it."
+
+msgid "Adendos"
+msgstr "Addenda"
+
+msgid "Incluir adendo"
+msgstr "Add addendum"
 
 #, python-format
 msgid "Rechamadas de %(dia)s"

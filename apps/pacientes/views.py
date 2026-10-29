@@ -18,6 +18,8 @@ from apps.core.validadores import normalizar_cnpj
 from apps.financeiro.models import Lancamento, Pagamento, Parcela
 from apps.financeiro.servicos import resumo_do_paciente
 from apps.orcamentos.models import ItemOrcamento, Orcamento
+from apps.prontuario.models import Atendimento
+from apps.prontuario.permissoes import profissional_do_usuario
 from apps.rechamadas.models import Rechamada
 
 from .forms import PacienteForm
@@ -97,6 +99,10 @@ def ficha(request, pk):
     if pode(request, Modulo.ORCAMENTOS, Acao.VER):
         contexto["orcamentos"] = list(
             Orcamento.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
+        )
+    if profissional_do_usuario(request) is not None:
+        contexto["prontuario"] = list(
+            Atendimento.objects.filter(paciente=paciente).select_related("profissional")
         )
     return render(request, "pacientes/ficha.html", contexto)
 
@@ -195,6 +201,15 @@ def excluir(request, pk):
     and the notes, and the patient's personal data is removed from the audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
+    # The medical record is kept for 20 years (Law 13.787/2018, decision 081): a patient
+    # with one stays archived and is never permanently deleted.
+    atendimentos = Atendimento.objects.filter(paciente=paciente).count()
+    if atendimentos:
+        if request.method == "POST":
+            messages.error(request, _("Paciente com prontuário não pode ser excluído."))
+        return render(
+            request, "pacientes/excluir.html", {"paciente": paciente, "atendimentos": atendimentos}
+        )
     if request.method == "POST":
         codigo = paciente.pk
         agendamentos = Agendamento.objects.filter(paciente=paciente)

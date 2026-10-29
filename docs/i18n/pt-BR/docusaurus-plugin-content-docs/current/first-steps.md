@@ -37,7 +37,7 @@ Daqui em diante, o administrador da clínica faz tudo dentro do sistema, sem o `
 |---|---|
 | **Administrador** | Tudo na clínica: equipe, profissionais, configurações, contas a pagar, fluxo de caixa, relatórios, auditoria e pacientes arquivados |
 | **Recepção** | Agenda de todos os profissionais, pacientes, orçamentos, rechamadas, recebimentos e caixa do dia |
-| **Profissional** | Só a própria agenda, pacientes, orçamentos e rechamadas; nenhum valor da clínica |
+| **Profissional** | Só a própria agenda, pacientes, orçamentos, rechamadas e o [prontuário](manual/prontuario.md); nenhum valor da clínica |
 
 Os botões que a pessoa não pode usar não aparecem. Veja [Primeiros passos do manual](manual/inicio.md#perfis).
 
