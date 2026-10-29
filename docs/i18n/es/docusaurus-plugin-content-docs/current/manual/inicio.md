@@ -39,7 +39,8 @@ Lo que ve depende de su perfil en la clínica:
 |---|---|
 | **Recepción** | Agenda de todos los profesionales, pacientes (sin archivar), recordatorios y cumpleaños |
 | **Profesional** | Solo su propia agenda, pacientes (sin archivar), recordatorios, cumpleaños y la [historia clínica](prontuario.md) |
-| **Administrador de la clínica** | Todo, incluidos equipo, profesionales, tipos de atención, configuración de la clínica, auditoría y pacientes archivados |
+| **Administrador de la clínica** | Todo, incluidas finanzas, equipo, profesionales, tipos de atención, configuración de la clínica, auditoría y pacientes archivados; la historia clínica solo cuando también es profesional |
+| **Administrador del sistema** | Todo, en todas las clínicas, incluida la historia clínica |
 
 Los botones que no puede usar no aparecen.
 

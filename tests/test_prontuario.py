@@ -79,8 +79,9 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
     for quem in ("recepcao", "admin"):
         assert cenario[quem].get(novo).status_code == 403
         assert "prontuario" not in cenario[quem].get(ficha).context
+    # The system administrator always reaches it (decision 087), the clinic administrator not.
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    assert cliente(root).get(novo).status_code == 403  # support account, not a practitioner
+    assert cliente(root).get(novo).status_code == 200
     pagina = cenario["dra"].get(ficha)
     assert pagina.context["prontuario"] == [] and "Novo atendimento" in pagina.content.decode()
 
@@ -320,3 +321,50 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
     assert cenario["dra"].post(remover(segundo)).status_code == 403
     with usar_clinica(cenario["clinica"]):
         assert list(Anexo.objects.values_list("pk", flat=True)) == [segundo.pk]
+
+
+def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
+    """The superuser writes on behalf of a chosen practitioner and edits anyone's draft."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.prontuario.models import Anexo, Atestado
+
+    root = cliente(django_user_model.objects.create_superuser("root", password="x-12345678"))
+    novo = reverse("prontuario:novo", args=[cenario["paciente"].pk])
+    assert 'name="profissional"' in root.get(novo).content.decode()
+    resposta = root.post(novo, {**ANAMNESE, "profissional": cenario["ana"].pk})
+    assert resposta.status_code == 302
+    with usar_clinica(cenario["clinica"]):
+        atendimento = Atendimento.objects.get()
+    assert atendimento.profissional == cenario["ana"]
+    assert atendimento.criado_por.username == "root"  # the audit keeps who really wrote it
+
+    # Another practitioner's draft (Dra. Ana's) can be edited by the superuser only.
+    url = reverse("prontuario:atendimento", args=[atendimento.pk])
+    assert cenario["dr"].post(url, {**ANAMNESE, "conduta": "x"}).status_code == 403
+    assert root.post(url, {**ANAMNESE, "conduta": "Retorno em 15 dias"}).status_code == 302
+    anexo_url = reverse("prontuario:anexo_enviar", args=[atendimento.pk])
+    cenario["dra"].post(
+        anexo_url, {"arquivo": SimpleUploadedFile("x.png", PNG), "descricao": "Foto"}
+    )
+    with usar_clinica(cenario["clinica"]):
+        anexo = Anexo.objects.get()
+    assert root.post(reverse("prontuario:anexo_remover", args=[anexo.pk])).status_code == 302
+
+    root.post(url, {**ANAMNESE, "acao": "finalizar"})
+    resposta = root.post(
+        reverse("prontuario:atestado_novo", args=[atendimento.pk]),
+        {
+            "tipo": "comparecimento",
+            "data": "2031-03-05",
+            "hora_inicio": "10:00",
+            "hora_fim": "11:00",
+        },
+    )
+    assert resposta.status_code == 302
+    with usar_clinica(cenario["clinica"]):
+        assert Atestado.objects.get().profissional == cenario["ana"]
+        assert not Anexo.objects.exists()
+    root.post(reverse("prontuario:adendo", args=[atendimento.pk]), {"texto": "Correção"})
+    with usar_clinica(cenario["clinica"]):
+        assert atendimento.adendos.get().profissional == cenario["ana"]

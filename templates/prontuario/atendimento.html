@@ -22,7 +22,7 @@
   {% endif %}
 </div>
 
-<p class="text-body-secondary small">{% translate "Prontuário: visível só para os profissionais da clínica e guardado por 20 anos. Depois de finalizado, o atendimento não muda mais; correções são feitas por adendo." %}</p>
+<p class="text-body-secondary small">{% translate "Prontuário: visível só para os profissionais da clínica (e o administrador do sistema) e guardado por 20 anos. Depois de finalizado, o atendimento não muda mais; correções são feitas por adendo." %}</p>
 
 {% if editavel %}
 <form method="post" style="max-width: 52rem;" novalidate>
@@ -107,7 +107,7 @@
         <a href="{% url 'prontuario:anexo' anexo.pk %}" target="_blank" rel="noopener">{{ anexo.descricao|default:anexo.nome }}</a>
         <span class="text-body-secondary small">{{ anexo.tamanho|filesizeformat }} · {{ anexo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ anexo.profissional.nome }}</span>
       </span>
-      {% if remove_anexos and anexo.criado_por_id == user.pk %}
+      {% if remove_anexos and anexo.criado_por_id == user.pk or remove_anexos and administra %}
       <form method="post" action="{% url 'prontuario:anexo_remover' anexo.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
       {% endif %}
     </li>

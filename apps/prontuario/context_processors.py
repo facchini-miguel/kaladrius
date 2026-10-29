@@ -1,6 +1,6 @@
-from .permissoes import profissional_do_usuario
+from .permissoes import acessa_prontuario
 
 
 def prontuario(request):
     # A callable: templates call it only where the menu or a page asks.
-    return {"pode_prontuario": lambda: profissional_do_usuario(request) is not None}
+    return {"pode_prontuario": lambda: acessa_prontuario(request)}

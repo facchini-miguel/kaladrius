@@ -19,7 +19,7 @@ from apps.financeiro.models import Lancamento, Pagamento, Parcela
 from apps.financeiro.servicos import resumo_do_paciente
 from apps.orcamentos.models import ItemOrcamento, Orcamento
 from apps.prontuario.models import Atendimento
-from apps.prontuario.permissoes import profissional_do_usuario
+from apps.prontuario.permissoes import acessa_prontuario
 from apps.rechamadas.models import Rechamada
 
 from .forms import PacienteForm
@@ -100,7 +100,7 @@ def ficha(request, pk):
         contexto["orcamentos"] = list(
             Orcamento.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
         )
-    if profissional_do_usuario(request) is not None:
+    if acessa_prontuario(request):
         contexto["prontuario"] = list(
             Atendimento.objects.filter(paciente=paciente).select_related("profissional")
         )

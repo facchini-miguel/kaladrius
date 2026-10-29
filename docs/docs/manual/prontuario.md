@@ -4,7 +4,7 @@ sidebar_position: 3.5
 
 # Medical record
 
-The medical record keeps the **anamnesis of each visit**. Only **practitioners** see it and write in it: the front desk never does, and an administrator only when also registered as a practitioner (**Records > Practitioners**, linked to their user).
+The medical record keeps the **anamnesis of each visit**. Only **practitioners** see it and write in it: the front desk never does, and a clinic administrator only when also registered as a practitioner (**Records > Practitioners**, linked to their user). The **system administrator** sees and does everything: when writing a visit, they choose on behalf of which practitioner, and the audit log keeps who really did it.
 
 ## Recording a visit
 - From the **schedule**: open the patient's appointment and click **Record visit** (or **Open visit**, when it already exists). The visit is linked to the appointment and takes its date.

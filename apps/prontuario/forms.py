@@ -7,6 +7,20 @@ from .models import CAMPOS_DA_ANAMNESE, Adendo, Atendimento, Atestado, PedidoDeE
 
 
 class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
+    """With `profissionais`, a new visit also asks on behalf of which practitioner it is
+    written (the system administrator, decision 087)."""
+
+    def __init__(self, *args, profissionais=None, **kwargs):
+        if profissionais is not None:
+            # Before the mixin's __init__, so it gets the Bootstrap classes too.
+            self.base_fields = {
+                "profissional": forms.ModelChoiceField(
+                    queryset=profissionais, label=_("Profissional")
+                ),
+                **self.base_fields,
+            }
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = Atendimento
         fields = ["data", *CAMPOS_DA_ANAMNESE]

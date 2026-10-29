@@ -4,7 +4,7 @@ sidebar_position: 3.5
 
 # Historia clínica
 
-La historia clínica guarda la **anamnesis de cada consulta**. Solo los **profesionales** la ven y escriben en ella: la recepción nunca, y el administrador solo cuando también está registrado como profesional (**Registros > Profesionales**, vinculado a su usuario).
+La historia clínica guarda la **anamnesis de cada consulta**. Solo los **profesionales** la ven y escriben en ella: la recepción nunca, y el administrador de la clínica solo cuando también está registrado como profesional (**Registros > Profesionales**, vinculado a su usuario). El **administrador del sistema** ve y hace todo: al registrar una consulta, elige en nombre de qué profesional, y la auditoría guarda quién lo hizo de verdad.
 
 ## Registrar una consulta
 - Desde la **agenda**: abra la cita del paciente y haga clic en **Registrar consulta** (o **Abrir consulta**, cuando ya existe). La consulta queda vinculada a la cita y usa su fecha.

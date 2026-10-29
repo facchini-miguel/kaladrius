@@ -4,6 +4,34 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.34.0
+  data: 2026-10-29
+  titulo:
+    pt-br: O administrador do sistema faz tudo, inclusive no prontuário
+    en: The system administrator does everything, the medical record included
+    es: El administrador del sistema hace todo, incluida la historia clínica
+  itens:
+    - tipo: melhoria
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O administrador do sistema agora vê e faz tudo no prontuário. Ao registrar um
+          atendimento, escolhe em nome de qual profissional, e a auditoria guarda quem de
+          fato fez. O administrador da clínica continua com toda a clínica, inclusive o
+          financeiro, e com o prontuário só quando também é profissional.
+        en: >
+          The system administrator now sees and does everything in the medical record. When
+          writing a visit, they choose on behalf of which practitioner, and the audit log
+          keeps who really did it. The clinic administrator keeps the whole clinic, finance
+          included, and the medical record only when also a practitioner.
+        es: >
+          El administrador del sistema ahora ve y hace todo en la historia clínica. Al
+          registrar una consulta, elige en nombre de qué profesional, y la auditoría guarda
+          quién lo hizo de verdad. El administrador de la clínica sigue con toda la clínica,
+          incluidas las finanzas, y con la historia clínica solo cuando también es
+          profesional.
+
 - versao: 0.33.0
   data: 2026-10-29
   titulo:

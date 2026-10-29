@@ -2,12 +2,22 @@ from apps.core.models import Papel
 from apps.profissionais.models import Profissional
 
 
+def administra_prontuario(request):
+    """The system administrator (superuser) sees and does everything in the medical record,
+    writing on behalf of a practitioner (decision 087). Clinic administrators do not."""
+    return request.user.is_authenticated and request.user.is_superuser
+
+
+def acessa_prontuario(request):
+    return administra_prontuario(request) or profissional_do_usuario(request) is not None
+
+
 def profissional_do_usuario(request):
     """The practitioner record of the logged-in user, or None (decision 081).
 
-    Only practitioners read and write the medical record: never the front desk, and an
-    administrator or the superuser only when also registered as an active practitioner
-    (Cadastros > Profissionais, linked to their user).
+    Practitioners read and write the medical record: never the front desk, and a clinic
+    administrator only when also registered as an active practitioner (Cadastros >
+    Profissionais, linked to their user). The superuser always reaches it (decision 087).
     """
     if not hasattr(request, "_profissional_do_prontuario"):
         request._profissional_do_prontuario = _profissional(request)

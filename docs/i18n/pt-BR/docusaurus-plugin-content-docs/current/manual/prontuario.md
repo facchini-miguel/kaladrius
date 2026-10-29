@@ -4,7 +4,7 @@ sidebar_position: 3.5
 
 # Prontuário
 
-O prontuário guarda a **anamnese de cada atendimento**. Só os **profissionais** veem e escrevem nele: a recepção nunca, e o administrador só quando também está cadastrado como profissional (**Cadastros > Profissionais**, ligado ao usuário dele).
+O prontuário guarda a **anamnese de cada atendimento**. Só os **profissionais** veem e escrevem nele: a recepção nunca, e o administrador da clínica só quando também está cadastrado como profissional (**Cadastros > Profissionais**, ligado ao usuário dele). O **administrador do sistema** vê e faz tudo: ao registrar um atendimento, escolhe em nome de qual profissional, e a auditoria guarda quem de fato fez.
 
 ## Registrar um atendimento
 - Pela **agenda**: abra o agendamento do paciente e clique em **Registrar atendimento** (ou **Abrir atendimento**, quando ele já existe). O atendimento fica ligado ao agendamento e usa a data dele.
