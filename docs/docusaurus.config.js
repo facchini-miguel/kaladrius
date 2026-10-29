@@ -11,7 +11,7 @@ export default {
   tagline: "Open-source clinic management for dentists and physicians",
   favicon: "img/favicon.svg",
   // Canonical address of the pages and the sitemap (kaladrius.dev once registered).
-  url: "https://docs.kaladrius.duckdns.org",
+  url: "https://docs.facchini.eti.br",
   baseUrl: "/",
   onBrokenLinks: "throw",
   markdown: {

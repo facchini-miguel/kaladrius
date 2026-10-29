@@ -22,7 +22,7 @@ Después de cambiarlo, reinicie: `kaladrius up -d` (se recrean los contenedores 
 | `DJANGO_BACKUP_MONITORADO` | activado cuando `DJANGO_DEBUG=0` | Avisa a los superusuarios cuando no se registró ningún backup en las últimas 26 horas |
 | `DJANGO_SAUDE_MONITORADA` | activado cuando `DJANGO_DEBUG=0` | Avisa a los superusuarios cuando la recolección de la salud del servidor se detiene o un recurso queda crítico. Use `0` fuera de la instalación de Google Cloud |
 | `DJANGO_SAUDE_DIR` | `/saude` | Carpeta, dentro del contenedor, con las muestras de salud |
-| `DJANGO_DOCS_URL` | `https://docs.kaladrius.duckdns.org` | Este sitio de documentación. El menú **Ayuda** lo abre en el idioma del usuario |
+| `DJANGO_DOCS_URL` | `https://docs.facchini.eti.br` | Este sitio de documentación. El menú **Ayuda** lo abre en el idioma del usuario |
 
 ## Base de datos
 

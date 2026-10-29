@@ -12,7 +12,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 **Versão atual: 0.31.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.duckdns.org (Google Cloud free tier, somente IPv6). Veja [Produção de referência](https://docs.kaladrius.duckdns.org/pt-BR/project/production).
+> Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.facchini.eti.br (Google Cloud free tier, somente IPv6). Veja [Produção de referência](https://docs.facchini.eti.br/pt-BR/project/production).
 
 ## Como rodar (local)
 
@@ -57,11 +57,11 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 
 ## Documentação
 
-Toda a documentação está no site **https://docs.kaladrius.duckdns.org/pt-BR/** (fonte em [`docs/`](docs/), Docusaurus): instalação, configuração, manual do usuário e as decisões do projeto, em português, inglês e espanhol.
+Toda a documentação está no site **https://docs.facchini.eti.br/pt-BR/** (fonte em [`docs/`](docs/), Docusaurus): instalação, configuração, manual do usuário e as decisões do projeto, em português, inglês e espanhol.
 
 ## Versões
 
-O histórico de versões fica em [`releases.yaml`](releases.yaml) e também pode ser consultado dentro do sistema e no app. Veja [Versões](https://docs.kaladrius.duckdns.org/pt-BR/project/versioning).
+O histórico de versões fica em [`releases.yaml`](releases.yaml) e também pode ser consultado dentro do sistema e no app. Veja [Versões](https://docs.facchini.eti.br/pt-BR/project/versioning).
 
 ## Licença
 

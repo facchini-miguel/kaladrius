@@ -20,4 +20,4 @@ credit to you, unless you prefer otherwise.
 
 The code in this repository: the web app, the API, the Docker images and the deploy scripts.
 How a clinic runs its own server (its passwords, firewall, backups) is the clinic's
-responsibility; see [Security and privacy](https://docs.kaladrius.duckdns.org/security).
+responsibility; see [Security and privacy](https://docs.facchini.eti.br/security).

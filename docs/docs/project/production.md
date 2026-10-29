@@ -4,10 +4,11 @@ sidebar_position: 4
 
 # Reference production
 
-Published at **https://kaladrius.duckdns.org** (**IPv6-only** access). Fallback address: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
+Published at **https://kaladrius.facchini.eti.br** (**IPv6-only** access), also at https://kaladrius.duckdns.org. Fallback address: https://2600-1900-4020-f0b-0-0-0-0.sslip.io.
 
 - **DNS:** `kaladrius.duckdns.org` (DuckDNS, free) has only an AAAA record for the VM's IPv6. The token is in `DUCKDNS_TOKEN` in the server `.env` and the local `.env.producao`. To repoint: `https://www.duckdns.org/update?domains=kaladrius&token=<token>&ipv6=<ipv6>` (when `ipv6` is given, DuckDNS does not fill in IPv4). Watch out: when a subdomain is **created** on the website, DuckDNS fills in the IPv4 of whoever created it (your home); clear it with `&clear=true` and point only the `ipv6` again.
-- **Documentation:** the site in `docs/` runs on the same server, at https://docs.kaladrius.duckdns.org (DuckDNS answers any `*.kaladrius.duckdns.org` with the same IPv6, nothing to create). CI publishes the `docs` image next to `app`; it only starts with `COMPOSE_PROFILES=docs` and `DOCS_HOSTNAME` in the server `.env`. It is public and open to search engines since the code was opened (decision 077). To view it on your computer: `docker compose --profile docs up --build docs` → http://localhost:3000.
+- **Documentation:** the site in `docs/` runs on the same server, at https://docs.facchini.eti.br, also at https://docs.kaladrius.duckdns.org (DuckDNS answers any `*.kaladrius.duckdns.org` with the same IPv6, nothing to create). CI publishes the `docs` image next to `app`; it only starts with `COMPOSE_PROFILES=docs` and `DOCS_HOSTNAME` in the server `.env`. It is public and open to search engines since the code was opened (decision 077). To view it on your computer: `docker compose --profile docs up --build docs` → http://localhost:3000.
+- **Owner's domain:** `kaladrius.facchini.eti.br` and `docs.facchini.eti.br` are CNAMEs at Registro.br to the DuckDNS names, so they follow the IPv6 with nothing to update. The server accepts every name: `SITE_HOSTNAME`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS` and `DOCS_HOSTNAME` are comma lists, and Caddy gets one certificate per name (decision 084).
 - **Static IPv6:** reserved address `kaladrius-ipv6` (`2600:1900:4020:f0b::`), free; it does not change when the VM restarts.
 
 ## Architecture
@@ -34,7 +35,7 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 | VM | `kaladrius` (e2-micro, us-east1-b, 30 GB standard disk, Debian 13) | Free tier |
 | Network | VPC `medical-system`, subnet `medical-system-us-east1` (internal IPv4 + external IPv6, Private Google Access) | Free |
 | Static IPv6 | `kaladrius-ipv6` (`2600:1900:4020:f0b::`, reserved) | Free |
-| Domain | `kaladrius.duckdns.org` (DuckDNS) | Free |
+| Domain | `kaladrius.facchini.eti.br` and `docs.facchini.eti.br` (owner's domain at Registro.br, CNAMEs to DuckDNS); `kaladrius.duckdns.org` (DuckDNS) | Free (DuckDNS); the owner pays for his domain |
 | Firewall | `medical-system-web-ipv6` (TCP 80/443 and UDP 443 for HTTP/3, from ::/0), `medical-system-icmpv6`, `medical-system-ssh-iap` (22 from IAP only) | Free |
 | Images | Artifact Registry `kaladrius` (us-east1), automatic cleanup (keeps 5 versions) | Free tier (0.5 GB) |
 | Backups | `gs://kaladrius-backups` (us-east1, private, deleted after 30 days) | Free tier (5 GB) |

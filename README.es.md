@@ -12,7 +12,7 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 **Versión actual: 0.31.0** · [Novedades](releases.yaml) · [Todas las versiones](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.duckdns.org (free tier de Google Cloud, solo IPv6). Ver [Producción de referencia](https://docs.kaladrius.duckdns.org/es/project/production).
+> Estado: **fase 1 concluida** (paridad de funciones con el sistema antiguo), funcionando en https://kaladrius.facchini.eti.br (free tier de Google Cloud, solo IPv6). Ver [Producción de referencia](https://docs.facchini.eti.br/es/project/production).
 
 ## Ejecutar en local
 
@@ -57,11 +57,11 @@ Abra http://localhost:8000. La documentación de la API está en http://localhos
 
 ## Documentación
 
-Toda la documentación está en el sitio **https://docs.kaladrius.duckdns.org/es/** (fuente en [`docs/`](docs/), Docusaurus): instalación, configuración, manual del usuario y las decisiones del proyecto, en español, inglés y portugués.
+Toda la documentación está en el sitio **https://docs.facchini.eti.br/es/** (fuente en [`docs/`](docs/), Docusaurus): instalación, configuración, manual del usuario y las decisiones del proyecto, en español, inglés y portugués.
 
 ## Versiones
 
-El historial de versiones está en [`releases.yaml`](releases.yaml) y también puede verse dentro del sistema y en la app. Ver [Versiones](https://docs.kaladrius.duckdns.org/es/project/versioning).
+El historial de versiones está en [`releases.yaml`](releases.yaml) y también puede verse dentro del sistema y en la app. Ver [Versiones](https://docs.facchini.eti.br/es/project/versioning).
 
 ## Licencia
 
