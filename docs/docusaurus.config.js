@@ -85,7 +85,7 @@ export default {
             ],
           },
         ],
-        copyright: `Kaladrius — Apache License 2.0`,
+        copyright: `Kaladrius — Apache License 2.0 · Built with <a href="https://docusaurus.io" target="_blank" rel="noopener">Docusaurus</a>.`,
       },
       prism: {
         theme: prismThemes.github,

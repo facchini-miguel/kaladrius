@@ -32,7 +32,7 @@
     "description": "The label of footer link with label=Contributing linking to /contributing"
   },
   "copyright": {
-    "message": "Kaladrius — Licencia Apache 2.0",
+    "message": "Kaladrius — Licencia Apache 2.0 · Hecho con <a href=\"https://docusaurus.io\" target=\"_blank\" rel=\"noopener\">Docusaurus</a>.",
     "description": "The footer copyright"
   },
   "link.item.label.Brand and press": {
