@@ -4,6 +4,8 @@
 import { themes as prismThemes } from "prism-react-renderer";
 
 const REPOSITORIO = "https://github.com/facchini-miguel/kaladrius";
+// The same footer line in every language, as the Docusaurus credit is a name.
+const ANO = new Date().getFullYear();
 
 /** @type {import('@docusaurus/types').Config} */
 export default {
@@ -85,7 +87,7 @@ export default {
             ],
           },
         ],
-        copyright: `Kaladrius — Apache License 2.0 · Built with <a href="https://docusaurus.io" target="_blank" rel="noopener">Docusaurus</a>.`,
+        copyright: `Copyright © ${ANO} Miguel Facchini · Apache License 2.0. Built with <a href="https://docusaurus.io" target="_blank" rel="noopener">Docusaurus</a>.`,
       },
       prism: {
         theme: prismThemes.github,
