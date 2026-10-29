@@ -1,7 +1,7 @@
 # Contributing to Kaladrius
 
 Thank you for helping. Everything you need is on the documentation site, in
-[Contributing](https://docs.facchini.eti.br/contributing); this is the short version.
+[Contributing](https://kaladrius-docs.facchini.eti.br/contributing); this is the short version.
 
 - **Bugs and ideas:** open an [issue](https://github.com/facchini-miguel/kaladrius/issues)
   with what you did, what you expected and what happened. Security problems go to
@@ -20,7 +20,7 @@ Thank you for helping. Everything you need is on the documentation site, in
   Spanish. A change to a text changes the three (`locale/` for the system, `docs/` for the
   site).
 - **Decisions:** an important technical or product choice gets a row in the
-  [decision log](https://docs.facchini.eti.br/project/decisions).
+  [decision log](https://kaladrius-docs.facchini.eti.br/project/decisions).
 - **License:** by contributing, you agree that your contribution is licensed under the
   [Apache License 2.0](LICENSE).
 

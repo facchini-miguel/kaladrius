@@ -4,7 +4,7 @@ FROM python:3.13-slim
 LABEL org.opencontainers.image.title="Kaladrius" \
       org.opencontainers.image.description="Open-source clinic management" \
       org.opencontainers.image.source="https://github.com/facchini-miguel/kaladrius" \
-      org.opencontainers.image.documentation="https://docs.facchini.eti.br" \
+      org.opencontainers.image.documentation="https://kaladrius-docs.facchini.eti.br" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

@@ -12,7 +12,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 **Current version: 0.31.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
 
-> Status: **phase 1 complete** (feature parity with the legacy system), running at https://kaladrius.facchini.eti.br (Google Cloud free tier, IPv6 only). See [Reference production](https://docs.facchini.eti.br/project/production).
+> Status: **phase 1 complete** (feature parity with the legacy system), running at https://kaladrius.facchini.eti.br (Google Cloud free tier, IPv6 only). See [Reference production](https://kaladrius-docs.facchini.eti.br/project/production).
 
 ## Running locally
 
@@ -57,11 +57,11 @@ Open http://localhost:8000. The API documentation is at http://localhost:8000/ap
 
 ## Documentation
 
-All documentation is on the site **https://docs.facchini.eti.br** (source in [`docs/`](docs/), Docusaurus): installation, configuration, the user manual and the project's decisions, in English, Portuguese and Spanish.
+All documentation is on the site **https://kaladrius-docs.facchini.eti.br** (source in [`docs/`](docs/), Docusaurus): installation, configuration, the user manual and the project's decisions, in English, Portuguese and Spanish.
 
 ## Versions
 
-The version history lives in [`releases.yaml`](releases.yaml) and can also be viewed inside the system and in the app. See [Versioning](https://docs.facchini.eti.br/project/versioning).
+The version history lives in [`releases.yaml`](releases.yaml) and can also be viewed inside the system and in the app. See [Versioning](https://kaladrius-docs.facchini.eti.br/project/versioning).
 
 ## License
 
