@@ -15,15 +15,21 @@ PROFISSIONAL = "demo.profissional"
 class Command(BaseCommand):
     help = (
         "Creates (or resets) the public demo logins: demo.recepcao (front desk) and "
-        "demo.profissional (practitioner, linked to an existing practitioner without a "
-        "login). Their passwords are meant to be published, so they cannot change them "
-        "nor upload attachments (decision 085). Never reuse DJANGO_SEED_PASSWORD."
+        "demo.profissional (practitioner, linked to a practitioner without a login; "
+        "--criar-profissional creates it when missing). Their passwords are meant to be "
+        "published, so they cannot change them nor upload attachments (decision 085). "
+        "Never reuse DJANGO_SEED_PASSWORD."
     )
 
     def add_arguments(self, parser):
         parser.add_argument("--clinica", required=True, help="Clinic name.")
         parser.add_argument(
             "--profissional", required=True, help="Practitioner the demo practitioner login uses."
+        )
+        parser.add_argument(
+            "--criar-profissional",
+            action="store_true",
+            help="Create the practitioner when no one has that name (an empty schedule).",
         )
         parser.add_argument("--senha-recepcao", required=True)
         parser.add_argument("--senha-profissional", required=True)
@@ -45,12 +51,14 @@ class Command(BaseCommand):
             PROFISSIONAL, "Profissional", senhas[1], clinica, Papel.PROFISSIONAL
         )
         with usar_clinica(clinica):
-            try:
-                cadastro = Profissional.objects.get(nome=options["profissional"])
-            except Profissional.DoesNotExist as erro:
-                raise CommandError(
-                    f"Profissional não encontrado: {options['profissional']}"
-                ) from erro
+            cadastro = Profissional.objects.filter(nome=options["profissional"]).first()
+            if cadastro is None:
+                if not options["criar_profissional"]:
+                    raise CommandError(
+                        f"Profissional não encontrado: {options['profissional']} "
+                        "(use --criar-profissional para criar)"
+                    )
+                cadastro = Profissional.objects.create(nome=options["profissional"])
             if cadastro.usuario_id not in (None, profissional.pk):
                 raise CommandError(
                     f"{cadastro.nome} já tem outro usuário de acesso; escolha outro profissional."

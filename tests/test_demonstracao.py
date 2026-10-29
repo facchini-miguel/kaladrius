@@ -70,6 +70,29 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
         call_command("contas_demonstracao", clinica="Clínica A", profissional="Dra. Ana", **SENHAS)
 
 
+def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
+    monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
+    with pytest.raises(CommandError, match="--criar-profissional"):
+        call_command("contas_demonstracao", clinica="Clínica A", profissional="Dra. Demo", **SENHAS)
+    call_command(
+        "contas_demonstracao",
+        clinica="Clínica A",
+        profissional="Dra. Demo",
+        criar_profissional=True,
+        **SENHAS,
+    )
+    call_command(  # running again reuses it
+        "contas_demonstracao",
+        clinica="Clínica A",
+        profissional="Dra. Demo",
+        criar_profissional=True,
+        **SENHAS,
+    )
+    with usar_clinica(clinica_a):
+        demo = Profissional.objects.get(nome="Dra. Demo")
+    assert demo.usuario.username == "demo.profissional"
+
+
 def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
     cliente = entrar("demo.recepcao", SENHAS["senha_recepcao"])
     assert "Trocar senha" not in cliente.get(reverse("inicio")).content.decode()

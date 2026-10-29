@@ -109,7 +109,7 @@ La demostración publica dos cuentas en el sitio del titular, `demo.recepcao` y 
 
 ```bash
 docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
-  --clinica "Clínica Sorriso" --profissional "Dr. Bruno Alves" \
+  --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
   --senha-recepcao <contraseña publicada> --senha-profissional <contraseña publicada>
 ```
 

@@ -109,7 +109,7 @@ The demo publishes two logins on the owner's website, `demo.recepcao` and `demo.
 
 ```bash
 docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
-  --clinica "Clínica Sorriso" --profissional "Dr. Bruno Alves" \
+  --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
   --senha-recepcao <published password> --senha-profissional <published password>
 ```
 
