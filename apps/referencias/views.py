@@ -6,7 +6,7 @@ from django.utils.http import urlencode
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 
-from .models import UF, Banco, Cidade
+from .models import UF, Bairro, Banco, Cidade, Logradouro
 
 POR_PAGINA = 50
 
@@ -55,3 +55,31 @@ def opcoes_cidades(request):
     uf = request.GET.get("uf", "")
     cidades = Cidade.objects.filter(uf_id=int(uf)) if uf.isdecimal() else Cidade.objects.none()
     return render(request, "referencias/opcoes_cidades.html", {"cidades": cidades})
+
+
+@exige_permissao(Modulo.PACIENTES, Acao.VER)
+def sugestoes_endereco(request):
+    """<datalist>s of a city's neighborhoods and streets for the patient form (decision 100):
+    the known ones plus the ones the clinic already typed for other patients there."""
+    from apps.pacientes.models import Paciente
+
+    codigo = request.GET.get("cidade", "")
+    bairros, logradouros = set(), set()
+    if codigo.isdecimal():
+        cidade = int(codigo)
+        bairros.update(Bairro.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
+        logradouros.update(
+            Logradouro.objects.filter(cidade_id=cidade).values_list("nome", flat=True)
+        )
+        da_clinica = Paciente.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
+        for bairro, logradouro in da_clinica.distinct():
+            bairros.add(bairro)
+            logradouros.add(logradouro)
+    return render(
+        request,
+        "referencias/sugestoes_endereco.html",
+        {
+            "bairros": sorted(filter(None, bairros), key=str.casefold),
+            "logradouros": sorted(filter(None, logradouros), key=str.casefold),
+        },
+    )

@@ -11,7 +11,7 @@ In **Patients > Patient list**, type part of the **name** (accents not needed), 
 Click **New patient**. Choose **individual** or **company**: the fields change with the type.
 - CPF, CNPJ, phones and postal code (CEP) can be typed with or without punctuation.
 - The system checks whether the CPF or CNPJ is valid and whether it already exists in the clinic.
-- Choose the **state** and then the **city**.
+- Choose the **state** and then the **city**. Once the city is chosen, **Neighborhood** and **Street** suggest its known names (the neighborhoods and streets that came from the old system and the ones the clinic already typed for other patients); any other can still be typed.
 - Phones need the area code.
 - Fill in **WhatsApp** (it may be the same number as the cell phone): the patient record and the recalls on the home page get a link that opens the chat. The old system's fax and MSN are not asked for anymore.
 

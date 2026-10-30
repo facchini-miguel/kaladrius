@@ -1,0 +1,701 @@
+[
+{
+"cidade": 4301602,
+"bairro": "Centro",
+"logradouros": [
+"Rua Bento Gonçalvez"
+]
+},
+{
+"cidade": 4301651,
+"bairro": "Arroio Canoas",
+"logradouros": [
+"Avenida Av. N.S. Navegantes"
+]
+},
+{
+"cidade": 4301651,
+"bairro": "Centro",
+"logradouros": [
+"Rua Rua Dr. Hoffor"
+]
+},
+{
+"cidade": 4302105,
+"bairro": "São Francisco",
+"logradouros": [
+"Rua Carlos Peçanha Filho"
+]
+},
+{
+"cidade": 4304606,
+"bairro": "RIO BRANCO",
+"logradouros": [
+"Rua PRIMAVERA"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "1ª Secção de Castro",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "7 de Castro",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Alpinada",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Aparecida",
+"logradouros": [
+"Estrada Estrada Azevedo Castro",
+"Rua 13 de Maio",
+"Rua Angelo Darsie",
+"Rua Antônio Calcagnotto",
+"Rua Buarque de Macedo",
+"Rua Carlos Breda",
+"Rua Ciro Mantovani",
+"Rua Do Imigrante",
+"Rua Floriano Peixoto",
+"Rua Francisco Darrigo",
+"Rua Imigrantes",
+"Rua Irmã Antônia Venturini",
+"Rua Irmã Camila Parmagnani",
+"Rua João Pessoa",
+"Rua João Spader",
+"Rua Luiza Joana S. Cichelero",
+"Rua Machado de Assis",
+"Rua Monte Castelo",
+"Rua Pio XII",
+"Rua Raymundo Comin",
+"Rua Rua K Lot. São Roque",
+"Rua Rua M Lot. São Roque",
+"Rua Rua N Lot. São Roque",
+"Rua Salvador Antônio de Oliveira",
+"Rua Trevizo",
+"Rua Vereador Estevão Baseggio"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "ArcoVerde",
+"logradouros": [
+"Estrada Rua Guerino Piacentini"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Aurora",
+"logradouros": [
+"Avenida Presidente Kennedy",
+"Rua 25 de Setembro",
+"Rua Adolfo Cara",
+"Rua Ampélio Carlotto",
+"Rua Antônio Adriano Guerra",
+"Rua Antônio Valmorbida",
+"Rua Arco-íris",
+"Rua Batista Luzardo",
+"Rua Catarina Dalmas Mantovani",
+"Rua Cristovão Colombo",
+"Rua Dona Leopoldina",
+"Rua Dr. Helmo Sebastião Diello",
+"Rua Duque de Caxias",
+"Rua Expedicionário Telini Tenedini",
+"Rua Humberto Accorsi",
+"Rua Ildo Meneguetti",
+"Rua Jacob Nicolau Ely",
+"Rua José Bonifácio",
+"Rua João Bragagnollo",
+"Rua Monteiro Lobato",
+"Rua Presidente Costa e Silva",
+"Rua Princesa Isabel",
+"Rua Rua B Lot. Altos da Colina",
+"Rua Salvador do Sul",
+"Rua Simões Lopes Neto",
+"Rua Verdolino Ângelo Guerra",
+"Rua Vicente Dal Bó",
+"Rua Vinícius de Moraes"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Bela Vista",
+"logradouros": [
+"Rua 25 de Setembro",
+"Rua Adolfo Cara",
+"Rua Cecília Meireles",
+"Rua Dr. Helmo Sebastião Diello",
+"Rua Edvino Wrieling",
+"Rua Expedicionário Telini Tenedini",
+"Rua Gonçalves Dias",
+"Rua Humberto Accorsi",
+"Rua Ildo Meneguetti",
+"Rua Jacob Nicolau Ely",
+"Rua Monteiro Lobato",
+"Rua Princesa Isabel",
+"Rua Renato Misturini",
+"Rua Rocco Zaro",
+"Rua Simões Lopes Neto",
+"Rua Vinícius de Moraes",
+"Rua Érico Veríssimo"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Centro",
+"logradouros": [
+"Avenida Presidente Kennedy",
+"Rua 13 de Maio",
+"Rua 15 de Novembro",
+"Rua 21 de Abril",
+"Rua 25 de Setembro",
+"Rua Alberto Pasqualini",
+"Rua Almirante Barroso",
+"Rua Almirante Tamandare",
+"Rua Ampélio Carlotto",
+"Rua Andrea Pontin",
+"Rua Antônio Adriano Guerra",
+"Rua Assis Brasil",
+"Rua Beco do Francês",
+"Rua Borges de Medeiros",
+"Rua Buarque de Macedo",
+"Rua Castro Alves",
+"Rua Davi Canabarro",
+"Rua Dr. Carlos Barbosa",
+"Rua Eliza Tramontina",
+"Rua Fernando Ferrari",
+"Rua Floriano Peixoto",
+"Rua Garibaldi",
+"Rua Independência",
+"Rua João XXIII",
+"Rua Júlio de Castilhos",
+"Rua Lageado",
+"Rua Marechal Rondon",
+"Rua Maúricio Cardoso",
+"Rua Olavo Bilac",
+"Rua PADRE PEDRO PICCOLI",
+"Rua Padre Anchieta",
+"Rua Paulo VI",
+"Rua Pedro Baldasso",
+"Rua Prefeito José Chies",
+"Rua Presidente Getúlio Vargas",
+"Rua Rio Branco",
+"Rua Rui Barbosa",
+"Rua Rui Ramos",
+"Rua Salgado Filho",
+"Rua Veneza",
+"Travessa Deitos",
+"Travessa Travessa Santa Luiza"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Cinco da Boa Vista Alto",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Cinco da Boa Vista Baixo",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Coblens",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Desvio Machado",
+"logradouros": [
+"Avenida 25 de Setembro"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Fátima",
+"logradouros": [
+"Rua São Francisco de Assis",
+"Rua Uruguai",
+"Rua Venezuela"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Forromeco",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Linha 12",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Linha 19",
+"logradouros": [
+"Estrada RST 470"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Linha Brasilia",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Linha Vitória",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Navegantes",
+"logradouros": [
+"Rua 07 de Setembro",
+"Rua 21 de Abril",
+"Rua Amália Sfoggia",
+"Rua Antônio Prado",
+"Rua Bom Princípio",
+"Rua Buarque de Macedo",
+"Rua Expedicionário Alberto Nazareno Ceratti",
+"Rua Expedicionário Dalardino",
+"Rua Farroupilha",
+"Rua Independência",
+"Rua José Raimundo Carlotto",
+"Rua Marau",
+"Rua Nossa Senhora dos Navegantes",
+"Rua Nova Prata",
+"Rua Paraí",
+"Rua Pedro Tessari",
+"Rua Pinheiro Machado",
+"Rua Riachuelo",
+"Rua Rua B Lot. Baú",
+"Rua São Marcos",
+"Rua São Sebastião",
+"Rua São Vendelino",
+"Rua Veranópolis"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Nossa Senhora de Fátima",
+"logradouros": [
+"Rua Buarque de Macedo",
+"Rua França",
+"Rua Itália",
+"Rua Suiça",
+"Rua São Francisco de Assis",
+"Rua São Roque",
+"Rua Uruguai",
+"Rua Venezuela"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Paraguassu",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Planalto",
+"logradouros": [
+"Rua Albino Jacob Sauthier",
+"Rua Antônio Martin Guerra",
+"Rua Assis Brasil",
+"Rua Bom Princípio",
+"Rua Borges de Medeiros",
+"Rua Castelo Branco",
+"Rua Ernesto Carlotto",
+"Rua Floriano Peixoto",
+"Rua João Pessoa",
+"Rua Jucelino Kubitschek",
+"Rua Machado de Assis",
+"Rua Osvaldo Aranha",
+"Rua Padre Anchieta",
+"Rua Presidente Castelo Branco",
+"Rua Rio Branco",
+"Rua Rua B Lot. Dalcin",
+"Rua Rui Ramos",
+"Rua Walter Jobim"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Ponte Seca",
+"logradouros": [
+"Avenida Presidente Kennedy",
+"Estrada Estrada José Chies",
+"Rua 13 de Maio",
+"Rua Alemanha",
+"Rua Argentina",
+"Rua Bergamo",
+"Rua Buarque de Macedo",
+"Rua Carlos Breda",
+"Rua Carlos Gomes",
+"Rua Ciro Mantovani",
+"Rua Das Laranjeiras",
+"Rua Do Imigrante",
+"Rua Elisa Martini Comin",
+"Rua Fioravante Baldasso",
+"Rua França",
+"Rua Irmã Antônia Venturini",
+"Rua Irmã Camila Parmagnani",
+"Rua Itália",
+"Rua João Spader",
+"Rua Júlio de Castilhos",
+"Rua Luiza Joana S. Cichelero",
+"Rua Monte Castelo",
+"Rua México",
+"Rua Nilo Emílio Guerra",
+"Rua Olavo Bilac",
+"Rua Pedro Guerra",
+"Rua Pedro Ângelo Guerra",
+"Rua Polônia",
+"Rua Portugal",
+"Rua Raymundo Comin",
+"Rua Rua A Lot. Domingos Canal",
+"Rua Rua B Lot. Domingos Canal",
+"Rua Rua B Lot. Florença II",
+"Rua Rua C Lot. Domingos Canal",
+"Rua Santo Antônio",
+"Rua Suiça",
+"Rua São Roque",
+"Rua Tiradentes",
+"Rua Ubaldo Baldasso",
+"Rua Vereador Armelindo D. Baldasso",
+"Rua Vereador Ubaldo Baldasso",
+"Rua Verona",
+"Rua Vêneto",
+"Rua Ângela Melere"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Santa Clara",
+"logradouros": [
+"Estrada José Chies",
+"Rua José Pedruzzi",
+"Rua Ângelo Malvessi"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Santa Clara Baixa",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Santo Antônio de Castro",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "São José",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "São Luis de Castro",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "São Luis de Santa Luisa",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "São Paulo",
+"logradouros": [
+"Rua Buarque de Macedo",
+"Rua Fermina Baldasso Guerra",
+"Rua Humberto José Baldasso",
+"Rua João Constantino Baldasso",
+"Rua Leonilda Maffacioli Baldasso",
+"Rua Rua B Lot. Domingos Canal",
+"Rua Rua C Lot. Domingos Canal",
+"Rua Vale Verde",
+"Travessa Travessa Morro do Calvário"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "São Rafael",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "São Sebastião de Castro",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Sobra da Linha 12",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Torino",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Torino Baixo",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Triângulo",
+"logradouros": [
+"Rua 21 de Abril",
+"Rua 25 de Setembro",
+"Rua Agostinho Scomazzon",
+"Rua Cecília Meireles",
+"Rua Dos Emancipadores",
+"Rua Expedicionário Alberto Nazareno Ceratti",
+"Rua Frei Miguel",
+"Rua Gonçalves Dias",
+"Rua Independência",
+"Rua Irmã Maria Tereza",
+"Rua Irmã Teofânia",
+"Rua Irmão José Otão",
+"Rua Ivaldo Mário Dal Bó",
+"Rua João De Martini",
+"Rua João Dêntice",
+"Rua João Paulo I",
+"Rua Madre Paulina",
+"Rua Marechal Deodoro",
+"Rua Nelso Waldemar Baseggio",
+"Rua Nossa Senhora do Caravaggio",
+"Rua Padre Arlindo Marcom",
+"Rua Padre Pedro Picolli",
+"Rua Padre Reus",
+"Rua Pedro Álvares Cabral",
+"Rua RS 446",
+"Rua Rua M Lot. Dorcelino de Souza",
+"Rua Santo Ernesto Facchini",
+"Rua Valentin Tramontina"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Vila Nova",
+"logradouros": [
+"Rua 15 de Novembro",
+"Rua 21 de Abril",
+"Rua Alberto Pasqualini",
+"Rua Antônio Prado",
+"Rua Bento Gonçalves",
+"Rua Bom Princípio",
+"Rua Buarque de Macedo",
+"Rua Casca",
+"Rua Caxias do Sul",
+"Rua Davi Canabarro",
+"Rua Farroupilha",
+"Rua Flores Da Cunha",
+"Rua José Raimundo Carlotto",
+"Rua Nova Bréscia",
+"Rua Nova Prata",
+"Rua Pinheiro Machado",
+"Rua Riachuelo",
+"Rua Rua A Lot. Baú",
+"Rua Rua B Lot. Baú",
+"Rua Rua C Lot. Baú",
+"Rua São Marcos",
+"Rua Veranópolis"
+]
+},
+{
+"cidade": 4304804,
+"bairro": "Vila Rica",
+"logradouros": []
+},
+{
+"cidade": 4304804,
+"bairro": "Vitória",
+"logradouros": [
+"Rua 15 de Novembro",
+"Rua Adair Bortolini",
+"Rua Bom Princípio",
+"Rua Caxias do Sul",
+"Rua Dom José Barea",
+"Rua João Francisco Anselmini",
+"Rua João Pessoa",
+"Rua Nova Brécia",
+"Rua Nova Bréscia",
+"Rua Nova Prata",
+"Rua Osvaldo Aranha",
+"Rua Pinheiro Machado",
+"Rua Presidente Getúlio Vargas",
+"Rua Presidente João Goulart",
+"Rua Rua A Lot. Baú",
+"Rua Rua B Lot. Dalcin",
+"Rua Rui Ramos",
+"Rua Walter Jobim"
+]
+},
+{
+"cidade": 4305108,
+"bairro": "CENTRO",
+"logradouros": [
+"Rua GARIBALDI"
+]
+},
+{
+"cidade": 4305108,
+"bairro": "Lurdes",
+"logradouros": [
+"Rua João Costanilau"
+]
+},
+{
+"cidade": 4305108,
+"bairro": "SÃO PELEGRINO",
+"logradouros": [
+"Rua CORONEL FLORES"
+]
+},
+{
+"cidade": 4308607,
+"bairro": "Alfândega",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Bela Vista",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Brasília",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Centro",
+"logradouros": [
+"Avenida Independência",
+"Avenida Rio Branco",
+"Rua David Sartori",
+"Travessa Leonel Nicolini"
+]
+},
+{
+"cidade": 4308607,
+"bairro": "Chácaras",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Champagne",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Ferroviário",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Glória",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Guarani",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Juventude",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Peterlongo",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Santa Terezinha",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "São Francisco",
+"logradouros": [
+"Avenida Avenida Rota do Sol",
+"Rua Café Filho",
+"Rua Ipiranga",
+"Rua Jose Bonifacio",
+"Rua Osvaldo Cruz",
+"Rua Saldanha Marinho"
+]
+},
+{
+"cidade": 4308607,
+"bairro": "São José",
+"logradouros": [
+"Avenida Perimetral"
+]
+},
+{
+"cidade": 4308607,
+"bairro": "São Roque Figueira de Mello",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Simonaggio",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Três Lagoas",
+"logradouros": []
+},
+{
+"cidade": 4308607,
+"bairro": "Vale dos Pinheiros",
+"logradouros": []
+},
+{
+"cidade": 4309407,
+"bairro": "centro",
+"logradouros": [
+"Rua Julio Campos"
+]
+},
+{
+"cidade": 4314100,
+"bairro": "Centro",
+"logradouros": [
+"Rua coronel chicuta"
+]
+},
+{
+"cidade": 4314902,
+"bairro": "122",
+"logradouros": [
+"Rua PROFESSOR ANES DIAS"
+]
+},
+{
+"cidade": 4314902,
+"bairro": "Menino Deus",
+"logradouros": [
+"Rua Visconde do Herval"
+]
+},
+{
+"cidade": 4322608,
+"bairro": "Centro",
+"logradouros": [
+"Rua OSVALDO ARANHA"
+]
+}
+]

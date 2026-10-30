@@ -11,7 +11,7 @@ En **Pacientes > Lista de pacientes**, escriba parte del **nombre** (no hacen fa
 Haga clic en **Nuevo paciente**. Elija **persona física** o **jurídica**: los campos cambian según el tipo.
 - El CPF, el CNPJ, los teléfonos y el código postal (CEP) pueden escribirse con o sin puntuación.
 - El sistema verifica si el CPF o el CNPJ es válido y si ya existe en la clínica.
-- Elija el **estado** y después la **ciudad**.
+- Elija el **estado** y después la **ciudad**. Con la ciudad elegida, **Barrio** y **Calle** sugieren sus nombres conocidos (los barrios y calles que vinieron del sistema antiguo y los que la clínica ya escribió para otros pacientes); se puede escribir cualquier otro.
 - Los teléfonos necesitan el código de área.
 - Complete el **WhatsApp** (puede ser el mismo número del celular): la ficha y los recordatorios de la pantalla de inicio tienen un enlace que abre la conversación. El fax y el MSN del sistema antiguo ya no se piden.
 

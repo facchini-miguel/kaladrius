@@ -92,6 +92,20 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 "hx-trigger": "change",
             }
         )
+        # Known neighborhoods and streets of the chosen city as suggestions (decision 100);
+        # anything else can still be typed.
+        self.fields["cidade"].widget.attrs.update(
+            {
+                "hx-get": reverse("referencias:sugestoes_endereco"),
+                "hx-target": "#sugestoes-endereco",
+                "hx-trigger": "load, change",
+            }
+        )
+        for campo, lista in (
+            ("bairro", "bairros-sugeridos"),
+            ("logradouro", "logradouros-sugeridos"),
+        ):
+            self.fields[campo].widget.attrs.update({"list": lista, "autocomplete": "off"})
         uf_id = self.data.get(self.add_prefix("uf")) if self.is_bound else self.instance.uf_id
         self.fields["cidade"].queryset = (
             Cidade.objects.filter(uf_id=int(uf_id))

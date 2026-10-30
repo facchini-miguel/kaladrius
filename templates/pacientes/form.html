@@ -43,7 +43,7 @@
     <div class="card-body row">
       <div class="col-md-2">{% with campo=form.cep %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.uf %}{% include "includes/campo.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.cidade %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.cidade %}{% include "includes/campo.html" %}{% endwith %}<div id="sugestoes-endereco"></div></div>
       <div class="col-md-6">{% with campo=form.logradouro %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-2">{% with campo=form.numero %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.complemento %}{% include "includes/campo.html" %}{% endwith %}</div>
