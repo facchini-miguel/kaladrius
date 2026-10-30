@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Fechamento do financeiro" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Fechamento do financeiro" %}</h1>
+
+<div class="alert {% if fechado_ate %}alert-secondary{% else %}alert-light border{% endif %}">
+  {% if fechado_ate %}
+  {% blocktranslate with data=fechado_ate|date:"SHORT_DATE_FORMAT" %}Fechado até <strong>{{ data }}</strong>.{% endblocktranslate %}
+  {% translate "Pagamentos e estornos nessa data ou antes dela não podem mais ser registrados, e os relatórios desse período não mudam." %}
+  {% else %}
+  {% translate "O financeiro está aberto: qualquer data aceita pagamentos e estornos." %}
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  {% if fechar_form %}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">{% translate "Fechar" %}</div>
+      <div class="card-body">
+        <p class="text-body-secondary small">{% translate "Feche um período depois de conferir o caixa e entregar os relatórios ao contador." %}</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="fechar">
+          {% with form=fechar_form %}{% include "includes/formulario.html" %}{% endwith %}
+          <button type="submit" class="btn btn-primary">{% translate "Fechar" %}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if reabrir_form and fechado_ate %}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">{% translate "Reabrir" %}</div>
+      <div class="card-body">
+        <p class="text-body-secondary small">{% translate "Só para corrigir um erro. O motivo fica no histórico e na auditoria." %}</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="reabrir">
+          {% with form=reabrir_form %}{% include "includes/formulario.html" %}{% endwith %}
+          <button type="submit" class="btn btn-outline-danger">{% translate "Reabrir" %}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<h2 class="h6 mt-4">{% translate "Histórico" %}</h2>
+<div class="table-responsive">
+  <table class="table table-sm align-middle bg-white">
+    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Quem" %}</th><th>{% translate "Fechado até" %}</th><th>{% translate "Motivo" %}</th></tr></thead>
+    <tbody>
+      {% for item in historico %}
+      <tr>
+        <td class="text-nowrap">{{ item.criado_em|date:"SHORT_DATETIME_FORMAT" }}</td>
+        <td>{% if item.criado_por %}{{ item.criado_por.get_full_name|default:item.criado_por.username }}{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{% if item.ate %}{{ item.ate|date:"SHORT_DATE_FORMAT" }}{% else %}{% translate "Aberto" %}{% endif %}</td>
+        <td>{{ item.motivo|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhum fechamento ainda." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

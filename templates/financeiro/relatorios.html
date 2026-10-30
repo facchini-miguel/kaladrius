@@ -31,6 +31,7 @@
 </div>
 <p class="text-body-secondary small mt-3">
   {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
+  {% if fechado_ate %}{% blocktranslate with data=fechado_ate|date:"SHORT_DATE_FORMAT" %}Financeiro fechado até {{ data }}: até essa data os valores não mudam mais.{% endblocktranslate %}{% endif %}
   {% if relatorio.juros %}{% translate "Juros e multa recebidos" %}: {{ relatorio.juros|moeda }}.{% endif %}
   {% if relatorio.descontos %}{% translate "Descontos dados" %}: {{ relatorio.descontos|moeda }}.{% endif %}
 </p>

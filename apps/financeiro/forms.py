@@ -231,6 +231,24 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         return dados
 
 
+class FecharForm(FormularioBootstrap, forms.Form):
+    ate = forms.DateField(
+        label=_("Fechar até"),
+        widget=DATA,
+        help_text=_("Último dia do período fechado (no máximo ontem)."),
+    )
+
+
+class ReabrirForm(FormularioBootstrap, forms.Form):
+    ate = forms.DateField(
+        label=_("Deixar fechado até"),
+        widget=DATA,
+        required=False,
+        help_text=_("Uma data anterior ao fechamento atual. Em branco, reabre tudo."),
+    )
+    motivo = forms.CharField(label=_("Motivo"), max_length=200)
+
+
 class ReceberForm(FormularioBootstrap, forms.ModelForm):
     """Payment of an installment. Discounts only for those allowed (administrators)."""
 

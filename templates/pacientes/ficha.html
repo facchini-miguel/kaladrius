@@ -24,6 +24,7 @@
     {% if pode.pacientes.alterar %}<a class="btn btn-primary" href="{% url 'pacientes:editar' paciente.pk %}">{% translate "Editar" %}</a>{% endif %}
     {% if pode.pacientes.excluir %}<a class="btn btn-outline-secondary" href="{% url 'pacientes:arquivar' paciente.pk %}">{% translate "Arquivar" %}</a>{% endif %}
     {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'pacientes:imprimir' paciente.pk %}">{% translate "Imprimir ficha" %}</a>
     <a class="btn btn-link" href="{% url 'pacientes:lista' %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>

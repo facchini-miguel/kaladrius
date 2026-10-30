@@ -18,6 +18,8 @@ Clique em **Novo paciente**. Escolha **pessoa física** ou **jurídica**: os cam
 ## Ficha do paciente
 Clique no nome para abrir a ficha: dados, contato, endereço, observações, **próximos e últimos agendamentos** (clique na data para ir à semana na agenda) e **rechamadas**.
 
+**Imprimir ficha** abre a ficha cadastral pronta para imprimir ou salvar em PDF: dados, contato, endereço, carteirinhas de convênio, observações e linha para assinatura.
+
 ## Ativo, inativo e arquivado
 
 | Situação | Para quê | Quem vê |

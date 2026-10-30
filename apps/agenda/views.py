@@ -71,6 +71,15 @@ def tipo_excluir(request, pk):
 # --- Schedule ----------------------------------------------------------------------
 
 SESSAO_PROFISSIONAL = "agenda_profissional"
+# The week last looked at, as in the legacy system: leaving the schedule and coming back
+# shows it again. Only on the same day; the next day the schedule opens on today.
+SESSAO_DATA = "agenda_data"
+
+
+def _data_lembrada(request):
+    lembrada = request.session.get(SESSAO_DATA) or {}
+    hoje = timezone.localdate().isoformat()
+    return lembrada.get("data", "") if lembrada.get("em") == hoje else ""
 
 
 def _resposta_sucesso(mensagem):
@@ -114,7 +123,7 @@ def calendario(request):
         "inicio": clinica.agenda_inicio.strftime("%H:%M:%S"),
         "fim": clinica.agenda_fim.strftime("%H:%M:%S"),
         "intervalo": clinica.agenda_intervalo,
-        "data": request.GET.get("data") or "",
+        "data": request.GET.get("data") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "idioma": get_language(),
         "textos": {
@@ -151,6 +160,12 @@ def eventos(request):
     if periodo is None or not profissional.isdecimal():
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     inicio, fim = periodo
+    # The middle of the visible range falls inside the week (or month) on the screen.
+    meio = timezone.localtime(inicio + (fim - inicio) / 2).date()
+    request.session[SESSAO_DATA] = {
+        "data": meio.isoformat(),
+        "em": timezone.localdate().isoformat(),
+    }
     agendamentos = (
         servicos.agendamentos_visiveis(request)
         .filter(profissional_id=int(profissional), inicio__lt=fim, fim__gt=inicio)

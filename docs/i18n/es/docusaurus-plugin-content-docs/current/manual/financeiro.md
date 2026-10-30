@@ -88,6 +88,9 @@ Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **
 ## Proveedores
 En **Registros > Proveedores**, registre a quién la clínica compra o paga: persona física o jurídica, nombre, razón social, CPF/CNPJ, teléfono, WhatsApp, correo electrónico y observaciones. El sistema verifica el CPF o CNPJ y no permite registrar dos veces el mismo documento. La ficha del proveedor muestra cuánto está **pendiente** y todas sus cuentas por pagar, y tiene el botón **Nuevo gasto**, que ya viene con él elegido. En las listas, el nombre del proveedor lleva a su ficha. Para dejar de usar un proveedor sin perder el historial, desmarque **activo**: sale del formulario de nuevo gasto, y las cuentas antiguas siguen vinculadas a él.
 
+## Cierre (administrador)
+Después de revisar la caja y entregar los informes al contador, cierre el período en **Financiero > Cierre**: elija **Cerrar hasta** (como máximo ayer). A partir de ahí, los pagos y reversiones con fecha en ese período o antes se rechazan, y los informes de ese período ya no cambian. Lo que ocurre hoy (cobrar, pagar, la caja del día) sigue normal. Para corregir un error, **Reabrir** lleva el cierre a una fecha anterior (o reabre todo) y pide el motivo, que queda en el historial de la pantalla y en la auditoría. El perfil Financiero también cierra y reabre; las cuentas públicas de demostración solo consultan.
+
 ## Centros de costo
 El centro de costo indica **para quién** es cada ingreso o gasto: un consultorio, una especialidad, la administración. La categoría sigue indicando **qué** es (alquiler, material). En **Registros > Centros de costo**, el administrador registra los centros. En cuanto haya uno activo, el campo **Centro de costo** aparece en el nuevo registro y en el nuevo gasto (es opcional), y los informes muestran los cuadros por centro de costo. Los registros antiguos quedan sin centro. Para dejar de usar un centro sin perder el historial, desmarque **activo**.
 

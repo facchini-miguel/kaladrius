@@ -15,6 +15,7 @@ from apps.financeiro.models import (
     CentroCusto,
     Comissao,
     Conta,
+    Fechamento,
     Fornecedor,
     ImportacaoExtrato,
     Lancamento,
@@ -95,6 +96,7 @@ class Command(BaseCommand):
                 Conta,
                 Categoria,
                 CentroCusto,
+                Fechamento,
                 ModuloDaClinica,
             ):
                 modelo.objects.filter(clinica__in=clinicas).delete()

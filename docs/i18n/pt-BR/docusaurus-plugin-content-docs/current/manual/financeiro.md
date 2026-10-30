@@ -88,6 +88,9 @@ Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissi
 ## Fornecedores
 Em **Cadastros > Fornecedores**, cadastre de quem a clínica compra ou a quem paga: pessoa física ou jurídica, nome, razão social, CPF/CNPJ, telefone, WhatsApp, e-mail e observações. O sistema confere o CPF ou CNPJ e não deixa cadastrar o mesmo documento duas vezes. A ficha do fornecedor mostra quanto está **em aberto** e todas as contas a pagar dele, e tem o botão **Nova despesa**, que já vem com ele escolhido. Nas listas, o nome do fornecedor leva à ficha. Para deixar de usar um fornecedor sem perder o histórico, desmarque **ativo**: ele some da nova despesa, e as contas antigas continuam ligadas a ele.
 
+## Fechamento (administrador)
+Depois de conferir o caixa e entregar os relatórios ao contador, feche o período em **Financeiro > Fechamento**: escolha **Fechar até** (no máximo ontem). A partir daí, pagamentos e estornos com data nesse período ou antes dele são recusados, e os relatórios desse período não mudam mais. O que acontece hoje (receber, pagar, caixa do dia) segue normal. Para corrigir um erro, **Reabrir** volta o fechamento para uma data anterior (ou reabre tudo) e pede o motivo, que fica no histórico da tela e na auditoria. O perfil Financeiro também fecha e reabre; as contas públicas de demonstração só consultam.
+
 ## Centros de custo
 O centro de custo diz **para quem** é cada receita ou despesa: um consultório, uma especialidade, o administrativo. A categoria continua dizendo **o que** é (aluguel, material). Em **Cadastros > Centros de custo**, o administrador cadastra os centros. Assim que houver um ativo, o campo **Centro de custo** aparece no novo lançamento e na nova despesa (é opcional), e os relatórios ganham os quadros por centro de custo. Os lançamentos antigos ficam sem centro. Para deixar de usar um centro sem perder o histórico, desmarque **ativo**.
 

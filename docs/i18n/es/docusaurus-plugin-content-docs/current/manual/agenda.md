@@ -5,7 +5,7 @@ sidebar_position: 2
 # Agenda
 
 ## Ver la agenda
-- En **Agenda**, elija el profesional en la lista junto al título. El sistema recuerda la última elección.
+- En **Agenda**, elija el profesional en la lista junto al título. El sistema recuerda la última elección y, en el mismo día, la semana que estaba viendo: al salir de la agenda y volver, se abre en esa semana (al día siguiente, se abre en hoy).
 - Use las flechas para ir a la semana anterior o a la siguiente, **hoy** para volver, o el campo de fecha para ir directo a un día.
 - Los colores muestran el **tipo de atención** (la leyenda está encima de la grilla).
 - En el encabezado de cada día aparecen los **cumpleaños** (🎂) y los **recordatorios pendientes** (📞). Haga clic para ver la lista.

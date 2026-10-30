@@ -88,6 +88,9 @@ Each receipt enters a commission only once. If a receipt already paid out is **r
 ## Suppliers
 In **Records > Suppliers**, register who the clinic buys from or pays: individual or company, name, legal name, CPF/CNPJ, phone, WhatsApp, e-mail and notes. The system checks the CPF or CNPJ and does not let the same document be registered twice. The supplier's page shows how much is **outstanding** and all their payables, and has a **New expense** button with the supplier already chosen. In the lists, the supplier's name leads to that page. To stop using a supplier without losing the history, uncheck **active**: it leaves the new expense form, and the old bills stay linked to it.
 
+## Closing (administrator)
+After checking the cash and handing the reports to the accountant, close the period in **Finance > Closing**: choose **Close up to** (yesterday at the latest). From then on, payments and reversals dated in that period or before it are refused, and that period's reports no longer change. What happens today (receiving, paying, the daily cash) goes on as usual. To fix a mistake, **Reopen** moves the closing back to an earlier date (or reopens everything) and asks for the reason, which stays in the page's history and in the audit log. The Finance role also closes and reopens; the public demo logins only look.
+
 ## Cost centers
 The cost center tells **who** each income or expense is for: a room, a specialty, the office. The category still tells **what** it is (rent, supplies). In **Records > Cost centers**, the administrator registers the centers. As soon as there is an active one, the **Cost center** field shows up on new entries and new expenses (it is optional), and the reports get the cost center tables. Older entries stay without a center. To stop using a center without losing the history, uncheck **active**.
 

@@ -34,6 +34,7 @@ from .forms import (
     CentroCustoForm,
     ContaForm,
     FecharCaixaForm,
+    FecharForm,
     FornecedorForm,
     ImportarExtratoForm,
     LancamentoDaTransacaoForm,
@@ -43,6 +44,7 @@ from .forms import (
     MovimentoCaixaForm,
     PagarComissaoForm,
     PercentualComissaoForm,
+    ReabrirForm,
     ReceberForm,
 )
 from .models import (
@@ -52,6 +54,7 @@ from .models import (
     CentroCusto,
     Comissao,
     Conta,
+    Fechamento,
     Fornecedor,
     ImportacaoExtrato,
     Lancamento,
@@ -514,7 +517,55 @@ def relatorios(request):
     return render(
         request,
         "financeiro/relatorios.html",
-        {"de": de, "ate": ate, "relatorio": servicos.relatorio(de, ate)},
+        {
+            "de": de,
+            "ate": ate,
+            "relatorio": servicos.relatorio(de, ate),
+            "fechado_ate": servicos.fechado_ate(request.clinica.pk),
+        },
+    )
+
+
+# --- Closing the books (decision 096) -------------------------------------------------
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def fechamento(request):
+    """Close the books up to a date, or reopen them with a reason. Public demo logins only
+    look: one visitor closing the books would block everyone else's payments."""
+    demonstracao = request.user.demonstracao
+    pode_fechar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR) and not demonstracao
+    pode_reabrir = pode(request, Modulo.FINANCEIRO, Acao.EXCLUIR) and not demonstracao
+    if request.method == "POST":
+        acao = request.POST.get("acao")
+        if not {"fechar": pode_fechar, "reabrir": pode_reabrir}.get(acao):
+            raise PermissionDenied
+        form = (FecharForm if acao == "fechar" else ReabrirForm)(request.POST)
+        if form.is_valid():
+            dados = form.cleaned_data
+            try:
+                if acao == "fechar":
+                    servicos.fechar(request.clinica, dados["ate"], usuario=request.user)
+                    messages.success(request, _("Financeiro fechado."))
+                else:
+                    servicos.reabrir(
+                        request.clinica, dados["ate"], motivo=dados["motivo"], usuario=request.user
+                    )
+                    messages.success(request, _("Período reaberto."))
+            except ValidationError as erro:
+                messages.error(request, erro.messages[0])
+        else:
+            messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
+        return redirect("financeiro:fechamento")
+    return render(
+        request,
+        "financeiro/fechamento.html",
+        {
+            "fechado_ate": servicos.fechado_ate(request.clinica.pk),
+            "historico": Fechamento.objects.select_related("criado_por")[:30],
+            "fechar_form": FecharForm() if pode_fechar else None,
+            "reabrir_form": ReabrirForm() if pode_reabrir else None,
+        },
     )
 
 

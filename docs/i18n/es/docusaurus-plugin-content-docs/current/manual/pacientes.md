@@ -18,6 +18,8 @@ Haga clic en **Nuevo paciente**. Elija **persona física** o **jurídica**: los 
 ## Ficha del paciente
 Haga clic en el nombre para abrir la ficha: datos, contacto, dirección, observaciones, **próximas y últimas citas** (haga clic en la fecha para ir a la semana en la agenda) y **recordatorios**.
 
+**Imprimir ficha** abre la ficha de registro lista para imprimir o guardar en PDF: datos, contacto, dirección, credenciales de convenio, observaciones y línea para la firma.
+
 ## Activo, inactivo y archivado
 
 | Situación | Para qué | Quién lo ve |

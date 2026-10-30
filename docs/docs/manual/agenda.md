@@ -5,7 +5,7 @@ sidebar_position: 2
 # Schedule
 
 ## Viewing the schedule
-- In **Schedule**, choose the practitioner in the list next to the title. The system remembers the last choice.
+- In **Schedule**, choose the practitioner in the list next to the title. The system remembers the last choice and, on the same day, the week you were looking at: leaving the schedule and coming back shows that week again (the next day it opens on today).
 - Use the arrows to go to the previous or next week, **today** to come back, or the date field to jump to a day.
 - Colors show the **appointment type** (the legend is above the grid).
 - The header of each day shows the **birthdays** (🎂) and the **pending recalls** (📞). Click to see the list.

@@ -112,6 +112,26 @@ def ficha(request, pk):
     return render(request, "pacientes/ficha.html", contexto)
 
 
+@exige_permissao(Modulo.PACIENTES, Acao.VER)
+def imprimir(request, pk):
+    """The registration sheet, ready to print or save as PDF (as the legacy Medical's
+    fichapaciente_imp): identification, contact, address and health plan cards."""
+    paciente = get_object_or_404(
+        _visiveis(request).select_related("cidade__uf", "estado_civil"), pk=pk
+    )
+    registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)  # LGPD, as the record
+    carteirinhas = (
+        list(Carteirinha.objects.filter(paciente=paciente, ativa=True).select_related("convenio"))
+        if pode(request, Modulo.CONVENIOS, Acao.VER)
+        else None
+    )
+    return render(
+        request,
+        "pacientes/imprimir.html",
+        {"paciente": paciente, "carteirinhas": carteirinhas, "hoje": timezone.localdate()},
+    )
+
+
 HISTORICO = 10  # appointments shown in each list of the patient record
 
 

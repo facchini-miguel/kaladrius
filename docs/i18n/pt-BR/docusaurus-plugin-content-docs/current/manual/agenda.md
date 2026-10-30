@@ -5,7 +5,7 @@ sidebar_position: 2
 # Agenda
 
 ## Ver a agenda
-- Em **Agenda**, escolha o profissional na lista ao lado do título. O sistema lembra a última escolha.
+- Em **Agenda**, escolha o profissional na lista ao lado do título. O sistema lembra a última escolha e, no mesmo dia, a semana que você estava vendo: ao sair da agenda e voltar, ela abre nessa semana (no dia seguinte, abre em hoje).
 - Use as setas para ir à semana anterior ou à próxima, **hoje** para voltar, ou o campo de data para ir direto a um dia.
 - As cores mostram o **tipo de atendimento** (a legenda fica acima da grade).
 - No cabeçalho de cada dia aparecem os **aniversariantes** (🎂) e as **rechamadas pendentes** (📞). Clique para ver a lista.

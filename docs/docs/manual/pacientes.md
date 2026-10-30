@@ -18,6 +18,8 @@ Click **New patient**. Choose **individual** or **company**: the fields change w
 ## Patient record
 Click the name to open the record: details, contact, address, notes, **upcoming and latest appointments** (click the date to go to the week in the schedule) and **recalls**.
 
+**Print sheet** opens the registration sheet ready to print or save as PDF: details, contact, address, health plan cards, notes and a signature line.
+
 ## Active, inactive and archived
 
 | Status | What for | Who sees it |

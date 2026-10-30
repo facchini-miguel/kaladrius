@@ -565,6 +565,35 @@ class Comissao(ModeloDaClinica):
         return self.valor + self.estornos
 
 
+class Fechamento(ModeloDaClinica):
+    """Finance closed up to a date (decision 096), so the reports given to the accountant
+    do not change: no payment dated on or before it can be recorded or reversed.
+
+    Each row is a closing or a reopening, kept as history; the newest one rules. A
+    reopening has an earlier date (or none: everything open) and a reason.
+    """
+
+    ate = models.DateField(_("fechado até"), null=True, blank=True)
+    motivo = models.CharField(_("motivo"), max_length=200, blank=True)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("criado por"),
+    )
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("fechamento do financeiro")
+        verbose_name_plural = _("fechamentos do financeiro")
+        ordering = ["-criado_em", "-pk"]
+
+    def __str__(self):
+        return f"{self.ate:%d/%m/%Y}" if self.ate else str(_("Aberto"))
+
+
 class ImportacaoExtrato(ModeloDaClinica):
     """One OFX file imported into a bank account (0.20.0, decision 054)."""
 

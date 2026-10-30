@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 17:43-0300\n"
+"POT-Creation-Date: 2026-10-30 18:21-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -738,6 +738,23 @@ msgstr "WhatsApp"
 msgid "Já existe um fornecedor com este documento."
 msgstr "A supplier with this document already exists."
 
+#
+msgid "Fechar até"
+msgstr "Close up to"
+
+msgid "Último dia do período fechado (no máximo ontem)."
+msgstr "Last day of the closed period (yesterday at the latest)."
+
+#
+msgid "Deixar fechado até"
+msgstr "Keep closed up to"
+
+msgid "Uma data anterior ao fechamento atual. Em branco, reabre tudo."
+msgstr "A date before the current closing. Blank reopens everything."
+
+msgid "Motivo"
+msgstr "Reason"
+
 msgid "Valor recebido"
 msgstr "Amount received"
 
@@ -749,9 +766,6 @@ msgstr "Already included in the amount received."
 
 msgid "Desconto"
 msgstr "Discount"
-
-msgid "Motivo"
-msgstr "Reason"
 
 msgid "Já existe uma categoria com este nome."
 msgstr "A category with this name already exists."
@@ -1070,6 +1084,21 @@ msgstr "cancelled"
 msgid "comissões"
 msgstr "commissions"
 
+#
+msgid "fechado até"
+msgstr "closed up to"
+
+#
+msgid "fechamento do financeiro"
+msgstr "finance closing"
+
+#
+msgid "fechamentos do financeiro"
+msgstr "finance closings"
+
+msgid "Aberto"
+msgstr "Open"
+
 msgid "código do banco"
 msgstr "bank code"
 
@@ -1170,6 +1199,32 @@ msgid ""
 "Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar."
 msgstr "This entry has payments. Reverse the payments before cancelling."
 
+#, python-format
+msgid ""
+"O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
+"antes dela não podem ser registrados. Use uma data posterior ou peça ao "
+"administrador para reabrir o período."
+msgstr "Finance is closed up to %(ate)s: payments and reversals on or before that date cannot be recorded. Use a later date or ask the administrator to reopen the period."
+
+msgid "Feche no máximo até ontem: hoje ainda há movimento."
+msgstr "Close up to yesterday at the latest: money is still moving today."
+
+#, python-format
+msgid ""
+"O financeiro já está fechado até %(ate)s. Para voltar, reabra o período."
+msgstr "Finance is already closed up to %(ate)s. To go back, reopen the period."
+
+#
+msgid "O financeiro não está fechado."
+msgstr "Finance is not closed."
+
+msgid "Para reabrir, escolha uma data anterior ao fechamento atual."
+msgstr "To reopen, choose a date before the current closing."
+
+#
+msgid "Informe o motivo da reabertura."
+msgstr "Enter the reason for reopening."
+
 msgid "Cancelada"
 msgstr "Cancelled"
 
@@ -1244,6 +1299,14 @@ msgstr "Drawer closed."
 
 msgid "Fechar caixa"
 msgstr "Close drawer"
+
+#
+msgid "Financeiro fechado."
+msgstr "Finance closed."
+
+#
+msgid "Período reaberto."
+msgstr "Period reopened."
 
 #, python-format
 msgid "Percentual de %(nome)s salvo."
@@ -2175,6 +2238,10 @@ msgstr "Commissions"
 msgid "Relatórios"
 msgstr "Reports"
 
+#
+msgid "Fechamento"
+msgstr "Closing"
+
 msgid "Tabela de procedimentos"
 msgstr "Procedure price list"
 
@@ -2648,7 +2715,11 @@ msgid ""
 "uma especialidade, o administrativo). Ele aparece nos lançamentos e nos "
 "relatórios assim que houver um cadastrado. Para deixar de usar sem perder o "
 "histórico, edite e desmarque “ativo”."
-msgstr "The cost center tells who each income or expense is for (a room, a specialty, the office). It shows up on entries and reports once there is one registered. To stop using one without losing the history, edit it and uncheck “active”."
+msgstr ""
+"The cost center tells who each income or expense is for (a room, a "
+"specialty, the office). It shows up on entries and reports once there is one "
+"registered. To stop using one without losing the history, edit it and "
+"uncheck “active”."
 
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
 msgstr ""
@@ -2697,9 +2768,6 @@ msgstr "Opened on %(momento)s by %(nome)s"
 #, python-format
 msgid "fechado em %(momento)s por %(nome)s"
 msgstr "closed on %(momento)s by %(nome)s"
-
-msgid "Aberto"
-msgstr "Open"
 
 msgid "Fechado"
 msgstr "Closed"
@@ -2952,6 +3020,47 @@ msgstr "New"
 
 msgid "Nenhum extrato importado ainda."
 msgstr "No statement imported yet."
+
+#
+msgid "Fechamento do financeiro"
+msgstr "Finance closing"
+
+#, python-format
+msgid "Fechado até <strong>%(data)s</strong>."
+msgstr "Closed up to <strong>%(data)s</strong>."
+
+msgid ""
+"Pagamentos e estornos nessa data ou antes dela não podem mais ser "
+"registrados, e os relatórios desse período não mudam."
+msgstr "Payments and reversals on or before that date can no longer be recorded, and the reports of that period do not change."
+
+msgid "O financeiro está aberto: qualquer data aceita pagamentos e estornos."
+msgstr "Finance is open: any date accepts payments and reversals."
+
+msgid ""
+"Feche um período depois de conferir o caixa e entregar os relatórios ao "
+"contador."
+msgstr "Close a period after checking the cash and handing the reports to the accountant."
+
+msgid "Reabrir"
+msgstr "Reopen"
+
+msgid "Só para corrigir um erro. O motivo fica no histórico e na auditoria."
+msgstr "Only to fix a mistake. The reason stays in the history and in the audit log."
+
+msgid "Histórico"
+msgstr "History"
+
+msgid "Quem"
+msgstr "Who"
+
+#
+msgid "Fechado até"
+msgstr "Closed up to"
+
+#
+msgid "Nenhum fechamento ainda."
+msgstr "No closing yet."
 
 msgid "Saldo no início"
 msgstr "Balance at the start"
@@ -3215,6 +3324,11 @@ msgstr "Expenses paid by cost center"
 
 msgid "Pela data do pagamento, sem os estornados e os cancelados."
 msgstr "By payment date, without reversed and cancelled ones."
+
+#, python-format
+msgid ""
+"Financeiro fechado até %(data)s: até essa data os valores não mudam mais."
+msgstr "Finance closed up to %(data)s: up to that date the amounts no longer change."
 
 msgid "Juros e multa recebidos"
 msgstr "Interest and late fees received"
@@ -3589,6 +3703,10 @@ msgstr "Archived"
 msgid "Restaurar"
 msgstr "Restore"
 
+#
+msgid "Imprimir ficha"
+msgstr "Print sheet"
+
 #, python-format
 msgid "Arquivado em %(momento)s."
 msgstr "Archived on %(momento)s."
@@ -3715,6 +3833,37 @@ msgstr "Edit patient"
 
 msgid "Contato"
 msgstr "Contact"
+
+msgid "Ficha cadastral"
+msgstr "Registration sheet"
+
+msgid "FICHA CADASTRAL"
+msgstr "REGISTRATION SHEET"
+
+#
+msgid "Convênio"
+msgstr "Health plan"
+
+#
+msgid "Plano"
+msgstr "Plan type"
+
+#
+#
+msgid "Número da carteirinha"
+msgstr "Card number"
+
+#
+#
+msgid "Validade"
+msgstr "Valid until"
+
+#
+msgid "Titular"
+msgstr "Holder"
+
+msgid "Assinatura do paciente ou responsável"
+msgstr "Signature of the patient or guardian"
 
 msgid "Nome, código ou CPF/CNPJ"
 msgstr "Name, code or CPF/CNPJ"
@@ -3934,9 +4083,6 @@ msgstr "Overdue"
 
 msgid "Hoje"
 msgstr "Today"
-
-msgid "Reabrir"
-msgstr "Reopen"
 
 msgid "Concluir"
 msgstr "Mark as done"

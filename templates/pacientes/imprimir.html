@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Ficha cadastral" %} · {{ paciente.nome }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex gap-2 mb-3 d-print-none">
+  <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar" %}</a>
+</div>
+<div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">
+  <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+    <div>
+      <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
+      {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
+      {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
+    </div>
+    <div class="text-end">
+      <div class="fs-4 fw-semibold">{% translate "FICHA CADASTRAL" %}</div>
+      <div class="small">{% translate "Código" %} {{ paciente.pk }} · {{ hoje|date:"SHORT_DATE_FORMAT" }}</div>
+    </div>
+  </div>
+
+  <p class="fs-5 fw-semibold mb-3">{{ paciente.nome }}</p>
+  <div class="row">
+    <div class="col-6">
+      <dl class="row mb-0 small">
+        {% if paciente.tipo == "PJ" %}
+        <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ paciente.razao_social|default:"—" }}</dd>
+        <dt class="col-5">{% translate "CNPJ" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ paciente.inscricao_estadual|default:"—" }}</dd>
+        {% else %}
+        <dt class="col-5">{% translate "CPF" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>
+        <dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ paciente.rg|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ paciente.data_nascimento|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ paciente.get_sexo_display|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Estado civil" %}</dt><dd class="col-7">{{ paciente.estado_civil|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Profissão" %}</dt><dd class="col-7">{{ paciente.profissao|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Responsável" %}</dt><dd class="col-7">{{ paciente.responsavel|default:"—" }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+    <div class="col-6">
+      <dl class="row mb-0 small">
+        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ paciente.telefone_celular|telefone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ paciente.whatsapp|telefone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ paciente.telefone_residencial|telefone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ paciente.telefone_comercial|telefone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "E-mail" %}</dt><dd class="col-7">{{ paciente.email|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Endereço" %}</dt>
+        <dd class="col-7">
+          {% if paciente.logradouro %}{{ paciente.logradouro }}{% if paciente.numero %}, {{ paciente.numero }}{% endif %}{% if paciente.complemento %} - {{ paciente.complemento }}{% endif %}<br>{% endif %}
+          {% if paciente.bairro %}{{ paciente.bairro }}<br>{% endif %}
+          {% if paciente.cidade %}{{ paciente.cidade.nome }}/{{ paciente.cidade.uf.sigla }}<br>{% endif %}
+          {% if paciente.cep %}{% translate "CEP" %} {{ paciente.cep|cep }}{% endif %}
+          {% if not paciente.logradouro and not paciente.bairro and not paciente.cidade and not paciente.cep %}—{% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
+
+  {% if carteirinhas %}
+  <h2 class="h6 mt-3">{% translate "Convênios" %}</h2>
+  <table class="table table-sm small">
+    <thead><tr><th>{% translate "Convênio" %}</th><th>{% translate "Plano" %}</th><th>{% translate "Número da carteirinha" %}</th><th>{% translate "Validade" %}</th><th>{% translate "Titular" %}</th></tr></thead>
+    <tbody>
+      {% for carteirinha in carteirinhas %}
+      <tr><td>{{ carteirinha.convenio.nome }}</td><td>{{ carteirinha.plano|default:"—" }}</td><td>{{ carteirinha.numero }}</td><td>{{ carteirinha.validade|date:"SHORT_DATE_FORMAT"|default:"—" }}</td><td>{{ carteirinha.titular|default:"—" }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if paciente.observacoes %}
+  <h2 class="h6 mt-3">{% translate "Observações" %}</h2>
+  <p class="small">{{ paciente.observacoes|linebreaksbr }}</p>
+  {% endif %}
+
+  <div class="row mt-5 pt-4 small text-center">
+    <div class="col-6 offset-3 border-top pt-1">{% translate "Assinatura do paciente ou responsável" %}</div>
+  </div>
+</div>
+{% endblock %}

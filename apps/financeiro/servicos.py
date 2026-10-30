@@ -10,7 +10,10 @@ from django.db import transaction
 from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
+
+from apps.core.models import Clinica
 
 from . import comissoes
 from .models import (
@@ -18,6 +21,7 @@ from .models import (
     Caixa,
     CentroCusto,
     Comissao,
+    Fechamento,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
@@ -72,6 +76,7 @@ def receber(parcela, *, usuario, **campos):
     if parcela.lancamento.cancelado:
         raise ValidationError(_("Este lançamento foi cancelado."))
     pagamento = Pagamento(clinica=parcela.clinica, parcela=parcela, criado_por=usuario, **campos)
+    conferir_periodo(pagamento.clinica_id, pagamento.data)
     _pago, saldo = parcela.valores()
     if pagamento.principal <= 0:
         raise ValidationError(_("O valor abatido da parcela precisa ser maior que zero."))
@@ -89,6 +94,7 @@ def estornar(pagamento, *, motivo, usuario):
     pagamento = Pagamento.objects.select_for_update().get(pk=pagamento.pk)
     if pagamento.estornado:
         raise ValidationError(_("Este pagamento já foi estornado."))
+    conferir_periodo(pagamento.clinica_id, pagamento.data)
     pagamento.estornado = True
     pagamento.estornado_em = timezone.now()
     pagamento.estornado_por = usuario
@@ -129,6 +135,63 @@ def cancelar(lancamento, *, motivo, usuario):
     lancamento.motivo_cancelamento = motivo
     lancamento.save()
     return lancamento
+
+
+# --- Closing the books (decision 096) -------------------------------------------------
+
+
+def fechado_ate(clinica_id):
+    """Last day of the clinic's closed period, or None. Explicit clinic: also called by
+    commands that run without the request's isolation."""
+    ultimo = Fechamento.todos.filter(clinica_id=clinica_id).first()  # newest first
+    return ultimo.ate if ultimo else None
+
+
+def conferir_periodo(clinica_id, data):
+    """Refuse money dated inside the closed period. Locks the clinic row, shared with
+    fechar(), so a payment cannot slip in while the period is being closed."""
+    Clinica.objects.select_for_update().get(pk=clinica_id)
+    ate = fechado_ate(clinica_id)
+    if ate is not None and data <= ate:
+        raise ValidationError(
+            _(
+                "O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
+                "antes dela não podem ser registrados. Use uma data posterior ou peça ao "
+                "administrador para reabrir o período."
+            )
+            % {"ate": date_format(ate, "SHORT_DATE_FORMAT")}
+        )
+
+
+@transaction.atomic
+def fechar(clinica, ate, *, usuario):
+    """Close the books up to `ate` (at most yesterday: today's cash is still moving)."""
+    Clinica.objects.select_for_update().get(pk=clinica.pk)
+    if ate >= timezone.localdate():
+        raise ValidationError(_("Feche no máximo até ontem: hoje ainda há movimento."))
+    atual = fechado_ate(clinica.pk)
+    if atual is not None and ate <= atual:
+        raise ValidationError(
+            _("O financeiro já está fechado até %(ate)s. Para voltar, reabra o período.")
+            % {"ate": date_format(atual, "SHORT_DATE_FORMAT")}
+        )
+    return Fechamento.objects.create(clinica=clinica, ate=ate, criado_por=usuario)
+
+
+@transaction.atomic
+def reabrir(clinica, ate, *, motivo, usuario):
+    """Move the closing back to `ate` (None opens everything). A reason is required."""
+    Clinica.objects.select_for_update().get(pk=clinica.pk)
+    atual = fechado_ate(clinica.pk)
+    if atual is None:
+        raise ValidationError(_("O financeiro não está fechado."))
+    if ate is not None and ate >= atual:
+        raise ValidationError(_("Para reabrir, escolha uma data anterior ao fechamento atual."))
+    if not motivo.strip():
+        raise ValidationError(_("Informe o motivo da reabertura."))
+    return Fechamento.objects.create(
+        clinica=clinica, ate=ate, motivo=motivo.strip(), criado_por=usuario
+    )
 
 
 def situacao(parcela, hoje=None):
