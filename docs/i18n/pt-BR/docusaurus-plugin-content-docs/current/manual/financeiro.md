@@ -47,7 +47,7 @@ Em **Financeiro > Caixa do dia**, a recepção controla o dinheiro da gaveta:
 Só pode haver um caixa aberto por conta. Os caixas fechados ficam em **Caixas anteriores**, com o esperado, o contado e a diferença.
 
 ## Contas a pagar (administrador)
-Em **Financeiro > Nova despesa**, informe o **fornecedor**, a categoria, a descrição e o valor. Em **O valor é**, escolha:
+Em **Financeiro > Nova despesa**, escolha o **fornecedor** cadastrado (num pagamento avulso, escreva o nome em **Fornecedor sem cadastro**), a categoria, a descrição e o valor. Em **O valor é**, escolha:
 - **o total, dividido nas parcelas**: uma compra de R$ 900 em 3 vezes vira 3 parcelas de R$ 300;
 - **de cada mês**: uma conta fixa, como o aluguel de R$ 3.000 por 12 meses, vira 12 parcelas de R$ 3.000.
 
@@ -84,6 +84,9 @@ Em **Financeiro > Comissões**, cada profissional tem um **percentual** sobre o 
 3. Clique em **Pagar**, confira os recebimentos e o vencimento e clique em **Lançar em A pagar**. A comissão vira uma despesa em **A pagar**, em nome do profissional, onde você registra o pagamento.
 
 Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissionado for **estornado**, a comissão dele é descontada no próximo pagamento ao profissional (pelo percentual da época). Se a despesa da comissão for **cancelada**, a comissão é desfeita e os recebimentos voltam a ficar pendentes. Se uma comissão posterior já descontou o estorno de um recebimento dela, cancele primeiro a posterior. O **Extrato** de cada comissão lista os recebimentos e os descontos e pode ser impresso para o profissional.
+
+## Fornecedores
+Em **Cadastros > Fornecedores**, cadastre de quem a clínica compra ou a quem paga: pessoa física ou jurídica, nome, razão social, CPF/CNPJ, telefone, WhatsApp, e-mail e observações. O sistema confere o CPF ou CNPJ e não deixa cadastrar o mesmo documento duas vezes. A ficha do fornecedor mostra quanto está **em aberto** e todas as contas a pagar dele, e tem o botão **Nova despesa**, que já vem com ele escolhido. Nas listas, o nome do fornecedor leva à ficha. Para deixar de usar um fornecedor sem perder o histórico, desmarque **ativo**: ele some da nova despesa, e as contas antigas continuam ligadas a ele.
 
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

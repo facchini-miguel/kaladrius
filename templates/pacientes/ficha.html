@@ -69,6 +69,7 @@
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Celular" %}</dt><dd class="col-sm-7">{{ paciente.telefone_celular|telefone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if paciente.whatsapp %}<a href="{{ paciente.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ paciente.whatsapp|telefone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "Residencial" %}</dt><dd class="col-sm-7">{{ paciente.telefone_residencial|telefone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "Comercial" %}</dt><dd class="col-sm-7">{{ paciente.telefone_comercial|telefone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ paciente.email|default:"—" }}</dd>
@@ -157,6 +158,32 @@
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhum orçamento." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if carteirinhas is not None %}
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    {% translate "Convênios" %}
+    {% if pode.convenios.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'convenios:carteirinha_nova' paciente.pk %}">{% translate "Nova carteirinha" %}</a>{% endif %}
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for carteirinha in carteirinhas %}
+    <li class="list-group-item d-flex justify-content-between align-items-center gap-2{% if not carteirinha.ativa %} text-body-secondary{% endif %}">
+      <span>
+        <strong>{{ carteirinha.convenio.nome }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.numero }}
+        {% if carteirinha.validade %}<span class="small">· {% translate "validade" %} {{ carteirinha.validade|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
+        {% if carteirinha.titular %}<span class="small">· {% translate "titular" %}: {{ carteirinha.titular }}</span>{% endif %}
+      </span>
+      <span class="text-nowrap">
+        {% if not carteirinha.ativa %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
+        {% if pode.convenios.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0 ms-2" href="{% url 'convenios:carteirinha_editar' carteirinha.pk %}">{% translate "editar" %}</a>{% endif %}
+      </span>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">{% translate "Particular: nenhuma carteirinha de convênio." %}</li>
     {% endfor %}
   </ul>
 </div>

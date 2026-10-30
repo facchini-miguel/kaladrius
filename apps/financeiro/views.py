@@ -23,6 +23,7 @@ from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
+from apps.core.validadores import normalizar_cnpj
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
@@ -32,6 +33,7 @@ from .forms import (
     CategoriaForm,
     ContaForm,
     FecharCaixaForm,
+    FornecedorForm,
     ImportarExtratoForm,
     LancamentoDaTransacaoForm,
     LancamentoPagarForm,
@@ -43,10 +45,12 @@ from .forms import (
     ReceberForm,
 )
 from .models import (
+    ZERO,
     Caixa,
     Categoria,
     Comissao,
     Conta,
+    Fornecedor,
     ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
@@ -167,12 +171,17 @@ def lancamento_novo(request):
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
 def despesa_nova(request):
-    form = LancamentoPagarForm(request.POST or None, clinica=request.clinica)
+    form = LancamentoPagarForm(
+        request.POST or None,
+        clinica=request.clinica,
+        initial={"fornecedor": request.GET.get("fornecedor")},
+    )
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
         lancamento = servicos.criar_lancamento(
             clinica=request.clinica,
             tipo=Lancamento.Tipo.PAGAR,
+            fornecedor=dados["fornecedor"],
             pessoa=dados["pessoa"].strip(),
             descricao=dados["descricao"],
             categoria=dados["categoria"],
@@ -536,6 +545,71 @@ def cadastro_form(request, cadastro, pk=None):
         request,
         "financeiro/cadastro_form.html",
         {"form": form, "cadastro": cadastro, "instancia": instancia, "modelo": modelo._meta},
+    )
+
+
+# --- Suppliers (decision 093) ---------------------------------------------------------
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def fornecedores(request):
+    busca = request.GET.get("q", "").strip()
+    lista = Fornecedor.objects.all()
+    if busca:
+        filtro = Q(nome__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
+        documento = normalizar_cnpj(busca)
+        if any(c.isdigit() for c in documento):
+            filtro |= Q(cpf_cnpj__startswith=documento)
+        lista = lista.filter(filtro)
+    pagina = Paginator(lista, POR_PAGINA).get_page(request.GET.get("pagina"))
+    return render(
+        request,
+        "financeiro/fornecedores.html",
+        {"pagina": pagina, "busca": busca, "parametros": urlencode({"q": busca})},
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def fornecedor(request, pk):
+    fornecedor = get_object_or_404(Fornecedor.objects, pk=pk)
+    hoje = timezone.localdate()
+    parcelas = list(
+        Parcela.objects.com_saldo()
+        .filter(lancamento__fornecedor=fornecedor)
+        .select_related("lancamento")
+        .order_by("-vencimento", "-pk")[:POR_PAGINA]
+    )
+    for parcela in parcelas:
+        parcela.situacao = servicos.situacao(parcela, hoje)
+    em_aberto = sum(
+        (p.saldo for p in Parcela.objects.abertas().filter(lancamento__fornecedor=fornecedor)),
+        start=ZERO,
+    )
+    return render(
+        request,
+        "financeiro/fornecedor.html",
+        {"fornecedor": fornecedor, "parcelas": parcelas, "em_aberto": em_aberto},
+    )
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
+def fornecedor_novo(request):
+    return _fornecedor_form(request, Fornecedor())
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+def fornecedor_editar(request, pk):
+    return _fornecedor_form(request, get_object_or_404(Fornecedor.objects, pk=pk))
+
+
+def _fornecedor_form(request, instancia):
+    form = FornecedorForm(request.POST or None, instance=instancia, clinica=request.clinica)
+    if request.method == "POST" and form.is_valid():
+        fornecedor = form.save()
+        messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
+        return redirect("financeiro:fornecedor", pk=fornecedor.pk)
+    return render(
+        request, "financeiro/fornecedor_form.html", {"form": form, "instancia": instancia}
     )
 
 

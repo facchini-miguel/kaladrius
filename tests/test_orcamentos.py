@@ -247,18 +247,19 @@ def test_odontograma_so_na_area_odontologia(cenario):
     assert pagina.context["mostrar_dentes"] and "odontograma" in pagina.content.decode()
     assert "dentes" in pagina.context["item_form"].fields
 
+    from apps.core.models import MODULOS_GERAIS
     from apps.core.modulos import configurar
 
-    configurar(cenario["clinica"], {Clinica.Area.MEDICINA})
+    configurar(cenario["clinica"], {*MODULOS_GERAIS, Clinica.Area.MEDICINA})
     pagina = recepcao.get(detalhe)
     assert not pagina.context["mostrar_dentes"] and "odontograma" not in pagina.content.decode()
     assert "dentes" not in pagina.context["item_form"].fields
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk, dentes="11", faces="V")
     with usar_clinica(cenario["clinica"]):
         assert not orcamento.itens.exists()  # forged fields are rejected, not discarded
-    configurar(cenario["clinica"], {Clinica.Area.ODONTOLOGIA})
+    configurar(cenario["clinica"], {*MODULOS_GERAIS, Clinica.Area.ODONTOLOGIA})
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk, dentes="11", faces="V")
-    configurar(cenario["clinica"], {Clinica.Area.MEDICINA})
+    configurar(cenario["clinica"], {*MODULOS_GERAIS, Clinica.Area.MEDICINA})
     pagina = recepcao.get(detalhe)
     assert pagina.context["mostrar_dentes"] and "11" in pagina.content.decode()
     impressao = recepcao.get(reverse("orcamentos:imprimir", args=[orcamento.pk]))

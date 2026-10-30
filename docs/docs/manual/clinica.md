@@ -11,9 +11,11 @@ In **Records > Clinic settings**: the clinic's name, CPF/CNPJ, e-mail and phone,
 
 The installation serves **one clinic**, with one patient register, team, schedule and finance. There is no clinic switcher. The internal clinic identifiers remain in place for a possible future extension.
 
-The **primary area** sets the appointment types when the clinic is first created. Under **Clinical modules**, independently enable **Dentistry**, **Medicine**, both, or neither. The same options appear in the system administrator's clinic form. Changing the primary area later does not change these switches or replace existing appointment types.
+The **primary area** sets the appointment types when the clinic is first created. Under **Specialties**, enable **Dentistry** only, **Medicine** only, or both together (or neither, for another health area). The same options appear in the system administrator's clinic form. Changing the primary area later does not change these switches or replace existing appointment types.
 
 Dentistry enables the dental chart and the teeth and surfaces of estimate items. Disabling it keeps existing dental items visible and printable, but prevents creating, changing or removing them until it is enabled again. General estimate items remain available. Medicine prepares the configuration for medical extensions; the shared medical record remains available in every area, according to the existing practitioner permissions. Enabling a module does not grant access to clinical records or create new specialty forms automatically.
+
+**Modules** holds the parts shared by the specialties: **Schedule**, **Medical record**, **Estimates**, **Finance**, **Recalls**, **Birthdays** and [**Health plans**](convenios.md). A new clinic starts with all of them on, and so does an updated installation. A module turned off leaves the menu, the home page and the patient record for the whole team, the system administrator included, and its address is refused. Nothing already recorded is erased: turning it back on shows everything again. **Estimates** needs **Finance** on, because approving an estimate creates the receivable. Patients, practitioners, the team, the base tables, the clinic settings and the audit log are always on.
 
 If a future appointment would fall outside the new hours or slot length, the change is refused and the screen shows which one. Adjust that appointment first.
 

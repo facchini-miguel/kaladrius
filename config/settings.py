@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "apps.agenda",
     "apps.pacientes",
     "apps.rechamadas",
+    "apps.convenios",
     "apps.auditoria",
     "apps.equipe",
     "apps.legado",

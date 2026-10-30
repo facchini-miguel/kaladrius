@@ -9,9 +9,11 @@
   {% csrf_token %}
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
   <div class="row">
-    <div class="col-md-6">{% with campo=form.pessoa %}{% include "includes/campo.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with campo=form.fornecedor %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.categoria %}{% include "includes/campo.html" %}{% endwith %}</div>
   </div>
+  {% with campo=form.pessoa %}{% include "includes/campo.html" %}{% endwith %}
+  <p class="text-body-secondary small"><a href="{% url 'financeiro:fornecedor_novo' %}">{% translate "Cadastrar um fornecedor novo" %}</a></p>
   {% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}
   <div class="row">
     <div class="col-md-4">{% with campo=form.valor %}{% include "includes/campo.html" %}{% endwith %}</div>

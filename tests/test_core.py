@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.core.isolamento import usar_clinica
-from apps.core.models import Papel
+from apps.core.models import MODULOS_GERAIS, Papel
 from apps.profissionais.models import Profissional
 
 pytestmark = pytest.mark.django_db
@@ -155,6 +155,7 @@ def dados_clinica(**extra):
         "agenda_inicio": "08:00",
         "agenda_fim": "18:00",
         "agenda_intervalo": 30,
+        "modulos_gerais": sorted(MODULOS_GERAIS),
         **extra,
     }
 

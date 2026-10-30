@@ -24,6 +24,7 @@ urlpatterns = [
     path("agenda/", include("apps.agenda.urls")),
     path("pacientes/", include("apps.pacientes.urls")),
     path("rechamadas/", include("apps.rechamadas.urls")),
+    path("convenios/", include("apps.convenios.urls")),
     path("auditoria/", include("apps.auditoria.urls")),
     path("equipe/", include("apps.equipe.urls")),
     path("ajuda/", include("apps.ajuda.urls")),

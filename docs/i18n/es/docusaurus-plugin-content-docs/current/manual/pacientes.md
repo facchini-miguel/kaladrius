@@ -13,6 +13,7 @@ Haga clic en **Nuevo paciente**. Elija **persona física** o **jurídica**: los 
 - El sistema verifica si el CPF o el CNPJ es válido y si ya existe en la clínica.
 - Elija el **estado** y después la **ciudad**.
 - Los teléfonos necesitan el código de área.
+- Complete el **WhatsApp** (puede ser el mismo número del celular): la ficha y los recordatorios de la pantalla de inicio tienen un enlace que abre la conversación. El fax y el MSN del sistema antiguo ya no se piden.
 
 ## Ficha del paciente
 Haga clic en el nombre para abrir la ficha: datos, contacto, dirección, observaciones, **próximas y últimas citas** (haga clic en la fecha para ir a la semana en la agenda) y **recordatorios**.

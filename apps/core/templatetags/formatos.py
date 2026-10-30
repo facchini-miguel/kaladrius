@@ -29,6 +29,13 @@ def telefone(valor):
 
 
 @register.filter
+def whatsapp(valor):
+    """Link that opens a WhatsApp chat with a Brazilian number (DDD and number)."""
+    valor = valor or ""
+    return f"https://wa.me/55{valor}" if len(valor) in (10, 11) else ""
+
+
+@register.filter
 def cep(valor):
     valor = valor or ""
     if len(valor) == 8:

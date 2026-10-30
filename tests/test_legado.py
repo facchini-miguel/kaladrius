@@ -1,6 +1,7 @@
 """Import of the legacy Odonto System dump. Uses a small made-up dump (no real data)."""
 
 import datetime
+from decimal import Decimal
 
 import pytest
 from django.core.management import CommandError, call_command
@@ -8,8 +9,11 @@ from django.utils import timezone
 
 from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.auditoria.models import RegistroAuditoria
+from apps.convenios.models import Carteirinha, Convenio
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Clinica
+from apps.financeiro import servicos
+from apps.financeiro.models import Categoria, Fornecedor, Lancamento
 from apps.legado.anonimizacao import RECHAMADAS
 from apps.legado.dump import DumpInvalido, ler_tabelas
 from apps.legado.importacao import ImportacaoRecusada, _documento, importar
@@ -335,3 +339,59 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
 def test_anonimizar_clinica_inexistente(db):
     with pytest.raises(CommandError, match="não encontrada"):
         call_command("anonimizar_clinica", clinica="Não existe", confirmar=True)
+
+
+def test_anonimizacao_dos_fornecedores(importado):
+    _, clinica = importado
+    with usar_clinica(clinica):
+        pessoa = Fornecedor.objects.create(
+            tipo=Fornecedor.Tipo.FISICA,
+            nome="Fulana Fornecedora",
+            cpf_cnpj="52998224725",
+            telefone="4833334444",
+            email="fulana@example.com",
+            observacoes="Indicada pela Fulana",
+        )
+        empresa = Fornecedor.objects.create(nome="Dental Fictícia", whatsapp="48999990000")
+        categoria = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).first()
+        for fornecedor in (pessoa, empresa):
+            servicos.criar_lancamento(
+                clinica=clinica,
+                tipo=Lancamento.Tipo.PAGAR,
+                fornecedor=fornecedor,
+                pessoa=fornecedor.nome,
+                descricao="Compra",
+                categoria=categoria,
+                valor_total=Decimal("10"),
+                parcelas=1,
+                primeiro_vencimento=HOJE,
+                usuario=None,
+            )
+    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+
+    pessoa, empresa = dados(clinica, Fornecedor)
+    assert "Fulana" not in str(vars(pessoa))
+    assert (pessoa.cpf_cnpj, len(pessoa.telefone)) == ("", 10)
+    assert pessoa.email.endswith("@example.com")
+    assert empresa.nome == "Dental Fictícia"  # a company name is not personal data
+    assert len(empresa.whatsapp) == 11 and empresa.whatsapp != "48999990000"
+    # Payables keep showing their supplier's (new) name.
+    for lancamento in dados(clinica, Lancamento, tipo=Lancamento.Tipo.PAGAR):
+        assert lancamento.pessoa == lancamento.fornecedor.nome
+
+
+def test_anonimizacao_das_carteirinhas(importado):
+    _, clinica = importado
+    with usar_clinica(clinica):
+        convenio = Convenio.objects.create(nome="Saúde Exemplo")
+        Carteirinha.objects.create(
+            paciente=Paciente.objects.first(),
+            convenio=convenio,
+            plano="Básico",
+            numero="98765",
+            titular="Fulano Titular",
+        )
+    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+    (carteirinha,) = dados(clinica, Carteirinha)
+    assert carteirinha.numero != "98765" and "Fulano" not in carteirinha.titular
+    assert carteirinha.titular and (carteirinha.convenio, carteirinha.plano) == (convenio, "Básico")

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 14:38-0300\n"
+"POT-Creation-Date: 2026-10-30 16:48-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -270,19 +270,111 @@ msgstr "registro de auditoría"
 msgid "registros de auditoria"
 msgstr "registros de auditoría"
 
+msgid "Convênios"
+msgstr "Convenios"
+
+#
+msgid "Registro na ANS"
+msgstr "Registro en la ANS"
+
+msgid "Telefone"
+msgstr "Teléfono"
+
+#
+msgid "Já existe um convênio com este nome."
+msgstr "Ya existe un convenio con este nombre."
+
+msgid "O registro na ANS tem 6 dígitos."
+msgstr "El registro en la ANS tiene 6 dígitos."
+
+msgid "Informe o DDD e o número (10 ou 11 dígitos)."
+msgstr "Indique el código de área y el número (10 u 11 dígitos)."
+
+msgid "Esta carteirinha já está cadastrada neste convênio."
+msgstr "Esta credencial ya está registrada en este convenio."
+
+#
+msgid "registro na ANS"
+msgstr "registro en la ANS"
+
+msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
+msgstr "Los 6 dígitos del registro de la operadora en la ANS, si lo hay."
+
+msgid "telefone"
+msgstr "teléfono"
+
+msgid "observações"
+msgstr "observaciones"
+
+msgid "convênio"
+msgstr "convenio"
+
+msgid "convênios"
+msgstr "convenios"
+
+msgid "plano"
+msgstr "plan"
+
+#
+msgid "número da carteirinha"
+msgstr "número de la credencial"
+
+#
+msgid "validade"
+msgstr "validez"
+
+msgid "titular"
+msgstr "titular"
+
+msgid "Se o paciente for dependente, o nome do titular do plano."
+msgstr "Si el paciente es dependiente, el nombre del titular del plan."
+
+msgid "ativa"
+msgstr "activa"
+
+msgid "carteirinha"
+msgstr "credencial"
+
+msgid "carteirinhas"
+msgstr "credenciales"
+
+#, python-format
+msgid "%(nome)s salvo."
+msgstr "%(nome)s guardado."
+
+msgid "Carteirinha salva."
+msgstr "Credencial guardada."
+
 msgid "Núcleo"
 msgstr "Núcleo"
 
-msgid "Módulos clínicos"
-msgstr "Módulos clínicos"
+#
+msgid "Especialidades"
+msgstr "Especialidades"
 
 msgid ""
-"Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
-"financeiro continuam disponíveis. Desativar não apaga o histórico."
+"Só Odontologia, só Medicina ou as duas juntas (ou nenhuma, em outra área da "
+"saúde). Desativar não apaga o histórico."
 msgstr ""
-"Elija un área, ambas o ninguna. La agenda, los pacientes, la historia "
-"clínica común y las finanzas siguen disponibles. Desactivar no borra el "
-"historial."
+"Solo Odontología, solo Medicina o las dos juntas (o ninguna, en otra área de "
+"la salud). Desactivar no borra el historial."
+
+#
+msgid "Módulos"
+msgstr "Módulos"
+
+msgid ""
+"Comuns às especialidades. Um módulo desligado sai do menu e das telas para "
+"toda a equipe, e nada do que já foi registrado é apagado. Pacientes, "
+"profissionais, equipe e tabelas base estão sempre ligados."
+msgstr ""
+"Comunes a las especialidades. Un módulo desactivado sale del menú y de las "
+"pantallas para todo el equipo, y no se borra nada de lo ya registrado. "
+"Pacientes, profesionales, equipo y tablas base están siempre activos."
+
+#, python-format
+msgid "%(modulo)s precisa de: %(precisa)s."
+msgstr "%(modulo)s necesita: %(precisa)s."
 
 msgid "CPF/CNPJ"
 msgstr "CPF/CNPJ (identificación fiscal)"
@@ -346,12 +438,13 @@ msgstr "Otra área de la salud"
 msgid "área principal"
 msgstr "área principal"
 
+#
 msgid ""
-"Define os tipos iniciais de atendimento. Os módulos clínicos são escolhidos "
-"separadamente e podem ser usados juntos."
+"Define os tipos iniciais de atendimento. As especialidades e os módulos são "
+"escolhidos abaixo e podem ser usados juntos."
 msgstr ""
-"Define los tipos iniciales de atención. Los módulos clínicos se eligen por "
-"separado y pueden usarse juntos."
+"Define los tipos iniciales de atención. Las especialidades y los módulos se "
+"eligen abajo y pueden usarse juntos."
 
 msgid "Somente números."
 msgstr "Solo números."
@@ -359,18 +452,12 @@ msgstr "Solo números."
 msgid "e-mail"
 msgstr "correo electrónico"
 
-msgid "telefone"
-msgstr "teléfono"
-
 msgid "endereço"
 msgstr "dirección"
 
 msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
 msgstr ""
 "Calle, número, barrio, ciudad/estado y código postal, como sale en el recibo."
-
-msgid "ativa"
-msgstr "activa"
 
 msgid "início da agenda"
 msgstr "inicio de la agenda"
@@ -393,6 +480,21 @@ msgstr "clínicas"
 msgid "O início da agenda deve ser antes do fim."
 msgstr "El inicio de la agenda debe ser anterior al fin."
 
+msgid "Prontuário"
+msgstr "Historia clínica"
+
+msgid "Orçamentos"
+msgstr "Presupuestos"
+
+msgid "Financeiro"
+msgstr "Financiero"
+
+msgid "Rechamadas"
+msgstr "Recordatorios"
+
+msgid "Aniversariantes"
+msgstr "Cumpleaños"
+
 msgid "módulo"
 msgstr "módulo"
 
@@ -410,9 +512,6 @@ msgstr "Recepción"
 
 msgid "Profissional"
 msgstr "Profesional"
-
-msgid "Financeiro"
-msgstr "Financiero"
 
 msgid "perfil"
 msgstr "perfil"
@@ -441,17 +540,15 @@ msgstr "copias de seguridad"
 msgid "Módulo clínico desconhecido."
 msgstr "Módulo clínico desconocido."
 
+#
+msgid "Orçamentos precisa do Financeiro habilitado."
+msgstr "Presupuestos necesita Financiero habilitado."
+
 msgid "Cadastre a clínica antes de configurar os módulos."
 msgstr "Registre la clínica antes de configurar los módulos."
 
 msgid "Pacientes"
 msgstr "Pacientes"
-
-msgid "Rechamadas"
-msgstr "Recordatorios"
-
-msgid "Aniversariantes"
-msgstr "Cumpleaños"
 
 msgid "Profissionais"
 msgstr "Profesionales"
@@ -467,9 +564,6 @@ msgstr "Configuración de la clínica"
 
 msgid "Recebimentos"
 msgstr "Cobros"
-
-msgid "Orçamentos"
-msgstr "Presupuestos"
 
 msgid "Ver"
 msgstr "Ver"
@@ -625,8 +719,23 @@ msgstr "Número de cuotas o de meses"
 msgid "A 1ª parcela já foi paga"
 msgstr "La 1.ª cuota ya se pagó"
 
-msgid "Fornecedor"
-msgstr "Proveedor"
+#
+msgid "Fornecedor sem cadastro"
+msgstr "Proveedor sin registro"
+
+msgid "Só para um pagamento avulso, sem cadastrar o fornecedor."
+msgstr "Solo para un pago suelto, sin registrar al proveedor."
+
+#
+msgid "Escolha o fornecedor ou informe para quem é."
+msgstr "Elija el proveedor o indique para quién es."
+
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+#
+msgid "Já existe um fornecedor com este documento."
+msgstr "Ya existe un proveedor con este documento."
 
 msgid "Valor recebido"
 msgstr "Valor cobrado"
@@ -734,6 +843,26 @@ msgstr "categoría"
 msgid "categorias"
 msgstr "categorías"
 
+msgid "Pessoa física"
+msgstr "Persona física"
+
+msgid "Pessoa jurídica"
+msgstr "Persona jurídica"
+
+msgid "Para pessoa jurídica, o nome fantasia."
+msgstr "Para personas jurídicas, el nombre comercial."
+
+msgid "razão social"
+msgstr "razón social"
+
+#
+msgid "fornecedor"
+msgstr "proveedor"
+
+#
+msgid "fornecedores"
+msgstr "proveedores"
+
 msgid "A receber"
 msgstr "Por cobrar"
 
@@ -751,9 +880,6 @@ msgstr "valor total"
 
 msgid "data"
 msgstr "fecha"
-
-msgid "observações"
-msgstr "observaciones"
 
 msgid "cancelado"
 msgstr "cancelado"
@@ -1103,10 +1229,6 @@ msgid "Fechar caixa"
 msgstr "Cerrar caja"
 
 #, python-format
-msgid "%(nome)s salvo."
-msgstr "%(nome)s guardado."
-
-#, python-format
 msgid "Percentual de %(nome)s salvo."
 msgstr "Porcentaje de %(nome)s guardado."
 
@@ -1379,9 +1501,6 @@ msgstr "Teléfono del trabajo"
 msgid "O CEP deve ter 8 dígitos."
 msgstr "El código postal (CEP) debe tener 8 dígitos."
 
-msgid "Informe o DDD e o número (10 ou 11 dígitos)."
-msgstr "Indique el código de área y el número (10 u 11 dígitos)."
-
 msgid "A data de nascimento não pode estar no futuro."
 msgstr "La fecha de nacimiento no puede estar en el futuro."
 
@@ -1398,12 +1517,6 @@ msgstr "Ya existe un paciente con este CPF/CNPJ en esta clínica."
 msgid "A cidade não pertence à UF escolhida."
 msgstr "La ciudad no pertenece al estado elegido."
 
-msgid "Pessoa física"
-msgstr "Persona física"
-
-msgid "Pessoa jurídica"
-msgstr "Persona jurídica"
-
 msgid "Feminino"
 msgstr "Femenino"
 
@@ -1412,12 +1525,6 @@ msgstr "Masculino"
 
 msgid "Outro"
 msgstr "Otro"
-
-msgid "Para pessoa jurídica, o nome fantasia."
-msgstr "Para personas jurídicas, el nombre comercial."
-
-msgid "razão social"
-msgstr "razón social"
 
 msgid "Pode ser digitado com ou sem pontuação."
 msgstr "Puede escribirse con o sin puntuación."
@@ -1448,6 +1555,11 @@ msgstr "Para menores de edad, por ejemplo."
 
 msgid "celular"
 msgstr "celular"
+
+msgid "Com DDD. A ficha abre a conversa direto no WhatsApp."
+msgstr ""
+"Con el código de área. La ficha abre la conversación directamente en "
+"WhatsApp."
 
 msgid "telefone residencial"
 msgstr "teléfono de casa"
@@ -1551,9 +1663,6 @@ msgstr ""
 #, python-format
 msgid "Profissional %(nome)s excluído."
 msgstr "Profesional %(nome)s eliminado."
-
-msgid "Prontuário"
-msgstr "Historia clínica"
 
 msgid "Informe quantos dias de afastamento."
 msgstr "Indique cuántos días de reposo."
@@ -2064,6 +2173,10 @@ msgstr "Categorías"
 msgid "Contas"
 msgstr "Cuentas"
 
+#
+msgid "Fornecedores"
+msgstr "Proveedores"
+
 msgid "Manual do usuário"
 msgstr "Manual del usuario"
 
@@ -2139,6 +2252,37 @@ msgstr "Desarrollado por"
 
 msgid "Política de privacidade"
 msgstr "Política de privacidad"
+
+msgid "Carteirinha"
+msgstr "Credencial"
+
+#
+msgid "Nova carteirinha"
+msgstr "Nueva credencial"
+
+msgid "O convênio não está na lista?"
+msgstr "¿El convenio no está en la lista?"
+
+#
+msgid "Cadastre o convênio"
+msgstr "Registre el convenio"
+
+#
+msgid "Novo convênio"
+msgstr "Nuevo convenio"
+
+#
+msgid "Nenhum convênio cadastrado."
+msgstr "Ningún convenio registrado."
+
+#
+#
+msgid ""
+"A carteirinha de cada paciente é cadastrada na ficha dele. Para deixar de "
+"aceitar um convênio sem perder o histórico, edite e desmarque “ativo”."
+msgstr ""
+"La credencial de cada paciente se registra en su ficha. Para dejar de "
+"aceptar un convenio sin perder el historial, edítelo y desmarque “activo”."
 
 msgid "Cadastre sua clínica"
 msgstr "Registre su clínica"
@@ -2660,6 +2804,10 @@ msgstr "Extracto"
 msgid "Nenhuma comissão lançada ainda."
 msgstr "Ninguna comisión registrada todavía."
 
+#
+msgid "Cadastrar um fornecedor novo"
+msgstr "Registrar un proveedor nuevo"
+
 msgid ""
 "Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
 "Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
@@ -2827,6 +2975,50 @@ msgstr ""
 msgid "Saldo atual por conta"
 msgstr "Saldo actual por cuenta"
 
+msgid "Dados"
+msgstr "Datos"
+
+msgid "Razão social"
+msgstr "Razón social"
+
+msgid "E-mail"
+msgstr "Correo electrónico"
+
+msgid "em aberto, somando as parcelas ainda não pagas"
+msgstr "pendiente, sumando las cuotas aún no pagadas"
+
+#
+msgid "Contas a pagar"
+msgstr "Cuentas por pagar"
+
+msgid "Falta"
+msgstr "Falta"
+
+#
+msgid "Nenhuma conta deste fornecedor ainda."
+msgstr "Aún no hay cuentas de este proveedor."
+
+#
+msgid "Novo fornecedor"
+msgstr "Nuevo proveedor"
+
+#
+msgid "Nome, razão social ou CPF/CNPJ"
+msgstr "Nombre, razón social o CPF/CNPJ"
+
+#
+msgid "Buscar fornecedor"
+msgstr "Buscar proveedor"
+
+#
+msgid "Nenhum fornecedor encontrado."
+msgstr "Ningún proveedor encontrado."
+
+#
+msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativo”."
+msgstr ""
+"Para dejar de usarlo sin perder el historial, edítelo y desmarque “activo”."
+
 msgid "Cancelado"
 msgstr "Cancelada"
 
@@ -2839,9 +3031,6 @@ msgstr "Cancelada el %(momento)s. Motivo: %(motivo)s"
 
 msgid "Pago"
 msgstr "Pagado"
-
-msgid "Falta"
-msgstr "Falta"
 
 msgid "Parcela"
 msgstr "Cuota"
@@ -2879,6 +3068,9 @@ msgstr "Pagadas"
 
 msgid "Todas"
 msgstr "Todos"
+
+msgid "Fornecedor"
+msgstr "Proveedor"
 
 msgid "Nenhuma parcela encontrada."
 msgstr "Ninguna cuota encontrada."
@@ -3250,12 +3442,6 @@ msgstr[1] "%(total)s cumpleaños (pacientes activos)"
 msgid "Completa"
 msgstr "Cumple"
 
-msgid "Telefone"
-msgstr "Teléfono"
-
-msgid "E-mail"
-msgstr "Correo electrónico"
-
 msgid "Nenhum aniversariante neste mês."
 msgstr "Ningún cumpleaños en este mes."
 
@@ -3343,6 +3529,10 @@ msgstr "las citas siguen en la agenda, pero sin el paciente;"
 msgid "as rechamadas do paciente são apagadas;"
 msgstr "los recordatorios del paciente se eliminan;"
 
+#
+msgid "as carteirinhas de convênio do paciente são apagadas;"
+msgstr "las credenciales de convenio del paciente se borran;"
+
 msgid ""
 "a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
 "pessoais do paciente;"
@@ -3385,9 +3575,6 @@ msgstr ""
 
 msgid "Identificação"
 msgstr "Identificación"
-
-msgid "Razão social"
-msgstr "Razón social"
 
 msgid "CNPJ"
 msgstr "CNPJ"
@@ -3461,6 +3648,17 @@ msgstr "Ninguna cita anterior."
 
 msgid "Nenhum orçamento."
 msgstr "Ningún presupuesto."
+
+msgctxt "carteirinha"
+msgid "Vencida"
+msgstr "Vencida"
+
+#
+msgid "editar"
+msgstr "editar"
+
+msgid "Particular: nenhuma carteirinha de convênio."
+msgstr "Particular: ninguna credencial de convenio."
 
 msgid "receber"
 msgstr "cobrar"
@@ -3782,6 +3980,17 @@ msgstr "No tiene permiso para acceder a esta página."
 
 msgid "Senha"
 msgstr "Contraseña"
+
+#~ msgid "Módulos clínicos"
+#~ msgstr "Módulos clínicos"
+
+#~ msgid ""
+#~ "Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
+#~ "financeiro continuam disponíveis. Desativar não apaga o histórico."
+#~ msgstr ""
+#~ "Elija un área, ambas o ninguna. La agenda, los pacientes, la historia "
+#~ "clínica común y las finanzas siguen disponibles. Desactivar no borra el "
+#~ "historial."
 
 #~ msgid "área"
 #~ msgstr "área"

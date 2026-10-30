@@ -13,6 +13,7 @@ from apps.agenda.models import Agendamento
 from apps.agenda.servicos import agendamentos_visiveis
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import anonimizar, registrar
+from apps.convenios.models import Carteirinha
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.validadores import normalizar_cnpj
 from apps.financeiro.models import Lancamento, Pagamento, Parcela
@@ -99,6 +100,10 @@ def ficha(request, pk):
     if pode(request, Modulo.ORCAMENTOS, Acao.VER):
         contexto["orcamentos"] = list(
             Orcamento.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
+        )
+    if pode(request, Modulo.CONVENIOS, Acao.VER):
+        contexto["carteirinhas"] = list(
+            Carteirinha.objects.filter(paciente=paciente).select_related("convenio")
         )
     if acessa_prontuario(request):
         contexto["prontuario"] = list(
@@ -197,8 +202,9 @@ def excluir(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
     The appointments stay in the schedule without the patient (and without their notes),
-    the recalls go, financial entries are kept (accounting history) without the patient
-    and the notes, and the patient's personal data is removed from the audit log as well.
+    the recalls and health plan cards go, financial entries are kept (accounting history)
+    without the patient and the notes, and the patient's personal data is removed from the
+    audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
     # The medical record is kept for 20 years (Law 13.787/2018, decision 081): a patient
@@ -216,6 +222,8 @@ def excluir(request, pk):
         ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
         rechamadas = Rechamada.objects.filter(paciente=paciente)
         ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
+        carteirinhas = Carteirinha.objects.filter(paciente=paciente)
+        ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
         lancamentos = Lancamento.objects.filter(paciente=paciente)
         ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
         ids_parcelas = list(
@@ -238,10 +246,12 @@ def excluir(request, pk):
             lancamentos.update(paciente=None, pessoa=excluido, observacoes="")
             Pagamento.objects.filter(pk__in=ids_pagamentos).update(observacao="")
             rechamadas.delete()
+            carteirinhas.delete()
             paciente.delete()
             anonimizar(Paciente, [codigo])
             anonimizar(Agendamento, ids_agendamentos)
             anonimizar(Rechamada, ids_rechamadas)
+            anonimizar(Carteirinha, ids_carteirinhas)
             anonimizar(Lancamento, ids_lancamentos)
             anonimizar(Parcela, ids_parcelas)
             anonimizar(Pagamento, ids_pagamentos)

@@ -1,3 +1,4 @@
+import datetime
 import os
 import random
 
@@ -5,9 +6,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from apps.agenda.models import Agendamento
 from apps.agenda.simulacao import simular_agendamentos, simular_rechamadas
+from apps.convenios.models import Carteirinha, Convenio
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
@@ -150,12 +153,14 @@ class Command(BaseCommand):
                 documento = ""
             documentos.add(documento)
             cidade = fake.random_element(cidades)
+            celular = f"489{fake.numerify('########')}"
             paciente = Paciente(
                 clinica=clinica,
                 tipo=Paciente.Tipo.JURIDICA if juridica else Paciente.Tipo.FISICA,
                 nome=nome,
                 cpf_cnpj=documento,
-                telefone_celular=f"489{fake.numerify('########')}",
+                telefone_celular=celular,
+                whatsapp=celular,
                 email=f"paciente{clinica.pk}.{numero}@example.com",
                 cep=f"88{fake.numerify('######')}",
                 uf_id=cidade.uf_id,
@@ -174,7 +179,29 @@ class Command(BaseCommand):
                 paciente.profissao = fake.job()[:100]
             novos.append(paciente)
         Paciente.objects.bulk_create(novos, batch_size=500)
+        self._carteirinhas(clinica, novos)
         return len(novos)
+
+    def _carteirinhas(self, clinica, pacientes):
+        """Two made-up health plans and a card for about a third of the patients."""
+        sorteio = random.Random(clinica.pk + 2000)  # noqa: S311 (fake data, not security)
+        convenios = [
+            Convenio.objects.create(clinica=clinica, nome=nome, registro_ans=registro)
+            for nome, registro in (("Saúde Exemplo", "000001"), ("Plano Fictício", "000002"))
+        ]
+        hoje = timezone.localdate()
+        Carteirinha.objects.bulk_create(
+            Carteirinha(
+                clinica=clinica,
+                paciente=paciente,
+                convenio=sorteio.choice(convenios),
+                plano=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
+                numero=f"{numero:012d}",
+                validade=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
+            )
+            for numero, paciente in enumerate(pacientes, start=1)
+            if sorteio.random() < 0.35
+        )
 
     def _agendamentos(self, clinica):
         """Fill ~60% of the weekday slots from 2 weeks ago to 4 weeks ahead."""

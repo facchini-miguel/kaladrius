@@ -14,6 +14,8 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from apps.core import modulos
+from apps.core.models import ModuloClinico
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.financeiro.models import Categoria
 from apps.odontologia.dentes import odontograma
@@ -40,6 +42,11 @@ def _aberto(request, pk):
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("orcamentos:detalhe", pk=orcamento.pk)
     return orcamento, None
+
+
+def _odontologia(request):
+    # The request's cached modules; the item's save() re-checks under the clinic lock.
+    return ModuloClinico.ODONTOLOGIA in modulos.habilitados(request)
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
@@ -111,7 +118,7 @@ def editar(request, pk):
 def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     aberto = orcamento.situacao == Orcamento.Situacao.ABERTO
-    odontologia = request.clinica.odontologia
+    odontologia = _odontologia(request)
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
     pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
     return render(
@@ -137,7 +144,7 @@ def _dentes(request, orcamento):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
     tem_historico = any(item.dentes or item.faces for item in orcamento.itens.all())
-    if not (request.clinica.odontologia or tem_historico):
+    if not (_odontologia(request) or tem_historico):
         return {"mostrar_dentes": False}
     return {"mostrar_dentes": True, **odontograma(orcamento.dentes)}
 
@@ -148,7 +155,7 @@ def item_adicionar(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    form = ItemForm(request.POST, odontologia=request.clinica.odontologia)
+    form = ItemForm(request.POST, odontologia=_odontologia(request))
     if form.is_valid():
         item = form.save(commit=False)
         item.orcamento = orcamento
@@ -173,7 +180,7 @@ def item_remover(request, pk, item):
     if resposta:
         return resposta
     registro = get_object_or_404(orcamento.itens, pk=item)
-    if (registro.dentes or registro.faces) and not request.clinica.odontologia:
+    if (registro.dentes or registro.faces) and not _odontologia(request):
         raise PermissionDenied
     try:
         registro.delete()

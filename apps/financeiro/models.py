@@ -103,6 +103,43 @@ def criar_padroes(clinica):
             )
 
 
+class Fornecedor(ModeloDaClinica):
+    """Who the clinic buys from or pays (decision 093), picked on a payable."""
+
+    class Tipo(models.TextChoices):
+        FISICA = "PF", _("Pessoa física")
+        JURIDICA = "PJ", _("Pessoa jurídica")
+
+    tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.JURIDICA)
+    nome = models.CharField(
+        _("nome"), max_length=200, help_text=_("Para pessoa jurídica, o nome fantasia.")
+    )
+    razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
+    cpf_cnpj = models.CharField(_("CPF/CNPJ"), max_length=14, blank=True)
+    telefone = models.CharField(_("telefone"), max_length=11, blank=True)
+    whatsapp = models.CharField(_("WhatsApp"), max_length=11, blank=True)
+    email = models.EmailField(_("e-mail"), blank=True)
+    observacoes = models.TextField(_("observações"), blank=True)
+    ativo = models.BooleanField(_("ativo"), default=True)
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("fornecedor")
+        verbose_name_plural = _("fornecedores")
+        ordering = ["nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["clinica", "cpf_cnpj"],
+                condition=~Q(cpf_cnpj=""),
+                name="fornecedor_cpf_cnpj_unico_por_clinica",
+            ),
+        ]
+
+    def __str__(self):
+        return self.nome
+
+
 class Lancamento(ModeloDaClinica):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
@@ -123,8 +160,17 @@ class Lancamento(ModeloDaClinica):
         related_name="lancamentos",
         verbose_name=_("paciente"),
     )
-    # Who pays (receivable without a registered patient) or the supplier (payable).
+    # Who pays (receivable without a registered patient) or the supplier (payable). With a
+    # registered supplier it holds the supplier's name, so lists and reports need no join.
     pessoa = models.CharField(_("pagador"), max_length=200, blank=True)
+    fornecedor = models.ForeignKey(
+        Fornecedor,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="lancamentos",
+        verbose_name=_("fornecedor"),
+    )
     profissional = models.ForeignKey(
         "profissionais.Profissional",
         on_delete=models.PROTECT,

@@ -59,8 +59,8 @@ class Clinica(models.Model):
         choices=Area.choices,
         default=Area.ODONTOLOGIA,
         help_text=_(
-            "Define os tipos iniciais de atendimento. Os módulos clínicos são escolhidos "
-            "separadamente e podem ser usados juntos."
+            "Define os tipos iniciais de atendimento. As especialidades e os módulos são "
+            "escolhidos abaixo e podem ser usados juntos."
         ),
     )
     documento = models.CharField(
@@ -125,8 +125,27 @@ class Clinica(models.Model):
 
 
 class ModuloClinico(models.TextChoices):
+    """Parts of the system the clinic administrator turns on or off (decision 092).
+
+    Patients, practitioners, the team, the base tables, the clinic settings and the audit
+    log are the core: always on, so they are not listed here.
+    """
+
     ODONTOLOGIA = "odontologia", _("Odontologia")
     MEDICINA = "medicina", _("Medicina")
+    AGENDA = "agenda", _("Agenda")
+    PRONTUARIO = "prontuario", _("Prontuário")
+    ORCAMENTOS = "orcamentos", _("Orçamentos")
+    FINANCEIRO = "financeiro", _("Financeiro")
+    RECHAMADAS = "rechamadas", _("Rechamadas")
+    ANIVERSARIANTES = "aniversariantes", _("Aniversariantes")
+    CONVENIOS = "convenios", _("Convênios")
+
+
+ESPECIALIDADES = frozenset({ModuloClinico.ODONTOLOGIA, ModuloClinico.MEDICINA})
+MODULOS_GERAIS = frozenset(ModuloClinico) - ESPECIALIDADES
+# An approved estimate becomes a receivable, so estimates need finance turned on.
+DEPENDENCIAS = {ModuloClinico.ORCAMENTOS: frozenset({ModuloClinico.FINANCEIRO})}
 
 
 class ModuloDaClinica(ModeloDaClinica):
@@ -140,7 +159,7 @@ class ModuloDaClinica(ModeloDaClinica):
         constraints = [
             models.UniqueConstraint(fields=["clinica", "codigo"], name="modulo_unico_por_clinica"),
             models.CheckConstraint(
-                condition=models.Q(codigo__in=["odontologia", "medicina"]),
+                condition=models.Q(codigo__in=ModuloClinico.values),
                 name="modulo_clinico_conhecido",
             ),
         ]

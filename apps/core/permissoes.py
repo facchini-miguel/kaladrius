@@ -2,7 +2,7 @@
 
 Each role (Papel) gets a set of actions (Acao) per module (Modulo). The same check
 guards the views (server side) and decides which menus and buttons the templates show.
-Platform superusers can do everything in any clinic.
+Platform superusers can do everything in any clinic, in the modules the clinic has on.
 """
 
 from functools import wraps
@@ -13,7 +13,8 @@ from django.db import models
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext_lazy as _
 
-from .models import Papel
+from . import modulos
+from .models import ModuloClinico, Papel
 
 
 class Modulo(models.TextChoices):
@@ -32,6 +33,8 @@ class Modulo(models.TextChoices):
     FINANCEIRO = "financeiro", _("Financeiro")
     # Treatment estimates (0.18.0): written by practitioners and the front desk.
     ORCAMENTOS = "orcamentos", _("Orçamentos")
+    # Health plans and the patients' cards (decision 094).
+    CONVENIOS = "convenios", _("Convênios")
 
 
 class Acao(models.TextChoices):
@@ -58,6 +61,7 @@ MATRIZ = {
         # Cancelling entries, reversing payments and discounts stay with administrators.
         Modulo.RECEBIMENTOS: _SEM_EXCLUIR,
         Modulo.ORCAMENTOS: _SEM_EXCLUIR,
+        Modulo.CONVENIOS: _SEM_EXCLUIR,
     },
     # All of finance, and only a look at who the money is about (decision 088).
     Papel.FINANCEIRO: {
@@ -67,6 +71,7 @@ MATRIZ = {
         Modulo.ORCAMENTOS: _VER,
         Modulo.PROFISSIONAIS: _VER,
         Modulo.CADASTROS: _VER,
+        Modulo.CONVENIOS: _VER,
     },
     Papel.PROFISSIONAL: {
         Modulo.PACIENTES: _SEM_EXCLUIR,
@@ -76,6 +81,7 @@ MATRIZ = {
         Modulo.PROFISSIONAIS: _VER,
         Modulo.CADASTROS: _VER,
         Modulo.ORCAMENTOS: _SEM_EXCLUIR,
+        Modulo.CONVENIOS: _VER,
     },
 }
 
@@ -84,11 +90,26 @@ MATRIZ = {
 # published password must never create users, reset others' passwords or rename the clinic.
 SO_LEITURA_NA_DEMONSTRACAO = frozenset({Modulo.USUARIOS, Modulo.CLINICA})
 
+# The clinic module (decision 092) each permission module belongs to; the rest is the core.
+MODULO_DA_CLINICA = {
+    Modulo.AGENDA: ModuloClinico.AGENDA,
+    Modulo.RECHAMADAS: ModuloClinico.RECHAMADAS,
+    Modulo.ANIVERSARIANTES: ModuloClinico.ANIVERSARIANTES,
+    Modulo.RECEBIMENTOS: ModuloClinico.FINANCEIRO,
+    Modulo.FINANCEIRO: ModuloClinico.FINANCEIRO,
+    Modulo.ORCAMENTOS: ModuloClinico.ORCAMENTOS,
+    Modulo.CONVENIOS: ModuloClinico.CONVENIOS,
+}
+
 
 def pode(request, modulo, acao):
     """Whether the current user may perform `acao` on `modulo` in the current clinic."""
     usuario = request.user
     if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+        return False
+    if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modulos.habilitados(
+        request
+    ):
         return False
     if usuario.is_superuser:
         return True

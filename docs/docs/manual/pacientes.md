@@ -13,6 +13,7 @@ Click **New patient**. Choose **individual** or **company**: the fields change w
 - The system checks whether the CPF or CNPJ is valid and whether it already exists in the clinic.
 - Choose the **state** and then the **city**.
 - Phones need the area code.
+- Fill in **WhatsApp** (it may be the same number as the cell phone): the patient record and the recalls on the home page get a link that opens the chat. The old system's fax and MSN are not asked for anymore.
 
 ## Patient record
 Click the name to open the record: details, contact, address, notes, **upcoming and latest appointments** (click the date to go to the week in the schedule) and **recalls**.

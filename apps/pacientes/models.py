@@ -51,6 +51,13 @@ class Paciente(ModeloDaClinica):
     )
 
     telefone_celular = models.CharField(_("celular"), max_length=11, blank=True)
+    # Fax and MSN from the legacy system are not kept as fields: nobody uses them anymore.
+    whatsapp = models.CharField(
+        _("WhatsApp"),
+        max_length=11,
+        blank=True,
+        help_text=_("Com DDD. A ficha abre a conversa direto no WhatsApp."),
+    )
     telefone_residencial = models.CharField(_("telefone residencial"), max_length=11, blank=True)
     telefone_comercial = models.CharField(_("telefone comercial"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)

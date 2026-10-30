@@ -64,12 +64,15 @@
             </ul>
           </li>
           {% endif %}
-          {% if pode.profissionais.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinica.alterar %}
+          {% if pode.profissionais.ver or pode.convenios.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinica.alterar %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Cadastros" %}</a>
             <ul class="dropdown-menu">
               {% if pode.profissionais.ver %}
               <li><a class="dropdown-item" href="{% url 'profissionais:lista' %}">{% translate "Profissionais" %}</a></li>
+              {% endif %}
+              {% if pode.convenios.ver %}
+              <li><a class="dropdown-item" href="{% url 'convenios:lista' %}">{% translate "Convênios" %}</a></li>
               {% endif %}
               {% if pode.usuarios.ver %}
               <li><a class="dropdown-item" href="{% url 'equipe:lista' %}">{% translate "Equipe" %}</a></li>
@@ -87,6 +90,7 @@
               <li><h6 class="dropdown-header">{% translate "Financeiro" %}</h6></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'categorias' %}">{% translate "Categorias" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'contas' %}">{% translate "Contas" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:fornecedores' %}">{% translate "Fornecedores" %}</a></li>
               {% endif %}
               {% if pode.clinica.alterar or pode.auditoria.ver %}
               <li><hr class="dropdown-divider"></li>

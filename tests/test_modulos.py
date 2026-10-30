@@ -14,7 +14,7 @@ from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.auditoria.models import RegistroAuditoria
 from apps.core.forms import ClinicaAdminForm, ClinicaForm
 from apps.core.isolamento import ClinicaDiferente, SemClinicaAtual, usar_clinica
-from apps.core.models import Clinica, ModuloDaClinica, Papel
+from apps.core.models import MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica, Papel
 from apps.core.modulos import configurar
 from apps.orcamentos.models import ItemOrcamento, Orcamento
 from apps.pacientes.models import Paciente
@@ -31,6 +31,7 @@ def configuracao(**extra):
         "agenda_fim": "20:00",
         "agenda_intervalo": 30,
         "modulos": ["odontologia", "medicina"],
+        "modulos_gerais": sorted(MODULOS_GERAIS),
         **extra,
     }
 
@@ -41,7 +42,7 @@ def test_criacao_preserva_a_capacidade_da_area_original(area):
     assert clinica.odontologia == (area == "odontologia")
     assert clinica.medicina == (area == "medicina")
     with usar_clinica(clinica):
-        assert ModuloDaClinica.objects.count() == 2
+        assert ModuloDaClinica.objects.count() == len(ModuloClinico)
 
 
 @pytest.mark.parametrize(
@@ -79,7 +80,7 @@ def test_modulo_desconhecido_nao_grava_nem_no_servico_nem_no_form(clinica_a):
 
 
 def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_b):
-    configurar(clinica_b, {"medicina"})
+    configurar(clinica_b, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
         assert set(ModuloDaClinica.objects.values_list("clinica_id", flat=True)) == {clinica_a.pk}
     with pytest.raises(SemClinicaAtual):
@@ -89,14 +90,14 @@ def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_
 
 def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
     antes = dict(ModuloDaClinica.todos.filter(clinica=clinica_a).values_list("codigo", "pk"))
-    configurar(clinica_a, {"medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     depois = dict(ModuloDaClinica.todos.filter(clinica=clinica_a).values_list("codigo", "pk"))
     assert antes == depois
     alteracoes = RegistroAuditoria.objects.filter(
         clinica=clinica_a, modelo="Módulo da clínica", acao=RegistroAuditoria.Acao.ALTERAR
     )
     assert alteracoes.count() == 2
-    configurar(clinica_a, {"medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     assert alteracoes.count() == 2
 
 
@@ -205,7 +206,7 @@ def test_detalhe_nao_consulta_modulos_para_cada_item(
 
 
 def test_modelo_bloqueia_dentes_sem_depender_da_tela(clinica_a, orcamento):
-    configurar(clinica_a, {"medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
         with pytest.raises(ValidationError):
             novo_item(orcamento, dentes="11").save()
@@ -217,7 +218,7 @@ def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, orcamento)
     with usar_clinica(clinica_a):
         item = novo_item(orcamento, dentes="11", faces="V")
         item.save()
-    configurar(clinica_a, {"medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
         assert ItemOrcamento.objects.get().dentes == "11"
         item.dentes = item.faces = ""
@@ -225,7 +226,7 @@ def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, orcamento)
             item.save()
         with pytest.raises(ValidationError):
             item.delete()
-    configurar(clinica_a, {"odontologia", "medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     with usar_clinica(clinica_a):
         item.refresh_from_db()
         item.delete()
@@ -237,7 +238,7 @@ def test_http_nao_remove_historico_quando_modulo_desativado(
     with usar_clinica(clinica_a):
         item = novo_item(orcamento, faces="Arcada superior")
         item.save()
-    configurar(clinica_a, {"medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_modulos", clinica_a, Papel.RECEPCAO))
     detalhe = cliente.get(reverse("orcamentos:detalhe", args=[orcamento.pk]))
     assert detalhe.status_code == 200 and detalhe.context["mostrar_dentes"]
@@ -259,7 +260,7 @@ def test_item_nao_pode_vincular_orcamento_de_outra_clinica(clinica_b, orcamento)
 def test_prontuario_comum_nao_exige_modulo_especializado(
     codigos, clinica_a, orcamento, criar_usuario, cliente_de
 ):
-    configurar(clinica_a, codigos)
+    configurar(clinica_a, {*MODULOS_GERAIS, *codigos})
     usuario = criar_usuario("prof_modulos", clinica_a, Papel.PROFISSIONAL)
     with usar_clinica(clinica_a):
         Profissional.objects.create(nome="Profissional fictício", usuario=usuario)
@@ -270,7 +271,7 @@ def test_prontuario_comum_nao_exige_modulo_especializado(
 def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
     clinica_a, orcamento, criar_usuario, cliente_de
 ):
-    configurar(clinica_a, {"odontologia", "medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_sem_prontuario", clinica_a, Papel.RECEPCAO))
     assert cliente.get(reverse("prontuario:novo", args=[orcamento.paciente_id])).status_code == 403
 
@@ -278,7 +279,7 @@ def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
 def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
     clinica_a, django_user_model, cliente_de
 ):
-    configurar(clinica_a, {"odontologia", "medicina"})
+    configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     cliente = cliente_de(django_user_model.objects.create_superuser("root_modulos"))
     assert (
         cliente.post(

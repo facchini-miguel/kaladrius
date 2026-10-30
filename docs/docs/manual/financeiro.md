@@ -47,7 +47,7 @@ In **Finance > Daily cash**, the front desk controls the money in the drawer:
 Each account can have only one open drawer. Closed drawers are listed in **Previous drawers**, with the expected and counted amounts and the difference.
 
 ## Payables (administrator)
-In **Finance > New expense**, enter the **supplier**, the category, the description and the amount. In **The amount is**, choose:
+In **Finance > New expense**, choose the registered **supplier** (for a one-off payment, type the name in **Unregistered supplier**), the category, the description and the amount. In **The amount is**, choose:
 - **the total, split into the installments**: a R$ 900 purchase in 3 installments becomes 3 installments of R$ 300;
 - **per month**: a fixed bill, like rent of R$ 3,000 for 12 months, becomes 12 installments of R$ 3,000.
 
@@ -84,6 +84,9 @@ In **Finance > Commissions**, each practitioner has a **percentage** of the amou
 3. Click **Pay**, check the receipts and the due date and click **Add to Payables**. The commission becomes an expense in **Payables**, in the practitioner's name, where you record the payment.
 
 Each receipt enters a commission only once. If a receipt already paid out is **reversed**, its commission is deducted from the next payment to the practitioner (at the percentage of the time). If the commission expense is **cancelled**, the commission is undone and the receipts become pending again. If a later commission already deducted the reversal of one of its receipts, cancel the later one first. Each commission's **Statement** lists the receipts and deductions and can be printed for the practitioner.
+
+## Suppliers
+In **Records > Suppliers**, register who the clinic buys from or pays: individual or company, name, legal name, CPF/CNPJ, phone, WhatsApp, e-mail and notes. The system checks the CPF or CNPJ and does not let the same document be registered twice. The supplier's page shows how much is **outstanding** and all their payables, and has a **New expense** button with the supplier already chosen. In the lists, the supplier's name leads to that page. To stop using a supplier without losing the history, uncheck **active**: it leaves the new expense form, and the old bills stay linked to it.
 
 ## Categories and accounts
 In **Records > Categories** and **Records > Accounts**, the administrator creates new categories (income and expenses) and accounts (cash drawer, bank, card machine). To stop using one without losing the history, uncheck **active**.

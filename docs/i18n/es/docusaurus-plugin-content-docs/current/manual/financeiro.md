@@ -47,7 +47,7 @@ En **Financiero > Caja del día**, la recepción controla el dinero de la caja:
 Solo puede haber una caja abierta por cuenta. Las cajas cerradas quedan en **Cajas anteriores**, con lo esperado, lo contado y la diferencia.
 
 ## Cuentas por pagar (administrador)
-En **Financiero > Nuevo gasto**, indique el **proveedor**, la categoría, la descripción y el valor. En **El valor es**, elija:
+En **Financiero > Nuevo gasto**, elija el **proveedor** registrado (en un pago suelto, escriba el nombre en **Proveedor sin registro**), la categoría, la descripción y el valor. En **El valor es**, elija:
 - **el total, dividido en las cuotas**: una compra de R$ 900 en 3 cuotas pasa a 3 cuotas de R$ 300;
 - **de cada mes**: una cuenta fija, como el alquiler de R$ 3.000 durante 12 meses, pasa a 12 cuotas de R$ 3.000.
 
@@ -84,6 +84,9 @@ En **Financiero > Comisiones**, cada profesional tiene un **porcentaje** sobre e
 3. Haga clic en **Pagar**, revise los cobros y el vencimiento y haga clic en **Registrar en Por pagar**. La comisión pasa a ser un gasto en **Por pagar**, a nombre del profesional, donde usted registra el pago.
 
 Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **revierte**, su comisión se descuenta en el próximo pago al profesional (con el porcentaje de la época). Si el gasto de la comisión se **cancela**, la comisión se deshace y los cobros vuelven a quedar pendientes. Si una comisión posterior ya descontó el reverso de uno de sus cobros, cancele primero la posterior. El **Extracto** de cada comisión lista los cobros y los descuentos y puede imprimirse para el profesional.
+
+## Proveedores
+En **Registros > Proveedores**, registre a quién la clínica compra o paga: persona física o jurídica, nombre, razón social, CPF/CNPJ, teléfono, WhatsApp, correo electrónico y observaciones. El sistema verifica el CPF o CNPJ y no permite registrar dos veces el mismo documento. La ficha del proveedor muestra cuánto está **pendiente** y todas sus cuentas por pagar, y tiene el botón **Nuevo gasto**, que ya viene con él elegido. En las listas, el nombre del proveedor lleva a su ficha. Para dejar de usar un proveedor sin perder el historial, desmarque **activo**: sale del formulario de nuevo gasto, y las cuentas antiguas siguen vinculadas a él.
 
 ## Categorías y cuentas
 En **Registros > Categorías** y **Registros > Cuentas**, el administrador crea nuevas categorías (ingresos y gastos) y cuentas (caja, banco, terminal de tarjetas). Para dejar de usar una sin perder el historial, desmarque **activa**.

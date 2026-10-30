@@ -7,9 +7,13 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
-from .models import Clinica, ModuloClinico, ModuloDaClinica
-from .modulos import configurar, iniciais
+from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
+from .modulos import configurar, faltando, iniciais
 from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
+
+
+def _opcoes(grupo):
+    return [(valor, nome) for valor, nome in ModuloClinico.choices if valor in grupo]
 
 
 class FormularioBootstrap:
@@ -48,32 +52,61 @@ class TrocaSenhaForm(FormularioBootstrap, PasswordChangeForm):
 
 
 class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
+    """Specialties and general modules of the clinic (decision 092)."""
+
     modulos = forms.MultipleChoiceField(
-        label=_("Módulos clínicos"),
-        choices=ModuloClinico.choices,
+        label=_("Especialidades"),
+        choices=_opcoes(ESPECIALIDADES),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         help_text=_(
-            "Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
-            "financeiro continuam disponíveis. Desativar não apaga o histórico."
+            "Só Odontologia, só Medicina ou as duas juntas (ou nenhuma, em outra área da "
+            "saúde). Desativar não apaga o histórico."
+        ),
+    )
+    modulos_gerais = forms.MultipleChoiceField(
+        label=_("Módulos"),
+        choices=_opcoes(MODULOS_GERAIS),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text=_(
+            "Comuns às especialidades. Um módulo desligado sai do menu e das telas para toda "
+            "a equipe, e nada do que já foi registrado é apagado. Pacientes, profissionais, "
+            "equipe e tabelas base estão sempre ligados."
         ),
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.initial["modulos"] = (
-            list(
-                ModuloDaClinica.todos.filter(clinica=self.instance, ativo=True).values_list(
-                    "codigo", flat=True
-                )
+        ligados = set(
+            ModuloDaClinica.todos.filter(clinica=self.instance, ativo=True).values_list(
+                "codigo", flat=True
             )
             if self.instance.pk
-            else list(iniciais(self.instance.area))
+            else iniciais(self.instance.area)
         )
+        self.initial["modulos"] = sorted(ligados & ESPECIALIDADES)
+        self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
+
+    def _escolhidos(self):
+        return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
+
+    def clean(self):
+        dados = super().clean()
+        for modulo, precisa in faltando(self._escolhidos()).items():
+            self.add_error(
+                "modulos_gerais",
+                _("%(modulo)s precisa de: %(precisa)s.")
+                % {
+                    "modulo": ModuloClinico(modulo).label,
+                    "precisa": ", ".join(str(ModuloClinico(p).label) for p in sorted(precisa)),
+                },
+            )
+        return dados
 
     def _save_m2m(self):
         super()._save_m2m()
-        configurar(self.instance, self.cleaned_data["modulos"])
+        configurar(self.instance, self._escolhidos())
 
     @transaction.atomic
     def save(self, commit=True):
@@ -161,7 +194,15 @@ class ClinicaForm(ModulosClinicosForm):
 
 class NovaClinicaForm(ModulosClinicosForm):
     """The installation's clinic, registered on the first access (decision 069). The
-    schedule and the rest are set later in the clinic settings."""
+    schedule and the rest are set later in the clinic settings, the general modules
+    included: a new clinic starts with all of them on."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields["modulos_gerais"]
+
+    def _escolhidos(self):
+        return {*self.cleaned_data.get("modulos", ()), *MODULOS_GERAIS}
 
     class Meta:
         model = Clinica

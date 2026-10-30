@@ -237,7 +237,7 @@
         {% for rechamada in rechamadas.lista %}
         <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
           <div class="small">
-            <div>{{ rechamada.paciente.nome }}{% if rechamada.paciente.telefone_celular %} · <span class="text-nowrap">{{ rechamada.paciente.telefone_celular|telefone }}</span>{% endif %}</div>
+            <div>{{ rechamada.paciente.nome }}{% if rechamada.paciente.telefone_celular %} · <span class="text-nowrap">{{ rechamada.paciente.telefone_celular|telefone }}</span>{% endif %}{% if rechamada.paciente.whatsapp %} · <a class="text-nowrap" href="{{ rechamada.paciente.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
             <div class="text-body-secondary">{{ rechamada.descricao }}{% if rechamada.data < painel.hoje %} · <span class="text-danger">{% blocktranslate with data=rechamada.data|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
           {% if pode.rechamadas.alterar %}

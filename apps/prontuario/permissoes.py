@@ -1,15 +1,27 @@
-from apps.core.models import Papel
+from apps.core import modulos
+from apps.core.models import ModuloClinico, Papel
 from apps.profissionais.models import Profissional
+
+
+def prontuario_habilitado(request):
+    """The clinic has the medical record module on (decision 092)."""
+    return ModuloClinico.PRONTUARIO in modulos.habilitados(request)
 
 
 def administra_prontuario(request):
     """The system administrator (superuser) sees and does everything in the medical record,
     writing on behalf of a practitioner (decision 087). Clinic administrators do not."""
-    return request.user.is_authenticated and request.user.is_superuser
+    return (
+        request.user.is_authenticated
+        and request.user.is_superuser
+        and prontuario_habilitado(request)
+    )
 
 
 def acessa_prontuario(request):
-    return administra_prontuario(request) or profissional_do_usuario(request) is not None
+    return administra_prontuario(request) or (
+        prontuario_habilitado(request) and profissional_do_usuario(request) is not None
+    )
 
 
 def profissional_do_usuario(request):

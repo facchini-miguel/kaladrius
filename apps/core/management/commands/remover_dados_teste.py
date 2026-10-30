@@ -6,6 +6,7 @@ from django.db import transaction
 from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
+from apps.convenios.models import Carteirinha, Convenio
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, ModuloDaClinica
 from apps.financeiro.models import (
@@ -13,6 +14,7 @@ from apps.financeiro.models import (
     Categoria,
     Comissao,
     Conta,
+    Fornecedor,
     ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
@@ -81,8 +83,11 @@ class Command(BaseCommand):
                 Receita,
                 Atendimento,
                 Lancamento,
+                Fornecedor,
                 Agendamento,
                 Rechamada,
+                Carteirinha,
+                Convenio,
                 Paciente,
                 Profissional,
                 TipoAtendimento,

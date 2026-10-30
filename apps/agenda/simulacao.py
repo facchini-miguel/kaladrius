@@ -196,7 +196,7 @@ def _simular_despesas(clinica, sorteio, contas, usuario):
     from decimal import Decimal
 
     from apps.financeiro import servicos
-    from apps.financeiro.models import Categoria, Lancamento
+    from apps.financeiro.models import Categoria, Fornecedor, Lancamento
 
     categorias = {
         c.nome: c for c in Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.DESPESA)
@@ -209,9 +209,11 @@ def _simular_despesas(clinica, sorteio, contas, usuario):
             continue
         parcelas = meses or sorteio.choice([1, 2, 3])
         valor = Decimal(valor)
+        cadastro, _criado = Fornecedor.objects.get_or_create(clinica=clinica, nome=fornecedor)
         lancamento = servicos.criar_lancamento(
             clinica=clinica,
             tipo=Lancamento.Tipo.PAGAR,
+            fornecedor=cadastro,
             pessoa=fornecedor,
             descricao=descricao,
             categoria=categorias[categoria],

@@ -40,6 +40,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     cpf_cnpj = _campo_texto(_("CPF/CNPJ"), 18)
     cep = _campo_texto(_("CEP"), 9, inputmode="numeric")
     telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
+    whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
     telefone_residencial = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
     telefone_comercial = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
 
@@ -58,6 +59,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "profissao",
             "responsavel",
             "telefone_celular",
+            "whatsapp",
             "telefone_residencial",
             "telefone_comercial",
             "email",
@@ -115,6 +117,9 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
     def clean_telefone_celular(self):
         return self._limpar_telefone("telefone_celular")
+
+    def clean_whatsapp(self):
+        return self._limpar_telefone("whatsapp")
 
     def clean_telefone_residencial(self):
         return self._limpar_telefone("telefone_residencial")

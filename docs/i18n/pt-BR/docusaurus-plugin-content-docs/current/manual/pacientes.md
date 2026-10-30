@@ -13,6 +13,7 @@ Clique em **Novo paciente**. Escolha **pessoa física** ou **jurídica**: os cam
 - O sistema confere se o CPF ou o CNPJ é válido e se já existe na clínica.
 - Escolha a **UF** e depois a **cidade**.
 - Telefones precisam do DDD.
+- Preencha o **WhatsApp** (pode ser o mesmo número do celular): a ficha e as rechamadas da tela inicial ganham um link que abre a conversa. Fax e MSN do sistema antigo não são mais pedidos.
 
 ## Ficha do paciente
 Clique no nome para abrir a ficha: dados, contato, endereço, observações, **próximos e últimos agendamentos** (clique na data para ir à semana na agenda) e **rechamadas**.

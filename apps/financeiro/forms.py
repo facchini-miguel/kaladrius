@@ -3,10 +3,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
+from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
-from .models import Categoria, Conta, Lancamento, Pagamento
+from .models import Categoria, Conta, Fornecedor, Lancamento, Pagamento
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
@@ -109,15 +110,16 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Lancamento
-        fields = ["pessoa", "descricao", "categoria", "observacoes"]
-        labels = {"pessoa": _("Fornecedor")}
+        fields = ["fornecedor", "pessoa", "descricao", "categoria", "observacoes"]
+        labels = {"pessoa": _("Fornecedor sem cadastro")}
+        help_texts = {"pessoa": _("Só para um pagamento avulso, sem cadastrar o fornecedor.")}
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 2})}
 
     def __init__(self, *args, clinica, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.clinica = clinica
         self.instance.tipo = Lancamento.Tipo.PAGAR
-        self.fields["pessoa"].required = True
+        self.fields["fornecedor"].queryset = Fornecedor.objects.filter(ativo=True)
         self.fields["categoria"].queryset = Categoria.objects.filter(
             tipo=Categoria.Tipo.DESPESA, ativa=True
         )
@@ -125,6 +127,10 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
+        if dados.get("fornecedor"):
+            dados["pessoa"] = dados["fornecedor"].nome
+        elif not (dados.get("pessoa") or "").strip():
+            self.add_error("fornecedor", _("Escolha o fornecedor ou informe para quem é."))
         if dados.get("valor") is not None and dados["valor"] <= 0:
             self.add_error("valor", _("Informe um valor maior que zero."))
         if dados.get("pago_agora"):
@@ -138,6 +144,72 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         if dados["modo"] == self.REPETIR:
             return dados["valor"] * dados["parcelas"]
         return dados["valor"]
+
+
+class FornecedorForm(FormularioBootstrap, forms.ModelForm):
+    """A supplier (decision 093). Documents and phones are typed with or without punctuation."""
+
+    cpf_cnpj = forms.CharField(label=_("CPF/CNPJ"), max_length=18, required=False)
+    telefone = forms.CharField(
+        label=_("Telefone"),
+        max_length=16,
+        required=False,
+        widget=forms.TextInput({"inputmode": "tel"}),
+    )
+    whatsapp = forms.CharField(
+        label=_("WhatsApp"),
+        max_length=16,
+        required=False,
+        widget=forms.TextInput({"inputmode": "tel"}),
+    )
+
+    class Meta:
+        model = Fornecedor
+        fields = [
+            "tipo",
+            "nome",
+            "razao_social",
+            "cpf_cnpj",
+            "telefone",
+            "whatsapp",
+            "email",
+            "observacoes",
+            "ativo",
+        ]
+        widgets = {"tipo": forms.RadioSelect, "observacoes": forms.Textarea(attrs={"rows": 3})}
+
+    def __init__(self, *args, clinica, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.clinica_id is None:
+            self.instance.clinica = clinica
+
+    def _telefone(self, nome):
+        telefone = somente_digitos(self.cleaned_data.get(nome))
+        if telefone and len(telefone) not in (10, 11):
+            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
+        return telefone
+
+    def clean_telefone(self):
+        return self._telefone("telefone")
+
+    def clean_whatsapp(self):
+        return self._telefone("whatsapp")
+
+    def clean_cpf_cnpj(self):
+        return normalizar_cnpj(self.cleaned_data.get("cpf_cnpj", ""))
+
+    def clean(self):
+        dados = super().clean()
+        documento = dados.get("cpf_cnpj", "")
+        if documento:
+            fisica = dados.get("tipo") == Fornecedor.Tipo.FISICA
+            if not (cpf_valido(documento) if fisica else cnpj_valido(documento)):
+                self.add_error("cpf_cnpj", _("CPF inválido.") if fisica else _("CNPJ inválido."))
+            elif (
+                Fornecedor.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists()
+            ):
+                self.add_error("cpf_cnpj", _("Já existe um fornecedor com este documento."))
+        return dados
 
 
 class ReceberForm(FormularioBootstrap, forms.ModelForm):

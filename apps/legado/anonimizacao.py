@@ -18,11 +18,13 @@ from faker import Faker
 from apps.agenda.models import Agendamento
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import nome_do_modelo, registrar
+from apps.convenios.models import Carteirinha
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
 from apps.financeiro.models import (
     Caixa,
+    Fornecedor,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
@@ -127,6 +129,7 @@ class _Anonimizador:
             p.telefone_residencial = _mesmo_tamanho(p.telefone_residencial, fake)
             p.telefone_comercial = _mesmo_tamanho(p.telefone_comercial, fake)
             p.telefone_celular = _mesmo_tamanho(p.telefone_celular, fake)
+            p.whatsapp = _mesmo_tamanho(p.whatsapp, fake)
             p.email = f"paciente{numero}@example.com" if p.email else ""
             p.cep = (p.cep[:2] + fake.numerify("######")) if p.cep else ""
             p.bairro = fake.bairro()[:100] if p.bairro else ""
@@ -146,6 +149,7 @@ class _Anonimizador:
             "telefone_residencial",
             "telefone_comercial",
             "telefone_celular",
+            "whatsapp",
             "email",
             "cep",
             "bairro",
@@ -169,6 +173,14 @@ class _Anonimizador:
         Agendamento.objects.bulk_update(agendamentos, ["descricao"], batch_size=1000)
         self.resultado.agendamentos = len(agendamentos)
 
+    def carteirinhas(self):
+        """Card numbers and the plan holder's name identify a person; the plan stays."""
+        carteirinhas = list(Carteirinha.objects.filter(clinica=self.clinica))
+        for carteirinha in carteirinhas:
+            carteirinha.numero = f"{carteirinha.pk:012d}"
+            carteirinha.titular = self._nome(self.sorte.choice("FM")) if carteirinha.titular else ""
+        Carteirinha.objects.bulk_update(carteirinhas, ["numero", "titular"], batch_size=500)
+
     def rechamadas(self):
         rechamadas = list(Rechamada.objects.filter(clinica=self.clinica))
         for rechamada in rechamadas:
@@ -187,14 +199,38 @@ class _Anonimizador:
         Profissional.objects.bulk_update(profissionais, ["nome", "registro"])
         self.resultado.profissionais = len(profissionais)
 
+    def fornecedores(self):
+        """A supplier who is a person is personal data; any supplier's contacts may be."""
+        fake = self.fake
+        fornecedores = list(Fornecedor.objects.filter(clinica=self.clinica))
+        for numero, f in enumerate(fornecedores, start=1):
+            if f.tipo == Fornecedor.Tipo.FISICA:
+                f.nome = self._nome(self.sorte.choice("FM"))
+                f.razao_social = ""
+                f.cpf_cnpj = ""
+            f.telefone = _mesmo_tamanho(f.telefone, fake)
+            f.whatsapp = _mesmo_tamanho(f.whatsapp, fake)
+            f.email = f"fornecedor{numero}@example.com" if f.email else ""
+            f.observacoes = ""
+        Fornecedor.objects.bulk_update(
+            fornecedores,
+            ["nome", "razao_social", "cpf_cnpj", "telefone", "whatsapp", "email", "observacoes"],
+            batch_size=500,
+        )
+
     def financeiro(self):
         """Free text of financial entries (payer, description, notes) may name people."""
         lancamentos = list(
-            Lancamento.objects.filter(clinica=self.clinica).select_related("categoria")
+            Lancamento.objects.filter(clinica=self.clinica).select_related(
+                "categoria", "fornecedor"
+            )
         )
         for lancamento in lancamentos:
             lancamento.descricao = lancamento.categoria.nome
-            lancamento.pessoa = self._nome(self.sorte.choice("FM")) if lancamento.pessoa else ""
+            if lancamento.fornecedor_id:
+                lancamento.pessoa = lancamento.fornecedor.nome
+            else:
+                lancamento.pessoa = self._nome(self.sorte.choice("FM")) if lancamento.pessoa else ""
             lancamento.observacoes = ""
         Lancamento.objects.bulk_update(
             lancamentos, ["descricao", "pessoa", "observacoes"], batch_size=500
@@ -216,12 +252,14 @@ class _Anonimizador:
                 Paciente,
                 Agendamento,
                 Rechamada,
+                Carteirinha,
                 Profissional,
                 Lancamento,
                 Parcela,
                 Pagamento,
                 Orcamento,
                 TransacaoBancaria,
+                Fornecedor,
             )
         ]
         apagados, _ = RegistroAuditoria.objects.filter(
@@ -237,8 +275,10 @@ class _Anonimizador:
         with transaction.atomic(), sem_isolamento():
             nomes = self.pacientes()
             self.agendamentos(nomes)
+            self.fornecedores()
             self.financeiro()
             self.rechamadas()
+            self.carteirinhas()
             self.profissionais()
             self.auditoria()
             r = self.resultado
