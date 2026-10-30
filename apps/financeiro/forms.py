@@ -240,6 +240,28 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         return dados
 
 
+class PlanejamentoForm(FormularioBootstrap, forms.Form):
+    """One goal field per group of the chart of accounts (decision 098)."""
+
+    def __init__(self, *args, grupos, metas, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.grupos = grupos
+        for grupo in grupos:
+            # Rendered by the field itself: it shows 1.000,00 in Portuguese and reads it back.
+            campo = _campo_dinheiro(str(grupo), obrigatorio=False, initial=metas.get(grupo.pk))
+            campo.widget.attrs.update(
+                {"class": "form-control form-control-sm text-end", "aria-label": str(grupo)}
+            )
+            self.fields[self.nome(grupo)] = campo
+
+    @staticmethod
+    def nome(grupo):
+        return f"meta-{grupo.pk}"
+
+    def valores(self):
+        return {grupo: self.cleaned_data.get(self.nome(grupo)) for grupo in self.grupos}
+
+
 class FecharForm(FormularioBootstrap, forms.Form):
     ate = forms.DateField(
         label=_("Fechar até"),

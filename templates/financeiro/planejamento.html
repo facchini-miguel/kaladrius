@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{% translate "Planejamento" %} {{ ano }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+  <h1 class="h3 mb-0">{% blocktranslate %}Planejamento {{ ano }}{% endblocktranslate %}</h1>
+  <div class="btn-group">
+    <a class="btn btn-outline-secondary" href="?ano={{ ano_anterior }}">← {{ ano_anterior }}</a>
+    <a class="btn btn-outline-secondary" href="?ano={{ proximo_ano }}">{{ proximo_ano }} →</a>
+  </div>
+</div>
+<p class="text-body-secondary small">{% translate "A meta de cada grupo do plano de contas para o ano, comparada com o que foi recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta proporcional aos dias do ano que já passaram." %}</p>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  {% for secao in secoes %}
+  <h2 class="h5 mt-4">{{ secao.rotulo }}</h2>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle bg-white">
+      <thead>
+        <tr>
+          <th>{% translate "Grupo" %}</th>
+          <th class="text-end" style="width: 11rem;">{% translate "Meta do ano" %}</th>
+          <th class="text-end">{% translate "Esperado até hoje" %}</th>
+          <th class="text-end">{% translate "Realizado" %}</th>
+          <th class="text-end">%</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in secao.linhas %}
+        <tr>
+          <td style="padding-left: {{ linha.nivel|add:1 }}rem;"{% if linha.nivel == 0 %} class="fw-semibold"{% endif %}>{{ linha.grupo }}</td>
+          <td class="text-end">
+            {% if linha.campo %}
+            {{ linha.campo }}{% for erro in linha.campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+            {% else %}{{ linha.meta|moeda|default:"—" }}{% endif %}
+          </td>
+          <td class="text-end text-nowrap text-body-secondary">{{ linha.esperado|moeda|default:"—" }}</td>
+          <td class="text-end text-nowrap">{{ linha.realizado|moeda }}</td>
+          <td class="text-end">{% if linha.percentual is not None %}<span class="badge {% if linha.em_dia %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ linha.percentual }}%</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'financeiro:plano_contas' %}">{% translate "Plano de contas" %}</a></td></tr>
+        {% endfor %}
+        {% if secao.sem_grupo %}
+        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ secao.sem_grupo|moeda }}</td><td></td></tr>
+        {% endif %}
+      </tbody>
+      <tfoot>
+        <tr class="fw-semibold">
+          <td>{% translate "Total" %}</td>
+          <td class="text-end text-nowrap">{{ secao.meta|moeda }}</td>
+          <td class="text-end text-nowrap">{{ secao.esperado|moeda }}</td>
+          <td class="text-end text-nowrap">{{ secao.realizado|moeda }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% endfor %}
+  {% if pode_alterar %}
+  <div class="d-flex flex-wrap gap-2">
+    <button type="submit" class="btn btn-primary">{% translate "Salvar metas" %}</button>
+    {% if tem_metas_anteriores %}<button type="submit" name="acao" value="copiar" class="btn btn-outline-secondary">{% blocktranslate %}Copiar as metas de {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
+  </div>
+  <p class="text-body-secondary small mt-2">{% translate "Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar duas vezes a meta de um subgrupo." %}</p>
+  {% endif %}
+</form>
+{% endblock %}

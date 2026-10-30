@@ -21,6 +21,7 @@ from apps.financeiro.models import (
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    Planejamento,
     TransacaoBancaria,
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
@@ -53,6 +54,7 @@ AUDITADOS = [
     Conta,
     Categoria,
     GrupoContabil,
+    Planejamento,
     CentroCusto,
     Fechamento,
     Caixa,

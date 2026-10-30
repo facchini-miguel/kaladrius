@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 19:24-0300\n"
+"POT-Creation-Date: 2026-10-30 19:45-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -881,7 +881,8 @@ msgid "código"
 msgstr "code"
 
 msgid "Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."
-msgstr "Position inside the parent group (1, 2, 3…); builds numbers such as 2.1."
+msgstr ""
+"Position inside the parent group (1, 2, 3…); builds numbers such as 2.1."
 
 msgid "grupo contábil"
 msgstr "account group"
@@ -1123,6 +1124,21 @@ msgid "comissões"
 msgstr "commissions"
 
 #
+msgid "ano"
+msgstr "year"
+
+msgid "meta"
+msgstr "goal"
+
+#
+msgid "meta do planejamento"
+msgstr "planning goal"
+
+#
+msgid "metas do planejamento"
+msgstr "planning goals"
+
+#
 msgid "fechado até"
 msgstr "closed up to"
 
@@ -1288,6 +1304,14 @@ msgstr "No cost center"
 msgid "Sem grupo"
 msgstr "No group"
 
+#
+msgid "Receitas"
+msgstr "Income"
+
+#
+msgid "Despesas"
+msgstr "Expenses"
+
 msgid "O caixa desta conta já está aberto."
 msgstr "This account's drawer is already open."
 
@@ -1344,6 +1368,16 @@ msgstr "Drawer closed."
 
 msgid "Fechar caixa"
 msgstr "Close drawer"
+
+#, python-format
+msgid "%(n)s meta copiada do ano anterior."
+msgid_plural "%(n)s metas copiadas do ano anterior."
+msgstr[0] "%(n)s goal copied from last year."
+msgstr[1] "%(n)s goals copied from last year."
+
+#
+msgid "Planejamento salvo."
+msgstr "Plan saved."
 
 #
 msgid "Financeiro fechado."
@@ -2279,6 +2313,10 @@ msgstr "Commissions"
 
 msgid "Relatórios"
 msgstr "Reports"
+
+#
+msgid "Planejamento"
+msgstr "Planning"
 
 #
 msgid "Fechamento"
@@ -3275,6 +3313,50 @@ msgstr ""
 "Nothing is deleted: the record is marked, with the reason, and shows in the "
 "audit log."
 
+#, python-format
+msgid "Planejamento %(ano)s"
+msgstr "Planning %(ano)s"
+
+msgid ""
+"A meta de cada grupo do plano de contas para o ano, comparada com o que foi "
+"recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta "
+"proporcional aos dias do ano que já passaram."
+msgstr "The year's goal for each group of the chart of accounts, compared with what was received and paid (by payment date). “Expected so far” is the goal in proportion to the days of the year already gone."
+
+#
+msgid "Meta do ano"
+msgstr "Year's goal"
+
+#
+msgid "Esperado até hoje"
+msgstr "Expected so far"
+
+#
+msgid "Realizado"
+msgstr "Actual"
+
+#
+#
+msgid "Nenhum grupo no plano de contas."
+msgstr "No groups in the chart of accounts."
+
+msgid "Total"
+msgstr "Total"
+
+#
+msgid "Salvar metas"
+msgstr "Save goals"
+
+#, python-format
+msgid "Copiar as metas de %(ano_anterior)s"
+msgstr "Copy the goals of %(ano_anterior)s"
+
+msgid ""
+"Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não "
+"têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar "
+"duas vezes a meta de um subgrupo."
+msgstr "Leave a group without a goal blank. Copying only fills the groups that have no goal this year yet. The total adds the goals of the highest groups, without counting a subgroup's goal twice."
+
 #
 #
 msgid "Nova categoria"
@@ -3283,7 +3365,9 @@ msgstr "New category"
 msgid ""
 "Os grupos organizam as categorias em árvore, e os relatórios somam cada "
 "grupo com os de baixo. Os lançamentos continuam indo nas categorias."
-msgstr "Groups arrange the categories as a tree, and the reports add each group up with the ones below it. Entries still go to the categories."
+msgstr ""
+"Groups arrange the categories as a tree, and the reports add each group up "
+"with the ones below it. Entries still go to the categories."
 
 #
 msgid "editar"
@@ -3613,9 +3697,6 @@ msgstr "Surfaces or region"
 
 msgid "Qtd."
 msgstr "Qty."
-
-msgid "Total"
-msgstr "Total"
 
 msgid "remover"
 msgstr "remove"

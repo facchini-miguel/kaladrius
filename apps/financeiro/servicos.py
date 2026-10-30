@@ -28,6 +28,7 @@ from .models import (
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    Planejamento,
     TransacaoBancaria,
 )
 
@@ -473,10 +474,27 @@ def ligar_grupos(consulta):
     return grupos
 
 
-def arvore_por_grupo(pagamentos, tipo):
-    """Payments summed by group of the chart of accounts, each group including its
-    subgroups: (level, name, total) rows in tree order, groups without money left out,
-    and a last row for the categories outside any group."""
+def em_ordem_de_arvore(grupos):
+    """(level, group) pairs in chart order: each group followed by its subgroups."""
+    filhos = defaultdict(list)
+    for grupo in grupos:  # already in chart order (code, then name)
+        filhos[grupo.pai_id].append(grupo)
+    saida = []
+
+    def descer(pai_id, nivel):
+        for grupo in filhos[pai_id]:
+            saida.append((nivel, grupo))
+            descer(grupo.pk, nivel + 1)
+
+    descer(None, 0)
+    return saida
+
+
+def totais_por_grupo(pagamentos, tipo):
+    """Payments summed by group, each group including its subgroups.
+
+    Returns (groups of the type, {group id: total}, total of categories outside any group).
+    """
     por_categoria = dict(
         pagamentos.order_by()
         .values_list("parcela__lancamento__categoria_id")
@@ -494,21 +512,116 @@ def arvore_por_grupo(pagamentos, tipo):
         while grupo_id is not None:
             totais[grupo_id] += valor
             grupo_id = pai.get(grupo_id)
-    filhos = defaultdict(list)
-    for grupo in grupos:  # already in chart order (code, then name)
-        filhos[grupo.pai_id].append(grupo)
-    linhas = []
+    return grupos, totais, sem_grupo
 
-    def descer(pai_id, nivel):
-        for grupo in filhos[pai_id]:
-            if totais[grupo.pk]:
-                linhas.append((nivel, str(grupo), totais[grupo.pk]))
-                descer(grupo.pk, nivel + 1)
 
-    descer(None, 0)
+def arvore_por_grupo(pagamentos, tipo):
+    """(level, name, total) rows in tree order for the reports, groups without money left
+    out, and a last row for the categories outside any group."""
+    grupos, totais, sem_grupo = totais_por_grupo(pagamentos, tipo)
+    linhas = [
+        (nivel, str(grupo), totais[grupo.pk])
+        for nivel, grupo in em_ordem_de_arvore(grupos)
+        if totais[grupo.pk]
+    ]
     if sem_grupo:
         linhas.append((0, _("Sem grupo"), sem_grupo))
     return linhas
+
+
+# --- Yearly planning (decision 098) ---------------------------------------------------
+
+
+def fracao_do_ano(ano, hoje=None):
+    """Share of the year already gone: 0 before it starts, 1 once it is over."""
+    hoje = hoje or timezone.localdate()
+    inicio, fim = datetime.date(ano, 1, 1), datetime.date(ano, 12, 31)
+    if hoje < inicio:
+        return Decimal(0)
+    if hoje >= fim:
+        return Decimal(1)
+    return Decimal((hoje - inicio).days + 1) / Decimal((fim - inicio).days + 1)
+
+
+def planejamento(ano, hoje=None):
+    """Goals of the year next to what was received and paid, group by group.
+
+    "Esperado" is the goal times the share of the year gone, so mid-year a group can be
+    compared with where it should be. Section totals add the goals of the highest groups
+    that have one, so a goal and its subgroups' goals are not counted twice.
+    """
+    fracao = fracao_do_ano(ano, hoje)
+    metas = dict(Planejamento.objects.filter(ano=ano).values_list("grupo_id", "valor"))
+    pagamentos = pagamentos_validos().filter(data__year=ano)
+    secoes = []
+    for tipo, rotulo, lancamentos in (
+        (Categoria.Tipo.RECEITA, _("Receitas"), Lancamento.Tipo.RECEBER),
+        (Categoria.Tipo.DESPESA, _("Despesas"), Lancamento.Tipo.PAGAR),
+    ):
+        grupos, totais, sem_grupo = totais_por_grupo(
+            pagamentos.filter(parcela__lancamento__tipo=lancamentos), tipo
+        )
+        linhas, meta_total, cobertos = [], ZERO, set()
+        for nivel, grupo in em_ordem_de_arvore(grupos):
+            meta, realizado = metas.get(grupo.pk), totais[grupo.pk]
+            if not grupo.ativo and meta is None and not realizado:
+                continue
+            if meta and grupo.pai_id not in cobertos:
+                meta_total += meta
+            if meta or grupo.pai_id in cobertos:
+                cobertos.add(grupo.pk)
+            esperado = (meta * fracao).quantize(CENTAVO) if meta else None
+            linhas.append(
+                {
+                    "nivel": nivel,
+                    "grupo": grupo,
+                    "meta": meta,
+                    "realizado": realizado,
+                    "esperado": esperado,
+                    "percentual": round(100 * realizado / meta) if meta else None,
+                    # On track: income at or above where it should be, expenses at or below.
+                    "em_dia": None
+                    if not meta
+                    else realizado >= esperado
+                    if tipo == Categoria.Tipo.RECEITA
+                    else realizado <= esperado,
+                }
+            )
+        realizado_total = sum((totais[g.pk] for g in grupos if g.pai_id is None), ZERO) + sem_grupo
+        secoes.append(
+            {
+                "tipo": tipo,
+                "rotulo": rotulo,
+                "linhas": linhas,
+                "sem_grupo": sem_grupo,
+                "meta": meta_total,
+                "esperado": (meta_total * fracao).quantize(CENTAVO),
+                "realizado": realizado_total,
+            }
+        )
+    return {"ano": ano, "fracao": fracao, "secoes": secoes}
+
+
+@transaction.atomic
+def salvar_metas(ano, valores):
+    """{group: goal or None}: saves the goals, removing the ones left blank."""
+    for grupo, valor in valores.items():
+        if valor:
+            Planejamento.objects.update_or_create(ano=ano, grupo=grupo, defaults={"valor": valor})
+        else:
+            Planejamento.objects.filter(ano=ano, grupo=grupo).delete()
+
+
+@transaction.atomic
+def copiar_metas(ano):
+    """Copy last year's goals into the groups still without a goal; returns how many."""
+    existentes = set(Planejamento.objects.filter(ano=ano).values_list("grupo_id", flat=True))
+    copiadas = 0
+    for anterior in Planejamento.objects.filter(ano=ano - 1).exclude(grupo_id__in=existentes):
+        # One by one, not bulk_create, so the audit log records each goal.
+        Planejamento.objects.create(ano=ano, grupo_id=anterior.grupo_id, valor=anterior.valor)
+        copiadas += 1
+    return copiadas
 
 
 # --- Daily cash drawer (0.17.0) ----------------------------------------------------------

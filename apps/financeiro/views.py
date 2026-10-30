@@ -45,6 +45,7 @@ from .forms import (
     MovimentoCaixaForm,
     PagarComissaoForm,
     PercentualComissaoForm,
+    PlanejamentoForm,
     ReabrirForm,
     ReceberForm,
 )
@@ -63,6 +64,7 @@ from .models import (
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    Planejamento,
     TransacaoBancaria,
 )
 from .ofx import ArquivoInvalido
@@ -524,6 +526,60 @@ def relatorios(request):
             "ate": ate,
             "relatorio": servicos.relatorio(de, ate),
             "fechado_ate": servicos.fechado_ate(request.clinica.pk),
+        },
+    )
+
+
+# --- Yearly planning (decision 098) ---------------------------------------------------
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def planejamento(request):
+    """Goals of the year per group of the chart of accounts, next to what was done."""
+    hoje = timezone.localdate()
+    try:
+        ano = int(request.GET.get("ano", hoje.year))
+    except ValueError:
+        ano = hoje.year
+    ano = min(max(ano, 2000), hoje.year + 5)
+    pode_alterar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
+    grupos = servicos.ligar_grupos(GrupoContabil.objects.filter(ativo=True))
+    metas = dict(Planejamento.objects.filter(ano=ano).values_list("grupo_id", "valor"))
+    form = PlanejamentoForm(request.POST or None, grupos=grupos, metas=metas)
+    if request.method == "POST":
+        if not pode_alterar:
+            raise PermissionDenied
+        if request.POST.get("acao") == "copiar":
+            copiadas = servicos.copiar_metas(ano)
+            messages.success(
+                request,
+                ngettext(
+                    "%(n)s meta copiada do ano anterior.",
+                    "%(n)s metas copiadas do ano anterior.",
+                    copiadas,
+                )
+                % {"n": copiadas},
+            )
+            return redirect(f"{reverse('financeiro:planejamento')}?ano={ano}")
+        if form.is_valid():
+            servicos.salvar_metas(ano, form.valores())
+            messages.success(request, _("Planejamento salvo."))
+            return redirect(f"{reverse('financeiro:planejamento')}?ano={ano}")
+    dados = servicos.planejamento(ano)
+    for secao in dados["secoes"]:
+        for linha in secao["linhas"]:
+            if pode_alterar and linha["grupo"].ativo:
+                linha["campo"] = form[PlanejamentoForm.nome(linha["grupo"])]
+    return render(
+        request,
+        "financeiro/planejamento.html",
+        {
+            **dados,
+            "form": form,
+            "pode_alterar": pode_alterar,
+            "ano_anterior": ano - 1,
+            "proximo_ano": ano + 1,
+            "tem_metas_anteriores": Planejamento.objects.filter(ano=ano - 1).exists(),
         },
     )
 

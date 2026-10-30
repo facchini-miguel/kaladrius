@@ -649,6 +649,31 @@ class Comissao(ModeloDaClinica):
         return self.valor + self.estornos
 
 
+class Planejamento(ModeloDaClinica):
+    """The year's goal for a group of the chart of accounts (decision 098, legacy Medical
+    planejamento_estrategico): how much to receive or spend, compared with what was paid."""
+
+    ano = models.PositiveSmallIntegerField(_("ano"))
+    grupo = models.ForeignKey(
+        GrupoContabil, on_delete=models.PROTECT, related_name="+", verbose_name=_("grupo")
+    )
+    valor = models.DecimalField(_("meta"), **DINHEIRO)
+
+    class Meta:
+        verbose_name = _("meta do planejamento")
+        verbose_name_plural = _("metas do planejamento")
+        ordering = ["ano", "grupo"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["clinica", "ano", "grupo"], name="planejamento_unico_por_grupo"
+            ),
+            models.CheckConstraint(condition=Q(valor__gt=0), name="planejamento_valor_positivo"),
+        ]
+
+    def __str__(self):
+        return f"{self.ano} · {self.grupo}"
+
+
 class Fechamento(ModeloDaClinica):
     """Finance closed up to a date (decision 096), so the reports given to the accountant
     do not change: no payment dated on or before it can be recorded or reversed.

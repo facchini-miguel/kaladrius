@@ -23,6 +23,7 @@ from apps.financeiro.models import (
     MovimentoCaixa,
     Pagamento,
     Parcela,
+    Planejamento,
     TransacaoBancaria,
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
@@ -98,6 +99,7 @@ class Command(BaseCommand):
                 TipoAtendimento,
                 Conta,
                 Categoria,
+                Planejamento,
                 GrupoContabil,
                 CentroCusto,
                 Fechamento,
