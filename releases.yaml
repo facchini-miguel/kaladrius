@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.38.0
+  data: 2026-10-30
+  titulo:
+    pt-br: Centros de custo
+    en: Cost centers
+    es: Centros de costo
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cadastre centros de custo em Cadastros > Centros de custo (um consultório, uma
+          especialidade, o administrativo). O lançamento e a despesa passam a dizer para quem é
+          o dinheiro, e os relatórios mostram o recebido e o pago por centro de custo.
+        en: >
+          Register cost centers in Records > Cost centers (a room, a specialty, the office).
+          Entries and expenses then say who the money is for, and the reports show what was
+          received and paid by cost center.
+        es: >
+          Registre centros de costo en Registros > Centros de costo (un consultorio, una
+          especialidad, la administración). Los registros y gastos indican para quién es el
+          dinero, y los informes muestran lo cobrado y lo pagado por centro de costo.
+
 - versao: 0.37.0
   data: 2026-10-30
   titulo:
