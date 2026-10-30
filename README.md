@@ -61,7 +61,7 @@ All documentation is on the site **https://kaladrius-docs.facchini.eti.br** (sou
 
 ## Versions
 
-The version history lives in [`releases.yaml`](releases.yaml) and can also be viewed inside the system and in the app. See [Versioning](https://kaladrius-docs.facchini.eti.br/project/versioning).
+The version history lives in [`releases.yaml`](releases.yaml) and can also be viewed inside the system and in the app. The complete list, with each version's notes, is in [GitHub Releases](https://github.com/facchini-miguel/kaladrius/releases). See [Versioning](https://kaladrius-docs.facchini.eti.br/project/versioning).
 
 ## License
 
