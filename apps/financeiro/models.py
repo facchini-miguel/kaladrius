@@ -49,15 +49,77 @@ class Conta(ModeloDaClinica):
         return self.nome
 
 
-class Categoria(ModeloDaClinica):
-    """Grouping of income and expenses for the reports."""
+class TipoFinanceiro(models.TextChoices):
+    RECEITA = "receita", _("Receita")
+    DESPESA = "despesa", _("Despesa")
 
-    class Tipo(models.TextChoices):
-        RECEITA = "receita", _("Receita")
-        DESPESA = "despesa", _("Despesa")
+
+class GrupoContabil(ModeloDaClinica):
+    """A node of the chart of accounts (decision 097, legacy Medical grupocontabil):
+    groups hold subgroups and categories; entries go to the categories (the leaves)."""
+
+    Tipo = TipoFinanceiro
 
     nome = models.CharField(_("nome"), max_length=60)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    pai = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="filhos",
+        verbose_name=_("grupo acima"),
+    )
+    codigo = models.PositiveSmallIntegerField(
+        _("código"),
+        null=True,
+        blank=True,
+        help_text=_("Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."),
+    )
+    ativo = models.BooleanField(_("ativo"), default=True)
+
+    class Meta:
+        verbose_name = _("grupo contábil")
+        verbose_name_plural = _("grupos contábeis")
+        ordering = ["tipo", "codigo", "nome"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["clinica", "tipo", "pai", "nome"], name="grupo_contabil_unico"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.numero} {self.nome}" if self.numero else self.nome
+
+    def ancestrais(self):
+        """From the top group down to the parent of this one."""
+        cadeia, atual = [], self.pai
+        while atual is not None:
+            cadeia.insert(0, atual)
+            atual = atual.pai
+        return cadeia
+
+    @property
+    def numero(self):
+        codigos = [g.codigo for g in [*self.ancestrais(), self]]
+        return ".".join(map(str, codigos)) if None not in codigos else ""
+
+
+class Categoria(ModeloDaClinica):
+    """Grouping of income and expenses for the reports."""
+
+    Tipo = TipoFinanceiro
+
+    nome = models.CharField(_("nome"), max_length=60)
+    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    grupo = models.ForeignKey(
+        GrupoContabil,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="categorias",
+        verbose_name=_("grupo"),
+    )
     ativa = models.BooleanField(_("ativa"), default=True)
 
     class Meta:
@@ -109,6 +171,20 @@ CATEGORIAS_PADRAO = [
     ("Manutenção", Categoria.Tipo.DESPESA),
     ("Outras despesas", Categoria.Tipo.DESPESA),
 ]
+# A basic chart of accounts for new clinics (decision 097): code, group and its categories.
+PLANO_PADRAO = {
+    Categoria.Tipo.RECEITA: [
+        (1, "Atendimentos", ["Tratamento", "Consulta"]),
+        (2, "Outras receitas", ["Outras receitas"]),
+    ],
+    Categoria.Tipo.DESPESA: [
+        (1, "Ocupação", ["Aluguel", "Água, luz e internet", "Manutenção"]),
+        (2, "Pessoal", ["Salários e encargos", "Comissões"]),
+        (3, "Materiais e laboratório", ["Material odontológico", "Laboratório de prótese"]),
+        (4, "Impostos", ["Impostos"]),
+        (5, "Outras despesas", ["Outras despesas"]),
+    ],
+}
 
 
 def criar_padroes(clinica):
@@ -119,8 +195,16 @@ def criar_padroes(clinica):
                 Conta(clinica=clinica, nome=nome, tipo=tipo) for nome, tipo in CONTAS_PADRAO
             )
         if not Categoria.objects.filter(clinica=clinica).exists():
+            grupo_de = {}
+            for tipo, linhas in PLANO_PADRAO.items():
+                for codigo, nome, categorias in linhas:
+                    grupo = GrupoContabil.objects.create(
+                        clinica=clinica, tipo=tipo, codigo=codigo, nome=nome
+                    )
+                    grupo_de.update({(tipo, categoria): grupo for categoria in categorias})
             Categoria.objects.bulk_create(
-                Categoria(clinica=clinica, nome=nome, tipo=tipo) for nome, tipo in CATEGORIAS_PADRAO
+                Categoria(clinica=clinica, nome=nome, tipo=tipo, grupo=grupo_de.get((tipo, nome)))
+                for nome, tipo in CATEGORIAS_PADRAO
             )
 
 

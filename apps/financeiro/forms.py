@@ -7,7 +7,16 @@ from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, some
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
-from .models import Categoria, CentroCusto, Conta, Fornecedor, Lancamento, Pagamento
+from .models import (
+    Categoria,
+    CentroCusto,
+    Conta,
+    Fornecedor,
+    GrupoContabil,
+    Lancamento,
+    Pagamento,
+)
+from .servicos import ligar_grupos
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
@@ -297,13 +306,72 @@ class MotivoForm(FormularioBootstrap, forms.Form):
     motivo = forms.CharField(label=_("Motivo"), max_length=200)
 
 
-class CategoriaForm(FormularioBootstrap, forms.ModelForm):
+def _grupos(excluir=()):
+    """Groups as choices, numbered without one query per level."""
+    grupos = ligar_grupos(GrupoContabil.objects.exclude(pk__in=excluir))
+    return [("", "—"), *((g.pk, f"{g.get_tipo_display()} · {g}") for g in grupos)]
+
+
+class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
+    """A group of the chart of accounts (decision 097)."""
+
+    pai = forms.ModelChoiceField(
+        queryset=GrupoContabil.objects.none(), required=False, label=_("Grupo acima")
+    )
+
     class Meta:
-        model = Categoria
-        fields = ["nome", "tipo", "ativa"]
+        model = GrupoContabil
+        fields = ["nome", "tipo", "pai", "codigo", "ativo"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # A group cannot go under itself or under one of its own subgroups.
+        proibidos = {self.instance.pk, *self._descendentes()} if self.instance.pk else set()
+        self.fields["pai"].queryset = GrupoContabil.objects.exclude(pk__in=proibidos)
+        self.fields["pai"].choices = _grupos(excluir=proibidos)
+
+    def _descendentes(self):
+        encontrados, fila = set(), [self.instance.pk]
+        while fila:
+            filhos = set(GrupoContabil.objects.filter(pai__in=fila).values_list("pk", flat=True))
+            fila = list(filhos - encontrados)
+            encontrados |= filhos
+        return encontrados
 
     def clean(self):
         dados = super().clean()
+        pai, tipo = dados.get("pai"), dados.get("tipo")
+        if pai and tipo and pai.tipo != tipo:
+            self.add_error(
+                "pai", _("O grupo acima precisa ser do mesmo tipo (receita ou despesa).")
+            )
+        nome = (dados.get("nome") or "").strip()
+        repetido = GrupoContabil.objects.filter(tipo=tipo, pai=pai, nome__iexact=nome)
+        if nome and repetido.exclude(pk=self.instance.pk).exists():
+            self.add_error("nome", _("Já existe um grupo com este nome neste lugar do plano."))
+        return dados
+
+
+class CategoriaForm(FormularioBootstrap, forms.ModelForm):
+    grupo = forms.ModelChoiceField(
+        queryset=GrupoContabil.objects.none(), required=False, label=_("Grupo")
+    )
+
+    class Meta:
+        model = Categoria
+        fields = ["nome", "tipo", "grupo", "ativa"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["grupo"].queryset = GrupoContabil.objects.all()
+        self.fields["grupo"].choices = _grupos()
+        self.fields["grupo"].help_text = _("Onde a categoria fica no plano de contas (opcional).")
+
+    def clean(self):
+        dados = super().clean()
+        grupo = dados.get("grupo")
+        if grupo and dados.get("tipo") and grupo.tipo != dados["tipo"]:
+            self.add_error("grupo", _("O grupo precisa ser do mesmo tipo da categoria."))
         repetida = Categoria.objects.filter(nome=dados.get("nome"), tipo=dados.get("tipo"))
         if repetida.exclude(pk=self.instance.pk).exists():
             self.add_error("nome", _("Já existe uma categoria com este nome."))

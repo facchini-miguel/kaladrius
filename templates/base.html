@@ -89,6 +89,7 @@
               {% if pode.financeiro.ver %}
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Financeiro" %}</h6></li>
+              <li><a class="dropdown-item" href="{% url 'financeiro:plano_contas' %}">{% translate "Plano de contas" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'categorias' %}">{% translate "Categorias" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'contas' %}">{% translate "Contas" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'centros-de-custo' %}">{% translate "Centros de custo" %}</a></li>

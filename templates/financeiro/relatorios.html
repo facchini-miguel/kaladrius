@@ -16,6 +16,12 @@
 <div class="row g-4">
   {% translate "Recebido por forma de pagamento" as titulo1 %}
   {% include "financeiro/_grupo.html" with titulo=titulo1 linhas=relatorio.por_forma total=relatorio.total_recebido %}
+  {% if relatorio.grupos %}
+  {% translate "Recebido por grupo do plano de contas" as titulo_g1 %}
+  {% include "financeiro/_arvore.html" with titulo=titulo_g1 linhas=relatorio.por_grupo total=relatorio.total_recebido %}
+  {% translate "Despesas pagas por grupo do plano de contas" as titulo_g2 %}
+  {% include "financeiro/_arvore.html" with titulo=titulo_g2 linhas=relatorio.despesas_por_grupo total=relatorio.total_pago %}
+  {% endif %}
   {% translate "Recebido por categoria" as titulo2 %}
   {% include "financeiro/_grupo.html" with titulo=titulo2 linhas=relatorio.por_categoria total=relatorio.total_recebido %}
   {% translate "Recebido por profissional" as titulo3 %}

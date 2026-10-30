@@ -17,6 +17,7 @@ from apps.financeiro.models import (
     Conta,
     Fechamento,
     Fornecedor,
+    GrupoContabil,
     ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
@@ -66,7 +67,9 @@ class Command(BaseCommand):
                 )
             )
             pacientes = Paciente.objects.filter(clinica__in=clinicas).count()
-            # Clinic data is protected against deleting the clinic, so it goes first.
+            # Clinic data is protected against deleting the clinic, so it goes first. Groups of
+            # the chart of accounts protect their parent group: unlink them first.
+            GrupoContabil.objects.filter(clinica__in=clinicas).update(pai=None)
             for modelo in (
                 TransacaoBancaria,
                 ImportacaoExtrato,
@@ -95,6 +98,7 @@ class Command(BaseCommand):
                 TipoAtendimento,
                 Conta,
                 Categoria,
+                GrupoContabil,
                 CentroCusto,
                 Fechamento,
                 ModuloDaClinica,

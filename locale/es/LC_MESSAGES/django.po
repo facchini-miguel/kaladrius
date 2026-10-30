@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 18:21-0300\n"
+"POT-Creation-Date: 2026-10-30 19:24-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -766,6 +766,25 @@ msgstr "Ya incluidos en el valor cobrado."
 msgid "Desconto"
 msgstr "Descuento"
 
+msgid "Grupo acima"
+msgstr "Grupo superior"
+
+msgid "O grupo acima precisa ser do mesmo tipo (receita ou despesa)."
+msgstr "El grupo superior debe ser del mismo tipo (ingreso o gasto)."
+
+#
+msgid "Já existe um grupo com este nome neste lugar do plano."
+msgstr "Ya existe un grupo con este nombre en este lugar del plan."
+
+msgid "Grupo"
+msgstr "Grupo"
+
+msgid "Onde a categoria fica no plano de contas (opcional)."
+msgstr "Dónde queda la categoría en el plan de cuentas (opcional)."
+
+msgid "O grupo precisa ser do mesmo tipo da categoria."
+msgstr "El grupo debe ser del mismo tipo que la categoría."
+
 msgid "Já existe uma categoria com este nome."
 msgstr "Ya existe una categoría con este nombre."
 
@@ -854,6 +873,25 @@ msgstr "Ingreso"
 
 msgid "Despesa"
 msgstr "Gasto"
+
+msgid "grupo acima"
+msgstr "grupo superior"
+
+msgid "código"
+msgstr "código"
+
+msgid "Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."
+msgstr "Posición dentro del grupo superior (1, 2, 3…); forma números como 2.1."
+
+msgid "grupo contábil"
+msgstr "grupo contable"
+
+msgid "grupos contábeis"
+msgstr "grupos contables"
+
+#
+msgid "grupo"
+msgstr "grupo"
 
 msgid "categoria"
 msgstr "categoría"
@@ -1202,7 +1240,10 @@ msgid ""
 "O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
 "antes dela não podem ser registrados. Use uma data posterior ou peça ao "
 "administrador para reabrir o período."
-msgstr "El financiero está cerrado hasta el %(ate)s: los pagos y reversiones en esa fecha o antes no pueden registrarse. Use una fecha posterior o pida al administrador que reabra el período."
+msgstr ""
+"El financiero está cerrado hasta el %(ate)s: los pagos y reversiones en esa "
+"fecha o antes no pueden registrarse. Use una fecha posterior o pida al "
+"administrador que reabra el período."
 
 msgid "Feche no máximo até ontem: hoje ainda há movimento."
 msgstr "Cierre como máximo hasta ayer: hoy todavía hay movimiento."
@@ -1210,7 +1251,9 @@ msgstr "Cierre como máximo hasta ayer: hoy todavía hay movimiento."
 #, python-format
 msgid ""
 "O financeiro já está fechado até %(ate)s. Para voltar, reabra o período."
-msgstr "El financiero ya está cerrado hasta el %(ate)s. Para volver, reabra el período."
+msgstr ""
+"El financiero ya está cerrado hasta el %(ate)s. Para volver, reabra el "
+"período."
 
 #
 msgid "O financeiro não está fechado."
@@ -1240,6 +1283,9 @@ msgstr "Abiertas"
 
 msgid "Sem centro de custo"
 msgstr "Sin centro de costo"
+
+msgid "Sem grupo"
+msgstr "Sin grupo"
 
 msgid "O caixa desta conta já está aberto."
 msgstr "La caja de esta cuenta ya está abierta."
@@ -1954,9 +2000,6 @@ msgstr "ciudades"
 msgid "ISPB"
 msgstr "ISPB"
 
-msgid "código"
-msgstr "código"
-
 msgid "nome curto"
 msgstr "nombre corto"
 
@@ -2248,6 +2291,10 @@ msgstr "Ciudades"
 
 msgid "Bancos"
 msgstr "Bancos"
+
+#
+msgid "Plano de contas"
+msgstr "Plan de cuentas"
 
 msgid "Categorias"
 msgstr "Categorías"
@@ -2661,6 +2708,9 @@ msgstr "Nueva contraseña"
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "La persona sale del sistema en los dispositivos donde esté conectada."
 
+msgid "Nada no período."
+msgstr "Nada en el período."
+
 msgid "Pagador"
 msgstr "Pagador"
 
@@ -2689,9 +2739,6 @@ msgstr "Comisión por pagar"
 
 msgid "Sem profissional"
 msgstr "Sin profesional"
-
-msgid "Nada no período."
-msgstr "Nada en el período."
 
 msgid "Agrupar por"
 msgstr "Agrupar por"
@@ -3033,21 +3080,28 @@ msgstr "Cerrado hasta el <strong>%(data)s</strong>."
 msgid ""
 "Pagamentos e estornos nessa data ou antes dela não podem mais ser "
 "registrados, e os relatórios desse período não mudam."
-msgstr "Los pagos y reversiones en esa fecha o antes ya no pueden registrarse, y los informes de ese período no cambian."
+msgstr ""
+"Los pagos y reversiones en esa fecha o antes ya no pueden registrarse, y los "
+"informes de ese período no cambian."
 
 msgid "O financeiro está aberto: qualquer data aceita pagamentos e estornos."
-msgstr "El financiero está abierto: cualquier fecha acepta pagos y reversiones."
+msgstr ""
+"El financiero está abierto: cualquier fecha acepta pagos y reversiones."
 
 msgid ""
 "Feche um período depois de conferir o caixa e entregar os relatórios ao "
 "contador."
-msgstr "Cierre un período después de revisar la caja y entregar los informes al contador."
+msgstr ""
+"Cierre un período después de revisar la caja y entregar los informes al "
+"contador."
 
 msgid "Reabrir"
 msgstr "Reabrir"
 
 msgid "Só para corrigir um erro. O motivo fica no histórico e na auditoria."
-msgstr "Solo para corregir un error. El motivo queda en el historial y en la auditoría."
+msgstr ""
+"Solo para corregir un error. El motivo queda en el historial y en la "
+"auditoría."
 
 msgid "Histórico"
 msgstr "Historial"
@@ -3154,6 +3208,15 @@ msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativo�
 msgstr ""
 "Para dejar de usarlo sin perder el historial, edítelo y desmarque “activo”."
 
+#
+msgid "Novo grupo"
+msgstr "Nuevo grupo"
+
+#
+#
+msgid "Para deixar de usar sem perder o histórico, desmarque “ativo”."
+msgstr "Para dejar de usarlo sin perder el historial, desmarque “activo”."
+
 msgid "Cancelado"
 msgstr "Cancelada"
 
@@ -3216,6 +3279,24 @@ msgid ""
 msgstr ""
 "No se borra nada: el registro queda marcado, con el motivo, y aparece en la "
 "auditoría."
+
+#
+#
+msgid "Nova categoria"
+msgstr "Nueva categoría"
+
+msgid ""
+"Os grupos organizam as categorias em árvore, e os relatórios somam cada "
+"grupo com os de baixo. Os lançamentos continuam indo nas categorias."
+msgstr "Los grupos organizan las categorías en árbol, y los informes suman cada grupo con los de abajo. Los registros siguen yendo en las categorías."
+
+#
+msgid "editar"
+msgstr "editar"
+
+#
+msgid "Nada cadastrado."
+msgstr "Nada registrado."
 
 #, python-format
 msgid "parcela %(numero)s de %(total)s"
@@ -3306,6 +3387,15 @@ msgstr "Resultado"
 msgid "Recebido por forma de pagamento"
 msgstr "Cobrado por forma de pago"
 
+#
+msgid "Recebido por grupo do plano de contas"
+msgstr "Cobrado por grupo del plan de cuentas"
+
+#
+#
+msgid "Despesas pagas por grupo do plano de contas"
+msgstr "Gastos pagados por grupo del plan de cuentas"
+
 msgid "Recebido por categoria"
 msgstr "Cobrado por categoría"
 
@@ -3329,7 +3419,9 @@ msgstr "Por la fecha del pago, sin los revertidos ni los cancelados."
 #, python-format
 msgid ""
 "Financeiro fechado até %(data)s: até essa data os valores não mudam mais."
-msgstr "Financiero cerrado hasta el %(data)s: hasta esa fecha los valores ya no cambian."
+msgstr ""
+"Financiero cerrado hasta el %(data)s: hasta esa fecha los valores ya no "
+"cambian."
 
 msgid "Juros e multa recebidos"
 msgstr "Intereses y multas cobrados"
@@ -3804,10 +3896,6 @@ msgstr "Ningún presupuesto."
 msgctxt "carteirinha"
 msgid "Vencida"
 msgstr "Vencida"
-
-#
-msgid "editar"
-msgstr "editar"
 
 msgid "Particular: nenhuma carteirinha de convênio."
 msgstr "Particular: ninguna credencial de convenio."

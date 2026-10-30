@@ -94,5 +94,8 @@ Depois de conferir o caixa e entregar os relatórios ao contador, feche o perío
 ## Centros de custo
 O centro de custo diz **para quem** é cada receita ou despesa: um consultório, uma especialidade, o administrativo. A categoria continua dizendo **o que** é (aluguel, material). Em **Cadastros > Centros de custo**, o administrador cadastra os centros. Assim que houver um ativo, o campo **Centro de custo** aparece no novo lançamento e na nova despesa (é opcional), e os relatórios ganham os quadros por centro de custo. Os lançamentos antigos ficam sem centro. Para deixar de usar um centro sem perder o histórico, desmarque **ativo**.
 
+## Plano de contas
+Em **Cadastros > Plano de contas**, as categorias ficam organizadas em **grupos**, que podem ter **subgrupos** (como no plano de contas do contador). Cada grupo pode ter um **código** (1, 2, 3…), e os subgrupos formam números como **2.1**. Os lançamentos continuam indo nas categorias; os relatórios ganham o recebido e o pago **por grupo**, cada um somando os de baixo, e uma linha "Sem grupo". Clínicas novas começam com um plano básico (Atendimentos e Outras receitas; Ocupação, Pessoal, Materiais e laboratório, Impostos e Outras despesas); nas clínicas que já existiam, as categorias com o nome padrão entram nele e as outras ficam sem grupo até alguém escolher. Para mudar uma categoria de grupo, edite a categoria. Um grupo não pode ficar dentro dele mesmo nem misturar receita com despesa.
+
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

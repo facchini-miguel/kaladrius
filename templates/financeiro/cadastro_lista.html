@@ -10,7 +10,7 @@
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Nome" %}</th>{% if cadastro != "centros-de-custo" %}<th>{% translate "Tipo" %}</th>{% endif %}<th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Nome" %}</th>{% if cadastro != "centros-de-custo" %}<th>{% translate "Tipo" %}</th>{% endif %}{% if cadastro == "categorias" %}<th>{% translate "Grupo" %}</th>{% endif %}<th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
     <tbody>
       {% for item in itens %}
       <tr>
@@ -19,6 +19,7 @@
         <td>{% if item.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         {% else %}
         <td>{{ item.get_tipo_display }}</td>
+        {% if cadastro == "categorias" %}<td>{{ item.grupo|default:"—" }}</td>{% endif %}
         <td>{% if item.ativa %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
         {% endif %}
         <td class="text-end">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:cadastro_editar' cadastro item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>

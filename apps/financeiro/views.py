@@ -36,6 +36,7 @@ from .forms import (
     FecharCaixaForm,
     FecharForm,
     FornecedorForm,
+    GrupoContabilForm,
     ImportarExtratoForm,
     LancamentoDaTransacaoForm,
     LancamentoPagarForm,
@@ -56,6 +57,7 @@ from .models import (
     Conta,
     Fechamento,
     Fornecedor,
+    GrupoContabil,
     ImportacaoExtrato,
     Lancamento,
     MovimentoCaixa,
@@ -603,6 +605,53 @@ def cadastro_form(request, cadastro, pk=None):
         "financeiro/cadastro_form.html",
         {"form": form, "cadastro": cadastro, "instancia": instancia, "modelo": modelo._meta},
     )
+
+
+# --- Chart of accounts (decision 097) ---------------------------------------------------
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.VER)
+def plano_contas(request):
+    """The chart of accounts as a tree: groups, subgroups and their categories."""
+    grupos = servicos.ligar_grupos(GrupoContabil.objects.all())
+    categorias = list(Categoria.objects.all())
+    arvores = []
+    for tipo, rotulo in Categoria.Tipo.choices:
+        linhas = []
+
+        def descer(pai_id, nivel, tipo=tipo, linhas=linhas):
+            for grupo in (g for g in grupos if g.tipo == tipo and g.pai_id == pai_id):
+                linhas.append({"nivel": nivel, "grupo": grupo})
+                linhas.extend(
+                    {"nivel": nivel + 1, "categoria": c}
+                    for c in categorias
+                    if c.grupo_id == grupo.pk
+                )
+                descer(grupo.pk, nivel + 1)
+
+        descer(None, 0)
+        sem_grupo = [c for c in categorias if c.tipo == tipo and c.grupo_id is None]
+        arvores.append({"rotulo": rotulo, "linhas": linhas, "sem_grupo": sem_grupo})
+    return render(request, "financeiro/plano_contas.html", {"arvores": arvores})
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
+def grupo_novo(request):
+    return _grupo_form(request, GrupoContabil(tipo=request.GET.get("tipo") or None))
+
+
+@exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
+def grupo_editar(request, pk):
+    return _grupo_form(request, get_object_or_404(GrupoContabil.objects, pk=pk))
+
+
+def _grupo_form(request, instancia):
+    form = GrupoContabilForm(request.POST or None, instance=instancia)
+    if request.method == "POST" and form.is_valid():
+        grupo = form.save()
+        messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.nome})
+        return redirect("financeiro:plano_contas")
+    return render(request, "financeiro/grupo_form.html", {"form": form, "instancia": instancia})
 
 
 # --- Suppliers (decision 093) ---------------------------------------------------------

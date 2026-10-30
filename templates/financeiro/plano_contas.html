@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Plano de contas" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{% translate "Plano de contas" %}</h1>
+  {% if pode.financeiro.criar %}
+  <div class="d-flex gap-2">
+    <a class="btn btn-primary" href="{% url 'financeiro:grupo_novo' %}">{% translate "Novo grupo" %}</a>
+    <a class="btn btn-outline-primary" href="{% url 'financeiro:cadastro_novo' 'categorias' %}">{% translate "Nova categoria" %}</a>
+  </div>
+  {% endif %}
+</div>
+<p class="text-body-secondary small">{% translate "Os grupos organizam as categorias em árvore, e os relatórios somam cada grupo com os de baixo. Os lançamentos continuam indo nas categorias." %}</p>
+
+<div class="row g-3">
+  {% for arvore in arvores %}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">{{ arvore.rotulo }}</div>
+      <ul class="list-group list-group-flush">
+        {% for linha in arvore.linhas %}
+        <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ linha.nivel|add:1 }}rem;">
+          {% if linha.grupo %}
+          <span class="fw-semibold{% if not linha.grupo.ativo %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.grupo }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:grupo_editar' linha.grupo.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% else %}
+          <span class="{% if not linha.categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.categoria.nome }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:cadastro_editar' 'categorias' linha.categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% endif %}
+        </li>
+        {% endfor %}
+        {% if arvore.sem_grupo %}
+        <li class="list-group-item text-body-secondary small">{% translate "Sem grupo" %}</li>
+        {% for categoria in arvore.sem_grupo %}
+        <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: 2rem;">
+          <span class="{% if not categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ categoria.nome }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:cadastro_editar' 'categorias' categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+        </li>
+        {% endfor %}
+        {% endif %}
+        {% if not arvore.linhas and not arvore.sem_grupo %}
+        <li class="list-group-item text-body-secondary">{% translate "Nada cadastrado." %}</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

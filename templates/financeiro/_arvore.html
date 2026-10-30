@@ -1,0 +1,16 @@
+{% load i18n formatos %}<div class="col-lg-6">
+  <h2 class="h6">{{ titulo }}</h2>
+  <table class="table table-sm bg-white">
+    <tbody>
+      {% for nivel, nome, valor in linhas %}
+      <tr>
+        <td style="padding-left: {{ nivel|add:1 }}rem;"{% if nivel == 0 %} class="fw-semibold"{% endif %}>{{ nome }}</td>
+        <td class="text-end text-nowrap{% if nivel == 0 %} fw-semibold{% endif %}">{{ valor|moeda }}</td>
+        <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio valor total 100 %}%</td>
+      </tr>
+      {% empty %}
+      <tr><td class="text-body-secondary">{% translate "Nada no período." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -19,9 +19,11 @@ from . import comissoes
 from .models import (
     ZERO,
     Caixa,
+    Categoria,
     CentroCusto,
     Comissao,
     Fechamento,
+    GrupoContabil,
     Lancamento,
     MovimentoCaixa,
     Pagamento,
@@ -435,11 +437,16 @@ def relatorio(de, ate):
     formas = dict(Pagamento.Forma.choices)
     total_recebido = somar(recebidos, "valor")
     total_pago = somar(pagos, "valor")
+    # The chart of accounts (decision 097) only once the clinic has groups.
+    grupos = GrupoContabil.objects.exists()
     # Cost centers (decision 095) only once the clinic has registered one.
     centros = CentroCusto.objects.exists()
     sem_centro = {None: _("Sem centro de custo")}
     centro = "parcela__lancamento__centro_custo__nome"
     return {
+        "grupos": grupos,
+        "por_grupo": arvore_por_grupo(recebidos, Categoria.Tipo.RECEITA) if grupos else [],
+        "despesas_por_grupo": arvore_por_grupo(pagos, Categoria.Tipo.DESPESA) if grupos else [],
         "centros": centros,
         "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
         "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
@@ -453,6 +460,55 @@ def relatorio(de, ate):
         "descontos": somar(recebidos, "desconto"),
         "juros": somar(recebidos, "juros"),
     }
+
+
+def ligar_grupos(consulta):
+    """The groups with each parent set from the same list, so numbers like 2.1 are
+    built without one query per level."""
+    grupos = list(consulta)
+    por_id = {grupo.pk: grupo for grupo in grupos}
+    for grupo in grupos:
+        if grupo.pai_id in por_id:
+            grupo.pai = por_id[grupo.pai_id]
+    return grupos
+
+
+def arvore_por_grupo(pagamentos, tipo):
+    """Payments summed by group of the chart of accounts, each group including its
+    subgroups: (level, name, total) rows in tree order, groups without money left out,
+    and a last row for the categories outside any group."""
+    por_categoria = dict(
+        pagamentos.order_by()
+        .values_list("parcela__lancamento__categoria_id")
+        .annotate(total=Sum("valor"))
+    )
+    grupo_da_categoria = dict(Categoria.objects.filter(tipo=tipo).values_list("pk", "grupo_id"))
+    grupos = ligar_grupos(GrupoContabil.objects.filter(tipo=tipo))
+    pai = {grupo.pk: grupo.pai_id for grupo in grupos}
+    totais = defaultdict(lambda: ZERO)
+    sem_grupo = ZERO
+    for categoria_id, valor in por_categoria.items():
+        grupo_id = grupo_da_categoria.get(categoria_id)
+        if grupo_id is None:
+            sem_grupo += valor
+        while grupo_id is not None:
+            totais[grupo_id] += valor
+            grupo_id = pai.get(grupo_id)
+    filhos = defaultdict(list)
+    for grupo in grupos:  # already in chart order (code, then name)
+        filhos[grupo.pai_id].append(grupo)
+    linhas = []
+
+    def descer(pai_id, nivel):
+        for grupo in filhos[pai_id]:
+            if totais[grupo.pk]:
+                linhas.append((nivel, str(grupo), totais[grupo.pk]))
+                descer(grupo.pk, nivel + 1)
+
+    descer(None, 0)
+    if sem_grupo:
+        linhas.append((0, _("Sem grupo"), sem_grupo))
+    return linhas
 
 
 # --- Daily cash drawer (0.17.0) ----------------------------------------------------------
