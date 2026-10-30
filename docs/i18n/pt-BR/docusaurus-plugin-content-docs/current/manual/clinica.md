@@ -9,7 +9,11 @@ Estas telas são do **administrador da clínica**, no menu **Cadastros**.
 ## Configurações da clínica
 Em **Cadastros > Configurações da clínica**: nome, CPF/CNPJ, e-mail e telefone da clínica, e o **horário da agenda** (início, fim e duração de cada horário).
 
-A **área** (Odontologia, Medicina ou outra área da saúde) mostra as partes de cada uma: na Odontologia, o **odontograma** e os dentes e faces dos orçamentos. Trocar a área não apaga nada: um orçamento que já tem dentes continua mostrando.
+A instalação atende **uma única clínica**, com um cadastro de pacientes, equipe, agenda e financeiro. Não há seletor de clínicas. A identificação interna da clínica é mantida para uma possível evolução futura.
+
+A **área principal** define os tipos de atendimento quando a clínica é cadastrada. Em **Módulos clínicos**, habilite **Odontologia**, **Medicina**, ambas ou nenhuma, de forma independente. As mesmas opções aparecem no formulário da clínica no painel do administrador do sistema. Alterar a área principal depois não modifica essas opções nem substitui os tipos de atendimento já existentes.
+
+Odontologia habilita o odontograma e os dentes e faces dos itens de orçamento. Desativar preserva a consulta e a impressão dos itens dentários existentes, mas impede criar, alterar ou removê-los até habilitar novamente. Itens de orçamento gerais continuam disponíveis. Medicina prepara a configuração para extensões médicas; o prontuário comum continua disponível em qualquer área, conforme as permissões profissionais existentes. Habilitar um módulo não concede acesso ao prontuário nem cria automaticamente novos formulários de especialidade.
 
 Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a mudança é recusada e a tela mostra qual. Ajuste esse agendamento antes.
 

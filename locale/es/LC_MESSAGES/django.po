@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 23:38-0300\n"
+"POT-Creation-Date: 2026-10-30 14:38-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -273,6 +273,17 @@ msgstr "registros de auditoría"
 msgid "Núcleo"
 msgstr "Núcleo"
 
+msgid "Módulos clínicos"
+msgstr "Módulos clínicos"
+
+msgid ""
+"Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
+"financeiro continuam disponíveis. Desativar não apaga o histórico."
+msgstr ""
+"Elija un área, ambas o ninguna. La agenda, los pacientes, la historia "
+"clínica común y las finanzas siguen disponibles. Desactivar no borra el "
+"historial."
+
 msgid "CPF/CNPJ"
 msgstr "CPF/CNPJ (identificación fiscal)"
 
@@ -332,15 +343,15 @@ msgstr "Medicina"
 msgid "Outra área da saúde"
 msgstr "Otra área de la salud"
 
-msgid "área"
-msgstr "área"
+msgid "área principal"
+msgstr "área principal"
 
 msgid ""
-"Mostra as partes de cada área, como o odontograma nos orçamentos da "
-"Odontologia. Trocar a área não apaga nada."
+"Define os tipos iniciais de atendimento. Os módulos clínicos são escolhidos "
+"separadamente e podem ser usados juntos."
 msgstr ""
-"Muestra las partes de cada área, como el odontograma en los presupuestos de "
-"Odontología. Cambiar el área no borra nada."
+"Define los tipos iniciales de atención. Los módulos clínicos se eligen por "
+"separado y pueden usarse juntos."
 
 msgid "Somente números."
 msgstr "Solo números."
@@ -382,6 +393,15 @@ msgstr "clínicas"
 msgid "O início da agenda deve ser antes do fim."
 msgstr "El inicio de la agenda debe ser anterior al fin."
 
+msgid "módulo"
+msgstr "módulo"
+
+msgid "módulo da clínica"
+msgstr "módulo de la clínica"
+
+msgid "módulos da clínica"
+msgstr "módulos de la clínica"
+
 msgid "Administrador da clínica"
 msgstr "Administrador de la clínica"
 
@@ -417,6 +437,12 @@ msgstr "copia de seguridad"
 
 msgid "backups"
 msgstr "copias de seguridad"
+
+msgid "Módulo clínico desconhecido."
+msgstr "Módulo clínico desconocido."
+
+msgid "Cadastre a clínica antes de configurar os módulos."
+msgstr "Registre la clínica antes de configurar los módulos."
 
 msgid "Pacientes"
 msgstr "Pacientes"
@@ -1219,6 +1245,9 @@ msgstr "Valor unitario"
 msgid "Dente inválido."
 msgstr "Diente no válido."
 
+msgid "Habilite Odontologia para registrar dentes ou faces."
+msgstr "Habilite Odontología para registrar dientes o caras."
+
 msgid "Escolha um procedimento ou descreva o item."
 msgstr "Elija un procedimiento o describa el ítem."
 
@@ -1281,6 +1310,9 @@ msgstr "ítem del presupuesto"
 
 msgid "itens do orçamento"
 msgstr "ítems del presupuesto"
+
+msgid "Habilite Odontologia para alterar itens com dentes ou faces."
+msgstr "Habilite Odontología para modificar elementos con dientes o caras."
 
 msgid "Só um orçamento em aberto pode ser aprovado."
 msgstr "Solo un presupuesto abierto puede aprobarse."
@@ -3167,6 +3199,9 @@ msgstr "Ningún procedimiento todavía."
 msgid "Subtotal"
 msgstr "Subtotal"
 
+msgid "Dentes do orçamento"
+msgstr "Dientes del presupuesto"
+
 msgid "Incluir procedimento"
 msgstr "Agregar procedimiento"
 
@@ -3178,9 +3213,6 @@ msgstr "Sin descripción ni valor, valen los de la tabla de procedimientos."
 
 msgid "Incluir"
 msgstr "Agregar"
-
-msgid "Dentes do orçamento"
-msgstr "Dientes del presupuesto"
 
 msgid "Aplicar"
 msgstr "Aplicar"
@@ -3750,6 +3782,16 @@ msgstr "No tiene permiso para acceder a esta página."
 
 msgid "Senha"
 msgstr "Contraseña"
+
+#~ msgid "área"
+#~ msgstr "área"
+
+#~ msgid ""
+#~ "Mostra as partes de cada área, como o odontograma nos orçamentos da "
+#~ "Odontologia. Trocar a área não apaga nada."
+#~ msgstr ""
+#~ "Muestra las partes de cada área, como el odontograma en los presupuestos "
+#~ "de Odontología. Cambiar el área no borra nada."
 
 #~ msgid "Atestados e receitas"
 #~ msgstr "Certificados y recetas"

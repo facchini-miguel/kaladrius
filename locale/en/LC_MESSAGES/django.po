@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 23:38-0300\n"
+"POT-Creation-Date: 2026-10-30 14:38-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -274,6 +274,16 @@ msgstr "audit entries"
 msgid "Núcleo"
 msgstr "Core"
 
+msgid "Módulos clínicos"
+msgstr "Clinical modules"
+
+msgid ""
+"Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
+"financeiro continuam disponíveis. Desativar não apaga o histórico."
+msgstr ""
+"Choose one area, both or neither. Schedule, patients, shared medical records "
+"and finance remain available. Disabling does not delete history."
+
 msgid "CPF/CNPJ"
 msgstr "CPF/CNPJ (tax ID)"
 
@@ -333,15 +343,15 @@ msgstr "Medicine"
 msgid "Outra área da saúde"
 msgstr "Other health area"
 
-msgid "área"
-msgstr "area"
+msgid "área principal"
+msgstr "primary area"
 
 msgid ""
-"Mostra as partes de cada área, como o odontograma nos orçamentos da "
-"Odontologia. Trocar a área não apaga nada."
+"Define os tipos iniciais de atendimento. Os módulos clínicos são escolhidos "
+"separadamente e podem ser usados juntos."
 msgstr ""
-"Shows the parts of each area, such as the dental chart in Dentistry "
-"estimates. Changing the area deletes nothing."
+"Sets the initial appointment types. Clinical modules are selected separately "
+"and can be used together."
 
 msgid "Somente números."
 msgstr "Numbers only."
@@ -383,6 +393,15 @@ msgstr "clinics"
 msgid "O início da agenda deve ser antes do fim."
 msgstr "The schedule start must be before its end."
 
+msgid "módulo"
+msgstr "module"
+
+msgid "módulo da clínica"
+msgstr "clinic module"
+
+msgid "módulos da clínica"
+msgstr "clinic modules"
+
 msgid "Administrador da clínica"
 msgstr "Clinic administrator"
 
@@ -418,6 +437,12 @@ msgstr "backup"
 
 msgid "backups"
 msgstr "backups"
+
+msgid "Módulo clínico desconhecido."
+msgstr "Unknown clinical module."
+
+msgid "Cadastre a clínica antes de configurar os módulos."
+msgstr "Register the clinic before configuring modules."
 
 msgid "Pacientes"
 msgstr "Patients"
@@ -1221,6 +1246,9 @@ msgstr "Unit price"
 msgid "Dente inválido."
 msgstr "Invalid tooth."
 
+msgid "Habilite Odontologia para registrar dentes ou faces."
+msgstr "Enable Dentistry to record teeth or surfaces."
+
 msgid "Escolha um procedimento ou descreva o item."
 msgstr "Choose a procedure or describe the item."
 
@@ -1283,6 +1311,9 @@ msgstr "estimate item"
 
 msgid "itens do orçamento"
 msgstr "estimate items"
+
+msgid "Habilite Odontologia para alterar itens com dentes ou faces."
+msgstr "Enable Dentistry to change items with teeth or surfaces."
 
 msgid "Só um orçamento em aberto pode ser aprovado."
 msgstr "Only an open estimate can be approved."
@@ -3167,6 +3198,9 @@ msgstr "No procedures yet."
 msgid "Subtotal"
 msgstr "Subtotal"
 
+msgid "Dentes do orçamento"
+msgstr "Teeth in the estimate"
+
 msgid "Incluir procedimento"
 msgstr "Add procedure"
 
@@ -3178,9 +3212,6 @@ msgstr "Without a description or price, the procedure price list's apply."
 
 msgid "Incluir"
 msgstr "Add"
-
-msgid "Dentes do orçamento"
-msgstr "Teeth in the estimate"
 
 msgid "Aplicar"
 msgstr "Apply"
@@ -3746,6 +3777,16 @@ msgstr "You do not have permission to access this page."
 
 msgid "Senha"
 msgstr "Password"
+
+#~ msgid "área"
+#~ msgstr "area"
+
+#~ msgid ""
+#~ "Mostra as partes de cada área, como o odontograma nos orçamentos da "
+#~ "Odontologia. Trocar a área não apaga nada."
+#~ msgstr ""
+#~ "Shows the parts of each area, such as the dental chart in Dentistry "
+#~ "estimates. Changing the area deletes nothing."
 
 #~ msgid "Atestados e receitas"
 #~ msgstr "Certificates and prescriptions"

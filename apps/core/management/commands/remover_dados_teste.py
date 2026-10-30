@@ -7,7 +7,7 @@ from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
 from apps.core.isolamento import sem_isolamento
-from apps.core.models import Clinica
+from apps.core.models import Clinica, ModuloDaClinica
 from apps.financeiro.models import (
     Caixa,
     Categoria,
@@ -88,6 +88,7 @@ class Command(BaseCommand):
                 TipoAtendimento,
                 Conta,
                 Categoria,
+                ModuloDaClinica,
             ):
                 modelo.objects.filter(clinica__in=clinicas).delete()
             # Collected now: delete() clears the instances' pk.

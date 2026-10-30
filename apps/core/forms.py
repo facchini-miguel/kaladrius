@@ -2,11 +2,13 @@ import datetime
 
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
+from django.db import transaction
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
-from .models import Clinica
+from .models import Clinica, ModuloClinico, ModuloDaClinica
+from .modulos import configurar, iniciais
 from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
 
 
@@ -20,7 +22,9 @@ class FormularioBootstrap:
                 # Django 6.1's "- Select an option -" has no Portuguese translation yet.
                 campo.empty_label = "—"
             widget = campo.widget
-            if isinstance(widget, forms.CheckboxInput | forms.RadioSelect):
+            if isinstance(
+                widget, forms.CheckboxInput | forms.RadioSelect | forms.CheckboxSelectMultiple
+            ):
                 classe = "form-check-input"
             elif isinstance(widget, forms.Select):
                 classe = "form-select"
@@ -43,7 +47,40 @@ class TrocaSenhaForm(FormularioBootstrap, PasswordChangeForm):
     """The user's own password change, with Bootstrap styling."""
 
 
-class ClinicaForm(FormularioBootstrap, forms.ModelForm):
+class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
+    modulos = forms.MultipleChoiceField(
+        label=_("Módulos clínicos"),
+        choices=ModuloClinico.choices,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text=_(
+            "Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
+            "financeiro continuam disponíveis. Desativar não apaga o histórico."
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initial["modulos"] = (
+            list(
+                ModuloDaClinica.todos.filter(clinica=self.instance, ativo=True).values_list(
+                    "codigo", flat=True
+                )
+            )
+            if self.instance.pk
+            else list(iniciais(self.instance.area))
+        )
+
+    def _save_m2m(self):
+        super()._save_m2m()
+        configurar(self.instance, self.cleaned_data["modulos"])
+
+    @transaction.atomic
+    def save(self, commit=True):
+        return super().save(commit=commit)
+
+
+class ClinicaForm(ModulosClinicosForm):
     """Clinic details and schedule settings, changed by the clinic administrator."""
 
     # Typed with punctuation (up to 18 characters), stored as 11 or 14.
@@ -103,7 +140,13 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
             return hora.hour * 60 + hora.minute
 
         base = minutos(inicio)
-        futuros = Agendamento.objects.filter(fim__gt=timezone.now()).order_by("inicio")
+        if self.instance.pk is None:
+            return None
+        # Django Admin runs without the request's clinic isolation. Validate only the
+        # clinic being edited, including when this form is used outside a request.
+        futuros = Agendamento.todos.filter(clinica=self.instance, fim__gt=timezone.now()).order_by(
+            "inicio"
+        )
         for comeca, termina in futuros.values_list("inicio", "fim"):
             comeca, termina = timezone.localtime(comeca), timezone.localtime(termina)
             horas = (comeca.time(), termina.time())
@@ -116,10 +159,15 @@ class ClinicaForm(FormularioBootstrap, forms.ModelForm):
         return None
 
 
-class NovaClinicaForm(FormularioBootstrap, forms.ModelForm):
+class NovaClinicaForm(ModulosClinicosForm):
     """The installation's clinic, registered on the first access (decision 069). The
     schedule and the rest are set later in the clinic settings."""
 
     class Meta:
         model = Clinica
         fields = ["nome", "area", "documento", "email", "telefone", "endereco"]
+
+
+class ClinicaAdminForm(ClinicaForm):
+    class Meta(ClinicaForm.Meta):
+        fields = [*ClinicaForm.Meta.fields, "ativa"]

@@ -111,6 +111,7 @@ def editar(request, pk):
 def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     aberto = orcamento.situacao == Orcamento.Situacao.ABERTO
+    odontologia = request.clinica.odontologia
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
     pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
     return render(
@@ -119,7 +120,8 @@ def detalhe(request, pk):
         {
             "orcamento": orcamento,
             "aberto": aberto,
-            "item_form": ItemForm(odontologia=request.clinica.odontologia),
+            "item_form": ItemForm(odontologia=odontologia),
+            "odontologia_habilitada": odontologia,
             "desconto_form": DescontoForm(initial={"desconto": orcamento.desconto})
             if pode_desconto and aberto
             else None,
@@ -134,7 +136,8 @@ def detalhe(request, pk):
 def _dentes(request, orcamento):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
-    if not (request.clinica.odontologia or orcamento.dentes):
+    tem_historico = any(item.dentes or item.faces for item in orcamento.itens.all())
+    if not (request.clinica.odontologia or tem_historico):
         return {"mostrar_dentes": False}
     return {"mostrar_dentes": True, **odontograma(orcamento.dentes)}
 
@@ -151,8 +154,12 @@ def item_adicionar(request, pk):
         item.orcamento = orcamento
         item.descricao = form.cleaned_data["descricao"]
         item.valor_unitario = form.cleaned_data["valor_unitario"]
-        item.save()
-        messages.success(request, _("Item incluído."))
+        try:
+            item.save()
+        except ValidationError as erro:
+            messages.error(request, erro.messages[0])
+        else:
+            messages.success(request, _("Item incluído."))
     else:
         erros = [str(erro) for lista in form.errors.values() for erro in lista]
         messages.error(request, " ".join(erros))
@@ -165,8 +172,15 @@ def item_remover(request, pk, item):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    get_object_or_404(orcamento.itens, pk=item).delete()
-    messages.success(request, _("Item removido."))
+    registro = get_object_or_404(orcamento.itens, pk=item)
+    if (registro.dentes or registro.faces) and not request.clinica.odontologia:
+        raise PermissionDenied
+    try:
+        registro.delete()
+    except ValidationError as erro:
+        messages.error(request, erro.messages[0])
+    else:
+        messages.success(request, _("Item removido."))
     return redirect("orcamentos:detalhe", pk=orcamento.pk)
 
 

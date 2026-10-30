@@ -2,8 +2,10 @@ import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+
+from .isolamento import ModeloDaClinica
 
 
 class Usuario(AbstractUser):
@@ -44,7 +46,7 @@ class Clinica(models.Model):
     ]
 
     class Area(models.TextChoices):
-        """Health area (decision 080): shows or hides the parts of each area's module."""
+        """Primary area, kept for classification and the initial appointment types."""
 
         ODONTOLOGIA = "odontologia", _("Odontologia")
         MEDICINA = "medicina", _("Medicina")
@@ -52,13 +54,13 @@ class Clinica(models.Model):
 
     nome = models.CharField(_("nome"), max_length=200)
     area = models.CharField(
-        _("área"),
+        _("área principal"),
         max_length=20,
         choices=Area.choices,
         default=Area.ODONTOLOGIA,
         help_text=_(
-            "Mostra as partes de cada área, como o odontograma nos orçamentos da Odontologia. "
-            "Trocar a área não apaga nada."
+            "Define os tipos iniciais de atendimento. Os módulos clínicos são escolhidos "
+            "separadamente e podem ser usados juntos."
         ),
     )
     documento = models.CharField(
@@ -96,14 +98,55 @@ class Clinica(models.Model):
     def __str__(self):
         return self.nome
 
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        # Clinic creation and its initial capabilities/seeds succeed together.
+        return super().save(*args, **kwargs)
+
     @property
     def odontologia(self):
-        return self.area == self.Area.ODONTOLOGIA
+        return self.modulo_habilitado(ModuloClinico.ODONTOLOGIA)
+
+    @property
+    def medicina(self):
+        return self.modulo_habilitado(ModuloClinico.MEDICINA)
+
+    def modulo_habilitado(self, codigo):
+        # Explicit clinic filtering: this property is also used during clinic creation,
+        # before a request has selected a clinic. Missing/unknown modules fail closed.
+        if self.pk is None or codigo not in ModuloClinico.values:
+            return False
+        return ModuloDaClinica.todos.filter(clinica=self, codigo=codigo, ativo=True).exists()
 
     @classmethod
     def unica(cls):
         """The clinic of this installation (decision 069: one installation, one clinic)."""
         return cls.objects.filter(ativa=True).order_by("pk").first()
+
+
+class ModuloClinico(models.TextChoices):
+    ODONTOLOGIA = "odontologia", _("Odontologia")
+    MEDICINA = "medicina", _("Medicina")
+
+
+class ModuloDaClinica(ModeloDaClinica):
+    codigo = models.CharField(_("módulo"), max_length=20, choices=ModuloClinico.choices)
+    ativo = models.BooleanField(_("ativo"), default=True)
+
+    class Meta:
+        verbose_name = _("módulo da clínica")
+        verbose_name_plural = _("módulos da clínica")
+        ordering = ["codigo"]
+        constraints = [
+            models.UniqueConstraint(fields=["clinica", "codigo"], name="modulo_unico_por_clinica"),
+            models.CheckConstraint(
+                condition=models.Q(codigo__in=["odontologia", "medicina"]),
+                name="modulo_clinico_conhecido",
+            ),
+        ]
+
+    def __str__(self):
+        return self.get_codigo_display()
 
 
 class Papel(models.TextChoices):

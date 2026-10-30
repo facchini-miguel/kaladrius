@@ -5,7 +5,7 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out, user_lo
 from django.db.models.signals import post_delete, post_save, pre_save
 
 from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.core.models import Clinica, Vinculo
+from apps.core.models import Clinica, ModuloDaClinica, Vinculo
 from apps.financeiro.models import (
     Caixa,
     Categoria,
@@ -36,6 +36,7 @@ AUDITADOS = [
     Profissional,
     TipoAtendimento,
     Clinica,
+    ModuloDaClinica,
     Vinculo,
     Usuario,
     Lancamento,

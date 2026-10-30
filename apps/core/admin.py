@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
+from .forms import ClinicaAdminForm
 from .models import Backup, Clinica, Usuario, Vinculo
 
 
@@ -27,6 +28,7 @@ class VinculoDoUsuarioInline(admin.TabularInline):
 
 @admin.register(Clinica)
 class ClinicaAdmin(admin.ModelAdmin):
+    form = ClinicaAdminForm
     list_display = ["nome", "documento", "ativa", "agenda_inicio", "agenda_fim", "agenda_intervalo"]
     list_filter = ["ativa"]
     search_fields = ["nome", "documento"]

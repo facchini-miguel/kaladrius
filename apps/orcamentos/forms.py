@@ -68,6 +68,7 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, odontologia=True, **kwargs):
         super().__init__(*args, **kwargs)
+        self.odontologia = odontologia
         self.fields["procedimento"].queryset = Procedimento.objects.filter(ativo=True)
         self.fields["descricao"].required = False
         if not odontologia:
@@ -84,6 +85,10 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
     def clean(self):
         dados = super().clean()
         procedimento = dados.get("procedimento")
+        if not self.odontologia and any(
+            self.data.get(self.add_prefix(campo), "").strip() for campo in ("dentes", "faces")
+        ):
+            raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
         if not (dados.get("descricao") or "").strip():
             if procedimento is None:
                 self.add_error("descricao", _("Escolha um procedimento ou descreva o item."))

@@ -9,12 +9,14 @@ import datetime
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolamento import ModeloDaClinica
+from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
+from apps.core.models import Clinica
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 VALIDADE_PADRAO = 30  # days
@@ -172,6 +174,30 @@ class ItemOrcamento(ModeloDaClinica):
 
     def __str__(self):
         return self.descricao
+
+    def _conferir_modulo(self):
+        self._conferir_clinica()
+        if self.orcamento.clinica_id != self.clinica_id:
+            raise ClinicaDiferente("The estimate belongs to another clinic.")
+        clinica = Clinica.objects.select_for_update().get(pk=self.clinica_id)
+        anterior = (
+            type(self).objects.filter(pk=self.pk).values("dentes", "faces").first()
+            if self.pk is not None
+            else None
+        )
+        dental = self.dentes or self.faces or (anterior and any(anterior.values()))
+        if dental and not clinica.odontologia:
+            raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
+
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        self._conferir_modulo()
+        return super().save(*args, **kwargs)
+
+    @transaction.atomic
+    def delete(self, *args, **kwargs):
+        self._conferir_modulo()
+        return super().delete(*args, **kwargs)
 
     @property
     def total(self):

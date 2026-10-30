@@ -150,7 +150,7 @@ def criar_tipos_padrao(clinica):
     with sem_isolamento():
         if TipoAtendimento.objects.filter(clinica=clinica).exists():
             return
-        tipos = TIPOS_DE_ATENDIMENTO if clinica.odontologia else TIPOS_PADRAO
+        tipos = TIPOS_DE_ATENDIMENTO if clinica.area == clinica.Area.ODONTOLOGIA else TIPOS_PADRAO
         TipoAtendimento.objects.bulk_create(
             TipoAtendimento(clinica=clinica, nome=nome, cor=cor) for nome, cor in tipos
         )

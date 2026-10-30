@@ -4,7 +4,7 @@
     {{ campo }}
     <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
   </div>
-  {% elif campo.widget_type == "radioselect" %}
+  {% elif campo.widget_type == "radioselect" or campo.widget_type == "checkboxselectmultiple" %}
   <div class="form-label">{{ campo.label }}</div>
   <div>
     {% for opcao in campo %}
