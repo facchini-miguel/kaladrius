@@ -4,6 +4,66 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.40.0
+  data: 2026-10-30
+  titulo:
+    pt-br: Plano de contas, planejamento anual e folha do mês
+    en: Chart of accounts, yearly planning and the month's pay
+    es: Plan de cuentas, planificación anual y sueldos del mes
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Plano de contas: as categorias ficam em grupos e subgrupos (como 2.1), e os relatórios
+          mostram o recebido e o pago por grupo. As clínicas já começam com um plano básico.
+        en: >
+          Chart of accounts: categories sit in groups and subgroups (such as 2.1), and the
+          reports show what was received and paid by group. Clinics start with a basic chart.
+        es: >
+          Plan de cuentas: las categorías quedan en grupos y subgrupos (como 2.1), y los informes
+          muestran lo cobrado y lo pagado por grupo. Las clínicas empiezan con un plan básico.
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em Financeiro > Planejamento, defina a meta do ano de cada grupo e acompanhe o realizado
+          e o esperado até hoje. As metas do ano anterior podem ser copiadas.
+        en: >
+          In Finance > Planning, set each group's goal for the year and follow the actual amount
+          and what was expected so far. Last year's goals can be copied.
+        es: >
+          En Financiero > Planificación, defina la meta del año de cada grupo y siga lo realizado
+          y lo esperado hasta hoy. Las metas del año anterior pueden copiarse.
+    - tipo: novo
+      modulo: Pessoal
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo módulo Pessoal: funcionários com histórico de salários e a folha do mês, com horas
+          extras e faltas, lançada como contas a pagar. Encargos ficam com o contador.
+        en: >
+          New Staff module: employees with a salary history and the month's pay, with overtime
+          and absences, launched as payables. Payroll taxes stay with the accountant.
+        es: >
+          Nuevo módulo Personal: empleados con historial de salarios y los sueldos del mes, con
+          horas extras y ausencias, registrados como cuentas por pagar. Las cargas, con el contador.
+    - tipo: melhoria
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No cadastro do paciente, ao escolher a cidade, bairro e rua sugerem os nomes conhecidos
+          dela e os que a clínica já digitou.
+        en: >
+          On the patient form, once the city is chosen, neighborhood and street suggest its known
+          names and the ones the clinic already typed.
+        es: >
+          En el registro del paciente, al elegir la ciudad, barrio y calle sugieren sus nombres
+          conocidos y los que la clínica ya escribió.
+
 - versao: 0.39.0
   data: 2026-10-30
   titulo:
