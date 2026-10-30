@@ -4,6 +4,55 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.39.0
+  data: 2026-10-30
+  titulo:
+    pt-br: Fechamento do financeiro e ficha impressa
+    en: Closing the books and a printed registration sheet
+    es: Cierre del financiero y ficha impresa
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em Financeiro > Fechamento, feche o período já entregue ao contador: pagamentos e
+          estornos nessas datas passam a ser recusados e os relatórios não mudam mais. Reabrir
+          pede um motivo, que fica no histórico.
+        en: >
+          In Finance > Closing, close the period already handed to the accountant: payments and
+          reversals on those dates are refused and the reports no longer change. Reopening asks
+          for a reason, kept in the history.
+        es: >
+          En Financiero > Cierre, cierre el período ya entregado al contador: los pagos y
+          reversiones en esas fechas se rechazan y los informes ya no cambian. Reabrir pide un
+          motivo, que queda en el historial.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Imprimir ficha: a ficha cadastral do paciente pronta para imprimir ou salvar em PDF,
+          com contato, endereço, convênios e linha para assinatura.
+        en: >
+          Print sheet: the patient's registration sheet ready to print or save as PDF, with
+          contact, address, health plans and a signature line.
+        es: >
+          Imprimir ficha: la ficha de registro del paciente lista para imprimir o guardar en
+          PDF, con contacto, dirección, convenios y línea para la firma.
+    - tipo: melhoria
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Ao sair da agenda e voltar no mesmo dia, ela abre na semana que você estava vendo.
+        en: >
+          Leaving the schedule and coming back on the same day opens it on the week you were
+          looking at.
+        es: >
+          Al salir de la agenda y volver en el mismo día, se abre en la semana que estaba
+          viendo.
+
 - versao: 0.38.0
   data: 2026-10-30
   titulo:

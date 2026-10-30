@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.38.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.39.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: **fase 1 concluída** (paridade com o sistema antigo), publicada em https://kaladrius.facchini.eti.br (Google Cloud free tier, somente IPv6). Veja [Produção de referência](https://kaladrius-docs.facchini.eti.br/pt-BR/project/production).
 
