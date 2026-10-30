@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 19:45-0300\n"
+"POT-Creation-Date: 2026-10-30 19:58-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -495,6 +495,10 @@ msgstr "Recordatorios"
 msgid "Aniversariantes"
 msgstr "Cumpleaños"
 
+#
+msgid "Pessoal"
+msgstr "Personal"
+
 msgid "módulo"
 msgstr "módulo"
 
@@ -541,8 +545,9 @@ msgid "Módulo clínico desconhecido."
 msgstr "Módulo clínico desconocido."
 
 #
-msgid "Orçamentos precisa do Financeiro habilitado."
-msgstr "Presupuestos necesita Financiero habilitado."
+#
+msgid "Orçamentos e Pessoal precisam do Financeiro habilitado."
+msgstr "Presupuestos y Personal necesitan Financiero habilitado."
 
 msgid "Cadastre a clínica antes de configurar os módulos."
 msgstr "Registre la clínica antes de configurar los módulos."
@@ -1777,6 +1782,131 @@ msgstr "Un paciente con historia clínica no puede eliminarse."
 msgid "Os dados do paciente de código %(codigo)s foram excluídos."
 msgstr "Los datos del paciente de código %(codigo)s fueron eliminados."
 
+msgid "CPF"
+msgstr "CPF"
+
+#
+msgid "Salário"
+msgstr "Salario"
+
+msgid "Salário a partir de"
+msgstr "Salario a partir de"
+
+#
+msgid "Novo salário"
+msgstr "Nuevo salario"
+
+#
+msgid "Só para um aumento ou mudança: o anterior fica no histórico."
+msgstr "Solo para un aumento o cambio: el anterior queda en el historial."
+
+msgid "Em branco: a data de admissão ou hoje."
+msgstr "En blanco: la fecha de ingreso u hoy."
+
+#
+#
+msgid "Já existe um funcionário com este CPF."
+msgstr "Ya existe un empleado con este CPF."
+
+msgid "Informe a partir de quando vale o novo salário."
+msgstr "Indique desde cuándo vale el nuevo salario."
+
+#
+msgid "O desligamento não pode ser antes da admissão."
+msgstr "La baja no puede ser antes del ingreso."
+
+msgid "Horas extras"
+msgstr "Horas extras"
+
+#
+msgid "Valor da hora extra"
+msgstr "Valor de la hora extra"
+
+msgid "No máximo 30 dias de falta."
+msgstr "Como máximo 30 días de ausencia."
+
+msgid "cargo"
+msgstr "cargo"
+
+#
+msgid "admissão"
+msgstr "ingreso"
+
+#
+msgid "desligamento"
+msgstr "baja"
+
+#
+msgid "funcionário"
+msgstr "empleado"
+
+#
+msgid "funcionários"
+msgstr "empleados"
+
+#
+msgid "salário"
+msgstr "salario"
+
+msgid "desde"
+msgstr "desde"
+
+#
+msgid "salários"
+msgstr "salarios"
+
+msgid "competência"
+msgstr "mes"
+
+msgid "O primeiro dia do mês."
+msgstr "El primer día del mes."
+
+msgid "horas extras"
+msgstr "horas extras"
+
+#
+msgid "valor da hora extra"
+msgstr "valor de la hora extra"
+
+#
+msgid "dias de falta"
+msgstr "días de ausencia"
+
+#
+#
+msgid "conta a pagar"
+msgstr "cuenta por pagar"
+
+#
+msgid "folha do mês"
+msgstr "sueldos del mes"
+
+#
+msgid "folhas do mês"
+msgstr "sueldos de los meses"
+
+#, python-format
+msgid "O total de %(nome)s precisa ser maior que zero."
+msgstr "El total de %(nome)s debe ser mayor que cero."
+
+#, python-format
+msgid "Salário %(mes)s"
+msgstr "Salario %(mes)s"
+
+#, python-format
+msgid "Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s."
+msgstr "Salario %(salario)s + horas extras %(extras)s − ausencias %(faltas)s."
+
+#
+msgid "Folha salva."
+msgstr "Sueldos guardados."
+
+#, python-format
+msgid "%(n)s conta a pagar criada no financeiro."
+msgid_plural "%(n)s contas a pagar criadas no financeiro."
+msgstr[0] "%(n)s cuenta por pagar creada en el financiero."
+msgstr[1] "%(n)s cuentas por pagar creadas en el financiero."
+
 msgid "Este usuário já está ligado a outro profissional desta clínica."
 msgstr "Este usuario ya está vinculado a otro profesional de esta clínica."
 
@@ -2319,6 +2449,14 @@ msgstr "Planificación"
 #
 msgid "Fechamento"
 msgstr "Cierre"
+
+#
+msgid "Folha do mês"
+msgstr "Sueldos del mes"
+
+#
+msgid "Funcionários"
+msgstr "Empleados"
 
 msgid "Tabela de procedimentos"
 msgstr "Tabla de procedimientos"
@@ -3325,7 +3463,10 @@ msgid ""
 "A meta de cada grupo do plano de contas para o ano, comparada com o que foi "
 "recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta "
 "proporcional aos dias do ano que já passaram."
-msgstr "La meta de cada grupo del plan de cuentas para el año, comparada con lo cobrado y pagado (por la fecha del pago). “Esperado hasta hoy” es la meta proporcional a los días del año ya transcurridos."
+msgstr ""
+"La meta de cada grupo del plan de cuentas para el año, comparada con lo "
+"cobrado y pagado (por la fecha del pago). “Esperado hasta hoy” es la meta "
+"proporcional a los días del año ya transcurridos."
 
 #
 msgid "Meta do ano"
@@ -3359,7 +3500,10 @@ msgid ""
 "Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não "
 "têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar "
 "duas vezes a meta de um subgrupo."
-msgstr "Deje en blanco el grupo sin meta. Copiar solo completa los grupos que aún no tienen meta este año. El total suma las metas de los grupos más altos, sin contar dos veces la meta de un subgrupo."
+msgstr ""
+"Deje en blanco el grupo sin meta. Copiar solo completa los grupos que aún no "
+"tienen meta este año. El total suma las metas de los grupos más altos, sin "
+"contar dos veces la meta de un subgrupo."
 
 #
 #
@@ -3906,9 +4050,6 @@ msgstr "CNPJ"
 msgid "Inscrição estadual"
 msgstr "Inscripción estatal"
 
-msgid "CPF"
-msgstr "CPF"
-
 msgid "Nascimento"
 msgstr "Nacimiento"
 
@@ -4059,6 +4200,114 @@ msgstr "Edad"
 
 msgid "Nenhum paciente encontrado."
 msgstr "Ningún paciente encontrado."
+
+#, python-format
+msgid "Folha de %(mes)s"
+msgstr "Sueldos de %(mes)s"
+
+msgid ""
+"Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da "
+"hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. "
+"Encargos, férias e 13º ficam com o contador."
+msgstr "Una línea por empleado activo en el mes. Horas extras = cantidad × valor de la hora (sugerido: salario ÷ 220 × 1,5). Las ausencias descuentan salario ÷ 30 por día. Cargas sociales, vacaciones y aguinaldo quedan con el contador."
+
+#
+msgid "Funcionário"
+msgstr "Empleado"
+
+#
+msgid "Valor da hora"
+msgstr "Valor de la hora"
+
+msgid "Faltas (dias)"
+msgstr "Ausencias (días)"
+
+#
+msgid "no financeiro"
+msgstr "en el financiero"
+
+#
+msgid "Nenhum funcionário com salário neste mês."
+msgstr "Ningún empleado con salario en este mes."
+
+#
+#
+msgid "Cadastrar um funcionário"
+msgstr "Registrar un empleado"
+
+#
+msgid "Total do mês"
+msgstr "Total del mes"
+
+#
+msgid "Lançar no financeiro"
+msgstr "Registrar en el financiero"
+
+msgid ""
+"Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. "
+"Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta "
+"no financeiro."
+msgstr "Cada línea aún no registrada se convierte en una cuenta por pagar a nombre del empleado. Una vez registrada, la línea ya no cambia aquí; para rehacerla, cancele la cuenta en el financiero."
+
+#
+msgid "Salvar e lançar no financeiro"
+msgstr "Guardar y registrar en el financiero"
+
+#
+#
+msgid "Novo funcionário"
+msgstr "Nuevo empleado"
+
+msgid "Cargo"
+msgstr "Cargo"
+
+#
+msgid "Admissão"
+msgstr "Ingreso"
+
+#
+msgid "Desligamento"
+msgstr "Baja"
+
+msgid "Salário atual"
+msgstr "Salario actual"
+
+#
+msgid "Histórico de salários"
+msgstr "Historial de salarios"
+
+#
+msgid "Nenhum salário registrado."
+msgstr "Ningún salario registrado."
+
+msgid "Folhas"
+msgstr "Sueldos"
+
+#
+msgid "Faltas"
+msgstr "Ausencias"
+
+#
+msgid "No financeiro"
+msgstr "En el financiero"
+
+msgid "Em preparo"
+msgstr "En preparación"
+
+#
+#
+msgid "Nenhuma folha ainda."
+msgstr "Aún no hay sueldos."
+
+#
+#
+msgid "Nenhum funcionário cadastrado."
+msgstr "Ningún empleado registrado."
+
+msgid ""
+"Salário, horas extras e faltas viram contas a pagar na folha do mês. "
+"Encargos, férias e 13º ficam com o contador."
+msgstr "Salario, horas extras y ausencias se convierten en cuentas por pagar en los sueldos del mes. Cargas sociales, vacaciones y aguinaldo quedan con el contador."
 
 msgid "Excluir profissional"
 msgstr "Eliminar profesional"

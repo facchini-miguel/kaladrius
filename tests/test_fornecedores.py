@@ -156,7 +156,11 @@ def test_perfil_financeiro_cadastra_fornecedor(clinica_a, criar_usuario, cliente
 
 def test_fornecedores_somem_com_o_financeiro_desligado(clinica_a, fornecedor, admin):
     assert reverse("financeiro:fornecedores") in admin.get(reverse("inicio")).content.decode()
-    configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS})
+    configurar(
+        clinica_a,
+        MODULOS_GERAIS
+        - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS, ModuloClinico.PESSOAL},
+    )
     assert admin.get(reverse("financeiro:fornecedores")).status_code == 403
     assert reverse("financeiro:fornecedores") not in admin.get(reverse("inicio")).content.decode()
 

@@ -37,7 +37,7 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'rechamadas:lista' %}">{% translate "Rechamadas" %}</a></li>
           {% endif %}
 
-          {% if pode.recebimentos.ver or pode.financeiro.ver %}
+          {% if pode.recebimentos.ver or pode.financeiro.ver or pode.pessoal.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}</a>
             <ul class="dropdown-menu">
@@ -62,6 +62,11 @@
               <li><a class="dropdown-item" href="{% url 'financeiro:relatorios' %}">{% translate "Relatórios" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:planejamento' %}">{% translate "Planejamento" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'financeiro:fechamento' %}">{% translate "Fechamento" %}</a></li>
+              {% endif %}
+              {% if pode.pessoal.ver %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'pessoal:folha' %}">{% translate "Folha do mês" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'pessoal:lista' %}">{% translate "Funcionários" %}</a></li>
               {% endif %}
             </ul>
           </li>

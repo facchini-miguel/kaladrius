@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidad
 
-Versión 2 · 30/10/2026
+Versión 3 · 30/10/2026
 
 Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
@@ -37,6 +37,7 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 - Nombre, usuario, correo, perfil de acceso e idioma.
 - Registro de entradas y salidas del sistema, con fecha, hora y dirección IP; historial de quién creó, modificó o eliminó cada registro; intentos de entrada con contraseña incorrecta (usuario escrito y dirección IP).
 - De los profesionales: matrícula profesional y porcentaje de comisión.
+- De los empleados registrados en Personal: nombre, CPF, teléfono, cargo, fechas de ingreso y baja, historial de salarios, y horas extras y ausencias de cada mes, que solo ven el administrador y el financiero de la clínica.
 
 **Proveedores y otras personas**: nombre de proveedores y de quien paga o recibe valores de la clínica; de los proveedores registrados, también CPF o CNPJ, teléfonos y correo; en los extractos bancarios importados para conciliación, el nombre que el banco muestra en cada transacción.
 

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 19:45-0300\n"
+"POT-Creation-Date: 2026-10-30 19:58-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -496,6 +496,10 @@ msgstr "Recalls"
 msgid "Aniversariantes"
 msgstr "Birthdays"
 
+#
+msgid "Pessoal"
+msgstr "Staff"
+
 msgid "módulo"
 msgstr "module"
 
@@ -542,8 +546,9 @@ msgid "Módulo clínico desconhecido."
 msgstr "Unknown clinical module."
 
 #
-msgid "Orçamentos precisa do Financeiro habilitado."
-msgstr "Estimates need Finance turned on."
+#
+msgid "Orçamentos e Pessoal precisam do Financeiro habilitado."
+msgstr "Estimates and Staff need Finance turned on."
 
 msgid "Cadastre a clínica antes de configurar os módulos."
 msgstr "Register the clinic before configuring modules."
@@ -1778,6 +1783,131 @@ msgstr "A patient with a medical record cannot be deleted."
 msgid "Os dados do paciente de código %(codigo)s foram excluídos."
 msgstr "The data of patient code %(codigo)s was deleted."
 
+msgid "CPF"
+msgstr "CPF"
+
+#
+msgid "Salário"
+msgstr "Salary"
+
+msgid "Salário a partir de"
+msgstr "Salary from"
+
+#
+msgid "Novo salário"
+msgstr "New salary"
+
+#
+msgid "Só para um aumento ou mudança: o anterior fica no histórico."
+msgstr "Only for a raise or change: the previous one stays in the history."
+
+msgid "Em branco: a data de admissão ou hoje."
+msgstr "Blank: the hiring date, or today."
+
+#
+#
+msgid "Já existe um funcionário com este CPF."
+msgstr "An employee with this CPF already exists."
+
+msgid "Informe a partir de quando vale o novo salário."
+msgstr "Enter from when the new salary applies."
+
+#
+msgid "O desligamento não pode ser antes da admissão."
+msgstr "The leaving date cannot be before the hiring date."
+
+msgid "Horas extras"
+msgstr "Overtime"
+
+#
+msgid "Valor da hora extra"
+msgstr "Overtime hourly rate"
+
+msgid "No máximo 30 dias de falta."
+msgstr "At most 30 days of absence."
+
+msgid "cargo"
+msgstr "job title"
+
+#
+msgid "admissão"
+msgstr "hiring date"
+
+#
+msgid "desligamento"
+msgstr "leaving date"
+
+#
+msgid "funcionário"
+msgstr "employee"
+
+#
+msgid "funcionários"
+msgstr "employees"
+
+#
+msgid "salário"
+msgstr "salary"
+
+msgid "desde"
+msgstr "since"
+
+#
+msgid "salários"
+msgstr "salaries"
+
+msgid "competência"
+msgstr "month"
+
+msgid "O primeiro dia do mês."
+msgstr "The first day of the month."
+
+msgid "horas extras"
+msgstr "overtime hours"
+
+#
+msgid "valor da hora extra"
+msgstr "overtime hourly rate"
+
+#
+msgid "dias de falta"
+msgstr "days of absence"
+
+#
+#
+msgid "conta a pagar"
+msgstr "payable"
+
+#
+msgid "folha do mês"
+msgstr "month's pay"
+
+#
+msgid "folhas do mês"
+msgstr "months' pay"
+
+#, python-format
+msgid "O total de %(nome)s precisa ser maior que zero."
+msgstr "The total for %(nome)s must be greater than zero."
+
+#, python-format
+msgid "Salário %(mes)s"
+msgstr "Salary %(mes)s"
+
+#, python-format
+msgid "Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s."
+msgstr "Salary %(salario)s + overtime %(extras)s − absences %(faltas)s."
+
+#
+msgid "Folha salva."
+msgstr "Pay saved."
+
+#, python-format
+msgid "%(n)s conta a pagar criada no financeiro."
+msgid_plural "%(n)s contas a pagar criadas no financeiro."
+msgstr[0] "%(n)s payable created in finance."
+msgstr[1] "%(n)s payables created in finance."
+
 msgid "Este usuário já está ligado a outro profissional desta clínica."
 msgstr "This user is already linked to another practitioner in this clinic."
 
@@ -2321,6 +2451,14 @@ msgstr "Planning"
 #
 msgid "Fechamento"
 msgstr "Closing"
+
+#
+msgid "Folha do mês"
+msgstr "Month's pay"
+
+#
+msgid "Funcionários"
+msgstr "Employees"
 
 msgid "Tabela de procedimentos"
 msgstr "Procedure price list"
@@ -3321,7 +3459,10 @@ msgid ""
 "A meta de cada grupo do plano de contas para o ano, comparada com o que foi "
 "recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta "
 "proporcional aos dias do ano que já passaram."
-msgstr "The year's goal for each group of the chart of accounts, compared with what was received and paid (by payment date). “Expected so far” is the goal in proportion to the days of the year already gone."
+msgstr ""
+"The year's goal for each group of the chart of accounts, compared with what "
+"was received and paid (by payment date). “Expected so far” is the goal in "
+"proportion to the days of the year already gone."
 
 #
 msgid "Meta do ano"
@@ -3355,7 +3496,10 @@ msgid ""
 "Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não "
 "têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar "
 "duas vezes a meta de um subgrupo."
-msgstr "Leave a group without a goal blank. Copying only fills the groups that have no goal this year yet. The total adds the goals of the highest groups, without counting a subgroup's goal twice."
+msgstr ""
+"Leave a group without a goal blank. Copying only fills the groups that have "
+"no goal this year yet. The total adds the goals of the highest groups, "
+"without counting a subgroup's goal twice."
 
 #
 #
@@ -3900,9 +4044,6 @@ msgstr "CNPJ"
 msgid "Inscrição estadual"
 msgstr "State registration"
 
-msgid "CPF"
-msgstr "CPF"
-
 msgid "Nascimento"
 msgstr "Birth date"
 
@@ -4053,6 +4194,114 @@ msgstr "Age"
 
 msgid "Nenhum paciente encontrado."
 msgstr "No patients found."
+
+#, python-format
+msgid "Folha de %(mes)s"
+msgstr "Pay for %(mes)s"
+
+msgid ""
+"Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da "
+"hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. "
+"Encargos, férias e 13º ficam com o contador."
+msgstr "One line per employee working in the month. Overtime = hours × hourly rate (suggested: salary ÷ 220 × 1.5). Absences deduct salary ÷ 30 per day. Payroll taxes, vacations and the 13th salary stay with the accountant."
+
+#
+msgid "Funcionário"
+msgstr "Employee"
+
+#
+msgid "Valor da hora"
+msgstr "Hourly rate"
+
+msgid "Faltas (dias)"
+msgstr "Absences (days)"
+
+#
+msgid "no financeiro"
+msgstr "in finance"
+
+#
+msgid "Nenhum funcionário com salário neste mês."
+msgstr "No employee with a salary in this month."
+
+#
+#
+msgid "Cadastrar um funcionário"
+msgstr "Register an employee"
+
+#
+msgid "Total do mês"
+msgstr "Month's total"
+
+#
+msgid "Lançar no financeiro"
+msgstr "Launch into finance"
+
+msgid ""
+"Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. "
+"Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta "
+"no financeiro."
+msgstr "Each line not launched yet becomes a payable in the employee's name. Once launched, the line no longer changes here; to redo it, cancel the payable in finance."
+
+#
+msgid "Salvar e lançar no financeiro"
+msgstr "Save and launch into finance"
+
+#
+#
+msgid "Novo funcionário"
+msgstr "New employee"
+
+msgid "Cargo"
+msgstr "Job title"
+
+#
+msgid "Admissão"
+msgstr "Hired"
+
+#
+msgid "Desligamento"
+msgstr "Left"
+
+msgid "Salário atual"
+msgstr "Current salary"
+
+#
+msgid "Histórico de salários"
+msgstr "Salary history"
+
+#
+msgid "Nenhum salário registrado."
+msgstr "No salary registered."
+
+msgid "Folhas"
+msgstr "Monthly pay"
+
+#
+msgid "Faltas"
+msgstr "Absences"
+
+#
+msgid "No financeiro"
+msgstr "In finance"
+
+msgid "Em preparo"
+msgstr "Being prepared"
+
+#
+#
+msgid "Nenhuma folha ainda."
+msgstr "No monthly pay yet."
+
+#
+#
+msgid "Nenhum funcionário cadastrado."
+msgstr "No employees registered."
+
+msgid ""
+"Salário, horas extras e faltas viram contas a pagar na folha do mês. "
+"Encargos, férias e 13º ficam com o contador."
+msgstr "Salary, overtime and absences become payables in the month's pay. Payroll taxes, vacations and the 13th salary stay with the accountant."
 
 msgid "Excluir profissional"
 msgstr "Delete practitioner"

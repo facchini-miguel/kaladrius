@@ -152,6 +152,10 @@ def test_recepcao_nao_cadastra(clinica_a, criar_usuario, cliente_de):
 def test_some_com_o_financeiro_desligado(clinica_a, admin):
     lista = reverse(URL, args=["centros-de-custo"])
     assert lista in admin.get(reverse("inicio")).content.decode()
-    configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS})
+    configurar(
+        clinica_a,
+        MODULOS_GERAIS
+        - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS, ModuloClinico.PESSOAL},
+    )
     assert admin.get(lista).status_code == 403
     assert lista not in admin.get(reverse("inicio")).content.decode()

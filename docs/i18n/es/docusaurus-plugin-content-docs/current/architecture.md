@@ -37,6 +37,7 @@ apps/
   orcamentos/     presupuestos y tabla de procedimientos
   odontologia/    módulo de odontología (odontograma), solo con la especialidad Odontología activa
   convenios/      convenios y credenciales de los pacientes
+  pessoal/        empleados, salarios y sueldos del mes
   prontuario/     historia clínica: anamnesis de cada consulta y adendas (solo profesionales)
   rechamadas/     recordatorios y cumpleaños
   financeiro/     cuentas por cobrar y por pagar, caja, bancos, comisiones

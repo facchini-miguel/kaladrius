@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Privacy policy
 
-Version 2 · 10/30/2026
+Version 3 · 10/30/2026
 
 This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
@@ -37,6 +37,7 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 - Name, username, e-mail, access profile and language.
 - Logins and logouts, with date, time and IP address; history of who created, changed or deleted each record; login attempts with a wrong password (username typed and IP address).
 - For practitioners: professional license and commission percentage.
+- For employees registered in Staff: name, CPF, phone, job title, hiring and leaving dates, salary history, and each month's overtime and absences, which only the clinic's administrator and finance staff can see.
 
 **Suppliers and other people**: names of suppliers and of whoever pays or receives money from the clinic; for registered suppliers, also CPF or CNPJ, phone numbers and e-mail; in bank statements imported for reconciliation, the name the bank shows on each transaction.
 

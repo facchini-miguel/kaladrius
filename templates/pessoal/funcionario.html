@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n formatos %}
+
+{% block titulo %}{{ funcionario.nome }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <h1 class="h3 mb-0">{{ funcionario.nome }}{% if not funcionario.ativo %} <span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}</h1>
+  <div class="d-flex gap-2">
+    {% if pode.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'pessoal:editar' funcionario.pk %}">{% translate "Editar" %}</a>{% endif %}
+    <a class="btn btn-link" href="{% url 'pessoal:lista' %}">{% translate "Voltar à lista" %}</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">{% translate "Dados" %}</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ funcionario.cargo|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "CPF" %}</dt><dd class="col-sm-7">{{ funcionario.cpf|cpf_cnpj|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ funcionario.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+          {% if funcionario.desligamento %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ funcionario.desligamento|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
+          <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ funcionario.telefone|telefone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Salário atual" %}</dt><dd class="col-sm-7">{{ salario_atual|moeda|default:"—" }}</dd>
+        </dl>
+        {% if funcionario.observacoes %}<p class="mt-3 mb-0 text-body-secondary">{{ funcionario.observacoes|linebreaksbr }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header">{% translate "Histórico de salários" %}</div>
+      <ul class="list-group list-group-flush">
+        {% for salario in salarios %}
+        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salario.desde|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salario.valor|moeda }}</strong></li>
+        {% empty %}
+        <li class="list-group-item text-body-secondary">{% translate "Nenhum salário registrado." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-header">{% translate "Folhas" %}</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>{% translate "Mês" %}</th><th class="text-end">{% translate "Salário" %}</th><th class="text-end">{% translate "Horas extras" %}</th><th class="text-end">{% translate "Faltas" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
+      <tbody>
+        {% for folha in folhas %}
+        <tr>
+          <td><a href="{% url 'pessoal:folha' %}?mes={{ folha.competencia|date:'Y-m' }}">{{ folha.competencia|date:"m/Y" }}</a></td>
+          <td class="text-end text-nowrap">{{ folha.salario|moeda }}</td>
+          <td class="text-end text-nowrap">{{ folha.horas_extras }} h · {{ folha.valor_horas_extras|moeda }}</td>
+          <td class="text-end text-nowrap">{{ folha.faltas }} · − {{ folha.desconto_faltas|moeda }}</td>
+          <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
+          <td>{% if folha.lancada %}<a href="{% url 'financeiro:lancamento' folha.lancamento_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma folha ainda." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

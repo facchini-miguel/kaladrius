@@ -35,6 +35,8 @@ class Modulo(models.TextChoices):
     ORCAMENTOS = "orcamentos", _("Orçamentos")
     # Health plans and the patients' cards (decision 094).
     CONVENIOS = "convenios", _("Convênios")
+    # Staff, salaries and the month's pay (decision 099): administrators and Finance only.
+    PESSOAL = "pessoal", _("Pessoal")
 
 
 class Acao(models.TextChoices):
@@ -67,6 +69,7 @@ MATRIZ = {
     Papel.FINANCEIRO: {
         Modulo.RECEBIMENTOS: _TODAS,
         Modulo.FINANCEIRO: _TODAS,
+        Modulo.PESSOAL: _TODAS,
         Modulo.PACIENTES: _VER,
         Modulo.ORCAMENTOS: _VER,
         Modulo.PROFISSIONAIS: _VER,
@@ -99,6 +102,7 @@ MODULO_DA_CLINICA = {
     Modulo.FINANCEIRO: ModuloClinico.FINANCEIRO,
     Modulo.ORCAMENTOS: ModuloClinico.ORCAMENTOS,
     Modulo.CONVENIOS: ModuloClinico.CONVENIOS,
+    Modulo.PESSOAL: ModuloClinico.PESSOAL,
 }
 
 

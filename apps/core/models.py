@@ -140,12 +140,17 @@ class ModuloClinico(models.TextChoices):
     RECHAMADAS = "rechamadas", _("Rechamadas")
     ANIVERSARIANTES = "aniversariantes", _("Aniversariantes")
     CONVENIOS = "convenios", _("Convênios")
+    PESSOAL = "pessoal", _("Pessoal")
 
 
 ESPECIALIDADES = frozenset({ModuloClinico.ODONTOLOGIA, ModuloClinico.MEDICINA})
 MODULOS_GERAIS = frozenset(ModuloClinico) - ESPECIALIDADES
-# An approved estimate becomes a receivable, so estimates need finance turned on.
-DEPENDENCIAS = {ModuloClinico.ORCAMENTOS: frozenset({ModuloClinico.FINANCEIRO})}
+# An approved estimate becomes a receivable and a month's pay becomes a payable, so both
+# need finance turned on.
+DEPENDENCIAS = {
+    ModuloClinico.ORCAMENTOS: frozenset({ModuloClinico.FINANCEIRO}),
+    ModuloClinico.PESSOAL: frozenset({ModuloClinico.FINANCEIRO}),
+}
 
 
 class ModuloDaClinica(ModeloDaClinica):

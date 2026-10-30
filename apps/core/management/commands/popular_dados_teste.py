@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -15,6 +16,7 @@ from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
 from apps.pacientes.models import Paciente
+from apps.pessoal.models import Funcionario, Salario
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
 from apps.referencias.models import Cidade, EstadoCivil
@@ -101,6 +103,8 @@ class Command(BaseCommand):
             if not sem_agenda:
                 total_agendamentos = sum(self._agendamentos(clinica) for clinica in clinicas)
             total_rechamadas = sum(self._rechamadas(clinica) for clinica in clinicas)
+            for clinica in clinicas:
+                self._funcionarios(clinica)
 
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
         self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
@@ -202,6 +206,22 @@ class Command(BaseCommand):
             for numero, paciente in enumerate(pacientes, start=1)
             if sorteio.random() < 0.35
         )
+
+    def _funcionarios(self, clinica):
+        """Two made-up employees with a salary, for the month's pay (decision 099)."""
+        if Funcionario.objects.filter(clinica=clinica).exists():
+            return
+        admissao = timezone.localdate().replace(day=1) - datetime.timedelta(days=400)
+        for nome, cargo, salario in (
+            ("Lúcia Andrade (fictícia)", "Recepcionista", "2200.00"),
+            ("Paulo Teixeira (fictício)", "Auxiliar de saúde bucal", "2500.00"),
+        ):
+            funcionario = Funcionario.objects.create(
+                clinica=clinica, nome=nome, cargo=cargo, admissao=admissao
+            )
+            Salario.objects.create(
+                clinica=clinica, funcionario=funcionario, valor=Decimal(salario), desde=admissao
+            )
 
     def _agendamentos(self, clinica):
         """Fill ~60% of the weekday slots from 2 weeks ago to 4 weeks ahead."""

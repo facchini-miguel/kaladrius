@@ -37,6 +37,7 @@ apps/
   orcamentos/     estimates and price list
   odontologia/    dental module (dental chart), shown with the Dentistry specialty on
   convenios/      health plans and patients' cards
+  pessoal/        staff, salaries and the month's pay
   prontuario/     medical record: anamnesis per visit, addenda (practitioners only)
   rechamadas/     recalls and birthdays
   financeiro/     receivables, payables, cash, banks, commissions

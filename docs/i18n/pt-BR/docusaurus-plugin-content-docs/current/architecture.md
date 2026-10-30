@@ -37,6 +37,7 @@ apps/
   orcamentos/     orçamentos e tabela de procedimentos
   odontologia/    módulo de odontologia (odontograma), só com a especialidade Odontologia ligada
   convenios/      convênios e carteirinhas dos pacientes
+  pessoal/        funcionários, salários e folha do mês
   prontuario/     prontuário: anamnese de cada atendimento e adendos (só profissionais)
   rechamadas/     rechamadas e aniversariantes
   financeiro/     contas a receber e a pagar, caixa, bancos, comissões

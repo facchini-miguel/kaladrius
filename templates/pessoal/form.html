@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% if instancia.pk %}{{ instancia.nome }}{% else %}{% translate "Novo funcionário" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-4">{% if instancia.pk %}{{ instancia.nome }}{% else %}{% translate "Novo funcionário" %}{% endif %}</h1>
+<form method="post" style="max-width: 40rem;" novalidate>
+  {% csrf_token %}
+  {% include "includes/formulario.html" %}
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% if instancia.pk %}{% url 'pessoal:funcionario' instancia.pk %}{% else %}{% url 'pessoal:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
+</form>
+{% endblock %}

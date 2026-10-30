@@ -18,6 +18,7 @@ from apps.legado.anonimizacao import RECHAMADAS
 from apps.legado.dump import DumpInvalido, ler_tabelas
 from apps.legado.importacao import ImportacaoRecusada, _documento, importar
 from apps.pacientes.models import Paciente
+from apps.pessoal.models import Folha, Funcionario, Salario
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
 
@@ -395,3 +396,39 @@ def test_anonimizacao_das_carteirinhas(importado):
     (carteirinha,) = dados(clinica, Carteirinha)
     assert carteirinha.numero != "98765" and "Fulano" not in carteirinha.titular
     assert carteirinha.titular and (carteirinha.convenio, carteirinha.plano) == (convenio, "Básico")
+
+
+def test_anonimizacao_dos_funcionarios(importado):
+    _, clinica = importado
+    with usar_clinica(clinica):
+        funcionaria = Funcionario.objects.create(
+            nome="Fulana Funcionária", cpf="52998224725", telefone="4833334444"
+        )
+        Salario.objects.create(funcionario=funcionaria, valor=Decimal("2000"), desde=HOJE)
+        folha = Folha.objects.create(
+            funcionario=funcionaria,
+            competencia=HOJE.replace(day=1),
+            salario=Decimal("2000"),
+            observacao="Atestado da Fulana",
+        )
+        categoria = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).first()
+        folha.lancamento = servicos.criar_lancamento(
+            clinica=clinica,
+            tipo=Lancamento.Tipo.PAGAR,
+            pessoa=funcionaria.nome,
+            descricao="Salário",
+            categoria=categoria,
+            valor_total=Decimal("2000"),
+            parcelas=1,
+            primeiro_vencimento=HOJE,
+            usuario=None,
+        )
+        folha.save()
+    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+    (funcionaria,) = dados(clinica, Funcionario)
+    (folha,) = dados(clinica, Folha)
+    assert "Fulana" not in funcionaria.nome and funcionaria.cpf == ""
+    assert len(funcionaria.telefone) == 10 and folha.observacao == ""
+    with usar_clinica(clinica):
+        assert Lancamento.objects.get(pk=folha.lancamento_id).pessoa == funcionaria.nome
+        assert funcionaria.salario_em(HOJE) == Decimal("2000")

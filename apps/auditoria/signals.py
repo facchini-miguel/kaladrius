@@ -26,6 +26,7 @@ from apps.financeiro.models import (
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
 from apps.pacientes.models import Paciente
+from apps.pessoal.models import Folha, Funcionario, Salario
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
 
@@ -55,6 +56,9 @@ AUDITADOS = [
     Categoria,
     GrupoContabil,
     Planejamento,
+    Funcionario,
+    Salario,
+    Folha,
     CentroCusto,
     Fechamento,
     Caixa,

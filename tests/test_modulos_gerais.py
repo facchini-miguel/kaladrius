@@ -64,7 +64,7 @@ def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
 def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
     modulo, rota, texto_do_menu, clinica_a, admin, django_user_model, cliente_de
 ):
-    desligados = {modulo, M.ORCAMENTOS} if modulo == M.FINANCEIRO else {modulo}
+    desligados = {modulo, M.ORCAMENTOS, M.PESSOAL} if modulo == M.FINANCEIRO else {modulo}
     assert texto_do_menu in admin.get(reverse("inicio")).content.decode()
     configurar(clinica_a, sem(*desligados))
     assert texto_do_menu not in admin.get(reverse("inicio")).content.decode()
@@ -129,7 +129,7 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
     form = ClinicaForm(dados, instance=clinica_a)
     assert not form.is_valid()
     assert "modulos_gerais" in form.errors
-    dados["modulos_gerais"] = sorted(sem(M.FINANCEIRO, M.ORCAMENTOS))
+    dados["modulos_gerais"] = sorted(sem(M.FINANCEIRO, M.ORCAMENTOS, M.PESSOAL))
     assert ClinicaForm(dados, instance=clinica_a).is_valid()
 
 
@@ -202,8 +202,9 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
                 "codigo", flat=True
             )
         )
-        assert ligados == {"medicina", *MODULOS_GERAIS}
-        assert Modulo.objects.filter(clinica_id=clinica.pk).count() == len(ModuloClinico)
+        # Pessoal came later (core 0012), so it is not part of this step.
+        assert ligados == {"medicina", *MODULOS_GERAIS} - {"pessoal"}
+        assert Modulo.objects.filter(clinica_id=clinica.pk).count() == len(ModuloClinico) - 1
     finally:
         MigrationExecutor(connection).migrate(folhas)
 

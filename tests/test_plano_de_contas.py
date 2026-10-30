@@ -141,7 +141,8 @@ def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
     anterior = [("financeiro", "0011_fechamento")]
     try:
         executor.migrate(anterior)
-        estado = [folha for folha in folhas if folha[0] != "financeiro"] + anterior
+        # Pessoal depends on the newer finance, so it is rolled back along with it.
+        estado = [f for f in folhas if f[0] not in ("financeiro", "pessoal")] + anterior
         apps = executor.loader.project_state(estado).apps
         clinica = apps.get_model("core", "Clinica").objects.create(nome="Clínica fictícia antiga")
         Categoria = apps.get_model("financeiro", "Categoria")

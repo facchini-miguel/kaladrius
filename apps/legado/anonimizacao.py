@@ -33,6 +33,7 @@ from apps.financeiro.models import (
 )
 from apps.orcamentos.models import Orcamento
 from apps.pacientes.models import Paciente
+from apps.pessoal.models import Folha, Funcionario
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
 
@@ -199,6 +200,27 @@ class _Anonimizador:
         Profissional.objects.bulk_update(profissionais, ["nome", "registro"])
         self.resultado.profissionais = len(profissionais)
 
+    def funcionarios(self):
+        """Staff are people: name, CPF, phone and notes go. Salaries stay (no longer tied to
+        a person), and the payables of their pay show the new names."""
+        fake = self.fake
+        funcionarios = list(Funcionario.objects.filter(clinica=self.clinica))
+        for funcionario in funcionarios:
+            funcionario.nome = self._nome(self.sorte.choice("FM"))
+            funcionario.cpf = ""
+            funcionario.telefone = _mesmo_tamanho(funcionario.telefone, fake)
+            funcionario.observacoes = ""
+        Funcionario.objects.bulk_update(
+            funcionarios, ["nome", "cpf", "telefone", "observacoes"], batch_size=500
+        )
+        Folha.objects.filter(clinica=self.clinica).update(observacao="")
+        for folha in (
+            Folha.objects.filter(clinica=self.clinica)
+            .exclude(lancamento=None)
+            .select_related("funcionario", "lancamento")
+        ):
+            Lancamento.objects.filter(pk=folha.lancamento_id).update(pessoa=folha.funcionario.nome)
+
     def fornecedores(self):
         """A supplier who is a person is personal data; any supplier's contacts may be."""
         fake = self.fake
@@ -253,6 +275,7 @@ class _Anonimizador:
                 Agendamento,
                 Rechamada,
                 Carteirinha,
+                Funcionario,
                 Profissional,
                 Lancamento,
                 Parcela,
@@ -277,6 +300,7 @@ class _Anonimizador:
             self.agendamentos(nomes)
             self.fornecedores()
             self.financeiro()
+            self.funcionarios()
             self.rechamadas()
             self.carteirinhas()
             self.profissionais()

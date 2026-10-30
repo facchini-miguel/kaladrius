@@ -56,7 +56,7 @@ def configurar(clinica, codigos):
     if not codigos <= set(ModuloClinico.values):
         raise ValidationError(_("Módulo clínico desconhecido."))
     if faltando(codigos):
-        raise ValidationError(_("Orçamentos precisa do Financeiro habilitado."))
+        raise ValidationError(_("Orçamentos e Pessoal precisam do Financeiro habilitado."))
     if clinica.pk is None:
         raise ValidationError(_("Cadastre a clínica antes de configurar os módulos."))
     Clinica.objects.select_for_update().get(pk=clinica.pk)
