@@ -11,7 +11,7 @@ En **Pacientes > Presupuestos**, el profesional, la recepción y el administrado
 2. En **Agregar procedimiento**, haga clic en los **dientes** del odontograma (la cantidad acompaña el número de dientes), elija el **procedimiento** de la tabla y, si quiere, las **caras o región** (por ejemplo, MOD o "arcada superior"). Sin descripción ni valor, valen los de la tabla; para un ítem fuera de la tabla, escriba la descripción y el valor.
 3. Repita para cada procedimiento. Para quitar un ítem, haga clic en **quitar**.
 
-El odontograma, los dientes y las caras solo aparecen cuando el área de la clínica es **Odontología** ([Configuración de la clínica](clinica.md)); en las otras áreas, el ítem es procedimiento, descripción, cantidad y valor. El **odontograma** usa la numeración FDI: dientes superiores arriba, inferiores abajo y dientes de leche en las filas del medio, con la derecha del paciente a la izquierda de la pantalla. Un presupuesto sin dientes vale para toda la boca.
+El odontograma, los dientes y las caras solo aparecen cuando la clínica tiene **Odontología** activa ([Configuración de la clínica](clinica.md)); sin ella, el ítem es procedimiento, descripción, cantidad y valor. El **odontograma** usa la numeración FDI: dientes superiores arriba, inferiores abajo y dientes de leche en las filas del medio, con la derecha del paciente a la izquierda de la pantalla. Un presupuesto sin dientes vale para toda la boca.
 
 Quien escribe el presupuesto (recepción, profesional o administrador) puede dar **descuento** sobre el total.
 

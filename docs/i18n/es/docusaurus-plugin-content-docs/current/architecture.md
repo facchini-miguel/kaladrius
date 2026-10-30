@@ -31,11 +31,12 @@ Django + PostgreSQL ──────┤
 ```
 config/           configuración, URLs, API
 apps/
-  core/           clínicas, usuarios, vínculos, permisos, pantalla de inicio
+  core/           clínicas, módulos activados/desactivados, usuarios, vínculos, permisos, pantalla de inicio
   agenda/         agenda y asistencia
   pacientes/      pacientes
   orcamentos/     presupuestos y tabla de procedimientos
-  odontologia/    módulo de odontología (odontograma), solo en el área Odontología
+  odontologia/    módulo de odontología (odontograma), solo con la especialidad Odontología activa
+  convenios/      convenios y credenciales de los pacientes
   prontuario/     historia clínica: anamnesis de cada consulta y adendas (solo profesionales)
   rechamadas/     recordatorios y cumpleaños
   financeiro/     cuentas por cobrar y por pagar, caja, bancos, comisiones

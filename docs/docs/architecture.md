@@ -31,11 +31,12 @@ Django + PostgreSQL ──────┤
 ```
 config/           settings, URLs, API
 apps/
-  core/           clinics, users, memberships, permissions, home page
+  core/           clinics, modules turned on/off, users, memberships, permissions, home page
   agenda/         schedule and attendance
   pacientes/      patients
   orcamentos/     estimates and price list
-  odontologia/    dental module (dental chart), shown in the Dentistry area
+  odontologia/    dental module (dental chart), shown with the Dentistry specialty on
+  convenios/      health plans and patients' cards
   prontuario/     medical record: anamnesis per visit, addenda (practitioners only)
   rechamadas/     recalls and birthdays
   financeiro/     receivables, payables, cash, banks, commissions

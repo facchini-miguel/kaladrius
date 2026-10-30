@@ -11,8 +11,8 @@ Una instalación atiende a **una clínica**. Para atender a otra clínica, insta
 
 ## 1. Registre la clínica
 
-1. Ingrese con el superusuario. En el primer acceso, el sistema pide los datos de la clínica: nombre, **área** (Odontología, Medicina u otra área de la salud) y, si quiere, CPF/CNPJ, e-mail, teléfono y dirección.
-2. Guarde. La clínica empieza con **tipos de atención** (de odontología en Odontología, generales en las otras áreas) y **categorías y cuentas** de finanzas predeterminados, que la clínica puede cambiar. El horario de la agenda (inicio, fin y duración de cada turno) y el área están en **Registros > Configuración de la clínica**.
+1. Ingrese con el superusuario. En el primer acceso, el sistema pide los datos de la clínica: nombre, **área principal** (Odontología, Medicina u otra área de la salud), las **especialidades** usadas (Odontología, Medicina o las dos) y, si quiere, CPF/CNPJ, e-mail, teléfono y dirección.
+2. Guarde. La clínica empieza con **tipos de atención** (de odontología en Odontología, generales en las otras áreas) y **categorías y cuentas** de finanzas predeterminados, que la clínica puede cambiar, y con todos los módulos comunes activos. El horario de la agenda (inicio, fin y duración de cada turno), las especialidades y los módulos están en **Registros > Configuración de la clínica**.
 
 ## 2. Cree el administrador de la clínica
 

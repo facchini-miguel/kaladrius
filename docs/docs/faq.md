@@ -7,7 +7,7 @@ title: FAQ and troubleshooting
 
 ## Is it only for dentists?
 
-No. Schedule, patients, recalls, estimates and finance serve any clinic. The clinic chooses its **area** (Dentistry, Medicine or another health area) in Clinic settings: the dental parts, such as the dental chart in estimates, are a module that only appears in Dentistry.
+No. Schedule, patients, recalls, estimates and finance serve any clinic. In Clinic settings, the clinic turns on **Dentistry**, **Medicine** or both (or neither, for another health area): the dental parts, such as the dental chart in estimates, only appear with Dentistry on. The shared modules (schedule, medical record, estimates, finance, recalls, birthdays, health plans) can also be turned off one by one.
 
 ## How much does it cost?
 

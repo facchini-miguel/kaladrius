@@ -11,8 +11,8 @@ One installation serves **one clinic**. To serve another clinic, install the sys
 
 ## 1. Register the clinic
 
-1. Log in with the superuser. On the first access, the system asks for the clinic: name, **area** (Dentistry, Medicine or another health area) and, if you want, CPF/CNPJ, e-mail, phone and address.
-2. Save. The clinic starts with default **appointment types** (dental ones in Dentistry, general ones in the other areas) and finance **categories and accounts**, which the clinic can change. The schedule hours (start, end, length of each slot) and the area are in **Records > Clinic settings**.
+1. Log in with the superuser. On the first access, the system asks for the clinic: name, **primary area** (Dentistry, Medicine or another health area), the **specialties** in use (Dentistry, Medicine or both) and, if you want, CPF/CNPJ, e-mail, phone and address.
+2. Save. The clinic starts with default **appointment types** (dental ones in Dentistry, general ones in the other areas) and finance **categories and accounts**, which the clinic can change, and with every shared module on. The schedule hours (start, end, length of each slot), the specialties and the modules are in **Records > Clinic settings**.
 
 ## 2. Create the clinic's administrator
 

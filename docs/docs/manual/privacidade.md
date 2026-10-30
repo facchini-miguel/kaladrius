@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Privacy policy
 
-Version 1 · 10/27/2026
+Version 2 · 10/30/2026
 
 This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
@@ -25,7 +25,8 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 
 **Patients**
 - Identification: name, CPF or CNPJ (Brazilian tax numbers), RG (ID card), date of birth, sex and occupation.
-- Contact: phone numbers, e-mail and address.
+- Contact: phone numbers, WhatsApp, e-mail and address.
+- Health plan: the plan, plan type, card number, valid until and, for a dependent, the plan holder's name.
 - Care: appointments (date, practitioner, type of appointment and notes), recalls, treatment estimates, with the procedures and teeth involved, and the **medical record** (the anamnesis of each visit: complaints, health history, examination and plan, with certificates, prescriptions, exam requests and attached files such as exam results and photos), which only the clinic's practitioners can see. These are **health data**, which the law treats as sensitive.
 - Finance: amounts, installments, payments (date, method and account; for cards, only the brand, number of installments and transaction code, **never the card number**) and receipts.
 - Notes written by the team during care.
@@ -37,7 +38,7 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 - Logins and logouts, with date, time and IP address; history of who created, changed or deleted each record; login attempts with a wrong password (username typed and IP address).
 - For practitioners: professional license and commission percentage.
 
-**Suppliers and other people**: names of suppliers and of whoever pays or receives money from the clinic; in bank statements imported for reconciliation, the name the bank shows on each transaction.
+**Suppliers and other people**: names of suppliers and of whoever pays or receives money from the clinic; for registered suppliers, also CPF or CNPJ, phone numbers and e-mail; in bank statements imported for reconciliation, the name the bank shows on each transaction.
 
 The clinic asks only for the data needed for the purposes in section 4. The data is provided by the data subject or the guardian, or written down by the team during care. Keeping it correct helps the clinic treat you well: let it know when something changes.
 

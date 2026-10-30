@@ -4,6 +4,69 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.37.0
+  data: 2026-10-30
+  titulo:
+    pt-br: Módulos que ligam e desligam, fornecedores e convênios
+    en: Modules you turn on and off, suppliers and health plans
+    es: Módulos que se activan y desactivan, proveedores y convenios
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Nas Configurações da clínica, ligue só Odontologia, só Medicina ou as duas, e desligue
+          os módulos que a clínica não usa (agenda, prontuário, orçamentos, financeiro,
+          rechamadas, aniversariantes, convênios). Desligar não apaga nada.
+        en: >
+          In Clinic settings, turn on only Dentistry, only Medicine or both, and turn off the
+          modules the clinic does not use (schedule, medical record, estimates, finance, recalls,
+          birthdays, health plans). Turning one off deletes nothing.
+        es: >
+          En la Configuración de la clínica, active solo Odontología, solo Medicina o las dos, y
+          desactive los módulos que la clínica no usa (agenda, historia clínica, presupuestos,
+          financiero, recordatorios, cumpleaños, convenios). Desactivar no borra nada.
+    - tipo: novo
+      modulo: Convênios
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cadastro de convênios em Cadastros > Convênios e carteirinhas na ficha do paciente,
+          com plano, número e validade. A ficha avisa quando a carteirinha está vencida.
+        en: >
+          Health plans in Records > Health plans and cards on the patient record, with the plan
+          type, number and valid-until date. The record warns when a card has expired.
+        es: >
+          Registro de convenios en Registros > Convenios y credenciales en la ficha del paciente,
+          con plan, número y validez. La ficha avisa cuando la credencial está vencida.
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cadastro de fornecedores em Cadastros > Fornecedores. Na nova despesa, escolha o
+          fornecedor; a ficha dele mostra o valor em aberto e todas as contas a pagar.
+        en: >
+          Suppliers in Records > Suppliers. Choose the supplier on a new expense; the supplier's
+          page shows the outstanding amount and all their payables.
+        es: >
+          Registro de proveedores en Registros > Proveedores. En el nuevo gasto, elija el
+          proveedor; su ficha muestra el valor pendiente y todas sus cuentas por pagar.
+    - tipo: melhoria
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Novo campo WhatsApp no cadastro do paciente. A ficha e as rechamadas da tela inicial
+          ganham um link que abre a conversa.
+        en: >
+          New WhatsApp field on the patient form. The patient record and the recalls on the home
+          page get a link that opens the chat.
+        es: >
+          Nuevo campo WhatsApp en el registro del paciente. La ficha y los recordatorios de la
+          pantalla de inicio tienen un enlace que abre la conversación.
+
 - versao: 0.36.0
   data: 2026-10-29
   titulo:

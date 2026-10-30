@@ -7,7 +7,7 @@ title: Preguntas frecuentes y problemas
 
 ## ¿Es solo para dentistas?
 
-No. Agenda, pacientes, recordatorios, presupuestos y finanzas sirven para cualquier clínica. La clínica elige su **área** (Odontología, Medicina u otra área de la salud) en la Configuración de la clínica: las partes de odontología, como el odontograma en los presupuestos, son un módulo que solo aparece en Odontología.
+No. Agenda, pacientes, recordatorios, presupuestos y finanzas sirven para cualquier clínica. En la Configuración de la clínica, la clínica activa **Odontología**, **Medicina** o las dos (o ninguna, en otra área de la salud): las partes de odontología, como el odontograma en los presupuestos, solo aparecen con Odontología activa. Los módulos comunes (agenda, historia clínica, presupuestos, financiero, recordatorios, cumpleaños, convenios) también pueden desactivarse uno a uno.
 
 ## ¿Cuánto cuesta?
 

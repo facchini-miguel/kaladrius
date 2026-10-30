@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidad
 
-Versión 1 · 27/10/2026
+Versión 2 · 30/10/2026
 
 Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
@@ -25,7 +25,8 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 
 **Pacientes**
 - Identificación: nombre, CPF o CNPJ (números fiscales de Brasil), RG (documento de identidad), fecha de nacimiento, sexo y profesión.
-- Contacto: teléfonos, correo y dirección.
+- Contacto: teléfonos, WhatsApp, correo y dirección.
+- Convenio: el convenio, el plan, el número de la credencial, la validez y, para un dependiente, el nombre del titular del plan.
 - Atención: turnos (fecha, profesional, tipo de atención y observaciones), recordatorios, presupuestos, con los procedimientos y los dientes involucrados, y la **historia clínica** (la anamnesis de cada consulta: motivos, antecedentes de salud, examen y conducta, con certificados, recetas, solicitudes de exámenes y archivos adjuntos, como resultados de exámenes y fotos), que solo los profesionales de la clínica pueden ver. Son **datos de salud**, que la ley trata como sensibles.
 - Financiero: valores, cuotas, pagos (fecha, forma y cuenta; en tarjeta, solo la marca, el número de cuotas y el código de la transacción, **nunca el número de la tarjeta**) y recibos.
 - Observaciones anotadas por el equipo durante la atención.
@@ -37,7 +38,7 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 - Registro de entradas y salidas del sistema, con fecha, hora y dirección IP; historial de quién creó, modificó o eliminó cada registro; intentos de entrada con contraseña incorrecta (usuario escrito y dirección IP).
 - De los profesionales: matrícula profesional y porcentaje de comisión.
 
-**Proveedores y otras personas**: nombre de proveedores y de quien paga o recibe valores de la clínica; en los extractos bancarios importados para conciliación, el nombre que el banco muestra en cada transacción.
+**Proveedores y otras personas**: nombre de proveedores y de quien paga o recibe valores de la clínica; de los proveedores registrados, también CPF o CNPJ, teléfonos y correo; en los extractos bancarios importados para conciliación, el nombre que el banco muestra en cada transacción.
 
 La clínica pide solo los datos necesarios para las finalidades de la sección 4. Los datos los informa el propio titular o su responsable, o los anota el equipo durante la atención. Mantenerlos correctos ayuda a la clínica a atenderlo bien: avise cuando algo cambie.
 

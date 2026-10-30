@@ -11,8 +11,8 @@ Uma instalação atende **uma clínica**. Para atender outra clínica, instale o
 
 ## 1. Cadastre a clínica
 
-1. Entre com o superusuário. No primeiro acesso, o sistema pede os dados da clínica: nome, **área** (Odontologia, Medicina ou outra área da saúde) e, se quiser, CPF/CNPJ, e-mail, telefone e endereço.
-2. Salve. A clínica já começa com **tipos de atendimento** (de dentista na Odontologia, gerais nas outras áreas) e **categorias e contas** do financeiro padrão, que a clínica pode alterar. O horário da agenda (início, fim e duração de cada horário) e a área ficam em **Cadastros > Configurações da clínica**.
+1. Entre com o superusuário. No primeiro acesso, o sistema pede os dados da clínica: nome, **área principal** (Odontologia, Medicina ou outra área da saúde), as **especialidades** usadas (Odontologia, Medicina ou as duas) e, se quiser, CPF/CNPJ, e-mail, telefone e endereço.
+2. Salve. A clínica já começa com **tipos de atendimento** (de dentista na Odontologia, gerais nas outras áreas) e **categorias e contas** do financeiro padrão, que a clínica pode alterar, e com todos os módulos comuns ligados. O horário da agenda (início, fim e duração de cada horário), as especialidades e os módulos ficam em **Cadastros > Configurações da clínica**.
 
 ## 2. Crie o administrador da clínica
 
