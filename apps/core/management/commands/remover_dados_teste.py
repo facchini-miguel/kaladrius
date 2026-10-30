@@ -12,6 +12,7 @@ from apps.core.models import Clinica, ModuloDaClinica
 from apps.financeiro.models import (
     Caixa,
     Categoria,
+    CentroCusto,
     Comissao,
     Conta,
     Fornecedor,
@@ -93,6 +94,7 @@ class Command(BaseCommand):
                 TipoAtendimento,
                 Conta,
                 Categoria,
+                CentroCusto,
                 ModuloDaClinica,
             ):
                 modelo.objects.filter(clinica__in=clinicas).delete()

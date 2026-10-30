@@ -31,6 +31,7 @@ from . import comissoes, conciliacao, servicos
 from .forms import (
     AbrirCaixaForm,
     CategoriaForm,
+    CentroCustoForm,
     ContaForm,
     FecharCaixaForm,
     FornecedorForm,
@@ -48,6 +49,7 @@ from .models import (
     ZERO,
     Caixa,
     Categoria,
+    CentroCusto,
     Comissao,
     Conta,
     Fornecedor,
@@ -144,6 +146,7 @@ def lancamento_novo(request):
             pessoa="" if dados["paciente"] else dados["pessoa"].strip(),
             descricao=dados["descricao"],
             categoria=dados["categoria"],
+            centro_custo=dados.get("centro_custo"),
             profissional=dados["profissional"],
             observacoes=dados["observacoes"],
             valor_total=dados["valor_total"],
@@ -185,6 +188,7 @@ def despesa_nova(request):
             pessoa=dados["pessoa"].strip(),
             descricao=dados["descricao"],
             categoria=dados["categoria"],
+            centro_custo=dados.get("centro_custo"),
             observacoes=dados["observacoes"],
             valor_total=form.valor_total(),
             parcelas=dados["parcelas"],
@@ -208,7 +212,8 @@ def despesa_nova(request):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def lancamento(request, pk):
     lancamento = get_object_or_404(
-        Lancamento.objects.select_related("paciente", "categoria", "profissional"), pk=pk
+        Lancamento.objects.select_related("paciente", "categoria", "centro_custo", "profissional"),
+        pk=pk,
     )
     _exigir(request, lancamento.tipo, Acao.VER)
     hoje = timezone.localdate()
@@ -513,12 +518,13 @@ def relatorios(request):
     )
 
 
-# --- Accounts and categories (administrators) -----------------------------------------
+# --- Accounts, categories and cost centers (administrators) ----------------------------
 
 
 CADASTROS = {
     "categorias": (Categoria, CategoriaForm),
     "contas": (Conta, ContaForm),
+    "centros-de-custo": (CentroCusto, CentroCustoForm),
 }
 
 

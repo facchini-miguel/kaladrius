@@ -62,7 +62,7 @@ En **Financiero > Flujo de caja**, elija el período y si quiere verlo por **dí
 Abajo aparece el **saldo actual de cada cuenta**. Para que coincida con el banco y la caja, indique el **saldo inicial** de cada cuenta en **Registros > Cuentas** (cuánto había antes del primer registro en el sistema).
 
 ## Informes (administrador)
-En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría. Los pagos revertidos y las cuentas canceladas quedan fuera.
+En **Financiero > Informes**, para el período elegido: total cobrado, total pagado y el resultado; cobrado por forma de pago, por categoría y por profesional; y gastos pagados por categoría; con centros de costo registrados, también lo cobrado y lo pagado por **centro de costo**, con una línea "Sin centro de costo". Los pagos revertidos y las cuentas canceladas quedan fuera.
 
 ## Extracto bancario (administrador)
 En **Financiero > Extracto bancario**, importe el extracto de la cuenta, descargado del sitio o la aplicación del banco en formato **OFX** (a veces llamado "Money"). Elija la cuenta del sistema (por ejemplo, Banco) y el archivo. Las transacciones ya importadas se omiten, así que puede importar períodos que se superponen. Si alguna línea del archivo no tiene fecha o importe legible, el sistema avisa cuántas quedaron fuera: revíselas en el extracto del banco.
@@ -87,6 +87,9 @@ Cada cobro entra en una comisión una sola vez. Si un cobro ya comisionado se **
 
 ## Proveedores
 En **Registros > Proveedores**, registre a quién la clínica compra o paga: persona física o jurídica, nombre, razón social, CPF/CNPJ, teléfono, WhatsApp, correo electrónico y observaciones. El sistema verifica el CPF o CNPJ y no permite registrar dos veces el mismo documento. La ficha del proveedor muestra cuánto está **pendiente** y todas sus cuentas por pagar, y tiene el botón **Nuevo gasto**, que ya viene con él elegido. En las listas, el nombre del proveedor lleva a su ficha. Para dejar de usar un proveedor sin perder el historial, desmarque **activo**: sale del formulario de nuevo gasto, y las cuentas antiguas siguen vinculadas a él.
+
+## Centros de costo
+El centro de costo indica **para quién** es cada ingreso o gasto: un consultorio, una especialidad, la administración. La categoría sigue indicando **qué** es (alquiler, material). En **Registros > Centros de costo**, el administrador registra los centros. En cuanto haya uno activo, el campo **Centro de costo** aparece en el nuevo registro y en el nuevo gasto (es opcional), y los informes muestran los cuadros por centro de costo. Los registros antiguos quedan sin centro. Para dejar de usar un centro sin perder el historial, desmarque **activo**.
 
 ## Categorías y cuentas
 En **Registros > Categorías** y **Registros > Cuentas**, el administrador crea nuevas categorías (ingresos y gastos) y cuentas (caja, banco, terminal de tarjetas). Para dejar de usar una sin perder el historial, desmarque **activa**.

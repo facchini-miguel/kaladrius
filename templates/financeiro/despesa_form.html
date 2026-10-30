@@ -14,7 +14,10 @@
   </div>
   {% with campo=form.pessoa %}{% include "includes/campo.html" %}{% endwith %}
   <p class="text-body-secondary small"><a href="{% url 'financeiro:fornecedor_novo' %}">{% translate "Cadastrar um fornecedor novo" %}</a></p>
-  {% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}
+  <div class="row">
+    <div class="col-md-{% if form.centro_custo %}8{% else %}12{% endif %}">{% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
+    {% if form.centro_custo %}<div class="col-md-4">{% with campo=form.centro_custo %}{% include "includes/campo.html" %}{% endwith %}</div>{% endif %}
+  </div>
   <div class="row">
     <div class="col-md-4">{% with campo=form.valor %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-8">{% with campo=form.modo %}{% include "includes/campo.html" %}{% endwith %}</div>

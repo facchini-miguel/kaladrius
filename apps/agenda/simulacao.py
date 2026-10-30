@@ -141,7 +141,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
     from decimal import Decimal
 
     from apps.financeiro import servicos
-    from apps.financeiro.models import Categoria, Conta, Lancamento, Pagamento
+    from apps.financeiro.models import Categoria, CentroCusto, Conta, Lancamento, Pagamento
 
     pacientes = _pacientes(clinica)
     categorias = list(Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.RECEITA))
@@ -151,6 +151,11 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
         return 0, 0
     hoje = timezone.localdate()
     formas = [forma for forma, _rotulo in Pagamento.Forma.choices]
+    # Two cost centers (decision 095): the care itself and the office.
+    centros = {
+        nome: CentroCusto.objects.get_or_create(clinica=clinica, nome=nome)[0]
+        for nome in ("Atendimento", "Administrativo")
+    }
     criados = 0
     for _ in range(quantidade):
         data = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
@@ -160,6 +165,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
             paciente=sorteio.choice(pacientes),
             descricao=sorteio.choice(DESCRICOES_FINANCEIRAS),
             categoria=sorteio.choice(categorias),
+            centro_custo=centros["Atendimento"],
             profissional=sorteio.choice(profissionais) if profissionais else None,
             valor_total=Decimal(sorteio.randrange(150, 3000, 10)),
             data=data,
@@ -178,7 +184,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
                     conta=sorteio.choice(contas),
                 )
         criados += 1
-    return criados, _simular_despesas(clinica, sorteio, contas, usuario)
+    return criados, _simular_despesas(clinica, sorteio, contas, usuario, centros)
 
 
 # Fake payables: (supplier, description, category, amount, monthly repetitions or None).
@@ -191,7 +197,10 @@ DESPESAS_SIMULADAS = [
 ]
 
 
-def _simular_despesas(clinica, sorteio, contas, usuario):
+DESPESAS_DO_ATENDIMENTO = {"Material odontológico", "Laboratório de prótese"}
+
+
+def _simular_despesas(clinica, sorteio, contas, usuario, centros):
     """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
     from decimal import Decimal
 
@@ -217,6 +226,9 @@ def _simular_despesas(clinica, sorteio, contas, usuario):
             pessoa=fornecedor,
             descricao=descricao,
             categoria=categorias[categoria],
+            centro_custo=centros[
+                "Atendimento" if categoria in DESPESAS_DO_ATENDIMENTO else "Administrativo"
+            ],
             valor_total=valor * parcelas if meses else valor,
             data=inicio,
             parcelas=parcelas,

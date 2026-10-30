@@ -7,7 +7,7 @@ from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, some
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
-from .models import Categoria, Conta, Fornecedor, Lancamento, Pagamento
+from .models import Categoria, CentroCusto, Conta, Fornecedor, Lancamento, Pagamento
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
@@ -25,6 +25,15 @@ def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
 
 
 DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+
+
+def _centros_de_custo(form):
+    """The cost center field shows up only once the clinic has one (decision 095)."""
+    centros = CentroCusto.objects.filter(ativo=True)
+    if centros.exists():
+        form.fields["centro_custo"].queryset = centros
+    else:
+        del form.fields["centro_custo"]
 
 
 class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
@@ -49,7 +58,15 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Lancamento
-        fields = ["paciente", "pessoa", "descricao", "categoria", "profissional", "observacoes"]
+        fields = [
+            "paciente",
+            "pessoa",
+            "descricao",
+            "categoria",
+            "centro_custo",
+            "profissional",
+            "observacoes",
+        ]
         widgets = {
             "paciente": forms.HiddenInput,
             "observacoes": forms.Textarea(attrs={"rows": 2}),
@@ -66,6 +83,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         )
         self.fields["profissional"].queryset = Profissional.objects.filter(ativo=True)
         self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        _centros_de_custo(self)
 
     def clean(self):
         dados = super().clean()
@@ -110,7 +128,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Lancamento
-        fields = ["fornecedor", "pessoa", "descricao", "categoria", "observacoes"]
+        fields = ["fornecedor", "pessoa", "descricao", "categoria", "centro_custo", "observacoes"]
         labels = {"pessoa": _("Fornecedor sem cadastro")}
         help_texts = {"pessoa": _("Só para um pagamento avulso, sem cadastrar o fornecedor.")}
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 2})}
@@ -124,6 +142,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
             tipo=Categoria.Tipo.DESPESA, ativa=True
         )
         self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        _centros_de_custo(self)
 
     def clean(self):
         dados = super().clean()
@@ -271,6 +290,18 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
         if repetida.exclude(pk=self.instance.pk).exists():
             self.add_error("nome", _("Já existe uma categoria com este nome."))
         return dados
+
+
+class CentroCustoForm(FormularioBootstrap, forms.ModelForm):
+    class Meta:
+        model = CentroCusto
+        fields = ["nome", "ativo"]
+
+    def clean_nome(self):
+        nome = self.cleaned_data["nome"].strip()
+        if CentroCusto.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_("Já existe um centro de custo com este nome."))
+        return nome
 
 
 class ContaForm(FormularioBootstrap, forms.ModelForm):

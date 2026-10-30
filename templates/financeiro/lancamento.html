@@ -9,7 +9,7 @@
     <h1 class="h3 mb-0">{{ lancamento.descricao }}</h1>
     <span class="text-body-secondary">
       {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' lancamento.paciente_id %}">{{ lancamento.paciente.nome }}</a>{% elif lancamento.fornecedor_id %}<a href="{% url 'financeiro:fornecedor' lancamento.fornecedor_id %}">{{ lancamento.pessoa }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
-      · {{ lancamento.categoria }}{% if lancamento.profissional %} · {{ lancamento.profissional.nome }}{% endif %}
+      · {{ lancamento.categoria }}{% if lancamento.centro_custo %} · {{ lancamento.centro_custo }}{% endif %}{% if lancamento.profissional %} · {{ lancamento.profissional.nome }}{% endif %}
       {% if comissao %} · <a href="{% url 'financeiro:comissao' comissao.pk %}">{% translate "Extrato da comissão" %}</a>{% endif %}
       · {{ lancamento.data|date:"SHORT_DATE_FORMAT" }}
     </span>

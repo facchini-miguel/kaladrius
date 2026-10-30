@@ -72,6 +72,27 @@ class Categoria(ModeloDaClinica):
         return self.nome
 
 
+class CentroCusto(ModeloDaClinica):
+    """Who in the clinic an entry is for (decision 095): a room, a specialty, the office.
+
+    Optional on every entry, one per entry (no split across centers yet).
+    """
+
+    nome = models.CharField(_("nome"), max_length=60)
+    ativo = models.BooleanField(_("ativo"), default=True)
+
+    class Meta:
+        verbose_name = _("centro de custo")
+        verbose_name_plural = _("centros de custo")
+        ordering = ["nome"]
+        constraints = [
+            models.UniqueConstraint(fields=["clinica", "nome"], name="centro_custo_unico")
+        ]
+
+    def __str__(self):
+        return self.nome
+
+
 # Accounts and categories every new clinic starts with (it can add, rename or deactivate).
 CONTAS_PADRAO = [("Caixa", Conta.Tipo.DINHEIRO), ("Banco", Conta.Tipo.BANCO)]
 CATEGORIAS_PADRAO = [
@@ -151,6 +172,14 @@ class Lancamento(ModeloDaClinica):
     descricao = models.CharField(_("descrição"), max_length=200)
     categoria = models.ForeignKey(
         Categoria, on_delete=models.PROTECT, related_name="+", verbose_name=_("categoria")
+    )
+    centro_custo = models.ForeignKey(
+        CentroCusto,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="lancamentos",
+        verbose_name=_("centro de custo"),
     )
     paciente = models.ForeignKey(
         "pacientes.Paciente",

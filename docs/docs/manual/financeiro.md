@@ -62,7 +62,7 @@ In **Finance > Cash flow**, choose the period and whether to see it by **day** o
 Below it you see the **current balance of each account**. For it to match the bank and the drawer, enter each account's **initial balance** in **Records > Accounts** (how much it had before the first entry in the system).
 
 ## Reports (administrator)
-In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category. Reversed payments and cancelled entries are left out.
+In **Finance > Reports**, for the chosen period: total received, total paid and the result; received by payment method, by category and by practitioner; and expenses paid by category; with cost centers registered, also what was received and paid by **cost center**, with a "No cost center" line. Reversed payments and cancelled entries are left out.
 
 ## Bank statement (administrator)
 In **Finance > Bank statement**, import the account's statement, downloaded from the bank's website or app in **OFX** format (sometimes called "Money"). Choose the system account (for example, Banco) and the file. Transactions imported before are skipped, so overlapping periods can be imported. If a line of the file has no readable date or amount, the system tells how many were left out: check those on the bank statement.
@@ -87,6 +87,9 @@ Each receipt enters a commission only once. If a receipt already paid out is **r
 
 ## Suppliers
 In **Records > Suppliers**, register who the clinic buys from or pays: individual or company, name, legal name, CPF/CNPJ, phone, WhatsApp, e-mail and notes. The system checks the CPF or CNPJ and does not let the same document be registered twice. The supplier's page shows how much is **outstanding** and all their payables, and has a **New expense** button with the supplier already chosen. In the lists, the supplier's name leads to that page. To stop using a supplier without losing the history, uncheck **active**: it leaves the new expense form, and the old bills stay linked to it.
+
+## Cost centers
+The cost center tells **who** each income or expense is for: a room, a specialty, the office. The category still tells **what** it is (rent, supplies). In **Records > Cost centers**, the administrator registers the centers. As soon as there is an active one, the **Cost center** field shows up on new entries and new expenses (it is optional), and the reports get the cost center tables. Older entries stay without a center. To stop using a center without losing the history, uncheck **active**.
 
 ## Categories and accounts
 In **Records > Categories** and **Records > Accounts**, the administrator creates new categories (income and expenses) and accounts (cash drawer, bank, card machine). To stop using one without losing the history, uncheck **active**.

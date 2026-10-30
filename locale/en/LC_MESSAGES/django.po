@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 16:48-0300\n"
+"POT-Creation-Date: 2026-10-30 17:43-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -756,6 +756,10 @@ msgstr "Reason"
 msgid "Já existe uma categoria com este nome."
 msgstr "A category with this name already exists."
 
+#
+msgid "Já existe um centro de custo com este nome."
+msgstr "A cost center with this name already exists."
+
 msgid "Saldo inicial"
 msgstr "Initial balance"
 
@@ -842,6 +846,14 @@ msgstr "category"
 
 msgid "categorias"
 msgstr "categories"
+
+#
+msgid "centro de custo"
+msgstr "cost center"
+
+#
+msgid "centros de custo"
+msgstr "cost centers"
 
 msgid "Pessoa física"
 msgstr "Individual"
@@ -1172,6 +1184,9 @@ msgstr "Partly paid"
 
 msgid "Em aberto"
 msgstr "Open"
+
+msgid "Sem centro de custo"
+msgstr "No cost center"
 
 msgid "O caixa desta conta já está aberto."
 msgstr "This account's drawer is already open."
@@ -2176,6 +2191,10 @@ msgid "Contas"
 msgstr "Accounts"
 
 #
+msgid "Centros de custo"
+msgstr "Cost centers"
+
+#
 msgid "Fornecedores"
 msgstr "Suppliers"
 
@@ -2623,6 +2642,13 @@ msgstr "Active"
 
 msgid "Inativa"
 msgstr "Inactive"
+
+msgid ""
+"O centro de custo diz para quem é cada receita ou despesa (um consultório, "
+"uma especialidade, o administrativo). Ele aparece nos lançamentos e nos "
+"relatórios assim que houver um cadastrado. Para deixar de usar sem perder o "
+"histórico, edite e desmarque “ativo”."
+msgstr "The cost center tells who each income or expense is for (a room, a specialty, the office). It shows up on entries and reports once there is one registered. To stop using one without losing the history, edit it and uncheck “active”."
 
 msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
 msgstr ""
@@ -3178,6 +3204,14 @@ msgstr "Received by practitioner"
 
 msgid "Despesas pagas por categoria"
 msgstr "Expenses paid by category"
+
+#
+msgid "Recebido por centro de custo"
+msgstr "Received by cost center"
+
+#
+msgid "Despesas pagas por centro de custo"
+msgstr "Expenses paid by cost center"
 
 msgid "Pela data do pagamento, sem os estornados e os cancelados."
 msgstr "By payment date, without reversed and cancelled ones."

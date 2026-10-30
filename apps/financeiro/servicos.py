@@ -16,6 +16,7 @@ from . import comissoes
 from .models import (
     ZERO,
     Caixa,
+    CentroCusto,
     Comissao,
     Lancamento,
     MovimentoCaixa,
@@ -371,7 +372,14 @@ def relatorio(de, ate):
     formas = dict(Pagamento.Forma.choices)
     total_recebido = somar(recebidos, "valor")
     total_pago = somar(pagos, "valor")
+    # Cost centers (decision 095) only once the clinic has registered one.
+    centros = CentroCusto.objects.exists()
+    sem_centro = {None: _("Sem centro de custo")}
+    centro = "parcela__lancamento__centro_custo__nome"
     return {
+        "centros": centros,
+        "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
+        "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
         "por_forma": agrupar(recebidos, "forma", formas),
         "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__nome"),
         "por_profissional": agrupar(recebidos, "parcela__lancamento__profissional__nome"),

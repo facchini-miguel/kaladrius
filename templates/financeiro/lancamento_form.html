@@ -13,6 +13,7 @@
   <div class="row">
     <div class="col-md-8">{% with campo=form.descricao %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.categoria %}{% include "includes/campo.html" %}{% endwith %}</div>
+    {% if form.centro_custo %}<div class="col-md-6">{% with campo=form.centro_custo %}{% include "includes/campo.html" %}{% endwith %}</div>{% endif %}
     <div class="col-md-6">{% with campo=form.profissional %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.valor_total %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>

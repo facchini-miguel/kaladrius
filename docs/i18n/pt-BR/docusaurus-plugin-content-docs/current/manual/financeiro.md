@@ -62,7 +62,7 @@ Em **Financeiro > Fluxo de caixa**, escolha o período e se quer ver por **dia**
 Embaixo aparece o **saldo atual de cada conta**. Para ele bater com o banco e a gaveta, informe o **saldo inicial** de cada conta em **Cadastros > Contas** (quanto havia antes do primeiro lançamento no sistema).
 
 ## Relatórios (administrador)
-Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria. Os pagamentos estornados e os lançamentos cancelados ficam de fora.
+Em **Financeiro > Relatórios**, para o período escolhido: total recebido, total pago e o resultado; recebido por forma de pagamento, por categoria e por profissional; e despesas pagas por categoria; com centros de custo cadastrados, também o recebido e o pago por **centro de custo**, com uma linha "Sem centro de custo". Os pagamentos estornados e os lançamentos cancelados ficam de fora.
 
 ## Extrato bancário (administrador)
 Em **Financeiro > Extrato bancário**, importe o extrato da conta, baixado do site ou aplicativo do banco no formato **OFX** (às vezes chamado "Money"). Escolha a conta do sistema (por exemplo, Banco) e o arquivo. Transações já importadas são puladas, então pode importar períodos que se sobrepõem. Se alguma linha do arquivo vier sem data ou valor que dê para ler, o sistema avisa quantas ficaram de fora: confira essas no extrato do banco.
@@ -87,6 +87,9 @@ Cada recebimento entra numa comissão uma vez só. Se um recebimento já comissi
 
 ## Fornecedores
 Em **Cadastros > Fornecedores**, cadastre de quem a clínica compra ou a quem paga: pessoa física ou jurídica, nome, razão social, CPF/CNPJ, telefone, WhatsApp, e-mail e observações. O sistema confere o CPF ou CNPJ e não deixa cadastrar o mesmo documento duas vezes. A ficha do fornecedor mostra quanto está **em aberto** e todas as contas a pagar dele, e tem o botão **Nova despesa**, que já vem com ele escolhido. Nas listas, o nome do fornecedor leva à ficha. Para deixar de usar um fornecedor sem perder o histórico, desmarque **ativo**: ele some da nova despesa, e as contas antigas continuam ligadas a ele.
+
+## Centros de custo
+O centro de custo diz **para quem** é cada receita ou despesa: um consultório, uma especialidade, o administrativo. A categoria continua dizendo **o que** é (aluguel, material). Em **Cadastros > Centros de custo**, o administrador cadastra os centros. Assim que houver um ativo, o campo **Centro de custo** aparece no novo lançamento e na nova despesa (é opcional), e os relatórios ganham os quadros por centro de custo. Os lançamentos antigos ficam sem centro. Para deixar de usar um centro sem perder o histórico, desmarque **ativo**.
 
 ## Categorias e contas
 Em **Cadastros > Categorias** e **Cadastros > Contas**, o administrador cria novas categorias (receitas e despesas) e contas (caixa, banco, maquininha). Para deixar de usar uma sem perder o histórico, desmarque **ativa**.

@@ -22,6 +22,12 @@
   {% include "financeiro/_grupo.html" with titulo=titulo3 linhas=relatorio.por_profissional total=relatorio.total_recebido %}
   {% translate "Despesas pagas por categoria" as titulo4 %}
   {% include "financeiro/_grupo.html" with titulo=titulo4 linhas=relatorio.despesas_por_categoria total=relatorio.total_pago %}
+  {% if relatorio.centros %}
+  {% translate "Recebido por centro de custo" as titulo5 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo5 linhas=relatorio.por_centro total=relatorio.total_recebido %}
+  {% translate "Despesas pagas por centro de custo" as titulo6 %}
+  {% include "financeiro/_grupo.html" with titulo=titulo6 linhas=relatorio.despesas_por_centro total=relatorio.total_pago %}
+  {% endif %}
 </div>
 <p class="text-body-secondary small mt-3">
   {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
