@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Pessoa relacionada" %} · {{ paciente.nome }} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% if instancia.pk %}{% translate "Pessoa relacionada" %}{% else %}{% translate "Nova pessoa relacionada" %}{% endif %}</h1>
+<p class="text-body-secondary mb-4">{{ paciente.nome }}</p>
+<form method="post" style="max-width: 36rem;" novalidate>
+  {% csrf_token %}
+  {% with campo=form.vinculo %}{% include "includes/campo.html" %}{% endwith %}
+  {% translate "Paciente da clínica" as rotulo %}{% translate "Se a pessoa for paciente da clínica, procure pelo nome; se não, preencha o nome abaixo." as ajuda %}
+  {% include "includes/busca_paciente.html" with campo=form.outro_paciente paciente=outro rotulo=rotulo ajuda=ajuda %}
+  {% with campo=form.nome %}{% include "includes/campo.html" %}{% endwith %}
+  {% with campo=form.telefone %}{% include "includes/campo.html" %}{% endwith %}
+  {% with campo=form.observacao %}{% include "includes/campo.html" %}{% endwith %}
+  <p class="text-body-secondary small">{% translate "O vínculo é só informação do cadastro: não dá acesso a nenhum dado do paciente." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+  <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Cancelar" %}</a>
+</form>
+{% if instancia.pk %}
+<form method="post" action="{% url 'pacientes:relacionado_remover' instancia.pk %}" class="mt-3">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-outline-danger btn-sm">{% translate "Remover" %}</button>
+</form>
+{% endif %}
+{% endblock %}

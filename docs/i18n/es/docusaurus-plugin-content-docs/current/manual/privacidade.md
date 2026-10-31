@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidad
 
-Versión 3 · 30/10/2026
+Versión 4 · 30/10/2026
 
 Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
@@ -26,6 +26,7 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 **Pacientes**
 - Identificación: nombre, CPF o CNPJ (números fiscales de Brasil), RG (documento de identidad), fecha de nacimiento, sexo y profesión.
 - Contacto: teléfonos, WhatsApp, correo y dirección.
+- Personas relacionadas: parientes y contactos que informa el paciente (el vínculo y, de quien no es paciente de la clínica, el nombre y el teléfono).
 - Convenio: el convenio, el plan, el número de la credencial, la validez y, para un dependiente, el nombre del titular del plan.
 - Atención: turnos (fecha, profesional, tipo de atención y observaciones), recordatorios, presupuestos, con los procedimientos y los dientes involucrados, y la **historia clínica** (la anamnesis de cada consulta: motivos, antecedentes de salud, examen y conducta, con certificados, recetas, solicitudes de exámenes y archivos adjuntos, como resultados de exámenes y fotos), que solo los profesionales de la clínica pueden ver. Son **datos de salud**, que la ley trata como sensibles.
 - Financiero: valores, cuotas, pagos (fecha, forma y cuenta; en tarjeta, solo la marca, el número de cuotas y el código de la transacción, **nunca el número de la tarjeta**) y recibos.

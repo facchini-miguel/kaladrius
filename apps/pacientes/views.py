@@ -23,8 +23,8 @@ from apps.prontuario.models import Atendimento
 from apps.prontuario.permissoes import acessa_prontuario
 from apps.rechamadas.models import Rechamada
 
-from .forms import PacienteForm
-from .models import Paciente
+from .forms import PacienteForm, PessoaRelacionadaForm
+from .models import Paciente, PessoaRelacionada
 
 POR_PAGINA = 50
 SITUACOES = {
@@ -105,6 +105,7 @@ def ficha(request, pk):
         contexto["carteirinhas"] = list(
             Carteirinha.objects.filter(paciente=paciente).select_related("convenio")
         )
+    contexto["relacionados"] = relacionados_de(paciente)
     if acessa_prontuario(request):
         contexto["prontuario"] = list(
             Atendimento.objects.filter(paciente=paciente).select_related("profissional")
@@ -128,7 +129,14 @@ def imprimir(request, pk):
     return render(
         request,
         "pacientes/imprimir.html",
-        {"paciente": paciente, "carteirinhas": carteirinhas, "hoje": timezone.localdate()},
+        {
+            "paciente": paciente,
+            "carteirinhas": carteirinhas,
+            "relacionados": PessoaRelacionada.objects.filter(paciente=paciente).select_related(
+                "outro_paciente"
+            ),
+            "hoje": timezone.localdate(),
+        },
     )
 
 
@@ -222,9 +230,9 @@ def excluir(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
     The appointments stay in the schedule without the patient (and without their notes),
-    the recalls and health plan cards go, financial entries are kept (accounting history)
-    without the patient and the notes, and the patient's personal data is removed from the
-    audit log as well.
+    the recalls, health plan cards and related people go, financial entries are kept
+    (accounting history) without the patient and the notes, and the patient's personal data
+    is removed from the audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
     # The medical record is kept for 20 years (Law 13.787/2018, decision 081): a patient
@@ -244,6 +252,11 @@ def excluir(request, pk):
         ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
         carteirinhas = Carteirinha.objects.filter(paciente=paciente)
         ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
+        # Their own relatives and contacts, and the links other patients made to them.
+        relacionadas = PessoaRelacionada.objects.filter(
+            Q(paciente=paciente) | Q(outro_paciente=paciente)
+        )
+        ids_relacionadas = list(relacionadas.values_list("pk", flat=True))
         lancamentos = Lancamento.objects.filter(paciente=paciente)
         ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
         ids_parcelas = list(
@@ -267,11 +280,13 @@ def excluir(request, pk):
             Pagamento.objects.filter(pk__in=ids_pagamentos).update(observacao="")
             rechamadas.delete()
             carteirinhas.delete()
+            relacionadas.delete()
             paciente.delete()
             anonimizar(Paciente, [codigo])
             anonimizar(Agendamento, ids_agendamentos)
             anonimizar(Rechamada, ids_rechamadas)
             anonimizar(Carteirinha, ids_carteirinhas)
+            anonimizar(PessoaRelacionada, ids_relacionadas)
             anonimizar(Lancamento, ids_lancamentos)
             anonimizar(Parcela, ids_parcelas)
             anonimizar(Pagamento, ids_pagamentos)
@@ -315,3 +330,69 @@ def aniversariantes(request):
         "pacientes/aniversariantes.html",
         {"mes": mes, "meses": list(enumerate(MESES, start=1)), "linhas": linhas, "hoje": hoje},
     )
+
+
+# --- Related people (decision 101) ------------------------------------------------------
+
+
+def relacionados_de(paciente):
+    """The patient's relatives and contacts, plus the patients who listed this one.
+
+    Each item is (link, other person's name, the other patient or None, is_reverse); a
+    reverse link reads "Mãe de Ana" on the mother's record.
+    """
+    proprios = PessoaRelacionada.objects.filter(paciente=paciente).select_related("outro_paciente")
+    inversos = PessoaRelacionada.objects.filter(outro_paciente=paciente).select_related("paciente")
+    return [(r, r.nome_exibido, r.outro_paciente, False) for r in proprios] + [
+        (r, r.paciente.nome, r.paciente, True) for r in inversos
+    ]
+
+
+@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+def relacionado_novo(request, pk):
+    paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=False)
+    return _relacionado(request, paciente, PessoaRelacionada())
+
+
+@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+def relacionado_editar(request, pk):
+    relacionada = get_object_or_404(
+        PessoaRelacionada.objects.select_related("paciente", "outro_paciente"),
+        pk=pk,
+        paciente__arquivado=False,
+    )
+    return _relacionado(request, relacionada.paciente, relacionada)
+
+
+def _relacionado(request, paciente, instancia):
+    form = PessoaRelacionadaForm(request.POST or None, instance=instancia, paciente=paciente)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Pessoa relacionada salva."))
+        return redirect("pacientes:ficha", pk=paciente.pk)
+    # The patient chosen in the search box, shown again when the form comes back.
+    if form.is_bound:
+        outro = form.cleaned_data.get("outro_paciente")
+    else:
+        outro = instancia.outro_paciente if instancia.outro_paciente_id else None
+    return render(
+        request,
+        "pacientes/relacionado_form.html",
+        {
+            "form": form,
+            "paciente": paciente,
+            "instancia": instancia,
+            "outro": outro,
+        },
+    )
+
+
+@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+def relacionado_remover(request, pk):
+    relacionada = get_object_or_404(PessoaRelacionada.objects, pk=pk, paciente__arquivado=False)
+    if request.method == "POST":
+        paciente = relacionada.paciente_id
+        relacionada.delete()
+        messages.success(request, _("Pessoa relacionada removida."))
+        return redirect("pacientes:ficha", pk=paciente)
+    return redirect("pacientes:relacionado_editar", pk=pk)

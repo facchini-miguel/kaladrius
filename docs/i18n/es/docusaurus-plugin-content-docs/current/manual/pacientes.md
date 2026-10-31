@@ -18,7 +18,10 @@ Haga clic en **Nuevo paciente**. Elija **persona física** o **jurídica**: los 
 ## Ficha del paciente
 Haga clic en el nombre para abrir la ficha: datos, contacto, dirección, observaciones, **próximas y últimas citas** (haga clic en la fecha para ir a la semana en la agenda) y **recordatorios**.
 
-**Imprimir ficha** abre la ficha de registro lista para imprimir o guardar en PDF: datos, contacto, dirección, credenciales de convenio, observaciones y línea para la firma.
+**Imprimir ficha** abre la ficha de registro lista para imprimir o guardar en PDF: datos, contacto, dirección, credenciales de convenio, personas relacionadas, observaciones y línea para la firma.
+
+## Personas relacionadas
+En **Personas relacionadas**, en la ficha, **Nueva persona relacionada** agrega un pariente o contacto: el vínculo (madre, padre, responsable legal, cónyuge, hijo, contacto de emergencia…) y **otro paciente de la clínica**, buscado por el nombre, o el **nombre y teléfono** de quien no es paciente. El vínculo con otro paciente aparece en las dos fichas ("Madre de Ana" en la ficha de la madre), con el teléfono del propio paciente. El vínculo es solo información del registro: no da acceso a los datos de la otra persona.
 
 ## Activo, inactivo y archivado
 

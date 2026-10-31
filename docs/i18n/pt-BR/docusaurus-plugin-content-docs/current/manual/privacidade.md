@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidade
 
-Versão 3 · 30/10/2026
+Versão 4 · 30/10/2026
 
 Esta política explica como os dados pessoais de pacientes, responsáveis, equipe e fornecedores são tratados no **Kaladrius**, o sistema de gestão que a clínica usa: quais dados, para quê, com que base legal, quem tem acesso, onde ficam, por quanto tempo e como exercer seus direitos. Ela segue a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018) e a lei sobre prontuários eletrônicos (Lei 13.787/2018).
 
@@ -26,6 +26,7 @@ A **clínica que atende você** é a controladora: decide como e para que os dad
 **Pacientes**
 - Identificação: nome, CPF ou CNPJ, RG, data de nascimento, sexo e profissão.
 - Contato: telefones, WhatsApp, e-mail e endereço.
+- Pessoas relacionadas: parentes e contatos informados pelo paciente (o vínculo e, de quem não é paciente da clínica, o nome e o telefone).
 - Convênio: o convênio, o plano, o número da carteirinha, a validade e, para um dependente, o nome do titular do plano.
 - Atendimento: consultas marcadas (data, profissional, tipo de atendimento e observações), retornos a lembrar, orçamentos, com os procedimentos e os dentes envolvidos, e o **prontuário** (a anamnese de cada atendimento: queixas, histórico de saúde, exame e conduta, com atestados, receitas, pedidos de exames e arquivos anexados, como resultados de exames e fotos), que só os profissionais da clínica podem ver. São **dados de saúde**, que a lei trata como sensíveis.
 - Financeiro: valores, parcelas, pagamentos (data, forma e conta; no cartão, só a bandeira, o número de parcelas e o código da transação, **nunca o número do cartão**) e recibos.

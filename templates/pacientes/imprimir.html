@@ -72,6 +72,18 @@
   </table>
   {% endif %}
 
+  {% if relacionados %}
+  <h2 class="h6 mt-3">{% translate "Pessoas relacionadas" %}</h2>
+  <table class="table table-sm small">
+    <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
+    <tbody>
+      {% for relacionada in relacionados %}
+      <tr><td>{{ relacionada.get_vinculo_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|telefone|default:"—" }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
   {% if paciente.observacoes %}
   <h2 class="h6 mt-3">{% translate "Observações" %}</h2>
   <p class="small">{{ paciente.observacoes|linebreaksbr }}</p>

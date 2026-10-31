@@ -15,7 +15,7 @@ from apps.convenios.models import Carteirinha, Convenio
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import somente_digitos
-from apps.pacientes.models import Paciente
+from apps.pacientes.models import Paciente, PessoaRelacionada
 from apps.pessoal.models import Funcionario, Salario
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -105,6 +105,7 @@ class Command(BaseCommand):
             total_rechamadas = sum(self._rechamadas(clinica) for clinica in clinicas)
             for clinica in clinicas:
                 self._funcionarios(clinica)
+                self._relacionados(clinica)
 
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
         self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
@@ -221,6 +222,33 @@ class Command(BaseCommand):
             )
             Salario.objects.create(
                 clinica=clinica, funcionario=funcionario, valor=Decimal(salario), desde=admissao
+            )
+
+    def _relacionados(self, clinica):
+        """A few family links between made-up patients and outside contacts (decision 101)."""
+        if PessoaRelacionada.objects.filter(clinica=clinica).exists():
+            return
+        pacientes = list(
+            Paciente.objects.filter(clinica=clinica, tipo=Paciente.Tipo.FISICA).order_by("pk")[:12]
+        )
+        vinculos = PessoaRelacionada.Vinculo
+        for i, vinculo in zip(
+            range(0, 6, 2), (vinculos.MAE, vinculos.PAI, vinculos.CONJUGE), strict=False
+        ):
+            if i + 1 < len(pacientes):
+                PessoaRelacionada.objects.create(
+                    clinica=clinica,
+                    paciente=pacientes[i],
+                    outro_paciente=pacientes[i + 1],
+                    vinculo=vinculo,
+                )
+        for n, paciente in enumerate(pacientes[6:9], start=1):
+            PessoaRelacionada.objects.create(
+                clinica=clinica,
+                paciente=paciente,
+                vinculo=vinculos.EMERGENCIA,
+                nome=f"Contato fictício {n}",
+                telefone=f"5499000000{n}",
             )
 
     def _agendamentos(self, clinica):

@@ -18,7 +18,10 @@ Clique em **Novo paciente**. Escolha **pessoa física** ou **jurídica**: os cam
 ## Ficha do paciente
 Clique no nome para abrir a ficha: dados, contato, endereço, observações, **próximos e últimos agendamentos** (clique na data para ir à semana na agenda) e **rechamadas**.
 
-**Imprimir ficha** abre a ficha cadastral pronta para imprimir ou salvar em PDF: dados, contato, endereço, carteirinhas de convênio, observações e linha para assinatura.
+**Imprimir ficha** abre a ficha cadastral pronta para imprimir ou salvar em PDF: dados, contato, endereço, carteirinhas de convênio, pessoas relacionadas, observações e linha para assinatura.
+
+## Pessoas relacionadas
+Em **Pessoas relacionadas**, na ficha, **Nova pessoa relacionada** inclui um parente ou contato: o vínculo (mãe, pai, responsável legal, cônjuge, filho, contato de emergência…) e **outro paciente da clínica**, procurado pelo nome, ou o **nome e telefone** de quem não é paciente. O vínculo com outro paciente aparece nas duas fichas ("Mãe de Ana" na ficha da mãe), com o telefone do próprio paciente. O vínculo é só informação do cadastro: não dá acesso aos dados da outra pessoa.
 
 ## Ativo, inativo e arquivado
 

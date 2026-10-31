@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolamento import ModeloDaClinica
+from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
 
 
 class Paciente(ModeloDaClinica):
@@ -139,3 +139,89 @@ class Paciente(ModeloDaClinica):
     @property
     def telefone_principal(self):
         return self.telefone_celular or self.telefone_residencial or self.telefone_comercial
+
+
+class PessoaRelacionada(ModeloDaClinica):
+    """A relative or contact of a patient (decision 101, legacy `id_pessoas_relac`).
+
+    Either another patient of the clinic (the link then shows on both records) or someone
+    outside it, kept with just a name and a phone. A link grants no access to anything:
+    it is only information on the registration.
+    """
+
+    class Vinculo(models.TextChoices):
+        MAE = "mae", _("Mãe")
+        PAI = "pai", _("Pai")
+        RESPONSAVEL = "responsavel", _("Responsável legal")
+        CONJUGE = "conjuge", _("Cônjuge")
+        FILHO = "filho", _("Filho(a)")
+        IRMAO = "irmao", _("Irmão(ã)")
+        AVO = "avo", _("Avô/avó")
+        NETO = "neto", _("Neto(a)")
+        PARENTE = "parente", _("Outro parente")
+        EMERGENCIA = "emergencia", _("Contato de emergência")
+        CONTATO = "contato", _("Contato")
+
+    paciente = models.ForeignKey(
+        Paciente,
+        on_delete=models.CASCADE,
+        related_name="relacionados",
+        verbose_name=_("paciente"),
+    )
+    vinculo = models.CharField(_("vínculo"), max_length=20, choices=Vinculo.choices)
+    outro_paciente = models.ForeignKey(
+        Paciente,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="relacionado_a",
+        verbose_name=_("paciente da clínica"),
+    )
+    nome = models.CharField(_("nome"), max_length=200, blank=True)
+    telefone = models.CharField(_("telefone"), max_length=11, blank=True)
+    observacao = models.CharField(_("observação"), max_length=200, blank=True)
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("pessoa relacionada")
+        verbose_name_plural = _("pessoas relacionadas")
+        ordering = ["pk"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(outro_paciente__isnull=False) | ~models.Q(nome=""),
+                name="relacionada_paciente_ou_nome",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(outro_paciente=models.F("paciente")),
+                name="relacionada_nao_e_o_proprio",
+            ),
+            models.UniqueConstraint(
+                fields=["paciente", "outro_paciente", "vinculo"],
+                name="relacionada_unica",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_vinculo_display()}: {self.nome_exibido}"
+
+    def save(self, *args, **kwargs):
+        self._conferir_clinica()
+        if self.clinica_id is None:  # without isolation (commands)
+            self.clinica_id = self.paciente.clinica_id
+        clinicas = {self.paciente.clinica_id}
+        if self.outro_paciente_id:
+            clinicas.add(self.outro_paciente.clinica_id)
+        if clinicas != {self.clinica_id}:
+            raise ClinicaDiferente("Both patients must be of this clinic.")
+        super().save(*args, **kwargs)
+
+    @property
+    def nome_exibido(self):
+        return self.outro_paciente.nome if self.outro_paciente_id else self.nome
+
+    @property
+    def telefone_exibido(self):
+        if self.telefone or not self.outro_paciente_id:
+            return self.telefone
+        outro = self.outro_paciente
+        return outro.whatsapp or outro.telefone_celular or outro.telefone_residencial

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-30 20:07-0300\n"
+"POT-Creation-Date: 2026-10-30 21:04-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -1679,6 +1679,22 @@ msgstr "Ya existe un paciente con este CPF/CNPJ en esta clínica."
 msgid "A cidade não pertence à UF escolhida."
 msgstr "La ciudad no pertenece al estado elegido."
 
+#
+msgid "Só para quem não é paciente da clínica."
+msgstr "Solo para quien no es paciente de la clínica."
+
+#
+msgid "Escolha um paciente ou digite um nome, não os dois."
+msgstr "Elija un paciente o escriba un nombre, no ambos."
+
+#
+msgid "Escolha um paciente da clínica ou digite o nome."
+msgstr "Elija un paciente de la clínica o escriba el nombre."
+
+#
+msgid "Este vínculo já está cadastrado."
+msgstr "Este vínculo ya está registrado."
+
 msgid "Feminino"
 msgstr "Femenino"
 
@@ -1756,6 +1772,56 @@ msgstr "registrado el"
 msgid "pacientes"
 msgstr "pacientes"
 
+msgid "Mãe"
+msgstr "Madre"
+
+#
+msgid "Pai"
+msgstr "Padre"
+
+#
+msgid "Responsável legal"
+msgstr "Responsable legal"
+
+msgid "Cônjuge"
+msgstr "Cónyuge"
+
+msgid "Filho(a)"
+msgstr "Hijo(a)"
+
+msgid "Irmão(ã)"
+msgstr "Hermano(a)"
+
+msgid "Avô/avó"
+msgstr "Abuelo(a)"
+
+msgid "Neto(a)"
+msgstr "Nieto(a)"
+
+#
+msgid "Outro parente"
+msgstr "Otro pariente"
+
+#
+msgid "Contato de emergência"
+msgstr "Contacto de emergencia"
+
+msgid "Contato"
+msgstr "Contacto"
+
+msgid "vínculo"
+msgstr "vínculo"
+
+#
+msgid "paciente da clínica"
+msgstr "paciente de la clínica"
+
+msgid "pessoa relacionada"
+msgstr "persona relacionada"
+
+msgid "pessoas relacionadas"
+msgstr "personas relacionadas"
+
 #, python-format
 msgid "Paciente %(nome)s salvo."
 msgstr "Paciente %(nome)s guardado."
@@ -1781,6 +1847,13 @@ msgstr "Un paciente con historia clínica no puede eliminarse."
 #, python-format
 msgid "Os dados do paciente de código %(codigo)s foram excluídos."
 msgstr "Los datos del paciente de código %(codigo)s fueron eliminados."
+
+#
+msgid "Pessoa relacionada salva."
+msgstr "Persona relacionada guardada."
+
+msgid "Pessoa relacionada removida."
+msgstr "Persona relacionada eliminada."
 
 msgid "CPF"
 msgstr "CPF"
@@ -4008,6 +4081,11 @@ msgid "as carteirinhas de convênio do paciente são apagadas;"
 msgstr "las credenciales de convenio del paciente se borran;"
 
 msgid ""
+"as pessoas relacionadas são apagadas, inclusive os vínculos de outros "
+"pacientes com ele;"
+msgstr "las personas relacionadas se eliminan, incluidos los vínculos de otros pacientes con él;"
+
+msgid ""
 "a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
 "pessoais do paciente;"
 msgstr ""
@@ -4090,6 +4168,20 @@ msgstr "Dirección"
 msgid "Observações"
 msgstr "Observaciones"
 
+msgid "Pessoas relacionadas"
+msgstr "Personas relacionadas"
+
+msgid "Nova pessoa relacionada"
+msgstr "Nueva persona relacionada"
+
+#, python-format
+msgid "%(vinculo)s de"
+msgstr "%(vinculo)s de"
+
+#
+msgid "Nenhuma pessoa relacionada."
+msgstr "Ninguna persona relacionada."
+
 msgid "Novo atendimento"
 msgstr "Nueva consulta"
 
@@ -4153,9 +4245,6 @@ msgstr "Registrado el %(criado)s · modificado el %(alterado)s"
 msgid "Editar paciente"
 msgstr "Editar paciente"
 
-msgid "Contato"
-msgstr "Contacto"
-
 msgid "Ficha cadastral"
 msgstr "Ficha de registro"
 
@@ -4184,6 +4273,9 @@ msgstr "Validez"
 msgid "Titular"
 msgstr "Titular"
 
+msgid "Vínculo"
+msgstr "Vínculo"
+
 msgid "Assinatura do paciente ou responsável"
 msgstr "Firma del paciente o responsable"
 
@@ -4210,6 +4302,27 @@ msgstr "Edad"
 
 msgid "Nenhum paciente encontrado."
 msgstr "Ningún paciente encontrado."
+
+msgid "Pessoa relacionada"
+msgstr "Persona relacionada"
+
+#
+msgid "Paciente da clínica"
+msgstr "Paciente de la clínica"
+
+msgid ""
+"Se a pessoa for paciente da clínica, procure pelo nome; se não, preencha o "
+"nome abaixo."
+msgstr "Si la persona es paciente de la clínica, búsquela por el nombre; si no, complete el nombre abajo."
+
+msgid ""
+"O vínculo é só informação do cadastro: não dá acesso a nenhum dado do "
+"paciente."
+msgstr "El vínculo es solo información del registro: no da acceso a ningún dato del paciente."
+
+#
+msgid "Remover"
+msgstr "Quitar"
 
 #, python-format
 msgid "Folha de %(mes)s"

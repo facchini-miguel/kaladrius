@@ -51,6 +51,7 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | Entidade | Campos principais | Sistema antigo |
 |---|---|---|
 | `Paciente` | clinica, tipo (PF/PJ), nome, razão social, CPF/CNPJ, RG, inscrição estadual, sexo, estado civil, nascimento, profissão, responsável, telefones (residencial, comercial, celular), WhatsApp, e-mail, endereço (CEP, UF, cidade, bairro, logradouro, número, complemento), observações, ativo, arquivado (com data e quem arquivou), datas de criação e alteração | `pessoas` |
+| `PessoaRelacionada` (decisão 101) | clinica, paciente, vínculo (mãe, pai, responsável legal, cônjuge, filho, irmão, avô, neto, outro parente, contato de emergência, contato), outro paciente da clínica **ou** um nome, telefone, observação | `id_pessoas_relac` |
 | `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, comissão (%, desde a 0.19), ativo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clinica, nome, cor, ativo | `agenda_cor` (Cirurgia, Prótese…) |
 | `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, situação (agendado, compareceu, faltou, desmarcou; desde a 0.24), série (repetição), criado por | `agendax` |

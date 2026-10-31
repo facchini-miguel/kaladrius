@@ -27,7 +27,7 @@ from apps.financeiro.models import (
     TransacaoBancaria,
 )
 from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
-from apps.pacientes.models import Paciente
+from apps.pacientes.models import Paciente, PessoaRelacionada
 from apps.pessoal.models import Folha, Funcionario, Salario
 from apps.profissionais.models import Profissional
 from apps.prontuario.models import Adendo, Anexo, Atendimento, Atestado, PedidoDeExames, Receita
@@ -98,6 +98,7 @@ class Command(BaseCommand):
                 Rechamada,
                 Carteirinha,
                 Convenio,
+                PessoaRelacionada,
                 Paciente,
                 Profissional,
                 TipoAtendimento,

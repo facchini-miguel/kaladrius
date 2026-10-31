@@ -53,6 +53,7 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | Entity | Main fields | Legacy table |
 |---|---|---|
 | `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), WhatsApp, email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
+| `PessoaRelacionada` (related person, decision 101) | clinic, patient, relationship (mother, father, legal guardian, spouse, child, sibling, grandparent, grandchild, other relative, emergency contact, contact), another patient of the clinic **or** a name, phone, note | `id_pessoas_relac` |
 | `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
 | `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
 | `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, status (booked, came, missed, cancelled; since 0.24), series (recurrence), created by | `agendax` |

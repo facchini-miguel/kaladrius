@@ -15,4 +15,7 @@ urlpatterns = [
     path("<int:pk>/arquivar/", views.arquivar, name="arquivar"),
     path("<int:pk>/restaurar/", views.restaurar, name="restaurar"),
     path("<int:pk>/excluir/", views.excluir, name="excluir"),
+    path("<int:pk>/relacionados/novo/", views.relacionado_novo, name="relacionado_novo"),
+    path("relacionados/<int:pk>/", views.relacionado_editar, name="relacionado_editar"),
+    path("relacionados/<int:pk>/remover/", views.relacionado_remover, name="relacionado_remover"),
 ]

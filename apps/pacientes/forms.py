@@ -8,7 +8,7 @@ from apps.core.forms import FormularioBootstrap
 from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
 from apps.referencias.models import UF, Cidade
 
-from .models import Paciente
+from .models import Paciente, PessoaRelacionada
 
 
 class UFField(forms.ModelChoiceField):
@@ -187,4 +187,48 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         cidade, uf = dados.get("cidade"), dados.get("uf")
         if cidade is not None and cidade.uf_id != getattr(uf, "pk", None):
             self.add_error("cidade", _("A cidade não pertence à UF escolhida."))
+        return dados
+
+
+class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
+    """A relative or contact (decision 101): another patient of the clinic, or a name."""
+
+    telefone = _campo_texto(_("Telefone"), 16, inputmode="tel")
+
+    class Meta:
+        model = PessoaRelacionada
+        fields = ["vinculo", "outro_paciente", "nome", "telefone", "observacao"]
+        widgets = {"outro_paciente": forms.HiddenInput}
+        help_texts = {"nome": _("Só para quem não é paciente da clínica.")}
+
+    def __init__(self, *args, paciente, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.paciente = paciente
+        if self.instance.clinica_id is None:
+            self.instance.clinica_id = paciente.clinica_id
+        self.fields["outro_paciente"].queryset = Paciente.objects.exclude(pk=paciente.pk)
+
+    def clean_telefone(self):
+        telefone = somente_digitos(self.cleaned_data.get("telefone"))
+        if telefone and len(telefone) not in (10, 11):
+            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
+        return telefone
+
+    def clean(self):
+        dados = super().clean()
+        outro, nome = dados.get("outro_paciente"), dados.get("nome", "").strip()
+        if outro and nome:
+            self.add_error("nome", _("Escolha um paciente ou digite um nome, não os dois."))
+        elif not outro and not nome:
+            self.add_error("nome", _("Escolha um paciente da clínica ou digite o nome."))
+        dados["nome"] = nome
+        if (
+            outro
+            and PessoaRelacionada.objects.filter(
+                paciente=self.instance.paciente, outro_paciente=outro, vinculo=dados.get("vinculo")
+            )
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
+            self.add_error("outro_paciente", _("Este vínculo já está cadastrado."))
         return dados

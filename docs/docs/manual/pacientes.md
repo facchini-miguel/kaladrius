@@ -18,7 +18,10 @@ Click **New patient**. Choose **individual** or **company**: the fields change w
 ## Patient record
 Click the name to open the record: details, contact, address, notes, **upcoming and latest appointments** (click the date to go to the week in the schedule) and **recalls**.
 
-**Print sheet** opens the registration sheet ready to print or save as PDF: details, contact, address, health plan cards, notes and a signature line.
+**Print sheet** opens the registration sheet ready to print or save as PDF: details, contact, address, health plan cards, related people, notes and a signature line.
+
+## Related people
+In **Related people** on the record, **New related person** adds a relative or contact: the relationship (mother, father, legal guardian, spouse, child, emergency contact…) and either **another patient of the clinic**, found by name, or the **name and phone** of someone who is not a patient. A link to another patient shows on both records ("Mother of Ana" on the mother's), and that patient's own phone is shown. The link is only registration information: it gives no access to the other person's data.
 
 ## Active, inactive and archived
 

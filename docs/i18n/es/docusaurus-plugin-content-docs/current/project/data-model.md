@@ -51,6 +51,7 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 | Entidad | Campos principales | Sistema antiguo |
 |---|---|---|
 | `Paciente` | clínica, tipo (PF/PJ), nombre, razón social, CPF/CNPJ, RG, inscripción estatal, sexo, estado civil, nacimiento, profesión, responsable, teléfonos (casa, trabajo, celular), WhatsApp, correo, dirección (CEP, estado, ciudad, barrio, calle, número, complemento), observaciones, activo, archivado (con fecha y quién archivó), fechas de creación y modificación | `pessoas` |
+| `PessoaRelacionada` (decisión 101) | clínica, paciente, vínculo (madre, padre, responsable legal, cónyuge, hijo, hermano, abuelo, nieto, otro pariente, contacto de emergencia, contacto), otro paciente de la clínica **o** un nombre, teléfono, observación | `id_pessoas_relac` |
 | `Profissional` | clínica, nombre, registro profesional (CRO/CRM…), color, comisión (%, desde la 0.19), activo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clínica, nombre, color, activo | `agenda_cor` (Cirugía, Prótesis…) |
 | `Agendamento` | clínica, profesional, tipo, inicio y fin (fecha y hora), paciente (opcional), descripción, situación (agendada, asistió, faltó, canceló; desde la 0.24), serie (repetición), creado por | `agendax` |

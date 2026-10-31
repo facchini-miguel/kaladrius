@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Privacy policy
 
-Version 3 · 10/30/2026
+Version 4 · 10/30/2026
 
 This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
@@ -26,6 +26,7 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 **Patients**
 - Identification: name, CPF or CNPJ (Brazilian tax numbers), RG (ID card), date of birth, sex and occupation.
 - Contact: phone numbers, WhatsApp, e-mail and address.
+- Related people: relatives and contacts the patient gives (relationship, and the name and phone of someone who is not a patient of the clinic).
 - Health plan: the plan, plan type, card number, valid until and, for a dependent, the plan holder's name.
 - Care: appointments (date, practitioner, type of appointment and notes), recalls, treatment estimates, with the procedures and teeth involved, and the **medical record** (the anamnesis of each visit: complaints, health history, examination and plan, with certificates, prescriptions, exam requests and attached files such as exam results and photos), which only the clinic's practitioners can see. These are **health data**, which the law treats as sensitive.
 - Finance: amounts, installments, payments (date, method and account; for cards, only the brand, number of installments and transaction code, **never the card number**) and receipts.

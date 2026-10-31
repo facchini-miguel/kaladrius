@@ -95,6 +95,32 @@
   </div>
 </div>
 
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    {% translate "Pessoas relacionadas" %}
+    {% if pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:relacionado_novo' paciente.pk %}">{% translate "Nova pessoa relacionada" %}</a>{% endif %}
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for relacionada, nome, outro, inverso in relacionados %}
+    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+      <span>
+        {% if inverso %}
+        {% with vinculo=relacionada.get_vinculo_display %}{% blocktranslate %}{{ vinculo }} de{% endblocktranslate %} <a href="{% url 'pacientes:ficha' outro.pk %}">{{ nome }}</a>{% endwith %}
+        {% else %}
+        <strong>{{ relacionada.get_vinculo_display }}:</strong>
+        {% if outro %}<a href="{% url 'pacientes:ficha' outro.pk %}">{{ nome }}</a>{% else %}{{ nome }}{% endif %}
+        {% with telefone=relacionada.telefone_exibido %}{% if telefone %}· <span class="text-nowrap">{{ telefone|telefone }}</span>{% endif %}{% endwith %}
+        {% if relacionada.observacao %}<span class="small text-body-secondary">· {{ relacionada.observacao }}</span>{% endif %}
+        {% endif %}
+      </span>
+      {% if not inverso and pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0" href="{% url 'pacientes:relacionado_editar' relacionada.pk %}">{% translate "editar" %}</a>{% endif %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-body-secondary">{% translate "Nenhuma pessoa relacionada." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+
 {% if prontuario is not None %}
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">

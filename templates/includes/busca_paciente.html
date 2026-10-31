@@ -1,6 +1,6 @@
-{% load i18n %}{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None).{% endcomment %}
+{% load i18n %}{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None); optional rotulo (label) and ajuda (help text).{% endcomment %}
 <div class="mb-3 position-relative busca-paciente">
-  <label class="form-label" for="busca-paciente">{% translate "Paciente" %}{% if campo.field.required %} *{% endif %}</label>
+  <label class="form-label" for="busca-paciente">{% if rotulo %}{{ rotulo }}{% else %}{% translate "Paciente" %}{% endif %}{% if campo.field.required %} *{% endif %}</label>
   <input type="search" id="busca-paciente" class="form-control busca-paciente-texto{% if campo.errors %} is-invalid{% endif %}" autocomplete="off"
          placeholder="{% translate 'Digite o nome, código ou CPF' %}" value="{{ paciente.nome|default:'' }}"
          name="q" hx-get="{% url 'pacientes:sugestoes' %}" hx-trigger="input changed delay:300ms"
