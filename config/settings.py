@@ -235,6 +235,7 @@ SESSION_COOKIE_HTTPONLY = True
 _SERVIDOR_EMAIL = env("DJANGO_EMAIL_HOST", "")
 RECUPERAR_SENHA_POR_EMAIL = bool(_SERVIDOR_EMAIL)
 if _SERVIDOR_EMAIL:
+    _EMAIL_SSL = env_bool("DJANGO_EMAIL_SSL", False)  # port 465; otherwise STARTTLS
     MAILERS = {
         "default": {
             "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
@@ -243,7 +244,9 @@ if _SERVIDOR_EMAIL:
                 "port": int(env("DJANGO_EMAIL_PORT", "587")),
                 "username": env("DJANGO_EMAIL_USER", ""),
                 "password": env("DJANGO_EMAIL_PASSWORD", ""),
-                "use_tls": env_bool("DJANGO_EMAIL_TLS", True),
+                "use_tls": env_bool("DJANGO_EMAIL_TLS", True) and not _EMAIL_SSL,
+                "use_ssl": _EMAIL_SSL,
+                "timeout": 15,  # a stuck server must not hold the page
             },
         }
     }

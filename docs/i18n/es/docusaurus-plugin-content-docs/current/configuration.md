@@ -27,6 +27,7 @@ Después de cambiarlo, reinicie: `kaladrius up -d` (se recrean los contenedores 
 | `DJANGO_EMAIL_PORT` | `587` | Puerto del SMTP |
 | `DJANGO_EMAIL_USER` / `DJANGO_EMAIL_PASSWORD` | vacío | Usuario del SMTP |
 | `DJANGO_EMAIL_TLS` | `1` | STARTTLS en la conexión SMTP |
+| `DJANGO_EMAIL_SSL` | `0` | SSL desde el inicio (puerto 465) en lugar de STARTTLS. Con Gmail: `smtp.gmail.com`, puerto `587`, la dirección de Gmail como usuario y una [contraseña de aplicación](https://myaccount.google.com/apppasswords) (requiere la verificación en dos pasos en la cuenta de Google; unos 500 correos al día) |
 | `DJANGO_EMAIL_FROM` | el usuario del SMTP | Remitente de los correos |
 | `DJANGO_DOCS_URL` | `https://kaladrius-docs.facchini.eti.br` | Este sitio de documentación. El menú **Ayuda** lo abre en el idioma del usuario |
 
