@@ -14,7 +14,7 @@ sidebar_position: 2
 O **profissional** vê só a própria agenda. Se a agenda aparecer vazia com um aviso, peça ao administrador para ligar o seu usuário ao seu cadastro de profissional.
 
 ## Agendar
-1. Clique num horário livre, ou arraste sobre vários horários.
+1. Clique num horário livre, ou arraste sobre vários horários. No celular ou no tablet, toque no horário livre.
 2. Escolha o **tipo de atendimento** e o **paciente** (digite parte do nome, o código ou o CPF e escolha na lista).
 3. Sem paciente cadastrado, escreva uma **descrição** (por exemplo, "Reunião" ou "Bloqueado").
 4. Para repetir toda semana, informe em **Repetir por quantas semanas** (1 = só nesta data).

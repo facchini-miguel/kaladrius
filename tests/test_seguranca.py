@@ -75,8 +75,18 @@ def test_login_certo_zera_o_contador(client, criar_usuario):
         assert tentar(client, "errada").status_code == 200
 
 
+def test_usuario_novo_comeca_na_versao_atual_sem_aviso(client, criar_usuario):
+    """Review (superuser, fresh install): a new person saw "the system was updated"."""
+    usuario = criar_usuario("novata")
+    assert usuario.ultima_versao_vista == releases.versao_atual()
+    client.force_login(usuario)
+    assert "Veja o que mudou" not in client.get(reverse("inicio")).content.decode()
+
+
 def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
     usuario = criar_usuario("maria")
+    usuario.ultima_versao_vista = "0.40.0"  # seen before this version came out
+    usuario.save(update_fields=["ultima_versao_vista"])
     client.force_login(usuario)
     assert "Veja o que mudou" in client.get(reverse("inicio")).content.decode()
     client.get(reverse("novidades"))

@@ -33,6 +33,18 @@ class Usuario(AbstractUser):
         verbose_name = _("usuário")
         verbose_name_plural = _("usuários")
 
+    def save(self, *args, **kwargs):
+        # A new person starts at the current version: "the system was updated" and forty
+        # versions of history mean nothing to someone who just arrived (review, superuser).
+        if self._state.adding and not self.ultima_versao_vista:
+            from apps.novidades.releases import ReleasesInvalidas, versao_atual
+
+            try:
+                self.ultima_versao_vista = versao_atual()
+            except ReleasesInvalidas:
+                pass
+        super().save(*args, **kwargs)
+
 
 class Clinica(models.Model):
     """A clinic: the tenant that owns patients, schedules and the rest of the data."""

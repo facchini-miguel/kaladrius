@@ -116,3 +116,12 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
         paciente = Paciente.objects.create(nome="Paciente Fictício")
     ficha = recepcao.get(reverse("pacientes:imprimir", args=[paciente.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
+
+
+def test_painel_do_django_sem_ingles(client, django_user_model):
+    """Review (superuser): the admin's action and filter lists showed Django 6.1's
+    "- Select an option -" in English."""
+    super_usuario = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
+    client.force_login(super_usuario)
+    pagina = client.get(reverse("admin:referencias_uf_changelist")).content.decode()
+    assert "Select an option" not in pagina and "Selecione uma opção" in pagina

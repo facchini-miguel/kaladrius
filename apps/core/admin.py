@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_noop
 
 from .forms import ClinicaAdminForm
 from .models import Backup, Clinica, Usuario, Vinculo
@@ -11,6 +12,10 @@ def _somente_superusuario(request):
 
 
 admin.site.has_permission = _somente_superusuario
+
+# Django 6.1 has no Portuguese or Spanish text for the blank option of the admin's lists
+# (actions, filters): marked here so the project's catalogs translate it (review, superuser).
+gettext_noop("- Select an option -")
 
 
 class VinculoNaClinicaInline(admin.TabularInline):

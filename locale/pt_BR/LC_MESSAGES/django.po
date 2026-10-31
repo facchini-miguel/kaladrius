@@ -91,3 +91,7 @@ msgstr "novembro"
 msgctxt "alt. month"
 msgid "December"
 msgstr "dezembro"
+
+# The blank option of the admin's lists (Django 6.1 has no Portuguese text for it).
+msgid "- Select an option -"
+msgstr "- Selecione uma opção -"

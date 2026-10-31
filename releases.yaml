@@ -4,6 +4,53 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.6
+  data: 2026-10-31
+  titulo:
+    pt-br: Revisão do administrador do sistema e de outros navegadores
+    en: System administrator and other browsers review
+    es: Revisión del administrador del sistema y otros navegadores
+  itens:
+    - tipo: correcao
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No celular e no tablet, tocar num horário livre da agenda abre o novo agendamento;
+          antes era preciso segurar o dedo por um segundo, e quase ninguém descobria.
+        en: >
+          On phones and tablets, tapping a free time in the schedule opens the new appointment;
+          before, a finger had to be held down for a second, which hardly anyone found.
+        es: >
+          En el celular y la tableta, tocar un horario libre de la agenda abre la nueva cita;
+          antes había que mantener el dedo un segundo, y casi nadie lo descubría.
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Quem acaba de entrar na equipe não vê mais o aviso "o sistema foi atualizado" com todo
+          o histórico de versões; o aviso fica para as atualizações seguintes.
+        en: >
+          Someone who just joined the team no longer sees the "the system was updated" notice
+          with the whole version history; it is kept for the following updates.
+        es: >
+          Quien acaba de entrar al equipo ya no ve el aviso "el sistema se actualizó" con todo
+          el historial de versiones; queda para las actualizaciones siguientes.
+    - tipo: correcao
+      modulo: Geral
+      publico: []
+      texto:
+        pt-br: >
+          No painel do Django, as listas de ações e filtros mostravam "Select an option" em
+          inglês; agora aparecem em português e em espanhol.
+        en: >
+          In the Django admin, the action and filter lists showed "Select an option" in English
+          in every language; they are now in Portuguese and Spanish.
+        es: >
+          En el panel de Django, las listas de acciones y filtros mostraban "Select an option" en
+          inglés; ahora aparecen en portugués y en español.
+
 - versao: 0.41.5
   data: 2026-10-30
   titulo:

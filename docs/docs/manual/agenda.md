@@ -14,7 +14,7 @@ sidebar_position: 2
 **Practitioners** see only their own schedule. If the schedule is empty with a notice, ask the administrator to link your user to your practitioner record.
 
 ## Booking
-1. Click a free slot, or drag over several slots.
+1. Click a free slot, or drag over several slots. On a phone or tablet, tap the free slot.
 2. Choose the **appointment type** and the **patient** (type part of the name, the code or the CPF and pick from the list).
 3. Without a registered patient, write a **description** (for example, "Meeting" or "Blocked").
 4. To repeat every week, fill in **Repeat for how many weeks** (1 = only on this date).

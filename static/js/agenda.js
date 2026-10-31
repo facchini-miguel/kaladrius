@@ -14,6 +14,18 @@
   const hora = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   const dataISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
+  const toque = window.matchMedia("(pointer: coarse)").matches;
+
+  function abrirNovo(inicio, fim) {
+    const params = new URLSearchParams({
+      profissional: config.profissional,
+      data: dataISO(inicio),
+      inicio: hora(inicio),
+      fim: hora(fim),
+    });
+    abrirModal(`${config.urls.novo}?${params}`);
+  }
+
   function abrirModal(url) {
     htmx.ajax("GET", url, { target: "#modal-conteudo", swap: "innerHTML" }).then(() => modal.show());
   }
@@ -77,13 +89,13 @@
     datesSet: marcarDias,
     select(info) {
       calendario.unselect();
-      const params = new URLSearchParams({
-        profissional: config.profissional,
-        data: dataISO(info.start),
-        inicio: hora(info.start),
-        fim: hora(info.end),
-      });
-      abrirModal(`${config.urls.novo}?${params}`);
+      abrirNovo(info.start, info.end);
+    },
+    // Touch screens (phones, tablets): the calendar only selects after holding a finger for a
+    // second, which nobody finds; a tap on a free slot opens the new appointment for that slot.
+    dateClick(info) {
+      if (!config.pode.criar || !toque) return;
+      abrirNovo(info.date, new Date(info.date.getTime() + config.intervalo * 60000));
     },
     eventClick(info) {
       if (config.pode.alterar) abrirModal(info.event.extendedProps.url);
