@@ -23,6 +23,11 @@ After changing it, restart: `kaladrius up -d` (the containers whose settings cha
 | `DJANGO_BACKUP_MONITORADO` | on when `DJANGO_DEBUG=0` | Warns superusers when no backup was recorded in the last 26 hours |
 | `DJANGO_SAUDE_MONITORADA` | on when `DJANGO_DEBUG=0` | Warns superusers when the server health samples stop or a resource is critical. Set `0` outside the Google Cloud installation |
 | `DJANGO_SAUDE_DIR` | `/saude` | Folder, inside the container, with the health samples |
+| `DJANGO_EMAIL_HOST` | empty | SMTP server for password recovery by e-mail; empty: no recovery, the administrator sets new passwords |
+| `DJANGO_EMAIL_PORT` | `587` | SMTP port |
+| `DJANGO_EMAIL_USER` / `DJANGO_EMAIL_PASSWORD` | empty | SMTP login |
+| `DJANGO_EMAIL_TLS` | `1` | STARTTLS on the SMTP connection |
+| `DJANGO_EMAIL_FROM` | the SMTP user | Sender of the e-mails |
 | `DJANGO_DOCS_URL` | `https://kaladrius-docs.facchini.eti.br` | This documentation site. The **Help** menu opens it in the user's language |
 
 ## Database
@@ -67,6 +72,6 @@ After the first login you can remove `DJANGO_ADMIN_PASSWORD` from the file.
 These are in `config/settings.py` and apply to every installation:
 
 - **Time zone** `America/Sao_Paulo` and **default language** Portuguese (each user can switch to English or Spanish).
-- **Sessions** last up to 8 hours and end when the browser closes.
-- **Login lockout:** 5 wrong passwords for the same user from the same address block it for 1 hour.
+- **Sessions** end after 30 minutes without use and when the browser closes.
+- **Login lockout:** 5 wrong passwords for the same user from the same address block it for 1 hour; 20 wrong logins from one address, whatever the user, block that address for 1 hour.
 - **Uploads** up to 6 MB (the largest is an OFX bank statement), limited by Caddy.

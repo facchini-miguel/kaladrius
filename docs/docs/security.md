@@ -14,8 +14,10 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 | **Data of the clinic only** | Every query is limited to the installation's clinic, and a person needs an active membership to enter |
 | **Roles** | Administrator, front desk and practitioner; a practitioner sees only their own schedule and no clinic money |
 | **Passwords** | Stored with Argon2; at least 10 characters, not common, not only numbers, not similar to the user name |
-| **Login lockout** | 5 wrong passwords for the same user from the same address block it for 1 hour |
-| **Sessions** | Up to 8 hours, ending when the browser closes; cookies `HttpOnly` and, with `DJANGO_SECURE=1`, `Secure` |
+| **Login lockout** | 5 wrong passwords (or two-step codes) for the same user from the same address block it for 1 hour; 20 wrong logins from one address, whatever the user, block that address for 1 hour |
+| **Two-step verification** | Optional per person: a code from an authenticator app (TOTP, QR code) after the password, with 10 single-use recovery codes; the clinic administrator can remove it for someone who lost the phone |
+| **Sessions** | End after 30 minutes without use (the page also leaves by itself, with a warning 2 minutes before) and when the browser closes; cookies `HttpOnly` and, with `DJANGO_SECURE=1`, `Secure` |
+| **Password recovery** | By e-mail, only when the installation configures SMTP (`DJANGO_EMAIL_*`); the link works once, for 1 hour; never for the public demo logins |
 | **HTTPS** | Automatic certificate (Caddy); with `DJANGO_SECURE=1`, redirect to HTTPS and HSTS for one year |
 | **Content Security Policy** | Only the system's own scripts run; no CDN, no inline JavaScript |
 | **Audit log** | Who created, changed, deleted or opened each record, when and from which address; cannot be changed |

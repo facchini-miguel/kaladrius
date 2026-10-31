@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "apps.core",
+    "apps.conta",
     "apps.novidades",
     "apps.profissionais",
     "apps.referencias",
@@ -120,6 +121,7 @@ TEMPLATES = [
                 "apps.core.context_processors.backup",
                 "apps.monitoramento.context_processors.alerta",
                 "apps.core.context_processors.idiomas",
+                "apps.core.context_processors.inatividade",
                 "apps.ajuda.context_processors.documentacao",
                 "apps.prontuario.context_processors.prontuario",
             ],
@@ -219,10 +221,32 @@ MESSAGE_TAGS = {messages.ERROR: "danger"}
 # Version history file (What's new page, API and footer)
 RELEASES_ARQUIVO = BASE_DIR / "releases.yaml"
 
-# Session: expires after 8 hours and when the browser closes
-SESSION_COOKIE_AGE = 8 * 60 * 60
+# Session: ends after 30 minutes without use (renewed on every request; the page also
+# leaves by itself, decision 111) and when the browser closes.
+INATIVIDADE_MINUTOS = 30
+SESSION_COOKIE_AGE = INATIVIDADE_MINUTOS * 60
+SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True
+
+# Password recovery by e-mail (decision 111): only when the installation has an SMTP server.
+_SERVIDOR_EMAIL = env("DJANGO_EMAIL_HOST", "")
+RECUPERAR_SENHA_POR_EMAIL = bool(_SERVIDOR_EMAIL)
+if _SERVIDOR_EMAIL:
+    MAILERS = {
+        "default": {
+            "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+            "OPTIONS": {
+                "host": _SERVIDOR_EMAIL,
+                "port": int(env("DJANGO_EMAIL_PORT", "587")),
+                "username": env("DJANGO_EMAIL_USER", ""),
+                "password": env("DJANGO_EMAIL_PASSWORD", ""),
+                "use_tls": env_bool("DJANGO_EMAIL_TLS", True),
+            },
+        }
+    }
+    DEFAULT_FROM_EMAIL = env("DJANGO_EMAIL_FROM", env("DJANGO_EMAIL_USER", ""))
+PASSWORD_RESET_TIMEOUT = 60 * 60  # the e-mailed link works for 1 hour
 
 # Protections that require HTTPS: enabled in production with DJANGO_SECURE=1
 if env_bool("DJANGO_SECURE"):

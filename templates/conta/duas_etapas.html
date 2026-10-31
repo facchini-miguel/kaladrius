@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Verificação em duas etapas" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Verificação em duas etapas" %}</h1>
+{% if ativa %}
+<p><span class="badge text-bg-success">{% translate "Ativa" %}</span> {% translate "Ao entrar, depois da senha, o sistema pede o código do aplicativo autenticador." %}</p>
+<p class="text-body-secondary">{% blocktranslate count n=restantes %}Resta {{ n }} código de recuperação sem uso.{% plural %}Restam {{ n }} códigos de recuperação sem uso.{% endblocktranslate %}</p>
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h2 class="h6">{% translate "Novos códigos de recuperação" %}</h2>
+      <p class="small text-body-secondary">{% translate "Os códigos antigos param de funcionar." %}</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="codigos">
+        {% include "includes/formulario.html" with form=novos %}
+        <button type="submit" class="btn btn-outline-primary">{% translate "Gerar novos códigos" %}</button>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h2 class="h6">{% translate "Desativar" %}</h2>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="acao" value="desativar">
+        {% include "includes/formulario.html" with form=desativar %}
+        <button type="submit" class="btn btn-outline-danger">{% translate "Desativar a verificação em duas etapas" %}</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% else %}
+<p>{% translate "Além da senha, o sistema passa a pedir um código que muda a cada 30 segundos, gerado por um aplicativo no seu celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha não entra sem o celular." %}</p>
+<ol>
+  <li>{% translate "Instale um aplicativo autenticador no celular." %}</li>
+  <li>{% translate "No aplicativo, adicione uma conta lendo este QR code:" %}</li>
+</ol>
+<div class="d-flex flex-wrap align-items-center gap-4 mb-3">
+  <div class="bg-white p-2 border rounded qr-codigo">{{ qr|safe }}</div>
+  <div class="small">
+    {% translate "Sem câmera? Digite esta chave no aplicativo:" %}<br>
+    <code class="fs-6 user-select-all">{{ segredo }}</code><br>
+    <a href="?novo=1">{% translate "Gerar outra chave" %}</a>
+  </div>
+</div>
+<ol start="3"><li>{% translate "Digite o código de 6 números que o aplicativo mostra:" %}</li></ol>
+<form method="post" style="max-width: 20rem;" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="acao" value="ativar">
+  {% include "includes/formulario.html" %}
+  <button type="submit" class="btn btn-primary">{% translate "Ativar" %}</button>
+</form>
+{% endif %}
+{% endblock %}

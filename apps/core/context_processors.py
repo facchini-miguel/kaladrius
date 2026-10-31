@@ -44,3 +44,11 @@ def backup(request):
     if timezone.now() - ultimo.momento <= BACKUP_ATRASADO_APOS:
         return {}
     return {"backup_atrasado": ultimo}
+
+
+def inatividade(request):
+    """Minutes without use before the page leaves by itself (decision 111)."""
+    usuario = getattr(request, "user", None)
+    if usuario is None or not usuario.is_authenticated:
+        return {}
+    return {"inatividade_minutos": settings.INATIVIDADE_MINUTOS}

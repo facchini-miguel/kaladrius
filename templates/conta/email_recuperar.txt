@@ -1,0 +1,9 @@
+{% load i18n %}{% blocktranslate with nome=user.get_full_name|default:user.get_username %}Olá, {{ nome }}.{% endblocktranslate %}
+
+{% translate "Alguém pediu uma senha nova para a sua conta. Para criar a senha, abra o link abaixo (ele vale por 1 hora e funciona uma vez):" %}
+
+{{ protocol }}://{{ domain }}{% url 'conta:nova_senha' uidb64=uid token=token %}
+
+{% blocktranslate with usuario=user.get_username %}Seu usuário: {{ usuario }}{% endblocktranslate %}
+
+{% translate "Se não foi você, ignore este e-mail: a senha atual continua valendo." %}

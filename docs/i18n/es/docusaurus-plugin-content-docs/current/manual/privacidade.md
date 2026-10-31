@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidad
 
-Versión 4 · 30/10/2026
+Versión 5 · 31/10/2026
 
 Esta política explica cómo se tratan los datos personales de pacientes, responsables, equipo y proveedores en **Kaladrius**, el sistema de gestión que usa la clínica: qué datos, para qué, con qué base legal, quién tiene acceso, dónde se guardan, por cuánto tiempo y cómo ejercer sus derechos. Sigue la Ley General de Protección de Datos Personales de Brasil (LGPD, Ley 13.709/2018) y la ley sobre historias clínicas electrónicas (Ley 13.787/2018).
 
@@ -87,14 +87,14 @@ Usted puede pedir a la clínica, gratuitamente y en cualquier momento (LGPD, art
 **Cómo pedir:** en la recepción o por el canal de la sección 2. Para proteger sus datos, la clínica puede pedirle que confirme su identidad. La confirmación y el acceso pueden darse en el momento, de forma simplificada, o en hasta 15 días, de forma completa (art. 19). Si no queda satisfecho, puede reclamar ante la ANPD, en [gov.br/anpd](https://www.gov.br/anpd).
 
 ## 9. Seguridad
-- Contraseñas guardadas de forma irreversible (ni la clínica las ve); acceso bloqueado por una hora después de 5 intentos incorrectos; sesión cerrada a las 8 horas.
+- Contraseñas guardadas de forma irreversible (ni la clínica las ve); acceso bloqueado por una hora después de 5 intentos incorrectos; verificación en dos pasos opcional, con aplicación autenticadora; sesión cerrada después de 30 minutos sin uso.
 - Acceso por perfil y registro de todos los cambios.
 - Copias de seguridad diarias, con pruebas de recuperación.
 
 Ningún sistema es totalmente inmune a fallas. Si ocurre un incidente de seguridad que pueda causar riesgo o daño relevante, la clínica comunica a los afectados y a la ANPD en hasta 3 días hábiles (art. 48 y Resolución CD/ANPD n.º 15/2024).
 
 ## 10. Cookies
-El sistema usa solo las cookies necesarias para funcionar: la de la sesión (mantiene a la persona conectada; vence a las 8 horas), la de protección de los formularios y la del idioma elegido (1 año). No hay cookies de publicidad, de estadística ni de terceros.
+El sistema usa solo las cookies necesarias para funcionar: la de la sesión (mantiene a la persona conectada; vence después de 30 minutos sin uso), la de protección de los formularios y la del idioma elegido (1 año). No hay cookies de publicidad, de estadística ni de terceros.
 
 ## 11. Cambios en esta política
 Cuando esta política cambie, la nueva versión se publica en esta página, con su fecha. Los cambios importantes también se avisan en la clínica.

@@ -27,4 +27,16 @@
   {% endif %}
   <a class="btn btn-link" href="{% url 'equipe:lista' %}">{% translate "Cancelar" %}</a>
 </form>
+{% if duas_etapas %}
+<div class="card mt-4" style="max-width: 36rem;"><div class="card-body">
+  <h2 class="h6">{% translate "Verificação em duas etapas" %} <span class="badge text-bg-success">{% translate "Ativa" %}</span></h2>
+  {% if exclusiva and vinculo.usuario != user %}
+  <p class="small text-body-secondary">{% translate "Se a pessoa perdeu o celular e os códigos de recuperação, remova a verificação: ela entra só com a senha e ativa de novo com um QR code novo." %}</p>
+  <form method="post" action="{% url 'equipe:duas_etapas' vinculo.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-outline-danger">{% translate "Remover a verificação em duas etapas" %}</button>
+  </form>
+  {% endif %}
+</div></div>
+{% endif %}
 {% endblock %}

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' data-mostrar-senha="{% translate 'Mostrar a senha' %}" data-ocultar-senha="{% translate 'Ocultar a senha' %}"{% if inatividade_minutos %} data-inatividade="{{ inatividade_minutos }}" data-url-ativo="{% url 'conta:ativo' %}" data-url-saiu="{% url 'login' %}?inatividade=1" data-aviso-inatividade="{% translate 'Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque na tela ou use o teclado para continuar.' %}"{% endif %}>
   {% if user.is_authenticated %}
   <nav class="navbar navbar-expand-lg bg-primary sticky-top d-print-none" data-bs-theme="dark">
     <div class="container-fluid">
@@ -168,10 +168,11 @@
             <ul class="dropdown-menu dropdown-menu-end">
               {% if not user.demonstracao %}
               <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">{% translate "Trocar senha" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'conta:duas_etapas' %}">{% translate "Verificação em duas etapas" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               {% endif %}
               <li>
-                <form method="post" action="{% url 'logout' %}">
+                <form method="post" action="{% url 'logout' %}" id="form-sair">
                   {% csrf_token %}
                   <button type="submit" class="dropdown-item">{% translate "Sair" %}</button>
                 </form>

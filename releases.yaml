@@ -4,6 +4,68 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.42.0
+  data: 2026-10-31
+  titulo:
+    pt-br: Segurança do login
+    en: Login security
+    es: Seguridad del ingreso
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Verificação em duas etapas: além da senha, o sistema pode pedir um código de um
+          aplicativo autenticador no celular, ativado lendo um QR code no menu com o seu nome.
+        en: >
+          Two-step verification: besides the password, the system can ask for a code from an
+          authenticator app on the phone, turned on by reading a QR code in the menu with your
+          name.
+        es: >
+          Verificación en dos pasos: además de la contraseña, el sistema puede pedir un código de
+          una aplicación autenticadora en el celular, activada leyendo un código QR en el menú
+          con su nombre.
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Depois de 30 minutos sem uso, o sistema sai sozinho, com um aviso 2 minutos antes, para
+          os dados dos pacientes não ficarem numa tela sem ninguém.
+        en: >
+          After 30 minutes without use, the system logs out by itself, with a warning 2 minutes
+          before, so patient data does not stay on an unattended screen.
+        es: >
+          Después de 30 minutos sin uso, el sistema sale solo, con un aviso 2 minutos antes, para
+          que los datos de los pacientes no queden en una pantalla sin nadie.
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Um olho ao lado de cada campo de senha mostra o que foi digitado.
+        en: >
+          An eye beside each password field shows what was typed.
+        es: >
+          Un ojo al lado de cada campo de contraseña muestra lo que se escribió.
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          "Esqueci minha senha" envia um link por e-mail para criar uma senha nova, quando a
+          instalação tem e-mail configurado. E muitas tentativas erradas a partir do mesmo
+          endereço passam a bloquear esse endereço por 1 hora, seja qual for o usuário.
+        en: >
+          "Forgot my password" e-mails a link to create a new password, when the installation has
+          e-mail set up. And many wrong attempts from the same address now block that address for
+          1 hour, whatever the user.
+        es: >
+          "Olvidé mi contraseña" envía un enlace por correo para crear una contraseña nueva,
+          cuando la instalación tiene correo configurado. Y muchos intentos erróneos desde la
+          misma dirección pasan a bloquear esa dirección por 1 hora, sea cual sea el usuario.
+
 - versao: 0.41.9
   data: 2026-10-31
   titulo:

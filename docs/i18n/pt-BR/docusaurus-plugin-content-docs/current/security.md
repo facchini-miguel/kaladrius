@@ -14,8 +14,10 @@ O Kaladrius guarda dados de saúde, o tipo mais sensível de dado pessoal. Esta 
 | **Só os dados da clínica** | Toda consulta ao banco é limitada à clínica da instalação, e a pessoa precisa de um vínculo ativo para entrar |
 | **Perfis** | Administrador, recepção e profissional; o profissional vê só a própria agenda e nenhum valor da clínica |
 | **Senhas** | Guardadas com Argon2; no mínimo 10 caracteres, não comuns, não só números, não parecidas com o nome de usuário |
-| **Bloqueio de login** | 5 senhas erradas para o mesmo usuário a partir do mesmo endereço bloqueiam por 1 hora |
-| **Sessões** | Até 8 horas, terminando quando o navegador fecha; cookies `HttpOnly` e, com `DJANGO_SECURE=1`, `Secure` |
+| **Bloqueio de login** | 5 senhas (ou códigos da verificação em duas etapas) erradas para o mesmo usuário a partir do mesmo endereço bloqueiam por 1 hora; 20 entradas erradas de um endereço, seja qual for o usuário, bloqueiam esse endereço por 1 hora |
+| **Verificação em duas etapas** | Opcional por pessoa: um código de aplicativo autenticador (TOTP, QR code) depois da senha, com 10 códigos de recuperação de uso único; o administrador da clínica pode removê-la de quem perdeu o celular |
+| **Sessões** | Terminam depois de 30 minutos sem uso (a página também sai sozinha, com aviso 2 minutos antes) e quando o navegador fecha; cookies `HttpOnly` e, com `DJANGO_SECURE=1`, `Secure` |
+| **Recuperação de senha** | Por e-mail, só quando a instalação configura SMTP (`DJANGO_EMAIL_*`); o link vale uma vez, por 1 hora; nunca para os logins públicos da demonstração |
 | **HTTPS** | Certificado automático (Caddy); com `DJANGO_SECURE=1`, redireciona para HTTPS e usa HSTS de um ano |
 | **Content Security Policy** | Só rodam os scripts do próprio sistema; sem CDN, sem JavaScript embutido na página |
 | **Auditoria** | Quem criou, alterou, excluiu ou abriu cada registro, quando e de qual endereço; não pode ser alterada |

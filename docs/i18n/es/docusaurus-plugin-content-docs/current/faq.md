@@ -40,9 +40,11 @@ El bloqueo termina solo después de 1 hora. Para liberarlo ahora:
 kaladrius exec app python manage.py axes_reset_username <usuario>
 ```
 
+Si una dirección entera quedó bloqueada (20 ingresos erróneos desde ella, sea cual sea el usuario), libérela con `axes_reset_ip <dirección>` de la misma forma.
+
 ## Alguien olvidó la contraseña
 
-El administrador de la clínica define una nueva en **Registros > Equipo > Definir nueva contraseña**. Para el superusuario:
+Con el correo configurado (`DJANGO_EMAIL_HOST`), la persona usa **Olvidé mi contraseña** en la pantalla de ingreso. Si no, el administrador de la clínica define una nueva en **Registros > Equipo > Definir nueva contraseña**. Para el superusuario:
 
 ```bash
 kaladrius exec app python manage.py changepassword <usuario>

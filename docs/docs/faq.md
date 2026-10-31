@@ -40,9 +40,11 @@ The lockout ends by itself after 1 hour. To release it now:
 kaladrius exec app python manage.py axes_reset_username <user name>
 ```
 
+If a whole address was blocked (20 wrong logins from it, whatever the user), release it with `axes_reset_ip <address>` the same way.
+
 ## Someone forgot their password
 
-The clinic administrator sets a new one in **Records > Team > Set new password**. For the superuser:
+With e-mail configured (`DJANGO_EMAIL_HOST`), the person uses **Forgot my password** on the login page. Otherwise, the clinic administrator sets a new one in **Records > Team > Set new password**. For the superuser:
 
 ```bash
 kaladrius exec app python manage.py changepassword <user name>

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 00:53-0300\n"
+"POT-Creation-Date: 2026-10-31 01:29-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -45,7 +45,9 @@ msgstr "Enter the patient or a description."
 msgid ""
 "Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
 "“Agendar outro paciente neste horário”."
-msgstr "This appointment was cancelled. To put another patient at this time, use “Book another patient at this time”."
+msgstr ""
+"This appointment was cancelled. To put another patient at this time, use "
+"“Book another patient at this time”."
 
 msgid "O fim deve ser depois do início."
 msgstr "The end must be after the start."
@@ -276,6 +278,76 @@ msgstr "audit entry"
 msgid "registros de auditoria"
 msgstr "audit entries"
 
+msgid "Conta"
+msgstr "Account"
+
+msgid ""
+"Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."
+msgstr "Too many wrong attempts from this address. Try again in 1 hour."
+
+msgid "Código"
+msgstr "Code"
+
+#
+msgid "Sua senha"
+msgstr "Your password"
+
+#
+msgid "Código do aplicativo"
+msgstr "App code"
+
+#
+msgid "Senha incorreta."
+msgstr "Wrong password."
+
+#
+msgid "Código incorreto."
+msgstr "Wrong code."
+
+msgid "segredo"
+msgstr "secret"
+
+msgid "ativa"
+msgstr "active"
+
+#
+msgid "ativada em"
+msgstr "turned on at"
+
+msgid "verificação em duas etapas"
+msgstr "two-step verification"
+
+msgid "verificações em duas etapas"
+msgstr "two-step verifications"
+
+#
+msgid "usado em"
+msgstr "used at"
+
+#
+msgid "código de recuperação"
+msgstr "recovery code"
+
+#
+msgid "códigos de recuperação"
+msgstr "recovery codes"
+
+msgid "Entre de novo com o usuário e a senha."
+msgstr "Log in again with the username and password."
+
+msgid "Muitos códigos errados. Entre de novo."
+msgstr "Too many wrong codes. Log in again."
+
+#
+msgid "Contas de demonstração não usam verificação em duas etapas."
+msgstr "Demo accounts do not use two-step verification."
+
+msgid "Verificação em duas etapas desativada."
+msgstr "Two-step verification turned off."
+
+msgid "Código incorreto. Confira a hora do celular e tente de novo."
+msgstr "Wrong code. Check the phone's clock and try again."
+
 msgid "Convênios"
 msgstr "Health plans"
 
@@ -331,9 +403,6 @@ msgstr "holder"
 
 msgid "Se o paciente for dependente, o nome do titular do plano."
 msgstr "If the patient is a dependent, the name of the plan holder."
-
-msgid "ativa"
-msgstr "active"
 
 msgid "carteirinha"
 msgstr "card"
@@ -660,6 +729,10 @@ msgstr ""
 msgid "Nova senha de %(nome)s definida."
 msgstr "New password set for %(nome)s."
 
+#, python-format
+msgid "Verificação em duas etapas de %(nome)s removida."
+msgstr "Two-step verification of %(nome)s removed."
+
 msgid "Não há comissão a pagar até esta data."
 msgstr "There is no commission to pay up to this date."
 
@@ -706,9 +779,6 @@ msgstr "The 1st installment has just been paid"
 
 msgid "Forma de pagamento"
 msgstr "Payment method"
-
-msgid "Conta"
-msgstr "Account"
 
 msgid "Só se quem paga não for um paciente cadastrado."
 msgstr "Only if the payer is not a registered patient."
@@ -2522,6 +2592,19 @@ msgstr[1] "%(total)s fields"
 msgid "Nenhum registro encontrado."
 msgstr "No entries found."
 
+#
+msgid "Mostrar a senha"
+msgstr "Show the password"
+
+#
+msgid "Ocultar a senha"
+msgstr "Hide the password"
+
+msgid ""
+"Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque "
+"na tela ou use o teclado para continuar."
+msgstr "Without use, you will be logged out in 2 minutes. Move the mouse, touch the screen or use the keyboard to stay."
+
 msgid "Abrir menu"
 msgstr "Open menu"
 
@@ -2613,6 +2696,9 @@ msgstr "Django admin"
 msgid "Trocar senha"
 msgstr "Change password"
 
+msgid "Verificação em duas etapas"
+msgstr "Two-step verification"
+
 msgid "Sair"
 msgstr "Log out"
 
@@ -2672,6 +2758,149 @@ msgstr "Developed by"
 
 msgid "Política de privacidade"
 msgstr "Privacy policy"
+
+msgid ""
+"Digite o código de 6 números que aparece no aplicativo autenticador do seu "
+"celular. Sem o celular, use um dos códigos de recuperação."
+msgstr "Type the 6-digit code shown by the authenticator app on your phone. Without the phone, use one of the recovery codes."
+
+msgid "Entrar"
+msgstr "Log in"
+
+#
+msgid "Códigos de recuperação"
+msgstr "Recovery codes"
+
+msgid "Verificação em duas etapas ativada."
+msgstr "Two-step verification turned on."
+
+msgid ""
+"Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). "
+"Cada um entra uma vez no lugar do código do aplicativo, se o celular for "
+"perdido. Eles não aparecem de novo."
+msgstr "Keep these codes in a safe place, away from the phone (print or write them down). Each one logs in once instead of the app's code, if the phone is lost. They are not shown again."
+
+msgid "Imprimir"
+msgstr "Print"
+
+msgid "Já guardei"
+msgstr "I have kept them"
+
+msgid "Ativa"
+msgstr "Active"
+
+msgid ""
+"Ao entrar, depois da senha, o sistema pede o código do aplicativo "
+"autenticador."
+msgstr "When logging in, after the password, the system asks for the authenticator app's code."
+
+#, python-format
+msgid "Resta %(n)s código de recuperação sem uso."
+msgid_plural "Restam %(n)s códigos de recuperação sem uso."
+msgstr[0] "%(n)s unused recovery code left."
+msgstr[1] "%(n)s unused recovery codes left."
+
+msgid "Novos códigos de recuperação"
+msgstr "New recovery codes"
+
+msgid "Os códigos antigos param de funcionar."
+msgstr "The old codes stop working."
+
+msgid "Gerar novos códigos"
+msgstr "Make new codes"
+
+#
+msgid "Desativar"
+msgstr "Turn off"
+
+msgid "Desativar a verificação em duas etapas"
+msgstr "Turn off two-step verification"
+
+msgid ""
+"Além da senha, o sistema passa a pedir um código que muda a cada 30 "
+"segundos, gerado por um aplicativo no seu celular (Google Authenticator, "
+"Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha "
+"não entra sem o celular."
+msgstr "Besides the password, the system asks for a code that changes every 30 seconds, made by an app on your phone (Google Authenticator, Microsoft Authenticator, Authy, 2FAS or another). Whoever finds out your password cannot get in without the phone."
+
+msgid "Instale um aplicativo autenticador no celular."
+msgstr "Install an authenticator app on the phone."
+
+msgid "No aplicativo, adicione uma conta lendo este QR code:"
+msgstr "In the app, add an account by reading this QR code:"
+
+msgid "Sem câmera? Digite esta chave no aplicativo:"
+msgstr "No camera? Type this key in the app:"
+
+msgid "Gerar outra chave"
+msgstr "Make another key"
+
+msgid "Digite o código de 6 números que o aplicativo mostra:"
+msgstr "Type the 6-digit code the app shows:"
+
+#
+msgid "Ativar"
+msgstr "Turn on"
+
+#, python-format
+msgid "Olá, %(nome)s."
+msgstr "Hello, %(nome)s."
+
+msgid ""
+"Alguém pediu uma senha nova para a sua conta. Para criar a senha, abra o "
+"link abaixo (ele vale por 1 hora e funciona uma vez):"
+msgstr "Someone asked for a new password for your account. To create it, open the link below (it works once, for 1 hour):"
+
+#, python-format
+msgid "Seu usuário: %(usuario)s"
+msgstr "Your username: %(usuario)s"
+
+msgid "Se não foi você, ignore este e-mail: a senha atual continua valendo."
+msgstr "If it was not you, ignore this e-mail: the current password still works."
+
+#, python-format
+msgid "%(sistema)s: criar uma senha nova"
+msgstr "%(sistema)s: create a new password"
+
+msgid "Nova senha"
+msgstr "New password"
+
+msgid "Este link não vale mais: ele já foi usado ou passou de 1 hora."
+msgstr "This link no longer works: it was already used or more than 1 hour went by."
+
+msgid "Pedir outro link"
+msgstr "Ask for another link"
+
+msgid "Esqueci minha senha"
+msgstr "Forgot my password"
+
+msgid ""
+"Informe o e-mail da sua conta. Se ele estiver cadastrado, você recebe um "
+"link para criar uma senha nova, que vale por 1 hora."
+msgstr "Enter your account's e-mail. If it is registered, you get a link to create a new password, which works for 1 hour."
+
+msgid "Enviar o link"
+msgstr "Send the link"
+
+msgid "Confira o seu e-mail"
+msgstr "Check your e-mail"
+
+msgid ""
+"Se o e-mail estiver cadastrado, o link para criar uma senha nova chega em "
+"alguns minutos. Olhe também a caixa de spam."
+msgstr "If the e-mail is registered, the link to create a new password arrives in a few minutes. Also look in the spam folder."
+
+#
+msgid "Voltar para entrar"
+msgstr "Back to log in"
+
+#
+#
+msgid "Senha salva"
+msgstr "Password saved"
+
+msgid "Agora entre com a senha nova."
+msgstr "Now log in with the new password."
 
 msgid "Carteirinha"
 msgstr "Card"
@@ -2954,6 +3183,14 @@ msgstr ""
 msgid "Definir nova senha"
 msgstr "Set new password"
 
+msgid ""
+"Se a pessoa perdeu o celular e os códigos de recuperação, remova a "
+"verificação: ela entra só com a senha e ativa de novo com um QR code novo."
+msgstr "If the person lost the phone and the recovery codes, remove the verification: they log in with the password only and turn it on again with a new QR code."
+
+msgid "Remover a verificação em duas etapas"
+msgstr "Remove two-step verification"
+
 msgid "Novo membro"
 msgstr "New member"
 
@@ -2988,9 +3225,6 @@ msgid ""
 msgstr ""
 "Give the password to the person and ask them to change it on first login "
 "(menu with their name › Change password)."
-
-msgid "Nova senha"
-msgstr "New password"
 
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "The person is logged out on the devices where they are signed in."
@@ -3038,9 +3272,6 @@ msgstr "Month"
 
 msgid "Tipo"
 msgstr "Type"
-
-msgid "Ativa"
-msgstr "Active"
 
 msgid "Inativa"
 msgstr "Inactive"
@@ -3940,9 +4171,6 @@ msgstr "Approve"
 msgid "válido até %(validade)s"
 msgstr "valid until %(validade)s"
 
-msgid "Imprimir"
-msgstr "Print"
-
 msgid "Recusar"
 msgstr "Refuse"
 
@@ -4131,9 +4359,6 @@ msgstr ""
 
 msgid "Excluir definitivamente"
 msgstr "Delete permanently"
-
-msgid "Código"
-msgstr "Code"
 
 msgid "Arquivado"
 msgstr "Archived"
@@ -4730,8 +4955,11 @@ msgstr "You have logged out."
 msgid "Entrar novamente"
 msgstr "Log in again"
 
-msgid "Entrar"
-msgstr "Log in"
+#, python-format
+msgid ""
+"Você saiu do sistema depois de %(minutos)s minutos sem uso. Entre de novo "
+"para continuar."
+msgstr "You were logged out after %(minutos)s minutes without use. Log in again to continue."
 
 msgid "Usuário ou senha incorretos."
 msgstr "Incorrect username or password."

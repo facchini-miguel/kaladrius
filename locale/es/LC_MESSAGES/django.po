@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 00:53-0300\n"
+"POT-Creation-Date: 2026-10-31 01:29-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -45,7 +45,9 @@ msgstr "Indique el paciente o una descripción."
 msgid ""
 "Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
 "“Agendar outro paciente neste horário”."
-msgstr "Esta cita fue cancelada. Para poner otro paciente en este horario, use “Agendar otro paciente en este horario”."
+msgstr ""
+"Esta cita fue cancelada. Para poner otro paciente en este horario, use "
+"“Agendar otro paciente en este horario”."
 
 msgid "O fim deve ser depois do início."
 msgstr "El fin debe ser posterior al inicio."
@@ -275,6 +277,76 @@ msgstr "registro de auditoría"
 msgid "registros de auditoria"
 msgstr "registros de auditoría"
 
+msgid "Conta"
+msgstr "Cuenta"
+
+msgid ""
+"Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."
+msgstr "Demasiados intentos erróneos desde esta dirección. Inténtelo de nuevo en 1 hora."
+
+msgid "Código"
+msgstr "Código"
+
+#
+msgid "Sua senha"
+msgstr "Su contraseña"
+
+#
+msgid "Código do aplicativo"
+msgstr "Código de la aplicación"
+
+#
+msgid "Senha incorreta."
+msgstr "Contraseña incorrecta."
+
+#
+msgid "Código incorreto."
+msgstr "Código incorrecto."
+
+msgid "segredo"
+msgstr "secreto"
+
+msgid "ativa"
+msgstr "activa"
+
+#
+msgid "ativada em"
+msgstr "activada el"
+
+msgid "verificação em duas etapas"
+msgstr "verificación en dos pasos"
+
+msgid "verificações em duas etapas"
+msgstr "verificaciones en dos pasos"
+
+#
+msgid "usado em"
+msgstr "usado el"
+
+#
+msgid "código de recuperação"
+msgstr "código de recuperación"
+
+#
+msgid "códigos de recuperação"
+msgstr "códigos de recuperación"
+
+msgid "Entre de novo com o usuário e a senha."
+msgstr "Ingrese de nuevo con el usuario y la contraseña."
+
+msgid "Muitos códigos errados. Entre de novo."
+msgstr "Demasiados códigos erróneos. Ingrese de nuevo."
+
+#
+msgid "Contas de demonstração não usam verificação em duas etapas."
+msgstr "Las cuentas de demostración no usan verificación en dos pasos."
+
+msgid "Verificação em duas etapas desativada."
+msgstr "Verificación en dos pasos desactivada."
+
+msgid "Código incorreto. Confira a hora do celular e tente de novo."
+msgstr "Código incorrecto. Verifique la hora del celular e inténtelo de nuevo."
+
 msgid "Convênios"
 msgstr "Convenios"
 
@@ -330,9 +402,6 @@ msgstr "titular"
 
 msgid "Se o paciente for dependente, o nome do titular do plano."
 msgstr "Si el paciente es dependiente, el nombre del titular del plan."
-
-msgid "ativa"
-msgstr "activa"
 
 msgid "carteirinha"
 msgstr "credencial"
@@ -659,6 +728,10 @@ msgstr ""
 msgid "Nova senha de %(nome)s definida."
 msgstr "Nueva contraseña de %(nome)s definida."
 
+#, python-format
+msgid "Verificação em duas etapas de %(nome)s removida."
+msgstr "Verificación en dos pasos de %(nome)s quitada."
+
 msgid "Não há comissão a pagar até esta data."
 msgstr "No hay comisión por pagar hasta esta fecha."
 
@@ -705,9 +778,6 @@ msgstr "La 1.ª cuota ya se pagó ahora"
 
 msgid "Forma de pagamento"
 msgstr "Forma de pago"
-
-msgid "Conta"
-msgstr "Cuenta"
 
 msgid "Só se quem paga não for um paciente cadastrado."
 msgstr "Solo si quien paga no es un paciente registrado."
@@ -2521,6 +2591,19 @@ msgstr[1] "%(total)s campos"
 msgid "Nenhum registro encontrado."
 msgstr "Ningún registro encontrado."
 
+#
+msgid "Mostrar a senha"
+msgstr "Mostrar la contraseña"
+
+#
+msgid "Ocultar a senha"
+msgstr "Ocultar la contraseña"
+
+msgid ""
+"Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque "
+"na tela ou use o teclado para continuar."
+msgstr "Por falta de uso, saldrá del sistema en 2 minutos. Mueva el mouse, toque la pantalla o use el teclado para continuar."
+
 msgid "Abrir menu"
 msgstr "Abrir menú"
 
@@ -2612,6 +2695,9 @@ msgstr "Panel de Django"
 msgid "Trocar senha"
 msgstr "Cambiar contraseña"
 
+msgid "Verificação em duas etapas"
+msgstr "Verificación en dos pasos"
+
 msgid "Sair"
 msgstr "Salir"
 
@@ -2672,6 +2758,149 @@ msgstr "Desarrollado por"
 
 msgid "Política de privacidade"
 msgstr "Política de privacidad"
+
+msgid ""
+"Digite o código de 6 números que aparece no aplicativo autenticador do seu "
+"celular. Sem o celular, use um dos códigos de recuperação."
+msgstr "Escriba el código de 6 números que aparece en la aplicación autenticadora de su celular. Sin el celular, use uno de los códigos de recuperación."
+
+msgid "Entrar"
+msgstr "Entrar"
+
+#
+msgid "Códigos de recuperação"
+msgstr "Códigos de recuperación"
+
+msgid "Verificação em duas etapas ativada."
+msgstr "Verificación en dos pasos activada."
+
+msgid ""
+"Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). "
+"Cada um entra uma vez no lugar do código do aplicativo, se o celular for "
+"perdido. Eles não aparecem de novo."
+msgstr "Guarde estos códigos en un lugar seguro, fuera del celular (imprímalos o anótelos). Cada uno sirve una vez en lugar del código de la aplicación, si se pierde el celular. No vuelven a aparecer."
+
+msgid "Imprimir"
+msgstr "Imprimir"
+
+msgid "Já guardei"
+msgstr "Ya los guardé"
+
+msgid "Ativa"
+msgstr "Activa"
+
+msgid ""
+"Ao entrar, depois da senha, o sistema pede o código do aplicativo "
+"autenticador."
+msgstr "Al ingresar, después de la contraseña, el sistema pide el código de la aplicación autenticadora."
+
+#, python-format
+msgid "Resta %(n)s código de recuperação sem uso."
+msgid_plural "Restam %(n)s códigos de recuperação sem uso."
+msgstr[0] "Queda %(n)s código de recuperación sin usar."
+msgstr[1] "Quedan %(n)s códigos de recuperación sin usar."
+
+msgid "Novos códigos de recuperação"
+msgstr "Nuevos códigos de recuperación"
+
+msgid "Os códigos antigos param de funcionar."
+msgstr "Los códigos antiguos dejan de funcionar."
+
+msgid "Gerar novos códigos"
+msgstr "Generar nuevos códigos"
+
+#
+msgid "Desativar"
+msgstr "Desactivar"
+
+msgid "Desativar a verificação em duas etapas"
+msgstr "Desactivar la verificación en dos pasos"
+
+msgid ""
+"Além da senha, o sistema passa a pedir um código que muda a cada 30 "
+"segundos, gerado por um aplicativo no seu celular (Google Authenticator, "
+"Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha "
+"não entra sem o celular."
+msgstr "Además de la contraseña, el sistema pide un código que cambia cada 30 segundos, generado por una aplicación en su celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS u otra). Quien descubra su contraseña no entra sin el celular."
+
+msgid "Instale um aplicativo autenticador no celular."
+msgstr "Instale una aplicación autenticadora en el celular."
+
+msgid "No aplicativo, adicione uma conta lendo este QR code:"
+msgstr "En la aplicación, agregue una cuenta leyendo este código QR:"
+
+msgid "Sem câmera? Digite esta chave no aplicativo:"
+msgstr "¿Sin cámara? Escriba esta clave en la aplicación:"
+
+msgid "Gerar outra chave"
+msgstr "Generar otra clave"
+
+msgid "Digite o código de 6 números que o aplicativo mostra:"
+msgstr "Escriba el código de 6 números que muestra la aplicación:"
+
+#
+msgid "Ativar"
+msgstr "Activar"
+
+#, python-format
+msgid "Olá, %(nome)s."
+msgstr "Hola, %(nome)s."
+
+msgid ""
+"Alguém pediu uma senha nova para a sua conta. Para criar a senha, abra o "
+"link abaixo (ele vale por 1 hora e funciona uma vez):"
+msgstr "Alguien pidió una contraseña nueva para su cuenta. Para crearla, abra el enlace de abajo (vale por 1 hora y funciona una vez):"
+
+#, python-format
+msgid "Seu usuário: %(usuario)s"
+msgstr "Su usuario: %(usuario)s"
+
+msgid "Se não foi você, ignore este e-mail: a senha atual continua valendo."
+msgstr "Si no fue usted, ignore este correo: la contraseña actual sigue valiendo."
+
+#, python-format
+msgid "%(sistema)s: criar uma senha nova"
+msgstr "%(sistema)s: crear una contraseña nueva"
+
+msgid "Nova senha"
+msgstr "Nueva contraseña"
+
+msgid "Este link não vale mais: ele já foi usado ou passou de 1 hora."
+msgstr "Este enlace ya no vale: ya fue usado o pasó más de 1 hora."
+
+msgid "Pedir outro link"
+msgstr "Pedir otro enlace"
+
+msgid "Esqueci minha senha"
+msgstr "Olvidé mi contraseña"
+
+msgid ""
+"Informe o e-mail da sua conta. Se ele estiver cadastrado, você recebe um "
+"link para criar uma senha nova, que vale por 1 hora."
+msgstr "Informe el correo de su cuenta. Si está registrado, recibirá un enlace para crear una contraseña nueva, que vale por 1 hora."
+
+msgid "Enviar o link"
+msgstr "Enviar el enlace"
+
+msgid "Confira o seu e-mail"
+msgstr "Revise su correo"
+
+msgid ""
+"Se o e-mail estiver cadastrado, o link para criar uma senha nova chega em "
+"alguns minutos. Olhe também a caixa de spam."
+msgstr "Si el correo está registrado, el enlace para crear una contraseña nueva llega en algunos minutos. Mire también la carpeta de spam."
+
+#
+msgid "Voltar para entrar"
+msgstr "Volver a ingresar"
+
+#
+#
+msgid "Senha salva"
+msgstr "Contraseña guardada"
+
+msgid "Agora entre com a senha nova."
+msgstr "Ahora ingrese con la contraseña nueva."
 
 msgid "Carteirinha"
 msgstr "Credencial"
@@ -2955,6 +3184,14 @@ msgstr ""
 msgid "Definir nova senha"
 msgstr "Definir nueva contraseña"
 
+msgid ""
+"Se a pessoa perdeu o celular e os códigos de recuperação, remova a "
+"verificação: ela entra só com a senha e ativa de novo com um QR code novo."
+msgstr "Si la persona perdió el celular y los códigos de recuperación, quite la verificación: ingresa solo con la contraseña y la activa de nuevo con un código QR nuevo."
+
+msgid "Remover a verificação em duas etapas"
+msgstr "Quitar la verificación en dos pasos"
+
 msgid "Novo membro"
 msgstr "Nuevo miembro"
 
@@ -2989,9 +3226,6 @@ msgid ""
 msgstr ""
 "Entregue la contraseña a la persona y pídale que la cambie en el primer "
 "acceso (menú con su nombre › Cambiar contraseña)."
-
-msgid "Nova senha"
-msgstr "Nueva contraseña"
 
 msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
 msgstr "La persona sale del sistema en los dispositivos donde esté conectada."
@@ -3039,9 +3273,6 @@ msgstr "Mes"
 
 msgid "Tipo"
 msgstr "Tipo"
-
-msgid "Ativa"
-msgstr "Activa"
 
 msgid "Inativa"
 msgstr "Inactiva"
@@ -3944,9 +4175,6 @@ msgstr "Aprobar"
 msgid "válido até %(validade)s"
 msgstr "válido hasta el %(validade)s"
 
-msgid "Imprimir"
-msgstr "Imprimir"
-
 msgid "Recusar"
 msgstr "Rechazar"
 
@@ -4138,9 +4366,6 @@ msgstr ""
 
 msgid "Excluir definitivamente"
 msgstr "Eliminar definitivamente"
-
-msgid "Código"
-msgstr "Código"
 
 msgid "Arquivado"
 msgstr "Archivado"
@@ -4740,8 +4965,11 @@ msgstr "Ha salido del sistema."
 msgid "Entrar novamente"
 msgstr "Entrar nuevamente"
 
-msgid "Entrar"
-msgstr "Entrar"
+#, python-format
+msgid ""
+"Você saiu do sistema depois de %(minutos)s minutos sem uso. Entre de novo "
+"para continuar."
+msgstr "Salió del sistema después de %(minutos)s minutos sin uso. Ingrese de nuevo para continuar."
 
 msgid "Usuário ou senha incorretos."
 msgstr "Usuario o contraseña incorrectos."

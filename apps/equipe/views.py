@@ -10,6 +10,9 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
+from apps.auditoria.models import RegistroAuditoria
+from apps.auditoria.registro import registrar
+from apps.conta import servicos as conta_servicos
 from apps.core.models import Vinculo
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 
@@ -66,7 +69,13 @@ def editar(request, pk):
     return render(
         request,
         "equipe/editar.html",
-        {"vinculo": vinculo, "form": form, "conta": conta, "exclusiva": exclusiva},
+        {
+            "vinculo": vinculo,
+            "form": form,
+            "conta": conta,
+            "exclusiva": exclusiva,
+            "duas_etapas": conta_servicos.ativa_para(usuario),
+        },
     )
 
 
@@ -95,3 +104,28 @@ def senha(request, pk):
         )
         return redirect("equipe:lista")
     return render(request, "equipe/senha.html", {"vinculo": vinculo, "form": form})
+
+
+@exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
+def duas_etapas(request, pk):
+    """Remove a member's two-step verification (lost phone, decision 111); they turn it on
+    again with a new QR code."""
+    vinculo = _vinculo(request, pk)
+    usuario = vinculo.usuario
+    if (
+        request.method == "POST"
+        and usuario != request.user
+        and conta_exclusiva(usuario, request.clinica)
+    ):
+        conta_servicos.desativar(usuario)
+        registrar(
+            RegistroAuditoria.Acao.ALTERAR,
+            usuario,
+            descricao=f"{usuario}: verificação em duas etapas removida pelo administrador",
+        )
+        messages.success(
+            request,
+            _("Verificação em duas etapas de %(nome)s removida.")
+            % {"nome": usuario.get_full_name() or usuario},
+        )
+    return redirect("equipe:editar", pk=vinculo.pk)

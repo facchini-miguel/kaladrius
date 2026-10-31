@@ -38,6 +38,7 @@ apps/
   odontologia/    dental module (dental chart), shown with the Dentistry specialty on
   convenios/      health plans and patients' cards
   pessoal/        staff, salaries and the month's pay
+  conta/          login: two-step verification, password recovery, idle logout
   prontuario/     medical record: anamnesis per visit, addenda (practitioners only)
   rechamadas/     recalls and birthdays
   financeiro/     receivables, payables, cash, banks, commissions

@@ -23,6 +23,11 @@ Después de cambiarlo, reinicie: `kaladrius up -d` (se recrean los contenedores 
 | `DJANGO_BACKUP_MONITORADO` | activado cuando `DJANGO_DEBUG=0` | Avisa a los superusuarios cuando no se registró ningún backup en las últimas 26 horas |
 | `DJANGO_SAUDE_MONITORADA` | activado cuando `DJANGO_DEBUG=0` | Avisa a los superusuarios cuando la recolección de la salud del servidor se detiene o un recurso queda crítico. Use `0` fuera de la instalación de Google Cloud |
 | `DJANGO_SAUDE_DIR` | `/saude` | Carpeta, dentro del contenedor, con las muestras de salud |
+| `DJANGO_EMAIL_HOST` | vacío | Servidor SMTP para la recuperación de contraseña por correo; vacío: sin recuperación, el administrador define contraseñas nuevas |
+| `DJANGO_EMAIL_PORT` | `587` | Puerto del SMTP |
+| `DJANGO_EMAIL_USER` / `DJANGO_EMAIL_PASSWORD` | vacío | Usuario del SMTP |
+| `DJANGO_EMAIL_TLS` | `1` | STARTTLS en la conexión SMTP |
+| `DJANGO_EMAIL_FROM` | el usuario del SMTP | Remitente de los correos |
 | `DJANGO_DOCS_URL` | `https://kaladrius-docs.facchini.eti.br` | Este sitio de documentación. El menú **Ayuda** lo abre en el idioma del usuario |
 
 ## Base de datos
@@ -67,6 +72,6 @@ Después del primer ingreso, puede quitar `DJANGO_ADMIN_PASSWORD` del archivo.
 Está en `config/settings.py` y vale para todas las instalaciones:
 
 - **Zona horaria** `America/Sao_Paulo` e **idioma predeterminado** portugués (cada usuario puede cambiar a inglés o español).
-- **Sesiones** de hasta 8 horas, que terminan al cerrar el navegador.
-- **Bloqueo de ingreso:** 5 contraseñas erróneas para el mismo usuario desde la misma dirección lo bloquean por 1 hora.
+- **Sesiones** que terminan después de 30 minutos sin uso y al cerrar el navegador.
+- **Bloqueo de ingreso:** 5 contraseñas erróneas para el mismo usuario desde la misma dirección lo bloquean por 1 hora; 20 ingresos erróneos desde una dirección, sea cual sea el usuario, bloquean esa dirección por 1 hora.
 - **Envío de archivos** hasta 6 MB (el mayor es un extracto bancario OFX), limitado por Caddy.

@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
 from apps.ajuda import views as ajuda_views
+from apps.conta import views as conta_views
 
 from .api import api
 
@@ -14,10 +15,11 @@ admin.site.index_title = "Administração"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", api.urls),
-    # Only login and logout from django.contrib.auth: password reset needs e-mail, which
-    # is not configured (users ask the clinic administrator for a new password instead).
-    path("conta/login/", auth_views.LoginView.as_view(), name="login"),
+    # Login with a limit per address and two-step verification; password recovery by
+    # e-mail where the installation has SMTP (apps.conta, decision 111).
+    path("conta/login/", conta_views.EntrarView.as_view(), name="login"),
     path("conta/logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("conta/", include("apps.conta.urls")),
     path("novidades/", include("apps.novidades.urls")),
     path("profissionais/", include("apps.profissionais.urls")),
     path("referencias/", include("apps.referencias.urls")),

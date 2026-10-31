@@ -14,8 +14,10 @@ Kaladrius guarda datos de salud, el tipo más sensible de dato personal. Esta p�
 | **Solo los datos de la clínica** | Toda consulta a la base se limita a la clínica de la instalación, y la persona necesita un vínculo activo para ingresar |
 | **Perfiles** | Administrador, recepción y profesional; el profesional ve solo su propia agenda y ningún valor de la clínica |
 | **Contraseñas** | Guardadas con Argon2; mínimo 10 caracteres, no comunes, no solo números, no parecidas al nombre de usuario |
-| **Bloqueo de ingreso** | 5 contraseñas erróneas para el mismo usuario desde la misma dirección lo bloquean por 1 hora |
-| **Sesiones** | Hasta 8 horas, terminan al cerrar el navegador; cookies `HttpOnly` y, con `DJANGO_SECURE=1`, `Secure` |
+| **Bloqueo de ingreso** | 5 contraseñas (o códigos de la verificación en dos pasos) erróneas para el mismo usuario desde la misma dirección lo bloquean por 1 hora; 20 ingresos erróneos desde una dirección, sea cual sea el usuario, bloquean esa dirección por 1 hora |
+| **Verificación en dos pasos** | Opcional por persona: un código de aplicación autenticadora (TOTP, código QR) después de la contraseña, con 10 códigos de recuperación de un solo uso; el administrador de la clínica puede quitarla a quien perdió el celular |
+| **Sesiones** | Terminan después de 30 minutos sin uso (la página también sale sola, con aviso 2 minutos antes) y al cerrar el navegador; cookies `HttpOnly` y, con `DJANGO_SECURE=1`, `Secure` |
+| **Recuperación de contraseña** | Por correo, solo cuando la instalación configura SMTP (`DJANGO_EMAIL_*`); el enlace vale una vez, por 1 hora; nunca para los ingresos públicos de la demostración |
 | **HTTPS** | Certificado automático (Caddy); con `DJANGO_SECURE=1`, redirige a HTTPS y usa HSTS de un año |
 | **Content Security Policy** | Solo se ejecutan los scripts del propio sistema; sin CDN, sin JavaScript incrustado en la página |
 | **Auditoría** | Quién creó, cambió, eliminó o abrió cada registro, cuándo y desde qué dirección; no se puede modificar |

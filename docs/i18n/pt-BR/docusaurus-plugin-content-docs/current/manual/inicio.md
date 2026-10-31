@@ -6,7 +6,10 @@ sidebar_position: 1
 
 ## Entrar e sair
 - Entre com o **usuário** e a **senha** que o administrador da clínica criou para você.
-- Depois de 5 tentativas com senha errada, o acesso fica bloqueado por 1 hora. Se esqueceu a senha, peça uma nova ao administrador da clínica.
+- Depois de 5 tentativas com senha errada, o acesso fica bloqueado por 1 hora. Se esqueceu a senha, use **Esqueci minha senha** na tela de entrada (quando a clínica configurou o e-mail) ou peça uma nova ao administrador da clínica.
+- Clique no olho ao lado da senha para ver o que digitou.
+- Depois de 30 minutos sem uso, o sistema sai sozinho (com aviso 2 minutos antes), para os dados dos pacientes não ficarem numa tela sem ninguém.
+- Para mais proteção, ative a **Verificação em duas etapas** no menu com o seu nome: além da senha, o sistema pede um código de um aplicativo autenticador no celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS…), lido de um QR code. Guarde os 10 códigos de recuperação num lugar seguro, fora do celular: cada um vale uma vez no lugar do código do aplicativo. Se perder o celular e os códigos, o administrador da clínica remove a verificação em **Cadastros > Equipe**.
 - Para sair, abra o menu com o seu nome, no canto direito da barra superior, e clique em **Sair**.
 
 ## Trocar a senha

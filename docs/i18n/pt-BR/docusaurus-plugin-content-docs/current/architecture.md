@@ -38,6 +38,7 @@ apps/
   odontologia/    módulo de odontologia (odontograma), só com a especialidade Odontologia ligada
   convenios/      convênios e carteirinhas dos pacientes
   pessoal/        funcionários, salários e folha do mês
+  conta/          login: verificação em duas etapas, recuperação de senha, saída por inatividade
   prontuario/     prontuário: anamnese de cada atendimento e adendos (só profissionais)
   rechamadas/     rechamadas e aniversariantes
   financeiro/     contas a receber e a pagar, caixa, bancos, comissões

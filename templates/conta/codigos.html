@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Códigos de recuperação" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Códigos de recuperação" %}</h1>
+{% if ativada %}<div class="alert alert-success">{% translate "Verificação em duas etapas ativada." %}</div>{% endif %}
+<p>{% translate "Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). Cada um entra uma vez no lugar do código do aplicativo, se o celular for perdido. Eles não aparecem de novo." %}</p>
+<ul class="list-unstyled font-monospace fs-5 row row-cols-2 g-2" style="max-width: 24rem;">
+  {% for codigo in codigos %}<li class="col">{{ codigo }}</li>{% endfor %}
+</ul>
+<p class="d-print-none">
+  <button type="button" class="btn btn-outline-secondary" data-imprimir>{% translate "Imprimir" %}</button>
+  <a class="btn btn-primary" href="{% url 'inicio' %}">{% translate "Já guardei" %}</a>
+</p>
+{% endblock %}

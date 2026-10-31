@@ -6,7 +6,10 @@ sidebar_position: 1
 
 ## Logging in and out
 - Log in with the **username** and **password** the clinic administrator created for you.
-- After 5 attempts with a wrong password, access is blocked for 1 hour. If you forgot your password, ask the clinic administrator for a new one.
+- After 5 attempts with a wrong password, access is blocked for 1 hour. If you forgot your password, use **Forgot my password** on the login page (when the clinic set up e-mail) or ask the clinic administrator for a new one.
+- Click the eye beside a password to see what you typed.
+- After 30 minutes without use, the system leaves by itself (with a warning 2 minutes before), so patient data does not stay on an unattended screen.
+- For more protection, turn on **Two-step verification** in the menu with your name: besides the password, the system asks for a code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, Authy, 2FAS…), read from a QR code. Keep the 10 recovery codes in a safe place, away from the phone: each one replaces the app's code once. If you lose the phone and the codes, the clinic administrator removes the verification in **Records > Team**.
 - To log out, open the menu with your name, at the right of the top bar, and click **Log out**.
 
 ## Changing your password

@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Política de privacidade
 
-Versão 4 · 30/10/2026
+Versão 5 · 31/10/2026
 
 Esta política explica como os dados pessoais de pacientes, responsáveis, equipe e fornecedores são tratados no **Kaladrius**, o sistema de gestão que a clínica usa: quais dados, para quê, com que base legal, quem tem acesso, onde ficam, por quanto tempo e como exercer seus direitos. Ela segue a Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018) e a lei sobre prontuários eletrônicos (Lei 13.787/2018).
 
@@ -87,14 +87,14 @@ Você pode pedir à clínica, gratuitamente e a qualquer momento (LGPD, art. 18)
 **Como pedir:** na recepção ou pelo canal da seção 2. Para proteger seus dados, a clínica pode pedir que você confirme sua identidade. A confirmação e o acesso podem ser dados na hora, de forma simplificada, ou em até 15 dias, de forma completa (art. 19). Se não ficar satisfeito, você pode reclamar à ANPD, em [gov.br/anpd](https://www.gov.br/anpd).
 
 ## 9. Segurança
-- Senhas guardadas de forma irreversível (nem a clínica as vê); acesso bloqueado por uma hora após 5 tentativas erradas; sessão encerrada após 8 horas.
+- Senhas guardadas de forma irreversível (nem a clínica as vê); acesso bloqueado por uma hora após 5 tentativas erradas; verificação em duas etapas opcional, com aplicativo autenticador; sessão encerrada após 30 minutos sem uso.
 - Acesso por perfil e registro de todas as alterações.
 - Cópias de segurança diárias, com testes de recuperação.
 
 Nenhum sistema é totalmente imune a falhas. Se ocorrer um incidente de segurança que possa causar risco ou dano relevante, a clínica comunica os afetados e a ANPD em até 3 dias úteis (art. 48 e Resolução CD/ANPD nº 15/2024).
 
 ## 10. Cookies
-O sistema usa só cookies necessários ao funcionamento: o da sessão (mantém a pessoa conectada; expira em 8 horas), o de proteção dos formulários e o do idioma escolhido (1 ano). Não há cookies de publicidade, de estatística ou de terceiros.
+O sistema usa só cookies necessários ao funcionamento: o da sessão (mantém a pessoa conectada; expira depois de 30 minutos sem uso), o de proteção dos formulários e o do idioma escolhido (1 ano). Não há cookies de publicidade, de estatística ou de terceiros.
 
 ## 11. Mudanças nesta política
 Quando esta política mudar, a nova versão é publicada nesta página, com a data. Mudanças importantes são avisadas também na clínica.

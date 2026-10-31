@@ -23,6 +23,11 @@ Depois de alterar, reinicie: `kaladrius up -d` (os containers com configuração
 | `DJANGO_BACKUP_MONITORADO` | ligado quando `DJANGO_DEBUG=0` | Avisa os superusuários quando nenhum backup foi registrado nas últimas 26 horas |
 | `DJANGO_SAUDE_MONITORADA` | ligado quando `DJANGO_DEBUG=0` | Avisa os superusuários quando a coleta da saúde do servidor para ou um recurso fica crítico. Use `0` fora da instalação do Google Cloud |
 | `DJANGO_SAUDE_DIR` | `/saude` | Pasta, dentro do container, com as amostras de saúde |
+| `DJANGO_EMAIL_HOST` | vazio | Servidor SMTP para a recuperação de senha por e-mail; vazio: sem recuperação, o administrador define senhas novas |
+| `DJANGO_EMAIL_PORT` | `587` | Porta do SMTP |
+| `DJANGO_EMAIL_USER` / `DJANGO_EMAIL_PASSWORD` | vazio | Login do SMTP |
+| `DJANGO_EMAIL_TLS` | `1` | STARTTLS na conexão SMTP |
+| `DJANGO_EMAIL_FROM` | o usuário do SMTP | Remetente dos e-mails |
 | `DJANGO_DOCS_URL` | `https://kaladrius-docs.facchini.eti.br` | Este site de documentação. O menu **Ajuda** abre o site no idioma do usuário |
 
 ## Banco de dados
@@ -67,6 +72,6 @@ Depois do primeiro acesso, você pode tirar o `DJANGO_ADMIN_PASSWORD` do arquivo
 Ficam em `config/settings.py` e valem para todas as instalações:
 
 - **Fuso horário** `America/Sao_Paulo` e **idioma padrão** português (cada usuário pode trocar para inglês ou espanhol).
-- **Sessões** duram até 8 horas e terminam quando o navegador fecha.
-- **Bloqueio de login:** 5 senhas erradas para o mesmo usuário a partir do mesmo endereço bloqueiam por 1 hora.
+- **Sessões** terminam depois de 30 minutos sem uso e quando o navegador fecha.
+- **Bloqueio de login:** 5 senhas erradas para o mesmo usuário a partir do mesmo endereço bloqueiam por 1 hora; 20 entradas erradas de um endereço, seja qual for o usuário, bloqueiam esse endereço por 1 hora.
 - **Envio de arquivos** até 6 MB (o maior é um extrato bancário OFX), limitado pelo Caddy.

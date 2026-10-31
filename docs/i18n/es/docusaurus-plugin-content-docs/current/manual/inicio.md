@@ -6,7 +6,10 @@ sidebar_position: 1
 
 ## Entrar y salir
 - Entre con el **usuario** y la **contraseña** que el administrador de la clínica creó para usted.
-- Después de 5 intentos con una contraseña incorrecta, el acceso queda bloqueado durante 1 hora. Si olvidó su contraseña, pida una nueva al administrador de la clínica.
+- Después de 5 intentos con una contraseña incorrecta, el acceso queda bloqueado durante 1 hora. Si olvidó su contraseña, use **Olvidé mi contraseña** en la pantalla de ingreso (cuando la clínica configuró el correo) o pida una nueva al administrador de la clínica.
+- Haga clic en el ojo al lado de la contraseña para ver lo que escribió.
+- Después de 30 minutos sin uso, el sistema sale solo (con aviso 2 minutos antes), para que los datos de los pacientes no queden en una pantalla sin nadie.
+- Para más protección, active la **Verificación en dos pasos** en el menú con su nombre: además de la contraseña, el sistema pide un código de una aplicación autenticadora en el celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS…), leído de un código QR. Guarde los 10 códigos de recuperación en un lugar seguro, fuera del celular: cada uno vale una vez en lugar del código de la aplicación. Si pierde el celular y los códigos, el administrador de la clínica quita la verificación en **Registros > Equipo**.
 - Para salir, abra el menú con su nombre, a la derecha de la barra superior, y haga clic en **Salir**.
 
 ## Cambiar la contraseña

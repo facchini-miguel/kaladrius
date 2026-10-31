@@ -11,7 +11,12 @@
         <div class="text-center text-primary mb-2">{% include "includes/logo.html" with classe="logo-entrada" %}</div>
         <h1 class="h4 mb-4 text-center">{{ nome_sistema }}</h1>
 
-        {% if form.errors %}
+        {% if inatividade %}
+        <div class="alert alert-info" role="status">{% blocktranslate %}Você saiu do sistema depois de {{ minutos }} minutos sem uso. Entre de novo para continuar.{% endblocktranslate %}</div>
+        {% endif %}
+        {% if endereco_bloqueado %}
+        <div class="alert alert-danger" role="alert">{% translate "Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora." %}</div>
+        {% elif form.errors %}
         <div class="alert alert-danger" role="alert">{% translate "Usuário ou senha incorretos." %}</div>
         {% endif %}
         {% if next and user.is_authenticated %}
@@ -33,7 +38,7 @@
           <input type="hidden" name="next" value="{{ next }}">
           <button type="submit" class="btn btn-primary w-100">{% translate "Entrar" %}</button>
         </form>
-        <p class="text-center small mt-3 mb-0"><a href="{% url 'privacidade' %}">{% translate "Política de privacidade" %}</a></p>
+        <p class="text-center small mt-3 mb-0">{% if recuperar_por_email %}<a href="{% url 'conta:recuperar' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacidade' %}">{% translate "Política de privacidade" %}</a></p>
       </div>
     </div>
   </div>

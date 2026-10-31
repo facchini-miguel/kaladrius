@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Privacy policy
 
-Version 4 · 10/30/2026
+Version 5 · 10/31/2026
 
 This policy explains how the personal data of patients, guardians, staff and suppliers is processed in **Kaladrius**, the management system the clinic uses: what data, what for, on what legal basis, who has access, where it is stored, for how long and how to exercise your rights. It follows Brazil's General Data Protection Law (LGPD, Law 13,709/2018) and the law on electronic patient records (Law 13,787/2018).
 
@@ -87,14 +87,14 @@ You can ask the clinic, free of charge and at any time (LGPD, art. 18):
 **How to ask:** at the front desk or through the channel in section 2. To protect your data, the clinic may ask you to confirm your identity. Confirmation and access may be given right away, in a simplified form, or within 15 days, in full (art. 19). If you are not satisfied, you can complain to the ANPD, at [gov.br/anpd](https://www.gov.br/anpd).
 
 ## 9. Security
-- Passwords stored irreversibly (not even the clinic can see them); access blocked for one hour after 5 wrong attempts; sessions end after 8 hours.
+- Passwords stored irreversibly (not even the clinic can see them); access blocked for one hour after 5 wrong attempts; optional two-step verification with an authenticator app; sessions end after 30 minutes without use.
 - Access by profile and a record of every change.
 - Daily backups, with recovery tests.
 
 No system is completely immune to failures. If a security incident occurs that may cause relevant risk or harm, the clinic notifies those affected and the ANPD within 3 business days (art. 48 and Resolution CD/ANPD No. 15/2024).
 
 ## 10. Cookies
-The system uses only the cookies it needs to work: the session cookie (keeps the person logged in; expires after 8 hours), the form protection cookie and the chosen language (1 year). There are no advertising, analytics or third-party cookies.
+The system uses only the cookies it needs to work: the session cookie (keeps the person logged in; expires after 30 minutes without use), the form protection cookie and the chosen language (1 year). There are no advertising, analytics or third-party cookies.
 
 ## 11. Changes to this policy
 When this policy changes, the new version is published on this page, with its date. Important changes are also announced at the clinic.
