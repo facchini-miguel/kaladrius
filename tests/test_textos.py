@@ -2,6 +2,7 @@
 month names in lowercase as Portuguese writes them."""
 
 import datetime
+from decimal import Decimal
 
 import pytest
 from django import forms
@@ -12,6 +13,7 @@ from django.utils.formats import date_format
 from apps.core.forms import FormularioBootstrap
 from apps.core.isolamento import usar_clinica
 from apps.core.models import Papel
+from apps.core.ordem import chave_alfabetica
 from apps.pacientes.models import Paciente
 
 pytestmark = pytest.mark.django_db
@@ -23,6 +25,7 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 
 
 class _Exemplo(FormularioBootstrap, forms.Form):
+    valor = forms.DecimalField(max_digits=12, decimal_places=2, localize=True, required=False)
     fixa = forms.ChoiceField(choices=[("", "- Select an option -"), ("a", "A")])
     agrupada = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
 
@@ -31,6 +34,31 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
     form = _Exemplo()
     assert form.fields["fixa"].choices == [("", "—"), ("a", "A")]
     assert form.fields["agrupada"].choices == [("Grupo", [("b", "B")])]  # untouched
+
+
+@pytest.mark.parametrize(
+    ("idioma", "digitado", "valor"),
+    [
+        ("pt-br", "1.234.567,89", "1234567.89"),
+        ("pt-br", "R$ 1.500,00", "1500.00"),
+        ("pt-br", "1.500", "1500"),
+        ("pt-br", "1500.50", "1500.50"),
+        ("pt-br", "0,5", "0.5"),
+        ("es", "12.000,50", "12000.50"),
+        ("en", "1,500.00", "1500.00"),
+        ("en", "1,500", "1500"),
+    ],
+)
+def test_numeros_com_separador_de_milhar(idioma, digitado, valor):
+    with translation.override(idioma):
+        form = _Exemplo({"fixa": "a", "agrupada": "b", "valor": digitado})
+        assert form.is_valid(), form.errors
+    assert form.cleaned_data["valor"] == Decimal(valor)
+
+
+def test_numero_ambiguo_continua_recusado():
+    with translation.override("pt-br"):
+        assert not _Exemplo({"fixa": "a", "agrupada": "b", "valor": "1,500"}).is_valid()
 
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
@@ -56,3 +84,17 @@ def test_meses_em_minuscula_no_portugues():
 def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(recepcao):
     pagina = recepcao.get(reverse("pacientes:aniversariantes"), {"mes": 10}).content.decode()
     assert ">Outubro</option>" in pagina
+
+
+def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
+    """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
+    with usar_clinica(clinica_a):
+        for nome in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
+            Paciente.objects.create(nome=nome)
+        nomes = list(Paciente.objects.values_list("nome", flat=True))
+    assert nomes == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
+
+
+def test_chave_alfabetica_ignora_acento_e_caixa():
+    nomes = ["Zeca", "Érica", "ana", "Água", "Beto"]
+    assert sorted(nomes, key=chave_alfabetica) == ["Água", "ana", "Beto", "Érica", "Zeca"]

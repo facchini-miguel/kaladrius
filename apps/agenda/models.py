@@ -7,6 +7,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ModeloDaClinica, sem_isolamento
+from apps.core.ordem import ALFABETICA
 from apps.core.validadores import validar_cor
 from apps.odontologia.dentes import TIPOS_DE_ATENDIMENTO
 
@@ -27,7 +28,7 @@ TIPOS_PADRAO = [
 class TipoAtendimento(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    nome = models.CharField(_("nome"), max_length=60)
+    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     cor = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validar_cor])
     ativo = models.BooleanField(_("ativo"), default=True)
 

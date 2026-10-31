@@ -91,7 +91,8 @@ def folha(request):
             f,
             None
             if f.lancada or not pode_alterar
-            else FolhaForm(dados, instance=f, prefix=f"f{f.pk}"),
+            # By employee: a sheet not saved yet has no pk.
+            else FolhaForm(dados, instance=f, prefix=f"f{f.funcionario_id}"),
         )
         for f in folhas
     ]

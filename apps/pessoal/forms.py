@@ -2,7 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import CampoDecimal, FormularioBootstrap
 from apps.core.validadores import cpf_valido, somente_digitos
 from apps.financeiro.models import Categoria
 
@@ -12,7 +12,7 @@ DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
 def _dinheiro(rotulo, obrigatorio):
-    return forms.DecimalField(
+    return CampoDecimal(
         label=rotulo,
         max_digits=12,
         decimal_places=2,
@@ -100,7 +100,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
 class FolhaForm(FormularioBootstrap, forms.ModelForm):
     """One employee's line of the month: overtime, absences and a note."""
 
-    horas_extras = forms.DecimalField(
+    horas_extras = CampoDecimal(
         label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
     valor_hora_extra = _dinheiro(_("Valor da hora extra"), obrigatorio=True)

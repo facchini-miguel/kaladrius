@@ -66,7 +66,8 @@ def test_fracao_do_ano(hoje, esperado):
 
 def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
     ocupacao = grupo(clinica_a, "Ocupação")
-    resposta = admin.post(f"{URL}?ano={HOJE.year}", {f"meta-{ocupacao.pk}": "12000,50"})
+    # With the thousands dot, as people type it (review stage 3: it was refused).
+    resposta = admin.post(f"{URL}?ano={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         assert Planejamento.objects.get().valor == Decimal("12000.50")

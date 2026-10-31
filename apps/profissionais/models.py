@@ -6,13 +6,14 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ModeloDaClinica
+from apps.core.ordem import ALFABETICA
 from apps.core.validadores import validar_cor
 
 
 class Profissional(ModeloDaClinica):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
-    nome = models.CharField(_("nome"), max_length=200)
+    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
     registro = models.CharField(
         _("registro profissional"),
         max_length=30,

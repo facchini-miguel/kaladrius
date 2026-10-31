@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
+from apps.core.ordem import ALFABETICA
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 CENTAVO = Decimal("0.01")
@@ -22,7 +23,7 @@ DIAS_POR_MES = Decimal(30)
 
 
 class Funcionario(ModeloDaClinica):
-    nome = models.CharField(_("nome"), max_length=200)
+    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
     cpf = models.CharField(_("CPF"), max_length=11, blank=True)
     cargo = models.CharField(_("cargo"), max_length=100, blank=True)
     admissao = models.DateField(_("admissão"), null=True, blank=True)

@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext as _
 
+from apps.core.ordem import chave_alfabetica
 from apps.financeiro import servicos as financeiro
 from apps.financeiro.models import Lancamento
 
@@ -21,12 +22,12 @@ def fim_do_mes(competencia):
     return competencia.replace(day=calendar.monthrange(competencia.year, competencia.month)[1])
 
 
-@transaction.atomic
 def preparar(competencia):
     """The month's sheets: one per employee working in the month that has a salary.
 
-    New sheets start with the salary in force at the end of the month and the suggested
-    overtime hour; sheets already there keep what was typed.
+    Sheets already saved keep what was typed; the missing ones come unsaved, with the
+    salary in force at the end of the month and the suggested overtime hour. Only saving
+    the page stores them, so looking at a month (even a future one) leaves nothing behind.
     """
     fim = fim_do_mes(competencia)
     trabalhando = (
@@ -34,20 +35,23 @@ def preparar(competencia):
         .exclude(admissao__gt=fim)
         .exclude(desligamento__lt=competencia)
     )
-    existentes = {f.funcionario_id for f in Folha.objects.filter(competencia=competencia)}
+    folhas = list(
+        Folha.objects.filter(competencia=competencia).select_related("funcionario", "lancamento")
+    )
+    existentes = {f.funcionario_id for f in folhas}
     for funcionario in trabalhando:
         salario = funcionario.salario_em(fim)
         if funcionario.pk in existentes or salario is None:
             continue
-        Folha.objects.create(
-            funcionario=funcionario,
-            competencia=competencia,
-            salario=salario,
-            valor_hora_extra=hora_extra_sugerida(salario),
+        folhas.append(
+            Folha(
+                funcionario=funcionario,
+                competencia=competencia,
+                salario=salario,
+                valor_hora_extra=hora_extra_sugerida(salario),
+            )
         )
-    return list(
-        Folha.objects.filter(competencia=competencia).select_related("funcionario", "lancamento")
-    )
+    return sorted(folhas, key=lambda f: chave_alfabetica(f.funcionario.nome))
 
 
 @transaction.atomic

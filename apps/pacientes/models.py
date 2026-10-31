@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
+from apps.core.ordem import ALFABETICA
 
 
 class Paciente(ModeloDaClinica):
@@ -21,7 +22,10 @@ class Paciente(ModeloDaClinica):
 
     tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.FISICA)
     nome = models.CharField(
-        _("nome"), max_length=200, help_text=_("Para pessoa jurídica, o nome fantasia.")
+        _("nome"),
+        max_length=200,
+        help_text=_("Para pessoa jurídica, o nome fantasia."),
+        db_collation=ALFABETICA,
     )
     razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
     cpf_cnpj = models.CharField(

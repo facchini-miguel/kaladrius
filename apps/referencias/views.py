@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.utils.http import urlencode
 
+from apps.core.ordem import chave_alfabetica
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 
 from .models import UF, Bairro, Banco, Cidade, Logradouro
@@ -79,7 +80,7 @@ def sugestoes_endereco(request):
         request,
         "referencias/sugestoes_endereco.html",
         {
-            "bairros": sorted(filter(None, bairros), key=str.casefold),
-            "logradouros": sorted(filter(None, logradouros), key=str.casefold),
+            "bairros": sorted(filter(None, bairros), key=chave_alfabetica),
+            "logradouros": sorted(filter(None, logradouros), key=chave_alfabetica),
         },
     )

@@ -2,7 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import CampoDecimal, FormularioBootstrap
 from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
@@ -20,8 +20,8 @@ from .servicos import ligar_grupos
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
-    """Amount typed in the user's format (150,50 in Portuguese and Spanish)."""
-    return forms.DecimalField(
+    """Amount typed in the user's format (1.500,50 in Portuguese and Spanish)."""
+    return CampoDecimal(
         label=rotulo,
         max_digits=12,
         decimal_places=2,
@@ -344,6 +344,12 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = GrupoContabil
         fields = ["nome", "tipo", "pai", "codigo", "ativo"]
+        help_texts = {
+            "codigo": _(
+                "Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1. "
+                "Em branco: o próximo número."
+            )
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -371,6 +377,13 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
         repetido = GrupoContabil.objects.filter(tipo=tipo, pai=pai, nome__iexact=nome)
         if nome and repetido.exclude(pk=self.instance.pk).exists():
             self.add_error("nome", _("Já existe um grupo com este nome neste lugar do plano."))
+        if dados.get("codigo") is None and tipo:
+            # Left blank where the neighbors are numbered: the next number, so the new group
+            # reads "1.3" like the rest instead of having none (review stage 3).
+            vizinhos = GrupoContabil.objects.filter(tipo=tipo, pai=pai).exclude(pk=self.instance.pk)
+            codigos = [c for c in vizinhos.values_list("codigo", flat=True) if c is not None]
+            if codigos or (pai is not None and pai.codigo is not None):
+                dados["codigo"] = max(codigos, default=0) + 1
         return dados
 
 

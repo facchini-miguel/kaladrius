@@ -14,6 +14,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 
 from apps.core.models import Clinica
+from apps.core.ordem import chave_alfabetica
 
 from . import comissoes
 from .models import (
@@ -259,7 +260,7 @@ def devedores(hoje=None):
         if linha["mais_antigo"] is None or parcela.vencimento < linha["mais_antigo"]:
             linha["mais_antigo"] = parcela.vencimento
     resultado = [linha for linha in linhas.values() if linha["vencido"] or linha["a_vencer"]]
-    return sorted(resultado, key=lambda linha: (-linha["vencido"], linha["nome"]))
+    return sorted(resultado, key=lambda linha: (-linha["vencido"], chave_alfabetica(linha["nome"])))
 
 
 def resumo_do_paciente(paciente, hoje=None):

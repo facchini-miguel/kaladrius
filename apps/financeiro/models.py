@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ClinicaManager, ModeloDaClinica, sem_isolamento
+from apps.core.ordem import ALFABETICA
 
 ZERO = Decimal("0.00")
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
@@ -29,7 +30,7 @@ class Conta(ModeloDaClinica):
         BANCO = "banco", _("Banco")
         CARTAO = "cartao", _("Maquininha de cartão")
 
-    nome = models.CharField(_("nome"), max_length=60)
+    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     saldo_inicial = models.DecimalField(
         _("saldo inicial"),
@@ -60,7 +61,7 @@ class GrupoContabil(ModeloDaClinica):
 
     Tipo = TipoFinanceiro
 
-    nome = models.CharField(_("nome"), max_length=60)
+    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     pai = models.ForeignKey(
         "self",
@@ -110,7 +111,7 @@ class Categoria(ModeloDaClinica):
 
     Tipo = TipoFinanceiro
 
-    nome = models.CharField(_("nome"), max_length=60)
+    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     grupo = models.ForeignKey(
         GrupoContabil,
@@ -140,7 +141,7 @@ class CentroCusto(ModeloDaClinica):
     Optional on every entry, one per entry (no split across centers yet).
     """
 
-    nome = models.CharField(_("nome"), max_length=60)
+    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
@@ -217,7 +218,10 @@ class Fornecedor(ModeloDaClinica):
 
     tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.JURIDICA)
     nome = models.CharField(
-        _("nome"), max_length=200, help_text=_("Para pessoa jurídica, o nome fantasia.")
+        _("nome"),
+        max_length=200,
+        help_text=_("Para pessoa jurídica, o nome fantasia."),
+        db_collation=ALFABETICA,
     )
     razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
     cpf_cnpj = models.CharField(_("CPF/CNPJ"), max_length=14, blank=True)

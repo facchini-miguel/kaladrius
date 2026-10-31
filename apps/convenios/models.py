@@ -10,10 +10,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
+from apps.core.ordem import ALFABETICA
 
 
 class Convenio(ModeloDaClinica):
-    nome = models.CharField(_("nome"), max_length=200)
+    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
     registro_ans = models.CharField(
         _("registro na ANS"),
         max_length=6,

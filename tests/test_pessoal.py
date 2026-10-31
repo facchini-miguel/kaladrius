@@ -109,6 +109,13 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
     ) == Decimal("15.00")
 
 
+def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
+    for mes in ("2026-10", "2030-01"):
+        assert admin.get(FOLHA, {"mes": mes}).status_code == 200
+    with usar_clinica(clinica_a):
+        assert not Folha.objects.exists()
+
+
 def test_calculo_do_total():
     folha = Folha(
         salario=Decimal("3000"),
@@ -131,9 +138,10 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         f"{prefixo}-faltas": "1",
         f"{prefixo}-observacao": "",
     }
+    assert folha.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", dados).status_code == 302
     with usar_clinica(clinica_a):
-        folha.refresh_from_db()
+        folha = Folha.objects.get(funcionario=ana, competencia=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         categoria = pagina.context["lancar_form"].fields["categoria"].initial
     assert categoria.nome == "Salários e encargos"

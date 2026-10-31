@@ -618,3 +618,14 @@ def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
         servicos.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
         caixa.refresh_from_db()
     assert (caixa.valor_esperado, caixa.diferenca) == (Decimal("50.00"), 0)
+
+
+@pytest.mark.parametrize("digitado", ["1.500,00", "R$ 1.500,00", "1500,00", "1.500"])
+def test_valor_com_ponto_de_milhar(cenario, digitado):
+    """Review stage 3: "1.500,00", as people write it, was refused ("Informe um número")."""
+    resposta = entrar(cenario, "admin").post(
+        reverse("financeiro:lancamento_novo"), novo(cenario, valor_total=digitado, parcelas=1)
+    )
+    assert resposta.status_code == 302, resposta.context["form"].errors
+    with usar_clinica(cenario["clinica"]):
+        assert Lancamento.objects.get().valor_total == Decimal("1500.00")

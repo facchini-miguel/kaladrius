@@ -6,7 +6,7 @@ from django.db.models import F
 from apps.agenda.models import Agendamento
 from apps.auditoria.models import RegistroAuditoria
 from apps.core.isolamento import sem_isolamento
-from apps.core.models import Clinica, Vinculo
+from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validadores import cnpj_valido, cpf_valido
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
@@ -25,6 +25,8 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     assert Clinica.objects.count() == 1
     assert get_user_model().objects.get(username="dr.carlos").check_password("senha-de-teste-123")
     assert Vinculo.objects.filter(usuario__username="dra.ana").count() == 1
+    # One user per role, so every role can be tried (review stage 3).
+    assert set(Vinculo.objects.values_list("papel", flat=True)) == set(Papel)
     with sem_isolamento():
         assert Profissional.objects.count() == 5
         assert Profissional.objects.get(nome="Dra. Ana Souza").usuario.username == "dra.ana"

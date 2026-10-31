@@ -63,6 +63,22 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     assert "2.1 Equipe da recepção" in pagina and "Salários e encargos" in pagina
 
 
+def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
+    """Review stage 3: a subgroup saved with a blank code had no number at all."""
+    pessoal = grupo(clinica_a, "Pessoal")
+    for nome in ("Equipe A", "Equipe B"):
+        dados = {"nome": nome, "tipo": "despesa", "pai": pessoal.pk, "codigo": "", "ativo": "on"}
+        assert admin.post(reverse("financeiro:grupo_novo"), dados).status_code == 302
+    with usar_clinica(clinica_a):
+        assert grupo(clinica_a, "Equipe A").numero == "2.1"
+        assert grupo(clinica_a, "Equipe B").numero == "2.2"
+    # A new top group goes after the five of the basic plan.
+    topo = {"nome": "Investimentos", "tipo": "despesa", "pai": "", "codigo": "", "ativo": "on"}
+    assert admin.post(reverse("financeiro:grupo_novo"), topo).status_code == 302
+    with usar_clinica(clinica_a):
+        assert grupo(clinica_a, "Investimentos").numero == "6"
+
+
 def test_validacoes_do_grupo(clinica_a, admin):
     pessoal = grupo(clinica_a, "Pessoal")
     atendimentos = grupo(clinica_a, "Atendimentos")

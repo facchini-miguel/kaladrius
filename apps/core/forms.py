@@ -1,10 +1,11 @@
 import datetime
+import re
 
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.db import transaction
 from django.utils import timezone
-from django.utils.formats import date_format
+from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
 from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
@@ -16,12 +17,38 @@ def _opcoes(grupo):
     return [(valor, nome) for valor, nome in ModuloClinico.choices if valor in grupo]
 
 
+class CampoDecimal(forms.DecimalField):
+    """A number typed the way people write it: "1.500,00", "R$ 1.500,00" or "1500,00" in
+    Portuguese and Spanish ("1,500.00" in English). Django's own field refused the
+    thousands separator ("Informe um número."), and "1.500" read as one and a half.
+    """
+
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = self._sem_milhar(value)
+        return super().to_python(value)
+
+    @staticmethod
+    def _sem_milhar(texto):
+        texto = re.sub(r"[R$€\s\u00a0]", "", texto)
+        decimal = get_format("DECIMAL_SEPARATOR")
+        milhar = "." if decimal == "," else ","
+        grupos = rf"-?\d{{1,3}}(\{milhar}\d{{3}})+"
+        if decimal in texto or re.fullmatch(grupos, texto):
+            # "1.500,00" and "1.500": the dots group thousands.
+            return texto.replace(milhar, "")
+        # "1500.00": a lone point is taken as the decimal mark, whatever the language.
+        return texto if decimal == "," else texto.replace(milhar, decimal)
+
+
 class FormularioBootstrap:
     """Mixin that adds Bootstrap 5 classes to every widget of a form."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for campo in self.fields.values():
+            if type(campo) is forms.DecimalField:
+                campo.__class__ = CampoDecimal
             # Django 6.1's "- Select an option -" has no Portuguese translation yet: the
             # blank option of every list becomes a dash, from a table or fixed choices.
             if isinstance(campo, forms.ModelChoiceField):

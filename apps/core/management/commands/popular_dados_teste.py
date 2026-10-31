@@ -29,6 +29,7 @@ CLINICAS = [
         "usuarios": [
             ("admin.sorriso", "Beatriz", "Lima", Papel.ADMIN),
             ("recepcao.sorriso", "Carla", "Mendes", Papel.RECEPCAO),
+            ("financeiro.sorriso", "Diego", "Rocha", Papel.FINANCEIRO),
             ("dra.ana", "Ana", "Souza", Papel.PROFISSIONAL),
             ("dr.carlos", "Carlos", "Pereira", Papel.PROFISSIONAL),
         ],

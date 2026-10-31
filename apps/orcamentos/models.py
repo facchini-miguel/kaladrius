@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
 from apps.core.models import Clinica
+from apps.core.ordem import ALFABETICA
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 VALIDADE_PADRAO = 30  # days
@@ -29,7 +30,7 @@ def validade_padrao():
 class Procedimento(ModeloDaClinica):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
-    nome = models.CharField(_("nome"), max_length=120)
+    nome = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA)
     valor = models.DecimalField(_("valor"), **DINHEIRO)
     categoria = models.ForeignKey(
         "financeiro.Categoria",

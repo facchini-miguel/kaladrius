@@ -4,6 +4,66 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.2
+  data: 2026-10-30
+  titulo:
+    pt-br: Revisão do financeiro
+    en: Finance review
+    es: Revisión del financiero
+  itens:
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Valores podem ser digitados com ponto de milhar, como 1.500,00 ou R$ 1.500,00, em
+          todos os campos; antes só 1500,00 era aceito.
+        en: >
+          Amounts can be typed with the thousands separator, such as 1,500.00 (1.500,00 in
+          Portuguese), in every field; before, only 1500.00 was accepted.
+        es: >
+          Los valores pueden escribirse con punto de miles, como 1.500,00, en todos los campos;
+          antes solo se aceptaba 1500,00.
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Listas em ordem alfabética, como pacientes, categorias e fornecedores, punham nomes
+          com acento ou em minúscula no fim (Água depois de Zeca); agora seguem a ordem certa.
+        en: >
+          Alphabetical lists, such as patients, categories and suppliers, put accented or
+          lowercase names at the end; they now follow the right order.
+        es: >
+          Las listas en orden alfabético, como pacientes, categorías y proveedores, ponían los
+          nombres con acento o en minúscula al final; ahora siguen el orden correcto.
+    - tipo: correcao
+      modulo: Pessoal
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Só abrir a folha de um mês, mesmo futuro, já deixava folhas vazias no histórico dos
+          funcionários; agora elas só são guardadas ao salvar.
+        en: >
+          Just opening the month's pay of any month, even a future one, left empty sheets in
+          the employees' history; they are now stored only when saved.
+        es: >
+          Solo abrir los sueldos de un mes, incluso futuro, dejaba hojas vacías en el historial
+          de los empleados; ahora se guardan solo al guardar.
+    - tipo: melhoria
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No plano de contas, um grupo novo com o código em branco recebe o próximo número
+          (como 2.3), em vez de ficar sem número.
+        en: >
+          In the chart of accounts, a new group with a blank code gets the next number (such
+          as 2.3) instead of having none.
+        es: >
+          En el plan de cuentas, un grupo nuevo con el código en blanco recibe el número
+          siguiente (como 2.3), en vez de quedar sin número.
+
 - versao: 0.41.1
   data: 2026-10-30
   titulo:
