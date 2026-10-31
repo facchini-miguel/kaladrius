@@ -28,7 +28,7 @@ The system does not allow two appointments at the same time for the same practit
 ## Attendance
 Open the appointment to mark the patient's **status** (you can also mark it on the home page):
 - **✓ Came** and **✗ Missed:** from the day of the appointment on.
-- **Cancelled:** at any time. The appointment stays on the schedule, faded and struck through, for the history and the no-show figures, but the **slot becomes free** for another patient.
+- **Cancelled:** at any time. The appointment stays on the schedule, faded and struck through, for the history and the no-show figures, but the **slot becomes free** for another patient: open the cancelled appointment and click **Book another patient at this time** (its patient cannot be changed, so the record of who cancelled stays).
 - **Undo mark:** back to "booked". A cancelled appointment only comes back if nobody took the slot.
 
 On the grid, ✓ marks who came and ✗ who missed. If the appointment is moved to a future day, or left without a patient, the mark is undone.

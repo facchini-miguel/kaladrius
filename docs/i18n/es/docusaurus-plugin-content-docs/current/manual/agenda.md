@@ -28,7 +28,7 @@ El sistema no permite dos citas en el mismo horario para el mismo profesional. L
 ## Asistencia
 Abra la cita para marcar la **situación** del paciente (también se puede marcar en la pantalla de inicio):
 - **✓ Asistió** y **✗ Faltó:** a partir del día de la cita.
-- **Canceló:** en cualquier momento. La cita sigue en la agenda, atenuada y tachada, para el historial y el cálculo de faltas, pero el **horario queda libre** para otro paciente.
+- **Canceló:** en cualquier momento. La cita sigue en la agenda, atenuada y tachada, para el historial y el cálculo de faltas, pero el **horario queda libre** para otro paciente: abra la cita cancelada y haga clic en **Agendar otro paciente en este horario** (su paciente no puede cambiarse, para no perder el registro de quién canceló).
 - **Deshacer marca:** vuelve a "agendada". Una cita cancelada solo vuelve si nadie ocupó el horario.
 
 En la grilla, ✓ marca quién asistió y ✗ quién faltó. Si la cita se pasa a otro día futuro, o queda sin paciente, la marca se deshace.

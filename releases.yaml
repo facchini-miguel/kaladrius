@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.9
+  data: 2026-10-31
+  titulo:
+    pt-br: Horário desmarcado para outro paciente
+    en: Cancelled time for another patient
+    es: Horario cancelado para otro paciente
+  itens:
+    - tipo: correcao
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Num agendamento desmarcado, o botão "Agendar outro paciente neste horário" abre um
+          agendamento novo no mesmo horário. Antes, o desmarcado ocupava o espaço na agenda e,
+          trocando o paciente dele, perdia-se o registro de quem tinha desmarcado.
+        en: >
+          On a cancelled appointment, the "Book another patient at this time" button opens a new
+          appointment at the same time. Before, the cancelled one covered the slot on the
+          schedule and changing its patient lost the record of who had cancelled.
+        es: >
+          En una cita cancelada, el botón "Agendar otro paciente en este horario" abre una cita
+          nueva en el mismo horario. Antes, la cancelada ocupaba el espacio en la agenda y, al
+          cambiar su paciente, se perdía el registro de quién había cancelado.
+
 - versao: 0.41.8
   data: 2026-10-31
   titulo:

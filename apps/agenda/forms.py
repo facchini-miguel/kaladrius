@@ -110,6 +110,20 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         )
         if not dados.get("paciente") and not dados.get("descricao", "").strip():
             self.add_error("descricao", _("Informe o paciente ou uma descrição."))
+        paciente = dados.get("paciente")
+        if (
+            self.instance.pk
+            and self.instance.desmarcado
+            and (getattr(paciente, "pk", None) != self.instance.paciente_id)
+        ):
+            # Changing the patient would overwrite the record that this one cancelled.
+            self.add_error(
+                "paciente",
+                _(
+                    "Este agendamento foi desmarcado. Para pôr outro paciente neste horário, "
+                    "use “Agendar outro paciente neste horário”."
+                ),
+            )
         if None in (data, hora_inicio, hora_fim) or self.errors:
             return dados
 

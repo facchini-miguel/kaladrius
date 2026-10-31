@@ -28,7 +28,7 @@ O sistema não deixa marcar dois atendimentos no mesmo horário para o mesmo pro
 ## Presença
 Abra o agendamento para marcar a **situação** do paciente (também dá para marcar na tela de início):
 - **✓ Compareceu** e **✗ Faltou:** a partir do dia do atendimento.
-- **Desmarcou:** a qualquer momento. O agendamento continua na agenda, apagado e riscado, para o histórico e para a conta de faltas, mas o **horário fica livre** para outro paciente.
+- **Desmarcou:** a qualquer momento. O agendamento continua na agenda, apagado e riscado, para o histórico e para a conta de faltas, mas o **horário fica livre** para outro paciente: abra o agendamento desmarcado e clique em **Agendar outro paciente neste horário** (o paciente dele não pode ser trocado, para não perder o registro de quem desmarcou).
 - **Desfazer marcação:** volta para "agendado". Um desmarcado só volta se ninguém tiver ocupado o horário.
 
 Na grade, ✓ marca quem compareceu e ✗ quem faltou. Se o atendimento for remarcado para outro dia futuro, ou ficar sem paciente, a marcação é desfeita.

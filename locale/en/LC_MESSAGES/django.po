@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 00:25-0300\n"
+"POT-Creation-Date: 2026-10-31 00:53-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -41,6 +41,11 @@ msgstr ""
 
 msgid "Informe o paciente ou uma descrição."
 msgstr "Enter the patient or a description."
+
+msgid ""
+"Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
+"“Agendar outro paciente neste horário”."
+msgstr "This appointment was cancelled. To put another patient at this time, use “Book another patient at this time”."
 
 msgid "O fim deve ser depois do início."
 msgstr "The end must be after the start."
@@ -2357,6 +2362,9 @@ msgstr "Status:"
 
 msgid "Desfazer marcação"
 msgstr "Undo mark"
+
+msgid "Agendar outro paciente neste horário"
+msgstr "Book another patient at this time"
 
 msgid "Abrir atendimento"
 msgstr "Open visit"

@@ -184,6 +184,29 @@ def test_editar_muda_o_horario_sem_conflitar_consigo_mesmo(cenario):
     assert agendamento.inicio.astimezone().time() == datetime.time(9, 30)
 
 
+def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cenario):
+    """Round 2: the cancelled appointment covers the freed slot on the calendar, and changing
+    its patient overwrote the record of who cancelled."""
+    agendar(cenario)
+    [agendamento] = agendamentos(cenario)
+    cliente = cenario["cliente"]
+    cliente.post(reverse("agenda:situacao", args=[agendamento.pk]), {"situacao": "desmarcou"})
+    janela = cliente.get(reverse("agenda:editar", args=[agendamento.pk])).content.decode()
+    assert "Agendar outro paciente neste horário" in janela
+    assert f"{reverse('agenda:novo')}?profissional={cenario['ana'].pk}&amp;data={SEGUNDA}" in janela
+    with usar_clinica(cenario["clinica"]):
+        outro = Paciente.objects.create(nome="Outro Paciente")
+    troca = cliente.post(
+        reverse("agenda:editar", args=[agendamento.pk]), dados(cenario, paciente=outro.pk)
+    )
+    assert "paciente" in troca.context["form"].errors
+    novo = cliente.post(reverse("agenda:novo"), dados(cenario, paciente=outro.pk))
+    assert novo.status_code == 204
+    with usar_clinica(cenario["clinica"]):
+        nomes = sorted((a.paciente.nome, a.situacao) for a in Agendamento.objects.all())
+    assert nomes == [("Maria Paciente", "desmarcou"), ("Outro Paciente", "agendado")]
+
+
 def test_excluir_um_ou_a_serie_dali_em_diante(cenario, criar_usuario, cliente_de):
     agendar(cenario, repeticoes=4)
     criados = agendamentos(cenario)
