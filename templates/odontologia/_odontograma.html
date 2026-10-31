@@ -1,5 +1,5 @@
 {% load i18n %}{% comment %}Dental chart (FDI). Expects permanentes, deciduos, selecionados and interativo.{% endcomment %}
-<div class="odontograma{% if interativo %} odontograma-interativo{% endif %}" role="group" aria-label="{% translate 'Odontograma' %}">
+<div class="odontograma-rolagem"><div class="odontograma{% if interativo %} odontograma-interativo{% endif %}" role="group" aria-label="{% translate 'Odontograma' %}">
   {% for linha in permanentes %}
   {% if forloop.last %}
   {% for decidua in deciduos %}
@@ -13,4 +13,4 @@
   </div>
   {% endfor %}
   <div class="small text-body-secondary mt-1">{% translate "Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas do meio. Direita do paciente à esquerda." %}</div>
-</div>
+</div></div>

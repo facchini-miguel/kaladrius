@@ -17,12 +17,14 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
+from apps.core.templatetags.formatos import moeda
 from apps.core.validadores import normalizar_cnpj
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
@@ -361,7 +363,14 @@ def estornar(request, pk):
         {
             "form": form,
             "titulo": _("Estornar pagamento"),
-            "objeto": pagamento,
+            # Not str(pagamento): that has the raw amount ("1350.00"), for the audit log.
+            "objeto": " · ".join(
+                [
+                    str(pagamento.parcela),
+                    moeda(pagamento.valor),
+                    date_format(pagamento.data, "SHORT_DATE_FORMAT"),
+                ]
+            ),
             "voltar": pagamento.parcela.lancamento_id,
         },
     )

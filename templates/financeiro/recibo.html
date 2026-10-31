@@ -38,9 +38,9 @@
     {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
     {% if pagamento.observacao %}<li>{{ pagamento.observacao }}</li>{% endif %}
   </ul>
-  <div class="d-flex justify-content-between align-items-end">
-    <div>{{ pagamento.data|date:"DATE_FORMAT" }}</div>
-    <div class="text-center" style="min-width: 18rem;">
+  <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">
+    <div class="text-nowrap">{{ pagamento.data|date:"DATE_FORMAT" }}</div>
+    <div class="text-center" style="min-width: min(18rem, 100%);">
       <div class="border-top pt-1">{{ clinica_atual.nome }}</div>
       {% if pagamento.criado_por %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.criado_por.get_full_name|default:pagamento.criado_por.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
     </div>

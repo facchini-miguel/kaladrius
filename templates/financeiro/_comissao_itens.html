@@ -1,4 +1,4 @@
-{% load i18n formatos %}<table class="table table-sm align-middle bg-white">
+{% load i18n formatos %}<div class="table-responsive"><table class="table table-sm align-middle bg-white">
   <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Pagador" %}</th><th>{% translate "Lançamento" %}</th><th class="text-end">{% translate "Valor recebido" %}</th></tr></thead>
   <tbody>
     {% for pagamento in pagamentos %}
@@ -9,16 +9,16 @@
   </tbody>
   <tfoot><tr class="fw-semibold"><td colspan="3" class="text-end">{% translate "Total recebido" %}</td><td class="text-end text-nowrap">{{ recebido|moeda }}</td></tr>
   <tr class="fw-semibold"><td colspan="3" class="text-end">{% blocktranslate with percentual=percentual|floatformat:"-2" %}Comissão ({{ percentual }}%){% endblocktranslate %}</td><td class="text-end text-nowrap">{{ bruta|moeda }}</td></tr></tfoot>
-</table>
+</table></div>
 {% if estornos %}
 <h2 class="h6">{% translate "Estornos descontados (recebimentos já comissionados e depois estornados)" %}</h2>
-<table class="table table-sm align-middle bg-white">
+<div class="table-responsive"><table class="table table-sm align-middle bg-white">
   <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Pagador" %}</th><th>{% translate "Lançamento" %}</th><th class="text-end">{% translate "Valor recebido" %}</th><th class="text-end">{% translate "Comissão descontada" %}</th></tr></thead>
   <tbody>
     {% for pagamento in estornos %}
     <tr><td class="text-nowrap">{{ pagamento.data|date:"SHORT_DATE_FORMAT" }}</td><td>{{ pagamento.parcela.lancamento.nome_pessoa }}</td><td>{{ pagamento.parcela.lancamento.descricao }} ({{ pagamento.parcela.numero }})</td><td class="text-end text-nowrap">{{ pagamento.valor|moeda }}</td><td class="text-end text-nowrap">− {{ pagamento.comissao_devolvida|moeda }}</td></tr>
     {% endfor %}
   </tbody>
-</table>
+</table></div>
 {% endif %}
 <p class="fs-5 fw-semibold text-end">{% translate "Comissão a pagar" %}: {{ valor|moeda }}</p>

@@ -98,3 +98,21 @@ def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
 def test_chave_alfabetica_ignora_acento_e_caixa():
     nomes = ["Zeca", "Érica", "ana", "Água", "Beto"]
     assert sorted(nomes, key=chave_alfabetica) == ["Água", "ana", "Beto", "Érica", "Zeca"]
+
+
+def test_telas_cabem_no_celular(clinica_a, recepcao):
+    """Review stage 5 (phone, 390 px): the dental chart scrolls in its own box and the
+    printed registration sheet stacks its two columns on a narrow screen."""
+    from django.template.loader import render_to_string
+
+    from apps.odontologia.dentes import DENTES_DECIDUOS, DENTES_PERMANENTES
+
+    html = render_to_string(
+        "odontologia/_odontograma.html",
+        {"permanentes": DENTES_PERMANENTES, "deciduos": DENTES_DECIDUOS, "interativo": True},
+    )
+    assert 'class="odontograma-rolagem"' in html
+    with usar_clinica(clinica_a):
+        paciente = Paciente.objects.create(nome="Paciente Fictício")
+    ficha = recepcao.get(reverse("pacientes:imprimir", args=[paciente.pk])).content.decode()
+    assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha

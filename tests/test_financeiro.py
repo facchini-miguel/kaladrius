@@ -219,6 +219,8 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
     # With an active payment the entry cannot be cancelled.
     resposta = admin.post(cancelar, {"motivo": "Desistiu"}, follow=True)
     assert "Estorne os pagamentos" in resposta.content.decode()
+    # The page names the payment with the amount in reais (review stage 5: it read "100.00").
+    assert "R$ 100,00" in admin.get(estornar).content.decode()
     admin.post(estornar, {"motivo": "Pix devolvido"})
     pagamento.refresh_from_db()
     assert pagamento.estornado and pagamento.estornado_por == cenario["admin"]

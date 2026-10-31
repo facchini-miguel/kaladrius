@@ -24,7 +24,7 @@
 
   <p class="fs-5 fw-semibold mb-3">{{ paciente.nome }}</p>
   <div class="row">
-    <div class="col-6">
+    <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
         {% if paciente.tipo == "PJ" %}
         <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ paciente.razao_social|default:"—" }}</dd>
@@ -41,7 +41,7 @@
         {% endif %}
       </dl>
     </div>
-    <div class="col-6">
+    <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
         <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ paciente.telefone_celular|telefone|default:"—" }}</dd>
         <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ paciente.whatsapp|telefone|default:"—" }}</dd>

@@ -25,6 +25,7 @@
   <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ orcamento.paciente.nome }}</p>
   {% if orcamento.profissional %}<p><strong>{% translate "Profissional" %}:</strong> {{ orcamento.profissional.nome }}{% if orcamento.profissional.registro %} ({{ orcamento.profissional.registro }}){% endif %}</p>{% endif %}
   {% if selecionados %}<div class="mb-3">{% include "odontologia/_odontograma.html" with interativo=False %}</div>{% endif %}
+  <div class="table-responsive">
   <table class="table table-sm">
     <thead><tr><th>{% translate "Procedimento" %}</th>{% if mostrar_dentes %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
     <tbody>
@@ -40,10 +41,11 @@
       <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
     </tfoot>
   </table>
+  </div>
   {% if orcamento.observacoes %}<p class="small">{{ orcamento.observacoes|linebreaksbr }}</p>{% endif %}
-  <div class="d-flex justify-content-around mt-5 pt-4">
-    <div class="text-center border-top pt-1" style="min-width: 16rem;">{{ orcamento.paciente.nome }}</div>
-    <div class="text-center border-top pt-1" style="min-width: 16rem;">{{ orcamento.profissional.nome|default:clinica_atual.nome }}</div>
+  <div class="d-flex flex-wrap gap-5 justify-content-around mt-5 pt-4">
+    <div class="text-center border-top pt-1" style="min-width: min(16rem, 100%);">{{ orcamento.paciente.nome }}</div>
+    <div class="text-center border-top pt-1" style="min-width: min(16rem, 100%);">{{ orcamento.profissional.nome|default:clinica_atual.nome }}</div>
   </div>
 </div>
 {% endblock %}

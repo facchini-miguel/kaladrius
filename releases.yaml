@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.4
+  data: 2026-10-30
+  titulo:
+    pt-br: Revisão no celular e nos idiomas
+    en: Phone and languages review
+    es: Revisión en el celular y los idiomas
+  itens:
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No celular, a agenda põe a data numa linha própria acima dos botões, o odontograma rola
+          dentro da sua caixa, e a ficha impressa, o recibo, o orçamento impresso e o extrato de
+          comissão cabem na tela.
+        en: >
+          On phones, the schedule puts the date on its own line above the buttons, the dental
+          chart scrolls inside its box, and the printed sheet, receipt, printed estimate and
+          commission statement fit the screen.
+        es: >
+          En el celular, la agenda pone la fecha en su propia línea sobre los botones, el
+          odontograma se desplaza dentro de su caja, y la ficha impresa, el recibo, el presupuesto
+          impreso y el extracto de comisión caben en la pantalla.
+    - tipo: correcao
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A tela de estornar pagamento mostra o valor em reais e a data (antes, "1350.00").
+        en: >
+          The reverse payment page shows the amount in reais and the date (before, "1350.00").
+        es: >
+          La pantalla de revertir pago muestra el valor en reales y la fecha (antes, "1350.00").
+
 - versao: 0.41.3
   data: 2026-10-30
   titulo:

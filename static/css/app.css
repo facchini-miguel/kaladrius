@@ -42,6 +42,12 @@ a.indicador:hover { border-color: #0d6efd; }
 
 /* Schedule: time slots twice FullCalendar's default height (1.5em), easier to read (0.24.1). */
 .fc .fc-timegrid-slot { height: 3em; }
+/* Phone: the date goes on its own line above the buttons, instead of pushing them off. */
+@media (max-width: 575.98px) {
+  .fc .fc-header-toolbar { flex-wrap: wrap; row-gap: 0.5rem; }
+  .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) { order: -1; width: 100%; text-align: center; }
+  .fc .fc-toolbar-title { font-size: 1.25rem; }
+}
 
 /* Schedule: whether the patient came (0.24.0). */
 .fc-event.situacao-compareceu .fc-event-title::before { content: "✓ "; font-weight: 700; }
@@ -105,6 +111,8 @@ a.indicador:hover { border-color: #0d6efd; }
 }
 
 /* Dental chart (estimates). */
+/* On a phone the chart (16 teeth a row) is wider than the screen: it scrolls in its box. */
+.odontograma-rolagem { max-width: 100%; overflow-x: auto; }
 .odontograma { display: inline-block; }
 .odontograma-linha { display: flex; gap: 2px; justify-content: center; margin-bottom: 2px; }
 .odontograma-linha.deciduos .dente { width: 2rem; height: 1.6rem; font-size: 0.7rem; }
