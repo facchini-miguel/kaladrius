@@ -249,7 +249,7 @@ class Command(BaseCommand):
                 paciente=paciente,
                 vinculo=vinculos.EMERGENCIA,
                 nome=f"Contato fictício {n}",
-                telefone=f"5499000000{n}",
+                telefone=f"4899000000{n}",
             )
 
     def _agendamentos(self, clinica):

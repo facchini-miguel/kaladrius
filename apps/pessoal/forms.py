@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import CampoDecimal, FormularioBootstrap
-from apps.core.validadores import cpf_valido, somente_digitos
+from apps.core.validadores import cpf_valido, normalizar_telefone, somente_digitos
 from apps.financeiro.models import Categoria
 
 from .models import Folha, Funcionario
@@ -74,10 +74,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
         return cpf
 
     def clean_telefone(self):
-        telefone = somente_digitos(self.cleaned_data.get("telefone"))
-        if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-        return telefone
+        return normalizar_telefone(self.cleaned_data.get("telefone"))
 
     def clean(self):
         dados = super().clean()

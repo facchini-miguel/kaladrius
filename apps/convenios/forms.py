@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
-from apps.core.validadores import somente_digitos
+from apps.core.validadores import normalizar_telefone, somente_digitos
 
 from .models import Carteirinha, Convenio
 
@@ -45,10 +45,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
         return registro
 
     def clean_telefone(self):
-        telefone = somente_digitos(self.cleaned_data.get("telefone"))
-        if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-        return telefone
+        return normalizar_telefone(self.cleaned_data.get("telefone"))
 
 
 class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):

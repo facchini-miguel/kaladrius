@@ -71,12 +71,21 @@ class Resultado:
 
 
 def _mesmo_tamanho(valor, fake):
-    """Fake digits with the length of the original (keeping the area code of phones)."""
+    """Fake digits like the original, keeping the area code (DDD) of phones.
+
+    A mobile stays a mobile with the ninth digit (DDD + 9 + 8 digits) and a landline starts
+    with 2 to 5, as in Anatel's plan: random digits made "mobiles" with 8 digits that
+    WhatsApp links cannot open.
+    """
     digitos = somente_digitos(valor)
     if not digitos:
         return ""
-    prefixo = digitos[:2] if len(digitos) >= 10 else ""
-    return prefixo + fake.numerify("#" * (len(digitos) - len(prefixo)))
+    if len(digitos) < 10:
+        return fake.numerify("#" * len(digitos))
+    ddd = digitos[:2]
+    if len(digitos) == 11 or digitos[2] in "6789":
+        return f"{ddd}9{fake.numerify('########')}"
+    return f"{ddd}{fake.random_int(2, 5)}{fake.numerify('#' * (len(digitos) - 3))}"
 
 
 class _Anonimizador:
@@ -129,8 +138,9 @@ class _Anonimizador:
             p.responsavel = self._nome(self.sorte.choice("FM")) if p.responsavel else ""
             p.telefone_residencial = _mesmo_tamanho(p.telefone_residencial, fake)
             p.telefone_comercial = _mesmo_tamanho(p.telefone_comercial, fake)
+            mesmo_numero = p.whatsapp and p.whatsapp == p.telefone_celular
             p.telefone_celular = _mesmo_tamanho(p.telefone_celular, fake)
-            p.whatsapp = _mesmo_tamanho(p.whatsapp, fake)
+            p.whatsapp = p.telefone_celular if mesmo_numero else _mesmo_tamanho(p.whatsapp, fake)
             p.email = f"paciente{numero}@example.com" if p.email else ""
             p.cep = (p.cep[:2] + fake.numerify("######")) if p.cep else ""
             p.bairro = fake.bairro()[:100] if p.bairro else ""

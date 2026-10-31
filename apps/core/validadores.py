@@ -53,3 +53,59 @@ def validar_cpf(valor):
 def validar_cnpj(valor):
     if not cnpj_valido(valor):
         raise ValidationError(_("CNPJ inválido."))
+
+
+# Brazilian area codes (DDD) in use, from Anatel's numbering plan.
+DDDS = {
+    *range(11, 20),
+    21,
+    22,
+    24,
+    27,
+    28,
+    *range(31, 36),
+    37,
+    38,
+    *range(41, 50),
+    51,
+    53,
+    54,
+    55,
+    *range(61, 70),
+    71,
+    73,
+    74,
+    75,
+    77,
+    79,
+    *range(81, 90),
+    *range(91, 100),
+}
+
+
+def nono_digito(numero):
+    """An 8-digit mobile (DDD + number starting with 6 to 9) with the ninth digit added."""
+    if len(numero) == 10 and numero[2] in "6789":
+        return f"{numero[:2]}9{numero[2:]}"
+    return numero
+
+
+def normalizar_telefone(valor):
+    """A Brazilian phone as DDD + number digits, or ValidationError.
+
+    Accepts what people type: punctuation, a leading 0 (carrier prefix) or +55. A mobile
+    written the old way, with 8 digits starting with 6 to 9, gets the ninth digit (Anatel's
+    rule: landlines start with 2 to 5), so WhatsApp links work.
+    """
+    numero = somente_digitos(valor).lstrip("0")
+    if len(numero) in (12, 13) and numero.startswith("55"):
+        numero = numero[2:]
+    if not numero:
+        return ""
+    if len(numero) not in (10, 11):
+        raise ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
+    if int(numero[:2]) not in DDDS:
+        raise ValidationError(_("O DDD %(ddd)s não existe.") % {"ddd": numero[:2]})
+    if len(numero) == 11 and numero[2] != "9":
+        raise ValidationError(_("Com 11 dígitos, o número começa com 9 depois do DDD."))
+    return nono_digito(numero)

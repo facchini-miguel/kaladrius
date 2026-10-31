@@ -12,7 +12,7 @@ Click **New patient**. Choose **individual** or **company**: the fields change w
 - CPF, CNPJ, phones and postal code (CEP) can be typed with or without punctuation.
 - The system checks whether the CPF or CNPJ is valid and whether it already exists in the clinic.
 - Choose the **state** and then the **city**. Once the city is chosen, **Neighborhood** and **Street** suggest its known names (the neighborhoods and streets that came from the old system and the ones the clinic already typed for other patients); any other can still be typed.
-- Phones need the area code.
+- Phones need the area code (DDD), and the system checks that it exists. A mobile typed the old way, with 8 digits (such as 54 8123-4567), gets the leading 9 by itself; without the area code and the 9, the WhatsApp link does not open.
 - Fill in **WhatsApp** (it may be the same number as the cell phone): the patient record and the recalls on the home page get a link that opens the chat. The old system's fax and MSN are not asked for anymore.
 
 ## Patient record

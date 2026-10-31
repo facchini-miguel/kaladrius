@@ -3,7 +3,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import CampoDecimal, FormularioBootstrap
-from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
+from apps.core.validadores import (
+    cnpj_valido,
+    cpf_valido,
+    normalizar_cnpj,
+    normalizar_telefone,
+)
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
@@ -216,10 +221,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
             self.instance.clinica = clinica
 
     def _telefone(self, nome):
-        telefone = somente_digitos(self.cleaned_data.get(nome))
-        if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-        return telefone
+        return normalizar_telefone(self.cleaned_data.get(nome))
 
     def clean_telefone(self):
         return self._telefone("telefone")

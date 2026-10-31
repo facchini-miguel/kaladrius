@@ -4,6 +4,31 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.8
+  data: 2026-10-31
+  titulo:
+    pt-br: Telefones com DDD e nono dígito
+    en: Phones with area code and ninth digit
+    es: Teléfonos con código de área y noveno dígito
+  itens:
+    - tipo: correcao
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Telefones agora precisam de um DDD que exista, e um celular digitado com 8 dígitos
+          (como 54 8123-4567) ganha o 9 na frente sozinho, para o link do WhatsApp funcionar.
+          Vale para pacientes, pessoas relacionadas, fornecedores, convênios e funcionários.
+        en: >
+          Phones now need an area code (DDD) that exists, and a mobile typed with 8 digits (such
+          as 54 8123-4567) gets the leading 9 by itself, so the WhatsApp link works. It applies
+          to patients, related people, suppliers, health plans and employees.
+        es: >
+          Los teléfonos ahora necesitan un código de área (DDD) que exista, y un celular escrito
+          con 8 dígitos (como 54 8123-4567) recibe el 9 adelante solo, para que el enlace de
+          WhatsApp funcione. Vale para pacientes, personas relacionadas, proveedores, convenios
+          y empleados.
+
 - versao: 0.41.7
   data: 2026-10-31
   titulo:

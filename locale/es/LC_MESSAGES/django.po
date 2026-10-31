@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 00:08-0300\n"
+"POT-Creation-Date: 2026-10-31 00:25-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -286,9 +286,6 @@ msgstr "Ya existe un convenio con este nombre."
 
 msgid "O registro na ANS tem 6 dígitos."
 msgstr "El registro en la ANS tiene 6 dígitos."
-
-msgid "Informe o DDD e o número (10 ou 11 dígitos)."
-msgstr "Indique el código de área y el número (10 u 11 dígitos)."
 
 msgid "Esta carteirinha já está cadastrada neste convênio."
 msgstr "Esta credencial ya está registrada en este convenio."
@@ -590,6 +587,16 @@ msgstr "CPF no válido."
 
 msgid "CNPJ inválido."
 msgstr "CNPJ no válido."
+
+msgid "Informe o DDD e o número (10 ou 11 dígitos)."
+msgstr "Indique el código de área y el número (10 u 11 dígitos)."
+
+#, python-format
+msgid "O DDD %(ddd)s não existe."
+msgstr "El código de área %(ddd)s no existe."
+
+msgid "Com 11 dígitos, o número começa com 9 depois do DDD."
+msgstr "Con 11 dígitos, el número empieza con 9 después del código de área."
 
 msgid "Bom dia"
 msgstr "Buenos días"

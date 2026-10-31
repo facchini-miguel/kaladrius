@@ -25,7 +25,13 @@ from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
-from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
+from apps.core.validadores import (
+    cnpj_valido,
+    cpf_valido,
+    nono_digito,
+    normalizar_cnpj,
+    somente_digitos,
+)
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -237,7 +243,10 @@ class _Importador:
                 numero = ""
             elif numero and len(numero) < 10:
                 avisos["Telefones sem DDD (mantidos como estavam)"] += 1
-            telefones[campo] = numero
+            if len(numero) == 11 and numero.startswith("0"):  # carrier prefix: 0 + DDD
+                numero = numero[1:]
+            # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
+            telefones[campo] = nono_digito(numero)
         if _texto(linha["fone_fax"]):
             extras.append(f"Fax: {_texto(linha['fone_fax'])}")
 

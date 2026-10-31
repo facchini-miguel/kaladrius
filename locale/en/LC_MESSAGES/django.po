@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 00:08-0300\n"
+"POT-Creation-Date: 2026-10-31 00:25-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -287,9 +287,6 @@ msgstr "A health plan with this name already exists."
 
 msgid "O registro na ANS tem 6 dígitos."
 msgstr "The ANS registration has 6 digits."
-
-msgid "Informe o DDD e o número (10 ou 11 dígitos)."
-msgstr "Enter the area code and number (10 or 11 digits)."
 
 msgid "Esta carteirinha já está cadastrada neste convênio."
 msgstr "This card is already registered in this health plan."
@@ -591,6 +588,16 @@ msgstr "Invalid CPF."
 
 msgid "CNPJ inválido."
 msgstr "Invalid CNPJ."
+
+msgid "Informe o DDD e o número (10 ou 11 dígitos)."
+msgstr "Enter the area code and number (10 or 11 digits)."
+
+#, python-format
+msgid "O DDD %(ddd)s não existe."
+msgstr "Area code %(ddd)s does not exist."
+
+msgid "Com 11 dígitos, o número começa com 9 depois do DDD."
+msgstr "With 11 digits, the number starts with 9 after the area code."
 
 msgid "Bom dia"
 msgstr "Good morning"

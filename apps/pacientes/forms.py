@@ -5,7 +5,13 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
-from apps.core.validadores import cnpj_valido, cpf_valido, normalizar_cnpj, somente_digitos
+from apps.core.validadores import (
+    cnpj_valido,
+    cpf_valido,
+    normalizar_cnpj,
+    normalizar_telefone,
+    somente_digitos,
+)
 from apps.referencias.models import UF, Cidade
 
 from .models import Paciente, PessoaRelacionada
@@ -124,10 +130,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         return cep
 
     def _limpar_telefone(self, nome):
-        telefone = somente_digitos(self.cleaned_data.get(nome))
-        if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-        return telefone
+        return normalizar_telefone(self.cleaned_data.get(nome))
 
     def clean_telefone_celular(self):
         return self._limpar_telefone("telefone_celular")
@@ -209,10 +212,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         self.fields["outro_paciente"].queryset = Paciente.objects.exclude(pk=paciente.pk)
 
     def clean_telefone(self):
-        telefone = somente_digitos(self.cleaned_data.get("telefone"))
-        if telefone and len(telefone) not in (10, 11):
-            raise forms.ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-        return telefone
+        return normalizar_telefone(self.cleaned_data.get("telefone"))
 
     def clean(self):
         dados = super().clean()
