@@ -35,13 +35,14 @@
 </div>
 {% else %}
 <div class="alert alert-warning">
-  {% translate "Você ainda não está vinculado a nenhuma clínica ativa. Procure o administrador da sua clínica." %}
+  {% translate "Você não tem acesso a nenhuma clínica ativa: ainda não foi incluído na equipe ou o acesso foi retirado. Procure o administrador da sua clínica." %}
 </div>
 {% endif %}
 {% endif %}
 
 {% if painel %}
 {% with agenda=painel.agenda receb=painel.recebimentos fin=painel.financeiro %}
+{% if agenda or receb or fin %}
 <h2 class="h6 text-uppercase text-body-secondary mb-2">{% translate "Resumo do dia" %}</h2>
 <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
   {% if agenda %}
@@ -129,6 +130,7 @@
   </div>
   {% endif %}
 </div>
+{% endif %}
 {% endwith %}
 
 <div class="row g-4">

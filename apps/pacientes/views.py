@@ -294,6 +294,9 @@ def excluir(request, pk):
             anonimizar(ItemOrcamento, ids_itens)
             registrar(
                 RegistroAuditoria.Acao.EXCLUIR,
+                # Filed under the clinic, so its administrator sees the erasure in the audit
+                # log (review stage 4: with no object, it had no clinic and stayed hidden).
+                clinica=request.clinica,
                 descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",
             )
         messages.success(

@@ -222,7 +222,7 @@ def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_
 def test_sem_clinica_nao_ha_resumo(cenario, criar_usuario, cliente_de):
     resposta = cliente_de(criar_usuario("solto")).get(reverse("inicio"))
     assert "painel" not in resposta.context
-    assert "não está vinculado a nenhuma clínica" in resposta.content.decode()
+    assert "não tem acesso a nenhuma clínica ativa" in resposta.content.decode()
 
 
 def test_saudacao_pela_hora(monkeypatch, criar_usuario, cliente_de):

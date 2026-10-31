@@ -149,7 +149,7 @@ def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usua
 def test_usuario_sem_clinica_ve_aviso(criar_usuario, cliente_de):
     resposta = cliente_de(criar_usuario("solto")).get(reverse("profissionais:lista"))
     assert resposta.status_code == 403
-    assert "não está vinculado a nenhuma clínica" in resposta.content.decode()
+    assert "não tem acesso a nenhuma clínica ativa" in resposta.content.decode()
 
 
 def test_formulario_so_oferece_usuarios_da_propria_clinica(

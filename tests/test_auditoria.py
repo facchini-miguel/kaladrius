@@ -69,6 +69,9 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     criacao = next(r for r in registros if r.acao == Acao.CRIAR)
     assert criacao.alteracoes["nome"] == ["(removido)", "(removido)"]
     assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
+    # The erasure shows in the clinic's own audit log (review stage 4).
+    pagina = admin_a.get(reverse("auditoria:lista")).content.decode()
+    assert f"Paciente {paciente.pk}: dados pessoais excluídos a pedido do titular" in pagina
 
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):

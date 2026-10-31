@@ -114,6 +114,13 @@ def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, pac
     assert "Retorno" in admin.get(reverse("rechamadas:lista")).content.decode()
 
 
+def test_so_o_nucleo_ligado_sem_resumo_vazio(clinica_a, admin):
+    """Review stage 4: with every optional module off, "Resumo do dia" stood alone."""
+    configurar(clinica_a, set())
+    pagina = admin.get(reverse("inicio")).content.decode()
+    assert "Resumo do dia" not in pagina and "Novo paciente" in pagina
+
+
 def test_orcamentos_precisa_do_financeiro(clinica_a):
     with pytest.raises(ValidationError):
         configurar(clinica_a, sem(M.FINANCEIRO))

@@ -4,6 +4,53 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.3
+  data: 2026-10-30
+  titulo:
+    pt-br: Revisão da administração
+    en: Administration review
+    es: Revisión de la administración
+  itens:
+    - tipo: correcao
+      modulo: Auditoria
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A exclusão dos dados de um paciente a pedido dele agora aparece na auditoria da
+          clínica ("dados pessoais excluídos a pedido do titular"); antes ficava escondida.
+        en: >
+          Erasing a patient's data at their request now shows in the clinic's audit log
+          ("dados pessoais excluídos a pedido do titular"); before, it stayed hidden.
+        es: >
+          La eliminación de los datos de un paciente a su pedido ahora aparece en la auditoría
+          de la clínica ("dados pessoais excluídos a pedido do titular"); antes quedaba oculta.
+    - tipo: melhoria
+      modulo: Equipe
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Quem teve o acesso retirado vê um aviso claro ao entrar, em vez de "ainda não está
+          vinculado".
+        en: >
+          Someone whose access was removed sees a clear notice on logging in, instead of "not
+          yet linked".
+        es: >
+          Quien tuvo el acceso retirado ve un aviso claro al entrar, en vez de "todavía no está
+          vinculado".
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Com todos os módulos desligados, a tela inicial não mostra mais o título "Resumo do
+          dia" sozinho.
+        en: >
+          With every module turned off, the home page no longer shows the "Day summary" title
+          on its own.
+        es: >
+          Con todos los módulos desactivados, la pantalla inicial ya no muestra el título
+          "Resumen del día" solo.
+
 - versao: 0.41.2
   data: 2026-10-30
   titulo:
