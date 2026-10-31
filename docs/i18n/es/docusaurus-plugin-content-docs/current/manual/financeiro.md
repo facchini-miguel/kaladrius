@@ -27,7 +27,7 @@ Solo el administrador de la clínica puede dar **descuento**.
 Después de cobrar, el recibo se abre listo para **imprimir o guardar como PDF**. Muestra los datos de la clínica (nombre, CPF/CNPJ, dirección y teléfono, de **Registros > Configuración de la clínica**), quién pagó, el valor, la cuota y la forma de pago. Para reimprimirlo, abra la cuenta y haga clic en **recibo** junto al pago.
 
 ## Deudores
-En **Financiero > Deudores**, cada paciente con cuotas vencidas, el total vencido separado por tiempo de atraso (hasta 30, 31 a 60, 61 a 90 y más de 90 días), lo que todavía va a vencer y el vencimiento más antiguo. Haga clic en el nombre para abrir la ficha.
+En **Financiero > Deudores**, cada paciente con cuotas vencidas, el total vencido separado por tiempo de atraso (hasta 30, 31 a 60, 61 a 90 y más de 90 días), lo que todavía va a vencer y el vencimiento más antiguo, 50 por página, con búsqueda por nombre (los totales de arriba suman a todos). Haga clic en el nombre para abrir la ficha.
 
 ## Corregir un error
 No se borra nada. El **administrador** puede:

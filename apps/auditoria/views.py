@@ -8,6 +8,7 @@ from django.utils.http import urlencode
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 
 from .models import RegistroAuditoria
+from .registro import nome_do_modelo
 
 POR_PAGINA = 100
 
@@ -17,6 +18,18 @@ def _data(valor):
         return datetime.date.fromisoformat(valor or "")
     except ValueError:
         return None
+
+
+def tipos_de_registro():
+    """Kinds of record in the filter: the audited models and the medical record documents
+    (logged by hand). Asking the database took most of the page's time once the log had
+    hundreds of thousands of entries (volume test, decision 108)."""
+    from apps.prontuario.models import Adendo, Anexo, Atendimento, Atestado, PedidoDeExames, Receita
+
+    from .signals import AUDITADOS
+
+    documentos = [Atendimento, Adendo, Atestado, Receita, PedidoDeExames, Anexo]
+    return sorted({nome_do_modelo(modelo) for modelo in [*AUDITADOS, *documentos]})
 
 
 @exige_permissao(Modulo.AUDITORIA, Acao.VER)
@@ -30,7 +43,7 @@ def lista(request):
         "de": request.GET.get("de", ""),
         "ate": request.GET.get("ate", ""),
     }
-    modelos = sorted(set(registros.exclude(modelo="").values_list("modelo", flat=True)))
+    modelos = tipos_de_registro()
     if filtros["q"]:
         registros = registros.filter(
             Q(usuario_nome__icontains=filtros["q"])

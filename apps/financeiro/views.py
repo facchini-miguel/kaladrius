@@ -23,6 +23,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
+from apps.core.ordem import chave_alfabetica
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.templatetags.formatos import moeda
 from apps.core.validadores import normalizar_cnpj
@@ -379,11 +380,21 @@ def estornar(request, pk):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def devedores(request):
     linhas = servicos.devedores()
+    busca = request.GET.get("q", "").strip()
+    encontrados = linhas
+    if busca:
+        termo = chave_alfabetica(busca)
+        encontrados = [linha for linha in linhas if termo in chave_alfabetica(linha["nome"])]
+    # A clinic with years of use has thousands of debtors: one page held them all (volume
+    # test, decision 108). The totals still add up everyone.
+    pagina = Paginator(encontrados, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
         "financeiro/devedores.html",
         {
-            "linhas": linhas,
+            "pagina": pagina,
+            "busca": busca,
+            "parametros": urlencode({"q": busca}),
             "total_vencido": sum(linha["vencido"] for linha in linhas),
             "total_a_vencer": sum(linha["a_vencer"] for linha in linhas),
         },

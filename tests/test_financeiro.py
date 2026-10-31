@@ -659,3 +659,26 @@ def test_cheque_nao_e_mais_oferecido(cenario):
             conta=cenario["caixa"],
         )
     assert antigo.get_forma_display() == "Cheque"
+
+
+def test_devedores_paginados_e_com_busca(cenario):
+    """Volume test: thousands of debtors filled a single page of several MB."""
+    with usar_clinica(cenario["clinica"]):
+        for n in range(55):
+            servicos.criar_lancamento(
+                clinica=cenario["clinica"],
+                tipo=Lancamento.Tipo.RECEBER,
+                pessoa=f"Pagador Fictício {n:02d}",
+                descricao="Consulta",
+                categoria=cenario["categoria"],
+                valor_total=Decimal("10"),
+                parcelas=1,
+                primeiro_vencimento=HOJE - datetime.timedelta(days=10),
+                usuario=cenario["admin"],
+            )
+    cliente = entrar(cenario, "recepcao")
+    primeira = cliente.get(reverse("financeiro:devedores")).content.decode()
+    assert "55 devedores" in primeira and "Página 1 de 2" in primeira
+    assert "R$ 550,00" in primeira  # the totals still add up everyone
+    busca = cliente.get(reverse("financeiro:devedores"), {"q": "fictício 07"}).content.decode()
+    assert "Pagador Fictício 07" in busca and "Pagador Fictício 08" not in busca

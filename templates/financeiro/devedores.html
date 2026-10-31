@@ -12,6 +12,11 @@
   <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_vencido|moeda }}</div></div></div></div>
   <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_a_vencer|moeda }}</div></div></div></div>
 </div>
+<form method="get" class="row g-2 mb-2" role="search">
+  <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Paciente ou pagador' %}" aria-label="{% translate 'Paciente ou pagador' %}"></div>
+  <div class="col-auto"><button type="submit" class="btn btn-primary">{% translate "Buscar" %}</button></div>
+</form>
+<p class="text-body-secondary small mb-2">{% blocktranslate count n=pagina.paginator.count %}{{ n }} devedor{% plural %}{{ n }} devedores{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
@@ -27,9 +32,9 @@
       </tr>
     </thead>
     <tbody>
-      {% for linha in linhas %}
+      {% for linha in pagina %}
       <tr>
-        <td>{% if linha.paciente %}<a href="{% url 'pacientes:ficha' linha.paciente.pk %}">{{ linha.nome }}</a>{% else %}{{ linha.nome }}{% endif %}</td>
+        <td>{% if linha.paciente_id %}<a href="{% url 'pacientes:ficha' linha.paciente_id %}">{{ linha.nome }}</a>{% else %}{{ linha.nome }}{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|moeda }}</td>
         {% for valor in linha.faixas %}<td class="text-end text-nowrap">{% if valor %}{{ valor|moeda }}{% else %}—{% endif %}</td>{% endfor %}
         <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|moeda }}{% else %}—{% endif %}</td>
@@ -41,4 +46,5 @@
     </tbody>
   </table>
 </div>
+{% include "includes/paginacao.html" %}
 {% endblock %}

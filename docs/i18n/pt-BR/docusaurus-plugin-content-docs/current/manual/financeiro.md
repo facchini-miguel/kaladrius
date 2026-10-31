@@ -27,7 +27,7 @@ Só o administrador da clínica pode dar **desconto**.
 Depois de receber, o recibo abre pronto para **imprimir ou salvar em PDF**. Ele mostra os dados da clínica (nome, CPF/CNPJ, endereço e telefone, de **Cadastros > Configurações da clínica**), quem pagou, o valor, a parcela e a forma de pagamento. Para reimprimir, abra o lançamento e clique em **recibo** ao lado do pagamento.
 
 ## Devedores
-Em **Financeiro > Devedores**, cada paciente com parcelas vencidas, o total vencido separado por tempo de atraso (até 30, 31 a 60, 61 a 90 e mais de 90 dias), o que ainda vai vencer e o vencimento mais antigo. Clique no nome para abrir a ficha.
+Em **Financeiro > Devedores**, cada paciente com parcelas vencidas, o total vencido separado por tempo de atraso (até 30, 31 a 60, 61 a 90 e mais de 90 dias), o que ainda vai vencer e o vencimento mais antigo, 50 por página, com busca por nome (os totais no alto somam todos). Clique no nome para abrir a ficha.
 
 ## Corrigir um erro
 Nada é apagado. O **administrador** pode:

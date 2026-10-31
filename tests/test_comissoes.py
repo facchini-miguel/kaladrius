@@ -131,6 +131,10 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
             Decimal("120.00"),
             Decimal("-20.00"),
         )
+        # The list adds up in the database (volume test) and must agree with the detail.
+        linha = next(x for x in comissoes.resumo(HOJE) if x["profissional"] == cenario["dra"])
+        chaves = ("recebido", "bruta", "estornos", "valor")
+        assert [linha[c] for c in chaves] == [calculo[c] for c in chaves]
     # Nothing to pay while the deduction is larger: it waits for more receipts.
     pagar_comissao(cenario, cenario["dra"])
     receber(cenario, "500.00", cenario["dra"], data=HOJE)

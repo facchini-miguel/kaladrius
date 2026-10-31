@@ -219,14 +219,22 @@ def devedores(hoje=None):
     due and the oldest due date, ordered by the overdue total.
     """
     hoje = hoje or timezone.localdate()
+    # Plain values, not model instances: a clinic with years of use has thousands of open
+    # installments, and full objects took tens of MB per request (volume test, decision 108).
     parcelas = (
         Parcela.objects.abertas()
         .filter(lancamento__tipo=Lancamento.Tipo.RECEBER)
-        .select_related("lancamento__paciente")
+        .values(
+            "vencimento",
+            "saldo",
+            "lancamento__paciente_id",
+            "lancamento__paciente__nome",
+            "lancamento__pessoa",
+        )
     )
     linhas = defaultdict(
         lambda: {
-            "paciente": None,
+            "paciente_id": None,
             "nome": "",
             "faixas": [ZERO] * (len(FAIXAS_DE_ATRASO) + 1),
             "vencido": ZERO,
@@ -235,30 +243,25 @@ def devedores(hoje=None):
         }
     )
     for parcela in parcelas:
-        lancamento = parcela.lancamento
-        chave = (
-            ("paciente", lancamento.paciente_id)
-            if lancamento.paciente_id
-            else (
-                "pessoa",
-                lancamento.pessoa.strip().lower(),
-            )
-        )
+        paciente_id = parcela["lancamento__paciente_id"]
+        pessoa = parcela["lancamento__pessoa"]
+        chave = ("paciente", paciente_id) if paciente_id else ("pessoa", pessoa.strip().lower())
         linha = linhas[chave]
-        linha["paciente"] = lancamento.paciente
-        linha["nome"] = lancamento.nome_pessoa
-        if parcela.vencimento >= hoje:
-            linha["a_vencer"] += parcela.saldo
+        linha["paciente_id"] = paciente_id
+        linha["nome"] = parcela["lancamento__paciente__nome"] if paciente_id else pessoa
+        vencimento, saldo = parcela["vencimento"], parcela["saldo"]
+        if vencimento >= hoje:
+            linha["a_vencer"] += saldo
             continue
-        atraso = (hoje - parcela.vencimento).days
+        atraso = (hoje - vencimento).days
         faixa = next(
             (i for i, limite in enumerate(FAIXAS_DE_ATRASO) if atraso <= limite),
             len(FAIXAS_DE_ATRASO),
         )
-        linha["faixas"][faixa] += parcela.saldo
-        linha["vencido"] += parcela.saldo
-        if linha["mais_antigo"] is None or parcela.vencimento < linha["mais_antigo"]:
-            linha["mais_antigo"] = parcela.vencimento
+        linha["faixas"][faixa] += saldo
+        linha["vencido"] += saldo
+        if linha["mais_antigo"] is None or vencimento < linha["mais_antigo"]:
+            linha["mais_antigo"] = vencimento
     resultado = [linha for linha in linhas.values() if linha["vencido"] or linha["a_vencer"]]
     return sorted(resultado, key=lambda linha: (-linha["vencido"], chave_alfabetica(linha["nome"])))
 

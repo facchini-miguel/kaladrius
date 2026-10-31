@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.7
+  data: 2026-10-31
+  titulo:
+    pt-br: Teste de volume
+    en: Volume test
+    es: Prueba de volumen
+  itens:
+    - tipo: melhoria
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Devedores agora tem busca por nome e páginas de 50, e abre bem mais rápido em clínicas
+          com muitos anos de uso.
+        en: >
+          Debtors now has a name search and pages of 50, and opens much faster in clinics with
+          years of use.
+        es: >
+          Deudores ahora tiene búsqueda por nombre y páginas de 50, y abre mucho más rápido en
+          clínicas con años de uso.
+    - tipo: melhoria
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A tela de comissões e a auditoria abrem muito mais rápido quando há anos de
+          recebimentos e centenas de milhares de registros.
+        en: >
+          The commissions page and the audit log open much faster when there are years of
+          receipts and hundreds of thousands of entries.
+        es: >
+          La pantalla de comisiones y la auditoría abren mucho más rápido cuando hay años de
+          cobros y cientos de miles de registros.
+
 - versao: 0.41.6
   data: 2026-10-31
   titulo:

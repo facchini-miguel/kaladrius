@@ -27,7 +27,7 @@ Only the clinic administrator can give a **discount**.
 After receiving, the receipt opens ready to **print or save as PDF**. It shows the clinic's details (name, CPF/CNPJ, address and phone, from **Records > Clinic settings**), who paid, the amount, the installment and the payment method. To print it again, open the entry and click **receipt** next to the payment.
 
 ## Debtors
-In **Finance > Debtors**, each patient with overdue installments, the overdue total split by days late (up to 30, 31 to 60, 61 to 90 and over 90 days), what is not yet due and the oldest due date. Click the name to open the record.
+In **Finance > Debtors**, each patient with overdue installments, the overdue total split by days late (up to 30, 31 to 60, 61 to 90 and over 90 days), what is not yet due and the oldest due date, 50 per page, with a name search (the totals at the top cover everyone). Click the name to open the record.
 
 ## Fixing a mistake
 Nothing is deleted. The **administrator** can:

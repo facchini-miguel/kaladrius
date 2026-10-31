@@ -10,6 +10,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Count, Sum
 from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 
@@ -32,13 +33,12 @@ def _recebimentos(profissional):
     ).select_related("parcela__lancamento__paciente")
 
 
-def pendente(profissional, ate):
-    """What would be paid to the practitioner for receipts up to `ate`."""
-    creditos = list(
-        _recebimentos(profissional)
-        .filter(estornado=False, comissao__isnull=True, data__lte=ate)
-        .order_by("data", "pk")
-    )
+def _creditos(profissional, ate):
+    return _recebimentos(profissional).filter(estornado=False, comissao__isnull=True, data__lte=ate)
+
+
+def _debitos(profissional):
+    """Receipts already commissioned and then reversed, not discounted yet (a few)."""
     debitos = list(
         _recebimentos(profissional)
         .filter(estornado=True, comissao__isnull=False, comissao_estorno__isnull=True)
@@ -47,6 +47,13 @@ def pendente(profissional, ate):
     )
     for debito in debitos:
         debito.comissao_devolvida = percentual_de(debito.valor, debito.comissao.percentual)
+    return debitos
+
+
+def pendente(profissional, ate):
+    """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
+    creditos = list(_creditos(profissional, ate).order_by("data", "pk"))
+    debitos = _debitos(profissional)
     recebido = sum((p.valor for p in creditos), start=ZERO)
     bruta = percentual_de(recebido, profissional.comissao_percentual)
     estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
@@ -62,12 +69,29 @@ def pendente(profissional, ate):
 
 
 def resumo(ate):
-    """Pending commission of every practitioner with a percentage or something pending."""
+    """Pending commission of every practitioner with a percentage or something pending.
+
+    Only the totals, added up by the database: loading every receipt not commissioned yet
+    took seconds in a clinic with years of them (volume test, decision 108).
+    """
     linhas = []
     for profissional in Profissional.objects.order_by("-ativo", "nome"):
-        linha = pendente(profissional, ate)
-        if profissional.comissao_percentual or linha["creditos"] or linha["debitos"]:
-            linhas.append(linha)
+        totais = _creditos(profissional, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
+        debitos = _debitos(profissional)
+        if not (profissional.comissao_percentual or totais["quantos"] or debitos):
+            continue
+        recebido = totais["recebido"] or ZERO
+        bruta = percentual_de(recebido, profissional.comissao_percentual)
+        estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
+        linhas.append(
+            {
+                "profissional": profissional,
+                "recebido": recebido,
+                "bruta": bruta,
+                "estornos": estornos,
+                "valor": bruta - estornos,
+            }
+        )
     return linhas
 
 
