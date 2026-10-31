@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.1
+  data: 2026-10-30
+  titulo:
+    pt-br: Revisão da recepção
+    en: Front desk review
+    es: Revisión de la recepción
+  itens:
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Algumas listas de escolha, como sexo, vínculo e forma de pagamento, ainda mostravam
+          "Select an option" em inglês; agora mostram "—", como as demais.
+        en: >
+          Some choice lists, such as sex, relationship and payment method, still showed "Select
+          an option" in English even in Portuguese; they now show "—", like the others.
+        es: >
+          Algunas listas de opciones, como sexo, vínculo y forma de pago, todavía mostraban
+          "Select an option" en inglés; ahora muestran "—", como las demás.
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em português, os meses agora aparecem em minúscula nas datas por extenso, como no
+          recibo e na tela inicial: "30 de outubro de 2026".
+        en: >
+          In Portuguese, month names are now lowercase in long dates, such as on receipts and
+          the home page ("30 de outubro de 2026").
+        es: >
+          En portugués, los meses ahora aparecen en minúscula en las fechas largas, como en el
+          recibo y la pantalla inicial ("30 de outubro de 2026").
+
 - versao: 0.41.0
   data: 2026-10-30
   titulo:

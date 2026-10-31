@@ -1,0 +1,93 @@
+# Overrides of Django's own Brazilian Portuguese strings. The system's texts are written
+# in Portuguese and need no catalog; this one only fixes what Django gets wrong for us:
+# month names are lowercase in Portuguese ("30 de outubro de 2026"), and Django 6.1
+# capitalizes them.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "January"
+msgstr "janeiro"
+
+msgid "February"
+msgstr "fevereiro"
+
+msgid "March"
+msgstr "março"
+
+msgid "April"
+msgstr "abril"
+
+msgid "May"
+msgstr "maio"
+
+msgid "June"
+msgstr "junho"
+
+msgid "July"
+msgstr "julho"
+
+msgid "August"
+msgstr "agosto"
+
+msgid "September"
+msgstr "setembro"
+
+msgid "October"
+msgstr "outubro"
+
+msgid "November"
+msgstr "novembro"
+
+msgid "December"
+msgstr "dezembro"
+
+msgctxt "alt. month"
+msgid "January"
+msgstr "janeiro"
+
+msgctxt "alt. month"
+msgid "February"
+msgstr "fevereiro"
+
+msgctxt "alt. month"
+msgid "March"
+msgstr "março"
+
+msgctxt "alt. month"
+msgid "April"
+msgstr "abril"
+
+msgctxt "alt. month"
+msgid "May"
+msgstr "maio"
+
+msgctxt "alt. month"
+msgid "June"
+msgstr "junho"
+
+msgctxt "alt. month"
+msgid "July"
+msgstr "julho"
+
+msgctxt "alt. month"
+msgid "August"
+msgstr "agosto"
+
+msgctxt "alt. month"
+msgid "September"
+msgstr "setembro"
+
+msgctxt "alt. month"
+msgid "October"
+msgstr "outubro"
+
+msgctxt "alt. month"
+msgid "November"
+msgstr "novembro"
+
+msgctxt "alt. month"
+msgid "December"
+msgstr "dezembro"

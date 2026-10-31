@@ -22,9 +22,15 @@ class FormularioBootstrap:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for campo in self.fields.values():
-            if isinstance(campo, forms.ModelChoiceField) and campo.empty_label is not None:
-                # Django 6.1's "- Select an option -" has no Portuguese translation yet.
-                campo.empty_label = "—"
+            # Django 6.1's "- Select an option -" has no Portuguese translation yet: the
+            # blank option of every list becomes a dash, from a table or fixed choices.
+            if isinstance(campo, forms.ModelChoiceField):
+                if campo.empty_label is not None:
+                    campo.empty_label = "—"
+            elif isinstance(campo, forms.ChoiceField):
+                opcoes = list(campo.choices)
+                if opcoes and opcoes[0][0] in ("", None) and not isinstance(opcoes[0][1], list):
+                    campo.choices = [("", "—"), *opcoes[1:]]
             widget = campo.widget
             if isinstance(
                 widget, forms.CheckboxInput | forms.RadioSelect | forms.CheckboxSelectMultiple
