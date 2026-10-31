@@ -12,6 +12,7 @@ from apps.agenda.forms import AgendamentoForm
 from apps.agenda.models import Agendamento, TipoAtendimento
 from apps.core.isolamento import SemClinicaAtual, usar_clinica
 from apps.core.models import Papel
+from apps.financeiro.models import Pagamento
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 from apps.rechamadas.models import Rechamada
@@ -457,6 +458,9 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         assert novos.filter(tipo__nome="Ocupado").count() == 0
         assert Rechamada.objects.count() == 80
         assert not Rechamada.objects.filter(paciente__arquivado=True).exists()
+        # Cheques are not used anymore, not even in made-up data.
+        assert Pagamento.objects.exists()
+        assert not Pagamento.objects.filter(forma=Pagamento.Forma.CHEQUE).exists()
 
 
 def test_simular_so_rechamadas(cenario):

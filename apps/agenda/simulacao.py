@@ -150,7 +150,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
     if not (pacientes and categorias and contas):
         return 0, 0
     hoje = timezone.localdate()
-    formas = [forma for forma, _rotulo in Pagamento.Forma.choices]
+    formas = [forma for forma, _rotulo in Pagamento.Forma.em_uso()]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
         nome: CentroCusto.objects.get_or_create(clinica=clinica, nome=nome)[0]

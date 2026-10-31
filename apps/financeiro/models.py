@@ -409,7 +409,14 @@ class Pagamento(ModeloDaClinica):
         CREDITO = "credito", _("Cartão de crédito")
         TRANSFERENCIA = "transferencia", _("Transferência")
         BOLETO = "boleto", _("Boleto")
+        # No longer offered (the owner: cheques are not used anymore); kept only so payments
+        # recorded as cheque before still show their method.
         CHEQUE = "cheque", _("Cheque")
+
+        @classmethod
+        def em_uso(cls):
+            """The methods offered when recording a payment."""
+            return [(valor, rotulo) for valor, rotulo in cls.choices if valor != cls.CHEQUE]
 
     parcela = models.ForeignKey(
         Parcela, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")

@@ -116,7 +116,9 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
-        label=_("Forma de pagamento"), choices=[("", "—"), *Pagamento.Forma.choices], required=False
+        label=_("Forma de pagamento"),
+        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
 

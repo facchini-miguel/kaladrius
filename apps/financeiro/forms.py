@@ -61,7 +61,9 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
     )
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
-        label=_("Forma de pagamento"), choices=[("", "—"), *Pagamento.Forma.choices], required=False
+        label=_("Forma de pagamento"),
+        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
 
@@ -131,7 +133,9 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
     )
     pago_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
     forma = forms.ChoiceField(
-        label=_("Forma de pagamento"), choices=[("", "—"), *Pagamento.Forma.choices], required=False
+        label=_("Forma de pagamento"),
+        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
 
@@ -307,6 +311,7 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, pode_dar_desconto, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["forma"].choices = [("", "—"), *Pagamento.Forma.em_uso()]
         self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
         if not pode_dar_desconto:
             del self.fields["desconto"]
@@ -542,7 +547,7 @@ class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
     )
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=Pagamento.Forma.choices,
+        choices=Pagamento.Forma.em_uso(),
         initial=Pagamento.Forma.TRANSFERENCIA,
     )
 

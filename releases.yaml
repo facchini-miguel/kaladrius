@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.5
+  data: 2026-10-30
+  titulo:
+    pt-br: Sem cheque
+    en: No more cheques
+    es: Sin cheques
+  itens:
+    - tipo: melhoria
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cheque saiu das formas de pagamento, porque não é mais usado. Pagamentos antigos em
+          cheque continuam aparecendo com o nome certo.
+        en: >
+          Cheque was removed from the payment methods, as it is no longer used. Older cheque
+          payments still show their method.
+        es: >
+          El cheque salió de las formas de pago, porque ya no se usa. Los pagos antiguos con
+          cheque siguen apareciendo con su nombre.
+
 - versao: 0.41.4
   data: 2026-10-30
   titulo:

@@ -631,3 +631,31 @@ def test_valor_com_ponto_de_milhar(cenario, digitado):
     assert resposta.status_code == 302, resposta.context["form"].errors
     with usar_clinica(cenario["clinica"]):
         assert Lancamento.objects.get().valor_total == Decimal("1500.00")
+
+
+def test_cheque_nao_e_mais_oferecido(cenario):
+    """The owner: cheques are not used anymore. A cheque recorded before keeps its name."""
+    lancamento = lancamento_com(cenario)
+    parcela = parcelas_de(cenario, lancamento)[0]
+    admin = entrar(cenario, "admin")
+    for url in (
+        reverse("financeiro:receber_parcela", args=[parcela.pk]),
+        reverse("financeiro:lancamento_novo"),
+        reverse("financeiro:despesa_nova"),
+    ):
+        pagina = admin.get(url).content.decode()
+        assert 'value="pix"' in pagina and 'value="cheque"' not in pagina, url
+    recusado = admin.post(
+        reverse("financeiro:receber_parcela", args=[parcela.pk]),
+        {"data": "2026-10-30", "valor": "100,00", "forma": "cheque", "conta": cenario["caixa"].pk},
+    )
+    assert "forma" in recusado.context["form"].errors
+    with usar_clinica(cenario["clinica"]):
+        antigo = servicos.receber(
+            parcela,
+            usuario=cenario["admin"],
+            valor=Decimal("100"),
+            forma="cheque",
+            conta=cenario["caixa"],
+        )
+    assert antigo.get_forma_display() == "Cheque"
