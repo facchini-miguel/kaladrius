@@ -4,6 +4,31 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.41.0
+  data: 2026-10-30
+  titulo:
+    pt-br: Pessoas relacionadas
+    en: Related people
+    es: Personas relacionadas
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Na ficha do paciente, registre parentes e contatos: mãe, pai, responsável legal, contato
+          de emergência e outros. Pode ser outro paciente da clínica, que aparece nas duas fichas,
+          ou alguém de fora, com nome e telefone. A ficha impressa também lista essas pessoas.
+        en: >
+          On the patient record, register relatives and contacts: mother, father, legal guardian,
+          emergency contact and others. It can be another patient of the clinic, shown on both
+          records, or someone outside, with a name and phone. The printed sheet lists them too.
+        es: >
+          En la ficha del paciente, registre parientes y contactos: madre, padre, responsable
+          legal, contacto de emergencia y otros. Puede ser otro paciente de la clínica, que aparece
+          en las dos fichas, o alguien de afuera, con nombre y teléfono. La ficha impresa también
+          los lista.
+
 - versao: 0.40.0
   data: 2026-10-30
   titulo:
