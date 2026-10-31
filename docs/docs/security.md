@@ -15,7 +15,7 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 | **Roles** | Administrator, front desk and practitioner; a practitioner sees only their own schedule and no clinic money |
 | **Passwords** | Stored with Argon2; at least 10 characters, not common, not only numbers, not similar to the user name |
 | **Login lockout** | 5 wrong passwords (or two-step codes) for the same user from the same address block it for 1 hour; 20 wrong logins from one address, whatever the user, block that address for 1 hour |
-| **Two-step verification** | Optional per person: a code from an authenticator app (TOTP, QR code) after the password, with 10 single-use recovery codes; the clinic administrator can remove it for someone who lost the phone |
+| **Two-step verification** | Optional per person: a code from an authenticator app (TOTP, QR code) after the password, with 10 single-use recovery codes; the clinic administrator can remove it for someone who lost the phone; required by default (clinic setting) from whoever reaches the medical record or the full finance |
 | **Sessions** | End after 30 minutes without use (the page also leaves by itself, with a warning 2 minutes before) and when the browser closes; cookies `HttpOnly` and, with `DJANGO_SECURE=1`, `Secure` |
 | **Password recovery** | By e-mail, only when the installation configures SMTP (`DJANGO_EMAIL_*`); the link works once, for 1 hour; never for the public demo logins |
 | **HTTPS** | Automatic certificate (Caddy); with `DJANGO_SECURE=1`, redirect to HTTPS and HSTS for one year |

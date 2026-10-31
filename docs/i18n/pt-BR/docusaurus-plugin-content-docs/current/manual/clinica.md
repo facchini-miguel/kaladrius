@@ -19,6 +19,8 @@ Em **Módulos** ficam as partes comuns às especialidades: **Agenda**, **Prontu�
 
 Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a mudança é recusada e a tela mostra qual. Ajuste esse agendamento antes.
 
+**Exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro** (vem ligada): profissionais com prontuário, administradores e o financeiro só usam o sistema depois de ativar o código do aplicativo autenticador (veja [Primeiros passos](inicio.md)); até lá, cada página leva ao QR code. A recepção não é obrigada, e os logins públicos da demonstração nunca são.
+
 ## Tipos de atendimento
 Em **Cadastros > Tipos de atendimento**: os tipos (cirurgia, consulta inicial…) e a cor que cada um pinta na agenda. Para deixar de usar um tipo sem perder o histórico, desmarque **ativo**.
 

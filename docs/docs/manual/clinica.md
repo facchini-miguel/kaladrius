@@ -19,6 +19,8 @@ Dentistry enables the dental chart and the teeth and surfaces of estimate items.
 
 If a future appointment would fall outside the new hours or slot length, the change is refused and the screen shows which one. Adjust that appointment first.
 
+**Require two-step verification from whoever reaches the medical record or finance** (on by default): practitioners with medical records, administrators and finance staff only use the system after turning on the authenticator app code (see [Getting started](inicio.md)); until then each page takes them to the QR code. The front desk is not required, and the public demo logins never are.
+
 ## Appointment types
 In **Records > Appointment types**: the types (surgery, first visit…) and the color each one paints in the schedule. To stop using a type without losing the history, uncheck **active**.
 

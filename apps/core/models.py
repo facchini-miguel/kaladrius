@@ -87,6 +87,14 @@ class Clinica(models.Model):
         help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
     )
     ativa = models.BooleanField(_("ativa"), default=True)
+    exigir_duas_etapas = models.BooleanField(
+        _("exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"),
+        default=False,
+        help_text=_(
+            "Profissionais com prontuário, administradores e o financeiro só usam o sistema "
+            "depois de ativar o código do aplicativo autenticador. A recepção não é obrigada."
+        ),
+    )
     agenda_inicio = models.TimeField(_("início da agenda"), default=datetime.time(7, 30))
     agenda_fim = models.TimeField(_("fim da agenda"), default=datetime.time(20, 0))
     agenda_intervalo = models.PositiveSmallIntegerField(

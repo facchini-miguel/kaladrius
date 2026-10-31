@@ -259,3 +259,81 @@ def test_conta_de_demonstracao_nao_recebe_email(client, pessoa, settings):
     pessoa.save(update_fields=["demonstracao"])
     client.post(reverse("conta:recuperar"), {"email": "pessoa@example.com"})
     assert mail.outbox == []
+
+
+# --- Required by the clinic (decision 112) ----------------------------------------------------
+
+
+@pytest.fixture
+def exigida(clinica_a):
+    clinica_a.exigir_duas_etapas = True
+    clinica_a.save(update_fields=["exigir_duas_etapas"])
+    return clinica_a
+
+
+def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
+    client, exigida, criar_usuario, criar_profissional
+):
+    profissional = criar_usuario("prof_exigida", exigida, Papel.PROFISSIONAL)
+    criar_profissional(exigida, "Dra. Fictícia", usuario=profissional)
+    financeiro = criar_usuario("fin_exigida", exigida, Papel.FINANCEIRO)
+    for usuario in (profissional, financeiro):
+        client.force_login(usuario)
+        resposta = client.get(reverse("pacientes:lista"))
+        assert resposta.url == reverse("conta:duas_etapas"), usuario
+        pagina = client.get(reverse("conta:duas_etapas")).content.decode()
+        assert "A clínica exige a verificação em duas etapas" in pagina
+        assert client.get(reverse("conta:ativo")).status_code == 204  # still allowed
+        ligar_duas_etapas(usuario)
+        assert client.get(reverse("pacientes:lista")).status_code == 200
+
+
+def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuario):
+    recepcao = criar_usuario("rec_exigida", exigida, Papel.RECEPCAO)
+    client.force_login(recepcao)
+    assert client.get(reverse("pacientes:lista")).status_code == 200
+    demo = criar_usuario("demo_exigida", exigida, Papel.ADMIN)
+    demo.demonstracao = True
+    demo.save(update_fields=["demonstracao"])
+    client.force_login(demo)
+    assert client.get(reverse("pacientes:lista")).status_code == 200
+
+
+def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
+    admin = criar_usuario("admin_exigida", exigida, Papel.ADMIN)
+    admin.set_password(SENHA)
+    admin.save()
+    dispositivo, _ = ligar_duas_etapas(admin)
+    client.force_login(admin)
+    pagina = client.get(reverse("conta:duas_etapas")).content.decode()
+    assert "não pode ser desativada" in pagina
+    client.post(
+        reverse("conta:duas_etapas"),
+        {
+            "acao": "desativar",
+            "desativar-senha": SENHA,
+            "desativar-codigo": codigo_atual(dispositivo),
+        },
+    )
+    assert servicos.ativa_para(admin)
+
+
+def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
+    client.force_login(criar_usuario("fin_livre", clinica_a, Papel.FINANCEIRO))
+    assert client.get(reverse("financeiro:receber")).status_code == 200
+
+
+def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model, client):
+    import importlib
+
+    from django.apps import apps
+
+    from apps.core.models import Clinica
+
+    super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
+    client.force_login(super_usuario)
+    client.post(reverse("cadastrar_clinica"), {"nome": "Clínica Fictícia Nova", "area": "medicina"})
+    assert Clinica.unica().exigir_duas_etapas
+    Clinica.objects.update(exigir_duas_etapas=False)
+    importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(apps, None)
+    assert Clinica.unica().exigir_duas_etapas

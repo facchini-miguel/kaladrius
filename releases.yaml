@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.43.0
+  data: 2026-10-31
+  titulo:
+    pt-br: Verificação em duas etapas exigida
+    en: Two-step verification required
+    es: Verificación en dos pasos exigida
+  itens:
+    - tipo: novo
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A clínica passa a exigir a verificação em duas etapas de quem acessa o prontuário ou o
+          financeiro: profissionais, administradores e o financeiro ativam o código do aplicativo
+          na primeira entrada. A recepção não é obrigada. Dá para desligar nas Configurações da
+          clínica.
+        en: >
+          The clinic now requires two-step verification from whoever reaches the medical record
+          or finance: practitioners, administrators and finance staff turn on the app code at
+          their first login. The front desk is not required. It can be turned off in the clinic
+          settings.
+        es: >
+          La clínica pasa a exigir la verificación en dos pasos a quien accede a la historia
+          clínica o al financiero: profesionales, administradores y el financiero activan el
+          código de la aplicación en el primer ingreso. La recepción no está obligada. Se puede
+          desactivar en la Configuración de la clínica.
+
 - versao: 0.42.0
   data: 2026-10-31
   titulo:

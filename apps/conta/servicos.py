@@ -42,6 +42,20 @@ def ativa_para(usuario):
     return DuasEtapas.objects.filter(usuario=usuario, ativa=True).exists()
 
 
+def obrigatoria(request):
+    """Whether the clinic requires two-step verification from this person (decision 112):
+    whoever reaches the medical record or the full finance, never the public demo logins."""
+    from apps.core.permissoes import Acao, Modulo, pode
+    from apps.prontuario.permissoes import acessa_prontuario
+
+    usuario, clinica = request.user, getattr(request, "clinica", None)
+    if not usuario.is_authenticated or usuario.demonstracao or clinica is None:
+        return False
+    if not clinica.exigir_duas_etapas:
+        return False
+    return pode(request, Modulo.FINANCEIRO, Acao.VER) or acessa_prontuario(request)
+
+
 def preparar(usuario, novo=False):
     """The person's not yet active device, with a secret to show as a QR code."""
     dispositivo, criado = DuasEtapas.objects.get_or_create(

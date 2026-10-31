@@ -127,6 +127,11 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     )
     assert resposta.url == reverse("inicio")
     assert list(Clinica.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
+    # A new clinic requires two-step verification (decision 112): the superuser turns it on.
+    assert cliente.get(reverse("profissionais:lista")).url == reverse("conta:duas_etapas")
+    from apps.conta import servicos as conta_servicos
+
+    conta_servicos.ativar(conta_servicos.preparar(root))
     assert cliente.get(reverse("profissionais:lista")).status_code == 200
     # Only one: the page and the Django admin no longer add clinics.
     assert cliente.get(reverse("cadastrar_clinica")).url == reverse("inicio")

@@ -96,6 +96,8 @@ MIDDLEWARE = [
     "apps.auditoria.middleware.AuditoriaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # After the clinic is known: required two-step verification (decision 112).
+    "apps.conta.middleware.ExigirDuasEtapasMiddleware",
     # Must be the last middleware (django-axes).
     "axes.middleware.AxesMiddleware",
 ]

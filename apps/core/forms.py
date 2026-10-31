@@ -158,6 +158,7 @@ class ClinicaForm(ModulosClinicosForm):
             "agenda_inicio",
             "agenda_fim",
             "agenda_intervalo",
+            "exigir_duas_etapas",
         ]
         widgets = {
             "agenda_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
@@ -236,6 +237,11 @@ class NovaClinicaForm(ModulosClinicosForm):
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *MODULOS_GERAIS}
+
+    def save(self, commit=True):
+        # A new installation starts requiring two-step verification (decision 112).
+        self.instance.exigir_duas_etapas = True
+        return super().save(commit)
 
     class Meta:
         model = Clinica

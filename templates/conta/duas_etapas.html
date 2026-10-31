@@ -21,6 +21,7 @@
       </form>
     </div></div>
   </div>
+  {% if desativar %}
   <div class="col-md-6">
     <div class="card"><div class="card-body">
       <h2 class="h6">{% translate "Desativar" %}</h2>
@@ -32,8 +33,12 @@
       </form>
     </div></div>
   </div>
+  {% else %}
+  <div class="col-md-6"><p class="small text-body-secondary">{% translate "A clínica exige a verificação em duas etapas de quem acessa o prontuário ou o financeiro, por isso ela não pode ser desativada." %}</p></div>
+  {% endif %}
 </div>
 {% else %}
+{% if obrigatoria %}<div class="alert alert-warning">{% translate "A clínica exige a verificação em duas etapas de quem acessa o prontuário ou o financeiro. Ative abaixo para continuar usando o sistema." %}</div>{% endif %}
 <p>{% translate "Além da senha, o sistema passa a pedir um código que muda a cada 30 segundos, gerado por um aplicativo no seu celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha não entra sem o celular." %}</p>
 <ol>
   <li>{% translate "Instale um aplicativo autenticador no celular." %}</li>

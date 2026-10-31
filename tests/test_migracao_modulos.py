@@ -75,7 +75,11 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             )
             assert ativos == ({area} if area != "outra" else set())
             assert Modulo.objects.filter(clinica_id=codigo_clinica).count() == 2
-        atualizados = executor.loader.project_state(folhas).apps
+        # The models as the database is now (core at the target, the rest at their latest):
+        # core's later migrations add columns that do not exist yet.
+        atualizados = executor.loader.project_state(
+            [folha for folha in folhas if folha[0] != "core"] + destino
+        ).apps
         for label, registros in antes.items():
             modelo = atualizados.get_model(label)
             assert list(modelo.objects.order_by("pk").values()) == registros, label

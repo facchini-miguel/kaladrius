@@ -19,6 +19,8 @@ En **Módulos** están las partes comunes a las especialidades: **Agenda**, **Hi
 
 Si alguna cita futura quedara fuera del nuevo horario o del nuevo intervalo, el cambio se rechaza y la pantalla muestra cuál. Ajuste esa cita antes.
 
+**Exigir verificación en dos pasos a quien accede a la historia clínica o al financiero** (viene activada): los profesionales con historia clínica, los administradores y el financiero solo usan el sistema después de activar el código de la aplicación autenticadora (vea [Primeros pasos](inicio.md)); hasta entonces, cada página lleva al código QR. La recepción no está obligada, y los ingresos públicos de la demostración nunca lo están.
+
 ## Tipos de atención
 En **Registros > Tipos de atención**: los tipos (cirugía, consulta inicial…) y el color que cada uno pinta en la agenda. Para dejar de usar un tipo sin perder el historial, desmarque **activo**.
 

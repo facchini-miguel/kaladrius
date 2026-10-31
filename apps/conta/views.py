@@ -98,12 +98,18 @@ def duas_etapas(request):
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
         return redirect("inicio")
     acao = request.POST.get("acao")
+    obrigatoria = servicos.obrigatoria(request)
     if servicos.ativa_para(usuario):
-        desativar = DesativarForm(
-            request.POST if acao == "desativar" else None, usuario=usuario, prefix="desativar"
+        # Required by the clinic: it can only be renewed (new codes), not turned off.
+        desativar = (
+            None
+            if obrigatoria
+            else DesativarForm(
+                request.POST if acao == "desativar" else None, usuario=usuario, prefix="desativar"
+            )
         )
         novos = CodigoForm(request.POST if acao == "codigos" else None, prefix="codigos")
-        if acao == "desativar" and desativar.is_valid():
+        if acao == "desativar" and desativar is not None and desativar.is_valid():
             servicos.desativar(usuario)
             registrar(
                 RegistroAuditoria.Acao.ALTERAR,
@@ -124,7 +130,13 @@ def duas_etapas(request):
         return render(
             request,
             "conta/duas_etapas.html",
-            {"ativa": True, "desativar": desativar, "novos": novos, "restantes": restantes},
+            {
+                "ativa": True,
+                "desativar": desativar,
+                "novos": novos,
+                "restantes": restantes,
+                "obrigatoria": obrigatoria,
+            },
         )
     dispositivo = servicos.preparar(usuario, novo=request.GET.get("novo") == "1")
     form = CodigoForm(request.POST if acao == "ativar" else None)
@@ -144,6 +156,7 @@ def duas_etapas(request):
         "conta/duas_etapas.html",
         {
             "ativa": False,
+            "obrigatoria": obrigatoria,
             "form": form,
             "qr": servicos.qr_svg(endereco),
             "segredo": servicos.segredo_em_grupos(dispositivo.segredo),
