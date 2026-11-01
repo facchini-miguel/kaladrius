@@ -13,6 +13,11 @@ updates:
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
     groups:
+      # Development tools first (a dependency goes to the first group it matches): a lint or
+      # test-tool change must not hold back the libraries that run in production.
+      ferramentas:
+        patterns: [ruff, "pytest*"]
+        update-types: [minor, patch]
       python-menores:
         update-types: [minor, patch]
 

@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.4
+  data: 2026-11-01
+  titulo:
+    pt-br: Bibliotecas atualizadas
+    en: Libraries updated
+    es: Bibliotecas actualizadas
+  itens:
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Bibliotecas do sistema atualizadas (arquivos estáticos, páginas em Markdown, API,
+          verificação em duas etapas e QR code), com correções de segurança que não afetavam o
+          uso do Kaladrius. Nada muda para quem usa o sistema.
+        en: >
+          System libraries updated (static files, Markdown pages, API, two-step verification and
+          QR code), with security fixes that did not affect how Kaladrius uses them. Nothing
+          changes for users.
+        es: >
+          Bibliotecas del sistema actualizadas (archivos estáticos, páginas en Markdown, API,
+          verificación en dos pasos y código QR), con correcciones de seguridad que no afectaban
+          el uso de Kaladrius. Nada cambia para quien usa el sistema.
+
 - versao: 0.52.3
   data: 2026-11-01
   titulo:

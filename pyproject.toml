@@ -1,13 +1,13 @@
 [project]
 name = "kaladrius"
-version = "0.52.3"
+version = "0.52.4"
 description = "Clinic management system"
 requires-python = ">=3.14"
 license = { file = "LICENSE" }
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"  # py314 once ruff fully supports it (0.11 does not)
+target-version = "py313"  # py314 drops the parentheses of except (A, B): (decision 130)
 extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
