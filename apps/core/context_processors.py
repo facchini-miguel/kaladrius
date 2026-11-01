@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
-from . import modulos, paises
+from . import identificacao, modulos, paises
 from .models import Backup
 from .permissoes import tabela_permissoes
 
@@ -24,8 +24,12 @@ def clinica(request):
         # the menu, and the page of one says so.
         "modulos_desligados": SimpleLazyObject(lambda: modulos.desligados_visiveis(request)),
         "modulo_desligado": getattr(request, "modulo_desligado", None),
-        # Brazilian fields (CPF/CNPJ, RG...) are shown only in Brazil (decision 117).
+        # Brazilian fields (RG, state registration, IBGE cities) are shown only in Brazil
+        # (decision 117); the documents are the country's (decision 121).
         "no_brasil": paises.pais_da_clinica(getattr(request, "clinica", None)) == "BR",
+        "documentos_do_pais": identificacao.do_pais(
+            paises.pais_da_clinica(getattr(request, "clinica", None))
+        ),
     }
 
 

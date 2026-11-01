@@ -1,21 +1,31 @@
-"""Display formats: Brazilian documents and phone numbers (stored unformatted) and amounts
-in the clinic's currency."""
+"""Display formats of the clinic's country: documents, phone numbers and postal codes (stored
+unformatted) and amounts in the clinic's currency."""
 
 from django import template
 
-from apps.core import moedas, paises
+from apps.core import identificacao, moedas, paises
 
 register = template.Library()
 
 
 @register.filter
-def cpf_cnpj(valor):
-    valor = valor or ""
-    if len(valor) == 11:
-        return f"{valor[:3]}.{valor[3:6]}.{valor[6:9]}-{valor[9:]}"
-    if len(valor) == 14:
-        return f"{valor[:2]}.{valor[2:5]}.{valor[5:8]}/{valor[8:12]}-{valor[12:]}"
-    return valor
+def documento(valor, papeis=""):
+    """A document written the country's way: 123.456.789-09, 12-3456789, 943 476 5919. The
+    roles ("paciente", "empresa,pessoa"; see apps/core/identificacao.py) say which documents
+    it may be; all of the country's by default."""
+    return identificacao.escrever(valor, identificacao.papeis(papeis))
+
+
+@register.filter
+def sigla_documento(valor, papeis=""):
+    """The name of the document this value is ("CNPJ"), or every one the roles may have."""
+    return identificacao.sigla(valor, identificacao.papeis(papeis))
+
+
+@register.simple_tag
+def rotulo_documento(*papeis):
+    """The documents of these roles in the clinic's country: "CPF/CNPJ", "RUT", "EIN"."""
+    return identificacao.do_pais().rotulo(*(papeis or identificacao.PAPEIS))
 
 
 @register.filter

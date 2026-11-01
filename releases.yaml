@@ -4,6 +4,51 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.48.0
+  data: 2026-11-01
+  titulo:
+    pt-br: Documentos de cada país
+    en: Each country's documents
+    es: Documentos de cada país
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Fora do Brasil, pacientes, clínica, fornecedores e funcionários têm os documentos do
+          país da clínica, conferidos e escritos do jeito do país: NHS number no Reino Unido, EIN
+          nos Estados Unidos, CURP e RFC no México, DNI e CUIT na Argentina, RUT no Chile e os
+          demais. No Brasil, CPF e CNPJ continuam como sempre, e a ficha mostra "CPF" ou "CNPJ"
+          conforme o tipo de pessoa escolhido.
+        en: >
+          Outside Brazil, patients, the clinic, suppliers and employees have the documents of the
+          clinic's country, checked and written the country's way: NHS number in the United
+          Kingdom, EIN in the United States, CURP and RFC in Mexico, DNI and CUIT in Argentina,
+          RUT in Chile and the others. In Brazil, CPF and CNPJ stay as always, and the form shows
+          "CPF" or "CNPJ" depending on the person type chosen.
+        es: >
+          Fuera de Brasil, pacientes, clínica, proveedores y empleados tienen los documentos del
+          país de la clínica, verificados y escritos a la manera del país: NHS number en el Reino
+          Unido, EIN en Estados Unidos, CURP y RFC en México, DNI y CUIT en Argentina, RUT en
+          Chile y los demás. En Brasil, CPF y CNPJ siguen como siempre, y la ficha muestra "CPF"
+          o "CNPJ" según el tipo de persona elegido.
+    - tipo: melhoria
+      modulo: Profissionais
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O registro profissional traz os exemplos do país da clínica (CRO, CRM… no Brasil; GDC,
+          GMC… no Reino Unido; NPI nos Estados Unidos; cédula profesional no México).
+        en: >
+          The professional registration shows the examples of the clinic's country (CRO, CRM… in
+          Brazil; GDC, GMC… in the United Kingdom; NPI in the United States; cédula profesional in
+          Mexico).
+        es: >
+          El registro profesional muestra los ejemplos del país de la clínica (CRO, CRM… en
+          Brasil; GDC, GMC… en el Reino Unido; NPI en Estados Unidos; cédula profesional en
+          México).
+
 - versao: 0.47.0
   data: 2026-11-01
   titulo:

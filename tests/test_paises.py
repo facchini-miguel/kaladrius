@@ -158,8 +158,10 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
         "Europe/London",
         "GBP",
     )
-    # Outside Brazil there is no CPF/CNPJ field (each country's documents: phase 2).
-    assert 'name="documento"' not in admin.get(reverse("configuracoes")).content.decode()
+    # The document is the new country's (decision 121).
+    assert admin.get(reverse("configuracoes")).context["form"]["documento"].label == (
+        "Company number"
+    )
 
     # A currency chosen on purpose is kept when the country changes.
     dados = dados_clinica(pais="AU", moeda="USD", fuso_horario="Australia/Perth")
@@ -187,7 +189,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
     admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Papel.ADMIN))
     formulario = admin.get(reverse("pacientes:novo")).content.decode()
-    assert 'name="cpf_cnpj"' not in formulario and 'name="rg"' not in formulario
+    assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
     assert 'name="uf"' not in formulario and 'name="cidade_nome"' in formulario
     assert "Código postal" in formulario
 

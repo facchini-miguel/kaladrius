@@ -8,10 +8,9 @@ from django.utils import timezone
 from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
-from . import moedas, paises
+from . import identificacao, moedas, paises
 from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
 from .modulos import configurar, faltando, iniciais
-from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
 
 
 def _opcoes(grupo):
@@ -85,6 +84,34 @@ class FormularioBootstrap:
                 widget.attrs["class"] = f"{widget.attrs.get('class', '')} is-invalid".strip()
 
 
+def campo_documento():
+    """A document of the clinic's country, typed with or without punctuation (decision 121).
+    The form names it and checks it (apps/core/identificacao.py)."""
+    return forms.CharField(
+        label=_("Documento"),
+        max_length=25,
+        required=False,
+        widget=forms.TextInput(attrs={"autocomplete": "off"}),
+    )
+
+
+def documento_por_tipo(campo, individuo, empresa, tipo):
+    """Name and example of a document field that depends on the person type: the document of
+    an individual and of a company (either may be None, and then the field is hidden for that
+    type). The page switches them when the type changes (static/js/pagina.js)."""
+    atual = empresa if tipo == "PJ" else individuo
+    campo.label = (atual or individuo or empresa).sigla
+    campo.widget.attrs.update(
+        {
+            "data-rotulo-pf": individuo.sigla if individuo else "",
+            "data-rotulo-pj": empresa.sigla if empresa else "",
+            "data-exemplo-pf": individuo.exemplo if individuo else "",
+            "data-exemplo-pj": empresa.exemplo if empresa else "",
+            "placeholder": atual.exemplo if atual else "",
+        }
+    )
+
+
 class TrocaSenhaForm(FormularioBootstrap, PasswordChangeForm):
     """The user's own password change, with Bootstrap styling."""
 
@@ -130,9 +157,23 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         for campo in ("moeda", "pais", "fuso_horario"):
             if campo in self.fields:
                 self.fields[campo].required = False
-        # CPF/CNPJ only for a Brazilian clinic; each country's documents are phase 2 (decision 117).
-        if "documento" in self.fields and self._pais_escolhido() != "BR":
-            del self.fields["documento"]
+        # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
+        # in Brazil, "EIN" in the United States... of the country chosen now.
+        if "documento" in self.fields:
+            documentos = identificacao.do_pais(self._pais_escolhido())
+            self.documentos_da_clinica = documentos.de("pessoa", "empresa")
+            campo = self.fields["documento"]
+            campo.label = documentos.rotulo("pessoa", "empresa")
+            campo.widget.attrs["placeholder"] = " · ".join(
+                d.exemplo for d in self.documentos_da_clinica
+            )
+
+    def clean_documento(self):
+        return identificacao.limpar(
+            self.cleaned_data.get("documento", ""),
+            self.documentos_da_clinica,
+            self.fields["documento"].label,
+        )
 
     def _pais_escolhido(self):
         if self.is_bound and self.data.get(self.add_prefix("pais")):
@@ -201,8 +242,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
 class ClinicaForm(ModulosClinicosForm):
     """Clinic details and schedule settings, changed by the clinic administrator."""
 
-    # Typed with punctuation (up to 18 characters), stored as 11 or 14.
-    documento = forms.CharField(label=_("CPF/CNPJ"), max_length=18, required=False)
+    documento = campo_documento()
 
     class Meta:
         model = Clinica
@@ -229,14 +269,6 @@ class ClinicaForm(ModulosClinicosForm):
         help_texts = {
             "agenda_intervalo": _("Os agendamentos começam e terminam em múltiplos deste tempo."),
         }
-
-    def clean_documento(self):
-        documento = normalizar_cnpj(self.cleaned_data.get("documento", ""))
-        if documento and not (
-            cpf_valido(documento) if len(documento) == 11 else cnpj_valido(documento)
-        ):
-            raise forms.ValidationError(_("CPF/CNPJ inválido."))
-        return documento
 
     def clean(self):
         dados = super().clean()
@@ -292,6 +324,8 @@ class NovaClinicaForm(ModulosClinicosForm):
     """The installation's clinic, registered on the first access (decision 069). The
     schedule and the rest are set later in the clinic settings, the general modules
     included: a new clinic starts with all of them on."""
+
+    documento = campo_documento()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

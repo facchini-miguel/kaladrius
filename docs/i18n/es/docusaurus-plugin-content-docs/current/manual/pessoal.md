@@ -9,7 +9,7 @@ El módulo **Personal** guarda los empleados de la clínica, sus salarios y las 
 Las cargas sociales, vacaciones y aguinaldo **no** se calculan: quedan con el contador o con el sistema de sueldos.
 
 ## Empleados
-En **Financiero > Empleados**, haga clic en **Nuevo empleado**: nombre, CPF, cargo, ingreso, teléfono y el **salario** (desde el ingreso, si no elige otra fecha). En un aumento, edite el empleado y complete **Nuevo salario** y la fecha desde la que vale: el salario anterior queda en el **historial de salarios**, y cada mes usa el salario vigente al final de él. Quien se fue recibe una **fecha de baja** y deja de aparecer en los meses siguientes.
+En **Financiero > Empleados**, haga clic en **Nuevo empleado**: nombre, CPF (fuera de Brasil, el documento del país), cargo, ingreso, teléfono y el **salario** (desde el ingreso, si no elige otra fecha). En un aumento, edite el empleado y complete **Nuevo salario** y la fecha desde la que vale: el salario anterior queda en el **historial de salarios**, y cada mes usa el salario vigente al final de él. Quien se fue recibe una **fecha de baja** y deja de aparecer en los meses siguientes.
 
 ## Los sueldos del mes
 En **Financiero > Sueldos del mes**, elija el mes. Aparece una línea por empleado que trabajó en él, con el salario. Complete:

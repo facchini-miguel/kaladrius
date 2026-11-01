@@ -76,9 +76,8 @@ class Clinica(models.Model):
             "escolhidos abaixo e podem ser usados juntos."
         ),
     )
-    documento = models.CharField(
-        _("CPF/CNPJ"), max_length=14, blank=True, help_text=_("Somente números.")
-    )
+    # The country's tax document, an individual's or a company's (decision 121).
+    documento = models.CharField(_("documento"), max_length=20, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
     telefone = models.CharField(_("telefone"), max_length=20, blank=True)
     endereco = models.CharField(
@@ -150,6 +149,19 @@ class Clinica(models.Model):
     def save(self, *args, **kwargs):
         # Clinic creation and its initial capabilities/seeds succeed together.
         return super().save(*args, **kwargs)
+
+    @property
+    def sigla_documento(self):
+        """The name of its document, in its country: "CNPJ", "EIN" (decision 121)."""
+        from .identificacao import sigla
+
+        return sigla(self.documento, ("pessoa", "empresa"), self.pais)
+
+    @property
+    def documento_escrito(self):
+        from .identificacao import escrever
+
+        return escrever(self.documento, ("pessoa", "empresa"), self.pais)
 
     @property
     def odontologia(self):

@@ -19,7 +19,7 @@
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ funcionario.cargo|default:"—" }}</dd>
-          <dt class="col-sm-5">{% translate "CPF" %}</dt><dd class="col-sm-7">{{ funcionario.cpf|cpf_cnpj|default:"—" }}</dd>
+          {% if documentos_do_pais.funcionario or funcionario.cpf %}<dt class="col-sm-5">{{ funcionario.cpf|sigla_documento:"funcionario" }}</dt><dd class="col-sm-7">{{ funcionario.cpf|documento:"funcionario"|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ funcionario.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
           {% if funcionario.desligamento %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ funcionario.desligamento|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ funcionario.telefone|telefone|default:"—" }}</dd>

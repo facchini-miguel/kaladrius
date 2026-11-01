@@ -23,7 +23,7 @@
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ fornecedor.get_tipo_display }}</dd>
           {% if fornecedor.razao_social %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ fornecedor.razao_social }}</dd>{% endif %}
-          <dt class="col-sm-5">{% translate "CPF/CNPJ" %}</dt><dd class="col-sm-7">{{ fornecedor.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>
+          {% with sigla=fornecedor.cpf_cnpj|sigla_documento:fornecedor.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ fornecedor.telefone|telefone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|telefone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ fornecedor.email|default:"—" }}</dd>

@@ -12,7 +12,7 @@
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
-      {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica_atual.documento %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
       {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
       {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
     </div>
@@ -28,10 +28,10 @@
       <dl class="row mb-0 small">
         {% if paciente.tipo == "PJ" %}
         <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ paciente.razao_social|default:"—" }}</dd>
-        {% if no_brasil or paciente.cpf_cnpj %}<dt class="col-5">{% translate "CNPJ" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>{% endif %}
+        {% if documentos_do_pais.empresa or paciente.cpf_cnpj %}<dt class="col-5">{{ paciente.cpf_cnpj|sigla_documento:"empresa" }}</dt><dd class="col-7">{{ paciente.cpf_cnpj|documento:"empresa"|default:"—" }}</dd>{% endif %}
         {% if no_brasil or paciente.inscricao_estadual %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ paciente.inscricao_estadual|default:"—" }}</dd>{% endif %}
         {% else %}
-        {% if no_brasil or paciente.cpf_cnpj %}<dt class="col-5">{% translate "CPF" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>{% endif %}
+        {% if documentos_do_pais.paciente or paciente.cpf_cnpj %}<dt class="col-5">{{ paciente.cpf_cnpj|sigla_documento:"paciente" }}</dt><dd class="col-7">{{ paciente.cpf_cnpj|documento:"paciente"|default:"—" }}</dd>{% endif %}
         {% if no_brasil or paciente.rg %}<dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ paciente.rg|default:"—" }}</dd>{% endif %}
         <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ paciente.data_nascimento|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
         <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ paciente.get_sexo_display|default:"—" }}</dd>

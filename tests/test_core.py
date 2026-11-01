@@ -184,7 +184,7 @@ def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, client
     ("extra", "erro"),
     [
         ({"agenda_inicio": "18:00", "agenda_fim": "08:00"}, "depois do início"),
-        ({"documento": "123"}, "CPF/CNPJ inválido"),
+        ({"documento": "123"}, "CPF/CNPJ: número inválido"),
         ({"agenda_inicio": "10:00"}, "ficaria fora do novo horário"),  # 09:00 appointment
         ({"agenda_intervalo": 60, "agenda_inicio": "08:30"}, "ficaria fora"),  # misaligned
     ],

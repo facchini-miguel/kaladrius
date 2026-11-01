@@ -24,7 +24,7 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 ## 3. What data is processed
 
 **Patients**
-- Identification: name, CPF or CNPJ (Brazilian tax numbers), RG (ID card), date of birth, sex and occupation.
+- Identification: name, CPF or CNPJ (Brazilian tax numbers) or the identity and tax documents of the clinic's country, RG (ID card), date of birth, sex and occupation.
 - Contact: phone numbers, WhatsApp, e-mail and address.
 - Related people: relatives and contacts the patient gives (relationship, and the name and phone of someone who is not a patient of the clinic).
 - Health plan: the plan, plan type, card number, valid until and, for a dependent, the plan holder's name.
@@ -38,9 +38,9 @@ The **clinic that treats you** is the controller: it decides how and why the dat
 - Name, username, e-mail, access profile and language.
 - Logins and logouts, with date, time and IP address; history of who created, changed or deleted each record; login attempts with a wrong password (username typed and IP address).
 - For practitioners: professional license and commission percentage.
-- For employees registered in Staff: name, CPF, phone, job title, hiring and leaving dates, salary history, and each month's overtime and absences, which only the clinic's administrator and finance staff can see.
+- For employees registered in Staff: name, CPF (or the country's document), phone, job title, hiring and leaving dates, salary history, and each month's overtime and absences, which only the clinic's administrator and finance staff can see.
 
-**Suppliers and other people**: names of suppliers and of whoever pays or receives money from the clinic; for registered suppliers, also CPF or CNPJ, phone numbers and e-mail; in bank statements imported for reconciliation, the name the bank shows on each transaction.
+**Suppliers and other people**: names of suppliers and of whoever pays or receives money from the clinic; for registered suppliers, also CPF or CNPJ (or the country's document), phone numbers and e-mail; in bank statements imported for reconciliation, the name the bank shows on each transaction.
 
 The clinic asks only for the data needed for the purposes in section 4. The data is provided by the data subject or the guardian, or written down by the team during care. Keeping it correct helps the clinic treat you well: let it know when something changes.
 

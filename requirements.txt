@@ -10,3 +10,4 @@ Faker==37.1.0
 Markdown==3.10.3
 pyotp==2.9.0
 segno==1.6.1
+python-stdnum==2.2

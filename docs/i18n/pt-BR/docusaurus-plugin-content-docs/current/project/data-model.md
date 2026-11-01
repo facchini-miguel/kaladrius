@@ -118,7 +118,7 @@ Mostra identificação, contato, observações, os próximos e os últimos 10 ag
 - **Excluído definitivamente:** só a partir de um paciente arquivado, pelo administrador, quando o próprio paciente pede a exclusão dos dados (LGPD, art. 18). O cadastro e as rechamadas são apagados, os agendamentos ficam sem o paciente, e os registros de auditoria do paciente, dos seus agendamentos e rechamadas perdem os dados pessoais (`apps/auditoria/registro.py`, `anonimizar`): ficam quem fez, o quê, quando, o código e os nomes dos campos. A tela lembra que a clínica pode ser obrigada a guardar o prontuário (Lei 13.787/2018).
 
 ## Documentos e formatos
-- CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`).
+- CPF, CNPJ, telefones e CEP são guardados **sem pontuação** e formatados só na exibição (filtros em `apps/core/templatetags/formatos.py`). Desde a 0.48.0, os campos `cpf_cnpj`, `cpf` e `Clinica.documento` mantêm o nome mas guardam o documento do país da clínica, com até 20 caracteres (regras em `apps/core/identificacao.py`, decisão 121).
 - O CNPJ aceita o **formato alfanumérico** da Receita Federal (em vigor desde julho de 2026: letras nas 12 primeiras posições, dígitos verificadores numéricos). Validação em `apps/core/validadores.py`.
 - O CPF/CNPJ é opcional (crianças, por exemplo), mas **único dentro da clínica** quando informado.
 

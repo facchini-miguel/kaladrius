@@ -7,7 +7,7 @@ sidebar_position: 8
 Estas telas são do **administrador da clínica**, no menu **Cadastros**.
 
 ## Configurações da clínica
-Em **Cadastros > Configurações da clínica**: nome, CPF/CNPJ, e-mail e telefone da clínica, e o **horário da agenda** (início, fim e duração de cada horário).
+Em **Cadastros > Configurações da clínica**: nome, documento (CPF/CNPJ no Brasil), e-mail e telefone da clínica, e o **horário da agenda** (início, fim e duração de cada horário).
 
 A instalação atende **uma única clínica**, com um cadastro de pacientes, equipe, agenda e financeiro. Não há seletor de clínicas. A identificação interna da clínica é mantida para uma possível evolução futura.
 
@@ -21,7 +21,29 @@ Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a 
 
 **Exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro** (vem ligada): profissionais com prontuário, administradores e o financeiro só usam o sistema depois de ativar o código do aplicativo autenticador (veja [Primeiros passos](inicio.md)); até lá, cada página leva ao QR code. A recepção não é obrigada, e os logins públicos da demonstração nunca são.
 
-**País e fuso horário**: Brasil por padrão; também Estados Unidos, Reino Unido, Canadá, Austrália e África do Sul, e na América Latina México, Argentina, Chile, Colômbia, Peru, Uruguai, Paraguai, Bolívia e Equador. O país define os fusos oferecidos (a agenda e todos os horários seguem o da clínica, onde quer que cada pessoa esteja), os telefones no formato do país com o código certo do WhatsApp, os códigos postais (ZIP code, postcode…), a ordem das datas em inglês (10/31 nos Estados Unidos, 31/10 no Reino Unido, na Austrália e na África do Sul, 2026-10-31 no Canadá) os números e as datas em espanhol (1,234.56 no México e no Peru, 1.234,56 nos demais países latino-americanos) e a moeda sugerida, que acompanha a troca de país se nenhuma outra tiver sido escolhida. Fora do Brasil, o estado e a cidade do paciente são digitados, e CPF/CNPJ, RG e inscrição estadual não aparecem: os documentos de cada país vêm numa próxima versão.
+**País e fuso horário**: Brasil por padrão; também Estados Unidos, Reino Unido, Canadá, Austrália e África do Sul, e na América Latina México, Argentina, Chile, Colômbia, Peru, Uruguai, Paraguai, Bolívia e Equador. O país define os fusos oferecidos (a agenda e todos os horários seguem o da clínica, onde quer que cada pessoa esteja), os telefones no formato do país com o código certo do WhatsApp, os códigos postais (ZIP code, postcode…), a ordem das datas em inglês (10/31 nos Estados Unidos, 31/10 no Reino Unido, na Austrália e na África do Sul, 2026-10-31 no Canadá) os números e as datas em espanhol (1,234.56 no México e no Peru, 1.234,56 nos demais países latino-americanos) e a moeda sugerida, que acompanha a troca de país se nenhuma outra tiver sido escolhida. Fora do Brasil, o estado e a cidade do paciente são digitados, e RG e inscrição estadual não aparecem.
+
+**Documentos de cada país**: pacientes, clínica, fornecedores e funcionários recebem os documentos do país da clínica, conferidos pelos dígitos verificadores e escritos do jeito do país (12-3456789, 943 476 5919, 20-12345678-6), e cada um mantém o nome oficial em todos os idiomas. Nas fichas de paciente e de fornecedor, o campo muda ao escolher pessoa física ou jurídica; quando um tipo não tem documento, o campo some. A clínica aceita o documento de pessoa física ou de empresa. O registro profissional continua livre, com os exemplos do país (CRO, CRM… no Brasil; GDC, GMC… no Reino Unido; NPI nos Estados Unidos).
+
+| País | Paciente pessoa física | Empresa (paciente, fornecedor, clínica) | Fornecedor ou clínica pessoa física | Funcionário |
+|---|---|---|---|---|
+| Brasil | CPF | CNPJ | CPF | CPF |
+| México | CURP | RFC | RFC | CURP |
+| Argentina | DNI | CUIT | CUIT | DNI |
+| Chile | RUT | RUT | RUT | RUT |
+| Colômbia | Cédula de ciudadanía | NIT | NIT | Cédula de ciudadanía |
+| Peru | DNI | RUC | RUC | DNI |
+| Uruguai | Cédula de identidad | RUT | RUT | Cédula de identidad |
+| Paraguai | Cédula de identidad | RUC | RUC | Cédula de identidad |
+| Bolívia | Cédula de identidad | NIT | NIT | Cédula de identidad |
+| Equador | Cédula | RUC | RUC | Cédula |
+| Estados Unidos | — | EIN | EIN | SSN |
+| Reino Unido | NHS number | Company number | — | National Insurance number |
+| Canadá | Health card number | Business Number | Business Number | SIN |
+| Austrália | Medicare number | ABN | ABN | — |
+| África do Sul | ID number | Company registration number | — | ID number |
+
+Nos Estados Unidos não se pede número nacional ao paciente, e na Austrália o tax file number dos funcionários não é guardado (a lei restringe quem pode guardá-lo). Se o país mudar, os documentos já salvos ficam como estão e são conferidos de novo ao editar.
 
 **Moeda**: a moeda em que a clínica trabalha (real por padrão; também dólar americano, euro, libra esterlina e os pesos argentino, mexicano, chileno, colombiano e uruguaio, o guarani paraguaio, o sol peruano e o boliviano). Todos os valores do sistema, recibos inclusive, aparecem nela, para toda a equipe e em qualquer idioma que cada um use: o idioma só define os separadores (1.234,56 ou 1,234.56). Trocar a moeda **não converte** os valores já lançados; só muda como eles aparecem.
 

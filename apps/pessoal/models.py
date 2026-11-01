@@ -24,7 +24,8 @@ DIAS_POR_MES = Decimal(30)
 
 class Funcionario(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
-    cpf = models.CharField(_("CPF"), max_length=11, blank=True)
+    # The country's employee document (decision 121); the name stayed from Brazil.
+    cpf = models.CharField(_("documento"), max_length=20, blank=True)
     cargo = models.CharField(_("cargo"), max_length=100, blank=True)
     admissao = models.DateField(_("admissão"), null=True, blank=True)
     desligamento = models.DateField(_("desligamento"), null=True, blank=True)
@@ -48,6 +49,8 @@ class Funcionario(ModeloDaClinica):
 
     def __str__(self):
         return self.nome
+
+    papel_documento = "funcionario"  # see apps/core/identificacao.py
 
     def salario_em(self, data):
         """The salary in force on `data` (the newest one starting on or before it)."""

@@ -1,7 +1,7 @@
 {% load i18n formatos %}<div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
   <div>
     <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
-    {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+    {% if clinica_atual.documento %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
     {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
     {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
   </div>

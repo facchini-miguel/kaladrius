@@ -9,7 +9,7 @@ The **Staff** module keeps the clinic's employees, their salaries and each month
 Payroll taxes, vacations and the 13th salary are **not** calculated: the accountant or a payroll system takes care of them.
 
 ## Employees
-In **Finance > Employees**, click **New employee**: name, CPF, job title, hiring date, phone and the **salary** (from the hiring date, unless you choose another date). For a raise, edit the employee and fill in **New salary** and the date it applies from: the previous salary stays in the **salary history**, and each month uses the salary in force at its end. An employee who left gets a **leaving date** and stops appearing in the months after it.
+In **Finance > Employees**, click **New employee**: name, CPF (outside Brazil, the country's document), job title, hiring date, phone and the **salary** (from the hiring date, unless you choose another date). For a raise, edit the employee and fill in **New salary** and the date it applies from: the previous salary stays in the **salary history**, and each month uses the salary in force at its end. An employee who left gets a **leaving date** and stops appearing in the months after it.
 
 ## The month's pay
 In **Finance > Month's pay**, choose the month. There is one line per employee working in it, with their salary. Fill in:

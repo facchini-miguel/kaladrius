@@ -224,7 +224,8 @@ class Fornecedor(ModeloDaClinica):
         db_collation=ALFABETICA,
     )
     razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
-    cpf_cnpj = models.CharField(_("CPF/CNPJ"), max_length=14, blank=True)
+    # The country's tax document (decision 121); the name stayed from Brazil.
+    cpf_cnpj = models.CharField(_("documento"), max_length=20, blank=True)
     telefone = models.CharField(_("telefone"), max_length=11, blank=True)
     whatsapp = models.CharField(_("WhatsApp"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
@@ -247,6 +248,11 @@ class Fornecedor(ModeloDaClinica):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def papel_documento(self):
+        """Its document's role in apps/core/identificacao.py."""
+        return "empresa" if self.tipo == self.Tipo.JURIDICA else "pessoa"
 
 
 class Lancamento(ModeloDaClinica):

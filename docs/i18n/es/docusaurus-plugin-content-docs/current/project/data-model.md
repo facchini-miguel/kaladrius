@@ -118,7 +118,7 @@ Muestra identificación, contacto, observaciones, las próximas y las últimas 1
 - **Eliminado definitivamente:** solo a partir de un paciente archivado, por el administrador, cuando el propio paciente pide la eliminación de sus datos (LGPD, art. 18). El registro y los recordatorios se eliminan, las citas quedan sin el paciente, y los registros de auditoría del paciente, de sus citas y recordatorios pierden los datos personales (`apps/auditoria/registro.py`, `anonimizar`): quedan quién, qué, cuándo, el código y los nombres de los campos. La pantalla recuerda que la clínica puede estar obligada a guardar la historia clínica (Ley 13.787/2018).
 
 ## Documentos y formatos
-- CPF, CNPJ, teléfonos y CEP se guardan **sin puntuación** y se formatean solo al mostrarlos (filtros en `apps/core/templatetags/formatos.py`).
+- CPF, CNPJ, teléfonos y CEP se guardan **sin puntuación** y se formatean solo al mostrarlos (filtros en `apps/core/templatetags/formatos.py`). Desde la 0.48.0, los campos `cpf_cnpj`, `cpf` y `Clinica.documento` mantienen el nombre pero guardan el documento del país de la clínica, con hasta 20 caracteres (reglas en `apps/core/identificacao.py`, decisión 121).
 - El CNPJ acepta el **formato alfanumérico** de la Receita Federal (vigente desde julio de 2026: letras en las 12 primeras posiciones, dígitos verificadores numéricos). Validación en `apps/core/validadores.py`.
 - El CPF/CNPJ es opcional (niños, por ejemplo), pero **único dentro de la clínica** cuando se informa.
 

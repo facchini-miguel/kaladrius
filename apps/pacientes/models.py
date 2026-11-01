@@ -28,9 +28,11 @@ class Paciente(ModeloDaClinica):
         db_collation=ALFABETICA,
     )
     razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
+    # The country's document of an individual or a company (decision 121); the name stayed from
+    # Brazil.
     cpf_cnpj = models.CharField(
-        _("CPF/CNPJ"),
-        max_length=14,
+        _("documento"),
+        max_length=20,
         blank=True,
         help_text=_("Pode ser digitado com ou sem pontuação."),
     )
@@ -130,6 +132,11 @@ class Paciente(ModeloDaClinica):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def papel_documento(self):
+        """Its document's role in apps/core/identificacao.py."""
+        return "empresa" if self.tipo == self.Tipo.JURIDICA else "paciente"
 
     @property
     def idade(self):

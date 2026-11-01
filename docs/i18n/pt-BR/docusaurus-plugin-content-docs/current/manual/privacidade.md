@@ -24,7 +24,7 @@ A **clínica que atende você** é a controladora: decide como e para que os dad
 ## 3. Quais dados são tratados
 
 **Pacientes**
-- Identificação: nome, CPF ou CNPJ, RG, data de nascimento, sexo e profissão.
+- Identificação: nome, CPF ou CNPJ (ou os documentos de identidade e fiscais do país da clínica), RG, data de nascimento, sexo e profissão.
 - Contato: telefones, WhatsApp, e-mail e endereço.
 - Pessoas relacionadas: parentes e contatos informados pelo paciente (o vínculo e, de quem não é paciente da clínica, o nome e o telefone).
 - Convênio: o convênio, o plano, o número da carteirinha, a validade e, para um dependente, o nome do titular do plano.
@@ -38,9 +38,9 @@ A **clínica que atende você** é a controladora: decide como e para que os dad
 - Nome, usuário, e-mail, perfil de acesso e idioma.
 - Registro de entradas e saídas do sistema, com data, hora e endereço IP; histórico de quem criou, alterou ou excluiu cada registro; tentativas de entrada com senha errada (usuário digitado e endereço IP).
 - Dos profissionais: registro profissional e percentual de comissão.
-- Dos funcionários cadastrados em Pessoal: nome, CPF, telefone, cargo, datas de admissão e desligamento, histórico de salários, horas extras e faltas de cada mês, que só o administrador e o financeiro da clínica veem.
+- Dos funcionários cadastrados em Pessoal: nome, CPF (ou o documento do país), telefone, cargo, datas de admissão e desligamento, histórico de salários, horas extras e faltas de cada mês, que só o administrador e o financeiro da clínica veem.
 
-**Fornecedores e outras pessoas**: nome de fornecedores e de quem paga ou recebe valores da clínica; dos fornecedores cadastrados, também CPF ou CNPJ, telefones e e-mail; nos extratos bancários importados para conferência, o nome que o banco mostra em cada transação.
+**Fornecedores e outras pessoas**: nome de fornecedores e de quem paga ou recebe valores da clínica; dos fornecedores cadastrados, também CPF ou CNPJ (ou o documento do país), telefones e e-mail; nos extratos bancários importados para conferência, o nome que o banco mostra em cada transação.
 
 A clínica pede apenas os dados necessários para as finalidades da seção 4. Os dados são informados pelo próprio titular ou pelo responsável, ou anotados pela equipe durante o atendimento. Manter os dados corretos ajuda a clínica a atender bem: avise quando algo mudar.
 

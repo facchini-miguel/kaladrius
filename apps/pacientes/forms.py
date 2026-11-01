@@ -1,17 +1,13 @@
 import datetime
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from apps.core import paises
-from apps.core.forms import FormularioBootstrap
-from apps.core.validadores import (
-    cnpj_valido,
-    cpf_valido,
-    normalizar_cnpj,
-    normalizar_telefone,
-)
+from apps.core import identificacao, paises
+from apps.core.forms import FormularioBootstrap, campo_documento, documento_por_tipo
+from apps.core.validadores import normalizar_telefone
 from apps.referencias.models import UF, Cidade
 
 from .models import Paciente, PessoaRelacionada
@@ -42,8 +38,8 @@ def _campo_texto(label, max_length, **attrs):
 class PacienteForm(FormularioBootstrap, forms.ModelForm):
     uf = UFField(queryset=UF.objects.all(), required=False, label=_("UF"))
     cidade = CidadeField(queryset=Cidade.objects.none(), required=False, label=_("Cidade"))
-    # Typed with punctuation (up to 18 characters), stored as digits/letters only.
-    cpf_cnpj = _campo_texto(_("CPF/CNPJ"), 18)
+    # The country's document (decision 121), typed with punctuation, stored compact.
+    cpf_cnpj = campo_documento()
     cep = _campo_texto(_("CEP"), 10)
     telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
     whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
@@ -87,9 +83,9 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "observacoes": forms.Textarea(attrs={"rows": 4}),
         }
 
-    # Brazilian fields; outside Brazil the documents are phase 2 of the internationalization and
-    # the state and city are typed (decision 117).
-    SO_NO_BRASIL = ["cpf_cnpj", "inscricao_estadual", "rg", "uf", "cidade"]
+    # Brazilian fields; outside Brazil the state and city are typed (decision 117) and the
+    # document is the country's (decision 121).
+    SO_NO_BRASIL = ["inscricao_estadual", "rg", "uf", "cidade"]
     FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
 
     def __init__(self, *args, clinica, **kwargs):
@@ -98,6 +94,13 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             self.instance.clinica = clinica
         self.pais = paises.pais_da_clinica(clinica)
         self.fields["cep"].label = paises.rotulo_cep(self.pais)
+        self.documentos = identificacao.do_pais(self.pais)
+        documento_por_tipo(
+            self.fields["cpf_cnpj"],
+            self.documentos.paciente,
+            self.documentos.empresa,
+            self["tipo"].value(),
+        )
         for campo in self.FORA_DO_BRASIL if self.pais == "BR" else self.SO_NO_BRASIL:
             del self.fields[campo]
         if self.pais != "BR":
@@ -133,10 +136,6 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             else Cidade.objects.none()
         )
 
-    def clean_cpf_cnpj(self):
-        # Normalized here; validated in clean() because it depends on the person type.
-        return normalizar_cnpj(self.cleaned_data.get("cpf_cnpj", ""))
-
     def clean_cep(self):
         return paises.normalizar_cep(self.cleaned_data.get("cep"), self.pais)
 
@@ -164,30 +163,37 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     def clean(self):
         dados = super().clean()
         tipo = dados.get("tipo")
-        documento = dados.get("cpf_cnpj", "")
+        # Checked here because it depends on the person type; a type without a document in
+        # this country (an individual in the United States) keeps none.
+        do_tipo = (
+            self.documentos.empresa if tipo == Paciente.Tipo.JURIDICA else self.documentos.paciente
+        )
+        documento = ""
+        if do_tipo is not None:
+            try:
+                documento = identificacao.limpar(
+                    dados.get("cpf_cnpj", ""), [do_tipo], do_tipo.sigla
+                )
+            except ValidationError as erro:
+                self.add_error("cpf_cnpj", erro)
+        if "cpf_cnpj" in dados:
+            dados["cpf_cnpj"] = documento
 
         if documento:
-            if tipo == Paciente.Tipo.FISICA and not cpf_valido(documento):
-                self.add_error("cpf_cnpj", _("CPF inválido."))
-            elif tipo == Paciente.Tipo.JURIDICA and not cnpj_valido(documento):
-                self.add_error("cpf_cnpj", _("CNPJ inválido."))
-            else:
-                # The clinic is not a form field, so the unique constraint is checked here.
-                outro = (
-                    Paciente.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
+            # The clinic is not a form field, so the unique constraint is checked here.
+            outro = Paciente.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
+            if outro is not None and outro.arquivado:
+                self.add_error(
+                    "cpf_cnpj",
+                    _(
+                        "Este documento é de um paciente arquivado. Peça ao administrador "
+                        "da clínica para restaurá-lo."
+                    ),
                 )
-                if outro is not None and outro.arquivado:
-                    self.add_error(
-                        "cpf_cnpj",
-                        _(
-                            "Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador "
-                            "da clínica para restaurá-lo."
-                        ),
-                    )
-                elif outro is not None:
-                    self.add_error(
-                        "cpf_cnpj", _("Já existe um paciente com este CPF/CNPJ nesta clínica.")
-                    )
+            elif outro is not None:
+                self.add_error(
+                    "cpf_cnpj", _("Já existe um paciente com este documento nesta clínica.")
+                )
 
         # Fields that only make sense for one person type are cleared for the other.
         if tipo == Paciente.Tipo.JURIDICA:

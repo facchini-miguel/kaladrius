@@ -2,8 +2,8 @@
 and Spanish variants of dates and numbers, and the default currency. Brazil keeps every rule it
 had; the other countries are the English-speaking markets (United States, United Kingdom,
 Canada, Australia and South Africa) and Latin America (Mexico, Argentina, Chile, Colombia, Peru,
-Uruguay, Paraguay, Bolivia and Ecuador). Documents (CPF/CNPJ and each country's own) are phase
-2 of the internationalization.
+Uruguay, Paraguay, Bolivia and Ecuador). Each country's documents are in identificacao.py
+(decision 121).
 """
 
 import re

@@ -11,6 +11,30 @@
     if (evento.target.closest("[data-imprimir]")) window.print();
   });
 
+  // A document that depends on the person type (decision 121): the field takes the name and
+  // example of the chosen type's document ("CPF" or "CNPJ") and hides when that type has none
+  // in the clinic's country.
+  function documentos(form) {
+    const tipo = form.querySelector("input[name=tipo]:checked")?.value || "PF";
+    const sufixo = tipo === "PJ" ? "Pj" : "Pf";
+    form.querySelectorAll("input[data-rotulo-pf]").forEach((campo) => {
+      const rotulo = campo.dataset["rotulo" + sufixo];
+      const caixa = campo.closest(".mb-3") || campo;
+      const pai = caixa.parentElement;
+      const alvo = pai && pai.children.length === 1 && /\bcol/.test(pai.className) ? pai : caixa;
+      alvo.hidden = !rotulo;
+      const nome = form.querySelector(`label[for="${campo.id}"]`);
+      if (rotulo && nome) nome.textContent = rotulo;
+      campo.placeholder = campo.dataset["exemplo" + sufixo] || "";
+    });
+  }
+  document.querySelectorAll("form").forEach((form) => {
+    if (form.querySelector("input[data-rotulo-pf]")) documentos(form);
+  });
+  document.addEventListener("change", (evento) => {
+    if (evento.target.matches("input[name=tipo]") && evento.target.form) documentos(evento.target.form);
+  });
+
   // Every password field gets an eye button to show or hide what was typed.
   const OLHO = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 3C4.5 3 1.7 5.3.5 8c1.2 2.7 4 5 7.5 5s6.3-2.3 7.5-5C14.3 5.3 11.5 3 8 3Zm0 8.3A3.3 3.3 0 1 1 8 4.7a3.3 3.3 0 0 1 0 6.6Zm0-5.1a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6Z"/></svg>';
   const OLHO_RISCADO = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M2.1 1.4 1.4 2.1l2.2 2.2C2.2 5.2 1.1 6.5.5 8c1.2 2.7 4 5 7.5 5 1.4 0 2.7-.4 3.8-1l2.1 2.1.7-.7L2.1 1.4ZM8 11.3A3.3 3.3 0 0 1 4.9 6.8l1.2 1.1a1.8 1.8 0 0 0 2 2l1.2 1.1c-.4.2-.9.3-1.3.3ZM8 3c-1 0-2 .2-2.8.6l1.3 1.3c.5-.2 1-.2 1.5-.2a3.3 3.3 0 0 1 3.3 3.3c0 .5-.1 1-.2 1.5l2 2c1.1-.9 1.9-2.1 2.4-3.5C14.3 5.3 11.5 3 8 3Z"/></svg>';

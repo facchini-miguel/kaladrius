@@ -9,10 +9,11 @@
   {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:fornecedor_novo' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
 </div>
 
+{% rotulo_documento "pessoa" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-8">
     <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
-           placeholder="{% translate 'Nome, razão social ou CPF/CNPJ' %}" aria-label="{% translate 'Buscar fornecedor' %}">
+           placeholder="{{ dica_busca }}" aria-label="{% translate 'Buscar fornecedor' %}">
   </div>
   <div class="col-md-2">
     <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
@@ -24,7 +25,7 @@
     <thead>
       <tr>
         <th>{% translate "Nome" %}</th>
-        <th>{% translate "CPF/CNPJ" %}</th>
+        <th>{% rotulo_documento "pessoa" "empresa" %}</th>
         <th>{% translate "Telefone" %}</th>
         <th>{% translate "WhatsApp" %}</th>
         <th class="text-end">{% translate "Ações" %}</th>
@@ -37,7 +38,7 @@
           <a href="{% url 'financeiro:fornecedor' fornecedor.pk %}">{{ fornecedor.nome }}</a>
           {% if not fornecedor.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ fornecedor.cpf_cnpj|cpf_cnpj|default:"—" }}</td>
+        <td class="text-nowrap">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ fornecedor.telefone|telefone|default:"—" }}</td>
         <td class="text-nowrap">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|telefone }}</a>{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:fornecedor_editar' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}</td>

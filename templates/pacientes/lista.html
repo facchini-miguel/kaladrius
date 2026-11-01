@@ -11,10 +11,11 @@
   {% endif %}
 </div>
 
+{% rotulo_documento "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, código ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
     <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
-           placeholder="{% translate 'Nome, código ou CPF/CNPJ' %}" aria-label="{% translate 'Buscar paciente' %}">
+           placeholder="{{ dica_busca }}" aria-label="{% translate 'Buscar paciente' %}">
   </div>
   <div class="col-6 col-md-2">
     <select name="tipo" class="form-select" aria-label="{% translate 'Tipo' %}">
@@ -46,7 +47,7 @@
       <tr>
         <th>{% translate "Código" %}</th>
         <th>{% translate "Nome" %}</th>
-        <th>{% translate "CPF/CNPJ" %}</th>
+        <th>{% rotulo_documento "paciente" "empresa" %}</th>
         <th>{% translate "Telefone" %}</th>
         <th>{% translate "Cidade" %}</th>
         <th>{% translate "Idade" %}</th>
@@ -63,7 +64,7 @@
           {% if not paciente.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if paciente.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</td>
+        <td class="text-nowrap">{{ paciente.cpf_cnpj|documento:paciente.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ paciente.telefone_principal|telefone|default:"—" }}</td>
         <td>{% if paciente.cidade %}{{ paciente.cidade.nome }}/{{ paciente.cidade.uf.sigla }}{% else %}—{% endif %}</td>
         <td>{% if paciente.idade is not None %}{{ paciente.idade }}{% else %}—{% endif %}</td>

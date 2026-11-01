@@ -120,7 +120,7 @@ Shows identification, contact, notes, the next and the latest 10 appointments (v
 - **Permanently deleted:** only from an archived patient, by the administrator, when the patient asks for their data to be erased (LGPD, art. 18). The record and recalls are deleted, appointments lose the patient, and the audit entries of the patient and of their appointments and recalls lose the personal data (`apps/auditoria/registro.py`, `anonimizar`): who, what, when, the code and the field names remain. The screen reminds that the clinic may be required to keep clinical records (Law 13.787/2018).
 
 ## Documents and formats
-- CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`).
+- CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`). Since 0.48.0 the fields `cpf_cnpj`, `cpf` and `Clinica.documento` keep their names but hold the document of the clinic's country, up to 20 characters (rules in `apps/core/identificacao.py`, decision 121).
 - CNPJ accepts the Receita Federal **alphanumeric format** (in force since July 2026: letters in the first 12 positions, numeric check digits). Validation in `apps/core/validadores.py`.
 - CPF/CNPJ is optional (e.g., children), but **unique within the clinic** when given.
 

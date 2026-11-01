@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
+from apps.core import identificacao, paises
 from apps.core.forms import FormularioBootstrap
 
 from .models import Profissional
@@ -17,6 +18,9 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
+        # The registrations of the clinic's country as examples (decision 121).
+        exemplos = identificacao.do_pais(paises.pais_da_clinica(clinica)).registro_profissional
+        self.fields["registro"].help_text = exemplos
         # Only users with an active membership in this clinic can be linked.
         self.fields["usuario"].queryset = (
             get_user_model()

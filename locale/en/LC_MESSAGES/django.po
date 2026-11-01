@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 05:31-0300\n"
+"POT-Creation-Date: 2026-11-01 07:10-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -479,6 +479,9 @@ msgstr "- Select an option -"
 msgid "Núcleo"
 msgstr "Core"
 
+msgid "Documento"
+msgstr "Document"
+
 #
 msgid "Especialidades"
 msgstr "Specialties"
@@ -511,14 +514,8 @@ msgstr "Choose a time zone of %(pais)s."
 msgid "%(modulo)s precisa de: %(precisa)s."
 msgstr "%(modulo)s needs: %(precisa)s."
 
-msgid "CPF/CNPJ"
-msgstr "CPF/CNPJ (tax ID)"
-
 msgid "Os agendamentos começam e terminam em múltiplos deste tempo."
 msgstr "Appointments start and end at multiples of this time."
-
-msgid "CPF/CNPJ inválido."
-msgstr "Invalid CPF/CNPJ."
 
 msgid "O fim da agenda deve ser depois do início."
 msgstr "The schedule end must be after its start."
@@ -530,6 +527,13 @@ msgid ""
 msgstr ""
 "The appointment on %(momento)s would fall outside the new hours or slot "
 "length. Adjust future appointments before changing the schedule."
+
+msgid "CRO, CRM, CREFITO, CRP…"
+msgstr "CRO, CRM, CREFITO, CRP…"
+
+#, python-format
+msgid "%(documento)s: número inválido."
+msgstr "%(documento)s: invalid number."
 
 msgid "idioma"
 msgstr "language"
@@ -581,8 +585,8 @@ msgstr ""
 "Sets the initial appointment types. The specialties and the modules are "
 "chosen below and can be used together."
 
-msgid "Somente números."
-msgstr "Numbers only."
+msgid "documento"
+msgstr "document"
 
 msgid "e-mail"
 msgstr "e-mail"
@@ -2020,14 +2024,14 @@ msgid "A data de nascimento não pode estar no futuro."
 msgstr "The birth date cannot be in the future."
 
 msgid ""
-"Este CPF/CNPJ é de um paciente arquivado. Peça ao administrador da clínica "
+"Este documento é de um paciente arquivado. Peça ao administrador da clínica "
 "para restaurá-lo."
 msgstr ""
-"This CPF/CNPJ belongs to an archived patient. Ask the clinic administrator "
+"This document belongs to an archived patient. Ask the clinic administrator "
 "to restore them."
 
-msgid "Já existe um paciente com este CPF/CNPJ nesta clínica."
-msgstr "A patient with this CPF/CNPJ already exists in this clinic."
+msgid "Já existe um paciente com este documento nesta clínica."
+msgstr "A patient with this document already exists in this clinic."
 
 msgid "A cidade não pertence à UF escolhida."
 msgstr "The city is not in the chosen state."
@@ -2210,9 +2214,6 @@ msgstr "Related person saved."
 msgid "Pessoa relacionada removida."
 msgstr "Related person removed."
 
-msgid "CPF"
-msgstr "CPF"
-
 #
 msgid "Salário"
 msgstr "Salary"
@@ -2232,9 +2233,8 @@ msgid "Em branco: a data de admissão ou hoje."
 msgstr "Blank: the hiring date, or today."
 
 #
-#
-msgid "Já existe um funcionário com este CPF."
-msgstr "An employee with this CPF already exists."
+msgid "Já existe um funcionário com este documento."
+msgstr "An employee with this document already exists."
 
 msgid "Informe a partir de quando vale o novo salário."
 msgstr "Enter from when the new salary applies."
@@ -2340,9 +2340,6 @@ msgstr "This user is already linked to another practitioner in this clinic."
 
 msgid "registro profissional"
 msgstr "professional license"
-
-msgid "CRO, CRM, CREFITO, CRP…"
-msgstr "CRO, CRM, CREFITO, CRP…"
 
 msgid "cor na agenda"
 msgstr "schedule color"
@@ -4023,8 +4020,9 @@ msgid "Novo fornecedor"
 msgstr "New supplier"
 
 #
-msgid "Nome, razão social ou CPF/CNPJ"
-msgstr "Name, legal name or CPF/CNPJ"
+#, python-format
+msgid "Nome, razão social ou %(documentos)s"
+msgstr "Name, legal name or %(documentos)s"
 
 #
 msgid "Buscar fornecedor"
@@ -4231,10 +4229,10 @@ msgstr "No."
 
 #, python-format
 msgid ""
-"Recebemos de <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) a quantia de "
-"<strong>%(valor)s</strong>,"
+"Recebemos de <strong>%(nome)s</strong> (%(sigla)s %(documento)s) a quantia "
+"de <strong>%(valor)s</strong>,"
 msgstr ""
-"We received from <strong>%(nome)s</strong> (CPF/CNPJ %(documento)s) the "
+"We received from <strong>%(nome)s</strong> (%(sigla)s %(documento)s) the "
 "amount of <strong>%(valor)s</strong>,"
 
 #, python-format
@@ -4332,8 +4330,9 @@ msgstr ""
 msgid "Criar e conciliar"
 msgstr "Create and reconcile"
 
-msgid "Digite o nome, código ou CPF"
-msgstr "Type the name, code or CPF"
+#, python-format
+msgid "Digite o nome, código ou %(documentos)s"
+msgstr "Type the name, code or %(documentos)s"
 
 msgid "Desligado nesta clínica: só o administrador do sistema vê"
 msgstr "Turned off in this clinic: only the system administrator sees it"
@@ -4712,9 +4711,6 @@ msgstr ""
 msgid "Identificação"
 msgstr "Identification"
 
-msgid "CNPJ"
-msgstr "CNPJ"
-
 msgid "Inscrição estadual"
 msgstr "State registration"
 
@@ -4859,8 +4855,9 @@ msgstr "Relationship"
 msgid "Assinatura do paciente ou responsável"
 msgstr "Signature of the patient or guardian"
 
-msgid "Nome, código ou CPF/CNPJ"
-msgstr "Name, code or CPF/CNPJ"
+#, python-format
+msgid "Nome, código ou %(documentos)s"
+msgstr "Name, code or %(documentos)s"
 
 msgid "Ativos"
 msgstr "Active"
@@ -5295,6 +5292,29 @@ msgstr "You do not have permission to access this page."
 
 msgid "Senha"
 msgstr "Password"
+
+#~ msgid "CPF/CNPJ"
+#~ msgstr "CPF/CNPJ (tax ID)"
+
+#~ msgid "CPF/CNPJ inválido."
+#~ msgstr "Invalid CPF/CNPJ."
+
+#~ msgid "Somente números."
+#~ msgstr "Numbers only."
+
+#~ msgid "CPF"
+#~ msgstr "CPF"
+
+#
+#
+#~ msgid "Já existe um funcionário com este CPF."
+#~ msgstr "An employee with this CPF already exists."
+
+#~ msgid "CNPJ"
+#~ msgstr "CNPJ"
+
+#~ msgid "Nome, código ou CPF/CNPJ"
+#~ msgstr "Name, code or CPF/CNPJ"
 
 #~ msgid "Módulos clínicos"
 #~ msgstr "Clinical modules"

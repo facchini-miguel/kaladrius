@@ -9,7 +9,7 @@ O módulo **Pessoal** guarda os funcionários da clínica, os salários e as hor
 Encargos (INSS, FGTS), férias e 13º **não** são calculados: ficam com o contador ou com o sistema de folha.
 
 ## Funcionários
-Em **Financeiro > Funcionários**, clique em **Novo funcionário**: nome, CPF, cargo, admissão, telefone e o **salário** (a partir da admissão, se você não escolher outra data). Num aumento, edite o funcionário e preencha **Novo salário** e a data a partir da qual vale: o salário anterior fica no **histórico de salários**, e cada mês usa o salário em vigor no fim dele. Quem saiu ganha uma **data de desligamento** e deixa de aparecer nos meses seguintes.
+Em **Financeiro > Funcionários**, clique em **Novo funcionário**: nome, CPF (fora do Brasil, o documento do país), cargo, admissão, telefone e o **salário** (a partir da admissão, se você não escolher outra data). Num aumento, edite o funcionário e preencha **Novo salário** e a data a partir da qual vale: o salário anterior fica no **histórico de salários**, e cada mês usa o salário em vigor no fim dele. Quem saiu ganha uma **data de desligamento** e deixa de aparecer nos meses seguintes.
 
 ## A folha do mês
 Em **Financeiro > Folha do mês**, escolha o mês. Aparece uma linha por funcionário que trabalhou nele, com o salário. Preencha:

@@ -24,7 +24,7 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 ## 3. Qué datos se tratan
 
 **Pacientes**
-- Identificación: nombre, CPF o CNPJ (números fiscales de Brasil), RG (documento de identidad), fecha de nacimiento, sexo y profesión.
+- Identificación: nombre, CPF o CNPJ (números fiscales de Brasil) o los documentos de identidad y fiscales del país de la clínica, RG (documento de identidad), fecha de nacimiento, sexo y profesión.
 - Contacto: teléfonos, WhatsApp, correo y dirección.
 - Personas relacionadas: parientes y contactos que informa el paciente (el vínculo y, de quien no es paciente de la clínica, el nombre y el teléfono).
 - Convenio: el convenio, el plan, el número de la credencial, la validez y, para un dependiente, el nombre del titular del plan.
@@ -38,9 +38,9 @@ La **clínica que lo atiende** es la responsable del tratamiento: decide cómo y
 - Nombre, usuario, correo, perfil de acceso e idioma.
 - Registro de entradas y salidas del sistema, con fecha, hora y dirección IP; historial de quién creó, modificó o eliminó cada registro; intentos de entrada con contraseña incorrecta (usuario escrito y dirección IP).
 - De los profesionales: matrícula profesional y porcentaje de comisión.
-- De los empleados registrados en Personal: nombre, CPF, teléfono, cargo, fechas de ingreso y baja, historial de salarios, y horas extras y ausencias de cada mes, que solo ven el administrador y el financiero de la clínica.
+- De los empleados registrados en Personal: nombre, CPF (o el documento del país), teléfono, cargo, fechas de ingreso y baja, historial de salarios, y horas extras y ausencias de cada mes, que solo ven el administrador y el financiero de la clínica.
 
-**Proveedores y otras personas**: nombre de proveedores y de quien paga o recibe valores de la clínica; de los proveedores registrados, también CPF o CNPJ, teléfonos y correo; en los extractos bancarios importados para conciliación, el nombre que el banco muestra en cada transacción.
+**Proveedores y otras personas**: nombre de proveedores y de quien paga o recibe valores de la clínica; de los proveedores registrados, también CPF o CNPJ (o el documento del país), teléfonos y correo; en los extractos bancarios importados para conciliación, el nombre que el banco muestra en cada transacción.
 
 La clínica pide solo los datos necesarios para las finalidades de la sección 4. Los datos los informa el propio titular o su responsable, o los anota el equipo durante la atención. Mantenerlos correctos ayuda a la clínica a atenderlo bien: avise cuando algo cambie.
 

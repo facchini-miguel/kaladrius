@@ -68,7 +68,7 @@ def test_validacao_de_cnpj_numerico_e_alfanumerico(valor, esperado):
 
 def test_filtros_de_formatacao():
     template = Template(
-        "{% load formatos %}{{ a|cpf_cnpj }} {{ b|cpf_cnpj }} "
+        "{% load formatos %}{{ a|documento }} {{ b|documento }} "
         "{{ c|telefone }} {{ d|telefone }} {{ e|cep }}"
     )
     contexto = Context(
@@ -140,8 +140,8 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
 @pytest.mark.parametrize(
     ("dados", "campo", "mensagem"),
     [
-        ({"cpf_cnpj": "529.982.247-24"}, "cpf_cnpj", "CPF inválido"),
-        ({"tipo": "PJ", "cpf_cnpj": CPF}, "cpf_cnpj", "CNPJ inválido"),
+        ({"cpf_cnpj": "529.982.247-24"}, "cpf_cnpj", "CPF: número inválido"),
+        ({"tipo": "PJ", "cpf_cnpj": CPF}, "cpf_cnpj", "CNPJ: número inválido"),
         ({"telefone_celular": "9999-0000"}, "telefone_celular", "Informe o DDD"),
         ({"cep": "123"}, "cep", "8 dígitos"),
         ({"data_nascimento": "2999-01-01"}, "data_nascimento", "futuro"),
@@ -166,7 +166,7 @@ def test_cidade_precisa_ser_da_uf_escolhida(admin_a):
 def test_cpf_repetido_na_mesma_clinica_e_recusado_mas_vale_em_outra(admin_a, clinica_a, clinica_b):
     criar_paciente(clinica_a, cpf_cnpj="52998224725")
     resposta = admin_a.post(reverse("pacientes:novo"), dados_formulario(cpf_cnpj=CPF))
-    assert "Já existe um paciente com este CPF/CNPJ" in resposta.content.decode()
+    assert "Já existe um paciente com este documento" in resposta.content.decode()
     criar_paciente(clinica_b, cpf_cnpj="52998224725")  # another clinic: allowed
 
 

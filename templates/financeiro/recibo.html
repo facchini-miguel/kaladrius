@@ -14,7 +14,7 @@
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
-      {% if clinica_atual.documento %}<div class="small">{% translate "CPF/CNPJ" %}: {{ clinica_atual.documento|cpf_cnpj }}</div>{% endif %}
+      {% if clinica_atual.documento %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
       {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
       {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
     </div>
@@ -26,7 +26,7 @@
   </div>
   <p class="fs-6">
     {% if lancamento.paciente.cpf_cnpj %}
-    {% blocktranslate with nome=lancamento.nome_pessoa documento=lancamento.paciente.cpf_cnpj|cpf_cnpj valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> (CPF/CNPJ {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=lancamento.nome_pessoa sigla=lancamento.paciente.cpf_cnpj|sigla_documento:lancamento.paciente.papel_documento documento=lancamento.paciente.cpf_cnpj|documento:lancamento.paciente.papel_documento valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
     {% blocktranslate with nome=lancamento.nome_pessoa valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}

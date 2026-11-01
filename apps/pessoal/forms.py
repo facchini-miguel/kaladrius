@@ -2,9 +2,9 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core import paises
-from apps.core.forms import CampoDecimal, FormularioBootstrap
-from apps.core.validadores import cpf_valido, normalizar_telefone, somente_digitos
+from apps.core import identificacao
+from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento
+from apps.core.validadores import normalizar_telefone
 from apps.financeiro.models import Categoria
 
 from .models import Folha, Funcionario
@@ -27,7 +27,7 @@ def _dinheiro(rotulo, obrigatorio):
 class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     """The employee and, on registering or on a raise, the salary from a date."""
 
-    cpf = forms.CharField(label=_("CPF"), max_length=14, required=False)
+    cpf = campo_documento()  # the country's employee document (decision 121)
     telefone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -57,8 +57,13 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if paises.pais_da_clinica() != "BR":
-            del self.fields["cpf"]  # each country's documents: phase 2 (decision 117)
+        # None in Australia: the law restricts who may record the tax file number.
+        self.documento = identificacao.do_pais().funcionario
+        if self.documento is None:
+            del self.fields["cpf"]
+        else:
+            self.fields["cpf"].label = self.documento.sigla
+            self.fields["cpf"].widget.attrs["placeholder"] = self.documento.exemplo
         if self.instance.pk:
             self.fields["salario"].label = _("Novo salário")
             self.fields["salario"].help_text = _(
@@ -69,11 +74,11 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
             self.fields["salario_desde"].help_text = _("Em branco: a data de admissão ou hoje.")
 
     def clean_cpf(self):
-        cpf = somente_digitos(self.cleaned_data.get("cpf"))
-        if cpf and not cpf_valido(cpf):
-            raise forms.ValidationError(_("CPF inválido."))
+        cpf = identificacao.limpar(
+            self.cleaned_data.get("cpf"), [self.documento], self.documento.sigla
+        )
         if cpf and Funcionario.objects.filter(cpf=cpf).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(_("Já existe um funcionário com este CPF."))
+            raise forms.ValidationError(_("Já existe um funcionário com este documento."))
         return cpf
 
     def clean_telefone(self):

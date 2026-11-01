@@ -1,15 +1,11 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core import paises
-from apps.core.forms import CampoDecimal, FormularioBootstrap
-from apps.core.validadores import (
-    cnpj_valido,
-    cpf_valido,
-    normalizar_cnpj,
-    normalizar_telefone,
-)
+from apps.core import identificacao, paises
+from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento, documento_por_tipo
+from apps.core.validadores import normalizar_telefone
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
@@ -187,7 +183,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
 class FornecedorForm(FormularioBootstrap, forms.ModelForm):
     """A supplier (decision 093). Documents and phones are typed with or without punctuation."""
 
-    cpf_cnpj = forms.CharField(label=_("CPF/CNPJ"), max_length=18, required=False)
+    cpf_cnpj = campo_documento()
     telefone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -220,8 +216,14 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
-        if paises.pais_da_clinica(clinica) != "BR":
-            del self.fields["cpf_cnpj"]  # each country's documents: phase 2 (decision 117)
+        # The country's tax document of an individual or a company (decision 121).
+        self.documentos = identificacao.do_pais(paises.pais_da_clinica(clinica))
+        documento_por_tipo(
+            self.fields["cpf_cnpj"],
+            self.documentos.pessoa,
+            self.documentos.empresa,
+            self["tipo"].value(),
+        )
 
     def _telefone(self, nome):
         return normalizar_telefone(self.cleaned_data.get(nome))
@@ -232,20 +234,26 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
     def clean_whatsapp(self):
         return self._telefone("whatsapp")
 
-    def clean_cpf_cnpj(self):
-        return normalizar_cnpj(self.cleaned_data.get("cpf_cnpj", ""))
-
     def clean(self):
         dados = super().clean()
-        documento = dados.get("cpf_cnpj", "")
-        if documento:
-            fisica = dados.get("tipo") == Fornecedor.Tipo.FISICA
-            if not (cpf_valido(documento) if fisica else cnpj_valido(documento)):
-                self.add_error("cpf_cnpj", _("CPF inválido.") if fisica else _("CNPJ inválido."))
-            elif (
-                Fornecedor.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists()
-            ):
-                self.add_error("cpf_cnpj", _("Já existe um fornecedor com este documento."))
+        # A type without a document in this country (an individual in the UK) keeps none.
+        juridica = dados.get("tipo") == Fornecedor.Tipo.JURIDICA
+        do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
+        documento = ""
+        if do_tipo is not None:
+            try:
+                documento = identificacao.limpar(
+                    dados.get("cpf_cnpj", ""), [do_tipo], do_tipo.sigla
+                )
+            except ValidationError as erro:
+                self.add_error("cpf_cnpj", erro)
+                return dados
+        dados["cpf_cnpj"] = documento
+        if (
+            documento
+            and Fornecedor.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists()
+        ):
+            self.add_error("cpf_cnpj", _("Já existe um fornecedor com este documento."))
         return dados
 
 
