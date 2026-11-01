@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
+from . import modulos
 from .models import Backup
 from .permissoes import tabela_permissoes
 
@@ -19,6 +20,10 @@ def clinica(request):
         "clinica_atual": getattr(request, "clinica", None),
         "vinculo_atual": getattr(request, "vinculo", None),
         "pode": SimpleLazyObject(lambda: tabela_permissoes(request)),
+        # Turned-off modules the system administrator still sees (decision 115): marked in
+        # the menu, and the page of one says so.
+        "modulos_desligados": SimpleLazyObject(lambda: modulos.desligados_visiveis(request)),
+        "modulo_desligado": getattr(request, "modulo_desligado", None),
     }
 
 

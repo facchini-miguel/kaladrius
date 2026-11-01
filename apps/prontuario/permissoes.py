@@ -10,11 +10,12 @@ def prontuario_habilitado(request):
 
 def administra_prontuario(request):
     """The system administrator (superuser) sees and does everything in the medical record,
-    writing on behalf of a practitioner (decision 087). Clinic administrators do not."""
+    writing on behalf of a practitioner (decision 087), even with the module turned off
+    (decision 115). Clinic administrators do not."""
     return (
         request.user.is_authenticated
         and request.user.is_superuser
-        and prontuario_habilitado(request)
+        and ModuloClinico.PRONTUARIO in modulos.visiveis(request)
     )
 
 

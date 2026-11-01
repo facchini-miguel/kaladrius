@@ -12,6 +12,8 @@ from django.views.decorators.http import require_POST
 from apps.agenda.models import Agendamento
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import registrar
+from apps.core import modulos
+from apps.core.models import ModuloClinico
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
@@ -40,6 +42,7 @@ def exige_profissional(view):
     def protegida(request, *args, **kwargs):
         if not acessa_prontuario(request):
             raise PermissionDenied
+        modulos.marcar_se_desligado(request, ModuloClinico.PRONTUARIO)
         return view(request, profissional_do_usuario(request), *args, **kwargs)
 
     return protegida

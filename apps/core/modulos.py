@@ -44,6 +44,27 @@ def habilitados(request):
     return request._modulos_habilitados
 
 
+def visiveis(request):
+    """Modules the user reaches: the enabled ones, and every one for the system administrator
+    (decision 115), who sees a turned-off module, marked as off, to maintain it or to try it
+    before turning it on. The team never sees a turned-off module."""
+    usuario = getattr(request, "user", None)
+    if usuario is not None and usuario.is_superuser and getattr(request, "clinica", None):
+        return frozenset(ModuloClinico.values)
+    return habilitados(request)
+
+
+def desligados_visiveis(request):
+    """Turned-off modules the user still sees: only the system administrator has any."""
+    return visiveis(request) - habilitados(request)
+
+
+def marcar_se_desligado(request, codigo):
+    """A page of a turned-off module that the system administrator opened: base.html warns."""
+    if codigo and codigo not in habilitados(request):
+        request.modulo_desligado = ModuloClinico(codigo)
+
+
 @transaction.atomic
 def configurar(clinica, codigos):
     """Replace the enabled modules, retaining disabled rows and their audit history.

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 00:35-0300\n"
+"POT-Creation-Date: 2026-11-01 01:53-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -597,7 +597,10 @@ msgstr "moneda"
 msgid ""
 "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda "
 "a equipe e em qualquer idioma: nenhum valor já lançado é convertido."
-msgstr "La moneda con que trabaja la clínica. Solo cambia cómo se muestran los valores, para todo el equipo y en cualquier idioma: ningún valor ya registrado se convierte."
+msgstr ""
+"La moneda con que trabaja la clínica. Solo cambia cómo se muestran los "
+"valores, para todo el equipo y en cualquier idioma: ningún valor ya "
+"registrado se convierte."
 
 #
 msgid ""
@@ -815,7 +818,9 @@ msgstr "Configuración de la clínica guardada."
 msgid ""
 "Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi "
 "convertido."
-msgstr "Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se convirtió."
+msgstr ""
+"Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se "
+"convirtió."
 
 msgid "Equipe"
 msgstr "Equipo"
@@ -2876,6 +2881,12 @@ msgstr "El sistema se actualizó a la versión %(versao_sistema)s."
 msgid "Veja o que mudou"
 msgstr "Vea qué cambió"
 
+msgid "O módulo %(modulo)s está desligado nesta clínica: a equipe não o vê, só o administrador do sistema."
+msgstr "El módulo %(modulo)s está desactivado en esta clínica: el equipo no lo ve, solo el administrador del sistema."
+
+msgid "Ligar nas Configurações da clínica"
+msgstr "Activarlo en la Configuración de la clínica"
+
 msgid "versão"
 msgstr "versión"
 
@@ -4186,6 +4197,13 @@ msgstr "Crear y conciliar"
 
 msgid "Digite o nome, código ou CPF"
 msgstr "Escriba el nombre, código o CPF"
+
+msgid "Desligado nesta clínica: só o administrador do sistema vê"
+msgstr "Desactivado en esta clínica: solo el administrador del sistema lo ve"
+
+#
+msgid "desligado"
+msgstr "desactivado"
 
 msgid "Paginação"
 msgstr "Paginación"

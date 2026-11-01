@@ -69,9 +69,13 @@ def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
     configurar(clinica_a, sem(*desligados))
     assert texto_do_menu not in admin.get(reverse("inicio")).content.decode()
     assert admin.get(reverse(rota)).status_code == 403
-    # Not even the system administrator reaches a module the clinic turned off.
+    # The system administrator still reaches it, marked as off (decision 115).
     root = cliente_de(django_user_model.objects.create_superuser("root_gerais"))
-    assert root.get(reverse(rota)).status_code == 403
+    pagina = root.get(reverse(rota))
+    assert pagina.status_code == 200
+    assert "está desligado nesta clínica" in pagina.content.decode()
+    menu = root.get(reverse("inicio")).content.decode()
+    assert texto_do_menu in menu and ">desligado</span>" in menu
 
 
 def test_orcamentos_desligado(clinica_a, admin, paciente):
@@ -82,7 +86,7 @@ def test_orcamentos_desligado(clinica_a, admin, paciente):
     assert "Novo orçamento" not in ficha.content.decode()
 
 
-def test_prontuario_desligado_bloqueia_profissional_e_superusuario(
+def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
     clinica_a, paciente, criar_usuario, django_user_model, cliente_de
 ):
     usuario = criar_usuario("prof_gerais", clinica_a, Papel.PROFISSIONAL)
@@ -98,7 +102,9 @@ def test_prontuario_desligado_bloqueia_profissional_e_superusuario(
         not in cliente.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
     )
     root = cliente_de(django_user_model.objects.create_superuser("root_prontuario"))
-    assert root.get(url).status_code == 403
+    pagina = root.get(url)
+    assert pagina.status_code == 200
+    assert "O módulo Prontuário está desligado nesta clínica" in pagina.content.decode()
 
 
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, paciente):
@@ -228,3 +234,11 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
     assert 'href="https://wa.me/5548999990000"' in ficha
     assert whatsapp("123") == "" and whatsapp("") == ""
+
+
+def test_modulo_ligado_nao_mostra_aviso_ao_superusuario(clinica_a, django_user_model, cliente_de):
+    root = cliente_de(django_user_model.objects.create_superuser("root_ligado"))
+    for pagina in (reverse("inicio"), reverse("agenda:calendario")):
+        conteudo = root.get(pagina).content.decode()
+        assert "está desligado nesta clínica" not in conteudo
+        assert ">desligado</span>" not in conteudo

@@ -4,6 +4,26 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.45.0
+  data: 2026-11-01
+  itens:
+    - tipo: melhoria
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O administrador do sistema continua vendo os módulos desligados, marcados como
+          desligados no menu e com um aviso nas telas, para manutenção ou para conhecer um
+          módulo antes de ligá-lo. Para a equipe, um módulo desligado continua escondido.
+        en: >
+          The system administrator still sees turned-off modules, marked as off in the menu and
+          with a warning on their pages, to maintain them or to try one before turning it on.
+          For the team, a turned-off module stays hidden.
+        es: >
+          El administrador del sistema sigue viendo los módulos desactivados, marcados como
+          desactivados en el menú y con un aviso en sus pantallas, para mantenimiento o para
+          conocer un módulo antes de activarlo. Para el equipo, un módulo desactivado sigue oculto.
+
 - versao: 0.44.0
   data: 2026-11-01
   titulo:

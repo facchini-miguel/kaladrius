@@ -2,7 +2,8 @@
 
 Each role (Papel) gets a set of actions (Acao) per module (Modulo). The same check
 guards the views (server side) and decides which menus and buttons the templates show.
-Platform superusers can do everything in any clinic, in the modules the clinic has on.
+Platform superusers can do everything in any clinic, turned-off modules included
+(decision 115: marked as off; the team does not see them).
 """
 
 from functools import wraps
@@ -111,9 +112,7 @@ def pode(request, modulo, acao):
     usuario = request.user
     if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
         return False
-    if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modulos.habilitados(
-        request
-    ):
+    if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modulos.visiveis(request):
         return False
     if usuario.is_superuser:
         return True
@@ -159,6 +158,7 @@ def exige_permissao(modulo, acao):
                 return render(request, "core/sem_clinica.html", status=403)
             if not pode(request, modulo, acao):
                 raise PermissionDenied
+            modulos.marcar_se_desligado(request, MODULO_DA_CLINICA.get(modulo))
             return view(request, *args, **kwargs)
 
         return protegida
