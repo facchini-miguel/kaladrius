@@ -16,7 +16,7 @@ Django + PostgreSQL ──────┤
 
 | Camada | Escolha |
 |---|---|
-| Linguagem | Python 3.13 |
+| Linguagem | Python 3.15 |
 | Framework | Django, com Django Ninja para a API |
 | Banco de dados | PostgreSQL 16 (regras como "dois agendamentos não ocupam o mesmo horário" ficam no próprio banco) |
 | Páginas | Templates montados no servidor, HTMX para atualizar partes da tela, Bootstrap 5, FullCalendar na agenda |
