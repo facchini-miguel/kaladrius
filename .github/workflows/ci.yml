@@ -33,6 +33,8 @@ jobs:
       POSTGRES_HOST: localhost
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
@@ -63,6 +65,8 @@ jobs:
       IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
       - name: Build do site
         run: docker build -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" docs
       - id: google
@@ -94,6 +98,8 @@ jobs:
       IMAGEM_PUBLICA: ghcr.io/facchini-miguel/kaladrius
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
       - id: google
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
         with:
@@ -134,10 +140,13 @@ jobs:
     env:
       DJANGO_SECRET_KEY: ci-only-never-use-in-production
       DJANGO_DEBUG: "0"
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SITE_TOKEN: ${{ secrets.SITE_TOKEN }}
+      # Only whether the secret exists, so tokens reach just the steps that use them, never
+      # "pip install", which runs third-party code (decision 132).
+      TEM_SITE_TOKEN: ${{ secrets.SITE_TOKEN != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
@@ -147,6 +156,8 @@ jobs:
       - name: GNU gettext (the notes name the types and modules in English)
         run: sudo apt-get install -y --no-install-recommends gettext
       - name: Release da versão nova
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           if gh release view "v$VERSAO" >/dev/null 2>&1; then
@@ -160,7 +171,7 @@ jobs:
             --notes-file notas.md --latest
           echo "SITE_DESATUALIZADO=1" >> "$GITHUB_ENV"
       - name: Atualizar o site do titular
-        if: env.SITE_DESATUALIZADO == '1' && env.SITE_TOKEN != ''
+        if: env.SITE_DESATUALIZADO == '1' && env.TEM_SITE_TOKEN == 'true'
         env:
           GH_TOKEN: ${{ secrets.SITE_TOKEN }}
         run: gh workflow run publicar.yml -R facchini-miguel/facchini.eti.br
