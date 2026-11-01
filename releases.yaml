@@ -4,6 +4,39 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.45.1
+  data: 2026-11-01
+  itens:
+    - tipo: correcao
+      modulo: Idioma
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em inglês, os horários aparecem como 11:15 PM, sem o ponto duplo no fim das frases. Em
+          espanhol, orçamentos, parcelas e valores em aberto aparecem com a palavra certa
+          (Abierto, Abierta, Pendiente).
+        en: >
+          In English, times show as 11:15 PM, without a double period at the end of sentences. In
+          Spanish, open estimates, installments and amounts show with the right word (Abierto,
+          Abierta, Pendiente).
+        es: >
+          En inglés, los horarios aparecen como 11:15 PM, sin el punto doble al final de las
+          frases. En español, los presupuestos, cuotas y valores pendientes aparecen con la palabra
+          correcta (Abierto, Abierta, Pendiente).
+    - tipo: melhoria
+      modulo: Orçamentos
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Com a Odontologia desligada, o administrador do sistema continua vendo e usando o
+          odontograma dos orçamentos, com um aviso de que está desligada para a equipe.
+        en: >
+          With Dentistry turned off, the system administrator still sees and uses the dental chart
+          of estimates, with a warning that it is off for the team.
+        es: >
+          Con Odontología desactivada, el administrador del sistema sigue viendo y usando el
+          odontograma de los presupuestos, con un aviso de que está desactivada para el equipo.
+
 - versao: 0.45.0
   data: 2026-11-01
   itens:

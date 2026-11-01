@@ -193,6 +193,8 @@ LANGUAGES = [
     ("es", "Español"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
+# English times with AM/PM (config/formatos/en/formats.py).
+FORMAT_MODULE_PATH = ["config.formatos"]
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 USE_TZ = True

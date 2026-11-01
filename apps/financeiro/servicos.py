@@ -12,6 +12,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 
 from apps.core.models import Clinica
 from apps.core.ordem import chave_alfabetica
@@ -209,7 +210,7 @@ def situacao(parcela, hoje=None):
         return "vencida", _("Vencida")
     if parcela.pago > 0:
         return "parcial", _("Paga em parte")
-    return "aberta", _("Em aberto")
+    return "aberta", pgettext("parcela", "Em aberto")
 
 
 def devedores(hoje=None):

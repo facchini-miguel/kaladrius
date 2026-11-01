@@ -12,7 +12,7 @@
   {% translate "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no financeiro e depois volte para arquivar." %}
 </div>
 <table class="table table-sm bg-white" style="max-width: 44rem;">
-  <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" %}</th></tr></thead>
+  <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" context "valor" %}</th></tr></thead>
   <tbody>
     {% for parcela in abertas %}
     <tr>

@@ -14,6 +14,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.core.isolamento import ClinicaDiferente, ModeloDaClinica
 from apps.core.models import Clinica
@@ -58,7 +59,7 @@ class Procedimento(ModeloDaClinica):
 
 class Orcamento(ModeloDaClinica):
     class Situacao(models.TextChoices):
-        ABERTO = "aberto", _("Em aberto")
+        ABERTO = "aberto", pgettext_lazy("orçamento", "Em aberto")
         APROVADO = "aprovado", _("Aprovado")
         RECUSADO = "recusado", _("Recusado")
 
@@ -187,7 +188,9 @@ class ItemOrcamento(ModeloDaClinica):
             else None
         )
         dental = self.dentes or self.faces or (anterior and any(anterior.values()))
-        if dental and not clinica.odontologia:
+        # The view sets the flag only for the system administrator (decision 115).
+        liberado = getattr(self, "odontologia_desligada_liberada", False)
+        if dental and not clinica.odontologia and not liberado:
             raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
 
     @transaction.atomic

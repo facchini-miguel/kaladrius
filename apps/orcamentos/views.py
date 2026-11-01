@@ -45,8 +45,15 @@ def _aberto(request, pk):
 
 
 def _odontologia(request):
-    # The request's cached modules; the item's save() re-checks under the clinic lock.
-    return ModuloClinico.ODONTOLOGIA in modulos.habilitados(request)
+    # The request's cached modules; the item's save() re-checks under the clinic lock. The
+    # system administrator also gets the dental chart with Dentistry off (decision 115).
+    return ModuloClinico.ODONTOLOGIA in modulos.visiveis(request)
+
+
+def _liberar_se_desligado(request, item):
+    """The system administrator writes dental items with Dentistry off; the page says so."""
+    if ModuloClinico.ODONTOLOGIA not in modulos.habilitados(request) and _odontologia(request):
+        item.odontologia_desligada_liberada = True
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
@@ -119,6 +126,8 @@ def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     aberto = orcamento.situacao == Orcamento.Situacao.ABERTO
     odontologia = _odontologia(request)
+    if odontologia:
+        modulos.marcar_se_desligado(request, ModuloClinico.ODONTOLOGIA)
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
     pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
     return render(
@@ -161,6 +170,7 @@ def item_adicionar(request, pk):
         item.orcamento = orcamento
         item.descricao = form.cleaned_data["descricao"]
         item.valor_unitario = form.cleaned_data["valor_unitario"]
+        _liberar_se_desligado(request, item)
         try:
             item.save()
         except ValidationError as erro:
@@ -182,6 +192,7 @@ def item_remover(request, pk, item):
     registro = get_object_or_404(orcamento.itens, pk=item)
     if (registro.dentes or registro.faces) and not _odontologia(request):
         raise PermissionDenied
+    _liberar_se_desligado(request, registro)
     try:
         registro.delete()
     except ValidationError as erro:

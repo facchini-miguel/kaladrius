@@ -98,3 +98,33 @@ def test_novidades_nos_tres_idiomas():
         for item in release.itens:
             assert set(dict(item.textos)) == idiomas, (release.versao, item.texto)
             assert item.modulo in releases.MODULOS, item.modulo
+
+
+def test_situacoes_em_aberto_concordam_em_espanhol():
+    """One Portuguese "Em aberto", a different Spanish word for each thing it describes."""
+    from django.utils import translation
+    from django.utils.translation import pgettext
+
+    from apps.orcamentos.models import Orcamento
+
+    with translation.override("es"):
+        assert str(Orcamento.Situacao.ABERTO.label) == "Abierto"
+        assert pgettext("parcela", "Em aberto") == "Abierta"
+        assert pgettext("valor", "Em aberto") == "Pendiente"
+    with translation.override("en"):
+        assert str(Orcamento.Situacao.ABERTO.label) == "Open"
+
+
+def test_horario_em_ingles_sem_ponto_duplo():
+    """Django's "p.m." made a sentence ending in a time end with two periods."""
+    import datetime
+
+    from django.utils import translation
+    from django.utils.formats import date_format
+
+    momento = datetime.datetime(2026, 10, 31, 23, 15)
+    with translation.override("en"):
+        assert date_format(momento, "SHORT_DATETIME_FORMAT") == "10/31/2026 11:15 PM"
+        assert date_format(momento, "TIME_FORMAT") == "11:15 PM"
+    with translation.override("pt-br"):
+        assert date_format(momento, "SHORT_DATETIME_FORMAT") == "31/10/2026 23:15"

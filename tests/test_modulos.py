@@ -289,3 +289,35 @@ def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
         == 302
     )
     assert Clinica.objects.count() == 1
+
+
+def test_superusuario_usa_odontograma_com_odontologia_desligada(
+    clinica_a, orcamento, criar_usuario, django_user_model, cliente_de
+):
+    """Decision 115: the system administrator still uses a turned-off specialty, marked as off;
+    the team cannot."""
+    configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
+    item_dental = {
+        "descricao": "Restauração fictícia",
+        "dentes": "36",
+        "faces": "O",
+        "quantidade": 1,
+        "valor_unitario": "100",
+    }
+    adicionar = reverse("orcamentos:item_adicionar", args=[orcamento.pk])
+
+    admin = cliente_de(criar_usuario("admin_odonto", clinica_a, Papel.ADMIN))
+    admin.post(adicionar, item_dental)
+    with usar_clinica(clinica_a):
+        assert not ItemOrcamento.objects.filter(dentes="36").exists()
+
+    root = cliente_de(django_user_model.objects.create_superuser("root_odonto"))
+    detalhe = root.get(reverse("orcamentos:detalhe", args=[orcamento.pk]))
+    assert detalhe.context["mostrar_dentes"]
+    assert "O módulo Odontologia está desligado nesta clínica" in detalhe.content.decode()
+    root.post(adicionar, item_dental)
+    with usar_clinica(clinica_a):
+        item = ItemOrcamento.objects.get(dentes="36")
+    root.post(reverse("orcamentos:item_remover", args=[orcamento.pk, item.pk]))
+    with usar_clinica(clinica_a):
+        assert not ItemOrcamento.objects.filter(pk=item.pk).exists()

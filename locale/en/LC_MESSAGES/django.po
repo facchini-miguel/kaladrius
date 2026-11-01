@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 02:14-0300\n"
+"POT-Creation-Date: 2026-11-01 03:11-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -1518,6 +1518,7 @@ msgstr "Overdue"
 msgid "Paga em parte"
 msgstr "Partly paid"
 
+msgctxt "parcela"
 msgid "Em aberto"
 msgstr "Open"
 
@@ -1769,6 +1770,10 @@ msgstr "procedure"
 
 msgid "procedimentos"
 msgstr "procedures"
+
+msgctxt "orçamento"
+msgid "Em aberto"
+msgstr "Open"
 
 msgid "Aprovado"
 msgstr "Approved"
@@ -3953,6 +3958,9 @@ msgstr "Supplier or description"
 msgid "Paciente, pagador ou descrição"
 msgstr "Patient, payer or description"
 
+msgid "Em aberto"
+msgstr "Open"
+
 msgid "Vencidas"
 msgstr "Overdue"
 
@@ -4461,6 +4469,10 @@ msgid ""
 msgstr ""
 "This patient still has open entries. Receive or cancel each one in Finance, "
 "then come back to archive."
+
+msgctxt "valor"
+msgid "Em aberto"
+msgstr "Outstanding"
 
 msgid "Voltar para a ficha"
 msgstr "Back to the patient record"

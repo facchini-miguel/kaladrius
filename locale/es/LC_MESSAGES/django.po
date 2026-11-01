@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 02:14-0300\n"
+"POT-Creation-Date: 2026-11-01 03:11-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -1520,8 +1520,9 @@ msgstr "Vencida"
 msgid "Paga em parte"
 msgstr "Pagada en parte"
 
+msgctxt "parcela"
 msgid "Em aberto"
-msgstr "Abiertas"
+msgstr "Abierta"
 
 msgid "Sem centro de custo"
 msgstr "Sin centro de costo"
@@ -1771,6 +1772,10 @@ msgstr "procedimiento"
 
 msgid "procedimentos"
 msgstr "procedimientos"
+
+msgctxt "orçamento"
+msgid "Em aberto"
+msgstr "Abierto"
 
 msgid "Aprovado"
 msgstr "Aprobado"
@@ -3960,6 +3965,9 @@ msgstr "Proveedor o descripción"
 msgid "Paciente, pagador ou descrição"
 msgstr "Paciente, pagador o descripción"
 
+msgid "Em aberto"
+msgstr "Abiertas"
+
 msgid "Vencidas"
 msgstr "Vencidas"
 
@@ -4469,6 +4477,10 @@ msgid ""
 msgstr ""
 "Este paciente todavía tiene cuentas pendientes. Cobre o anule cada una en "
 "Finanzas y después vuelva para archivar."
+
+msgctxt "valor"
+msgid "Em aberto"
+msgstr "Pendiente"
 
 msgid "Voltar para a ficha"
 msgstr "Volver a la ficha"
