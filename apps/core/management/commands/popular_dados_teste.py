@@ -12,9 +12,9 @@ from django.utils import timezone
 from apps.agenda.models import Agendamento
 from apps.agenda.simulacao import simular_agendamentos, simular_rechamadas
 from apps.convenios.models import Carteirinha, Convenio
+from apps.core import ficticios
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
-from apps.core.validadores import somente_digitos
 from apps.pacientes.models import Paciente, PessoaRelacionada
 from apps.pessoal.models import Funcionario, Salario
 from apps.profissionais.models import Profissional
@@ -150,11 +150,11 @@ class Command(BaseCommand):
             juridica = numero % 25 == 0  # about 4% companies
             if juridica:
                 nome = fake.company()
-                documento = somente_digitos(fake.cnpj())
+                documento = ficticios.cnpj(fake)
             else:
                 sexo = fake.random_element(["F", "M"])
                 nome = fake.name_female() if sexo == "F" else fake.name_male()
-                documento = somente_digitos(fake.cpf()) if fake.boolean(85) else ""
+                documento = ficticios.cpf(fake) if fake.boolean(85) else ""
             if documento in documentos:
                 documento = ""
             documentos.add(documento)
@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 paciente.sexo = sexo
                 paciente.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
                 paciente.estado_civil = fake.random_element(estados_civis)
-                paciente.profissao = fake.job()[:100]
+                paciente.profissao = ficticios.profissao(fake)
             novos.append(paciente)
         Paciente.objects.bulk_create(novos, batch_size=500)
         self._carteirinhas(clinica, novos)
