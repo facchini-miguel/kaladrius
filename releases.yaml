@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.2
+  data: 2026-11-01
+  titulo:
+    pt-br: Python 3.14
+    en: Python 3.14
+    es: Python 3.14
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O sistema passa a rodar no Python 3.14, com a mesma versão nos testes automáticos e na
+          imagem publicada.
+        en: >
+          The system now runs on Python 3.14, with the same version in the automated tests and
+          in the published image.
+        es: >
+          El sistema pasa a ejecutarse en Python 3.14, con la misma versión en las pruebas
+          automáticas y en la imagen publicada.
+
 - versao: 0.52.1
   data: 2026-11-01
   titulo:

@@ -27,7 +27,7 @@ The two communicate **only through the API**.
 
 | Item | Choice | License |
 |---|---|---|
-| Language | Python 3.13 | PSF |
+| Language | Python 3.14 | PSF |
 | Framework | Django (current stable; move to 6.2 LTS in Apr/2027) | BSD |
 | API | Django Ninja | MIT |
 | Database | PostgreSQL 16 | PostgreSQL (permissive) |
