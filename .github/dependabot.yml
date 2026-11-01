@@ -41,6 +41,11 @@ updates:
     directories: [/, /docs]
     schedule:
       interval: monthly
+    ignore:
+      # A new Python version for the image is a planned change (PR #1, closed): the version
+      # set in one place for CI and the image, the tests run on it and the docs updated.
+      - dependency-name: python
+        update-types: [version-update:semver-minor, version-update:semver-major]
 
   - package-ecosystem: docker-compose
     directory: /
