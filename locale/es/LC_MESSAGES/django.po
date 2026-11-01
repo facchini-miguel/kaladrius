@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 03:46-0300\n"
+"POT-Creation-Date: 2026-11-01 05:31-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -780,6 +780,33 @@ msgstr "Boliviano"
 msgid "Brasil"
 msgstr "Brasil"
 
+msgid "México"
+msgstr "México"
+
+msgid "Argentina"
+msgstr "Argentina"
+
+msgid "Chile"
+msgstr "Chile"
+
+msgid "Colômbia"
+msgstr "Colombia"
+
+msgid "Peru"
+msgstr "Perú"
+
+msgid "Uruguai"
+msgstr "Uruguay"
+
+msgid "Paraguai"
+msgstr "Paraguay"
+
+msgid "Bolívia"
+msgstr "Bolivia"
+
+msgid "Equador"
+msgstr "Ecuador"
+
 msgid "Estados Unidos"
 msgstr "Estados Unidos"
 
@@ -797,6 +824,15 @@ msgstr "Sudáfrica"
 
 msgid "Informe o código de área e o número (10 dígitos)."
 msgstr "Indique el código de área y el número (10 dígitos)."
+
+msgid "Informe o número com o código de área (9 dígitos)."
+msgstr "Indique el número con el código de área (9 dígitos)."
+
+msgid "Informe o número com o código de área (8 ou 9 dígitos)."
+msgstr "Indique el número con el código de área (8 o 9 dígitos)."
+
+msgid "Informe o número com o código de área (8 dígitos)."
+msgstr "Indique el número con el código de área (8 dígitos)."
 
 msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
 msgstr "Indique el número con el código de área (10 u 11 dígitos con el 0)."
@@ -821,6 +857,24 @@ msgstr "El postcode australiano tiene 4 dígitos."
 
 msgid "O código postal sul-africano tem 4 dígitos."
 msgstr "El código postal sudafricano tiene 4 dígitos."
+
+msgid "O código postal tem 5 dígitos."
+msgstr "El código postal tiene 5 dígitos."
+
+msgid "O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."
+msgstr "El código postal argentino tiene el formato C1425ABC (o 4 dígitos)."
+
+msgid "O código postal tem 7 dígitos."
+msgstr "El código postal tiene 7 dígitos."
+
+msgid "O código postal tem 6 dígitos."
+msgstr "El código postal tiene 6 dígitos."
+
+msgid "O código postal tem 6 dígitos (ou 4, no formato antigo)."
+msgstr "El código postal tiene 6 dígitos (o 4, en el formato anterior)."
+
+msgid "Use até 9 letras ou números."
+msgstr "Use hasta 9 letras o números."
 
 msgid "CEP"
 msgstr "Código postal (CEP)"

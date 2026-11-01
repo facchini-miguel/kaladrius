@@ -3,6 +3,7 @@ dates and the Brazilian-only fields. Brazil keeps every rule it had (the other t
 
 import datetime
 import re
+from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -253,3 +254,107 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     assert [(e["start"], e["end"]) for e in eventos] == [
         ("2031-03-03T09:00:00", "2031-03-03T09:30:00")
     ]
+
+
+# --- Latin America (decision 120) -------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("pais", "digitado", "guardado", "exibido", "whatsapp"),
+    [
+        ("MX", "55 1234 5678", "5512345678", "55 1234 5678", "https://wa.me/525512345678"),
+        ("MX", "+52 1 55 1234 5678", "5512345678", "55 1234 5678", "https://wa.me/525512345678"),
+        ("MX", "(664) 123 4567", "6641234567", "664 123 4567", "https://wa.me/526641234567"),
+        ("AR", "011 15 1234-5678", "1112345678", "011 1234-5678", "https://wa.me/5491112345678"),
+        ("AR", "+54 9 11 1234 5678", "1112345678", "011 1234-5678", "https://wa.me/5491112345678"),
+        ("AR", "0351 15 123-4567", "3511234567", "0351 123-4567", "https://wa.me/5493511234567"),
+        ("CL", "+56 9 1234 5678", "912345678", "9 1234 5678", "https://wa.me/56912345678"),
+        ("CO", "300 123 4567", "3001234567", "300 123 4567", "https://wa.me/573001234567"),
+        ("CO", "601 234 5678", "6012345678", "601 234 5678", "https://wa.me/576012345678"),
+        ("PE", "987 654 321", "987654321", "987 654 321", "https://wa.me/51987654321"),
+        ("PE", "(01) 234 5678", "12345678", "(01) 234 5678", "https://wa.me/5112345678"),
+        ("UY", "099 123 456", "99123456", "099 123 456", "https://wa.me/59899123456"),
+        ("UY", "2123 4567", "21234567", "2123 4567", "https://wa.me/59821234567"),
+        ("PY", "0981 123 456", "981123456", "0981 123 456", "https://wa.me/595981123456"),
+        ("BO", "7123 4567", "71234567", "7123 4567", "https://wa.me/59171234567"),
+        ("EC", "099 123 4567", "991234567", "099 123 4567", "https://wa.me/593991234567"),
+        ("EC", "(02) 234 5678", "22345678", "(02) 234 5678", "https://wa.me/59322345678"),
+    ],
+)
+def test_telefone_da_america_latina(pais, digitado, guardado, exibido, whatsapp):
+    assert normalizar_telefone(digitado, pais) == guardado
+    assert paises.formatar_telefone(guardado, pais) == exibido
+    assert paises.link_whatsapp(guardado, pais) == whatsapp
+
+
+@pytest.mark.parametrize(
+    ("pais", "digitado"),
+    [("MX", "1234 5678"), ("AR", "011 1234"), ("CL", "1234 5678"), ("UY", "099 123")],
+)
+def test_telefone_latino_invalido(pais, digitado):
+    with pytest.raises(ValidationError):
+        normalizar_telefone(digitado, pais)
+
+
+@pytest.mark.parametrize(
+    ("pais", "digitado", "guardado"),
+    [
+        ("MX", "06600", "06600"),
+        ("AR", "c1425abc", "C1425ABC"),
+        ("AR", "1425", "1425"),
+        ("CL", "8320000", "8320000"),
+        ("CO", "110111", "110111"),
+        ("PE", "15001", "15001"),
+        ("UY", "11000", "11000"),
+        ("PY", "001001", "001001"),
+        ("BO", "zona sur", "ZONASUR"),
+        ("EC", "170150", "170150"),
+    ],
+)
+def test_codigo_postal_da_america_latina(pais, digitado, guardado):
+    assert paises.normalizar_cep(digitado, pais) == guardado
+
+
+@pytest.mark.parametrize(("pais", "digitado"), [("MX", "0660"), ("CL", "83200"), ("AR", "C14ABC")])
+def test_codigo_postal_latino_invalido(pais, digitado):
+    with pytest.raises(ValidationError):
+        paises.normalizar_cep(digitado, pais)
+
+
+@pytest.mark.parametrize(
+    ("pais", "variante", "valor"),
+    [
+        ("MX", "es-mx", "$ 1,234.56"),
+        ("AR", "es-ar", "$ 1.234,56"),
+        ("CL", "es-cl", "$ 1.235"),
+        ("CO", "es-co", "$ 1.234,56"),
+        ("PE", "es-pe", "S/ 1,234.56"),
+        ("UY", "es-uy", "$U 1.234,56"),
+        ("PY", "es-py", "₲ 1.235"),
+        ("BO", "es-bo", "Bs 1.234,56"),
+        ("EC", "es-ec", "US$ 1.234,56"),
+    ],
+)
+def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
+    """Spanish with each country's numbers and its currency, texts from the es catalog."""
+    from apps.core import moedas
+
+    usuario = criar_usuario(f"recepcao_{pais.lower()}", clinica_a, Papel.RECEPCAO)
+    no_pais(clinica_a, pais)
+    with translation.override("es"):
+        assert _durante_requisicao(usuario)["idioma"] == variante
+    with translation.override(variante):
+        assert moedas.formatar(Decimal("1234.56"), paises.PAISES[pais].moeda) == valor
+        assert translation.gettext("Rechamadas") == "Recordatorios"
+
+
+def test_pais_latino_no_formulario_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de):
+    admin = cliente_de(criar_usuario("admin_mexico", clinica_a, Papel.ADMIN))
+    assert admin.post(reverse("configuracoes"), dados_clinica(pais="MX")).status_code == 302
+    clinica_a.refresh_from_db()
+    assert (clinica_a.fuso_horario, clinica_a.moeda) == ("America/Mexico_City", "MXN")
+    # The screen sends the currency it shows (the clinic's, now the Mexican peso).
+    dados = dados_clinica(pais="AR", moeda="MXN", fuso_horario="America/Argentina/Mendoza")
+    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    clinica_a.refresh_from_db()
+    assert (clinica_a.fuso_horario, clinica_a.moeda) == ("America/Argentina/Mendoza", "ARS")

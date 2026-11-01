@@ -1,7 +1,9 @@
-"""The clinic's country (decision 117): time zone, phones, postal codes, the English variant
-of dates and the default currency. Brazil keeps every rule it had; the other countries start
-with the English-speaking markets (United States, United Kingdom, Canada, Australia and South
-Africa). Documents (CPF/CNPJ and each country's own) are phase 2 of the internationalization.
+"""The clinic's country (decisions 117 and 120): time zone, phones, postal codes, the English
+and Spanish variants of dates and numbers, and the default currency. Brazil keeps every rule it
+had; the other countries are the English-speaking markets (United States, United Kingdom,
+Canada, Australia and South Africa) and Latin America (Mexico, Argentina, Chile, Colombia, Peru,
+Uruguay, Paraguay, Bolivia and Ecuador). Documents (CPF/CNPJ and each country's own) are phase
+2 of the internationalization.
 """
 
 import re
@@ -19,7 +21,8 @@ class Pais:
     ddi: str  # international calling code, without "+"
     moeda: str  # ISO 4217, see apps/core/moedas.py
     fusos: tuple  # IANA time zones; the first is the default
-    ingles: str  # language code of the English variant (dates and times)
+    ingles: str = "en"  # language code of the English variant (dates and times)
+    espanhol: str = "es"  # language code of the Spanish variant (dates and numbers)
 
 
 PAISES = {
@@ -38,6 +41,48 @@ PAISES = {
             "America/Noronha",
         ),
         "en",
+    ),
+    # Latin America (decision 120): Spanish with each country's numbers (1,234.56 in Mexico
+    # and Peru, 1.234,56 in the others) and dates.
+    "MX": Pais(
+        _("México"),
+        "52",
+        "MXN",
+        (
+            "America/Mexico_City",
+            "America/Cancun",
+            "America/Chihuahua",
+            "America/Hermosillo",
+            "America/Mazatlan",
+            "America/Tijuana",
+        ),
+        espanhol="es-mx",
+    ),
+    "AR": Pais(
+        _("Argentina"),
+        "54",
+        "ARS",
+        (
+            "America/Argentina/Buenos_Aires",
+            "America/Argentina/Cordoba",
+            "America/Argentina/Mendoza",
+        ),
+        espanhol="es-ar",
+    ),
+    "CL": Pais(
+        _("Chile"),
+        "56",
+        "CLP",
+        ("America/Santiago", "America/Punta_Arenas", "Pacific/Easter"),
+        espanhol="es-cl",
+    ),
+    "CO": Pais(_("Colômbia"), "57", "COP", ("America/Bogota",), espanhol="es-co"),
+    "PE": Pais(_("Peru"), "51", "PEN", ("America/Lima",), espanhol="es-pe"),
+    "UY": Pais(_("Uruguai"), "598", "UYU", ("America/Montevideo",), espanhol="es-uy"),
+    "PY": Pais(_("Paraguai"), "595", "PYG", ("America/Asuncion",), espanhol="es-py"),
+    "BO": Pais(_("Bolívia"), "591", "BOB", ("America/La_Paz",), espanhol="es-bo"),
+    "EC": Pais(
+        _("Equador"), "593", "USD", ("America/Guayaquil", "Pacific/Galapagos"), espanhol="es-ec"
     ),
     "US": Pais(
         _("Estados Unidos"),
@@ -115,22 +160,31 @@ def do_codigo(codigo):
 
 
 def variante_do_idioma(idioma, pais):
-    """The English variant for the clinic's country ("en-gb"...), or None to keep `idioma`."""
-    if idioma and idioma.split("-")[0] == "en":
-        variante = do_codigo(pais).ingles
-        return None if variante == idioma else variante
-    return None
+    """The English or Spanish variant for the clinic's country ("en-gb", "es-mx"...), or None
+    to keep `idioma`. Portuguese has no variants."""
+    base = (idioma or "").split("-")[0]
+    variante = {"en": do_codigo(pais).ingles, "es": do_codigo(pais).espanhol}.get(base)
+    return None if variante in (None, idioma) else variante
 
 
 # Phones ------------------------------------------------------------------------------------
 # Stored as the national number (no country code, no trunk 0), which fits the 11 characters
-# of the existing fields: 10 digits in the United States, Canada and the United Kingdom,
-# 9 in Australia and South Africa. Brazil keeps validadores.normalizar_telefone.
+# of the existing fields: 8 to 10 digits. Brazil keeps validadores.normalizar_telefone.
 
+_DEZ_DIGITOS = _("Informe o código de área e o número (10 dígitos).")
 _TELEFONE = {
+    "MX": ((10,), "23456789", _DEZ_DIGITOS),
+    "AR": ((10,), "123", _DEZ_DIGITOS),
+    "CL": ((9,), "2345679", _("Informe o número com o código de área (9 dígitos).")),
+    "CO": ((10,), "36", _DEZ_DIGITOS),
+    "PE": ((8, 9), "1456789", _("Informe o número com o código de área (8 ou 9 dígitos).")),
+    "UY": ((8,), "249", _("Informe o número com o código de área (8 dígitos).")),
+    "PY": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
+    "BO": ((8,), "234567", _("Informe o número com o código de área (8 dígitos).")),
+    "EC": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
     # country: (digits of the national number, its first digit, message)
-    "US": ((10,), "23456789", _("Informe o código de área e o número (10 dígitos).")),
-    "CA": ((10,), "23456789", _("Informe o código de área e o número (10 dígitos).")),
+    "US": ((10,), "23456789", _DEZ_DIGITOS),
+    "CA": ((10,), "23456789", _DEZ_DIGITOS),
     "GB": (
         (9, 10),
         "123578",
@@ -148,10 +202,21 @@ def normalizar_telefone_internacional(digitos, pais):
     numero = digitos
     if numero.startswith("00"):  # international prefix typed
         numero = numero[2:]
+    if pais == "MX" and numero.startswith("521") and len(numero) == 13:
+        numero = numero[3:]  # the old "1" of Mexican mobiles after +52
+    elif pais == "AR" and numero.startswith("549") and len(numero) == 13:
+        numero = numero[3:]  # the "9" of Argentine mobiles after +54
     if numero.startswith(ddi) and len(numero) - len(ddi) in tamanhos:
         numero = numero[len(ddi) :]
     if pais not in ("US", "CA"):
         numero = numero.lstrip("0")  # trunk prefix
+    if pais == "AR" and len(numero) == 12:
+        # Argentine mobiles are dialed with "15" after the area code (2 to 4 digits): it is
+        # not part of the number.
+        for area in (2, 3, 4):
+            if numero[area : area + 2] == "15":
+                numero = numero[:area] + numero[area + 2 :]
+                break
     if len(numero) not in tamanhos or numero[0] not in inicios:
         raise ValidationError(mensagem)
     return numero
@@ -173,11 +238,50 @@ def formatar_telefone(numero, pais):
         return f"(0{numero[0]}) {numero[1:5]} {numero[5:]}"
     if pais == "ZA" and len(numero) == 9:
         return f"0{numero[:2]} {numero[2:5]} {numero[5:]}"
-    return numero
+    return _formatar_telefone_latino(numero, pais)
+
+
+def _formatar_telefone_latino(n, pais):
+    tamanho = len(n)
+    if pais == "MX" and tamanho == 10:
+        if n[:2] in ("55", "33", "81"):  # Mexico City, Guadalajara, Monterrey: 2-digit areas
+            return f"{n[:2]} {n[2:6]} {n[6:]}"
+        return f"{n[:3]} {n[3:6]} {n[6:]}"
+    if pais == "AR" and tamanho == 10:
+        if n.startswith("11"):  # Buenos Aires
+            return f"011 {n[2:6]}-{n[6:]}"
+        return f"0{n[:3]} {n[3:6]}-{n[6:]}"
+    if pais == "CL" and tamanho == 9:
+        return f"{n[0]} {n[1:5]} {n[5:]}"
+    if pais == "CO" and tamanho == 10:
+        return f"{n[:3]} {n[3:6]} {n[6:]}"
+    if pais == "PE":
+        if tamanho == 9:
+            return f"{n[:3]} {n[3:6]} {n[6:]}"
+        if n.startswith("1"):  # Lima
+            return f"(01) {n[1:4]} {n[4:]}"
+        return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
+    if pais == "UY" and tamanho == 8:
+        return f"0{n[:2]} {n[2:5]} {n[5:]}" if n.startswith("9") else f"{n[:4]} {n[4:]}"
+    if pais == "PY":
+        if tamanho == 9:
+            return f"0{n[:3]} {n[3:6]} {n[6:]}"
+        return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
+    if pais == "BO" and tamanho == 8:
+        return f"{n[:4]} {n[4:]}"
+    if pais == "EC":
+        if tamanho == 9:
+            return f"0{n[:2]} {n[2:5]} {n[5:]}"
+        return f"(0{n[0]}) {n[1:4]} {n[4:]}"
+    return n
 
 
 def link_whatsapp(numero, pais):
-    return f"https://wa.me/{do_codigo(pais).ddi}{numero}" if numero else ""
+    if not numero:
+        return ""
+    # WhatsApp writes Argentine mobiles with a 9 after the country code.
+    ddi = "549" if pais == "AR" else do_codigo(pais).ddi
+    return f"https://wa.me/{ddi}{numero}"
 
 
 # Postal codes ------------------------------------------------------------------------------
@@ -190,6 +294,19 @@ _CEP = {
     "GB": (r"[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}", _("Informe um postcode válido, como SW1A 1AA.")),
     "AU": (r"\d{4}", _("O postcode australiano tem 4 dígitos.")),
     "ZA": (r"\d{4}", _("O código postal sul-africano tem 4 dígitos.")),
+    "MX": (r"\d{5}", _("O código postal tem 5 dígitos.")),
+    "AR": (
+        r"[A-Z]\d{4}[A-Z]{3}|\d{4}",
+        _("O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."),
+    ),
+    "CL": (r"\d{7}", _("O código postal tem 7 dígitos.")),
+    "CO": (r"\d{6}", _("O código postal tem 6 dígitos.")),
+    "PE": (r"\d{5}", _("O código postal tem 5 dígitos.")),
+    "UY": (r"\d{5}", _("O código postal tem 5 dígitos.")),
+    "PY": (r"\d{4}(\d{2})?", _("O código postal tem 6 dígitos (ou 4, no formato antigo).")),
+    # Bolivia has no national postal codes: whatever reference the address uses.
+    "BO": (r"[A-Z0-9]{1,9}", _("Use até 9 letras ou números.")),
+    "EC": (r"\d{6}", _("O código postal tem 6 dígitos.")),
 }
 
 

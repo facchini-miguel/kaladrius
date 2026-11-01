@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.47.0
+  data: 2026-11-01
+  titulo:
+    pt-br: América Latina
+    en: Latin America
+    es: América Latina
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A clínica pode ficar no México, Argentina, Chile, Colômbia, Peru, Uruguai, Paraguai,
+          Bolívia ou Equador, com o fuso, os telefones, os códigos postais e a moeda do país. Em
+          espanhol, números e datas seguem o país (1,234.56 no México e no Peru, 1.234,56 nos
+          demais).
+        en: >
+          The clinic can be in Mexico, Argentina, Chile, Colombia, Peru, Uruguay, Paraguay,
+          Bolivia or Ecuador, with the country's time zone, phones, postal codes and currency. In
+          Spanish, numbers and dates follow the country (1,234.56 in Mexico and Peru, 1.234,56 in
+          the others).
+        es: >
+          La clínica puede estar en México, Argentina, Chile, Colombia, Perú, Uruguay, Paraguay,
+          Bolivia o Ecuador, con la zona horaria, los teléfonos, los códigos postales y la moneda
+          del país. En español, los números y las fechas siguen el país (1,234.56 en México y
+          Perú, 1.234,56 en los demás).
+
 - versao: 0.46.2
   data: 2026-11-01
   itens:
