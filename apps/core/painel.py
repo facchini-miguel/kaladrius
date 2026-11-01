@@ -12,7 +12,8 @@ from django.utils import timezone
 from apps.agenda import servicos as agenda
 from apps.agenda.models import Agendamento
 from apps.financeiro import servicos as financeiro
-from apps.financeiro.models import ZERO, Caixa, Lancamento, Pagamento, Parcela
+from apps.financeiro.formas import rotulos as rotulos_das_formas
+from apps.financeiro.models import ZERO, Caixa, Lancamento, Parcela
 from apps.orcamentos.models import Orcamento
 from apps.pacientes.models import Paciente
 from apps.rechamadas.models import Rechamada
@@ -133,7 +134,7 @@ def _recebimentos(hoje):
     recebidos = financeiro.pagamentos_validos().filter(
         data=hoje, parcela__lancamento__tipo=Lancamento.Tipo.RECEBER
     )
-    formas = dict(Pagamento.Forma.choices)
+    formas = rotulos_das_formas()
     por_forma = [
         (formas.get(forma, forma), total)
         for forma, total in recebidos.order_by()

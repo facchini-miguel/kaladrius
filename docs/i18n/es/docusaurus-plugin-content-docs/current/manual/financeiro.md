@@ -21,6 +21,25 @@ En **Financiero > Por cobrar**, la lista muestra las cuotas abiertas (las vencid
 - **forma de pago** y **cuenta** (Caja, Banco…);
 - para tarjeta: marca, número de cuotas con tarjeta y código de la transacción. **Nunca** anote el número de la tarjeta.
 
+Las formas son las del país de la clínica (**Registros > Configuración de la clínica**), con el nombre de los sistemas locales entre paréntesis:
+
+| País | Formas además de efectivo y tarjetas de débito y crédito |
+|---|---|
+| Brasil | Pix, transferencia, boleto |
+| México | transferencia (SPEI), billetera digital (Mercado Pago, CoDi), cheque |
+| Argentina | transferencia, billetera digital (Mercado Pago, MODO), cheque |
+| Chile | transferencia, billetera digital (Mercado Pago, MACH), cheque; el débito es Redcompra |
+| Colombia | transferencia (PSE, Bre-B), billetera digital (Nequi, Daviplata) |
+| Perú | transferencia, billetera digital (Yape, Plin) |
+| Uruguay, Paraguay, Bolivia, Ecuador | transferencia, billetera digital (Mercado Pago en Uruguay; QR en los demás) |
+| Estados Unidos | cheque, tarjeta HSA/FSA, transferencia (ACH), billetera digital (Zelle, Venmo), financiamiento al paciente |
+| Reino Unido | transferencia (Faster Payments), débito automático (Direct Debit), cheque |
+| Canadá | transferencia (Interac e-Transfer), débito automático (PAD), cheque, financiamiento al paciente; el débito es Interac |
+| Australia | transferencia (PayID), BPAY, débito automático, financiamiento al paciente; el débito es EFTPOS |
+| Sudáfrica | transferencia (EFT), billetera digital (SnapScan, Zapper), débito automático (debit order) |
+
+En los países de habla inglesa los emisores no dividen en cuotas con tarjeta, así que el campo **cuotas con tarjeta** no aparece. Los pagos ya registrados mantienen su forma, aunque el país ya no la ofrezca.
+
 Solo el administrador de la clínica puede dar **descuento**.
 
 ## Recibo

@@ -150,7 +150,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
     if not (pacientes and categorias and contas):
         return 0, 0
     hoje = timezone.localdate()
-    formas = [forma for forma, _rotulo in Pagamento.Forma.em_uso()]
+    formas = [forma for forma, _rotulo in Pagamento.Forma.em_uso(clinica.pais)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
         nome: CentroCusto.objects.get_or_create(clinica=clinica, nome=nome)[0]
@@ -204,9 +204,14 @@ def _simular_despesas(clinica, sorteio, contas, usuario, centros):
     """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
     from decimal import Decimal
 
+    from apps.financeiro import formas as metodos
     from apps.financeiro import servicos
     from apps.financeiro.models import Categoria, Fornecedor, Lancamento
 
+    # Bills are paid the way the clinic's country pays them (decision 123).
+    do_pais = metodos.do_pais(clinica.pais).codigos
+    contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
+    formas = [forma for forma in contas_a_pagar if forma in do_pais]
     categorias = {
         c.nome: c for c in Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.DESPESA)
     }
@@ -242,7 +247,7 @@ def _simular_despesas(clinica, sorteio, contas, usuario, centros):
                     usuario=usuario,
                     valor=parcela.valor,
                     data=parcela.vencimento,
-                    forma=sorteio.choice(["pix", "boleto", "transferencia"]),
+                    forma=sorteio.choice(formas),
                     conta=sorteio.choice(contas),
                 )
         criadas += 1

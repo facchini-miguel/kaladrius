@@ -31,10 +31,10 @@
     <legend class="fs-6 float-none w-auto px-2 mb-0">{% translate "Só para cartão" %}</legend>
     <div class="row">
       <div class="col-md-4">{% with campo=form.cartao_bandeira %}{% include "includes/campo.html" %}{% endwith %}</div>
-      <div class="col-md-4">{% with campo=form.cartao_parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% if "cartao_parcelas" in form.fields %}<div class="col-md-4">{% with campo=form.cartao_parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>{% endif %}
       <div class="col-md-4">{% with campo=form.cartao_codigo %}{% include "includes/campo.html" %}{% endwith %}</div>
     </div>
-    <p class="text-body-secondary small mb-0">{% translate "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a parcela fica paga. Nunca anote o número do cartão." %}</p>
+    <p class="text-body-secondary small mb-0">{% if "cartao_parcelas" in form.fields %}{% translate "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a parcela fica paga. Nunca anote o número do cartão." %}{% else %}{% translate "Nunca anote o número do cartão." %}{% endif %}</p>
   </fieldset>
   {% with campo=form.observacao %}{% include "includes/campo.html" %}{% endwith %}
   {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}

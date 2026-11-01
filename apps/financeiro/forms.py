@@ -9,6 +9,7 @@ from apps.core.validadores import normalizar_telefone
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
 
+from . import formas
 from .models import (
     Categoria,
     CentroCusto,
@@ -19,6 +20,11 @@ from .models import (
     Pagamento,
 )
 from .servicos import ligar_grupos
+
+
+def _formas_com_vazio():
+    """The clinic's country's payment methods (decision 123), after an empty choice."""
+    return [("", "—"), *Pagamento.Forma.em_uso()]
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
@@ -64,7 +70,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        choices=_formas_com_vazio,
         required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
@@ -136,7 +142,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
     pago_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        choices=_formas_com_vazio,
         required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
@@ -324,10 +330,18 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, pode_dar_desconto, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["forma"].choices = [("", "—"), *Pagamento.Forma.em_uso()]
+        self.fields["forma"].choices = _formas_com_vazio()
         self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
         if not pode_dar_desconto:
             del self.fields["desconto"]
+        # Card installments and the transaction code's local name (NSU) depend on the country.
+        do_pais = formas.do_pais()
+        if not do_pais.parcelas_no_cartao:
+            del self.fields["cartao_parcelas"]
+        rotulo = _("Código da transação")
+        if do_pais.codigo_do_cartao:
+            rotulo = f"{rotulo} ({do_pais.codigo_do_cartao})"
+        self.fields["cartao_codigo"].label = rotulo
 
     def clean(self):
         dados = super().clean()
@@ -336,9 +350,10 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
             dados["desconto"] = dados.get("desconto") or 0
         if dados.get("valor") is not None and dados["valor"] <= 0:
             self.add_error("valor", _("Informe um valor maior que zero."))
-        if dados.get("forma") not in (Pagamento.Forma.CREDITO, Pagamento.Forma.DEBITO):
-            for campo in ("cartao_bandeira", "cartao_parcelas", "cartao_codigo"):
-                dados[campo] = None if campo == "cartao_parcelas" else ""
+        if dados.get("forma") not in formas.CARTOES or "cartao_parcelas" not in self.fields:
+            dados["cartao_parcelas"] = None
+        if dados.get("forma") not in formas.CARTOES:
+            dados["cartao_bandeira"] = dados["cartao_codigo"] = ""
         return dados
 
 
@@ -560,7 +575,7 @@ class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
     )
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=Pagamento.Forma.em_uso(),
+        choices=Pagamento.Forma.em_uso,
         initial=Pagamento.Forma.TRANSFERENCIA,
     )
 

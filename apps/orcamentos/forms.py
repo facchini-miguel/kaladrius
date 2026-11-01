@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
-from apps.financeiro.forms import DATA, _campo_dinheiro
-from apps.financeiro.models import Categoria, Conta, Pagamento
+from apps.financeiro.forms import DATA, _campo_dinheiro, _formas_com_vazio
+from apps.financeiro.models import Categoria, Conta
 from apps.odontologia.dentes import DENTES_VALIDOS
 from apps.pacientes.models import Paciente
 from apps.profissionais.models import Profissional
@@ -117,7 +117,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=[("", "—"), *Pagamento.Forma.em_uso()],
+        choices=_formas_com_vazio,
         required=False,
     )
     conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)

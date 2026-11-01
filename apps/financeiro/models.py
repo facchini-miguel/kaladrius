@@ -409,20 +409,30 @@ class Pagamento(ModeloDaClinica):
     """
 
     class Forma(models.TextChoices):
+        """Every method of every country; each country offers some (formas.py, decision
+        123)."""
+
         DINHEIRO = "dinheiro", _("Dinheiro")
         PIX = "pix", _("Pix")
         DEBITO = "debito", _("Cartão de débito")
         CREDITO = "credito", _("Cartão de crédito")
         TRANSFERENCIA = "transferencia", _("Transferência")
         BOLETO = "boleto", _("Boleto")
-        # No longer offered (the owner: cheques are not used anymore); kept only so payments
-        # recorded as cheque before still show their method.
+        # No longer offered in Brazil (the owner: cheques are not used anymore); kept so
+        # payments recorded as cheque there still show their method.
         CHEQUE = "cheque", _("Cheque")
+        CARTEIRA = "carteira", _("Carteira digital")
+        DEBITO_AUTOMATICO = "debito_auto", _("Débito automático")
+        HSA = "hsa", _("Cartão HSA/FSA")
+        FINANCIAMENTO = "financiamento", _("Financiamento ao paciente")
+        BPAY = "bpay", "BPAY"
 
         @classmethod
-        def em_uso(cls):
-            """The methods offered when recording a payment."""
-            return [(valor, rotulo) for valor, rotulo in cls.choices if valor != cls.CHEQUE]
+        def em_uso(cls, pais=None):
+            """The methods offered when recording a payment, in the clinic's country."""
+            from .formas import em_uso
+
+            return em_uso(pais)
 
     parcela = models.ForeignKey(
         Parcela, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")
@@ -500,6 +510,12 @@ class Pagamento(ModeloDaClinica):
 
     def __str__(self):
         return f"{self.parcela} – {self.valor}"
+
+    def get_forma_display(self):
+        """The method's name in the clinic's country ("Transferência (SPEI)" in Mexico)."""
+        from .formas import rotulo
+
+        return rotulo(self.forma)
 
     @property
     def principal(self):

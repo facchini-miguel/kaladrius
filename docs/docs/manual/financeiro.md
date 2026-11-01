@@ -21,6 +21,25 @@ In **Finance > Receivables**, the list shows the open installments (overdue ones
 - **payment method** and **account** (Cash, Bank…);
 - for cards: brand, number of card installments and transaction code. **Never** write down the card number.
 
+The methods are those of the clinic's country (**Records > Clinic settings**), with the local systems' names in parentheses:
+
+| Country | Methods besides cash, debit and credit cards |
+|---|---|
+| Brazil | Pix, transfer, boleto |
+| Mexico | transfer (SPEI), digital wallet (Mercado Pago, CoDi), check |
+| Argentina | transfer, digital wallet (Mercado Pago, MODO), check |
+| Chile | transfer, digital wallet (Mercado Pago, MACH), check; debit is Redcompra |
+| Colombia | transfer (PSE, Bre-B), digital wallet (Nequi, Daviplata) |
+| Peru | transfer, digital wallet (Yape, Plin) |
+| Uruguay, Paraguay, Bolivia, Ecuador | transfer, digital wallet (Mercado Pago in Uruguay; QR in the others) |
+| United States | check, HSA/FSA card, transfer (ACH), digital wallet (Zelle, Venmo), patient financing |
+| United Kingdom | transfer (Faster Payments), direct debit, cheque |
+| Canada | transfer (Interac e-Transfer), direct debit (PAD), cheque, patient financing; debit is Interac |
+| Australia | transfer (PayID), BPAY, direct debit, patient financing; debit is EFTPOS |
+| South Africa | transfer (EFT), digital wallet (SnapScan, Zapper), direct debit (debit order) |
+
+In the English-speaking countries card issuers do not split payments, so the **card installments** field does not appear. Payments recorded before keep their method even if the country no longer offers it.
+
 Only the clinic administrator can give a **discount**.
 
 ## Receipt

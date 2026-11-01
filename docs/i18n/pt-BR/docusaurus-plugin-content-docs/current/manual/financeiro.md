@@ -21,6 +21,25 @@ Em **Financeiro > A receber**, a lista mostra as parcelas em aberto (as vencidas
 - **forma de pagamento** e **conta** (Caixa, Banco…);
 - para cartão: bandeira, número de parcelas no cartão e código da transação. **Nunca** anote o número do cartão.
 
+As formas são as do país da clínica (**Cadastros > Configurações da clínica**), com o nome dos sistemas locais entre parênteses:
+
+| País | Formas além de dinheiro e cartões de débito e crédito |
+|---|---|
+| Brasil | Pix, transferência, boleto |
+| México | transferência (SPEI), carteira digital (Mercado Pago, CoDi), cheque |
+| Argentina | transferência, carteira digital (Mercado Pago, MODO), cheque |
+| Chile | transferência, carteira digital (Mercado Pago, MACH), cheque; o débito é o Redcompra |
+| Colômbia | transferência (PSE, Bre-B), carteira digital (Nequi, Daviplata) |
+| Peru | transferência, carteira digital (Yape, Plin) |
+| Uruguai, Paraguai, Bolívia, Equador | transferência, carteira digital (Mercado Pago no Uruguai; QR nos outros) |
+| Estados Unidos | cheque, cartão HSA/FSA, transferência (ACH), carteira digital (Zelle, Venmo), financiamento ao paciente |
+| Reino Unido | transferência (Faster Payments), débito automático (Direct Debit), cheque |
+| Canadá | transferência (Interac e-Transfer), débito automático (PAD), cheque, financiamento ao paciente; o débito é o Interac |
+| Austrália | transferência (PayID), BPAY, débito automático, financiamento ao paciente; o débito é o EFTPOS |
+| África do Sul | transferência (EFT), carteira digital (SnapScan, Zapper), débito automático (debit order) |
+
+Nos países de língua inglesa as operadoras não parcelam no cartão, então o campo **parcelas no cartão** não aparece. Pagamentos já registrados mantêm a forma, mesmo que o país não a ofereça mais.
+
 Só o administrador da clínica pode dar **desconto**.
 
 ## Recibo

@@ -4,6 +4,39 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.50.0
+  data: 2026-11-01
+  titulo:
+    pt-br: Formas de pagamento de cada país
+    en: Each country's payment methods
+    es: Formas de pago de cada país
+  itens:
+    - tipo: novo
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Ao receber ou pagar, a lista de formas de pagamento é a do país da clínica, com o
+          nome dos sistemas locais: Pix e boleto no Brasil, SPEI no México, Yape e Plin no Peru,
+          Nequi e PSE na Colômbia, cheque, cartão HSA/FSA, ACH e Zelle nos Estados Unidos, Direct
+          Debit no Reino Unido, Interac no Canadá, EFTPOS e BPAY na Austrália, entre outros. Nos
+          países de língua inglesa, onde o cartão não é parcelado, o campo de parcelas no cartão
+          não aparece.
+        en: >
+          When receiving or paying, the list of payment methods is that of the clinic's country,
+          with the local systems' names: Pix and boleto in Brazil, SPEI in Mexico, Yape and Plin
+          in Peru, Nequi and PSE in Colombia, check, HSA/FSA card, ACH and Zelle in the United
+          States, Direct Debit in the United Kingdom, Interac in Canada, EFTPOS and BPAY in
+          Australia, among others. In the English-speaking countries, where card payments are
+          not split into installments, the card installments field does not appear.
+        es: >
+          Al cobrar o pagar, la lista de formas de pago es la del país de la clínica, con el
+          nombre de los sistemas locales: Pix y boleto en Brasil, SPEI en México, Yape y Plin en
+          Perú, Nequi y PSE en Colombia, cheque, tarjeta HSA/FSA, ACH y Zelle en Estados Unidos,
+          Direct Debit en el Reino Unido, Interac en Canadá, EFTPOS y BPAY en Australia, entre
+          otros. En los países de habla inglesa, donde la tarjeta no se divide en cuotas, el
+          campo de cuotas con tarjeta no aparece.
+
 - versao: 0.49.0
   data: 2026-11-01
   titulo:

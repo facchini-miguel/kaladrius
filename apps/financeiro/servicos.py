@@ -18,6 +18,7 @@ from apps.core.models import Clinica
 from apps.core.ordem import chave_alfabetica
 
 from . import comissoes
+from .formas import rotulos as rotulos_das_formas
 from .models import (
     ZERO,
     Caixa,
@@ -440,7 +441,7 @@ def relatorio(de, ate):
     def somar(consulta, campo):
         return consulta.aggregate(total=Coalesce(Sum(campo), ZERO, output_field=DINHEIRO))["total"]
 
-    formas = dict(Pagamento.Forma.choices)
+    formas = rotulos_das_formas()
     total_recebido = somar(recebidos, "valor")
     total_pago = somar(pagos, "valor")
     # The chart of accounts (decision 097) only once the clinic has groups.

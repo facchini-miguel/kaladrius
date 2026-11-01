@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 07:34-0300\n"
+"POT-Creation-Date: 2026-11-01 15:25-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -1134,6 +1134,9 @@ msgstr "Ya incluidos en el valor cobrado."
 msgid "Desconto"
 msgstr "Descuento"
 
+msgid "Código da transação"
+msgstr "Código de la transacción"
+
 msgid "Grupo acima"
 msgstr "Grupo superior"
 
@@ -1374,6 +1377,18 @@ msgstr "Boleto bancario"
 
 msgid "Cheque"
 msgstr "Cheque"
+
+msgid "Carteira digital"
+msgstr "Billetera digital"
+
+msgid "Débito automático"
+msgstr "Débito automático"
+
+msgid "Cartão HSA/FSA"
+msgstr "Tarjeta HSA/FSA"
+
+msgid "Financiamento ao paciente"
+msgstr "Financiamiento al paciente"
 
 msgid "valor recebido"
 msgstr "valor cobrado"
@@ -4245,6 +4260,9 @@ msgid ""
 msgstr ""
 "Cuotas con tarjeta: indique aquí el número de cuotas; para la clínica, la "
 "cuota queda pagada. Nunca anote el número de la tarjeta."
+
+msgid "Nunca anote o número do cartão."
+msgstr "Nunca anote el número de la tarjeta."
 
 msgid "Descontos só podem ser dados pelo administrador da clínica."
 msgstr "Solo el administrador de la clínica puede dar descuentos."

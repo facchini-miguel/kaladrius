@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 07:34-0300\n"
+"POT-Creation-Date: 2026-11-01 15:25-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -1130,6 +1130,9 @@ msgstr "Already included in the amount received."
 msgid "Desconto"
 msgstr "Discount"
 
+msgid "Código da transação"
+msgstr "Transaction code"
+
 msgid "Grupo acima"
 msgstr "Parent group"
 
@@ -1370,6 +1373,18 @@ msgstr "Boleto (bank slip)"
 
 msgid "Cheque"
 msgstr "Check"
+
+msgid "Carteira digital"
+msgstr "Digital wallet"
+
+msgid "Débito automático"
+msgstr "Direct debit"
+
+msgid "Cartão HSA/FSA"
+msgstr "HSA/FSA card"
+
+msgid "Financiamento ao paciente"
+msgstr "Patient financing"
 
 msgid "valor recebido"
 msgstr "amount received"
@@ -4237,6 +4252,9 @@ msgid ""
 msgstr ""
 "Card installments: enter the number of installments here; for the clinic, "
 "the installment is paid. Never write down the card number."
+
+msgid "Nunca anote o número do cartão."
+msgstr "Never write down the card number."
 
 msgid "Descontos só podem ser dados pelo administrador da clínica."
 msgstr "Only the clinic administrator can give discounts."
