@@ -4,6 +4,52 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.0
+  data: 2026-11-01
+  titulo:
+    pt-br: Convênios e seguros de cada país
+    en: Each country's health plans and insurance
+    es: Convenios y seguros de cada país
+  itens:
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O cadastro de convênios segue o país da clínica: o registro da operadora (ANS no
+          Brasil, Payer ID nos Estados Unidos, RNOS na Argentina, CMS na África do Sul), o nome
+          local do número da carteirinha (Member ID, número de afiliado), o número do grupo das
+          carteirinhas dos Estados Unidos e do Canadá e o código do beneficiário das carteirinhas
+          familiares da África do Sul e da Austrália.
+        en: >
+          The health plan register follows the clinic's country: the insurer registration (ANS
+          in Brazil, Payer ID in the United States, RNOS in Argentina, CMS in South Africa), the
+          local name of the card number (Member ID, número de afiliado), the group number of
+          United States and Canadian cards and the beneficiary code of South African and
+          Australian family cards.
+        es: >
+          El registro de convenios sigue el país de la clínica: el registro de la aseguradora
+          (ANS en Brasil, Payer ID en Estados Unidos, RNOS en Argentina, CMS en Sudáfrica), el
+          nombre local del número de la credencial (Member ID, número de afiliado), el número de
+          grupo de las credenciales de Estados Unidos y Canadá y el código del beneficiario de
+          las credenciales familiares de Sudáfrica y Australia.
+    - tipo: novo
+      modulo: Orçamentos
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Cada procedimento pode ter o código da codificação do país (TUSS no Brasil, CDT nos
+          Estados Unidos, USC&LS no Canadá, item da ADA na Austrália, CUPS na Colômbia), que vai
+          para o orçamento e sai na impressão.
+        en: >
+          Each procedure can have its code in the country's coding (TUSS in Brazil, CDT in the
+          United States, USC&LS in Canada, ADA item number in Australia, CUPS in Colombia),
+          which goes into the estimate and is printed.
+        es: >
+          Cada procedimiento puede tener su código en la codificación del país (TUSS en Brasil,
+          CDT en Estados Unidos, USC&LS en Canadá, ítem de la ADA en Australia, CUPS en
+          Colombia), que pasa al presupuesto y sale en la impresión.
+
 - versao: 0.51.0
   data: 2026-11-01
   titulo:

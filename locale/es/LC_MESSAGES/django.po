@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 15:48-0300\n"
+"POT-Creation-Date: 2026-11-01 16:13-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -408,29 +408,37 @@ msgstr "Código incorrecto. Verifique la hora del celular e inténtelo de nuevo.
 msgid "Convênios"
 msgstr "Convenios"
 
-#
-msgid "Registro na ANS"
-msgstr "Registro en la ANS"
-
 msgid "Telefone"
 msgstr "Teléfono"
+
+#, python-format
+msgid "Por exemplo: %(tipos)s."
+msgstr "Por ejemplo: %(tipos)s."
 
 #
 msgid "Já existe um convênio com este nome."
 msgstr "Ya existe un convenio con este nombre."
 
-msgid "O registro na ANS tem 6 dígitos."
-msgstr "El registro en la ANS tiene 6 dígitos."
+msgid "Use no máximo 20 caracteres."
+msgstr "Use como máximo 20 caracteres."
+
+#
+#
+msgid "Número da carteirinha"
+msgstr "Número de la credencial"
+
+#
+msgid "Número do grupo"
+msgstr "Número de grupo"
+
+msgid "Código do beneficiário"
+msgstr "Código del beneficiario"
 
 msgid "Esta carteirinha já está cadastrada neste convênio."
 msgstr "Esta credencial ya está registrada en este convenio."
 
-#
-msgid "registro na ANS"
-msgstr "registro en la ANS"
-
-msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
-msgstr "Los 6 dígitos del registro de la operadora en la ANS, si lo hay."
+msgid "registro da operadora"
+msgstr "registro de la aseguradora"
 
 msgid "telefone"
 msgstr "teléfono"
@@ -452,6 +460,13 @@ msgid "número da carteirinha"
 msgstr "número de la credencial"
 
 #
+msgid "número do grupo"
+msgstr "número de grupo"
+
+msgid "código do beneficiário"
+msgstr "código del beneficiario"
+
+#
 msgid "validade"
 msgstr "validez"
 
@@ -466,6 +481,13 @@ msgstr "credencial"
 
 msgid "carteirinhas"
 msgstr "credenciales"
+
+#, python-format
+msgid "%(nome)s: formato inválido. Exemplo: %(exemplo)s."
+msgstr "%(nome)s: formato inválido. Ejemplo: %(exemplo)s."
+
+msgid "Registro da operadora"
+msgstr "Registro de la aseguradora"
 
 #, python-format
 msgid "%(nome)s salvo."
@@ -1964,6 +1986,9 @@ msgid ""
 msgstr ""
 "Notación de Palmer: UR superior derecho, UL superior izquierdo, LL inferior "
 "izquierdo, LR inferior derecho."
+
+msgid "Opcional. Vai para os orçamentos."
+msgstr "Opcional. Pasa a los presupuestos."
 
 msgid "Já existe um procedimento com este nome."
 msgstr "Ya existe un procedimiento con este nombre."
@@ -4918,6 +4943,10 @@ msgstr "Ninguna cita anterior."
 msgid "Nenhum orçamento."
 msgstr "Ningún presupuesto."
 
+#
+msgid "beneficiário"
+msgstr "beneficiario"
+
 msgctxt "carteirinha"
 msgid "Vencida"
 msgstr "Vencida"
@@ -4960,11 +4989,6 @@ msgstr "Convenio"
 #
 msgid "Plano"
 msgstr "Plan"
-
-#
-#
-msgid "Número da carteirinha"
-msgstr "Número de la credencial"
 
 #
 #
@@ -5422,6 +5446,19 @@ msgstr "No tiene permiso para acceder a esta página."
 msgid "Senha"
 msgstr "Contraseña"
 
+#
+#~ msgid "Registro na ANS"
+#~ msgstr "Registro en la ANS"
+
+#~ msgid "O registro na ANS tem 6 dígitos."
+#~ msgstr "El registro en la ANS tiene 6 dígitos."
+
+#
+#~ msgid "registro na ANS"
+#~ msgstr "registro en la ANS"
+
+#~ msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
+#~ msgstr "Los 6 dígitos del registro de la operadora en la ANS, si lo hay."
 
 #~ msgid "CPF/CNPJ"
 #~ msgstr "CPF/CNPJ (identificación fiscal)"

@@ -2,19 +2,16 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
-from apps.core.validadores import normalizar_telefone, somente_digitos
+from apps.core.validadores import normalizar_telefone
 
+from . import seguros
 from .models import Carteirinha, Convenio
 
 
 class ConvenioForm(FormularioBootstrap, forms.ModelForm):
-    # Typed with punctuation, stored as the 6 digits.
-    registro_ans = forms.CharField(
-        label=_("Registro na ANS"),
-        max_length=10,
-        required=False,
-        help_text=Convenio._meta.get_field("registro_ans").help_text,
-    )
+    # Typed with punctuation, stored without it (ANS: the 6 digits). Only in the countries
+    # whose insurers have a registry (decision 125).
+    registro = forms.CharField(max_length=30, required=False)
     telefone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -24,13 +21,23 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Convenio
-        fields = ["nome", "registro_ans", "telefone", "observacoes", "ativo"]
+        fields = ["nome", "registro", "telefone", "observacoes", "ativo"]
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 3})}
 
     def __init__(self, *args, clinica, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
+        do_pais = seguros.do_pais(clinica.pais)
+        if do_pais.tipos:
+            self.fields["nome"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
+        self.registro = do_pais.registro
+        if self.registro is None:
+            del self.fields["registro"]
+        else:
+            self.fields["registro"].label = seguros.rotulo_do_registro(clinica.pais)
+            if self.registro.exemplo:
+                self.fields["registro"].widget.attrs["placeholder"] = self.registro.exemplo
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"].strip()
@@ -38,10 +45,10 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             raise forms.ValidationError(_("Já existe um convênio com este nome."))
         return nome
 
-    def clean_registro_ans(self):
-        registro = somente_digitos(self.cleaned_data.get("registro_ans"))
-        if registro and len(registro) != 6:
-            raise forms.ValidationError(_("O registro na ANS tem 6 dígitos."))
+    def clean_registro(self):
+        registro = self.registro.limpar(self.cleaned_data.get("registro"))
+        if len(registro) > 20:
+            raise forms.ValidationError(_("Use no máximo 20 caracteres."))
         return registro
 
     def clean_telefone(self):
@@ -51,7 +58,16 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Carteirinha
-        fields = ["convenio", "plano", "numero", "validade", "titular", "ativa"]
+        fields = [
+            "convenio",
+            "plano",
+            "numero",
+            "grupo",
+            "beneficiario",
+            "validade",
+            "titular",
+            "ativa",
+        ]
         widgets = {"validade": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def __init__(self, *args, paciente, **kwargs):
@@ -59,6 +75,19 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         self.instance.paciente = paciente
         if self.instance.clinica_id is None:
             self.instance.clinica_id = paciente.clinica_id
+        # The card's fields and their local names in the clinic's country (decision 125).
+        do_pais = seguros.do_pais(paciente.clinica.pais)
+        self.fields["numero"].label = seguros.com_nome_local(
+            _("Número da carteirinha"), do_pais.numero
+        )
+        for campo, local, rotulo in (
+            ("grupo", do_pais.grupo, _("Número do grupo")),
+            ("beneficiario", do_pais.beneficiario, _("Código do beneficiário")),
+        ):
+            if local or getattr(self.instance, campo):
+                self.fields[campo].label = seguros.com_nome_local(rotulo, local)
+            else:
+                del self.fields[campo]
         # Active plans, plus the card's own plan when it was deactivated later.
         self.fields["convenio"].queryset = Convenio.objects.filter(ativo=True) | (
             Convenio.objects.filter(pk=self.instance.convenio_id)

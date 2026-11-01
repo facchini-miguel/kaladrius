@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 from apps.core.permissoes import Acao, Modulo, exige_permissao
 from apps.pacientes.models import Paciente
 
+from . import seguros
 from .forms import CarteirinhaForm, ConvenioForm
 from .models import Carteirinha, Convenio
 
@@ -17,7 +18,11 @@ def lista(request):
     convenios = Convenio.objects.annotate(
         pacientes=Count("carteirinhas", filter=Q(carteirinhas__ativa=True))
     )
-    return render(request, "convenios/lista.html", {"convenios": convenios})
+    return render(
+        request,
+        "convenios/lista.html",
+        {"convenios": convenios, "rotulo_do_registro": seguros.rotulo_do_registro()},
+    )
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)

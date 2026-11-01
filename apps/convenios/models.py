@@ -1,7 +1,8 @@
 """Health plans the clinic accepts and the patients' cards (decision 094).
 
 Taken from the legacy Medical system (medical_convenios, medical_convenios_pessoas). This
-first step is the register only: authorizations and billing the plan are another scope.
+first step is the register only: authorizations and billing the plan are another scope. What
+each country registers, and how it is called, is in seguros.py (decision 125).
 """
 
 from django.db import models
@@ -15,12 +16,9 @@ from apps.core.ordem import ALFABETICA
 
 class Convenio(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
-    registro_ans = models.CharField(
-        _("registro na ANS"),
-        max_length=6,
-        blank=True,
-        help_text=_("Os 6 dígitos do registro da operadora na ANS, se houver."),
-    )
+    # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
+    # United States (seguros.py).
+    registro = models.CharField(_("registro da operadora"), max_length=20, blank=True)
     telefone = models.CharField(_("telefone"), max_length=11, blank=True)
     observacoes = models.TextField(_("observações"), blank=True)
     ativo = models.BooleanField(_("ativo"), default=True)
@@ -55,6 +53,10 @@ class Carteirinha(ModeloDaClinica):
     )
     plano = models.CharField(_("plano"), max_length=100, blank=True)
     numero = models.CharField(_("número da carteirinha"), max_length=30)
+    # Only where the country's cards have them (seguros.py): the group or policy number of
+    # North American cards, the patient's code on a family card.
+    grupo = models.CharField(_("número do grupo"), max_length=30, blank=True)
+    beneficiario = models.CharField(_("código do beneficiário"), max_length=10, blank=True)
     validade = models.DateField(_("validade"), null=True, blank=True)
     titular = models.CharField(
         _("titular"),

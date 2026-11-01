@@ -32,6 +32,8 @@ class Procedimento(ModeloDaClinica):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
     nome = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA)
+    # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
+    codigo = models.CharField(_("código"), max_length=20, blank=True)
     valor = models.DecimalField(_("valor"), **DINHEIRO)
     categoria = models.ForeignKey(
         "financeiro.Categoria",
@@ -154,6 +156,7 @@ class ItemOrcamento(ModeloDaClinica):
         verbose_name=_("procedimento"),
     )
     descricao = models.CharField(_("descrição"), max_length=200)
+    codigo = models.CharField(_("código"), max_length=20, blank=True)  # copied, like descricao
     # FDI tooth numbers separated by commas ("11,12"); empty for the whole mouth.
     dentes = models.CharField(_("dentes"), max_length=200, blank=True)
     faces = models.CharField(

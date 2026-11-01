@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.convenios import seguros
 from apps.core.forms import FormularioBootstrap
 from apps.financeiro.forms import DATA, _campo_dinheiro, _formas_com_vazio
 from apps.financeiro.models import Categoria, Conta
@@ -17,13 +18,25 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Procedimento
-        fields = ["nome", "valor", "categoria", "ativo"]
+        fields = ["nome", "codigo", "valor", "categoria", "ativo"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["categoria"].queryset = Categoria.objects.filter(
             tipo=Categoria.Tipo.RECEITA, ativa=True
         )
+        # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
+        self.codificacao = seguros.do_pais().procedimento
+        self.fields["codigo"].label = seguros.rotulo_do_codigo()
+        if self.codificacao and self.codificacao.exemplo:
+            self.fields["codigo"].widget.attrs["placeholder"] = self.codificacao.exemplo
+        self.fields["codigo"].help_text = _("Opcional. Vai para os orçamentos.")
+
+    def clean_codigo(self):
+        codigo = (self.cleaned_data.get("codigo") or "").strip()
+        if self.codificacao:
+            return self.codificacao.limpar(codigo)
+        return codigo
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"]
@@ -89,6 +102,8 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
             self.data.get(self.add_prefix(campo), "").strip() for campo in ("dentes", "faces")
         ):
             raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
+        # The procedure's code is copied, like its description and price.
+        self.instance.codigo = procedimento.codigo if procedimento else ""
         if not (dados.get("descricao") or "").strip():
             if procedimento is None:
                 self.add_error("descricao", _("Escolha um procedimento ou descreva o item."))

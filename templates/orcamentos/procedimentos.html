@@ -14,7 +14,7 @@
     <tbody>
       {% for procedimento in procedimentos %}
       <tr>
-        <td>{{ procedimento.nome }}</td>
+        <td>{% if procedimento.codigo %}<span class="text-body-secondary small">{{ procedimento.codigo }}</span> {% endif %}{{ procedimento.nome }}</td>
         <td class="text-end text-nowrap">{{ procedimento.valor|moeda }}</td>
         <td>{{ procedimento.categoria|default:"—" }}</td>
         <td>{% if procedimento.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>

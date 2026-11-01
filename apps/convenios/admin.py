@@ -5,9 +5,9 @@ from .models import Carteirinha, Convenio
 
 @admin.register(Convenio)
 class ConvenioAdmin(admin.ModelAdmin):
-    list_display = ["nome", "registro_ans", "ativo", "clinica"]
+    list_display = ["nome", "registro", "ativo", "clinica"]
     list_filter = ["clinica", "ativo"]
-    search_fields = ["nome", "registro_ans"]
+    search_fields = ["nome", "registro"]
 
 
 @admin.register(Carteirinha)

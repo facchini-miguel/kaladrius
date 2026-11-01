@@ -25,4 +25,4 @@ Whoever writes the estimate (front desk, practitioner or administrator) can give
 Open estimates past their validity show as **Overdue**.
 
 ## Procedure price list
-In **Records > Procedure price list**, the administrator registers each procedure with its price and income category. Changing a price does not change estimates already made. To stop using a procedure, uncheck **active**.
+In **Records > Procedure price list**, the administrator registers each procedure with its price, income category and, optionally, its **code** in the country's coding (TUSS in Brazil, CDT in the United States, USC&LS in Canada, ADA item number in Australia, tariff code in South Africa, CUPS in Colombia…), which is checked where the coding has a fixed format and goes into the estimates. Changing a price does not change estimates already made. To stop using a procedure, uncheck **active**.

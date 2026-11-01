@@ -192,7 +192,7 @@ class Command(BaseCommand):
         """Two made-up health plans and a card for about a third of the patients."""
         sorteio = random.Random(clinica.pk + 2000)  # noqa: S311 (fake data, not security)
         convenios = [
-            Convenio.objects.create(clinica=clinica, nome=nome, registro_ans=registro)
+            Convenio.objects.create(clinica=clinica, nome=nome, registro=registro)
             for nome, registro in (("Saúde Exemplo", "000001"), ("Plano Fictício", "000002"))
         ]
         hoje = timezone.localdate()

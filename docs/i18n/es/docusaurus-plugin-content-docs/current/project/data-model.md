@@ -80,9 +80,9 @@ Las cuentas por pagar (0.16.0) usan las mismas entidades. Desde la 0.37.0, la cu
 ### Presupuestos (versión 0.18.0)
 | Entidad | Campos principales | Observación |
 |---|---|---|
-| `Procedimento` (procedimiento) | clínica, nombre, valor, categoría de ingreso, activo | Tabla de precios de la clínica |
+| `Procedimento` (procedimiento) | clínica, nombre, código (en la codificación del país: TUSS, CDT…, decisión 125), valor, categoría de ingreso, activo | Tabla de precios de la clínica |
 | `Orcamento` (presupuesto) | clínica, paciente, profesional, fecha, validez, situación (abierto, aprobado, rechazado), descuento (solo administrador), observaciones, cuenta por cobrar, aprobado o rechazado el/por, creado por | Al aprobarse, pasa a ser un `Lancamento` por cobrar y ya no cambia |
-| `ItemOrcamento` (ítem del presupuesto) | clínica, presupuesto, procedimiento (opcional), descripción, dientes (FDI, separados por coma; mostrados en la numeración de la clínica, decisión 122), caras o región, cantidad, valor unitario | Descripción y valor copiados de la tabla en el momento; cambiar la tabla no modifica los presupuestos |
+| `ItemOrcamento` (ítem del presupuesto) | clínica, presupuesto, procedimiento (opcional), descripción, código (copiado del procedimiento), dientes (FDI, separados por coma; mostrados en la numeración de la clínica, decisión 122), caras o región, cantidad, valor unitario | Descripción y valor copiados de la tabla en el momento; cambiar la tabla no modifica los presupuestos |
 
 En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los dientes son datos de salud) y su auditoría pierde los datos personales.
 

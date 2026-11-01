@@ -32,7 +32,7 @@ def paciente(clinica_a):
 @pytest.fixture
 def convenio(clinica_a):
     with usar_clinica(clinica_a):
-        return Convenio.objects.create(nome="Saúde Exemplo", registro_ans="000001")
+        return Convenio.objects.create(nome="Saúde Exemplo", registro="000001")
 
 
 def carteirinha(convenio, **extra):
@@ -42,12 +42,12 @@ def carteirinha(convenio, **extra):
 def test_cadastro_do_convenio(clinica_a, admin):
     resposta = admin.post(
         reverse("convenios:novo"),
-        {"nome": " Plano Fictício ", "registro_ans": "00.000-2", "telefone": "", "ativo": "on"},
+        {"nome": " Plano Fictício ", "registro": "00.000-2", "telefone": "", "ativo": "on"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         criado = Convenio.objects.get()
-    assert (criado.nome, criado.registro_ans) == ("Plano Fictício", "000002")
+    assert (criado.nome, criado.registro) == ("Plano Fictício", "000002")
     assert "Plano Fictício" in admin.get(reverse("convenios:lista")).content.decode()
 
 
@@ -55,7 +55,7 @@ def test_cadastro_do_convenio(clinica_a, admin):
     ("dados", "campo"),
     [
         ({"nome": "saúde exemplo"}, "nome"),
-        ({"nome": "Outro", "registro_ans": "123"}, "registro_ans"),
+        ({"nome": "Outro", "registro": "123"}, "registro"),
         ({"nome": "Outro", "telefone": "99"}, "telefone"),
     ],
 )

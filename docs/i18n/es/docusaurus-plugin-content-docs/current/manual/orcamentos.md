@@ -25,4 +25,4 @@ Quien escribe el presupuesto (recepción, profesional o administrador) puede dar
 Los presupuestos abiertos después de la validez aparecen como **Vencido**.
 
 ## Tabla de procedimientos
-En **Registros > Tabla de procedimientos**, el administrador registra cada procedimiento con su valor y la categoría de ingreso. Cambiar un valor no modifica los presupuestos ya hechos. Para dejar de usar un procedimiento, desmarque **activo**.
+En **Registros > Tabla de procedimientos**, el administrador registra cada procedimiento con su valor, la categoría de ingreso y, si quiere, su **código** en la codificación del país (TUSS en Brasil, CDT en Estados Unidos, USC&LS en Canadá, ítem de la ADA en Australia, tariff code en Sudáfrica, CUPS en Colombia…), que se verifica donde la codificación tiene formato fijo y pasa a los presupuestos. Cambiar un valor no modifica los presupuestos ya hechos. Para dejar de usar un procedimiento, desmarque **activo**.

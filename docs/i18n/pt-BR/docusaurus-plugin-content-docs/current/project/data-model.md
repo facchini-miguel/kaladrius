@@ -80,9 +80,9 @@ As contas a pagar (0.16.0) usam as mesmas entidades. Desde a 0.37.0, a conta a p
 ### Orçamentos (versão 0.18.0)
 | Entidade | Campos principais | Observação |
 |---|---|---|
-| `Procedimento` | clinica, nome, valor, categoria de receita, ativo | Tabela de preços da clínica |
+| `Procedimento` | clinica, nome, código (na codificação do país: TUSS, CDT…, decisão 125), valor, categoria de receita, ativo | Tabela de preços da clínica |
 | `Orcamento` | clinica, paciente, profissional, data, validade, situação (em aberto, aprovado, recusado), desconto (só administrador), observações, lançamento a receber, aprovado ou recusado em/por, criado por | Aprovado, vira um `Lancamento` a receber e não muda mais |
-| `ItemOrcamento` | clinica, orçamento, procedimento (opcional), descrição, dentes (FDI, separados por vírgula; exibidos na numeração da clínica, decisão 122), faces ou região, quantidade, valor unitário | Descrição e valor copiados da tabela no momento; mudar a tabela não altera orçamentos |
+| `ItemOrcamento` | clinica, orçamento, procedimento (opcional), descrição, código (copiado do procedimento), dentes (FDI, separados por vírgula; exibidos na numeração da clínica, decisão 122), faces ou região, quantidade, valor unitário | Descrição e valor copiados da tabela no momento; mudar a tabela não altera orçamentos |
 
 Na exclusão definitiva de um paciente, os orçamentos dele são apagados (os dentes são dado de saúde) e a auditoria deles perde os dados pessoais.
 

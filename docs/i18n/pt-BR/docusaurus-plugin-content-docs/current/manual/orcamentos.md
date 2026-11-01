@@ -25,4 +25,4 @@ Quem escreve o orçamento (recepção, profissional ou administrador) pode dar *
 Orçamentos em aberto depois da validade aparecem como **Vencido**.
 
 ## Tabela de procedimentos
-Em **Cadastros > Tabela de procedimentos**, o administrador cadastra cada procedimento com o valor e a categoria de receita. Mudar um valor não altera orçamentos já feitos. Para deixar de usar um procedimento, desmarque **ativo**.
+Em **Cadastros > Tabela de procedimentos**, o administrador cadastra cada procedimento com o valor, a categoria de receita e, se quiser, o **código** na codificação do país (TUSS no Brasil, CDT nos Estados Unidos, USC&LS no Canadá, item da ADA na Austrália, tariff code na África do Sul, CUPS na Colômbia…), conferido onde a codificação tem formato fixo e levado para os orçamentos. Mudar um valor não altera orçamentos já feitos. Para deixar de usar um procedimento, desmarque **ativo**.

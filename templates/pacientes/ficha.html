@@ -201,6 +201,8 @@
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2{% if not carteirinha.ativa %} text-body-secondary{% endif %}">
       <span>
         <strong>{{ carteirinha.convenio.nome }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.numero }}
+        {% if carteirinha.beneficiario %}<span class="small">· {% translate "beneficiário" %} {{ carteirinha.beneficiario }}</span>{% endif %}
+        {% if carteirinha.grupo %}<span class="small">· {% translate "grupo" %} {{ carteirinha.grupo }}</span>{% endif %}
         {% if carteirinha.validade %}<span class="small">· {% translate "validade" %} {{ carteirinha.validade|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
         {% if carteirinha.titular %}<span class="small">· {% translate "titular" %}: {{ carteirinha.titular }}</span>{% endif %}
       </span>

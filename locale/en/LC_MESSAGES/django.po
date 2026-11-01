@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 15:48-0300\n"
+"POT-Creation-Date: 2026-11-01 16:13-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -407,29 +407,37 @@ msgstr "Wrong code. Check the phone's clock and try again."
 msgid "Convênios"
 msgstr "Health plans"
 
-#
-msgid "Registro na ANS"
-msgstr "ANS registration"
-
 msgid "Telefone"
 msgstr "Phone"
+
+#, python-format
+msgid "Por exemplo: %(tipos)s."
+msgstr "For example: %(tipos)s."
 
 #
 msgid "Já existe um convênio com este nome."
 msgstr "A health plan with this name already exists."
 
-msgid "O registro na ANS tem 6 dígitos."
-msgstr "The ANS registration has 6 digits."
+msgid "Use no máximo 20 caracteres."
+msgstr "Use at most 20 characters."
+
+#
+#
+msgid "Número da carteirinha"
+msgstr "Card number"
+
+#
+msgid "Número do grupo"
+msgstr "Group number"
+
+msgid "Código do beneficiário"
+msgstr "Beneficiary code"
 
 msgid "Esta carteirinha já está cadastrada neste convênio."
 msgstr "This card is already registered in this health plan."
 
-#
-msgid "registro na ANS"
-msgstr "ANS registration"
-
-msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
-msgstr "The 6 digits of the operator's ANS registration, if any."
+msgid "registro da operadora"
+msgstr "insurer registration"
 
 msgid "telefone"
 msgstr "phone"
@@ -451,6 +459,13 @@ msgid "número da carteirinha"
 msgstr "card number"
 
 #
+msgid "número do grupo"
+msgstr "group number"
+
+msgid "código do beneficiário"
+msgstr "beneficiary code"
+
+#
 msgid "validade"
 msgstr "valid until"
 
@@ -465,6 +480,13 @@ msgstr "card"
 
 msgid "carteirinhas"
 msgstr "cards"
+
+#, python-format
+msgid "%(nome)s: formato inválido. Exemplo: %(exemplo)s."
+msgstr "%(nome)s: invalid format. Example: %(exemplo)s."
+
+msgid "Registro da operadora"
+msgstr "Insurer registration"
 
 #, python-format
 msgid "%(nome)s salvo."
@@ -1956,6 +1978,9 @@ msgid ""
 msgstr ""
 "Palmer notation: UR upper right, UL upper left, LL lower left, LR lower "
 "right."
+
+msgid "Opcional. Vai para os orçamentos."
+msgstr "Optional. It goes into the estimates."
 
 msgid "Já existe um procedimento com este nome."
 msgstr "A procedure with this name already exists."
@@ -4898,6 +4923,10 @@ msgstr "No past appointments."
 msgid "Nenhum orçamento."
 msgstr "No estimates."
 
+#
+msgid "beneficiário"
+msgstr "beneficiary"
+
 msgctxt "carteirinha"
 msgid "Vencida"
 msgstr "Expired"
@@ -4940,11 +4969,6 @@ msgstr "Health plan"
 #
 msgid "Plano"
 msgstr "Plan type"
-
-#
-#
-msgid "Número da carteirinha"
-msgstr "Card number"
 
 #
 #
@@ -5399,6 +5423,19 @@ msgstr "You do not have permission to access this page."
 msgid "Senha"
 msgstr "Password"
 
+#
+#~ msgid "Registro na ANS"
+#~ msgstr "ANS registration"
+
+#~ msgid "O registro na ANS tem 6 dígitos."
+#~ msgstr "The ANS registration has 6 digits."
+
+#
+#~ msgid "registro na ANS"
+#~ msgstr "ANS registration"
+
+#~ msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
+#~ msgstr "The 6 digits of the operator's ANS registration, if any."
 
 #~ msgid "CPF/CNPJ"
 #~ msgstr "CPF/CNPJ (tax ID)"

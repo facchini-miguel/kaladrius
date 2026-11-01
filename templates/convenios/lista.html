@@ -13,7 +13,7 @@
     <thead>
       <tr>
         <th>{% translate "Nome" %}</th>
-        <th>{% translate "Registro na ANS" %}</th>
+        {% if rotulo_do_registro %}<th>{{ rotulo_do_registro }}</th>{% endif %}
         <th>{% translate "Telefone" %}</th>
         <th class="text-end">{% translate "Pacientes" %}</th>
         <th>{% translate "Situação" %}</th>
@@ -24,7 +24,7 @@
       {% for convenio in convenios %}
       <tr>
         <td>{{ convenio.nome }}</td>
-        <td>{{ convenio.registro_ans|default:"—" }}</td>
+        {% if rotulo_do_registro %}<td>{{ convenio.registro|default:"—" }}</td>{% endif %}
         <td class="text-nowrap">{{ convenio.telefone|telefone|default:"—" }}</td>
         <td class="text-end">{{ convenio.pacientes }}</td>
         <td>{% if convenio.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
