@@ -4,6 +4,34 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.49.0
+  data: 2026-11-01
+  titulo:
+    pt-br: Numeração dos dentes
+    en: Tooth numbering
+    es: Numeración de los dientes
+  itens:
+    - tipo: novo
+      modulo: Orçamentos
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O odontograma e os orçamentos podem mostrar os dentes na numeração FDI, na Universal
+          dos Estados Unidos (1 a 32, dentes de leite A a T) ou na de Palmer (UR6, LL3), escolhida
+          nas configurações da clínica. Nos Estados Unidos a Universal já vem escolhida. Muda só
+          a exibição: os dentes já registrados continuam os mesmos.
+        en: >
+          The dental chart and estimates can show teeth in FDI numbering, in the United States'
+          Universal numbering (1 to 32, baby teeth A to T) or in Palmer notation (UR6, LL3),
+          chosen in the clinic settings. In the United States, Universal comes already chosen. It
+          only changes the display: teeth already recorded stay the same.
+        es: >
+          El odontograma y los presupuestos pueden mostrar los dientes en la numeración FDI, en
+          la Universal de Estados Unidos (1 a 32, dientes de leche A a T) o en la de Palmer (UR6,
+          LL3), elegida en la configuración de la clínica. En Estados Unidos la Universal ya
+          viene elegida. Solo cambia la visualización: los dientes ya registrados siguen siendo
+          los mismos.
+
 - versao: 0.48.0
   data: 2026-11-01
   titulo:

@@ -209,7 +209,10 @@ class ItemOrcamento(ModeloDaClinica):
 
     @property
     def dentes_exibicao(self):
-        return ", ".join(str(d) for d in self.lista_dentes)
+        """In the clinic's numbering (decision 122): "18, 36" in FDI, "1, 19" in Universal."""
+        from apps.odontologia.dentes import nome, ordenar
+
+        return ", ".join(nome(d) for d in ordenar(self.lista_dentes))
 
     @property
     def lista_dentes(self):

@@ -84,7 +84,7 @@ Payables (0.16.0) use the same entities. Since 0.37.0 a payable may link a regis
 |---|---|---|
 | `Procedimento` (procedure) | clinic, name, price, income category, active | The clinic's price list |
 | `Orcamento` (estimate) | clinic, patient, practitioner, date, validity, status (open, approved, refused), discount (administrators only), notes, receivable, approved or refused at/by, created by | Once approved, it becomes a receivable `Lancamento` and no longer changes |
-| `ItemOrcamento` (estimate item) | clinic, estimate, procedure (optional), description, teeth (FDI, comma-separated), surfaces or region, quantity, unit price | Description and price copied from the list at the time; changing the list does not change estimates |
+| `ItemOrcamento` (estimate item) | clinic, estimate, procedure (optional), description, teeth (FDI, comma-separated; shown in the clinic's numbering, decision 122), surfaces or region, quantity, unit price | Description and price copied from the list at the time; changing the list does not change estimates |
 
 When a patient is permanently deleted, their estimates are deleted (teeth are health data) and their audit entries lose the personal data.
 

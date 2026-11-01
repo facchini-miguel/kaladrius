@@ -154,7 +154,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
         # The screen always sends them; a page opened before the update does not, and then
         # the clinic keeps its currency, country and time zone (Brazil's for a new one).
-        for campo in ("moeda", "pais", "fuso_horario"):
+        for campo in ("moeda", "pais", "fuso_horario", "numeracao_dentaria"):
             if campo in self.fields:
                 self.fields[campo].required = False
         # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
@@ -212,6 +212,16 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
             and dados.get("moeda") == anterior.moeda
         ):
             dados["moeda"] = pais.moeda
+        # The tooth numbering too (decision 122); a new clinic, without the field, gets its
+        # country's.
+        if "numeracao_dentaria" not in self.fields:
+            self.instance.numeracao_dentaria = pais.numeracao
+        else:
+            atual = self.instance.numeracao_dentaria or anterior.numeracao
+            escolhida = dados.get("numeracao_dentaria") or atual
+            if "pais" in self.changed_data and escolhida == atual == anterior.numeracao:
+                escolhida = pais.numeracao
+            dados["numeracao_dentaria"] = escolhida
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
@@ -256,6 +266,7 @@ class ClinicaForm(ModulosClinicosForm):
             "endereco",
             "moeda",
             "fuso_horario",
+            "numeracao_dentaria",
         ] + [
             "agenda_inicio",
             "agenda_fim",

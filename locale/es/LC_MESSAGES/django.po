@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 07:10-0300\n"
+"POT-Creation-Date: 2026-11-01 07:34-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -626,6 +626,16 @@ msgstr "zona horaria"
 msgid "Os horários da agenda e de todo o sistema seguem este fuso."
 msgstr ""
 "Los horarios de la agenda y de todo el sistema siguen esta zona horaria."
+
+msgid "numeração dos dentes"
+msgstr "numeración de los dientes"
+
+msgid ""
+"Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: "
+"os dentes já registrados continuam os mesmos."
+msgstr ""
+"Cómo aparecen los dientes en el odontograma y en los presupuestos. Solo "
+"cambia la visualización: los dientes ya registrados siguen siendo los mismos."
 
 #
 msgid ""
@@ -1875,6 +1885,28 @@ msgstr "Sistema"
 
 msgid "Tipos de atendimento"
 msgstr "Tipos de atención"
+
+msgid "FDI (11 a 48; dentes de leite 51 a 85)"
+msgstr "FDI (11 a 48; dientes de leche 51 a 85)"
+
+msgid "Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)"
+msgstr "Universal, de Estados Unidos (1 a 32; dientes de leche A a T)"
+
+msgid "Palmer (UR6, LL3; dentes de leite URE a LRE)"
+msgstr "Palmer (UR6, LL3; dientes de leche URE a LRE)"
+
+msgid "Numeração FDI."
+msgstr "Numeración FDI."
+
+msgid "Numeração universal (Estados Unidos)."
+msgstr "Numeración universal (Estados Unidos)."
+
+msgid ""
+"Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior "
+"esquerdo, LR inferior direito."
+msgstr ""
+"Notación de Palmer: UR superior derecho, UL superior izquierdo, LL inferior "
+"izquierdo, LR inferior derecho."
 
 msgid "Já existe um procedimento com este nome."
 msgstr "Ya existe un procedimiento con este nombre."
@@ -4471,11 +4503,11 @@ msgid "Odontograma"
 msgstr "Odontograma"
 
 msgid ""
-"Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas "
-"do meio. Direita do paciente à esquerda."
+"Superior acima, inferior abaixo; dentes de leite nas linhas do meio. Direita "
+"do paciente à esquerda."
 msgstr ""
-"Numeración FDI. Superiores arriba, inferiores abajo; dientes de leche en las "
-"filas del medio. Derecha del paciente a la izquierda."
+"Superiores arriba, inferiores abajo; dientes de leche en las filas del "
+"medio. Derecha del paciente a la izquierda."
 
 msgid "Aprovar orçamento"
 msgstr "Aprobar presupuesto"

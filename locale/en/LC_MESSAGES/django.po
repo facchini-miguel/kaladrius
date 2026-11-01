@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 07:10-0300\n"
+"POT-Creation-Date: 2026-11-01 07:34-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -623,6 +623,16 @@ msgstr "time zone"
 
 msgid "Os horários da agenda e de todo o sistema seguem este fuso."
 msgstr "The schedule and every time in the system follow this time zone."
+
+msgid "numeração dos dentes"
+msgstr "tooth numbering"
+
+msgid ""
+"Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: "
+"os dentes já registrados continuam os mesmos."
+msgstr ""
+"How teeth appear on the dental chart and in estimates. It only changes the "
+"display: teeth already recorded stay the same."
 
 #
 msgid ""
@@ -1872,6 +1882,28 @@ msgstr "System"
 
 msgid "Tipos de atendimento"
 msgstr "Appointment types"
+
+msgid "FDI (11 a 48; dentes de leite 51 a 85)"
+msgstr "FDI (11 to 48; baby teeth 51 to 85)"
+
+msgid "Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)"
+msgstr "Universal, United States (1 to 32; baby teeth A to T)"
+
+msgid "Palmer (UR6, LL3; dentes de leite URE a LRE)"
+msgstr "Palmer (UR6, LL3; baby teeth URE to LRE)"
+
+msgid "Numeração FDI."
+msgstr "FDI numbering."
+
+msgid "Numeração universal (Estados Unidos)."
+msgstr "Universal numbering (United States)."
+
+msgid ""
+"Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior "
+"esquerdo, LR inferior direito."
+msgstr ""
+"Palmer notation: UR upper right, UL upper left, LL lower left, LR lower "
+"right."
 
 msgid "Já existe um procedimento com este nome."
 msgstr "A procedure with this name already exists."
@@ -4463,11 +4495,11 @@ msgid "Odontograma"
 msgstr "Dental chart"
 
 msgid ""
-"Numeração FDI. Superior acima, inferior abaixo; dentes de leite nas linhas "
-"do meio. Direita do paciente à esquerda."
+"Superior acima, inferior abaixo; dentes de leite nas linhas do meio. Direita "
+"do paciente à esquerda."
 msgstr ""
-"FDI numbering. Upper teeth on top, lower below; baby teeth in the middle "
-"rows. Patient's right on the left."
+"Upper teeth on top, lower below; baby teeth in the middle rows. Patient's "
+"right on the left."
 
 msgid "Aprovar orçamento"
 msgstr "Approve estimate"

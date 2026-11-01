@@ -23,6 +23,7 @@ class Pais:
     fusos: tuple  # IANA time zones; the first is the default
     ingles: str = "en"  # language code of the English variant (dates and times)
     espanhol: str = "es"  # language code of the Spanish variant (dates and numbers)
+    numeracao: str = "fdi"  # tooth numbering, see apps/odontologia/dentes.py (decision 122)
 
 
 PAISES = {
@@ -98,6 +99,7 @@ PAISES = {
             "Pacific/Honolulu",
         ),
         "en",
+        numeracao="universal",
     ),
     "GB": Pais(_("Reino Unido"), "44", "GBP", ("Europe/London",), "en-gb"),
     "CA": Pais(

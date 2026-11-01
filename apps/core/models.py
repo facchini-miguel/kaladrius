@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
+from apps.odontologia.dentes import FDI, NUMERACOES
+
 from . import moedas, paises
 from .isolamento import ModeloDaClinica
 
@@ -112,6 +114,16 @@ class Clinica(models.Model):
         choices=paises.ESCOLHAS_FUSO,
         default=paises.FUSO_PADRAO,
         help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
+    )
+    numeracao_dentaria = models.CharField(
+        _("numeração dos dentes"),
+        max_length=10,
+        choices=NUMERACOES,
+        default=FDI,
+        help_text=_(
+            "Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os "
+            "dentes já registrados continuam os mesmos."
+        ),
     )
     ativa = models.BooleanField(_("ativa"), default=True)
     exigir_duas_etapas = models.BooleanField(
