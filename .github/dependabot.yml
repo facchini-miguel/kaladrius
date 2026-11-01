@@ -1,0 +1,53 @@
+# Dependabot (decision 126): pull requests that update dependencies. Security fixes come as
+# soon as an advisory is published; version updates come on a schedule, small ones grouped so
+# there is one pull request per ecosystem. The CI tests every pull request and deploys only
+# what is merged into main.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      python-menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      documentacao-menores:
+        update-types: [minor, patch]
+
+  # Actions are pinned to a commit with the tag in a comment: Dependabot updates both.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      acoes:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories: [/, /docs]
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    ignore:
+      # A new PostgreSQL major version needs the data migrated (pg_upgrade or dump and
+      # restore): it is done by hand, not by a pull request.
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
