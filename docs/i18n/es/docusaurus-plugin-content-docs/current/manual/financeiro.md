@@ -43,7 +43,7 @@ En los países de habla inglesa los emisores no dividen en cuotas con tarjeta, a
 Solo el administrador de la clínica puede dar **descuento**.
 
 ## Recibo
-Después de cobrar, el recibo se abre listo para **imprimir o guardar como PDF**. Muestra los datos de la clínica (nombre, CPF/CNPJ, dirección y teléfono, de **Registros > Configuración de la clínica**), quién pagó, el valor, la cuota y la forma de pago. Para reimprimirlo, abra la cuenta y haga clic en **recibo** junto al pago.
+Después de cobrar, el recibo se abre listo para **imprimir o guardar como PDF**. Muestra los datos de la clínica (nombre, CPF/CNPJ, dirección y teléfono, de **Registros > Configuración de la clínica**), quién pagó, el valor, la cuota y la forma de pago. Cuando la cuenta tiene profesional, el recibo muestra su nombre y su registro profesional. En los países de América Latina fuera de Brasil, donde el comprobante fiscal es una factura electrónica aparte (CFDI en México, factura electrónica en Argentina y Colombia, boleta en Chile y Perú…), el recibo indica que no la sustituye: Kaladrius no emite comprobantes fiscales. Para reimprimirlo, abra la cuenta y haga clic en **recibo** junto al pago.
 
 ## Deudores
 En **Financiero > Deudores**, cada paciente con cuotas vencidas, el total vencido separado por tiempo de atraso (hasta 30, 31 a 60, 61 a 90 y más de 90 días), lo que todavía va a vencer y el vencimiento más antiguo, 50 por página, con búsqueda por nombre (los totales de arriba suman a todos). Haga clic en el nombre para abrir la ficha.

@@ -4,6 +4,49 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.51.0
+  data: 2026-11-01
+  titulo:
+    pt-br: Leis de cada país
+    en: Each country's laws
+    es: Leyes de cada país
+  itens:
+    - tipo: novo
+      modulo: Ajuda
+      publico: [equipe, paciente]
+      texto:
+        pt-br: >
+          Fora do Brasil, a política de privacidade mostra antes a lei de proteção de dados do
+          país (como HIPAA, UK GDPR, PIPEDA, POPIA ou a Ley 1581 da Colômbia), a autoridade e
+          o prazo de guarda do prontuário. A tela de exclusão do paciente cita a lei e o prazo
+          do país.
+        en: >
+          Outside Brazil, the privacy policy first shows the country's data protection law (such
+          as HIPAA, UK GDPR, PIPEDA, POPIA or Colombia's Ley 1581), the authority and how long
+          health records are kept. The patient deletion page cites the country's law and
+          period.
+        es: >
+          Fuera de Brasil, la política de privacidad muestra antes la ley de protección de datos
+          del país (como HIPAA, UK GDPR, PIPEDA, POPIA o la Ley 1581 de Colombia), la autoridad
+          y el plazo de conservación de la historia clínica. La pantalla de eliminación del
+          paciente cita la ley y el plazo del país.
+    - tipo: melhoria
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O recibo mostra o profissional e o registro profissional dele. Na América Latina fora
+          o Brasil, avisa que não substitui o documento fiscal (CFDI, factura ou boleta
+          eletrônica).
+        en: >
+          The receipt shows the practitioner and their professional registration. In Latin
+          America outside Brazil, it says it does not replace the tax document (CFDI, electronic
+          factura or boleta).
+        es: >
+          El recibo muestra al profesional y su registro profesional. En América Latina fuera de
+          Brasil, indica que no sustituye al comprobante fiscal (CFDI, factura o boleta
+          electrónica).
+
 - versao: 0.50.0
   data: 2026-11-01
   titulo:

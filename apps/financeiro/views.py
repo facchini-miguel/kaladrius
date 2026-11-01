@@ -23,6 +23,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
+from apps.core import legislacao
 from apps.core.ordem import chave_alfabetica
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.templatetags.formatos import moeda
@@ -328,7 +329,12 @@ def receber(request, pk):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def recibo(request, pk):
     pagamento = get_object_or_404(
-        Pagamento.objects.select_related("parcela__lancamento__paciente", "conta", "criado_por"),
+        Pagamento.objects.select_related(
+            "parcela__lancamento__paciente",
+            "parcela__lancamento__profissional",
+            "conta",
+            "criado_por",
+        ),
         pk=pk,
         parcela__lancamento__tipo=Lancamento.Tipo.RECEBER,
     )
@@ -339,6 +345,8 @@ def recibo(request, pk):
             "pagamento": pagamento,
             "lancamento": pagamento.parcela.lancamento,
             "total_parcelas": pagamento.parcela.lancamento.parcelas.count(),
+            # Where a tax document is required, the receipt says it does not replace it.
+            "documento_fiscal": legislacao.do_pais().fiscal,
         },
     )
 

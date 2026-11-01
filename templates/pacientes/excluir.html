@@ -6,11 +6,11 @@
 {% block conteudo %}
 <h1 class="h3 mb-3">{% blocktranslate with nome=paciente.nome %}Excluir definitivamente {{ nome }}?{% endblocktranslate %}</h1>
 <div class="alert alert-warning">
-  {% translate "Use só quando o próprio paciente pedir a exclusão dos seus dados (LGPD, art. 18). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento (a Lei 13.787/2018 manda guardar o prontuário por 20 anos)." %}
+  {% blocktranslate with lei=lei.curta %}Use só quando o próprio paciente pedir a exclusão dos seus dados ({{ lei }}). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento.{% endblocktranslate %} {{ prazo_de_guarda }}
 </div>
 {% if atendimentos %}
 <div class="alert alert-danger">
-  {% blocktranslate count total=atendimentos %}Este paciente tem prontuário ({{ total }} atendimento). O prontuário precisa ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser excluído definitivamente: mantenha-o arquivado.{% plural %}Este paciente tem prontuário ({{ total }} atendimentos). O prontuário precisa ser guardado por 20 anos (Lei 13.787/2018), então o paciente não pode ser excluído definitivamente: mantenha-o arquivado.{% endblocktranslate %}
+  {% blocktranslate count total=atendimentos %}Este paciente tem prontuário ({{ total }} atendimento), que a clínica precisa guardar, então ele não pode ser excluído definitivamente: mantenha-o arquivado.{% plural %}Este paciente tem prontuário ({{ total }} atendimentos), que a clínica precisa guardar, então ele não pode ser excluído definitivamente: mantenha-o arquivado.{% endblocktranslate %} {{ prazo_de_guarda }}
 </div>
 <a class="btn btn-link px-0" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
 {% else %}

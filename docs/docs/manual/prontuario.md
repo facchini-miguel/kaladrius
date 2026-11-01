@@ -30,5 +30,5 @@ In the **Attachments** card, any practitioner adds files to the visit: exam resu
 
 ## Privacy and retention
 - The **audit log** records who created, changed, finalized or **opened** each visit, but never copies the clinical text.
-- The medical record is kept for **20 years** (Law 13.787/2018): archiving the patient keeps it, and a patient with a medical record cannot be permanently deleted.
+- The medical record is kept for **20 years** (Law 13.787/2018): archiving the patient keeps it, and a patient with a medical record cannot be permanently deleted. In other countries the period is the local one (15 years in Chile and Colombia, 10 in Argentina, 5 in Mexico; set by each state or province in the United States, Canada and Australia), shown on the deletion page and on the privacy policy; the system never deletes a patient with a medical record, in any country.
 - ICD codes are not available yet.

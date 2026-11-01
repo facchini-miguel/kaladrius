@@ -36,6 +36,7 @@
     <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
     {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
     {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
+    {% if lancamento.profissional %}<li>{% translate "Profissional" %}: {{ lancamento.profissional.nome }}{% if lancamento.profissional.registro %} ({{ lancamento.profissional.registro }}){% endif %}</li>{% endif %}
     {% if pagamento.observacao %}<li>{{ pagamento.observacao }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">
@@ -45,5 +46,6 @@
       {% if pagamento.criado_por %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.criado_por.get_full_name|default:pagamento.criado_por.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
     </div>
   </div>
+  {% if documento_fiscal %}<p class="small text-body-secondary border-top pt-2 mt-3 mb-0">{% blocktranslate with documento=documento_fiscal %}Este recibo não substitui o documento fiscal ({{ documento }}).{% endblocktranslate %}</p>{% endif %}
 </div>
 {% endblock %}

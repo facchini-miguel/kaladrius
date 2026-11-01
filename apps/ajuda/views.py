@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 
+from apps.core import legislacao, paises
 from apps.core.models import Clinica
 
 from . import documentos
@@ -24,6 +25,13 @@ def privacidade(request):
     """
     clinica = getattr(request, "clinica", None) or Clinica.unica()
     titulo, html = documentos.privacidade()
-    return render(
-        request, "ajuda/privacidade.html", {"titulo": titulo, "html": html, "clinica": clinica}
-    )
+    # The policy is written for Brazilian law: elsewhere, the country's law comes first.
+    pais = paises.pais_da_clinica(clinica)
+    contexto = {"titulo": titulo, "html": html, "clinica": clinica}
+    if pais != paises.PADRAO:
+        contexto.update(
+            pais=paises.do_codigo(pais).nome,
+            lei=legislacao.do_pais(pais),
+            prazo_de_guarda=legislacao.prazo_de_guarda(pais),
+        )
+    return render(request, "ajuda/privacidade.html", contexto)

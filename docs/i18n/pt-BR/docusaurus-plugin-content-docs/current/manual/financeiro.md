@@ -43,7 +43,7 @@ Nos países de língua inglesa as operadoras não parcelam no cartão, então o 
 Só o administrador da clínica pode dar **desconto**.
 
 ## Recibo
-Depois de receber, o recibo abre pronto para **imprimir ou salvar em PDF**. Ele mostra os dados da clínica (nome, CPF/CNPJ, endereço e telefone, de **Cadastros > Configurações da clínica**), quem pagou, o valor, a parcela e a forma de pagamento. Para reimprimir, abra o lançamento e clique em **recibo** ao lado do pagamento.
+Depois de receber, o recibo abre pronto para **imprimir ou salvar em PDF**. Ele mostra os dados da clínica (nome, CPF/CNPJ, endereço e telefone, de **Cadastros > Configurações da clínica**), quem pagou, o valor, a parcela e a forma de pagamento. Quando o lançamento tem profissional, o recibo mostra o nome e o registro profissional dele. Nos países da América Latina fora o Brasil, onde o documento fiscal é uma nota eletrônica à parte (CFDI no México, factura electrónica na Argentina e na Colômbia, boleta no Chile e no Peru…), o recibo avisa que não a substitui: o Kaladrius não emite documentos fiscais. Para reimprimir, abra o lançamento e clique em **recibo** ao lado do pagamento.
 
 ## Devedores
 Em **Financeiro > Devedores**, cada paciente com parcelas vencidas, o total vencido separado por tempo de atraso (até 30, 31 a 60, 61 a 90 e mais de 90 dias), o que ainda vai vencer e o vencimento mais antigo, 50 por página, com busca por nome (os totais no alto somam todos). Clique no nome para abrir a ficha.

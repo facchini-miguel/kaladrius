@@ -30,5 +30,5 @@ No quadro **Anexos**, qualquer profissional inclui arquivos no atendimento: resu
 
 ## Privacidade e guarda
 - A **auditoria** registra quem criou, alterou, finalizou ou **abriu** cada atendimento, mas nunca copia o texto clínico.
-- O prontuário é guardado por **20 anos** (Lei 13.787/2018): arquivar o paciente mantém o prontuário, e um paciente com prontuário não pode ser excluído definitivamente.
+- O prontuário é guardado por **20 anos** (Lei 13.787/2018): arquivar o paciente mantém o prontuário, e um paciente com prontuário não pode ser excluído definitivamente. Em outros países vale o prazo local (15 anos no Chile e na Colômbia, 10 na Argentina, 5 no México; definido por cada estado ou província nos Estados Unidos, no Canadá e na Austrália), mostrado na tela de exclusão e na política de privacidade; o sistema nunca exclui um paciente com prontuário, em nenhum país.
 - A CID ainda não está disponível.

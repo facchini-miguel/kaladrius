@@ -14,6 +14,7 @@ from apps.agenda.servicos import agendamentos_visiveis
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import anonimizar, registrar
 from apps.convenios.models import Carteirinha
+from apps.core import legislacao
 from apps.core.permissoes import Acao, Modulo, exige_permissao, pode
 from apps.core.validadores import normalizar_cnpj
 from apps.financeiro.models import Lancamento, Pagamento, Parcela
@@ -235,15 +236,19 @@ def excluir(request, pk):
     is removed from the audit log as well.
     """
     paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
-    # The medical record is kept for 20 years (Law 13.787/2018, decision 081): a patient
-    # with one stays archived and is never permanently deleted.
+    # The country's law and how long it keeps medical records (decision 124).
+    contexto = {
+        "paciente": paciente,
+        "lei": legislacao.do_pais(),
+        "prazo_de_guarda": legislacao.prazo_de_guarda(),
+    }
+    # The medical record must be kept (20 years in Brazil, Law 13.787/2018, decision 081): a
+    # patient with one stays archived and is never permanently deleted, in any country.
     atendimentos = Atendimento.objects.filter(paciente=paciente).count()
     if atendimentos:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
-        return render(
-            request, "pacientes/excluir.html", {"paciente": paciente, "atendimentos": atendimentos}
-        )
+        return render(request, "pacientes/excluir.html", {**contexto, "atendimentos": atendimentos})
     if request.method == "POST":
         codigo = paciente.pk
         agendamentos = Agendamento.objects.filter(paciente=paciente)
@@ -304,7 +309,7 @@ def excluir(request, pk):
             _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": codigo},
         )
         return redirect(f"{reverse('pacientes:lista')}?situacao=arquivados")
-    return render(request, "pacientes/excluir.html", {"paciente": paciente})
+    return render(request, "pacientes/excluir.html", contexto)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)

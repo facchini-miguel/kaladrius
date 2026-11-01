@@ -30,5 +30,5 @@ En el cuadro **Adjuntos**, cualquier profesional agrega archivos a la consulta: 
 
 ## Privacidad y conservación
 - La **auditoría** registra quién creó, modificó, finalizó o **abrió** cada consulta, pero nunca copia el texto clínico.
-- La historia clínica se guarda por **20 años** (Ley 13.787/2018 de Brasil): archivar al paciente la conserva, y un paciente con historia clínica no puede eliminarse definitivamente.
+- La historia clínica se guarda por **20 años** (Ley 13.787/2018 de Brasil): archivar al paciente la conserva, y un paciente con historia clínica no puede eliminarse definitivamente. En otros países rige el plazo local (15 años en Chile y Colombia, 10 en Argentina, 5 en México; lo fija cada estado o provincia en Estados Unidos, Canadá y Australia), que aparece en la pantalla de eliminación y en la política de privacidad; el sistema nunca elimina a un paciente con historia clínica, en ningún país.
 - La CIE todavía no está disponible.
