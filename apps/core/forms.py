@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
-from . import moedas
+from . import moedas, paises
 from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
 from .modulos import configurar, faltando, iniciais
 from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
@@ -125,19 +125,59 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         )
         self.initial["modulos"] = sorted(ligados & ESPECIALIDADES)
         self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
-        if "moeda" in self.fields:
-            # The screen always sends it; a page opened before the update does not, and then
-            # the clinic keeps its currency (the real for a new one).
-            self.fields["moeda"].required = False
+        # The screen always sends them; a page opened before the update does not, and then
+        # the clinic keeps its currency, country and time zone (Brazil's for a new one).
+        for campo in ("moeda", "pais", "fuso_horario"):
+            if campo in self.fields:
+                self.fields[campo].required = False
+        # CPF/CNPJ only for a Brazilian clinic; each country's documents are phase 2 (decision 117).
+        if "documento" in self.fields and self._pais_escolhido() != "BR":
+            del self.fields["documento"]
+
+    def _pais_escolhido(self):
+        if self.is_bound and self.data.get(self.add_prefix("pais")):
+            return self.data[self.add_prefix("pais")]
+        return self.instance.pais or paises.PADRAO
 
     def clean_moeda(self):
         return self.cleaned_data.get("moeda") or self.instance.moeda or moedas.PADRAO
+
+    def clean_pais(self):
+        return self.cleaned_data.get("pais") or self.instance.pais or paises.PADRAO
+
+    def _ajustar_ao_pais(self, dados):
+        """Time zone and currency of a new country (decision 117): a time zone of another country
+        is refused; left as it was, it becomes the new country's first. The currency follows the
+        country when it was still the previous country's default and was not changed now."""
+        if "pais" not in dados:
+            return
+        pais = paises.do_codigo(dados["pais"])
+        fuso = dados.get("fuso_horario")
+        if "fuso_horario" in self.fields and fuso and fuso not in pais.fusos:
+            if "fuso_horario" in self.changed_data:
+                self.add_error(
+                    "fuso_horario",
+                    _("Escolha um fuso horário de %(pais)s.") % {"pais": pais.nome},
+                )
+            else:
+                dados["fuso_horario"] = pais.fusos[0]
+        elif not fuso:
+            atual = self.instance.fuso_horario
+            dados["fuso_horario"] = atual if atual in pais.fusos else pais.fusos[0]
+        anterior = paises.do_codigo(self.instance.pais)
+        if (
+            "pais" in self.changed_data
+            and "moeda" not in self.changed_data
+            and dados.get("moeda") == anterior.moeda
+        ):
+            dados["moeda"] = pais.moeda
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
 
     def clean(self):
         dados = super().clean()
+        self._ajustar_ao_pais(dados)
         for modulo, precisa in faltando(self._escolhidos()).items():
             self.add_error(
                 "modulos_gerais",
@@ -166,7 +206,17 @@ class ClinicaForm(ModulosClinicosForm):
 
     class Meta:
         model = Clinica
-        fields = ["nome", "area", "documento", "email", "telefone", "endereco", "moeda"] + [
+        fields = [
+            "nome",
+            "area",
+            "pais",
+            "documento",
+            "email",
+            "telefone",
+            "endereco",
+            "moeda",
+            "fuso_horario",
+        ] + [
             "agenda_inicio",
             "agenda_fim",
             "agenda_intervalo",
@@ -257,7 +307,17 @@ class NovaClinicaForm(ModulosClinicosForm):
 
     class Meta:
         model = Clinica
-        fields = ["nome", "area", "documento", "email", "telefone", "endereco", "moeda"]
+        fields = [
+            "nome",
+            "area",
+            "pais",
+            "documento",
+            "email",
+            "telefone",
+            "endereco",
+            "moeda",
+            "fuso_horario",
+        ]
 
 
 class ClinicaAdminForm(ClinicaForm):

@@ -1,6 +1,9 @@
-from django.urls import reverse
-from django.utils import translation
+import zoneinfo
 
+from django.urls import reverse
+from django.utils import timezone, translation
+
+from . import paises
 from .isolamento import sem_isolamento, usar_clinica
 from .models import Clinica, Vinculo
 
@@ -42,8 +45,26 @@ class ClinicaAtualMiddleware:
                 return self.get_response(request)
         if request.user.is_authenticated:
             request.clinica, request.vinculo = resolver_clinica(request)
-        with usar_clinica(request.clinica):
-            return self.get_response(request)
+        if request.clinica is not None:
+            _usar_pais_da_clinica(request, request.clinica)
+        try:
+            with usar_clinica(request.clinica):
+                return self.get_response(request)
+        finally:
+            timezone.deactivate()
+
+
+def _usar_pais_da_clinica(request, clinica):
+    """The clinic's time zone, and the English variant of its country for dates and times
+    (decision 117): an English-speaking user of a British clinic gets 31/10/2026."""
+    try:
+        timezone.activate(zoneinfo.ZoneInfo(clinica.fuso_horario))
+    except (zoneinfo.ZoneInfoNotFoundError, ValueError):
+        pass  # an unknown zone keeps settings.TIME_ZONE
+    variante = paises.variante_do_idioma(translation.get_language(), clinica.pais)
+    if variante:
+        translation.activate(variante)
+        request.LANGUAGE_CODE = variante
 
 
 class ProxyReversoMiddleware:

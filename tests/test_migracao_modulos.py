@@ -6,6 +6,21 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
 
+def estado_do_banco():
+    """The models as the database is now: each app at its last applied migration. Taking core
+    back also undoes the later migrations of the apps that depend on it (pacientes 0004 on)."""
+    executor = MigrationExecutor(connection)
+    aplicadas = set(executor.loader.applied_migrations)
+    grafo = executor.loader.graph
+    ultimas = [
+        no
+        for no in aplicadas
+        if no in grafo.nodes
+        and not any(f in aplicadas and f[0] == no[0] for f in grafo.node_map[no].children)
+    ]
+    return executor.loader.project_state(ultimas).apps
+
+
 @pytest.mark.django_db(transaction=True)
 def test_migracao_preserva_as_areas_das_clinicas_existentes():
     executor = MigrationExecutor(connection)
@@ -14,8 +29,7 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
     destino = [("core", "0010_modulos_clinicos")]
     try:
         executor.migrate(anterior)
-        estado_anterior = [folha for folha in folhas if folha[0] != "core"] + anterior
-        apps = executor.loader.project_state(estado_anterior).apps
+        apps = estado_do_banco()
         Clinica = apps.get_model("core", "Clinica")
         ids = {
             area: Clinica.objects.create(nome=f"Clínica fictícia {area}", area=area).pk
@@ -75,11 +89,9 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             )
             assert ativos == ({area} if area != "outra" else set())
             assert Modulo.objects.filter(clinica_id=codigo_clinica).count() == 2
-        # The models as the database is now (core at the target, the rest at their latest):
-        # core's later migrations add columns that do not exist yet.
-        atualizados = executor.loader.project_state(
-            [folha for folha in folhas if folha[0] != "core"] + destino
-        ).apps
+        # The models as the database is now: core's later migrations add columns that do not
+        # exist yet.
+        atualizados = estado_do_banco()
         for label, registros in antes.items():
             modelo = atualizados.get_model(label)
             assert list(modelo.objects.order_by("pk").values()) == registros, label

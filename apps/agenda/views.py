@@ -91,18 +91,22 @@ def _resposta_sucesso(mensagem):
     return resposta
 
 
+def _relogio(momento):
+    """A moment as the clinic's wall clock, without an offset (decision 117): the calendar runs
+    in UTC mode, so it shows the clinic's times whatever the browser's time zone."""
+    return timezone.localtime(momento).replace(tzinfo=None).isoformat()
+
+
 def _periodo(request):
-    """The [start, end) range FullCalendar asks for, as aware datetimes."""
+    """The [start, end) range FullCalendar asks for, as aware datetimes. The calendar runs in UTC
+    mode with the clinic's wall clock (decision 117), so any offset that comes along is dropped
+    and the bounds are read in the clinic's time zone."""
     try:
         inicio = datetime.datetime.fromisoformat(request.GET["start"])
         fim = datetime.datetime.fromisoformat(request.GET["end"])
     except (KeyError, ValueError):
         return None
-    # Each bound may come with or without a UTC offset; naive ones are local time.
-    inicio, fim = (
-        timezone.make_aware(momento) if timezone.is_naive(momento) else momento
-        for momento in (inicio, fim)
-    )
+    inicio, fim = (timezone.make_aware(momento.replace(tzinfo=None)) for momento in (inicio, fim))
     if fim <= inicio or fim - inicio > datetime.timedelta(days=62):
         return None
     return inicio, fim
@@ -128,6 +132,8 @@ def calendario(request):
         "data": request.GET.get("data") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "idioma": get_language(),
+        # "Now" on the clinic's wall clock: the calendar runs in UTC mode (decision 117).
+        "agora": _relogio(timezone.now()),
         "textos": {
             "aniversariantes": _("aniversariante(s)"),
             "rechamadas": _("rechamada(s) pendente(s)"),
@@ -178,8 +184,8 @@ def eventos(request):
             {
                 "id": agendamento.pk,
                 "title": agendamento.titulo,
-                "start": timezone.localtime(agendamento.inicio).isoformat(),
-                "end": timezone.localtime(agendamento.fim).isoformat(),
+                "start": _relogio(agendamento.inicio),
+                "end": _relogio(agendamento.fim),
                 "backgroundColor": agendamento.tipo.cor,
                 "borderColor": agendamento.tipo.cor,
                 "textColor": "#212529",

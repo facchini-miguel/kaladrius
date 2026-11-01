@@ -4,13 +4,13 @@ from django import forms
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from apps.core import paises
 from apps.core.forms import FormularioBootstrap
 from apps.core.validadores import (
     cnpj_valido,
     cpf_valido,
     normalizar_cnpj,
     normalizar_telefone,
-    somente_digitos,
 )
 from apps.referencias.models import UF, Cidade
 
@@ -44,7 +44,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     cidade = CidadeField(queryset=Cidade.objects.none(), required=False, label=_("Cidade"))
     # Typed with punctuation (up to 18 characters), stored as digits/letters only.
     cpf_cnpj = _campo_texto(_("CPF/CNPJ"), 18)
-    cep = _campo_texto(_("CEP"), 9, inputmode="numeric")
+    cep = _campo_texto(_("CEP"), 10)
     telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
     whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
     telefone_residencial = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
@@ -72,6 +72,8 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "cep",
             "uf",
             "cidade",
+            "estado_nome",
+            "cidade_nome",
             "bairro",
             "logradouro",
             "numero",
@@ -85,10 +87,22 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "observacoes": forms.Textarea(attrs={"rows": 4}),
         }
 
+    # Brazilian fields; outside Brazil the documents are phase 2 of the internationalization and
+    # the state and city are typed (decision 117).
+    SO_NO_BRASIL = ["cpf_cnpj", "inscricao_estadual", "rg", "uf", "cidade"]
+    FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
+
     def __init__(self, *args, clinica, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
+        self.pais = paises.pais_da_clinica(clinica)
+        self.fields["cep"].label = paises.rotulo_cep(self.pais)
+        for campo in self.FORA_DO_BRASIL if self.pais == "BR" else self.SO_NO_BRASIL:
+            del self.fields[campo]
+        if self.pais != "BR":
+            return
+        self.fields["cep"].widget.attrs["inputmode"] = "numeric"
 
         # Chained selects: the city list depends on the chosen state (HTMX).
         self.fields["uf"].widget.attrs.update(
@@ -124,13 +138,10 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         return normalizar_cnpj(self.cleaned_data.get("cpf_cnpj", ""))
 
     def clean_cep(self):
-        cep = somente_digitos(self.cleaned_data.get("cep"))
-        if cep and len(cep) != 8:
-            raise forms.ValidationError(_("O CEP deve ter 8 dígitos."))
-        return cep
+        return paises.normalizar_cep(self.cleaned_data.get("cep"), self.pais)
 
     def _limpar_telefone(self, nome):
-        return normalizar_telefone(self.cleaned_data.get(nome))
+        return normalizar_telefone(self.cleaned_data.get(nome), self.pais)
 
     def clean_telefone_celular(self):
         return self._limpar_telefone("telefone_celular")

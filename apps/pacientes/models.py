@@ -66,7 +66,8 @@ class Paciente(ModeloDaClinica):
     telefone_comercial = models.CharField(_("telefone comercial"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
 
-    cep = models.CharField(_("CEP"), max_length=8, blank=True)
+    # Brazil: 8 digits; other countries (decision 117): up to a 9-digit ZIP+4.
+    cep = models.CharField(_("CEP"), max_length=9, blank=True)
     uf = models.ForeignKey(
         "referencias.UF",
         on_delete=models.PROTECT,
@@ -83,6 +84,9 @@ class Paciente(ModeloDaClinica):
         related_name="+",
         verbose_name=_("cidade"),
     )
+    # Outside Brazil the national state and city tables (IBGE) do not apply: typed text.
+    estado_nome = models.CharField(_("estado ou província"), max_length=60, blank=True)
+    cidade_nome = models.CharField(_("cidade"), max_length=100, blank=True)
     bairro = models.CharField(_("bairro"), max_length=100, blank=True)
     logradouro = models.CharField(
         _("endereço"), max_length=200, blank=True, help_text=_("Rua, avenida…")
@@ -139,6 +143,14 @@ class Paciente(ModeloDaClinica):
             - nascimento.year
             - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
         )
+
+    @property
+    def cidade_estado(self):
+        """City and state as written on the record: from the national tables in Brazil, typed
+        anywhere else (decision 117)."""
+        if self.cidade_id:
+            return f"{self.cidade.nome}/{self.cidade.uf.sigla}"
+        return ", ".join(parte for parte in (self.cidade_nome, self.estado_nome) if parte)
 
     @property
     def telefone_principal(self):

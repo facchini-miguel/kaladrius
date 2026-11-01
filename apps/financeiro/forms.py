@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.core import paises
 from apps.core.forms import CampoDecimal, FormularioBootstrap
 from apps.core.validadores import (
     cnpj_valido,
@@ -219,6 +220,8 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinica_id is None:
             self.instance.clinica = clinica
+        if paises.pais_da_clinica(clinica) != "BR":
+            del self.fields["cpf_cnpj"]  # each country's documents: phase 2 (decision 117)
 
     def _telefone(self, nome):
         return normalizar_telefone(self.cleaned_data.get(nome))

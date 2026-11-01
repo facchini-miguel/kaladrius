@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
-from . import modulos
+from . import modulos, paises
 from .models import Backup
 from .permissoes import tabela_permissoes
 
@@ -24,6 +24,8 @@ def clinica(request):
         # the menu, and the page of one says so.
         "modulos_desligados": SimpleLazyObject(lambda: modulos.desligados_visiveis(request)),
         "modulo_desligado": getattr(request, "modulo_desligado", None),
+        # Brazilian fields (CPF/CNPJ, RG...) are shown only in Brazil (decision 117).
+        "no_brasil": paises.pais_da_clinica(getattr(request, "clinica", None)) == "BR",
     }
 
 
@@ -31,9 +33,14 @@ def idiomas(request):
     """Languages for the top bar menu, each one named in itself ("English", "Español"):
     get_available_languages would translate the names into the current language."""
     atual = translation.get_language()
+    # A country's English (en-gb, en-au... decision 117) is still "English" in the menu.
+    base = next(
+        (codigo for codigo, _nome in settings.LANGUAGES if atual.split("-")[0] == codigo), atual
+    )
     return {
         "idiomas": settings.LANGUAGES,
-        "idioma_nome": dict(settings.LANGUAGES).get(atual, atual),
+        "idioma_base": base,
+        "idioma_nome": dict(settings.LANGUAGES).get(base, atual),
     }
 
 

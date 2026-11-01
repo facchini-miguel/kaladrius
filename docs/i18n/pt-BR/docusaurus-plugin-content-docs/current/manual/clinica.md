@@ -21,6 +21,8 @@ Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a 
 
 **Exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro** (vem ligada): profissionais com prontuário, administradores e o financeiro só usam o sistema depois de ativar o código do aplicativo autenticador (veja [Primeiros passos](inicio.md)); até lá, cada página leva ao QR code. A recepção não é obrigada, e os logins públicos da demonstração nunca são.
 
+**País e fuso horário**: Brasil por padrão; também Estados Unidos, Reino Unido, Canadá, Austrália e África do Sul. O país define os fusos oferecidos (a agenda e todos os horários seguem o da clínica, onde quer que cada pessoa esteja), os telefones no formato do país com o código certo do WhatsApp, os códigos postais (ZIP code, postcode…), a ordem das datas em inglês (10/31 nos Estados Unidos, 31/10 no Reino Unido, na Austrália e na África do Sul, 2026-10-31 no Canadá) e a moeda sugerida, que acompanha a troca de país se nenhuma outra tiver sido escolhida. Fora do Brasil, o estado e a cidade do paciente são digitados, e CPF/CNPJ, RG e inscrição estadual não aparecem: os documentos de cada país vêm numa próxima versão.
+
 **Moeda**: a moeda em que a clínica trabalha (real por padrão; também dólar americano, euro, libra esterlina e os pesos argentino, mexicano, chileno, colombiano e uruguaio, o guarani paraguaio, o sol peruano e o boliviano). Todos os valores do sistema, recibos inclusive, aparecem nela, para toda a equipe e em qualquer idioma que cada um use: o idioma só define os separadores (1.234,56 ou 1,234.56). Trocar a moeda **não converte** os valores já lançados; só muda como eles aparecem.
 
 ## Tipos de atendimento

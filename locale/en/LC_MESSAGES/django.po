@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 03:11-0300\n"
+"POT-Creation-Date: 2026-11-01 03:46-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: English\n"
@@ -504,6 +504,10 @@ msgstr ""
 "Patients, practitioners, the team and the base tables are always on."
 
 #, python-format
+msgid "Escolha um fuso horário de %(pais)s."
+msgstr "Choose a time zone of %(pais)s."
+
+#, python-format
 msgid "%(modulo)s precisa de: %(precisa)s."
 msgstr "%(modulo)s needs: %(precisa)s."
 
@@ -599,6 +603,22 @@ msgid ""
 msgstr ""
 "The currency the clinic works in. It only changes how amounts are shown, for "
 "the whole team and in any language: no amount already entered is converted."
+
+msgid "país"
+msgstr "country"
+
+msgid ""
+"Define o fuso horário disponível, o formato de telefones, códigos postais e "
+"datas em inglês, e a moeda sugerida."
+msgstr ""
+"Sets the available time zones, the format of phones, postal codes and "
+"English dates, and the suggested currency."
+
+msgid "fuso horário"
+msgstr "time zone"
+
+msgid "Os horários da agenda e de todo o sistema seguem este fuso."
+msgstr "The schedule and every time in the system follow this time zone."
 
 #
 msgid ""
@@ -721,6 +741,15 @@ msgstr "Euro"
 msgid "Libra esterlina"
 msgstr "Pound sterling"
 
+msgid "Dólar canadense"
+msgstr "Canadian dollar"
+
+msgid "Dólar australiano"
+msgstr "Australian dollar"
+
+msgid "Rand sul-africano"
+msgstr "South African rand"
+
 msgid "Peso argentino"
 msgstr "Argentine peso"
 
@@ -744,6 +773,57 @@ msgstr "Peruvian sol"
 
 msgid "Boliviano"
 msgstr "Boliviano"
+
+msgid "Brasil"
+msgstr "Brazil"
+
+msgid "Estados Unidos"
+msgstr "United States"
+
+msgid "Reino Unido"
+msgstr "United Kingdom"
+
+msgid "Canadá"
+msgstr "Canada"
+
+msgid "Austrália"
+msgstr "Australia"
+
+msgid "África do Sul"
+msgstr "South Africa"
+
+msgid "Informe o código de área e o número (10 dígitos)."
+msgstr "Enter the area code and the number (10 digits)."
+
+msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
+msgstr "Enter the number with the area code (10 or 11 digits with the 0)."
+
+msgid "Informe o número com o código de área (10 dígitos com o 0)."
+msgstr "Enter the number with the area code (10 digits with the 0)."
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr "The postal code (CEP) must have 8 digits."
+
+msgid "O ZIP code tem 5 dígitos (ou 9, com a extensão)."
+msgstr "The ZIP code has 5 digits (or 9, with the extension)."
+
+msgid "O código postal canadense tem o formato A1A 1A1."
+msgstr "The Canadian postal code has the format A1A 1A1."
+
+msgid "Informe um postcode válido, como SW1A 1AA."
+msgstr "Enter a valid postcode, such as SW1A 1AA."
+
+msgid "O postcode australiano tem 4 dígitos."
+msgstr "The Australian postcode has 4 digits."
+
+msgid "O código postal sul-africano tem 4 dígitos."
+msgstr "The South African postal code has 4 digits."
+
+msgid "CEP"
+msgstr "Postal code (CEP)"
+
+msgid "Código postal"
+msgstr "Postal code"
 
 msgid "Pacientes"
 msgstr "Patients"
@@ -1873,9 +1953,6 @@ msgstr "State"
 msgid "Cidade"
 msgstr "City"
 
-msgid "CEP"
-msgstr "Postal code (CEP)"
-
 msgid "Celular"
 msgstr "Mobile"
 
@@ -1884,9 +1961,6 @@ msgstr "Home phone"
 
 msgid "Telefone comercial"
 msgstr "Work phone"
-
-msgid "O CEP deve ter 8 dígitos."
-msgstr "The postal code (CEP) must have 8 digits."
 
 msgid "A data de nascimento não pode estar no futuro."
 msgstr "The birth date cannot be in the future."
@@ -1971,6 +2045,9 @@ msgstr "work phone"
 
 msgid "cidade"
 msgstr "city"
+
+msgid "estado ou província"
+msgstr "state or province"
 
 msgid "bairro"
 msgstr "district"
@@ -5184,9 +5261,6 @@ msgstr "Password"
 #~ msgstr ""
 #~ "Shows the parts of each area, such as the dental chart in Dentistry "
 #~ "estimates. Changing the area deletes nothing."
-
-#~ msgid "Atestados e receitas"
-#~ msgstr "Certificates and prescriptions"
 
 #~ msgid "Documentação técnica"
 #~ msgstr "Technical documentation"

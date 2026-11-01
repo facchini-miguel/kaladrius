@@ -28,11 +28,11 @@
       <dl class="row mb-0 small">
         {% if paciente.tipo == "PJ" %}
         <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ paciente.razao_social|default:"—" }}</dd>
-        <dt class="col-5">{% translate "CNPJ" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ paciente.inscricao_estadual|default:"—" }}</dd>
+        {% if no_brasil or paciente.cpf_cnpj %}<dt class="col-5">{% translate "CNPJ" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>{% endif %}
+        {% if no_brasil or paciente.inscricao_estadual %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ paciente.inscricao_estadual|default:"—" }}</dd>{% endif %}
         {% else %}
-        <dt class="col-5">{% translate "CPF" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>
-        <dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ paciente.rg|default:"—" }}</dd>
+        {% if no_brasil or paciente.cpf_cnpj %}<dt class="col-5">{% translate "CPF" %}</dt><dd class="col-7">{{ paciente.cpf_cnpj|cpf_cnpj|default:"—" }}</dd>{% endif %}
+        {% if no_brasil or paciente.rg %}<dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ paciente.rg|default:"—" }}</dd>{% endif %}
         <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ paciente.data_nascimento|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
         <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ paciente.get_sexo_display|default:"—" }}</dd>
         <dt class="col-5">{% translate "Estado civil" %}</dt><dd class="col-7">{{ paciente.estado_civil|default:"—" }}</dd>
@@ -52,9 +52,9 @@
         <dd class="col-7">
           {% if paciente.logradouro %}{{ paciente.logradouro }}{% if paciente.numero %}, {{ paciente.numero }}{% endif %}{% if paciente.complemento %} - {{ paciente.complemento }}{% endif %}<br>{% endif %}
           {% if paciente.bairro %}{{ paciente.bairro }}<br>{% endif %}
-          {% if paciente.cidade %}{{ paciente.cidade.nome }}/{{ paciente.cidade.uf.sigla }}<br>{% endif %}
-          {% if paciente.cep %}{% translate "CEP" %} {{ paciente.cep|cep }}{% endif %}
-          {% if not paciente.logradouro and not paciente.bairro and not paciente.cidade and not paciente.cep %}—{% endif %}
+          {% if paciente.cidade_estado %}{{ paciente.cidade_estado }}<br>{% endif %}
+          {% if paciente.cep %}{% rotulo_cep %} {{ paciente.cep|cep }}{% endif %}
+          {% if not paciente.logradouro and not paciente.bairro and not paciente.cidade_estado and not paciente.cep %}—{% endif %}
         </dd>
       </dl>
     </div>

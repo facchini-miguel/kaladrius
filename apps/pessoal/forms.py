@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.core import paises
 from apps.core.forms import CampoDecimal, FormularioBootstrap
 from apps.core.validadores import cpf_valido, normalizar_telefone, somente_digitos
 from apps.financeiro.models import Categoria
@@ -56,6 +57,8 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if paises.pais_da_clinica() != "BR":
+            del self.fields["cpf"]  # each country's documents: phase 2 (decision 117)
         if self.instance.pk:
             self.fields["salario"].label = _("Novo salário")
             self.fields["salario"].help_text = _(

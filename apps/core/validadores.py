@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
+from . import paises
+
 validar_cor = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
 
 
@@ -90,13 +92,18 @@ def nono_digito(numero):
     return numero
 
 
-def normalizar_telefone(valor):
-    """A Brazilian phone as DDD + number digits, or ValidationError.
+def normalizar_telefone(valor, pais=None):
+    """A phone of the clinic's country as stored digits, or ValidationError.
 
-    Accepts what people type: punctuation, a leading 0 (carrier prefix) or +55. A mobile
-    written the old way, with 8 digits starting with 6 to 9, gets the ninth digit (Anatel's
-    rule: landlines start with 2 to 5), so WhatsApp links work.
+    Brazil: DDD + number. Accepts what people type: punctuation, a leading 0 (carrier prefix)
+    or +55. A mobile written the old way, with 8 digits starting with 6 to 9, gets the ninth
+    digit (Anatel's rule: landlines start with 2 to 5), so WhatsApp links work. Other countries
+    (decision 117): the national number, see paises.normalizar_telefone_internacional.
     """
+    pais = pais or paises.pais_da_clinica()
+    if pais != "BR":
+        digitos = somente_digitos(valor)
+        return paises.normalizar_telefone_internacional(digitos, pais) if digitos else ""
     numero = somente_digitos(valor).lstrip("0")
     if len(numero) in (12, 13) and numero.startswith("55"):
         numero = numero[2:]

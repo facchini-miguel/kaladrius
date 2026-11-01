@@ -16,9 +16,11 @@
       <div class="col-12">{% with campo=form.tipo %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.nome %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-6 so-pj">{% with campo=form.razao_social %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% if form.cpf_cnpj %}{# Brazil only (decision 117) #}
       <div class="col-md-3">{% with campo=form.cpf_cnpj %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-3 so-pj">{% with campo=form.inscricao_estadual %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-3 so-pf">{% with campo=form.rg %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% endif %}
       <div class="col-md-3 so-pf">{% with campo=form.data_nascimento %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-3 so-pf">{% with campo=form.sexo %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-3 so-pf">{% with campo=form.estado_civil %}{% include "includes/campo.html" %}{% endwith %}</div>
@@ -42,8 +44,13 @@
     <div class="card-header">{% translate "Endereço" %}</div>
     <div class="card-body row">
       <div class="col-md-2">{% with campo=form.cep %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% if form.uf %}
       <div class="col-md-4">{% with campo=form.uf %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.cidade %}{% include "includes/campo.html" %}{% endwith %}<div id="sugestoes-endereco"></div></div>
+      {% else %}{# outside Brazil: typed state and city (decision 117) #}
+      <div class="col-md-4">{% with campo=form.estado_nome %}{% include "includes/campo.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.cidade_nome %}{% include "includes/campo.html" %}{% endwith %}</div>
+      {% endif %}
       <div class="col-md-6">{% with campo=form.logradouro %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-2">{% with campo=form.numero %}{% include "includes/campo.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.complemento %}{% include "includes/campo.html" %}{% endwith %}</div>

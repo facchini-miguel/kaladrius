@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
-from . import moedas
+from . import moedas, paises
 from .isolamento import ModeloDaClinica
 
 
@@ -96,6 +96,23 @@ class Clinica(models.Model):
             "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
             "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
         ),
+    )
+    pais = models.CharField(
+        _("país"),
+        max_length=2,
+        choices=paises.ESCOLHAS,
+        default=paises.PADRAO,
+        help_text=_(
+            "Define o fuso horário disponível, o formato de telefones, códigos postais e "
+            "datas em inglês, e a moeda sugerida."
+        ),
+    )
+    fuso_horario = models.CharField(
+        _("fuso horário"),
+        max_length=40,
+        choices=paises.ESCOLHAS_FUSO,
+        default=paises.FUSO_PADRAO,
+        help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
     )
     ativa = models.BooleanField(_("ativa"), default=True)
     exigir_duas_etapas = models.BooleanField(

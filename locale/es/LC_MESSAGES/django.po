@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 03:11-0300\n"
+"POT-Creation-Date: 2026-11-01 03:46-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -505,6 +505,10 @@ msgstr ""
 "Pacientes, profesionales, equipo y tablas base están siempre activos."
 
 #, python-format
+msgid "Escolha um fuso horário de %(pais)s."
+msgstr "Elija una zona horaria de %(pais)s."
+
+#, python-format
 msgid "%(modulo)s precisa de: %(precisa)s."
 msgstr "%(modulo)s necesita: %(precisa)s."
 
@@ -601,6 +605,23 @@ msgstr ""
 "La moneda con que trabaja la clínica. Solo cambia cómo se muestran los "
 "valores, para todo el equipo y en cualquier idioma: ningún valor ya "
 "registrado se convierte."
+
+msgid "país"
+msgstr "país"
+
+msgid ""
+"Define o fuso horário disponível, o formato de telefones, códigos postais e "
+"datas em inglês, e a moeda sugerida."
+msgstr ""
+"Define las zonas horarias disponibles, el formato de teléfonos, códigos "
+"postales y fechas en inglés, y la moneda sugerida."
+
+msgid "fuso horário"
+msgstr "zona horaria"
+
+msgid "Os horários da agenda e de todo o sistema seguem este fuso."
+msgstr ""
+"Los horarios de la agenda y de todo el sistema siguen esta zona horaria."
 
 #
 msgid ""
@@ -723,6 +744,15 @@ msgstr "Euro"
 msgid "Libra esterlina"
 msgstr "Libra esterlina"
 
+msgid "Dólar canadense"
+msgstr "Dólar canadiense"
+
+msgid "Dólar australiano"
+msgstr "Dólar australiano"
+
+msgid "Rand sul-africano"
+msgstr "Rand sudafricano"
+
 msgid "Peso argentino"
 msgstr "Peso argentino"
 
@@ -746,6 +776,57 @@ msgstr "Sol peruano"
 
 msgid "Boliviano"
 msgstr "Boliviano"
+
+msgid "Brasil"
+msgstr "Brasil"
+
+msgid "Estados Unidos"
+msgstr "Estados Unidos"
+
+msgid "Reino Unido"
+msgstr "Reino Unido"
+
+msgid "Canadá"
+msgstr "Canadá"
+
+msgid "Austrália"
+msgstr "Australia"
+
+msgid "África do Sul"
+msgstr "Sudáfrica"
+
+msgid "Informe o código de área e o número (10 dígitos)."
+msgstr "Indique el código de área y el número (10 dígitos)."
+
+msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
+msgstr "Indique el número con el código de área (10 u 11 dígitos con el 0)."
+
+msgid "Informe o número com o código de área (10 dígitos com o 0)."
+msgstr "Indique el número con el código de área (10 dígitos con el 0)."
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr "El código postal (CEP) debe tener 8 dígitos."
+
+msgid "O ZIP code tem 5 dígitos (ou 9, com a extensão)."
+msgstr "El ZIP code tiene 5 dígitos (o 9, con la extensión)."
+
+msgid "O código postal canadense tem o formato A1A 1A1."
+msgstr "El código postal canadiense tiene el formato A1A 1A1."
+
+msgid "Informe um postcode válido, como SW1A 1AA."
+msgstr "Indique un postcode válido, como SW1A 1AA."
+
+msgid "O postcode australiano tem 4 dígitos."
+msgstr "El postcode australiano tiene 4 dígitos."
+
+msgid "O código postal sul-africano tem 4 dígitos."
+msgstr "El código postal sudafricano tiene 4 dígitos."
+
+msgid "CEP"
+msgstr "Código postal (CEP)"
+
+msgid "Código postal"
+msgstr "Código postal"
 
 msgid "Pacientes"
 msgstr "Pacientes"
@@ -1875,9 +1956,6 @@ msgstr "Estado"
 msgid "Cidade"
 msgstr "Ciudad"
 
-msgid "CEP"
-msgstr "Código postal (CEP)"
-
 msgid "Celular"
 msgstr "Celular"
 
@@ -1886,9 +1964,6 @@ msgstr "Teléfono de casa"
 
 msgid "Telefone comercial"
 msgstr "Teléfono del trabajo"
-
-msgid "O CEP deve ter 8 dígitos."
-msgstr "El código postal (CEP) debe tener 8 dígitos."
 
 msgid "A data de nascimento não pode estar no futuro."
 msgstr "La fecha de nacimiento no puede estar en el futuro."
@@ -1974,6 +2049,9 @@ msgstr "teléfono del trabajo"
 
 msgid "cidade"
 msgstr "ciudad"
+
+msgid "estado ou província"
+msgstr "estado o provincia"
 
 msgid "bairro"
 msgstr "barrio"
@@ -5198,9 +5276,6 @@ msgstr "Contraseña"
 #~ msgstr ""
 #~ "Muestra las partes de cada área, como el odontograma en los presupuestos "
 #~ "de Odontología. Cambiar el área no borra nada."
-
-#~ msgid "Atestados e receitas"
-#~ msgstr "Certificados y recetas"
 
 #~ msgid "Documentação técnica"
 #~ msgstr "Documentación técnica"

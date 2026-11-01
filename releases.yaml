@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.46.0
+  data: 2026-11-01
+  titulo:
+    pt-br: O país da clínica
+    en: The clinic's country
+    es: El país de la clínica
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Nas Configurações da clínica, o país (Brasil, Estados Unidos, Reino Unido, Canadá,
+          Austrália ou África do Sul) e o fuso horário. A agenda segue o fuso da clínica, e os
+          telefones, códigos postais e datas em inglês seguem o formato do país.
+        en: >
+          Clinic settings now have the country (Brazil, United States, United Kingdom, Canada,
+          Australia or South Africa) and the time zone. The schedule follows the clinic's time
+          zone, and phones, postal codes and English dates follow the country's format.
+        es: >
+          En la Configuración de la clínica, el país (Brasil, Estados Unidos, Reino Unido,
+          Canadá, Australia o Sudáfrica) y la zona horaria. La agenda sigue la zona horaria de la
+          clínica, y los teléfonos, códigos postales y fechas en inglés siguen el formato del país.
+    - tipo: novo
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Fora do Brasil, o estado e a cidade do paciente são digitados, o código postal segue o
+          país, e CPF, RG e inscrição estadual não aparecem.
+        en: >
+          Outside Brazil, the patient's state and city are typed, the postal code follows the
+          country, and CPF, RG and state registration are not shown.
+        es: >
+          Fuera de Brasil, el estado y la ciudad del paciente se escriben, el código postal sigue
+          el país, y CPF, RG e inscripción estatal no aparecen.
+
 - versao: 0.45.1
   data: 2026-11-01
   itens:

@@ -11,8 +11,10 @@
   const modal = new bootstrap.Modal(modalEl);
   const aviso = document.getElementById("aviso-agenda");
   const pad = (n) => String(n).padStart(2, "0");
-  const hora = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  const dataISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  // The calendar runs in UTC mode with the clinic's wall clock (decision 117): its dates carry
+  // the clinic's times in their UTC fields, whatever the browser's time zone.
+  const hora = (d) => `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  const dataISO = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 
   const toque = window.matchMedia("(pointer: coarse)").matches;
 
@@ -66,6 +68,8 @@
 
   const calendario = new FullCalendar.Calendar(elementoCalendario, {
     locale: config.idioma,
+    timeZone: "UTC",
+    now: config.agora,
     initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
     initialDate: config.data || undefined,
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },
