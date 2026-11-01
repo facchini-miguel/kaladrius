@@ -51,6 +51,16 @@ def test_nomes_locais_entre_parenteses():
         assert formas.rotulo("debito_auto", "ZA") == "Direct debit (debit order)"
 
 
+def test_cheque_com_a_grafia_de_cada_ingles():
+    with translation.override("en"):
+        assert formas.rotulo("cheque", "US") == "Check"
+    for variante in ("en-gb", "en-ca", "en-au", "en-za"):
+        with translation.override(variante):
+            assert formas.rotulo("cheque", "GB") == "Cheque", variante
+    with translation.override("es"):
+        assert formas.rotulo("cheque", "MX") == "Cheque"
+
+
 def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     mudar_pais(cenario, "PE")
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)

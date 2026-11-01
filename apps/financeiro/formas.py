@@ -9,6 +9,8 @@ longer offers (Brazil's cheque) still shows on old payments.
 
 from dataclasses import dataclass, field
 
+from django.utils import translation
+
 from apps.core import paises
 
 DINHEIRO = "dinheiro"
@@ -84,11 +86,18 @@ def do_pais(pais=None):
     return FORMAS.get(pais or paises.pais_da_clinica(), FORMAS[paises.PADRAO])
 
 
+# The English variants other than the United States' (en-gb, en-ca, en-au, en-za) spell it
+# "cheque"; the English catalog has the American "check".
+_INGLES_COM_CHEQUE = {pais.ingles for pais in paises.PAISES.values()} - {"en"}
+
+
 def rotulo(codigo, pais=None):
     """The method's name in the country: "Transferência (SPEI)" in Mexico."""
     from .models import Pagamento
 
     nome = dict(Pagamento.Forma.choices).get(codigo, codigo)
+    if codigo == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
+        nome = "Cheque"
     local = do_pais(pais).nomes.get(codigo)
     if not local or local.lower() == str(nome).lower():  # "Direct debit" in English
         return str(nome)

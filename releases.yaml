@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.1
+  data: 2026-11-01
+  titulo:
+    pt-br: Cheque no inglês britânico
+    en: Cheque in British English
+    es: Cheque en inglés británico
+  itens:
+    - tipo: correcao
+      modulo: Financeiro
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em inglês, a forma de pagamento aparece como "Cheque" no Reino Unido, no Canadá, na
+          Austrália e na África do Sul, e como "Check" só nos Estados Unidos.
+        en: >
+          In English, the payment method shows as "Cheque" in the United Kingdom, Canada,
+          Australia and South Africa, and as "Check" only in the United States.
+        es: >
+          En inglés, la forma de pago aparece como "Cheque" en el Reino Unido, Canadá, Australia
+          y Sudáfrica, y como "Check" solo en Estados Unidos.
+
 - versao: 0.52.0
   data: 2026-11-01
   titulo:
