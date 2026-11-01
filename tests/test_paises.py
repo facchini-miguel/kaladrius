@@ -2,6 +2,7 @@
 dates and the Brazilian-only fields. Brazil keeps every rule it had (the other test files)."""
 
 import datetime
+import re
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -130,7 +131,8 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     cliente.post(reverse("trocar_idioma"), {"idioma": "en"})
     pagina = cliente.get(reverse("inicio")).content.decode()
     assert '<html lang="en-gb">' in pagina
-    assert "bandeiras/en.svg" in pagina and "Patients" in pagina
+    # The English flag, with or without the hash of the collected static files (CI).
+    assert re.search(r"bandeiras/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(
             nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
