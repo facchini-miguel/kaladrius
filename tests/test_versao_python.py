@@ -25,6 +25,7 @@ def test_versao_do_python_em_um_lugar_so():
     assert '--build-arg PYTHON_VERSION="$(cat .python-version)"' in ci
     projeto = tomllib.loads((RAIZ / "pyproject.toml").read_text())
     assert projeto["project"]["requires-python"] == f">={versao}"
-    # Ruff may lag one version behind (its 3.14 support was still a preview), never ahead.
+    # Ruff may lag one version behind, never ahead: with py314 its formatter writes
+    # "except A, B:" (PEP 758), which reads like Python 2, so it stays on py313 (decision 130).
     alvo = projeto["tool"]["ruff"]["target-version"]
     assert int(alvo[3:]) <= int(versao.split(".")[1]), alvo
