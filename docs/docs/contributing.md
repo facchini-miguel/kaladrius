@@ -42,6 +42,8 @@ docker compose exec app python manage.py makemigrations --check
 
 ## This documentation site
 
+It needs Node.js 26, the version the image builds it with (`docs/Dockerfile`).
+
 ```bash
 cd docs
 npm install
