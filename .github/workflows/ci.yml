@@ -118,3 +118,49 @@ jobs:
           docker build "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"
           docker push --all-tags "$IMAGEM_PUBLICA"
+
+  # GitHub Release of each new version (decision 119): after the image is published, the version
+  # of pyproject.toml (the top of releases.yaml, the tests check they match) gets its tag vX.Y.Z
+  # and its release in English, from notas_release, when they do not exist yet. Nobody has to
+  # remember. With a SITE_TOKEN secret (a fine-grained token with Actions: write on
+  # facchini-miguel/facchini.eti.br), the owner's site is rebuilt right away to show it;
+  # without one, the site's hourly build picks it up.
+  release:
+    needs: [publicar]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write  # tag and release
+    env:
+      DJANGO_SECRET_KEY: ci-only-never-use-in-production
+      DJANGO_DEBUG: "0"
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SITE_TOKEN: ${{ secrets.SITE_TOKEN }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: GNU gettext (the notes name the types and modules in English)
+        run: sudo apt-get install -y --no-install-recommends gettext
+      - name: Release da versão nova
+        run: |
+          VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if gh release view "v$VERSAO" >/dev/null 2>&1; then
+            echo "v$VERSAO já está publicada."
+            exit 0
+          fi
+          python manage.py compilemessages >/dev/null
+          python manage.py notas_release "$VERSAO" --titulo > titulo.txt
+          python manage.py notas_release "$VERSAO" > notas.md
+          gh release create "v$VERSAO" --target "$GITHUB_SHA" --title "$(cat titulo.txt)" \
+            --notes-file notas.md --latest
+          echo "SITE_DESATUALIZADO=1" >> "$GITHUB_ENV"
+      - name: Atualizar o site do titular
+        if: env.SITE_DESATUALIZADO == '1' && env.SITE_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.SITE_TOKEN }}
+        run: gh workflow run publicar.yml -R facchini-miguel/facchini.eti.br

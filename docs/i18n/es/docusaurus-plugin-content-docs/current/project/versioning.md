@@ -80,7 +80,7 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 ## Proceso para publicar una versión
 1. Agregar la entrada al inicio de `releases.yaml` en el mismo pull request del cambio.
 2. Actualizar la versión del proyecto (`pyproject.toml`) y la línea "Versión actual" de los tres README. Las pruebas fallan si alguno queda distinto de `releases.yaml`.
-3. Crear la etiqueta Git `vX.Y.Z` y la *Release* de GitHub **en inglés**, con el título y el texto que genera el comando:
+3. **El CI crea solo la etiqueta Git `vX.Y.Z` y la *Release* de GitHub** **en inglés**, después de publicar la imagen, cuando la versión es nueva (decisión 119); con el secreto `SITE_TOKEN` también reconstruye el sitio del titular, que si no toma la versión en menos de una hora. El título y el texto son los que genera el comando (útil para revisarlos antes):
    ```bash
    docker compose exec app python manage.py notas_release X.Y.Z --titulo   # título
    docker compose exec app python manage.py notas_release X.Y.Z            # texto
