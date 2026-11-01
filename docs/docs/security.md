@@ -23,6 +23,7 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 | **Audit log** | Who created, changed, deleted or opened each record, when and from which address; cannot be changed |
 | **Uploads** | Limited to 6 MB |
 | **API docs** | `/api/v1/docs` only for superusers |
+| **Dependencies** | Pinned versions; GitHub's Dependabot warns of known vulnerabilities and opens a pull request with the fix as soon as an advisory is published, and proposes new versions weekly (libraries) or monthly (GitHub Actions and Docker images). Every pull request is reviewed and tested before it is merged; a new Python or PostgreSQL version is a planned change |
 
 ## Privacy (LGPD)
 

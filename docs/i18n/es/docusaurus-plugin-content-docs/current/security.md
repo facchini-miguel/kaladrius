@@ -23,6 +23,7 @@ Kaladrius guarda datos de salud, el tipo más sensible de dato personal. Esta p�
 | **Auditoría** | Quién creó, cambió, eliminó o abrió cada registro, cuándo y desde qué dirección; no se puede modificar |
 | **Envío de archivos** | Limitado a 6 MB |
 | **Documentación de la API** | `/api/v1/docs` solo para superusuarios |
+| **Dependencias** | Versiones fijadas; el Dependabot de GitHub avisa de vulnerabilidades conocidas y abre un pull request con la corrección en cuanto se publica una alerta, y propone versiones nuevas cada semana (bibliotecas) o cada mes (GitHub Actions e imágenes Docker). Cada pull request se revisa y se prueba antes de aceptarse; una nueva versión de Python o de PostgreSQL es un cambio planificado |
 
 ## Privacidad (LGPD)
 
