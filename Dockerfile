@@ -1,4 +1,7 @@
-FROM python:3.13-slim
+# The Python version comes from .python-version, the single source for CI and the image
+# (decision 127); the CI passes it, and this default must be the same (tests/test_versao_python.py).
+ARG PYTHON_VERSION=3.14
+FROM python:${PYTHON_VERSION}-slim
 
 # Shown on the package page and used by GitHub to link the image to the repository.
 LABEL org.opencontainers.image.title="Kaladrius" \

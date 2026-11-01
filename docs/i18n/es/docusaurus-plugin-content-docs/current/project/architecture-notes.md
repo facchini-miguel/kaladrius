@@ -27,7 +27,7 @@ Los dos se comunican **solo por la API**.
 
 | Ítem | Elección | Licencia |
 |---|---|---|
-| Lenguaje | Python 3.13 | PSF |
+| Lenguaje | Python 3.14 | PSF |
 | Framework | Django (versión estable actual; migrar a la 6.2 LTS en abr/2027) | BSD |
 | API | Django Ninja | MIT |
 | Base de datos | PostgreSQL 16 | PostgreSQL (permisiva) |

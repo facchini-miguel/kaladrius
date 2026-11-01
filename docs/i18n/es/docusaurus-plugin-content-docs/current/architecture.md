@@ -16,7 +16,7 @@ Django + PostgreSQL ──────┤
 
 | Capa | Elección |
 |---|---|
-| Lenguaje | Python 3.13 |
+| Lenguaje | Python 3.14 |
 | Framework | Django, con Django Ninja para la API |
 | Base de datos | PostgreSQL 16 (reglas como "dos citas no ocupan el mismo horario" están en la propia base) |
 | Páginas | Plantillas generadas en el servidor, HTMX para actualizar partes de la pantalla, Bootstrap 5, FullCalendar en la agenda |
