@@ -77,6 +77,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.fields["tipo"].queryset = TipoAtendimento.objects.filter(
             Q(ativo=True) | Q(pk=agendamento.tipo_id)
         )
+        self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
         self.fields["paciente"].queryset = Paciente.objects.all()
 
         passo = clinica.agenda_intervalo * 60

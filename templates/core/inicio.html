@@ -158,7 +158,7 @@
             <tr class="{% if agendamento == agenda.proximo %}table-primary{% elif agendamento.desmarcado %}text-body-secondary text-decoration-line-through{% endif %}">
               <td class="text-nowrap">{{ agendamento.inicio|time:"H:i" }}–{{ agendamento.fim|time:"H:i" }}</td>
               <td>
-                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.tipo.cor }}" title="{{ agendamento.tipo.nome }}"></span>
+                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.tipo.cor }}" title="{{ agendamento.tipo.nome_exibido }}"></span>
                 {% if agendamento.paciente_id %}
                 {% if pode.pacientes.ver %}<a href="{% url 'pacientes:ficha' agendamento.paciente_id %}">{{ agendamento.paciente.nome }}</a>{% else %}{{ agendamento.paciente.nome }}{% endif %}
                 {% if agendamento == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if agendamento.inicio <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}

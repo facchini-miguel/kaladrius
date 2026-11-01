@@ -40,7 +40,9 @@ def _formulario(request, tipo):
     form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinica=request.clinica)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome})
+        messages.success(
+            request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome_exibido}
+        )
         return redirect("agenda:tipos")
     return render(request, "agenda/tipo_form.html", {"form": form, "tipo": tipo})
 
@@ -58,11 +60,11 @@ def tipo_excluir(request, pk):
                     "%(nome)s já foi usado em agendamentos e não pode ser excluído. "
                     "Desmarque “ativo” para escondê-lo."
                 )
-                % {"nome": tipo.nome},
+                % {"nome": tipo.nome_exibido},
             )
         else:
             messages.success(
-                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome}
+                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome_exibido}
             )
         return redirect("agenda:tipos")
     return render(request, "agenda/tipo_excluir.html", {"tipo": tipo})
@@ -183,7 +185,7 @@ def eventos(request):
                 "textColor": "#212529",
                 "classNames": [f"situacao-{agendamento.situacao}"],
                 "extendedProps": {
-                    "tipo": agendamento.tipo.nome,
+                    "tipo": agendamento.tipo.nome_exibido,
                     "descricao": agendamento.descricao,
                     "situacao": agendamento.situacao,
                     "situacao_nome": agendamento.get_situacao_display(),

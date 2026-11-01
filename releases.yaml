@@ -4,6 +4,26 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.43.1
+  data: 2026-10-31
+  itens:
+    - tipo: correcao
+      modulo: Agenda
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Os tipos de atendimento padrão (Cirurgia, Ortodontia, Consulta…) aparecem no idioma
+          escolhido na legenda da agenda e no restante do sistema. Tipos criados ou renomeados
+          pela clínica aparecem como foram digitados.
+        en: >
+          The default appointment types (Surgery, Orthodontics, Consultation…) now show in the
+          chosen language in the schedule legend and the rest of the system. Types the clinic
+          created or renamed show as they were typed.
+        es: >
+          Los tipos de atención predeterminados (Cirugía, Ortodoncia, Consulta…) aparecen en el
+          idioma elegido en la leyenda de la agenda y en el resto del sistema. Los tipos creados
+          o renombrados por la clínica aparecen como se escribieron.
+
 - versao: 0.43.0
   data: 2026-10-31
   titulo:

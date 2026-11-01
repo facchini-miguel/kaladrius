@@ -3,7 +3,7 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeBoundary, RangeOperators
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import gettext
+from django.utils.translation import gettext, pgettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.isolamento import ModeloDaClinica, sem_isolamento
@@ -24,6 +24,25 @@ TIPOS_PADRAO = [
     ("Ocupado", "#a7bef1"),
 ]
 
+# The default names are saved in Portuguese and shown in the user's language (see
+# TipoAtendimento.nome_exibido). This list only marks them for makemessages; it is never read.
+_NOMES_PADRAO_PARA_TRADUCAO = [
+    pgettext_lazy("tipo de atendimento", "Liberado"),
+    pgettext_lazy("tipo de atendimento", "Consulta"),
+    pgettext_lazy("tipo de atendimento", "Retorno"),
+    pgettext_lazy("tipo de atendimento", "Exame"),
+    pgettext_lazy("tipo de atendimento", "Procedimento"),
+    pgettext_lazy("tipo de atendimento", "Atendimento de 15 em 15"),
+    pgettext_lazy("tipo de atendimento", "Ocupado"),
+    pgettext_lazy("tipo de atendimento", "Cirurgia"),
+    pgettext_lazy("tipo de atendimento", "Dentística"),
+    pgettext_lazy("tipo de atendimento", "Periodontia"),
+    pgettext_lazy("tipo de atendimento", "Consulta inicial"),
+    pgettext_lazy("tipo de atendimento", "Prótese"),
+    pgettext_lazy("tipo de atendimento", "Endodontia"),
+    pgettext_lazy("tipo de atendimento", "Ortodontia"),
+]
+
 
 class TipoAtendimento(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
@@ -42,6 +61,12 @@ class TipoAtendimento(ModeloDaClinica):
 
     def __str__(self):
         return self.nome
+
+    @property
+    def nome_exibido(self):
+        """The name in the user's language when it is one of the default types; a name the
+        clinic typed itself (or renamed) has no translation and is shown as saved."""
+        return pgettext("tipo de atendimento", self.nome)
 
 
 class TsTzRange(models.Func):

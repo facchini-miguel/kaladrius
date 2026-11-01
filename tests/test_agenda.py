@@ -630,3 +630,23 @@ def test_eventos_trazem_a_situacao(cenario):
     [evento] = resposta.json()
     assert evento["classNames"] == ["situacao-faltou"]
     assert evento["extendedProps"]["situacao_nome"] == "Faltou"
+
+
+def test_tipos_padrao_aparecem_no_idioma_do_usuario(cenario):
+    """The default types are saved in Portuguese and shown translated; a type the clinic
+    typed itself is shown as saved."""
+    cliente = cenario["cliente"]
+    with usar_clinica(cenario["clinica"]):
+        TipoAtendimento.objects.create(nome="Clareamento a laser", cor="#ffffff")
+
+    cliente.post(reverse("trocar_idioma"), {"idioma": "en"})
+    legenda = cliente.get(reverse("agenda:calendario")).content.decode()
+    assert ">Surgery<" in legenda and ">Orthodontics<" in legenda
+    assert ">Cirurgia<" not in legenda
+    assert ">Clareamento a laser<" in legenda
+    assert ">Surgery</option>" in cliente.get(reverse("agenda:novo")).content.decode()
+
+    cliente.post(reverse("trocar_idioma"), {"idioma": "es"})
+    assert ">Cirugía<" in cliente.get(reverse("agenda:calendario")).content.decode()
+    with usar_clinica(cenario["clinica"]):
+        assert TipoAtendimento.objects.filter(nome="Cirurgia").exists()  # data untouched
