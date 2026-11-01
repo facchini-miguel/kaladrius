@@ -16,7 +16,7 @@ Django + PostgreSQL ──────┤
 
 | Layer | Choice |
 |---|---|
-| Language | Python 3.13 |
+| Language | Python 3.14 |
 | Framework | Django, with Django Ninja for the API |
 | Database | PostgreSQL 16 (constraints such as "no two appointments at the same time" live in the database) |
 | Pages | Server-rendered templates, HTMX for partial updates, Bootstrap 5, FullCalendar for the schedule |
