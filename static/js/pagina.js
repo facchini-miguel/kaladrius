@@ -35,6 +35,9 @@
       mostrar(false);
       botao.addEventListener("click", () => mostrar(campo.type === "password"));
       grupo.appendChild(botao);
+      // Submitted while shown, the field would go as plain text and the browser would not offer
+      // to save the password: it always goes back to a password field before sending.
+      if (campo.form) campo.form.addEventListener("submit", () => mostrar(false));
     });
   }
   olhos(document);

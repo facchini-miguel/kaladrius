@@ -4,6 +4,23 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.46.2
+  data: 2026-11-01
+  itens:
+    - tipo: correcao
+      modulo: Acesso
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O navegador volta a oferecer salvar a senha depois de entrar, mesmo quando ela foi
+          mostrada pelo botão do olho antes de clicar em Entrar.
+        en: >
+          The browser offers to save the password after logging in again, even when it was shown
+          with the eye button before clicking Log in.
+        es: >
+          El navegador vuelve a ofrecer guardar la contraseña después de ingresar, incluso cuando
+          se mostró con el botón del ojo antes de hacer clic en Ingresar.
+
 - versao: 0.46.1
   data: 2026-11-01
   itens:
