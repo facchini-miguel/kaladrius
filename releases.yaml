@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.3
+  data: 2026-11-01
+  titulo:
+    pt-br: Servidor de aplicação atualizado
+    en: Application server updated
+    es: Servidor de aplicaciones actualizado
+  itens:
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O servidor que roda o sistema (Gunicorn) passa da versão 23 para a 26, que recusa
+          requisições com cabeçalhos malformados.
+        en: >
+          The server that runs the system (Gunicorn) moves from version 23 to 26, which refuses
+          requests with malformed headers.
+        es: >
+          El servidor que ejecuta el sistema (Gunicorn) pasa de la versión 23 a la 26, que
+          rechaza solicitudes con encabezados malformados.
+
 - versao: 0.52.2
   data: 2026-11-01
   titulo:
