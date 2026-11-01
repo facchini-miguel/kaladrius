@@ -124,7 +124,7 @@ echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
 sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
 ```
 
-The reset also brings back **the owner's** account and settings as they were in the base: after changing a password or a setting that should stay, save the base again (`--salvar-base`). To reset right away: `sudo systemctl start kaladrius-demonstracao.service`.
+The **system administrators'** accounts (superusers) are kept across the reset (decision 118): password, e-mail, language, two-step verification and recovery codes stay as they were. The rest of **the owner's** settings (the clinic's, for example) go back to the base: after changing one that should stay, save the base again (`--salvar-base`). To reset right away: `sudo systemctl start kaladrius-demonstracao.service`.
 
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).

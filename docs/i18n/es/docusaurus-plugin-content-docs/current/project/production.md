@@ -124,7 +124,7 @@ echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
 sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
 ```
 
-El reinicio también devuelve **la cuenta y la configuración del titular** a como estaban en la base: después de cambiar una contraseña o una configuración que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demonstracao.service`.
+Las cuentas de los **administradores del sistema** (superusuarios) se mantienen en el reinicio (decisión 118): contraseña, correo, idioma, verificación en dos pasos y códigos de recuperación quedan como estaban. El resto de la configuración **del titular** (la de la clínica, por ejemplo) vuelve a la base: después de cambiar una que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demonstracao.service`.
 
 ## Cuidados
 - **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).

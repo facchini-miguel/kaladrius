@@ -4,6 +4,23 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.46.1
+  data: 2026-11-01
+  itens:
+    - tipo: correcao
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O reinício diário da demonstração mantém as contas dos administradores do sistema:
+          senha, verificação em duas etapas e códigos de recuperação.
+        en: >
+          The nightly demo reset keeps the system administrators' accounts: password, two-step
+          verification and recovery codes.
+        es: >
+          El reinicio diario de la demostración mantiene las cuentas de los administradores del
+          sistema: contraseña, verificación en dos pasos y códigos de recuperación.
+
 - versao: 0.46.0
   data: 2026-11-01
   titulo:
