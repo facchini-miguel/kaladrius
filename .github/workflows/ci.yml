@@ -32,8 +32,8 @@ jobs:
       POSTGRES_PASSWORD: ci-only
       POSTGRES_HOST: localhost
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
           cache: pip
@@ -62,7 +62,7 @@ jobs:
     env:
       IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Build do site
         run: docker build -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" docs
       - id: google
@@ -93,7 +93,7 @@ jobs:
       IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app
       IMAGEM_PUBLICA: ghcr.io/facchini-miguel/kaladrius
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - id: google
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
         with:
@@ -137,8 +137,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SITE_TOKEN: ${{ secrets.SITE_TOKEN }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
           cache: pip
