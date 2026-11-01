@@ -1,6 +1,6 @@
 # Documentation site (decisions 067 and 073): Docusaurus builds the static pages, Caddy serves them.
 #   docker build -t kaladrius-docs docs
-FROM node:20-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /site
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
