@@ -154,6 +154,7 @@ def dados_clinica(**extra):
         "telefone": "",
         "agenda_inicio": "08:00",
         "agenda_fim": "18:00",
+        "moeda": "BRL",
         "agenda_intervalo": 30,
         "modulos_gerais": sorted(MODULOS_GERAIS),
         **extra,

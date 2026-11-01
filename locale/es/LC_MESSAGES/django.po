@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 23:04-0300\n"
+"POT-Creation-Date: 2026-11-01 00:35-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -591,6 +591,14 @@ msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
 msgstr ""
 "Calle, número, barrio, ciudad/estado y código postal, como sale en el recibo."
 
+msgid "moeda"
+msgstr "moneda"
+
+msgid ""
+"Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda "
+"a equipe e em qualquer idioma: nenhum valor já lançado é convertido."
+msgstr "La moneda con que trabaja la clínica. Solo cambia cómo se muestran los valores, para todo el equipo y en cualquier idioma: ningún valor ya registrado se convierte."
+
 #
 msgid ""
 "exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"
@@ -700,6 +708,42 @@ msgstr "Presupuestos y Personal necesitan Financiero habilitado."
 msgid "Cadastre a clínica antes de configurar os módulos."
 msgstr "Registre la clínica antes de configurar los módulos."
 
+msgid "Real brasileiro"
+msgstr "Real brasileño"
+
+msgid "Dólar americano"
+msgstr "Dólar estadounidense"
+
+msgid "Euro"
+msgstr "Euro"
+
+msgid "Libra esterlina"
+msgstr "Libra esterlina"
+
+msgid "Peso argentino"
+msgstr "Peso argentino"
+
+msgid "Peso mexicano"
+msgstr "Peso mexicano"
+
+msgid "Peso chileno"
+msgstr "Peso chileno"
+
+msgid "Peso colombiano"
+msgstr "Peso colombiano"
+
+msgid "Peso uruguaio"
+msgstr "Peso uruguayo"
+
+msgid "Guarani paraguaio"
+msgstr "Guaraní paraguayo"
+
+msgid "Sol peruano"
+msgstr "Sol peruano"
+
+msgid "Boliviano"
+msgstr "Boliviano"
+
 msgid "Pacientes"
 msgstr "Pacientes"
 
@@ -766,6 +810,12 @@ msgstr "Contraseña cambiada."
 
 msgid "Configurações da clínica salvas."
 msgstr "Configuración de la clínica guardada."
+
+#, python-format
+msgid ""
+"Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi "
+"convertido."
+msgstr "Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se convirtió."
 
 msgid "Equipe"
 msgstr "Equipo"
@@ -3580,11 +3630,11 @@ msgid "Cadastrar um fornecedor novo"
 msgstr "Registrar un proveedor nuevo"
 
 msgid ""
-"Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
-"Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3."
+"Exemplo: aluguel de 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
+"Compra de 900 em 3 vezes → valor 900, “o total”, 3."
 msgstr ""
-"Ejemplo: alquiler de R$ 3.000 durante 12 meses → valor 3.000, “de cada mes”, "
-"12. Compra de R$ 900 en 3 cuotas → valor 900, “el total”, 3."
+"Ejemplo: alquiler de 3.000 durante 12 meses → valor 3.000, “de cada mes”, "
+"12. Compra de 900 en 3 cuotas → valor 900, “el total”, 3."
 
 msgid "Total vencido"
 msgstr "Total vencido"

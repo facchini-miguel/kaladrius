@@ -21,8 +21,10 @@ Se algum agendamento futuro ficar fora do novo horário ou do novo intervalo, a 
 
 **Exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro** (vem ligada): profissionais com prontuário, administradores e o financeiro só usam o sistema depois de ativar o código do aplicativo autenticador (veja [Primeiros passos](inicio.md)); até lá, cada página leva ao QR code. A recepção não é obrigada, e os logins públicos da demonstração nunca são.
 
+**Moeda**: a moeda em que a clínica trabalha (real por padrão; também dólar americano, euro, libra esterlina e os pesos argentino, mexicano, chileno, colombiano e uruguaio, o guarani paraguaio, o sol peruano e o boliviano). Todos os valores do sistema, recibos inclusive, aparecem nela, para toda a equipe e em qualquer idioma que cada um use: o idioma só define os separadores (1.234,56 ou 1,234.56). Trocar a moeda **não converte** os valores já lançados; só muda como eles aparecem.
+
 ## Tipos de atendimento
-Em **Cadastros > Tipos de atendimento**: os tipos (cirurgia, consulta inicial…) e a cor que cada um pinta na agenda. Para deixar de usar um tipo sem perder o histórico, desmarque **ativo**.
+Em **Cadastros > Tipos de atendimento**: os tipos (cirurgia, consulta inicial…) e a cor que cada um pinta na agenda. Para deixar de usar um tipo sem perder o histórico, desmarque **ativo**. Os tipos padrão (Cirurgia, Consulta inicial…) aparecem no idioma de cada pessoa; um tipo que a clínica cria ou renomeia aparece como foi digitado.
 
 ## Auditoria
 Em **Cadastros > Auditoria**: quem criou, alterou, excluiu ou abriu cada registro da clínica, quando, de qual endereço e o que mudou. Os filtros buscam por usuário, ação, tipo de registro e período. Os registros não podem ser alterados. Tentativas de entrada recusadas são apagadas depois de 30 dias.

@@ -21,8 +21,10 @@ If a future appointment would fall outside the new hours or slot length, the cha
 
 **Require two-step verification from whoever reaches the medical record or finance** (on by default): practitioners with medical records, administrators and finance staff only use the system after turning on the authenticator app code (see [Getting started](inicio.md)); until then each page takes them to the QR code. The front desk is not required, and the public demo logins never are.
 
+**Currency**: the currency the clinic works in (Brazilian real by default; also US dollar, euro, pound sterling and the Argentine, Mexican, Chilean, Colombian and Uruguayan pesos, the Paraguayan guaraní, the Peruvian sol and the boliviano). Every amount in the system, receipts included, shows in it, for the whole team and whatever language each person uses: the language only sets the separators (1.234,56 or 1,234.56). Changing it does **not convert** amounts already entered; it only changes how they are shown.
+
 ## Appointment types
-In **Records > Appointment types**: the types (surgery, first visit…) and the color each one paints in the schedule. To stop using a type without losing the history, uncheck **active**.
+In **Records > Appointment types**: the types (surgery, first visit…) and the color each one paints in the schedule. To stop using a type without losing the history, uncheck **active**. The default types (Surgery, First visit…) show in each person's language; a type the clinic creates or renames shows as typed.
 
 ## Audit log
 In **Records > Audit log**: who created, changed, deleted or opened each record of the clinic, when, from which address and what changed. Filters search by user, action, record type and period. Entries cannot be changed. Refused login attempts are deleted after 30 days.

@@ -21,8 +21,10 @@ Si alguna cita futura quedara fuera del nuevo horario o del nuevo intervalo, el 
 
 **Exigir verificación en dos pasos a quien accede a la historia clínica o al financiero** (viene activada): los profesionales con historia clínica, los administradores y el financiero solo usan el sistema después de activar el código de la aplicación autenticadora (vea [Primeros pasos](inicio.md)); hasta entonces, cada página lleva al código QR. La recepción no está obligada, y los ingresos públicos de la demostración nunca lo están.
 
+**Moneda**: la moneda con que trabaja la clínica (real brasileño por defecto; también dólar estadounidense, euro, libra esterlina y los pesos argentino, mexicano, chileno, colombiano y uruguayo, el guaraní paraguayo, el sol peruano y el boliviano). Todos los valores del sistema, recibos incluidos, se muestran en ella, para todo el equipo y en el idioma que use cada uno: el idioma solo define los separadores (1.234,56 o 1,234.56). Cambiar la moneda **no convierte** los valores ya registrados; solo cambia cómo se muestran.
+
 ## Tipos de atención
-En **Registros > Tipos de atención**: los tipos (cirugía, consulta inicial…) y el color que cada uno pinta en la agenda. Para dejar de usar un tipo sin perder el historial, desmarque **activo**.
+En **Registros > Tipos de atención**: los tipos (cirugía, consulta inicial…) y el color que cada uno pinta en la agenda. Para dejar de usar un tipo sin perder el historial, desmarque **activo**. Los tipos predeterminados (Cirugía, Primera consulta…) aparecen en el idioma de cada persona; un tipo que la clínica crea o renombra aparece como se escribió.
 
 ## Auditoría
 En **Registros > Auditoría**: quién creó, modificó, eliminó o abrió cada registro de la clínica, cuándo, desde qué dirección y qué cambió. Los filtros buscan por usuario, acción, tipo de registro y período. Los registros no se pueden modificar. Los intentos de acceso rechazados se eliminan después de 30 días.

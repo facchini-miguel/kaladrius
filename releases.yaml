@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.44.0
+  data: 2026-11-01
+  titulo:
+    pt-br: A moeda da clínica
+    en: The clinic's currency
+    es: La moneda de la clínica
+  itens:
+    - tipo: novo
+      modulo: Clínica
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O administrador escolhe nas Configurações da clínica a moeda em que ela trabalha: real,
+          dólar, euro, libra ou peso, entre outras. Todos os valores aparecem nela, em qualquer
+          idioma. Trocar a moeda não converte os valores já lançados.
+        en: >
+          The administrator picks the currency the clinic works in under Clinic settings: real,
+          dollar, euro, pound or peso, among others. Every amount shows in it, in any language.
+          Changing the currency does not convert amounts already entered.
+        es: >
+          El administrador elige en la Configuración de la clínica la moneda con que trabaja: real,
+          dólar, euro, libra o peso, entre otras. Todos los valores se muestran en ella, en
+          cualquier idioma. Cambiar la moneda no convierte los valores ya registrados.
+
 - versao: 0.43.1
   data: 2026-10-31
   itens:

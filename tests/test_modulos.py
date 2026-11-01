@@ -29,6 +29,7 @@ def configuracao(**extra):
         "area": "medicina",
         "agenda_inicio": "07:30",
         "agenda_fim": "20:00",
+        "moeda": "BRL",
         "agenda_intervalo": 30,
         "modulos": ["odontologia", "medicina"],
         "modulos_gerais": sorted(MODULOS_GERAIS),

@@ -1,9 +1,9 @@
-"""Display formats for Brazilian documents and phone numbers (values are stored unformatted)."""
-
-from decimal import Decimal, InvalidOperation
+"""Display formats: Brazilian documents and phone numbers (stored unformatted) and amounts
+in the clinic's currency."""
 
 from django import template
-from django.utils.formats import number_format
+
+from apps.core import moedas
 
 register = template.Library()
 
@@ -45,9 +45,12 @@ def cep(valor):
 
 @register.filter
 def moeda(valor):
-    """Amount in reais with the separators of the current language (R$ 1.234,56)."""
-    try:
-        valor = Decimal(valor)
-    except (InvalidOperation, TypeError, ValueError):
-        return ""
-    return "R$ " + number_format(valor, 2, force_grouping=True)
+    """Amount in the clinic's currency with the separators of the current language
+    (R$ 1.234,56 · US$ 1,234.56 · 1.234,56 €; see apps/core/moedas.py)."""
+    return moedas.formatar(valor)
+
+
+@register.simple_tag
+def simbolo_moeda():
+    """Symbol of the clinic's currency (R$, US$, €...), for labels and examples."""
+    return moedas.simbolo()

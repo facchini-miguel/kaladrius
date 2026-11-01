@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
+from . import moedas
 from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
 from .modulos import configurar, faltando, iniciais
 from .validadores import cnpj_valido, cpf_valido, normalizar_cnpj
@@ -18,7 +19,7 @@ def _opcoes(grupo):
 
 
 class CampoDecimal(forms.DecimalField):
-    """A number typed the way people write it: "1.500,00", "R$ 1.500,00" or "1500,00" in
+    """A number typed the way people write it: "1.500,00", "R$ 1.500,00", "€ 1.500" or "1500,00" in
     Portuguese and Spanish ("1,500.00" in English). Django's own field refused the
     thousands separator ("Informe um número."), and "1.500" read as one and a half.
     """
@@ -30,7 +31,11 @@ class CampoDecimal(forms.DecimalField):
 
     @staticmethod
     def _sem_milhar(texto):
-        texto = re.sub(r"[R$€\s\u00a0]", "", texto)
+        # The currency symbols of apps/core/moedas.py (R$, US$, €, $U, S/, ₲...) and spaces;
+        # anything else stays, so "abc" is still refused.
+        for simbolo in moedas.SIMBOLOS:
+            texto = texto.replace(simbolo, "")
+        texto = re.sub(r"\s", "", texto)
         decimal = get_format("DECIMAL_SEPARATOR")
         milhar = "." if decimal == "," else ","
         grupos = rf"-?\d{{1,3}}(\{milhar}\d{{3}})+"
@@ -120,6 +125,13 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         )
         self.initial["modulos"] = sorted(ligados & ESPECIALIDADES)
         self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
+        if "moeda" in self.fields:
+            # The screen always sends it; a page opened before the update does not, and then
+            # the clinic keeps its currency (the real for a new one).
+            self.fields["moeda"].required = False
+
+    def clean_moeda(self):
+        return self.cleaned_data.get("moeda") or self.instance.moeda or moedas.PADRAO
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
@@ -154,7 +166,7 @@ class ClinicaForm(ModulosClinicosForm):
 
     class Meta:
         model = Clinica
-        fields = ["nome", "area", "documento", "email", "telefone", "endereco"] + [
+        fields = ["nome", "area", "documento", "email", "telefone", "endereco", "moeda"] + [
             "agenda_inicio",
             "agenda_fim",
             "agenda_intervalo",
@@ -245,7 +257,7 @@ class NovaClinicaForm(ModulosClinicosForm):
 
     class Meta:
         model = Clinica
-        fields = ["nome", "area", "documento", "email", "telefone", "endereco"]
+        fields = ["nome", "area", "documento", "email", "telefone", "endereco", "moeda"]
 
 
 class ClinicaAdminForm(ClinicaForm):

@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
+from . import moedas
 from .isolamento import ModeloDaClinica
 
 
@@ -85,6 +86,16 @@ class Clinica(models.Model):
         max_length=250,
         blank=True,
         help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
+    )
+    moeda = models.CharField(
+        _("moeda"),
+        max_length=3,
+        choices=moedas.ESCOLHAS,
+        default=moedas.PADRAO,
+        help_text=_(
+            "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
+            "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
+        ),
     )
     ativa = models.BooleanField(_("ativa"), default=True)
     exigir_duas_etapas = models.BooleanField(

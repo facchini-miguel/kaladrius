@@ -24,7 +24,7 @@
     <div class="col-md-6">{% with campo=form.parcelas %}{% include "includes/campo.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.primeiro_vencimento %}{% include "includes/campo.html" %}{% endwith %}</div>
   </div>
-  <p class="text-body-secondary small">{% translate "Exemplo: aluguel de R$ 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. Compra de R$ 900 em 3 vezes → valor 900, “o total”, 3." %}</p>
+  <p class="text-body-secondary small">{% translate "Exemplo: aluguel de 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. Compra de 900 em 3 vezes → valor 900, “o total”, 3." %}</p>
   {% with campo=form.observacoes %}{% include "includes/campo.html" %}{% endwith %}
   <div class="card mb-3">
     <div class="card-body">

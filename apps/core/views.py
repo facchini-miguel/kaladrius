@@ -83,6 +83,12 @@ def configuracoes(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Configurações da clínica salvas."))
+        if "moeda" in form.changed_data:
+            messages.info(
+                request,
+                _("Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi convertido.")
+                % {"moeda": form.instance.get_moeda_display()},
+            )
         return redirect("configuracoes")
     return render(request, "core/configuracoes.html", {"form": form})
 
