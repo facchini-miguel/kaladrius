@@ -11,3 +11,6 @@ Markdown==3.11.2
 pyotp==2.10.0
 segno==1.6.6
 python-stdnum==2.2
+# Time zones of the clinics' countries (zoneinfo): pinned, since Faker 40 no longer brings
+# it and the image's own database depends on the base image (decision 131).
+tzdata==2026.6

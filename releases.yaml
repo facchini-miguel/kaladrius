@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.52.5
+  data: 2026-11-01
+  titulo:
+    pt-br: Dados fictícios atualizados
+    en: Made-up data updated
+    es: Datos ficticios actualizados
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A biblioteca que gera os dados fictícios da demonstração e da anonimização (Faker)
+          foi atualizada, com profissões mais variadas; uma profissão que não cabe no cadastro
+          é trocada por outra, nunca cortada.
+        en: >
+          The library that generates the made-up data of the demo and of the anonymization
+          (Faker) was updated, with more varied occupations; an occupation that does not fit the
+          record is replaced by another, never cut.
+        es: >
+          La biblioteca que genera los datos ficticios de la demostración y de la anonimización
+          (Faker) se actualizó, con profesiones más variadas; una profesión que no cabe en el
+          registro se cambia por otra, nunca se corta.
+
 - versao: 0.52.4
   data: 2026-11-01
   titulo:

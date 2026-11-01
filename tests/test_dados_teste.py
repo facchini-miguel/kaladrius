@@ -76,3 +76,29 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     assert RegistroAuditoria.objects.filter(
         objeto_descricao__startswith="Dados de teste removidos: 1 clínicas"
     ).exists()
+
+
+def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
+    """Faker 40's pt_BR job list has titles over 100 characters: another one is drawn."""
+    from apps.core import ficticios
+
+    titulos = iter(["Especialista " * 10, "Dentista"])
+
+    class Falso:
+        def job(self):
+            return next(titulos)
+
+    assert ficticios.profissao(Falso()) == "Dentista"
+
+
+def test_documento_ficticio_sempre_valido():
+    """Faker 40 can, rarely, make up a CPF with all digits equal: another one is drawn."""
+    from apps.core import ficticios
+
+    numeros = iter(["111.111.111-11", "529.982.247-25"])
+
+    class Falso:
+        def cpf(self):
+            return next(numeros)
+
+    assert ficticios.cpf(Falso()) == "52998224725"

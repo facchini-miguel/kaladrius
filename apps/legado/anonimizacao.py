@@ -19,6 +19,7 @@ from apps.agenda.models import Agendamento
 from apps.auditoria.models import RegistroAuditoria
 from apps.auditoria.registro import nome_do_modelo, registrar
 from apps.convenios.models import Carteirinha
+from apps.core import ficticios
 from apps.core.isolamento import sem_isolamento
 from apps.core.models import Clinica
 from apps.core.validadores import somente_digitos
@@ -105,8 +106,8 @@ class _Anonimizador:
         if not paciente.cpf_cnpj:
             return ""
         while True:
-            gerar = self.fake.cnpj if paciente.tipo == Paciente.Tipo.JURIDICA else self.fake.cpf
-            documento = somente_digitos(gerar())
+            gerar = ficticios.cnpj if paciente.tipo == Paciente.Tipo.JURIDICA else ficticios.cpf
+            documento = gerar(self.fake)
             if documento not in usados:
                 usados.add(documento)
                 return documento
@@ -134,7 +135,7 @@ class _Anonimizador:
             p.rg = fake.numerify("#" * min(len(p.rg), 10)) if p.rg else ""
             p.inscricao_estadual = fake.numerify("#########") if p.inscricao_estadual else ""
             p.data_nascimento = self._nascimento(p.data_nascimento)
-            p.profissao = fake.job()[:100] if p.profissao else ""
+            p.profissao = ficticios.profissao(fake) if p.profissao else ""
             p.responsavel = self._nome(self.sorte.choice("FM")) if p.responsavel else ""
             p.telefone_residencial = _mesmo_tamanho(p.telefone_residencial, fake)
             p.telefone_comercial = _mesmo_tamanho(p.telefone_comercial, fake)
