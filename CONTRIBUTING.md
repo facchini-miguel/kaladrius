@@ -17,7 +17,8 @@ Thank you for helping. Everything you need is on the documentation site, in
   ```
 
   `main` only takes pull requests, merged once the CI checks pass; on a pull request
-  from a fork, CI starts after a maintainer approves it.
+  from someone who is not a collaborator (usually from a fork), CI starts after a
+  maintainer clicks "Approve and run workflows".
 
 - **Three languages:** the interface and the documentation are in Portuguese, English and
   Spanish. A change to a text changes the three (`locale/` for the system, `docs/` for the

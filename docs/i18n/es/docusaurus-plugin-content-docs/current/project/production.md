@@ -76,7 +76,7 @@ gcloud storage ls -l gs://kaladrius-backups/
 ```
 
 ### Volver a una versión anterior
-Lo normal es deshacer el commit (`git revert`) y enviarlo a `main`: el CI publica una imagen nueva y la VM la instala en hasta 5 minutos. En una emergencia, se puede fijar una imagen antigua en la VM (cada versión tiene la etiqueta `X.Y.Z`, que nunca cambia, y cada commit la etiqueta con los 12 primeros caracteres del SHA):
+Lo normal es deshacer el commit (`git revert`) en una rama y hacer el merge en `main` por pull request (`main` no acepta otra cosa, decisión 141; el admin puede enviarlo directo, saltándose el ruleset): el CI publica una imagen nueva y la VM la instala en hasta 5 minutos después del merge. En una emergencia, se puede fijar una imagen antigua en la VM (cada versión tiene la etiqueta `X.Y.Z`, que nunca cambia, y cada commit la etiqueta con los 12 primeros caracteres del SHA):
 
 ```bash
 sudo systemctl stop kaladrius-atualizar.timer   # si no, la VM vuelve a latest en 5 min
