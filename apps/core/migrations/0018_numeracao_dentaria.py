@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('fdi', 'FDI (11 a 48; dentes de leite 51 a 85)'), ('universal', 'Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)'), ('palmer', 'Palmer (UR6, LL3; dentes de leite URE a LRE)')], default='fdi', help_text='Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os dentes já registrados continuam os mesmos.', max_length=10, verbose_name='numeração dos dentes'),
         ),
     ]
+# test only: an edit to an applied migration (do not merge)
