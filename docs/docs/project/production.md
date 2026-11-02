@@ -76,7 +76,7 @@ gcloud storage ls -l gs://kaladrius-backups/
 ```
 
 ### Rolling back to a previous version
-The normal way is to revert the commit (`git revert`) and push to `main`: CI publishes a new image and the VM installs it within 5 minutes. In an emergency, an old image can be pinned on the VM (each version has an `X.Y.Z` tag that never moves, and each commit a tag with the first 12 characters of its SHA):
+The normal way is to revert the commit (`git revert`) on a branch and merge it into `main` through a pull request (`main` takes nothing else, decision 141; the admin may push it straight, bypassing the ruleset): CI publishes a new image and the VM installs it within 5 minutes of the merge. In an emergency, an old image can be pinned on the VM (each version has an `X.Y.Z` tag that never moves, and each commit a tag with the first 12 characters of its SHA):
 
 ```bash
 sudo systemctl stop kaladrius-atualizar.timer   # otherwise the VM goes back to latest in 5 min
