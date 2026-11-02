@@ -42,14 +42,15 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Dependencies
 
-The libraries the system uses directly are listed in `requirements.in` (the test and lint tools in `requirements-dev.in`). `requirements.txt` and `requirements-dev.txt` are **generated** from them with every dependency, indirect ones included, pinned to an exact version and a hash, so CI, the production image and your machine install exactly the same thing, and pip refuses a package whose hash does not match. Do not edit the `.txt` files by hand: change the `.in` file and regenerate them, with the Python of `.python-version`:
+The libraries the system uses directly are listed in `requirements.in` (the test and lint tools in `requirements-dev.in`). `requirements.txt` and `requirements-dev.txt` are **generated** from them with every dependency, indirect ones included, pinned to an exact version and a hash, so CI and the production image install exactly the same thing, and pip refuses a package whose hash does not match. Do not edit the `.txt` files by hand: change the `.in` file and regenerate them (needs Docker; it uses the Python of `.python-version`):
 
 ```bash
-docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/w" -w /w python:3.14-slim sh -c \
-  "pip install -q pip-tools==7.6.2 && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements.in && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements-dev.in"
+deploy/gerar_lock.sh
 ```
 
-Dependabot updates both files in its pull requests.
+CI runs `deploy/gerar_lock.sh --verificar` and fails while a lock does not match its `.in` file. Dependabot updates both files in its pull requests, indirect libraries included.
+
+The locks are resolved for Linux, where the system runs. On Windows, `pip install` refuses them (a package only Windows needs, such as `colorama`, has no hash in them): develop in Docker ([Quick start](quick-start.md)) or in WSL.
 
 ## This documentation site
 

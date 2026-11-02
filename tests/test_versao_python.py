@@ -16,6 +16,12 @@ def test_versao_do_python_em_um_lugar_so():
     dockerfile = (RAIZ / "Dockerfile").read_text()
     assert f"ARG PYTHON_VERSION={versao}\n" in dockerfile
     assert "FROM python:${PYTHON_VERSION}-slim" in dockerfile
+    # The locks are resolved for this same Python (decision 136).
+    gerar_lock = (RAIZ / "deploy" / "gerar_lock.sh").read_text()
+    assert 'VERSAO=$(cat "$RAIZ/.python-version")' in gerar_lock
+    assert '"python:$VERSAO-slim"' in gerar_lock
+    for lock in ("requirements.txt", "requirements-dev.txt", "deploy/pip-tools.txt"):
+        assert f"pip-compile with Python {versao}\n" in (RAIZ / lock).read_text(), lock
     arquivo_ci = RAIZ / ".github" / "workflows" / "ci.yml"
     if not arquivo_ci.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")

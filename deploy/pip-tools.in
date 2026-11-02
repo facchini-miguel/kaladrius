@@ -1,0 +1,4 @@
+# The tool that generates the dependency locks (decision 136), itself locked with hashes in
+# pip-tools.txt, so the step that writes the hashes production trusts installs only checked
+# packages. deploy/gerar_lock.sh generates both.
+pip-tools==7.6.2

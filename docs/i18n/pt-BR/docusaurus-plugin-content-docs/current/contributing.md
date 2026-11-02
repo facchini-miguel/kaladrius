@@ -42,14 +42,15 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Dependências
 
-As bibliotecas que o sistema usa diretamente ficam em `requirements.in` (as ferramentas de teste e lint em `requirements-dev.in`). O `requirements.txt` e o `requirements-dev.txt` são **gerados** a partir delas, com todas as dependências, inclusive as indiretas, fixadas numa versão exata e com hash, para o CI, a imagem de produção e a sua máquina instalarem exatamente a mesma coisa, e o pip recusa um pacote cujo hash não bate. Não edite os `.txt` à mão: mude o `.in` e gere-os de novo, com o Python do `.python-version`:
+As bibliotecas que o sistema usa diretamente ficam em `requirements.in` (as ferramentas de teste e lint em `requirements-dev.in`). O `requirements.txt` e o `requirements-dev.txt` são **gerados** a partir delas, com todas as dependências, inclusive as indiretas, fixadas numa versão exata e com hash, para o CI e a imagem de produção instalarem exatamente a mesma coisa, e o pip recusa um pacote cujo hash não bate. Não edite os `.txt` à mão: mude o `.in` e gere-os de novo (precisa do Docker; usa o Python do `.python-version`):
 
 ```bash
-docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/w" -w /w python:3.14-slim sh -c \
-  "pip install -q pip-tools==7.6.2 && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements.in && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements-dev.in"
+deploy/gerar_lock.sh
 ```
 
-O Dependabot atualiza os dois arquivos nos pull requests dele.
+O CI roda `deploy/gerar_lock.sh --verificar` e falha enquanto um lock não bater com o `.in` dele. O Dependabot atualiza os dois arquivos nos pull requests dele, inclusive as bibliotecas indiretas.
+
+Os locks são resolvidos para Linux, onde o sistema roda. No Windows o `pip install` os recusa (um pacote que só o Windows precisa, como o `colorama`, não tem hash neles): desenvolva no Docker ([Início rápido](quick-start.md)) ou no WSL.
 
 ## Este site de documentação
 

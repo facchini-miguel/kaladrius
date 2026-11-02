@@ -1,7 +1,6 @@
 # The libraries the system uses directly (decision 136). requirements.txt is generated from
-# this file with every dependency pinned and hashed; after changing it, run:
-#   docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/w" -w /w python:3.14-slim sh -c \
-#     "pip install -q pip-tools==7.6.2 && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements.in && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements-dev.in"
+# this file with every dependency pinned and hashed; after changing it, run
+# deploy/gerar_lock.sh (CI fails while the lock does not match).
 Django==6.1.2
 django-ninja==1.7.3
 psycopg[binary]==3.3.6
