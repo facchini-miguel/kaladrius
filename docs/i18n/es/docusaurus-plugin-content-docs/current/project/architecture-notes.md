@@ -42,6 +42,7 @@ Los dos se comunican **solo por la API**.
 | HTTPS / proxy | Caddy | Apache 2.0 |
 | Pruebas | pytest + pytest-django | MIT |
 | Lint y formato | Ruff | MIT |
+| Lock de las dependencias | pip-tools (`pip-compile`, todos los paquetes fijados y con hash, decisión 136), solo como herramienta de build | BSD |
 
 Regla: **no usar dependencias GPL/AGPL**, para mantener libre la elección de licencia del proyecto.
 

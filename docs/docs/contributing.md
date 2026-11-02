@@ -40,6 +40,18 @@ docker compose exec app python manage.py makemigrations --check
 2. Make sure tests, lint and formatting pass.
 3. Open the pull request explaining what and why. By contributing, you agree that your contribution is licensed under Apache 2.0.
 
+## Dependencies
+
+The libraries the system uses directly are listed in `requirements.in` (the test and lint tools in `requirements-dev.in`). `requirements.txt` and `requirements-dev.txt` are **generated** from them with every dependency, indirect ones included, pinned to an exact version and a hash, so CI and the production image install exactly the same thing, and pip refuses a package whose hash does not match. Do not edit the `.txt` files by hand: change the `.in` file and regenerate them (needs Docker; it uses the Python of `.python-version`):
+
+```bash
+deploy/gerar_lock.sh
+```
+
+CI runs `deploy/gerar_lock.sh --verificar` and fails while a lock does not match its `.in` file. Dependabot updates both files in its pull requests, indirect libraries included.
+
+The locks are resolved for Linux, where the system runs. On Windows, `pip install` refuses them (a package only Windows needs, such as `colorama`, has no hash in them): develop in Docker ([Quick start](quick-start.md)) or in WSL.
+
 ## This documentation site
 
 It needs Node.js 26, the version the image builds it with (`docs/Dockerfile`).

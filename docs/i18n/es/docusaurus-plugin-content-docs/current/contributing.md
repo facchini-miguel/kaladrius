@@ -40,6 +40,18 @@ docker compose exec app python manage.py makemigrations --check
 2. Verifique que pruebas, lint y formato pasen.
 3. Abra el pull request explicando qué y por qué. Al contribuir, acepta que su contribución queda bajo la licencia Apache 2.0.
 
+## Dependencias
+
+Las bibliotecas que el sistema usa directamente están en `requirements.in` (las herramientas de prueba y lint en `requirements-dev.in`). `requirements.txt` y `requirements-dev.txt` se **generan** a partir de ellas, con todas las dependencias, incluidas las indirectas, fijadas en una versión exacta y con hash, para que el CI y la imagen de producción instalen exactamente lo mismo, y pip rechaza un paquete cuyo hash no coincide. No edite los `.txt` a mano: cambie el `.in` y vuelva a generarlos (necesita Docker; usa el Python de `.python-version`):
+
+```bash
+deploy/gerar_lock.sh
+```
+
+El CI ejecuta `deploy/gerar_lock.sh --verificar` y falla mientras un lock no coincida con su `.in`. Dependabot actualiza los dos archivos en sus pull requests, incluidas las bibliotecas indirectas.
+
+Los locks se resuelven para Linux, donde se ejecuta el sistema. En Windows, `pip install` los rechaza (un paquete que solo Windows necesita, como `colorama`, no tiene hash en ellos): desarrolle en Docker ([Inicio rápido](quick-start.md)) o en WSL.
+
 ## Este sitio de documentación
 
 Necesita Node.js 26, la versión con la que la imagen lo genera (`docs/Dockerfile`).

@@ -12,6 +12,10 @@ updates:
       time: "06:00"
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
+    # Indirect libraries too, pinned in the locks (decision 136): without this, version
+    # updates only touch what the .in files list and the rest of the lock stays frozen.
+    allow:
+      - dependency-type: all
     groups:
       # Development tools first (a dependency goes to the first group it matches): a lint or
       # test-tool change must not hold back the libraries that run in production.
@@ -20,6 +24,17 @@ updates:
         update-types: [minor, patch]
       python-menores:
         update-types: [minor, patch]
+
+  # pip-tools, which generates the locks, locked itself in deploy/pip-tools.txt.
+  - package-ecosystem: pip
+    directory: /deploy
+    schedule:
+      interval: monthly
+    allow:
+      - dependency-type: all
+    groups:
+      pip-tools:
+        patterns: ["*"]
 
   - package-ecosystem: npm
     directory: /docs

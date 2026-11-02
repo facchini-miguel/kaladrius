@@ -1,0 +1,19 @@
+# The libraries the system uses directly (decision 136). requirements.txt is generated from
+# this file with every dependency pinned and hashed; after changing it, run
+# deploy/gerar_lock.sh (CI fails while the lock does not match).
+Django==6.1.2
+django-ninja==1.7.3
+psycopg[binary]==3.3.6
+argon2-cffi==25.1.0
+gunicorn==26.2.0
+whitenoise==6.12.0
+PyYAML==6.0.3
+django-axes==8.3.1
+Faker==40.44.0
+Markdown==3.11.2
+pyotp==2.10.0
+segno==1.6.6
+python-stdnum==2.2
+# Time zones of the clinics' countries (zoneinfo): pinned, since Faker 40 no longer brings
+# it and the image's own database depends on the base image (decision 131).
+tzdata==2026.6
