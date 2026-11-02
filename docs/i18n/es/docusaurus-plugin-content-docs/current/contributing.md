@@ -40,6 +40,17 @@ docker compose exec app python manage.py makemigrations --check
 2. Verifique que pruebas, lint y formato pasen.
 3. Abra el pull request explicando qué y por qué. Al contribuir, acepta que su contribución queda bajo la licencia Apache 2.0.
 
+## Dependencias
+
+Las bibliotecas que el sistema usa directamente están en `requirements.in` (las herramientas de prueba y lint en `requirements-dev.in`). `requirements.txt` y `requirements-dev.txt` se **generan** a partir de ellas, con todas las dependencias, incluidas las indirectas, fijadas en una versión exacta y con hash, para que el CI, la imagen de producción y su máquina instalen exactamente lo mismo, y pip rechaza un paquete cuyo hash no coincide. No edite los `.txt` a mano: cambie el `.in` y vuelva a generarlos, con el Python de `.python-version`:
+
+```bash
+docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/w" -w /w python:3.14-slim sh -c \
+  "pip install -q pip-tools==7.6.2 && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements.in && ~/.local/bin/pip-compile --generate-hashes --strip-extras requirements-dev.in"
+```
+
+Dependabot actualiza los dos archivos en sus pull requests.
+
 ## Este sitio de documentación
 
 Necesita Node.js 26, la versión con la que la imagen lo genera (`docs/Dockerfile`).

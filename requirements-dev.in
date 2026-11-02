@@ -1,0 +1,8 @@
+# Development and test tools, on top of the system's libraries (decision 136). The lock
+# (requirements-dev.txt) keeps the shared libraries at the versions of requirements.txt.
+-c requirements.txt
+-r requirements.in
+pytest==9.2.0
+pytest-django==4.14.0
+ruff==0.17.3
+pytest-cov==7.1.0

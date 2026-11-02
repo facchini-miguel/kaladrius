@@ -20,7 +20,7 @@ medical-system/
 ├── Dockerfile
 ├── .env.example
 ├── pyproject.toml            versão, configuração do ruff, do pytest e da cobertura
-├── requirements*.txt         dependências (fixadas)
+├── requirements*.in/.txt     dependências (.in) e o lock gerado delas (.txt)
 ├── releases.yaml
 ├── config/                   settings (um arquivo, configurado por .env), urls, api, wsgi
 ├── apps/

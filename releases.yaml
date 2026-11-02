@@ -4,6 +4,28 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.4
+  data: 2026-11-02
+  titulo:
+    pt-br: Bibliotecas travadas
+    en: Libraries locked
+    es: Bibliotecas fijadas
+  itens:
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Todas as bibliotecas do sistema, inclusive as indiretas, ficam travadas na versão
+          testada e conferidas na instalação, para o servidor rodar exatamente o que foi testado.
+        en: >
+          Every library of the system, indirect ones included, is locked to the tested version
+          and checked when installed, so the server runs exactly what was tested.
+        es: >
+          Todas las bibliotecas del sistema, incluidas las indirectas, quedan fijadas en la
+          versión probada y verificadas al instalarse, para que el servidor ejecute exactamente
+          lo que se probó.
+
 - versao: 0.53.3
   data: 2026-11-02
   titulo:
