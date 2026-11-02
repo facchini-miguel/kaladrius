@@ -8,7 +8,12 @@ export default {
       type: "category",
       label: "Installation",
       collapsed: false,
-      items: ["installation/requirements", "installation/docker-compose", "installation/google-cloud"],
+      items: [
+        "installation/requirements",
+        "installation/linux-package",
+        "installation/docker-compose",
+        "installation/google-cloud",
+      ],
     },
     "configuration",
     "first-steps",

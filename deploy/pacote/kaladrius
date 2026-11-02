@@ -1,0 +1,451 @@
+#!/bin/bash
+# The `kaladrius` command of the Linux package (.deb and .rpm, decision 140): configures the
+# installation (a few questions in text screens, or none with options, for technicians) and
+# runs the everyday tasks. The rest is done by the server scripts beside it (comum.sh,
+# atualizar.sh, backup.sh, saude.sh, testar_restauracao.sh), the same ones as on Google Cloud.
+# Messages follow the server's language: Portuguese, Spanish or English.
+set -euo pipefail
+# A failed answer inside $(…) (a cancelled screen, the end of the input) stops the whole command.
+shopt -s inherit_errexit
+
+BIN=$(dirname "$(readlink -f "$0")")
+# shellcheck source=../servidor/comum.sh
+source "$BIN/comum.sh"
+
+case "${KALADRIUS_IDIOMA:-${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}}" in
+  pt*) IDIOMA=pt ;;
+  es*) IDIOMA=es ;;
+  *) IDIOMA=en ;;
+esac
+
+# The message in the server's language: t "português" "español" "English".
+t() {
+  case "$IDIOMA" in
+    pt) printf '%s' "$1" ;;
+    es) printf '%s' "$2" ;;
+    *) printf '%s' "$3" ;;
+  esac
+}
+
+ADMIN_CRIADO="$DIR/admin-criado"
+BACKUPS_PADRAO=/var/backups/kaladrius
+TITULO="Kaladrius"
+
+erro() {
+  echo "$(t "Erro" "Error" "Error"): $*" >&2
+  exit 1
+}
+
+exigir_root() {
+  [ "$(id -u)" -eq 0 ] || erro "$(t "rode com sudo: sudo kaladrius $*" "ejecute con sudo: sudo kaladrius $*" "run with sudo: sudo kaladrius $*")"
+}
+
+# --- Questions: text screens (whiptail) in a terminal, plain lines otherwise ----------------
+# The screens and the prompts go to stderr, the terminal: the answers are read through $(…).
+
+com_telas() {
+  [ -z "${KALADRIUS_SEM_TELAS:-}" ] && command -v whiptail >/dev/null && [ -t 0 ] && [ -t 2 ]
+}
+
+# The screens' buttons in the server's language.
+BOTOES=(--ok-button "$(t "Avançar" "Siguiente" "Next")" --cancel-button "$(t "Cancelar" "Cancelar" "Cancel")")
+
+# Text for a screen, wrapped to its width: whiptail sizes the box by the number of lines.
+quebrar() {
+  printf '%s' "$1" | fold -s -w 66
+}
+
+aviso() {  # aviso "text"
+  if com_telas; then
+    whiptail --title "$TITULO" --ok-button "OK" --msgbox "$(quebrar "$1")" 0 72 >&2
+  else
+    printf '\n%s\n\n' "$1" >&2
+  fi
+}
+
+confirmar() {  # confirmar "question": yes = 0
+  if com_telas; then
+    whiptail --title "$TITULO" --yes-button "$(t "Sim" "Sí" "Yes")" \
+      --no-button "$(t "Não" "No" "No")" --yesno "$(quebrar "$1")" 0 72 >&2
+  else
+    local resposta
+    read -r -p "$1 [$(t "s/N" "s/N" "y/N")] " resposta
+    case "$resposta" in [sSyY]*) return 0 ;; *) return 1 ;; esac
+  fi
+}
+
+perguntar() {  # perguntar "question" "default": prints the answer
+  local resposta
+  if com_telas; then
+    resposta=$(whiptail --title "$TITULO" "${BOTOES[@]}" --inputbox "$(quebrar "$1")" 0 72 "$2" 3>&1 1>&2 2>&3) || cancelar
+  else
+    read -r -p "$1 [${2}] " resposta || cancelar
+    resposta=${resposta:-$2}
+  fi
+  printf '%s' "$resposta"
+}
+
+perguntar_senha() {  # perguntar_senha "question": prints the answer
+  local resposta
+  if com_telas; then
+    resposta=$(whiptail --title "$TITULO" "${BOTOES[@]}" --passwordbox "$(quebrar "$1")" 0 72 3>&1 1>&2 2>&3) || cancelar
+  else
+    read -r -s -p "$1 " resposta || cancelar
+    echo >&2
+  fi
+  printf '%s' "$resposta"
+}
+
+escolher() {  # escolher "question" tag1 "text1" tag2 "text2"…: prints the chosen tag
+  local pergunta=$1 resposta
+  shift
+  if com_telas; then
+    resposta=$(whiptail --title "$TITULO" "${BOTOES[@]}" --notags --menu "$(quebrar "$pergunta")" 0 72 0 "$@" 3>&1 1>&2 2>&3) \
+      || cancelar
+  else
+    local -a tags=() i=1
+    echo "$pergunta" >&2
+    while [ $# -gt 0 ]; do
+      echo "  $i) $2" >&2
+      tags+=("$1")
+      shift 2
+      i=$((i + 1))
+    done
+    while :; do
+      read -r -p "> " resposta || cancelar
+      if [[ "$resposta" =~ ^[0-9]+$ ]] && [ "$resposta" -ge 1 ] && [ "$resposta" -le "${#tags[@]}" ]; then
+        resposta=${tags[$((resposta - 1))]}
+        break
+      fi
+    done
+  fi
+  printf '%s' "$resposta"
+}
+
+cancelar() {
+  echo >&2
+  echo "$(t "Configuração interrompida. Para continuar: sudo kaladrius configurar" "Configuración interrumpida. Para continuar: sudo kaladrius configurar" "Setup interrupted. To go on: sudo kaladrius configurar")" >&2
+  exit 1
+}
+
+# --- Checks --------------------------------------------------------------------------------
+
+# This server's address on the clinic's network (the one its traffic leaves from).
+endereco_local() {
+  ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -1
+}
+
+eh_ipv4() {
+  [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
+}
+
+eh_dominio() {
+  [[ "$1" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$ ]]
+}
+
+# Another program already listens on port 80 or 443 (Caddy needs both).
+portas_ocupadas() {
+  compose ps --status running --services 2>/dev/null | grep -qx caddy && return 1
+  ss -ltnH 2>/dev/null | awk '{print $4}' | grep -qE ':(80|443)$'
+}
+
+docker_pronto() {
+  command -v docker >/dev/null || erro "$(t "o Docker não está instalado." "Docker no está instalado." "Docker is not installed.")"
+  systemctl enable --now docker >/dev/null 2>&1 || true
+  docker compose version >/dev/null 2>&1 \
+    || erro "$(t "falta o Docker Compose (docker compose)." "falta Docker Compose (docker compose)." "Docker Compose (docker compose) is missing.")"
+}
+
+# --- configurar ----------------------------------------------------------------------------
+
+ajuda_configurar() {
+  cat <<EOF
+$(t "Uso" "Uso" "Usage"): sudo kaladrius configurar [--acesso rede-interna|internet] [--endereco IP|DOMAIN]
+                               [--usuario USER] [--email EMAIL]
+
+$(t "Sem opções, pergunta tudo em telas. Com todas as opções e a senha em KALADRIUS_SENHA_ADMIN,
+não pergunta nada (instalação por um técnico):" "Sin opciones, pregunta todo en pantallas. Con todas las opciones y la contraseña en
+KALADRIUS_SENHA_ADMIN, no pregunta nada (instalación por un técnico):" "With no options it asks everything in screens. With every option and the password in
+KALADRIUS_SENHA_ADMIN it asks nothing (installation by a technician):")
+
+  read -rs KALADRIUS_SENHA_ADMIN && export KALADRIUS_SENHA_ADMIN
+  sudo --preserve-env=KALADRIUS_SENHA_ADMIN kaladrius configurar --acesso rede-interna \\
+    --endereco 192.168.0.10 --usuario admin
+EOF
+}
+
+# A new .env, or the existing one with the address changed: the passwords and keys stay.
+escrever_env() {
+  local acesso=$1 endereco=$2 usuario=$3 email=$4 novo
+  novo=$(mktemp "$DIR/.env.XXXXXX")
+  if [ -f "$DIR/.env" ]; then
+    grep -vE '^(KALADRIUS_ACESSO|SITE_HOSTNAME|DJANGO_ALLOWED_HOSTS|DJANGO_CSRF_TRUSTED_ORIGINS)=' \
+      "$DIR/.env" >"$novo"
+  else
+    cat >"$novo" <<EOF
+# Kaladrius: written by "kaladrius configurar" on $(date -u +%Y-%m-%d). Never share this file:
+# it holds the keys of the system. The administrator's password is not kept here.
+DJANGO_DEBUG=0
+DJANGO_SECRET_KEY=$(head -c 48 /dev/urandom | base64 | tr -d '\n/+=')
+DJANGO_SECURE=1
+DJANGO_PROXY_REVERSO=1
+POSTGRES_DB=kaladrius
+POSTGRES_USER=kaladrius
+POSTGRES_PASSWORD=$(head -c 32 /dev/urandom | base64 | tr -d '\n/+=')
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+DJANGO_ADMIN_USERNAME=$usuario
+DJANGO_ADMIN_EMAIL=$email
+# Daily backup (06:00 UTC): this folder, keeping the last days. Copy it to another disk or
+# computer: a backup on the same disk does not survive the disk.
+KALADRIUS_BACKUP_PASTA=$BACKUPS_PADRAO
+KALADRIUS_BACKUP_DIAS=14
+# Password recovery by e-mail (optional; empty: the administrator sets new passwords).
+DJANGO_EMAIL_HOST=
+DJANGO_EMAIL_PORT=587
+DJANGO_EMAIL_USER=
+DJANGO_EMAIL_PASSWORD=
+DJANGO_EMAIL_FROM=
+EOF
+  fi
+  cat >>"$novo" <<EOF
+KALADRIUS_ACESSO=$acesso
+SITE_HOSTNAME=$endereco
+DJANGO_ALLOWED_HOSTS=$endereco
+DJANGO_CSRF_TRUSTED_ORIGINS=https://$endereco
+EOF
+  chmod 600 "$novo"
+  mv -f "$novo" "$DIR/.env"
+  ln -sfn ../.env "$DIR/release/.env"
+}
+
+# Creates the administrator with the password given; on a refusal (the system's password
+# rules), prints the reasons and fails. The password goes in the environment only; stdin is
+# not handed to the container (it would read the answers still to come).
+criar_administrador() {
+  local usuario=$1 email=$2 senha=$3
+  DJANGO_ADMIN_USERNAME=$usuario DJANGO_ADMIN_EMAIL=$email DJANGO_ADMIN_PASSWORD=$senha \
+    compose exec -T -e DJANGO_ADMIN_USERNAME -e DJANGO_ADMIN_EMAIL -e DJANGO_ADMIN_PASSWORD \
+    app python manage.py criar_admin </dev/null 2>&1
+}
+
+pedir_senha() {
+  local senha confirmacao
+  while :; do
+    senha=$(perguntar_senha "$(t "Senha do administrador (mínimo de 10 caracteres, não só números):" "Contraseña del administrador (mínimo 10 caracteres, no solo números):" "Administrator's password (at least 10 characters, not only digits):")")
+    if [ "${#senha}" -lt 10 ] || [[ "$senha" =~ ^[0-9]+$ ]]; then
+      aviso "$(t "A senha precisa de pelo menos 10 caracteres e não pode ter só números." "La contraseña necesita al menos 10 caracteres y no puede tener solo números." "The password needs at least 10 characters and cannot be only digits.")"
+      continue
+    fi
+    confirmacao=$(perguntar_senha "$(t "Digite a senha de novo:" "Escriba la contraseña de nuevo:" "Type the password again:")")
+    [ "$senha" = "$confirmacao" ] && break
+    aviso "$(t "As senhas não conferem. Tente de novo." "Las contraseñas no coinciden. Inténtelo de nuevo." "The passwords do not match. Try again.")"
+  done
+  printf '%s' "$senha"
+}
+
+configurar() {
+  local acesso="" endereco="" usuario="" email="" sugestao interativo=1 senha="" saida
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --acesso) acesso=${2:-}; shift 2 ;;
+      --endereco) endereco=${2:-}; shift 2 ;;
+      --usuario) usuario=${2:-}; shift 2 ;;
+      --email) email=${2:-}; shift 2 ;;
+      -h | --help) ajuda_configurar; return 0 ;;
+      *) ajuda_configurar >&2; exit 2 ;;
+    esac
+  done
+  exigir_root configurar
+  docker_pronto
+  # Everything given (the password in the environment): a technician's installation, no questions.
+  if [ -n "$acesso" ] && [ -n "$endereco" ] && { [ -n "$usuario" ] || [ -f "$ADMIN_CRIADO" ]; }; then
+    interativo=""
+  fi
+  [ -n "$interativo" ] || [ -f "$ADMIN_CRIADO" ] || [ -n "${KALADRIUS_SENHA_ADMIN:-}" ] \
+    || erro "$(t "sem perguntas, a senha do administrador vem em KALADRIUS_SENHA_ADMIN." "sin preguntas, la contraseña del administrador va en KALADRIUS_SENHA_ADMIN." "without questions, the administrator's password goes in KALADRIUS_SENHA_ADMIN.")"
+
+  if [ -n "$interativo" ] && [ ! -f "$DIR/.env" ]; then
+    aviso "$(t "Bem-vindo ao Kaladrius.
+
+Algumas perguntas para terminar a instalação: como a clínica vai acessar o sistema e o usuário administrador. Os dados da clínica você preenche depois, dentro do sistema." "Bienvenido a Kaladrius.
+
+Algunas preguntas para terminar la instalación: cómo accederá la clínica al sistema y el usuario administrador. Los datos de la clínica se completan después, dentro del sistema." "Welcome to Kaladrius.
+
+A few questions to finish the installation: how the clinic will reach the system, and the administrator user. You fill in the clinic's details later, inside the system.")"
+  fi
+
+  if [ -z "$acesso" ]; then
+    acesso=$(escolher "$(t "Como a clínica vai acessar o Kaladrius?" "¿Cómo accederá la clínica a Kaladrius?" "How will the clinic reach Kaladrius?")" \
+      rede-interna "$(t "Só na rede interna (sem domínio)" "Solo en la red interna (sin dominio)" "Internal network only (no domain)")" \
+      internet "$(t "Pela internet, com domínio" "Por internet, con dominio" "Through the internet, with a domain")")
+  fi
+  case "$acesso" in
+    rede-interna | internet) ;;
+    *) erro "--acesso: rede-interna | internet" ;;
+  esac
+
+  while :; do
+    if [ "$acesso" = rede-interna ]; then
+      if [ -z "$endereco" ]; then
+        sugestao=$(valor_do_env SITE_HOSTNAME)
+        eh_ipv4 "$sugestao" || sugestao=$(endereco_local)
+        endereco=$(perguntar "$(t "Endereço IP deste servidor na rede da clínica. Ele deve ser fixo: reserve-o no roteador." "Dirección IP de este servidor en la red de la clínica. Debe ser fija: resérvela en el router." "This server's IP address on the clinic's network. It must not change: reserve it in the router.")" "$sugestao")
+      fi
+      eh_ipv4 "$endereco" && break
+      [ -n "$interativo" ] || erro "$(t "endereço IP inválido: $endereco" "dirección IP inválida: $endereco" "invalid IP address: $endereco")"
+      aviso "$(t "Endereço IP inválido: $endereco" "Dirección IP inválida: $endereco" "Invalid IP address: $endereco")"
+    else
+      if [ -z "$endereco" ]; then
+        sugestao=$(valor_do_env SITE_HOSTNAME)
+        eh_dominio "$sugestao" || sugestao=""
+        endereco=$(perguntar "$(t "Domínio do sistema (por exemplo clinica.exemplo.com.br). Ele já deve apontar para este servidor, com as portas 80 e 443 abertas na internet, para o certificado HTTPS gratuito." "Dominio del sistema (por ejemplo clinica.ejemplo.com). Ya debe apuntar a este servidor, con los puertos 80 y 443 abiertos a internet, para el certificado HTTPS gratuito." "The system's domain (for example clinic.example.com). It must already point to this server, with ports 80 and 443 open to the internet, for the free HTTPS certificate.")" "$sugestao")
+        endereco=$(printf '%s' "$endereco" | tr '[:upper:]' '[:lower:]')
+      fi
+      if eh_dominio "$endereco"; then
+        getent ahosts "$endereco" >/dev/null && break
+        [ -n "$interativo" ] || erro "$(t "o domínio $endereco não existe no DNS." "el dominio $endereco no existe en el DNS." "the domain $endereco does not exist in DNS.")"
+        confirmar "$(t "O domínio $endereco ainda não existe no DNS. Sem isso o certificado HTTPS não sai. Continuar mesmo assim?" "El dominio $endereco aún no existe en el DNS. Sin eso el certificado HTTPS no se emite. ¿Continuar de todos modos?" "The domain $endereco does not exist in DNS yet. Without it the HTTPS certificate is not issued. Continue anyway?")" && break
+      else
+        [ -n "$interativo" ] || erro "$(t "domínio inválido: $endereco" "dominio inválido: $endereco" "invalid domain: $endereco")"
+        aviso "$(t "Domínio inválido: $endereco" "Dominio inválido: $endereco" "Invalid domain: $endereco")"
+      fi
+    fi
+    endereco=""
+  done
+
+  if portas_ocupadas; then
+    erro "$(t "outro programa já usa a porta 80 ou 443 deste servidor (veja: sudo ss -ltnp). O Kaladrius precisa das duas." "otro programa ya usa el puerto 80 o 443 de este servidor (vea: sudo ss -ltnp). Kaladrius necesita los dos." "another program already uses port 80 or 443 of this server (see: sudo ss -ltnp). Kaladrius needs both.")"
+  fi
+
+  if [ ! -f "$ADMIN_CRIADO" ]; then
+    [ -n "$usuario" ] || usuario=$(perguntar "$(t "Usuário do administrador (a conta de suporte da instalação):" "Usuario del administrador (la cuenta de soporte de la instalación):" "Administrator's user name (the installation's support account):")" "admin")
+    [ -n "$email" ] || [ -z "$interativo" ] || email=$(perguntar "$(t "E-mail do administrador (opcional):" "Correo del administrador (opcional):" "Administrator's e-mail (optional):")" "")
+    if [ -n "$interativo" ] && [ -z "${KALADRIUS_SENHA_ADMIN:-}" ]; then
+      senha=$(pedir_senha)
+    else
+      senha=${KALADRIUS_SENHA_ADMIN:-}
+    fi
+  fi
+
+  escrever_env "$acesso" "$endereco" "${usuario:-$(valor_do_env DJANGO_ADMIN_USERNAME)}" "$email"
+  echo "$(t "Baixando e iniciando o sistema; na primeira vez leva alguns minutos..." "Descargando e iniciando el sistema; la primera vez tarda unos minutos..." "Downloading and starting the system; the first time takes a few minutes...")"
+  "$BIN/atualizar.sh" --forcar </dev/null \
+    || erro "$(t "o sistema não respondeu. Veja os registros: sudo kaladrius logs" "el sistema no respondió. Vea los registros: sudo kaladrius logs" "the system did not answer. See the logs: sudo kaladrius logs")"
+
+  while [ ! -f "$ADMIN_CRIADO" ]; do
+    if saida=$(criar_administrador "$usuario" "$email" "$senha"); then
+      touch "$ADMIN_CRIADO"
+      break
+    fi
+    # Only the reasons (the command's other lines are the app's own log).
+    saida=$(printf '%s\n' "$saida" | sed -n 's/^CommandError: //p')
+    [ -n "$interativo" ] || erro "$(t "o sistema recusou a senha:" "el sistema rechazó la contraseña:" "the system refused the password:") $saida"
+    aviso "$(t "O sistema recusou a senha:" "El sistema rechazó la contraseña:" "The system refused the password:")
+
+$saida"
+    senha=$(pedir_senha)
+  done
+  concluido
+}
+
+concluido() {
+  local endereco texto
+  endereco=$(valor_do_env SITE_HOSTNAME)
+  texto="$(t "Kaladrius instalado e no ar." "Kaladrius instalado y en marcha." "Kaladrius is installed and running.")
+
+$(t "Abra no navegador:" "Abra en el navegador:" "Open in the browser:")  https://$endereco"
+  if rede_interna; then
+    texto="$texto
+
+$(t "Na rede interna o certificado HTTPS é da própria instalação. Para o navegador confiar nele, instale nos computadores da clínica o arquivo gerado por:" "En la red interna el certificado HTTPS es de la propia instalación. Para que el navegador confíe en él, instale en las computadoras de la clínica el archivo generado por:" "On the internal network the HTTPS certificate belongs to the installation itself. For the browser to trust it, install on the clinic's computers the file made by:")
+  sudo kaladrius certificado"
+  fi
+  texto="$texto
+
+$(t "Backup diário em" "Copia de seguridad diaria en" "Daily backup in") $(valor_do_env KALADRIUS_BACKUP_PASTA). $(t "Comandos:" "Comandos:" "Commands:") kaladrius $(t ajuda ayuda help)"
+  if com_telas; then aviso "$texto"; fi
+  printf '\n%s\n\n' "$texto"
+}
+
+# --- Everyday commands ---------------------------------------------------------------------
+
+exigir_configurado() {
+  [ -f "$DIR/.env" ] || erro "$(t "o Kaladrius ainda não foi configurado: sudo kaladrius configurar" "Kaladrius aún no fue configurado: sudo kaladrius configurar" "Kaladrius is not set up yet: sudo kaladrius configurar")"
+}
+
+certificado() {
+  local destino=${1:-$PWD/kaladrius-certificado.crt}
+  exigir_root certificado
+  exigir_configurado
+  rede_interna || erro "$(t "só a instalação na rede interna usa um certificado próprio." "solo la instalación en la red interna usa un certificado propio." "only the internal network installation uses a certificate of its own.")"
+  compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt >"$destino"
+  chmod 644 "$destino"
+  cat <<EOF
+$(t "Certificado salvo em" "Certificado guardado en" "Certificate saved in"): $destino
+
+$(t "Copie-o (por exemplo num pen drive) para cada computador da clínica e instale-o:" "Cópielo (por ejemplo en un pendrive) a cada computadora de la clínica e instálelo:" "Copy it (on a USB stick, for example) to each of the clinic's computers and install it:")
+  Windows: $(t "dois cliques no arquivo > Instalar certificado > Máquina local > Autoridades de Certificação Raiz Confiáveis" "doble clic en el archivo > Instalar certificado > Equipo local > Entidades de certificación raíz de confianza" "double-click the file > Install Certificate > Local Machine > Trusted Root Certification Authorities")
+  macOS: $(t "dois cliques > Acesso às Chaves > Sistema; depois, no certificado, Confiar > Sempre" "doble clic > Acceso a Llaveros > Sistema; luego, en el certificado, Confiar > Siempre" "double-click > Keychain Access > System; then, on the certificate, Trust > Always Trust")
+  Linux: sudo cp kaladrius-certificado.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
+  Firefox: $(t "Configurações > Privacidade e Segurança > Certificados > Importar" "Ajustes > Privacidad y seguridad > Certificados > Importar" "Settings > Privacy & Security > Certificates > Import")
+EOF
+}
+
+estado() {
+  exigir_root estado
+  exigir_configurado
+  echo "Kaladrius ${VERSAO_DO_PACOTE:-?}: https://$(valor_do_env SITE_HOSTNAME)"
+  # The package's version is not the one running: its image did not come up (automatic
+  # rollback) or could not be downloaded.
+  local rodando
+  rodando=$(docker inspect --format '{{.Config.Image}}' "$(compose ps -q app 2>/dev/null)" 2>/dev/null || true)
+  if [ "$rodando" != "$IMAGEM_APP" ]; then
+    echo "$(t "Atenção: a versão do pacote não está no ar; o sistema roda a anterior ($rodando). Instale o pacote de novo ou veja: sudo kaladrius logs app" "Atención: la versión del paquete no está en marcha; el sistema ejecuta la anterior ($rodando). Instale el paquete de nuevo o vea: sudo kaladrius logs app" "Warning: the package's version is not running; the system runs the previous one ($rodando). Install the package again or see: sudo kaladrius logs app")"
+  fi
+  compose ps
+}
+
+ajuda() {
+  cat <<EOF
+Kaladrius ${VERSAO_DO_PACOTE:-}
+
+  sudo kaladrius configurar          $(t "configura (ou muda o endereço de) a instalação" "configura (o cambia la dirección de) la instalación" "sets up the installation (or changes its address)")
+  sudo kaladrius estado              $(t "endereço e situação dos serviços" "dirección y estado de los servicios" "address and state of the services")
+  sudo kaladrius saude               $(t "processador, memória, disco, backups e tarefas" "procesador, memoria, disco, copias y tareas" "processor, memory, disk, backups and tasks")
+  sudo kaladrius backup              $(t "faz um backup agora" "hace una copia de seguridad ahora" "makes a backup now")
+  sudo kaladrius testar-restauracao  $(t "restaura o último backup num banco descartável e confere" "restaura la última copia en una base descartable y verifica" "restores the latest backup into a throwaway database and checks it")
+  sudo kaladrius certificado [ARQ]   $(t "o certificado para os computadores da rede interna" "el certificado para las computadoras de la red interna" "the certificate for the internal network's computers")
+  sudo kaladrius senha [USUARIO]     $(t "troca a senha de um usuário" "cambia la contraseña de un usuario" "changes a user's password")
+  sudo kaladrius logs [SERVICO]      $(t "registros (app, db, caddy); Ctrl+C para sair" "registros (app, db, caddy); Ctrl+C para salir" "logs (app, db, caddy); Ctrl+C to leave")
+  sudo kaladrius reiniciar           $(t "reinicia os serviços (e aplica mudanças do .env)" "reinicia los servicios (y aplica cambios del .env)" "restarts the services (and applies changes to .env)")
+  sudo kaladrius parar | iniciar     $(t "para ou inicia o sistema (os dados ficam)" "detiene o inicia el sistema (los datos quedan)" "stops or starts the system (the data stays)")
+
+$(t "Atualizações: chegam com o sistema (sudo apt upgrade ou sudo dnf upgrade)." "Actualizaciones: llegan con el sistema (sudo apt upgrade o sudo dnf upgrade)." "Updates: they come with the system (sudo apt upgrade or sudo dnf upgrade).")
+$(t "Documentação" "Documentación" "Documentation"): https://kaladrius-docs.facchini.eti.br
+EOF
+}
+
+comando=${1:-ajuda}
+shift || true
+case "$comando" in
+  configurar) configurar "$@" ;;
+  estado) estado ;;
+  saude) exigir_root saude; exigir_configurado; "$BIN/saude.sh" ;;
+  backup) exigir_root backup; exigir_configurado; "$BIN/backup.sh" ;;
+  testar-restauracao) exigir_root testar-restauracao; exigir_configurado; "$BIN/testar_restauracao.sh" ;;
+  certificado) certificado "$@" ;;
+  senha)
+    exigir_root senha
+    exigir_configurado
+    compose exec app python manage.py changepassword "${1:-$(valor_do_env DJANGO_ADMIN_USERNAME)}"
+    ;;
+  logs) exigir_root logs; exigir_configurado; compose logs -f --tail 100 "$@" ;;
+  # Recreated, not just restarted: a container reads .env only when it is created.
+  reiniciar) exigir_root reiniciar; exigir_configurado; compose up -d --force-recreate ;;
+  parar) exigir_root parar; exigir_configurado; compose stop ;;
+  iniciar) exigir_root iniciar; exigir_configurado; compose up -d ;;
+  versao | --version) echo "${VERSAO_DO_PACOTE:-?}" ;;
+  ajuda | ayuda | help | -h | --help) ajuda ;;
+  *) ajuda >&2; exit 2 ;;
+esac

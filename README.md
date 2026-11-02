@@ -10,9 +10,19 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Current version: 0.53.6** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
+**Current version: 0.54.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: in development, running as a public demo. **To try it, start at https://www.facchini.eti.br/en/kaladrius/**: the page has the demo logins for each role (front desk, practitioner, finance, clinic administrator), screenshots and every link. The demo runs on the Google Cloud free tier, IPv6 only; see [Reference production](https://kaladrius-docs.facchini.eti.br/project/production).
+
+## Installing on a server
+
+On Debian 13+ or Ubuntu 24.04+, download the `.deb` of the [latest release](https://github.com/facchini-miguel/kaladrius/releases/latest) and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups:
+
+```bash
+sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: the .rpm with dnf or zypper
+```
+
+See [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package) for the details, and the other ways to install (Docker Compose by hand, Google Cloud).
 
 ## Running locally
 

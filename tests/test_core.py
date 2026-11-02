@@ -60,6 +60,16 @@ def test_criar_admin(monkeypatch):
     assert get_user_model().objects.filter(username="admin").count() == 1
 
 
+@pytest.mark.parametrize("senha", ["curta1", "1234567890123", "password123"])
+def test_criar_admin_recusa_senha_fraca(monkeypatch, senha):
+    # The Linux package's installer shows the reasons and asks again (decision 140).
+    monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
+    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", senha)
+    with pytest.raises(CommandError):
+        call_command("criar_admin")
+    assert not get_user_model().objects.filter(username="admin").exists()
+
+
 def test_criar_admin_sem_senha(monkeypatch):
     monkeypatch.delenv("DJANGO_ADMIN_PASSWORD", raising=False)
     with pytest.raises(CommandError):

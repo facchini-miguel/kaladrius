@@ -1,13 +1,17 @@
 import os
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
     help = (
         "Creates the superuser from DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_PASSWORD and "
-        "DJANGO_ADMIN_EMAIL. Does nothing if the user already exists."
+        "DJANGO_ADMIN_EMAIL. Does nothing if the user already exists. The password must pass "
+        "the system's password rules (the Linux package's installer shows the reasons and asks "
+        "again)."
     )
 
     def handle(self, *args, **options):
@@ -22,6 +26,11 @@ class Command(BaseCommand):
         if Usuario.objects.filter(username=username).exists():
             self.stdout.write(f"O usuário '{username}' já existe. Nada foi alterado.")
             return
+
+        try:
+            validate_password(senha, Usuario(username=username, email=email))
+        except ValidationError as erro:
+            raise CommandError(" ".join(erro.messages)) from erro
 
         Usuario.objects.create_superuser(username=username, email=email, password=senha)
         self.stdout.write(self.style.SUCCESS(f"Superusuário '{username}' criado."))

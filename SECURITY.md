@@ -5,7 +5,8 @@ Kaladrius stores patient data, so security reports get priority.
 ## Supported versions
 
 Only the newest version receives fixes. Installations are expected to update (the Google
-Cloud installation updates itself within 5 minutes of a release).
+Cloud installation updates itself within 5 minutes of a release; the Linux package by
+installing the package of the new version, with the same automatic rollback).
 
 ## Dependencies
 

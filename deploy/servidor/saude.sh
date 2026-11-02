@@ -117,10 +117,11 @@ hosts_de() {
 
 # Every hostname answers `caminho` over HTTPS.
 todos_respondem() {
-  local caminho=$1 host
+  local caminho=$1 host opcoes=()
   shift
+  rede_interna && opcoes=(--insecure)  # Caddy's local certificate authority (comum.sh)
   for host in "$@"; do
-    curl -fsS -m 20 -o /dev/null "https://$host$caminho" || return 1
+    curl -fsS -m 20 "${opcoes[@]}" -o /dev/null "https://$host$caminho" || return 1
   done
 }
 
@@ -142,7 +143,9 @@ verificar() {
   mapfile -t docs < <(hosts_de DOCS_HOSTNAME)
   # The system, with its database (/api/v1/saude answers 503 when the database does not).
   sinal_de MONITOR_SISTEMA_URL todos_respondem /api/v1/saude "${sites[@]}"
-  sinal_de MONITOR_CERTIFICADO_URL certificados_ok "${sites[@]}" "${docs[@]}"
+  # On the internal network Caddy's local certificates last hours and are renewed by it: there
+  # is no expiry to watch.
+  rede_interna || sinal_de MONITOR_CERTIFICADO_URL certificados_ok "${sites[@]}" "${docs[@]}"
   if [ "${#docs[@]}" -gt 0 ]; then
     sinal_de MONITOR_DOCS_URL todos_respondem / "${docs[@]}"
   fi

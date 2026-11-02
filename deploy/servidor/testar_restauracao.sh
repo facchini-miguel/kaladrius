@@ -12,13 +12,22 @@ API="https://storage.googleapis.com/storage/v1/b/$BUCKET_BACKUP/o"
 pasta=$(mktemp -d)
 trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
 
-token=$(token_google)
-# Newest by the timestamp in the name (kaladrius-YYYYMMDD-HHMMSS.dump).
-objeto=$(curl -sf -H "Authorization: Bearer $token" "$API?fields=items(name)" \
-  | grep -o '"name": *"[^"]*\.dump"' | sed -E 's/.*"([^"]*)"$/\1/' \
-  | sed -E 's/.*-([0-9]{8}-[0-9]{6})\.dump$/\1 &/' | sort | tail -1 | cut -d' ' -f2)
-[ -n "$objeto" ]
-curl -sf -H "Authorization: Bearer $token" "$API/$objeto?alt=media" -o "$pasta/backup.dump"
+if instalado_por_pacote; then
+  # The local folder of backup.sh (decision 140); the names sort by their timestamp.
+  local_backups=$(valor_do_env KALADRIUS_BACKUP_PASTA)
+  objeto=$(find "${local_backups:-/var/backups/kaladrius}" -maxdepth 1 -name 'kaladrius-*.dump' \
+    | sort | tail -1)
+  [ -n "$objeto" ]
+  cp "$objeto" "$pasta/backup.dump"
+else
+  token=$(token_google)
+  # Newest by the timestamp in the name (kaladrius-YYYYMMDD-HHMMSS.dump).
+  objeto=$(curl -sf -H "Authorization: Bearer $token" "$API?fields=items(name)" \
+    | grep -o '"name": *"[^"]*\.dump"' | sed -E 's/.*"([^"]*)"$/\1/' \
+    | sed -E 's/.*-([0-9]{8}-[0-9]{6})\.dump$/\1 &/' | sort | tail -1 | cut -d' ' -f2)
+  [ -n "$objeto" ]
+  curl -sf -H "Authorization: Bearer $token" "$API/$objeto?alt=media" -o "$pasta/backup.dump"
+fi
 echo "Backup: $objeto ($(du -h "$pasta/backup.dump" | cut -f1))"
 
 # A small container: the e2-micro has 1 GB of RAM and the system keeps running. The image of
@@ -39,11 +48,17 @@ docker cp "$pasta/backup.dump" "$CONTAINER:/backup.dump"
 docker exec "$CONTAINER" pg_restore -U postgres -d restaurado --no-owner --no-privileges \
   --exit-on-error /backup.dump
 
-# The restored database has the clinic and the migrations of every app.
+# The restored database has the migrations of every app and, when the system has a clinic
+# (a new installation has none until "Primeiros passos"), the clinic. One check per line: a
+# failing `[ a ] && [ b ]` does not stop a `set -e` script.
 clinicas=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM core_clinica")
 migracoes=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM django_migrations")
-echo "Restaurado: $clinicas clínica(s), $migracoes migrações."
-[ "$clinicas" -ge 1 ] && [ "$migracoes" -ge 1 ]
+no_sistema=$(compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT count(*) FROM core_clinica"' </dev/null)
+echo "Restaurado: $clinicas clínica(s), $migracoes migrações (o sistema tem $no_sistema clínica(s))."
+[ "$migracoes" -ge 1 ]
+if [ "$no_sistema" -ge 1 ]; then
+  [ "$clinicas" -ge 1 ]
+fi
 
 avisar_monitor MONITOR_RESTAURACAO_URL
 echo "Teste de restauração concluído."

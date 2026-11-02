@@ -45,10 +45,22 @@ voltar_a_anterior() {
 }
 
 entrar_no_registro
-docker pull -q "$IMAGEM_APP" >/dev/null
-# The documentation site (decision 067) never blocks an update of the system.
-docker pull -q "$IMAGEM_DOCS" >/dev/null 2>&1 || true
-atual=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP" "$IMAGEM_DOCS" 2>/dev/null || true)
+if ! instalado_por_pacote; then
+  docker pull -q "$IMAGEM_APP" >/dev/null  # a failure tells the monitor (the ERR trap)
+# Installed from the Linux package, an image already on the server is enough when the registry
+# cannot be reached (an installation without internet, or a test image built there).
+elif ! docker pull -q "$IMAGEM_APP" >/dev/null 2>&1 && ! docker image inspect "$IMAGEM_APP" >/dev/null 2>&1; then
+  echo "Não foi possível baixar $IMAGEM_APP (sem internet ou o registro fora do ar)." >&2
+  false  # the ERR trap tells the monitor
+fi
+imagens=("$IMAGEM_APP")
+# The documentation site (decision 067) never blocks an update of the system, and a package
+# installation has none.
+if [ -n "$IMAGEM_DOCS" ]; then
+  docker pull -q "$IMAGEM_DOCS" >/dev/null 2>&1 || true
+  imagens+=("$IMAGEM_DOCS")
+fi
+atual=$(docker image inspect --format '{{.Id}}' "${imagens[@]}" 2>/dev/null || true)
 instalada=$(cat "$IMAGEM_INSTALADA" 2>/dev/null || true)
 recusada=$(cat "$IMAGEM_RECUSADA" 2>/dev/null || true)
 
@@ -79,6 +91,7 @@ if [ "$atual" != "$instalada" ] || [ -n "$forcar" ]; then
   rm -f "$IMAGEM_RECUSADA"
   docker tag "$IMAGEM_APP" "$IMAGEM_APP_ANTERIOR"
   docker image prune -f >/dev/null
-  echo "Sistema atualizado: $(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGEM_APP")"
+  echo "Sistema atualizado: $(docker image inspect --format \
+    '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$IMAGEM_APP")"
 fi
 avisar_monitor MONITOR_ATUALIZACAO_URL

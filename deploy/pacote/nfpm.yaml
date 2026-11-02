@@ -1,0 +1,106 @@
+# Linux packages of Kaladrius (decision 140), built by deploy/pacote/gerar.sh with nFPM
+# (https://nfpm.goreleaser.com) from the repository's root: one .deb (Debian 13+, Ubuntu
+# 24.04+) and one .rpm (Fedora, Rocky Linux, AlmaLinux, openSUSE) of shell scripts and
+# configuration. The system itself is the public image of the same version, pinned by digest
+# in release/pacote-linux; amd64 only, like the image.
+name: kaladrius
+arch: amd64
+platform: linux
+version: ${VERSAO}
+version_schema: semver
+release: "1"
+section: misc
+priority: optional
+maintainer: Miguel Facchini <facchini-miguel@users.noreply.github.com>
+vendor: Miguel Facchini
+homepage: https://github.com/facchini-miguel/kaladrius
+license: Apache-2.0
+description: |-
+  Clinic management system (Kaladrius)
+  Patients, schedule, medical records, budgets, finances and the clinic's team, in a web app
+  for the clinic's internal network or the internet. Runs in Docker containers (PostgreSQL,
+  Caddy with HTTPS), with daily backups, a weekly restore test and automatic rollback of a
+  failed update. After installing: sudo kaladrius configurar
+
+contents:
+  - src: deploy/pacote/kaladrius
+    dst: /opt/kaladrius/bin/kaladrius
+    file_info: {mode: 0755}
+  - src: /opt/kaladrius/bin/kaladrius
+    dst: /usr/bin/kaladrius
+    type: symlink
+  - src: deploy/servidor/comum.sh
+    dst: /opt/kaladrius/bin/comum.sh
+    file_info: {mode: 0644}
+  - src: deploy/servidor/atualizar.sh
+    dst: /opt/kaladrius/bin/atualizar.sh
+    file_info: {mode: 0755}
+  - src: deploy/servidor/backup.sh
+    dst: /opt/kaladrius/bin/backup.sh
+    file_info: {mode: 0755}
+  - src: deploy/servidor/saude.sh
+    dst: /opt/kaladrius/bin/saude.sh
+    file_info: {mode: 0755}
+  - src: deploy/servidor/testar_restauracao.sh
+    dst: /opt/kaladrius/bin/testar_restauracao.sh
+    file_info: {mode: 0755}
+  - src: deploy/docker-compose.prod.yml
+    dst: /opt/kaladrius/release/docker-compose.prod.yml
+    file_info: {mode: 0644}
+  - src: deploy/Caddyfile
+    dst: /opt/kaladrius/release/Caddyfile
+    file_info: {mode: 0644}
+  # VERSAO and IMAGEM (with its digest), written by gerar.sh.
+  - src: dist/pacote-linux
+    dst: /opt/kaladrius/release/pacote-linux
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-backup.service
+    dst: /usr/lib/systemd/system/kaladrius-backup.service
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-backup.timer
+    dst: /usr/lib/systemd/system/kaladrius-backup.timer
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-saude.service
+    dst: /usr/lib/systemd/system/kaladrius-saude.service
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-saude.timer
+    dst: /usr/lib/systemd/system/kaladrius-saude.timer
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-restauracao.service
+    dst: /usr/lib/systemd/system/kaladrius-restauracao.service
+    file_info: {mode: 0644}
+  - src: deploy/servidor/kaladrius-restauracao.timer
+    dst: /usr/lib/systemd/system/kaladrius-restauracao.timer
+    file_info: {mode: 0644}
+  - src: LICENSE
+    dst: /usr/share/doc/kaladrius/copyright
+    file_info: {mode: 0644}
+    packager: deb
+  - src: LICENSE
+    dst: /usr/share/licenses/kaladrius/LICENSE
+    file_info: {mode: 0644}
+    packager: rpm
+
+scripts:
+  postinstall: deploy/pacote/depois_de_instalar.sh
+  preremove: deploy/pacote/antes_de_remover.sh
+  postremove: deploy/pacote/depois_de_remover.sh
+
+recommends:
+  - whiptail
+
+overrides:
+  deb:
+    depends:
+      - docker.io (>= 24) | docker-ce
+      - docker-compose (>= 2) | docker-compose-v2 | docker-compose-plugin
+      - curl
+      - iproute2
+  rpm:
+    depends:
+      - (moby-engine or docker-ce or docker)
+      - (docker-compose or docker-compose-plugin)
+      - curl
+      - iproute
+    recommends:
+      - newt

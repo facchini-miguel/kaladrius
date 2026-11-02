@@ -12,12 +12,14 @@ title: Requisitos
 | Procesador | 1 vCPU compartida (e2-micro de Google Cloud) | 2 vCPUs |
 | Memoria | 1 GB de RAM + 1 GB de swap | 2 GB de RAM |
 | Disco | 10 GB | 30 GB (base de datos, imágenes y backups locales) |
-| Sistema operativo | Cualquier Linux que ejecute Docker (probado en Debian 13) | |
+| Sistema operativo | Cualquier Linux que ejecute Docker (probado en Debian 13; el [paquete Linux](linux-package.md) en Debian, Ubuntu, Fedora, Rocky Linux y openSUSE) | |
 | Programas | Docker Engine con el plugin Compose, Git | |
 
 La instalación de referencia es una **e2-micro** de Google Cloud (free tier) que atiende una clínica pequeña.
 
 ## Red
+
+En la **red interna** de la clínica (paquete Linux), solo una dirección IP fija para el servidor. Por internet:
 
 - Un **dominio** que apunte al servidor: registro `A` (IPv4) y/o `AAAA` (IPv6). Sirve un subdominio gratuito de [DuckDNS](https://www.duckdns.org).
 - Puertos **80** y **443** abiertos a internet (443/UDP también, para HTTP/3). Caddy, incluido, obtiene y renueva solo el certificado HTTPS de Let's Encrypt; para eso necesita el puerto 80.
@@ -31,7 +33,8 @@ Cualquier Chrome, Edge, Firefox o Safari actual, en computadora, tableta o celul
 
 | Opción | Para quién | Guía |
 |---|---|---|
-| **Servidor propio** | Cualquier servidor Linux o VPS con Docker | [Servidor propio (Docker Compose)](docker-compose.md) |
+| **Paquete Linux** | Un servidor de la clínica o un VPS, instalado por la propia clínica o por un técnico: algunas preguntas, para la red interna o internet | [Paquete Linux (.deb y .rpm)](linux-package.md) |
+| **Servidor propio** | Cualquier servidor Linux o VPS con Docker, configurado a mano | [Servidor propio (Docker Compose)](docker-compose.md) |
 | **Free tier de Google Cloud** | Sin costo de servidor; actualización automática, backup diario y monitoreo de la salud del servidor | [Google Cloud](google-cloud.md) |
 | **Su computadora** | Evaluación y desarrollo | [Inicio rápido](../quick-start.md) |
 

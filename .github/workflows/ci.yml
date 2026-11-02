@@ -80,6 +80,20 @@ jobs:
           echo "${{ steps.google.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://us-east1-docker.pkg.dev
           docker push --all-tags "$IMAGEM"
 
+  # Linux packages (decision 140): built on every push and pull request, and installed in clean
+  # Debian, Ubuntu, Fedora and openSUSE containers. The release job builds them again with the
+  # published image's digest and attaches them to the release.
+  pacote-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
+      - name: Pacotes .deb e .rpm
+        run: deploy/pacote/gerar.sh --imagem ghcr.io/facchini-miguel/kaladrius:latest
+      - name: Instalação no Debian, Ubuntu, Fedora e openSUSE
+        run: deploy/pacote/testar_instalacao.sh
+
   # Publishes the image to Google Artifact Registry (the VM picks it up within 5 minutes) and
   # to GitHub Packages, ghcr.io, for anyone installing Kaladrius (decision 076).
   # After the docs image, so the VM never starts a stack whose docs image is missing.
@@ -130,7 +144,7 @@ jobs:
   # facchini-miguel/facchini.eti.br), the owner's site is rebuilt right away to show it;
   # without one, the site's hourly build picks it up.
   release:
-    needs: [publicar]
+    needs: [publicar, pacote-linux]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
@@ -165,8 +179,13 @@ jobs:
           python manage.py compilemessages >/dev/null
           python manage.py notas_release "$VERSAO" --titulo > titulo.txt
           python manage.py notas_release "$VERSAO" > notas.md
+          # The Linux packages of the version (decision 140), with the image just published,
+          # pinned by its digest.
+          deploy/pacote/gerar.sh
           gh release create "v$VERSAO" --target "$GITHUB_SHA" --title "$(cat titulo.txt)" \
-            --notes-file notas.md --latest
+            --notes-file notas.md --latest \
+            "dist/kaladrius_${VERSAO}-1_amd64.deb" "dist/kaladrius-${VERSAO}-1.x86_64.rpm" \
+            dist/SHA256SUMS
           echo "SITE_DESATUALIZADO=1" >> "$GITHUB_ENV"
       - name: Atualizar o site do titular
         if: env.SITE_DESATUALIZADO == '1' && env.TEM_SITE_TOKEN == 'true'

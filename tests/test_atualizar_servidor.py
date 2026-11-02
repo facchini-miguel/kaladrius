@@ -48,6 +48,7 @@ IMAGEM_RECUSADA="$DIR/imagem-recusada"
 export IMAGEM_APP IMAGEM_DOCS
 log() {{ echo "$*" >> "$DIR/log"; }}
 entrar_no_registro() {{ :; }}
+instalado_por_pacote() {{ [ -f "$DIR/pacote-linux" ]; }}
 extrair_arquivos_de_deploy() {{ log "extrair $IMAGEM_APP"; }}
 instalar_agendamentos() {{ log agendamentos; }}
 compose() {{ log "compose $* com $(cat "$IMAGENS/$(echo "$IMAGEM_APP" | tr '/:' '__')")"; }}
@@ -204,3 +205,39 @@ def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
     ]
     assert servidor.ler("imagem-recusada") == ["B", "D"]
     assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+
+
+def test_pacote_linux_sem_documentacao_e_com_imagem_so_local(servidor):
+    # Installed from the Linux package (decision 140): no docs image, and an image already on
+    # the server is enough when the registry does not have it (a test image, no internet).
+    comum = servidor.dir / "bin" / "comum.sh"
+    comum.write_text(
+        comum.read_text().replace('IMAGEM_DOCS="registro/docs:latest"', 'IMAGEM_DOCS=""')
+    )
+    (servidor.dir / "pacote-linux").write_text("VERSAO=0.54.0\n")
+    (servidor.dir / "imagem-instalada").write_text("A\n")
+    servidor.imagem("imagens", "registro/app:latest", "B")
+    (servidor.dir / "remoto" / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 0
+    assert "compose up -d --remove-orphans com B" in log
+    assert servidor.ler("imagem-instalada") == ["B"]
+
+
+def test_google_cloud_sem_o_registro_falha_e_avisa(servidor):
+    # Only the Linux package goes on with the image already on the server: on Google Cloud the
+    # update monitor reports a registry it cannot reach.
+    (servidor.dir / "remoto" / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 1
+    assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+
+
+def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor):
+    (servidor.dir / "pacote-linux").write_text("VERSAO=0.54.0\n")
+    for lugar in ("imagens", "remoto"):
+        (servidor.dir / lugar / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 1
+    assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+    assert not [linha for linha in log if linha.startswith("compose")]
