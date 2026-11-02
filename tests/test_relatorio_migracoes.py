@@ -1,6 +1,7 @@
 """Report of the migrations a pull request adds (decision 139)."""
 
 import subprocess
+from io import StringIO
 
 import pytest
 from django.db import connection, migrations, models
@@ -86,4 +87,21 @@ def test_migracoes_novas_le_o_git(monkeypatch):
 
 @pytest.mark.django_db(transaction=True)
 def test_ida_e_volta_de_uma_migracao_real():
-    assert relatorio.testar_volta([CONVENIOS]) == []
+    assert relatorio.ida_e_volta([CONVENIOS]) == []
+
+
+@pytest.mark.django_db(transaction=True)
+def test_comando_completo_com_ida_e_volta(tmp_path):
+    """The command as CI runs it (it once failed: an option hid the function of the same name)."""
+    from django.core.management import call_command
+
+    arquivo = tmp_path / "relatorio.md"
+    saida = StringIO()
+    call_command(
+        "relatorio_migracoes",
+        f"{CONVENIOS[0]}.{CONVENIOS[1]}",
+        testar_volta=True,
+        saida=str(arquivo),
+        stdout=saida,
+    )
+    assert "Back and forth tested" in arquivo.read_text() == saida.getvalue()
