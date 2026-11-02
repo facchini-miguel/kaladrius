@@ -1,20 +1,17 @@
 # Lint on every commit of every branch (decision 137): its own check, "Lint / ruff", next to the
 # CI's, so a branch pushed before its pull request is opened is checked too. The CI's tests job
-# runs the same lint again before publishing.
+# runs the same lint again before publishing, also on pull requests from forks, whose pushes do
+# not run workflows here (no pull_request trigger: it showed a second, skipped "ruff").
 name: Lint
 
 on:
   push:
-  # Pull requests from forks: their pushes do not run workflows in this repository. Those from
-  # this repository were already checked by their push.
-  pull_request:
 
 permissions:
   contents: read
 
 jobs:
   ruff:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
