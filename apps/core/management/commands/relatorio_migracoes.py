@@ -149,7 +149,7 @@ def analisar(chaves, loader=None):
     return resultado
 
 
-def testar_volta(chaves, saida=None):
+def ida_e_volta(chaves):
     """Applies everything, undoes each app's new migrations and applies them again. Returns the
     (app, target) pairs that failed, with the error."""
     loader = MigrationLoader(connection, ignore_no_migrations=True)
@@ -225,7 +225,7 @@ class Command(BaseCommand):
         else:
             raise CommandError("Informe as migrações ou --base.")
         analisadas = analisar(chaves)
-        falhas = testar_volta(chaves) if testar_volta and chaves else None
+        falhas = ida_e_volta(chaves) if testar_volta and chaves else None
         relatorio = markdown(analisadas, falhas)
         if saida:
             with open(saida, "w", encoding="utf-8") as arquivo:
