@@ -70,3 +70,16 @@ def test_ci_confere_os_locks():
     if not arquivo_ci.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
     assert "deploy/gerar_lock.sh --verificar" in arquivo_ci.read_text()
+
+
+def test_lint_a_cada_commit_usa_o_ruff_do_lock():
+    """Decision 137: the Lint workflow runs on every push and installs ruff from the lock,
+    with its hashes, for the Python of .python-version."""
+    arquivo = RAIZ / ".github" / "workflows" / "lint.yml"
+    if not arquivo.exists():  # inside the image, which leaves .github out
+        pytest.skip(".github is not in the image")
+    lint = arquivo.read_text()
+    assert "\n  push:\n" in lint
+    assert "python-version-file: .python-version" in lint and "python-version:" not in lint
+    assert "requirements-dev.txt" in lint and "--require-hashes" in lint
+    assert "ruff check" in lint and "ruff format --check" in lint

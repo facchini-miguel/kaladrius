@@ -1,0 +1,32 @@
+# Lint on every commit of every branch (decision 137): its own check, "Lint / ruff", next to the
+# CI's, so a branch pushed before its pull request is opened is checked too. The CI's tests job
+# runs the same lint again before publishing.
+name: Lint
+
+on:
+  push:
+  # Pull requests from forks: their pushes do not run workflows in this repository. Those from
+  # this repository were already checked by their push.
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version-file: .python-version
+      # Only ruff, at the version and hashes of the lock (decision 136); it has no dependencies.
+      - name: Ruff from the lock
+        run: |
+          sed -n '/^ruff==/,/^[a-z]/p' requirements-dev.txt | sed '$ { /^[a-z]/d }' > ruff.txt
+          pip install --no-deps --require-hashes -r ruff.txt
+      - name: Lint
+        run: ruff check --output-format=github . && ruff format --check .
