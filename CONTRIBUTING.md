@@ -16,6 +16,9 @@ Thank you for helping. Everything you need is on the documentation site, in
   docker compose exec app ruff check . && docker compose exec app ruff format --check .
   ```
 
+  `main` only takes pull requests, merged once the CI checks pass; on a pull request
+  from a fork, CI starts after a maintainer approves it.
+
 - **Three languages:** the interface and the documentation are in Portuguese, English and
   Spanish. A change to a text changes the three (`locale/` for the system, `docs/` for the
   site).
