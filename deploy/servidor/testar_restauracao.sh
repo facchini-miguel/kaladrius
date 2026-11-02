@@ -21,9 +21,10 @@ objeto=$(curl -sf -H "Authorization: Bearer $token" "$API?fields=items(name)" \
 curl -sf -H "Authorization: Bearer $token" "$API/$objeto?alt=media" -o "$pasta/backup.dump"
 echo "Backup: $objeto ($(du -h "$pasta/backup.dump" | cut -f1))"
 
-# A small container: the e2-micro has 1 GB of RAM and the system keeps running.
+# A small container: the e2-micro has 1 GB of RAM and the system keeps running. The image of
+# production's database, digest included (decision 138).
 docker run -d --rm --name "$CONTAINER" --memory 256m -e POSTGRES_PASSWORD=teste \
-  postgres:16-alpine >/dev/null
+  "$(imagem_postgres)" >/dev/null
 for _ in $(seq 1 60); do
   docker exec "$CONTAINER" pg_isready -U postgres -q 2>/dev/null && break
   sleep 1

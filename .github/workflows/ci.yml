@@ -13,17 +13,6 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-24.04
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: kaladrius
-          POSTGRES_USER: kaladrius
-          POSTGRES_PASSWORD: ci-only
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U kaladrius"
-          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DJANGO_SECRET_KEY: ci-only-never-use-in-production
       DJANGO_DEBUG: "0"
@@ -35,6 +24,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
+      # The PostgreSQL of production: the image and digest of deploy/docker-compose.prod.yml
+      # (decision 138), read from it, so a Dependabot pull request for that file is tested on
+      # the digest it proposes. Not a "services:" entry, which cannot read a file. Started first
+      # and waited for before the Django checks, so it comes up while the rest is installed.
+      - name: PostgreSQL (the production image)
+        run: |
+          imagem=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' deploy/docker-compose.prod.yml)
+          echo "$imagem"
+          docker run -d --name postgres -p 5432:5432 -e POSTGRES_DB=kaladrius \
+            -e POSTGRES_USER=kaladrius -e POSTGRES_PASSWORD=ci-only \
+            --health-cmd "pg_isready -U kaladrius" --health-interval 2s "$imagem"
       - name: Locks up to date (every .in compiled, both locks agree, decision 136)
         run: deploy/gerar_lock.sh --verificar
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
@@ -47,6 +47,9 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends gettext
       - name: Lint
         run: ruff check . && ruff format --check .
+      - name: PostgreSQL ready
+        run: |
+          timeout 120 sh -c 'until [ "$(docker inspect -f "{{.State.Health.Status}}" postgres)" = healthy ]; do sleep 1; done'
       - name: Django checks
         run: python manage.py check && python manage.py makemigrations --check --dry-run
       - name: Translations up to date (every text marked and extracted)
@@ -123,7 +126,7 @@ jobs:
               TAGS+=(-t "$destino:$VERSAO")
             fi
           done
-          docker build --build-arg PYTHON_VERSION="$(cat .python-version)" "${TAGS[@]}" .
+          docker build "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"
           docker push --all-tags "$IMAGEM_PUBLICA"
 

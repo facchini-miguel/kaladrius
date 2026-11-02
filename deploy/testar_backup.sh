@@ -8,6 +8,10 @@
 set -euo pipefail
 
 BUCKET=kaladrius-backups
+# The image of production's database, digest included (decision 138).
+COMPOSE_PROD="$(cd "$(dirname "$0")" && pwd)/docker-compose.prod.yml"
+IMAGEM=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' "$COMPOSE_PROD")
+[ -n "$IMAGEM" ] || { echo "Sem imagem do PostgreSQL em $COMPOSE_PROD." >&2; exit 1; }
 CONTAINER=kaladrius-teste-backup
 pasta=$(mktemp -d)
 trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
@@ -19,7 +23,7 @@ echo "Backup: gs://$BUCKET/$objeto"
 gcloud storage cp --quiet "gs://$BUCKET/$objeto" "$pasta/backup.dump"
 echo "Tamanho: $(du -h "$pasta/backup.dump" | cut -f1)"
 
-docker run -d --rm --name "$CONTAINER" -e POSTGRES_PASSWORD=teste postgres:16-alpine >/dev/null
+docker run -d --rm --name "$CONTAINER" -e POSTGRES_PASSWORD=teste "$IMAGEM" >/dev/null
 until docker exec "$CONTAINER" pg_isready -U postgres -q; do sleep 1; done
 sleep 2  # the image restarts the server once after the first initialization
 until docker exec "$CONTAINER" pg_isready -U postgres -q; do sleep 1; done

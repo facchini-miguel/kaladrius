@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.5
+  data: 2026-11-02
+  titulo:
+    pt-br: Imagens do servidor travadas
+    en: Server images locked
+    es: Imágenes del servidor fijadas
+  itens:
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          As imagens de base do servidor (Python, banco de dados, Caddy e as do site de
+          documentação) ficam travadas na versão exata testada; cada atualização delas passa
+          por revisão antes de entrar.
+        en: >
+          The server's base images (Python, database, Caddy and those of the documentation
+          site) are locked to the exact tested version; each update to them is reviewed before
+          it goes in.
+        es: >
+          Las imágenes base del servidor (Python, base de datos, Caddy y las del sitio de
+          documentación) quedan fijadas en la versión exacta probada; cada actualización pasa
+          por revisión antes de entrar.
+
 - versao: 0.53.4
   data: 2026-11-02
   titulo:

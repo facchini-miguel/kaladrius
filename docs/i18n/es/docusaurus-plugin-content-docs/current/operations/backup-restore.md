@@ -69,10 +69,11 @@ sudo docker compose -f docker-compose.prod.yml exec -T db \
 
 ## Probar un backup sin tocar el servidor
 
-Restáurelo en un PostgreSQL descartable, en cualquier computadora con Docker, y vea qué contiene:
+Restáurelo en un PostgreSQL descartable, en cualquier computadora con Docker, desde una copia del repositorio, y vea qué contiene. La imagen es la de producción, con el digest, leída de `deploy/docker-compose.prod.yml`:
 
 ```bash
-docker run -d --rm --name teste-backup -e POSTGRES_PASSWORD=teste postgres:16-alpine
+IMAGEM=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' deploy/docker-compose.prod.yml)
+docker run -d --rm --name teste-backup -e POSTGRES_PASSWORD=teste "$IMAGEM"
 sleep 5
 docker exec teste-backup createdb -U postgres restaurado
 docker cp <archivo>.dump teste-backup:/backup.dump
