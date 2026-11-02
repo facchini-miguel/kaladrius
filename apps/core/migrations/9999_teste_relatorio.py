@@ -5,4 +5,4 @@ from django.db import migrations
 class Migration(migrations.Migration):
     dependencies = [("core", "0018_numeracao_dentaria")]
 
-    operations = [migrations.RunSQL("SELECT 1", reverse_sql="SELECT 1")]
+    operations = [migrations.RunSQL("SELECT 1")]  # no reverse: cannot be undone
