@@ -14,7 +14,11 @@
 set -euo pipefail
 
 RAIZ=$(cd "$(dirname "$0")/.." && pwd)
-VERSAO=$(cat "$RAIZ/.python-version")
+IMAGEM=$(sed -n 's/^FROM \(python:[^ ]*\).*/\1/p' "$RAIZ/Dockerfile")
+if [ -z "$IMAGEM" ]; then
+  echo "O Dockerfile não tem uma linha FROM python:…" >&2
+  exit 1
+fi
 LOCKS=(deploy/pip-tools.txt requirements.txt requirements-dev.txt)
 ARQUIVOS=(deploy/pip-tools.in requirements.in requirements-dev.in "${LOCKS[@]}")
 
@@ -36,7 +40,7 @@ esac
 # production lock as a constraint, so it is compiled after it.
 COMPILAR="pip-compile --quiet --generate-hashes --strip-extras"
 docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e PIP_DISABLE_PIP_VERSION_CHECK=1 \
-  -v "$PASTA:/w" -w /w "python:$VERSAO-slim" sh -ec "
+  -v "$PASTA:/w" -w /w "$IMAGEM" sh -ec "
     pip install --quiet --user --no-warn-script-location --no-deps -r deploy/pip-tools.txt
     export PATH=\$HOME/.local/bin:\$PATH
     $COMPILAR --allow-unsafe deploy/pip-tools.in

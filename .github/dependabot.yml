@@ -57,6 +57,9 @@ updates:
       acoes:
         patterns: ["*"]
 
+  # The Dockerfiles: python in /, node and caddy in /docs, so each pull request touches the only
+  # file that names its image. The digest of the docs site's Caddy may differ from production's
+  # for a while (decision 138): each one is tested where it runs.
   - package-ecosystem: docker
     directories: [/, /docs]
     schedule:
@@ -68,10 +71,15 @@ updates:
         update-types: [version-update:semver-minor, version-update:semver-major]
 
   # The development and the production Compose files (images pinned by digest, decision 138).
+  # One pull request for both: postgres is in each, and tests/test_imagens.py requires they
+  # name the same digest (CI also reads its PostgreSQL from the production file).
   - package-ecosystem: docker-compose
     directories: [/, /deploy]
     schedule:
       interval: monthly
+    groups:
+      imagens-compose:
+        patterns: ["*"]
     ignore:
       # A new PostgreSQL major version needs the data migrated (pg_upgrade or dump and
       # restore): it is done by hand, not by a pull request.

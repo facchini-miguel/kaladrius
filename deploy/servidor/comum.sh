@@ -65,6 +65,23 @@ compose() {
   docker compose -f "$DIR/release/docker-compose.prod.yml" "$@"
 }
 
+# The PostgreSQL image of the running Compose file, digest included (decision 138), for the
+# throwaway containers of the restore test: the same database production writes its backups with.
+imagem_postgres() {
+  local imagem
+  imagem=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' "$DIR/release/docker-compose.prod.yml")
+  [ -n "$imagem" ] || { echo "Sem imagem do PostgreSQL em docker-compose.prod.yml." >&2; return 1; }
+  echo "$imagem"
+}
+
+# The Compose file and the Caddyfile of an app image (the rollback's, decision 135): they name
+# the Caddy and PostgreSQL digests (decision 138), so going back to the previous app image also
+# puts back its Caddy and PostgreSQL. The scripts stay those of the new version.
+restaurar_compose_de() {
+  docker run --rm --entrypoint sh "$1" -c 'tar -C /app/deploy -cf - docker-compose.prod.yml Caddyfile' \
+    | tar -C "$DIR/release" -xf -
+}
+
 # Copy the deploy files shipped inside the app image to $DIR/release and $DIR/bin.
 extrair_arquivos_de_deploy() {
   local tmp

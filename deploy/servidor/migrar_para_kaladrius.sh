@@ -19,6 +19,14 @@ if [ ! -d "$ANTIGO" ]; then
   exit 1
 fi
 
+# The volumes are copied with the database image the old stack ran, already on the server (only
+# its shell is used). Read before anything stops.
+copia=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' "$ANTIGO/release/docker-compose.prod.yml")
+if [ -z "$copia" ]; then
+  echo "Sem imagem do PostgreSQL em $ANTIGO/release/docker-compose.prod.yml." >&2
+  exit 1
+fi
+
 echo "== Parando os agendamentos e o sistema"
 systemctl stop medical-system-atualizar.timer medical-system-backup.timer \
   medical-system-saude.timer medical-system-atualizar.service medical-system-backup.service \
@@ -32,7 +40,7 @@ echo "== Copiando os volumes (os antigos ficam como cópia)"
 for volume in pgdata caddy_data caddy_config; do
   docker volume create "kaladrius_$volume" >/dev/null
   docker run --rm --entrypoint sh -v "medical-system_$volume:/de:ro" \
-    -v "kaladrius_$volume:/para" postgres:16-alpine -c 'cp -a /de/. /para/'
+    -v "kaladrius_$volume:/para" "$copia" -c 'cp -a /de/. /para/'
 done
 
 echo "== Trocando os agendamentos do systemd"

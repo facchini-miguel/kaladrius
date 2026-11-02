@@ -18,8 +18,9 @@ trap 'avisar_monitor MONITOR_ATUALIZACAO_URL fail' ERR
 
 forcar=$([ "${1:-}" = "--forcar" ] && echo 1 || true)
 
-# The new version did not come up: the previous app image goes back. The deploy files stay
-# those of the new version (this script included), so the refusal is kept on the next runs.
+# The new version did not come up: the previous app image goes back, with its Compose file and
+# Caddyfile, so a new Caddy or PostgreSQL digest (decision 138) is undone too. The scripts stay
+# those of the new version (this one included), so the refusal is kept on the next runs.
 voltar_a_anterior() {
   echo "$1" > "$IMAGEM_RECUSADA"
   echo "O sistema não respondeu com a versão nova: voltando à anterior." >&2
@@ -30,7 +31,10 @@ voltar_a_anterior() {
   fi
   IMAGEM_APP="$IMAGEM_APP_ANTERIOR"
   export IMAGEM_APP
+  restaurar_compose_de "$IMAGEM_APP_ANTERIOR" \
+    || echo "Aviso: sem o Compose da versão anterior; segue o da nova." >&2
   compose up -d --remove-orphans
+  recarregar_caddy
   if sistema_no_ar; then
     echo "De volta à versão anterior; a nova fica recusada até sair outra." >&2
   else

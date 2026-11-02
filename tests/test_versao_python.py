@@ -18,10 +18,10 @@ def test_versao_do_python_em_um_lugar_so():
     # The image's Python, pinned by digest (decision 138).
     imagem = rf"^FROM python:{re.escape(versao)}-slim@sha256:[0-9a-f]{{64}}$"
     assert re.search(imagem, dockerfile, re.M)
-    # The locks are resolved for this same Python (decision 136).
+    # The locks are resolved on this same image, digest included (decisions 136 and 138).
     gerar_lock = (RAIZ / "deploy" / "gerar_lock.sh").read_text()
-    assert 'VERSAO=$(cat "$RAIZ/.python-version")' in gerar_lock
-    assert '"python:$VERSAO-slim"' in gerar_lock
+    assert re.search(r'^IMAGEM=\$\(sed .*\(python:.* "\$RAIZ/Dockerfile"\)$', gerar_lock, re.M)
+    assert '-w /w "$IMAGEM" sh -ec' in gerar_lock
     for lock in ("requirements.txt", "requirements-dev.txt", "deploy/pip-tools.txt"):
         assert f"pip-compile with Python {versao}\n" in (RAIZ / lock).read_text(), lock
     arquivo_ci = RAIZ / ".github" / "workflows" / "ci.yml"
