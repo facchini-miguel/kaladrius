@@ -56,6 +56,8 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 | `itens[].tipo` | sim | `novo`, `melhoria`, `correcao` ou `seguranca` |
 | `itens[].modulo` | sim | Área do sistema (Agenda, Pacientes…), em português; a tela mostra a tradução |
 | `itens[].publico` | sim | Quem vê o item: `equipe`, `paciente` ou ambos |
+| `itens[].origem` | não | `dependabot` para uma atualização proposta pelo Dependabot; fica de fora nas mudanças do próprio projeto (decisão 133) |
+| `itens[].pr` | com `origem` | Número do pull request; a página e a release do GitHub apontam para ele |
 | `itens[].texto` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar. Um texto por idioma (`pt-br`, `en`, `es`); um teste exige os três |
 
 ### Regras de escrita
@@ -64,6 +66,7 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 - Correções de segurança não descrevem a falha, só que foi corrigida.
 - Itens só internos (infraestrutura, refatoração) não entram, ou entram com `publico: []`, e aí não aparecem para ninguém.
 - Pacientes só veem itens com `paciente` em `publico`.
+- Todo item de um pull request do Dependabot tem `origem: dependabot` e o `pr`: as Novidades mostram o selo "Dependabot · #N" e a release do GitHub acrescenta "(Dependabot, #N)", para separar as mudanças do titular das do Dependabot.
 
 ## Como aparece
 

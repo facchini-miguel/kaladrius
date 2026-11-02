@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.0
+  data: 2026-11-01
+  titulo:
+    pt-br: O que veio do Dependabot
+    en: What came from Dependabot
+    es: Lo que vino de Dependabot
+  itens:
+    - tipo: melhoria
+      modulo: Novidades
+      publico: [equipe]
+      texto:
+        pt-br: >
+          As atualizações propostas pelo Dependabot, que mantém as bibliotecas do sistema em
+          dia, aparecem nas Novidades com o selo "Dependabot" e o link para a proposta; os
+          demais itens são mudanças feitas pelo próprio projeto.
+        en: >
+          Updates proposed by Dependabot, which keeps the system's libraries current, show in
+          What's new with a "Dependabot" badge and a link to the proposal; the other items are
+          changes made by the project itself.
+        es: >
+          Las actualizaciones propuestas por Dependabot, que mantiene al día las bibliotecas del
+          sistema, aparecen en las Novedades con la etiqueta "Dependabot" y el enlace a la
+          propuesta; los demás ítems son cambios hechos por el propio proyecto.
+
 - versao: 0.52.5
   data: 2026-11-01
   titulo:
@@ -14,6 +38,8 @@
     - tipo: melhoria
       modulo: Sistema
       publico: [equipe]
+      origem: dependabot
+      pr: 5
       texto:
         pt-br: >
           A biblioteca que gera os dados fictícios da demonstração e da anonimização (Faker)
@@ -38,6 +64,8 @@
     - tipo: seguranca
       modulo: Sistema
       publico: [equipe]
+      origem: dependabot
+      pr: 10
       texto:
         pt-br: >
           Bibliotecas do sistema atualizadas (arquivos estáticos, páginas em Markdown, API,
@@ -62,6 +90,8 @@
     - tipo: seguranca
       modulo: Sistema
       publico: [equipe]
+      origem: dependabot
+      pr: 6
       texto:
         pt-br: >
           O servidor que roda o sistema (Gunicorn) passa da versão 23 para a 26, que recusa

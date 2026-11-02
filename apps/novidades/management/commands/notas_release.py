@@ -26,4 +26,8 @@ class Command(BaseCommand):
                 self.stdout.write(nome)
                 return
             for item in release.itens:
-                self.stdout.write(f"- **{item.tipo_nome} · {item.modulo_nome}:** {item.texto}")
+                # Dependabot items say so; on GitHub, "#6" links to the pull request.
+                origem = f" ({item.origem_nome}, #{item.pr})" if item.origem else ""
+                self.stdout.write(
+                    f"- **{item.tipo_nome} · {item.modulo_nome}:** {item.texto}{origem}"
+                )

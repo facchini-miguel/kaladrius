@@ -96,6 +96,16 @@ def test_leitura_e_filtro_por_publico(arquivo, settings):
         ),
         (
             "- versao: 1.0.0\n  data: 2027-01-01\n  itens:\n"
+            "    - {tipo: novo, modulo: A, publico: [equipe], texto: t, origem: robo, pr: 1}",
+            "origem",
+        ),
+        (
+            "- versao: 1.0.0\n  data: 2027-01-01\n  itens:\n"
+            "    - {tipo: novo, modulo: A, publico: [equipe], texto: t, origem: dependabot}",
+            "pr",
+        ),
+        (
+            "- versao: 1.0.0\n  data: 2027-01-01\n  itens:\n"
             "    - {tipo: novo, modulo: A, publico: [equipe], texto: t}\n"
             "- versao: 1.1.0\n  data: 2027-01-02\n  itens:\n"
             "    - {tipo: novo, modulo: A, publico: [equipe], texto: t}",
@@ -138,3 +148,49 @@ def test_api_releases(client):
 @pytest.mark.django_db
 def test_api_versao(client):
     assert client.get("/api/v1/versao").json() == {"versao": releases.versao_atual()}
+
+
+DEPENDABOT = """
+- versao: 2.0.0
+  data: 2027-05-01
+  itens:
+    - tipo: seguranca
+      modulo: Sistema
+      publico: [equipe, paciente]
+      origem: dependabot
+      pr: 42
+      texto: Biblioteca atualizada.
+    - tipo: novo
+      modulo: Agenda
+      publico: [equipe, paciente]
+      texto: Feito pelo projeto.
+"""
+
+
+@pytest.mark.django_db
+def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django_user_model):
+    """Decision 133: Dependabot's items say so, with their pull request; the project's do not."""
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    settings.RELEASES_ARQUIVO = arquivo(DEPENDABOT)
+    releases.todas.cache_clear()
+    try:
+        usuario = django_user_model.objects.create_user(username="bia", password="x-1234567890")
+        client.force_login(usuario)
+        pagina = client.get(reverse("novidades")).content.decode()
+        assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in pagina
+        assert "Dependabot · #42" in pagina and pagina.count("Dependabot ·") == 1
+        dados = client.get("/api/v1/releases?publico=paciente").json()
+        assert [(i["origem"], i["pr"]) for i in dados[0]["itens"]] == [
+            ("Dependabot", 42),
+            (None, None),
+        ]
+        saida = StringIO()
+        call_command("notas_release", "2.0.0", stdout=saida)
+        linhas = saida.getvalue().splitlines()
+        assert linhas[0].endswith("Biblioteca atualizada. (Dependabot, #42)")
+        assert linhas[1].endswith("Feito pelo projeto.")
+    finally:
+        releases.todas.cache_clear()

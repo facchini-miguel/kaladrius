@@ -58,6 +58,8 @@ Release note texts are written in the **three interface languages** (`pt-br`, `e
 | `itens[].tipo` | yes | `novo` (new), `melhoria` (improvement), `correcao` (fix) or `seguranca` (security) |
 | `itens[].modulo` | yes | Area of the system (Agenda, Pacientes…), in Portuguese; the page shows the translation |
 | `itens[].publico` | yes | Who sees the item: `equipe` (staff), `paciente` (patient) or both |
+| `itens[].origem` | no | `dependabot` for an update proposed by Dependabot; left out for the project's own changes (decision 133) |
+| `itens[].pr` | with `origem` | Number of the pull request; the page and the GitHub release link to it |
 | `itens[].texto` | yes | **A few lines**, in user language: what changed and how to use it. One text per language (`pt-br`, `en`, `es`); a test requires all three |
 
 ### Writing rules
@@ -66,6 +68,7 @@ Release note texts are written in the **three interface languages** (`pt-br`, `e
 - Security fixes do not describe the flaw, only that it was fixed.
 - Internal-only items (infrastructure, refactoring) are left out, or added with `publico: []`, which hides them from everyone.
 - Patients only see items with `paciente` in `publico`.
+- Every item from a Dependabot pull request has `origem: dependabot` and its `pr`: What's new shows a "Dependabot · #N" badge and the GitHub release adds "(Dependabot, #N)", so the owner's changes and Dependabot's are told apart.
 
 ## How it is shown
 

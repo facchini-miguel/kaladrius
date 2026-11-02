@@ -58,6 +58,8 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
 | `itens[].tipo` | sí | `novo`, `melhoria`, `correcao` o `seguranca` |
 | `itens[].modulo` | sí | Área del sistema (Agenda, Pacientes…), en portugués; la pantalla muestra la traducción |
 | `itens[].publico` | sí | Quién ve el ítem: `equipe`, `paciente` o ambos |
+| `itens[].origem` | no | `dependabot` para una actualización propuesta por Dependabot; se omite en los cambios del propio proyecto (decisión 133) |
+| `itens[].pr` | con `origem` | Número del pull request; la página y el release de GitHub enlazan a él |
 | `itens[].texto` | sí | **Pocas líneas**, en lenguaje de usuario: qué cambió y cómo usarlo. Un texto por idioma (`pt-br`, `en`, `es`); una prueba exige los tres |
 
 ### Reglas de redacción
@@ -66,6 +68,7 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
 - Las correcciones de seguridad no describen la falla, solo que se corrigió.
 - Los ítems solo internos (infraestructura, refactorización) no entran, o entran con `publico: []`, y entonces no aparecen para nadie.
 - Los pacientes solo ven ítems con `paciente` en `publico`.
+- Todo ítem de un pull request de Dependabot tiene `origem: dependabot` y su `pr`: las Novedades muestran la etiqueta "Dependabot · #N" y el release de GitHub agrega "(Dependabot, #N)", para distinguir los cambios del titular de los de Dependabot.
 
 ## Cómo aparece
 

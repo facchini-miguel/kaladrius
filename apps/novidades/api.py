@@ -14,6 +14,8 @@ class ItemOut(Schema):
     tipo_nome: str
     modulo: str
     texto: str
+    origem: str | None = None  # "Dependabot" for its updates; null for the project's own
+    pr: int | None = None
 
 
 class ReleaseOut(Schema):
@@ -41,7 +43,14 @@ def listar_releases(
             data=release.data,
             titulo=release.titulo,
             itens=[
-                ItemOut(tipo=i.tipo, tipo_nome=i.tipo_nome, modulo=i.modulo_nome, texto=i.texto)
+                ItemOut(
+                    tipo=i.tipo,
+                    tipo_nome=i.tipo_nome,
+                    modulo=i.modulo_nome,
+                    texto=i.texto,
+                    origem=i.origem_nome or None,
+                    pr=i.pr,
+                )
                 for i in itens
             ],
         )

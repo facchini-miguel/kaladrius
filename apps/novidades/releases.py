@@ -49,6 +49,10 @@ MODULOS = [
 ]
 IDIOMA_ORIGEM = "pt-br"
 PUBLICOS = {"equipe", "paciente"}
+# Where an item came from (decision 133): no `origem` is a change made by the project; Dependabot
+# items carry the number of their pull request, so owner and readers tell them apart.
+ORIGENS = {"dependabot": "Dependabot"}
+REPOSITORIO = "https://github.com/facchini-miguel/kaladrius"
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 
@@ -68,6 +72,8 @@ class Item:
     modulo: str
     publico: tuple[str, ...]
     textos: tuple[tuple[str, str], ...]  # (language, text)
+    origem: str = ""  # "" (the project) or a key of ORIGENS
+    pr: int | None = None  # the pull request, for items from Dependabot
 
     @property
     def tipo_nome(self):
@@ -80,6 +86,14 @@ class Item:
     @property
     def texto(self):
         return _no_idioma(self.textos)
+
+    @property
+    def origem_nome(self):
+        return ORIGENS.get(self.origem, "")
+
+    @property
+    def url_pr(self):
+        return f"{REPOSITORIO}/pull/{self.pr}" if self.pr else ""
 
 
 @dataclass(frozen=True)
@@ -141,7 +155,17 @@ def _validar_item(bruto, versao):
         raise ReleasesInvalidas(
             f"{versao}: 'publico' deve ser uma lista com {sorted(PUBLICOS)} (ou vazia)."
         )
-    return Item(tipo=tipo, modulo=modulo, publico=tuple(publico), textos=textos)
+    origem = bruto.get("origem") or ""
+    if origem and origem not in ORIGENS:
+        raise ReleasesInvalidas(f"{versao}: origem '{origem}' inválida. Use: {', '.join(ORIGENS)}.")
+    pr = bruto.get("pr")
+    if pr is not None and (not isinstance(pr, int) or isinstance(pr, bool) or pr < 1):
+        raise ReleasesInvalidas(f"{versao}: 'pr' deve ser o número do pull request.")
+    if origem and pr is None:
+        raise ReleasesInvalidas(f"{versao}: um item do {ORIGENS[origem]} precisa do 'pr'.")
+    return Item(
+        tipo=tipo, modulo=modulo, publico=tuple(publico), textos=textos, origem=origem, pr=pr
+    )
 
 
 def _validar_release(bruto):
