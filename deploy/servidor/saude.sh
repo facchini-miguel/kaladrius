@@ -110,19 +110,41 @@ dias_do_certificado() {
   echo $(((fim - $(date +%s)) / 86400))
 }
 
+# The hostnames of a variable of .env ("a.example, b.example"), one per line.
+hosts_de() {
+  valor_do_env "$1" | tr ',' '\n' | tr -d ' ' | grep -v '^$' || true
+}
+
+# Every hostname answers `caminho` over HTTPS.
+todos_respondem() {
+  local caminho=$1 host
+  shift
+  for host in "$@"; do
+    curl -fsS -m 20 -o /dev/null "https://$host$caminho" || return 1
+  done
+}
+
+# No certificate of these hostnames expires in less than 14 days: Caddy renews them about 30
+# days before, so 14 days left means renewing is failing.
+certificados_ok() {
+  local host
+  for host in "$@"; do
+    [ "$(dias_do_certificado "$host")" -ge 14 ] || return 1
+  done
+}
+
 # What anyone sees, through the internet and by the server's addresses, for the external
 # monitor (decisions 078 and 079). Each check is independent and never stops the others.
+# Every hostname is checked (SITE_HOSTNAME and DOCS_HOSTNAME may list several, decision 134).
 verificar() {
-  local site docs
-  site=$(valor_do_env SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
-  docs=$(valor_do_env DOCS_HOSTNAME)
+  local -a sites docs
+  mapfile -t sites < <(hosts_de SITE_HOSTNAME)
+  mapfile -t docs < <(hosts_de DOCS_HOSTNAME)
   # The system, with its database (/api/v1/saude answers 503 when the database does not).
-  sinal_de MONITOR_SISTEMA_URL curl -fsS -m 20 -o /dev/null "https://$site/api/v1/saude"
-  # The certificate: Caddy renews it about 30 days before it expires; 14 days left means
-  # renewing is failing.
-  sinal_de MONITOR_CERTIFICADO_URL test "$(dias_do_certificado "$site")" -ge 14
-  if [ -n "$docs" ]; then
-    sinal_de MONITOR_DOCS_URL curl -fsS -m 20 -o /dev/null "https://$docs/"
+  sinal_de MONITOR_SISTEMA_URL todos_respondem /api/v1/saude "${sites[@]}"
+  sinal_de MONITOR_CERTIFICADO_URL certificados_ok "${sites[@]}" "${docs[@]}"
+  if [ "${#docs[@]}" -gt 0 ]; then
+    sinal_de MONITOR_DOCS_URL todos_respondem / "${docs[@]}"
   fi
 }
 

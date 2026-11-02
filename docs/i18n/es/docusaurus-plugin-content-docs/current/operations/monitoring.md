@@ -25,14 +25,14 @@ El propio servidor puede avisarle mediante [Healthchecks.io](https://healthcheck
 
 | Variable en el `.env` | Verificación | Período / tolerancia | Avisa cuando |
 |---|---|---|---|
-| `MONITOR_SISTEMA_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por su dirección (el primer nombre de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
+| `MONITOR_SISTEMA_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por cada una de sus direcciones (todos los nombres de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Respaldo diario | 1 día / 2 h | El respaldo diario falla o no corre |
 | `MONITOR_DEMONSTRACAO_URL` | Reinicio de la demostración (solo en el servidor de la demostración) | 1 día / 2 horas | El reinicio diario de la demostración (07:30 UTC) falla o no corre |
 | `MONITOR_RESTAURACAO_URL` | Restauración del respaldo | 7 días / 1 día | La prueba semanal de restauración (domingos, 07:00 UTC: el respaldo más nuevo restaurado en una base descartable) falla |
 | `MONITOR_ATUALIZACAO_URL` | Actualización automática | 5 min / 15 min | Las actualizaciones automáticas fallan o dejan de correr |
 | `MONITOR_RECURSOS_URL` | Disco y memoria | 5 min / 15 min | La memoria, el swap o el disco llegan al nivel crítico |
-| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 día / 2 h | Faltan menos de 14 días para que venza el certificado (Caddy lo renueva unos 30 días antes) |
-| `MONITOR_DOCS_URL` | Documentación funcionando | 5 min / 10 min | Este sitio de documentación, cuando el servidor lo corre (`DOCS_HOSTNAME`), no responde |
+| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 día / 2 h | Faltan menos de 14 días para que venza el certificado de alguna dirección (`SITE_HOSTNAME` y `DOCS_HOSTNAME`) (Caddy lo renueva unos 30 días antes) |
+| `MONITOR_DOCS_URL` | Documentación funcionando | 5 min / 10 min | Este sitio de documentación, cuando el servidor lo corre, no responde en alguna de sus direcciones (todos los nombres de `DOCS_HOSTNAME`) |
 
 Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
 

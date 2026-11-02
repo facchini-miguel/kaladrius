@@ -25,14 +25,14 @@ O próprio servidor pode avisar você pelo [Healthchecks.io](https://healthcheck
 
 | Variável no `.env` | Verificação | Período / tolerância | Avisa quando |
 |---|---|---|---|
-| `MONITOR_SISTEMA_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet pelo endereço dele (o primeiro nome de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/saude`) |
+| `MONITOR_SISTEMA_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet por cada um dos endereços dele (todos os nomes de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Backup diário | 1 dia / 2 h | O backup diário falha ou não roda |
 | `MONITOR_DEMONSTRACAO_URL` | Reinício da demonstração (só no servidor da demonstração) | 1 dia / 2 horas | O reinício diário da demonstração (07:30 UTC) falha ou não roda |
 | `MONITOR_RESTAURACAO_URL` | Restauração do backup | 7 dias / 1 dia | O teste semanal de restauração (domingos, 07:00 UTC: o backup mais novo restaurado num banco descartável) falha |
 | `MONITOR_ATUALIZACAO_URL` | Atualização automática | 5 min / 15 min | As atualizações automáticas falham ou param de rodar |
 | `MONITOR_RECURSOS_URL` | Disco e memória | 5 min / 15 min | Memória, swap ou disco chegam ao nível crítico |
-| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 dia / 2 h | Faltam menos de 14 dias para o certificado vencer (o Caddy renova uns 30 dias antes) |
-| `MONITOR_DOCS_URL` | Documentação no ar | 5 min / 10 min | Este site de documentação, quando o servidor roda ele (`DOCS_HOSTNAME`), não responde |
+| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 dia / 2 h | Falta menos de 14 dias para vencer o certificado de algum endereço (`SITE_HOSTNAME` e `DOCS_HOSTNAME`) (o Caddy renova uns 30 dias antes) |
+| `MONITOR_DOCS_URL` | Documentação no ar | 5 min / 10 min | Este site de documentação, quando o servidor roda ele, não responde em algum dos endereços dele (todos os nomes de `DOCS_HOSTNAME`) |
 
 Você é avisado quando um sinal informa falha ou **para de chegar**, o que também cobre o servidor inteiro desligado. Sem essas variáveis, nada é enviado.
 

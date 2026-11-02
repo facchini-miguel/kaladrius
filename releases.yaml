@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.2
+  data: 2026-11-01
+  titulo:
+    pt-br: Monitoramento de todos os endereços
+    en: Monitoring of every address
+    es: Monitoreo de todas las direcciones
+  itens:
+    - tipo: correcao
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O monitoramento externo verifica o sistema, o site de documentação e os certificados
+          em todos os endereços; o aviso de "documentação fora do ar" era falso e parou.
+        en: >
+          External monitoring checks the system, the documentation site and the certificates at
+          every address; the "documentation down" warning was false and has stopped.
+        es: >
+          El monitoreo externo verifica el sistema, el sitio de documentación y los certificados
+          en todas las direcciones; el aviso de "documentación caída" era falso y se detuvo.
+
 - versao: 0.53.1
   data: 2026-11-01
   titulo:
