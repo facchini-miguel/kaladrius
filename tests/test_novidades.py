@@ -181,6 +181,7 @@ def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django
         client.force_login(usuario)
         pagina = client.get(reverse("novidades")).content.decode()
         assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in pagina
+        assert 'target="_blank" rel="noopener noreferrer"' in pagina  # opens in a new tab
         assert "Dependabot · #42" in pagina and pagina.count("Dependabot ·") == 1
         dados = client.get("/api/v1/releases?publico=paciente").json()
         assert [(i["origem"], i["pr"]) for i in dados[0]["itens"]] == [

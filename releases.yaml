@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.1
+  data: 2026-11-01
+  titulo:
+    pt-br: Link do Dependabot numa aba nova
+    en: Dependabot link in a new tab
+    es: Enlace de Dependabot en una pestaña nueva
+  itens:
+    - tipo: correcao
+      modulo: Novidades
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Nas Novidades, o selo "Dependabot" abre a proposta no GitHub numa aba nova, sem
+          sair do sistema.
+        en: >
+          In What's new, the "Dependabot" badge opens the proposal on GitHub in a new tab,
+          without leaving the system.
+        es: >
+          En las Novedades, la etiqueta "Dependabot" abre la propuesta en GitHub en una pestaña
+          nueva, sin salir del sistema.
+
 - versao: 0.53.0
   data: 2026-11-01
   titulo:
