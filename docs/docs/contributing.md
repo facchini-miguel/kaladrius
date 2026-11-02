@@ -40,6 +40,8 @@ docker compose exec app python manage.py makemigrations --check
 2. Make sure tests, lint and formatting pass.
 3. Open the pull request explaining what and why. By contributing, you agree that your contribution is licensed under Apache 2.0.
 
+`main` only takes changes through pull requests, merged once the `tests` and `documentacao` checks pass (decision 141). On a pull request from a fork, CI only starts after a maintainer approves it, so its checks may wait a while.
+
 ## Database migrations
 
 A change to a model needs its migration (`python manage.py makemigrations`), committed with it; CI fails otherwise. Migrations run by themselves when the new version starts. When a pull request adds one, CI comments on it with the SQL each migration runs in production, the operations that need attention, the already applied migrations it edits or deletes, and a test that each one can be undone and applied again (`python manage.py relatorio_migracoes`).
