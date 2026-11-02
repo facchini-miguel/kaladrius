@@ -40,6 +40,12 @@ docker compose exec app python manage.py makemigrations --check
 2. Confira se testes, lint e formatação passam.
 3. Abra o pull request explicando o quê e por quê. Ao contribuir, você concorda que a sua contribuição fica sob a licença Apache 2.0.
 
+## Migrações do banco
+
+Uma mudança num modelo precisa da migração dela (`python manage.py makemigrations`), no mesmo commit; sem ela, o CI falha. As migrações rodam sozinhas quando a versão nova sobe. Quando um pull request traz uma, o CI comenta nele o SQL que cada migração roda em produção, as operações que pedem atenção e um teste de que cada uma pode ser desfeita e aplicada de novo (`python manage.py relatorio_migracoes`).
+
+A volta automática do servidor (decisão 135) põe o código anterior de volta, mas nunca desfaz uma migração. Então não apague nem renomeie de uma vez uma coluna que a versão atual usa: primeiro lance uma versão que pare de usá-la, e só depois a migração que a apaga.
+
 ## Dependências
 
 As bibliotecas que o sistema usa diretamente ficam em `requirements.in` (as ferramentas de teste e lint em `requirements-dev.in`). O `requirements.txt` e o `requirements-dev.txt` são **gerados** a partir delas, com todas as dependências, inclusive as indiretas, fixadas numa versão exata e com hash, para o CI e a imagem de produção instalarem exatamente a mesma coisa, e o pip recusa um pacote cujo hash não bate. Não edite os `.txt` à mão: mude o `.in` e gere-os de novo (precisa do Docker; usa o Python do `.python-version`):

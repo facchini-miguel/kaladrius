@@ -4,6 +4,27 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.6
+  data: 2026-11-02
+  titulo:
+    pt-br: Revisão das mudanças no banco
+    en: Review of database changes
+    es: Revisión de los cambios en la base
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Toda mudança na estrutura do banco de dados é mostrada e testada antes de entrar,
+          com aviso para as que apagam dados ou não poderiam ser desfeitas.
+        en: >
+          Every change to the database structure is shown and tested before it goes in, with a
+          warning for those that delete data or could not be undone.
+        es: >
+          Todo cambio en la estructura de la base de datos se muestra y se prueba antes de
+          entrar, con aviso para los que eliminan datos o no podrían deshacerse.
+
 - versao: 0.53.5
   data: 2026-11-02
   titulo:
