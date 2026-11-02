@@ -27,6 +27,8 @@ Nothing to do: the VM installs every new image published by the CI within 5 minu
 sudo /opt/kaladrius/bin/atualizar.sh --forcar
 ```
 
+**Automatic rollback:** after starting a new version, the VM waits up to 5 minutes for the system to answer its health page (`/api/v1/saude`, with the database). If it does not, the VM puts back the version of the last successful update (kept as the `app:anterior` image), records the new one as refused, so it is not installed again until a newer version is published, and the "automatic update" monitor reports the failure until then. `--forcar` tries the refused version again. A migration the new version already applied is not undone: when the previous version does not work with it, restore the backup.
+
 ## Going back to an earlier version
 
 Migrations are not undone. An older version only works if the newer migrations are compatible with it (for example, they only added tables and columns). The safe way back is to restore the backup taken before the upgrade.

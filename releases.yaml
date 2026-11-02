@@ -4,6 +4,28 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.53.3
+  data: 2026-11-02
+  titulo:
+    pt-br: Volta automática nas atualizações
+    en: Automatic rollback of updates
+    es: Vuelta automática en las actualizaciones
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Se uma versão nova não subir no servidor, o sistema volta sozinho para a versão
+          anterior em poucos minutos e o administrador é avisado, em vez de ficar fora do ar.
+        en: >
+          If a new version does not come up on the server, the system goes back to the previous
+          version by itself within minutes and the administrator is warned, instead of staying
+          down.
+        es: >
+          Si una versión nueva no levanta en el servidor, el sistema vuelve solo a la versión
+          anterior en pocos minutos y se avisa al administrador, en lugar de quedar caído.
+
 - versao: 0.53.2
   data: 2026-11-01
   titulo:

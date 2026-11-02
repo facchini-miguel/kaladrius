@@ -6,6 +6,12 @@ IMAGEM_DOCS="$REGISTRO/medical-system-facchini/kaladrius/docs:latest"
 BUCKET_BACKUP=kaladrius-backups
 # Id of the image running since the last successful update (written by atualizar.sh).
 IMAGEM_INSTALADA="$DIR/imagem-instalada"
+# Automatic rollback (decision 135): the app image of the last successful update, kept under
+# this tag to go back to, and the ids of an update that did not come up (not tried again).
+IMAGEM_APP_ANTERIOR="${IMAGEM_APP%:latest}:anterior"
+IMAGEM_RECUSADA="$DIR/imagem-recusada"
+# How long a new version has to answer after starting (it migrates the database first).
+SAUDE_ESPERA=${SAUDE_ESPERA:-300}
 export IMAGEM_APP IMAGEM_DOCS
 
 # A server installed before 0.26.1 keeps everything in /opt/medical-system. Until
@@ -30,6 +36,18 @@ avisar_monitor() {
   url=$(valor_do_env "$1")
   [ -n "$url" ] || return 0
   curl -fsS -m 10 --retry 3 -o /dev/null "$url${2:+/$2}" || echo "Aviso: o monitor $1 não respondeu." >&2
+}
+
+# The system answers its health page, with the database, at its first address and through
+# Caddy, like anyone on the internet, within SAUDE_ESPERA seconds.
+sistema_no_ar() {
+  local site fim
+  site=$(valor_do_env SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
+  fim=$(($(date +%s) + SAUDE_ESPERA))
+  until curl -fsS -m 10 -o /dev/null "https://$site/api/v1/saude" 2>/dev/null; do
+    [ "$(date +%s)" -lt "$fim" ] || return 1
+    sleep 5
+  done
 }
 
 # Access token of the VM's service account (no keys stored on the server).

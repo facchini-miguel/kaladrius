@@ -27,6 +27,8 @@ Nada a fazer: a VM instala cada imagem nova publicada pelo CI em até 5 minutos.
 sudo /opt/kaladrius/bin/atualizar.sh --forcar
 ```
 
+**Volta automática:** depois de subir uma versão nova, a VM espera até 5 minutos o sistema responder a página de saúde (`/api/v1/saude`, com o banco). Se não responder, a VM põe de volta a versão da última atualização bem-sucedida (guardada como a imagem `app:anterior`), anota a nova como recusada, para não instalá-la de novo até sair uma versão mais nova, e o monitor "atualização automática" avisa da falha até lá. O `--forcar` tenta de novo a versão recusada. Uma migração que a versão nova já aplicou não é desfeita: se a versão anterior não funcionar com ela, restaure o backup.
+
 ## Voltar para uma versão anterior
 
 As migrações não são desfeitas. Uma versão antiga só funciona se as migrações novas forem compatíveis com ela (por exemplo, só acrescentaram tabelas e campos). O caminho seguro é restaurar o backup feito antes da atualização.
