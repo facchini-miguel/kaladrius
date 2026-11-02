@@ -42,9 +42,9 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Database migrations
 
-A change to a model needs its migration (`python manage.py makemigrations`), committed with it; CI fails otherwise. Migrations run by themselves when the new version starts. When a pull request adds one, CI comments on it with the SQL each migration runs in production, the operations that need attention and a test that each one can be undone and applied again (`python manage.py relatorio_migracoes`).
+A change to a model needs its migration (`python manage.py makemigrations`), committed with it; CI fails otherwise. Migrations run by themselves when the new version starts. When a pull request adds one, CI comments on it with the SQL each migration runs in production, the operations that need attention, the already applied migrations it edits or deletes, and a test that each one can be undone and applied again (`python manage.py relatorio_migracoes`).
 
-The automatic rollback of the server (decision 135) puts the previous code back but never undoes a migration. So do not drop or rename a column the current version uses in one step: first release a version that stops using it, and only then the migration that drops it.
+The automatic rollback of the server (decision 135) puts the previous code back but never undoes a migration. So do not drop or rename a column the current version uses in one step: first release a version that stops using it, and only then the migration that drops it. A new required column has the same problem: the previous version's inserts leave it out, so give it `null=True` or a `db_default` (a Python `default` only fills the rows that already exist). And never edit a migration that is already in `main`: production does not run it again; write a new one. `--testar-volta` undoes migrations, so it only runs on a throwaway database (the test one, or `BANCO_DESCARTAVEL=1`, as in CI).
 
 ## Dependencies
 

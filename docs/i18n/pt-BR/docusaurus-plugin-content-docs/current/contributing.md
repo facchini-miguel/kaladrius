@@ -42,9 +42,9 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Migrações do banco
 
-Uma mudança num modelo precisa da migração dela (`python manage.py makemigrations`), no mesmo commit; sem ela, o CI falha. As migrações rodam sozinhas quando a versão nova sobe. Quando um pull request traz uma, o CI comenta nele o SQL que cada migração roda em produção, as operações que pedem atenção e um teste de que cada uma pode ser desfeita e aplicada de novo (`python manage.py relatorio_migracoes`).
+Uma mudança num modelo precisa da migração dela (`python manage.py makemigrations`), no mesmo commit; sem ela, o CI falha. As migrações rodam sozinhas quando a versão nova sobe. Quando um pull request traz uma, o CI comenta nele o SQL que cada migração roda em produção, as operações que pedem atenção, as migrações já aplicadas que ele edita ou apaga, e um teste de que cada uma pode ser desfeita e aplicada de novo (`python manage.py relatorio_migracoes`).
 
-A volta automática do servidor (decisão 135) põe o código anterior de volta, mas nunca desfaz uma migração. Então não apague nem renomeie de uma vez uma coluna que a versão atual usa: primeiro lance uma versão que pare de usá-la, e só depois a migração que a apaga.
+A volta automática do servidor (decisão 135) põe o código anterior de volta, mas nunca desfaz uma migração. Então não apague nem renomeie de uma vez uma coluna que a versão atual usa: primeiro lance uma versão que pare de usá-la, e só depois a migração que a apaga. Uma coluna obrigatória nova tem o mesmo problema: os INSERTs da versão anterior a deixam de fora, então dê a ela `null=True` ou um `db_default` (um `default` do Python só preenche as linhas que já existem). E nunca edite uma migração que já está na `main`: produção não a roda de novo; escreva uma nova. O `--testar-volta` desfaz migrações, então só roda num banco descartável (o de testes, ou com `BANCO_DESCARTAVEL=1`, como no CI).
 
 ## Dependências
 

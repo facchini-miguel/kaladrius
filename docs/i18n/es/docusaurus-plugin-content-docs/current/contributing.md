@@ -42,9 +42,9 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Migraciones de la base
 
-Un cambio en un modelo necesita su migración (`python manage.py makemigrations`), en el mismo commit; sin ella, el CI falla. Las migraciones se ejecutan solas cuando la versión nueva arranca. Cuando un pull request trae una, el CI comenta en él el SQL que cada migración ejecuta en producción, las operaciones que requieren atención y una prueba de que cada una puede deshacerse y aplicarse de nuevo (`python manage.py relatorio_migracoes`).
+Un cambio en un modelo necesita su migración (`python manage.py makemigrations`), en el mismo commit; sin ella, el CI falla. Las migraciones se ejecutan solas cuando la versión nueva arranca. Cuando un pull request trae una, el CI comenta en él el SQL que cada migración ejecuta en producción, las operaciones que requieren atención, las migraciones ya aplicadas que edita o elimina, y una prueba de que cada una puede deshacerse y aplicarse de nuevo (`python manage.py relatorio_migracoes`).
 
-La vuelta automática del servidor (decisión 135) vuelve a poner el código anterior, pero nunca deshace una migración. Así que no elimine ni renombre de una vez una columna que la versión actual usa: primero publique una versión que deje de usarla, y solo después la migración que la elimina.
+La vuelta automática del servidor (decisión 135) vuelve a poner el código anterior, pero nunca deshace una migración. Así que no elimine ni renombre de una vez una columna que la versión actual usa: primero publique una versión que deje de usarla, y solo después la migración que la elimina. Una columna obligatoria nueva tiene el mismo problema: los INSERT de la versión anterior la dejan fuera, así que dele `null=True` o un `db_default` (un `default` de Python solo rellena las filas que ya existen). Y nunca edite una migración que ya está en `main`: producción no la ejecuta de nuevo; escriba una nueva. `--testar-volta` deshace migraciones, así que solo se ejecuta en una base desechable (la de pruebas, o con `BANCO_DESCARTAVEL=1`, como en el CI).
 
 ## Dependencias
 

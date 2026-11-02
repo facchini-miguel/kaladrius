@@ -1,8 +1,11 @@
 # Report of the database migrations a pull request adds (decision 139): the SQL each one runs in
 # production, the operations that delete data or that the previous version of the system cannot
-# run with (the automatic rollback never undoes a migration, decision 135), and a back-and-forth
-# test on production's PostgreSQL. Posted as one comment on the pull request, updated on every
-# push, and in the run's summary. Runs only when a pull request touches a migration.
+# run with (the automatic rollback never undoes a migration, decision 135), the migrations
+# already in the base branch it edits or deletes, and a back-and-forth test on production's
+# PostgreSQL. Posted as one comment on the pull request, updated on every push, and in the run's
+# summary. Runs only when a pull request touches a migration. A job of its own, not a step of
+# ci.yml: only this one needs to write to the pull request, and the tests job runs third-party
+# code (pip install, decision 132).
 name: Migrations
 
 on:
@@ -28,14 +31,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
-          fetch-depth: 0  # the base branch, to find the migrations this pull request adds
-      # Production's PostgreSQL, digest included (decision 138), as in the CI.
+          fetch-depth: 0  # the base branch, to find the migrations this pull request changes
       - name: PostgreSQL (the production image)
-        run: |
-          imagem=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' deploy/docker-compose.prod.yml)
-          docker run -d --name postgres -p 5432:5432 -e POSTGRES_DB=kaladrius \
-            -e POSTGRES_USER=kaladrius -e POSTGRES_PASSWORD=ci-only \
-            --health-cmd "pg_isready -U kaladrius" --health-interval 2s "$imagem"
+        run: .github/postgres.sh iniciar
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
@@ -43,31 +41,37 @@ jobs:
           cache-dependency-path: requirements.txt
       - run: pip install -r requirements.txt
       - name: PostgreSQL ready
-        run: |
-          timeout 120 sh -c 'until [ "$(docker inspect -f "{{.State.Health.Status}}" postgres)" = healthy ]; do sleep 1; done'
+        run: .github/postgres.sh esperar
       - name: Report and back-and-forth test
+        env:
+          BANCO_DESCARTAVEL: "1"  # this job's database is thrown away: --testar-volta may run
         run: |
           python manage.py relatorio_migracoes --base "origin/$GITHUB_BASE_REF" \
-            --testar-volta --saida relatorio.md
+            --testar-volta --saida relatorio.md --comentario comentario.md
       - name: Summary of the run
         if: always() && hashFiles('relatorio.md') != ''
         run: cat relatorio.md >> "$GITHUB_STEP_SUMMARY"
-      # One comment, found by its marker and updated in place. Pull requests from Dependabot and
-      # from forks get a read-only token: the report stays in the run's summary.
+      # One comment, the bot's own, found by its marker and updated in place; without the SQL
+      # when the report is longer than a comment allows. Pull requests from Dependabot and from
+      # forks get a read-only token, so this step is skipped there and the report stays in the
+      # run's summary; anywhere else, a failure to comment fails the run.
       - name: Comment on the pull request
-        if: always() && hashFiles('relatorio.md') != ''
-        continue-on-error: true
+        if: >-
+          always() && hashFiles('comentario.md') != ''
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.actor != 'dependabot[bot]'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
         run: |
           marca='<!-- relatorio-migracoes -->'
-          { echo "$marca"; cat relatorio.md; } > comentario.md
-          existente=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
-            --jq ".[] | select(.body | startswith(\"$marca\")) | .id" | head -1)
+          { echo "$marca"; cat comentario.md; } > corpo.md
+          ids=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marca\"))) | .id")
+          existente=${ids%%$'\n'*}
           if [ -n "$existente" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existente" \
-              -F body=@comentario.md >/dev/null
+              -F body=@corpo.md >/dev/null
           else
-            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@comentario.md >/dev/null
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@corpo.md >/dev/null
           fi

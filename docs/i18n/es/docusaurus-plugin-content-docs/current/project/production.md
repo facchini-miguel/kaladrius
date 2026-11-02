@@ -85,7 +85,7 @@ sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.
   docker compose -f docker-compose.prod.yml up -d app
 # Después de corregir y publicar: sudo systemctl start kaladrius-atualizar.timer
 ```
-Las migraciones no se deshacen: una versión antigua solo funciona si las migraciones nuevas son compatibles con ella (solo agregar tablas y campos, por ejemplo).
+Las migraciones no se deshacen: una versión antigua solo funciona si las migraciones nuevas son compatibles con ella (agregar tablas, o campos que pueden quedar vacíos o tienen `db_default`, por ejemplo; el informe de migraciones de cada pull request marca el resto, decisión 139).
 
 ### Restaurar una copia de seguridad
 ```bash
