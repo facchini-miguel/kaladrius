@@ -123,7 +123,7 @@ jobs:
               TAGS+=(-t "$destino:$VERSAO")
             fi
           done
-          docker build --build-arg PYTHON_VERSION="$(cat .python-version)" "${TAGS[@]}" .
+          docker build "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"
           docker push --all-tags "$IMAGEM_PUBLICA"
 

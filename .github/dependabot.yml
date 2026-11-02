@@ -67,8 +67,9 @@ updates:
       - dependency-name: python
         update-types: [version-update:semver-minor, version-update:semver-major]
 
+  # The development and the production Compose files (images pinned by digest, decision 138).
   - package-ecosystem: docker-compose
-    directory: /
+    directories: [/, /deploy]
     schedule:
       interval: monthly
     ignore:
