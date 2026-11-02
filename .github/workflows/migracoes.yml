@@ -1,0 +1,77 @@
+# Report of the database migrations a pull request adds (decision 139): the SQL each one runs in
+# production, the operations that delete data or that the previous version of the system cannot
+# run with (the automatic rollback never undoes a migration, decision 135), the migrations
+# already in the base branch it edits or deletes, and a back-and-forth test on production's
+# PostgreSQL. Posted as one comment on the pull request, updated on every push, and in the run's
+# summary. Runs only when a pull request touches a migration. A job of its own, not a step of
+# ci.yml: only this one needs to write to the pull request, and the tests job runs third-party
+# code (pip install, decision 132).
+name: Migrations
+
+on:
+  pull_request:
+    paths:
+      - "apps/*/migrations/**"
+
+permissions:
+  contents: read
+  pull-requests: write  # the report comment
+
+jobs:
+  relatorio:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_SECRET_KEY: ci-only-never-use-in-production
+      DJANGO_DEBUG: "0"
+      POSTGRES_DB: kaladrius
+      POSTGRES_USER: kaladrius
+      POSTGRES_PASSWORD: ci-only
+      POSTGRES_HOST: localhost
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false  # no step uses git credentials (decision 132)
+          fetch-depth: 0  # the base branch, to find the migrations this pull request changes
+      - name: PostgreSQL (the production image)
+        run: .github/postgres.sh iniciar
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: PostgreSQL ready
+        run: .github/postgres.sh esperar
+      - name: Report and back-and-forth test
+        env:
+          BANCO_DESCARTAVEL: "1"  # this job's database is thrown away: --testar-volta may run
+        run: |
+          python manage.py relatorio_migracoes --base "origin/$GITHUB_BASE_REF" \
+            --testar-volta --saida relatorio.md --comentario comentario.md
+      - name: Summary of the run
+        if: always() && hashFiles('relatorio.md') != ''
+        run: cat relatorio.md >> "$GITHUB_STEP_SUMMARY"
+      # One comment, the bot's own, found by its marker and updated in place; without the SQL
+      # when the report is longer than a comment allows. Pull requests from Dependabot and from
+      # forks get a read-only token, so this step is skipped there and the report stays in the
+      # run's summary; anywhere else, a failure to comment fails the run.
+      - name: Comment on the pull request
+        if: >-
+          always() && hashFiles('comentario.md') != ''
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && github.actor != 'dependabot[bot]'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          marca='<!-- relatorio-migracoes -->'
+          { echo "$marca"; cat comentario.md; } > corpo.md
+          ids=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marca\"))) | .id")
+          existente=${ids%%$'\n'*}
+          if [ -n "$existente" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existente" \
+              -F body=@corpo.md >/dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@corpo.md >/dev/null
+          fi
