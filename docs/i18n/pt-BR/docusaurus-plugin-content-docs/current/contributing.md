@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Convenções
 
 - **Nomes do domínio em português** (`Paciente`, `Agendamento`), **comentários em inglês**.
+- **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144).
 - **Todo texto da tela** é escrito em português no código e traduzido em `locale/en` e `locale/es`:
   ```bash
   docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests

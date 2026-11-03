@@ -1,4 +1,4 @@
-# The Python of .python-version (decision 127; tests/test_versao_python.py checks they agree),
+# The Python of .python-version (decision 127; tests/test_python_version.py checks they agree),
 # pinned by digest so the base image only changes in a reviewed commit; Dependabot proposes the
 # new digest when the image is rebuilt (decision 138).
 FROM python:3.14-slim@sha256:cd89c30eda26ee911a4611b18680086e0ea42e6f5f8cbe653d07fa7958c9cec8

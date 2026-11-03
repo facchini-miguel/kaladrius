@@ -10,7 +10,7 @@ from apps.core.models import Papel, Vinculo
 from apps.profissionais.models import Profissional
 from apps.prontuario.models import Anexo, Atendimento
 
-from .test_prontuario import ANAMNESE, PNG
+from .test_medical_record import ANAMNESE, PNG
 
 SENHAS = {"senha_recepcao": "demo-recepcao-1", "senha_profissional": "demo-profissional-1"}
 
