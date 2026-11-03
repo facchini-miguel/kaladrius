@@ -10,19 +10,19 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.54.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.54.1** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: em desenvolvimento, em uso de demonstração. **Para conhecer, comece por https://www.facchini.eti.br/kaladrius/**: a página tem os acessos de demonstração de cada perfil (recepção, profissional, financeiro, administrador da clínica), as telas e todos os links. A demonstração roda no Google Cloud free tier, somente IPv6; veja [Produção de referência](https://kaladrius-docs.facchini.eti.br/pt-BR/project/production).
 
 ## Instalar num servidor
 
-No Debian 13+ ou Ubuntu 24.04+, baixe o `.deb` da [release mais nova](https://github.com/facchini-miguel/kaladrius/releases/latest) e instale; algumas perguntas na tela (rede interna ou internet, o administrador) e o sistema está no ar, com backup diário:
+No Debian 13+ ou Ubuntu 24.04+, adicione o repositório de pacotes [packages.facchini.eti.br](https://packages.facchini.eti.br) e instale; algumas perguntas na tela (rede interna ou internet, o administrador) e o sistema está no ar, com backup diário, e as versões novas chegam com `sudo apt upgrade`:
 
 ```bash
-sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: o .rpm com dnf ou zypper; Arch, CachyOS: o .pkg.tar.zst com pacman
+sudo apt install kaladrius     # depois de adicionar o repositório; Fedora, Rocky, AlmaLinux: dnf; openSUSE: zypper
 ```
 
-Veja [Pacote Linux](https://kaladrius-docs.facchini.eti.br/pt-BR/installation/linux-package) para os detalhes e as outras formas de instalar (Docker Compose à mão, Google Cloud).
+Veja [Pacote Linux](https://kaladrius-docs.facchini.eti.br/pt-BR/installation/linux-package) para os detalhes (também os pacotes `.deb`, `.rpm` e do Arch Linux de cada [release](https://github.com/facchini-miguel/kaladrius/releases/latest)) e as outras formas de instalar (Docker Compose à mão, Google Cloud).
 
 ## Como rodar (local)
 

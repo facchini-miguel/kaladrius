@@ -4,6 +4,30 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.54.1
+  data: 2026-11-03
+  titulo:
+    pt-br: Atualizações pelo repositório de pacotes
+    en: Updates from the package repository
+    es: Actualizaciones desde el repositorio de paquetes
+  itens:
+    - tipo: novo
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          O servidor da clínica pode receber o Kaladrius pelo repositório de pacotes
+          packages.facchini.eti.br, com pacotes assinados: as versões novas chegam junto com
+          as atualizações do próprio sistema (apt, dnf ou zypper).
+        en: >
+          The clinic's server can get Kaladrius from the package repository
+          packages.facchini.eti.br, with signed packages: new versions come with the system's
+          own updates (apt, dnf or zypper).
+        es: >
+          El servidor de la clínica puede recibir Kaladrius desde el repositorio de paquetes
+          packages.facchini.eti.br, con paquetes firmados: las versiones nuevas llegan con las
+          actualizaciones del propio sistema (apt, dnf o zypper).
+
 - versao: 0.54.0
   data: 2026-11-02
   titulo:

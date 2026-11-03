@@ -497,10 +497,13 @@ def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
 
 
 @pytest.mark.parametrize("idioma", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
-def test_ajuda_nao_promete_atualizacao_pelo_sistema(tmp_path, idioma):
-    # No package repository yet: updates are the next version's package, from the releases.
+def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, idioma):
+    # Installed from the package repository, with the system's updates; from a downloaded
+    # package, the next version's package from the releases.
     saida = kaladrius(tmp_path, "ajuda", idioma=idioma).stdout
-    assert "apt upgrade" not in saida and "dnf upgrade" not in saida
+    for comando in ("sudo apt upgrade", "sudo dnf upgrade", "sudo zypper update"):
+        assert comando in saida
+    assert "https://packages.facchini.eti.br" in saida
     assert "github.com/facchini-miguel/kaladrius/releases" in saida
 
 
