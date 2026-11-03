@@ -61,7 +61,7 @@ def lista(request):
     pagina = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
-        "auditoria/lista.html",
+        "audit/list.html",
         {
             "pagina": pagina,
             "filtros": filtros,

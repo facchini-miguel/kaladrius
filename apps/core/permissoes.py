@@ -155,7 +155,7 @@ def exige_permissao(modulo, acao):
             if request.clinica is None:
                 if request.user.is_superuser:
                     return redirect("cadastrar_clinica")
-                return render(request, "core/sem_clinica.html", status=403)
+                return render(request, "core/no_clinic.html", status=403)
             if not pode(request, modulo, acao):
                 raise PermissionDenied
             modulos.marcar_se_desligado(request, MODULO_DA_CLINICA.get(modulo))

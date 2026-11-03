@@ -33,7 +33,7 @@ def lista(request):
         .select_related("usuario")
         .order_by("-ativo", "usuario__first_name", "usuario__username")
     )
-    return render(request, "equipe/lista.html", {"vinculos": vinculos})
+    return render(request, "team/list.html", {"vinculos": vinculos})
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.CRIAR)
@@ -46,7 +46,7 @@ def novo(request):
             request, _("%(nome)s agora faz parte da equipe.") % {"nome": usuario.get_full_name()}
         )
         return redirect("equipe:lista")
-    return render(request, "equipe/novo.html", {"form": form})
+    return render(request, "team/new.html", {"form": form})
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
@@ -68,7 +68,7 @@ def editar(request, pk):
         return redirect("equipe:lista")
     return render(
         request,
-        "equipe/editar.html",
+        "team/edit.html",
         {
             "vinculo": vinculo,
             "form": form,
@@ -103,7 +103,7 @@ def senha(request, pk):
             _("Nova senha de %(nome)s definida.") % {"nome": usuario.get_full_name() or usuario},
         )
         return redirect("equipe:lista")
-    return render(request, "equipe/senha.html", {"vinculo": vinculo, "form": form})
+    return render(request, "team/password.html", {"vinculo": vinculo, "form": form})
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)

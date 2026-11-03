@@ -1,4 +1,4 @@
-// Clickable dental chart (templates/orcamentos/_odontograma.html): toggles teeth and keeps
+// Clickable dental chart (templates/dentistry/_odontogram.html): toggles teeth and keeps
 // the form's hidden "dentes" field and the quantity in sync.
 (function () {
   "use strict";

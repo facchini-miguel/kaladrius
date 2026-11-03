@@ -96,7 +96,7 @@ def novo(request, profissional, paciente):
         return redirect("prontuario:atendimento", pk=atendimento.pk)
     return render(
         request,
-        "prontuario/atendimento.html",
+        "medical_records/visit.html",
         {"form": form, "paciente": paciente, "agendamento": agendamento, "editavel": True},
     )
 
@@ -127,7 +127,7 @@ def atendimento(request, profissional, pk):
         registrar(Acao.VISUALIZAR, atendimento)
     return render(
         request,
-        "prontuario/atendimento.html",
+        "medical_records/visit.html",
         {
             "atendimento": atendimento,
             "paciente": atendimento.paciente,
@@ -179,7 +179,7 @@ def imprimir(request, profissional, pk):
     registrar(Acao.VISUALIZAR, atendimento, descricao=f"{atendimento} (impressão)")
     return render(
         request,
-        "prontuario/imprimir.html",
+        "medical_records/print.html",
         {
             "atendimento": atendimento,
             "campos": _campos(atendimento),
@@ -218,7 +218,7 @@ def atestado_novo(request, profissional, pk):
         return redirect("prontuario:atestado", pk=atestado.pk)
     return render(
         request,
-        "prontuario/documento_form.html",
+        "medical_records/document_form.html",
         {"form": form, "atendimento": atendimento, "titulo": _("Emitir atestado")},
     )
 
@@ -238,7 +238,7 @@ def receita_nova(request, profissional, pk):
         return redirect("prontuario:receita", pk=receita.pk)
     return render(
         request,
-        "prontuario/documento_form.html",
+        "medical_records/document_form.html",
         {"form": form, "atendimento": atendimento, "titulo": _("Emitir receita")},
     )
 
@@ -249,7 +249,7 @@ def atestado(request, profissional, pk):
         Atestado.objects.select_related("atendimento__paciente", "profissional"), pk=pk
     )
     registrar(Acao.VISUALIZAR, atestado)
-    return render(request, "prontuario/atestado.html", {"atestado": atestado})
+    return render(request, "medical_records/certificate.html", {"atestado": atestado})
 
 
 @exige_profissional
@@ -259,7 +259,9 @@ def receita(request, profissional, pk):
     )
     registrar(Acao.VISUALIZAR, receita)
     linhas = [linha for linha in receita.prescricao.splitlines() if linha.strip()]
-    return render(request, "prontuario/receita.html", {"receita": receita, "linhas": linhas})
+    return render(
+        request, "medical_records/prescription.html", {"receita": receita, "linhas": linhas}
+    )
 
 
 @require_POST
@@ -304,7 +306,7 @@ def pedido_de_exames_novo(request, profissional, pk):
         return redirect("prontuario:pedido_de_exames", pk=pedido.pk)
     return render(
         request,
-        "prontuario/documento_form.html",
+        "medical_records/document_form.html",
         {"form": form, "atendimento": atendimento, "titulo": _("Pedir exames")},
     )
 
@@ -316,7 +318,9 @@ def pedido_de_exames(request, profissional, pk):
     )
     registrar(Acao.VISUALIZAR, pedido)
     linhas = [linha for linha in pedido.exames.splitlines() if linha.strip()]
-    return render(request, "prontuario/pedido_de_exames.html", {"pedido": pedido, "linhas": linhas})
+    return render(
+        request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": linhas}
+    )
 
 
 @require_POST

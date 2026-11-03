@@ -97,7 +97,7 @@ def painel(request):
         )
     return render(
         request,
-        "monitoramento/saude.html",
+        "monitoring/health.html",
         {
             "periodo": periodo,
             "inicio": inicio,

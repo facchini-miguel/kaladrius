@@ -68,7 +68,7 @@ def lista(request):
     pagina = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
-        "orcamentos/lista.html",
+        "estimates/list.html",
         {
             "pagina": pagina,
             "situacao": situacao,
@@ -101,7 +101,7 @@ def novo(request):
         if str(valor_paciente or "").isdecimal()
         else None
     )
-    return render(request, "orcamentos/form.html", {"form": form, "paciente": paciente})
+    return render(request, "estimates/form.html", {"form": form, "paciente": paciente})
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
@@ -116,7 +116,7 @@ def editar(request, pk):
         return redirect("orcamentos:detalhe", pk=orcamento.pk)
     return render(
         request,
-        "orcamentos/form.html",
+        "estimates/form.html",
         {"form": form, "paciente": orcamento.paciente, "orcamento": orcamento},
     )
 
@@ -132,7 +132,7 @@ def detalhe(request, pk):
     pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
     return render(
         request,
-        "orcamentos/detalhe.html",
+        "estimates/detail.html",
         {
             "orcamento": orcamento,
             "aberto": aberto,
@@ -253,7 +253,7 @@ def aprovar(request, pk):
         else:
             messages.success(request, _("Orçamento aprovado e lançado em A receber."))
             return redirect("financeiro:lancamento", pk=lancamento.pk)
-    return render(request, "orcamentos/aprovar.html", {"form": form, "orcamento": orcamento})
+    return render(request, "estimates/approve.html", {"form": form, "orcamento": orcamento})
 
 
 @require_POST
@@ -276,7 +276,7 @@ def imprimir(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     return render(
         request,
-        "orcamentos/imprimir.html",
+        "estimates/print.html",
         {"orcamento": orcamento, **_dentes(request, orcamento)},
     )
 
@@ -288,7 +288,7 @@ def imprimir(request, pk):
 def procedimentos(request):
     return render(
         request,
-        "orcamentos/procedimentos.html",
+        "estimates/procedures.html",
         {"procedimentos": Procedimento.objects.select_related("categoria")},
     )
 
@@ -303,6 +303,6 @@ def procedimento_form(request, pk=None):
         return redirect("orcamentos:procedimentos")
     return render(
         request,
-        "orcamentos/procedimento_form.html",
+        "estimates/procedure_form.html",
         {"form": form, "procedimento": procedimento},
     )

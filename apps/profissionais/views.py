@@ -12,7 +12,7 @@ from .models import Profissional
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.VER)
 def lista(request):
     profissionais = Profissional.objects.select_related("usuario")
-    return render(request, "profissionais/lista.html", {"profissionais": profissionais})
+    return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.CRIAR)
@@ -32,7 +32,7 @@ def _formulario(request, profissional):
         form.save()
         messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": profissional.nome})
         return redirect("profissionais:lista")
-    return render(request, "profissionais/form.html", {"form": form, "profissional": profissional})
+    return render(request, "practitioners/form.html", {"form": form, "profissional": profissional})
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.EXCLUIR)
@@ -55,4 +55,4 @@ def excluir(request, pk):
                 request, _("Profissional %(nome)s excluído.") % {"nome": profissional.nome}
             )
         return redirect("profissionais:lista")
-    return render(request, "profissionais/excluir.html", {"profissional": profissional})
+    return render(request, "practitioners/delete.html", {"profissional": profissional})

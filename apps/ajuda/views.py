@@ -34,4 +34,4 @@ def privacidade(request):
             lei=legislacao.do_pais(pais),
             prazo_de_guarda=legislacao.prazo_de_guarda(pais),
         )
-    return render(request, "ajuda/privacidade.html", contexto)
+    return render(request, "help/privacy.html", contexto)

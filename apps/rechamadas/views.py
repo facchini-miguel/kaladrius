@@ -55,7 +55,7 @@ def lista(request):
     }
     return render(
         request,
-        "rechamadas/lista.html",
+        "recalls/list.html",
         {
             "pagina": pagina,
             "filtros": filtros,
@@ -96,7 +96,7 @@ def _formulario(request, rechamada, inicial):
         paciente = consulta.filter(pk=int(codigo)).first() if codigo.isdecimal() else None
     return render(
         request,
-        "rechamadas/form.html",
+        "recalls/form.html",
         {
             "form": form,
             "rechamada": rechamada,
@@ -129,7 +129,7 @@ def excluir(request, pk):
             request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.paciente.nome}
         )
         return _voltar(request)
-    return render(request, "rechamadas/excluir.html", {"rechamada": rechamada})
+    return render(request, "recalls/delete.html", {"rechamada": rechamada})
 
 
 # --- Schedule integration --------------------------------------------------------
@@ -158,4 +158,4 @@ def do_dia(request):
     rechamadas = Rechamada.objects.filter(data=dia, paciente__arquivado=False).select_related(
         "paciente"
     )
-    return render(request, "rechamadas/_do_dia.html", {"dia": dia, "rechamadas": rechamadas})
+    return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})

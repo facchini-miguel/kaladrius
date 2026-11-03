@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Convenciones
 
 - **Nombres del dominio en portugués** (`Paciente`, `Agendamento`), **comentarios en inglés**.
+- **Plantillas con nombre en inglés**, en una carpeta con el nombre de su app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); los nombres del propio Django se mantienen (`base.html`, `403.html`, `registration/login.html`) (decisión 146).
 - **Archivos de prueba con nombre en inglés**, según lo que prueban (`tests/test_patients.py`, `tests/test_schedule.py`), aunque el módulo probado tenga nombre en portugués (decisión 144).
 - **Todo texto de la pantalla** se escribe en portugués en el código y se traduce en `locale/en` y `locale/es`:
   ```bash
