@@ -6,12 +6,12 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from faker import Faker
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.core.templatetags.formatos import whatsapp
-from apps.core.validadores import nono_digito, normalizar_telefone
-from apps.legado.anonimizacao import _mesmo_tamanho
-from apps.pacientes.models import Paciente
+from apps.core.templatetags.formats import whatsapp
+from apps.core.validators import nono_digito, normalizar_telefone
+from apps.legacy.anonymization import _mesmo_tamanho
+from apps.patients.models import Paciente
 
 
 @pytest.mark.parametrize(

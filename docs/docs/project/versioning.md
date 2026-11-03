@@ -39,7 +39,7 @@ Release note texts are written in the **three interface languages** (`pt-br`, `e
     es: Recordatorios de regreso en la app
   itens:
     - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas    # one of the MODULOS names in apps/novidades/releases.py
+      modulo: Rechamadas    # one of the MODULOS names in apps/whats_new/releases.py
       publico: [equipe, paciente]
       texto:
         pt-br: >

@@ -7,20 +7,20 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.utils import timezone
 
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.auditoria.models import RegistroAuditoria
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core.isolamento import usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import usar_clinica
 from apps.core.models import Clinica
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, Fornecedor, Lancamento
-from apps.legado.anonimizacao import RECHAMADAS
-from apps.legado.dump import DumpInvalido, ler_tabelas
-from apps.legado.importacao import ImportacaoRecusada, _documento, importar
-from apps.pacientes.models import Paciente
-from apps.pessoal.models import Folha, Funcionario, Salario
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
+from apps.finance import services
+from apps.finance.models import Categoria, Fornecedor, Lancamento
+from apps.health_plans.models import Carteirinha, Convenio
+from apps.legacy.anonymization import RECHAMADAS
+from apps.legacy.dump import DumpInvalido, ler_tabelas
+from apps.legacy.importer import ImportacaoRecusada, _documento, importar
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.staff.models import Folha, Funcionario, Salario
 
 HOJE = datetime.date(2026, 10, 27)
 
@@ -250,12 +250,12 @@ def test_nao_importa_duas_vezes_na_mesma_clinica(importado):
 
 
 def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
-    from apps.legado import importacao
+    from apps.legacy import importer
 
     def quebrar(self, pacientes):
         raise RuntimeError("falha no meio")
 
-    monkeypatch.setattr(importacao._Importador, "_rechamadas", quebrar)
+    monkeypatch.setattr(importer._Importador, "_rechamadas", quebrar)
     with pytest.raises(RuntimeError):
         importar(DUMP, "Clínica Importada", hoje=HOJE)
     assert not Clinica.objects.filter(nome="Clínica Importada").exists()
@@ -356,7 +356,7 @@ def test_anonimizacao_dos_fornecedores(importado):
         empresa = Fornecedor.objects.create(nome="Dental Fictícia", whatsapp="48999990000")
         categoria = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).first()
         for fornecedor in (pessoa, empresa):
-            servicos.criar_lancamento(
+            services.criar_lancamento(
                 clinica=clinica,
                 tipo=Lancamento.Tipo.PAGAR,
                 fornecedor=fornecedor,
@@ -412,7 +412,7 @@ def test_anonimizacao_dos_funcionarios(importado):
             observacao="Atestado da Fulana",
         )
         categoria = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).first()
-        folha.lancamento = servicos.criar_lancamento(
+        folha.lancamento = services.criar_lancamento(
             clinica=clinica,
             tipo=Lancamento.Tipo.PAGAR,
             pessoa=funcionaria.nome,

@@ -7,10 +7,10 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, Conta, GrupoContabil, Lancamento, Planejamento
+from apps.finance import services
+from apps.finance.models import Categoria, Conta, GrupoContabil, Lancamento, Planejamento
 
 pytestmark = pytest.mark.django_db
 
@@ -30,7 +30,7 @@ def grupo(clinica, nome):
 
 def pagar(clinica, categoria, valor, data=HOJE):
     with usar_clinica(clinica):
-        lancamento = servicos.criar_lancamento(
+        lancamento = services.criar_lancamento(
             clinica=clinica,
             tipo=Lancamento.Tipo.PAGAR,
             pessoa="Fictício",
@@ -42,7 +42,7 @@ def pagar(clinica, categoria, valor, data=HOJE):
             usuario=None,
         )
         parcela = lancamento.parcelas.get()
-        servicos.receber(
+        services.receber(
             parcela,
             usuario=None,
             valor=parcela.valor,
@@ -61,7 +61,7 @@ def pagar(clinica, categoria, valor, data=HOJE):
     ],
 )
 def test_fracao_do_ano(hoje, esperado):
-    assert servicos.fracao_do_ano(2026, hoje) == esperado
+    assert services.fracao_do_ano(2026, hoje) == esperado
 
 
 def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
@@ -101,7 +101,7 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
         Planejamento.objects.create(
             ano=2026, grupo=GrupoContabil.objects.get(nome="Impostos"), valor=Decimal("700")
         )
-        despesas = servicos.planejamento(2026, hoje=datetime.date(2026, 12, 31))["secoes"][1]
+        despesas = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))["secoes"][1]
     assert despesas["meta"] == Decimal("5700")
     assert despesas["esperado"] == Decimal("5700.00")
 
@@ -114,7 +114,7 @@ def test_em_dia_para_receita_e_despesa(clinica_a):
         Planejamento.objects.create(
             ano=2026, grupo=GrupoContabil.objects.get(nome="Impostos"), valor=Decimal("1200")
         )
-        dados = servicos.planejamento(2026, hoje=datetime.date(2026, 12, 31))
+        dados = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))
     receita = next(linha for linha in dados["secoes"][0]["linhas"] if linha["meta"])
     despesa = next(linha for linha in dados["secoes"][1]["linhas"] if linha["meta"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.

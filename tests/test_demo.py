@@ -5,10 +5,10 @@ from django.core.management import CommandError, call_command
 from django.test import Client
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel, Vinculo
-from apps.profissionais.models import Profissional
-from apps.prontuario.models import Anexo, Atendimento
+from apps.medical_records.models import Anexo, Atendimento
+from apps.practitioners.models import Profissional
 
 from .test_medical_record import ANAMNESE, PNG
 
@@ -112,7 +112,7 @@ def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
 def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     cliente = entrar("demo.profissional", SENHAS["senha_profissional"])
     with usar_clinica(demonstracao["clinica"]):
-        from apps.pacientes.models import Paciente
+        from apps.patients.models import Paciente
 
         paciente = Paciente.objects.create(nome="Maria Paciente")
     cliente.post(reverse("prontuario:novo", args=[paciente.pk]), ANAMNESE)

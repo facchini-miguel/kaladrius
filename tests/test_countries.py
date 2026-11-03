@@ -12,12 +12,12 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from apps.core import paises
-from apps.core.isolamento import usar_clinica
+from apps.core import countries
+from apps.core.isolation import usar_clinica
 from apps.core.middleware import ClinicaAtualMiddleware
 from apps.core.models import Papel
-from apps.core.validadores import normalizar_telefone
-from apps.pacientes.models import Paciente
+from apps.core.validators import normalizar_telefone
+from apps.patients.models import Paciente
 from tests.test_core import dados_clinica
 
 pytestmark = pytest.mark.django_db
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 def no_pais(clinica, pais, **extra):
     clinica.pais = pais
-    clinica.fuso_horario = extra.pop("fuso", paises.PAISES[pais].fusos[0])
+    clinica.fuso_horario = extra.pop("fuso", countries.PAISES[pais].fusos[0])
     for campo, valor in extra.items():
         setattr(clinica, campo, valor)
     clinica.save()
@@ -51,8 +51,8 @@ def no_pais(clinica, pais, **extra):
 )
 def test_telefone_de_cada_pais(pais, digitado, guardado, exibido, whatsapp):
     assert normalizar_telefone(digitado, pais) == guardado
-    assert paises.formatar_telefone(guardado, pais) == exibido
-    assert paises.link_whatsapp(guardado, pais) == whatsapp
+    assert countries.formatar_telefone(guardado, pais) == exibido
+    assert countries.link_whatsapp(guardado, pais) == whatsapp
 
 
 @pytest.mark.parametrize(
@@ -85,14 +85,14 @@ def test_telefone_brasileiro_continua_igual(clinica_a):
     ],
 )
 def test_codigo_postal_de_cada_pais(pais, digitado, guardado, exibido):
-    assert paises.normalizar_cep(digitado, pais) == guardado
-    assert paises.formatar_cep(guardado, pais) == exibido
+    assert countries.normalizar_cep(digitado, pais) == guardado
+    assert countries.formatar_cep(guardado, pais) == exibido
 
 
 @pytest.mark.parametrize(("pais", "digitado"), [("US", "1000"), ("CA", "12345"), ("GB", "XYZ")])
 def test_codigo_postal_invalido(pais, digitado):
     with pytest.raises(ValidationError):
-        paises.normalizar_cep(digitado, pais)
+        countries.normalizar_cep(digitado, pais)
 
 
 # --- Time zone and the English variant -------------------------------------------
@@ -235,7 +235,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     clinic's time zone, so a browser in another zone shows the same times as the rest."""
     import zoneinfo
 
-    from apps.agenda.models import Agendamento, TipoAtendimento
+    from apps.schedule.models import Agendamento, TipoAtendimento
 
     no_pais(clinica_a, "GB")
     ana = criar_profissional(clinica_a, "Dr. Fictício de Londres")
@@ -285,8 +285,8 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
 )
 def test_telefone_da_america_latina(pais, digitado, guardado, exibido, whatsapp):
     assert normalizar_telefone(digitado, pais) == guardado
-    assert paises.formatar_telefone(guardado, pais) == exibido
-    assert paises.link_whatsapp(guardado, pais) == whatsapp
+    assert countries.formatar_telefone(guardado, pais) == exibido
+    assert countries.link_whatsapp(guardado, pais) == whatsapp
 
 
 @pytest.mark.parametrize(
@@ -314,13 +314,13 @@ def test_telefone_latino_invalido(pais, digitado):
     ],
 )
 def test_codigo_postal_da_america_latina(pais, digitado, guardado):
-    assert paises.normalizar_cep(digitado, pais) == guardado
+    assert countries.normalizar_cep(digitado, pais) == guardado
 
 
 @pytest.mark.parametrize(("pais", "digitado"), [("MX", "0660"), ("CL", "83200"), ("AR", "C14ABC")])
 def test_codigo_postal_latino_invalido(pais, digitado):
     with pytest.raises(ValidationError):
-        paises.normalizar_cep(digitado, pais)
+        countries.normalizar_cep(digitado, pais)
 
 
 @pytest.mark.parametrize(
@@ -339,14 +339,14 @@ def test_codigo_postal_latino_invalido(pais, digitado):
 )
 def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
     """Spanish with each country's numbers and its currency, texts from the es catalog."""
-    from apps.core import moedas
+    from apps.core import currencies
 
     usuario = criar_usuario(f"recepcao_{pais.lower()}", clinica_a, Papel.RECEPCAO)
     no_pais(clinica_a, pais)
     with translation.override("es"):
         assert _durante_requisicao(usuario)["idioma"] == variante
     with translation.override(variante):
-        assert moedas.formatar(Decimal("1234.56"), paises.PAISES[pais].moeda) == valor
+        assert currencies.formatar(Decimal("1234.56"), countries.PAISES[pais].moeda) == valor
         assert translation.gettext("Rechamadas") == "Recordatorios"
 
 

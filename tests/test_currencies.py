@@ -9,9 +9,9 @@ from django.template import Context, Template
 from django.urls import reverse
 from django.utils import translation
 
-from apps.core import moedas
+from apps.core import currencies
 from apps.core.forms import CampoDecimal
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from tests.test_core import dados_clinica
 
@@ -38,16 +38,16 @@ VALOR = Decimal("1234.56")
 )
 def test_simbolo_da_moeda_e_separadores_do_idioma(codigo, idioma, esperado):
     with translation.override(idioma):
-        assert moedas.formatar(VALOR, codigo) == esperado
+        assert currencies.formatar(VALOR, codigo) == esperado
 
 
 def test_valor_invalido_fica_vazio():
-    assert moedas.formatar(None, "USD") == ""
-    assert moedas.formatar("abc", "USD") == ""
+    assert currencies.formatar(None, "USD") == ""
+    assert currencies.formatar("abc", "USD") == ""
 
 
 def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
-    modelo = Template("{% load formatos %}{{ valor|moeda }} {% simbolo_moeda %}")
+    modelo = Template("{% load formats %}{{ valor|moeda }} {% simbolo_moeda %}")
     contexto = Context({"valor": VALOR})
     with translation.override("pt-br"):
         assert modelo.render(contexto) == "R$ 1.234,56 R$"  # no current clinic: the real

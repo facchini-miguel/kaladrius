@@ -39,7 +39,7 @@ Los textos se escriben en los **tres idiomas de la interfaz** (`pt-br`, `en`, `e
     es: Recordatorios de regreso en la app
   itens:
     - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas    # uno de los nombres de MODULOS en apps/novidades/releases.py
+      modulo: Rechamadas    # uno de los nombres de MODULOS en apps/whats_new/releases.py
       publico: [equipe, paciente]
       texto:
         pt-br: >

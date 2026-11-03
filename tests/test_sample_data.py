@@ -3,14 +3,14 @@ from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
 from django.db.models import F
 
-from apps.agenda.models import Agendamento
-from apps.auditoria.models import RegistroAuditoria
-from apps.core.isolamento import sem_isolamento
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
-from apps.core.validadores import cnpj_valido, cpf_valido
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
+from apps.core.validators import cnpj_valido, cpf_valido
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.schedule.models import Agendamento
 
 pytestmark = pytest.mark.django_db
 
@@ -80,7 +80,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
 
 def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
     """Faker 40's pt_BR job list has titles over 100 characters: another one is drawn."""
-    from apps.core import ficticios
+    from apps.core import fake_data
 
     titulos = iter(["Especialista " * 10, "Dentista"])
 
@@ -88,12 +88,12 @@ def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
         def job(self):
             return next(titulos)
 
-    assert ficticios.profissao(Falso()) == "Dentista"
+    assert fake_data.profissao(Falso()) == "Dentista"
 
 
 def test_documento_ficticio_sempre_valido():
     """Faker 40 can, rarely, make up a CPF with all digits equal: another one is drawn."""
-    from apps.core import ficticios
+    from apps.core import fake_data
 
     numeros = iter(["111.111.111-11", "529.982.247-25"])
 
@@ -101,4 +101,4 @@ def test_documento_ficticio_sempre_valido():
         def cpf(self):
             return next(numeros)
 
-    assert ficticios.cpf(Falso()) == "52998224725"
+    assert fake_data.cpf(Falso()) == "52998224725"

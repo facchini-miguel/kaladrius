@@ -153,7 +153,7 @@ verificar() {
 }
 
 # After a sample: failure when memory, swap or disk is critical (the same limits as the web
-# app's health page, apps/monitoramento/saude.py LIMITES; not the processor, whose peaks are
+# app's health page, apps/monitoring/health.py LIMITES; not the processor, whose peaks are
 # normal).
 recursos_ok() {
   local memoria swap disco

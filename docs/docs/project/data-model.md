@@ -9,7 +9,7 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
 - The filter is applied centrally (middleware + managers), not by hand in each screen.
-- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolamento.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
+- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolation.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
 - The current clinic comes from the session and is only honored if the user has an active membership in it (or is a superuser). The Django admin is restricted to platform superusers.
 - Public reference tables (state, city, bank, marital status) are **global**, shared by all clinics.
 
@@ -30,7 +30,7 @@ Entity and field names are kept in Portuguese, as in the code. See the glossary 
 | Front desk | — | Schedule, patients, recalls, birthdays |
 | Practitioner | — | Schedule and patients. Sees and changes **only their own schedule**: that of the practitioner record linked to their user in Records > Practitioners (decision 044). Without a linked record the schedule is empty, with a notice |
 
-Each role gets `view`, `create`, `change` and `delete` permissions per module. The matrix lives in `apps/core/permissoes.py` and applies both on the server (the request is blocked) and on screen (buttons and menus are hidden). A detailed review is planned after phase 1, as agreed.
+Each role gets `view`, `create`, `change` and `delete` permissions per module. The matrix lives in `apps/core/permissions.py` and applies both on the server (the request is blocked) and on screen (buttons and menus are hidden). A detailed review is planned after phase 1, as agreed.
 
 | Module | Administrator | Front desk | Practitioner |
 |---|---|---|---|
@@ -101,7 +101,7 @@ When a patient is permanently deleted, their estimates are deleted (teeth are he
 - Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time. **Cancelled** appointments (0.24) are left out of both checks: they stay in the history but free the slot.
 
 ## Audit log (LGPD)
-- `RegistroAuditoria` (`apps/auditoria`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
+- `RegistroAuditoria` (`apps/audit`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `aplicar_retencao` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).
@@ -117,11 +117,11 @@ Shows identification, contact, notes, the next and the latest 10 appointments (v
 ## Inactive, archived and deleted patients (version 0.9.0)
 - **Inactive:** stopped coming, but still visible to the whole team ("Inactive" filter). Not shown in birthdays.
 - **Archived** (replaces the everyday "delete", decision 046): the patient leaves the team's lists, search, schedule (suggestions), birthdays and recalls. Nothing is deleted: appointments, recalls and audit entries stay, and past appointments still show the name. Only the clinic administrator archives, sees archived patients (patient list, Status: Archived) and restores them. An archived patient's CPF/CNPJ stays reserved; the screen says to ask for the restore.
-- **Permanently deleted:** only from an archived patient, by the administrator, when the patient asks for their data to be erased (LGPD, art. 18). The record and recalls are deleted, appointments lose the patient, and the audit entries of the patient and of their appointments and recalls lose the personal data (`apps/auditoria/registro.py`, `anonimizar`): who, what, when, the code and the field names remain. The screen reminds that the clinic may be required to keep clinical records (Law 13.787/2018).
+- **Permanently deleted:** only from an archived patient, by the administrator, when the patient asks for their data to be erased (LGPD, art. 18). The record and recalls are deleted, appointments lose the patient, and the audit entries of the patient and of their appointments and recalls lose the personal data (`apps/audit/record.py`, `anonimizar`): who, what, when, the code and the field names remain. The screen reminds that the clinic may be required to keep clinical records (Law 13.787/2018).
 
 ## Documents and formats
-- CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formatos.py`). Since 0.48.0 the fields `cpf_cnpj`, `cpf` and `Clinica.documento` keep their names but hold the document of the clinic's country, up to 20 characters (rules in `apps/core/identificacao.py`, decision 121).
-- CNPJ accepts the Receita Federal **alphanumeric format** (in force since July 2026: letters in the first 12 positions, numeric check digits). Validation in `apps/core/validadores.py`.
+- CPF, CNPJ, phones and postal codes are stored **without punctuation** and formatted only for display (filters in `apps/core/templatetags/formats.py`). Since 0.48.0 the fields `cpf_cnpj`, `cpf` and `Clinica.documento` keep their names but hold the document of the clinic's country, up to 20 characters (rules in `apps/core/identification.py`, decision 121).
+- CNPJ accepts the Receita Federal **alphanumeric format** (in force since July 2026: letters in the first 12 positions, numeric check digits). Validation in `apps/core/validators.py`.
 - CPF/CNPJ is optional (e.g., children), but **unique within the clinic** when given.
 
 ## Intentional differences from the legacy system

@@ -9,11 +9,11 @@ from django.template import Context, Template
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Clinica, Papel
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, Conta, Lancamento, Pagamento, Parcela
-from apps.pacientes.models import Paciente
+from apps.finance import services
+from apps.finance.models import Categoria, Conta, Lancamento, Pagamento, Parcela
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 
@@ -59,7 +59,7 @@ def novo(cenario, **extra):
 
 def lancamento_com(cenario, valor="300.00", parcelas=3, vencimento=None, paciente=True):
     with usar_clinica(cenario["clinica"]):
-        return servicos.criar_lancamento(
+        return services.criar_lancamento(
             clinica=cenario["clinica"],
             tipo=Lancamento.Tipo.RECEBER,
             paciente=cenario["paciente"] if paciente else None,
@@ -82,13 +82,13 @@ def parcelas_de(cenario, lancamento):
 
 
 def test_divisao_em_parcelas_e_vencimentos_mensais():
-    assert servicos.dividir(Decimal("100.00"), 3) == [
+    assert services.dividir(Decimal("100.00"), 3) == [
         Decimal("33.34"),
         Decimal("33.33"),
         Decimal("33.33"),
     ]
-    assert servicos.somar_meses(datetime.date(2031, 1, 31), 1) == datetime.date(2031, 2, 28)
-    assert servicos.somar_meses(datetime.date(2031, 11, 15), 3) == datetime.date(2032, 2, 15)
+    assert services.somar_meses(datetime.date(2031, 1, 31), 1) == datetime.date(2031, 2, 28)
+    assert services.somar_meses(datetime.date(2031, 11, 15), 3) == datetime.date(2032, 2, 15)
 
 
 def test_clinica_nova_recebe_contas_e_categorias_padrao():
@@ -100,7 +100,7 @@ def test_clinica_nova_recebe_contas_e_categorias_padrao():
 
 
 def test_moeda_no_formato_do_idioma():
-    modelo = Template("{% load formatos %}{{ valor|moeda }}")
+    modelo = Template("{% load formats %}{{ valor|moeda }}")
     with translation.override("pt-br"):
         assert modelo.render(Context({"valor": Decimal("1234.5")})) == "R$ 1.234,50"
     with translation.override("en"):
@@ -174,7 +174,7 @@ def test_pagamento_parcial_juros_e_saldo(cenario):
     assert cliente.post(url, {**dados, "valor": "60", "juros": "10"}).status_code == 302
     primeira = parcelas_de(cenario, lancamento)[0]
     assert (primeira.pago, primeira.saldo) == (Decimal("50.00"), Decimal("50.00"))
-    assert servicos.situacao(primeira)[0] == "parcial"
+    assert services.situacao(primeira)[0] == "parcial"
     # Paying more than what is left is refused.
     resposta = cliente.post(url, {**dados, "valor": "50,01"})
     assert "passa do que falta" in resposta.content.decode()
@@ -202,7 +202,7 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     parcela = parcelas_de(cenario, lancamento)[0]
     with usar_clinica(cenario["clinica"]):
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             parcela,
             usuario=cenario["admin"],
             valor=Decimal("100"),
@@ -234,9 +234,9 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
     assert lancamento.cancelado and lancamento.motivo_cancelamento == "Desistiu do tratamento"
     # A second click (or a stale page) changes nothing.
     with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
-        servicos.cancelar(lancamento, motivo="De novo", usuario=cenario["admin"])
+        services.cancelar(lancamento, motivo="De novo", usuario=cenario["admin"])
     with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
-        servicos.estornar(pagamento, motivo="De novo", usuario=cenario["admin"])
+        services.estornar(pagamento, motivo="De novo", usuario=cenario["admin"])
     lancamento.refresh_from_db()
     pagamento.refresh_from_db()
     assert lancamento.motivo_cancelamento == "Desistiu do tratamento"
@@ -257,7 +257,7 @@ def test_devedores_por_tempo_de_atraso(cenario):
         paciente=False,
     )
     with usar_clinica(cenario["clinica"]):
-        linhas = servicos.devedores()
+        linhas = services.devedores()
     assert [linha["nome"] for linha in linhas] == ["Maria Devedora", "João Avulso"]
     maria, joao = linhas
     # 45 days late (31-60) and the next one 15 days late (up to 30).
@@ -336,7 +336,7 @@ def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
     lancamento = lancamento_com(cenario)
     with usar_clinica(cenario["clinica"]):
         Lancamento.objects.filter(pk=lancamento.pk).update(observacoes="Mãe: Joana, 9999-0000")
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             lancamento.parcelas.first(),
             usuario=cenario["admin"],
             valor=Decimal("10.00"),
@@ -439,14 +439,14 @@ def test_saldo_das_contas_com_saldo_inicial(cenario):
         Conta.objects.filter(pk=cenario["caixa"].pk).update(saldo_inicial=Decimal("-50.00"))
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     with usar_clinica(cenario["clinica"]):
-        servicos.receber(
+        services.receber(
             parcelas_de(cenario, lancamento)[0],
             usuario=cenario["admin"],
             valor=Decimal("100"),
             forma="dinheiro",
             conta=cenario["caixa"],
         )
-        saldos = dict((conta.nome, saldo) for conta, saldo in servicos.saldos_das_contas())
+        saldos = dict((conta.nome, saldo) for conta, saldo in services.saldos_das_contas())
     assert saldos == {"Caixa": Decimal("50.00"), "Banco": Decimal("0.00")}
     # A negative initial balance is accepted in the form (overdrawn bank).
     admin = entrar(cenario, "admin")
@@ -465,7 +465,7 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
     )
     with usar_clinica(cenario["clinica"]):
         Conta.objects.filter(pk=cenario["caixa"].pk).update(saldo_inicial=Decimal("1000.00"))
-        servicos.receber(
+        services.receber(
             parcelas_de(cenario, recebivel)[0],
             usuario=cenario["admin"],
             valor=Decimal("100"),
@@ -473,7 +473,7 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
             conta=cenario["caixa"],
             data=datetime.date(2031, 3, 5),
         )
-        aluguel = servicos.criar_lancamento(
+        aluguel = services.criar_lancamento(
             clinica=cenario["clinica"],
             tipo=Lancamento.Tipo.PAGAR,
             pessoa="Imobiliária",
@@ -484,7 +484,7 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
             primeiro_vencimento=datetime.date(2031, 3, 10),
             usuario=cenario["admin"],
         )
-        fluxo = servicos.fluxo_de_caixa(de, ate, hoje=datetime.date(2031, 3, 1))
+        fluxo = services.fluxo_de_caixa(de, ate, hoje=datetime.date(2031, 3, 1))
     assert fluxo["saldo_inicial"] == Decimal("1000.00")
     linhas = {linha["data"]: linha for linha in fluxo["linhas"]}
     assert linhas[datetime.date(2031, 3, 5)]["entradas"] == Decimal("100.00")
@@ -501,21 +501,21 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
 def test_relatorio_por_forma_categoria_e_profissional(cenario):
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     with usar_clinica(cenario["clinica"]):
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
             usuario=cenario["admin"],
             valor=Decimal("100"),
             forma="pix",
             conta=cenario["caixa"],
         )
-        relatorio = servicos.relatorio(HOJE, HOJE)
+        relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Pix", Decimal("100.00"))]
     assert relatorio["por_categoria"] == [("Tratamento", Decimal("100.00"))]
     assert relatorio["resultado"] == Decimal("100.00")
     # Reversed payments leave the reports.
     with usar_clinica(cenario["clinica"]):
-        servicos.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
-        assert servicos.relatorio(HOJE, HOJE)["total_recebido"] == 0
+        services.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
+        assert services.relatorio(HOJE, HOJE)["total_recebido"] == 0
     assert (
         entrar(cenario, "admin").get(reverse("financeiro:relatorios"), {"de": "lixo"}).status_code
         == 200
@@ -531,7 +531,7 @@ def test_listas_de_escolha_sem_texto_em_ingles(cenario):
 
 
 def test_caixa_do_dia_completo(cenario):
-    from apps.financeiro.models import Caixa, MovimentoCaixa
+    from apps.finance.models import Caixa, MovimentoCaixa
 
     with usar_clinica(cenario["clinica"]):
         banco = Conta.objects.get(nome="Banco")
@@ -548,14 +548,14 @@ def test_caixa_do_dia_completo(cenario):
     lancamento = lancamento_com(cenario, valor="80.00", parcelas=2)
     primeira, segunda = parcelas_de(cenario, lancamento)
     with usar_clinica(cenario["clinica"]):
-        servicos.receber(
+        services.receber(
             primeira,
             usuario=cenario["recepcao"],
             valor=Decimal("40"),
             forma="dinheiro",
             conta=cenario["caixa"],
         )
-        servicos.receber(
+        services.receber(
             segunda, usuario=cenario["recepcao"], valor=Decimal("40"), forma="pix", conta=banco
         )
 
@@ -570,8 +570,8 @@ def test_caixa_do_dia_completo(cenario):
     assert "passa do valor" in resposta.content.decode()
 
     with usar_clinica(cenario["clinica"]):
-        resumo = servicos.resumo_do_caixa(caixa)
-        saldos = dict((c.nome, s) for c, s in servicos.saldos_das_contas())
+        resumo = services.resumo_do_caixa(caixa)
+        saldos = dict((c.nome, s) for c, s in services.saldos_das_contas())
     assert (resumo["entradas"], resumo["reforcos"], resumo["retiradas"]) == (
         Decimal("40.00"),
         Decimal("10.00"),
@@ -604,20 +604,20 @@ def test_profissional_nao_opera_o_caixa(cenario):
 
 def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
     with usar_clinica(cenario["clinica"]):
-        caixa = servicos.abrir_caixa(cenario["caixa"], valor=Decimal("0"), usuario=cenario["admin"])
+        caixa = services.abrir_caixa(cenario["caixa"], valor=Decimal("0"), usuario=cenario["admin"])
     lancamento = lancamento_com(cenario, valor="50.00", parcelas=1)
     with usar_clinica(cenario["clinica"]):
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
             usuario=cenario["admin"],
             valor=Decimal("50"),
             forma="dinheiro",
             conta=cenario["caixa"],
         )
-        servicos.fechar_caixa(
+        services.fechar_caixa(
             caixa, valor_contado=Decimal("50"), observacao="", usuario=cenario["admin"]
         )
-        servicos.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
+        services.estornar(pagamento, motivo="erro", usuario=cenario["admin"])
         caixa.refresh_from_db()
     assert (caixa.valor_esperado, caixa.diferenca) == (Decimal("50.00"), 0)
 
@@ -651,7 +651,7 @@ def test_cheque_nao_e_mais_oferecido(cenario):
     )
     assert "forma" in recusado.context["form"].errors
     with usar_clinica(cenario["clinica"]):
-        antigo = servicos.receber(
+        antigo = services.receber(
             parcela,
             usuario=cenario["admin"],
             valor=Decimal("100"),
@@ -665,7 +665,7 @@ def test_devedores_paginados_e_com_busca(cenario):
     """Volume test: thousands of debtors filled a single page of several MB."""
     with usar_clinica(cenario["clinica"]):
         for n in range(55):
-            servicos.criar_lancamento(
+            services.criar_lancamento(
                 clinica=cenario["clinica"],
                 tipo=Lancamento.Tipo.RECEBER,
                 pessoa=f"Pagador Fictício {n:02d}",

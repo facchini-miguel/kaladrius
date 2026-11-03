@@ -9,17 +9,17 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.agenda.models import Agendamento
-from apps.agenda.simulacao import simular_agendamentos, simular_rechamadas
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core import ficticios
-from apps.core.isolamento import sem_isolamento
+from apps.core import fake_data
+from apps.core.isolation import sem_isolamento
 from apps.core.models import Clinica, Papel, Vinculo
-from apps.pacientes.models import Paciente, PessoaRelacionada
-from apps.pessoal.models import Funcionario, Salario
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
-from apps.referencias.models import Cidade, EstadoCivil
+from apps.health_plans.models import Carteirinha, Convenio
+from apps.patients.models import Paciente, PessoaRelacionada
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.reference_data.models import Cidade, EstadoCivil
+from apps.schedule.models import Agendamento
+from apps.schedule.simulation import simular_agendamentos, simular_rechamadas
+from apps.staff.models import Funcionario, Salario
 
 # Fake data only. Names, registrations and e-mails are invented.
 CLINICAS = [
@@ -150,11 +150,11 @@ class Command(BaseCommand):
             juridica = numero % 25 == 0  # about 4% companies
             if juridica:
                 nome = fake.company()
-                documento = ficticios.cnpj(fake)
+                documento = fake_data.cnpj(fake)
             else:
                 sexo = fake.random_element(["F", "M"])
                 nome = fake.name_female() if sexo == "F" else fake.name_male()
-                documento = ficticios.cpf(fake) if fake.boolean(85) else ""
+                documento = fake_data.cpf(fake) if fake.boolean(85) else ""
             if documento in documentos:
                 documento = ""
             documentos.add(documento)
@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 paciente.sexo = sexo
                 paciente.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
                 paciente.estado_civil = fake.random_element(estados_civis)
-                paciente.profissao = ficticios.profissao(fake)
+                paciente.profissao = fake_data.profissao(fake)
             novos.append(paciente)
         Paciente.objects.bulk_create(novos, batch_size=500)
         self._carteirinhas(clinica, novos)

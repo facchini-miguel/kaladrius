@@ -6,10 +6,10 @@ from django.core.management import CommandError, call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, Papel
-from apps.profissionais.models import Profissional
+from apps.practitioners.models import Profissional
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 

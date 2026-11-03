@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Convenciones
 
 - **Nombres del dominio en portugués** (`Paciente`, `Agendamento`), **comentarios en inglés**.
+- **Carpetas y módulos de las apps con nombre en inglés** (`apps/patients/`, `apps/core/countries.py`). Cada app mantiene su **label** en portugués (`label = "pacientes"` en `apps.py`), el nombre con el que la conocen las tablas de la base de datos, las migraciones y los permisos, y los archivos de migración mantienen sus nombres: producción los tiene registrados (decisión 145).
 - **Archivos de prueba con nombre en inglés**, según lo que prueban (`tests/test_patients.py`, `tests/test_schedule.py`), aunque el módulo probado tenga nombre en portugués (decisión 144).
 - **Todo texto de la pantalla** se escribe en portugués en el código y se traduce en `locale/en` y `locale/es`:
   ```bash

@@ -3,13 +3,12 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.auditoria.models import RegistroAuditoria
-from apps.auditoria.registro import registrar
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core.isolamento import sem_isolamento
+from apps.audit.models import RegistroAuditoria
+from apps.audit.record import registrar
+from apps.core.isolation import sem_isolamento
 from apps.core.models import Clinica, ModuloDaClinica
-from apps.financeiro.models import (
+from apps.estimates.models import ItemOrcamento, Orcamento, Procedimento
+from apps.finance.models import (
     Caixa,
     Categoria,
     CentroCusto,
@@ -26,12 +25,20 @@ from apps.financeiro.models import (
     Planejamento,
     TransacaoBancaria,
 )
-from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
-from apps.pacientes.models import Paciente, PessoaRelacionada
-from apps.pessoal.models import Folha, Funcionario, Salario
-from apps.profissionais.models import Profissional
-from apps.prontuario.models import Adendo, Anexo, Atendimento, Atestado, PedidoDeExames, Receita
-from apps.rechamadas.models import Rechamada
+from apps.health_plans.models import Carteirinha, Convenio
+from apps.medical_records.models import (
+    Adendo,
+    Anexo,
+    Atendimento,
+    Atestado,
+    PedidoDeExames,
+    Receita,
+)
+from apps.patients.models import Paciente, PessoaRelacionada
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.staff.models import Folha, Funcionario, Salario
 
 from .popular_dados_teste import CLINICAS
 

@@ -12,9 +12,9 @@ from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.auditoria.models import RegistroAuditoria
-from apps.conta import servicos
-from apps.conta.models import CodigoRecuperacao, DuasEtapas
+from apps.account import services
+from apps.account.models import CodigoRecuperacao, DuasEtapas
+from apps.audit.models import RegistroAuditoria
 from apps.core.models import Papel
 
 pytestmark = pytest.mark.django_db
@@ -38,8 +38,8 @@ def entrar(client, usuario, senha=SENHA, proximo=""):
 
 
 def ligar_duas_etapas(usuario):
-    dispositivo = servicos.preparar(usuario)
-    codigos = servicos.ativar(dispositivo)
+    dispositivo = services.preparar(usuario)
+    codigos = services.ativar(dispositivo)
     return dispositivo, codigos
 
 
@@ -187,7 +187,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
         {"acao": "codigos", "codigos-codigo": codigo_atual(dispositivo)},
     )
     assert "Códigos de recuperação" in novos.content.decode()
-    assert not servicos.verificar_recuperacao(pessoa, antigos[1])  # old ones stop working
+    assert not services.verificar_recuperacao(pessoa, antigos[1])  # old ones stop working
     errado = client.post(
         reverse("conta:duas_etapas"),
         {"acao": "desativar", "desativar-senha": "errada", "desativar-codigo": "000000"},
@@ -201,7 +201,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
             "desativar-codigo": codigo_atual(dispositivo, deslocamento=1),
         },
     )
-    assert resposta.status_code == 302 and not servicos.ativa_para(pessoa)
+    assert resposta.status_code == 302 and not services.ativa_para(pessoa)
 
 
 def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
@@ -214,7 +214,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     pagina = client.get(reverse("equipe:editar", args=[vinculo.pk])).content.decode()
     assert "Remover a verificação em duas etapas" in pagina
     client.post(reverse("equipe:duas_etapas", args=[vinculo.pk]))
-    assert not servicos.ativa_para(pessoa)
+    assert not services.ativa_para(pessoa)
     assert RegistroAuditoria.objects.filter(objeto_descricao__contains="removida").exists()
 
 
@@ -315,7 +315,7 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
             "desativar-codigo": codigo_atual(dispositivo),
         },
     )
-    assert servicos.ativa_para(admin)
+    assert services.ativa_para(admin)
 
 
 def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
