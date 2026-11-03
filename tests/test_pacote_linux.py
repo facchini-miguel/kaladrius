@@ -462,3 +462,133 @@ def test_cada_formato_tem_as_dependencias_de_docker():
         bloco = re.search(rf"^  {formato}:\n((?:    .*\n)+)", NFPM, re.M).group(1)
         dependencias = bloco.split("depends:")[1].split("recommends:")[0]
         assert "docker" in dependencias and "compose" in dependencias, formato
+
+
+def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
+    # Without whiptail (openSUSE, Arch Linux) the password is read as typed, spaces included.
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    shutil.copy(PACOTE / "kaladrius", bin_ / "kaladrius")
+    shutil.copy(comum_em(tmp_path), bin_ / "comum.sh")
+    resultado = subprocess.run(  # noqa: S603 (the package's own command)
+        [
+            BASH,
+            "-c",
+            'source "$0" versao >/dev/null; perguntar_senha "Senha:"',
+            str(bin_ / "kaladrius"),
+        ],
+        input="  minha senha \n",
+        capture_output=True,
+        text=True,
+        env={"PATH": "/usr/bin:/bin", "KALADRIUS_SEM_TELAS": "1"},
+        timeout=30,
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    assert resultado.stdout == "  minha senha "
+
+
+@pytest.mark.parametrize("idioma", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
+def test_ajuda_nao_promete_atualizacao_pelo_sistema(tmp_path, idioma):
+    # No package repository yet: updates are the next version's package, from the releases.
+    saida = kaladrius(tmp_path, "ajuda", idioma=idioma).stdout
+    assert "apt upgrade" not in saida and "dnf upgrade" not in saida
+    assert "github.com/facchini-miguel/kaladrius/releases" in saida
+
+
+def test_certificado_com_o_caddy_parado_nao_deixa_arquivo(tmp_path):
+    destino = tmp_path / "kaladrius-certificado.crt"
+    expressao = (
+        "exigir_root() { :; }; compose() { return 1; }; "
+        f'echo KALADRIUS_ACESSO=rede-interna > "$DIR/.env"; certificado "{destino}"'
+    )
+    resultado = funcao_do_comando(tmp_path, expressao, {"PATH": "/usr/bin:/bin"})
+    assert resultado.returncode == 1
+    assert "sudo kaladrius iniciar" in resultado.stderr
+    assert not destino.exists()
+
+
+def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None):
+    """depois_de_instalar.sh with DIR in tmp_path; systemctl, systemd-run, atualizar.sh faked."""
+    dir_ = tmp_path / "opt"
+    (dir_ / "release").mkdir(parents=True)
+    (dir_ / "bin").mkdir()
+    (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\n")
+    if admin_criado:
+        (dir_ / "admin-criado").write_text("")
+    path = tmp_path / "path"
+    path.mkdir()
+    for comando in ("systemctl", "systemd-run"):
+        falso = path / comando
+        falso.write_text(REGISTRO_DE_CHAMADAS)
+        falso.chmod(0o755)
+    atualizar = dir_ / "bin" / "atualizar.sh"
+    atualizar.write_text(REGISTRO_DE_CHAMADAS)
+    atualizar.chmod(0o755)
+    script = tmp_path / "depois_de_instalar.sh"
+    texto = (PACOTE / "depois_de_instalar.sh").read_text()
+    script.write_text(texto.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1))
+    chamadas = tmp_path / "chamadas"
+    chamadas.write_text("")
+    resultado = subprocess.run(  # noqa: S603 (the package's own script)
+        [shutil.which("sh"), str(script), argumento],
+        capture_output=True,
+        text=True,
+        env={"PATH": f"{path}:/usr/bin:/bin", "CHAMADAS": str(chamadas), **(ambiente or {})},
+        timeout=30,
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    return resultado.stdout, chamadas.read_text()
+
+
+def test_instalar_de_novo_sem_administrador_volta_as_perguntas(tmp_path):
+    # A first `configurar` that stopped after writing .env: installing the package again must not
+    # bring the system up with no account to log in.
+    saida, chamadas = depois_de_instalar(tmp_path, "1", admin_criado=False)
+    assert "atualizar.sh" not in chamadas
+    assert "sudo kaladrius configurar" in saida
+
+
+def test_atualizar_o_pacote_configurado_sobe_a_versao_nova(tmp_path):
+    _saida, chamadas = depois_de_instalar(tmp_path, "2", admin_criado=True)
+    assert "atualizar.sh --forcar" in chamadas
+    assert "systemd-run" not in chamadas
+
+
+def test_no_pacman_a_atualizacao_leva_as_variaveis(tmp_path):
+    # pacman: atualizar.sh runs as its own systemd unit, which starts with a clean environment.
+    _saida, chamadas = depois_de_instalar(
+        tmp_path,
+        "0.55.0-1",
+        admin_criado=True,
+        ambiente={"KALADRIUS_IMAGEM": "kaladrius:teste", "SAUDE_ESPERA": "60"},
+    )
+    linha = next(c for c in chamadas.splitlines() if c.startswith("systemd-run"))
+    assert "--setenv=KALADRIUS_IMAGEM=kaladrius:teste" in linha
+    assert "--setenv=SAUDE_ESPERA=60" in linha
+
+
+def test_teste_de_restauracao_sem_backup_ainda_explica_e_nao_falha(tmp_path):
+    comum_em(
+        tmp_path,
+        pacote=f"VERSAO=0.54.0\nIMAGEM={IMAGEM}\n",
+        env=f"KALADRIUS_BACKUP_PASTA={tmp_path / 'nao-existe'}\nMONITOR_RESTAURACAO_URL=http://monitor.test\n",
+    )
+    shutil.copy(SERVIDOR / "testar_restauracao.sh", tmp_path / "testar_restauracao.sh")
+    (tmp_path / "path").mkdir()
+    for comando in ("docker", "curl"):
+        falso = tmp_path / "path" / comando
+        falso.write_text(REGISTRO_DE_CHAMADAS)
+        falso.chmod(0o755)
+    chamadas = tmp_path / "chamadas"
+    chamadas.write_text("")
+    resultado = subprocess.run(  # noqa: S603 (the server's own script)
+        [BASH, str(tmp_path / "testar_restauracao.sh")],
+        capture_output=True,
+        text=True,
+        env={"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin", "CHAMADAS": str(chamadas)},
+        timeout=30,
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    assert "Ainda não há backup" in resultado.stdout
+    assert "sudo kaladrius backup" in resultado.stdout
+    assert "curl" not in chamadas.read_text()  # the monitor hears neither a success nor a failure

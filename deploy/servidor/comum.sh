@@ -16,8 +16,8 @@ valor_do_env() {
 # Installed from the Linux package (.deb or .rpm, decision 140): the package ships the deploy
 # files and the scripts, and runs the public image of its own version (ghcr.io), pinned by
 # digest in release/pacote-linux when the package is built (a file; Google Cloud's release/ also
-# gets the deploy/pacote folder, with the package's sources); updates come with apt or dnf, and
-# backups go to a local folder. KALADRIUS_IMAGEM (environment or .env) names another image,
+# gets the deploy/pacote folder, with the package's sources); an update is the next version's
+# package installed over it, and backups go to a local folder. KALADRIUS_IMAGEM (environment or .env) names another image,
 # for tests or an installation without internet.
 PACOTE="$DIR/release/pacote-linux"
 instalado_por_pacote() {
@@ -222,7 +222,7 @@ instalar_scripts() {
 
 # Install (or update) the systemd units shipped with the deploy files.
 instalar_agendamentos() {
-  if instalado_por_pacote; then  # its units came with the package; updates come with apt/dnf
+  if instalado_por_pacote; then  # its units came with the package, and so do its updates
     mkdir -p "$DIR/saude"
     systemctl daemon-reload
     systemctl enable --now kaladrius-backup.timer kaladrius-saude.timer kaladrius-restauracao.timer
@@ -242,12 +242,16 @@ instalar_agendamentos() {
   recarregar_caddy
 }
 
+# The Compose service $1 (app, db, caddy) is running. grep without -q: it reads all its input,
+# so the writer never dies of a closed pipe (SIGPIPE), which pipefail would take as a failure.
+servico_rodando() {
+  compose ps --status running --services 2>/dev/null | grep -x "$1" >/dev/null
+}
+
 # `compose up` does not restart Caddy when only the content of the Caddyfile changed, so
 # apply it (a no-op when unchanged). Caddy keeps the old configuration if the new one fails.
 recarregar_caddy() {
-  # grep without -q: it reads all its input, so the writer never dies of a closed pipe (SIGPIPE),
-  # which pipefail would take as a failure.
-  if compose ps --status running --services 2>/dev/null | grep -x caddy >/dev/null; then
+  if servico_rodando caddy; then
     compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null >/dev/null 2>&1 \
       || echo "Aviso: o Caddy não aceitou o novo Caddyfile e continua com o anterior."
   fi

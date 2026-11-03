@@ -20,10 +20,25 @@ trap 'avisar_monitor MONITOR_ATUALIZACAO_URL fail' ERR
 
 forcar=$([ "${1:-}" = "--forcar" ] && echo 1 || true)
 
+# Removes by id the images in $1 that are not in $2 (ids separated by spaces or lines).
+# Installed from the package, images are pulled by digest: an untagged one keeps that reference,
+# is not "dangling", and prune never removes it. Refused while a container uses it; on Google
+# Cloud prune already removed them.
+remover_imagens() {
+  local manter=" ${2//$'\n'/ } " velha
+  for velha in $1; do
+    case "$manter" in *" $velha "*) continue ;; esac
+    docker image rm "$velha" >/dev/null 2>&1 || true
+  done
+}
+
 # The new version did not come up: the previous app image goes back, with its Compose file and
 # Caddyfile, so a new Caddy or PostgreSQL digest (decision 138) is undone too. The scripts stay
 # those of the new version (this one included), so the refusal is kept on the next runs.
 voltar_a_anterior() {
+  local antes
+  # The version refused before this one is not needed any more: only the last refusal is kept.
+  antes=$(cat "$IMAGEM_RECUSADA" 2>/dev/null || true)
   echo "$1" > "$IMAGEM_RECUSADA"
   echo "O sistema não respondeu com a versão nova: voltando à anterior." >&2
   if ! docker image inspect "$IMAGEM_APP_ANTERIOR" >/dev/null 2>&1; then
@@ -37,6 +52,7 @@ voltar_a_anterior() {
     || echo "Aviso: sem o Compose da versão anterior; segue o da nova." >&2
   compose up -d --remove-orphans
   recarregar_caddy
+  remover_imagens "$antes" "$1 $(docker image inspect --format '{{.Id}}' "$IMAGEM_APP_ANTERIOR" 2>/dev/null || true)"
   if sistema_no_ar; then
     echo "De volta à versão anterior; a nova fica recusada até sair outra." >&2
   else
@@ -96,14 +112,7 @@ if [ "$atual" != "$instalada" ] || [ -n "$forcar" ]; then
   docker tag "$IMAGEM_APP" "$IMAGEM_APP_ANTERIOR"
   guardar_compose_anterior
   docker image prune -f >/dev/null
-  # Installed from the package, images are pulled by digest: an untagged one keeps that
-  # reference, is not "dangling", and prune never removes it. Removed by id (refused while a
-  # container uses it); on Google Cloud prune already removed them.
-  atuais=" ${atual//$'\n'/ } "
-  for velha in $velhas; do
-    case "$atuais" in *" $velha "*) continue ;; esac
-    docker image rm "$velha" >/dev/null 2>&1 || true
-  done
+  remover_imagens "$velhas" "$atual"
   echo "Sistema atualizado: $(docker image inspect --format \
     '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$IMAGEM_APP")"
 fi

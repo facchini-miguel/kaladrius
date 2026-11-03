@@ -180,8 +180,8 @@ jobs:
           python manage.py notas_release "$VERSAO" --titulo > titulo.txt
           python manage.py notas_release "$VERSAO" > notas.md
           # The Linux packages of the version (decision 140), with the image just published,
-          # pinned by its digest.
-          deploy/pacote/gerar.sh
+          # pinned by its digest; refused when the version's image came from another commit.
+          deploy/pacote/gerar.sh --commit "$GITHUB_SHA"
           gh release create "v$VERSAO" --target "$GITHUB_SHA" --title "$(cat titulo.txt)" \
             --notes-file notas.md --latest \
             "dist/kaladrius_${VERSAO}-1_amd64.deb" "dist/kaladrius-${VERSAO}-1.x86_64.rpm" \

@@ -181,6 +181,24 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     assert servidor.ler("removidas") == ["A", "B"]  # the old :anterior and the refused one
 
 
+def test_duas_versoes_recusadas_seguidas_nao_ficam_no_disco(servidor):
+    servidor.imagem("remoto", "registro/app:latest", "B")
+    servidor.saude(1, 0)
+    servidor.rodar()
+    # C refused too: B is not needed any more, and only the latest refusal is kept.
+    servidor.imagem("remoto", "registro/app:latest", "C")
+    servidor.saude(1, 0)
+    codigo, _log = servidor.rodar()
+    assert codigo == 1
+    assert servidor.ler("imagem-recusada") == ["C", "D"]
+    assert servidor.ler("removidas") == ["B"]  # never A (running again) or D (in use)
+    servidor.imagem("remoto", "registro/app:latest", "E")
+    servidor.saude(0)
+    codigo, _log = servidor.rodar()
+    assert codigo == 0
+    assert servidor.ler("removidas") == ["B", "A", "C"]
+
+
 def test_forcar_tenta_de_novo_a_versao_recusada(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)

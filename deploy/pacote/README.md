@@ -56,3 +56,14 @@ build the package with `--imagem kaladrius:teste`. What to go through:
    port 80 or 443"), and after deleting `/opt/kaladrius/admin-criado` with the same user name
    and another password: it says the user already exists, and the original password still
    logs in.
+9. A first `sudo kaladrius configurar` stopped after the address (no internet, or Ctrl+C at
+   the password): `kaladrius estado` says the setup did not finish, and installing the package
+   again goes back to the questions (or the message to run `configurar`) instead of starting a
+   system with no administrator.
+10. Without whiptail (openSUSE, Arch Linux: text mode), a password with a space at the start or
+    the end logs in exactly as typed.
+11. `sudo kaladrius certificado` with the system stopped fails with a message and leaves no
+    empty file; `sudo kaladrius testar-restauracao` before the first backup says so and does
+    not fail.
+12. On Arch Linux or CachyOS, `sudo KALADRIUS_IMAGEM=kaladrius:teste pacman -U …` updates to
+    that image (the update runs as its own systemd unit).

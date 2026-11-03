@@ -15,9 +15,14 @@ trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
 if instalado_por_pacote; then
   # The local folder of backup.sh (decision 140); the names sort by their timestamp. Read where
   # it is: a copy in /tmp (a small tmpfs on Debian 13) would not fit a big dump.
-  objeto=$(find "$(pasta_dos_backups)" -maxdepth 1 -name 'kaladrius-*.dump' \
-    | sort | tail -1)
-  [ -n "$objeto" ]
+  # No backup yet (installed hours before the first one, or a new KALADRIUS_BACKUP_PASTA): said
+  # plainly, and not a failure of the restore test; a backup that fails warns by itself.
+  objeto=$(find "$(pasta_dos_backups)" -maxdepth 1 -name 'kaladrius-*.dump' 2>/dev/null \
+    | sort | tail -1 || true)
+  if [ -z "$objeto" ]; then
+    echo "Ainda não há backup em $(pasta_dos_backups) para testar: o primeiro sai às 06:00 UTC (ou agora: sudo kaladrius backup)."
+    exit 0
+  fi
   backup=$objeto
 else
   token=$(token_google)
@@ -58,8 +63,7 @@ docker exec "$CONTAINER" pg_restore -U postgres -d restaurado --no-owner --no-pr
 clinicas=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM core_clinica")
 migracoes=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM django_migrations")
 exigir_clinica=$(instalado_por_pacote || echo 1)
-# grep without -q (it reads all its input): an early exit would fail the pipeline (pipefail).
-if compose ps --status running --services 2>/dev/null | grep -x db >/dev/null; then
+if servico_rodando db; then
   no_sistema=$(compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT count(*) FROM core_clinica"' </dev/null)
   echo "Restaurado: $clinicas clínica(s), $migracoes migrações (o sistema tem $no_sistema clínica(s))."
   if [ "$no_sistema" -ge 1 ]; then exigir_clinica=1; fi

@@ -84,7 +84,8 @@ perguntar_senha() {  # perguntar_senha "question": prints the answer
     resposta=$(whiptail --title "$TITULO" "${BOTOES[@]}" --passwordbox "$texto" \
       "$(($(printf '%s\n' "$texto" | wc -l) + 7))" 72 3>&1 1>&2 2>&3) || cancelar
   else
-    read -r -s -p "$1 " resposta || cancelar
+    # IFS= : spaces at the start or the end belong to the password.
+    IFS= read -r -s -p "$1 " resposta || cancelar
     echo >&2
   fi
   printf '%s' "$resposta"
@@ -152,11 +153,10 @@ eh_dominio() {
   [[ "$1" =~ ^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$ ]]
 }
 
-# Another program already listens on port 80 or 443 (Caddy needs both). grep without -q: it
-# reads all its input, so the writer never dies of a closed pipe (SIGPIPE), which pipefail would
-# take as a failure (Kaladrius's own Caddy taken for another program).
+# Another program already listens on port 80 or 443 (Caddy needs both): Kaladrius's own Caddy
+# is not one.
 portas_ocupadas() {
-  compose ps --status running --services 2>/dev/null | grep -x caddy >/dev/null && return 1
+  servico_rodando caddy && return 1
   ss -ltnH 2>/dev/null | awk '{print $4}' | grep -E ':(80|443)$' >/dev/null
 }
 
@@ -447,7 +447,12 @@ certificado() {
   exigir_root certificado
   exigir_configurado
   rede_interna || erro "$(t "só a instalação na rede interna usa um certificado próprio." "solo la instalación en la red interna usa un certificado propio." "only the internal network installation uses a certificate of its own.")"
-  compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt >"$destino"
+  local raiz
+  # Read first: a failure (Caddy stopped) never leaves an empty file to copy to the computers.
+  raiz=$(compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt </dev/null 2>/dev/null) \
+    && [ -n "$raiz" ] \
+    || erro "$(t "o Caddy não está rodando, ou ainda não criou o certificado. Inicie o sistema (sudo kaladrius iniciar) e tente de novo." "Caddy no está en marcha, o aún no creó el certificado. Inicie el sistema (sudo kaladrius iniciar) e inténtelo de nuevo." "Caddy is not running, or has not made the certificate yet. Start the system (sudo kaladrius iniciar) and try again.")"
+  printf '%s\n' "$raiz" >"$destino"
   chmod 644 "$destino"
   cat <<EOF
 $(t "Certificado salvo em" "Certificado guardado en" "Certificate saved in"): $destino
@@ -473,6 +478,8 @@ estado() {
   if ! docker info >/dev/null 2>&1; then
     echo "$(t "Atenção: o Docker não está rodando, e o sistema está fora do ar. Para ligá-lo: sudo systemctl enable --now docker; depois: sudo kaladrius iniciar" "Atención: Docker no está en marcha, y el sistema está fuera de servicio. Para iniciarlo: sudo systemctl enable --now docker; después: sudo kaladrius iniciar" "Warning: Docker is not running, and the system is down. To start it: sudo systemctl enable --now docker; then: sudo kaladrius iniciar")"
     return 0
+  elif [ ! -f "$ADMIN_CRIADO" ]; then
+    echo "$(t "Atenção: a configuração não terminou (o administrador não foi criado). Para terminar: sudo kaladrius configurar" "Atención: la configuración no terminó (el administrador no se creó). Para terminar: sudo kaladrius configurar" "Warning: the setup did not finish (the administrator was not created). To finish it: sudo kaladrius configurar")"
   elif [ -z "$esperada" ]; then
     echo "$(t "Atenção: a imagem da versão ${VERSAO_DO_PACOTE:-} não está neste servidor (não foi possível baixá-la). Com a internet funcionando, instale o pacote de novo." "Atención: la imagen de la versión ${VERSAO_DO_PACOTE:-} no está en este servidor (no se pudo descargar). Con internet funcionando, instale el paquete de nuevo." "Warning: the image of version ${VERSAO_DO_PACOTE:-} is not on this server (it could not be downloaded). With the internet working, install the package again.")"
   elif [ -z "$container" ]; then
@@ -500,7 +507,8 @@ Kaladrius ${VERSAO_DO_PACOTE:-}
   sudo kaladrius reiniciar           $(t "reinicia os serviços (e aplica mudanças do .env)" "reinicia los servicios (y aplica cambios del .env)" "restarts the services (and applies changes to .env)")
   sudo kaladrius parar | iniciar     $(t "para ou inicia o sistema (os dados ficam)" "detiene o inicia el sistema (los datos quedan)" "stops or starts the system (the data stays)")
 
-$(t "Atualizações: chegam com o sistema (sudo apt upgrade ou sudo dnf upgrade)." "Actualizaciones: llegan con el sistema (sudo apt upgrade o sudo dnf upgrade)." "Updates: they come with the system (sudo apt upgrade or sudo dnf upgrade).")
+$(t "Atualizações: baixe o pacote da versão nova e instale-o por cima deste (sudo apt install ./kaladrius_….deb, sudo dnf install ./kaladrius-….rpm ou sudo pacman -U kaladrius-….pkg.tar.zst):" "Actualizaciones: descargue el paquete de la versión nueva e instálelo sobre este (sudo apt install ./kaladrius_….deb, sudo dnf install ./kaladrius-….rpm o sudo pacman -U kaladrius-….pkg.tar.zst):" "Updates: download the new version's package and install it over this one (sudo apt install ./kaladrius_….deb, sudo dnf install ./kaladrius-….rpm or sudo pacman -U kaladrius-….pkg.tar.zst):")
+  https://github.com/facchini-miguel/kaladrius/releases
 $(t "Documentação" "Documentación" "Documentation"): https://kaladrius-docs.facchini.eti.br
 EOF
 }
