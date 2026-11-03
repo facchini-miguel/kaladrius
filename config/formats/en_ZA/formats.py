@@ -1,5 +1,5 @@
 # South African English (decision 117): day/month and the 24-hour clock. Django has no en_ZA,
-# so every date format is here (otherwise the American ones of config/formatos/en would win).
+# so every date format is here (otherwise the American ones of config/formats/en would win).
 DATE_FORMAT = "j F Y"
 TIME_FORMAT = "H:i"
 DATETIME_FORMAT = "j F Y, H:i"
