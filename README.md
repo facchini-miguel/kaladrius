@@ -10,19 +10,20 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Current version: 0.54.0** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
+**Current version: 0.54.1** · [What's new](releases.yaml) · [All releases](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: in development, running as a public demo. **To try it, start at https://www.facchini.eti.br/en/kaladrius/**: the page has the demo logins for each role (front desk, practitioner, finance, clinic administrator), screenshots and every link. The demo runs on the Google Cloud free tier, IPv6 only; see [Reference production](https://kaladrius-docs.facchini.eti.br/project/production).
 
 ## Installing on a server
 
-On Debian 13+ or Ubuntu 24.04+, download the `.deb` of the [latest release](https://github.com/facchini-miguel/kaladrius/releases/latest) and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups:
+On Debian 13+ or Ubuntu 24.04+, add Kaladrius's package repository and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups, and new versions come with `sudo apt upgrade`:
 
 ```bash
-sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: the .rpm with dnf or zypper; Arch, CachyOS: the .pkg.tar.zst with pacman
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
+sudo apt update && sudo apt install kaladrius
 ```
 
-See [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package) for the details, and the other ways to install (Docker Compose by hand, Google Cloud).
+See [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package) for the details (also the `.deb`, `.rpm` and Arch Linux packages of each [release](https://github.com/facchini-miguel/kaladrius/releases/latest)), and the other ways to install (Docker Compose by hand, Google Cloud).
 
 ## Running locally
 

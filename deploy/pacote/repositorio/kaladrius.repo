@@ -1,0 +1,9 @@
+[kaladrius]
+name=kaladrius (https://packages.facchini.eti.br)
+baseurl=https://packages.facchini.eti.br/kaladrius/rpm
+type=rpm-md
+enabled=1
+autorefresh=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.facchini.eti.br/facchini.asc

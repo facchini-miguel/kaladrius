@@ -13,7 +13,7 @@ The simplest way to install Kaladrius on a server of the clinic or on a VPS: a p
 |---|---|---|
 | Debian 13 or newer, Ubuntu 24.04 or newer | `.deb` | from the distribution, installed with the package |
 | Fedora, openSUSE Tumbleweed | `.rpm` | from the distribution, installed with the package |
-| Arch Linux, CachyOS | `.pkg.tar.zst` | from the distribution, installed with the package. Rolling releases: good for trying Kaladrius out; for a clinic's server, prefer one of the systems above |
+| Arch Linux, CachyOS | `.pkg.tar.zst` (downloaded; not in the repository) | from the distribution, installed with the package. Rolling releases: good for trying Kaladrius out; for a clinic's server, prefer one of the systems above |
 | Rocky Linux, AlmaLinux, Red Hat Enterprise Linux | `.rpm` | add [Docker's repository](https://docs.docker.com/engine/install/rhel/) first (below) |
 | Debian 12, Ubuntu 22.04 | `.deb` | their Docker Compose is too old: install [Docker's own packages](https://docs.docker.com/engine/install/debian/) first |
 
@@ -27,6 +27,45 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
 ```
 
 ## Install
+
+### From the package repository
+
+With Kaladrius's package repository (at [packages.facchini.eti.br](https://packages.facchini.eti.br/kaladrius/)) added, its new versions come with the system's own updates. On Debian and Ubuntu:
+
+```bash
+sudo apt install -y curl ca-certificates
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
+sudo apt update
+sudo apt install kaladrius
+```
+
+That one file holds the repository's address and its key (apt's deb822 format).
+
+On Fedora, Rocky Linux, AlmaLinux and Red Hat Enterprise Linux:
+
+```bash
+sudo curl -fsSLo /etc/yum.repos.d/kaladrius.repo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
+sudo dnf install kaladrius
+```
+
+On openSUSE:
+
+```bash
+sudo zypper addrepo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
+sudo zypper install kaladrius
+```
+
+The repository and its `.rpm` packages are signed with the [key](https://packages.facchini.eti.br/facchini.asc) of packages.facchini.eti.br. Before trusting it, `dnf` and `zypper` show its fingerprint, which must be `9D3A 0438 FF6C 00F9 1CA1 A0AB A5C3 35B2 EB36 7ABA`.
+
+On Debian and Ubuntu the questions appear right away, in the server's language (Portuguese, Spanish or English). With `dnf` and `zypper`, run them yourself afterwards:
+
+```bash
+sudo kaladrius configurar
+```
+
+### From a downloaded package
+
+On Arch Linux and CachyOS, which the repository does not serve, or to pick a version by hand. Like Google Chrome's and VS Code's, the `.deb` and the `.rpm` add the package repository when they are installed (the same file as above, unless it is already there), so later versions come with the system's updates anyway:
 
 1. Download the package of the newest version from the [releases page](https://github.com/facchini-miguel/kaladrius/releases/latest), with the `SHA256SUMS` file to check it. For example, for version 0.54.0:
 
@@ -47,13 +86,9 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
    sudo pacman -Syu && sudo pacman -U ./kaladrius-0.54.0-1-x86_64.pkg.tar.zst   # Arch Linux, CachyOS
    ```
 
-   On Debian and Ubuntu the questions appear right away, in the server's language (Portuguese, Spanish or English). With `dnf`, `zypper` and `pacman`, run them yourself afterwards:
+   On Debian and Ubuntu the questions appear right away; with `dnf`, `zypper` and `pacman`, run `sudo kaladrius configurar` afterwards.
 
-   ```bash
-   sudo kaladrius configurar
-   ```
-
-The installer is not signed yet: `dnf` and `zypper` say so ("skipped OpenPGP checks", "unsigned rpm"). The `SHA256SUMS` check above is what proves the file is the one published.
+A downloaded package is not signed: `dnf` and `zypper` say so ("skipped OpenPGP checks", "unsigned rpm"). The `SHA256SUMS` check above is what proves the file is the one published; the updates that come from the repository afterwards are signed.
 
 ## The questions
 
@@ -99,6 +134,8 @@ sudo --preserve-env=KALADRIUS_SENHA_ADMIN kaladrius configurar \
 
 `--acesso` is `rede-interna` (internal network) or `internet`; for `internet`, `--endereco` is the domain. On an error (an invalid address, a refused password) it stops with the reason and a non-zero exit code.
 
+To install a downloaded package without adding the package repository (a server updated by hand, say): `sudo KALADRIUS_SEM_REPOSITORIO=1 apt install ./kaladrius_….deb` (or `dnf install`). The choice is kept in `/opt/kaladrius/sem-repositorio`, so later packages do not add it either.
+
 ## Everyday commands
 
 | Command | What it does |
@@ -126,9 +163,14 @@ The folder and the number of days are `KALADRIUS_BACKUP_PASTA` and `KALADRIUS_BA
 
 ## Updates
 
-Download the package of the new version and install it the same way (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` or `sudo pacman -U ./kaladrius-….pkg.tar.zst`). The system restarts on the new version; database migrations run by themselves. Make a backup before (`sudo kaladrius backup`).
+Make a backup before (`sudo kaladrius backup`), then:
 
-**Automatic rollback:** if the new version does not answer within 5 minutes, the previous version is put back by itself, with its Compose file and Caddyfile, and keeps running, and `sudo kaladrius estado` shows the warning. `sudo kaladrius reiniciar`, `parar` and `iniciar` keep it on the previous version; installing the package again tries the new one again. A package repository, so updates come with `sudo apt upgrade` and `sudo dnf upgrade`, is the next step.
+- **With the package repository** (added by hand or by the downloaded `.deb` or `.rpm`): `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`, like the rest of the system. A new version reaches the repository within an hour of its release.
+- **On Arch Linux and CachyOS, or without the repository:** download the package of the new version and install it the same way (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` or `sudo pacman -U ./kaladrius-….pkg.tar.zst`).
+
+The system restarts on the new version; database migrations run by themselves.
+
+**Automatic rollback:** if the new version does not answer within 5 minutes, the previous version is put back by itself, with its Compose file and Caddyfile, and keeps running, and `sudo kaladrius estado` shows the warning. `sudo kaladrius reiniciar`, `parar` and `iniciar` keep it on the previous version; installing the package again (`sudo apt install --reinstall kaladrius`, `sudo dnf reinstall kaladrius`, `sudo zypper install -f kaladrius`, or the downloaded file) tries the new one again.
 
 ## E-mail and monitoring (optional)
 
@@ -145,6 +187,8 @@ sudo pacman -R kaladrius                       # Arch Linux, CachyOS
 
 The system stops, and **the data is kept**: the database (Docker volume `kaladrius_pgdata`), the backups in `/var/backups/kaladrius` and `/opt/kaladrius/.env`, with the database password. Installing the package again brings the system back with them. Without `--noautoremove`, dnf also removes Docker when it came with the package; the data stays, but installing again then needs the internet to download Docker. Deleting them is irreversible and is done by hand; the commands are shown when the package is removed.
 
+The package repository stays too, so `sudo apt install kaladrius` (or `dnf`, `zypper`) brings the system back. To remove it: `sudo apt purge kaladrius` instead of `remove` (Debian, Ubuntu; the data still stays), `sudo rm /etc/yum.repos.d/kaladrius.repo` (Fedora, Rocky, AlmaLinux) or `sudo zypper removerepo kaladrius` (openSUSE).
+
 ## Where things are
 
 | Path | What |
@@ -153,4 +197,5 @@ The system stops, and **the data is kept**: the database (Docker volume `kaladri
 | `/opt/kaladrius/release/` | the Compose file and the Caddyfile of the installed version |
 | `/opt/kaladrius/bin/` | the `kaladrius` command and the server scripts |
 | `/var/backups/kaladrius/` | the daily backups |
+| `/etc/apt/sources.list.d/kaladrius.sources`, `/etc/yum.repos.d/kaladrius.repo`, `/etc/zypp/repos.d/kaladrius.repo` | the package repository |
 | `kaladrius-*.timer` (systemd) | backup, health samples every 5 minutes, weekly restore test |

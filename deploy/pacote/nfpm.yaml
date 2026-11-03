@@ -73,6 +73,16 @@ contents:
   - src: deploy/servidor/kaladrius-restauracao.timer
     dst: /usr/lib/systemd/system/kaladrius-restauracao.timer
     file_info: {mode: 0644}
+  # The package repository's apt source and .repo file (decision 142), which
+  # depois_de_instalar.sh copies when the repository is not configured yet.
+  - src: deploy/pacote/repositorio/kaladrius.sources
+    dst: /opt/kaladrius/repositorio/kaladrius.sources
+    file_info: {mode: 0644}
+    packager: deb
+  - src: deploy/pacote/repositorio/kaladrius.repo
+    dst: /opt/kaladrius/repositorio/kaladrius.repo
+    file_info: {mode: 0644}
+    packager: rpm
   - src: LICENSE
     dst: /usr/share/doc/kaladrius/copyright
     file_info: {mode: 0644}

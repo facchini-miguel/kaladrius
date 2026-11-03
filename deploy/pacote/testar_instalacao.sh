@@ -11,7 +11,10 @@ VERSAO=$(sed -n 's/^VERSAO=//p' dist/pacote-linux)
 DEB=kaladrius_${VERSAO}-1_amd64.deb
 RPM=kaladrius-${VERSAO}-1.x86_64.rpm
 ARCH=kaladrius-${VERSAO}-1-x86_64.pkg.tar.zst
-CONFERIR='kaladrius versao && docker compose version && test -x /opt/kaladrius/bin/atualizar.sh'
+# The .deb and the .rpm also add the package repository (decision 142); Arch Linux does not.
+CONFERIR='kaladrius versao && docker compose version && test -x /opt/kaladrius/bin/atualizar.sh &&
+  { test -e /etc/apt/sources.list.d/kaladrius.sources || test -e /etc/yum.repos.d/kaladrius.repo ||
+    test -e /etc/zypp/repos.d/kaladrius.repo || command -v pacman >/dev/null; }'
 
 instalar() {  # instalar IMAGE COMMAND
   echo "== $1"
