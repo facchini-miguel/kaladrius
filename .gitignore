@@ -42,3 +42,6 @@ htmlcov/
 # Bank statements (real ones hold financial data; fake ones are generated on demand)
 *.ofx
 *.OFX
+
+# Linux packages built by deploy/pacote/gerar.sh
+dist/

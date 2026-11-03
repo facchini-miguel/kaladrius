@@ -41,3 +41,4 @@ docs/i18n/*/docusaurus-plugin-content-docs/current/*
 !docs/i18n/*/docusaurus-plugin-content-docs/current/manual/
 docs/i18n/*/docusaurus-plugin-content-docs/current/manual/*
 !docs/i18n/*/docusaurus-plugin-content-docs/current/manual/privacidade.md
+dist/

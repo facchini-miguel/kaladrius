@@ -12,14 +12,33 @@ API="https://storage.googleapis.com/storage/v1/b/$BUCKET_BACKUP/o"
 pasta=$(mktemp -d)
 trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
 
-token=$(token_google)
-# Newest by the timestamp in the name (kaladrius-YYYYMMDD-HHMMSS.dump).
-objeto=$(curl -sf -H "Authorization: Bearer $token" "$API?fields=items(name)" \
-  | grep -o '"name": *"[^"]*\.dump"' | sed -E 's/.*"([^"]*)"$/\1/' \
-  | sed -E 's/.*-([0-9]{8}-[0-9]{6})\.dump$/\1 &/' | sort | tail -1 | cut -d' ' -f2)
-[ -n "$objeto" ]
-curl -sf -H "Authorization: Bearer $token" "$API/$objeto?alt=media" -o "$pasta/backup.dump"
-echo "Backup: $objeto ($(du -h "$pasta/backup.dump" | cut -f1))"
+if instalado_por_pacote; then
+  # The local folder of backup.sh (decision 140); the names sort by their timestamp. Read where
+  # it is: a copy in /tmp (a small tmpfs on Debian 13) would not fit a big dump.
+  objeto=$(find "$(pasta_dos_backups)" -maxdepth 1 -name 'kaladrius-*.dump' | sort | tail -1 || true)
+  if [ -z "$objeto" ]; then
+    # Installed less than two days ago (the setup finished, admin-criado), before the first
+    # daily backup: said plainly, not a failure. Later, no backup at all is a failure the monitor
+    # hears (a disk no longer mounted, the dumps deleted).
+    if [ ! -f "$DIR/admin-criado" ] || [ -n "$(find "$DIR/admin-criado" -mmin -2880)" ]; then
+      echo "Ainda não há backup em $(pasta_dos_backups) para testar: o primeiro sai às 06:00 UTC (ou agora: sudo kaladrius backup)."
+      exit 0
+    fi
+    echo "Nenhum backup em $(pasta_dos_backups): confira a pasta (um disco desmontado?) e sudo systemctl status kaladrius-backup.service." >&2
+    false  # the ERR trap tells the monitor
+  fi
+  backup=$objeto
+else
+  token=$(token_google)
+  # Newest by the timestamp in the name (kaladrius-YYYYMMDD-HHMMSS.dump).
+  objeto=$(curl -sf -H "Authorization: Bearer $token" "$API?fields=items(name)" \
+    | grep -o '"name": *"[^"]*\.dump"' | sed -E 's/.*"([^"]*)"$/\1/' \
+    | sed -E 's/.*-([0-9]{8}-[0-9]{6})\.dump$/\1 &/' | sort | tail -1 | cut -d' ' -f2)
+  [ -n "$objeto" ]
+  backup="$pasta/backup.dump"
+  curl -sf -H "Authorization: Bearer $token" "$API/$objeto?alt=media" -o "$backup"
+fi
+echo "Backup: $objeto ($(du -h "$backup" | cut -f1))"
 
 # A small container: the e2-micro has 1 GB of RAM and the system keeps running. The image of
 # production's database, digest included (decision 138).
@@ -35,15 +54,30 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 docker exec "$CONTAINER" createdb -U postgres restaurado
-docker cp "$pasta/backup.dump" "$CONTAINER:/backup.dump"
+docker cp "$backup" "$CONTAINER:/backup.dump"
 docker exec "$CONTAINER" pg_restore -U postgres -d restaurado --no-owner --no-privileges \
   --exit-on-error /backup.dump
 
-# The restored database has the clinic and the migrations of every app.
+# The restored database has the migrations of every app and the clinic. Google Cloud always has
+# one. A package installation has none until "Primeiros passos", so there the clinic is required
+# when the system's database has one: it is read for that count only, and only when it is
+# running (a stopped system does not make a good backup fail its test). When it runs, the count
+# must succeed: a failed query never skips the check. One check per line: a failing
+# `[ a ] && [ b ]` does not stop a `set -e` script.
 clinicas=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM core_clinica")
 migracoes=$(docker exec "$CONTAINER" psql -U postgres -d restaurado -tAc "SELECT count(*) FROM django_migrations")
-echo "Restaurado: $clinicas clínica(s), $migracoes migrações."
-[ "$clinicas" -ge 1 ] && [ "$migracoes" -ge 1 ]
+exigir_clinica=$(instalado_por_pacote || echo 1)
+if servico_rodando db; then
+  no_sistema=$(compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT count(*) FROM core_clinica"' </dev/null)
+  echo "Restaurado: $clinicas clínica(s), $migracoes migrações (o sistema tem $no_sistema clínica(s))."
+  if [ "$no_sistema" -ge 1 ]; then exigir_clinica=1; fi
+else
+  echo "Restaurado: $clinicas clínica(s), $migracoes migrações (o sistema está parado: sem comparar as clínicas)."
+fi
+[ "$migracoes" -ge 1 ]
+if [ -n "$exigir_clinica" ]; then
+  [ "$clinicas" -ge 1 ]
+fi
 
 avisar_monitor MONITOR_RESTAURACAO_URL
 echo "Teste de restauração concluído."

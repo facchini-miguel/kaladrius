@@ -88,7 +88,7 @@ relatorio() {
   echo
   echo "== Tarefas agendadas"
   systemctl list-timers 'kaladrius-*' --no-pager | head -n -3
-  if systemctl --failed --no-legend 'kaladrius-*' | grep -q .; then
+  if systemctl --failed --no-legend 'kaladrius-*' | grep . >/dev/null; then
     echo
     echo "!! Com falha:"
     systemctl --failed --no-legend 'kaladrius-*'
@@ -105,7 +105,8 @@ sinal_de() {
 # Days until the HTTPS certificate of $1 expires (0 when it cannot be read).
 dias_do_certificado() {
   local validade fim
-  validade=$(curl -sv -m 20 -o /dev/null "https://$1/" 2>&1 | sed -n 's/^\*[[:space:]]*expire date: //p' | head -1)
+  opcoes_para_o_site "$1"  # comum.sh
+  validade=$(curl -sv -m 20 "${OPCOES_CURL[@]}" -o /dev/null "https://$1/" 2>&1 | sed -n 's/^\*[[:space:]]*expire date: //p' | head -1)
   fim=$(date -d "$validade" +%s 2>/dev/null || echo 0)
   echo $(((fim - $(date +%s)) / 86400))
 }
@@ -120,7 +121,8 @@ todos_respondem() {
   local caminho=$1 host
   shift
   for host in "$@"; do
-    curl -fsS -m 20 -o /dev/null "https://$host$caminho" || return 1
+    opcoes_para_o_site "$host"  # comum.sh
+    curl -fsS -m 20 "${OPCOES_CURL[@]}" -o /dev/null "https://$host$caminho" || return 1
   done
 }
 
@@ -142,7 +144,9 @@ verificar() {
   mapfile -t docs < <(hosts_de DOCS_HOSTNAME)
   # The system, with its database (/api/v1/saude answers 503 when the database does not).
   sinal_de MONITOR_SISTEMA_URL todos_respondem /api/v1/saude "${sites[@]}"
-  sinal_de MONITOR_CERTIFICADO_URL certificados_ok "${sites[@]}" "${docs[@]}"
+  # On the internal network Caddy's local certificates last hours and are renewed by it: there
+  # is no expiry to watch.
+  rede_interna || sinal_de MONITOR_CERTIFICADO_URL certificados_ok "${sites[@]}" "${docs[@]}"
   if [ "${#docs[@]}" -gt 0 ]; then
     sinal_de MONITOR_DOCS_URL todos_respondem / "${docs[@]}"
   fi

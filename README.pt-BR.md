@@ -10,9 +10,19 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.53.6** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.54.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: em desenvolvimento, em uso de demonstração. **Para conhecer, comece por https://www.facchini.eti.br/kaladrius/**: a página tem os acessos de demonstração de cada perfil (recepção, profissional, financeiro, administrador da clínica), as telas e todos os links. A demonstração roda no Google Cloud free tier, somente IPv6; veja [Produção de referência](https://kaladrius-docs.facchini.eti.br/pt-BR/project/production).
+
+## Instalar num servidor
+
+No Debian 13+ ou Ubuntu 24.04+, baixe o `.deb` da [release mais nova](https://github.com/facchini-miguel/kaladrius/releases/latest) e instale; algumas perguntas na tela (rede interna ou internet, o administrador) e o sistema está no ar, com backup diário:
+
+```bash
+sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: o .rpm com dnf ou zypper; Arch, CachyOS: o .pkg.tar.zst com pacman
+```
+
+Veja [Pacote Linux](https://kaladrius-docs.facchini.eti.br/pt-BR/installation/linux-package) para os detalhes e as outras formas de instalar (Docker Compose à mão, Google Cloud).
 
 ## Como rodar (local)
 

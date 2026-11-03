@@ -60,6 +60,28 @@ def test_criar_admin(monkeypatch):
     assert get_user_model().objects.filter(username="admin").count() == 1
 
 
+def test_criar_admin_falha_se_existir(monkeypatch):
+    # The Linux package's installer tells the user that the password typed was not used.
+    monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
+    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
+    call_command("criar_admin", "--falhar-se-existir")
+    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "outra-senha-forte-456")
+    with pytest.raises(CommandError) as erro:
+        call_command("criar_admin", "--falhar-se-existir")
+    assert erro.value.returncode == 3
+    assert get_user_model().objects.get(username="admin").check_password("senha-forte-de-teste-123")
+
+
+@pytest.mark.parametrize("senha", ["curta1", "1234567890123", "password123"])
+def test_criar_admin_recusa_senha_fraca(monkeypatch, senha):
+    # The Linux package's installer shows the reasons and asks again (decision 140).
+    monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
+    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", senha)
+    with pytest.raises(CommandError):
+        call_command("criar_admin")
+    assert not get_user_model().objects.filter(username="admin").exists()
+
+
 def test_criar_admin_sem_senha(monkeypatch):
     monkeypatch.delenv("DJANGO_ADMIN_PASSWORD", raising=False)
     with pytest.raises(CommandError):

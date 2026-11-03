@@ -4,6 +4,59 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.54.0
+  data: 2026-11-02
+  titulo:
+    pt-br: Instalação pelo pacote Linux
+    en: Installation from the Linux package
+    es: Instalación con el paquete Linux
+  itens:
+    - tipo: novo
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A clínica pode instalar o Kaladrius no próprio servidor com um pacote do Linux
+          (Debian, Ubuntu, Fedora e outros), respondendo a algumas perguntas na tela, para usar
+          na rede interna ou pela internet, com backup diário e volta automática de uma
+          atualização que falhar.
+        en: >
+          A clinic can install Kaladrius on its own server with a Linux package (Debian,
+          Ubuntu, Fedora and others) by answering a few questions on screen, for use on the
+          internal network or through the internet, with daily backups and automatic rollback
+          of an update that fails.
+        es: >
+          La clínica puede instalar Kaladrius en su propio servidor con un paquete de Linux
+          (Debian, Ubuntu, Fedora y otros), respondiendo algunas preguntas en pantalla, para
+          usarlo en la red interna o por internet, con copia de seguridad diaria y vuelta
+          automática de una actualización que falle.
+    - tipo: seguranca
+      modulo: Acesso
+      publico: [equipe]
+      texto:
+        pt-br: >
+          A senha do primeiro administrador, criada na instalação, segue as mesmas regras de
+          senha forte das demais.
+        en: >
+          The first administrator's password, created at installation, follows the same strong
+          password rules as every other.
+        es: >
+          La contraseña del primer administrador, creada en la instalación, sigue las mismas
+          reglas de contraseña fuerte que las demás.
+    - tipo: correcao
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Um servidor próprio sem o site de documentação não iniciava o HTTPS, e o teste semanal
+          de restauração do backup não acusava um backup sem a clínica.
+        en: >
+          An own server without the documentation site did not start HTTPS, and the weekly
+          backup restore test did not catch a backup without the clinic.
+        es: >
+          Un servidor propio sin el sitio de documentación no iniciaba el HTTPS, y la prueba
+          semanal de restauración de la copia no detectaba una copia sin la clínica.
+
 - versao: 0.53.6
   data: 2026-11-02
   titulo:

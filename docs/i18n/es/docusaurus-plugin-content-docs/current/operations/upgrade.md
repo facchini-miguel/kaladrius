@@ -7,6 +7,10 @@ title: Actualización
 
 Kaladrius sigue el [versionado semántico](https://semver.org/lang/es/): `MAYOR.MENOR.CORRECCIÓN`. Cada versión aparece, con lo que cambió, en **Novedades** dentro del sistema y en las [releases de GitHub](https://github.com/facchini-miguel/kaladrius/releases). Las migraciones de la base se ejecutan solas cuando la app inicia.
 
+## Paquete Linux
+
+Descargue el paquete de la versión nueva en la [página de releases](https://github.com/facchini-miguel/kaladrius/releases) e instálelo sobre el instalado: `sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb` o `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`. Tiene la misma vuelta automática que la instalación en Google Cloud (abajo): una versión que no responde en 5 minutos se deshace y la anterior sigue en marcha; `sudo kaladrius estado` lo muestra. Vea [Paquete Linux](../installation/linux-package.md#actualizaciones).
+
 ## Servidor propio
 
 ```bash

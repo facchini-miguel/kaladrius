@@ -7,6 +7,10 @@ title: Upgrade
 
 Kaladrius follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`. Each version is listed, with what changed, in **What's new** inside the system and in the [releases on GitHub](https://github.com/facchini-miguel/kaladrius/releases). Database migrations run by themselves when the app starts.
 
+## Linux package
+
+Download the package of the new version from the [releases page](https://github.com/facchini-miguel/kaladrius/releases) and install it over the installed one: `sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb` or `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`. It has the same automatic rollback as the Google Cloud installation (below): a version that does not answer within 5 minutes is undone and the previous one keeps running; `sudo kaladrius estado` shows it. See [Linux package](../installation/linux-package.md#updates).
+
 ## Own server
 
 ```bash

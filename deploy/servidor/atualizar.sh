@@ -9,6 +9,8 @@
 # :anterior) is put back, the new images are recorded as refused, so they are not tried again
 # until a newer one is published, and the update monitor reports the failure until then.
 set -euo pipefail
+# This script decides the version itself, refusals included (comum.sh).
+ATUALIZANDO=1
 source "$(dirname "$0")/comum.sh"
 # One run at a time: a manual --forcar waits for the timer's run instead of racing it.
 exec 9>"$DIR/atualizar.lock"
@@ -18,10 +20,25 @@ trap 'avisar_monitor MONITOR_ATUALIZACAO_URL fail' ERR
 
 forcar=$([ "${1:-}" = "--forcar" ] && echo 1 || true)
 
+# Removes by id the images in $1 that are not in $2 (ids separated by spaces or lines).
+# Installed from the package, images are pulled by digest: an untagged one keeps that reference,
+# is not "dangling", and prune never removes it. Refused while a container uses it; on Google
+# Cloud prune already removed them.
+remover_imagens() {
+  local manter=" ${2//$'\n'/ } " velha
+  for velha in $1; do
+    case "$manter" in *" $velha "*) continue ;; esac
+    docker image rm "$velha" >/dev/null 2>&1 || true
+  done
+}
+
 # The new version did not come up: the previous app image goes back, with its Compose file and
 # Caddyfile, so a new Caddy or PostgreSQL digest (decision 138) is undone too. The scripts stay
 # those of the new version (this one included), so the refusal is kept on the next runs.
 voltar_a_anterior() {
+  local antes
+  # The version refused before this one is not needed any more: only the last refusal is kept.
+  antes=$(cat "$IMAGEM_RECUSADA" 2>/dev/null || true)
   echo "$1" > "$IMAGEM_RECUSADA"
   echo "O sistema não respondeu com a versão nova: voltando à anterior." >&2
   if ! docker image inspect "$IMAGEM_APP_ANTERIOR" >/dev/null 2>&1; then
@@ -35,6 +52,7 @@ voltar_a_anterior() {
     || echo "Aviso: sem o Compose da versão anterior; segue o da nova." >&2
   compose up -d --remove-orphans
   recarregar_caddy
+  remover_imagens "$antes" "$1 $(docker image inspect --format '{{.Id}}' "$IMAGEM_APP_ANTERIOR" 2>/dev/null || true)"
   if sistema_no_ar; then
     echo "De volta à versão anterior; a nova fica recusada até sair outra." >&2
   else
@@ -45,10 +63,22 @@ voltar_a_anterior() {
 }
 
 entrar_no_registro
-docker pull -q "$IMAGEM_APP" >/dev/null
-# The documentation site (decision 067) never blocks an update of the system.
-docker pull -q "$IMAGEM_DOCS" >/dev/null 2>&1 || true
-atual=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP" "$IMAGEM_DOCS" 2>/dev/null || true)
+if ! instalado_por_pacote; then
+  docker pull -q "$IMAGEM_APP" >/dev/null  # a failure tells the monitor (the ERR trap)
+# Installed from the Linux package, an image already on the server is enough when the registry
+# cannot be reached (an installation without internet, or a test image built there).
+elif ! docker pull -q "$IMAGEM_APP" >/dev/null 2>&1 && ! docker image inspect "$IMAGEM_APP" >/dev/null 2>&1; then
+  echo "Não foi possível baixar $IMAGEM_APP (sem internet ou o registro fora do ar)." >&2
+  false  # the ERR trap tells the monitor
+fi
+imagens=("$IMAGEM_APP")
+# The documentation site (decision 067) never blocks an update of the system, and a package
+# installation has none.
+if [ -n "$IMAGEM_DOCS" ]; then
+  docker pull -q "$IMAGEM_DOCS" >/dev/null 2>&1 || true
+  imagens+=("$IMAGEM_DOCS")
+fi
+atual=$(docker image inspect --format '{{.Id}}' "${imagens[@]}" 2>/dev/null || true)
 instalada=$(cat "$IMAGEM_INSTALADA" 2>/dev/null || true)
 recusada=$(cat "$IMAGEM_RECUSADA" 2>/dev/null || true)
 
@@ -76,9 +106,14 @@ if [ "$atual" != "$instalada" ] || [ -n "$forcar" ]; then
   sistema_no_ar || voltar_a_anterior "$atual"
   # Recorded only after the system answered: until then every run tries again.
   echo "$atual" > "$IMAGEM_INSTALADA"
+  # The image :anterior named until now and a refused one are not needed any more.
+  velhas="$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP_ANTERIOR" 2>/dev/null || true) $recusada"
   rm -f "$IMAGEM_RECUSADA"
   docker tag "$IMAGEM_APP" "$IMAGEM_APP_ANTERIOR"
+  guardar_compose_anterior
   docker image prune -f >/dev/null
-  echo "Sistema atualizado: $(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGEM_APP")"
+  remover_imagens "$velhas" "$atual"
+  echo "Sistema atualizado: $(docker image inspect --format \
+    '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$IMAGEM_APP")"
 fi
 avisar_monitor MONITOR_ATUALIZACAO_URL

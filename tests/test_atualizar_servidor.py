@@ -34,6 +34,7 @@ case "$1 $2" in
     exit $erro ;;
   "tag "*) cp "$(arquivo "$2")" "$(arquivo "$3")" ;;
   "image prune") ;;
+  "image rm") echo "${@: -1}" >> "$IMAGENS/../removidas" ;;
   *) echo "docker falso: $*" >&2; exit 2 ;;
 esac
 """
@@ -48,10 +49,12 @@ IMAGEM_RECUSADA="$DIR/imagem-recusada"
 export IMAGEM_APP IMAGEM_DOCS
 log() {{ echo "$*" >> "$DIR/log"; }}
 entrar_no_registro() {{ :; }}
+instalado_por_pacote() {{ [ -f "$DIR/pacote-linux" ]; }}
 extrair_arquivos_de_deploy() {{ log "extrair $IMAGEM_APP"; }}
 instalar_agendamentos() {{ log agendamentos; }}
 compose() {{ log "compose $* com $(cat "$IMAGENS/$(echo "$IMAGEM_APP" | tr '/:' '__')")"; }}
 restaurar_compose_de() {{ log "compose de $(cat "$IMAGENS/$(echo "$1" | tr '/:' '__')")"; }}
+guardar_compose_anterior() {{ log "guardar compose"; }}
 recarregar_caddy() {{ log caddy; }}
 avisar_monitor() {{ log "monitor $1 ${{2:-ok}}"; }}
 # Answers from $DIR/saude, one per line (0 = up, 1 = down); up when it runs out.
@@ -136,6 +139,9 @@ def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
     assert servidor.ler("imagem-instalada") == ["B", "D"]
     assert servidor.id_local("registro/app:anterior") == "B"
     assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL ok"
+    # Pulled by digest (the Linux package), the image :anterior named is never "dangling":
+    # removed by id, the docs image still in use kept.
+    assert servidor.ler("removidas") == ["A"]
 
 
 def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
@@ -172,6 +178,25 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     assert "compose up -d --remove-orphans com C" in log
     assert servidor.ler("imagem-instalada") == ["C", "D"]
     assert servidor.ler("imagem-recusada") is None
+    assert servidor.ler("removidas") == ["A", "B"]  # the old :anterior and the refused one
+
+
+def test_duas_versoes_recusadas_seguidas_nao_ficam_no_disco(servidor):
+    servidor.imagem("remoto", "registro/app:latest", "B")
+    servidor.saude(1, 0)
+    servidor.rodar()
+    # C refused too: B is not needed any more, and only the latest refusal is kept.
+    servidor.imagem("remoto", "registro/app:latest", "C")
+    servidor.saude(1, 0)
+    codigo, _log = servidor.rodar()
+    assert codigo == 1
+    assert servidor.ler("imagem-recusada") == ["C", "D"]
+    assert servidor.ler("removidas") == ["B"]  # never A (running again) or D (in use)
+    servidor.imagem("remoto", "registro/app:latest", "E")
+    servidor.saude(0)
+    codigo, _log = servidor.rodar()
+    assert codigo == 0
+    assert servidor.ler("removidas") == ["B", "A", "C"]
 
 
 def test_forcar_tenta_de_novo_a_versao_recusada(servidor):
@@ -204,3 +229,39 @@ def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
     ]
     assert servidor.ler("imagem-recusada") == ["B", "D"]
     assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+
+
+def test_pacote_linux_sem_documentacao_e_com_imagem_so_local(servidor):
+    # Installed from the Linux package (decision 140): no docs image, and an image already on
+    # the server is enough when the registry does not have it (a test image, no internet).
+    comum = servidor.dir / "bin" / "comum.sh"
+    comum.write_text(
+        comum.read_text().replace('IMAGEM_DOCS="registro/docs:latest"', 'IMAGEM_DOCS=""')
+    )
+    (servidor.dir / "pacote-linux").write_text("VERSAO=0.54.0\n")
+    (servidor.dir / "imagem-instalada").write_text("A\n")
+    servidor.imagem("imagens", "registro/app:latest", "B")
+    (servidor.dir / "remoto" / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 0
+    assert "compose up -d --remove-orphans com B" in log
+    assert servidor.ler("imagem-instalada") == ["B"]
+
+
+def test_google_cloud_sem_o_registro_falha_e_avisa(servidor):
+    # Only the Linux package goes on with the image already on the server: on Google Cloud the
+    # update monitor reports a registry it cannot reach.
+    (servidor.dir / "remoto" / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 1
+    assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+
+
+def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor):
+    (servidor.dir / "pacote-linux").write_text("VERSAO=0.54.0\n")
+    for lugar in ("imagens", "remoto"):
+        (servidor.dir / lugar / "registro_app_latest").unlink()
+    codigo, log = servidor.rodar()
+    assert codigo == 1
+    assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL fail"
+    assert not [linha for linha in log if linha.startswith("compose")]

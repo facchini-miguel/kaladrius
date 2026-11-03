@@ -16,6 +16,24 @@ sudo /opt/kaladrius/bin/backup.sh                       # on the VM: back up now
 gcloud storage ls -l gs://<bucket>/                         # on your computer: list
 ```
 
+## Linux package
+
+Already set up: every day at 06:00 UTC to `/var/backups/kaladrius` (the last 14 days are kept), and every Sunday the newest one is restored into a throwaway database and checked. Each backup is recorded in the system, as above. Copy the folder to somewhere else (see the warning below).
+
+```bash
+sudo kaladrius backup                # back up now
+sudo kaladrius testar-restauracao    # restore the newest into a throwaway database and check it
+sudo ls -l /var/backups/kaladrius    # list
+```
+
+To restore one (it **replaces** the database, see below):
+
+```bash
+sudo cat /var/backups/kaladrius/<file>.dump | sudo docker compose -f /opt/kaladrius/release/docker-compose.prod.yml \
+  exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+sudo kaladrius reiniciar
+```
+
 ## Own server
 
 Create `/opt/kaladrius/backup.sh`:
