@@ -11,5 +11,6 @@ esac
 systemctl disable --now kaladrius-backup.timer kaladrius-saude.timer \
   kaladrius-restauracao.timer >/dev/null 2>&1 || true
 if [ -f /opt/kaladrius/.env ] && command -v docker >/dev/null; then
-  docker compose -f /opt/kaladrius/release/docker-compose.prod.yml down || true
+  # Through comum.sh: after a rollback, with the Compose file of the version running.
+  bash -c 'source /opt/kaladrius/bin/comum.sh && compose down' || true
 fi

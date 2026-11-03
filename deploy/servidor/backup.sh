@@ -12,8 +12,7 @@ trap 'avisar_monitor MONITOR_BACKUP_URL fail' ERR
 
 nome="kaladrius-$(date -u +%Y%m%d-%H%M%S).dump"
 if instalado_por_pacote; then
-  pasta=$(valor_do_env KALADRIUS_BACKUP_PASTA)
-  pasta=${pasta:-/var/backups/kaladrius}
+  pasta=$(pasta_dos_backups)
   dias=$(valor_do_env KALADRIUS_BACKUP_DIAS)
   mkdir -p "$pasta"
   chmod 700 "$pasta"

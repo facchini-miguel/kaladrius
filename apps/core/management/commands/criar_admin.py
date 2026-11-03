@@ -9,10 +9,15 @@ from django.core.management.base import BaseCommand, CommandError
 class Command(BaseCommand):
     help = (
         "Creates the superuser from DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_PASSWORD and "
-        "DJANGO_ADMIN_EMAIL. Does nothing if the user already exists. The password must pass "
-        "the system's password rules (the Linux package's installer shows the reasons and asks "
-        "again)."
+        "DJANGO_ADMIN_EMAIL. Does nothing if the user already exists (with --falhar-se-existir, "
+        "fails with exit status 3). The password must pass the system's password rules (the "
+        "Linux package's installer shows the reasons and asks again)."
     )
+
+    def add_arguments(self, parser):
+        # The Linux package's installer (decision 140): the password just typed would be thrown
+        # away without a word, so it tells the user instead.
+        parser.add_argument("--falhar-se-existir", action="store_true")
 
     def handle(self, *args, **options):
         username = os.environ.get("DJANGO_ADMIN_USERNAME", "admin")
@@ -24,6 +29,8 @@ class Command(BaseCommand):
 
         Usuario = get_user_model()
         if Usuario.objects.filter(username=username).exists():
+            if options["falhar_se_existir"]:
+                raise CommandError(f"O usuário '{username}' já existe.", returncode=3)
             self.stdout.write(f"O usuário '{username}' já existe. Nada foi alterado.")
             return
 

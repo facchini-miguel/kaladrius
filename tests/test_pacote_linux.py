@@ -198,6 +198,54 @@ def test_nenhum_script_confere_duas_condicoes_numa_linha_so():
             assert not padrao.match(linha), f"{script.name}:{numero}: {linha.strip()}"
 
 
+def test_nenhum_script_usa_grep_q_depois_de_um_cano():
+    # With pipefail, `cmd | grep -q x` fails when grep exits at the first match and `cmd` dies
+    # writing the rest (SIGPIPE): Kaladrius's own Caddy was taken for another program on 80/443.
+    padrao = re.compile(r"\|\s*grep\s+-[a-zA-Z]*q")
+    for script in [*SERVIDOR.glob("*.sh"), *PACOTE.glob("*.sh"), PACOTE / "kaladrius"]:
+        for numero, linha in enumerate(script.read_text().splitlines(), 1):
+            assert not padrao.search(linha), f"{script.name}:{numero}: {linha.strip()}"
+
+
+@pytest.mark.parametrize(
+    ("endereco", "valido"),
+    [
+        ("192.168.0.10", True),
+        ("10.0.0.255", True),
+        ("192.168.0.08", True),  # a leading zero is not octal
+        ("192.168.0.300", False),
+        ("300.1.1.999", False),
+        ("192.168.0", False),
+        ("clinica.exemplo.com", False),
+    ],
+)
+def test_eh_ipv4(tmp_path, endereco, valido):
+    resultado = funcao_do_comando(
+        tmp_path, f'eh_ipv4 "{endereco}" && echo sim || echo nao', {"PATH": "/usr/bin:/bin"}
+    )
+    assert resultado.stdout.strip() == ("sim" if valido else "nao"), resultado.stderr
+
+
+def test_configurar_de_novo_grava_o_novo_usuario_do_administrador(tmp_path):
+    # A first run that did not finish wrote .env; the user name typed on the next run is the
+    # one created, so .env (read by `kaladrius senha`) must say the same.
+    expressao = (
+        'rm "$DIR/.env"; escrever_env rede-interna 192.168.0.10 admin a@x.test; '
+        'escrever_env rede-interna 192.168.0.11 suporte ""; '
+        'grep -c DJANGO_SECRET_KEY "$DIR/.env"; valor_do_env DJANGO_ADMIN_USERNAME; '
+        "valor_do_env DJANGO_ADMIN_EMAIL; valor_do_env SITE_HOSTNAME"
+    )
+    resultado = funcao_do_comando(tmp_path, expressao, {"PATH": "/usr/bin:/bin"})
+    assert resultado.returncode == 0, resultado.stderr
+    assert resultado.stdout.splitlines() == ["1", "suporte", "", "192.168.0.11"]
+
+
+def test_pasta_dos_backups(tmp_path):
+    assert avaliar(comum_em(tmp_path / "a"), "pasta_dos_backups") == "/var/backups/kaladrius"
+    outra = comum_em(tmp_path / "b", env="KALADRIUS_BACKUP_PASTA=/srv/copias\n")
+    assert avaliar(outra, "pasta_dos_backups") == "/srv/copias"
+
+
 def test_caddy_nunca_recebe_o_endereco_da_documentacao_vazio():
     # An empty address makes the Caddyfile's docs block invalid and Caddy does not start.
     compose = (RAIZ / "deploy" / "docker-compose.prod.yml").read_text()
@@ -256,9 +304,8 @@ def comum_com_imagens(tmp_path, imagens, recusada=None):
     return comum, ambiente
 
 
-VERSAO_NO_AR = (
-    'if na_versao_anterior; then usar_a_versao_anterior; fi; echo "$IMAGEM_APP $COMPOSE_ARQUIVO"'
-)
+# Decided by comum.sh itself, for every script that sources it.
+VERSAO_NO_AR = 'echo "$IMAGEM_APP $COMPOSE_ARQUIVO"'
 
 
 def test_depois_de_um_rollback_os_comandos_seguem_na_versao_anterior(tmp_path):
@@ -269,6 +316,18 @@ def test_depois_de_um_rollback_os_comandos_seguem_na_versao_anterior(tmp_path):
     (tmp_path / "anterior" / "docker-compose.prod.yml").write_text("")
     assert avaliar(comum, VERSAO_NO_AR, ambiente) == (
         f"kaladrius:anterior {tmp_path}/anterior/docker-compose.prod.yml"
+    )
+
+
+def test_atualizar_decide_a_versao_sozinho(tmp_path):
+    # atualizar.sh compares the package's image with the refused one: it must see the package's.
+    comum, ambiente = comum_com_imagens(
+        tmp_path, {"kaladrius:nova": "B", "kaladrius:anterior": "A"}, recusada="B"
+    )
+    assert avaliar(comum, 'echo "$NA_ANTERIOR"', ambiente) == "1"
+    atualizando = {**ambiente, "ATUALIZANDO": "1"}
+    assert avaliar(comum, f'{VERSAO_NO_AR}; echo "[$NA_ANTERIOR]"', atualizando) == (
+        f"kaladrius:nova {tmp_path}/release/docker-compose.prod.yml\n[]"
     )
 
 

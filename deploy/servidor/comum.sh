@@ -51,6 +51,8 @@ COMPOSE_ARQUIVO="$DIR/release/docker-compose.prod.yml"
 # How long a new version has to answer after starting (it migrates the database first).
 SAUDE_ESPERA=${SAUDE_ESPERA:-300}
 export IMAGEM_APP IMAGEM_DOCS
+# The local backup folder of a package installation (decision 140), unless .env names another.
+BACKUP_PASTA_PADRAO=/var/backups/kaladrius
 
 # A server installed before 0.26.1 keeps everything in /opt/medical-system. Until
 # migrar_para_kaladrius.sh moves it, the new scripts do nothing: starting the "kaladrius"
@@ -89,6 +91,12 @@ opcoes_para_o_site() {
   elif instalado_por_pacote; then
     OPCOES_CURL=(--resolve "$1:443:127.0.0.1")
   fi
+}
+
+pasta_dos_backups() {
+  local pasta
+  pasta=$(valor_do_env KALADRIUS_BACKUP_PASTA)
+  echo "${pasta:-$BACKUP_PASTA_PADRAO}"
 }
 
 # The system answers its health page, with the database, at its first address and through
@@ -175,6 +183,15 @@ usar_a_versao_anterior() {
   restaurar_compose_de "$IMAGEM_APP" || true  # without the copy, the package's own files
 }
 
+# Decided here, once, for every script that sources this file (the `kaladrius` command, backups,
+# health, the restore test, the removal): after a rollback they all act on the version running.
+# Only atualizar.sh (ATUALIZANDO) decides the version itself. NA_ANTERIOR tells the commands.
+NA_ANTERIOR=""
+if [ -z "${ATUALIZANDO:-}" ] && na_versao_anterior; then
+  NA_ANTERIOR=1
+  usar_a_versao_anterior
+fi
+
 # Copy the deploy files shipped inside the app image to $DIR/release and $DIR/bin.
 extrair_arquivos_de_deploy() {
   local tmp
@@ -228,7 +245,9 @@ instalar_agendamentos() {
 # `compose up` does not restart Caddy when only the content of the Caddyfile changed, so
 # apply it (a no-op when unchanged). Caddy keeps the old configuration if the new one fails.
 recarregar_caddy() {
-  if compose ps --status running --services 2>/dev/null | grep -qx caddy; then
+  # grep without -q: it reads all its input, so the writer never dies of a closed pipe (SIGPIPE),
+  # which pipefail would take as a failure.
+  if compose ps --status running --services 2>/dev/null | grep -x caddy >/dev/null; then
     compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null >/dev/null 2>&1 \
       || echo "Aviso: o Caddy não aceitou o novo Caddyfile e continua com o anterior."
   fi

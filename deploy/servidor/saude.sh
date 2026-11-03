@@ -88,7 +88,7 @@ relatorio() {
   echo
   echo "== Tarefas agendadas"
   systemctl list-timers 'kaladrius-*' --no-pager | head -n -3
-  if systemctl --failed --no-legend 'kaladrius-*' | grep -q .; then
+  if systemctl --failed --no-legend 'kaladrius-*' | grep . >/dev/null; then
     echo
     echo "!! Com falha:"
     systemctl --failed --no-legend 'kaladrius-*'

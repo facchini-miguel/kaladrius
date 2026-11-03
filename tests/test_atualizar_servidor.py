@@ -34,6 +34,7 @@ case "$1 $2" in
     exit $erro ;;
   "tag "*) cp "$(arquivo "$2")" "$(arquivo "$3")" ;;
   "image prune") ;;
+  "image rm") echo "${@: -1}" >> "$IMAGENS/../removidas" ;;
   *) echo "docker falso: $*" >&2; exit 2 ;;
 esac
 """
@@ -138,6 +139,9 @@ def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
     assert servidor.ler("imagem-instalada") == ["B", "D"]
     assert servidor.id_local("registro/app:anterior") == "B"
     assert log[-1] == "monitor MONITOR_ATUALIZACAO_URL ok"
+    # Pulled by digest (the Linux package), the image :anterior named is never "dangling":
+    # removed by id, the docs image still in use kept.
+    assert servidor.ler("removidas") == ["A"]
 
 
 def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
@@ -174,6 +178,7 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     assert "compose up -d --remove-orphans com C" in log
     assert servidor.ler("imagem-instalada") == ["C", "D"]
     assert servidor.ler("imagem-recusada") is None
+    assert servidor.ler("removidas") == ["A", "B"]  # the old :anterior and the refused one
 
 
 def test_forcar_tenta_de_novo_a_versao_recusada(servidor):

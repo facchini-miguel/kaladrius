@@ -9,6 +9,8 @@
 # :anterior) is put back, the new images are recorded as refused, so they are not tried again
 # until a newer one is published, and the update monitor reports the failure until then.
 set -euo pipefail
+# This script decides the version itself, refusals included (comum.sh).
+ATUALIZANDO=1
 source "$(dirname "$0")/comum.sh"
 # One run at a time: a manual --forcar waits for the timer's run instead of racing it.
 exec 9>"$DIR/atualizar.lock"
@@ -88,10 +90,20 @@ if [ "$atual" != "$instalada" ] || [ -n "$forcar" ]; then
   sistema_no_ar || voltar_a_anterior "$atual"
   # Recorded only after the system answered: until then every run tries again.
   echo "$atual" > "$IMAGEM_INSTALADA"
+  # The image :anterior named until now and a refused one are not needed any more.
+  velhas="$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP_ANTERIOR" 2>/dev/null || true) $recusada"
   rm -f "$IMAGEM_RECUSADA"
   docker tag "$IMAGEM_APP" "$IMAGEM_APP_ANTERIOR"
   guardar_compose_anterior
   docker image prune -f >/dev/null
+  # Installed from the package, images are pulled by digest: an untagged one keeps that
+  # reference, is not "dangling", and prune never removes it. Removed by id (refused while a
+  # container uses it); on Google Cloud prune already removed them.
+  atuais=" ${atual//$'\n'/ } "
+  for velha in $velhas; do
+    case "$atuais" in *" $velha "*) continue ;; esac
+    docker image rm "$velha" >/dev/null 2>&1 || true
+  done
   echo "Sistema atualizado: $(docker image inspect --format \
     '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$IMAGEM_APP")"
 fi
