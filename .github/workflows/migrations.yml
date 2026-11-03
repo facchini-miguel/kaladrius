@@ -18,7 +18,7 @@ permissions:
   pull-requests: write  # the report comment
 
 jobs:
-  relatorio:
+  report:
     runs-on: ubuntu-24.04
     env:
       DJANGO_SECRET_KEY: ci-only-never-use-in-production
@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false  # no step uses git credentials (decision 132)
           fetch-depth: 0  # the base branch, to find the migrations this pull request changes
       - name: PostgreSQL (the production image)
-        run: .github/postgres.sh iniciar
+        run: .github/postgres.sh start
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
@@ -41,37 +41,37 @@ jobs:
           cache-dependency-path: requirements.txt
       - run: pip install -r requirements.txt
       - name: PostgreSQL ready
-        run: .github/postgres.sh esperar
+        run: .github/postgres.sh wait
       - name: Report and back-and-forth test
         env:
           BANCO_DESCARTAVEL: "1"  # this job's database is thrown away: --testar-volta may run
         run: |
           python manage.py relatorio_migracoes --base "origin/$GITHUB_BASE_REF" \
-            --testar-volta --saida relatorio.md --comentario comentario.md
+            --testar-volta --saida report.md --comentario comment.md
       - name: Summary of the run
-        if: always() && hashFiles('relatorio.md') != ''
-        run: cat relatorio.md >> "$GITHUB_STEP_SUMMARY"
+        if: always() && hashFiles('report.md') != ''
+        run: cat report.md >> "$GITHUB_STEP_SUMMARY"
       # One comment, the bot's own, found by its marker and updated in place; without the SQL
       # when the report is longer than a comment allows. Pull requests from Dependabot and from
       # forks get a read-only token, so this step is skipped there and the report stays in the
       # run's summary; anywhere else, a failure to comment fails the run.
       - name: Comment on the pull request
         if: >-
-          always() && hashFiles('comentario.md') != ''
+          always() && hashFiles('comment.md') != ''
           && github.event.pull_request.head.repo.full_name == github.repository
           && github.actor != 'dependabot[bot]'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          marca='<!-- relatorio-migracoes -->'
-          { echo "$marca"; cat comentario.md; } > corpo.md
+          marker='<!-- migrations-report -->'
+          { echo "$marker"; cat comment.md; } > body.md
           ids=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
-            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marca\"))) | .id")
-          existente=${ids%%$'\n'*}
-          if [ -n "$existente" ]; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existente" \
-              -F body=@corpo.md >/dev/null
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id")
+          existing=${ids%%$'\n'*}
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" \
+              -F body=@body.md >/dev/null
           else
-            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@corpo.md >/dev/null
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@body.md >/dev/null
           fi

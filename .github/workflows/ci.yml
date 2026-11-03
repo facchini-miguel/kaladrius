@@ -25,10 +25,10 @@ jobs:
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
       # The PostgreSQL of production, image and digest read from deploy/docker-compose.prod.yml
-      # (decision 138; the same script as migracoes.yml). Started first and waited for before
+      # (decision 138; the same script as migrations.yml). Started first and waited for before
       # the Django checks, so it comes up while the rest is installed.
       - name: PostgreSQL (the production image)
-        run: .github/postgres.sh iniciar
+        run: .github/postgres.sh start
       - name: Locks up to date (every .in compiled, both locks agree, decision 136)
         run: deploy/gerar_lock.sh --verificar
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
@@ -42,7 +42,7 @@ jobs:
       - name: Lint
         run: ruff check . && ruff format --check .
       - name: PostgreSQL ready
-        run: .github/postgres.sh esperar
+        run: .github/postgres.sh wait
       - name: Django checks
         run: python manage.py check && python manage.py makemigrations --check --dry-run
       - name: Translations up to date (every text marked and extracted)
@@ -54,19 +54,19 @@ jobs:
 
   # Documentation site (docs/, decisions 067 and 073): built on every push and pull request (broken
   # links fail the build); on main, published next to the app image.
-  documentacao:
+  docs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write  # keyless login to Google Cloud (Workload Identity Federation)
     env:
-      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs
+      IMAGE: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
-      - name: Build do site
-        run: docker build -t "$IMAGEM:latest" -t "$IMAGEM:${GITHUB_SHA::12}" docs
+      - name: Build the site
+        run: docker build -t "$IMAGE:latest" -t "$IMAGE:${GITHUB_SHA::12}" docs
       - id: google
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093  # v3.0.0
@@ -74,31 +74,31 @@ jobs:
           workload_identity_provider: projects/16678297522/locations/global/workloadIdentityPools/github/providers/kaladrius
           service_account: github-ci@medical-system-facchini.iam.gserviceaccount.com
           token_format: access_token
-      - name: Publicação da imagem
+      - name: Publish the image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           echo "${{ steps.google.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://us-east1-docker.pkg.dev
-          docker push --all-tags "$IMAGEM"
+          docker push --all-tags "$IMAGE"
 
   # Linux packages (decision 140): built on every push and pull request, and installed in clean
   # Debian, Ubuntu, Fedora, openSUSE and Arch Linux containers. The release job builds them again with the
   # published image's digest and attaches them to the release.
-  pacote-linux:
+  linux-package:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
-      - name: Pacotes .deb, .rpm e .pkg.tar.zst
+      - name: .deb, .rpm and .pkg.tar.zst packages
         run: deploy/pacote/gerar.sh --imagem ghcr.io/facchini-miguel/kaladrius:latest
-      - name: Instalação no Debian, Ubuntu, Fedora, openSUSE e Arch Linux
+      - name: Install on Debian, Ubuntu, Fedora, openSUSE and Arch Linux
         run: deploy/pacote/testar_instalacao.sh
 
   # Publishes the image to Google Artifact Registry (the VM picks it up within 5 minutes) and
   # to GitHub Packages, ghcr.io, for anyone installing Kaladrius (decision 076).
   # After the docs image, so the VM never starts a stack whose docs image is missing.
-  publicar:
-    needs: [tests, documentacao]
+  publish:
+    needs: [tests, docs]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
@@ -106,8 +106,8 @@ jobs:
       id-token: write  # keyless login to Google Cloud (Workload Identity Federation)
       packages: write  # ghcr.io/facchini-miguel/kaladrius
     env:
-      IMAGEM: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app
-      IMAGEM_PUBLICA: ghcr.io/facchini-miguel/kaladrius
+      IMAGE: us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app
+      PUBLIC_IMAGE: ghcr.io/facchini-miguel/kaladrius
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -118,26 +118,26 @@ jobs:
           workload_identity_provider: projects/16678297522/locations/global/workloadIdentityPools/github/providers/kaladrius
           service_account: github-ci@medical-system-facchini.iam.gserviceaccount.com
           token_format: access_token
-      - name: Login no Artifact Registry
+      - name: Log in to Artifact Registry
         run: echo "${{ steps.google.outputs.access_token }}" | docker login -u oauth2accesstoken --password-stdin https://us-east1-docker.pkg.dev
-      - name: Login no GitHub Packages
+      - name: Log in to GitHub Packages
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u "${{ github.actor }}" --password-stdin ghcr.io
-      - name: Build e publicação da imagem
+      - name: Build and publish the image
         run: |
-          VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           TAGS=()
-          for destino in "$IMAGEM" "$IMAGEM_PUBLICA"; do
-            TAGS+=(-t "$destino:latest" -t "$destino:${GITHUB_SHA::12}")
+          for target in "$IMAGE" "$PUBLIC_IMAGE"; do
+            TAGS+=(-t "$target:latest" -t "$target:${GITHUB_SHA::12}")
             # The version tag points to the first image of that version and is never moved.
-            if ! docker manifest inspect "$destino:$VERSAO" >/dev/null 2>&1; then
-              TAGS+=(-t "$destino:$VERSAO")
+            if ! docker manifest inspect "$target:$VERSION" >/dev/null 2>&1; then
+              TAGS+=(-t "$target:$VERSION")
             fi
           done
           # The commit inside the image: the release packages the version's image only for the
           # commit that built it (deploy/pacote/gerar.sh --commit).
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" "${TAGS[@]}" .
-          docker push --all-tags "$IMAGEM"
-          docker push --all-tags "$IMAGEM_PUBLICA"
+          docker push --all-tags "$IMAGE"
+          docker push --all-tags "$PUBLIC_IMAGE"
 
   # GitHub Release of each new version (decision 119): after the image is published, the version
   # of pyproject.toml (the top of releases.yaml, the tests check they match) gets its tag vX.Y.Z
@@ -146,7 +146,7 @@ jobs:
   # facchini-miguel/facchini.eti.br), the owner's site is rebuilt right away to show it;
   # without one, the site's hourly build picks it up.
   release:
-    needs: [publicar, pacote-linux]
+    needs: [publish, linux-package]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
@@ -156,7 +156,7 @@ jobs:
       DJANGO_DEBUG: "0"
       # Only whether the secret exists, so tokens reach just the steps that use them, never
       # "pip install", which runs third-party code (decision 132).
-      TEM_SITE_TOKEN: ${{ secrets.SITE_TOKEN != '' }}
+      HAS_SITE_TOKEN: ${{ secrets.SITE_TOKEN != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -169,28 +169,28 @@ jobs:
       - run: pip install -r requirements.txt
       - name: GNU gettext (the notes name the types and modules in English)
         run: sudo apt-get install -y --no-install-recommends gettext
-      - name: Release da versão nova
+      - name: Release of the new version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSAO=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          if gh release view "v$VERSAO" >/dev/null 2>&1; then
-            echo "v$VERSAO já está publicada."
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION is already published."
             exit 0
           fi
           python manage.py compilemessages >/dev/null
-          python manage.py notas_release "$VERSAO" --titulo > titulo.txt
-          python manage.py notas_release "$VERSAO" > notas.md
+          python manage.py notas_release "$VERSION" --titulo > title.txt
+          python manage.py notas_release "$VERSION" > notes.md
           # The Linux packages of the version (decision 140), with the image just published,
           # pinned by its digest; refused when the version's image came from another commit.
           deploy/pacote/gerar.sh --commit "$GITHUB_SHA"
-          gh release create "v$VERSAO" --target "$GITHUB_SHA" --title "$(cat titulo.txt)" \
-            --notes-file notas.md --latest \
-            "dist/kaladrius_${VERSAO}-1_amd64.deb" "dist/kaladrius-${VERSAO}-1.x86_64.rpm" \
-            "dist/kaladrius-${VERSAO}-1-x86_64.pkg.tar.zst" dist/SHA256SUMS
-          echo "SITE_DESATUALIZADO=1" >> "$GITHUB_ENV"
-      - name: Atualizar o site do titular
-        if: env.SITE_DESATUALIZADO == '1' && env.TEM_SITE_TOKEN == 'true'
+          gh release create "v$VERSION" --target "$GITHUB_SHA" --title "$(cat title.txt)" \
+            --notes-file notes.md --latest \
+            "dist/kaladrius_${VERSION}-1_amd64.deb" "dist/kaladrius-${VERSION}-1.x86_64.rpm" \
+            "dist/kaladrius-${VERSION}-1-x86_64.pkg.tar.zst" dist/SHA256SUMS
+          echo "SITE_OUTDATED=1" >> "$GITHUB_ENV"
+      - name: Rebuild the owner's site
+        if: env.SITE_OUTDATED == '1' && env.HAS_SITE_TOKEN == 'true'
         env:
           GH_TOKEN: ${{ secrets.SITE_TOKEN }}
-        run: gh workflow run publicar.yml -R facchini-miguel/facchini.eti.br
+        run: gh workflow run publish.yml -R facchini-miguel/facchini.eti.br
