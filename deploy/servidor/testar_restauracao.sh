@@ -15,13 +15,17 @@ trap 'docker rm -f "$CONTAINER" >/dev/null 2>&1 || true; rm -rf "$pasta"' EXIT
 if instalado_por_pacote; then
   # The local folder of backup.sh (decision 140); the names sort by their timestamp. Read where
   # it is: a copy in /tmp (a small tmpfs on Debian 13) would not fit a big dump.
-  # No backup yet (installed hours before the first one, or a new KALADRIUS_BACKUP_PASTA): said
-  # plainly, and not a failure of the restore test; a backup that fails warns by itself.
-  objeto=$(find "$(pasta_dos_backups)" -maxdepth 1 -name 'kaladrius-*.dump' 2>/dev/null \
-    | sort | tail -1 || true)
+  objeto=$(find "$(pasta_dos_backups)" -maxdepth 1 -name 'kaladrius-*.dump' | sort | tail -1 || true)
   if [ -z "$objeto" ]; then
-    echo "Ainda não há backup em $(pasta_dos_backups) para testar: o primeiro sai às 06:00 UTC (ou agora: sudo kaladrius backup)."
-    exit 0
+    # Installed less than two days ago (the setup finished, admin-criado), before the first
+    # daily backup: said plainly, not a failure. Later, no backup at all is a failure the monitor
+    # hears (a disk no longer mounted, the dumps deleted).
+    if [ ! -f "$DIR/admin-criado" ] || [ -n "$(find "$DIR/admin-criado" -mmin -2880)" ]; then
+      echo "Ainda não há backup em $(pasta_dos_backups) para testar: o primeiro sai às 06:00 UTC (ou agora: sudo kaladrius backup)."
+      exit 0
+    fi
+    echo "Nenhum backup em $(pasta_dos_backups): confira a pasta (um disco desmontado?) e sudo systemctl status kaladrius-backup.service." >&2
+    false  # the ERR trap tells the monitor
   fi
   backup=$objeto
 else

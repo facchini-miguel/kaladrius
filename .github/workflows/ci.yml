@@ -133,7 +133,9 @@ jobs:
               TAGS+=(-t "$destino:$VERSAO")
             fi
           done
-          docker build "${TAGS[@]}" .
+          # The commit inside the image: the release packages the version's image only for the
+          # commit that built it (deploy/pacote/gerar.sh --commit).
+          docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" "${TAGS[@]}" .
           docker push --all-tags "$IMAGEM"
           docker push --all-tags "$IMAGEM_PUBLICA"
 

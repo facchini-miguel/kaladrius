@@ -442,6 +442,13 @@ exigir_configurado() {
   [ -f "$DIR/.env" ] || erro "$(t "o Kaladrius ainda não foi configurado: sudo kaladrius configurar" "Kaladrius aún no fue configurado: sudo kaladrius configurar" "Kaladrius is not set up yet: sudo kaladrius configurar")"
 }
 
+# Starting the system needs the setup finished: with no administrator yet nobody could log in.
+# The other commands (logs, parar, estado) still work, to see why `configurar` stopped.
+exigir_administrador() {
+  exigir_configurado
+  [ -f "$ADMIN_CRIADO" ] || erro "$(t "a configuração não terminou (o administrador não foi criado). Para terminar: sudo kaladrius configurar" "la configuración no terminó (el administrador no se creó). Para terminar: sudo kaladrius configurar" "the setup did not finish (the administrator was not created). To finish it: sudo kaladrius configurar")"
+}
+
 certificado() {
   local destino=${1:-$PWD/kaladrius-certificado.crt}
   exigir_root certificado
@@ -449,9 +456,10 @@ certificado() {
   rede_interna || erro "$(t "só a instalação na rede interna usa um certificado próprio." "solo la instalación en la red interna usa un certificado propio." "only the internal network installation uses a certificate of its own.")"
   local raiz
   # Read first: a failure (Caddy stopped) never leaves an empty file to copy to the computers.
-  raiz=$(compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt </dev/null 2>/dev/null) \
+  # Docker's own error, if any, shows above the message.
+  raiz=$(compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt </dev/null) \
     && [ -n "$raiz" ] \
-    || erro "$(t "o Caddy não está rodando, ou ainda não criou o certificado. Inicie o sistema (sudo kaladrius iniciar) e tente de novo." "Caddy no está en marcha, o aún no creó el certificado. Inicie el sistema (sudo kaladrius iniciar) e inténtelo de nuevo." "Caddy is not running, or has not made the certificate yet. Start the system (sudo kaladrius iniciar) and try again.")"
+    || erro "$(t "não foi possível ler o certificado do Caddy (acima, o motivo). Com o sistema parado: sudo kaladrius iniciar, e tente de novo." "no fue posible leer el certificado de Caddy (arriba, el motivo). Con el sistema detenido: sudo kaladrius iniciar, e inténtelo de nuevo." "the certificate could not be read from Caddy (above, why). With the system stopped: sudo kaladrius iniciar, and try again.")"
   printf '%s\n' "$raiz" >"$destino"
   chmod 644 "$destino"
   cat <<EOF
@@ -529,9 +537,9 @@ case "$comando" in
     ;;
   logs) exigir_root logs; exigir_configurado; compose logs -f --tail 100 "$@" ;;
   # Recreated, not just restarted: a container reads .env only when it is created.
-  reiniciar) exigir_root reiniciar; exigir_configurado; compose up -d --force-recreate ;;
+  reiniciar) exigir_root reiniciar; exigir_administrador; compose up -d --force-recreate ;;
   parar) exigir_root parar; exigir_configurado; compose stop ;;
-  iniciar) exigir_root iniciar; exigir_configurado; compose up -d ;;
+  iniciar) exigir_root iniciar; exigir_administrador; compose up -d ;;
   versao | --version) echo "${VERSAO_DO_PACOTE:-?}" ;;
   ajuda | ayuda | help | -h | --help) ajuda ;;
   *) ajuda >&2; exit 2 ;;

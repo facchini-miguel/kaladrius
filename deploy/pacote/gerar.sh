@@ -6,7 +6,7 @@
 #   deploy/pacote/gerar.sh [--commit SHA]   the version of pyproject.toml and its public image,
 #                                           pinned by the digest published on ghcr.io; with
 #                                           --commit (CI's release), only when that image was
-#                                           built from that commit
+#                                           built from that commit (its revision label)
 #   deploy/pacote/gerar.sh --imagem IMAGEM [--versao X.Y.Z]
 #                                           another image (tests: one built on this machine),
 #                                           under another version (tests of an update)
@@ -25,19 +25,21 @@ while [ $# -gt 0 ]; do
     *) echo "Opção desconhecida: $1" >&2; exit 2 ;;
   esac
 done
-digest_de() {
-  docker buildx imagetools inspect "ghcr.io/facchini-miguel/kaladrius:$1" \
-    --format '{{json .Manifest}}' | python3 -c "import json, sys; print(json.load(sys.stdin)['digest'])"
-}
 if [ -z "$imagem" ]; then
-  digest=$(digest_de "$VERSAO")
+  digest=$(docker buildx imagetools inspect "ghcr.io/facchini-miguel/kaladrius:$VERSAO" \
+    --format '{{json .Manifest}}' | python3 -c "import json, sys; print(json.load(sys.stdin)['digest'])")
   imagem="ghcr.io/facchini-miguel/kaladrius:$VERSAO@$digest"
   # The version's tag points to its first image and is never moved (ci.yml): a release retried
   # on a later commit of the same version would ship that commit's scripts and Compose file with
-  # the older image.
-  if [ -n "$commit" ] && [ "$(digest_de "${commit::12}")" != "$digest" ]; then
-    echo "A imagem $VERSAO foi publicada por outro commit, não por ${commit::12}: suba a versão em pyproject.toml e releases.yaml." >&2
-    exit 1
+  # the older image. The commit is the one the image records (ci.yml labels it), not its sha tag:
+  # rebuilding the same commit moves that tag to a new digest, never the version's.
+  if [ -n "$commit" ]; then
+    revisao=$(docker buildx imagetools inspect "$imagem" --format '{{json .Image}}' | python3 -c \
+      "import json, sys; print(json.load(sys.stdin)['config'].get('Labels', {}).get('org.opencontainers.image.revision', ''))")
+    if [ "$revisao" != "$commit" ]; then
+      echo "A imagem $VERSAO foi publicada pelo commit ${revisao:-(sem o rótulo org.opencontainers.image.revision)}, não por $commit: suba a versão em pyproject.toml e releases.yaml." >&2
+      exit 1
+    fi
   fi
 fi
 

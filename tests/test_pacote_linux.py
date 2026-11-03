@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -426,6 +427,19 @@ echo "$(basename "$0") $*" >> "$CHAMADAS"
 """
 
 
+def falsos(pasta, *comandos):
+    """Fake `comandos` in `pasta` that only record their calls; returns the calls file and an
+    environment with them first in PATH."""
+    pasta.mkdir(exist_ok=True)
+    for comando in comandos:
+        falso = pasta / comando
+        falso.write_text(REGISTRO_DE_CHAMADAS)
+        falso.chmod(0o755)
+    chamadas = pasta / "chamadas"
+    chamadas.write_text("")
+    return chamadas, {"PATH": f"{pasta}:/usr/bin:/bin", "CHAMADAS": str(chamadas)}
+
+
 @pytest.mark.parametrize(
     ("argumento", "remove"),
     [
@@ -438,17 +452,12 @@ echo "$(basename "$0") $*" >> "$CHAMADAS"
     ],
 )
 def test_remover_para_o_sistema_so_numa_remocao(tmp_path, argumento, remove):
-    for comando in ("systemctl", "docker"):
-        falso = tmp_path / comando
-        falso.write_text(REGISTRO_DE_CHAMADAS)
-        falso.chmod(0o755)
-    chamadas = tmp_path / "chamadas"
-    chamadas.write_text("")
+    chamadas, ambiente = falsos(tmp_path / "path", "systemctl", "docker")
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(PACOTE / "antes_de_remover.sh"), argumento],
         capture_output=True,
         text=True,
-        env={"PATH": f"{tmp_path}:/usr/bin:/bin", "CHAMADAS": str(chamadas)},
+        env=ambiente,
         timeout=30,
     )
     assert resultado.returncode == 0, resultado.stderr
@@ -515,25 +524,18 @@ def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None):
     (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\n")
     if admin_criado:
         (dir_ / "admin-criado").write_text("")
-    path = tmp_path / "path"
-    path.mkdir()
-    for comando in ("systemctl", "systemd-run"):
-        falso = path / comando
-        falso.write_text(REGISTRO_DE_CHAMADAS)
-        falso.chmod(0o755)
+    chamadas, ambiente_falso = falsos(tmp_path / "path", "systemctl", "systemd-run")
     atualizar = dir_ / "bin" / "atualizar.sh"
     atualizar.write_text(REGISTRO_DE_CHAMADAS)
     atualizar.chmod(0o755)
     script = tmp_path / "depois_de_instalar.sh"
     texto = (PACOTE / "depois_de_instalar.sh").read_text()
     script.write_text(texto.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1))
-    chamadas = tmp_path / "chamadas"
-    chamadas.write_text("")
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(script), argumento],
         capture_output=True,
         text=True,
-        env={"PATH": f"{path}:/usr/bin:/bin", "CHAMADAS": str(chamadas), **(ambiente or {})},
+        env={**ambiente_falso, **(ambiente or {})},
         timeout=30,
     )
     assert resultado.returncode == 0, resultado.stderr
@@ -567,28 +569,63 @@ def test_no_pacman_a_atualizacao_leva_as_variaveis(tmp_path):
     assert "--setenv=SAUDE_ESPERA=60" in linha
 
 
-def test_teste_de_restauracao_sem_backup_ainda_explica_e_nao_falha(tmp_path):
+@pytest.mark.parametrize(
+    ("admin_criado_ha_horas", "falha"),
+    [
+        (None, False),  # the setup has not finished
+        (3, False),  # installed hours ago, before the first daily backup
+        (24 * 30, True),  # a month later no backup at all is a failure: a disk not mounted?
+    ],
+)
+def test_teste_de_restauracao_sem_backup(tmp_path, admin_criado_ha_horas, falha):
     comum_em(
         tmp_path,
         pacote=f"VERSAO=0.54.0\nIMAGEM={IMAGEM}\n",
-        env=f"KALADRIUS_BACKUP_PASTA={tmp_path / 'nao-existe'}\nMONITOR_RESTAURACAO_URL=http://monitor.test\n",
+        env=(
+            f"KALADRIUS_BACKUP_PASTA={tmp_path / 'nao-existe'}\n"
+            "MONITOR_RESTAURACAO_URL=http://monitor.test\n"
+        ),
     )
+    if admin_criado_ha_horas is not None:
+        admin = tmp_path / "admin-criado"
+        admin.write_text("")
+        quando = time.time() - admin_criado_ha_horas * 3600
+        os.utime(admin, (quando, quando))
     shutil.copy(SERVIDOR / "testar_restauracao.sh", tmp_path / "testar_restauracao.sh")
-    (tmp_path / "path").mkdir()
-    for comando in ("docker", "curl"):
-        falso = tmp_path / "path" / comando
-        falso.write_text(REGISTRO_DE_CHAMADAS)
-        falso.chmod(0o755)
-    chamadas = tmp_path / "chamadas"
-    chamadas.write_text("")
+    chamadas, ambiente = falsos(tmp_path / "path", "docker", "curl")
     resultado = subprocess.run(  # noqa: S603 (the server's own script)
         [BASH, str(tmp_path / "testar_restauracao.sh")],
         capture_output=True,
         text=True,
-        env={"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin", "CHAMADAS": str(chamadas)},
+        env=ambiente,
         timeout=30,
     )
-    assert resultado.returncode == 0, resultado.stderr
-    assert "Ainda não há backup" in resultado.stdout
-    assert "sudo kaladrius backup" in resultado.stdout
-    assert "curl" not in chamadas.read_text()  # the monitor hears neither a success nor a failure
+    if falha:
+        assert resultado.returncode != 0
+        assert "Nenhum backup" in resultado.stderr
+        assert "curl -fsS -m 10 --retry 3 -o /dev/null http://monitor.test/fail" in (
+            chamadas.read_text()
+        )
+    else:
+        assert resultado.returncode == 0, resultado.stderr
+        assert "Ainda não há backup" in resultado.stdout
+        assert "sudo kaladrius backup" in resultado.stdout
+        assert "curl" not in chamadas.read_text()  # the monitor hears no success, no failure
+
+
+@pytest.mark.parametrize("comando", ["iniciar", "reiniciar"])
+def test_iniciar_sem_administrador_manda_terminar_a_configuracao(tmp_path, comando):
+    # A setup that stopped before the administrator: starting the system would leave nobody
+    # able to log in. `logs` and `parar` still work, to see why.
+    expressao = (
+        'exigir_root() { :; }; compose() { echo "compose $*"; }; echo X=1 > "$DIR/.env"; '
+        f"exigir_administrador && echo {comando}"
+    )
+    resultado = funcao_do_comando(tmp_path, expressao, {"PATH": "/usr/bin:/bin"})
+    assert resultado.returncode == 1
+    assert "sudo kaladrius configurar" in resultado.stderr
+    (tmp_path / "admin-criado").write_text("")
+    resultado = funcao_do_comando(tmp_path, expressao, {"PATH": "/usr/bin:/bin"})
+    assert resultado.stdout.strip() == comando, resultado.stderr
+    kaladrius_ = (PACOTE / "kaladrius").read_text()
+    assert f"{comando}) exigir_root {comando}; exigir_administrador;" in kaladrius_
