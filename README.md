@@ -19,7 +19,7 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 On Debian 13+ or Ubuntu 24.04+, download the `.deb` of the [latest release](https://github.com/facchini-miguel/kaladrius/releases/latest) and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups:
 
 ```bash
-sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: the .rpm with dnf or zypper
+sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: the .rpm with dnf or zypper; Arch, CachyOS: the .pkg.tar.zst with pacman
 ```
 
 See [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package) for the details, and the other ways to install (Docker Compose by hand, Google Cloud).

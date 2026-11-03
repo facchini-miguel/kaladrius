@@ -1,6 +1,7 @@
 # Linux packages of Kaladrius (decision 140), built by deploy/pacote/gerar.sh with nFPM
 # (https://nfpm.goreleaser.com) from the repository's root: one .deb (Debian 13+, Ubuntu
-# 24.04+) and one .rpm (Fedora, Rocky Linux, AlmaLinux, openSUSE) of shell scripts and
+# 24.04+), one .rpm (Fedora, RHEL, Rocky Linux, AlmaLinux, openSUSE) and one .pkg.tar.zst
+# (Arch Linux, CachyOS) of shell scripts and
 # configuration. The system itself is the public image of the same version, pinned by digest
 # in release/pacote-linux; amd64 only, like the image.
 name: kaladrius
@@ -86,6 +87,12 @@ scripts:
   preremove: deploy/pacote/antes_de_remover.sh
   postremove: deploy/pacote/depois_de_remover.sh
 
+# pacman runs post_upgrade, not post_install, on an update: the same script (it updates the
+# system when there is a .env).
+archlinux:
+  scripts:
+    postupgrade: deploy/pacote/depois_de_instalar.sh
+
 recommends:
   - whiptail
 
@@ -104,3 +111,11 @@ overrides:
       - iproute
     recommends:
       - newt
+  archlinux:
+    depends:
+      - docker
+      - docker-compose
+      - curl
+      - iproute2
+    recommends:
+      - libnewt  # whiptail (an optional dependency on Arch Linux)

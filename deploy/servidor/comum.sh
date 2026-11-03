@@ -43,6 +43,11 @@ repositorio_de() {
 # this tag to go back to, and the ids of an update that did not come up (not tried again).
 IMAGEM_APP_ANTERIOR="$(repositorio_de "$IMAGEM_APP"):anterior"
 IMAGEM_RECUSADA="$DIR/imagem-recusada"
+# Installed from the package, the Compose file and the Caddyfile of that version too: the package
+# replaces those of release/ with the next version's before it is started.
+ANTERIOR="$DIR/anterior"
+# The Compose file of the running version (release/, or anterior/ after a rollback).
+COMPOSE_ARQUIVO="$DIR/release/docker-compose.prod.yml"
 # How long a new version has to answer after starting (it migrates the database first).
 SAUDE_ESPERA=${SAUDE_ESPERA:-300}
 export IMAGEM_APP IMAGEM_DOCS
@@ -71,14 +76,29 @@ rede_interna() {
   [ "$(valor_do_env KALADRIUS_ACESSO)" = rede-interna ]
 }
 
+# curl's options (in OPCOES_CURL) to reach this installation's site $1 from the server itself.
+# On the internal network, Caddy's local certificate authority, which this server's curl does not
+# know. Installed from the package with a domain, through this server's own Caddy (127.0.0.1): a
+# clinic's router often does not send back inside what the server sends to the clinic's public
+# address (no "hairpin NAT"), and a new version must not be refused for that. On Google Cloud,
+# through the internet, like anyone.
+opcoes_para_o_site() {
+  OPCOES_CURL=()
+  if rede_interna; then
+    OPCOES_CURL=(--insecure)
+  elif instalado_por_pacote; then
+    OPCOES_CURL=(--resolve "$1:443:127.0.0.1")
+  fi
+}
+
 # The system answers its health page, with the database, at its first address and through
-# Caddy, like anyone on the internet, within SAUDE_ESPERA seconds.
+# Caddy within SAUDE_ESPERA seconds.
 sistema_no_ar() {
-  local site fim opcoes=()
+  local site fim
   site=$(valor_do_env SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
-  rede_interna && opcoes=(--insecure)
+  opcoes_para_o_site "$site"
   fim=$(($(date +%s) + SAUDE_ESPERA))
-  until curl -fsS -m 10 "${opcoes[@]}" -o /dev/null "https://$site/api/v1/saude" 2>/dev/null; do
+  until curl -fsS -m 10 "${OPCOES_CURL[@]}" -o /dev/null "https://$site/api/v1/saude" 2>/dev/null; do
     [ "$(date +%s)" -lt "$fim" ] || return 1
     sleep 5
   done
@@ -97,25 +117,62 @@ entrar_no_registro() {
 }
 
 compose() {
-  docker compose -f "$DIR/release/docker-compose.prod.yml" "$@"
+  docker compose -f "$COMPOSE_ARQUIVO" "$@"
 }
 
 # The PostgreSQL image of the running Compose file, digest included (decision 138), for the
 # throwaway containers of the restore test: the same database production writes its backups with.
 imagem_postgres() {
   local imagem
-  imagem=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' "$DIR/release/docker-compose.prod.yml")
+  imagem=$(sed -n 's/^ *image: *\(postgres:[^ ]*\).*/\1/p' "$COMPOSE_ARQUIVO")
   [ -n "$imagem" ] || { echo "Sem imagem do PostgreSQL em docker-compose.prod.yml." >&2; return 1; }
   echo "$imagem"
 }
 
 # The Compose file and the Caddyfile of an app image (the rollback's, decision 135): they name
 # the Caddy and PostgreSQL digests (decision 138), so going back to the previous app image also
-# puts back its Caddy and PostgreSQL. The scripts stay those of the new version.
+# puts back its Caddy and PostgreSQL. The scripts stay those of the new version. Installed from
+# the package, the copy kept by guardar_compose_anterior: release/ belongs to the package.
 restaurar_compose_de() {
-  instalado_por_pacote && return 0  # the package owns its Compose file and Caddyfile
+  if instalado_por_pacote; then
+    [ -f "$ANTERIOR/docker-compose.prod.yml" ] || return 1
+    COMPOSE_ARQUIVO="$ANTERIOR/docker-compose.prod.yml"
+    return 0
+  fi
   docker run --rm --entrypoint sh "$1" -c 'tar -C /app/deploy -cf - docker-compose.prod.yml Caddyfile' \
     | tar -C "$DIR/release" -xf -
+}
+
+# Installed from the package, the version that just came up keeps its Compose file and Caddyfile
+# in $ANTERIOR, beside its app image under :anterior, for the next update's rollback. Replaced
+# whole (mv): a rollback never finds half of it. On Google Cloud they are inside the app image.
+guardar_compose_anterior() {
+  instalado_por_pacote || return 0
+  rm -rf "$ANTERIOR.novo"
+  mkdir -p "$ANTERIOR.novo"
+  cp "$DIR/release/docker-compose.prod.yml" "$DIR/release/Caddyfile" "$ANTERIOR.novo/"
+  ln -sfn ../.env "$ANTERIOR.novo/.env"  # Compose reads the ${VAR} values from .env beside it
+  rm -rf "$ANTERIOR"
+  mv "$ANTERIOR.novo" "$ANTERIOR"
+}
+
+# Installed from the package, after an automatic rollback: the package's version is refused and
+# the previous one runs (its app image, Compose file and Caddyfile). Every command then acts on
+# the previous one, so restarting the system never brings back the version that did not come up;
+# installing the package again tries it again (atualizar.sh --forcar).
+na_versao_anterior() {
+  local recusada id
+  instalado_por_pacote || return 1
+  recusada=$(cat "$IMAGEM_RECUSADA" 2>/dev/null) || return 1
+  id=$(docker image inspect --format '{{.Id}}' "$IMAGEM_APP" 2>/dev/null) || return 1
+  [ "$id" = "$recusada" ] || return 1
+  docker image inspect "$IMAGEM_APP_ANTERIOR" >/dev/null 2>&1
+}
+
+usar_a_versao_anterior() {
+  IMAGEM_APP="$IMAGEM_APP_ANTERIOR"
+  export IMAGEM_APP
+  restaurar_compose_de "$IMAGEM_APP" || true  # without the copy, the package's own files
 }
 
 # Copy the deploy files shipped inside the app image to $DIR/release and $DIR/bin.

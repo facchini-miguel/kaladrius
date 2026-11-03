@@ -1,9 +1,9 @@
 ---
 sidebar_position: 2
-title: Paquete Linux (.deb y .rpm)
+title: Paquete Linux (.deb, .rpm y Arch Linux)
 ---
 
-# Paquete Linux (.deb y .rpm)
+# Paquete Linux (.deb, .rpm y Arch Linux)
 
 La forma más simple de instalar Kaladrius en un servidor de la clínica o en un VPS: un paquete de la distribución, que instala Docker por sí solo y hace algunas preguntas en pantallas de texto. Ningún archivo para editar a mano.
 
@@ -13,10 +13,11 @@ La forma más simple de instalar Kaladrius en un servidor de la clínica o en un
 |---|---|---|
 | Debian 13 o más nuevo, Ubuntu 24.04 o más nuevo | `.deb` | de la propia distribución, instalado junto con el paquete |
 | Fedora, openSUSE Tumbleweed | `.rpm` | de la propia distribución, instalado junto con el paquete |
+| Arch Linux, CachyOS | `.pkg.tar.zst` | de la propia distribución, instalado junto con el paquete. Distribuciones *rolling release*: buenas para probar Kaladrius; para el servidor de una clínica, prefiera uno de los sistemas de arriba |
 | Rocky Linux, AlmaLinux, Red Hat Enterprise Linux | `.rpm` | agregue antes el [repositorio de Docker](https://docs.docker.com/engine/install/rhel/) (abajo) |
 | Debian 12, Ubuntu 22.04 | `.deb` | su Docker Compose es demasiado antiguo: instale antes los [paquetes del propio Docker](https://docs.docker.com/engine/install/debian/) |
 
-Solo procesadores Intel y AMD de 64 bits (`amd64` / `x86_64`). El servidor necesita los puertos **80** y **443** libres: Kaladrius trae su propio servidor web, Caddy, con HTTPS. Memoria y disco: vea [Requisitos](requirements.md).
+Solo procesadores Intel y AMD de 64 bits (`amd64` / `x86_64`). El servidor necesita los puertos **80** y **443** libres: Kaladrius trae su propio servidor web, Caddy, con HTTPS. Con un firewall activo (firewalld en Fedora, Rocky, AlmaLinux y openSUSE; ufw en Ubuntu), `kaladrius configurar` abre los dos. Memoria y disco: vea [Requisitos](requirements.md).
 
 En Rocky Linux, AlmaLinux y Red Hat Enterprise Linux:
 
@@ -35,7 +36,7 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
    sha256sum --ignore-missing -c SHA256SUMS    # debe decir: OK (o CORRECTO)
    ```
 
-   En Fedora, openSUSE, Rocky y AlmaLinux el archivo es `kaladrius-0.54.0-1.x86_64.rpm`.
+   En Fedora, openSUSE, Rocky y AlmaLinux el archivo es `kaladrius-0.54.0-1.x86_64.rpm`; en Arch Linux y CachyOS, `kaladrius-0.54.0-1-x86_64.pkg.tar.zst`.
 
 2. Instálelo:
 
@@ -43,9 +44,10 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
    sudo apt install ./kaladrius_0.54.0-1_amd64.deb       # Debian y Ubuntu
    sudo dnf install ./kaladrius-0.54.0-1.x86_64.rpm      # Fedora, Rocky, AlmaLinux
    sudo zypper install ./kaladrius-0.54.0-1.x86_64.rpm   # openSUSE
+   sudo pacman -Syu && sudo pacman -U ./kaladrius-0.54.0-1-x86_64.pkg.tar.zst   # Arch Linux, CachyOS
    ```
 
-   En Debian y Ubuntu las preguntas aparecen enseguida, en el idioma del servidor (portugués, español o inglés). Con `dnf` y `zypper`, ejecútelas usted mismo después:
+   En Debian y Ubuntu las preguntas aparecen enseguida, en el idioma del servidor (portugués, español o inglés). Con `dnf`, `zypper` y `pacman`, ejecútelas usted mismo después:
 
    ```bash
    sudo kaladrius configurar
@@ -57,7 +59,7 @@ El paquete todavía no está firmado: `dnf` y `zypper` lo avisan ("skipped OpenP
 
 1. **Cómo accederá la clínica a Kaladrius**
    - **Solo en la red interna de la clínica:** no necesita dominio. El instalador sugiere la dirección IP de este servidor en la red (por ejemplo `192.168.0.10`). Esa dirección no puede cambiar: resérvela para el servidor en el router (*reserva DHCP*), o dele al servidor una IP fija.
-   - **Por internet, con dominio:** el dominio (por ejemplo `clinica.ejemplo.com`) ya debe apuntar a este servidor, con los puertos 80 y 443 abiertos a internet, para el certificado gratuito de Let's Encrypt.
+   - **Por internet, con dominio:** el dominio (por ejemplo `clinica.ejemplo.com`) ya debe apuntar a este servidor, con los puertos 80 y 443 abiertos a internet, para el certificado gratuito de Let's Encrypt. El instalador verifica el dominio en el DNS y no sigue sin él.
 2. **El administrador:** el nombre de usuario (`admin` si no lo cambia), un correo opcional y la contraseña, escrita dos veces. Necesita al menos 10 caracteres, no puede tener solo números ni ser una contraseña común; cuando el sistema la rechaza, la pantalla dice por qué y la pide de nuevo. La contraseña no queda guardada en ningún archivo.
 
 Después el sistema se descarga y se inicia (unos minutos la primera vez), y la última pantalla muestra la dirección para abrir en el navegador. Ingrese con el administrador y siga los [Primeros pasos](../first-steps.md): los datos de la clínica se completan allí.
@@ -124,9 +126,9 @@ La carpeta y la cantidad de días son `KALADRIUS_BACKUP_PASTA` y `KALADRIUS_BACK
 
 ## Actualizaciones
 
-Descargue el paquete de la versión nueva e instálelo de la misma forma (`sudo apt install ./kaladrius_….deb` o `sudo dnf install ./kaladrius-….rpm`). El sistema se reinicia en la versión nueva; las migraciones de la base se ejecutan solas. Haga una copia antes (`sudo kaladrius backup`).
+Descargue el paquete de la versión nueva e instálelo de la misma forma (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` o `sudo pacman -U ./kaladrius-….pkg.tar.zst`). El sistema se reinicia en la versión nueva; las migraciones de la base se ejecutan solas. Haga una copia antes (`sudo kaladrius backup`).
 
-**Vuelta automática:** si la versión nueva no responde en 5 minutos, la anterior vuelve sola y sigue en marcha, y `sudo kaladrius estado` muestra el aviso. Un repositorio de paquetes, para que las actualizaciones lleguen con `sudo apt upgrade` y `sudo dnf upgrade`, es el próximo paso.
+**Vuelta automática:** si la versión nueva no responde en 5 minutos, la anterior vuelve sola, con su archivo de Compose y su Caddyfile, y sigue en marcha, y `sudo kaladrius estado` muestra el aviso. `sudo kaladrius reiniciar`, `parar` e `iniciar` la mantienen en la versión anterior; instalar el paquete de nuevo intenta otra vez la nueva. Un repositorio de paquetes, para que las actualizaciones lleguen con `sudo apt upgrade` y `sudo dnf upgrade`, es el próximo paso.
 
 ## Correo y monitoreo (opcionales)
 
@@ -135,10 +137,13 @@ El archivo `/opt/kaladrius/.env` tiene la configuración de correo para la recup
 ## Desinstalar
 
 ```bash
-sudo apt remove kaladrius        # o: sudo dnf remove kaladrius
+sudo apt remove kaladrius                      # Debian, Ubuntu
+sudo dnf remove --noautoremove kaladrius       # Fedora, Rocky, AlmaLinux
+sudo zypper remove kaladrius                   # openSUSE
+sudo pacman -R kaladrius                       # Arch Linux, CachyOS
 ```
 
-El sistema se detiene, y **los datos se mantienen**: la base (volumen Docker `kaladrius_pgdata`), las copias en `/var/backups/kaladrius` y `/opt/kaladrius/.env`, con la contraseña de la base. Instalar el paquete de nuevo trae el sistema de vuelta con ellos. Borrarlos es irreversible y se hace a mano; los comandos se muestran al quitar el paquete.
+El sistema se detiene, y **los datos se mantienen**: la base (volumen Docker `kaladrius_pgdata`), las copias en `/var/backups/kaladrius` y `/opt/kaladrius/.env`, con la contraseña de la base. Instalar el paquete de nuevo trae el sistema de vuelta con ellos. Sin `--noautoremove`, dnf también quita Docker cuando vino con el paquete; los datos se mantienen, pero entonces instalar de nuevo necesita internet para descargar Docker. Borrarlos es irreversible y se hace a mano; los comandos se muestran al quitar el paquete.
 
 ## Dónde está cada cosa
 

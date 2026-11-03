@@ -12,7 +12,7 @@ title: Requirements
 | CPU | 1 shared vCPU (Google Cloud e2-micro) | 2 vCPUs |
 | Memory | 1 GB RAM + 1 GB swap | 2 GB RAM |
 | Disk | 10 GB | 30 GB (database, images and local backups) |
-| Operating system | Any Linux that runs Docker (tested on Debian 13; the [Linux package](linux-package.md) on Debian, Ubuntu, Fedora, Rocky Linux and openSUSE) | |
+| Operating system | Any Linux that runs Docker (tested on Debian 13; the [Linux package](linux-package.md) on Debian, Ubuntu, Fedora, RHEL, Rocky Linux, AlmaLinux, openSUSE, Arch Linux and CachyOS) | |
 | Software | Docker Engine with the Compose plugin, Git | |
 
 The reference installation is a Google Cloud **e2-micro** (free tier) serving a small clinic.

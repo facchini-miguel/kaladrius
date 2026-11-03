@@ -53,6 +53,7 @@ extrair_arquivos_de_deploy() {{ log "extrair $IMAGEM_APP"; }}
 instalar_agendamentos() {{ log agendamentos; }}
 compose() {{ log "compose $* com $(cat "$IMAGENS/$(echo "$IMAGEM_APP" | tr '/:' '__')")"; }}
 restaurar_compose_de() {{ log "compose de $(cat "$IMAGENS/$(echo "$1" | tr '/:' '__')")"; }}
+guardar_compose_anterior() {{ log "guardar compose"; }}
 recarregar_caddy() {{ log caddy; }}
 avisar_monitor() {{ log "monitor $1 ${{2:-ok}}"; }}
 # Answers from $DIR/saude, one per line (0 = up, 1 = down); up when it runs out.

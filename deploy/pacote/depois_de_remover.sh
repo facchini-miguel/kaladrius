@@ -2,10 +2,12 @@
 # After the package is removed. The patients' data is never deleted by the package: the
 # database (Docker volume kaladrius_pgdata), the backups and the .env with its passwords stay,
 # and only a person decides to delete them, with the commands below.
+# .deb: "remove" or "purge"; .rpm: 0; Arch Linux: the version removed (pacman runs post_remove
+# only on a removal).
 set -e
 systemctl daemon-reload >/dev/null 2>&1 || true
 case "${1:-}" in
-  remove | purge | 0) ;;
+  remove | purge | 0 | [0-9]*.*-*) ;;
   *) exit 0 ;;
 esac
 rm -f /opt/kaladrius/release/.env

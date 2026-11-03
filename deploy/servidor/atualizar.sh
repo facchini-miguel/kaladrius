@@ -90,6 +90,7 @@ if [ "$atual" != "$instalada" ] || [ -n "$forcar" ]; then
   echo "$atual" > "$IMAGEM_INSTALADA"
   rm -f "$IMAGEM_RECUSADA"
   docker tag "$IMAGEM_APP" "$IMAGEM_APP_ANTERIOR"
+  guardar_compose_anterior
   docker image prune -f >/dev/null
   echo "Sistema atualizado: $(docker image inspect --format \
     '{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}' "$IMAGEM_APP")"

@@ -105,7 +105,8 @@ sinal_de() {
 # Days until the HTTPS certificate of $1 expires (0 when it cannot be read).
 dias_do_certificado() {
   local validade fim
-  validade=$(curl -sv -m 20 -o /dev/null "https://$1/" 2>&1 | sed -n 's/^\*[[:space:]]*expire date: //p' | head -1)
+  opcoes_para_o_site "$1"  # comum.sh
+  validade=$(curl -sv -m 20 "${OPCOES_CURL[@]}" -o /dev/null "https://$1/" 2>&1 | sed -n 's/^\*[[:space:]]*expire date: //p' | head -1)
   fim=$(date -d "$validade" +%s 2>/dev/null || echo 0)
   echo $(((fim - $(date +%s)) / 86400))
 }
@@ -117,11 +118,11 @@ hosts_de() {
 
 # Every hostname answers `caminho` over HTTPS.
 todos_respondem() {
-  local caminho=$1 host opcoes=()
+  local caminho=$1 host
   shift
-  rede_interna && opcoes=(--insecure)  # Caddy's local certificate authority (comum.sh)
   for host in "$@"; do
-    curl -fsS -m 20 "${opcoes[@]}" -o /dev/null "https://$host$caminho" || return 1
+    opcoes_para_o_site "$host"  # comum.sh
+    curl -fsS -m 20 "${OPCOES_CURL[@]}" -o /dev/null "https://$host$caminho" || return 1
   done
 }
 

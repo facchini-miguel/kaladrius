@@ -10,6 +10,7 @@ cd "$(dirname "$0")/../.."
 VERSAO=$(sed -n 's/^VERSAO=//p' dist/pacote-linux)
 DEB=kaladrius_${VERSAO}-1_amd64.deb
 RPM=kaladrius-${VERSAO}-1.x86_64.rpm
+ARCH=kaladrius-${VERSAO}-1-x86_64.pkg.tar.zst
 CONFERIR='kaladrius versao && docker compose version && test -x /opt/kaladrius/bin/atualizar.sh'
 
 instalar() {  # instalar IMAGE COMMAND
@@ -21,4 +22,5 @@ instalar debian:13 "apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get
 instalar ubuntu:24.04 "apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq /dist/$DEB >/dev/null"
 instalar fedora:43 "dnf -y -q install /dist/$RPM >/dev/null"
 instalar opensuse/tumbleweed "zypper -q -n --no-gpg-checks install --allow-unsigned-rpm /dist/$RPM >/dev/null"
+instalar archlinux:latest "pacman -Sy --noconfirm >/dev/null && pacman -U --noconfirm /dist/$ARCH >/dev/null"
 echo "Instalação conferida em todas as distribuições."

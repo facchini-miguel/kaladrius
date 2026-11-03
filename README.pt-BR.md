@@ -19,7 +19,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 No Debian 13+ ou Ubuntu 24.04+, baixe o `.deb` da [release mais nova](https://github.com/facchini-miguel/kaladrius/releases/latest) e instale; algumas perguntas na tela (rede interna ou internet, o administrador) e o sistema está no ar, com backup diário:
 
 ```bash
-sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: o .rpm com dnf ou zypper
+sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb     # Fedora, Rocky, openSUSE: o .rpm com dnf ou zypper; Arch, CachyOS: o .pkg.tar.zst com pacman
 ```
 
 Veja [Pacote Linux](https://kaladrius-docs.facchini.eti.br/pt-BR/installation/linux-package) para os detalhes e as outras formas de instalar (Docker Compose à mão, Google Cloud).

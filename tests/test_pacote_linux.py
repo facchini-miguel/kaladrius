@@ -32,7 +32,7 @@ def test_todo_arquivo_do_pacote_existe():
         ):  # a symlink; written by gerar.sh
             continue
         assert (RAIZ / origem).is_file(), origem
-    for script in re.findall(r"(?:postinstall|preremove|postremove): (\S+)", NFPM):
+    for script in re.findall(r"(?:postinstall|postupgrade|preremove|postremove): (\S+)", NFPM):
         assert (RAIZ / script).is_file(), script
 
 
@@ -57,6 +57,11 @@ def test_o_pacote_liga_as_tarefas_que_traz():
     ligadas = set(re.findall(r"kaladrius-[a-z]+\.timer", bloco.split("return 0")[0]))
     trazidas = {Path(d).name for _o, d in conteudo() if d.endswith(".timer")}
     assert ligadas == trazidas
+    # Also when the package is installed again over a configured installation, before the
+    # system is started: a removal disabled them, and the new version may not come up.
+    instalar = (PACOTE / "depois_de_instalar.sh").read_text().split('if [ -f "$DIR/.env" ]')[1]
+    antes_de_subir = instalar.split('"$DIR/bin/atualizar.sh"')[0]
+    assert set(re.findall(r"kaladrius-[a-z]+\.timer", antes_de_subir)) == trazidas
 
 
 def comum_em(pasta, pacote=None, env=""):
@@ -209,3 +214,192 @@ def test_remover_o_pacote_nunca_apaga_os_dados():
             assert "volume rm" not in linha and "down -v" not in linha, linha
             if re.search(r"\brm\b", linha):
                 assert linha.strip() == "rm -f /opt/kaladrius/release/.env", linha
+
+
+def test_o_site_e_conferido_pelo_proprio_servidor(tmp_path):
+    # A clinic's router often has no "hairpin NAT": from inside, the clinic's public address
+    # never answers, and a good new version would be refused.
+    pacote = f"VERSAO=0.54.0\nIMAGEM={IMAGEM}\n"
+    expressao = 'opcoes_para_o_site k.example; echo "${OPCOES_CURL[*]}"'
+    internet = comum_em(tmp_path / "a", pacote=pacote, env="KALADRIUS_ACESSO=internet\n")
+    assert avaliar(internet, expressao) == "--resolve k.example:443:127.0.0.1"
+    interna = comum_em(tmp_path / "b", pacote=pacote, env="KALADRIUS_ACESSO=rede-interna\n")
+    assert avaliar(interna, expressao) == "--insecure"
+    # Google Cloud: through the internet, like anyone.
+    assert avaliar(comum_em(tmp_path / "c"), expressao) == ""
+
+
+DOCKER_FALSO = """#!/bin/bash
+# docker image inspect [--format F] IMAGE: the id in $IMAGENS/<image>, or a failure.
+[ "$1 $2" = "image inspect" ] || exit 2
+nome=${@: -1}
+arquivo="$IMAGENS/$(echo "$nome" | tr '/:@' '___')"
+[ -f "$arquivo" ] || exit 1
+[ "$3" = "--format" ] && cat "$arquivo"
+exit 0
+"""
+
+
+def comum_com_imagens(tmp_path, imagens, recusada=None):
+    """comum.sh in package mode, with a fake `docker` that knows only `imagens` (name: id)."""
+    comum = comum_em(tmp_path, pacote="VERSAO=0.55.0\nIMAGEM=kaladrius:nova\n")
+    (tmp_path / "imagens").mkdir()
+    for nome, ident in imagens.items():
+        (tmp_path / "imagens" / nome.replace(":", "_")).write_text(ident)
+    (tmp_path / "path").mkdir()
+    docker = tmp_path / "path" / "docker"
+    docker.write_text(DOCKER_FALSO)
+    docker.chmod(0o755)
+    if recusada is not None:
+        (tmp_path / "imagem-recusada").write_text(recusada + "\n")
+    ambiente = {"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin", "IMAGENS": str(tmp_path / "imagens")}
+    return comum, ambiente
+
+
+VERSAO_NO_AR = (
+    'if na_versao_anterior; then usar_a_versao_anterior; fi; echo "$IMAGEM_APP $COMPOSE_ARQUIVO"'
+)
+
+
+def test_depois_de_um_rollback_os_comandos_seguem_na_versao_anterior(tmp_path):
+    comum, ambiente = comum_com_imagens(
+        tmp_path, {"kaladrius:nova": "B", "kaladrius:anterior": "A"}, recusada="B"
+    )
+    (tmp_path / "anterior").mkdir()
+    (tmp_path / "anterior" / "docker-compose.prod.yml").write_text("")
+    assert avaliar(comum, VERSAO_NO_AR, ambiente) == (
+        f"kaladrius:anterior {tmp_path}/anterior/docker-compose.prod.yml"
+    )
+
+
+def test_anterior_sem_a_copia_do_compose_usa_o_do_pacote(tmp_path):
+    comum, ambiente = comum_com_imagens(
+        tmp_path, {"kaladrius:nova": "B", "kaladrius:anterior": "A"}, recusada="B"
+    )
+    assert avaliar(comum, VERSAO_NO_AR, ambiente) == (
+        f"kaladrius:anterior {tmp_path}/release/docker-compose.prod.yml"
+    )
+
+
+@pytest.mark.parametrize(
+    ("imagens", "recusada"),
+    [
+        ({"kaladrius:nova": "B", "kaladrius:anterior": "A"}, None),  # nothing refused
+        ({"kaladrius:nova": "C", "kaladrius:anterior": "A"}, "B"),  # a newer package since
+        ({"kaladrius:nova": "B"}, "B"),  # a first installation that did not come up
+    ],
+)
+def test_sem_rollback_os_comandos_usam_a_versao_do_pacote(tmp_path, imagens, recusada):
+    comum, ambiente = comum_com_imagens(tmp_path, imagens, recusada)
+    assert avaliar(comum, VERSAO_NO_AR, ambiente) == (
+        f"kaladrius:nova {tmp_path}/release/docker-compose.prod.yml"
+    )
+
+
+def test_a_versao_que_subiu_guarda_o_compose_e_o_caddyfile(tmp_path):
+    comum = comum_em(tmp_path, pacote=f"VERSAO=0.54.0\nIMAGEM={IMAGEM}\n")
+    (tmp_path / "release" / "docker-compose.prod.yml").write_text("compose 0.54.0")
+    (tmp_path / "release" / "Caddyfile").write_text("caddy 0.54.0")
+    avaliar(comum, "guardar_compose_anterior")
+    # The package replaces release/ with the next version's; the copy stays.
+    (tmp_path / "release" / "docker-compose.prod.yml").write_text("compose 0.55.0")
+    assert (tmp_path / "anterior" / "docker-compose.prod.yml").read_text() == "compose 0.54.0"
+    assert (tmp_path / "anterior" / "Caddyfile").read_text() == "caddy 0.54.0"
+    assert os.readlink(tmp_path / "anterior" / ".env") == "../.env"
+    assert avaliar(comum, 'restaurar_compose_de x && echo "$COMPOSE_ARQUIVO"') == (
+        f"{tmp_path}/anterior/docker-compose.prod.yml"
+    )
+
+
+def funcao_do_comando(tmp_path, expressao, ambiente):
+    """Runs `expressao` with the functions of the `kaladrius` command defined."""
+    bin_ = tmp_path / "bin"
+    bin_.mkdir(exist_ok=True)
+    shutil.copy(PACOTE / "kaladrius", bin_ / "kaladrius")
+    shutil.copy(comum_em(tmp_path), bin_ / "comum.sh")
+    return subprocess.run(  # noqa: S603 (the package's own command)
+        # $0 is the command's path, as when it runs: it finds comum.sh beside itself.
+        [BASH, "-c", f'source "$0" versao >/dev/null; {expressao}', str(bin_ / "kaladrius")],
+        capture_output=True,
+        text=True,
+        env=ambiente,
+        timeout=30,
+    )
+
+
+IP_SEM_ROTA = """#!/bin/sh
+# A clinic's network with no way out: no default route.
+case "$*" in
+  "-4 route get 1.1.1.1") echo "RTNETLINK answers: Network is unreachable" >&2; exit 2 ;;
+  "-4 -o addr show scope global")
+    echo "2: docker0    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0"
+    echo "3: enp1s0    inet 192.168.0.10/24 brd 192.168.0.255 scope global enp1s0" ;;
+esac
+"""
+
+
+def test_endereco_local_numa_rede_sem_saida(tmp_path):
+    (tmp_path / "path").mkdir()
+    ip = tmp_path / "path" / "ip"
+    ip.write_text(IP_SEM_ROTA)
+    ip.chmod(0o755)
+    resultado = funcao_do_comando(
+        tmp_path, "endereco_local", {"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin"}
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    assert resultado.stdout == "192.168.0.10"
+
+
+def test_endereco_local_sem_endereco_nenhum_nao_falha(tmp_path):
+    (tmp_path / "path").mkdir()
+    ip = tmp_path / "path" / "ip"
+    ip.write_text("#!/bin/sh\nexit 2\n")
+    ip.chmod(0o755)
+    resultado = funcao_do_comando(
+        tmp_path, "endereco_local; echo fim", {"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin"}
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    assert resultado.stdout == "fim\n"
+
+
+REGISTRO_DE_CHAMADAS = """#!/bin/sh
+echo "$(basename "$0") $*" >> "$CHAMADAS"
+"""
+
+
+@pytest.mark.parametrize(
+    ("argumento", "remove"),
+    [
+        ("remove", True),  # apt
+        ("0", True),  # rpm: the last copy goes
+        ("0.54.0-1", True),  # pacman runs pre_remove (with the version) only on a removal
+        ("upgrade", False),  # apt: an update
+        ("1", False),  # rpm: an update (one copy stays)
+        ("failed-upgrade", False),
+    ],
+)
+def test_remover_para_o_sistema_so_numa_remocao(tmp_path, argumento, remove):
+    for comando in ("systemctl", "docker"):
+        falso = tmp_path / comando
+        falso.write_text(REGISTRO_DE_CHAMADAS)
+        falso.chmod(0o755)
+    chamadas = tmp_path / "chamadas"
+    chamadas.write_text("")
+    resultado = subprocess.run(  # noqa: S603 (the package's own script)
+        [shutil.which("sh"), str(PACOTE / "antes_de_remover.sh"), argumento],
+        capture_output=True,
+        text=True,
+        env={"PATH": f"{tmp_path}:/usr/bin:/bin", "CHAMADAS": str(chamadas)},
+        timeout=30,
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    desligou = "disable --now kaladrius-backup.timer" in chamadas.read_text()
+    assert desligou is remove, chamadas.read_text()
+
+
+def test_cada_formato_tem_as_dependencias_de_docker():
+    # Each package format names Docker and Docker Compose in its own distributions' words.
+    for formato in ("deb", "rpm", "archlinux"):
+        bloco = re.search(rf"^  {formato}:\n((?:    .*\n)+)", NFPM, re.M).group(1)
+        dependencias = bloco.split("depends:")[1].split("recommends:")[0]
+        assert "docker" in dependencias and "compose" in dependencias, formato

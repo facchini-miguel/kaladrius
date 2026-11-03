@@ -11,18 +11,28 @@ source "$(dirname "$0")/comum.sh"
 trap 'avisar_monitor MONITOR_BACKUP_URL fail' ERR
 
 nome="kaladrius-$(date -u +%Y%m%d-%H%M%S).dump"
-arquivo=$(mktemp)
-trap 'rm -f "$arquivo"' EXIT
-compose exec -T db sh -c 'pg_dump -Fc -U "$POSTGRES_USER" "$POSTGRES_DB"' > "$arquivo"
 if instalado_por_pacote; then
   pasta=$(valor_do_env KALADRIUS_BACKUP_PASTA)
   pasta=${pasta:-/var/backups/kaladrius}
   dias=$(valor_do_env KALADRIUS_BACKUP_DIAS)
   mkdir -p "$pasta"
   chmod 700 "$pasta"
-  install -m 600 "$arquivo" "$pasta/$nome"
-  find "$pasta" -maxdepth 1 -name 'kaladrius-*.dump' -mtime +"${dias:-14}" -delete
-  echo "Backup salvo: $pasta/$nome ($(du -h "$arquivo" | cut -f1))"
+  # Written in the backup folder itself and renamed when complete: never through /tmp (a tmpfs
+  # of half the RAM on Debian 13, smaller than a big dump), and written to disk once.
+  arquivo=$(mktemp "$pasta/.$nome.XXXXXX")
+else
+  arquivo=$(mktemp)
+fi
+trap 'rm -f "$arquivo"' EXIT
+compose exec -T db sh -c 'pg_dump -Fc -U "$POSTGRES_USER" "$POSTGRES_DB"' > "$arquivo"
+tamanho=$(stat -c %s "$arquivo")
+legivel=$(du -h "$arquivo" | cut -f1)
+if instalado_por_pacote; then
+  mv -f "$arquivo" "$pasta/$nome"
+  # The old backups, and a dump left half-written by a server that went down in the middle.
+  find "$pasta" -maxdepth 1 \( -name 'kaladrius-*.dump' -mtime +"${dias:-14}" \
+    -o -name '.kaladrius-*.dump.*' -mmin +1440 \) -delete
+  echo "Backup salvo: $pasta/$nome ($legivel)"
 else
   # --upload-file streams the dump instead of loading it into memory (the VM has 1 GB).
   curl -sf -X POST \
@@ -30,11 +40,11 @@ else
     -H "Content-Type: application/octet-stream" \
     --upload-file "$arquivo" \
     "https://storage.googleapis.com/upload/storage/v1/b/$BUCKET_BACKUP/o?uploadType=media&name=$nome" >/dev/null
-  echo "Backup enviado: gs://$BUCKET_BACKUP/$nome ($(du -h "$arquivo" | cut -f1))"
+  echo "Backup enviado: gs://$BUCKET_BACKUP/$nome ($legivel)"
 fi
 
 # Recorded in the database: superusers see a warning in the web app when backups stop.
-compose exec -T app python manage.py registrar_backup "$nome" "$(stat -c %s "$arquivo")" \
+compose exec -T app python manage.py registrar_backup "$nome" "$tamanho" \
   || echo "Aviso: backup enviado, mas não foi possível registrá-lo no sistema."
 
 # Daily retention: failed login records older than 30 days are deleted (decision 045).

@@ -1,6 +1,6 @@
 #!/bin/sh
 # After the package is installed or updated (.deb: "configure" [old version]; .rpm: 1 install,
-# 2 update). An installation without .env is configured with `kaladrius configurar`; an
+# 2 update; Arch Linux: post_install or post_upgrade, with the new version). An installation without .env is configured with `kaladrius configurar`; an
 # update, or installing again after a removal, starts the system on the image of the package's version, with the automatic rollback of
 # atualizar.sh (decision 135). --forcar: installing a package is always deliberate, and the
 # image may be the one already recorded (the containers stopped with the removal).
@@ -11,9 +11,27 @@ ln -sfn ../.env "$DIR/release/.env"
 systemctl daemon-reload >/dev/null 2>&1 || true
 
 if [ -f "$DIR/.env" ]; then
+  # The scheduled tasks first (a removal disabled them; atualizar.sh enables them only once the
+  # new version is running): the backups go on, and warn, even when it does not come up below.
+  systemctl enable --now kaladrius-backup.timer kaladrius-saude.timer \
+    kaladrius-restauracao.timer >/dev/null 2>&1 || true
+  # Docker itself: Docker's own package (docker-ce: Rocky, AlmaLinux, RHEL) does not start it
+  # when installed, and dnf removes it with this package, so installing again after a removal
+  # brings it back stopped.
+  systemctl enable --now docker >/dev/null 2>&1 || true
   echo "Kaladrius: atualizando o sistema para a versão do pacote..."
-  "$DIR/bin/atualizar.sh" --forcar </dev/null \
-    || echo "Kaladrius: a versão nova não entrou no ar e o sistema segue na anterior (sudo kaladrius estado)."
+  # pacman (Arch Linux, CachyOS: the version as $1) may run this in a sandbox with no network
+  # (CachyOS's does), where the health check of atualizar.sh never reaches the system and every
+  # update would be rolled back: there the update runs as its own systemd unit, outside it, and
+  # this waits for it and shows its output.
+  case "${1:-}" in
+    [0-9]*.*-*)
+      set -- systemd-run --quiet --wait --pipe --collect --unit=kaladrius-atualizar-pacote \
+        ${SAUDE_ESPERA:+"--setenv=SAUDE_ESPERA=$SAUDE_ESPERA"} ;;
+    *) set -- ;;
+  esac
+  "$@" "$DIR/bin/atualizar.sh" --forcar </dev/null \
+    || echo "Kaladrius: a versão nova não entrou no ar (veja: sudo kaladrius estado)."
   exit 0
 fi
 

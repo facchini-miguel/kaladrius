@@ -1,6 +1,6 @@
 # Linux package (decision 140)
 
-The `.deb` and `.rpm` of Kaladrius. The user guide is
+The `.deb`, `.rpm` and Arch Linux `.pkg.tar.zst` of Kaladrius. The user guide is
 [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package)
 (`docs/docs/installation/linux-package.md`).
 
@@ -10,7 +10,7 @@ The `.deb` and `.rpm` of Kaladrius. The user guide is
 | `kaladrius` | the `kaladrius` command: `configurar` (the text screens, or none with options) and the everyday tasks |
 | `depois_de_instalar.sh`, `antes_de_remover.sh`, `depois_de_remover.sh` | the package's scripts: configure or update, stop, and never delete data |
 | `gerar.sh` | builds both packages into `dist/` with nFPM (a container pinned by digest) |
-| `testar_instalacao.sh` | installs them in clean Debian, Ubuntu, Fedora and openSUSE containers (CI, every push) |
+| `testar_instalacao.sh` | installs them in clean Debian, Ubuntu, Fedora, openSUSE and Arch Linux containers (CI, every push) |
 
 The server scripts are those of `deploy/servidor/` (the Google Cloud ones): `comum.sh` switches to
 its package mode when the file `/opt/kaladrius/release/pacote-linux` exists. That file, written by `gerar.sh`,

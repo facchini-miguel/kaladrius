@@ -81,7 +81,7 @@ jobs:
           docker push --all-tags "$IMAGEM"
 
   # Linux packages (decision 140): built on every push and pull request, and installed in clean
-  # Debian, Ubuntu, Fedora and openSUSE containers. The release job builds them again with the
+  # Debian, Ubuntu, Fedora, openSUSE and Arch Linux containers. The release job builds them again with the
   # published image's digest and attaches them to the release.
   pacote-linux:
     runs-on: ubuntu-24.04
@@ -89,9 +89,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
-      - name: Pacotes .deb e .rpm
+      - name: Pacotes .deb, .rpm e .pkg.tar.zst
         run: deploy/pacote/gerar.sh --imagem ghcr.io/facchini-miguel/kaladrius:latest
-      - name: Instalação no Debian, Ubuntu, Fedora e openSUSE
+      - name: Instalação no Debian, Ubuntu, Fedora, openSUSE e Arch Linux
         run: deploy/pacote/testar_instalacao.sh
 
   # Publishes the image to Google Artifact Registry (the VM picks it up within 5 minutes) and
@@ -185,7 +185,7 @@ jobs:
           gh release create "v$VERSAO" --target "$GITHUB_SHA" --title "$(cat titulo.txt)" \
             --notes-file notas.md --latest \
             "dist/kaladrius_${VERSAO}-1_amd64.deb" "dist/kaladrius-${VERSAO}-1.x86_64.rpm" \
-            dist/SHA256SUMS
+            "dist/kaladrius-${VERSAO}-1-x86_64.pkg.tar.zst" dist/SHA256SUMS
           echo "SITE_DESATUALIZADO=1" >> "$GITHUB_ENV"
       - name: Atualizar o site do titular
         if: env.SITE_DESATUALIZADO == '1' && env.TEM_SITE_TOKEN == 'true'

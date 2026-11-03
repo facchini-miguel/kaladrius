@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds the Linux packages (decision 140) into dist/: kaladrius_<version>-1_amd64.deb,
-# kaladrius-<version>-1.x86_64.rpm and their SHA256SUMS, with nFPM in a container pinned by
+# kaladrius-<version>-1.x86_64.rpm, kaladrius-<version>-1-x86_64.pkg.tar.zst (Arch Linux) and
+# their SHA256SUMS, with nFPM in a container pinned by
 # digest.
 #   deploy/pacote/gerar.sh                  the version of pyproject.toml and its public image,
 #                                           pinned by the digest published on ghcr.io
@@ -28,10 +29,11 @@ fi
 
 mkdir -p dist
 printf 'VERSAO=%s\nIMAGEM=%s\n' "$VERSAO" "$imagem" >dist/pacote-linux
-for formato in deb rpm; do
+for formato in deb rpm archlinux; do
   docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" -w /src -e VERSAO="$VERSAO" \
     "$NFPM" package --config deploy/pacote/nfpm.yaml --packager "$formato" --target dist/
 done
-(cd dist && sha256sum "kaladrius_${VERSAO}-1_amd64.deb" "kaladrius-${VERSAO}-1.x86_64.rpm" >SHA256SUMS)
+(cd dist && sha256sum "kaladrius_${VERSAO}-1_amd64.deb" "kaladrius-${VERSAO}-1.x86_64.rpm" \
+  "kaladrius-${VERSAO}-1-x86_64.pkg.tar.zst" >SHA256SUMS)
 echo "Imagem: $imagem"
 ls -l dist/*"$VERSAO"* dist/SHA256SUMS
