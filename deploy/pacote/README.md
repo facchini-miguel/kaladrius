@@ -40,8 +40,19 @@ build the package with `--imagem kaladrius:teste`. What to go through:
 2. A refused password (only digits; a common one), then a good one; the administrator logs in.
 3. `curl --cacert` with the file of `sudo kaladrius certificado` reaches `https://<IP>/`.
 4. `sudo kaladrius backup`, `sudo kaladrius testar-restauracao`, a restore, the timers
-   (`systemctl list-timers 'kaladrius-*'`: backup, health, restore test).
+   (`systemctl list-timers 'kaladrius-*'`: backup, health, restore test). The restore test
+   passes with no clinic yet, passes with the system stopped (`sudo kaladrius parar`: it says
+   it did not compare the clinics), and fails on a backup without the clinic once the system
+   has one (create it, then test the older backup).
 5. An update to a package of a newer version (`--versao`), and one whose image does not start
-   (the previous version comes back, `kaladrius estado` warns).
+   (the previous version comes back, `kaladrius estado` warns; `sudo SAUDE_ESPERA=60 apt
+   install …` waits 60 seconds instead of 300). In that state, `sudo kaladrius configurar` with
+   another address restarts the previous version in seconds and never tries the refused one;
+   backups and `kaladrius saude` keep working. Then a good newer version: it comes up, and the
+   previous and the refused images are gone from `docker image ls`.
 6. `sudo apt remove kaladrius` (data kept) and installing it again (back with the data).
 7. The technician's mode: every option and `KALADRIUS_SENHA_ADMIN`, with errors and without.
+8. `sudo kaladrius configurar` run again with the system running (no "another program uses
+   port 80 or 443"), and after deleting `/opt/kaladrius/admin-criado` with the same user name
+   and another password: it says the user already exists, and the original password still
+   logs in.
