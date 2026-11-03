@@ -13,7 +13,7 @@ from apps.financeiro.models import Fornecedor
 from apps.pacientes.models import Paciente
 from apps.pessoal.models import Funcionario
 from tests.test_core import dados_clinica
-from tests.test_paises import no_pais
+from tests.test_countries import no_pais
 
 pytestmark = pytest.mark.django_db
 

@@ -11,7 +11,7 @@ from apps.core.isolamento import usar_clinica
 from apps.core.paises import PAISES
 from apps.financeiro import formas, servicos
 from apps.financeiro.models import Pagamento
-from tests.test_financeiro import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
+from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 

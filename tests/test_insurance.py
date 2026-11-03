@@ -11,8 +11,8 @@ from apps.convenios.models import Carteirinha, Convenio
 from apps.core.isolamento import usar_clinica
 from apps.core.paises import PAISES
 from apps.orcamentos.models import Procedimento
-from tests.test_convenios import admin, carteirinha, convenio, paciente  # noqa: F401
-from tests.test_orcamentos import cenario, criar_orcamento, entrar, incluir  # noqa: F401
+from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
+from tests.test_health_plans import admin, carteirinha, convenio, paciente  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 

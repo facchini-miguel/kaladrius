@@ -49,7 +49,7 @@ docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp -e PIP_DISABLE_PIP_VERSION_C
 
 # Packages and versions only: the hashes of a version change when its project uploads one more
 # file for it (a wheel for a newer Python), and comments vary with the pip-tools that wrote
-# them (Dependabot uses its own). tests/test_dependencias.py checks every package has hashes
+# them (Dependabot uses its own). tests/test_dependencies.py checks every package has hashes
 # and that both locks agree on them.
 pinos() { grep -E '^[A-Za-z0-9._-]+==' "$1" | sed 's/ .*//' | sort; }
 

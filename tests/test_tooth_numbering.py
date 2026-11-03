@@ -16,7 +16,7 @@ from apps.odontologia.dentes import (
     ordenar,
 )
 from tests.test_core import dados_clinica
-from tests.test_orcamentos import cenario, criar_orcamento, entrar, incluir  # noqa: F401
+from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
