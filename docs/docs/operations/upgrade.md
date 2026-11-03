@@ -9,7 +9,7 @@ Kaladrius follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`
 
 ## Linux package
 
-Installed from the [package repository](https://packages.facchini.eti.br), with the system's own updates: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`. From a downloaded package, download the new version's package from the [releases page](https://github.com/facchini-miguel/kaladrius/releases) and install it over the installed one (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). It has the same automatic rollback as the Google Cloud installation (below): a version that does not answer within 5 minutes is undone and the previous one keeps running; `sudo kaladrius estado` shows it. See [Linux package](../installation/linux-package.md#updates).
+With the package repository (added by hand, or by the downloaded `.deb` or `.rpm` when installed), with the system's own updates: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`. On Arch Linux and CachyOS, or without the repository, download the new version's package from the [releases page](https://github.com/facchini-miguel/kaladrius/releases) and install it over the installed one (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). It has the same automatic rollback as the Google Cloud installation (below): a version that does not answer within 5 minutes is undone and the previous one keeps running; `sudo kaladrius estado` shows it. See [Linux package](../installation/linux-package.md#updates).
 
 ## Own server
 

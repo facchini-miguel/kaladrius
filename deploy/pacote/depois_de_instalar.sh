@@ -8,9 +8,33 @@
 # containers stopped with the removal).
 set -e
 DIR=/opt/kaladrius
+ETC=/etc
 mkdir -p "$DIR/saude"
 ln -sfn ../.env "$DIR/release/.env"
 systemctl daemon-reload >/dev/null 2>&1 || true
+
+# The package repository (decision 142), like Google Chrome's and VS Code's packages: a server
+# installed from a downloaded .deb or .rpm then gets new versions with the system's own updates.
+# Added only when the repository is not configured yet (by hand, in any file, or by an earlier
+# installation, whose file is left as it is); never on Arch Linux. KALADRIUS_SEM_REPOSITORIO=1
+# (a technician's choice) leaves it out, now and on later installations.
+repositorio() {
+  case "${1:-}" in
+    configure) origem=kaladrius.sources pasta=$ETC/apt/sources.list.d ;;
+    1 | 2)
+      origem=kaladrius.repo
+      if [ -d "$ETC/zypp/repos.d" ]; then pasta=$ETC/zypp/repos.d; else pasta=$ETC/yum.repos.d; fi ;;
+    *) return 0 ;;
+  esac
+  [ "${KALADRIUS_SEM_REPOSITORIO:-}" = 1 ] && touch "$DIR/sem-repositorio"
+  [ -e "$DIR/sem-repositorio" ] && return 0
+  [ -d "$pasta" ] || return 0
+  [ -e "$pasta/$origem" ] && return 0
+  grep -qsF packages.facchini.eti.br/kaladrius "$pasta"/* && return 0
+  install -m 0644 "$DIR/repositorio/$origem" "$pasta/$origem" || return 1
+  echo "Kaladrius: repositório de pacotes adicionado / repositorio de paquetes añadido / package repository added: $pasta/$origem"
+}
+repositorio "${1:-}" || echo "Kaladrius: o repositório de pacotes não foi adicionado."
 
 # A first `configurar` that stopped after writing .env (no internet, say) left no administrator:
 # starting the system alone would leave the clinic with no account to log in, so it goes to the

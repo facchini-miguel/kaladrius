@@ -30,32 +30,32 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
 
 ### From the package repository
 
-With the package repository at [packages.facchini.eti.br](https://packages.facchini.eti.br) added, new versions of Kaladrius come with the system's own updates. On Debian and Ubuntu:
+With Kaladrius's package repository (at [packages.facchini.eti.br](https://packages.facchini.eti.br/kaladrius/)) added, its new versions come with the system's own updates. On Debian and Ubuntu:
 
 ```bash
 sudo apt install -y curl ca-certificates
-sudo install -d -m 0755 /etc/apt/keyrings
-sudo curl -fsSLo /etc/apt/keyrings/facchini.asc https://packages.facchini.eti.br/chave.asc
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/facchini.asc] https://packages.facchini.eti.br/deb stable main" | sudo tee /etc/apt/sources.list.d/facchini.list
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
 sudo apt update
 sudo apt install kaladrius
 ```
 
+That one file holds the repository's address and its key (apt's deb822 format).
+
 On Fedora, Rocky Linux, AlmaLinux and Red Hat Enterprise Linux:
 
 ```bash
-sudo curl -fsSLo /etc/yum.repos.d/facchini.repo https://packages.facchini.eti.br/rpm/facchini.repo
+sudo curl -fsSLo /etc/yum.repos.d/kaladrius.repo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
 sudo dnf install kaladrius
 ```
 
 On openSUSE:
 
 ```bash
-sudo zypper addrepo https://packages.facchini.eti.br/rpm/facchini.repo
+sudo zypper addrepo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
 sudo zypper install kaladrius
 ```
 
-The repository and its `.rpm` packages are signed. Before trusting the key, `dnf` and `zypper` show its fingerprint, which must be `9D3A 0438 FF6C 00F9 1CA1 A0AB A5C3 35B2 EB36 7ABA`.
+The repository and its `.rpm` packages are signed with the [key](https://packages.facchini.eti.br/facchini.asc) of packages.facchini.eti.br. Before trusting it, `dnf` and `zypper` show its fingerprint, which must be `9D3A 0438 FF6C 00F9 1CA1 A0AB A5C3 35B2 EB36 7ABA`.
 
 On Debian and Ubuntu the questions appear right away, in the server's language (Portuguese, Spanish or English). With `dnf` and `zypper`, run them yourself afterwards:
 
@@ -65,7 +65,7 @@ sudo kaladrius configurar
 
 ### From a downloaded package
 
-On Arch Linux and CachyOS, which the repository does not serve, or to pick a version by hand:
+On Arch Linux and CachyOS, which the repository does not serve, or to pick a version by hand. Like Google Chrome's and VS Code's, the `.deb` and the `.rpm` add the package repository when they are installed (the same file as above, unless it is already there), so later versions come with the system's updates anyway:
 
 1. Download the package of the newest version from the [releases page](https://github.com/facchini-miguel/kaladrius/releases/latest), with the `SHA256SUMS` file to check it. For example, for version 0.54.0:
 
@@ -88,7 +88,7 @@ On Arch Linux and CachyOS, which the repository does not serve, or to pick a ver
 
    On Debian and Ubuntu the questions appear right away; with `dnf`, `zypper` and `pacman`, run `sudo kaladrius configurar` afterwards.
 
-A downloaded package is not signed: `dnf` and `zypper` say so ("skipped OpenPGP checks", "unsigned rpm"). The `SHA256SUMS` check above is what proves the file is the one published.
+A downloaded package is not signed: `dnf` and `zypper` say so ("skipped OpenPGP checks", "unsigned rpm"). The `SHA256SUMS` check above is what proves the file is the one published; the updates that come from the repository afterwards are signed.
 
 ## The questions
 
@@ -134,6 +134,8 @@ sudo --preserve-env=KALADRIUS_SENHA_ADMIN kaladrius configurar \
 
 `--acesso` is `rede-interna` (internal network) or `internet`; for `internet`, `--endereco` is the domain. On an error (an invalid address, a refused password) it stops with the reason and a non-zero exit code.
 
+To install a downloaded package without adding the package repository (a server updated by hand, say): `sudo KALADRIUS_SEM_REPOSITORIO=1 apt install ./kaladrius_….deb` (or `dnf install`). The choice is kept in `/opt/kaladrius/sem-repositorio`, so later packages do not add it either.
+
 ## Everyday commands
 
 | Command | What it does |
@@ -163,8 +165,8 @@ The folder and the number of days are `KALADRIUS_BACKUP_PASTA` and `KALADRIUS_BA
 
 Make a backup before (`sudo kaladrius backup`), then:
 
-- **Installed from the repository:** `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`, like the rest of the system. A new version reaches the repository within an hour of its release.
-- **From a downloaded package:** download the package of the new version and install it the same way (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` or `sudo pacman -U ./kaladrius-….pkg.tar.zst`).
+- **With the package repository** (added by hand or by the downloaded `.deb` or `.rpm`): `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`, like the rest of the system. A new version reaches the repository within an hour of its release.
+- **On Arch Linux and CachyOS, or without the repository:** download the package of the new version and install it the same way (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` or `sudo pacman -U ./kaladrius-….pkg.tar.zst`).
 
 The system restarts on the new version; database migrations run by themselves.
 
@@ -185,7 +187,7 @@ sudo pacman -R kaladrius                       # Arch Linux, CachyOS
 
 The system stops, and **the data is kept**: the database (Docker volume `kaladrius_pgdata`), the backups in `/var/backups/kaladrius` and `/opt/kaladrius/.env`, with the database password. Installing the package again brings the system back with them. Without `--noautoremove`, dnf also removes Docker when it came with the package; the data stays, but installing again then needs the internet to download Docker. Deleting them is irreversible and is done by hand; the commands are shown when the package is removed.
 
-To remove the package repository too: `sudo rm /etc/apt/sources.list.d/facchini.list /etc/apt/keyrings/facchini.asc` (Debian, Ubuntu), `sudo rm /etc/yum.repos.d/facchini.repo` (Fedora, Rocky, AlmaLinux) or `sudo zypper removerepo facchini` (openSUSE).
+The package repository stays too, so `sudo apt install kaladrius` (or `dnf`, `zypper`) brings the system back. To remove it: `sudo apt purge kaladrius` instead of `remove` (Debian, Ubuntu; the data still stays), `sudo rm /etc/yum.repos.d/kaladrius.repo` (Fedora, Rocky, AlmaLinux) or `sudo zypper removerepo kaladrius` (openSUSE).
 
 ## Where things are
 
@@ -195,4 +197,5 @@ To remove the package repository too: `sudo rm /etc/apt/sources.list.d/facchini.
 | `/opt/kaladrius/release/` | the Compose file and the Caddyfile of the installed version |
 | `/opt/kaladrius/bin/` | the `kaladrius` command and the server scripts |
 | `/var/backups/kaladrius/` | the daily backups |
+| `/etc/apt/sources.list.d/kaladrius.sources`, `/etc/yum.repos.d/kaladrius.repo`, `/etc/zypp/repos.d/kaladrius.repo` | the package repository |
 | `kaladrius-*.timer` (systemd) | backup, health samples every 5 minutes, weekly restore test |

@@ -16,10 +16,11 @@ Es la reescritura del antiguo *Odonto System* (PHP 5, 2009–2019), ahora genér
 
 ## Instalar en un servidor
 
-En Debian 13+ o Ubuntu 24.04+, agregue el repositorio de paquetes [packages.facchini.eti.br](https://packages.facchini.eti.br) e instálelo; algunas preguntas en pantalla (red interna o internet, el administrador) y el sistema está en marcha, con copia de seguridad diaria, y las versiones nuevas llegan con `sudo apt upgrade`:
+En Debian 13+ o Ubuntu 24.04+, agregue el repositorio de paquetes de Kaladrius e instálelo; algunas preguntas en pantalla (red interna o internet, el administrador) y el sistema está en marcha, con copia de seguridad diaria, y las versiones nuevas llegan con `sudo apt upgrade`:
 
 ```bash
-sudo apt install kaladrius     # después de agregar el repositorio; Fedora, Rocky, AlmaLinux: dnf; openSUSE: zypper
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
+sudo apt update && sudo apt install kaladrius
 ```
 
 Vea [Paquete Linux](https://kaladrius-docs.facchini.eti.br/es/installation/linux-package) para los detalles (también los paquetes `.deb`, `.rpm` y de Arch Linux de cada [release](https://github.com/facchini-miguel/kaladrius/releases/latest)) y las otras formas de instalar (Docker Compose a mano, Google Cloud).

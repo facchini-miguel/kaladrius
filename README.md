@@ -16,10 +16,11 @@ It is the rewrite of the old *Odonto System* (PHP 5, 2009–2019), now generic f
 
 ## Installing on a server
 
-On Debian 13+ or Ubuntu 24.04+, add the package repository at [packages.facchini.eti.br](https://packages.facchini.eti.br) and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups, and new versions come with `sudo apt upgrade`:
+On Debian 13+ or Ubuntu 24.04+, add Kaladrius's package repository and install it; a few questions on screen (internal network or internet, the administrator) and the system is running, with daily backups, and new versions come with `sudo apt upgrade`:
 
 ```bash
-sudo apt install kaladrius     # after adding the repository; Fedora, Rocky, AlmaLinux: dnf; openSUSE: zypper
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
+sudo apt update && sudo apt install kaladrius
 ```
 
 See [Linux package](https://kaladrius-docs.facchini.eti.br/installation/linux-package) for the details (also the `.deb`, `.rpm` and Arch Linux packages of each [release](https://github.com/facchini-miguel/kaladrius/releases/latest)), and the other ways to install (Docker Compose by hand, Google Cloud).

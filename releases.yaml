@@ -16,17 +16,20 @@
       publico: [equipe]
       texto:
         pt-br: >
-          O servidor da clínica pode receber o Kaladrius pelo repositório de pacotes
-          packages.facchini.eti.br, com pacotes assinados: as versões novas chegam junto com
-          as atualizações do próprio sistema (apt, dnf ou zypper).
+          O servidor da clínica recebe as versões novas do Kaladrius junto com as atualizações
+          do próprio sistema (apt, dnf ou zypper), pelo repositório de pacotes assinado em
+          packages.facchini.eti.br. O pacote baixado também adiciona o repositório ao ser
+          instalado.
         en: >
-          The clinic's server can get Kaladrius from the package repository
-          packages.facchini.eti.br, with signed packages: new versions come with the system's
-          own updates (apt, dnf or zypper).
+          The clinic's server gets new versions of Kaladrius with the system's own updates
+          (apt, dnf or zypper), from the signed package repository at
+          packages.facchini.eti.br. The downloaded package also adds the repository when
+          installed.
         es: >
-          El servidor de la clínica puede recibir Kaladrius desde el repositorio de paquetes
-          packages.facchini.eti.br, con paquetes firmados: las versiones nuevas llegan con las
-          actualizaciones del propio sistema (apt, dnf o zypper).
+          El servidor de la clínica recibe las versiones nuevas de Kaladrius con las
+          actualizaciones del propio sistema (apt, dnf o zypper), desde el repositorio de
+          paquetes firmado en packages.facchini.eti.br. El paquete descargado también agrega
+          el repositorio al instalarse.
 
 - versao: 0.54.0
   data: 2026-11-02

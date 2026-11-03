@@ -30,32 +30,32 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker
 
 ### Pelo repositório de pacotes
 
-Com o repositório de pacotes [packages.facchini.eti.br](https://packages.facchini.eti.br) adicionado, as versões novas do Kaladrius chegam com as atualizações do próprio sistema. No Debian e no Ubuntu:
+Com o repositório de pacotes do Kaladrius (em [packages.facchini.eti.br](https://packages.facchini.eti.br/kaladrius/)) adicionado, as versões novas chegam com as atualizações do próprio sistema. No Debian e no Ubuntu:
 
 ```bash
 sudo apt install -y curl ca-certificates
-sudo install -d -m 0755 /etc/apt/keyrings
-sudo curl -fsSLo /etc/apt/keyrings/facchini.asc https://packages.facchini.eti.br/chave.asc
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/facchini.asc] https://packages.facchini.eti.br/deb stable main" | sudo tee /etc/apt/sources.list.d/facchini.list
+sudo curl -fsSLo /etc/apt/sources.list.d/kaladrius.sources https://packages.facchini.eti.br/kaladrius/deb/kaladrius.sources
 sudo apt update
 sudo apt install kaladrius
 ```
 
+Esse arquivo único tem o endereço do repositório e a chave dele (o formato deb822 do apt).
+
 No Fedora, Rocky Linux, AlmaLinux e Red Hat Enterprise Linux:
 
 ```bash
-sudo curl -fsSLo /etc/yum.repos.d/facchini.repo https://packages.facchini.eti.br/rpm/facchini.repo
+sudo curl -fsSLo /etc/yum.repos.d/kaladrius.repo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
 sudo dnf install kaladrius
 ```
 
 No openSUSE:
 
 ```bash
-sudo zypper addrepo https://packages.facchini.eti.br/rpm/facchini.repo
+sudo zypper addrepo https://packages.facchini.eti.br/kaladrius/rpm/kaladrius.repo
 sudo zypper install kaladrius
 ```
 
-O repositório e os pacotes `.rpm` dele são assinados. Antes de confiar na chave, o `dnf` e o `zypper` mostram a impressão digital dela, que precisa ser `9D3A 0438 FF6C 00F9 1CA1 A0AB A5C3 35B2 EB36 7ABA`.
+O repositório e os pacotes `.rpm` dele são assinados com a [chave](https://packages.facchini.eti.br/facchini.asc) do packages.facchini.eti.br. Antes de confiar nela, o `dnf` e o `zypper` mostram a impressão digital, que precisa ser `9D3A 0438 FF6C 00F9 1CA1 A0AB A5C3 35B2 EB36 7ABA`.
 
 No Debian e no Ubuntu as perguntas aparecem na hora, no idioma do servidor (português, espanhol ou inglês). Com `dnf` e `zypper`, rode-as você mesmo em seguida:
 
@@ -65,7 +65,7 @@ sudo kaladrius configurar
 
 ### Por um pacote baixado
 
-No Arch Linux e no CachyOS, que o repositório não atende, ou para escolher a versão à mão:
+No Arch Linux e no CachyOS, que o repositório não atende, ou para escolher a versão à mão. Como os do Google Chrome e do VS Code, o `.deb` e o `.rpm` adicionam o repositório de pacotes ao serem instalados (o mesmo arquivo de cima, se ele ainda não estiver lá), e assim as versões seguintes chegam com as atualizações do sistema do mesmo jeito:
 
 1. Baixe o pacote da versão mais nova na [página de releases](https://github.com/facchini-miguel/kaladrius/releases/latest), com o arquivo `SHA256SUMS` para conferi-lo. Por exemplo, para a versão 0.54.0:
 
@@ -88,7 +88,7 @@ No Arch Linux e no CachyOS, que o repositório não atende, ou para escolher a v
 
    No Debian e no Ubuntu as perguntas aparecem na hora; com `dnf`, `zypper` e `pacman`, rode `sudo kaladrius configurar` em seguida.
 
-Um pacote baixado não é assinado: o `dnf` e o `zypper` avisam isso ("skipped OpenPGP checks", "unsigned rpm"). Quem prova que o arquivo é o publicado é a conferência do `SHA256SUMS` acima.
+Um pacote baixado não é assinado: o `dnf` e o `zypper` avisam isso ("skipped OpenPGP checks", "unsigned rpm"). Quem prova que o arquivo é o publicado é a conferência do `SHA256SUMS` acima; as atualizações que vêm depois pelo repositório são assinadas.
 
 ## As perguntas
 
@@ -134,6 +134,8 @@ sudo --preserve-env=KALADRIUS_SENHA_ADMIN kaladrius configurar \
 
 `--acesso` é `rede-interna` ou `internet`; com `internet`, o `--endereco` é o domínio. Num erro (um endereço inválido, uma senha recusada) ele para com o motivo e um código de saída diferente de zero.
 
+Para instalar um pacote baixado sem adicionar o repositório de pacotes (um servidor atualizado à mão, por exemplo): `sudo KALADRIUS_SEM_REPOSITORIO=1 apt install ./kaladrius_….deb` (ou `dnf install`). A escolha fica guardada em `/opt/kaladrius/sem-repositorio`, e os pacotes seguintes também não o adicionam.
+
 ## Comandos do dia a dia
 
 | Comando | O que faz |
@@ -163,8 +165,8 @@ A pasta e o número de dias são `KALADRIUS_BACKUP_PASTA` e `KALADRIUS_BACKUP_DI
 
 Faça um backup antes (`sudo kaladrius backup`) e então:
 
-- **Instalado pelo repositório:** `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`, junto com o resto do sistema. Uma versão nova chega ao repositório em até uma hora depois de lançada.
-- **Por um pacote baixado:** baixe o pacote da versão nova e instale do mesmo jeito (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` ou `sudo pacman -U ./kaladrius-….pkg.tar.zst`).
+- **Com o repositório de pacotes** (adicionado à mão ou pelo `.deb` ou `.rpm` baixado): `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`, junto com o resto do sistema. Uma versão nova chega ao repositório em até uma hora depois de lançada.
+- **No Arch Linux e no CachyOS, ou sem o repositório:** baixe o pacote da versão nova e instale do mesmo jeito (`sudo apt install ./kaladrius_….deb`, `sudo dnf install ./kaladrius-….rpm` ou `sudo pacman -U ./kaladrius-….pkg.tar.zst`).
 
 O sistema reinicia na versão nova; as migrações do banco rodam sozinhas.
 
@@ -185,7 +187,7 @@ sudo pacman -R kaladrius                       # Arch Linux, CachyOS
 
 O sistema para, e **os dados ficam**: o banco (volume Docker `kaladrius_pgdata`), os backups em `/var/backups/kaladrius` e o `/opt/kaladrius/.env`, com a senha do banco. Instalar o pacote de novo traz o sistema de volta com eles. Sem o `--noautoremove`, o dnf também remove o Docker quando ele veio com o pacote; os dados ficam, mas aí instalar de novo precisa da internet para baixar o Docker. Apagá-los é irreversível e é feito à mão; os comandos aparecem quando o pacote é removido.
 
-Para remover também o repositório de pacotes: `sudo rm /etc/apt/sources.list.d/facchini.list /etc/apt/keyrings/facchini.asc` (Debian, Ubuntu), `sudo rm /etc/yum.repos.d/facchini.repo` (Fedora, Rocky, AlmaLinux) ou `sudo zypper removerepo facchini` (openSUSE).
+O repositório de pacotes também fica, e `sudo apt install kaladrius` (ou `dnf`, `zypper`) traz o sistema de volta. Para removê-lo: `sudo apt purge kaladrius` no lugar do `remove` (Debian, Ubuntu; os dados continuam), `sudo rm /etc/yum.repos.d/kaladrius.repo` (Fedora, Rocky, AlmaLinux) ou `sudo zypper removerepo kaladrius` (openSUSE).
 
 ## Onde fica cada coisa
 
@@ -195,4 +197,5 @@ Para remover também o repositório de pacotes: `sudo rm /etc/apt/sources.list.d
 | `/opt/kaladrius/release/` | o arquivo do Compose e o Caddyfile da versão instalada |
 | `/opt/kaladrius/bin/` | o comando `kaladrius` e os scripts do servidor |
 | `/var/backups/kaladrius/` | os backups diários |
+| `/etc/apt/sources.list.d/kaladrius.sources`, `/etc/yum.repos.d/kaladrius.repo`, `/etc/zypp/repos.d/kaladrius.repo` | o repositório de pacotes |
 | `kaladrius-*.timer` (systemd) | backup, amostras de saúde a cada 5 minutos, teste semanal de restauração |

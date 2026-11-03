@@ -9,6 +9,7 @@ The `.deb`, `.rpm` and Arch Linux `.pkg.tar.zst` of Kaladrius. The user guide is
 | `nfpm.yaml` | what goes into the packages, and their dependencies per format |
 | `kaladrius` | the `kaladrius` command: `configurar` (the text screens, or none with options) and the everyday tasks |
 | `depois_de_instalar.sh`, `antes_de_remover.sh`, `depois_de_remover.sh` | the package's scripts: configure or update, stop, and never delete data |
+| `repositorio/` | the apt source (`kaladrius.sources`, with the key) and the `.repo` file of the package repository at packages.facchini.eti.br (decision 142), which `depois_de_instalar.sh` adds when it is not configured yet; the same files the site serves |
 | `gerar.sh` | builds both packages into `dist/` with nFPM (a container pinned by digest) |
 | `testar_instalacao.sh` | installs them in clean Debian, Ubuntu, Fedora, openSUSE and Arch Linux containers (CI, every push) |
 
@@ -65,5 +66,8 @@ build the package with `--imagem kaladrius:teste`. What to go through:
 11. `sudo kaladrius certificado` with the system stopped fails with a message and leaves no
     empty file; `sudo kaladrius testar-restauracao` before the first backup says so and does
     not fail.
-12. On Arch Linux or CachyOS, `sudo KALADRIUS_IMAGEM=kaladrius:teste pacman -U …` updates to
+12. The package repository: installing the downloaded package adds it (`apt update` then reads
+    it), installing again does not duplicate it, `KALADRIUS_SEM_REPOSITORIO=1` leaves it out,
+    and `sudo apt purge kaladrius` removes it (the data stays).
+13. On Arch Linux or CachyOS, `sudo KALADRIUS_IMAGEM=kaladrius:teste pacman -U …` updates to
     that image (the update runs as its own systemd unit).

@@ -9,7 +9,7 @@ O Kaladrius segue o [versionamento semântico](https://semver.org/lang/pt-BR/): 
 
 ## Pacote Linux
 
-Instalado pelo [repositório de pacotes](https://packages.facchini.eti.br), com as atualizações do próprio sistema: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`. Por um pacote baixado, baixe o pacote da versão nova na [página de releases](https://github.com/facchini-miguel/kaladrius/releases) e instale por cima do instalado (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). Ele tem a mesma volta automática da instalação no Google Cloud (abaixo): uma versão que não responde em 5 minutos é desfeita e a anterior continua no ar; o `sudo kaladrius estado` mostra isso. Veja [Pacote Linux](../installation/linux-package.md#atualizações).
+Com o repositório de pacotes (adicionado à mão, ou pelo `.deb` ou `.rpm` baixado ao ser instalado), com as atualizações do próprio sistema: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`. No Arch Linux e no CachyOS, ou sem o repositório, baixe o pacote da versão nova na [página de releases](https://github.com/facchini-miguel/kaladrius/releases) e instale por cima do instalado (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). Ele tem a mesma volta automática da instalação no Google Cloud (abaixo): uma versão que não responde em 5 minutos é desfeita e a anterior continua no ar; o `sudo kaladrius estado` mostra isso. Veja [Pacote Linux](../installation/linux-package.md#atualizações).
 
 ## Servidor próprio
 

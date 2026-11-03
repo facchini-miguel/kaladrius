@@ -3,6 +3,8 @@ package mode of deploy/servidor/comum.sh, and the `kaladrius` command. The insta
 (apt and dnf, the text screens, backups, the restore test, an update and its rollback) is tested
 for real in a clean virtual machine before each change; see deploy/pacote/README.md."""
 
+import base64
+import hashlib
 import os
 import re
 import shutil
@@ -258,11 +260,15 @@ def test_remover_o_pacote_nunca_apaga_os_dados():
     # commands, for a person to decide (indented lines of the message).
     for script in ("antes_de_remover.sh", "depois_de_remover.sh"):
         for linha in (PACOTE / script).read_text().splitlines():
-            if linha.lstrip().startswith("#") or linha.startswith("    sudo "):
+            if linha.lstrip().startswith(("#", "printf")) or linha.startswith("    sudo "):
                 continue
             assert "volume rm" not in linha and "down -v" not in linha, linha
             if re.search(r"\brm\b", linha):
-                assert linha.strip() == "rm -f /opt/kaladrius/release/.env", linha
+                # The package repository's apt source (on a purge) is configuration, not data.
+                assert linha.strip() in {
+                    "rm -f /opt/kaladrius/release/.env",
+                    'rm -f "$ETC/apt/sources.list.d/kaladrius.sources"',
+                }, linha
 
 
 def test_o_site_e_conferido_pelo_proprio_servidor(tmp_path):
@@ -498,12 +504,11 @@ def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
 
 @pytest.mark.parametrize("idioma", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
 def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, idioma):
-    # Installed from the package repository, with the system's updates; from a downloaded
-    # package, the next version's package from the releases.
+    # With the package repository (which the package adds), the system's updates; on Arch
+    # Linux or without it, the next version's package from the releases.
     saida = kaladrius(tmp_path, "ajuda", idioma=idioma).stdout
-    for comando in ("sudo apt upgrade", "sudo dnf upgrade", "sudo zypper update"):
+    for comando in ("sudo apt upgrade", "sudo dnf upgrade", "sudo zypper update", "pacman -U"):
         assert comando in saida
-    assert "https://packages.facchini.eti.br" in saida
     assert "github.com/facchini-miguel/kaladrius/releases" in saida
 
 
@@ -519,12 +524,15 @@ def test_certificado_com_o_caddy_parado_nao_deixa_arquivo(tmp_path):
     assert not destino.exists()
 
 
-def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None):
-    """depois_de_instalar.sh with DIR in tmp_path; systemctl, systemd-run, atualizar.sh faked."""
+def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None, configurado=True):
+    """depois_de_instalar.sh with DIR and ETC in tmp_path; systemctl, systemd-run, atualizar.sh
+    faked."""
     dir_ = tmp_path / "opt"
-    (dir_ / "release").mkdir(parents=True)
-    (dir_ / "bin").mkdir()
-    (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\n")
+    (dir_ / "release").mkdir(parents=True, exist_ok=True)
+    (dir_ / "bin").mkdir(exist_ok=True)
+    shutil.copytree(PACOTE / "repositorio", dir_ / "repositorio", dirs_exist_ok=True)
+    if configurado:
+        (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\n")
     if admin_criado:
         (dir_ / "admin-criado").write_text("")
     chamadas, ambiente_falso = falsos(tmp_path / "path", "systemctl", "systemd-run")
@@ -533,7 +541,8 @@ def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None):
     atualizar.chmod(0o755)
     script = tmp_path / "depois_de_instalar.sh"
     texto = (PACOTE / "depois_de_instalar.sh").read_text()
-    script.write_text(texto.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1))
+    texto = texto.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
+    script.write_text(texto.replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1))
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(script), argumento],
         capture_output=True,
@@ -632,3 +641,130 @@ def test_iniciar_sem_administrador_manda_terminar_a_configuracao(tmp_path, coman
     assert resultado.stdout.strip() == comando, resultado.stderr
     kaladrius_ = (PACOTE / "kaladrius").read_text()
     assert f"{comando}) exigir_root {comando}; exigir_administrador;" in kaladrius_
+
+
+IMPRESSAO_DIGITAL = "9D3A0438FF6C00F91CA1A0ABA5C335B2EB367ABA"  # decision 142
+
+
+def impressao_digital(armadura):
+    """The fingerprint of an ASCII-armored OpenPGP v4 public key: SHA-1 of its first packet."""
+    linhas = armadura.strip().splitlines()
+    corpo = linhas[linhas.index("") + 1 : -1]
+    dados = base64.b64decode("".join(linha for linha in corpo if not linha.startswith("=")))
+    if dados[0] & 0x40:  # new packet format
+        tamanho, inicio = (
+            (dados[1], 2) if dados[1] < 192 else (((dados[1] - 192) << 8) + dados[2] + 192, 3)
+        )
+    else:  # old format: the length type in the low two bits
+        n = {0: 1, 1: 2, 2: 4}[dados[0] & 3]
+        tamanho, inicio = int.from_bytes(dados[1 : 1 + n]), 1 + n
+    pacote = dados[inicio : inicio + tamanho]
+    return hashlib.sha1(b"\x99" + len(pacote).to_bytes(2) + pacote).hexdigest().upper()  # noqa: S324
+
+
+def test_o_repositorio_que_o_pacote_traz_e_o_publicado():
+    # The apt source carries the key in Signed-By (deb822: one space before each line, "." for
+    # an empty one); both files point to the software's own folder on packages.facchini.eti.br.
+    fonte = (PACOTE / "repositorio" / "kaladrius.sources").read_text()
+    assert "URIs: https://packages.facchini.eti.br/kaladrius/deb\n" in fonte
+    assert "Suites: stable\nComponents: main\nArchitectures: amd64\n" in fonte
+    linhas = fonte.split("Signed-By:\n", 1)[1].splitlines()
+    chave = "\n".join("" if linha == " ." else linha.removeprefix(" ") for linha in linhas)
+    assert impressao_digital(chave) == IMPRESSAO_DIGITAL
+    repo = (PACOTE / "repositorio" / "kaladrius.repo").read_text()
+    for linha in (
+        "baseurl=https://packages.facchini.eti.br/kaladrius/rpm",
+        "gpgcheck=1",
+        "repo_gpgcheck=1",
+        "autorefresh=1",
+        "gpgkey=https://packages.facchini.eti.br/facchini.asc",
+    ):
+        assert linha in repo.splitlines()
+
+
+@pytest.mark.parametrize(
+    ("argumento", "pastas", "esperado"),
+    [
+        ("configure", ["apt/sources.list.d"], "apt/sources.list.d/kaladrius.sources"),
+        ("1", ["yum.repos.d"], "yum.repos.d/kaladrius.repo"),  # dnf
+        ("2", ["yum.repos.d"], "yum.repos.d/kaladrius.repo"),  # an update from a downloaded rpm
+        ("1", ["zypp/repos.d"], "zypp/repos.d/kaladrius.repo"),  # zypper
+        ("0.55.0-1", ["apt/sources.list.d", "yum.repos.d"], None),  # Arch Linux: none
+    ],
+)
+def test_o_pacote_adiciona_o_repositorio(tmp_path, argumento, pastas, esperado):
+    for pasta in pastas:
+        (tmp_path / "etc" / pasta).mkdir(parents=True)
+    saida, _chamadas = depois_de_instalar(tmp_path, argumento, admin_criado=True)
+    adicionados = sorted(
+        str(a.relative_to(tmp_path / "etc")) for a in (tmp_path / "etc").rglob("kaladrius.*")
+    )
+    assert adicionados == ([esperado] if esperado else [])
+    if esperado:
+        origem = PACOTE / "repositorio" / Path(esperado).name
+        assert (tmp_path / "etc" / esperado).read_text() == origem.read_text()
+        assert "package repository added" in saida
+
+
+def test_o_repositorio_ja_configurado_nao_e_adicionado_de_novo(tmp_path):
+    # By hand under another name, or the file of an earlier installation, as the person left it.
+    fontes = tmp_path / "etc" / "apt" / "sources.list.d"
+    fontes.mkdir(parents=True)
+    (fontes / "facchini.list").write_text(
+        "deb [signed-by=/etc/apt/keyrings/facchini.asc]"
+        " https://packages.facchini.eti.br/kaladrius/deb stable main\n"
+    )
+    depois_de_instalar(tmp_path, "configure", admin_criado=True)
+    assert sorted(a.name for a in fontes.iterdir()) == ["facchini.list"]
+    (fontes / "facchini.list").unlink()
+    # Its own file, changed by hand (another address, say): left as it is.
+    (fontes / "kaladrius.sources").write_text("Enabled: no\nURIs: http://espelho.exemplo/k\n")
+    saida, _chamadas = depois_de_instalar(tmp_path, "configure", admin_criado=True)
+    assert (fontes / "kaladrius.sources").read_text().startswith("Enabled: no")
+    assert "package repository added" not in saida
+
+
+def test_sem_repositorio_por_escolha_tambem_nas_proximas_instalacoes(tmp_path):
+    fontes = tmp_path / "etc" / "apt" / "sources.list.d"
+    fontes.mkdir(parents=True)
+    depois_de_instalar(
+        tmp_path, "configure", admin_criado=True, ambiente={"KALADRIUS_SEM_REPOSITORIO": "1"}
+    )
+    assert not list(fontes.iterdir())
+    depois_de_instalar(tmp_path, "configure", admin_criado=True)  # a later update: still none
+    assert not list(fontes.iterdir())
+
+
+def test_a_primeira_instalacao_ja_adiciona_o_repositorio(tmp_path):
+    # Before `configurar`: the server is on the repository even if the setup never finishes.
+    fontes = tmp_path / "etc" / "apt" / "sources.list.d"
+    fontes.mkdir(parents=True)
+    saida, _chamadas = depois_de_instalar(
+        tmp_path, "configure", admin_criado=False, configurado=False
+    )
+    assert (fontes / "kaladrius.sources").exists()
+    assert "sudo kaladrius configurar" in saida
+
+
+@pytest.mark.parametrize(("argumento", "fica"), [("remove", True), ("purge", False)])
+def test_remover_mantem_o_repositorio_e_purge_apaga(tmp_path, argumento, fica):
+    fontes = tmp_path / "etc" / "apt" / "sources.list.d"
+    fontes.mkdir(parents=True)
+    (fontes / "kaladrius.sources").write_text("Types: deb\n")
+    script = tmp_path / "depois_de_remover.sh"
+    texto = (
+        (PACOTE / "depois_de_remover.sh")
+        .read_text()
+        .replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1)
+    )
+    script.write_text(texto.replace("rm -f /opt/kaladrius/", f"rm -f {tmp_path}/", 1))
+    _chamadas, ambiente = falsos(tmp_path / "path", "systemctl")
+    resultado = subprocess.run(  # noqa: S603 (the package's own script)
+        [shutil.which("sh"), str(script), argumento],
+        capture_output=True,
+        text=True,
+        env=ambiente,
+        timeout=30,
+    )
+    assert resultado.returncode == 0, resultado.stderr
+    assert ("sudo rm " + str(fontes / "kaladrius.sources") in resultado.stdout) is fica
