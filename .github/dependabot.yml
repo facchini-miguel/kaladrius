@@ -2,6 +2,10 @@
 # soon as an advisory is published; version updates come on a schedule, small ones grouped so
 # there is one pull request per ecosystem. The CI tests every pull request and deploys only
 # what is merged into main.
+#
+# Every block has a 7-day cooldown (decision 143): a version update only proposes a release
+# published at least 7 days ago, because a compromised package is usually pulled within hours
+# or days. Security updates ignore the cooldown and still come right away.
 version: 2
 updates:
   - package-ecosystem: pip
@@ -11,6 +15,8 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     # Indirect libraries too, pinned in the locks (decision 136): without this, version
     # updates only touch what the .in files list and the rest of the lock stays frozen.
@@ -30,6 +36,8 @@ updates:
     directory: /deploy
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     allow:
       - dependency-type: all
     groups:
@@ -43,6 +51,8 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Sao_Paulo
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
     groups:
       documentacao-menores:
@@ -53,6 +63,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       acoes:
         patterns: ["*"]
@@ -64,6 +76,8 @@ updates:
     directories: [/, /docs]
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     ignore:
       # A new Python version for the image is a planned change (PR #1, closed): the version
       # set in one place for CI and the image, the tests run on it and the docs updated.
@@ -77,6 +91,8 @@ updates:
     directories: [/, /deploy]
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       imagens-compose:
         patterns: ["*"]
