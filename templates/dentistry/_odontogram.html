@@ -1,4 +1,4 @@
-{% load i18n odontologia %}{% comment %}Dental chart: posted in FDI, shown in the clinic's numbering (decision 122). Expects permanentes, deciduos, selecionados and interativo.{% endcomment %}
+{% load i18n dentistry %}{% comment %}Dental chart: posted in FDI, shown in the clinic's numbering (decision 122). Expects permanentes, deciduos, selecionados and interativo.{% endcomment %}
 <div class="odontograma-rolagem"><div class="odontograma{% if interativo %} odontograma-interativo{% endif %}" role="group" aria-label="{% translate 'Odontograma' %}">
   {% for linha in permanentes %}
   {% if forloop.last %}

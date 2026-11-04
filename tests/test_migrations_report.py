@@ -148,24 +148,51 @@ def test_comentario_cabe_no_limite_do_github():
 
 
 def test_migracoes_do_diff_le_o_git(monkeypatch):
+    """Folders become labels (apps/health_plans is "convenios", decision 145), and a migration
+    moved with its folder is unchanged when its text is the same, edited when it is not."""
     saida = (
-        "A\tapps/convenios/migrations/0004_x.py\n"
+        "A\tapps/health_plans/migrations/0004_x.py\n"
         "M\tapps/core/forms.py\n"
         "A\tapps/core/migrations/0019_y.py\n"
-        "M\tapps/convenios/migrations/0003_seguros_de_cada_pais.py\n"
+        "M\tapps/health_plans/migrations/0003_seguros_de_cada_pais.py\n"
         "D\tapps/core/migrations/0002_z.py\n"
         "M\tapps/core/migrations/__init__.py\n"
+        "D\tapps/agenda/migrations/0001_initial.py\n"
+        "A\tapps/schedule/migrations/0001_initial.py\n"
+        "D\tapps/agenda/migrations/0003_agendamento.py\n"
+        "A\tapps/schedule/migrations/0003_agendamento.py\n"
     )
+    textos = {
+        "origin/main:apps/agenda/migrations/0001_initial.py": "igual",
+        "HEAD:apps/schedule/migrations/0001_initial.py": "igual",
+        "origin/main:apps/agenda/migrations/0003_agendamento.py": "import apps.agenda.models",
+        "HEAD:apps/schedule/migrations/0003_agendamento.py": "import apps.schedule.models",
+    }
 
-    def git(*args, **kwargs):
-        assert args[0][1:4] == ["diff", "--name-status", "--no-renames"]
-        return subprocess.CompletedProcess(args[0], 0, stdout=saida, stderr="")
+    def git(args, **kwargs):
+        if args[1] == "show":
+            return subprocess.CompletedProcess(args, 0, stdout=textos[args[2]], stderr="")
+        assert args[1:4] == ["diff", "--name-status", "--no-renames"]
+        return subprocess.CompletedProcess(args, 0, stdout=saida, stderr="")
 
     monkeypatch.setattr(relatorio.subprocess, "run", git)
     assert relatorio.migracoes_do_diff("origin/main") == (
         [("convenios", "0004_x"), ("core", "0019_y")],
-        [("convenios", "0003_seguros_de_cada_pais", "M"), ("core", "0002_z", "D")],
+        [
+            ("agenda", "0003_agendamento", "M"),
+            ("convenios", "0003_seguros_de_cada_pais", "M"),
+            ("core", "0002_z", "D"),
+        ],
     )
+
+
+def test_migracoes_do_diff_quando_o_git_falha(monkeypatch):
+    def git(args, **kwargs):
+        return subprocess.CompletedProcess(args, 128, stdout="", stderr="unknown revision")
+
+    monkeypatch.setattr(relatorio.subprocess, "run", git)
+    with pytest.raises(CommandError, match="unknown revision"):
+        relatorio.migracoes_do_diff("origin/nada")
 
 
 def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):

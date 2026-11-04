@@ -30,7 +30,7 @@ jobs:
       - name: PostgreSQL (the production image)
         run: .github/postgres.sh start
       - name: Locks up to date (every .in compiled, both locks agree, decision 136)
-        run: deploy/gerar_lock.sh --verificar
+        run: deploy/lock.sh --check
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version-file: .python-version
@@ -90,9 +90,9 @@ jobs:
         with:
           persist-credentials: false  # no step uses git credentials (decision 132)
       - name: .deb, .rpm and .pkg.tar.zst packages
-        run: deploy/pacote/gerar.sh --imagem ghcr.io/facchini-miguel/kaladrius:latest
+        run: deploy/package/build.sh --image ghcr.io/facchini-miguel/kaladrius:latest
       - name: Install on Debian, Ubuntu, Fedora, openSUSE and Arch Linux
-        run: deploy/pacote/testar_instalacao.sh
+        run: deploy/package/test_install.sh
 
   # Publishes the image to Google Artifact Registry (the VM picks it up within 5 minutes) and
   # to GitHub Packages, ghcr.io, for anyone installing Kaladrius (decision 076).
@@ -134,7 +134,7 @@ jobs:
             fi
           done
           # The commit inside the image: the release packages the version's image only for the
-          # commit that built it (deploy/pacote/gerar.sh --commit).
+          # commit that built it (deploy/package/build.sh --commit).
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" "${TAGS[@]}" .
           docker push --all-tags "$IMAGE"
           docker push --all-tags "$PUBLIC_IMAGE"
@@ -183,7 +183,7 @@ jobs:
           python manage.py notas_release "$VERSION" > notes.md
           # The Linux packages of the version (decision 140), with the image just published,
           # pinned by its digest; refused when the version's image came from another commit.
-          deploy/pacote/gerar.sh --commit "$GITHUB_SHA"
+          deploy/package/build.sh --commit "$GITHUB_SHA"
           gh release create "v$VERSION" --target "$GITHUB_SHA" --title "$(cat title.txt)" \
             --notes-file notes.md --latest \
             "dist/kaladrius_${VERSION}-1_amd64.deb" "dist/kaladrius-${VERSION}-1.x86_64.rpm" \

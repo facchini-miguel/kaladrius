@@ -3,9 +3,9 @@
 import pytest
 from django.urls import reverse
 
-from apps.auditoria.models import RegistroAuditoria
+from apps.audit.models import RegistroAuditoria
 from apps.core.models import Papel, Vinculo
-from apps.equipe.forms import VinculoForm
+from apps.team.forms import VinculoForm
 
 pytestmark = pytest.mark.django_db
 

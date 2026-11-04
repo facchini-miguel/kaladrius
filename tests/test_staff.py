@@ -7,13 +7,13 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modulos import configurar
-from apps.financeiro import servicos as financeiro
-from apps.financeiro.models import Lancamento
-from apps.pessoal import servicos
-from apps.pessoal.models import Folha, Funcionario, Salario, hora_extra_sugerida
+from apps.core.modules import configurar
+from apps.finance import services as financeiro
+from apps.finance.models import Lancamento
+from apps.staff import services
+from apps.staff.models import Folha, Funcionario, Salario, hora_extra_sugerida
 
 pytestmark = pytest.mark.django_db
 
@@ -101,7 +101,7 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
             funcionario=saiu, valor=Decimal("2000"), desde=datetime.date(2025, 1, 1)
         )
         Funcionario.objects.create(nome="Sem salário")
-        folhas = servicos.preparar(OUTUBRO)
+        folhas = services.preparar(OUTUBRO)
     assert [f.funcionario.nome for f in folhas] == ["Ana Fictícia"]
     folha = folhas[0]
     assert folha.salario == Decimal("2200") and folha.valor_hora_extra == hora_extra_sugerida(
@@ -164,7 +164,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert linha[1] is None
     with usar_clinica(clinica_a):
         assert (
-            servicos.lancar(
+            services.lancar(
                 [folha], categoria=categoria, vencimento=datetime.date(2026, 11, 5), usuario=None
             )
             == 0
@@ -177,11 +177,11 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
 
 def test_total_zero_nao_e_lancado(clinica_a, ana):
     with usar_clinica(clinica_a):
-        folha = servicos.preparar(OUTUBRO)[0]
+        folha = services.preparar(OUTUBRO)[0]
         folha.faltas = 30
         folha.save()
         with pytest.raises(ValidationError, match="maior que zero"):
-            servicos.lancar([folha], categoria=None, vencimento=OUTUBRO, usuario=None)
+            services.lancar([folha], categoria=None, vencimento=OUTUBRO, usuario=None)
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])

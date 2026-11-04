@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Conventions
 
 - **Domain names in Portuguese** (`Paciente`, `Agendamento`), **comments in English**.
+- **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`). Each app keeps its Portuguese **label** (`label = "pacientes"` in `apps.py`), the name the database tables, the migrations and the permissions know it by, and migration files keep their names: production has them recorded (decision 145).
 - **Templates named in English**, in a folder named after their app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); Django's own names stay (`base.html`, `403.html`, `registration/login.html`) (decision 146).
 - **Test files named in English**, after what they test (`tests/test_patients.py`, `tests/test_schedule.py`), even when the module they test has a Portuguese name (decision 144).
 - **Every text on screen** is written in Portuguese in the code and translated in `locale/en` and `locale/es`:
@@ -55,10 +56,10 @@ The automatic rollback of the server (decision 135) puts the previous code back 
 The libraries the system uses directly are listed in `requirements.in` (the test and lint tools in `requirements-dev.in`). `requirements.txt` and `requirements-dev.txt` are **generated** from them with every dependency, indirect ones included, pinned to an exact version and a hash, so CI and the production image install exactly the same thing, and pip refuses a package whose hash does not match. Do not edit the `.txt` files by hand: change the `.in` file and regenerate them (needs Docker; it uses the Python of `.python-version`):
 
 ```bash
-deploy/gerar_lock.sh
+deploy/lock.sh
 ```
 
-CI runs `deploy/gerar_lock.sh --verificar` and fails while a lock does not match its `.in` file. Dependabot updates both files in its pull requests, indirect libraries included.
+CI runs `deploy/lock.sh --check` and fails while a lock does not match its `.in` file. Dependabot updates both files in its pull requests, indirect libraries included.
 
 The locks are resolved for Linux, where the system runs. On Windows, `pip install` refuses them (a package only Windows needs, such as `colorama`, has no hash in them): develop in Docker ([Quick start](quick-start.md)) or in WSL.
 

@@ -6,12 +6,12 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modulos import configurar
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, CentroCusto, Conta, Lancamento
-from apps.pacientes.models import Paciente
+from apps.core.modules import configurar
+from apps.finance import services
+from apps.finance.models import Categoria, CentroCusto, Conta, Lancamento
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 
@@ -112,7 +112,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
         aluguel = Categoria.objects.get(nome="Aluguel")
         caixa = Conta.objects.get(nome="Caixa")
         for valor, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
-            lancamento = servicos.criar_lancamento(
+            lancamento = services.criar_lancamento(
                 clinica=clinica_a,
                 tipo=Lancamento.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
@@ -125,7 +125,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
                 usuario=None,
             )
             parcela = lancamento.parcelas.get()
-            servicos.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
+            services.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("financeiro:relatorios")).context["relatorio"]
     assert relatorio["centros"]
     assert {nome: str(total) for nome, total in relatorio["despesas_por_centro"]} == {

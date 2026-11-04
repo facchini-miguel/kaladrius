@@ -4,7 +4,7 @@ from apps.core.models import Backup
 
 
 class Command(BaseCommand):
-    help = "Records a successful database backup (called by deploy/servidor/backup.sh)."
+    help = "Records a successful database backup (called by deploy/server/backup.sh)."
 
     def add_arguments(self, parser):
         parser.add_argument("arquivo", help="Object name in the backup bucket.")

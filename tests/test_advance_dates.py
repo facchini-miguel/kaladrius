@@ -4,11 +4,11 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.utils import timezone
 
-from apps.agenda import servicos as agenda
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.core.isolamento import usar_clinica
-from apps.pacientes.models import Paciente
-from apps.rechamadas.models import Rechamada
+from apps.core.isolation import usar_clinica
+from apps.patients.models import Paciente
+from apps.recalls.models import Rechamada
+from apps.schedule import services as agenda
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 
 @pytest.fixture

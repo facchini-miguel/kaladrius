@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Convenções
 
 - **Nomes do domínio em português** (`Paciente`, `Agendamento`), **comentários em inglês**.
+- **Pastas e módulos dos apps com nome em inglês** (`apps/patients/`, `apps/core/countries.py`). Cada app mantém o seu **label** em português (`label = "pacientes"` no `apps.py`), o nome pelo qual as tabelas do banco, as migrações e as permissões o conhecem, e os arquivos de migração mantêm os seus nomes: a produção os tem registrados (decisão 145).
 - **Templates com nome em inglês**, numa pasta com o nome do seu app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); os nomes do próprio Django ficam (`base.html`, `403.html`, `registration/login.html`) (decisão 146).
 - **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144).
 - **Todo texto da tela** é escrito em português no código e traduzido em `locale/en` e `locale/es`:
@@ -55,10 +56,10 @@ A volta automática do servidor (decisão 135) põe o código anterior de volta,
 As bibliotecas que o sistema usa diretamente ficam em `requirements.in` (as ferramentas de teste e lint em `requirements-dev.in`). O `requirements.txt` e o `requirements-dev.txt` são **gerados** a partir delas, com todas as dependências, inclusive as indiretas, fixadas numa versão exata e com hash, para o CI e a imagem de produção instalarem exatamente a mesma coisa, e o pip recusa um pacote cujo hash não bate. Não edite os `.txt` à mão: mude o `.in` e gere-os de novo (precisa do Docker; usa o Python do `.python-version`):
 
 ```bash
-deploy/gerar_lock.sh
+deploy/lock.sh
 ```
 
-O CI roda `deploy/gerar_lock.sh --verificar` e falha enquanto um lock não bater com o `.in` dele. O Dependabot atualiza os dois arquivos nos pull requests dele, inclusive as bibliotecas indiretas.
+O CI roda `deploy/lock.sh --check` e falha enquanto um lock não bater com o `.in` dele. O Dependabot atualiza os dois arquivos nos pull requests dele, inclusive as bibliotecas indiretas.
 
 Os locks são resolvidos para Linux, onde o sistema roda. No Windows o `pip install` os recusa (um pacote que só o Windows precisa, como o `colorama`, não tem hash neles): desenvolva no Docker ([Início rápido](quick-start.md)) ou no WSL.
 

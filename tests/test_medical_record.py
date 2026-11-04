@@ -7,14 +7,14 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.agenda import servicos as agenda
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.auditoria.models import RegistroAuditoria
-from apps.core.isolamento import usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
-from apps.prontuario.models import Atendimento
+from apps.medical_records.models import Atendimento
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.schedule import services as agenda
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 
@@ -261,7 +261,7 @@ PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    from apps.prontuario.models import Anexo
+    from apps.medical_records.models import Anexo
 
     atendimento = registrar(cenario)
     url = reverse("prontuario:anexo_enviar", args=[atendimento.pk])
@@ -304,7 +304,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
 def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    from apps.prontuario.models import Anexo
+    from apps.medical_records.models import Anexo
 
     atendimento = registrar(cenario)
     url = reverse("prontuario:anexo_enviar", args=[atendimento.pk])
@@ -327,7 +327,7 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     """The superuser writes on behalf of a chosen practitioner and edits anyone's draft."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    from apps.prontuario.models import Anexo, Atestado
+    from apps.medical_records.models import Anexo, Atestado
 
     root = cliente(django_user_model.objects.create_superuser("root", password="x-12345678"))
     novo = reverse("prontuario:novo", args=[cenario["paciente"].pk])

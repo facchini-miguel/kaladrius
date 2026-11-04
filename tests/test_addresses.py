@@ -3,10 +3,10 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.pacientes.models import Paciente
-from apps.referencias.models import Bairro, Logradouro
+from apps.patients.models import Paciente
+from apps.reference_data.models import Bairro, Logradouro
 
 pytestmark = pytest.mark.django_db
 

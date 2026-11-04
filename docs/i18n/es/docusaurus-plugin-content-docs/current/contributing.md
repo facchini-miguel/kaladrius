@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Convenciones
 
 - **Nombres del dominio en portugués** (`Paciente`, `Agendamento`), **comentarios en inglés**.
+- **Carpetas y módulos de las apps con nombre en inglés** (`apps/patients/`, `apps/core/countries.py`). Cada app mantiene su **label** en portugués (`label = "pacientes"` en `apps.py`), el nombre con el que la conocen las tablas de la base de datos, las migraciones y los permisos, y los archivos de migración mantienen sus nombres: producción los tiene registrados (decisión 145).
 - **Plantillas con nombre en inglés**, en una carpeta con el nombre de su app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); los nombres del propio Django se mantienen (`base.html`, `403.html`, `registration/login.html`) (decisión 146).
 - **Archivos de prueba con nombre en inglés**, según lo que prueban (`tests/test_patients.py`, `tests/test_schedule.py`), aunque el módulo probado tenga nombre en portugués (decisión 144).
 - **Todo texto de la pantalla** se escribe en portugués en el código y se traduce en `locale/en` y `locale/es`:
@@ -55,10 +56,10 @@ La vuelta automática del servidor (decisión 135) vuelve a poner el código ant
 Las bibliotecas que el sistema usa directamente están en `requirements.in` (las herramientas de prueba y lint en `requirements-dev.in`). `requirements.txt` y `requirements-dev.txt` se **generan** a partir de ellas, con todas las dependencias, incluidas las indirectas, fijadas en una versión exacta y con hash, para que el CI y la imagen de producción instalen exactamente lo mismo, y pip rechaza un paquete cuyo hash no coincide. No edite los `.txt` a mano: cambie el `.in` y vuelva a generarlos (necesita Docker; usa el Python de `.python-version`):
 
 ```bash
-deploy/gerar_lock.sh
+deploy/lock.sh
 ```
 
-El CI ejecuta `deploy/gerar_lock.sh --verificar` y falla mientras un lock no coincida con su `.in`. Dependabot actualiza los dos archivos en sus pull requests, incluidas las bibliotecas indirectas.
+El CI ejecuta `deploy/lock.sh --check` y falla mientras un lock no coincida con su `.in`. Dependabot actualiza los dos archivos en sus pull requests, incluidas las bibliotecas indirectas.
 
 Los locks se resuelven para Linux, donde se ejecuta el sistema. En Windows, `pip install` los rechaza (un paquete que solo Windows necesita, como `colorama`, no tiene hash en ellos): desarrolle en Docker ([Inicio rápido](quick-start.md)) o en WSL.
 

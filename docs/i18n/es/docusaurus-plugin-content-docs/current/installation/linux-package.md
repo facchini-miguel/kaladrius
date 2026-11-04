@@ -17,7 +17,7 @@ La forma más simple de instalar Kaladrius en un servidor de la clínica o en un
 | Rocky Linux, AlmaLinux, Red Hat Enterprise Linux | `.rpm` | agregue antes el [repositorio de Docker](https://docs.docker.com/engine/install/rhel/) (abajo) |
 | Debian 12, Ubuntu 22.04 | `.deb` | su Docker Compose es demasiado antiguo: instale antes los [paquetes del propio Docker](https://docs.docker.com/engine/install/debian/) |
 
-Solo procesadores Intel y AMD de 64 bits (`amd64` / `x86_64`). El servidor necesita los puertos **80** y **443** libres: Kaladrius trae su propio servidor web, Caddy, con HTTPS. Con un firewall activo (firewalld en Fedora, Rocky, AlmaLinux y openSUSE; ufw en Ubuntu), `kaladrius configurar` abre los dos. Memoria y disco: vea [Requisitos](requirements.md).
+Solo procesadores Intel y AMD de 64 bits (`amd64` / `x86_64`). El servidor necesita los puertos **80** y **443** libres: Kaladrius trae su propio servidor web, Caddy, con HTTPS. Con un firewall activo (firewalld en Fedora, Rocky, AlmaLinux y openSUSE; ufw en Ubuntu), `kaladrius configure` abre los dos. Memoria y disco: vea [Requisitos](requirements.md).
 
 En Rocky Linux, AlmaLinux y Red Hat Enterprise Linux:
 
@@ -60,7 +60,7 @@ El repositorio y sus paquetes `.rpm` están firmados con la [clave](https://pack
 En Debian y Ubuntu las preguntas aparecen enseguida, en el idioma del servidor (portugués, español o inglés). Con `dnf` y `zypper`, ejecútelas usted mismo después:
 
 ```bash
-sudo kaladrius configurar
+sudo kaladrius configure
 ```
 
 ### Con un paquete descargado
@@ -86,7 +86,7 @@ En Arch Linux y CachyOS, que el repositorio no atiende, o para elegir la versió
    sudo pacman -Syu && sudo pacman -U ./kaladrius-0.54.0-1-x86_64.pkg.tar.zst   # Arch Linux, CachyOS
    ```
 
-   En Debian y Ubuntu las preguntas aparecen enseguida; con `dnf`, `zypper` y `pacman`, ejecute `sudo kaladrius configurar` después.
+   En Debian y Ubuntu las preguntas aparecen enseguida; con `dnf`, `zypper` y `pacman`, ejecute `sudo kaladrius configure` después.
 
 Un paquete descargado no está firmado: `dnf` y `zypper` lo avisan ("skipped OpenPGP checks", "unsigned rpm"). Lo que prueba que el archivo es el publicado es la verificación de `SHA256SUMS` de arriba; las actualizaciones que llegan después por el repositorio están firmadas.
 
@@ -99,14 +99,14 @@ Un paquete descargado no está firmado: `dnf` y `zypper` lo avisan ("skipped Ope
 
 Después el sistema se descarga y se inicia (unos minutos la primera vez), y la última pantalla muestra la dirección para abrir en el navegador. Ingrese con el administrador y siga los [Primeros pasos](../first-steps.md): los datos de la clínica se completan allí.
 
-Para cambiar la dirección después (una IP nueva, o pasar de la red interna a un dominio), ejecute `sudo kaladrius configurar` de nuevo: contraseñas, claves y datos se mantienen.
+Para cambiar la dirección después (una IP nueva, o pasar de la red interna a un dominio), ejecute `sudo kaladrius configure` de nuevo: contraseñas, claves y datos se mantienen.
 
 ## Red interna: el certificado
 
 En la red interna el certificado HTTPS lo emite la propia instalación, así que, hasta que las computadoras de la clínica confíen en él, el navegador muestra un aviso de seguridad. Exporte el certificado una vez:
 
 ```bash
-sudo kaladrius certificado        # guarda kaladrius-certificado.crt en la carpeta actual
+sudo kaladrius certificate        # guarda kaladrius-certificate.crt en la carpeta actual
 ```
 
 Copie ese archivo (en un pendrive, por ejemplo) a cada computadora de la clínica e instálelo:
@@ -115,7 +115,7 @@ Copie ese archivo (en un pendrive, por ejemplo) a cada computadora de la clínic
 |---|---|
 | Windows | doble clic en el archivo > **Instalar certificado** > **Equipo local** > **Colocar todos los certificados en el siguiente almacén** > **Entidades de certificación raíz de confianza** |
 | macOS | doble clic > **Acceso a Llaveros**, llavero **Sistema**; luego abra el certificado, **Confiar** > **Confiar siempre** |
-| Linux | `sudo cp kaladrius-certificado.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates` |
+| Linux | `sudo cp kaladrius-certificate.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates` |
 | Firefox (cualquier sistema) | **Ajustes** > **Privacidad y seguridad** > **Certificados** > **Ver certificados** > **Autoridades** > **Importar** |
 | Android, iPhone | envíe el archivo al dispositivo y ábralo; en el iPhone, después actívelo en **Ajustes** > **General** > **Información** > **Ajustes de confianza de certificados** |
 
@@ -123,32 +123,32 @@ El certificado es solo de esta instalación. Sigue siendo el mismo cuando cambia
 
 ## Instalación por un técnico (sin preguntas)
 
-Con todas las opciones y la contraseña del administrador en `KALADRIUS_SENHA_ADMIN`, `configurar` no pregunta nada. `read -rs` deja la contraseña fuera del historial de la terminal:
+Con todas las opciones y la contraseña del administrador en `KALADRIUS_ADMIN_PASSWORD`, `configure` no pregunta nada. `read -rs` deja la contraseña fuera del historial de la terminal:
 
 ```bash
 sudo DEBIAN_FRONTEND=noninteractive apt install -y ./kaladrius_0.54.0-1_amd64.deb
-read -rs KALADRIUS_SENHA_ADMIN && export KALADRIUS_SENHA_ADMIN
-sudo --preserve-env=KALADRIUS_SENHA_ADMIN kaladrius configurar \
-  --acesso rede-interna --endereco 192.168.0.10 --usuario admin --email ti@clinica.ejemplo
+read -rs KALADRIUS_ADMIN_PASSWORD && export KALADRIUS_ADMIN_PASSWORD
+sudo --preserve-env=KALADRIUS_ADMIN_PASSWORD kaladrius configure \
+  --access internal-network --address 192.168.0.10 --user admin --email ti@clinica.ejemplo
 ```
 
-`--acesso` es `rede-interna` (red interna) o `internet`; con `internet`, `--endereco` es el dominio. Ante un error (una dirección inválida, una contraseña rechazada) se detiene con el motivo y un código de salida distinto de cero.
+`--access` es `internal-network` (red interna) o `internet`; con `internet`, `--address` es el dominio. Ante un error (una dirección inválida, una contraseña rechazada) se detiene con el motivo y un código de salida distinto de cero.
 
-Para instalar un paquete descargado sin agregar el repositorio de paquetes (un servidor actualizado a mano, por ejemplo): `sudo KALADRIUS_SEM_REPOSITORIO=1 apt install ./kaladrius_….deb` (o `dnf install`). La elección queda guardada en `/opt/kaladrius/sem-repositorio`, y los paquetes siguientes tampoco lo agregan.
+Para instalar un paquete descargado sin agregar el repositorio de paquetes (un servidor actualizado a mano, por ejemplo): `sudo KALADRIUS_NO_REPOSITORY=1 apt install ./kaladrius_….deb` (o `dnf install`). La elección queda guardada en `/opt/kaladrius/no-repository`, y los paquetes siguientes tampoco lo agregan.
 
 ## Comandos del día a día
 
 | Comando | Qué hace |
 |---|---|
-| `sudo kaladrius estado` | dirección, versión y estado de los servicios |
-| `sudo kaladrius saude` | procesador, memoria, disco, las últimas copias y las tareas programadas |
+| `sudo kaladrius status` | dirección, versión y estado de los servicios |
+| `sudo kaladrius health` | procesador, memoria, disco, las últimas copias y las tareas programadas |
 | `sudo kaladrius backup` | hace una copia de seguridad ahora |
-| `sudo kaladrius testar-restauracao` | restaura la copia más nueva en una base descartable y la verifica |
-| `sudo kaladrius certificado [ARCHIVO]` | el certificado para las computadoras de la red interna |
-| `sudo kaladrius senha [USUARIO]` | cambia la contraseña de un usuario (la del administrador si no se indica) |
+| `sudo kaladrius test-restore` | restaura la copia más nueva en una base descartable y la verifica |
+| `sudo kaladrius certificate [ARCHIVO]` | el certificado para las computadoras de la red interna |
+| `sudo kaladrius password [USUARIO]` | cambia la contraseña de un usuario (la del administrador si no se indica) |
 | `sudo kaladrius logs [app\|db\|caddy]` | los registros de los servicios (Ctrl+C para salir) |
-| `sudo kaladrius reiniciar` | reinicia los servicios, aplicando los cambios de `/opt/kaladrius/.env` |
-| `sudo kaladrius parar` / `iniciar` | detiene o inicia el sistema; los datos se mantienen |
+| `sudo kaladrius restart` | reinicia los servicios, aplicando los cambios de `/opt/kaladrius/.env` |
+| `sudo kaladrius stop` / `start` | detiene o inicia el sistema; los datos se mantienen |
 | `kaladrius ayuda` | la lista de comandos |
 
 ## Copias de seguridad
@@ -159,7 +159,7 @@ Todos los días a las 06:00 UTC la base se guarda en `/var/backups/kaladrius`, y
 Una copia en el mismo disco no sobrevive a la pérdida del disco. Copie `/var/backups/kaladrius` todos los días a otra computadora, un disco externo o un almacenamiento en la nube (por ejemplo con `rclone`). Los archivos tienen datos de pacientes: guárdelos en un lugar privado y cifrado.
 :::
 
-La carpeta y la cantidad de días son `KALADRIUS_BACKUP_PASTA` y `KALADRIUS_BACKUP_DIAS` en `/opt/kaladrius/.env`. Para restaurar una copia, vea [Copia de seguridad y restauración](../operations/backup-restore.md#paquete-linux).
+La carpeta y la cantidad de días son `KALADRIUS_BACKUP_DIR` y `KALADRIUS_BACKUP_DAYS` en `/opt/kaladrius/.env`. Para restaurar una copia, vea [Copia de seguridad y restauración](../operations/backup-restore.md#paquete-linux).
 
 ## Actualizaciones
 
@@ -170,11 +170,13 @@ Haga una copia antes (`sudo kaladrius backup`) y después:
 
 El sistema se reinicia en la versión nueva; las migraciones de la base se ejecutan solas.
 
-**Vuelta automática:** si la versión nueva no responde en 5 minutos, la anterior vuelve sola, con su archivo de Compose y su Caddyfile, y sigue en marcha, y `sudo kaladrius estado` muestra el aviso. `sudo kaladrius reiniciar`, `parar` e `iniciar` la mantienen en la versión anterior; instalar el paquete de nuevo (`sudo apt install --reinstall kaladrius`, `sudo dnf reinstall kaladrius`, `sudo zypper install -f kaladrius` o el archivo descargado) intenta otra vez la nueva.
+**Desde la 0.55.0 los nombres están en inglés** (decisión 147): los comandos (`configure`, `status`, `health`, `test-restore`, `certificate`, `password`, `restart`, `stop`, `start`), las opciones (`--access internal-network`, `--address`, `--user`), las variables del `.env` (`KALADRIUS_ACCESS`, `KALADRIUS_BACKUP_DIR`, `KALADRIUS_BACKUP_DAYS`, `MONITOR_UPDATE_URL`…) y las tareas programadas (`kaladrius-health`, `kaladrius-restore-test`). Actualizar desde la 0.54 o anterior los cambia solo, guardando el `.env` antiguo como `/opt/kaladrius/.env.before-147`, y los nombres antiguos de los comandos siguen funcionando.
+
+**Vuelta automática:** si la versión nueva no responde en 5 minutos, la anterior vuelve sola, con su archivo de Compose y su Caddyfile, y sigue en marcha, y `sudo kaladrius status` muestra el aviso. `sudo kaladrius restart`, `stop` y `start` la mantienen en la versión anterior; instalar el paquete de nuevo (`sudo apt install --reinstall kaladrius`, `sudo dnf reinstall kaladrius`, `sudo zypper install -f kaladrius` o el archivo descargado) intenta otra vez la nueva.
 
 ## Correo y monitoreo (opcionales)
 
-El archivo `/opt/kaladrius/.env` tiene la configuración de correo para la recuperación de contraseña (`DJANGO_EMAIL_*`, vea [Configuración](../configuration.md)) y acepta las direcciones del monitor externo (`MONITOR_*_URL`, vea [Monitoreo](../operations/monitoring.md)). Después de editarlo: `sudo kaladrius reiniciar`.
+El archivo `/opt/kaladrius/.env` tiene la configuración de correo para la recuperación de contraseña (`DJANGO_EMAIL_*`, vea [Configuración](../configuration.md)) y acepta las direcciones del monitor externo (`MONITOR_*_URL`, vea [Monitoreo](../operations/monitoring.md)). Después de editarlo: `sudo kaladrius restart`.
 
 ## Desinstalar
 

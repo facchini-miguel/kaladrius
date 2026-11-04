@@ -7,7 +7,7 @@ sidebar_position: 3
 ## Principio multiclínica
 - Toda información de una clínica tiene una clave `clinica`. Ninguna consulta se hace sin filtrar por la clínica actual.
 - El filtro se aplica de forma centralizada (middleware + managers), no a mano en cada pantalla.
-- **Falla cerrada:** todo modelo de la clínica hereda de `ModeloDaClinica` (`apps/core/isolamento.py`). El manager por defecto filtra por la clínica actual y, si no hay clínica definida, **da error en lugar de mostrar datos**. El filtro se decide **cuando la consulta se ejecuta** (no cuando se arma), lo que permite declarar campos de formulario con datos de la clínica. Guardar o eliminar un registro de otra clínica también da error. El código de la plataforma que necesita ver todas las clínicas (admin de Django, comandos) usa `sem_isolamento()` de forma explícita.
+- **Falla cerrada:** todo modelo de la clínica hereda de `ModeloDaClinica` (`apps/core/isolation.py`). El manager por defecto filtra por la clínica actual y, si no hay clínica definida, **da error en lugar de mostrar datos**. El filtro se decide **cuando la consulta se ejecuta** (no cuando se arma), lo que permite declarar campos de formulario con datos de la clínica. Guardar o eliminar un registro de otra clínica también da error. El código de la plataforma que necesita ver todas las clínicas (admin de Django, comandos) usa `sem_isolamento()` de forma explícita.
 - La clínica actual viene de la sesión y solo se acepta si el usuario tiene un vínculo activo con ella (o es superusuario). El admin de Django está restringido a los superusuarios de la plataforma.
 - Las tablas de referencia públicas (estado, ciudad, banco, estado civil) son **globales**, compartidas entre las clínicas.
 
@@ -28,7 +28,7 @@ sidebar_position: 3
 | Recepción | — | Agenda, pacientes, recordatorios, cumpleaños |
 | Profesional | — | Agenda y pacientes. Ve y modifica **solo su propia agenda**: la del registro de profesional vinculado a su usuario en Registros > Profesionales (decisión 044). Sin registro vinculado, la agenda queda vacía, con un aviso |
 
-Cada perfil recibe los permisos `ver`, `crear`, `modificar` y `eliminar` por módulo. La matriz está en `apps/core/permissoes.py` y vale tanto en el servidor (la solicitud se bloquea) como en la pantalla (botones y menús desaparecen).
+Cada perfil recibe los permisos `ver`, `crear`, `modificar` y `eliminar` por módulo. La matriz está en `apps/core/permissions.py` y vale tanto en el servidor (la solicitud se bloquea) como en la pantalla (botones y menús desaparecen).
 
 | Módulo | Administrador | Recepción | Profesional |
 |---|---|---|---|
@@ -99,7 +99,7 @@ En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los 
 - La superposición se verifica en el formulario (con un mensaje que dice con quién es el conflicto) **y** por una *exclusion constraint* de PostgreSQL (`btree_gist`), que vale incluso con dos personas guardando al mismo tiempo. Las citas **canceladas** (0.24) quedan fuera de ambas verificaciones: siguen en el historial, pero liberan el horario.
 
 ## Auditoría (LGPD)
-- `RegistroAuditoria` (`apps/auditoria`) guarda **quién**, **cuándo**, **desde qué IP**, **qué acción** y, en los cambios, el **antes y después** de cada campo.
+- `RegistroAuditoria` (`apps/audit`) guarda **quién**, **cuándo**, **desde qué IP**, **qué acción** y, en los cambios, el **antes y después** de cada campo.
 - Se registra automáticamente (señales de Django): crear, modificar y eliminar Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo y Usuario. También: abrir la ficha de un paciente, entrar, salir e intentos de acceso rechazados.
 - **Nunca** guarda contraseñas ni su hash (el cambio de contraseña aparece solo como "cambiada").
 - Los registros guardan los códigos de clínica y usuario sin clave foránea rígida: el historial sobrevive a la eliminación de un usuario o una clínica. No se pueden editar ni eliminar (admin de solo lectura), con una excepción: los intentos de acceso rechazados, que guardan el usuario escrito, se eliminan después de 30 días con el comando `aplicar_retencao`, que el servidor ejecuta todos los días junto con la copia de seguridad (decisión 045). En las copias, duran 30 días más. En la eliminación definitiva de un paciente, sus registros pierden los datos personales (ver abajo).
@@ -115,11 +115,11 @@ Muestra identificación, contacto, observaciones, las próximas y las últimas 1
 ## Pacientes inactivos, archivados y eliminados (versión 0.9.0)
 - **Inactivo:** dejó de venir, pero sigue visible para todo el equipo (filtro "Inactivos"). No aparece en los cumpleaños.
 - **Archivado** (reemplaza el "eliminar" del día a día, decisión 046): el paciente sale de las listas, la búsqueda, la agenda (sugerencias), los cumpleaños y los recordatorios del equipo. No se borra nada: citas, recordatorios y auditoría se conservan, y las citas antiguas siguen mostrando el nombre. Solo el administrador de la clínica archiva, ve los archivados (lista de pacientes, Situación: Archivados) y restaura. El CPF/CNPJ de un archivado sigue reservado; la pantalla avisa que hay que pedir la restauración.
-- **Eliminado definitivamente:** solo a partir de un paciente archivado, por el administrador, cuando el propio paciente pide la eliminación de sus datos (LGPD, art. 18). El registro y los recordatorios se eliminan, las citas quedan sin el paciente, y los registros de auditoría del paciente, de sus citas y recordatorios pierden los datos personales (`apps/auditoria/registro.py`, `anonimizar`): quedan quién, qué, cuándo, el código y los nombres de los campos. La pantalla recuerda que la clínica puede estar obligada a guardar la historia clínica (Ley 13.787/2018).
+- **Eliminado definitivamente:** solo a partir de un paciente archivado, por el administrador, cuando el propio paciente pide la eliminación de sus datos (LGPD, art. 18). El registro y los recordatorios se eliminan, las citas quedan sin el paciente, y los registros de auditoría del paciente, de sus citas y recordatorios pierden los datos personales (`apps/audit/record.py`, `anonimizar`): quedan quién, qué, cuándo, el código y los nombres de los campos. La pantalla recuerda que la clínica puede estar obligada a guardar la historia clínica (Ley 13.787/2018).
 
 ## Documentos y formatos
-- CPF, CNPJ, teléfonos y CEP se guardan **sin puntuación** y se formatean solo al mostrarlos (filtros en `apps/core/templatetags/formatos.py`). Desde la 0.48.0, los campos `cpf_cnpj`, `cpf` y `Clinica.documento` mantienen el nombre pero guardan el documento del país de la clínica, con hasta 20 caracteres (reglas en `apps/core/identificacao.py`, decisión 121).
-- El CNPJ acepta el **formato alfanumérico** de la Receita Federal (vigente desde julio de 2026: letras en las 12 primeras posiciones, dígitos verificadores numéricos). Validación en `apps/core/validadores.py`.
+- CPF, CNPJ, teléfonos y CEP se guardan **sin puntuación** y se formatean solo al mostrarlos (filtros en `apps/core/templatetags/formats.py`). Desde la 0.48.0, los campos `cpf_cnpj`, `cpf` y `Clinica.documento` mantienen el nombre pero guardan el documento del país de la clínica, con hasta 20 caracteres (reglas en `apps/core/identification.py`, decisión 121).
+- El CNPJ acepta el **formato alfanumérico** de la Receita Federal (vigente desde julio de 2026: letras en las 12 primeras posiciones, dígitos verificadores numéricos). Validación en `apps/core/validators.py`.
 - El CPF/CNPJ es opcional (niños, por ejemplo), pero **único dentro de la clínica** cuando se informa.
 
 ## Diferencias intencionales con el sistema antiguo

@@ -1,4 +1,4 @@
-"""Server health page (0.22.0): samples from deploy/servidor/saude.sh."""
+"""Server health page (0.22.0): samples from deploy/server/health.sh."""
 
 import datetime
 import json
@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.core.models import Papel
-from apps.monitoramento import saude
+from apps.monitoring import health
 
 pytestmark = pytest.mark.django_db
 MB = 2**20
@@ -46,7 +46,7 @@ def pasta(tmp_path, settings):
     settings.SAUDE_MONITORADA = True
 
     def gravar(*linhas):
-        (tmp_path / saude.ARQUIVO).write_text("\n".join(linhas) + "\n", encoding="utf-8")
+        (tmp_path / health.ARQUIVO).write_text("\n".join(linhas) + "\n", encoding="utf-8")
 
     return gravar
 
@@ -59,35 +59,35 @@ def superusuario(client, django_user_model):
 
 def test_le_amostras_ignora_linha_cortada_e_calcula_percentuais(pasta):
     pasta(amostra(10, disponivel=250, swap_livre=750), '{"momento": "2026-10-27T1')
-    (lida,) = saude.amostras()
+    (lida,) = health.amostras()
     assert (lida["memoria_pct"], lida["swap_pct"]) == (75, 25)
     assert round(lida["disco_pct"]) == 17
-    assert saude.ultima()["memoria_pct"] == 75
+    assert health.ultima()["memoria_pct"] == 75
 
 
 def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
     pasta(amostra(10, rede=0), amostra(5, rede=300_000), amostra(0, rede=1000))  # reboot
-    lista = saude.com_rede(saude.amostras())
+    lista = health.com_rede(health.amostras())
     assert lista[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
     assert lista[2]["rede_entrada"] is None
-    assert saude.resumo(lista)["recebido"] == pytest.approx(300_000, rel=0.01)
+    assert health.resumo(lista)["recebido"] == pytest.approx(300_000, rel=0.01)
 
 
 def test_niveis_e_coleta_parada(pasta):
     pasta(amostra(30, disponivel=30, swap_livre=400, disco=28))
-    ultima = saude.ultima()
-    assert saude.niveis(ultima) == {
+    ultima = health.ultima()
+    assert health.niveis(ultima) == {
         "cpu": "ok",
         "memoria": "critico",
         "swap": "atencao",
         "disco": "critico",
     }
-    assert saude.parada(ultima)
+    assert health.parada(ultima)
 
 
 def test_grafico_quebra_a_linha_na_lacuna(pasta):
     pasta(amostra(120), amostra(115), amostra(10), amostra(5))
-    svg = saude.grafico(saude.amostras(), [("cpu", "linha-1")], maximo=100)
+    svg = health.grafico(health.amostras(), [("cpu", "linha-1")], maximo=100)
     assert svg.count("<polyline") == 2
 
 
@@ -99,7 +99,7 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
     assert pagina.status_code == 200
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "Nenhum backup registrado" in conteudo
-    assert "Maiores tabelas" not in conteudo and "saude.sh" not in conteudo
+    assert "Maiores tabelas" not in conteudo and "health.sh" not in conteudo
 
 
 def test_tela_com_amostras(pasta, superusuario):
@@ -150,23 +150,23 @@ def test_comando_resume_as_24_horas(pasta):
 
 def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
     pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
-    lista = saude.com_rede(saude.amostras())
+    lista = health.com_rede(health.amostras())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
-    assert saude.topo_da_escala(lista, [("cpu", "linha-1")], piso=10) == 10
-    assert saude.topo_da_escala(lista, [("cpu", "linha-1")], maximo=100) == 100
+    assert health.topo_da_escala(lista, [("cpu", "linha-1")], piso=10) == 10
+    assert health.topo_da_escala(lista, [("cpu", "linha-1")], maximo=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
-    svg = saude.grafico(lista, [("rede_entrada", "linha-1")])
+    svg = health.grafico(lista, [("rede_entrada", "linha-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = saude.grafico(lista, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
+    svg = health.grafico(lista, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
     assert svg.rindex("linha-1") > svg.rindex("linha-2")
 
 
 def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     pasta(amostra(10), amostra(5))
     agora = timezone.now()
-    svg = saude.grafico(
-        saude.amostras(),
+    svg = health.grafico(
+        health.amostras(),
         [("cpu", "linha-1")],
         inicio=agora - datetime.timedelta(hours=1),
         fim=agora,

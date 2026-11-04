@@ -6,12 +6,12 @@ import pytest
 from django.template import Context, Template
 from django.urls import reverse
 
-from apps.core import identificacao, paises
-from apps.core.isolamento import usar_clinica
+from apps.core import countries, identification
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro.models import Fornecedor
-from apps.pacientes.models import Paciente
-from apps.pessoal.models import Funcionario
+from apps.finance.models import Fornecedor
+from apps.patients.models import Paciente
+from apps.staff.models import Funcionario
 from tests.test_core import dados_clinica
 from tests.test_countries import no_pais
 
@@ -27,18 +27,18 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 
 def test_todo_pais_tem_seus_documentos():
-    assert identificacao.DOCUMENTOS.keys() == paises.PAISES.keys()
-    for codigo, documentos in identificacao.DOCUMENTOS.items():
+    assert identification.DOCUMENTOS.keys() == countries.PAISES.keys()
+    for codigo, documentos in identification.DOCUMENTOS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
         assert documentos.empresa is not None, codigo
         assert documentos.registro_profissional, codigo
 
 
 def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
-    for codigo, documentos in identificacao.DOCUMENTOS.items():
+    for codigo, documentos in identification.DOCUMENTOS.items():
         if codigo == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
-        for documento in documentos.de(*identificacao.PAPEIS):
+        for documento in documentos.de(*identification.PAPEIS):
             compacto = documento.normalizar(documento.exemplo)
             assert documento.valido(compacto), (codigo, documento.sigla)
             assert documento.escrever(compacto) in (documento.exemplo, compacto), documento.sigla
@@ -78,9 +78,9 @@ def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
     ],
 )
 def test_documento_valido_e_escrito_do_jeito_do_pais(pais, papel, digitado, escrito):
-    documento = identificacao.do_pais(pais).do_papel(papel)
-    guardado = identificacao.limpar(digitado, [documento], documento.sigla)
-    assert identificacao.escrever(guardado, (papel,), pais) == escrito
+    documento = identification.do_pais(pais).do_papel(papel)
+    guardado = identification.limpar(digitado, [documento], documento.sigla)
+    assert identification.escrever(guardado, (papel,), pais) == escrito
 
 
 @pytest.mark.parametrize(
@@ -103,22 +103,22 @@ def test_documento_valido_e_escrito_do_jeito_do_pais(pais, papel, digitado, escr
     ],
 )
 def test_documento_invalido_e_recusado(pais, papel, digitado):
-    documento = identificacao.do_pais(pais).do_papel(papel)
-    with pytest.raises(identificacao.ValidationError, match="número inválido"):
-        identificacao.limpar(digitado, [documento], documento.sigla)
+    documento = identification.do_pais(pais).do_papel(papel)
+    with pytest.raises(identification.ValidationError, match="número inválido"):
+        identification.limpar(digitado, [documento], documento.sigla)
 
 
 def test_valor_que_nao_e_documento_do_pais_fica_como_esta():
     # A CPF kept from when the clinic was Brazilian, now in the United States.
-    assert identificacao.escrever("52998224725", None, "US") == "52998224725"
-    assert identificacao.sigla("52998224725", ("pessoa", "empresa"), "US") == "EIN"
-    assert identificacao.sigla("", ("paciente", "empresa"), "GB") == "NHS number/Company number"
+    assert identification.escrever("52998224725", None, "US") == "52998224725"
+    assert identification.sigla("52998224725", ("pessoa", "empresa"), "US") == "EIN"
+    assert identification.sigla("", ("paciente", "empresa"), "GB") == "NHS number/Company number"
 
 
 def test_filtros_dos_templates(clinica_a):
     no_pais(clinica_a, "AR")
     template = Template(
-        '{% load formatos %}{{ a|documento:"paciente" }} · {{ b|documento }} · '
+        '{% load formats %}{{ a|documento:"paciente" }} · {{ b|documento }} · '
         '{{ b|sigla_documento:"empresa" }} · {% rotulo_documento "paciente" "empresa" %}'
     )
     with usar_clinica(clinica_a):

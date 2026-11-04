@@ -4,11 +4,11 @@ import pytest
 from django.template import Context, Template
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.core.validadores import cnpj_valido, cpf_valido
-from apps.pacientes.models import Paciente
-from apps.referencias.models import Cidade
+from apps.core.validators import cnpj_valido, cpf_valido
+from apps.patients.models import Paciente
+from apps.reference_data.models import Cidade
 
 pytestmark = pytest.mark.django_db
 
@@ -68,7 +68,7 @@ def test_validacao_de_cnpj_numerico_e_alfanumerico(valor, esperado):
 
 def test_filtros_de_formatacao():
     template = Template(
-        "{% load formatos %}{{ a|documento }} {{ b|documento }} "
+        "{% load formats %}{{ a|documento }} {{ b|documento }} "
         "{{ c|telefone }} {{ d|telefone }} {{ e|cep }}"
     )
     contexto = Context(
@@ -298,13 +298,13 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     # Decision 075: the administrator first receives or cancels the open entries.
     from decimal import Decimal
 
-    from apps.financeiro import servicos
-    from apps.financeiro.models import Categoria, Conta, Lancamento
+    from apps.finance import services
+    from apps.finance.models import Categoria, Conta, Lancamento
 
     paciente = criar_paciente(clinica_a, nome="Paciente Devedor")
     usuario = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
-        lancamento = servicos.criar_lancamento(
+        lancamento = services.criar_lancamento(
             clinica=clinica_a,
             tipo=Lancamento.Tipo.RECEBER,
             descricao="Tratamento",
@@ -328,7 +328,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
 
     def receber(parcela):
         with usar_clinica(clinica_a):
-            servicos.receber(
+            services.receber(
                 parcela,
                 usuario=usuario,
                 valor=Decimal("150"),

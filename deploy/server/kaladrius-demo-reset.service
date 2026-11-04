@@ -1,0 +1,7 @@
+[Unit]
+Description=Kaladrius: reset the public demo (only with DJANGO_DEMONSTRACAO=1)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/reset_demo.sh

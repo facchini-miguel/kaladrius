@@ -7,10 +7,10 @@ import pytest
 from django.urls import reverse
 from django.utils import translation
 
-from apps.core.isolamento import usar_clinica
-from apps.core.paises import PAISES
-from apps.financeiro import formas, servicos
-from apps.financeiro.models import Pagamento
+from apps.core.countries import PAISES
+from apps.core.isolation import usar_clinica
+from apps.finance import payment_methods, services
+from apps.finance.models import Pagamento
 from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
 
 pytestmark = pytest.mark.django_db
@@ -23,8 +23,8 @@ def mudar_pais(dados, pais):
 
 
 def test_cada_pais_tem_as_suas_formas():
-    assert set(formas.FORMAS) == set(PAISES)
-    for pais, do_pais in formas.FORMAS.items():
+    assert set(payment_methods.FORMAS) == set(PAISES)
+    for pais, do_pais in payment_methods.FORMAS.items():
         assert len(set(do_pais.codigos)) == len(do_pais.codigos), pais
         assert set(do_pais.codigos) <= set(Pagamento.Forma.values), pais
         assert {"dinheiro", "credito", "transferencia"} <= set(do_pais.codigos), pais
@@ -33,11 +33,11 @@ def test_cada_pais_tem_as_suas_formas():
 
 def test_nomes_locais_entre_parenteses():
     with translation.override("pt-br"):
-        assert formas.rotulo("transferencia", "MX") == "Transferência (SPEI)"
-        assert formas.rotulo("carteira", "PE") == "Carteira digital (Yape, Plin)"
-        assert formas.rotulo("transferencia", "BR") == "Transferência"
+        assert payment_methods.rotulo("transferencia", "MX") == "Transferência (SPEI)"
+        assert payment_methods.rotulo("carteira", "PE") == "Carteira digital (Yape, Plin)"
+        assert payment_methods.rotulo("transferencia", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
-        assert [codigo for codigo, _nome in formas.em_uso("BR")] == [
+        assert [codigo for codigo, _nome in payment_methods.em_uso("BR")] == [
             "dinheiro",
             "pix",
             "debito",
@@ -47,18 +47,18 @@ def test_nomes_locais_entre_parenteses():
         ]
     with translation.override("en"):
         # The local name is not repeated when it is the translated name itself.
-        assert formas.rotulo("debito_auto", "GB") == "Direct debit"
-        assert formas.rotulo("debito_auto", "ZA") == "Direct debit (debit order)"
+        assert payment_methods.rotulo("debito_auto", "GB") == "Direct debit"
+        assert payment_methods.rotulo("debito_auto", "ZA") == "Direct debit (debit order)"
 
 
 def test_cheque_com_a_grafia_de_cada_ingles():
     with translation.override("en"):
-        assert formas.rotulo("cheque", "US") == "Check"
+        assert payment_methods.rotulo("cheque", "US") == "Check"
     for variante in ("en-gb", "en-ca", "en-au", "en-za"):
         with translation.override(variante):
-            assert formas.rotulo("cheque", "GB") == "Cheque", variante
+            assert payment_methods.rotulo("cheque", "GB") == "Cheque", variante
     with translation.override("es"):
-        assert formas.rotulo("cheque", "MX") == "Cheque"
+        assert payment_methods.rotulo("cheque", "MX") == "Cheque"
 
 
 def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
@@ -76,7 +76,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     with usar_clinica(cenario["clinica"]), translation.override("pt-br"):
         pagamento = Pagamento.objects.get()
         assert pagamento.get_forma_display() == "Carteira digital (Yape, Plin)"
-        relatorio = servicos.relatorio(HOJE, HOJE)
+        relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
     nova = admin.get(reverse("financeiro:lancamento_novo")).content.decode()
     assert 'value="carteira"' in nova and 'value="pix"' not in nova
@@ -137,7 +137,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     with usar_clinica(cenario["clinica"]), translation.override("pt-br"):
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
             usuario=cenario["admin"],
             valor=Decimal("100"),
@@ -146,4 +146,4 @@ def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noq
         )
         mudar_pais(cenario, "US")
         assert pagamento.get_forma_display() == "Pix"
-        assert servicos.relatorio(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]
+        assert services.relatorio(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]

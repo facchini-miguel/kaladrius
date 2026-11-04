@@ -10,10 +10,10 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from . import painel
+from . import dashboard
 from .forms import ClinicaForm, NovaClinicaForm, TrocaSenhaForm
 from .models import Clinica
-from .permissoes import Acao, Modulo, exige_permissao
+from .permissions import Acao, Modulo, exige_permissao
 
 
 def _saudacao():
@@ -29,7 +29,7 @@ def _saudacao():
 def inicio(request):
     contexto = {"saudacao": _saudacao()}
     if request.clinica is not None:
-        contexto["painel"] = painel.montar(request)
+        contexto["painel"] = dashboard.montar(request)
     return render(request, "core/home.html", contexto)
 
 

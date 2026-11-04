@@ -43,5 +43,5 @@ htmlcov/
 *.ofx
 *.OFX
 
-# Linux packages built by deploy/pacote/gerar.sh
+# Linux packages built by deploy/package/build.sh
 dist/

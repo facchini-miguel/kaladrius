@@ -10,7 +10,7 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.core.forms import ClinicaForm
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import (
     ESPECIALIDADES,
     MODULOS_GERAIS,
@@ -19,11 +19,11 @@ from apps.core.models import (
     ModuloDaClinica,
     Papel,
 )
-from apps.core.modulos import configurar
-from apps.core.templatetags.formatos import whatsapp
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
+from apps.core.modules import configurar
+from apps.core.templatetags.formats import whatsapp
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
 
 pytestmark = pytest.mark.django_db
 

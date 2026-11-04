@@ -55,7 +55,7 @@ Regla: **no usar dependencias GPL/AGPL**, para mantener libre la elección de li
 
 ## Ayuda (versión 0.14.0, decisión 050)
 - Menú **Ayuda** con el **manual del usuario** (`docs/<idioma>/manual/`, para todo el equipo, en el idioma del usuario), las **Novedades** y, solo para el superusuario, la **documentación técnica** (el resto de `docs/`, que describe la infraestructura).
-- Los archivos Markdown se convierten en HTML en el servidor (`apps/ajuda`). Los enlaces entre documentos se vuelven enlaces dentro del sistema; los demás archivos del repositorio apuntan a GitHub. Solo se abren archivos `.md` dentro de `docs/`.
+- Los archivos Markdown se convierten en HTML en el servidor (`apps/help`). Los enlaces entre documentos se vuelven enlaces dentro del sistema; los demás archivos del repositorio apuntan a GitHub. Solo se abren archivos `.md` dentro de `docs/`.
 
 ## Ejecución (Docker Compose)
 
@@ -65,7 +65,7 @@ Regla: **no usar dependencias GPL/AGPL**, para mantener libre la elección de li
 | `app` | Imagen construida en la máquina, código montado como volumen, servidor de desarrollo de Django (recarga al guardar) | Imagen de Artifact Registry con Gunicorn, accesible solo en `127.0.0.1:8000` |
 | `caddy` | — | caddy:2-alpine en la red del host: HTTPS automático (Let's Encrypt) y proxy hacia la app |
 
-En producción, solo la app recibe el `.env` completo; la base de datos recibe solo las variables de Postgres y Caddy, solo el nombre del sitio. Los nombres de los proyectos son distintos (`medical-system-dev` en local, `medical-system` en la VM), para que los dos nunca compartan contenedores ni volúmenes en la misma máquina. En los dos casos la app ejecuta las migraciones al iniciar y lee la configuración del `.env`. La copia de seguridad no es un servicio de Compose: un *timer* de systemd en la VM ejecuta `deploy/servidor/backup.sh` todos los días (`pg_dump` → Cloud Storage). Detalles en [despliegue.md](production.md).
+En producción, solo la app recibe el `.env` completo; la base de datos recibe solo las variables de Postgres y Caddy, solo el nombre del sitio. Los nombres de los proyectos son distintos (`medical-system-dev` en local, `medical-system` en la VM), para que los dos nunca compartan contenedores ni volúmenes en la misma máquina. En los dos casos la app ejecuta las migraciones al iniciar y lee la configuración del `.env`. La copia de seguridad no es un servicio de Compose: un *timer* de systemd en la VM ejecuta `deploy/server/backup.sh` todos los días (`pg_dump` → Cloud Storage). Detalles en [despliegue.md](production.md).
 
 ## Infraestructura
 
@@ -87,7 +87,7 @@ Regla: **solo recursos del free tier de Google Cloud** (decisión 020).
 - Protecciones nativas de Django activas (CSRF, escape de XSS, ORM parametrizado, encabezados de seguridad). `manage.py check --deploy` sin alertas.
 - Contraseñas con hash Argon2 y límite de intentos de acceso (django-axes: 5 errores por usuario + IP bloquean durante 1 hora). En IPv6 cuenta la red /48, y no la dirección, porque cambiar de dirección dentro de la propia red es trivial (decisión 041).
 - Sin recuperación de contraseña por correo (el servidor no envía correos): cada persona cambia su propia contraseña en el menú con su nombre, y el administrador de la clínica define una nueva en Registros > Equipo (decisión 042).
-- Registro de auditoría de cambios, consultas a fichas y accesos al sistema (`apps/auditoria`).
+- Registro de auditoría de cambios, consultas a fichas y accesos al sistema (`apps/audit`).
 - Detrás de Caddy, la IP real del cliente viene de `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), usada por django-axes y por la auditoría.
 - **Aislamiento por clínica** en todas las consultas, con pruebas automáticas que intentan acceder a datos de otra clínica.
 - Secretos solo en `.env` (fuera de Git) y en los *Secrets* de GitHub. Push protection activo.

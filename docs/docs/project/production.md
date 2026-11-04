@@ -44,13 +44,18 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 | Budget alert | R$ 5 (notifications at 10%, 50% and 100%) | Free |
 
 ## How the server works
-- `deploy/servidor/instalar.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
-- `deploy/servidor/atualizar.sh` (every 5 min): pulls the `latest` image; if it differs from the last one installed successfully (`/opt/kaladrius/imagem-instalada`), extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. If anything fails, the next run tries again. Migrations run when the app starts.
-- `deploy/servidor/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system; then deletes refused login attempts older than 30 days (`aplicar_retencao`). If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
-- `deploy/servidor/saude.sh --coletar` (every 5 min, since 0.22.0): reads processor, memory, swap, disk, network and load with Linux tools (`/proc`, `df`) and each container's memory and processor (`docker stats`), and appends a line to `/opt/kaladrius/saude/amostras.jsonl` (7 days kept, about 1.5 MB). The app reads that file, read-only, and shows **Administration > System health** to superusers, with a warning at the top of every screen if collection stops or memory, swap or disk reach the critical level. The app has no access to Docker. Without arguments, `saude.sh` prints a report in the terminal.
+- `deploy/server/install.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
+- `deploy/server/update.sh` (every 5 min): pulls the `latest` image; if it differs from the last one installed successfully (`/opt/kaladrius/installed-image`), extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. If anything fails, the next run tries again. Migrations run when the app starts.
+- `deploy/server/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system; then deletes refused login attempts older than 30 days (`aplicar_retencao`). If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
+- `deploy/server/health.sh --collect` (every 5 min, since 0.22.0): reads processor, memory, swap, disk, network and load with Linux tools (`/proc`, `df`) and each container's memory and processor (`docker stats`), and appends a line to `/opt/kaladrius/saude/amostras.jsonl` (7 days kept, about 1.5 MB). The app reads that file, read-only, and shows **Administration > System health** to superusers, with a warning at the top of every screen if collection stops or memory, swap or disk reach the critical level. The app has no access to Docker. Without arguments, `health.sh` prints a report in the terminal.
 - The production compose file reads its `${...}` variables from `.env`, linked next to it (`/opt/kaladrius/release/.env` → `../.env`). Only the app receives the whole file.
 - Settings and passwords: `/opt/kaladrius/.env` (root only). Local copy in `.env.producao`, ignored by Git.
 - No stored keys: the VM and CI use short-lived Google tokens.
+- **Names of decision 147 (0.55.0).** The scripts, scheduled tasks, state files and `.env` variables have English names. The first update to 0.55.0 is run by the server's previous `atualizar.sh`, which loads `deploy/servidor/comum.sh` from the new image: that bridge moves the server to the new names (`migrate_legacy_names` in `common.sh`; old units and scripts go to `/opt/kaladrius/legacy/`, the old `.env` stays as `.env.before-147`). The VM's startup script in its metadata is still the old `instalar.sh`, which keeps working through the same bridge and `bin/atualizar.sh` (a pointer to `update.sh`). Replace it, and the bridge can be deleted after the next update:
+  ```bash
+  gcloud compute instances add-metadata kaladrius --zone=us-east1-b \
+    --metadata-from-file startup-script=deploy/server/install.sh
+  ```
 
 ## Common tasks
 
@@ -65,11 +70,11 @@ sudo docker compose -f docker-compose.prod.yml logs -f app
 sudo docker compose -f docker-compose.prod.yml exec app python manage.py <command>
 
 # Update now / back up now
-sudo /opt/kaladrius/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/update.sh --force
 sudo /opt/kaladrius/bin/backup.sh
 
 # Server health: now, last 24 hours, containers and timers
-sudo /opt/kaladrius/bin/saude.sh
+sudo /opt/kaladrius/bin/health.sh
 
 # List backups (on your machine)
 gcloud storage ls -l gs://kaladrius-backups/
@@ -79,11 +84,11 @@ gcloud storage ls -l gs://kaladrius-backups/
 The normal way is to revert the commit (`git revert`) on a branch and merge it into `main` through a pull request (`main` takes nothing else, decision 141; the admin may push it straight, bypassing the ruleset): CI publishes a new image and the VM installs it within 5 minutes of the merge. In an emergency, an old image can be pinned on the VM (each version has an `X.Y.Z` tag that never moves, and each commit a tag with the first 12 characters of its SHA):
 
 ```bash
-sudo systemctl stop kaladrius-atualizar.timer   # otherwise the VM goes back to latest in 5 min
+sudo systemctl stop kaladrius-update.timer   # otherwise the VM goes back to latest in 5 min
 cd /opt/kaladrius/release
-sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
+sudo APP_IMAGE=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
   docker compose -f docker-compose.prod.yml up -d app
-# After fixing and publishing: sudo systemctl start kaladrius-atualizar.timer
+# After fixing and publishing: sudo systemctl start kaladrius-update.timer
 ```
 Migrations are not undone: an old version only works if the new migrations are compatible with it (adding tables, or fields that may be empty or have a `db_default`, for example; the migration report on each pull request flags the rest, decision 139).
 
@@ -99,8 +104,8 @@ sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --cl
 A backup is only worth something if it comes back. The test runs on your machine, in a throwaway PostgreSQL: it downloads the backup, restores it (failing on any error), shows how many rows each table has and the latest migration, and deletes everything at the end. It does not touch the server or the development database.
 
 ```bash
-deploy/testar_backup.sh                 # the newest backup
-deploy/testar_backup.sh <file>.dump     # a specific one
+deploy/test_backup.sh                 # the newest backup
+deploy/test_backup.sh <file>.dump     # a specific one
 ```
 Done on 2026-10-27 with the 10/26 backup (fake data of that time): restored without errors in 9 seconds. The same test showed that that day's automatic backup had failed (the server was between 0.7.0 and 0.8.0, without the `.env` link) and that the web warning did not show when **no** backup had ever been recorded; since 0.17.1 superusers see that case too (`DJANGO_BACKUP_MONITORADO`, on by default when `DJANGO_DEBUG` is off).
 
@@ -121,10 +126,10 @@ Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restore
 
 ```bash
 echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
-sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
+sudo /opt/kaladrius/bin/reset_demo.sh --save-base
 ```
 
-The **system administrators'** accounts (superusers) are kept across the reset (decision 118): password, e-mail, language, two-step verification and recovery codes stay as they were. The rest of **the owner's** settings (the clinic's, for example) go back to the base: after changing one that should stay, save the base again (`--salvar-base`). To reset right away: `sudo systemctl start kaladrius-demonstracao.service`.
+The **system administrators'** accounts (superusers) are kept across the reset (decision 118): password, e-mail, language, two-step verification and recovery codes stay as they were. The rest of **the owner's** settings (the clinic's, for example) go back to the base: after changing one that should stay, save the base again (`--salvar-base`). To reset right away: `sudo systemctl start kaladrius-demo-reset.service`.
 
 ## Cautions
 - **Real patient data:** data lives in the US (free tier requirement). Before real use, review the LGPD (international transfer, art. 33) or move to the São Paulo region (paid).

@@ -88,6 +88,6 @@ La revisión de paridad con el sistema antiguo (ver sistema-heredado.md) mostró
 | Pantalla de gestión del equipo por el administrador de la clínica | ✅ 0.8.0: **Registros > Equipo**, con perfiles fijos (decisión 040) |
 | Importar datos reales del sistema antiguo | ✅ 0.8.0: comando `importar_legado` (decisión 039). Importado en producción el 27/10/2026 (Clínica Sorriso) y anonimizado el mismo día, para uso como datos de prueba (decisión 047) |
 | Pantalla de configuración de la clínica (horario y duración de la agenda) | ✅ 0.10.0: **Registros > Configuración de la clínica** |
-| Revisión de la matriz de permisos (`apps/core/permissoes.py`) | Profesional limitado a su propia agenda (decisión 044). El resto de la matriz sigue igual |
+| Revisión de la matriz de permisos (`apps/core/permissions.py`) | Profesional limitado a su propia agenda (decisión 044). El resto de la matriz sigue igual |
 | Prueba de la agenda y los recordatorios en el navegador | Con el titular |
 | Logotipo (SVG) | Con el titular |

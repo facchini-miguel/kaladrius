@@ -1,8 +1,8 @@
 import pytest
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Clinica, Papel, Vinculo
-from apps.profissionais.models import Profissional
+from apps.practitioners.models import Profissional
 
 SENHA = "senha-de-teste-123"
 

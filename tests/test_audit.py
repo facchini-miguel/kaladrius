@@ -6,10 +6,10 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.auditoria.models import RegistroAuditoria
-from apps.core.isolamento import usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.pacientes.models import Paciente
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 Acao = RegistroAuditoria.Acao

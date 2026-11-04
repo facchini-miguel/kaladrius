@@ -1,0 +1,8 @@
+[Unit]
+Description=Kaladrius: update to the newest image
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/update.sh

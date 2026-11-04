@@ -8,7 +8,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from apps.core.models import Papel
-from apps.novidades import releases
+from apps.whats_new import releases
 
 pytestmark = pytest.mark.django_db
 
@@ -105,7 +105,7 @@ def test_situacoes_em_aberto_concordam_em_espanhol():
     from django.utils import translation
     from django.utils.translation import pgettext
 
-    from apps.orcamentos.models import Orcamento
+    from apps.estimates.models import Orcamento
 
     with translation.override("es"):
         assert str(Orcamento.Situacao.ABERTO.label) == "Abierto"

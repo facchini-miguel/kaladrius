@@ -5,10 +5,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
-from apps.odontologia.dentes import FDI, NUMERACOES
+from apps.dentistry.teeth import FDI, NUMERACOES
 
-from . import moedas, paises
-from .isolamento import ModeloDaClinica
+from . import countries, currencies
+from .isolation import ModeloDaClinica
 
 
 class Usuario(AbstractUser):
@@ -40,7 +40,7 @@ class Usuario(AbstractUser):
         # A new person starts at the current version: "the system was updated" and forty
         # versions of history mean nothing to someone who just arrived (review, superuser).
         if self._state.adding and not self.ultima_versao_vista:
-            from apps.novidades.releases import ReleasesInvalidas, versao_atual
+            from apps.whats_new.releases import ReleasesInvalidas, versao_atual
 
             try:
                 self.ultima_versao_vista = versao_atual()
@@ -91,8 +91,8 @@ class Clinica(models.Model):
     moeda = models.CharField(
         _("moeda"),
         max_length=3,
-        choices=moedas.ESCOLHAS,
-        default=moedas.PADRAO,
+        choices=currencies.ESCOLHAS,
+        default=currencies.PADRAO,
         help_text=_(
             "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
             "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
@@ -101,8 +101,8 @@ class Clinica(models.Model):
     pais = models.CharField(
         _("país"),
         max_length=2,
-        choices=paises.ESCOLHAS,
-        default=paises.PADRAO,
+        choices=countries.ESCOLHAS,
+        default=countries.PADRAO,
         help_text=_(
             "Define o fuso horário disponível, o formato de telefones, códigos postais e "
             "datas em inglês, e a moeda sugerida."
@@ -111,8 +111,8 @@ class Clinica(models.Model):
     fuso_horario = models.CharField(
         _("fuso horário"),
         max_length=40,
-        choices=paises.ESCOLHAS_FUSO,
-        default=paises.FUSO_PADRAO,
+        choices=countries.ESCOLHAS_FUSO,
+        default=countries.FUSO_PADRAO,
         help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
     )
     numeracao_dentaria = models.CharField(
@@ -165,13 +165,13 @@ class Clinica(models.Model):
     @property
     def sigla_documento(self):
         """The name of its document, in its country: "CNPJ", "EIN" (decision 121)."""
-        from .identificacao import sigla
+        from .identification import sigla
 
         return sigla(self.documento, ("pessoa", "empresa"), self.pais)
 
     @property
     def documento_escrito(self):
-        from .identificacao import escrever
+        from .identification import escrever
 
         return escrever(self.documento, ("pessoa", "empresa"), self.pais)
 
@@ -246,7 +246,7 @@ class ModuloDaClinica(ModeloDaClinica):
 
 
 class Papel(models.TextChoices):
-    """A user's role inside one clinic. Permissions per role live in permissoes.py."""
+    """A user's role inside one clinic. Permissions per role live in permissions.py."""
 
     ADMIN = "admin", _("Administrador da clínica")
     RECEPCAO = "recepcao", _("Recepção")
@@ -288,7 +288,7 @@ class Vinculo(models.Model):
 
 
 class Backup(models.Model):
-    """A database backup sent to Cloud Storage, recorded by deploy/servidor/backup.sh.
+    """A database backup sent to Cloud Storage, recorded by deploy/server/backup.sh.
 
     Superusers see a warning in the web app when the newest one is too old, which is
     how a failing backup gets noticed (the server has no e-mail or paid alerting).

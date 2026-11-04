@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from django.urls import reverse
 
-from apps.novidades import releases
+from apps.whats_new import releases
 
 pytestmark = pytest.mark.django_db
 
@@ -60,7 +60,7 @@ def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario)
     ],
 )
 def test_ip_para_bloqueio(rf, endereco, esperado):
-    from apps.core.seguranca import ip_para_bloqueio
+    from apps.core.security import ip_para_bloqueio
 
     assert ip_para_bloqueio(rf.get("/", REMOTE_ADDR=endereco)) == esperado
 

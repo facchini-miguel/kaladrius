@@ -5,8 +5,8 @@ import pytest
 from django.urls import reverse
 
 from apps.core.forms import NovaClinicaForm
-from apps.core.isolamento import usar_clinica
-from apps.odontologia.dentes import (
+from apps.core.isolation import usar_clinica
+from apps.dentistry.teeth import (
     DENTES_DECIDUOS,
     DENTES_PERMANENTES,
     FDI,
