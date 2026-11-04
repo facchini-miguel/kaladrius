@@ -1,6 +1,6 @@
 #!/bin/bash
 # Nightly reset of the public demo (decision 086). Only on a server with
-# DJANGO_DEMONSTRACAO=1 in .env; anywhere else it does nothing.
+# DJANGO_DEMO=1 in .env; anywhere else it does nothing.
 #
 #   reset_demo.sh --save-base   keep the current database as the demo's base
 #   reset_demo.sh               restore the base and move its dates forward
@@ -15,8 +15,8 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
-if [ "$(env_value DJANGO_DEMONSTRACAO)" != "1" ]; then
-  echo "This is not the demo server (DJANGO_DEMONSTRACAO=1): nothing to do."
+if [ "$(env_value DJANGO_DEMO)" != "1" ]; then
+  echo "This is not the demo server (DJANGO_DEMO=1): nothing to do."
   exit 0
 fi
 trap 'notify_monitor MONITOR_DEMO_URL fail' ERR

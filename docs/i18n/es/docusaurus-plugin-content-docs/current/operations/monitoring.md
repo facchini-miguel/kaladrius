@@ -42,12 +42,12 @@ Los superusuarios ven un aviso arriba de las pantallas cuando:
 
 | Aviso | Cuándo | Configuración |
 |---|---|---|
-| **Backup** | Ningún backup registrado en las últimas 26 horas, o ninguno hasta hoy | `DJANGO_BACKUP_MONITORADO` |
-| **Salud del servidor** | La recolección se detuvo, o la memoria, el swap o el disco llegaron al nivel crítico | `DJANGO_SAUDE_MONITORADA` |
+| **Backup** | Ningún backup registrado en las últimas 26 horas, o ninguno hasta hoy | `DJANGO_BACKUP_MONITORED` |
+| **Salud del servidor** | La recolección se detuvo, o la memoria, el swap o el disco llegaron al nivel crítico | `DJANGO_HEALTH_MONITORED` |
 
 ## Salud del sistema (instalación en Google Cloud)
 
-Cada 5 minutos, `deploy/server/health.sh --collect` lee procesador, memoria, swap, disco, red, carga y la memoria y el procesador de cada contenedor, y agrega una línea a `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, unos 1,5 MB). Todos lo ven en **Ayuda > Salud del sistema**, con gráficos de las últimas horas y días; las tablas de la base y el comando del servidor se muestran solo a los superusuarios. La app solo lee el archivo; no tiene acceso a Docker.
+Cada 5 minutos, `deploy/server/health.sh --collect` lee procesador, memoria, swap, disco, red, carga y la memoria y el procesador de cada contenedor, y agrega una línea a `/opt/kaladrius/health/amostras.jsonl` (7 días guardados, unos 1,5 MB). Todos lo ven en **Ayuda > Salud del sistema**, con gráficos de las últimas horas y días; las tablas de la base y el comando del servidor se muestran solo a los superusuarios. La app solo lee el archivo; no tiene acceso a Docker.
 
 En el servidor, `sudo /opt/kaladrius/bin/health.sh` muestra un informe: ahora, últimas 24 horas, contenedores y tareas programadas.
 

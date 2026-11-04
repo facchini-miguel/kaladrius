@@ -38,16 +38,16 @@ def cenario(clinica_a, criar_profissional):
 
 
 def test_so_no_servidor_de_demonstracao(cenario, settings):
-    settings.DEMONSTRACAO = False
-    with pytest.raises(CommandError, match="DJANGO_DEMONSTRACAO"):
+    settings.DEMO = False
+    with pytest.raises(CommandError, match="DJANGO_DEMO"):
         call_command("advance_dates", desde="2026-01-01", confirmar=True)
-    settings.DEMONSTRACAO = True
+    settings.DEMO = True
     with pytest.raises(CommandError, match="--confirm"):
         call_command("advance_dates", desde="2026-01-01")
 
 
 def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
-    settings.DEMONSTRACAO = True
+    settings.DEMO = True
     hoje = timezone.localdate()
     antes = {a.pk: (a.inicio, a.fim) for a in cenario["agenda"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
@@ -72,7 +72,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
 
 
 def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
-    settings.DEMONSTRACAO = True
+    settings.DEMO = True
     hoje = timezone.localdate()
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
     with usar_clinica(cenario["clinica"]):

@@ -307,6 +307,7 @@ def test_migrar_o_env_so_troca_os_nomes(tmp_path):
     env = (
         "# a comment\nDJANGO_SECRET_KEY=x=y\nKALADRIUS_ACESSO=rede-interna\n"
         "KALADRIUS_BACKUP_PASTA=/srv/b\nSITE_HOSTNAME=192.168.0.10\nIMAGEM_APP=k:1\n"
+        "DJANGO_PROXY_REVERSO=1\n"
     )
     dir_ = comum(tmp_path, env)
     sistema = tmp_path / "systemd"
@@ -315,6 +316,9 @@ def test_migrar_o_env_so_troca_os_nomes(tmp_path):
     assert (dir_ / ".env").read_text() == (
         "# a comment\nDJANGO_SECRET_KEY=x=y\nKALADRIUS_ACCESS=internal-network\n"
         "KALADRIUS_BACKUP_DIR=/srv/b\nSITE_HOSTNAME=192.168.0.10\nAPP_IMAGE=k:1\n"
+        # The app's variable (decision 149): the new name added, the old one kept for the
+        # previous version's app after a rollback.
+        "DJANGO_PROXY_REVERSO=1\nDJANGO_REVERSE_PROXY=1\n"
     )
     assert (dir_ / ".env.before-147").read_text() == env
     # Again: nothing changes, and the copy of the original stays.
@@ -329,6 +333,8 @@ def test_migrar_os_arquivos_de_estado(tmp_path):
     (dir_ / "demonstracao").mkdir()
     (dir_ / "demonstracao" / "base-data").write_text("2026-10-30")
     (dir_ / "anterior").mkdir()
+    (dir_ / "saude").mkdir()
+    (dir_ / "saude" / "amostras.jsonl").write_text('{"momento": "2026-11-03T10:00:00Z"}\n')
     (dir_ / "installed-image").write_text("ja-novo")  # never overwritten by an old one
     (dir_ / "imagem-instalada").write_text("velho")
     sistema = tmp_path / "systemd"
@@ -340,6 +346,9 @@ def test_migrar_os_arquivos_de_estado(tmp_path):
     assert (dir_ / "demo" / "base-date").read_text() == "2026-10-30"
     assert (dir_ / "previous").is_dir()
     assert (dir_ / "installed-image").read_text() == "ja-novo"
+    # The health samples (decision 149): the app reads the old lines too.
+    assert (dir_ / "health" / "samples.jsonl").read_text().startswith('{"momento"')
+    assert not (dir_ / "saude").exists()
 
 
 def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
@@ -384,3 +393,17 @@ def test_os_comandos_antigos_ainda_funcionam(tmp_path, antigo, novo):
     a = kaladrius(tmp_path / "a", antigo)
     b = kaladrius(tmp_path / "b", novo)
     assert (a.returncode, a.stdout, a.stderr) == (b.returncode, b.stdout, b.stderr)
+
+
+def test_a_configuracao_le_o_nome_antigo_da_variavel(monkeypatch):
+    # The app's variables of decision 149: the new name wins, the old one is read without it.
+    from config.settings import env_renomeada
+
+    for nome in ("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
+        monkeypatch.delenv(nome, raising=False)
+    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
+    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", padrao=True) is True
+    monkeypatch.setenv("DJANGO_PROXY_REVERSO", "1")
+    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is True
+    monkeypatch.setenv("DJANGO_REVERSE_PROXY", "0")
+    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False

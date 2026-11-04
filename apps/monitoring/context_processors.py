@@ -7,7 +7,7 @@ def alerta(request):
     """For superusers on monitored servers: a warning when the health samples stop or
     memory, swap or disk reach the critical level."""
     usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_superuser or not settings.SAUDE_MONITORADA:
+    if usuario is None or not usuario.is_superuser or not settings.HEALTH_MONITORED:
         return {}
     ultima = health.ultima()
     if ultima is None:

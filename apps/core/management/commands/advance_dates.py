@@ -31,7 +31,7 @@ def campos_de_data():
 
 class Command(BaseCommand):
     help = (
-        "Demo server only (DJANGO_DEMONSTRACAO=1, decision 086): moves every date of the "
+        "Demo server only (DJANGO_DEMO=1, decision 086): moves every date of the "
         "clinic's activity (schedule, recalls, finance, estimates, medical records, audit) "
         "forward by the whole weeks since --since, so the restored demo looks current and "
         "each appointment stays on its weekday. Birth dates do not move."
@@ -44,8 +44,8 @@ class Command(BaseCommand):
         parser.add_argument("--confirm", dest="confirmar", action="store_true", help="Required.")
 
     def handle(self, *args, desde, confirmar, **options):
-        if not settings.DEMONSTRACAO:
-            raise CommandError("Só no servidor de demonstração (DJANGO_DEMONSTRACAO=1).")
+        if not settings.DEMO:
+            raise CommandError("Só no servidor de demonstração (DJANGO_DEMO=1).")
         if not confirmar:
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:

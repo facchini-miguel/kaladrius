@@ -47,7 +47,7 @@ Google charges for public IPv4 on VMs (US$ 0.005/hour, about US$ 3.65/month; the
 - `deploy/server/install.sh` is the VM startup script: installs Docker, adds 1 GB of swap, installs the systemd timers and starts the stack. Safe to run again.
 - `deploy/server/update.sh` (every 5 min): pulls the `latest` image; if it differs from the last one installed successfully (`/opt/kaladrius/installed-image`), extracts the `deploy/` files from the image, updates the systemd units and restarts the containers. If anything fails, the next run tries again. Migrations run when the app starts.
 - `deploy/server/backup.sh` (daily): `pg_dump` uploaded to Cloud Storage and recorded in the system; then deletes refused login attempts older than 30 days (`apply_retention`). If it fails, systemd retries every 20 minutes (up to 4 attempts in 3 hours). If the newest recorded backup is older than 26 hours, superusers see a warning at the top of every screen.
-- `deploy/server/health.sh --collect` (every 5 min, since 0.22.0): reads processor, memory, swap, disk, network and load with Linux tools (`/proc`, `df`) and each container's memory and processor (`docker stats`), and appends a line to `/opt/kaladrius/saude/amostras.jsonl` (7 days kept, about 1.5 MB). The app reads that file, read-only, and shows **Administration > System health** to superusers, with a warning at the top of every screen if collection stops or memory, swap or disk reach the critical level. The app has no access to Docker. Without arguments, `health.sh` prints a report in the terminal.
+- `deploy/server/health.sh --collect` (every 5 min, since 0.22.0): reads processor, memory, swap, disk, network and load with Linux tools (`/proc`, `df`) and each container's memory and processor (`docker stats`), and appends a line to `/opt/kaladrius/health/amostras.jsonl` (7 days kept, about 1.5 MB). The app reads that file, read-only, and shows **Administration > System health** to superusers, with a warning at the top of every screen if collection stops or memory, swap or disk reach the critical level. The app has no access to Docker. Without arguments, `health.sh` prints a report in the terminal.
 - The production compose file reads its `${...}` variables from `.env`, linked next to it (`/opt/kaladrius/release/.env` → `../.env`). Only the app receives the whole file.
 - Settings and passwords: `/opt/kaladrius/.env` (root only). Local copy in `.env.producao`, ignored by Git.
 - No stored keys: the VM and CI use short-lived Google tokens.
@@ -107,7 +107,7 @@ A backup is only worth something if it comes back. The test runs on your machine
 deploy/test_backup.sh                 # the newest backup
 deploy/test_backup.sh <file>.dump     # a specific one
 ```
-Done on 2026-10-27 with the 10/26 backup (fake data of that time): restored without errors in 9 seconds. The same test showed that that day's automatic backup had failed (the server was between 0.7.0 and 0.8.0, without the `.env` link) and that the web warning did not show when **no** backup had ever been recorded; since 0.17.1 superusers see that case too (`DJANGO_BACKUP_MONITORADO`, on by default when `DJANGO_DEBUG` is off).
+Done on 2026-10-27 with the 10/26 backup (fake data of that time): restored without errors in 9 seconds. The same test showed that that day's automatic backup had failed (the server was between 0.7.0 and 0.8.0, without the `.env` link) and that the web warning did not show when **no** backup had ever been recorded; since 0.17.1 superusers see that case too (`DJANGO_BACKUP_MONITORED`, on by default when `DJANGO_DEBUG` is off).
 
 ## Public demo logins
 The demo publishes one login per role on the owner's website: `demo.recepcao`, `demo.profissional`, `demo.financeiro` and `demo.admin` (decisions 085 and 089). As demo logins, they never change their password, upload attachments, change the team or the clinic settings, nor see IP addresses in the audit log. To create them, or to reset their passwords:
@@ -122,10 +122,10 @@ docker compose -f docker-compose.prod.yml exec app python manage.py demo_account
 Never use the `DJANGO_SEED_PASSWORD` password there: the seed users, the seed administrator included, share it.
 
 ### Nightly reset (decision 086)
-Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restores a saved **base** of the demo, dropping what visitors changed, and moves every date forward by the whole weeks since the base was saved, so the schedule always looks current and each appointment keeps its weekday (birth dates do not move). The list of backups is kept. It only runs with `DJANGO_DEMONSTRACAO=1` in the server `.env`. To turn it on, once:
+Every day at 07:30 UTC (04:30 in Brasília, after the backup) the server restores a saved **base** of the demo, dropping what visitors changed, and moves every date forward by the whole weeks since the base was saved, so the schedule always looks current and each appointment keeps its weekday (birth dates do not move). The list of backups is kept. It only runs with `DJANGO_DEMO=1` in the server `.env`. To turn it on, once:
 
 ```bash
-echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
+echo 'DJANGO_DEMO=1' | sudo tee -a /opt/kaladrius/.env
 sudo /opt/kaladrius/bin/reset_demo.sh --save-base
 ```
 

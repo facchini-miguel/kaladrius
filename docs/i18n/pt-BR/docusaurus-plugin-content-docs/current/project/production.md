@@ -47,7 +47,7 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 - `deploy/server/install.sh` é o *startup script* da VM: instala Docker, cria 1 GB de swap, instala os agendamentos do systemd e sobe o sistema. Pode rodar de novo sem problema.
 - `deploy/server/update.sh` (a cada 5 min): baixa a imagem `latest`; se ela for diferente da última instalada com sucesso (`/opt/kaladrius/installed-image`), extrai os arquivos de `deploy/` de dentro da imagem, atualiza os agendamentos do systemd e reinicia os containers. Se algo falhar, tenta de novo na rodada seguinte. As migrações rodam na subida do app.
 - `deploy/server/backup.sh` (diário): `pg_dump` enviado ao Cloud Storage e registrado no sistema; depois, apaga as tentativas de entrada recusadas com mais de 30 dias (`apply_retention`). Se falhar, o systemd tenta de novo a cada 20 minutos (até 4 tentativas em 3 horas). Se o último backup registrado tiver mais de 26 horas, os superusuários veem um aviso no topo das telas.
-- `deploy/server/health.sh --collect` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/kaladrius/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `health.sh` mostra um relatório no terminal.
+- `deploy/server/health.sh --collect` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/kaladrius/health/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `health.sh` mostra um relatório no terminal.
 - O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/kaladrius/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
 - Configuração e senhas: `/opt/kaladrius/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
 - Sem chaves guardadas: a VM e o CI usam tokens temporários do Google.
@@ -107,7 +107,7 @@ Um backup só vale se voltar. O teste roda na sua máquina, num PostgreSQL tempo
 deploy/test_backup.sh                 # o backup mais recente
 deploy/test_backup.sh <arquivo>.dump  # um específico
 ```
-Feito em 27/10/2026 com o backup de 26/10 (dados fictícios da época): restaurado sem erros em 9 segundos. O mesmo teste mostrou que o backup automático daquele dia tinha falhado (o servidor estava entre a 0.7.0 e a 0.8.0, sem o link do `.env`) e que o aviso na web não aparecia quando **nenhum** backup tinha sido registrado; desde a 0.17.1 os superusuários também veem esse caso (`DJANGO_BACKUP_MONITORADO`, ligado por padrão quando `DJANGO_DEBUG` está desligado).
+Feito em 27/10/2026 com o backup de 26/10 (dados fictícios da época): restaurado sem erros em 9 segundos. O mesmo teste mostrou que o backup automático daquele dia tinha falhado (o servidor estava entre a 0.7.0 e a 0.8.0, sem o link do `.env`) e que o aviso na web não aparecia quando **nenhum** backup tinha sido registrado; desde a 0.17.1 os superusuários também veem esse caso (`DJANGO_BACKUP_MONITORED`, ligado por padrão quando `DJANGO_DEBUG` está desligado).
 
 ## Contas públicas de demonstração
 A demonstração publica uma conta de cada perfil no site do titular: `demo.recepcao`, `demo.profissional`, `demo.financeiro` e `demo.admin` (decisões 085 e 089). Por serem de demonstração, elas nunca trocam a senha, enviam anexos, mudam a equipe ou as configurações da clínica, nem veem os IPs na auditoria. Para criá-las, ou para reiniciar as senhas:
@@ -122,10 +122,10 @@ docker compose -f docker-compose.prod.yml exec app python manage.py demo_account
 Nunca use ali a senha de `DJANGO_SEED_PASSWORD`: os usuários de teste, inclusive o administrador de teste, usam essa senha.
 
 ### Reinício diário (decisão 086)
-Todo dia às 07:30 UTC (04:30 em Brasília, depois do backup) o servidor restaura uma **base** salva da demonstração, desfazendo o que os visitantes mudaram, e avança todas as datas pelas semanas inteiras desde que a base foi salva, para a agenda sempre parecer atual e cada consulta ficar no mesmo dia da semana (datas de nascimento não mudam). A lista de backups é mantida. Só roda com `DJANGO_DEMONSTRACAO=1` no `.env` do servidor. Para ligar, uma vez:
+Todo dia às 07:30 UTC (04:30 em Brasília, depois do backup) o servidor restaura uma **base** salva da demonstração, desfazendo o que os visitantes mudaram, e avança todas as datas pelas semanas inteiras desde que a base foi salva, para a agenda sempre parecer atual e cada consulta ficar no mesmo dia da semana (datas de nascimento não mudam). A lista de backups é mantida. Só roda com `DJANGO_DEMO=1` no `.env` do servidor. Para ligar, uma vez:
 
 ```bash
-echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
+echo 'DJANGO_DEMO=1' | sudo tee -a /opt/kaladrius/.env
 sudo /opt/kaladrius/bin/reset_demo.sh --save-base
 ```
 

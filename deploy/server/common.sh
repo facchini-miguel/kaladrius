@@ -19,17 +19,22 @@ MONITOR_SYSTEM_URL=MONITOR_SISTEMA_URL MONITOR_UPDATE_URL=MONITOR_ATUALIZACAO_UR
 MONITOR_RESTORE_URL=MONITOR_RESTAURACAO_URL MONITOR_CERTIFICATE_URL=MONITOR_CERTIFICADO_URL
 MONITOR_RESOURCES_URL=MONITOR_RECURSOS_URL MONITOR_DEMO_URL=MONITOR_DEMONSTRACAO_URL
 APP_IMAGE=IMAGEM_APP DOCS_IMAGE=IMAGEM_DOCS"
+# The app's variables renamed by decision 149. migrate_env adds the new name and keeps the old
+# one: after a rollback, the previous version's app reads only the old name (without
+# DJANGO_PROXY_REVERSO, behind Caddy, nobody could log in).
+LEGACY_APP_ENV_NAMES="DJANGO_REVERSE_PROXY=DJANGO_PROXY_REVERSO DJANGO_DEMO=DJANGO_DEMONSTRACAO
+DJANGO_HEALTH_MONITORED=DJANGO_SAUDE_MONITORADA DJANGO_BACKUP_MONITORED=DJANGO_BACKUP_MONITORADO"
 
 # Value of one variable of the server .env (empty when missing). The scripts never source
 # the whole file: it holds the app's passwords.
 env_value() {
   local name=$1 pair value=""
-  for pair in $LEGACY_ENV_NAMES; do
+  for pair in $LEGACY_ENV_NAMES $LEGACY_APP_ENV_NAMES; do
     if [ "${pair#*=}" = "$name" ]; then name=${pair%%=*}; fi
   done
   value=$(grep -m1 "^$name=" "$DIR/.env" 2>/dev/null | cut -d= -f2-) || true
   if [ -z "$value" ]; then
-    for pair in $LEGACY_ENV_NAMES; do
+    for pair in $LEGACY_ENV_NAMES $LEGACY_APP_ENV_NAMES; do
       if [ "${pair%%=*}" = "$name" ]; then
         value=$(grep -m1 "^${pair#*=}=" "$DIR/.env" 2>/dev/null | cut -d= -f2-) || true
       fi
@@ -284,7 +289,7 @@ install_scripts() {
 install_schedules() {
   migrate_legacy_names
   if installed_by_package; then  # its units came with the package, and so do its updates
-    mkdir -p "$DIR/saude"
+    mkdir -p "$DIR/health"
     systemctl daemon-reload
     systemctl enable --now kaladrius-backup.timer kaladrius-health.timer kaladrius-restore-test.timer
     reload_caddy
@@ -293,7 +298,7 @@ install_schedules() {
   # Also here: a server updating from an older version copied only the scripts it knew.
   install_scripts
   # Health samples, read by the app through a read-only mount (docker-compose.prod.yml).
-  mkdir -p "$DIR/saude"
+  mkdir -p "$DIR/health"
   cp "$DIR"/release/server/*.service "$DIR"/release/server/*.timer "$SYSTEMD_DIR/"
   systemctl daemon-reload
   systemctl enable --now kaladrius-update.timer kaladrius-backup.timer \
@@ -332,7 +337,7 @@ migrate_legacy_names() {
   done
   for pair in imagem-instalada:installed-image imagem-recusada:refused-image anterior:previous \
     admin-criado:admin-created sem-repositorio:no-repository demonstracao:demo \
-    demo/base-data:demo/base-date; do
+    demo/base-data:demo/base-date saude:health health/amostras.jsonl:health/samples.jsonl; do
     old="$DIR/${pair%%:*}" new="$DIR/${pair#*:}"
     if [ -e "$old" ] && [ ! -e "$new" ]; then mv "$old" "$new"; fi
   done
@@ -361,7 +366,8 @@ migrate_legacy_names() {
 }
 
 # .env with the variable names of decision 147 (LEGACY_ENV_NAMES) and the access value
-# internal-network; the file as it was is kept once, beside it, as .env.before-147.
+# internal-network, plus the app's names of decision 149 (LEGACY_APP_ENV_NAMES) beside the old
+# ones; the file as it was is kept once, beside it, as .env.before-147.
 migrate_env() {
   local pair script="" new
   [ -f "$DIR/.env" ] || return 0
@@ -371,6 +377,11 @@ migrate_env() {
   script="${script}s/^KALADRIUS_ACCESS=rede-interna\$/KALADRIUS_ACCESS=internal-network/"
   new=$(mktemp "$DIR/.env.XXXXXX")
   sed "$script" "$DIR/.env" >"$new"
+  for pair in $LEGACY_APP_ENV_NAMES; do
+    if grep -q "^${pair#*=}=" "$new" && ! grep -q "^${pair%%=*}=" "$new"; then
+      echo "${pair%%=*}=$(grep -m1 "^${pair#*=}=" "$new" | cut -d= -f2-)" >>"$new"
+    fi
+  done
   if cmp -s "$new" "$DIR/.env"; then
     rm -f "$new"
     return 0

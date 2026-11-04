@@ -34,7 +34,7 @@ services:
       - "127.0.0.1:8000:8000"
     # Server health samples written by deploy/server/health.sh (read-only for the app).
     volumes:
-      - ../saude:/saude:ro
+      - ../health:/health:ro
 
   # Documentation site (docs/, decisions 067 and 073). Optional: runs only with COMPOSE_PROFILES=docs
   # and DOCS_HOSTNAME in .env.

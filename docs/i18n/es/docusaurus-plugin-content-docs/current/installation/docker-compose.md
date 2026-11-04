@@ -52,7 +52,7 @@ DJANGO_SECRET_KEY=<un valor aleatorio largo>
 DJANGO_ALLOWED_HOSTS=clinica.ejemplo.com
 DJANGO_CSRF_TRUSTED_ORIGINS=https://clinica.ejemplo.com
 DJANGO_SECURE=1
-DJANGO_PROXY_REVERSO=1
+DJANGO_REVERSE_PROXY=1
 
 POSTGRES_PASSWORD=<una contraseña fuerte>
 
@@ -64,13 +64,13 @@ SITE_HOSTNAME=clinica.ejemplo.com
 # La imagen construida en el paso 4
 APP_IMAGE=kaladrius:latest
 # La recolección de la salud del servidor solo existe en la instalación de Google Cloud
-DJANGO_SAUDE_MONITORADA=0
+DJANGO_HEALTH_MONITORED=0
 ```
 
 Para generar valores aleatorios: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"`.
 
 :::tip
-Deje `DJANGO_BACKUP_MONITORADO` activado (el valor predeterminado): los superusuarios ven un aviso arriba de las pantallas cuando no se registró ningún backup en las últimas 26 horas. [Backup y restauración](../operations/backup-restore.md) muestra cómo programar backups que se registran solos.
+Deje `DJANGO_BACKUP_MONITORED` activado (el valor predeterminado): los superusuarios ven un aviso arriba de las pantallas cuando no se registró ningún backup en las últimas 26 horas. [Backup y restauración](../operations/backup-restore.md) muestra cómo programar backups que se registran solos.
 :::
 
 ## 4. Construya la imagen

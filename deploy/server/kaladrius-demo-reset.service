@@ -1,5 +1,5 @@
 [Unit]
-Description=Kaladrius: reset the public demo (only with DJANGO_DEMONSTRACAO=1)
+Description=Kaladrius: reset the public demo (only with DJANGO_DEMO=1)
 After=docker.service
 
 [Service]

@@ -148,10 +148,10 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     comum = django_user_model.objects.create_user("ana", password="senha-de-teste-123")
     client.force_login(admin)
     # Development has no backups: no warning.
-    settings.BACKUP_MONITORADO = False
+    settings.BACKUP_MONITORED = False
     assert "backup" not in client.get(reverse("inicio")).content.decode()
     # A server where no backup was ever recorded warns too.
-    settings.BACKUP_MONITORADO = True
+    settings.BACKUP_MONITORED = True
     assert "Nenhum backup do banco foi registrado" in client.get(reverse("inicio")).content.decode()
 
     call_command("record_backup", "kaladrius-x.dump", "1024")
