@@ -10,7 +10,7 @@ Em **Pacientes > Lista de pacientes**, digite parte do **nome** (não precisa de
 ## Cadastrar e alterar
 Clique em **Novo paciente**. Escolha **pessoa física** ou **jurídica**: os campos mudam conforme o tipo.
 - CPF, CNPJ, telefones e CEP podem ser digitados com ou sem pontuação.
-- O sistema confere se o CPF ou o CNPJ é válido e se já existe na clínica. Fora do Brasil, os documentos são os do país (veja [Clínica](clinica.md)).
+- O sistema confere se o CPF ou o CNPJ é válido e se já existe na clínica. Fora do Brasil, os documentos são os do país (veja [Clínica](clinic.md)).
 - Escolha a **UF** e depois a **cidade**. Com a cidade escolhida, **Bairro** e **Logradouro** sugerem os nomes conhecidos dela (os bairros e ruas que vieram do sistema antigo e os que a clínica já digitou para outros pacientes); dá para digitar qualquer outro.
 - Telefones precisam do DDD, e o sistema confere se o DDD existe. Um celular digitado do jeito antigo, com 8 dígitos (como 54 8123-4567), ganha o 9 na frente sozinho; sem o DDD e o 9, o link do WhatsApp não abre.
 - Preencha o **WhatsApp** (pode ser o mesmo número do celular): a ficha e as rechamadas da tela inicial ganham um link que abre a conversa. Fax e MSN do sistema antigo não são mais pedidos.

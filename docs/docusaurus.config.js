@@ -61,7 +61,7 @@ export default {
         logo: { alt: "Kaladrius", src: "img/logo.svg", srcDark: "img/logo-escuro.svg" },
         items: [
           { type: "docSidebar", sidebarId: "docs", position: "left", label: "Docs" },
-          { to: "/manual/inicio", position: "left", label: "User manual" },
+          { to: "/manual/getting-started", position: "left", label: "User manual" },
           { type: "localeDropdown", position: "right" },
           { href: REPOSITORIO, label: "GitHub", position: "right" },
         ],
@@ -74,7 +74,7 @@ export default {
             items: [
               { label: "Quick start", to: "/quick-start" },
               { label: "Installation", to: "/installation/requirements" },
-              { label: "User manual", to: "/manual/inicio" },
+              { label: "User manual", to: "/manual/getting-started" },
             ],
           },
           {

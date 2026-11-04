@@ -27,8 +27,8 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 
 ## Privacy (LGPD)
 
-- **Privacy policy** in the system, at `/privacidade/`, in the three languages: what is processed, for what, on what legal basis, who has access, where it is stored, for how long and the patient's rights. Adapt it to your clinic: the clinic is the data controller. See [Privacy policy](manual/privacidade.md).
-- **Archived patients** leave the lists and searches; the administrator can **permanently delete** a patient who asks for it, keeping the schedule and the finance without their identity. See [Patients](manual/pacientes.md).
+- **Privacy policy** in the system, at `/privacidade/`, in the three languages: what is processed, for what, on what legal basis, who has access, where it is stored, for how long and the patient's rights. Adapt it to your clinic: the clinic is the data controller. See [Privacy policy](manual/privacy.md).
+- **Archived patients** leave the lists and searches; the administrator can **permanently delete** a patient who asks for it, keeping the schedule and the finance without their identity. See [Patients](manual/patients.md).
 - **Retention:** refused login attempts are deleted after 30 days; backups on Google Cloud after 30 days.
 - **No tracking:** only the session and security cookies; no analytics, no third-party scripts.
 

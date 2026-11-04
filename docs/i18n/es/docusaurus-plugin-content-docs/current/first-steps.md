@@ -16,7 +16,7 @@ Una instalación atiende a **una clínica**. Para atender a otra clínica, insta
 
 ## 2. Cree el administrador de la clínica
 
-En **Registros > Equipo > Nuevo miembro**, cree a la persona con el perfil **Administrador**. Vea [Equipo](manual/equipe.md).
+En **Registros > Equipo > Nuevo miembro**, cree a la persona con el perfil **Administrador**. Vea [Equipo](manual/team.md).
 
 ## 3. Entréguelo a la clínica
 
@@ -24,12 +24,12 @@ De aquí en adelante, el administrador de la clínica hace todo dentro del siste
 
 | Paso | Dónde | Manual |
 |---|---|---|
-| Datos de la clínica y horario de la agenda | **Registros > Configuración de la clínica** | [Configuración de la clínica](manual/clinica.md) |
-| Equipo (recepción, profesionales, administradores) | **Registros > Equipo** | [Equipo](manual/equipe.md) |
-| Profesionales y sus colores en la agenda | **Registros > Profesionales** | [Equipo](manual/equipe.md) |
-| Tipos de atención | **Registros > Tipos de atención** | [Configuración de la clínica](manual/clinica.md) |
-| Tabla de procedimientos | **Registros > Tabla de procedimientos** | [Presupuestos](manual/orcamentos.md) |
-| Categorías y cuentas de finanzas | **Registros > Categorías** y **Registros > Cuentas** | [Finanzas](manual/financeiro.md) |
+| Datos de la clínica y horario de la agenda | **Registros > Configuración de la clínica** | [Configuración de la clínica](manual/clinic.md) |
+| Equipo (recepción, profesionales, administradores) | **Registros > Equipo** | [Equipo](manual/team.md) |
+| Profesionales y sus colores en la agenda | **Registros > Profesionales** | [Equipo](manual/team.md) |
+| Tipos de atención | **Registros > Tipos de atención** | [Configuración de la clínica](manual/clinic.md) |
+| Tabla de procedimientos | **Registros > Tabla de procedimientos** | [Presupuestos](manual/estimates.md) |
+| Categorías y cuentas de finanzas | **Registros > Categorías** y **Registros > Cuentas** | [Finanzas](manual/finance.md) |
 
 ## Perfiles
 
@@ -37,9 +37,9 @@ De aquí en adelante, el administrador de la clínica hace todo dentro del siste
 |---|---|
 | **Administrador** | Todo en la clínica: equipo, profesionales, configuración, cuentas por pagar, flujo de caja, informes, auditoría y pacientes archivados |
 | **Recepción** | Agenda de todos los profesionales, pacientes, presupuestos, recordatorios, cobros y caja del día |
-| **Profesional** | Solo su propia agenda, pacientes, presupuestos, recordatorios y la [historia clínica](manual/prontuario.md); ningún valor de la clínica |
+| **Profesional** | Solo su propia agenda, pacientes, presupuestos, recordatorios y la [historia clínica](manual/medical-record.md); ningún valor de la clínica |
 
-Los botones que la persona no puede usar no aparecen. Vea [Primeros pasos del manual](manual/inicio.md#perfiles).
+Los botones que la persona no puede usar no aparecen. Vea [Primeros pasos del manual](manual/getting-started.md#perfiles).
 
 ## Importar desde otro sistema
 

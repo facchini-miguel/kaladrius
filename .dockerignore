@@ -32,7 +32,7 @@ docs/*
 docs/docs/*
 !docs/docs/manual/
 docs/docs/manual/*
-!docs/docs/manual/privacidade.md
+!docs/docs/manual/privacy.md
 !docs/i18n/
 docs/i18n/*/*.json
 docs/i18n/*/docusaurus-theme-classic/
@@ -40,5 +40,5 @@ docs/i18n/*/docusaurus-plugin-content-docs/*.json
 docs/i18n/*/docusaurus-plugin-content-docs/current/*
 !docs/i18n/*/docusaurus-plugin-content-docs/current/manual/
 docs/i18n/*/docusaurus-plugin-content-docs/current/manual/*
-!docs/i18n/*/docusaurus-plugin-content-docs/current/manual/privacidade.md
+!docs/i18n/*/docusaurus-plugin-content-docs/current/manual/privacy.md
 dist/

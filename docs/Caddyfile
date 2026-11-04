@@ -2,6 +2,32 @@
 :80 {
 	root * /srv
 	encode gzip
+	# The user manual's pages by their names before decision 151, in every language: bookmarks and
+	# links elsewhere keep working.
+	@inicio path_regexp inicio ^(/pt-BR|/es)?/manual/inicio/?$
+	redir @inicio {re.inicio.1}/manual/getting-started 301
+	@agenda path_regexp agenda ^(/pt-BR|/es)?/manual/agenda/?$
+	redir @agenda {re.agenda.1}/manual/schedule 301
+	@clinica path_regexp clinica ^(/pt-BR|/es)?/manual/clinica/?$
+	redir @clinica {re.clinica.1}/manual/clinic 301
+	@convenios path_regexp convenios ^(/pt-BR|/es)?/manual/convenios/?$
+	redir @convenios {re.convenios.1}/manual/health-plans 301
+	@equipe path_regexp equipe ^(/pt-BR|/es)?/manual/equipe/?$
+	redir @equipe {re.equipe.1}/manual/team 301
+	@financeiro path_regexp financeiro ^(/pt-BR|/es)?/manual/financeiro/?$
+	redir @financeiro {re.financeiro.1}/manual/finance 301
+	@orcamentos path_regexp orcamentos ^(/pt-BR|/es)?/manual/orcamentos/?$
+	redir @orcamentos {re.orcamentos.1}/manual/estimates 301
+	@pacientes path_regexp pacientes ^(/pt-BR|/es)?/manual/pacientes/?$
+	redir @pacientes {re.pacientes.1}/manual/patients 301
+	@pessoal path_regexp pessoal ^(/pt-BR|/es)?/manual/pessoal/?$
+	redir @pessoal {re.pessoal.1}/manual/staff 301
+	@privacidade path_regexp privacidade ^(/pt-BR|/es)?/manual/privacidade/?$
+	redir @privacidade {re.privacidade.1}/manual/privacy 301
+	@prontuario path_regexp prontuario ^(/pt-BR|/es)?/manual/prontuario/?$
+	redir @prontuario {re.prontuario.1}/manual/medical-record 301
+	@rechamadas path_regexp rechamadas ^(/pt-BR|/es)?/manual/rechamadas/?$
+	redir @rechamadas {re.rechamadas.1}/manual/recalls 301
 	# Docusaurus links have no trailing slash: serve the folder's index.html without a redirect.
 	try_files {path} {path}/index.html
 	file_server

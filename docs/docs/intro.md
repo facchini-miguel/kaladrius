@@ -34,7 +34,7 @@ A single Python/Django application with PostgreSQL, server-rendered pages with H
 
 - **Try it on your computer in 5 minutes:** [Quick start](quick-start.md)
 - **Install it for a clinic:** [Requirements](installation/requirements.md), then [your own server](installation/docker-compose.md) or the [Google Cloud free tier](installation/google-cloud.md)
-- **Learn to use it:** [User manual](manual/inicio.md)
+- **Learn to use it:** [User manual](manual/getting-started.md)
 
 ## License
 

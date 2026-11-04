@@ -4,7 +4,7 @@ sidebar_position: 6.5
 
 # Staff
 
-The **Staff** module keeps the clinic's employees, their salaries and each month's overtime and absences, and turns the month's pay into payables in [finance](financeiro.md). Only the administrator and the Finance role see it. It can be turned off in the [clinic settings](clinica.md) and needs Finance on.
+The **Staff** module keeps the clinic's employees, their salaries and each month's overtime and absences, and turns the month's pay into payables in [finance](finance.md). Only the administrator and the Finance role see it. It can be turned off in the [clinic settings](clinic.md) and needs Finance on.
 
 Payroll taxes, vacations and the 13th salary are **not** calculated: the accountant or a payroll system takes care of them.
 

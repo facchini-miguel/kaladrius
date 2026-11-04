@@ -60,7 +60,7 @@ def _separar_listas(texto):
 
 def privacidade():
     """(title, HTML) of the privacy policy in the current language."""
-    arquivo = DOCS / PASTAS[_idioma()] / "manual" / "privacidade.md"
+    arquivo = DOCS / PASTAS[_idioma()] / "manual" / "privacy.md"
     texto = _FRONTMATTER.sub("", arquivo.read_text(encoding="utf-8"), count=1)
     titulo = next((linha[2:].strip() for linha in texto.splitlines() if linha.startswith("# ")), "")
     html = markdown.markdown(

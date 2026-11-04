@@ -4,7 +4,7 @@ sidebar_position: 3.7
 
 # Convenios
 
-El módulo **Convenios** guarda los convenios (planes de salud) que la clínica acepta y la credencial de cada paciente. Puede desactivarse en la [configuración de la clínica](clinica.md) si la clínica solo atiende pacientes particulares.
+El módulo **Convenios** guarda los convenios (planes de salud) que la clínica acepta y la credencial de cada paciente. Puede desactivarse en la [configuración de la clínica](clinic.md) si la clínica solo atiende pacientes particulares.
 
 ## Registrar un convenio
 En **Registros > Convenios**, haga clic en **Nuevo convenio** y complete el nombre y, si lo hay, el **registro de la aseguradora** en el país de la clínica (en Brasil, la ANS, de 6 dígitos; en Estados Unidos, el Payer ID; en Argentina, el RNOS; en Sudáfrica, el número en el CMS), el teléfono y observaciones. En los países sin registro de aseguradoras el campo no aparece. El mismo nombre no puede registrarse dos veces. Para dejar de aceptar un convenio sin perder el historial, edítelo y desmarque **activo**: sale de la lista de credenciales nuevas, y las existentes se mantienen.

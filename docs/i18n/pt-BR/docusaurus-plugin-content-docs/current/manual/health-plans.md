@@ -4,7 +4,7 @@ sidebar_position: 3.7
 
 # Convênios
 
-O módulo **Convênios** guarda os convênios que a clínica aceita e a carteirinha de cada paciente. Ele pode ser desligado nas [configurações da clínica](clinica.md) por quem só atende particular.
+O módulo **Convênios** guarda os convênios que a clínica aceita e a carteirinha de cada paciente. Ele pode ser desligado nas [configurações da clínica](clinic.md) por quem só atende particular.
 
 ## Cadastrar um convênio
 Em **Cadastros > Convênios**, clique em **Novo convênio** e preencha o nome e, se houver, o **registro da operadora** no país da clínica (no Brasil, a ANS, com 6 dígitos; nos Estados Unidos, o Payer ID; na Argentina, o RNOS; na África do Sul, o número no CMS), o telefone e observações. Nos países sem registro de operadoras o campo não aparece. O mesmo nome não pode ser cadastrado duas vezes. Para deixar de aceitar um convênio sem perder o histórico, edite e desmarque **ativo**: ele sai da lista das carteirinhas novas, e as existentes continuam.

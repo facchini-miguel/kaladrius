@@ -4,7 +4,7 @@ sidebar_position: 6.5
 
 # Pessoal
 
-O módulo **Pessoal** guarda os funcionários da clínica, os salários e as horas extras e faltas de cada mês, e transforma a folha do mês em contas a pagar no [financeiro](financeiro.md). Só o administrador e o perfil Financeiro veem. Ele pode ser desligado nas [configurações da clínica](clinica.md) e precisa do Financeiro ligado.
+O módulo **Pessoal** guarda os funcionários da clínica, os salários e as horas extras e faltas de cada mês, e transforma a folha do mês em contas a pagar no [financeiro](finance.md). Só o administrador e o perfil Financeiro veem. Ele pode ser desligado nas [configurações da clínica](clinic.md) e precisa do Financeiro ligado.
 
 Encargos (INSS, FGTS), férias e 13º **não** são calculados: ficam com o contador ou com o sistema de folha.
 

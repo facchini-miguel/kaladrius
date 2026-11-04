@@ -27,26 +27,26 @@ def superusuario(client, django_user_model):
 def test_manual_e_politica_do_site_em_cada_idioma(pasta):
     manual = documents.DOCS / pasta / "manual"
     paginas = {arquivo.stem for arquivo in manual.glob("*.md")}
-    assert {"inicio", "agenda", "pacientes", "privacidade"} <= paginas, pasta
+    assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
 
 
 def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_user_model):
     settings.DOCS_URL = "https://docs.exemplo.test/"
     pagina = recepcao.get(reverse("inicio")).content.decode()
-    assert 'href="https://docs.exemplo.test/pt-BR/manual/inicio"' in pagina
+    assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in pagina
     assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
     usuario = django_user_model.objects.get(username="recepcao")
     usuario.idioma = "en"
     usuario.save()
     pagina = recepcao.get(reverse("inicio")).content.decode()
-    assert 'href="https://docs.exemplo.test/manual/inicio"' in pagina
+    assert 'href="https://docs.exemplo.test/manual/getting-started"' in pagina
 
 
 def test_enderecos_antigos_da_ajuda_levam_ao_site(recepcao, settings):
     settings.DOCS_URL = "https://docs.exemplo.test"
     site = "https://docs.exemplo.test/pt-BR/"
-    assert recepcao.get(reverse("ajuda:indice")).url == site + "manual/inicio"
-    assert recepcao.get(reverse("ajuda:manual", args=["agenda"])).url == site + "manual/agenda"
+    assert recepcao.get(reverse("ajuda:indice")).url == site + "manual/getting-started"
+    assert recepcao.get(reverse("ajuda:manual", args=["agenda"])).url == site + "manual/schedule"
     assert recepcao.get(reverse("ajuda:tecnica_indice")).url == site
     assert recepcao.get(reverse("ajuda:tecnica", args=["pt-BR/deploy.md"])).url == site
     assert recepcao.get(reverse("ajuda:manual", args=["privacidade"])).url == reverse("privacidade")

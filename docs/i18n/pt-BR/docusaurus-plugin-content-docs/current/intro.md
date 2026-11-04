@@ -34,7 +34,7 @@ Uma única aplicação Python/Django com PostgreSQL, páginas montadas no servid
 
 - **Experimentar no seu computador em 5 minutos:** [Início rápido](quick-start.md)
 - **Instalar para uma clínica:** [Requisitos](installation/requirements.md), depois [servidor próprio](installation/docker-compose.md) ou [free tier do Google Cloud](installation/google-cloud.md)
-- **Aprender a usar:** [Manual do usuário](manual/inicio.md)
+- **Aprender a usar:** [Manual do usuário](manual/getting-started.md)
 
 ## Licença
 
