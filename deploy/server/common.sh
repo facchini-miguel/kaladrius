@@ -275,14 +275,6 @@ install_scripts() {
     chmod 755 "$DIR/bin/$(basename "$script").new"
     mv -f "$DIR/bin/$(basename "$script").new" "$DIR/bin/$(basename "$script")"
   done
-  # The VM's startup script of a server created before decision 147 runs bin/atualizar.sh
-  # --forcar on every boot: kept as a pointer to update.sh until the startup script is
-  # install.sh (docs/docs/project/production.md).
-  printf '%s\n' '#!/bin/bash' \
-    '# Before decision 147 this was the update script; the VM'"'"'s old startup script still runs it.' \
-    'exec "$(dirname "$0")/update.sh" ${1:+--force}' >"$DIR/bin/atualizar.sh.new"
-  chmod 755 "$DIR/bin/atualizar.sh.new"
-  mv -f "$DIR/bin/atualizar.sh.new" "$DIR/bin/atualizar.sh"
 }
 
 # Install (or update) the systemd units shipped with the deploy files.
@@ -361,11 +353,14 @@ migrate_legacy_names() {
   # The package repository's files of 0.54 (package files: an .rpm update removes them only
   # after this runs, so the folder left empty goes on the next update).
   rmdir "$DIR/repositorio" 2>/dev/null || true
-  # Google Cloud: the scripts under their old names, moved to $DIR/legacy/bin (bin/atualizar.sh
-  # is install_scripts' pointer). The package manager removes the package's own.
+  # The lock of the update script of 0.54 and earlier, which no script takes any more.
+  rm -f "$DIR/atualizar.lock"
+  # Google Cloud: the scripts under their old names (and the pointer bin/atualizar.sh that 0.55
+  # kept for the VM's old startup script), moved to $DIR/legacy/bin. The package manager removes
+  # the package's own.
   if ! installed_by_package; then
-    for old in comum.sh saude.sh testar_restauracao.sh reiniciar_demonstracao.sh instalar.sh \
-      migrar_para_kaladrius.sh; do
+    for old in atualizar.sh comum.sh saude.sh testar_restauracao.sh reiniciar_demonstracao.sh \
+      instalar.sh migrar_para_kaladrius.sh; do
       if [ -f "$DIR/bin/$old" ]; then
         mkdir -p "$DIR/legacy/bin"
         mv -f "$DIR/bin/$old" "$DIR/legacy/bin/"

@@ -51,11 +51,7 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 - O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/kaladrius/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
 - Configuração e senhas: `/opt/kaladrius/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
 - Sem chaves guardadas: a VM e o CI usam tokens temporários do Google.
-- **Nomes da decisão 147 (0.55.0).** Os scripts, as tarefas agendadas, os arquivos de estado e as variáveis do `.env` têm nomes em inglês. A primeira atualização para a 0.55.0 é feita pelo `atualizar.sh` anterior do servidor, que carrega `deploy/servidor/comum.sh` da imagem nova: essa ponte passa o servidor para os nomes novos (`migrate_legacy_names` no `common.sh`; as unidades e os scripts antigos vão para `/opt/kaladrius/legacy/`, o `.env` antigo fica como `.env.before-147`). O startup script da VM, nos metadados, ainda é o `instalar.sh` antigo, que continua funcionando pela mesma ponte e pelo `bin/atualizar.sh` (um atalho para o `update.sh`). Troque-o, e a ponte pode ser apagada depois da próxima atualização:
-  ```bash
-  gcloud compute instances add-metadata kaladrius --zone=us-east1-b \
-    --metadata-from-file startup-script=deploy/server/install.sh
-  ```
+- **Nomes da decisão 147 (0.55.0).** Os scripts, as tarefas agendadas, os arquivos de estado e as variáveis do `.env` têm nomes em inglês. A produção passou para eles em 04/11/2026, por uma ponte que o `atualizar.sh` anterior carregou da imagem nova; as unidades e os scripts antigos estão em `/opt/kaladrius/legacy/`, o `.env` antigo em `.env.before-147`, e o startup script da VM é o `deploy/server/install.sh`. A ponte foi removida depois (decisão 152).
 
 ## Tarefas comuns
 

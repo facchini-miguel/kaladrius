@@ -12,15 +12,9 @@ set -euo pipefail
 # This script decides the version itself, refusals included (common.sh).
 UPDATING=1
 source "$(dirname "$0")/common.sh"
-# One run at a time: a manual --force waits for the timer's run instead of racing it. Until
-# every server has moved to the names of decision 147, also the lock of the update script of
-# 0.54 and earlier, which may still be running the update that brought this one.
+# One run at a time: a manual --force waits for the timer's run instead of racing it.
 exec 9>"$DIR/update.lock"
 flock 9
-if [ -e "$DIR/atualizar.lock" ]; then
-  exec 8>>"$DIR/atualizar.lock"
-  flock 8
-fi
 # The state files below under the names of decision 147 before they are read (a no-op once done).
 migrate_legacy_names
 # The external monitor warns when updates fail or stop running (decision 079).
