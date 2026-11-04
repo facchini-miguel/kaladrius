@@ -118,6 +118,30 @@ def _campo(estado, app, modelo, nome):
         return None
 
 
+def _tabelas(estado, app, modelo):
+    """The model's table and its many-to-many tables: what a rename may move."""
+    try:
+        meta = estado.apps.get_model(app, modelo)._meta
+    except LookupError:
+        return None
+    return [meta.db_table, *(campo.m2m_db_table() for campo in meta.local_many_to_many)]
+
+
+def _so_o_nome(operacao, app, antes):
+    """A rename that keeps the table and columns (decision 156: Meta.db_table, db_column): only
+    the name in the code changes, the database and the previous version see nothing."""
+    depois = _depois(operacao, app, antes)
+    if isinstance(operacao, ops.RenameModel):
+        tabelas = _tabelas(antes, app, operacao.old_name), _tabelas(depois, app, operacao.new_name)
+    elif isinstance(operacao, ops.AlterModelTable):
+        tabelas = _tabelas(antes, app, operacao.name), _tabelas(depois, app, operacao.name)
+    else:  # RenameField
+        antigo = _campo(antes, app, operacao.model_name, operacao.old_name)
+        novo = _campo(depois, app, operacao.model_name, operacao.new_name)
+        tabelas = [getattr(antigo, "column", None)], [getattr(novo, "column", None)]
+    return None not in tabelas and tabelas[0] == tabelas[1]
+
+
 def _depois(operacao, app, antes):
     """The project state after `operacao`, leaving `antes` as it was."""
     depois = antes.clone()
@@ -154,7 +178,11 @@ def alertas_da_operacao(operacao, app, antes, conexao=connection):
             estado = _depois(sub, app, estado)
         return alertas
     alertas = []
-    if isinstance(operacao, ops.RemoveField):
+    if isinstance(operacao, ops.RenameModel | ops.AlterModelTable | ops.RenameField) and _so_o_nome(
+        operacao, app, antes
+    ):
+        pass
+    elif isinstance(operacao, ops.RemoveField):
         alertas.append(Alerta(APAGA, f"drops column `{operacao.name}` of `{operacao.model_name}`"))
         alertas.append(Alerta(QUEBRA_VOLTA, "the previous version still reads that column"))
     elif isinstance(operacao, ops.DeleteModel):
