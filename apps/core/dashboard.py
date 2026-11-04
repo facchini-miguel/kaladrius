@@ -126,24 +126,24 @@ def _orcamentos(hoje):
 
 
 def _soma_dos_saldos(parcelas):
-    saldos = list(parcelas.values_list("saldo", flat=True))
+    saldos = list(parcelas.values_list("balance", flat=True))
     return sum(saldos, start=ZERO), len(saldos)
 
 
 def _recebimentos(hoje):
     recebidos = financeiro.pagamentos_validos().filter(
-        date=hoje, parcela__entry__kind=Entry.Tipo.RECEBER
+        date=hoje, installment__entry__kind=Entry.Tipo.RECEBER
     )
     formas = rotulos_das_formas()
     por_forma = [
-        (formas.get(forma, forma), total)
-        for forma, total in recebidos.order_by()
-        .values_list("forma")
+        (formas.get(method, method), total)
+        for method, total in recebidos.order_by()
+        .values_list("method")
         .annotate(total=Sum("amount"))
         .order_by("-total")
     ]
     a_receber, parcelas = _soma_dos_saldos(
-        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, vencimento=hoje)
+        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, due_date=hoje)
     )
     return {
         "recebido": sum((total for _forma, total in por_forma), start=ZERO),
@@ -151,7 +151,7 @@ def _recebimentos(hoje):
         "a_receber": a_receber,
         "parcelas_a_receber": parcelas,
         "caixas": list(
-            CashRegister.objects.filter(fechado_em__isnull=True).select_related("account")
+            CashRegister.objects.filter(closed_at__isnull=True).select_related("account")
         ),
     }
 
@@ -167,12 +167,12 @@ def _financeiro(hoje):
     recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
     abertas = Installment.objects.abertas()
     vencido, parcelas_vencidas = _soma_dos_saldos(
-        abertas.filter(entry__kind=Entry.Tipo.RECEBER, vencimento__lt=hoje)
+        abertas.filter(entry__kind=Entry.Tipo.RECEBER, due_date__lt=hoje)
     )
     a_pagar, contas_a_pagar = _soma_dos_saldos(
         abertas.filter(
             entry__kind=Entry.Tipo.PAGAR,
-            vencimento__lte=hoje + datetime.timedelta(days=DIAS_A_PAGAR),
+            due_date__lte=hoje + datetime.timedelta(days=DIAS_A_PAGAR),
         )
     )
     return {

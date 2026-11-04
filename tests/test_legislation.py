@@ -65,20 +65,20 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             description="Limpeza",
             category=cenario["category"],
             practitioner=dra,
-            valor_total=Decimal("100"),
+            total_amount=Decimal("100"),
             parcelas=1,
             primeiro_vencimento=HOJE,
             user=cenario["admin"],
         )
-        pagamento = services.receber(
+        payment = services.receber(
             parcelas_de(cenario, entry)[0],
             user=cenario["admin"],
             amount=Decimal("100"),
-            forma="dinheiro",
-            account=cenario["caixa"],
+            method="dinheiro",
+            account=cenario["cash_register"],
         )
     admin = entrar(cenario, "admin")
-    url = reverse("finance:receipt", args=[pagamento.pk])
+    url = reverse("finance:receipt", args=[payment.pk])
     pagina = admin.get(url).content.decode()
     assert "Dra. Fictícia (CRO-SP 12345)" in pagina
     assert "documento fiscal" not in pagina

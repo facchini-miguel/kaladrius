@@ -96,7 +96,7 @@ def folha(request):
     ]
     lancar_form = LancarForm(
         dados if dados and dados.get("acao") == "lancar" else None,
-        initial={"vencimento": services.fim_do_mes(competencia) + datetime.timedelta(days=5)},
+        initial={"due_date": services.fim_do_mes(competencia) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
         if not pode_alterar:
@@ -114,7 +114,7 @@ def folha(request):
                     lancadas = services.lancar(
                         [f for f, form in linhas if form is not None],
                         category=lancar_form.cleaned_data["category"],
-                        vencimento=lancar_form.cleaned_data["vencimento"],
+                        due_date=lancar_form.cleaned_data["due_date"],
                         user=request.user,
                     )
                 except ValidationError as erro:

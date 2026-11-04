@@ -164,7 +164,7 @@ class Payroll(ModeloDaClinica):
 
     @property
     def lancada(self):
-        return self.entry_id is not None and not self.entry.cancelado
+        return self.entry_id is not None and not self.entry.cancelled
 
 
 def hora_extra_sugerida(salario):

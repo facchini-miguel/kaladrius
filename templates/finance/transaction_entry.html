@@ -11,6 +11,6 @@
   {% include "includes/form.html" %}
   <p class="text-body-secondary small">{% if transacao.entrada %}{% translate "Cria um lançamento a receber já recebido nesta data e nesta conta, conciliado com a transação." %}{% else %}{% translate "Cria uma despesa já paga nesta data e nesta conta, conciliada com a transação." %}{% endif %}</p>
   <button type="submit" class="btn btn-primary">{% translate "Criar e conciliar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:statement' transacao.importacao_id %}#t{{ transacao.pk }}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:statement' transacao.statement_import_id %}#t{{ transacao.pk }}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

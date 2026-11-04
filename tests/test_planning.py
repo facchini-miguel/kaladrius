@@ -33,21 +33,21 @@ def pagar(clinic, category, amount, date=HOJE):
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.PAGAR,
-            pessoa="Fictício",
+            payer="Fictício",
             description="Despesa",
             category=Category.objects.get(name=category),
-            valor_total=Decimal(amount),
+            total_amount=Decimal(amount),
             parcelas=1,
             primeiro_vencimento=date,
             user=None,
         )
-        parcela = entry.parcelas.get()
+        installment = entry.parcelas.get()
         services.receber(
-            parcela,
+            installment,
             user=None,
-            amount=parcela.amount,
+            amount=installment.amount,
             date=date,
-            forma="pix",
+            method="pix",
             account=FinancialAccount.objects.get(name="Caixa"),
         )
 
@@ -67,14 +67,14 @@ def test_fracao_do_ano(hoje, esperado):
 def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
     ocupacao = group(clinica_a, "Ocupação")
     # With the thousands dot, as people type it (review stage 3: it was refused).
-    resposta = admin.post(f"{URL}?ano={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
+    resposta = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         assert Planning.objects.get().amount == Decimal("12000.50")
-    pagina = admin.get(f"{URL}?ano={HOJE.year}").content.decode()
+    pagina = admin.get(f"{URL}?year={HOJE.year}").content.decode()
     assert 'value="12000,50"' in pagina  # shown back with a comma, not as 12000.50
     # Blank removes the goal.
-    admin.post(f"{URL}?ano={HOJE.year}", {f"meta-{ocupacao.pk}": ""})
+    admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": ""})
     with usar_clinica(clinica_a):
         assert not Planning.objects.exists()
 
@@ -82,24 +82,24 @@ def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
 def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
     with usar_clinica(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
-        Planning.objects.create(ano=HOJE.year, group=ocupacao, amount=Decimal("1000"))
+        Planning.objects.create(year=HOJE.year, group=ocupacao, amount=Decimal("1000"))
     pagar(clinica_a, "Aluguel", "250")
     pagar(clinica_a, "Manutenção", "50")
     pagar(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
-    despesas = admin.get(f"{URL}?ano={HOJE.year}").context["secoes"][1]
+    despesas = admin.get(f"{URL}?year={HOJE.year}").context["secoes"][1]
     linha = next(linha for linha in despesas["linhas"] if linha["group"] == ocupacao)
-    assert (linha["realizado"], linha["percentual"]) == (Decimal("300.00"), 30)
+    assert (linha["realizado"], linha["percentage"]) == (Decimal("300.00"), 30)
     assert despesas["meta"] == Decimal("1000") and despesas["realizado"] == Decimal("300.00")
 
 
 def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
     with usar_clinica(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", pai=pessoal)
-        Planning.objects.create(ano=2026, group=pessoal, amount=Decimal("5000"))
-        Planning.objects.create(ano=2026, group=sub, amount=Decimal("2000"))
+        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal)
+        Planning.objects.create(year=2026, group=pessoal, amount=Decimal("5000"))
+        Planning.objects.create(year=2026, group=sub, amount=Decimal("2000"))
         Planning.objects.create(
-            ano=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
+            year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
         despesas = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))["secoes"][1]
     assert despesas["meta"] == Decimal("5700")
@@ -109,10 +109,10 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
 def test_em_dia_para_receita_e_despesa(clinica_a):
     with usar_clinica(clinica_a):
         Planning.objects.create(
-            ano=2026, group=AccountGroup.objects.get(name="Atendimentos"), amount=Decimal("1200")
+            year=2026, group=AccountGroup.objects.get(name="Atendimentos"), amount=Decimal("1200")
         )
         Planning.objects.create(
-            ano=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
+            year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
         dados = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))
     receita = next(linha for linha in dados["secoes"][0]["linhas"] if linha["meta"])
@@ -125,21 +125,21 @@ def test_copiar_metas_do_ano_anterior(clinica_a, admin):
     with usar_clinica(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         impostos = AccountGroup.objects.get(name="Impostos")
-        Planning.objects.create(ano=HOJE.year - 1, group=ocupacao, amount=Decimal("900"))
-        Planning.objects.create(ano=HOJE.year - 1, group=impostos, amount=Decimal("300"))
-        Planning.objects.create(ano=HOJE.year, group=impostos, amount=Decimal("400"))
-    pagina = admin.get(f"{URL}?ano={HOJE.year}")
+        Planning.objects.create(year=HOJE.year - 1, group=ocupacao, amount=Decimal("900"))
+        Planning.objects.create(year=HOJE.year - 1, group=impostos, amount=Decimal("300"))
+        Planning.objects.create(year=HOJE.year, group=impostos, amount=Decimal("400"))
+    pagina = admin.get(f"{URL}?year={HOJE.year}")
     assert pagina.context["tem_metas_anteriores"]
-    admin.post(f"{URL}?ano={HOJE.year}", {"acao": "copiar"})
+    admin.post(f"{URL}?year={HOJE.year}", {"acao": "copiar"})
     with usar_clinica(clinica_a):
         deste_ano = dict(
-            Planning.objects.filter(ano=HOJE.year).values_list("group__name", "amount")
+            Planning.objects.filter(year=HOJE.year).values_list("group__name", "amount")
         )
     assert deste_ano == {"Ocupação": Decimal("900.00"), "Impostos": Decimal("400.00")}
 
 
 def test_ano_invalido_volta_para_o_atual(admin):
-    assert admin.get(URL, {"ano": "abc"}).context["ano"] == HOJE.year
+    assert admin.get(URL, {"year": "abc"}).context["year"] == HOJE.year
 
 
 def test_permissoes(clinica_a, criar_usuario, cliente_de):

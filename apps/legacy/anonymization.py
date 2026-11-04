@@ -230,7 +230,7 @@ class _Anonimizador:
             .exclude(entry=None)
             .select_related("employee", "entry")
         ):
-            Entry.objects.filter(pk=folha.entry_id).update(pessoa=folha.employee.name)
+            Entry.objects.filter(pk=folha.entry_id).update(payer=folha.employee.name)
 
     def fornecedores(self):
         """A supplier who is a person is personal data; any supplier's contacts may be."""
@@ -254,17 +254,17 @@ class _Anonimizador:
     def financeiro(self):
         """Free text of financial entries (payer, description, notes) may name people."""
         lancamentos = list(
-            Entry.objects.filter(clinic=self.clinic).select_related("category", "fornecedor")
+            Entry.objects.filter(clinic=self.clinic).select_related("category", "supplier")
         )
         for entry in lancamentos:
             entry.description = entry.category.name
-            if entry.fornecedor_id:
-                entry.pessoa = entry.fornecedor.name
+            if entry.supplier_id:
+                entry.payer = entry.supplier.name
             else:
-                entry.pessoa = self._nome(self.sorte.choice("FM")) if entry.pessoa else ""
+                entry.payer = self._nome(self.sorte.choice("FM")) if entry.payer else ""
             entry.notes = ""
-        Entry.objects.bulk_update(lancamentos, ["description", "pessoa", "notes"], batch_size=500)
-        Payment.objects.filter(clinic=self.clinic).update(note="", cartao_codigo="")
+        Entry.objects.bulk_update(lancamentos, ["description", "payer", "notes"], batch_size=500)
+        Payment.objects.filter(clinic=self.clinic).update(note="", card_transaction_code="")
         CashRegister.objects.filter(clinic=self.clinic).update(note="")
         Estimate.objects.filter(clinic=self.clinic).update(notes="")
         CashMovement.objects.filter(clinic=self.clinic).update(reason="-")

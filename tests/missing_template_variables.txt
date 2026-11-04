@@ -113,13 +113,13 @@ finance/entry.html  saude_alerta
 finance/entry_form.html  ajuda
 finance/entry_form.html  backup_atrasado
 finance/entry_form.html  backup_nenhum
-finance/entry_form.html  form.centro_custo
+finance/entry_form.html  form.cost_center
 finance/entry_form.html  patient.name
 finance/entry_form.html  rotulo
 finance/entry_form.html  saude_alerta
 finance/expense_form.html  backup_atrasado
 finance/expense_form.html  backup_nenhum
-finance/expense_form.html  form.centro_custo
+finance/expense_form.html  form.cost_center
 finance/expense_form.html  saude_alerta
 finance/group_form.html  backup_atrasado
 finance/group_form.html  backup_nenhum

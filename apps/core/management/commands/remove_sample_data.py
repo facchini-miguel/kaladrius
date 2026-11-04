@@ -81,7 +81,7 @@ class Command(BaseCommand):
             pacientes = Patient.objects.filter(clinic__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first. Groups of
             # the chart of accounts protect their parent group: unlink them first.
-            AccountGroup.objects.filter(clinic__in=clinicas).update(pai=None)
+            AccountGroup.objects.filter(clinic__in=clinicas).update(parent=None)
             for modelo in (
                 BankTransaction,
                 StatementImport,

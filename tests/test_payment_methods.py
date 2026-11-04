@@ -64,18 +64,18 @@ def test_cheque_com_a_grafia_de_cada_ingles():
 def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     mudar_pais(cenario, "PE")
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, entry)[0]
-    url = reverse("finance:receive_installment", args=[parcela.pk])
+    installment = parcelas_de(cenario, entry)[0]
+    url = reverse("finance:receive_installment", args=[installment.pk])
     admin = entrar(cenario, "admin")
     pagina = admin.get(url).content.decode()
     assert 'value="carteira"' in pagina and "Yape, Plin" in pagina
     assert 'value="pix"' not in pagina and 'value="boleto"' not in pagina
-    dados = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["caixa"].pk}
-    assert "forma" in admin.post(url, {**dados, "forma": "pix"}).context["form"].errors
-    assert admin.post(url, {**dados, "forma": "carteira"}).status_code == 302
+    dados = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["cash_register"].pk}
+    assert "method" in admin.post(url, {**dados, "method": "pix"}).context["form"].errors
+    assert admin.post(url, {**dados, "method": "carteira"}).status_code == 302
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
-        pagamento = Payment.objects.get()
-        assert pagamento.get_forma_display() == "Carteira digital (Yape, Plin)"
+        payment = Payment.objects.get()
+        assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
         relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
     nova = admin.get(reverse("finance:entry_new")).content.decode()
@@ -84,50 +84,52 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
 
 def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, entry)[0]
-    url = reverse("finance:receive_installment", args=[parcela.pk])
+    installment = parcelas_de(cenario, entry)[0]
+    url = reverse("finance:receive_installment", args=[installment.pk])
     admin = entrar(cenario, "admin")
     form = admin.get(url).context["form"]
-    assert "cartao_parcelas" in form.fields and "NSU" in str(form.fields["cartao_codigo"].label)
+    assert "card_installments" in form.fields and "NSU" in str(
+        form.fields["card_transaction_code"].label
+    )
 
     mudar_pais(cenario, "US")
     form = admin.get(url).context["form"]
-    assert "cartao_parcelas" not in form.fields
-    assert "NSU" not in str(form.fields["cartao_codigo"].label)
+    assert "card_installments" not in form.fields
+    assert "NSU" not in str(form.fields["card_transaction_code"].label)
     dados = {
         "date": HOJE.isoformat(),
         "amount": "100",
-        "account": cenario["caixa"].pk,
-        "forma": "hsa",
-        "cartao_bandeira": "Visa",
-        "cartao_parcelas": "3",
-        "cartao_codigo": "A1B2",
+        "account": cenario["cash_register"].pk,
+        "method": "hsa",
+        "card_brand": "Visa",
+        "card_installments": "3",
+        "card_transaction_code": "A1B2",
     }
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(cenario["clinic"]):
-        pagamento = Payment.objects.get()
+        payment = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
-    assert (pagamento.cartao_bandeira, pagamento.cartao_codigo) == ("Visa", "A1B2")
-    assert pagamento.cartao_parcelas is None
+    assert (payment.card_brand, payment.card_transaction_code) == ("Visa", "A1B2")
+    assert payment.card_installments is None
 
 
 def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, entry)[0]
-    url = reverse("finance:receive_installment", args=[parcela.pk])
+    installment = parcelas_de(cenario, entry)[0]
+    url = reverse("finance:receive_installment", args=[installment.pk])
     dados = {
         "date": HOJE.isoformat(),
         "amount": "100",
-        "account": cenario["caixa"].pk,
-        "forma": "pix",
-        "cartao_bandeira": "Visa",
-        "cartao_parcelas": "3",
-        "cartao_codigo": "A1B2",
+        "account": cenario["cash_register"].pk,
+        "method": "pix",
+        "card_brand": "Visa",
+        "card_installments": "3",
+        "card_transaction_code": "A1B2",
     }
     assert entrar(cenario, "admin").post(url, dados).status_code == 302
     with usar_clinica(cenario["clinic"]):
-        pagamento = Payment.objects.get()
-    assert (pagamento.cartao_bandeira, pagamento.cartao_parcelas, pagamento.cartao_codigo) == (
+        payment = Payment.objects.get()
+    assert (payment.card_brand, payment.card_installments, payment.card_transaction_code) == (
         "",
         None,
         "",
@@ -137,13 +139,13 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
-        pagamento = services.receber(
+        payment = services.receber(
             parcelas_de(cenario, entry)[0],
             user=cenario["admin"],
             amount=Decimal("100"),
-            forma="pix",
-            account=cenario["caixa"],
+            method="pix",
+            account=cenario["cash_register"],
         )
         mudar_pais(cenario, "US")
-        assert pagamento.get_forma_display() == "Pix"
+        assert payment.get_method_display() == "Pix"
         assert services.relatorio(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]

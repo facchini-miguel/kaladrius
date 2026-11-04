@@ -150,7 +150,7 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     if not (pacientes and categorias and contas):
         return 0, 0
     hoje = timezone.localdate()
-    formas = [forma for forma, _rotulo in Payment.Forma.em_uso(clinic.pais)]
+    formas = [method for method, _rotulo in Payment.Forma.em_uso(clinic.pais)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
         name: CostCenter.objects.get_or_create(clinic=clinic, name=name)[0]
@@ -165,22 +165,22 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
             patient=sorteio.choice(pacientes),
             description=sorteio.choice(DESCRICOES_FINANCEIRAS),
             category=sorteio.choice(categorias),
-            centro_custo=centros["Atendimento"],
+            cost_center=centros["Atendimento"],
             practitioner=sorteio.choice(profissionais) if profissionais else None,
-            valor_total=Decimal(sorteio.randrange(150, 3000, 10)),
+            total_amount=Decimal(sorteio.randrange(150, 3000, 10)),
             date=date,
             parcelas=sorteio.choice([1, 1, 2, 3, 4, 6]),
             primeiro_vencimento=date,
             user=user,
         )
-        for parcela in entry.parcelas.all():
-            if parcela.vencimento <= hoje and sorteio.random() < 0.8:
+        for installment in entry.parcelas.all():
+            if installment.due_date <= hoje and sorteio.random() < 0.8:
                 services.receber(
-                    parcela,
+                    installment,
                     user=user,
-                    amount=parcela.amount,
-                    date=parcela.vencimento,
-                    forma=sorteio.choice(formas),
+                    amount=installment.amount,
+                    date=installment.due_date,
+                    method=sorteio.choice(formas),
                     account=sorteio.choice(contas),
                 )
         criados += 1
@@ -211,43 +211,43 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     # Bills are paid the way the clinic's country pays them (decision 123).
     do_pais = metodos.do_pais(clinic.pais).codigos
     contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
-    formas = [forma for forma in contas_a_pagar if forma in do_pais]
+    formas = [method for method in contas_a_pagar if method in do_pais]
     categorias = {
         c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Tipo.DESPESA)
     }
     hoje = timezone.localdate()
     start = services.somar_meses(hoje.replace(day=10), -2)
     criadas = 0
-    for fornecedor, description, category, amount, meses in DESPESAS_SIMULADAS:
+    for supplier, description, category, amount, meses in DESPESAS_SIMULADAS:
         if category not in categorias:
             continue
         parcelas = meses or sorteio.choice([1, 2, 3])
         amount = Decimal(amount)
-        cadastro, _criado = Supplier.objects.get_or_create(clinic=clinic, name=fornecedor)
+        cadastro, _criado = Supplier.objects.get_or_create(clinic=clinic, name=supplier)
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.PAGAR,
-            fornecedor=cadastro,
-            pessoa=fornecedor,
+            supplier=cadastro,
+            payer=supplier,
             description=description,
             category=categorias[category],
-            centro_custo=centros[
+            cost_center=centros[
                 "Atendimento" if category in DESPESAS_DO_ATENDIMENTO else "Administrativo"
             ],
-            valor_total=amount * parcelas if meses else amount,
+            total_amount=amount * parcelas if meses else amount,
             date=start,
             parcelas=parcelas,
             primeiro_vencimento=start if meses else hoje - datetime.timedelta(days=20),
             user=user,
         )
-        for parcela in entry.parcelas.all():
-            if parcela.vencimento <= hoje and sorteio.random() < 0.9:
+        for installment in entry.parcelas.all():
+            if installment.due_date <= hoje and sorteio.random() < 0.9:
                 services.receber(
-                    parcela,
+                    installment,
                     user=user,
-                    amount=parcela.amount,
-                    date=parcela.vencimento,
-                    forma=sorteio.choice(formas),
+                    amount=installment.amount,
+                    date=installment.due_date,
+                    method=sorteio.choice(formas),
                     account=sorteio.choice(contas),
                 )
         criadas += 1
@@ -356,7 +356,7 @@ def simular_comissoes(clinic, sorteio, user=None):
             commissions.pagar(
                 practitioner,
                 until=fim_do_mes_passado,
-                vencimento=fim_do_mes_passado + datetime.timedelta(days=5),
+                due_date=fim_do_mes_passado + datetime.timedelta(days=5),
                 category=category,
                 user=user,
             )

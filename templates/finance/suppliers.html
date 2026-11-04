@@ -32,16 +32,16 @@
       </tr>
     </thead>
     <tbody>
-      {% for fornecedor in pagina %}
+      {% for supplier in pagina %}
       <tr>
         <td>
-          <a href="{% url 'finance:supplier' fornecedor.pk %}">{{ fornecedor.name }}</a>
-          {% if not fornecedor.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
+          <a href="{% url 'finance:supplier' supplier.pk %}">{{ supplier.name }}</a>
+          {% if not supplier.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ fornecedor.tax_id|documento:fornecedor.papel_documento|default:"—" }}</td>
-        <td class="text-nowrap">{{ fornecedor.phone|phone|default:"—" }}</td>
-        <td class="text-nowrap">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-nowrap">{{ supplier.tax_id|documento:supplier.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ supplier.phone|phone|default:"—" }}</td>
+        <td class="text-nowrap">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum fornecedor encontrado." %}</td></tr>

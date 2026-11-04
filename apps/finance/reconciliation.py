@@ -34,17 +34,17 @@ def importar(account, *, nome_arquivo, conteudo, user):
     extrato = ofx.ler(conteudo)
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
-    importacao = StatementImport.objects.create(
+    statement_import = StatementImport.objects.create(
         clinic=account.clinic,
         account=account,
         file=nome_arquivo[:200],
-        banco=extrato.banco,
-        conta_no_banco=extrato.account,
+        bank_code=extrato.bank_code,
+        bank_account_number=extrato.account,
         start=extrato.start or min(t.date for t in extrato.transacoes),
         end=extrato.end or max(t.date for t in extrato.transacoes),
-        saldo=extrato.saldo,
-        saldo_em=extrato.saldo_em or extrato.end,
-        ignoradas=extrato.ignoradas,
+        balance=extrato.balance,
+        balance_date=extrato.balance_date or extrato.end,
+        unreadable_transactions=extrato.unreadable_transactions,
         created_by=user,
     )
     existentes = set(
@@ -58,7 +58,7 @@ def importar(account, *, nome_arquivo, conteudo, user):
             BankTransaction(
                 clinic=account.clinic,
                 account=account,
-                importacao=importacao,
+                statement_import=statement_import,
                 fitid=t.fitid,
                 date=t.date,
                 amount=t.amount,
@@ -71,26 +71,30 @@ def importar(account, *, nome_arquivo, conteudo, user):
         ignore_conflicts=True,  # another import of the same file at the same moment
     )
     # Counted in the database: with ignore_conflicts, bulk_create returns skipped rows too.
-    importacao.novas = BankTransaction.objects.filter(importacao=importacao).count()
-    importacao.repetidas = len(extrato.transacoes) - importacao.novas
-    importacao.save(update_fields=["novas", "repetidas"])
-    return importacao
+    statement_import.new_transactions = BankTransaction.objects.filter(
+        statement_import=statement_import
+    ).count()
+    statement_import.duplicate_transactions = (
+        len(extrato.transacoes) - statement_import.new_transactions
+    )
+    statement_import.save(update_fields=["new_transactions", "duplicate_transactions"])
+    return statement_import
 
 
-def outra_conta_no_banco(importacao):
+def outra_conta_no_banco(statement_import):
     """The bank account number of an earlier import into the same account, if different."""
     anterior = (
-        StatementImport.objects.filter(account=importacao.account)
-        .exclude(pk=importacao.pk)
-        .exclude(conta_no_banco="")
+        StatementImport.objects.filter(account=statement_import.account)
+        .exclude(pk=statement_import.pk)
+        .exclude(bank_account_number="")
         .first()
     )
     if (
         anterior
-        and importacao.conta_no_banco
-        and anterior.conta_no_banco != importacao.conta_no_banco
+        and statement_import.bank_account_number
+        and anterior.bank_account_number != statement_import.bank_account_number
     ):
-        return anterior.conta_no_banco
+        return anterior.bank_account_number
     return None
 
 
@@ -112,15 +116,15 @@ def candidatos(transacoes):
     until = max(t.date for t in pendentes) + JANELA
     pagamentos = list(
         Payment.objects.filter(
-            account_id__in=contas, estornado=False, transacao__isnull=True, date__range=(de, until)
-        ).select_related("parcela__entry__patient")
+            account_id__in=contas, reversed=False, transacao__isnull=True, date__range=(de, until)
+        ).select_related("installment__entry__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
-            outra_conta_id__in=contas,
+            other_account_id__in=contas,
             transacao__isnull=True,
             created_at__date__range=(de, until),
-        ).select_related("caixa__account")
+        ).select_related("cash_register__account")
     )
     resultado = {}
     for t in pendentes:
@@ -130,7 +134,7 @@ def candidatos(transacoes):
         tipo_movimento = CashMovement.Tipo.RETIRADA if t.entrada else CashMovement.Tipo.REFORCO
         lista = []
         for p in pagamentos:
-            entry = p.parcela.entry
+            entry = p.installment.entry
             if (
                 p.account_id == t.account_id
                 and p.amount == amount
@@ -148,7 +152,7 @@ def candidatos(transacoes):
         for m in movimentos:
             date = timezone.localtime(m.created_at).date()
             if (
-                m.outra_conta_id == t.account_id
+                m.other_account_id == t.account_id
                 and m.amount == amount
                 and m.kind == tipo_movimento
                 and abs(date - t.date) <= JANELA
@@ -157,7 +161,7 @@ def candidatos(transacoes):
                     Candidato(
                         f"m{m.pk}",
                         date,
-                        f"{m.caixa.account} · {m.get_kind_display()}: {m.reason}",
+                        f"{m.cash_register.account} · {m.get_kind_display()}: {m.reason}",
                         m,
                     )
                 )
@@ -168,12 +172,12 @@ def candidatos(transacoes):
 
 def _vincular(transacao, candidato, user):
     if isinstance(candidato.objeto, Payment):
-        transacao.pagamento = candidato.objeto
+        transacao.payment = candidato.objeto
     else:
-        transacao.movimento = candidato.objeto
+        transacao.cash_movement = candidato.objeto
     transacao.status = Situacao.CONCILIADA
-    transacao.conciliado_por = user
-    transacao.conciliado_em = timezone.now()
+    transacao.reconciled_by = user
+    transacao.reconciled_at = timezone.now()
     try:
         with transaction.atomic():
             transacao.save()
@@ -200,11 +204,11 @@ def conciliar(transacao, chave, *, user):
 
 
 @transaction.atomic
-def conciliar_unicos(importacao, *, user):
+def conciliar_unicos(statement_import, *, user):
     """Reconcile every pending line with exactly one candidate that no other line wants."""
     transacoes = list(
         BankTransaction.objects.select_for_update().filter(
-            importacao=importacao, status=Situacao.PENDENTE
+            statement_import=statement_import, status=Situacao.PENDENTE
         )
     )
     por_transacao = candidatos(transacoes)
@@ -219,29 +223,29 @@ def conciliar_unicos(importacao, *, user):
 
 
 @transaction.atomic
-def criar_lancamento(transacao, *, description, category, pessoa, forma, user):
+def criar_lancamento(transacao, *, description, category, payer, method, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
     entry = services.criar_lancamento(
         clinic=transacao.clinic,
         kind=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
-        pessoa=pessoa or description,
+        payer=payer or description,
         description=description,
         category=category,
-        valor_total=abs(transacao.amount),
+        total_amount=abs(transacao.amount),
         parcelas=1,
         primeiro_vencimento=transacao.date,
         user=user,
     )
-    pagamento = services.receber(
+    payment = services.receber(
         entry.parcelas.get(),
         user=user,
         amount=abs(transacao.amount),
-        forma=forma,
+        method=method,
         account=transacao.account,
         date=transacao.date,
     )
-    _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.date, "", pagamento), user)
+    _vincular(transacao, Candidato(f"p{payment.pk}", payment.date, "", payment), user)
     return entry
 
 
@@ -250,8 +254,8 @@ def ignorar(transacao, *, reason, user):
     transacao = _pendente(transacao)
     transacao.status = Situacao.IGNORADA
     transacao.reason = reason
-    transacao.conciliado_por = user
-    transacao.conciliado_em = timezone.now()
+    transacao.reconciled_by = user
+    transacao.reconciled_at = timezone.now()
     transacao.save()
 
 
@@ -260,19 +264,19 @@ def desfazer(transacao):
     """Back to pending. An entry created from the line stays (cancel it if it was wrong)."""
     transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
     transacao.status = Situacao.PENDENTE
-    transacao.pagamento = None
-    transacao.movimento = None
+    transacao.payment = None
+    transacao.cash_movement = None
     transacao.reason = ""
-    transacao.conciliado_por = None
-    transacao.conciliado_em = None
+    transacao.reconciled_by = None
+    transacao.reconciled_at = None
     transacao.save()
 
 
-def saldo_no_sistema(importacao):
+def saldo_no_sistema(statement_import):
     """The system's balance of the account on the bank balance date (None without one)."""
-    if importacao.saldo is None or importacao.saldo_em is None:
+    if statement_import.balance is None or statement_import.balance_date is None:
         return None
-    for account, saldo in services.saldos_das_contas(until=importacao.saldo_em):
-        if account.pk == importacao.account_id:
-            return saldo
+    for account, balance in services.saldos_das_contas(until=statement_import.balance_date):
+        if account.pk == statement_import.account_id:
+            return balance
     return None

@@ -354,15 +354,15 @@ def test_anonimizacao_dos_fornecedores(importado):
         )
         empresa = Supplier.objects.create(name="Dental Fictícia", whatsapp="48999990000")
         category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
-        for fornecedor in (pessoa, empresa):
+        for supplier in (pessoa, empresa):
             services.criar_lancamento(
                 clinic=clinic,
                 kind=Entry.Tipo.PAGAR,
-                fornecedor=fornecedor,
-                pessoa=fornecedor.name,
+                supplier=supplier,
+                payer=supplier.name,
                 description="Compra",
                 category=category,
-                valor_total=Decimal("10"),
+                total_amount=Decimal("10"),
                 parcelas=1,
                 primeiro_vencimento=HOJE,
                 user=None,
@@ -377,7 +377,7 @@ def test_anonimizacao_dos_fornecedores(importado):
     assert len(empresa.whatsapp) == 11 and empresa.whatsapp != "48999990000"
     # Payables keep showing their supplier's (new) name.
     for entry in dados(clinic, Entry, kind=Entry.Tipo.PAGAR):
-        assert entry.pessoa == entry.fornecedor.name
+        assert entry.payer == entry.supplier.name
 
 
 def test_anonimizacao_das_carteirinhas(importado):
@@ -414,10 +414,10 @@ def test_anonimizacao_dos_funcionarios(importado):
         folha.entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.PAGAR,
-            pessoa=funcionaria.name,
+            payer=funcionaria.name,
             description="Salário",
             category=category,
-            valor_total=Decimal("2000"),
+            total_amount=Decimal("2000"),
             parcelas=1,
             primeiro_vencimento=HOJE,
             user=None,
@@ -429,5 +429,5 @@ def test_anonimizacao_dos_funcionarios(importado):
     assert "Fulana" not in funcionaria.name and funcionaria.cpf == ""
     assert len(funcionaria.phone) == 10 and folha.note == ""
     with usar_clinica(clinic):
-        assert Entry.objects.get(pk=folha.entry_id).pessoa == funcionaria.name
+        assert Entry.objects.get(pk=folha.entry_id).payer == funcionaria.name
         assert funcionaria.salario_em(HOJE) == Decimal("2000")

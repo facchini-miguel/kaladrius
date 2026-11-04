@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Recibo" %} {{ pagamento.pk }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Recibo" %} {{ payment.pk }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex gap-2 mb-3 d-print-none">
@@ -10,7 +10,7 @@
 </div>
 
 <div class="recibo bg-white border rounded p-4 position-relative">
-  {% if pagamento.estornado %}<div class="recibo-estornado">{% translate "ESTORNADO" %}</div>{% endif %}
+  {% if payment.reversed %}<div class="recibo-estornado">{% translate "ESTORNADO" %}</div>{% endif %}
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>
@@ -20,30 +20,30 @@
     </div>
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "RECIBO" %}</div>
-      <div class="small">{% translate "Nº" %} {{ pagamento.pk }}</div>
-      <div class="fs-5 mt-1">{{ pagamento.amount|moeda }}</div>
+      <div class="small">{% translate "Nº" %} {{ payment.pk }}</div>
+      <div class="fs-5 mt-1">{{ payment.amount|moeda }}</div>
     </div>
   </div>
   <p class="fs-6">
     {% if entry.patient.tax_id %}
-    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.tax_id|sigla_documento:entry.patient.papel_documento documento=entry.patient.tax_id|documento:entry.patient.papel_documento valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.tax_id|sigla_documento:entry.patient.papel_documento documento=entry.patient.tax_id|documento:entry.patient.papel_documento valor=payment.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
-    {% blocktranslate with nome=entry.nome_pessoa valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=entry.nome_pessoa valor=payment.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}
-    {% blocktranslate with descricao=entry.description numero=pagamento.parcela.number total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
+    {% blocktranslate with descricao=entry.description numero=payment.installment.number total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
   </p>
   <ul class="list-unstyled small mb-4">
-    <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
-    {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
-    {% if pagamento.discount %}<li>{% translate "Desconto" %}: {{ pagamento.discount|moeda }}</li>{% endif %}
+    <li>{% translate "Forma de pagamento" %}: {{ payment.get_method_display }}{% if payment.card_brand %} ({{ payment.card_brand }}{% if payment.card_installments %}, {% blocktranslate count n=payment.card_installments %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
+    {% if payment.interest %}<li>{% translate "Juros e multa incluídos" %}: {{ payment.interest|moeda }}</li>{% endif %}
+    {% if payment.discount %}<li>{% translate "Desconto" %}: {{ payment.discount|moeda }}</li>{% endif %}
     {% if entry.practitioner %}<li>{% translate "Profissional" %}: {{ entry.practitioner.name }}{% if entry.practitioner.registration %} ({{ entry.practitioner.registration }}){% endif %}</li>{% endif %}
-    {% if pagamento.note %}<li>{{ pagamento.note }}</li>{% endif %}
+    {% if payment.note %}<li>{{ payment.note }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">
-    <div class="text-nowrap">{{ pagamento.date|date:"DATE_FORMAT" }}</div>
+    <div class="text-nowrap">{{ payment.date|date:"DATE_FORMAT" }}</div>
     <div class="text-center" style="min-width: min(18rem, 100%);">
       <div class="border-top pt-1">{{ clinica_atual.name }}</div>
-      {% if pagamento.created_by %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.created_by.get_full_name|default:pagamento.created_by.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
+      {% if payment.created_by %}<div class="small text-body-secondary">{% blocktranslate with nome=payment.created_by.get_full_name|default:payment.created_by.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
     </div>
   </div>
   {% if documento_fiscal %}<p class="small text-body-secondary border-top pt-2 mt-3 mb-0">{% blocktranslate with documento=documento_fiscal %}Este recibo não substitui o documento fiscal ({{ documento }}).{% endblocktranslate %}</p>{% endif %}

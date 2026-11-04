@@ -65,7 +65,7 @@
       <p class="text-body-secondary small">{% translate "Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta no financeiro." %}</p>
       <div class="row">
         <div class="col-md-6">{% with campo=lancar_form.category %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-6">{% with campo=lancar_form.vencimento %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with campo=lancar_form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
       <button type="submit" name="acao" value="lancar" class="btn btn-primary">{% translate "Salvar e lançar no financeiro" %}</button>
     </div>

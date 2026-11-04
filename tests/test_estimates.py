@@ -137,7 +137,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk)
     with usar_clinica(cenario["clinic"]):
         Estimate.objects.filter(pk=orcamento.pk).update(discount=Decimal("200"))
-        caixa = FinancialAccount.objects.get(name="Caixa")
+        cash_register = FinancialAccount.objects.get(name="Caixa")
     url = reverse("estimates:approve", args=[orcamento.pk])
     # The category comes from the first procedure.
     assert recepcao.get(url).context["form"].initial["category"] == cenario["canal"].category
@@ -148,15 +148,15 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
             "primeiro_vencimento": HOJE.isoformat(),
             "category": cenario["canal"].category.pk,
             "recebido_agora": "on",
-            "forma": "pix",
-            "account": caixa.pk,
+            "method": "pix",
+            "account": cash_register.pk,
         },
     )
     orcamento.refresh_from_db()
     entry = orcamento.entry
     assert resposta.url == reverse("finance:entry", args=[entry.pk])
     assert orcamento.status == Estimate.Situacao.APROVADO
-    assert (entry.kind, entry.valor_total) == (
+    assert (entry.kind, entry.total_amount) == (
         Entry.Tipo.RECEBER,
         Decimal("1000.00"),
     )

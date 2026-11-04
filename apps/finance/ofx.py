@@ -30,15 +30,15 @@ class Transacao:
 
 @dataclass
 class Extrato:
-    banco: str
+    bank_code: str
     account: str
     start: datetime.date | None
     end: datetime.date | None
-    saldo: Decimal | None
-    saldo_em: datetime.date | None
+    balance: Decimal | None
+    balance_date: datetime.date | None
     transacoes: list
     # Transaction blocks whose date or amount could not be read (reported to the user).
-    ignoradas: int = 0
+    unreadable_transactions: int = 0
 
 
 def _texto(conteudo: bytes) -> str:
@@ -87,12 +87,12 @@ def ler(conteudo: bytes) -> Extrato:
         raise ArquivoInvalido(_("O arquivo não é um extrato OFX."))
     transacoes = []
     vistos = {}
-    ignoradas = 0
+    unreadable_transactions = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", texto, re.IGNORECASE | re.DOTALL):
         date = _data(_campo(bloco, "DTPOSTED"))
         amount = _valor(_campo(bloco, "TRNAMT"))
         if date is None or amount is None:
-            ignoradas += 1
+            unreadable_transactions += 1
             continue
         if amount == 0:  # nothing moved (some banks list balance lines this way)
             continue
@@ -123,12 +123,12 @@ def ler(conteudo: bytes) -> Extrato:
     saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", texto, re.I | re.S)
     saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
     return Extrato(
-        banco=_campo(texto, "BANKID")[:20],
+        bank_code=_campo(texto, "BANKID")[:20],
         account=_campo(texto, "ACCTID")[:40],
         start=_data(_campo(texto, "DTSTART")),
         end=_data(_campo(texto, "DTEND")),
-        saldo=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
-        saldo_em=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
+        balance=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
+        balance_date=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,
-        ignoradas=ignoradas,
+        unreadable_transactions=unreadable_transactions,
     )

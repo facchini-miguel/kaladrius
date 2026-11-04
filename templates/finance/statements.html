@@ -27,14 +27,14 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Importado em" %}</th><th>{% translate "Conta" %}</th><th>{% translate "Período" %}</th><th>{% translate "Arquivo" %}</th><th class="text-end">{% translate "Novas" %}</th><th class="text-end">{% translate "Pendentes" %}</th></tr></thead>
     <tbody>
-      {% for importacao in pagina %}
+      {% for statement_import in pagina %}
       <tr>
-        <td class="text-nowrap"><a href="{% url 'finance:statement' importacao.pk %}">{{ importacao.created_at|date:"SHORT_DATETIME_FORMAT" }}</a></td>
-        <td>{{ importacao.account }}</td>
-        <td class="text-nowrap">{{ importacao.start|date:"SHORT_DATE_FORMAT" }} – {{ importacao.end|date:"SHORT_DATE_FORMAT" }}</td>
-        <td class="text-break">{{ importacao.file }}</td>
-        <td class="text-end">{{ importacao.novas }}</td>
-        <td class="text-end">{% if importacao.pendentes %}<span class="badge text-bg-warning">{{ importacao.pendentes }}</span>{% else %}<span class="badge text-bg-success">0</span>{% endif %}</td>
+        <td class="text-nowrap"><a href="{% url 'finance:statement' statement_import.pk %}">{{ statement_import.created_at|date:"SHORT_DATETIME_FORMAT" }}</a></td>
+        <td>{{ statement_import.account }}</td>
+        <td class="text-nowrap">{{ statement_import.start|date:"SHORT_DATE_FORMAT" }} – {{ statement_import.end|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-break">{{ statement_import.file }}</td>
+        <td class="text-end">{{ statement_import.new_transactions }}</td>
+        <td class="text-end">{% if statement_import.pendentes %}<span class="badge text-bg-warning">{{ statement_import.pendentes }}</span>{% else %}<span class="badge text-bg-success">0</span>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum extrato importado ainda." %}</td></tr>

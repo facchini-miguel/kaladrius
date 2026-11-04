@@ -27,15 +27,15 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 
 @pytest.fixture
-def parcela(clinica_a):
+def installment(clinica_a):
     with usar_clinica(clinica_a):
         entry = services.criar_lancamento(
             clinic=clinica_a,
             kind=Entry.Tipo.RECEBER,
-            pessoa="Pagador fictício",
+            payer="Pagador fictício",
             description="Consulta",
             category=Category.objects.get(name="Consulta"),
-            valor_total=Decimal("300"),
+            total_amount=Decimal("300"),
             parcelas=1,
             primeiro_vencimento=ANTEONTEM,
             user=None,
@@ -43,40 +43,40 @@ def parcela(clinica_a):
         return entry.parcelas.get()
 
 
-def receber(clinic, parcela, date, amount="100"):
+def receber(clinic, installment, date, amount="100"):
     with usar_clinica(clinic):
         return services.receber(
-            parcela,
+            installment,
             user=None,
             amount=Decimal(amount),
             date=date,
-            forma="pix",
+            method="pix",
             account=FinancialAccount.objects.get(name="Caixa"),
         )
 
 
-def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, parcela, admin):
-    antigo = receber(clinica_a, parcela, ANTEONTEM)
+def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, installment, admin):
+    antigo = receber(clinica_a, installment, ANTEONTEM)
     assert admin.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
     with usar_clinica(clinica_a):
         assert services.fechado_ate(clinica_a.pk) == ONTEM
     with pytest.raises(ValidationError, match="fechado"):
-        receber(clinica_a, parcela, ONTEM)
+        receber(clinica_a, installment, ONTEM)
     with usar_clinica(clinica_a), pytest.raises(ValidationError, match="fechado"):
         services.estornar(antigo, reason="erro", user=None)
     # Today is never closed: money keeps coming in.
-    assert receber(clinica_a, parcela, HOJE).pk
+    assert receber(clinica_a, installment, HOJE).pk
 
 
-def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
+def test_receber_pela_tela_mostra_o_erro(clinica_a, installment, admin):
     with usar_clinica(clinica_a):
         services.fechar(clinica_a, ONTEM, user=None)
     resposta = admin.post(
-        reverse("finance:receive_installment", args=[parcela.pk]),
+        reverse("finance:receive_installment", args=[installment.pk]),
         {
             "date": ONTEM.isoformat(),
             "amount": "100",
-            "forma": "pix",
+            "method": "pix",
             "account": FinancialAccount.todos.get(clinic=clinica_a, name="Caixa").pk,
         },
         follow=True,

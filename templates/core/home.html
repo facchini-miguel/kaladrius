@@ -210,15 +210,15 @@
         <a class="small" href="{% url 'finance:cash' %}">{% translate "Abrir" %}</a>
       </div>
       <div class="card-body">
-        {% for caixa in receb.caixas %}
-        <p class="mb-1"><span class="badge text-bg-success">{% translate "aberto" %}</span> {{ caixa.account.name }} <span class="text-body-secondary small">{% blocktranslate with hora=caixa.aberto_em|time:"H:i" %}desde {{ hora }}{% endblocktranslate %}</span></p>
+        {% for cash_register in receb.caixas %}
+        <p class="mb-1"><span class="badge text-bg-success">{% translate "aberto" %}</span> {{ cash_register.account.name }} <span class="text-body-secondary small">{% blocktranslate with hora=cash_register.opened_at|time:"H:i" %}desde {{ hora }}{% endblocktranslate %}</span></p>
         {% empty %}
         <p class="mb-1"><span class="badge text-bg-secondary">{% translate "fechado" %}</span> {% translate "Nenhum caixa aberto." %}</p>
         {% endfor %}
         {% if receb.por_forma %}
         <table class="table table-sm mb-0 mt-2 small">
-          {% for forma, total in receb.por_forma %}
-          <tr><td>{{ forma }}</td><td class="text-end">{{ total|moeda }}</td></tr>
+          {% for method, total in receb.por_forma %}
+          <tr><td>{{ method }}</td><td class="text-end">{{ total|moeda }}</td></tr>
           {% endfor %}
         </table>
         {% endif %}

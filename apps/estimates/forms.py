@@ -130,7 +130,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     )
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
-    forma = forms.ChoiceField(
+    method = forms.ChoiceField(
         label=_("Forma de pagamento"),
         choices=_formas_com_vazio,
         required=False,
@@ -149,7 +149,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     def clean(self):
         dados = super().clean()
         if dados.get("recebido_agora"):
-            for campo in ("forma", "account"):
+            for campo in ("method", "account"):
                 if not dados.get(campo):
                     self.add_error(campo, _("Informe para registrar o pagamento."))
         return dados

@@ -9,18 +9,18 @@
   <a class="btn btn-link" href="{% url 'finance:commissions' %}">{% translate "Voltar" %}</a>
 </div>
 <div class="recibo bg-white border rounded p-4 position-relative">
-  {% if comissao.cancelada %}<div class="recibo-estornado">{% translate "CANCELADA" %}</div>{% endif %}
+  {% if commission.cancelled %}<div class="recibo-estornado">{% translate "CANCELADA" %}</div>{% endif %}
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>
-      <div>{% translate "Profissional" %}: {{ comissao.practitioner.name }}{% if comissao.practitioner.registration %} ({{ comissao.practitioner.registration }}){% endif %}</div>
+      <div>{% translate "Profissional" %}: {{ commission.practitioner.name }}{% if commission.practitioner.registration %} ({{ commission.practitioner.registration }}){% endif %}</div>
     </div>
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "EXTRATO DE COMISSÃO" %}</div>
-      <div class="small">{% blocktranslate with data=comissao.until|date:"SHORT_DATE_FORMAT" %}recebimentos até {{ data }}{% endblocktranslate %}</div>
-      <div class="small">{% blocktranslate with data=comissao.created_at|date:"SHORT_DATE_FORMAT" %}lançada em {{ data }}{% endblocktranslate %}</div>
+      <div class="small">{% blocktranslate with data=commission.until|date:"SHORT_DATE_FORMAT" %}recebimentos até {{ data }}{% endblocktranslate %}</div>
+      <div class="small">{% blocktranslate with data=commission.created_at|date:"SHORT_DATE_FORMAT" %}lançada em {{ data }}{% endblocktranslate %}</div>
     </div>
   </div>
-  {% include "finance/_commission_items.html" with recebido=comissao.recebido bruta=comissao.bruta amount=comissao.amount percentual=comissao.percentual %}
+  {% include "finance/_commission_items.html" with received_amount=commission.received_amount bruta=commission.bruta amount=commission.amount percentage=commission.percentage %}
 </div>
 {% endblock %}
