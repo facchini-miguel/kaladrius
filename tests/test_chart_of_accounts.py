@@ -8,10 +8,10 @@ from django.db.migrations.executor import MigrationExecutor
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, Conta, GrupoContabil, Lancamento
+from apps.finance import services
+from apps.finance.models import Categoria, Conta, GrupoContabil, Lancamento
 
 pytestmark = pytest.mark.django_db
 
@@ -124,7 +124,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
             (Categoria.objects.get(nome="Comissões"), "300"),
             (avulsa, "50"),
         ):
-            lancamento = servicos.criar_lancamento(
+            lancamento = services.criar_lancamento(
                 clinica=clinica_a,
                 tipo=Lancamento.Tipo.PAGAR,
                 pessoa="Fictício",
@@ -136,7 +136,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
                 usuario=None,
             )
             parcela = lancamento.parcelas.get()
-            servicos.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
+            services.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("financeiro:relatorios")).context["relatorio"]
     assert [(n, nome, str(v)) for n, nome, v in relatorio["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),

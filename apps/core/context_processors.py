@@ -4,9 +4,9 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.functional import SimpleLazyObject
 
-from . import identificacao, modulos, paises
+from . import countries, identification, modules
 from .models import Backup
-from .permissoes import tabela_permissoes
+from .permissions import tabela_permissoes
 
 # A daily backup runs at 06:00 UTC; older than this means at least one was missed.
 BACKUP_ATRASADO_APOS = datetime.timedelta(hours=26)
@@ -22,13 +22,13 @@ def clinica(request):
         "pode": SimpleLazyObject(lambda: tabela_permissoes(request)),
         # Turned-off modules the system administrator still sees (decision 115): marked in
         # the menu, and the page of one says so.
-        "modulos_desligados": SimpleLazyObject(lambda: modulos.desligados_visiveis(request)),
+        "modulos_desligados": SimpleLazyObject(lambda: modules.desligados_visiveis(request)),
         "modulo_desligado": getattr(request, "modulo_desligado", None),
         # Brazilian fields (RG, state registration, IBGE cities) are shown only in Brazil
         # (decision 117); the documents are the country's (decision 121).
-        "no_brasil": paises.pais_da_clinica(getattr(request, "clinica", None)) == "BR",
-        "documentos_do_pais": identificacao.do_pais(
-            paises.pais_da_clinica(getattr(request, "clinica", None))
+        "no_brasil": countries.pais_da_clinica(getattr(request, "clinica", None)) == "BR",
+        "documentos_do_pais": identification.do_pais(
+            countries.pais_da_clinica(getattr(request, "clinica", None))
         ),
     }
 

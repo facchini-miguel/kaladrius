@@ -1,10 +1,10 @@
 import pytest
 from django.urls import reverse
 
-from apps.agenda.models import TIPOS_PADRAO, TipoAtendimento
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Clinica, Papel
-from apps.odontologia.dentes import TIPOS_DE_ATENDIMENTO
+from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
+from apps.schedule.models import TIPOS_PADRAO, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 

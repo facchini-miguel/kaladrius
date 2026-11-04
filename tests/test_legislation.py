@@ -6,19 +6,19 @@ import pytest
 from django.urls import reverse
 from django.utils import translation
 
-from apps.core import legislacao
-from apps.core.isolamento import usar_clinica
-from apps.core.paises import PAISES
-from apps.financeiro import servicos
-from apps.financeiro.models import Lancamento
+from apps.core import legislation
+from apps.core.countries import PAISES
+from apps.core.isolation import usar_clinica
+from apps.finance import services
+from apps.finance.models import Lancamento
 from tests.test_finance import HOJE, cenario, entrar, parcelas_de  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
 
 def test_cada_pais_tem_a_sua_lei():
-    assert set(legislacao.LEIS) == set(PAISES)
-    for pais, lei in legislacao.LEIS.items():
+    assert set(legislation.LEIS) == set(PAISES)
+    for pais, lei in legislation.LEIS.items():
         assert lei.lei and lei.curta, pais
         guarda = lei.guarda
         # A period always names its source; "varies" never comes with a number.
@@ -29,19 +29,19 @@ def test_cada_pais_tem_a_sua_lei():
 
 def test_prazo_de_guarda_em_cada_situacao():
     with translation.override("pt-br"):
-        assert legislacao.prazo_de_guarda("BR") == (
+        assert legislation.prazo_de_guarda("BR") == (
             "O prontuário deve ser guardado por pelo menos 20 anos depois do último registro "
             "(Lei 13.787/2018, art. 6º)."
         )
-        assert "até o paciente fazer 21 anos" in legislacao.prazo_de_guarda("ZA")
-        assert "lei de cada estado" in legislacao.prazo_de_guarda("US")
-        assert "lei de cada província" in legislacao.prazo_de_guarda("CA")
+        assert "até o paciente fazer 21 anos" in legislation.prazo_de_guarda("ZA")
+        assert "lei de cada estado" in legislation.prazo_de_guarda("US")
+        assert "lei de cada província" in legislation.prazo_de_guarda("CA")
         # No national period confirmed: the source, without a number.
-        assert "NTS 139-MINSA/2018/DGAIN" in legislacao.prazo_de_guarda("PE")
-        assert "Confira com a autoridade" in legislacao.prazo_de_guarda("BO")
+        assert "NTS 139-MINSA/2018/DGAIN" in legislation.prazo_de_guarda("PE")
+        assert "Confira com a autoridade" in legislation.prazo_de_guarda("BO")
     with translation.override("es"):
-        assert "15" in legislacao.prazo_de_guarda("CL")
-        assert "O prontuário" not in legislacao.prazo_de_guarda("CL")
+        assert "15" in legislation.prazo_de_guarda("CL")
+        assert "O prontuário" not in legislation.prazo_de_guarda("CL")
 
 
 def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
@@ -58,7 +58,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     clinica = cenario["clinica"]
     dra = criar_profissional(clinica, "Dra. Fictícia", registro="CRO-SP 12345")
     with usar_clinica(clinica):
-        lancamento = servicos.criar_lancamento(
+        lancamento = services.criar_lancamento(
             clinica=clinica,
             tipo=Lancamento.Tipo.RECEBER,
             paciente=cenario["paciente"],
@@ -70,7 +70,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             primeiro_vencimento=HOJE,
             usuario=cenario["admin"],
         )
-        pagamento = servicos.receber(
+        pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
             usuario=cenario["admin"],
             valor=Decimal("100"),

@@ -7,7 +7,7 @@
 #                        read-only, and never gets access to Docker itself. Also checks the
 #                        site through the internet and signals the external monitor.
 # The folder, the file and the samples' fields keep their names: the app reads them
-# (apps/monitoramento/saude.py), and they change with it.
+# (apps/monitoring/health.py), and they change with it.
 set -euo pipefail
 export LC_ALL=C  # numbers with a dot, whatever the server's language
 source "$(dirname "$0")/common.sh"
@@ -155,7 +155,7 @@ check_sites() {
 }
 
 # After a sample: failure when memory, swap or disk is critical (the same limits as the web
-# app's health page, apps/monitoramento/saude.py LIMITES; not the processor, whose peaks are
+# app's health page, apps/monitoring/health.py LIMITES; not the processor, whose peaks are
 # normal).
 resources_ok() {
   local memory_pct swap_pct disk_pct

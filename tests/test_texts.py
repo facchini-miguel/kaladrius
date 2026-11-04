@@ -11,10 +11,10 @@ from django.utils import translation
 from django.utils.formats import date_format
 
 from apps.core.forms import FormularioBootstrap
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.core.ordem import chave_alfabetica
-from apps.pacientes.models import Paciente
+from apps.core.ordering import chave_alfabetica
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 
@@ -105,7 +105,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     printed registration sheet stacks its two columns on a narrow screen."""
     from django.template.loader import render_to_string
 
-    from apps.odontologia.dentes import DENTES_DECIDUOS, DENTES_PERMANENTES
+    from apps.dentistry.teeth import DENTES_DECIDUOS, DENTES_PERMANENTES
 
     html = render_to_string(
         "odontologia/_odontograma.html",

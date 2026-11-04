@@ -10,15 +10,15 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.auditoria.models import RegistroAuditoria
+from apps.audit.models import RegistroAuditoria
 from apps.core.forms import ClinicaAdminForm, ClinicaForm
-from apps.core.isolamento import ClinicaDiferente, SemClinicaAtual, usar_clinica
+from apps.core.isolation import ClinicaDiferente, SemClinicaAtual, usar_clinica
 from apps.core.models import MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica, Papel
-from apps.core.modulos import configurar
-from apps.orcamentos.models import ItemOrcamento, Orcamento
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
+from apps.core.modules import configurar
+from apps.estimates.models import ItemOrcamento, Orcamento
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 

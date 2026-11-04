@@ -6,12 +6,12 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.auditoria.models import RegistroAuditoria
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core.isolamento import ClinicaDiferente, usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import ClinicaDiferente, usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modulos import configurar
-from apps.pacientes.models import Paciente
+from apps.core.modules import configurar
+from apps.health_plans.models import Carteirinha, Convenio
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 

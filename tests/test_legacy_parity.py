@@ -7,11 +7,11 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.auditoria.models import RegistroAuditoria
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core.isolamento import usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.pacientes.models import Paciente
+from apps.health_plans.models import Carteirinha, Convenio
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 

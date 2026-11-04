@@ -25,6 +25,7 @@ docker compose exec app python manage.py makemigrations --check
 ## Conventions
 
 - **Domain names in Portuguese** (`Paciente`, `Agendamento`), **comments in English**.
+- **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`). Each app keeps its Portuguese **label** (`label = "pacientes"` in `apps.py`), the name the database tables, the migrations and the permissions know it by, and migration files keep their names: production has them recorded (decision 145).
 - **Test files named in English**, after what they test (`tests/test_patients.py`, `tests/test_schedule.py`), even when the module they test has a Portuguese name (decision 144).
 - **Every text on screen** is written in Portuguese in the code and translated in `locale/en` and `locale/es`:
   ```bash

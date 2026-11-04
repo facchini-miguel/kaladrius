@@ -37,7 +37,7 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
     es: Recordatorios de regreso en la app
   itens:
     - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas    # um dos nomes de MODULOS em apps/novidades/releases.py
+      modulo: Rechamadas    # um dos nomes de MODULOS em apps/whats_new/releases.py
       publico: [equipe, paciente]
       texto:
         pt-br: >

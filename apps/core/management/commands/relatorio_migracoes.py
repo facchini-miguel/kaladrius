@@ -20,6 +20,7 @@ import subprocess
 from dataclasses import dataclass, field
 from io import StringIO
 
+from django.apps import apps as django_apps
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, models
@@ -62,29 +63,51 @@ class Migracao:
         return [alerta for _descricao, alertas in self.operacoes for alerta in alertas]
 
 
-def migracoes_do_diff(base):
-    """The migration files this branch changed since `base` (a git ref): (added, changed). Added
-    is the sorted (app, name) list of the new ones; changed, the (app, name, status) of those
-    already in `base` that it edits (M) or deletes (D). A rename counts as a deletion and an
-    addition (--no-renames): production recorded the old name and runs the new one as new."""
+def _rotulos():
+    """The label of each app folder: apps/schedule keeps the label "agenda" (decision 145), and
+    the database, the migrations and production know an app by its label."""
+    return {
+        config.name.removeprefix("apps."): config.label
+        for config in django_apps.get_app_configs()
+        if config.name.startswith("apps.")
+    }
+
+
+def _git(*args):
     git = shutil.which("git") or "git"
     resultado = subprocess.run(  # noqa: S603 (fixed git command, ref given by CI)
-        [git, "diff", "--name-status", "--no-renames", f"{base}...HEAD"],
-        capture_output=True,
-        text=True,
-        check=False,
+        [git, *args], capture_output=True, text=True, check=False
     )
     if resultado.returncode:
-        raise CommandError(f"git diff falhou: {resultado.stderr.strip()}")
-    novas, alteradas = [], []
-    for linha in resultado.stdout.splitlines():
+        raise CommandError(f"git {args[0]} falhou: {resultado.stderr.strip()}")
+    return resultado.stdout
+
+
+def migracoes_do_diff(base):
+    """The migration files this branch changed since `base` (a git ref): (added, changed). Added
+    is the sorted (app label, name) list of the new ones; changed, the (app label, name, status)
+    of those already in `base` that it edits (M) or deletes (D). A rename counts as a deletion
+    and an addition (--no-renames): production recorded the old name and runs the new one as
+    new. A migration moved with its app's folder keeps its label and name, so production sees
+    the same migration: unchanged when its text is the same, edited (M) otherwise."""
+    rotulos = _rotulos()
+    novas, apagadas, alteradas = {}, {}, []
+    for linha in _git("diff", "--name-status", "--no-renames", f"{base}...HEAD").splitlines():
         status, _tab, caminho = linha.partition("\t")
         if not (m := ARQUIVO.match(caminho)):
             continue
+        chave = (rotulos.get(m[1], m[1]), m[2])
         if status == "A":
-            novas.append(m.groups())
+            novas[chave] = caminho
+        elif status == "D":
+            apagadas[chave] = caminho
         else:
-            alteradas.append((*m.groups(), status[:1]))
+            alteradas.append((*chave, status[:1]))
+    for chave in novas.keys() & apagadas.keys():
+        antes = _git("show", f"{base}:{apagadas.pop(chave)}")
+        if antes != _git("show", f"HEAD:{novas.pop(chave)}"):
+            alteradas.append((*chave, "M"))
+    alteradas += [(*chave, "D") for chave in apagadas]
     return sorted(novas), sorted(alteradas)
 
 

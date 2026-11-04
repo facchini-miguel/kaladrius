@@ -6,8 +6,8 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.urls import reverse
 
-from apps.ajuda import documentos
 from apps.core.models import Papel
+from apps.help import documents
 
 pytestmark = pytest.mark.django_db
 
@@ -23,9 +23,9 @@ def superusuario(client, django_user_model):
     return client
 
 
-@pytest.mark.parametrize("pasta", documentos.PASTAS.values())
+@pytest.mark.parametrize("pasta", documents.PASTAS.values())
 def test_manual_e_politica_do_site_em_cada_idioma(pasta):
-    manual = documentos.DOCS / pasta / "manual"
+    manual = documents.DOCS / pasta / "manual"
     paginas = {arquivo.stem for arquivo in manual.glob("*.md")}
     assert {"inicio", "agenda", "pacientes", "privacidade"} <= paginas, pasta
 
@@ -54,7 +54,7 @@ def test_enderecos_antigos_da_ajuda_levam_ao_site(recepcao, settings):
 
 def test_lista_logo_depois_de_um_paragrafo_vira_lista():
     texto = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
-    resultado = documentos._separar_listas(texto)
+    resultado = documents._separar_listas(texto)
     assert resultado.startswith("Texto:\n\n- um\n- dois")
     assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
 
@@ -107,7 +107,7 @@ def test_logo_na_barra_na_entrada_e_na_aba(client, recepcao):
     assert "logo-entrada" in entrada and "img/favicon" in entrada
     assert "logo-barra" in recepcao.get(reverse("inicio")).content.decode()
     for arquivo in ("logo.svg", "favicon.svg"):
-        assert (documentos.DOCS.parent / "static" / "img" / arquivo).is_file()
+        assert (documents.DOCS.parent / "static" / "img" / arquivo).is_file()
 
 
 def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, recepcao):

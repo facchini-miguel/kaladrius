@@ -3,10 +3,10 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modulos import configurar
-from apps.financeiro.models import Categoria, Fornecedor, Lancamento
+from apps.core.modules import configurar
+from apps.finance.models import Categoria, Fornecedor, Lancamento
 
 pytestmark = pytest.mark.django_db
 

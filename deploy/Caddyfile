@@ -12,7 +12,7 @@
 {$SITE_HOSTNAME} {
 	encode zstd gzip
 	# The largest legitimate upload is a medical record attachment (10 MB,
-	# apps/prontuario/forms.py); a bank statement is up to 5 MB.
+	# apps/medical_records/forms.py); a bank statement is up to 5 MB.
 	request_body {
 		max_size 11MB
 	}

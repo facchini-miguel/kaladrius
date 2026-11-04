@@ -4,11 +4,11 @@ import pytest
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 
-from apps.auditoria.models import RegistroAuditoria
-from apps.auditoria.registro import nome_do_modelo
-from apps.core.isolamento import ClinicaDiferente, sem_isolamento, usar_clinica
+from apps.audit.models import RegistroAuditoria
+from apps.audit.record import nome_do_modelo
+from apps.core.isolation import ClinicaDiferente, sem_isolamento, usar_clinica
 from apps.core.models import Papel
-from apps.pacientes.models import Paciente, PessoaRelacionada
+from apps.patients.models import Paciente, PessoaRelacionada
 
 pytestmark = pytest.mark.django_db
 

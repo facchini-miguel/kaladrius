@@ -7,15 +7,15 @@ from django.db import IntegrityError, transaction
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.agenda import servicos
-from apps.agenda.forms import AgendamentoForm
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.core.isolamento import SemClinicaAtual, usar_clinica
+from apps.core.isolation import SemClinicaAtual, usar_clinica
 from apps.core.models import Papel
-from apps.financeiro.models import Pagamento
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
+from apps.finance.models import Pagamento
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.schedule import services
+from apps.schedule.forms import AgendamentoForm
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 
@@ -158,14 +158,14 @@ def test_repeticao_com_conflito_nao_grava_nenhuma(cenario):
 def test_banco_de_dados_impede_sobreposicao(cenario):
     """Even bypassing the form (e.g. two simultaneous requests), the database refuses."""
     with usar_clinica(cenario["clinica"]):
-        intervalos = servicos.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10))
+        intervalos = services.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10))
         modelo = Agendamento(
             profissional=cenario["ana"], tipo=cenario["tipo"], descricao="Primeiro"
         )
-        servicos.criar(modelo, intervalos, None)
-        sobreposto = servicos.ocorrencias(SEGUNDA, datetime.time(9, 30), datetime.time(10, 30))
+        services.criar(modelo, intervalos, None)
+        sobreposto = services.ocorrencias(SEGUNDA, datetime.time(9, 30), datetime.time(10, 30))
         with pytest.raises(IntegrityError), transaction.atomic():
-            servicos.criar(modelo, sobreposto, None)
+            services.criar(modelo, sobreposto, None)
 
 
 # --- Editing and deleting ----------------------------------------------------------
@@ -320,9 +320,9 @@ def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissio
     with usar_clinica(clinica_b):
         tipo_b = TipoAtendimento.objects.get(nome="Cirurgia")
         paciente_b = Paciente.objects.create(nome="Paciente B")
-        [agendamento_b] = servicos.criar(
+        [agendamento_b] = services.criar(
             Agendamento(profissional=de_b, tipo=tipo_b, paciente=paciente_b),
-            servicos.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10)),
+            services.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10)),
             None,
         )
     cliente = cenario["cliente"]
@@ -431,8 +431,8 @@ def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
             profissional=cenario["ana"],
             tipo=cenario["tipo"],
             paciente=cenario["paciente"],
-            inicio=servicos.momento(passado, datetime.time(9)),
-            fim=servicos.momento(passado, datetime.time(10)),
+            inicio=services.momento(passado, datetime.time(9)),
+            fim=services.momento(passado, datetime.time(10)),
         )
     agendar(cenario)  # 2031, Dra. Ana
     agendar(cenario, profissional=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00")
@@ -463,8 +463,8 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         existente = Agendamento.objects.create(
             profissional=cenario["ana"],
             tipo=cenario["tipo"],
-            inicio=servicos.momento(hoje, datetime.time(9)),
-            fim=servicos.momento(hoje, datetime.time(10)),
+            inicio=services.momento(hoje, datetime.time(9)),
+            fim=services.momento(hoje, datetime.time(10)),
             descricao="Real",
         )
     with pytest.raises(CommandError):
@@ -509,8 +509,8 @@ def agendamento_em(cenario, dia, hora=9, paciente=True, profissional="ana"):
             tipo=cenario["tipo"],
             paciente=cenario["paciente"] if paciente else None,
             descricao="" if paciente else "Bloqueado",
-            inicio=servicos.momento(dia, datetime.time(hora)),
-            fim=servicos.momento(dia, datetime.time(hora + 1)),
+            inicio=services.momento(dia, datetime.time(hora)),
+            fim=services.momento(dia, datetime.time(hora + 1)),
         )
 
 

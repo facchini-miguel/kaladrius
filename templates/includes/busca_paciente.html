@@ -1,4 +1,4 @@
-{% load i18n formatos %}{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None); optional rotulo (label) and ajuda (help text).{% endcomment %}
+{% load i18n formats %}{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None); optional rotulo (label) and ajuda (help text).{% endcomment %}
 {% rotulo_documento "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Digite o nome, código ou {{ documentos }}{% endblocktranslate %}
 <div class="mb-3 position-relative busca-paciente">
   <label class="form-label" for="busca-paciente">{% if rotulo %}{{ rotulo }}{% else %}{% translate "Paciente" %}{% endif %}{% if campo.field.required %} *{% endif %}</label>
