@@ -21,7 +21,7 @@ VALOR = Decimal("1234.56")
 
 
 @pytest.mark.parametrize(
-    ("code", "idioma", "esperado"),
+    ("code", "language", "esperado"),
     [
         ("BRL", "pt-br", "R$ 1.234,56"),
         ("BRL", "en", "R$ 1,234.56"),
@@ -36,8 +36,8 @@ VALOR = Decimal("1234.56")
         ("UYU", "es", "$U 1\u00a0234,56"),
     ],
 )
-def test_simbolo_da_moeda_e_separadores_do_idioma(code, idioma, esperado):
-    with translation.override(idioma):
+def test_simbolo_da_moeda_e_separadores_do_idioma(code, language, esperado):
+    with translation.override(language):
         assert currencies.formatar(VALOR, code) == esperado
 
 
@@ -47,47 +47,49 @@ def test_valor_invalido_fica_vazio():
 
 
 def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
-    modelo = Template("{% load formats %}{{ amount|moeda }} {% simbolo_moeda %}")
+    modelo = Template("{% load formats %}{{ amount|currency }} {% simbolo_moeda %}")
     contexto = Context({"amount": VALOR})
     with translation.override("pt-br"):
         assert modelo.render(contexto) == "R$ 1.234,56 R$"  # no current clinic: the real
-        clinica_a.moeda = "EUR"
+        clinica_a.currency = "EUR"
         with usar_clinica(clinica_a):
             assert modelo.render(contexto) == "1.234,56 € €"
 
 
 def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario, cliente_de):
-    assert clinica_a.moeda == "BRL"  # existing and new clinics start with the real
+    assert clinica_a.currency == "BRL"  # existing and new clinics start with the real
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     assert "Dólar americano (US$, USD)" in admin.get(reverse("clinic_settings")).content.decode()
 
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="USD"), follow=True)
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
     pagina = resposta.content.decode()
     assert "Nenhum valor já lançado foi convertido" in pagina
     clinica_a.refresh_from_db()
-    assert clinica_a.moeda == "USD"
+    assert clinica_a.currency == "USD"
 
     # The language stays each user's own: the currency follows the clinic in any of them.
-    admin.post(reverse("change_language"), {"idioma": "es"})
+    admin.post(reverse("change_language"), {"language": "es"})
     assert "US$ 0,00" in admin.get(reverse("home")).content.decode()  # received today
 
     # Saving again without changing it does not repeat the warning.
-    admin.post(reverse("change_language"), {"idioma": "pt-br"})
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="USD"), follow=True)
+    admin.post(reverse("change_language"), {"language": "pt-br"})
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
     assert "Nenhum valor já lançado foi convertido" not in resposta.content.decode()
 
 
 def test_moeda_desconhecida_e_recusada(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="XXX"))
-    assert resposta.status_code == 200 and "moeda" in resposta.context["form"].errors
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="XXX"))
+    assert resposta.status_code == 200 and "currency" in resposta.context["form"].errors
 
 
 def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
     recepcao = cliente_de(criar_usuario("recepcao_a", clinica_a, Papel.RECEPCAO))
-    assert recepcao.post(reverse("clinic_settings"), dados_clinica(moeda="EUR")).status_code == 403
+    assert (
+        recepcao.post(reverse("clinic_settings"), dados_clinica(currency="EUR")).status_code == 403
+    )
     clinica_a.refresh_from_db()
-    assert clinica_a.moeda == "BRL"
+    assert clinica_a.currency == "BRL"
 
 
 @pytest.mark.parametrize(
@@ -105,11 +107,11 @@ def test_texto_que_nao_e_valor_continua_recusado():
 
 def test_formulario_sem_a_moeda_mantem_a_atual(clinica_a, criar_usuario, cliente_de):
     """A settings page opened before the update does not send the currency."""
-    clinica_a.moeda = "EUR"
-    clinica_a.save(update_fields=["moeda"])
+    clinica_a.currency = "EUR"
+    clinica_a.save(update_fields=["currency"])
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     dados = dados_clinica()
-    del dados["moeda"]
+    del dados["currency"]
     assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
-    assert clinica_a.moeda == "EUR"
+    assert clinica_a.currency == "EUR"

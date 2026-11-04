@@ -36,7 +36,7 @@ def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_
     assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in pagina
     assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
     user = django_user_model.objects.get(username="recepcao")
-    user.idioma = "en"
+    user.language = "en"
     user.save()
     pagina = recepcao.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/manual/getting-started"' in pagina
@@ -53,8 +53,8 @@ def test_enderecos_antigos_da_ajuda_levam_ao_site(recepcao, settings):
 
 
 def test_lista_logo_depois_de_um_paragrafo_vira_lista():
-    texto = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
-    resultado = documents._separar_listas(texto)
+    text = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
+    resultado = documents._separar_listas(text)
     assert resultado.startswith("Texto:\n\n- um\n- dois")
     assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
 
@@ -95,10 +95,10 @@ def test_politica_sem_clinica_cadastrada(client):
 
 
 @pytest.mark.parametrize(
-    ("idioma", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
+    ("language", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
 )
-def test_politica_nos_tres_idiomas(client, idioma, titulo):
-    pagina = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=idioma).content.decode()
+def test_politica_nos_tres_idiomas(client, language, titulo):
+    pagina = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=language).content.decode()
     assert f"<h1>{titulo}</h1>" in pagina
 
 

@@ -87,10 +87,10 @@ class Command(BaseCommand):
                     name=dados["name"], defaults=dados["dados"]
                 )
                 clinicas.append(clinic)
-                for username, name, sobrenome, papel in dados["usuarios"]:
+                for username, name, sobrenome, role in dados["usuarios"]:
                     user = self._usuario(username, name, sobrenome, senha, criados)
                     Membership.objects.get_or_create(
-                        user=user, clinic=clinic, defaults={"papel": papel}
+                        user=user, clinic=clinic, defaults={"role": role}
                     )
                 for name, registration, color, username in dados["profissionais"]:
                     user = get_user_model().objects.filter(username=username).first()
@@ -151,21 +151,21 @@ class Command(BaseCommand):
             juridica = number % 25 == 0  # about 4% companies
             if juridica:
                 name = fake.company()
-                documento = fake_data.cnpj(fake)
+                document = fake_data.cnpj(fake)
             else:
                 sex = fake.random_element(["F", "M"])
                 name = fake.name_female() if sex == "F" else fake.name_male()
-                documento = fake_data.cpf(fake) if fake.boolean(85) else ""
-            if documento in documentos:
-                documento = ""
-            documentos.add(documento)
+                document = fake_data.cpf(fake) if fake.boolean(85) else ""
+            if document in documentos:
+                document = ""
+            documentos.add(document)
             city = fake.random_element(cidades)
             celular = f"489{fake.numerify('########')}"
             patient = Patient(
                 clinic=clinic,
                 kind=Patient.Tipo.JURIDICA if juridica else Patient.Tipo.FISICA,
                 name=name,
-                tax_id=documento,
+                tax_id=document,
                 mobile_phone=celular,
                 whatsapp=celular,
                 email=f"paciente{clinic.pk}.{number}@example.com",

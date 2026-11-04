@@ -6,9 +6,9 @@ from apps.core.validators import cnpj_valido, cpf_valido, somente_digitos
 
 def _valido(gerar, valido):
     while True:
-        documento = somente_digitos(gerar())
-        if valido(documento):
-            return documento
+        document = somente_digitos(gerar())
+        if valido(document):
+            return document
 
 
 def cpf(fake):

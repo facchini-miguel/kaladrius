@@ -34,16 +34,16 @@ class Command(BaseCommand):
             "--account", dest="account", default="Banco", help="Account name (default: Banco)."
         )
         parser.add_argument(
-            "--days", dest="dias", type=int, default=30, help="Days back (default 30)."
+            "--days", dest="days", type=int, default=30, help="Days back (default 30)."
         )
 
-    def handle(self, *args, clinic, account, dias, **options):
+    def handle(self, *args, clinic, account, days, **options):
         alvo = Clinic.objects.filter(name=clinic).first()
         if alvo is None:
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         hoje = timezone.localdate()
-        start = hoje - datetime.timedelta(days=dias)
+        start = hoje - datetime.timedelta(days=days)
         with usar_clinica(alvo):
             alvo_conta = FinancialAccount.objects.filter(name=account).first()
             if alvo_conta is None:
@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
                 linhas.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
-                date = start + datetime.timedelta(days=sorteio.randint(0, dias))
+                date = start + datetime.timedelta(days=sorteio.randint(0, days))
                 linhas.append(
                     (date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}")
                 )

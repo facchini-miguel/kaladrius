@@ -3,7 +3,7 @@
 
 {% block titulo %}{{ entry.description }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{{ entry.description }}</h1>
@@ -30,9 +30,9 @@
 {% endif %}
 
 <div class="row g-3 mb-3">
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Valor total" %}</div><div class="fs-5">{{ entry.total_amount|moeda }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-success">{{ total_pago|moeda }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_saldo > 0 %} text-danger{% endif %}">{{ total_saldo|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Valor total" %}</div><div class="fs-5">{{ entry.total_amount|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-success">{{ total_pago|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_saldo > 0 %} text-danger{% endif %}">{{ total_saldo|currency }}</div></div></div></div>
 </div>
 
 {% if entry.notes %}<p class="text-body-secondary">{{ entry.notes|linebreaksbr }}</p>{% endif %}
@@ -55,13 +55,13 @@
       <tr>
         <td>{{ installment.number }}/{{ parcelas|length }}</td>
         <td class="text-nowrap">{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
-        <td class="text-end text-nowrap">{{ installment.amount|moeda }}</td>
-        <td class="text-end text-nowrap">{% if installment.balance > 0 and not entry.cancelled %}{{ installment.balance|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap">{{ installment.amount|currency }}</td>
+        <td class="text-end text-nowrap">{% if installment.balance > 0 and not entry.cancelled %}{{ installment.balance|currency }}{% else %}—{% endif %}</td>
         <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="small">
           {% for payment in installment.lista_pagamentos %}
           <div{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>
-            {{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|moeda }} · {{ payment.get_method_display }}
+            {{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|currency }} · {{ payment.get_method_display }}
             {% if not pagar %}<a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a>{% endif %}
             {% if pode_excluir and not payment.reversed %}· <a class="text-danger" href="{% url 'finance:reverse_payment' payment.pk %}">{% translate "estornar" %}</a>{% endif %}
           </div>

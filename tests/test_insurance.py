@@ -17,18 +17,18 @@ from tests.test_health_plans import admin, carteirinha, convenio, patient  # noq
 pytestmark = pytest.mark.django_db
 
 
-def mudar_pais(clinic, pais):
-    clinic.pais = pais
+def mudar_pais(clinic, country):
+    clinic.country = country
     clinic.save()
 
 
 def test_cada_pais_tem_as_suas_regras():
     assert set(insurance.SEGUROS) == set(PAISES)
-    for pais, regras in insurance.SEGUROS.items():
+    for country, regras in insurance.SEGUROS.items():
         for code in (regras.registration, regras.procedimento):
             if code and code.padrao:
                 # Every format has an example, and the example follows it.
-                assert re.fullmatch(code.padrao, code.exemplo), pais
+                assert re.fullmatch(code.padrao, code.exemplo), country
 
 
 def test_codigo_limpo_e_conferido():

@@ -49,9 +49,9 @@ def obrigatoria(request):
     from apps.medical_records.permissions import acessa_prontuario
 
     user, clinic = request.user, getattr(request, "clinic", None)
-    if not user.is_authenticated or user.demonstracao or clinic is None:
+    if not user.is_authenticated or user.demo or clinic is None:
         return False
-    if not clinic.exigir_duas_etapas:
+    if not clinic.require_two_factor:
         return False
     return pode(request, Modulo.FINANCEIRO, Acao.VER) or acessa_prontuario(request)
 
@@ -74,8 +74,8 @@ def endereco_do_app(dispositivo):
     )
 
 
-def qr_svg(endereco):
-    return segno.make(endereco, error="m").svg_inline(scale=5, dark="#212529", border=2)
+def qr_svg(address):
+    return segno.make(address, error="m").svg_inline(scale=5, dark="#212529", border=2)
 
 
 def segredo_em_grupos(segredo):

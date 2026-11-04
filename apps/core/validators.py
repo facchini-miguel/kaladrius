@@ -92,7 +92,7 @@ def nono_digito(number):
     return number
 
 
-def normalizar_telefone(value, pais=None):
+def normalizar_telefone(value, country=None):
     """A phone of the clinic's country as stored digits, or ValidationError.
 
     Brazil: DDD + number. Accepts what people type: punctuation, a leading 0 (carrier prefix)
@@ -100,10 +100,10 @@ def normalizar_telefone(value, pais=None):
     digit (Anatel's rule: landlines start with 2 to 5), so WhatsApp links work. Other countries
     (decision 117): the national number, see countries.normalizar_telefone_internacional.
     """
-    pais = pais or countries.pais_da_clinica()
-    if pais != "BR":
+    country = country or countries.pais_da_clinica()
+    if country != "BR":
         digitos = somente_digitos(value)
-        return countries.normalizar_telefone_internacional(digitos, pais) if digitos else ""
+        return countries.normalizar_telefone_internacional(digitos, country) if digitos else ""
     number = somente_digitos(value).lstrip("0")
     if len(number) in (12, 13) and number.startswith("55"):
         number = number[2:]

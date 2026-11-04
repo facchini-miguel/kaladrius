@@ -18,9 +18,9 @@ def lista(request):
 
     # Opening this page clears the "new version" notice.
     atual = releases.versao_atual()
-    if request.user.ultima_versao_vista != atual:
-        request.user.ultima_versao_vista = atual
-        request.user.save(update_fields=["ultima_versao_vista"])
+    if request.user.last_seen_version != atual:
+        request.user.last_seen_version = atual
+        request.user.save(update_fields=["last_seen_version"])
 
     return render(
         request,

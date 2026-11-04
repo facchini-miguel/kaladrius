@@ -89,9 +89,9 @@ def lancar(folhas, *, category, due_date, user):
     return lancadas
 
 
-def mes_da_url(texto, hoje):
+def mes_da_url(text, hoje):
     """The month asked as YYYY-MM, or the current one."""
     try:
-        return datetime.datetime.strptime(texto or "", "%Y-%m").date()
+        return datetime.datetime.strptime(text or "", "%Y-%m").date()
     except ValueError:
         return competencia_de(hoje)

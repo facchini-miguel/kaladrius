@@ -76,14 +76,14 @@ _MOJIBAKE = re.compile("[\u00c2\u00c3][\u0080-\u00bf]")
 
 def _texto(value):
     """Clean text: fixes UTF-8 read as Latin-1 ("JoÃ£o") and normalizes line breaks."""
-    texto = "" if value is None else str(value)
-    texto = _MOJIBAKE.sub(lambda m: m.group().encode("latin-1").decode("utf-8"), texto)
-    return texto.replace("\r\n", "\n").replace("\r", "\n").strip()
+    text = "" if value is None else str(value)
+    text = _MOJIBAKE.sub(lambda m: m.group().encode("latin-1").decode("utf-8"), text)
+    return text.replace("\r\n", "\n").replace("\r", "\n").strip()
 
 
-def _chave(texto):
+def _chave(text):
     """Comparison key: no accents, lowercase, only letters and digits."""
-    sem_acentos = unicodedata.normalize("NFKD", _texto(texto)).encode("ascii", "ignore").decode()
+    sem_acentos = unicodedata.normalize("NFKD", _texto(text)).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]", "", sem_acentos.lower())
 
 
@@ -115,18 +115,18 @@ def _email(value):
 def _documento(bruto, kind):
     """(valid document, None) or ("", original text) when it cannot be used."""
     original = _texto(bruto)
-    documento = normalizar_cnpj(original)
-    if not documento:
+    document = normalizar_cnpj(original)
+    if not document:
         return "", None
-    so_digitos = documento.isascii() and documento.isdigit()
+    so_digitos = document.isascii() and document.isdigit()
     if kind == Patient.Tipo.FISICA:
-        if so_digitos and 8 <= len(documento) <= 11:
-            documento = documento.zfill(11)  # leading zeros lost in the legacy system
+        if so_digitos and 8 <= len(document) <= 11:
+            document = document.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
-        return (documento, None) if so_digitos and cpf_valido(documento) else ("", original)
-    if so_digitos and 12 <= len(documento) <= 14:
-        documento = documento.zfill(14)
-    return (documento, None) if cnpj_valido(documento) else ("", original)
+        return (document, None) if so_digitos and cpf_valido(document) else ("", original)
+    if so_digitos and 12 <= len(document) <= 14:
+        document = document.zfill(14)
+    return (document, None) if cnpj_valido(document) else ("", original)
 
 
 def _cabe(value, size, rotulo, extras):
@@ -220,16 +220,16 @@ class _Importador:
         kind = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
         name = _texto(linha["nome"]) or f"Sem nome (código {linha['id']})"
 
-        documento, original = _documento(linha["cpf_cnpj"], kind)
-        if documento and documento in usados:
-            documento, original = "", _texto(linha["cpf_cnpj"])
+        document, original = _documento(linha["cpf_cnpj"], kind)
+        if document and document in usados:
+            document, original = "", _texto(linha["cpf_cnpj"])
             avisos["CPF/CNPJ repetido (guardado nas observações)"] += 1
         elif original:
             avisos["CPF/CNPJ inválido (guardado nas observações)"] += 1
         if original:
             extras.append(f"CPF/CNPJ no sistema antigo: {original}")
-        if documento:
-            usados.add(documento)
+        if document:
+            usados.add(document)
 
         telefones = {}
         for campo, legado in (
@@ -299,7 +299,7 @@ class _Importador:
             legal_name=""
             if pf
             else _cabe(_texto(linha["razao_social"]), 200, "Razão social", extras),
-            tax_id=documento,
+            tax_id=document,
             rg=_cabe(_texto(linha["rg"]), 20, "RG", extras) if pf else "",
             state_registration="" if pf else _cabe(_texto(linha["insc_est"]), 20, "IE", extras),
             sex=sex if pf else "",
@@ -387,12 +387,12 @@ class _Importador:
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
         aceitos, ultimo_fim = [], {}
-        for agendamento in sorted(novos, key=lambda a: (a.practitioner.pk, a.start)):
-            if agendamento.start < ultimo_fim.get(agendamento.practitioner.pk, agendamento.start):
+        for appointment in sorted(novos, key=lambda a: (a.practitioner.pk, a.start)):
+            if appointment.start < ultimo_fim.get(appointment.practitioner.pk, appointment.start):
                 avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] += 1
                 continue
-            ultimo_fim[agendamento.practitioner.pk] = agendamento.end
-            aceitos.append(agendamento)
+            ultimo_fim[appointment.practitioner.pk] = appointment.end
+            aceitos.append(appointment)
         Appointment.objects.bulk_create(aceitos, batch_size=1000)
         self.relatorio.agendamentos = len(aceitos)
         if aceitos:
@@ -400,7 +400,7 @@ class _Importador:
 
     def _ampliar_horario(self, clinic, agendamentos):
         """Widen the clinic's schedule hours so every imported appointment shows in the grid."""
-        passo = clinic.agenda_intervalo
+        passo = clinic.schedule_interval
 
         def minutos(timestamp):
             local = timezone.localtime(timestamp)
@@ -408,13 +408,13 @@ class _Importador:
 
         primeiro = min(minutos(a.start) for a in agendamentos) // passo * passo
         ultimo = -(-max(minutos(a.end) or 24 * 60 for a in agendamentos) // passo) * passo
-        start = min(clinic.agenda_inicio, datetime.time(primeiro // 60, primeiro % 60))
-        end = clinic.agenda_fim
+        start = min(clinic.schedule_start, datetime.time(primeiro // 60, primeiro % 60))
+        end = clinic.schedule_end
         if ultimo < 24 * 60:
             end = max(end, datetime.time(ultimo // 60, ultimo % 60))
-        if (start, end) != (clinic.agenda_inicio, clinic.agenda_fim):
-            clinic.agenda_inicio, clinic.agenda_fim = start, end
-            clinic.save(update_fields=["agenda_inicio", "agenda_fim"])
+        if (start, end) != (clinic.schedule_start, clinic.schedule_end):
+            clinic.schedule_start, clinic.schedule_end = start, end
+            clinic.save(update_fields=["schedule_start", "schedule_end"])
             self.relatorio.avisos[
                 f"Horário da agenda ampliado para {start:%H:%M}–{end:%H:%M} "
                 "(havia atendimentos fora do padrão)"

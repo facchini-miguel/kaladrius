@@ -16,7 +16,7 @@ SENHAS = {"senha_recepcao": "demo-recepcao-1", "senha_profissional": "demo-profi
 
 
 @pytest.fixture
-def demonstracao(clinica_a, criar_profissional, monkeypatch):
+def demo(clinica_a, criar_profissional, monkeypatch):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
     bruno = criar_profissional(clinica_a, "Dr. Bruno")
     call_command("demo_accounts", clinic="Clínica A", practitioner="Dr. Bruno", **SENHAS)
@@ -31,15 +31,15 @@ def entrar(username, senha):
     return cliente
 
 
-def test_cria_as_duas_contas_com_os_perfis(demonstracao):
+def test_cria_as_duas_contas_com_os_perfis(demo):
     Usuario = get_user_model()
     recepcao = Usuario.objects.get(username="demo.recepcao")
     practitioner = Usuario.objects.get(username="demo.profissional")
-    assert recepcao.demonstracao and practitioner.demonstracao
+    assert recepcao.demo and practitioner.demo
     assert not (recepcao.is_staff or recepcao.is_superuser)
-    assert Membership.objects.get(user=recepcao).papel == Papel.RECEPCAO
-    assert Membership.objects.get(user=practitioner).papel == Papel.PROFISSIONAL
-    with usar_clinica(demonstracao["clinic"]):
+    assert Membership.objects.get(user=recepcao).role == Papel.RECEPCAO
+    assert Membership.objects.get(user=practitioner).role == Papel.PROFISSIONAL
+    with usar_clinica(demo["clinic"]):
         assert Practitioner.objects.get(name="Dr. Bruno").user == practitioner
     # Running again resets the passwords and keeps one link per clinic.
     call_command(
@@ -54,7 +54,7 @@ def test_cria_as_duas_contas_com_os_perfis(demonstracao):
 
 
 def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
-    demonstracao, criar_usuario, clinica_a
+    demo, criar_usuario, clinica_a
 ):
     with pytest.raises(CommandError, match="DJANGO_SEED_PASSWORD"):
         call_command(
@@ -93,7 +93,7 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
     assert demo.user.username == "demo.profissional"
 
 
-def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
+def test_conta_de_demonstracao_nao_troca_a_senha(demo):
     cliente = entrar("demo.recepcao", SENHAS["senha_recepcao"])
     assert "Trocar senha" not in cliente.get(reverse("home")).content.decode()
     resposta = cliente.post(
@@ -109,14 +109,14 @@ def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
     entrar("demo.recepcao", SENHAS["senha_recepcao"])
 
 
-def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
+def test_conta_de_demonstracao_nao_envia_anexos(demo):
     cliente = entrar("demo.profissional", SENHAS["senha_profissional"])
-    with usar_clinica(demonstracao["clinic"]):
+    with usar_clinica(demo["clinic"]):
         from apps.patients.models import Patient
 
         patient = Patient.objects.create(name="Maria Paciente")
     cliente.post(reverse("medical_records:new", args=[patient.pk]), ANAMNESE)
-    with usar_clinica(demonstracao["clinic"]):
+    with usar_clinica(demo["clinic"]):
         visit = Visit.objects.get()
     pagina = cliente.get(reverse("medical_records:visit", args=[visit.pk])).content.decode()
     assert "Contas de demonstração não enviam anexos." in pagina
@@ -127,7 +127,7 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
         follow=True,
     )
     assert "Contas de demonstração não enviam anexos." in resposta.content.decode()
-    with usar_clinica(demonstracao["clinic"]):
+    with usar_clinica(demo["clinic"]):
         assert not Attachment.objects.exists()
 
 
@@ -144,7 +144,7 @@ def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
         senha_admin="demo-admin-1",
         **SENHAS,
     )
-    assert Membership.objects.get(user__username="demo.financeiro").papel == Papel.FINANCEIRO
+    assert Membership.objects.get(user__username="demo.financeiro").role == Papel.FINANCEIRO
     admin = entrar("demo.admin", "demo-admin-1")
     recepcao = get_user_model().objects.get(username="demo.recepcao")
     vinculo = Membership.objects.get(user=recepcao)

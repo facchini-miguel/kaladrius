@@ -58,12 +58,12 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # None in Australia: the law restricts who may record the tax file number.
-        self.documento = identification.do_pais().funcionario
-        if self.documento is None:
+        self.document = identification.do_pais().funcionario
+        if self.document is None:
             del self.fields["cpf"]
         else:
-            self.fields["cpf"].label = self.documento.sigla
-            self.fields["cpf"].widget.attrs["placeholder"] = self.documento.exemplo
+            self.fields["cpf"].label = self.document.sigla
+            self.fields["cpf"].widget.attrs["placeholder"] = self.document.exemplo
         if self.instance.pk:
             self.fields["salario"].label = _("Novo salário")
             self.fields["salario"].help_text = _(
@@ -75,7 +75,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
 
     def clean_cpf(self):
         cpf = identification.limpar(
-            self.cleaned_data.get("cpf"), [self.documento], self.documento.sigla
+            self.cleaned_data.get("cpf"), [self.document], self.document.sigla
         )
         if cpf and Employee.objects.filter(cpf=cpf).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um funcionário com este documento."))

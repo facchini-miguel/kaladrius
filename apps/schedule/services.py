@@ -31,10 +31,10 @@ def timestamp(date, hora):
     return timezone.make_aware(datetime.datetime.combine(date, hora))
 
 
-def ocorrencias(date, hora_inicio, hora_fim, repeticoes=1):
+def ocorrencias(date, start_time, end_time, repeticoes=1):
     """(start, end) of each weekly occurrence, built from local date/time (DST-safe)."""
     return [
-        (timestamp(dia, hora_inicio), timestamp(dia, hora_fim))
+        (timestamp(dia, start_time), timestamp(dia, end_time))
         for dia in (date + datetime.timedelta(weeks=semana) for semana in range(repeticoes))
     ]
 
@@ -65,7 +65,7 @@ def criar(modelo, intervalos, user):
     serie = uuid.uuid4() if len(intervalos) > 1 else None
     criados = []
     for start, end in intervalos:
-        agendamento = Appointment(
+        appointment = Appointment(
             practitioner=modelo.practitioner,
             kind=modelo.kind,
             patient=modelo.patient,
@@ -75,13 +75,13 @@ def criar(modelo, intervalos, user):
             serie=serie,
             created_by=user,
         )
-        agendamento.save()
-        criados.append(agendamento)
+        appointment.save()
+        criados.append(appointment)
     return criados
 
 
 @transaction.atomic
-def marcar(agendamento, status):
+def marcar(appointment, status):
     """Record whether the patient came, missed or cancelled (0.24.0).
 
     Came or missed only from the day of the appointment on. Leaving "cancelled" takes the
@@ -89,23 +89,23 @@ def marcar(agendamento, status):
     """
     if status not in Appointment.Situacao.values:
         raise ValidationError(_("Situação inválida."))
-    if agendamento.patient_id is None:
+    if appointment.patient_id is None:
         raise ValidationError(_("Só agendamentos com paciente têm situação."))
     presenca = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
-    if status in presenca and not agendamento.presenca_marcavel:
+    if status in presenca and not appointment.presenca_marcavel:
         raise ValidationError(
             _("Comparecimento e falta só podem ser marcados a partir do dia do atendimento.")
         )
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
-    if agendamento.desmarcado and status != Appointment.Situacao.DESMARCOU:
+    if appointment.desmarcado and status != Appointment.Situacao.DESMARCOU:
         if conflitos(
-            agendamento.practitioner, [(agendamento.start, agendamento.end)], agendamento.pk
+            appointment.practitioner, [(appointment.start, appointment.end)], appointment.pk
         ):
             raise ValidationError(ocupado)
-    agendamento.status = status
+    appointment.status = status
     try:
         with transaction.atomic():
-            agendamento.save(update_fields=["status", "updated_at"])
+            appointment.save(update_fields=["status", "updated_at"])
     except IntegrityError:
         raise ValidationError(ocupado) from None
-    return agendamento
+    return appointment

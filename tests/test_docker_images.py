@@ -28,11 +28,11 @@ def _arquivos(*padroes):
                 yield file
 
 
-def _from_do_dockerfile(texto):
+def _from_do_dockerfile(text):
     """Images of the FROM lines: any case, continued lines joined, --platform and other flags
     skipped, and earlier stages (FROM build) and scratch left out."""
     estagios = {"scratch"}
-    for instrucao in re.sub(r"\\\n", " ", texto).splitlines():
+    for instrucao in re.sub(r"\\\n", " ", text).splitlines():
         partes = instrucao.split()
         if not partes or partes[0].upper() != "FROM":
             continue
@@ -43,8 +43,8 @@ def _from_do_dockerfile(texto):
             yield resto[0]
 
 
-def _imagens_do_compose(texto):
-    servicos = (yaml.safe_load(texto) or {}).get("services") or {}
+def _imagens_do_compose(text):
+    servicos = (yaml.safe_load(text) or {}).get("services") or {}
     for servico in servicos.values():
         imagem = str((servico or {}).get("image") or "")
         if imagem and not imagem.startswith("${"):

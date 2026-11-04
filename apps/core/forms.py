@@ -29,20 +29,20 @@ class CampoDecimal(forms.DecimalField):
         return super().to_python(value)
 
     @staticmethod
-    def _sem_milhar(texto):
+    def _sem_milhar(text):
         # The currency symbols of apps/core/currencies.py (R$, US$, €, $U, S/, ₲...) and spaces;
         # anything else stays, so "abc" is still refused.
         for simbolo in currencies.SIMBOLOS:
-            texto = texto.replace(simbolo, "")
-        texto = re.sub(r"\s", "", texto)
+            text = text.replace(simbolo, "")
+        text = re.sub(r"\s", "", text)
         decimal = get_format("DECIMAL_SEPARATOR")
         milhar = "." if decimal == "," else ","
         grupos = rf"-?\d{{1,3}}(\{milhar}\d{{3}})+"
-        if decimal in texto or re.fullmatch(grupos, texto):
+        if decimal in text or re.fullmatch(grupos, text):
             # "1.500,00" and "1.500": the dots group thousands.
-            return texto.replace(milhar, "")
+            return text.replace(milhar, "")
         # "1500.00": a lone point is taken as the decimal mark, whatever the language.
-        return texto if decimal == "," else texto.replace(milhar, decimal)
+        return text if decimal == "," else text.replace(milhar, decimal)
 
 
 class FormularioBootstrap:
@@ -154,74 +154,74 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
         # The screen always sends them; a page opened before the update does not, and then
         # the clinic keeps its currency, country and time zone (Brazil's for a new one).
-        for campo in ("moeda", "pais", "fuso_horario", "numeracao_dentaria"):
+        for campo in ("currency", "country", "time_zone", "tooth_numbering"):
             if campo in self.fields:
                 self.fields[campo].required = False
         # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
         # in Brazil, "EIN" in the United States... of the country chosen now.
-        if "documento" in self.fields:
+        if "document" in self.fields:
             documentos = identification.do_pais(self._pais_escolhido())
             self.documentos_da_clinica = documentos.de("pessoa", "empresa")
-            campo = self.fields["documento"]
+            campo = self.fields["document"]
             campo.label = documentos.rotulo("pessoa", "empresa")
             campo.widget.attrs["placeholder"] = " · ".join(
                 d.exemplo for d in self.documentos_da_clinica
             )
 
-    def clean_documento(self):
+    def clean_document(self):
         return identification.limpar(
-            self.cleaned_data.get("documento", ""),
+            self.cleaned_data.get("document", ""),
             self.documentos_da_clinica,
-            self.fields["documento"].label,
+            self.fields["document"].label,
         )
 
     def _pais_escolhido(self):
-        if self.is_bound and self.data.get(self.add_prefix("pais")):
-            return self.data[self.add_prefix("pais")]
-        return self.instance.pais or countries.PADRAO
+        if self.is_bound and self.data.get(self.add_prefix("country")):
+            return self.data[self.add_prefix("country")]
+        return self.instance.country or countries.PADRAO
 
-    def clean_moeda(self):
-        return self.cleaned_data.get("moeda") or self.instance.moeda or currencies.PADRAO
+    def clean_currency(self):
+        return self.cleaned_data.get("currency") or self.instance.currency or currencies.PADRAO
 
-    def clean_pais(self):
-        return self.cleaned_data.get("pais") or self.instance.pais or countries.PADRAO
+    def clean_country(self):
+        return self.cleaned_data.get("country") or self.instance.country or countries.PADRAO
 
     def _ajustar_ao_pais(self, dados):
         """Time zone and currency of a new country (decision 117): a time zone of another country
         is refused; left as it was, it becomes the new country's first. The currency follows the
         country when it was still the previous country's default and was not changed now."""
-        if "pais" not in dados:
+        if "country" not in dados:
             return
-        pais = countries.do_codigo(dados["pais"])
-        fuso = dados.get("fuso_horario")
-        if "fuso_horario" in self.fields and fuso and fuso not in pais.fusos:
-            if "fuso_horario" in self.changed_data:
+        country = countries.do_codigo(dados["country"])
+        fuso = dados.get("time_zone")
+        if "time_zone" in self.fields and fuso and fuso not in country.fusos:
+            if "time_zone" in self.changed_data:
                 self.add_error(
-                    "fuso_horario",
-                    _("Escolha um fuso horário de %(pais)s.") % {"pais": pais.name},
+                    "time_zone",
+                    _("Escolha um fuso horário de %(pais)s.") % {"pais": country.name},
                 )
             else:
-                dados["fuso_horario"] = pais.fusos[0]
+                dados["time_zone"] = country.fusos[0]
         elif not fuso:
-            atual = self.instance.fuso_horario
-            dados["fuso_horario"] = atual if atual in pais.fusos else pais.fusos[0]
-        anterior = countries.do_codigo(self.instance.pais)
+            atual = self.instance.time_zone
+            dados["time_zone"] = atual if atual in country.fusos else country.fusos[0]
+        anterior = countries.do_codigo(self.instance.country)
         if (
-            "pais" in self.changed_data
-            and "moeda" not in self.changed_data
-            and dados.get("moeda") == anterior.moeda
+            "country" in self.changed_data
+            and "currency" not in self.changed_data
+            and dados.get("currency") == anterior.currency
         ):
-            dados["moeda"] = pais.moeda
+            dados["currency"] = country.currency
         # The tooth numbering too (decision 122); a new clinic, without the field, gets its
         # country's.
-        if "numeracao_dentaria" not in self.fields:
-            self.instance.numeracao_dentaria = pais.numeracao
+        if "tooth_numbering" not in self.fields:
+            self.instance.tooth_numbering = country.numeracao
         else:
-            atual = self.instance.numeracao_dentaria or anterior.numeracao
-            escolhida = dados.get("numeracao_dentaria") or atual
-            if "pais" in self.changed_data and escolhida == atual == anterior.numeracao:
-                escolhida = pais.numeracao
-            dados["numeracao_dentaria"] = escolhida
+            atual = self.instance.tooth_numbering or anterior.numeracao
+            escolhida = dados.get("tooth_numbering") or atual
+            if "country" in self.changed_data and escolhida == atual == anterior.numeracao:
+                escolhida = country.numeracao
+            dados["tooth_numbering"] = escolhida
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
@@ -252,43 +252,43 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
 class ClinicaForm(ModulosClinicosForm):
     """Clinic details and schedule settings, changed by the clinic administrator."""
 
-    documento = campo_documento()
+    document = campo_documento()
 
     class Meta:
         model = Clinic
         fields = [
             "name",
             "area",
-            "pais",
-            "documento",
+            "country",
+            "document",
             "email",
             "phone",
-            "endereco",
-            "moeda",
-            "fuso_horario",
-            "numeracao_dentaria",
+            "address",
+            "currency",
+            "time_zone",
+            "tooth_numbering",
         ] + [
-            "agenda_inicio",
-            "agenda_fim",
-            "agenda_intervalo",
-            "exigir_duas_etapas",
+            "schedule_start",
+            "schedule_end",
+            "schedule_interval",
+            "require_two_factor",
         ]
         widgets = {
-            "agenda_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
-            "agenda_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "schedule_start": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "schedule_end": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
         }
         help_texts = {
-            "agenda_intervalo": _("Os agendamentos começam e terminam em múltiplos deste tempo."),
+            "schedule_interval": _("Os agendamentos começam e terminam em múltiplos deste tempo."),
         }
 
     def clean(self):
         dados = super().clean()
-        start, end = dados.get("agenda_inicio"), dados.get("agenda_fim")
-        intervalo = dados.get("agenda_intervalo")
+        start, end = dados.get("schedule_start"), dados.get("schedule_end")
+        intervalo = dados.get("schedule_interval")
         if None in (start, end, intervalo):
             return dados
         if start >= end:
-            self.add_error("agenda_fim", _("O fim da agenda deve ser depois do início."))
+            self.add_error("schedule_end", _("O fim da agenda deve ser depois do início."))
             return dados
         problema = self._agendamento_fora(start, end, intervalo)
         if problema is not None:
@@ -336,7 +336,7 @@ class NovaClinicaForm(ModulosClinicosForm):
     schedule and the rest are set later in the clinic settings, the general modules
     included: a new clinic starts with all of them on."""
 
-    documento = campo_documento()
+    document = campo_documento()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -347,7 +347,7 @@ class NovaClinicaForm(ModulosClinicosForm):
 
     def save(self, commit=True):
         # A new installation starts requiring two-step verification (decision 112).
-        self.instance.exigir_duas_etapas = True
+        self.instance.require_two_factor = True
         return super().save(commit)
 
     class Meta:
@@ -355,13 +355,13 @@ class NovaClinicaForm(ModulosClinicosForm):
         fields = [
             "name",
             "area",
-            "pais",
-            "documento",
+            "country",
+            "document",
             "email",
             "phone",
-            "endereco",
-            "moeda",
-            "fuso_horario",
+            "address",
+            "currency",
+            "time_zone",
         ]
 
 

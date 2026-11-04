@@ -77,8 +77,8 @@ IGNORADOS = {
     "last_login",
     "created_at",
     "updated_at",
-    "ultima_versao_vista",
-    "idioma",
+    "last_seen_version",
+    "language",
 }
 
 

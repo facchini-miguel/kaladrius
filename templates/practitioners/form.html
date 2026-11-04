@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if practitioner.pk %}{% translate "Editar profissional" %}{% else %}{% translate "Novo profissional" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if practitioner.pk %}{% blocktranslate with nome=practitioner.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo profissional" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>

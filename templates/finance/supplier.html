@@ -3,7 +3,7 @@
 
 {% block titulo %}{{ supplier.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">
     {{ supplier.name }}
@@ -23,7 +23,7 @@
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ supplier.get_kind_display }}</dd>
           {% if supplier.legal_name %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ supplier.legal_name }}</dd>{% endif %}
-          {% with sigla=supplier.tax_id|sigla_documento:supplier.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ supplier.tax_id|documento:supplier.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
+          {% with sigla=supplier.tax_id|sigla_documento:supplier.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ supplier.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ supplier.email|default:"—" }}</dd>
@@ -36,7 +36,7 @@
     <div class="card h-100">
       <div class="card-header">{% translate "A pagar" %}</div>
       <div class="card-body">
-        <p class="h4 mb-0">{{ em_aberto|moeda }}</p>
+        <p class="h4 mb-0">{{ em_aberto|currency }}</p>
         <p class="text-body-secondary small mb-0">{% translate "em aberto, somando as parcelas ainda não pagas" %}</p>
       </div>
     </div>
@@ -61,8 +61,8 @@
         <tr>
           <td class="text-nowrap">{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
           <td><a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">({{ installment.number }})</span></td>
-          <td class="text-end text-nowrap">{{ installment.amount|moeda }}</td>
-          <td class="text-end text-nowrap">{% if installment.balance > 0 and not installment.entry.cancelled %}{{ installment.balance|moeda }}{% else %}—{% endif %}</td>
+          <td class="text-end text-nowrap">{{ installment.amount|currency }}</td>
+          <td class="text-end text-nowrap">{% if installment.balance > 0 and not installment.entry.cancelled %}{{ installment.balance|currency }}{% else %}—{% endif %}</td>
           <td>{% include "finance/_status.html" with status=installment.status %}</td>
         </tr>
         {% empty %}

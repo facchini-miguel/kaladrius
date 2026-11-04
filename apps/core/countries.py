@@ -19,7 +19,7 @@ PADRAO = "BR"
 class Pais:
     name: str
     ddi: str  # international calling code, without "+"
-    moeda: str  # ISO 4217, see apps/core/currencies.py
+    currency: str  # ISO 4217, see apps/core/currencies.py
     fusos: tuple  # IANA time zones; the first is the default
     ingles: str = "en"  # language code of the English variant (dates and times)
     espanhol: str = "es"  # language code of the Spanish variant (dates and numbers)
@@ -135,7 +135,7 @@ PAISES = {
     "ZA": Pais(_("África do Sul"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
 }
 
-ESCOLHAS = [(code, pais.name) for code, pais in PAISES.items()]
+ESCOLHAS = [(code, country.name) for code, country in PAISES.items()]
 
 
 def _cidade(fuso):
@@ -143,7 +143,9 @@ def _cidade(fuso):
 
 
 # Grouped by country, named by the zone's city ("New York", "Sao Paulo").
-ESCOLHAS_FUSO = [(pais.name, [(f, _cidade(f)) for f in pais.fusos]) for pais in PAISES.values()]
+ESCOLHAS_FUSO = [
+    (country.name, [(f, _cidade(f)) for f in country.fusos]) for country in PAISES.values()
+]
 FUSO_PADRAO = PAISES[PADRAO].fusos[0]
 
 
@@ -154,19 +156,19 @@ def pais_da_clinica(clinic=None):
         from .isolation import clinica_atual
 
         clinic = clinica_atual()
-    return getattr(clinic, "pais", None) or PADRAO
+    return getattr(clinic, "country", None) or PADRAO
 
 
 def do_codigo(code):
     return PAISES.get(code or PADRAO, PAISES[PADRAO])
 
 
-def variante_do_idioma(idioma, pais):
+def variante_do_idioma(language, country):
     """The English or Spanish variant for the clinic's country ("en-gb", "es-mx"...), or None
     to keep `idioma`. Portuguese has no variants."""
-    base = (idioma or "").split("-")[0]
-    variante = {"en": do_codigo(pais).ingles, "es": do_codigo(pais).espanhol}.get(base)
-    return None if variante in (None, idioma) else variante
+    base = (language or "").split("-")[0]
+    variante = {"en": do_codigo(country).ingles, "es": do_codigo(country).espanhol}.get(base)
+    return None if variante in (None, language) else variante
 
 
 # Phones ------------------------------------------------------------------------------------
@@ -197,22 +199,22 @@ _TELEFONE = {
 }
 
 
-def normalizar_telefone_internacional(digitos, pais):
+def normalizar_telefone_internacional(digitos, country):
     """National number of a phone outside Brazil from its digits, or ValidationError."""
-    ddi = do_codigo(pais).ddi
-    tamanhos, inicios, mensagem = _TELEFONE[pais]
+    ddi = do_codigo(country).ddi
+    tamanhos, inicios, mensagem = _TELEFONE[country]
     number = digitos
     if number.startswith("00"):  # international prefix typed
         number = number[2:]
-    if pais == "MX" and number.startswith("521") and len(number) == 13:
+    if country == "MX" and number.startswith("521") and len(number) == 13:
         number = number[3:]  # the old "1" of Mexican mobiles after +52
-    elif pais == "AR" and number.startswith("549") and len(number) == 13:
+    elif country == "AR" and number.startswith("549") and len(number) == 13:
         number = number[3:]  # the "9" of Argentine mobiles after +54
     if number.startswith(ddi) and len(number) - len(ddi) in tamanhos:
         number = number[len(ddi) :]
-    if pais not in ("US", "CA"):
+    if country not in ("US", "CA"):
         number = number.lstrip("0")  # trunk prefix
-    if pais == "AR" and len(number) == 12:
+    if country == "AR" and len(number) == 12:
         # Argentine mobiles are dialed with "15" after the area code (2 to 4 digits): it is
         # not part of the number.
         for area in (2, 3, 4):
@@ -224,65 +226,65 @@ def normalizar_telefone_internacional(digitos, pais):
     return number
 
 
-def formatar_telefone(number, pais):
+def formatar_telefone(number, country):
     """A stored national number written the way the country writes it."""
     if not number:
         return ""
-    if pais in ("US", "CA") and len(number) == 10:
+    if country in ("US", "CA") and len(number) == 10:
         return f"({number[:3]}) {number[3:6]}-{number[6:]}"
-    if pais == "GB":
+    if country == "GB":
         if number.startswith("2") and len(number) == 10:  # London, Cardiff... 020 xxxx xxxx
             return f"0{number[:2]} {number[2:6]} {number[6:]}"
         return f"0{number[:4]} {number[4:]}"
-    if pais == "AU" and len(number) == 9:
+    if country == "AU" and len(number) == 9:
         if number.startswith("4"):  # mobile 04xx xxx xxx
             return f"0{number[:3]} {number[3:6]} {number[6:]}"
         return f"(0{number[0]}) {number[1:5]} {number[5:]}"
-    if pais == "ZA" and len(number) == 9:
+    if country == "ZA" and len(number) == 9:
         return f"0{number[:2]} {number[2:5]} {number[5:]}"
-    return _formatar_telefone_latino(number, pais)
+    return _formatar_telefone_latino(number, country)
 
 
-def _formatar_telefone_latino(n, pais):
+def _formatar_telefone_latino(n, country):
     size = len(n)
-    if pais == "MX" and size == 10:
+    if country == "MX" and size == 10:
         if n[:2] in ("55", "33", "81"):  # Mexico City, Guadalajara, Monterrey: 2-digit areas
             return f"{n[:2]} {n[2:6]} {n[6:]}"
         return f"{n[:3]} {n[3:6]} {n[6:]}"
-    if pais == "AR" and size == 10:
+    if country == "AR" and size == 10:
         if n.startswith("11"):  # Buenos Aires
             return f"011 {n[2:6]}-{n[6:]}"
         return f"0{n[:3]} {n[3:6]}-{n[6:]}"
-    if pais == "CL" and size == 9:
+    if country == "CL" and size == 9:
         return f"{n[0]} {n[1:5]} {n[5:]}"
-    if pais == "CO" and size == 10:
+    if country == "CO" and size == 10:
         return f"{n[:3]} {n[3:6]} {n[6:]}"
-    if pais == "PE":
+    if country == "PE":
         if size == 9:
             return f"{n[:3]} {n[3:6]} {n[6:]}"
         if n.startswith("1"):  # Lima
             return f"(01) {n[1:4]} {n[4:]}"
         return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
-    if pais == "UY" and size == 8:
+    if country == "UY" and size == 8:
         return f"0{n[:2]} {n[2:5]} {n[5:]}" if n.startswith("9") else f"{n[:4]} {n[4:]}"
-    if pais == "PY":
+    if country == "PY":
         if size == 9:
             return f"0{n[:3]} {n[3:6]} {n[6:]}"
         return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
-    if pais == "BO" and size == 8:
+    if country == "BO" and size == 8:
         return f"{n[:4]} {n[4:]}"
-    if pais == "EC":
+    if country == "EC":
         if size == 9:
             return f"0{n[:2]} {n[2:5]} {n[5:]}"
         return f"(0{n[0]}) {n[1:4]} {n[4:]}"
     return n
 
 
-def link_whatsapp(number, pais):
+def link_whatsapp(number, country):
     if not number:
         return ""
     # WhatsApp writes Argentine mobiles with a 9 after the country code.
-    ddi = "549" if pais == "AR" else do_codigo(pais).ddi
+    ddi = "549" if country == "AR" else do_codigo(country).ddi
     return f"https://wa.me/{ddi}{number}"
 
 
@@ -312,28 +314,28 @@ _CEP = {
 }
 
 
-def normalizar_cep(value, pais):
+def normalizar_cep(value, country):
     postal_code = re.sub(r"[\s\-.]", "", value or "").upper()
     if not postal_code:
         return ""
-    padrao, mensagem = _CEP.get(pais, _CEP[PADRAO])
+    padrao, mensagem = _CEP.get(country, _CEP[PADRAO])
     if not re.fullmatch(padrao, postal_code):
         raise ValidationError(mensagem)
     return postal_code
 
 
-def formatar_cep(postal_code, pais):
+def formatar_cep(postal_code, country):
     if not postal_code:
         return ""
-    if pais == "BR" and len(postal_code) == 8:
+    if country == "BR" and len(postal_code) == 8:
         return f"{postal_code[:5]}-{postal_code[5:]}"
-    if pais == "US" and len(postal_code) == 9:
+    if country == "US" and len(postal_code) == 9:
         return f"{postal_code[:5]}-{postal_code[5:]}"
-    if pais in ("CA", "GB") and len(postal_code) > 3:
+    if country in ("CA", "GB") and len(postal_code) > 3:
         return f"{postal_code[:-3]} {postal_code[-3:]}"
     return postal_code
 
 
-def rotulo_cep(pais):
+def rotulo_cep(country):
     """Field label: "CEP" in Brazil, a postal code anywhere else."""
-    return _("CEP") if pais == "BR" else _("Código postal")
+    return _("CEP") if country == "BR" else _("Código postal")

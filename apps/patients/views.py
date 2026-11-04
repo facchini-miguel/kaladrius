@@ -51,9 +51,9 @@ def filtrar(pacientes, busca, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if busca:
         filtro = Q(name__unaccent__icontains=busca) | Q(legal_name__unaccent__icontains=busca)
-        documento = normalizar_cnpj(busca)
-        if len(documento) >= 3 and not any(c.isspace() for c in busca.strip()):
-            filtro |= Q(tax_id__startswith=documento)
+        document = normalizar_cnpj(busca)
+        if len(document) >= 3 and not any(c.isspace() for c in busca.strip()):
+            filtro |= Q(tax_id__startswith=document)
         if busca.isdecimal() and len(busca) <= 9:
             filtro |= Q(pk=int(busca))
         pacientes = pacientes.filter(filtro)

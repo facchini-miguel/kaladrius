@@ -92,18 +92,18 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
-        self.pais = countries.pais_da_clinica(clinic)
-        self.fields["postal_code"].label = countries.rotulo_cep(self.pais)
-        self.documentos = identification.do_pais(self.pais)
+        self.country = countries.pais_da_clinica(clinic)
+        self.fields["postal_code"].label = countries.rotulo_cep(self.country)
+        self.documentos = identification.do_pais(self.country)
         documento_por_tipo(
             self.fields["tax_id"],
             self.documentos.paciente,
             self.documentos.empresa,
             self["kind"].value(),
         )
-        for campo in self.FORA_DO_BRASIL if self.pais == "BR" else self.SO_NO_BRASIL:
+        for campo in self.FORA_DO_BRASIL if self.country == "BR" else self.SO_NO_BRASIL:
             del self.fields[campo]
-        if self.pais != "BR":
+        if self.country != "BR":
             return
         self.fields["postal_code"].widget.attrs["inputmode"] = "numeric"
 
@@ -139,10 +139,10 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         )
 
     def clean_postal_code(self):
-        return countries.normalizar_cep(self.cleaned_data.get("postal_code"), self.pais)
+        return countries.normalizar_cep(self.cleaned_data.get("postal_code"), self.country)
 
     def _limpar_telefone(self, name):
-        return normalizar_telefone(self.cleaned_data.get(name), self.pais)
+        return normalizar_telefone(self.cleaned_data.get(name), self.country)
 
     def clean_mobile_phone(self):
         return self._limpar_telefone("mobile_phone")
@@ -170,18 +170,18 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         do_tipo = (
             self.documentos.empresa if kind == Patient.Tipo.JURIDICA else self.documentos.paciente
         )
-        documento = ""
+        document = ""
         if do_tipo is not None:
             try:
-                documento = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+                document = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
             except ValidationError as erro:
                 self.add_error("tax_id", erro)
         if "tax_id" in dados:
-            dados["tax_id"] = documento
+            dados["tax_id"] = document
 
-        if documento:
+        if document:
             # The clinic is not a form field, so the unique constraint is checked here.
-            outro = Patient.objects.filter(tax_id=documento).exclude(pk=self.instance.pk).first()
+            outro = Patient.objects.filter(tax_id=document).exclude(pk=self.instance.pk).first()
             if outro is not None and outro.archived:
                 self.add_error(
                     "tax_id",

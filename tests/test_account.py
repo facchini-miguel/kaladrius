@@ -120,12 +120,12 @@ def test_ativar_com_qr_code(client, pessoa):
     resposta = client.post(
         reverse("account:two_factor"), {"acao": "ativar", "code": codigo_atual(dispositivo)}
     )
-    texto = resposta.content.decode()
-    assert "Verificação em duas etapas ativada" in texto
+    text = resposta.content.decode()
+    assert "Verificação em duas etapas ativada" in text
     assert RecoveryCode.objects.filter(user=pessoa).count() == 10
     assert AuditEntry.objects.filter(objeto_descricao__contains="ativada").exists()
     dispositivo.refresh_from_db()
-    assert dispositivo.active and dispositivo.segredo not in texto
+    assert dispositivo.active and dispositivo.segredo not in text
 
 
 def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
@@ -219,8 +219,8 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
 
 
 def test_conta_de_demonstracao_nao_ativa(client, pessoa):
-    pessoa.demonstracao = True
-    pessoa.save(update_fields=["demonstracao"])
+    pessoa.demo = True
+    pessoa.save(update_fields=["demo"])
     client.force_login(pessoa)
     assert client.get(reverse("account:two_factor")).status_code == 302
     assert not TwoFactor.objects.exists()
@@ -255,8 +255,8 @@ def test_recuperar_senha_por_email(client, pessoa, settings):
 def test_conta_de_demonstracao_nao_recebe_email(client, pessoa, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
-    pessoa.demonstracao = True
-    pessoa.save(update_fields=["demonstracao"])
+    pessoa.demo = True
+    pessoa.save(update_fields=["demo"])
     client.post(reverse("account:recover"), {"email": "pessoa@example.com"})
     assert mail.outbox == []
 
@@ -266,8 +266,8 @@ def test_conta_de_demonstracao_nao_recebe_email(client, pessoa, settings):
 
 @pytest.fixture
 def exigida(clinica_a):
-    clinica_a.exigir_duas_etapas = True
-    clinica_a.save(update_fields=["exigir_duas_etapas"])
+    clinica_a.require_two_factor = True
+    clinica_a.save(update_fields=["require_two_factor"])
     return clinica_a
 
 
@@ -293,8 +293,8 @@ def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuari
     client.force_login(recepcao)
     assert client.get(reverse("patients:list")).status_code == 200
     demo = criar_usuario("demo_exigida", exigida, Papel.ADMIN)
-    demo.demonstracao = True
-    demo.save(update_fields=["demonstracao"])
+    demo.demo = True
+    demo.save(update_fields=["demo"])
     client.force_login(demo)
     assert client.get(reverse("patients:list")).status_code == 200
 
@@ -334,12 +334,12 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
     super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_usuario)
     client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicina"})
-    assert Clinic.unica().exigir_duas_etapas
-    Clinic.objects.update(exigir_duas_etapas=False)
+    assert Clinic.unica().require_two_factor
+    Clinic.objects.update(require_two_factor=False)
     # The migration runs with the models as they were then (Clinica, before decision 157).
     estado = MigrationLoader(connection).project_state(("core", "0013_exigir_duas_etapas")).apps
     importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(estado, None)
-    assert Clinic.unica().exigir_duas_etapas
+    assert Clinic.unica().require_two_factor
 
 
 def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado(

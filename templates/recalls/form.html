@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %}</h1>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}

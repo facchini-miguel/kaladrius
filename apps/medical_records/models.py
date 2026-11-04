@@ -17,7 +17,13 @@ from apps.practitioners.models import Practitioner
 from apps.schedule.models import Appointment
 
 # The anamnesis fields, in the order they are written and shown.
-CAMPOS_DA_ANAMNESE = ["queixa_principal", "historia", "antecedentes", "exame_fisico", "conduta"]
+CAMPOS_DA_ANAMNESE = [
+    "chief_complaint",
+    "present_illness",
+    "medical_history",
+    "physical_exam",
+    "plan",
+]
 
 
 class Visit(ModeloDaClinica):
@@ -35,24 +41,30 @@ class Visit(ModeloDaClinica):
         verbose_name=_("profissional"),
         db_column="profissional_id",
     )
-    agendamento = models.OneToOneField(
+    appointment = models.OneToOneField(
         Appointment,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="visit",
         verbose_name=_("agendamento"),
+        db_column="agendamento_id",
     )
     date = models.DateTimeField(_("data do atendimento"), default=timezone.now, db_column="data")
-    queixa_principal = models.TextField(_("queixa principal"), blank=True)
-    historia = models.TextField(_("história da doença atual"), blank=True)
-    antecedentes = models.TextField(
+    chief_complaint = models.TextField(
+        _("queixa principal"), blank=True, db_column="queixa_principal"
+    )
+    present_illness = models.TextField(
+        _("história da doença atual"), blank=True, db_column="historia"
+    )
+    medical_history = models.TextField(
         _("antecedentes"),
         blank=True,
         help_text=_("Pessoais e familiares, medicamentos em uso, alergias."),
+        db_column="antecedentes",
     )
-    exame_fisico = models.TextField(_("exame físico"), blank=True)
-    conduta = models.TextField(_("conduta e plano"), blank=True)
+    physical_exam = models.TextField(_("exame físico"), blank=True, db_column="exame_fisico")
+    plan = models.TextField(_("conduta e plano"), blank=True, db_column="conduta")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -61,13 +73,16 @@ class Visit(ModeloDaClinica):
     )
     created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(auto_now=True, db_column="alterado_em")
-    finalizado_em = models.DateTimeField(_("finalizado em"), null=True, blank=True)
-    finalizado_por = models.ForeignKey(
+    finalized_at = models.DateTimeField(
+        _("finalizado em"), null=True, blank=True, db_column="finalizado_em"
+    )
+    finalized_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
+        db_column="finalizado_por_id",
     )
 
     class Meta:
@@ -81,7 +96,7 @@ class Visit(ModeloDaClinica):
 
     @property
     def finalizado(self):
-        return self.finalizado_em is not None
+        return self.finalized_at is not None
 
 
 class Addendum(ModeloDaClinica):
@@ -94,7 +109,7 @@ class Addendum(ModeloDaClinica):
         verbose_name=_("atendimento"),
         db_column="atendimento_id",
     )
-    texto = models.TextField(_("adendo"))
+    text = models.TextField(_("adendo"), db_column="texto")
     practitioner = models.ForeignKey(
         Practitioner,
         on_delete=models.PROTECT,
@@ -143,10 +158,14 @@ class Certificate(ModeloDaClinica):
         db_column="tipo",
     )
     date = models.DateField(_("data do atendimento"), default=timezone.localdate, db_column="data")
-    hora_inicio = models.TimeField(_("das"), null=True, blank=True)
-    hora_fim = models.TimeField(_("às"), null=True, blank=True)
-    dias = models.PositiveSmallIntegerField(
-        _("dias de afastamento"), null=True, blank=True, help_text=_("Só para afastamento.")
+    start_time = models.TimeField(_("das"), null=True, blank=True, db_column="hora_inicio")
+    end_time = models.TimeField(_("às"), null=True, blank=True, db_column="hora_fim")
+    days = models.PositiveSmallIntegerField(
+        _("dias de afastamento"),
+        null=True,
+        blank=True,
+        help_text=_("Só para afastamento."),
+        db_column="dias",
     )
     note = models.TextField(
         _("observações"),
@@ -190,9 +209,10 @@ class Prescription(ModeloDaClinica):
         verbose_name=_("atendimento"),
         db_column="atendimento_id",
     )
-    prescricao = models.TextField(
+    medications = models.TextField(
         _("medicamentos e como usar"),
         help_text=_("Um item por linha: medicamento, dose e como usar."),
+        db_column="prescricao",
     )
     practitioner = models.ForeignKey(
         Practitioner,
@@ -230,9 +250,9 @@ class ExamRequest(ModeloDaClinica):
         verbose_name=_("atendimento"),
         db_column="atendimento_id",
     )
-    exames = models.TextField(_("exames"), help_text=_("Um exame por linha."))
-    indicacao = models.TextField(
-        _("indicação clínica"), blank=True, help_text=_("Aparece no pedido.")
+    exams = models.TextField(_("exames"), help_text=_("Um exame por linha."), db_column="exames")
+    indication = models.TextField(
+        _("indicação clínica"), blank=True, help_text=_("Aparece no pedido."), db_column="indicacao"
     )
     practitioner = models.ForeignKey(
         Practitioner,
@@ -283,7 +303,7 @@ class Attachment(ModeloDaClinica):
     name = models.CharField(_("arquivo"), max_length=255, db_column="nome")
     kind = models.CharField(max_length=50, db_column="tipo")
     size = models.PositiveIntegerField(db_column="tamanho")
-    conteudo = models.BinaryField()
+    content = models.BinaryField(db_column="conteudo")
     practitioner = models.ForeignKey(
         Practitioner,
         on_delete=models.PROTECT,

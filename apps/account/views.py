@@ -94,7 +94,7 @@ def duas_etapas(request):
     """Turn two-step verification on (QR code) or off, and make new recovery codes."""
     # The real row, not the request's lazy user: the audit log needs its model.
     user = get_user_model().objects.get(pk=request.user.pk)
-    if user.demonstracao:
+    if user.demo:
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
         return redirect("home")
     acao = request.POST.get("acao")
@@ -150,7 +150,7 @@ def duas_etapas(request):
             )
             return render(request, "account/codes.html", {"codigos": codigos, "ativada": True})
         form.add_error("code", _("Código incorreto. Confira a hora do celular e tente de novo."))
-    endereco = services.endereco_do_app(dispositivo)
+    address = services.endereco_do_app(dispositivo)
     return render(
         request,
         "account/two_factor.html",
@@ -158,7 +158,7 @@ def duas_etapas(request):
             "active": False,
             "obrigatoria": obrigatoria,
             "form": form,
-            "qr": services.qr_svg(endereco),
+            "qr": services.qr_svg(address),
             "segredo": services.segredo_em_grupos(dispositivo.segredo),
         },
     )

@@ -51,7 +51,7 @@ def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario)
 
 
 @pytest.mark.parametrize(
-    ("endereco", "esperado"),
+    ("address", "esperado"),
     [
         ("203.0.113.7", "203.0.113.7"),
         ("2001:db8:abcd:12:34::1", "2001:db8:abcd::"),
@@ -59,10 +59,10 @@ def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario)
         ("", None),
     ],
 )
-def test_ip_para_bloqueio(rf, endereco, esperado):
+def test_ip_para_bloqueio(rf, address, esperado):
     from apps.core.security import ip_para_bloqueio
 
-    assert ip_para_bloqueio(rf.get("/", REMOTE_ADDR=endereco)) == esperado
+    assert ip_para_bloqueio(rf.get("/", REMOTE_ADDR=address)) == esperado
 
 
 def test_login_certo_zera_o_contador(client, criar_usuario):
@@ -78,20 +78,20 @@ def test_login_certo_zera_o_contador(client, criar_usuario):
 def test_usuario_novo_comeca_na_versao_atual_sem_aviso(client, criar_usuario):
     """Review (superuser, fresh install): a new person saw "the system was updated"."""
     user = criar_usuario("novata")
-    assert user.ultima_versao_vista == releases.versao_atual()
+    assert user.last_seen_version == releases.versao_atual()
     client.force_login(user)
     assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 
 def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
     user = criar_usuario("maria")
-    user.ultima_versao_vista = "0.40.0"  # seen before this version came out
-    user.save(update_fields=["ultima_versao_vista"])
+    user.last_seen_version = "0.40.0"  # seen before this version came out
+    user.save(update_fields=["last_seen_version"])
     client.force_login(user)
     assert "Veja o que mudou" in client.get(reverse("home")).content.decode()
     client.get(reverse("whats_new"))
     user.refresh_from_db()
-    assert user.ultima_versao_vista == releases.versao_atual()
+    assert user.last_seen_version == releases.versao_atual()
     assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 

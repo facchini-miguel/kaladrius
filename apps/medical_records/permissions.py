@@ -44,6 +44,6 @@ def _profissional(request):
     vinculo = getattr(request, "vinculo", None)
     if vinculo is None and not user.is_superuser:
         return None
-    if vinculo is not None and vinculo.papel == Papel.RECEPCAO:
+    if vinculo is not None and vinculo.role == Papel.RECEPCAO:
         return None
     return Practitioner.objects.filter(user=user, active=True).first()

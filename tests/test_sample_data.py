@@ -26,7 +26,7 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     assert get_user_model().objects.get(username="dr.carlos").check_password("senha-de-teste-123")
     assert Membership.objects.filter(user__username="dra.ana").count() == 1
     # One user per role, so every role can be tried (review stage 3).
-    assert set(Membership.objects.values_list("papel", flat=True)) == set(Papel)
+    assert set(Membership.objects.values_list("role", flat=True)) == set(Papel)
     with sem_isolamento():
         assert Practitioner.objects.count() == 5
         assert Practitioner.objects.get(name="Dra. Ana Souza").user.username == "dra.ana"

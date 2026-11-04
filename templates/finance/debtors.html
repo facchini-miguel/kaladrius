@@ -3,14 +3,14 @@
 
 {% block titulo %}{% translate "Devedores" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Devedores" %}</h1>
   <a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "A receber" %}</a>
 </div>
 <div class="row g-3 mb-3">
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_vencido|moeda }}</div></div></div></div>
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_a_vencer|moeda }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_vencido|currency }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_a_vencer|currency }}</div></div></div></div>
 </div>
 <form method="get" class="row g-2 mb-2" role="search">
   <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Paciente ou pagador' %}" aria-label="{% translate 'Paciente ou pagador' %}"></div>
@@ -35,9 +35,9 @@
       {% for linha in pagina %}
       <tr>
         <td>{% if linha.patient_id %}<a href="{% url 'patients:record' linha.patient_id %}">{{ linha.name }}</a>{% else %}{{ linha.name }}{% endif %}</td>
-        <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|moeda }}</td>
-        {% for value in linha.faixas %}<td class="text-end text-nowrap">{% if value %}{{ value|moeda }}{% else %}—{% endif %}</td>{% endfor %}
-        <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|currency }}</td>
+        {% for value in linha.faixas %}<td class="text-end text-nowrap">{% if value %}{{ value|currency }}{% else %}—{% endif %}</td>{% endfor %}
+        <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|currency }}{% else %}—{% endif %}</td>
         <td class="text-nowrap">{{ linha.mais_antigo|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
       </tr>
       {% empty %}

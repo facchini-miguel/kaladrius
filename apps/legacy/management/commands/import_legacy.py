@@ -31,14 +31,14 @@ class Command(BaseCommand):
     def handle(self, *args, file, clinic, codificacao, **options):
         try:
             if file == "-":
-                texto = sys.stdin.buffer.read().decode(codificacao)
+                text = sys.stdin.buffer.read().decode(codificacao)
             else:
-                texto = Path(file).read_text(encoding=codificacao)
+                text = Path(file).read_text(encoding=codificacao)
         except (OSError, UnicodeDecodeError) as erro:
             raise CommandError(f"Não foi possível ler o arquivo: {erro}") from erro
 
         try:
-            relatorio = importar(texto, clinic)
+            relatorio = importar(text, clinic)
         except (DumpInvalido, ImportacaoRecusada) as erro:
             raise CommandError(str(erro)) from erro
 

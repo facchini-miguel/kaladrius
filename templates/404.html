@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Página não encontrada" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-3">{% translate "Página não encontrada" %}</h1>
 <p>{% translate "O endereço não existe ou o registro não pertence à clínica atual." %}</p>
 <p><a href="{% url 'home' %}">{% translate "Voltar ao início" %}</a></p>

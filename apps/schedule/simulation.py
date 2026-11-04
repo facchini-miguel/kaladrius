@@ -34,17 +34,17 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
     pacientes = _pacientes(clinic)
     if not (profissionais and tipos and pacientes):
         return 0
-    passo = datetime.timedelta(minutes=clinic.agenda_intervalo)
+    passo = datetime.timedelta(minutes=clinic.schedule_interval)
     hoje = timezone.localdate()
     segunda = hoje - datetime.timedelta(days=hoje.weekday() + 7 * semanas_antes)
-    dias = [
+    days = [
         segunda + datetime.timedelta(days=n) for n in range(7 * (semanas_antes + semanas_depois))
     ]
     ocupados = {}
     for practitioner_id, start, end in Appointment.objects.filter(
         clinic=clinic,
-        start__lt=timestamp(dias[-1], datetime.time(23, 59)),
-        end__gt=timestamp(dias[0], datetime.time(0)),
+        start__lt=timestamp(days[-1], datetime.time(23, 59)),
+        end__gt=timestamp(days[0], datetime.time(0)),
     ).values_list("practitioner_id", "start", "end"):
         ocupados.setdefault(practitioner_id, []).append((start, end))
 
@@ -52,12 +52,12 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
         return all(end <= a or start >= b for a, b in ocupados.get(practitioner.pk, []))
 
     novos = []
-    for dia in dias:
+    for dia in days:
         if dia.weekday() >= 5:
             continue
         for practitioner in profissionais:
-            atual = timestamp(dia, clinic.agenda_inicio)
-            fim_do_dia = timestamp(dia, clinic.agenda_fim)
+            atual = timestamp(dia, clinic.schedule_start)
+            fim_do_dia = timestamp(dia, clinic.schedule_end)
             while atual < fim_do_dia:
                 duracao = passo * sorteio.choice([1, 1, 2])
                 end = atual + duracao
@@ -150,7 +150,7 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     if not (pacientes and categorias and contas):
         return 0, 0
     hoje = timezone.localdate()
-    formas = [method for method, _rotulo in Payment.Forma.em_uso(clinic.pais)]
+    formas = [method for method, _rotulo in Payment.Forma.em_uso(clinic.country)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
         name: CostCenter.objects.get_or_create(clinic=clinic, name=name)[0]
@@ -209,7 +209,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     from apps.finance.models import Category, Entry, Supplier
 
     # Bills are paid the way the clinic's country pays them (decision 123).
-    do_pais = metodos.do_pais(clinic.pais).codigos
+    do_pais = metodos.do_pais(clinic.country).codigos
     contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
     formas = [method for method in contas_a_pagar if method in do_pais]
     categorias = {

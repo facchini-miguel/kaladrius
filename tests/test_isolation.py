@@ -102,9 +102,9 @@ def test_lista_mostra_somente_a_propria_clinica(
     criar_profissional(clinica_a, "Dra. Ana da Clínica A")
     criar_profissional(clinica_b, "Dr. Bruno da Clínica B")
     cliente = cliente_de(criar_usuario("ana", clinica_a))
-    conteudo = cliente.get(reverse("practitioners:list")).content.decode()
-    assert "Dra. Ana da Clínica A" in conteudo
-    assert "Dr. Bruno da Clínica B" not in conteudo
+    content = cliente.get(reverse("practitioners:list")).content.decode()
+    assert "Dra. Ana da Clínica A" in content
+    assert "Dr. Bruno da Clínica B" not in content
 
 
 @pytest.mark.parametrize("rota", ["practitioners:edit", "practitioners:delete"])
@@ -127,12 +127,12 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
     # database ever has another one: nobody chooses, each user gets their own clinic.
     criar_profissional(clinica_a, "Profissional A")
     criar_profissional(clinica_b, "Profissional B")
-    conteudo = cliente_de(criar_usuario("ana", clinica_a)).get(reverse("practitioners:list"))
-    conteudo = conteudo.content.decode()
-    assert "Profissional A" in conteudo and "Profissional B" not in conteudo
-    conteudo = cliente_de(criar_usuario("bia", clinica_b)).get(reverse("practitioners:list"))
-    conteudo = conteudo.content.decode()
-    assert "Profissional B" in conteudo and "Profissional A" not in conteudo
+    content = cliente_de(criar_usuario("ana", clinica_a)).get(reverse("practitioners:list"))
+    content = content.content.decode()
+    assert "Profissional A" in content and "Profissional B" not in content
+    content = cliente_de(criar_usuario("bia", clinica_b)).get(reverse("practitioners:list"))
+    content = content.content.decode()
+    assert "Profissional B" in content and "Profissional A" not in content
 
 
 def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usuario, cliente_de):
@@ -158,9 +158,9 @@ def test_formulario_so_oferece_usuarios_da_propria_clinica(
     criar_usuario("colega_a", clinica_a)
     criar_usuario("estranho_b", clinica_b)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    conteudo = cliente.get(reverse("practitioners:new")).content.decode()
-    assert "colega_a" in conteudo
-    assert "estranho_b" not in conteudo
+    content = cliente.get(reverse("practitioners:new")).content.decode()
+    assert "colega_a" in content
+    assert "estranho_b" not in content
 
 
 def test_nao_liga_usuario_de_outra_clinica_via_post(

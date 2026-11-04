@@ -41,10 +41,10 @@ def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinic
             city_id=CARLOS_BARBOSA,
             neighborhood="Bairro de Outra Clínica",
         )
-    texto = recepcao.get(URL, {"city": CARLOS_BARBOSA}).content.decode()
-    assert 'id="bairros-sugeridos"' in texto and 'value="Centro"' in texto
-    assert 'value="Bairro Novo Fictício"' in texto and 'value="Rua Inventada A"' in texto
-    assert "Outra Clínica" not in texto  # another clinic's patients stay private
+    text = recepcao.get(URL, {"city": CARLOS_BARBOSA}).content.decode()
+    assert 'id="bairros-sugeridos"' in text and 'value="Centro"' in text
+    assert 'value="Bairro Novo Fictício"' in text and 'value="Rua Inventada A"' in text
+    assert "Outra Clínica" not in text  # another clinic's patients stay private
 
 
 def test_cidade_sem_dados_e_parametro_invalido(recepcao):

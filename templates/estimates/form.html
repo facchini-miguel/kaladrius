@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if orcamento %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if orcamento %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}{% else %}{% translate "Novo orçamento" %}{% endif %}</h1>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}

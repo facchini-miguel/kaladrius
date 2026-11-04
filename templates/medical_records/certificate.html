@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Atestado" %} · {{ atestado.visit.patient.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'medical_records:visit' atestado.visit_id %}">{% translate "Voltar" %}</a>
@@ -11,9 +11,9 @@
 <div class="recibo bg-white border rounded p-4" style="max-width: 48rem;">
   {% translate "ATESTADO" as titulo_documento %}
   {% include "medical_records/_header.html" with data_documento=atestado.created_at %}
-  {% get_current_language as idioma %}
+  {% get_current_language as language %}
   {# Month names are capitalized in Django's Portuguese dates, but not in running text. #}
-  {% if idioma == "pt-br" %}{% with data_longa=atestado.date|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with date=data_longa %}{% endwith %}
+  {% if language == "pt-br" %}{% with data_longa=atestado.date|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with date=data_longa %}{% endwith %}
   {% else %}{% include "medical_records/_certificate_text.html" with date=atestado.date|date:"DATE_FORMAT" %}{% endif %}
   {% if atestado.note %}<p>{{ atestado.note|linebreaksbr }}</p>{% endif %}
   {% include "medical_records/_signature.html" with practitioner=atestado.practitioner %}

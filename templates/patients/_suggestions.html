@@ -1,5 +1,5 @@
 {% load formats i18n %}{% for patient in pacientes %}
 <a href="#" class="list-group-item list-group-item-action" data-paciente-id="{{ patient.pk }}" data-paciente-nome="{{ patient.name }}">
-  {{ patient.name }} <small class="text-body-secondary">· {% translate "código" %} {{ patient.pk }}{% if patient.tax_id %} · {{ patient.tax_id|documento:patient.papel_documento }}{% endif %}</small>
+  {{ patient.name }} <small class="text-body-secondary">· {% translate "código" %} {{ patient.pk }}{% if patient.tax_id %} · {{ patient.tax_id|document:patient.papel_documento }}{% endif %}</small>
 </a>
 {% endfor %}

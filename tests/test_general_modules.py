@@ -134,9 +134,9 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
     dados = {
         "name": "Clínica fictícia",
         "area": "odontologia",
-        "agenda_inicio": "08:00",
-        "agenda_fim": "18:00",
-        "agenda_intervalo": 30,
+        "schedule_start": "08:00",
+        "schedule_end": "18:00",
+        "schedule_interval": 30,
         "modulos": ["odontologia"],
         "modulos_gerais": sorted(sem(M.FINANCEIRO)),
     }
@@ -153,9 +153,9 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
         {
             "name": "Clínica fictícia",
             "area": "medicina",
-            "agenda_inicio": "08:00",
-            "agenda_fim": "18:00",
-            "agenda_intervalo": 30,
+            "schedule_start": "08:00",
+            "schedule_end": "18:00",
+            "schedule_interval": 30,
             "modulos": ["medicina"],
             "modulos_gerais": [M.AGENDA, M.PRONTUARIO],
         },
@@ -237,6 +237,6 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
 def test_modulo_ligado_nao_mostra_aviso_ao_superusuario(clinica_a, django_user_model, cliente_de):
     root = cliente_de(django_user_model.objects.create_superuser("root_ligado"))
     for pagina in (reverse("home"), reverse("schedule:calendar")):
-        conteudo = root.get(pagina).content.decode()
-        assert "está desligado nesta clínica" not in conteudo
-        assert ">desligado</span>" not in conteudo
+        content = root.get(pagina).content.decode()
+        assert "está desligado nesta clínica" not in content
+        assert ">desligado</span>" not in content

@@ -3,7 +3,7 @@
 
 {% block titulo %}{{ patient.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{{ patient.name }}</h1>
@@ -45,10 +45,10 @@
         <dl class="row mb-0">
           {% if patient.kind == "PJ" %}
           <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.legal_name|default:"—" }}</dd>
-          {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|documento:"empresa"|default:"—" }}</dd>{% endif %}
+          {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"empresa"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.state_registration %}<dt class="col-sm-5">{% translate "Inscrição estadual" %}</dt><dd class="col-sm-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
           {% else %}
-          {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|documento:"paciente"|default:"—" }}</dd>{% endif %}
+          {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"paciente"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.rg %}<dt class="col-sm-5">{% translate "RG" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Nascimento" %}</dt>
           <dd class="col-sm-7">
@@ -150,7 +150,7 @@
     <div class="col-md-6">
       <div class="px-3 pt-2 small fw-semibold">{% translate "Próximos" %}</div>
       <ul class="list-group list-group-flush">
-        {% for agendamento in agendamentos.proximos %}
+        {% for appointment in agendamentos.proximos %}
         {% include "patients/_appointment.html" %}
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum agendamento futuro." %}</li>
@@ -160,7 +160,7 @@
     <div class="col-md-6 border-start">
       <div class="px-3 pt-2 small fw-semibold">{% translate "Anteriores (mais recentes primeiro)" %}</div>
       <ul class="list-group list-group-flush">
-        {% for agendamento in agendamentos.anteriores %}
+        {% for appointment in agendamentos.anteriores %}
         {% include "patients/_appointment.html" %}
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum agendamento anterior." %}</li>
@@ -180,7 +180,7 @@
   <ul class="list-group list-group-flush">
     {% for orcamento in orcamentos %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
+      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|currency }}</span>
       {% include "estimates/_status.html" %}
     </li>
     {% empty %}
@@ -226,14 +226,14 @@
   </div>
   <div class="card-body">
     <p class="mb-2">
-      {% translate "Vencido" %}: <strong class="{% if financeiro.vencido %}text-danger{% endif %}">{{ financeiro.vencido|moeda }}</strong> ·
-      {% translate "A vencer" %}: <strong>{{ financeiro.a_vencer|moeda }}</strong>
+      {% translate "Vencido" %}: <strong class="{% if financeiro.vencido %}text-danger{% endif %}">{{ financeiro.vencido|currency }}</strong> ·
+      {% translate "A vencer" %}: <strong>{{ financeiro.a_vencer|currency }}</strong>
     </p>
     {% if financeiro.abertas %}
     <ul class="list-unstyled small mb-2">
       {% for installment in financeiro.abertas %}
       <li>
-        {{ installment.due_date|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> ({{ installment.number }}) · {{ installment.balance|moeda }}
+        {{ installment.due_date|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> ({{ installment.number }}) · {{ installment.balance|currency }}
         {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' installment.pk %}">{% translate "receber" %}</a>{% endif %}
       </li>
       {% endfor %}
@@ -243,7 +243,7 @@
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
       {% for payment in financeiro.pagamentos %}
-      <li{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|moeda }} · {{ payment.get_method_display }} · <a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a></li>
+      <li{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|currency }} · {{ payment.get_method_display }} · <a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>
     {% endif %}

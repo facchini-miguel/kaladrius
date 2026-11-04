@@ -3,14 +3,14 @@
 
 {% block titulo %}{% translate "Relatórios" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-3">{% translate "Relatórios financeiros" %}</h1>
 {% include "finance/_period.html" %}
 
 <div class="row g-3 mb-4">
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ relatorio.total_recebido|moeda }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ relatorio.total_pago|moeda }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if relatorio.resultado < 0 %} text-danger{% endif %}">{{ relatorio.resultado|moeda }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ relatorio.total_recebido|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ relatorio.total_pago|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if relatorio.resultado < 0 %} text-danger{% endif %}">{{ relatorio.resultado|currency }}</div></div></div></div>
 </div>
 
 <div class="row g-4">
@@ -38,7 +38,7 @@
 <p class="text-body-secondary small mt-3">
   {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
   {% if fechado_ate %}{% blocktranslate with data=fechado_ate|date:"SHORT_DATE_FORMAT" %}Financeiro fechado até {{ data }}: até essa data os valores não mudam mais.{% endblocktranslate %}{% endif %}
-  {% if relatorio.interest %}{% translate "Juros e multa recebidos" %}: {{ relatorio.interest|moeda }}.{% endif %}
-  {% if relatorio.descontos %}{% translate "Descontos dados" %}: {{ relatorio.descontos|moeda }}.{% endif %}
+  {% if relatorio.interest %}{% translate "Juros e multa recebidos" %}: {{ relatorio.interest|currency }}.{% endif %}
+  {% if relatorio.descontos %}{% translate "Descontos dados" %}: {{ relatorio.descontos|currency }}.{% endif %}
 </p>
 {% endblock %}

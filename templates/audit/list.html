@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Auditoria" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-1">{% translate "Auditoria" %}</h1>
 <p class="text-body-secondary">{% translate "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros não podem ser alterados." %}</p>
 
@@ -28,7 +28,7 @@
 
 <div class="table-responsive">
   <table class="table table-sm align-middle bg-white">
-    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demonstracao %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
+    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demo %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
     <tbody>
       {% for record in pagina %}
       <tr>
@@ -48,7 +48,7 @@
           </details>
           {% endif %}
         </td>
-        {% if not user.demonstracao %}<td class="small text-body-secondary">{{ record.ip|default:"" }}</td>{% endif %}
+        {% if not user.demo %}<td class="small text-body-secondary">{{ record.ip|default:"" }}</td>{% endif %}
       </tr>
       {% empty %}
       <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum registro encontrado." %}</td></tr>

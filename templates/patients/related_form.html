@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Pessoa relacionada" %} · {{ patient.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-1">{% if instancia.pk %}{% translate "Pessoa relacionada" %}{% else %}{% translate "Nova pessoa relacionada" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">{{ patient.name }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>

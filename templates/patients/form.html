@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
 
 <form method="post" novalidate id="form-paciente">

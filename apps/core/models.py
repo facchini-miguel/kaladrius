@@ -18,19 +18,26 @@ class Usuario(AbstractUser):
     migrations. Access to clinics comes from Vinculo rows.
     """
 
-    idioma = models.CharField(
+    language = models.CharField(
         _("idioma"),
         max_length=10,
         choices=settings.LANGUAGES,
         blank=True,
         help_text=_("Vazio: o idioma do navegador."),
+        db_column="idioma",
     )
-    ultima_versao_vista = models.CharField(
-        _("última versão vista nas novidades"), max_length=20, blank=True, editable=False
+    last_seen_version = models.CharField(
+        _("última versão vista nas novidades"),
+        max_length=20,
+        blank=True,
+        editable=False,
+        db_column="ultima_versao_vista",
     )
     # Public demo login (0.32.0, decision 085): its password is published, so it cannot
     # change it (nobody locks the others out) nor upload attachments (no file hosting).
-    demonstracao = models.BooleanField(_("conta de demonstração"), default=False, editable=False)
+    demo = models.BooleanField(
+        _("conta de demonstração"), default=False, editable=False, db_column="demonstracao"
+    )
 
     class Meta:
         verbose_name = _("usuário")
@@ -39,11 +46,11 @@ class Usuario(AbstractUser):
     def save(self, *args, **kwargs):
         # A new person starts at the current version: "the system was updated" and forty
         # versions of history mean nothing to someone who just arrived (review, superuser).
-        if self._state.adding and not self.ultima_versao_vista:
+        if self._state.adding and not self.last_seen_version:
             from apps.whats_new.releases import ReleasesInvalidas, versao_atual
 
             try:
-                self.ultima_versao_vista = versao_atual()
+                self.last_seen_version = versao_atual()
             except ReleasesInvalidas:
                 pass
         super().save(*args, **kwargs)
@@ -79,16 +86,17 @@ class Clinic(models.Model):
         ),
     )
     # The country's tax document, an individual's or a company's (decision 121).
-    documento = models.CharField(_("documento"), max_length=20, blank=True)
+    document = models.CharField(_("documento"), max_length=20, blank=True, db_column="documento")
     email = models.EmailField(_("e-mail"), blank=True)
     phone = models.CharField(_("telefone"), max_length=20, blank=True, db_column="telefone")
-    endereco = models.CharField(
+    address = models.CharField(
         _("endereço"),
         max_length=250,
         blank=True,
         help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
+        db_column="endereco",
     )
-    moeda = models.CharField(
+    currency = models.CharField(
         _("moeda"),
         max_length=3,
         choices=currencies.ESCOLHAS,
@@ -97,8 +105,9 @@ class Clinic(models.Model):
             "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
             "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
         ),
+        db_column="moeda",
     )
-    pais = models.CharField(
+    country = models.CharField(
         _("país"),
         max_length=2,
         choices=countries.ESCOLHAS,
@@ -107,15 +116,17 @@ class Clinic(models.Model):
             "Define o fuso horário disponível, o formato de telefones, códigos postais e "
             "datas em inglês, e a moeda sugerida."
         ),
+        db_column="pais",
     )
-    fuso_horario = models.CharField(
+    time_zone = models.CharField(
         _("fuso horário"),
         max_length=40,
         choices=countries.ESCOLHAS_FUSO,
         default=countries.FUSO_PADRAO,
         help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
+        db_column="fuso_horario",
     )
-    numeracao_dentaria = models.CharField(
+    tooth_numbering = models.CharField(
         _("numeração dos dentes"),
         max_length=10,
         choices=NUMERACOES,
@@ -124,20 +135,26 @@ class Clinic(models.Model):
             "Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os "
             "dentes já registrados continuam os mesmos."
         ),
+        db_column="numeracao_dentaria",
     )
     active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
-    exigir_duas_etapas = models.BooleanField(
+    require_two_factor = models.BooleanField(
         _("exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"),
         default=False,
         help_text=_(
             "Profissionais com prontuário, administradores e o financeiro só usam o sistema "
             "depois de ativar o código do aplicativo autenticador. A recepção não é obrigada."
         ),
+        db_column="exigir_duas_etapas",
     )
-    agenda_inicio = models.TimeField(_("início da agenda"), default=datetime.time(7, 30))
-    agenda_fim = models.TimeField(_("fim da agenda"), default=datetime.time(20, 0))
-    agenda_intervalo = models.PositiveSmallIntegerField(
-        _("duração de cada horário"), choices=INTERVALOS, default=30
+    schedule_start = models.TimeField(
+        _("início da agenda"), default=datetime.time(7, 30), db_column="agenda_inicio"
+    )
+    schedule_end = models.TimeField(
+        _("fim da agenda"), default=datetime.time(20, 0), db_column="agenda_fim"
+    )
+    schedule_interval = models.PositiveSmallIntegerField(
+        _("duração de cada horário"), choices=INTERVALOS, default=30, db_column="agenda_intervalo"
     )
     created_at = models.DateTimeField(_("criada em"), auto_now_add=True, db_column="criada_em")
     updated_at = models.DateTimeField(_("alterada em"), auto_now=True, db_column="alterada_em")
@@ -149,7 +166,7 @@ class Clinic(models.Model):
         ordering = ["name"]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(agenda_inicio__lt=models.F("agenda_fim")),
+                condition=models.Q(schedule_start__lt=models.F("schedule_end")),
                 name="clinica_agenda_inicio_antes_do_fim",
                 violation_error_message=_("O início da agenda deve ser antes do fim."),
             ),
@@ -168,13 +185,13 @@ class Clinic(models.Model):
         """The name of its document, in its country: "CNPJ", "EIN" (decision 121)."""
         from .identification import sigla
 
-        return sigla(self.documento, ("pessoa", "empresa"), self.pais)
+        return sigla(self.document, ("pessoa", "empresa"), self.country)
 
     @property
     def documento_escrito(self):
         from .identification import escrever
 
-        return escrever(self.documento, ("pessoa", "empresa"), self.pais)
+        return escrever(self.document, ("pessoa", "empresa"), self.country)
 
     @property
     def odontologia(self):
@@ -276,7 +293,7 @@ class Membership(models.Model):
         verbose_name=_("clínica"),
         db_column="clinica_id",
     )
-    papel = models.CharField(_("perfil"), max_length=20, choices=Papel.choices)
+    role = models.CharField(_("perfil"), max_length=20, choices=Papel.choices, db_column="papel")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
@@ -294,7 +311,7 @@ class Membership(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user} em {self.clinic} ({self.get_papel_display()})"
+        return f"{self.user} em {self.clinic} ({self.get_role_display()})"
 
 
 class Backup(models.Model):

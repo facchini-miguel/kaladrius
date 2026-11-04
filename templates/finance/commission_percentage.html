@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Percentual de comissão" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% blocktranslate with nome=practitioner.name %}Comissão de {{ nome }}{% endblocktranslate %}</h1>
 <form method="post" style="max-width: 24rem;" novalidate>
   {% csrf_token %}

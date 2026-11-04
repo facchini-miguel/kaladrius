@@ -18,7 +18,7 @@ def test_matriz_cobre_todos_os_papeis():
 
 
 @pytest.mark.parametrize(
-    ("papel", "esperado"),
+    ("role", "esperado"),
     [
         (Papel.ADMIN, {"lista": 200, "novo": 200, "editar": 200, "excluir": 200}),
         (Papel.RECEPCAO, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
@@ -26,10 +26,10 @@ def test_matriz_cobre_todos_os_papeis():
     ],
 )
 def test_acesso_as_telas_de_profissionais_por_papel(
-    papel, esperado, clinica_a, criar_usuario, criar_profissional, cliente_de
+    role, esperado, clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
     practitioner = criar_profissional(clinica_a, "Dra. A")
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     urls = {
         "lista": reverse("practitioners:list"),
         "novo": reverse("practitioners:new"),
@@ -54,16 +54,16 @@ def test_botoes_aparecem_conforme_a_permissao(
 ):
     criar_profissional(clinica_a, "Dra. A")
     recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    conteudo = recepcao.get(reverse("practitioners:list")).content.decode()
-    assert "Novo profissional" not in conteudo
-    assert ">Editar<" not in conteudo
-    assert ">Excluir<" not in conteudo
+    content = recepcao.get(reverse("practitioners:list")).content.decode()
+    assert "Novo profissional" not in content
+    assert ">Editar<" not in content
+    assert ">Excluir<" not in content
 
     admin = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    conteudo = admin.get(reverse("practitioners:list")).content.decode()
-    assert "Novo profissional" in conteudo
-    assert ">Editar<" in conteudo
-    assert ">Excluir<" in conteudo
+    content = admin.get(reverse("practitioners:list")).content.decode()
+    assert "Novo profissional" in content
+    assert ">Editar<" in content
+    assert ">Excluir<" in content
 
 
 def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_de):
@@ -159,12 +159,12 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    conteudo = (
+    content = (
         cliente_de(root)
         .get(reverse("admin:profissionais_practitioner_changelist"))
         .content.decode()
     )
-    assert "Dra. A" in conteudo and "Dr. B" in conteudo
+    assert "Dra. A" in content and "Dr. B" in content
 
 
 def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario, cliente_de):

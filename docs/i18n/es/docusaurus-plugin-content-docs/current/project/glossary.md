@@ -114,7 +114,7 @@ Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clin
 
 ## Campos de cada app
 
-Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167), pacientes (decisión 168).
+Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167), pacientes (decisión 168), core e historia clínica (decisión 169).
 
 ### Finanzas (`financeiro`)
 
@@ -194,6 +194,48 @@ Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión
 | `outro_paciente` | `other_patient` |
 
 `rg` queda: es el nombre del documento brasileño, como `cpf`.
+
+### Core (`core`)
+
+| Antes | Después |
+|---|---|
+| `idioma` | `language` |
+| `ultima_versao_vista` | `last_seen_version` |
+| `demonstracao` | `demo` |
+| `documento` | `document` |
+| `endereco` | `address` |
+| `moeda` | `currency` |
+| `pais` | `country` |
+| `fuso_horario` | `time_zone` |
+| `numeracao_dentaria` | `tooth_numbering` |
+| `exigir_duas_etapas` | `require_two_factor` |
+| `agenda_inicio` | `schedule_start` |
+| `agenda_fim` | `schedule_end` |
+| `agenda_intervalo` | `schedule_interval` |
+| `papel` | `role` |
+
+`area` ya está en inglés.
+
+### Historia clínica (`prontuario`)
+
+| Antes | Después |
+|---|---|
+| `agendamento` | `appointment` |
+| `queixa_principal` | `chief_complaint` |
+| `historia` | `present_illness` |
+| `antecedentes` | `medical_history` |
+| `exame_fisico` | `physical_exam` |
+| `conduta` | `plan` |
+| `finalizado_em` | `finalized_at` |
+| `finalizado_por` | `finalized_by` |
+| `texto` | `text` |
+| `hora_inicio` | `start_time` |
+| `hora_fim` | `end_time` |
+| `dias` | `days` |
+| `prescricao` | `medications` |
+| `exames` | `exams` |
+| `indicacao` | `indication` |
+| `conteudo` | `content` |
 
 ## Lo que queda en portugués
 

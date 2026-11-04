@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Atendimento" %} · {{ visit.patient.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'medical_records:visit' visit.pk %}">{% translate "Voltar" %}</a>
@@ -19,9 +19,9 @@
   {% endif %}{% endfor %}
   {% for adendo in adendos %}
   <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.practitioner.name }}</h2>
-  <div>{{ adendo.texto|linebreaksbr }}</div>
+  <div>{{ adendo.text|linebreaksbr }}</div>
   {% endfor %}
-  <p class="small text-body-secondary mt-3">{% blocktranslate with momento=visit.finalizado_em|date:"SHORT_DATETIME_FORMAT" %}Finalizado no sistema em {{ momento }}.{% endblocktranslate %}</p>
+  <p class="small text-body-secondary mt-3">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalizado no sistema em {{ momento }}.{% endblocktranslate %}</p>
   {% include "medical_records/_signature.html" with practitioner=visit.practitioner %}
 </div>
 {% endblock %}

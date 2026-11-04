@@ -12,8 +12,8 @@ import unicodedata
 ALFABETICA = "und-x-icu"
 
 
-def chave_alfabetica(texto):
+def chave_alfabetica(text):
     """Sort key for Python lists of names, matching the database order closely enough:
     accents and case are ignored."""
-    sem_acento = unicodedata.normalize("NFKD", texto or "")
+    sem_acento = unicodedata.normalize("NFKD", text or "")
     return "".join(c for c in sem_acento if not unicodedata.combining(c)).casefold()

@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Planejamento" %} {{ year }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
   <h1 class="h3 mb-0">{% blocktranslate with ano=year %}Planejamento {{ ano }}{% endblocktranslate %}</h1>
   <div class="btn-group">
@@ -36,25 +36,25 @@
           <td class="text-end">
             {% if linha.campo %}
             {{ linha.campo }}{% for erro in linha.campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
-            {% else %}{{ linha.meta|moeda|default:"—" }}{% endif %}
+            {% else %}{{ linha.meta|currency|default:"—" }}{% endif %}
           </td>
-          <td class="text-end text-nowrap text-body-secondary">{{ linha.esperado|moeda|default:"—" }}</td>
-          <td class="text-end text-nowrap">{{ linha.realizado|moeda }}</td>
+          <td class="text-end text-nowrap text-body-secondary">{{ linha.esperado|currency|default:"—" }}</td>
+          <td class="text-end text-nowrap">{{ linha.realizado|currency }}</td>
           <td class="text-end">{% if linha.percentage is not None %}<span class="badge {% if linha.em_dia %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ linha.percentage }}%</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></td></tr>
         {% endfor %}
         {% if secao.sem_grupo %}
-        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ secao.sem_grupo|moeda }}</td><td></td></tr>
+        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ secao.sem_grupo|currency }}</td><td></td></tr>
         {% endif %}
       </tbody>
       <tfoot>
         <tr class="fw-semibold">
           <td>{% translate "Total" %}</td>
-          <td class="text-end text-nowrap">{{ secao.meta|moeda }}</td>
-          <td class="text-end text-nowrap">{{ secao.esperado|moeda }}</td>
-          <td class="text-end text-nowrap">{{ secao.realizado|moeda }}</td>
+          <td class="text-end text-nowrap">{{ secao.meta|currency }}</td>
+          <td class="text-end text-nowrap">{{ secao.esperado|currency }}</td>
+          <td class="text-end text-nowrap">{{ secao.realizado|currency }}</td>
           <td></td>
         </tr>
       </tfoot>

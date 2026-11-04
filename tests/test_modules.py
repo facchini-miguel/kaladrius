@@ -27,10 +27,10 @@ def configuracao(**extra):
     return {
         "name": "Clínica fictícia",
         "area": "medicina",
-        "agenda_inicio": "07:30",
-        "agenda_fim": "20:00",
-        "moeda": "BRL",
-        "agenda_intervalo": 30,
+        "schedule_start": "07:30",
+        "schedule_end": "20:00",
+        "currency": "BRL",
+        "schedule_interval": 30,
         "modulos": ["odontologia", "medicina"],
         "modulos_gerais": sorted(MODULOS_GERAIS),
         **extra,
@@ -59,15 +59,15 @@ def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, 
     assert clinica_a.medicina == ("medicina" in codigos)
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL, Papel.FINANCEIRO])
-def test_outros_papeis_nao_alteram_modulos(papel, clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("usuario_modulos", clinica_a, papel))
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL, Papel.FINANCEIRO])
+def test_outros_papeis_nao_alteram_modulos(role, clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("usuario_modulos", clinica_a, role))
     assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
     assert clinica_a.odontologia and not clinica_a.medicina
 
 
 def test_administrador_de_demo_nao_altera_modulos(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("demo_modulos", clinica_a, Papel.ADMIN, demonstracao=True))
+    cliente = cliente_de(criar_usuario("demo_modulos", clinica_a, Papel.ADMIN, demo=True))
     assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
     assert not clinica_a.medicina
 

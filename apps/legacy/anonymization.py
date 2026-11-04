@@ -107,16 +107,16 @@ class _Anonimizador:
             return ""
         while True:
             gerar = fake_data.cnpj if patient.kind == Patient.Tipo.JURIDICA else fake_data.cpf
-            documento = gerar(self.fake)
-            if documento not in usados:
-                usados.add(documento)
-                return documento
+            document = gerar(self.fake)
+            if document not in usados:
+                usados.add(document)
+                return document
 
     def _nascimento(self, date):
         if date is None:
             return None
-        dias = self.sorte.randint(-DESLOCAMENTO_NASCIMENTO, DESLOCAMENTO_NASCIMENTO)
-        return min(date + datetime.timedelta(days=dias), self.hoje)
+        days = self.sorte.randint(-DESLOCAMENTO_NASCIMENTO, DESLOCAMENTO_NASCIMENTO)
+        return min(date + datetime.timedelta(days=days), self.hoje)
 
     def pacientes(self):
         fake = self.fake
@@ -176,12 +176,12 @@ class _Anonimizador:
 
     def agendamentos(self, nomes):
         agendamentos = list(Appointment.objects.filter(clinic=self.clinic).select_related("kind"))
-        for agendamento in agendamentos:
+        for appointment in agendamentos:
             # Blocked slots ("Ocupado") hold no personal data; the rest named the patient
             # and the procedure in free text.
-            if agendamento.description and agendamento.description != agendamento.kind.name:
+            if appointment.description and appointment.description != appointment.kind.name:
                 name = self.sorte.choice(nomes) if nomes else self._nome(self.sorte.choice("FM"))
-                agendamento.description = f"{name} - {agendamento.kind.name}"
+                appointment.description = f"{name} - {appointment.kind.name}"
         Appointment.objects.bulk_update(agendamentos, ["description"], batch_size=1000)
         self.resultado.agendamentos = len(agendamentos)
 

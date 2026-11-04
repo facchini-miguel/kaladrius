@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Orçamentos" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Orçamentos" %}</h1>
   <div class="d-flex gap-2">
@@ -31,7 +31,7 @@
         <td class="text-nowrap">{{ orcamento.date|date:"SHORT_DATE_FORMAT" }}</td>
         <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.name }}</a></td>
         <td>{{ orcamento.practitioner.name|default:"—" }}</td>
-        <td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td>
+        <td class="text-end text-nowrap">{{ orcamento.total|currency }}</td>
         <td>{% include "estimates/_status.html" %}</td>
       </tr>
       {% empty %}

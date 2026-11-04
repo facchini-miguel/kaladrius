@@ -58,10 +58,10 @@ def _usar_pais_da_clinica(request, clinic):
     """The clinic's time zone, and the English variant of its country for dates and times
     (decision 117): an English-speaking user of a British clinic gets 31/10/2026."""
     try:
-        timezone.activate(zoneinfo.ZoneInfo(clinic.fuso_horario))
+        timezone.activate(zoneinfo.ZoneInfo(clinic.time_zone))
     except (zoneinfo.ZoneInfoNotFoundError, ValueError):
         pass  # an unknown zone keeps settings.TIME_ZONE
-    variante = countries.variante_do_idioma(translation.get_language(), clinic.pais)
+    variante = countries.variante_do_idioma(translation.get_language(), clinic.country)
     if variante:
         translation.activate(variante)
         request.LANGUAGE_CODE = variante
@@ -92,8 +92,8 @@ class IdiomaDoUsuarioMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        idioma = getattr(getattr(request, "user", None), "idioma", "")
-        if idioma:
-            translation.activate(idioma)
-            request.LANGUAGE_CODE = idioma
+        language = getattr(getattr(request, "user", None), "language", "")
+        if language:
+            translation.activate(language)
+            request.LANGUAGE_CODE = language
         return self.get_response(request)

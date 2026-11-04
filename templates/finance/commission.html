@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Extrato da comissão" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'finance:commissions' %}">{% translate "Voltar" %}</a>

@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Funcionários" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Funcionários" %}</h1>
   <div class="d-flex gap-2">
@@ -20,7 +20,7 @@
         <td><a href="{% url 'staff:employee' employee.pk %}">{{ employee.name }}</a></td>
         <td>{{ employee.cargo|default:"—" }}</td>
         <td>{{ employee.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
-        <td class="text-end text-nowrap">{{ employee.salario_atual|moeda|default:"—" }}</td>
+        <td class="text-end text-nowrap">{{ employee.salario_atual|currency|default:"—" }}</td>
         <td>{% if employee.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
       </tr>
       {% empty %}

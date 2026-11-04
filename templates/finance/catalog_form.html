@@ -3,7 +3,7 @@
 
 {% block titulo %}{{ modelo.verbose_name|capfirst }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if instancia.pk %}{{ instancia.name }}{% else %}{{ modelo.verbose_name|capfirst }}{% endif %}</h1>
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}

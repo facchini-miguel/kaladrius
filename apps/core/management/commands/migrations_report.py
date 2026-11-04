@@ -44,7 +44,7 @@ ALTERADA = "changes a migration production already applied"
 @dataclass
 class Alerta:
     kind: str
-    texto: str
+    text: str
 
 
 @dataclass
@@ -292,8 +292,8 @@ def ida_e_volta(chaves):
     falhas = []
     for app in sorted({app for app, _nome in chaves}):
         primeira = min(name for a, name in chaves if a == app)
-        pais = [p.key for p in loader.graph.node_map[(app, primeira)].parents if p.key[0] == app]
-        alvo = pais[0][1] if pais else "zero"
+        country = [p.key for p in loader.graph.node_map[(app, primeira)].parents if p.key[0] == app]
+        alvo = country[0][1] if country else "zero"
         try:
             _migrar(app, alvo)
             _migrar()
@@ -339,14 +339,14 @@ def markdown(migracoes, falhas=None, alteradas=(), limite=None):
     """The report, in English, for the pull request comment and the CI summary. With `limite`
     (a comment's size), the SQL is left out when the report would be longer, and as a last
     resort the report is cut."""
-    texto = _markdown(migracoes, falhas, alteradas, com_sql=True)
-    if limite is None or len(texto) <= limite:
-        return texto
-    texto = _markdown(migracoes, falhas, alteradas, com_sql=False)
-    if len(texto) <= limite:
-        return texto
+    text = _markdown(migracoes, falhas, alteradas, com_sql=True)
+    if limite is None or len(text) <= limite:
+        return text
+    text = _markdown(migracoes, falhas, alteradas, com_sql=False)
+    if len(text) <= limite:
+        return text
     corte = "\n\n… (cut: the full report is in the run's summary)\n"
-    return texto[: limite - len(corte)] + corte
+    return text[: limite - len(corte)] + corte
 
 
 def _markdown(migracoes, falhas, alteradas, com_sql):
@@ -366,7 +366,7 @@ def _markdown(migracoes, falhas, alteradas, com_sql):
     if alertas or alteradas:
         linhas.append("### ⚠️ Needs attention")
         linhas += _alteradas(alteradas)
-        linhas += [f"- **{m.chave}** — {a.kind}: {a.texto}" for m, a in alertas]
+        linhas += [f"- **{m.chave}** — {a.kind}: {a.text}" for m, a in alertas]
     else:
         linhas.append("✅ No operation deletes data or breaks the previous version.")
     linhas.append("")
