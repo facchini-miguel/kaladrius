@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import Paciente
+from .models import Patient
 
 
-@admin.register(Paciente)
+@admin.register(Patient)
 class PacienteAdmin(admin.ModelAdmin):
     list_display = ["nome", "clinica", "tipo", "cpf_cnpj", "telefone_celular", "ativo"]
     list_filter = ["clinica", "tipo", "ativo"]

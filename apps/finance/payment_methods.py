@@ -93,9 +93,9 @@ _INGLES_COM_CHEQUE = {pais.ingles for pais in countries.PAISES.values()} - {"en"
 
 def rotulo(codigo, pais=None):
     """The method's name in the country: "Transferência (SPEI)" in Mexico."""
-    from .models import Pagamento
+    from .models import Payment
 
-    nome = dict(Pagamento.Forma.choices).get(codigo, codigo)
+    nome = dict(Payment.Forma.choices).get(codigo, codigo)
     if codigo == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
         nome = "Cheque"
     local = do_pais(pais).nomes.get(codigo)
@@ -111,6 +111,6 @@ def em_uso(pais=None):
 
 def rotulos(pais=None):
     """code → name of every method, for the reports (old payments included)."""
-    from .models import Pagamento
+    from .models import Payment
 
-    return {codigo: rotulo(codigo, pais) for codigo in Pagamento.Forma.values}
+    return {codigo: rotulo(codigo, pais) for codigo in Payment.Forma.values}

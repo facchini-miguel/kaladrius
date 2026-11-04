@@ -13,8 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.account import services
-from apps.account.models import CodigoRecuperacao, DuasEtapas
-from apps.audit.models import RegistroAuditoria
+from apps.account.models import RecoveryCode, TwoFactor
+from apps.audit.models import AuditEntry
 from apps.core.models import Papel
 
 pytestmark = pytest.mark.django_db
@@ -114,7 +114,7 @@ def test_ativar_com_qr_code(client, pessoa):
     client.force_login(pessoa)
     pagina = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in pagina and "otpauth" not in pagina  # the secret is in the QR, not text
-    dispositivo = DuasEtapas.objects.get(usuario=pessoa)
+    dispositivo = TwoFactor.objects.get(usuario=pessoa)
     errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "codigo": "000000"})
     assert "Código incorreto" in errado.content.decode()
     resposta = client.post(
@@ -122,8 +122,8 @@ def test_ativar_com_qr_code(client, pessoa):
     )
     texto = resposta.content.decode()
     assert "Verificação em duas etapas ativada" in texto
-    assert CodigoRecuperacao.objects.filter(usuario=pessoa).count() == 10
-    assert RegistroAuditoria.objects.filter(objeto_descricao__contains="ativada").exists()
+    assert RecoveryCode.objects.filter(usuario=pessoa).count() == 10
+    assert AuditEntry.objects.filter(objeto_descricao__contains="ativada").exists()
     dispositivo.refresh_from_db()
     assert dispositivo.ativa and dispositivo.segredo not in texto
 
@@ -215,7 +215,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     assert "Remover a verificação em duas etapas" in pagina
     client.post(reverse("team:two_factor", args=[vinculo.pk]))
     assert not services.ativa_para(pessoa)
-    assert RegistroAuditoria.objects.filter(objeto_descricao__contains="removida").exists()
+    assert AuditEntry.objects.filter(objeto_descricao__contains="removida").exists()
 
 
 def test_conta_de_demonstracao_nao_ativa(client, pessoa):
@@ -223,7 +223,7 @@ def test_conta_de_demonstracao_nao_ativa(client, pessoa):
     pessoa.save(update_fields=["demonstracao"])
     client.force_login(pessoa)
     assert client.get(reverse("account:two_factor")).status_code == 302
-    assert not DuasEtapas.objects.exists()
+    assert not TwoFactor.objects.exists()
 
 
 # --- Password recovery by e-mail -------------------------------------------------------------
@@ -326,17 +326,20 @@ def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
 def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model, client):
     import importlib
 
-    from django.apps import apps
+    from django.db import connection
+    from django.db.migrations.loader import MigrationLoader
 
-    from apps.core.models import Clinica
+    from apps.core.models import Clinic
 
     super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_usuario)
     client.post(reverse("register_clinic"), {"nome": "Clínica Fictícia Nova", "area": "medicina"})
-    assert Clinica.unica().exigir_duas_etapas
-    Clinica.objects.update(exigir_duas_etapas=False)
-    importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(apps, None)
-    assert Clinica.unica().exigir_duas_etapas
+    assert Clinic.unica().exigir_duas_etapas
+    Clinic.objects.update(exigir_duas_etapas=False)
+    # The migration runs with the models as they were then (Clinica, before decision 157).
+    estado = MigrationLoader(connection).project_state(("core", "0013_exigir_duas_etapas")).apps
+    importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(estado, None)
+    assert Clinic.unica().exigir_duas_etapas
 
 
 def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado(
@@ -348,8 +351,8 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
     from django.db import connection
 
     migracao = importlib.import_module("apps.account.migrations.0002_back_from_account_tables")
-    assert DuasEtapas._meta.db_table == "conta_duasetapas"
-    assert CodigoRecuperacao._meta.db_table == "conta_codigorecuperacao"
+    assert TwoFactor._meta.db_table == "conta_duasetapas"
+    assert RecoveryCode._meta.db_table == "conta_codigorecuperacao"
 
     # An installation that never ran as "account" has no such tables: nothing to do.
     with connection.schema_editor() as editor:
@@ -357,8 +360,8 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
 
     so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
     nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
-    DuasEtapas.objects.create(usuario=nas_duas, segredo="ORIGINAL", ativa=True)
-    CodigoRecuperacao.objects.create(usuario=nas_duas, resumo="original")
+    TwoFactor.objects.create(usuario=nas_duas, segredo="ORIGINAL", ativa=True)
+    RecoveryCode.objects.create(usuario=nas_duas, resumo="original")
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(
@@ -379,11 +382,11 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
         migracao.copiar(None, editor)
 
     # Saved only in account_*: copied. Already in conta_*: kept as it was.
-    assert DuasEtapas.objects.get(usuario=so_na_account).segredo == "NOVO"
-    assert DuasEtapas.objects.get(usuario=nas_duas).segredo == "ORIGINAL"
+    assert TwoFactor.objects.get(usuario=so_na_account).segredo == "NOVO"
+    assert TwoFactor.objects.get(usuario=nas_duas).segredo == "ORIGINAL"
     assert list(
-        CodigoRecuperacao.objects.filter(usuario=so_na_account).values_list("resumo", flat=True)
+        RecoveryCode.objects.filter(usuario=so_na_account).values_list("resumo", flat=True)
     ) == ["codigo-NOVO"]
-    assert list(
-        CodigoRecuperacao.objects.filter(usuario=nas_duas).values_list("resumo", flat=True)
-    ) == ["original"]
+    assert list(RecoveryCode.objects.filter(usuario=nas_duas).values_list("resumo", flat=True)) == [
+        "original"
+    ]

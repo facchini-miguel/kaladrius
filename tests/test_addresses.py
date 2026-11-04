@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from apps.reference_data.models import Neighborhood, Street
 
 pytestmark = pytest.mark.django_db
@@ -29,14 +29,14 @@ def test_bairros_e_logradouros_do_odonto_carregados():
 
 def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinica_b, recepcao):
     with usar_clinica(clinica_a):
-        Paciente.objects.create(
+        Patient.objects.create(
             nome="Paciente fictício A",
             cidade_id=CARLOS_BARBOSA,
             bairro="Bairro Novo Fictício",
             logradouro="Rua Inventada A",
         )
     with usar_clinica(clinica_b):
-        Paciente.objects.create(
+        Patient.objects.create(
             nome="Paciente fictício B", cidade_id=CARLOS_BARBOSA, bairro="Bairro de Outra Clínica"
         )
     texto = recepcao.get(URL, {"cidade": CARLOS_BARBOSA}).content.decode()

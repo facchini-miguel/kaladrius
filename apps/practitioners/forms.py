@@ -5,12 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import countries, identification
 from apps.core.forms import FormularioBootstrap
 
-from .models import Profissional
+from .models import Practitioner
 
 
 class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Profissional
+        model = Practitioner
         fields = ["nome", "registro", "cor", "usuario", "ativo"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
@@ -32,7 +32,7 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
     def clean_usuario(self):
         usuario = self.cleaned_data.get("usuario")
         if usuario is not None:
-            outros = Profissional.objects.filter(usuario=usuario).exclude(pk=self.instance.pk)
+            outros = Practitioner.objects.filter(usuario=usuario).exclude(pk=self.instance.pk)
             if outros.exists():
                 raise forms.ValidationError(
                     _("Este usuário já está ligado a outro profissional desta clínica.")

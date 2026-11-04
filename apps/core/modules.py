@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 from .isolation import sem_isolamento
-from .models import DEPENDENCIAS, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
+from .models import DEPENDENCIAS, MODULOS_GERAIS, Clinic, ClinicModule, ModuloClinico
 
 
 def iniciais(area):
@@ -34,7 +34,7 @@ def habilitados(request):
         clinica = getattr(request, "clinica", None)
         request._modulos_habilitados = (
             frozenset(
-                ModuloDaClinica.todos.filter(clinica=clinica, ativo=True).values_list(
+                ClinicModule.todos.filter(clinica=clinica, ativo=True).values_list(
                     "codigo", flat=True
                 )
             )
@@ -80,12 +80,12 @@ def configurar(clinica, codigos):
         raise ValidationError(_("Orçamentos e Pessoal precisam do Financeiro habilitado."))
     if clinica.pk is None:
         raise ValidationError(_("Cadastre a clínica antes de configurar os módulos."))
-    Clinica.objects.select_for_update().get(pk=clinica.pk)
+    Clinic.objects.select_for_update().get(pk=clinica.pk)
     # Administrative configuration has an explicit clinic; the ordinary model manager
     # remains isolated for queries from all the other modules.
     with sem_isolamento():
         for codigo in ModuloClinico:
-            modulo, criado = ModuloDaClinica.objects.get_or_create(
+            modulo, criado = ClinicModule.objects.get_or_create(
                 clinica=clinica, codigo=codigo, defaults={"ativo": codigo in codigos}
             )
             if not criado and modulo.ativo != (codigo in codigos):

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
-from apps.core.models import Papel, Usuario, Vinculo
+from apps.core.models import Membership, Papel, Usuario
 
 
 def conta_exclusiva(usuario, clinica):
@@ -37,7 +37,7 @@ class NovoMembroForm(FormularioBootstrap, UserCreationForm):
     def save(self, commit=True):
         usuario = super().save(commit=commit)
         if commit:
-            Vinculo.objects.create(
+            Membership.objects.create(
                 usuario=usuario, clinica=self.clinica, papel=self.cleaned_data["papel"]
             )
         return usuario
@@ -47,7 +47,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
     """Role and access of a member in the current clinic."""
 
     class Meta:
-        model = Vinculo
+        model = Membership
         fields = ["papel", "ativo"]
         labels = {"ativo": _("Acesso a esta clínica liberado")}
 
@@ -66,7 +66,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
         continua_admin = dados.get("papel") == Papel.ADMIN and dados.get("ativo")
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
-            outros = Vinculo.objects.filter(
+            outros = Membership.objects.filter(
                 clinica_id=self.instance.clinica_id,
                 papel=Papel.ADMIN,
                 ativo=True,

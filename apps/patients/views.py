@@ -9,23 +9,23 @@ from django.utils.dates import MONTHS
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import anonimizar, registrar
 from apps.core import legislation
 from apps.core.permissions import Acao, Modulo, exige_permissao, pode
 from apps.core.validators import normalizar_cnpj
-from apps.estimates.models import ItemOrcamento, Orcamento
-from apps.finance.models import Lancamento, Pagamento, Parcela
+from apps.estimates.models import Estimate, EstimateItem
+from apps.finance.models import Entry, Installment, Payment
 from apps.finance.services import resumo_do_paciente
-from apps.health_plans.models import Carteirinha
-from apps.medical_records.models import Atendimento
+from apps.health_plans.models import MemberCard
+from apps.medical_records.models import Visit
 from apps.medical_records.permissions import acessa_prontuario
 from apps.recalls.models import Recall
-from apps.schedule.models import Agendamento
+from apps.schedule.models import Appointment
 from apps.schedule.services import agendamentos_visiveis
 
 from .forms import PacienteForm, PessoaRelacionadaForm
-from .models import Paciente, PessoaRelacionada
+from .models import Patient, RelatedPerson
 
 POR_PAGINA = 50
 SITUACOES = {
@@ -43,8 +43,8 @@ def _ve_arquivados(request):
 
 def _visiveis(request):
     if _ve_arquivados(request):
-        return Paciente.objects.all()
-    return Paciente.objects.filter(arquivado=False)
+        return Patient.objects.all()
+    return Patient.objects.filter(arquivado=False)
 
 
 def filtrar(pacientes, busca, tipo, situacao):
@@ -57,7 +57,7 @@ def filtrar(pacientes, busca, tipo, situacao):
         if busca.isdecimal() and len(busca) <= 9:
             filtro |= Q(pk=int(busca))
         pacientes = pacientes.filter(filtro)
-    if tipo in Paciente.Tipo.values:
+    if tipo in Patient.Tipo.values:
         pacientes = pacientes.filter(tipo=tipo)
     return pacientes.filter(SITUACOES.get(situacao, SITUACOES["ativos"]))
 
@@ -69,7 +69,7 @@ def lista(request):
     situacao = request.GET.get("situacao", "ativos")
     if situacao == "arquivados" and not _ve_arquivados(request):
         situacao = "ativos"
-    pacientes = filtrar(Paciente.objects.select_related("cidade__uf"), busca, tipo, situacao)
+    pacientes = filtrar(Patient.objects.select_related("cidade__uf"), busca, tipo, situacao)
     pagina = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -79,7 +79,7 @@ def lista(request):
             "busca": busca,
             "tipo": tipo,
             "situacao": situacao,
-            "tipos": Paciente.Tipo.choices,
+            "tipos": Patient.Tipo.choices,
             "parametros": urlencode({"q": busca, "tipo": tipo, "situacao": situacao}),
         },
     )
@@ -91,7 +91,7 @@ def ficha(request, pk):
         _visiveis(request).select_related("cidade__uf", "estado_civil", "arquivado_por"), pk=pk
     )
     # LGPD: access to a patient's record (health data) is logged.
-    registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)
+    registrar(AuditEntry.Acao.VISUALIZAR, paciente)
     rechamadas = Recall.objects.filter(paciente=paciente).order_by("-data")[:20]
     contexto = {"paciente": paciente, "rechamadas": rechamadas}
     if pode(request, Modulo.AGENDA, Acao.VER):
@@ -100,16 +100,16 @@ def ficha(request, pk):
         contexto["financeiro"] = resumo_do_paciente(paciente)
     if pode(request, Modulo.ORCAMENTOS, Acao.VER):
         contexto["orcamentos"] = list(
-            Orcamento.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
+            Estimate.objects.filter(paciente=paciente).prefetch_related("itens")[:10]
         )
     if pode(request, Modulo.CONVENIOS, Acao.VER):
         contexto["carteirinhas"] = list(
-            Carteirinha.objects.filter(paciente=paciente).select_related("convenio")
+            MemberCard.objects.filter(paciente=paciente).select_related("convenio")
         )
     contexto["relacionados"] = relacionados_de(paciente)
     if acessa_prontuario(request):
         contexto["prontuario"] = list(
-            Atendimento.objects.filter(paciente=paciente).select_related("profissional")
+            Visit.objects.filter(paciente=paciente).select_related("profissional")
         )
     return render(request, "patients/record.html", contexto)
 
@@ -121,9 +121,9 @@ def imprimir(request, pk):
     paciente = get_object_or_404(
         _visiveis(request).select_related("cidade__uf", "estado_civil"), pk=pk
     )
-    registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)  # LGPD, as the record
+    registrar(AuditEntry.Acao.VISUALIZAR, paciente)  # LGPD, as the record
     carteirinhas = (
-        list(Carteirinha.objects.filter(paciente=paciente, ativa=True).select_related("convenio"))
+        list(MemberCard.objects.filter(paciente=paciente, ativa=True).select_related("convenio"))
         if pode(request, Modulo.CONVENIOS, Acao.VER)
         else None
     )
@@ -133,7 +133,7 @@ def imprimir(request, pk):
         {
             "paciente": paciente,
             "carteirinhas": carteirinhas,
-            "relacionados": PessoaRelacionada.objects.filter(paciente=paciente).select_related(
+            "relacionados": RelatedPerson.objects.filter(paciente=paciente).select_related(
                 "outro_paciente"
             ),
             "hoje": timezone.localdate(),
@@ -161,13 +161,13 @@ def _historico(request, paciente):
 
 @exige_permissao(Modulo.PACIENTES, Acao.CRIAR)
 def novo(request):
-    return _formulario(request, Paciente())
+    return _formulario(request, Patient())
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def editar(request, pk):
     # An archived patient is restored before being changed.
-    return _formulario(request, get_object_or_404(Paciente.objects, pk=pk, arquivado=False))
+    return _formulario(request, get_object_or_404(Patient.objects, pk=pk, arquivado=False))
 
 
 def _formulario(request, paciente):
@@ -181,11 +181,11 @@ def _formulario(request, paciente):
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
 def arquivar(request, pk):
-    paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=False)
+    paciente = get_object_or_404(Patient.objects, pk=pk, arquivado=False)
     # Not while the patient still owes or is owed money: the administrator first receives or
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
     abertas = list(
-        Parcela.objects.abertas()
+        Installment.objects.abertas()
         .filter(lancamento__paciente=paciente)
         .select_related("lancamento")
         .order_by("vencimento", "pk")
@@ -215,7 +215,7 @@ def arquivar(request, pk):
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
 def restaurar(request, pk):
-    paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
+    paciente = get_object_or_404(Patient.objects, pk=pk, arquivado=True)
     if request.method == "POST":
         paciente.arquivado = False
         paciente.arquivado_em = paciente.arquivado_por = None
@@ -233,7 +233,7 @@ def excluir(request, pk):
     (accounting history) without the patient and the notes, and the patient's personal data
     is removed from the audit log as well.
     """
-    paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=True)
+    paciente = get_object_or_404(Patient.objects, pk=pk, arquivado=True)
     # The country's law and how long it keeps medical records (decision 124).
     contexto = {
         "paciente": paciente,
@@ -242,36 +242,36 @@ def excluir(request, pk):
     }
     # The medical record must be kept (20 years in Brazil, Law 13.787/2018, decision 081): a
     # patient with one stays archived and is never permanently deleted, in any country.
-    atendimentos = Atendimento.objects.filter(paciente=paciente).count()
+    atendimentos = Visit.objects.filter(paciente=paciente).count()
     if atendimentos:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
         return render(request, "patients/delete.html", {**contexto, "atendimentos": atendimentos})
     if request.method == "POST":
         codigo = paciente.pk
-        agendamentos = Agendamento.objects.filter(paciente=paciente)
+        agendamentos = Appointment.objects.filter(paciente=paciente)
         ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
         rechamadas = Recall.objects.filter(paciente=paciente)
         ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
-        carteirinhas = Carteirinha.objects.filter(paciente=paciente)
+        carteirinhas = MemberCard.objects.filter(paciente=paciente)
         ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
         # Their own relatives and contacts, and the links other patients made to them.
-        relacionadas = PessoaRelacionada.objects.filter(
+        relacionadas = RelatedPerson.objects.filter(
             Q(paciente=paciente) | Q(outro_paciente=paciente)
         )
         ids_relacionadas = list(relacionadas.values_list("pk", flat=True))
-        lancamentos = Lancamento.objects.filter(paciente=paciente)
+        lancamentos = Entry.objects.filter(paciente=paciente)
         ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
         ids_parcelas = list(
-            Parcela.objects.filter(lancamento__in=ids_lancamentos).values_list("pk", flat=True)
+            Installment.objects.filter(lancamento__in=ids_lancamentos).values_list("pk", flat=True)
         )
         ids_pagamentos = list(
-            Pagamento.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)
+            Payment.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)
         )
-        orcamentos = Orcamento.objects.filter(paciente=paciente)
+        orcamentos = Estimate.objects.filter(paciente=paciente)
         ids_orcamentos = list(orcamentos.values_list("pk", flat=True))
         ids_itens = list(
-            ItemOrcamento.objects.filter(orcamento__in=ids_orcamentos).values_list("pk", flat=True)
+            EstimateItem.objects.filter(orcamento__in=ids_orcamentos).values_list("pk", flat=True)
         )
         # Stored in Portuguese, like the rest of the data. Free-text notes may hold
         # personal data, so they go too; the amounts and dates stay (accounting history).
@@ -280,23 +280,23 @@ def excluir(request, pk):
             orcamentos.delete()  # items go with them (cascade)
             agendamentos.update(paciente=None, descricao=excluido)
             lancamentos.update(paciente=None, pessoa=excluido, observacoes="")
-            Pagamento.objects.filter(pk__in=ids_pagamentos).update(observacao="")
+            Payment.objects.filter(pk__in=ids_pagamentos).update(observacao="")
             rechamadas.delete()
             carteirinhas.delete()
             relacionadas.delete()
             paciente.delete()
-            anonimizar(Paciente, [codigo])
-            anonimizar(Agendamento, ids_agendamentos)
+            anonimizar(Patient, [codigo])
+            anonimizar(Appointment, ids_agendamentos)
             anonimizar(Recall, ids_rechamadas)
-            anonimizar(Carteirinha, ids_carteirinhas)
-            anonimizar(PessoaRelacionada, ids_relacionadas)
-            anonimizar(Lancamento, ids_lancamentos)
-            anonimizar(Parcela, ids_parcelas)
-            anonimizar(Pagamento, ids_pagamentos)
-            anonimizar(Orcamento, ids_orcamentos)
-            anonimizar(ItemOrcamento, ids_itens)
+            anonimizar(MemberCard, ids_carteirinhas)
+            anonimizar(RelatedPerson, ids_relacionadas)
+            anonimizar(Entry, ids_lancamentos)
+            anonimizar(Installment, ids_parcelas)
+            anonimizar(Payment, ids_pagamentos)
+            anonimizar(Estimate, ids_orcamentos)
+            anonimizar(EstimateItem, ids_itens)
             registrar(
-                RegistroAuditoria.Acao.EXCLUIR,
+                AuditEntry.Acao.EXCLUIR,
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
                 clinica=request.clinica,
@@ -314,7 +314,7 @@ def excluir(request, pk):
 def sugestoes(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     busca = request.GET.get("q", "").strip()
-    pacientes = filtrar(Paciente.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
+    pacientes = filtrar(Patient.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
     return render(request, "patients/_suggestions.html", {"pacientes": pacientes})
 
 
@@ -326,7 +326,7 @@ def aniversariantes(request):
     hoje = timezone.localdate()
     mes = request.GET.get("mes", "")
     mes = int(mes) if mes.isdecimal() and 1 <= int(mes) <= 12 else hoje.month
-    pacientes = Paciente.objects.filter(
+    pacientes = Patient.objects.filter(
         ativo=True, arquivado=False, data_nascimento__month=mes
     ).order_by("data_nascimento__day", "nome")
     ano = hoje.year if mes >= hoje.month else hoje.year + 1  # next birthday's year
@@ -347,8 +347,8 @@ def relacionados_de(paciente):
     Each item is (link, other person's name, the other patient or None, is_reverse); a
     reverse link reads "Mãe de Ana" on the mother's record.
     """
-    proprios = PessoaRelacionada.objects.filter(paciente=paciente).select_related("outro_paciente")
-    inversos = PessoaRelacionada.objects.filter(outro_paciente=paciente).select_related("paciente")
+    proprios = RelatedPerson.objects.filter(paciente=paciente).select_related("outro_paciente")
+    inversos = RelatedPerson.objects.filter(outro_paciente=paciente).select_related("paciente")
     return [(r, r.nome_exibido, r.outro_paciente, False) for r in proprios] + [
         (r, r.paciente.nome, r.paciente, True) for r in inversos
     ]
@@ -356,14 +356,14 @@ def relacionados_de(paciente):
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_novo(request, pk):
-    paciente = get_object_or_404(Paciente.objects, pk=pk, arquivado=False)
-    return _relacionado(request, paciente, PessoaRelacionada())
+    paciente = get_object_or_404(Patient.objects, pk=pk, arquivado=False)
+    return _relacionado(request, paciente, RelatedPerson())
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_editar(request, pk):
     relacionada = get_object_or_404(
-        PessoaRelacionada.objects.select_related("paciente", "outro_paciente"),
+        RelatedPerson.objects.select_related("paciente", "outro_paciente"),
         pk=pk,
         paciente__arquivado=False,
     )
@@ -395,7 +395,7 @@ def _relacionado(request, paciente, instancia):
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_remover(request, pk):
-    relacionada = get_object_or_404(PessoaRelacionada.objects, pk=pk, paciente__arquivado=False)
+    relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, paciente__arquivado=False)
     if request.method == "POST":
         paciente = relacionada.paciente_id
         relacionada.delete()

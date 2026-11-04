@@ -8,7 +8,7 @@ from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
 from apps.core.ordering import ALFABETICA
 
 
-class Paciente(ModeloDaClinica):
+class Patient(ModeloDaClinica):
     """A patient: an individual (CPF) or a company (CNPJ)."""
 
     class Tipo(models.TextChoices):
@@ -115,6 +115,7 @@ class Paciente(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "pacientes_paciente"
         verbose_name = _("paciente")
         verbose_name_plural = _("pacientes")
         ordering = ["nome"]
@@ -164,7 +165,7 @@ class Paciente(ModeloDaClinica):
         return self.telefone_celular or self.telefone_residencial or self.telefone_comercial
 
 
-class PessoaRelacionada(ModeloDaClinica):
+class RelatedPerson(ModeloDaClinica):
     """A relative or contact of a patient (decision 101, legacy `id_pessoas_relac`).
 
     Either another patient of the clinic (the link then shows on both records) or someone
@@ -172,7 +173,7 @@ class PessoaRelacionada(ModeloDaClinica):
     it is only information on the registration.
     """
 
-    class Vinculo(models.TextChoices):
+    class Relationship(models.TextChoices):
         MAE = "mae", _("Mãe")
         PAI = "pai", _("Pai")
         RESPONSAVEL = "responsavel", _("Responsável legal")
@@ -186,14 +187,14 @@ class PessoaRelacionada(ModeloDaClinica):
         CONTATO = "contato", _("Contato")
 
     paciente = models.ForeignKey(
-        Paciente,
+        Patient,
         on_delete=models.CASCADE,
         related_name="relacionados",
         verbose_name=_("paciente"),
     )
-    vinculo = models.CharField(_("vínculo"), max_length=20, choices=Vinculo.choices)
+    vinculo = models.CharField(_("vínculo"), max_length=20, choices=Relationship.choices)
     outro_paciente = models.ForeignKey(
-        Paciente,
+        Patient,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -206,6 +207,7 @@ class PessoaRelacionada(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "pacientes_pessoarelacionada"
         verbose_name = _("pessoa relacionada")
         verbose_name_plural = _("pessoas relacionadas")
         ordering = ["pk"]

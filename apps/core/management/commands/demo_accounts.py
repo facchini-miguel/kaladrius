@@ -5,8 +5,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core.isolation import usar_clinica
-from apps.core.models import Clinica, Papel, Vinculo
-from apps.practitioners.models import Profissional
+from apps.core.models import Clinic, Membership, Papel
+from apps.practitioners.models import Practitioner
 
 RECEPCAO = "demo.recepcao"
 PROFISSIONAL = "demo.profissional"
@@ -62,8 +62,8 @@ class Command(BaseCommand):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
-            clinica = Clinica.objects.get(nome=options["clinica"])
-        except Clinica.DoesNotExist as erro:
+            clinica = Clinic.objects.get(nome=options["clinica"])
+        except Clinic.DoesNotExist as erro:
             raise CommandError(f"Clínica não encontrada: {options['clinica']}") from erro
 
         recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinica, Papel.RECEPCAO)
@@ -72,14 +72,14 @@ class Command(BaseCommand):
         )
         outras = [self._conta(u, nome, senha, clinica, papel) for u, nome, senha, papel in extras]
         with usar_clinica(clinica):
-            cadastro = Profissional.objects.filter(nome=options["profissional"]).first()
+            cadastro = Practitioner.objects.filter(nome=options["profissional"]).first()
             if cadastro is None:
                 if not options["criar_profissional"]:
                     raise CommandError(
                         f"Profissional não encontrado: {options['profissional']} "
                         "(use --create-practitioner para criar)"
                     )
-                cadastro = Profissional.objects.create(nome=options["profissional"])
+                cadastro = Practitioner.objects.create(nome=options["profissional"])
             if cadastro.usuario_id not in (None, profissional.pk):
                 raise CommandError(
                     f"{cadastro.nome} já tem outro usuário de acesso; escolha outro profissional."
@@ -105,7 +105,7 @@ class Command(BaseCommand):
         usuario.demonstracao = True
         usuario.set_password(senha)
         usuario.save()
-        Vinculo.objects.update_or_create(
+        Membership.objects.update_or_create(
             usuario=usuario, clinica=clinica, defaults={"papel": papel, "ativo": True}
         )
         return usuario

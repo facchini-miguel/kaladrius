@@ -6,16 +6,16 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from apps.core.forms import FormularioBootstrap
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 
 from . import services
-from .models import Agendamento, TipoAtendimento
+from .models import Appointment, AppointmentType
 
 
 class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = TipoAtendimento
+        model = AppointmentType
         fields = ["nome", "cor", "ativo"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
@@ -27,7 +27,7 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
     def clean_nome(self):
         # The clinic is not a form field, so the unique constraint must be checked here.
         nome = self.cleaned_data["nome"].strip()
-        repetido = TipoAtendimento.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk)
+        repetido = AppointmentType.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk)
         if repetido.exists():
             raise forms.ValidationError(_("Já existe um tipo de atendimento com este nome."))
         return nome
@@ -53,7 +53,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
     )
 
     class Meta:
-        model = Agendamento
+        model = Appointment
         fields = ["profissional", "tipo", "paciente", "descricao"]
         widgets = {
             "paciente": forms.HiddenInput,
@@ -70,15 +70,15 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
         # Inactive practitioners/types are hidden, except the ones already in use here.
         if profissionais is None:
-            profissionais = Profissional.objects.all()
+            profissionais = Practitioner.objects.all()
         self.fields["profissional"].queryset = profissionais.filter(
             Q(ativo=True) | Q(pk=agendamento.profissional_id)
         )
-        self.fields["tipo"].queryset = TipoAtendimento.objects.filter(
+        self.fields["tipo"].queryset = AppointmentType.objects.filter(
             Q(ativo=True) | Q(pk=agendamento.tipo_id)
         )
         self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
-        self.fields["paciente"].queryset = Paciente.objects.all()
+        self.fields["paciente"].queryset = Patient.objects.all()
 
         passo = clinica.agenda_intervalo * 60
         for campo in ("hora_inicio", "hora_fim"):
@@ -154,13 +154,13 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             data, hora_inicio, hora_fim, dados.get("repeticoes") or 1
         )
         self.instance.inicio, self.instance.fim = self.intervalos[0]
-        marcado = (Agendamento.Situacao.COMPARECEU, Agendamento.Situacao.FALTOU)
+        marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
         if not dados.get("paciente") or (
             self.instance.situacao in marcado and data > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
             # came or missed it yet.
-            self.instance.situacao = Agendamento.Situacao.AGENDADO
+            self.instance.situacao = Appointment.Situacao.AGENDADO
         if self.instance.desmarcado:
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
             return dados

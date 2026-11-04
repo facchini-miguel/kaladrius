@@ -1,6 +1,6 @@
 from apps.core import modules
 from apps.core.models import ModuloClinico, Papel
-from apps.practitioners.models import Profissional
+from apps.practitioners.models import Practitioner
 
 
 def prontuario_habilitado(request):
@@ -46,4 +46,4 @@ def _profissional(request):
         return None
     if vinculo is not None and vinculo.papel == Papel.RECEPCAO:
         return None
-    return Profissional.objects.filter(usuario=usuario, ativo=True).first()
+    return Practitioner.objects.filter(usuario=usuario, ativo=True).first()

@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from apps.core.security import ip_para_bloqueio
 
-from .models import CodigoRecuperacao, DuasEtapas
+from .models import RecoveryCode, TwoFactor
 
 # Wrong logins from one address in the cooling-off time, whatever the username: stops someone
 # from trying a common password on many users (the per-user lock only counts 5 per user).
@@ -39,7 +39,7 @@ def endereco_bloqueado(request):
 
 
 def ativa_para(usuario):
-    return DuasEtapas.objects.filter(usuario=usuario, ativa=True).exists()
+    return TwoFactor.objects.filter(usuario=usuario, ativa=True).exists()
 
 
 def obrigatoria(request):
@@ -58,7 +58,7 @@ def obrigatoria(request):
 
 def preparar(usuario, novo=False):
     """The person's not yet active device, with a secret to show as a QR code."""
-    dispositivo, criado = DuasEtapas.objects.get_or_create(
+    dispositivo, criado = TwoFactor.objects.get_or_create(
         usuario=usuario, defaults={"segredo": pyotp.random_base32()}
     )
     if novo and not criado and not dispositivo.ativa:
@@ -107,19 +107,19 @@ def _resumo(codigo):
 @transaction.atomic
 def novos_codigos(usuario):
     """Ten new recovery codes (the old ones stop working), shown once."""
-    CodigoRecuperacao.objects.filter(usuario=usuario).delete()
+    RecoveryCode.objects.filter(usuario=usuario).delete()
     codigos = [
         "-".join("".join(secrets.choice(ALFABETO) for _ in range(4)) for _ in range(2))
         for _ in range(QUANTOS_CODIGOS)
     ]
-    CodigoRecuperacao.objects.bulk_create(
-        CodigoRecuperacao(usuario=usuario, resumo=_resumo(c)) for c in codigos
+    RecoveryCode.objects.bulk_create(
+        RecoveryCode(usuario=usuario, resumo=_resumo(c)) for c in codigos
     )
     return codigos
 
 
 def verificar_recuperacao(usuario, codigo):
-    restante = CodigoRecuperacao.objects.filter(
+    restante = RecoveryCode.objects.filter(
         usuario=usuario, resumo=_resumo(codigo), usado_em__isnull=True
     ).first()
     if restante is None:
@@ -131,7 +131,7 @@ def verificar_recuperacao(usuario, codigo):
 
 def verificar(usuario, codigo):
     """The app's code or an unused recovery code."""
-    dispositivo = DuasEtapas.objects.filter(usuario=usuario, ativa=True).first()
+    dispositivo = TwoFactor.objects.filter(usuario=usuario, ativa=True).first()
     if dispositivo is None:
         return False
     return verificar_app(dispositivo, codigo) or verificar_recuperacao(usuario, codigo)
@@ -147,5 +147,5 @@ def ativar(dispositivo):
 
 @transaction.atomic
 def desativar(usuario):
-    DuasEtapas.objects.filter(usuario=usuario).delete()
-    CodigoRecuperacao.objects.filter(usuario=usuario).delete()
+    TwoFactor.objects.filter(usuario=usuario).delete()
+    RecoveryCode.objects.filter(usuario=usuario).delete()

@@ -9,7 +9,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class DuasEtapas(models.Model):
+class TwoFactor(models.Model):
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -23,6 +23,7 @@ class DuasEtapas(models.Model):
     ultimo_passo = models.BigIntegerField(default=0, editable=False)
 
     class Meta:
+        db_table = "conta_duasetapas"
         verbose_name = _("verificação em duas etapas")
         verbose_name_plural = _("verificações em duas etapas")
 
@@ -30,7 +31,7 @@ class DuasEtapas(models.Model):
         return str(self.usuario)
 
 
-class CodigoRecuperacao(models.Model):
+class RecoveryCode(models.Model):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -41,6 +42,7 @@ class CodigoRecuperacao(models.Model):
     usado_em = models.DateTimeField(_("usado em"), null=True, blank=True)
 
     class Meta:
+        db_table = "conta_codigorecuperacao"
         verbose_name = _("código de recuperação")
         verbose_name_plural = _("códigos de recuperação")
 

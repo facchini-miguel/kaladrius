@@ -6,7 +6,7 @@ from django.urls import reverse
 from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
 from apps.core.modules import configurar
-from apps.finance.models import Categoria, Fornecedor, Lancamento
+from apps.finance.models import Category, Entry, Supplier
 
 pytestmark = pytest.mark.django_db
 
@@ -21,7 +21,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def fornecedor(clinica_a):
     with usar_clinica(clinica_a):
-        return Fornecedor.objects.create(nome="Dental Fictícia", cpf_cnpj=CNPJ)
+        return Supplier.objects.create(nome="Dental Fictícia", cpf_cnpj=CNPJ)
 
 
 def dados(**extra):
@@ -30,7 +30,7 @@ def dados(**extra):
 
 def despesa(clinica, **extra):
     with usar_clinica(clinica):
-        categoria = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA).first()
+        categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
     return {
         "fornecedor": "",
         "pessoa": "",
@@ -52,7 +52,7 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        criado = Fornecedor.objects.get()
+        criado = Supplier.objects.get()
     assert (criado.cpf_cnpj, criado.telefone, criado.whatsapp) == (
         CNPJ,
         "4833334444",
@@ -94,7 +94,7 @@ def test_despesa_com_fornecedor_guarda_o_nome_e_aparece_na_ficha(clinica_a, forn
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        lancamento = Lancamento.objects.get()
+        lancamento = Entry.objects.get()
     assert lancamento.fornecedor == fornecedor
     assert lancamento.pessoa == "Dental Fictícia"
     ficha = admin.get(reverse("finance:supplier", args=[fornecedor.pk]))
@@ -109,7 +109,7 @@ def test_despesa_avulsa_sem_fornecedor_continua_valendo(clinica_a, admin):
     resposta = admin.post(reverse("finance:expense_new"), despesa(clinica_a, pessoa="Feira"))
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        lancamento = Lancamento.objects.get()
+        lancamento = Entry.objects.get()
     assert (lancamento.fornecedor, lancamento.pessoa) == (None, "Feira")
 
 

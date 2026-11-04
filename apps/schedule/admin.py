@@ -1,16 +1,16 @@
 from django.contrib import admin
 
-from .models import Agendamento, TipoAtendimento
+from .models import Appointment, AppointmentType
 
 
-@admin.register(TipoAtendimento)
+@admin.register(AppointmentType)
 class TipoAtendimentoAdmin(admin.ModelAdmin):
     list_display = ["nome", "clinica", "cor", "ativo"]
     list_filter = ["clinica", "ativo"]
     search_fields = ["nome"]
 
 
-@admin.register(Agendamento)
+@admin.register(Appointment)
 class AgendamentoAdmin(admin.ModelAdmin):
     list_display = ["inicio", "fim", "profissional", "paciente", "tipo", "clinica"]
     list_filter = ["clinica", "profissional", "tipo"]

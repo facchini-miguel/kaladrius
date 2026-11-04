@@ -13,7 +13,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 
 from . import services
@@ -112,7 +112,7 @@ def duas_etapas(request):
         if acao == "desativar" and desativar is not None and desativar.is_valid():
             services.desativar(usuario)
             registrar(
-                RegistroAuditoria.Acao.ALTERAR,
+                AuditEntry.Acao.ALTERAR,
                 usuario,
                 descricao=f"{usuario}: verificação em duas etapas desativada",
             )
@@ -144,7 +144,7 @@ def duas_etapas(request):
         if services.verificar_app(dispositivo, form.cleaned_data["codigo"]):
             codigos = services.ativar(dispositivo)
             registrar(
-                RegistroAuditoria.Acao.ALTERAR,
+                AuditEntry.Acao.ALTERAR,
                 usuario,
                 descricao=f"{usuario}: verificação em duas etapas ativada",
             )

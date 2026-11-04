@@ -7,7 +7,7 @@ from django.urls import reverse
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.core.validators import cnpj_valido, cpf_valido
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from apps.reference_data.models import City
 
 pytestmark = pytest.mark.django_db
@@ -27,7 +27,7 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
 
 def criar_paciente(clinica, **dados):
     with usar_clinica(clinica):
-        return Paciente.objects.create(**{"nome": "Paciente", **dados})
+        return Patient.objects.create(**{"nome": "Paciente", **dados})
 
 
 def dados_formulario(**extra):
@@ -110,7 +110,7 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Maria da Silva")
+        paciente = Patient.objects.get(nome="Maria da Silva")
     assert resposta.url == reverse("patients:record", args=[paciente.pk])
     assert paciente.cpf_cnpj == "52998224725"
     assert paciente.telefone_celular == "48999990000"
@@ -132,7 +132,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Empresa X")
+        paciente = Patient.objects.get(nome="Empresa X")
     assert paciente.cpf_cnpj == "12ABC34501DE35"
     assert paciente.rg == "" and paciente.sexo == ""  # individual-only fields are cleared
 
@@ -299,16 +299,16 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     from decimal import Decimal
 
     from apps.finance import services
-    from apps.finance.models import Categoria, Conta, Lancamento
+    from apps.finance.models import Category, Entry, FinancialAccount
 
     paciente = criar_paciente(clinica_a, nome="Paciente Devedor")
     usuario = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
             clinica=clinica_a,
-            tipo=Lancamento.Tipo.RECEBER,
+            tipo=Entry.Tipo.RECEBER,
             descricao="Tratamento",
-            categoria=Categoria.objects.get(nome="Tratamento"),
+            categoria=Category.objects.get(nome="Tratamento"),
             valor_total=Decimal("300"),
             parcelas=2,
             primeiro_vencimento=datetime.date(2031, 3, 5),
@@ -334,7 +334,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
                 valor=Decimal("150"),
                 data=datetime.date(2031, 3, 5),
                 forma="pix",
-                conta=Conta.objects.get(nome="Caixa"),
+                conta=FinancialAccount.objects.get(nome="Caixa"),
             )
 
     with usar_clinica(clinica_a):

@@ -14,26 +14,26 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core.permissions import Acao, Modulo, exige_permissao, pode, so_a_propria_agenda
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 
 from . import services
 from .forms import AgendamentoForm, TipoAtendimentoForm
-from .models import Agendamento, TipoAtendimento
+from .models import Appointment, AppointmentType
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def tipos(request):
-    return render(request, "schedule/types.html", {"tipos": TipoAtendimento.objects.all()})
+    return render(request, "schedule/types.html", {"tipos": AppointmentType.objects.all()})
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.CRIAR)
 def tipo_novo(request):
-    return _formulario(request, TipoAtendimento())
+    return _formulario(request, AppointmentType())
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.ALTERAR)
 def tipo_editar(request, pk):
-    return _formulario(request, get_object_or_404(TipoAtendimento.objects, pk=pk))
+    return _formulario(request, get_object_or_404(AppointmentType.objects, pk=pk))
 
 
 def _formulario(request, tipo):
@@ -49,7 +49,7 @@ def _formulario(request, tipo):
 
 @exige_permissao(Modulo.CADASTROS, Acao.EXCLUIR)
 def tipo_excluir(request, pk):
-    tipo = get_object_or_404(TipoAtendimento.objects, pk=pk)
+    tipo = get_object_or_404(AppointmentType.objects, pk=pk)
     if request.method == "POST":
         try:
             tipo.delete()
@@ -154,7 +154,7 @@ def calendario(request):
         {
             "profissionais": profissionais,
             "profissional": profissional,
-            "tipos": TipoAtendimento.objects.filter(ativo=True),
+            "tipos": AppointmentType.objects.filter(ativo=True),
             "configuracao": configuracao,
             "so_a_propria": so_a_propria_agenda(request),
         },
@@ -219,7 +219,7 @@ def novo(request):
     form = AgendamentoForm(
         request.POST or None,
         initial=inicial,
-        instance=Agendamento(),
+        instance=Appointment(),
         clinica=request.clinica,
         profissionais=services.profissionais_visiveis(request),
     )
@@ -263,10 +263,10 @@ def editar(request, pk):
 
 
 MENSAGENS_SITUACAO = {
-    Agendamento.Situacao.AGENDADO: gettext_lazy("%(nome)s: marcação de presença desfeita."),
-    Agendamento.Situacao.COMPARECEU: gettext_lazy("%(nome)s compareceu."),
-    Agendamento.Situacao.FALTOU: gettext_lazy("%(nome)s faltou."),
-    Agendamento.Situacao.DESMARCOU: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
+    Appointment.Situacao.AGENDADO: gettext_lazy("%(nome)s: marcação de presença desfeita."),
+    Appointment.Situacao.COMPARECEU: gettext_lazy("%(nome)s compareceu."),
+    Appointment.Situacao.FALTOU: gettext_lazy("%(nome)s faltou."),
+    Appointment.Situacao.DESMARCOU: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
 }
 
 
@@ -305,10 +305,10 @@ def excluir(request, pk):
         services.agendamentos_visiveis(request).select_related("paciente"), pk=pk
     )
     if request.method == "POST":
-        excluidos = Agendamento.objects.filter(pk=agendamento.pk)
+        excluidos = Appointment.objects.filter(pk=agendamento.pk)
         if request.POST.get("escopo") == "serie" and agendamento.serie:
             # This one and the following ones of the same series.
-            excluidos = Agendamento.objects.filter(
+            excluidos = Appointment.objects.filter(
                 serie=agendamento.serie, inicio__gte=agendamento.inicio
             )
         total, _ = excluidos.delete()
@@ -317,7 +317,7 @@ def excluir(request, pk):
         )
     proximos = 0
     if agendamento.serie:
-        proximos = Agendamento.objects.filter(
+        proximos = Appointment.objects.filter(
             serie=agendamento.serie, inicio__gt=agendamento.inicio
         ).count()
     return render(
@@ -333,7 +333,7 @@ def _aniversariantes_em(dias):
     resultado = {dia: [] for dia in dias}
     if not dias:
         return resultado
-    pacientes = Paciente.objects.filter(filtro, ativo=True, arquivado=False).order_by("nome")
+    pacientes = Patient.objects.filter(filtro, ativo=True, arquivado=False).order_by("nome")
     por_mes_dia = {(dia.month, dia.day): dia for dia in dias}
     for paciente in pacientes:
         nascimento = paciente.data_nascimento

@@ -6,7 +6,7 @@ from django.urls import reverse
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.core.permissions import MATRIZ, Acao, Modulo
-from apps.practitioners.models import Profissional
+from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
 
@@ -46,7 +46,7 @@ def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profis
     resposta = cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
     assert resposta.status_code == 403
     with usar_clinica(clinica_a):
-        assert Profissional.objects.filter(pk=profissional.pk).exists()
+        assert Practitioner.objects.filter(pk=profissional.pk).exists()
 
 
 def test_botoes_aparecem_conforme_a_permissao(
@@ -74,7 +74,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        profissional = Profissional.objects.get(nome="Dr. Novo")
+        profissional = Practitioner.objects.get(nome="Dr. Novo")
     assert profissional.clinica == clinica_a
 
     cliente.post(
@@ -87,7 +87,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
 
     cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
     with usar_clinica(clinica_a):
-        assert not Profissional.objects.exists()
+        assert not Practitioner.objects.exists()
 
 
 def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
@@ -114,7 +114,7 @@ def test_superusuario_entra_direto_na_clinica_da_instalacao(
 
 
 def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_user_model):
-    from apps.core.models import Clinica
+    from apps.core.models import Clinic
 
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
@@ -126,7 +126,7 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
         reverse("register_clinic"), {"nome": "Clínica Nova", "area": "medicina"}
     )
     assert resposta.url == reverse("home")
-    assert list(Clinica.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
+    assert list(Clinic.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
     assert cliente.get(reverse("practitioners:list")).url == reverse("account:two_factor")
     from apps.account import services as conta_servicos
@@ -136,8 +136,8 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     # Only one: the page and the Django admin no longer add clinics.
     assert cliente.get(reverse("register_clinic")).url == reverse("home")
     cliente.post(reverse("register_clinic"), {"nome": "Outra"})
-    assert Clinica.objects.count() == 1
-    assert cliente.get(reverse("admin:core_clinica_add")).status_code == 403
+    assert Clinic.objects.count() == 1
+    assert cliente.get(reverse("admin:core_clinic_add")).status_code == 403
     # Other users may not register it (cliente_de logs this one in on the same client).
     assert cliente_de(criar_usuario("ana")).get(reverse("register_clinic")).status_code == 403
 
@@ -161,7 +161,7 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     conteudo = (
         cliente_de(root)
-        .get(reverse("admin:profissionais_profissional_changelist"))
+        .get(reverse("admin:profissionais_practitioner_changelist"))
         .content.decode()
     )
     assert "Dra. A" in conteudo and "Dr. B" in conteudo

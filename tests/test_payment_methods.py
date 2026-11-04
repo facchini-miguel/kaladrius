@@ -10,7 +10,7 @@ from django.utils import translation
 from apps.core.countries import PAISES
 from apps.core.isolation import usar_clinica
 from apps.finance import payment_methods, services
-from apps.finance.models import Pagamento
+from apps.finance.models import Payment
 from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
 
 pytestmark = pytest.mark.django_db
@@ -26,7 +26,7 @@ def test_cada_pais_tem_as_suas_formas():
     assert set(payment_methods.FORMAS) == set(PAISES)
     for pais, do_pais in payment_methods.FORMAS.items():
         assert len(set(do_pais.codigos)) == len(do_pais.codigos), pais
-        assert set(do_pais.codigos) <= set(Pagamento.Forma.values), pais
+        assert set(do_pais.codigos) <= set(Payment.Forma.values), pais
         assert {"dinheiro", "credito", "transferencia"} <= set(do_pais.codigos), pais
         assert set(do_pais.nomes) <= set(do_pais.codigos), pais
 
@@ -74,7 +74,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     assert "forma" in admin.post(url, {**dados, "forma": "pix"}).context["form"].errors
     assert admin.post(url, {**dados, "forma": "carteira"}).status_code == 302
     with usar_clinica(cenario["clinica"]), translation.override("pt-br"):
-        pagamento = Pagamento.objects.get()
+        pagamento = Payment.objects.get()
         assert pagamento.get_forma_display() == "Carteira digital (Yape, Plin)"
         relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
@@ -105,7 +105,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     }
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(cenario["clinica"]):
-        pagamento = Pagamento.objects.get()
+        pagamento = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
     assert (pagamento.cartao_bandeira, pagamento.cartao_codigo) == ("Visa", "A1B2")
     assert pagamento.cartao_parcelas is None
@@ -126,7 +126,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     }
     assert entrar(cenario, "admin").post(url, dados).status_code == 302
     with usar_clinica(cenario["clinica"]):
-        pagamento = Pagamento.objects.get()
+        pagamento = Payment.objects.get()
     assert (pagamento.cartao_bandeira, pagamento.cartao_parcelas, pagamento.cartao_codigo) == (
         "",
         None,

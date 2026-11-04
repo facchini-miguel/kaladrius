@@ -5,7 +5,7 @@ from apps.core.forms import FormularioBootstrap
 from apps.core.validators import normalizar_telefone
 
 from . import insurance
-from .models import Carteirinha, Convenio
+from .models import HealthPlan, MemberCard
 
 
 class ConvenioForm(FormularioBootstrap, forms.ModelForm):
@@ -20,7 +20,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
     )
 
     class Meta:
-        model = Convenio
+        model = HealthPlan
         fields = ["nome", "registro", "telefone", "observacoes", "ativo"]
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 3})}
 
@@ -41,7 +41,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"].strip()
-        if Convenio.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
+        if HealthPlan.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um convênio com este nome."))
         return nome
 
@@ -57,7 +57,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 
 class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Carteirinha
+        model = MemberCard
         fields = [
             "convenio",
             "plano",
@@ -89,8 +89,8 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             else:
                 del self.fields[campo]
         # Active plans, plus the card's own plan when it was deactivated later.
-        self.fields["convenio"].queryset = Convenio.objects.filter(ativo=True) | (
-            Convenio.objects.filter(pk=self.instance.convenio_id)
+        self.fields["convenio"].queryset = HealthPlan.objects.filter(ativo=True) | (
+            HealthPlan.objects.filter(pk=self.instance.convenio_id)
         )
 
     def clean_numero(self):
@@ -102,7 +102,7 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         if (
             convenio
             and numero
-            and Carteirinha.objects.filter(convenio=convenio, numero=numero)
+            and MemberCard.objects.filter(convenio=convenio, numero=numero)
             .exclude(pk=self.instance.pk)
             .exists()
         ):

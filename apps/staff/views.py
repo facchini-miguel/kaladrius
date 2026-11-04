@@ -15,12 +15,12 @@ from apps.core.permissions import Acao, Modulo, exige_permissao, pode
 
 from . import services
 from .forms import FolhaForm, FuncionarioForm, LancarForm
-from .models import Folha, Funcionario, Salario
+from .models import Employee, Payroll, Salary
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
 def lista(request):
-    funcionarios = list(Funcionario.objects.all())
+    funcionarios = list(Employee.objects.all())
     hoje = timezone.localdate()
     for funcionario in funcionarios:
         funcionario.salario_atual = funcionario.salario_em(hoje)
@@ -29,7 +29,7 @@ def lista(request):
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
 def funcionario(request, pk):
-    funcionario = get_object_or_404(Funcionario.objects, pk=pk)
+    funcionario = get_object_or_404(Employee.objects, pk=pk)
     return render(
         request,
         "staff/employee.html",
@@ -44,12 +44,12 @@ def funcionario(request, pk):
 
 @exige_permissao(Modulo.PESSOAL, Acao.CRIAR)
 def novo(request):
-    return _formulario(request, Funcionario())
+    return _formulario(request, Employee())
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.ALTERAR)
 def editar(request, pk):
-    return _formulario(request, get_object_or_404(Funcionario.objects, pk=pk))
+    return _formulario(request, get_object_or_404(Employee.objects, pk=pk))
 
 
 def _formulario(request, instancia):
@@ -58,7 +58,7 @@ def _formulario(request, instancia):
         with transaction.atomic():
             funcionario = form.save()
             if form.cleaned_data.get("salario"):
-                Salario.objects.create(
+                Salary.objects.create(
                     funcionario=funcionario,
                     valor=form.cleaned_data["salario"],
                     desde=form.cleaned_data["salario_desde"],
@@ -80,7 +80,7 @@ def folha(request):
         services.preparar(competencia)
         if pode_alterar
         else list(
-            Folha.objects.filter(competencia=competencia).select_related(
+            Payroll.objects.filter(competencia=competencia).select_related(
                 "funcionario", "lancamento"
             )
         )

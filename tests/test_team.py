@@ -3,8 +3,8 @@
 import pytest
 from django.urls import reverse
 
-from apps.audit.models import RegistroAuditoria
-from apps.core.models import Papel, Vinculo
+from apps.audit.models import AuditEntry
+from apps.core.models import Membership, Papel
 from apps.team.forms import VinculoForm
 
 pytestmark = pytest.mark.django_db
@@ -60,11 +60,11 @@ def test_lista_mostra_so_a_equipe_da_clinica(cliente_admin, clinica_a, clinica_b
 def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
     resposta = cliente_admin.post(reverse("team:new"), dados_novo())
     assert resposta.status_code == 302
-    vinculo = Vinculo.objects.get(usuario__username="carla")
+    vinculo = Membership.objects.get(usuario__username="carla")
     assert (vinculo.clinica, vinculo.papel, vinculo.ativo) == (clinica_a, Papel.RECEPCAO, True)
     assert vinculo.usuario.check_password(NOVA_SENHA)
     # The account creation shows up in the clinic's audit log.
-    assert RegistroAuditoria.objects.filter(
+    assert AuditEntry.objects.filter(
         clinica=clinica_a, acao="criar", modelo="Usuário", objeto_descricao="carla"
     ).exists()
 
@@ -165,7 +165,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
     cliente_admin, clinica_a, clinica_b, criar_usuario
 ):
     membro = criar_usuario("multi", clinica_a, first_name="Multi")
-    Vinculo.objects.create(usuario=membro, clinica=clinica_b, papel=Papel.ADMIN)
+    Membership.objects.create(usuario=membro, clinica=clinica_b, papel=Papel.ADMIN)
     vinculo = membro.vinculos.get(clinica=clinica_a)
 
     resposta = cliente_admin.post(
@@ -189,7 +189,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
 
 def test_nao_mexe_na_conta_de_superusuario(cliente_admin, clinica_a, django_user_model):
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    vinculo = Vinculo.objects.create(usuario=superusuario, clinica=clinica_a, papel=Papel.ADMIN)
+    vinculo = Membership.objects.create(usuario=superusuario, clinica=clinica_a, papel=Papel.ADMIN)
     cliente_admin.post(
         reverse("team:password", args=[vinculo.pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},

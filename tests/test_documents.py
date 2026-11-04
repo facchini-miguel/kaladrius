@@ -9,9 +9,9 @@ from django.urls import reverse
 from apps.core import countries, identification
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.finance.models import Fornecedor
-from apps.patients.models import Paciente
-from apps.staff.models import Funcionario
+from apps.finance.models import Supplier
+from apps.patients.models import Patient
+from apps.staff.models import Employee
 from tests.test_core import dados_clinica
 from tests.test_countries import no_pais
 
@@ -139,7 +139,7 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "boxw310820hnerxn09"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get()
+        paciente = Patient.objects.get()
     assert paciente.cpf_cnpj == "BOXW310820HNERXN09"
     ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "CURP" in ficha and "BOXW310820HNERXN09" in ficha
@@ -159,8 +159,8 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
     empresa = {"tipo": "PJ", "nome": "Acme Fictitious", "ativo": "on", "cpf_cnpj": "91-1144442"}
     assert admin.post(reverse("patients:new"), empresa).status_code == 302
     with usar_clinica(clinica_a):
-        assert Paciente.objects.get(nome="John Fictitious").cpf_cnpj == ""
-        acme = Paciente.objects.get(nome="Acme Fictitious")
+        assert Patient.objects.get(nome="John Fictitious").cpf_cnpj == ""
+        acme = Patient.objects.get(nome="Acme Fictitious")
     assert acme.cpf_cnpj == "911144442"
     lista = admin.get(reverse("patients:list")).content.decode()
     assert "91-1144442" in lista and "<th>EIN</th>" in lista
@@ -206,8 +206,8 @@ def test_fornecedor_no_reino_unido(clinica_a, admin):
     pessoa = {"tipo": "PF", "nome": "John Plumber", "ativo": "on", "cpf_cnpj": "01234567"}
     assert admin.post(reverse("finance:supplier_new"), pessoa).status_code == 302
     with usar_clinica(clinica_a):
-        assert Fornecedor.objects.get(nome="Dental Supplies Ltd").cpf_cnpj == "01234567"
-        assert Fornecedor.objects.get(nome="John Plumber").cpf_cnpj == ""
+        assert Supplier.objects.get(nome="Dental Supplies Ltd").cpf_cnpj == "01234567"
+        assert Supplier.objects.get(nome="John Plumber").cpf_cnpj == ""
 
 
 def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
@@ -217,7 +217,7 @@ def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     assert resposta.context["form"].errors["cpf"] == ["SSN: número inválido."]
     assert admin.post(reverse("staff:new"), {**dados, "cpf": "536904399"}).status_code == 302
     with usar_clinica(clinica_a):
-        jane = Funcionario.objects.get()
+        jane = Employee.objects.get()
     assert jane.cpf == "536904399"
     ficha = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
     assert "SSN" in ficha and "536-90-4399" in ficha

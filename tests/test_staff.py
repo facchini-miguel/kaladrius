@@ -11,9 +11,9 @@ from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
 from apps.core.modules import configurar
 from apps.finance import services as financeiro
-from apps.finance.models import Lancamento
+from apps.finance.models import Entry
 from apps.staff import services
-from apps.staff.models import Folha, Funcionario, Salario, hora_extra_sugerida
+from apps.staff.models import Employee, Payroll, Salary, hora_extra_sugerida
 
 pytestmark = pytest.mark.django_db
 
@@ -29,10 +29,10 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def ana(clinica_a):
     with usar_clinica(clinica_a):
-        funcionario = Funcionario.objects.create(
+        funcionario = Employee.objects.create(
             nome="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
         )
-        Salario.objects.create(
+        Salary.objects.create(
             funcionario=funcionario, valor=Decimal("2200"), desde=datetime.date(2025, 3, 1)
         )
         return funcionario
@@ -51,7 +51,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        bruno = Funcionario.objects.get()
+        bruno = Employee.objects.get()
         assert bruno.cpf == "52998224725"
         assert bruno.salarios.get().desde == datetime.date(2026, 1, 5)  # admission date
     aumento = admin.post(
@@ -88,19 +88,19 @@ def test_validacoes_do_cadastro(dados, campo, admin):
 
 def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
     with usar_clinica(clinica_a):
-        futuro = Funcionario.objects.create(
+        futuro = Employee.objects.create(
             nome="Admitido depois", admissao=datetime.date(2026, 11, 3)
         )
-        Salario.objects.create(
+        Salary.objects.create(
             funcionario=futuro, valor=Decimal("2000"), desde=datetime.date(2026, 11, 3)
         )
-        saiu = Funcionario.objects.create(
+        saiu = Employee.objects.create(
             nome="Desligado antes", desligamento=datetime.date(2026, 9, 30)
         )
-        Salario.objects.create(
+        Salary.objects.create(
             funcionario=saiu, valor=Decimal("2000"), desde=datetime.date(2025, 1, 1)
         )
-        Funcionario.objects.create(nome="Sem salário")
+        Employee.objects.create(nome="Sem salário")
         folhas = services.preparar(OUTUBRO)
     assert [f.funcionario.nome for f in folhas] == ["Ana Fictícia"]
     folha = folhas[0]
@@ -113,11 +113,11 @@ def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
     for mes in ("2026-10", "2030-01"):
         assert admin.get(FOLHA, {"mes": mes}).status_code == 200
     with usar_clinica(clinica_a):
-        assert not Folha.objects.exists()
+        assert not Payroll.objects.exists()
 
 
 def test_calculo_do_total():
-    folha = Folha(
+    folha = Payroll(
         salario=Decimal("3000"),
         horas_extras=Decimal("10"),
         valor_hora_extra=Decimal("20.45"),
@@ -141,7 +141,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert folha.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", dados).status_code == 302
     with usar_clinica(clinica_a):
-        folha = Folha.objects.get(funcionario=ana, competencia=OUTUBRO)
+        folha = Payroll.objects.get(funcionario=ana, competencia=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         categoria = pagina.context["lancar_form"].fields["categoria"].initial
     assert categoria.nome == "Salários e encargos"
@@ -154,7 +154,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         folha.refresh_from_db()
         lancamento = folha.lancamento
         assert (lancamento.tipo, lancamento.pessoa, lancamento.valor_total) == (
-            Lancamento.Tipo.PAGAR,
+            Entry.Tipo.PAGAR,
             "Ana Fictícia",
             Decimal("2276.67"),
         )

@@ -10,7 +10,7 @@ from apps.core.ordering import ALFABETICA
 from apps.core.validators import validar_cor
 
 
-class Profissional(ModeloDaClinica):
+class Practitioner(ModeloDaClinica):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
     nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
@@ -46,6 +46,7 @@ class Profissional(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "profissionais_profissional"
         verbose_name = _("profissional")
         verbose_name_plural = _("profissionais")
         ordering = ["nome"]

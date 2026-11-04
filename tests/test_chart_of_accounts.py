@@ -11,7 +11,8 @@ from django.utils import timezone
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.finance import services
-from apps.finance.models import Categoria, Conta, GrupoContabil, Lancamento
+from apps.finance.models import AccountGroup, Category, Entry, FinancialAccount
+from tests.test_modules_migration import estado_do_banco
 
 pytestmark = pytest.mark.django_db
 
@@ -25,16 +26,16 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 def grupo(clinica, nome, **extra):
     with usar_clinica(clinica):
-        return GrupoContabil.objects.get(nome=nome, **extra)
+        return AccountGroup.objects.get(nome=nome, **extra)
 
 
 def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
     with usar_clinica(clinica_a):
-        aluguel = Categoria.objects.get(nome="Aluguel")
+        aluguel = Category.objects.get(nome="Aluguel")
         assert str(aluguel.grupo) == "1 Ocupação"
-        assert Categoria.objects.get(nome="Comissões").grupo.nome == "Pessoal"
-        assert not Categoria.objects.filter(grupo=None).exists()
-        assert GrupoContabil.objects.filter(tipo="receita").count() == 2
+        assert Category.objects.get(nome="Comissões").grupo.nome == "Pessoal"
+        assert not Category.objects.filter(grupo=None).exists()
+        assert AccountGroup.objects.filter(tipo="receita").count() == 2
 
 
 def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
@@ -53,7 +54,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     sub = grupo(clinica_a, "Equipe da recepção")
     with usar_clinica(clinica_a):
         assert sub.numero == "2.1"
-        salarios = Categoria.objects.get(nome="Salários e encargos")
+        salarios = Category.objects.get(nome="Salários e encargos")
     editar = admin.post(
         reverse("finance:catalog_edit", args=["categories", salarios.pk]),
         {"nome": salarios.nome, "tipo": "despesa", "grupo": sub.pk, "ativa": "on"},
@@ -89,7 +90,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
     assert "nome" in repetido.context["form"].errors
     # A group cannot go under itself or under one of its subgroups.
     with usar_clinica(clinica_a):
-        sub = GrupoContabil.objects.create(nome="Sub", tipo="despesa", pai=pessoal)
+        sub = AccountGroup.objects.create(nome="Sub", tipo="despesa", pai=pessoal)
     ciclo = admin.post(
         reverse("finance:group_edit", args=[pessoal.pk]),
         {"nome": "Pessoal", "tipo": "despesa", "pai": sub.pk},
@@ -112,21 +113,21 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
 
 def test_relatorio_soma_os_subgrupos(clinica_a, admin):
     with usar_clinica(clinica_a):
-        pessoal = GrupoContabil.objects.get(nome="Pessoal")
-        sub = GrupoContabil.objects.create(nome="Recepção", tipo="despesa", pai=pessoal, codigo=1)
-        salarios = Categoria.objects.get(nome="Salários e encargos")
+        pessoal = AccountGroup.objects.get(nome="Pessoal")
+        sub = AccountGroup.objects.create(nome="Recepção", tipo="despesa", pai=pessoal, codigo=1)
+        salarios = Category.objects.get(nome="Salários e encargos")
         salarios.grupo = sub
         salarios.save()
-        avulsa = Categoria.objects.create(nome="Despesa avulsa", tipo="despesa")
-        caixa = Conta.objects.get(nome="Caixa")
+        avulsa = Category.objects.create(nome="Despesa avulsa", tipo="despesa")
+        caixa = FinancialAccount.objects.get(nome="Caixa")
         for categoria, valor in (
             (salarios, "1000"),
-            (Categoria.objects.get(nome="Comissões"), "300"),
+            (Category.objects.get(nome="Comissões"), "300"),
             (avulsa, "50"),
         ):
             lancamento = services.criar_lancamento(
                 clinica=clinica_a,
-                tipo=Lancamento.Tipo.PAGAR,
+                tipo=Entry.Tipo.PAGAR,
                 pessoa="Fictício",
                 descricao="Pagamento",
                 categoria=categoria,
@@ -157,13 +158,13 @@ def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
     anterior = [("financeiro", "0011_fechamento")]
     try:
         executor.migrate(anterior)
-        # Pessoal depends on the newer finance, so it is rolled back along with it.
-        estado = [f for f in folhas if f[0] not in ("financeiro", "pessoal")] + anterior
-        apps = executor.loader.project_state(estado).apps
+        # Pessoal and the renames of decision 157 depend on the newer finance, so they were
+        # rolled back along with it.
+        apps = estado_do_banco()
         clinica = apps.get_model("core", "Clinica").objects.create(nome="Clínica fictícia antiga")
-        Categoria = apps.get_model("financeiro", "Categoria")
-        Categoria.objects.create(clinica_id=clinica.pk, nome="Aluguel", tipo="despesa")
-        Categoria.objects.create(clinica_id=clinica.pk, nome="Aluguel da sala", tipo="despesa")
+        Category = apps.get_model("financeiro", "Categoria")
+        Category.objects.create(clinica_id=clinica.pk, nome="Aluguel", tipo="despesa")
+        Category.objects.create(clinica_id=clinica.pk, nome="Aluguel da sala", tipo="despesa")
         executor = MigrationExecutor(connection)
         executor.migrate([("financeiro", "0012_plano_de_contas")])
         novos = executor.loader.project_state([("financeiro", "0012_plano_de_contas")]).apps

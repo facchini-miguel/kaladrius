@@ -8,7 +8,7 @@ from django.db import connection, models
 from django.utils import timezone
 
 # Dates about the person or the server, not the clinic's activity: they never move.
-FIXAS = {"pacientes.paciente.data_nascimento", "core.backup.momento"}
+FIXAS = {"pacientes.patient.data_nascimento", "core.backup.momento"}
 
 
 def _fixa(modelo, campo):

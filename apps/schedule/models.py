@@ -44,7 +44,7 @@ _NOMES_PADRAO_PARA_TRADUCAO = [
 ]
 
 
-class TipoAtendimento(ModeloDaClinica):
+class AppointmentType(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
     nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
@@ -52,6 +52,7 @@ class TipoAtendimento(ModeloDaClinica):
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
+        db_table = "agenda_tipoatendimento"
         verbose_name = _("tipo de atendimento")
         verbose_name_plural = _("tipos de atendimento")
         ordering = ["nome"]
@@ -74,7 +75,7 @@ class TsTzRange(models.Func):
     output_field = DateTimeRangeField()
 
 
-class Agendamento(ModeloDaClinica):
+class Appointment(ModeloDaClinica):
     """An appointment in a practitioner's schedule."""
 
     class Situacao(models.TextChoices):
@@ -87,13 +88,13 @@ class Agendamento(ModeloDaClinica):
         DESMARCOU = "desmarcou", _("Desmarcou")
 
     profissional = models.ForeignKey(
-        "profissionais.Profissional",
+        "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("profissional"),
     )
     tipo = models.ForeignKey(
-        TipoAtendimento,
+        AppointmentType,
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("tipo de atendimento"),
@@ -101,7 +102,7 @@ class Agendamento(ModeloDaClinica):
     inicio = models.DateTimeField(_("início"))
     fim = models.DateTimeField(_("fim"))
     paciente = models.ForeignKey(
-        "pacientes.Paciente",
+        "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -126,6 +127,7 @@ class Agendamento(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "agenda_agendamento"
         verbose_name = _("agendamento")
         verbose_name_plural = _("agendamentos")
         ordering = ["inicio"]
@@ -174,9 +176,9 @@ class Agendamento(ModeloDaClinica):
 def criar_tipos_padrao(clinica):
     """Create the default appointment types for a clinic that has none."""
     with sem_isolamento():
-        if TipoAtendimento.objects.filter(clinica=clinica).exists():
+        if AppointmentType.objects.filter(clinica=clinica).exists():
             return
         tipos = TIPOS_DE_ATENDIMENTO if clinica.area == clinica.Area.ODONTOLOGIA else TIPOS_PADRAO
-        TipoAtendimento.objects.bulk_create(
-            TipoAtendimento(clinica=clinica, nome=nome, cor=cor) for nome, cor in tipos
+        AppointmentType.objects.bulk_create(
+            AppointmentType(clinica=clinica, nome=nome, cor=cor) for nome, cor in tipos
         )

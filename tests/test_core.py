@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, Papel
-from apps.practitioners.models import Profissional
-from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.practitioners.models import Practitioner
+from apps.schedule.models import Appointment, AppointmentType
 
 pytestmark = pytest.mark.django_db
 
@@ -214,11 +214,11 @@ def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, client
 )
 def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        profissional = Profissional.objects.create(nome="Dra. Teste")
-        tipo = TipoAtendimento.objects.first()
+        profissional = Practitioner.objects.create(nome="Dra. Teste")
+        tipo = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
         inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
-        Agendamento.objects.create(
+        Appointment.objects.create(
             profissional=profissional,
             tipo=tipo,
             inicio=inicio,

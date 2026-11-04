@@ -6,9 +6,9 @@ from django.test import Client
 from django.urls import reverse
 
 from apps.core.isolation import usar_clinica
-from apps.core.models import Papel, Vinculo
-from apps.medical_records.models import Anexo, Atendimento
-from apps.practitioners.models import Profissional
+from apps.core.models import Membership, Papel
+from apps.medical_records.models import Attachment, Visit
+from apps.practitioners.models import Practitioner
 
 from .test_medical_record import ANAMNESE, PNG
 
@@ -37,10 +37,10 @@ def test_cria_as_duas_contas_com_os_perfis(demonstracao):
     profissional = Usuario.objects.get(username="demo.profissional")
     assert recepcao.demonstracao and profissional.demonstracao
     assert not (recepcao.is_staff or recepcao.is_superuser)
-    assert Vinculo.objects.get(usuario=recepcao).papel == Papel.RECEPCAO
-    assert Vinculo.objects.get(usuario=profissional).papel == Papel.PROFISSIONAL
+    assert Membership.objects.get(usuario=recepcao).papel == Papel.RECEPCAO
+    assert Membership.objects.get(usuario=profissional).papel == Papel.PROFISSIONAL
     with usar_clinica(demonstracao["clinica"]):
-        assert Profissional.objects.get(nome="Dr. Bruno").usuario == profissional
+        assert Practitioner.objects.get(nome="Dr. Bruno").usuario == profissional
     # Running again resets the passwords and keeps one link per clinic.
     call_command(
         "demo_accounts",
@@ -49,7 +49,7 @@ def test_cria_as_duas_contas_com_os_perfis(demonstracao):
         senha_recepcao="outra-1",
         senha_profissional="outra-2",
     )
-    assert Vinculo.objects.filter(usuario__username__startswith="demo.").count() == 2
+    assert Membership.objects.filter(usuario__username__startswith="demo.").count() == 2
     entrar("demo.recepcao", "outra-1")
 
 
@@ -65,7 +65,7 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
             senha_profissional="x-1",
         )
     with usar_clinica(clinica_a):
-        Profissional.objects.create(nome="Dra. Ana", usuario=criar_usuario("dra.ana"))
+        Practitioner.objects.create(nome="Dra. Ana", usuario=criar_usuario("dra.ana"))
     with pytest.raises(CommandError, match="outro usuário"):
         call_command("demo_accounts", clinica="Clínica A", profissional="Dra. Ana", **SENHAS)
 
@@ -89,7 +89,7 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
         **SENHAS,
     )
     with usar_clinica(clinica_a):
-        demo = Profissional.objects.get(nome="Dra. Demo")
+        demo = Practitioner.objects.get(nome="Dra. Demo")
     assert demo.usuario.username == "demo.profissional"
 
 
@@ -112,12 +112,12 @@ def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
 def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     cliente = entrar("demo.profissional", SENHAS["senha_profissional"])
     with usar_clinica(demonstracao["clinica"]):
-        from apps.patients.models import Paciente
+        from apps.patients.models import Patient
 
-        paciente = Paciente.objects.create(nome="Maria Paciente")
+        paciente = Patient.objects.create(nome="Maria Paciente")
     cliente.post(reverse("medical_records:new", args=[paciente.pk]), ANAMNESE)
     with usar_clinica(demonstracao["clinica"]):
-        atendimento = Atendimento.objects.get()
+        atendimento = Visit.objects.get()
     pagina = cliente.get(reverse("medical_records:visit", args=[atendimento.pk])).content.decode()
     assert "Contas de demonstração não enviam anexos." in pagina
     assert "anexo_enviar" not in pagina and 'enctype="multipart/form-data"' not in pagina
@@ -128,7 +128,7 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     )
     assert "Contas de demonstração não enviam anexos." in resposta.content.decode()
     with usar_clinica(demonstracao["clinica"]):
-        assert not Anexo.objects.exists()
+        assert not Attachment.objects.exists()
 
 
 def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
@@ -144,10 +144,10 @@ def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
         senha_admin="demo-admin-1",
         **SENHAS,
     )
-    assert Vinculo.objects.get(usuario__username="demo.financeiro").papel == Papel.FINANCEIRO
+    assert Membership.objects.get(usuario__username="demo.financeiro").papel == Papel.FINANCEIRO
     admin = entrar("demo.admin", "demo-admin-1")
     recepcao = get_user_model().objects.get(username="demo.recepcao")
-    vinculo = Vinculo.objects.get(usuario=recepcao)
+    vinculo = Membership.objects.get(usuario=recepcao)
     # Sees the team, but cannot add members, edit them or reset their passwords.
     lista = admin.get(reverse("team:list"))
     assert lista.status_code == 200 and "Novo membro" not in lista.content.decode()

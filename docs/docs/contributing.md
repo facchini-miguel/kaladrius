@@ -24,7 +24,7 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Conventions
 
-- **Domain names in Portuguese** (`Paciente`, `Agendamento`), **comments in English**.
+- **Names in English** in new code (`Patient`, `Appointment`), **comments in English**; screen texts in Portuguese, inside `_()`. Older fields and functions still have Portuguese names (being renamed, decision 157).
 - **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`). Each app keeps its Portuguese **label** (`label = "pacientes"` in `apps.py`), the name the database tables, the migrations and the permissions know it by, and migration files keep their names: production has them recorded (decision 145).
 - **Management commands named in English**, options included (`python manage.py seed_sample_data --patients 50`) (decision 148).
 - **Templates named in English**, in a folder named after their app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); Django's own names stay (`base.html`, `403.html`, `registration/login.html`) (decision 146).

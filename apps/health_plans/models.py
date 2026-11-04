@@ -14,7 +14,7 @@ from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
 from apps.core.ordering import ALFABETICA
 
 
-class Convenio(ModeloDaClinica):
+class HealthPlan(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
@@ -26,6 +26,7 @@ class Convenio(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "convenios_convenio"
         verbose_name = _("convênio")
         verbose_name_plural = _("convênios")
         ordering = ["nome"]
@@ -39,17 +40,20 @@ class Convenio(ModeloDaClinica):
         return self.nome
 
 
-class Carteirinha(ModeloDaClinica):
+class MemberCard(ModeloDaClinica):
     """A patient's card of a health plan."""
 
     paciente = models.ForeignKey(
-        "pacientes.Paciente",
+        "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="carteirinhas",
         verbose_name=_("paciente"),
     )
     convenio = models.ForeignKey(
-        Convenio, on_delete=models.PROTECT, related_name="carteirinhas", verbose_name=_("convênio")
+        HealthPlan,
+        on_delete=models.PROTECT,
+        related_name="carteirinhas",
+        verbose_name=_("convênio"),
     )
     plano = models.CharField(_("plano"), max_length=100, blank=True)
     numero = models.CharField(_("número da carteirinha"), max_length=30)
@@ -69,6 +73,7 @@ class Carteirinha(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "convenios_carteirinha"
         verbose_name = _("carteirinha")
         verbose_name_plural = _("carteirinhas")
         ordering = ["-ativa", "convenio__nome"]

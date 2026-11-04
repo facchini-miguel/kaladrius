@@ -3,42 +3,42 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 from apps.core.isolation import sem_isolamento
-from apps.core.models import Clinica, ModuloDaClinica
-from apps.estimates.models import ItemOrcamento, Orcamento, Procedimento
+from apps.core.models import Clinic, ClinicModule
+from apps.estimates.models import Estimate, EstimateItem, Procedure
 from apps.finance.models import (
-    Caixa,
-    Categoria,
-    CentroCusto,
-    Comissao,
-    Conta,
-    Fechamento,
-    Fornecedor,
-    GrupoContabil,
-    ImportacaoExtrato,
-    Lancamento,
-    MovimentoCaixa,
-    Pagamento,
-    Parcela,
-    Planejamento,
-    TransacaoBancaria,
+    AccountGroup,
+    BankTransaction,
+    BookClosing,
+    CashMovement,
+    CashRegister,
+    Category,
+    Commission,
+    CostCenter,
+    Entry,
+    FinancialAccount,
+    Installment,
+    Payment,
+    Planning,
+    StatementImport,
+    Supplier,
 )
-from apps.health_plans.models import Carteirinha, Convenio
+from apps.health_plans.models import HealthPlan, MemberCard
 from apps.medical_records.models import (
-    Adendo,
-    Anexo,
-    Atendimento,
-    Atestado,
-    PedidoDeExames,
-    Receita,
+    Addendum,
+    Attachment,
+    Certificate,
+    ExamRequest,
+    Prescription,
+    Visit,
 )
-from apps.patients.models import Paciente, PessoaRelacionada
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient, RelatedPerson
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
-from apps.schedule.models import Agendamento, TipoAtendimento
-from apps.staff.models import Folha, Funcionario, Salario
+from apps.schedule.models import Appointment, AppointmentType
+from apps.staff.models import Employee, Payroll, Salary
 
 from .seed_sample_data import CLINICAS
 
@@ -69,56 +69,56 @@ class Command(BaseCommand):
         usernames = [u[0] for dados in CLINICAS for u in dados["usuarios"]] + USUARIOS_ANTIGOS
 
         with transaction.atomic(), sem_isolamento():
-            clinicas = list(Clinica.objects.filter(nome__in=nomes))
+            clinicas = list(Clinic.objects.filter(nome__in=nomes))
             # Only users that work solely in the test clinics, never a platform account.
             usuarios = list(
                 get_user_model()
                 .objects.filter(username__in=usernames, is_superuser=False, is_staff=False)
                 .exclude(
-                    vinculos__clinica__in=Clinica.objects.exclude(pk__in=[c.pk for c in clinicas])
+                    vinculos__clinica__in=Clinic.objects.exclude(pk__in=[c.pk for c in clinicas])
                 )
             )
-            pacientes = Paciente.objects.filter(clinica__in=clinicas).count()
+            pacientes = Patient.objects.filter(clinica__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first. Groups of
             # the chart of accounts protect their parent group: unlink them first.
-            GrupoContabil.objects.filter(clinica__in=clinicas).update(pai=None)
+            AccountGroup.objects.filter(clinica__in=clinicas).update(pai=None)
             for modelo in (
-                TransacaoBancaria,
-                ImportacaoExtrato,
-                ItemOrcamento,
-                Orcamento,
-                Procedimento,
-                MovimentoCaixa,
-                Caixa,
-                Pagamento,
-                Comissao,
-                Parcela,
-                Adendo,
-                Atestado,
-                PedidoDeExames,
-                Anexo,
-                Receita,
-                Atendimento,
-                Folha,
-                Salario,
-                Funcionario,
-                Lancamento,
-                Fornecedor,
-                Agendamento,
+                BankTransaction,
+                StatementImport,
+                EstimateItem,
+                Estimate,
+                Procedure,
+                CashMovement,
+                CashRegister,
+                Payment,
+                Commission,
+                Installment,
+                Addendum,
+                Certificate,
+                ExamRequest,
+                Attachment,
+                Prescription,
+                Visit,
+                Payroll,
+                Salary,
+                Employee,
+                Entry,
+                Supplier,
+                Appointment,
                 Recall,
-                Carteirinha,
-                Convenio,
-                PessoaRelacionada,
-                Paciente,
-                Profissional,
-                TipoAtendimento,
-                Conta,
-                Categoria,
-                Planejamento,
-                GrupoContabil,
-                CentroCusto,
-                Fechamento,
-                ModuloDaClinica,
+                MemberCard,
+                HealthPlan,
+                RelatedPerson,
+                Patient,
+                Practitioner,
+                AppointmentType,
+                FinancialAccount,
+                Category,
+                Planning,
+                AccountGroup,
+                CostCenter,
+                BookClosing,
+                ClinicModule,
             ):
                 modelo.objects.filter(clinica__in=clinicas).delete()
             # Collected now: delete() clears the instances' pk.
@@ -129,9 +129,9 @@ class Command(BaseCommand):
             for clinica in clinicas:
                 clinica.delete()
             # Their history, including the entries the deletion itself just wrote.
-            RegistroAuditoria.objects.filter(clinica_id__in=ids_clinicas).delete()
-            RegistroAuditoria.objects.filter(usuario_id__in=ids_usuarios).delete()
-            RegistroAuditoria.objects.filter(
+            AuditEntry.objects.filter(clinica_id__in=ids_clinicas).delete()
+            AuditEntry.objects.filter(usuario_id__in=ids_usuarios).delete()
+            AuditEntry.objects.filter(
                 modelo__in=["Usuário", "Clínica"],
                 objeto_id__in=[str(i) for i in ids_usuarios + ids_clinicas],
             ).delete()
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             AccessLog.objects.filter(username__in=nomes_usuarios).delete()
             AccessAttempt.objects.filter(username__in=nomes_usuarios).delete()
             registrar(
-                RegistroAuditoria.Acao.EXCLUIR,
+                AuditEntry.Acao.EXCLUIR,
                 descricao=(
                     f"Dados de teste removidos: {len(clinicas)} clínicas, {pacientes} pacientes, "
                     f"{len(usuarios)} usuários"

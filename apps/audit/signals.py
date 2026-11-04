@@ -4,72 +4,72 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.db.models.signals import post_delete, post_save, pre_save
 
-from apps.core.models import Clinica, ModuloDaClinica, Vinculo
-from apps.estimates.models import ItemOrcamento, Orcamento, Procedimento
+from apps.core.models import Clinic, ClinicModule, Membership
+from apps.estimates.models import Estimate, EstimateItem, Procedure
 from apps.finance.models import (
-    Caixa,
-    Categoria,
-    CentroCusto,
-    Comissao,
-    Conta,
-    Fechamento,
-    Fornecedor,
-    GrupoContabil,
-    ImportacaoExtrato,
-    Lancamento,
-    MovimentoCaixa,
-    Pagamento,
-    Parcela,
-    Planejamento,
-    TransacaoBancaria,
+    AccountGroup,
+    BankTransaction,
+    BookClosing,
+    CashMovement,
+    CashRegister,
+    Category,
+    Commission,
+    CostCenter,
+    Entry,
+    FinancialAccount,
+    Installment,
+    Payment,
+    Planning,
+    StatementImport,
+    Supplier,
 )
-from apps.health_plans.models import Carteirinha, Convenio
-from apps.patients.models import Paciente, PessoaRelacionada
-from apps.practitioners.models import Profissional
+from apps.health_plans.models import HealthPlan, MemberCard
+from apps.patients.models import Patient, RelatedPerson
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
-from apps.schedule.models import Agendamento, TipoAtendimento
-from apps.staff.models import Folha, Funcionario, Salario
+from apps.schedule.models import Appointment, AppointmentType
+from apps.staff.models import Employee, Payroll, Salary
 
-from .models import RegistroAuditoria
+from .models import AuditEntry
 from .record import ip_da_requisicao, registrar
 
-Acao = RegistroAuditoria.Acao
+Acao = AuditEntry.Acao
 Usuario = get_user_model()
 
 AUDITADOS = [
-    Paciente,
-    Agendamento,
+    Patient,
+    Appointment,
     Recall,
-    Convenio,
-    Carteirinha,
-    PessoaRelacionada,
-    Profissional,
-    TipoAtendimento,
-    Clinica,
-    ModuloDaClinica,
-    Vinculo,
+    HealthPlan,
+    MemberCard,
+    RelatedPerson,
+    Practitioner,
+    AppointmentType,
+    Clinic,
+    ClinicModule,
+    Membership,
     Usuario,
-    Fornecedor,
-    Lancamento,
-    Parcela,
-    Pagamento,
-    Conta,
-    Categoria,
-    GrupoContabil,
-    Planejamento,
-    Funcionario,
-    Salario,
-    Folha,
-    CentroCusto,
-    Fechamento,
-    Caixa,
-    MovimentoCaixa,
-    Comissao,
-    ImportacaoExtrato,
-    TransacaoBancaria,
-    Procedimento,
-    Orcamento,
-    ItemOrcamento,
+    Supplier,
+    Entry,
+    Installment,
+    Payment,
+    FinancialAccount,
+    Category,
+    AccountGroup,
+    Planning,
+    Employee,
+    Salary,
+    Payroll,
+    CostCenter,
+    BookClosing,
+    CashRegister,
+    CashMovement,
+    Commission,
+    StatementImport,
+    BankTransaction,
+    Procedure,
+    Estimate,
+    EstimateItem,
 ]
 # Never stored (secrets) or not worth storing (bookkeeping timestamps).
 IGNORADOS = {

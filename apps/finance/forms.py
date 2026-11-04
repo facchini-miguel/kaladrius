@@ -6,25 +6,25 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import countries, identification
 from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento, documento_por_tipo
 from apps.core.validators import normalizar_telefone
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 
 from . import payment_methods
 from .models import (
-    Categoria,
-    CentroCusto,
-    Conta,
-    Fornecedor,
-    GrupoContabil,
-    Lancamento,
-    Pagamento,
+    AccountGroup,
+    Category,
+    CostCenter,
+    Entry,
+    FinancialAccount,
+    Payment,
+    Supplier,
 )
 from .services import ligar_grupos
 
 
 def _formas_com_vazio():
     """The clinic's country's payment methods (decision 123), after an empty choice."""
-    return [("", "—"), *Pagamento.Forma.em_uso()]
+    return [("", "—"), *Payment.Forma.em_uso()]
 
 
 def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
@@ -46,7 +46,7 @@ DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 def _centros_de_custo(form):
     """The cost center field shows up only once the clinic has one (decision 095)."""
-    centros = CentroCusto.objects.filter(ativo=True)
+    centros = CostCenter.objects.filter(ativo=True)
     if centros.exists():
         form.fields["centro_custo"].queryset = centros
     else:
@@ -73,10 +73,12 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
+    conta = forms.ModelChoiceField(
+        label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
+    )
 
     class Meta:
-        model = Lancamento
+        model = Entry
         fields = [
             "paciente",
             "pessoa",
@@ -95,13 +97,13 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, clinica, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.clinica = clinica
-        self.instance.tipo = Lancamento.Tipo.RECEBER
-        self.fields["paciente"].queryset = Paciente.objects.filter(arquivado=False)
-        self.fields["categoria"].queryset = Categoria.objects.filter(
-            tipo=Categoria.Tipo.RECEITA, ativa=True
+        self.instance.tipo = Entry.Tipo.RECEBER
+        self.fields["paciente"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["categoria"].queryset = Category.objects.filter(
+            tipo=Category.Tipo.RECEITA, ativa=True
         )
-        self.fields["profissional"].queryset = Profissional.objects.filter(ativo=True)
-        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        self.fields["profissional"].queryset = Practitioner.objects.filter(ativo=True)
+        self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
         _centros_de_custo(self)
 
     def clean(self):
@@ -145,10 +147,12 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
+    conta = forms.ModelChoiceField(
+        label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
+    )
 
     class Meta:
-        model = Lancamento
+        model = Entry
         fields = ["fornecedor", "pessoa", "descricao", "categoria", "centro_custo", "observacoes"]
         labels = {"pessoa": _("Fornecedor sem cadastro")}
         help_texts = {"pessoa": _("Só para um pagamento avulso, sem cadastrar o fornecedor.")}
@@ -157,12 +161,12 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, clinica, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.clinica = clinica
-        self.instance.tipo = Lancamento.Tipo.PAGAR
-        self.fields["fornecedor"].queryset = Fornecedor.objects.filter(ativo=True)
-        self.fields["categoria"].queryset = Categoria.objects.filter(
-            tipo=Categoria.Tipo.DESPESA, ativa=True
+        self.instance.tipo = Entry.Tipo.PAGAR
+        self.fields["fornecedor"].queryset = Supplier.objects.filter(ativo=True)
+        self.fields["categoria"].queryset = Category.objects.filter(
+            tipo=Category.Tipo.DESPESA, ativa=True
         )
-        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
         _centros_de_custo(self)
 
     def clean(self):
@@ -204,7 +208,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
     )
 
     class Meta:
-        model = Fornecedor
+        model = Supplier
         fields = [
             "tipo",
             "nome",
@@ -243,7 +247,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
     def clean(self):
         dados = super().clean()
         # A type without a document in this country (an individual in the UK) keeps none.
-        juridica = dados.get("tipo") == Fornecedor.Tipo.JURIDICA
+        juridica = dados.get("tipo") == Supplier.Tipo.JURIDICA
         do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
         documento = ""
         if do_tipo is not None:
@@ -257,7 +261,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         dados["cpf_cnpj"] = documento
         if (
             documento
-            and Fornecedor.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists()
+            and Supplier.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).exists()
         ):
             self.add_error("cpf_cnpj", _("Já existe um fornecedor com este documento."))
         return dados
@@ -313,7 +317,7 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
     desconto = _campo_dinheiro(_("Desconto"), obrigatorio=False)
 
     class Meta:
-        model = Pagamento
+        model = Payment
         fields = [
             "data",
             "valor",
@@ -331,7 +335,7 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, pode_dar_desconto, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["forma"].choices = _formas_com_vazio()
-        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
         if not pode_dar_desconto:
             del self.fields["desconto"]
         # Card installments and the transaction code's local name (NSU) depend on the country.
@@ -366,7 +370,7 @@ class MotivoForm(FormularioBootstrap, forms.Form):
 
 def _grupos(excluir=()):
     """Groups as choices, numbered without one query per level."""
-    grupos = ligar_grupos(GrupoContabil.objects.exclude(pk__in=excluir))
+    grupos = ligar_grupos(AccountGroup.objects.exclude(pk__in=excluir))
     return [("", "—"), *((g.pk, f"{g.get_tipo_display()} · {g}") for g in grupos)]
 
 
@@ -374,11 +378,11 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
     """A group of the chart of accounts (decision 097)."""
 
     pai = forms.ModelChoiceField(
-        queryset=GrupoContabil.objects.none(), required=False, label=_("Grupo acima")
+        queryset=AccountGroup.objects.none(), required=False, label=_("Grupo acima")
     )
 
     class Meta:
-        model = GrupoContabil
+        model = AccountGroup
         fields = ["nome", "tipo", "pai", "codigo", "ativo"]
         help_texts = {
             "codigo": _(
@@ -391,13 +395,13 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         # A group cannot go under itself or under one of its own subgroups.
         proibidos = {self.instance.pk, *self._descendentes()} if self.instance.pk else set()
-        self.fields["pai"].queryset = GrupoContabil.objects.exclude(pk__in=proibidos)
+        self.fields["pai"].queryset = AccountGroup.objects.exclude(pk__in=proibidos)
         self.fields["pai"].choices = _grupos(excluir=proibidos)
 
     def _descendentes(self):
         encontrados, fila = set(), [self.instance.pk]
         while fila:
-            filhos = set(GrupoContabil.objects.filter(pai__in=fila).values_list("pk", flat=True))
+            filhos = set(AccountGroup.objects.filter(pai__in=fila).values_list("pk", flat=True))
             fila = list(filhos - encontrados)
             encontrados |= filhos
         return encontrados
@@ -410,13 +414,13 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
                 "pai", _("O grupo acima precisa ser do mesmo tipo (receita ou despesa).")
             )
         nome = (dados.get("nome") or "").strip()
-        repetido = GrupoContabil.objects.filter(tipo=tipo, pai=pai, nome__iexact=nome)
+        repetido = AccountGroup.objects.filter(tipo=tipo, pai=pai, nome__iexact=nome)
         if nome and repetido.exclude(pk=self.instance.pk).exists():
             self.add_error("nome", _("Já existe um grupo com este nome neste lugar do plano."))
         if dados.get("codigo") is None and tipo:
             # Left blank where the neighbors are numbered: the next number, so the new group
             # reads "1.3" like the rest instead of having none (review stage 3).
-            vizinhos = GrupoContabil.objects.filter(tipo=tipo, pai=pai).exclude(pk=self.instance.pk)
+            vizinhos = AccountGroup.objects.filter(tipo=tipo, pai=pai).exclude(pk=self.instance.pk)
             codigos = [c for c in vizinhos.values_list("codigo", flat=True) if c is not None]
             if codigos or (pai is not None and pai.codigo is not None):
                 dados["codigo"] = max(codigos, default=0) + 1
@@ -425,16 +429,16 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
 
 class CategoriaForm(FormularioBootstrap, forms.ModelForm):
     grupo = forms.ModelChoiceField(
-        queryset=GrupoContabil.objects.none(), required=False, label=_("Grupo")
+        queryset=AccountGroup.objects.none(), required=False, label=_("Grupo")
     )
 
     class Meta:
-        model = Categoria
+        model = Category
         fields = ["nome", "tipo", "grupo", "ativa"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["grupo"].queryset = GrupoContabil.objects.all()
+        self.fields["grupo"].queryset = AccountGroup.objects.all()
         self.fields["grupo"].choices = _grupos()
         self.fields["grupo"].help_text = _("Onde a categoria fica no plano de contas (opcional).")
 
@@ -443,7 +447,7 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
         grupo = dados.get("grupo")
         if grupo and dados.get("tipo") and grupo.tipo != dados["tipo"]:
             self.add_error("grupo", _("O grupo precisa ser do mesmo tipo da categoria."))
-        repetida = Categoria.objects.filter(nome=dados.get("nome"), tipo=dados.get("tipo"))
+        repetida = Category.objects.filter(nome=dados.get("nome"), tipo=dados.get("tipo"))
         if repetida.exclude(pk=self.instance.pk).exists():
             self.add_error("nome", _("Já existe uma categoria com este nome."))
         return dados
@@ -451,12 +455,12 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
 
 class CentroCustoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = CentroCusto
+        model = CostCenter
         fields = ["nome", "ativo"]
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"].strip()
-        if CentroCusto.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
+        if CostCenter.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um centro de custo com este nome."))
         return nome
 
@@ -470,7 +474,7 @@ class ContaForm(FormularioBootstrap, forms.ModelForm):
     )
 
     class Meta:
-        model = Conta
+        model = FinancialAccount
         fields = ["nome", "tipo", "saldo_inicial", "ativa"]
 
     def clean_saldo_inicial(self):
@@ -478,7 +482,7 @@ class ContaForm(FormularioBootstrap, forms.ModelForm):
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"]
-        if Conta.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
+        if FinancialAccount.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe uma conta com este nome."))
         return nome
 
@@ -493,7 +497,7 @@ class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
     valor = _campo_dinheiro(_("Valor"))
     outra_conta = forms.ModelChoiceField(
         label=_("Outra conta"),
-        queryset=Conta.objects.none(),
+        queryset=FinancialAccount.objects.none(),
         required=False,
         help_text=_("Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."),
     )
@@ -501,7 +505,7 @@ class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, caixa, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["outra_conta"].queryset = Conta.objects.filter(ativa=True).exclude(
+        self.fields["outra_conta"].queryset = FinancialAccount.objects.filter(ativa=True).exclude(
             pk=caixa.conta_id
         )
 
@@ -524,19 +528,19 @@ class FecharCaixaForm(FormularioBootstrap, forms.Form):
 
 class PercentualComissaoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Profissional
+        model = Practitioner
         fields = ["comissao_percentual"]
         localized_fields = ["comissao_percentual"]
 
 
 class PagarComissaoForm(FormularioBootstrap, forms.Form):
     vencimento = forms.DateField(label=_("Vencimento"), widget=DATA, initial=timezone.localdate)
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["categoria"].queryset = Categoria.objects.filter(
-            tipo=Categoria.Tipo.DESPESA, ativa=True
+        self.fields["categoria"].queryset = Category.objects.filter(
+            tipo=Category.Tipo.DESPESA, ativa=True
         )
 
 
@@ -544,7 +548,7 @@ TAMANHO_MAXIMO_OFX = 5 * 1024 * 1024
 
 
 class ImportarExtratoForm(FormularioBootstrap, forms.Form):
-    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none())
+    conta = forms.ModelChoiceField(label=_("Conta"), queryset=FinancialAccount.objects.none())
     arquivo = forms.FileField(
         label=_("Arquivo OFX"),
         help_text=_("Exporte no site ou aplicativo do banco, no formato OFX (Money)."),
@@ -553,8 +557,10 @@ class ImportarExtratoForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
-        banco = Conta.objects.filter(ativa=True, tipo=Conta.Tipo.BANCO).first()
+        self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
+        banco = FinancialAccount.objects.filter(
+            ativa=True, tipo=FinancialAccount.Tipo.BANCO
+        ).first()
         if banco is not None:
             self.fields["conta"].initial = banco.pk
 
@@ -569,7 +575,7 @@ class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
     """A new entry, already paid, for a statement line (a bank fee, an unrecorded Pix)."""
 
     descricao = forms.CharField(label=_("Descrição"), max_length=200)
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     pessoa = forms.CharField(
         label=_("Pagador ou fornecedor"),
         max_length=200,
@@ -578,11 +584,11 @@ class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
     )
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=Pagamento.Forma.em_uso,
-        initial=Pagamento.Forma.TRANSFERENCIA,
+        choices=Payment.Forma.em_uso,
+        initial=Payment.Forma.TRANSFERENCIA,
     )
 
     def __init__(self, *args, entrada, **kwargs):
         super().__init__(*args, **kwargs)
-        tipo = Categoria.Tipo.RECEITA if entrada else Categoria.Tipo.DESPESA
-        self.fields["categoria"].queryset = Categoria.objects.filter(tipo=tipo, ativa=True)
+        tipo = Category.Tipo.RECEITA if entrada else Category.Tipo.DESPESA
+        self.fields["categoria"].queryset = Category.objects.filter(tipo=tipo, ativa=True)

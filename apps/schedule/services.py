@@ -10,20 +10,20 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.core.permissions import so_a_propria_agenda
-from apps.practitioners.models import Profissional
+from apps.practitioners.models import Practitioner
 
-from .models import Agendamento
+from .models import Appointment
 
 
 def profissionais_visiveis(request):
     """Practitioners whose schedule the user may see and change (decision 044)."""
     if so_a_propria_agenda(request):
-        return Profissional.objects.filter(usuario=request.user)
-    return Profissional.objects.all()
+        return Practitioner.objects.filter(usuario=request.user)
+    return Practitioner.objects.all()
 
 
 def agendamentos_visiveis(request):
-    return Agendamento.objects.filter(profissional__in=profissionais_visiveis(request))
+    return Appointment.objects.filter(profissional__in=profissionais_visiveis(request))
 
 
 def momento(data, hora):
@@ -47,8 +47,8 @@ def conflitos(profissional, intervalos, ignorar=None):
     sobreposicao = Q()
     for inicio, fim in intervalos:
         sobreposicao |= Q(inicio__lt=fim, fim__gt=inicio)
-    existentes = Agendamento.objects.filter(sobreposicao, profissional=profissional).exclude(
-        situacao=Agendamento.Situacao.DESMARCOU
+    existentes = Appointment.objects.filter(sobreposicao, profissional=profissional).exclude(
+        situacao=Appointment.Situacao.DESMARCOU
     )
     if ignorar is not None:
         existentes = existentes.exclude(pk=ignorar)
@@ -65,7 +65,7 @@ def criar(modelo, intervalos, usuario):
     serie = uuid.uuid4() if len(intervalos) > 1 else None
     criados = []
     for inicio, fim in intervalos:
-        agendamento = Agendamento(
+        agendamento = Appointment(
             profissional=modelo.profissional,
             tipo=modelo.tipo,
             paciente=modelo.paciente,
@@ -87,17 +87,17 @@ def marcar(agendamento, situacao):
     Came or missed only from the day of the appointment on. Leaving "cancelled" takes the
     slot back, so it is refused if another appointment took it meanwhile.
     """
-    if situacao not in Agendamento.Situacao.values:
+    if situacao not in Appointment.Situacao.values:
         raise ValidationError(_("Situação inválida."))
     if agendamento.paciente_id is None:
         raise ValidationError(_("Só agendamentos com paciente têm situação."))
-    presenca = (Agendamento.Situacao.COMPARECEU, Agendamento.Situacao.FALTOU)
+    presenca = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
     if situacao in presenca and not agendamento.presenca_marcavel:
         raise ValidationError(
             _("Comparecimento e falta só podem ser marcados a partir do dia do atendimento.")
         )
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
-    if agendamento.desmarcado and situacao != Agendamento.Situacao.DESMARCOU:
+    if agendamento.desmarcado and situacao != Appointment.Situacao.DESMARCOU:
         if conflitos(
             agendamento.profissional, [(agendamento.inicio, agendamento.fim)], agendamento.pk
         ):

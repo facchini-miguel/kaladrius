@@ -55,7 +55,7 @@ deploy/           compose de produção, Caddyfile, scripts do servidor
 docs/             este site de documentação: instalação, manual, decisões
 ```
 
-Os nomes no código seguem o domínio em **português** (`Paciente`, `Agendamento`), com comentários em inglês. Os dados de cada clínica levam a chave `clinica`, e as consultas filtram pela clínica em uso.
+Os nomes no código são em **inglês**: os modelos já são (`Patient`, `Appointment`, decisões 156 e 157); campos, funções e variáveis ainda têm nomes em português, que passam para o inglês em seguida. Os comentários são em inglês; as telas, em português, com traduções. Os dados de cada clínica levam a chave `clinica`, e as consultas filtram pela clínica em uso.
 
 ## Decisões
 

@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import DuasEtapas
+from .models import TwoFactor
 
 
-@admin.register(DuasEtapas)
+@admin.register(TwoFactor)
 class DuasEtapasAdmin(admin.ModelAdmin):
     """Superusers can remove someone's two-step verification (lost phone); the secret is
     never shown here."""

@@ -11,7 +11,7 @@ from django.utils import timezone
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.finance import services
-from apps.finance.models import Categoria, Conta, Fechamento, Lancamento
+from apps.finance.models import BookClosing, Category, Entry, FinancialAccount
 
 pytestmark = pytest.mark.django_db
 
@@ -31,10 +31,10 @@ def parcela(clinica_a):
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
             clinica=clinica_a,
-            tipo=Lancamento.Tipo.RECEBER,
+            tipo=Entry.Tipo.RECEBER,
             pessoa="Pagador fictício",
             descricao="Consulta",
-            categoria=Categoria.objects.get(nome="Consulta"),
+            categoria=Category.objects.get(nome="Consulta"),
             valor_total=Decimal("300"),
             parcelas=1,
             primeiro_vencimento=ANTEONTEM,
@@ -51,7 +51,7 @@ def receber(clinica, parcela, data, valor="100"):
             valor=Decimal(valor),
             data=data,
             forma="pix",
-            conta=Conta.objects.get(nome="Caixa"),
+            conta=FinancialAccount.objects.get(nome="Caixa"),
         )
 
 
@@ -77,7 +77,7 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
             "data": ONTEM.isoformat(),
             "valor": "100",
             "forma": "pix",
-            "conta": Conta.todos.get(clinica=clinica_a, nome="Caixa").pk,
+            "conta": FinancialAccount.todos.get(clinica=clinica_a, nome="Caixa").pk,
         },
         follow=True,
     )
@@ -111,7 +111,7 @@ def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
     )
     with usar_clinica(clinica_a):
         assert services.fechado_ate(clinica_a.pk) is None
-        assert Fechamento.objects.count() == 3
+        assert BookClosing.objects.count() == 3
     pagina = admin.get(URL).content.decode()
     assert "Lançamento esquecido" in pagina and "O financeiro está aberto" in pagina
 
@@ -142,4 +142,4 @@ def test_demonstracao_so_consulta(clinica_a, criar_usuario, cliente_de):
     assert pagina.status_code == 200 and pagina.context["fechar_form"] is None
     assert demo.post(URL, {"acao": "fechar", "ate": ONTEM.isoformat()}).status_code == 403
     with usar_clinica(clinica_a):
-        assert not Fechamento.objects.exists()
+        assert not BookClosing.objects.exists()

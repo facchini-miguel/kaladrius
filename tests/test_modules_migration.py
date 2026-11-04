@@ -30,24 +30,24 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
     try:
         executor.migrate(anterior)
         apps = estado_do_banco()
-        Clinica = apps.get_model("core", "Clinica")
+        Clinic = apps.get_model("core", "Clinica")
         ids = {
-            area: Clinica.objects.create(nome=f"Clínica fictícia {area}", area=area).pk
+            area: Clinic.objects.create(nome=f"Clínica fictícia {area}", area=area).pk
             for area in ("odontologia", "medicina", "outra")
         }
         clinica_id = ids["odontologia"]
-        Paciente = apps.get_model("pacientes", "Paciente")
-        paciente = Paciente.objects.create(
+        Patient = apps.get_model("pacientes", "Paciente")
+        paciente = Patient.objects.create(
             clinica_id=clinica_id,
             nome="Paciente fictício anterior à atualização",
             observacoes="Texto inteiramente fictício preservado",
         )
-        Categoria = apps.get_model("financeiro", "Categoria")
-        categoria = Categoria.objects.create(
+        Category = apps.get_model("financeiro", "Categoria")
+        categoria = Category.objects.create(
             clinica_id=clinica_id, nome="Receita fictícia", tipo="receita"
         )
-        Lancamento = apps.get_model("financeiro", "Lancamento")
-        lancamento = Lancamento.objects.create(
+        Entry = apps.get_model("financeiro", "Lancamento")
+        lancamento = Entry.objects.create(
             clinica_id=clinica_id,
             tipo="receber",
             descricao="Tratamento fictício",
@@ -55,16 +55,16 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             paciente=paciente,
             valor_total=Decimal("123.45"),
         )
-        Parcela = apps.get_model("financeiro", "Parcela")
-        Parcela.objects.create(
+        Installment = apps.get_model("financeiro", "Parcela")
+        Installment.objects.create(
             clinica_id=clinica_id,
             lancamento=lancamento,
             numero=1,
             vencimento=datetime.date(2026, 11, 10),
             valor=Decimal("123.45"),
         )
-        Orcamento = apps.get_model("orcamentos", "Orcamento")
-        orcamento = Orcamento.objects.create(clinica_id=clinica_id, paciente=paciente)
+        Estimate = apps.get_model("orcamentos", "Orcamento")
+        orcamento = Estimate.objects.create(clinica_id=clinica_id, paciente=paciente)
         Item = apps.get_model("orcamentos", "ItemOrcamento")
         Item.objects.create(
             clinica_id=clinica_id,
@@ -74,7 +74,7 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             faces="V",
             valor_unitario=Decimal("123.45"),
         )
-        modelos = [Clinica, Paciente, Categoria, Lancamento, Parcela, Orcamento, Item]
+        modelos = [Clinic, Patient, Category, Entry, Installment, Estimate, Item]
         antes = {
             modelo._meta.label: list(modelo.objects.order_by("pk").values()) for modelo in modelos
         }

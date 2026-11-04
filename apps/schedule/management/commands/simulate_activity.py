@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.core.isolation import sem_isolamento
-from apps.core.models import Clinica
+from apps.core.models import Clinic
 from apps.schedule.simulation import (
     simular_agendamentos,
     simular_comissoes,
@@ -64,7 +64,7 @@ class Command(BaseCommand):
             )
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), sem_isolamento():
-            alvo = Clinica.objects.filter(nome=clinica).first()
+            alvo = Clinic.objects.filter(nome=clinica).first()
             if alvo is None:
                 raise CommandError(f"Clínica “{clinica}” não encontrada.")
             agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)

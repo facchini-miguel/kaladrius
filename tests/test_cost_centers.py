@@ -10,8 +10,8 @@ from apps.core.isolation import usar_clinica
 from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
 from apps.core.modules import configurar
 from apps.finance import services
-from apps.finance.models import Categoria, CentroCusto, Conta, Lancamento
-from apps.patients.models import Paciente
+from apps.finance.models import Category, CostCenter, Entry, FinancialAccount
+from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
 
@@ -27,12 +27,12 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def centro(clinica_a):
     with usar_clinica(clinica_a):
-        return CentroCusto.objects.create(nome="Ortodontia")
+        return CostCenter.objects.create(nome="Ortodontia")
 
 
 def despesa(clinica, **extra):
     with usar_clinica(clinica):
-        categoria = Categoria.objects.get(nome="Aluguel")
+        categoria = Category.objects.get(nome="Aluguel")
     return {
         "pessoa": "Imobiliária fictícia",
         "descricao": "Aluguel",
@@ -50,7 +50,7 @@ def test_cadastro_e_nome_repetido(clinica_a, admin):
     url = reverse("finance:catalog_new", args=["cost-centers"])
     assert admin.post(url, {"nome": " Consultório 1 ", "ativo": "on"}).status_code == 302
     with usar_clinica(clinica_a):
-        assert CentroCusto.objects.get().nome == "Consultório 1"
+        assert CostCenter.objects.get().nome == "Consultório 1"
     repetido = admin.post(url, {"nome": "consultório 1", "ativo": "on"})
     assert "nome" in repetido.context["form"].errors
     lista = admin.get(reverse(URL, args=["cost-centers"])).content.decode()
@@ -61,10 +61,10 @@ def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
     for rota in ("finance:entry_new", "finance:expense_new"):
         assert "centro_custo" not in admin.get(reverse(rota)).context["form"].fields
     with usar_clinica(clinica_a):
-        inativo = CentroCusto.objects.create(nome="Desativado", ativo=False)
+        inativo = CostCenter.objects.create(nome="Desativado", ativo=False)
     assert "centro_custo" not in admin.get(reverse("finance:expense_new")).context["form"].fields
     with usar_clinica(clinica_a):
-        CentroCusto.objects.create(nome="Ativo")
+        CostCenter.objects.create(nome="Ativo")
     campo = admin.get(reverse("finance:expense_new")).context["form"].fields["centro_custo"]
     with usar_clinica(clinica_a):
         assert inativo not in campo.queryset and campo.queryset.count() == 1
@@ -78,8 +78,8 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
         == 302
     )
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Paciente fictício do centro")
-        receita = Categoria.objects.get(nome="Tratamento")
+        paciente = Patient.objects.create(nome="Paciente fictício do centro")
+        receita = Category.objects.get(nome="Tratamento")
     resposta = admin.post(
         reverse("finance:entry_new"),
         {
@@ -97,8 +97,8 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        assert Lancamento.objects.filter(centro_custo=centro).count() == 2
-        lancamento = Lancamento.objects.get(tipo=Lancamento.Tipo.PAGAR)
+        assert Entry.objects.filter(centro_custo=centro).count() == 2
+        lancamento = Entry.objects.get(tipo=Entry.Tipo.PAGAR)
     pagina = admin.get(reverse("finance:entry", args=[lancamento.pk])).content.decode()
     assert "Ortodontia" in pagina
     # Without a center the entry still saves (the field is optional).
@@ -107,12 +107,12 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
 
 def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
     with usar_clinica(clinica_a):
-        aluguel = Categoria.objects.get(nome="Aluguel")
-        caixa = Conta.objects.get(nome="Caixa")
+        aluguel = Category.objects.get(nome="Aluguel")
+        caixa = FinancialAccount.objects.get(nome="Caixa")
         for valor, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
             lancamento = services.criar_lancamento(
                 clinica=clinica_a,
-                tipo=Lancamento.Tipo.PAGAR,
+                tipo=Entry.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
                 descricao="Compra",
                 categoria=aluguel,

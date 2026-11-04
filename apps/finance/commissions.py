@@ -14,10 +14,10 @@ from django.db.models import Count, Sum
 from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 
-from apps.practitioners.models import Profissional
+from apps.practitioners.models import Practitioner
 
 from . import services
-from .models import ZERO, Comissao, Lancamento, Pagamento
+from .models import ZERO, Commission, Entry, Payment
 
 CENTAVO = Decimal("0.01")
 
@@ -27,8 +27,8 @@ def percentual_de(valor, percentual):
 
 
 def _recebimentos(profissional):
-    return Pagamento.objects.filter(
-        parcela__lancamento__tipo=Lancamento.Tipo.RECEBER,
+    return Payment.objects.filter(
+        parcela__lancamento__tipo=Entry.Tipo.RECEBER,
         parcela__lancamento__profissional=profissional,
     ).select_related("parcela__lancamento__paciente")
 
@@ -75,7 +75,7 @@ def resumo(ate):
     took seconds in a clinic with years of them (volume test, decision 108).
     """
     linhas = []
-    for profissional in Profissional.objects.order_by("-ativo", "nome"):
+    for profissional in Practitioner.objects.order_by("-ativo", "nome"):
         totais = _creditos(profissional, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
         debitos = _debitos(profissional)
         if not (profissional.comissao_percentual or totais["quantos"] or debitos):
@@ -99,13 +99,13 @@ def resumo(ate):
 def pagar(profissional, *, ate, vencimento, categoria, usuario):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
-    profissional = Profissional.objects.select_for_update().get(pk=profissional.pk)
+    profissional = Practitioner.objects.select_for_update().get(pk=profissional.pk)
     calculo = pendente(profissional, ate)
     if calculo["valor"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
     lancamento = services.criar_lancamento(
         clinica=profissional.clinica,
-        tipo=Lancamento.Tipo.PAGAR,
+        tipo=Entry.Tipo.PAGAR,
         pessoa=profissional.nome,
         profissional=profissional,
         descricao=_("Comissão de %(nome)s até %(data)s")
@@ -116,7 +116,7 @@ def pagar(profissional, *, ate, vencimento, categoria, usuario):
         primeiro_vencimento=vencimento,
         usuario=usuario,
     )
-    comissao = Comissao.objects.create(
+    comissao = Commission.objects.create(
         clinica=profissional.clinica,
         profissional=profissional,
         ate=ate,
@@ -144,7 +144,7 @@ def liberar(comissao):
     deduction only makes sense if this one was paid, so the later one is cancelled first.
     """
     descontou = (
-        Comissao.objects.filter(
+        Commission.objects.filter(
             cancelada=False,
             pagamentos_estornados__comissao=comissao,
         )
@@ -161,10 +161,10 @@ def liberar(comissao):
             % {"data": date_format(descontou.ate, "SHORT_DATE_FORMAT")}
         )
     # One by one (not .update()), so the audit log records each change.
-    for pagamento in Pagamento.objects.filter(comissao=comissao):
+    for pagamento in Payment.objects.filter(comissao=comissao):
         pagamento.comissao = None
         pagamento.save(update_fields=["comissao"])
-    for pagamento in Pagamento.objects.filter(comissao_estorno=comissao):
+    for pagamento in Payment.objects.filter(comissao_estorno=comissao):
         pagamento.comissao_estorno = None
         pagamento.save(update_fields=["comissao_estorno"])
     comissao.cancelada = True

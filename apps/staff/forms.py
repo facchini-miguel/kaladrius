@@ -5,9 +5,9 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import identification
 from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento
 from apps.core.validators import normalizar_telefone
-from apps.finance.models import Categoria
+from apps.finance.models import Category
 
-from .models import Folha, Funcionario
+from .models import Employee, Payroll
 
 DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
@@ -38,7 +38,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     salario_desde = forms.DateField(label=_("Salário a partir de"), widget=DATA, required=False)
 
     class Meta:
-        model = Funcionario
+        model = Employee
         fields = [
             "nome",
             "cpf",
@@ -77,7 +77,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
         cpf = identification.limpar(
             self.cleaned_data.get("cpf"), [self.documento], self.documento.sigla
         )
-        if cpf and Funcionario.objects.filter(cpf=cpf).exclude(pk=self.instance.pk).exists():
+        if cpf and Employee.objects.filter(cpf=cpf).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um funcionário com este documento."))
         return cpf
 
@@ -111,7 +111,7 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
     valor_hora_extra = _dinheiro(_("Valor da hora extra"), obrigatorio=True)
 
     class Meta:
-        model = Folha
+        model = Payroll
         fields = ["horas_extras", "valor_hora_extra", "faltas", "observacao"]
 
     def __init__(self, *args, **kwargs):
@@ -128,11 +128,11 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
 
 
 class LancarForm(FormularioBootstrap, forms.Form):
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     vencimento = forms.DateField(label=_("Vencimento"), widget=DATA)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        despesas = Categoria.objects.filter(tipo=Categoria.Tipo.DESPESA, ativa=True)
+        despesas = Category.objects.filter(tipo=Category.Tipo.DESPESA, ativa=True)
         self.fields["categoria"].queryset = despesas
         self.fields["categoria"].initial = despesas.filter(nome="Salários e encargos").first()
