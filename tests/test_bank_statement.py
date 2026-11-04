@@ -302,7 +302,7 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
 
     recebido = pago(cenario, "250.00", timezone.localdate())
     saida = StringIO()
-    call_command("simular_extrato", clinica=cenario["clinica"].nome, stdout=saida)
+    call_command("simulate_statement", clinica=cenario["clinica"].nome, stdout=saida)
     extrato = ofx.ler(saida.getvalue().encode())
     assert len(extrato.transacoes) in (4, 5)  # the bank extras, plus the payment (85%)
     assert extrato.saldo is not None

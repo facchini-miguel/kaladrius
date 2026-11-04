@@ -40,7 +40,7 @@ from apps.recalls.models import Rechamada
 from apps.schedule.models import Agendamento, TipoAtendimento
 from apps.staff.models import Folha, Funcionario, Salario
 
-from .popular_dados_teste import CLINICAS
+from .seed_sample_data import CLINICAS
 
 # Test data created before 0.26.0 (two clinics and a user in both): removed too.
 CLINICAS_ANTIGAS = ["Clínica Bem Estar (teste)"]
@@ -49,19 +49,22 @@ USUARIOS_ANTIGOS = ["admin.bemestar", "recepcao.bemestar", "recepcao.multi"]
 
 class Command(BaseCommand):
     help = (
-        "Deletes the fake data created by popular_dados_teste: the '(teste)' clinics with "
+        "Deletes the fake data created by seed_sample_data: the '(teste)' clinics with "
         "everything in them, the test users and their audit and login records. Real "
         "clinics and users are never touched."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--confirmar", action="store_true", help="Required: the deletion cannot be undone."
+            "--confirm",
+            dest="confirmar",
+            action="store_true",
+            help="Required: the deletion cannot be undone.",
         )
 
     def handle(self, *args, confirmar=False, **options):
         if not confirmar:
-            raise CommandError("Nada foi apagado: rode de novo com --confirmar.")
+            raise CommandError("Nada foi apagado: rode de novo com --confirm.")
         nomes = [dados["nome"] for dados in CLINICAS] + CLINICAS_ANTIGAS
         usernames = [u[0] for dados in CLINICAS for u in dados["usuarios"]] + USUARIOS_ANTIGOS
 

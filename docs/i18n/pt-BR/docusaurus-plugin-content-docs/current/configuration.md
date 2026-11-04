@@ -45,7 +45,7 @@ O container do banco cria o banco e o usuário com esses valores na primeira vez
 
 ## Primeiro administrador
 
-Usadas só pelo `python manage.py criar_admin`, que não faz nada se o usuário já existir.
+Usadas só pelo `python manage.py create_admin`, que não faz nada se o usuário já existir.
 
 | Variável | Padrão | O que faz |
 |---|---|---|
@@ -66,7 +66,7 @@ Depois do primeiro acesso, você pode tirar o `DJANGO_ADMIN_PASSWORD` do arquivo
 
 | Variável | O que faz |
 |---|---|
-| `DJANGO_SEED_PASSWORD` | Senha dos usuários fictícios criados pelo `popular_dados_teste`. **Nunca** rode esse comando num servidor com dados reais: todos os usuários fictícios têm essa mesma senha |
+| `DJANGO_SEED_PASSWORD` | Senha dos usuários fictícios criados pelo `seed_sample_data`. **Nunca** rode esse comando num servidor com dados reais: todos os usuários fictícios têm essa mesma senha |
 
 ## Configurações fixas
 

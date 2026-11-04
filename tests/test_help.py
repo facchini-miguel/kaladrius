@@ -61,13 +61,13 @@ def test_lista_logo_depois_de_um_paragrafo_vira_lista():
 
 def test_notas_da_release_do_github_em_ingles():
     saida = StringIO()
-    call_command("notas_release", "0.7.0", "--titulo", stdout=saida)
+    call_command("release_notes", "0.7.0", "--title", stdout=saida)
     assert saida.getvalue().strip() == "0.7.0 – Audit log and security (end of phase 1)"
     saida = StringIO()
-    call_command("notas_release", "0.7.0", stdout=saida)
+    call_command("release_notes", "0.7.0", stdout=saida)
     assert saida.getvalue().startswith("- **New · Audit log:** The clinic administrator")
     with pytest.raises(CommandError):
-        call_command("notas_release", "9.9.9")
+        call_command("release_notes", "9.9.9")
 
 
 def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinica_a):

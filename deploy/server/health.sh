@@ -85,7 +85,7 @@ report() {
   docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}'
   echo
   echo "== Last 24 hours and last backup"
-  compose exec -T app python manage.py saude 2>/dev/null \
+  manage health -- saude 2>/dev/null \
     || echo "(the system is down: no summary of the last 24 hours)"
   echo
   echo "== Scheduled tasks"

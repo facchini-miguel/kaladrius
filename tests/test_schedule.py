@@ -468,8 +468,8 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
             descricao="Real",
         )
     with pytest.raises(CommandError):
-        call_command("simular_movimento", clinica=cenario["clinica"].nome)
-    call_command("simular_movimento", clinica=cenario["clinica"].nome, confirmar=True)
+        call_command("simulate_activity", clinica=cenario["clinica"].nome)
+    call_command("simulate_activity", clinica=cenario["clinica"].nome, confirmar=True)
 
     with usar_clinica(cenario["clinica"]):
         novos = Agendamento.objects.exclude(pk=existente.pk)
@@ -488,7 +488,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
 
 def test_simular_so_rechamadas(cenario):
     call_command(
-        "simular_movimento",
+        "simulate_activity",
         clinica=cenario["clinica"].nome,
         sem_agenda=True,
         rechamadas=5,

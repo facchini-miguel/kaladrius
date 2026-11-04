@@ -328,7 +328,7 @@ class _Anonimizador:
         return self.resultado
 
 
-def anonimizar_clinica(nome_clinica, hoje=None):
+def anonymize_clinic(nome_clinica, hoje=None):
     with sem_isolamento():
         clinica = Clinica.objects.filter(nome=nome_clinica).first()
     if clinica is None:

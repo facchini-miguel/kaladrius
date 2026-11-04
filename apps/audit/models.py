@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 class RegistroAuditoria(models.Model):
     """Who did what, when and from where (LGPD accountability). Never edited or deleted,
-    except failed logins, deleted after 30 days by the aplicar_retencao command, and the
+    except failed logins, deleted after 30 days by the apply_retention command, and the
     personal data of a patient deleted at their request (registro.anonimizar).
 
     Not a ModeloDaClinica: entries must be written in every context (including

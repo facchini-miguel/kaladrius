@@ -43,12 +43,12 @@ The first time takes a few minutes (it downloads PostgreSQL and builds the image
 In another terminal, in the same folder:
 
 ```bash
-docker compose exec app python manage.py criar_admin
-docker compose exec app python manage.py popular_dados_teste
+docker compose exec app python manage.py create_admin
+docker compose exec app python manage.py seed_sample_data
 ```
 
-- `criar_admin` creates the **superuser** from `DJANGO_ADMIN_USERNAME` and `DJANGO_ADMIN_PASSWORD`.
-- `popular_dados_teste` creates a fictitious clinic (marked "(teste)") with patients, schedule, estimates and finance, and test users for each role, all with the password `DJANGO_SEED_PASSWORD`.
+- `create_admin` creates the **superuser** from `DJANGO_ADMIN_USERNAME` and `DJANGO_ADMIN_PASSWORD`.
+- `seed_sample_data` creates a fictitious clinic (marked "(teste)") with patients, schedule, estimates and finance, and test users for each role, all with the password `DJANGO_SEED_PASSWORD`.
 
 ## 5. Open it
 
@@ -61,4 +61,4 @@ docker compose down          # stops; the data stays for next time
 docker compose down -v       # stops and deletes the database
 ```
 
-To remove only the fake data and keep everything else: `docker compose exec app python manage.py remover_dados_teste --confirmar`.
+To remove only the fake data and keep everything else: `docker compose exec app python manage.py remove_sample_data --confirm`.

@@ -54,7 +54,7 @@ The [reference production](../project/production.md) page records every resource
 8. **First administrator.** Through the IAP tunnel:
    ```bash
    gcloud compute ssh <vm> --zone=<zone> --tunnel-through-iap --command \
-     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
+     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py create_admin'
    ```
 
 ## Day to day

@@ -54,7 +54,7 @@ La página [Producción de referencia](../project/production.md) registra cada r
 8. **Primer administrador.** Por el túnel IAP:
    ```bash
    gcloud compute ssh <vm> --zone=<zona> --tunnel-through-iap --command \
-     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py criar_admin'
+     'cd /opt/kaladrius/release && sudo docker compose -f docker-compose.prod.yml exec app python manage.py create_admin'
    ```
 
 ## En el día a día

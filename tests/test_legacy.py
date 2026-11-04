@@ -264,13 +264,13 @@ def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
 def test_comando(db, tmp_path, capsys):
     arquivo = tmp_path / "dump.sql"
     arquivo.write_text(DUMP, encoding="utf-8")
-    call_command("importar_legado", str(arquivo), clinica="Pelo Comando")
+    call_command("import_legacy", str(arquivo), clinica="Pelo Comando")
     saida = capsys.readouterr().out
     assert "Pacientes: 4" in saida and "Avisos:" in saida
     with pytest.raises(CommandError):
-        call_command("importar_legado", str(arquivo), clinica="Pelo Comando")
+        call_command("import_legacy", str(arquivo), clinica="Pelo Comando")
     with pytest.raises(CommandError):
-        call_command("importar_legado", str(tmp_path / "nao-existe.sql"), clinica="X")
+        call_command("import_legacy", str(tmp_path / "nao-existe.sql"), clinica="X")
 
 
 # --- Anonymization -----------------------------------------------------------------
@@ -284,8 +284,8 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
         "profissionais": dados(clinica, Profissional),
     }
     with pytest.raises(CommandError):
-        call_command("anonimizar_clinica", clinica=clinica.nome)
-    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+        call_command("anonymize_clinic", clinica=clinica.nome)
+    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
 
     pacientes = dados(clinica, Paciente)
     assert [p.pk for p in pacientes] == [p.pk for p in antes["pacientes"]]
@@ -339,7 +339,7 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
 
 def test_anonimizar_clinica_inexistente(db):
     with pytest.raises(CommandError, match="não encontrada"):
-        call_command("anonimizar_clinica", clinica="Não existe", confirmar=True)
+        call_command("anonymize_clinic", clinica="Não existe", confirmar=True)
 
 
 def test_anonimizacao_dos_fornecedores(importado):
@@ -368,7 +368,7 @@ def test_anonimizacao_dos_fornecedores(importado):
                 primeiro_vencimento=HOJE,
                 usuario=None,
             )
-    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
 
     pessoa, empresa = dados(clinica, Fornecedor)
     assert "Fulana" not in str(vars(pessoa))
@@ -392,7 +392,7 @@ def test_anonimizacao_das_carteirinhas(importado):
             numero="98765",
             titular="Fulano Titular",
         )
-    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
     (carteirinha,) = dados(clinica, Carteirinha)
     assert carteirinha.numero != "98765" and "Fulano" not in carteirinha.titular
     assert carteirinha.titular and (carteirinha.convenio, carteirinha.plano) == (convenio, "Básico")
@@ -424,7 +424,7 @@ def test_anonimizacao_dos_funcionarios(importado):
             usuario=None,
         )
         folha.save()
-    call_command("anonimizar_clinica", clinica=clinica.nome, confirmar=True)
+    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
     (funcionaria,) = dados(clinica, Funcionario)
     (folha,) = dados(clinica, Folha)
     assert "Fulana" not in funcionaria.nome and funcionaria.cpf == ""

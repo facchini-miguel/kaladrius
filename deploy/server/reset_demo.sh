@@ -111,7 +111,8 @@ INSERT INTO conta_codigorecuperacao (resumo, usado_em, usuario_id)
 DROP TABLE _kept_users, _kept_two_factor, _kept_codes;
 SQL
 
-compose exec -T app python manage.py avancar_datas --desde "$(cat "$BASE_DATE")" --confirmar
+since=$(cat "$BASE_DATE")
+manage advance_dates --since "$since" --confirm -- avancar_datas --desde "$since" --confirmar
 
 notify_monitor MONITOR_DEMO_URL
 echo "Demo reset."

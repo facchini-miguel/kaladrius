@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.legacy.anonymization import ClinicaNaoEncontrada, anonimizar_clinica
+from apps.legacy.anonymization import ClinicaNaoEncontrada, anonymize_clinic
 
 
 class Command(BaseCommand):
@@ -11,16 +11,19 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinica", required=True, help="Name of the clinic.")
+        parser.add_argument("--clinic", dest="clinica", required=True, help="Name of the clinic.")
         parser.add_argument(
-            "--confirmar", action="store_true", help="Required: the change cannot be undone."
+            "--confirm",
+            dest="confirmar",
+            action="store_true",
+            help="Required: the change cannot be undone.",
         )
 
     def handle(self, *args, clinica, confirmar, **options):
         if not confirmar:
-            raise CommandError("Nada foi alterado: rode de novo com --confirmar.")
+            raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
-            r = anonimizar_clinica(clinica)
+            r = anonymize_clinic(clinica)
         except ClinicaNaoEncontrada as erro:
             raise CommandError(str(erro)) from erro
         self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinica}” anonimizados:"))

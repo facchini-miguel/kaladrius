@@ -141,7 +141,7 @@ jobs:
 
   # GitHub Release of each new version (decision 119): after the image is published, the version
   # of pyproject.toml (the top of releases.yaml, the tests check they match) gets its tag vX.Y.Z
-  # and its release in English, from notas_release, when they do not exist yet. Nobody has to
+  # and its release in English, from release_notes, when they do not exist yet. Nobody has to
   # remember. With a SITE_TOKEN secret (a fine-grained token with Actions: write on
   # facchini-miguel/facchini.eti.br), the owner's site is rebuilt right away to show it;
   # without one, the site's hourly build picks it up.
@@ -179,8 +179,8 @@ jobs:
             exit 0
           fi
           python manage.py compilemessages >/dev/null
-          python manage.py notas_release "$VERSION" --titulo > title.txt
-          python manage.py notas_release "$VERSION" > notes.md
+          python manage.py release_notes "$VERSION" --title > title.txt
+          python manage.py release_notes "$VERSION" > notes.md
           # The Linux packages of the version (decision 140), with the image just published,
           # pinned by its digest; refused when the version's image came from another commit.
           deploy/package/build.sh --commit "$GITHUB_SHA"

@@ -103,7 +103,7 @@ The app applies the database migrations every time it starts. Caddy asks Let's E
 ## 6. Create the administrator
 
 ```bash
-kaladrius exec app python manage.py criar_admin
+kaladrius exec app python manage.py create_admin
 ```
 
 Open `https://clinic.example.com`, log in and follow [First steps](../first-steps.md) to create the clinic and the team.

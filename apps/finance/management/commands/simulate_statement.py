@@ -27,9 +27,15 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinica", required=True, help="Name of the test clinic.")
-        parser.add_argument("--conta", default="Banco", help="Account name (default: Banco).")
-        parser.add_argument("--dias", type=int, default=30, help="Days back (default 30).")
+        parser.add_argument(
+            "--clinic", dest="clinica", required=True, help="Name of the test clinic."
+        )
+        parser.add_argument(
+            "--account", dest="conta", default="Banco", help="Account name (default: Banco)."
+        )
+        parser.add_argument(
+            "--days", dest="dias", type=int, default=30, help="Days back (default 30)."
+        )
 
     def handle(self, *args, clinica, conta, dias, **options):
         alvo = Clinica.objects.filter(nome=clinica).first()

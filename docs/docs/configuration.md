@@ -45,7 +45,7 @@ The database container creates the database and the user from these values the f
 
 ## First administrator
 
-Used only by `python manage.py criar_admin`, which does nothing if the user already exists.
+Used only by `python manage.py create_admin`, which does nothing if the user already exists.
 
 | Variable | Default | What it does |
 |---|---|---|
@@ -66,7 +66,7 @@ After the first login you can remove `DJANGO_ADMIN_PASSWORD` from the file.
 
 | Variable | What it does |
 |---|---|
-| `DJANGO_SEED_PASSWORD` | Password of the fake users created by `popular_dados_teste`. **Never** run that command on a server with real data: every fake user shares this password |
+| `DJANGO_SEED_PASSWORD` | Password of the fake users created by `seed_sample_data`. **Never** run that command on a server with real data: every fake user shares this password |
 
 ## Fixed settings
 

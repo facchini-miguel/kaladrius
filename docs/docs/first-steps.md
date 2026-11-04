@@ -5,7 +5,7 @@ title: First steps
 
 # First steps
 
-After installing, the system has only the **superuser** created by `criar_admin`. The superuser is the support account of the installation: it sees everything in the clinic and the technical pages. The clinic is then run by its own **administrator**.
+After installing, the system has only the **superuser** created by `create_admin`. The superuser is the support account of the installation: it sees everything in the clinic and the technical pages. The clinic is then run by its own **administrator**.
 
 One installation serves **one clinic**. To serve another clinic, install the system again (another server, or another Compose project on the same one).
 
@@ -43,4 +43,4 @@ Buttons a person cannot use are not shown. See [Getting started](manual/inicio.m
 
 ## Importing from another system
 
-Kaladrius can import the database of the PHP system it replaces (`python manage.py importar_legado`). For other systems, the import has to be written; see [Contributing](contributing.md).
+Kaladrius can import the database of the PHP system it replaces (`python manage.py import_legacy`). For other systems, the import has to be written; see [Contributing](contributing.md).

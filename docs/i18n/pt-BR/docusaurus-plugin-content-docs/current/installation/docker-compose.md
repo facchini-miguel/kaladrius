@@ -103,7 +103,7 @@ O app aplica as migrações do banco toda vez que sobe. O Caddy pede o certifica
 ## 6. Crie o administrador
 
 ```bash
-kaladrius exec app python manage.py criar_admin
+kaladrius exec app python manage.py create_admin
 ```
 
 Abra `https://clinica.exemplo.com.br`, entre e siga os [Primeiros passos](../first-steps.md) para criar a clínica e a equipe.

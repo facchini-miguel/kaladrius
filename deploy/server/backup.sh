@@ -43,11 +43,11 @@ else
 fi
 
 # Recorded in the database: superusers see a warning in the web app when backups stop.
-compose exec -T app python manage.py registrar_backup "$name" "$size" \
+manage record_backup "$name" "$size" -- registrar_backup "$name" "$size" \
   || echo "Warning: backup made, but it could not be recorded in the system."
 
 # Daily retention: failed login records older than 30 days are deleted (decision 045).
-compose exec -T app python manage.py aplicar_retencao \
+manage apply_retention -- aplicar_retencao \
   || echo "Warning: the old records could not be deleted."
 
 notify_monitor MONITOR_BACKUP_URL

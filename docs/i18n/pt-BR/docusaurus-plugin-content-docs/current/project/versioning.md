@@ -24,7 +24,7 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 - a página **Novidades** dentro do sistema web;
 - o endpoint da API que o app usa para mostrar "O que há de novo";
 - o número da versão exibido no rodapé do sistema;
-- as *Releases* do GitHub, em inglês (comando `notas_release`).
+- as *Releases* do GitHub, em inglês (comando `release_notes`).
 
 ### Formato
 
@@ -83,8 +83,8 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 2. Atualizar a versão do projeto (`pyproject.toml`) e a linha "Versão atual" dos três READMEs. Os testes falham se algum deles ficar diferente do `releases.yaml`.
 3. **O CI cria sozinho a tag Git `vX.Y.Z` e a *Release* no GitHub** **em inglês**, depois de publicar a imagem, quando a versão é nova (decisão 119); com o segredo `SITE_TOKEN` ele também reconstrói o site do titular, que senão pega a versão em até uma hora. O título e o texto são os gerados pelo comando (útil para conferir antes):
    ```bash
-   docker compose exec app python manage.py notas_release X.Y.Z --titulo   # título
-   docker compose exec app python manage.py notas_release X.Y.Z            # texto
+   docker compose exec app python manage.py release_notes X.Y.Z --title   # título
+   docker compose exec app python manage.py release_notes X.Y.Z            # texto
    ```
 4. O CI valida o `releases.yaml` (formato, versão maior que a anterior, data, os três idiomas) antes do deploy.
 

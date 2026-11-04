@@ -18,26 +18,36 @@ class Command(BaseCommand):
     help = (
         "Creates (or resets) the public demo logins: demo.recepcao (front desk) and "
         "demo.profissional (practitioner, linked to a practitioner without a login; "
-        "--criar-profissional creates it when missing). Their passwords are meant to be "
+        "--create-practitioner creates it when missing). Their passwords are meant to be "
         "published, so they cannot change them nor upload attachments (decision 085). "
         "Never reuse DJANGO_SEED_PASSWORD."
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinica", required=True, help="Clinic name.")
+        parser.add_argument("--clinic", dest="clinica", required=True, help="Clinic name.")
         parser.add_argument(
-            "--profissional", required=True, help="Practitioner the demo practitioner login uses."
+            "--practitioner",
+            dest="profissional",
+            required=True,
+            help="Practitioner the demo practitioner login uses.",
         )
         parser.add_argument(
-            "--criar-profissional",
+            "--create-practitioner",
+            dest="criar_profissional",
             action="store_true",
             help="Create the practitioner when no one has that name (an empty schedule).",
         )
-        parser.add_argument("--senha-recepcao", required=True)
-        parser.add_argument("--senha-profissional", required=True)
+        parser.add_argument("--front-desk-password", dest="senha_recepcao", required=True)
+        parser.add_argument("--practitioner-password", dest="senha_profissional", required=True)
         # Optional (decision 089); as demo logins, they only look at the team and settings.
-        parser.add_argument("--senha-financeiro", help="Also create demo.financeiro.")
-        parser.add_argument("--senha-admin", help="Also create demo.admin (clinic administrator).")
+        parser.add_argument(
+            "--finance-password", dest="senha_financeiro", help="Also create demo.financeiro."
+        )
+        parser.add_argument(
+            "--admin-password",
+            dest="senha_admin",
+            help="Also create demo.admin (clinic administrator).",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -67,7 +77,7 @@ class Command(BaseCommand):
                 if not options["criar_profissional"]:
                     raise CommandError(
                         f"Profissional não encontrado: {options['profissional']} "
-                        "(use --criar-profissional para criar)"
+                        "(use --create-practitioner para criar)"
                     )
                 cadastro = Profissional.objects.create(nome=options["profissional"])
             if cadastro.usuario_id not in (None, profissional.pk):

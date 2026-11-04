@@ -50,13 +50,13 @@ def test_senha_usa_argon2(django_user_model):
 def test_criar_admin(monkeypatch):
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
-    call_command("criar_admin")
+    call_command("create_admin")
     admin = get_user_model().objects.get(username="admin")
     assert admin.is_superuser and admin.is_staff
     assert admin.check_password("senha-forte-de-teste-123")
 
     # Running it again changes nothing
-    call_command("criar_admin")
+    call_command("create_admin")
     assert get_user_model().objects.filter(username="admin").count() == 1
 
 
@@ -64,10 +64,10 @@ def test_criar_admin_falha_se_existir(monkeypatch):
     # The Linux package's installer tells the user that the password typed was not used.
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
-    call_command("criar_admin", "--falhar-se-existir")
+    call_command("create_admin", "--fail-if-exists")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "outra-senha-forte-456")
     with pytest.raises(CommandError) as erro:
-        call_command("criar_admin", "--falhar-se-existir")
+        call_command("create_admin", "--fail-if-exists")
     assert erro.value.returncode == 3
     assert get_user_model().objects.get(username="admin").check_password("senha-forte-de-teste-123")
 
@@ -78,14 +78,14 @@ def test_criar_admin_recusa_senha_fraca(monkeypatch, senha):
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", senha)
     with pytest.raises(CommandError):
-        call_command("criar_admin")
+        call_command("create_admin")
     assert not get_user_model().objects.filter(username="admin").exists()
 
 
 def test_criar_admin_sem_senha(monkeypatch):
     monkeypatch.delenv("DJANGO_ADMIN_PASSWORD", raising=False)
     with pytest.raises(CommandError):
-        call_command("criar_admin")
+        call_command("create_admin")
 
 
 def test_logout_exige_post(client, django_user_model):
@@ -154,7 +154,7 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     settings.BACKUP_MONITORADO = True
     assert "Nenhum backup do banco foi registrado" in client.get(reverse("inicio")).content.decode()
 
-    call_command("registrar_backup", "kaladrius-x.dump", "1024")
+    call_command("record_backup", "kaladrius-x.dump", "1024")
     assert Backup.objects.get().tamanho == 1024
     assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
 

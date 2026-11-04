@@ -142,7 +142,7 @@ def test_aviso_no_topo(pasta, superusuario, linhas, esperado):
 def test_comando_resume_as_24_horas(pasta):
     pasta(amostra(10, cpu=4), amostra(5, cpu=8, disco=29))
     saida = StringIO()
-    call_command("saude", stdout=saida)
+    call_command("health", stdout=saida)
     texto = saida.getvalue()
     assert "Amostras: 2" in texto and "pico 8.0%" in texto
     assert "disco: critico" in texto and "Último backup: nenhum registrado" in texto
