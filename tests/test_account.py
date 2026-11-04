@@ -390,3 +390,45 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
     assert list(RecoveryCode.objects.filter(usuario=nas_duas).values_list("resumo", flat=True)) == [
         "original"
     ]
+
+
+def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
+    """Decision 158: the account_* tables, their migration row and content types go; conta_*
+    stays as it is."""
+    import importlib
+
+    from django.apps import apps
+    from django.contrib.auth.models import Permission
+    from django.contrib.contenttypes.models import ContentType
+    from django.db import connection
+
+    migracao = importlib.import_module("apps.account.migrations.0004_remove_account_leftovers")
+    # An installation that never ran as "account": nothing there, nothing fails.
+    with connection.schema_editor() as editor:
+        migracao.remover(apps, editor)
+
+    usuario = django_user_model.objects.create_user("com_duas_etapas", password="x")
+    TwoFactor.objects.create(usuario=usuario, segredo="FICA", ativa=True)
+    with connection.cursor() as cursor:
+        for tabela in ("duasetapas", "codigorecuperacao"):
+            cursor.execute(f"CREATE TABLE account_{tabela} (LIKE conta_{tabela})")
+        cursor.execute(
+            "INSERT INTO django_migrations (app, name, applied) "
+            "VALUES ('account', '0001_initial', now())"
+        )
+    tipo = ContentType.objects.create(app_label="account", model="duasetapas")
+    Permission.objects.create(content_type=tipo, codename="view_duasetapas", name="x")
+
+    with connection.schema_editor() as editor:
+        migracao.remover(apps, editor)
+
+    with connection.cursor() as cursor:
+        tabelas = set(connection.introspection.table_names(cursor))
+        cursor.execute("SELECT count(*) FROM django_migrations WHERE app = 'account'")
+        [(linhas,)] = cursor.fetchall()
+    assert not {"account_duasetapas", "account_codigorecuperacao"} & tabelas
+    assert linhas == 0
+    assert not ContentType.objects.filter(app_label="account").exists()
+    assert not Permission.objects.filter(codename="view_duasetapas").exists()
+    assert TwoFactor.objects.get(usuario=usuario).segredo == "FICA"
+    assert ContentType.objects.filter(app_label="conta", model="twofactor").exists()
