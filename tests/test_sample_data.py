@@ -18,8 +18,8 @@ pytestmark = pytest.mark.django_db
 def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
-    call_command("popular_dados_teste", pacientes=30)
-    call_command("popular_dados_teste", pacientes=30)
+    call_command("seed_sample_data", pacientes=30)
+    call_command("seed_sample_data", pacientes=30)
 
     # One installation, one clinic (decision 069).
     assert Clinica.objects.count() == 1
@@ -47,13 +47,13 @@ def test_popular_dados_teste_exige_debug(settings, monkeypatch):
     settings.DEBUG = False
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     with pytest.raises(CommandError):
-        call_command("popular_dados_teste")
+        call_command("seed_sample_data")
 
 
 def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, criar_usuario):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
-    call_command("popular_dados_teste", pacientes=5)
+    call_command("seed_sample_data", pacientes=5)
     real = Clinica.objects.create(nome="Clínica Real")
     criar_usuario("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
@@ -62,8 +62,8 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
         Paciente.objects.create(clinica=real, nome="Paciente Real")
 
     with pytest.raises(CommandError):
-        call_command("remover_dados_teste")
-    call_command("remover_dados_teste", confirmar=True)
+        call_command("remove_sample_data")
+    call_command("remove_sample_data", confirmar=True)
 
     assert list(Clinica.objects.values_list("nome", flat=True)) == ["Clínica Real"]
     restantes = set(get_user_model().objects.values_list("username", flat=True))

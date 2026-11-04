@@ -1,4 +1,4 @@
-"""Helpers for made-up data: the test and demo data (popular_dados_teste) and the
+"""Helpers for made-up data: the test and demo data (seed_sample_data) and the
 anonymization of imported data (apps/legacy/anonymization.py). Decision 131."""
 
 from apps.core.validators import cnpj_valido, cpf_valido, somente_digitos

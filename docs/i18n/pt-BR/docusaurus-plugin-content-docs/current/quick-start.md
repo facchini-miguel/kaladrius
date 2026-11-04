@@ -43,12 +43,12 @@ Da primeira vez leva alguns minutos (baixa o PostgreSQL e monta a imagem). Quand
 Em outro terminal, na mesma pasta:
 
 ```bash
-docker compose exec app python manage.py criar_admin
-docker compose exec app python manage.py popular_dados_teste
+docker compose exec app python manage.py create_admin
+docker compose exec app python manage.py seed_sample_data
 ```
 
-- `criar_admin` cria o **superusuário** com `DJANGO_ADMIN_USERNAME` e `DJANGO_ADMIN_PASSWORD`.
-- `popular_dados_teste` cria uma clínica fictícia (marcada "(teste)") com pacientes, agenda, orçamentos e financeiro, e usuários de teste para cada perfil, todos com a senha `DJANGO_SEED_PASSWORD`.
+- `create_admin` cria o **superusuário** com `DJANGO_ADMIN_USERNAME` e `DJANGO_ADMIN_PASSWORD`.
+- `seed_sample_data` cria uma clínica fictícia (marcada "(teste)") com pacientes, agenda, orçamentos e financeiro, e usuários de teste para cada perfil, todos com a senha `DJANGO_SEED_PASSWORD`.
 
 ## 5. Abra
 
@@ -61,4 +61,4 @@ docker compose down          # para; os dados ficam para a próxima vez
 docker compose down -v       # para e apaga o banco de dados
 ```
 
-Para apagar só os dados fictícios e manter o resto: `docker compose exec app python manage.py remover_dados_teste --confirmar`.
+Para apagar só os dados fictícios e manter o resto: `docker compose exec app python manage.py remove_sample_data --confirm`.

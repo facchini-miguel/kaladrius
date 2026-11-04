@@ -5,7 +5,7 @@ title: Primeros pasos
 
 # Primeros pasos
 
-Después de instalar, el sistema tiene solo el **superusuario** creado por `criar_admin`. El superusuario es la cuenta de soporte de la instalación: ve todo de la clínica y las páginas técnicas. La clínica la administra su propio **administrador**.
+Después de instalar, el sistema tiene solo el **superusuario** creado por `create_admin`. El superusuario es la cuenta de soporte de la instalación: ve todo de la clínica y las páginas técnicas. La clínica la administra su propio **administrador**.
 
 Una instalación atiende a **una clínica**. Para atender a otra clínica, instale el sistema de nuevo (otro servidor, u otro proyecto de Compose en el mismo servidor).
 
@@ -43,4 +43,4 @@ Los botones que la persona no puede usar no aparecen. Vea [Primeros pasos del ma
 
 ## Importar desde otro sistema
 
-Kaladrius importa la base del sistema PHP al que reemplaza (`python manage.py importar_legado`). Para otros sistemas, hay que escribir la importación; vea [Cómo contribuir](contributing.md).
+Kaladrius importa la base del sistema PHP al que reemplaza (`python manage.py import_legacy`). Para otros sistemas, hay que escribir la importación; vea [Cómo contribuir](contributing.md).

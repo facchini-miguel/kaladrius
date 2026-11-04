@@ -46,7 +46,7 @@ Google cobra el IPv4 público de las VM (US$ 0,005/hora, cerca de US$ 3,65/mes; 
 ## Cómo funciona el servidor
 - `deploy/server/install.sh` es el *startup script* de la VM: instala Docker, crea 1 GB de swap, instala las tareas programadas de systemd y levanta el sistema. Puede volver a ejecutarse sin problema.
 - `deploy/server/update.sh` (cada 5 min): descarga la imagen `latest`; si es distinta de la última instalada con éxito (`/opt/kaladrius/installed-image`), extrae los archivos de `deploy/` de la imagen, actualiza las tareas de systemd y reinicia los contenedores. Si algo falla, lo intenta de nuevo en la siguiente vuelta. Las migraciones se ejecutan al iniciar la app.
-- `deploy/server/backup.sh` (diario): `pg_dump` enviado a Cloud Storage y registrado en el sistema; después, elimina los intentos de acceso rechazados con más de 30 días (`aplicar_retencao`). Si falla, systemd lo intenta de nuevo cada 20 minutos (hasta 4 intentos en 3 horas). Si la última copia registrada tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas.
+- `deploy/server/backup.sh` (diario): `pg_dump` enviado a Cloud Storage y registrado en el sistema; después, elimina los intentos de acceso rechazados con más de 30 días (`apply_retention`). Si falla, systemd lo intenta de nuevo cada 20 minutos (hasta 4 intentos en 3 horas). Si la última copia registrada tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas.
 - `deploy/server/health.sh --collect` (cada 5 min, desde la 0.22.0): lee procesador, memoria, swap, disco, red y carga con comandos de Linux (`/proc`, `df`) y la memoria y el procesador de cada contenedor (`docker stats`), y agrega una línea en `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, cerca de 1,5 MB). La app lee ese archivo solo en modo lectura y muestra **Administración > Salud del sistema** a los superusuarios, con un aviso arriba de las pantallas si la recolección se detiene o si la memoria, el swap o el disco llegan al nivel crítico. La app no tiene acceso a Docker. Sin argumentos, `health.sh` muestra un informe en la terminal.
 - El compose de producción lee las variables `${...}` del `.env`, enlazado a su lado (`/opt/kaladrius/release/.env` → `../.env`). Solo la app recibe el archivo completo.
 - Configuración y contraseñas: `/opt/kaladrius/.env` (solo root). Copia local en `.env.producao`, ignorada por Git.
@@ -113,10 +113,10 @@ Hecho el 27/10/2026 con la copia del 26/10 (datos ficticios de esa época): rest
 La demostración publica una cuenta de cada perfil en el sitio del titular: `demo.recepcao`, `demo.profissional`, `demo.financeiro` y `demo.admin` (decisiones 085 y 089). Por ser de demostración, nunca cambian la contraseña, envían adjuntos, cambian el equipo o la configuración de la clínica, ni ven las IP en la auditoría. Para crearlas, o para reiniciar las contraseñas:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
-  --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
-  --senha-recepcao <contraseña publicada> --senha-profissional <contraseña publicada> \
-  --senha-financeiro <contraseña publicada> --senha-admin <contraseña publicada>
+docker compose -f docker-compose.prod.yml exec app python manage.py demo_accounts \
+  --clinic "Clínica Sorriso" --practitioner "Dra. Demonstração" --create-practitioner \
+  --front-desk-password <contraseña publicada> --practitioner-password <contraseña publicada> \
+  --finance-password <contraseña publicada> --admin-password <contraseña publicada>
 ```
 
 Nunca use allí la contraseña de `DJANGO_SEED_PASSWORD`: los usuarios de prueba, incluido el administrador de prueba, la usan.
@@ -134,4 +134,4 @@ Las cuentas de los **administradores del sistema** (superusuarios) se mantienen 
 ## Cuidados
 - **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).
 - El disco **estándar** es el gratuito; la consola sugiere "balanced", que se cobra.
-- Con datos reales en el servidor, **no ejecute** `popular_dados_teste` en producción: crea usuarios que comparten la misma contraseña (`DJANGO_SEED_PASSWORD`). Para eliminarlos, `remover_dados_teste --confirmar`, que nunca toca clínicas ni usuarios reales.
+- Con datos reales en el servidor, **no ejecute** `seed_sample_data` en producción: crea usuarios que comparten la misma contraseña (`DJANGO_SEED_PASSWORD`). Para eliminarlos, `remove_sample_data --confirm`, que nunca toca clínicas ni usuarios reales.

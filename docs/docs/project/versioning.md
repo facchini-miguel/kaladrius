@@ -24,7 +24,7 @@ We follow [Semantic Versioning](https://semver.org/):
 - the **What's new** page in the web app;
 - the API endpoint the app uses to show "What's new";
 - the version number shown in the footer;
-- the GitHub *Releases*, in English (`notas_release` command).
+- the GitHub *Releases*, in English (`release_notes` command).
 
 Release note texts are written in the **three interface languages** (`pt-br`, `en`, `es`; decision 049). Field names stay in Portuguese, as in the file.
 
@@ -85,8 +85,8 @@ GET /api/v1/releases?desde=1.4.0&publico=paciente
 2. Update the project version (`pyproject.toml`) and the "Current version" line in the three READMEs. Tests fail if any of them differs from `releases.yaml`.
 3. **CI creates the Git tag `vX.Y.Z` and the GitHub *Release*** **in English** by itself, after publishing the image, when the version is new (decision 119); with a `SITE_TOKEN` secret it also rebuilds the owner's site, which otherwise picks the version up within the hour. The title and text are the ones produced by the command (useful to preview them):
    ```bash
-   docker compose exec app python manage.py notas_release X.Y.Z --titulo   # title
-   docker compose exec app python manage.py notas_release X.Y.Z            # text
+   docker compose exec app python manage.py release_notes X.Y.Z --title   # title
+   docker compose exec app python manage.py release_notes X.Y.Z            # text
    ```
 4. CI validates `releases.yaml` (format, version greater than the previous one, date, the three languages) before deploying.
 

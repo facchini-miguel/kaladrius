@@ -12,9 +12,16 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("versao", help="Version, e.g. 0.14.0.")
-        parser.add_argument("--idioma", default="en", choices=[c for c, _n in settings.LANGUAGES])
-        parser.add_argument("--titulo", action="store_true", help="Print only the title.")
+        parser.add_argument("versao", metavar="version", help="Version, e.g. 0.14.0.")
+        parser.add_argument(
+            "--language",
+            dest="idioma",
+            default="en",
+            choices=[c for c, _n in settings.LANGUAGES],
+        )
+        parser.add_argument(
+            "--title", dest="titulo", action="store_true", help="Print only the title."
+        )
 
     def handle(self, *args, versao, idioma, titulo, **options):
         release = next((r for r in releases.todas() if r.versao == versao), None)

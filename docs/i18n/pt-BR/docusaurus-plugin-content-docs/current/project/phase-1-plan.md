@@ -44,13 +44,13 @@ medical-system/
 | # | Etapa | Entrega | Versão |
 |---|---|---|---|
 | 1 ✅ | **Esqueleto** | Projeto Django, Docker Compose (Postgres + app), settings via `.env`, Ruff, pytest, CI no GitHub, login, página inicial, usuário `admin`. Adiantado da etapa 7: página Novidades, versão no rodapé e API `/api/v1/releases` | 0.1.0 |
-| 2 ✅ | **Multi-clínica e permissões** | Clinica, Vinculo, papéis (admin da clínica, recepção, profissional), isolamento por clínica que falha fechado, matriz de permissões, seletor de clínica, admin restrito ao superusuário, testes de isolamento. Adiantado da etapa 3: cadastro de **Profissionais** (primeiro dado da clínica, usado para testar o isolamento de ponta a ponta) e a primeira parte do comando `popular_dados_teste` | 0.2.0 |
+| 2 ✅ | **Multi-clínica e permissões** | Clinica, Vinculo, papéis (admin da clínica, recepção, profissional), isolamento por clínica que falha fechado, matriz de permissões, seletor de clínica, admin restrito ao superusuário, testes de isolamento. Adiantado da etapa 3: cadastro de **Profissionais** (primeiro dado da clínica, usado para testar o isolamento de ponta a ponta) e a primeira parte do comando `seed_sample_data` | 0.2.0 |
 | 3 ✅ | **Referências e cadastros simples** | UF e cidades (lista oficial do IBGE), bancos (Banco Central), estado civil, carregados por migração e com busca sem acentos. Tipos de atendimento por clínica, com os 10 tipos e cores originais criados automaticamente em toda clínica nova. Menu Cadastros. Endpoint UF → cidades para o formulário de pacientes | 0.3.0 |
-| 4 ✅ | **Pacientes** | Lista paginada, busca (nome, código, CPF/CNPJ), formulário único PF/PJ com validação de CPF/CNPJ, UF → cidade encadeado (HTMX), ficha com idade, exclusão com confirmação. CNPJ alfanumérico (julho/2026) aceito. Pacientes fictícios no `popular_dados_teste` (Faker) | 0.4.0 |
+| 4 ✅ | **Pacientes** | Lista paginada, busca (nome, código, CPF/CNPJ), formulário único PF/PJ com validação de CPF/CNPJ, UF → cidade encadeado (HTMX), ficha com idade, exclusão com confirmação. CNPJ alfanumérico (julho/2026) aceito. Pacientes fictícios no `seed_sample_data` (Faker) | 0.4.0 |
 | 5 ✅ | **Agenda** | Grade semanal por profissional (FullCalendar), horário e slot configuráveis por clínica, cores e legenda, criar/editar/excluir em modal, repetição semanal N vezes, bloqueio de conflito (validação no servidor + constraint no banco), paciente opcional (busca enquanto digita), aniversariantes do dia, exclusão de um ou da série. Restrição no banco (PostgreSQL) contra sobreposição. As **rechamadas do dia** entram com o módulo de rechamadas (etapa 6) | 0.5.0 |
 | 6 ✅ | **Rechamadas e aniversariantes** | Rechamadas (cadastro, filtros, concluir, na ficha do paciente e no cabeçalho dos dias da agenda). Aniversariantes por mês com idade a completar e link para a ficha | 0.6.0 |
 | 7 ✅ | **Novidades** (restante) | Aviso "versão nova: veja o que mudou" até o usuário abrir, filtro por módulo | 0.7.0 |
-| 8 ✅ | **Dados de teste** | Comando `manage.py popular_dados_teste`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~1.500 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
+| 8 ✅ | **Dados de teste** | Comando `manage.py seed_sample_data`: 2 clínicas, ~1.200 pacientes fictícios (CPF/CNPJ válidos e falsos), profissionais, ~1.500 agendamentos em torno da data atual, rechamadas, um usuário por papel | 0.7.0 |
 | 9 ✅ | **Qualidade** | Cobertura dos testes nas regras críticas (isolamento, conflito, permissões), `check --deploy` sem alertas, auditoria de alterações (LGPD), limite de tentativas de login (django-axes), cobertura medida no CI (mínimo 90%; atual 96%) | 0.7.0 |
 
 ## Regras de negócio (testadas automaticamente)
@@ -65,7 +65,7 @@ Django, Django Ninja (instalado já na fase 1 para o endpoint de releases), psyc
 
 ## Verificação
 1. `docker compose up` → sistema em `http://localhost:8000`.
-2. `docker compose exec app python manage.py popular_dados_teste` → dados fictícios carregados.
+2. `docker compose exec app python manage.py seed_sample_data` → dados fictícios carregados.
 3. Login com `admin` e com um usuário de cada papel, conferindo que o menu e os botões mudam conforme a permissão.
 4. Agenda: criar com repetição, provocar um conflito, editar, excluir, trocar de profissional e de semana.
 5. Um usuário da clínica A não acessa um paciente da clínica B, nem digitando a URL.
@@ -86,7 +86,7 @@ A revisão de paridade com o sistema antigo (ver sistema-legado.md) mostrou que 
 | Pendência | Situação |
 |---|---|
 | Tela de gestão da equipe pelo administrador da clínica | ✅ 0.8.0: **Cadastros > Equipe**, com papéis fixos (decisão 040) |
-| Importar dados reais do sistema antigo | ✅ 0.8.0: comando `importar_legado` (decisão 039), já testado no ambiente local. Importado em produção em 27/10/2026 (Clínica Sorriso) e anonimizado no mesmo dia, para uso como dados de teste (decisão 047) |
+| Importar dados reais do sistema antigo | ✅ 0.8.0: comando `import_legacy` (decisão 039), já testado no ambiente local. Importado em produção em 27/10/2026 (Clínica Sorriso) e anonimizado no mesmo dia, para uso como dados de teste (decisão 047) |
 | Tela de configurações da clínica (horário e slot da agenda) | ✅ 0.10.0: **Cadastros > Configurações da clínica** |
 | Revisão da matriz de permissões (`apps/core/permissions.py`) | Profissional limitado à própria agenda (decisão 044). O resto da matriz segue como está |
 | Teste da agenda e das rechamadas no navegador | Com o titular |

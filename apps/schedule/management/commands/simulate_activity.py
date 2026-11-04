@@ -22,25 +22,35 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinica", required=True, help="Name of the test clinic.")
-        parser.add_argument("--rechamadas", type=int, default=80, help="How many recalls.")
         parser.add_argument(
-            "--sem-agenda", action="store_true", help="Only recalls, no appointments."
+            "--clinic", dest="clinica", required=True, help="Name of the test clinic."
         )
         parser.add_argument(
-            "--lancamentos",
+            "--recalls", dest="rechamadas", type=int, default=80, help="How many recalls."
+        )
+        parser.add_argument(
+            "--no-schedule",
+            dest="sem_agenda",
+            action="store_true",
+            help="Only recalls, no appointments.",
+        )
+        parser.add_argument(
+            "--entries",
+            dest="lancamentos",
             type=int,
             default=60,
             help="Fake receivables of the last 90 days, plus fake bills (0 for none).",
         )
         parser.add_argument(
-            "--orcamentos",
+            "--estimates",
+            dest="orcamentos",
             type=int,
             default=20,
             help="Fake estimates of the last 60 days (0 for none).",
         )
         parser.add_argument(
-            "--confirmar",
+            "--confirm",
+            dest="confirmar",
             action="store_true",
             help="Required: fake data is mixed with the clinic's data.",
         )
@@ -50,7 +60,7 @@ class Command(BaseCommand):
     ):
         if not confirmar:
             raise CommandError(
-                "Nada foi criado: rode de novo com --confirmar (só em clínicas de teste)."
+                "Nada foi criado: rode de novo com --confirm (só em clínicas de teste)."
             )
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), sem_isolamento():

@@ -46,7 +46,7 @@ O Google cobra o IPv4 público de VMs (US$ 0,005/hora, cerca de US$ 3,65/mês; o
 ## Como o servidor funciona
 - `deploy/server/install.sh` é o *startup script* da VM: instala Docker, cria 1 GB de swap, instala os agendamentos do systemd e sobe o sistema. Pode rodar de novo sem problema.
 - `deploy/server/update.sh` (a cada 5 min): baixa a imagem `latest`; se ela for diferente da última instalada com sucesso (`/opt/kaladrius/installed-image`), extrai os arquivos de `deploy/` de dentro da imagem, atualiza os agendamentos do systemd e reinicia os containers. Se algo falhar, tenta de novo na rodada seguinte. As migrações rodam na subida do app.
-- `deploy/server/backup.sh` (diário): `pg_dump` enviado ao Cloud Storage e registrado no sistema; depois, apaga as tentativas de entrada recusadas com mais de 30 dias (`aplicar_retencao`). Se falhar, o systemd tenta de novo a cada 20 minutos (até 4 tentativas em 3 horas). Se o último backup registrado tiver mais de 26 horas, os superusuários veem um aviso no topo das telas.
+- `deploy/server/backup.sh` (diário): `pg_dump` enviado ao Cloud Storage e registrado no sistema; depois, apaga as tentativas de entrada recusadas com mais de 30 dias (`apply_retention`). Se falhar, o systemd tenta de novo a cada 20 minutos (até 4 tentativas em 3 horas). Se o último backup registrado tiver mais de 26 horas, os superusuários veem um aviso no topo das telas.
 - `deploy/server/health.sh --collect` (a cada 5 min, desde a 0.22.0): lê processador, memória, swap, disco, rede e carga com comandos do Linux (`/proc`, `df`) e a memória e o processador de cada container (`docker stats`), e acrescenta uma linha em `/opt/kaladrius/saude/amostras.jsonl` (7 dias guardados, cerca de 1,5 MB). O app lê esse arquivo só para leitura e mostra **Administração > Saúde do sistema** aos superusuários, com um aviso no topo das telas se a coleta parar ou se a memória, o swap ou o disco chegarem ao nível crítico. O app não tem acesso ao Docker. Sem argumentos, `health.sh` mostra um relatório no terminal.
 - O compose de produção lê as variáveis `${...}` do `.env`, ligado ao lado dele (`/opt/kaladrius/release/.env` → `../.env`). Só o app recebe o arquivo inteiro.
 - Configuração e senhas: `/opt/kaladrius/.env` (só root). Cópia local em `.env.producao`, ignorada pelo Git.
@@ -113,10 +113,10 @@ Feito em 27/10/2026 com o backup de 26/10 (dados fictícios da época): restaura
 A demonstração publica uma conta de cada perfil no site do titular: `demo.recepcao`, `demo.profissional`, `demo.financeiro` e `demo.admin` (decisões 085 e 089). Por serem de demonstração, elas nunca trocam a senha, enviam anexos, mudam a equipe ou as configurações da clínica, nem veem os IPs na auditoria. Para criá-las, ou para reiniciar as senhas:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec app python manage.py contas_demonstracao \
-  --clinica "Clínica Sorriso" --profissional "Dra. Demonstração" --criar-profissional \
-  --senha-recepcao <senha publicada> --senha-profissional <senha publicada> \
-  --senha-financeiro <senha publicada> --senha-admin <senha publicada>
+docker compose -f docker-compose.prod.yml exec app python manage.py demo_accounts \
+  --clinic "Clínica Sorriso" --practitioner "Dra. Demonstração" --create-practitioner \
+  --front-desk-password <senha publicada> --practitioner-password <senha publicada> \
+  --finance-password <senha publicada> --admin-password <senha publicada>
 ```
 
 Nunca use ali a senha de `DJANGO_SEED_PASSWORD`: os usuários de teste, inclusive o administrador de teste, usam essa senha.
@@ -134,4 +134,4 @@ As contas dos **administradores do sistema** (superusuários) são mantidas no r
 ## Cuidados
 - **Dados reais de pacientes:** os dados ficam nos EUA (exigência do free tier). Antes de uso real, rever a LGPD (transferência internacional, art. 33) ou migrar para a região de São Paulo (paga).
 - O disco **standard** é o gratuito; o console sugere "balanced", que é cobrado.
-- Com dados reais no servidor, **não rode** `popular_dados_teste` em produção: ele cria usuários que compartilham a mesma senha (`DJANGO_SEED_PASSWORD`). Para apagá-los, `remover_dados_teste --confirmar`, que nunca toca em clínicas e usuários reais.
+- Com dados reais no servidor, **não rode** `seed_sample_data` em produção: ele cria usuários que compartilham a mesma senha (`DJANGO_SEED_PASSWORD`). Para apagá-los, `remove_sample_data --confirm`, que nunca toca em clínicas e usuários reais.

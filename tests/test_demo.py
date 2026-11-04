@@ -19,7 +19,7 @@ SENHAS = {"senha_recepcao": "demo-recepcao-1", "senha_profissional": "demo-profi
 def demonstracao(clinica_a, criar_profissional, monkeypatch):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
     bruno = criar_profissional(clinica_a, "Dr. Bruno")
-    call_command("contas_demonstracao", clinica="Clínica A", profissional="Dr. Bruno", **SENHAS)
+    call_command("demo_accounts", clinica="Clínica A", profissional="Dr. Bruno", **SENHAS)
     return {"clinica": clinica_a, "bruno": bruno}
 
 
@@ -43,7 +43,7 @@ def test_cria_as_duas_contas_com_os_perfis(demonstracao):
         assert Profissional.objects.get(nome="Dr. Bruno").usuario == profissional
     # Running again resets the passwords and keeps one link per clinic.
     call_command(
-        "contas_demonstracao",
+        "demo_accounts",
         clinica="Clínica A",
         profissional="Dr. Bruno",
         senha_recepcao="outra-1",
@@ -58,7 +58,7 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
 ):
     with pytest.raises(CommandError, match="DJANGO_SEED_PASSWORD"):
         call_command(
-            "contas_demonstracao",
+            "demo_accounts",
             clinica="Clínica A",
             profissional="Dr. Bruno",
             senha_recepcao="semente-secreta",
@@ -67,22 +67,22 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
     with usar_clinica(clinica_a):
         Profissional.objects.create(nome="Dra. Ana", usuario=criar_usuario("dra.ana"))
     with pytest.raises(CommandError, match="outro usuário"):
-        call_command("contas_demonstracao", clinica="Clínica A", profissional="Dra. Ana", **SENHAS)
+        call_command("demo_accounts", clinica="Clínica A", profissional="Dra. Ana", **SENHAS)
 
 
 def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
-    with pytest.raises(CommandError, match="--criar-profissional"):
-        call_command("contas_demonstracao", clinica="Clínica A", profissional="Dra. Demo", **SENHAS)
+    with pytest.raises(CommandError, match="--create-practitioner"):
+        call_command("demo_accounts", clinica="Clínica A", profissional="Dra. Demo", **SENHAS)
     call_command(
-        "contas_demonstracao",
+        "demo_accounts",
         clinica="Clínica A",
         profissional="Dra. Demo",
         criar_profissional=True,
         **SENHAS,
     )
     call_command(  # running again reuses it
-        "contas_demonstracao",
+        "demo_accounts",
         clinica="Clínica A",
         profissional="Dra. Demo",
         criar_profissional=True,
@@ -137,7 +137,7 @@ def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
     criar_profissional(clinica_a, "Dr. Bruno")
     call_command(
-        "contas_demonstracao",
+        "demo_accounts",
         clinica="Clínica A",
         profissional="Dr. Bruno",
         senha_financeiro="demo-financeiro-1",

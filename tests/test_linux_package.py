@@ -782,3 +782,41 @@ def test_remover_mantem_o_repositorio_e_purge_apaga(tmp_path, argumento, fica):
     )
     assert resultado.returncode == 0, resultado.stderr
     assert ("sudo rm " + str(fontes / "kaladrius.sources") in resultado.stdout) is fica
+
+
+DOCKER_COMANDOS = """#!/bin/bash
+# docker compose … exec -T app python manage.py ARGS: `help NAME` answers whether the app knows
+# NAME (in $KNOWN); anything else is recorded.
+args=("$@")
+for i in "${!args[@]}"; do [ "${args[$i]}" = manage.py ] && break; done
+rest=("${args[@]:$((i + 1))}")
+if [ "${rest[0]}" = help ]; then
+  case " $KNOWN " in *" ${rest[1]} "*) exit 0 ;; *) exit 1 ;; esac
+fi
+echo "${rest[*]}" >>"$CALLS"
+"""
+
+
+@pytest.mark.parametrize(
+    ("conhecidos", "esperado"),
+    [
+        ("record_backup", "record_backup a.dump 10"),
+        # The previous version, after a rollback: only the name before decision 148.
+        ("registrar_backup", "registrar_backup a.dump 10"),
+    ],
+)
+def test_manage_usa_o_nome_antigo_so_num_app_que_nao_o_conhece(tmp_path, conhecidos, esperado):
+    comum = comum_em(tmp_path)
+    (tmp_path / "path").mkdir()
+    docker = tmp_path / "path" / "docker"
+    docker.write_text(DOCKER_COMANDOS)
+    docker.chmod(0o755)
+    chamadas = tmp_path / "chamadas"
+    ambiente = {
+        "PATH": f"{tmp_path / 'path'}:/usr/bin:/bin",
+        "KNOWN": conhecidos,
+        "CALLS": str(chamadas),
+    }
+    avaliar(comum, "manage record_backup a.dump 10 -- registrar_backup a.dump 10", ambiente)
+    avaliar(comum, "manage health", ambiente)  # no old name given: always the new one
+    assert chamadas.read_text().splitlines() == [esperado, "health"]

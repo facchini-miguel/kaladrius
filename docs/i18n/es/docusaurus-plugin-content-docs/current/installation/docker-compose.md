@@ -103,7 +103,7 @@ La app aplica las migraciones de la base de datos cada vez que inicia. Caddy pid
 ## 6. Cree el administrador
 
 ```bash
-kaladrius exec app python manage.py criar_admin
+kaladrius exec app python manage.py create_admin
 ```
 
 Abra `https://clinica.ejemplo.com`, ingrese y siga los [Primeros pasos](../first-steps.md) para crear la clínica y el equipo.

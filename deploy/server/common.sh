@@ -161,6 +161,26 @@ compose() {
   IMAGEM_APP=$APP_IMAGE IMAGEM_DOCS=$DOCS_IMAGE docker compose -f "$COMPOSE_PATH" "$@"
 }
 
+# A management command of the running app: `manage NEW_ARGS… [-- OLD_ARGS…]`. The names and
+# options are those of decision 148; after a rollback the app may be a version from before it,
+# which only knows the ones given after --.
+manage() {
+  local -a new=() old=()
+  while [ $# -gt 0 ] && [ "$1" != -- ]; do
+    new+=("$1")
+    shift
+  done
+  if [ $# -gt 0 ]; then
+    shift
+    old=("$@")
+  fi
+  if [ "${#old[@]}" -gt 0 ] && ! compose exec -T app python manage.py help "${new[0]}" >/dev/null 2>&1 </dev/null; then
+    compose exec -T app python manage.py "${old[@]}"
+  else
+    compose exec -T app python manage.py "${new[@]}"
+  fi
+}
+
 # The PostgreSQL image of the running Compose file, digest included (decision 138), for the
 # throwaway containers of the restore test: the same database production writes its backups with.
 postgres_image() {

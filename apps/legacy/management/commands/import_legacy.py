@@ -15,10 +15,17 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("arquivo", help="MySQL dump (.sql). Use - to read from stdin.")
-        parser.add_argument("--clinica", required=True, help="Name of the clinic to create.")
         parser.add_argument(
-            "--codificacao", default="utf-8", help="Dump encoding (default: utf-8)."
+            "arquivo", metavar="file", help="MySQL dump (.sql). Use - to read from stdin."
+        )
+        parser.add_argument(
+            "--clinic", dest="clinica", required=True, help="Name of the clinic to create."
+        )
+        parser.add_argument(
+            "--encoding",
+            dest="codificacao",
+            default="utf-8",
+            help="Dump encoding (default: utf-8).",
         )
 
     def handle(self, *args, arquivo, clinica, codificacao, **options):

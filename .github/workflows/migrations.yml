@@ -44,10 +44,10 @@ jobs:
         run: .github/postgres.sh wait
       - name: Report and back-and-forth test
         env:
-          BANCO_DESCARTAVEL: "1"  # this job's database is thrown away: --testar-volta may run
+          DISPOSABLE_DATABASE: "1"  # this job's database is thrown away: --test-rollback may run
         run: |
-          python manage.py relatorio_migracoes --base "origin/$GITHUB_BASE_REF" \
-            --testar-volta --saida report.md --comentario comment.md
+          python manage.py migrations_report --base "origin/$GITHUB_BASE_REF" \
+            --test-rollback --output report.md --comment comment.md
       - name: Summary of the run
         if: always() && hashFiles('report.md') != ''
         run: cat report.md >> "$GITHUB_STEP_SUMMARY"

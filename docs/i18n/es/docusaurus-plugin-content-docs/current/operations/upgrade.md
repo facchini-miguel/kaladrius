@@ -31,7 +31,7 @@ Nada que hacer: la VM instala cada imagen nueva publicada por el CI en hasta 5 m
 sudo /opt/kaladrius/bin/update.sh --force
 ```
 
-**Vuelta automática:** después de levantar una versión nueva, la VM espera hasta 5 minutos que el sistema responda la página de salud (`/api/v1/saude`, con la base). Si no responde, la VM vuelve a poner la versión de la última actualización exitosa (guardada como la imagen `app:previous`) con su Compose y su Caddyfile, así que una imagen nueva de Caddy o de PostgreSQL también se deshace, registra la nueva como rechazada, para no instalarla de nuevo hasta que salga una versión más nueva, y el monitor "actualización automática" avisa de la falla hasta entonces. `--forcar` vuelve a intentar la versión rechazada. Una migración que la versión nueva ya aplicó no se deshace: si la versión anterior no funciona con ella, restaure el backup.
+**Vuelta automática:** después de levantar una versión nueva, la VM espera hasta 5 minutos que el sistema responda la página de salud (`/api/v1/saude`, con la base). Si no responde, la VM vuelve a poner la versión de la última actualización exitosa (guardada como la imagen `app:previous`) con su Compose y su Caddyfile, así que una imagen nueva de Caddy o de PostgreSQL también se deshace, registra la nueva como rechazada, para no instalarla de nuevo hasta que salga una versión más nueva, y el monitor "actualización automática" avisa de la falla hasta entonces. `--force` vuelve a intentar la versión rechazada. Una migración que la versión nueva ya aplicó no se deshace: si la versión anterior no funciona con ella, restaure el backup.
 
 ## Volver a una versión anterior
 

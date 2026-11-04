@@ -52,15 +52,17 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--forcar", action="store_true", help="Run even when DJANGO_DEBUG is off."
+            "--force", dest="forcar", action="store_true", help="Run even when DJANGO_DEBUG is off."
         )
         parser.add_argument(
-            "--sem-agenda",
+            "--no-schedule",
+            dest="sem_agenda",
             action="store_true",
             help="Do not create fake appointments.",
         )
         parser.add_argument(
-            "--pacientes",
+            "--patients",
+            dest="pacientes",
             type=int,
             default=600,
             help="Fake patients per clinic (only for clinics without patients).",
@@ -69,8 +71,7 @@ class Command(BaseCommand):
     def handle(self, *args, forcar=False, pacientes=600, sem_agenda=False, **options):
         if not settings.DEBUG and not forcar:
             raise CommandError(
-                "Dados de teste só podem ser criados com DJANGO_DEBUG=1 "
-                "(use --forcar para ignorar)."
+                "Dados de teste só podem ser criados com DJANGO_DEBUG=1 (use --force para ignorar)."
             )
         senha = os.environ.get("DJANGO_SEED_PASSWORD")
         if not senha:

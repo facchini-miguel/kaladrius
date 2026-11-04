@@ -2,15 +2,15 @@
 production, the operations that lose data or that the previous version of the system cannot
 run with (the automatic rollback, decision 135, puts the previous code back but never undoes a
 migration), the migrations already in the base branch that it edits or deletes (production
-never runs an applied migration again) and, with --testar-volta, a test that each new one can
+never runs an applied migration again) and, with --test-rollback, a test that each new one can
 be applied, undone and applied again. CI posts the report as a comment on the pull request
 (.github/workflows/migrations.yml).
 
-    python manage.py relatorio_migracoes --base origin/main [--testar-volta]
-    python manage.py relatorio_migracoes convenios.0003_seguros_de_cada_pais
+    python manage.py migrations_report --base origin/main [--test-rollback]
+    python manage.py migrations_report convenios.0003_seguros_de_cada_pais
 
---testar-volta undoes migrations on the database it runs on, so it only runs on a throwaway
-one: the test database, or with BANCO_DESCARTAVEL=1, as in CI.
+--test-rollback undoes migrations on the database it runs on, so it only runs on a throwaway
+one: the test database, or with DISPOSABLE_DATABASE=1, as in CI.
 """
 
 import os
@@ -233,14 +233,14 @@ def analisar(chaves, loader=None):
 
 
 def banco_descartavel(conexao=connection):
-    """--testar-volta undoes migrations: an AddField undone loses that column's data. Only on
-    the test database or where BANCO_DESCARTAVEL=1 says the database is throwaway (CI)."""
+    """--test-rollback undoes migrations: an AddField undone loses that column's data. Only on
+    the test database or where DISPOSABLE_DATABASE=1 says the database is throwaway (CI)."""
     nome = str(conexao.settings_dict["NAME"])
-    if os.environ.get("BANCO_DESCARTAVEL") == "1" or nome.startswith("test_"):
+    if os.environ.get("DISPOSABLE_DATABASE") == "1" or nome.startswith("test_"):
         return
     raise CommandError(
-        f"--testar-volta desfaz migrações no banco {nome}, e os dados delas se perdem. Só num "
-        "banco descartável: o de testes, ou com BANCO_DESCARTAVEL=1 (o CI)."
+        f"--test-rollback desfaz migrações no banco {nome}, e os dados delas se perdem. Só num "
+        "banco descartável: o de testes, ou com DISPOSABLE_DATABASE=1 (o CI)."
     )
 
 
@@ -367,16 +367,21 @@ class Command(BaseCommand):
     help = "Report of new migrations: SQL, operations needing attention and back-and-forth test."
 
     def add_arguments(self, parser):
-        parser.add_argument("migracoes", nargs="*", help="app.migration (default: --base)")
+        parser.add_argument(
+            "migracoes", metavar="migrations", nargs="*", help="app.migration (default: --base)"
+        )
         parser.add_argument("--base", help="git ref to compare with, e.g. origin/main")
         parser.add_argument(
-            "--testar-volta",
+            "--test-rollback",
+            dest="testar_volta",
             action="store_true",
-            help="undo and redo them (throwaway database only: tests, or BANCO_DESCARTAVEL=1)",
+            help="undo and redo them (throwaway database only: tests, or DISPOSABLE_DATABASE=1)",
         )
-        parser.add_argument("--saida", help="also write the report to this file")
+        parser.add_argument("--output", dest="saida", help="also write the report to this file")
         parser.add_argument(
-            "--comentario", help="also write it, cut to fit a pull request comment, to this file"
+            "--comment",
+            dest="comentario",
+            help="also write it, cut to fit a pull request comment, to this file",
         )
 
     def handle(self, *args, migracoes, base, testar_volta, saida, comentario, **options):

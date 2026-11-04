@@ -26,6 +26,7 @@ docker compose exec app python manage.py makemigrations --check
 
 - **Nomes do domínio em português** (`Paciente`, `Agendamento`), **comentários em inglês**.
 - **Pastas e módulos dos apps com nome em inglês** (`apps/patients/`, `apps/core/countries.py`). Cada app mantém o seu **label** em português (`label = "pacientes"` no `apps.py`), o nome pelo qual as tabelas do banco, as migrações e as permissões o conhecem, e os arquivos de migração mantêm os seus nomes: a produção os tem registrados (decisão 145).
+- **Comandos de gerenciamento com nome em inglês**, opções incluídas (`python manage.py seed_sample_data --patients 50`) (decisão 148).
 - **Templates com nome em inglês**, numa pasta com o nome do seu app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); os nomes do próprio Django ficam (`base.html`, `403.html`, `registration/login.html`) (decisão 146).
 - **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144).
 - **Todo texto da tela** é escrito em português no código e traduzido em `locale/en` e `locale/es`:
@@ -47,9 +48,9 @@ A `main` só recebe mudanças por pull request, com merge depois que os checks `
 
 ## Migrações do banco
 
-Uma mudança num modelo precisa da migração dela (`python manage.py makemigrations`), no mesmo commit; sem ela, o CI falha. As migrações rodam sozinhas quando a versão nova sobe. Quando um pull request traz uma, o CI comenta nele o SQL que cada migração roda em produção, as operações que pedem atenção, as migrações já aplicadas que ele edita ou apaga, e um teste de que cada uma pode ser desfeita e aplicada de novo (`python manage.py relatorio_migracoes`).
+Uma mudança num modelo precisa da migração dela (`python manage.py makemigrations`), no mesmo commit; sem ela, o CI falha. As migrações rodam sozinhas quando a versão nova sobe. Quando um pull request traz uma, o CI comenta nele o SQL que cada migração roda em produção, as operações que pedem atenção, as migrações já aplicadas que ele edita ou apaga, e um teste de que cada uma pode ser desfeita e aplicada de novo (`python manage.py migrations_report`).
 
-A volta automática do servidor (decisão 135) põe o código anterior de volta, mas nunca desfaz uma migração. Então não apague nem renomeie de uma vez uma coluna que a versão atual usa: primeiro lance uma versão que pare de usá-la, e só depois a migração que a apaga. Uma coluna obrigatória nova tem o mesmo problema: os INSERTs da versão anterior a deixam de fora, então dê a ela `null=True` ou um `db_default` (um `default` do Python só preenche as linhas que já existem). E nunca edite uma migração que já está na `main`: produção não a roda de novo; escreva uma nova. O `--testar-volta` desfaz migrações, então só roda num banco descartável (o de testes, ou com `BANCO_DESCARTAVEL=1`, como no CI).
+A volta automática do servidor (decisão 135) põe o código anterior de volta, mas nunca desfaz uma migração. Então não apague nem renomeie de uma vez uma coluna que a versão atual usa: primeiro lance uma versão que pare de usá-la, e só depois a migração que a apaga. Uma coluna obrigatória nova tem o mesmo problema: os INSERTs da versão anterior a deixam de fora, então dê a ela `null=True` ou um `db_default` (um `default` do Python só preenche as linhas que já existem). E nunca edite uma migração que já está na `main`: produção não a roda de novo; escreva uma nova. O `--test-rollback` desfaz migrações, então só roda num banco descartável (o de testes, ou com `DISPOSABLE_DATABASE=1`, como no CI).
 
 ## Dependências
 

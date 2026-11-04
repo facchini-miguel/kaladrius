@@ -153,7 +153,7 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
         tentativa = AccessAttempt.objects.create(username="quem", failures_since_start=1)
         AccessAttempt.objects.filter(pk=tentativa.pk).update(attempt_time=momento)
 
-    call_command("aplicar_retencao")
+    call_command("apply_retention")
 
     restantes = RegistroAuditoria.objects.values_list("acao", "momento")
     assert sorted(acao for acao, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]

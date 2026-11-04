@@ -264,13 +264,16 @@ EOF
 # goes in the environment only; stdin is not handed to the container (it would read the answers
 # still to come).
 create_admin() {
-  local user=$1 email=$2 password=$3
+  local user=$1 email=$2 password=$3 command=(create_admin --fail-if-exists)
+  # The previous version, after a rollback, may know only the command's name before decision 148.
+  compose exec -T app python manage.py help create_admin >/dev/null 2>&1 </dev/null \
+    || command=(criar_admin --falhar-se-existir)
   DJANGO_ADMIN_USERNAME=$user DJANGO_ADMIN_EMAIL=$email DJANGO_ADMIN_PASSWORD=$password \
     compose exec -T -e DJANGO_ADMIN_USERNAME -e DJANGO_ADMIN_EMAIL -e DJANGO_ADMIN_PASSWORD \
-    app python manage.py criar_admin --falhar-se-existir </dev/null 2>&1
+    app python manage.py "${command[@]}" </dev/null 2>&1
 }
 
-# The password's rules are the system's own (criar_admin), checked once it is running; the
+# The password's rules are the system's own (create_admin), checked once it is running; the
 # question only names the main ones.
 ask_new_password() {
   local password confirmation

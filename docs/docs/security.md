@@ -36,7 +36,7 @@ Kaladrius stores health data, the most sensitive kind of personal data. This pag
 
 - Keep `.env` readable only by root, with a long `DJANGO_SECRET_KEY` and strong passwords. Never commit it.
 - Run with `DJANGO_DEBUG=0`, `DJANGO_SECURE=1` and `DJANGO_PROXY_REVERSO=1` behind Caddy.
-- Never run `popular_dados_teste` on a server with real data (its users share one password).
+- Never run `seed_sample_data` on a server with real data (its users share one password).
 - Expose only ports 80 and 443. The database and the app listen only inside the server.
 - Restrict SSH (keys only; on Google Cloud, only through the IAP tunnel).
 - Back up every day, keep a copy away from the server, encrypt it and [test restoring it](operations/backup-restore.md).

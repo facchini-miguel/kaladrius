@@ -47,8 +47,8 @@ PASTA=/var/backups/kaladrius
 mkdir -p "$PASTA" && chmod 700 "$PASTA"
 nome="kaladrius-$(date -u +%Y%m%d-%H%M%S).dump"
 $K exec -T db sh -c 'pg_dump -Fc -U "$POSTGRES_USER" "$POSTGRES_DB"' > "$PASTA/$nome"
-$K exec -T app python manage.py registrar_backup "$nome" "$(stat -c %s "$PASTA/$nome")"
-$K exec -T app python manage.py aplicar_retencao
+$K exec -T app python manage.py record_backup "$nome" "$(stat -c %s "$PASTA/$nome")"
+$K exec -T app python manage.py apply_retention
 find "$PASTA" -name 'kaladrius-*.dump' -mtime +30 -delete
 ```
 
@@ -59,8 +59,8 @@ sudo chmod 700 /opt/kaladrius/backup.sh
 echo '0 3 * * * root /opt/kaladrius/backup.sh >> /var/log/kaladrius-backup.log 2>&1' | sudo tee /etc/cron.d/kaladrius-backup
 ```
 
-- `registrar_backup` registra o backup, para o aviso aos superusuários funcionar.
-- `aplicar_retencao` apaga as tentativas de entrada recusadas com mais de 30 dias (política de privacidade).
+- `record_backup` registra o backup, para o aviso aos superusuários funcionar.
+- `apply_retention` apaga as tentativas de entrada recusadas com mais de 30 dias (política de privacidade).
 
 :::warning
 Um backup no mesmo disco não sobrevive à perda do servidor. Copie `/var/backups/kaladrius` todo dia para outro lugar: outro servidor, um armazenamento de objetos (S3, Backblaze B2, Google Cloud Storage) com o `rclone`, ou um disco externo criptografado. Os arquivos têm dados de pacientes: mantenha-os privados e criptografados.

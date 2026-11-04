@@ -33,19 +33,21 @@ class Command(BaseCommand):
     help = (
         "Demo server only (DJANGO_DEMONSTRACAO=1, decision 086): moves every date of the "
         "clinic's activity (schedule, recalls, finance, estimates, medical records, audit) "
-        "forward by the whole weeks since --desde, so the restored demo looks current and "
+        "forward by the whole weeks since --since, so the restored demo looks current and "
         "each appointment stays on its weekday. Birth dates do not move."
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--desde", required=True, help="Date the data refers to (YYYY-MM-DD).")
-        parser.add_argument("--confirmar", action="store_true", help="Required.")
+        parser.add_argument(
+            "--since", dest="desde", required=True, help="Date the data refers to (YYYY-MM-DD)."
+        )
+        parser.add_argument("--confirm", dest="confirmar", action="store_true", help="Required.")
 
     def handle(self, *args, desde, confirmar, **options):
         if not settings.DEMONSTRACAO:
             raise CommandError("Só no servidor de demonstração (DJANGO_DEMONSTRACAO=1).")
         if not confirmar:
-            raise CommandError("Nada foi alterado: rode de novo com --confirmar.")
+            raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
             inicio = datetime.date.fromisoformat(desde)
         except ValueError as erro:

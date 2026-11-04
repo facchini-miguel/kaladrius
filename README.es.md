@@ -32,21 +32,21 @@ Requisito: Docker con Docker Compose v2 (el comando `docker compose`).
 ```bash
 cp .env.example .env          # complete las contraseñas y la SECRET_KEY (valores aleatorios)
 docker compose up --build -d  # levanta la base de datos y la aplicación
-docker compose exec app python manage.py criar_admin   # crea el administrador definido en .env
+docker compose exec app python manage.py create_admin   # crea el administrador definido en .env
 ```
 
 Abra http://localhost:8000. La documentación de la API está en http://localhost:8000/api/v1/docs.
 
 | Tarea | Comando |
 |---|---|
-| Datos de prueba (una clínica, usuarios y profesionales ficticios, 600 pacientes, 6 semanas de agenda y recordatorios) | `docker compose exec app python manage.py popular_dados_teste` |
+| Datos de prueba (una clínica, usuarios y profesionales ficticios, 600 pacientes, 6 semanas de agenda y recordatorios) | `docker compose exec app python manage.py seed_sample_data` |
 | Compilar las traducciones (después de `git pull` o de cambiar textos; la imagen lo hace en el build) | `docker compose exec app python manage.py compilemessages` |
 | Extraer textos nuevos para traducir (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
-| Eliminar los datos de prueba (nunca toca clínicas ni usuarios reales) | `docker compose exec app python manage.py remover_dados_teste --confirmar` |
-| Importar los datos del antiguo Odonto System en una clínica nueva | `docker compose exec -T app python manage.py importar_legado - --clinica "Nombre" < dump.sql` |
-| Anonimizar los datos de una clínica para usarlos en pruebas (irreversible) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Nombre" --confirmar` |
-| Simular agenda y recordatorios actuales en una clínica de **prueba** | `docker compose exec app python manage.py simular_movimento --clinica "Nombre" --confirmar` |
-| Título y texto de la *Release* de GitHub (en inglés) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
+| Eliminar los datos de prueba (nunca toca clínicas ni usuarios reales) | `docker compose exec app python manage.py remove_sample_data --confirm` |
+| Importar los datos del antiguo Odonto System en una clínica nueva | `docker compose exec -T app python manage.py import_legacy - --clinic "Nombre" < dump.sql` |
+| Anonimizar los datos de una clínica para usarlos en pruebas (irreversible) | `docker compose exec app python manage.py anonymize_clinic --clinic "Nombre" --confirm` |
+| Simular agenda y recordatorios actuales en una clínica de **prueba** | `docker compose exec app python manage.py simulate_activity --clinic "Nombre" --confirm` |
+| Título y texto de la *Release* de GitHub (en inglés) | `docker compose exec app python manage.py release_notes X.Y.Z [--title]` |
 | Probar la restauración de una copia (la descarga y la restaura en un PostgreSQL temporal) | `deploy/test_backup.sh [archivo.dump]` |
 | Pruebas (con cobertura, mínimo 90 %) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |

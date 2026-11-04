@@ -45,7 +45,7 @@ El contenedor de la base crea la base y el usuario con estos valores la primera 
 
 ## Primer administrador
 
-Usadas solo por `python manage.py criar_admin`, que no hace nada si el usuario ya existe.
+Usadas solo por `python manage.py create_admin`, que no hace nada si el usuario ya existe.
 
 | Variable | Predeterminado | Qué hace |
 |---|---|---|
@@ -66,7 +66,7 @@ Después del primer ingreso, puede quitar `DJANGO_ADMIN_PASSWORD` del archivo.
 
 | Variable | Qué hace |
 |---|---|
-| `DJANGO_SEED_PASSWORD` | Contraseña de los usuarios ficticios creados por `popular_dados_teste`. **Nunca** ejecute ese comando en un servidor con datos reales: todos los usuarios ficticios comparten esta contraseña |
+| `DJANGO_SEED_PASSWORD` | Contraseña de los usuarios ficticios creados por `seed_sample_data`. **Nunca** ejecute ese comando en un servidor con datos reales: todos los usuarios ficticios comparten esta contraseña |
 
 ## Configuración fija
 

@@ -189,7 +189,7 @@ def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django
             (None, None),
         ]
         saida = StringIO()
-        call_command("notas_release", "2.0.0", stdout=saida)
+        call_command("release_notes", "2.0.0", stdout=saida)
         linhas = saida.getvalue().splitlines()
         assert linhas[0].endswith("Biblioteca atualizada. (Dependabot, #42)")
         assert linhas[1].endswith("Feito pelo projeto.")

@@ -1,6 +1,6 @@
 """Fake schedule and recalls around today, for test clinics (fake data, not security).
 
-Used by popular_dados_teste and by simular_movimento (for a clinic whose own data is
+Used by seed_sample_data and by simulate_activity (for a clinic whose own data is
 anonymized test data). Only active, non-archived patients and active practitioners take
 part, and slots already taken are skipped, so the overlap constraint is never hit.
 """

@@ -9,7 +9,7 @@ from django.core.management.base import CommandError
 from django.db import connection, migrations, models
 from django.db.migrations.loader import MigrationLoader
 
-from apps.core.management.commands import relatorio_migracoes as relatorio
+from apps.core.management.commands import migrations_report as relatorio
 
 CONVENIOS = ("convenios", "0003_seguros_de_cada_pais")
 
@@ -196,26 +196,26 @@ def test_migracoes_do_diff_quando_o_git_falha(monkeypatch):
 
 
 def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):
-    """--testar-volta undoes migrations: never on a database with real data."""
-    monkeypatch.delenv("BANCO_DESCARTAVEL", raising=False)
+    """--test-rollback undoes migrations: never on a database with real data."""
+    monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     producao = SimpleNamespace(settings_dict={"NAME": "kaladrius"})
     with pytest.raises(CommandError, match="banco descartável"):
         relatorio.banco_descartavel(producao)
     relatorio.banco_descartavel(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
-    monkeypatch.setenv("BANCO_DESCARTAVEL", "1")
+    monkeypatch.setenv("DISPOSABLE_DATABASE", "1")
     relatorio.banco_descartavel(producao)
 
 
 @pytest.mark.django_db
 def test_comando_recusa_testar_volta_fora_do_banco_descartavel(monkeypatch):
-    monkeypatch.delenv("BANCO_DESCARTAVEL", raising=False)
+    monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     monkeypatch.setitem(connection.settings_dict, "NAME", "kaladrius")
     chamadas = []
     monkeypatch.setattr(relatorio, "analisar", lambda chaves: chamadas.append(chaves) or [])
     from django.core.management import call_command
 
     with pytest.raises(CommandError, match="banco descartável"):
-        call_command("relatorio_migracoes", "convenios.0003_x", testar_volta=True)
+        call_command("migrations_report", "convenios.0003_x", testar_volta=True)
     assert chamadas == []  # refused before anything ran
 
 
@@ -267,7 +267,7 @@ def test_comando_completo_com_ida_e_volta(tmp_path):
     arquivo, comentario = tmp_path / "relatorio.md", tmp_path / "comentario.md"
     saida = StringIO()
     call_command(
-        "relatorio_migracoes",
+        "migrations_report",
         f"{CONVENIOS[0]}.{CONVENIOS[1]}",
         testar_volta=True,
         saida=str(arquivo),

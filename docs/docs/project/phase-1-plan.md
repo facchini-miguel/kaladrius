@@ -44,13 +44,13 @@ medical-system/
 | # | Step | Deliverable | Version |
 |---|---|---|---|
 | 1 ✅ | **Skeleton** | Django project, Docker Compose (Postgres + app), settings via `.env`, Ruff, pytest, GitHub CI, login, home page, `admin` user. Pulled forward from step 7: What's new page, version in the footer and `/api/v1/releases` API | 0.1.0 |
-| 2 ✅ | **Multi-tenancy and permissions** | Clinica, Vinculo, roles (clinic admin, front desk, practitioner), fail-closed per-clinic isolation, permission matrix, clinic switcher, admin restricted to superusers, isolation tests. Pulled forward from step 3: **Practitioners** (the first clinic data, used to test isolation end to end) and the first part of the `popular_dados_teste` command | 0.2.0 |
+| 2 ✅ | **Multi-tenancy and permissions** | Clinica, Vinculo, roles (clinic admin, front desk, practitioner), fail-closed per-clinic isolation, permission matrix, clinic switcher, admin restricted to superusers, isolation tests. Pulled forward from step 3: **Practitioners** (the first clinic data, used to test isolation end to end) and the first part of the `seed_sample_data` command | 0.2.0 |
 | 3 ✅ | **Reference data and simple records** | States and cities (official IBGE list), banks (Banco Central), marital status, loaded by migration with accent-insensitive search. Per-clinic appointment types, with the 10 original types and colors created automatically for every new clinic. Records menu. State → city endpoint for the patient form | 0.3.0 |
-| 4 ✅ | **Patients** | Paginated list, search (name, ID, CPF/CNPJ), single individual/company form with CPF/CNPJ validation, chained state → city (HTMX), record with age, delete with confirmation. Alphanumeric CNPJ (July 2026) supported. Fake patients in `popular_dados_teste` (Faker) | 0.4.0 |
+| 4 ✅ | **Patients** | Paginated list, search (name, ID, CPF/CNPJ), single individual/company form with CPF/CNPJ validation, chained state → city (HTMX), record with age, delete with confirmation. Alphanumeric CNPJ (July 2026) supported. Fake patients in `seed_sample_data` (Faker) | 0.4.0 |
 | 5 ✅ | **Schedule** | Weekly grid per practitioner (FullCalendar), hours and slot length configurable per clinic, colors and legend, create/edit/delete in a modal, weekly recurrence N times, conflict blocking (server validation + database constraint), optional patient (search as you type), the day's birthdays, delete one or the series. Database (PostgreSQL) constraint against overlaps. The **day's recalls** come with the recalls module (step 6) | 0.5.0 |
 | 6 ✅ | **Recalls and birthdays** | Recalls (create, filters, mark as done, on the patient record and in the schedule day headers). Birthdays by month with the age to be reached and a link to the record | 0.6.0 |
 | 7 ✅ | **What's new** (remaining) | "New version: see what changed" notice until the user opens it, filter by module | 0.7.0 |
-| 8 ✅ | **Test data** | `manage.py popular_dados_teste` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~1,500 appointments around the current date, recalls, one user per role | 0.7.0 |
+| 8 ✅ | **Test data** | `manage.py seed_sample_data` command: 2 clinics, ~1,200 fake patients (valid but fake CPF/CNPJ), practitioners, ~1,500 appointments around the current date, recalls, one user per role | 0.7.0 |
 | 9 ✅ | **Quality** | Test coverage of critical rules (isolation, conflicts, permissions), `check --deploy` with no warnings, change auditing (LGPD), login attempt limiting (django-axes), coverage measured in CI (minimum 90%; currently 96%) | 0.7.0 |
 
 ## Business rules (automatically tested)
@@ -65,7 +65,7 @@ Django, Django Ninja (installed in phase 1 for the releases endpoint), psycopg, 
 
 ## Verification
 1. `docker compose up` → system at `http://localhost:8000`.
-2. `docker compose exec app python manage.py popular_dados_teste` → fake data loaded.
+2. `docker compose exec app python manage.py seed_sample_data` → fake data loaded.
 3. Log in as `admin` and as one user per role, checking that the menu and buttons follow the permissions.
 4. Schedule: create with recurrence, trigger a conflict, edit, delete, switch practitioner and week.
 5. A user from clinic A cannot access a patient from clinic B, not even by typing the URL.
@@ -86,7 +86,7 @@ The parity review against the legacy system (see legacy-system.md) found everyth
 | Item | Status |
 |---|---|
 | Team management screen for the clinic administrator | ✅ 0.8.0: **Records > Team**, with fixed roles (decision 040) |
-| Import real data from the legacy system | ✅ 0.8.0: `importar_legado` command (decision 039), already tested locally. Imported in production on 2026-10-27 (Clínica Sorriso) and anonymized the same day, for use as test data (decision 047) |
+| Import real data from the legacy system | ✅ 0.8.0: `import_legacy` command (decision 039), already tested locally. Imported in production on 2026-10-27 (Clínica Sorriso) and anonymized the same day, for use as test data (decision 047) |
 | Clinic settings screen (schedule hours and slot length) | ✅ 0.10.0: **Records > Clinic settings** |
 | Permission matrix review (`apps/core/permissions.py`) | Practitioners limited to their own schedule (decision 044). The rest of the matrix stays as is |
 | Browser test of the schedule and recalls | With the owner |
