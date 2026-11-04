@@ -14,14 +14,19 @@ class Practitioner(ModeloDaClinica):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
     name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
-    registro = models.CharField(
+    registration = models.CharField(
         _("registro profissional"),
         max_length=30,
         blank=True,
         help_text=_("CRO, CRM, CREFITO, CRP…"),
+        db_column="registro",
     )
-    cor = models.CharField(
-        _("cor na agenda"), max_length=7, default="#0d6efd", validators=[validar_cor]
+    color = models.CharField(
+        _("cor na agenda"),
+        max_length=7,
+        default="#0d6efd",
+        validators=[validar_cor],
+        db_column="cor",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

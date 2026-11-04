@@ -57,7 +57,7 @@
       {% for movimento in resumo.movimentos %}
       <tr>
         <td class="text-nowrap">{{ movimento.created_at|date:"TIME_FORMAT" }}</td>
-        <td>{{ movimento.get_kind_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.name }}){% endif %}</td>
+        <td>{{ movimento.get_kind_display }}: {{ movimento.reason }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.name }}){% endif %}</td>
         <td>—</td>
         <td class="text-end text-nowrap {% if movimento.kind == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.amount|moeda }}</td>
       </tr>

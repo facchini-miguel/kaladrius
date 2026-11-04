@@ -72,10 +72,10 @@ def anonimizar(modelo, ids):
     """
     name = nome_do_modelo(modelo)
     registros = AuditEntry.objects.filter(modelo=name, objeto_id__in=[str(i) for i in ids])
-    for registro in registros:
-        registro.objeto_descricao = f"{name} {registro.objeto_id} (dados removidos)"
-        registro.alteracoes = {campo: [REMOVIDO, REMOVIDO] for campo in registro.alteracoes}
-        registro.save(update_fields=["objeto_descricao", "alteracoes"])
+    for record in registros:
+        record.objeto_descricao = f"{name} {record.objeto_id} (dados removidos)"
+        record.alteracoes = {campo: [REMOVIDO, REMOVIDO] for campo in record.alteracoes}
+        record.save(update_fields=["objeto_descricao", "alteracoes"])
 
 
 def _clinica_de(objeto):

@@ -53,7 +53,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
 def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
     admin_a.post(
         reverse("patients:new"),
-        {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "cpf_cnpj": "52998224725"},
+        {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "tax_id": "52998224725"},
     )
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Maria Sigilosa")
@@ -146,16 +146,16 @@ def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
 def test_retencao_apaga_so_tentativas_recusadas_antigas():
     antigo = timezone.now() - datetime.timedelta(days=31)
     recente = timezone.now() - datetime.timedelta(days=29)
-    for momento in (antigo, recente):
+    for timestamp in (antigo, recente):
         for acao in (Acao.LOGIN_FALHOU, Acao.LOGIN):
-            registro = AuditEntry.objects.create(acao=acao)
-            AuditEntry.objects.filter(pk=registro.pk).update(momento=momento)
+            record = AuditEntry.objects.create(acao=acao)
+            AuditEntry.objects.filter(pk=record.pk).update(timestamp=timestamp)
         tentativa = AccessAttempt.objects.create(username="quem", failures_since_start=1)
-        AccessAttempt.objects.filter(pk=tentativa.pk).update(attempt_time=momento)
+        AccessAttempt.objects.filter(pk=tentativa.pk).update(attempt_time=timestamp)
 
     call_command("apply_retention")
 
-    restantes = AuditEntry.objects.values_list("acao", "momento")
+    restantes = AuditEntry.objects.values_list("acao", "timestamp")
     assert sorted(acao for acao, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]
     assert all(m == recente for acao, m in restantes if acao == Acao.LOGIN_FALHOU)
     assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]

@@ -23,21 +23,21 @@
       <ul class="list-group list-group-flush">
         {% for linha in arvore.linhas %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ linha.nivel|add:1 }}rem;">
-          {% if linha.grupo %}
-          <span class="fw-semibold{% if not linha.grupo.active %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.grupo }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:group_edit' linha.grupo.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% if linha.group %}
+          <span class="fw-semibold{% if not linha.group.active %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.group }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:group_edit' linha.group.pk %}">{% translate "editar" %}</a>{% endif %}
           {% else %}
-          <span class="{% if not linha.categoria.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.categoria.name }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' linha.categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+          <span class="{% if not linha.category.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.category.name }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' linha.category.pk %}">{% translate "editar" %}</a>{% endif %}
           {% endif %}
         </li>
         {% endfor %}
         {% if arvore.sem_grupo %}
         <li class="list-group-item text-body-secondary small">{% translate "Sem grupo" %}</li>
-        {% for categoria in arvore.sem_grupo %}
+        {% for category in arvore.sem_grupo %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: 2rem;">
-          <span class="{% if not categoria.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ categoria.name }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+          <span class="{% if not category.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ category.name }}</span>
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' category.pk %}">{% translate "editar" %}</a>{% endif %}
         </li>
         {% endfor %}
         {% endif %}

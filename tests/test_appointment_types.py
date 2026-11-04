@@ -21,13 +21,13 @@ def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
     # Decision 080: dental types for the Odontologia area, general ones for the others.
     clinic = Clinic.objects.create(name="Nova", area=area)
     with usar_clinica(clinic):
-        tipos = {t.name: t.cor for t in AppointmentType.objects.all()}
+        tipos = {t.name: t.color for t in AppointmentType.objects.all()}
     assert tipos == dict(esperados)
 
 
 def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
     with usar_clinica(clinica_b):
-        AppointmentType.objects.create(name="Exclusivo da B", cor="#000000")
+        AppointmentType.objects.create(name="Exclusivo da B", color="#000000")
         de_b = AppointmentType.objects.get(name="Cirurgia")
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     conteudo = cliente.get(reverse("schedule:types")).content.decode()
@@ -40,19 +40,20 @@ def test_admin_cria_e_nome_repetido_e_recusado(clinica_a, criar_usuario, cliente
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     url = reverse("schedule:type_new")
     assert (
-        cliente.post(url, {"name": "Retorno", "cor": "#112233", "active": "on"}).status_code == 302
+        cliente.post(url, {"name": "Retorno", "color": "#112233", "active": "on"}).status_code
+        == 302
     )
-    resposta = cliente.post(url, {"name": "retorno", "cor": "#112233"})
+    resposta = cliente.post(url, {"name": "retorno", "color": "#112233"})
     assert resposta.status_code == 200
     assert "Já existe um tipo de atendimento com este nome" in resposta.content.decode()
 
 
 def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    resposta = cliente.post(reverse("schedule:type_new"), {"name": "Retorno", "cor": "#112233"})
+    resposta = cliente.post(reverse("schedule:type_new"), {"name": "Retorno", "color": "#112233"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        AppointmentType.objects.create(name="Retorno", cor="#445566")
+        AppointmentType.objects.create(name="Retorno", color="#445566")
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])

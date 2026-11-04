@@ -44,11 +44,11 @@
       <div class="card-body">
         <dl class="row mb-0">
           {% if patient.kind == "PJ" %}
-          <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.razao_social|default:"—" }}</dd>
-          {% if documentos_do_pais.empresa or patient.cpf_cnpj %}<dt class="col-sm-5">{{ patient.cpf_cnpj|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.cpf_cnpj|documento:"empresa"|default:"—" }}</dd>{% endif %}
+          <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.legal_name|default:"—" }}</dd>
+          {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|documento:"empresa"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.inscricao_estadual %}<dt class="col-sm-5">{% translate "Inscrição estadual" %}</dt><dd class="col-sm-7">{{ patient.inscricao_estadual|default:"—" }}</dd>{% endif %}
           {% else %}
-          {% if documentos_do_pais.paciente or patient.cpf_cnpj %}<dt class="col-sm-5">{{ patient.cpf_cnpj|sigla_documento:"paciente" }}</dt><dd class="col-sm-7">{{ patient.cpf_cnpj|documento:"paciente"|default:"—" }}</dd>{% endif %}
+          {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|documento:"paciente"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.rg %}<dt class="col-sm-5">{% translate "RG" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Nascimento" %}</dt>
           <dd class="col-sm-7">
@@ -77,7 +77,7 @@
           <dt class="col-sm-5">{% translate "Endereço" %}</dt>
           <dd class="col-sm-7">
             {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
-            {% if patient.bairro %}{{ patient.bairro }}<br>{% endif %}
+            {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
             {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
             {% if patient.cep %}{% rotulo_cep %} {{ patient.cep|cep }}{% endif %}
             {% if not patient.logradouro and not patient.cidade_estado and not patient.cep %}—{% endif %}
@@ -202,8 +202,8 @@
       <span>
         <strong>{{ carteirinha.convenio.name }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.number }}
         {% if carteirinha.beneficiario %}<span class="small">· {% translate "beneficiário" %} {{ carteirinha.beneficiario }}</span>{% endif %}
-        {% if carteirinha.grupo %}<span class="small">· {% translate "grupo" %} {{ carteirinha.grupo }}</span>{% endif %}
-        {% if carteirinha.validade %}<span class="small">· {% translate "validade" %} {{ carteirinha.validade|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
+        {% if carteirinha.group %}<span class="small">· {% translate "grupo" %} {{ carteirinha.group }}</span>{% endif %}
+        {% if carteirinha.valid_until %}<span class="small">· {% translate "validade" %} {{ carteirinha.valid_until|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
         {% if carteirinha.titular %}<span class="small">· {% translate "titular" %}: {{ carteirinha.titular }}</span>{% endif %}
       </span>
       <span class="text-nowrap">

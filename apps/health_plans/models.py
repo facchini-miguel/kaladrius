@@ -18,7 +18,9 @@ class HealthPlan(ModeloDaClinica):
     name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
-    registro = models.CharField(_("registro da operadora"), max_length=20, blank=True)
+    registration = models.CharField(
+        _("registro da operadora"), max_length=20, blank=True, db_column="registro"
+    )
     phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
@@ -60,9 +62,9 @@ class MemberCard(ModeloDaClinica):
     number = models.CharField(_("número da carteirinha"), max_length=30, db_column="numero")
     # Only where the country's cards have them (seguros.py): the group or policy number of
     # North American cards, the patient's code on a family card.
-    grupo = models.CharField(_("número do grupo"), max_length=30, blank=True)
+    group = models.CharField(_("número do grupo"), max_length=30, blank=True, db_column="grupo")
     beneficiario = models.CharField(_("código do beneficiário"), max_length=10, blank=True)
-    validade = models.DateField(_("validade"), null=True, blank=True)
+    valid_until = models.DateField(_("validade"), null=True, blank=True, db_column="validade")
     titular = models.CharField(
         _("titular"),
         max_length=200,
@@ -98,4 +100,4 @@ class MemberCard(ModeloDaClinica):
 
     @property
     def vencida(self):
-        return self.validade is not None and self.validade < timezone.localdate()
+        return self.valid_until is not None and self.valid_until < timezone.localdate()

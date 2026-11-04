@@ -29,50 +29,50 @@ def preparar(competencia):
     salary in force at the end of the month and the suggested overtime hour. Only saving
     the page stores them, so looking at a month (even a future one) leaves nothing behind.
     """
-    fim = fim_do_mes(competencia)
+    end = fim_do_mes(competencia)
     trabalhando = (
         Employee.objects.filter(active=True)
-        .exclude(admissao__gt=fim)
+        .exclude(admissao__gt=end)
         .exclude(desligamento__lt=competencia)
     )
     folhas = list(
-        Payroll.objects.filter(competencia=competencia).select_related("funcionario", "entry")
+        Payroll.objects.filter(competencia=competencia).select_related("employee", "entry")
     )
-    existentes = {f.funcionario_id for f in folhas}
-    for funcionario in trabalhando:
-        salario = funcionario.salario_em(fim)
-        if funcionario.pk in existentes or salario is None:
+    existentes = {f.employee_id for f in folhas}
+    for employee in trabalhando:
+        salario = employee.salario_em(end)
+        if employee.pk in existentes or salario is None:
             continue
         folhas.append(
             Payroll(
-                funcionario=funcionario,
+                employee=employee,
                 competencia=competencia,
                 salario=salario,
                 valor_hora_extra=hora_extra_sugerida(salario),
             )
         )
-    return sorted(folhas, key=lambda f: chave_alfabetica(f.funcionario.name))
+    return sorted(folhas, key=lambda f: chave_alfabetica(f.employee.name))
 
 
 @transaction.atomic
-def lancar(folhas, *, categoria, vencimento, user):
+def lancar(folhas, *, category, vencimento, user):
     """Turn the sheets not yet launched into payables, one per employee."""
     lancadas = 0
     for folha in folhas:
-        folha = Payroll.objects.select_for_update().select_related("funcionario").get(pk=folha.pk)
+        folha = Payroll.objects.select_for_update().select_related("employee").get(pk=folha.pk)
         if folha.lancada:
             continue
         if folha.total <= 0:
             raise ValidationError(
-                _("O total de %(nome)s precisa ser maior que zero.") % {"nome": folha.funcionario}
+                _("O total de %(nome)s precisa ser maior que zero.") % {"nome": folha.employee}
             )
         mes = f"{folha.competencia:%m/%Y}"
         folha.entry = financeiro.criar_lancamento(
-            clinic=folha.funcionario.clinic,
+            clinic=folha.employee.clinic,
             kind=Entry.Tipo.PAGAR,
-            pessoa=folha.funcionario.name,
+            pessoa=folha.employee.name,
             description=_("Salário %(mes)s") % {"mes": mes},
-            categoria=categoria,
+            category=category,
             notes=_("Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s.")
             % {
                 "salario": folha.salario,

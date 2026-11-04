@@ -244,35 +244,35 @@ def formatar_telefone(number, pais):
 
 
 def _formatar_telefone_latino(n, pais):
-    tamanho = len(n)
-    if pais == "MX" and tamanho == 10:
+    size = len(n)
+    if pais == "MX" and size == 10:
         if n[:2] in ("55", "33", "81"):  # Mexico City, Guadalajara, Monterrey: 2-digit areas
             return f"{n[:2]} {n[2:6]} {n[6:]}"
         return f"{n[:3]} {n[3:6]} {n[6:]}"
-    if pais == "AR" and tamanho == 10:
+    if pais == "AR" and size == 10:
         if n.startswith("11"):  # Buenos Aires
             return f"011 {n[2:6]}-{n[6:]}"
         return f"0{n[:3]} {n[3:6]}-{n[6:]}"
-    if pais == "CL" and tamanho == 9:
+    if pais == "CL" and size == 9:
         return f"{n[0]} {n[1:5]} {n[5:]}"
-    if pais == "CO" and tamanho == 10:
+    if pais == "CO" and size == 10:
         return f"{n[:3]} {n[3:6]} {n[6:]}"
     if pais == "PE":
-        if tamanho == 9:
+        if size == 9:
             return f"{n[:3]} {n[3:6]} {n[6:]}"
         if n.startswith("1"):  # Lima
             return f"(01) {n[1:4]} {n[4:]}"
         return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
-    if pais == "UY" and tamanho == 8:
+    if pais == "UY" and size == 8:
         return f"0{n[:2]} {n[2:5]} {n[5:]}" if n.startswith("9") else f"{n[:4]} {n[4:]}"
     if pais == "PY":
-        if tamanho == 9:
+        if size == 9:
             return f"0{n[:3]} {n[3:6]} {n[6:]}"
         return f"(0{n[:2]}) {n[2:5]} {n[5:]}"
-    if pais == "BO" and tamanho == 8:
+    if pais == "BO" and size == 8:
         return f"{n[:4]} {n[4:]}"
     if pais == "EC":
-        if tamanho == 9:
+        if size == 9:
             return f"0{n[:2]} {n[2:5]} {n[5:]}"
         return f"(0{n[0]}) {n[1:4]} {n[4:]}"
     return n

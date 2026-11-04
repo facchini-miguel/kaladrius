@@ -32,11 +32,11 @@ def centro(clinica_a):
 
 def despesa(clinic, **extra):
     with usar_clinica(clinic):
-        categoria = Category.objects.get(name="Aluguel")
+        category = Category.objects.get(name="Aluguel")
     return {
         "pessoa": "Imobiliária fictícia",
         "description": "Aluguel",
-        "categoria": categoria.pk,
+        "category": category.pk,
         "amount": "1000",
         "modo": "dividir",
         "parcelas": 1,
@@ -86,7 +86,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
             "patient": patient.pk,
             "pessoa": "",
             "description": "Aparelho",
-            "categoria": receita.pk,
+            "category": receita.pk,
             "centro_custo": centro.pk,
             "practitioner": "",
             "valor_total": "500",
@@ -115,7 +115,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
                 kind=Entry.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
                 description="Compra",
-                categoria=aluguel,
+                category=aluguel,
                 centro_custo=centro_custo,
                 valor_total=amount,
                 parcelas=1,

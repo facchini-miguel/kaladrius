@@ -26,7 +26,7 @@ def agendamentos_visiveis(request):
     return Appointment.objects.filter(practitioner__in=profissionais_visiveis(request))
 
 
-def momento(date, hora):
+def timestamp(date, hora):
     """Aware datetime for a local date and time."""
     return timezone.make_aware(datetime.datetime.combine(date, hora))
 
@@ -34,7 +34,7 @@ def momento(date, hora):
 def ocorrencias(date, hora_inicio, hora_fim, repeticoes=1):
     """(start, end) of each weekly occurrence, built from local date/time (DST-safe)."""
     return [
-        (momento(dia, hora_inicio), momento(dia, hora_fim))
+        (timestamp(dia, hora_inicio), timestamp(dia, hora_fim))
         for dia in (date + datetime.timedelta(weeks=semana) for semana in range(repeticoes))
     ]
 
@@ -45,14 +45,14 @@ def conflitos(practitioner, intervalos, ignorar=None):
     Cancelled ones (desmarcados) do not hold the slot.
     """
     sobreposicao = Q()
-    for inicio, fim in intervalos:
-        sobreposicao |= Q(inicio__lt=fim, fim__gt=inicio)
+    for start, end in intervalos:
+        sobreposicao |= Q(start__lt=end, end__gt=start)
     existentes = Appointment.objects.filter(sobreposicao, practitioner=practitioner).exclude(
         status=Appointment.Situacao.DESMARCOU
     )
     if ignorar is not None:
         existentes = existentes.exclude(pk=ignorar)
-    return list(existentes.select_related("patient").order_by("inicio"))
+    return list(existentes.select_related("patient").order_by("start"))
 
 
 @transaction.atomic
@@ -64,14 +64,14 @@ def criar(modelo, intervalos, user):
     """
     serie = uuid.uuid4() if len(intervalos) > 1 else None
     criados = []
-    for inicio, fim in intervalos:
+    for start, end in intervalos:
         agendamento = Appointment(
             practitioner=modelo.practitioner,
             kind=modelo.kind,
             patient=modelo.patient,
             description=modelo.description,
-            inicio=inicio,
-            fim=fim,
+            start=start,
+            end=end,
             serie=serie,
             created_by=user,
         )
@@ -99,7 +99,7 @@ def marcar(agendamento, status):
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
     if agendamento.desmarcado and status != Appointment.Situacao.DESMARCOU:
         if conflitos(
-            agendamento.practitioner, [(agendamento.inicio, agendamento.fim)], agendamento.pk
+            agendamento.practitioner, [(agendamento.start, agendamento.end)], agendamento.pk
         ):
             raise ValidationError(ocupado)
     agendamento.status = status

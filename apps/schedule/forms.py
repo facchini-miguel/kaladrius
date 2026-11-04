@@ -16,8 +16,8 @@ from .models import Appointment, AppointmentType
 class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = AppointmentType
-        fields = ["name", "cor", "active"]
-        widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
+        fields = ["name", "color", "active"]
+        widgets = {"color": forms.TextInput(attrs={"type": "color"})}
 
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,16 +90,16 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
         if agendamento.pk:
             del self.fields["repeticoes"]  # recurrence only applies when creating
-            inicio = timezone.localtime(agendamento.inicio)
+            start = timezone.localtime(agendamento.start)
             self.initial.update(
-                date=inicio.date(),
-                hora_inicio=inicio.time(),
-                hora_fim=timezone.localtime(agendamento.fim).time(),
+                date=start.date(),
+                hora_inicio=start.time(),
+                hora_fim=timezone.localtime(agendamento.end).time(),
             )
 
     def _alinhado(self, hora):
-        inicio = self.clinic.agenda_inicio
-        minutos = (hora.hour * 60 + hora.minute) - (inicio.hour * 60 + inicio.minute)
+        start = self.clinic.agenda_inicio
+        minutos = (hora.hour * 60 + hora.minute) - (start.hour * 60 + start.minute)
         return hora.second == 0 and minutos % self.clinic.agenda_intervalo == 0
 
     def clean(self):
@@ -153,7 +153,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.intervalos = services.ocorrencias(
             date, hora_inicio, hora_fim, dados.get("repeticoes") or 1
         )
-        self.instance.inicio, self.instance.fim = self.intervalos[0]
+        self.instance.start, self.instance.end = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
         if not dados.get("patient") or (
             self.instance.status in marcado and date > timezone.localdate()
@@ -169,7 +169,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         )
         if encontrados:
             lista = "; ".join(
-                f"{date_format(timezone.localtime(a.inicio), 'SHORT_DATETIME_FORMAT')} ({a.titulo})"
+                f"{date_format(timezone.localtime(a.start), 'SHORT_DATETIME_FORMAT')} ({a.titulo})"
                 for a in encontrados[:5]
             )
             if len(encontrados) > 5:

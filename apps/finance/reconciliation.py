@@ -37,13 +37,13 @@ def importar(account, *, nome_arquivo, conteudo, user):
     importacao = StatementImport.objects.create(
         clinic=account.clinic,
         account=account,
-        arquivo=nome_arquivo[:200],
+        file=nome_arquivo[:200],
         banco=extrato.banco,
         conta_no_banco=extrato.account,
-        inicio=extrato.inicio or min(t.date for t in extrato.transacoes),
-        fim=extrato.fim or max(t.date for t in extrato.transacoes),
+        start=extrato.start or min(t.date for t in extrato.transacoes),
+        end=extrato.end or max(t.date for t in extrato.transacoes),
         saldo=extrato.saldo,
-        saldo_em=extrato.saldo_em or extrato.fim,
+        saldo_em=extrato.saldo_em or extrato.end,
         ignoradas=extrato.ignoradas,
         created_by=user,
     )
@@ -109,17 +109,17 @@ def candidatos(transacoes):
         return {}
     contas = {t.account_id for t in pendentes}
     de = min(t.date for t in pendentes) - JANELA
-    ate = max(t.date for t in pendentes) + JANELA
+    until = max(t.date for t in pendentes) + JANELA
     pagamentos = list(
         Payment.objects.filter(
-            account_id__in=contas, estornado=False, transacao__isnull=True, date__range=(de, ate)
+            account_id__in=contas, estornado=False, transacao__isnull=True, date__range=(de, until)
         ).select_related("parcela__entry__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
             outra_conta_id__in=contas,
             transacao__isnull=True,
-            created_at__date__range=(de, ate),
+            created_at__date__range=(de, until),
         ).select_related("caixa__account")
     )
     resultado = {}
@@ -157,7 +157,7 @@ def candidatos(transacoes):
                     Candidato(
                         f"m{m.pk}",
                         date,
-                        f"{m.caixa.account} · {m.get_kind_display()}: {m.motivo}",
+                        f"{m.caixa.account} · {m.get_kind_display()}: {m.reason}",
                         m,
                     )
                 )
@@ -219,7 +219,7 @@ def conciliar_unicos(importacao, *, user):
 
 
 @transaction.atomic
-def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
+def criar_lancamento(transacao, *, description, category, pessoa, forma, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
     entry = services.criar_lancamento(
@@ -227,7 +227,7 @@ def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
         kind=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
         pessoa=pessoa or description,
         description=description,
-        categoria=categoria,
+        category=category,
         valor_total=abs(transacao.amount),
         parcelas=1,
         primeiro_vencimento=transacao.date,
@@ -246,10 +246,10 @@ def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
 
 
 @transaction.atomic
-def ignorar(transacao, *, motivo, user):
+def ignorar(transacao, *, reason, user):
     transacao = _pendente(transacao)
     transacao.status = Situacao.IGNORADA
-    transacao.motivo = motivo
+    transacao.reason = reason
     transacao.conciliado_por = user
     transacao.conciliado_em = timezone.now()
     transacao.save()
@@ -262,7 +262,7 @@ def desfazer(transacao):
     transacao.status = Situacao.PENDENTE
     transacao.pagamento = None
     transacao.movimento = None
-    transacao.motivo = ""
+    transacao.reason = ""
     transacao.conciliado_por = None
     transacao.conciliado_em = None
     transacao.save()
@@ -272,7 +272,7 @@ def saldo_no_sistema(importacao):
     """The system's balance of the account on the bank balance date (None without one)."""
     if importacao.saldo is None or importacao.saldo_em is None:
         return None
-    for account, saldo in services.saldos_das_contas(ate=importacao.saldo_em):
+    for account, saldo in services.saldos_das_contas(until=importacao.saldo_em):
         if account.pk == importacao.account_id:
             return saldo
     return None

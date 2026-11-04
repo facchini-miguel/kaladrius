@@ -49,10 +49,10 @@ class Command(BaseCommand):
         if not confirmar:
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
-            inicio = datetime.date.fromisoformat(desde)
+            start = datetime.date.fromisoformat(desde)
         except ValueError as erro:
             raise CommandError(f"Data inválida: {desde}") from erro
-        dias = (timezone.localdate() - inicio).days // 7 * 7
+        dias = (timezone.localdate() - start).days // 7 * 7
         if dias <= 0:
             self.stdout.write("Menos de uma semana: nada a avançar.")
             return

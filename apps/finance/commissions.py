@@ -33,8 +33,10 @@ def _recebimentos(practitioner):
     ).select_related("parcela__entry__patient")
 
 
-def _creditos(practitioner, ate):
-    return _recebimentos(practitioner).filter(estornado=False, comissao__isnull=True, date__lte=ate)
+def _creditos(practitioner, until):
+    return _recebimentos(practitioner).filter(
+        estornado=False, comissao__isnull=True, date__lte=until
+    )
 
 
 def _debitos(practitioner):
@@ -50,9 +52,9 @@ def _debitos(practitioner):
     return debitos
 
 
-def pendente(practitioner, ate):
+def pendente(practitioner, until):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
-    creditos = list(_creditos(practitioner, ate).order_by("date", "pk"))
+    creditos = list(_creditos(practitioner, until).order_by("date", "pk"))
     debitos = _debitos(practitioner)
     recebido = sum((p.amount for p in creditos), start=ZERO)
     bruta = percentual_de(recebido, practitioner.comissao_percentual)
@@ -68,7 +70,7 @@ def pendente(practitioner, ate):
     }
 
 
-def resumo(ate):
+def resumo(until):
     """Pending commission of every practitioner with a percentage or something pending.
 
     Only the totals, added up by the database: loading every receipt not commissioned yet
@@ -76,7 +78,9 @@ def resumo(ate):
     """
     linhas = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
-        totais = _creditos(practitioner, ate).aggregate(recebido=Sum("amount"), quantos=Count("pk"))
+        totais = _creditos(practitioner, until).aggregate(
+            recebido=Sum("amount"), quantos=Count("pk")
+        )
         debitos = _debitos(practitioner)
         if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
             continue
@@ -96,11 +100,11 @@ def resumo(ate):
 
 
 @transaction.atomic
-def pagar(practitioner, *, ate, vencimento, categoria, user):
+def pagar(practitioner, *, until, vencimento, category, user):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
-    calculo = pendente(practitioner, ate)
+    calculo = pendente(practitioner, until)
     if calculo["amount"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
     entry = services.criar_lancamento(
@@ -109,8 +113,8 @@ def pagar(practitioner, *, ate, vencimento, categoria, user):
         pessoa=practitioner.name,
         practitioner=practitioner,
         description=_("Comissão de %(nome)s até %(data)s")
-        % {"nome": practitioner.name, "data": date_format(ate, "SHORT_DATE_FORMAT")},
-        categoria=categoria,
+        % {"nome": practitioner.name, "data": date_format(until, "SHORT_DATE_FORMAT")},
+        category=category,
         valor_total=calculo["amount"],
         parcelas=1,
         primeiro_vencimento=vencimento,
@@ -119,7 +123,7 @@ def pagar(practitioner, *, ate, vencimento, categoria, user):
     comissao = Commission.objects.create(
         clinic=practitioner.clinic,
         practitioner=practitioner,
-        ate=ate,
+        until=until,
         percentual=practitioner.comissao_percentual,
         recebido=calculo["recebido"],
         estornos=calculo["estornos"],
@@ -149,7 +153,7 @@ def liberar(comissao):
             pagamentos_estornados__comissao=comissao,
         )
         .exclude(pk=comissao.pk)
-        .order_by("ate")
+        .order_by("until")
         .first()
     )
     if descontou is not None:
@@ -158,7 +162,7 @@ def liberar(comissao):
                 "Esta comissão não pode ser cancelada: o estorno de um recebimento dela já foi "
                 "descontado na comissão até %(data)s. Cancele aquela antes."
             )
-            % {"data": date_format(descontou.ate, "SHORT_DATE_FORMAT")}
+            % {"data": date_format(descontou.until, "SHORT_DATE_FORMAT")}
         )
     # One by one (not .update()), so the audit log records each change.
     for pagamento in Payment.objects.filter(comissao=comissao):

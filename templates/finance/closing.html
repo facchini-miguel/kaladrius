@@ -59,8 +59,8 @@
       <tr>
         <td class="text-nowrap">{{ item.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
         <td>{% if item.created_by %}{{ item.created_by.get_full_name|default:item.created_by.username }}{% else %}—{% endif %}</td>
-        <td class="text-nowrap">{% if item.ate %}{{ item.ate|date:"SHORT_DATE_FORMAT" }}{% else %}{% translate "Aberto" %}{% endif %}</td>
-        <td>{{ item.motivo|default:"—" }}</td>
+        <td class="text-nowrap">{% if item.until %}{{ item.until|date:"SHORT_DATE_FORMAT" }}{% else %}{% translate "Aberto" %}{% endif %}</td>
+        <td>{{ item.reason|default:"—" }}</td>
       </tr>
       {% empty %}
       <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhum fechamento ainda." %}</td></tr>

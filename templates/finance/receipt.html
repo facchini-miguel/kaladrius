@@ -25,8 +25,8 @@
     </div>
   </div>
   <p class="fs-6">
-    {% if entry.patient.cpf_cnpj %}
-    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.cpf_cnpj|sigla_documento:entry.patient.papel_documento documento=entry.patient.cpf_cnpj|documento:entry.patient.papel_documento valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% if entry.patient.tax_id %}
+    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.tax_id|sigla_documento:entry.patient.papel_documento documento=entry.patient.tax_id|documento:entry.patient.papel_documento valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
     {% blocktranslate with nome=entry.nome_pessoa valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}
@@ -35,8 +35,8 @@
   <ul class="list-unstyled small mb-4">
     <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
     {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
-    {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
-    {% if entry.practitioner %}<li>{% translate "Profissional" %}: {{ entry.practitioner.name }}{% if entry.practitioner.registro %} ({{ entry.practitioner.registro }}){% endif %}</li>{% endif %}
+    {% if pagamento.discount %}<li>{% translate "Desconto" %}: {{ pagamento.discount|moeda }}</li>{% endif %}
+    {% if entry.practitioner %}<li>{% translate "Profissional" %}: {{ entry.practitioner.name }}{% if entry.practitioner.registration %} ({{ entry.practitioner.registration }}){% endif %}</li>{% endif %}
     {% if pagamento.note %}<li>{{ pagamento.note }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">

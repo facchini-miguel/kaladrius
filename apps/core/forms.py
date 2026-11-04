@@ -13,8 +13,8 @@ from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinic, ClinicModule, Modulo
 from .modules import configurar, faltando, iniciais
 
 
-def _opcoes(grupo):
-    return [(value, name) for value, name in ModuloClinico.choices if value in grupo]
+def _opcoes(group):
+    return [(value, name) for value, name in ModuloClinico.choices if value in group]
 
 
 class CampoDecimal(forms.DecimalField):
@@ -283,14 +283,14 @@ class ClinicaForm(ModulosClinicosForm):
 
     def clean(self):
         dados = super().clean()
-        inicio, fim = dados.get("agenda_inicio"), dados.get("agenda_fim")
+        start, end = dados.get("agenda_inicio"), dados.get("agenda_fim")
         intervalo = dados.get("agenda_intervalo")
-        if None in (inicio, fim, intervalo):
+        if None in (start, end, intervalo):
             return dados
-        if inicio >= fim:
+        if start >= end:
             self.add_error("agenda_fim", _("O fim da agenda deve ser depois do início."))
             return dados
-        problema = self._agendamento_fora(inicio, fim, intervalo)
+        problema = self._agendamento_fora(start, end, intervalo)
         if problema is not None:
             raise forms.ValidationError(
                 _(
@@ -301,7 +301,7 @@ class ClinicaForm(ModulosClinicosForm):
             )
         return dados
 
-    def _agendamento_fora(self, inicio, fim, intervalo):
+    def _agendamento_fora(self, start, end, intervalo):
         """Start of the first future appointment the new settings would leave out, if any.
 
         Past appointments are not checked: the history may have other hours.
@@ -311,19 +311,19 @@ class ClinicaForm(ModulosClinicosForm):
         def minutos(hora):
             return hora.hour * 60 + hora.minute
 
-        base = minutos(inicio)
+        base = minutos(start)
         if self.instance.pk is None:
             return None
         # Django Admin runs without the request's clinic isolation. Validate only the
         # clinic being edited, including when this form is used outside a request.
-        futuros = Appointment.todos.filter(clinic=self.instance, fim__gt=timezone.now()).order_by(
-            "inicio"
+        futuros = Appointment.todos.filter(clinic=self.instance, end__gt=timezone.now()).order_by(
+            "start"
         )
-        for comeca, termina in futuros.values_list("inicio", "fim"):
+        for comeca, termina in futuros.values_list("start", "end"):
             comeca, termina = timezone.localtime(comeca), timezone.localtime(termina)
             horas = (comeca.time(), termina.time())
-            fora = comeca.time() < inicio or (
-                termina.time() > fim and termina.time() != datetime.time(0)
+            fora = comeca.time() < start or (
+                termina.time() > end and termina.time() != datetime.time(0)
             )
             desalinhado = any((minutos(h) - base) % intervalo or h.second for h in horas)
             if fora or desalinhado:

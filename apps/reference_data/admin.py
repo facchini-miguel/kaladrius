@@ -11,10 +11,10 @@ class UFAdmin(admin.ModelAdmin):
 
 @admin.register(City)
 class CidadeAdmin(admin.ModelAdmin):
-    list_display = ["name", "uf", "code"]
-    list_filter = ["uf"]
+    list_display = ["name", "state", "code"]
+    list_filter = ["state"]
     search_fields = ["name"]
-    list_select_related = ["uf"]
+    list_select_related = ["state"]
 
 
 @admin.register(Bank)

@@ -22,7 +22,7 @@
     </select>
   </div>
   <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
-  <div class="col-6 col-md-2"><input type="date" name="ate" value="{{ filtros.ate }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filtros.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
   <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
 </form>
 
@@ -30,25 +30,25 @@
   <table class="table table-sm align-middle bg-white">
     <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demonstracao %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
     <tbody>
-      {% for registro in pagina %}
+      {% for record in pagina %}
       <tr>
-        <td class="text-nowrap">{{ registro.momento|date:"SHORT_DATETIME_FORMAT" }}</td>
-        <td>{% if registro.usuario_nome %}{{ registro.usuario_nome }}{% else %}{% translate "sistema" %}{% endif %}</td>
-        <td>{{ registro.get_acao_display }}</td>
-        <td>{% if registro.modelo %}<span class="text-body-secondary">{{ registro.modelo }} {{ registro.objeto_id }}:</span> {% endif %}{{ registro.objeto_descricao }}</td>
+        <td class="text-nowrap">{{ record.timestamp|date:"SHORT_DATETIME_FORMAT" }}</td>
+        <td>{% if record.usuario_nome %}{{ record.usuario_nome }}{% else %}{% translate "sistema" %}{% endif %}</td>
+        <td>{{ record.get_acao_display }}</td>
+        <td>{% if record.modelo %}<span class="text-body-secondary">{{ record.modelo }} {{ record.objeto_id }}:</span> {% endif %}{{ record.objeto_descricao }}</td>
         <td>
-          {% if registro.alteracoes %}
+          {% if record.alteracoes %}
           <details>
-            <summary>{% blocktranslate count total=registro.alteracoes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
+            <summary>{% blocktranslate count total=record.alteracoes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
             <ul class="small mb-0">
-              {% for rotulo, antes, depois in registro.campos %}
+              {% for rotulo, antes, depois in record.campos %}
               <li><strong>{{ rotulo }}</strong>: {{ antes|default_if_none:"—" }} → {{ depois|default_if_none:"—" }}</li>
               {% endfor %}
             </ul>
           </details>
           {% endif %}
         </td>
-        {% if not user.demonstracao %}<td class="small text-body-secondary">{{ registro.ip|default:"" }}</td>{% endif %}
+        {% if not user.demonstracao %}<td class="small text-body-secondary">{{ record.ip|default:"" }}</td>{% endif %}
       </tr>
       {% empty %}
       <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum registro encontrado." %}</td></tr>

@@ -59,7 +59,7 @@ def agendar(cenario, **extra):
 
 def agendamentos(cenario):
     with usar_clinica(cenario["clinic"]):
-        return list(Appointment.objects.order_by("inicio"))
+        return list(Appointment.objects.order_by("start"))
 
 
 def erros(resposta):
@@ -87,7 +87,7 @@ def test_repeticao_semanal_cria_a_serie(cenario):
     criados = agendamentos(cenario)
     assert len(criados) == 4
     assert len({a.serie for a in criados}) == 1 and criados[0].serie is not None
-    datas = [a.inicio.date() for a in criados]
+    datas = [a.start.date() for a in criados]
     assert datas == [SEGUNDA + datetime.timedelta(weeks=n) for n in range(4)]
 
 
@@ -102,7 +102,7 @@ def test_sem_paciente_exige_descricao(cenario):
 
 
 @pytest.mark.parametrize(
-    ("inicio", "fim", "mensagem"),
+    ("start", "end", "mensagem"),
     [
         ("09:15", "10:00", "de 30 em 30 minutos"),
         ("09:00", "09:00", "O fim deve ser depois do início"),
@@ -111,8 +111,8 @@ def test_sem_paciente_exige_descricao(cenario):
         ("19:30", "20:30", "Fora do horário de atendimento"),
     ],
 )
-def test_regras_de_horario(cenario, inicio, fim, mensagem):
-    resposta = agendar(cenario, hora_inicio=inicio, hora_fim=fim)
+def test_regras_de_horario(cenario, start, end, mensagem):
+    resposta = agendar(cenario, hora_inicio=start, hora_fim=end)
     assert resposta.status_code == 200
     assert mensagem in erros(resposta)
     assert agendamentos(cenario) == []
@@ -181,7 +181,7 @@ def test_editar_muda_o_horario_sem_conflitar_consigo_mesmo(cenario):
     resposta = cenario["cliente"].post(url, dados(cenario, hora_inicio="09:30", hora_fim="10:30"))
     assert resposta.status_code == 204
     agendamento.refresh_from_db()
-    assert agendamento.inicio.astimezone().time() == datetime.time(9, 30)
+    assert agendamento.start.astimezone().time() == datetime.time(9, 30)
 
 
 def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cenario):
@@ -305,7 +305,7 @@ def test_calendario_abre_no_profissional_escolhido(cenario):
     )
     assert pagina.context["practitioner"] == cenario["bruno"]
     config = pagina.context["configuracao"]
-    assert config["intervalo"] == 30 and config["inicio"] == "07:30:00"
+    assert config["intervalo"] == 30 and config["start"] == "07:30:00"
     assert config["pode"] == {"criar": True, "alterar": True}
     # The choice is remembered for the next visit.
     assert (
@@ -433,8 +433,8 @@ def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
             practitioner=cenario["ana"],
             kind=cenario["kind"],
             patient=cenario["patient"],
-            inicio=services.momento(passado, datetime.time(9)),
-            fim=services.momento(passado, datetime.time(10)),
+            start=services.timestamp(passado, datetime.time(9)),
+            end=services.timestamp(passado, datetime.time(10)),
         )
     agendar(cenario)  # 2031, Dra. Ana
     agendar(cenario, practitioner=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00")
@@ -443,7 +443,7 @@ def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
     historico = cenario["cliente"].get(url).context["agendamentos"]
     assert historico["total"] == 3
     assert [a.practitioner.name for a in historico["proximos"]] == ["Dra. Ana", "Dr. Bruno"]
-    assert [a.inicio.date() for a in historico["anteriores"]] == [passado]
+    assert [a.start.date() for a in historico["anteriores"]] == [passado]
 
     # Practitioners see only their own appointments in the record too.
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
@@ -465,8 +465,8 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         existente = Appointment.objects.create(
             practitioner=cenario["ana"],
             kind=cenario["kind"],
-            inicio=services.momento(hoje, datetime.time(9)),
-            fim=services.momento(hoje, datetime.time(10)),
+            start=services.timestamp(hoje, datetime.time(9)),
+            end=services.timestamp(hoje, datetime.time(10)),
             description="Real",
         )
     with pytest.raises(CommandError):
@@ -477,7 +477,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         novos = Appointment.objects.exclude(pk=existente.pk)
         assert novos.count() > 0
         assert not novos.filter(
-            practitioner=cenario["ana"], inicio__lt=existente.fim, fim__gt=existente.inicio
+            practitioner=cenario["ana"], start__lt=existente.end, end__gt=existente.start
         ).exists()
         assert not novos.filter(patient__arquivado=True).exists()
         assert novos.filter(kind__name="Ocupado").count() == 0
@@ -511,8 +511,8 @@ def agendamento_em(cenario, dia, hora=9, patient=True, practitioner="ana"):
             kind=cenario["kind"],
             patient=cenario["patient"] if patient else None,
             description="" if patient else "Bloqueado",
-            inicio=services.momento(dia, datetime.time(hora)),
-            fim=services.momento(dia, datetime.time(hora + 1)),
+            start=services.timestamp(dia, datetime.time(hora)),
+            end=services.timestamp(dia, datetime.time(hora + 1)),
         )
 
 
@@ -639,7 +639,7 @@ def test_tipos_padrao_aparecem_no_idioma_do_usuario(cenario):
     typed itself is shown as saved."""
     cliente = cenario["cliente"]
     with usar_clinica(cenario["clinic"]):
-        AppointmentType.objects.create(name="Clareamento a laser", cor="#ffffff")
+        AppointmentType.objects.create(name="Clareamento a laser", color="#ffffff")
 
     cliente.post(reverse("change_language"), {"idioma": "en"})
     legenda = cliente.get(reverse("schedule:calendar")).content.decode()

@@ -53,7 +53,7 @@ def _banco():
     """Database size and its largest tables."""
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_database_size(current_database())")
-        tamanho = cursor.fetchone()[0]
+        size = cursor.fetchone()[0]
         cursor.execute(
             """
             SELECT relname, pg_total_relation_size(relid), n_live_tup
@@ -61,10 +61,10 @@ def _banco():
             """
         )
         tabelas = [
-            {"name": name, "tamanho": tamanho_tabela, "registros": registros}
+            {"name": name, "size": tamanho_tabela, "registros": registros}
             for name, tamanho_tabela, registros in cursor.fetchall()
         ]
-    return {"tamanho": tamanho, "tabelas": tabelas}
+    return {"size": size, "tabelas": tabelas}
 
 
 @login_required
@@ -75,9 +75,9 @@ def painel(request):
     if periodo not in PERIODOS:
         periodo = "1h"
     # The time axis is the whole period, even while there are fewer samples.
-    fim = timezone.now()
-    inicio = fim - PERIODOS[periodo]
-    lista = health.com_rede(health.amostras(desde=inicio))
+    end = timezone.now()
+    start = end - PERIODOS[periodo]
+    lista = health.com_rede(health.amostras(desde=start))
     ultima = lista[-1] if lista else health.ultima()
     graficos = []
     for titulo, series, maximo, unidade in GRAFICOS:
@@ -88,7 +88,7 @@ def painel(request):
             {
                 "titulo": titulo,
                 "svg": health.grafico(
-                    lista, linhas, inicio=inicio, fim=fim, maximo=maximo, piso=piso, teto=teto
+                    lista, linhas, start=start, end=end, maximo=maximo, piso=piso, teto=teto
                 ),
                 "topo": min(topo, teto) if teto else topo,
                 "unidade": unidade,
@@ -100,8 +100,8 @@ def painel(request):
         "monitoring/health.html",
         {
             "periodo": periodo,
-            "inicio": inicio,
-            "fim": fim,
+            "start": start,
+            "end": end,
             "ultima": ultima,
             "niveis": health.niveis(ultima) if ultima else {},
             "parada": health.parada(ultima) if ultima else False,

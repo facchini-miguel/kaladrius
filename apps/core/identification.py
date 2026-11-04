@@ -7,8 +7,8 @@ Four roles per country, each one a document or None (then the field is not shown
 - ``pessoa``: an individual as a taxpayer, a supplier or the clinic (CPF, RFC, CUIT, RUC...);
 - ``empresa``: a company, as a patient, a supplier or the clinic (CNPJ, EIN, ABN, RFC...).
 
-Values are stored compact (letters and digits, uppercase) in the fields that kept their
-Brazilian names (``cpf_cnpj``, ``cpf``, ``documento``) and are written each country's way on
+Values are stored compact (letters and digits, uppercase) in the document fields
+(``tax_id``, ``cpf``, ``documento``) and are written each country's way on
 screen and on paper. Check digits come from python-stdnum where it has the document; Brazil
 keeps its own CPF/CNPJ rules (the alphanumeric CNPJ included). The documents keep their
 official names in every language: "CPF" is also "CPF" in English.
@@ -137,9 +137,9 @@ CNPJ = Documento("CNPJ", "00.000.000/0000-00", _cnpj, _escrever_cnpj)
 
 
 # ---- Mexico. The RFC's check digit is not checked: many issued RFCs fail it (python-stdnum).
-def _rfc(tamanho):
+def _rfc(size):
     def validar(value):
-        _exigir(len(value) == tamanho)
+        _exigir(len(value) == size)
         rfc.validate(value)
 
     return validar

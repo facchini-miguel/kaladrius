@@ -45,7 +45,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
             name="Paciente fictícia da ficha",
-            cpf_cnpj="52998224725",
+            tax_id="52998224725",
             whatsapp="48999990000",
             notes="Prefere manhã",
         )

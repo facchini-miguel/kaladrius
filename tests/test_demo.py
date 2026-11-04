@@ -123,7 +123,7 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     assert "anexo_enviar" not in pagina and 'enctype="multipart/form-data"' not in pagina
     resposta = cliente.post(
         reverse("medical_records:attachment_upload", args=[visit.pk]),
-        {"arquivo": SimpleUploadedFile("x.png", PNG)},
+        {"file": SimpleUploadedFile("x.png", PNG)},
         follow=True,
     )
     assert "Contas de demonstração não enviam anexos." in resposta.content.decode()

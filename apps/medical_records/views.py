@@ -73,7 +73,7 @@ def novo(request, practitioner, patient):
         existente = Visit.objects.filter(agendamento=agendamento).first()
         if existente is not None:
             return redirect("medical_records:visit", pk=existente.pk)
-    inicial = {"date": agendamento.inicio if agendamento else timezone.now()}
+    inicial = {"date": agendamento.start if agendamento else timezone.now()}
     profissionais = None
     if administra_prontuario(request):
         profissionais = Practitioner.objects.filter(active=True)
@@ -188,11 +188,11 @@ def imprimir(request, practitioner, pk):
 def atestado_novo(request, practitioner, pk):
     visit = _do_autor(request, practitioner, pk)
     agendamento = visit.agendamento
-    momento = timezone.localtime(agendamento.inicio if agendamento else visit.date)
+    timestamp = timezone.localtime(agendamento.start if agendamento else visit.date)
     inicial = {
-        "date": momento.date(),
-        "hora_inicio": momento.time().replace(second=0, microsecond=0),
-        "hora_fim": timezone.localtime(agendamento.fim).time() if agendamento else None,
+        "date": timestamp.date(),
+        "hora_inicio": timestamp.time().replace(second=0, microsecond=0),
+        "hora_fim": timezone.localtime(agendamento.end).time() if agendamento else None,
     }
     form = AtestadoForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
@@ -329,14 +329,14 @@ def anexo_enviar(request, practitioner, pk):
         return redirect("medical_records:visit", pk=visit.pk)
     form = AnexoForm(request.POST, request.FILES)
     if form.is_valid():
-        arquivo = form.cleaned_data["arquivo"]
+        file = form.cleaned_data["file"]
         anexo = Attachment.objects.create(
             visit=visit,
             description=form.cleaned_data["description"],
-            name=arquivo.name[:255],
-            kind=arquivo.tipo_conferido,
-            tamanho=arquivo.size,
-            conteudo=arquivo.read(),
+            name=file.name[:255],
+            kind=file.tipo_conferido,
+            size=file.size,
+            conteudo=file.read(),
             practitioner=practitioner or visit.practitioner,
             created_by=request.user,
         )
@@ -344,7 +344,7 @@ def anexo_enviar(request, practitioner, pk):
             Acao.CRIAR,
             anexo,
             description=f"{visit} – {_('anexo')}",
-            alteracoes={"arquivo": [None, SIGILO]},
+            alteracoes={"file": [None, SIGILO]},
         )
         messages.success(request, _("Anexo incluído."))
     else:
@@ -378,7 +378,7 @@ def anexo_remover(request, practitioner, pk):
         Acao.EXCLUIR,
         anexo,
         description=f"{visit} – {_('anexo')}",
-        alteracoes={"arquivo": [SIGILO, None]},
+        alteracoes={"file": [SIGILO, None]},
     )
     anexo.delete()
     messages.success(request, _("Anexo removido."))

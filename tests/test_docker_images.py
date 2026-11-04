@@ -22,10 +22,10 @@ FORA = {".git", "node_modules", ".venv", "venv", "build", ".docusaurus"}
 def _arquivos(*padroes):
     vistos = set()
     for padrao in padroes:
-        for arquivo in sorted(RAIZ.rglob(padrao)):
-            if arquivo not in vistos and not FORA.intersection(arquivo.relative_to(RAIZ).parts):
-                vistos.add(arquivo)
-                yield arquivo
+        for file in sorted(RAIZ.rglob(padrao)):
+            if file not in vistos and not FORA.intersection(file.relative_to(RAIZ).parts):
+                vistos.add(file)
+                yield file
 
 
 def _from_do_dockerfile(texto):
@@ -52,12 +52,12 @@ def _imagens_do_compose(texto):
 
 
 def _imagens():
-    for arquivo in _arquivos("Dockerfile", "*.Dockerfile", "Dockerfile.*"):
-        for imagem in _from_do_dockerfile(arquivo.read_text()):
-            yield arquivo.relative_to(RAIZ).as_posix(), imagem
-    for arquivo in _arquivos("docker-compose*.yml", "docker-compose*.yaml", "compose*.y*ml"):
-        for imagem in _imagens_do_compose(arquivo.read_text()):
-            yield arquivo.relative_to(RAIZ).as_posix(), imagem
+    for file in _arquivos("Dockerfile", "*.Dockerfile", "Dockerfile.*"):
+        for imagem in _from_do_dockerfile(file.read_text()):
+            yield file.relative_to(RAIZ).as_posix(), imagem
+    for file in _arquivos("docker-compose*.yml", "docker-compose*.yaml", "compose*.y*ml"):
+        for imagem in _imagens_do_compose(file.read_text()):
+            yield file.relative_to(RAIZ).as_posix(), imagem
 
 
 def _repositorio(imagem):
@@ -73,15 +73,15 @@ IMAGENS = list(_imagens())
 def test_encontra_as_imagens_do_sistema():
     """The scan sees the system image and production's database and Caddy (the docs site's
     Dockerfile is not inside the system image, so it is not required)."""
-    arquivos = {arquivo for arquivo, _imagem in IMAGENS}
+    arquivos = {file for file, _imagem in IMAGENS}
     assert {"Dockerfile", "docker-compose.yml", "deploy/docker-compose.prod.yml"} <= arquivos
     producao = {_repositorio(i) for a, i in IMAGENS if a == "deploy/docker-compose.prod.yml"}
     assert {"postgres", "caddy"} <= producao
 
 
-@pytest.mark.parametrize(("arquivo", "imagem"), IMAGENS)
-def test_imagem_de_base_fixada_por_digest(arquivo, imagem):
-    assert DIGEST.search(imagem), f"{arquivo}: {imagem} needs @sha256:<digest> (decision 138)"
+@pytest.mark.parametrize(("file", "imagem"), IMAGENS)
+def test_imagem_de_base_fixada_por_digest(file, imagem):
+    assert DIGEST.search(imagem), f"{file}: {imagem} needs @sha256:<digest> (decision 138)"
 
 
 def test_mesma_imagem_nos_arquivos_do_compose():
@@ -89,9 +89,9 @@ def test_mesma_imagem_nos_arquivos_do_compose():
     Dependabot updates them in one pull request (the imagens-compose group), while the docs
     site's Caddy, in a Dockerfile, gets its own and may differ from production's for a while."""
     por_repositorio = {}
-    for arquivo, imagem in IMAGENS:
-        if "compose" in Path(arquivo).name:
-            por_repositorio.setdefault(_repositorio(imagem), {})[arquivo] = imagem
+    for file, imagem in IMAGENS:
+        if "compose" in Path(file).name:
+            por_repositorio.setdefault(_repositorio(imagem), {})[file] = imagem
     divergentes = {r: a for r, a in por_repositorio.items() if len(set(a.values())) > 1}
     assert not divergentes, divergentes
 
@@ -103,14 +103,14 @@ def test_scripts_e_ci_nao_usam_tag_solta():
     repositorios = "|".join(sorted({re.escape(_repositorio(i)) for _a, i in IMAGENS}))
     solta = re.compile(rf"(?<![\w/.-])(?:{repositorios}):[\w.${{}}-]+(?!\S*@sha256:)")
     achados = []
-    for arquivo in _arquivos("*.sh", "*.yml", "*.yaml"):
-        if "compose" in arquivo.name or arquivo.name == "releases.yaml":
+    for file in _arquivos("*.sh", "*.yml", "*.yaml"):
+        if "compose" in file.name or file.name == "releases.yaml":
             continue
-        for number, linha in enumerate(arquivo.read_text().splitlines(), 1):
+        for number, linha in enumerate(file.read_text().splitlines(), 1):
             code = linha.split(" #", 1)[0]
             if code.lstrip().startswith("#"):
                 continue
-            local = arquivo.relative_to(RAIZ)
+            local = file.relative_to(RAIZ)
             achados += [f"{local}:{number}: {m[0]}" for m in solta.finditer(code)]
     assert not achados, achados
 

@@ -282,7 +282,7 @@ class Attachment(ModeloDaClinica):
     )
     name = models.CharField(_("arquivo"), max_length=255, db_column="nome")
     kind = models.CharField(max_length=50, db_column="tipo")
-    tamanho = models.PositiveIntegerField()
+    size = models.PositiveIntegerField(db_column="tamanho")
     conteudo = models.BinaryField()
     practitioner = models.ForeignKey(
         Practitioner,

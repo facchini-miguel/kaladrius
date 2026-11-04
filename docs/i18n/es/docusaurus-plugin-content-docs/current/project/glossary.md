@@ -67,7 +67,7 @@ Los nombres del código están pasando del portugués al inglés (decisiones 155
 
 ## Campos, primer lote
 
-Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` y `criado_por` (decisión 160), `paciente`, `profissional` y `usuario` (decisión 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` y `numero` (decisión 163), `tipo`, `valor`, `situacao`, `atendimento` y `lancamento` (decisión 164), `data` y `conta` (decisión 165; también las variables locales con esos nombres exactos, como `clinica` → `clinic`). Después, los campos propios de cada app y, por último, las funciones y variables.
+Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` y `criado_por` (decisión 160), `paciente`, `profissional` y `usuario` (decisión 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` y `numero` (decisión 163), `tipo`, `valor`, `situacao`, `atendimento` y `lancamento` (decisión 164), `data` y `conta` (decisión 165), los 19 nombres después de `conta` en la tabla (decisión 166; también las variables locales con esos nombres exactos, como `clinica` → `clinic`). Después, los campos propios de cada app y, por último, las funciones y variables.
 
 | Antes | Después |
 |---|---|
@@ -93,6 +93,24 @@ Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clin
 | `atendimento` | `visit` |
 | `lancamento` | `entry` |
 | `conta` | `account` |
+| `arquivo` | `file` |
+| `ate` | `until` |
+| `bairro` | `neighborhood` |
+| `categoria` | `category` |
+| `cidade` | `city` |
+| `cor` | `color` |
+| `cpf_cnpj` | `tax_id` |
+| `desconto` | `discount` |
+| `inicio`, `fim` | `start`, `end` |
+| `funcionario` | `employee` |
+| `grupo` | `group` |
+| `momento` | `timestamp` |
+| `motivo` | `reason` |
+| `razao_social` | `legal_name` |
+| `registro` | `registration` |
+| `tamanho` | `size` |
+| `uf` | `state` |
+| `validade` | `valid_until` |
 
 ## Lo que queda en portugués
 

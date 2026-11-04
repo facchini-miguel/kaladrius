@@ -16,7 +16,7 @@
       <tr>
         <td>{% if procedimento.code %}<span class="text-body-secondary small">{{ procedimento.code }}</span> {% endif %}{{ procedimento.name }}</td>
         <td class="text-end text-nowrap">{{ procedimento.amount|moeda }}</td>
-        <td>{{ procedimento.categoria|default:"—" }}</td>
+        <td>{{ procedimento.category|default:"—" }}</td>
         <td>{% if procedimento.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         <td class="text-end">{% if pode.cadastros.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:procedure_edit' procedimento.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>

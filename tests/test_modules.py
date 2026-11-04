@@ -155,15 +155,15 @@ def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
     clinica_a, clinica_b, criar_profissional, django_user_model, cliente_de
 ):
     practitioner = criar_profissional(clinica_b, "Profissional fictício B")
-    inicio = timezone.localtime(timezone.now() + datetime.timedelta(days=2)).replace(
+    start = timezone.localtime(timezone.now() + datetime.timedelta(days=2)).replace(
         hour=6, minute=0, second=0, microsecond=0
     )
     with usar_clinica(clinica_b):
         Appointment.objects.create(
             practitioner=practitioner,
             kind=AppointmentType.objects.first(),
-            inicio=inicio,
-            fim=inicio + datetime.timedelta(minutes=30),
+            start=start,
+            end=start + datetime.timedelta(minutes=30),
         )
     cliente = cliente_de(django_user_model.objects.create_superuser("root_agenda_ficticio"))
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])

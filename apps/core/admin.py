@@ -68,7 +68,7 @@ class VinculoAdmin(admin.ModelAdmin):
 class BackupAdmin(admin.ModelAdmin):
     """Read-only list of the backups recorded by the server."""
 
-    list_display = ["momento", "arquivo", "tamanho"]
+    list_display = ["timestamp", "file", "size"]
 
     def has_add_permission(self, request):
         return False

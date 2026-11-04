@@ -156,12 +156,12 @@
           <tbody>
             {% for agendamento in agenda.lista %}
             <tr class="{% if agendamento == agenda.proximo %}table-primary{% elif agendamento.desmarcado %}text-body-secondary text-decoration-line-through{% endif %}">
-              <td class="text-nowrap">{{ agendamento.inicio|time:"H:i" }}–{{ agendamento.fim|time:"H:i" }}</td>
+              <td class="text-nowrap">{{ agendamento.start|time:"H:i" }}–{{ agendamento.end|time:"H:i" }}</td>
               <td>
-                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.kind.cor }}" title="{{ agendamento.kind.nome_exibido }}"></span>
+                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.kind.color }}" title="{{ agendamento.kind.nome_exibido }}"></span>
                 {% if agendamento.patient_id %}
                 {% if pode.pacientes.ver %}<a href="{% url 'patients:record' agendamento.patient_id %}">{{ agendamento.patient.name }}</a>{% else %}{{ agendamento.patient.name }}{% endif %}
-                {% if agendamento == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if agendamento.inicio <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
+                {% if agendamento == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if agendamento.start <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
                 <span class="text-body-secondary">{{ agendamento.titulo }}</span>
                 {% endif %}
@@ -283,7 +283,7 @@
         {% for orcamento in painel.orcamentos %}
         <li class="list-group-item small d-flex justify-content-between gap-2">
           <a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.name }}</a>
-          <span class="text-nowrap">{{ orcamento.total|moeda }} · {% if orcamento.validade == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.validade|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
+          <span class="text-nowrap">{{ orcamento.total|moeda }} · {% if orcamento.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>

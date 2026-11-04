@@ -80,10 +80,10 @@ def amostras(desde=None):
 def ultima():
     """The newest sample, reading only the end of the file (used on every superuser page)."""
     try:
-        with _arquivo().open("rb") as arquivo:
-            arquivo.seek(0, 2)
-            arquivo.seek(max(0, arquivo.tell() - 16384))
-            linhas = arquivo.read().decode("utf-8", errors="ignore").splitlines()
+        with _arquivo().open("rb") as file:
+            file.seek(0, 2)
+            file.seek(max(0, file.tell() - 16384))
+            linhas = file.read().decode("utf-8", errors="ignore").splitlines()
     except OSError:
         return None
     for linha in reversed(linhas):
@@ -140,8 +140,8 @@ def resumo(lista):
     entradas = [a for a in lista if a["rede_entrada"] is not None]
     return {
         "amostras": len(lista),
-        "inicio": lista[0]["momento"],
-        "fim": lista[-1]["momento"],
+        "start": lista[0]["momento"],
+        "end": lista[-1]["momento"],
         "cpu_media": sum(a["cpu"] for a in lista) / len(lista),
         "cpu_maxima": max(a["cpu"] for a in lista),
         "memoria_maxima": max(a["memoria_pct"] for a in lista),
@@ -175,8 +175,8 @@ def grafico(
     lista,
     series,
     *,
-    inicio=None,
-    fim=None,
+    start=None,
+    end=None,
     maximo=None,
     piso=None,
     teto=None,
@@ -192,18 +192,18 @@ def grafico(
     pontos = [a for a in lista if any(a.get(chave) is not None for chave, _ in series)]
     if not pontos:
         return ""
-    inicio = inicio or pontos[0]["momento"]
-    fim = fim or pontos[-1]["momento"]
-    duracao = max((fim - inicio).total_seconds(), 1)
+    start = start or pontos[0]["momento"]
+    end = end or pontos[-1]["momento"]
+    duracao = max((end - start).total_seconds(), 1)
     topo = topo_da_escala(lista, series, maximo, piso)
     if teto:
         topo = min(topo, teto)
     margem = 4  # lines at 0 or at the top stay visible
 
-    def x(momento):
-        if fim == inicio:
+    def x(timestamp):
+        if end == start:
             return largura / 2
-        return (momento - inicio).total_seconds() / duracao * largura
+        return (timestamp - start).total_seconds() / duracao * largura
 
     def y(value):
         return altura - margem - min(value, topo) / topo * (altura - 2 * margem)

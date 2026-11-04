@@ -115,7 +115,7 @@ def test_url_com_id_de_outra_clinica_da_404(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     url = reverse(rota, args=[de_b.pk])
     assert cliente.get(url).status_code == 404
-    assert cliente.post(url, {"name": "Invadido", "cor": "#000000"}).status_code == 404
+    assert cliente.post(url, {"name": "Invadido", "color": "#000000"}).status_code == 404
     with usar_clinica(clinica_b):
         assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
@@ -170,7 +170,7 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
         reverse("practitioners:new"),
-        {"name": "Dr. Novo", "cor": "#123456", "user": estranho.pk, "active": "on"},
+        {"name": "Dr. Novo", "color": "#123456", "user": estranho.pk, "active": "on"},
     )
     assert resposta.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):
@@ -185,7 +185,7 @@ def test_nao_liga_o_mesmo_usuario_a_dois_profissionais(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
         reverse("practitioners:new"),
-        {"name": "Dr. Segundo", "cor": "#123456", "user": colega.pk, "active": "on"},
+        {"name": "Dr. Segundo", "color": "#123456", "user": colega.pk, "active": "on"},
     )
     assert "já está ligado a outro profissional" in resposta.content.decode()
     with usar_clinica(clinica_a):

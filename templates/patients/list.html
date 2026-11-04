@@ -64,9 +64,9 @@
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ patient.cpf_cnpj|documento:patient.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.tax_id|documento:patient.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
-        <td>{% if patient.cidade %}{{ patient.cidade.name }}/{{ patient.cidade.uf.sigla }}{% else %}—{% endif %}</td>
+        <td>{% if patient.city %}{{ patient.city.name }}/{{ patient.city.state.sigla }}{% else %}—{% endif %}</td>
         <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
           {% if patient.arquivado %}

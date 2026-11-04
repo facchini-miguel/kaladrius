@@ -15,11 +15,11 @@ POR_PAGINA = 50
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def cidades(request):
     ufs = State.objects.all()
-    uf = request.GET.get("uf", "")
+    state = request.GET.get("state", "")
     busca = request.GET.get("q", "").strip()
-    cidades = City.objects.select_related("uf")
-    if uf.isdecimal():
-        cidades = cidades.filter(uf_id=int(uf))
+    cidades = City.objects.select_related("state")
+    if state.isdecimal():
+        cidades = cidades.filter(state_id=int(state))
     if busca:
         cidades = cidades.filter(name__unaccent__icontains=busca)
     pagina = Paginator(cidades, POR_PAGINA).get_page(request.GET.get("pagina"))
@@ -28,10 +28,10 @@ def cidades(request):
         "reference_data/cities.html",
         {
             "ufs": ufs,
-            "uf": uf,
+            "state": state,
             "busca": busca,
             "pagina": pagina,
-            "parametros": urlencode({"uf": uf, "q": busca}),
+            "parametros": urlencode({"state": state, "q": busca}),
         },
     )
 
@@ -53,8 +53,8 @@ def bancos(request):
 @login_required
 def opcoes_cidades(request):
     """<option> list of a state's cities, for chained UF → city selects (HTMX)."""
-    uf = request.GET.get("uf", "")
-    cidades = City.objects.filter(uf_id=int(uf)) if uf.isdecimal() else City.objects.none()
+    state = request.GET.get("state", "")
+    cidades = City.objects.filter(state_id=int(state)) if state.isdecimal() else City.objects.none()
     return render(request, "reference_data/city_options.html", {"cidades": cidades})
 
 
@@ -64,15 +64,15 @@ def sugestoes_endereco(request):
     the known ones plus the ones the clinic already typed for other patients there."""
     from apps.patients.models import Patient
 
-    code = request.GET.get("cidade", "")
+    code = request.GET.get("city", "")
     bairros, logradouros = set(), set()
     if code.isdecimal():
-        cidade = int(code)
-        bairros.update(Neighborhood.objects.filter(cidade_id=cidade).values_list("name", flat=True))
-        logradouros.update(Street.objects.filter(cidade_id=cidade).values_list("name", flat=True))
-        da_clinica = Patient.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
-        for bairro, logradouro in da_clinica.distinct():
-            bairros.add(bairro)
+        city = int(code)
+        bairros.update(Neighborhood.objects.filter(city_id=city).values_list("name", flat=True))
+        logradouros.update(Street.objects.filter(city_id=city).values_list("name", flat=True))
+        da_clinica = Patient.objects.filter(city_id=city).values_list("neighborhood", "logradouro")
+        for neighborhood, logradouro in da_clinica.distinct():
+            bairros.add(neighborhood)
             logradouros.add(logradouro)
     return render(
         request,

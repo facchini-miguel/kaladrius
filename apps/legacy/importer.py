@@ -129,12 +129,12 @@ def _documento(bruto, kind):
     return (documento, None) if cnpj_valido(documento) else ("", original)
 
 
-def _cabe(value, tamanho, rotulo, extras):
+def _cabe(value, size, rotulo, extras):
     """The value if it fits the field; otherwise it goes in full to the notes."""
-    if len(value) <= tamanho:
+    if len(value) <= size:
         return value
     extras.append(f"{rotulo}: {value}")
-    return value[:tamanho]
+    return value[:size]
 
 
 class _Importador:
@@ -149,10 +149,10 @@ class _Importador:
     def _cidades(self):
         """Legacy city id → (UF, IBGE city or None, legacy name)."""
         ufs_legado = {u["id"]: _texto(u["sigla"]).upper() for u in self.t.get("uf", [])}
-        ufs = {uf.sigla: uf for uf in State.objects.all()}
+        ufs = {state.sigla: state for state in State.objects.all()}
         ibge = defaultdict(dict)
-        for cidade in City.objects.select_related("uf"):
-            ibge[cidade.uf.sigla][_chave(cidade.name)] = cidade
+        for city in City.objects.select_related("state"):
+            ibge[city.state.sigla][_chave(city.name)] = city
         resultado = {}
         for linha in self.t.get("cidade", []):
             id_uf = str(linha["id_uf"] or "")
@@ -206,9 +206,9 @@ class _Importador:
             name = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
             kind = existentes.get(_chave(name))
             if kind is None:
-                cor = _texto(linha["cor"])
-                cor = cor if re.fullmatch(r"#[0-9a-fA-F]{6}", cor) else "#0d6efd"
-                kind = AppointmentType.objects.create(clinic=clinic, name=name, cor=cor.lower())
+                color = _texto(linha["cor"])
+                color = color if re.fullmatch(r"#[0-9a-fA-F]{6}", color) else "#0d6efd"
+                kind = AppointmentType.objects.create(clinic=clinic, name=name, color=color.lower())
                 existentes[_chave(name)] = kind
                 self.relatorio.tipos_criados += 1
             mapa[linha["id"]] = kind
@@ -261,10 +261,12 @@ class _Importador:
             avisos["CEP incompleto (guardado nas observações)"] += 1
             cep = ""
 
-        uf = cidade = None
+        state = city = None
         if linha["id_cidade"]:
-            uf, cidade, nome_cidade, sigla = cidades.get(linha["id_cidade"], (None, None, "", None))
-            if cidade is None:
+            state, city, nome_cidade, sigla = cidades.get(
+                linha["id_cidade"], (None, None, "", None)
+            )
+            if city is None:
                 extras.append(f"Cidade no sistema antigo: {nome_cidade}/{sigla or '?'}")
                 avisos["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
 
@@ -294,10 +296,10 @@ class _Importador:
             clinic=clinic,
             kind=kind,
             name=_cabe(name, 200, "Nome completo", extras),
-            razao_social=""
+            legal_name=""
             if pf
             else _cabe(_texto(linha["razao_social"]), 200, "Razão social", extras),
-            cpf_cnpj=documento,
+            tax_id=documento,
             rg=_cabe(_texto(linha["rg"]), 20, "RG", extras) if pf else "",
             inscricao_estadual="" if pf else _cabe(_texto(linha["insc_est"]), 20, "IE", extras),
             sexo=sexo if pf else "",
@@ -309,9 +311,11 @@ class _Importador:
             else "",
             email=email,
             cep=cep,
-            uf=uf,
-            cidade=cidade,
-            bairro=_cabe(bairros.get(linha["id_bairrocomunidade"], ""), 100, "Bairro", extras),
+            state=state,
+            city=city,
+            neighborhood=_cabe(
+                bairros.get(linha["id_bairrocomunidade"], ""), 100, "Bairro", extras
+            ),
             logradouro=_cabe(logradouros.get(linha["id_logradouro"], ""), 200, "Endereço", extras),
             number=_cabe(_texto(linha["endereco_num"]), 10, "Número", extras),
             complemento=_cabe(_texto(linha["endereco_compl"]), 100, "Complemento", extras),
@@ -358,17 +362,17 @@ class _Importador:
             practitioner = profissionais.get(linha["id_dentista"])
             kind = tipos.get(linha["id_cor"])
             dia = _data(linha["data_marcar"])
-            inicio, fim = _hora(linha["hora_inicial"]), _hora(linha["hora_final"])
-            if None in (practitioner, kind, dia, inicio, fim):
+            start, end = _hora(linha["hora_inicial"]), _hora(linha["hora_final"])
+            if None in (practitioner, kind, dia, start, end):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
             description = _texto(linha["descricao"]) or kind.name
-            inicio = timezone.make_aware(datetime.datetime.combine(dia, inicio))
-            fim = timezone.make_aware(datetime.datetime.combine(dia, fim))
-            if fim <= inicio:
-                fim = inicio + DURACAO_MINIMA
+            start = timezone.make_aware(datetime.datetime.combine(dia, start))
+            end = timezone.make_aware(datetime.datetime.combine(dia, end))
+            if end <= start:
+                end = start + DURACAO_MINIMA
                 description = (
                     f"{description}\n[Sistema antigo: horário de término corrigido]".strip()
                 )
@@ -378,18 +382,18 @@ class _Importador:
                     clinic=practitioner.clinic,
                     practitioner=practitioner,
                     kind=kind,
-                    inicio=inicio,
-                    fim=fim,
+                    start=start,
+                    end=end,
                     description=description,
                 )
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
         aceitos, ultimo_fim = [], {}
-        for agendamento in sorted(novos, key=lambda a: (a.practitioner.pk, a.inicio)):
-            if agendamento.inicio < ultimo_fim.get(agendamento.practitioner.pk, agendamento.inicio):
+        for agendamento in sorted(novos, key=lambda a: (a.practitioner.pk, a.start)):
+            if agendamento.start < ultimo_fim.get(agendamento.practitioner.pk, agendamento.start):
                 avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] += 1
                 continue
-            ultimo_fim[agendamento.practitioner.pk] = agendamento.fim
+            ultimo_fim[agendamento.practitioner.pk] = agendamento.end
             aceitos.append(agendamento)
         Appointment.objects.bulk_create(aceitos, batch_size=1000)
         self.relatorio.agendamentos = len(aceitos)
@@ -400,21 +404,21 @@ class _Importador:
         """Widen the clinic's schedule hours so every imported appointment shows in the grid."""
         passo = clinic.agenda_intervalo
 
-        def minutos(momento):
-            local = timezone.localtime(momento)
+        def minutos(timestamp):
+            local = timezone.localtime(timestamp)
             return local.hour * 60 + local.minute
 
-        primeiro = min(minutos(a.inicio) for a in agendamentos) // passo * passo
-        ultimo = -(-max(minutos(a.fim) or 24 * 60 for a in agendamentos) // passo) * passo
-        inicio = min(clinic.agenda_inicio, datetime.time(primeiro // 60, primeiro % 60))
-        fim = clinic.agenda_fim
+        primeiro = min(minutos(a.start) for a in agendamentos) // passo * passo
+        ultimo = -(-max(minutos(a.end) or 24 * 60 for a in agendamentos) // passo) * passo
+        start = min(clinic.agenda_inicio, datetime.time(primeiro // 60, primeiro % 60))
+        end = clinic.agenda_fim
         if ultimo < 24 * 60:
-            fim = max(fim, datetime.time(ultimo // 60, ultimo % 60))
-        if (inicio, fim) != (clinic.agenda_inicio, clinic.agenda_fim):
-            clinic.agenda_inicio, clinic.agenda_fim = inicio, fim
+            end = max(end, datetime.time(ultimo // 60, ultimo % 60))
+        if (start, end) != (clinic.agenda_inicio, clinic.agenda_fim):
+            clinic.agenda_inicio, clinic.agenda_fim = start, end
             clinic.save(update_fields=["agenda_inicio", "agenda_fim"])
             self.relatorio.avisos[
-                f"Horário da agenda ampliado para {inicio:%H:%M}–{fim:%H:%M} "
+                f"Horário da agenda ampliado para {start:%H:%M}–{end:%H:%M} "
                 "(havia atendimentos fora do padrão)"
             ] += 1
 

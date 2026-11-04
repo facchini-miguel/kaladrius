@@ -22,8 +22,8 @@
     const params = new URLSearchParams({
       practitioner: config.practitioner,
       date: dataISO(inicio),
-      inicio: hora(inicio),
-      fim: hora(fim),
+      start: hora(inicio),
+      end: hora(fim),
     });
     abrirModal(`${config.urls.novo}?${params}`);
   }
@@ -75,8 +75,8 @@
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },
     firstDay: 1,
     allDaySlot: false,
-    slotMinTime: config.inicio,
-    slotMaxTime: config.fim,
+    slotMinTime: config.start,
+    slotMaxTime: config.end,
     slotDuration: { minutes: config.intervalo },
     snapDuration: { minutes: config.intervalo },
     slotLabelInterval: { minutes: config.intervalo },

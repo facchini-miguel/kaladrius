@@ -12,7 +12,7 @@ from .models import Estimate
 
 
 @transaction.atomic
-def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagamento=None):
+def aprovar(orcamento, *, parcelas, primeiro_vencimento, category, user, pagamento=None):
     """Approve an open estimate: creates the receivable (and, optionally, pays the 1st
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
     orcamento = Estimate.objects.select_for_update().get(pk=orcamento.pk)
@@ -27,7 +27,7 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagame
         patient=orcamento.patient,
         practitioner=orcamento.practitioner,
         description=_("Orçamento nº %(numero)s") % {"numero": orcamento.pk},
-        categoria=categoria,
+        category=category,
         valor_total=total,
         parcelas=parcelas,
         primeiro_vencimento=primeiro_vencimento,

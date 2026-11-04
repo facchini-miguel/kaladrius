@@ -8,7 +8,7 @@
 <form method="get" class="row g-2 align-items-end mb-3">
   <div class="col-6 col-md-3">
     <label class="form-label small" for="ate">{% translate "Recebimentos até" %}</label>
-    <input type="date" id="ate" name="ate" value="{{ ate|date:'Y-m-d' }}" class="form-control">
+    <input type="date" id="ate" name="until" value="{{ until|date:'Y-m-d' }}" class="form-control">
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>
 </form>
@@ -26,7 +26,7 @@
         <td class="text-end text-nowrap fw-semibold">{{ linha.amount|moeda }}</td>
         <td class="text-end text-nowrap">
           {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' linha.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
-          {% if pode.financeiro.criar and linha.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' linha.practitioner.pk %}?ate={{ ate|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
+          {% if pode.financeiro.criar and linha.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' linha.practitioner.pk %}?until={{ until|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}
@@ -51,7 +51,7 @@
       <tr>
         <td class="text-nowrap">{{ comissao.created_at|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ comissao.practitioner.name }}</td>
-        <td class="text-nowrap">{{ comissao.ate|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-nowrap">{{ comissao.until|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="text-end text-nowrap">{% if comissao.cancelada %}<s>{{ comissao.amount|moeda }}</s> <span class="badge text-bg-secondary">{% translate "Cancelada" %}</span>{% else %}{{ comissao.amount|moeda }}{% endif %}</td>
         <td class="text-end text-nowrap"><a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'finance:entry' comissao.entry_id %}">{% translate "A pagar" %}</a></td>
       </tr>

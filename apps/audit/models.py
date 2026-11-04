@@ -22,7 +22,9 @@ class AuditEntry(models.Model):
         LOGIN_FALHOU = "login_falhou", _("Tentativa de entrada recusada")
         LOGOUT = "logout", _("Saiu do sistema")
 
-    momento = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
+    timestamp = models.DateTimeField(
+        _("quando"), auto_now_add=True, db_index=True, db_column="momento"
+    )
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
     clinic = models.ForeignKey(
@@ -58,13 +60,13 @@ class AuditEntry(models.Model):
         db_table = "auditoria_registroauditoria"
         verbose_name = _("registro de auditoria")
         verbose_name_plural = _("registros de auditoria")
-        ordering = ["-momento", "-pk"]
+        ordering = ["-timestamp", "-pk"]
         indexes = [
-            models.Index(fields=["clinic", "-momento"], name="auditoria_clinica_momento"),
+            models.Index(fields=["clinic", "-timestamp"], name="auditoria_clinica_momento"),
             models.Index(fields=["modelo", "objeto_id"], name="auditoria_objeto"),
         ]
 
     def __str__(self):
         quem = self.usuario_nome or "sistema"
         acao = self.get_acao_display()
-        return f"{self.momento:%d/%m/%Y %H:%M} {quem}: {acao} {self.objeto_descricao}"
+        return f"{self.timestamp:%d/%m/%Y %H:%M} {quem}: {acao} {self.objeto_descricao}"

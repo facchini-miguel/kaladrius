@@ -12,6 +12,6 @@ class FuncionarioAdmin(admin.ModelAdmin):
 
 @admin.register(Payroll)
 class FolhaAdmin(admin.ModelAdmin):
-    list_display = ["funcionario", "competencia", "salario", "horas_extras", "faltas"]
+    list_display = ["employee", "competencia", "salario", "horas_extras", "faltas"]
     list_filter = ["clinic", "competencia"]
-    raw_id_fields = ["funcionario", "entry"]
+    raw_id_fields = ["employee", "entry"]

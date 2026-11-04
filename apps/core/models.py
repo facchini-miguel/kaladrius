@@ -304,14 +304,16 @@ class Backup(models.Model):
     how a failing backup gets noticed (the server has no e-mail or paid alerting).
     """
 
-    momento = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
-    arquivo = models.CharField(_("arquivo"), max_length=200)
-    tamanho = models.PositiveBigIntegerField(_("tamanho (bytes)"))
+    timestamp = models.DateTimeField(
+        _("quando"), auto_now_add=True, db_index=True, db_column="momento"
+    )
+    file = models.CharField(_("arquivo"), max_length=200, db_column="arquivo")
+    size = models.PositiveBigIntegerField(_("tamanho (bytes)"), db_column="tamanho")
 
     class Meta:
         verbose_name = _("backup")
         verbose_name_plural = _("backups")
-        ordering = ["-momento"]
+        ordering = ["-timestamp"]
 
     def __str__(self):
-        return self.arquivo
+        return self.file

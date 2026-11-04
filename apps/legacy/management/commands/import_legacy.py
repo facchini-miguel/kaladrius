@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "arquivo", metavar="file", help="MySQL dump (.sql). Use - to read from stdin."
+            "file", metavar="file", help="MySQL dump (.sql). Use - to read from stdin."
         )
         parser.add_argument(
             "--clinic", dest="clinic", required=True, help="Name of the clinic to create."
@@ -28,12 +28,12 @@ class Command(BaseCommand):
             help="Dump encoding (default: utf-8).",
         )
 
-    def handle(self, *args, arquivo, clinic, codificacao, **options):
+    def handle(self, *args, file, clinic, codificacao, **options):
         try:
-            if arquivo == "-":
+            if file == "-":
                 texto = sys.stdin.buffer.read().decode(codificacao)
             else:
-                texto = Path(arquivo).read_text(encoding=codificacao)
+                texto = Path(file).read_text(encoding=codificacao)
         except (OSError, UnicodeDecodeError) as erro:
             raise CommandError(f"Não foi possível ler o arquivo: {erro}") from erro
 

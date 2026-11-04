@@ -156,7 +156,7 @@ def lancamento_novo(request):
             patient=dados["patient"],
             pessoa="" if dados["patient"] else dados["pessoa"].strip(),
             description=dados["description"],
-            categoria=dados["categoria"],
+            category=dados["category"],
             centro_custo=dados.get("centro_custo"),
             practitioner=dados["practitioner"],
             notes=dados["notes"],
@@ -198,7 +198,7 @@ def despesa_nova(request):
             fornecedor=dados["fornecedor"],
             pessoa=dados["pessoa"].strip(),
             description=dados["description"],
-            categoria=dados["categoria"],
+            category=dados["category"],
             centro_custo=dados.get("centro_custo"),
             notes=dados["notes"],
             valor_total=form.valor_total(),
@@ -223,7 +223,7 @@ def despesa_nova(request):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def entry(request, pk):
     entry = get_object_or_404(
-        Entry.objects.select_related("patient", "categoria", "centro_custo", "practitioner"),
+        Entry.objects.select_related("patient", "category", "centro_custo", "practitioner"),
         pk=pk,
     )
     _exigir(request, entry.kind, Acao.VER)
@@ -258,7 +258,7 @@ def lancamento_cancelar(request, pk):
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.cancelar(entry, motivo=form.cleaned_data["motivo"], user=request.user)
+            services.cancelar(entry, reason=form.cleaned_data["reason"], user=request.user)
         except ValidationError as erro:
             messages.error(request, erro.messages[0])
         else:
@@ -302,7 +302,7 @@ def receber(request, pk):
         form.fields["juros"].help_text = _("Já incluídos no valor pago.")
     if request.method == "POST" and form.is_valid():
         dados = {campo: value for campo, value in form.cleaned_data.items() if campo in form.fields}
-        dados.setdefault("desconto", 0)
+        dados.setdefault("discount", 0)
         dados["juros"] = dados.get("juros") or 0
         try:
             pagamento = services.receber(parcela, user=request.user, **dados)
@@ -360,7 +360,7 @@ def estornar(request, pk):
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.estornar(pagamento, motivo=form.cleaned_data["motivo"], user=request.user)
+            services.estornar(pagamento, reason=form.cleaned_data["reason"], user=request.user)
         except ValidationError as erro:
             messages.error(request, erro.messages[0])
         else:
@@ -532,26 +532,26 @@ def _periodo(request):
     except ValueError:
         de = inicio_do_mes
     try:
-        ate = datetime.date.fromisoformat(request.GET.get("ate", ""))
+        until = datetime.date.fromisoformat(request.GET.get("until", ""))
     except ValueError:
-        ate = fim_do_mes
-    if ate < de or (ate - de).days > 731:
-        de, ate = inicio_do_mes, fim_do_mes
-    return de, ate
+        until = fim_do_mes
+    if until < de or (until - de).days > 731:
+        de, until = inicio_do_mes, fim_do_mes
+    return de, until
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
 def fluxo_de_caixa(request):
-    de, ate = _periodo(request)
+    de, until = _periodo(request)
     por_mes = request.GET.get("agrupar") == "mes"
     return render(
         request,
         "finance/cash_flow.html",
         {
             "de": de,
-            "ate": ate,
+            "until": until,
             "por_mes": por_mes,
-            "fluxo": services.fluxo_de_caixa(de, ate, por_mes=por_mes),
+            "fluxo": services.fluxo_de_caixa(de, until, por_mes=por_mes),
             "contas": services.saldos_das_contas(),
         },
     )
@@ -559,14 +559,14 @@ def fluxo_de_caixa(request):
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
 def relatorios(request):
-    de, ate = _periodo(request)
+    de, until = _periodo(request)
     return render(
         request,
         "finance/reports.html",
         {
             "de": de,
-            "ate": ate,
-            "relatorio": services.relatorio(de, ate),
+            "until": until,
+            "relatorio": services.relatorio(de, until),
             "fechado_ate": services.fechado_ate(request.clinic.pk),
         },
     )
@@ -586,7 +586,7 @@ def planejamento(request):
     ano = min(max(ano, 2000), hoje.year + 5)
     pode_alterar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
     grupos = services.ligar_grupos(AccountGroup.objects.filter(active=True))
-    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "amount"))
+    metas = dict(Planning.objects.filter(ano=ano).values_list("group_id", "amount"))
     form = PlanejamentoForm(request.POST or None, grupos=grupos, metas=metas)
     if request.method == "POST":
         if not pode_alterar:
@@ -610,8 +610,8 @@ def planejamento(request):
     dados = services.planejamento(ano)
     for secao in dados["secoes"]:
         for linha in secao["linhas"]:
-            if pode_alterar and linha["grupo"].active:
-                linha["campo"] = form[PlanejamentoForm.name(linha["grupo"])]
+            if pode_alterar and linha["group"].active:
+                linha["campo"] = form[PlanejamentoForm.name(linha["group"])]
     return render(
         request,
         "finance/planning.html",
@@ -645,11 +645,11 @@ def fechamento(request):
             dados = form.cleaned_data
             try:
                 if acao == "fechar":
-                    services.fechar(request.clinic, dados["ate"], user=request.user)
+                    services.fechar(request.clinic, dados["until"], user=request.user)
                     messages.success(request, _("Financeiro fechado."))
                 else:
                     services.reabrir(
-                        request.clinic, dados["ate"], motivo=dados["motivo"], user=request.user
+                        request.clinic, dados["until"], reason=dados["reason"], user=request.user
                     )
                     messages.success(request, _("Período reaberto."))
             except ValidationError as erro:
@@ -718,17 +718,17 @@ def plano_contas(request):
         linhas = []
 
         def descer(pai_id, nivel, kind=kind, linhas=linhas):
-            for grupo in (g for g in grupos if g.kind == kind and g.pai_id == pai_id):
-                linhas.append({"nivel": nivel, "grupo": grupo})
+            for group in (g for g in grupos if g.kind == kind and g.pai_id == pai_id):
+                linhas.append({"nivel": nivel, "group": group})
                 linhas.extend(
-                    {"nivel": nivel + 1, "categoria": c}
+                    {"nivel": nivel + 1, "category": c}
                     for c in categorias
-                    if c.grupo_id == grupo.pk
+                    if c.group_id == group.pk
                 )
-                descer(grupo.pk, nivel + 1)
+                descer(group.pk, nivel + 1)
 
         descer(None, 0)
-        sem_grupo = [c for c in categorias if c.kind == kind and c.grupo_id is None]
+        sem_grupo = [c for c in categorias if c.kind == kind and c.group_id is None]
         arvores.append({"rotulo": rotulo, "linhas": linhas, "sem_grupo": sem_grupo})
     return render(request, "finance/chart_of_accounts.html", {"arvores": arvores})
 
@@ -746,8 +746,8 @@ def grupo_editar(request, pk):
 def _grupo_form(request, instancia):
     form = GrupoContabilForm(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
-        grupo = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.name})
+        group = form.save()
+        messages.success(request, _("%(nome)s salvo.") % {"nome": group.name})
         return redirect("finance:chart_of_accounts")
     return render(request, "finance/group_form.html", {"form": form, "instancia": instancia})
 
@@ -760,10 +760,10 @@ def fornecedores(request):
     busca = request.GET.get("q", "").strip()
     lista = Supplier.objects.all()
     if busca:
-        filtro = Q(name__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(legal_name__unaccent__icontains=busca)
         documento = normalizar_cnpj(busca)
         if any(c.isdigit() for c in documento):
-            filtro |= Q(cpf_cnpj__startswith=documento)
+            filtro |= Q(tax_id__startswith=documento)
         lista = lista.filter(filtro)
     pagina = Paginator(lista, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
@@ -821,20 +821,20 @@ def _fornecedor_form(request, instancia):
 def _ate(request):
     hoje = timezone.localdate()
     try:
-        return min(datetime.date.fromisoformat(request.GET.get("ate", "")), hoje)
+        return min(datetime.date.fromisoformat(request.GET.get("until", "")), hoje)
     except ValueError:
         return hoje
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
 def comissoes_lista(request):
-    ate = _ate(request)
+    until = _ate(request)
     return render(
         request,
         "finance/commissions.html",
         {
-            "ate": ate,
-            "linhas": commissions.resumo(ate),
+            "until": until,
+            "linhas": commissions.resumo(until),
             "sem_percentual": Practitioner.objects.filter(active=True, comissao_percentual=0),
             "historico": Commission.objects.select_related("practitioner", "entry")[:30],
         },
@@ -859,26 +859,26 @@ def comissao_percentual(request, pk):
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
 def comissao_pagar(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
-    ate = _ate(request)
+    until = _ate(request)
     padrao = (
         Category.objects.filter(kind=Category.Tipo.DESPESA, name="Comissões", active=True).first()
         or Category.objects.filter(kind=Category.Tipo.DESPESA, active=True).first()
     )
-    form = PagarComissaoForm(request.POST or None, initial={"categoria": padrao})
+    form = PagarComissaoForm(request.POST or None, initial={"category": padrao})
     if request.method == "POST" and form.is_valid():
         try:
             comissao = commissions.pagar(
-                practitioner, ate=ate, user=request.user, **form.cleaned_data
+                practitioner, until=until, user=request.user, **form.cleaned_data
             )
         except ValidationError as erro:
             messages.error(request, erro.messages[0])
-            return redirect(f"{reverse('finance:commissions')}?ate={ate.isoformat()}")
+            return redirect(f"{reverse('finance:commissions')}?until={until.isoformat()}")
         messages.success(request, _("Comissão lançada em A pagar."))
         return redirect("finance:entry", pk=comissao.entry_id)
     return render(
         request,
         "finance/commission_pay.html",
-        {"form": form, "calculo": commissions.pendente(practitioner, ate), "ate": ate},
+        {"form": form, "calculo": commissions.pendente(practitioner, until), "until": until},
     )
 
 
@@ -912,16 +912,16 @@ def extratos(request):
         if not pode(request, Modulo.FINANCEIRO, Acao.CRIAR):
             raise PermissionDenied
         if form.is_valid():
-            arquivo = form.cleaned_data["arquivo"]
+            file = form.cleaned_data["file"]
             try:
                 importacao = reconciliation.importar(
                     form.cleaned_data["account"],
-                    nome_arquivo=arquivo.name,
-                    conteudo=arquivo.read(),
+                    nome_arquivo=file.name,
+                    conteudo=file.read(),
                     user=request.user,
                 )
             except ArquivoInvalido as erro:
-                form.add_error("arquivo", str(erro))
+                form.add_error("file", str(erro))
             else:
                 messages.success(
                     request,
@@ -1017,10 +1017,10 @@ def transacao_acao(request, pk, acao):
         if acao == "reconcile":
             reconciliation.conciliar(transacao, request.POST.get("chave", ""), user=request.user)
         elif acao == "ignore":
-            motivo = request.POST.get("motivo", "").strip()[:200]
-            if not motivo:
+            reason = request.POST.get("reason", "").strip()[:200]
+            if not reason:
                 raise ValidationError(_("Informe o motivo para ignorar a transação."))
-            reconciliation.ignorar(transacao, motivo=motivo, user=request.user)
+            reconciliation.ignorar(transacao, reason=reason, user=request.user)
         else:
             reconciliation.desfazer(transacao)
     except ValidationError as erro:

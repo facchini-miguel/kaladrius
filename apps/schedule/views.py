@@ -91,10 +91,10 @@ def _resposta_sucesso(mensagem):
     return resposta
 
 
-def _relogio(momento):
+def _relogio(timestamp):
     """A moment as the clinic's wall clock, without an offset (decision 117): the calendar runs
     in UTC mode, so it shows the clinic's times whatever the browser's time zone."""
-    return timezone.localtime(momento).replace(tzinfo=None).isoformat()
+    return timezone.localtime(timestamp).replace(tzinfo=None).isoformat()
 
 
 def _periodo(request):
@@ -102,14 +102,14 @@ def _periodo(request):
     mode with the clinic's wall clock (decision 117), so any offset that comes along is dropped
     and the bounds are read in the clinic's time zone."""
     try:
-        inicio = datetime.datetime.fromisoformat(request.GET["start"])
-        fim = datetime.datetime.fromisoformat(request.GET["end"])
+        start = datetime.datetime.fromisoformat(request.GET["start"])
+        end = datetime.datetime.fromisoformat(request.GET["end"])
     except (KeyError, ValueError):
         return None
-    inicio, fim = (timezone.make_aware(momento.replace(tzinfo=None)) for momento in (inicio, fim))
-    if fim <= inicio or fim - inicio > datetime.timedelta(days=62):
+    start, end = (timezone.make_aware(timestamp.replace(tzinfo=None)) for timestamp in (start, end))
+    if end <= start or end - start > datetime.timedelta(days=62):
         return None
-    return inicio, fim
+    return start, end
 
 
 @exige_permissao(Modulo.AGENDA, Acao.VER)
@@ -126,8 +126,8 @@ def calendario(request):
     ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
     configuracao = {
         "practitioner": practitioner.pk if practitioner else None,
-        "inicio": clinic.agenda_inicio.strftime("%H:%M:%S"),
-        "fim": clinic.agenda_fim.strftime("%H:%M:%S"),
+        "start": clinic.agenda_inicio.strftime("%H:%M:%S"),
+        "end": clinic.agenda_fim.strftime("%H:%M:%S"),
         "intervalo": clinic.agenda_intervalo,
         "date": request.GET.get("date") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
@@ -167,16 +167,16 @@ def eventos(request):
     practitioner = request.GET.get("practitioner", "")
     if periodo is None or not practitioner.isdecimal():
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
-    inicio, fim = periodo
+    start, end = periodo
     # The middle of the visible range falls inside the week (or month) on the screen.
-    meio = timezone.localtime(inicio + (fim - inicio) / 2).date()
+    meio = timezone.localtime(start + (end - start) / 2).date()
     request.session[SESSAO_DATA] = {
         "data": meio.isoformat(),
         "em": timezone.localdate().isoformat(),
     }
     agendamentos = (
         services.agendamentos_visiveis(request)
-        .filter(practitioner_id=int(practitioner), inicio__lt=fim, fim__gt=inicio)
+        .filter(practitioner_id=int(practitioner), start__lt=end, end__gt=start)
         .select_related("kind", "patient")
     )
     return JsonResponse(
@@ -184,10 +184,10 @@ def eventos(request):
             {
                 "id": agendamento.pk,
                 "title": agendamento.titulo,
-                "start": _relogio(agendamento.inicio),
-                "end": _relogio(agendamento.fim),
-                "backgroundColor": agendamento.kind.cor,
-                "borderColor": agendamento.kind.cor,
+                "start": _relogio(agendamento.start),
+                "end": _relogio(agendamento.end),
+                "backgroundColor": agendamento.kind.color,
+                "borderColor": agendamento.kind.color,
                 "textColor": "#212529",
                 "classNames": [f"situacao-{agendamento.status}"],
                 "extendedProps": {
@@ -211,8 +211,8 @@ def novo(request):
         for campo, parametro in [
             ("practitioner", "practitioner"),
             ("date", "date"),
-            ("hora_inicio", "inicio"),
-            ("hora_fim", "fim"),
+            ("hora_inicio", "start"),
+            ("hora_fim", "end"),
         ]
         if request.GET.get(parametro)
     }
@@ -309,7 +309,7 @@ def excluir(request, pk):
         if request.POST.get("escopo") == "serie" and agendamento.serie:
             # This one and the following ones of the same series.
             excluidos = Appointment.objects.filter(
-                serie=agendamento.serie, inicio__gte=agendamento.inicio
+                serie=agendamento.serie, start__gte=agendamento.start
             )
         total, _ = excluidos.delete()
         return _resposta_sucesso(
@@ -318,7 +318,7 @@ def excluir(request, pk):
     proximos = 0
     if agendamento.serie:
         proximos = Appointment.objects.filter(
-            serie=agendamento.serie, inicio__gt=agendamento.inicio
+            serie=agendamento.serie, start__gt=agendamento.start
         ).count()
     return render(
         request, "schedule/_delete.html", {"agendamento": agendamento, "proximos": proximos}
@@ -347,9 +347,9 @@ def aniversariantes(request):
     periodo = _periodo(request)
     if periodo is None:
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
-    inicio = timezone.localdate(periodo[0])
-    total_dias = (timezone.localdate(periodo[1]) - inicio).days
-    dias = [inicio + datetime.timedelta(days=n) for n in range(total_dias)]
+    start = timezone.localdate(periodo[0])
+    total_dias = (timezone.localdate(periodo[1]) - start).days
+    dias = [start + datetime.timedelta(days=n) for n in range(total_dias)]
     return JsonResponse(
         {dia.isoformat(): len(lista) for dia, lista in _aniversariantes_em(dias).items() if lista}
     )

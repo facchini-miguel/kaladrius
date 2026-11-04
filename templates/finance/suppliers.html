@@ -38,7 +38,7 @@
           <a href="{% url 'finance:supplier' fornecedor.pk %}">{{ fornecedor.name }}</a>
           {% if not fornecedor.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ fornecedor.tax_id|documento:fornecedor.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ fornecedor.phone|phone|default:"—" }}</td>
         <td class="text-nowrap">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}</td>

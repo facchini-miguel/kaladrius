@@ -23,7 +23,7 @@
     <div class="col-md-4">{% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.juros %}{% include "includes/field.html" %}{% endwith %}</div>
-    {% if pode_desconto %}<div class="col-md-4">{% with campo=form.desconto %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+    {% if pode_desconto %}<div class="col-md-4">{% with campo=form.discount %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
     <div class="col-md-4">{% with campo=form.forma %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>

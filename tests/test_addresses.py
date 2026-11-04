@@ -22,7 +22,7 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 def test_bairros_e_logradouros_do_odonto_carregados():
     # 75 in the legacy, 5 of them registered twice in the same city.
     assert Neighborhood.objects.count() == 70
-    assert Neighborhood.objects.filter(cidade_id=CARLOS_BARBOSA).count() == 39
+    assert Neighborhood.objects.filter(city_id=CARLOS_BARBOSA).count() == 39
     assert Street.objects.count() == 316
     assert Street.objects.filter(name__startswith="Rua ").exists()
 
@@ -31,23 +31,25 @@ def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinic
     with usar_clinica(clinica_a):
         Patient.objects.create(
             name="Paciente fictício A",
-            cidade_id=CARLOS_BARBOSA,
-            bairro="Bairro Novo Fictício",
+            city_id=CARLOS_BARBOSA,
+            neighborhood="Bairro Novo Fictício",
             logradouro="Rua Inventada A",
         )
     with usar_clinica(clinica_b):
         Patient.objects.create(
-            name="Paciente fictício B", cidade_id=CARLOS_BARBOSA, bairro="Bairro de Outra Clínica"
+            name="Paciente fictício B",
+            city_id=CARLOS_BARBOSA,
+            neighborhood="Bairro de Outra Clínica",
         )
-    texto = recepcao.get(URL, {"cidade": CARLOS_BARBOSA}).content.decode()
+    texto = recepcao.get(URL, {"city": CARLOS_BARBOSA}).content.decode()
     assert 'id="bairros-sugeridos"' in texto and 'value="Centro"' in texto
     assert 'value="Bairro Novo Fictício"' in texto and 'value="Rua Inventada A"' in texto
     assert "Outra Clínica" not in texto  # another clinic's patients stay private
 
 
 def test_cidade_sem_dados_e_parametro_invalido(recepcao):
-    assert "<option" not in recepcao.get(URL, {"cidade": "3550308"}).content.decode()
-    assert recepcao.get(URL, {"cidade": "abc"}).status_code == 200
+    assert "<option" not in recepcao.get(URL, {"city": "3550308"}).content.decode()
+    assert recepcao.get(URL, {"city": "abc"}).status_code == 200
 
 
 def test_formulario_do_paciente_liga_as_sugestoes(recepcao):
@@ -57,4 +59,4 @@ def test_formulario_do_paciente_liga_as_sugestoes(recepcao):
 
 
 def test_sem_login_nao_ve_sugestoes(client):
-    assert client.get(URL, {"cidade": CARLOS_BARBOSA}).status_code == 302
+    assert client.get(URL, {"city": CARLOS_BARBOSA}).status_code == 302

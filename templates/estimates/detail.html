@@ -11,7 +11,7 @@
       <a href="{% url 'patients:record' orcamento.patient_id %}">{{ orcamento.patient.name }}</a>
       {% if orcamento.practitioner %} · {{ orcamento.practitioner.name }}{% endif %}
       · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }}
-      · {% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
+      · {% blocktranslate with validade=orcamento.valid_until|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
     </span>
   </div>
   <div class="d-flex flex-wrap gap-2">
@@ -46,9 +46,9 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      {% if orcamento.desconto %}
+      {% if orcamento.discount %}
       <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ orcamento.subtotal|moeda }}</td><td></td></tr>
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ orcamento.desconto|moeda }}</td><td></td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ orcamento.discount|moeda }}</td><td></td></tr>
       {% endif %}
       <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td><td></td></tr>
     </tfoot>
@@ -91,7 +91,7 @@
 {% if desconto_form %}
 <form method="post" action="{% url 'estimates:discount' orcamento.pk %}" class="row g-2 align-items-end mb-3" style="max-width: 28rem;" novalidate>
   {% csrf_token %}
-  <div class="col-8">{% with campo=desconto_form.desconto %}{% include "includes/field.html" %}{% endwith %}</div>
+  <div class="col-8">{% with campo=desconto_form.discount %}{% include "includes/field.html" %}{% endwith %}</div>
   <div class="col-4 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Aplicar" %}</button></div>
 </form>
 {% endif %}

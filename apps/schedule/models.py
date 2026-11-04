@@ -48,7 +48,9 @@ class AppointmentType(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
-    cor = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validar_cor])
+    color = models.CharField(
+        _("cor"), max_length=7, default="#0d6efd", validators=[validar_cor], db_column="cor"
+    )
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
     class Meta:
@@ -101,8 +103,8 @@ class Appointment(ModeloDaClinica):
         verbose_name=_("tipo de atendimento"),
         db_column="tipo_id",
     )
-    inicio = models.DateTimeField(_("início"))
-    fim = models.DateTimeField(_("fim"))
+    start = models.DateTimeField(_("início"), db_column="inicio")
+    end = models.DateTimeField(_("fim"), db_column="fim")
     patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
@@ -138,22 +140,22 @@ class Appointment(ModeloDaClinica):
         db_table = "agenda_agendamento"
         verbose_name = _("agendamento")
         verbose_name_plural = _("agendamentos")
-        ordering = ["inicio"]
+        ordering = ["start"]
         indexes = [
             models.Index(
-                fields=["clinic", "practitioner", "inicio"], name="agendamento_prof_inicio"
+                fields=["clinic", "practitioner", "start"], name="agendamento_prof_inicio"
             ),
         ]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(inicio__lt=models.F("fim")),
+                condition=models.Q(start__lt=models.F("end")),
                 name="agendamento_inicio_antes_do_fim",
             ),
             # Last line of defense against double booking, even under concurrent requests.
             ExclusionConstraint(
                 name="agendamento_sem_sobreposicao",
                 expressions=[
-                    (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
+                    (TsTzRange("start", "end", RangeBoundary()), RangeOperators.OVERLAPS),
                     ("practitioner", RangeOperators.EQUAL),
                 ],
                 # A cancelled appointment does not hold the slot.
@@ -163,7 +165,7 @@ class Appointment(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.titulo} ({timezone.localtime(self.inicio):%d/%m/%Y %H:%M})"
+        return f"{self.titulo} ({timezone.localtime(self.start):%d/%m/%Y %H:%M})"
 
     @property
     def titulo(self):
@@ -178,7 +180,7 @@ class Appointment(ModeloDaClinica):
     @property
     def presenca_marcavel(self):
         """Came or missed can be marked from the day of the appointment on."""
-        return timezone.localdate(self.inicio) <= timezone.localdate()
+        return timezone.localdate(self.start) <= timezone.localdate()
 
 
 def criar_tipos_padrao(clinic):
@@ -188,5 +190,5 @@ def criar_tipos_padrao(clinic):
             return
         tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.ODONTOLOGIA else TIPOS_PADRAO
         AppointmentType.objects.bulk_create(
-            AppointmentType(clinic=clinic, name=name, cor=cor) for name, cor in tipos
+            AppointmentType(clinic=clinic, name=name, color=color) for name, color in tipos
         )

@@ -668,13 +668,13 @@ def impressao_digital(armadura):
     corpo = linhas[linhas.index("") + 1 : -1]
     dados = base64.b64decode("".join(linha for linha in corpo if not linha.startswith("=")))
     if dados[0] & 0x40:  # new packet format
-        tamanho, inicio = (
+        size, start = (
             (dados[1], 2) if dados[1] < 192 else (((dados[1] - 192) << 8) + dados[2] + 192, 3)
         )
     else:  # old format: the length type in the low two bits
         n = {0: 1, 1: 2, 2: 4}[dados[0] & 3]
-        tamanho, inicio = int.from_bytes(dados[1 : 1 + n]), 1 + n
-    pacote = dados[inicio : inicio + tamanho]
+        size, start = int.from_bytes(dados[1 : 1 + n]), 1 + n
+    pacote = dados[start : start + size]
     return hashlib.sha1(b"\x99" + len(pacote).to_bytes(2) + pacote).hexdigest().upper()  # noqa: S324
 
 

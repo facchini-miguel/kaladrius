@@ -17,19 +17,19 @@ def _nome(name):
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-def _escolhidas(arquivo):
+def _escolhidas(file):
     """Pins of a .in file (name -> version); -r/-c lines are followed by the lock itself."""
     pinos = {}
-    for linha in (RAIZ / arquivo).read_text().splitlines():
+    for linha in (RAIZ / file).read_text().splitlines():
         if m := PINO.match(linha.strip()):
             pinos[_nome(m[1])] = m[2]
     return pinos
 
 
-def _lock(arquivo):
+def _lock(file):
     """Packages of a lock: name -> (version, sorted hashes)."""
     pacotes, atual = {}, None
-    for linha in (RAIZ / arquivo).read_text().splitlines():
+    for linha in (RAIZ / file).read_text().splitlines():
         if m := PINO.match(linha):
             atual = _nome(m[1])
             pacotes[atual] = (m[2], [])
@@ -75,10 +75,10 @@ def test_ci_confere_os_locks():
 def test_lint_a_cada_commit_usa_o_ruff_do_lock():
     """Decision 137: the Lint workflow runs on every push and installs ruff from the lock,
     with its hashes, for the Python of .python-version."""
-    arquivo = RAIZ / ".github" / "workflows" / "lint.yml"
-    if not arquivo.exists():  # inside the image, which leaves .github out
+    file = RAIZ / ".github" / "workflows" / "lint.yml"
+    if not file.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
-    lint = arquivo.read_text()
+    lint = file.read_text()
     assert "\n  push:\n" in lint
     assert "python-version-file: .python-version" in lint and "python-version:" not in lint
     assert "requirements-dev.txt" in lint and "--require-hashes" in lint

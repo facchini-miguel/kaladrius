@@ -25,7 +25,7 @@ def mudar_pais(clinic, pais):
 def test_cada_pais_tem_as_suas_regras():
     assert set(insurance.SEGUROS) == set(PAISES)
     for pais, regras in insurance.SEGUROS.items():
-        for code in (regras.registro, regras.procedimento):
+        for code in (regras.registration, regras.procedimento):
             if code and code.padrao:
                 # Every format has an example, and the example follows it.
                 assert re.fullmatch(code.padrao, code.exemplo), pais
@@ -36,45 +36,45 @@ def test_codigo_limpo_e_conferido():
     assert cdt.limpar(" d1110 ") == "D1110"
     with pytest.raises(Exception, match="CDT"):
         cdt.limpar("1110")
-    assert insurance.do_pais("BR").registro.limpar("00.000-2") == "000002"
-    assert insurance.do_pais("AR").registro.limpar("1-0040-7") == "100407"  # free format
+    assert insurance.do_pais("BR").registration.limpar("00.000-2") == "000002"
+    assert insurance.do_pais("AR").registration.limpar("1-0040-7") == "100407"  # free format
 
 
 def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     form = admin.get(reverse("health_plans:new")).context["form"]
-    assert str(form.fields["registro"].label) == "Registro da operadora (ANS)"
+    assert str(form.fields["registration"].label) == "Registro da operadora (ANS)"
     mudar_pais(clinica_a, "US")
     form = admin.get(reverse("health_plans:new")).context["form"]
-    assert str(form.fields["registro"].label) == "Registro da operadora (Payer ID)"
+    assert str(form.fields["registration"].label) == "Registro da operadora (Payer ID)"
     assert "dental insurance carriers" in str(form.fields["name"].help_text)
     recusado = admin.post(
-        reverse("health_plans:new"), {"name": "Fictitious Dental", "registro": "1"}
+        reverse("health_plans:new"), {"name": "Fictitious Dental", "registration": "1"}
     )
-    assert "registro" in recusado.context["form"].errors
-    dados = {"name": "Fictitious Dental", "registro": "ab-123", "active": "on"}
+    assert "registration" in recusado.context["form"].errors
+    dados = {"name": "Fictitious Dental", "registration": "ab-123", "active": "on"}
     assert admin.post(reverse("health_plans:new"), dados).status_code == 302
     with usar_clinica(clinica_a):
-        assert HealthPlan.objects.get().registro == "AB123"
+        assert HealthPlan.objects.get().registration == "AB123"
     assert "Payer ID" in admin.get(reverse("health_plans:list")).content.decode()
     # The United Kingdom has no insurer registry: no field and no column.
     mudar_pais(clinica_a, "GB")
-    assert "registro" not in admin.get(reverse("health_plans:new")).context["form"].fields
+    assert "registration" not in admin.get(reverse("health_plans:new")).context["form"].fields
     assert "Registro da operadora" not in admin.get(reverse("health_plans:list")).content.decode()
 
 
 def test_campos_da_carteirinha_por_pais(clinica_a, patient, convenio, admin):  # noqa: F811
     url = reverse("health_plans:card_new", args=[patient.pk])
     campos = admin.get(url).context["form"].fields
-    assert "grupo" not in campos and "beneficiario" not in campos  # Brazil
+    assert "group" not in campos and "beneficiario" not in campos  # Brazil
     mudar_pais(clinica_a, "US")
     campos = admin.get(url).context["form"].fields
     assert str(campos["number"].label) == "Número da carteirinha (Member ID)"
-    assert str(campos["grupo"].label) == "Número do grupo (Group number)"
+    assert str(campos["group"].label) == "Número do grupo (Group number)"
     assert "beneficiario" not in campos
-    dados = carteirinha(convenio, number="W123456789", grupo="G-100")
+    dados = carteirinha(convenio, number="W123456789", group="G-100")
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
-        assert MemberCard.objects.get().grupo == "G-100"
+        assert MemberCard.objects.get().group == "G-100"
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
@@ -86,7 +86,7 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     cliente = entrar(cenario, "admin")
     url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])
-    dados = {"name": "Restauração", "amount": "250,00", "categoria": "", "active": "on"}
+    dados = {"name": "Restauração", "amount": "250,00", "category": "", "active": "on"}
     form = cliente.get(url).context["form"]
     assert str(form.fields["code"].label) == "Código (TUSS)"
     assert "code" in cliente.post(url, {**dados, "code": "123"}).context["form"].errors

@@ -96,7 +96,7 @@ def receber(parcela, *, user, **campos):
 
 
 @transaction.atomic
-def estornar(pagamento, *, motivo, user):
+def estornar(pagamento, *, reason, user):
     pagamento = Payment.objects.select_for_update().get(pk=pagamento.pk)
     if pagamento.estornado:
         raise ValidationError(_("Este pagamento já foi estornado."))
@@ -104,7 +104,7 @@ def estornar(pagamento, *, motivo, user):
     pagamento.estornado = True
     pagamento.estornado_em = timezone.now()
     pagamento.estornado_por = user
-    pagamento.motivo_estorno = motivo
+    pagamento.motivo_estorno = reason
     # Only these fields: the commission links are set elsewhere and must not be overwritten.
     pagamento.save(update_fields=["estornado", "estornado_em", "estornado_por", "motivo_estorno"])
     # A reversed payment no longer explains its bank statement line (saved, not .update(),
@@ -119,7 +119,7 @@ def estornar(pagamento, *, motivo, user):
 
 
 @transaction.atomic
-def cancelar(entry, *, motivo, user):
+def cancelar(entry, *, reason, user):
     """Cancel an entry. Payments must be reversed first (they are real money).
 
     The entry row is locked: receber() locks it too (through its installment), so a
@@ -138,7 +138,7 @@ def cancelar(entry, *, motivo, user):
     entry.cancelado = True
     entry.cancelado_em = timezone.now()
     entry.cancelado_por = user
-    entry.motivo_cancelamento = motivo
+    entry.motivo_cancelamento = reason
     entry.save()
     return entry
 
@@ -150,53 +150,53 @@ def fechado_ate(clinic_id):
     """Last day of the clinic's closed period, or None. Explicit clinic: also called by
     commands that run without the request's isolation."""
     ultimo = BookClosing.todos.filter(clinic_id=clinic_id).first()  # newest first
-    return ultimo.ate if ultimo else None
+    return ultimo.until if ultimo else None
 
 
 def conferir_periodo(clinic_id, date):
     """Refuse money dated inside the closed period. Locks the clinic row, shared with
     fechar(), so a payment cannot slip in while the period is being closed."""
     Clinic.objects.select_for_update().get(pk=clinic_id)
-    ate = fechado_ate(clinic_id)
-    if ate is not None and date <= ate:
+    until = fechado_ate(clinic_id)
+    if until is not None and date <= until:
         raise ValidationError(
             _(
                 "O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
                 "antes dela não podem ser registrados. Use uma data posterior ou peça ao "
                 "administrador para reabrir o período."
             )
-            % {"ate": date_format(ate, "SHORT_DATE_FORMAT")}
+            % {"ate": date_format(until, "SHORT_DATE_FORMAT")}
         )
 
 
 @transaction.atomic
-def fechar(clinic, ate, *, user):
+def fechar(clinic, until, *, user):
     """Close the books up to `ate` (at most yesterday: today's cash is still moving)."""
     Clinic.objects.select_for_update().get(pk=clinic.pk)
-    if ate >= timezone.localdate():
+    if until >= timezone.localdate():
         raise ValidationError(_("Feche no máximo até ontem: hoje ainda há movimento."))
     atual = fechado_ate(clinic.pk)
-    if atual is not None and ate <= atual:
+    if atual is not None and until <= atual:
         raise ValidationError(
             _("O financeiro já está fechado até %(ate)s. Para voltar, reabra o período.")
             % {"ate": date_format(atual, "SHORT_DATE_FORMAT")}
         )
-    return BookClosing.objects.create(clinic=clinic, ate=ate, created_by=user)
+    return BookClosing.objects.create(clinic=clinic, until=until, created_by=user)
 
 
 @transaction.atomic
-def reabrir(clinic, ate, *, motivo, user):
+def reabrir(clinic, until, *, reason, user):
     """Move the closing back to `ate` (None opens everything). A reason is required."""
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     atual = fechado_ate(clinic.pk)
     if atual is None:
         raise ValidationError(_("O financeiro não está fechado."))
-    if ate is not None and ate >= atual:
+    if until is not None and until >= atual:
         raise ValidationError(_("Para reabrir, escolha uma data anterior ao fechamento atual."))
-    if not motivo.strip():
+    if not reason.strip():
         raise ValidationError(_("Informe o motivo da reabertura."))
     return BookClosing.objects.create(
-        clinic=clinic, ate=ate, motivo=motivo.strip(), created_by=user
+        clinic=clinic, until=until, reason=reason.strip(), created_by=user
     )
 
 
@@ -301,7 +301,7 @@ def pagamentos_validos():
     return Payment.objects.filter(estornado=False, parcela__entry__cancelado=False)
 
 
-def saldos_das_contas(ate=None):
+def saldos_das_contas(until=None):
     """[(account, balance)] = initial balance + money in - money out (payments up to `ate`).
 
     Summed in the database, grouped by account, so it does not grow with the history.
@@ -309,8 +309,8 @@ def saldos_das_contas(ate=None):
     from .models import FinancialAccount
 
     pagamentos = pagamentos_validos()
-    if ate is not None:
-        pagamentos = pagamentos.filter(date__lte=ate)
+    if until is not None:
+        pagamentos = pagamentos.filter(date__lte=until)
     movimento = defaultdict(lambda: ZERO)
     for account_id, kind, total in (
         pagamentos.order_by()
@@ -319,8 +319,8 @@ def saldos_das_contas(ate=None):
     ):
         movimento[account_id] += _sinal(kind) * total
     movimentos = CashMovement.objects.all()
-    if ate is not None:
-        movimentos = movimentos.filter(created_at__date__lte=ate)
+    if until is not None:
+        movimentos = movimentos.filter(created_at__date__lte=until)
     for account_id, outra_id, kind, total in (
         movimentos.order_by()
         .values_list("caixa__account_id", "outra_conta_id", "kind")
@@ -337,7 +337,7 @@ def saldos_das_contas(ate=None):
     ]
 
 
-def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
+def fluxo_de_caixa(de, until, por_mes=False, hoje=None):
     """Rows per day (or month) from `de` to `ate`.
 
     Actual = payments made (by payment date); expected = what is still open in the
@@ -359,21 +359,21 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
     )
     for date, kind, amount in (
         pagamentos_validos()
-        .filter(date__gte=de, date__lte=ate)
+        .filter(date__gte=de, date__lte=until)
         .values_list("date", "parcela__entry__kind", "amount")
     ):
         linhas[chave(date)]["entradas" if kind == Entry.Tipo.RECEBER else "saidas"] += amount
     # Drawer movements to or from outside the system (moves between accounts net to zero).
-    for momento, kind, amount in CashMovement.objects.filter(
-        outra_conta__isnull=True, created_at__date__gte=de, created_at__date__lte=ate
+    for timestamp, kind, amount in CashMovement.objects.filter(
+        outra_conta__isnull=True, created_at__date__gte=de, created_at__date__lte=until
     ).values_list("created_at", "kind", "amount"):
-        date = timezone.localtime(momento).date()
+        date = timezone.localtime(timestamp).date()
         linhas[chave(date)]["saidas" if kind == CashMovement.Tipo.RETIRADA else "entradas"] += (
             amount
         )
     for parcela in (
         Installment.objects.abertas()
-        .filter(vencimento__gte=de, vencimento__lte=ate)
+        .filter(vencimento__gte=de, vencimento__lte=until)
         .select_related("entry")
     ):
         campo = (
@@ -382,7 +382,9 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
         linhas[chave(parcela.vencimento)][campo] += parcela.saldo
 
     anterior = de - datetime.timedelta(days=1)
-    saldo_inicial = sum((amount for _conta, amount in saldos_das_contas(ate=anterior)), start=ZERO)
+    saldo_inicial = sum(
+        (amount for _conta, amount in saldos_das_contas(until=anterior)), start=ZERO
+    )
     saldo = saldo_inicial
     resultado = []
     for date in sorted(linhas):
@@ -413,11 +415,11 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
     }
 
 
-def recebido_e_pago(de, ate):
+def recebido_e_pago(de, until):
     """(money received, money paid) from `de` to `ate`, in one query (home page, 0.24.0)."""
     totais = dict(
         pagamentos_validos()
-        .filter(date__gte=de, date__lte=ate)
+        .filter(date__gte=de, date__lte=until)
         .order_by()
         .values_list("parcela__entry__kind")
         .annotate(total=Sum("amount"))
@@ -425,9 +427,9 @@ def recebido_e_pago(de, ate):
     return totais.get(Entry.Tipo.RECEBER, ZERO), totais.get(Entry.Tipo.PAGAR, ZERO)
 
 
-def relatorio(de, ate):
+def relatorio(de, until):
     """Money received and paid in the period, grouped for the reports page."""
-    pagamentos = pagamentos_validos().filter(date__gte=de, date__lte=ate)
+    pagamentos = pagamentos_validos().filter(date__gte=de, date__lte=until)
     recebidos = pagamentos.filter(parcela__entry__kind=Entry.Tipo.RECEBER)
     pagos = pagamentos.filter(parcela__entry__kind=Entry.Tipo.PAGAR)
 
@@ -456,13 +458,13 @@ def relatorio(de, ate):
         "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
         "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
         "por_forma": agrupar(recebidos, "forma", formas),
-        "por_categoria": agrupar(recebidos, "parcela__entry__categoria__name"),
+        "por_categoria": agrupar(recebidos, "parcela__entry__category__name"),
         "por_profissional": agrupar(recebidos, "parcela__entry__practitioner__name"),
-        "despesas_por_categoria": agrupar(pagos, "parcela__entry__categoria__name"),
+        "despesas_por_categoria": agrupar(pagos, "parcela__entry__category__name"),
         "total_recebido": total_recebido,
         "total_pago": total_pago,
         "resultado": total_recebido - total_pago,
-        "descontos": somar(recebidos, "desconto"),
+        "descontos": somar(recebidos, "discount"),
         "juros": somar(recebidos, "juros"),
     }
 
@@ -471,24 +473,24 @@ def ligar_grupos(consulta):
     """The groups with each parent set from the same list, so numbers like 2.1 are
     built without one query per level."""
     grupos = list(consulta)
-    por_id = {grupo.pk: grupo for grupo in grupos}
-    for grupo in grupos:
-        if grupo.pai_id in por_id:
-            grupo.pai = por_id[grupo.pai_id]
+    por_id = {group.pk: group for group in grupos}
+    for group in grupos:
+        if group.pai_id in por_id:
+            group.pai = por_id[group.pai_id]
     return grupos
 
 
 def em_ordem_de_arvore(grupos):
     """(level, group) pairs in chart order: each group followed by its subgroups."""
     filhos = defaultdict(list)
-    for grupo in grupos:  # already in chart order (code, then name)
-        filhos[grupo.pai_id].append(grupo)
+    for group in grupos:  # already in chart order (code, then name)
+        filhos[group.pai_id].append(group)
     saida = []
 
     def descer(pai_id, nivel):
-        for grupo in filhos[pai_id]:
-            saida.append((nivel, grupo))
-            descer(grupo.pk, nivel + 1)
+        for group in filhos[pai_id]:
+            saida.append((nivel, group))
+            descer(group.pk, nivel + 1)
 
     descer(None, 0)
     return saida
@@ -501,21 +503,21 @@ def totais_por_grupo(pagamentos, kind):
     """
     por_categoria = dict(
         pagamentos.order_by()
-        .values_list("parcela__entry__categoria_id")
+        .values_list("parcela__entry__category_id")
         .annotate(total=Sum("amount"))
     )
-    grupo_da_categoria = dict(Category.objects.filter(kind=kind).values_list("pk", "grupo_id"))
+    grupo_da_categoria = dict(Category.objects.filter(kind=kind).values_list("pk", "group_id"))
     grupos = ligar_grupos(AccountGroup.objects.filter(kind=kind))
-    pai = {grupo.pk: grupo.pai_id for grupo in grupos}
+    pai = {group.pk: group.pai_id for group in grupos}
     totais = defaultdict(lambda: ZERO)
     sem_grupo = ZERO
-    for categoria_id, amount in por_categoria.items():
-        grupo_id = grupo_da_categoria.get(categoria_id)
-        if grupo_id is None:
+    for category_id, amount in por_categoria.items():
+        group_id = grupo_da_categoria.get(category_id)
+        if group_id is None:
             sem_grupo += amount
-        while grupo_id is not None:
-            totais[grupo_id] += amount
-            grupo_id = pai.get(grupo_id)
+        while group_id is not None:
+            totais[group_id] += amount
+            group_id = pai.get(group_id)
     return grupos, totais, sem_grupo
 
 
@@ -524,9 +526,9 @@ def arvore_por_grupo(pagamentos, kind):
     out, and a last row for the categories outside any group."""
     grupos, totais, sem_grupo = totais_por_grupo(pagamentos, kind)
     linhas = [
-        (nivel, str(grupo), totais[grupo.pk])
-        for nivel, grupo in em_ordem_de_arvore(grupos)
-        if totais[grupo.pk]
+        (nivel, str(group), totais[group.pk])
+        for nivel, group in em_ordem_de_arvore(grupos)
+        if totais[group.pk]
     ]
     if sem_grupo:
         linhas.append((0, _("Sem grupo"), sem_grupo))
@@ -539,12 +541,12 @@ def arvore_por_grupo(pagamentos, kind):
 def fracao_do_ano(ano, hoje=None):
     """Share of the year already gone: 0 before it starts, 1 once it is over."""
     hoje = hoje or timezone.localdate()
-    inicio, fim = datetime.date(ano, 1, 1), datetime.date(ano, 12, 31)
-    if hoje < inicio:
+    start, end = datetime.date(ano, 1, 1), datetime.date(ano, 12, 31)
+    if hoje < start:
         return Decimal(0)
-    if hoje >= fim:
+    if hoje >= end:
         return Decimal(1)
-    return Decimal((hoje - inicio).days + 1) / Decimal((fim - inicio).days + 1)
+    return Decimal((hoje - start).days + 1) / Decimal((end - start).days + 1)
 
 
 def planejamento(ano, hoje=None):
@@ -555,7 +557,7 @@ def planejamento(ano, hoje=None):
     that have one, so a goal and its subgroups' goals are not counted twice.
     """
     fracao = fracao_do_ano(ano, hoje)
-    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "amount"))
+    metas = dict(Planning.objects.filter(ano=ano).values_list("group_id", "amount"))
     pagamentos = pagamentos_validos().filter(date__year=ano)
     secoes = []
     for kind, rotulo, lancamentos in (
@@ -566,19 +568,19 @@ def planejamento(ano, hoje=None):
             pagamentos.filter(parcela__entry__kind=lancamentos), kind
         )
         linhas, meta_total, cobertos = [], ZERO, set()
-        for nivel, grupo in em_ordem_de_arvore(grupos):
-            meta, realizado = metas.get(grupo.pk), totais[grupo.pk]
-            if not grupo.active and meta is None and not realizado:
+        for nivel, group in em_ordem_de_arvore(grupos):
+            meta, realizado = metas.get(group.pk), totais[group.pk]
+            if not group.active and meta is None and not realizado:
                 continue
-            if meta and grupo.pai_id not in cobertos:
+            if meta and group.pai_id not in cobertos:
                 meta_total += meta
-            if meta or grupo.pai_id in cobertos:
-                cobertos.add(grupo.pk)
+            if meta or group.pai_id in cobertos:
+                cobertos.add(group.pk)
             esperado = (meta * fracao).quantize(CENTAVO) if meta else None
             linhas.append(
                 {
                     "nivel": nivel,
-                    "grupo": grupo,
+                    "group": group,
                     "meta": meta,
                     "realizado": realizado,
                     "esperado": esperado,
@@ -609,21 +611,21 @@ def planejamento(ano, hoje=None):
 @transaction.atomic
 def salvar_metas(ano, valores):
     """{group: goal or None}: saves the goals, removing the ones left blank."""
-    for grupo, amount in valores.items():
+    for group, amount in valores.items():
         if amount:
-            Planning.objects.update_or_create(ano=ano, grupo=grupo, defaults={"amount": amount})
+            Planning.objects.update_or_create(ano=ano, group=group, defaults={"amount": amount})
         else:
-            Planning.objects.filter(ano=ano, grupo=grupo).delete()
+            Planning.objects.filter(ano=ano, group=group).delete()
 
 
 @transaction.atomic
 def copiar_metas(ano):
     """Copy last year's goals into the groups still without a goal; returns how many."""
-    existentes = set(Planning.objects.filter(ano=ano).values_list("grupo_id", flat=True))
+    existentes = set(Planning.objects.filter(ano=ano).values_list("group_id", flat=True))
     copiadas = 0
-    for anterior in Planning.objects.filter(ano=ano - 1).exclude(grupo_id__in=existentes):
+    for anterior in Planning.objects.filter(ano=ano - 1).exclude(group_id__in=existentes):
         # One by one, not bulk_create, so the audit log records each goal.
-        Planning.objects.create(ano=ano, grupo_id=anterior.grupo_id, amount=anterior.amount)
+        Planning.objects.create(ano=ano, group_id=anterior.group_id, amount=anterior.amount)
         copiadas += 1
     return copiadas
 
@@ -650,10 +652,10 @@ def resumo_do_caixa(caixa):
     Payments count by the moment they were registered (not their date), so a payment
     typed in today for last week still lands in today's drawer.
     """
-    fim = caixa.fechado_em or timezone.now()
+    end = caixa.fechado_em or timezone.now()
     pagamentos = list(
         pagamentos_validos()
-        .filter(account=caixa.account, created_at__gte=caixa.aberto_em, created_at__lte=fim)
+        .filter(account=caixa.account, created_at__gte=caixa.aberto_em, created_at__lte=end)
         .select_related("parcela__entry__patient")
         .order_by("created_at")
     )
@@ -684,7 +686,7 @@ def resumo_do_caixa(caixa):
 
 
 @transaction.atomic
-def movimentar_caixa(caixa, *, kind, amount, motivo, user, outra_conta=None):
+def movimentar_caixa(caixa, *, kind, amount, reason, user, outra_conta=None):
     caixa = CashRegister.objects.select_for_update().get(pk=caixa.pk)
     if not caixa.aberto:
         raise ValidationError(_("Este caixa já foi fechado."))
@@ -697,7 +699,7 @@ def movimentar_caixa(caixa, *, kind, amount, motivo, user, outra_conta=None):
         caixa=caixa,
         kind=kind,
         amount=amount,
-        motivo=motivo,
+        reason=reason,
         outra_conta=outra_conta,
         created_by=user,
     )

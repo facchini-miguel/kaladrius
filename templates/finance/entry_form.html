@@ -12,7 +12,7 @@
   {% with campo=form.pessoa %}{% include "includes/field.html" %}{% endwith %}
   <div class="row">
     <div class="col-md-8">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.categoria %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
     {% if form.centro_custo %}<div class="col-md-6">{% with campo=form.centro_custo %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
     <div class="col-md-6">{% with campo=form.practitioner %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.valor_total %}{% include "includes/field.html" %}{% endwith %}</div>
