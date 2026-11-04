@@ -363,34 +363,34 @@
   },
   "marca.logo": {
     "message": "Logo",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.logoBranco": {
     "message": "Logo, branco",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.logoPreto": {
     "message": "Logo, preto",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.simbolo": {
     "message": "Símbolo",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.simboloBranco": {
     "message": "Símbolo, branco",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.simboloPreto": {
     "message": "Símbolo, preto",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.icone": {
     "message": "Ícone do aplicativo",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   },
   "marca.baixarTudo": {
     "message": "Baixar tudo (.zip)",
-    "description": "Brand kit download card (KitDeMarca component)"
+    "description": "Brand kit download card (BrandKit component)"
   }
 }

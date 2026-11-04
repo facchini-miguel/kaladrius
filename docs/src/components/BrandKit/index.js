@@ -66,7 +66,7 @@ function Cartao({ nome, titulo, fundo }) {
   );
 }
 
-export default function KitDeMarca() {
+export default function BrandKit() {
   return (
     <>
       <p>
@@ -83,7 +83,7 @@ export default function KitDeMarca() {
   );
 }
 
-export function Cor({ nome, hex }) {
+export function Color({ nome, hex }) {
   return (
     <div className={estilos.cor}>
       <span className={estilos.amostra} style={{ background: hex }} />
