@@ -373,6 +373,11 @@ def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
     assert "KALADRIUS_ACCESS=internal-network" in (dir_ / ".env").read_text()
     assert not list(links.iterdir())
     assert "systemctl disable kaladrius-saude.timer" in chamadas
+    # Their service files already gone, the old timers fail on the reload: that state goes.
+    assert (
+        "systemctl reset-failed kaladrius-saude.timer kaladrius-saude.service "
+        "kaladrius-restauracao.timer kaladrius-restauracao.service" in chamadas
+    )
 
 
 @pytest.mark.parametrize(
