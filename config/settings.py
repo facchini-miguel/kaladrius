@@ -28,6 +28,12 @@ def env_bool(nome, padrao=False):
     return env(nome, "1" if padrao else "0").strip().lower() in {"1", "true", "sim", "yes"}
 
 
+def env_renomeada(nome, antigo, padrao=False):
+    """A yes/no variable by its name of decision 149, or by the one it had before (a .env of
+    0.55 or earlier, or a person following older documentation)."""
+    return env_bool(nome, padrao=env_bool(antigo, padrao=padrao))
+
+
 def env_lista(nome, padrao=""):
     return [item.strip() for item in env(nome, padrao).split(",") if item.strip()]
 
@@ -35,13 +41,18 @@ def env_lista(nome, padrao=""):
 DEBUG = env_bool("DJANGO_DEBUG")
 # Production servers run daily backups (deploy/server/backup.sh): superusers are warned
 # when none was recorded recently, or none at all. Development has no backups.
-BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
+BACKUP_MONITORED = env_renomeada(
+    "DJANGO_BACKUP_MONITORED", "DJANGO_BACKUP_MONITORADO", padrao=not DEBUG
+)
 # Health samples written every 5 minutes by deploy/server/health.sh (decision 056):
 # superusers are warned when they stop or a resource is critical.
-SAUDE_MONITORADA = env_bool("DJANGO_SAUDE_MONITORADA", padrao=not DEBUG)
-SAUDE_DIR = env("DJANGO_SAUDE_DIR", "/saude")
+HEALTH_MONITORED = env_renomeada(
+    "DJANGO_HEALTH_MONITORED", "DJANGO_SAUDE_MONITORADA", padrao=not DEBUG
+)
+# Inside the app container (docker-compose.prod.yml mounts the server's /opt/kaladrius/health).
+HEALTH_DIR = env("DJANGO_HEALTH_DIR", "/health")
 # Public demo server (decision 086): enables the nightly reset and advance_dates.
-DEMONSTRACAO = env_bool("DJANGO_DEMONSTRACAO")
+DEMO = env_renomeada("DJANGO_DEMO", "DJANGO_DEMONSTRACAO")
 # The documentation site (docs/, decision 073): the Help menu links to it, in the user's
 # language. Every installation links to the official site, which documents the newest version.
 DOCS_URL = env("DJANGO_DOCS_URL", "https://kaladrius-docs.facchini.eti.br")
@@ -103,7 +114,7 @@ MIDDLEWARE = [
 ]
 
 # Behind Caddy in production: take the client IP from X-Forwarded-For (must run first).
-if env_bool("DJANGO_PROXY_REVERSO"):
+if env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
     MIDDLEWARE.insert(0, "apps.core.middleware.ProxyReversoMiddleware")
 
 ROOT_URLCONF = "config.urls"

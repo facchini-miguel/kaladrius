@@ -2,18 +2,17 @@
 # Server health (0.22.0, decision 056), with plain Linux tools: no monitoring stack (the
 # e2-micro has 1 GB of RAM).
 #   health.sh            report in the terminal: now, the last 24 hours, containers, timers
-#   health.sh --collect  append one sample to $DIR/saude/amostras.jsonl (systemd timer, every
+#   health.sh --collect  append one sample to $DIR/health/samples.jsonl (systemd timer, every
 #                        5 minutes; 7 days kept). The web app reads that file, mounted
-#                        read-only, and never gets access to Docker itself. Also checks the
-#                        site through the internet and signals the external monitor.
-# The folder, the file and the samples' fields keep their names: the app reads them
-# (apps/monitoring/health.py), and they change with it.
+#                        read-only (apps/monitoring/health.py), and never gets access to Docker
+#                        itself. Also checks the site through the internet and signals the
+#                        external monitor.
 set -euo pipefail
 export LC_ALL=C  # numbers with a dot, whatever the server's language
 source "$(dirname "$0")/common.sh"
 
-HEALTH_DIR="$DIR/saude"
-SAMPLES="$HEALTH_DIR/amostras.jsonl"
+HEALTH_DIR="$DIR/health"
+SAMPLES="$HEALTH_DIR/samples.jsonl"
 KEEP=2016  # 7 days of 5-minute samples
 
 # CPU busy and steal (time taken by other VMs on the shared core), in %, over 2 seconds.
@@ -44,7 +43,7 @@ network() {  # bytes received and sent since boot by the real interfaces (not do
 containers() {  # JSON array: name, CPU % and memory of each container
   local lines
   lines=$(docker stats --no-stream --format \
-    '{"nome":"{{.Name}}","cpu":"{{.CPUPerc}}","memoria":"{{.MemUsage}}","memoria_pct":"{{.MemPerc}}"}' \
+    '{"name":"{{.Name}}","cpu":"{{.CPUPerc}}","memory":"{{.MemUsage}}","memory_pct":"{{.MemPerc}}"}' \
     2>/dev/null | paste -sd, -)
   echo "[${lines}]"
 }
@@ -57,7 +56,7 @@ collect() {
   read -r rx tx <<<"$(network)"
   read -r l1 l5 l15 _ <"/proc/loadavg"
   read -r uptime _ <"/proc/uptime"
-  printf '{"momento":"%s","cpu":%s,"cpu_roubada":%s,"carga":[%s,%s,%s],"memoria_total":%s,"memoria_disponivel":%s,"swap_total":%s,"swap_livre":%s,"disco_total":%s,"disco_usado":%s,"rede_recebido":%s,"rede_enviado":%s,"ligado_ha":%.0f,"containers":%s}\n' \
+  printf '{"time":"%s","cpu":%s,"cpu_steal":%s,"load":[%s,%s,%s],"memory_total":%s,"memory_available":%s,"swap_total":%s,"swap_free":%s,"disk_total":%s,"disk_used":%s,"network_received":%s,"network_sent":%s,"uptime":%.0f,"containers":%s}\n' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$busy" "$steal" "$l1" "$l5" "$l15" \
     "$((mem_total * 1024))" "$((mem_available * 1024))" "$((swap_total * 1024))" "$((swap_free * 1024))" \
     "$disk_total" "$disk_used" "$rx" "$tx" "$uptime" "$(containers)" >>"$SAMPLES"

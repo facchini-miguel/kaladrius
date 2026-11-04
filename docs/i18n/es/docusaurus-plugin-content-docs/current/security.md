@@ -35,7 +35,7 @@ Kaladrius guarda datos de salud, el tipo más sensible de dato personal. Esta p�
 ## Lo que debe hacer la instalación
 
 - Dejar el `.env` legible solo por root, con una `DJANGO_SECRET_KEY` larga y contraseñas fuertes. Nunca ponerlo en Git.
-- Ejecutar con `DJANGO_DEBUG=0`, `DJANGO_SECURE=1` y `DJANGO_PROXY_REVERSO=1` detrás de Caddy.
+- Ejecutar con `DJANGO_DEBUG=0`, `DJANGO_SECURE=1` y `DJANGO_REVERSE_PROXY=1` detrás de Caddy.
 - Nunca ejecutar `seed_sample_data` en un servidor con datos reales (sus usuarios comparten la contraseña).
 - Exponer solo los puertos 80 y 443. La base y la app escuchan solo dentro del servidor.
 - Restringir el SSH (solo con clave; en Google Cloud, solo por el túnel IAP).

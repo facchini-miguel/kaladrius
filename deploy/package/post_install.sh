@@ -18,7 +18,7 @@ KALADRIUS_NO_REPOSITORY=${KALADRIUS_NO_REPOSITORY:-${KALADRIUS_SEM_REPOSITORIO:-
 # under their names of decision 147, before anything below reads them.
 bash -c '. "$0" && migrate_legacy_names' "$DIR/bin/common.sh" \
   || echo "Kaladrius: the names of an older version could not all be updated."
-mkdir -p "$DIR/saude"
+mkdir -p "$DIR/health"
 ln -sfn ../.env "$DIR/release/.env"
 systemctl daemon-reload >/dev/null 2>&1 || true
 

@@ -1,8 +1,9 @@
 """Server health read from the samples of deploy/server/health.sh (0.22.0, decision 056).
 
 The server collects them every 5 minutes with plain Linux tools and keeps 7 days in a
-JSON-lines file mounted read-only in the app container (settings.SAUDE_DIR). Nothing is
-stored in the database.
+JSON-lines file mounted read-only in the app container (settings.HEALTH_DIR). Nothing is
+stored in the database. The fields are in English since decision 149; a line written before
+(Portuguese fields, kept up to 7 days) is read too. Here they all get the internal names.
 """
 
 import datetime
@@ -14,7 +15,22 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-ARQUIVO = "amostras.jsonl"
+ARQUIVO = "samples.jsonl"
+# The fields of a sample and of each of its containers, as health.sh writes them: internal names.
+CAMPOS = {
+    "time": "momento",
+    "cpu_steal": "cpu_roubada",
+    "load": "carga",
+    "memory_total": "memoria_total",
+    "memory_available": "memoria_disponivel",
+    "swap_free": "swap_livre",
+    "disk_total": "disco_total",
+    "disk_used": "disco_usado",
+    "network_received": "rede_recebido",
+    "network_sent": "rede_enviado",
+    "uptime": "ligado_ha",
+}
+CAMPOS_CONTAINER = {"name": "nome", "memory": "memoria", "memory_pct": "memoria_pct"}
 COLETA_PARADA_APOS = datetime.timedelta(minutes=20)
 # A gap longer than this between samples breaks the chart line (collection was down).
 LACUNA = datetime.timedelta(minutes=15)
@@ -23,12 +39,18 @@ LIMITES = {"memoria": (85, 95), "swap": (50, 80), "disco": (80, 90), "cpu": (80,
 
 
 def _arquivo():
-    return Path(settings.SAUDE_DIR) / ARQUIVO
+    return Path(settings.HEALTH_DIR) / ARQUIVO
 
 
 def _ler(linha):
     try:
         amostra = json.loads(linha)
+        if "time" in amostra:
+            amostra = {CAMPOS.get(chave, chave): valor for chave, valor in amostra.items()}
+            amostra["containers"] = [
+                {CAMPOS_CONTAINER.get(chave, chave): valor for chave, valor in c.items()}
+                for c in amostra.get("containers", [])
+            ]
         amostra["momento"] = parse_datetime(amostra["momento"])
         if amostra["momento"] is None:
             return None

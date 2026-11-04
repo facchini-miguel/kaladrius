@@ -42,8 +42,8 @@ def amostra(minutos_atras, *, disponivel=400, swap_livre=900, disco=5, rede=0, c
 
 @pytest.fixture
 def pasta(tmp_path, settings):
-    settings.SAUDE_DIR = str(tmp_path)
-    settings.SAUDE_MONITORADA = True
+    settings.HEALTH_DIR = str(tmp_path)
+    settings.HEALTH_MONITORED = True
 
     def gravar(*linhas):
         (tmp_path / health.ARQUIVO).write_text("\n".join(linhas) + "\n", encoding="utf-8")
@@ -62,6 +62,30 @@ def test_le_amostras_ignora_linha_cortada_e_calcula_percentuais(pasta):
     (lida,) = health.amostras()
     assert (lida["memoria_pct"], lida["swap_pct"]) == (75, 25)
     assert round(lida["disco_pct"]) == 17
+    assert health.ultima()["memoria_pct"] == 75
+
+
+def amostra_em_ingles(minutos_atras, **valores):
+    """The same sample with the fields health.sh writes since decision 149."""
+    antiga = json.loads(amostra(minutos_atras, **valores))
+    nomes = {interno: campo for campo, interno in health.CAMPOS.items()}
+    nova = {nomes.get(chave, chave): valor for chave, valor in antiga.items()}
+    nomes_container = {interno: campo for campo, interno in health.CAMPOS_CONTAINER.items()}
+    nova["containers"] = [
+        {nomes_container.get(chave, chave): valor for chave, valor in c.items()}
+        for c in antiga["containers"]
+    ]
+    return json.dumps(nova)
+
+
+def test_le_as_amostras_em_ingles_e_as_antigas(pasta):
+    # The file keeps up to 7 days: right after the update, lines of both formats.
+    pasta(amostra(20, disponivel=250), amostra_em_ingles(10, disponivel=250, swap_livre=750))
+    antiga, nova = health.amostras()
+    assert "time" in amostra_em_ingles(10)
+    assert (nova["memoria_pct"], nova["swap_pct"]) == (75, 25)
+    assert nova["momento"] > antiga["momento"]
+    assert nova["containers"] == antiga["containers"]
     assert health.ultima()["memoria_pct"] == 75
 
 
@@ -114,7 +138,7 @@ def test_tela_com_amostras(pasta, superusuario):
 
 
 def test_tela_sem_amostras(settings, tmp_path, superusuario):
-    settings.SAUDE_DIR = str(tmp_path / "nao-existe")
+    settings.HEALTH_DIR = str(tmp_path / "nao-existe")
     pagina = superusuario.get(reverse("monitoramento:saude")).content.decode()
     assert "Ainda não há amostras" in pagina
 

@@ -133,7 +133,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     pagina = cliente.get(reverse("inicio")).content.decode()
     assert '<html lang="en-gb">' in pagina
     # The English flag, with or without the hash of the collected static files (CI).
-    assert re.search(r"bandeiras/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
+    assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(
             nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)

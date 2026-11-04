@@ -141,7 +141,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle seletor-idioma" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
                title="{% translate 'Idioma' %}: {{ idioma_nome }}">
-              <img class="bandeira" src="{% static 'img/bandeiras/'|add:idioma_base|add:'.svg' %}" alt="" width="24" height="17">
+              <img class="bandeira" src="{% static 'img/flags/'|add:idioma_base|add:'.svg' %}" alt="" width="24" height="17">
               <span class="d-lg-none">{{ idioma_nome }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -153,7 +153,7 @@
                   <input type="hidden" name="idioma" value="{{ codigo }}">
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="dropdown-item d-flex align-items-center gap-2{% if codigo == idioma_base %} active{% endif %}" lang="{{ codigo }}">
-                    <img class="bandeira" src="{% static 'img/bandeiras/'|add:codigo|add:'.svg' %}" alt="" width="24" height="17">
+                    <img class="bandeira" src="{% static 'img/flags/'|add:codigo|add:'.svg' %}" alt="" width="24" height="17">
                     {{ nome }}
                   </button>
                 </form>
@@ -232,8 +232,8 @@
 
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
-  <script src="{% static 'js/busca-paciente.js' %}"></script>
-  <script src="{% static 'js/pagina.js' %}"></script>
+  <script src="{% static 'js/patient-search.js' %}"></script>
+  <script src="{% static 'js/page.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

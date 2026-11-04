@@ -228,7 +228,7 @@ write_env() {
 DJANGO_DEBUG=0
 DJANGO_SECRET_KEY=$(head -c 48 /dev/urandom | base64 | tr -d '\n/+=')
 DJANGO_SECURE=1
-DJANGO_PROXY_REVERSO=1
+DJANGO_REVERSE_PROXY=1
 POSTGRES_DB=kaladrius
 POSTGRES_USER=kaladrius
 POSTGRES_PASSWORD=$(head -c 32 /dev/urandom | base64 | tr -d '\n/+=')

@@ -52,7 +52,7 @@ def backup(request):
     """For superusers on servers with backups: a warning when the newest one is overdue
     or when no backup was ever recorded (backups never worked)."""
     usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_superuser or not settings.BACKUP_MONITORADO:
+    if usuario is None or not usuario.is_superuser or not settings.BACKUP_MONITORED:
         return {}
     ultimo = Backup.objects.first()
     if ultimo is None:

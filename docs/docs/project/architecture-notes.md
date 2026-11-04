@@ -88,7 +88,7 @@ Rule: **Google Cloud free tier resources only** (decision 020).
 - Argon2 password hashing and login attempt limiting (django-axes: 5 failures per user + IP lock for 1 hour). For IPv6 the /48 network counts, not the address, since switching addresses inside one's own network is trivial (decision 041).
 - No password recovery by e-mail (the server sends no e-mail): each person changes their own password in the menu with their name, and the clinic administrator sets a new one in Records > Team (decision 042).
 - Audit log of changes, patient record views and logins (`apps/audit`).
-- Behind Caddy, the real client IP comes from `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), used by django-axes and the audit log.
+- Behind Caddy, the real client IP comes from `X-Forwarded-For` (`DJANGO_REVERSE_PROXY=1`), used by django-axes and the audit log.
 - **Per-clinic isolation** in every query, with automated tests that try to access another clinic's data.
 - Secrets only in `.env` (outside Git) and in GitHub *Secrets*. Push protection enabled.
 - Postgres port not exposed. VM firewall: only TCP 80/443 and UDP 443 (HTTP/3) from the internet; SSH only through Google's IAP tunnel.

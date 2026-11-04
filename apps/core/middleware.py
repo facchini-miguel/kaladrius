@@ -70,7 +70,7 @@ def _usar_pais_da_clinica(request, clinica):
 class ProxyReversoMiddleware:
     """Use the client IP reported by the reverse proxy (Caddy) as REMOTE_ADDR.
 
-    Only enabled with DJANGO_PROXY_REVERSO=1, where the app port is reachable solely
+    Only enabled with DJANGO_REVERSE_PROXY=1, where the app port is reachable solely
     by the proxy; otherwise anyone could forge the header. The proxy sets the client
     address as the last X-Forwarded-For entry.
     """

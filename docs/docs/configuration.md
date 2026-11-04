@@ -18,11 +18,11 @@ After changing it, restart: `kaladrius up -d` (the containers whose settings cha
 | `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Domains the system answers to, separated by commas |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | empty | The same domains with `https://`, separated by commas |
 | `DJANGO_SECURE` | `0` | `1` turns on the HTTPS protections: redirect to HTTPS, secure cookies, HSTS for one year. Use `1` on a server |
-| `DJANGO_PROXY_REVERSO` | `0` | `1` when behind Caddy (or another proxy): takes the visitor's IP from `X-Forwarded-For`, for the audit log and the login lockout |
-| `DJANGO_DEMONSTRACAO` | off | Public demo server only: enables the nightly reset of the demo (decision 086). Never on a clinic's server |
-| `DJANGO_BACKUP_MONITORADO` | on when `DJANGO_DEBUG=0` | Warns superusers when no backup was recorded in the last 26 hours |
-| `DJANGO_SAUDE_MONITORADA` | on when `DJANGO_DEBUG=0` | Warns superusers when the server health samples stop or a resource is critical. Set `0` outside the Google Cloud installation |
-| `DJANGO_SAUDE_DIR` | `/saude` | Folder, inside the container, with the health samples |
+| `DJANGO_REVERSE_PROXY` | `0` | `1` when behind Caddy (or another proxy): takes the visitor's IP from `X-Forwarded-For`, for the audit log and the login lockout |
+| `DJANGO_DEMO` | off | Public demo server only: enables the nightly reset of the demo (decision 086). Never on a clinic's server |
+| `DJANGO_BACKUP_MONITORED` | on when `DJANGO_DEBUG=0` | Warns superusers when no backup was recorded in the last 26 hours |
+| `DJANGO_HEALTH_MONITORED` | on when `DJANGO_DEBUG=0` | Warns superusers when the server health samples stop or a resource is critical. Set `0` outside the Google Cloud installation |
+| `DJANGO_HEALTH_DIR` | `/health` | Folder, inside the container, with the health samples |
 | `DJANGO_EMAIL_HOST` | empty | SMTP server for password recovery by e-mail; empty: no recovery, the administrator sets new passwords |
 | `DJANGO_EMAIL_PORT` | `587` | SMTP port |
 | `DJANGO_EMAIL_USER` / `DJANGO_EMAIL_PASSWORD` | empty | SMTP login |
@@ -30,6 +30,8 @@ After changing it, restart: `kaladrius up -d` (the containers whose settings cha
 | `DJANGO_EMAIL_SSL` | `0` | SSL from the start (port 465) instead of STARTTLS. With Gmail: `smtp.gmail.com`, port `587`, the Gmail address as user and an [app password](https://myaccount.google.com/apppasswords) (needs two-step verification on the Google account; about 500 e-mails a day) |
 | `DJANGO_EMAIL_FROM` | the SMTP user | Sender of the e-mails |
 | `DJANGO_DOCS_URL` | `https://kaladrius-docs.facchini.eti.br` | This documentation site. The **Help** menu opens it in the user's language |
+
+Before decision 149 these five variables had Portuguese names (`DJANGO_PROXY_REVERSO`, `DJANGO_DEMONSTRACAO`, `DJANGO_BACKUP_MONITORADO`, `DJANGO_SAUDE_MONITORADA`, `DJANGO_SAUDE_DIR`); the first four are still read when the new one is not set.
 
 ## Database
 
