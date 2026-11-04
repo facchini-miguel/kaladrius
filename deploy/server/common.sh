@@ -288,7 +288,7 @@ install_schedules() {
 # install_schedules (every update) and by the package's post_install.sh, before anything reads
 # them. Only the names change: the data, the backups and the database stay where they are.
 migrate_legacy_names() {
-  local unit file pair old new image
+  local unit file pair old new image legacy_units=""
   # The units moved aside by decision 071's migration, beside the ones moved here.
   if [ -d "$DIR/unidades-antigas" ] && [ ! -e "$DIR/legacy/units" ]; then
     mkdir -p "$DIR/legacy"
@@ -302,6 +302,7 @@ migrate_legacy_names() {
       systemctl stop "$unit.timer" >/dev/null 2>&1 || true
       systemctl disable "$unit.timer" >/dev/null 2>&1 || true
       rm -f "$SYSTEMD_DIR"/*.wants/"$unit.timer"
+      legacy_units="$legacy_units $unit.timer $unit.service"
     fi
     for file in "$SYSTEMD_DIR/$unit.service" "$SYSTEMD_DIR/$unit.timer"; do
       if [ -f "$file" ]; then
@@ -310,6 +311,14 @@ migrate_legacy_names() {
       fi
     done
   done
+  if [ -n "$legacy_units" ]; then
+    # A timer whose service file the package manager already removed fails when systemd
+    # reloads ("unit to trigger vanished"): that state is cleared, or `kaladrius health` would
+    # list it as a failure. Only the old names: a real failure of a current task stays.
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    # shellcheck disable=SC2086  # one unit per word
+    systemctl reset-failed $legacy_units >/dev/null 2>&1 || true
+  fi
   for pair in imagem-instalada:installed-image imagem-recusada:refused-image anterior:previous \
     admin-criado:admin-created sem-repositorio:no-repository demonstracao:demo \
     demo/base-data:demo/base-date; do
