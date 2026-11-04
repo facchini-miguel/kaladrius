@@ -337,3 +337,53 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
     Clinica.objects.update(exigir_duas_etapas=False)
     importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(apps, None)
     assert Clinica.unica().exigir_duas_etapas
+
+
+def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado(
+    django_user_model,
+):
+    """Decision 154: while the app ran as "account", its data went to account_* tables."""
+    import importlib
+
+    from django.db import connection
+
+    migracao = importlib.import_module("apps.account.migrations.0002_back_from_account_tables")
+    assert DuasEtapas._meta.db_table == "conta_duasetapas"
+    assert CodigoRecuperacao._meta.db_table == "conta_codigorecuperacao"
+
+    # An installation that never ran as "account" has no such tables: nothing to do.
+    with connection.schema_editor() as editor:
+        migracao.copiar(None, editor)
+
+    so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
+    nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
+    DuasEtapas.objects.create(usuario=nas_duas, segredo="ORIGINAL", ativa=True)
+    CodigoRecuperacao.objects.create(usuario=nas_duas, resumo="original")
+    with connection.cursor() as cursor:
+        for tabela in ("duasetapas", "codigorecuperacao"):
+            cursor.execute(
+                f"CREATE TABLE account_{tabela} (LIKE conta_{tabela} INCLUDING DEFAULTS)"
+            )
+        for usuario, segredo in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
+            cursor.execute(
+                "INSERT INTO account_duasetapas (id, usuario_id, segredo, ativa, ultimo_passo) "
+                "VALUES (%s, %s, %s, true, 0)",
+                [usuario.pk + 1000, usuario.pk, segredo],
+            )
+            cursor.execute(
+                "INSERT INTO account_codigorecuperacao (id, usuario_id, resumo) "
+                "VALUES (%s, %s, %s)",
+                [usuario.pk + 1000, usuario.pk, f"codigo-{segredo}"],
+            )
+    with connection.schema_editor() as editor:
+        migracao.copiar(None, editor)
+
+    # Saved only in account_*: copied. Already in conta_*: kept as it was.
+    assert DuasEtapas.objects.get(usuario=so_na_account).segredo == "NOVO"
+    assert DuasEtapas.objects.get(usuario=nas_duas).segredo == "ORIGINAL"
+    assert list(
+        CodigoRecuperacao.objects.filter(usuario=so_na_account).values_list("resumo", flat=True)
+    ) == ["codigo-NOVO"]
+    assert list(
+        CodigoRecuperacao.objects.filter(usuario=nas_duas).values_list("resumo", flat=True)
+    ) == ["original"]
