@@ -402,13 +402,13 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
     from django.contrib.contenttypes.models import ContentType
     from django.db import connection
 
-    migracao = importlib.import_module("apps.account.migrations.0004_remove_account_leftovers")
+    migracao = importlib.import_module("apps.account.migrations.0005_remove_account_leftovers")
     # An installation that never ran as "account": nothing there, nothing fails.
     with connection.schema_editor() as editor:
         migracao.remover(apps, editor)
 
-    usuario = django_user_model.objects.create_user("com_duas_etapas", password="x")
-    TwoFactor.objects.create(usuario=usuario, segredo="FICA", ativa=True)
+    user = django_user_model.objects.create_user("com_duas_etapas", password="x")
+    TwoFactor.objects.create(user=user, segredo="FICA", ativa=True)
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(f"CREATE TABLE account_{tabela} (LIKE conta_{tabela})")
@@ -430,5 +430,5 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
     assert linhas == 0
     assert not ContentType.objects.filter(app_label="account").exists()
     assert not Permission.objects.filter(codename="view_duasetapas").exists()
-    assert TwoFactor.objects.get(usuario=usuario).segredo == "FICA"
+    assert TwoFactor.objects.get(user=user).segredo == "FICA"
     assert ContentType.objects.filter(app_label="conta", model="twofactor").exists()

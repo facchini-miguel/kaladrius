@@ -25,7 +25,7 @@ def remover(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("conta", "0003_english_model_names"),
+        ("conta", "0004_english_field_names_2"),
         ("contenttypes", "0002_remove_content_type_name"),
         ("auth", "0012_alter_user_first_name_max_length"),
     ]
