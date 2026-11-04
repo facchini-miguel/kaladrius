@@ -72,7 +72,7 @@ def novo(request, profissional, paciente):
         agendamento = get_object_or_404(Agendamento.objects, pk=codigo, paciente=paciente)
         existente = Atendimento.objects.filter(agendamento=agendamento).first()
         if existente is not None:
-            return redirect("prontuario:atendimento", pk=existente.pk)
+            return redirect("medical_records:visit", pk=existente.pk)
     inicial = {"data": agendamento.inicio if agendamento else timezone.now()}
     profissionais = None
     if administra_prontuario(request):
@@ -93,7 +93,7 @@ def novo(request, profissional, paciente):
             _finalizar(request, atendimento)
         else:
             messages.success(request, _("Atendimento salvo."))
-        return redirect("prontuario:atendimento", pk=atendimento.pk)
+        return redirect("medical_records:visit", pk=atendimento.pk)
     return render(
         request,
         "medical_records/visit.html",
@@ -122,7 +122,7 @@ def atendimento(request, profissional, pk):
                 _finalizar(request, atendimento)
             else:
                 messages.success(request, _("Atendimento salvo."))
-            return redirect("prontuario:atendimento", pk=atendimento.pk)
+            return redirect("medical_records:visit", pk=atendimento.pk)
     else:
         registrar(Acao.VISUALIZAR, atendimento)
     return render(
@@ -215,7 +215,7 @@ def atestado_novo(request, profissional, pk):
             },
         )
         messages.success(request, _("Atestado emitido."))
-        return redirect("prontuario:atestado", pk=atestado.pk)
+        return redirect("medical_records:certificate", pk=atestado.pk)
     return render(
         request,
         "medical_records/document_form.html",
@@ -235,7 +235,7 @@ def receita_nova(request, profissional, pk):
         receita.save()
         registrar(Acao.CRIAR, receita, alteracoes={"prescricao": [None, SIGILO]})
         messages.success(request, _("Receita emitida."))
-        return redirect("prontuario:receita", pk=receita.pk)
+        return redirect("medical_records:prescription", pk=receita.pk)
     return render(
         request,
         "medical_records/document_form.html",
@@ -281,7 +281,7 @@ def adendo(request, profissional, pk):
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
-    return redirect("prontuario:atendimento", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=atendimento.pk)
 
 
 @exige_profissional
@@ -303,7 +303,7 @@ def pedido_de_exames_novo(request, profissional, pk):
             },
         )
         messages.success(request, _("Pedido de exames emitido."))
-        return redirect("prontuario:pedido_de_exames", pk=pedido.pk)
+        return redirect("medical_records:exam_request", pk=pedido.pk)
     return render(
         request,
         "medical_records/document_form.html",
@@ -330,7 +330,7 @@ def anexo_enviar(request, profissional, pk):
     atendimento = get_object_or_404(Atendimento.objects, pk=pk)
     if request.user.demonstracao:
         messages.error(request, _("Contas de demonstração não enviam anexos."))
-        return redirect("prontuario:atendimento", pk=atendimento.pk)
+        return redirect("medical_records:visit", pk=atendimento.pk)
     form = AnexoForm(request.POST, request.FILES)
     if form.is_valid():
         arquivo = form.cleaned_data["arquivo"]
@@ -353,7 +353,7 @@ def anexo_enviar(request, profissional, pk):
         messages.success(request, _("Anexo incluído."))
     else:
         messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
-    return redirect("prontuario:atendimento", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=atendimento.pk)
 
 
 @exige_profissional
@@ -386,4 +386,4 @@ def anexo_remover(request, profissional, pk):
     )
     anexo.delete()
     messages.success(request, _("Anexo removido."))
-    return redirect("prontuario:atendimento", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=atendimento.pk)

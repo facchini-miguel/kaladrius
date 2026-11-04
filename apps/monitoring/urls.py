@@ -2,6 +2,6 @@ from django.urls import path
 
 from . import views
 
-app_name = "monitoramento"
+app_name = "monitoring"
 
-urlpatterns = [path("", views.painel, name="saude")]
+urlpatterns = [path("", views.painel, name="health")]

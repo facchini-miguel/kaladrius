@@ -8,10 +8,10 @@
   <h1 class="h3 mb-0">{% if pagar %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %}</h1>
   <div class="d-flex gap-2">
     {% if pagar %}
-    {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:despesa_nova' %}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a>{% endif %}
     {% else %}
-    <a class="btn btn-outline-primary" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a>
-    {% if pode.recebimentos.criar %}<a class="btn btn-primary" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a>{% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'finance:debtors' %}">{% translate "Devedores" %}</a>
+    {% if pode.recebimentos.criar %}<a class="btn btn-primary" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a>{% endif %}
     {% endif %}
   </div>
 </div>
@@ -49,18 +49,18 @@
       <tr>
         <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
         <td>
-          {% if parcela.lancamento.paciente_id %}<a href="{% url 'pacientes:ficha' parcela.lancamento.paciente_id %}">{{ parcela.lancamento.paciente.nome }}</a>
-          {% elif parcela.lancamento.fornecedor_id %}<a href="{% url 'financeiro:fornecedor' parcela.lancamento.fornecedor_id %}">{{ parcela.lancamento.pessoa }}</a>
+          {% if parcela.lancamento.paciente_id %}<a href="{% url 'patients:record' parcela.lancamento.paciente_id %}">{{ parcela.lancamento.paciente.nome }}</a>
+          {% elif parcela.lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.lancamento.fornecedor_id %}">{{ parcela.lancamento.pessoa }}</a>
           {% else %}{{ parcela.lancamento.pessoa }}{% endif %}
         </td>
-        <td><a href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">({{ parcela.numero }})</span></td>
+        <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">({{ parcela.numero }})</span></td>
         <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
         <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
         <td>{% include "finance/_status.html" with situacao=parcela.situacao %}</td>
         <td class="text-end text-nowrap">
           {% if parcela.saldo > 0 and not parcela.lancamento.cancelado %}
-          {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Pagar" %}</a>
-          {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "Receber" %}</a>{% endif %}
+          {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Pagar" %}</a>
+          {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Receber" %}</a>{% endif %}
           {% endif %}
         </td>
       </tr>

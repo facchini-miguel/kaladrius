@@ -9,6 +9,6 @@
   {% csrf_token %}
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if instancia.pk %}{% url 'pessoal:funcionario' instancia.pk %}{% else %}{% url 'pessoal:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% if instancia.pk %}{% url 'staff:employee' instancia.pk %}{% else %}{% url 'staff:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

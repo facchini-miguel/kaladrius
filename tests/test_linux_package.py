@@ -820,3 +820,23 @@ def test_manage_usa_o_nome_antigo_so_num_app_que_nao_o_conhece(tmp_path, conheci
     avaliar(comum, "manage record_backup a.dump 10 -- registrar_backup a.dump 10", ambiente)
     avaliar(comum, "manage health", ambiente)  # no old name given: always the new one
     assert chamadas.read_text().splitlines() == [esperado, "health"]
+
+
+CURL_SO_O_ANTIGO = """#!/bin/sh
+# Only the health page's address before decision 155 answers (an app rolled back to 0.55).
+case "$*" in *"/api/v1/saude"*) exit 0 ;; *) exit 22 ;; esac
+"""
+
+
+@pytest.mark.parametrize(
+    ("curl", "responde"), [(CURL_SO_O_ANTIGO, "sim"), ("#!/bin/sh\nexit 22\n", "nao")]
+)
+def test_a_saude_pelo_endereco_novo_ou_pelo_antigo(tmp_path, curl, responde):
+    comum = comum_em(tmp_path)
+    (tmp_path / "path").mkdir()
+    falso = tmp_path / "path" / "curl"
+    falso.write_text(curl)
+    falso.chmod(0o755)
+    ambiente = {"PATH": f"{tmp_path / 'path'}:/usr/bin:/bin"}
+    expressao = "CURL_OPTIONS=(); health_answers k.example && echo sim || echo nao"
+    assert avaliar(comum, expressao, ambiente) == responde

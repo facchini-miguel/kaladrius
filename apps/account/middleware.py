@@ -5,7 +5,7 @@ from django.urls import reverse
 from . import services
 
 # Pages open to someone who still has to turn two-step verification on.
-LIVRES = ["conta:duas_etapas", "conta:ativo", "logout", "trocar_idioma", "privacidade"]
+LIVRES = ["account:two_factor", "account:active", "logout", "change_language", "privacy"]
 
 
 class ExigirDuasEtapasMiddleware:
@@ -17,7 +17,7 @@ class ExigirDuasEtapasMiddleware:
 
     def __call__(self, request):
         if self._pendente(request):
-            return redirect("conta:duas_etapas")
+            return redirect("account:two_factor")
         return self.get_response(request)
 
     def _pendente(self, request):

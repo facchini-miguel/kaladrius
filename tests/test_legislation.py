@@ -45,11 +45,11 @@ def test_prazo_de_guarda_em_cada_situacao():
 
 
 def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
-    pagina = client.get(reverse("privacidade")).content.decode()
+    pagina = client.get(reverse("privacy")).content.decode()
     assert "País da clínica" not in pagina  # Brazil: the policy is already Brazilian
     clinica_a.pais = "US"
     clinica_a.save()
-    pagina = client.get(reverse("privacidade")).content.decode()
+    pagina = client.get(reverse("privacy")).content.decode()
     assert "País da clínica: Estados Unidos" in pagina and "HIPAA" in pagina
     assert 'href="https://www.hhs.gov/ocr"' in pagina and "lei de cada estado" in pagina
 
@@ -78,7 +78,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             conta=cenario["caixa"],
         )
     admin = entrar(cenario, "admin")
-    url = reverse("financeiro:recibo", args=[pagamento.pk])
+    url = reverse("finance:receipt", args=[pagamento.pk])
     pagina = admin.get(url).content.decode()
     assert "Dra. Fictícia (CRO-SP 12345)" in pagina
     assert "documento fiscal" not in pagina
@@ -96,6 +96,6 @@ def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
     with usar_clinica(clinica):
         paciente.arquivado = True
         paciente.save()
-    pagina = entrar(cenario, "admin").get(reverse("pacientes:excluir", args=[paciente.pk]))
+    pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[paciente.pk]))
     texto = pagina.content.decode()
     assert "(Ley 19.628)" in texto and "15 anos" in texto and "LGPD" not in texto

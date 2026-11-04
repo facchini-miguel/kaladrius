@@ -54,15 +54,15 @@ def codigo_atual(dispositivo, deslocamento=0):
 def test_sessao_termina_com_30_minutos_sem_uso(client, pessoa):
     assert settings.SESSION_COOKIE_AGE == 30 * 60 and settings.SESSION_SAVE_EVERY_REQUEST
     client.force_login(pessoa)
-    pagina = client.get(reverse("inicio")).content.decode()
-    assert 'data-inatividade="30"' in pagina and reverse("conta:ativo") in pagina
-    assert client.get(reverse("conta:ativo")).status_code == 204
+    pagina = client.get(reverse("home")).content.decode()
+    assert 'data-inatividade="30"' in pagina and reverse("account:active") in pagina
+    assert client.get(reverse("account:active")).status_code == 204
     saiu = client.get(reverse("login"), {"inatividade": "1"})
     assert "30 minutos sem uso" in saiu.content.decode()
 
 
 def test_ativo_sem_login_vai_para_o_login(client):
-    assert client.get(reverse("conta:ativo")).status_code == 302
+    assert client.get(reverse("account:active")).status_code == 302
 
 
 def test_campos_de_senha_ganham_o_olhinho(client):
@@ -112,13 +112,13 @@ def test_poucas_tentativas_do_endereco_nao_bloqueiam(client, pessoa):
 
 def test_ativar_com_qr_code(client, pessoa):
     client.force_login(pessoa)
-    pagina = client.get(reverse("conta:duas_etapas")).content.decode()
+    pagina = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in pagina and "otpauth" not in pagina  # the secret is in the QR, not text
     dispositivo = DuasEtapas.objects.get(usuario=pessoa)
-    errado = client.post(reverse("conta:duas_etapas"), {"acao": "ativar", "codigo": "000000"})
+    errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "codigo": "000000"})
     assert "Código incorreto" in errado.content.decode()
     resposta = client.post(
-        reverse("conta:duas_etapas"), {"acao": "ativar", "codigo": codigo_atual(dispositivo)}
+        reverse("account:two_factor"), {"acao": "ativar", "codigo": codigo_atual(dispositivo)}
     )
     texto = resposta.content.decode()
     assert "Verificação em duas etapas ativada" in texto
@@ -130,30 +130,30 @@ def test_ativar_com_qr_code(client, pessoa):
 
 def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
     dispositivo, _ = ligar_duas_etapas(pessoa)
-    resposta = entrar(client, pessoa, proximo=reverse("pacientes:lista"))
-    assert resposta.url == reverse("conta:codigo")
+    resposta = entrar(client, pessoa, proximo=reverse("patients:list"))
+    assert resposta.url == reverse("account:code")
     assert "_auth_user_id" not in client.session  # not logged in yet
-    errado = client.post(reverse("conta:codigo"), {"codigo": "123456"})
+    errado = client.post(reverse("account:code"), {"codigo": "123456"})
     assert "Código incorreto" in errado.content.decode()
     assert AccessAttempt.objects.filter(username=pessoa.username).exists()  # counted
     codigo = codigo_atual(dispositivo)
-    certo = client.post(reverse("conta:codigo"), {"codigo": codigo})
-    assert certo.url == reverse("pacientes:lista")
+    certo = client.post(reverse("account:code"), {"codigo": codigo})
+    assert certo.url == reverse("patients:list")
     assert client.session["_auth_user_id"] == str(pessoa.pk)
     # The same code does not work twice.
     client.logout()
     entrar(client, pessoa)
-    repetido = client.post(reverse("conta:codigo"), {"codigo": codigo})
+    repetido = client.post(reverse("account:code"), {"codigo": codigo})
     assert "Código incorreto" in repetido.content.decode()
 
 
 def test_codigo_de_recuperacao_vale_uma_vez(client, pessoa):
     _, codigos = ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
-    assert client.post(reverse("conta:codigo"), {"codigo": codigos[0].lower()}).status_code == 302
+    assert client.post(reverse("account:code"), {"codigo": codigos[0].lower()}).status_code == 302
     client.logout()
     entrar(client, pessoa)
-    segunda = client.post(reverse("conta:codigo"), {"codigo": codigos[0]})
+    segunda = client.post(reverse("account:code"), {"codigo": codigos[0]})
     assert "Código incorreto" in segunda.content.decode()
 
 
@@ -161,9 +161,9 @@ def test_cinco_codigos_errados_voltam_ao_login(client, pessoa):
     ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
     for _ in range(5):
-        client.post(reverse("conta:codigo"), {"codigo": "000000"})
+        client.post(reverse("account:code"), {"codigo": "000000"})
     # Like 5 wrong passwords: the login protection locks the user for an hour.
-    assert client.get(reverse("conta:codigo")).url == reverse("login")
+    assert client.get(reverse("account:code")).url == reverse("login")
     bloqueado = entrar(client, pessoa)
     assert "_auth_user_id" not in client.session and bloqueado.status_code != 302
 
@@ -174,7 +174,7 @@ def test_passo_do_codigo_expira(client, pessoa):
     sessao = client.session
     sessao["duas_etapas_pendente"]["momento"] -= 10 * 60
     sessao.save()
-    assert client.post(reverse("conta:codigo"), {"codigo": codigo_atual(dispositivo)}).url == (
+    assert client.post(reverse("account:code"), {"codigo": codigo_atual(dispositivo)}).url == (
         reverse("login")
     )
 
@@ -183,18 +183,18 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
     dispositivo, antigos = ligar_duas_etapas(pessoa)
     client.force_login(pessoa)
     novos = client.post(
-        reverse("conta:duas_etapas"),
+        reverse("account:two_factor"),
         {"acao": "codigos", "codigos-codigo": codigo_atual(dispositivo)},
     )
     assert "Códigos de recuperação" in novos.content.decode()
     assert not services.verificar_recuperacao(pessoa, antigos[1])  # old ones stop working
     errado = client.post(
-        reverse("conta:duas_etapas"),
+        reverse("account:two_factor"),
         {"acao": "desativar", "desativar-senha": "errada", "desativar-codigo": "000000"},
     )
     assert "Senha incorreta" in errado.content.decode()
     resposta = client.post(
-        reverse("conta:duas_etapas"),
+        reverse("account:two_factor"),
         {
             "acao": "desativar",
             "desativar-senha": SENHA,
@@ -211,9 +211,9 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     admin = criar_usuario("admin_conta", clinica_a, Papel.ADMIN)
     client.force_login(admin)
     vinculo = pessoa.vinculos.get()
-    pagina = client.get(reverse("equipe:editar", args=[vinculo.pk])).content.decode()
+    pagina = client.get(reverse("team:edit", args=[vinculo.pk])).content.decode()
     assert "Remover a verificação em duas etapas" in pagina
-    client.post(reverse("equipe:duas_etapas", args=[vinculo.pk]))
+    client.post(reverse("team:two_factor", args=[vinculo.pk]))
     assert not services.ativa_para(pessoa)
     assert RegistroAuditoria.objects.filter(objeto_descricao__contains="removida").exists()
 
@@ -222,7 +222,7 @@ def test_conta_de_demonstracao_nao_ativa(client, pessoa):
     pessoa.demonstracao = True
     pessoa.save(update_fields=["demonstracao"])
     client.force_login(pessoa)
-    assert client.get(reverse("conta:duas_etapas")).status_code == 302
+    assert client.get(reverse("account:two_factor")).status_code == 302
     assert not DuasEtapas.objects.exists()
 
 
@@ -231,7 +231,7 @@ def test_conta_de_demonstracao_nao_ativa(client, pessoa):
 
 def test_sem_email_configurado_nao_ha_recuperacao(client, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = False
-    assert client.get(reverse("conta:recuperar")).status_code == 404
+    assert client.get(reverse("account:recover")).status_code == 404
     assert "Esqueci minha senha" not in client.get(reverse("login")).content.decode()
 
 
@@ -239,11 +239,11 @@ def test_recuperar_senha_por_email(client, pessoa, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     assert "Esqueci minha senha" in client.get(reverse("login")).content.decode()
-    resposta = client.post(reverse("conta:recuperar"), {"email": "pessoa@example.com"})
-    assert resposta.url == reverse("conta:recuperar_enviado")
+    resposta = client.post(reverse("account:recover"), {"email": "pessoa@example.com"})
+    assert resposta.url == reverse("account:recovery_sent")
     [mensagem] = mail.outbox
     assert "pessoa_conta" in mensagem.body and "Kaladrius" in mensagem.subject
-    link = next(linha for linha in mensagem.body.splitlines() if "/conta/senha/nova/" in linha)
+    link = next(linha for linha in mensagem.body.splitlines() if "/account/password/new/" in linha)
     caminho = link.split("testserver", 1)[1]
     formulario = client.get(caminho, follow=True)
     nova = "Nova-Senha-Ficticia-77"
@@ -257,7 +257,7 @@ def test_conta_de_demonstracao_nao_recebe_email(client, pessoa, settings):
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     pessoa.demonstracao = True
     pessoa.save(update_fields=["demonstracao"])
-    client.post(reverse("conta:recuperar"), {"email": "pessoa@example.com"})
+    client.post(reverse("account:recover"), {"email": "pessoa@example.com"})
     assert mail.outbox == []
 
 
@@ -279,24 +279,24 @@ def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
     financeiro = criar_usuario("fin_exigida", exigida, Papel.FINANCEIRO)
     for usuario in (profissional, financeiro):
         client.force_login(usuario)
-        resposta = client.get(reverse("pacientes:lista"))
-        assert resposta.url == reverse("conta:duas_etapas"), usuario
-        pagina = client.get(reverse("conta:duas_etapas")).content.decode()
+        resposta = client.get(reverse("patients:list"))
+        assert resposta.url == reverse("account:two_factor"), usuario
+        pagina = client.get(reverse("account:two_factor")).content.decode()
         assert "A clínica exige a verificação em duas etapas" in pagina
-        assert client.get(reverse("conta:ativo")).status_code == 204  # still allowed
+        assert client.get(reverse("account:active")).status_code == 204  # still allowed
         ligar_duas_etapas(usuario)
-        assert client.get(reverse("pacientes:lista")).status_code == 200
+        assert client.get(reverse("patients:list")).status_code == 200
 
 
 def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuario):
     recepcao = criar_usuario("rec_exigida", exigida, Papel.RECEPCAO)
     client.force_login(recepcao)
-    assert client.get(reverse("pacientes:lista")).status_code == 200
+    assert client.get(reverse("patients:list")).status_code == 200
     demo = criar_usuario("demo_exigida", exigida, Papel.ADMIN)
     demo.demonstracao = True
     demo.save(update_fields=["demonstracao"])
     client.force_login(demo)
-    assert client.get(reverse("pacientes:lista")).status_code == 200
+    assert client.get(reverse("patients:list")).status_code == 200
 
 
 def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
@@ -305,10 +305,10 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
     admin.save()
     dispositivo, _ = ligar_duas_etapas(admin)
     client.force_login(admin)
-    pagina = client.get(reverse("conta:duas_etapas")).content.decode()
+    pagina = client.get(reverse("account:two_factor")).content.decode()
     assert "não pode ser desativada" in pagina
     client.post(
-        reverse("conta:duas_etapas"),
+        reverse("account:two_factor"),
         {
             "acao": "desativar",
             "desativar-senha": SENHA,
@@ -320,7 +320,7 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
 
 def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
     client.force_login(criar_usuario("fin_livre", clinica_a, Papel.FINANCEIRO))
-    assert client.get(reverse("financeiro:receber")).status_code == 200
+    assert client.get(reverse("finance:receivables")).status_code == 200
 
 
 def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model, client):
@@ -332,7 +332,7 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
 
     super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_usuario)
-    client.post(reverse("cadastrar_clinica"), {"nome": "Clínica Fictícia Nova", "area": "medicina"})
+    client.post(reverse("register_clinic"), {"nome": "Clínica Fictícia Nova", "area": "medicina"})
     assert Clinica.unica().exigir_duas_etapas
     Clinica.objects.update(exigir_duas_etapas=False)
     importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(apps, None)

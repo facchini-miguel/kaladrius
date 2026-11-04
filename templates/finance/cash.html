@@ -49,7 +49,7 @@
     <tbody>
       {% for item in historico %}
       <tr>
-        <td><a href="{% url 'financeiro:caixa_detalhe' item.pk %}">{{ item.aberto_em|date:"SHORT_DATETIME_FORMAT" }}</a></td>
+        <td><a href="{% url 'finance:cash_detail' item.pk %}">{{ item.aberto_em|date:"SHORT_DATETIME_FORMAT" }}</a></td>
         <td>{{ item.fechado_em|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
         <td class="text-end">{{ item.valor_esperado|moeda|default:"—" }}</td>
         <td class="text-end">{{ item.valor_contado|moeda|default:"—" }}</td>

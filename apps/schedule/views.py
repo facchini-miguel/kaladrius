@@ -43,7 +43,7 @@ def _formulario(request, tipo):
         messages.success(
             request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome_exibido}
         )
-        return redirect("agenda:tipos")
+        return redirect("schedule:types")
     return render(request, "schedule/type_form.html", {"form": form, "tipo": tipo})
 
 
@@ -66,7 +66,7 @@ def tipo_excluir(request, pk):
             messages.success(
                 request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome_exibido}
             )
-        return redirect("agenda:tipos")
+        return redirect("schedule:types")
     return render(request, "schedule/type_delete.html", {"tipo": tipo})
 
 
@@ -140,12 +140,12 @@ def calendario(request):
         },
         "pode": {acao: pode(request, Modulo.AGENDA, acao) for acao in ("criar", "alterar")},
         "urls": {
-            "eventos": reverse("agenda:eventos"),
-            "novo": reverse("agenda:novo"),
-            "aniversariantes": reverse("agenda:aniversariantes"),
-            "aniversariantes_dia": reverse("agenda:aniversariantes_dia"),
-            "rechamadas": reverse("rechamadas:resumo") if ver_rechamadas else None,
-            "rechamadas_dia": reverse("rechamadas:do_dia") if ver_rechamadas else None,
+            "eventos": reverse("schedule:events"),
+            "novo": reverse("schedule:new"),
+            "aniversariantes": reverse("schedule:birthdays"),
+            "aniversariantes_dia": reverse("schedule:birthdays_today"),
+            "rechamadas": reverse("recalls:summary") if ver_rechamadas else None,
+            "rechamadas_dia": reverse("recalls:today") if ver_rechamadas else None,
         },
     }
     return render(
@@ -195,7 +195,7 @@ def eventos(request):
                     "descricao": agendamento.descricao,
                     "situacao": agendamento.situacao,
                     "situacao_nome": agendamento.get_situacao_display(),
-                    "url": reverse("agenda:editar", args=[agendamento.pk]),
+                    "url": reverse("schedule:edit", args=[agendamento.pk]),
                 },
             }
             for agendamento in agendamentos
@@ -291,12 +291,12 @@ def situacao(request, pk):
             contexto = {"form": form, "agendamento": agendamento, "erro_situacao": erro.messages[0]}
             return render(request, "schedule/_form.html", contexto)
         messages.error(request, erro.messages[0])
-        return redirect("inicio")
+        return redirect("home")
     mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.paciente.nome}
     if request.headers.get("HX-Request"):
         return _resposta_sucesso(mensagem)
     messages.success(request, mensagem)
-    return redirect("inicio")
+    return redirect("home")
 
 
 @exige_permissao(Modulo.AGENDA, Acao.EXCLUIR)

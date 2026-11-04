@@ -15,11 +15,11 @@
   </div>
   <div class="d-flex flex-wrap gap-2">
     {% if caixa.aberto and pode.recebimentos.criar %}
-    <a class="btn btn-outline-danger" href="{% url 'financeiro:caixa_movimento' caixa.pk 'retirada' %}">{% translate "Retirada (sangria)" %}</a>
-    <a class="btn btn-outline-success" href="{% url 'financeiro:caixa_movimento' caixa.pk 'reforco' %}">{% translate "Reforço" %}</a>
-    <a class="btn btn-primary" href="{% url 'financeiro:caixa_fechar' caixa.pk %}">{% translate "Fechar caixa" %}</a>
+    <a class="btn btn-outline-danger" href="{% url 'finance:cash_movement' caixa.pk 'withdrawal' %}">{% translate "Retirada (sangria)" %}</a>
+    <a class="btn btn-outline-success" href="{% url 'finance:cash_movement' caixa.pk 'top-up' %}">{% translate "Reforço" %}</a>
+    <a class="btn btn-primary" href="{% url 'finance:cash_close' caixa.pk %}">{% translate "Fechar caixa" %}</a>
     {% endif %}
-    <a class="btn btn-link" href="{% url 'financeiro:caixa' %}?conta={{ caixa.conta_id }}">{% translate "Caixas anteriores" %}</a>
+    <a class="btn btn-link" href="{% url 'finance:cash' %}?conta={{ caixa.conta_id }}">{% translate "Caixas anteriores" %}</a>
   </div>
 </div>
 
@@ -49,7 +49,7 @@
       {% for pagamento in resumo.pagamentos %}
       <tr>
         <td class="text-nowrap">{{ pagamento.criado_em|date:"TIME_FORMAT" }}</td>
-        <td><a href="{% url 'financeiro:lancamento' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.descricao }}</a></td>
+        <td><a href="{% url 'finance:entry' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.descricao }}</a></td>
         <td>{{ pagamento.get_forma_display }}</td>
         <td class="text-end text-nowrap {% if pagamento.parcela.lancamento.tipo == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.valor|moeda }}</td>
       </tr>

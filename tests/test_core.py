@@ -15,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 
 def test_inicio_exige_login(client):
-    resposta = client.get(reverse("inicio"))
+    resposta = client.get(reverse("home"))
     assert resposta.status_code == 302
     assert reverse("login") in resposta.url
 
@@ -93,15 +93,15 @@ def test_logout_exige_post(client, django_user_model):
     client.force_login(usuario)
     assert client.get(reverse("logout")).status_code == 405
     client.post(reverse("logout"))
-    assert client.get(reverse("inicio")).status_code == 302
+    assert client.get(reverse("home")).status_code == 302
 
 
 def test_usuario_troca_a_propria_senha(client, django_user_model):
     usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(usuario)
-    assert "Trocar senha" in client.get(reverse("inicio")).content.decode()
+    assert "Trocar senha" in client.get(reverse("home")).content.decode()
     resposta = client.post(
-        reverse("trocar_senha"),
+        reverse("change_password"),
         {
             "old_password": "senha-de-teste-123",
             "new_password1": "outra-senha-forte-456",
@@ -113,14 +113,14 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
     usuario.refresh_from_db()
     assert usuario.check_password("outra-senha-forte-456")
     # The session stays open after the change.
-    assert client.get(reverse("inicio")).status_code == 200
+    assert client.get(reverse("home")).status_code == 200
 
 
 def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
     usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(usuario)
     resposta = client.post(
-        reverse("trocar_senha"),
+        reverse("change_password"),
         {
             "old_password": "errada",
             "new_password1": "outra-senha-forte-456",
@@ -134,7 +134,7 @@ def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
 
 def test_sem_recuperacao_de_senha_por_email(client):
     # No e-mail is configured, so the reset pages would never deliver anything.
-    assert client.get("/conta/password_reset/").status_code == 404
+    assert client.get("/account/password_reset/").status_code == 404
 
 
 def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model, settings):
@@ -149,19 +149,19 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     client.force_login(admin)
     # Development has no backups: no warning.
     settings.BACKUP_MONITORED = False
-    assert "backup" not in client.get(reverse("inicio")).content.decode()
+    assert "backup" not in client.get(reverse("home")).content.decode()
     # A server where no backup was ever recorded warns too.
     settings.BACKUP_MONITORED = True
-    assert "Nenhum backup do banco foi registrado" in client.get(reverse("inicio")).content.decode()
+    assert "Nenhum backup do banco foi registrado" in client.get(reverse("home")).content.decode()
 
     call_command("record_backup", "kaladrius-x.dump", "1024")
     assert Backup.objects.get().tamanho == 1024
-    assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
+    assert "backups diários pararam" not in client.get(reverse("home")).content.decode()
 
     Backup.objects.update(momento=timezone.now() - datetime.timedelta(hours=27))
-    assert "backups diários pararam" in client.get(reverse("inicio")).content.decode()
+    assert "backups diários pararam" in client.get(reverse("home")).content.decode()
     client.force_login(comum)
-    assert "backups diários pararam" not in client.get(reverse("inicio")).content.decode()
+    assert "backups diários pararam" not in client.get(reverse("home")).content.decode()
 
 
 # --- Clinic settings ---------------------------------------------------------------
@@ -185,10 +185,11 @@ def dados_clinica(**extra):
 
 def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    assert "Configurações da clínica" in cliente.get(reverse("inicio")).content.decode()
-    assert 'value="07:30"' in cliente.get(reverse("configuracoes")).content.decode()
+    assert "Configurações da clínica" in cliente.get(reverse("home")).content.decode()
+    assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
     resposta = cliente.post(
-        reverse("configuracoes"), dados_clinica(documento="11.222.333/0001-81", agenda_intervalo=15)
+        reverse("clinic_settings"),
+        dados_clinica(documento="11.222.333/0001-81", agenda_intervalo=15),
     )
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
@@ -199,7 +200,7 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
-    assert cliente.get(reverse("configuracoes")).status_code == 403
+    assert cliente.get(reverse("clinic_settings")).status_code == 403
 
 
 @pytest.mark.parametrize(
@@ -224,7 +225,7 @@ def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_
             fim=inicio + datetime.timedelta(hours=1),
         )
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("configuracoes"), dados_clinica(**extra))
+    resposta = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))
     assert resposta.status_code == 200
     assert erro in resposta.content.decode()
 

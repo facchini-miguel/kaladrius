@@ -9,6 +9,6 @@
   {% csrf_token %}
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'financeiro:cadastro' cadastro %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:catalog' cadastro %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

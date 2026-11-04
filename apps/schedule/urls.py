@@ -2,19 +2,19 @@ from django.urls import path
 
 from . import views
 
-app_name = "agenda"
+app_name = "schedule"
 
 urlpatterns = [
-    path("", views.calendario, name="calendario"),
-    path("eventos/", views.eventos, name="eventos"),
-    path("novo/", views.novo, name="novo"),
-    path("<int:pk>/editar/", views.editar, name="editar"),
-    path("<int:pk>/excluir/", views.excluir, name="excluir"),
-    path("<int:pk>/situacao/", views.situacao, name="situacao"),
-    path("aniversariantes/", views.aniversariantes, name="aniversariantes"),
-    path("aniversariantes/dia/", views.aniversariantes_dia, name="aniversariantes_dia"),
-    path("tipos/", views.tipos, name="tipos"),
-    path("tipos/novo/", views.tipo_novo, name="tipo_novo"),
-    path("tipos/<int:pk>/editar/", views.tipo_editar, name="tipo_editar"),
-    path("tipos/<int:pk>/excluir/", views.tipo_excluir, name="tipo_excluir"),
+    path("", views.calendario, name="calendar"),
+    path("events/", views.eventos, name="events"),
+    path("new/", views.novo, name="new"),
+    path("<int:pk>/edit/", views.editar, name="edit"),
+    path("<int:pk>/delete/", views.excluir, name="delete"),
+    path("<int:pk>/status/", views.situacao, name="status"),
+    path("birthdays/", views.aniversariantes, name="birthdays"),
+    path("birthdays/today/", views.aniversariantes_dia, name="birthdays_today"),
+    path("types/", views.tipos, name="types"),
+    path("types/new/", views.tipo_novo, name="type_new"),
+    path("types/<int:pk>/edit/", views.tipo_editar, name="type_edit"),
+    path("types/<int:pk>/delete/", views.tipo_excluir, name="type_delete"),
 ]

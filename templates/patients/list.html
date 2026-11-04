@@ -7,7 +7,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Pacientes" %}</h1>
   {% if pode.pacientes.criar %}
-  <a class="btn btn-primary" href="{% url 'pacientes:novo' %}">{% translate "Novo paciente" %}</a>
+  <a class="btn btn-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>
   {% endif %}
 </div>
 
@@ -59,7 +59,7 @@
       <tr>
         <td>{{ paciente.pk }}</td>
         <td>
-          <a href="{% url 'pacientes:ficha' paciente.pk %}">{{ paciente.nome }}</a>
+          <a href="{% url 'patients:record' paciente.pk %}">{{ paciente.nome }}</a>
           {% if paciente.tipo == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
           {% if not paciente.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if paciente.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
@@ -70,13 +70,13 @@
         <td>{% if paciente.idade is not None %}{{ paciente.idade }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
           {% if paciente.arquivado %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Ver" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' paciente.pk %}">{% translate "Ver" %}</a>
           {% else %}
           {% if pode.pacientes.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:editar' paciente.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' paciente.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.pacientes.excluir %}
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'pacientes:arquivar' paciente.pk %}">{% translate "Arquivar" %}</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' paciente.pk %}">{% translate "Arquivar" %}</a>
           {% endif %}
           {% endif %}
         </td>

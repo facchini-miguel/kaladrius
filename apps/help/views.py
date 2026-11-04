@@ -24,8 +24,8 @@ PAGINAS = {
 
 def para_o_site(request, pagina=None, caminho=None):
     """Old in-system help addresses (before 0.27.0) now open the documentation site."""
-    if pagina == "privacidade":
-        return redirect("privacidade")
+    if pagina in ("privacidade", "privacy"):
+        return redirect("privacy")
     if pagina is not None:
         return redirect(documents.url_do_site(f"manual/{PAGINAS.get(pagina, pagina)}"))
     if caminho is not None:

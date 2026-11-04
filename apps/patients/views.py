@@ -175,7 +175,7 @@ def _formulario(request, paciente):
     if request.method == "POST" and form.is_valid():
         paciente = form.save()
         messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": paciente.nome})
-        return redirect("pacientes:ficha", pk=paciente.pk)
+        return redirect("patients:record", pk=paciente.pk)
     return render(request, "patients/form.html", {"form": form, "paciente": paciente})
 
 
@@ -209,7 +209,7 @@ def arquivar(request, pk):
             )
             % {"nome": paciente.nome},
         )
-        return redirect("pacientes:lista")
+        return redirect("patients:list")
     return render(request, "patients/archive.html", {"paciente": paciente})
 
 
@@ -221,7 +221,7 @@ def restaurar(request, pk):
         paciente.arquivado_em = paciente.arquivado_por = None
         paciente.save()
         messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": paciente.nome})
-    return redirect("pacientes:ficha", pk=paciente.pk)
+    return redirect("patients:record", pk=paciente.pk)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
@@ -306,7 +306,7 @@ def excluir(request, pk):
             request,
             _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": codigo},
         )
-        return redirect(f"{reverse('pacientes:lista')}?situacao=arquivados")
+        return redirect(f"{reverse('patients:list')}?situacao=arquivados")
     return render(request, "patients/delete.html", contexto)
 
 
@@ -375,7 +375,7 @@ def _relacionado(request, paciente, instancia):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Pessoa relacionada salva."))
-        return redirect("pacientes:ficha", pk=paciente.pk)
+        return redirect("patients:record", pk=paciente.pk)
     # The patient chosen in the search box, shown again when the form comes back.
     if form.is_bound:
         outro = form.cleaned_data.get("outro_paciente")
@@ -400,5 +400,5 @@ def relacionado_remover(request, pk):
         paciente = relacionada.paciente_id
         relacionada.delete()
         messages.success(request, _("Pessoa relacionada removida."))
-        return redirect("pacientes:ficha", pk=paciente)
-    return redirect("pacientes:relacionado_editar", pk=pk)
+        return redirect("patients:record", pk=paciente)
+    return redirect("patients:related_edit", pk=pk)

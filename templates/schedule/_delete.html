@@ -1,4 +1,4 @@
-{% load i18n %}<form hx-post="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">
+{% load i18n %}<form hx-post="{% url 'schedule:delete' agendamento.pk %}" hx-target="#modal-conteudo">
   {% csrf_token %}
   <div class="modal-header">
     <h2 class="modal-title h5">{% translate "Excluir agendamento?" %}</h2>
@@ -20,7 +20,7 @@
     {% endif %}
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-link" hx-get="{% url 'agenda:editar' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Voltar" %}</button>
+    <button type="button" class="btn btn-link" hx-get="{% url 'schedule:edit' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Voltar" %}</button>
     <button type="submit" class="btn btn-danger">{% translate "Excluir" %}</button>
   </div>
 </form>

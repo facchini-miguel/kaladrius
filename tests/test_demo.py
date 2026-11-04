@@ -95,9 +95,9 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
 
 def test_conta_de_demonstracao_nao_troca_a_senha(demonstracao):
     cliente = entrar("demo.recepcao", SENHAS["senha_recepcao"])
-    assert "Trocar senha" not in cliente.get(reverse("inicio")).content.decode()
+    assert "Trocar senha" not in cliente.get(reverse("home")).content.decode()
     resposta = cliente.post(
-        reverse("trocar_senha"),
+        reverse("change_password"),
         {
             "old_password": SENHAS["senha_recepcao"],
             "new_password1": "Nova-senha-123!",
@@ -115,14 +115,14 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
         from apps.patients.models import Paciente
 
         paciente = Paciente.objects.create(nome="Maria Paciente")
-    cliente.post(reverse("prontuario:novo", args=[paciente.pk]), ANAMNESE)
+    cliente.post(reverse("medical_records:new", args=[paciente.pk]), ANAMNESE)
     with usar_clinica(demonstracao["clinica"]):
         atendimento = Atendimento.objects.get()
-    pagina = cliente.get(reverse("prontuario:atendimento", args=[atendimento.pk])).content.decode()
+    pagina = cliente.get(reverse("medical_records:visit", args=[atendimento.pk])).content.decode()
     assert "Contas de demonstração não enviam anexos." in pagina
     assert "anexo_enviar" not in pagina and 'enctype="multipart/form-data"' not in pagina
     resposta = cliente.post(
-        reverse("prontuario:anexo_enviar", args=[atendimento.pk]),
+        reverse("medical_records:attachment_upload", args=[atendimento.pk]),
         {"arquivo": SimpleUploadedFile("x.png", PNG)},
         follow=True,
     )
@@ -149,14 +149,14 @@ def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
     recepcao = get_user_model().objects.get(username="demo.recepcao")
     vinculo = Vinculo.objects.get(usuario=recepcao)
     # Sees the team, but cannot add members, edit them or reset their passwords.
-    lista = admin.get(reverse("equipe:lista"))
+    lista = admin.get(reverse("team:list"))
     assert lista.status_code == 200 and "Novo membro" not in lista.content.decode()
-    assert admin.get(reverse("equipe:novo")).status_code == 403
-    assert admin.post(reverse("equipe:senha", args=[vinculo.pk]), {}).status_code == 403
-    assert admin.get(reverse("configuracoes")).status_code == 403
+    assert admin.get(reverse("team:new")).status_code == 403
+    assert admin.post(reverse("team:password", args=[vinculo.pk]), {}).status_code == 403
+    assert admin.get(reverse("clinic_settings")).status_code == 403
     # The audit log is there, without the visitors' IP addresses.
-    auditoria = admin.get(reverse("auditoria:lista")).content.decode()
+    auditoria = admin.get(reverse("audit:list")).content.decode()
     assert ">IP<" not in auditoria
     # Everything else of an administrator still works (finance, for example).
-    assert admin.get(reverse("financeiro:pagar")).status_code == 200
-    entrar("demo.financeiro", "demo-financeiro-1").get(reverse("financeiro:fluxo"))
+    assert admin.get(reverse("finance:payables")).status_code == 200
+    entrar("demo.financeiro", "demo-financeiro-1").get(reverse("finance:cash_flow"))

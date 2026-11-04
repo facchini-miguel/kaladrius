@@ -2,14 +2,14 @@ from django.urls import path
 
 from . import views
 
-app_name = "rechamadas"
+app_name = "recalls"
 
 urlpatterns = [
-    path("", views.lista, name="lista"),
-    path("novo/", views.novo, name="novo"),
-    path("<int:pk>/editar/", views.editar, name="editar"),
-    path("<int:pk>/concluir/", views.concluir, name="concluir"),
-    path("<int:pk>/excluir/", views.excluir, name="excluir"),
-    path("resumo/", views.resumo, name="resumo"),
-    path("dia/", views.do_dia, name="do_dia"),
+    path("", views.lista, name="list"),
+    path("new/", views.novo, name="new"),
+    path("<int:pk>/edit/", views.editar, name="edit"),
+    path("<int:pk>/complete/", views.concluir, name="complete"),
+    path("<int:pk>/delete/", views.excluir, name="delete"),
+    path("summary/", views.resumo, name="summary"),
+    path("today/", views.do_dia, name="today"),
 ]

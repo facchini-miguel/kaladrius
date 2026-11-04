@@ -6,7 +6,7 @@
 {% block conteudo %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Fornecedores" %}</h1>
-  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:fornecedor_novo' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
+  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
 </div>
 
 {% rotulo_documento "pessoa" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
@@ -35,13 +35,13 @@
       {% for fornecedor in pagina %}
       <tr>
         <td>
-          <a href="{% url 'financeiro:fornecedor' fornecedor.pk %}">{{ fornecedor.nome }}</a>
+          <a href="{% url 'finance:supplier' fornecedor.pk %}">{{ fornecedor.nome }}</a>
           {% if not fornecedor.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ fornecedor.telefone|telefone|default:"—" }}</td>
         <td class="text-nowrap">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|telefone }}</a>{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:fornecedor_editar' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum fornecedor encontrado." %}</td></tr>

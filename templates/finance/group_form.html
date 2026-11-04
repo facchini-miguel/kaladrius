@@ -10,6 +10,6 @@
   {% include "includes/form.html" %}
   <p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, desmarque “ativo”." %}</p>
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'financeiro:plano_contas' %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:chart_of_accounts' %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

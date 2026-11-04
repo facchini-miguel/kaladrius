@@ -40,7 +40,7 @@ def _convenio(request, instancia):
     if request.method == "POST" and form.is_valid():
         convenio = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.nome})
-        return redirect("convenios:lista")
+        return redirect("health_plans:list")
     return render(request, "health_plans/form.html", {"form": form, "instancia": instancia})
 
 
@@ -63,7 +63,7 @@ def _carteirinha(request, paciente, instancia):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Carteirinha salva."))
-        return redirect("pacientes:ficha", pk=paciente.pk)
+        return redirect("patients:record", pk=paciente.pk)
     return render(
         request,
         "health_plans/card_form.html",

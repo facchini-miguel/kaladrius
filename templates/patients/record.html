@@ -14,18 +14,18 @@
   <div>
     {% if paciente.arquivado %}
     {% if pode.pacientes.excluir %}
-    <form method="post" action="{% url 'pacientes:restaurar' paciente.pk %}" class="d-inline">
+    <form method="post" action="{% url 'patients:restore' paciente.pk %}" class="d-inline">
       {% csrf_token %}
       <button type="submit" class="btn btn-primary">{% translate "Restaurar" %}</button>
     </form>
-    <a class="btn btn-outline-danger" href="{% url 'pacientes:excluir' paciente.pk %}">{% translate "Excluir definitivamente" %}</a>
+    <a class="btn btn-outline-danger" href="{% url 'patients:delete' paciente.pk %}">{% translate "Excluir definitivamente" %}</a>
     {% endif %}
     {% else %}
-    {% if pode.pacientes.alterar %}<a class="btn btn-primary" href="{% url 'pacientes:editar' paciente.pk %}">{% translate "Editar" %}</a>{% endif %}
-    {% if pode.pacientes.excluir %}<a class="btn btn-outline-secondary" href="{% url 'pacientes:arquivar' paciente.pk %}">{% translate "Arquivar" %}</a>{% endif %}
+    {% if pode.pacientes.alterar %}<a class="btn btn-primary" href="{% url 'patients:edit' paciente.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if pode.pacientes.excluir %}<a class="btn btn-outline-secondary" href="{% url 'patients:archive' paciente.pk %}">{% translate "Arquivar" %}</a>{% endif %}
     {% endif %}
-    <a class="btn btn-outline-secondary" href="{% url 'pacientes:imprimir' paciente.pk %}">{% translate "Imprimir ficha" %}</a>
-    <a class="btn btn-link" href="{% url 'pacientes:lista' %}">{% translate "Voltar à lista" %}</a>
+    <a class="btn btn-outline-secondary" href="{% url 'patients:print' paciente.pk %}">{% translate "Imprimir ficha" %}</a>
+    <a class="btn btn-link" href="{% url 'patients:list' %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>
 
@@ -98,22 +98,22 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Pessoas relacionadas" %}
-    {% if pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'pacientes:relacionado_novo' paciente.pk %}">{% translate "Nova pessoa relacionada" %}</a>{% endif %}
+    {% if pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'patients:related_new' paciente.pk %}">{% translate "Nova pessoa relacionada" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for relacionada, nome, outro, inverso in relacionados %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
       <span>
         {% if inverso %}
-        {% with vinculo=relacionada.get_vinculo_display %}{% blocktranslate %}{{ vinculo }} de{% endblocktranslate %} <a href="{% url 'pacientes:ficha' outro.pk %}">{{ nome }}</a>{% endwith %}
+        {% with vinculo=relacionada.get_vinculo_display %}{% blocktranslate %}{{ vinculo }} de{% endblocktranslate %} <a href="{% url 'patients:record' outro.pk %}">{{ nome }}</a>{% endwith %}
         {% else %}
         <strong>{{ relacionada.get_vinculo_display }}:</strong>
-        {% if outro %}<a href="{% url 'pacientes:ficha' outro.pk %}">{{ nome }}</a>{% else %}{{ nome }}{% endif %}
+        {% if outro %}<a href="{% url 'patients:record' outro.pk %}">{{ nome }}</a>{% else %}{{ nome }}{% endif %}
         {% with telefone=relacionada.telefone_exibido %}{% if telefone %}· <span class="text-nowrap">{{ telefone|telefone }}</span>{% endif %}{% endwith %}
         {% if relacionada.observacao %}<span class="small text-body-secondary">· {{ relacionada.observacao }}</span>{% endif %}
         {% endif %}
       </span>
-      {% if not inverso and pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0" href="{% url 'pacientes:relacionado_editar' relacionada.pk %}">{% translate "editar" %}</a>{% endif %}
+      {% if not inverso and pode.pacientes.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0" href="{% url 'patients:related_edit' relacionada.pk %}">{% translate "editar" %}</a>{% endif %}
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhuma pessoa relacionada." %}</li>
@@ -125,12 +125,12 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Prontuário" %}
-    {% if not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'prontuario:novo' paciente.pk %}">{% translate "Novo atendimento" %}</a>{% endif %}
+    {% if not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:new' paciente.pk %}">{% translate "Novo atendimento" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for atendimento in prontuario %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'prontuario:atendimento' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.profissional.nome }}</a>
+      <a href="{% url 'medical_records:visit' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.profissional.nome }}</a>
       {% if atendimento.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
     </li>
     {% empty %}
@@ -175,12 +175,12 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Orçamentos" %}
-    {% if pode.orcamentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'orcamentos:novo' %}?paciente={{ paciente.pk }}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if pode.orcamentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:new' %}?paciente={{ paciente.pk }}">{% translate "Novo orçamento" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for orcamento in orcamentos %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-      <span><a href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
+      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
       {% include "estimates/_status.html" %}
     </li>
     {% empty %}
@@ -194,7 +194,7 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Convênios" %}
-    {% if pode.convenios.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'convenios:carteirinha_nova' paciente.pk %}">{% translate "Nova carteirinha" %}</a>{% endif %}
+    {% if pode.convenios.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:card_new' paciente.pk %}">{% translate "Nova carteirinha" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for carteirinha in carteirinhas %}
@@ -208,7 +208,7 @@
       </span>
       <span class="text-nowrap">
         {% if not carteirinha.ativa %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
-        {% if pode.convenios.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0 ms-2" href="{% url 'convenios:carteirinha_editar' carteirinha.pk %}">{% translate "editar" %}</a>{% endif %}
+        {% if pode.convenios.alterar and not paciente.arquivado %}<a class="btn btn-sm btn-link p-0 ms-2" href="{% url 'health_plans:card_edit' carteirinha.pk %}">{% translate "editar" %}</a>{% endif %}
       </span>
     </li>
     {% empty %}
@@ -222,7 +222,7 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Financeiro" %}
-    {% if pode.recebimentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:lancamento_novo' %}?paciente={{ paciente.pk }}">{% translate "Novo lançamento" %}</a>{% endif %}
+    {% if pode.recebimentos.criar and not paciente.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:entry_new' %}?paciente={{ paciente.pk }}">{% translate "Novo lançamento" %}</a>{% endif %}
   </div>
   <div class="card-body">
     <p class="mb-2">
@@ -233,8 +233,8 @@
     <ul class="list-unstyled small mb-2">
       {% for parcela in financeiro.abertas %}
       <li>
-        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> ({{ parcela.numero }}) · {{ parcela.saldo|moeda }}
-        {% if pode.recebimentos.criar %}· <a href="{% url 'financeiro:receber_parcela' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
+        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> ({{ parcela.numero }}) · {{ parcela.saldo|moeda }}
+        {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -243,7 +243,7 @@
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
       {% for pagamento in financeiro.pagamentos %}
-      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'financeiro:recibo' pagamento.pk %}">{% translate "recibo" %}</a></li>
+      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -255,7 +255,7 @@
 <div class="card mt-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     {% translate "Rechamadas" %}
-    {% if pode.rechamadas.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'rechamadas:novo' %}?paciente={{ paciente.pk }}&amp;next={{ request.path|urlencode }}">{% translate "Nova rechamada" %}</a>{% endif %}
+    {% if pode.rechamadas.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:new' %}?paciente={{ paciente.pk }}&amp;next={{ request.path|urlencode }}">{% translate "Nova rechamada" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for rechamada in rechamadas %}

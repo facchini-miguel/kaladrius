@@ -11,6 +11,6 @@
   {% include "includes/form.html" %}
   <p class="text-body-secondary small">{% translate "Nada é apagado: o registro fica marcado, com o motivo, e aparece na auditoria." %}</p>
   <button type="submit" class="btn btn-danger">{{ titulo }}</button>
-  <a class="btn btn-link" href="{% url 'financeiro:lancamento' voltar %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' voltar %}">{% translate "Voltar" %}</a>
 </form>
 {% endblock %}

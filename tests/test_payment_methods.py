@@ -65,7 +65,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     mudar_pais(cenario, "PE")
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     parcela = parcelas_de(cenario, lancamento)[0]
-    url = reverse("financeiro:receber_parcela", args=[parcela.pk])
+    url = reverse("finance:receive_installment", args=[parcela.pk])
     admin = entrar(cenario, "admin")
     pagina = admin.get(url).content.decode()
     assert 'value="carteira"' in pagina and "Yape, Plin" in pagina
@@ -78,14 +78,14 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
         assert pagamento.get_forma_display() == "Carteira digital (Yape, Plin)"
         relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
-    nova = admin.get(reverse("financeiro:lancamento_novo")).content.decode()
+    nova = admin.get(reverse("finance:entry_new")).content.decode()
     assert 'value="carteira"' in nova and 'value="pix"' not in nova
 
 
 def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     parcela = parcelas_de(cenario, lancamento)[0]
-    url = reverse("financeiro:receber_parcela", args=[parcela.pk])
+    url = reverse("finance:receive_installment", args=[parcela.pk])
     admin = entrar(cenario, "admin")
     form = admin.get(url).context["form"]
     assert "cartao_parcelas" in form.fields and "NSU" in str(form.fields["cartao_codigo"].label)
@@ -114,7 +114,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
 def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
     parcela = parcelas_de(cenario, lancamento)[0]
-    url = reverse("financeiro:receber_parcela", args=[parcela.pk])
+    url = reverse("finance:receive_installment", args=[parcela.pk])
     dados = {
         "data": HOJE.isoformat(),
         "valor": "100",

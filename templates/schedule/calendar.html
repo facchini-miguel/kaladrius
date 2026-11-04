@@ -27,7 +27,7 @@
   {% else %}
   {% translate "Nenhum profissional ativo nesta clínica." %}
   {% endif %}
-  {% if pode.profissionais.criar %}<a href="{% url 'profissionais:novo' %}">{% translate "Cadastre um profissional" %}</a> {% translate "para usar a agenda." %}{% endif %}
+  {% if pode.profissionais.criar %}<a href="{% url 'practitioners:new' %}">{% translate "Cadastre um profissional" %}</a> {% translate "para usar a agenda." %}{% endif %}
 </div>
 {% else %}
 <div class="d-flex flex-wrap gap-1 mb-2 small" aria-label="{% translate 'Legenda dos tipos de atendimento' %}">

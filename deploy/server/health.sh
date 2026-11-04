@@ -118,6 +118,15 @@ hosts_of() {
   env_value "$1" | tr ',' '\n' | tr -d ' ' | grep -v '^$' || true
 }
 
+# Every hostname answers its health page (common.sh's health_answers).
+all_healthy() {
+  local host
+  for host in "$@"; do
+    site_curl_options "$host"  # common.sh
+    health_answers "$host" || return 1
+  done
+}
+
 # Every hostname answers `path` over HTTPS.
 all_answer() {
   local path=$1 host
@@ -144,8 +153,8 @@ check_sites() {
   local -a sites docs
   mapfile -t sites < <(hosts_of SITE_HOSTNAME)
   mapfile -t docs < <(hosts_of DOCS_HOSTNAME)
-  # The system, with its database (/api/v1/saude answers 503 when the database does not).
-  signal_of MONITOR_SYSTEM_URL all_answer /api/v1/saude "${sites[@]}"
+  # The system, with its database (/api/v1/health answers 503 when the database does not).
+  signal_of MONITOR_SYSTEM_URL all_healthy "${sites[@]}"
   # On the internal network Caddy's local certificates last hours and are renewed by it: there
   # is no expiry to watch.
   internal_network || signal_of MONITOR_CERTIFICATE_URL certificates_ok "${sites[@]}" "${docs[@]}"

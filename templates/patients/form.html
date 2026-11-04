@@ -67,7 +67,7 @@
   </div>
 
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if paciente.pk %}{% url 'pacientes:ficha' paciente.pk %}{% else %}{% url 'pacientes:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% if paciente.pk %}{% url 'patients:record' paciente.pk %}{% else %}{% url 'patients:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}
 

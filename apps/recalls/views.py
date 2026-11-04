@@ -25,7 +25,7 @@ def _data(valor):
         return None
 
 
-def _voltar(request, padrao="rechamadas:lista"):
+def _voltar(request, padrao="recalls:list"):
     destino = request.POST.get("next") or request.GET.get("next")
     if destino and url_has_allowed_host_and_scheme(destino, allowed_hosts={request.get_host()}):
         return redirect(destino)

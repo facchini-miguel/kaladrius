@@ -16,6 +16,6 @@
   </div>
   {% with campo=form.observacoes %}{% include "includes/field.html" %}{% endwith %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if orcamento %}{% url 'orcamentos:detalhe' orcamento.pk %}{% else %}{% url 'orcamentos:lista' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% if orcamento %}{% url 'estimates:detail' orcamento.pk %}{% else %}{% url 'estimates:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

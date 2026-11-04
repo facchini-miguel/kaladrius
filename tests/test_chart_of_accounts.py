@@ -40,7 +40,7 @@ def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
 def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     pessoal = grupo(clinica_a, "Pessoal")
     resposta = admin.post(
-        reverse("financeiro:grupo_novo"),
+        reverse("finance:group_new"),
         {
             "nome": "Equipe da recepção",
             "tipo": "despesa",
@@ -55,11 +55,11 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
         assert sub.numero == "2.1"
         salarios = Categoria.objects.get(nome="Salários e encargos")
     editar = admin.post(
-        reverse("financeiro:cadastro_editar", args=["categorias", salarios.pk]),
+        reverse("finance:catalog_edit", args=["categories", salarios.pk]),
         {"nome": salarios.nome, "tipo": "despesa", "grupo": sub.pk, "ativa": "on"},
     )
     assert editar.status_code == 302
-    pagina = admin.get(reverse("financeiro:plano_contas")).content.decode()
+    pagina = admin.get(reverse("finance:chart_of_accounts")).content.decode()
     assert "2.1 Equipe da recepção" in pagina and "Salários e encargos" in pagina
 
 
@@ -68,13 +68,13 @@ def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
     pessoal = grupo(clinica_a, "Pessoal")
     for nome in ("Equipe A", "Equipe B"):
         dados = {"nome": nome, "tipo": "despesa", "pai": pessoal.pk, "codigo": "", "ativo": "on"}
-        assert admin.post(reverse("financeiro:grupo_novo"), dados).status_code == 302
+        assert admin.post(reverse("finance:group_new"), dados).status_code == 302
     with usar_clinica(clinica_a):
         assert grupo(clinica_a, "Equipe A").numero == "2.1"
         assert grupo(clinica_a, "Equipe B").numero == "2.2"
     # A new top group goes after the five of the basic plan.
     topo = {"nome": "Investimentos", "tipo": "despesa", "pai": "", "codigo": "", "ativo": "on"}
-    assert admin.post(reverse("financeiro:grupo_novo"), topo).status_code == 302
+    assert admin.post(reverse("finance:group_new"), topo).status_code == 302
     with usar_clinica(clinica_a):
         assert grupo(clinica_a, "Investimentos").numero == "6"
 
@@ -82,7 +82,7 @@ def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
 def test_validacoes_do_grupo(clinica_a, admin):
     pessoal = grupo(clinica_a, "Pessoal")
     atendimentos = grupo(clinica_a, "Atendimentos")
-    url = reverse("financeiro:grupo_novo")
+    url = reverse("finance:group_new")
     misturado = admin.post(url, {"nome": "X", "tipo": "despesa", "pai": atendimentos.pk})
     assert "pai" in misturado.context["form"].errors
     repetido = admin.post(url, {"nome": "pessoal", "tipo": "despesa"})
@@ -91,7 +91,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
     with usar_clinica(clinica_a):
         sub = GrupoContabil.objects.create(nome="Sub", tipo="despesa", pai=pessoal)
     ciclo = admin.post(
-        reverse("financeiro:grupo_editar", args=[pessoal.pk]),
+        reverse("finance:group_edit", args=[pessoal.pk]),
         {"nome": "Pessoal", "tipo": "despesa", "pai": sub.pk},
     )
     assert "pai" in ciclo.context["form"].errors
@@ -99,7 +99,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
 
 def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
     resposta = admin.post(
-        reverse("financeiro:cadastro_novo", args=["categorias"]),
+        reverse("finance:catalog_new", args=["categories"]),
         {
             "nome": "Exames",
             "tipo": "receita",
@@ -137,7 +137,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
             )
             parcela = lancamento.parcelas.get()
             services.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
-    relatorio = admin.get(reverse("financeiro:relatorios")).context["relatorio"]
+    relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert [(n, nome, str(v)) for n, nome, v in relatorio["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),
         (1, "2.1 Recepção", "1000.00"),
@@ -147,7 +147,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
 
 def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
     recepcao = cliente_de(criar_usuario("recepcao_plano", clinica_a, Papel.RECEPCAO))
-    assert recepcao.get(reverse("financeiro:plano_contas")).status_code == 403
+    assert recepcao.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
 @pytest.mark.django_db(transaction=True)

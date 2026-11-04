@@ -65,7 +65,7 @@ def _formulario(request, instancia):
                     criado_por=request.user,
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.nome})
-        return redirect("pessoal:funcionario", pk=funcionario.pk)
+        return redirect("staff:employee", pk=funcionario.pk)
     return render(request, "staff/form.html", {"form": form, "instancia": instancia})
 
 
@@ -74,7 +74,7 @@ def folha(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
     hoje = timezone.localdate()
     competencia = services.mes_da_url(request.GET.get("mes"), hoje)
-    url = f"{reverse('pessoal:folha')}?mes={competencia:%Y-%m}"
+    url = f"{reverse('staff:payroll')}?mes={competencia:%Y-%m}"
     pode_alterar = pode(request, Modulo.PESSOAL, Acao.ALTERAR)
     folhas = (
         services.preparar(competencia)

@@ -73,7 +73,7 @@ def receber(cenario, valor, profissional, data=ONTEM, juros="0"):
 
 def pagar_comissao(cenario, profissional, ate=HOJE):
     return cenario["cliente"].post(
-        f"{reverse('financeiro:comissao_pagar', args=[profissional.pk])}?ate={ate.isoformat()}",
+        f"{reverse('finance:commission_pay', args=[profissional.pk])}?ate={ate.isoformat()}",
         {"vencimento": HOJE.isoformat(), "categoria": cenario["categoria"].pk},
     )
 
@@ -96,7 +96,7 @@ def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
     with usar_clinica(cenario["clinica"]):
         comissao = Comissao.objects.get()
         lancamento = comissao.lancamento
-        assert resposta.url == reverse("financeiro:lancamento", args=[lancamento.pk])
+        assert resposta.url == reverse("finance:entry", args=[lancamento.pk])
         assert (lancamento.tipo, lancamento.valor_total, lancamento.pessoa) == (
             Lancamento.Tipo.PAGAR,
             Decimal("120.00"),
@@ -148,7 +148,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
         )
         pagamento.refresh_from_db()
         assert pagamento.comissao_estorno == segunda
-    extrato = cenario["cliente"].get(reverse("financeiro:comissao", args=[segunda.pk]))
+    extrato = cenario["cliente"].get(reverse("finance:commission", args=[segunda.pk]))
     assert "Pix devolvido" not in extrato.content.decode()  # reasons are not on the statement
     assert list(extrato.context["estornos"]) == [pagamento]
 
@@ -159,7 +159,7 @@ def test_cancelar_a_despesa_desfaz_a_comissao(cenario):
     with usar_clinica(cenario["clinica"]):
         comissao = Comissao.objects.get()
     cenario["cliente"].post(
-        reverse("financeiro:cancelar", args=[comissao.lancamento_id]), {"motivo": "Errado"}
+        reverse("finance:cancel", args=[comissao.lancamento_id]), {"motivo": "Errado"}
     )
     comissao.refresh_from_db()
     assert comissao.cancelada
@@ -171,32 +171,32 @@ def test_cancelar_a_despesa_desfaz_a_comissao(cenario):
 def test_telas_e_percentual(cenario):
     receber(cenario, "300.00", cenario["dra"])
     cliente = cenario["cliente"]
-    pagina = cliente.get(reverse("financeiro:comissoes"))
+    pagina = cliente.get(reverse("finance:commissions"))
     assert [linha["profissional"] for linha in pagina.context["linhas"]] == [cenario["dra"]]
     assert list(pagina.context["sem_percentual"]) == [cenario["dr"]]
     assert "R$ 120,00" in pagina.content.decode()
-    url = reverse("financeiro:comissao_percentual", args=[cenario["dr"].pk])
+    url = reverse("finance:commission_percentage", args=[cenario["dr"].pk])
     assert cliente.post(url, {"comissao_percentual": "101"}).status_code == 200  # > 100
     cliente.post(url, {"comissao_percentual": "35,5"})
     cenario["dr"].refresh_from_db()
     assert cenario["dr"].comissao_percentual == Decimal("35.50")
-    pagar = cliente.get(reverse("financeiro:comissao_pagar", args=[cenario["dra"].pk]))
+    pagar = cliente.get(reverse("finance:commission_pay", args=[cenario["dra"].pk]))
     assert pagar.context["calculo"]["valor"] == Decimal("120.00")
     # A future cut-off date is not allowed: it becomes today.
     futuro = (HOJE + datetime.timedelta(days=30)).isoformat()
-    assert cliente.get(reverse("financeiro:comissoes"), {"ate": futuro}).context["ate"] == HOJE
+    assert cliente.get(reverse("finance:commissions"), {"ate": futuro}).context["ate"] == HOJE
 
 
 def test_so_o_administrador(cenario):
     recepcao = cenario["cliente_de"](cenario["recepcao"])
-    assert recepcao.get(reverse("financeiro:comissoes")).status_code == 403
+    assert recepcao.get(reverse("finance:commissions")).status_code == 403
     assert (
-        recepcao.post(reverse("financeiro:comissao_pagar", args=[cenario["dra"].pk])).status_code
+        recepcao.post(reverse("finance:commission_pay", args=[cenario["dra"].pk])).status_code
         == 403
     )
     assert (
         recepcao.post(
-            reverse("financeiro:comissao_percentual", args=[cenario["dra"].pk]),
+            reverse("finance:commission_percentage", args=[cenario["dra"].pk]),
             {"comissao_percentual": "90"},
         ).status_code
         == 403
@@ -205,9 +205,7 @@ def test_so_o_administrador(cenario):
 
 def test_profissional_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
     outro = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    assert (
-        outro.get(reverse("financeiro:comissao_pagar", args=[cenario["dra"].pk])).status_code == 404
-    )
+    assert outro.get(reverse("finance:commission_pay", args=[cenario["dra"].pk])).status_code == 404
 
 
 def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
@@ -221,7 +219,7 @@ def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
         segunda = Comissao.objects.exclude(pk=primeira.pk).get()
-    cancelar = reverse("financeiro:cancelar", args=[primeira.lancamento_id])
+    cancelar = reverse("finance:cancel", args=[primeira.lancamento_id])
     resposta = cenario["cliente"].post(cancelar, {"motivo": "Errado"}, follow=True)
     assert "Cancele aquela antes" in resposta.content.decode()
     primeira.refresh_from_db()
@@ -230,7 +228,7 @@ def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
     assert (pagamento.comissao, pagamento.comissao_estorno) == (primeira, segunda)
     # In the right order both go, and everything is pending again.
     cenario["cliente"].post(
-        reverse("financeiro:cancelar", args=[segunda.lancamento_id]), {"motivo": "Errado"}
+        reverse("finance:cancel", args=[segunda.lancamento_id]), {"motivo": "Errado"}
     )
     cenario["cliente"].post(cancelar, {"motivo": "Errado"})
     primeira.refresh_from_db()

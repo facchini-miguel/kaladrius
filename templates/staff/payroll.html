@@ -31,7 +31,7 @@
       <tbody>
         {% for folha, form in linhas %}
         <tr>
-          <td><a href="{% url 'pessoal:funcionario' folha.funcionario_id %}">{{ folha.funcionario.nome }}</a></td>
+          <td><a href="{% url 'staff:employee' folha.funcionario_id %}">{{ folha.funcionario.nome }}</a></td>
           <td class="text-end text-nowrap">{{ folha.salario|moeda }}</td>
           {% if form %}
           <td>{{ form.horas_extras }}{% for erro in form.horas_extras.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
@@ -42,12 +42,12 @@
           <td>{{ folha.horas_extras }}</td>
           <td class="text-nowrap">{{ folha.valor_hora_extra|moeda }}</td>
           <td>{{ folha.faltas }}</td>
-          <td>{{ folha.observacao|default:"—" }}{% if folha.lancada %} · <a href="{% url 'financeiro:lancamento' folha.lancamento_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ folha.observacao|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if pode.pessoal.criar %}<a href="{% url 'pessoal:novo' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
+        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if pode.pessoal.criar %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
         {% endfor %}
       </tbody>
       {% if linhas %}

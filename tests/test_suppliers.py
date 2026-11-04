@@ -47,7 +47,7 @@ def despesa(clinica, **extra):
 
 def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     resposta = admin.post(
-        reverse("financeiro:fornecedor_novo"),
+        reverse("finance:supplier_new"),
         dados(cpf_cnpj="11.222.333/0001-81", telefone="(48) 3333-4444", whatsapp="48 99999-0000"),
     )
     assert resposta.status_code == 302
@@ -58,7 +58,7 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
         "4833334444",
         "48999990000",
     )
-    assert resposta.url == reverse("financeiro:fornecedor", args=[criado.pk])
+    assert resposta.url == reverse("finance:supplier", args=[criado.pk])
 
 
 @pytest.mark.parametrize(
@@ -71,42 +71,42 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     ],
 )
 def test_validacoes_do_cadastro(extra, campo, admin):
-    resposta = admin.post(reverse("financeiro:fornecedor_novo"), dados(**extra))
+    resposta = admin.post(reverse("finance:supplier_new"), dados(**extra))
     assert resposta.status_code == 200
     assert campo in resposta.context["form"].errors
 
 
 def test_documento_repetido_e_recusado(fornecedor, admin):
-    resposta = admin.post(reverse("financeiro:fornecedor_novo"), dados(cpf_cnpj=CNPJ))
+    resposta = admin.post(reverse("finance:supplier_new"), dados(cpf_cnpj=CNPJ))
     assert "cpf_cnpj" in resposta.context["form"].errors
     editar = admin.post(
-        reverse("financeiro:fornecedor_editar", args=[fornecedor.pk]),
+        reverse("finance:supplier_edit", args=[fornecedor.pk]),
         dados(nome="Dental Fictícia Renomeada", cpf_cnpj=CNPJ),
     )
     assert editar.status_code == 302
 
 
 def test_despesa_com_fornecedor_guarda_o_nome_e_aparece_na_ficha(clinica_a, fornecedor, admin):
-    pagina = admin.get(reverse("financeiro:despesa_nova") + f"?fornecedor={fornecedor.pk}")
+    pagina = admin.get(reverse("finance:expense_new") + f"?fornecedor={fornecedor.pk}")
     assert pagina.context["form"]["fornecedor"].value() == str(fornecedor.pk)
     resposta = admin.post(
-        reverse("financeiro:despesa_nova"), despesa(clinica_a, fornecedor=fornecedor.pk)
+        reverse("finance:expense_new"), despesa(clinica_a, fornecedor=fornecedor.pk)
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         lancamento = Lancamento.objects.get()
     assert lancamento.fornecedor == fornecedor
     assert lancamento.pessoa == "Dental Fictícia"
-    ficha = admin.get(reverse("financeiro:fornecedor", args=[fornecedor.pk]))
+    ficha = admin.get(reverse("finance:supplier", args=[fornecedor.pk]))
     assert len(ficha.context["parcelas"]) == 3
     assert str(ficha.context["em_aberto"]) == "450.00"
-    lista = admin.get(reverse("financeiro:pagar")).content.decode()
-    assert reverse("financeiro:fornecedor", args=[fornecedor.pk]) in lista
-    assert admin.get(reverse("financeiro:pagar") + "?q=Dental").context["pagina"].paginator.count
+    lista = admin.get(reverse("finance:payables")).content.decode()
+    assert reverse("finance:supplier", args=[fornecedor.pk]) in lista
+    assert admin.get(reverse("finance:payables") + "?q=Dental").context["pagina"].paginator.count
 
 
 def test_despesa_avulsa_sem_fornecedor_continua_valendo(clinica_a, admin):
-    resposta = admin.post(reverse("financeiro:despesa_nova"), despesa(clinica_a, pessoa="Feira"))
+    resposta = admin.post(reverse("finance:expense_new"), despesa(clinica_a, pessoa="Feira"))
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         lancamento = Lancamento.objects.get()
@@ -114,7 +114,7 @@ def test_despesa_avulsa_sem_fornecedor_continua_valendo(clinica_a, admin):
 
 
 def test_despesa_exige_fornecedor_ou_nome(clinica_a, admin):
-    resposta = admin.post(reverse("financeiro:despesa_nova"), despesa(clinica_a))
+    resposta = admin.post(reverse("finance:expense_new"), despesa(clinica_a))
     assert resposta.status_code == 200
     assert "fornecedor" in resposta.context["form"].errors
 
@@ -123,14 +123,14 @@ def test_fornecedor_inativo_some_da_despesa_mas_fica_na_lista(clinica_a, fornece
     with usar_clinica(clinica_a):
         fornecedor.ativo = False
         fornecedor.save()
-    form = admin.get(reverse("financeiro:despesa_nova")).context["form"]
+    form = admin.get(reverse("finance:expense_new")).context["form"]
     with usar_clinica(clinica_a):
         assert fornecedor not in form.fields["fornecedor"].queryset
-    assert fornecedor in admin.get(reverse("financeiro:fornecedores")).context["pagina"]
+    assert fornecedor in admin.get(reverse("finance:suppliers")).context["pagina"]
 
 
 def test_busca_por_nome_e_documento(fornecedor, admin):
-    url = reverse("financeiro:fornecedores")
+    url = reverse("finance:suppliers")
     assert list(admin.get(url, {"q": "dental ficticia"}).context["pagina"]) == [fornecedor]
     assert list(admin.get(url, {"q": "11.222.333"}).context["pagina"]) == [fornecedor]
     assert list(admin.get(url, {"q": "outro"}).context["pagina"]) == []
@@ -142,29 +142,29 @@ def test_so_quem_cuida_do_financeiro_ve_fornecedores(
 ):
     cliente = cliente_de(criar_usuario("sem_financeiro", clinica_a, papel))
     for url in (
-        reverse("financeiro:fornecedores"),
-        reverse("financeiro:fornecedor", args=[fornecedor.pk]),
-        reverse("financeiro:fornecedor_novo"),
+        reverse("finance:suppliers"),
+        reverse("finance:supplier", args=[fornecedor.pk]),
+        reverse("finance:supplier_new"),
     ):
         assert cliente.get(url).status_code == 403, url
 
 
 def test_perfil_financeiro_cadastra_fornecedor(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("financeiro_fornecedores", clinica_a, Papel.FINANCEIRO))
-    assert cliente.post(reverse("financeiro:fornecedor_novo"), dados()).status_code == 302
+    assert cliente.post(reverse("finance:supplier_new"), dados()).status_code == 302
 
 
 def test_fornecedores_somem_com_o_financeiro_desligado(clinica_a, fornecedor, admin):
-    assert reverse("financeiro:fornecedores") in admin.get(reverse("inicio")).content.decode()
+    assert reverse("finance:suppliers") in admin.get(reverse("home")).content.decode()
     configurar(
         clinica_a,
         MODULOS_GERAIS
         - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS, ModuloClinico.PESSOAL},
     )
-    assert admin.get(reverse("financeiro:fornecedores")).status_code == 403
-    assert reverse("financeiro:fornecedores") not in admin.get(reverse("inicio")).content.decode()
+    assert admin.get(reverse("finance:suppliers")).status_code == 403
+    assert reverse("finance:suppliers") not in admin.get(reverse("home")).content.decode()
 
 
 def test_fornecedor_de_outra_clinica_nao_aparece(clinica_b, fornecedor, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    assert cliente.get(reverse("financeiro:fornecedor", args=[fornecedor.pk])).status_code == 404
+    assert cliente.get(reverse("finance:supplier", args=[fornecedor.pk])).status_code == 404

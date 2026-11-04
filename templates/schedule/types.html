@@ -7,7 +7,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Tipos de atendimento" %}</h1>
   {% if pode.cadastros.criar %}
-  <a class="btn btn-primary" href="{% url 'agenda:tipo_novo' %}">{% translate "Novo tipo" %}</a>
+  <a class="btn btn-primary" href="{% url 'schedule:type_new' %}">{% translate "Novo tipo" %}</a>
   {% endif %}
 </div>
 <p class="text-body-secondary">{% translate "A cor de cada tipo pinta os horários na agenda." %}</p>
@@ -28,10 +28,10 @@
         </td>
         <td class="text-end text-nowrap">
           {% if pode.cadastros.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'agenda:tipo_editar' tipo.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' tipo.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.cadastros.excluir %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'agenda:tipo_excluir' tipo.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' tipo.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>
       </tr>

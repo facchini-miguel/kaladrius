@@ -38,7 +38,7 @@
           <input type="hidden" name="next" value="{{ next }}">
           <button type="submit" class="btn btn-primary w-100">{% translate "Entrar" %}</button>
         </form>
-        <p class="text-center small mt-3 mb-0">{% if recuperar_por_email %}<a href="{% url 'conta:recuperar' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacidade' %}">{% translate "Política de privacidade" %}</a></p>
+        <p class="text-center small mt-3 mb-0">{% if recuperar_por_email %}<a href="{% url 'account:recover' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacy' %}">{% translate "Política de privacidade" %}</a></p>
       </div>
     </div>
   </div>

@@ -25,7 +25,7 @@ def ultimos(**filtros):
 
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
-    admin_a.post(reverse("pacientes:novo"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
+    admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.get(nome="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
@@ -36,7 +36,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
     assert criacao.ip == "127.0.0.1"
 
     admin_a.post(
-        reverse("pacientes:editar", args=[paciente.pk]),
+        reverse("patients:edit", args=[paciente.pk]),
         {"tipo": "PF", "nome": "Maria Souza", "ativo": "on", "profissao": "Professora"},
     )
     [alteracao] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")
@@ -45,21 +45,21 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
         "profissao": ["", "Professora"],
     }
 
-    admin_a.post(reverse("pacientes:arquivar", args=[paciente.pk]))
+    admin_a.post(reverse("patients:archive", args=[paciente.pk]))
     [arquivamento] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")[1:]
     assert arquivamento.alteracoes["arquivado"] == [False, True]
 
 
 def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
     admin_a.post(
-        reverse("pacientes:novo"),
+        reverse("patients:new"),
         {"tipo": "PF", "nome": "Maria Sigilosa", "ativo": "on", "cpf_cnpj": "52998224725"},
     )
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.get(nome="Maria Sigilosa")
-    admin_a.get(reverse("pacientes:ficha", args=[paciente.pk]))
-    admin_a.post(reverse("pacientes:arquivar", args=[paciente.pk]))
-    admin_a.post(reverse("pacientes:excluir", args=[paciente.pk]))
+    admin_a.get(reverse("patients:record", args=[paciente.pk]))
+    admin_a.post(reverse("patients:archive", args=[paciente.pk]))
+    admin_a.post(reverse("patients:delete", args=[paciente.pk]))
 
     registros = ultimos(modelo="Paciente", objeto_id=str(paciente.pk))
     assert {r.acao for r in registros} == {Acao.CRIAR, Acao.VISUALIZAR, Acao.ALTERAR, Acao.EXCLUIR}
@@ -70,7 +70,7 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     assert criacao.alteracoes["nome"] == ["(removido)", "(removido)"]
     assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
-    pagina = admin_a.get(reverse("auditoria:lista")).content.decode()
+    pagina = admin_a.get(reverse("audit:list")).content.decode()
     assert f"Paciente {paciente.pk}: dados pessoais excluídos a pedido do titular" in pagina
 
 
@@ -84,7 +84,7 @@ def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
 def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(nome="Consultado")
-    admin_a.get(reverse("pacientes:ficha", args=[paciente.pk]))
+    admin_a.get(reverse("patients:record", args=[paciente.pk]))
     [visualizacao] = ultimos(acao=Acao.VISUALIZAR)
     assert visualizacao.objeto_descricao == "Consultado"
     assert visualizacao.usuario_nome == "admin_a"
@@ -118,7 +118,7 @@ def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
         Paciente.objects.create(nome="Paciente da A")
     with usar_clinica(clinica_b):
         Paciente.objects.create(nome="Paciente da B")
-    conteudo = admin_a.get(reverse("auditoria:lista"), {"modelo": "Paciente"}).content.decode()
+    conteudo = admin_a.get(reverse("audit:list"), {"modelo": "Paciente"}).content.decode()
     assert "Paciente da A" in conteudo
     assert "Paciente da B" not in conteudo
 
@@ -126,8 +126,8 @@ def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_somente_administrador_ve_a_auditoria(papel, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
-    assert cliente.get(reverse("auditoria:lista")).status_code == 403
-    assert "Auditoria" not in cliente.get(reverse("inicio")).content.decode()
+    assert cliente.get(reverse("audit:list")).status_code == 403
+    assert "Auditoria" not in cliente.get(reverse("home")).content.decode()
 
 
 def test_admin_do_django_e_somente_leitura(django_user_model, client):

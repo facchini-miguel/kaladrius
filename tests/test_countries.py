@@ -129,8 +129,8 @@ def test_fuso_e_ingles_do_pais_durante_a_requisicao(clinica_a, criar_usuario):
 def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
     cliente = cliente_de(criar_usuario("admin_londres", clinica_a, Papel.ADMIN))
-    cliente.post(reverse("trocar_idioma"), {"idioma": "en"})
-    pagina = cliente.get(reverse("inicio")).content.decode()
+    cliente.post(reverse("change_language"), {"idioma": "en"})
+    pagina = cliente.get(reverse("home")).content.decode()
     assert '<html lang="en-gb">' in pagina
     # The English flag, with or without the hash of the collected static files (CI).
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
@@ -138,11 +138,11 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
         paciente = Paciente.objects.create(
             nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
         )
-    ficha = cliente.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = cliente.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "25/12/2000" in ficha and "12/25/2000" not in ficha
     no_pais(clinica_a, "US")
     assert (
-        "12/25/2000" in cliente.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+        "12/25/2000" in cliente.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     )
 
 
@@ -151,7 +151,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
 
 def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_pais", clinica_a, Papel.ADMIN))
-    assert admin.post(reverse("configuracoes"), dados_clinica(pais="GB")).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados_clinica(pais="GB")).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.pais, clinica_a.fuso_horario, clinica_a.moeda) == (
         "GB",
@@ -159,13 +159,13 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
         "GBP",
     )
     # The document is the new country's (decision 121).
-    assert admin.get(reverse("configuracoes")).context["form"]["documento"].label == (
+    assert admin.get(reverse("clinic_settings")).context["form"]["documento"].label == (
         "Company number"
     )
 
     # A currency chosen on purpose is kept when the country changes.
     dados = dados_clinica(pais="AU", moeda="USD", fuso_horario="Australia/Perth")
-    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.pais, clinica_a.fuso_horario, clinica_a.moeda) == (
         "AU",
@@ -177,7 +177,7 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
 def test_fuso_de_outro_pais_e_recusado(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_fuso", clinica_a, Papel.ADMIN))
     resposta = admin.post(
-        reverse("configuracoes"), dados_clinica(pais="ZA", fuso_horario="America/New_York")
+        reverse("clinic_settings"), dados_clinica(pais="ZA", fuso_horario="America/New_York")
     )
     assert resposta.status_code == 200 and "fuso_horario" in resposta.context["form"].errors
 
@@ -188,13 +188,13 @@ def test_fuso_de_outro_pais_e_recusado(clinica_a, criar_usuario, cliente_de):
 def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
     admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Papel.ADMIN))
-    formulario = admin.get(reverse("pacientes:novo")).content.decode()
+    formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
     assert 'name="uf"' not in formulario and 'name="cidade_nome"' in formulario
     assert "Código postal" in formulario
 
     resposta = admin.post(
-        reverse("pacientes:novo"),
+        reverse("patients:new"),
         {
             "tipo": "PF",
             "nome": "Oliver Fictício",
@@ -214,7 +214,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
         "7700900123",
         "SW1A1AA",
     )
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "London, England" in ficha and "SW1A 1AA" in ficha
     assert "07700 900123" in ficha and "https://wa.me/447700900123" in ficha
     assert ">CPF<" not in ficha and ">RG<" not in ficha
@@ -222,7 +222,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
 
 def test_paciente_no_brasil_continua_com_cpf_e_cidades(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_brasil", clinica_a, Papel.ADMIN))
-    formulario = admin.get(reverse("pacientes:novo")).content.decode()
+    formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'name="cpf_cnpj"' in formulario and 'name="uf"' in formulario
     assert 'name="cidade_nome"' not in formulario and ">CEP" in formulario
 
@@ -250,7 +250,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
         )
     cliente = cliente_de(criar_usuario("recepcao_agenda_londres", clinica_a, Papel.RECEPCAO))
     eventos = cliente.get(
-        reverse("agenda:eventos"),
+        reverse("schedule:events"),
         {"profissional": ana.pk, "start": "2031-03-03T00:00:00Z", "end": "2031-03-04T00:00:00Z"},
     ).json()
     assert [(e["start"], e["end"]) for e in eventos] == [
@@ -352,11 +352,11 @@ def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
 
 def test_pais_latino_no_formulario_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_mexico", clinica_a, Papel.ADMIN))
-    assert admin.post(reverse("configuracoes"), dados_clinica(pais="MX")).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados_clinica(pais="MX")).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.fuso_horario, clinica_a.moeda) == ("America/Mexico_City", "MXN")
     # The screen sends the currency it shows (the clinic's, now the Mexican peso).
     dados = dados_clinica(pais="AR", moeda="MXN", fuso_horario="America/Argentina/Mendoza")
-    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.fuso_horario, clinica_a.moeda) == ("America/Argentina/Mendoza", "ARS")

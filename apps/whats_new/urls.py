@@ -3,5 +3,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.lista, name="novidades"),
+    path("", views.lista, name="whats_new"),
 ]

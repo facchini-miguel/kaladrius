@@ -175,9 +175,9 @@ def lancamento_novo(request):
                 conta=dados["conta"],
             )
             messages.success(request, _("Lançamento criado e 1ª parcela recebida."))
-            return redirect("financeiro:recibo", pk=pagamento.pk)
+            return redirect("finance:receipt", pk=pagamento.pk)
         messages.success(request, _("Lançamento criado."))
-        return redirect("financeiro:lancamento", pk=lancamento.pk)
+        return redirect("finance:entry", pk=lancamento.pk)
     if paciente is None and form["paciente"].value():
         paciente = Paciente.objects.filter(pk=form["paciente"].value()).first()
     return render(request, "finance/entry_form.html", {"form": form, "paciente": paciente})
@@ -216,7 +216,7 @@ def despesa_nova(request):
                 conta=dados["conta"],
             )
         messages.success(request, _("Despesa lançada."))
-        return redirect("financeiro:lancamento", pk=lancamento.pk)
+        return redirect("finance:entry", pk=lancamento.pk)
     return render(request, "finance/expense_form.html", {"form": form})
 
 
@@ -265,7 +265,7 @@ def lancamento_cancelar(request, pk):
             messages.error(request, erro.messages[0])
         else:
             messages.success(request, _("Lançamento cancelado."))
-        return redirect("financeiro:lancamento", pk=lancamento.pk)
+        return redirect("finance:entry", pk=lancamento.pk)
     return render(
         request,
         "finance/reason.html",
@@ -289,7 +289,7 @@ def receber(request, pk):
     pagar = parcela.lancamento.tipo == Lancamento.Tipo.PAGAR
     if parcela.saldo <= 0:
         messages.info(request, _("Esta parcela já está paga."))
-        return redirect("financeiro:lancamento", pk=parcela.lancamento_id)
+        return redirect("finance:entry", pk=parcela.lancamento_id)
     pode_desconto = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
     conta_padrao = Conta.objects.filter(ativa=True, tipo=Conta.Tipo.DINHEIRO).first()
     form = ReceberForm(
@@ -311,8 +311,8 @@ def receber(request, pk):
         else:
             messages.success(request, _("Pagamento registrado."))
             if pagar:
-                return redirect("financeiro:lancamento", pk=parcela.lancamento_id)
-            return redirect("financeiro:recibo", pk=pagamento.pk)
+                return redirect("finance:entry", pk=parcela.lancamento_id)
+            return redirect("finance:receipt", pk=pagamento.pk)
     return render(
         request,
         "finance/receive.html",
@@ -365,7 +365,7 @@ def estornar(request, pk):
             messages.error(request, erro.messages[0])
         else:
             messages.success(request, _("Pagamento estornado."))
-        return redirect("financeiro:lancamento", pk=pagamento.parcela.lancamento_id)
+        return redirect("finance:entry", pk=pagamento.parcela.lancamento_id)
     return render(
         request,
         "finance/reason.html",
@@ -421,7 +421,7 @@ def caixa(request):
     if conta is not None:
         aberto = services.caixa_aberto(conta)
         if aberto is not None:
-            return redirect("financeiro:caixa_detalhe", pk=aberto.pk)
+            return redirect("finance:cash_detail", pk=aberto.pk)
     saldo = dict(services.saldos_das_contas()).get(conta) if conta else None
     # Empty on purpose: the opening amount is what is counted, not the system balance.
     form = AbrirCaixaForm(request.POST or None)
@@ -437,7 +437,7 @@ def caixa(request):
                 messages.error(request, erro.messages[0])
                 return redirect(f"{request.path}?conta={conta.pk}")
             messages.success(request, _("Caixa aberto."))
-            return redirect("financeiro:caixa_detalhe", pk=novo.pk)
+            return redirect("finance:cash_detail", pk=novo.pk)
     historico = Caixa.objects.filter(conta=conta).select_related("aberto_por", "fechado_por")[:30]
     return render(
         request,
@@ -464,11 +464,19 @@ def caixa_detalhe(request, pk):
     )
 
 
+# The kind of cash movement in the URL (decision 155) and the value the database stores.
+MOVIMENTOS_NA_URL = {
+    "withdrawal": MovimentoCaixa.Tipo.RETIRADA,
+    "top-up": MovimentoCaixa.Tipo.REFORCO,
+}
+
+
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
 def caixa_movimento(request, pk, tipo):
     sessao = get_object_or_404(Caixa.objects.select_related("conta"), pk=pk, fechado_em=None)
-    if tipo not in MovimentoCaixa.Tipo.values:
+    if tipo not in MOVIMENTOS_NA_URL:
         raise Http404
+    tipo = MOVIMENTOS_NA_URL[tipo]
     form = MovimentoCaixaForm(request.POST or None, caixa=sessao)
     if request.method == "POST" and form.is_valid():
         try:
@@ -477,7 +485,7 @@ def caixa_movimento(request, pk, tipo):
             form.add_error(None, erro.messages[0])
         else:
             messages.success(request, _("Movimento registrado."))
-            return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
+            return redirect("finance:cash_detail", pk=sessao.pk)
     return render(
         request,
         "finance/cash_form.html",
@@ -492,7 +500,7 @@ def caixa_fechar(request, pk):
     if request.method == "POST" and form.is_valid():
         services.fechar_caixa(sessao, usuario=request.user, **form.cleaned_data)
         messages.success(request, _("Caixa fechado."))
-        return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
+        return redirect("finance:cash_detail", pk=sessao.pk)
     return render(
         request,
         "finance/cash_form.html",
@@ -588,11 +596,11 @@ def planejamento(request):
                 )
                 % {"n": copiadas},
             )
-            return redirect(f"{reverse('financeiro:planejamento')}?ano={ano}")
+            return redirect(f"{reverse('finance:planning')}?ano={ano}")
         if form.is_valid():
             services.salvar_metas(ano, form.valores())
             messages.success(request, _("Planejamento salvo."))
-            return redirect(f"{reverse('financeiro:planejamento')}?ano={ano}")
+            return redirect(f"{reverse('finance:planning')}?ano={ano}")
     dados = services.planejamento(ano)
     for secao in dados["secoes"]:
         for linha in secao["linhas"]:
@@ -642,7 +650,7 @@ def fechamento(request):
                 messages.error(request, erro.messages[0])
         else:
             messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
-        return redirect("financeiro:fechamento")
+        return redirect("finance:closing")
     return render(
         request,
         "finance/closing.html",
@@ -659,9 +667,9 @@ def fechamento(request):
 
 
 CADASTROS = {
-    "categorias": (Categoria, CategoriaForm),
-    "contas": (Conta, ContaForm),
-    "centros-de-custo": (CentroCusto, CentroCustoForm),
+    "categories": (Categoria, CategoriaForm),
+    "accounts": (Conta, ContaForm),
+    "cost-centers": (CentroCusto, CentroCustoForm),
 }
 
 
@@ -683,7 +691,7 @@ def cadastro_form(request, cadastro, pk=None):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": form.instance.nome})
-        return redirect("financeiro:cadastro", cadastro=cadastro)
+        return redirect("finance:catalog", cadastro=cadastro)
     return render(
         request,
         "finance/catalog_form.html",
@@ -734,7 +742,7 @@ def _grupo_form(request, instancia):
     if request.method == "POST" and form.is_valid():
         grupo = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.nome})
-        return redirect("financeiro:plano_contas")
+        return redirect("finance:chart_of_accounts")
     return render(request, "finance/group_form.html", {"form": form, "instancia": instancia})
 
 
@@ -797,7 +805,7 @@ def _fornecedor_form(request, instancia):
     if request.method == "POST" and form.is_valid():
         fornecedor = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
-        return redirect("financeiro:fornecedor", pk=fornecedor.pk)
+        return redirect("finance:supplier", pk=fornecedor.pk)
     return render(request, "finance/supplier_form.html", {"form": form, "instancia": instancia})
 
 
@@ -834,7 +842,7 @@ def comissao_percentual(request, pk):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": profissional.nome})
-        return redirect("financeiro:comissoes")
+        return redirect("finance:commissions")
     return render(
         request,
         "finance/commission_percentage.html",
@@ -858,9 +866,9 @@ def comissao_pagar(request, pk):
             )
         except ValidationError as erro:
             messages.error(request, erro.messages[0])
-            return redirect(f"{reverse('financeiro:comissoes')}?ate={ate.isoformat()}")
+            return redirect(f"{reverse('finance:commissions')}?ate={ate.isoformat()}")
         messages.success(request, _("Comissão lançada em A pagar."))
-        return redirect("financeiro:lancamento", pk=comissao.lancamento_id)
+        return redirect("finance:entry", pk=comissao.lancamento_id)
     return render(
         request,
         "finance/commission_pay.html",
@@ -942,7 +950,7 @@ def extratos(request):
                             "antiga": outra,
                         },
                     )
-                return redirect("financeiro:extrato", pk=importacao.pk)
+                return redirect("finance:statement", pk=importacao.pk)
     importacoes = ImportacaoExtrato.objects.select_related("conta", "criado_por")
     pendentes = dict(
         TransacaoBancaria.objects.filter(situacao=TransacaoBancaria.Situacao.PENDENTE)
@@ -984,7 +992,7 @@ def extrato(request, pk):
 
 def _voltar_ao_extrato(transacao):
     return redirect(
-        f"{reverse('financeiro:extrato', args=[transacao.importacao_id])}#t{transacao.pk}"
+        f"{reverse('finance:statement', args=[transacao.importacao_id])}#t{transacao.pk}"
     )
 
 
@@ -994,7 +1002,7 @@ def extrato_conciliar_unicos(request, pk):
     importacao = get_object_or_404(ImportacaoExtrato.objects, pk=pk)
     feitas = reconciliation.conciliar_unicos(importacao, usuario=request.user)
     messages.success(request, _("%(n)s transações conciliadas.") % {"n": feitas})
-    return redirect("financeiro:extrato", pk=importacao.pk)
+    return redirect("finance:statement", pk=importacao.pk)
 
 
 @require_POST
@@ -1002,9 +1010,9 @@ def extrato_conciliar_unicos(request, pk):
 def transacao_acao(request, pk, acao):
     transacao = get_object_or_404(TransacaoBancaria.objects, pk=pk)
     try:
-        if acao == "conciliar":
+        if acao == "reconcile":
             reconciliation.conciliar(transacao, request.POST.get("chave", ""), usuario=request.user)
-        elif acao == "ignorar":
+        elif acao == "ignore":
             motivo = request.POST.get("motivo", "").strip()[:200]
             if not motivo:
                 raise ValidationError(_("Informe o motivo para ignorar a transação."))

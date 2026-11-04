@@ -154,7 +154,7 @@ def exige_permissao(modulo, acao):
         def protegida(request, *args, **kwargs):
             if request.clinica is None:
                 if request.user.is_superuser:
-                    return redirect("cadastrar_clinica")
+                    return redirect("register_clinic")
                 return render(request, "core/no_clinic.html", status=403)
             if not pode(request, modulo, acao):
                 raise PermissionDenied
