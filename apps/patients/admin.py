@@ -5,7 +5,7 @@ from .models import Patient
 
 @admin.register(Patient)
 class PacienteAdmin(admin.ModelAdmin):
-    list_display = ["name", "clinic", "kind", "tax_id", "telefone_celular", "active"]
+    list_display = ["name", "clinic", "kind", "tax_id", "mobile_phone", "active"]
     list_filter = ["clinic", "kind", "active"]
     search_fields = ["name", "legal_name", "tax_id"]
     autocomplete_fields = ["city"]

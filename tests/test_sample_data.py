@@ -88,7 +88,7 @@ def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
         def job(self):
             return next(titulos)
 
-    assert fake_data.profissao(Falso()) == "Dentista"
+    assert fake_data.occupation(Falso()) == "Dentista"
 
 
 def test_documento_ficticio_sempre_valido():

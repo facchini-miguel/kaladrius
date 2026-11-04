@@ -40,11 +40,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     city = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
     # The country's document (decision 121), typed with punctuation, stored compact.
     tax_id = campo_documento()
-    cep = _campo_texto(_("CEP"), 10)
-    telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
+    postal_code = _campo_texto(_("CEP"), 10)
+    mobile_phone = _campo_texto(_("Celular"), 16, inputmode="tel")
     whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
-    telefone_residencial = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
-    telefone_comercial = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
+    home_phone = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
+    work_phone = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
 
     class Meta:
         model = Patient
@@ -53,47 +53,47 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "name",
             "legal_name",
             "tax_id",
-            "inscricao_estadual",
+            "state_registration",
             "rg",
-            "sexo",
-            "data_nascimento",
-            "estado_civil",
-            "profissao",
-            "responsavel",
-            "telefone_celular",
+            "sex",
+            "birth_date",
+            "marital_status",
+            "occupation",
+            "guardian",
+            "mobile_phone",
             "whatsapp",
-            "telefone_residencial",
-            "telefone_comercial",
+            "home_phone",
+            "work_phone",
             "email",
-            "cep",
+            "postal_code",
             "state",
             "city",
-            "estado_nome",
-            "cidade_nome",
+            "state_name",
+            "city_name",
             "neighborhood",
-            "logradouro",
+            "street",
             "number",
-            "complemento",
+            "complement",
             "notes",
             "active",
         ]
         widgets = {
             "kind": forms.RadioSelect,
-            "data_nascimento": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "birth_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "notes": forms.Textarea(attrs={"rows": 4}),
         }
 
     # Brazilian fields; outside Brazil the state and city are typed (decision 117) and the
     # document is the country's (decision 121).
-    SO_NO_BRASIL = ["inscricao_estadual", "rg", "state", "city"]
-    FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
+    SO_NO_BRASIL = ["state_registration", "rg", "state", "city"]
+    FORA_DO_BRASIL = ["state_name", "city_name"]
 
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         self.pais = countries.pais_da_clinica(clinic)
-        self.fields["cep"].label = countries.rotulo_cep(self.pais)
+        self.fields["postal_code"].label = countries.rotulo_cep(self.pais)
         self.documentos = identification.do_pais(self.pais)
         documento_por_tipo(
             self.fields["tax_id"],
@@ -105,7 +105,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             del self.fields[campo]
         if self.pais != "BR":
             return
-        self.fields["cep"].widget.attrs["inputmode"] = "numeric"
+        self.fields["postal_code"].widget.attrs["inputmode"] = "numeric"
 
         # Chained selects: the city list depends on the chosen state (HTMX).
         self.fields["state"].widget.attrs.update(
@@ -126,7 +126,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         )
         for campo, lista in (
             ("neighborhood", "bairros-sugeridos"),
-            ("logradouro", "logradouros-sugeridos"),
+            ("street", "logradouros-sugeridos"),
         ):
             self.fields[campo].widget.attrs.update({"list": lista, "autocomplete": "off"})
         state_id = (
@@ -138,26 +138,26 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             else City.objects.none()
         )
 
-    def clean_cep(self):
-        return countries.normalizar_cep(self.cleaned_data.get("cep"), self.pais)
+    def clean_postal_code(self):
+        return countries.normalizar_cep(self.cleaned_data.get("postal_code"), self.pais)
 
     def _limpar_telefone(self, name):
         return normalizar_telefone(self.cleaned_data.get(name), self.pais)
 
-    def clean_telefone_celular(self):
-        return self._limpar_telefone("telefone_celular")
+    def clean_mobile_phone(self):
+        return self._limpar_telefone("mobile_phone")
 
     def clean_whatsapp(self):
         return self._limpar_telefone("whatsapp")
 
-    def clean_telefone_residencial(self):
-        return self._limpar_telefone("telefone_residencial")
+    def clean_home_phone(self):
+        return self._limpar_telefone("home_phone")
 
-    def clean_telefone_comercial(self):
-        return self._limpar_telefone("telefone_comercial")
+    def clean_work_phone(self):
+        return self._limpar_telefone("work_phone")
 
-    def clean_data_nascimento(self):
-        date = self.cleaned_data.get("data_nascimento")
+    def clean_birth_date(self):
+        date = self.cleaned_data.get("birth_date")
         if date and date > datetime.date.today():
             raise forms.ValidationError(_("A data de nascimento não pode estar no futuro."))
         return date
@@ -182,7 +182,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         if documento:
             # The clinic is not a form field, so the unique constraint is checked here.
             outro = Patient.objects.filter(tax_id=documento).exclude(pk=self.instance.pk).first()
-            if outro is not None and outro.arquivado:
+            if outro is not None and outro.archived:
                 self.add_error(
                     "tax_id",
                     _(
@@ -197,12 +197,12 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
         # Fields that only make sense for one person type are cleared for the other.
         if kind == Patient.Tipo.JURIDICA:
-            for campo in ["rg", "sexo", "estado_civil", "profissao", "responsavel"]:
-                dados[campo] = None if campo == "estado_civil" else ""
-            dados["data_nascimento"] = None
+            for campo in ["rg", "sex", "marital_status", "occupation", "guardian"]:
+                dados[campo] = None if campo == "marital_status" else ""
+            dados["birth_date"] = None
         else:
             dados["legal_name"] = ""
-            dados["inscricao_estadual"] = ""
+            dados["state_registration"] = ""
 
         city, state = dados.get("city"), dados.get("state")
         if city is not None and city.state_id != getattr(state, "pk", None):
@@ -217,8 +217,8 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = RelatedPerson
-        fields = ["vinculo", "outro_paciente", "name", "phone", "note"]
-        widgets = {"outro_paciente": forms.HiddenInput}
+        fields = ["relationship", "other_patient", "name", "phone", "note"]
+        widgets = {"other_patient": forms.HiddenInput}
         help_texts = {"name": _("Só para quem não é paciente da clínica.")}
 
     def __init__(self, *args, patient, **kwargs):
@@ -226,14 +226,14 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         self.instance.patient = patient
         if self.instance.clinic_id is None:
             self.instance.clinic_id = patient.clinic_id
-        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=patient.pk)
+        self.fields["other_patient"].queryset = Patient.objects.exclude(pk=patient.pk)
 
     def clean_phone(self):
         return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
         dados = super().clean()
-        outro, name = dados.get("outro_paciente"), dados.get("name", "").strip()
+        outro, name = dados.get("other_patient"), dados.get("name", "").strip()
         if outro and name:
             self.add_error("name", _("Escolha um paciente ou digite um nome, não os dois."))
         elif not outro and not name:
@@ -242,10 +242,12 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         if (
             outro
             and RelatedPerson.objects.filter(
-                patient=self.instance.patient, outro_paciente=outro, vinculo=dados.get("vinculo")
+                patient=self.instance.patient,
+                other_patient=outro,
+                relationship=dados.get("relationship"),
             )
             .exclude(pk=self.instance.pk)
             .exists()
         ):
-            self.add_error("outro_paciente", _("Este vínculo já está cadastrado."))
+            self.add_error("other_patient", _("Este vínculo já está cadastrado."))
         return dados

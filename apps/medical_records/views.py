@@ -65,7 +65,7 @@ def _finalizar(request, visit):
 
 @exige_profissional
 def novo(request, practitioner, patient):
-    patient = get_object_or_404(Patient.objects, pk=patient, arquivado=False)
+    patient = get_object_or_404(Patient.objects, pk=patient, archived=False)
     agendamento = None
     code = request.POST.get("agendamento") or request.GET.get("agendamento") or ""
     if code.isdecimal():

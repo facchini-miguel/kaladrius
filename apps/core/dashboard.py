@@ -90,7 +90,7 @@ def _agenda(request, hoje):
 
 def _rechamadas(hoje):
     pendentes = Recall.objects.filter(
-        concluida=False, date__lte=hoje, patient__arquivado=False
+        concluida=False, date__lte=hoje, patient__archived=False
     ).select_related("patient")
     return {
         "lista": list(pendentes.order_by("date", "patient__name")[:LIMITE]),
@@ -101,12 +101,12 @@ def _rechamadas(hoje):
 
 def _aniversariantes(hoje):
     return [
-        (patient, hoje.year - patient.data_nascimento.year)
+        (patient, hoje.year - patient.birth_date.year)
         for patient in Patient.objects.filter(
             active=True,
-            arquivado=False,
-            data_nascimento__month=hoje.month,
-            data_nascimento__day=hoje.day,
+            archived=False,
+            birth_date__month=hoje.month,
+            birth_date__day=hoje.day,
         ).order_by("name")
     ]
 
@@ -117,7 +117,7 @@ def _orcamentos(hoje):
             status=Estimate.Situacao.ABERTO,
             valid_until__gte=hoje,
             valid_until__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
-            patient__arquivado=False,
+            patient__archived=False,
         )
         .select_related("patient")
         .prefetch_related("itens")

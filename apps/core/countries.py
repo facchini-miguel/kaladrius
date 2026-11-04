@@ -313,25 +313,25 @@ _CEP = {
 
 
 def normalizar_cep(value, pais):
-    cep = re.sub(r"[\s\-.]", "", value or "").upper()
-    if not cep:
+    postal_code = re.sub(r"[\s\-.]", "", value or "").upper()
+    if not postal_code:
         return ""
     padrao, mensagem = _CEP.get(pais, _CEP[PADRAO])
-    if not re.fullmatch(padrao, cep):
+    if not re.fullmatch(padrao, postal_code):
         raise ValidationError(mensagem)
-    return cep
+    return postal_code
 
 
-def formatar_cep(cep, pais):
-    if not cep:
+def formatar_cep(postal_code, pais):
+    if not postal_code:
         return ""
-    if pais == "BR" and len(cep) == 8:
-        return f"{cep[:5]}-{cep[5:]}"
-    if pais == "US" and len(cep) == 9:
-        return f"{cep[:5]}-{cep[5:]}"
-    if pais in ("CA", "GB") and len(cep) > 3:
-        return f"{cep[:-3]} {cep[-3:]}"
-    return cep
+    if pais == "BR" and len(postal_code) == 8:
+        return f"{postal_code[:5]}-{postal_code[5:]}"
+    if pais == "US" and len(postal_code) == 9:
+        return f"{postal_code[:5]}-{postal_code[5:]}"
+    if pais in ("CA", "GB") and len(postal_code) > 3:
+        return f"{postal_code[:-3]} {postal_code[-3:]}"
+    return postal_code
 
 
 def rotulo_cep(pais):

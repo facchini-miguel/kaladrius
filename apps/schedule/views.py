@@ -329,14 +329,14 @@ def _aniversariantes_em(dias):
     """{date: [patients]} for active patients whose birthday falls on the given days."""
     filtro = Q()
     for dia in dias:
-        filtro |= Q(data_nascimento__month=dia.month, data_nascimento__day=dia.day)
+        filtro |= Q(birth_date__month=dia.month, birth_date__day=dia.day)
     resultado = {dia: [] for dia in dias}
     if not dias:
         return resultado
-    pacientes = Patient.objects.filter(filtro, active=True, arquivado=False).order_by("name")
+    pacientes = Patient.objects.filter(filtro, active=True, archived=False).order_by("name")
     por_mes_dia = {(dia.month, dia.day): dia for dia in dias}
     for patient in pacientes:
-        nascimento = patient.data_nascimento
+        nascimento = patient.birth_date
         resultado[por_mes_dia[(nascimento.month, nascimento.day)]].append(patient)
     return resultado
 
@@ -362,8 +362,7 @@ def aniversariantes_dia(request):
     except ValueError:
         return HttpResponse(_("Data inválida."), status=400)
     aniversariantes = [
-        (patient, dia.year - patient.data_nascimento.year)
-        for patient in _aniversariantes_em([dia])[dia]
+        (patient, dia.year - patient.birth_date.year) for patient in _aniversariantes_em([dia])[dia]
     ]
     return render(
         request, "schedule/_birthdays.html", {"dia": dia, "aniversariantes": aniversariantes}

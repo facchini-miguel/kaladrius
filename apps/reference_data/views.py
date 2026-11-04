@@ -70,10 +70,10 @@ def sugestoes_endereco(request):
         city = int(code)
         bairros.update(Neighborhood.objects.filter(city_id=city).values_list("name", flat=True))
         logradouros.update(Street.objects.filter(city_id=city).values_list("name", flat=True))
-        da_clinica = Patient.objects.filter(city_id=city).values_list("neighborhood", "logradouro")
-        for neighborhood, logradouro in da_clinica.distinct():
+        da_clinica = Patient.objects.filter(city_id=city).values_list("neighborhood", "street")
+        for neighborhood, street in da_clinica.distinct():
             bairros.add(neighborhood)
-            logradouros.add(logradouro)
+            logradouros.add(street)
     return render(
         request,
         "reference_data/address_suggestions.html",

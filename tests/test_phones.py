@@ -53,15 +53,15 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
         {
             "kind": "PF",
             "name": "Paciente Fictício",
-            "telefone_celular": "(54) 8123-4567",
+            "mobile_phone": "(54) 8123-4567",
             "whatsapp": "54 8123-4567",
-            "telefone_residencial": "(54) 3461-3354",
+            "home_phone": "(54) 3461-3354",
         },
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         patient = Patient.objects.get()
-    assert (patient.telefone_celular, patient.whatsapp, patient.telefone_residencial) == (
+    assert (patient.mobile_phone, patient.whatsapp, patient.home_phone) == (
         "54981234567",
         "54981234567",
         "5434613354",

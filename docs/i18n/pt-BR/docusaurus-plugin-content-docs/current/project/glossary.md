@@ -114,7 +114,7 @@ Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`
 
 ## Campos de cada app
 
-Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão 167).
+Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão 167), pacientes (decisão 168).
 
 ### Financeiro (`financeiro`)
 
@@ -168,6 +168,32 @@ Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão
 | `movimento` | `cash_movement` |
 | `conciliado_por` | `reconciled_by` |
 | `conciliado_em` | `reconciled_at` |
+
+### Pacientes (`pacientes`)
+
+| Antes | Depois |
+|---|---|
+| `inscricao_estadual` | `state_registration` |
+| `sexo` | `sex` |
+| `data_nascimento` | `birth_date` |
+| `estado_civil` | `marital_status` |
+| `profissao` | `occupation` |
+| `responsavel` | `guardian` |
+| `telefone_celular` | `mobile_phone` |
+| `telefone_residencial` | `home_phone` |
+| `telefone_comercial` | `work_phone` |
+| `cep` | `postal_code` |
+| `estado_nome` | `state_name` |
+| `cidade_nome` | `city_name` |
+| `logradouro` | `street` |
+| `complemento` | `complement` |
+| `arquivado` | `archived` |
+| `arquivado_em` | `archived_at` |
+| `arquivado_por` | `archived_by` |
+| `vinculo` | `relationship` |
+| `outro_paciente` | `other_patient` |
+
+`rg` fica: é o nome do documento brasileiro, como `cpf`.
 
 ## O que fica em português
 

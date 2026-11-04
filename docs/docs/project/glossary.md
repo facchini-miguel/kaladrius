@@ -114,7 +114,7 @@ The names that repeat across the models, in four parts. **Done:** `clinica`, `cr
 
 ## Fields of each app
 
-Each app's own fields, one app at a time. **Done:** finance (decision 167).
+Each app's own fields, one app at a time. **Done:** finance (decision 167), patients (decision 168).
 
 ### Finance (`financeiro`)
 
@@ -168,6 +168,32 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167).
 | `movimento` | `cash_movement` |
 | `conciliado_por` | `reconciled_by` |
 | `conciliado_em` | `reconciled_at` |
+
+### Patients (`pacientes`)
+
+| Before | After |
+|---|---|
+| `inscricao_estadual` | `state_registration` |
+| `sexo` | `sex` |
+| `data_nascimento` | `birth_date` |
+| `estado_civil` | `marital_status` |
+| `profissao` | `occupation` |
+| `responsavel` | `guardian` |
+| `telefone_celular` | `mobile_phone` |
+| `telefone_residencial` | `home_phone` |
+| `telefone_comercial` | `work_phone` |
+| `cep` | `postal_code` |
+| `estado_nome` | `state_name` |
+| `cidade_nome` | `city_name` |
+| `logradouro` | `street` |
+| `complemento` | `complement` |
+| `arquivado` | `archived` |
+| `arquivado_em` | `archived_at` |
+| `arquivado_por` | `archived_by` |
+| `vinculo` | `relationship` |
+| `outro_paciente` | `other_patient` |
+
+`rg` stays: it is the Brazilian document's name, like `cpf`.
 
 ## What stays in Portuguese
 

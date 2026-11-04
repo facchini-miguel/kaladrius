@@ -20,7 +20,7 @@ MOTIVOS_RECHAMADA = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpez
 
 
 def _pacientes(clinic):
-    return list(Patient.objects.filter(clinic=clinic, active=True, arquivado=False))
+    return list(Patient.objects.filter(clinic=clinic, active=True, archived=False))
 
 
 def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocupacao=0.6):

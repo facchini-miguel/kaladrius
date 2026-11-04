@@ -233,9 +233,9 @@ class _Importador:
 
         telefones = {}
         for campo, legado in (
-            ("telefone_residencial", "fone_res"),
-            ("telefone_comercial", "fone_com"),
-            ("telefone_celular", "fone_cel"),
+            ("home_phone", "fone_res"),
+            ("work_phone", "fone_com"),
+            ("mobile_phone", "fone_cel"),
         ):
             number = somente_digitos(linha[legado])
             if len(number) > 11:
@@ -255,11 +255,11 @@ class _Importador:
             extras.append(f"E-mail no sistema antigo: {email_invalido}")
             avisos["E-mail inválido (guardado nas observações)"] += 1
 
-        cep = somente_digitos(linha["cep"])
-        if cep and len(cep) != 8:
+        postal_code = somente_digitos(linha["cep"])
+        if postal_code and len(postal_code) != 8:
             extras.append(f"CEP no sistema antigo: {linha['cep']}")
             avisos["CEP incompleto (guardado nas observações)"] += 1
-            cep = ""
+            postal_code = ""
 
         state = city = None
         if linha["id_cidade"]:
@@ -270,7 +270,7 @@ class _Importador:
                 extras.append(f"Cidade no sistema antigo: {nome_cidade}/{sigla or '?'}")
                 avisos["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
 
-        sexo = linha["sexo"] if linha["sexo"] in ("F", "M") else ""
+        sex = linha["sexo"] if linha["sexo"] in ("F", "M") else ""
         nascimento = _data(linha["data_nasc"])
         if nascimento is not None and nascimento > self.hoje:
             extras.append(f"Data de nascimento no sistema antigo: {linha['data_nasc']}")
@@ -301,24 +301,22 @@ class _Importador:
             else _cabe(_texto(linha["razao_social"]), 200, "Razão social", extras),
             tax_id=documento,
             rg=_cabe(_texto(linha["rg"]), 20, "RG", extras) if pf else "",
-            inscricao_estadual="" if pf else _cabe(_texto(linha["insc_est"]), 20, "IE", extras),
-            sexo=sexo if pf else "",
-            data_nascimento=nascimento if pf else None,
-            estado_civil=estados_civis.get(linha["estado_civil"]) if pf else None,
-            profissao=_cabe(_texto(linha["profissao"]), 100, "Profissão", extras) if pf else "",
-            responsavel=_cabe(_texto(linha["responsavel"]), 200, "Responsável", extras)
-            if pf
-            else "",
+            state_registration="" if pf else _cabe(_texto(linha["insc_est"]), 20, "IE", extras),
+            sex=sex if pf else "",
+            birth_date=nascimento if pf else None,
+            marital_status=estados_civis.get(linha["estado_civil"]) if pf else None,
+            occupation=_cabe(_texto(linha["profissao"]), 100, "Profissão", extras) if pf else "",
+            guardian=_cabe(_texto(linha["responsavel"]), 200, "Responsável", extras) if pf else "",
             email=email,
-            cep=cep,
+            postal_code=postal_code,
             state=state,
             city=city,
             neighborhood=_cabe(
                 bairros.get(linha["id_bairrocomunidade"], ""), 100, "Bairro", extras
             ),
-            logradouro=_cabe(logradouros.get(linha["id_logradouro"], ""), 200, "Endereço", extras),
+            street=_cabe(logradouros.get(linha["id_logradouro"], ""), 200, "Endereço", extras),
             number=_cabe(_texto(linha["endereco_num"]), 10, "Número", extras),
-            complemento=_cabe(_texto(linha["endereco_compl"]), 100, "Complemento", extras),
+            complement=_cabe(_texto(linha["endereco_compl"]), 100, "Complemento", extras),
             active=linha["ativo"] != "N",
             **telefones,
         )

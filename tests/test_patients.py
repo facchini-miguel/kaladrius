@@ -69,7 +69,7 @@ def test_validacao_de_cnpj_numerico_e_alfanumerico(amount, esperado):
 def test_filtros_de_formatacao():
     template = Template(
         "{% load formats %}{{ a|documento }} {{ b|documento }} "
-        "{{ c|phone }} {{ d|phone }} {{ e|cep }}"
+        "{{ c|phone }} {{ d|phone }} {{ e|postal_code }}"
     )
     contexto = Context(
         {
@@ -88,9 +88,9 @@ def test_filtros_de_formatacao():
 def test_idade(clinica_a):
     hoje = datetime.date.today()
     nascimento = hoje.replace(year=hoje.year - 30)
-    assert criar_paciente(clinica_a, data_nascimento=nascimento).idade == 30
+    assert criar_paciente(clinica_a, birth_date=nascimento).idade == 30
     amanha_ha_30_anos = nascimento + datetime.timedelta(days=1)
-    assert criar_paciente(clinica_a, data_nascimento=amanha_ha_30_anos).idade == 29
+    assert criar_paciente(clinica_a, birth_date=amanha_ha_30_anos).idade == 29
     assert criar_paciente(clinica_a).idade is None
 
 
@@ -102,8 +102,8 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
         reverse("patients:new"),
         dados_formulario(
             tax_id=CPF,
-            telefone_celular="(48) 99999-0000",
-            cep="88010-000",
+            mobile_phone="(48) 99999-0000",
+            postal_code="88010-000",
             state=SC,
             city=FLORIANOPOLIS,
         ),
@@ -113,8 +113,8 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
         patient = Patient.objects.get(name="Maria da Silva")
     assert resposta.url == reverse("patients:record", args=[patient.pk])
     assert patient.tax_id == "52998224725"
-    assert patient.telefone_celular == "48999990000"
-    assert patient.cep == "88010000"
+    assert patient.mobile_phone == "48999990000"
+    assert patient.postal_code == "88010000"
     assert patient.city.name == "Florianópolis"
 
 
@@ -127,14 +127,14 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
             legal_name="Empresa X Ltda.",
             tax_id=CNPJ_ALFANUMERICO,
             rg="123",
-            sexo="F",
+            sex="F",
         ),
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Empresa X")
     assert patient.tax_id == "12ABC34501DE35"
-    assert patient.rg == "" and patient.sexo == ""  # individual-only fields are cleared
+    assert patient.rg == "" and patient.sex == ""  # individual-only fields are cleared
 
 
 @pytest.mark.parametrize(
@@ -142,9 +142,9 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     [
         ({"tax_id": "529.982.247-24"}, "tax_id", "CPF: número inválido"),
         ({"kind": "PJ", "tax_id": CPF}, "tax_id", "CNPJ: número inválido"),
-        ({"telefone_celular": "9999-0000"}, "telefone_celular", "Informe o DDD"),
-        ({"cep": "123"}, "cep", "8 dígitos"),
-        ({"data_nascimento": "2999-01-01"}, "data_nascimento", "futuro"),
+        ({"mobile_phone": "9999-0000"}, "mobile_phone", "Informe o DDD"),
+        ({"postal_code": "123"}, "postal_code", "8 dígitos"),
+        ({"birth_date": "2999-01-01"}, "birth_date", "futuro"),
         ({"name": ""}, "name", "obrigatório"),
     ],
 )
@@ -243,7 +243,7 @@ def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de)
     assert admin_a.post(reverse("patients:delete", args=[patient.pk])).status_code == 404
     assert admin_a.post(reverse("patients:archive", args=[patient.pk])).status_code == 302
     patient.refresh_from_db()
-    assert patient.arquivado and patient.arquivado_por.username == "admin_a"
+    assert patient.archived and patient.archived_by.username == "admin_a"
 
     lista = reverse("patients:list")
     for status, esperado in (("todos", []), ("arquivados", [patient])):
@@ -254,12 +254,12 @@ def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de)
 
     admin_a.post(reverse("patients:restore", args=[patient.pk]))
     patient.refresh_from_db()
-    assert not patient.arquivado and patient.arquivado_por is None
+    assert not patient.archived and patient.archived_by is None
 
 
 def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
     patient = criar_paciente(
-        clinica_a, name="Fulano Escondido", tax_id="52998224725", arquivado=True
+        clinica_a, name="Fulano Escondido", tax_id="52998224725", archived=True
     )
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
     lista = reverse("patients:list")
@@ -276,7 +276,7 @@ def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
         clinica_a,
         name="Maria",
         tax_id="52998224725",
-        telefone_celular="48999990000",
+        mobile_phone="48999990000",
         city_id=FLORIANOPOLIS,
         state_id=SC,
     )
@@ -324,7 +324,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     resposta = admin_a.post(url, follow=True)
     assert "Resolva as contas em aberto" in resposta.content.decode()
     patient.refresh_from_db()
-    assert not patient.arquivado
+    assert not patient.archived
 
     def receber(installment):
         with usar_clinica(clinica_a):
@@ -344,4 +344,4 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     receber(segunda)
     assert admin_a.post(url).status_code == 302
     patient.refresh_from_db()
-    assert patient.arquivado
+    assert patient.archived

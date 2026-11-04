@@ -31,7 +31,7 @@ POR_PAGINA = 50
 
 def _orcamentos():
     # Archived patients leave the team's screens (decision 046).
-    return Estimate.objects.filter(patient__arquivado=False).select_related(
+    return Estimate.objects.filter(patient__archived=False).select_related(
         "patient", "practitioner"
     )
 
@@ -97,7 +97,7 @@ def novo(request):
         return redirect("estimates:detail", pk=orcamento.pk)
     valor_paciente = form["patient"].value()
     patient = (
-        Patient.objects.filter(pk=valor_paciente, arquivado=False).first()
+        Patient.objects.filter(pk=valor_paciente, archived=False).first()
         if str(valor_paciente or "").isdecimal()
         else None
     )

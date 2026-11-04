@@ -44,12 +44,12 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         kind = AppointmentType.objects.get(name="Cirurgia")
         maria = Patient.objects.create(
             name="Maria Paciente",
-            data_nascimento=dia(5, 3).replace(year=1990),
-            telefone_celular="11987654321",
+            birth_date=dia(5, 3).replace(year=1990),
+            mobile_phone="11987654321",
         )
         joao = Patient.objects.create(name="João Paciente")
-        arquivado = Patient.objects.create(
-            name="Paciente Arquivado", arquivado=True, data_nascimento=dia(5).replace(year=1980)
+        archived = Patient.objects.create(
+            name="Paciente Arquivado", archived=True, birth_date=dia(5).replace(year=1980)
         )
 
         def agendar(date, hora, practitioner=ana, patient=maria, status="agendado"):
@@ -77,7 +77,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             (HOJE, False, maria),
             (dia(1), False, maria),
             (dia(2), True, maria),
-            (HOJE, False, arquivado),
+            (HOJE, False, archived),
             (dia(10), False, maria),
         ]:
             Recall.objects.create(
@@ -88,7 +88,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             (maria, dia(8), Estimate.Situacao.ABERTO),
             (maria, dia(20), Estimate.Situacao.ABERTO),
             (maria, dia(6), Estimate.Situacao.APROVADO),
-            (arquivado, dia(6), Estimate.Situacao.ABERTO),
+            (archived, dia(6), Estimate.Situacao.ABERTO),
             (maria, dia(4), Estimate.Situacao.ABERTO),
         ]:
             Estimate.objects.create(

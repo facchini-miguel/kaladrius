@@ -99,8 +99,8 @@ class _Anonimizador:
         self.fake.seed_instance(self.sorte.getrandbits(64))
         self.resultado = Resultado()
 
-    def _nome(self, sexo):
-        return self.fake.name_female() if sexo == "F" else self.fake.name_male()
+    def _nome(self, sex):
+        return self.fake.name_female() if sex == "F" else self.fake.name_male()
 
     def _documento(self, patient, usados):
         if not patient.tax_id:
@@ -130,44 +130,44 @@ class _Anonimizador:
                 p.name = fake.company()[:200]
                 p.legal_name = f"{p.name} Ltda."[:200] if p.legal_name else ""
             else:
-                p.name = self._nome(p.sexo)
+                p.name = self._nome(p.sex)
             p.tax_id = self._documento(p, usados)
             p.rg = fake.numerify("#" * min(len(p.rg), 10)) if p.rg else ""
-            p.inscricao_estadual = fake.numerify("#########") if p.inscricao_estadual else ""
-            p.data_nascimento = self._nascimento(p.data_nascimento)
-            p.profissao = fake_data.profissao(fake) if p.profissao else ""
-            p.responsavel = self._nome(self.sorte.choice("FM")) if p.responsavel else ""
-            p.telefone_residencial = _mesmo_tamanho(p.telefone_residencial, fake)
-            p.telefone_comercial = _mesmo_tamanho(p.telefone_comercial, fake)
-            mesmo_numero = p.whatsapp and p.whatsapp == p.telefone_celular
-            p.telefone_celular = _mesmo_tamanho(p.telefone_celular, fake)
-            p.whatsapp = p.telefone_celular if mesmo_numero else _mesmo_tamanho(p.whatsapp, fake)
+            p.state_registration = fake.numerify("#########") if p.state_registration else ""
+            p.birth_date = self._nascimento(p.birth_date)
+            p.occupation = fake_data.occupation(fake) if p.occupation else ""
+            p.guardian = self._nome(self.sorte.choice("FM")) if p.guardian else ""
+            p.home_phone = _mesmo_tamanho(p.home_phone, fake)
+            p.work_phone = _mesmo_tamanho(p.work_phone, fake)
+            mesmo_numero = p.whatsapp and p.whatsapp == p.mobile_phone
+            p.mobile_phone = _mesmo_tamanho(p.mobile_phone, fake)
+            p.whatsapp = p.mobile_phone if mesmo_numero else _mesmo_tamanho(p.whatsapp, fake)
             p.email = f"paciente{number}@example.com" if p.email else ""
-            p.cep = (p.cep[:2] + fake.numerify("######")) if p.cep else ""
+            p.postal_code = (p.postal_code[:2] + fake.numerify("######")) if p.postal_code else ""
             p.neighborhood = fake.neighborhood()[:100] if p.neighborhood else ""
-            p.logradouro = fake.street_name()[:200] if p.logradouro else ""
+            p.street = fake.street_name()[:200] if p.street else ""
             p.number = fake.building_number()[:10] if p.number else ""
-            p.complemento = f"Apto {fake.random_int(1, 999)}" if p.complemento else ""
+            p.complement = f"Apto {fake.random_int(1, 999)}" if p.complement else ""
             p.notes = self.sorte.choice(OBSERVACOES) if p.notes else ""
         campos = [
             "name",
             "legal_name",
             "tax_id",
             "rg",
-            "inscricao_estadual",
-            "data_nascimento",
-            "profissao",
-            "responsavel",
-            "telefone_residencial",
-            "telefone_comercial",
-            "telefone_celular",
+            "state_registration",
+            "birth_date",
+            "occupation",
+            "guardian",
+            "home_phone",
+            "work_phone",
+            "mobile_phone",
             "whatsapp",
             "email",
-            "cep",
+            "postal_code",
             "neighborhood",
-            "logradouro",
+            "street",
             "number",
-            "complemento",
+            "complement",
             "notes",
         ]
         Patient.objects.bulk_update(pacientes, campos, batch_size=500)
@@ -203,9 +203,9 @@ class _Anonimizador:
     def profissionais(self):
         profissionais = list(Practitioner.objects.filter(clinic=self.clinic))
         for practitioner in profissionais:
-            sexo = self.sorte.choice("FM")
-            titulo = "Dra." if sexo == "F" else "Dr."
-            practitioner.name = f"{titulo} {self._nome(sexo)}"
+            sex = self.sorte.choice("FM")
+            titulo = "Dra." if sex == "F" else "Dr."
+            practitioner.name = f"{titulo} {self._nome(sex)}"
             if practitioner.registration:
                 practitioner.registration = f"CRO {self.fake.numerify('#####')}"
         Practitioner.objects.bulk_update(profissionais, ["name", "registration"])

@@ -20,8 +20,8 @@
     <thead><tr><th>{% translate "Dia" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Completa" %}</th><th>{% translate "Telefone" %}</th><th>{% translate "E-mail" %}</th></tr></thead>
     <tbody>
       {% for patient, idade in linhas %}
-      <tr{% if patient.data_nascimento|date:"md" == hoje|date:"md" %} class="table-warning"{% endif %}>
-        <td>{{ patient.data_nascimento|date:"d/m" }}</td>
+      <tr{% if patient.birth_date|date:"md" == hoje|date:"md" %} class="table-warning"{% endif %}>
+        <td>{{ patient.birth_date|date:"d/m" }}</td>
         <td><a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a></td>
         <td>{% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}</td>
         <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>

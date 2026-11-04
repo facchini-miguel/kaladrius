@@ -114,7 +114,7 @@ Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clin
 
 ## Campos de cada app
 
-Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167).
+Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167), pacientes (decisión 168).
 
 ### Finanzas (`financeiro`)
 
@@ -168,6 +168,32 @@ Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión
 | `movimento` | `cash_movement` |
 | `conciliado_por` | `reconciled_by` |
 | `conciliado_em` | `reconciled_at` |
+
+### Pacientes (`pacientes`)
+
+| Antes | Después |
+|---|---|
+| `inscricao_estadual` | `state_registration` |
+| `sexo` | `sex` |
+| `data_nascimento` | `birth_date` |
+| `estado_civil` | `marital_status` |
+| `profissao` | `occupation` |
+| `responsavel` | `guardian` |
+| `telefone_celular` | `mobile_phone` |
+| `telefone_residencial` | `home_phone` |
+| `telefone_comercial` | `work_phone` |
+| `cep` | `postal_code` |
+| `estado_nome` | `state_name` |
+| `cidade_nome` | `city_name` |
+| `logradouro` | `street` |
+| `complemento` | `complement` |
+| `arquivado` | `archived` |
+| `arquivado_em` | `archived_at` |
+| `arquivado_por` | `archived_by` |
+| `vinculo` | `relationship` |
+| `outro_paciente` | `other_patient` |
+
+`rg` queda: es el nombre del documento brasileño, como `cpf`.
 
 ## Lo que queda en portugués
 

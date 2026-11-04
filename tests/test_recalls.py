@@ -174,12 +174,10 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 def test_aniversariantes_do_mes(cenario):
     clinic = cenario["clinic"]
     with usar_clinica(clinic):
-        Patient.objects.create(name="Março 20", data_nascimento=datetime.date(1990, 3, 20))
-        Patient.objects.create(name="Março 2", data_nascimento=datetime.date(2000, 3, 2))
-        Patient.objects.create(
-            name="Inativo", data_nascimento=datetime.date(1990, 3, 1), active=False
-        )
-        Patient.objects.create(name="Nascido em abril", data_nascimento=datetime.date(1990, 4, 1))
+        Patient.objects.create(name="Março 20", birth_date=datetime.date(1990, 3, 20))
+        Patient.objects.create(name="Março 2", birth_date=datetime.date(2000, 3, 2))
+        Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 1), active=False)
+        Patient.objects.create(name="Nascido em abril", birth_date=datetime.date(1990, 4, 1))
     resposta = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
     assert [p.name for p, _ in resposta.context["linhas"]] == ["Março 2", "Março 20"]
     assert "Nascido em abril" not in resposta.content.decode()

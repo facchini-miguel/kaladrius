@@ -33,7 +33,7 @@ def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinic
             name="Paciente fictício A",
             city_id=CARLOS_BARBOSA,
             neighborhood="Bairro Novo Fictício",
-            logradouro="Rua Inventada A",
+            street="Rua Inventada A",
         )
     with usar_clinica(clinica_b):
         Patient.objects.create(

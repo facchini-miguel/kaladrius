@@ -144,7 +144,7 @@ def lancamento_novo(request):
     code = request.GET.get("patient", "")
     patient = None
     if code.isdecimal():
-        patient = Patient.objects.filter(pk=int(code), arquivado=False).first()
+        patient = Patient.objects.filter(pk=int(code), archived=False).first()
         if patient is not None:
             inicial["patient"] = patient.pk
     form = LancamentoReceberForm(request.POST or None, initial=inicial, clinic=request.clinic)

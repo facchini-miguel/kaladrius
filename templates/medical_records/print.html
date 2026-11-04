@@ -11,7 +11,7 @@
 <div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">
   {% translate "PRONTUÁRIO" as titulo_documento %}
   {% include "medical_records/_header.html" with data_documento=visit.date %}
-  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ visit.patient.name }}{% if visit.patient.data_nascimento %} · {% translate "nascido(a) em" %} {{ visit.patient.data_nascimento|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
+  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ visit.patient.name }}{% if visit.patient.birth_date %} · {% translate "nascido(a) em" %} {{ visit.patient.birth_date|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
   <p><strong>{% translate "Atendimento" %}:</strong> {{ visit.date|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</p>
   {% for rotulo, value in campos %}{% if value %}
   <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>

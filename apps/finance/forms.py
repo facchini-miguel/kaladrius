@@ -98,7 +98,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.instance.clinic = clinic
         self.instance.kind = Entry.Tipo.RECEBER
-        self.fields["patient"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["patient"].queryset = Patient.objects.filter(archived=False)
         self.fields["category"].queryset = Category.objects.filter(
             kind=Category.Tipo.RECEITA, active=True
         )

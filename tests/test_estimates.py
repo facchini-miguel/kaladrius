@@ -201,7 +201,7 @@ def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
     ficha = cliente.get(reverse("patients:record", args=[cenario["patient"].pk]))
     assert ficha.context["orcamentos"] == [orcamento]
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
+        Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     assert cliente.get(reverse("estimates:detail", args=[orcamento.pk])).status_code == 404
 
 
@@ -222,7 +222,7 @@ def test_exclusao_definitiva_apaga_os_orcamentos(cenario):
     orcamento = criar_orcamento(cenario, admin)
     incluir(admin, orcamento, procedimento=cenario["canal"].pk, dentes="11")
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
+        Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     admin.post(reverse("patients:delete", args=[cenario["patient"].pk]))
     with usar_clinica(cenario["clinic"]):
         assert not Estimate.objects.exists() and not EstimateItem.objects.exists()

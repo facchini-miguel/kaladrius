@@ -147,7 +147,7 @@ def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
     registrar(cenario)
     patient = cenario["patient"]
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.filter(pk=patient.pk).update(arquivado=True, arquivado_em=timezone.now())
+        Patient.objects.filter(pk=patient.pk).update(archived=True, archived_at=timezone.now())
     url = reverse("patients:delete", args=[patient.pk])
     pagina = cenario["admin"].get(url)
     assert pagina.context["atendimentos"] == 1 and "20 anos" in pagina.content.decode()

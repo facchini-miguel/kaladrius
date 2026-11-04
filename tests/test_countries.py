@@ -136,7 +136,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
-            name="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
+            name="Amelia Fictícia", birth_date=datetime.date(2000, 12, 25)
         )
     ficha = cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "25/12/2000" in ficha and "12/25/2000" not in ficha
@@ -190,7 +190,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Papel.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
-    assert 'name="state"' not in formulario and 'name="cidade_nome"' in formulario
+    assert 'name="state"' not in formulario and 'name="city_name"' in formulario
     assert "Código postal" in formulario
 
     resposta = admin.post(
@@ -199,17 +199,17 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
             "kind": "PF",
             "name": "Oliver Fictício",
             "active": "on",
-            "telefone_celular": "07700 900123",
+            "mobile_phone": "07700 900123",
             "whatsapp": "+44 7700 900123",
-            "cep": "sw1a 1aa",
-            "cidade_nome": "London",
-            "estado_nome": "England",
+            "postal_code": "sw1a 1aa",
+            "city_name": "London",
+            "state_name": "England",
         },
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Oliver Fictício")
-    assert (patient.telefone_celular, patient.whatsapp, patient.cep) == (
+    assert (patient.mobile_phone, patient.whatsapp, patient.postal_code) == (
         "7700900123",
         "7700900123",
         "SW1A1AA",
@@ -224,7 +224,7 @@ def test_paciente_no_brasil_continua_com_cpf_e_cidades(clinica_a, criar_usuario,
     admin = cliente_de(criar_usuario("admin_brasil", clinica_a, Papel.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'name="tax_id"' in formulario and 'name="state"' in formulario
-    assert 'name="cidade_nome"' not in formulario and ">CEP" in formulario
+    assert 'name="city_name"' not in formulario and ">CEP" in formulario
 
 
 def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
