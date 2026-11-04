@@ -34,7 +34,7 @@ from apps.finance.models import (
 from apps.health_plans.models import Carteirinha
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento
 from apps.staff.models import Folha, Funcionario
 
@@ -194,10 +194,10 @@ class _Anonimizador:
         Carteirinha.objects.bulk_update(carteirinhas, ["numero", "titular"], batch_size=500)
 
     def rechamadas(self):
-        rechamadas = list(Rechamada.objects.filter(clinica=self.clinica))
+        rechamadas = list(Recall.objects.filter(clinica=self.clinica))
         for rechamada in rechamadas:
             rechamada.descricao = self.sorte.choice(RECHAMADAS)
-        Rechamada.objects.bulk_update(rechamadas, ["descricao"])
+        Recall.objects.bulk_update(rechamadas, ["descricao"])
         self.resultado.rechamadas = len(rechamadas)
 
     def profissionais(self):
@@ -284,7 +284,7 @@ class _Anonimizador:
             for m in (
                 Paciente,
                 Agendamento,
-                Rechamada,
+                Recall,
                 Carteirinha,
                 Funcionario,
                 Profissional,

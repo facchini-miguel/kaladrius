@@ -9,7 +9,7 @@ from apps.core.models import Clinica, Papel, Vinculo
 from apps.core.validators import cnpj_valido, cpf_valido
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento
 
 pytestmark = pytest.mark.django_db
@@ -37,7 +37,7 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
             assert valido(paciente.cpf_cnpj), paciente.cpf_cnpj
         assert not Paciente.objects.exclude(email__endswith="@example.com").exists()
         assert Agendamento.objects.count() > 0  # created once, not duplicated
-        assert Rechamada.objects.count() == 80  # not duplicated
+        assert Recall.objects.count() == 80  # not duplicated
         assert Agendamento.objects.filter(profissional__clinica=F("clinica")).count() == (
             Agendamento.objects.count()
         )
@@ -70,7 +70,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     assert restantes == {"pessoa.real", "dra.ana"}
     with sem_isolamento():
         assert list(Paciente.objects.values_list("nome", flat=True)) == ["Paciente Real"]
-        assert not Agendamento.objects.exists() and not Rechamada.objects.exists()
+        assert not Agendamento.objects.exists() and not Recall.objects.exists()
         assert set(Profissional.objects.values_list("clinica", flat=True)) <= {real.pk}
     assert not RegistroAuditoria.objects.filter(objeto_descricao__contains="(teste)").exists()
     assert RegistroAuditoria.objects.filter(

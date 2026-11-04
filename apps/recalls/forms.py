@@ -4,12 +4,12 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.forms import FormularioBootstrap
 from apps.patients.models import Paciente
 
-from .models import Rechamada
+from .models import Recall
 
 
 class RechamadaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Rechamada
+        model = Recall
         fields = ["paciente", "data", "descricao", "concluida"]
         widgets = {
             "paciente": forms.HiddenInput,

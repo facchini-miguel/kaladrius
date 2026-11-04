@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
 from apps.patients.models import Paciente
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule import services as agenda
 from apps.schedule.models import Agendamento, TipoAtendimento
 
@@ -31,7 +31,7 @@ def cenario(clinica_a, criar_profissional):
             )
             for d in (21, 14)
         ]
-        rechamada = Rechamada.objects.create(
+        rechamada = Recall.objects.create(
             paciente=paciente, data=hoje - datetime.timedelta(days=20), descricao="Limpeza"
         )
     return {"clinica": clinica_a, "paciente": paciente, "agenda": semana, "rechamada": rechamada}
@@ -58,7 +58,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             assert agendamento.inicio - inicio == datetime.timedelta(days=14)
             assert agendamento.fim - fim == datetime.timedelta(days=14)
             assert agendamento.inicio.weekday() == inicio.weekday()
-        assert Rechamada.objects.get().data == hoje - datetime.timedelta(days=6)
+        assert Recall.objects.get().data == hoje - datetime.timedelta(days=6)
         assert Paciente.objects.get().data_nascimento == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
@@ -76,4 +76,4 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     hoje = timezone.localdate()
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
     with usar_clinica(cenario["clinica"]):
-        assert Rechamada.objects.get().data == hoje - datetime.timedelta(days=20)
+        assert Recall.objects.get().data == hoje - datetime.timedelta(days=20)

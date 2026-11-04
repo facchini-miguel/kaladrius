@@ -8,7 +8,7 @@ from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.core.validators import cnpj_valido, cpf_valido
 from apps.patients.models import Paciente
-from apps.reference_data.models import Cidade
+from apps.reference_data.models import City
 
 pytestmark = pytest.mark.django_db
 
@@ -157,7 +157,7 @@ def test_validacoes_do_formulario(admin_a, dados, campo, mensagem):
 
 
 def test_cidade_precisa_ser_da_uf_escolhida(admin_a):
-    sao_paulo = Cidade.objects.get(nome="São Paulo", uf__sigla="SP")
+    sao_paulo = City.objects.get(nome="São Paulo", uf__sigla="SP")
     resposta = admin_a.post(reverse("patients:new"), dados_formulario(uf=SC, cidade=sao_paulo.pk))
     assert resposta.status_code == 200
     assert "cidade" in resposta.context["form"].errors

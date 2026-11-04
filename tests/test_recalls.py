@@ -7,7 +7,7 @@ from django.utils import timezone
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.patients.models import Paciente
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 
 pytestmark = pytest.mark.django_db
 DIA = datetime.date(2031, 3, 5)
@@ -26,12 +26,12 @@ def cenario(clinica_a, criar_usuario, cliente_de):
 
 def rechamadas(clinica):
     with usar_clinica(clinica):
-        return list(Rechamada.objects.order_by("data"))
+        return list(Recall.objects.order_by("data"))
 
 
 def criar(clinica, paciente, data=DIA, **extra):
     with usar_clinica(clinica):
-        return Rechamada.objects.create(paciente=paciente, data=data, descricao="Revisão", **extra)
+        return Recall.objects.create(paciente=paciente, data=data, descricao="Revisão", **extra)
 
 
 def test_cria_rechamada(cenario):
@@ -165,7 +165,7 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
     # Permanent deletion takes the recalls with it.
     admin.post(reverse("patients:delete", args=[cenario["paciente"].pk]))
     with usar_clinica(cenario["clinica"]):
-        assert not Rechamada.objects.exists()
+        assert not Recall.objects.exists()
 
 
 # --- Birthdays ---------------------------------------------------------------------

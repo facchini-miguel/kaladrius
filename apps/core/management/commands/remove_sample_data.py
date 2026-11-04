@@ -36,7 +36,7 @@ from apps.medical_records.models import (
 )
 from apps.patients.models import Paciente, PessoaRelacionada
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento, TipoAtendimento
 from apps.staff.models import Folha, Funcionario, Salario
 
@@ -105,7 +105,7 @@ class Command(BaseCommand):
                 Lancamento,
                 Fornecedor,
                 Agendamento,
-                Rechamada,
+                Recall,
                 Carteirinha,
                 Convenio,
                 PessoaRelacionada,

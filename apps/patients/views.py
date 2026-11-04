@@ -20,7 +20,7 @@ from apps.finance.services import resumo_do_paciente
 from apps.health_plans.models import Carteirinha
 from apps.medical_records.models import Atendimento
 from apps.medical_records.permissions import acessa_prontuario
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento
 from apps.schedule.services import agendamentos_visiveis
 
@@ -92,7 +92,7 @@ def ficha(request, pk):
     )
     # LGPD: access to a patient's record (health data) is logged.
     registrar(RegistroAuditoria.Acao.VISUALIZAR, paciente)
-    rechamadas = Rechamada.objects.filter(paciente=paciente).order_by("-data")[:20]
+    rechamadas = Recall.objects.filter(paciente=paciente).order_by("-data")[:20]
     contexto = {"paciente": paciente, "rechamadas": rechamadas}
     if pode(request, Modulo.AGENDA, Acao.VER):
         contexto["agendamentos"] = _historico(request, paciente)
@@ -251,7 +251,7 @@ def excluir(request, pk):
         codigo = paciente.pk
         agendamentos = Agendamento.objects.filter(paciente=paciente)
         ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
-        rechamadas = Rechamada.objects.filter(paciente=paciente)
+        rechamadas = Recall.objects.filter(paciente=paciente)
         ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
         carteirinhas = Carteirinha.objects.filter(paciente=paciente)
         ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
@@ -287,7 +287,7 @@ def excluir(request, pk):
             paciente.delete()
             anonimizar(Paciente, [codigo])
             anonimizar(Agendamento, ids_agendamentos)
-            anonimizar(Rechamada, ids_rechamadas)
+            anonimizar(Recall, ids_rechamadas)
             anonimizar(Carteirinha, ids_carteirinhas)
             anonimizar(PessoaRelacionada, ids_relacionadas)
             anonimizar(Lancamento, ids_lancamentos)

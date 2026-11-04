@@ -14,7 +14,7 @@ from apps.finance import services as financeiro
 from apps.finance.models import ZERO, Caixa, Lancamento, Parcela
 from apps.finance.payment_methods import rotulos as rotulos_das_formas
 from apps.patients.models import Paciente
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule import services as agenda
 from apps.schedule.models import Agendamento
 
@@ -89,7 +89,7 @@ def _agenda(request, hoje):
 
 
 def _rechamadas(hoje):
-    pendentes = Rechamada.objects.filter(
+    pendentes = Recall.objects.filter(
         concluida=False, data__lte=hoje, paciente__arquivado=False
     ).select_related("paciente")
     return {

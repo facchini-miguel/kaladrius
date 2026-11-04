@@ -15,8 +15,8 @@ from apps.core.models import Clinica, Papel, Vinculo
 from apps.health_plans.models import Carteirinha, Convenio
 from apps.patients.models import Paciente, PessoaRelacionada
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
-from apps.reference_data.models import Cidade, EstadoCivil
+from apps.recalls.models import Recall
+from apps.reference_data.models import City, MaritalStatus
 from apps.schedule.models import Agendamento
 from apps.schedule.simulation import simular_agendamentos, simular_rechamadas
 from apps.staff.models import Funcionario, Salario
@@ -143,8 +143,8 @@ class Command(BaseCommand):
 
         fake = Faker("pt_BR")
         fake.seed_instance(clinica.pk)  # same data every time for the same clinic
-        cidades = list(Cidade.objects.filter(uf__sigla="SC"))
-        estados_civis = list(EstadoCivil.objects.all())
+        cidades = list(City.objects.filter(uf__sigla="SC"))
+        estados_civis = list(MaritalStatus.objects.all())
         documentos = set()
         novos = []
         for numero in range(1, quantidade + 1):
@@ -262,7 +262,7 @@ class Command(BaseCommand):
 
     def _rechamadas(self, clinica):
         """About 80 recalls from 30 days ago to 60 days ahead; past ones mostly done."""
-        if Rechamada.objects.filter(clinica=clinica).exists():
+        if Recall.objects.filter(clinica=clinica).exists():
             return 0
         sorteio = random.Random(clinica.pk + 1000)  # noqa: S311 (fake data, not security)
         return simular_rechamadas(clinica, sorteio)

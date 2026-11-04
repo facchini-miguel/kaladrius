@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from apps.core.permissions import Acao, Modulo, exige_permissao
 
 from .forms import RechamadaForm
-from .models import Rechamada
+from .models import Recall
 
 POR_PAGINA = 50
 SITUACOES = {"pendentes": {"concluida": False}, "concluidas": {"concluida": True}, "todas": {}}
@@ -37,7 +37,7 @@ def lista(request):
     situacao = request.GET.get("situacao", "pendentes")
     busca = request.GET.get("q", "").strip()
     de, ate = _data(request.GET.get("de")), _data(request.GET.get("ate"))
-    rechamadas = Rechamada.objects.select_related("paciente").filter(
+    rechamadas = Recall.objects.select_related("paciente").filter(
         **SITUACOES.get(situacao, SITUACOES["pendentes"]), paciente__arquivado=False
     )
     if busca:
@@ -70,12 +70,12 @@ def novo(request):
     inicial = {"data": request.GET.get("data") or ""}
     if request.GET.get("paciente", "").isdecimal():
         inicial["paciente"] = request.GET["paciente"]
-    return _formulario(request, Rechamada(criado_por=request.user), inicial)
+    return _formulario(request, Recall(criado_por=request.user), inicial)
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
 def editar(request, pk):
-    return _formulario(request, get_object_or_404(Rechamada.objects, pk=pk), {})
+    return _formulario(request, get_object_or_404(Recall.objects, pk=pk), {})
 
 
 def _formulario(request, rechamada, inicial):
@@ -109,7 +109,7 @@ def _formulario(request, rechamada, inicial):
 @require_POST
 @exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
 def concluir(request, pk):
-    rechamada = get_object_or_404(Rechamada.objects.select_related("paciente"), pk=pk)
+    rechamada = get_object_or_404(Recall.objects.select_related("paciente"), pk=pk)
     rechamada.concluida = not rechamada.concluida
     rechamada.save(update_fields=["concluida", "alterado_em"])
     if rechamada.concluida:
@@ -122,7 +122,7 @@ def concluir(request, pk):
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.EXCLUIR)
 def excluir(request, pk):
-    rechamada = get_object_or_404(Rechamada.objects.select_related("paciente"), pk=pk)
+    rechamada = get_object_or_404(Recall.objects.select_related("paciente"), pk=pk)
     if request.method == "POST":
         rechamada.delete()
         messages.success(
@@ -142,7 +142,7 @@ def resumo(request):
     if de is None or ate is None or not 0 < (ate - de).days <= 62:
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
-    pendentes = Rechamada.objects.filter(
+    pendentes = Recall.objects.filter(
         concluida=False, data__gte=de, data__lt=ate, paciente__arquivado=False
     )
     for data in pendentes.values_list("data", flat=True):
@@ -155,7 +155,7 @@ def do_dia(request):
     dia = _data(request.GET.get("data"))
     if dia is None:
         return HttpResponse(_("Data inválida."), status=400)
-    rechamadas = Rechamada.objects.filter(data=dia, paciente__arquivado=False).select_related(
+    rechamadas = Recall.objects.filter(data=dia, paciente__arquivado=False).select_related(
         "paciente"
     )
     return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})

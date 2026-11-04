@@ -14,7 +14,7 @@ from apps.finance import services as financeiro
 from apps.finance.models import Caixa, Categoria, Conta, Lancamento
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule import services as agenda
 from apps.schedule.models import Agendamento, TipoAtendimento
 
@@ -80,7 +80,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             (HOJE, False, arquivado),
             (dia(10), False, maria),
         ]:
-            Rechamada.objects.create(
+            Recall.objects.create(
                 paciente=paciente, data=data, descricao="Revisão", concluida=concluida
             )
 

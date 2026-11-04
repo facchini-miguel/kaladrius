@@ -1,15 +1,15 @@
 from django.contrib import admin
 
-from .models import UF, Banco, Cidade, EstadoCivil
+from .models import Bank, City, MaritalStatus, State
 
 
-@admin.register(UF)
+@admin.register(State)
 class UFAdmin(admin.ModelAdmin):
     list_display = ["sigla", "nome", "regiao", "codigo"]
     list_filter = ["regiao"]
 
 
-@admin.register(Cidade)
+@admin.register(City)
 class CidadeAdmin(admin.ModelAdmin):
     list_display = ["nome", "uf", "codigo"]
     list_filter = ["uf"]
@@ -17,13 +17,13 @@ class CidadeAdmin(admin.ModelAdmin):
     list_select_related = ["uf"]
 
 
-@admin.register(Banco)
+@admin.register(Bank)
 class BancoAdmin(admin.ModelAdmin):
     list_display = ["codigo", "nome_curto", "nome", "ispb"]
     search_fields = ["nome", "nome_curto", "ispb"]
 
 
-@admin.register(EstadoCivil)
+@admin.register(MaritalStatus)
 class EstadoCivilAdmin(admin.ModelAdmin):
     list_display = ["nome", "ordem"]
     list_editable = ["ordem"]

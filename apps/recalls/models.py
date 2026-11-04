@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.isolation import ModeloDaClinica
 
 
-class Rechamada(ModeloDaClinica):
+class Recall(ModeloDaClinica):
     """A recall: a date to contact a patient again (e.g. six-month check-up)."""
 
     paciente = models.ForeignKey(
@@ -31,6 +31,7 @@ class Rechamada(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "rechamadas_rechamada"
         verbose_name = _("rechamada")
         verbose_name_plural = _("rechamadas")
         ordering = ["data", "paciente__nome"]

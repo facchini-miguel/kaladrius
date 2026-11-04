@@ -6,7 +6,7 @@ from django.urls import reverse
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.patients.models import Paciente
-from apps.reference_data.models import Bairro, Logradouro
+from apps.reference_data.models import Neighborhood, Street
 
 pytestmark = pytest.mark.django_db
 
@@ -21,10 +21,10 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 
 def test_bairros_e_logradouros_do_odonto_carregados():
     # 75 in the legacy, 5 of them registered twice in the same city.
-    assert Bairro.objects.count() == 70
-    assert Bairro.objects.filter(cidade_id=CARLOS_BARBOSA).count() == 39
-    assert Logradouro.objects.count() == 316
-    assert Logradouro.objects.filter(nome__startswith="Rua ").exists()
+    assert Neighborhood.objects.count() == 70
+    assert Neighborhood.objects.filter(cidade_id=CARLOS_BARBOSA).count() == 39
+    assert Street.objects.count() == 316
+    assert Street.objects.filter(nome__startswith="Rua ").exists()
 
 
 def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinica_b, recepcao):

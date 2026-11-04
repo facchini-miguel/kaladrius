@@ -2,18 +2,18 @@ import pytest
 from django.urls import reverse
 
 from apps.core.models import Papel
-from apps.reference_data.models import UF, Banco, Cidade, EstadoCivil
+from apps.reference_data.models import Bank, City, MaritalStatus, State
 
 pytestmark = pytest.mark.django_db
 
 
 def test_dados_oficiais_carregados_pela_migracao():
-    assert UF.objects.count() == 27
-    assert Cidade.objects.count() > 5500
-    assert Banco.objects.filter(codigo=1).get().nome_curto == "BCO DO BRASIL S.A."
-    assert EstadoCivil.objects.count() == 6
-    assert Cidade.objects.get(codigo=4205407).nome == "Florianópolis"
-    assert Cidade.objects.get(codigo=4205407).uf.sigla == "SC"
+    assert State.objects.count() == 27
+    assert City.objects.count() > 5500
+    assert Bank.objects.filter(codigo=1).get().nome_curto == "BCO DO BRASIL S.A."
+    assert MaritalStatus.objects.count() == 6
+    assert City.objects.get(codigo=4205407).nome == "Florianópolis"
+    assert City.objects.get(codigo=4205407).uf.sigla == "SC"
 
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):

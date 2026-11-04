@@ -1,4 +1,5 @@
 import datetime
+from functools import cache
 
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -39,6 +40,32 @@ def tipos_de_registro():
     return sorted({nome_do_modelo(modelo) for modelo in [*AUDITADOS, *documentos]})
 
 
+@cache
+def _rotulos():
+    """For each kind of record, its fields' labels by every name an entry may have stored:
+    the field's name, and its column (the name before decision 155's renaming, which keeps
+    the database columns)."""
+    from .signals import AUDITADOS
+
+    rotulos = {}
+    for modelo in AUDITADOS:
+        campos = rotulos.setdefault(nome_do_modelo(modelo), {})
+        for campo in modelo._meta.concrete_fields:
+            for nome in {campo.column, campo.column.removesuffix("_id"), campo.attname, campo.name}:
+                campos[nome] = campo.verbose_name
+    return rotulos
+
+
+def campos_alterados(registro):
+    """The entry's changes as (label, before, after), in the user's language. A field the
+    model no longer has (or "senha") shows its stored name."""
+    rotulos = _rotulos().get(registro.modelo, {})
+    return [
+        (rotulos.get(campo, campo), valores[0], valores[1])
+        for campo, valores in registro.alteracoes.items()
+    ]
+
+
 @exige_permissao(Modulo.AUDITORIA, Acao.VER)
 def lista(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
@@ -66,6 +93,8 @@ def lista(request):
     if ate := _data(filtros["ate"]):
         registros = registros.filter(momento__date__lte=ate)
     pagina = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
+    for registro in pagina:
+        registro.campos = campos_alterados(registro)
     return render(
         request,
         "audit/list.html",

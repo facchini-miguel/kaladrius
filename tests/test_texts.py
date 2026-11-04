@@ -123,5 +123,5 @@ def test_painel_do_django_sem_ingles(client, django_user_model):
     "- Select an option -" in English."""
     super_usuario = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
     client.force_login(super_usuario)
-    pagina = client.get(reverse("admin:referencias_uf_changelist")).content.decode()
+    pagina = client.get(reverse("admin:referencias_state_changelist")).content.decode()
     assert "Select an option" not in pagina and "Selecione uma opção" in pagina
