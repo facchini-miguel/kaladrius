@@ -15,7 +15,7 @@ class Recall(ModeloDaClinica):
         verbose_name=_("paciente"),
         db_column="paciente_id",
     )
-    data = models.DateField(_("data"))
+    date = models.DateField(_("data"), db_column="data")
     description = models.CharField(
         _("descrição"),
         max_length=200,
@@ -39,8 +39,8 @@ class Recall(ModeloDaClinica):
         db_table = "rechamadas_rechamada"
         verbose_name = _("rechamada")
         verbose_name_plural = _("rechamadas")
-        ordering = ["data", "patient__name"]
-        indexes = [models.Index(fields=["clinic", "data"], name="rechamada_clinica_data")]
+        ordering = ["date", "patient__name"]
+        indexes = [models.Index(fields=["clinic", "date"], name="rechamada_clinica_data")]
 
     def __str__(self):
-        return f"{self.patient} em {self.data:%d/%m/%Y}"
+        return f"{self.patient} em {self.date:%d/%m/%Y}"

@@ -29,7 +29,7 @@
     <tbody>
       {% for linha in fluxo.linhas %}
       <tr>
-        <td class="text-nowrap">{% if por_mes %}{{ linha.data|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.data|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
+        <td class="text-nowrap">{% if por_mes %}{{ linha.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
         <td class="text-end text-nowrap text-success">{% if linha.entradas %}{{ linha.entradas|moeda }}{% endif %}</td>
         <td class="text-end text-nowrap text-danger">{% if linha.saidas %}{{ linha.saidas|moeda }}{% endif %}</td>
         <td class="text-end text-nowrap text-body-secondary">{% if linha.entradas_previstas %}{{ linha.entradas_previstas|moeda }}{% endif %}</td>
@@ -48,8 +48,8 @@
 <div class="table-responsive" style="max-width: 32rem;">
   <table class="table table-sm bg-white">
     <tbody>
-      {% for conta, saldo in contas %}
-      <tr><td>{{ conta.name }}{% if not conta.active %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if saldo < 0 %} text-danger{% endif %}">{{ saldo|moeda }}</td></tr>
+      {% for account, saldo in contas %}
+      <tr><td>{{ account.name }}{% if not account.active %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if saldo < 0 %} text-danger{% endif %}">{{ saldo|moeda }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

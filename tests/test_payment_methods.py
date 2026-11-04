@@ -70,7 +70,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     pagina = admin.get(url).content.decode()
     assert 'value="carteira"' in pagina and "Yape, Plin" in pagina
     assert 'value="pix"' not in pagina and 'value="boleto"' not in pagina
-    dados = {"data": HOJE.isoformat(), "amount": "100", "conta": cenario["caixa"].pk}
+    dados = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["caixa"].pk}
     assert "forma" in admin.post(url, {**dados, "forma": "pix"}).context["form"].errors
     assert admin.post(url, {**dados, "forma": "carteira"}).status_code == 302
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
@@ -95,9 +95,9 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     assert "cartao_parcelas" not in form.fields
     assert "NSU" not in str(form.fields["cartao_codigo"].label)
     dados = {
-        "data": HOJE.isoformat(),
+        "date": HOJE.isoformat(),
         "amount": "100",
-        "conta": cenario["caixa"].pk,
+        "account": cenario["caixa"].pk,
         "forma": "hsa",
         "cartao_bandeira": "Visa",
         "cartao_parcelas": "3",
@@ -116,9 +116,9 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     parcela = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[parcela.pk])
     dados = {
-        "data": HOJE.isoformat(),
+        "date": HOJE.isoformat(),
         "amount": "100",
-        "conta": cenario["caixa"].pk,
+        "account": cenario["caixa"].pk,
         "forma": "pix",
         "cartao_bandeira": "Visa",
         "cartao_parcelas": "3",
@@ -142,7 +142,7 @@ def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noq
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="pix",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
         mudar_pais(cenario, "US")
         assert pagamento.get_forma_display() == "Pix"

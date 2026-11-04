@@ -34,7 +34,7 @@ def _recebimentos(practitioner):
 
 
 def _creditos(practitioner, ate):
-    return _recebimentos(practitioner).filter(estornado=False, comissao__isnull=True, data__lte=ate)
+    return _recebimentos(practitioner).filter(estornado=False, comissao__isnull=True, date__lte=ate)
 
 
 def _debitos(practitioner):
@@ -43,7 +43,7 @@ def _debitos(practitioner):
         _recebimentos(practitioner)
         .filter(estornado=True, comissao__isnull=False, comissao_estorno__isnull=True)
         .select_related("comissao")
-        .order_by("data", "pk")
+        .order_by("date", "pk")
     )
     for debito in debitos:
         debito.comissao_devolvida = percentual_de(debito.amount, debito.comissao.percentual)
@@ -52,7 +52,7 @@ def _debitos(practitioner):
 
 def pendente(practitioner, ate):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
-    creditos = list(_creditos(practitioner, ate).order_by("data", "pk"))
+    creditos = list(_creditos(practitioner, ate).order_by("date", "pk"))
     debitos = _debitos(practitioner)
     recebido = sum((p.amount for p in creditos), start=ZERO)
     bruta = percentual_de(recebido, practitioner.comissao_percentual)

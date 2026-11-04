@@ -9,7 +9,7 @@
   {% if agendamento.status != "agendado" %}<button type="button" class="btn btn-sm btn-link" hx-post="{{ url_situacao }}" hx-vals='{"situacao": "agendado"}' hx-target="#modal-conteudo">{% translate "Desfazer marcação" %}</button>{% endif %}
   {% if agendamento.desmarcado and pode.agenda.criar %}
   {# The cancelled appointment still covers the slot on the calendar: book the freed time from here. #}
-  <button type="button" class="btn btn-sm btn-primary" hx-get="{% url 'schedule:new' %}?practitioner={{ agendamento.practitioner_id }}&amp;data={{ agendamento.inicio|date:'Y-m-d' }}&amp;inicio={{ agendamento.inicio|time:'H:i' }}&amp;fim={{ agendamento.fim|time:'H:i' }}" hx-target="#modal-conteudo">{% translate "Agendar outro paciente neste horário" %}</button>
+  <button type="button" class="btn btn-sm btn-primary" hx-get="{% url 'schedule:new' %}?practitioner={{ agendamento.practitioner_id }}&amp;date={{ agendamento.inicio|date:'Y-m-d' }}&amp;inicio={{ agendamento.inicio|time:'H:i' }}&amp;fim={{ agendamento.fim|time:'H:i' }}" hx-target="#modal-conteudo">{% translate "Agendar outro paciente neste horário" %}</button>
   {% endif %}
   {% if agendamento.patient_id and pode_prontuario %}
   {% if agendamento.visit %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'medical_records:visit' agendamento.visit.pk %}">{% translate "Abrir atendimento" %}</a>

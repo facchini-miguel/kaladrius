@@ -43,9 +43,9 @@ def lista(request):
     if busca:
         rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
     if de:
-        rechamadas = rechamadas.filter(data__gte=de)
+        rechamadas = rechamadas.filter(date__gte=de)
     if ate:
-        rechamadas = rechamadas.filter(data__lte=ate)
+        rechamadas = rechamadas.filter(date__lte=ate)
     pagina = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
     filtros = {
         "q": busca,
@@ -67,7 +67,7 @@ def lista(request):
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.CRIAR)
 def novo(request):
-    inicial = {"data": request.GET.get("data") or ""}
+    inicial = {"date": request.GET.get("date") or ""}
     if request.GET.get("patient", "").isdecimal():
         inicial["patient"] = request.GET["patient"]
     return _formulario(request, Recall(created_by=request.user), inicial)
@@ -143,17 +143,17 @@ def resumo(request):
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        concluida=False, data__gte=de, data__lt=ate, patient__arquivado=False
+        concluida=False, date__gte=de, date__lt=ate, patient__arquivado=False
     )
-    for data in pendentes.values_list("data", flat=True):
-        contagem[data.isoformat()] = contagem.get(data.isoformat(), 0) + 1
+    for date in pendentes.values_list("date", flat=True):
+        contagem[date.isoformat()] = contagem.get(date.isoformat(), 0) + 1
     return JsonResponse(contagem)
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
 def do_dia(request):
-    dia = _data(request.GET.get("data"))
+    dia = _data(request.GET.get("date"))
     if dia is None:
         return HttpResponse(_("Data inválida."), status=400)
-    rechamadas = Recall.objects.filter(data=dia, patient__arquivado=False).select_related("patient")
+    rechamadas = Recall.objects.filter(date=dia, patient__arquivado=False).select_related("patient")
     return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})

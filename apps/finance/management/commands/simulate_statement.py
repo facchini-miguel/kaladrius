@@ -31,13 +31,13 @@ class Command(BaseCommand):
             "--clinic", dest="clinic", required=True, help="Name of the test clinic."
         )
         parser.add_argument(
-            "--account", dest="conta", default="Banco", help="Account name (default: Banco)."
+            "--account", dest="account", default="Banco", help="Account name (default: Banco)."
         )
         parser.add_argument(
             "--days", dest="dias", type=int, default=30, help="Days back (default 30)."
         )
 
-    def handle(self, *args, clinic, conta, dias, **options):
+    def handle(self, *args, clinic, account, dias, **options):
         alvo = Clinic.objects.filter(name=clinic).first()
         if alvo is None:
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
@@ -45,25 +45,25 @@ class Command(BaseCommand):
         hoje = timezone.localdate()
         inicio = hoje - datetime.timedelta(days=dias)
         with usar_clinica(alvo):
-            alvo_conta = FinancialAccount.objects.filter(name=conta).first()
+            alvo_conta = FinancialAccount.objects.filter(name=account).first()
             if alvo_conta is None:
-                raise CommandError(f"Conta “{conta}” não encontrada.")
+                raise CommandError(f"Conta “{account}” não encontrada.")
             linhas = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
-                conta=alvo_conta, estornado=False, data__range=(inicio, hoje)
+                account=alvo_conta, estornado=False, date__range=(inicio, hoje)
             ).select_related("parcela__entry"):
                 entrada = p.parcela.entry.kind == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
                     fora += p.amount if entrada else -p.amount
                     continue
-                data = min(p.data + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), hoje)
+                date = min(p.date + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), hoje)
                 description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
-                linhas.append((data, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
+                linhas.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
-                data = inicio + datetime.timedelta(days=sorteio.randint(0, dias))
+                date = inicio + datetime.timedelta(days=sorteio.randint(0, dias))
                 linhas.append(
-                    (data, amount, description, f"X{alvo_conta.pk}-{data:%Y%m%d}-{number}")
+                    (date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}")
                 )
             linhas.sort()
             saldo = dict(services.saldos_das_contas(ate=hoje)).get(alvo_conta)
@@ -75,12 +75,12 @@ class Command(BaseCommand):
         transacoes = "".join(
             "<STMTTRN>\n"
             f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
-            f"<DTPOSTED>{data:%Y%m%d}120000[-3:BRT]\n"
+            f"<DTPOSTED>{date:%Y%m%d}120000[-3:BRT]\n"
             f"<TRNAMT>{amount}\n"
             f"<FITID>{fitid}\n"
             f"<MEMO>{description}\n"
             "</STMTTRN>\n"
-            for data, amount, description, fitid in linhas
+            for date, amount, description, fitid in linhas
         )
         return (
             "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\n"

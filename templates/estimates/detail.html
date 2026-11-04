@@ -10,7 +10,7 @@
     <span class="text-body-secondary">
       <a href="{% url 'patients:record' orcamento.patient_id %}">{{ orcamento.patient.name }}</a>
       {% if orcamento.practitioner %} · {{ orcamento.practitioner.name }}{% endif %}
-      · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }}
+      · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }}
       · {% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
     </span>
   </div>

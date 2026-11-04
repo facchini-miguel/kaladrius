@@ -11,7 +11,7 @@
       {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if entry.patient_id %}<a href="{% url 'patients:record' entry.patient_id %}">{{ entry.patient.name }}</a>{% elif entry.fornecedor_id %}<a href="{% url 'finance:supplier' entry.fornecedor_id %}">{{ entry.pessoa }}</a>{% else %}{{ entry.pessoa }}{% endif %}
       · {{ entry.categoria }}{% if entry.centro_custo %} · {{ entry.centro_custo }}{% endif %}{% if entry.practitioner %} · {{ entry.practitioner.name }}{% endif %}
       {% if comissao %} · <a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato da comissão" %}</a>{% endif %}
-      · {{ entry.data|date:"SHORT_DATE_FORMAT" }}
+      · {{ entry.date|date:"SHORT_DATE_FORMAT" }}
     </span>
     {% if entry.cancelado %}<span class="badge text-bg-dark ms-1">{% translate "Cancelado" %}</span>{% endif %}
   </div>
@@ -61,7 +61,7 @@
         <td class="small">
           {% for pagamento in parcela.lista_pagamentos %}
           <div{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>
-            {{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }}
+            {{ pagamento.date|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }}
             {% if not pagar %}<a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a>{% endif %}
             {% if pode_excluir and not pagamento.estornado %}· <a class="text-danger" href="{% url 'finance:reverse_payment' pagamento.pk %}">{% translate "estornar" %}</a>{% endif %}
           </div>

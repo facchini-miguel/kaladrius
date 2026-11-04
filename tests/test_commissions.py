@@ -45,7 +45,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     }
 
 
-def receber(cenario, amount, practitioner, data=ONTEM, juros="0"):
+def receber(cenario, amount, practitioner, date=ONTEM, juros="0"):
     """A receivable for `valor` paid in full on `data`."""
     with usar_clinica(cenario["clinic"]):
         entry = services.criar_lancamento(
@@ -57,7 +57,7 @@ def receber(cenario, amount, practitioner, data=ONTEM, juros="0"):
             categoria=cenario["tratamento"],
             valor_total=Decimal(amount),
             parcelas=1,
-            primeiro_vencimento=data,
+            primeiro_vencimento=date,
             user=cenario["admin"],
         )
         return services.receber(
@@ -66,8 +66,8 @@ def receber(cenario, amount, practitioner, data=ONTEM, juros="0"):
             amount=Decimal(amount) + Decimal(juros),
             juros=Decimal(juros),
             forma="pix",
-            conta=cenario["caixa"],
-            data=data,
+            account=cenario["caixa"],
+            date=date,
         )
 
 
@@ -83,7 +83,7 @@ def test_calculo_inclui_juros_e_ignora_outros_profissionais(cenario):
     receber(cenario, "250.55", cenario["dra"])
     receber(cenario, "999.00", cenario["dr"])  # other practitioner
     receber(cenario, "500.00", None)  # no practitioner: no commission
-    receber(cenario, "80.00", cenario["dra"], data=HOJE)  # after the cut-off date
+    receber(cenario, "80.00", cenario["dra"], date=HOJE)  # after the cut-off date
     with usar_clinica(cenario["clinic"]):
         calculo = commissions.pendente(cenario["dra"], ONTEM)
     assert calculo["recebido"] == Decimal("360.55")
@@ -110,7 +110,7 @@ def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
     with usar_clinica(cenario["clinic"]):
         assert Commission.objects.count() == 1
     # Only new receipts make up the next one.
-    receber(cenario, "50.00", cenario["dra"], data=HOJE)
+    receber(cenario, "50.00", cenario["dra"], date=HOJE)
     with usar_clinica(cenario["clinic"]):
         assert commissions.pendente(cenario["dra"], HOJE)["amount"] == Decimal("20.00")
 
@@ -123,7 +123,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
         Practitioner.objects.filter(pk=cenario["dra"].pk).update(comissao_percentual=10)
         cenario["dra"].refresh_from_db()
         services.estornar(pagamento, motivo="Pix devolvido", user=cenario["admin"])
-    receber(cenario, "1000.00", cenario["dra"], data=HOJE)
+    receber(cenario, "1000.00", cenario["dra"], date=HOJE)
     with usar_clinica(cenario["clinic"]):
         calculo = commissions.pendente(cenario["dra"], HOJE)
         assert (calculo["bruta"], calculo["estornos"], calculo["amount"]) == (
@@ -137,7 +137,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
         assert [linha[c] for c in chaves] == [calculo[c] for c in chaves]
     # Nothing to pay while the deduction is larger: it waits for more receipts.
     pagar_comissao(cenario, cenario["dra"])
-    receber(cenario, "500.00", cenario["dra"], data=HOJE)
+    receber(cenario, "500.00", cenario["dra"], date=HOJE)
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinic"]):
         segunda = Commission.objects.latest("pk")
@@ -215,7 +215,7 @@ def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
     with usar_clinica(cenario["clinic"]):
         primeira = Commission.objects.get()
         services.estornar(pagamento, motivo="Pix devolvido", user=cenario["admin"])
-    receber(cenario, "300.00", cenario["dra"], data=HOJE)  # 120.00 - 40.00 in C2
+    receber(cenario, "300.00", cenario["dra"], date=HOJE)  # 120.00 - 40.00 in C2
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinic"]):
         segunda = Commission.objects.exclude(pk=primeira.pk).get()

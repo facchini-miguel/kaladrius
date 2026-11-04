@@ -53,9 +53,9 @@ class Employee(ModeloDaClinica):
 
     papel_documento = "funcionario"  # see apps/core/identification.py
 
-    def salario_em(self, data):
+    def salario_em(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""
-        salario = self.salarios.filter(desde__lte=data).order_by("-desde", "-pk").first()
+        salario = self.salarios.filter(desde__lte=date).order_by("-desde", "-pk").first()
         return salario.amount if salario else None
 
 

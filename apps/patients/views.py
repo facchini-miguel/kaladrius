@@ -92,7 +92,7 @@ def ficha(request, pk):
     )
     # LGPD: access to a patient's record (health data) is logged.
     registrar(AuditEntry.Acao.VISUALIZAR, patient)
-    rechamadas = Recall.objects.filter(patient=patient).order_by("-data")[:20]
+    rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
     contexto = {"patient": patient, "rechamadas": rechamadas}
     if pode(request, Modulo.AGENDA, Acao.VER):
         contexto["agendamentos"] = _historico(request, patient)

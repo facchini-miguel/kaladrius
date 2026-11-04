@@ -332,9 +332,9 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
                 parcela,
                 user=user,
                 amount=Decimal("150"),
-                data=datetime.date(2031, 3, 5),
+                date=datetime.date(2031, 3, 5),
                 forma="pix",
-                conta=FinancialAccount.objects.get(name="Caixa"),
+                account=FinancialAccount.objects.get(name="Caixa"),
             )
 
     with usar_clinica(clinica_a):

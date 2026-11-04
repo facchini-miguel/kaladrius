@@ -13,8 +13,8 @@
   {% include "medical_records/_header.html" with data_documento=atestado.created_at %}
   {% get_current_language as idioma %}
   {# Month names are capitalized in Django's Portuguese dates, but not in running text. #}
-  {% if idioma == "pt-br" %}{% with data_longa=atestado.data|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with data=data_longa %}{% endwith %}
-  {% else %}{% include "medical_records/_certificate_text.html" with data=atestado.data|date:"DATE_FORMAT" %}{% endif %}
+  {% if idioma == "pt-br" %}{% with data_longa=atestado.date|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with date=data_longa %}{% endwith %}
+  {% else %}{% include "medical_records/_certificate_text.html" with date=atestado.date|date:"DATE_FORMAT" %}{% endif %}
   {% if atestado.note %}<p>{{ atestado.note|linebreaksbr }}</p>{% endif %}
   {% include "medical_records/_signature.html" with practitioner=atestado.practitioner %}
 </div>

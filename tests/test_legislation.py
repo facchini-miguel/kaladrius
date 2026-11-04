@@ -75,7 +75,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="dinheiro",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
     admin = entrar(cenario, "admin")
     url = reverse("finance:receipt", args=[pagamento.pk])

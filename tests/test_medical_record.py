@@ -19,7 +19,7 @@ from apps.schedule.models import Appointment, AppointmentType
 pytestmark = pytest.mark.django_db
 
 ANAMNESE = {
-    "data": "2031-03-05T10:00",
+    "date": "2031-03-05T10:00",
     "queixa_principal": "Dor de cabeça há 3 dias",
     "historia": "Piora à tarde",
     "antecedentes": "Alergia a dipirona",
@@ -197,7 +197,7 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
         url,
         {
             "kind": "comparecimento",
-            "data": "2031-03-05",
+            "date": "2031-03-05",
             "hora_inicio": "10:00",
             "hora_fim": "11:00",
         },
@@ -205,10 +205,10 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     pagina = cenario["dra"].get(resposta.url).content.decode()
     assert "Maria Paciente" in pagina and "das 10:00 às 11:00" in pagina
 
-    sem_dias = cenario["dra"].post(url, {"kind": "afastamento", "data": "2031-03-05"})
+    sem_dias = cenario["dra"].post(url, {"kind": "afastamento", "date": "2031-03-05"})
     assert "Informe quantos dias" in sem_dias.content.decode()
     resposta = cenario["dra"].post(
-        url, {"kind": "afastamento", "data": "2031-03-05", "dias": "3", "note": "Repouso"}
+        url, {"kind": "afastamento", "date": "2031-03-05", "dias": "3", "note": "Repouso"}
     )
     pagina = cenario["dra"].get(resposta.url).content.decode()
     assert "3 dias de afastamento" in pagina and "Repouso" in pagina
@@ -359,7 +359,7 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
         reverse("medical_records:certificate_new", args=[visit.pk]),
         {
             "kind": "comparecimento",
-            "data": "2031-03-05",
+            "date": "2031-03-05",
             "hora_inicio": "10:00",
             "hora_fim": "11:00",
         },

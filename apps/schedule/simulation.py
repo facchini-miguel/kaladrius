@@ -106,14 +106,14 @@ def simular_rechamadas(clinic, sorteio, quantidade=80, dias_antes=30, dias_depoi
     hoje = timezone.localdate()
     novas = []
     for _ in range(quantidade):
-        data = hoje + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
+        date = hoje + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
         novas.append(
             Recall(
                 clinic=clinic,
                 patient=sorteio.choice(pacientes),
-                data=data,
+                date=date,
                 description=sorteio.choice(MOTIVOS_RECHAMADA),
-                concluida=data < hoje and sorteio.random() < 0.7,
+                concluida=date < hoje and sorteio.random() < 0.7,
             )
         )
     Recall.objects.bulk_create(novas)
@@ -158,7 +158,7 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     }
     criados = 0
     for _ in range(quantidade):
-        data = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
+        date = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.RECEBER,
@@ -168,9 +168,9 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
             centro_custo=centros["Atendimento"],
             practitioner=sorteio.choice(profissionais) if profissionais else None,
             valor_total=Decimal(sorteio.randrange(150, 3000, 10)),
-            data=data,
+            date=date,
             parcelas=sorteio.choice([1, 1, 2, 3, 4, 6]),
-            primeiro_vencimento=data,
+            primeiro_vencimento=date,
             user=user,
         )
         for parcela in entry.parcelas.all():
@@ -179,9 +179,9 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
                     parcela,
                     user=user,
                     amount=parcela.amount,
-                    data=parcela.vencimento,
+                    date=parcela.vencimento,
                     forma=sorteio.choice(formas),
-                    conta=sorteio.choice(contas),
+                    account=sorteio.choice(contas),
                 )
         criados += 1
     return criados, _simular_despesas(clinic, sorteio, contas, user, centros)
@@ -235,7 +235,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
                 "Atendimento" if categoria in DESPESAS_DO_ATENDIMENTO else "Administrativo"
             ],
             valor_total=amount * parcelas if meses else amount,
-            data=inicio,
+            date=inicio,
             parcelas=parcelas,
             primeiro_vencimento=inicio if meses else hoje - datetime.timedelta(days=20),
             user=user,
@@ -246,9 +246,9 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
                     parcela,
                     user=user,
                     amount=parcela.amount,
-                    data=parcela.vencimento,
+                    date=parcela.vencimento,
                     forma=sorteio.choice(formas),
-                    conta=sorteio.choice(contas),
+                    account=sorteio.choice(contas),
                 )
         criadas += 1
     return criadas
@@ -298,13 +298,13 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
     dentes = [d for linha in DENTES_PERMANENTES for d in linha]
     hoje = timezone.localdate()
     for _ in range(quantidade):
-        data = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
+        date = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
         orcamento = Estimate.objects.create(
             clinic=clinic,
             patient=sorteio.choice(pacientes),
             practitioner=sorteio.choice(profissionais) if profissionais else None,
-            data=data,
-            validade=data + datetime.timedelta(days=30),
+            date=date,
+            validade=date + datetime.timedelta(days=30),
             created_by=user,
         )
         for procedimento in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
@@ -323,7 +323,7 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
             services.aprovar(
                 orcamento,
                 parcelas=sorteio.choice([1, 2, 3, 4]),
-                primeiro_vencimento=data + datetime.timedelta(days=7),
+                primeiro_vencimento=date + datetime.timedelta(days=7),
                 categoria=categoria,
                 user=user,
             )

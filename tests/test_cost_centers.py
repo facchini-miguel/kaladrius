@@ -123,7 +123,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
                 user=None,
             )
             parcela = entry.parcelas.get()
-            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", conta=caixa)
+            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", account=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert relatorio["centros"]
     assert {name: str(total) for name, total in relatorio["despesas_por_centro"]} == {

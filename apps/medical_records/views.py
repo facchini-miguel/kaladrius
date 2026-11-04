@@ -73,7 +73,7 @@ def novo(request, practitioner, patient):
         existente = Visit.objects.filter(agendamento=agendamento).first()
         if existente is not None:
             return redirect("medical_records:visit", pk=existente.pk)
-    inicial = {"data": agendamento.inicio if agendamento else timezone.now()}
+    inicial = {"date": agendamento.inicio if agendamento else timezone.now()}
     profissionais = None
     if administra_prontuario(request):
         profissionais = Practitioner.objects.filter(active=True)
@@ -188,9 +188,9 @@ def imprimir(request, practitioner, pk):
 def atestado_novo(request, practitioner, pk):
     visit = _do_autor(request, practitioner, pk)
     agendamento = visit.agendamento
-    momento = timezone.localtime(agendamento.inicio if agendamento else visit.data)
+    momento = timezone.localtime(agendamento.inicio if agendamento else visit.date)
     inicial = {
-        "data": momento.date(),
+        "date": momento.date(),
         "hora_inicio": momento.time().replace(second=0, microsecond=0),
         "hora_fim": timezone.localtime(agendamento.fim).time() if agendamento else None,
     }

@@ -137,7 +137,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
                 user=None,
             )
             parcela = entry.parcelas.get()
-            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", conta=caixa)
+            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", account=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert [(n, name, str(v)) for n, name, v in relatorio["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),

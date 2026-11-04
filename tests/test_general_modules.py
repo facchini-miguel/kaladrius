@@ -111,7 +111,7 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, patient):
     with usar_clinica(clinica_a):
         Recall.objects.create(
-            patient=patient, data=datetime.date(2026, 11, 10), description="Retorno"
+            patient=patient, date=datetime.date(2026, 11, 10), description="Retorno"
         )
     configurar(clinica_a, sem(M.RECHAMADAS))
     assert admin.get(reverse("recalls:list")).status_code == 403

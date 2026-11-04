@@ -316,7 +316,7 @@ class Entry(ModeloDaClinica):
         db_column="profissional_id",
     )
     valor_total = models.DecimalField(_("valor total"), **DINHEIRO)
-    data = models.DateField(_("data"), default=timezone.localdate)
+    date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     cancelado = models.BooleanField(_("cancelado"), default=False)
     cancelado_em = models.DateTimeField(_("cancelado em"), null=True, blank=True)
@@ -345,7 +345,7 @@ class Entry(ModeloDaClinica):
         db_table = "financeiro_lancamento"
         verbose_name = _("lançamento")
         verbose_name_plural = _("lançamentos")
-        ordering = ["-data", "-pk"]
+        ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(
                 condition=Q(valor_total__gt=0), name="lancamento_valor_positivo"
@@ -454,7 +454,7 @@ class Payment(ModeloDaClinica):
     parcela = models.ForeignKey(
         Installment, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")
     )
-    data = models.DateField(_("data"), default=timezone.localdate)
+    date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
     amount = models.DecimalField(_("valor recebido"), **DINHEIRO, db_column="valor")
     juros = models.DecimalField(
         _("juros e multa"),
@@ -464,8 +464,12 @@ class Payment(ModeloDaClinica):
     )
     desconto = models.DecimalField(_("desconto"), default=ZERO, **DINHEIRO)
     forma = models.CharField(_("forma de pagamento"), max_length=15, choices=Forma.choices)
-    conta = models.ForeignKey(
-        FinancialAccount, on_delete=models.PROTECT, related_name="+", verbose_name=_("conta")
+    account = models.ForeignKey(
+        FinancialAccount,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("conta"),
+        db_column="conta_id",
     )
     # Card details only: never the card number.
     cartao_bandeira = models.CharField(_("bandeira do cartão"), max_length=30, blank=True)
@@ -518,7 +522,7 @@ class Payment(ModeloDaClinica):
         db_table = "financeiro_pagamento"
         verbose_name = _("pagamento")
         verbose_name_plural = _("pagamentos")
-        ordering = ["-data", "-pk"]
+        ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="pagamento_valor_positivo"),
             models.CheckConstraint(condition=Q(juros__gte=0), name="pagamento_juros_positivo"),
@@ -549,8 +553,12 @@ class CashRegister(ModeloDaClinica):
     reversals do not change a closed session.
     """
 
-    conta = models.ForeignKey(
-        FinancialAccount, on_delete=models.PROTECT, related_name="caixas", verbose_name=_("conta")
+    account = models.ForeignKey(
+        FinancialAccount,
+        on_delete=models.PROTECT,
+        related_name="caixas",
+        verbose_name=_("conta"),
+        db_column="conta_id",
     )
     aberto_em = models.DateTimeField(_("aberto em"), default=timezone.now)
     aberto_por = models.ForeignKey(
@@ -583,7 +591,7 @@ class CashRegister(ModeloDaClinica):
         ordering = ["-aberto_em"]
         constraints = [
             models.UniqueConstraint(
-                fields=["conta"],
+                fields=["account"],
                 condition=Q(fechado_em__isnull=True),
                 name="um_caixa_aberto_por_conta",
             ),
@@ -593,7 +601,7 @@ class CashRegister(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.conta} {timezone.localtime(self.aberto_em):%d/%m/%Y %H:%M}"
+        return f"{self.account} {timezone.localtime(self.aberto_em):%d/%m/%Y %H:%M}"
 
     @property
     def aberto(self):
@@ -768,11 +776,12 @@ class BookClosing(ModeloDaClinica):
 class StatementImport(ModeloDaClinica):
     """One OFX file imported into a bank account (0.20.0, decision 054)."""
 
-    conta = models.ForeignKey(
+    account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="importacoes",
         verbose_name=_("conta"),
+        db_column="conta_id",
     )
     arquivo = models.CharField(_("arquivo"), max_length=200)
     banco = models.CharField(_("código do banco"), max_length=20, blank=True)
@@ -806,7 +815,7 @@ class StatementImport(ModeloDaClinica):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.conta} {self.arquivo}"
+        return f"{self.account} {self.arquivo}"
 
 
 class BankTransaction(ModeloDaClinica):
@@ -817,11 +826,12 @@ class BankTransaction(ModeloDaClinica):
         CONCILIADA = "conciliada", _("Conciliada")
         IGNORADA = "ignorada", _("Ignorada")
 
-    conta = models.ForeignKey(
+    account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="transacoes",
         verbose_name=_("conta"),
+        db_column="conta_id",
     )
     importacao = models.ForeignKey(
         StatementImport,
@@ -830,7 +840,7 @@ class BankTransaction(ModeloDaClinica):
         verbose_name=_("importação"),
     )
     fitid = models.CharField(_("identificador no banco"), max_length=120)
-    data = models.DateField(_("data"))
+    date = models.DateField(_("data"), db_column="data")
     amount = models.DecimalField(
         _("valor"),
         help_text=_("Positivo: entrada; negativo: saída."),
@@ -879,9 +889,9 @@ class BankTransaction(ModeloDaClinica):
         db_table = "financeiro_transacaobancaria"
         verbose_name = _("transação bancária")
         verbose_name_plural = _("transações bancárias")
-        ordering = ["data", "pk"]
+        ordering = ["date", "pk"]
         constraints = [
-            models.UniqueConstraint(fields=["conta", "fitid"], name="transacao_unica_por_conta"),
+            models.UniqueConstraint(fields=["account", "fitid"], name="transacao_unica_por_conta"),
             models.CheckConstraint(
                 condition=~Q(pagamento__isnull=False, movimento__isnull=False),
                 name="transacao_um_vinculo",
@@ -889,7 +899,7 @@ class BankTransaction(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.data:%d/%m/%Y} {self.amount} {self.description}"
+        return f"{self.date:%d/%m/%Y} {self.amount} {self.description}"
 
     @property
     def entrada(self):

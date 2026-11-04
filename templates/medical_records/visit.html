@@ -38,7 +38,7 @@
 {% else %}
 <div class="card mb-3" style="max-width: 52rem;">
   <div class="card-body">
-    <div class="small text-body-secondary mb-2">{{ visit.data|date:"SHORT_DATETIME_FORMAT" }}</div>
+    <div class="small text-body-secondary mb-2">{{ visit.date|date:"SHORT_DATETIME_FORMAT" }}</div>
     {% for rotulo, value in campos %}
     <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>
     <div class="texto-clinico">{{ value|default:"—"|linebreaksbr }}</div>

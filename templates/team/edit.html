@@ -12,9 +12,9 @@
   <h2 class="h5">{% translate "Nesta clínica" %}</h2>
   {% include "includes/form.html" %}
 
-  {% if conta %}
+  {% if account %}
   <h2 class="h5 mt-4">{% translate "Dados da conta" %}</h2>
-  {% include "includes/form.html" with form=conta %}
+  {% include "includes/form.html" with form=account %}
   {% else %}
   <div class="alert alert-light border small">
     {% translate "Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail e senha só podem ser alterados por ela mesma ou pelo suporte." %}

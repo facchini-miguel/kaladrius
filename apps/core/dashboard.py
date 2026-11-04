@@ -90,12 +90,12 @@ def _agenda(request, hoje):
 
 def _rechamadas(hoje):
     pendentes = Recall.objects.filter(
-        concluida=False, data__lte=hoje, patient__arquivado=False
+        concluida=False, date__lte=hoje, patient__arquivado=False
     ).select_related("patient")
     return {
-        "lista": list(pendentes.order_by("data", "patient__name")[:LIMITE]),
+        "lista": list(pendentes.order_by("date", "patient__name")[:LIMITE]),
         "total": pendentes.count(),
-        "atrasadas": pendentes.filter(data__lt=hoje).count(),
+        "atrasadas": pendentes.filter(date__lt=hoje).count(),
     }
 
 
@@ -132,7 +132,7 @@ def _soma_dos_saldos(parcelas):
 
 def _recebimentos(hoje):
     recebidos = financeiro.pagamentos_validos().filter(
-        data=hoje, parcela__entry__kind=Entry.Tipo.RECEBER
+        date=hoje, parcela__entry__kind=Entry.Tipo.RECEBER
     )
     formas = rotulos_das_formas()
     por_forma = [
@@ -151,7 +151,7 @@ def _recebimentos(hoje):
         "a_receber": a_receber,
         "parcelas_a_receber": parcelas,
         "caixas": list(
-            CashRegister.objects.filter(fechado_em__isnull=True).select_related("conta")
+            CashRegister.objects.filter(fechado_em__isnull=True).select_related("account")
         ),
     }
 

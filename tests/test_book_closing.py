@@ -43,15 +43,15 @@ def parcela(clinica_a):
         return entry.parcelas.get()
 
 
-def receber(clinic, parcela, data, amount="100"):
+def receber(clinic, parcela, date, amount="100"):
     with usar_clinica(clinic):
         return services.receber(
             parcela,
             user=None,
             amount=Decimal(amount),
-            data=data,
+            date=date,
             forma="pix",
-            conta=FinancialAccount.objects.get(name="Caixa"),
+            account=FinancialAccount.objects.get(name="Caixa"),
         )
 
 
@@ -74,10 +74,10 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
     resposta = admin.post(
         reverse("finance:receive_installment", args=[parcela.pk]),
         {
-            "data": ONTEM.isoformat(),
+            "date": ONTEM.isoformat(),
             "amount": "100",
             "forma": "pix",
-            "conta": FinancialAccount.todos.get(clinic=clinica_a, name="Caixa").pk,
+            "account": FinancialAccount.todos.get(clinic=clinica_a, name="Caixa").pk,
         },
         follow=True,
     )

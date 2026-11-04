@@ -439,7 +439,7 @@ class _Importador:
                 Recall(
                     clinic=patient.clinic,
                     patient=patient,
-                    data=dia,
+                    date=dia,
                     description=description,
                     concluida=dia < self.hoje,
                 )
