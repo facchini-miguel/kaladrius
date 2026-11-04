@@ -18,7 +18,7 @@ from apps.legacy.dump import DumpInvalido, ler_tabelas
 from apps.legacy.importer import ImportacaoRecusada, _documento, importar
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento, TipoAtendimento
 from apps.staff.models import Folha, Funcionario, Salario
 
@@ -226,7 +226,7 @@ def test_agenda_e_rechamadas(importado):
     assert all(a.paciente is None for a in agendamentos)
     assert timezone.localtime(agendamentos[0].inicio).hour == 8
 
-    rechamadas = dados(clinica, Rechamada)
+    rechamadas = dados(clinica, Recall)
     assert [(r.paciente.nome, r.concluida) for r in rechamadas] == [
         ("João d'Ávila", True),  # past recall: considered handled
         ("Empresa Teste", False),
@@ -326,7 +326,7 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     descricoes = [a.descricao for a in agendamentos]
     assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
     assert not [d for d in descricoes if "Fulano" in d or "Até tarde" in d]
-    assert {r.descricao for r in dados(clinica, Rechamada)} <= set(RECHAMADAS)
+    assert {r.descricao for r in dados(clinica, Recall)} <= set(RECHAMADAS)
     nomes = [p.nome for p in dados(clinica, Profissional)]
     assert "Dr Teste" not in nomes and len(nomes) == len(antes["profissionais"])
 

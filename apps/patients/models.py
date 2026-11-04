@@ -41,7 +41,7 @@ class Paciente(ModeloDaClinica):
     sexo = models.CharField(_("sexo"), max_length=1, choices=Sexo.choices, blank=True)
     data_nascimento = models.DateField(_("data de nascimento"), null=True, blank=True)
     estado_civil = models.ForeignKey(
-        "referencias.EstadoCivil",
+        "referencias.MaritalStatus",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -71,7 +71,7 @@ class Paciente(ModeloDaClinica):
     # Brazil: 8 digits; other countries (decision 117): up to a 9-digit ZIP+4.
     cep = models.CharField(_("CEP"), max_length=9, blank=True)
     uf = models.ForeignKey(
-        "referencias.UF",
+        "referencias.State",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -79,7 +79,7 @@ class Paciente(ModeloDaClinica):
         verbose_name=_("UF"),
     )
     cidade = models.ForeignKey(
-        "referencias.Cidade",
+        "referencias.City",
         on_delete=models.PROTECT,
         null=True,
         blank=True,

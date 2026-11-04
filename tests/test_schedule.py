@@ -12,7 +12,7 @@ from apps.core.models import Papel
 from apps.finance.models import Pagamento
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule import services
 from apps.schedule.forms import AgendamentoForm
 from apps.schedule.models import Agendamento, TipoAtendimento
@@ -481,8 +481,8 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         ).exists()
         assert not novos.filter(paciente__arquivado=True).exists()
         assert novos.filter(tipo__nome="Ocupado").count() == 0
-        assert Rechamada.objects.count() == 80
-        assert not Rechamada.objects.filter(paciente__arquivado=True).exists()
+        assert Recall.objects.count() == 80
+        assert not Recall.objects.filter(paciente__arquivado=True).exists()
         # Cheques are not used anymore, not even in made-up data.
         assert Pagamento.objects.exists()
         assert not Pagamento.objects.filter(forma=Pagamento.Forma.CHEQUE).exists()
@@ -498,7 +498,7 @@ def test_simular_so_rechamadas(cenario):
     )
     with usar_clinica(cenario["clinica"]):
         assert not Agendamento.objects.exists()
-        assert Rechamada.objects.count() == 5
+        assert Recall.objects.count() == 5
 
 
 # --- Came / missed / cancelled (0.24.0) ---------------------------------------------------

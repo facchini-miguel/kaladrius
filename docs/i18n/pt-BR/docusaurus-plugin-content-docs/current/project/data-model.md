@@ -4,6 +4,8 @@ sidebar_position: 3
 
 # Modelo de dados
 
+Os nomes do código estão passando para o inglês (decisões 155 e 156): os modelos já citados aqui em inglês já passaram; os outros, e os campos, ainda têm os nomes em português. O banco mantém os nomes das tabelas e colunas.
+
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
 - O filtro é aplicado de forma centralizada (middleware + managers), não manualmente em cada tela.
@@ -55,10 +57,10 @@ O módulo "Usuários da clínica" é a tela **Cadastros > Equipe** (versão 0.8.
 | `Profissional` | clinica, nome, registro profissional (CRO/CRM…), cor, comissão (%, desde a 0.19), ativo, usuario (opcional) | `dentistas` |
 | `TipoAtendimento` | clinica, nome, cor, ativo | `agenda_cor` (Cirurgia, Prótese…) |
 | `Agendamento` | clinica, profissional, tipo, início e fim (data e hora), paciente (opcional), descrição, situação (agendado, compareceu, faltou, desmarcou; desde a 0.24), série (repetição), criado por | `agendax` |
-| `Rechamada` | clinica, paciente, data, descrição, concluída, criado por | `agenda` (is_rechamada) |
+| `Recall` (rechamada) | clinica, paciente, data, descrição, concluída, criado por | `agenda` (is_rechamada) |
 
 ### Referência (globais)
-`UF`, `Cidade` (fonte: IBGE), `Banco` (fonte: lista pública do Banco Central), `EstadoCivil`.
+`State` (UF), `City` (cidade; fonte: IBGE), `Bank` (banco; fonte: lista pública do Banco Central), `MaritalStatus` (estado civil), `Neighborhood` (bairro) e `Street` (logradouro), os conhecidos de cada cidade (decisão 100).
 
 ### Financeiro (versão 0.15.0)
 | Entidade | Campos principais | Observação |

@@ -38,6 +38,30 @@ def test_operacoes_que_apagam_ou_quebram_a_volta():
 
 
 @pytest.mark.django_db
+def test_renomear_mantendo_tabela_e_coluna_nao_alerta():
+    """Decision 156: renamed in the code only, the table and column kept, nothing reaches the
+    database; the previous version still works."""
+    antes = _antes(*CONVENIOS)
+    fixar = migrations.AlterModelTable("convenio", "convenios_convenio")
+    assert relatorio.alertas_da_operacao(fixar, "convenios", antes) == []
+    antes = relatorio._depois(fixar, "convenios", antes)
+    modelo = migrations.RenameModel("Convenio", "HealthPlan")
+    assert relatorio.alertas_da_operacao(modelo, "convenios", antes) == []
+    # The table follows the model's name when it is not pinned: the previous version breaks.
+    solto = migrations.RenameModel("Carteirinha", "Card")
+    assert _tipos(relatorio.alertas_da_operacao(solto, "convenios", antes)) == [
+        relatorio.QUEBRA_VOLTA
+    ]
+    antes = relatorio._depois(modelo, "convenios", antes)
+    coluna = migrations.AlterField(
+        "healthplan", "nome", models.CharField(max_length=100, db_column="nome")
+    )
+    antes = relatorio._depois(coluna, "convenios", antes)
+    campo = migrations.RenameField("healthplan", "nome", "name")
+    assert relatorio.alertas_da_operacao(campo, "convenios", antes) == []
+
+
+@pytest.mark.django_db
 def test_operacoes_sem_volta_e_campos_alterados():
     sem_volta = migrations.RunPython(lambda apps, schema: None)
     assert _alertas(sem_volta) == [relatorio.SEM_VOLTA]

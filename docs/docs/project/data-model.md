@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Data model
 
-Entity and field names are kept in Portuguese, as in the code. See the glossary in README.md.
+The code's names are being moved to English (decisions 155 and 156): the models named here in English already are; the others, and the fields, still have their Portuguese names. The database keeps its table and column names. See the glossary in README.md.
 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
@@ -57,10 +57,10 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 | `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
 | `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
 | `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, status (booked, came, missed, cancelled; since 0.24), series (recurrence), created by | `agendax` |
-| `Rechamada` (recall) | clinic, patient, date, description, done, created by | `agenda` (is_rechamada) |
+| `Recall` | clinic, patient, date, description, done, created by | `agenda` (is_rechamada) |
 
 ### Reference (global)
-`UF` (state), `Cidade` (city; source: IBGE), `Banco` (bank; source: Central Bank public list), `EstadoCivil` (marital status).
+`State`, `City` (source: IBGE), `Bank` (source: Central Bank public list), `MaritalStatus`, `Neighborhood` and `Street` (known ones per city, decision 100).
 
 ### Finance (version 0.15.0)
 | Entity | Main fields | Notes |

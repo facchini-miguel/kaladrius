@@ -7,17 +7,17 @@ from django.utils.http import urlencode
 from apps.core.ordering import chave_alfabetica
 from apps.core.permissions import Acao, Modulo, exige_permissao
 
-from .models import UF, Bairro, Banco, Cidade, Logradouro
+from .models import Bank, City, Neighborhood, State, Street
 
 POR_PAGINA = 50
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def cidades(request):
-    ufs = UF.objects.all()
+    ufs = State.objects.all()
     uf = request.GET.get("uf", "")
     busca = request.GET.get("q", "").strip()
-    cidades = Cidade.objects.select_related("uf")
+    cidades = City.objects.select_related("uf")
     if uf.isdecimal():
         cidades = cidades.filter(uf_id=int(uf))
     if busca:
@@ -39,7 +39,7 @@ def cidades(request):
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def bancos(request):
     busca = request.GET.get("q", "").strip()
-    bancos = Banco.objects.all()
+    bancos = Bank.objects.all()
     if busca:
         filtro = Q(nome__unaccent__icontains=busca) | Q(nome_curto__unaccent__icontains=busca)
         if busca.isdecimal():
@@ -54,7 +54,7 @@ def bancos(request):
 def opcoes_cidades(request):
     """<option> list of a state's cities, for chained UF → city selects (HTMX)."""
     uf = request.GET.get("uf", "")
-    cidades = Cidade.objects.filter(uf_id=int(uf)) if uf.isdecimal() else Cidade.objects.none()
+    cidades = City.objects.filter(uf_id=int(uf)) if uf.isdecimal() else City.objects.none()
     return render(request, "reference_data/city_options.html", {"cidades": cidades})
 
 
@@ -68,10 +68,8 @@ def sugestoes_endereco(request):
     bairros, logradouros = set(), set()
     if codigo.isdecimal():
         cidade = int(codigo)
-        bairros.update(Bairro.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
-        logradouros.update(
-            Logradouro.objects.filter(cidade_id=cidade).values_list("nome", flat=True)
-        )
+        bairros.update(Neighborhood.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
+        logradouros.update(Street.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
         da_clinica = Paciente.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
         for bairro, logradouro in da_clinica.distinct():
             bairros.add(bairro)

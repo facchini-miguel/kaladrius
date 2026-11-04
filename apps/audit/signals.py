@@ -26,7 +26,7 @@ from apps.finance.models import (
 from apps.health_plans.models import Carteirinha, Convenio
 from apps.patients.models import Paciente, PessoaRelacionada
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 from apps.schedule.models import Agendamento, TipoAtendimento
 from apps.staff.models import Folha, Funcionario, Salario
 
@@ -39,7 +39,7 @@ Usuario = get_user_model()
 AUDITADOS = [
     Paciente,
     Agendamento,
-    Rechamada,
+    Recall,
     Convenio,
     Carteirinha,
     PessoaRelacionada,

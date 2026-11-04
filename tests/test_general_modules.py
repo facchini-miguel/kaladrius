@@ -23,7 +23,7 @@ from apps.core.modules import configurar
 from apps.core.templatetags.formats import whatsapp
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 
 pytestmark = pytest.mark.django_db
 
@@ -109,13 +109,13 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, paciente):
     with usar_clinica(clinica_a):
-        Rechamada.objects.create(
+        Recall.objects.create(
             paciente=paciente, data=datetime.date(2026, 11, 10), descricao="Retorno"
         )
     configurar(clinica_a, sem(M.RECHAMADAS))
     assert admin.get(reverse("recalls:list")).status_code == 403
     with usar_clinica(clinica_a):
-        assert Rechamada.objects.count() == 1
+        assert Recall.objects.count() == 1
     configurar(clinica_a, MODULOS_GERAIS)
     assert "Retorno" in admin.get(reverse("recalls:list")).content.decode()
 

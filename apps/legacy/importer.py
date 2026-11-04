@@ -33,8 +33,8 @@ from apps.core.validators import (
 )
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
-from apps.reference_data.models import UF, Cidade, EstadoCivil
+from apps.recalls.models import Recall
+from apps.reference_data.models import City, MaritalStatus, State
 from apps.schedule.models import Agendamento, TipoAtendimento
 
 from .dump import ler_tabelas
@@ -149,9 +149,9 @@ class _Importador:
     def _cidades(self):
         """Legacy city id → (UF, IBGE city or None, legacy name)."""
         ufs_legado = {u["id"]: _texto(u["sigla"]).upper() for u in self.t.get("uf", [])}
-        ufs = {uf.sigla: uf for uf in UF.objects.all()}
+        ufs = {uf.sigla: uf for uf in State.objects.all()}
         ibge = defaultdict(dict)
-        for cidade in Cidade.objects.select_related("uf"):
+        for cidade in City.objects.select_related("uf"):
             ibge[cidade.uf.sigla][_chave(cidade.nome)] = cidade
         resultado = {}
         for linha in self.t.get("cidade", []):
@@ -162,7 +162,7 @@ class _Importador:
         return resultado
 
     def _estados_civis(self):
-        novos = {_chave(e.nome)[:5]: e for e in EstadoCivil.objects.all()}
+        novos = {_chave(e.nome)[:5]: e for e in MaritalStatus.objects.all()}
         return {
             linha["id"]: novos.get(_chave(linha["nome"])[:5])
             for linha in self.t.get("pessoas_estado_civil", [])
@@ -434,7 +434,7 @@ class _Importador:
                 descricao = descricao[:199] + "…"
             # The legacy system had no "done" flag: past recalls are considered handled.
             novas.append(
-                Rechamada(
+                Recall(
                     clinica=paciente.clinica,
                     paciente=paciente,
                     data=dia,
@@ -442,7 +442,7 @@ class _Importador:
                     concluida=dia < self.hoje,
                 )
             )
-        Rechamada.objects.bulk_create(novas)
+        Recall.objects.bulk_create(novas)
         self.relatorio.rechamadas = len(novas)
 
     def executar(self):

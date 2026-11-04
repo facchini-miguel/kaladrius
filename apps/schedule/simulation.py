@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from apps.patients.models import Paciente
 from apps.practitioners.models import Profissional
-from apps.recalls.models import Rechamada
+from apps.recalls.models import Recall
 
 from .models import Agendamento, TipoAtendimento
 from .services import momento
@@ -108,7 +108,7 @@ def simular_rechamadas(clinica, sorteio, quantidade=80, dias_antes=30, dias_depo
     for _ in range(quantidade):
         data = hoje + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
         novas.append(
-            Rechamada(
+            Recall(
                 clinica=clinica,
                 paciente=sorteio.choice(pacientes),
                 data=data,
@@ -116,7 +116,7 @@ def simular_rechamadas(clinica, sorteio, quantidade=80, dias_antes=30, dias_depo
                 concluida=data < hoje and sorteio.random() < 0.7,
             )
         )
-    Rechamada.objects.bulk_create(novas)
+    Recall.objects.bulk_create(novas)
     return len(novas)
 
 

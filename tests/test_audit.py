@@ -159,3 +159,22 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
     assert sorted(acao for acao, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]
     assert all(m == recente for acao, m in restantes if acao == Acao.LOGIN_FALHOU)
     assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]
+
+
+def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_a):
+    """Decision 156: the page shows the field's label, not its name in the code, so renaming a
+    field (or its column-keeping rename) does not change what the clinic reads."""
+    from apps.audit.models import RegistroAuditoria
+
+    admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
+    RegistroAuditoria.objects.create(
+        clinica=clinica_a,
+        acao=Acao.ALTERAR,
+        modelo="Paciente",
+        objeto_id="1",
+        alteracoes={"profissao": ["", "Professora"], "campo_que_saiu": [1, 2]},
+    )
+    pagina = admin_a.get(reverse("audit:list")).content.decode()
+    assert "<strong>nome</strong>: — → Maria" in pagina
+    assert "<strong>profissão</strong>:  → Professora" in pagina
+    assert "<strong>campo_que_saiu</strong>: 1 → 2" in pagina

@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from .models import Rechamada
+from .models import Recall
 
 
-@admin.register(Rechamada)
+@admin.register(Recall)
 class RechamadaAdmin(admin.ModelAdmin):
     list_display = ["data", "paciente", "descricao", "concluida", "clinica"]
     list_filter = ["clinica", "concluida"]

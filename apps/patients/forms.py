@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import countries, identification
 from apps.core.forms import FormularioBootstrap, campo_documento, documento_por_tipo
 from apps.core.validators import normalizar_telefone
-from apps.reference_data.models import UF, Cidade
+from apps.reference_data.models import City, State
 
 from .models import Paciente, PessoaRelacionada
 
@@ -36,8 +36,8 @@ def _campo_texto(label, max_length, **attrs):
 
 
 class PacienteForm(FormularioBootstrap, forms.ModelForm):
-    uf = UFField(queryset=UF.objects.all(), required=False, label=_("UF"))
-    cidade = CidadeField(queryset=Cidade.objects.none(), required=False, label=_("Cidade"))
+    uf = UFField(queryset=State.objects.all(), required=False, label=_("UF"))
+    cidade = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
     # The country's document (decision 121), typed with punctuation, stored compact.
     cpf_cnpj = campo_documento()
     cep = _campo_texto(_("CEP"), 10)
@@ -131,9 +131,9 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             self.fields[campo].widget.attrs.update({"list": lista, "autocomplete": "off"})
         uf_id = self.data.get(self.add_prefix("uf")) if self.is_bound else self.instance.uf_id
         self.fields["cidade"].queryset = (
-            Cidade.objects.filter(uf_id=int(uf_id))
+            City.objects.filter(uf_id=int(uf_id))
             if str(uf_id or "").isdecimal()
-            else Cidade.objects.none()
+            else City.objects.none()
         )
 
     def clean_cep(self):
