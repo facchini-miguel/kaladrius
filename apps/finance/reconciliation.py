@@ -35,7 +35,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
     importacao = StatementImport.objects.create(
-        clinica=conta.clinica,
+        clinic=conta.clinic,
         conta=conta,
         arquivo=nome_arquivo[:200],
         banco=extrato.banco,
@@ -45,7 +45,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         saldo=extrato.saldo,
         saldo_em=extrato.saldo_em or extrato.fim,
         ignoradas=extrato.ignoradas,
-        criado_por=usuario,
+        created_by=usuario,
     )
     existentes = set(
         BankTransaction.objects.filter(
@@ -56,7 +56,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
     BankTransaction.objects.bulk_create(
         [
             BankTransaction(
-                clinica=conta.clinica,
+                clinic=conta.clinic,
                 conta=conta,
                 importacao=importacao,
                 fitid=t.fitid,
@@ -119,7 +119,7 @@ def candidatos(transacoes):
         CashMovement.objects.filter(
             outra_conta_id__in=contas,
             transacao__isnull=True,
-            criado_em__date__range=(de, ate),
+            created_at__date__range=(de, ate),
         ).select_related("caixa__conta")
     )
     resultado = {}
@@ -143,7 +143,7 @@ def candidatos(transacoes):
                     )
                 )
         for m in movimentos:
-            data = timezone.localtime(m.criado_em).date()
+            data = timezone.localtime(m.created_at).date()
             if (
                 m.outra_conta_id == t.conta_id
                 and m.valor == valor
@@ -217,7 +217,7 @@ def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, usuario)
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
     lancamento = services.criar_lancamento(
-        clinica=transacao.clinica,
+        clinic=transacao.clinic,
         tipo=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
         pessoa=pessoa or descricao,
         descricao=descricao,

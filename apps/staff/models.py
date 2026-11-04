@@ -32,8 +32,8 @@ class Employee(ModeloDaClinica):
     telefone = models.CharField(_("telefone"), max_length=11, blank=True)
     observacoes = models.TextField(_("observações"), blank=True)
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "pessoal_funcionario"
@@ -42,7 +42,7 @@ class Employee(ModeloDaClinica):
         ordering = ["nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "cpf"],
+                fields=["clinic", "cpf"],
                 condition=~Q(cpf=""),
                 name="funcionario_cpf_unico_por_clinica",
             ),
@@ -70,15 +70,16 @@ class Salary(ModeloDaClinica):
     )
     valor = models.DecimalField(_("salário"), **DINHEIRO)
     desde = models.DateField(_("desde"))
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "pessoal_salario"
@@ -127,7 +128,7 @@ class Payroll(ModeloDaClinica):
         ordering = ["-competencia", "funcionario__nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "funcionario", "competencia"], name="folha_unica_por_mes"
+                fields=["clinic", "funcionario", "competencia"], name="folha_unica_por_mes"
             ),
             models.CheckConstraint(condition=Q(competencia__day=1), name="folha_competencia_dia_1"),
         ]
@@ -137,9 +138,9 @@ class Payroll(ModeloDaClinica):
 
     def save(self, *args, **kwargs):
         self._conferir_clinica()
-        if self.clinica_id is None:  # without isolation (commands)
-            self.clinica_id = self.funcionario.clinica_id
-        if self.funcionario.clinica_id != self.clinica_id:
+        if self.clinic_id is None:  # without isolation (commands)
+            self.clinic_id = self.funcionario.clinic_id
+        if self.funcionario.clinic_id != self.clinic_id:
             raise ClinicaDiferente("The employee must be of this clinic.")
         super().save(*args, **kwargs)
 

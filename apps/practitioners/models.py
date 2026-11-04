@@ -42,18 +42,18 @@ class Practitioner(ModeloDaClinica):
         help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
     )
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "profissionais_profissional"
         verbose_name = _("profissional")
         verbose_name_plural = _("profissionais")
         ordering = ["nome"]
-        indexes = [models.Index(fields=["clinica", "nome"], name="profissional_clinica_nome")]
+        indexes = [models.Index(fields=["clinic", "nome"], name="profissional_clinica_nome")]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "usuario"],
+                fields=["clinic", "usuario"],
                 condition=models.Q(usuario__isnull=False),
                 name="profissional_usuario_unico_por_clinica",
             ),

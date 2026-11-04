@@ -8,12 +8,12 @@
   <div class="card mb-4">
     <div class="card-body">
       <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
-      {% if clinica %}
-      <div class="fs-5 fw-semibold">{{ clinica.nome }}</div>
-      {% if clinica.documento %}<div class="small">{{ clinica.sigla_documento }}: {{ clinica.documento_escrito }}</div>{% endif %}
-      {% if clinica.email %}<div><a href="mailto:{{ clinica.email }}">{{ clinica.email }}</a></div>{% endif %}
-      {% if clinica.telefone %}<div>{{ clinica.telefone }}</div>{% endif %}
-      {% if clinica.endereco %}<div class="small">{{ clinica.endereco }}</div>{% endif %}
+      {% if clinic %}
+      <div class="fs-5 fw-semibold">{{ clinic.nome }}</div>
+      {% if clinic.documento %}<div class="small">{{ clinic.sigla_documento }}: {{ clinic.documento_escrito }}</div>{% endif %}
+      {% if clinic.email %}<div><a href="mailto:{{ clinic.email }}">{{ clinic.email }}</a></div>{% endif %}
+      {% if clinic.telefone %}<div>{{ clinic.telefone }}</div>{% endif %}
+      {% if clinic.endereco %}<div class="small">{{ clinic.endereco }}</div>{% endif %}
       {% else %}
       <div>{% translate "Fale com a clínica que atende você." %}</div>
       {% endif %}

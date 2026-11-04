@@ -37,7 +37,7 @@ def tipo_editar(request, pk):
 
 
 def _formulario(request, tipo):
-    form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinica=request.clinica)
+    form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
@@ -122,13 +122,13 @@ def calendario(request):
     )
     if profissional is not None:
         request.session[SESSAO_PROFISSIONAL] = profissional.pk
-    clinica = request.clinica
+    clinic = request.clinic
     ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
     configuracao = {
         "profissional": profissional.pk if profissional else None,
-        "inicio": clinica.agenda_inicio.strftime("%H:%M:%S"),
-        "fim": clinica.agenda_fim.strftime("%H:%M:%S"),
-        "intervalo": clinica.agenda_intervalo,
+        "inicio": clinic.agenda_inicio.strftime("%H:%M:%S"),
+        "fim": clinic.agenda_fim.strftime("%H:%M:%S"),
+        "intervalo": clinic.agenda_intervalo,
         "data": request.GET.get("data") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "idioma": get_language(),
@@ -220,7 +220,7 @@ def novo(request):
         request.POST or None,
         initial=inicial,
         instance=Appointment(),
-        clinica=request.clinica,
+        clinic=request.clinic,
         profissionais=services.profissionais_visiveis(request),
     )
     if request.method == "POST" and form.is_valid():
@@ -246,7 +246,7 @@ def editar(request, pk):
     form = AgendamentoForm(
         request.POST or None,
         instance=agendamento,
-        clinica=request.clinica,
+        clinic=request.clinic,
         profissionais=services.profissionais_visiveis(request),
     )
     if request.method == "POST" and form.is_valid():
@@ -285,7 +285,7 @@ def situacao(request, pk):
             agendamento.refresh_from_db()
             form = AgendamentoForm(
                 instance=agendamento,
-                clinica=request.clinica,
+                clinic=request.clinic,
                 profissionais=services.profissionais_visiveis(request),
             )
             contexto = {"form": form, "agendamento": agendamento, "erro_situacao": erro.messages[0]}

@@ -23,13 +23,13 @@ from tests.test_core import dados_clinica
 pytestmark = pytest.mark.django_db
 
 
-def no_pais(clinica, pais, **extra):
-    clinica.pais = pais
-    clinica.fuso_horario = extra.pop("fuso", countries.PAISES[pais].fusos[0])
+def no_pais(clinic, pais, **extra):
+    clinic.pais = pais
+    clinic.fuso_horario = extra.pop("fuso", countries.PAISES[pais].fusos[0])
     for campo, valor in extra.items():
-        setattr(clinica, campo, valor)
-    clinica.save()
-    return clinica
+        setattr(clinic, campo, valor)
+    clinic.save()
+    return clinic
 
 
 # --- Phones ----------------------------------------------------------------------

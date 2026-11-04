@@ -10,7 +10,7 @@
 </div>
 <div class="recibo bg-white border rounded p-4" style="max-width: 48rem;">
   {% translate "ATESTADO" as titulo_documento %}
-  {% include "medical_records/_header.html" with data_documento=atestado.criado_em %}
+  {% include "medical_records/_header.html" with data_documento=atestado.created_at %}
   {% get_current_language as idioma %}
   {# Month names are capitalized in Django's Portuguese dates, but not in running text. #}
   {% if idioma == "pt-br" %}{% with data_longa=atestado.data|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with data=data_longa %}{% endwith %}

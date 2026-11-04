@@ -55,11 +55,11 @@ def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
 
 
 def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissional):  # noqa: F811
-    clinica = cenario["clinica"]
-    dra = criar_profissional(clinica, "Dra. Fictícia", registro="CRO-SP 12345")
-    with usar_clinica(clinica):
+    clinic = cenario["clinic"]
+    dra = criar_profissional(clinic, "Dra. Fictícia", registro="CRO-SP 12345")
+    with usar_clinica(clinic):
         lancamento = services.criar_lancamento(
-            clinica=clinica,
+            clinic=clinic,
             tipo=Entry.Tipo.RECEBER,
             paciente=cenario["paciente"],
             descricao="Limpeza",
@@ -82,18 +82,18 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     pagina = admin.get(url).content.decode()
     assert "Dra. Fictícia (CRO-SP 12345)" in pagina
     assert "documento fiscal" not in pagina
-    clinica.pais = "MX"
-    clinica.save()
+    clinic.pais = "MX"
+    clinic.save()
     pagina = admin.get(url).content.decode()
     assert "Este recibo não substitui o documento fiscal (CFDI)." in pagina
 
 
 def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
-    clinica = cenario["clinica"]
-    clinica.pais = "CL"
-    clinica.save()
+    clinic = cenario["clinic"]
+    clinic.pais = "CL"
+    clinic.save()
     paciente = cenario["paciente"]
-    with usar_clinica(clinica):
+    with usar_clinica(clinic):
         paciente.arquivado = True
         paciente.save()
     pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[paciente.pk]))

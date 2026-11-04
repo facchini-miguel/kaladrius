@@ -30,7 +30,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
         paciente = Patient.objects.get(nome="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
     assert criacao.usuario_nome == "admin_a"
-    assert criacao.clinica_id == clinica_a.pk
+    assert criacao.clinic_id == clinica_a.pk
     assert criacao.objeto_id == str(paciente.pk)
     assert criacao.alteracoes["nome"] == [None, "Maria"]
     assert criacao.ip == "127.0.0.1"
@@ -168,7 +168,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
 
     admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
     AuditEntry.objects.create(
-        clinica=clinica_a,
+        clinic=clinica_a,
         acao=Acao.ALTERAR,
         modelo="Paciente",
         objeto_id="1",

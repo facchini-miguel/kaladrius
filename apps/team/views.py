@@ -22,14 +22,14 @@ from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_excl
 def _vinculo(request, pk):
     """A membership of the current clinic (404 for other clinics)."""
     return get_object_or_404(
-        Membership.objects.select_related("usuario"), pk=pk, clinica=request.clinica
+        Membership.objects.select_related("usuario"), pk=pk, clinic=request.clinic
     )
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.VER)
 def lista(request):
     vinculos = (
-        Membership.objects.filter(clinica=request.clinica)
+        Membership.objects.filter(clinic=request.clinic)
         .select_related("usuario")
         .order_by("-ativo", "usuario__first_name", "usuario__username")
     )
@@ -38,7 +38,7 @@ def lista(request):
 
 @exige_permissao(Modulo.USUARIOS, Acao.CRIAR)
 def novo(request):
-    form = NovoMembroForm(request.POST or None, clinica=request.clinica)
+    form = NovoMembroForm(request.POST or None, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             usuario = form.save()
@@ -53,7 +53,7 @@ def novo(request):
 def editar(request, pk):
     vinculo = _vinculo(request, pk)
     usuario = vinculo.usuario
-    exclusiva = conta_exclusiva(usuario, request.clinica)
+    exclusiva = conta_exclusiva(usuario, request.clinic)
     dados = request.POST or None
     form = VinculoForm(dados, instance=vinculo, editor=request.user, prefix="vinculo")
     conta = ContaForm(dados, instance=usuario, prefix="conta") if exclusiva else None
@@ -85,7 +85,7 @@ def senha(request, pk):
     usuario = vinculo.usuario
     if usuario == request.user:
         return redirect("change_password")
-    if not conta_exclusiva(usuario, request.clinica):
+    if not conta_exclusiva(usuario, request.clinic):
         messages.error(
             request,
             _(
@@ -115,7 +115,7 @@ def duas_etapas(request, pk):
     if (
         request.method == "POST"
         and usuario != request.user
-        and conta_exclusiva(usuario, request.clinica)
+        and conta_exclusiva(usuario, request.clinic)
     ):
         conta_servicos.desativar(usuario)
         registrar(

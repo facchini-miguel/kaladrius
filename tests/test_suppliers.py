@@ -28,8 +28,8 @@ def dados(**extra):
     return {"tipo": "PJ", "nome": "Laboratório Fictício", "ativo": "on", **extra}
 
 
-def despesa(clinica, **extra):
-    with usar_clinica(clinica):
+def despesa(clinic, **extra):
+    with usar_clinica(clinic):
         categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
     return {
         "fornecedor": "",

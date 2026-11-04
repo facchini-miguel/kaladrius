@@ -48,7 +48,7 @@
     <tbody>
       {% for pagamento in resumo.pagamentos %}
       <tr>
-        <td class="text-nowrap">{{ pagamento.criado_em|date:"TIME_FORMAT" }}</td>
+        <td class="text-nowrap">{{ pagamento.created_at|date:"TIME_FORMAT" }}</td>
         <td><a href="{% url 'finance:entry' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.descricao }}</a></td>
         <td>{{ pagamento.get_forma_display }}</td>
         <td class="text-end text-nowrap {% if pagamento.parcela.lancamento.tipo == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.valor|moeda }}</td>
@@ -56,7 +56,7 @@
       {% endfor %}
       {% for movimento in resumo.movimentos %}
       <tr>
-        <td class="text-nowrap">{{ movimento.criado_em|date:"TIME_FORMAT" }}</td>
+        <td class="text-nowrap">{{ movimento.created_at|date:"TIME_FORMAT" }}</td>
         <td>{{ movimento.get_tipo_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.nome }}){% endif %}</td>
         <td>—</td>
         <td class="text-end text-nowrap {% if movimento.tipo == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.valor|moeda }}</td>

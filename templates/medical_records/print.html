@@ -18,7 +18,7 @@
   <div>{{ valor|linebreaksbr }}</div>
   {% endif %}{% endfor %}
   {% for adendo in adendos %}
-  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ adendo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</h2>
+  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</h2>
   <div>{{ adendo.texto|linebreaksbr }}</div>
   {% endfor %}
   <p class="small text-body-secondary mt-3">{% blocktranslate with momento=atendimento.finalizado_em|date:"SHORT_DATETIME_FORMAT" %}Finalizado no sistema em {{ momento }}.{% endblocktranslate %}</p>

@@ -18,19 +18,19 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
         paciente = Patient.objects.create(nome="João Rechamada")
     return {
-        "clinica": clinica_a,
+        "clinic": clinica_a,
         "paciente": paciente,
         "cliente": cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO)),
     }
 
 
-def rechamadas(clinica):
-    with usar_clinica(clinica):
+def rechamadas(clinic):
+    with usar_clinica(clinic):
         return list(Recall.objects.order_by("data"))
 
 
-def criar(clinica, paciente, data=DIA, **extra):
-    with usar_clinica(clinica):
+def criar(clinic, paciente, data=DIA, **extra):
+    with usar_clinica(clinic):
         return Recall.objects.create(paciente=paciente, data=data, descricao="Revisão", **extra)
 
 
@@ -44,9 +44,9 @@ def test_cria_rechamada(cenario):
         },
     )
     assert resposta.status_code == 302
-    [rechamada] = rechamadas(cenario["clinica"])
+    [rechamada] = rechamadas(cenario["clinic"])
     assert rechamada.descricao == "Revisão 6 meses" and not rechamada.concluida
-    assert rechamada.criado_por.username == "recepcao"
+    assert rechamada.created_by.username == "recepcao"
 
 
 def test_paciente_e_obrigatorio(cenario):
@@ -76,7 +76,7 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
 
 
 def test_concluir_e_reabrir(cenario):
-    rechamada = criar(cenario["clinica"], cenario["paciente"])
+    rechamada = criar(cenario["clinic"], cenario["paciente"])
     url = reverse("recalls:complete", args=[rechamada.pk])
     assert cenario["cliente"].get(url).status_code == 405
     cenario["cliente"].post(url)
@@ -88,12 +88,12 @@ def test_concluir_e_reabrir(cenario):
 
 
 def test_filtros_da_lista(cenario):
-    clinica, paciente = cenario["clinica"], cenario["paciente"]
-    criar(clinica, paciente, DIA)
-    criar(clinica, paciente, DIA + datetime.timedelta(days=30), concluida=True)
-    with usar_clinica(clinica):
+    clinic, paciente = cenario["clinic"], cenario["paciente"]
+    criar(clinic, paciente, DIA)
+    criar(clinic, paciente, DIA + datetime.timedelta(days=30), concluida=True)
+    with usar_clinica(clinic):
         outro = Patient.objects.create(nome="Ana Outra")
-    criar(clinica, outro, DIA + datetime.timedelta(days=60))
+    criar(clinic, outro, DIA + datetime.timedelta(days=60))
     url = reverse("recalls:list")
 
     def nomes(**params):
@@ -107,15 +107,15 @@ def test_filtros_da_lista(cenario):
 
 def test_situacao_atrasada(cenario):
     ontem = timezone.localdate() - datetime.timedelta(days=1)
-    criar(cenario["clinica"], cenario["paciente"], ontem)
+    criar(cenario["clinic"], cenario["paciente"], ontem)
     assert "Atrasada" in cenario["cliente"].get(reverse("recalls:list")).content.decode()
 
 
 def test_resumo_e_lista_do_dia_para_a_agenda(cenario):
-    clinica, paciente = cenario["clinica"], cenario["paciente"]
-    criar(clinica, paciente, DIA)
-    criar(clinica, paciente, DIA)
-    criar(clinica, paciente, DIA, concluida=True)
+    clinic, paciente = cenario["clinic"], cenario["paciente"]
+    criar(clinic, paciente, DIA)
+    criar(clinic, paciente, DIA)
+    criar(clinic, paciente, DIA, concluida=True)
     resumo = cenario["cliente"].get(
         reverse("recalls:summary"),
         {"start": "2031-03-03T00:00:00-03:00", "end": "2031-03-10T00:00:00-03:00"},
@@ -126,7 +126,7 @@ def test_resumo_e_lista_do_dia_para_a_agenda(cenario):
 
 
 def test_agenda_recebe_as_urls_de_rechamadas(cenario, criar_profissional):
-    criar_profissional(cenario["clinica"], "Dra. A")
+    criar_profissional(cenario["clinic"], "Dra. A")
     urls = cenario["cliente"].get(reverse("schedule:calendar")).context["configuracao"]["urls"]
     assert urls["rechamadas"] == reverse("recalls:summary")
 
@@ -148,15 +148,15 @@ def test_isolamento(cenario, clinica_b):
 
 @pytest.mark.parametrize(("papel", "exclui"), [(Papel.RECEPCAO, True), (Papel.PROFISSIONAL, False)])
 def test_permissao_de_excluir(papel, exclui, cenario, criar_usuario, cliente_de):
-    rechamada = criar(cenario["clinica"], cenario["paciente"])
-    cliente = cliente_de(criar_usuario("usuario", cenario["clinica"], papel))
+    rechamada = criar(cenario["clinic"], cenario["paciente"])
+    cliente = cliente_de(criar_usuario("usuario", cenario["clinic"], papel))
     resposta = cliente.post(reverse("recalls:delete", args=[rechamada.pk]))
     assert resposta.status_code == (302 if exclui else 403)
 
 
 def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario, cliente_de):
-    rechamada = criar(cenario["clinica"], cenario["paciente"])
-    admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
+    rechamada = criar(cenario["clinic"], cenario["paciente"])
+    admin = cliente_de(criar_usuario("admin", cenario["clinic"], Papel.ADMIN))
     admin.post(reverse("patients:archive", args=[cenario["paciente"].pk]))
     assert "Maria" not in admin.get(reverse("recalls:list")).content.decode()
     dia = admin.get(reverse("recalls:today"), {"data": rechamada.data.isoformat()})
@@ -164,7 +164,7 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 
     # Permanent deletion takes the recalls with it.
     admin.post(reverse("patients:delete", args=[cenario["paciente"].pk]))
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert not Recall.objects.exists()
 
 
@@ -172,8 +172,8 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 
 
 def test_aniversariantes_do_mes(cenario):
-    clinica = cenario["clinica"]
-    with usar_clinica(clinica):
+    clinic = cenario["clinic"]
+    with usar_clinica(clinic):
         Patient.objects.create(nome="Março 20", data_nascimento=datetime.date(1990, 3, 20))
         Patient.objects.create(nome="Março 2", data_nascimento=datetime.date(2000, 3, 2))
         Patient.objects.create(
@@ -199,4 +199,4 @@ def test_paciente_adulterado_no_formulario_mostra_erro(cenario):
     )
     assert resposta.status_code == 200
     assert resposta.context["form"].errors["paciente"]
-    assert rechamadas(cenario["clinica"]) == []
+    assert rechamadas(cenario["clinic"]) == []

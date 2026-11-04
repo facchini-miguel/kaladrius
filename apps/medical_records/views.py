@@ -56,7 +56,7 @@ def _auditar(acao, atendimento, campos):
 def _finalizar(request, atendimento):
     atendimento.finalizado_em = timezone.now()
     atendimento.finalizado_por = request.user
-    atendimento.save(update_fields=["finalizado_em", "finalizado_por", "alterado_em"])
+    atendimento.save(update_fields=["finalizado_em", "finalizado_por", "updated_at"])
     registrar(Acao.ALTERAR, atendimento, alteracoes={"finalizado": [None, "sim"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
@@ -84,7 +84,7 @@ def novo(request, profissional, paciente):
         atendimento.paciente = paciente
         atendimento.profissional = form.cleaned_data.get("profissional") or profissional
         atendimento.agendamento = agendamento
-        atendimento.criado_por = request.user
+        atendimento.created_by = request.user
         atendimento.save()
         _auditar(
             Acao.CRIAR, atendimento, [c for c in CAMPOS_DA_ANAMNESE if getattr(atendimento, c)]
@@ -201,7 +201,7 @@ def atestado_novo(request, profissional, pk):
         atestado = form.save(commit=False)
         atestado.atendimento = atendimento
         atestado.profissional = atendimento.profissional
-        atestado.criado_por = request.user
+        atestado.created_by = request.user
         atestado.save()
         registrar(
             Acao.CRIAR,
@@ -229,7 +229,7 @@ def receita_nova(request, profissional, pk):
         receita = form.save(commit=False)
         receita.atendimento = atendimento
         receita.profissional = atendimento.profissional
-        receita.criado_por = request.user
+        receita.created_by = request.user
         receita.save()
         registrar(Acao.CRIAR, receita, alteracoes={"prescricao": [None, SIGILO]})
         messages.success(request, _("Receita emitida."))
@@ -273,7 +273,7 @@ def adendo(request, profissional, pk):
         adendo = form.save(commit=False)
         adendo.atendimento = atendimento
         adendo.profissional = profissional or atendimento.profissional
-        adendo.criado_por = request.user
+        adendo.created_by = request.user
         adendo.save()
         registrar(Acao.CRIAR, adendo, alteracoes={"texto": [None, SIGILO]})
         messages.success(request, _("Adendo incluído."))
@@ -290,7 +290,7 @@ def pedido_de_exames_novo(request, profissional, pk):
         pedido = form.save(commit=False)
         pedido.atendimento = atendimento
         pedido.profissional = atendimento.profissional
-        pedido.criado_por = request.user
+        pedido.created_by = request.user
         pedido.save()
         registrar(
             Acao.CRIAR,
@@ -340,7 +340,7 @@ def anexo_enviar(request, profissional, pk):
             tamanho=arquivo.size,
             conteudo=arquivo.read(),
             profissional=profissional or atendimento.profissional,
-            criado_por=request.user,
+            created_by=request.user,
         )
         registrar(
             Acao.CRIAR,
@@ -374,7 +374,7 @@ def anexo_remover(request, profissional, pk):
     anexo = get_object_or_404(
         Attachment.objects.select_related("atendimento").defer("conteudo"), pk=pk
     )
-    quem_enviou = anexo.criado_por_id == request.user.pk
+    quem_enviou = anexo.created_by_id == request.user.pk
     if anexo.atendimento.finalizado or not (quem_enviou or administra_prontuario(request)):
         raise PermissionDenied
     atendimento = anexo.atendimento

@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--clinic", dest="clinica", required=True, help="Name of the test clinic."
+            "--clinic", dest="clinic", required=True, help="Name of the test clinic."
         )
         parser.add_argument(
             "--recalls", dest="rechamadas", type=int, default=80, help="How many recalls."
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         )
 
     def handle(
-        self, *args, clinica, rechamadas, sem_agenda, lancamentos, orcamentos, confirmar, **options
+        self, *args, clinic, rechamadas, sem_agenda, lancamentos, orcamentos, confirmar, **options
     ):
         if not confirmar:
             raise CommandError(
@@ -64,9 +64,9 @@ class Command(BaseCommand):
             )
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), sem_isolamento():
-            alvo = Clinic.objects.filter(nome=clinica).first()
+            alvo = Clinic.objects.filter(nome=clinic).first()
             if alvo is None:
-                raise CommandError(f"Clínica “{clinica}” não encontrada.")
+                raise CommandError(f"Clínica “{clinic}” não encontrada.")
             agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)
             criadas = simular_rechamadas(alvo, sorteio, quantidade=rechamadas)
             criados = simular_orcamentos(alvo, sorteio, quantidade=orcamentos) if orcamentos else 0
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                 simular_financeiro(alvo, sorteio, quantidade=lancamentos) if lancamentos else (0, 0)
             )
             comissoes = simular_comissoes(alvo, sorteio)
-        self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinica}”:"))
+        self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinic}”:"))
         self.stdout.write(f"  Agendamentos fictícios: {agendamentos}")
         self.stdout.write(f"  Rechamadas fictícias: {criadas}")
         self.stdout.write(f"  Lançamentos a receber fictícios: {receber}")

@@ -75,10 +75,8 @@ AUDITADOS = [
 IGNORADOS = {
     "password",
     "last_login",
-    "criado_em",
-    "criada_em",
-    "alterado_em",
-    "alterada_em",
+    "created_at",
+    "updated_at",
     "ultima_versao_vista",
     "idioma",
 }

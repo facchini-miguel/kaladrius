@@ -24,7 +24,7 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinic", dest="clinica", required=True, help="Clinic name.")
+        parser.add_argument("--clinic", dest="clinic", required=True, help="Clinic name.")
         parser.add_argument(
             "--practitioner",
             dest="profissional",
@@ -62,16 +62,16 @@ class Command(BaseCommand):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
-            clinica = Clinic.objects.get(nome=options["clinica"])
+            clinic = Clinic.objects.get(nome=options["clinic"])
         except Clinic.DoesNotExist as erro:
-            raise CommandError(f"Clínica não encontrada: {options['clinica']}") from erro
+            raise CommandError(f"Clínica não encontrada: {options['clinic']}") from erro
 
-        recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinica, Papel.RECEPCAO)
+        recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinic, Papel.RECEPCAO)
         profissional = self._conta(
-            PROFISSIONAL, "Profissional", senhas[1], clinica, Papel.PROFISSIONAL
+            PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
         )
-        outras = [self._conta(u, nome, senha, clinica, papel) for u, nome, senha, papel in extras]
-        with usar_clinica(clinica):
+        outras = [self._conta(u, nome, senha, clinic, papel) for u, nome, senha, papel in extras]
+        with usar_clinica(clinic):
             cadastro = Practitioner.objects.filter(nome=options["profissional"]).first()
             if cadastro is None:
                 if not options["criar_profissional"]:
@@ -95,7 +95,7 @@ class Command(BaseCommand):
             )
         )
 
-    def _conta(self, username, nome, senha, clinica, papel):
+    def _conta(self, username, nome, senha, clinic, papel):
         Usuario = get_user_model()
         usuario, _criado = Usuario.objects.get_or_create(username=username)
         usuario.first_name = nome
@@ -106,6 +106,6 @@ class Command(BaseCommand):
         usuario.set_password(senha)
         usuario.save()
         Membership.objects.update_or_create(
-            usuario=usuario, clinica=clinica, defaults={"papel": papel, "ativo": True}
+            usuario=usuario, clinic=clinic, defaults={"papel": papel, "ativo": True}
         )
         return usuario

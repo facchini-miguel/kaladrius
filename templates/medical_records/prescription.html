@@ -10,7 +10,7 @@
 </div>
 <div class="recibo bg-white border rounded p-4" style="max-width: 48rem;">
   {% translate "RECEITUÁRIO" as titulo_documento %}
-  {% include "medical_records/_header.html" with data_documento=receita.criado_em %}
+  {% include "medical_records/_header.html" with data_documento=receita.created_at %}
   <p><strong>{% translate "Paciente" %}:</strong> {{ receita.atendimento.paciente.nome }}</p>
   <ol class="fs-6 lh-lg mt-3">
     {% for linha in linhas %}<li>{{ linha }}</li>{% endfor %}

@@ -175,8 +175,8 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
         {"nome": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
     )
     assert resposta.status_code == 302
-    clinica = Clinic.objects.get()
-    with usar_clinica(clinica):
+    clinic = Clinic.objects.get()
+    with usar_clinica(clinic):
         ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
     assert ligados == MODULOS_GERAIS | {M.MEDICINA}
 
@@ -198,11 +198,11 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
         apps = estado_do_banco()
         Antiga = apps.get_model("core", "Clinica")
         ModuloAntigo = apps.get_model("core", "ModuloDaClinica")
-        clinica = Antiga.objects.create(nome="Clínica fictícia antiga", area="medicina")
+        clinic = Antiga.objects.create(nome="Clínica fictícia antiga", area="medicina")
         ModuloAntigo.objects.bulk_create(
             [
-                ModuloAntigo(clinica_id=clinica.pk, codigo="odontologia", ativo=False),
-                ModuloAntigo(clinica_id=clinica.pk, codigo="medicina", ativo=True),
+                ModuloAntigo(clinica_id=clinic.pk, codigo="odontologia", ativo=False),
+                ModuloAntigo(clinica_id=clinic.pk, codigo="medicina", ativo=True),
             ]
         )
         executor = MigrationExecutor(connection)
@@ -211,13 +211,11 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
             "core", "ModuloDaClinica"
         )
         ligados = set(
-            Modulo.objects.filter(clinica_id=clinica.pk, ativo=True).values_list(
-                "codigo", flat=True
-            )
+            Modulo.objects.filter(clinica_id=clinic.pk, ativo=True).values_list("codigo", flat=True)
         )
         # Pessoal came later (core 0012), so it is not part of this step.
         assert ligados == {"medicina", *MODULOS_GERAIS} - {"pessoal"}
-        assert Modulo.objects.filter(clinica_id=clinica.pk).count() == len(ModuloClinico) - 1
+        assert Modulo.objects.filter(clinica_id=clinic.pk).count() == len(ModuloClinico) - 1
     finally:
         MigrationExecutor(connection).migrate(folhas)
 

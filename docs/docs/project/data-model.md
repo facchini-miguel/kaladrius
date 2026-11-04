@@ -7,7 +7,7 @@ sidebar_position: 3
 The code's names are being moved to English (decisions 155 to 157): the models are already in English; the fields still have their Portuguese names. The database keeps its table and column names. The [glossary](glossary.md) lists the names, before and after.
 
 ## Multi-tenancy principle
-- Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
+- Every piece of clinic data has a `clinic` key (column `clinica_id`). No query runs without filtering by the current clinic.
 - The filter is applied centrally (middleware + managers), not by hand in each screen.
 - **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolation.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
 - The current clinic comes from the session and is only honored if the user has an active membership in it (or is a superuser). The Django admin is restricted to platform superusers.

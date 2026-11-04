@@ -7,7 +7,7 @@ sidebar_position: 3
 Os nomes do código estão passando para o inglês (decisões 155 a 157): os modelos já estão em inglês; os campos ainda têm os nomes em português. O banco mantém os nomes das tabelas e colunas. O [glossário](glossary.md) lista os nomes, antes e depois.
 
 ## Princípio multi-clínica
-- Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
+- Toda informação de uma clínica tem uma chave `clinic` (coluna `clinica_id`). Nenhuma consulta é feita sem filtrar pela clínica atual.
 - O filtro é aplicado de forma centralizada (middleware + managers), não manualmente em cada tela.
 - **Falha fechada:** todo modelo da clínica herda de `ModeloDaClinica` (`apps/core/isolation.py`). O gerenciador padrão filtra pela clínica atual e, se não houver clínica definida, **dá erro em vez de mostrar dados**. O filtro é decidido **quando a consulta é executada** (não quando é montada), o que permite declarar campos de formulário com dados da clínica. Gravar ou excluir um registro de outra clínica também dá erro. Código da plataforma que precisa ver todas as clínicas (admin do Django, comandos) usa `sem_isolamento()` explicitamente.
 - A clínica atual vem da sessão e só é aceita se o usuário tiver vínculo ativo com ela (ou for superusuário). O admin do Django é restrito aos superusuários da plataforma.

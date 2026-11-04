@@ -19,8 +19,8 @@ pytestmark = pytest.mark.django_db
 )
 def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
     # Decision 080: dental types for the Odontologia area, general ones for the others.
-    clinica = Clinic.objects.create(nome="Nova", area=area)
-    with usar_clinica(clinica):
+    clinic = Clinic.objects.create(nome="Nova", area=area)
+    with usar_clinica(clinic):
         tipos = {t.nome: t.cor for t in AppointmentType.objects.all()}
     assert tipos == dict(esperados)
 

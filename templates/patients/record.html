@@ -271,6 +271,6 @@
 {% endif %}
 
 <p class="text-body-secondary small mt-3">
-  {% blocktranslate with criado=paciente.criado_em|date:"SHORT_DATETIME_FORMAT" alterado=paciente.alterado_em|date:"SHORT_DATETIME_FORMAT" %}Cadastrado em {{ criado }} · alterado em {{ alterado }}{% endblocktranslate %}
+  {% blocktranslate with criado=paciente.created_at|date:"SHORT_DATETIME_FORMAT" alterado=paciente.updated_at|date:"SHORT_DATETIME_FORMAT" %}Cadastrado em {{ criado }} · alterado em {{ alterado }}{% endblocktranslate %}
 </p>
 {% endblock %}

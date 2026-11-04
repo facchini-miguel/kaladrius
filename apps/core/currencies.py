@@ -48,8 +48,8 @@ def moeda_da_clinica():
     """Code of the current clinic's currency (the real when there is no current clinic)."""
     from .isolation import clinica_atual
 
-    clinica = clinica_atual()
-    return getattr(clinica, "moeda", None) or PADRAO
+    clinic = clinica_atual()
+    return getattr(clinic, "moeda", None) or PADRAO
 
 
 def formatar(valor, codigo=None):

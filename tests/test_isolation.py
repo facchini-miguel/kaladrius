@@ -66,7 +66,7 @@ def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, cria
 def test_novo_registro_recebe_a_clinica_atual(clinica_a):
     with usar_clinica(clinica_a):
         profissional = Practitioner.objects.create(nome="Dra. A")
-    assert profissional.clinica == clinica_a
+    assert profissional.clinic == clinica_a
 
 
 def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, criar_profissional):

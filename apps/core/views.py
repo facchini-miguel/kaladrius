@@ -28,7 +28,7 @@ def _saudacao():
 @login_required
 def inicio(request):
     contexto = {"saudacao": _saudacao()}
-    if request.clinica is not None:
+    if request.clinic is not None:
         contexto["painel"] = dashboard.montar(request)
     return render(request, "core/home.html", contexto)
 
@@ -79,7 +79,7 @@ class TrocarSenhaView(PasswordChangeView):
 
 @exige_permissao(Modulo.CLINICA, Acao.ALTERAR)
 def configuracoes(request):
-    form = ClinicaForm(request.POST or None, instance=request.clinica)
+    form = ClinicaForm(request.POST or None, instance=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Configurações da clínica salvas."))

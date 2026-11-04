@@ -39,10 +39,10 @@ def configuracao(**extra):
 
 @pytest.mark.parametrize("area", Clinic.Area.values)
 def test_criacao_preserva_a_capacidade_da_area_original(area):
-    clinica = Clinic.objects.create(nome="Clínica fictícia", area=area)
-    assert clinica.odontologia == (area == "odontologia")
-    assert clinica.medicina == (area == "medicina")
-    with usar_clinica(clinica):
+    clinic = Clinic.objects.create(nome="Clínica fictícia", area=area)
+    assert clinic.odontologia == (area == "odontologia")
+    assert clinic.medicina == (area == "medicina")
+    with usar_clinica(clinic):
         assert ClinicModule.objects.count() == len(ModuloClinico)
 
 
@@ -83,19 +83,19 @@ def test_modulo_desconhecido_nao_grava_nem_no_servico_nem_no_form(clinica_a):
 def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_b):
     configurar(clinica_b, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
-        assert set(ClinicModule.objects.values_list("clinica_id", flat=True)) == {clinica_a.pk}
+        assert set(ClinicModule.objects.values_list("clinic_id", flat=True)) == {clinica_a.pk}
     with pytest.raises(SemClinicaAtual):
         ClinicModule.objects.count()
     assert clinica_a.odontologia and not clinica_b.odontologia
 
 
 def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
-    antes = dict(ClinicModule.todos.filter(clinica=clinica_a).values_list("codigo", "pk"))
+    antes = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("codigo", "pk"))
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
-    depois = dict(ClinicModule.todos.filter(clinica=clinica_a).values_list("codigo", "pk"))
+    depois = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("codigo", "pk"))
     assert antes == depois
     alteracoes = AuditEntry.objects.filter(
-        clinica=clinica_a, modelo="Módulo da clínica", acao=AuditEntry.Acao.ALTERAR
+        clinic=clinica_a, modelo="Módulo da clínica", acao=AuditEntry.Acao.ALTERAR
     )
     assert alteracoes.count() == 2
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
@@ -106,11 +106,11 @@ def test_campos_administrativos_e_commit_false_preservados(clinica_a):
     form = ClinicaAdminForm(configuracao(ativa="on"), instance=clinica_a)
     assert "ativa" in form.fields and "modulos" in form.fields
     assert form.is_valid(), form.errors
-    clinica = form.save(commit=False)
-    assert not clinica.medicina
-    clinica.save()
+    clinic = form.save(commit=False)
+    assert not clinic.medicina
+    clinic.save()
     form.save_m2m()
-    assert clinica.medicina and clinica.odontologia
+    assert clinic.medicina and clinic.odontologia
 
 
 def test_django_admin_salva_modulos_e_audita_o_superusuario(
@@ -141,7 +141,7 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
     assert clinica_a.medicina and not clinica_a.odontologia
     assert (
         AuditEntry.objects.filter(
-            clinica=clinica_a,
+            clinic=clinica_a,
             usuario=usuario,
             modelo="Módulo da clínica",
             acao=AuditEntry.Acao.ALTERAR,

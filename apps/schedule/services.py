@@ -73,7 +73,7 @@ def criar(modelo, intervalos, usuario):
             inicio=inicio,
             fim=fim,
             serie=serie,
-            criado_por=usuario,
+            created_by=usuario,
         )
         agendamento.save()
         criados.append(agendamento)
@@ -105,7 +105,7 @@ def marcar(agendamento, situacao):
     agendamento.situacao = situacao
     try:
         with transaction.atomic():
-            agendamento.save(update_fields=["situacao", "alterado_em"])
+            agendamento.save(update_fields=["situacao", "updated_at"])
     except IntegrityError:
         raise ValidationError(ocupado) from None
     return agendamento
