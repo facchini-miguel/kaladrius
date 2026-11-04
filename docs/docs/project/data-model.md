@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Data model
 
-The code's names are being moved to English (decisions 155 to 157): the models are already in English; the fields still have their Portuguese names. The database keeps its table and column names. See the glossary in README.md.
+The code's names are being moved to English (decisions 155 to 157): the models are already in English; the fields still have their Portuguese names. The database keeps its table and column names. The [glossary](glossary.md) lists the names, before and after.
 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
