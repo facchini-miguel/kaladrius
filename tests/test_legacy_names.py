@@ -77,7 +77,7 @@ def test_migrar_os_arquivos_de_estado(tmp_path):
     for name in ("admin-criado", "sem-repositorio", "imagem-recusada"):
         (dir_ / name).write_text(name)
     (dir_ / "demonstracao").mkdir()
-    (dir_ / "demonstracao" / "base-date").write_text("2026-10-30")
+    (dir_ / "demonstracao" / "base-data").write_text("2026-10-30")
     (dir_ / "anterior").mkdir()
     (dir_ / "saude").mkdir()
     (dir_ / "saude" / "amostras.jsonl").write_text('{"momento": "2026-11-03T10:00:00Z"}\n')
