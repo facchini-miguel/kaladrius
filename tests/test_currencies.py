@@ -59,33 +59,33 @@ def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
 def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario, cliente_de):
     assert clinica_a.moeda == "BRL"  # existing and new clinics start with the real
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    assert "Dólar americano (US$, USD)" in admin.get(reverse("configuracoes")).content.decode()
+    assert "Dólar americano (US$, USD)" in admin.get(reverse("clinic_settings")).content.decode()
 
-    resposta = admin.post(reverse("configuracoes"), dados_clinica(moeda="USD"), follow=True)
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="USD"), follow=True)
     pagina = resposta.content.decode()
     assert "Nenhum valor já lançado foi convertido" in pagina
     clinica_a.refresh_from_db()
     assert clinica_a.moeda == "USD"
 
     # The language stays each user's own: the currency follows the clinic in any of them.
-    admin.post(reverse("trocar_idioma"), {"idioma": "es"})
-    assert "US$ 0,00" in admin.get(reverse("inicio")).content.decode()  # received today
+    admin.post(reverse("change_language"), {"idioma": "es"})
+    assert "US$ 0,00" in admin.get(reverse("home")).content.decode()  # received today
 
     # Saving again without changing it does not repeat the warning.
-    admin.post(reverse("trocar_idioma"), {"idioma": "pt-br"})
-    resposta = admin.post(reverse("configuracoes"), dados_clinica(moeda="USD"), follow=True)
+    admin.post(reverse("change_language"), {"idioma": "pt-br"})
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="USD"), follow=True)
     assert "Nenhum valor já lançado foi convertido" not in resposta.content.decode()
 
 
 def test_moeda_desconhecida_e_recusada(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = admin.post(reverse("configuracoes"), dados_clinica(moeda="XXX"))
+    resposta = admin.post(reverse("clinic_settings"), dados_clinica(moeda="XXX"))
     assert resposta.status_code == 200 and "moeda" in resposta.context["form"].errors
 
 
 def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
     recepcao = cliente_de(criar_usuario("recepcao_a", clinica_a, Papel.RECEPCAO))
-    assert recepcao.post(reverse("configuracoes"), dados_clinica(moeda="EUR")).status_code == 403
+    assert recepcao.post(reverse("clinic_settings"), dados_clinica(moeda="EUR")).status_code == 403
     clinica_a.refresh_from_db()
     assert clinica_a.moeda == "BRL"
 
@@ -110,6 +110,6 @@ def test_formulario_sem_a_moeda_mantem_a_atual(clinica_a, criar_usuario, cliente
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     dados = dados_clinica()
     del dados["moeda"]
-    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.moeda == "EUR"

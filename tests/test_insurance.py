@@ -41,27 +41,29 @@ def test_codigo_limpo_e_conferido():
 
 
 def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
-    form = admin.get(reverse("convenios:novo")).context["form"]
+    form = admin.get(reverse("health_plans:new")).context["form"]
     assert str(form.fields["registro"].label) == "Registro da operadora (ANS)"
     mudar_pais(clinica_a, "US")
-    form = admin.get(reverse("convenios:novo")).context["form"]
+    form = admin.get(reverse("health_plans:new")).context["form"]
     assert str(form.fields["registro"].label) == "Registro da operadora (Payer ID)"
     assert "dental insurance carriers" in str(form.fields["nome"].help_text)
-    recusado = admin.post(reverse("convenios:novo"), {"nome": "Fictitious Dental", "registro": "1"})
+    recusado = admin.post(
+        reverse("health_plans:new"), {"nome": "Fictitious Dental", "registro": "1"}
+    )
     assert "registro" in recusado.context["form"].errors
     dados = {"nome": "Fictitious Dental", "registro": "ab-123", "ativo": "on"}
-    assert admin.post(reverse("convenios:novo"), dados).status_code == 302
+    assert admin.post(reverse("health_plans:new"), dados).status_code == 302
     with usar_clinica(clinica_a):
         assert Convenio.objects.get().registro == "AB123"
-    assert "Payer ID" in admin.get(reverse("convenios:lista")).content.decode()
+    assert "Payer ID" in admin.get(reverse("health_plans:list")).content.decode()
     # The United Kingdom has no insurer registry: no field and no column.
     mudar_pais(clinica_a, "GB")
-    assert "registro" not in admin.get(reverse("convenios:novo")).context["form"].fields
-    assert "Registro da operadora" not in admin.get(reverse("convenios:lista")).content.decode()
+    assert "registro" not in admin.get(reverse("health_plans:new")).context["form"].fields
+    assert "Registro da operadora" not in admin.get(reverse("health_plans:list")).content.decode()
 
 
 def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  # noqa: F811
-    url = reverse("convenios:carteirinha_nova", args=[paciente.pk])
+    url = reverse("health_plans:card_new", args=[paciente.pk])
     campos = admin.get(url).context["form"].fields
     assert "grupo" not in campos and "beneficiario" not in campos  # Brazil
     mudar_pais(clinica_a, "US")
@@ -73,7 +75,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
         assert Carteirinha.objects.get().grupo == "G-100"
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
     campos = admin.get(url).context["form"].fields
@@ -83,7 +85,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  
 def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     clinica = cenario["clinica"]
     cliente = entrar(cenario, "admin")
-    url = reverse("orcamentos:procedimento_editar", args=[cenario["restauracao"].pk])
+    url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])
     dados = {"nome": "Restauração", "valor": "250,00", "categoria": "", "ativo": "on"}
     form = cliente.get(url).context["form"]
     assert str(form.fields["codigo"].label) == "Código (TUSS)"
@@ -95,7 +97,7 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk)
     with usar_clinica(clinica):
         assert orcamento.itens.get().codigo == "85100099"
-    impresso = cliente.get(reverse("orcamentos:imprimir", args=[orcamento.pk])).content.decode()
+    impresso = cliente.get(reverse("estimates:print", args=[orcamento.pk])).content.decode()
     assert "85100099 · Restauração" in impresso
     # A country without one coding: just "Código", free text.
     mudar_pais(clinica, "UY")

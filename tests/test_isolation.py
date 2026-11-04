@@ -102,12 +102,12 @@ def test_lista_mostra_somente_a_propria_clinica(
     criar_profissional(clinica_a, "Dra. Ana da Clínica A")
     criar_profissional(clinica_b, "Dr. Bruno da Clínica B")
     cliente = cliente_de(criar_usuario("ana", clinica_a))
-    conteudo = cliente.get(reverse("profissionais:lista")).content.decode()
+    conteudo = cliente.get(reverse("practitioners:list")).content.decode()
     assert "Dra. Ana da Clínica A" in conteudo
     assert "Dr. Bruno da Clínica B" not in conteudo
 
 
-@pytest.mark.parametrize("rota", ["profissionais:editar", "profissionais:excluir"])
+@pytest.mark.parametrize("rota", ["practitioners:edit", "practitioners:delete"])
 def test_url_com_id_de_outra_clinica_da_404(
     rota, clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
@@ -127,10 +127,10 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
     # database ever has another one: nobody chooses, each user gets their own clinic.
     criar_profissional(clinica_a, "Profissional A")
     criar_profissional(clinica_b, "Profissional B")
-    conteudo = cliente_de(criar_usuario("ana", clinica_a)).get(reverse("profissionais:lista"))
+    conteudo = cliente_de(criar_usuario("ana", clinica_a)).get(reverse("practitioners:list"))
     conteudo = conteudo.content.decode()
     assert "Profissional A" in conteudo and "Profissional B" not in conteudo
-    conteudo = cliente_de(criar_usuario("bia", clinica_b)).get(reverse("profissionais:lista"))
+    conteudo = cliente_de(criar_usuario("bia", clinica_b)).get(reverse("practitioners:list"))
     conteudo = conteudo.content.decode()
     assert "Profissional B" in conteudo and "Profissional A" not in conteudo
 
@@ -138,16 +138,16 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
 def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usuario, cliente_de):
     usuario = criar_usuario("ana", clinica_a)
     usuario.vinculos.update(ativo=False)
-    assert cliente_de(usuario).get(reverse("profissionais:lista")).status_code == 403
+    assert cliente_de(usuario).get(reverse("practitioners:list")).status_code == 403
 
     usuario.vinculos.update(ativo=True)
     clinica_a.ativa = False
     clinica_a.save()
-    assert cliente_de(usuario).get(reverse("profissionais:lista")).status_code == 403
+    assert cliente_de(usuario).get(reverse("practitioners:list")).status_code == 403
 
 
 def test_usuario_sem_clinica_ve_aviso(criar_usuario, cliente_de):
-    resposta = cliente_de(criar_usuario("solto")).get(reverse("profissionais:lista"))
+    resposta = cliente_de(criar_usuario("solto")).get(reverse("practitioners:list"))
     assert resposta.status_code == 403
     assert "não tem acesso a nenhuma clínica ativa" in resposta.content.decode()
 
@@ -158,7 +158,7 @@ def test_formulario_so_oferece_usuarios_da_propria_clinica(
     criar_usuario("colega_a", clinica_a)
     criar_usuario("estranho_b", clinica_b)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    conteudo = cliente.get(reverse("profissionais:novo")).content.decode()
+    conteudo = cliente.get(reverse("practitioners:new")).content.decode()
     assert "colega_a" in conteudo
     assert "estranho_b" not in conteudo
 
@@ -169,7 +169,7 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     estranho = criar_usuario("estranho_b", clinica_b)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
-        reverse("profissionais:novo"),
+        reverse("practitioners:new"),
         {"nome": "Dr. Novo", "cor": "#123456", "usuario": estranho.pk, "ativo": "on"},
     )
     assert resposta.status_code == 200  # form redisplayed with an error

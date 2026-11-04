@@ -7,11 +7,11 @@ title: Monitoring
 
 ## Is it up?
 
-`GET /api/v1/versao` answers, without login, with the installed version:
+`GET /api/v1/version` answers, without login, with the installed version:
 
 ```bash
-curl https://clinic.example.com/api/v1/versao
-# {"versao": "0.24.1"}
+curl https://clinic.example.com/api/v1/version
+# {"version": "0.55.0"}
 ```
 
 Use it in any uptime monitor (UptimeRobot, Healthchecks, Uptime Kuma…) to be warned when the system stops answering.
@@ -25,7 +25,7 @@ The server can warn you by itself through [Healthchecks.io](https://healthchecks
 
 | Variable in `.env` | Check | Period / grace | Warns when |
 |---|---|---|---|
-| `MONITOR_SYSTEM_URL` | System up | 5 min / 10 min | The system, opened through the internet by each of its addresses (every name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/saude`) |
+| `MONITOR_SYSTEM_URL` | System up | 5 min / 10 min | The system, opened through the internet by each of its addresses (every name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/health`) |
 | `MONITOR_BACKUP_URL` | Daily backup | 1 day / 2 h | The daily backup fails or does not run |
 | `MONITOR_DEMO_URL` | Demo reset (demo server only) | 1 day / 2 hours | The nightly demo reset (07:30 UTC) fails or does not run |
 | `MONITOR_RESTORE_URL` | Backup restore | 7 days / 1 day | The weekly restore test (Sundays, 07:00 UTC: the newest backup restored into a throwaway database) fails |

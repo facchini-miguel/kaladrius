@@ -39,7 +39,7 @@ class EntrarView(auth_views.LoginView):
             "tentativas": 0,
             "proximo": self.get_success_url(),
         }
-        return redirect("conta:codigo")
+        return redirect("account:code")
 
     def get_context_data(self, **kwargs):
         contexto = super().get_context_data(**kwargs)
@@ -96,7 +96,7 @@ def duas_etapas(request):
     usuario = get_user_model().objects.get(pk=request.user.pk)
     if usuario.demonstracao:
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
-        return redirect("inicio")
+        return redirect("home")
     acao = request.POST.get("acao")
     obrigatoria = services.obrigatoria(request)
     if services.ativa_para(usuario):
@@ -117,7 +117,7 @@ def duas_etapas(request):
                 descricao=f"{usuario}: verificação em duas etapas desativada",
             )
             messages.success(request, _("Verificação em duas etapas desativada."))
-            return redirect("conta:duas_etapas")
+            return redirect("account:two_factor")
         if acao == "codigos" and novos.is_valid():
             if services.verificar(usuario, novos.cleaned_data["codigo"]):
                 return render(
@@ -182,7 +182,7 @@ recuperar = _com_email(
         email_template_name="account/recovery_email.txt",
         subject_template_name="account/recovery_email_subject.txt",
         extra_email_context={"nome_sistema": settings.NOME_SISTEMA},
-        success_url=reverse_lazy("conta:recuperar_enviado"),
+        success_url=reverse_lazy("account:recovery_sent"),
     )
 )
 recuperar_enviado = _com_email(
@@ -192,7 +192,7 @@ nova_senha = _com_email(
     auth_views.PasswordResetConfirmView.as_view(
         form_class=NovaSenhaForm,
         template_name="account/new_password.html",
-        success_url=reverse_lazy("conta:senha_redefinida"),
+        success_url=reverse_lazy("account:password_changed"),
     )
 )
 senha_redefinida = _com_email(

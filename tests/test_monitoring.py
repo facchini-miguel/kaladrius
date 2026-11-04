@@ -118,8 +118,8 @@ def test_grafico_quebra_a_linha_na_lacuna(pasta):
 def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, cliente_de):
     pasta(amostra(5))
     recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    assert 'href="/sistema/saude/"' in recepcao.get(reverse("inicio")).content.decode()
-    pagina = recepcao.get(reverse("monitoramento:saude"))
+    assert 'href="/system/health/"' in recepcao.get(reverse("home")).content.decode()
+    pagina = recepcao.get(reverse("monitoring:health"))
     assert pagina.status_code == 200
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "Nenhum backup registrado" in conteudo
@@ -129,7 +129,7 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
 def test_tela_com_amostras(pasta, superusuario):
     pasta(*(amostra(m, rede=m * 1000) for m in range(60, -1, -5)))
     for periodo in ("1h", "24h", "7d", "outro"):
-        pagina = superusuario.get(reverse("monitoramento:saude"), {"periodo": periodo})
+        pagina = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
         assert pagina.status_code == 200
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "app" in conteudo and "Maiores tabelas" in conteudo
@@ -139,7 +139,7 @@ def test_tela_com_amostras(pasta, superusuario):
 
 def test_tela_sem_amostras(settings, tmp_path, superusuario):
     settings.HEALTH_DIR = str(tmp_path / "nao-existe")
-    pagina = superusuario.get(reverse("monitoramento:saude")).content.decode()
+    pagina = superusuario.get(reverse("monitoring:health")).content.decode()
     assert "Ainda não há amostras" in pagina
 
 
@@ -155,7 +155,7 @@ def test_tela_sem_amostras(settings, tmp_path, superusuario):
 def test_aviso_no_topo(pasta, superusuario, linhas, esperado):
     if linhas:
         pasta(*linhas)
-    contexto = superusuario.get(reverse("novidades")).context
+    contexto = superusuario.get(reverse("whats_new")).context
     alerta = contexto.get("saude_alerta")
     if esperado == "parada":
         assert "parada" in alerta
@@ -205,8 +205,9 @@ def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
     # Decision 079: the external monitor needs the database to answer, not only Django.
     from django.db import OperationalError
 
-    resposta = client.get("/api/v1/saude")
-    assert resposta.status_code == 200 and resposta.json()["banco"] is True
+    resposta = client.get("/api/v1/health")
+    assert resposta.status_code == 200 and resposta.json()["database"] is True
+    assert client.get("/api/v1/saude").json()["banco"] is True  # the old address (decision 155)
 
     import config.api
 
@@ -218,5 +219,7 @@ def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
             return False
 
     monkeypatch.setattr(config.api.connection, "cursor", lambda: CursorQuebrado())
+    resposta = client.get("/api/v1/health")
+    assert resposta.status_code == 503 and resposta.json() == {"database": False}
     resposta = client.get("/api/v1/saude")
     assert resposta.status_code == 503 and resposta.json() == {"banco": False}

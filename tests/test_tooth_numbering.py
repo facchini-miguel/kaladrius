@@ -71,14 +71,14 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
 
     admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Papel.ADMIN))
     assert clinica_a.numeracao_dentaria == FDI
-    assert admin.post(reverse("configuracoes"), dados_clinica(pais="US")).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados_clinica(pais="US")).status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.numeracao_dentaria == UNIVERSAL
     # Chosen on purpose, it stays when the country changes.
     dados = dados_clinica(pais="US", numeracao_dentaria=PALMER)
-    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     dados = dados_clinica(pais="GB", numeracao_dentaria=PALMER)
-    assert admin.post(reverse("configuracoes"), dados).status_code == 302
+    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.numeracao_dentaria == PALMER
 
@@ -100,7 +100,7 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
         item = orcamento.itens.get()
         assert item.dentes == "18,36"  # always FDI in the database
         assert item.dentes_exibicao == "1, 19"
-    pagina = cliente.get(reverse("orcamentos:detalhe", args=[orcamento.pk])).content.decode()
+    pagina = cliente.get(reverse("estimates:detail", args=[orcamento.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
     assert 'data-dente="36"' in pagina and ">19</button>" in pagina
     assert "Numeração universal (Estados Unidos)." in pagina

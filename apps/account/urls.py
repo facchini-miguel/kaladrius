@@ -2,14 +2,14 @@ from django.urls import path
 
 from . import views
 
-app_name = "conta"
+app_name = "account"
 
 urlpatterns = [
-    path("login/codigo/", views.codigo, name="codigo"),
-    path("ativo/", views.ativo, name="ativo"),
-    path("duas-etapas/", views.duas_etapas, name="duas_etapas"),
-    path("senha/esqueci/", views.recuperar, name="recuperar"),
-    path("senha/esqueci/enviado/", views.recuperar_enviado, name="recuperar_enviado"),
-    path("senha/nova/<uidb64>/<token>/", views.nova_senha, name="nova_senha"),
-    path("senha/redefinida/", views.senha_redefinida, name="senha_redefinida"),
+    path("login/code/", views.codigo, name="code"),
+    path("active/", views.ativo, name="active"),
+    path("two-factor/", views.duas_etapas, name="two_factor"),
+    path("password/forgot/", views.recuperar, name="recover"),
+    path("password/forgot/sent/", views.recuperar_enviado, name="recovery_sent"),
+    path("password/new/<uidb64>/<token>/", views.nova_senha, name="new_password"),
+    path("password/changed/", views.senha_redefinida, name="password_changed"),
 ]

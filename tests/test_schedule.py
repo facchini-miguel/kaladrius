@@ -54,7 +54,7 @@ def dados(cenario, **extra):
 
 
 def agendar(cenario, **extra):
-    return cenario["cliente"].post(reverse("agenda:novo"), dados(cenario, **extra))
+    return cenario["cliente"].post(reverse("schedule:new"), dados(cenario, **extra))
 
 
 def agendamentos(cenario):
@@ -174,7 +174,7 @@ def test_banco_de_dados_impede_sobreposicao(cenario):
 def test_editar_muda_o_horario_sem_conflitar_consigo_mesmo(cenario):
     agendar(cenario)
     [agendamento] = agendamentos(cenario)
-    url = reverse("agenda:editar", args=[agendamento.pk])
+    url = reverse("schedule:edit", args=[agendamento.pk])
     formulario = cenario["cliente"].get(url)
     assert formulario.context["form"].initial["hora_inicio"] == datetime.time(9)
     assert "repeticoes" not in formulario.context["form"].fields
@@ -190,17 +190,19 @@ def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cena
     agendar(cenario)
     [agendamento] = agendamentos(cenario)
     cliente = cenario["cliente"]
-    cliente.post(reverse("agenda:situacao", args=[agendamento.pk]), {"situacao": "desmarcou"})
-    janela = cliente.get(reverse("agenda:editar", args=[agendamento.pk])).content.decode()
+    cliente.post(reverse("schedule:status", args=[agendamento.pk]), {"situacao": "desmarcou"})
+    janela = cliente.get(reverse("schedule:edit", args=[agendamento.pk])).content.decode()
     assert "Agendar outro paciente neste horário" in janela
-    assert f"{reverse('agenda:novo')}?profissional={cenario['ana'].pk}&amp;data={SEGUNDA}" in janela
+    assert (
+        f"{reverse('schedule:new')}?profissional={cenario['ana'].pk}&amp;data={SEGUNDA}" in janela
+    )
     with usar_clinica(cenario["clinica"]):
         outro = Paciente.objects.create(nome="Outro Paciente")
     troca = cliente.post(
-        reverse("agenda:editar", args=[agendamento.pk]), dados(cenario, paciente=outro.pk)
+        reverse("schedule:edit", args=[agendamento.pk]), dados(cenario, paciente=outro.pk)
     )
     assert "paciente" in troca.context["form"].errors
-    novo = cliente.post(reverse("agenda:novo"), dados(cenario, paciente=outro.pk))
+    novo = cliente.post(reverse("schedule:new"), dados(cenario, paciente=outro.pk))
     assert novo.status_code == 204
     with usar_clinica(cenario["clinica"]):
         nomes = sorted((a.paciente.nome, a.situacao) for a in Agendamento.objects.all())
@@ -212,12 +214,12 @@ def test_excluir_um_ou_a_serie_dali_em_diante(cenario, criar_usuario, cliente_de
     criados = agendamentos(cenario)
     admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
 
-    admin.post(reverse("agenda:excluir", args=[criados[0].pk]), {"escopo": "este"})
+    admin.post(reverse("schedule:delete", args=[criados[0].pk]), {"escopo": "este"})
     assert len(agendamentos(cenario)) == 3
 
-    pagina = admin.get(reverse("agenda:excluir", args=[criados[1].pk])).content.decode()
+    pagina = admin.get(reverse("schedule:delete", args=[criados[1].pk])).content.decode()
     assert "os próximos 2" in pagina
-    resposta = admin.post(reverse("agenda:excluir", args=[criados[1].pk]), {"escopo": "serie"})
+    resposta = admin.post(reverse("schedule:delete", args=[criados[1].pk]), {"escopo": "serie"})
     assert json.loads(resposta["HX-Trigger"])["agendaAtualizada"]["mensagem"] == (
         "3 agendamentos excluídos."
     )
@@ -230,11 +232,11 @@ def test_paciente_arquivado_some_das_sugestoes_mas_fica_na_agenda(
     agendar(cenario)
     with usar_clinica(cenario["clinica"]):
         Paciente.objects.filter(pk=cenario["paciente"].pk).update(arquivado=True)
-    sugestoes = cenario["cliente"].get(reverse("pacientes:sugestoes"), {"q": "maria"})
+    sugestoes = cenario["cliente"].get(reverse("patients:suggestions"), {"q": "maria"})
     assert "Maria Paciente" not in sugestoes.content.decode()
     periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
     eventos = cenario["cliente"].get(
-        reverse("agenda:eventos"), {**periodo, "profissional": cenario["ana"].pk}
+        reverse("schedule:events"), {**periodo, "profissional": cenario["ana"].pk}
     )
     assert [e["title"] for e in eventos.json()] == ["Maria Paciente"]  # history kept
 
@@ -243,8 +245,8 @@ def test_exclusao_definitiva_tira_o_paciente_dos_agendamentos(cenario, criar_usu
     agendar(cenario)
     admin = cliente_de(criar_usuario("admin", cenario["clinica"], Papel.ADMIN))
     paciente = cenario["paciente"]
-    admin.post(reverse("pacientes:arquivar", args=[paciente.pk]))
-    assert admin.post(reverse("pacientes:excluir", args=[paciente.pk])).status_code == 302
+    admin.post(reverse("patients:archive", args=[paciente.pk]))
+    assert admin.post(reverse("patients:delete", args=[paciente.pk])).status_code == 302
     [agendamento] = agendamentos(cenario)
     assert agendamento.paciente is None
     # The slot stays taken, without the notes (they may hold personal data).
@@ -260,7 +262,7 @@ def test_eventos_do_periodo_em_json(cenario):
     agendar(cenario)
     agendar(cenario, data=(SEGUNDA + datetime.timedelta(weeks=1)).isoformat())
     resposta = cenario["cliente"].get(
-        reverse("agenda:eventos"),
+        reverse("schedule:events"),
         {
             "profissional": cenario["ana"].pk,
             "start": f"{SEGUNDA}T00:00:00-03:00",
@@ -275,7 +277,7 @@ def test_eventos_do_periodo_em_json(cenario):
 
 
 def test_eventos_com_parametros_invalidos(cenario):
-    url = reverse("agenda:eventos")
+    url = reverse("schedule:events")
     assert cenario["cliente"].get(url, {"profissional": "x"}).status_code == 400
     longo = {"profissional": 1, "start": "2031-01-01", "end": "2031-12-31"}
     assert cenario["cliente"].get(url, longo).status_code == 400
@@ -288,18 +290,18 @@ def test_aniversariantes_no_periodo(cenario):
             nome="Inativo", data_nascimento=datetime.date(1990, 3, 5), ativo=False
         )
     resposta = cenario["cliente"].get(
-        reverse("agenda:aniversariantes"),
+        reverse("schedule:birthdays"),
         {"start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA + datetime.timedelta(days=7)}T00:00:00"},
     )
     assert resposta.json() == {"2031-03-05": 1}
-    lista = cenario["cliente"].get(reverse("agenda:aniversariantes_dia"), {"data": "2031-03-05"})
+    lista = cenario["cliente"].get(reverse("schedule:birthdays_today"), {"data": "2031-03-05"})
     assert "Aniversariante" in lista.content.decode()
     assert "completa 41 anos" in lista.content.decode()
 
 
 def test_calendario_abre_no_profissional_escolhido(cenario):
     pagina = cenario["cliente"].get(
-        reverse("agenda:calendario"), {"profissional": cenario["bruno"].pk}
+        reverse("schedule:calendar"), {"profissional": cenario["bruno"].pk}
     )
     assert pagina.context["profissional"] == cenario["bruno"]
     config = pagina.context["configuracao"]
@@ -307,7 +309,7 @@ def test_calendario_abre_no_profissional_escolhido(cenario):
     assert config["pode"] == {"criar": True, "alterar": True}
     # The choice is remembered for the next visit.
     assert (
-        cenario["cliente"].get(reverse("agenda:calendario")).context["profissional"]
+        cenario["cliente"].get(reverse("schedule:calendar")).context["profissional"]
         == cenario["bruno"]
     )
 
@@ -327,11 +329,11 @@ def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissio
         )
     cliente = cenario["cliente"]
     eventos = cliente.get(
-        reverse("agenda:eventos"),
+        reverse("schedule:events"),
         {"profissional": de_b.pk, "start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA}T23:00:00"},
     ).json()
     assert eventos == []
-    assert cliente.get(reverse("agenda:editar", args=[agendamento_b.pk])).status_code == 404
+    assert cliente.get(reverse("schedule:edit", args=[agendamento_b.pk])).status_code == 404
     # Ids from another clinic are not accepted in the form either.
     resposta = agendar(cenario, profissional=de_b.pk, tipo=tipo_b.pk, paciente=paciente_b.pk)
     assert set(resposta.context["form"].errors) >= {"profissional", "tipo", "paciente"}
@@ -347,10 +349,10 @@ def cliente_da_dra_ana(cenario, criar_usuario, cliente_de):
 
 def test_profissional_agenda_mas_nao_exclui(cenario, criar_usuario, cliente_de):
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
-    assert cliente.post(reverse("agenda:novo"), dados(cenario)).status_code == 204
+    assert cliente.post(reverse("schedule:new"), dados(cenario)).status_code == 204
     [agendamento] = agendamentos(cenario)
-    assert cliente.post(reverse("agenda:excluir", args=[agendamento.pk])).status_code == 403
-    formulario = cliente.get(reverse("agenda:editar", args=[agendamento.pk])).content.decode()
+    assert cliente.post(reverse("schedule:delete", args=[agendamento.pk])).status_code == 403
+    formulario = cliente.get(reverse("schedule:edit", args=[agendamento.pk])).content.decode()
     assert "Excluir" not in formulario
 
 
@@ -358,22 +360,22 @@ def test_profissional_so_ve_a_propria_agenda(cenario, criar_usuario, cliente_de)
     assert agendar(cenario, profissional=cenario["bruno"].pk).status_code == 204
     [do_bruno] = agendamentos(cenario)
     # The front desk sees every practitioner (checked first: the test client is shared).
-    resposta = cenario["cliente"].get(reverse("agenda:calendario"))
+    resposta = cenario["cliente"].get(reverse("schedule:calendar"))
     assert len(resposta.context["profissionais"]) == 2
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
 
-    resposta = cliente.get(reverse("agenda:calendario"), {"profissional": cenario["bruno"].pk})
+    resposta = cliente.get(reverse("schedule:calendar"), {"profissional": cenario["bruno"].pk})
     assert [p.nome for p in resposta.context["profissionais"]] == ["Dra. Ana"]
     assert resposta.context["profissional"] == cenario["ana"]
     periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
     eventos = cliente.get(
-        reverse("agenda:eventos"), {**periodo, "profissional": cenario["bruno"].pk}
+        reverse("schedule:events"), {**periodo, "profissional": cenario["bruno"].pk}
     )
     assert eventos.json() == []
-    assert cliente.get(reverse("agenda:editar", args=[do_bruno.pk])).status_code == 404
+    assert cliente.get(reverse("schedule:edit", args=[do_bruno.pk])).status_code == 404
 
     resposta = cliente.post(
-        reverse("agenda:novo"),
+        reverse("schedule:new"),
         dados(cenario, profissional=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00"),
     )
     assert resposta.status_code == 200
@@ -382,7 +384,7 @@ def test_profissional_so_ve_a_propria_agenda(cenario, criar_usuario, cliente_de)
 
 def test_profissional_sem_cadastro_ligado_nao_ve_agenda(cenario, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("sem_cadastro", cenario["clinica"], Papel.PROFISSIONAL))
-    resposta = cliente.get(reverse("agenda:calendario"))
+    resposta = cliente.get(reverse("schedule:calendar"))
     assert resposta.context["profissionais"] == []
     assert "não está ligado a um cadastro de profissional" in resposta.content.decode()
 
@@ -391,7 +393,7 @@ def test_sugestoes_de_pacientes_so_da_clinica(cenario, clinica_b):
     with usar_clinica(clinica_b):
         Paciente.objects.create(nome="Maria de Outra Clínica")
     conteudo = (
-        cenario["cliente"].get(reverse("pacientes:sugestoes"), {"q": "maria"}).content.decode()
+        cenario["cliente"].get(reverse("patients:suggestions"), {"q": "maria"}).content.decode()
     )
     assert "Maria Paciente" in conteudo
     assert "Outra Clínica" not in conteudo
@@ -410,7 +412,7 @@ def test_filtro_da_clinica_e_decidido_na_execucao(clinica_a):
 
 def test_periodo_com_e_sem_fuso_misturados(cenario):
     resposta = cenario["cliente"].get(
-        reverse("agenda:eventos"),
+        reverse("schedule:events"),
         {
             "start": "2031-03-03T00:00:00",
             "end": "2031-03-10T00:00:00-03:00",
@@ -436,7 +438,7 @@ def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
         )
     agendar(cenario)  # 2031, Dra. Ana
     agendar(cenario, profissional=cenario["bruno"].pk, hora_inicio="11:00", hora_fim="12:00")
-    url = reverse("pacientes:ficha", args=[cenario["paciente"].pk])
+    url = reverse("patients:record", args=[cenario["paciente"].pk])
 
     historico = cenario["cliente"].get(url).context["agendamentos"]
     assert historico["total"] == 3
@@ -517,7 +519,7 @@ def agendamento_em(cenario, dia, hora=9, paciente=True, profissional="ana"):
 def marcar(cenario, agendamento, situacao, htmx=True, cliente=None):
     cabecalhos = {"HTTP_HX_REQUEST": "true"} if htmx else {}
     return (cliente or cenario["cliente"]).post(
-        reverse("agenda:situacao", args=[agendamento.pk]), {"situacao": situacao}, **cabecalhos
+        reverse("schedule:status", args=[agendamento.pk]), {"situacao": situacao}, **cabecalhos
     )
 
 
@@ -539,10 +541,10 @@ def test_marca_comparecimento_e_falta_a_partir_do_dia(cenario):
     assert situacao_de(cenario, agendamento) == "agendado"
 
     # The appointment window shows the buttons; a future one only offers "cancelled".
-    janela = cenario["cliente"].get(reverse("agenda:editar", args=[agendamento.pk]))
+    janela = cenario["cliente"].get(reverse("schedule:edit", args=[agendamento.pk]))
     assert "Compareceu" in janela.content.decode()
     futuro = agendamento_em(cenario, SEGUNDA)
-    janela = cenario["cliente"].get(reverse("agenda:editar", args=[futuro.pk])).content.decode()
+    janela = cenario["cliente"].get(reverse("schedule:edit", args=[futuro.pk])).content.decode()
     assert '"situacao": "faltou"' not in janela and '"situacao": "desmarcou"' in janela
     resposta = marcar(cenario, futuro, "faltou")
     assert resposta.status_code == 200
@@ -554,13 +556,13 @@ def test_situacao_invalida_e_horario_sem_paciente_sao_recusados(cenario):
     hoje = timezone.localdate()
     bloqueio = agendamento_em(cenario, hoje, paciente=False)
     resposta = marcar(cenario, bloqueio, "compareceu", htmx=False)
-    assert resposta.status_code == 302 and resposta.url == reverse("inicio")
+    assert resposta.status_code == 302 and resposta.url == reverse("home")
     assert situacao_de(cenario, bloqueio) == "agendado"
     agendamento = agendamento_em(cenario, hoje, hora=11)
     marcar(cenario, agendamento, "chegou")
     assert situacao_de(cenario, agendamento) == "agendado"
     assert (
-        cenario["cliente"].get(reverse("agenda:situacao", args=[agendamento.pk])).status_code == 405
+        cenario["cliente"].get(reverse("schedule:status", args=[agendamento.pk])).status_code == 405
     )
 
 
@@ -577,7 +579,7 @@ def test_desmarcado_libera_o_horario(cenario):
     assert situacao_de(cenario, primeiro) == "desmarcou"
     # Editing the cancelled one does not conflict with the new one either.
     resposta = cenario["cliente"].post(
-        reverse("agenda:editar", args=[primeiro.pk]), dados(cenario, descricao="Remarcar")
+        reverse("schedule:edit", args=[primeiro.pk]), dados(cenario, descricao="Remarcar")
     )
     assert resposta.status_code == 204
 
@@ -587,7 +589,7 @@ def test_remarcar_para_o_futuro_ou_tirar_o_paciente_limpa_a_presenca(cenario):
     agendamento = agendamento_em(cenario, hoje)
     marcar(cenario, agendamento, "faltou")
     resposta = cenario["cliente"].post(
-        reverse("agenda:editar", args=[agendamento.pk]), dados(cenario)
+        reverse("schedule:edit", args=[agendamento.pk]), dados(cenario)
     )
     assert resposta.status_code == 204
     assert situacao_de(cenario, agendamento) == "agendado"
@@ -602,7 +604,7 @@ def test_remarcar_para_o_futuro_ou_tirar_o_paciente_limpa_a_presenca(cenario):
         hora_inicio="11:00",
         hora_fim="12:00",
     )
-    cenario["cliente"].post(reverse("agenda:editar", args=[outro.pk]), sem_paciente)
+    cenario["cliente"].post(reverse("schedule:edit", args=[outro.pk]), sem_paciente)
     assert situacao_de(cenario, outro) == "agendado"
 
 
@@ -620,7 +622,7 @@ def test_eventos_trazem_a_situacao(cenario):
     marcar(cenario, agendamento, "faltou")
     hoje = timezone.localdate()
     resposta = cenario["cliente"].get(
-        reverse("agenda:eventos"),
+        reverse("schedule:events"),
         {
             "profissional": cenario["ana"].pk,
             "start": hoje.isoformat(),
@@ -639,14 +641,14 @@ def test_tipos_padrao_aparecem_no_idioma_do_usuario(cenario):
     with usar_clinica(cenario["clinica"]):
         TipoAtendimento.objects.create(nome="Clareamento a laser", cor="#ffffff")
 
-    cliente.post(reverse("trocar_idioma"), {"idioma": "en"})
-    legenda = cliente.get(reverse("agenda:calendario")).content.decode()
+    cliente.post(reverse("change_language"), {"idioma": "en"})
+    legenda = cliente.get(reverse("schedule:calendar")).content.decode()
     assert ">Surgery<" in legenda and ">Orthodontics<" in legenda
     assert ">Cirurgia<" not in legenda
     assert ">Clareamento a laser<" in legenda
-    assert ">Surgery</option>" in cliente.get(reverse("agenda:novo")).content.decode()
+    assert ">Surgery</option>" in cliente.get(reverse("schedule:new")).content.decode()
 
-    cliente.post(reverse("trocar_idioma"), {"idioma": "es"})
-    assert ">Cirugía<" in cliente.get(reverse("agenda:calendario")).content.decode()
+    cliente.post(reverse("change_language"), {"idioma": "es"})
+    assert ">Cirugía<" in cliente.get(reverse("schedule:calendar")).content.decode()
     with usar_clinica(cenario["clinica"]):
         assert TipoAtendimento.objects.filter(nome="Cirurgia").exists()  # data untouched

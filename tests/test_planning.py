@@ -15,7 +15,7 @@ from apps.finance.models import Categoria, Conta, GrupoContabil, Lancamento, Pla
 pytestmark = pytest.mark.django_db
 
 HOJE = timezone.localdate()
-URL = reverse("financeiro:planejamento")
+URL = reverse("finance:planning")
 
 
 @pytest.fixture

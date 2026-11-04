@@ -139,7 +139,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
 
 def inicio(cenario, cliente_de, quem):
-    return cliente_de(cenario[quem]).get(reverse("inicio"))
+    return cliente_de(cenario[quem]).get(reverse("home"))
 
 
 def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
@@ -164,7 +164,7 @@ def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
     assert "Bom dia, recepcao" in conteudo
     assert "Recebido hoje" in conteudo and "Pago hoje" not in conteudo
     assert "Saldo nas contas" not in conteudo
-    assert reverse("agenda:situacao", args=[dia_["proximo"].pk]) in conteudo
+    assert reverse("schedule:status", args=[dia_["proximo"].pk]) in conteudo
 
 
 def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
@@ -204,15 +204,15 @@ def test_listas_de_rechamadas_aniversariantes_e_orcamentos(cenario, cliente_de):
 
 def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_de):
     cliente = cliente_de(cenario["recepcao"])
-    painel = cliente.get(reverse("inicio")).context["painel"]
+    painel = cliente.get(reverse("home")).context["painel"]
     rechamada = painel["rechamadas"]["lista"][0]
     resposta = cliente.post(
-        reverse("rechamadas:concluir", args=[rechamada.pk]), {"next": reverse("inicio")}
+        reverse("recalls:complete", args=[rechamada.pk]), {"next": reverse("home")}
     )
-    assert resposta.url == reverse("inicio")
+    assert resposta.url == reverse("home")
     proximo = painel["agenda"]["proximo"]
     resposta = cliente.post(
-        reverse("agenda:situacao", args=[proximo.pk]), {"situacao": "compareceu"}, follow=True
+        reverse("schedule:status", args=[proximo.pk]), {"situacao": "compareceu"}, follow=True
     )
     assert "João Paciente compareceu." in resposta.content.decode()
     assert resposta.context["painel"]["agenda"]["compareceram"] == 2
@@ -220,7 +220,7 @@ def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_
 
 
 def test_sem_clinica_nao_ha_resumo(cenario, criar_usuario, cliente_de):
-    resposta = cliente_de(criar_usuario("solto")).get(reverse("inicio"))
+    resposta = cliente_de(criar_usuario("solto")).get(reverse("home"))
     assert "painel" not in resposta.context
     assert "não tem acesso a nenhuma clínica ativa" in resposta.content.decode()
 
@@ -231,5 +231,5 @@ def test_saudacao_pela_hora(monkeypatch, criar_usuario, cliente_de):
         momento = timezone.make_aware(datetime.datetime(2031, 3, 5, hora))
         monkeypatch.setattr(timezone, "now", lambda momento=momento: momento)
         # Logged in at the patched time, so the session is not seen as expired.
-        conteudo = cliente_de(usuario).get(reverse("inicio")).content.decode()
+        conteudo = cliente_de(usuario).get(reverse("home")).content.decode()
         assert f"{saudacao}, maria" in conteudo

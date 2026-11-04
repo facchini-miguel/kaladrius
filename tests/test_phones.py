@@ -49,7 +49,7 @@ def test_link_do_whatsapp_com_ddd_e_nono_digito():
 def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Papel.RECEPCAO))
     resposta = cliente.post(
-        reverse("pacientes:novo"),
+        reverse("patients:new"),
         {
             "tipo": "PF",
             "nome": "Paciente Fictício",
@@ -67,7 +67,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
         "5434613354",
     )
     errado = cliente.post(
-        reverse("pacientes:novo"), {"tipo": "PF", "nome": "Outro", "whatsapp": "(20) 98123-4567"}
+        reverse("patients:new"), {"tipo": "PF", "nome": "Outro", "whatsapp": "(20) 98123-4567"}
     )
     assert "whatsapp" in errado.context["form"].errors
 

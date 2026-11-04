@@ -7,8 +7,8 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{{ funcionario.nome }}{% if not funcionario.ativo %} <span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}</h1>
   <div class="d-flex gap-2">
-    {% if pode.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'pessoal:editar' funcionario.pk %}">{% translate "Editar" %}</a>{% endif %}
-    <a class="btn btn-link" href="{% url 'pessoal:lista' %}">{% translate "Voltar à lista" %}</a>
+    {% if pode.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'staff:edit' funcionario.pk %}">{% translate "Editar" %}</a>{% endif %}
+    <a class="btn btn-link" href="{% url 'staff:list' %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>
 
@@ -51,12 +51,12 @@
       <tbody>
         {% for folha in folhas %}
         <tr>
-          <td><a href="{% url 'pessoal:folha' %}?mes={{ folha.competencia|date:'Y-m' }}">{{ folha.competencia|date:"m/Y" }}</a></td>
+          <td><a href="{% url 'staff:payroll' %}?mes={{ folha.competencia|date:'Y-m' }}">{{ folha.competencia|date:"m/Y" }}</a></td>
           <td class="text-end text-nowrap">{{ folha.salario|moeda }}</td>
           <td class="text-end text-nowrap">{{ folha.horas_extras }} h · {{ folha.valor_horas_extras|moeda }}</td>
           <td class="text-end text-nowrap">{{ folha.faltas }} · − {{ folha.desconto_faltas|moeda }}</td>
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
-          <td>{% if folha.lancada %}<a href="{% url 'financeiro:lancamento' folha.lancamento_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
+          <td>{% if folha.lancada %}<a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma folha ainda." %}</td></tr>

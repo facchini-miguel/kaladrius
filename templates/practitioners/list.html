@@ -7,7 +7,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Profissionais" %}</h1>
   {% if pode.profissionais.criar %}
-  <a class="btn btn-primary" href="{% url 'profissionais:novo' %}">{% translate "Novo profissional" %}</a>
+  <a class="btn btn-primary" href="{% url 'practitioners:new' %}">{% translate "Novo profissional" %}</a>
   {% endif %}
 </div>
 
@@ -36,10 +36,10 @@
         </td>
         <td class="text-end text-nowrap">
           {% if pode.profissionais.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'profissionais:editar' profissional.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' profissional.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.profissionais.excluir %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'profissionais:excluir' profissional.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' profissional.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>
       </tr>

@@ -31,7 +31,7 @@ def _formulario(request, profissional):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": profissional.nome})
-        return redirect("profissionais:lista")
+        return redirect("practitioners:list")
     return render(request, "practitioners/form.html", {"form": form, "profissional": profissional})
 
 
@@ -54,5 +54,5 @@ def excluir(request, pk):
             messages.success(
                 request, _("Profissional %(nome)s excluído.") % {"nome": profissional.nome}
             )
-        return redirect("profissionais:lista")
+        return redirect("practitioners:list")
     return render(request, "practitioners/delete.html", {"profissional": profissional})

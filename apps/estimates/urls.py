@@ -2,20 +2,20 @@ from django.urls import path
 
 from . import views
 
-app_name = "orcamentos"
+app_name = "estimates"
 
 urlpatterns = [
-    path("", views.lista, name="lista"),
-    path("novo/", views.novo, name="novo"),
-    path("<int:pk>/", views.detalhe, name="detalhe"),
-    path("<int:pk>/editar/", views.editar, name="editar"),
-    path("<int:pk>/itens/", views.item_adicionar, name="item_adicionar"),
-    path("<int:pk>/itens/<int:item>/remover/", views.item_remover, name="item_remover"),
-    path("<int:pk>/desconto/", views.desconto, name="desconto"),
-    path("<int:pk>/aprovar/", views.aprovar, name="aprovar"),
-    path("<int:pk>/recusar/", views.recusar, name="recusar"),
-    path("<int:pk>/imprimir/", views.imprimir, name="imprimir"),
-    path("procedimentos/", views.procedimentos, name="procedimentos"),
-    path("procedimentos/novo/", views.procedimento_form, name="procedimento_novo"),
-    path("procedimentos/<int:pk>/", views.procedimento_form, name="procedimento_editar"),
+    path("", views.lista, name="list"),
+    path("new/", views.novo, name="new"),
+    path("<int:pk>/", views.detalhe, name="detail"),
+    path("<int:pk>/edit/", views.editar, name="edit"),
+    path("<int:pk>/items/", views.item_adicionar, name="item_add"),
+    path("<int:pk>/items/<int:item>/remove/", views.item_remover, name="item_remove"),
+    path("<int:pk>/discount/", views.desconto, name="discount"),
+    path("<int:pk>/approve/", views.aprovar, name="approve"),
+    path("<int:pk>/decline/", views.recusar, name="decline"),
+    path("<int:pk>/print/", views.imprimir, name="print"),
+    path("procedures/", views.procedimentos, name="procedures"),
+    path("procedures/new/", views.procedimento_form, name="procedure_new"),
+    path("procedures/<int:pk>/", views.procedimento_form, name="procedure_edit"),
 ]

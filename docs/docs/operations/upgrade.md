@@ -31,7 +31,7 @@ Nothing to do: the VM installs every new image published by the CI within 5 minu
 sudo /opt/kaladrius/bin/update.sh --force
 ```
 
-**Automatic rollback:** after starting a new version, the VM waits up to 5 minutes for the system to answer its health page (`/api/v1/saude`, with the database). If it does not, the VM puts back the version of the last successful update (kept as the `app:previous` image) with its Compose file and Caddyfile, so a new Caddy or PostgreSQL image is undone too, records the new one as refused, so it is not installed again until a newer version is published, and the "automatic update" monitor reports the failure until then. `--force` tries the refused version again. A migration the new version already applied is not undone: when the previous version does not work with it, restore the backup.
+**Automatic rollback:** after starting a new version, the VM waits up to 5 minutes for the system to answer its health page (`/api/v1/health`, with the database). If it does not, the VM puts back the version of the last successful update (kept as the `app:previous` image) with its Compose file and Caddyfile, so a new Caddy or PostgreSQL image is undone too, records the new one as refused, so it is not installed again until a newer version is published, and the "automatic update" monitor reports the failure until then. `--force` tries the refused version again. A migration the new version already applied is not undone: when the previous version does not work with it, restore the backup.
 
 ## Going back to an earlier version
 

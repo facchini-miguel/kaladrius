@@ -51,7 +51,7 @@ def test_criacao_preserva_a_capacidade_da_area_original(area):
 )
 def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_modulos", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("configuracoes"), configuracao(modulos=codigos))
+    resposta = cliente.post(reverse("clinic_settings"), configuracao(modulos=codigos))
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.area == "medicina"  # primary area does not dictate enabled modules
@@ -62,13 +62,13 @@ def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL, Papel.FINANCEIRO])
 def test_outros_papeis_nao_alteram_modulos(papel, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario_modulos", clinica_a, papel))
-    assert cliente.post(reverse("configuracoes"), configuracao()).status_code == 403
+    assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
     assert clinica_a.odontologia and not clinica_a.medicina
 
 
 def test_administrador_de_demo_nao_altera_modulos(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("demo_modulos", clinica_a, Papel.ADMIN, demonstracao=True))
-    assert cliente.post(reverse("configuracoes"), configuracao()).status_code == 403
+    assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
     assert not clinica_a.medicina
 
 
@@ -199,7 +199,7 @@ def test_detalhe_nao_consulta_modulos_para_cada_item(
             novo_item(orcamento, dentes="11").save()
     cliente = cliente_de(criar_usuario("recepcao_consultas", clinica_a, Papel.RECEPCAO))
     with CaptureQueriesContext(connection) as consultas:
-        resposta = cliente.get(reverse("orcamentos:detalhe", args=[orcamento.pk]))
+        resposta = cliente.get(reverse("estimates:detail", args=[orcamento.pk]))
     assert resposta.status_code == 200
     assert resposta.context["odontologia_habilitada"]
     consultas_modulos = [q for q in consultas if 'FROM "core_modulodaclinica"' in q["sql"]]
@@ -241,11 +241,11 @@ def test_http_nao_remove_historico_quando_modulo_desativado(
         item.save()
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_modulos", clinica_a, Papel.RECEPCAO))
-    detalhe = cliente.get(reverse("orcamentos:detalhe", args=[orcamento.pk]))
+    detalhe = cliente.get(reverse("estimates:detail", args=[orcamento.pk]))
     assert detalhe.status_code == 200 and detalhe.context["mostrar_dentes"]
     assert "Arcada superior" in detalhe.content.decode()
     assert (
-        cliente.post(reverse("orcamentos:item_remover", args=[orcamento.pk, item.pk])).status_code
+        cliente.post(reverse("estimates:item_remove", args=[orcamento.pk, item.pk])).status_code
         == 403
     )
     with usar_clinica(clinica_a):
@@ -266,7 +266,9 @@ def test_prontuario_comum_nao_exige_modulo_especializado(
     with usar_clinica(clinica_a):
         Profissional.objects.create(nome="Profissional fictício", usuario=usuario)
     cliente = cliente_de(usuario)
-    assert cliente.get(reverse("prontuario:novo", args=[orcamento.paciente_id])).status_code == 200
+    assert (
+        cliente.get(reverse("medical_records:new", args=[orcamento.paciente_id])).status_code == 200
+    )
 
 
 def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
@@ -274,7 +276,9 @@ def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
 ):
     configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_sem_prontuario", clinica_a, Papel.RECEPCAO))
-    assert cliente.get(reverse("prontuario:novo", args=[orcamento.paciente_id])).status_code == 403
+    assert (
+        cliente.get(reverse("medical_records:new", args=[orcamento.paciente_id])).status_code == 403
+    )
 
 
 def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
@@ -284,7 +288,7 @@ def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
     cliente = cliente_de(django_user_model.objects.create_superuser("root_modulos"))
     assert (
         cliente.post(
-            reverse("cadastrar_clinica"), {"nome": "Outra clínica fictícia", "area": "medicina"}
+            reverse("register_clinic"), {"nome": "Outra clínica fictícia", "area": "medicina"}
         ).status_code
         == 302
     )
@@ -304,7 +308,7 @@ def test_superusuario_usa_odontograma_com_odontologia_desligada(
         "quantidade": 1,
         "valor_unitario": "100",
     }
-    adicionar = reverse("orcamentos:item_adicionar", args=[orcamento.pk])
+    adicionar = reverse("estimates:item_add", args=[orcamento.pk])
 
     admin = cliente_de(criar_usuario("admin_odonto", clinica_a, Papel.ADMIN))
     admin.post(adicionar, item_dental)
@@ -312,12 +316,12 @@ def test_superusuario_usa_odontograma_com_odontologia_desligada(
         assert not ItemOrcamento.objects.filter(dentes="36").exists()
 
     root = cliente_de(django_user_model.objects.create_superuser("root_odonto"))
-    detalhe = root.get(reverse("orcamentos:detalhe", args=[orcamento.pk]))
+    detalhe = root.get(reverse("estimates:detail", args=[orcamento.pk]))
     assert detalhe.context["mostrar_dentes"]
     assert "O módulo Odontologia está desligado nesta clínica" in detalhe.content.decode()
     root.post(adicionar, item_dental)
     with usar_clinica(clinica_a):
         item = ItemOrcamento.objects.get(dentes="36")
-    root.post(reverse("orcamentos:item_remover", args=[orcamento.pk, item.pk]))
+    root.post(reverse("estimates:item_remove", args=[orcamento.pk, item.pk]))
     with usar_clinica(clinica_a):
         assert not ItemOrcamento.objects.filter(pk=item.pk).exists()

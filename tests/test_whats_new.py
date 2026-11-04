@@ -122,7 +122,7 @@ def test_arquivo_invalido(arquivo, conteudo, mensagem):
 def test_pagina_novidades(client, django_user_model):
     usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(usuario)
-    conteudo = client.get(reverse("novidades")).content.decode()
+    conteudo = client.get(reverse("whats_new")).content.decode()
     assert f"Versão {releases.versao_atual()}" in conteudo
     # Items with an empty publico are hidden from everyone
     assert "Estrutura do projeto, Docker" not in conteudo
@@ -130,7 +130,7 @@ def test_pagina_novidades(client, django_user_model):
 
 @pytest.mark.django_db
 def test_pagina_novidades_exige_login(client):
-    assert client.get(reverse("novidades")).status_code == 302
+    assert client.get(reverse("whats_new")).status_code == 302
 
 
 @pytest.mark.django_db
@@ -147,6 +147,7 @@ def test_api_releases(client):
 
 @pytest.mark.django_db
 def test_api_versao(client):
+    assert client.get("/api/v1/version").json() == {"version": releases.versao_atual()}
     assert client.get("/api/v1/versao").json() == {"versao": releases.versao_atual()}
 
 
@@ -179,7 +180,7 @@ def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django
     try:
         usuario = django_user_model.objects.create_user(username="bia", password="x-1234567890")
         client.force_login(usuario)
-        pagina = client.get(reverse("novidades")).content.decode()
+        pagina = client.get(reverse("whats_new")).content.decode()
         assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in pagina
         assert 'target="_blank" rel="noopener noreferrer"' in pagina  # opens in a new tab
         assert "Dependabot · #42" in pagina and pagina.count("Dependabot ·") == 1

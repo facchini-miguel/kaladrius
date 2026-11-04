@@ -7,8 +7,8 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Funcionários" %}</h1>
   <div class="d-flex gap-2">
-    <a class="btn btn-outline-primary" href="{% url 'pessoal:folha' %}">{% translate "Folha do mês" %}</a>
-    {% if pode.pessoal.criar %}<a class="btn btn-primary" href="{% url 'pessoal:novo' %}">{% translate "Novo funcionário" %}</a>{% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}</a>
+    {% if pode.pessoal.criar %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
   </div>
 </div>
 <div class="table-responsive">
@@ -17,7 +17,7 @@
     <tbody>
       {% for funcionario in funcionarios %}
       <tr>
-        <td><a href="{% url 'pessoal:funcionario' funcionario.pk %}">{{ funcionario.nome }}</a></td>
+        <td><a href="{% url 'staff:employee' funcionario.pk %}">{{ funcionario.nome }}</a></td>
         <td>{{ funcionario.cargo|default:"—" }}</td>
         <td>{{ funcionario.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
         <td class="text-end text-nowrap">{{ funcionario.salario_atual|moeda|default:"—" }}</td>

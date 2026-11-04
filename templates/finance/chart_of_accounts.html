@@ -8,8 +8,8 @@
   <h1 class="h3 mb-0">{% translate "Plano de contas" %}</h1>
   {% if pode.financeiro.criar %}
   <div class="d-flex gap-2">
-    <a class="btn btn-primary" href="{% url 'financeiro:grupo_novo' %}">{% translate "Novo grupo" %}</a>
-    <a class="btn btn-outline-primary" href="{% url 'financeiro:cadastro_novo' 'categorias' %}">{% translate "Nova categoria" %}</a>
+    <a class="btn btn-primary" href="{% url 'finance:group_new' %}">{% translate "Novo grupo" %}</a>
+    <a class="btn btn-outline-primary" href="{% url 'finance:catalog_new' 'categories' %}">{% translate "Nova categoria" %}</a>
   </div>
   {% endif %}
 </div>
@@ -25,10 +25,10 @@
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ linha.nivel|add:1 }}rem;">
           {% if linha.grupo %}
           <span class="fw-semibold{% if not linha.grupo.ativo %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.grupo }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:grupo_editar' linha.grupo.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:group_edit' linha.grupo.pk %}">{% translate "editar" %}</a>{% endif %}
           {% else %}
           <span class="{% if not linha.categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.categoria.nome }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:cadastro_editar' 'categorias' linha.categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' linha.categoria.pk %}">{% translate "editar" %}</a>{% endif %}
           {% endif %}
         </li>
         {% endfor %}
@@ -37,7 +37,7 @@
         {% for categoria in arvore.sem_grupo %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: 2rem;">
           <span class="{% if not categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ categoria.nome }}</span>
-          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'financeiro:cadastro_editar' 'categorias' categoria.pk %}">{% translate "editar" %}</a>{% endif %}
+          {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' categoria.pk %}">{% translate "editar" %}</a>{% endif %}
         </li>
         {% endfor %}
         {% endif %}

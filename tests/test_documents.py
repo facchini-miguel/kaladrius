@@ -131,38 +131,38 @@ def test_filtros_dos_templates(clinica_a):
 
 def test_paciente_no_mexico_com_curp(clinica_a, admin):
     no_pais(clinica_a, "MX")
-    formulario = admin.get(reverse("pacientes:novo")).content.decode()
+    formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="CURP"' in formulario and 'data-rotulo-pj="RFC"' in formulario
     dados = {"tipo": "PF", "nome": "Paciente Ficticio", "ativo": "on"}
-    resposta = admin.post(reverse("pacientes:novo"), {**dados, "cpf_cnpj": "BOXW310820HNERXN08"})
+    resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "BOXW310820HNERXN08"})
     assert resposta.context["form"].errors["cpf_cnpj"] == ["CURP: número inválido."]
-    resposta = admin.post(reverse("pacientes:novo"), {**dados, "cpf_cnpj": "boxw310820hnerxn09"})
+    resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "boxw310820hnerxn09"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.get()
     assert paciente.cpf_cnpj == "BOXW310820HNERXN09"
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "CURP" in ficha and "BOXW310820HNERXN09" in ficha
 
     # The same document again is refused, as in Brazil.
-    resposta = admin.post(reverse("pacientes:novo"), {**dados, "cpf_cnpj": "BOXW310820HNERXN09"})
+    resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "BOXW310820HNERXN09"})
     assert "Já existe um paciente com este documento" in resposta.content.decode()
 
 
 def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin):
     no_pais(clinica_a, "US")
-    formulario = admin.get(reverse("pacientes:novo")).content.decode()
+    formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf=""' in formulario and 'data-rotulo-pj="EIN"' in formulario
     # An individual: whatever was left in the hidden field is not kept.
     pessoa = {"tipo": "PF", "nome": "John Fictitious", "ativo": "on", "cpf_cnpj": "911144442"}
-    assert admin.post(reverse("pacientes:novo"), pessoa).status_code == 302
+    assert admin.post(reverse("patients:new"), pessoa).status_code == 302
     empresa = {"tipo": "PJ", "nome": "Acme Fictitious", "ativo": "on", "cpf_cnpj": "91-1144442"}
-    assert admin.post(reverse("pacientes:novo"), empresa).status_code == 302
+    assert admin.post(reverse("patients:new"), empresa).status_code == 302
     with usar_clinica(clinica_a):
         assert Paciente.objects.get(nome="John Fictitious").cpf_cnpj == ""
         acme = Paciente.objects.get(nome="Acme Fictitious")
     assert acme.cpf_cnpj == "911144442"
-    lista = admin.get(reverse("pacientes:lista")).content.decode()
+    lista = admin.get(reverse("patients:list")).content.decode()
     assert "91-1144442" in lista and "<th>EIN</th>" in lista
 
 
@@ -172,10 +172,12 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
 def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
     # The country and the document change together: the document is the new country's.
     resposta = admin.post(
-        reverse("configuracoes"), dados_clinica(pais="US", documento="52998224725")
+        reverse("clinic_settings"), dados_clinica(pais="US", documento="52998224725")
     )
     assert resposta.context["form"].errors["documento"] == ["EIN: número inválido."]
-    resposta = admin.post(reverse("configuracoes"), dados_clinica(pais="US", documento="911144442"))
+    resposta = admin.post(
+        reverse("clinic_settings"), dados_clinica(pais="US", documento="911144442")
+    )
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.documento == "911144442"
@@ -184,7 +186,7 @@ def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
 
 def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
     for rfc in ("GODE561231GR8", "ABC680524P76"):
-        resposta = admin.post(reverse("configuracoes"), dados_clinica(pais="MX", documento=rfc))
+        resposta = admin.post(reverse("clinic_settings"), dados_clinica(pais="MX", documento=rfc))
         assert resposta.status_code == 302
         clinica_a.refresh_from_db()
         assert (clinica_a.documento, clinica_a.sigla_documento) == (rfc, "RFC")
@@ -196,13 +198,13 @@ def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
 def test_fornecedor_no_reino_unido(clinica_a, admin):
     no_pais(clinica_a, "GB")
     empresa = {"tipo": "PJ", "nome": "Dental Supplies Ltd", "ativo": "on", "cpf_cnpj": "123"}
-    resposta = admin.post(reverse("financeiro:fornecedor_novo"), empresa)
+    resposta = admin.post(reverse("finance:supplier_new"), empresa)
     assert resposta.context["form"].errors["cpf_cnpj"] == ["Company number: número inválido."]
     empresa["cpf_cnpj"] = "01234567"
-    assert admin.post(reverse("financeiro:fornecedor_novo"), empresa).status_code == 302
+    assert admin.post(reverse("finance:supplier_new"), empresa).status_code == 302
     # A sole trader has no document in this table: nothing is kept.
     pessoa = {"tipo": "PF", "nome": "John Plumber", "ativo": "on", "cpf_cnpj": "01234567"}
-    assert admin.post(reverse("financeiro:fornecedor_novo"), pessoa).status_code == 302
+    assert admin.post(reverse("finance:supplier_new"), pessoa).status_code == 302
     with usar_clinica(clinica_a):
         assert Fornecedor.objects.get(nome="Dental Supplies Ltd").cpf_cnpj == "01234567"
         assert Fornecedor.objects.get(nome="John Plumber").cpf_cnpj == ""
@@ -211,22 +213,22 @@ def test_fornecedor_no_reino_unido(clinica_a, admin):
 def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     no_pais(clinica_a, "US")
     dados = {"nome": "Jane Fictitious", "salario": "3000", "ativo": "on"}
-    resposta = admin.post(reverse("pessoal:novo"), {**dados, "cpf": "000-12-3456"})
+    resposta = admin.post(reverse("staff:new"), {**dados, "cpf": "000-12-3456"})
     assert resposta.context["form"].errors["cpf"] == ["SSN: número inválido."]
-    assert admin.post(reverse("pessoal:novo"), {**dados, "cpf": "536904399"}).status_code == 302
+    assert admin.post(reverse("staff:new"), {**dados, "cpf": "536904399"}).status_code == 302
     with usar_clinica(clinica_a):
         jane = Funcionario.objects.get()
     assert jane.cpf == "536904399"
-    ficha = admin.get(reverse("pessoal:funcionario", args=[jane.pk])).content.decode()
+    ficha = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
     assert "SSN" in ficha and "536-90-4399" in ficha
 
     # Australia: the tax file number is not recorded, so there is no field.
     no_pais(clinica_a, "AU")
-    assert 'name="cpf"' not in admin.get(reverse("pessoal:novo")).content.decode()
+    assert 'name="cpf"' not in admin.get(reverse("staff:new")).content.decode()
 
 
 def test_registro_profissional_com_exemplos_do_pais(clinica_a, admin):
     no_pais(clinica_a, "GB")
-    assert "GDC, GMC" in admin.get(reverse("profissionais:novo")).content.decode()
+    assert "GDC, GMC" in admin.get(reverse("practitioners:new")).content.decode()
     no_pais(clinica_a, "BR")
-    assert "CRO, CRM" in admin.get(reverse("profissionais:novo")).content.decode()
+    assert "CRO, CRM" in admin.get(reverse("practitioners:new")).content.decode()

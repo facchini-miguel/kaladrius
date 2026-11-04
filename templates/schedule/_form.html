@@ -1,4 +1,4 @@
-{% load i18n %}<form hx-post="{% if agendamento.pk %}{% url 'agenda:editar' agendamento.pk %}{% else %}{% url 'agenda:novo' %}{% endif %}"
+{% load i18n %}<form hx-post="{% if agendamento.pk %}{% url 'schedule:edit' agendamento.pk %}{% else %}{% url 'schedule:new' %}{% endif %}"
       hx-target="#modal-conteudo" novalidate>
   {% csrf_token %}
   <div class="modal-header">
@@ -30,7 +30,7 @@
   <div class="modal-footer">
     {% if agendamento.pk and pode.agenda.excluir %}
     <button type="button" class="btn btn-outline-danger me-auto"
-            hx-get="{% url 'agenda:excluir' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Excluir" %}</button>
+            hx-get="{% url 'schedule:delete' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Excluir" %}</button>
     {% endif %}
     <button type="button" class="btn btn-link" data-bs-dismiss="modal">{% translate "Cancelar" %}</button>
     <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>

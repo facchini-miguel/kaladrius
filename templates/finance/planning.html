@@ -43,7 +43,7 @@
           <td class="text-end">{% if linha.percentual is not None %}<span class="badge {% if linha.em_dia %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ linha.percentual }}%</span>{% endif %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'financeiro:plano_contas' %}">{% translate "Plano de contas" %}</a></td></tr>
+        <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></td></tr>
         {% endfor %}
         {% if secao.sem_grupo %}
         <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ secao.sem_grupo|moeda }}</td><td></td></tr>

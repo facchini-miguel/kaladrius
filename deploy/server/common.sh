@@ -137,6 +137,13 @@ backup_dir() {
   echo "${dir:-$DEFAULT_BACKUP_DIR}"
 }
 
+# The health page of site $1, with the database, answers (curl's options in CURL_OPTIONS). Its
+# address before decision 155 too: after a rollback the app may be a version from before it.
+health_answers() {
+  curl -fsS -m 10 "${CURL_OPTIONS[@]}" -o /dev/null "https://$1/api/v1/health" 2>/dev/null \
+    || curl -fsS -m 10 "${CURL_OPTIONS[@]}" -o /dev/null "https://$1/api/v1/saude" 2>/dev/null
+}
+
 # The system answers its health page, with the database, at its first address and through
 # Caddy within HEALTH_WAIT seconds.
 system_up() {
@@ -144,7 +151,7 @@ system_up() {
   site=$(env_value SITE_HOSTNAME | cut -d, -f1 | tr -d ' ')
   site_curl_options "$site"
   end=$(($(date +%s) + HEALTH_WAIT))
-  until curl -fsS -m 10 "${CURL_OPTIONS[@]}" -o /dev/null "https://$site/api/v1/saude" 2>/dev/null; do
+  until health_answers "$site"; do
     [ "$(date +%s)" -lt "$end" ] || return 1
     sleep 5
   done

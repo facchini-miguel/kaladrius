@@ -41,14 +41,14 @@ def carteirinha(convenio, **extra):
 
 def test_cadastro_do_convenio(clinica_a, admin):
     resposta = admin.post(
-        reverse("convenios:novo"),
+        reverse("health_plans:new"),
         {"nome": " Plano Fictício ", "registro": "00.000-2", "telefone": "", "ativo": "on"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         criado = Convenio.objects.get()
     assert (criado.nome, criado.registro) == ("Plano Fictício", "000002")
-    assert "Plano Fictício" in admin.get(reverse("convenios:lista")).content.decode()
+    assert "Plano Fictício" in admin.get(reverse("health_plans:list")).content.decode()
 
 
 @pytest.mark.parametrize(
@@ -60,36 +60,36 @@ def test_cadastro_do_convenio(clinica_a, admin):
     ],
 )
 def test_validacoes_do_convenio(dados, campo, convenio, admin):
-    resposta = admin.post(reverse("convenios:novo"), dados)
+    resposta = admin.post(reverse("health_plans:new"), dados)
     assert campo in resposta.context["form"].errors
 
 
 def test_carteirinha_na_ficha_com_validade(clinica_a, paciente, convenio, admin):
-    url = reverse("convenios:carteirinha_nova", args=[paciente.pk])
+    url = reverse("health_plans:card_new", args=[paciente.pk])
     vencida = (HOJE - datetime.timedelta(days=1)).isoformat()
     resposta = admin.post(url, carteirinha(convenio, numero=" 0099 ", validade=vencida))
-    assert resposta.url == reverse("pacientes:ficha", args=[paciente.pk])
+    assert resposta.url == reverse("patients:record", args=[paciente.pk])
     with usar_clinica(clinica_a):
         criada = Carteirinha.objects.get()
     assert (criada.paciente, criada.numero, criada.vencida) == (paciente, "0099", True)
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "Saúde Exemplo" in ficha and "Vencida" in ficha
     # The same card number cannot belong to two patients of the same plan.
     with usar_clinica(clinica_a):
         outro = Paciente.objects.create(nome="Outra paciente fictícia")
     repetida = admin.post(
-        reverse("convenios:carteirinha_nova", args=[outro.pk]), carteirinha(convenio, numero="0099")
+        reverse("health_plans:card_new", args=[outro.pk]), carteirinha(convenio, numero="0099")
     )
     assert "numero" in repetida.context["form"].errors
     editar = admin.post(
-        reverse("convenios:carteirinha_editar", args=[criada.pk]),
+        reverse("health_plans:card_edit", args=[criada.pk]),
         carteirinha(convenio, numero="0099", plano="Apartamento"),
     )
     assert editar.status_code == 302
 
 
 def test_paciente_sem_carteirinha_e_particular(paciente, admin):
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "Particular" in ficha
 
 
@@ -100,8 +100,8 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
         existente = Carteirinha.objects.create(paciente=paciente, convenio=convenio, numero="1")
         convenio.ativo = False
         convenio.save()
-    nova = admin.get(reverse("convenios:carteirinha_nova", args=[paciente.pk])).context["form"]
-    antiga = admin.get(reverse("convenios:carteirinha_editar", args=[existente.pk])).context["form"]
+    nova = admin.get(reverse("health_plans:card_new", args=[paciente.pk])).context["form"]
+    antiga = admin.get(reverse("health_plans:card_edit", args=[existente.pk])).context["form"]
     with usar_clinica(clinica_a):
         assert convenio not in nova.fields["convenio"].queryset
         assert convenio in antiga.fields["convenio"].queryset
@@ -119,18 +119,16 @@ def test_permissoes_por_papel(
     papel, ver, criar, clinica_a, paciente, convenio, criar_usuario, cliente_de
 ):
     cliente = cliente_de(criar_usuario("papel_convenios", clinica_a, papel))
-    assert cliente.get(reverse("convenios:lista")).status_code == ver
-    assert cliente.get(reverse("convenios:carteirinha_nova", args=[paciente.pk])).status_code == (
-        criar
-    )
+    assert cliente.get(reverse("health_plans:list")).status_code == ver
+    assert cliente.get(reverse("health_plans:card_new", args=[paciente.pk])).status_code == (criar)
 
 
 def test_modulo_desligado(clinica_a, paciente, convenio, admin):
-    assert reverse("convenios:lista") in admin.get(reverse("inicio")).content.decode()
+    assert reverse("health_plans:list") in admin.get(reverse("home")).content.decode()
     configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.CONVENIOS})
-    assert admin.get(reverse("convenios:lista")).status_code == 403
-    assert reverse("convenios:lista") not in admin.get(reverse("inicio")).content.decode()
-    ficha = admin.get(reverse("pacientes:ficha", args=[paciente.pk]))
+    assert admin.get(reverse("health_plans:list")).status_code == 403
+    assert reverse("health_plans:list") not in admin.get(reverse("home")).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[paciente.pk]))
     assert ficha.context.get("carteirinhas") is None
 
 
@@ -150,7 +148,7 @@ def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, paciente, convenio, admi
         )
         paciente.arquivado = True
         paciente.save()
-    resposta = admin.post(reverse("pacientes:excluir", args=[paciente.pk]))
+    resposta = admin.post(reverse("patients:delete", args=[paciente.pk]))
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         assert not Carteirinha.objects.exists()

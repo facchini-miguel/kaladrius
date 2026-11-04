@@ -16,10 +16,10 @@
   {% with campo=form.observacao %}{% include "includes/field.html" %}{% endwith %}
   <p class="text-body-secondary small">{% translate "O vínculo é só informação do cadastro: não dá acesso a nenhum dado do paciente." %}</p>
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'patients:record' paciente.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% if instancia.pk %}
-<form method="post" action="{% url 'pacientes:relacionado_remover' instancia.pk %}" class="mt-3">
+<form method="post" action="{% url 'patients:related_remove' instancia.pk %}" class="mt-3">
   {% csrf_token %}
   <button type="submit" class="btn btn-outline-danger btn-sm">{% translate "Remover" %}</button>
 </form>

@@ -7,11 +7,11 @@ title: Monitoreo
 
 ## ¿Está funcionando?
 
-`GET /api/v1/versao` responde, sin ingreso, con la versión instalada:
+`GET /api/v1/version` responde, sin ingreso, con la versión instalada:
 
 ```bash
-curl https://clinica.ejemplo.com/api/v1/versao
-# {"versao": "0.24.1"}
+curl https://clinica.ejemplo.com/api/v1/version
+# {"version": "0.55.0"}
 ```
 
 Úselo en cualquier monitor de disponibilidad (UptimeRobot, Healthchecks, Uptime Kuma…) para recibir un aviso cuando el sistema deje de responder.
@@ -25,7 +25,7 @@ El propio servidor puede avisarle mediante [Healthchecks.io](https://healthcheck
 
 | Variable en el `.env` | Verificación | Período / tolerancia | Avisa cuando |
 |---|---|---|---|
-| `MONITOR_SYSTEM_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por cada una de sus direcciones (todos los nombres de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
+| `MONITOR_SYSTEM_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por cada una de sus direcciones (todos los nombres de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/health`) |
 | `MONITOR_BACKUP_URL` | Respaldo diario | 1 día / 2 h | El respaldo diario falla o no corre |
 | `MONITOR_DEMO_URL` | Reinicio de la demostración (solo en el servidor de la demostración) | 1 día / 2 horas | El reinicio diario de la demostración (07:30 UTC) falla o no corre |
 | `MONITOR_RESTORE_URL` | Restauración del respaldo | 7 días / 1 día | La prueba semanal de restauración (domingos, 07:00 UTC: el respaldo más nuevo restaurado en una base descartable) falla |

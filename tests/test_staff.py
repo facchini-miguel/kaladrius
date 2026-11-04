@@ -18,7 +18,7 @@ from apps.staff.models import Folha, Funcionario, Salario, hora_extra_sugerida
 pytestmark = pytest.mark.django_db
 
 OUTUBRO = datetime.date(2026, 10, 1)
-FOLHA = reverse("pessoal:folha")
+FOLHA = reverse("staff:payroll")
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def ana(clinica_a):
 
 def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     resposta = admin.post(
-        reverse("pessoal:novo"),
+        reverse("staff:new"),
         {
             "nome": "Bruno Fictício",
             "cpf": "529.982.247-25",
@@ -55,7 +55,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
         assert bruno.cpf == "52998224725"
         assert bruno.salarios.get().desde == datetime.date(2026, 1, 5)  # admission date
     aumento = admin.post(
-        reverse("pessoal:editar", args=[bruno.pk]),
+        reverse("staff:edit", args=[bruno.pk]),
         {
             "nome": "Bruno Fictício",
             "cpf": "52998224725",
@@ -82,7 +82,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
 )
 def test_validacoes_do_cadastro(dados, campo, admin):
     base = {"nome": "Fictício", "salario": "2000", "ativo": "on"}
-    resposta = admin.post(reverse("pessoal:novo"), {**base, **dados})
+    resposta = admin.post(reverse("staff:new"), {**base, **dados})
     assert campo in resposta.context["form"].errors
 
 
@@ -189,7 +189,7 @@ def test_so_administrador_e_financeiro_veem_salarios(
     papel, clinica_a, ana, criar_usuario, cliente_de
 ):
     cliente = cliente_de(criar_usuario("sem_pessoal", clinica_a, papel))
-    for url in (FOLHA, reverse("pessoal:lista"), reverse("pessoal:funcionario", args=[ana.pk])):
+    for url in (FOLHA, reverse("staff:list"), reverse("staff:employee", args=[ana.pk])):
         assert cliente.get(url).status_code == 403, url
 
 
@@ -199,7 +199,7 @@ def test_perfil_financeiro_lanca_a_folha(clinica_a, ana, criar_usuario, cliente_
 
 
 def test_modulo_pessoal_liga_desliga_e_depende_do_financeiro(clinica_a, admin):
-    assert reverse("pessoal:folha") in admin.get(reverse("inicio")).content.decode()
+    assert reverse("staff:payroll") in admin.get(reverse("home")).content.decode()
     configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.PESSOAL})
     assert admin.get(FOLHA).status_code == 403
     with pytest.raises(ValidationError):

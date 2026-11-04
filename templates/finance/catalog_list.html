@@ -6,29 +6,29 @@
 {% block conteudo %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{{ modelo.verbose_name_plural|capfirst }}</h1>
-  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'financeiro:cadastro_novo' cadastro %}">{% translate "Novo" %}</a>{% endif %}
+  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:catalog_new' cadastro %}">{% translate "Novo" %}</a>{% endif %}
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Nome" %}</th>{% if cadastro != "centros-de-custo" %}<th>{% translate "Tipo" %}</th>{% endif %}{% if cadastro == "categorias" %}<th>{% translate "Grupo" %}</th>{% endif %}<th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Nome" %}</th>{% if cadastro != "cost-centers" %}<th>{% translate "Tipo" %}</th>{% endif %}{% if cadastro == "categories" %}<th>{% translate "Grupo" %}</th>{% endif %}<th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
     <tbody>
       {% for item in itens %}
       <tr>
         <td>{{ item.nome }}</td>
-        {% if cadastro == "centros-de-custo" %}
+        {% if cadastro == "cost-centers" %}
         <td>{% if item.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         {% else %}
         <td>{{ item.get_tipo_display }}</td>
-        {% if cadastro == "categorias" %}<td>{{ item.grupo|default:"—" }}</td>{% endif %}
+        {% if cadastro == "categories" %}<td>{{ item.grupo|default:"—" }}</td>{% endif %}
         <td>{% if item.ativa %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
         {% endif %}
-        <td class="text-end">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:cadastro_editar' cadastro item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:catalog_edit' cadastro item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-{% if cadastro == "centros-de-custo" %}
+{% if cadastro == "cost-centers" %}
 <p class="text-body-secondary small">{% translate "O centro de custo diz para quem é cada receita ou despesa (um consultório, uma especialidade, o administrativo). Ele aparece nos lançamentos e nos relatórios assim que houver um cadastrado. Para deixar de usar sem perder o histórico, edite e desmarque “ativo”." %}</p>
 {% else %}
 <p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”." %}</p>

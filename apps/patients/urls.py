@@ -2,20 +2,20 @@ from django.urls import path
 
 from . import views
 
-app_name = "pacientes"
+app_name = "patients"
 
 urlpatterns = [
-    path("", views.lista, name="lista"),
-    path("novo/", views.novo, name="novo"),
-    path("sugestoes/", views.sugestoes, name="sugestoes"),
-    path("aniversariantes/", views.aniversariantes, name="aniversariantes"),
-    path("<int:pk>/", views.ficha, name="ficha"),
-    path("<int:pk>/editar/", views.editar, name="editar"),
-    path("<int:pk>/imprimir/", views.imprimir, name="imprimir"),
-    path("<int:pk>/arquivar/", views.arquivar, name="arquivar"),
-    path("<int:pk>/restaurar/", views.restaurar, name="restaurar"),
-    path("<int:pk>/excluir/", views.excluir, name="excluir"),
-    path("<int:pk>/relacionados/novo/", views.relacionado_novo, name="relacionado_novo"),
-    path("relacionados/<int:pk>/", views.relacionado_editar, name="relacionado_editar"),
-    path("relacionados/<int:pk>/remover/", views.relacionado_remover, name="relacionado_remover"),
+    path("", views.lista, name="list"),
+    path("new/", views.novo, name="new"),
+    path("suggestions/", views.sugestoes, name="suggestions"),
+    path("birthdays/", views.aniversariantes, name="birthdays"),
+    path("<int:pk>/", views.ficha, name="record"),
+    path("<int:pk>/edit/", views.editar, name="edit"),
+    path("<int:pk>/print/", views.imprimir, name="print"),
+    path("<int:pk>/archive/", views.arquivar, name="archive"),
+    path("<int:pk>/restore/", views.restaurar, name="restore"),
+    path("<int:pk>/delete/", views.excluir, name="delete"),
+    path("<int:pk>/related/new/", views.relacionado_novo, name="related_new"),
+    path("related/<int:pk>/", views.relacionado_editar, name="related_edit"),
+    path("related/<int:pk>/remove/", views.relacionado_remover, name="related_remove"),
 ]

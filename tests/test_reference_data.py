@@ -18,7 +18,7 @@ def test_dados_oficiais_carregados_pela_migracao():
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.get(reverse("referencias:cidades"), {"uf": 42, "q": "florianopolis"})
+    resposta = cliente.get(reverse("reference_data:cities"), {"uf": 42, "q": "florianopolis"})
     conteudo = resposta.content.decode()
     assert resposta.status_code == 200
     assert "Florianópolis" in conteudo
@@ -27,18 +27,18 @@ def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuari
 
 def test_lista_de_bancos_busca_por_codigo(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    conteudo = cliente.get(reverse("referencias:bancos"), {"q": "341"}).content.decode()
+    conteudo = cliente.get(reverse("reference_data:banks"), {"q": "341"}).content.decode()
     assert "ITAÚ" in conteudo.upper()
 
 
 def test_paginacao_preserva_os_filtros(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    conteudo = cliente.get(reverse("referencias:cidades"), {"uf": 31}).content.decode()  # MG
+    conteudo = cliente.get(reverse("reference_data:cities"), {"uf": 31}).content.decode()  # MG
     assert "uf=31&amp;q=&amp;pagina=2" in conteudo
 
 
 def test_opcoes_de_cidades_para_o_select_encadeado(client, criar_usuario):
-    url = reverse("referencias:opcoes_cidades")
+    url = reverse("reference_data:city_options")
     assert client.get(url, {"uf": 42}).status_code == 302  # login required
     client.force_login(criar_usuario("qualquer"))
     conteudo = client.get(url, {"uf": 42}).content.decode()
@@ -49,4 +49,4 @@ def test_opcoes_de_cidades_para_o_select_encadeado(client, criar_usuario):
 
 def test_tabelas_de_referencia_exigem_clinica(criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("solto"))
-    assert cliente.get(reverse("referencias:cidades")).status_code == 403
+    assert cliente.get(reverse("reference_data:cities")).status_code == 403

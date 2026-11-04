@@ -31,10 +31,10 @@ def test_acesso_as_telas_de_profissionais_por_papel(
     profissional = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     urls = {
-        "lista": reverse("profissionais:lista"),
-        "novo": reverse("profissionais:novo"),
-        "editar": reverse("profissionais:editar", args=[profissional.pk]),
-        "excluir": reverse("profissionais:excluir", args=[profissional.pk]),
+        "lista": reverse("practitioners:list"),
+        "novo": reverse("practitioners:new"),
+        "editar": reverse("practitioners:edit", args=[profissional.pk]),
+        "excluir": reverse("practitioners:delete", args=[profissional.pk]),
     }
     for nome, url in urls.items():
         assert cliente.get(url).status_code == esperado[nome], nome
@@ -43,7 +43,7 @@ def test_acesso_as_telas_de_profissionais_por_papel(
 def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profissional, cliente_de):
     profissional = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.post(reverse("profissionais:excluir", args=[profissional.pk]))
+    resposta = cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
     assert resposta.status_code == 403
     with usar_clinica(clinica_a):
         assert Profissional.objects.filter(pk=profissional.pk).exists()
@@ -54,13 +54,13 @@ def test_botoes_aparecem_conforme_a_permissao(
 ):
     criar_profissional(clinica_a, "Dra. A")
     recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    conteudo = recepcao.get(reverse("profissionais:lista")).content.decode()
+    conteudo = recepcao.get(reverse("practitioners:list")).content.decode()
     assert "Novo profissional" not in conteudo
     assert ">Editar<" not in conteudo
     assert ">Excluir<" not in conteudo
 
     admin = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    conteudo = admin.get(reverse("profissionais:lista")).content.decode()
+    conteudo = admin.get(reverse("practitioners:list")).content.decode()
     assert "Novo profissional" in conteudo
     assert ">Editar<" in conteudo
     assert ">Excluir<" in conteudo
@@ -69,7 +69,7 @@ def test_botoes_aparecem_conforme_a_permissao(
 def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
-        reverse("profissionais:novo"),
+        reverse("practitioners:new"),
         {"nome": "Dr. Novo", "registro": "CRM 1", "cor": "#123456", "ativo": "on"},
     )
     assert resposta.status_code == 302
@@ -78,28 +78,28 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     assert profissional.clinica == clinica_a
 
     cliente.post(
-        reverse("profissionais:editar", args=[profissional.pk]),
+        reverse("practitioners:edit", args=[profissional.pk]),
         {"nome": "Dr. Renomeado", "cor": "#654321"},
     )
     profissional.refresh_from_db()
     assert profissional.nome == "Dr. Renomeado"
     assert profissional.ativo is False
 
-    cliente.post(reverse("profissionais:excluir", args=[profissional.pk]))
+    cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
     with usar_clinica(clinica_a):
         assert not Profissional.objects.exists()
 
 
 def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("profissionais:novo"), {"nome": "X", "cor": "#zzzzzz"})
+    resposta = cliente.post(reverse("practitioners:new"), {"nome": "X", "cor": "#zzzzzz"})
     assert resposta.status_code == 200
     assert "#RRGGBB" in resposta.content.decode()
 
 
 def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cliente_de):
     com_clinica = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    assert "Profissionais</a>" in com_clinica.get(reverse("inicio")).content.decode()
+    assert "Profissionais</a>" in com_clinica.get(reverse("home")).content.decode()
 
 
 def test_superusuario_entra_direto_na_clinica_da_instalacao(
@@ -108,8 +108,8 @@ def test_superusuario_entra_direto_na_clinica_da_instalacao(
     profissional = criar_profissional(clinica_a, "Dra. A")
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
-    assert cliente.get(reverse("profissionais:editar", args=[profissional.pk])).status_code == 200
-    inicio = cliente.get(reverse("inicio")).content.decode()
+    assert cliente.get(reverse("practitioners:edit", args=[profissional.pk])).status_code == 200
+    inicio = cliente.get(reverse("home")).content.decode()
     assert "Clínica A" in inicio and "Escolha" not in inicio
 
 
@@ -119,27 +119,27 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
     # Without a clinic, the superuser is sent to register it.
-    resposta = cliente.get(reverse("profissionais:lista"))
-    assert resposta.url == reverse("cadastrar_clinica")
+    resposta = cliente.get(reverse("practitioners:list"))
+    assert resposta.url == reverse("register_clinic")
 
     resposta = cliente.post(
-        reverse("cadastrar_clinica"), {"nome": "Clínica Nova", "area": "medicina"}
+        reverse("register_clinic"), {"nome": "Clínica Nova", "area": "medicina"}
     )
-    assert resposta.url == reverse("inicio")
+    assert resposta.url == reverse("home")
     assert list(Clinica.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
-    assert cliente.get(reverse("profissionais:lista")).url == reverse("conta:duas_etapas")
+    assert cliente.get(reverse("practitioners:list")).url == reverse("account:two_factor")
     from apps.account import services as conta_servicos
 
     conta_servicos.ativar(conta_servicos.preparar(root))
-    assert cliente.get(reverse("profissionais:lista")).status_code == 200
+    assert cliente.get(reverse("practitioners:list")).status_code == 200
     # Only one: the page and the Django admin no longer add clinics.
-    assert cliente.get(reverse("cadastrar_clinica")).url == reverse("inicio")
-    cliente.post(reverse("cadastrar_clinica"), {"nome": "Outra"})
+    assert cliente.get(reverse("register_clinic")).url == reverse("home")
+    cliente.post(reverse("register_clinic"), {"nome": "Outra"})
     assert Clinica.objects.count() == 1
     assert cliente.get(reverse("admin:core_clinica_add")).status_code == 403
     # Other users may not register it (cliente_de logs this one in on the same client).
-    assert cliente_de(criar_usuario("ana")).get(reverse("cadastrar_clinica")).status_code == 403
+    assert cliente_de(criar_usuario("ana")).get(reverse("register_clinic")).status_code == 403
 
 
 def test_admin_do_django_so_para_superusuario(
@@ -170,19 +170,27 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
 def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario, cliente_de):
     """Decision 088: all of finance; patients, estimates and records only to look at."""
     cliente = cliente_de(criar_usuario("financeiro", clinica_a, Papel.FINANCEIRO))
-    for nome in ("receber", "pagar", "fluxo", "caixa", "relatorios", "devedores", "comissoes"):
-        assert cliente.get(reverse(f"financeiro:{nome}")).status_code == 200, nome
-    for nome in ("pacientes:lista", "orcamentos:lista", "profissionais:lista"):
+    for nome in (
+        "receivables",
+        "payables",
+        "cash_flow",
+        "cash",
+        "reports",
+        "debtors",
+        "commissions",
+    ):
+        assert cliente.get(reverse(f"finance:{nome}")).status_code == 200, nome
+    for nome in ("patients:list", "estimates:list", "practitioners:list"):
         assert cliente.get(reverse(nome)).status_code == 200, nome
     for nome in (
-        "agenda:calendario",
-        "rechamadas:lista",
-        "equipe:lista",
-        "auditoria:lista",
-        "configuracoes",
-        "pacientes:novo",
-        "orcamentos:novo",
+        "schedule:calendar",
+        "recalls:list",
+        "team:list",
+        "audit:list",
+        "clinic_settings",
+        "patients:new",
+        "estimates:new",
     ):
         assert cliente.get(reverse(nome)).status_code in (302, 403), nome
-    inicio = cliente.get(reverse("inicio"))
+    inicio = cliente.get(reverse("home"))
     assert inicio.status_code == 200

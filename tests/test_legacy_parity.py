@@ -24,12 +24,12 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, recepcao, criar_profissional):
     profissional = criar_profissional(clinica_a, "Profissional fictício")
     semana = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
-    eventos = recepcao.get(reverse("agenda:eventos"), {**semana, "profissional": profissional.pk})
+    eventos = recepcao.get(reverse("schedule:events"), {**semana, "profissional": profissional.pk})
     assert eventos.status_code == 200
-    configuracao = recepcao.get(reverse("agenda:calendario")).context["configuracao"]
+    configuracao = recepcao.get(reverse("schedule:calendar")).context["configuracao"]
     assert configuracao["data"] == "2026-03-05"  # middle of the week on the screen
     # An explicit date still wins.
-    explicita = recepcao.get(reverse("agenda:calendario"), {"data": "2026-04-01"})
+    explicita = recepcao.get(reverse("schedule:calendar"), {"data": "2026-04-01"})
     assert explicita.context["configuracao"]["data"] == "2026-04-01"
 
 
@@ -38,7 +38,7 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
     ontem = timezone.localdate() - datetime.timedelta(days=1)
     sessao["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
     sessao.save()
-    assert recepcao.get(reverse("agenda:calendario")).context["configuracao"]["data"] == ""
+    assert recepcao.get(reverse("schedule:calendar")).context["configuracao"]["data"] == ""
 
 
 def test_ficha_cadastral_impressa(clinica_a, recepcao):
@@ -51,9 +51,9 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
         )
         convenio = Convenio.objects.create(nome="Saúde Exemplo")
         Carteirinha.objects.create(paciente=paciente, convenio=convenio, numero="123456")
-    ficha = recepcao.get(reverse("pacientes:ficha", args=[paciente.pk])).content.decode()
-    assert reverse("pacientes:imprimir", args=[paciente.pk]) in ficha
-    pagina = recepcao.get(reverse("pacientes:imprimir", args=[paciente.pk]))
+    ficha = recepcao.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    assert reverse("patients:print", args=[paciente.pk]) in ficha
+    pagina = recepcao.get(reverse("patients:print", args=[paciente.pk]))
     texto = pagina.content.decode()
     for trecho in (
         "FICHA CADASTRAL",
@@ -75,7 +75,7 @@ def test_ficha_impressa_respeita_permissao(clinica_a, criar_usuario, cliente_de)
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(nome="Paciente fictício sem acesso")
     sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))
-    assert sem_vinculo.get(reverse("pacientes:imprimir", args=[paciente.pk])).status_code in (
+    assert sem_vinculo.get(reverse("patients:print", args=[paciente.pk])).status_code in (
         302,
         403,
     )

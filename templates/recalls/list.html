@@ -6,7 +6,7 @@
 {% block conteudo %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Rechamadas" %}</h1>
-  {% if pode.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'rechamadas:novo' %}">{% translate "Nova rechamada" %}</a>{% endif %}
+  {% if pode.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
 </div>
 
 <form method="get" class="row g-2 mb-3">
@@ -31,7 +31,7 @@
       {% for rechamada in pagina %}
       <tr>
         <td class="text-nowrap">{{ rechamada.data|date:"SHORT_DATE_FORMAT" }}</td>
-        <td><a href="{% url 'pacientes:ficha' rechamada.paciente_id %}">{{ rechamada.paciente.nome }}</a></td>
+        <td><a href="{% url 'patients:record' rechamada.paciente_id %}">{{ rechamada.paciente.nome }}</a></td>
         <td>{{ rechamada.descricao }}</td>
         <td>
           {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
@@ -41,13 +41,13 @@
         </td>
         <td class="text-end text-nowrap">
           {% if pode.rechamadas.alterar %}
-          <form method="post" action="{% url 'rechamadas:concluir' rechamada.pk %}" class="d-inline">
+          <form method="post" action="{% url 'recalls:complete' rechamada.pk %}" class="d-inline">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
             <button type="submit" class="btn btn-sm btn-outline-success">{% if rechamada.concluida %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
           </form>
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'rechamadas:editar' rechamada.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' rechamada.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if pode.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'rechamadas:excluir' rechamada.pk %}">{% translate "Excluir" %}</a>{% endif %}
+          {% if pode.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' rechamada.pk %}">{% translate "Excluir" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}

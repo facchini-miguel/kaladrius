@@ -2,11 +2,11 @@ from django.urls import path
 
 from . import views
 
-app_name = "referencias"
+app_name = "reference_data"
 
 urlpatterns = [
-    path("cidades/", views.cidades, name="cidades"),
-    path("cidades/opcoes/", views.opcoes_cidades, name="opcoes_cidades"),
-    path("enderecos/sugestoes/", views.sugestoes_endereco, name="sugestoes_endereco"),
-    path("bancos/", views.bancos, name="bancos"),
+    path("cities/", views.cidades, name="cities"),
+    path("cities/options/", views.opcoes_cidades, name="city_options"),
+    path("addresses/suggestions/", views.sugestoes_endereco, name="address_suggestions"),
+    path("banks/", views.bancos, name="banks"),
 ]

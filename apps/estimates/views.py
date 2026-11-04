@@ -40,7 +40,7 @@ def _aberto(request, pk):
     orcamento = get_object_or_404(_orcamentos(), pk=pk)
     if orcamento.situacao != Orcamento.Situacao.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
-        return None, redirect("orcamentos:detalhe", pk=orcamento.pk)
+        return None, redirect("estimates:detail", pk=orcamento.pk)
     return orcamento, None
 
 
@@ -94,7 +94,7 @@ def novo(request):
         form.instance.criado_por = request.user
         orcamento = form.save()
         messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
-        return redirect("orcamentos:detalhe", pk=orcamento.pk)
+        return redirect("estimates:detail", pk=orcamento.pk)
     valor_paciente = form["paciente"].value()
     paciente = (
         Paciente.objects.filter(pk=valor_paciente, arquivado=False).first()
@@ -113,7 +113,7 @@ def editar(request, pk):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Orçamento salvo."))
-        return redirect("orcamentos:detalhe", pk=orcamento.pk)
+        return redirect("estimates:detail", pk=orcamento.pk)
     return render(
         request,
         "estimates/form.html",
@@ -180,7 +180,7 @@ def item_adicionar(request, pk):
     else:
         erros = [str(erro) for lista in form.errors.values() for erro in lista]
         messages.error(request, " ".join(erros))
-    return redirect("orcamentos:detalhe", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=orcamento.pk)
 
 
 @require_POST
@@ -199,7 +199,7 @@ def item_remover(request, pk, item):
         messages.error(request, erro.messages[0])
     else:
         messages.success(request, _("Item removido."))
-    return redirect("orcamentos:detalhe", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=orcamento.pk)
 
 
 @require_POST
@@ -217,7 +217,7 @@ def desconto(request, pk):
             orcamento.desconto = valor
             orcamento.save()
             messages.success(request, _("Desconto aplicado."))
-    return redirect("orcamentos:detalhe", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=orcamento.pk)
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
@@ -252,7 +252,7 @@ def aprovar(request, pk):
             form.add_error(None, erro.messages[0])
         else:
             messages.success(request, _("Orçamento aprovado e lançado em A receber."))
-            return redirect("financeiro:lancamento", pk=lancamento.pk)
+            return redirect("finance:entry", pk=lancamento.pk)
     return render(request, "estimates/approve.html", {"form": form, "orcamento": orcamento})
 
 
@@ -268,7 +268,7 @@ def recusar(request, pk):
         messages.error(request, erro.messages[0])
     else:
         messages.success(request, _("Orçamento marcado como recusado."))
-    return redirect("orcamentos:detalhe", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=orcamento.pk)
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
@@ -300,7 +300,7 @@ def procedimento_form(request, pk=None):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.nome})
-        return redirect("orcamentos:procedimentos")
+        return redirect("estimates:procedures")
     return render(
         request,
         "estimates/procedure_form.html",

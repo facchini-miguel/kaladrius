@@ -2,12 +2,12 @@ from django.urls import path
 
 from . import views
 
-app_name = "convenios"
+app_name = "health_plans"
 
 urlpatterns = [
-    path("", views.lista, name="lista"),
-    path("novo/", views.novo, name="novo"),
-    path("<int:pk>/editar/", views.editar, name="editar"),
-    path("carteirinhas/nova/<int:paciente>/", views.carteirinha_nova, name="carteirinha_nova"),
-    path("carteirinhas/<int:pk>/editar/", views.carteirinha_editar, name="carteirinha_editar"),
+    path("", views.lista, name="list"),
+    path("new/", views.novo, name="new"),
+    path("<int:pk>/edit/", views.editar, name="edit"),
+    path("cards/new/<int:paciente>/", views.carteirinha_nova, name="card_new"),
+    path("cards/<int:pk>/edit/", views.carteirinha_editar, name="card_edit"),
 ]

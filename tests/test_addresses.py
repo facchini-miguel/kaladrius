@@ -11,7 +11,7 @@ from apps.reference_data.models import Bairro, Logradouro
 pytestmark = pytest.mark.django_db
 
 CARLOS_BARBOSA = 4304804
-URL = reverse("referencias:sugestoes_endereco")
+URL = reverse("reference_data:address_suggestions")
 
 
 @pytest.fixture
@@ -51,9 +51,9 @@ def test_cidade_sem_dados_e_parametro_invalido(recepcao):
 
 
 def test_formulario_do_paciente_liga_as_sugestoes(recepcao):
-    pagina = recepcao.get(reverse("pacientes:novo")).content.decode()
+    pagina = recepcao.get(reverse("patients:new")).content.decode()
     assert 'list="bairros-sugeridos"' in pagina and 'list="logradouros-sugeridos"' in pagina
-    assert reverse("referencias:sugestoes_endereco") in pagina
+    assert reverse("reference_data:address_suggestions") in pagina
 
 
 def test_sem_login_nao_ve_sugestoes(client):

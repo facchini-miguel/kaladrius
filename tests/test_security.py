@@ -80,7 +80,7 @@ def test_usuario_novo_comeca_na_versao_atual_sem_aviso(client, criar_usuario):
     usuario = criar_usuario("novata")
     assert usuario.ultima_versao_vista == releases.versao_atual()
     client.force_login(usuario)
-    assert "Veja o que mudou" not in client.get(reverse("inicio")).content.decode()
+    assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 
 def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
@@ -88,16 +88,16 @@ def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
     usuario.ultima_versao_vista = "0.40.0"  # seen before this version came out
     usuario.save(update_fields=["ultima_versao_vista"])
     client.force_login(usuario)
-    assert "Veja o que mudou" in client.get(reverse("inicio")).content.decode()
-    client.get(reverse("novidades"))
+    assert "Veja o que mudou" in client.get(reverse("home")).content.decode()
+    client.get(reverse("whats_new"))
     usuario.refresh_from_db()
     assert usuario.ultima_versao_vista == releases.versao_atual()
-    assert "Veja o que mudou" not in client.get(reverse("inicio")).content.decode()
+    assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 
 def test_novidades_filtradas_por_modulo(client, criar_usuario):
     client.force_login(criar_usuario("maria"))
-    resposta = client.get(reverse("novidades"), {"modulo": "Agenda"})
+    resposta = client.get(reverse("whats_new"), {"modulo": "Agenda"})
     modulos = {item.modulo for _, itens in resposta.context["versoes"] for item in itens}
     assert modulos == {"Agenda"}
     assert ("Pacientes", "Pacientes") in resposta.context["modulos"]

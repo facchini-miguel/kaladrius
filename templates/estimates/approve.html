@@ -23,6 +23,6 @@
   </div></div>
   <p class="text-body-secondary small">{% translate "O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não pode mais ser alterado." %}</p>
   <button type="submit" class="btn btn-success">{% translate "Aprovar" %}</button>
-  <a class="btn btn-link" href="{% url 'orcamentos:detalhe' orcamento.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'estimates:detail' orcamento.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

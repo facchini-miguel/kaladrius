@@ -65,8 +65,8 @@ def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(nome="Paciente Fictício")
     for url in (
-        reverse("pacientes:novo"),
-        reverse("pacientes:relacionado_novo", args=[paciente.pk]),
+        reverse("patients:new"),
+        reverse("patients:related_new", args=[paciente.pk]),
     ):
         pagina = recepcao.get(url).content.decode()
         assert "Select an option" not in pagina, url
@@ -82,7 +82,7 @@ def test_meses_em_minuscula_no_portugues():
 
 
 def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(recepcao):
-    pagina = recepcao.get(reverse("pacientes:aniversariantes"), {"mes": 10}).content.decode()
+    pagina = recepcao.get(reverse("patients:birthdays"), {"mes": 10}).content.decode()
     assert ">Outubro</option>" in pagina
 
 
@@ -114,7 +114,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     assert 'class="odontograma-rolagem"' in html
     with usar_clinica(clinica_a):
         paciente = Paciente.objects.create(nome="Paciente Fictício")
-    ficha = recepcao.get(reverse("pacientes:imprimir", args=[paciente.pk])).content.decode()
+    ficha = recepcao.get(reverse("patients:print", args=[paciente.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
 
 

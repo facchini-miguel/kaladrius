@@ -11,6 +11,6 @@
   {% csrf_token %}
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'financeiro:caixa_detalhe' caixa.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:cash_detail' caixa.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

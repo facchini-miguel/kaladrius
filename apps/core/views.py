@@ -38,7 +38,7 @@ def _destino_seguro(request, destino):
         destino, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
         return destino
-    return "inicio"
+    return "home"
 
 
 @login_required
@@ -48,14 +48,14 @@ def cadastrar_clinica(request):
     if not request.user.is_superuser:
         raise PermissionDenied
     if Clinica.objects.exists():
-        return redirect("inicio")
+        return redirect("home")
     form = NovaClinicaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
             request, _("Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe.")
         )
-        return redirect("inicio")
+        return redirect("home")
     return render(request, "core/register_clinic.html", {"form": form})
 
 
@@ -64,12 +64,12 @@ class TrocarSenhaView(PasswordChangeView):
 
     form_class = TrocaSenhaForm
     template_name = "core/change_password.html"
-    success_url = reverse_lazy("inicio")
+    success_url = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
         if getattr(request.user, "demonstracao", False):
             messages.info(request, _("Contas de demonstração não trocam a senha."))
-            return redirect("inicio")
+            return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -89,7 +89,7 @@ def configuracoes(request):
                 _("Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi convertido.")
                 % {"moeda": form.instance.get_moeda_display()},
             )
-        return redirect("configuracoes")
+        return redirect("clinic_settings")
     return render(request, "core/settings.html", {"form": form})
 
 

@@ -2,7 +2,7 @@
 
 {% translate "Alguém pediu uma senha nova para a sua conta. Para criar a senha, abra o link abaixo (ele vale por 1 hora e funciona uma vez):" %}
 
-{{ protocol }}://{{ domain }}{% url 'conta:nova_senha' uidb64=uid token=token %}
+{{ protocol }}://{{ domain }}{% url 'account:new_password' uidb64=uid token=token %}
 
 {% blocktranslate with usuario=user.get_username %}Seu usuário: {{ usuario }}{% endblocktranslate %}
 

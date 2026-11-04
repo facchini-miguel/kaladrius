@@ -45,20 +45,20 @@ def dados_edicao(papel=Papel.RECEPCAO, ativo=True, **conta):
 def test_so_o_administrador_da_clinica_acessa(clinica_a, criar_usuario, cliente_de):
     for papel in (Papel.RECEPCAO, Papel.PROFISSIONAL):
         cliente = cliente_de(criar_usuario(f"u_{papel}", clinica_a, papel))
-        assert cliente.get(reverse("equipe:lista")).status_code == 403
-        assert "Equipe" not in cliente.get(reverse("inicio")).content.decode()
+        assert cliente.get(reverse("team:list")).status_code == 403
+        assert "Equipe" not in cliente.get(reverse("home")).content.decode()
 
 
 def test_lista_mostra_so_a_equipe_da_clinica(cliente_admin, clinica_a, clinica_b, criar_usuario):
     criar_usuario("recepcao_a", clinica_a)
     criar_usuario("recepcao_b", clinica_b)
-    conteudo = cliente_admin.get(reverse("equipe:lista")).content.decode()
+    conteudo = cliente_admin.get(reverse("team:list")).content.decode()
     assert "recepcao_a" in conteudo
     assert "recepcao_b" not in conteudo
 
 
 def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
-    resposta = cliente_admin.post(reverse("equipe:novo"), dados_novo())
+    resposta = cliente_admin.post(reverse("team:new"), dados_novo())
     assert resposta.status_code == 302
     vinculo = Vinculo.objects.get(usuario__username="carla")
     assert (vinculo.clinica, vinculo.papel, vinculo.ativo) == (clinica_a, Papel.RECEPCAO, True)
@@ -79,7 +79,7 @@ def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
     ],
 )
 def test_validacoes_do_novo_membro(cliente_admin, extra, campo):
-    resposta = cliente_admin.post(reverse("equipe:novo"), dados_novo(**extra))
+    resposta = cliente_admin.post(reverse("team:new"), dados_novo(**extra))
     assert resposta.status_code == 200
     assert campo in resposta.context["form"].errors
 
@@ -87,7 +87,7 @@ def test_validacoes_do_novo_membro(cliente_admin, extra, campo):
 def test_altera_perfil_e_tira_acesso(cliente_admin, clinica_a, criar_usuario, cliente_de):
     membro = criar_usuario("membro", clinica_a, Papel.RECEPCAO, first_name="Membro")
     vinculo = membro.vinculos.get()
-    url = reverse("equipe:editar", args=[vinculo.pk])
+    url = reverse("team:edit", args=[vinculo.pk])
     cliente_admin.post(url, dados_edicao(Papel.PROFISSIONAL, first_name="Novo nome"))
     vinculo.refresh_from_db()
     membro.refresh_from_db()
@@ -98,14 +98,14 @@ def test_altera_perfil_e_tira_acesso(cliente_admin, clinica_a, criar_usuario, cl
     vinculo.refresh_from_db()
     assert not vinculo.ativo
     # Without access the member no longer works in the clinic.
-    resposta = cliente_de(membro).get(reverse("pacientes:lista"))
+    resposta = cliente_de(membro).get(reverse("patients:list"))
     assert resposta.status_code == 403
 
 
 def test_nao_altera_o_proprio_perfil(cliente_admin, admin_a):
     vinculo = admin_a.vinculos.get()
     cliente_admin.post(
-        reverse("equipe:editar", args=[vinculo.pk]),
+        reverse("team:edit", args=[vinculo.pk]),
         dados_edicao(Papel.RECEPCAO, ativo=False, first_name="Admin"),
     )
     vinculo.refresh_from_db()
@@ -119,9 +119,7 @@ def test_clinica_nao_fica_sem_administrador(
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(superusuario)
     vinculo = unico_admin.vinculos.get()
-    resposta = cliente.post(
-        reverse("equipe:editar", args=[vinculo.pk]), dados_edicao(Papel.RECEPCAO)
-    )
+    resposta = cliente.post(reverse("team:edit", args=[vinculo.pk]), dados_edicao(Papel.RECEPCAO))
     assert "pelo menos um administrador ativo" in resposta.content.decode()
     vinculo.refresh_from_db()
     assert vinculo.papel == Papel.ADMIN
@@ -135,7 +133,7 @@ def test_administrador_com_conta_desativada_nao_conta(
     desativado.save()
     outro = criar_usuario("outro_admin", clinica_a, Papel.ADMIN, first_name="Outro")
     # With "outro_admin" demoted, admin_a is still an active administrator.
-    url = reverse("equipe:editar", args=[outro.vinculos.get().pk])
+    url = reverse("team:edit", args=[outro.vinculos.get().pk])
     assert cliente_admin.post(url, dados_edicao(first_name="Outro")).status_code == 302
 
     # Now admin_a cannot be demoted: the only other administrator cannot log in.
@@ -148,14 +146,14 @@ def test_administrador_com_conta_desativada_nao_conta(
 
 def test_vinculo_de_outra_clinica_da_404(cliente_admin, clinica_b, criar_usuario):
     vinculo = criar_usuario("outro", clinica_b).vinculos.get()
-    assert cliente_admin.get(reverse("equipe:editar", args=[vinculo.pk])).status_code == 404
-    assert cliente_admin.get(reverse("equipe:senha", args=[vinculo.pk])).status_code == 404
+    assert cliente_admin.get(reverse("team:edit", args=[vinculo.pk])).status_code == 404
+    assert cliente_admin.get(reverse("team:password", args=[vinculo.pk])).status_code == 404
 
 
 def test_define_senha_de_membro_exclusivo_da_clinica(cliente_admin, clinica_a, criar_usuario):
     membro = criar_usuario("membro", clinica_a)
     resposta = cliente_admin.post(
-        reverse("equipe:senha", args=[membro.vinculos.get().pk]),
+        reverse("team:password", args=[membro.vinculos.get().pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},
     )
     assert resposta.status_code == 302
@@ -171,7 +169,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
     vinculo = membro.vinculos.get(clinica=clinica_a)
 
     resposta = cliente_admin.post(
-        reverse("equipe:senha", args=[vinculo.pk]),
+        reverse("team:password", args=[vinculo.pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},
     )
     assert resposta.status_code == 302
@@ -180,7 +178,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
 
     # The role in this clinic can change, but not the name or e-mail of the account.
     cliente_admin.post(
-        reverse("equipe:editar", args=[vinculo.pk]),
+        reverse("team:edit", args=[vinculo.pk]),
         dados_edicao(Papel.PROFISSIONAL, first_name="Trocado"),
     )
     membro.refresh_from_db()
@@ -193,7 +191,7 @@ def test_nao_mexe_na_conta_de_superusuario(cliente_admin, clinica_a, django_user
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     vinculo = Vinculo.objects.create(usuario=superusuario, clinica=clinica_a, papel=Papel.ADMIN)
     cliente_admin.post(
-        reverse("equipe:senha", args=[vinculo.pk]),
+        reverse("team:password", args=[vinculo.pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},
     )
     superusuario.refresh_from_db()
@@ -201,5 +199,5 @@ def test_nao_mexe_na_conta_de_superusuario(cliente_admin, clinica_a, django_user
 
 
 def test_propria_senha_vai_para_a_troca_de_senha(cliente_admin, admin_a):
-    resposta = cliente_admin.get(reverse("equipe:senha", args=[admin_a.vinculos.get().pk]))
-    assert resposta.url == reverse("trocar_senha")
+    resposta = cliente_admin.get(reverse("team:password", args=[admin_a.vinculos.get().pk]))
+    assert resposta.url == reverse("change_password")

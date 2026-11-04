@@ -39,6 +39,6 @@
   {% with campo=form.observacao %}{% include "includes/field.html" %}{% endwith %}
   {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
   <button type="submit" class="btn btn-success">{% translate "Registrar pagamento" %}</button>
-  <a class="btn btn-link" href="{% url 'financeiro:lancamento' parcela.lancamento_id %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' parcela.lancamento_id %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

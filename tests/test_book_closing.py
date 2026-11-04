@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db
 HOJE = timezone.localdate()
 ONTEM = HOJE - datetime.timedelta(days=1)
 ANTEONTEM = HOJE - datetime.timedelta(days=2)
-URL = reverse("financeiro:fechamento")
+URL = reverse("finance:closing")
 
 
 @pytest.fixture
@@ -72,7 +72,7 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
     with usar_clinica(clinica_a):
         services.fechar(clinica_a, ONTEM, usuario=None)
     resposta = admin.post(
-        reverse("financeiro:receber_parcela", args=[parcela.pk]),
+        reverse("finance:receive_installment", args=[parcela.pk]),
         {
             "data": ONTEM.isoformat(),
             "valor": "100",
@@ -125,7 +125,7 @@ def test_cada_clinica_tem_o_seu_fechamento(clinica_a, clinica_b):
 def test_relatorio_mostra_o_fechamento(clinica_a, admin):
     with usar_clinica(clinica_a):
         services.fechar(clinica_a, ONTEM, usuario=None)
-    assert "Financeiro fechado até" in admin.get(reverse("financeiro:relatorios")).content.decode()
+    assert "Financeiro fechado até" in admin.get(reverse("finance:reports")).content.decode()
 
 
 def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):

@@ -25,8 +25,8 @@
         <td class="text-end text-nowrap">{% if linha.estornos %}− {{ linha.estornos|moeda }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold">{{ linha.valor|moeda }}</td>
         <td class="text-end text-nowrap">
-          {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:comissao_percentual' linha.profissional.pk %}">{% translate "Percentual" %}</a>{% endif %}
-          {% if pode.financeiro.criar and linha.valor > 0 %}<a class="btn btn-sm btn-success" href="{% url 'financeiro:comissao_pagar' linha.profissional.pk %}?ate={{ ate|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
+          {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' linha.profissional.pk %}">{% translate "Percentual" %}</a>{% endif %}
+          {% if pode.financeiro.criar and linha.valor > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' linha.profissional.pk %}?ate={{ ate|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}
@@ -37,7 +37,7 @@
 </div>
 {% if sem_percentual and pode.financeiro.alterar %}
 <p class="small">{% translate "Sem percentual definido:" %}
-  {% for profissional in sem_percentual %}<a href="{% url 'financeiro:comissao_percentual' profissional.pk %}">{{ profissional.nome }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  {% for profissional in sem_percentual %}<a href="{% url 'finance:commission_percentage' profissional.pk %}">{{ profissional.nome }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
 </p>
 {% endif %}
 <p class="text-body-secondary small">{% translate "A comissão é o percentual do profissional sobre o valor recebido dos lançamentos a receber em que ele aparece. Lançamentos sem profissional não entram. Cada recebimento é comissionado uma vez só; se for estornado depois de pago ao profissional, a comissão dele é descontada no próximo pagamento." %}</p>
@@ -53,7 +53,7 @@
         <td>{{ comissao.profissional.nome }}</td>
         <td class="text-nowrap">{{ comissao.ate|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="text-end text-nowrap">{% if comissao.cancelada %}<s>{{ comissao.valor|moeda }}</s> <span class="badge text-bg-secondary">{% translate "Cancelada" %}</span>{% else %}{{ comissao.valor|moeda }}{% endif %}</td>
-        <td class="text-end text-nowrap"><a href="{% url 'financeiro:comissao' comissao.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'financeiro:lancamento' comissao.lancamento_id %}">{% translate "A pagar" %}</a></td>
+        <td class="text-end text-nowrap"><a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'finance:entry' comissao.lancamento_id %}">{% translate "A pagar" %}</a></td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma comissão lançada ainda." %}</td></tr>

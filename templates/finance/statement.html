@@ -9,7 +9,7 @@
     <h1 class="h3 mb-0">{% translate "Extrato bancário" %} · {{ importacao.conta }}</h1>
     <span class="text-body-secondary">{{ importacao.inicio|date:"SHORT_DATE_FORMAT" }} – {{ importacao.fim|date:"SHORT_DATE_FORMAT" }} · {{ importacao.arquivo }}{% if importacao.conta_no_banco %} · {% blocktranslate with conta=importacao.conta_no_banco %}conta {{ conta }} no banco{% endblocktranslate %}{% endif %}</span>
   </div>
-  <a class="btn btn-link" href="{% url 'financeiro:extratos' %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:statements' %}">{% translate "Voltar" %}</a>
 </div>
 
 <div class="row g-3 mb-3">
@@ -24,7 +24,7 @@
 <div class="alert alert-warning">{% blocktranslate count n=importacao.ignoradas %}{{ n }} linha do arquivo não tinha data ou valor legível e não foi importada. Confira no extrato do banco.{% plural %}{{ n }} linhas do arquivo não tinham data ou valor legível e não foram importadas. Confira no extrato do banco.{% endblocktranslate %}</div>
 {% endif %}
 {% if pendentes and unicos and pode.financeiro.alterar %}
-<form method="post" action="{% url 'financeiro:extrato_conciliar' importacao.pk %}" class="mb-3">
+<form method="post" action="{% url 'finance:statement_reconcile' importacao.pk %}" class="mb-3">
   {% csrf_token %}
   <button type="submit" class="btn btn-success">{% blocktranslate count n=unicos %}Conciliar {{ n }} transação com correspondência única{% plural %}Conciliar {{ n }} transações com correspondência única{% endblocktranslate %}</button>
 </form>
@@ -42,14 +42,14 @@
         <td>
           {% if t.situacao == "conciliada" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
-            {% if t.pagamento %}<a href="{% url 'financeiro:lancamento' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.descricao }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
-            {% elif t.movimento %}<a href="{% url 'financeiro:caixa_detalhe' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_tipo_display }}</a>{% endif %}
+            {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.descricao }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
+            {% elif t.movimento %}<a href="{% url 'finance:cash_detail' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_tipo_display }}</a>{% endif %}
           {% elif t.situacao == "ignorada" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.motivo }}
           {% else %}
             {% if pode.financeiro.alterar %}
             {% if t.candidatos %}
-            <form method="post" action="{% url 'financeiro:transacao' t.pk 'conciliar' %}" class="d-flex gap-2 mb-1">
+            <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
               <select name="chave" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
                 {% for c in t.candidatos %}<option value="{{ c.chave }}">{{ c.data|date:"SHORT_DATE_FORMAT" }} · {{ c.descricao }}</option>{% endfor %}
@@ -60,8 +60,8 @@
             <span class="badge text-bg-warning">{% translate "Nada correspondente no sistema" %}</span>
             {% endif %}
             <div class="d-flex flex-wrap gap-2 align-items-center">
-              {% if pode.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'financeiro:transacao_lancamento' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
-              <form method="post" action="{% url 'financeiro:transacao' t.pk 'ignorar' %}" class="d-flex gap-1">
+              {% if pode.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
+              <form method="post" action="{% url 'finance:transaction' t.pk 'ignore' %}" class="d-flex gap-1">
                 {% csrf_token %}
                 <input type="text" name="motivo" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">{% translate "Ignorar" %}</button>
@@ -72,7 +72,7 @@
             {% endif %}
           {% endif %}
           {% if t.situacao != "pendente" and pode.financeiro.alterar %}
-          <form method="post" action="{% url 'financeiro:transacao' t.pk 'desfazer' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
+          <form method="post" action="{% url 'finance:transaction' t.pk 'undo' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
           {% endif %}
         </td>
       </tr>

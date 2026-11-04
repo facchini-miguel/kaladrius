@@ -110,7 +110,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         # Chained selects: the city list depends on the chosen state (HTMX).
         self.fields["uf"].widget.attrs.update(
             {
-                "hx-get": reverse("referencias:opcoes_cidades"),
+                "hx-get": reverse("reference_data:city_options"),
                 "hx-target": "#id_cidade",
                 "hx-trigger": "change",
             }
@@ -119,7 +119,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         # anything else can still be typed.
         self.fields["cidade"].widget.attrs.update(
             {
-                "hx-get": reverse("referencias:sugestoes_endereco"),
+                "hx-get": reverse("reference_data:address_suggestions"),
                 "hx-target": "#sugestoes-endereco",
                 "hx-trigger": "load, change",
             }

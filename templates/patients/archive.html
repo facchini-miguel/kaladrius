@@ -16,19 +16,19 @@
   <tbody>
     {% for parcela in abertas %}
     <tr>
-      <td><a href="{% url 'financeiro:lancamento' parcela.lancamento.pk %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">{{ parcela.numero }}/{{ parcela.lancamento.parcelas.count }}</span></td>
+      <td><a href="{% url 'finance:entry' parcela.lancamento.pk %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">{{ parcela.numero }}/{{ parcela.lancamento.parcelas.count }}</span></td>
       <td>{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
       <td class="text-end">{{ parcela.saldo|moeda }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-<a class="btn btn-link px-0" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
+<a class="btn btn-link px-0" href="{% url 'patients:record' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
 {% else %}
 <form method="post">
   {% csrf_token %}
   <button type="submit" class="btn btn-secondary">{% translate "Arquivar" %}</button>
-  <a class="btn btn-link" href="{% url 'pacientes:ficha' paciente.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'patients:record' paciente.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endif %}
 {% endblock %}

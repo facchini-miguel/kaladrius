@@ -7,11 +7,11 @@ title: Monitoramento
 
 ## Está no ar?
 
-`GET /api/v1/versao` responde, sem login, com a versão instalada:
+`GET /api/v1/version` responde, sem login, com a versão instalada:
 
 ```bash
-curl https://clinica.exemplo.com.br/api/v1/versao
-# {"versao": "0.24.1"}
+curl https://clinica.exemplo.com.br/api/v1/version
+# {"version": "0.55.0"}
 ```
 
 Use em qualquer monitor de disponibilidade (UptimeRobot, Healthchecks, Uptime Kuma…) para ser avisado quando o sistema parar de responder.
@@ -25,7 +25,7 @@ O próprio servidor pode avisar você pelo [Healthchecks.io](https://healthcheck
 
 | Variável no `.env` | Verificação | Período / tolerância | Avisa quando |
 |---|---|---|---|
-| `MONITOR_SYSTEM_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet por cada um dos endereços dele (todos os nomes de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/saude`) |
+| `MONITOR_SYSTEM_URL` | Sistema no ar | 5 min / 10 min | O sistema, aberto pela internet por cada um dos endereços dele (todos os nomes de `SITE_HOSTNAME`), não responde, ou o banco dele não responde (`/api/v1/health`) |
 | `MONITOR_BACKUP_URL` | Backup diário | 1 dia / 2 h | O backup diário falha ou não roda |
 | `MONITOR_DEMO_URL` | Reinício da demonstração (só no servidor da demonstração) | 1 dia / 2 horas | O reinício diário da demonstração (07:30 UTC) falha ou não roda |
 | `MONITOR_RESTORE_URL` | Restauração do backup | 7 dias / 1 dia | O teste semanal de restauração (domingos, 07:00 UTC: o backup mais novo restaurado num banco descartável) falha |

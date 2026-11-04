@@ -8,33 +8,33 @@
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' data-mostrar-senha="{% translate 'Mostrar a senha' %}" data-ocultar-senha="{% translate 'Ocultar a senha' %}"{% if inatividade_minutos %} data-inatividade="{{ inatividade_minutos }}" data-url-ativo="{% url 'conta:ativo' %}" data-url-saiu="{% url 'login' %}?inatividade=1" data-aviso-inatividade="{% translate 'Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque na tela ou use o teclado para continuar.' %}"{% endif %}>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' data-mostrar-senha="{% translate 'Mostrar a senha' %}" data-ocultar-senha="{% translate 'Ocultar a senha' %}"{% if inatividade_minutos %} data-inatividade="{{ inatividade_minutos }}" data-url-ativo="{% url 'account:active' %}" data-url-saiu="{% url 'login' %}?inatividade=1" data-aviso-inatividade="{% translate 'Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque na tela ou use o teclado para continuar.' %}"{% endif %}>
   {% if user.is_authenticated %}
   <nav class="navbar navbar-expand-lg bg-primary sticky-top d-print-none" data-bs-theme="dark">
     <div class="container-fluid">
-      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="{% url 'inicio' %}">{% include "includes/logo.html" with classe="logo-barra" %}{{ nome_sistema }}</a>
+      <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="{% url 'home' %}">{% include "includes/logo.html" with classe="logo-barra" %}{{ nome_sistema }}</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
               aria-controls="menu" aria-expanded="false" aria-label="{% translate 'Abrir menu' %}">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'inicio' %}">{% translate "Início" %}</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">{% translate "Início" %}</a></li>
           {% if pode.agenda.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'agenda:calendario' %}">{% translate "Agenda" %}{% if "agenda" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}{% if "agenda" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
           {% endif %}
           {% if pode.pacientes.ver or pode.orcamentos.ver or pode.aniversariantes.ver %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Pacientes" %}</a>
             <ul class="dropdown-menu">
-              {% if pode.pacientes.ver %}<li><a class="dropdown-item" href="{% url 'pacientes:lista' %}">{% translate "Lista de pacientes" %}</a></li>{% endif %}
-              {% if pode.orcamentos.ver %}<li><a class="dropdown-item" href="{% url 'orcamentos:lista' %}">{% translate "Orçamentos" %}{% if "orcamentos" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
-              {% if pode.aniversariantes.ver %}<li><a class="dropdown-item" href="{% url 'pacientes:aniversariantes' %}">{% translate "Aniversariantes" %}{% if "aniversariantes" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
+              {% if pode.pacientes.ver %}<li><a class="dropdown-item" href="{% url 'patients:list' %}">{% translate "Lista de pacientes" %}</a></li>{% endif %}
+              {% if pode.orcamentos.ver %}<li><a class="dropdown-item" href="{% url 'estimates:list' %}">{% translate "Orçamentos" %}{% if "orcamentos" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
+              {% if pode.aniversariantes.ver %}<li><a class="dropdown-item" href="{% url 'patients:birthdays' %}">{% translate "Aniversariantes" %}{% if "aniversariantes" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
             </ul>
           </li>
           {% endif %}
           {% if pode.rechamadas.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'rechamadas:lista' %}">{% translate "Rechamadas" %}{% if "rechamadas" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'recalls:list' %}">{% translate "Rechamadas" %}{% if "rechamadas" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
           {% endif %}
 
           {% if pode.recebimentos.ver or pode.financeiro.ver or pode.pessoal.ver %}
@@ -42,31 +42,31 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}{% if "financeiro" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a>
             <ul class="dropdown-menu">
               {% if pode.recebimentos.ver %}
-              <li><a class="dropdown-item" href="{% url 'financeiro:receber' %}">{% translate "A receber" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:devedores' %}">{% translate "Devedores" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:receivables' %}">{% translate "A receber" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:debtors' %}">{% translate "Devedores" %}</a></li>
               {% if pode.recebimentos.criar %}
-              <li><a class="dropdown-item" href="{% url 'financeiro:lancamento_novo' %}">{% translate "Novo lançamento" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a></li>
               {% endif %}
-              <li><a class="dropdown-item" href="{% url 'financeiro:caixa' %}">{% translate "Caixa do dia" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:cash' %}">{% translate "Caixa do dia" %}</a></li>
               {% endif %}
               {% if pode.financeiro.ver %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:pagar' %}">{% translate "A pagar" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:payables' %}">{% translate "A pagar" %}</a></li>
               {% if pode.financeiro.criar %}
-              <li><a class="dropdown-item" href="{% url 'financeiro:despesa_nova' %}">{% translate "Nova despesa" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a></li>
               {% endif %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:fluxo' %}">{% translate "Fluxo de caixa" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:extratos' %}">{% translate "Extrato bancário" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:comissoes' %}">{% translate "Comissões" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:relatorios' %}">{% translate "Relatórios" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:planejamento' %}">{% translate "Planejamento" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:fechamento' %}">{% translate "Fechamento" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:cash_flow' %}">{% translate "Fluxo de caixa" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:statements' %}">{% translate "Extrato bancário" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:commissions' %}">{% translate "Comissões" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:reports' %}">{% translate "Relatórios" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:planning' %}">{% translate "Planejamento" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:closing' %}">{% translate "Fechamento" %}</a></li>
               {% endif %}
               {% if pode.pessoal.ver %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'pessoal:folha' %}">{% translate "Folha do mês" %}{% if "pessoal" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'pessoal:lista' %}">{% translate "Funcionários" %}{% if "pessoal" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}{% if "pessoal" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'staff:list' %}">{% translate "Funcionários" %}{% if "pessoal" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
               {% endif %}
             </ul>
           </li>
@@ -76,39 +76,39 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Cadastros" %}</a>
             <ul class="dropdown-menu">
               {% if pode.profissionais.ver %}
-              <li><a class="dropdown-item" href="{% url 'profissionais:lista' %}">{% translate "Profissionais" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'practitioners:list' %}">{% translate "Profissionais" %}</a></li>
               {% endif %}
               {% if pode.convenios.ver %}
-              <li><a class="dropdown-item" href="{% url 'convenios:lista' %}">{% translate "Convênios" %}{% if "convenios" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'health_plans:list' %}">{% translate "Convênios" %}{% if "convenios" in modulos_desligados %} {% include "includes/disabled.html" %}{% endif %}</a></li>
               {% endif %}
               {% if pode.usuarios.ver %}
-              <li><a class="dropdown-item" href="{% url 'equipe:lista' %}">{% translate "Equipe" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'team:list' %}">{% translate "Equipe" %}</a></li>
               {% endif %}
               {% if pode.cadastros.ver %}
-              <li><a class="dropdown-item" href="{% url 'agenda:tipos' %}">{% translate "Tipos de atendimento" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'orcamentos:procedimentos' %}">{% translate "Tabela de procedimentos" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'schedule:types' %}">{% translate "Tipos de atendimento" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Tabelas de referência" %}</h6></li>
-              <li><a class="dropdown-item" href="{% url 'referencias:cidades' %}">{% translate "Cidades" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'referencias:bancos' %}">{% translate "Bancos" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'reference_data:cities' %}">{% translate "Cidades" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'reference_data:banks' %}">{% translate "Bancos" %}</a></li>
               {% endif %}
               {% if pode.financeiro.ver %}
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Financeiro" %}</h6></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:plano_contas' %}">{% translate "Plano de contas" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'categorias' %}">{% translate "Categorias" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'contas' %}">{% translate "Contas" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:cadastro' 'centros-de-custo' %}">{% translate "Centros de custo" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'financeiro:fornecedores' %}">{% translate "Fornecedores" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:catalog' 'categories' %}">{% translate "Categorias" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:catalog' 'accounts' %}">{% translate "Contas" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:catalog' 'cost-centers' %}">{% translate "Centros de custo" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'finance:suppliers' %}">{% translate "Fornecedores" %}</a></li>
               {% endif %}
               {% if pode.clinica.alterar or pode.auditoria.ver %}
               <li><hr class="dropdown-divider"></li>
               {% endif %}
               {% if pode.clinica.alterar %}
-              <li><a class="dropdown-item" href="{% url 'configuracoes' %}">{% translate "Configurações da clínica" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'clinic_settings' %}">{% translate "Configurações da clínica" %}</a></li>
               {% endif %}
               {% if pode.auditoria.ver %}
-              <li><a class="dropdown-item" href="{% url 'auditoria:lista' %}">{% translate "Auditoria" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'audit:list' %}">{% translate "Auditoria" %}</a></li>
               {% endif %}
             </ul>
           </li>
@@ -119,8 +119,8 @@
               <li><a class="dropdown-item" href="{{ url_manual }}" target="_blank" rel="noopener">{% translate "Manual do usuário" %}</a></li>
               <li><a class="dropdown-item" href="{{ url_documentacao }}" target="_blank" rel="noopener">{% translate "Documentação" %}</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'novidades' %}">{% translate "Novidades" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'monitoramento:saude' %}">{% translate "Saúde do sistema" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'whats_new' %}">{% translate "Novidades" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'monitoring:health' %}">{% translate "Saúde do sistema" %}</a></li>
             </ul>
           </li>
           {% if user.is_superuser %}
@@ -148,7 +148,7 @@
               <li><h6 class="dropdown-header">{% translate "Idioma" %}</h6></li>
               {% for codigo, nome in idiomas %}
               <li>
-                <form method="post" action="{% url 'trocar_idioma' %}">
+                <form method="post" action="{% url 'change_language' %}">
                   {% csrf_token %}
                   <input type="hidden" name="idioma" value="{{ codigo }}">
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -167,8 +167,8 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
             <ul class="dropdown-menu dropdown-menu-end">
               {% if not user.demonstracao %}
-              <li><a class="dropdown-item" href="{% url 'trocar_senha' %}">{% translate "Trocar senha" %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'conta:duas_etapas' %}">{% translate "Verificação em duas etapas" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'change_password' %}">{% translate "Trocar senha" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'account:two_factor' %}">{% translate "Verificação em duas etapas" %}</a></li>
               <li><hr class="dropdown-divider"></li>
               {% endif %}
               <li>
@@ -203,19 +203,19 @@
       {% if saude_alerta.sem_coleta %}{% translate "A saúde do servidor não está sendo coletada." %}
       {% elif saude_alerta.parada %}{% blocktranslate with momento=saude_alerta.parada|date:"SHORT_DATETIME_FORMAT" %}A coleta da saúde do servidor parou em {{ momento }}.{% endblocktranslate %}
       {% else %}{% translate "O servidor está com recursos no limite:" %} {% for item in saude_alerta.criticos %}{% if item == "memoria" %}{% translate "memória" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disco" %}{% translate "disco" %}{% else %}{% translate "processador" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
-      <a href="{% url 'monitoramento:saude' %}">{% translate "Ver a saúde do sistema" %}</a>
+      <a href="{% url 'monitoring:health' %}">{% translate "Ver a saúde do sistema" %}</a>
     </div>
     {% endif %}
     {% if versao_nova %}
     <div class="alert alert-info d-flex justify-content-between align-items-center d-print-none" role="status">
       <span>{% blocktranslate %}O sistema foi atualizado para a versão {{ versao_sistema }}.{% endblocktranslate %}</span>
-      <a class="btn btn-sm btn-info" href="{% url 'novidades' %}">{% translate "Veja o que mudou" %}</a>
+      <a class="btn btn-sm btn-info" href="{% url 'whats_new' %}">{% translate "Veja o que mudou" %}</a>
     </div>
     {% endif %}
     {% if modulo_desligado %}
     <div class="alert alert-warning d-print-none" role="status">
       {% blocktranslate with modulo=modulo_desligado.label %}O módulo {{ modulo }} está desligado nesta clínica: a equipe não o vê, só o administrador do sistema.{% endblocktranslate %}
-      {% if pode.clinica.alterar %}<a href="{% url 'configuracoes' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
+      {% if pode.clinica.alterar %}<a href="{% url 'clinic_settings' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
     </div>
     {% endif %}
     {% for mensagem in messages %}
@@ -225,9 +225,9 @@
   </main>
 
   <footer class="rodape text-center text-body-secondary small py-3 d-print-none">
-    {{ nome_sistema }} · {% translate "versão" %} <a href="{% if user.is_authenticated %}{% url 'novidades' %}{% else %}#{% endif %}">{{ versao_sistema }}</a>
+    {{ nome_sistema }} · {% translate "versão" %} <a href="{% if user.is_authenticated %}{% url 'whats_new' %}{% else %}#{% endif %}">{{ versao_sistema }}</a>
     · {% translate "Desenvolvido por" %} Miguel Facchini
-    · <a href="{% url 'privacidade' %}">{% translate "Política de privacidade" %}</a>
+    · <a href="{% url 'privacy' %}">{% translate "Política de privacidade" %}</a>
   </footer>
 
   <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>

@@ -45,7 +45,7 @@ def novo(request):
         messages.success(
             request, _("%(nome)s agora faz parte da equipe.") % {"nome": usuario.get_full_name()}
         )
-        return redirect("equipe:lista")
+        return redirect("team:list")
     return render(request, "team/new.html", {"form": form})
 
 
@@ -65,7 +65,7 @@ def editar(request, pk):
         messages.success(
             request, _("Dados de %(nome)s salvos.") % {"nome": usuario.get_full_name() or usuario}
         )
-        return redirect("equipe:lista")
+        return redirect("team:list")
     return render(
         request,
         "team/edit.html",
@@ -84,7 +84,7 @@ def senha(request, pk):
     vinculo = _vinculo(request, pk)
     usuario = vinculo.usuario
     if usuario == request.user:
-        return redirect("trocar_senha")
+        return redirect("change_password")
     if not conta_exclusiva(usuario, request.clinica):
         messages.error(
             request,
@@ -94,7 +94,7 @@ def senha(request, pk):
             )
             % {"nome": usuario},
         )
-        return redirect("equipe:editar", pk=vinculo.pk)
+        return redirect("team:edit", pk=vinculo.pk)
     form = SenhaForm(usuario, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -102,7 +102,7 @@ def senha(request, pk):
             request,
             _("Nova senha de %(nome)s definida.") % {"nome": usuario.get_full_name() or usuario},
         )
-        return redirect("equipe:lista")
+        return redirect("team:list")
     return render(request, "team/password.html", {"vinculo": vinculo, "form": form})
 
 
@@ -128,4 +128,4 @@ def duas_etapas(request, pk):
             _("Verificação em duas etapas de %(nome)s removida.")
             % {"nome": usuario.get_full_name() or usuario},
         )
-    return redirect("equipe:editar", pk=vinculo.pk)
+    return redirect("team:edit", pk=vinculo.pk)
