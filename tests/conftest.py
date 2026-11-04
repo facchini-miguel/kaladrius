@@ -50,3 +50,19 @@ def cliente_de(client):
         return client
 
     return entrar
+
+
+def pytest_sessionstart(session):
+    from tests import template_lookups
+
+    template_lookups.instalar()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Fails the run on a template variable that is not found and was not before (decision 159)."""
+    from tests import template_lookups
+
+    relatorio = session.config.pluginmanager.get_plugin("terminalreporter")
+    escrever = relatorio.write_line if relatorio else print
+    if template_lookups.conferir(escrever) and exitstatus == 0:
+        session.exitstatus = 1
