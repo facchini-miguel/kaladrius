@@ -55,7 +55,7 @@ Regra: **não usar dependências GPL/AGPL**, para manter livre a escolha de lice
 
 ## Ajuda (versão 0.14.0, decisão 050)
 - Menu **Ajuda** com o **manual do usuário** (`docs/<idioma>/manual/`, para toda a equipe, no idioma do usuário), as **Novidades** e, só para o superusuário, a **documentação técnica** (o resto de `docs/`, que descreve a infraestrutura).
-- Os arquivos Markdown viram HTML no servidor (`apps/ajuda`). Links entre documentos viram links dentro do sistema; os demais arquivos do repositório apontam para o GitHub. Só são abertos arquivos `.md` dentro de `docs/`.
+- Os arquivos Markdown viram HTML no servidor (`apps/help`). Links entre documentos viram links dentro do sistema; os demais arquivos do repositório apontam para o GitHub. Só são abertos arquivos `.md` dentro de `docs/`.
 
 ## Execução (Docker Compose)
 
@@ -87,7 +87,7 @@ Regra: **somente recursos do free tier do Google Cloud** (decisão 020).
 - Proteções nativas do Django ativas (CSRF, escape de XSS, ORM parametrizado, cabeçalhos de segurança). `manage.py check --deploy` sem alertas.
 - Senhas com hash Argon2 e limite de tentativas de login (django-axes: 5 erros por usuário + IP bloqueiam por 1 hora). Em IPv6 conta a rede /48, e não o endereço, porque trocar de endereço dentro da própria rede é trivial (decisão 041).
 - Sem recuperação de senha por e-mail (o servidor não envia e-mails): cada pessoa troca a própria senha no menu com o seu nome, e o administrador da clínica define uma nova em Cadastros > Equipe (decisão 042).
-- Registro de auditoria de alterações, consultas a fichas e entradas no sistema (`apps/auditoria`).
+- Registro de auditoria de alterações, consultas a fichas e entradas no sistema (`apps/audit`).
 - Atrás do Caddy, o IP real do cliente vem do `X-Forwarded-For` (`DJANGO_PROXY_REVERSO=1`), usado pelo django-axes e pela auditoria.
 - **Isolamento por clínica** em todas as consultas, com testes automatizados que tentam acessar dados de outra clínica.
 - Segredos só em `.env` (fora do Git) e nos *Secrets* do GitHub. Push protection ativo.

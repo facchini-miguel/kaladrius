@@ -3,14 +3,14 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolamento import (
+from apps.core.isolation import (
     ClinicaDiferente,
     SemClinicaAtual,
     sem_isolamento,
     usar_clinica,
 )
 from apps.core.models import Papel
-from apps.profissionais.models import Profissional
+from apps.practitioners.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 def test_todo_modelo_de_clinica_usa_o_gerenciador_isolado_como_padrao():
     from django.apps import apps
 
-    from apps.core.isolamento import ClinicaManager, ModeloDaClinica
+    from apps.core.isolation import ClinicaManager, ModeloDaClinica
 
     modelos = [m for m in apps.get_models() if issubclass(m, ModeloDaClinica)]
     assert modelos, "no clinic model found"

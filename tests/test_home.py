@@ -7,16 +7,16 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.agenda import servicos as agenda
-from apps.agenda.models import Agendamento, TipoAtendimento
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro import servicos as financeiro
-from apps.financeiro.models import Caixa, Categoria, Conta, Lancamento
-from apps.orcamentos.models import Orcamento
-from apps.pacientes.models import Paciente
-from apps.profissionais.models import Profissional
-from apps.rechamadas.models import Rechamada
+from apps.estimates.models import Orcamento
+from apps.finance import services as financeiro
+from apps.finance.models import Caixa, Categoria, Conta, Lancamento
+from apps.patients.models import Paciente
+from apps.practitioners.models import Profissional
+from apps.recalls.models import Rechamada
+from apps.schedule import services as agenda
+from apps.schedule.models import Agendamento, TipoAtendimento
 
 pytestmark = pytest.mark.django_db
 

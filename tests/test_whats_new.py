@@ -4,7 +4,7 @@ import pytest
 from django.conf import settings
 from django.urls import reverse
 
-from apps.novidades import releases
+from apps.whats_new import releases
 
 
 @pytest.fixture

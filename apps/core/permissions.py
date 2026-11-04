@@ -1,0 +1,166 @@
+"""Role-based permissions per clinic.
+
+Each role (Papel) gets a set of actions (Acao) per module (Modulo). The same check
+guards the views (server side) and decides which menus and buttons the templates show.
+Platform superusers can do everything in any clinic, turned-off modules included
+(decision 115: marked as off; the team does not see them).
+"""
+
+from functools import wraps
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db import models
+from django.shortcuts import redirect, render
+from django.utils.translation import gettext_lazy as _
+
+from . import modules
+from .models import ModuloClinico, Papel
+
+
+class Modulo(models.TextChoices):
+    PACIENTES = "pacientes", _("Pacientes")
+    AGENDA = "agenda", _("Agenda")
+    RECHAMADAS = "rechamadas", _("Rechamadas")
+    ANIVERSARIANTES = "aniversariantes", _("Aniversariantes")
+    PROFISSIONAIS = "profissionais", _("Profissionais")
+    CADASTROS = "cadastros", _("Tabelas base")
+    USUARIOS = "usuarios", _("Usuários da clínica")
+    CLINICA = "clinica", _("Configurações da clínica")
+    AUDITORIA = "auditoria", _("Auditoria")
+    # Receivables, receiving payments, receipts and debtors (front desk included).
+    RECEBIMENTOS = "recebimentos", _("Recebimentos")
+    # Accounts, categories and (0.16) payables and cash flow: administrators only.
+    FINANCEIRO = "financeiro", _("Financeiro")
+    # Treatment estimates (0.18.0): written by practitioners and the front desk.
+    ORCAMENTOS = "orcamentos", _("Orçamentos")
+    # Health plans and the patients' cards (decision 094).
+    CONVENIOS = "convenios", _("Convênios")
+    # Staff, salaries and the month's pay (decision 099): administrators and Finance only.
+    PESSOAL = "pessoal", _("Pessoal")
+
+
+class Acao(models.TextChoices):
+    VER = "ver", _("Ver")
+    CRIAR = "criar", _("Criar")
+    ALTERAR = "alterar", _("Alterar")
+    EXCLUIR = "excluir", _("Excluir")
+
+
+_TODAS = frozenset(Acao)
+_VER = frozenset({Acao.VER})
+_SEM_EXCLUIR = frozenset({Acao.VER, Acao.CRIAR, Acao.ALTERAR})
+
+# Default permission matrix. To be reviewed with the owner after phase 1.
+MATRIZ = {
+    Papel.ADMIN: {modulo: _TODAS for modulo in Modulo},
+    Papel.RECEPCAO: {
+        Modulo.PACIENTES: _SEM_EXCLUIR,
+        Modulo.AGENDA: _TODAS,
+        Modulo.RECHAMADAS: _TODAS,
+        Modulo.ANIVERSARIANTES: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+        # Cancelling entries, reversing payments and discounts stay with administrators.
+        Modulo.RECEBIMENTOS: _SEM_EXCLUIR,
+        Modulo.ORCAMENTOS: _SEM_EXCLUIR,
+        Modulo.CONVENIOS: _SEM_EXCLUIR,
+    },
+    # All of finance, and only a look at who the money is about (decision 088).
+    Papel.FINANCEIRO: {
+        Modulo.RECEBIMENTOS: _TODAS,
+        Modulo.FINANCEIRO: _TODAS,
+        Modulo.PESSOAL: _TODAS,
+        Modulo.PACIENTES: _VER,
+        Modulo.ORCAMENTOS: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+        Modulo.CONVENIOS: _VER,
+    },
+    Papel.PROFISSIONAL: {
+        Modulo.PACIENTES: _SEM_EXCLUIR,
+        Modulo.AGENDA: _SEM_EXCLUIR,
+        Modulo.RECHAMADAS: _SEM_EXCLUIR,
+        Modulo.ANIVERSARIANTES: _VER,
+        Modulo.PROFISSIONAIS: _VER,
+        Modulo.CADASTROS: _VER,
+        Modulo.ORCAMENTOS: _SEM_EXCLUIR,
+        Modulo.CONVENIOS: _VER,
+    },
+}
+
+
+# The public demo logins (decision 089) only look at the team and the clinic settings: a
+# published password must never create users, reset others' passwords or rename the clinic.
+SO_LEITURA_NA_DEMONSTRACAO = frozenset({Modulo.USUARIOS, Modulo.CLINICA})
+
+# The clinic module (decision 092) each permission module belongs to; the rest is the core.
+MODULO_DA_CLINICA = {
+    Modulo.AGENDA: ModuloClinico.AGENDA,
+    Modulo.RECHAMADAS: ModuloClinico.RECHAMADAS,
+    Modulo.ANIVERSARIANTES: ModuloClinico.ANIVERSARIANTES,
+    Modulo.RECEBIMENTOS: ModuloClinico.FINANCEIRO,
+    Modulo.FINANCEIRO: ModuloClinico.FINANCEIRO,
+    Modulo.ORCAMENTOS: ModuloClinico.ORCAMENTOS,
+    Modulo.CONVENIOS: ModuloClinico.CONVENIOS,
+    Modulo.PESSOAL: ModuloClinico.PESSOAL,
+}
+
+
+def pode(request, modulo, acao):
+    """Whether the current user may perform `acao` on `modulo` in the current clinic."""
+    usuario = request.user
+    if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+        return False
+    if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modules.visiveis(request):
+        return False
+    if usuario.is_superuser:
+        return True
+    vinculo = getattr(request, "vinculo", None)
+    if vinculo is None:
+        return False
+    if usuario.demonstracao and modulo in SO_LEITURA_NA_DEMONSTRACAO and acao != Acao.VER:
+        return False
+    return acao in MATRIZ.get(vinculo.papel, {}).get(modulo, frozenset())
+
+
+def so_a_propria_agenda(request):
+    """Practitioners see and change only their own schedule; the rest of the team sees all.
+
+    "Own" means the Profissional record linked to the user (Cadastros > Profissionais).
+    """
+    vinculo = getattr(request, "vinculo", None)
+    return (
+        not request.user.is_superuser
+        and vinculo is not None
+        and vinculo.papel == Papel.PROFISSIONAL
+    )
+
+
+def tabela_permissoes(request):
+    """All permissions as {modulo: {acao: bool}}, for use in templates."""
+    return {
+        modulo.value: {acao.value: pode(request, modulo, acao) for acao in Acao}
+        for modulo in Modulo
+    }
+
+
+def exige_permissao(modulo, acao):
+    """View decorator: requires login, a current clinic and the given permission."""
+
+    def decorador(view):
+        @wraps(view)
+        @login_required
+        def protegida(request, *args, **kwargs):
+            if request.clinica is None:
+                if request.user.is_superuser:
+                    return redirect("cadastrar_clinica")
+                return render(request, "core/sem_clinica.html", status=403)
+            if not pode(request, modulo, acao):
+                raise PermissionDenied
+            modules.marcar_se_desligado(request, MODULO_DA_CLINICA.get(modulo))
+            return view(request, *args, **kwargs)
+
+        return protegida
+
+    return decorador

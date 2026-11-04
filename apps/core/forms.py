@@ -8,9 +8,9 @@ from django.utils import timezone
 from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
-from . import identificacao, moedas, paises
+from . import countries, currencies, identification
 from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
-from .modulos import configurar, faltando, iniciais
+from .modules import configurar, faltando, iniciais
 
 
 def _opcoes(grupo):
@@ -30,9 +30,9 @@ class CampoDecimal(forms.DecimalField):
 
     @staticmethod
     def _sem_milhar(texto):
-        # The currency symbols of apps/core/moedas.py (R$, US$, €, $U, S/, ₲...) and spaces;
+        # The currency symbols of apps/core/currencies.py (R$, US$, €, $U, S/, ₲...) and spaces;
         # anything else stays, so "abc" is still refused.
-        for simbolo in moedas.SIMBOLOS:
+        for simbolo in currencies.SIMBOLOS:
             texto = texto.replace(simbolo, "")
         texto = re.sub(r"\s", "", texto)
         decimal = get_format("DECIMAL_SEPARATOR")
@@ -86,7 +86,7 @@ class FormularioBootstrap:
 
 def campo_documento():
     """A document of the clinic's country, typed with or without punctuation (decision 121).
-    The form names it and checks it (apps/core/identificacao.py)."""
+    The form names it and checks it (apps/core/identification.py)."""
     return forms.CharField(
         label=_("Documento"),
         max_length=25,
@@ -160,7 +160,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
         # in Brazil, "EIN" in the United States... of the country chosen now.
         if "documento" in self.fields:
-            documentos = identificacao.do_pais(self._pais_escolhido())
+            documentos = identification.do_pais(self._pais_escolhido())
             self.documentos_da_clinica = documentos.de("pessoa", "empresa")
             campo = self.fields["documento"]
             campo.label = documentos.rotulo("pessoa", "empresa")
@@ -169,7 +169,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
             )
 
     def clean_documento(self):
-        return identificacao.limpar(
+        return identification.limpar(
             self.cleaned_data.get("documento", ""),
             self.documentos_da_clinica,
             self.fields["documento"].label,
@@ -178,13 +178,13 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
     def _pais_escolhido(self):
         if self.is_bound and self.data.get(self.add_prefix("pais")):
             return self.data[self.add_prefix("pais")]
-        return self.instance.pais or paises.PADRAO
+        return self.instance.pais or countries.PADRAO
 
     def clean_moeda(self):
-        return self.cleaned_data.get("moeda") or self.instance.moeda or moedas.PADRAO
+        return self.cleaned_data.get("moeda") or self.instance.moeda or currencies.PADRAO
 
     def clean_pais(self):
-        return self.cleaned_data.get("pais") or self.instance.pais or paises.PADRAO
+        return self.cleaned_data.get("pais") or self.instance.pais or countries.PADRAO
 
     def _ajustar_ao_pais(self, dados):
         """Time zone and currency of a new country (decision 117): a time zone of another country
@@ -192,7 +192,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         country when it was still the previous country's default and was not changed now."""
         if "pais" not in dados:
             return
-        pais = paises.do_codigo(dados["pais"])
+        pais = countries.do_codigo(dados["pais"])
         fuso = dados.get("fuso_horario")
         if "fuso_horario" in self.fields and fuso and fuso not in pais.fusos:
             if "fuso_horario" in self.changed_data:
@@ -205,7 +205,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         elif not fuso:
             atual = self.instance.fuso_horario
             dados["fuso_horario"] = atual if atual in pais.fusos else pais.fusos[0]
-        anterior = paises.do_codigo(self.instance.pais)
+        anterior = countries.do_codigo(self.instance.pais)
         if (
             "pais" in self.changed_data
             and "moeda" not in self.changed_data
@@ -306,7 +306,7 @@ class ClinicaForm(ModulosClinicosForm):
 
         Past appointments are not checked: the history may have other hours.
         """
-        from apps.agenda.models import Agendamento
+        from apps.schedule.models import Agendamento
 
         def minutos(hora):
             return hora.hour * 60 + hora.minute

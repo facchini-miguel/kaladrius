@@ -7,10 +7,10 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro import conciliacao, ofx, servicos
-from apps.financeiro.models import (
+from apps.finance import ofx, reconciliation, services
+from apps.finance.models import (
     Caixa,
     Categoria,
     Conta,
@@ -19,7 +19,7 @@ from apps.financeiro.models import (
     MovimentoCaixa,
     TransacaoBancaria,
 )
-from apps.pacientes.models import Paciente
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 DIA = datetime.date(2026, 10, 5)
@@ -115,7 +115,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
 def pago(cenario, valor, data, tipo=Lancamento.Tipo.RECEBER, conta=None):
     with usar_clinica(cenario["clinica"]):
         receber = tipo == Lancamento.Tipo.RECEBER
-        lancamento = servicos.criar_lancamento(
+        lancamento = services.criar_lancamento(
             clinica=cenario["clinica"],
             tipo=tipo,
             paciente=cenario["paciente"] if receber else None,
@@ -127,7 +127,7 @@ def pago(cenario, valor, data, tipo=Lancamento.Tipo.RECEBER, conta=None):
             primeiro_vencimento=data,
             usuario=cenario["admin"],
         )
-        return servicos.receber(
+        return services.receber(
             lancamento.parcelas.get(),
             usuario=cenario["admin"],
             valor=Decimal(valor),
@@ -175,7 +175,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
     assert a4.situacao == TransacaoBancaria.Situacao.PENDENTE
     # The user picks one of the two by hand.
     with usar_clinica(cenario["clinica"]):
-        opcoes = conciliacao.candidatos([a4])[a4.pk]
+        opcoes = reconciliation.candidatos([a4])[a4.pk]
     assert len(opcoes) == 2 and opcoes[0].data == DIA + datetime.timedelta(days=1)  # closest first
     cenario["cliente"].post(
         reverse("financeiro:transacao", args=[a4.pk, "conciliar"]), {"chave": opcoes[1].chave}
@@ -259,7 +259,7 @@ def test_estorno_volta_a_transacao_para_pendente(cenario):
     importacao = importar(cenario)
     cenario["cliente"].post(reverse("financeiro:extrato_conciliar", args=[importacao.pk]))
     with usar_clinica(cenario["clinica"]):
-        servicos.estornar(recebido, motivo="Devolvido", usuario=cenario["admin"])
+        services.estornar(recebido, motivo="Devolvido", usuario=cenario["admin"])
     a1 = transacao(cenario, "A1")
     assert (a1.situacao, a1.pagamento) == (TransacaoBancaria.Situacao.PENDENTE, None)
 

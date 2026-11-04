@@ -3,8 +3,8 @@ import zoneinfo
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from . import paises
-from .isolamento import sem_isolamento, usar_clinica
+from . import countries
+from .isolation import sem_isolamento, usar_clinica
 from .models import Clinica, Vinculo
 
 
@@ -61,7 +61,7 @@ def _usar_pais_da_clinica(request, clinica):
         timezone.activate(zoneinfo.ZoneInfo(clinica.fuso_horario))
     except (zoneinfo.ZoneInfoNotFoundError, ValueError):
         pass  # an unknown zone keeps settings.TIME_ZONE
-    variante = paises.variante_do_idioma(translation.get_language(), clinica.pais)
+    variante = countries.variante_do_idioma(translation.get_language(), clinica.pais)
     if variante:
         translation.activate(variante)
         request.LANGUAGE_CODE = variante

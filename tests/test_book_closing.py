@@ -8,10 +8,10 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro import servicos
-from apps.financeiro.models import Categoria, Conta, Fechamento, Lancamento
+from apps.finance import services
+from apps.finance.models import Categoria, Conta, Fechamento, Lancamento
 
 pytestmark = pytest.mark.django_db
 
@@ -29,7 +29,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def parcela(clinica_a):
     with usar_clinica(clinica_a):
-        lancamento = servicos.criar_lancamento(
+        lancamento = services.criar_lancamento(
             clinica=clinica_a,
             tipo=Lancamento.Tipo.RECEBER,
             pessoa="Pagador fictício",
@@ -45,7 +45,7 @@ def parcela(clinica_a):
 
 def receber(clinica, parcela, data, valor="100"):
     with usar_clinica(clinica):
-        return servicos.receber(
+        return services.receber(
             parcela,
             usuario=None,
             valor=Decimal(valor),
@@ -59,18 +59,18 @@ def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, parcela, admin
     antigo = receber(clinica_a, parcela, ANTEONTEM)
     assert admin.post(URL, {"acao": "fechar", "ate": ONTEM.isoformat()}).status_code == 302
     with usar_clinica(clinica_a):
-        assert servicos.fechado_ate(clinica_a.pk) == ONTEM
+        assert services.fechado_ate(clinica_a.pk) == ONTEM
     with pytest.raises(ValidationError, match="fechado"):
         receber(clinica_a, parcela, ONTEM)
     with usar_clinica(clinica_a), pytest.raises(ValidationError, match="fechado"):
-        servicos.estornar(antigo, motivo="erro", usuario=None)
+        services.estornar(antigo, motivo="erro", usuario=None)
     # Today is never closed: money keeps coming in.
     assert receber(clinica_a, parcela, HOJE).pk
 
 
 def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
     with usar_clinica(clinica_a):
-        servicos.fechar(clinica_a, ONTEM, usuario=None)
+        services.fechar(clinica_a, ONTEM, usuario=None)
     resposta = admin.post(
         reverse("financeiro:receber_parcela", args=[parcela.pk]),
         {
@@ -90,19 +90,19 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
 )
 def test_nao_fecha_hoje_nem_o_futuro(clinica_a, ate, mensagem):
     with usar_clinica(clinica_a), pytest.raises(ValidationError, match=mensagem):
-        servicos.fechar(clinica_a, ate, usuario=None)
+        services.fechar(clinica_a, ate, usuario=None)
 
 
 def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
     with usar_clinica(clinica_a):
-        servicos.fechar(clinica_a, ANTEONTEM, usuario=None)
+        services.fechar(clinica_a, ANTEONTEM, usuario=None)
         with pytest.raises(ValidationError, match="já está fechado"):
-            servicos.fechar(clinica_a, ANTEONTEM, usuario=None)
-        servicos.fechar(clinica_a, ONTEM, usuario=None)
+            services.fechar(clinica_a, ANTEONTEM, usuario=None)
+        services.fechar(clinica_a, ONTEM, usuario=None)
         with pytest.raises(ValidationError, match="motivo"):
-            servicos.reabrir(clinica_a, ANTEONTEM, motivo=" ", usuario=None)
+            services.reabrir(clinica_a, ANTEONTEM, motivo=" ", usuario=None)
         with pytest.raises(ValidationError, match="anterior"):
-            servicos.reabrir(clinica_a, ONTEM, motivo="erro", usuario=None)
+            services.reabrir(clinica_a, ONTEM, motivo="erro", usuario=None)
     assert (
         admin.post(
             URL, {"acao": "reabrir", "ate": "", "motivo": "Lançamento esquecido"}
@@ -110,7 +110,7 @@ def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
         == 302
     )
     with usar_clinica(clinica_a):
-        assert servicos.fechado_ate(clinica_a.pk) is None
+        assert services.fechado_ate(clinica_a.pk) is None
         assert Fechamento.objects.count() == 3
     pagina = admin.get(URL).content.decode()
     assert "Lançamento esquecido" in pagina and "O financeiro está aberto" in pagina
@@ -118,13 +118,13 @@ def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
 
 def test_cada_clinica_tem_o_seu_fechamento(clinica_a, clinica_b):
     with usar_clinica(clinica_a):
-        servicos.fechar(clinica_a, ONTEM, usuario=None)
-    assert servicos.fechado_ate(clinica_b.pk) is None
+        services.fechar(clinica_a, ONTEM, usuario=None)
+    assert services.fechado_ate(clinica_b.pk) is None
 
 
 def test_relatorio_mostra_o_fechamento(clinica_a, admin):
     with usar_clinica(clinica_a):
-        servicos.fechar(clinica_a, ONTEM, usuario=None)
+        services.fechar(clinica_a, ONTEM, usuario=None)
     assert "Financeiro fechado até" in admin.get(reverse("financeiro:relatorios")).content.decode()
 
 

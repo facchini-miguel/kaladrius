@@ -6,11 +6,11 @@ import re
 import pytest
 from django.urls import reverse
 
-from apps.convenios import seguros
-from apps.convenios.models import Carteirinha, Convenio
-from apps.core.isolamento import usar_clinica
-from apps.core.paises import PAISES
-from apps.orcamentos.models import Procedimento
+from apps.core.countries import PAISES
+from apps.core.isolation import usar_clinica
+from apps.estimates.models import Procedimento
+from apps.health_plans import insurance
+from apps.health_plans.models import Carteirinha, Convenio
 from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
 from tests.test_health_plans import admin, carteirinha, convenio, paciente  # noqa: F401
 
@@ -23,8 +23,8 @@ def mudar_pais(clinica, pais):
 
 
 def test_cada_pais_tem_as_suas_regras():
-    assert set(seguros.SEGUROS) == set(PAISES)
-    for pais, regras in seguros.SEGUROS.items():
+    assert set(insurance.SEGUROS) == set(PAISES)
+    for pais, regras in insurance.SEGUROS.items():
         for codigo in (regras.registro, regras.procedimento):
             if codigo and codigo.padrao:
                 # Every format has an example, and the example follows it.
@@ -32,12 +32,12 @@ def test_cada_pais_tem_as_suas_regras():
 
 
 def test_codigo_limpo_e_conferido():
-    cdt = seguros.do_pais("US").procedimento
+    cdt = insurance.do_pais("US").procedimento
     assert cdt.limpar(" d1110 ") == "D1110"
     with pytest.raises(Exception, match="CDT"):
         cdt.limpar("1110")
-    assert seguros.do_pais("BR").registro.limpar("00.000-2") == "000002"
-    assert seguros.do_pais("AR").registro.limpar("1-0040-7") == "100407"  # free format
+    assert insurance.do_pais("BR").registro.limpar("00.000-2") == "000002"
+    assert insurance.do_pais("AR").registro.limpar("1-0040-7") == "100407"  # free format
 
 
 def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811

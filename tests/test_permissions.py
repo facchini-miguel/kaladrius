@@ -3,10 +3,10 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.core.permissoes import MATRIZ, Acao, Modulo
-from apps.profissionais.models import Profissional
+from apps.core.permissions import MATRIZ, Acao, Modulo
+from apps.practitioners.models import Profissional
 
 pytestmark = pytest.mark.django_db
 
@@ -129,7 +129,7 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     assert list(Clinica.objects.values_list("nome", "area")) == [("Clínica Nova", "medicina")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
     assert cliente.get(reverse("profissionais:lista")).url == reverse("conta:duas_etapas")
-    from apps.conta import servicos as conta_servicos
+    from apps.account import services as conta_servicos
 
     conta_servicos.ativar(conta_servicos.preparar(root))
     assert cliente.get(reverse("profissionais:lista")).status_code == 200

@@ -4,9 +4,9 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Clinica, Papel, Vinculo
-from apps.profissionais.models import Profissional
+from apps.practitioners.models import Profissional
 
 RECEPCAO = "demo.recepcao"
 PROFISSIONAL = "demo.profissional"

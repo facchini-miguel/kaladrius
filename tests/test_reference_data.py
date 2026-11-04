@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 
 from apps.core.models import Papel
-from apps.referencias.models import UF, Banco, Cidade, EstadoCivil
+from apps.reference_data.models import UF, Banco, Cidade, EstadoCivil
 
 pytestmark = pytest.mark.django_db
 

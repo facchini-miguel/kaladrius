@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from .models import Clinica
-from .modulos import configurar, iniciais
+from .modules import configurar, iniciais
 
 
 @receiver(post_save, sender=Clinica, dispatch_uid="core_modulos_iniciais")

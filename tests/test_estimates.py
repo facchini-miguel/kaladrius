@@ -7,12 +7,12 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolamento import usar_clinica
+from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.financeiro.models import Categoria, Conta, Lancamento
-from apps.orcamentos import servicos
-from apps.orcamentos.models import ItemOrcamento, Orcamento, Procedimento
-from apps.pacientes.models import Paciente
+from apps.estimates import services
+from apps.estimates.models import ItemOrcamento, Orcamento, Procedimento
+from apps.finance.models import Categoria, Conta, Lancamento
+from apps.patients.models import Paciente
 
 pytestmark = pytest.mark.django_db
 HOJE = timezone.localdate()
@@ -192,7 +192,7 @@ def test_recusar_e_imprimir(cenario):
     assert orcamento.situacao == Orcamento.Situacao.RECUSADO
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with usar_clinica(cenario["clinica"]), pytest.raises(ValidationError):
-        servicos.recusar(orcamento, usuario=None)
+        services.recusar(orcamento, usuario=None)
     lista = cliente.get(reverse("orcamentos:lista"), {"situacao": "recusado"})
     assert list(lista.context["pagina"]) == [orcamento]
 
@@ -248,7 +248,7 @@ def test_odontograma_so_na_area_odontologia(cenario):
     assert "dentes" in pagina.context["item_form"].fields
 
     from apps.core.models import MODULOS_GERAIS
-    from apps.core.modulos import configurar
+    from apps.core.modules import configurar
 
     configurar(cenario["clinica"], {*MODULOS_GERAIS, Clinica.Area.MEDICINA})
     pagina = recepcao.get(detalhe)

@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.db import DatabaseError, connection
 from ninja import NinjaAPI
 
-from apps.novidades.api import router as novidades_router
-from apps.novidades.releases import versao_atual
+from apps.whats_new.api import router as novidades_router
+from apps.whats_new.releases import versao_atual
 
 api = NinjaAPI(
     title=f"{settings.NOME_SISTEMA} API",

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-01 22:01-0300\n"
+"POT-Creation-Date: 2026-11-03 21:55-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -13,325 +13,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-msgid "Agenda"
-msgstr "Agenda"
-
-msgid "Já existe um tipo de atendimento com este nome."
-msgstr "Ya existe un tipo de atención con este nombre."
-
-msgid "Data"
-msgstr "Fecha"
-
-msgctxt "hora"
-msgid "Início"
-msgstr "Inicio"
-
-msgid "Fim"
-msgstr "Fin"
-
-msgid "Repetir por quantas semanas"
-msgstr "Repetir durante cuántas semanas"
-
-msgid ""
-"1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
-msgstr ""
-"1 = solo en esta fecha. Ej.: 4 crea el mismo horario durante 4 semanas "
-"seguidas."
-
-msgid "Informe o paciente ou uma descrição."
-msgstr "Indique el paciente o una descripción."
-
-msgid ""
-"Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
-"“Agendar outro paciente neste horário”."
-msgstr ""
-"Esta cita fue cancelada. Para poner otro paciente en este horario, use "
-"“Agendar otro paciente en este horario”."
-
-msgid "O fim deve ser depois do início."
-msgstr "El fin debe ser posterior al inicio."
-
-#, python-format
-msgid "Use horários de %(n)s em %(n)s minutos."
-msgstr "Use horarios de %(n)s en %(n)s minutos."
-
-#, python-format
-msgid "Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s)."
-msgstr "Fuera del horario de atención de la clínica (de %(inicio)s a %(fim)s)."
-
-#, python-format
-msgid "e mais %(n)s"
-msgstr "y %(n)s más"
-
-#, python-format
-msgid "Conflito de horário com: %(lista)s. Nada foi gravado."
-msgstr "Conflicto de horario con: %(lista)s. No se guardó nada."
-
-msgctxt "tipo de atendimento"
-msgid "Liberado"
-msgstr "Disponible"
-
-msgctxt "tipo de atendimento"
-msgid "Consulta"
-msgstr "Consulta"
-
-msgctxt "tipo de atendimento"
-msgid "Retorno"
-msgstr "Control"
-
-msgctxt "tipo de atendimento"
-msgid "Exame"
-msgstr "Examen"
-
-msgctxt "tipo de atendimento"
-msgid "Procedimento"
-msgstr "Procedimiento"
-
-msgctxt "tipo de atendimento"
-msgid "Atendimento de 15 em 15"
-msgstr "Citas de 15 minutos"
-
-msgctxt "tipo de atendimento"
-msgid "Ocupado"
-msgstr "Ocupado"
-
-msgctxt "tipo de atendimento"
-msgid "Cirurgia"
-msgstr "Cirugía"
-
-msgctxt "tipo de atendimento"
-msgid "Dentística"
-msgstr "Odontología restauradora"
-
-msgctxt "tipo de atendimento"
-msgid "Periodontia"
-msgstr "Periodoncia"
-
-msgctxt "tipo de atendimento"
-msgid "Consulta inicial"
-msgstr "Primera consulta"
-
-msgctxt "tipo de atendimento"
-msgid "Prótese"
-msgstr "Prótesis"
-
-msgctxt "tipo de atendimento"
-msgid "Endodontia"
-msgstr "Endodoncia"
-
-msgctxt "tipo de atendimento"
-msgid "Ortodontia"
-msgstr "Ortodoncia"
-
-msgid "nome"
-msgstr "nombre"
-
-msgid "cor"
-msgstr "color"
-
-msgid "ativo"
-msgstr "activo"
-
-msgid "tipo de atendimento"
-msgstr "tipo de atención"
-
-msgid "tipos de atendimento"
-msgstr "tipos de atención"
-
-msgid "Agendado"
-msgstr "Agendada"
-
-msgid "Compareceu"
-msgstr "Asistió"
-
-msgid "Faltou"
-msgstr "Faltó"
-
-msgid "Desmarcou"
-msgstr "Canceló"
-
-msgid "profissional"
-msgstr "profesional"
-
-msgid "início"
-msgstr "inicio"
-
-msgid "fim"
-msgstr "fin"
-
-msgid "paciente"
-msgstr "paciente"
-
-msgid "descrição"
-msgstr "descripción"
-
-msgid "situação"
-msgstr "situación"
-
-msgid "série"
-msgstr "serie"
-
-msgid "criado por"
-msgstr "creado por"
-
-msgid "criado em"
-msgstr "creado el"
-
-msgid "alterado em"
-msgstr "modificado el"
-
-msgid "agendamento"
-msgstr "cita"
-
-msgid "agendamentos"
-msgstr "citas"
-
-msgid "O profissional já tem um agendamento neste horário."
-msgstr "El profesional ya tiene una cita en este horario."
-
-msgid "Horário reservado"
-msgstr "Horario reservado"
-
-msgid "Situação inválida."
-msgstr "Situación inválida."
-
-msgid "Só agendamentos com paciente têm situação."
-msgstr "Solo las citas con paciente tienen situación."
-
-msgid ""
-"Comparecimento e falta só podem ser marcados a partir do dia do atendimento."
-msgstr ""
-"La asistencia y la falta solo se pueden marcar a partir del día de la cita."
-
-msgid ""
-"Este horário já foi ocupado por outro agendamento. Desmarque aquele antes."
-msgstr "Este horario ya fue ocupado por otra cita. Cancele aquella antes."
-
-#, python-format
-msgid "Tipo de atendimento %(nome)s salvo."
-msgstr "Tipo de atención %(nome)s guardado."
-
-#, python-format
-msgid ""
-"%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
-"“ativo” para escondê-lo."
-msgstr ""
-"%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
-"ocultarlo."
-
-#, python-format
-msgid "Tipo de atendimento %(nome)s excluído."
-msgstr "Tipo de atención %(nome)s eliminado."
-
-msgid "aniversariante(s)"
-msgstr "cumpleaños"
-
-msgid "rechamada(s) pendente(s)"
-msgstr "recordatorio(s) pendiente(s)"
-
-msgid "Parâmetros inválidos."
-msgstr "Parámetros no válidos."
-
-msgid "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
-msgstr "Otra cita acaba de ocupar este horario. No se guardó nada."
-
-#, python-format
-msgid "Agendamento criado."
-msgid_plural "%(n)s agendamentos criados."
-msgstr[0] "Cita creada."
-msgstr[1] "%(n)s citas creadas."
-
-msgid "Agendamento alterado."
-msgstr "Cita modificada."
-
-#, python-format
-msgid "%(nome)s: marcação de presença desfeita."
-msgstr "%(nome)s: marca de asistencia deshecha."
-
-#, python-format
-msgid "%(nome)s compareceu."
-msgstr "%(nome)s asistió."
-
-#, python-format
-msgid "%(nome)s faltou."
-msgstr "%(nome)s faltó."
-
-#, python-format
-msgid "%(nome)s desmarcou. O horário ficou livre."
-msgstr "%(nome)s canceló. El horario quedó libre."
-
-#, python-format
-msgid "Agendamento excluído."
-msgid_plural "%(n)s agendamentos excluídos."
-msgstr[0] "Cita eliminada."
-msgstr[1] "%(n)s citas eliminadas."
-
-msgid "Data inválida."
-msgstr "Fecha no válida."
-
-msgid "Ajuda"
-msgstr "Ayuda"
-
-msgid "Auditoria"
-msgstr "Auditoría"
-
-msgid "Criou"
-msgstr "Creó"
-
-msgid "Alterou"
-msgstr "Modificó"
-
-msgid "Excluiu"
-msgstr "Eliminó"
-
-msgid "Visualizou"
-msgstr "Consultó"
-
-msgid "Entrou no sistema"
-msgstr "Inició sesión"
-
-msgid "Tentativa de entrada recusada"
-msgstr "Intento de acceso rechazado"
-
-msgid "Saiu do sistema"
-msgstr "Cerró sesión"
-
-msgid "quando"
-msgstr "cuándo"
-
-msgid "clínica"
-msgstr "clínica"
-
-msgid "usuário"
-msgstr "usuario"
-
-msgid "usuário (texto)"
-msgstr "usuario (texto)"
-
-msgid "ação"
-msgstr "acción"
-
-msgid "tipo de registro"
-msgstr "tipo de registro"
-
-msgid "código do registro"
-msgstr "código del registro"
-
-msgid "registro"
-msgstr "registro"
-
-msgid "alterações"
-msgstr "cambios"
-
-msgid "IP"
-msgstr "IP"
-
-msgid "registro de auditoria"
-msgstr "registro de auditoría"
-
-msgid "registros de auditoria"
-msgstr "registros de auditoría"
 
 msgid "Conta"
 msgstr "Cuenta"
@@ -360,6 +41,9 @@ msgstr "Contraseña incorrecta."
 #
 msgid "Código incorreto."
 msgstr "Código incorrecto."
+
+msgid "usuário"
+msgstr "usuario"
 
 msgid "segredo"
 msgstr "secreto"
@@ -405,102 +89,218 @@ msgstr "Verificación en dos pasos desactivada."
 msgid "Código incorreto. Confira a hora do celular e tente de novo."
 msgstr "Código incorrecto. Verifique la hora del celular e inténtelo de nuevo."
 
-msgid "Convênios"
-msgstr "Convenios"
+msgid "Auditoria"
+msgstr "Auditoría"
 
-msgid "Telefone"
-msgstr "Teléfono"
+msgid "Criou"
+msgstr "Creó"
 
-#, python-format
-msgid "Por exemplo: %(tipos)s."
-msgstr "Por ejemplo: %(tipos)s."
+msgid "Alterou"
+msgstr "Modificó"
 
-#
-msgid "Já existe um convênio com este nome."
-msgstr "Ya existe un convenio con este nombre."
+msgid "Excluiu"
+msgstr "Eliminó"
 
-msgid "Use no máximo 20 caracteres."
-msgstr "Use como máximo 20 caracteres."
+msgid "Visualizou"
+msgstr "Consultó"
 
-#
-#
-msgid "Número da carteirinha"
-msgstr "Número de la credencial"
+msgid "Entrou no sistema"
+msgstr "Inició sesión"
 
-#
-msgid "Número do grupo"
-msgstr "Número de grupo"
+msgid "Tentativa de entrada recusada"
+msgstr "Intento de acceso rechazado"
 
-msgid "Código do beneficiário"
-msgstr "Código del beneficiario"
+msgid "Saiu do sistema"
+msgstr "Cerró sesión"
 
-msgid "Esta carteirinha já está cadastrada neste convênio."
-msgstr "Esta credencial ya está registrada en este convenio."
+msgid "quando"
+msgstr "cuándo"
 
-msgid "registro da operadora"
-msgstr "registro de la aseguradora"
+msgid "clínica"
+msgstr "clínica"
 
-msgid "telefone"
-msgstr "teléfono"
+msgid "usuário (texto)"
+msgstr "usuario (texto)"
 
-msgid "observações"
-msgstr "observaciones"
+msgid "ação"
+msgstr "acción"
 
-msgid "convênio"
-msgstr "convenio"
+msgid "tipo de registro"
+msgstr "tipo de registro"
 
-msgid "convênios"
-msgstr "convenios"
+msgid "código do registro"
+msgstr "código del registro"
 
-msgid "plano"
-msgstr "plan"
+msgid "registro"
+msgstr "registro"
 
-#
-msgid "número da carteirinha"
-msgstr "número de la credencial"
+msgid "alterações"
+msgstr "cambios"
 
-#
-msgid "número do grupo"
-msgstr "número de grupo"
+msgid "IP"
+msgstr "IP"
 
-msgid "código do beneficiário"
-msgstr "código del beneficiario"
+msgid "registro de auditoria"
+msgstr "registro de auditoría"
 
-#
-msgid "validade"
-msgstr "validez"
-
-msgid "titular"
-msgstr "titular"
-
-msgid "Se o paciente for dependente, o nome do titular do plano."
-msgstr "Si el paciente es dependiente, el nombre del titular del plan."
-
-msgid "carteirinha"
-msgstr "credencial"
-
-msgid "carteirinhas"
-msgstr "credenciales"
-
-#, python-format
-msgid "%(nome)s: formato inválido. Exemplo: %(exemplo)s."
-msgstr "%(nome)s: formato inválido. Ejemplo: %(exemplo)s."
-
-msgid "Registro da operadora"
-msgstr "Registro de la aseguradora"
-
-#, python-format
-msgid "%(nome)s salvo."
-msgstr "%(nome)s guardado."
-
-msgid "Carteirinha salva."
-msgstr "Credencial guardada."
+msgid "registros de auditoria"
+msgstr "registros de auditoría"
 
 msgid "- Select an option -"
 msgstr "- Seleccione una opción -"
 
 msgid "Núcleo"
 msgstr "Núcleo"
+
+msgid "Brasil"
+msgstr "Brasil"
+
+msgid "México"
+msgstr "México"
+
+msgid "Argentina"
+msgstr "Argentina"
+
+msgid "Chile"
+msgstr "Chile"
+
+msgid "Colômbia"
+msgstr "Colombia"
+
+msgid "Peru"
+msgstr "Perú"
+
+msgid "Uruguai"
+msgstr "Uruguay"
+
+msgid "Paraguai"
+msgstr "Paraguay"
+
+msgid "Bolívia"
+msgstr "Bolivia"
+
+msgid "Equador"
+msgstr "Ecuador"
+
+msgid "Estados Unidos"
+msgstr "Estados Unidos"
+
+msgid "Reino Unido"
+msgstr "Reino Unido"
+
+msgid "Canadá"
+msgstr "Canadá"
+
+msgid "Austrália"
+msgstr "Australia"
+
+msgid "África do Sul"
+msgstr "Sudáfrica"
+
+msgid "Informe o código de área e o número (10 dígitos)."
+msgstr "Indique el código de área y el número (10 dígitos)."
+
+msgid "Informe o número com o código de área (9 dígitos)."
+msgstr "Indique el número con el código de área (9 dígitos)."
+
+msgid "Informe o número com o código de área (8 ou 9 dígitos)."
+msgstr "Indique el número con el código de área (8 o 9 dígitos)."
+
+msgid "Informe o número com o código de área (8 dígitos)."
+msgstr "Indique el número con el código de área (8 dígitos)."
+
+msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
+msgstr "Indique el número con el código de área (10 u 11 dígitos con el 0)."
+
+msgid "Informe o número com o código de área (10 dígitos com o 0)."
+msgstr "Indique el número con el código de área (10 dígitos con el 0)."
+
+msgid "O CEP deve ter 8 dígitos."
+msgstr "El código postal (CEP) debe tener 8 dígitos."
+
+msgid "O ZIP code tem 5 dígitos (ou 9, com a extensão)."
+msgstr "El ZIP code tiene 5 dígitos (o 9, con la extensión)."
+
+msgid "O código postal canadense tem o formato A1A 1A1."
+msgstr "El código postal canadiense tiene el formato A1A 1A1."
+
+msgid "Informe um postcode válido, como SW1A 1AA."
+msgstr "Indique un postcode válido, como SW1A 1AA."
+
+msgid "O postcode australiano tem 4 dígitos."
+msgstr "El postcode australiano tiene 4 dígitos."
+
+msgid "O código postal sul-africano tem 4 dígitos."
+msgstr "El código postal sudafricano tiene 4 dígitos."
+
+msgid "O código postal tem 5 dígitos."
+msgstr "El código postal tiene 5 dígitos."
+
+msgid "O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."
+msgstr "El código postal argentino tiene el formato C1425ABC (o 4 dígitos)."
+
+msgid "O código postal tem 7 dígitos."
+msgstr "El código postal tiene 7 dígitos."
+
+msgid "O código postal tem 6 dígitos."
+msgstr "El código postal tiene 6 dígitos."
+
+msgid "O código postal tem 6 dígitos (ou 4, no formato antigo)."
+msgstr "El código postal tiene 6 dígitos (o 4, en el formato anterior)."
+
+msgid "Use até 9 letras ou números."
+msgstr "Use hasta 9 letras o números."
+
+msgid "CEP"
+msgstr "Código postal (CEP)"
+
+msgid "Código postal"
+msgstr "Código postal"
+
+msgid "Real brasileiro"
+msgstr "Real brasileño"
+
+msgid "Dólar americano"
+msgstr "Dólar estadounidense"
+
+msgid "Euro"
+msgstr "Euro"
+
+msgid "Libra esterlina"
+msgstr "Libra esterlina"
+
+msgid "Dólar canadense"
+msgstr "Dólar canadiense"
+
+msgid "Dólar australiano"
+msgstr "Dólar australiano"
+
+msgid "Rand sul-africano"
+msgstr "Rand sudafricano"
+
+msgid "Peso argentino"
+msgstr "Peso argentino"
+
+msgid "Peso mexicano"
+msgstr "Peso mexicano"
+
+msgid "Peso chileno"
+msgstr "Peso chileno"
+
+msgid "Peso colombiano"
+msgstr "Peso colombiano"
+
+msgid "Peso uruguaio"
+msgstr "Peso uruguayo"
+
+msgid "Guarani paraguaio"
+msgstr "Guaraní paraguayo"
+
+msgid "Sol peruano"
+msgstr "Sol peruano"
+
+msgid "Boliviano"
+msgstr "Boliviano"
 
 msgid "Documento"
 msgstr "Documento"
@@ -639,6 +439,9 @@ msgstr "Medicina"
 msgid "Outra área da saúde"
 msgstr "Otra área de la salud"
 
+msgid "nome"
+msgstr "nombre"
+
 msgid "área principal"
 msgstr "área principal"
 
@@ -655,6 +458,9 @@ msgstr "documento"
 
 msgid "e-mail"
 msgstr "correo electrónico"
+
+msgid "telefone"
+msgstr "teléfono"
 
 msgid "endereço"
 msgstr "dirección"
@@ -738,6 +544,9 @@ msgstr "clínicas"
 msgid "O início da agenda deve ser antes do fim."
 msgstr "El inicio de la agenda debe ser anterior al fin."
 
+msgid "Agenda"
+msgstr "Agenda"
+
 msgid "Prontuário"
 msgstr "Historia clínica"
 
@@ -753,12 +562,18 @@ msgstr "Recordatorios"
 msgid "Aniversariantes"
 msgstr "Cumpleaños"
 
+msgid "Convênios"
+msgstr "Convenios"
+
 #
 msgid "Pessoal"
 msgstr "Personal"
 
 msgid "módulo"
 msgstr "módulo"
+
+msgid "ativo"
+msgstr "activo"
 
 msgid "módulo da clínica"
 msgstr "módulo de la clínica"
@@ -777,6 +592,9 @@ msgstr "Profesional"
 
 msgid "perfil"
 msgstr "perfil"
+
+msgid "criado em"
+msgstr "creado el"
 
 msgid "vínculo com clínica"
 msgstr "vínculo con clínica"
@@ -809,156 +627,6 @@ msgstr "Presupuestos y Personal necesitan Financiero habilitado."
 
 msgid "Cadastre a clínica antes de configurar os módulos."
 msgstr "Registre la clínica antes de configurar los módulos."
-
-msgid "Real brasileiro"
-msgstr "Real brasileño"
-
-msgid "Dólar americano"
-msgstr "Dólar estadounidense"
-
-msgid "Euro"
-msgstr "Euro"
-
-msgid "Libra esterlina"
-msgstr "Libra esterlina"
-
-msgid "Dólar canadense"
-msgstr "Dólar canadiense"
-
-msgid "Dólar australiano"
-msgstr "Dólar australiano"
-
-msgid "Rand sul-africano"
-msgstr "Rand sudafricano"
-
-msgid "Peso argentino"
-msgstr "Peso argentino"
-
-msgid "Peso mexicano"
-msgstr "Peso mexicano"
-
-msgid "Peso chileno"
-msgstr "Peso chileno"
-
-msgid "Peso colombiano"
-msgstr "Peso colombiano"
-
-msgid "Peso uruguaio"
-msgstr "Peso uruguayo"
-
-msgid "Guarani paraguaio"
-msgstr "Guaraní paraguayo"
-
-msgid "Sol peruano"
-msgstr "Sol peruano"
-
-msgid "Boliviano"
-msgstr "Boliviano"
-
-msgid "Brasil"
-msgstr "Brasil"
-
-msgid "México"
-msgstr "México"
-
-msgid "Argentina"
-msgstr "Argentina"
-
-msgid "Chile"
-msgstr "Chile"
-
-msgid "Colômbia"
-msgstr "Colombia"
-
-msgid "Peru"
-msgstr "Perú"
-
-msgid "Uruguai"
-msgstr "Uruguay"
-
-msgid "Paraguai"
-msgstr "Paraguay"
-
-msgid "Bolívia"
-msgstr "Bolivia"
-
-msgid "Equador"
-msgstr "Ecuador"
-
-msgid "Estados Unidos"
-msgstr "Estados Unidos"
-
-msgid "Reino Unido"
-msgstr "Reino Unido"
-
-msgid "Canadá"
-msgstr "Canadá"
-
-msgid "Austrália"
-msgstr "Australia"
-
-msgid "África do Sul"
-msgstr "Sudáfrica"
-
-msgid "Informe o código de área e o número (10 dígitos)."
-msgstr "Indique el código de área y el número (10 dígitos)."
-
-msgid "Informe o número com o código de área (9 dígitos)."
-msgstr "Indique el número con el código de área (9 dígitos)."
-
-msgid "Informe o número com o código de área (8 ou 9 dígitos)."
-msgstr "Indique el número con el código de área (8 o 9 dígitos)."
-
-msgid "Informe o número com o código de área (8 dígitos)."
-msgstr "Indique el número con el código de área (8 dígitos)."
-
-msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
-msgstr "Indique el número con el código de área (10 u 11 dígitos con el 0)."
-
-msgid "Informe o número com o código de área (10 dígitos com o 0)."
-msgstr "Indique el número con el código de área (10 dígitos con el 0)."
-
-msgid "O CEP deve ter 8 dígitos."
-msgstr "El código postal (CEP) debe tener 8 dígitos."
-
-msgid "O ZIP code tem 5 dígitos (ou 9, com a extensão)."
-msgstr "El ZIP code tiene 5 dígitos (o 9, con la extensión)."
-
-msgid "O código postal canadense tem o formato A1A 1A1."
-msgstr "El código postal canadiense tiene el formato A1A 1A1."
-
-msgid "Informe um postcode válido, como SW1A 1AA."
-msgstr "Indique un postcode válido, como SW1A 1AA."
-
-msgid "O postcode australiano tem 4 dígitos."
-msgstr "El postcode australiano tiene 4 dígitos."
-
-msgid "O código postal sul-africano tem 4 dígitos."
-msgstr "El código postal sudafricano tiene 4 dígitos."
-
-msgid "O código postal tem 5 dígitos."
-msgstr "El código postal tiene 5 dígitos."
-
-msgid "O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."
-msgstr "El código postal argentino tiene el formato C1425ABC (o 4 dígitos)."
-
-msgid "O código postal tem 7 dígitos."
-msgstr "El código postal tiene 7 dígitos."
-
-msgid "O código postal tem 6 dígitos."
-msgstr "El código postal tiene 6 dígitos."
-
-msgid "O código postal tem 6 dígitos (ou 4, no formato antigo)."
-msgstr "El código postal tiene 6 dígitos (o 4, en el formato anterior)."
-
-msgid "Use até 9 letras ou números."
-msgstr "Use hasta 9 letras o números."
-
-msgid "CEP"
-msgstr "Código postal (CEP)"
-
-msgid "Código postal"
-msgstr "Código postal"
 
 msgid "Pacientes"
 msgstr "Pacientes"
@@ -1035,44 +703,219 @@ msgstr ""
 "Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se "
 "convirtió."
 
-msgid "Equipe"
-msgstr "Equipo"
+msgid "FDI (11 a 48; dentes de leite 51 a 85)"
+msgstr "FDI (11 a 48; dientes de leche 51 a 85)"
 
-msgid "Perfil"
-msgstr "Perfil"
+msgid "Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)"
+msgstr "Universal, de Estados Unidos (1 a 32; dientes de leche A a T)"
 
-msgid "Acesso a esta clínica liberado"
-msgstr "Acceso a esta clínica habilitado"
+msgid "Palmer (UR6, LL3; dentes de leite URE a LRE)"
+msgstr "Palmer (UR6, LL3; dientes de leche URE a LRE)"
 
-msgid "Você não pode alterar o próprio perfil."
-msgstr "No puede cambiar su propio perfil."
+msgid "Numeração FDI."
+msgstr "Numeración FDI."
 
-msgid "A clínica precisa de pelo menos um administrador ativo."
-msgstr "La clínica necesita al menos un administrador activo."
+msgid "Numeração universal (Estados Unidos)."
+msgstr "Numeración universal (Estados Unidos)."
 
-#, python-format
-msgid "%(nome)s agora faz parte da equipe."
-msgstr "%(nome)s ahora forma parte del equipo."
-
-#, python-format
-msgid "Dados de %(nome)s salvos."
-msgstr "Datos de %(nome)s guardados."
-
-#, python-format
 msgid ""
-"%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
-"ser trocada pelo próprio usuário ou pelo suporte."
+"Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior "
+"esquerdo, LR inferior direito."
 msgstr ""
-"%(nome)s también tiene acceso a otra clínica o a la plataforma: la "
-"contraseña solo puede cambiarla el propio usuario o el soporte."
+"Notación de Palmer: UR superior derecho, UL superior izquierdo, LL inferior "
+"izquierdo, LR inferior derecho."
+
+msgid "Valor"
+msgstr "Valor"
+
+msgid "Opcional. Vai para os orçamentos."
+msgstr "Opcional. Pasa a los presupuestos."
+
+msgid "Já existe um procedimento com este nome."
+msgstr "Ya existe un procedimiento con este nombre."
+
+msgid "Escolha o paciente."
+msgstr "Elija el paciente."
+
+msgid "A validade não pode ser antes da data do orçamento."
+msgstr "La validez no puede ser anterior a la fecha del presupuesto."
+
+msgid "Valor unitário"
+msgstr "Valor unitario"
+
+msgid "Dente inválido."
+msgstr "Diente no válido."
+
+msgid "Habilite Odontologia para registrar dentes ou faces."
+msgstr "Habilite Odontología para registrar dientes o caras."
+
+msgid "Escolha um procedimento ou descreva o item."
+msgstr "Elija un procedimiento o describa el ítem."
+
+msgid "Informe o valor."
+msgstr "Indique el valor."
+
+msgid "Desconto no total"
+msgstr "Descuento sobre el total"
+
+msgid "Número de parcelas"
+msgstr "Número de cuotas"
+
+msgid "Vencimento da 1ª parcela"
+msgstr "Vencimiento de la 1.ª cuota"
+
+msgid "Categoria"
+msgstr "Categoría"
+
+msgid "A 1ª parcela já foi paga agora"
+msgstr "La 1.ª cuota ya se pagó ahora"
+
+msgid "Forma de pagamento"
+msgstr "Forma de pago"
+
+msgid "Informe para registrar o pagamento."
+msgstr "Indíquelo para registrar el pago."
+
+msgid "código"
+msgstr "código"
+
+msgid "valor"
+msgstr "valor"
+
+msgid "categoria"
+msgstr "categoría"
+
+msgid "Categoria de receita usada quando o orçamento é aprovado."
+msgstr "Categoría de ingreso usada cuando se aprueba el presupuesto."
+
+msgid "procedimento"
+msgstr "procedimiento"
+
+msgid "procedimentos"
+msgstr "procedimientos"
+
+msgctxt "orçamento"
+msgid "Em aberto"
+msgstr "Abierto"
+
+msgid "Aprovado"
+msgstr "Aprobado"
+
+msgid "Recusado"
+msgstr "Rechazado"
+
+msgid "paciente"
+msgstr "paciente"
+
+msgid "profissional"
+msgstr "profesional"
+
+msgid "data"
+msgstr "fecha"
+
+msgid "válido até"
+msgstr "válido hasta"
+
+msgid "situação"
+msgstr "situación"
+
+msgid "desconto"
+msgstr "descuento"
+
+msgid "observações"
+msgstr "observaciones"
+
+msgid "lançamento a receber"
+msgstr "cuenta por cobrar"
+
+msgid "aprovado ou recusado em"
+msgstr "aprobado o rechazado el"
+
+msgid "aprovado ou recusado por"
+msgstr "aprobado o rechazado por"
+
+msgid "criado por"
+msgstr "creado por"
+
+msgid "alterado em"
+msgstr "modificado el"
+
+msgid "orçamento"
+msgstr "presupuesto"
+
+msgid "orçamentos"
+msgstr "presupuestos"
+
+msgid "descrição"
+msgstr "descripción"
+
+msgid "dentes"
+msgstr "dientes"
+
+msgid "faces ou região"
+msgstr "caras o región"
+
+msgid "Ex.: MOD, vestibular, arcada superior."
+msgstr "Ej.: MOD, vestibular, arcada superior."
+
+msgid "quantidade"
+msgstr "cantidad"
+
+msgid "valor unitário"
+msgstr "valor unitario"
+
+msgid "item do orçamento"
+msgstr "ítem del presupuesto"
+
+msgid "itens do orçamento"
+msgstr "ítems del presupuesto"
+
+msgid "Habilite Odontologia para alterar itens com dentes ou faces."
+msgstr "Habilite Odontología para modificar elementos con dientes o caras."
+
+msgid "Só um orçamento em aberto pode ser aprovado."
+msgstr "Solo un presupuesto abierto puede aprobarse."
+
+msgid "O orçamento não tem valor a receber."
+msgstr "El presupuesto no tiene valor por cobrar."
 
 #, python-format
-msgid "Nova senha de %(nome)s definida."
-msgstr "Nueva contraseña de %(nome)s definida."
+msgid "Orçamento nº %(numero)s"
+msgstr "Presupuesto n.º %(numero)s"
+
+msgid "Só um orçamento em aberto pode ser recusado."
+msgstr "Solo un presupuesto abierto puede rechazarse."
+
+msgid "Este orçamento já foi aprovado ou recusado."
+msgstr "Este presupuesto ya fue aprobado o rechazado."
+
+msgid "Orçamento criado. Agora inclua os procedimentos."
+msgstr "Presupuesto creado. Ahora agregue los procedimientos."
+
+msgid "Orçamento salvo."
+msgstr "Presupuesto guardado."
+
+msgid "Item incluído."
+msgstr "Ítem agregado."
+
+msgid "Item removido."
+msgstr "Ítem eliminado."
+
+msgid "O desconto passa do total do orçamento."
+msgstr "El descuento supera el total del presupuesto."
+
+msgid "Desconto aplicado."
+msgstr "Descuento aplicado."
+
+msgid "Orçamento aprovado e lançado em A receber."
+msgstr "Presupuesto aprobado y registrado en Por cobrar."
+
+msgid "Orçamento marcado como recusado."
+msgstr "Presupuesto marcado como rechazado."
 
 #, python-format
-msgid "Verificação em duas etapas de %(nome)s removida."
-msgstr "Verificación en dos pasos de %(nome)s quitada."
+msgid "Procedimento %(nome)s salvo."
+msgstr "Procedimiento %(nome)s guardado."
 
 msgid "Não há comissão a pagar até esta data."
 msgstr "No hay comisión por pagar hasta esta fecha."
@@ -1089,37 +932,13 @@ msgstr ""
 "Esta comisión no se puede cancelar: el reverso de uno de sus cobros ya se "
 "descontó en la comisión hasta %(data)s. Cancele aquella antes."
 
-msgid "O extrato não tem transações."
-msgstr "El extracto no tiene transacciones."
-
-msgid "Esse lançamento já foi conciliado com outra transação."
-msgstr "Ese registro ya fue conciliado con otra transacción."
-
-msgid "Esta transação já foi conciliada ou ignorada."
-msgstr "Esta transacción ya fue conciliada o ignorada."
-
-msgid "Esse lançamento não corresponde a esta transação."
-msgstr "Ese registro no corresponde a esta transacción."
-
 msgid "Valor total"
 msgstr "Valor total"
-
-msgid "Número de parcelas"
-msgstr "Número de cuotas"
 
 msgid "Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."
 msgstr ""
 "Cuotas mensuales del mismo valor. Las cuotas con tarjeta cuentan como 1 "
 "cuota aquí."
-
-msgid "Vencimento da 1ª parcela"
-msgstr "Vencimiento de la 1.ª cuota"
-
-msgid "A 1ª parcela já foi paga agora"
-msgstr "La 1.ª cuota ya se pagó ahora"
-
-msgid "Forma de pagamento"
-msgstr "Forma de pago"
 
 msgid "Só se quem paga não for um paciente cadastrado."
 msgstr "Solo si quien paga no es un paciente registrado."
@@ -1129,12 +948,6 @@ msgstr "Elija el paciente o indique quién paga."
 
 msgid "Informe um valor maior que zero."
 msgstr "Indique un valor mayor que cero."
-
-msgid "Informe para registrar o pagamento."
-msgstr "Indíquelo para registrar el pago."
-
-msgid "Valor"
-msgstr "Valor"
 
 msgid "O valor é"
 msgstr "El valor es"
@@ -1161,6 +974,9 @@ msgstr "Solo para un pago suelto, sin registrar al proveedor."
 #
 msgid "Escolha o fornecedor ou informe para quem é."
 msgstr "Elija el proveedor o indique para quién es."
+
+msgid "Telefone"
+msgstr "Teléfono"
 
 msgid "WhatsApp"
 msgstr "WhatsApp"
@@ -1268,9 +1084,6 @@ msgstr "Explique la diferencia, si la hay."
 msgid "Vencimento"
 msgstr "Vencimiento"
 
-msgid "Categoria"
-msgstr "Categoría"
-
 msgid "Arquivo OFX"
 msgstr "Archivo OFX"
 
@@ -1320,9 +1133,6 @@ msgstr "Gasto"
 msgid "grupo acima"
 msgstr "grupo superior"
 
-msgid "código"
-msgstr "código"
-
 msgid "Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."
 msgstr "Posición dentro del grupo superior (1, 2, 3…); forma números como 2.1."
 
@@ -1335,9 +1145,6 @@ msgstr "grupos contables"
 #
 msgid "grupo"
 msgstr "grupo"
-
-msgid "categoria"
-msgstr "categoría"
 
 msgid "categorias"
 msgstr "categorías"
@@ -1385,9 +1192,6 @@ msgstr "Quién hizo la atención (opcional)."
 msgid "valor total"
 msgstr "valor total"
 
-msgid "data"
-msgstr "fecha"
-
 msgid "cancelado"
 msgstr "cancelado"
 
@@ -1411,9 +1215,6 @@ msgstr "número"
 
 msgid "vencimento"
 msgstr "vencimiento"
-
-msgid "valor"
-msgstr "valor"
 
 msgid "parcela"
 msgstr "cuota"
@@ -1459,9 +1260,6 @@ msgstr "valor cobrado"
 
 msgid "juros e multa"
 msgstr "intereses y multa"
-
-msgid "desconto"
-msgstr "descuento"
 
 msgid "forma de pagamento"
 msgstr "forma de pago"
@@ -1612,6 +1410,12 @@ msgstr "código del banco"
 msgid "conta no banco"
 msgstr "cuenta en el banco"
 
+msgid "início"
+msgstr "inicio"
+
+msgid "fim"
+msgstr "fin"
+
 msgid "saldo no banco"
 msgstr "saldo en el banco"
 
@@ -1681,6 +1485,18 @@ msgstr "transacciones bancarias"
 
 msgid "O arquivo não é um extrato OFX."
 msgstr "El archivo no es un extracto OFX."
+
+msgid "O extrato não tem transações."
+msgstr "El extracto no tiene transacciones."
+
+msgid "Esse lançamento já foi conciliado com outra transação."
+msgstr "Ese registro ya fue conciliado con otra transacción."
+
+msgid "Esta transação já foi conciliada ou ignorada."
+msgstr "Esta transacción ya fue conciliada o ignorada."
+
+msgid "Esse lançamento não corresponde a esta transação."
+msgstr "Ese registro no corresponde a esta transacción."
 
 msgid "Este lançamento foi cancelado."
 msgstr "Esta cuenta fue cancelada."
@@ -1842,6 +1658,10 @@ msgid "Período reaberto."
 msgstr "Período reabierto."
 
 #, python-format
+msgid "%(nome)s salvo."
+msgstr "%(nome)s guardado."
+
+#, python-format
 msgid "Percentual de %(nome)s salvo."
 msgstr "Porcentaje de %(nome)s guardado."
 
@@ -1887,8 +1707,252 @@ msgstr "Indique el motivo para ignorar la transacción."
 msgid "Lançamento criado e conciliado."
 msgstr "Registro creado y conciliado."
 
+#, python-format
+msgid "Por exemplo: %(tipos)s."
+msgstr "Por ejemplo: %(tipos)s."
+
+#
+msgid "Já existe um convênio com este nome."
+msgstr "Ya existe un convenio con este nombre."
+
+msgid "Use no máximo 20 caracteres."
+msgstr "Use como máximo 20 caracteres."
+
+#
+#
+msgid "Número da carteirinha"
+msgstr "Número de la credencial"
+
+#
+msgid "Número do grupo"
+msgstr "Número de grupo"
+
+msgid "Código do beneficiário"
+msgstr "Código del beneficiario"
+
+msgid "Esta carteirinha já está cadastrada neste convênio."
+msgstr "Esta credencial ya está registrada en este convenio."
+
+#, python-format
+msgid "%(nome)s: formato inválido. Exemplo: %(exemplo)s."
+msgstr "%(nome)s: formato inválido. Ejemplo: %(exemplo)s."
+
+msgid "Registro da operadora"
+msgstr "Registro de la aseguradora"
+
+msgid "registro da operadora"
+msgstr "registro de la aseguradora"
+
+msgid "convênio"
+msgstr "convenio"
+
+msgid "convênios"
+msgstr "convenios"
+
+msgid "plano"
+msgstr "plan"
+
+#
+msgid "número da carteirinha"
+msgstr "número de la credencial"
+
+#
+msgid "número do grupo"
+msgstr "número de grupo"
+
+msgid "código do beneficiário"
+msgstr "código del beneficiario"
+
+#
+msgid "validade"
+msgstr "validez"
+
+msgid "titular"
+msgstr "titular"
+
+msgid "Se o paciente for dependente, o nome do titular do plano."
+msgstr "Si el paciente es dependiente, el nombre del titular del plan."
+
+msgid "carteirinha"
+msgstr "credencial"
+
+msgid "carteirinhas"
+msgstr "credenciales"
+
+msgid "Carteirinha salva."
+msgstr "Credencial guardada."
+
+msgid "Ajuda"
+msgstr "Ayuda"
+
 msgid "Importação do sistema antigo"
 msgstr "Importación del sistema antiguo"
+
+msgid "Informe quantos dias de afastamento."
+msgstr "Indique cuántos días de reposo."
+
+msgid "O horário final precisa ser depois do inicial."
+msgstr "La hora final debe ser posterior a la inicial."
+
+msgid "Arquivo"
+msgstr "Archivo"
+
+msgid "PDF, JPG ou PNG, até 10 MB."
+msgstr "PDF, JPG o PNG, hasta 10 MB."
+
+msgid "Por exemplo: hemograma de março."
+msgstr "Por ejemplo: hemograma de marzo."
+
+msgid "O arquivo passa de 10 MB."
+msgstr "El archivo supera los 10 MB."
+
+msgid "Envie um arquivo PDF, JPG ou PNG."
+msgstr "Envíe un archivo PDF, JPG o PNG."
+
+msgid "agendamento"
+msgstr "cita"
+
+msgid "data do atendimento"
+msgstr "fecha de la consulta"
+
+msgid "queixa principal"
+msgstr "motivo de consulta"
+
+msgid "história da doença atual"
+msgstr "enfermedad actual"
+
+msgid "antecedentes"
+msgstr "antecedentes"
+
+msgid "Pessoais e familiares, medicamentos em uso, alergias."
+msgstr "Personales y familiares, medicamentos en uso, alergias."
+
+msgid "exame físico"
+msgstr "examen físico"
+
+msgid "conduta e plano"
+msgstr "conducta y plan"
+
+msgid "finalizado em"
+msgstr "finalizada el"
+
+msgid "atendimento"
+msgstr "consulta"
+
+msgid "atendimentos"
+msgstr "consultas"
+
+msgid "adendo"
+msgstr "adenda"
+
+msgid "adendos"
+msgstr "adendas"
+
+msgid "Comparecimento"
+msgstr "Asistencia"
+
+msgid "Afastamento"
+msgstr "Reposo"
+
+msgid "das"
+msgstr "de las"
+
+msgid "às"
+msgstr "a las"
+
+msgid "dias de afastamento"
+msgstr "días de reposo"
+
+msgid "Só para afastamento."
+msgstr "Solo para reposo."
+
+msgid "Aparece no atestado. Por exemplo: deve permanecer em repouso."
+msgstr "Aparece en el certificado. Por ejemplo: debe guardar reposo."
+
+msgid "atestado"
+msgstr "certificado"
+
+msgid "atestados"
+msgstr "certificados"
+
+msgid "medicamentos e como usar"
+msgstr "medicamentos y cómo usarlos"
+
+msgid "Um item por linha: medicamento, dose e como usar."
+msgstr "Un ítem por línea: medicamento, dosis y cómo usarlo."
+
+msgctxt "prescrição"
+msgid "receita"
+msgstr "receta"
+
+msgctxt "prescrição"
+msgid "receitas"
+msgstr "recetas"
+
+msgid "exames"
+msgstr "exámenes"
+
+msgid "Um exame por linha."
+msgstr "Un examen por línea."
+
+msgid "indicação clínica"
+msgstr "indicación clínica"
+
+msgid "Aparece no pedido."
+msgstr "Aparece en la solicitud."
+
+msgid "pedido de exames"
+msgstr "solicitud de exámenes"
+
+msgid "pedidos de exames"
+msgstr "solicitudes de exámenes"
+
+msgid "anexo"
+msgstr "adjunto"
+
+msgid "anexos"
+msgstr "adjuntos"
+
+msgid ""
+"Atendimento finalizado. A partir de agora, correções são feitas por adendo."
+msgstr ""
+"Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
+
+msgid "Atendimento salvo."
+msgstr "Consulta guardada."
+
+msgid "Atestado emitido."
+msgstr "Certificado emitido."
+
+msgid "Emitir atestado"
+msgstr "Emitir certificado"
+
+msgid "Receita emitida."
+msgstr "Receta emitida."
+
+msgid "Emitir receita"
+msgstr "Emitir receta"
+
+msgid "Adendo incluído."
+msgstr "Adenda agregada."
+
+msgid "Escreva o adendo."
+msgstr "Escriba la adenda."
+
+msgid "Pedido de exames emitido."
+msgstr "Solicitud de exámenes emitida."
+
+msgid "Pedir exames"
+msgstr "Solicitar exámenes"
+
+msgid "Contas de demonstração não enviam anexos."
+msgstr "Las cuentas de demostración no envían adjuntos."
+
+msgid "Anexo incluído."
+msgstr "Adjunto agregado."
+
+msgid "Anexo removido."
+msgstr "Adjunto eliminado."
 
 msgid "Processador"
 msgstr "Procesador"
@@ -1919,208 +1983,6 @@ msgstr "recibido por segundo"
 
 msgid "enviado por segundo"
 msgstr "enviado por segundo"
-
-msgid "Novidades"
-msgstr "Novedades"
-
-msgid "Novo"
-msgstr "Nuevo"
-
-msgid "Melhoria"
-msgstr "Mejora"
-
-msgid "Correção"
-msgstr "Corrección"
-
-msgid "Segurança"
-msgstr "Seguridad"
-
-msgid "Acesso"
-msgstr "Acceso"
-
-msgid "Cadastros"
-msgstr "Registros"
-
-msgid "Clínica"
-msgstr "Clínica"
-
-msgid "Clínicas"
-msgstr "Clínicas"
-
-msgid "Documentação"
-msgstr "Documentación"
-
-msgid "Geral"
-msgstr "General"
-
-msgid "Idioma"
-msgstr "Idioma"
-
-msgid "Permissões"
-msgstr "Permisos"
-
-msgid "Sistema"
-msgstr "Sistema"
-
-msgid "Tipos de atendimento"
-msgstr "Tipos de atención"
-
-msgid "FDI (11 a 48; dentes de leite 51 a 85)"
-msgstr "FDI (11 a 48; dientes de leche 51 a 85)"
-
-msgid "Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)"
-msgstr "Universal, de Estados Unidos (1 a 32; dientes de leche A a T)"
-
-msgid "Palmer (UR6, LL3; dentes de leite URE a LRE)"
-msgstr "Palmer (UR6, LL3; dientes de leche URE a LRE)"
-
-msgid "Numeração FDI."
-msgstr "Numeración FDI."
-
-msgid "Numeração universal (Estados Unidos)."
-msgstr "Numeración universal (Estados Unidos)."
-
-msgid ""
-"Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior "
-"esquerdo, LR inferior direito."
-msgstr ""
-"Notación de Palmer: UR superior derecho, UL superior izquierdo, LL inferior "
-"izquierdo, LR inferior derecho."
-
-msgid "Opcional. Vai para os orçamentos."
-msgstr "Opcional. Pasa a los presupuestos."
-
-msgid "Já existe um procedimento com este nome."
-msgstr "Ya existe un procedimiento con este nombre."
-
-msgid "Escolha o paciente."
-msgstr "Elija el paciente."
-
-msgid "A validade não pode ser antes da data do orçamento."
-msgstr "La validez no puede ser anterior a la fecha del presupuesto."
-
-msgid "Valor unitário"
-msgstr "Valor unitario"
-
-msgid "Dente inválido."
-msgstr "Diente no válido."
-
-msgid "Habilite Odontologia para registrar dentes ou faces."
-msgstr "Habilite Odontología para registrar dientes o caras."
-
-msgid "Escolha um procedimento ou descreva o item."
-msgstr "Elija un procedimiento o describa el ítem."
-
-msgid "Informe o valor."
-msgstr "Indique el valor."
-
-msgid "Desconto no total"
-msgstr "Descuento sobre el total"
-
-msgid "Categoria de receita usada quando o orçamento é aprovado."
-msgstr "Categoría de ingreso usada cuando se aprueba el presupuesto."
-
-msgid "procedimento"
-msgstr "procedimiento"
-
-msgid "procedimentos"
-msgstr "procedimientos"
-
-msgctxt "orçamento"
-msgid "Em aberto"
-msgstr "Abierto"
-
-msgid "Aprovado"
-msgstr "Aprobado"
-
-msgid "Recusado"
-msgstr "Rechazado"
-
-msgid "válido até"
-msgstr "válido hasta"
-
-msgid "lançamento a receber"
-msgstr "cuenta por cobrar"
-
-msgid "aprovado ou recusado em"
-msgstr "aprobado o rechazado el"
-
-msgid "aprovado ou recusado por"
-msgstr "aprobado o rechazado por"
-
-msgid "orçamento"
-msgstr "presupuesto"
-
-msgid "orçamentos"
-msgstr "presupuestos"
-
-msgid "dentes"
-msgstr "dientes"
-
-msgid "faces ou região"
-msgstr "caras o región"
-
-msgid "Ex.: MOD, vestibular, arcada superior."
-msgstr "Ej.: MOD, vestibular, arcada superior."
-
-msgid "quantidade"
-msgstr "cantidad"
-
-msgid "valor unitário"
-msgstr "valor unitario"
-
-msgid "item do orçamento"
-msgstr "ítem del presupuesto"
-
-msgid "itens do orçamento"
-msgstr "ítems del presupuesto"
-
-msgid "Habilite Odontologia para alterar itens com dentes ou faces."
-msgstr "Habilite Odontología para modificar elementos con dientes o caras."
-
-msgid "Só um orçamento em aberto pode ser aprovado."
-msgstr "Solo un presupuesto abierto puede aprobarse."
-
-msgid "O orçamento não tem valor a receber."
-msgstr "El presupuesto no tiene valor por cobrar."
-
-#, python-format
-msgid "Orçamento nº %(numero)s"
-msgstr "Presupuesto n.º %(numero)s"
-
-msgid "Só um orçamento em aberto pode ser recusado."
-msgstr "Solo un presupuesto abierto puede rechazarse."
-
-msgid "Este orçamento já foi aprovado ou recusado."
-msgstr "Este presupuesto ya fue aprobado o rechazado."
-
-msgid "Orçamento criado. Agora inclua os procedimentos."
-msgstr "Presupuesto creado. Ahora agregue los procedimientos."
-
-msgid "Orçamento salvo."
-msgstr "Presupuesto guardado."
-
-msgid "Item incluído."
-msgstr "Ítem agregado."
-
-msgid "Item removido."
-msgstr "Ítem eliminado."
-
-msgid "O desconto passa do total do orçamento."
-msgstr "El descuento supera el total del presupuesto."
-
-msgid "Desconto aplicado."
-msgstr "Descuento aplicado."
-
-msgid "Orçamento aprovado e lançado em A receber."
-msgstr "Presupuesto aprobado y registrado en Por cobrar."
-
-msgid "Orçamento marcado como recusado."
-msgstr "Presupuesto marcado como rechazado."
-
-#, python-format
-msgid "Procedimento %(nome)s salvo."
-msgstr "Procedimiento %(nome)s guardado."
 
 msgid "UF"
 msgstr "Estado"
@@ -2332,6 +2194,338 @@ msgstr "Persona relacionada guardada."
 msgid "Pessoa relacionada removida."
 msgstr "Persona relacionada eliminada."
 
+msgid "Este usuário já está ligado a outro profissional desta clínica."
+msgstr "Este usuario ya está vinculado a otro profesional de esta clínica."
+
+msgid "registro profissional"
+msgstr "registro profesional"
+
+msgid "cor na agenda"
+msgstr "color en la agenda"
+
+msgid "usuário de acesso"
+msgstr "usuario de acceso"
+
+msgid "Conta usada por este profissional para entrar no sistema (opcional)."
+msgstr "Cuenta que este profesional usa para entrar al sistema (opcional)."
+
+msgid "comissão (%)"
+msgstr "comisión (%)"
+
+msgid "Percentual sobre o valor recebido dos lançamentos deste profissional."
+msgstr ""
+"Porcentaje sobre el valor cobrado de los registros de este profesional."
+
+msgid "profissionais"
+msgstr "profesionales"
+
+#, python-format
+msgid "Profissional %(nome)s salvo."
+msgstr "Profesional %(nome)s guardado."
+
+#, python-format
+msgid ""
+"%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
+"para escondê-lo."
+msgstr ""
+"%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque "
+"“activo” para ocultarlo."
+
+#, python-format
+msgid "Profissional %(nome)s excluído."
+msgstr "Profesional %(nome)s eliminado."
+
+msgid "Ex.: revisão de 6 meses."
+msgstr "Ej.: revisión de 6 meses."
+
+msgid "concluída"
+msgstr "completado"
+
+msgid "rechamada"
+msgstr "recordatorio"
+
+msgid "rechamadas"
+msgstr "recordatorios"
+
+#, python-format
+msgid "Rechamada de %(nome)s salva."
+msgstr "Recordatorio de %(nome)s guardado."
+
+#, python-format
+msgid "Rechamada de %(nome)s concluída."
+msgstr "Recordatorio de %(nome)s completado."
+
+#, python-format
+msgid "Rechamada de %(nome)s reaberta."
+msgstr "Recordatorio de %(nome)s reabierto."
+
+#, python-format
+msgid "Rechamada de %(nome)s excluída."
+msgstr "Recordatorio de %(nome)s eliminado."
+
+msgid "Parâmetros inválidos."
+msgstr "Parámetros no válidos."
+
+msgid "Data inválida."
+msgstr "Fecha no válida."
+
+msgid "Tabelas de referência"
+msgstr "Tablas de referencia"
+
+msgid "código IBGE"
+msgstr "código IBGE"
+
+msgid "sigla"
+msgstr "sigla"
+
+msgid "região"
+msgstr "región"
+
+msgid "UFs"
+msgstr "estados"
+
+msgid "cidades"
+msgstr "ciudades"
+
+msgid "ISPB"
+msgstr "ISPB"
+
+msgid "nome curto"
+msgstr "nombre corto"
+
+msgid "banco"
+msgstr "banco"
+
+msgid "bancos"
+msgstr "bancos"
+
+msgid "ordem"
+msgstr "orden"
+
+msgid "estados civis"
+msgstr "estados civiles"
+
+#
+msgid "bairros"
+msgstr "barrios"
+
+msgid "logradouro"
+msgstr "calle"
+
+msgid "logradouros"
+msgstr "calles"
+
+msgid "Já existe um tipo de atendimento com este nome."
+msgstr "Ya existe un tipo de atención con este nombre."
+
+msgid "Data"
+msgstr "Fecha"
+
+msgctxt "hora"
+msgid "Início"
+msgstr "Inicio"
+
+msgid "Fim"
+msgstr "Fin"
+
+msgid "Repetir por quantas semanas"
+msgstr "Repetir durante cuántas semanas"
+
+msgid ""
+"1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
+msgstr ""
+"1 = solo en esta fecha. Ej.: 4 crea el mismo horario durante 4 semanas "
+"seguidas."
+
+msgid "Informe o paciente ou uma descrição."
+msgstr "Indique el paciente o una descripción."
+
+msgid ""
+"Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
+"“Agendar outro paciente neste horário”."
+msgstr ""
+"Esta cita fue cancelada. Para poner otro paciente en este horario, use "
+"“Agendar otro paciente en este horario”."
+
+msgid "O fim deve ser depois do início."
+msgstr "El fin debe ser posterior al inicio."
+
+#, python-format
+msgid "Use horários de %(n)s em %(n)s minutos."
+msgstr "Use horarios de %(n)s en %(n)s minutos."
+
+#, python-format
+msgid "Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s)."
+msgstr "Fuera del horario de atención de la clínica (de %(inicio)s a %(fim)s)."
+
+#, python-format
+msgid "e mais %(n)s"
+msgstr "y %(n)s más"
+
+#, python-format
+msgid "Conflito de horário com: %(lista)s. Nada foi gravado."
+msgstr "Conflicto de horario con: %(lista)s. No se guardó nada."
+
+msgctxt "tipo de atendimento"
+msgid "Liberado"
+msgstr "Disponible"
+
+msgctxt "tipo de atendimento"
+msgid "Consulta"
+msgstr "Consulta"
+
+msgctxt "tipo de atendimento"
+msgid "Retorno"
+msgstr "Control"
+
+msgctxt "tipo de atendimento"
+msgid "Exame"
+msgstr "Examen"
+
+msgctxt "tipo de atendimento"
+msgid "Procedimento"
+msgstr "Procedimiento"
+
+msgctxt "tipo de atendimento"
+msgid "Atendimento de 15 em 15"
+msgstr "Citas de 15 minutos"
+
+msgctxt "tipo de atendimento"
+msgid "Ocupado"
+msgstr "Ocupado"
+
+msgctxt "tipo de atendimento"
+msgid "Cirurgia"
+msgstr "Cirugía"
+
+msgctxt "tipo de atendimento"
+msgid "Dentística"
+msgstr "Odontología restauradora"
+
+msgctxt "tipo de atendimento"
+msgid "Periodontia"
+msgstr "Periodoncia"
+
+msgctxt "tipo de atendimento"
+msgid "Consulta inicial"
+msgstr "Primera consulta"
+
+msgctxt "tipo de atendimento"
+msgid "Prótese"
+msgstr "Prótesis"
+
+msgctxt "tipo de atendimento"
+msgid "Endodontia"
+msgstr "Endodoncia"
+
+msgctxt "tipo de atendimento"
+msgid "Ortodontia"
+msgstr "Ortodoncia"
+
+msgid "cor"
+msgstr "color"
+
+msgid "tipo de atendimento"
+msgstr "tipo de atención"
+
+msgid "tipos de atendimento"
+msgstr "tipos de atención"
+
+msgid "Agendado"
+msgstr "Agendada"
+
+msgid "Compareceu"
+msgstr "Asistió"
+
+msgid "Faltou"
+msgstr "Faltó"
+
+msgid "Desmarcou"
+msgstr "Canceló"
+
+msgid "série"
+msgstr "serie"
+
+msgid "agendamentos"
+msgstr "citas"
+
+msgid "O profissional já tem um agendamento neste horário."
+msgstr "El profesional ya tiene una cita en este horario."
+
+msgid "Horário reservado"
+msgstr "Horario reservado"
+
+msgid "Situação inválida."
+msgstr "Situación inválida."
+
+msgid "Só agendamentos com paciente têm situação."
+msgstr "Solo las citas con paciente tienen situación."
+
+msgid ""
+"Comparecimento e falta só podem ser marcados a partir do dia do atendimento."
+msgstr ""
+"La asistencia y la falta solo se pueden marcar a partir del día de la cita."
+
+msgid ""
+"Este horário já foi ocupado por outro agendamento. Desmarque aquele antes."
+msgstr "Este horario ya fue ocupado por otra cita. Cancele aquella antes."
+
+#, python-format
+msgid "Tipo de atendimento %(nome)s salvo."
+msgstr "Tipo de atención %(nome)s guardado."
+
+#, python-format
+msgid ""
+"%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
+"“ativo” para escondê-lo."
+msgstr ""
+"%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
+"ocultarlo."
+
+#, python-format
+msgid "Tipo de atendimento %(nome)s excluído."
+msgstr "Tipo de atención %(nome)s eliminado."
+
+msgid "aniversariante(s)"
+msgstr "cumpleaños"
+
+msgid "rechamada(s) pendente(s)"
+msgstr "recordatorio(s) pendiente(s)"
+
+msgid "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
+msgstr "Otra cita acaba de ocupar este horario. No se guardó nada."
+
+#, python-format
+msgid "Agendamento criado."
+msgid_plural "%(n)s agendamentos criados."
+msgstr[0] "Cita creada."
+msgstr[1] "%(n)s citas creadas."
+
+msgid "Agendamento alterado."
+msgstr "Cita modificada."
+
+#, python-format
+msgid "%(nome)s: marcação de presença desfeita."
+msgstr "%(nome)s: marca de asistencia deshecha."
+
+#, python-format
+msgid "%(nome)s compareceu."
+msgstr "%(nome)s asistió."
+
+#, python-format
+msgid "%(nome)s faltou."
+msgstr "%(nome)s faltó."
+
+#, python-format
+msgid "%(nome)s desmarcou. O horário ficou livre."
+msgstr "%(nome)s canceló. El horario quedó libre."
+
+#, python-format
+msgid "Agendamento excluído."
+msgid_plural "%(n)s agendamentos excluídos."
+msgstr[0] "Cita eliminada."
+msgstr[1] "%(n)s citas eliminadas."
+
 #
 msgid "Salário"
 msgstr "Salario"
@@ -2453,283 +2647,89 @@ msgid_plural "%(n)s contas a pagar criadas no financeiro."
 msgstr[0] "%(n)s cuenta por pagar creada en el financiero."
 msgstr[1] "%(n)s cuentas por pagar creadas en el financiero."
 
-msgid "Este usuário já está ligado a outro profissional desta clínica."
-msgstr "Este usuario ya está vinculado a otro profesional de esta clínica."
+msgid "Equipe"
+msgstr "Equipo"
 
-msgid "registro profissional"
-msgstr "registro profesional"
+msgid "Perfil"
+msgstr "Perfil"
 
-msgid "cor na agenda"
-msgstr "color en la agenda"
+msgid "Acesso a esta clínica liberado"
+msgstr "Acceso a esta clínica habilitado"
 
-msgid "usuário de acesso"
-msgstr "usuario de acceso"
+msgid "Você não pode alterar o próprio perfil."
+msgstr "No puede cambiar su propio perfil."
 
-msgid "Conta usada por este profissional para entrar no sistema (opcional)."
-msgstr "Cuenta que este profesional usa para entrar al sistema (opcional)."
-
-msgid "comissão (%)"
-msgstr "comisión (%)"
-
-msgid "Percentual sobre o valor recebido dos lançamentos deste profissional."
-msgstr ""
-"Porcentaje sobre el valor cobrado de los registros de este profesional."
-
-msgid "profissionais"
-msgstr "profesionales"
+msgid "A clínica precisa de pelo menos um administrador ativo."
+msgstr "La clínica necesita al menos un administrador activo."
 
 #, python-format
-msgid "Profissional %(nome)s salvo."
-msgstr "Profesional %(nome)s guardado."
+msgid "%(nome)s agora faz parte da equipe."
+msgstr "%(nome)s ahora forma parte del equipo."
+
+#, python-format
+msgid "Dados de %(nome)s salvos."
+msgstr "Datos de %(nome)s guardados."
 
 #, python-format
 msgid ""
-"%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
-"para escondê-lo."
+"%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
+"ser trocada pelo próprio usuário ou pelo suporte."
 msgstr ""
-"%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque "
-"“activo” para ocultarlo."
+"%(nome)s también tiene acceso a otra clínica o a la plataforma: la "
+"contraseña solo puede cambiarla el propio usuario o el soporte."
 
 #, python-format
-msgid "Profissional %(nome)s excluído."
-msgstr "Profesional %(nome)s eliminado."
-
-msgid "Informe quantos dias de afastamento."
-msgstr "Indique cuántos días de reposo."
-
-msgid "O horário final precisa ser depois do inicial."
-msgstr "La hora final debe ser posterior a la inicial."
-
-msgid "Arquivo"
-msgstr "Archivo"
-
-msgid "PDF, JPG ou PNG, até 10 MB."
-msgstr "PDF, JPG o PNG, hasta 10 MB."
-
-msgid "Por exemplo: hemograma de março."
-msgstr "Por ejemplo: hemograma de marzo."
-
-msgid "O arquivo passa de 10 MB."
-msgstr "El archivo supera los 10 MB."
-
-msgid "Envie um arquivo PDF, JPG ou PNG."
-msgstr "Envíe un archivo PDF, JPG o PNG."
-
-msgid "data do atendimento"
-msgstr "fecha de la consulta"
-
-msgid "queixa principal"
-msgstr "motivo de consulta"
-
-msgid "história da doença atual"
-msgstr "enfermedad actual"
-
-msgid "antecedentes"
-msgstr "antecedentes"
-
-msgid "Pessoais e familiares, medicamentos em uso, alergias."
-msgstr "Personales y familiares, medicamentos en uso, alergias."
-
-msgid "exame físico"
-msgstr "examen físico"
-
-msgid "conduta e plano"
-msgstr "conducta y plan"
-
-msgid "finalizado em"
-msgstr "finalizada el"
-
-msgid "atendimento"
-msgstr "consulta"
-
-msgid "atendimentos"
-msgstr "consultas"
-
-msgid "adendo"
-msgstr "adenda"
-
-msgid "adendos"
-msgstr "adendas"
-
-msgid "Comparecimento"
-msgstr "Asistencia"
-
-msgid "Afastamento"
-msgstr "Reposo"
-
-msgid "das"
-msgstr "de las"
-
-msgid "às"
-msgstr "a las"
-
-msgid "dias de afastamento"
-msgstr "días de reposo"
-
-msgid "Só para afastamento."
-msgstr "Solo para reposo."
-
-msgid "Aparece no atestado. Por exemplo: deve permanecer em repouso."
-msgstr "Aparece en el certificado. Por ejemplo: debe guardar reposo."
-
-msgid "atestado"
-msgstr "certificado"
-
-msgid "atestados"
-msgstr "certificados"
-
-msgid "medicamentos e como usar"
-msgstr "medicamentos y cómo usarlos"
-
-msgid "Um item por linha: medicamento, dose e como usar."
-msgstr "Un ítem por línea: medicamento, dosis y cómo usarlo."
-
-msgctxt "prescrição"
-msgid "receita"
-msgstr "receta"
-
-msgctxt "prescrição"
-msgid "receitas"
-msgstr "recetas"
-
-msgid "exames"
-msgstr "exámenes"
-
-msgid "Um exame por linha."
-msgstr "Un examen por línea."
-
-msgid "indicação clínica"
-msgstr "indicación clínica"
-
-msgid "Aparece no pedido."
-msgstr "Aparece en la solicitud."
-
-msgid "pedido de exames"
-msgstr "solicitud de exámenes"
-
-msgid "pedidos de exames"
-msgstr "solicitudes de exámenes"
-
-msgid "anexo"
-msgstr "adjunto"
-
-msgid "anexos"
-msgstr "adjuntos"
-
-msgid ""
-"Atendimento finalizado. A partir de agora, correções são feitas por adendo."
-msgstr ""
-"Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
-
-msgid "Atendimento salvo."
-msgstr "Consulta guardada."
-
-msgid "Atestado emitido."
-msgstr "Certificado emitido."
-
-msgid "Emitir atestado"
-msgstr "Emitir certificado"
-
-msgid "Receita emitida."
-msgstr "Receta emitida."
-
-msgid "Emitir receita"
-msgstr "Emitir receta"
-
-msgid "Adendo incluído."
-msgstr "Adenda agregada."
-
-msgid "Escreva o adendo."
-msgstr "Escriba la adenda."
-
-msgid "Pedido de exames emitido."
-msgstr "Solicitud de exámenes emitida."
-
-msgid "Pedir exames"
-msgstr "Solicitar exámenes"
-
-msgid "Contas de demonstração não enviam anexos."
-msgstr "Las cuentas de demostración no envían adjuntos."
-
-msgid "Anexo incluído."
-msgstr "Adjunto agregado."
-
-msgid "Anexo removido."
-msgstr "Adjunto eliminado."
-
-msgid "Ex.: revisão de 6 meses."
-msgstr "Ej.: revisión de 6 meses."
-
-msgid "concluída"
-msgstr "completado"
-
-msgid "rechamada"
-msgstr "recordatorio"
-
-msgid "rechamadas"
-msgstr "recordatorios"
+msgid "Nova senha de %(nome)s definida."
+msgstr "Nueva contraseña de %(nome)s definida."
 
 #, python-format
-msgid "Rechamada de %(nome)s salva."
-msgstr "Recordatorio de %(nome)s guardado."
+msgid "Verificação em duas etapas de %(nome)s removida."
+msgstr "Verificación en dos pasos de %(nome)s quitada."
 
-#, python-format
-msgid "Rechamada de %(nome)s concluída."
-msgstr "Recordatorio de %(nome)s completado."
+msgid "Novidades"
+msgstr "Novedades"
 
-#, python-format
-msgid "Rechamada de %(nome)s reaberta."
-msgstr "Recordatorio de %(nome)s reabierto."
+msgid "Novo"
+msgstr "Nuevo"
 
-#, python-format
-msgid "Rechamada de %(nome)s excluída."
-msgstr "Recordatorio de %(nome)s eliminado."
+msgid "Melhoria"
+msgstr "Mejora"
 
-msgid "Tabelas de referência"
-msgstr "Tablas de referencia"
+msgid "Correção"
+msgstr "Corrección"
 
-msgid "código IBGE"
-msgstr "código IBGE"
+msgid "Segurança"
+msgstr "Seguridad"
 
-msgid "sigla"
-msgstr "sigla"
+msgid "Acesso"
+msgstr "Acceso"
 
-msgid "região"
-msgstr "región"
+msgid "Cadastros"
+msgstr "Registros"
 
-msgid "UFs"
-msgstr "estados"
+msgid "Clínica"
+msgstr "Clínica"
 
-msgid "cidades"
-msgstr "ciudades"
+msgid "Clínicas"
+msgstr "Clínicas"
 
-msgid "ISPB"
-msgstr "ISPB"
+msgid "Documentação"
+msgstr "Documentación"
 
-msgid "nome curto"
-msgstr "nombre corto"
+msgid "Geral"
+msgstr "General"
 
-msgid "banco"
-msgstr "banco"
+msgid "Idioma"
+msgstr "Idioma"
 
-msgid "bancos"
-msgstr "bancos"
+msgid "Permissões"
+msgstr "Permisos"
 
-msgid "ordem"
-msgstr "orden"
+msgid "Sistema"
+msgstr "Sistema"
 
-msgid "estados civis"
-msgstr "estados civiles"
-
-#
-msgid "bairros"
-msgstr "barrios"
-
-msgid "logradouro"
-msgstr "calle"
-
-msgid "logradouros"
-msgstr "calles"
+msgid "Tipos de atendimento"
+msgstr "Tipos de atención"
 
 msgid "Acesso negado"
 msgstr "Acceso denegado"
