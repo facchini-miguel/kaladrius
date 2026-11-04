@@ -42,7 +42,7 @@ docker compose exec app python manage.py makemigrations --check
 2. Verifique que pruebas, lint y formato pasen.
 3. Abra el pull request explicando qué y por qué. Al contribuir, acepta que su contribución queda bajo la licencia Apache 2.0.
 
-`main` solo recibe cambios por pull request, con merge después de que pasan los checks `tests` y `documentacao` (decisión 141); no hace falta una revisión que apruebe. En un pull request de quien no es colaborador del repositorio (por lo general, de un fork), el CI solo empieza después de que un mantenedor hace clic en "Approve and run workflows", así que los checks pueden quedar esperando un rato.
+`main` solo recibe cambios por pull request, con merge después de que pasan los checks `tests` y `docs` (decisión 141); no hace falta una revisión que apruebe. En un pull request de quien no es colaborador del repositorio (por lo general, de un fork), el CI solo empieza después de que un mantenedor hace clic en "Approve and run workflows", así que los checks pueden quedar esperando un rato.
 
 ## Migraciones de la base
 

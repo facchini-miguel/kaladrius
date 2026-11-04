@@ -4,7 +4,7 @@ run with (the automatic rollback, decision 135, puts the previous code back but 
 migration), the migrations already in the base branch that it edits or deletes (production
 never runs an applied migration again) and, with --testar-volta, a test that each new one can
 be applied, undone and applied again. CI posts the report as a comment on the pull request
-(.github/workflows/migracoes.yml).
+(.github/workflows/migrations.yml).
 
     python manage.py relatorio_migracoes --base origin/main [--testar-volta]
     python manage.py relatorio_migracoes convenios.0003_seguros_de_cada_pais
