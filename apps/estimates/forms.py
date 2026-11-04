@@ -58,7 +58,7 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["patient"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["patient"].queryset = Patient.objects.filter(archived=False)
         self.fields["patient"].error_messages["required"] = _("Escolha o paciente.")
         self.fields["practitioner"].queryset = Practitioner.objects.filter(active=True)
 

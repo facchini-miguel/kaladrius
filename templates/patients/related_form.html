@@ -8,9 +8,9 @@
 <p class="text-body-secondary mb-4">{{ patient.name }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
-  {% with campo=form.vinculo %}{% include "includes/field.html" %}{% endwith %}
+  {% with campo=form.relationship %}{% include "includes/field.html" %}{% endwith %}
   {% translate "Paciente da clínica" as rotulo %}{% translate "Se a pessoa for paciente da clínica, procure pelo nome; se não, preencha o nome abaixo." as ajuda %}
-  {% include "includes/patient_search.html" with campo=form.outro_paciente patient=outro rotulo=rotulo ajuda=ajuda %}
+  {% include "includes/patient_search.html" with campo=form.other_patient patient=outro rotulo=rotulo ajuda=ajuda %}
   {% with campo=form.name %}{% include "includes/field.html" %}{% endwith %}
   {% with campo=form.phone %}{% include "includes/field.html" %}{% endwith %}
   {% with campo=form.note %}{% include "includes/field.html" %}{% endwith %}

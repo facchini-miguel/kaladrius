@@ -62,14 +62,14 @@
           <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
           {% if patient.kind == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
-          {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
+          {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ patient.tax_id|documento:patient.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
         <td>{% if patient.city %}{{ patient.city.name }}/{{ patient.city.state.sigla }}{% else %}—{% endif %}</td>
         <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
-          {% if patient.arquivado %}
+          {% if patient.archived %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>
           {% else %}
           {% if pode.pacientes.alterar %}

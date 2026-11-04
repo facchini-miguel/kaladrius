@@ -94,7 +94,7 @@ def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
     clinic.save()
     patient = cenario["patient"]
     with usar_clinica(clinic):
-        patient.arquivado = True
+        patient.archived = True
         patient.save()
     pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[patient.pk]))
     texto = pagina.content.decode()

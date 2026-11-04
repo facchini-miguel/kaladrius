@@ -37,17 +37,17 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
 
     admin_a.post(
         reverse("patients:edit", args=[patient.pk]),
-        {"kind": "PF", "name": "Maria Souza", "active": "on", "profissao": "Professora"},
+        {"kind": "PF", "name": "Maria Souza", "active": "on", "occupation": "Professora"},
     )
     [alteracao] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")
     assert alteracao.alteracoes == {
         "name": ["Maria", "Maria Souza"],
-        "profissao": ["", "Professora"],
+        "occupation": ["", "Professora"],
     }
 
     admin_a.post(reverse("patients:archive", args=[patient.pk]))
     [arquivamento] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")[1:]
-    assert arquivamento.alteracoes["arquivado"] == [False, True]
+    assert arquivamento.alteracoes["archived"] == [False, True]
 
 
 def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
@@ -172,7 +172,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
         acao=Acao.ALTERAR,
         modelo="Paciente",
         objeto_id="1",
-        alteracoes={"profissao": ["", "Professora"], "campo_que_saiu": [1, 2]},
+        alteracoes={"occupation": ["", "Professora"], "campo_que_saiu": [1, 2]},
     )
     pagina = admin_a.get(reverse("audit:list")).content.decode()
     assert "<strong>nome</strong>: — → Maria" in pagina

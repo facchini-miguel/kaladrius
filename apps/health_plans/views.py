@@ -46,14 +46,14 @@ def _convenio(request, instancia):
 
 @exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
 def carteirinha_nova(request, patient):
-    patient = get_object_or_404(Patient.objects, pk=patient, arquivado=False)
+    patient = get_object_or_404(Patient.objects, pk=patient, archived=False)
     return _carteirinha(request, patient, MemberCard())
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.ALTERAR)
 def carteirinha_editar(request, pk):
     carteirinha = get_object_or_404(
-        MemberCard.objects.select_related("patient"), pk=pk, patient__arquivado=False
+        MemberCard.objects.select_related("patient"), pk=pk, patient__archived=False
     )
     return _carteirinha(request, carteirinha.patient, carteirinha)
 

@@ -231,7 +231,7 @@ def test_paciente_arquivado_some_das_sugestoes_mas_fica_na_agenda(
 ):
     agendar(cenario)
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
+        Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     sugestoes = cenario["cliente"].get(reverse("patients:suggestions"), {"q": "maria"})
     assert "Maria Paciente" not in sugestoes.content.decode()
     periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
@@ -285,10 +285,8 @@ def test_eventos_com_parametros_invalidos(cenario):
 
 def test_aniversariantes_no_periodo(cenario):
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.create(name="Aniversariante", data_nascimento=datetime.date(1990, 3, 5))
-        Patient.objects.create(
-            name="Inativo", data_nascimento=datetime.date(1990, 3, 5), active=False
-        )
+        Patient.objects.create(name="Aniversariante", birth_date=datetime.date(1990, 3, 5))
+        Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 5), active=False)
     resposta = cenario["cliente"].get(
         reverse("schedule:birthdays"),
         {"start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA + datetime.timedelta(days=7)}T00:00:00"},
@@ -461,7 +459,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
     # A real appointment today at 09:00 for Dra. Ana must stay untouched.
     hoje = timezone.localdate()
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.create(name="Arquivado", arquivado=True)
+        Patient.objects.create(name="Arquivado", archived=True)
         existente = Appointment.objects.create(
             practitioner=cenario["ana"],
             kind=cenario["kind"],
@@ -479,10 +477,10 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         assert not novos.filter(
             practitioner=cenario["ana"], start__lt=existente.end, end__gt=existente.start
         ).exists()
-        assert not novos.filter(patient__arquivado=True).exists()
+        assert not novos.filter(patient__archived=True).exists()
         assert novos.filter(kind__name="Ocupado").count() == 0
         assert Recall.objects.count() == 80
-        assert not Recall.objects.filter(patient__arquivado=True).exists()
+        assert not Recall.objects.filter(patient__archived=True).exists()
         # Cheques are not used anymore, not even in made-up data.
         assert Payment.objects.exists()
         assert not Payment.objects.filter(method=Payment.Forma.CHEQUE).exists()

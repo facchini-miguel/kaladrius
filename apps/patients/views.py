@@ -29,10 +29,10 @@ from .models import Patient, RelatedPerson
 
 POR_PAGINA = 50
 SITUACOES = {
-    "ativos": Q(active=True, arquivado=False),
-    "inativos": Q(active=False, arquivado=False),
-    "todos": Q(arquivado=False),
-    "arquivados": Q(arquivado=True),  # clinic administrators only (see lista)
+    "ativos": Q(active=True, archived=False),
+    "inativos": Q(active=False, archived=False),
+    "todos": Q(archived=False),
+    "arquivados": Q(archived=True),  # clinic administrators only (see lista)
 }
 
 
@@ -44,7 +44,7 @@ def _ve_arquivados(request):
 def _visiveis(request):
     if _ve_arquivados(request):
         return Patient.objects.all()
-    return Patient.objects.filter(arquivado=False)
+    return Patient.objects.filter(archived=False)
 
 
 def filtrar(pacientes, busca, kind, status):
@@ -88,7 +88,7 @@ def lista(request):
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
 def ficha(request, pk):
     patient = get_object_or_404(
-        _visiveis(request).select_related("city__state", "estado_civil", "arquivado_por"), pk=pk
+        _visiveis(request).select_related("city__state", "marital_status", "archived_by"), pk=pk
     )
     # LGPD: access to a patient's record (health data) is logged.
     registrar(AuditEntry.Acao.VISUALIZAR, patient)
@@ -119,7 +119,7 @@ def imprimir(request, pk):
     """The registration sheet, ready to print or save as PDF (as the legacy Medical's
     fichapaciente_imp): identification, contact, address and health plan cards."""
     patient = get_object_or_404(
-        _visiveis(request).select_related("city__state", "estado_civil"), pk=pk
+        _visiveis(request).select_related("city__state", "marital_status"), pk=pk
     )
     registrar(AuditEntry.Acao.VISUALIZAR, patient)  # LGPD, as the record
     carteirinhas = (
@@ -134,7 +134,7 @@ def imprimir(request, pk):
             "patient": patient,
             "carteirinhas": carteirinhas,
             "relacionados": RelatedPerson.objects.filter(patient=patient).select_related(
-                "outro_paciente"
+                "other_patient"
             ),
             "hoje": timezone.localdate(),
         },
@@ -167,7 +167,7 @@ def novo(request):
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def editar(request, pk):
     # An archived patient is restored before being changed.
-    return _formulario(request, get_object_or_404(Patient.objects, pk=pk, arquivado=False))
+    return _formulario(request, get_object_or_404(Patient.objects, pk=pk, archived=False))
 
 
 def _formulario(request, patient):
@@ -181,7 +181,7 @@ def _formulario(request, patient):
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
 def arquivar(request, pk):
-    patient = get_object_or_404(Patient.objects, pk=pk, arquivado=False)
+    patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     # Not while the patient still owes or is owed money: the administrator first receives or
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
     abertas = list(
@@ -197,9 +197,9 @@ def arquivar(request, pk):
             )
         return render(request, "patients/archive.html", {"patient": patient, "abertas": abertas})
     if request.method == "POST":
-        patient.arquivado = True
-        patient.arquivado_em = timezone.now()
-        patient.arquivado_por = request.user
+        patient.archived = True
+        patient.archived_at = timezone.now()
+        patient.archived_by = request.user
         patient.save()
         messages.success(
             request,
@@ -215,10 +215,10 @@ def arquivar(request, pk):
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
 def restaurar(request, pk):
-    patient = get_object_or_404(Patient.objects, pk=pk, arquivado=True)
+    patient = get_object_or_404(Patient.objects, pk=pk, archived=True)
     if request.method == "POST":
-        patient.arquivado = False
-        patient.arquivado_em = patient.arquivado_por = None
+        patient.archived = False
+        patient.archived_at = patient.archived_by = None
         patient.save()
         messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": patient.name})
     return redirect("patients:record", pk=patient.pk)
@@ -233,7 +233,7 @@ def excluir(request, pk):
     (accounting history) without the patient and the notes, and the patient's personal data
     is removed from the audit log as well.
     """
-    patient = get_object_or_404(Patient.objects, pk=pk, arquivado=True)
+    patient = get_object_or_404(Patient.objects, pk=pk, archived=True)
     # The country's law and how long it keeps medical records (decision 124).
     contexto = {
         "patient": patient,
@@ -256,7 +256,7 @@ def excluir(request, pk):
         carteirinhas = MemberCard.objects.filter(patient=patient)
         ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
         # Their own relatives and contacts, and the links other patients made to them.
-        relacionadas = RelatedPerson.objects.filter(Q(patient=patient) | Q(outro_paciente=patient))
+        relacionadas = RelatedPerson.objects.filter(Q(patient=patient) | Q(other_patient=patient))
         ids_relacionadas = list(relacionadas.values_list("pk", flat=True))
         lancamentos = Entry.objects.filter(patient=patient)
         ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
@@ -324,11 +324,11 @@ def aniversariantes(request):
     hoje = timezone.localdate()
     mes = request.GET.get("mes", "")
     mes = int(mes) if mes.isdecimal() and 1 <= int(mes) <= 12 else hoje.month
-    pacientes = Patient.objects.filter(
-        active=True, arquivado=False, data_nascimento__month=mes
-    ).order_by("data_nascimento__day", "name")
+    pacientes = Patient.objects.filter(active=True, archived=False, birth_date__month=mes).order_by(
+        "birth_date__day", "name"
+    )
     ano = hoje.year if mes >= hoje.month else hoje.year + 1  # next birthday's year
-    linhas = [(patient, ano - patient.data_nascimento.year) for patient in pacientes]
+    linhas = [(patient, ano - patient.birth_date.year) for patient in pacientes]
     return render(
         request,
         "patients/birthdays.html",
@@ -345,25 +345,25 @@ def relacionados_de(patient):
     Each item is (link, other person's name, the other patient or None, is_reverse); a
     reverse link reads "Mãe de Ana" on the mother's record.
     """
-    proprios = RelatedPerson.objects.filter(patient=patient).select_related("outro_paciente")
-    inversos = RelatedPerson.objects.filter(outro_paciente=patient).select_related("patient")
-    return [(r, r.nome_exibido, r.outro_paciente, False) for r in proprios] + [
+    proprios = RelatedPerson.objects.filter(patient=patient).select_related("other_patient")
+    inversos = RelatedPerson.objects.filter(other_patient=patient).select_related("patient")
+    return [(r, r.nome_exibido, r.other_patient, False) for r in proprios] + [
         (r, r.patient.name, r.patient, True) for r in inversos
     ]
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_novo(request, pk):
-    patient = get_object_or_404(Patient.objects, pk=pk, arquivado=False)
+    patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     return _relacionado(request, patient, RelatedPerson())
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_editar(request, pk):
     relacionada = get_object_or_404(
-        RelatedPerson.objects.select_related("patient", "outro_paciente"),
+        RelatedPerson.objects.select_related("patient", "other_patient"),
         pk=pk,
-        patient__arquivado=False,
+        patient__archived=False,
     )
     return _relacionado(request, relacionada.patient, relacionada)
 
@@ -376,9 +376,9 @@ def _relacionado(request, patient, instancia):
         return redirect("patients:record", pk=patient.pk)
     # The patient chosen in the search box, shown again when the form comes back.
     if form.is_bound:
-        outro = form.cleaned_data.get("outro_paciente")
+        outro = form.cleaned_data.get("other_patient")
     else:
-        outro = instancia.outro_paciente if instancia.outro_paciente_id else None
+        outro = instancia.other_patient if instancia.other_patient_id else None
     return render(
         request,
         "patients/related_form.html",
@@ -393,7 +393,7 @@ def _relacionado(request, patient, instancia):
 
 @exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
 def relacionado_remover(request, pk):
-    relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, patient__arquivado=False)
+    relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, patient__archived=False)
     if request.method == "POST":
         patient = relacionada.patient_id
         relacionada.delete()

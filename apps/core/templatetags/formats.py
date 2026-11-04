@@ -53,7 +53,7 @@ def whatsapp(value):
 
 
 @register.filter
-def cep(value):
+def postal_code(value):
     value = value or ""
     pais = countries.pais_da_clinica()
     if pais != "BR":

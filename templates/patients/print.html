@@ -29,32 +29,32 @@
         {% if patient.kind == "PJ" %}
         <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ patient.legal_name|default:"—" }}</dd>
         {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-5">{{ patient.tax_id|sigla_documento:"empresa" }}</dt><dd class="col-7">{{ patient.tax_id|documento:"empresa"|default:"—" }}</dd>{% endif %}
-        {% if no_brasil or patient.inscricao_estadual %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ patient.inscricao_estadual|default:"—" }}</dd>{% endif %}
+        {% if no_brasil or patient.state_registration %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
         {% else %}
         {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-5">{{ patient.tax_id|sigla_documento:"paciente" }}</dt><dd class="col-7">{{ patient.tax_id|documento:"paciente"|default:"—" }}</dd>{% endif %}
         {% if no_brasil or patient.rg %}<dt class="col-5">{% translate "RG" %}</dt><dd class="col-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
-        <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ patient.data_nascimento|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ patient.get_sexo_display|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Estado civil" %}</dt><dd class="col-7">{{ patient.estado_civil|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Profissão" %}</dt><dd class="col-7">{{ patient.profissao|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Responsável" %}</dt><dd class="col-7">{{ patient.responsavel|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Nascimento" %}</dt><dd class="col-7">{{ patient.birth_date|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Sexo" %}</dt><dd class="col-7">{{ patient.get_sex_display|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Estado civil" %}</dt><dd class="col-7">{{ patient.marital_status|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Profissão" %}</dt><dd class="col-7">{{ patient.occupation|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Responsável" %}</dt><dd class="col-7">{{ patient.guardian|default:"—" }}</dd>
         {% endif %}
       </dl>
     </div>
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
-        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ patient.telefone_celular|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ patient.mobile_phone|phone|default:"—" }}</dd>
         <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ patient.whatsapp|phone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ patient.telefone_residencial|phone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ patient.telefone_comercial|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ patient.home_phone|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ patient.work_phone|phone|default:"—" }}</dd>
         <dt class="col-5">{% translate "E-mail" %}</dt><dd class="col-7">{{ patient.email|default:"—" }}</dd>
         <dt class="col-5">{% translate "Endereço" %}</dt>
         <dd class="col-7">
-          {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
+          {% if patient.street %}{{ patient.street }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complement %} - {{ patient.complement }}{% endif %}<br>{% endif %}
           {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
           {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
-          {% if patient.cep %}{% rotulo_cep %} {{ patient.cep|cep }}{% endif %}
-          {% if not patient.logradouro and not patient.neighborhood and not patient.cidade_estado and not patient.cep %}—{% endif %}
+          {% if patient.postal_code %}{% rotulo_cep %} {{ patient.postal_code|postal_code }}{% endif %}
+          {% if not patient.street and not patient.neighborhood and not patient.cidade_estado and not patient.postal_code %}—{% endif %}
         </dd>
       </dl>
     </div>
@@ -78,7 +78,7 @@
     <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
     <tbody>
       {% for relacionada in relacionados %}
-      <tr><td>{{ relacionada.get_vinculo_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
+      <tr><td>{{ relacionada.get_relationship_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

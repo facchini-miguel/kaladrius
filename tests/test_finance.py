@@ -340,7 +340,7 @@ def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
             account=FinancialAccount.objects.get(name="Caixa"),
             note="Pago pela Joana",
         )
-        Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
+        Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     admin = entrar(cenario, "admin")
     admin.post(reverse("patients:delete", args=[cenario["patient"].pk]))
     entry.refresh_from_db()

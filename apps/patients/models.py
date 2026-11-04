@@ -43,26 +43,36 @@ class Patient(ModeloDaClinica):
         db_column="cpf_cnpj",
     )
     rg = models.CharField(_("RG"), max_length=20, blank=True)
-    inscricao_estadual = models.CharField(_("inscrição estadual"), max_length=20, blank=True)
-    sexo = models.CharField(_("sexo"), max_length=1, choices=Sexo.choices, blank=True)
-    data_nascimento = models.DateField(_("data de nascimento"), null=True, blank=True)
-    estado_civil = models.ForeignKey(
+    state_registration = models.CharField(
+        _("inscrição estadual"), max_length=20, blank=True, db_column="inscricao_estadual"
+    )
+    sex = models.CharField(
+        _("sexo"), max_length=1, choices=Sexo.choices, blank=True, db_column="sexo"
+    )
+    birth_date = models.DateField(
+        _("data de nascimento"), null=True, blank=True, db_column="data_nascimento"
+    )
+    marital_status = models.ForeignKey(
         "referencias.MaritalStatus",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("estado civil"),
+        db_column="estado_civil_id",
     )
-    profissao = models.CharField(_("profissão"), max_length=100, blank=True)
-    responsavel = models.CharField(
+    occupation = models.CharField(_("profissão"), max_length=100, blank=True, db_column="profissao")
+    guardian = models.CharField(
         _("responsável"),
         max_length=200,
         blank=True,
         help_text=_("Para menores de idade, por exemplo."),
+        db_column="responsavel",
     )
 
-    telefone_celular = models.CharField(_("celular"), max_length=11, blank=True)
+    mobile_phone = models.CharField(
+        _("celular"), max_length=11, blank=True, db_column="telefone_celular"
+    )
     # Fax and MSN from the legacy system are not kept as fields: nobody uses them anymore.
     whatsapp = models.CharField(
         _("WhatsApp"),
@@ -70,12 +80,16 @@ class Patient(ModeloDaClinica):
         blank=True,
         help_text=_("Com DDD. A ficha abre a conversa direto no WhatsApp."),
     )
-    telefone_residencial = models.CharField(_("telefone residencial"), max_length=11, blank=True)
-    telefone_comercial = models.CharField(_("telefone comercial"), max_length=11, blank=True)
+    home_phone = models.CharField(
+        _("telefone residencial"), max_length=11, blank=True, db_column="telefone_residencial"
+    )
+    work_phone = models.CharField(
+        _("telefone comercial"), max_length=11, blank=True, db_column="telefone_comercial"
+    )
     email = models.EmailField(_("e-mail"), blank=True)
 
     # Brazil: 8 digits; other countries (decision 117): up to a 9-digit ZIP+4.
-    cep = models.CharField(_("CEP"), max_length=9, blank=True)
+    postal_code = models.CharField(_("CEP"), max_length=9, blank=True, db_column="cep")
     state = models.ForeignKey(
         "referencias.State",
         on_delete=models.PROTECT,
@@ -95,29 +109,40 @@ class Patient(ModeloDaClinica):
         db_column="cidade_id",
     )
     # Outside Brazil the national state and city tables (IBGE) do not apply: typed text.
-    estado_nome = models.CharField(_("estado ou província"), max_length=60, blank=True)
-    cidade_nome = models.CharField(_("cidade"), max_length=100, blank=True)
+    state_name = models.CharField(
+        _("estado ou província"), max_length=60, blank=True, db_column="estado_nome"
+    )
+    city_name = models.CharField(_("cidade"), max_length=100, blank=True, db_column="cidade_nome")
     neighborhood = models.CharField(_("bairro"), max_length=100, blank=True, db_column="bairro")
-    logradouro = models.CharField(
-        _("endereço"), max_length=200, blank=True, help_text=_("Rua, avenida…")
+    street = models.CharField(
+        _("endereço"),
+        max_length=200,
+        blank=True,
+        help_text=_("Rua, avenida…"),
+        db_column="logradouro",
     )
     number = models.CharField(_("número"), max_length=10, blank=True, db_column="numero")
-    complemento = models.CharField(_("complemento"), max_length=100, blank=True)
+    complement = models.CharField(
+        _("complemento"), max_length=100, blank=True, db_column="complemento"
+    )
 
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     # Archiving replaces deleting: the patient leaves every screen of the team but keeps
     # their history (schedule, recalls, audit). Only clinic administrators see archived
     # patients, and can restore them (decision 046).
-    arquivado = models.BooleanField(_("arquivado"), default=False)
-    arquivado_em = models.DateTimeField(_("arquivado em"), null=True, blank=True)
-    arquivado_por = models.ForeignKey(
+    archived = models.BooleanField(_("arquivado"), default=False, db_column="arquivado")
+    archived_at = models.DateTimeField(
+        _("arquivado em"), null=True, blank=True, db_column="arquivado_em"
+    )
+    archived_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("arquivado por"),
+        db_column="arquivado_por_id",
     )
     created_at = models.DateTimeField(_("cadastrado em"), auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
@@ -150,10 +175,10 @@ class Patient(ModeloDaClinica):
     @property
     def idade(self):
         """Age in whole years, or None when the birth date is unknown."""
-        if self.data_nascimento is None:
+        if self.birth_date is None:
             return None
         hoje = datetime.date.today()
-        nascimento = self.data_nascimento
+        nascimento = self.birth_date
         return (
             hoje.year
             - nascimento.year
@@ -166,11 +191,11 @@ class Patient(ModeloDaClinica):
         anywhere else (decision 117)."""
         if self.city_id:
             return f"{self.city.name}/{self.city.state.sigla}"
-        return ", ".join(parte for parte in (self.cidade_nome, self.estado_nome) if parte)
+        return ", ".join(parte for parte in (self.city_name, self.state_name) if parte)
 
     @property
     def telefone_principal(self):
-        return self.telefone_celular or self.telefone_residencial or self.telefone_comercial
+        return self.mobile_phone or self.home_phone or self.work_phone
 
 
 class RelatedPerson(ModeloDaClinica):
@@ -201,14 +226,17 @@ class RelatedPerson(ModeloDaClinica):
         verbose_name=_("paciente"),
         db_column="paciente_id",
     )
-    vinculo = models.CharField(_("vínculo"), max_length=20, choices=Relationship.choices)
-    outro_paciente = models.ForeignKey(
+    relationship = models.CharField(
+        _("vínculo"), max_length=20, choices=Relationship.choices, db_column="vinculo"
+    )
+    other_patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="relacionado_a",
         verbose_name=_("paciente da clínica"),
+        db_column="outro_paciente_id",
     )
     name = models.CharField(_("nome"), max_length=200, blank=True, db_column="nome")
     phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
@@ -222,40 +250,40 @@ class RelatedPerson(ModeloDaClinica):
         ordering = ["pk"]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(outro_paciente__isnull=False) | ~models.Q(name=""),
+                condition=models.Q(other_patient__isnull=False) | ~models.Q(name=""),
                 name="relacionada_paciente_ou_nome",
             ),
             models.CheckConstraint(
-                condition=~models.Q(outro_paciente=models.F("patient")),
+                condition=~models.Q(other_patient=models.F("patient")),
                 name="relacionada_nao_e_o_proprio",
             ),
             models.UniqueConstraint(
-                fields=["patient", "outro_paciente", "vinculo"],
+                fields=["patient", "other_patient", "relationship"],
                 name="relacionada_unica",
             ),
         ]
 
     def __str__(self):
-        return f"{self.get_vinculo_display()}: {self.nome_exibido}"
+        return f"{self.get_relationship_display()}: {self.nome_exibido}"
 
     def save(self, *args, **kwargs):
         self._conferir_clinica()
         if self.clinic_id is None:  # without isolation (commands)
             self.clinic_id = self.patient.clinic_id
         clinicas = {self.patient.clinic_id}
-        if self.outro_paciente_id:
-            clinicas.add(self.outro_paciente.clinic_id)
+        if self.other_patient_id:
+            clinicas.add(self.other_patient.clinic_id)
         if clinicas != {self.clinic_id}:
             raise ClinicaDiferente("Both patients must be of this clinic.")
         super().save(*args, **kwargs)
 
     @property
     def nome_exibido(self):
-        return self.outro_paciente.name if self.outro_paciente_id else self.name
+        return self.other_patient.name if self.other_patient_id else self.name
 
     @property
     def telefone_exibido(self):
-        if self.phone or not self.outro_paciente_id:
+        if self.phone or not self.other_patient_id:
             return self.phone
-        outro = self.outro_paciente
-        return outro.whatsapp or outro.telefone_celular or outro.telefone_residencial
+        outro = self.other_patient
+        return outro.whatsapp or outro.mobile_phone or outro.home_phone

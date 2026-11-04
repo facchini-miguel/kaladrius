@@ -21,10 +21,10 @@ def cnpj(fake):
     return _valido(fake.cnpj, cnpj_valido)
 
 
-def profissao(fake):
+def occupation(fake):
     """A Faker job title that fits `Paciente.profissao`, drawn again instead of cut: since
     Faker 40 the pt_BR list has titles longer than the field."""
     from apps.patients.models import Patient
 
-    limite = Patient._meta.get_field("profissao").max_length
+    limite = Patient._meta.get_field("occupation").max_length
     return next(titulo for titulo in iter(fake.job, None) if len(titulo) <= limite)

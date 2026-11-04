@@ -157,15 +157,15 @@ def test_paciente_completo(importado):
     _, clinic = importado
     joao = dados(clinic, Patient, name="João d'Ávila")[0]  # Latin-1 mojibake fixed
     assert joao.tax_id == "01234567890"  # leading zero restored
-    assert (joao.sexo, joao.data_nascimento) == ("M", datetime.date(1980, 2, 3))
-    assert joao.estado_civil.name == "Solteiro(a)"
+    assert (joao.sex, joao.birth_date) == ("M", datetime.date(1980, 2, 3))
+    assert joao.marital_status.name == "Solteiro(a)"
     assert joao.city.name == "Florianópolis" and joao.state.sigla == "SC"
-    assert (joao.neighborhood, joao.logradouro, joao.number) == (
+    assert (joao.neighborhood, joao.street, joao.number) == (
         "Trindade",
         "Avenida Beira-Mar",
         "100",
     )
-    assert (joao.telefone_residencial, joao.telefone_celular) == ("4830001111", "99998888")
+    assert (joao.home_phone, joao.mobile_phone) == ("4830001111", "99998888")
     assert joao.notes.startswith("Alergia a dipirona\n\n[Sistema antigo]")
     for trecho in [
         "Código no sistema antigo: 10",
@@ -182,9 +182,9 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
     # Same CPF as João after restoring the leading zero: kept only in the notes.
     assert ana.tax_id == ""
     assert "CPF/CNPJ no sistema antigo: 012.345.678-90" in ana.notes
-    assert (ana.sexo, ana.data_nascimento, ana.estado_civil.name) == ("", None, "Viúvo(a)")
+    assert (ana.sex, ana.birth_date, ana.marital_status.name) == ("", None, "Viúvo(a)")
     assert ana.email == "" and "E-mail no sistema antigo: email-invalido" in ana.notes
-    assert ana.cep == "" and "CEP no sistema antigo: 880" in ana.notes
+    assert ana.postal_code == "" and "CEP no sistema antigo: 880" in ana.notes
     assert ana.city is None and "Cidade no sistema antigo: Cidade Que Nao Existe/SC" in ana.notes
     assert "Fax: 3333" in ana.notes and "Site: www.ana.example" in ana.notes
     assert not ana.active
@@ -194,7 +194,7 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
 
     empresa = dados(clinic, Patient, name="Empresa Teste")[0]
     assert (empresa.kind, empresa.tax_id) == ("PJ", "11222333000181")
-    assert (empresa.legal_name, empresa.inscricao_estadual) == ("Empresa Teste Ltda", "123")
+    assert (empresa.legal_name, empresa.state_registration) == ("Empresa Teste Ltda", "123")
 
 
 @pytest.mark.parametrize(
@@ -304,18 +304,18 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     texto = str([vars(p) for p in pacientes])
     assert not [trecho for trecho in originais if trecho in texto]
     for velho, novo in zip(antes["pacientes"], pacientes, strict=True):
-        assert (novo.kind, novo.sexo, novo.active, novo.city_id) == (
+        assert (novo.kind, novo.sex, novo.active, novo.city_id) == (
             velho.kind,
-            velho.sexo,
+            velho.sex,
             velho.active,
             velho.city_id,
         )
         assert bool(novo.tax_id) == bool(velho.tax_id)
-        assert bool(novo.telefone_residencial) == bool(velho.telefone_residencial)
-        if velho.data_nascimento:
-            assert abs((novo.data_nascimento - velho.data_nascimento).days) <= 180
+        assert bool(novo.home_phone) == bool(velho.home_phone)
+        if velho.birth_date:
+            assert abs((novo.birth_date - velho.birth_date).days) <= 180
     joao = next(p for p in pacientes if p.pk == antes["pacientes"][0].pk)
-    assert joao.telefone_residencial.startswith("48")  # area code kept
+    assert joao.home_phone.startswith("48")  # area code kept
     assert len(joao.tax_id) == 11
 
     agendamentos = dados(clinic, Appointment)

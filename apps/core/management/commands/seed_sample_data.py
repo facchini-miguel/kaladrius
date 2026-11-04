@@ -153,8 +153,8 @@ class Command(BaseCommand):
                 name = fake.company()
                 documento = fake_data.cnpj(fake)
             else:
-                sexo = fake.random_element(["F", "M"])
-                name = fake.name_female() if sexo == "F" else fake.name_male()
+                sex = fake.random_element(["F", "M"])
+                name = fake.name_female() if sex == "F" else fake.name_male()
                 documento = fake_data.cpf(fake) if fake.boolean(85) else ""
             if documento in documentos:
                 documento = ""
@@ -166,24 +166,24 @@ class Command(BaseCommand):
                 kind=Patient.Tipo.JURIDICA if juridica else Patient.Tipo.FISICA,
                 name=name,
                 tax_id=documento,
-                telefone_celular=celular,
+                mobile_phone=celular,
                 whatsapp=celular,
                 email=f"paciente{clinic.pk}.{number}@example.com",
-                cep=f"88{fake.numerify('######')}",
+                postal_code=f"88{fake.numerify('######')}",
                 state_id=city.state_id,
                 city=city,
                 neighborhood=fake.neighborhood(),
-                logradouro=fake.street_name(),
+                street=fake.street_name(),
                 number=fake.building_number(),
                 active=fake.boolean(95),
             )
             if juridica:
                 patient.legal_name = f"{name} Ltda."
             else:
-                patient.sexo = sexo
-                patient.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
-                patient.estado_civil = fake.random_element(estados_civis)
-                patient.profissao = fake_data.profissao(fake)
+                patient.sex = sex
+                patient.birth_date = fake.date_of_birth(minimum_age=0, maximum_age=90)
+                patient.marital_status = fake.random_element(estados_civis)
+                patient.occupation = fake_data.occupation(fake)
             novos.append(patient)
         Patient.objects.bulk_create(novos, batch_size=500)
         self._carteirinhas(clinic, novos)
@@ -241,14 +241,14 @@ class Command(BaseCommand):
                 RelatedPerson.objects.create(
                     clinic=clinic,
                     patient=pacientes[i],
-                    outro_paciente=pacientes[i + 1],
-                    vinculo=vinculo,
+                    other_patient=pacientes[i + 1],
+                    relationship=vinculo,
                 )
         for n, patient in enumerate(pacientes[6:9], start=1):
             RelatedPerson.objects.create(
                 clinic=clinic,
                 patient=patient,
-                vinculo=vinculos.EMERGENCIA,
+                relationship=vinculos.EMERGENCIA,
                 name=f"Contato fictício {n}",
                 phone=f"4899000000{n}",
             )

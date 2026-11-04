@@ -17,7 +17,7 @@ def cenario(clinica_a, criar_profissional):
     ana = criar_profissional(clinica_a, "Dra. Ana")
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
-            name="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
+            name="Maria Paciente", birth_date=datetime.date(1980, 5, 17)
         )
         kind = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
@@ -59,7 +59,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             assert agendamento.end - end == datetime.timedelta(days=14)
             assert agendamento.start.weekday() == start.weekday()
         assert Recall.objects.get().date == hoje - datetime.timedelta(days=6)
-        assert Patient.objects.get().data_nascimento == datetime.date(1980, 5, 17)
+        assert Patient.objects.get().birth_date == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
             primeiro = Appointment.objects.first()
@@ -77,3 +77,15 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
         assert Recall.objects.get().date == hoje - datetime.timedelta(days=20)
+
+
+def test_as_datas_fixas_existem():
+    """A field renamed without updating FIXAS would silently start to move (a birth date)."""
+    from django.apps import apps
+
+    from apps.core.management.commands.advance_dates import FIXAS
+
+    for nome in FIXAS:
+        label, modelo, campo = nome.split(".")
+        field = apps.get_model(label, modelo)._meta.get_field(campo)
+        assert field.get_internal_type() in ("DateField", "DateTimeField"), nome

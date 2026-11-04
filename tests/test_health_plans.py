@@ -146,7 +146,7 @@ def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, convenio, admin
         criada = MemberCard.objects.create(
             patient=patient, convenio=convenio, number="CARTEIRINHA-SIGILOSA"
         )
-        patient.arquivado = True
+        patient.archived = True
         patient.save()
     resposta = admin.post(reverse("patients:delete", args=[patient.pk]))
     assert resposta.status_code == 302

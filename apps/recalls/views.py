@@ -38,7 +38,7 @@ def lista(request):
     busca = request.GET.get("q", "").strip()
     de, until = _data(request.GET.get("de")), _data(request.GET.get("until"))
     rechamadas = Recall.objects.select_related("patient").filter(
-        **SITUACOES.get(status, SITUACOES["pendentes"]), patient__arquivado=False
+        **SITUACOES.get(status, SITUACOES["pendentes"]), patient__archived=False
     )
     if busca:
         rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
@@ -143,7 +143,7 @@ def resumo(request):
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        concluida=False, date__gte=de, date__lt=until, patient__arquivado=False
+        concluida=False, date__gte=de, date__lt=until, patient__archived=False
     )
     for date in pendentes.values_list("date", flat=True):
         contagem[date.isoformat()] = contagem.get(date.isoformat(), 0) + 1
@@ -155,5 +155,5 @@ def do_dia(request):
     dia = _data(request.GET.get("date"))
     if dia is None:
         return HttpResponse(_("Data inválida."), status=400)
-    rechamadas = Recall.objects.filter(date=dia, patient__arquivado=False).select_related("patient")
+    rechamadas = Recall.objects.filter(date=dia, patient__archived=False).select_related("patient")
     return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})
