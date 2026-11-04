@@ -1,5 +1,5 @@
 [Unit]
-Description=Kaladrius: backup diário às 06:00 UTC (03:00 em Brasília)
+Description=Kaladrius: daily backup at 06:00 UTC
 
 [Timer]
 OnCalendar=*-*-* 06:00:00 UTC

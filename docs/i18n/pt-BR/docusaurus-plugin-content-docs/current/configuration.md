@@ -60,7 +60,7 @@ Depois do primeiro acesso, você pode tirar o `DJANGO_ADMIN_PASSWORD` do arquivo
 | Variável | Padrão | O que faz |
 |---|---|---|
 | `SITE_HOSTNAME` | **obrigatória** | Domínio(s) que o Caddy atende e para os quais obtém o certificado HTTPS, separados por vírgula, ex.: `clinica.exemplo.com.br, www.clinica.exemplo.com.br` |
-| `IMAGEM_APP` | o registro da instalação de referência | Imagem Docker do app, ex.: `kaladrius:latest` quando você mesmo monta |
+| `APP_IMAGE` | o registro da instalação de referência | Imagem Docker do app, ex.: `kaladrius:latest` quando você mesmo monta |
 
 ## Só para desenvolvimento
 

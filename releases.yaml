@@ -4,6 +4,33 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.55.0
+  data: 2026-11-03
+  titulo:
+    pt-br: Comandos do servidor em inglês
+    en: Server commands in English
+    es: Comandos del servidor en inglés
+  itens:
+    - tipo: melhoria
+      modulo: Sistema
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Os comandos do servidor da clínica agora têm nomes em inglês, como
+          `sudo kaladrius configure`, `status`, `health`, `restart` e `test-restore`. Os nomes
+          antigos (`configurar`, `estado`…) continuam funcionando, e a atualização ajusta
+          sozinha as configurações e as tarefas agendadas do servidor.
+        en: >
+          The clinic server's commands now have English names, such as
+          `sudo kaladrius configure`, `status`, `health`, `restart` and `test-restore`. The old
+          names (`configurar`, `estado`…) still work, and the update adjusts the server's
+          settings and scheduled tasks by itself.
+        es: >
+          Los comandos del servidor de la clínica ahora tienen nombres en inglés, como
+          `sudo kaladrius configure`, `status`, `health`, `restart` y `test-restore`. Los
+          nombres antiguos (`configurar`, `estado`…) siguen funcionando, y la actualización
+          ajusta sola la configuración y las tareas programadas del servidor.
+
 - versao: 0.54.1
   data: 2026-11-03
   titulo:

@@ -22,7 +22,7 @@ Ya viene listo: todos los días a las 06:00 UTC en `/var/backups/kaladrius` (se 
 
 ```bash
 sudo kaladrius backup                # backup ahora
-sudo kaladrius testar-restauracao    # restaura el más nuevo en una base descartable y lo verifica
+sudo kaladrius test-restore    # restaura el más nuevo en una base descartable y lo verifica
 sudo ls -l /var/backups/kaladrius    # lista
 ```
 
@@ -31,7 +31,7 @@ Para restaurar uno (**reemplaza** la base, vea abajo):
 ```bash
 sudo cat /var/backups/kaladrius/<archivo>.dump | sudo docker compose -f /opt/kaladrius/release/docker-compose.prod.yml \
   exec -T db sh -c 'pg_restore --clean --if-exists -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
-sudo kaladrius reiniciar
+sudo kaladrius restart
 ```
 
 ## Servidor propio
@@ -100,4 +100,4 @@ docker exec teste-backup psql -U postgres -d restaurado -c 'SELECT count(*) FROM
 docker rm -f teste-backup
 ```
 
-Con `--exit-on-error`, cualquier problema en el archivo hace fallar la prueba. El repositorio tiene un script que hace todo esto con el bucket de Google Cloud: `deploy/testar_backup.sh`.
+Con `--exit-on-error`, cualquier problema en el archivo hace fallar la prueba. El repositorio tiene un script que hace todo esto con el bucket de Google Cloud: `deploy/test_backup.sh`.

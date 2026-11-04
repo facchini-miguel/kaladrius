@@ -1,4 +1,4 @@
-"""Server health read from the samples of deploy/servidor/saude.sh (0.22.0, decision 056).
+"""Server health read from the samples of deploy/server/health.sh (0.22.0, decision 056).
 
 The server collects them every 5 minutes with plain Linux tools and keeps 7 days in a
 JSON-lines file mounted read-only in the app container (settings.SAUDE_DIR). Nothing is

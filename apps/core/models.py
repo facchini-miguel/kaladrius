@@ -288,7 +288,7 @@ class Vinculo(models.Model):
 
 
 class Backup(models.Model):
-    """A database backup sent to Cloud Storage, recorded by deploy/servidor/backup.sh.
+    """A database backup sent to Cloud Storage, recorded by deploy/server/backup.sh.
 
     Superusers see a warning in the web app when the newest one is too old, which is
     how a failing backup gets noticed (the server has no e-mail or paid alerting).

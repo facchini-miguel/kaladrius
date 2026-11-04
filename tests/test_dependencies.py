@@ -1,7 +1,7 @@
 """The dependency locks (decision 136): every library chosen in a .in file is in its lock at the
 same version, and the libraries both locks share have the same version and hashes, so the
 tests in CI (requirements-dev.txt) run what the production image installs (requirements.txt).
-CI also regenerates the locks and fails on any difference (deploy/gerar_lock.sh --verificar);
+CI also regenerates the locks and fails on any difference (deploy/lock.sh --check);
 these checks need no network and catch the common mistakes earlier."""
 
 import re
@@ -51,7 +51,7 @@ def test_lock_tem_as_versoes_do_in(entrada, lock):
     escolhidas = _escolhidas(entrada)
     assert escolhidas
     for nome, versao in escolhidas.items():
-        assert nome in pacotes, f"{nome} not in {lock}: run deploy/gerar_lock.sh"
+        assert nome in pacotes, f"{nome} not in {lock}: run deploy/lock.sh"
         no_lock = pacotes[nome][0]
         assert no_lock == versao, f"{nome}: {entrada} has {versao}, {lock} has {no_lock}"
     assert all(hashes for _, hashes in pacotes.values()), f"{lock} has a package without a hash"
@@ -69,7 +69,7 @@ def test_ci_confere_os_locks():
     arquivo_ci = RAIZ / ".github" / "workflows" / "ci.yml"
     if not arquivo_ci.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
-    assert "deploy/gerar_lock.sh --verificar" in arquivo_ci.read_text()
+    assert "deploy/lock.sh --check" in arquivo_ci.read_text()
 
 
 def test_lint_a_cada_commit_usa_o_ruff_do_lock():

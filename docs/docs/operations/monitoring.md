@@ -25,13 +25,13 @@ The server can warn you by itself through [Healthchecks.io](https://healthchecks
 
 | Variable in `.env` | Check | Period / grace | Warns when |
 |---|---|---|---|
-| `MONITOR_SISTEMA_URL` | System up | 5 min / 10 min | The system, opened through the internet by each of its addresses (every name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/saude`) |
+| `MONITOR_SYSTEM_URL` | System up | 5 min / 10 min | The system, opened through the internet by each of its addresses (every name in `SITE_HOSTNAME`), does not answer, or its database does not (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Daily backup | 1 day / 2 h | The daily backup fails or does not run |
-| `MONITOR_DEMONSTRACAO_URL` | Demo reset (demo server only) | 1 day / 2 hours | The nightly demo reset (07:30 UTC) fails or does not run |
-| `MONITOR_RESTAURACAO_URL` | Backup restore | 7 days / 1 day | The weekly restore test (Sundays, 07:00 UTC: the newest backup restored into a throwaway database) fails |
-| `MONITOR_ATUALIZACAO_URL` | Automatic update | 5 min / 15 min | The automatic updates fail or stop running |
-| `MONITOR_RECURSOS_URL` | Disk and memory | 5 min / 15 min | Memory, swap or disk reach the critical level |
-| `MONITOR_CERTIFICADO_URL` | HTTPS certificate | 1 day / 2 h | A certificate of any address (`SITE_HOSTNAME` and `DOCS_HOSTNAME`) has less than 14 days left (Caddy renews it about 30 days before) |
+| `MONITOR_DEMO_URL` | Demo reset (demo server only) | 1 day / 2 hours | The nightly demo reset (07:30 UTC) fails or does not run |
+| `MONITOR_RESTORE_URL` | Backup restore | 7 days / 1 day | The weekly restore test (Sundays, 07:00 UTC: the newest backup restored into a throwaway database) fails |
+| `MONITOR_UPDATE_URL` | Automatic update | 5 min / 15 min | The automatic updates fail or stop running |
+| `MONITOR_RESOURCES_URL` | Disk and memory | 5 min / 15 min | Memory, swap or disk reach the critical level |
+| `MONITOR_CERTIFICATE_URL` | HTTPS certificate | 1 day / 2 h | A certificate of any address (`SITE_HOSTNAME` and `DOCS_HOSTNAME`) has less than 14 days left (Caddy renews it about 30 days before) |
 | `MONITOR_DOCS_URL` | Documentation up | 5 min / 10 min | This documentation site, when the server runs it, does not answer at one of its addresses (every name in `DOCS_HOSTNAME`) |
 
 You are warned when a signal reports a failure or **stops arriving**, which also covers the whole server being off. Without these variables, nothing is sent.
@@ -47,9 +47,9 @@ Superusers see a warning at the top of every page when:
 
 ## System health (Google Cloud installation)
 
-Every 5 minutes, `deploy/servidor/saude.sh --coletar` reads CPU, memory, swap, disk, network, load and the memory and CPU of each container, and appends a line to `/opt/kaladrius/saude/amostras.jsonl` (7 days kept, about 1.5 MB). Everyone sees it in **Help > System health**, with charts of the last hours and days; the database tables and the server command are shown to superusers only. The app only reads the file; it has no access to Docker.
+Every 5 minutes, `deploy/server/health.sh --collect` reads CPU, memory, swap, disk, network, load and the memory and CPU of each container, and appends a line to `/opt/kaladrius/saude/amostras.jsonl` (7 days kept, about 1.5 MB). Everyone sees it in **Help > System health**, with charts of the last hours and days; the database tables and the server command are shown to superusers only. The app only reads the file; it has no access to Docker.
 
-On the server, `sudo /opt/kaladrius/bin/saude.sh` prints a report: now, last 24 hours, containers and timers.
+On the server, `sudo /opt/kaladrius/bin/health.sh` prints a report: now, last 24 hours, containers and timers.
 
 ## Logs
 
