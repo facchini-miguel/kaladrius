@@ -227,3 +227,13 @@ def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_
     resposta = cliente.post(reverse("configuracoes"), dados_clinica(**extra))
     assert resposta.status_code == 200
     assert erro in resposta.content.decode()
+
+
+def test_todo_app_declara_o_proprio_label():
+    """Without one, Django takes the folder's name for the label, and renaming the folder would
+    leave the database's tables behind (decision 154: the account app, ex-conta)."""
+    from django.apps import apps
+
+    for config in apps.get_app_configs():
+        if config.name.startswith("apps."):
+            assert "label" in type(config).__dict__, config.name
