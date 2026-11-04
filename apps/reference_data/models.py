@@ -1,7 +1,7 @@
 """Public reference tables shared by every clinic (not isolated per clinic).
 
 Data comes from official sources (IBGE, Banco Central) and is loaded by migrations
-from the JSON files in apps/reference_data/dados/.
+from the JSON files in apps/reference_data/data/.
 """
 
 from django.db import models
