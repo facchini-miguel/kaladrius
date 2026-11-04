@@ -33,8 +33,8 @@ def parcela(clinica_a):
             clinic=clinica_a,
             tipo=Entry.Tipo.RECEBER,
             pessoa="Pagador fictício",
-            descricao="Consulta",
-            categoria=Category.objects.get(nome="Consulta"),
+            description="Consulta",
+            categoria=Category.objects.get(name="Consulta"),
             valor_total=Decimal("300"),
             parcelas=1,
             primeiro_vencimento=ANTEONTEM,
@@ -51,7 +51,7 @@ def receber(clinic, parcela, data, valor="100"):
             valor=Decimal(valor),
             data=data,
             forma="pix",
-            conta=FinancialAccount.objects.get(nome="Caixa"),
+            conta=FinancialAccount.objects.get(name="Caixa"),
         )
 
 
@@ -77,7 +77,7 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
             "data": ONTEM.isoformat(),
             "valor": "100",
             "forma": "pix",
-            "conta": FinancialAccount.todos.get(clinic=clinica_a, nome="Caixa").pk,
+            "conta": FinancialAccount.todos.get(clinic=clinica_a, name="Caixa").pk,
         },
         follow=True,
     )

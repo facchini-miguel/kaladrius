@@ -67,7 +67,7 @@ class Clinic(models.Model):
         MEDICINA = "medicina", _("Medicina")
         OUTRA = "outra", _("Outra área da saúde")
 
-    nome = models.CharField(_("nome"), max_length=200)
+    name = models.CharField(_("nome"), max_length=200, db_column="nome")
     area = models.CharField(
         _("área principal"),
         max_length=20,
@@ -81,7 +81,7 @@ class Clinic(models.Model):
     # The country's tax document, an individual's or a company's (decision 121).
     documento = models.CharField(_("documento"), max_length=20, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
-    telefone = models.CharField(_("telefone"), max_length=20, blank=True)
+    phone = models.CharField(_("telefone"), max_length=20, blank=True, db_column="telefone")
     endereco = models.CharField(
         _("endereço"),
         max_length=250,
@@ -125,7 +125,7 @@ class Clinic(models.Model):
             "dentes já registrados continuam os mesmos."
         ),
     )
-    ativa = models.BooleanField(_("ativa"), default=True)
+    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
     exigir_duas_etapas = models.BooleanField(
         _("exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"),
         default=False,
@@ -146,7 +146,7 @@ class Clinic(models.Model):
         db_table = "core_clinica"
         verbose_name = _("clínica")
         verbose_name_plural = _("clínicas")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(agenda_inicio__lt=models.F("agenda_fim")),
@@ -156,7 +156,7 @@ class Clinic(models.Model):
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -184,17 +184,17 @@ class Clinic(models.Model):
     def medicina(self):
         return self.modulo_habilitado(ModuloClinico.MEDICINA)
 
-    def modulo_habilitado(self, codigo):
+    def modulo_habilitado(self, code):
         # Explicit clinic filtering: this property is also used during clinic creation,
         # before a request has selected a clinic. Missing/unknown modules fail closed.
-        if self.pk is None or codigo not in ModuloClinico.values:
+        if self.pk is None or code not in ModuloClinico.values:
             return False
-        return ClinicModule.todos.filter(clinic=self, codigo=codigo, ativo=True).exists()
+        return ClinicModule.todos.filter(clinic=self, code=code, active=True).exists()
 
     @classmethod
     def unica(cls):
         """The clinic of this installation (decision 069: one installation, one clinic)."""
-        return cls.objects.filter(ativa=True).order_by("pk").first()
+        return cls.objects.filter(active=True).order_by("pk").first()
 
 
 class ModuloClinico(models.TextChoices):
@@ -227,24 +227,26 @@ DEPENDENCIAS = {
 
 
 class ClinicModule(ModeloDaClinica):
-    codigo = models.CharField(_("módulo"), max_length=20, choices=ModuloClinico.choices)
-    ativo = models.BooleanField(_("ativo"), default=True)
+    code = models.CharField(
+        _("módulo"), max_length=20, choices=ModuloClinico.choices, db_column="codigo"
+    )
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
     class Meta:
         db_table = "core_modulodaclinica"
         verbose_name = _("módulo da clínica")
         verbose_name_plural = _("módulos da clínica")
-        ordering = ["codigo"]
+        ordering = ["code"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "codigo"], name="modulo_unico_por_clinica"),
+            models.UniqueConstraint(fields=["clinic", "code"], name="modulo_unico_por_clinica"),
             models.CheckConstraint(
-                condition=models.Q(codigo__in=ModuloClinico.values),
+                condition=models.Q(code__in=ModuloClinico.values),
                 name="modulo_clinico_conhecido",
             ),
         ]
 
     def __str__(self):
-        return self.get_codigo_display()
+        return self.get_code_display()
 
 
 class Papel(models.TextChoices):
@@ -275,14 +277,14 @@ class Membership(models.Model):
         db_column="clinica_id",
     )
     papel = models.CharField(_("perfil"), max_length=20, choices=Papel.choices)
-    ativo = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "core_vinculo"
         verbose_name = _("vínculo com clínica")
         verbose_name_plural = _("vínculos com clínicas")
-        ordering = ["clinic__nome", "user__username"]
+        ordering = ["clinic__name", "user__username"]
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "clinic"],

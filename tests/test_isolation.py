@@ -42,9 +42,9 @@ def test_consulta_ve_somente_a_clinica_atual(clinica_a, clinica_b, criar_profiss
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with usar_clinica(clinica_a):
-        assert [p.nome for p in Practitioner.objects.all()] == ["Dra. A"]
+        assert [p.name for p in Practitioner.objects.all()] == ["Dra. A"]
     with usar_clinica(clinica_b):
-        assert [p.nome for p in Practitioner.objects.all()] == ["Dr. B"]
+        assert [p.name for p in Practitioner.objects.all()] == ["Dr. B"]
 
 
 def test_busca_por_id_de_outra_clinica_nao_encontra(clinica_a, clinica_b, criar_profissional):
@@ -57,33 +57,33 @@ def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, cria
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with usar_clinica(clinica_a):
-        Practitioner.objects.update(ativo=False)
+        Practitioner.objects.update(active=False)
         Practitioner.objects.all().delete()
     with usar_clinica(clinica_b):
-        assert Practitioner.objects.get().ativo is True
+        assert Practitioner.objects.get().active is True
 
 
 def test_novo_registro_recebe_a_clinica_atual(clinica_a):
     with usar_clinica(clinica_a):
-        practitioner = Practitioner.objects.create(nome="Dra. A")
+        practitioner = Practitioner.objects.create(name="Dra. A")
     assert practitioner.clinic == clinica_a
 
 
 def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
     with usar_clinica(clinica_a):
-        de_b.nome = "Alterado"
+        de_b.name = "Alterado"
         with pytest.raises(ClinicaDiferente):
             de_b.save()
         with pytest.raises(ClinicaDiferente):
             de_b.delete()
     with usar_clinica(clinica_b):
-        assert Practitioner.objects.get(pk=de_b.pk).nome == "Dr. B"
+        assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
 def test_criar_sem_clinica_atual_falha():
     with pytest.raises(SemClinicaAtual):
-        Practitioner(nome="Sem clínica").save()
+        Practitioner(name="Sem clínica").save()
 
 
 def test_sem_isolamento_ve_todas_as_clinicas(clinica_a, clinica_b, criar_profissional):
@@ -115,9 +115,9 @@ def test_url_com_id_de_outra_clinica_da_404(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     url = reverse(rota, args=[de_b.pk])
     assert cliente.get(url).status_code == 404
-    assert cliente.post(url, {"nome": "Invadido", "cor": "#000000"}).status_code == 404
+    assert cliente.post(url, {"name": "Invadido", "cor": "#000000"}).status_code == 404
     with usar_clinica(clinica_b):
-        assert Practitioner.objects.get(pk=de_b.pk).nome == "Dr. B"
+        assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
 def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
@@ -137,11 +137,11 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
 
 def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usuario, cliente_de):
     user = criar_usuario("ana", clinica_a)
-    user.vinculos.update(ativo=False)
+    user.vinculos.update(active=False)
     assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
 
-    user.vinculos.update(ativo=True)
-    clinica_a.ativa = False
+    user.vinculos.update(active=True)
+    clinica_a.active = False
     clinica_a.save()
     assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
 
@@ -170,8 +170,8 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
         reverse("practitioners:new"),
-        {"nome": "Dr. Novo", "cor": "#123456", "user": estranho.pk, "ativo": "on"},
+        {"name": "Dr. Novo", "cor": "#123456", "user": estranho.pk, "active": "on"},
     )
     assert resposta.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):
-        assert not Practitioner.objects.filter(nome="Dr. Novo").exists()
+        assert not Practitioner.objects.filter(name="Dr. Novo").exists()

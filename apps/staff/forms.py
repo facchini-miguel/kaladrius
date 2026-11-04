@@ -28,7 +28,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     """The employee and, on registering or on a raise, the salary from a date."""
 
     cpf = campo_documento()  # the country's employee document (decision 121)
-    telefone = forms.CharField(
+    phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
         required=False,
@@ -40,19 +40,19 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Employee
         fields = [
-            "nome",
+            "name",
             "cpf",
             "cargo",
             "admissao",
             "desligamento",
-            "telefone",
-            "observacoes",
-            "ativo",
+            "phone",
+            "notes",
+            "active",
         ]
         widgets = {
             "admissao": DATA,
             "desligamento": DATA,
-            "observacoes": forms.Textarea(attrs={"rows": 3}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -81,8 +81,8 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
             raise forms.ValidationError(_("Já existe um funcionário com este documento."))
         return cpf
 
-    def clean_telefone(self):
-        return normalizar_telefone(self.cleaned_data.get("telefone"))
+    def clean_phone(self):
+        return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
         dados = super().clean()
@@ -112,7 +112,7 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Payroll
-        fields = ["horas_extras", "valor_hora_extra", "faltas", "observacao"]
+        fields = ["horas_extras", "valor_hora_extra", "faltas", "note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -133,6 +133,6 @@ class LancarForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        despesas = Category.objects.filter(tipo=Category.Tipo.DESPESA, ativa=True)
+        despesas = Category.objects.filter(tipo=Category.Tipo.DESPESA, active=True)
         self.fields["categoria"].queryset = despesas
-        self.fields["categoria"].initial = despesas.filter(nome="Salários e encargos").first()
+        self.fields["categoria"].initial = despesas.filter(name="Salários e encargos").first()

@@ -72,13 +72,13 @@ def test_le_ofx_sgml_em_windows_1252():
         datetime.date(2026, 10, 6),
         Decimal("300.00"),
     )
-    assert primeira.descricao == "JOSÉ PACIENTE · PIX RECEBIDO"
+    assert primeira.description == "JOSÉ PACIENTE · PIX RECEBIDO"
     assert segunda.valor == Decimal("-39.90")  # comma as decimal separator
 
 
 def test_le_ofx_xml_com_fitid_repetido_ou_ausente():
     extrato = ofx.ler(OFX_XML)
-    assert [t.descricao for t in extrato.transacoes] == ["Pix João", "Pix João", "Tarifa"]
+    assert [t.description for t in extrato.transacoes] == ["Pix João", "Pix João", "Tarifa"]
     fitids = [t.fitid for t in extrato.transacoes]
     assert fitids[:2] == ["X", "X#2"] and len(fitids[2]) == 40  # zero amount skipped
     assert extrato.saldo is None
@@ -93,11 +93,11 @@ def test_arquivo_que_nao_e_ofx():
 def cenario(clinica_a, criar_usuario, cliente_de):
     admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
     with usar_clinica(clinica_a):
-        banco = FinancialAccount.objects.get(nome="Banco")
-        caixa = FinancialAccount.objects.get(nome="Caixa")
-        patient = Patient.objects.create(nome="José Paciente")
-        receita = Category.objects.get(nome="Tratamento")
-        despesa = Category.objects.get(nome="Outras despesas")
+        banco = FinancialAccount.objects.get(name="Banco")
+        caixa = FinancialAccount.objects.get(name="Caixa")
+        patient = Patient.objects.create(name="José Paciente")
+        receita = Category.objects.get(name="Tratamento")
+        despesa = Category.objects.get(name="Outras despesas")
     return {
         "clinic": clinica_a,
         "banco": banco,
@@ -120,7 +120,7 @@ def pago(cenario, valor, data, tipo=Entry.Tipo.RECEBER, conta=None):
             tipo=tipo,
             patient=cenario["patient"] if receber else None,
             pessoa="" if receber else "Fornecedor",
-            descricao="Tratamento" if receber else "Conta",
+            description="Tratamento" if receber else "Conta",
             categoria=cenario["receita"] if receber else cenario["despesa"],
             valor_total=Decimal(valor),
             parcelas=1,
@@ -225,7 +225,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
     cenario["cliente"].post(
         url,
         {
-            "descricao": "Tarifa bancária",
+            "description": "Tarifa bancária",
             "categoria": cenario["despesa"].pk,
             "pessoa": "Banco Itaú",
             "forma": "transferencia",
@@ -304,7 +304,7 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
 
     recebido = pago(cenario, "250.00", timezone.localdate())
     saida = StringIO()
-    call_command("simulate_statement", clinic=cenario["clinic"].nome, stdout=saida)
+    call_command("simulate_statement", clinic=cenario["clinic"].name, stdout=saida)
     extrato = ofx.ler(saida.getvalue().encode())
     assert len(extrato.transacoes) in (4, 5)  # the bank extras, plus the payment (85%)
     assert extrato.saldo is not None

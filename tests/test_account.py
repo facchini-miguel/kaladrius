@@ -74,9 +74,9 @@ def test_campos_de_senha_ganham_o_olhinho(client):
 
 
 def test_muitas_tentativas_do_mesmo_endereco_bloqueiam_qualquer_usuario(client, pessoa):
-    for numero in range(4):  # 4 usernames x 5 failures: 20 from 127.0.0.1
+    for number in range(4):  # 4 usernames x 5 failures: 20 from 127.0.0.1
         AccessAttempt.objects.create(
-            username=f"tentativa{numero}",
+            username=f"tentativa{number}",
             ip_address="127.0.0.1",
             user_agent="teste",
             failures_since_start=5,
@@ -115,17 +115,17 @@ def test_ativar_com_qr_code(client, pessoa):
     pagina = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in pagina and "otpauth" not in pagina  # the secret is in the QR, not text
     dispositivo = TwoFactor.objects.get(user=pessoa)
-    errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "codigo": "000000"})
+    errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "code": "000000"})
     assert "Código incorreto" in errado.content.decode()
     resposta = client.post(
-        reverse("account:two_factor"), {"acao": "ativar", "codigo": codigo_atual(dispositivo)}
+        reverse("account:two_factor"), {"acao": "ativar", "code": codigo_atual(dispositivo)}
     )
     texto = resposta.content.decode()
     assert "Verificação em duas etapas ativada" in texto
     assert RecoveryCode.objects.filter(user=pessoa).count() == 10
     assert AuditEntry.objects.filter(objeto_descricao__contains="ativada").exists()
     dispositivo.refresh_from_db()
-    assert dispositivo.ativa and dispositivo.segredo not in texto
+    assert dispositivo.active and dispositivo.segredo not in texto
 
 
 def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
@@ -133,27 +133,27 @@ def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
     resposta = entrar(client, pessoa, proximo=reverse("patients:list"))
     assert resposta.url == reverse("account:code")
     assert "_auth_user_id" not in client.session  # not logged in yet
-    errado = client.post(reverse("account:code"), {"codigo": "123456"})
+    errado = client.post(reverse("account:code"), {"code": "123456"})
     assert "Código incorreto" in errado.content.decode()
     assert AccessAttempt.objects.filter(username=pessoa.username).exists()  # counted
-    codigo = codigo_atual(dispositivo)
-    certo = client.post(reverse("account:code"), {"codigo": codigo})
+    code = codigo_atual(dispositivo)
+    certo = client.post(reverse("account:code"), {"code": code})
     assert certo.url == reverse("patients:list")
     assert client.session["_auth_user_id"] == str(pessoa.pk)
     # The same code does not work twice.
     client.logout()
     entrar(client, pessoa)
-    repetido = client.post(reverse("account:code"), {"codigo": codigo})
+    repetido = client.post(reverse("account:code"), {"code": code})
     assert "Código incorreto" in repetido.content.decode()
 
 
 def test_codigo_de_recuperacao_vale_uma_vez(client, pessoa):
     _, codigos = ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
-    assert client.post(reverse("account:code"), {"codigo": codigos[0].lower()}).status_code == 302
+    assert client.post(reverse("account:code"), {"code": codigos[0].lower()}).status_code == 302
     client.logout()
     entrar(client, pessoa)
-    segunda = client.post(reverse("account:code"), {"codigo": codigos[0]})
+    segunda = client.post(reverse("account:code"), {"code": codigos[0]})
     assert "Código incorreto" in segunda.content.decode()
 
 
@@ -161,7 +161,7 @@ def test_cinco_codigos_errados_voltam_ao_login(client, pessoa):
     ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
     for _ in range(5):
-        client.post(reverse("account:code"), {"codigo": "000000"})
+        client.post(reverse("account:code"), {"code": "000000"})
     # Like 5 wrong passwords: the login protection locks the user for an hour.
     assert client.get(reverse("account:code")).url == reverse("login")
     bloqueado = entrar(client, pessoa)
@@ -174,7 +174,7 @@ def test_passo_do_codigo_expira(client, pessoa):
     sessao = client.session
     sessao["duas_etapas_pendente"]["momento"] -= 10 * 60
     sessao.save()
-    assert client.post(reverse("account:code"), {"codigo": codigo_atual(dispositivo)}).url == (
+    assert client.post(reverse("account:code"), {"code": codigo_atual(dispositivo)}).url == (
         reverse("login")
     )
 
@@ -184,13 +184,13 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
     client.force_login(pessoa)
     novos = client.post(
         reverse("account:two_factor"),
-        {"acao": "codigos", "codigos-codigo": codigo_atual(dispositivo)},
+        {"acao": "codigos", "codigos-code": codigo_atual(dispositivo)},
     )
     assert "Códigos de recuperação" in novos.content.decode()
     assert not services.verificar_recuperacao(pessoa, antigos[1])  # old ones stop working
     errado = client.post(
         reverse("account:two_factor"),
-        {"acao": "desativar", "desativar-senha": "errada", "desativar-codigo": "000000"},
+        {"acao": "desativar", "desativar-senha": "errada", "desativar-code": "000000"},
     )
     assert "Senha incorreta" in errado.content.decode()
     resposta = client.post(
@@ -198,7 +198,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
         {
             "acao": "desativar",
             "desativar-senha": SENHA,
-            "desativar-codigo": codigo_atual(dispositivo, deslocamento=1),
+            "desativar-code": codigo_atual(dispositivo, deslocamento=1),
         },
     )
     assert resposta.status_code == 302 and not services.ativa_para(pessoa)
@@ -312,7 +312,7 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
         {
             "acao": "desativar",
             "desativar-senha": SENHA,
-            "desativar-codigo": codigo_atual(dispositivo),
+            "desativar-code": codigo_atual(dispositivo),
         },
     )
     assert services.ativa_para(admin)
@@ -333,7 +333,7 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
 
     super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_usuario)
-    client.post(reverse("register_clinic"), {"nome": "Clínica Fictícia Nova", "area": "medicina"})
+    client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicina"})
     assert Clinic.unica().exigir_duas_etapas
     Clinic.objects.update(exigir_duas_etapas=False)
     # The migration runs with the models as they were then (Clinica, before decision 157).
@@ -360,7 +360,7 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
 
     so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
     nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
-    TwoFactor.objects.create(user=nas_duas, segredo="ORIGINAL", ativa=True)
+    TwoFactor.objects.create(user=nas_duas, segredo="ORIGINAL", active=True)
     RecoveryCode.objects.create(user=nas_duas, resumo="original")
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
@@ -408,7 +408,7 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
         migracao.remover(apps, editor)
 
     user = django_user_model.objects.create_user("com_duas_etapas", password="x")
-    TwoFactor.objects.create(user=user, segredo="FICA", ativa=True)
+    TwoFactor.objects.create(user=user, segredo="FICA", active=True)
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(f"CREATE TABLE account_{tabela} (LIKE conta_{tabela})")

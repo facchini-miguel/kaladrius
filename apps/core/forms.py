@@ -14,7 +14,7 @@ from .modules import configurar, faltando, iniciais
 
 
 def _opcoes(grupo):
-    return [(valor, nome) for valor, nome in ModuloClinico.choices if valor in grupo]
+    return [(valor, name) for valor, name in ModuloClinico.choices if valor in grupo]
 
 
 class CampoDecimal(forms.DecimalField):
@@ -78,9 +78,9 @@ class FormularioBootstrap:
     def full_clean(self):
         super().full_clean()
         # Mark invalid fields so Bootstrap shows them in red.
-        for nome in self.errors:
-            if nome in self.fields:
-                widget = self.fields[nome].widget
+        for name in self.errors:
+            if name in self.fields:
+                widget = self.fields[name].widget
                 widget.attrs["class"] = f"{widget.attrs.get('class', '')} is-invalid".strip()
 
 
@@ -144,8 +144,8 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         ligados = set(
-            ClinicModule.todos.filter(clinic=self.instance, ativo=True).values_list(
-                "codigo", flat=True
+            ClinicModule.todos.filter(clinic=self.instance, active=True).values_list(
+                "code", flat=True
             )
             if self.instance.pk
             else iniciais(self.instance.area)
@@ -198,7 +198,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
             if "fuso_horario" in self.changed_data:
                 self.add_error(
                     "fuso_horario",
-                    _("Escolha um fuso horário de %(pais)s.") % {"pais": pais.nome},
+                    _("Escolha um fuso horário de %(pais)s.") % {"pais": pais.name},
                 )
             else:
                 dados["fuso_horario"] = pais.fusos[0]
@@ -257,12 +257,12 @@ class ClinicaForm(ModulosClinicosForm):
     class Meta:
         model = Clinic
         fields = [
-            "nome",
+            "name",
             "area",
             "pais",
             "documento",
             "email",
-            "telefone",
+            "phone",
             "endereco",
             "moeda",
             "fuso_horario",
@@ -353,12 +353,12 @@ class NovaClinicaForm(ModulosClinicosForm):
     class Meta:
         model = Clinic
         fields = [
-            "nome",
+            "name",
             "area",
             "pais",
             "documento",
             "email",
-            "telefone",
+            "phone",
             "endereco",
             "moeda",
             "fuso_horario",
@@ -367,4 +367,4 @@ class NovaClinicaForm(ModulosClinicosForm):
 
 class ClinicaAdminForm(ClinicaForm):
     class Meta(ClinicaForm.Meta):
-        fields = [*ClinicaForm.Meta.fields, "ativa"]
+        fields = [*ClinicaForm.Meta.fields, "active"]

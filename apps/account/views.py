@@ -53,7 +53,7 @@ class EntrarView(auth_views.LoginView):
         }
 
 
-def codigo(request):
+def code(request):
     """Second step of the login: the 6-digit code of the app or a recovery code."""
     pendente = request.session.get(PENDENTE)
     if not pendente or time.time() - pendente["momento"] > VALIDADE_PENDENTE:
@@ -63,7 +63,7 @@ def codigo(request):
     user = get_user_model().objects.get(pk=pendente["usuario"])
     form = CodigoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        if services.verificar(user, form.cleaned_data["codigo"]):
+        if services.verificar(user, form.cleaned_data["code"]):
             del request.session[PENDENTE]
             login(request, user, backend=pendente["backend"])
             return redirect(pendente["proximo"])
@@ -77,13 +77,13 @@ def codigo(request):
             messages.error(request, _("Muitos códigos errados. Entre de novo."))
             return redirect("login")
         request.session[PENDENTE] = pendente
-        form.add_error("codigo", _("Código incorreto."))
+        form.add_error("code", _("Código incorreto."))
     return render(request, "account/code.html", {"form": form})
 
 
 @login_required
 @require_GET
-def ativo(request):
+def active(request):
     """Called by the page while the person is using it, so 30 idle minutes are counted only
     when nobody touches the computer (the session is renewed on every request)."""
     return HttpResponse(status=204)
@@ -114,24 +114,24 @@ def duas_etapas(request):
             registrar(
                 AuditEntry.Acao.ALTERAR,
                 user,
-                descricao=f"{user}: verificação em duas etapas desativada",
+                description=f"{user}: verificação em duas etapas desativada",
             )
             messages.success(request, _("Verificação em duas etapas desativada."))
             return redirect("account:two_factor")
         if acao == "codigos" and novos.is_valid():
-            if services.verificar(user, novos.cleaned_data["codigo"]):
+            if services.verificar(user, novos.cleaned_data["code"]):
                 return render(
                     request,
                     "account/codes.html",
                     {"codigos": services.novos_codigos(user)},
                 )
-            novos.add_error("codigo", _("Código incorreto."))
+            novos.add_error("code", _("Código incorreto."))
         restantes = user.codigos_recuperacao.filter(usado_em__isnull=True).count()
         return render(
             request,
             "account/two_factor.html",
             {
-                "ativa": True,
+                "active": True,
                 "desativar": desativar,
                 "novos": novos,
                 "restantes": restantes,
@@ -141,21 +141,21 @@ def duas_etapas(request):
     dispositivo = services.preparar(user, novo=request.GET.get("novo") == "1")
     form = CodigoForm(request.POST if acao == "ativar" else None)
     if acao == "ativar" and form.is_valid():
-        if services.verificar_app(dispositivo, form.cleaned_data["codigo"]):
+        if services.verificar_app(dispositivo, form.cleaned_data["code"]):
             codigos = services.ativar(dispositivo)
             registrar(
                 AuditEntry.Acao.ALTERAR,
                 user,
-                descricao=f"{user}: verificação em duas etapas ativada",
+                description=f"{user}: verificação em duas etapas ativada",
             )
             return render(request, "account/codes.html", {"codigos": codigos, "ativada": True})
-        form.add_error("codigo", _("Código incorreto. Confira a hora do celular e tente de novo."))
+        form.add_error("code", _("Código incorreto. Confira a hora do celular e tente de novo."))
     endereco = services.endereco_do_app(dispositivo)
     return render(
         request,
         "account/two_factor.html",
         {
-            "ativa": False,
+            "active": False,
             "obrigatoria": obrigatoria,
             "form": form,
             "qr": services.qr_svg(endereco),

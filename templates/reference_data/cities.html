@@ -12,7 +12,7 @@
     <select name="uf" class="form-select" aria-label="UF">
       <option value="">{% translate "Todas as UFs" %}</option>
       {% for item in ufs %}
-      <option value="{{ item.codigo }}"{% if uf == item.codigo|stringformat:"d" %} selected{% endif %}>{{ item.sigla }} - {{ item.nome }}</option>
+      <option value="{{ item.code }}"{% if uf == item.code|stringformat:"d" %} selected{% endif %}>{{ item.sigla }} - {{ item.name }}</option>
       {% endfor %}
     </select>
   </div>
@@ -30,7 +30,7 @@
     <thead><tr><th>{% translate "Cidade" %}</th><th>{% translate "UF" %}</th><th>{% translate "Código IBGE" %}</th></tr></thead>
     <tbody>
       {% for cidade in pagina %}
-      <tr><td>{{ cidade.nome }}</td><td>{{ cidade.uf.sigla }}</td><td>{{ cidade.codigo }}</td></tr>
+      <tr><td>{{ cidade.name }}</td><td>{{ cidade.uf.sigla }}</td><td>{{ cidade.code }}</td></tr>
       {% empty %}
       <tr><td colspan="3" class="text-body-secondary">{% translate "Nenhuma cidade encontrada." %}</td></tr>
       {% endfor %}

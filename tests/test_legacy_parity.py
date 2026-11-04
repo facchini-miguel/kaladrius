@@ -44,13 +44,13 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
 def test_ficha_cadastral_impressa(clinica_a, recepcao):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
-            nome="Paciente fictícia da ficha",
+            name="Paciente fictícia da ficha",
             cpf_cnpj="52998224725",
             whatsapp="48999990000",
-            observacoes="Prefere manhã",
+            notes="Prefere manhã",
         )
-        convenio = HealthPlan.objects.create(nome="Saúde Exemplo")
-        MemberCard.objects.create(patient=patient, convenio=convenio, numero="123456")
+        convenio = HealthPlan.objects.create(name="Saúde Exemplo")
+        MemberCard.objects.create(patient=patient, convenio=convenio, number="123456")
     ficha = recepcao.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert reverse("patients:print", args=[patient.pk]) in ficha
     pagina = recepcao.get(reverse("patients:print", args=[patient.pk]))
@@ -73,7 +73,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
 
 def test_ficha_impressa_respeita_permissao(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Paciente fictício sem acesso")
+        patient = Patient.objects.create(name="Paciente fictício sem acesso")
     sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))
     assert sem_vinculo.get(reverse("patients:print", args=[patient.pk])).status_code in (
         302,

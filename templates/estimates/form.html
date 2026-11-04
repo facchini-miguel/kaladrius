@@ -14,7 +14,7 @@
     <div class="col-md-6">{% with campo=form.data %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.validade %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
-  {% with campo=form.observacoes %}{% include "includes/field.html" %}{% endwith %}
+  {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{% if orcamento %}{% url 'estimates:detail' orcamento.pk %}{% else %}{% url 'estimates:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>

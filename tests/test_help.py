@@ -79,7 +79,7 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
     pagina = resposta.content.decode()
     assert resposta.status_code == 200
     assert "Política de privacidade" in pagina and "20 anos" in pagina
-    assert clinica_a.nome in pagina and "privacidade@sorriso.com.br" in pagina
+    assert clinica_a.name in pagina and "privacidade@sorriso.com.br" in pagina
 
 
 def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, recepcao):

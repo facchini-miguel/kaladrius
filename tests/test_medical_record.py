@@ -48,7 +48,7 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
     with usar_clinica(clinica_a):
         Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
         Practitioner.objects.filter(pk=bruno.pk).update(user=usuarios["dr"])
-        patient = Patient.objects.create(nome="Maria Paciente")
+        patient = Patient.objects.create(name="Maria Paciente")
         agendamento = Appointment.objects.create(
             practitioner=ana,
             tipo=AppointmentType.objects.first(),
@@ -61,7 +61,7 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
         "patient": patient,
         "agendamento": agendamento,
         "ana": ana,
-        **{nome: cliente(user) for nome, user in usuarios.items()},
+        **{name: cliente(user) for name, user in usuarios.items()},
     }
 
 
@@ -88,7 +88,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
     # An administrator who is also a registered practitioner reaches it.
     with usar_clinica(cenario["clinic"]):
         Practitioner.objects.create(
-            nome="Dr. Admin", user=django_user_model.objects.get(username="admin")
+            name="Dr. Admin", user=django_user_model.objects.get(username="admin")
         )
     assert cenario["admin"].get(novo).status_code == 200
 
@@ -118,7 +118,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     )
     with usar_clinica(cenario["clinic"]):
         adendo = atendimento.adendos.get()
-    assert adendo.texto == "Exame ok" and adendo.practitioner.nome == "Dr. Bruno"
+    assert adendo.texto == "Exame ok" and adendo.practitioner.name == "Dr. Bruno"
     assert "Exame ok" in cenario["dra"].get(url).content.decode()
 
 
@@ -210,7 +210,7 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     sem_dias = cenario["dra"].post(url, {"tipo": "afastamento", "data": "2031-03-05"})
     assert "Informe quantos dias" in sem_dias.content.decode()
     resposta = cenario["dra"].post(
-        url, {"tipo": "afastamento", "data": "2031-03-05", "dias": "3", "observacao": "Repouso"}
+        url, {"tipo": "afastamento", "data": "2031-03-05", "dias": "3", "note": "Repouso"}
     )
     pagina = cenario["dra"].get(resposta.url).content.decode()
     assert "3 dias de afastamento" in pagina and "Repouso" in pagina
@@ -267,8 +267,8 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
 
     atendimento = registrar(cenario)
     url = reverse("medical_records:attachment_upload", args=[atendimento.pk])
-    enviar = lambda quem, nome, conteudo: cenario[quem].post(  # noqa: E731
-        url, {"arquivo": SimpleUploadedFile(nome, conteudo), "descricao": "Raio-X"}, follow=True
+    enviar = lambda quem, name, conteudo: cenario[quem].post(  # noqa: E731
+        url, {"arquivo": SimpleUploadedFile(name, conteudo), "description": "Raio-X"}, follow=True
     )
     # Checked by the content, not the name: an HTML page named .png is refused.
     assert (
@@ -284,7 +284,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
     with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()
-    assert (anexo.tipo, anexo.tamanho, anexo.practitioner.nome) == (
+    assert (anexo.tipo, anexo.tamanho, anexo.practitioner.name) == (
         "image/png",
         len(PNG),
         "Dr. Bruno",
@@ -348,7 +348,7 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     assert root.post(url, {**ANAMNESE, "conduta": "Retorno em 15 dias"}).status_code == 302
     anexo_url = reverse("medical_records:attachment_upload", args=[atendimento.pk])
     cenario["dra"].post(
-        anexo_url, {"arquivo": SimpleUploadedFile("x.png", PNG), "descricao": "Foto"}
+        anexo_url, {"arquivo": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
     )
     with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()

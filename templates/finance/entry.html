@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ lancamento.descricao }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ lancamento.description }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{{ lancamento.descricao }}</h1>
+    <h1 class="h3 mb-0">{{ lancamento.description }}</h1>
     <span class="text-body-secondary">
-      {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if lancamento.patient_id %}<a href="{% url 'patients:record' lancamento.patient_id %}">{{ lancamento.patient.nome }}</a>{% elif lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' lancamento.fornecedor_id %}">{{ lancamento.pessoa }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
-      · {{ lancamento.categoria }}{% if lancamento.centro_custo %} · {{ lancamento.centro_custo }}{% endif %}{% if lancamento.practitioner %} · {{ lancamento.practitioner.nome }}{% endif %}
+      {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if lancamento.patient_id %}<a href="{% url 'patients:record' lancamento.patient_id %}">{{ lancamento.patient.name }}</a>{% elif lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' lancamento.fornecedor_id %}">{{ lancamento.pessoa }}</a>{% else %}{{ lancamento.pessoa }}{% endif %}
+      · {{ lancamento.categoria }}{% if lancamento.centro_custo %} · {{ lancamento.centro_custo }}{% endif %}{% if lancamento.practitioner %} · {{ lancamento.practitioner.name }}{% endif %}
       {% if comissao %} · <a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato da comissão" %}</a>{% endif %}
       · {{ lancamento.data|date:"SHORT_DATE_FORMAT" }}
     </span>
@@ -35,7 +35,7 @@
   <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_saldo > 0 %} text-danger{% endif %}">{{ total_saldo|moeda }}</div></div></div></div>
 </div>
 
-{% if lancamento.observacoes %}<p class="text-body-secondary">{{ lancamento.observacoes|linebreaksbr }}</p>{% endif %}
+{% if lancamento.notes %}<p class="text-body-secondary">{{ lancamento.notes|linebreaksbr }}</p>{% endif %}
 
 <div class="table-responsive">
   <table class="table align-middle bg-white">
@@ -53,7 +53,7 @@
     <tbody>
       {% for parcela in parcelas %}
       <tr>
-        <td>{{ parcela.numero }}/{{ parcelas|length }}</td>
+        <td>{{ parcela.number }}/{{ parcelas|length }}</td>
         <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
         <td class="text-end text-nowrap">{% if parcela.saldo > 0 and not lancamento.cancelado %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>

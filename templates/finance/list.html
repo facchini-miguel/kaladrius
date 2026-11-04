@@ -49,11 +49,11 @@
       <tr>
         <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
         <td>
-          {% if parcela.lancamento.patient_id %}<a href="{% url 'patients:record' parcela.lancamento.patient_id %}">{{ parcela.lancamento.patient.nome }}</a>
+          {% if parcela.lancamento.patient_id %}<a href="{% url 'patients:record' parcela.lancamento.patient_id %}">{{ parcela.lancamento.patient.name }}</a>
           {% elif parcela.lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.lancamento.fornecedor_id %}">{{ parcela.lancamento.pessoa }}</a>
           {% else %}{{ parcela.lancamento.pessoa }}{% endif %}
         </td>
-        <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">({{ parcela.numero }})</span></td>
+        <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
         <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
         <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
         <td>{% include "finance/_status.html" with situacao=parcela.situacao %}</td>

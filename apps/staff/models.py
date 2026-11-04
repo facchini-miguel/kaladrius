@@ -23,15 +23,15 @@ DIAS_POR_MES = Decimal(30)
 
 
 class Employee(ModeloDaClinica):
-    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     # The country's employee document (decision 121); the name stayed from Brazil.
     cpf = models.CharField(_("documento"), max_length=20, blank=True)
     cargo = models.CharField(_("cargo"), max_length=100, blank=True)
     admissao = models.DateField(_("admissão"), null=True, blank=True)
     desligamento = models.DateField(_("desligamento"), null=True, blank=True)
-    telefone = models.CharField(_("telefone"), max_length=11, blank=True)
-    observacoes = models.TextField(_("observações"), blank=True)
-    ativo = models.BooleanField(_("ativo"), default=True)
+    phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
+    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
@@ -39,7 +39,7 @@ class Employee(ModeloDaClinica):
         db_table = "pessoal_funcionario"
         verbose_name = _("funcionário")
         verbose_name_plural = _("funcionários")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
                 fields=["clinic", "cpf"],
@@ -49,7 +49,7 @@ class Employee(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
     papel_documento = "funcionario"  # see apps/core/identification.py
 
@@ -111,7 +111,7 @@ class Payroll(ModeloDaClinica):
     )
     valor_hora_extra = models.DecimalField(_("valor da hora extra"), **DINHEIRO, default=Decimal(0))
     faltas = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
-    observacao = models.CharField(_("observação"), max_length=200, blank=True)
+    note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
     lancamento = models.OneToOneField(
         "financeiro.Entry",
         on_delete=models.SET_NULL,
@@ -125,7 +125,7 @@ class Payroll(ModeloDaClinica):
         db_table = "pessoal_folha"
         verbose_name = _("folha do mês")
         verbose_name_plural = _("folhas do mês")
-        ordering = ["-competencia", "funcionario__nome"]
+        ordering = ["-competencia", "funcionario__name"]
         constraints = [
             models.UniqueConstraint(
                 fields=["clinic", "funcionario", "competencia"], name="folha_unica_por_mes"

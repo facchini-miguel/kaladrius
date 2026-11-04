@@ -29,8 +29,8 @@ from .models import Patient, RelatedPerson
 
 POR_PAGINA = 50
 SITUACOES = {
-    "ativos": Q(ativo=True, arquivado=False),
-    "inativos": Q(ativo=False, arquivado=False),
+    "ativos": Q(active=True, arquivado=False),
+    "inativos": Q(active=False, arquivado=False),
     "todos": Q(arquivado=False),
     "arquivados": Q(arquivado=True),  # clinic administrators only (see lista)
 }
@@ -50,7 +50,7 @@ def _visiveis(request):
 def filtrar(pacientes, busca, tipo, situacao):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if busca:
-        filtro = Q(nome__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
         documento = normalizar_cnpj(busca)
         if len(documento) >= 3 and not any(c.isspace() for c in busca.strip()):
             filtro |= Q(cpf_cnpj__startswith=documento)
@@ -123,7 +123,7 @@ def imprimir(request, pk):
     )
     registrar(AuditEntry.Acao.VISUALIZAR, patient)  # LGPD, as the record
     carteirinhas = (
-        list(MemberCard.objects.filter(patient=patient, ativa=True).select_related("convenio"))
+        list(MemberCard.objects.filter(patient=patient, active=True).select_related("convenio"))
         if pode(request, Modulo.CONVENIOS, Acao.VER)
         else None
     )
@@ -174,7 +174,7 @@ def _formulario(request, patient):
     form = PacienteForm(request.POST or None, instance=patient, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         patient = form.save()
-        messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": patient.nome})
+        messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": patient.name})
         return redirect("patients:record", pk=patient.pk)
     return render(request, "patients/form.html", {"form": form, "patient": patient})
 
@@ -207,7 +207,7 @@ def arquivar(request, pk):
                 "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
                 "restaurado na lista de pacientes, em Situação: Arquivados."
             )
-            % {"nome": patient.nome},
+            % {"nome": patient.name},
         )
         return redirect("patients:list")
     return render(request, "patients/archive.html", {"patient": patient})
@@ -220,7 +220,7 @@ def restaurar(request, pk):
         patient.arquivado = False
         patient.arquivado_em = patient.arquivado_por = None
         patient.save()
-        messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": patient.nome})
+        messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": patient.name})
     return redirect("patients:record", pk=patient.pk)
 
 
@@ -248,7 +248,7 @@ def excluir(request, pk):
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
         return render(request, "patients/delete.html", {**contexto, "atendimentos": atendimentos})
     if request.method == "POST":
-        codigo = patient.pk
+        code = patient.pk
         agendamentos = Appointment.objects.filter(patient=patient)
         ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
         rechamadas = Recall.objects.filter(patient=patient)
@@ -273,17 +273,17 @@ def excluir(request, pk):
         )
         # Stored in Portuguese, like the rest of the data. Free-text notes may hold
         # personal data, so they go too; the amounts and dates stay (accounting history).
-        excluido = f"Paciente excluído (código {codigo})"
+        excluido = f"Paciente excluído (código {code})"
         with transaction.atomic():
             orcamentos.delete()  # items go with them (cascade)
-            agendamentos.update(patient=None, descricao=excluido)
-            lancamentos.update(patient=None, pessoa=excluido, observacoes="")
-            Payment.objects.filter(pk__in=ids_pagamentos).update(observacao="")
+            agendamentos.update(patient=None, description=excluido)
+            lancamentos.update(patient=None, pessoa=excluido, notes="")
+            Payment.objects.filter(pk__in=ids_pagamentos).update(note="")
             rechamadas.delete()
             carteirinhas.delete()
             relacionadas.delete()
             patient.delete()
-            anonimizar(Patient, [codigo])
+            anonimizar(Patient, [code])
             anonimizar(Appointment, ids_agendamentos)
             anonimizar(Recall, ids_rechamadas)
             anonimizar(MemberCard, ids_carteirinhas)
@@ -298,11 +298,11 @@ def excluir(request, pk):
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
                 clinic=request.clinic,
-                descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",
+                description=f"Paciente {code}: dados pessoais excluídos a pedido do titular",
             )
         messages.success(
             request,
-            _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": codigo},
+            _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": code},
         )
         return redirect(f"{reverse('patients:list')}?situacao=arquivados")
     return render(request, "patients/delete.html", contexto)
@@ -325,8 +325,8 @@ def aniversariantes(request):
     mes = request.GET.get("mes", "")
     mes = int(mes) if mes.isdecimal() and 1 <= int(mes) <= 12 else hoje.month
     pacientes = Patient.objects.filter(
-        ativo=True, arquivado=False, data_nascimento__month=mes
-    ).order_by("data_nascimento__day", "nome")
+        active=True, arquivado=False, data_nascimento__month=mes
+    ).order_by("data_nascimento__day", "name")
     ano = hoje.year if mes >= hoje.month else hoje.year + 1  # next birthday's year
     linhas = [(patient, ano - patient.data_nascimento.year) for patient in pacientes]
     return render(
@@ -348,7 +348,7 @@ def relacionados_de(patient):
     proprios = RelatedPerson.objects.filter(patient=patient).select_related("outro_paciente")
     inversos = RelatedPerson.objects.filter(outro_paciente=patient).select_related("patient")
     return [(r, r.nome_exibido, r.outro_paciente, False) for r in proprios] + [
-        (r, r.patient.nome, r.patient, True) for r in inversos
+        (r, r.patient.name, r.patient, True) for r in inversos
     ]
 
 

@@ -17,7 +17,7 @@ PADRAO = "BR"
 
 @dataclass(frozen=True)
 class Pais:
-    nome: str
+    name: str
     ddi: str  # international calling code, without "+"
     moeda: str  # ISO 4217, see apps/core/currencies.py
     fusos: tuple  # IANA time zones; the first is the default
@@ -135,7 +135,7 @@ PAISES = {
     "ZA": Pais(_("África do Sul"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
 }
 
-ESCOLHAS = [(codigo, pais.nome) for codigo, pais in PAISES.items()]
+ESCOLHAS = [(code, pais.name) for code, pais in PAISES.items()]
 
 
 def _cidade(fuso):
@@ -143,7 +143,7 @@ def _cidade(fuso):
 
 
 # Grouped by country, named by the zone's city ("New York", "Sao Paulo").
-ESCOLHAS_FUSO = [(pais.nome, [(f, _cidade(f)) for f in pais.fusos]) for pais in PAISES.values()]
+ESCOLHAS_FUSO = [(pais.name, [(f, _cidade(f)) for f in pais.fusos]) for pais in PAISES.values()]
 FUSO_PADRAO = PAISES[PADRAO].fusos[0]
 
 
@@ -157,8 +157,8 @@ def pais_da_clinica(clinic=None):
     return getattr(clinic, "pais", None) or PADRAO
 
 
-def do_codigo(codigo):
-    return PAISES.get(codigo or PADRAO, PAISES[PADRAO])
+def do_codigo(code):
+    return PAISES.get(code or PADRAO, PAISES[PADRAO])
 
 
 def variante_do_idioma(idioma, pais):
@@ -201,46 +201,46 @@ def normalizar_telefone_internacional(digitos, pais):
     """National number of a phone outside Brazil from its digits, or ValidationError."""
     ddi = do_codigo(pais).ddi
     tamanhos, inicios, mensagem = _TELEFONE[pais]
-    numero = digitos
-    if numero.startswith("00"):  # international prefix typed
-        numero = numero[2:]
-    if pais == "MX" and numero.startswith("521") and len(numero) == 13:
-        numero = numero[3:]  # the old "1" of Mexican mobiles after +52
-    elif pais == "AR" and numero.startswith("549") and len(numero) == 13:
-        numero = numero[3:]  # the "9" of Argentine mobiles after +54
-    if numero.startswith(ddi) and len(numero) - len(ddi) in tamanhos:
-        numero = numero[len(ddi) :]
+    number = digitos
+    if number.startswith("00"):  # international prefix typed
+        number = number[2:]
+    if pais == "MX" and number.startswith("521") and len(number) == 13:
+        number = number[3:]  # the old "1" of Mexican mobiles after +52
+    elif pais == "AR" and number.startswith("549") and len(number) == 13:
+        number = number[3:]  # the "9" of Argentine mobiles after +54
+    if number.startswith(ddi) and len(number) - len(ddi) in tamanhos:
+        number = number[len(ddi) :]
     if pais not in ("US", "CA"):
-        numero = numero.lstrip("0")  # trunk prefix
-    if pais == "AR" and len(numero) == 12:
+        number = number.lstrip("0")  # trunk prefix
+    if pais == "AR" and len(number) == 12:
         # Argentine mobiles are dialed with "15" after the area code (2 to 4 digits): it is
         # not part of the number.
         for area in (2, 3, 4):
-            if numero[area : area + 2] == "15":
-                numero = numero[:area] + numero[area + 2 :]
+            if number[area : area + 2] == "15":
+                number = number[:area] + number[area + 2 :]
                 break
-    if len(numero) not in tamanhos or numero[0] not in inicios:
+    if len(number) not in tamanhos or number[0] not in inicios:
         raise ValidationError(mensagem)
-    return numero
+    return number
 
 
-def formatar_telefone(numero, pais):
+def formatar_telefone(number, pais):
     """A stored national number written the way the country writes it."""
-    if not numero:
+    if not number:
         return ""
-    if pais in ("US", "CA") and len(numero) == 10:
-        return f"({numero[:3]}) {numero[3:6]}-{numero[6:]}"
+    if pais in ("US", "CA") and len(number) == 10:
+        return f"({number[:3]}) {number[3:6]}-{number[6:]}"
     if pais == "GB":
-        if numero.startswith("2") and len(numero) == 10:  # London, Cardiff... 020 xxxx xxxx
-            return f"0{numero[:2]} {numero[2:6]} {numero[6:]}"
-        return f"0{numero[:4]} {numero[4:]}"
-    if pais == "AU" and len(numero) == 9:
-        if numero.startswith("4"):  # mobile 04xx xxx xxx
-            return f"0{numero[:3]} {numero[3:6]} {numero[6:]}"
-        return f"(0{numero[0]}) {numero[1:5]} {numero[5:]}"
-    if pais == "ZA" and len(numero) == 9:
-        return f"0{numero[:2]} {numero[2:5]} {numero[5:]}"
-    return _formatar_telefone_latino(numero, pais)
+        if number.startswith("2") and len(number) == 10:  # London, Cardiff... 020 xxxx xxxx
+            return f"0{number[:2]} {number[2:6]} {number[6:]}"
+        return f"0{number[:4]} {number[4:]}"
+    if pais == "AU" and len(number) == 9:
+        if number.startswith("4"):  # mobile 04xx xxx xxx
+            return f"0{number[:3]} {number[3:6]} {number[6:]}"
+        return f"(0{number[0]}) {number[1:5]} {number[5:]}"
+    if pais == "ZA" and len(number) == 9:
+        return f"0{number[:2]} {number[2:5]} {number[5:]}"
+    return _formatar_telefone_latino(number, pais)
 
 
 def _formatar_telefone_latino(n, pais):
@@ -278,12 +278,12 @@ def _formatar_telefone_latino(n, pais):
     return n
 
 
-def link_whatsapp(numero, pais):
-    if not numero:
+def link_whatsapp(number, pais):
+    if not number:
         return ""
     # WhatsApp writes Argentine mobiles with a 9 after the country code.
     ddi = "549" if pais == "AR" else do_codigo(pais).ddi
-    return f"https://wa.me/{ddi}{numero}"
+    return f"https://wa.me/{ddi}{number}"
 
 
 # Postal codes ------------------------------------------------------------------------------

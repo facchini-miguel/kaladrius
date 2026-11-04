@@ -10,10 +10,10 @@ pytestmark = pytest.mark.django_db
 def test_dados_oficiais_carregados_pela_migracao():
     assert State.objects.count() == 27
     assert City.objects.count() > 5500
-    assert Bank.objects.filter(codigo=1).get().nome_curto == "BCO DO BRASIL S.A."
+    assert Bank.objects.filter(code=1).get().nome_curto == "BCO DO BRASIL S.A."
     assert MaritalStatus.objects.count() == 6
-    assert City.objects.get(codigo=4205407).nome == "Florianópolis"
-    assert City.objects.get(codigo=4205407).uf.sigla == "SC"
+    assert City.objects.get(code=4205407).name == "Florianópolis"
+    assert City.objects.get(code=4205407).uf.sigla == "SC"
 
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):

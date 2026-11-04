@@ -5,8 +5,8 @@ from . import views
 app_name = "account"
 
 urlpatterns = [
-    path("login/code/", views.codigo, name="code"),
-    path("active/", views.ativo, name="active"),
+    path("login/code/", views.code, name="code"),
+    path("active/", views.active, name="active"),
     path("two-factor/", views.duas_etapas, name="two_factor"),
     path("password/forgot/", views.recuperar, name="recover"),
     path("password/forgot/sent/", views.recuperar_enviado, name="recovery_sent"),

@@ -27,11 +27,11 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
 
 def criar_paciente(clinic, **dados):
     with usar_clinica(clinic):
-        return Patient.objects.create(**{"nome": "Paciente", **dados})
+        return Patient.objects.create(**{"name": "Paciente", **dados})
 
 
 def dados_formulario(**extra):
-    return {"tipo": "PF", "nome": "Maria da Silva", "ativo": "on", **extra}
+    return {"tipo": "PF", "name": "Maria da Silva", "active": "on", **extra}
 
 
 # --- Validators and formats ------------------------------------------------------
@@ -69,7 +69,7 @@ def test_validacao_de_cnpj_numerico_e_alfanumerico(valor, esperado):
 def test_filtros_de_formatacao():
     template = Template(
         "{% load formats %}{{ a|documento }} {{ b|documento }} "
-        "{{ c|telefone }} {{ d|telefone }} {{ e|cep }}"
+        "{{ c|phone }} {{ d|phone }} {{ e|cep }}"
     )
     contexto = Context(
         {
@@ -110,12 +110,12 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Maria da Silva")
+        patient = Patient.objects.get(name="Maria da Silva")
     assert resposta.url == reverse("patients:record", args=[patient.pk])
     assert patient.cpf_cnpj == "52998224725"
     assert patient.telefone_celular == "48999990000"
     assert patient.cep == "88010000"
-    assert patient.cidade.nome == "Florianópolis"
+    assert patient.cidade.name == "Florianópolis"
 
 
 def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
@@ -123,7 +123,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
         reverse("patients:new"),
         dados_formulario(
             tipo="PJ",
-            nome="Empresa X",
+            name="Empresa X",
             razao_social="Empresa X Ltda.",
             cpf_cnpj=CNPJ_ALFANUMERICO,
             rg="123",
@@ -132,7 +132,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Empresa X")
+        patient = Patient.objects.get(name="Empresa X")
     assert patient.cpf_cnpj == "12ABC34501DE35"
     assert patient.rg == "" and patient.sexo == ""  # individual-only fields are cleared
 
@@ -145,7 +145,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
         ({"telefone_celular": "9999-0000"}, "telefone_celular", "Informe o DDD"),
         ({"cep": "123"}, "cep", "8 dígitos"),
         ({"data_nascimento": "2999-01-01"}, "data_nascimento", "futuro"),
-        ({"nome": ""}, "nome", "obrigatório"),
+        ({"name": ""}, "name", "obrigatório"),
     ],
 )
 def test_validacoes_do_formulario(admin_a, dados, campo, mensagem):
@@ -157,7 +157,7 @@ def test_validacoes_do_formulario(admin_a, dados, campo, mensagem):
 
 
 def test_cidade_precisa_ser_da_uf_escolhida(admin_a):
-    sao_paulo = City.objects.get(nome="São Paulo", uf__sigla="SP")
+    sao_paulo = City.objects.get(name="São Paulo", uf__sigla="SP")
     resposta = admin_a.post(reverse("patients:new"), dados_formulario(uf=SC, cidade=sao_paulo.pk))
     assert resposta.status_code == 200
     assert "cidade" in resposta.context["form"].errors
@@ -180,12 +180,12 @@ def test_edicao_mantem_as_cidades_da_uf(admin_a, clinica_a):
 
 
 def test_busca_por_nome_sem_acento_codigo_e_cpf(admin_a, clinica_a):
-    joao = criar_paciente(clinica_a, nome="João Conceição", cpf_cnpj="52998224725")
-    criar_paciente(clinica_a, nome="Ana Souza", cpf_cnpj="11144477735")
+    joao = criar_paciente(clinica_a, name="João Conceição", cpf_cnpj="52998224725")
+    criar_paciente(clinica_a, name="Ana Souza", cpf_cnpj="11144477735")
     url = reverse("patients:list")
 
     def nomes(**params):
-        return [p.nome for p in admin_a.get(url, params).context["pagina"]]
+        return [p.name for p in admin_a.get(url, params).context["pagina"]]
 
     assert nomes(q="joao conceicao") == ["João Conceição"]
     assert nomes(q="529.982") == ["João Conceição"]
@@ -194,13 +194,13 @@ def test_busca_por_nome_sem_acento_codigo_e_cpf(admin_a, clinica_a):
 
 
 def test_filtros_de_tipo_e_situacao(admin_a, clinica_a):
-    criar_paciente(clinica_a, nome="Ativo PF")
-    criar_paciente(clinica_a, nome="Inativo PF", ativo=False)
-    criar_paciente(clinica_a, nome="Empresa", tipo="PJ")
+    criar_paciente(clinica_a, name="Ativo PF")
+    criar_paciente(clinica_a, name="Inativo PF", active=False)
+    criar_paciente(clinica_a, name="Empresa", tipo="PJ")
     url = reverse("patients:list")
 
     def nomes(**params):
-        return sorted(p.nome for p in admin_a.get(url, params).context["pagina"])
+        return sorted(p.name for p in admin_a.get(url, params).context["pagina"])
 
     assert nomes() == ["Ativo PF", "Empresa"]
     assert nomes(situacao="inativos") == ["Inativo PF"]
@@ -212,13 +212,13 @@ def test_filtros_de_tipo_e_situacao(admin_a, clinica_a):
 
 @pytest.mark.parametrize("rota", ["patients:record", "patients:edit", "patients:delete"])
 def test_paciente_de_outra_clinica_da_404(rota, admin_a, clinica_b):
-    de_b = criar_paciente(clinica_b, nome="Paciente da B")
+    de_b = criar_paciente(clinica_b, name="Paciente da B")
     assert admin_a.get(reverse(rota, args=[de_b.pk])).status_code == 404
     assert admin_a.post(reverse(rota, args=[de_b.pk]), dados_formulario()).status_code == 404
 
 
 def test_lista_e_busca_nao_mostram_outra_clinica(admin_a, clinica_b):
-    criar_paciente(clinica_b, nome="Paciente da B", cpf_cnpj="52998224725")
+    criar_paciente(clinica_b, name="Paciente da B", cpf_cnpj="52998224725")
     for busca in ["", "Paciente da B", "52998224725"]:
         pagina = admin_a.get(reverse("patients:list"), {"q": busca}).context["pagina"]
         assert len(pagina) == 0
@@ -228,7 +228,7 @@ def test_lista_e_busca_nao_mostram_outra_clinica(admin_a, clinica_b):
 def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
     papel, clinica_a, criar_usuario, cliente_de
 ):
-    patient = criar_paciente(clinica_a, nome="Paciente")
+    patient = criar_paciente(clinica_a, name="Paciente")
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     assert cliente.post(reverse("patients:new"), dados_formulario()).status_code == 302
     assert cliente.get(reverse("patients:edit", args=[patient.pk])).status_code == 200
@@ -238,7 +238,7 @@ def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
 
 
 def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de):
-    patient = criar_paciente(clinica_a, nome="Paciente Arquivável")
+    patient = criar_paciente(clinica_a, name="Paciente Arquivável")
     # Not archived yet: permanent deletion is not available.
     assert admin_a.post(reverse("patients:delete", args=[patient.pk])).status_code == 404
     assert admin_a.post(reverse("patients:archive", args=[patient.pk])).status_code == 302
@@ -259,7 +259,7 @@ def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de)
 
 def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
     patient = criar_paciente(
-        clinica_a, nome="Fulano Escondido", cpf_cnpj="52998224725", arquivado=True
+        clinica_a, name="Fulano Escondido", cpf_cnpj="52998224725", arquivado=True
     )
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
     lista = reverse("patients:list")
@@ -274,7 +274,7 @@ def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
 def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
     patient = criar_paciente(
         clinica_a,
-        nome="Maria",
+        name="Maria",
         cpf_cnpj="52998224725",
         telefone_celular="48999990000",
         cidade_id=FLORIANOPOLIS,
@@ -288,7 +288,7 @@ def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
 
 @pytest.mark.parametrize("busca", ["²", "¹²³", "١٢"])
 def test_busca_com_digitos_nao_ascii_nao_quebra(admin_a, clinica_a, busca):
-    criar_paciente(clinica_a, nome="Maria")
+    criar_paciente(clinica_a, name="Maria")
     assert admin_a.get(reverse("patients:list"), {"q": busca}).status_code == 200
     assert admin_a.get(reverse("patients:birthdays"), {"mes": busca}).status_code == 200
     assert admin_a.get(reverse("reference_data:city_options"), {"uf": busca}).status_code == 200
@@ -301,14 +301,14 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     from apps.finance import services
     from apps.finance.models import Category, Entry, FinancialAccount
 
-    patient = criar_paciente(clinica_a, nome="Paciente Devedor")
+    patient = criar_paciente(clinica_a, name="Paciente Devedor")
     user = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
             clinic=clinica_a,
             tipo=Entry.Tipo.RECEBER,
-            descricao="Tratamento",
-            categoria=Category.objects.get(nome="Tratamento"),
+            description="Tratamento",
+            categoria=Category.objects.get(name="Tratamento"),
             valor_total=Decimal("300"),
             parcelas=2,
             primeiro_vencimento=datetime.date(2031, 3, 5),
@@ -317,7 +317,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
         )
     url = reverse("patients:archive", args=[patient.pk])
     pagina = admin_a.get(url)
-    assert [p.numero for p in pagina.context["abertas"]] == [1, 2]
+    assert [p.number for p in pagina.context["abertas"]] == [1, 2]
     conteudo = pagina.content.decode()
     assert reverse("finance:entry", args=[lancamento.pk]) in conteudo
     assert 'btn btn-secondary">Arquivar<' not in conteudo
@@ -334,13 +334,13 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
                 valor=Decimal("150"),
                 data=datetime.date(2031, 3, 5),
                 forma="pix",
-                conta=FinancialAccount.objects.get(nome="Caixa"),
+                conta=FinancialAccount.objects.get(name="Caixa"),
             )
 
     with usar_clinica(clinica_a):
-        primeira, segunda = lancamento.parcelas.order_by("numero")
+        primeira, segunda = lancamento.parcelas.order_by("number")
     receber(primeira)
-    assert [p.numero for p in admin_a.get(url).context["abertas"]] == [2]
+    assert [p.number for p in admin_a.get(url).context["abertas"]] == [2]
     receber(segunda)
     assert admin_a.post(url).status_code == 302
     patient.refresh_from_db()

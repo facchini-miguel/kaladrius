@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ patient.nome }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ patient.name }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{{ patient.nome }}</h1>
+    <h1 class="h3 mb-0">{{ patient.name }}</h1>
     <span class="text-body-secondary">{% translate "Código" %} {{ patient.pk }} · {{ patient.get_tipo_display }}</span>
-    {% if not patient.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
+    {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
     {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
   </div>
   <div>
@@ -69,14 +69,14 @@
       <div class="card-header">{% translate "Contato e endereço" %}</div>
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-5">{% translate "Celular" %}</dt><dd class="col-sm-7">{{ patient.telefone_celular|telefone|default:"—" }}</dd>
-          <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if patient.whatsapp %}<a href="{{ patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ patient.whatsapp|telefone }}</a>{% else %}—{% endif %}</dd>
-          <dt class="col-sm-5">{% translate "Residencial" %}</dt><dd class="col-sm-7">{{ patient.telefone_residencial|telefone|default:"—" }}</dd>
-          <dt class="col-sm-5">{% translate "Comercial" %}</dt><dd class="col-sm-7">{{ patient.telefone_comercial|telefone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Celular" %}</dt><dd class="col-sm-7">{{ patient.telefone_celular|phone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if patient.whatsapp %}<a href="{{ patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ patient.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
+          <dt class="col-sm-5">{% translate "Residencial" %}</dt><dd class="col-sm-7">{{ patient.telefone_residencial|phone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Comercial" %}</dt><dd class="col-sm-7">{{ patient.telefone_comercial|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ patient.email|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "Endereço" %}</dt>
           <dd class="col-sm-7">
-            {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.numero %}, {{ patient.numero }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
+            {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
             {% if patient.bairro %}{{ patient.bairro }}<br>{% endif %}
             {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
             {% if patient.cep %}{% rotulo_cep %} {{ patient.cep|cep }}{% endif %}
@@ -90,7 +90,7 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">{% translate "Observações" %}</div>
-      <div class="card-body">{{ patient.observacoes|default:"—"|linebreaksbr }}</div>
+      <div class="card-body">{{ patient.notes|default:"—"|linebreaksbr }}</div>
     </div>
   </div>
 </div>
@@ -101,16 +101,16 @@
     {% if pode.pacientes.alterar and not patient.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'patients:related_new' patient.pk %}">{% translate "Nova pessoa relacionada" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
-    {% for relacionada, nome, outro, inverso in relacionados %}
+    {% for relacionada, name, outro, inverso in relacionados %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
       <span>
         {% if inverso %}
-        {% with vinculo=relacionada.get_vinculo_display %}{% blocktranslate %}{{ vinculo }} de{% endblocktranslate %} <a href="{% url 'patients:record' outro.pk %}">{{ nome }}</a>{% endwith %}
+        {% with vinculo=relacionada.get_vinculo_display %}{% blocktranslate %}{{ vinculo }} de{% endblocktranslate %} <a href="{% url 'patients:record' outro.pk %}">{{ name }}</a>{% endwith %}
         {% else %}
         <strong>{{ relacionada.get_vinculo_display }}:</strong>
-        {% if outro %}<a href="{% url 'patients:record' outro.pk %}">{{ nome }}</a>{% else %}{{ nome }}{% endif %}
-        {% with telefone=relacionada.telefone_exibido %}{% if telefone %}· <span class="text-nowrap">{{ telefone|telefone }}</span>{% endif %}{% endwith %}
-        {% if relacionada.observacao %}<span class="small text-body-secondary">· {{ relacionada.observacao }}</span>{% endif %}
+        {% if outro %}<a href="{% url 'patients:record' outro.pk %}">{{ name }}</a>{% else %}{{ name }}{% endif %}
+        {% with phone=relacionada.telefone_exibido %}{% if phone %}· <span class="text-nowrap">{{ phone|phone }}</span>{% endif %}{% endwith %}
+        {% if relacionada.note %}<span class="small text-body-secondary">· {{ relacionada.note }}</span>{% endif %}
         {% endif %}
       </span>
       {% if not inverso and pode.pacientes.alterar and not patient.arquivado %}<a class="btn btn-sm btn-link p-0" href="{% url 'patients:related_edit' relacionada.pk %}">{% translate "editar" %}</a>{% endif %}
@@ -130,7 +130,7 @@
   <ul class="list-group list-group-flush">
     {% for atendimento in prontuario %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'medical_records:visit' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.practitioner.nome }}</a>
+      <a href="{% url 'medical_records:visit' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.practitioner.name }}</a>
       {% if atendimento.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
     </li>
     {% empty %}
@@ -198,16 +198,16 @@
   </div>
   <ul class="list-group list-group-flush">
     {% for carteirinha in carteirinhas %}
-    <li class="list-group-item d-flex justify-content-between align-items-center gap-2{% if not carteirinha.ativa %} text-body-secondary{% endif %}">
+    <li class="list-group-item d-flex justify-content-between align-items-center gap-2{% if not carteirinha.active %} text-body-secondary{% endif %}">
       <span>
-        <strong>{{ carteirinha.convenio.nome }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.numero }}
+        <strong>{{ carteirinha.convenio.name }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.number }}
         {% if carteirinha.beneficiario %}<span class="small">· {% translate "beneficiário" %} {{ carteirinha.beneficiario }}</span>{% endif %}
         {% if carteirinha.grupo %}<span class="small">· {% translate "grupo" %} {{ carteirinha.grupo }}</span>{% endif %}
         {% if carteirinha.validade %}<span class="small">· {% translate "validade" %} {{ carteirinha.validade|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
         {% if carteirinha.titular %}<span class="small">· {% translate "titular" %}: {{ carteirinha.titular }}</span>{% endif %}
       </span>
       <span class="text-nowrap">
-        {% if not carteirinha.ativa %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
+        {% if not carteirinha.active %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
         {% if pode.convenios.alterar and not patient.arquivado %}<a class="btn btn-sm btn-link p-0 ms-2" href="{% url 'health_plans:card_edit' carteirinha.pk %}">{% translate "editar" %}</a>{% endif %}
       </span>
     </li>
@@ -233,7 +233,7 @@
     <ul class="list-unstyled small mb-2">
       {% for parcela in financeiro.abertas %}
       <li>
-        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> ({{ parcela.numero }}) · {{ parcela.saldo|moeda }}
+        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> ({{ parcela.number }}) · {{ parcela.saldo|moeda }}
         {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
       </li>
       {% endfor %}
@@ -260,7 +260,7 @@
   <ul class="list-group list-group-flush">
     {% for rechamada in rechamadas %}
     <li class="list-group-item d-flex justify-content-between">
-      <span>{{ rechamada.data|date:"SHORT_DATE_FORMAT" }} · {{ rechamada.descricao }}</span>
+      <span>{{ rechamada.data|date:"SHORT_DATE_FORMAT" }} · {{ rechamada.description }}</span>
       {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
     </li>
     {% empty %}

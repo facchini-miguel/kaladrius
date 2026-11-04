@@ -8,7 +8,7 @@
 {% if ativada %}<div class="alert alert-success">{% translate "Verificação em duas etapas ativada." %}</div>{% endif %}
 <p>{% translate "Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). Cada um entra uma vez no lugar do código do aplicativo, se o celular for perdido. Eles não aparecem de novo." %}</p>
 <ul class="list-unstyled font-monospace fs-5 row row-cols-2 g-2" style="max-width: 24rem;">
-  {% for codigo in codigos %}<li class="col">{{ codigo }}</li>{% endfor %}
+  {% for code in codigos %}<li class="col">{{ code }}</li>{% endfor %}
 </ul>
 <p class="d-print-none">
   <button type="button" class="btn btn-outline-secondary" data-imprimir>{% translate "Imprimir" %}</button>

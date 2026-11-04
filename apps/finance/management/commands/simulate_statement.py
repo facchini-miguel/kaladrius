@@ -38,14 +38,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, clinic, conta, dias, **options):
-        alvo = Clinic.objects.filter(nome=clinic).first()
+        alvo = Clinic.objects.filter(name=clinic).first()
         if alvo is None:
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         hoje = timezone.localdate()
         inicio = hoje - datetime.timedelta(days=dias)
         with usar_clinica(alvo):
-            alvo_conta = FinancialAccount.objects.filter(nome=conta).first()
+            alvo_conta = FinancialAccount.objects.filter(name=conta).first()
             if alvo_conta is None:
                 raise CommandError(f"Conta “{conta}” não encontrada.")
             linhas = []
@@ -58,11 +58,13 @@ class Command(BaseCommand):
                     fora += p.valor if entrada else -p.valor
                     continue
                 data = min(p.data + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), hoje)
-                descricao = "PIX RECEBIDO" if entrada else "PAGAMENTO"
-                linhas.append((data, p.valor if entrada else -p.valor, descricao, f"P{p.pk}"))
-            for numero, (descricao, valor) in enumerate(EXTRAS):
+                description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
+                linhas.append((data, p.valor if entrada else -p.valor, description, f"P{p.pk}"))
+            for number, (description, valor) in enumerate(EXTRAS):
                 data = inicio + datetime.timedelta(days=sorteio.randint(0, dias))
-                linhas.append((data, valor, descricao, f"X{alvo_conta.pk}-{data:%Y%m%d}-{numero}"))
+                linhas.append(
+                    (data, valor, description, f"X{alvo_conta.pk}-{data:%Y%m%d}-{number}")
+                )
             linhas.sort()
             saldo = dict(services.saldos_das_contas(ate=hoje)).get(alvo_conta)
         # The bank balance: what the system has plus the extras minus what is not there yet.
@@ -76,9 +78,9 @@ class Command(BaseCommand):
             f"<DTPOSTED>{data:%Y%m%d}120000[-3:BRT]\n"
             f"<TRNAMT>{valor}\n"
             f"<FITID>{fitid}\n"
-            f"<MEMO>{descricao}\n"
+            f"<MEMO>{description}\n"
             "</STMTTRN>\n"
-            for data, valor, descricao, fitid in linhas
+            for data, valor, description, fitid in linhas
         )
         return (
             "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\n"

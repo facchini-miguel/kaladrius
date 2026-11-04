@@ -34,9 +34,7 @@ def habilitados(request):
         clinic = getattr(request, "clinic", None)
         request._modulos_habilitados = (
             frozenset(
-                ClinicModule.todos.filter(clinic=clinic, ativo=True).values_list(
-                    "codigo", flat=True
-                )
+                ClinicModule.todos.filter(clinic=clinic, active=True).values_list("code", flat=True)
             )
             if clinic is not None and clinic.pk is not None
             else frozenset()
@@ -59,10 +57,10 @@ def desligados_visiveis(request):
     return visiveis(request) - habilitados(request)
 
 
-def marcar_se_desligado(request, codigo):
+def marcar_se_desligado(request, code):
     """A page of a turned-off module that the system administrator opened: base.html warns."""
-    if codigo and codigo not in habilitados(request):
-        request.modulo_desligado = ModuloClinico(codigo)
+    if code and code not in habilitados(request):
+        request.modulo_desligado = ModuloClinico(code)
 
 
 @transaction.atomic
@@ -84,10 +82,10 @@ def configurar(clinic, codigos):
     # Administrative configuration has an explicit clinic; the ordinary model manager
     # remains isolated for queries from all the other modules.
     with sem_isolamento():
-        for codigo in ModuloClinico:
+        for code in ModuloClinico:
             modulo, criado = ClinicModule.objects.get_or_create(
-                clinic=clinic, codigo=codigo, defaults={"ativo": codigo in codigos}
+                clinic=clinic, code=code, defaults={"active": code in codigos}
             )
-            if not criado and modulo.ativo != (codigo in codigos):
-                modulo.ativo = codigo in codigos
-                modulo.save(update_fields=["ativo"])
+            if not criado and modulo.active != (code in codigos):
+                modulo.active = code in codigos
+                modulo.save(update_fields=["active"])

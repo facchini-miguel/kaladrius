@@ -64,7 +64,7 @@ def lista(request):
     if situacao in Estimate.Situacao.values:
         orcamentos = orcamentos.filter(situacao=situacao)
     if busca:
-        orcamentos = orcamentos.filter(patient__nome__unaccent__icontains=busca)
+        orcamentos = orcamentos.filter(patient__name__unaccent__icontains=busca)
     pagina = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -82,11 +82,11 @@ def lista(request):
 @exige_permissao(Modulo.ORCAMENTOS, Acao.CRIAR)
 def novo(request):
     inicial = {}
-    codigo = request.GET.get("patient", "")
-    if codigo.isdecimal():
-        inicial["patient"] = codigo
+    code = request.GET.get("patient", "")
+    if code.isdecimal():
+        inicial["patient"] = code
     # A practitioner writes estimates in their own name by default.
-    proprio = Practitioner.objects.filter(user=request.user, ativo=True).first()
+    proprio = Practitioner.objects.filter(user=request.user, active=True).first()
     if proprio is not None:
         inicial["practitioner"] = proprio.pk
     form = OrcamentoForm(request.POST or None, initial=inicial)
@@ -168,7 +168,7 @@ def item_adicionar(request, pk):
     if form.is_valid():
         item = form.save(commit=False)
         item.orcamento = orcamento
-        item.descricao = form.cleaned_data["descricao"]
+        item.description = form.cleaned_data["description"]
         item.valor_unitario = form.cleaned_data["valor_unitario"]
         _liberar_se_desligado(request, item)
         try:
@@ -231,7 +231,7 @@ def aprovar(request, pk):
     categoria = (
         item.procedimento.categoria
         if item and item.procedimento and item.procedimento.categoria
-        else Category.objects.filter(tipo=Category.Tipo.RECEITA, ativa=True).first()
+        else Category.objects.filter(tipo=Category.Tipo.RECEITA, active=True).first()
     )
     form = AprovarForm(request.POST or None, initial={"categoria": categoria})
     if request.method == "POST" and form.is_valid():
@@ -299,7 +299,7 @@ def procedimento_form(request, pk=None):
     form = ProcedimentoForm(request.POST or None, instance=procedimento)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.nome})
+        messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.name})
         return redirect("estimates:procedures")
     return render(
         request,

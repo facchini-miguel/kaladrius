@@ -21,7 +21,7 @@
         {% translate "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." as ajuda_paciente %}
         {% include "includes/patient_search.html" with campo=form.patient patient=agendamento.patient ajuda=ajuda_paciente %}
       </div>
-      <div class="col-12">{% with campo=form.descricao %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-12">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.repeticoes %}
       <div class="col-md-6">{% with campo=form.repeticoes %}{% include "includes/field.html" %}{% endwith %}</div>
       {% endif %}

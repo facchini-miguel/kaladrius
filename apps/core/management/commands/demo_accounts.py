@@ -62,7 +62,7 @@ class Command(BaseCommand):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
-            clinic = Clinic.objects.get(nome=options["clinic"])
+            clinic = Clinic.objects.get(name=options["clinic"])
         except Clinic.DoesNotExist as erro:
             raise CommandError(f"Clínica não encontrada: {options['clinic']}") from erro
 
@@ -70,35 +70,35 @@ class Command(BaseCommand):
         practitioner = self._conta(
             PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
         )
-        outras = [self._conta(u, nome, senha, clinic, papel) for u, nome, senha, papel in extras]
+        outras = [self._conta(u, name, senha, clinic, papel) for u, name, senha, papel in extras]
         with usar_clinica(clinic):
-            cadastro = Practitioner.objects.filter(nome=options["practitioner"]).first()
+            cadastro = Practitioner.objects.filter(name=options["practitioner"]).first()
             if cadastro is None:
                 if not options["criar_profissional"]:
                     raise CommandError(
                         f"Profissional não encontrado: {options['practitioner']} "
                         "(use --create-practitioner para criar)"
                     )
-                cadastro = Practitioner.objects.create(nome=options["practitioner"])
+                cadastro = Practitioner.objects.create(name=options["practitioner"])
             if cadastro.user_id not in (None, practitioner.pk):
                 raise CommandError(
-                    f"{cadastro.nome} já tem outro usuário de acesso; escolha outro profissional."
+                    f"{cadastro.name} já tem outro usuário de acesso; escolha outro profissional."
                 )
             cadastro.user = practitioner
             cadastro.save(update_fields=["user"])
         self.stdout.write(
             self.style.SUCCESS(
                 f"Contas prontas: {recepcao.username} (recepção), {practitioner.username} "
-                f"(profissional, agenda de {cadastro.nome})"
+                f"(profissional, agenda de {cadastro.name})"
                 + "".join(f", {conta.username}" for conta in outras)
                 + "."
             )
         )
 
-    def _conta(self, username, nome, senha, clinic, papel):
+    def _conta(self, username, name, senha, clinic, papel):
         Usuario = get_user_model()
         user, _criado = Usuario.objects.get_or_create(username=username)
-        user.first_name = nome
+        user.first_name = name
         user.last_name = "(demonstração)"
         user.is_active = True
         user.is_staff = user.is_superuser = False
@@ -106,6 +106,6 @@ class Command(BaseCommand):
         user.set_password(senha)
         user.save()
         Membership.objects.update_or_create(
-            user=user, clinic=clinic, defaults={"papel": papel, "ativo": True}
+            user=user, clinic=clinic, defaults={"papel": papel, "active": True}
         )
         return user

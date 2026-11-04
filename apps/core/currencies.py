@@ -35,8 +35,8 @@ MOEDAS = {
 }
 
 ESCOLHAS = [
-    (codigo, format_lazy("{} ({}, {})", nome, simbolo, codigo))
-    for codigo, (nome, simbolo, _casas) in MOEDAS.items()
+    (code, format_lazy("{} ({}, {})", name, simbolo, code))
+    for code, (name, simbolo, _casas) in MOEDAS.items()
 ]
 
 
@@ -52,20 +52,20 @@ def moeda_da_clinica():
     return getattr(clinic, "moeda", None) or PADRAO
 
 
-def formatar(valor, codigo=None):
+def formatar(valor, code=None):
     """The amount with the currency symbol, e.g. R$ 1.234,56 · US$ 1,234.56 · 1.234,56 €.
     The euro goes after the number in languages with a decimal comma (Portugal, Spain)."""
     try:
         valor = Decimal(valor)
     except (InvalidOperation, TypeError, ValueError):
         return ""
-    _nome, simbolo, casas = MOEDAS.get(codigo or moeda_da_clinica(), MOEDAS[PADRAO])
+    _nome, simbolo, casas = MOEDAS.get(code or moeda_da_clinica(), MOEDAS[PADRAO])
     # Rounded like money (Django's number_format just cuts the extra decimals).
     valor = valor.quantize(Decimal(1).scaleb(-casas), rounding=ROUND_HALF_UP)
-    numero = number_format(valor, casas, force_grouping=True)
+    number = number_format(valor, casas, force_grouping=True)
     if simbolo == "€" and get_format("DECIMAL_SEPARATOR") == ",":
-        return f"{numero} {simbolo}"
-    return f"{simbolo} {numero}"
+        return f"{number} {simbolo}"
+    return f"{simbolo} {number}"
 
 
 def simbolo():

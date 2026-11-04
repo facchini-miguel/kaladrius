@@ -47,27 +47,27 @@ _NOMES_PADRAO_PARA_TRADUCAO = [
 class AppointmentType(ModeloDaClinica):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
     cor = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validar_cor])
-    ativo = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
     class Meta:
         db_table = "agenda_tipoatendimento"
         verbose_name = _("tipo de atendimento")
         verbose_name_plural = _("tipos de atendimento")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "nome"], name="tipo_atendimento_unico"),
+            models.UniqueConstraint(fields=["clinic", "name"], name="tipo_atendimento_unico"),
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
     @property
     def nome_exibido(self):
         """The name in the user's language when it is one of the default types; a name the
         clinic typed itself (or renamed) has no translation and is shown as saved."""
-        return pgettext("tipo de atendimento", self.nome)
+        return pgettext("tipo de atendimento", self.name)
 
 
 class TsTzRange(models.Func):
@@ -111,7 +111,7 @@ class Appointment(ModeloDaClinica):
         verbose_name=_("paciente"),
         db_column="paciente_id",
     )
-    descricao = models.TextField(_("descrição"), blank=True)
+    description = models.TextField(_("descrição"), blank=True, db_column="descricao")
     situacao = models.CharField(
         _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.AGENDADO
     )
@@ -163,8 +163,8 @@ class Appointment(ModeloDaClinica):
     @property
     def titulo(self):
         if self.patient_id:
-            return self.patient.nome
-        return (self.descricao.strip().splitlines() or [gettext("Horário reservado")])[0]
+            return self.patient.name
+        return (self.description.strip().splitlines() or [gettext("Horário reservado")])[0]
 
     @property
     def desmarcado(self):
@@ -183,5 +183,5 @@ def criar_tipos_padrao(clinic):
             return
         tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.ODONTOLOGIA else TIPOS_PADRAO
         AppointmentType.objects.bulk_create(
-            AppointmentType(clinic=clinic, nome=nome, cor=cor) for nome, cor in tipos
+            AppointmentType(clinic=clinic, name=name, cor=cor) for name, cor in tipos
         )

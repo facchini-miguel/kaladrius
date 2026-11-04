@@ -169,11 +169,11 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
 
 def dados_clinica(**extra):
     return {
-        "nome": "Clínica Atualizada",
+        "name": "Clínica Atualizada",
         "area": "odontologia",
         "documento": "",
         "email": "",
-        "telefone": "",
+        "phone": "",
         "agenda_inicio": "08:00",
         "agenda_fim": "18:00",
         "moeda": "BRL",
@@ -193,7 +193,7 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
     )
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
-    assert (clinica_a.nome, clinica_a.documento) == ("Clínica Atualizada", "11222333000181")
+    assert (clinica_a.name, clinica_a.documento) == ("Clínica Atualizada", "11222333000181")
     assert (clinica_a.agenda_inicio, clinica_a.agenda_intervalo) == (datetime.time(8), 15)
 
 
@@ -214,7 +214,7 @@ def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, client
 )
 def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        practitioner = Practitioner.objects.create(nome="Dra. Teste")
+        practitioner = Practitioner.objects.create(name="Dra. Teste")
         tipo = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
         inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))

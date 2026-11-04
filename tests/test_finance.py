@@ -23,9 +23,9 @@ HOJE = timezone.localdate()
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Maria Devedora", cpf_cnpj="52998224725")
-        categoria = Category.objects.get(nome="Tratamento")
-        caixa = FinancialAccount.objects.get(nome="Caixa")
+        patient = Patient.objects.create(name="Maria Devedora", cpf_cnpj="52998224725")
+        categoria = Category.objects.get(name="Tratamento")
+        caixa = FinancialAccount.objects.get(name="Caixa")
     return {
         "clinic": clinica_a,
         "patient": patient,
@@ -46,13 +46,13 @@ def novo(cenario, **extra):
     return {
         "patient": cenario["patient"].pk,
         "pessoa": "",
-        "descricao": "Tratamento de canal",
+        "description": "Tratamento de canal",
         "categoria": cenario["categoria"].pk,
         "practitioner": "",
         "valor_total": "100,00",
         "parcelas": 3,
         "primeiro_vencimento": "2031-01-31",
-        "observacoes": "",
+        "notes": "",
         **extra,
     }
 
@@ -64,7 +64,7 @@ def lancamento_com(cenario, valor="300.00", parcelas=3, vencimento=None, patient
             tipo=Entry.Tipo.RECEBER,
             patient=cenario["patient"] if patient else None,
             pessoa="" if patient else "João Avulso",
-            descricao="Prótese",
+            description="Prótese",
             categoria=cenario["categoria"],
             valor_total=Decimal(valor),
             parcelas=parcelas,
@@ -76,7 +76,7 @@ def lancamento_com(cenario, valor="300.00", parcelas=3, vencimento=None, patient
 def parcelas_de(cenario, lancamento):
     with usar_clinica(cenario["clinic"]):
         return list(
-            Installment.objects.com_saldo().filter(lancamento=lancamento).order_by("numero")
+            Installment.objects.com_saldo().filter(lancamento=lancamento).order_by("number")
         )
 
 
@@ -94,9 +94,9 @@ def test_divisao_em_parcelas_e_vencimentos_mensais():
 
 
 def test_clinica_nova_recebe_contas_e_categorias_padrao():
-    clinic = Clinic.objects.create(nome="Clínica Nova")
+    clinic = Clinic.objects.create(name="Clínica Nova")
     with usar_clinica(clinic):
-        assert set(FinancialAccount.objects.values_list("nome", flat=True)) == {"Caixa", "Banco"}
+        assert set(FinancialAccount.objects.values_list("name", flat=True)) == {"Caixa", "Banco"}
         assert Category.objects.filter(tipo=Category.Tipo.RECEITA).count() == 3
         assert Category.objects.filter(tipo=Category.Tipo.DESPESA).count() == 9
 
@@ -119,7 +119,7 @@ def test_recepcao_lanca_parcelado(cenario):
     assert resposta.status_code == 302
     with usar_clinica(cenario["clinic"]):
         lancamento = Entry.objects.get()
-        parcelas = list(lancamento.parcelas.order_by("numero"))
+        parcelas = list(lancamento.parcelas.order_by("number"))
     assert lancamento.created_by == cenario["recepcao"]
     assert [p.valor for p in parcelas] == [Decimal("33.34"), Decimal("33.33"), Decimal("33.33")]
     assert [p.vencimento for p in parcelas] == [
@@ -260,7 +260,7 @@ def test_devedores_por_tempo_de_atraso(cenario):
     )
     with usar_clinica(cenario["clinic"]):
         linhas = services.devedores()
-    assert [linha["nome"] for linha in linhas] == ["Maria Devedora", "João Avulso"]
+    assert [linha["name"] for linha in linhas] == ["Maria Devedora", "João Avulso"]
     maria, joao = linhas
     # 45 days late (31-60) and the next one 15 days late (up to 30).
     assert maria["faixas"] == [Decimal("100.00"), Decimal("100.00"), 0, 0]
@@ -312,18 +312,18 @@ def test_admin_cadastra_categorias_e_contas(cenario):
     cliente = entrar(cenario, "admin")
     url = reverse("finance:catalog_new", args=["categories"])
     assert (
-        cliente.post(url, {"nome": "Ortodontia", "tipo": "receita", "ativa": "on"}).status_code
+        cliente.post(url, {"name": "Ortodontia", "tipo": "receita", "active": "on"}).status_code
         == 302
     )
-    resposta = cliente.post(url, {"nome": "Ortodontia", "tipo": "receita", "ativa": "on"})
+    resposta = cliente.post(url, {"name": "Ortodontia", "tipo": "receita", "active": "on"})
     assert "Já existe" in resposta.content.decode()
     cliente.post(
         reverse("finance:catalog_new", args=["accounts"]),
-        {"nome": "Maquininha", "tipo": "cartao", "ativa": "on"},
+        {"name": "Maquininha", "tipo": "cartao", "active": "on"},
     )
     with usar_clinica(cenario["clinic"]):
-        assert Category.objects.filter(nome="Ortodontia").exists()
-        assert FinancialAccount.objects.filter(nome="Maquininha", tipo="cartao").exists()
+        assert Category.objects.filter(name="Ortodontia").exists()
+        assert FinancialAccount.objects.filter(name="Maquininha", tipo="cartao").exists()
     assert cliente.get("/finance/something-else/").status_code == 404
 
 
@@ -337,14 +337,14 @@ def test_lancamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, c
 def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
     lancamento = lancamento_com(cenario)
     with usar_clinica(cenario["clinic"]):
-        Entry.objects.filter(pk=lancamento.pk).update(observacoes="Mãe: Joana, 9999-0000")
+        Entry.objects.filter(pk=lancamento.pk).update(notes="Mãe: Joana, 9999-0000")
         pagamento = services.receber(
             lancamento.parcelas.first(),
             user=cenario["admin"],
             valor=Decimal("10.00"),
             forma="pix",
-            conta=FinancialAccount.objects.get(nome="Caixa"),
-            observacao="Pago pela Joana",
+            conta=FinancialAccount.objects.get(name="Caixa"),
+            note="Pago pela Joana",
         )
         Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
     admin = entrar(cenario, "admin")
@@ -354,7 +354,7 @@ def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
     assert lancamento.patient is None
     assert lancamento.pessoa == f"Paciente excluído (código {cenario['patient'].pk})"
     # Notes may hold personal data; amounts stay.
-    assert (lancamento.observacoes, pagamento.observacao) == ("", "")
+    assert (lancamento.notes, pagamento.note) == ("", "")
     assert pagamento.valor == Decimal("10.00")
 
 
@@ -363,16 +363,16 @@ def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
 
 def despesa(cenario, **extra):
     with usar_clinica(cenario["clinic"]):
-        aluguel = Category.objects.get(nome="Aluguel")
+        aluguel = Category.objects.get(name="Aluguel")
     return {
         "pessoa": "Imobiliária",
-        "descricao": "Aluguel",
+        "description": "Aluguel",
         "categoria": aluguel.pk,
         "valor": "3.000,00".replace(".", ""),
         "modo": "repetir",
         "parcelas": 12,
         "primeiro_vencimento": "2031-01-10",
-        "observacoes": "",
+        "notes": "",
         **extra,
     }
 
@@ -382,16 +382,16 @@ def test_despesa_fixa_mensal_e_parcelada(cenario):
     assert admin.post(reverse("finance:expense_new"), despesa(cenario)).status_code == 302
     admin.post(
         reverse("finance:expense_new"),
-        despesa(cenario, descricao="Cadeira", modo="dividir", valor="900", parcelas=3),
+        despesa(cenario, description="Cadeira", modo="dividir", valor="900", parcelas=3),
     )
     with usar_clinica(cenario["clinic"]):
-        aluguel = Entry.objects.get(descricao="Aluguel")
-        cadeira = Entry.objects.get(descricao="Cadeira")
+        aluguel = Entry.objects.get(description="Aluguel")
+        cadeira = Entry.objects.get(description="Cadeira")
         assert aluguel.tipo == Entry.Tipo.PAGAR
         assert aluguel.valor_total == Decimal("36000.00")
         assert {p.valor for p in aluguel.parcelas.all()} == {Decimal("3000.00")}
         assert aluguel.parcelas.count() == 12
-        assert [p.valor for p in cadeira.parcelas.order_by("numero")] == [Decimal("300.00")] * 3
+        assert [p.valor for p in cadeira.parcelas.order_by("number")] == [Decimal("300.00")] * 3
 
 
 def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
@@ -450,13 +450,13 @@ def test_saldo_das_contas_com_saldo_inicial(cenario):
             forma="dinheiro",
             conta=cenario["caixa"],
         )
-        saldos = dict((conta.nome, saldo) for conta, saldo in services.saldos_das_contas())
+        saldos = dict((conta.name, saldo) for conta, saldo in services.saldos_das_contas())
     assert saldos == {"Caixa": Decimal("50.00"), "Banco": Decimal("0.00")}
     # A negative initial balance is accepted in the form (overdrawn bank).
     admin = entrar(cenario, "admin")
     resposta = admin.post(
         reverse("finance:catalog_edit", args=["accounts", cenario["caixa"].pk]),
-        {"nome": "Caixa", "tipo": "dinheiro", "saldo_inicial": "-10,50", "ativa": "on"},
+        {"name": "Caixa", "tipo": "dinheiro", "saldo_inicial": "-10,50", "active": "on"},
     )
     assert resposta.status_code == 302
 
@@ -483,8 +483,8 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
             clinic=cenario["clinic"],
             tipo=Entry.Tipo.PAGAR,
             pessoa="Imobiliária",
-            descricao="Aluguel",
-            categoria=Category.objects.get(nome="Aluguel"),
+            description="Aluguel",
+            categoria=Category.objects.get(name="Aluguel"),
             valor_total=Decimal("300.00"),
             parcelas=1,
             primeiro_vencimento=datetime.date(2031, 3, 10),
@@ -539,7 +539,7 @@ def test_caixa_do_dia_completo(cenario):
     from apps.finance.models import CashMovement, CashRegister
 
     with usar_clinica(cenario["clinic"]):
-        banco = FinancialAccount.objects.get(nome="Banco")
+        banco = FinancialAccount.objects.get(name="Banco")
     recepcao = entrar(cenario, "recepcao")
     assert recepcao.get(reverse("finance:cash")).status_code == 200
     resposta = recepcao.post(reverse("finance:cash"), {"valor": "100,00"})
@@ -564,7 +564,7 @@ def test_caixa_do_dia_completo(cenario):
             segunda, user=cenario["recepcao"], valor=Decimal("40"), forma="pix", conta=banco
         )
 
-    url = lambda nome, *args: reverse(f"finance:{nome}", args=[caixa.pk, *args])  # noqa: E731
+    url = lambda name, *args: reverse(f"finance:{name}", args=[caixa.pk, *args])  # noqa: E731
     recepcao.post(url("cash_movement", "top-up"), {"valor": "10", "motivo": "Troco"})
     recepcao.post(
         url("cash_movement", "withdrawal"),
@@ -576,7 +576,7 @@ def test_caixa_do_dia_completo(cenario):
 
     with usar_clinica(cenario["clinic"]):
         resumo = services.resumo_do_caixa(caixa)
-        saldos = dict((c.nome, s) for c, s in services.saldos_das_contas())
+        saldos = dict((c.name, s) for c, s in services.saldos_das_contas())
     assert (resumo["entradas"], resumo["reforcos"], resumo["retiradas"]) == (
         Decimal("40.00"),
         Decimal("10.00"),
@@ -586,7 +586,7 @@ def test_caixa_do_dia_completo(cenario):
     # The deposit moved money from the drawer account to the bank.
     assert saldos == {"Caixa": Decimal("-70.00"), "Banco": Decimal("160.00")}
 
-    recepcao.post(url("cash_close"), {"valor_contado": "28,50", "observacao": "Faltou troco"})
+    recepcao.post(url("cash_close"), {"valor_contado": "28,50", "note": "Faltou troco"})
     caixa.refresh_from_db()
     assert not caixa.aberto and caixa.fechado_por == cenario["recepcao"]
     assert (caixa.valor_esperado, caixa.valor_contado, caixa.diferenca) == (
@@ -619,9 +619,7 @@ def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
             forma="dinheiro",
             conta=cenario["caixa"],
         )
-        services.fechar_caixa(
-            caixa, valor_contado=Decimal("50"), observacao="", user=cenario["admin"]
-        )
+        services.fechar_caixa(caixa, valor_contado=Decimal("50"), note="", user=cenario["admin"])
         services.estornar(pagamento, motivo="erro", user=cenario["admin"])
         caixa.refresh_from_db()
     assert (caixa.valor_esperado, caixa.diferenca) == (Decimal("50.00"), 0)
@@ -674,7 +672,7 @@ def test_devedores_paginados_e_com_busca(cenario):
                 clinic=cenario["clinic"],
                 tipo=Entry.Tipo.RECEBER,
                 pessoa=f"Pagador Fictício {n:02d}",
-                descricao="Consulta",
+                description="Consulta",
                 categoria=cenario["categoria"],
                 valor_total=Decimal("10"),
                 parcelas=1,

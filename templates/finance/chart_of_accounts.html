@@ -24,10 +24,10 @@
         {% for linha in arvore.linhas %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ linha.nivel|add:1 }}rem;">
           {% if linha.grupo %}
-          <span class="fw-semibold{% if not linha.grupo.ativo %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.grupo }}</span>
+          <span class="fw-semibold{% if not linha.grupo.active %} text-body-secondary text-decoration-line-through{% endif %}">{{ linha.grupo }}</span>
           {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:group_edit' linha.grupo.pk %}">{% translate "editar" %}</a>{% endif %}
           {% else %}
-          <span class="{% if not linha.categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.categoria.nome }}</span>
+          <span class="{% if not linha.categoria.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ linha.categoria.name }}</span>
           {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' linha.categoria.pk %}">{% translate "editar" %}</a>{% endif %}
           {% endif %}
         </li>
@@ -36,7 +36,7 @@
         <li class="list-group-item text-body-secondary small">{% translate "Sem grupo" %}</li>
         {% for categoria in arvore.sem_grupo %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: 2rem;">
-          <span class="{% if not categoria.ativa %}text-body-secondary text-decoration-line-through{% endif %}">{{ categoria.nome }}</span>
+          <span class="{% if not categoria.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ categoria.name }}</span>
           {% if pode.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' categoria.pk %}">{% translate "editar" %}</a>{% endif %}
         </li>
         {% endfor %}

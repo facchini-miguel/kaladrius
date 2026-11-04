@@ -42,7 +42,7 @@ class Command(BaseCommand):
         except (DumpInvalido, ImportacaoRecusada) as erro:
             raise CommandError(str(erro)) from erro
 
-        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.nome}”:"))
+        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.name}”:"))
         self.stdout.write(f"  Profissionais: {relatorio.profissionais}")
         self.stdout.write(f"  Tipos de atendimento novos: {relatorio.tipos_criados}")
         self.stdout.write(f"  Pacientes: {relatorio.pacientes}")

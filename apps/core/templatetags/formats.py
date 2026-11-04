@@ -29,7 +29,7 @@ def rotulo_documento(*papeis):
 
 
 @register.filter
-def telefone(valor):
+def phone(valor):
     valor = valor or ""
     pais = countries.pais_da_clinica()
     if pais != "BR":

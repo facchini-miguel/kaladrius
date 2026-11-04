@@ -17,25 +17,25 @@ NOME_SISTEMA = "Kaladrius"
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def env(nome, padrao=None):
-    valor = os.environ.get(nome, padrao)
+def env(name, padrao=None):
+    valor = os.environ.get(name, padrao)
     if valor is None:
-        raise ImproperlyConfigured(f"Missing required environment variable: {nome}")
+        raise ImproperlyConfigured(f"Missing required environment variable: {name}")
     return valor
 
 
-def env_bool(nome, padrao=False):
-    return env(nome, "1" if padrao else "0").strip().lower() in {"1", "true", "sim", "yes"}
+def env_bool(name, padrao=False):
+    return env(name, "1" if padrao else "0").strip().lower() in {"1", "true", "sim", "yes"}
 
 
-def env_renomeada(nome, antigo, padrao=False):
+def env_renomeada(name, antigo, padrao=False):
     """A yes/no variable by its name of decision 149, or by the one it had before (a .env of
     0.55 or earlier, or a person following older documentation)."""
-    return env_bool(nome, padrao=env_bool(antigo, padrao=padrao))
+    return env_bool(name, padrao=env_bool(antigo, padrao=padrao))
 
 
-def env_lista(nome, padrao=""):
-    return [item.strip() for item in env(nome, padrao).split(",") if item.strip()]
+def env_lista(name, padrao=""):
+    return [item.strip() for item in env(name, padrao).split(",") if item.strip()]
 
 
 DEBUG = env_bool("DJANGO_DEBUG")

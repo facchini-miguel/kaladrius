@@ -8,8 +8,8 @@
   <div>
     <h1 class="h3 mb-0">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
     <span class="text-body-secondary">
-      <a href="{% url 'patients:record' orcamento.patient_id %}">{{ orcamento.patient.nome }}</a>
-      {% if orcamento.practitioner %} · {{ orcamento.practitioner.nome }}{% endif %}
+      <a href="{% url 'patients:record' orcamento.patient_id %}">{{ orcamento.patient.name }}</a>
+      {% if orcamento.practitioner %} · {{ orcamento.practitioner.name }}{% endif %}
       · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }}
       · {% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
     </span>
@@ -31,7 +31,7 @@
     <tbody>
       {% for item in orcamento.itens.all %}
       <tr>
-        <td>{% if item.codigo %}<span class="text-body-secondary small">{{ item.codigo }}</span> {% endif %}{{ item.descricao }}</td>
+        <td>{% if item.code %}<span class="text-body-secondary small">{{ item.code }}</span> {% endif %}{{ item.description }}</td>
         {% if mostrar_dentes %}
         <td>{{ item.dentes_exibicao|default:"—" }}</td>
         <td>{{ item.faces|default:"—" }}</td>
@@ -54,7 +54,7 @@
     </tfoot>
   </table>
 </div>
-{% if orcamento.observacoes %}<p class="text-body-secondary">{{ orcamento.observacoes|linebreaksbr }}</p>{% endif %}
+{% if orcamento.notes %}<p class="text-body-secondary">{{ orcamento.notes|linebreaksbr }}</p>{% endif %}
 
 {% if mostrar_dentes and not odontologia_habilitada %}
 <h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
@@ -73,7 +73,7 @@
       {% endif %}
       <div class="row mt-3">
         <div class="col-md-4">{% with campo=item_form.procedimento %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-4">{% with campo=item_form.descricao %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-4">{% with campo=item_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
         {% if odontologia_habilitada %}<div class="col-md-4">{% with campo=item_form.faces %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
         <div class="col-6 col-md-2">{% with campo=item_form.quantidade %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-6 col-md-3">{% with campo=item_form.valor_unitario %}{% include "includes/field.html" %}{% endwith %}</div>

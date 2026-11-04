@@ -52,7 +52,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
         reverse("patients:new"),
         {
             "tipo": "PF",
-            "nome": "Paciente Fictício",
+            "name": "Paciente Fictício",
             "telefone_celular": "(54) 8123-4567",
             "whatsapp": "54 8123-4567",
             "telefone_residencial": "(54) 3461-3354",
@@ -67,7 +67,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
         "5434613354",
     )
     errado = cliente.post(
-        reverse("patients:new"), {"tipo": "PF", "nome": "Outro", "whatsapp": "(20) 98123-4567"}
+        reverse("patients:new"), {"tipo": "PF", "name": "Outro", "whatsapp": "(20) 98123-4567"}
     )
     assert "whatsapp" in errado.context["form"].errors
 

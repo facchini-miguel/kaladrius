@@ -168,9 +168,9 @@ RUC_PE = Documento("RUC", "20512333797", pe_ruc.validate)
 # ---- Uruguay: the cédula's last digit checks the others (weights 2987634).
 def _cedula_uy(valor):
     _exigir(re.fullmatch(r"\d{6,8}", valor))
-    numero = valor.zfill(8)
-    soma = sum(int(d) * p for d, p in zip(numero[:7], (2, 9, 8, 7, 6, 3, 4), strict=True))
-    _exigir((10 - soma % 10) % 10 == int(numero[7]))
+    number = valor.zfill(8)
+    soma = sum(int(d) * p for d, p in zip(number[:7], (2, 9, 8, 7, 6, 3, 4), strict=True))
+    _exigir((10 - soma % 10) % 10 == int(number[7]))
 
 
 def _escrever_cedula_uy(v):

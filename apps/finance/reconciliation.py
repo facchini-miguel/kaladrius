@@ -62,7 +62,7 @@ def importar(conta, *, nome_arquivo, conteudo, user):
                 fitid=t.fitid,
                 data=t.data,
                 valor=t.valor,
-                descricao=t.descricao,
+                description=t.description,
                 tipo=t.tipo,
             )
             for t in extrato.transacoes
@@ -98,7 +98,7 @@ def outra_conta_no_banco(importacao):
 class Candidato:
     chave: str  # "p<pk>" for a payment, "m<pk>" for a drawer movement
     data: datetime.date
-    descricao: str
+    description: str
     objeto: object
 
 
@@ -139,7 +139,10 @@ def candidatos(transacoes):
             ):
                 lista.append(
                     Candidato(
-                        f"p{p.pk}", p.data, f"{lancamento.nome_pessoa} · {lancamento.descricao}", p
+                        f"p{p.pk}",
+                        p.data,
+                        f"{lancamento.nome_pessoa} · {lancamento.description}",
+                        p,
                     )
                 )
         for m in movimentos:
@@ -213,14 +216,14 @@ def conciliar_unicos(importacao, *, user):
 
 
 @transaction.atomic
-def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, user):
+def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
     lancamento = services.criar_lancamento(
         clinic=transacao.clinic,
         tipo=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
-        pessoa=pessoa or descricao,
-        descricao=descricao,
+        pessoa=pessoa or description,
+        description=description,
         categoria=categoria,
         valor_total=abs(transacao.valor),
         parcelas=1,

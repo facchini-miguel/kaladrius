@@ -85,11 +85,11 @@ def servidor(tmp_path):
     class Servidor:
         dir = tmp_path
 
-        def imagem(self, lugar, nome, ident):
-            (tmp_path / lugar / nome.replace("/", "_").replace(":", "_")).write_text(ident + "\n")
+        def imagem(self, lugar, name, ident):
+            (tmp_path / lugar / name.replace("/", "_").replace(":", "_")).write_text(ident + "\n")
 
-        def id_local(self, nome):
-            arquivo = tmp_path / "imagens" / nome.replace("/", "_").replace(":", "_")
+        def id_local(self, name):
+            arquivo = tmp_path / "imagens" / name.replace("/", "_").replace(":", "_")
             return arquivo.read_text().strip() if arquivo.exists() else None
 
         def saude(self, *respostas):
@@ -111,8 +111,8 @@ def servidor(tmp_path):
             )
             return resultado.returncode, (tmp_path / "log").read_text().splitlines()
 
-        def ler(self, nome):
-            arquivo = tmp_path / nome
+        def ler(self, name):
+            arquivo = tmp_path / name
             return arquivo.read_text().split() if arquivo.exists() else None
 
     s = Servidor()
@@ -126,16 +126,16 @@ def servidor(tmp_path):
 
 
 def test_sem_versao_nova_nada_muda(servidor):
-    codigo, log = servidor.rodar()
-    assert codigo == 0
+    code, log = servidor.rodar()
+    assert code == 0
     assert log == ["monitor MONITOR_UPDATE_URL ok"]
 
 
 def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(0)
-    codigo, log = servidor.rodar()
-    assert codigo == 0
+    code, log = servidor.rodar()
+    assert code == 0
     assert "compose up -d --remove-orphans com B" in log
     assert servidor.ler("installed-image") == ["B", "D"]
     assert servidor.id_local("registro/app:previous") == "B"
@@ -148,8 +148,8 @@ def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
 def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)  # B does not answer; A answers again
-    codigo, log = servidor.rodar()
-    assert codigo == 1
+    code, log = servidor.rodar()
+    assert code == 1
     subidas = [linha for linha in log if linha.startswith("compose up")]
     assert subidas == [
         "compose up -d --remove-orphans com B",
@@ -166,16 +166,16 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
 
     # Next runs: the refused version is not tried again, and the monitor stays red.
-    codigo, log = servidor.rodar()
-    assert codigo == 0
+    code, log = servidor.rodar()
+    assert code == 0
     assert not any(linha.startswith("compose") for linha in log)
     assert log == ["monitor MONITOR_UPDATE_URL fail"]
 
     # A newer version is tried, and once it comes up the refusal is gone.
     servidor.imagem("remoto", "registro/app:latest", "C")
     servidor.saude(0)
-    codigo, log = servidor.rodar()
-    assert codigo == 0
+    code, log = servidor.rodar()
+    assert code == 0
     assert "compose up -d --remove-orphans com C" in log
     assert servidor.ler("installed-image") == ["C", "D"]
     assert servidor.ler("refused-image") is None
@@ -189,14 +189,14 @@ def test_duas_versoes_recusadas_seguidas_nao_ficam_no_disco(servidor):
     # C refused too: B is not needed any more, and only the latest refusal is kept.
     servidor.imagem("remoto", "registro/app:latest", "C")
     servidor.saude(1, 0)
-    codigo, _log = servidor.rodar()
-    assert codigo == 1
+    code, _log = servidor.rodar()
+    assert code == 1
     assert servidor.ler("refused-image") == ["C", "D"]
     assert servidor.ler("removidas") == ["B"]  # never A (running again) or D (in use)
     servidor.imagem("remoto", "registro/app:latest", "E")
     servidor.saude(0)
-    codigo, _log = servidor.rodar()
-    assert codigo == 0
+    code, _log = servidor.rodar()
+    assert code == 0
     assert servidor.ler("removidas") == ["B", "A", "C"]
 
 
@@ -205,16 +205,16 @@ def test_forcar_tenta_de_novo_a_versao_recusada(servidor):
     servidor.saude(1, 0)
     servidor.rodar()
     servidor.saude(0)
-    codigo, log = servidor.rodar("--force")
-    assert codigo == 0
+    code, log = servidor.rodar("--force")
+    assert code == 0
     assert "compose up -d --remove-orphans com B" in log
     assert servidor.ler("installed-image") == ["B", "D"]
 
 
 def test_servidor_antigo_guarda_a_anterior_na_primeira_execucao(servidor):
     (servidor.dir / "imagens" / "registro_app_previous").unlink()
-    codigo, _log = servidor.rodar()
-    assert codigo == 0
+    code, _log = servidor.rodar()
+    assert code == 0
     assert servidor.id_local("registro/app:previous") == "A"
 
 
@@ -223,8 +223,8 @@ def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
     (servidor.dir / "installed-image").write_text("X\nD\n")  # A was never confirmed
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1)
-    codigo, log = servidor.rodar()
-    assert codigo == 1
+    code, log = servidor.rodar()
+    assert code == 1
     assert [linha for linha in log if linha.startswith("compose up")] == [
         "compose up -d --remove-orphans com B"
     ]
@@ -243,8 +243,8 @@ def test_pacote_linux_sem_documentacao_e_com_imagem_so_local(servidor):
     (servidor.dir / "installed-image").write_text("A\n")
     servidor.imagem("imagens", "registro/app:latest", "B")
     (servidor.dir / "remoto" / "registro_app_latest").unlink()
-    codigo, log = servidor.rodar()
-    assert codigo == 0
+    code, log = servidor.rodar()
+    assert code == 0
     assert "compose up -d --remove-orphans com B" in log
     assert servidor.ler("installed-image") == ["B"]
 
@@ -253,8 +253,8 @@ def test_google_cloud_sem_o_registro_falha_e_avisa(servidor):
     # Only the Linux package goes on with the image already on the server: on Google Cloud the
     # update monitor reports a registry it cannot reach.
     (servidor.dir / "remoto" / "registro_app_latest").unlink()
-    codigo, log = servidor.rodar()
-    assert codigo == 1
+    code, log = servidor.rodar()
+    assert code == 1
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
 
 
@@ -262,8 +262,8 @@ def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor)
     (servidor.dir / "linux-package").write_text("VERSION=0.54.0\n")
     for lugar in ("imagens", "remoto"):
         (servidor.dir / lugar / "registro_app_latest").unlink()
-    codigo, log = servidor.rodar()
-    assert codigo == 1
+    code, log = servidor.rodar()
+    assert code == 1
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
     assert not [linha for linha in log if linha.startswith("compose")]
 
@@ -274,6 +274,6 @@ def test_o_nome_antigo_de_force_ainda_vale(servidor):
     servidor.saude(1, 0)
     servidor.rodar()
     servidor.saude(0)
-    codigo, log = servidor.rodar("--forcar")
-    assert codigo == 0
+    code, log = servidor.rodar("--forcar")
+    assert code == 0
     assert "compose up -d --remove-orphans com B" in log

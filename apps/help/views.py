@@ -46,7 +46,7 @@ def privacidade(request):
     contexto = {"titulo": titulo, "html": html, "clinic": clinic}
     if pais != countries.PADRAO:
         contexto.update(
-            pais=countries.do_codigo(pais).nome,
+            pais=countries.do_codigo(pais).name,
             lei=legislation.do_pais(pais),
             prazo_de_guarda=legislation.prazo_de_guarda(pais),
         )

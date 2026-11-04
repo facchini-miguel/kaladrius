@@ -2,9 +2,9 @@
   <h2 class="h6">{{ titulo }}</h2>
   <table class="table table-sm bg-white">
     <tbody>
-      {% for nivel, nome, valor in linhas %}
+      {% for nivel, name, valor in linhas %}
       <tr>
-        <td style="padding-left: {{ nivel|add:1 }}rem;"{% if nivel == 0 %} class="fw-semibold"{% endif %}>{{ nome }}</td>
+        <td style="padding-left: {{ nivel|add:1 }}rem;"{% if nivel == 0 %} class="fw-semibold"{% endif %}>{{ name }}</td>
         <td class="text-end text-nowrap{% if nivel == 0 %} fw-semibold{% endif %}">{{ valor|moeda }}</td>
         <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio valor total 100 %}%</td>
       </tr>

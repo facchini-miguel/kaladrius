@@ -65,11 +65,11 @@ class Command(BaseCommand):
     def handle(self, *args, confirmar=False, **options):
         if not confirmar:
             raise CommandError("Nada foi apagado: rode de novo com --confirm.")
-        nomes = [dados["nome"] for dados in CLINICAS] + CLINICAS_ANTIGAS
+        nomes = [dados["name"] for dados in CLINICAS] + CLINICAS_ANTIGAS
         usernames = [u[0] for dados in CLINICAS for u in dados["usuarios"]] + USUARIOS_ANTIGOS
 
         with transaction.atomic(), sem_isolamento():
-            clinicas = list(Clinic.objects.filter(nome__in=nomes))
+            clinicas = list(Clinic.objects.filter(name__in=nomes))
             # Only users that work solely in the test clinics, never a platform account.
             usuarios = list(
                 get_user_model()
@@ -140,13 +140,13 @@ class Command(BaseCommand):
             AccessAttempt.objects.filter(username__in=nomes_usuarios).delete()
             registrar(
                 AuditEntry.Acao.EXCLUIR,
-                descricao=(
+                description=(
                     f"Dados de teste removidos: {len(clinicas)} clínicas, {pacientes} pacientes, "
                     f"{len(usuarios)} usuários"
                 ),
             )
 
         self.stdout.write(self.style.SUCCESS("Dados de teste removidos."))
-        self.stdout.write(f"Clínicas: {', '.join(c.nome for c in clinicas) or 'nenhuma'}")
+        self.stdout.write(f"Clínicas: {', '.join(c.name for c in clinicas) or 'nenhuma'}")
         self.stdout.write(f"Pacientes fictícios: {pacientes}")
         self.stdout.write(f"Usuários: {', '.join(nomes_usuarios) or 'nenhum'}")

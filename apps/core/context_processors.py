@@ -38,9 +38,7 @@ def idiomas(request):
     get_available_languages would translate the names into the current language."""
     atual = translation.get_language()
     # A country's English (en-gb, en-au... decision 117) is still "English" in the menu.
-    base = next(
-        (codigo for codigo, _nome in settings.LANGUAGES if atual.split("-")[0] == codigo), atual
-    )
+    base = next((code for code, _nome in settings.LANGUAGES if atual.split("-")[0] == code), atual)
     return {
         "idiomas": settings.LANGUAGES,
         "idioma_base": base,

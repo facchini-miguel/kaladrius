@@ -5,9 +5,9 @@ from .models import Employee, Payroll
 
 @admin.register(Employee)
 class FuncionarioAdmin(admin.ModelAdmin):
-    list_display = ["nome", "cargo", "admissao", "ativo", "clinic"]
-    list_filter = ["clinic", "ativo"]
-    search_fields = ["nome", "cargo"]
+    list_display = ["name", "cargo", "admissao", "active", "clinic"]
+    list_filter = ["clinic", "active"]
+    search_fields = ["name", "cargo"]
 
 
 @admin.register(Payroll)

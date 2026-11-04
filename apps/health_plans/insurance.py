@@ -25,27 +25,27 @@ from apps.core import countries
 class Codigo:
     """A local code: its name and, where it has a fixed format, the pattern and an example."""
 
-    nome: str
+    name: str
     padrao: str = ""  # regular expression for the whole code, letters in upper case
     exemplo: str = ""
 
     def limpar(self, valor):
         """The code without spaces, dots or dashes, in upper case; ValidationError if it does
         not follow the format."""
-        codigo = re.sub(r"[\s.\-/]", "", valor or "").upper()
-        if codigo and self.padrao and not re.fullmatch(self.padrao, codigo):
+        code = re.sub(r"[\s.\-/]", "", valor or "").upper()
+        if code and self.padrao and not re.fullmatch(self.padrao, code):
             raise ValidationError(
                 _("%(nome)s: formato inválido. Exemplo: %(exemplo)s.")
-                % {"nome": self.nome, "exemplo": self.exemplo}
+                % {"nome": self.name, "exemplo": self.exemplo}
             )
-        return codigo
+        return code
 
 
 @dataclass(frozen=True)
 class Seguros:
     tipos: str = ""  # the local kinds of plan, as examples for the plan's name
     registro: Codigo | None = None  # the insurer's registry
-    numero: str = ""  # local name of the card number
+    number: str = ""  # local name of the card number
     grupo: str = ""  # local name of the group or policy number, where cards have one
     beneficiario: str = ""  # local name of the patient's code on a family card
     procedimento: Codigo | None = None  # the procedure coding
@@ -56,11 +56,11 @@ SEGUROS = {
         registro=Codigo("ANS", r"\d{6}", "123456"),
         procedimento=Codigo("TUSS", r"\d{8}", "81000065"),
     ),
-    "MX": Seguros("aseguradoras de gastos médicos, planes dentales", numero="número de póliza"),
+    "MX": Seguros("aseguradoras de gastos médicos, planes dentales", number="número de póliza"),
     "AR": Seguros(
         "obras sociales, prepagas, PAMI",
         registro=Codigo("RNOS"),
-        numero="número de afiliado",
+        number="número de afiliado",
         procedimento=Codigo("nomenclador"),
     ),
     "CL": Seguros("Fonasa, Isapres, seguros dentales", procedimento=Codigo("Fonasa")),
@@ -76,27 +76,27 @@ SEGUROS = {
     "US": Seguros(
         "dental insurance carriers (PPO, DHMO), Medicaid",
         registro=Codigo("Payer ID", r"[0-9A-Z]{5,10}", "12345"),
-        numero="Member ID",
+        number="Member ID",
         grupo="Group number",
         procedimento=Codigo("CDT", r"D\d{4}", "D1110"),
     ),
-    "GB": Seguros("NHS, dental plans, private insurance", numero="membership number"),
+    "GB": Seguros("NHS, dental plans, private insurance", number="membership number"),
     "CA": Seguros(
         "insurance carriers, Canadian Dental Care Plan (CDCP)",
-        numero="certificate / ID number",
+        number="certificate / ID number",
         grupo="group / policy number",
         procedimento=Codigo("USC&LS", r"\d{5}", "11101"),
     ),
     "AU": Seguros(
         "private health funds, Child Dental Benefits Schedule (Medicare)",
-        numero="membership number",
+        number="membership number",
         beneficiario="patient number on the card",
         procedimento=Codigo("ADA item number", r"\d{3}", "114"),
     ),
     "ZA": Seguros(
         "medical aid schemes",
         registro=Codigo("CMS"),
-        numero="membership number",
+        number="membership number",
         beneficiario="dependant code",
         procedimento=Codigo("tariff code", r"\d{4}", "8101"),
     ),
@@ -115,10 +115,10 @@ def com_nome_local(rotulo, local):
 def rotulo_do_registro(pais=None):
     """ "Registro da operadora (ANS)", or "" where the country has no insurer registry."""
     registro = do_pais(pais).registro
-    return com_nome_local(_("Registro da operadora"), registro.nome) if registro else ""
+    return com_nome_local(_("Registro da operadora"), registro.name) if registro else ""
 
 
 def rotulo_do_codigo(pais=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
     procedimento = do_pais(pais).procedimento
-    return com_nome_local(_("Código"), procedimento.nome if procedimento else "")
+    return com_nome_local(_("Código"), procedimento.name if procedimento else "")

@@ -26,12 +26,12 @@
     <tbody>
       {% for practitioner in profissionais %}
       <tr>
-        <td>{{ practitioner.nome }}</td>
+        <td>{{ practitioner.name }}</td>
         <td>{{ practitioner.registro|default:"—" }}</td>
         <td><span class="amostra-cor" style="background-color: {{ practitioner.cor }}" title="{{ practitioner.cor }}"></span></td>
         <td>{{ practitioner.user.username|default:"—" }}</td>
         <td>
-          {% if practitioner.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if practitioner.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">

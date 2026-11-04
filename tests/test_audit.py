@@ -25,23 +25,23 @@ def ultimos(**filtros):
 
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
-    admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
+    admin_a.post(reverse("patients:new"), {"tipo": "PF", "name": "Maria", "active": "on"})
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Maria")
+        patient = Patient.objects.get(name="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
     assert criacao.usuario_nome == "admin_a"
     assert criacao.clinic_id == clinica_a.pk
     assert criacao.objeto_id == str(patient.pk)
-    assert criacao.alteracoes["nome"] == [None, "Maria"]
+    assert criacao.alteracoes["name"] == [None, "Maria"]
     assert criacao.ip == "127.0.0.1"
 
     admin_a.post(
         reverse("patients:edit", args=[patient.pk]),
-        {"tipo": "PF", "nome": "Maria Souza", "ativo": "on", "profissao": "Professora"},
+        {"tipo": "PF", "name": "Maria Souza", "active": "on", "profissao": "Professora"},
     )
     [alteracao] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")
     assert alteracao.alteracoes == {
-        "nome": ["Maria", "Maria Souza"],
+        "name": ["Maria", "Maria Souza"],
         "profissao": ["", "Professora"],
     }
 
@@ -53,10 +53,10 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
 def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
     admin_a.post(
         reverse("patients:new"),
-        {"tipo": "PF", "nome": "Maria Sigilosa", "ativo": "on", "cpf_cnpj": "52998224725"},
+        {"tipo": "PF", "name": "Maria Sigilosa", "active": "on", "cpf_cnpj": "52998224725"},
     )
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Maria Sigilosa")
+        patient = Patient.objects.get(name="Maria Sigilosa")
     admin_a.get(reverse("patients:record", args=[patient.pk]))
     admin_a.post(reverse("patients:archive", args=[patient.pk]))
     admin_a.post(reverse("patients:delete", args=[patient.pk]))
@@ -67,7 +67,7 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     assert "Sigilosa" not in texto and "52998224725" not in texto
     assert "admin_a" in texto  # who did it stays
     criacao = next(r for r in registros if r.acao == Acao.CRIAR)
-    assert criacao.alteracoes["nome"] == ["(removido)", "(removido)"]
+    assert criacao.alteracoes["name"] == ["(removido)", "(removido)"]
     assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
     pagina = admin_a.get(reverse("audit:list")).content.decode()
@@ -76,14 +76,14 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Sem mudança")
+        patient = Patient.objects.create(name="Sem mudança")
         patient.save()
     assert not ultimos(acao=Acao.ALTERAR, modelo="Paciente")
 
 
 def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Consultado")
+        patient = Patient.objects.create(name="Consultado")
     admin_a.get(reverse("patients:record", args=[patient.pk]))
     [visualizacao] = ultimos(acao=Acao.VISUALIZAR)
     assert visualizacao.objeto_descricao == "Consultado"
@@ -115,9 +115,9 @@ def test_senha_nunca_e_gravada(criar_usuario):
 
 def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
     with usar_clinica(clinica_a):
-        Patient.objects.create(nome="Paciente da A")
+        Patient.objects.create(name="Paciente da A")
     with usar_clinica(clinica_b):
-        Patient.objects.create(nome="Paciente da B")
+        Patient.objects.create(name="Paciente da B")
     conteudo = admin_a.get(reverse("audit:list"), {"modelo": "Paciente"}).content.decode()
     assert "Paciente da A" in conteudo
     assert "Paciente da B" not in conteudo
@@ -166,7 +166,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
     field (or its column-keeping rename) does not change what the clinic reads."""
     from apps.audit.models import AuditEntry
 
-    admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
+    admin_a.post(reverse("patients:new"), {"tipo": "PF", "name": "Maria", "active": "on"})
     AuditEntry.objects.create(
         clinic=clinica_a,
         acao=Acao.ALTERAR,

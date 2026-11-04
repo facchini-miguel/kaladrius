@@ -39,7 +39,7 @@ def endereco_bloqueado(request):
 
 
 def ativa_para(user):
-    return TwoFactor.objects.filter(user=user, ativa=True).exists()
+    return TwoFactor.objects.filter(user=user, active=True).exists()
 
 
 def obrigatoria(request):
@@ -61,7 +61,7 @@ def preparar(user, novo=False):
     dispositivo, criado = TwoFactor.objects.get_or_create(
         user=user, defaults={"segredo": pyotp.random_base32()}
     )
-    if novo and not criado and not dispositivo.ativa:
+    if novo and not criado and not dispositivo.active:
         dispositivo.segredo = pyotp.random_base32()
         dispositivo.save(update_fields=["segredo"])
     return dispositivo
@@ -82,16 +82,16 @@ def segredo_em_grupos(segredo):
     return " ".join(segredo[i : i + 4] for i in range(0, len(segredo), 4))
 
 
-def verificar_app(dispositivo, codigo):
+def verificar_app(dispositivo, code):
     """A 6-digit code from the app, accepting the step before and after (clock drift)."""
-    codigo = re.sub(r"\D", "", codigo or "")
-    if len(codigo) != 6:
+    code = re.sub(r"\D", "", code or "")
+    if len(code) != 6:
         return False
     totp = pyotp.TOTP(dispositivo.segredo)
     agora = int(timezone.now().timestamp() // totp.interval)
     for passo in (agora - 1, agora, agora + 1):
         if passo > dispositivo.ultimo_passo and hmac.compare_digest(
-            totp.at(passo * totp.interval), codigo
+            totp.at(passo * totp.interval), code
         ):
             dispositivo.ultimo_passo = passo
             dispositivo.save(update_fields=["ultimo_passo"])
@@ -99,8 +99,8 @@ def verificar_app(dispositivo, codigo):
     return False
 
 
-def _resumo(codigo):
-    limpo = re.sub(r"[^A-Z0-9]", "", (codigo or "").upper())
+def _resumo(code):
+    limpo = re.sub(r"[^A-Z0-9]", "", (code or "").upper())
     return hmac.new(settings.SECRET_KEY.encode(), limpo.encode(), hashlib.sha256).hexdigest()
 
 
@@ -116,9 +116,9 @@ def novos_codigos(user):
     return codigos
 
 
-def verificar_recuperacao(user, codigo):
+def verificar_recuperacao(user, code):
     restante = RecoveryCode.objects.filter(
-        user=user, resumo=_resumo(codigo), usado_em__isnull=True
+        user=user, resumo=_resumo(code), usado_em__isnull=True
     ).first()
     if restante is None:
         return False
@@ -127,19 +127,19 @@ def verificar_recuperacao(user, codigo):
     return True
 
 
-def verificar(user, codigo):
+def verificar(user, code):
     """The app's code or an unused recovery code."""
-    dispositivo = TwoFactor.objects.filter(user=user, ativa=True).first()
+    dispositivo = TwoFactor.objects.filter(user=user, active=True).first()
     if dispositivo is None:
         return False
-    return verificar_app(dispositivo, codigo) or verificar_recuperacao(user, codigo)
+    return verificar_app(dispositivo, code) or verificar_recuperacao(user, code)
 
 
 @transaction.atomic
 def ativar(dispositivo):
-    dispositivo.ativa = True
+    dispositivo.active = True
     dispositivo.ativada_em = timezone.now()
-    dispositivo.save(update_fields=["ativa", "ativada_em"])
+    dispositivo.save(update_fields=["active", "ativada_em"])
     return novos_codigos(dispositivo.user)
 
 

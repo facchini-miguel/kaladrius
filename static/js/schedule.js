@@ -105,9 +105,9 @@
       if (config.pode.alterar) abrirModal(info.event.extendedProps.url);
     },
     eventDidMount(info) {
-      const { tipo, descricao, situacao, situacao_nome } = info.event.extendedProps;
+      const { tipo, description, situacao, situacao_nome } = info.event.extendedProps;
       const marcada = situacao && situacao !== "agendado" ? situacao_nome : "";
-      info.el.title = [tipo, marcada, descricao].filter(Boolean).join(" · ");
+      info.el.title = [tipo, marcada, description].filter(Boolean).join(" · ");
     },
   });
   calendario.render();

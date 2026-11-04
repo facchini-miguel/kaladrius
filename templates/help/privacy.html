@@ -9,10 +9,10 @@
     <div class="card-body">
       <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
       {% if clinic %}
-      <div class="fs-5 fw-semibold">{{ clinic.nome }}</div>
+      <div class="fs-5 fw-semibold">{{ clinic.name }}</div>
       {% if clinic.documento %}<div class="small">{{ clinic.sigla_documento }}: {{ clinic.documento_escrito }}</div>{% endif %}
       {% if clinic.email %}<div><a href="mailto:{{ clinic.email }}">{{ clinic.email }}</a></div>{% endif %}
-      {% if clinic.telefone %}<div>{{ clinic.telefone }}</div>{% endif %}
+      {% if clinic.phone %}<div>{{ clinic.phone }}</div>{% endif %}
       {% if clinic.endereco %}<div class="small">{{ clinic.endereco }}</div>{% endif %}
       {% else %}
       <div>{% translate "Fale com a clínica que atende você." %}</div>

@@ -48,8 +48,8 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Membership
-        fields = ["papel", "ativo"]
-        labels = {"ativo": _("Acesso a esta clínica liberado")}
+        fields = ["papel", "active"]
+        labels = {"active": _("Acesso a esta clínica liberado")}
 
     def __init__(self, *args, editor, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,14 +62,14 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        era_admin_ativo = self.initial.get("papel") == Papel.ADMIN and self.initial.get("ativo")
-        continua_admin = dados.get("papel") == Papel.ADMIN and dados.get("ativo")
+        era_admin_ativo = self.initial.get("papel") == Papel.ADMIN and self.initial.get("active")
+        continua_admin = dados.get("papel") == Papel.ADMIN and dados.get("active")
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Membership.objects.filter(
                 clinic_id=self.instance.clinic_id,
                 papel=Papel.ADMIN,
-                ativo=True,
+                active=True,
                 user__is_active=True,
             ).exclude(pk=self.instance.pk)
             if not outros.exists():

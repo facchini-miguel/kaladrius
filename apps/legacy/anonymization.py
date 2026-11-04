@@ -125,12 +125,12 @@ class _Anonimizador:
         # under the unique constraint.
         Patient.objects.filter(clinic=self.clinic).update(cpf_cnpj="")
         usados = set()
-        for numero, p in enumerate(pacientes, start=1):
+        for number, p in enumerate(pacientes, start=1):
             if p.tipo == Patient.Tipo.JURIDICA:
-                p.nome = fake.company()[:200]
-                p.razao_social = f"{p.nome} Ltda."[:200] if p.razao_social else ""
+                p.name = fake.company()[:200]
+                p.razao_social = f"{p.name} Ltda."[:200] if p.razao_social else ""
             else:
-                p.nome = self._nome(p.sexo)
+                p.name = self._nome(p.sexo)
             p.cpf_cnpj = self._documento(p, usados)
             p.rg = fake.numerify("#" * min(len(p.rg), 10)) if p.rg else ""
             p.inscricao_estadual = fake.numerify("#########") if p.inscricao_estadual else ""
@@ -142,15 +142,15 @@ class _Anonimizador:
             mesmo_numero = p.whatsapp and p.whatsapp == p.telefone_celular
             p.telefone_celular = _mesmo_tamanho(p.telefone_celular, fake)
             p.whatsapp = p.telefone_celular if mesmo_numero else _mesmo_tamanho(p.whatsapp, fake)
-            p.email = f"paciente{numero}@example.com" if p.email else ""
+            p.email = f"paciente{number}@example.com" if p.email else ""
             p.cep = (p.cep[:2] + fake.numerify("######")) if p.cep else ""
             p.bairro = fake.bairro()[:100] if p.bairro else ""
             p.logradouro = fake.street_name()[:200] if p.logradouro else ""
-            p.numero = fake.building_number()[:10] if p.numero else ""
+            p.number = fake.building_number()[:10] if p.number else ""
             p.complemento = f"Apto {fake.random_int(1, 999)}" if p.complemento else ""
-            p.observacoes = self.sorte.choice(OBSERVACOES) if p.observacoes else ""
+            p.notes = self.sorte.choice(OBSERVACOES) if p.notes else ""
         campos = [
-            "nome",
+            "name",
             "razao_social",
             "cpf_cnpj",
             "rg",
@@ -166,38 +166,38 @@ class _Anonimizador:
             "cep",
             "bairro",
             "logradouro",
-            "numero",
+            "number",
             "complemento",
-            "observacoes",
+            "notes",
         ]
         Patient.objects.bulk_update(pacientes, campos, batch_size=500)
         self.resultado.pacientes = len(pacientes)
-        return [p.nome for p in pacientes if p.tipo == Patient.Tipo.FISICA]
+        return [p.name for p in pacientes if p.tipo == Patient.Tipo.FISICA]
 
     def agendamentos(self, nomes):
         agendamentos = list(Appointment.objects.filter(clinic=self.clinic).select_related("tipo"))
         for agendamento in agendamentos:
             # Blocked slots ("Ocupado") hold no personal data; the rest named the patient
             # and the procedure in free text.
-            if agendamento.descricao and agendamento.descricao != agendamento.tipo.nome:
-                nome = self.sorte.choice(nomes) if nomes else self._nome(self.sorte.choice("FM"))
-                agendamento.descricao = f"{nome} - {agendamento.tipo.nome}"
-        Appointment.objects.bulk_update(agendamentos, ["descricao"], batch_size=1000)
+            if agendamento.description and agendamento.description != agendamento.tipo.name:
+                name = self.sorte.choice(nomes) if nomes else self._nome(self.sorte.choice("FM"))
+                agendamento.description = f"{name} - {agendamento.tipo.name}"
+        Appointment.objects.bulk_update(agendamentos, ["description"], batch_size=1000)
         self.resultado.agendamentos = len(agendamentos)
 
     def carteirinhas(self):
         """Card numbers and the plan holder's name identify a person; the plan stays."""
         carteirinhas = list(MemberCard.objects.filter(clinic=self.clinic))
         for carteirinha in carteirinhas:
-            carteirinha.numero = f"{carteirinha.pk:012d}"
+            carteirinha.number = f"{carteirinha.pk:012d}"
             carteirinha.titular = self._nome(self.sorte.choice("FM")) if carteirinha.titular else ""
-        MemberCard.objects.bulk_update(carteirinhas, ["numero", "titular"], batch_size=500)
+        MemberCard.objects.bulk_update(carteirinhas, ["number", "titular"], batch_size=500)
 
     def rechamadas(self):
         rechamadas = list(Recall.objects.filter(clinic=self.clinic))
         for rechamada in rechamadas:
-            rechamada.descricao = self.sorte.choice(RECHAMADAS)
-        Recall.objects.bulk_update(rechamadas, ["descricao"])
+            rechamada.description = self.sorte.choice(RECHAMADAS)
+        Recall.objects.bulk_update(rechamadas, ["description"])
         self.resultado.rechamadas = len(rechamadas)
 
     def profissionais(self):
@@ -205,10 +205,10 @@ class _Anonimizador:
         for practitioner in profissionais:
             sexo = self.sorte.choice("FM")
             titulo = "Dra." if sexo == "F" else "Dr."
-            practitioner.nome = f"{titulo} {self._nome(sexo)}"
+            practitioner.name = f"{titulo} {self._nome(sexo)}"
             if practitioner.registro:
                 practitioner.registro = f"CRO {self.fake.numerify('#####')}"
-        Practitioner.objects.bulk_update(profissionais, ["nome", "registro"])
+        Practitioner.objects.bulk_update(profissionais, ["name", "registro"])
         self.resultado.profissionais = len(profissionais)
 
     def funcionarios(self):
@@ -217,37 +217,37 @@ class _Anonimizador:
         fake = self.fake
         funcionarios = list(Employee.objects.filter(clinic=self.clinic))
         for funcionario in funcionarios:
-            funcionario.nome = self._nome(self.sorte.choice("FM"))
+            funcionario.name = self._nome(self.sorte.choice("FM"))
             funcionario.cpf = ""
-            funcionario.telefone = _mesmo_tamanho(funcionario.telefone, fake)
-            funcionario.observacoes = ""
+            funcionario.phone = _mesmo_tamanho(funcionario.phone, fake)
+            funcionario.notes = ""
         Employee.objects.bulk_update(
-            funcionarios, ["nome", "cpf", "telefone", "observacoes"], batch_size=500
+            funcionarios, ["name", "cpf", "phone", "notes"], batch_size=500
         )
-        Payroll.objects.filter(clinic=self.clinic).update(observacao="")
+        Payroll.objects.filter(clinic=self.clinic).update(note="")
         for folha in (
             Payroll.objects.filter(clinic=self.clinic)
             .exclude(lancamento=None)
             .select_related("funcionario", "lancamento")
         ):
-            Entry.objects.filter(pk=folha.lancamento_id).update(pessoa=folha.funcionario.nome)
+            Entry.objects.filter(pk=folha.lancamento_id).update(pessoa=folha.funcionario.name)
 
     def fornecedores(self):
         """A supplier who is a person is personal data; any supplier's contacts may be."""
         fake = self.fake
         fornecedores = list(Supplier.objects.filter(clinic=self.clinic))
-        for numero, f in enumerate(fornecedores, start=1):
+        for number, f in enumerate(fornecedores, start=1):
             if f.tipo == Supplier.Tipo.FISICA:
-                f.nome = self._nome(self.sorte.choice("FM"))
+                f.name = self._nome(self.sorte.choice("FM"))
                 f.razao_social = ""
                 f.cpf_cnpj = ""
-            f.telefone = _mesmo_tamanho(f.telefone, fake)
+            f.phone = _mesmo_tamanho(f.phone, fake)
             f.whatsapp = _mesmo_tamanho(f.whatsapp, fake)
-            f.email = f"fornecedor{numero}@example.com" if f.email else ""
-            f.observacoes = ""
+            f.email = f"fornecedor{number}@example.com" if f.email else ""
+            f.notes = ""
         Supplier.objects.bulk_update(
             fornecedores,
-            ["nome", "razao_social", "cpf_cnpj", "telefone", "whatsapp", "email", "observacoes"],
+            ["name", "razao_social", "cpf_cnpj", "phone", "whatsapp", "email", "notes"],
             batch_size=500,
         )
 
@@ -257,21 +257,19 @@ class _Anonimizador:
             Entry.objects.filter(clinic=self.clinic).select_related("categoria", "fornecedor")
         )
         for lancamento in lancamentos:
-            lancamento.descricao = lancamento.categoria.nome
+            lancamento.description = lancamento.categoria.name
             if lancamento.fornecedor_id:
-                lancamento.pessoa = lancamento.fornecedor.nome
+                lancamento.pessoa = lancamento.fornecedor.name
             else:
                 lancamento.pessoa = self._nome(self.sorte.choice("FM")) if lancamento.pessoa else ""
-            lancamento.observacoes = ""
-        Entry.objects.bulk_update(
-            lancamentos, ["descricao", "pessoa", "observacoes"], batch_size=500
-        )
-        Payment.objects.filter(clinic=self.clinic).update(observacao="", cartao_codigo="")
-        CashRegister.objects.filter(clinic=self.clinic).update(observacao="")
-        Estimate.objects.filter(clinic=self.clinic).update(observacoes="")
+            lancamento.notes = ""
+        Entry.objects.bulk_update(lancamentos, ["description", "pessoa", "notes"], batch_size=500)
+        Payment.objects.filter(clinic=self.clinic).update(note="", cartao_codigo="")
+        CashRegister.objects.filter(clinic=self.clinic).update(note="")
+        Estimate.objects.filter(clinic=self.clinic).update(notes="")
         CashMovement.objects.filter(clinic=self.clinic).update(motivo="-")
         # Bank lines name who paid (Pix): keep only the bank's transaction type.
-        BankTransaction.objects.filter(clinic=self.clinic).update(descricao=F("tipo"), motivo="")
+        BankTransaction.objects.filter(clinic=self.clinic).update(description=F("tipo"), motivo="")
 
     def auditoria(self):
         """Entries about these records held the original values: they go."""
@@ -314,7 +312,7 @@ class _Anonimizador:
             registrar(
                 AuditEntry.Acao.ALTERAR,
                 clinic=self.clinic,
-                descricao=(
+                description=(
                     f"Dados anonimizados: {r.pacientes} pacientes, {r.agendamentos} agendamentos, "
                     f"{r.rechamadas} rechamadas, {r.profissionais} profissionais"
                 ),
@@ -324,7 +322,7 @@ class _Anonimizador:
 
 def anonymize_clinic(nome_clinica, hoje=None):
     with sem_isolamento():
-        clinic = Clinic.objects.filter(nome=nome_clinica).first()
+        clinic = Clinic.objects.filter(name=nome_clinica).first()
     if clinic is None:
         raise ClinicaNaoEncontrada(f"Clínica “{nome_clinica}” não encontrada.")
     return _Anonimizador(clinic, hoje or timezone.localdate()).executar()

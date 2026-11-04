@@ -15,7 +15,7 @@
   {% with campo=form.pessoa %}{% include "includes/field.html" %}{% endwith %}
   <p class="text-body-secondary small"><a href="{% url 'finance:supplier_new' %}">{% translate "Cadastrar um fornecedor novo" %}</a></p>
   <div class="row">
-    <div class="col-md-{% if form.centro_custo %}8{% else %}12{% endif %}">{% with campo=form.descricao %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-{% if form.centro_custo %}8{% else %}12{% endif %}">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
     {% if form.centro_custo %}<div class="col-md-4">{% with campo=form.centro_custo %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
   </div>
   <div class="row">
@@ -25,7 +25,7 @@
     <div class="col-md-6">{% with campo=form.primeiro_vencimento %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
   <p class="text-body-secondary small">{% translate "Exemplo: aluguel de 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. Compra de 900 em 3 vezes → valor 900, “o total”, 3." %}</p>
-  {% with campo=form.observacoes %}{% include "includes/field.html" %}{% endwith %}
+  {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
   <div class="card mb-3">
     <div class="card-body">
       {% with campo=form.pago_agora %}{% include "includes/field.html" %}{% endwith %}

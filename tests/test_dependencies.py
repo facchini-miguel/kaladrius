@@ -13,8 +13,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 PINO = re.compile(r"^([A-Za-z0-9._-]+)(?:\[[^\]]*\])?==([^\s\\;]+)")
 
 
-def _nome(nome):
-    return re.sub(r"[-_.]+", "-", nome).lower()
+def _nome(name):
+    return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def _escolhidas(arquivo):
@@ -35,7 +35,7 @@ def _lock(arquivo):
             pacotes[atual] = (m[2], [])
         elif atual and (h := re.search(r"--hash=(\S+)", linha)):
             pacotes[atual][1].append(h[1])
-    return {nome: (versao, sorted(hashes)) for nome, (versao, hashes) in pacotes.items()}
+    return {name: (versao, sorted(hashes)) for name, (versao, hashes) in pacotes.items()}
 
 
 @pytest.mark.parametrize(
@@ -50,10 +50,10 @@ def test_lock_tem_as_versoes_do_in(entrada, lock):
     pacotes = _lock(lock)
     escolhidas = _escolhidas(entrada)
     assert escolhidas
-    for nome, versao in escolhidas.items():
-        assert nome in pacotes, f"{nome} not in {lock}: run deploy/lock.sh"
-        no_lock = pacotes[nome][0]
-        assert no_lock == versao, f"{nome}: {entrada} has {versao}, {lock} has {no_lock}"
+    for name, versao in escolhidas.items():
+        assert name in pacotes, f"{name} not in {lock}: run deploy/lock.sh"
+        no_lock = pacotes[name][0]
+        assert no_lock == versao, f"{name}: {entrada} has {versao}, {lock} has {no_lock}"
     assert all(hashes for _, hashes in pacotes.values()), f"{lock} has a package without a hash"
 
 
@@ -61,7 +61,7 @@ def test_locks_de_producao_e_de_desenvolvimento_concordam():
     producao = _lock("requirements.txt")
     desenvolvimento = _lock("requirements-dev.txt")
     assert producao.keys() <= desenvolvimento.keys(), "production packages missing in the dev lock"
-    diferentes = [nome for nome, pino in producao.items() if desenvolvimento[nome] != pino]
+    diferentes = [name for name, pino in producao.items() if desenvolvimento[name] != pino]
     assert not diferentes, f"version or hashes differ between the locks: {diferentes}"
 
 

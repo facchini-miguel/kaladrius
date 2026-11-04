@@ -31,18 +31,18 @@
       <tbody>
         {% for folha, form in linhas %}
         <tr>
-          <td><a href="{% url 'staff:employee' folha.funcionario_id %}">{{ folha.funcionario.nome }}</a></td>
+          <td><a href="{% url 'staff:employee' folha.funcionario_id %}">{{ folha.funcionario.name }}</a></td>
           <td class="text-end text-nowrap">{{ folha.salario|moeda }}</td>
           {% if form %}
           <td>{{ form.horas_extras }}{% for erro in form.horas_extras.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
           <td>{{ form.valor_hora_extra }}{% for erro in form.valor_hora_extra.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
           <td>{{ form.faltas }}{% for erro in form.faltas.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
-          <td>{{ form.observacao }}</td>
+          <td>{{ form.note }}</td>
           {% else %}
           <td>{{ folha.horas_extras }}</td>
           <td class="text-nowrap">{{ folha.valor_hora_extra|moeda }}</td>
           <td>{{ folha.faltas }}</td>
-          <td>{{ folha.observacao|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
         </tr>

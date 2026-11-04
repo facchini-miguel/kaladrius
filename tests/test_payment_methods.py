@@ -37,7 +37,7 @@ def test_nomes_locais_entre_parenteses():
         assert payment_methods.rotulo("carteira", "PE") == "Carteira digital (Yape, Plin)"
         assert payment_methods.rotulo("transferencia", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
-        assert [codigo for codigo, _nome in payment_methods.em_uso("BR")] == [
+        assert [code for code, _nome in payment_methods.em_uso("BR")] == [
             "dinheiro",
             "pix",
             "debito",

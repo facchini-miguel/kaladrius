@@ -40,7 +40,7 @@ def test_cria_as_duas_contas_com_os_perfis(demonstracao):
     assert Membership.objects.get(user=recepcao).papel == Papel.RECEPCAO
     assert Membership.objects.get(user=practitioner).papel == Papel.PROFISSIONAL
     with usar_clinica(demonstracao["clinic"]):
-        assert Practitioner.objects.get(nome="Dr. Bruno").user == practitioner
+        assert Practitioner.objects.get(name="Dr. Bruno").user == practitioner
     # Running again resets the passwords and keeps one link per clinic.
     call_command(
         "demo_accounts",
@@ -65,7 +65,7 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
             senha_profissional="x-1",
         )
     with usar_clinica(clinica_a):
-        Practitioner.objects.create(nome="Dra. Ana", user=criar_usuario("dra.ana"))
+        Practitioner.objects.create(name="Dra. Ana", user=criar_usuario("dra.ana"))
     with pytest.raises(CommandError, match="outro usuário"):
         call_command("demo_accounts", clinic="Clínica A", practitioner="Dra. Ana", **SENHAS)
 
@@ -89,7 +89,7 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
         **SENHAS,
     )
     with usar_clinica(clinica_a):
-        demo = Practitioner.objects.get(nome="Dra. Demo")
+        demo = Practitioner.objects.get(name="Dra. Demo")
     assert demo.user.username == "demo.profissional"
 
 
@@ -114,7 +114,7 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
     with usar_clinica(demonstracao["clinic"]):
         from apps.patients.models import Patient
 
-        patient = Patient.objects.create(nome="Maria Paciente")
+        patient = Patient.objects.create(name="Maria Paciente")
     cliente.post(reverse("medical_records:new", args=[patient.pk]), ANAMNESE)
     with usar_clinica(demonstracao["clinic"]):
         atendimento = Visit.objects.get()

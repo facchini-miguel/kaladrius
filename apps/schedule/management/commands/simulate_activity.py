@@ -64,7 +64,7 @@ class Command(BaseCommand):
             )
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), sem_isolamento():
-            alvo = Clinic.objects.filter(nome=clinic).first()
+            alvo = Clinic.objects.filter(name=clinic).first()
             if alvo is None:
                 raise CommandError(f"Clínica “{clinic}” não encontrada.")
             agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)

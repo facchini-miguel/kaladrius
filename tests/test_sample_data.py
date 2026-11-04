@@ -29,7 +29,7 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     assert set(Membership.objects.values_list("papel", flat=True)) == set(Papel)
     with sem_isolamento():
         assert Practitioner.objects.count() == 5
-        assert Practitioner.objects.get(nome="Dra. Ana Souza").user.username == "dra.ana"
+        assert Practitioner.objects.get(name="Dra. Ana Souza").user.username == "dra.ana"
         assert Patient.objects.count() == 30  # not duplicated on the 2nd run
         assert Patient.objects.filter(tipo=Patient.Tipo.JURIDICA).count() == 1
         for patient in Patient.objects.exclude(cpf_cnpj=""):
@@ -54,22 +54,22 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     call_command("seed_sample_data", pacientes=5)
-    real = Clinic.objects.create(nome="Clínica Real")
+    real = Clinic.objects.create(name="Clínica Real")
     criar_usuario("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
     Membership.objects.create(user=get_user_model().objects.get(username="dra.ana"), clinic=real)
     with sem_isolamento():
-        Patient.objects.create(clinic=real, nome="Paciente Real")
+        Patient.objects.create(clinic=real, name="Paciente Real")
 
     with pytest.raises(CommandError):
         call_command("remove_sample_data")
     call_command("remove_sample_data", confirmar=True)
 
-    assert list(Clinic.objects.values_list("nome", flat=True)) == ["Clínica Real"]
+    assert list(Clinic.objects.values_list("name", flat=True)) == ["Clínica Real"]
     restantes = set(get_user_model().objects.values_list("username", flat=True))
     assert restantes == {"pessoa.real", "dra.ana"}
     with sem_isolamento():
-        assert list(Patient.objects.values_list("nome", flat=True)) == ["Paciente Real"]
+        assert list(Patient.objects.values_list("name", flat=True)) == ["Paciente Real"]
         assert not Appointment.objects.exists() and not Recall.objects.exists()
         assert set(Practitioner.objects.values_list("clinic", flat=True)) <= {real.pk}
     assert not AuditEntry.objects.filter(objeto_descricao__contains="(teste)").exists()

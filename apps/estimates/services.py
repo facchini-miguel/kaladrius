@@ -26,7 +26,7 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagame
         tipo=Entry.Tipo.RECEBER,
         patient=orcamento.patient,
         practitioner=orcamento.practitioner,
-        descricao=_("Orçamento nº %(numero)s") % {"numero": orcamento.pk},
+        description=_("Orçamento nº %(numero)s") % {"numero": orcamento.pk},
         categoria=categoria,
         valor_total=total,
         parcelas=parcelas,
@@ -34,7 +34,7 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagame
         user=user,
     )
     if pagamento:
-        primeira = lancamento.parcelas.order_by("numero").first()
+        primeira = lancamento.parcelas.order_by("number").first()
         financeiro.receber(primeira, user=user, valor=primeira.valor, **pagamento)
     orcamento.situacao = Estimate.Situacao.APROVADO
     orcamento.lancamento = lancamento

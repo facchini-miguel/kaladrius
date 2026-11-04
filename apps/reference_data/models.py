@@ -11,9 +11,9 @@ from apps.core.ordering import ALFABETICA
 
 
 class State(models.Model):
-    codigo = models.PositiveSmallIntegerField(_("código IBGE"), primary_key=True)
+    code = models.PositiveSmallIntegerField(_("código IBGE"), primary_key=True, db_column="codigo")
     sigla = models.CharField(_("sigla"), max_length=2, unique=True)
-    nome = models.CharField(_("nome"), max_length=50)
+    name = models.CharField(_("nome"), max_length=50, db_column="nome")
     regiao = models.CharField(_("região"), max_length=20)
 
     class Meta:
@@ -27,8 +27,8 @@ class State(models.Model):
 
 
 class City(models.Model):
-    codigo = models.PositiveIntegerField(_("código IBGE"), primary_key=True)
-    nome = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA)
+    code = models.PositiveIntegerField(_("código IBGE"), primary_key=True, db_column="codigo")
+    name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
     uf = models.ForeignKey(
         State, on_delete=models.PROTECT, related_name="cidades", verbose_name=_("UF")
     )
@@ -37,43 +37,47 @@ class City(models.Model):
         db_table = "referencias_cidade"
         verbose_name = _("cidade")
         verbose_name_plural = _("cidades")
-        ordering = ["nome"]
-        indexes = [models.Index(fields=["uf", "nome"], name="cidade_uf_nome")]
+        ordering = ["name"]
+        indexes = [models.Index(fields=["uf", "name"], name="cidade_uf_nome")]
 
     def __str__(self):
-        return f"{self.nome} - {self.uf.sigla}"
+        return f"{self.name} - {self.uf.sigla}"
 
 
 class Bank(models.Model):
     ispb = models.CharField(_("ISPB"), max_length=8, primary_key=True)
-    codigo = models.PositiveSmallIntegerField(_("código"), null=True, blank=True, unique=True)
-    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
+    code = models.PositiveSmallIntegerField(
+        _("código"), null=True, blank=True, unique=True, db_column="codigo"
+    )
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     nome_curto = models.CharField(_("nome curto"), max_length=100)
 
     class Meta:
         db_table = "referencias_banco"
         verbose_name = _("banco")
         verbose_name_plural = _("bancos")
-        ordering = [models.F("codigo").asc(nulls_last=True), "nome"]
+        ordering = [models.F("code").asc(nulls_last=True), "name"]
 
     def __str__(self):
-        if self.codigo is None:
+        if self.code is None:
             return self.nome_curto
-        return f"{self.codigo:03d} - {self.nome_curto}"
+        return f"{self.code:03d} - {self.nome_curto}"
 
 
 class MaritalStatus(models.Model):
-    nome = models.CharField(_("nome"), max_length=30, unique=True, db_collation=ALFABETICA)
+    name = models.CharField(
+        _("nome"), max_length=30, unique=True, db_collation=ALFABETICA, db_column="nome"
+    )
     ordem = models.PositiveSmallIntegerField(_("ordem"), default=0)
 
     class Meta:
         db_table = "referencias_estadocivil"
         verbose_name = _("estado civil")
         verbose_name_plural = _("estados civis")
-        ordering = ["ordem", "nome"]
+        ordering = ["ordem", "name"]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
 
 class Neighborhood(models.Model):
@@ -83,19 +87,19 @@ class Neighborhood(models.Model):
     cidade = models.ForeignKey(
         City, on_delete=models.CASCADE, related_name="bairros", verbose_name=_("cidade")
     )
-    nome = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
 
     class Meta:
         db_table = "referencias_bairro"
         verbose_name = _("bairro")
         verbose_name_plural = _("bairros")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["cidade", "nome"], name="bairro_unico_por_cidade")
+            models.UniqueConstraint(fields=["cidade", "name"], name="bairro_unico_por_cidade")
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
 
 class Street(models.Model):
@@ -112,18 +116,18 @@ class Street(models.Model):
         related_name="logradouros",
         verbose_name=_("bairro"),
     )
-    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
 
     class Meta:
         db_table = "referencias_logradouro"
         verbose_name = _("logradouro")
         verbose_name_plural = _("logradouros")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["cidade", "bairro", "nome"], name="logradouro_unico_por_bairro"
+                fields=["cidade", "bairro", "name"], name="logradouro_unico_por_bairro"
             )
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name

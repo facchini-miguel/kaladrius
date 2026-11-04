@@ -29,8 +29,8 @@ class Command(BaseCommand):
             raise CommandError(f"Versão {versao} não está no releases.yaml.")
         with translation.override(idioma):
             if titulo:
-                nome = f"{release.versao} – {release.titulo}" if release.titulo else release.versao
-                self.stdout.write(nome)
+                name = f"{release.versao} – {release.titulo}" if release.titulo else release.versao
+                self.stdout.write(name)
                 return
             for item in release.itens:
                 # Dependabot items say so; on GitHub, "#6" links to the pull request.

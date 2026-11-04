@@ -152,23 +152,23 @@ for modelo in AUDITADOS:
 
 
 def _entrou(sender, request, user, **kwargs):
-    registrar(Acao.LOGIN, user=user, ip=ip_da_requisicao(request), descricao=user.get_username())
+    registrar(Acao.LOGIN, user=user, ip=ip_da_requisicao(request), description=user.get_username())
 
 
 def _saiu(sender, request, user, **kwargs):
     if user is not None:
         registrar(
-            Acao.LOGOUT, user=user, ip=ip_da_requisicao(request), descricao=user.get_username()
+            Acao.LOGOUT, user=user, ip=ip_da_requisicao(request), description=user.get_username()
         )
 
 
 def _falhou(sender, credentials, request=None, **kwargs):
     # Only the username is kept; the password typed is never stored.
-    nome = str(credentials.get("username", ""))[:150]
+    name = str(credentials.get("username", ""))[:150]
     registrar(
         Acao.LOGIN_FALHOU,
         ip=ip_da_requisicao(request) if request is not None else None,
-        descricao=f"usuário informado: {nome}",
+        description=f"usuário informado: {name}",
     )
 
 

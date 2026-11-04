@@ -15,13 +15,13 @@ from apps.core.ordering import ALFABETICA
 
 
 class HealthPlan(ModeloDaClinica):
-    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
     registro = models.CharField(_("registro da operadora"), max_length=20, blank=True)
-    telefone = models.CharField(_("telefone"), max_length=11, blank=True)
-    observacoes = models.TextField(_("observações"), blank=True)
-    ativo = models.BooleanField(_("ativo"), default=True)
+    phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
+    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
@@ -29,15 +29,15 @@ class HealthPlan(ModeloDaClinica):
         db_table = "convenios_convenio"
         verbose_name = _("convênio")
         verbose_name_plural = _("convênios")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                "clinic", Lower("nome"), name="convenio_nome_unico_por_clinica"
+                "clinic", Lower("name"), name="convenio_nome_unico_por_clinica"
             ),
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
 
 class MemberCard(ModeloDaClinica):
@@ -57,7 +57,7 @@ class MemberCard(ModeloDaClinica):
         verbose_name=_("convênio"),
     )
     plano = models.CharField(_("plano"), max_length=100, blank=True)
-    numero = models.CharField(_("número da carteirinha"), max_length=30)
+    number = models.CharField(_("número da carteirinha"), max_length=30, db_column="numero")
     # Only where the country's cards have them (seguros.py): the group or policy number of
     # North American cards, the patient's code on a family card.
     grupo = models.CharField(_("número do grupo"), max_length=30, blank=True)
@@ -69,7 +69,7 @@ class MemberCard(ModeloDaClinica):
         blank=True,
         help_text=_("Se o paciente for dependente, o nome do titular do plano."),
     )
-    ativa = models.BooleanField(_("ativa"), default=True)
+    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
@@ -77,15 +77,15 @@ class MemberCard(ModeloDaClinica):
         db_table = "convenios_carteirinha"
         verbose_name = _("carteirinha")
         verbose_name_plural = _("carteirinhas")
-        ordering = ["-ativa", "convenio__nome"]
+        ordering = ["-active", "convenio__name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "convenio", "numero"], name="carteirinha_unica_por_convenio"
+                fields=["clinic", "convenio", "number"], name="carteirinha_unica_por_convenio"
             ),
         ]
 
     def __str__(self):
-        return f"{self.convenio} {self.numero}"
+        return f"{self.convenio} {self.number}"
 
     def save(self, *args, **kwargs):
         # Having clinica_id on every row does not stop a link across clinics on its own.

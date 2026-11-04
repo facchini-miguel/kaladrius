@@ -16,7 +16,7 @@ from .models import HealthPlan, MemberCard
 @exige_permissao(Modulo.CONVENIOS, Acao.VER)
 def lista(request):
     convenios = HealthPlan.objects.annotate(
-        pacientes=Count("carteirinhas", filter=Q(carteirinhas__ativa=True))
+        pacientes=Count("carteirinhas", filter=Q(carteirinhas__active=True))
     )
     return render(
         request,
@@ -39,7 +39,7 @@ def _convenio(request, instancia):
     form = ConvenioForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         convenio = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.nome})
+        messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.name})
         return redirect("health_plans:list")
     return render(request, "health_plans/form.html", {"form": form, "instancia": instancia})
 

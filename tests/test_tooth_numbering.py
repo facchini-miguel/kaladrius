@@ -12,7 +12,7 @@ from apps.dentistry.teeth import (
     FDI,
     PALMER,
     UNIVERSAL,
-    nome,
+    name,
     ordenar,
 )
 from tests.test_core import dados_clinica
@@ -43,20 +43,20 @@ DECIDUOS = [d for linha in DENTES_DECIDUOS for d in linha]
     ],
 )
 def test_nomes_de_cada_numeracao(fdi, universal, palmer):
-    nomes = (nome(fdi, FDI), nome(fdi, UNIVERSAL), nome(fdi, PALMER))
+    nomes = (name(fdi, FDI), name(fdi, UNIVERSAL), name(fdi, PALMER))
     assert nomes == (str(fdi), universal, palmer)
 
 
 def test_cada_dente_tem_um_nome_so():
     for numeracao in (FDI, UNIVERSAL, PALMER):
-        nomes = [nome(d, numeracao) for d in PERMANENTES + DECIDUOS]
+        nomes = [name(d, numeracao) for d in PERMANENTES + DECIDUOS]
         assert len(set(nomes)) == 52, numeracao
-    assert sorted(int(nome(d, UNIVERSAL)) for d in PERMANENTES) == list(range(1, 33))
-    assert sorted(nome(d, UNIVERSAL) for d in DECIDUOS) == list("ABCDEFGHIJKLMNOPQRST")
+    assert sorted(int(name(d, UNIVERSAL)) for d in PERMANENTES) == list(range(1, 33))
+    assert sorted(name(d, UNIVERSAL) for d in DECIDUOS) == list("ABCDEFGHIJKLMNOPQRST")
 
 
 def test_ordem_da_numeracao():
-    assert [nome(d, UNIVERSAL) for d in ordenar([85, 36, 11, 55, 18], UNIVERSAL)] == [
+    assert [name(d, UNIVERSAL) for d in ordenar([85, 36, 11, 55, 18], UNIVERSAL)] == [
         "1",
         "8",
         "19",
@@ -84,7 +84,7 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
 
 
 def test_clinica_nova_nos_estados_unidos_comeca_com_a_universal():
-    form = NovaClinicaForm({"nome": "Smile Fictitious", "area": "odontologia", "pais": "US"})
+    form = NovaClinicaForm({"name": "Smile Fictitious", "area": "odontologia", "pais": "US"})
     assert form.is_valid(), form.errors
     assert form.instance.numeracao_dentaria == UNIVERSAL
 

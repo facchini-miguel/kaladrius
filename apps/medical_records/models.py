@@ -139,10 +139,11 @@ class Certificate(ModeloDaClinica):
     dias = models.PositiveSmallIntegerField(
         _("dias de afastamento"), null=True, blank=True, help_text=_("Só para afastamento.")
     )
-    observacao = models.TextField(
+    note = models.TextField(
         _("observações"),
         blank=True,
         help_text=_("Aparece no atestado. Por exemplo: deve permanecer em repouso."),
+        db_column="observacao",
     )
     practitioner = models.ForeignKey(
         Practitioner,
@@ -257,10 +258,14 @@ class Attachment(ModeloDaClinica):
     atendimento = models.ForeignKey(
         Visit, on_delete=models.PROTECT, related_name="anexos", verbose_name=_("atendimento")
     )
-    descricao = models.CharField(
-        _("descrição"), max_length=200, blank=True, help_text=_("Por exemplo: hemograma de março.")
+    description = models.CharField(
+        _("descrição"),
+        max_length=200,
+        blank=True,
+        help_text=_("Por exemplo: hemograma de março."),
+        db_column="descricao",
     )
-    nome = models.CharField(_("arquivo"), max_length=255)
+    name = models.CharField(_("arquivo"), max_length=255, db_column="nome")
     tipo = models.CharField(max_length=50)
     tamanho = models.PositiveIntegerField()
     conteudo = models.BinaryField()
@@ -286,4 +291,4 @@ class Attachment(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {self.descricao or self.nome}"
+        return f"{self.atendimento} – {self.description or self.name}"

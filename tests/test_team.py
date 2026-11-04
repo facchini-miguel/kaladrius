@@ -35,10 +35,10 @@ def dados_novo(**extra):
     }
 
 
-def dados_edicao(papel=Papel.RECEPCAO, ativo=True, **conta):
+def dados_edicao(papel=Papel.RECEPCAO, active=True, **conta):
     dados = {"vinculo-papel": papel, **{f"conta-{k}": v for k, v in conta.items()}}
-    if ativo:
-        dados["vinculo-ativo"] = "on"
+    if active:
+        dados["vinculo-active"] = "on"
     return dados
 
 
@@ -61,7 +61,7 @@ def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
     resposta = cliente_admin.post(reverse("team:new"), dados_novo())
     assert resposta.status_code == 302
     vinculo = Membership.objects.get(user__username="carla")
-    assert (vinculo.clinic, vinculo.papel, vinculo.ativo) == (clinica_a, Papel.RECEPCAO, True)
+    assert (vinculo.clinic, vinculo.papel, vinculo.active) == (clinica_a, Papel.RECEPCAO, True)
     assert vinculo.user.check_password(NOVA_SENHA)
     # The account creation shows up in the clinic's audit log.
     assert AuditEntry.objects.filter(
@@ -94,9 +94,9 @@ def test_altera_perfil_e_tira_acesso(cliente_admin, clinica_a, criar_usuario, cl
     assert vinculo.papel == Papel.PROFISSIONAL
     assert membro.first_name == "Novo nome"
 
-    cliente_admin.post(url, dados_edicao(Papel.PROFISSIONAL, ativo=False, first_name="Novo nome"))
+    cliente_admin.post(url, dados_edicao(Papel.PROFISSIONAL, active=False, first_name="Novo nome"))
     vinculo.refresh_from_db()
-    assert not vinculo.ativo
+    assert not vinculo.active
     # Without access the member no longer works in the clinic.
     resposta = cliente_de(membro).get(reverse("patients:list"))
     assert resposta.status_code == 403
@@ -106,10 +106,10 @@ def test_nao_altera_o_proprio_perfil(cliente_admin, admin_a):
     vinculo = admin_a.vinculos.get()
     cliente_admin.post(
         reverse("team:edit", args=[vinculo.pk]),
-        dados_edicao(Papel.RECEPCAO, ativo=False, first_name="Admin"),
+        dados_edicao(Papel.RECEPCAO, active=False, first_name="Admin"),
     )
     vinculo.refresh_from_db()
-    assert (vinculo.papel, vinculo.ativo) == (Papel.ADMIN, True)
+    assert (vinculo.papel, vinculo.active) == (Papel.ADMIN, True)
 
 
 def test_clinica_nao_fica_sem_administrador(
@@ -138,7 +138,7 @@ def test_administrador_com_conta_desativada_nao_conta(
 
     # Now admin_a cannot be demoted: the only other administrator cannot log in.
     form = VinculoForm(
-        {"papel": Papel.RECEPCAO, "ativo": "on"}, instance=admin_a.vinculos.get(), editor=outro
+        {"papel": Papel.RECEPCAO, "active": "on"}, instance=admin_a.vinculos.get(), editor=outro
     )
     assert not form.is_valid()
     assert "pelo menos um administrador ativo" in str(form.errors)

@@ -21,7 +21,7 @@ VALOR = Decimal("1234.56")
 
 
 @pytest.mark.parametrize(
-    ("codigo", "idioma", "esperado"),
+    ("code", "idioma", "esperado"),
     [
         ("BRL", "pt-br", "R$ 1.234,56"),
         ("BRL", "en", "R$ 1,234.56"),
@@ -36,9 +36,9 @@ VALOR = Decimal("1234.56")
         ("UYU", "es", "$U 1\u00a0234,56"),
     ],
 )
-def test_simbolo_da_moeda_e_separadores_do_idioma(codigo, idioma, esperado):
+def test_simbolo_da_moeda_e_separadores_do_idioma(code, idioma, esperado):
     with translation.override(idioma):
-        assert currencies.formatar(VALOR, codigo) == esperado
+        assert currencies.formatar(VALOR, code) == esperado
 
 
 def test_valor_invalido_fica_vazio():

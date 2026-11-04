@@ -21,11 +21,11 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def fornecedor(clinica_a):
     with usar_clinica(clinica_a):
-        return Supplier.objects.create(nome="Dental Fictícia", cpf_cnpj=CNPJ)
+        return Supplier.objects.create(name="Dental Fictícia", cpf_cnpj=CNPJ)
 
 
 def dados(**extra):
-    return {"tipo": "PJ", "nome": "Laboratório Fictício", "ativo": "on", **extra}
+    return {"tipo": "PJ", "name": "Laboratório Fictício", "active": "on", **extra}
 
 
 def despesa(clinic, **extra):
@@ -34,13 +34,13 @@ def despesa(clinic, **extra):
     return {
         "fornecedor": "",
         "pessoa": "",
-        "descricao": "Material fictício",
+        "description": "Material fictício",
         "categoria": categoria.pk,
         "valor": "450",
         "modo": "dividir",
         "parcelas": 3,
         "primeiro_vencimento": "2031-01-10",
-        "observacoes": "",
+        "notes": "",
         **extra,
     }
 
@@ -48,12 +48,12 @@ def despesa(clinic, **extra):
 def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     resposta = admin.post(
         reverse("finance:supplier_new"),
-        dados(cpf_cnpj="11.222.333/0001-81", telefone="(48) 3333-4444", whatsapp="48 99999-0000"),
+        dados(cpf_cnpj="11.222.333/0001-81", phone="(48) 3333-4444", whatsapp="48 99999-0000"),
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         criado = Supplier.objects.get()
-    assert (criado.cpf_cnpj, criado.telefone, criado.whatsapp) == (
+    assert (criado.cpf_cnpj, criado.phone, criado.whatsapp) == (
         CNPJ,
         "4833334444",
         "48999990000",
@@ -66,8 +66,8 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     [
         ({"cpf_cnpj": "11.222.333/0001-00"}, "cpf_cnpj"),
         ({"tipo": "PF", "cpf_cnpj": "111.111.111-11"}, "cpf_cnpj"),
-        ({"telefone": "1234"}, "telefone"),
-        ({"nome": ""}, "nome"),
+        ({"phone": "1234"}, "phone"),
+        ({"name": ""}, "name"),
     ],
 )
 def test_validacoes_do_cadastro(extra, campo, admin):
@@ -81,7 +81,7 @@ def test_documento_repetido_e_recusado(fornecedor, admin):
     assert "cpf_cnpj" in resposta.context["form"].errors
     editar = admin.post(
         reverse("finance:supplier_edit", args=[fornecedor.pk]),
-        dados(nome="Dental Fictícia Renomeada", cpf_cnpj=CNPJ),
+        dados(name="Dental Fictícia Renomeada", cpf_cnpj=CNPJ),
     )
     assert editar.status_code == 302
 
@@ -121,7 +121,7 @@ def test_despesa_exige_fornecedor_ou_nome(clinica_a, admin):
 
 def test_fornecedor_inativo_some_da_despesa_mas_fica_na_lista(clinica_a, fornecedor, admin):
     with usar_clinica(clinica_a):
-        fornecedor.ativo = False
+        fornecedor.active = False
         fornecedor.save()
     form = admin.get(reverse("finance:expense_new")).context["form"]
     with usar_clinica(clinica_a):

@@ -30,7 +30,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 def ana(clinica_a):
     with usar_clinica(clinica_a):
         funcionario = Employee.objects.create(
-            nome="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
+            name="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
         )
         Salary.objects.create(
             funcionario=funcionario, valor=Decimal("2200"), desde=datetime.date(2025, 3, 1)
@@ -42,11 +42,11 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     resposta = admin.post(
         reverse("staff:new"),
         {
-            "nome": "Bruno Fictício",
+            "name": "Bruno Fictício",
             "cpf": "529.982.247-25",
             "admissao": "2026-01-05",
             "salario": "3000",
-            "ativo": "on",
+            "active": "on",
         },
     )
     assert resposta.status_code == 302
@@ -57,12 +57,12 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     aumento = admin.post(
         reverse("staff:edit", args=[bruno.pk]),
         {
-            "nome": "Bruno Fictício",
+            "name": "Bruno Fictício",
             "cpf": "52998224725",
             "admissao": "2026-01-05",
             "salario": "3300",
             "salario_desde": "2026-07-01",
-            "ativo": "on",
+            "active": "on",
         },
     )
     assert aumento.status_code == 302
@@ -81,7 +81,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     ],
 )
 def test_validacoes_do_cadastro(dados, campo, admin):
-    base = {"nome": "Fictício", "salario": "2000", "ativo": "on"}
+    base = {"name": "Fictício", "salario": "2000", "active": "on"}
     resposta = admin.post(reverse("staff:new"), {**base, **dados})
     assert campo in resposta.context["form"].errors
 
@@ -89,20 +89,20 @@ def test_validacoes_do_cadastro(dados, campo, admin):
 def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
     with usar_clinica(clinica_a):
         futuro = Employee.objects.create(
-            nome="Admitido depois", admissao=datetime.date(2026, 11, 3)
+            name="Admitido depois", admissao=datetime.date(2026, 11, 3)
         )
         Salary.objects.create(
             funcionario=futuro, valor=Decimal("2000"), desde=datetime.date(2026, 11, 3)
         )
         saiu = Employee.objects.create(
-            nome="Desligado antes", desligamento=datetime.date(2026, 9, 30)
+            name="Desligado antes", desligamento=datetime.date(2026, 9, 30)
         )
         Salary.objects.create(
             funcionario=saiu, valor=Decimal("2000"), desde=datetime.date(2025, 1, 1)
         )
-        Employee.objects.create(nome="Sem salário")
+        Employee.objects.create(name="Sem salário")
         folhas = services.preparar(OUTUBRO)
-    assert [f.funcionario.nome for f in folhas] == ["Ana Fictícia"]
+    assert [f.funcionario.name for f in folhas] == ["Ana Fictícia"]
     folha = folhas[0]
     assert folha.salario == Decimal("2200") and folha.valor_hora_extra == hora_extra_sugerida(
         Decimal("2200")
@@ -144,7 +144,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         folha = Payroll.objects.get(funcionario=ana, competencia=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         categoria = pagina.context["lancar_form"].fields["categoria"].initial
-    assert categoria.nome == "Salários e encargos"
+    assert categoria.name == "Salários e encargos"
     resposta = admin.post(
         f"{FOLHA}?mes=2026-10",
         {**dados, "acao": "lancar", "categoria": categoria.pk, "vencimento": "2026-11-05"},

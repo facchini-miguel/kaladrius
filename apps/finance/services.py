@@ -61,12 +61,12 @@ def criar_lancamento(*, parcelas, primeiro_vencimento, user, **campos):
     """Create an entry with `parcelas` monthly installments from `primeiro_vencimento`."""
     lancamento = Entry.objects.create(created_by=user, **campos)
     # One by one (at most 48), not bulk_create, so the audit log records each installment.
-    for numero, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1):
+    for number, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1):
         Installment.objects.create(
             clinic=lancamento.clinic,
             lancamento=lancamento,
-            numero=numero,
-            vencimento=somar_meses(primeiro_vencimento, numero - 1),
+            number=number,
+            vencimento=somar_meses(primeiro_vencimento, number - 1),
             valor=valor,
         )
     return lancamento
@@ -232,14 +232,14 @@ def devedores(hoje=None):
             "vencimento",
             "saldo",
             "lancamento__patient_id",
-            "lancamento__patient__nome",
+            "lancamento__patient__name",
             "lancamento__pessoa",
         )
     )
     linhas = defaultdict(
         lambda: {
             "patient_id": None,
-            "nome": "",
+            "name": "",
             "faixas": [ZERO] * (len(FAIXAS_DE_ATRASO) + 1),
             "vencido": ZERO,
             "a_vencer": ZERO,
@@ -252,7 +252,7 @@ def devedores(hoje=None):
         chave = ("patient", patient_id) if patient_id else ("pessoa", pessoa.strip().lower())
         linha = linhas[chave]
         linha["patient_id"] = patient_id
-        linha["nome"] = parcela["lancamento__patient__nome"] if patient_id else pessoa
+        linha["name"] = parcela["lancamento__patient__name"] if patient_id else pessoa
         vencimento, saldo = parcela["vencimento"], parcela["saldo"]
         if vencimento >= hoje:
             linha["a_vencer"] += saldo
@@ -267,7 +267,7 @@ def devedores(hoje=None):
         if linha["mais_antigo"] is None or vencimento < linha["mais_antigo"]:
             linha["mais_antigo"] = vencimento
     resultado = [linha for linha in linhas.values() if linha["vencido"] or linha["a_vencer"]]
-    return sorted(resultado, key=lambda linha: (-linha["vencido"], chave_alfabetica(linha["nome"])))
+    return sorted(resultado, key=lambda linha: (-linha["vencido"], chave_alfabetica(linha["name"])))
 
 
 def resumo_do_paciente(patient, hoje=None):
@@ -335,7 +335,7 @@ def saldos_das_contas(ate=None):
             movimento[outra_id] -= sinal * total
     return [
         (conta, conta.saldo_inicial + movimento[conta.pk])
-        for conta in FinancialAccount.objects.all().order_by("nome")
+        for conta in FinancialAccount.objects.all().order_by("name")
     ]
 
 
@@ -449,7 +449,7 @@ def relatorio(de, ate):
     # Cost centers (decision 095) only once the clinic has registered one.
     centros = CostCenter.objects.exists()
     sem_centro = {None: _("Sem centro de custo")}
-    centro = "parcela__lancamento__centro_custo__nome"
+    centro = "parcela__lancamento__centro_custo__name"
     return {
         "grupos": grupos,
         "por_grupo": arvore_por_grupo(recebidos, Category.Tipo.RECEITA) if grupos else [],
@@ -458,9 +458,9 @@ def relatorio(de, ate):
         "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
         "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
         "por_forma": agrupar(recebidos, "forma", formas),
-        "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__nome"),
-        "por_profissional": agrupar(recebidos, "parcela__lancamento__practitioner__nome"),
-        "despesas_por_categoria": agrupar(pagos, "parcela__lancamento__categoria__nome"),
+        "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__name"),
+        "por_profissional": agrupar(recebidos, "parcela__lancamento__practitioner__name"),
+        "despesas_por_categoria": agrupar(pagos, "parcela__lancamento__categoria__name"),
         "total_recebido": total_recebido,
         "total_pago": total_pago,
         "resultado": total_recebido - total_pago,
@@ -570,7 +570,7 @@ def planejamento(ano, hoje=None):
         linhas, meta_total, cobertos = [], ZERO, set()
         for nivel, grupo in em_ordem_de_arvore(grupos):
             meta, realizado = metas.get(grupo.pk), totais[grupo.pk]
-            if not grupo.ativo and meta is None and not realizado:
+            if not grupo.active and meta is None and not realizado:
                 continue
             if meta and grupo.pai_id not in cobertos:
                 meta_total += meta
@@ -704,13 +704,13 @@ def movimentar_caixa(caixa, *, tipo, valor, motivo, user, outra_conta=None):
 
 
 @transaction.atomic
-def fechar_caixa(caixa, *, valor_contado, observacao, user):
+def fechar_caixa(caixa, *, valor_contado, note, user):
     caixa = CashRegister.objects.select_for_update().get(pk=caixa.pk)
     if not caixa.aberto:
         raise ValidationError(_("Este caixa já foi fechado."))
     caixa.valor_esperado = resumo_do_caixa(caixa)["esperado"]
     caixa.valor_contado = valor_contado
-    caixa.observacao = observacao
+    caixa.note = note
     caixa.fechado_em = timezone.now()
     caixa.fechado_por = user
     caixa.save()

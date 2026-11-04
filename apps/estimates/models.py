@@ -31,9 +31,9 @@ def validade_padrao():
 class Procedure(ModeloDaClinica):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
-    nome = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA, db_column="nome")
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
-    codigo = models.CharField(_("código"), max_length=20, blank=True)
+    code = models.CharField(_("código"), max_length=20, blank=True, db_column="codigo")
     valor = models.DecimalField(_("valor"), **DINHEIRO)
     categoria = models.ForeignKey(
         "financeiro.Category",
@@ -44,20 +44,20 @@ class Procedure(ModeloDaClinica):
         verbose_name=_("categoria"),
         help_text=_("Categoria de receita usada quando o orçamento é aprovado."),
     )
-    ativo = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
     class Meta:
         db_table = "orcamentos_procedimento"
         verbose_name = _("procedimento")
         verbose_name_plural = _("procedimentos")
-        ordering = ["nome"]
+        ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "nome"], name="procedimento_unico"),
+            models.UniqueConstraint(fields=["clinic", "name"], name="procedimento_unico"),
             models.CheckConstraint(condition=Q(valor__gte=0), name="procedimento_valor"),
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
 
 class Estimate(ModeloDaClinica):
@@ -88,7 +88,7 @@ class Estimate(ModeloDaClinica):
         _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.ABERTO
     )
     desconto = models.DecimalField(_("desconto"), default=Decimal("0.00"), **DINHEIRO)
-    observacoes = models.TextField(_("observações"), blank=True)
+    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     lancamento = models.OneToOneField(
         "financeiro.Entry",
         on_delete=models.SET_NULL,
@@ -160,8 +160,10 @@ class EstimateItem(ModeloDaClinica):
         related_name="+",
         verbose_name=_("procedimento"),
     )
-    descricao = models.CharField(_("descrição"), max_length=200)
-    codigo = models.CharField(_("código"), max_length=20, blank=True)  # copied, like descricao
+    description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
+    code = models.CharField(
+        _("código"), max_length=20, blank=True, db_column="codigo"
+    )  # copied, like descricao
     # FDI tooth numbers separated by commas ("11,12"); empty for the whole mouth.
     dentes = models.CharField(_("dentes"), max_length=200, blank=True)
     faces = models.CharField(
@@ -184,7 +186,7 @@ class EstimateItem(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return self.descricao
+        return self.description
 
     def _conferir_modulo(self):
         self._conferir_clinica()
@@ -219,9 +221,9 @@ class EstimateItem(ModeloDaClinica):
     @property
     def dentes_exibicao(self):
         """In the clinic's numbering (decision 122): "18, 36" in FDI, "1, 19" in Universal."""
-        from apps.dentistry.teeth import nome, ordenar
+        from apps.dentistry.teeth import name, ordenar
 
-        return ", ".join(nome(d) for d in ordenar(self.lista_dentes))
+        return ", ".join(name(d) for d in ordenar(self.lista_dentes))
 
     @property
     def lista_dentes(self):

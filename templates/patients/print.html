@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Ficha cadastral" %} · {{ patient.nome }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Ficha cadastral" %} · {{ patient.name }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex gap-2 mb-3 d-print-none">
@@ -11,10 +11,10 @@
 <div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
-      <div class="fs-5 fw-semibold">{{ clinica_atual.nome }}</div>
+      <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>
       {% if clinica_atual.documento %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
       {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
-      {% if clinica_atual.telefone %}<div class="small">{{ clinica_atual.telefone }}</div>{% endif %}
+      {% if clinica_atual.phone %}<div class="small">{{ clinica_atual.phone }}</div>{% endif %}
     </div>
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "FICHA CADASTRAL" %}</div>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <p class="fs-5 fw-semibold mb-3">{{ patient.nome }}</p>
+  <p class="fs-5 fw-semibold mb-3">{{ patient.name }}</p>
   <div class="row">
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
@@ -43,14 +43,14 @@
     </div>
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
-        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ patient.telefone_celular|telefone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ patient.whatsapp|telefone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ patient.telefone_residencial|telefone|default:"—" }}</dd>
-        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ patient.telefone_comercial|telefone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Celular" %}</dt><dd class="col-7">{{ patient.telefone_celular|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "WhatsApp" %}</dt><dd class="col-7">{{ patient.whatsapp|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Residencial" %}</dt><dd class="col-7">{{ patient.telefone_residencial|phone|default:"—" }}</dd>
+        <dt class="col-5">{% translate "Comercial" %}</dt><dd class="col-7">{{ patient.telefone_comercial|phone|default:"—" }}</dd>
         <dt class="col-5">{% translate "E-mail" %}</dt><dd class="col-7">{{ patient.email|default:"—" }}</dd>
         <dt class="col-5">{% translate "Endereço" %}</dt>
         <dd class="col-7">
-          {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.numero %}, {{ patient.numero }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
+          {% if patient.logradouro %}{{ patient.logradouro }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complemento %} - {{ patient.complemento }}{% endif %}<br>{% endif %}
           {% if patient.bairro %}{{ patient.bairro }}<br>{% endif %}
           {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
           {% if patient.cep %}{% rotulo_cep %} {{ patient.cep|cep }}{% endif %}
@@ -66,7 +66,7 @@
     <thead><tr><th>{% translate "Convênio" %}</th><th>{% translate "Plano" %}</th><th>{% translate "Número da carteirinha" %}</th><th>{% translate "Validade" %}</th><th>{% translate "Titular" %}</th></tr></thead>
     <tbody>
       {% for carteirinha in carteirinhas %}
-      <tr><td>{{ carteirinha.convenio.nome }}</td><td>{{ carteirinha.plano|default:"—" }}</td><td>{{ carteirinha.numero }}</td><td>{{ carteirinha.validade|date:"SHORT_DATE_FORMAT"|default:"—" }}</td><td>{{ carteirinha.titular|default:"—" }}</td></tr>
+      <tr><td>{{ carteirinha.convenio.name }}</td><td>{{ carteirinha.plano|default:"—" }}</td><td>{{ carteirinha.number }}</td><td>{{ carteirinha.validade|date:"SHORT_DATE_FORMAT"|default:"—" }}</td><td>{{ carteirinha.titular|default:"—" }}</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -78,15 +78,15 @@
     <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
     <tbody>
       {% for relacionada in relacionados %}
-      <tr><td>{{ relacionada.get_vinculo_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|telefone|default:"—" }}</td></tr>
+      <tr><td>{{ relacionada.get_vinculo_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
       {% endfor %}
     </tbody>
   </table>
   {% endif %}
 
-  {% if patient.observacoes %}
+  {% if patient.notes %}
   <h2 class="h6 mt-3">{% translate "Observações" %}</h2>
-  <p class="small">{{ patient.observacoes|linebreaksbr }}</p>
+  <p class="small">{{ patient.notes|linebreaksbr }}</p>
   {% endif %}
 
   <div class="row mt-5 pt-4 small text-center">

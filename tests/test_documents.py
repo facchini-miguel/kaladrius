@@ -28,19 +28,19 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 def test_todo_pais_tem_seus_documentos():
     assert identification.DOCUMENTOS.keys() == countries.PAISES.keys()
-    for codigo, documentos in identification.DOCUMENTOS.items():
+    for code, documentos in identification.DOCUMENTOS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
-        assert documentos.empresa is not None, codigo
-        assert documentos.registro_profissional, codigo
+        assert documentos.empresa is not None, code
+        assert documentos.registro_profissional, code
 
 
 def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
-    for codigo, documentos in identification.DOCUMENTOS.items():
-        if codigo == "BR":
+    for code, documentos in identification.DOCUMENTOS.items():
+        if code == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
         for documento in documentos.de(*identification.PAPEIS):
             compacto = documento.normalizar(documento.exemplo)
-            assert documento.valido(compacto), (codigo, documento.sigla)
+            assert documento.valido(compacto), (code, documento.sigla)
             assert documento.escrever(compacto) in (documento.exemplo, compacto), documento.sigla
 
 
@@ -133,7 +133,7 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     no_pais(clinica_a, "MX")
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="CURP"' in formulario and 'data-rotulo-pj="RFC"' in formulario
-    dados = {"tipo": "PF", "nome": "Paciente Ficticio", "ativo": "on"}
+    dados = {"tipo": "PF", "name": "Paciente Ficticio", "active": "on"}
     resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "BOXW310820HNERXN08"})
     assert resposta.context["form"].errors["cpf_cnpj"] == ["CURP: número inválido."]
     resposta = admin.post(reverse("patients:new"), {**dados, "cpf_cnpj": "boxw310820hnerxn09"})
@@ -154,13 +154,13 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf=""' in formulario and 'data-rotulo-pj="EIN"' in formulario
     # An individual: whatever was left in the hidden field is not kept.
-    pessoa = {"tipo": "PF", "nome": "John Fictitious", "ativo": "on", "cpf_cnpj": "911144442"}
+    pessoa = {"tipo": "PF", "name": "John Fictitious", "active": "on", "cpf_cnpj": "911144442"}
     assert admin.post(reverse("patients:new"), pessoa).status_code == 302
-    empresa = {"tipo": "PJ", "nome": "Acme Fictitious", "ativo": "on", "cpf_cnpj": "91-1144442"}
+    empresa = {"tipo": "PJ", "name": "Acme Fictitious", "active": "on", "cpf_cnpj": "91-1144442"}
     assert admin.post(reverse("patients:new"), empresa).status_code == 302
     with usar_clinica(clinica_a):
-        assert Patient.objects.get(nome="John Fictitious").cpf_cnpj == ""
-        acme = Patient.objects.get(nome="Acme Fictitious")
+        assert Patient.objects.get(name="John Fictitious").cpf_cnpj == ""
+        acme = Patient.objects.get(name="Acme Fictitious")
     assert acme.cpf_cnpj == "911144442"
     lista = admin.get(reverse("patients:list")).content.decode()
     assert "91-1144442" in lista and "<th>EIN</th>" in lista
@@ -197,22 +197,22 @@ def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
 
 def test_fornecedor_no_reino_unido(clinica_a, admin):
     no_pais(clinica_a, "GB")
-    empresa = {"tipo": "PJ", "nome": "Dental Supplies Ltd", "ativo": "on", "cpf_cnpj": "123"}
+    empresa = {"tipo": "PJ", "name": "Dental Supplies Ltd", "active": "on", "cpf_cnpj": "123"}
     resposta = admin.post(reverse("finance:supplier_new"), empresa)
     assert resposta.context["form"].errors["cpf_cnpj"] == ["Company number: número inválido."]
     empresa["cpf_cnpj"] = "01234567"
     assert admin.post(reverse("finance:supplier_new"), empresa).status_code == 302
     # A sole trader has no document in this table: nothing is kept.
-    pessoa = {"tipo": "PF", "nome": "John Plumber", "ativo": "on", "cpf_cnpj": "01234567"}
+    pessoa = {"tipo": "PF", "name": "John Plumber", "active": "on", "cpf_cnpj": "01234567"}
     assert admin.post(reverse("finance:supplier_new"), pessoa).status_code == 302
     with usar_clinica(clinica_a):
-        assert Supplier.objects.get(nome="Dental Supplies Ltd").cpf_cnpj == "01234567"
-        assert Supplier.objects.get(nome="John Plumber").cpf_cnpj == ""
+        assert Supplier.objects.get(name="Dental Supplies Ltd").cpf_cnpj == "01234567"
+        assert Supplier.objects.get(name="John Plumber").cpf_cnpj == ""
 
 
 def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     no_pais(clinica_a, "US")
-    dados = {"nome": "Jane Fictitious", "salario": "3000", "ativo": "on"}
+    dados = {"name": "Jane Fictitious", "salario": "3000", "active": "on"}
     resposta = admin.post(reverse("staff:new"), {**dados, "cpf": "000-12-3456"})
     assert resposta.context["form"].errors["cpf"] == ["SSN: número inválido."]
     assert admin.post(reverse("staff:new"), {**dados, "cpf": "536904399"}).status_code == 302
