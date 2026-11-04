@@ -20,7 +20,7 @@ def lista(request):
     )
     return render(
         request,
-        "convenios/lista.html",
+        "health_plans/list.html",
         {"convenios": convenios, "rotulo_do_registro": insurance.rotulo_do_registro()},
     )
 
@@ -41,7 +41,7 @@ def _convenio(request, instancia):
         convenio = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.nome})
         return redirect("convenios:lista")
-    return render(request, "convenios/form.html", {"form": form, "instancia": instancia})
+    return render(request, "health_plans/form.html", {"form": form, "instancia": instancia})
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
@@ -66,6 +66,6 @@ def _carteirinha(request, paciente, instancia):
         return redirect("pacientes:ficha", pk=paciente.pk)
     return render(
         request,
-        "convenios/carteirinha_form.html",
+        "health_plans/card_form.html",
         {"form": form, "paciente": paciente, "instancia": instancia},
     )

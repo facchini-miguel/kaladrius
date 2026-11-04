@@ -98,7 +98,7 @@ TIPOS_DE_ATENDIMENTO = [
 
 
 def odontograma(selecionados):
-    """Template context of the dental chart (templates/odontologia/_odontograma.html)."""
+    """Template context of the dental chart (templates/dentistry/_odontogram.html)."""
     return {
         "permanentes": DENTES_PERMANENTES,
         "deciduos": DENTES_DECIDUOS,

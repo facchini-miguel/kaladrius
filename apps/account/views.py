@@ -78,7 +78,7 @@ def codigo(request):
             return redirect("login")
         request.session[PENDENTE] = pendente
         form.add_error("codigo", _("Código incorreto."))
-    return render(request, "conta/codigo.html", {"form": form})
+    return render(request, "account/code.html", {"form": form})
 
 
 @login_required
@@ -122,14 +122,14 @@ def duas_etapas(request):
             if services.verificar(usuario, novos.cleaned_data["codigo"]):
                 return render(
                     request,
-                    "conta/codigos.html",
+                    "account/codes.html",
                     {"codigos": services.novos_codigos(usuario)},
                 )
             novos.add_error("codigo", _("Código incorreto."))
         restantes = usuario.codigos_recuperacao.filter(usado_em__isnull=True).count()
         return render(
             request,
-            "conta/duas_etapas.html",
+            "account/two_factor.html",
             {
                 "ativa": True,
                 "desativar": desativar,
@@ -148,12 +148,12 @@ def duas_etapas(request):
                 usuario,
                 descricao=f"{usuario}: verificação em duas etapas ativada",
             )
-            return render(request, "conta/codigos.html", {"codigos": codigos, "ativada": True})
+            return render(request, "account/codes.html", {"codigos": codigos, "ativada": True})
         form.add_error("codigo", _("Código incorreto. Confira a hora do celular e tente de novo."))
     endereco = services.endereco_do_app(dispositivo)
     return render(
         request,
-        "conta/duas_etapas.html",
+        "account/two_factor.html",
         {
             "ativa": False,
             "obrigatoria": obrigatoria,
@@ -178,23 +178,23 @@ def _com_email(view):
 recuperar = _com_email(
     auth_views.PasswordResetView.as_view(
         form_class=RecuperarSenhaForm,
-        template_name="conta/recuperar.html",
-        email_template_name="conta/email_recuperar.txt",
-        subject_template_name="conta/email_recuperar_assunto.txt",
+        template_name="account/recover.html",
+        email_template_name="account/recovery_email.txt",
+        subject_template_name="account/recovery_email_subject.txt",
         extra_email_context={"nome_sistema": settings.NOME_SISTEMA},
         success_url=reverse_lazy("conta:recuperar_enviado"),
     )
 )
 recuperar_enviado = _com_email(
-    auth_views.PasswordResetDoneView.as_view(template_name="conta/recuperar_enviado.html")
+    auth_views.PasswordResetDoneView.as_view(template_name="account/recovery_sent.html")
 )
 nova_senha = _com_email(
     auth_views.PasswordResetConfirmView.as_view(
         form_class=NovaSenhaForm,
-        template_name="conta/nova_senha.html",
+        template_name="account/new_password.html",
         success_url=reverse_lazy("conta:senha_redefinida"),
     )
 )
 senha_redefinida = _com_email(
-    auth_views.PasswordResetCompleteView.as_view(template_name="conta/senha_redefinida.html")
+    auth_views.PasswordResetCompleteView.as_view(template_name="account/password_changed.html")
 )

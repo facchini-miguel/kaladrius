@@ -73,7 +73,7 @@ def lista(request):
     pagina = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
-        "pacientes/lista.html",
+        "patients/list.html",
         {
             "pagina": pagina,
             "busca": busca,
@@ -111,7 +111,7 @@ def ficha(request, pk):
         contexto["prontuario"] = list(
             Atendimento.objects.filter(paciente=paciente).select_related("profissional")
         )
-    return render(request, "pacientes/ficha.html", contexto)
+    return render(request, "patients/record.html", contexto)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
@@ -129,7 +129,7 @@ def imprimir(request, pk):
     )
     return render(
         request,
-        "pacientes/imprimir.html",
+        "patients/print.html",
         {
             "paciente": paciente,
             "carteirinhas": carteirinhas,
@@ -176,7 +176,7 @@ def _formulario(request, paciente):
         paciente = form.save()
         messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": paciente.nome})
         return redirect("pacientes:ficha", pk=paciente.pk)
-    return render(request, "pacientes/form.html", {"form": form, "paciente": paciente})
+    return render(request, "patients/form.html", {"form": form, "paciente": paciente})
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
@@ -195,9 +195,7 @@ def arquivar(request, pk):
             messages.error(
                 request, _("Resolva as contas em aberto do paciente antes de arquivá-lo.")
             )
-        return render(
-            request, "pacientes/arquivar.html", {"paciente": paciente, "abertas": abertas}
-        )
+        return render(request, "patients/archive.html", {"paciente": paciente, "abertas": abertas})
     if request.method == "POST":
         paciente.arquivado = True
         paciente.arquivado_em = timezone.now()
@@ -212,7 +210,7 @@ def arquivar(request, pk):
             % {"nome": paciente.nome},
         )
         return redirect("pacientes:lista")
-    return render(request, "pacientes/arquivar.html", {"paciente": paciente})
+    return render(request, "patients/archive.html", {"paciente": paciente})
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
@@ -248,7 +246,7 @@ def excluir(request, pk):
     if atendimentos:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
-        return render(request, "pacientes/excluir.html", {**contexto, "atendimentos": atendimentos})
+        return render(request, "patients/delete.html", {**contexto, "atendimentos": atendimentos})
     if request.method == "POST":
         codigo = paciente.pk
         agendamentos = Agendamento.objects.filter(paciente=paciente)
@@ -309,7 +307,7 @@ def excluir(request, pk):
             _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": codigo},
         )
         return redirect(f"{reverse('pacientes:lista')}?situacao=arquivados")
-    return render(request, "pacientes/excluir.html", contexto)
+    return render(request, "patients/delete.html", contexto)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
@@ -317,7 +315,7 @@ def sugestoes(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     busca = request.GET.get("q", "").strip()
     pacientes = filtrar(Paciente.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
-    return render(request, "pacientes/_sugestoes.html", {"pacientes": pacientes})
+    return render(request, "patients/_suggestions.html", {"pacientes": pacientes})
 
 
 MESES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
@@ -335,7 +333,7 @@ def aniversariantes(request):
     linhas = [(paciente, ano - paciente.data_nascimento.year) for paciente in pacientes]
     return render(
         request,
-        "pacientes/aniversariantes.html",
+        "patients/birthdays.html",
         {"mes": mes, "meses": list(enumerate(MESES, start=1)), "linhas": linhas, "hoje": hoje},
     )
 
@@ -385,7 +383,7 @@ def _relacionado(request, paciente, instancia):
         outro = instancia.outro_paciente if instancia.outro_paciente_id else None
     return render(
         request,
-        "pacientes/relacionado_form.html",
+        "patients/related_form.html",
         {
             "form": form,
             "paciente": paciente,

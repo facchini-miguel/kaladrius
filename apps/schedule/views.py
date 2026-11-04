@@ -23,7 +23,7 @@ from .models import Agendamento, TipoAtendimento
 
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def tipos(request):
-    return render(request, "agenda/tipos.html", {"tipos": TipoAtendimento.objects.all()})
+    return render(request, "schedule/types.html", {"tipos": TipoAtendimento.objects.all()})
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.CRIAR)
@@ -44,7 +44,7 @@ def _formulario(request, tipo):
             request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome_exibido}
         )
         return redirect("agenda:tipos")
-    return render(request, "agenda/tipo_form.html", {"form": form, "tipo": tipo})
+    return render(request, "schedule/type_form.html", {"form": form, "tipo": tipo})
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.EXCLUIR)
@@ -67,7 +67,7 @@ def tipo_excluir(request, pk):
                 request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome_exibido}
             )
         return redirect("agenda:tipos")
-    return render(request, "agenda/tipo_excluir.html", {"tipo": tipo})
+    return render(request, "schedule/type_delete.html", {"tipo": tipo})
 
 
 # --- Schedule ----------------------------------------------------------------------
@@ -150,7 +150,7 @@ def calendario(request):
     }
     return render(
         request,
-        "agenda/calendario.html",
+        "schedule/calendar.html",
         {
             "profissionais": profissionais,
             "profissional": profissional,
@@ -235,7 +235,7 @@ def novo(request):
             return _resposta_sucesso(
                 ngettext("Agendamento criado.", "%(n)s agendamentos criados.", total) % {"n": total}
             )
-    return render(request, "agenda/_form.html", {"form": form, "agendamento": form.instance})
+    return render(request, "schedule/_form.html", {"form": form, "agendamento": form.instance})
 
 
 @exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
@@ -259,7 +259,7 @@ def editar(request, pk):
             )
         else:
             return _resposta_sucesso(_("Agendamento alterado."))
-    return render(request, "agenda/_form.html", {"form": form, "agendamento": agendamento})
+    return render(request, "schedule/_form.html", {"form": form, "agendamento": agendamento})
 
 
 MENSAGENS_SITUACAO = {
@@ -289,7 +289,7 @@ def situacao(request, pk):
                 profissionais=services.profissionais_visiveis(request),
             )
             contexto = {"form": form, "agendamento": agendamento, "erro_situacao": erro.messages[0]}
-            return render(request, "agenda/_form.html", contexto)
+            return render(request, "schedule/_form.html", contexto)
         messages.error(request, erro.messages[0])
         return redirect("inicio")
     mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.paciente.nome}
@@ -321,7 +321,7 @@ def excluir(request, pk):
             serie=agendamento.serie, inicio__gt=agendamento.inicio
         ).count()
     return render(
-        request, "agenda/_excluir.html", {"agendamento": agendamento, "proximos": proximos}
+        request, "schedule/_delete.html", {"agendamento": agendamento, "proximos": proximos}
     )
 
 
@@ -366,5 +366,5 @@ def aniversariantes_dia(request):
         for paciente in _aniversariantes_em([dia])[dia]
     ]
     return render(
-        request, "agenda/_aniversariantes.html", {"dia": dia, "aniversariantes": aniversariantes}
+        request, "schedule/_birthdays.html", {"dia": dia, "aniversariantes": aniversariantes}
     )

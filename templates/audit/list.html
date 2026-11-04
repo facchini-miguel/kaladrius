@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Auditoria" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-1">{% translate "Auditoria" %}</h1>
+<p class="text-body-secondary">{% translate "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros não podem ser alterados." %}</p>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="{% translate 'Usuário, registro ou código' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-6 col-md-2">
+    <select name="acao" class="form-select" aria-label="{% translate 'Ação' %}">
+      <option value="">{% translate "Todas as ações" %}</option>
+      {% for valor, rotulo in acoes %}<option value="{{ valor }}"{% if filtros.acao == valor %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <select name="modelo" class="form-select" aria-label="{% translate 'Tipo de registro' %}">
+      <option value="">{% translate "Todos os tipos" %}</option>
+      {% for item in modelos %}<option value="{{ item }}"{% if filtros.modelo == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="ate" value="{{ filtros.ate }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
+  <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-sm align-middle bg-white">
+    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demonstracao %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
+    <tbody>
+      {% for registro in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ registro.momento|date:"SHORT_DATETIME_FORMAT" }}</td>
+        <td>{% if registro.usuario_nome %}{{ registro.usuario_nome }}{% else %}{% translate "sistema" %}{% endif %}</td>
+        <td>{{ registro.get_acao_display }}</td>
+        <td>{% if registro.modelo %}<span class="text-body-secondary">{{ registro.modelo }} {{ registro.objeto_id }}:</span> {% endif %}{{ registro.objeto_descricao }}</td>
+        <td>
+          {% if registro.alteracoes %}
+          <details>
+            <summary>{% blocktranslate count total=registro.alteracoes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
+            <ul class="small mb-0">
+              {% for campo, valores in registro.alteracoes.items %}
+              <li><strong>{{ campo }}</strong>: {{ valores.0|default_if_none:"—" }} → {{ valores.1|default_if_none:"—" }}</li>
+              {% endfor %}
+            </ul>
+          </details>
+          {% endif %}
+        </td>
+        {% if not user.demonstracao %}<td class="small text-body-secondary">{{ registro.ip|default:"" }}</td>{% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum registro encontrado." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/pagination.html" %}
+{% endblock %}

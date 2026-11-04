@@ -162,7 +162,7 @@ AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 # IPv6 clients are grouped by /48 network, so rotating addresses does not reset the count.
 AXES_CLIENT_IP_CALLABLE = "apps.core.security.ip_para_bloqueio"
 AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_TEMPLATE = "registration/bloqueado.html"
+AXES_LOCKOUT_TEMPLATE = "registration/locked.html"
 
 # Argon2 first: new passwords use Argon2; others are upgraded on the next login.
 PASSWORD_HASHERS = [
