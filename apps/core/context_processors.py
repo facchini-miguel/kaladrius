@@ -13,8 +13,8 @@ BACKUP_ATRASADO_APOS = datetime.timedelta(hours=26)
 
 
 def clinic(request):
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_authenticated:
+    user = getattr(request, "user", None)
+    if user is None or not user.is_authenticated:
         return {}
     return {
         "clinica_atual": getattr(request, "clinic", None),
@@ -51,8 +51,8 @@ def idiomas(request):
 def backup(request):
     """For superusers on servers with backups: a warning when the newest one is overdue
     or when no backup was ever recorded (backups never worked)."""
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_superuser or not settings.BACKUP_MONITORED:
+    user = getattr(request, "user", None)
+    if user is None or not user.is_superuser or not settings.BACKUP_MONITORED:
         return {}
     ultimo = Backup.objects.first()
     if ultimo is None:
@@ -64,7 +64,7 @@ def backup(request):
 
 def inatividade(request):
     """Minutes without use before the page leaves by itself (decision 111)."""
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_authenticated:
+    user = getattr(request, "user", None)
+    if user is None or not user.is_authenticated:
         return {}
     return {"inatividade_minutos": settings.INATIVIDADE_MINUTOS}

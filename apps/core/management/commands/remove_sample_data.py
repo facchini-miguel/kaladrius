@@ -124,13 +124,13 @@ class Command(BaseCommand):
             # Collected now: delete() clears the instances' pk.
             ids_usuarios = [u.pk for u in usuarios]
             ids_clinicas = [c.pk for c in clinicas]
-            for usuario in usuarios:
-                usuario.delete()
+            for user in usuarios:
+                user.delete()
             for clinic in clinicas:
                 clinic.delete()
             # Their history, including the entries the deletion itself just wrote.
             AuditEntry.objects.filter(clinic_id__in=ids_clinicas).delete()
-            AuditEntry.objects.filter(usuario_id__in=ids_usuarios).delete()
+            AuditEntry.objects.filter(user_id__in=ids_usuarios).delete()
             AuditEntry.objects.filter(
                 modelo__in=["Usuário", "Clínica"],
                 objeto_id__in=[str(i) for i in ids_usuarios + ids_clinicas],

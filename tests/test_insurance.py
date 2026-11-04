@@ -12,7 +12,7 @@ from apps.estimates.models import Procedure
 from apps.health_plans import insurance
 from apps.health_plans.models import HealthPlan, MemberCard
 from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
-from tests.test_health_plans import admin, carteirinha, convenio, paciente  # noqa: F401
+from tests.test_health_plans import admin, carteirinha, convenio, patient  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
@@ -62,8 +62,8 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     assert "Registro da operadora" not in admin.get(reverse("health_plans:list")).content.decode()
 
 
-def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  # noqa: F811
-    url = reverse("health_plans:card_new", args=[paciente.pk])
+def test_campos_da_carteirinha_por_pais(clinica_a, patient, convenio, admin):  # noqa: F811
+    url = reverse("health_plans:card_new", args=[patient.pk])
     campos = admin.get(url).context["form"].fields
     assert "grupo" not in campos and "beneficiario" not in campos  # Brazil
     mudar_pais(clinica_a, "US")
@@ -75,7 +75,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
         assert MemberCard.objects.get().grupo == "G-100"
-    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
     campos = admin.get(url).context["form"].fields

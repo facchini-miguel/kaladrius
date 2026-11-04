@@ -48,9 +48,9 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Estimate
-        fields = ["paciente", "profissional", "data", "validade", "observacoes"]
+        fields = ["patient", "practitioner", "data", "validade", "observacoes"]
         widgets = {
-            "paciente": forms.HiddenInput,
+            "patient": forms.HiddenInput,
             "data": DATA,
             "validade": DATA,
             "observacoes": forms.Textarea(attrs={"rows": 2}),
@@ -58,9 +58,9 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["paciente"].queryset = Patient.objects.filter(arquivado=False)
-        self.fields["paciente"].error_messages["required"] = _("Escolha o paciente.")
-        self.fields["profissional"].queryset = Practitioner.objects.filter(ativo=True)
+        self.fields["patient"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["patient"].error_messages["required"] = _("Escolha o paciente.")
+        self.fields["practitioner"].queryset = Practitioner.objects.filter(ativo=True)
 
     def clean(self):
         dados = super().clean()

@@ -290,7 +290,7 @@ class _Importador:
                 extras.append(f"{rotulo}: {_texto(linha[legado])}")
 
         pf = tipo == Patient.Tipo.FISICA
-        paciente = Patient(
+        patient = Patient(
             clinic=clinic,
             tipo=tipo,
             nome=_cabe(nome, 200, "Nome completo", extras),
@@ -320,8 +320,8 @@ class _Importador:
         )
         observacoes = _texto(linha["obs"])
         bloco = "[Sistema antigo]\n" + "\n".join(extras)
-        paciente.observacoes = f"{observacoes}\n\n{bloco}" if observacoes else bloco
-        return paciente, _data(linha["data_cadast"])
+        patient.observacoes = f"{observacoes}\n\n{bloco}" if observacoes else bloco
+        return patient, _data(linha["data_cadast"])
 
     def _pacientes(self, clinic):
         cidades = self._cidades()
@@ -338,28 +338,28 @@ class _Importador:
             )
             for linha in sorted(self.t.get("pessoas", []), key=lambda linha: linha["id"])
         ]
-        Patient.objects.bulk_create([paciente for _, paciente, _ in pares], batch_size=500)
+        Patient.objects.bulk_create([patient for _, patient, _ in pares], batch_size=500)
         # Keep the original registration date (auto_now_add only fills it on creation).
         com_data = []
-        for _, paciente, cadastro in pares:
+        for _, patient, cadastro in pares:
             if cadastro is not None:
-                paciente.created_at = timezone.make_aware(
+                patient.created_at = timezone.make_aware(
                     datetime.datetime.combine(cadastro, datetime.time(12))
                 )
-                com_data.append(paciente)
+                com_data.append(patient)
         Patient.objects.bulk_update(com_data, ["created_at"], batch_size=500)
         self.relatorio.pacientes = len(pares)
-        return {codigo: paciente for codigo, paciente, _ in pares}
+        return {codigo: patient for codigo, patient, _ in pares}
 
     def _agendamentos(self, profissionais, tipos):
         avisos = self.relatorio.avisos
         novos = []
         for linha in sorted(self.t.get("agendax", []), key=lambda linha: linha["id"]):
-            profissional = profissionais.get(linha["id_dentista"])
+            practitioner = profissionais.get(linha["id_dentista"])
             tipo = tipos.get(linha["id_cor"])
             dia = _data(linha["data_marcar"])
             inicio, fim = _hora(linha["hora_inicial"]), _hora(linha["hora_final"])
-            if None in (profissional, tipo, dia, inicio, fim):
+            if None in (practitioner, tipo, dia, inicio, fim):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
@@ -373,8 +373,8 @@ class _Importador:
                 avisos["Agendamento com término antes do início (corrigido para 30 min)"] += 1
             novos.append(
                 Appointment(
-                    clinic=profissional.clinic,
-                    profissional=profissional,
+                    clinic=practitioner.clinic,
+                    practitioner=practitioner,
                     tipo=tipo,
                     inicio=inicio,
                     fim=fim,
@@ -383,11 +383,11 @@ class _Importador:
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
         aceitos, ultimo_fim = [], {}
-        for agendamento in sorted(novos, key=lambda a: (a.profissional.pk, a.inicio)):
-            if agendamento.inicio < ultimo_fim.get(agendamento.profissional.pk, agendamento.inicio):
+        for agendamento in sorted(novos, key=lambda a: (a.practitioner.pk, a.inicio)):
+            if agendamento.inicio < ultimo_fim.get(agendamento.practitioner.pk, agendamento.inicio):
                 avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] += 1
                 continue
-            ultimo_fim[agendamento.profissional.pk] = agendamento.fim
+            ultimo_fim[agendamento.practitioner.pk] = agendamento.fim
             aceitos.append(agendamento)
         Appointment.objects.bulk_create(aceitos, batch_size=1000)
         self.relatorio.agendamentos = len(aceitos)
@@ -422,21 +422,21 @@ class _Importador:
         for linha in self.t.get("agenda", []):
             if not linha.get("is_rechamada"):
                 continue
-            paciente = pacientes.get(linha["id_pessoa"])
+            patient = pacientes.get(linha["id_pessoa"])
             dia = _data(linha["data_marcar"])
-            if paciente is None or dia is None:
+            if patient is None or dia is None:
                 avisos["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
                 continue
             descricao = _texto(linha["descricao"]) or "Rechamada"
             if len(descricao) > 200:
-                paciente.observacoes += f"\nRechamada de {dia:%d/%m/%Y}: {descricao}"
-                paciente.save(update_fields=["observacoes"])
+                patient.observacoes += f"\nRechamada de {dia:%d/%m/%Y}: {descricao}"
+                patient.save(update_fields=["observacoes"])
                 descricao = descricao[:199] + "…"
             # The legacy system had no "done" flag: past recalls are considered handled.
             novas.append(
                 Recall(
-                    clinic=paciente.clinic,
-                    paciente=paciente,
+                    clinic=patient.clinic,
+                    patient=patient,
                     data=dia,
                     descricao=descricao,
                     concluida=dia < self.hoje,

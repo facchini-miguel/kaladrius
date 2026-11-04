@@ -80,16 +80,16 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Entry
         fields = [
-            "paciente",
+            "patient",
             "pessoa",
             "descricao",
             "categoria",
             "centro_custo",
-            "profissional",
+            "practitioner",
             "observacoes",
         ]
         widgets = {
-            "paciente": forms.HiddenInput,
+            "patient": forms.HiddenInput,
             "observacoes": forms.Textarea(attrs={"rows": 2}),
         }
         help_texts = {"pessoa": _("Só se quem paga não for um paciente cadastrado.")}
@@ -98,17 +98,17 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.instance.clinic = clinic
         self.instance.tipo = Entry.Tipo.RECEBER
-        self.fields["paciente"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["patient"].queryset = Patient.objects.filter(arquivado=False)
         self.fields["categoria"].queryset = Category.objects.filter(
             tipo=Category.Tipo.RECEITA, ativa=True
         )
-        self.fields["profissional"].queryset = Practitioner.objects.filter(ativo=True)
+        self.fields["practitioner"].queryset = Practitioner.objects.filter(ativo=True)
         self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
         _centros_de_custo(self)
 
     def clean(self):
         dados = super().clean()
-        if not dados.get("paciente") and not (dados.get("pessoa") or "").strip():
+        if not dados.get("patient") and not (dados.get("pessoa") or "").strip():
             self.add_error("pessoa", _("Escolha o paciente ou informe quem paga."))
         if dados.get("valor_total") is not None and dados["valor_total"] <= 0:
             self.add_error("valor_total", _("Informe um valor maior que zero."))

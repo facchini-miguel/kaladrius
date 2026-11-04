@@ -4,7 +4,7 @@
 {% block titulo %}{% translate "Arquivar paciente" %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=paciente.nome %}Arquivar {{ nome }}?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with nome=patient.nome %}Arquivar {{ nome }}?{% endblocktranslate %}</h1>
 <p>{% translate "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o histórico continuam guardados." %}</p>
 <p>{% translate "Só administradores da clínica veem os pacientes arquivados (na lista de pacientes, em Situação: Arquivados) e podem restaurá-los." %}</p>
 {% if abertas %}
@@ -23,12 +23,12 @@
     {% endfor %}
   </tbody>
 </table>
-<a class="btn btn-link px-0" href="{% url 'patients:record' paciente.pk %}">{% translate "Voltar para a ficha" %}</a>
+<a class="btn btn-link px-0" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a>
 {% else %}
 <form method="post">
   {% csrf_token %}
   <button type="submit" class="btn btn-secondary">{% translate "Arquivar" %}</button>
-  <a class="btn btn-link" href="{% url 'patients:record' paciente.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endif %}
 {% endblock %}

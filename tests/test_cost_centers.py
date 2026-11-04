@@ -78,17 +78,17 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
         == 302
     )
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paciente fictício do centro")
+        patient = Patient.objects.create(nome="Paciente fictício do centro")
         receita = Category.objects.get(nome="Tratamento")
     resposta = admin.post(
         reverse("finance:entry_new"),
         {
-            "paciente": paciente.pk,
+            "patient": patient.pk,
             "pessoa": "",
             "descricao": "Aparelho",
             "categoria": receita.pk,
             "centro_custo": centro.pk,
-            "profissional": "",
+            "practitioner": "",
             "valor_total": "500",
             "parcelas": 1,
             "primeiro_vencimento": HOJE.isoformat(),
@@ -120,10 +120,10 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
                 valor_total=valor,
                 parcelas=1,
                 primeiro_vencimento=HOJE,
-                usuario=None,
+                user=None,
             )
             parcela = lancamento.parcelas.get()
-            services.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
+            services.receber(parcela, user=None, valor=parcela.valor, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert relatorio["centros"]
     assert {nome: str(total) for nome, total in relatorio["despesas_por_centro"]} == {

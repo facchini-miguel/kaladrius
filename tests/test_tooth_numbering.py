@@ -93,7 +93,7 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     clinic.numeracao_dentaria = UNIVERSAL
     clinic.save()
-    cliente = entrar(cenario, "profissional")
+    cliente = entrar(cenario, "practitioner")
     orcamento = criar_orcamento(cenario, cliente)
     incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk, dentes="36,18")
     with usar_clinica(clinic):

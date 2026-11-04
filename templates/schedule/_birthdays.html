@@ -4,9 +4,9 @@
 </div>
 <div class="modal-body">
   <ul class="list-group">
-    {% for paciente, idade in aniversariantes %}
+    {% for patient, idade in aniversariantes %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'patients:record' paciente.pk %}">{{ paciente.nome }}</a>
+      <a href="{% url 'patients:record' patient.pk %}">{{ patient.nome }}</a>
       <span class="text-body-secondary">{% blocktranslate count idade=idade %}completa {{ idade }} ano{% plural %}completa {{ idade }} anos{% endblocktranslate %}</span>
     </li>
     {% empty %}

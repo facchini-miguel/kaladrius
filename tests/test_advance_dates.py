@@ -16,25 +16,25 @@ def cenario(clinica_a, criar_profissional):
     hoje = timezone.localdate()
     ana = criar_profissional(clinica_a, "Dra. Ana")
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(
+        patient = Patient.objects.create(
             nome="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
         )
         tipo = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
         semana = [
             Appointment.objects.create(
-                profissional=ana,
+                practitioner=ana,
                 tipo=tipo,
-                paciente=paciente,
+                patient=patient,
                 inicio=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(9)),
                 fim=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(10)),
             )
             for d in (21, 14)
         ]
         rechamada = Recall.objects.create(
-            paciente=paciente, data=hoje - datetime.timedelta(days=20), descricao="Limpeza"
+            patient=patient, data=hoje - datetime.timedelta(days=20), descricao="Limpeza"
         )
-    return {"clinic": clinica_a, "paciente": paciente, "agenda": semana, "rechamada": rechamada}
+    return {"clinic": clinica_a, "patient": patient, "agenda": semana, "rechamada": rechamada}
 
 
 def test_so_no_servidor_de_demonstracao(cenario, settings):
@@ -64,7 +64,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
             primeiro = Appointment.objects.first()
             Appointment.objects.create(
-                profissional=primeiro.profissional,
+                practitioner=primeiro.practitioner,
                 tipo=primeiro.tipo,
                 inicio=primeiro.inicio,
                 fim=primeiro.fim,

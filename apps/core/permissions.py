@@ -109,17 +109,17 @@ MODULO_DA_CLINICA = {
 
 def pode(request, modulo, acao):
     """Whether the current user may perform `acao` on `modulo` in the current clinic."""
-    usuario = request.user
-    if not usuario.is_authenticated or getattr(request, "clinic", None) is None:
+    user = request.user
+    if not user.is_authenticated or getattr(request, "clinic", None) is None:
         return False
     if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modules.visiveis(request):
         return False
-    if usuario.is_superuser:
+    if user.is_superuser:
         return True
     vinculo = getattr(request, "vinculo", None)
     if vinculo is None:
         return False
-    if usuario.demonstracao and modulo in SO_LEITURA_NA_DEMONSTRACAO and acao != Acao.VER:
+    if user.demonstracao and modulo in SO_LEITURA_NA_DEMONSTRACAO and acao != Acao.VER:
         return False
     return acao in MATRIZ.get(vinculo.papel, {}).get(modulo, frozenset())
 

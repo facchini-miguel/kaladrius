@@ -102,11 +102,11 @@ class _Anonimizador:
     def _nome(self, sexo):
         return self.fake.name_female() if sexo == "F" else self.fake.name_male()
 
-    def _documento(self, paciente, usados):
-        if not paciente.cpf_cnpj:
+    def _documento(self, patient, usados):
+        if not patient.cpf_cnpj:
             return ""
         while True:
-            gerar = fake_data.cnpj if paciente.tipo == Patient.Tipo.JURIDICA else fake_data.cpf
+            gerar = fake_data.cnpj if patient.tipo == Patient.Tipo.JURIDICA else fake_data.cpf
             documento = gerar(self.fake)
             if documento not in usados:
                 usados.add(documento)
@@ -202,12 +202,12 @@ class _Anonimizador:
 
     def profissionais(self):
         profissionais = list(Practitioner.objects.filter(clinic=self.clinic))
-        for profissional in profissionais:
+        for practitioner in profissionais:
             sexo = self.sorte.choice("FM")
             titulo = "Dra." if sexo == "F" else "Dr."
-            profissional.nome = f"{titulo} {self._nome(sexo)}"
-            if profissional.registro:
-                profissional.registro = f"CRO {self.fake.numerify('#####')}"
+            practitioner.nome = f"{titulo} {self._nome(sexo)}"
+            if practitioner.registro:
+                practitioner.registro = f"CRO {self.fake.numerify('#####')}"
         Practitioner.objects.bulk_update(profissionais, ["nome", "registro"])
         self.resultado.profissionais = len(profissionais)
 

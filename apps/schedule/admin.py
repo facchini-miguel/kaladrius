@@ -12,8 +12,8 @@ class TipoAtendimentoAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AgendamentoAdmin(admin.ModelAdmin):
-    list_display = ["inicio", "fim", "profissional", "paciente", "tipo", "clinic"]
-    list_filter = ["clinic", "profissional", "tipo"]
-    search_fields = ["descricao", "paciente__nome"]
+    list_display = ["inicio", "fim", "practitioner", "patient", "tipo", "clinic"]
+    list_filter = ["clinic", "practitioner", "tipo"]
+    search_fields = ["descricao", "patient__nome"]
     date_hierarchy = "inicio"
-    raw_id_fields = ["paciente"]
+    raw_id_fields = ["patient"]

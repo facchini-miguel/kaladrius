@@ -139,7 +139,7 @@ def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noq
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
         pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal("100"),
             forma="pix",
             conta=cenario["caixa"],

@@ -23,22 +23,22 @@ SENHA = "Senha-Ficticia-2026!"
 
 @pytest.fixture
 def pessoa(clinica_a, criar_usuario):
-    usuario = criar_usuario("pessoa_conta", clinica_a, Papel.RECEPCAO)
-    usuario.set_password(SENHA)
-    usuario.email = "pessoa@example.com"
-    usuario.save()
-    return usuario
+    user = criar_usuario("pessoa_conta", clinica_a, Papel.RECEPCAO)
+    user.set_password(SENHA)
+    user.email = "pessoa@example.com"
+    user.save()
+    return user
 
 
-def entrar(client, usuario, senha=SENHA, proximo=""):
-    dados = {"username": usuario.username, "password": senha}
+def entrar(client, user, senha=SENHA, proximo=""):
+    dados = {"username": user.username, "password": senha}
     if proximo:
         dados["next"] = proximo
     return client.post(reverse("login"), dados)
 
 
-def ligar_duas_etapas(usuario):
-    dispositivo = services.preparar(usuario)
+def ligar_duas_etapas(user):
+    dispositivo = services.preparar(user)
     codigos = services.ativar(dispositivo)
     return dispositivo, codigos
 
@@ -114,7 +114,7 @@ def test_ativar_com_qr_code(client, pessoa):
     client.force_login(pessoa)
     pagina = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in pagina and "otpauth" not in pagina  # the secret is in the QR, not text
-    dispositivo = TwoFactor.objects.get(usuario=pessoa)
+    dispositivo = TwoFactor.objects.get(user=pessoa)
     errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "codigo": "000000"})
     assert "Código incorreto" in errado.content.decode()
     resposta = client.post(
@@ -122,7 +122,7 @@ def test_ativar_com_qr_code(client, pessoa):
     )
     texto = resposta.content.decode()
     assert "Verificação em duas etapas ativada" in texto
-    assert RecoveryCode.objects.filter(usuario=pessoa).count() == 10
+    assert RecoveryCode.objects.filter(user=pessoa).count() == 10
     assert AuditEntry.objects.filter(objeto_descricao__contains="ativada").exists()
     dispositivo.refresh_from_db()
     assert dispositivo.ativa and dispositivo.segredo not in texto
@@ -274,17 +274,17 @@ def exigida(clinica_a):
 def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
     client, exigida, criar_usuario, criar_profissional
 ):
-    profissional = criar_usuario("prof_exigida", exigida, Papel.PROFISSIONAL)
-    criar_profissional(exigida, "Dra. Fictícia", usuario=profissional)
+    practitioner = criar_usuario("prof_exigida", exigida, Papel.PROFISSIONAL)
+    criar_profissional(exigida, "Dra. Fictícia", user=practitioner)
     financeiro = criar_usuario("fin_exigida", exigida, Papel.FINANCEIRO)
-    for usuario in (profissional, financeiro):
-        client.force_login(usuario)
+    for user in (practitioner, financeiro):
+        client.force_login(user)
         resposta = client.get(reverse("patients:list"))
-        assert resposta.url == reverse("account:two_factor"), usuario
+        assert resposta.url == reverse("account:two_factor"), user
         pagina = client.get(reverse("account:two_factor")).content.decode()
         assert "A clínica exige a verificação em duas etapas" in pagina
         assert client.get(reverse("account:active")).status_code == 204  # still allowed
-        ligar_duas_etapas(usuario)
+        ligar_duas_etapas(user)
         assert client.get(reverse("patients:list")).status_code == 200
 
 
@@ -360,33 +360,33 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
 
     so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
     nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
-    TwoFactor.objects.create(usuario=nas_duas, segredo="ORIGINAL", ativa=True)
-    RecoveryCode.objects.create(usuario=nas_duas, resumo="original")
+    TwoFactor.objects.create(user=nas_duas, segredo="ORIGINAL", ativa=True)
+    RecoveryCode.objects.create(user=nas_duas, resumo="original")
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(
                 f"CREATE TABLE account_{tabela} (LIKE conta_{tabela} INCLUDING DEFAULTS)"
             )
-        for usuario, segredo in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
+        for user, segredo in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
             cursor.execute(
                 "INSERT INTO account_duasetapas (id, usuario_id, segredo, ativa, ultimo_passo) "
                 "VALUES (%s, %s, %s, true, 0)",
-                [usuario.pk + 1000, usuario.pk, segredo],
+                [user.pk + 1000, user.pk, segredo],
             )
             cursor.execute(
                 "INSERT INTO account_codigorecuperacao (id, usuario_id, resumo) "
                 "VALUES (%s, %s, %s)",
-                [usuario.pk + 1000, usuario.pk, f"codigo-{segredo}"],
+                [user.pk + 1000, user.pk, f"codigo-{segredo}"],
             )
     with connection.schema_editor() as editor:
         migracao.copiar(None, editor)
 
     # Saved only in account_*: copied. Already in conta_*: kept as it was.
-    assert TwoFactor.objects.get(usuario=so_na_account).segredo == "NOVO"
-    assert TwoFactor.objects.get(usuario=nas_duas).segredo == "ORIGINAL"
+    assert TwoFactor.objects.get(user=so_na_account).segredo == "NOVO"
+    assert TwoFactor.objects.get(user=nas_duas).segredo == "ORIGINAL"
     assert list(
-        RecoveryCode.objects.filter(usuario=so_na_account).values_list("resumo", flat=True)
+        RecoveryCode.objects.filter(user=so_na_account).values_list("resumo", flat=True)
     ) == ["codigo-NOVO"]
-    assert list(RecoveryCode.objects.filter(usuario=nas_duas).values_list("resumo", flat=True)) == [
+    assert list(RecoveryCode.objects.filter(user=nas_duas).values_list("resumo", flat=True)) == [
         "original"
     ]

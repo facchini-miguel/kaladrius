@@ -70,13 +70,13 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         ]
         widgets = {"validade": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
-    def __init__(self, *args, paciente, **kwargs):
+    def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.paciente = paciente
+        self.instance.patient = patient
         if self.instance.clinic_id is None:
-            self.instance.clinic_id = paciente.clinic_id
+            self.instance.clinic_id = patient.clinic_id
         # The card's fields and their local names in the clinic's country (decision 125).
-        do_pais = insurance.do_pais(paciente.clinic.pais)
+        do_pais = insurance.do_pais(patient.clinic.pais)
         self.fields["numero"].label = insurance.com_nome_local(
             _("Número da carteirinha"), do_pais.numero
         )

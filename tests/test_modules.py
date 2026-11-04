@@ -116,8 +116,8 @@ def test_campos_administrativos_e_commit_false_preservados(clinica_a):
 def test_django_admin_salva_modulos_e_audita_o_superusuario(
     clinica_a, django_user_model, cliente_de
 ):
-    usuario = django_user_model.objects.create_superuser("root_config_ficticio")
-    cliente = cliente_de(usuario)
+    user = django_user_model.objects.create_superuser("root_config_ficticio")
+    cliente = cliente_de(user)
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])
     pagina = cliente.get(url)
     assert pagina.status_code == 200
@@ -142,7 +142,7 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
     assert (
         AuditEntry.objects.filter(
             clinic=clinica_a,
-            usuario=usuario,
+            user=user,
             modelo="Módulo da clínica",
             acao=AuditEntry.Acao.ALTERAR,
         ).count()
@@ -154,13 +154,13 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
 def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
     clinica_a, clinica_b, criar_profissional, django_user_model, cliente_de
 ):
-    profissional = criar_profissional(clinica_b, "Profissional fictício B")
+    practitioner = criar_profissional(clinica_b, "Profissional fictício B")
     inicio = timezone.localtime(timezone.now() + datetime.timedelta(days=2)).replace(
         hour=6, minute=0, second=0, microsecond=0
     )
     with usar_clinica(clinica_b):
         Appointment.objects.create(
-            profissional=profissional,
+            practitioner=practitioner,
             tipo=AppointmentType.objects.first(),
             inicio=inicio,
             fim=inicio + datetime.timedelta(minutes=30),
@@ -178,8 +178,8 @@ def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
 @pytest.fixture
 def orcamento(clinica_a):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paciente inteiramente fictício")
-        return Estimate.objects.create(paciente=paciente)
+        patient = Patient.objects.create(nome="Paciente inteiramente fictício")
+        return Estimate.objects.create(patient=patient)
 
 
 def novo_item(orcamento, **extra):
@@ -262,12 +262,12 @@ def test_prontuario_comum_nao_exige_modulo_especializado(
     codigos, clinica_a, orcamento, criar_usuario, cliente_de
 ):
     configurar(clinica_a, {*MODULOS_GERAIS, *codigos})
-    usuario = criar_usuario("prof_modulos", clinica_a, Papel.PROFISSIONAL)
+    user = criar_usuario("prof_modulos", clinica_a, Papel.PROFISSIONAL)
     with usar_clinica(clinica_a):
-        Practitioner.objects.create(nome="Profissional fictício", usuario=usuario)
-    cliente = cliente_de(usuario)
+        Practitioner.objects.create(nome="Profissional fictício", user=user)
+    cliente = cliente_de(user)
     assert (
-        cliente.get(reverse("medical_records:new", args=[orcamento.paciente_id])).status_code == 200
+        cliente.get(reverse("medical_records:new", args=[orcamento.patient_id])).status_code == 200
     )
 
 
@@ -277,7 +277,7 @@ def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
     configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_sem_prontuario", clinica_a, Papel.RECEPCAO))
     assert (
-        cliente.get(reverse("medical_records:new", args=[orcamento.paciente_id])).status_code == 403
+        cliente.get(reverse("medical_records:new", args=[orcamento.patient_id])).status_code == 403
     )
 
 

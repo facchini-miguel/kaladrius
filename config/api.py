@@ -13,7 +13,7 @@ api = NinjaAPI(
     urls_namespace="api-v1",
     # The interactive docs (/api/v1/docs) describe the API: superusers only. The app only
     # calls the endpoints, which keep their own access rules.
-    docs_decorator=user_passes_test(lambda usuario: usuario.is_superuser),
+    docs_decorator=user_passes_test(lambda user: user.is_superuser),
 )
 
 api.add_router("/", novidades_router)

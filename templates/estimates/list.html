@@ -29,8 +29,8 @@
       <tr>
         <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.pk }}</a></td>
         <td class="text-nowrap">{{ orcamento.data|date:"SHORT_DATE_FORMAT" }}</td>
-        <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.paciente.nome }}</a></td>
-        <td>{{ orcamento.profissional.nome|default:"—" }}</td>
+        <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.nome }}</a></td>
+        <td>{{ orcamento.practitioner.nome|default:"—" }}</td>
         <td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td>
         <td>{% include "estimates/_status.html" %}</td>
       </tr>

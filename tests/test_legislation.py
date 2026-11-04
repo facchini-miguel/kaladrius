@@ -61,18 +61,18 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
         lancamento = services.criar_lancamento(
             clinic=clinic,
             tipo=Entry.Tipo.RECEBER,
-            paciente=cenario["paciente"],
+            patient=cenario["patient"],
             descricao="Limpeza",
             categoria=cenario["categoria"],
-            profissional=dra,
+            practitioner=dra,
             valor_total=Decimal("100"),
             parcelas=1,
             primeiro_vencimento=HOJE,
-            usuario=cenario["admin"],
+            user=cenario["admin"],
         )
         pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal("100"),
             forma="dinheiro",
             conta=cenario["caixa"],
@@ -92,10 +92,10 @@ def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     clinic.pais = "CL"
     clinic.save()
-    paciente = cenario["paciente"]
+    patient = cenario["patient"]
     with usar_clinica(clinic):
-        paciente.arquivado = True
-        paciente.save()
-    pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[paciente.pk]))
+        patient.arquivado = True
+        patient.save()
+    pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[patient.pk]))
     texto = pagina.content.decode()
     assert "(Ley 19.628)" in texto and "15 anos" in texto and "LGPD" not in texto

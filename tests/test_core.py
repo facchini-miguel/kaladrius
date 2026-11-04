@@ -43,8 +43,8 @@ def test_login_com_senha_errada(client, django_user_model):
 
 
 def test_senha_usa_argon2(django_user_model):
-    usuario = django_user_model.objects.create_user(username="joao", password="senha-de-teste-123")
-    assert usuario.password.startswith("argon2")
+    user = django_user_model.objects.create_user(username="joao", password="senha-de-teste-123")
+    assert user.password.startswith("argon2")
 
 
 def test_criar_admin(monkeypatch):
@@ -89,16 +89,16 @@ def test_criar_admin_sem_senha(monkeypatch):
 
 
 def test_logout_exige_post(client, django_user_model):
-    usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
-    client.force_login(usuario)
+    user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
+    client.force_login(user)
     assert client.get(reverse("logout")).status_code == 405
     client.post(reverse("logout"))
     assert client.get(reverse("home")).status_code == 302
 
 
 def test_usuario_troca_a_propria_senha(client, django_user_model):
-    usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
-    client.force_login(usuario)
+    user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
+    client.force_login(user)
     assert "Trocar senha" in client.get(reverse("home")).content.decode()
     resposta = client.post(
         reverse("change_password"),
@@ -110,15 +110,15 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
         follow=True,
     )
     assert "Senha alterada." in resposta.content.decode()
-    usuario.refresh_from_db()
-    assert usuario.check_password("outra-senha-forte-456")
+    user.refresh_from_db()
+    assert user.check_password("outra-senha-forte-456")
     # The session stays open after the change.
     assert client.get(reverse("home")).status_code == 200
 
 
 def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
-    usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
-    client.force_login(usuario)
+    user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
+    client.force_login(user)
     resposta = client.post(
         reverse("change_password"),
         {
@@ -128,8 +128,8 @@ def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
         },
     )
     assert resposta.status_code == 200
-    usuario.refresh_from_db()
-    assert usuario.check_password("senha-de-teste-123")
+    user.refresh_from_db()
+    assert user.check_password("senha-de-teste-123")
 
 
 def test_sem_recuperacao_de_senha_por_email(client):
@@ -214,12 +214,12 @@ def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, client
 )
 def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        profissional = Practitioner.objects.create(nome="Dra. Teste")
+        practitioner = Practitioner.objects.create(nome="Dra. Teste")
         tipo = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
         inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
         Appointment.objects.create(
-            profissional=profissional,
+            practitioner=practitioner,
             tipo=tipo,
             inicio=inicio,
             fim=inicio + datetime.timedelta(hours=1),

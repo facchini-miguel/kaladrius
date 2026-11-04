@@ -60,8 +60,8 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get()
-    assert (paciente.telefone_celular, paciente.whatsapp, paciente.telefone_residencial) == (
+        patient = Patient.objects.get()
+    assert (patient.telefone_celular, patient.whatsapp, patient.telefone_residencial) == (
         "54981234567",
         "54981234567",
         "5434613354",

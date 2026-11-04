@@ -281,13 +281,14 @@ class Entry(ModeloDaClinica):
         related_name="lancamentos",
         verbose_name=_("centro de custo"),
     )
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="lancamentos",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     # Who pays (receivable without a registered patient) or the supplier (payable). With a
     # registered supplier it holds the supplier's name, so lists and reports need no join.
@@ -300,7 +301,7 @@ class Entry(ModeloDaClinica):
         related_name="lancamentos",
         verbose_name=_("fornecedor"),
     )
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         null=True,
@@ -308,6 +309,7 @@ class Entry(ModeloDaClinica):
         related_name="+",
         verbose_name=_("profissional"),
         help_text=_("Quem fez o atendimento (opcional)."),
+        db_column="profissional_id",
     )
     valor_total = models.DecimalField(_("valor total"), **DINHEIRO)
     data = models.DateField(_("data"), default=timezone.localdate)
@@ -351,7 +353,7 @@ class Entry(ModeloDaClinica):
 
     @property
     def nome_pessoa(self):
-        return self.paciente.nome if self.paciente_id else self.pessoa
+        return self.patient.nome if self.patient_id else self.pessoa
 
 
 class ParcelaQuerySet(models.QuerySet):
@@ -649,11 +651,12 @@ class Commission(ModeloDaClinica):
     creates a payable; cancelling that payable cancels the commission and frees the receipts.
     """
 
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="comissoes",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     ate = models.DateField(_("recebimentos até"))
     percentual = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
@@ -688,7 +691,7 @@ class Commission(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.profissional} {self.ate:%d/%m/%Y}"
+        return f"{self.practitioner} {self.ate:%d/%m/%Y}"
 
     @property
     def bruta(self):

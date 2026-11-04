@@ -23,7 +23,7 @@ class Practitioner(ModeloDaClinica):
     cor = models.CharField(
         _("cor na agenda"), max_length=7, default="#0d6efd", validators=[validar_cor]
     )
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
@@ -31,6 +31,7 @@ class Practitioner(ModeloDaClinica):
         related_name="profissionais",
         verbose_name=_("usuário de acesso"),
         help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
+        db_column="usuario_id",
     )
     # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
     comissao_percentual = models.DecimalField(
@@ -53,8 +54,8 @@ class Practitioner(ModeloDaClinica):
         indexes = [models.Index(fields=["clinic", "nome"], name="profissional_clinica_nome")]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "usuario"],
-                condition=models.Q(usuario__isnull=False),
+                fields=["clinic", "user"],
+                condition=models.Q(user__isnull=False),
                 name="profissional_usuario_unico_por_clinica",
             ),
         ]

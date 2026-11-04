@@ -24,21 +24,21 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     # One installation, one clinic (decision 069).
     assert Clinic.objects.count() == 1
     assert get_user_model().objects.get(username="dr.carlos").check_password("senha-de-teste-123")
-    assert Membership.objects.filter(usuario__username="dra.ana").count() == 1
+    assert Membership.objects.filter(user__username="dra.ana").count() == 1
     # One user per role, so every role can be tried (review stage 3).
     assert set(Membership.objects.values_list("papel", flat=True)) == set(Papel)
     with sem_isolamento():
         assert Practitioner.objects.count() == 5
-        assert Practitioner.objects.get(nome="Dra. Ana Souza").usuario.username == "dra.ana"
+        assert Practitioner.objects.get(nome="Dra. Ana Souza").user.username == "dra.ana"
         assert Patient.objects.count() == 30  # not duplicated on the 2nd run
         assert Patient.objects.filter(tipo=Patient.Tipo.JURIDICA).count() == 1
-        for paciente in Patient.objects.exclude(cpf_cnpj=""):
-            valido = cpf_valido if paciente.tipo == Patient.Tipo.FISICA else cnpj_valido
-            assert valido(paciente.cpf_cnpj), paciente.cpf_cnpj
+        for patient in Patient.objects.exclude(cpf_cnpj=""):
+            valido = cpf_valido if patient.tipo == Patient.Tipo.FISICA else cnpj_valido
+            assert valido(patient.cpf_cnpj), patient.cpf_cnpj
         assert not Patient.objects.exclude(email__endswith="@example.com").exists()
         assert Appointment.objects.count() > 0  # created once, not duplicated
         assert Recall.objects.count() == 80  # not duplicated
-        assert Appointment.objects.filter(profissional__clinic=F("clinic")).count() == (
+        assert Appointment.objects.filter(practitioner__clinic=F("clinic")).count() == (
             Appointment.objects.count()
         )
 
@@ -57,7 +57,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     real = Clinic.objects.create(nome="Clínica Real")
     criar_usuario("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
-    Membership.objects.create(usuario=get_user_model().objects.get(username="dra.ana"), clinic=real)
+    Membership.objects.create(user=get_user_model().objects.get(username="dra.ana"), clinic=real)
     with sem_isolamento():
         Patient.objects.create(clinic=real, nome="Paciente Real")
 

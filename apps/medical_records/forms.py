@@ -14,7 +14,7 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
         if profissionais is not None:
             # Before the mixin's __init__, so it gets the Bootstrap classes too.
             self.base_fields = {
-                "profissional": forms.ModelChoiceField(
+                "practitioner": forms.ModelChoiceField(
                     queryset=profissionais, label=_("Profissional")
                 ),
                 **self.base_fields,

@@ -31,7 +31,7 @@
       {% for rechamada in pagina %}
       <tr>
         <td class="text-nowrap">{{ rechamada.data|date:"SHORT_DATE_FORMAT" }}</td>
-        <td><a href="{% url 'patients:record' rechamada.paciente_id %}">{{ rechamada.paciente.nome }}</a></td>
+        <td><a href="{% url 'patients:record' rechamada.patient_id %}">{{ rechamada.patient.nome }}</a></td>
         <td>{{ rechamada.descricao }}</td>
         <td>
           {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>

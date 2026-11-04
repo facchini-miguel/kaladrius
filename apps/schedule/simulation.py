@@ -41,21 +41,21 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
         segunda + datetime.timedelta(days=n) for n in range(7 * (semanas_antes + semanas_depois))
     ]
     ocupados = {}
-    for profissional_id, inicio, fim in Appointment.objects.filter(
+    for practitioner_id, inicio, fim in Appointment.objects.filter(
         clinic=clinic,
         inicio__lt=momento(dias[-1], datetime.time(23, 59)),
         fim__gt=momento(dias[0], datetime.time(0)),
-    ).values_list("profissional_id", "inicio", "fim"):
-        ocupados.setdefault(profissional_id, []).append((inicio, fim))
+    ).values_list("practitioner_id", "inicio", "fim"):
+        ocupados.setdefault(practitioner_id, []).append((inicio, fim))
 
-    def livre(profissional, inicio, fim):
-        return all(fim <= a or inicio >= b for a, b in ocupados.get(profissional.pk, []))
+    def livre(practitioner, inicio, fim):
+        return all(fim <= a or inicio >= b for a, b in ocupados.get(practitioner.pk, []))
 
     novos = []
     for dia in dias:
         if dia.weekday() >= 5:
             continue
-        for profissional in profissionais:
+        for practitioner in profissionais:
             atual = momento(dia, clinic.agenda_inicio)
             fim_do_dia = momento(dia, clinic.agenda_fim)
             while atual < fim_do_dia:
@@ -64,7 +64,7 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
                 if (
                     fim > fim_do_dia
                     or sorteio.random() > ocupacao
-                    or not livre(profissional, atual, fim)
+                    or not livre(practitioner, atual, fim)
                 ):
                     atual += passo
                     continue
@@ -72,9 +72,9 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
                 novos.append(
                     Appointment(
                         clinic=clinic,
-                        profissional=profissional,
+                        practitioner=practitioner,
                         tipo=sorteio.choice(tipos),
-                        paciente=sorteio.choice(pacientes) if com_paciente else None,
+                        patient=sorteio.choice(pacientes) if com_paciente else None,
                         descricao="" if com_paciente else "Horário bloqueado",
                         situacao=_situacao(sorteio, atual) if com_paciente else "agendado",
                         inicio=atual,
@@ -110,7 +110,7 @@ def simular_rechamadas(clinic, sorteio, quantidade=80, dias_antes=30, dias_depoi
         novas.append(
             Recall(
                 clinic=clinic,
-                paciente=sorteio.choice(pacientes),
+                patient=sorteio.choice(pacientes),
                 data=data,
                 descricao=sorteio.choice(MOTIVOS_RECHAMADA),
                 concluida=data < hoje and sorteio.random() < 0.7,
@@ -132,7 +132,7 @@ DESCRICOES_FINANCEIRAS = [
 ]
 
 
-def simular_financeiro(clinic, sorteio, quantidade=60, usuario=None):
+def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     """Fake receivables from 90 days ago to today, in 1 to 6 installments.
 
     Installments due in the past are mostly paid (some are left overdue, for the debtors
@@ -162,29 +162,29 @@ def simular_financeiro(clinic, sorteio, quantidade=60, usuario=None):
         lancamento = services.criar_lancamento(
             clinic=clinic,
             tipo=Entry.Tipo.RECEBER,
-            paciente=sorteio.choice(pacientes),
+            patient=sorteio.choice(pacientes),
             descricao=sorteio.choice(DESCRICOES_FINANCEIRAS),
             categoria=sorteio.choice(categorias),
             centro_custo=centros["Atendimento"],
-            profissional=sorteio.choice(profissionais) if profissionais else None,
+            practitioner=sorteio.choice(profissionais) if profissionais else None,
             valor_total=Decimal(sorteio.randrange(150, 3000, 10)),
             data=data,
             parcelas=sorteio.choice([1, 1, 2, 3, 4, 6]),
             primeiro_vencimento=data,
-            usuario=usuario,
+            user=user,
         )
         for parcela in lancamento.parcelas.all():
             if parcela.vencimento <= hoje and sorteio.random() < 0.8:
                 services.receber(
                     parcela,
-                    usuario=usuario,
+                    user=user,
                     valor=parcela.valor,
                     data=parcela.vencimento,
                     forma=sorteio.choice(formas),
                     conta=sorteio.choice(contas),
                 )
         criados += 1
-    return criados, _simular_despesas(clinic, sorteio, contas, usuario, centros)
+    return criados, _simular_despesas(clinic, sorteio, contas, user, centros)
 
 
 # Fake payables: (supplier, description, category, amount, monthly repetitions or None).
@@ -200,7 +200,7 @@ DESPESAS_SIMULADAS = [
 DESPESAS_DO_ATENDIMENTO = {"Material odontológico", "Laboratório de prótese"}
 
 
-def _simular_despesas(clinic, sorteio, contas, usuario, centros):
+def _simular_despesas(clinic, sorteio, contas, user, centros):
     """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
     from decimal import Decimal
 
@@ -238,13 +238,13 @@ def _simular_despesas(clinic, sorteio, contas, usuario, centros):
             data=inicio,
             parcelas=parcelas,
             primeiro_vencimento=inicio if meses else hoje - datetime.timedelta(days=20),
-            usuario=usuario,
+            user=user,
         )
         for parcela in lancamento.parcelas.all():
             if parcela.vencimento <= hoje and sorteio.random() < 0.9:
                 services.receber(
                     parcela,
-                    usuario=usuario,
+                    user=user,
                     valor=parcela.valor,
                     data=parcela.vencimento,
                     forma=sorteio.choice(formas),
@@ -267,7 +267,7 @@ PROCEDIMENTOS_EXEMPLO = [
 ]
 
 
-def simular_orcamentos(clinic, sorteio, quantidade=20, usuario=None):
+def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
     """Fake estimates of the last 60 days: some approved (they become receivables), some
     refused, the rest open. Creates an example price list if the clinic has none."""
     from decimal import Decimal
@@ -301,11 +301,11 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, usuario=None):
         data = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
         orcamento = Estimate.objects.create(
             clinic=clinic,
-            paciente=sorteio.choice(pacientes),
-            profissional=sorteio.choice(profissionais) if profissionais else None,
+            patient=sorteio.choice(pacientes),
+            practitioner=sorteio.choice(profissionais) if profissionais else None,
             data=data,
             validade=data + datetime.timedelta(days=30),
-            created_by=usuario,
+            created_by=user,
         )
         for procedimento in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
             escolhidos = sorted(sorteio.sample(dentes, sorteio.randint(0, 3)))
@@ -325,14 +325,14 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, usuario=None):
                 parcelas=sorteio.choice([1, 2, 3, 4]),
                 primeiro_vencimento=data + datetime.timedelta(days=7),
                 categoria=categoria,
-                usuario=usuario,
+                user=user,
             )
         elif sorte < 0.6:
-            services.recusar(orcamento, usuario=usuario)
+            services.recusar(orcamento, user=user)
     return quantidade
 
 
-def simular_comissoes(clinic, sorteio, usuario=None):
+def simular_comissoes(clinic, sorteio, user=None):
     """Give practitioners without one a commission percentage and pay out what each had
     pending up to the end of last month (test clinics only). Returns how many were paid."""
     from decimal import Decimal
@@ -347,18 +347,18 @@ def simular_comissoes(clinic, sorteio, usuario=None):
         return 0
     fim_do_mes_passado = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
     pagas = 0
-    for profissional in Practitioner.objects.filter(clinic=clinic, ativo=True):
-        if not profissional.comissao_percentual:
-            profissional.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
-            profissional.save(update_fields=["comissao_percentual"])
+    for practitioner in Practitioner.objects.filter(clinic=clinic, ativo=True):
+        if not practitioner.comissao_percentual:
+            practitioner.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
+            practitioner.save(update_fields=["comissao_percentual"])
         # Runs without isolation (like the command); the practitioner pins the clinic.
-        if commissions.pendente(profissional, fim_do_mes_passado)["valor"] > 0:
+        if commissions.pendente(practitioner, fim_do_mes_passado)["valor"] > 0:
             commissions.pagar(
-                profissional,
+                practitioner,
                 ate=fim_do_mes_passado,
                 vencimento=fim_do_mes_passado + datetime.timedelta(days=5),
                 categoria=categoria,
-                usuario=usuario,
+                user=user,
             )
             pagas += 1
     return pagas

@@ -26,21 +26,21 @@ def percentual_de(valor, percentual):
     return (valor * percentual / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
 
-def _recebimentos(profissional):
+def _recebimentos(practitioner):
     return Payment.objects.filter(
         parcela__lancamento__tipo=Entry.Tipo.RECEBER,
-        parcela__lancamento__profissional=profissional,
-    ).select_related("parcela__lancamento__paciente")
+        parcela__lancamento__practitioner=practitioner,
+    ).select_related("parcela__lancamento__patient")
 
 
-def _creditos(profissional, ate):
-    return _recebimentos(profissional).filter(estornado=False, comissao__isnull=True, data__lte=ate)
+def _creditos(practitioner, ate):
+    return _recebimentos(practitioner).filter(estornado=False, comissao__isnull=True, data__lte=ate)
 
 
-def _debitos(profissional):
+def _debitos(practitioner):
     """Receipts already commissioned and then reversed, not discounted yet (a few)."""
     debitos = list(
-        _recebimentos(profissional)
+        _recebimentos(practitioner)
         .filter(estornado=True, comissao__isnull=False, comissao_estorno__isnull=True)
         .select_related("comissao")
         .order_by("data", "pk")
@@ -50,15 +50,15 @@ def _debitos(profissional):
     return debitos
 
 
-def pendente(profissional, ate):
+def pendente(practitioner, ate):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
-    creditos = list(_creditos(profissional, ate).order_by("data", "pk"))
-    debitos = _debitos(profissional)
+    creditos = list(_creditos(practitioner, ate).order_by("data", "pk"))
+    debitos = _debitos(practitioner)
     recebido = sum((p.valor for p in creditos), start=ZERO)
-    bruta = percentual_de(recebido, profissional.comissao_percentual)
+    bruta = percentual_de(recebido, practitioner.comissao_percentual)
     estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
     return {
-        "profissional": profissional,
+        "practitioner": practitioner,
         "creditos": creditos,
         "debitos": debitos,
         "recebido": recebido,
@@ -75,17 +75,17 @@ def resumo(ate):
     took seconds in a clinic with years of them (volume test, decision 108).
     """
     linhas = []
-    for profissional in Practitioner.objects.order_by("-ativo", "nome"):
-        totais = _creditos(profissional, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
-        debitos = _debitos(profissional)
-        if not (profissional.comissao_percentual or totais["quantos"] or debitos):
+    for practitioner in Practitioner.objects.order_by("-ativo", "nome"):
+        totais = _creditos(practitioner, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
+        debitos = _debitos(practitioner)
+        if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
             continue
         recebido = totais["recebido"] or ZERO
-        bruta = percentual_de(recebido, profissional.comissao_percentual)
+        bruta = percentual_de(recebido, practitioner.comissao_percentual)
         estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
         linhas.append(
             {
-                "profissional": profissional,
+                "practitioner": practitioner,
                 "recebido": recebido,
                 "bruta": bruta,
                 "estornos": estornos,
@@ -96,36 +96,36 @@ def resumo(ate):
 
 
 @transaction.atomic
-def pagar(profissional, *, ate, vencimento, categoria, usuario):
+def pagar(practitioner, *, ate, vencimento, categoria, user):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
-    profissional = Practitioner.objects.select_for_update().get(pk=profissional.pk)
-    calculo = pendente(profissional, ate)
+    practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
+    calculo = pendente(practitioner, ate)
     if calculo["valor"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
     lancamento = services.criar_lancamento(
-        clinic=profissional.clinic,
+        clinic=practitioner.clinic,
         tipo=Entry.Tipo.PAGAR,
-        pessoa=profissional.nome,
-        profissional=profissional,
+        pessoa=practitioner.nome,
+        practitioner=practitioner,
         descricao=_("Comissão de %(nome)s até %(data)s")
-        % {"nome": profissional.nome, "data": date_format(ate, "SHORT_DATE_FORMAT")},
+        % {"nome": practitioner.nome, "data": date_format(ate, "SHORT_DATE_FORMAT")},
         categoria=categoria,
         valor_total=calculo["valor"],
         parcelas=1,
         primeiro_vencimento=vencimento,
-        usuario=usuario,
+        user=user,
     )
     comissao = Commission.objects.create(
-        clinic=profissional.clinic,
-        profissional=profissional,
+        clinic=practitioner.clinic,
+        practitioner=practitioner,
         ate=ate,
-        percentual=profissional.comissao_percentual,
+        percentual=practitioner.comissao_percentual,
         recebido=calculo["recebido"],
         estornos=calculo["estornos"],
         valor=calculo["valor"],
         lancamento=lancamento,
-        created_by=usuario,
+        created_by=user,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.
     for pagamento in calculo["creditos"]:

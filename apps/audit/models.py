@@ -35,7 +35,7 @@ class AuditEntry(models.Model):
         verbose_name=_("clínica"),
         db_column="clinica_id",
     )
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.DO_NOTHING,
         db_constraint=False,
@@ -43,6 +43,7 @@ class AuditEntry(models.Model):
         blank=True,
         related_name="+",
         verbose_name=_("usuário"),
+        db_column="usuario_id",
     )
     # Kept as text so the entry still says who it was if the user is deleted.
     usuario_nome = models.CharField(_("usuário (texto)"), max_length=150, blank=True)

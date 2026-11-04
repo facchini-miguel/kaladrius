@@ -28,10 +28,10 @@ ANAMNESE = {
 }
 
 
-def cliente(usuario):
+def cliente(user):
     """A client of its own for each user (the shared fixture logs one user at a time)."""
     novo = Client()
-    novo.force_login(usuario)
+    novo.force_login(user)
     return novo
 
 
@@ -46,27 +46,27 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
     ana = criar_profissional(clinica_a, "Dra. Ana")
     bruno = criar_profissional(clinica_a, "Dr. Bruno")
     with usar_clinica(clinica_a):
-        Practitioner.objects.filter(pk=ana.pk).update(usuario=usuarios["dra"])
-        Practitioner.objects.filter(pk=bruno.pk).update(usuario=usuarios["dr"])
-        paciente = Patient.objects.create(nome="Maria Paciente")
+        Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
+        Practitioner.objects.filter(pk=bruno.pk).update(user=usuarios["dr"])
+        patient = Patient.objects.create(nome="Maria Paciente")
         agendamento = Appointment.objects.create(
-            profissional=ana,
+            practitioner=ana,
             tipo=AppointmentType.objects.first(),
-            paciente=paciente,
+            patient=patient,
             inicio=agenda.momento(datetime.date(2031, 3, 5), datetime.time(10)),
             fim=agenda.momento(datetime.date(2031, 3, 5), datetime.time(11)),
         )
     return {
         "clinic": clinica_a,
-        "paciente": paciente,
+        "patient": patient,
         "agendamento": agendamento,
         "ana": ana,
-        **{nome: cliente(usuario) for nome, usuario in usuarios.items()},
+        **{nome: cliente(user) for nome, user in usuarios.items()},
     }
 
 
 def registrar(cenario, quem="dra", **extra):
-    url = reverse("medical_records:new", args=[cenario["paciente"].pk])
+    url = reverse("medical_records:new", args=[cenario["patient"].pk])
     resposta = cenario[quem].post(url, {**ANAMNESE, **extra})
     assert resposta.status_code == 302, resposta.content.decode()[:500]
     with usar_clinica(cenario["clinic"]):
@@ -74,8 +74,8 @@ def registrar(cenario, quem="dra", **extra):
 
 
 def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
-    novo = reverse("medical_records:new", args=[cenario["paciente"].pk])
-    ficha = reverse("patients:record", args=[cenario["paciente"].pk])
+    novo = reverse("medical_records:new", args=[cenario["patient"].pk])
+    ficha = reverse("patients:record", args=[cenario["patient"].pk])
     for quem in ("recepcao", "admin"):
         assert cenario[quem].get(novo).status_code == 403
         assert "prontuario" not in cenario[quem].get(ficha).context
@@ -88,7 +88,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
     # An administrator who is also a registered practitioner reaches it.
     with usar_clinica(cenario["clinic"]):
         Practitioner.objects.create(
-            nome="Dr. Admin", usuario=django_user_model.objects.get(username="admin")
+            nome="Dr. Admin", user=django_user_model.objects.get(username="admin")
         )
     assert cenario["admin"].get(novo).status_code == 200
 
@@ -96,11 +96,11 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
 def test_registrar_salvar_e_finalizar(cenario):
     agendamento = cenario["agendamento"]
     atendimento = registrar(cenario, agendamento=agendamento.pk)
-    assert (atendimento.profissional, atendimento.agendamento) == (cenario["ana"], agendamento)
+    assert (atendimento.practitioner, atendimento.agendamento) == (cenario["ana"], agendamento)
     assert atendimento.queixa_principal == ANAMNESE["queixa_principal"]
     assert not atendimento.finalizado
     # The appointment leads to the same visit, never a second one.
-    url_novo = reverse("medical_records:new", args=[cenario["paciente"].pk])
+    url_novo = reverse("medical_records:new", args=[cenario["patient"].pk])
     resposta = cenario["dra"].get(url_novo, {"agendamento": agendamento.pk})
     assert resposta.url == reverse("medical_records:visit", args=[atendimento.pk])
 
@@ -118,7 +118,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     )
     with usar_clinica(cenario["clinic"]):
         adendo = atendimento.adendos.get()
-    assert adendo.texto == "Exame ok" and adendo.profissional.nome == "Dr. Bruno"
+    assert adendo.texto == "Exame ok" and adendo.practitioner.nome == "Dr. Bruno"
     assert "Exame ok" in cenario["dra"].get(url).content.decode()
 
 
@@ -147,15 +147,15 @@ def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
 
 def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
     registrar(cenario)
-    paciente = cenario["paciente"]
+    patient = cenario["patient"]
     with usar_clinica(cenario["clinic"]):
-        Patient.objects.filter(pk=paciente.pk).update(arquivado=True, arquivado_em=timezone.now())
-    url = reverse("patients:delete", args=[paciente.pk])
+        Patient.objects.filter(pk=patient.pk).update(arquivado=True, arquivado_em=timezone.now())
+    url = reverse("patients:delete", args=[patient.pk])
     pagina = cenario["admin"].get(url)
     assert pagina.context["atendimentos"] == 1 and "20 anos" in pagina.content.decode()
     cenario["admin"].post(url)
     with usar_clinica(cenario["clinic"]):
-        assert Patient.objects.filter(pk=paciente.pk).exists()
+        assert Patient.objects.filter(pk=patient.pk).exists()
 
 
 def test_agenda_leva_ao_atendimento_so_para_profissionais(cenario):
@@ -284,7 +284,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
     with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()
-    assert (anexo.tipo, anexo.tamanho, anexo.profissional.nome) == (
+    assert (anexo.tipo, anexo.tamanho, anexo.practitioner.nome) == (
         "image/png",
         len(PNG),
         "Dr. Bruno",
@@ -333,13 +333,13 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     from apps.medical_records.models import Attachment, Certificate
 
     root = cliente(django_user_model.objects.create_superuser("root", password="x-12345678"))
-    novo = reverse("medical_records:new", args=[cenario["paciente"].pk])
-    assert 'name="profissional"' in root.get(novo).content.decode()
-    resposta = root.post(novo, {**ANAMNESE, "profissional": cenario["ana"].pk})
+    novo = reverse("medical_records:new", args=[cenario["patient"].pk])
+    assert 'name="practitioner"' in root.get(novo).content.decode()
+    resposta = root.post(novo, {**ANAMNESE, "practitioner": cenario["ana"].pk})
     assert resposta.status_code == 302
     with usar_clinica(cenario["clinic"]):
         atendimento = Visit.objects.get()
-    assert atendimento.profissional == cenario["ana"]
+    assert atendimento.practitioner == cenario["ana"]
     assert atendimento.created_by.username == "root"  # the audit keeps who really wrote it
 
     # Another practitioner's draft (Dra. Ana's) can be edited by the superuser only.
@@ -368,8 +368,8 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     )
     assert resposta.status_code == 302
     with usar_clinica(cenario["clinic"]):
-        assert Certificate.objects.get().profissional == cenario["ana"]
+        assert Certificate.objects.get().practitioner == cenario["ana"]
         assert not Attachment.objects.exists()
     root.post(reverse("medical_records:addendum", args=[atendimento.pk]), {"texto": "Correção"})
     with usar_clinica(cenario["clinic"]):
-        assert atendimento.adendos.get().profissional == cenario["ana"]
+        assert atendimento.adendos.get().practitioner == cenario["ana"]

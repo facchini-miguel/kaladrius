@@ -27,16 +27,16 @@ def ultimos(**filtros):
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
     admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get(nome="Maria")
+        patient = Patient.objects.get(nome="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
     assert criacao.usuario_nome == "admin_a"
     assert criacao.clinic_id == clinica_a.pk
-    assert criacao.objeto_id == str(paciente.pk)
+    assert criacao.objeto_id == str(patient.pk)
     assert criacao.alteracoes["nome"] == [None, "Maria"]
     assert criacao.ip == "127.0.0.1"
 
     admin_a.post(
-        reverse("patients:edit", args=[paciente.pk]),
+        reverse("patients:edit", args=[patient.pk]),
         {"tipo": "PF", "nome": "Maria Souza", "ativo": "on", "profissao": "Professora"},
     )
     [alteracao] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")
@@ -45,7 +45,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
         "profissao": ["", "Professora"],
     }
 
-    admin_a.post(reverse("patients:archive", args=[paciente.pk]))
+    admin_a.post(reverse("patients:archive", args=[patient.pk]))
     [arquivamento] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")[1:]
     assert arquivamento.alteracoes["arquivado"] == [False, True]
 
@@ -56,12 +56,12 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
         {"tipo": "PF", "nome": "Maria Sigilosa", "ativo": "on", "cpf_cnpj": "52998224725"},
     )
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get(nome="Maria Sigilosa")
-    admin_a.get(reverse("patients:record", args=[paciente.pk]))
-    admin_a.post(reverse("patients:archive", args=[paciente.pk]))
-    admin_a.post(reverse("patients:delete", args=[paciente.pk]))
+        patient = Patient.objects.get(nome="Maria Sigilosa")
+    admin_a.get(reverse("patients:record", args=[patient.pk]))
+    admin_a.post(reverse("patients:archive", args=[patient.pk]))
+    admin_a.post(reverse("patients:delete", args=[patient.pk]))
 
-    registros = ultimos(modelo="Paciente", objeto_id=str(paciente.pk))
+    registros = ultimos(modelo="Paciente", objeto_id=str(patient.pk))
     assert {r.acao for r in registros} == {Acao.CRIAR, Acao.VISUALIZAR, Acao.ALTERAR, Acao.EXCLUIR}
     texto = str([(r.objeto_descricao, r.alteracoes, r.usuario_nome) for r in registros])
     assert "Sigilosa" not in texto and "52998224725" not in texto
@@ -71,20 +71,20 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
     pagina = admin_a.get(reverse("audit:list")).content.decode()
-    assert f"Paciente {paciente.pk}: dados pessoais excluídos a pedido do titular" in pagina
+    assert f"Paciente {patient.pk}: dados pessoais excluídos a pedido do titular" in pagina
 
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Sem mudança")
-        paciente.save()
+        patient = Patient.objects.create(nome="Sem mudança")
+        patient.save()
     assert not ultimos(acao=Acao.ALTERAR, modelo="Paciente")
 
 
 def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Consultado")
-    admin_a.get(reverse("patients:record", args=[paciente.pk]))
+        patient = Patient.objects.create(nome="Consultado")
+    admin_a.get(reverse("patients:record", args=[patient.pk]))
     [visualizacao] = ultimos(acao=Acao.VISUALIZAR)
     assert visualizacao.objeto_descricao == "Consultado"
     assert visualizacao.usuario_nome == "admin_a"
@@ -103,9 +103,9 @@ def test_login_e_tentativa_recusada_ficam_registrados(client, criar_usuario):
 
 
 def test_senha_nunca_e_gravada(criar_usuario):
-    usuario = criar_usuario("joao")
-    usuario.set_password("nova-senha-secreta-123")
-    usuario.save()
+    user = criar_usuario("joao")
+    user.set_password("nova-senha-secreta-123")
+    user.save()
     registros = AuditEntry.objects.filter(modelo="Usuário")
     texto = " ".join(str(r.alteracoes) for r in registros)
     assert "argon2" not in texto and "nova-senha" not in texto
@@ -138,8 +138,8 @@ def test_admin_do_django_e_somente_leitura(django_user_model, client):
 
 
 def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
-    usuario = criar_usuario("temporario")
-    usuario.delete()
+    user = criar_usuario("temporario")
+    user.delete()
     assert AuditEntry.objects.filter(objeto_descricao="temporario").exists()
 
 

@@ -15,16 +15,16 @@ def resolver_clinica(request):
     the clinic of their active membership, and a superuser without one in the clinic of
     the installation. Returns (None, None) when there is no clinic for the user.
     """
-    usuario = request.user
+    user = request.user
     vinculo = (
-        Membership.objects.filter(usuario=usuario, ativo=True, clinic__ativa=True)
+        Membership.objects.filter(user=user, ativo=True, clinic__ativa=True)
         .select_related("clinic")
         .order_by("clinic_id")
         .first()
     )
     if vinculo is not None:
         return vinculo.clinic, vinculo
-    if usuario.is_superuser:
+    if user.is_superuser:
         return Clinic.unica(), None
     return None, None
 

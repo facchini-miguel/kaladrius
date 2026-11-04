@@ -95,14 +95,14 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
         banco = FinancialAccount.objects.get(nome="Banco")
         caixa = FinancialAccount.objects.get(nome="Caixa")
-        paciente = Patient.objects.create(nome="José Paciente")
+        patient = Patient.objects.create(nome="José Paciente")
         receita = Category.objects.get(nome="Tratamento")
         despesa = Category.objects.get(nome="Outras despesas")
     return {
         "clinic": clinica_a,
         "banco": banco,
         "caixa": caixa,
-        "paciente": paciente,
+        "patient": patient,
         "receita": receita,
         "despesa": despesa,
         "admin": admin,
@@ -118,18 +118,18 @@ def pago(cenario, valor, data, tipo=Entry.Tipo.RECEBER, conta=None):
         lancamento = services.criar_lancamento(
             clinic=cenario["clinic"],
             tipo=tipo,
-            paciente=cenario["paciente"] if receber else None,
+            patient=cenario["patient"] if receber else None,
             pessoa="" if receber else "Fornecedor",
             descricao="Tratamento" if receber else "Conta",
             categoria=cenario["receita"] if receber else cenario["despesa"],
             valor_total=Decimal(valor),
             parcelas=1,
             primeiro_vencimento=data,
-            usuario=cenario["admin"],
+            user=cenario["admin"],
         )
         return services.receber(
             lancamento.parcelas.get(),
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal(valor),
             forma="pix",
             conta=conta or cenario["banco"],
@@ -259,7 +259,7 @@ def test_estorno_volta_a_transacao_para_pendente(cenario):
     importacao = importar(cenario)
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[importacao.pk]))
     with usar_clinica(cenario["clinic"]):
-        services.estornar(recebido, motivo="Devolvido", usuario=cenario["admin"])
+        services.estornar(recebido, motivo="Devolvido", user=cenario["admin"])
     a1 = transacao(cenario, "A1")
     assert (a1.situacao, a1.pagamento) == (BankTransaction.Situacao.PENDENTE, None)
 

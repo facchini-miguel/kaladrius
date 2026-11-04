@@ -87,11 +87,12 @@ class Appointment(ModeloDaClinica):
         # Kept for the history and the no-show figures, but frees the time slot.
         DESMARCOU = "desmarcou", _("Desmarcou")
 
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     tipo = models.ForeignKey(
         AppointmentType,
@@ -101,13 +102,14 @@ class Appointment(ModeloDaClinica):
     )
     inicio = models.DateTimeField(_("início"))
     fim = models.DateTimeField(_("fim"))
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="agendamentos",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     descricao = models.TextField(_("descrição"), blank=True)
     situacao = models.CharField(
@@ -134,7 +136,7 @@ class Appointment(ModeloDaClinica):
         ordering = ["inicio"]
         indexes = [
             models.Index(
-                fields=["clinic", "profissional", "inicio"], name="agendamento_prof_inicio"
+                fields=["clinic", "practitioner", "inicio"], name="agendamento_prof_inicio"
             ),
         ]
         constraints = [
@@ -147,7 +149,7 @@ class Appointment(ModeloDaClinica):
                 name="agendamento_sem_sobreposicao",
                 expressions=[
                     (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
-                    ("profissional", RangeOperators.EQUAL),
+                    ("practitioner", RangeOperators.EQUAL),
                 ],
                 # A cancelled appointment does not hold the slot.
                 condition=~models.Q(situacao="desmarcou"),
@@ -160,8 +162,8 @@ class Appointment(ModeloDaClinica):
 
     @property
     def titulo(self):
-        if self.paciente_id:
-            return self.paciente.nome
+        if self.patient_id:
+            return self.patient.nome
         return (self.descricao.strip().splitlines() or [gettext("Horário reservado")])[0]
 
     @property

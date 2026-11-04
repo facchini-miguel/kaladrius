@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block titulo %}{% if paciente.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">{% if paciente.pk %}{% blocktranslate with nome=paciente.nome %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.nome %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
 
 <form method="post" novalidate id="form-paciente">
   {% csrf_token %}
@@ -67,7 +67,7 @@
   </div>
 
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if paciente.pk %}{% url 'patients:record' paciente.pk %}{% else %}{% url 'patients:list' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% if patient.pk %}{% url 'patients:record' patient.pk %}{% else %}{% url 'patients:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}
 

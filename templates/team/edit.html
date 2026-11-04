@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{{ vinculo.usuario.get_full_name|default:vinculo.usuario.username }} · {% translate "Equipe" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ vinculo.user.get_full_name|default:vinculo.user.username }} · {% translate "Equipe" %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-1">{{ vinculo.usuario.get_full_name|default:vinculo.usuario.username }}</h1>
-<p class="text-body-secondary mb-4">{% translate "Usuário:" %} {{ vinculo.usuario.username }}</p>
+<h1 class="h3 mb-1">{{ vinculo.user.get_full_name|default:vinculo.user.username }}</h1>
+<p class="text-body-secondary mb-4">{% translate "Usuário:" %} {{ vinculo.user.username }}</p>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
@@ -22,7 +22,7 @@
   {% endif %}
 
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  {% if exclusiva and vinculo.usuario != user %}
+  {% if exclusiva and vinculo.user != user %}
   <a class="btn btn-outline-secondary" href="{% url 'team:password' vinculo.pk %}">{% translate "Definir nova senha" %}</a>
   {% endif %}
   <a class="btn btn-link" href="{% url 'team:list' %}">{% translate "Cancelar" %}</a>
@@ -30,7 +30,7 @@
 {% if duas_etapas %}
 <div class="card mt-4" style="max-width: 36rem;"><div class="card-body">
   <h2 class="h6">{% translate "Verificação em duas etapas" %} <span class="badge text-bg-success">{% translate "Ativa" %}</span></h2>
-  {% if exclusiva and vinculo.usuario != user %}
+  {% if exclusiva and vinculo.user != user %}
   <p class="small text-body-secondary">{% translate "Se a pessoa perdeu o celular e os códigos de recuperação, remova a verificação: ela entra só com a senha e ativa de novo com um QR code novo." %}</p>
   <form method="post" action="{% url 'team:two_factor' vinculo.pk %}">
     {% csrf_token %}

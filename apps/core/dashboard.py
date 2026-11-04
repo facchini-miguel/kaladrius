@@ -50,10 +50,10 @@ def _agenda(request, hoje):
     visiveis = agenda.agendamentos_visiveis(request)
     do_dia = list(
         visiveis.filter(inicio__date=hoje)
-        .select_related("paciente", "profissional", "tipo")
-        .order_by("inicio", "profissional__nome")
+        .select_related("patient", "practitioner", "tipo")
+        .order_by("inicio", "practitioner__nome")
     )
-    pacientes = [a for a in do_dia if a.paciente_id]
+    pacientes = [a for a in do_dia if a.patient_id]
     situacao = Appointment.Situacao
     contagem = {valor: 0 for valor in situacao.values}
     for agendamento in pacientes:
@@ -90,10 +90,10 @@ def _agenda(request, hoje):
 
 def _rechamadas(hoje):
     pendentes = Recall.objects.filter(
-        concluida=False, data__lte=hoje, paciente__arquivado=False
-    ).select_related("paciente")
+        concluida=False, data__lte=hoje, patient__arquivado=False
+    ).select_related("patient")
     return {
-        "lista": list(pendentes.order_by("data", "paciente__nome")[:LIMITE]),
+        "lista": list(pendentes.order_by("data", "patient__nome")[:LIMITE]),
         "total": pendentes.count(),
         "atrasadas": pendentes.filter(data__lt=hoje).count(),
     }
@@ -101,8 +101,8 @@ def _rechamadas(hoje):
 
 def _aniversariantes(hoje):
     return [
-        (paciente, hoje.year - paciente.data_nascimento.year)
-        for paciente in Patient.objects.filter(
+        (patient, hoje.year - patient.data_nascimento.year)
+        for patient in Patient.objects.filter(
             ativo=True,
             arquivado=False,
             data_nascimento__month=hoje.month,
@@ -117,11 +117,11 @@ def _orcamentos(hoje):
             situacao=Estimate.Situacao.ABERTO,
             validade__gte=hoje,
             validade__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
-            paciente__arquivado=False,
+            patient__arquivado=False,
         )
-        .select_related("paciente")
+        .select_related("patient")
         .prefetch_related("itens")
-        .order_by("validade", "paciente__nome")
+        .order_by("validade", "patient__nome")
     )
 
 

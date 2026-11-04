@@ -22,9 +22,9 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 
 
 def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, recepcao, criar_profissional):
-    profissional = criar_profissional(clinica_a, "Profissional fictício")
+    practitioner = criar_profissional(clinica_a, "Profissional fictício")
     semana = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
-    eventos = recepcao.get(reverse("schedule:events"), {**semana, "profissional": profissional.pk})
+    eventos = recepcao.get(reverse("schedule:events"), {**semana, "practitioner": practitioner.pk})
     assert eventos.status_code == 200
     configuracao = recepcao.get(reverse("schedule:calendar")).context["configuracao"]
     assert configuracao["data"] == "2026-03-05"  # middle of the week on the screen
@@ -43,17 +43,17 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
 
 def test_ficha_cadastral_impressa(clinica_a, recepcao):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(
+        patient = Patient.objects.create(
             nome="Paciente fictícia da ficha",
             cpf_cnpj="52998224725",
             whatsapp="48999990000",
             observacoes="Prefere manhã",
         )
         convenio = HealthPlan.objects.create(nome="Saúde Exemplo")
-        MemberCard.objects.create(paciente=paciente, convenio=convenio, numero="123456")
-    ficha = recepcao.get(reverse("patients:record", args=[paciente.pk])).content.decode()
-    assert reverse("patients:print", args=[paciente.pk]) in ficha
-    pagina = recepcao.get(reverse("patients:print", args=[paciente.pk]))
+        MemberCard.objects.create(patient=patient, convenio=convenio, numero="123456")
+    ficha = recepcao.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert reverse("patients:print", args=[patient.pk]) in ficha
+    pagina = recepcao.get(reverse("patients:print", args=[patient.pk]))
     texto = pagina.content.decode()
     for trecho in (
         "FICHA CADASTRAL",
@@ -65,7 +65,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
         assert trecho in texto, trecho
     assert (
         AuditEntry.objects.filter(
-            acao=AuditEntry.Acao.VISUALIZAR, objeto_id=str(paciente.pk)
+            acao=AuditEntry.Acao.VISUALIZAR, objeto_id=str(patient.pk)
         ).count()
         == 2
     )  # the record and the print
@@ -73,9 +73,9 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
 
 def test_ficha_impressa_respeita_permissao(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paciente fictício sem acesso")
+        patient = Patient.objects.create(nome="Paciente fictício sem acesso")
     sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))
-    assert sem_vinculo.get(reverse("patients:print", args=[paciente.pk])).status_code in (
+    assert sem_vinculo.get(reverse("patients:print", args=[patient.pk])).status_code in (
         302,
         403,
     )

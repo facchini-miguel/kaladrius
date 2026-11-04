@@ -221,12 +221,12 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         widgets = {"outro_paciente": forms.HiddenInput}
         help_texts = {"nome": _("Só para quem não é paciente da clínica.")}
 
-    def __init__(self, *args, paciente, **kwargs):
+    def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.paciente = paciente
+        self.instance.patient = patient
         if self.instance.clinic_id is None:
-            self.instance.clinic_id = paciente.clinic_id
-        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=paciente.pk)
+            self.instance.clinic_id = patient.clinic_id
+        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=patient.pk)
 
     def clean_telefone(self):
         return normalizar_telefone(self.cleaned_data.get("telefone"))
@@ -242,7 +242,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         if (
             outro
             and RelatedPerson.objects.filter(
-                paciente=self.instance.paciente, outro_paciente=outro, vinculo=dados.get("vinculo")
+                patient=self.instance.patient, outro_paciente=outro, vinculo=dados.get("vinculo")
             )
             .exclude(pk=self.instance.pk)
             .exists()

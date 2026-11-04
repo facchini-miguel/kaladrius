@@ -88,16 +88,16 @@ class Command(BaseCommand):
                 )
                 clinicas.append(clinic)
                 for username, nome, sobrenome, papel in dados["usuarios"]:
-                    usuario = self._usuario(username, nome, sobrenome, senha, criados)
+                    user = self._usuario(username, nome, sobrenome, senha, criados)
                     Membership.objects.get_or_create(
-                        usuario=usuario, clinic=clinic, defaults={"papel": papel}
+                        user=user, clinic=clinic, defaults={"papel": papel}
                     )
                 for nome, registro, cor, username in dados["profissionais"]:
-                    usuario = get_user_model().objects.filter(username=username).first()
+                    user = get_user_model().objects.filter(username=username).first()
                     Practitioner.objects.get_or_create(
                         clinic=clinic,
                         nome=nome,
-                        defaults={"registro": registro, "cor": cor, "usuario": usuario},
+                        defaults={"registro": registro, "cor": cor, "user": user},
                     )
 
             total_pacientes = sum(self._pacientes(clinic, pacientes) for clinic in clinicas)
@@ -121,7 +121,7 @@ class Command(BaseCommand):
             self.stdout.write("Nenhum usuário novo: os dados de teste já existiam.")
 
     def _usuario(self, username, nome, sobrenome, senha, criados):
-        usuario, criado = get_user_model().objects.get_or_create(
+        user, criado = get_user_model().objects.get_or_create(
             username=username,
             defaults={
                 "first_name": nome,
@@ -130,10 +130,10 @@ class Command(BaseCommand):
             },
         )
         if criado:
-            usuario.set_password(senha)
-            usuario.save(update_fields=["password"])
+            user.set_password(senha)
+            user.save(update_fields=["password"])
             criados.append(username)
-        return usuario
+        return user
 
     def _pacientes(self, clinic, quantidade):
         """Create fake patients for a clinic that has none. Returns how many were created."""
@@ -161,7 +161,7 @@ class Command(BaseCommand):
             documentos.add(documento)
             cidade = fake.random_element(cidades)
             celular = f"489{fake.numerify('########')}"
-            paciente = Patient(
+            patient = Patient(
                 clinic=clinic,
                 tipo=Patient.Tipo.JURIDICA if juridica else Patient.Tipo.FISICA,
                 nome=nome,
@@ -178,13 +178,13 @@ class Command(BaseCommand):
                 ativo=fake.boolean(95),
             )
             if juridica:
-                paciente.razao_social = f"{nome} Ltda."
+                patient.razao_social = f"{nome} Ltda."
             else:
-                paciente.sexo = sexo
-                paciente.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
-                paciente.estado_civil = fake.random_element(estados_civis)
-                paciente.profissao = fake_data.profissao(fake)
-            novos.append(paciente)
+                patient.sexo = sexo
+                patient.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
+                patient.estado_civil = fake.random_element(estados_civis)
+                patient.profissao = fake_data.profissao(fake)
+            novos.append(patient)
         Patient.objects.bulk_create(novos, batch_size=500)
         self._carteirinhas(clinic, novos)
         return len(novos)
@@ -200,13 +200,13 @@ class Command(BaseCommand):
         MemberCard.objects.bulk_create(
             MemberCard(
                 clinic=clinic,
-                paciente=paciente,
+                patient=patient,
                 convenio=sorteio.choice(convenios),
                 plano=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
                 numero=f"{numero:012d}",
                 validade=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
             )
-            for numero, paciente in enumerate(pacientes, start=1)
+            for numero, patient in enumerate(pacientes, start=1)
             if sorteio.random() < 0.35
         )
 
@@ -240,14 +240,14 @@ class Command(BaseCommand):
             if i + 1 < len(pacientes):
                 RelatedPerson.objects.create(
                     clinic=clinic,
-                    paciente=pacientes[i],
+                    patient=pacientes[i],
                     outro_paciente=pacientes[i + 1],
                     vinculo=vinculo,
                 )
-        for n, paciente in enumerate(pacientes[6:9], start=1):
+        for n, patient in enumerate(pacientes[6:9], start=1):
             RelatedPerson.objects.create(
                 clinic=clinic,
-                paciente=paciente,
+                patient=patient,
                 vinculo=vinculos.EMERGENCIA,
                 nome=f"Contato fictício {n}",
                 telefone=f"4899000000{n}",
