@@ -55,7 +55,7 @@ deploy/           compose de producción, Caddyfile, scripts del servidor
 docs/             este sitio de documentación: instalación, manual, decisiones
 ```
 
-Los nombres en el código están en **inglés**: los modelos ya (`Patient`, `Appointment`, decisiones 156 y 157); campos, funciones y variables aún tienen nombres en portugués, que pasan al inglés a continuación. Los comentarios están en inglés; las pantallas, en portugués, con traducciones. Los datos de cada clínica llevan la clave `clinica`, y las consultas filtran por la clínica en uso.
+Los nombres en el código están en **inglés**: los modelos ya (`Patient`, `Appointment`, decisiones 156 y 157); campos, funciones y variables aún tienen nombres en portugués, que pasan al inglés a continuación. Los comentarios están en inglés; las pantallas, en portugués, con traducciones. Los datos de cada clínica llevan la clave `clinic`, y las consultas filtran por la clínica en uso.
 
 ## Decisiones
 

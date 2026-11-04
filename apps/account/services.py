@@ -48,10 +48,10 @@ def obrigatoria(request):
     from apps.core.permissions import Acao, Modulo, pode
     from apps.medical_records.permissions import acessa_prontuario
 
-    usuario, clinica = request.user, getattr(request, "clinica", None)
-    if not usuario.is_authenticated or usuario.demonstracao or clinica is None:
+    usuario, clinic = request.user, getattr(request, "clinic", None)
+    if not usuario.is_authenticated or usuario.demonstracao or clinic is None:
         return False
-    if not clinica.exigir_duas_etapas:
+    if not clinic.exigir_duas_etapas:
         return False
     return pode(request, Modulo.FINANCEIRO, Acao.VER) or acessa_prontuario(request)
 

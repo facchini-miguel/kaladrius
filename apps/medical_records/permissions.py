@@ -39,7 +39,7 @@ def profissional_do_usuario(request):
 
 def _profissional(request):
     usuario = request.user
-    if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+    if not usuario.is_authenticated or getattr(request, "clinic", None) is None:
         return None
     vinculo = getattr(request, "vinculo", None)
     if vinculo is None and not usuario.is_superuser:

@@ -48,11 +48,14 @@ class Visit(ModeloDaClinica):
     )
     exame_fisico = models.TextField(_("exame físico"), blank=True)
     conduta = models.TextField(_("conduta e plano"), blank=True)
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
-    alterado_em = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(auto_now=True, db_column="alterado_em")
     finalizado_em = models.DateTimeField(_("finalizado em"), null=True, blank=True)
     finalizado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -86,16 +89,19 @@ class Addendum(ModeloDaClinica):
     profissional = models.ForeignKey(
         Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_adendo"
         verbose_name = _("adendo")
         verbose_name_plural = _("adendos")
-        ordering = ["criado_em", "pk"]
+        ordering = ["created_at", "pk"]
 
     def __str__(self):
         return f"{self.atendimento} – {_('adendo')}"
@@ -132,16 +138,19 @@ class Certificate(ModeloDaClinica):
     profissional = models.ForeignKey(
         Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_atestado"
         verbose_name = _("atestado")
         verbose_name_plural = _("atestados")
-        ordering = ["criado_em", "pk"]
+        ordering = ["created_at", "pk"]
 
     def __str__(self):
         return f"{self.atendimento} – {self.get_tipo_display()}"
@@ -164,17 +173,20 @@ class Prescription(ModeloDaClinica):
     profissional = models.ForeignKey(
         Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_receita"
         # "Receita" is also revenue in Finance: a context keeps the translations apart.
         verbose_name = pgettext_lazy("prescrição", "receita")
         verbose_name_plural = pgettext_lazy("prescrição", "receitas")
-        ordering = ["criado_em", "pk"]
+        ordering = ["created_at", "pk"]
 
     def __str__(self):
         return f"{self.atendimento} – {pgettext_lazy('prescrição', 'receita')}"
@@ -196,16 +208,19 @@ class ExamRequest(ModeloDaClinica):
     profissional = models.ForeignKey(
         Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_pedidodeexames"
         verbose_name = _("pedido de exames")
         verbose_name_plural = _("pedidos de exames")
-        ordering = ["criado_em", "pk"]
+        ordering = ["created_at", "pk"]
 
     def __str__(self):
         return f"{self.atendimento} – {_('pedido de exames')}"
@@ -231,16 +246,19 @@ class Attachment(ModeloDaClinica):
     profissional = models.ForeignKey(
         Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
-    criado_por = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_anexo"
         verbose_name = _("anexo")
         verbose_name_plural = _("anexos")
-        ordering = ["criado_em", "pk"]
+        ordering = ["created_at", "pk"]
 
     def __str__(self):
         return f"{self.atendimento} – {self.descricao or self.nome}"

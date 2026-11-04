@@ -52,7 +52,7 @@ class Procedure(ModeloDaClinica):
         verbose_name_plural = _("procedimentos")
         ordering = ["nome"]
         constraints = [
-            models.UniqueConstraint(fields=["clinica", "nome"], name="procedimento_unico"),
+            models.UniqueConstraint(fields=["clinic", "nome"], name="procedimento_unico"),
             models.CheckConstraint(condition=Q(valor__gte=0), name="procedimento_valor"),
         ]
 
@@ -104,16 +104,17 @@ class Estimate(ModeloDaClinica):
         related_name="+",
         verbose_name=_("aprovado ou recusado por"),
     )
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "orcamentos_orcamento"
@@ -185,9 +186,9 @@ class EstimateItem(ModeloDaClinica):
 
     def _conferir_modulo(self):
         self._conferir_clinica()
-        if self.orcamento.clinica_id != self.clinica_id:
+        if self.orcamento.clinic_id != self.clinic_id:
             raise ClinicaDiferente("The estimate belongs to another clinic.")
-        clinica = Clinic.objects.select_for_update().get(pk=self.clinica_id)
+        clinic = Clinic.objects.select_for_update().get(pk=self.clinic_id)
         anterior = (
             type(self).objects.filter(pk=self.pk).values("dentes", "faces").first()
             if self.pk is not None
@@ -196,7 +197,7 @@ class EstimateItem(ModeloDaClinica):
         dental = self.dentes or self.faces or (anterior and any(anterior.values()))
         # The view sets the flag only for the system administrator (decision 115).
         liberado = getattr(self, "odontologia_desligada_liberada", False)
-        if dental and not clinica.odontologia and not liberado:
+        if dental and not clinic.odontologia and not liberado:
             raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
 
     @transaction.atomic

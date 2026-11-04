@@ -75,13 +75,13 @@ class Command(BaseCommand):
                 get_user_model()
                 .objects.filter(username__in=usernames, is_superuser=False, is_staff=False)
                 .exclude(
-                    vinculos__clinica__in=Clinic.objects.exclude(pk__in=[c.pk for c in clinicas])
+                    vinculos__clinic__in=Clinic.objects.exclude(pk__in=[c.pk for c in clinicas])
                 )
             )
-            pacientes = Patient.objects.filter(clinica__in=clinicas).count()
+            pacientes = Patient.objects.filter(clinic__in=clinicas).count()
             # Clinic data is protected against deleting the clinic, so it goes first. Groups of
             # the chart of accounts protect their parent group: unlink them first.
-            AccountGroup.objects.filter(clinica__in=clinicas).update(pai=None)
+            AccountGroup.objects.filter(clinic__in=clinicas).update(pai=None)
             for modelo in (
                 BankTransaction,
                 StatementImport,
@@ -120,16 +120,16 @@ class Command(BaseCommand):
                 BookClosing,
                 ClinicModule,
             ):
-                modelo.objects.filter(clinica__in=clinicas).delete()
+                modelo.objects.filter(clinic__in=clinicas).delete()
             # Collected now: delete() clears the instances' pk.
             ids_usuarios = [u.pk for u in usuarios]
             ids_clinicas = [c.pk for c in clinicas]
             for usuario in usuarios:
                 usuario.delete()
-            for clinica in clinicas:
-                clinica.delete()
+            for clinic in clinicas:
+                clinic.delete()
             # Their history, including the entries the deletion itself just wrote.
-            AuditEntry.objects.filter(clinica_id__in=ids_clinicas).delete()
+            AuditEntry.objects.filter(clinic_id__in=ids_clinicas).delete()
             AuditEntry.objects.filter(usuario_id__in=ids_usuarios).delete()
             AuditEntry.objects.filter(
                 modelo__in=["Usuário", "Clínica"],

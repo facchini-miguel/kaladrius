@@ -34,7 +34,7 @@ def cenario(clinica_a, criar_profissional):
         rechamada = Recall.objects.create(
             paciente=paciente, data=hoje - datetime.timedelta(days=20), descricao="Limpeza"
         )
-    return {"clinica": clinica_a, "paciente": paciente, "agenda": semana, "rechamada": rechamada}
+    return {"clinic": clinica_a, "paciente": paciente, "agenda": semana, "rechamada": rechamada}
 
 
 def test_so_no_servidor_de_demonstracao(cenario, settings):
@@ -52,7 +52,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     antes = {a.pk: (a.inicio, a.fim) for a in cenario["agenda"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=17)), confirmar=True)
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         for agendamento in Appointment.objects.all():
             inicio, fim = antes[agendamento.pk]
             assert agendamento.inicio - inicio == datetime.timedelta(days=14)
@@ -75,5 +75,5 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     settings.DEMO = True
     hoje = timezone.localdate()
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert Recall.objects.get().data == hoje - datetime.timedelta(days=20)

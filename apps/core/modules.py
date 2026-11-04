@@ -31,14 +31,14 @@ def faltando(codigos):
 def habilitados(request):
     """Enabled module codes of the request's clinic, read once per request."""
     if not hasattr(request, "_modulos_habilitados"):
-        clinica = getattr(request, "clinica", None)
+        clinic = getattr(request, "clinic", None)
         request._modulos_habilitados = (
             frozenset(
-                ClinicModule.todos.filter(clinica=clinica, ativo=True).values_list(
+                ClinicModule.todos.filter(clinic=clinic, ativo=True).values_list(
                     "codigo", flat=True
                 )
             )
-            if clinica is not None and clinica.pk is not None
+            if clinic is not None and clinic.pk is not None
             else frozenset()
         )
     return request._modulos_habilitados
@@ -49,7 +49,7 @@ def visiveis(request):
     (decision 115), who sees a turned-off module, marked as off, to maintain it or to try it
     before turning it on. The team never sees a turned-off module."""
     usuario = getattr(request, "user", None)
-    if usuario is not None and usuario.is_superuser and getattr(request, "clinica", None):
+    if usuario is not None and usuario.is_superuser and getattr(request, "clinic", None):
         return frozenset(ModuloClinico.values)
     return habilitados(request)
 
@@ -66,7 +66,7 @@ def marcar_se_desligado(request, codigo):
 
 
 @transaction.atomic
-def configurar(clinica, codigos):
+def configurar(clinic, codigos):
     """Replace the enabled modules, retaining disabled rows and their audit history.
 
     `codigos` is the whole set to leave on. Called after the caller's authorization
@@ -78,15 +78,15 @@ def configurar(clinica, codigos):
         raise ValidationError(_("Módulo clínico desconhecido."))
     if faltando(codigos):
         raise ValidationError(_("Orçamentos e Pessoal precisam do Financeiro habilitado."))
-    if clinica.pk is None:
+    if clinic.pk is None:
         raise ValidationError(_("Cadastre a clínica antes de configurar os módulos."))
-    Clinic.objects.select_for_update().get(pk=clinica.pk)
+    Clinic.objects.select_for_update().get(pk=clinic.pk)
     # Administrative configuration has an explicit clinic; the ordinary model manager
     # remains isolated for queries from all the other modules.
     with sem_isolamento():
         for codigo in ModuloClinico:
             modulo, criado = ClinicModule.objects.get_or_create(
-                clinica=clinica, codigo=codigo, defaults={"ativo": codigo in codigos}
+                clinic=clinic, codigo=codigo, defaults={"ativo": codigo in codigos}
             )
             if not criado and modulo.ativo != (codigo in codigos):
                 modulo.ativo = codigo in codigos

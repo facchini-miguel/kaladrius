@@ -88,11 +88,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     SO_NO_BRASIL = ["inscricao_estadual", "rg", "uf", "cidade"]
     FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
-        self.pais = countries.pais_da_clinica(clinica)
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
+        self.pais = countries.pais_da_clinica(clinic)
         self.fields["cep"].label = countries.rotulo_cep(self.pais)
         self.documentos = identification.do_pais(self.pais)
         documento_por_tipo(
@@ -224,8 +224,8 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, paciente, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.paciente = paciente
-        if self.instance.clinica_id is None:
-            self.instance.clinica_id = paciente.clinica_id
+        if self.instance.clinic_id is None:
+            self.instance.clinic_id = paciente.clinic_id
         self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=paciente.pk)
 
     def clean_telefone(self):

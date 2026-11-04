@@ -36,11 +36,11 @@ def isolamento_ativo():
 
 
 @contextlib.contextmanager
-def usar_clinica(clinica):
+def usar_clinica(clinic):
     """Run the block with `clinica` as the current clinic."""
-    token = _clinica_atual.set(clinica)
+    token = _clinica_atual.set(clinic)
     try:
-        yield clinica
+        yield clinic
     finally:
         _clinica_atual.reset(token)
 
@@ -80,7 +80,7 @@ class FiltroClinicaAtual(models.Expression):
         self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
     ):
         copia = self.copy()
-        copia.coluna = models.F("clinica_id").resolve_expression(
+        copia.coluna = models.F("clinic_id").resolve_expression(
             query, allow_joins, reuse, summarize, for_save
         )
         return copia
@@ -88,11 +88,11 @@ class FiltroClinicaAtual(models.Expression):
     def as_sql(self, compiler, connection):
         if not isolamento_ativo():
             return "(1 = 1)", []
-        clinica = clinica_atual()
-        if clinica is None:
+        clinic = clinica_atual()
+        if clinic is None:
             raise SemClinicaAtual("Clinic data queried with no current clinic set.")
         coluna, parametros = compiler.compile(self.coluna)
-        return f"({coluna} = %s)", [*parametros, clinica.pk]
+        return f"({coluna} = %s)", [*parametros, clinic.pk]
 
 
 class ClinicaManager(models.Manager):
@@ -105,11 +105,12 @@ class ClinicaManager(models.Manager):
 class ModeloDaClinica(models.Model):
     """Base class for every model that belongs to a clinic."""
 
-    clinica = models.ForeignKey(
+    clinic = models.ForeignKey(
         "core.Clinic",
         on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("clínica"),
+        db_column="clinica_id",
     )
 
     # The first manager declared is Django's default manager, so the isolated one must
@@ -136,10 +137,10 @@ class ModeloDaClinica(models.Model):
         atual = clinica_atual()
         if atual is None:
             raise SemClinicaAtual(f"{type(self).__name__}: no current clinic is set.")
-        if self.clinica_id is None:
-            self.clinica = atual
-        elif self.clinica_id != atual.pk:
+        if self.clinic_id is None:
+            self.clinic = atual
+        elif self.clinic_id != atual.pk:
             raise ClinicaDiferente(
-                f"{type(self).__name__} {self.pk} belongs to clinic {self.clinica_id}, "
+                f"{type(self).__name__} {self.pk} belongs to clinic {self.clinic_id}, "
                 f"not to the current clinic {atual.pk}."
             )

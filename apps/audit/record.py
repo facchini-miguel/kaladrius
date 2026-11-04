@@ -29,18 +29,18 @@ def ip_da_requisicao(request):
 
 
 def registrar(
-    acao, objeto=None, *, clinica=None, alteracoes=None, usuario=None, ip=None, descricao=""
+    acao, objeto=None, *, clinic=None, alteracoes=None, usuario=None, ip=None, descricao=""
 ):
     usuario = usuario if usuario is not None else _usuario.get()
     if usuario is not None and not getattr(usuario, "is_authenticated", False):
         usuario = None
-    if clinica is None and objeto is not None:
+    if clinic is None and objeto is not None:
         # Rows without a clinic of their own (user accounts) are filed under the clinic
         # where the change was made, so the clinic administrator sees it in the audit log.
-        clinica = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
+        clinic = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
     return AuditEntry.objects.create(
         acao=acao,
-        clinica_id=getattr(clinica, "pk", clinica),
+        clinic_id=getattr(clinic, "pk", clinic),
         usuario=usuario,
         usuario_nome=usuario.get_username() if usuario else "",
         modelo=nome_do_modelo(type(objeto)) if objeto is not None else "",
@@ -83,4 +83,4 @@ def _clinica_de(objeto):
 
     if isinstance(objeto, Clinic):
         return objeto.pk
-    return getattr(objeto, "clinica_id", None)
+    return getattr(objeto, "clinic_id", None)

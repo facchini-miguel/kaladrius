@@ -21,10 +21,10 @@ def clinica_b(db):
 def criar_usuario(django_user_model):
     """Create a user, optionally linked to a clinic with a role."""
 
-    def criar(username, clinica=None, papel=Papel.RECEPCAO, **extra):
+    def criar(username, clinic=None, papel=Papel.RECEPCAO, **extra):
         usuario = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
-        if clinica is not None:
-            Membership.objects.create(usuario=usuario, clinica=clinica, papel=papel)
+        if clinic is not None:
+            Membership.objects.create(usuario=usuario, clinic=clinic, papel=papel)
         return usuario
 
     return criar
@@ -34,8 +34,8 @@ def criar_usuario(django_user_model):
 def criar_profissional():
     """Create a practitioner inside the given clinic."""
 
-    def criar(clinica, nome, **extra):
-        with usar_clinica(clinica):
+    def criar(clinic, nome, **extra):
+        with usar_clinica(clinic):
             return Practitioner.objects.create(nome=nome, **extra)
 
     return criar

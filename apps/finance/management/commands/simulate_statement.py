@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--clinic", dest="clinica", required=True, help="Name of the test clinic."
+            "--clinic", dest="clinic", required=True, help="Name of the test clinic."
         )
         parser.add_argument(
             "--account", dest="conta", default="Banco", help="Account name (default: Banco)."
@@ -37,10 +37,10 @@ class Command(BaseCommand):
             "--days", dest="dias", type=int, default=30, help="Days back (default 30)."
         )
 
-    def handle(self, *args, clinica, conta, dias, **options):
-        alvo = Clinic.objects.filter(nome=clinica).first()
+    def handle(self, *args, clinic, conta, dias, **options):
+        alvo = Clinic.objects.filter(nome=clinic).first()
         if alvo is None:
-            raise CommandError(f"Clínica “{clinica}” não encontrada.")
+            raise CommandError(f"Clínica “{clinic}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         hoje = timezone.localdate()
         inicio = hoje - datetime.timedelta(days=dias)

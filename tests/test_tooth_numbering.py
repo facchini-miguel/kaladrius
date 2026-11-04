@@ -90,13 +90,13 @@ def test_clinica_nova_nos_estados_unidos_comeca_com_a_universal():
 
 
 def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
-    clinica = cenario["clinica"]
-    clinica.numeracao_dentaria = UNIVERSAL
-    clinica.save()
+    clinic = cenario["clinic"]
+    clinic.numeracao_dentaria = UNIVERSAL
+    clinic.save()
     cliente = entrar(cenario, "profissional")
     orcamento = criar_orcamento(cenario, cliente)
     incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk, dentes="36,18")
-    with usar_clinica(clinica):
+    with usar_clinica(clinic):
         item = orcamento.itens.get()
         assert item.dentes == "18,36"  # always FDI in the database
         assert item.dentes_exibicao == "1, 19"

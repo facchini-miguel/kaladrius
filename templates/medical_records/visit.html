@@ -56,7 +56,7 @@
 {% for adendo in adendos %}
 <div class="card mb-2" style="max-width: 52rem;">
   <div class="card-body py-2">
-    <div class="small text-body-secondary">{{ adendo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</div>
+    <div class="small text-body-secondary">{{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</div>
     <div class="texto-clinico">{{ adendo.texto|linebreaksbr }}</div>
   </div>
 </div>
@@ -86,13 +86,13 @@
   </div>
   <ul class="list-group list-group-flush">
     {% for atestado in atestados %}
-    <li class="list-group-item"><a href="{% url 'medical_records:certificate' atestado.pk %}">{% translate "Atestado" %} · {{ atestado.get_tipo_display }}{% if atestado.dias %} ({% blocktranslate count dias=atestado.dias %}{{ dias }} dia{% plural %}{{ dias }} dias{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ atestado.criado_em|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:certificate' atestado.pk %}">{% translate "Atestado" %} · {{ atestado.get_tipo_display }}{% if atestado.dias %} ({% blocktranslate count dias=atestado.dias %}{{ dias }} dia{% plural %}{{ dias }} dias{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ atestado.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% for receita in receitas %}
-    <li class="list-group-item"><a href="{% url 'medical_records:prescription' receita.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ receita.criado_em|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:prescription' receita.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ receita.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% for pedido in pedidos %}
-    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' pedido.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ pedido.criado_em|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' pedido.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ pedido.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% if not atestados and not receitas and not pedidos %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
   </ul>
@@ -105,9 +105,9 @@
     <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
       <span>
         <a href="{% url 'medical_records:attachment' anexo.pk %}" target="_blank" rel="noopener">{{ anexo.descricao|default:anexo.nome }}</a>
-        <span class="text-body-secondary small">{{ anexo.tamanho|filesizeformat }} · {{ anexo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ anexo.profissional.nome }}</span>
+        <span class="text-body-secondary small">{{ anexo.tamanho|filesizeformat }} · {{ anexo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ anexo.profissional.nome }}</span>
       </span>
-      {% if remove_anexos and anexo.criado_por_id == user.pk or remove_anexos and administra %}
+      {% if remove_anexos and anexo.created_by_id == user.pk or remove_anexos and administra %}
       <form method="post" action="{% url 'medical_records:attachment_remove' anexo.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
       {% endif %}
     </li>

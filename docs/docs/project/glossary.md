@@ -67,7 +67,7 @@ The code's names are moving from Portuguese to English (decisions 155 to 159); t
 
 ## Fields, first batch
 
-The names that repeat across the models. Then each app's own fields, and last the functions and variables.
+The names that repeat across the models, in four parts. **Done:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` and `criado_por` (decision 160; local variables with these exact names too, such as `clinica` → `clinic`). Then each app's own fields, and last the functions and variables.
 
 | Before | After |
 |---|---|

@@ -36,7 +36,7 @@ def editar(request, pk):
 
 
 def _convenio(request, instancia):
-    form = ConvenioForm(request.POST or None, instance=instancia, clinica=request.clinica)
+    form = ConvenioForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         convenio = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.nome})

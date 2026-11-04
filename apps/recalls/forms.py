@@ -16,9 +16,9 @@ class RechamadaForm(FormularioBootstrap, forms.ModelForm):
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
         }
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
         self.fields["paciente"].queryset = Patient.objects.all()
         self.fields["paciente"].error_messages["required"] = _("Escolha o paciente.")

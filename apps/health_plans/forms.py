@@ -24,18 +24,18 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
         fields = ["nome", "registro", "telefone", "observacoes", "ativo"]
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 3})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
-        do_pais = insurance.do_pais(clinica.pais)
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
+        do_pais = insurance.do_pais(clinic.pais)
         if do_pais.tipos:
             self.fields["nome"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
         self.registro = do_pais.registro
         if self.registro is None:
             del self.fields["registro"]
         else:
-            self.fields["registro"].label = insurance.rotulo_do_registro(clinica.pais)
+            self.fields["registro"].label = insurance.rotulo_do_registro(clinic.pais)
             if self.registro.exemplo:
                 self.fields["registro"].widget.attrs["placeholder"] = self.registro.exemplo
 
@@ -73,10 +73,10 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, paciente, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.paciente = paciente
-        if self.instance.clinica_id is None:
-            self.instance.clinica_id = paciente.clinica_id
+        if self.instance.clinic_id is None:
+            self.instance.clinic_id = paciente.clinic_id
         # The card's fields and their local names in the clinic's country (decision 125).
-        do_pais = insurance.do_pais(paciente.clinica.pais)
+        do_pais = insurance.do_pais(paciente.clinic.pais)
         self.fields["numero"].label = insurance.com_nome_local(
             _("Número da carteirinha"), do_pais.numero
         )

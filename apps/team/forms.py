@@ -6,7 +6,7 @@ from apps.core.forms import FormularioBootstrap
 from apps.core.models import Membership, Papel, Usuario
 
 
-def conta_exclusiva(usuario, clinica):
+def conta_exclusiva(usuario, clinic):
     """Whether the clinic administrator may manage the account itself (name, e-mail, password).
 
     Only for accounts used solely in this clinic: changing the password of someone who
@@ -16,7 +16,7 @@ def conta_exclusiva(usuario, clinica):
     return (
         not usuario.is_superuser
         and not usuario.is_staff
-        and not usuario.vinculos.exclude(clinica=clinica).exists()
+        and not usuario.vinculos.exclude(clinic=clinic).exists()
     )
 
 
@@ -29,16 +29,16 @@ class NovoMembroForm(FormularioBootstrap, UserCreationForm):
         model = Usuario
         fields = ["username", "first_name", "last_name", "email"]
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        self.clinica = clinica
+        self.clinic = clinic
         self.fields["first_name"].required = True
 
     def save(self, commit=True):
         usuario = super().save(commit=commit)
         if commit:
             Membership.objects.create(
-                usuario=usuario, clinica=self.clinica, papel=self.cleaned_data["papel"]
+                usuario=usuario, clinic=self.clinic, papel=self.cleaned_data["papel"]
             )
         return usuario
 
@@ -67,7 +67,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Membership.objects.filter(
-                clinica_id=self.instance.clinica_id,
+                clinic_id=self.instance.clinic_id,
                 papel=Papel.ADMIN,
                 ativo=True,
                 usuario__is_active=True,

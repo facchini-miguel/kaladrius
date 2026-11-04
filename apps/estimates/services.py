@@ -22,7 +22,7 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, usuario, pag
     if total <= 0:
         raise ValidationError(_("O orçamento não tem valor a receber."))
     lancamento = financeiro.criar_lancamento(
-        clinica=orcamento.clinica,
+        clinic=orcamento.clinic,
         tipo=Entry.Tipo.RECEBER,
         paciente=orcamento.paciente,
         profissional=orcamento.profissional,

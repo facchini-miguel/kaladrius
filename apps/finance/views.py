@@ -147,11 +147,11 @@ def lancamento_novo(request):
         paciente = Patient.objects.filter(pk=int(codigo), arquivado=False).first()
         if paciente is not None:
             inicial["paciente"] = paciente.pk
-    form = LancamentoReceberForm(request.POST or None, initial=inicial, clinica=request.clinica)
+    form = LancamentoReceberForm(request.POST or None, initial=inicial, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
         lancamento = services.criar_lancamento(
-            clinica=request.clinica,
+            clinic=request.clinic,
             tipo=Entry.Tipo.RECEBER,
             paciente=dados["paciente"],
             pessoa="" if dados["paciente"] else dados["pessoa"].strip(),
@@ -187,13 +187,13 @@ def lancamento_novo(request):
 def despesa_nova(request):
     form = LancamentoPagarForm(
         request.POST or None,
-        clinica=request.clinica,
+        clinic=request.clinic,
         initial={"fornecedor": request.GET.get("fornecedor")},
     )
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
         lancamento = services.criar_lancamento(
-            clinica=request.clinica,
+            clinic=request.clinic,
             tipo=Entry.Tipo.PAGAR,
             fornecedor=dados["fornecedor"],
             pessoa=dados["pessoa"].strip(),
@@ -232,7 +232,7 @@ def lancamento(request, pk):
         Installment.objects.com_saldo().filter(lancamento=lancamento).select_related("lancamento")
     )
     pagamentos = Payment.objects.filter(parcela__lancamento=lancamento).select_related(
-        "parcela", "conta", "criado_por"
+        "parcela", "conta", "created_by"
     )
     for parcela in parcelas:
         parcela.situacao = services.situacao(parcela, hoje)
@@ -335,7 +335,7 @@ def recibo(request, pk):
             "parcela__lancamento__paciente",
             "parcela__lancamento__profissional",
             "conta",
-            "criado_por",
+            "created_by",
         ),
         pk=pk,
         parcela__lancamento__tipo=Entry.Tipo.RECEBER,
@@ -565,7 +565,7 @@ def relatorios(request):
             "de": de,
             "ate": ate,
             "relatorio": services.relatorio(de, ate),
-            "fechado_ate": services.fechado_ate(request.clinica.pk),
+            "fechado_ate": services.fechado_ate(request.clinic.pk),
         },
     )
 
@@ -643,11 +643,11 @@ def fechamento(request):
             dados = form.cleaned_data
             try:
                 if acao == "fechar":
-                    services.fechar(request.clinica, dados["ate"], usuario=request.user)
+                    services.fechar(request.clinic, dados["ate"], usuario=request.user)
                     messages.success(request, _("Financeiro fechado."))
                 else:
                     services.reabrir(
-                        request.clinica, dados["ate"], motivo=dados["motivo"], usuario=request.user
+                        request.clinic, dados["ate"], motivo=dados["motivo"], usuario=request.user
                     )
                     messages.success(request, _("Período reaberto."))
             except ValidationError as erro:
@@ -659,8 +659,8 @@ def fechamento(request):
         request,
         "finance/closing.html",
         {
-            "fechado_ate": services.fechado_ate(request.clinica.pk),
-            "historico": BookClosing.objects.select_related("criado_por")[:30],
+            "fechado_ate": services.fechado_ate(request.clinic.pk),
+            "historico": BookClosing.objects.select_related("created_by")[:30],
             "fechar_form": FecharForm() if pode_fechar else None,
             "reabrir_form": ReabrirForm() if pode_reabrir else None,
         },
@@ -805,7 +805,7 @@ def fornecedor_editar(request, pk):
 
 
 def _fornecedor_form(request, instancia):
-    form = FornecedorForm(request.POST or None, instance=instancia, clinica=request.clinica)
+    form = FornecedorForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         fornecedor = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
@@ -955,7 +955,7 @@ def extratos(request):
                         },
                     )
                 return redirect("finance:statement", pk=importacao.pk)
-    importacoes = StatementImport.objects.select_related("conta", "criado_por")
+    importacoes = StatementImport.objects.select_related("conta", "created_by")
     pendentes = dict(
         BankTransaction.objects.filter(situacao=BankTransaction.Situacao.PENDENTE)
         .values("importacao")

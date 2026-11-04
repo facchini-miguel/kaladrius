@@ -25,8 +25,8 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
 
 
-def criar_paciente(clinica, **dados):
-    with usar_clinica(clinica):
+def criar_paciente(clinic, **dados):
+    with usar_clinica(clinic):
         return Patient.objects.create(**{"nome": "Paciente", **dados})
 
 
@@ -305,7 +305,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     usuario = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
-            clinica=clinica_a,
+            clinic=clinica_a,
             tipo=Entry.Tipo.RECEBER,
             descricao="Tratamento",
             categoria=Category.objects.get(nome="Tratamento"),

@@ -25,7 +25,7 @@ class AuditEntry(models.Model):
     momento = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
-    clinica = models.ForeignKey(
+    clinic = models.ForeignKey(
         "core.Clinic",
         on_delete=models.DO_NOTHING,
         db_constraint=False,
@@ -33,6 +33,7 @@ class AuditEntry(models.Model):
         blank=True,
         related_name="+",
         verbose_name=_("clínica"),
+        db_column="clinica_id",
     )
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -58,7 +59,7 @@ class AuditEntry(models.Model):
         verbose_name_plural = _("registros de auditoria")
         ordering = ["-momento", "-pk"]
         indexes = [
-            models.Index(fields=["clinica", "-momento"], name="auditoria_clinica_momento"),
+            models.Index(fields=["clinic", "-momento"], name="auditoria_clinica_momento"),
             models.Index(fields=["modelo", "objeto_id"], name="auditoria_objeto"),
         ]
 

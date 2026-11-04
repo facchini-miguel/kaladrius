@@ -27,7 +27,7 @@ def editar(request, pk):
 
 
 def _formulario(request, profissional):
-    form = ProfissionalForm(request.POST or None, instance=profissional, clinica=request.clinica)
+    form = ProfissionalForm(request.POST or None, instance=profissional, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": profissional.nome})

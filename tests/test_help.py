@@ -83,14 +83,14 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
 
 
 def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, recepcao):
-    assert recepcao.get(reverse("privacy")).context["clinica"] == clinica_a
+    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
     recepcao.logout()
-    assert recepcao.get(reverse("privacy")).context["clinica"] == clinica_a
+    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
 
 
 def test_politica_sem_clinica_cadastrada(client):
     pagina = client.get(reverse("privacy"))
-    assert pagina.context["clinica"] is None
+    assert pagina.context["clinic"] is None
     assert "Fale com a clínica que atende você." in pagina.content.decode()
 
 

@@ -111,8 +111,8 @@ class Patient(ModeloDaClinica):
         related_name="+",
         verbose_name=_("arquivado por"),
     )
-    criado_em = models.DateTimeField(_("cadastrado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("cadastrado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "pacientes_paciente"
@@ -120,12 +120,12 @@ class Patient(ModeloDaClinica):
         verbose_name_plural = _("pacientes")
         ordering = ["nome"]
         indexes = [
-            models.Index(fields=["clinica", "nome"], name="paciente_clinica_nome"),
-            models.Index(fields=["clinica", "cpf_cnpj"], name="paciente_clinica_cpf_cnpj"),
+            models.Index(fields=["clinic", "nome"], name="paciente_clinica_nome"),
+            models.Index(fields=["clinic", "cpf_cnpj"], name="paciente_clinica_cpf_cnpj"),
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "cpf_cnpj"],
+                fields=["clinic", "cpf_cnpj"],
                 condition=~models.Q(cpf_cnpj=""),
                 name="paciente_cpf_cnpj_unico_por_clinica",
             ),
@@ -204,7 +204,7 @@ class RelatedPerson(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=200, blank=True)
     telefone = models.CharField(_("telefone"), max_length=11, blank=True)
     observacao = models.CharField(_("observação"), max_length=200, blank=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "pacientes_pessoarelacionada"
@@ -231,12 +231,12 @@ class RelatedPerson(ModeloDaClinica):
 
     def save(self, *args, **kwargs):
         self._conferir_clinica()
-        if self.clinica_id is None:  # without isolation (commands)
-            self.clinica_id = self.paciente.clinica_id
-        clinicas = {self.paciente.clinica_id}
+        if self.clinic_id is None:  # without isolation (commands)
+            self.clinic_id = self.paciente.clinic_id
+        clinicas = {self.paciente.clinic_id}
         if self.outro_paciente_id:
-            clinicas.add(self.outro_paciente.clinica_id)
-        if clinicas != {self.clinica_id}:
+            clinicas.add(self.outro_paciente.clinic_id)
+        if clinicas != {self.clinic_id}:
             raise ClinicaDiferente("Both patients must be of this clinic.")
         super().save(*args, **kwargs)
 

@@ -19,7 +19,7 @@ class Command(BaseCommand):
             "arquivo", metavar="file", help="MySQL dump (.sql). Use - to read from stdin."
         )
         parser.add_argument(
-            "--clinic", dest="clinica", required=True, help="Name of the clinic to create."
+            "--clinic", dest="clinic", required=True, help="Name of the clinic to create."
         )
         parser.add_argument(
             "--encoding",
@@ -28,7 +28,7 @@ class Command(BaseCommand):
             help="Dump encoding (default: utf-8).",
         )
 
-    def handle(self, *args, arquivo, clinica, codificacao, **options):
+    def handle(self, *args, arquivo, clinic, codificacao, **options):
         try:
             if arquivo == "-":
                 texto = sys.stdin.buffer.read().decode(codificacao)
@@ -38,11 +38,11 @@ class Command(BaseCommand):
             raise CommandError(f"Não foi possível ler o arquivo: {erro}") from erro
 
         try:
-            relatorio = importar(texto, clinica)
+            relatorio = importar(texto, clinic)
         except (DumpInvalido, ImportacaoRecusada) as erro:
             raise CommandError(str(erro)) from erro
 
-        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinica.nome}”:"))
+        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.nome}”:"))
         self.stdout.write(f"  Profissionais: {relatorio.profissionais}")
         self.stdout.write(f"  Tipos de atendimento novos: {relatorio.tipos_criados}")
         self.stdout.write(f"  Pacientes: {relatorio.pacientes}")

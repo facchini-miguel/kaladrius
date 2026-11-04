@@ -101,7 +101,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         def lancar(tipo, valor, parcelas, vencimento, categoria, **campos):
             lancamento = financeiro.criar_lancamento(
-                clinica=clinica_a,
+                clinic=clinica_a,
                 tipo=tipo,
                 descricao="Teste",
                 categoria=categoria,
@@ -137,7 +137,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         CashRegister.objects.create(
             conta=caixa, valor_abertura=Decimal("0"), aberto_por=usuarios["admin"]
         )
-    return {"clinica": clinica_a, **usuarios}
+    return {"clinic": clinica_a, **usuarios}
 
 
 def inicio(cenario, cliente_de, quem):

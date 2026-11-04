@@ -17,9 +17,9 @@ from tests.test_health_plans import admin, carteirinha, convenio, paciente  # no
 pytestmark = pytest.mark.django_db
 
 
-def mudar_pais(clinica, pais):
-    clinica.pais = pais
-    clinica.save()
+def mudar_pais(clinic, pais):
+    clinic.pais = pais
+    clinic.save()
 
 
 def test_cada_pais_tem_as_suas_regras():
@@ -83,7 +83,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  
 
 
 def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
-    clinica = cenario["clinica"]
+    clinic = cenario["clinic"]
     cliente = entrar(cenario, "admin")
     url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])
     dados = {"nome": "Restauração", "valor": "250,00", "categoria": "", "ativo": "on"}
@@ -91,15 +91,15 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     assert str(form.fields["codigo"].label) == "Código (TUSS)"
     assert "codigo" in cliente.post(url, {**dados, "codigo": "123"}).context["form"].errors
     assert cliente.post(url, {**dados, "codigo": "8510.0099"}).status_code == 302
-    with usar_clinica(clinica):
+    with usar_clinica(clinic):
         assert Procedure.objects.get(nome="Restauração").codigo == "85100099"
     orcamento = criar_orcamento(cenario, cliente)
     incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk)
-    with usar_clinica(clinica):
+    with usar_clinica(clinic):
         assert orcamento.itens.get().codigo == "85100099"
     impresso = cliente.get(reverse("estimates:print", args=[orcamento.pk])).content.decode()
     assert "85100099 · Restauração" in impresso
     # A country without one coding: just "Código", free text.
-    mudar_pais(clinica, "UY")
+    mudar_pais(clinic, "UY")
     form = cliente.get(url).context["form"]
     assert str(form.fields["codigo"].label) == "Código"

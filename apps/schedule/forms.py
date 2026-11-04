@@ -19,10 +19,10 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
         fields = ["nome", "cor", "ativo"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
 
     def clean_nome(self):
         # The clinic is not a form field, so the unique constraint must be checked here.
@@ -60,13 +60,13 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             "descricao": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, clinica, profissionais=None, **kwargs):
+    def __init__(self, *args, clinic, profissionais=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.clinica = clinica
+        self.clinic = clinic
         self.intervalos = []
         agendamento = self.instance
-        if agendamento.clinica_id is None:
-            agendamento.clinica = clinica
+        if agendamento.clinic_id is None:
+            agendamento.clinic = clinic
 
         # Inactive practitioners/types are hidden, except the ones already in use here.
         if profissionais is None:
@@ -80,12 +80,12 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
         self.fields["paciente"].queryset = Patient.objects.all()
 
-        passo = clinica.agenda_intervalo * 60
+        passo = clinic.agenda_intervalo * 60
         for campo in ("hora_inicio", "hora_fim"):
             self.fields[campo].widget.attrs.update(
                 step=passo,
-                min=clinica.agenda_inicio.strftime("%H:%M"),
-                max=clinica.agenda_fim.strftime("%H:%M"),
+                min=clinic.agenda_inicio.strftime("%H:%M"),
+                max=clinic.agenda_fim.strftime("%H:%M"),
             )
 
         if agendamento.pk:
@@ -98,9 +98,9 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             )
 
     def _alinhado(self, hora):
-        inicio = self.clinica.agenda_inicio
+        inicio = self.clinic.agenda_inicio
         minutos = (hora.hour * 60 + hora.minute) - (inicio.hour * 60 + inicio.minute)
-        return hora.second == 0 and minutos % self.clinica.agenda_intervalo == 0
+        return hora.second == 0 and minutos % self.clinic.agenda_intervalo == 0
 
     def clean(self):
         dados = super().clean()
@@ -128,23 +128,23 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         if None in (data, hora_inicio, hora_fim) or self.errors:
             return dados
 
-        clinica = self.clinica
+        clinic = self.clinic
         if hora_fim <= hora_inicio:
             self.add_error("hora_fim", _("O fim deve ser depois do início."))
             return dados
-        intervalo = clinica.agenda_intervalo
+        intervalo = clinic.agenda_intervalo
         for campo, hora in (("hora_inicio", hora_inicio), ("hora_fim", hora_fim)):
             if not self._alinhado(hora):
                 self.add_error(
                     campo, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
                 )
-        if hora_inicio < clinica.agenda_inicio or hora_fim > clinica.agenda_fim:
+        if hora_inicio < clinic.agenda_inicio or hora_fim > clinic.agenda_fim:
             self.add_error(
                 None,
                 _("Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s).")
                 % {
-                    "inicio": f"{clinica.agenda_inicio:%H:%M}",
-                    "fim": f"{clinica.agenda_fim:%H:%M}",
+                    "inicio": f"{clinic.agenda_inicio:%H:%M}",
+                    "fim": f"{clinic.agenda_fim:%H:%M}",
                 },
             )
         if self.errors:

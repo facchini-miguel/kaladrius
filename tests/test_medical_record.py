@@ -57,7 +57,7 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
             fim=agenda.momento(datetime.date(2031, 3, 5), datetime.time(11)),
         )
     return {
-        "clinica": clinica_a,
+        "clinic": clinica_a,
         "paciente": paciente,
         "agendamento": agendamento,
         "ana": ana,
@@ -69,7 +69,7 @@ def registrar(cenario, quem="dra", **extra):
     url = reverse("medical_records:new", args=[cenario["paciente"].pk])
     resposta = cenario[quem].post(url, {**ANAMNESE, **extra})
     assert resposta.status_code == 302, resposta.content.decode()[:500]
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         return Visit.objects.latest("pk")
 
 
@@ -86,7 +86,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
     assert pagina.context["prontuario"] == [] and "Novo atendimento" in pagina.content.decode()
 
     # An administrator who is also a registered practitioner reaches it.
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         Practitioner.objects.create(
             nome="Dr. Admin", usuario=django_user_model.objects.get(username="admin")
         )
@@ -116,7 +116,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     cenario["dr"].post(
         reverse("medical_records:addendum", args=[atendimento.pk]), {"texto": "Exame ok"}
     )
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         adendo = atendimento.adendos.get()
     assert adendo.texto == "Exame ok" and adendo.profissional.nome == "Dr. Bruno"
     assert "Exame ok" in cenario["dra"].get(url).content.decode()
@@ -148,13 +148,13 @@ def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
 def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
     registrar(cenario)
     paciente = cenario["paciente"]
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         Patient.objects.filter(pk=paciente.pk).update(arquivado=True, arquivado_em=timezone.now())
     url = reverse("patients:delete", args=[paciente.pk])
     pagina = cenario["admin"].get(url)
     assert pagina.context["atendimentos"] == 1 and "20 anos" in pagina.content.decode()
     cenario["admin"].post(url)
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert Patient.objects.filter(pk=paciente.pk).exists()
 
 
@@ -215,7 +215,7 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     pagina = cenario["dra"].get(resposta.url).content.decode()
     assert "3 dias de afastamento" in pagina and "Repouso" in pagina
     assert "5 de março de 2031" in pagina  # month in lower case, as in running text
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert atendimento.atestados.count() == 2
     registro = AuditEntry.objects.filter(modelo="Atestado").latest("pk")
     assert "Repouso" not in str(registro.alteracoes)
@@ -282,7 +282,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     )
 
     enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()
     assert (anexo.tipo, anexo.tamanho, anexo.profissional.nome) == (
         "image/png",
@@ -313,7 +313,7 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
     url = reverse("medical_records:attachment_upload", args=[atendimento.pk])
     cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("a.png", PNG)})
     cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("b.png", PNG)})
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         primeiro, segundo = Attachment.objects.order_by("pk")
     remover = lambda anexo: reverse("medical_records:attachment_remove", args=[anexo.pk])  # noqa: E731
     assert cenario["dr"].post(remover(primeiro)).status_code == 403
@@ -322,7 +322,7 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
         reverse("medical_records:visit", args=[atendimento.pk]), {**ANAMNESE, "acao": "finalizar"}
     )
     assert cenario["dra"].post(remover(segundo)).status_code == 403
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert list(Attachment.objects.values_list("pk", flat=True)) == [segundo.pk]
 
 
@@ -337,10 +337,10 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     assert 'name="profissional"' in root.get(novo).content.decode()
     resposta = root.post(novo, {**ANAMNESE, "profissional": cenario["ana"].pk})
     assert resposta.status_code == 302
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         atendimento = Visit.objects.get()
     assert atendimento.profissional == cenario["ana"]
-    assert atendimento.criado_por.username == "root"  # the audit keeps who really wrote it
+    assert atendimento.created_by.username == "root"  # the audit keeps who really wrote it
 
     # Another practitioner's draft (Dra. Ana's) can be edited by the superuser only.
     url = reverse("medical_records:visit", args=[atendimento.pk])
@@ -350,7 +350,7 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     cenario["dra"].post(
         anexo_url, {"arquivo": SimpleUploadedFile("x.png", PNG), "descricao": "Foto"}
     )
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()
     assert (
         root.post(reverse("medical_records:attachment_remove", args=[anexo.pk])).status_code == 302
@@ -367,9 +367,9 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
         },
     )
     assert resposta.status_code == 302
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert Certificate.objects.get().profissional == cenario["ana"]
         assert not Attachment.objects.exists()
     root.post(reverse("medical_records:addendum", args=[atendimento.pk]), {"texto": "Correção"})
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         assert atendimento.adendos.get().profissional == cenario["ana"]

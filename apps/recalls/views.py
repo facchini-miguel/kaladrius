@@ -70,7 +70,7 @@ def novo(request):
     inicial = {"data": request.GET.get("data") or ""}
     if request.GET.get("paciente", "").isdecimal():
         inicial["paciente"] = request.GET["paciente"]
-    return _formulario(request, Recall(criado_por=request.user), inicial)
+    return _formulario(request, Recall(created_by=request.user), inicial)
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
@@ -80,7 +80,7 @@ def editar(request, pk):
 
 def _formulario(request, rechamada, inicial):
     form = RechamadaForm(
-        request.POST or None, instance=rechamada, initial=inicial, clinica=request.clinica
+        request.POST or None, instance=rechamada, initial=inicial, clinic=request.clinic
     )
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -111,7 +111,7 @@ def _formulario(request, rechamada, inicial):
 def concluir(request, pk):
     rechamada = get_object_or_404(Recall.objects.select_related("paciente"), pk=pk)
     rechamada.concluida = not rechamada.concluida
-    rechamada.save(update_fields=["concluida", "alterado_em"])
+    rechamada.save(update_fields=["concluida", "updated_at"])
     if rechamada.concluida:
         mensagem = _("Rechamada de %(nome)s concluída.")
     else:

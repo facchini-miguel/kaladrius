@@ -75,7 +75,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         profissional = Practitioner.objects.get(nome="Dr. Novo")
-    assert profissional.clinica == clinica_a
+    assert profissional.clinic == clinica_a
 
     cliente.post(
         reverse("practitioners:edit", args=[profissional.pk]),

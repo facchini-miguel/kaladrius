@@ -30,8 +30,8 @@ def centro(clinica_a):
         return CostCenter.objects.create(nome="Ortodontia")
 
 
-def despesa(clinica, **extra):
-    with usar_clinica(clinica):
+def despesa(clinic, **extra):
+    with usar_clinica(clinic):
         categoria = Category.objects.get(nome="Aluguel")
     return {
         "pessoa": "Imobiliária fictícia",
@@ -111,7 +111,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
         caixa = FinancialAccount.objects.get(nome="Caixa")
         for valor, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
             lancamento = services.criar_lancamento(
-                clinica=clinica_a,
+                clinic=clinica_a,
                 tipo=Entry.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
                 descricao="Compra",

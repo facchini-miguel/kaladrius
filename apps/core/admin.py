@@ -20,7 +20,7 @@ gettext_noop("- Select an option -")
 
 class VinculoNaClinicaInline(admin.TabularInline):
     model = Membership
-    fk_name = "clinica"
+    fk_name = "clinic"
     extra = 0
     autocomplete_fields = ["usuario"]
 
@@ -52,9 +52,9 @@ class UsuarioAdmin(UserAdmin):
 
 @admin.register(Membership)
 class VinculoAdmin(admin.ModelAdmin):
-    list_display = ["usuario", "clinica", "papel", "ativo"]
-    list_filter = ["papel", "ativo", "clinica"]
-    search_fields = ["usuario__username", "clinica__nome"]
+    list_display = ["usuario", "clinic", "papel", "ativo"]
+    list_filter = ["papel", "ativo", "clinic"]
+    search_fields = ["usuario__username", "clinic__nome"]
 
 
 @admin.register(Backup)

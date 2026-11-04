@@ -104,7 +104,7 @@ def pagar(profissional, *, ate, vencimento, categoria, usuario):
     if calculo["valor"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
     lancamento = services.criar_lancamento(
-        clinica=profissional.clinica,
+        clinic=profissional.clinic,
         tipo=Entry.Tipo.PAGAR,
         pessoa=profissional.nome,
         profissional=profissional,
@@ -117,7 +117,7 @@ def pagar(profissional, *, ate, vencimento, categoria, usuario):
         usuario=usuario,
     )
     comissao = Commission.objects.create(
-        clinica=profissional.clinica,
+        clinic=profissional.clinic,
         profissional=profissional,
         ate=ate,
         percentual=profissional.comissao_percentual,
@@ -125,7 +125,7 @@ def pagar(profissional, *, ate, vencimento, categoria, usuario):
         estornos=calculo["estornos"],
         valor=calculo["valor"],
         lancamento=lancamento,
-        criado_por=usuario,
+        created_by=usuario,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.
     for pagamento in calculo["creditos"]:

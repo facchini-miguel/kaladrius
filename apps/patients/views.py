@@ -171,7 +171,7 @@ def editar(request, pk):
 
 
 def _formulario(request, paciente):
-    form = PacienteForm(request.POST or None, instance=paciente, clinica=request.clinica)
+    form = PacienteForm(request.POST or None, instance=paciente, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         paciente = form.save()
         messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": paciente.nome})
@@ -299,7 +299,7 @@ def excluir(request, pk):
                 AuditEntry.Acao.EXCLUIR,
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
-                clinica=request.clinica,
+                clinic=request.clinic,
                 descricao=f"Paciente {codigo}: dados pessoais excluídos a pedido do titular",
             )
         messages.success(

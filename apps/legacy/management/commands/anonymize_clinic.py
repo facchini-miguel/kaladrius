@@ -11,7 +11,7 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinic", dest="clinica", required=True, help="Name of the clinic.")
+        parser.add_argument("--clinic", dest="clinic", required=True, help="Name of the clinic.")
         parser.add_argument(
             "--confirm",
             dest="confirmar",
@@ -19,14 +19,14 @@ class Command(BaseCommand):
             help="Required: the change cannot be undone.",
         )
 
-    def handle(self, *args, clinica, confirmar, **options):
+    def handle(self, *args, clinic, confirmar, **options):
         if not confirmar:
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
-            r = anonymize_clinic(clinica)
+            r = anonymize_clinic(clinic)
         except ClinicaNaoEncontrada as erro:
             raise CommandError(str(erro)) from erro
-        self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinica}” anonimizados:"))
+        self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinic}” anonimizados:"))
         self.stdout.write(f"  Pacientes: {r.pacientes}")
         self.stdout.write(f"  Agendamentos: {r.agendamentos}")
         self.stdout.write(f"  Rechamadas: {r.rechamadas}")

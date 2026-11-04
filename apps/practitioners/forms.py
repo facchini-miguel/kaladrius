@@ -14,17 +14,17 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
         fields = ["nome", "registro", "cor", "usuario", "ativo"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
         # The registrations of the clinic's country as examples (decision 121).
-        exemplos = identification.do_pais(countries.pais_da_clinica(clinica)).registro_profissional
+        exemplos = identification.do_pais(countries.pais_da_clinica(clinic)).registro_profissional
         self.fields["registro"].help_text = exemplos
         # Only users with an active membership in this clinic can be linked.
         self.fields["usuario"].queryset = (
             get_user_model()
-            .objects.filter(vinculos__clinica=clinica, vinculos__ativo=True)
+            .objects.filter(vinculos__clinic=clinic, vinculos__ativo=True)
             .order_by("username")
             .distinct()
         )

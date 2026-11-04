@@ -38,7 +38,7 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
         assert not Patient.objects.exclude(email__endswith="@example.com").exists()
         assert Appointment.objects.count() > 0  # created once, not duplicated
         assert Recall.objects.count() == 80  # not duplicated
-        assert Appointment.objects.filter(profissional__clinica=F("clinica")).count() == (
+        assert Appointment.objects.filter(profissional__clinic=F("clinic")).count() == (
             Appointment.objects.count()
         )
 
@@ -57,11 +57,9 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     real = Clinic.objects.create(nome="Clínica Real")
     criar_usuario("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
-    Membership.objects.create(
-        usuario=get_user_model().objects.get(username="dra.ana"), clinica=real
-    )
+    Membership.objects.create(usuario=get_user_model().objects.get(username="dra.ana"), clinic=real)
     with sem_isolamento():
-        Patient.objects.create(clinica=real, nome="Paciente Real")
+        Patient.objects.create(clinic=real, nome="Paciente Real")
 
     with pytest.raises(CommandError):
         call_command("remove_sample_data")
@@ -73,7 +71,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     with sem_isolamento():
         assert list(Patient.objects.values_list("nome", flat=True)) == ["Paciente Real"]
         assert not Appointment.objects.exists() and not Recall.objects.exists()
-        assert set(Practitioner.objects.values_list("clinica", flat=True)) <= {real.pk}
+        assert set(Practitioner.objects.values_list("clinic", flat=True)) <= {real.pk}
     assert not AuditEntry.objects.filter(objeto_descricao__contains="(teste)").exists()
     assert AuditEntry.objects.filter(
         objeto_descricao__startswith="Dados de teste removidos: 1 clínicas"

@@ -26,7 +26,7 @@ class Modulo(models.TextChoices):
     PROFISSIONAIS = "profissionais", _("Profissionais")
     CADASTROS = "cadastros", _("Tabelas base")
     USUARIOS = "usuarios", _("Usuários da clínica")
-    CLINICA = "clinica", _("Configurações da clínica")
+    CLINICA = "clinic", _("Configurações da clínica")
     AUDITORIA = "auditoria", _("Auditoria")
     # Receivables, receiving payments, receipts and debtors (front desk included).
     RECEBIMENTOS = "recebimentos", _("Recebimentos")
@@ -110,7 +110,7 @@ MODULO_DA_CLINICA = {
 def pode(request, modulo, acao):
     """Whether the current user may perform `acao` on `modulo` in the current clinic."""
     usuario = request.user
-    if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+    if not usuario.is_authenticated or getattr(request, "clinic", None) is None:
         return False
     if modulo in MODULO_DA_CLINICA and MODULO_DA_CLINICA[modulo] not in modules.visiveis(request):
         return False
@@ -152,7 +152,7 @@ def exige_permissao(modulo, acao):
         @wraps(view)
         @login_required
         def protegida(request, *args, **kwargs):
-            if request.clinica is None:
+            if request.clinic is None:
                 if request.user.is_superuser:
                     return redirect("register_clinic")
                 return render(request, "core/no_clinic.html", status=403)

@@ -68,7 +68,7 @@ def lancar(folhas, *, categoria, vencimento, usuario):
             )
         mes = f"{folha.competencia:%m/%Y}"
         folha.lancamento = financeiro.criar_lancamento(
-            clinica=folha.funcionario.clinica,
+            clinic=folha.funcionario.clinic,
             tipo=Entry.Tipo.PAGAR,
             pessoa=folha.funcionario.nome,
             descricao=_("Salário %(mes)s") % {"mes": mes},

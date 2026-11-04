@@ -30,7 +30,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 def parcela(clinica_a):
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
-            clinica=clinica_a,
+            clinic=clinica_a,
             tipo=Entry.Tipo.RECEBER,
             pessoa="Pagador fictício",
             descricao="Consulta",
@@ -43,8 +43,8 @@ def parcela(clinica_a):
         return lancamento.parcelas.get()
 
 
-def receber(clinica, parcela, data, valor="100"):
-    with usar_clinica(clinica):
+def receber(clinic, parcela, data, valor="100"):
+    with usar_clinica(clinic):
         return services.receber(
             parcela,
             usuario=None,
@@ -77,7 +77,7 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
             "data": ONTEM.isoformat(),
             "valor": "100",
             "forma": "pix",
-            "conta": FinancialAccount.todos.get(clinica=clinica_a, nome="Caixa").pk,
+            "conta": FinancialAccount.todos.get(clinic=clinica_a, nome="Caixa").pk,
         },
         follow=True,
     )

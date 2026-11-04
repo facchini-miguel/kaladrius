@@ -91,7 +91,7 @@ def novo(request):
         inicial["profissional"] = proprio.pk
     form = OrcamentoForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
-        form.instance.criado_por = request.user
+        form.instance.created_by = request.user
         orcamento = form.save()
         messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
         return redirect("estimates:detail", pk=orcamento.pk)

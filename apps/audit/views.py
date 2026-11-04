@@ -69,7 +69,7 @@ def campos_alterados(registro):
 @exige_permissao(Modulo.AUDITORIA, Acao.VER)
 def lista(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
-    registros = AuditEntry.objects.filter(clinica=request.clinica)
+    registros = AuditEntry.objects.filter(clinic=request.clinic)
     filtros = {
         "q": request.GET.get("q", "").strip(),
         "acao": request.GET.get("acao", ""),
