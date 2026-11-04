@@ -98,7 +98,7 @@ def campo_documento():
 def documento_por_tipo(campo, individuo, empresa, tipo):
     """Name and example of a document field that depends on the person type: the document of
     an individual and of a company (either may be None, and then the field is hidden for that
-    type). The page switches them when the type changes (static/js/pagina.js)."""
+    type). The page switches them when the type changes (static/js/page.js)."""
     atual = empresa if tipo == "PJ" else individuo
     campo.label = (atual or individuo or empresa).sigla
     campo.widget.attrs.update(
