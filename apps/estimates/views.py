@@ -31,8 +31,8 @@ POR_PAGINA = 50
 
 def _orcamentos():
     # Archived patients leave the team's screens (decision 046).
-    return Estimate.objects.filter(paciente__arquivado=False).select_related(
-        "paciente", "profissional"
+    return Estimate.objects.filter(patient__arquivado=False).select_related(
+        "patient", "practitioner"
     )
 
 
@@ -64,7 +64,7 @@ def lista(request):
     if situacao in Estimate.Situacao.values:
         orcamentos = orcamentos.filter(situacao=situacao)
     if busca:
-        orcamentos = orcamentos.filter(paciente__nome__unaccent__icontains=busca)
+        orcamentos = orcamentos.filter(patient__nome__unaccent__icontains=busca)
     pagina = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -82,26 +82,26 @@ def lista(request):
 @exige_permissao(Modulo.ORCAMENTOS, Acao.CRIAR)
 def novo(request):
     inicial = {}
-    codigo = request.GET.get("paciente", "")
+    codigo = request.GET.get("patient", "")
     if codigo.isdecimal():
-        inicial["paciente"] = codigo
+        inicial["patient"] = codigo
     # A practitioner writes estimates in their own name by default.
-    proprio = Practitioner.objects.filter(usuario=request.user, ativo=True).first()
+    proprio = Practitioner.objects.filter(user=request.user, ativo=True).first()
     if proprio is not None:
-        inicial["profissional"] = proprio.pk
+        inicial["practitioner"] = proprio.pk
     form = OrcamentoForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
-        form.instance.criado_por = request.user
+        form.instance.created_by = request.user
         orcamento = form.save()
         messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
         return redirect("estimates:detail", pk=orcamento.pk)
-    valor_paciente = form["paciente"].value()
-    paciente = (
+    valor_paciente = form["patient"].value()
+    patient = (
         Patient.objects.filter(pk=valor_paciente, arquivado=False).first()
         if str(valor_paciente or "").isdecimal()
         else None
     )
-    return render(request, "estimates/form.html", {"form": form, "paciente": paciente})
+    return render(request, "estimates/form.html", {"form": form, "patient": patient})
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
@@ -117,7 +117,7 @@ def editar(request, pk):
     return render(
         request,
         "estimates/form.html",
-        {"form": form, "paciente": orcamento.paciente, "orcamento": orcamento},
+        {"form": form, "patient": orcamento.patient, "orcamento": orcamento},
     )
 
 
@@ -245,7 +245,7 @@ def aprovar(request, pk):
                 parcelas=dados["parcelas"],
                 primeiro_vencimento=dados["primeiro_vencimento"],
                 categoria=dados["categoria"],
-                usuario=request.user,
+                user=request.user,
                 pagamento=pagamento,
             )
         except ValidationError as erro:
@@ -263,7 +263,7 @@ def recusar(request, pk):
     if resposta:
         return resposta
     try:
-        services.recusar(orcamento, usuario=request.user)
+        services.recusar(orcamento, user=request.user)
     except ValidationError as erro:  # approved or refused by someone else a moment ago
         messages.error(request, erro.messages[0])
     else:

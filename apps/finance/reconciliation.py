@@ -29,13 +29,13 @@ Situacao = BankTransaction.Situacao
 
 
 @transaction.atomic
-def importar(conta, *, nome_arquivo, conteudo, usuario):
+def importar(conta, *, nome_arquivo, conteudo, user):
     """Read an OFX file into `conta`. Lines imported before (same bank id) are skipped."""
     extrato = ofx.ler(conteudo)
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
     importacao = StatementImport.objects.create(
-        clinica=conta.clinica,
+        clinic=conta.clinic,
         conta=conta,
         arquivo=nome_arquivo[:200],
         banco=extrato.banco,
@@ -45,7 +45,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         saldo=extrato.saldo,
         saldo_em=extrato.saldo_em or extrato.fim,
         ignoradas=extrato.ignoradas,
-        criado_por=usuario,
+        created_by=user,
     )
     existentes = set(
         BankTransaction.objects.filter(
@@ -56,7 +56,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
     BankTransaction.objects.bulk_create(
         [
             BankTransaction(
-                clinica=conta.clinica,
+                clinic=conta.clinic,
                 conta=conta,
                 importacao=importacao,
                 fitid=t.fitid,
@@ -113,13 +113,13 @@ def candidatos(transacoes):
     pagamentos = list(
         Payment.objects.filter(
             conta_id__in=contas, estornado=False, transacao__isnull=True, data__range=(de, ate)
-        ).select_related("parcela__lancamento__paciente")
+        ).select_related("parcela__lancamento__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
             outra_conta_id__in=contas,
             transacao__isnull=True,
-            criado_em__date__range=(de, ate),
+            created_at__date__range=(de, ate),
         ).select_related("caixa__conta")
     )
     resultado = {}
@@ -143,7 +143,7 @@ def candidatos(transacoes):
                     )
                 )
         for m in movimentos:
-            data = timezone.localtime(m.criado_em).date()
+            data = timezone.localtime(m.created_at).date()
             if (
                 m.outra_conta_id == t.conta_id
                 and m.valor == valor
@@ -160,13 +160,13 @@ def candidatos(transacoes):
     return resultado
 
 
-def _vincular(transacao, candidato, usuario):
+def _vincular(transacao, candidato, user):
     if isinstance(candidato.objeto, Payment):
         transacao.pagamento = candidato.objeto
     else:
         transacao.movimento = candidato.objeto
     transacao.situacao = Situacao.CONCILIADA
-    transacao.conciliado_por = usuario
+    transacao.conciliado_por = user
     transacao.conciliado_em = timezone.now()
     try:
         with transaction.atomic():
@@ -184,17 +184,17 @@ def _pendente(transacao):
 
 
 @transaction.atomic
-def conciliar(transacao, chave, *, usuario):
+def conciliar(transacao, chave, *, user):
     transacao = _pendente(transacao)
     for candidato in candidatos([transacao]).get(transacao.pk, []):
         if candidato.chave == chave:
-            _vincular(transacao, candidato, usuario)
+            _vincular(transacao, candidato, user)
             return transacao
     raise ValidationError(_("Esse lançamento não corresponde a esta transação."))
 
 
 @transaction.atomic
-def conciliar_unicos(importacao, *, usuario):
+def conciliar_unicos(importacao, *, user):
     """Reconcile every pending line with exactly one candidate that no other line wants."""
     transacoes = list(
         BankTransaction.objects.select_for_update().filter(
@@ -207,17 +207,17 @@ def conciliar_unicos(importacao, *, usuario):
     for t in transacoes:
         lista = por_transacao.get(t.pk, [])
         if len(lista) == 1 and procurados[lista[0].chave] == 1:
-            _vincular(t, lista[0], usuario)
+            _vincular(t, lista[0], user)
             feitas += 1
     return feitas
 
 
 @transaction.atomic
-def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, usuario):
+def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
     lancamento = services.criar_lancamento(
-        clinica=transacao.clinica,
+        clinic=transacao.clinic,
         tipo=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
         pessoa=pessoa or descricao,
         descricao=descricao,
@@ -225,26 +225,26 @@ def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, usuario)
         valor_total=abs(transacao.valor),
         parcelas=1,
         primeiro_vencimento=transacao.data,
-        usuario=usuario,
+        user=user,
     )
     pagamento = services.receber(
         lancamento.parcelas.get(),
-        usuario=usuario,
+        user=user,
         valor=abs(transacao.valor),
         forma=forma,
         conta=transacao.conta,
         data=transacao.data,
     )
-    _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.data, "", pagamento), usuario)
+    _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.data, "", pagamento), user)
     return lancamento
 
 
 @transaction.atomic
-def ignorar(transacao, *, motivo, usuario):
+def ignorar(transacao, *, motivo, user):
     transacao = _pendente(transacao)
     transacao.situacao = Situacao.IGNORADA
     transacao.motivo = motivo
-    transacao.conciliado_por = usuario
+    transacao.conciliado_por = user
     transacao.conciliado_em = timezone.now()
     transacao.save()
 

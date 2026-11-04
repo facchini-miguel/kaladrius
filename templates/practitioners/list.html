@@ -24,22 +24,22 @@
       </tr>
     </thead>
     <tbody>
-      {% for profissional in profissionais %}
+      {% for practitioner in profissionais %}
       <tr>
-        <td>{{ profissional.nome }}</td>
-        <td>{{ profissional.registro|default:"—" }}</td>
-        <td><span class="amostra-cor" style="background-color: {{ profissional.cor }}" title="{{ profissional.cor }}"></span></td>
-        <td>{{ profissional.usuario.username|default:"—" }}</td>
+        <td>{{ practitioner.nome }}</td>
+        <td>{{ practitioner.registro|default:"—" }}</td>
+        <td><span class="amostra-cor" style="background-color: {{ practitioner.cor }}" title="{{ practitioner.cor }}"></span></td>
+        <td>{{ practitioner.user.username|default:"—" }}</td>
         <td>
-          {% if profissional.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if practitioner.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if pode.profissionais.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' profissional.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' practitioner.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.profissionais.excluir %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' profissional.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' practitioner.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>
       </tr>

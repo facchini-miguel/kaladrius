@@ -117,11 +117,11 @@ def test_dump_invalido(texto):
 @pytest.fixture
 def importado(db):
     relatorio = importar(DUMP, "Clínica Importada", hoje=HOJE)
-    return relatorio, relatorio.clinica
+    return relatorio, relatorio.clinic
 
 
-def dados(clinica, modelo, **filtro):
-    with usar_clinica(clinica):
+def dados(clinic, modelo, **filtro):
+    with usar_clinica(clinic):
         return list(modelo.objects.filter(**filtro).order_by("pk"))
 
 
@@ -137,25 +137,25 @@ def test_relatorio(importado):
 
 
 def test_horario_da_agenda_cobre_os_atendimentos(importado):
-    relatorio, clinica = importado
-    clinica.refresh_from_db()
-    assert (clinica.agenda_inicio, clinica.agenda_fim) == (datetime.time(7, 30), datetime.time(21))
+    relatorio, clinic = importado
+    clinic.refresh_from_db()
+    assert (clinic.agenda_inicio, clinic.agenda_fim) == (datetime.time(7, 30), datetime.time(21))
     assert any(aviso.startswith("Horário da agenda ampliado") for aviso in relatorio.avisos)
 
 
 def test_profissionais_e_tipos(importado):
-    _, clinica = importado
-    assert [p.nome for p in dados(clinica, Practitioner)] == ["Dr Teste", "Consultório 2"]
-    nomes = {t.nome for t in dados(clinica, AppointmentType)}
+    _, clinic = importado
+    assert [p.nome for p in dados(clinic, Practitioner)] == ["Dr Teste", "Consultório 2"]
+    nomes = {t.nome for t in dados(clinic, AppointmentType)}
     assert "Dentística" in nomes  # matched without accents, not duplicated
     assert "Dentistica" not in nomes
-    nova = dados(clinica, AppointmentType, nome="Cor Nova")[0]
+    nova = dados(clinic, AppointmentType, nome="Cor Nova")[0]
     assert nova.cor == "#0d6efd"  # invalid legacy color replaced
 
 
 def test_paciente_completo(importado):
-    _, clinica = importado
-    joao = dados(clinica, Patient, nome="João d'Ávila")[0]  # Latin-1 mojibake fixed
+    _, clinic = importado
+    joao = dados(clinic, Patient, nome="João d'Ávila")[0]  # Latin-1 mojibake fixed
     assert joao.cpf_cnpj == "01234567890"  # leading zero restored
     assert (joao.sexo, joao.data_nascimento) == ("M", datetime.date(1980, 2, 3))
     assert joao.estado_civil.nome == "Solteiro(a)"
@@ -169,12 +169,12 @@ def test_paciente_completo(importado):
         "Último pagamento: 06/05/2019",
     ]:
         assert trecho in joao.observacoes
-    assert timezone.localtime(joao.criado_em).date() == datetime.date(2012, 4, 5)
+    assert timezone.localtime(joao.created_at).date() == datetime.date(2012, 4, 5)
 
 
 def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
-    _, clinica = importado
-    ana = dados(clinica, Patient, nome="Ana Duplicada")[0]
+    _, clinic = importado
+    ana = dados(clinic, Patient, nome="Ana Duplicada")[0]
     # Same CPF as João after restoring the leading zero: kept only in the notes.
     assert ana.cpf_cnpj == ""
     assert "CPF/CNPJ no sistema antigo: 012.345.678-90" in ana.observacoes
@@ -188,10 +188,10 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
     assert "Fax: 3333" in ana.observacoes and "Site: www.ana.example" in ana.observacoes
     assert not ana.ativo
 
-    bia = dados(clinica, Patient, nome="Bia CPF Errado")[0]
+    bia = dados(clinic, Patient, nome="Bia CPF Errado")[0]
     assert bia.cpf_cnpj == "" and "CPF/CNPJ no sistema antigo: 11111111112" in bia.observacoes
 
-    empresa = dados(clinica, Patient, nome="Empresa Teste")[0]
+    empresa = dados(clinic, Patient, nome="Empresa Teste")[0]
     assert (empresa.tipo, empresa.cpf_cnpj) == ("PJ", "11222333000181")
     assert (empresa.razao_social, empresa.inscricao_estadual) == ("Empresa Teste Ltda", "123")
 
@@ -213,8 +213,8 @@ def test_documento(bruto, tipo, esperado):
 
 
 def test_agenda_e_rechamadas(importado):
-    _, clinica = importado
-    agendamentos = dados(clinica, Appointment)
+    _, clinic = importado
+    agendamentos = dados(clinic, Appointment)
     assert [a.descricao.splitlines()[0] for a in agendamentos] == [
         "Fulano - extração",
         "Término igual ao início",
@@ -223,19 +223,19 @@ def test_agenda_e_rechamadas(importado):
     ]
     corrigido = agendamentos[1]
     assert corrigido.fim - corrigido.inicio == datetime.timedelta(minutes=30)
-    assert all(a.paciente is None for a in agendamentos)
+    assert all(a.patient is None for a in agendamentos)
     assert timezone.localtime(agendamentos[0].inicio).hour == 8
 
-    rechamadas = dados(clinica, Recall)
-    assert [(r.paciente.nome, r.concluida) for r in rechamadas] == [
+    rechamadas = dados(clinic, Recall)
+    assert [(r.patient.nome, r.concluida) for r in rechamadas] == [
         ("João d'Ávila", True),  # past recall: considered handled
         ("Empresa Teste", False),
     ]
 
 
 def test_registro_na_auditoria_e_sem_usuarios(importado, django_user_model):
-    _, clinica = importado
-    registro = AuditEntry.objects.get(clinica=clinica, objeto_descricao__startswith="Importação")
+    _, clinic = importado
+    registro = AuditEntry.objects.get(clinic=clinic, objeto_descricao__startswith="Importação")
     assert "4 pacientes, 4 agendamentos, 2 rechamadas" in registro.objeto_descricao
     assert not django_user_model.objects.exists()
 
@@ -243,8 +243,8 @@ def test_registro_na_auditoria_e_sem_usuarios(importado, django_user_model):
 def test_nao_importa_duas_vezes_na_mesma_clinica(importado):
     with pytest.raises(ImportacaoRecusada):
         importar(DUMP, "Clínica Importada", hoje=HOJE)
-    _, clinica = importado
-    assert len(dados(clinica, Patient)) == 4
+    _, clinic = importado
+    assert len(dados(clinic, Patient)) == 4
 
 
 def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
@@ -262,30 +262,30 @@ def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
 def test_comando(db, tmp_path, capsys):
     arquivo = tmp_path / "dump.sql"
     arquivo.write_text(DUMP, encoding="utf-8")
-    call_command("import_legacy", str(arquivo), clinica="Pelo Comando")
+    call_command("import_legacy", str(arquivo), clinic="Pelo Comando")
     saida = capsys.readouterr().out
     assert "Pacientes: 4" in saida and "Avisos:" in saida
     with pytest.raises(CommandError):
-        call_command("import_legacy", str(arquivo), clinica="Pelo Comando")
+        call_command("import_legacy", str(arquivo), clinic="Pelo Comando")
     with pytest.raises(CommandError):
-        call_command("import_legacy", str(tmp_path / "nao-existe.sql"), clinica="X")
+        call_command("import_legacy", str(tmp_path / "nao-existe.sql"), clinic="X")
 
 
 # --- Anonymization -----------------------------------------------------------------
 
 
 def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
-    _, clinica = importado
+    _, clinic = importado
     antes = {
-        "pacientes": dados(clinica, Patient),
-        "agendamentos": dados(clinica, Appointment),
-        "profissionais": dados(clinica, Practitioner),
+        "pacientes": dados(clinic, Patient),
+        "agendamentos": dados(clinic, Appointment),
+        "profissionais": dados(clinic, Practitioner),
     }
     with pytest.raises(CommandError):
-        call_command("anonymize_clinic", clinica=clinica.nome)
-    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
+        call_command("anonymize_clinic", clinic=clinic.nome)
+    call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)
 
-    pacientes = dados(clinica, Patient)
+    pacientes = dados(clinic, Patient)
     assert [p.pk for p in pacientes] == [p.pk for p in antes["pacientes"]]
     originais = [
         "Ávila",
@@ -317,19 +317,19 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     assert joao.telefone_residencial.startswith("48")  # area code kept
     assert len(joao.cpf_cnpj) == 11
 
-    agendamentos = dados(clinica, Appointment)
-    assert [(a.inicio, a.fim, a.profissional_id) for a in agendamentos] == [
-        (a.inicio, a.fim, a.profissional_id) for a in antes["agendamentos"]
+    agendamentos = dados(clinic, Appointment)
+    assert [(a.inicio, a.fim, a.practitioner_id) for a in agendamentos] == [
+        (a.inicio, a.fim, a.practitioner_id) for a in antes["agendamentos"]
     ]
     descricoes = [a.descricao for a in agendamentos]
     assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
     assert not [d for d in descricoes if "Fulano" in d or "Até tarde" in d]
-    assert {r.descricao for r in dados(clinica, Recall)} <= set(RECHAMADAS)
-    nomes = [p.nome for p in dados(clinica, Practitioner)]
+    assert {r.descricao for r in dados(clinic, Recall)} <= set(RECHAMADAS)
+    nomes = [p.nome for p in dados(clinic, Practitioner)]
     assert "Dr Teste" not in nomes and len(nomes) == len(antes["profissionais"])
 
     # The audit no longer holds the original values; the anonymization is recorded.
-    registros = AuditEntry.objects.filter(clinica=clinica)
+    registros = AuditEntry.objects.filter(clinic=clinic)
     assert not registros.filter(modelo="Paciente").exists()
     assert not registros.filter(objeto_descricao__startswith="Importação").exists()
     assert registros.filter(objeto_descricao__startswith="Dados anonimizados: 4 pacientes").exists()
@@ -337,12 +337,12 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
 
 def test_anonimizar_clinica_inexistente(db):
     with pytest.raises(CommandError, match="não encontrada"):
-        call_command("anonymize_clinic", clinica="Não existe", confirmar=True)
+        call_command("anonymize_clinic", clinic="Não existe", confirmar=True)
 
 
 def test_anonimizacao_dos_fornecedores(importado):
-    _, clinica = importado
-    with usar_clinica(clinica):
+    _, clinic = importado
+    with usar_clinica(clinic):
         pessoa = Supplier.objects.create(
             tipo=Supplier.Tipo.FISICA,
             nome="Fulana Fornecedora",
@@ -355,7 +355,7 @@ def test_anonimizacao_dos_fornecedores(importado):
         categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
         for fornecedor in (pessoa, empresa):
             services.criar_lancamento(
-                clinica=clinica,
+                clinic=clinic,
                 tipo=Entry.Tipo.PAGAR,
                 fornecedor=fornecedor,
                 pessoa=fornecedor.nome,
@@ -364,41 +364,41 @@ def test_anonimizacao_dos_fornecedores(importado):
                 valor_total=Decimal("10"),
                 parcelas=1,
                 primeiro_vencimento=HOJE,
-                usuario=None,
+                user=None,
             )
-    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
+    call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)
 
-    pessoa, empresa = dados(clinica, Supplier)
+    pessoa, empresa = dados(clinic, Supplier)
     assert "Fulana" not in str(vars(pessoa))
     assert (pessoa.cpf_cnpj, len(pessoa.telefone)) == ("", 10)
     assert pessoa.email.endswith("@example.com")
     assert empresa.nome == "Dental Fictícia"  # a company name is not personal data
     assert len(empresa.whatsapp) == 11 and empresa.whatsapp != "48999990000"
     # Payables keep showing their supplier's (new) name.
-    for lancamento in dados(clinica, Entry, tipo=Entry.Tipo.PAGAR):
+    for lancamento in dados(clinic, Entry, tipo=Entry.Tipo.PAGAR):
         assert lancamento.pessoa == lancamento.fornecedor.nome
 
 
 def test_anonimizacao_das_carteirinhas(importado):
-    _, clinica = importado
-    with usar_clinica(clinica):
+    _, clinic = importado
+    with usar_clinica(clinic):
         convenio = HealthPlan.objects.create(nome="Saúde Exemplo")
         MemberCard.objects.create(
-            paciente=Patient.objects.first(),
+            patient=Patient.objects.first(),
             convenio=convenio,
             plano="Básico",
             numero="98765",
             titular="Fulano Titular",
         )
-    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
-    (carteirinha,) = dados(clinica, MemberCard)
+    call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)
+    (carteirinha,) = dados(clinic, MemberCard)
     assert carteirinha.numero != "98765" and "Fulano" not in carteirinha.titular
     assert carteirinha.titular and (carteirinha.convenio, carteirinha.plano) == (convenio, "Básico")
 
 
 def test_anonimizacao_dos_funcionarios(importado):
-    _, clinica = importado
-    with usar_clinica(clinica):
+    _, clinic = importado
+    with usar_clinica(clinic):
         funcionaria = Employee.objects.create(
             nome="Fulana Funcionária", cpf="52998224725", telefone="4833334444"
         )
@@ -411,7 +411,7 @@ def test_anonimizacao_dos_funcionarios(importado):
         )
         categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
         folha.lancamento = services.criar_lancamento(
-            clinica=clinica,
+            clinic=clinic,
             tipo=Entry.Tipo.PAGAR,
             pessoa=funcionaria.nome,
             descricao="Salário",
@@ -419,14 +419,14 @@ def test_anonimizacao_dos_funcionarios(importado):
             valor_total=Decimal("2000"),
             parcelas=1,
             primeiro_vencimento=HOJE,
-            usuario=None,
+            user=None,
         )
         folha.save()
-    call_command("anonymize_clinic", clinica=clinica.nome, confirmar=True)
-    (funcionaria,) = dados(clinica, Employee)
-    (folha,) = dados(clinica, Payroll)
+    call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)
+    (funcionaria,) = dados(clinic, Employee)
+    (folha,) = dados(clinic, Payroll)
     assert "Fulana" not in funcionaria.nome and funcionaria.cpf == ""
     assert len(funcionaria.telefone) == 10 and folha.observacao == ""
-    with usar_clinica(clinica):
+    with usar_clinica(clinic):
         assert Entry.objects.get(pk=folha.lancamento_id).pessoa == funcionaria.nome
         assert funcionaria.salario_em(HOJE) == Decimal("2000")

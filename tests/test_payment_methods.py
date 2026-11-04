@@ -17,9 +17,9 @@ pytestmark = pytest.mark.django_db
 
 
 def mudar_pais(dados, pais):
-    clinica = dados["clinica"]
-    clinica.pais = pais
-    clinica.save()
+    clinic = dados["clinic"]
+    clinic.pais = pais
+    clinic.save()
 
 
 def test_cada_pais_tem_as_suas_formas():
@@ -73,7 +73,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     dados = {"data": HOJE.isoformat(), "valor": "100", "conta": cenario["caixa"].pk}
     assert "forma" in admin.post(url, {**dados, "forma": "pix"}).context["form"].errors
     assert admin.post(url, {**dados, "forma": "carteira"}).status_code == 302
-    with usar_clinica(cenario["clinica"]), translation.override("pt-br"):
+    with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
         pagamento = Payment.objects.get()
         assert pagamento.get_forma_display() == "Carteira digital (Yape, Plin)"
         relatorio = services.relatorio(HOJE, HOJE)
@@ -104,7 +104,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
         "cartao_codigo": "A1B2",
     }
     assert admin.post(url, dados).status_code == 302
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         pagamento = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
     assert (pagamento.cartao_bandeira, pagamento.cartao_codigo) == ("Visa", "A1B2")
@@ -125,7 +125,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
         "cartao_codigo": "A1B2",
     }
     assert entrar(cenario, "admin").post(url, dados).status_code == 302
-    with usar_clinica(cenario["clinica"]):
+    with usar_clinica(cenario["clinic"]):
         pagamento = Payment.objects.get()
     assert (pagamento.cartao_bandeira, pagamento.cartao_parcelas, pagamento.cartao_codigo) == (
         "",
@@ -136,10 +136,10 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
     lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
-    with usar_clinica(cenario["clinica"]), translation.override("pt-br"):
+    with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
         pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal("100"),
             forma="pix",
             conta=cenario["caixa"],

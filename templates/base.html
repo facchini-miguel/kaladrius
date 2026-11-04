@@ -71,7 +71,7 @@
             </ul>
           </li>
           {% endif %}
-          {% if pode.profissionais.ver or pode.convenios.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinica.alterar %}
+          {% if pode.profissionais.ver or pode.convenios.ver or pode.cadastros.ver or pode.usuarios.ver or pode.auditoria.ver or pode.clinic.alterar %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Cadastros" %}</a>
             <ul class="dropdown-menu">
@@ -101,10 +101,10 @@
               <li><a class="dropdown-item" href="{% url 'finance:catalog' 'cost-centers' %}">{% translate "Centros de custo" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'finance:suppliers' %}">{% translate "Fornecedores" %}</a></li>
               {% endif %}
-              {% if pode.clinica.alterar or pode.auditoria.ver %}
+              {% if pode.clinic.alterar or pode.auditoria.ver %}
               <li><hr class="dropdown-divider"></li>
               {% endif %}
-              {% if pode.clinica.alterar %}
+              {% if pode.clinic.alterar %}
               <li><a class="dropdown-item" href="{% url 'clinic_settings' %}">{% translate "Configurações da clínica" %}</a></li>
               {% endif %}
               {% if pode.auditoria.ver %}
@@ -215,7 +215,7 @@
     {% if modulo_desligado %}
     <div class="alert alert-warning d-print-none" role="status">
       {% blocktranslate with modulo=modulo_desligado.label %}O módulo {{ modulo }} está desligado nesta clínica: a equipe não o vê, só o administrador do sistema.{% endblocktranslate %}
-      {% if pode.clinica.alterar %}<a href="{% url 'clinic_settings' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
+      {% if pode.clinic.alterar %}<a href="{% url 'clinic_settings' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
     </div>
     {% endif %}
     {% for mensagem in messages %}

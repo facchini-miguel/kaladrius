@@ -71,9 +71,9 @@ def test_leitura_e_filtro_por_publico(arquivo, settings):
     releases.todas.cache_clear()
     try:
         assert releases.versao_atual() == "1.5.0"
-        paciente = releases.para_publico("paciente")
-        assert [r.versao for r, _ in paciente] == ["1.5.0"]
-        assert [i.modulo for i in paciente[0][1]] == ["Rechamadas"]
+        patient = releases.para_publico("paciente")
+        assert [r.versao for r, _ in patient] == ["1.5.0"]
+        assert [i.modulo for i in patient[0][1]] == ["Rechamadas"]
         equipe_desde = releases.para_publico("equipe", desde="1.4.7")
         assert [r.versao for r, _ in equipe_desde] == ["1.5.0"]
     finally:
@@ -120,8 +120,8 @@ def test_arquivo_invalido(arquivo, conteudo, mensagem):
 
 @pytest.mark.django_db
 def test_pagina_novidades(client, django_user_model):
-    usuario = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
-    client.force_login(usuario)
+    user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
+    client.force_login(user)
     conteudo = client.get(reverse("whats_new")).content.decode()
     assert f"Versão {releases.versao_atual()}" in conteudo
     # Items with an empty publico are hidden from everyone
@@ -178,8 +178,8 @@ def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django
     settings.RELEASES_ARQUIVO = arquivo(DEPENDABOT)
     releases.todas.cache_clear()
     try:
-        usuario = django_user_model.objects.create_user(username="bia", password="x-1234567890")
-        client.force_login(usuario)
+        user = django_user_model.objects.create_user(username="bia", password="x-1234567890")
+        client.force_login(user)
         pagina = client.get(reverse("whats_new")).content.decode()
         assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in pagina
         assert 'target="_blank" rel="noopener noreferrer"' in pagina  # opens in a new tab

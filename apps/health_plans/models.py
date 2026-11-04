@@ -22,8 +22,8 @@ class HealthPlan(ModeloDaClinica):
     telefone = models.CharField(_("telefone"), max_length=11, blank=True)
     observacoes = models.TextField(_("observações"), blank=True)
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "convenios_convenio"
@@ -32,7 +32,7 @@ class HealthPlan(ModeloDaClinica):
         ordering = ["nome"]
         constraints = [
             models.UniqueConstraint(
-                "clinica", Lower("nome"), name="convenio_nome_unico_por_clinica"
+                "clinic", Lower("nome"), name="convenio_nome_unico_por_clinica"
             ),
         ]
 
@@ -43,11 +43,12 @@ class HealthPlan(ModeloDaClinica):
 class MemberCard(ModeloDaClinica):
     """A patient's card of a health plan."""
 
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="carteirinhas",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     convenio = models.ForeignKey(
         HealthPlan,
@@ -69,8 +70,8 @@ class MemberCard(ModeloDaClinica):
         help_text=_("Se o paciente for dependente, o nome do titular do plano."),
     )
     ativa = models.BooleanField(_("ativa"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "convenios_carteirinha"
@@ -79,7 +80,7 @@ class MemberCard(ModeloDaClinica):
         ordering = ["-ativa", "convenio__nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "convenio", "numero"], name="carteirinha_unica_por_convenio"
+                fields=["clinic", "convenio", "numero"], name="carteirinha_unica_por_convenio"
             ),
         ]
 
@@ -89,9 +90,9 @@ class MemberCard(ModeloDaClinica):
     def save(self, *args, **kwargs):
         # Having clinica_id on every row does not stop a link across clinics on its own.
         self._conferir_clinica()
-        if self.clinica_id is None:  # without isolation (commands)
-            self.clinica_id = self.paciente.clinica_id
-        if {self.paciente.clinica_id, self.convenio.clinica_id} != {self.clinica_id}:
+        if self.clinic_id is None:  # without isolation (commands)
+            self.clinic_id = self.patient.clinic_id
+        if {self.patient.clinic_id, self.convenio.clinic_id} != {self.clinic_id}:
             raise ClinicaDiferente("The patient and the health plan must be of this clinic.")
         super().save(*args, **kwargs)
 

@@ -63,10 +63,10 @@ def test_numero_ambiguo_continua_recusado():
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paciente Fictício")
+        patient = Patient.objects.create(nome="Paciente Fictício")
     for url in (
         reverse("patients:new"),
-        reverse("patients:related_new", args=[paciente.pk]),
+        reverse("patients:related_new", args=[patient.pk]),
     ):
         pagina = recepcao.get(url).content.decode()
         assert "Select an option" not in pagina, url
@@ -113,8 +113,8 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     )
     assert 'class="odontograma-rolagem"' in html
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paciente Fictício")
-    ficha = recepcao.get(reverse("patients:print", args=[paciente.pk])).content.decode()
+        patient = Patient.objects.create(nome="Paciente Fictício")
+    ficha = recepcao.get(reverse("patients:print", args=[patient.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
 
 

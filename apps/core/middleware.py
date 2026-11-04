@@ -15,16 +15,16 @@ def resolver_clinica(request):
     the clinic of their active membership, and a superuser without one in the clinic of
     the installation. Returns (None, None) when there is no clinic for the user.
     """
-    usuario = request.user
+    user = request.user
     vinculo = (
-        Membership.objects.filter(usuario=usuario, ativo=True, clinica__ativa=True)
-        .select_related("clinica")
-        .order_by("clinica_id")
+        Membership.objects.filter(user=user, ativo=True, clinic__ativa=True)
+        .select_related("clinic")
+        .order_by("clinic_id")
         .first()
     )
     if vinculo is not None:
-        return vinculo.clinica, vinculo
-    if usuario.is_superuser:
+        return vinculo.clinic, vinculo
+    if user.is_superuser:
         return Clinic.unica(), None
     return None, None
 
@@ -36,7 +36,7 @@ class ClinicaAtualMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.clinica = None
+        request.clinic = None
         request.vinculo = None
         if request.path_info.startswith(reverse("admin:index")):
             # The Django admin is restricted to platform superusers (see core/admin.py)
@@ -44,24 +44,24 @@ class ClinicaAtualMiddleware:
             with sem_isolamento():
                 return self.get_response(request)
         if request.user.is_authenticated:
-            request.clinica, request.vinculo = resolver_clinica(request)
-        if request.clinica is not None:
-            _usar_pais_da_clinica(request, request.clinica)
+            request.clinic, request.vinculo = resolver_clinica(request)
+        if request.clinic is not None:
+            _usar_pais_da_clinica(request, request.clinic)
         try:
-            with usar_clinica(request.clinica):
+            with usar_clinica(request.clinic):
                 return self.get_response(request)
         finally:
             timezone.deactivate()
 
 
-def _usar_pais_da_clinica(request, clinica):
+def _usar_pais_da_clinica(request, clinic):
     """The clinic's time zone, and the English variant of its country for dates and times
     (decision 117): an English-speaking user of a British clinic gets 31/10/2026."""
     try:
-        timezone.activate(zoneinfo.ZoneInfo(clinica.fuso_horario))
+        timezone.activate(zoneinfo.ZoneInfo(clinic.fuso_horario))
     except (zoneinfo.ZoneInfoNotFoundError, ValueError):
         pass  # an unknown zone keeps settings.TIME_ZONE
-    variante = countries.variante_do_idioma(translation.get_language(), clinica.pais)
+    variante = countries.variante_do_idioma(translation.get_language(), clinic.pais)
     if variante:
         translation.activate(variante)
         request.LANGUAGE_CODE = variante

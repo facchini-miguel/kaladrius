@@ -15,8 +15,8 @@ _ip = ContextVar("auditoria_ip", default=None)
 
 
 @contextlib.contextmanager
-def contexto(usuario, ip):
-    tokens = (_usuario.set(usuario), _ip.set(ip))
+def contexto(user, ip):
+    tokens = (_usuario.set(user), _ip.set(ip))
     try:
         yield
     finally:
@@ -28,21 +28,19 @@ def ip_da_requisicao(request):
     return request.META.get("REMOTE_ADDR") or None
 
 
-def registrar(
-    acao, objeto=None, *, clinica=None, alteracoes=None, usuario=None, ip=None, descricao=""
-):
-    usuario = usuario if usuario is not None else _usuario.get()
-    if usuario is not None and not getattr(usuario, "is_authenticated", False):
-        usuario = None
-    if clinica is None and objeto is not None:
+def registrar(acao, objeto=None, *, clinic=None, alteracoes=None, user=None, ip=None, descricao=""):
+    user = user if user is not None else _usuario.get()
+    if user is not None and not getattr(user, "is_authenticated", False):
+        user = None
+    if clinic is None and objeto is not None:
         # Rows without a clinic of their own (user accounts) are filed under the clinic
         # where the change was made, so the clinic administrator sees it in the audit log.
-        clinica = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
+        clinic = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
     return AuditEntry.objects.create(
         acao=acao,
-        clinica_id=getattr(clinica, "pk", clinica),
-        usuario=usuario,
-        usuario_nome=usuario.get_username() if usuario else "",
+        clinic_id=getattr(clinic, "pk", clinic),
+        user=user,
+        usuario_nome=user.get_username() if user else "",
         modelo=nome_do_modelo(type(objeto)) if objeto is not None else "",
         objeto_id=str(objeto.pk) if objeto is not None and objeto.pk is not None else "",
         objeto_descricao=(descricao or (str(objeto) if objeto is not None else ""))[:200],
@@ -83,4 +81,4 @@ def _clinica_de(objeto):
 
     if isinstance(objeto, Clinic):
         return objeto.pk
-    return getattr(objeto, "clinica_id", None)
+    return getattr(objeto, "clinic_id", None)

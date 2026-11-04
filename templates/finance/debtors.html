@@ -34,7 +34,7 @@
     <tbody>
       {% for linha in pagina %}
       <tr>
-        <td>{% if linha.paciente_id %}<a href="{% url 'patients:record' linha.paciente_id %}">{{ linha.nome }}</a>{% else %}{{ linha.nome }}{% endif %}</td>
+        <td>{% if linha.patient_id %}<a href="{% url 'patients:record' linha.patient_id %}">{{ linha.nome }}</a>{% else %}{{ linha.nome }}{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|moeda }}</td>
         {% for valor in linha.faixas %}<td class="text-end text-nowrap">{% if valor %}{{ valor|moeda }}{% else %}—{% endif %}</td>{% endfor %}
         <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|moeda }}{% else %}—{% endif %}</td>

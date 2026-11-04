@@ -80,35 +80,35 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Entry
         fields = [
-            "paciente",
+            "patient",
             "pessoa",
             "descricao",
             "categoria",
             "centro_custo",
-            "profissional",
+            "practitioner",
             "observacoes",
         ]
         widgets = {
-            "paciente": forms.HiddenInput,
+            "patient": forms.HiddenInput,
             "observacoes": forms.Textarea(attrs={"rows": 2}),
         }
         help_texts = {"pessoa": _("Só se quem paga não for um paciente cadastrado.")}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.clinica = clinica
+        self.instance.clinic = clinic
         self.instance.tipo = Entry.Tipo.RECEBER
-        self.fields["paciente"].queryset = Patient.objects.filter(arquivado=False)
+        self.fields["patient"].queryset = Patient.objects.filter(arquivado=False)
         self.fields["categoria"].queryset = Category.objects.filter(
             tipo=Category.Tipo.RECEITA, ativa=True
         )
-        self.fields["profissional"].queryset = Practitioner.objects.filter(ativo=True)
+        self.fields["practitioner"].queryset = Practitioner.objects.filter(ativo=True)
         self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
         _centros_de_custo(self)
 
     def clean(self):
         dados = super().clean()
-        if not dados.get("paciente") and not (dados.get("pessoa") or "").strip():
+        if not dados.get("patient") and not (dados.get("pessoa") or "").strip():
             self.add_error("pessoa", _("Escolha o paciente ou informe quem paga."))
         if dados.get("valor_total") is not None and dados["valor_total"] <= 0:
             self.add_error("valor_total", _("Informe um valor maior que zero."))
@@ -158,9 +158,9 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         help_texts = {"pessoa": _("Só para um pagamento avulso, sem cadastrar o fornecedor.")}
         widgets = {"observacoes": forms.Textarea(attrs={"rows": 2})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.clinica = clinica
+        self.instance.clinic = clinic
         self.instance.tipo = Entry.Tipo.PAGAR
         self.fields["fornecedor"].queryset = Supplier.objects.filter(ativo=True)
         self.fields["categoria"].queryset = Category.objects.filter(
@@ -222,12 +222,12 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         ]
         widgets = {"tipo": forms.RadioSelect, "observacoes": forms.Textarea(attrs={"rows": 3})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
         # The country's tax document of an individual or a company (decision 121).
-        self.documentos = identification.do_pais(countries.pais_da_clinica(clinica))
+        self.documentos = identification.do_pais(countries.pais_da_clinica(clinic))
         documento_por_tipo(
             self.fields["cpf_cnpj"],
             self.documentos.pessoa,

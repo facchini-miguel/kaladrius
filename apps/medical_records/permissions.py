@@ -38,12 +38,12 @@ def profissional_do_usuario(request):
 
 
 def _profissional(request):
-    usuario = request.user
-    if not usuario.is_authenticated or getattr(request, "clinica", None) is None:
+    user = request.user
+    if not user.is_authenticated or getattr(request, "clinic", None) is None:
         return None
     vinculo = getattr(request, "vinculo", None)
-    if vinculo is None and not usuario.is_superuser:
+    if vinculo is None and not user.is_superuser:
         return None
     if vinculo is not None and vinculo.papel == Papel.RECEPCAO:
         return None
-    return Practitioner.objects.filter(usuario=usuario, ativo=True).first()
+    return Practitioner.objects.filter(user=user, ativo=True).first()

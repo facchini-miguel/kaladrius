@@ -24,10 +24,10 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("--clinic", dest="clinica", required=True, help="Clinic name.")
+        parser.add_argument("--clinic", dest="clinic", required=True, help="Clinic name.")
         parser.add_argument(
             "--practitioner",
-            dest="profissional",
+            dest="practitioner",
             required=True,
             help="Practitioner the demo practitioner login uses.",
         )
@@ -62,50 +62,50 @@ class Command(BaseCommand):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
-            clinica = Clinic.objects.get(nome=options["clinica"])
+            clinic = Clinic.objects.get(nome=options["clinic"])
         except Clinic.DoesNotExist as erro:
-            raise CommandError(f"Clínica não encontrada: {options['clinica']}") from erro
+            raise CommandError(f"Clínica não encontrada: {options['clinic']}") from erro
 
-        recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinica, Papel.RECEPCAO)
-        profissional = self._conta(
-            PROFISSIONAL, "Profissional", senhas[1], clinica, Papel.PROFISSIONAL
+        recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinic, Papel.RECEPCAO)
+        practitioner = self._conta(
+            PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
         )
-        outras = [self._conta(u, nome, senha, clinica, papel) for u, nome, senha, papel in extras]
-        with usar_clinica(clinica):
-            cadastro = Practitioner.objects.filter(nome=options["profissional"]).first()
+        outras = [self._conta(u, nome, senha, clinic, papel) for u, nome, senha, papel in extras]
+        with usar_clinica(clinic):
+            cadastro = Practitioner.objects.filter(nome=options["practitioner"]).first()
             if cadastro is None:
                 if not options["criar_profissional"]:
                     raise CommandError(
-                        f"Profissional não encontrado: {options['profissional']} "
+                        f"Profissional não encontrado: {options['practitioner']} "
                         "(use --create-practitioner para criar)"
                     )
-                cadastro = Practitioner.objects.create(nome=options["profissional"])
-            if cadastro.usuario_id not in (None, profissional.pk):
+                cadastro = Practitioner.objects.create(nome=options["practitioner"])
+            if cadastro.user_id not in (None, practitioner.pk):
                 raise CommandError(
                     f"{cadastro.nome} já tem outro usuário de acesso; escolha outro profissional."
                 )
-            cadastro.usuario = profissional
-            cadastro.save(update_fields=["usuario"])
+            cadastro.user = practitioner
+            cadastro.save(update_fields=["user"])
         self.stdout.write(
             self.style.SUCCESS(
-                f"Contas prontas: {recepcao.username} (recepção), {profissional.username} "
+                f"Contas prontas: {recepcao.username} (recepção), {practitioner.username} "
                 f"(profissional, agenda de {cadastro.nome})"
                 + "".join(f", {conta.username}" for conta in outras)
                 + "."
             )
         )
 
-    def _conta(self, username, nome, senha, clinica, papel):
+    def _conta(self, username, nome, senha, clinic, papel):
         Usuario = get_user_model()
-        usuario, _criado = Usuario.objects.get_or_create(username=username)
-        usuario.first_name = nome
-        usuario.last_name = "(demonstração)"
-        usuario.is_active = True
-        usuario.is_staff = usuario.is_superuser = False
-        usuario.demonstracao = True
-        usuario.set_password(senha)
-        usuario.save()
+        user, _criado = Usuario.objects.get_or_create(username=username)
+        user.first_name = nome
+        user.last_name = "(demonstração)"
+        user.is_active = True
+        user.is_staff = user.is_superuser = False
+        user.demonstracao = True
+        user.set_password(senha)
+        user.save()
         Membership.objects.update_or_create(
-            usuario=usuario, clinica=clinica, defaults={"papel": papel, "ativo": True}
+            user=user, clinic=clinic, defaults={"papel": papel, "ativo": True}
         )
-        return usuario
+        return user

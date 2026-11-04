@@ -45,7 +45,7 @@ class FinancialAccount(ModeloDaClinica):
         verbose_name = _("conta")
         verbose_name_plural = _("contas")
         ordering = ["nome"]
-        constraints = [models.UniqueConstraint(fields=["clinica", "nome"], name="conta_unica")]
+        constraints = [models.UniqueConstraint(fields=["clinic", "nome"], name="conta_unica")]
 
     def __str__(self):
         return self.nome
@@ -87,7 +87,7 @@ class AccountGroup(ModeloDaClinica):
         ordering = ["tipo", "codigo", "nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "tipo", "pai", "nome"], name="grupo_contabil_unico"
+                fields=["clinic", "tipo", "pai", "nome"], name="grupo_contabil_unico"
             )
         ]
 
@@ -131,7 +131,7 @@ class Category(ModeloDaClinica):
         verbose_name_plural = _("categorias")
         ordering = ["tipo", "nome"]
         constraints = [
-            models.UniqueConstraint(fields=["clinica", "tipo", "nome"], name="categoria_unica")
+            models.UniqueConstraint(fields=["clinic", "tipo", "nome"], name="categoria_unica")
         ]
 
     def __str__(self):
@@ -153,7 +153,7 @@ class CostCenter(ModeloDaClinica):
         verbose_name_plural = _("centros de custo")
         ordering = ["nome"]
         constraints = [
-            models.UniqueConstraint(fields=["clinica", "nome"], name="centro_custo_unico")
+            models.UniqueConstraint(fields=["clinic", "nome"], name="centro_custo_unico")
         ]
 
     def __str__(self):
@@ -192,24 +192,24 @@ PLANO_PADRAO = {
 }
 
 
-def criar_padroes(clinica):
+def criar_padroes(clinic):
     """Default accounts and categories for a clinic that has none."""
     with sem_isolamento():
-        if not FinancialAccount.objects.filter(clinica=clinica).exists():
+        if not FinancialAccount.objects.filter(clinic=clinic).exists():
             FinancialAccount.objects.bulk_create(
-                FinancialAccount(clinica=clinica, nome=nome, tipo=tipo)
+                FinancialAccount(clinic=clinic, nome=nome, tipo=tipo)
                 for nome, tipo in CONTAS_PADRAO
             )
-        if not Category.objects.filter(clinica=clinica).exists():
+        if not Category.objects.filter(clinic=clinic).exists():
             grupo_de = {}
             for tipo, linhas in PLANO_PADRAO.items():
                 for codigo, nome, categorias in linhas:
                     grupo = AccountGroup.objects.create(
-                        clinica=clinica, tipo=tipo, codigo=codigo, nome=nome
+                        clinic=clinic, tipo=tipo, codigo=codigo, nome=nome
                     )
                     grupo_de.update({(tipo, categoria): grupo for categoria in categorias})
             Category.objects.bulk_create(
-                Category(clinica=clinica, nome=nome, tipo=tipo, grupo=grupo_de.get((tipo, nome)))
+                Category(clinic=clinic, nome=nome, tipo=tipo, grupo=grupo_de.get((tipo, nome)))
                 for nome, tipo in CATEGORIAS_PADRAO
             )
 
@@ -236,8 +236,8 @@ class Supplier(ModeloDaClinica):
     email = models.EmailField(_("e-mail"), blank=True)
     observacoes = models.TextField(_("observações"), blank=True)
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "financeiro_fornecedor"
@@ -246,7 +246,7 @@ class Supplier(ModeloDaClinica):
         ordering = ["nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "cpf_cnpj"],
+                fields=["clinic", "cpf_cnpj"],
                 condition=~Q(cpf_cnpj=""),
                 name="fornecedor_cpf_cnpj_unico_por_clinica",
             ),
@@ -281,13 +281,14 @@ class Entry(ModeloDaClinica):
         related_name="lancamentos",
         verbose_name=_("centro de custo"),
     )
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="lancamentos",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     # Who pays (receivable without a registered patient) or the supplier (payable). With a
     # registered supplier it holds the supplier's name, so lists and reports need no join.
@@ -300,7 +301,7 @@ class Entry(ModeloDaClinica):
         related_name="lancamentos",
         verbose_name=_("fornecedor"),
     )
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         null=True,
@@ -308,6 +309,7 @@ class Entry(ModeloDaClinica):
         related_name="+",
         verbose_name=_("profissional"),
         help_text=_("Quem fez o atendimento (opcional)."),
+        db_column="profissional_id",
     )
     valor_total = models.DecimalField(_("valor total"), **DINHEIRO)
     data = models.DateField(_("data"), default=timezone.localdate)
@@ -323,16 +325,17 @@ class Entry(ModeloDaClinica):
         verbose_name=_("cancelado por"),
     )
     motivo_cancelamento = models.CharField(_("motivo do cancelamento"), max_length=200, blank=True)
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "financeiro_lancamento"
@@ -350,7 +353,7 @@ class Entry(ModeloDaClinica):
 
     @property
     def nome_pessoa(self):
-        return self.paciente.nome if self.paciente_id else self.pessoa
+        return self.patient.nome if self.patient_id else self.pessoa
 
 
 class ParcelaQuerySet(models.QuerySet):
@@ -391,9 +394,7 @@ class Installment(ModeloDaClinica):
         verbose_name = _("parcela")
         verbose_name_plural = _("parcelas")
         ordering = ["vencimento", "numero"]
-        indexes = [
-            models.Index(fields=["clinica", "vencimento"], name="parcela_clinica_vencimento")
-        ]
+        indexes = [models.Index(fields=["clinic", "vencimento"], name="parcela_clinica_vencimento")]
         constraints = [
             models.UniqueConstraint(fields=["lancamento", "numero"], name="parcela_numero_unico"),
             models.CheckConstraint(condition=Q(valor__gt=0), name="parcela_valor_positivo"),
@@ -494,15 +495,16 @@ class Payment(ModeloDaClinica):
         related_name="pagamentos_estornados",
         verbose_name=_("comissão que descontou o estorno"),
     )
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("recebido por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "financeiro_pagamento"
@@ -618,20 +620,21 @@ class CashMovement(ModeloDaClinica):
         help_text=_("Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."),
     )
     motivo = models.CharField(_("motivo"), max_length=200)
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "financeiro_movimentocaixa"
         verbose_name = _("movimento de caixa")
         verbose_name_plural = _("movimentos de caixa")
-        ordering = ["criado_em"]
+        ordering = ["created_at"]
         constraints = [
             models.CheckConstraint(condition=Q(valor__gt=0), name="movimento_valor_positivo"),
         ]
@@ -648,11 +651,12 @@ class Commission(ModeloDaClinica):
     creates a payable; cancelling that payable cancels the commission and frees the receipts.
     """
 
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="comissoes",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     ate = models.DateField(_("recebimentos até"))
     percentual = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
@@ -666,27 +670,28 @@ class Commission(ModeloDaClinica):
         verbose_name=_("lançamento a pagar"),
     )
     cancelada = models.BooleanField(_("cancelada"), default=False)
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "financeiro_comissao"
         verbose_name = _("comissão")
         verbose_name_plural = _("comissões")
-        ordering = ["-criado_em"]
+        ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(condition=Q(valor__gt=0), name="comissao_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.profissional} {self.ate:%d/%m/%Y}"
+        return f"{self.practitioner} {self.ate:%d/%m/%Y}"
 
     @property
     def bruta(self):
@@ -711,7 +716,7 @@ class Planning(ModeloDaClinica):
         ordering = ["ano", "grupo"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "ano", "grupo"], name="planejamento_unico_por_grupo"
+                fields=["clinic", "ano", "grupo"], name="planejamento_unico_por_grupo"
             ),
             models.CheckConstraint(condition=Q(valor__gt=0), name="planejamento_valor_positivo"),
         ]
@@ -730,21 +735,22 @@ class BookClosing(ModeloDaClinica):
 
     ate = models.DateField(_("fechado até"), null=True, blank=True)
     motivo = models.CharField(_("motivo"), max_length=200, blank=True)
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "financeiro_fechamento"
         verbose_name = _("fechamento do financeiro")
         verbose_name_plural = _("fechamentos do financeiro")
-        ordering = ["-criado_em", "-pk"]
+        ordering = ["-created_at", "-pk"]
 
     def __str__(self):
         return f"{self.ate:%d/%m/%Y}" if self.ate else str(_("Aberto"))
@@ -773,21 +779,22 @@ class StatementImport(ModeloDaClinica):
         default=0,
         help_text=_("Linhas do arquivo sem data ou valor que dê para ler: não foram importadas."),
     )
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("importado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("importado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("importado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "financeiro_importacaoextrato"
         verbose_name = _("importação de extrato")
         verbose_name_plural = _("importações de extrato")
-        ordering = ["-criado_em"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.conta} {self.arquivo}"

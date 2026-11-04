@@ -25,8 +25,8 @@
     </div>
   </div>
   <p class="fs-6">
-    {% if lancamento.paciente.cpf_cnpj %}
-    {% blocktranslate with nome=lancamento.nome_pessoa sigla=lancamento.paciente.cpf_cnpj|sigla_documento:lancamento.paciente.papel_documento documento=lancamento.paciente.cpf_cnpj|documento:lancamento.paciente.papel_documento valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% if lancamento.patient.cpf_cnpj %}
+    {% blocktranslate with nome=lancamento.nome_pessoa sigla=lancamento.patient.cpf_cnpj|sigla_documento:lancamento.patient.papel_documento documento=lancamento.patient.cpf_cnpj|documento:lancamento.patient.papel_documento valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
     {% blocktranslate with nome=lancamento.nome_pessoa valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}
@@ -36,14 +36,14 @@
     <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
     {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
     {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
-    {% if lancamento.profissional %}<li>{% translate "Profissional" %}: {{ lancamento.profissional.nome }}{% if lancamento.profissional.registro %} ({{ lancamento.profissional.registro }}){% endif %}</li>{% endif %}
+    {% if lancamento.practitioner %}<li>{% translate "Profissional" %}: {{ lancamento.practitioner.nome }}{% if lancamento.practitioner.registro %} ({{ lancamento.practitioner.registro }}){% endif %}</li>{% endif %}
     {% if pagamento.observacao %}<li>{{ pagamento.observacao }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">
     <div class="text-nowrap">{{ pagamento.data|date:"DATE_FORMAT" }}</div>
     <div class="text-center" style="min-width: min(18rem, 100%);">
       <div class="border-top pt-1">{{ clinica_atual.nome }}</div>
-      {% if pagamento.criado_por %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.criado_por.get_full_name|default:pagamento.criado_por.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
+      {% if pagamento.created_by %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.created_by.get_full_name|default:pagamento.created_by.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}
     </div>
   </div>
   {% if documento_fiscal %}<p class="small text-body-secondary border-top pt-2 mt-3 mb-0">{% blocktranslate with documento=documento_fiscal %}Este recibo não substitui o documento fiscal ({{ documento }}).{% endblocktranslate %}</p>{% endif %}

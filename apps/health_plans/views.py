@@ -36,7 +36,7 @@ def editar(request, pk):
 
 
 def _convenio(request, instancia):
-    form = ConvenioForm(request.POST or None, instance=instancia, clinica=request.clinica)
+    form = ConvenioForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         convenio = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": convenio.nome})
@@ -45,27 +45,27 @@ def _convenio(request, instancia):
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
-def carteirinha_nova(request, paciente):
-    paciente = get_object_or_404(Patient.objects, pk=paciente, arquivado=False)
-    return _carteirinha(request, paciente, MemberCard())
+def carteirinha_nova(request, patient):
+    patient = get_object_or_404(Patient.objects, pk=patient, arquivado=False)
+    return _carteirinha(request, patient, MemberCard())
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.ALTERAR)
 def carteirinha_editar(request, pk):
     carteirinha = get_object_or_404(
-        MemberCard.objects.select_related("paciente"), pk=pk, paciente__arquivado=False
+        MemberCard.objects.select_related("patient"), pk=pk, patient__arquivado=False
     )
-    return _carteirinha(request, carteirinha.paciente, carteirinha)
+    return _carteirinha(request, carteirinha.patient, carteirinha)
 
 
-def _carteirinha(request, paciente, instancia):
-    form = CarteirinhaForm(request.POST or None, instance=instancia, paciente=paciente)
+def _carteirinha(request, patient, instancia):
+    form = CarteirinhaForm(request.POST or None, instance=instancia, patient=patient)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Carteirinha salva."))
-        return redirect("patients:record", pk=paciente.pk)
+        return redirect("patients:record", pk=patient.pk)
     return render(
         request,
         "health_plans/card_form.html",
-        {"form": form, "paciente": paciente, "instancia": instancia},
+        {"form": form, "patient": patient, "instancia": instancia},
     )

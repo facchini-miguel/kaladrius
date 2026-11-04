@@ -37,7 +37,7 @@ def tipo_editar(request, pk):
 
 
 def _formulario(request, tipo):
-    form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinica=request.clinica)
+    form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
@@ -115,20 +115,20 @@ def _periodo(request):
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def calendario(request):
     profissionais = list(services.profissionais_visiveis(request).filter(ativo=True))
-    escolhido = request.GET.get("profissional") or request.session.get(SESSAO_PROFISSIONAL)
-    profissional = next(
+    escolhido = request.GET.get("practitioner") or request.session.get(SESSAO_PROFISSIONAL)
+    practitioner = next(
         (p for p in profissionais if str(p.pk) == str(escolhido)),
         profissionais[0] if profissionais else None,
     )
-    if profissional is not None:
-        request.session[SESSAO_PROFISSIONAL] = profissional.pk
-    clinica = request.clinica
+    if practitioner is not None:
+        request.session[SESSAO_PROFISSIONAL] = practitioner.pk
+    clinic = request.clinic
     ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
     configuracao = {
-        "profissional": profissional.pk if profissional else None,
-        "inicio": clinica.agenda_inicio.strftime("%H:%M:%S"),
-        "fim": clinica.agenda_fim.strftime("%H:%M:%S"),
-        "intervalo": clinica.agenda_intervalo,
+        "practitioner": practitioner.pk if practitioner else None,
+        "inicio": clinic.agenda_inicio.strftime("%H:%M:%S"),
+        "fim": clinic.agenda_fim.strftime("%H:%M:%S"),
+        "intervalo": clinic.agenda_intervalo,
         "data": request.GET.get("data") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "idioma": get_language(),
@@ -153,7 +153,7 @@ def calendario(request):
         "schedule/calendar.html",
         {
             "profissionais": profissionais,
-            "profissional": profissional,
+            "practitioner": practitioner,
             "tipos": AppointmentType.objects.filter(ativo=True),
             "configuracao": configuracao,
             "so_a_propria": so_a_propria_agenda(request),
@@ -164,8 +164,8 @@ def calendario(request):
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def eventos(request):
     periodo = _periodo(request)
-    profissional = request.GET.get("profissional", "")
-    if periodo is None or not profissional.isdecimal():
+    practitioner = request.GET.get("practitioner", "")
+    if periodo is None or not practitioner.isdecimal():
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     inicio, fim = periodo
     # The middle of the visible range falls inside the week (or month) on the screen.
@@ -176,8 +176,8 @@ def eventos(request):
     }
     agendamentos = (
         services.agendamentos_visiveis(request)
-        .filter(profissional_id=int(profissional), inicio__lt=fim, fim__gt=inicio)
-        .select_related("tipo", "paciente")
+        .filter(practitioner_id=int(practitioner), inicio__lt=fim, fim__gt=inicio)
+        .select_related("tipo", "patient")
     )
     return JsonResponse(
         [
@@ -209,7 +209,7 @@ def novo(request):
     inicial = {
         campo: request.GET[parametro]
         for campo, parametro in [
-            ("profissional", "profissional"),
+            ("practitioner", "practitioner"),
             ("data", "data"),
             ("hora_inicio", "inicio"),
             ("hora_fim", "fim"),
@@ -220,7 +220,7 @@ def novo(request):
         request.POST or None,
         initial=inicial,
         instance=Appointment(),
-        clinica=request.clinica,
+        clinic=request.clinic,
         profissionais=services.profissionais_visiveis(request),
     )
     if request.method == "POST" and form.is_valid():
@@ -241,12 +241,12 @@ def novo(request):
 @exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
 def editar(request, pk):
     agendamento = get_object_or_404(
-        services.agendamentos_visiveis(request).select_related("paciente"), pk=pk
+        services.agendamentos_visiveis(request).select_related("patient"), pk=pk
     )
     form = AgendamentoForm(
         request.POST or None,
         instance=agendamento,
-        clinica=request.clinica,
+        clinic=request.clinic,
         profissionais=services.profissionais_visiveis(request),
     )
     if request.method == "POST" and form.is_valid():
@@ -275,7 +275,7 @@ MENSAGENS_SITUACAO = {
 def situacao(request, pk):
     """Came / missed / cancelled, from the appointment window or the home page."""
     agendamento = get_object_or_404(
-        services.agendamentos_visiveis(request).select_related("paciente", "profissional"), pk=pk
+        services.agendamentos_visiveis(request).select_related("patient", "practitioner"), pk=pk
     )
     try:
         services.marcar(agendamento, request.POST.get("situacao", ""))
@@ -285,14 +285,14 @@ def situacao(request, pk):
             agendamento.refresh_from_db()
             form = AgendamentoForm(
                 instance=agendamento,
-                clinica=request.clinica,
+                clinic=request.clinic,
                 profissionais=services.profissionais_visiveis(request),
             )
             contexto = {"form": form, "agendamento": agendamento, "erro_situacao": erro.messages[0]}
             return render(request, "schedule/_form.html", contexto)
         messages.error(request, erro.messages[0])
         return redirect("home")
-    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.paciente.nome}
+    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.patient.nome}
     if request.headers.get("HX-Request"):
         return _resposta_sucesso(mensagem)
     messages.success(request, mensagem)
@@ -302,7 +302,7 @@ def situacao(request, pk):
 @exige_permissao(Modulo.AGENDA, Acao.EXCLUIR)
 def excluir(request, pk):
     agendamento = get_object_or_404(
-        services.agendamentos_visiveis(request).select_related("paciente"), pk=pk
+        services.agendamentos_visiveis(request).select_related("patient"), pk=pk
     )
     if request.method == "POST":
         excluidos = Appointment.objects.filter(pk=agendamento.pk)
@@ -335,9 +335,9 @@ def _aniversariantes_em(dias):
         return resultado
     pacientes = Patient.objects.filter(filtro, ativo=True, arquivado=False).order_by("nome")
     por_mes_dia = {(dia.month, dia.day): dia for dia in dias}
-    for paciente in pacientes:
-        nascimento = paciente.data_nascimento
-        resultado[por_mes_dia[(nascimento.month, nascimento.day)]].append(paciente)
+    for patient in pacientes:
+        nascimento = patient.data_nascimento
+        resultado[por_mes_dia[(nascimento.month, nascimento.day)]].append(patient)
     return resultado
 
 
@@ -362,8 +362,8 @@ def aniversariantes_dia(request):
     except ValueError:
         return HttpResponse(_("Data inválida."), status=400)
     aniversariantes = [
-        (paciente, dia.year - paciente.data_nascimento.year)
-        for paciente in _aniversariantes_em([dia])[dia]
+        (patient, dia.year - patient.data_nascimento.year)
+        for patient in _aniversariantes_em([dia])[dia]
     ]
     return render(
         request, "schedule/_birthdays.html", {"dia": dia, "aniversariantes": aniversariantes}

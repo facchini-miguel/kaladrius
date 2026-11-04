@@ -5,8 +5,8 @@
 
 {% block conteudo %}
 <h1 class="h3 mb-1">{% translate "Pagar comissão" %}</h1>
-<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculo.profissional.nome data=ate|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
-{% include "finance/_commission_items.html" with pagamentos=calculo.creditos estornos=calculo.debitos recebido=calculo.recebido bruta=calculo.bruta valor=calculo.valor percentual=calculo.profissional.comissao_percentual %}
+<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculo.practitioner.nome data=ate|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
+{% include "finance/_commission_items.html" with pagamentos=calculo.creditos estornos=calculo.debitos recebido=calculo.recebido bruta=calculo.bruta valor=calculo.valor percentual=calculo.practitioner.comissao_percentual %}
 <form method="post" class="row g-2 align-items-end" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   <div class="col-md-5">{% with campo=form.vencimento %}{% include "includes/field.html" %}{% endwith %}</div>

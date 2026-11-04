@@ -24,8 +24,8 @@ def admin(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_plano", clinica_a, Papel.ADMIN))
 
 
-def grupo(clinica, nome, **extra):
-    with usar_clinica(clinica):
+def grupo(clinic, nome, **extra):
+    with usar_clinica(clinic):
         return AccountGroup.objects.get(nome=nome, **extra)
 
 
@@ -126,7 +126,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
             (avulsa, "50"),
         ):
             lancamento = services.criar_lancamento(
-                clinica=clinica_a,
+                clinic=clinica_a,
                 tipo=Entry.Tipo.PAGAR,
                 pessoa="Fictício",
                 descricao="Pagamento",
@@ -134,10 +134,10 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
                 valor_total=Decimal(valor),
                 parcelas=1,
                 primeiro_vencimento=HOJE,
-                usuario=None,
+                user=None,
             )
             parcela = lancamento.parcelas.get()
-            services.receber(parcela, usuario=None, valor=parcela.valor, forma="pix", conta=caixa)
+            services.receber(parcela, user=None, valor=parcela.valor, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert [(n, nome, str(v)) for n, nome, v in relatorio["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),
@@ -161,17 +161,17 @@ def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
         # Pessoal and the renames of decision 157 depend on the newer finance, so they were
         # rolled back along with it.
         apps = estado_do_banco()
-        clinica = apps.get_model("core", "Clinica").objects.create(nome="Clínica fictícia antiga")
+        clinic = apps.get_model("core", "Clinica").objects.create(nome="Clínica fictícia antiga")
         Category = apps.get_model("financeiro", "Categoria")
-        Category.objects.create(clinica_id=clinica.pk, nome="Aluguel", tipo="despesa")
-        Category.objects.create(clinica_id=clinica.pk, nome="Aluguel da sala", tipo="despesa")
+        Category.objects.create(clinica_id=clinic.pk, nome="Aluguel", tipo="despesa")
+        Category.objects.create(clinica_id=clinic.pk, nome="Aluguel da sala", tipo="despesa")
         executor = MigrationExecutor(connection)
         executor.migrate([("financeiro", "0012_plano_de_contas")])
         novos = executor.loader.project_state([("financeiro", "0012_plano_de_contas")]).apps
         Nova = novos.get_model("financeiro", "Categoria")
-        assert Nova.objects.get(clinica_id=clinica.pk, nome="Aluguel").grupo.nome == "Ocupação"
-        assert Nova.objects.get(clinica_id=clinica.pk, nome="Aluguel da sala").grupo is None
+        assert Nova.objects.get(clinica_id=clinic.pk, nome="Aluguel").grupo.nome == "Ocupação"
+        assert Nova.objects.get(clinica_id=clinic.pk, nome="Aluguel da sala").grupo is None
         Grupo = novos.get_model("financeiro", "GrupoContabil")
-        assert Grupo.objects.filter(clinica_id=clinica.pk).count() == 7
+        assert Grupo.objects.filter(clinica_id=clinic.pk).count() == 7
     finally:
         MigrationExecutor(connection).migrate(folhas)

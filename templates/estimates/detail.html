@@ -8,8 +8,8 @@
   <div>
     <h1 class="h3 mb-0">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
     <span class="text-body-secondary">
-      <a href="{% url 'patients:record' orcamento.paciente_id %}">{{ orcamento.paciente.nome }}</a>
-      {% if orcamento.profissional %} · {{ orcamento.profissional.nome }}{% endif %}
+      <a href="{% url 'patients:record' orcamento.patient_id %}">{{ orcamento.patient.nome }}</a>
+      {% if orcamento.practitioner %} · {{ orcamento.practitioner.nome }}{% endif %}
       · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }}
       · {% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
     </span>

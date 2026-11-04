@@ -39,11 +39,11 @@ def privacidade(request):
     The privacy contact is the clinic's: the user's clinic, or the installation's clinic
     for anyone else (one installation serves one clinic, decision 069).
     """
-    clinica = getattr(request, "clinica", None) or Clinic.unica()
+    clinic = getattr(request, "clinic", None) or Clinic.unica()
     titulo, html = documents.privacidade()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
-    pais = countries.pais_da_clinica(clinica)
-    contexto = {"titulo": titulo, "html": html, "clinica": clinica}
+    pais = countries.pais_da_clinica(clinic)
+    contexto = {"titulo": titulo, "html": html, "clinic": clinic}
     if pais != countries.PADRAO:
         contexto.update(
             pais=countries.do_codigo(pais).nome,

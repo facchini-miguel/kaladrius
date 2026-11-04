@@ -23,15 +23,15 @@ def admin(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_planejamento", clinica_a, Papel.ADMIN))
 
 
-def grupo(clinica, nome):
-    with usar_clinica(clinica):
+def grupo(clinic, nome):
+    with usar_clinica(clinic):
         return AccountGroup.objects.get(nome=nome)
 
 
-def pagar(clinica, categoria, valor, data=HOJE):
-    with usar_clinica(clinica):
+def pagar(clinic, categoria, valor, data=HOJE):
+    with usar_clinica(clinic):
         lancamento = services.criar_lancamento(
-            clinica=clinica,
+            clinic=clinic,
             tipo=Entry.Tipo.PAGAR,
             pessoa="Fictício",
             descricao="Despesa",
@@ -39,12 +39,12 @@ def pagar(clinica, categoria, valor, data=HOJE):
             valor_total=Decimal(valor),
             parcelas=1,
             primeiro_vencimento=data,
-            usuario=None,
+            user=None,
         )
         parcela = lancamento.parcelas.get()
         services.receber(
             parcela,
-            usuario=None,
+            user=None,
             valor=parcela.valor,
             data=data,
             forma="pix",

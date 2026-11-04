@@ -61,7 +61,7 @@ class ImportacaoRecusada(Exception):
 
 @dataclass
 class Relatorio:
-    clinica: Clinic | None = None
+    clinic: Clinic | None = None
     profissionais: int = 0
     tipos_criados: int = 0
     pacientes: int = 0
@@ -180,27 +180,27 @@ class _Importador:
     # --- Steps -------------------------------------------------------------------
 
     def _clinica(self):
-        clinica = Clinic.objects.filter(nome=self.nome_clinica).first()
-        if clinica is not None and Patient.objects.filter(clinica=clinica).exists():
+        clinic = Clinic.objects.filter(nome=self.nome_clinica).first()
+        if clinic is not None and Patient.objects.filter(clinic=clinic).exists():
             raise ImportacaoRecusada(
                 f"A clínica “{self.nome_clinica}” já tem pacientes. A importação só é feita "
                 "numa clínica nova ou vazia, para não duplicar dados."
             )
-        if clinica is None:
-            clinica = Clinic.objects.create(nome=self.nome_clinica)  # gets the default types
-        self.relatorio.clinica = clinica
-        return clinica
+        if clinic is None:
+            clinic = Clinic.objects.create(nome=self.nome_clinica)  # gets the default types
+        self.relatorio.clinic = clinic
+        return clinic
 
-    def _profissionais(self, clinica):
+    def _profissionais(self, clinic):
         mapa = {}
         for linha in self.t.get("dentistas", []):
             nome = _texto(linha["nome"]).lstrip("_ ").strip() or f"Profissional {linha['id']}"
-            mapa[linha["id"]] = Practitioner.objects.create(clinica=clinica, nome=nome[:200])
+            mapa[linha["id"]] = Practitioner.objects.create(clinic=clinic, nome=nome[:200])
         self.relatorio.profissionais = len(mapa)
         return mapa
 
-    def _tipos(self, clinica):
-        existentes = {_chave(t.nome): t for t in AppointmentType.objects.filter(clinica=clinica)}
+    def _tipos(self, clinic):
+        existentes = {_chave(t.nome): t for t in AppointmentType.objects.filter(clinic=clinic)}
         mapa = {}
         for linha in self.t.get("agenda_cor", []):
             nome = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
@@ -208,13 +208,13 @@ class _Importador:
             if tipo is None:
                 cor = _texto(linha["cor"])
                 cor = cor if re.fullmatch(r"#[0-9a-fA-F]{6}", cor) else "#0d6efd"
-                tipo = AppointmentType.objects.create(clinica=clinica, nome=nome, cor=cor.lower())
+                tipo = AppointmentType.objects.create(clinic=clinic, nome=nome, cor=cor.lower())
                 existentes[_chave(nome)] = tipo
                 self.relatorio.tipos_criados += 1
             mapa[linha["id"]] = tipo
         return mapa
 
-    def _paciente(self, linha, clinica, cidades, estados_civis, logradouros, bairros, usados):
+    def _paciente(self, linha, clinic, cidades, estados_civis, logradouros, bairros, usados):
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {linha['id']}"]
         tipo = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
@@ -290,8 +290,8 @@ class _Importador:
                 extras.append(f"{rotulo}: {_texto(linha[legado])}")
 
         pf = tipo == Patient.Tipo.FISICA
-        paciente = Patient(
-            clinica=clinica,
+        patient = Patient(
+            clinic=clinic,
             tipo=tipo,
             nome=_cabe(nome, 200, "Nome completo", extras),
             razao_social=""
@@ -320,10 +320,10 @@ class _Importador:
         )
         observacoes = _texto(linha["obs"])
         bloco = "[Sistema antigo]\n" + "\n".join(extras)
-        paciente.observacoes = f"{observacoes}\n\n{bloco}" if observacoes else bloco
-        return paciente, _data(linha["data_cadast"])
+        patient.observacoes = f"{observacoes}\n\n{bloco}" if observacoes else bloco
+        return patient, _data(linha["data_cadast"])
 
-    def _pacientes(self, clinica):
+    def _pacientes(self, clinic):
         cidades = self._cidades()
         estados_civis = self._estados_civis()
         logradouros = self._logradouros()
@@ -333,33 +333,33 @@ class _Importador:
             (
                 linha["id"],
                 *self._paciente(
-                    linha, clinica, cidades, estados_civis, logradouros, bairros, usados
+                    linha, clinic, cidades, estados_civis, logradouros, bairros, usados
                 ),
             )
             for linha in sorted(self.t.get("pessoas", []), key=lambda linha: linha["id"])
         ]
-        Patient.objects.bulk_create([paciente for _, paciente, _ in pares], batch_size=500)
+        Patient.objects.bulk_create([patient for _, patient, _ in pares], batch_size=500)
         # Keep the original registration date (auto_now_add only fills it on creation).
         com_data = []
-        for _, paciente, cadastro in pares:
+        for _, patient, cadastro in pares:
             if cadastro is not None:
-                paciente.criado_em = timezone.make_aware(
+                patient.created_at = timezone.make_aware(
                     datetime.datetime.combine(cadastro, datetime.time(12))
                 )
-                com_data.append(paciente)
-        Patient.objects.bulk_update(com_data, ["criado_em"], batch_size=500)
+                com_data.append(patient)
+        Patient.objects.bulk_update(com_data, ["created_at"], batch_size=500)
         self.relatorio.pacientes = len(pares)
-        return {codigo: paciente for codigo, paciente, _ in pares}
+        return {codigo: patient for codigo, patient, _ in pares}
 
     def _agendamentos(self, profissionais, tipos):
         avisos = self.relatorio.avisos
         novos = []
         for linha in sorted(self.t.get("agendax", []), key=lambda linha: linha["id"]):
-            profissional = profissionais.get(linha["id_dentista"])
+            practitioner = profissionais.get(linha["id_dentista"])
             tipo = tipos.get(linha["id_cor"])
             dia = _data(linha["data_marcar"])
             inicio, fim = _hora(linha["hora_inicial"]), _hora(linha["hora_final"])
-            if None in (profissional, tipo, dia, inicio, fim):
+            if None in (practitioner, tipo, dia, inicio, fim):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
@@ -373,8 +373,8 @@ class _Importador:
                 avisos["Agendamento com término antes do início (corrigido para 30 min)"] += 1
             novos.append(
                 Appointment(
-                    clinica=profissional.clinica,
-                    profissional=profissional,
+                    clinic=practitioner.clinic,
+                    practitioner=practitioner,
                     tipo=tipo,
                     inicio=inicio,
                     fim=fim,
@@ -383,20 +383,20 @@ class _Importador:
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
         aceitos, ultimo_fim = [], {}
-        for agendamento in sorted(novos, key=lambda a: (a.profissional.pk, a.inicio)):
-            if agendamento.inicio < ultimo_fim.get(agendamento.profissional.pk, agendamento.inicio):
+        for agendamento in sorted(novos, key=lambda a: (a.practitioner.pk, a.inicio)):
+            if agendamento.inicio < ultimo_fim.get(agendamento.practitioner.pk, agendamento.inicio):
                 avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] += 1
                 continue
-            ultimo_fim[agendamento.profissional.pk] = agendamento.fim
+            ultimo_fim[agendamento.practitioner.pk] = agendamento.fim
             aceitos.append(agendamento)
         Appointment.objects.bulk_create(aceitos, batch_size=1000)
         self.relatorio.agendamentos = len(aceitos)
         if aceitos:
-            self._ampliar_horario(aceitos[0].clinica, aceitos)
+            self._ampliar_horario(aceitos[0].clinic, aceitos)
 
-    def _ampliar_horario(self, clinica, agendamentos):
+    def _ampliar_horario(self, clinic, agendamentos):
         """Widen the clinic's schedule hours so every imported appointment shows in the grid."""
-        passo = clinica.agenda_intervalo
+        passo = clinic.agenda_intervalo
 
         def minutos(momento):
             local = timezone.localtime(momento)
@@ -404,13 +404,13 @@ class _Importador:
 
         primeiro = min(minutos(a.inicio) for a in agendamentos) // passo * passo
         ultimo = -(-max(minutos(a.fim) or 24 * 60 for a in agendamentos) // passo) * passo
-        inicio = min(clinica.agenda_inicio, datetime.time(primeiro // 60, primeiro % 60))
-        fim = clinica.agenda_fim
+        inicio = min(clinic.agenda_inicio, datetime.time(primeiro // 60, primeiro % 60))
+        fim = clinic.agenda_fim
         if ultimo < 24 * 60:
             fim = max(fim, datetime.time(ultimo // 60, ultimo % 60))
-        if (inicio, fim) != (clinica.agenda_inicio, clinica.agenda_fim):
-            clinica.agenda_inicio, clinica.agenda_fim = inicio, fim
-            clinica.save(update_fields=["agenda_inicio", "agenda_fim"])
+        if (inicio, fim) != (clinic.agenda_inicio, clinic.agenda_fim):
+            clinic.agenda_inicio, clinic.agenda_fim = inicio, fim
+            clinic.save(update_fields=["agenda_inicio", "agenda_fim"])
             self.relatorio.avisos[
                 f"Horário da agenda ampliado para {inicio:%H:%M}–{fim:%H:%M} "
                 "(havia atendimentos fora do padrão)"
@@ -422,21 +422,21 @@ class _Importador:
         for linha in self.t.get("agenda", []):
             if not linha.get("is_rechamada"):
                 continue
-            paciente = pacientes.get(linha["id_pessoa"])
+            patient = pacientes.get(linha["id_pessoa"])
             dia = _data(linha["data_marcar"])
-            if paciente is None or dia is None:
+            if patient is None or dia is None:
                 avisos["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
                 continue
             descricao = _texto(linha["descricao"]) or "Rechamada"
             if len(descricao) > 200:
-                paciente.observacoes += f"\nRechamada de {dia:%d/%m/%Y}: {descricao}"
-                paciente.save(update_fields=["observacoes"])
+                patient.observacoes += f"\nRechamada de {dia:%d/%m/%Y}: {descricao}"
+                patient.save(update_fields=["observacoes"])
                 descricao = descricao[:199] + "…"
             # The legacy system had no "done" flag: past recalls are considered handled.
             novas.append(
                 Recall(
-                    clinica=paciente.clinica,
-                    paciente=paciente,
+                    clinic=patient.clinic,
+                    patient=patient,
                     data=dia,
                     descricao=descricao,
                     concluida=dia < self.hoje,
@@ -447,16 +447,16 @@ class _Importador:
 
     def executar(self):
         with transaction.atomic(), sem_isolamento():
-            clinica = self._clinica()
-            profissionais = self._profissionais(clinica)
-            tipos = self._tipos(clinica)
-            pacientes = self._pacientes(clinica)
+            clinic = self._clinica()
+            profissionais = self._profissionais(clinic)
+            tipos = self._tipos(clinic)
+            pacientes = self._pacientes(clinic)
             self._agendamentos(profissionais, tipos)
             self._rechamadas(pacientes)
             r = self.relatorio
             registrar(
                 AuditEntry.Acao.CRIAR,
-                clinica=clinica,
+                clinic=clinic,
                 descricao=(
                     f"Importação do sistema antigo: {r.pacientes} pacientes, "
                     f"{r.agendamentos} agendamentos, {r.rechamadas} rechamadas"

@@ -57,7 +57,7 @@ class AppointmentType(ModeloDaClinica):
         verbose_name_plural = _("tipos de atendimento")
         ordering = ["nome"]
         constraints = [
-            models.UniqueConstraint(fields=["clinica", "nome"], name="tipo_atendimento_unico"),
+            models.UniqueConstraint(fields=["clinic", "nome"], name="tipo_atendimento_unico"),
         ]
 
     def __str__(self):
@@ -87,11 +87,12 @@ class Appointment(ModeloDaClinica):
         # Kept for the history and the no-show figures, but frees the time slot.
         DESMARCOU = "desmarcou", _("Desmarcou")
 
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     tipo = models.ForeignKey(
         AppointmentType,
@@ -101,13 +102,14 @@ class Appointment(ModeloDaClinica):
     )
     inicio = models.DateTimeField(_("início"))
     fim = models.DateTimeField(_("fim"))
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="agendamentos",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     descricao = models.TextField(_("descrição"), blank=True)
     situacao = models.CharField(
@@ -115,16 +117,17 @@ class Appointment(ModeloDaClinica):
     )
     # Appointments created together by "repeat N weeks" share the same series id.
     serie = models.UUIDField(_("série"), null=True, blank=True, editable=False)
-    criado_por = models.ForeignKey(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
+        db_column="criado_por_id",
     )
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "agenda_agendamento"
@@ -133,7 +136,7 @@ class Appointment(ModeloDaClinica):
         ordering = ["inicio"]
         indexes = [
             models.Index(
-                fields=["clinica", "profissional", "inicio"], name="agendamento_prof_inicio"
+                fields=["clinic", "practitioner", "inicio"], name="agendamento_prof_inicio"
             ),
         ]
         constraints = [
@@ -146,7 +149,7 @@ class Appointment(ModeloDaClinica):
                 name="agendamento_sem_sobreposicao",
                 expressions=[
                     (TsTzRange("inicio", "fim", RangeBoundary()), RangeOperators.OVERLAPS),
-                    ("profissional", RangeOperators.EQUAL),
+                    ("practitioner", RangeOperators.EQUAL),
                 ],
                 # A cancelled appointment does not hold the slot.
                 condition=~models.Q(situacao="desmarcou"),
@@ -159,8 +162,8 @@ class Appointment(ModeloDaClinica):
 
     @property
     def titulo(self):
-        if self.paciente_id:
-            return self.paciente.nome
+        if self.patient_id:
+            return self.patient.nome
         return (self.descricao.strip().splitlines() or [gettext("Horário reservado")])[0]
 
     @property
@@ -173,12 +176,12 @@ class Appointment(ModeloDaClinica):
         return timezone.localdate(self.inicio) <= timezone.localdate()
 
 
-def criar_tipos_padrao(clinica):
+def criar_tipos_padrao(clinic):
     """Create the default appointment types for a clinic that has none."""
     with sem_isolamento():
-        if AppointmentType.objects.filter(clinica=clinica).exists():
+        if AppointmentType.objects.filter(clinic=clinic).exists():
             return
-        tipos = TIPOS_DE_ATENDIMENTO if clinica.area == clinica.Area.ODONTOLOGIA else TIPOS_PADRAO
+        tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.ODONTOLOGIA else TIPOS_PADRAO
         AppointmentType.objects.bulk_create(
-            AppointmentType(clinica=clinica, nome=nome, cor=cor) for nome, cor in tipos
+            AppointmentType(clinic=clinic, nome=nome, cor=cor) for nome, cor in tipos
         )

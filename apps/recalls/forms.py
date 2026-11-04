@@ -10,15 +10,15 @@ from .models import Recall
 class RechamadaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Recall
-        fields = ["paciente", "data", "descricao", "concluida"]
+        fields = ["patient", "data", "descricao", "concluida"]
         widgets = {
-            "paciente": forms.HiddenInput,
+            "patient": forms.HiddenInput,
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
         }
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
-        self.fields["paciente"].queryset = Patient.objects.all()
-        self.fields["paciente"].error_messages["required"] = _("Escolha o paciente.")
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
+        self.fields["patient"].queryset = Patient.objects.all()
+        self.fields["patient"].error_messages["required"] = _("Escolha o paciente.")

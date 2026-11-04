@@ -55,7 +55,7 @@ def preparar(competencia):
 
 
 @transaction.atomic
-def lancar(folhas, *, categoria, vencimento, usuario):
+def lancar(folhas, *, categoria, vencimento, user):
     """Turn the sheets not yet launched into payables, one per employee."""
     lancadas = 0
     for folha in folhas:
@@ -68,7 +68,7 @@ def lancar(folhas, *, categoria, vencimento, usuario):
             )
         mes = f"{folha.competencia:%m/%Y}"
         folha.lancamento = financeiro.criar_lancamento(
-            clinica=folha.funcionario.clinica,
+            clinic=folha.funcionario.clinic,
             tipo=Entry.Tipo.PAGAR,
             pessoa=folha.funcionario.nome,
             descricao=_("Salário %(mes)s") % {"mes": mes},
@@ -82,7 +82,7 @@ def lancar(folhas, *, categoria, vencimento, usuario):
             valor_total=folha.total,
             parcelas=1,
             primeiro_vencimento=vencimento,
-            usuario=usuario,
+            user=user,
         )
         folha.save(update_fields=["lancamento"])
         lancadas += 1

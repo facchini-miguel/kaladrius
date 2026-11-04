@@ -13,7 +13,7 @@ class RegistroAuditoriaAdmin(admin.ModelAdmin):
         "acao",
         "modelo",
         "objeto_descricao",
-        "clinica_id",
+        "clinic_id",
         "ip",
     ]
     list_filter = ["acao", "modelo"]

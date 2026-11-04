@@ -35,9 +35,9 @@ def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_
     pagina = recepcao.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in pagina
     assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
-    usuario = django_user_model.objects.get(username="recepcao")
-    usuario.idioma = "en"
-    usuario.save()
+    user = django_user_model.objects.get(username="recepcao")
+    user.idioma = "en"
+    user.save()
     pagina = recepcao.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/manual/getting-started"' in pagina
 
@@ -83,14 +83,14 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
 
 
 def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, recepcao):
-    assert recepcao.get(reverse("privacy")).context["clinica"] == clinica_a
+    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
     recepcao.logout()
-    assert recepcao.get(reverse("privacy")).context["clinica"] == clinica_a
+    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
 
 
 def test_politica_sem_clinica_cadastrada(client):
     pagina = client.get(reverse("privacy"))
-    assert pagina.context["clinica"] is None
+    assert pagina.context["clinic"] is None
     assert "Fale com a clínica que atende você." in pagina.content.decode()
 
 

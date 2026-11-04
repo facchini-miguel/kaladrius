@@ -10,11 +10,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TwoFactor(models.Model):
-    usuario = models.OneToOneField(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="duas_etapas",
         verbose_name=_("usuário"),
+        db_column="usuario_id",
     )
     segredo = models.CharField(_("segredo"), max_length=64, editable=False)
     ativa = models.BooleanField(_("ativa"), default=False)
@@ -28,15 +29,16 @@ class TwoFactor(models.Model):
         verbose_name_plural = _("verificações em duas etapas")
 
     def __str__(self):
-        return str(self.usuario)
+        return str(self.user)
 
 
 class RecoveryCode(models.Model):
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="codigos_recuperacao",
         verbose_name=_("usuário"),
+        db_column="usuario_id",
     )
     resumo = models.CharField(max_length=64, editable=False)
     usado_em = models.DateTimeField(_("usado em"), null=True, blank=True)
@@ -47,4 +49,4 @@ class RecoveryCode(models.Model):
         verbose_name_plural = _("códigos de recuperação")
 
     def __str__(self):
-        return str(self.usuario)
+        return str(self.user)

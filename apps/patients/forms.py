@@ -88,11 +88,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     SO_NO_BRASIL = ["inscricao_estadual", "rg", "uf", "cidade"]
     FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
-        self.pais = countries.pais_da_clinica(clinica)
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
+        self.pais = countries.pais_da_clinica(clinic)
         self.fields["cep"].label = countries.rotulo_cep(self.pais)
         self.documentos = identification.do_pais(self.pais)
         documento_por_tipo(
@@ -221,12 +221,12 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         widgets = {"outro_paciente": forms.HiddenInput}
         help_texts = {"nome": _("Só para quem não é paciente da clínica.")}
 
-    def __init__(self, *args, paciente, **kwargs):
+    def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.paciente = paciente
-        if self.instance.clinica_id is None:
-            self.instance.clinica_id = paciente.clinica_id
-        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=paciente.pk)
+        self.instance.patient = patient
+        if self.instance.clinic_id is None:
+            self.instance.clinic_id = patient.clinic_id
+        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=patient.pk)
 
     def clean_telefone(self):
         return normalizar_telefone(self.cleaned_data.get("telefone"))
@@ -242,7 +242,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         if (
             outro
             and RelatedPerson.objects.filter(
-                paciente=self.instance.paciente, outro_paciente=outro, vinculo=dados.get("vinculo")
+                patient=self.instance.patient, outro_paciente=outro, vinculo=dados.get("vinculo")
             )
             .exclude(pk=self.instance.pk)
             .exists()

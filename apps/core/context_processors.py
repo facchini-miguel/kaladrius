@@ -12,12 +12,12 @@ from .permissions import tabela_permissoes
 BACKUP_ATRASADO_APOS = datetime.timedelta(hours=26)
 
 
-def clinica(request):
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_authenticated:
+def clinic(request):
+    user = getattr(request, "user", None)
+    if user is None or not user.is_authenticated:
         return {}
     return {
-        "clinica_atual": getattr(request, "clinica", None),
+        "clinica_atual": getattr(request, "clinic", None),
         "vinculo_atual": getattr(request, "vinculo", None),
         "pode": SimpleLazyObject(lambda: tabela_permissoes(request)),
         # Turned-off modules the system administrator still sees (decision 115): marked in
@@ -26,9 +26,9 @@ def clinica(request):
         "modulo_desligado": getattr(request, "modulo_desligado", None),
         # Brazilian fields (RG, state registration, IBGE cities) are shown only in Brazil
         # (decision 117); the documents are the country's (decision 121).
-        "no_brasil": countries.pais_da_clinica(getattr(request, "clinica", None)) == "BR",
+        "no_brasil": countries.pais_da_clinica(getattr(request, "clinic", None)) == "BR",
         "documentos_do_pais": identification.do_pais(
-            countries.pais_da_clinica(getattr(request, "clinica", None))
+            countries.pais_da_clinica(getattr(request, "clinic", None))
         ),
     }
 
@@ -51,8 +51,8 @@ def idiomas(request):
 def backup(request):
     """For superusers on servers with backups: a warning when the newest one is overdue
     or when no backup was ever recorded (backups never worked)."""
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_superuser or not settings.BACKUP_MONITORED:
+    user = getattr(request, "user", None)
+    if user is None or not user.is_superuser or not settings.BACKUP_MONITORED:
         return {}
     ultimo = Backup.objects.first()
     if ultimo is None:
@@ -64,7 +64,7 @@ def backup(request):
 
 def inatividade(request):
     """Minutes without use before the page leaves by itself (decision 111)."""
-    usuario = getattr(request, "user", None)
-    if usuario is None or not usuario.is_authenticated:
+    user = getattr(request, "user", None)
+    if user is None or not user.is_authenticated:
         return {}
     return {"inatividade_minutos": settings.INATIVIDADE_MINUTOS}

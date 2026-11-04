@@ -147,14 +147,14 @@ ESCOLHAS_FUSO = [(pais.nome, [(f, _cidade(f)) for f in pais.fusos]) for pais in 
 FUSO_PADRAO = PAISES[PADRAO].fusos[0]
 
 
-def pais_da_clinica(clinica=None):
+def pais_da_clinica(clinic=None):
     """Code of the clinic's country: the current clinic's when none is given, Brazil without
     one."""
-    if clinica is None:
+    if clinic is None:
         from .isolation import clinica_atual
 
-        clinica = clinica_atual()
-    return getattr(clinica, "pais", None) or PADRAO
+        clinic = clinica_atual()
+    return getattr(clinic, "pais", None) or PADRAO
 
 
 def do_codigo(codigo):

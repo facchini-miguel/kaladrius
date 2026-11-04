@@ -23,7 +23,7 @@ class Practitioner(ModeloDaClinica):
     cor = models.CharField(
         _("cor na agenda"), max_length=7, default="#0d6efd", validators=[validar_cor]
     )
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
@@ -31,6 +31,7 @@ class Practitioner(ModeloDaClinica):
         related_name="profissionais",
         verbose_name=_("usuário de acesso"),
         help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
+        db_column="usuario_id",
     )
     # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
     comissao_percentual = models.DecimalField(
@@ -42,19 +43,19 @@ class Practitioner(ModeloDaClinica):
         help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
     )
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
-    alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
     class Meta:
         db_table = "profissionais_profissional"
         verbose_name = _("profissional")
         verbose_name_plural = _("profissionais")
         ordering = ["nome"]
-        indexes = [models.Index(fields=["clinica", "nome"], name="profissional_clinica_nome")]
+        indexes = [models.Index(fields=["clinic", "nome"], name="profissional_clinica_nome")]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinica", "usuario"],
-                condition=models.Q(usuario__isnull=False),
+                fields=["clinic", "user"],
+                condition=models.Q(user__isnull=False),
                 name="profissional_usuario_unico_por_clinica",
             ),
         ]

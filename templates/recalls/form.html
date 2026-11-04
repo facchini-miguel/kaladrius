@@ -9,7 +9,7 @@
   {% csrf_token %}
   <input type="hidden" name="next" value="{{ next }}">
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
-  {% include "includes/patient_search.html" with campo=form.paciente paciente=paciente %}
+  {% include "includes/patient_search.html" with campo=form.patient patient=patient %}
   {% with campo=form.data %}{% include "includes/field.html" %}{% endwith %}
   {% with campo=form.descricao %}{% include "includes/field.html" %}{% endwith %}
   {% if rechamada.pk %}{% with campo=form.concluida %}{% include "includes/field.html" %}{% endwith %}{% endif %}

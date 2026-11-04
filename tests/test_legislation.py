@@ -55,24 +55,24 @@ def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
 
 
 def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissional):  # noqa: F811
-    clinica = cenario["clinica"]
-    dra = criar_profissional(clinica, "Dra. Fictícia", registro="CRO-SP 12345")
-    with usar_clinica(clinica):
+    clinic = cenario["clinic"]
+    dra = criar_profissional(clinic, "Dra. Fictícia", registro="CRO-SP 12345")
+    with usar_clinica(clinic):
         lancamento = services.criar_lancamento(
-            clinica=clinica,
+            clinic=clinic,
             tipo=Entry.Tipo.RECEBER,
-            paciente=cenario["paciente"],
+            patient=cenario["patient"],
             descricao="Limpeza",
             categoria=cenario["categoria"],
-            profissional=dra,
+            practitioner=dra,
             valor_total=Decimal("100"),
             parcelas=1,
             primeiro_vencimento=HOJE,
-            usuario=cenario["admin"],
+            user=cenario["admin"],
         )
         pagamento = services.receber(
             parcelas_de(cenario, lancamento)[0],
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal("100"),
             forma="dinheiro",
             conta=cenario["caixa"],
@@ -82,20 +82,20 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     pagina = admin.get(url).content.decode()
     assert "Dra. Fictícia (CRO-SP 12345)" in pagina
     assert "documento fiscal" not in pagina
-    clinica.pais = "MX"
-    clinica.save()
+    clinic.pais = "MX"
+    clinic.save()
     pagina = admin.get(url).content.decode()
     assert "Este recibo não substitui o documento fiscal (CFDI)." in pagina
 
 
 def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
-    clinica = cenario["clinica"]
-    clinica.pais = "CL"
-    clinica.save()
-    paciente = cenario["paciente"]
-    with usar_clinica(clinica):
-        paciente.arquivado = True
-        paciente.save()
-    pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[paciente.pk]))
+    clinic = cenario["clinic"]
+    clinic.pais = "CL"
+    clinic.save()
+    patient = cenario["patient"]
+    with usar_clinica(clinic):
+        patient.arquivado = True
+        patient.save()
+    pagina = entrar(cenario, "admin").get(reverse("patients:delete", args=[patient.pk]))
     texto = pagina.content.decode()
     assert "(Ley 19.628)" in texto and "15 anos" in texto and "LGPD" not in texto

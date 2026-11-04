@@ -35,7 +35,7 @@ def funcionario(request, pk):
         "staff/employee.html",
         {
             "funcionario": funcionario,
-            "salarios": funcionario.salarios.select_related("criado_por"),
+            "salarios": funcionario.salarios.select_related("created_by"),
             "folhas": funcionario.folhas.select_related("lancamento")[:24],
             "salario_atual": funcionario.salario_em(timezone.localdate()),
         },
@@ -62,7 +62,7 @@ def _formulario(request, instancia):
                     funcionario=funcionario,
                     valor=form.cleaned_data["salario"],
                     desde=form.cleaned_data["salario_desde"],
-                    criado_por=request.user,
+                    created_by=request.user,
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.nome})
         return redirect("staff:employee", pk=funcionario.pk)
@@ -117,7 +117,7 @@ def folha(request):
                         [f for f, form in linhas if form is not None],
                         categoria=lancar_form.cleaned_data["categoria"],
                         vencimento=lancar_form.cleaned_data["vencimento"],
-                        usuario=request.user,
+                        user=request.user,
                     )
                 except ValidationError as erro:
                     messages.error(request, erro.messages[0])

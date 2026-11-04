@@ -67,7 +67,7 @@ Os nomes do código estão passando do português para o inglês (decisões 155 
 
 ## Campos, primeiro lote
 
-Os nomes que se repetem entre os modelos. Depois, os campos próprios de cada app e, por último, as funções e variáveis.
+Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` e `criado_por` (decisão 160), `paciente`, `profissional` e `usuario` (decisão 161; também as variáveis locais com esses nomes exatos, como `clinica` → `clinic`). Depois, os campos próprios de cada app e, por último, as funções e variáveis.
 
 | Antes | Depois |
 |---|---|

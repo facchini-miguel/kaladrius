@@ -11,30 +11,30 @@ from .models import Practitioner
 class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Practitioner
-        fields = ["nome", "registro", "cor", "usuario", "ativo"]
+        fields = ["nome", "registro", "cor", "user", "ativo"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
-    def __init__(self, *args, clinica, **kwargs):
+    def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance.clinica_id is None:
-            self.instance.clinica = clinica
+        if self.instance.clinic_id is None:
+            self.instance.clinic = clinic
         # The registrations of the clinic's country as examples (decision 121).
-        exemplos = identification.do_pais(countries.pais_da_clinica(clinica)).registro_profissional
+        exemplos = identification.do_pais(countries.pais_da_clinica(clinic)).registro_profissional
         self.fields["registro"].help_text = exemplos
         # Only users with an active membership in this clinic can be linked.
-        self.fields["usuario"].queryset = (
+        self.fields["user"].queryset = (
             get_user_model()
-            .objects.filter(vinculos__clinica=clinica, vinculos__ativo=True)
+            .objects.filter(vinculos__clinic=clinic, vinculos__ativo=True)
             .order_by("username")
             .distinct()
         )
 
     def clean_usuario(self):
-        usuario = self.cleaned_data.get("usuario")
-        if usuario is not None:
-            outros = Practitioner.objects.filter(usuario=usuario).exclude(pk=self.instance.pk)
+        user = self.cleaned_data.get("user")
+        if user is not None:
+            outros = Practitioner.objects.filter(user=user).exclude(pk=self.instance.pk)
             if outros.exists():
                 raise forms.ValidationError(
                     _("Este usuário já está ligado a outro profissional desta clínica.")
                 )
-        return usuario
+        return user

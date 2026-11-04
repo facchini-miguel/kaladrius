@@ -35,20 +35,20 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             area: Clinic.objects.create(nome=f"Clínica fictícia {area}", area=area).pk
             for area in ("odontologia", "medicina", "outra")
         }
-        clinica_id = ids["odontologia"]
+        clinic_id = ids["odontologia"]
         Patient = apps.get_model("pacientes", "Paciente")
         paciente = Patient.objects.create(
-            clinica_id=clinica_id,
+            clinica_id=clinic_id,
             nome="Paciente fictício anterior à atualização",
             observacoes="Texto inteiramente fictício preservado",
         )
         Category = apps.get_model("financeiro", "Categoria")
         categoria = Category.objects.create(
-            clinica_id=clinica_id, nome="Receita fictícia", tipo="receita"
+            clinica_id=clinic_id, nome="Receita fictícia", tipo="receita"
         )
         Entry = apps.get_model("financeiro", "Lancamento")
         lancamento = Entry.objects.create(
-            clinica_id=clinica_id,
+            clinica_id=clinic_id,
             tipo="receber",
             descricao="Tratamento fictício",
             categoria=categoria,
@@ -57,17 +57,17 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
         )
         Installment = apps.get_model("financeiro", "Parcela")
         Installment.objects.create(
-            clinica_id=clinica_id,
+            clinica_id=clinic_id,
             lancamento=lancamento,
             numero=1,
             vencimento=datetime.date(2026, 11, 10),
             valor=Decimal("123.45"),
         )
         Estimate = apps.get_model("orcamentos", "Orcamento")
-        orcamento = Estimate.objects.create(clinica_id=clinica_id, paciente=paciente)
+        orcamento = Estimate.objects.create(clinica_id=clinic_id, paciente=paciente)
         Item = apps.get_model("orcamentos", "ItemOrcamento")
         Item.objects.create(
-            clinica_id=clinica_id,
+            clinica_id=clinic_id,
             orcamento=orcamento,
             descricao="Item dental fictício",
             dentes="11,12",

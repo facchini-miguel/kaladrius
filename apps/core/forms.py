@@ -144,7 +144,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         ligados = set(
-            ClinicModule.todos.filter(clinica=self.instance, ativo=True).values_list(
+            ClinicModule.todos.filter(clinic=self.instance, ativo=True).values_list(
                 "codigo", flat=True
             )
             if self.instance.pk
@@ -316,7 +316,7 @@ class ClinicaForm(ModulosClinicosForm):
             return None
         # Django Admin runs without the request's clinic isolation. Validate only the
         # clinic being edited, including when this form is used outside a request.
-        futuros = Appointment.todos.filter(clinica=self.instance, fim__gt=timezone.now()).order_by(
+        futuros = Appointment.todos.filter(clinic=self.instance, fim__gt=timezone.now()).order_by(
             "inicio"
         )
         for comeca, termina in futuros.values_list("inicio", "fim"):

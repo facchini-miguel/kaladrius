@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Atendimento" %} · {{ atendimento.paciente.nome }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Atendimento" %} · {{ atendimento.patient.nome }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex gap-2 mb-3 d-print-none">
@@ -11,17 +11,17 @@
 <div class="recibo bg-white border rounded p-4" style="max-width: 56rem;">
   {% translate "PRONTUÁRIO" as titulo_documento %}
   {% include "medical_records/_header.html" with data_documento=atendimento.data %}
-  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ atendimento.paciente.nome }}{% if atendimento.paciente.data_nascimento %} · {% translate "nascido(a) em" %} {{ atendimento.paciente.data_nascimento|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
-  <p><strong>{% translate "Atendimento" %}:</strong> {{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.profissional.nome }}</p>
+  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ atendimento.patient.nome }}{% if atendimento.patient.data_nascimento %} · {% translate "nascido(a) em" %} {{ atendimento.patient.data_nascimento|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
+  <p><strong>{% translate "Atendimento" %}:</strong> {{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.practitioner.nome }}</p>
   {% for rotulo, valor in campos %}{% if valor %}
   <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>
   <div>{{ valor|linebreaksbr }}</div>
   {% endif %}{% endfor %}
   {% for adendo in adendos %}
-  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ adendo.criado_em|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.profissional.nome }}</h2>
+  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.practitioner.nome }}</h2>
   <div>{{ adendo.texto|linebreaksbr }}</div>
   {% endfor %}
   <p class="small text-body-secondary mt-3">{% blocktranslate with momento=atendimento.finalizado_em|date:"SHORT_DATETIME_FORMAT" %}Finalizado no sistema em {{ momento }}.{% endblocktranslate %}</p>
-  {% include "medical_records/_signature.html" with profissional=atendimento.profissional %}
+  {% include "medical_records/_signature.html" with practitioner=atendimento.practitioner %}
 </div>
 {% endblock %}

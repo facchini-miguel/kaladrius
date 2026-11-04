@@ -77,21 +77,21 @@ def test_login_certo_zera_o_contador(client, criar_usuario):
 
 def test_usuario_novo_comeca_na_versao_atual_sem_aviso(client, criar_usuario):
     """Review (superuser, fresh install): a new person saw "the system was updated"."""
-    usuario = criar_usuario("novata")
-    assert usuario.ultima_versao_vista == releases.versao_atual()
-    client.force_login(usuario)
+    user = criar_usuario("novata")
+    assert user.ultima_versao_vista == releases.versao_atual()
+    client.force_login(user)
     assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 
 def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
-    usuario = criar_usuario("maria")
-    usuario.ultima_versao_vista = "0.40.0"  # seen before this version came out
-    usuario.save(update_fields=["ultima_versao_vista"])
-    client.force_login(usuario)
+    user = criar_usuario("maria")
+    user.ultima_versao_vista = "0.40.0"  # seen before this version came out
+    user.save(update_fields=["ultima_versao_vista"])
+    client.force_login(user)
     assert "Veja o que mudou" in client.get(reverse("home")).content.decode()
     client.get(reverse("whats_new"))
-    usuario.refresh_from_db()
-    assert usuario.ultima_versao_vista == releases.versao_atual()
+    user.refresh_from_db()
+    assert user.ultima_versao_vista == releases.versao_atual()
     assert "Veja o que mudou" not in client.get(reverse("home")).content.decode()
 
 

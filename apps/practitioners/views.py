@@ -11,7 +11,7 @@ from .models import Practitioner
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.VER)
 def lista(request):
-    profissionais = Practitioner.objects.select_related("usuario")
+    profissionais = Practitioner.objects.select_related("user")
     return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
@@ -26,21 +26,21 @@ def editar(request, pk):
     return _formulario(request, get_object_or_404(Practitioner.objects, pk=pk))
 
 
-def _formulario(request, profissional):
-    form = ProfissionalForm(request.POST or None, instance=profissional, clinica=request.clinica)
+def _formulario(request, practitioner):
+    form = ProfissionalForm(request.POST or None, instance=practitioner, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": profissional.nome})
+        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": practitioner.nome})
         return redirect("practitioners:list")
-    return render(request, "practitioners/form.html", {"form": form, "profissional": profissional})
+    return render(request, "practitioners/form.html", {"form": form, "practitioner": practitioner})
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.EXCLUIR)
 def excluir(request, pk):
-    profissional = get_object_or_404(Practitioner.objects, pk=pk)
+    practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     if request.method == "POST":
         try:
-            profissional.delete()
+            practitioner.delete()
         except ProtectedError:
             messages.error(
                 request,
@@ -48,11 +48,11 @@ def excluir(request, pk):
                     "%(nome)s tem registros ligados e não pode ser excluído. "
                     "Desmarque “ativo” para escondê-lo."
                 )
-                % {"nome": profissional.nome},
+                % {"nome": practitioner.nome},
             )
         else:
             messages.success(
-                request, _("Profissional %(nome)s excluído.") % {"nome": profissional.nome}
+                request, _("Profissional %(nome)s excluído.") % {"nome": practitioner.nome}
             )
         return redirect("practitioners:list")
-    return render(request, "practitioners/delete.html", {"profissional": profissional})
+    return render(request, "practitioners/delete.html", {"practitioner": practitioner})

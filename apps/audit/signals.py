@@ -75,10 +75,8 @@ AUDITADOS = [
 IGNORADOS = {
     "password",
     "last_login",
-    "criado_em",
-    "criada_em",
-    "alterado_em",
-    "alterada_em",
+    "created_at",
+    "updated_at",
     "ultima_versao_vista",
     "idioma",
 }
@@ -154,13 +152,13 @@ for modelo in AUDITADOS:
 
 
 def _entrou(sender, request, user, **kwargs):
-    registrar(Acao.LOGIN, usuario=user, ip=ip_da_requisicao(request), descricao=user.get_username())
+    registrar(Acao.LOGIN, user=user, ip=ip_da_requisicao(request), descricao=user.get_username())
 
 
 def _saiu(sender, request, user, **kwargs):
     if user is not None:
         registrar(
-            Acao.LOGOUT, usuario=user, ip=ip_da_requisicao(request), descricao=user.get_username()
+            Acao.LOGOUT, user=user, ip=ip_da_requisicao(request), descricao=user.get_username()
         )
 
 

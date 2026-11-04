@@ -40,7 +40,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         "dra": criar_usuario("dra", clinica_a, Papel.PROFISSIONAL),
     }
     with usar_clinica(clinica_a):
-        Practitioner.objects.filter(pk=ana.pk).update(usuario=usuarios["dra"])
+        Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
         tipo = AppointmentType.objects.get(nome="Cirurgia")
         maria = Patient.objects.create(
             nome="Maria Paciente",
@@ -52,12 +52,12 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             nome="Paciente Arquivado", arquivado=True, data_nascimento=dia(5).replace(year=1980)
         )
 
-        def agendar(data, hora, profissional=ana, paciente=maria, situacao="agendado"):
+        def agendar(data, hora, practitioner=ana, patient=maria, situacao="agendado"):
             Appointment.objects.create(
-                profissional=profissional,
+                practitioner=practitioner,
                 tipo=tipo,
-                paciente=paciente,
-                descricao="" if paciente else "Bloqueado",
+                patient=patient,
+                descricao="" if patient else "Bloqueado",
                 situacao=situacao,
                 inicio=agenda.momento(data, datetime.time(hora)),
                 fim=agenda.momento(data, datetime.time(hora + 1)),
@@ -65,15 +65,15 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         agendar(HOJE, 8, situacao="compareceu")
         agendar(HOJE, 9, situacao="faltou")
-        agendar(HOJE, 10, profissional=bruno, paciente=joao)  # started, nobody marked it
+        agendar(HOJE, 10, practitioner=bruno, patient=joao)  # started, nobody marked it
         agendar(HOJE, 11)
         agendar(HOJE, 14, situacao="desmarcou")
-        agendar(HOJE, 16, paciente=None)
+        agendar(HOJE, 16, patient=None)
         agendar(dia(3), 9, situacao="compareceu")
         agendar(dia(4), 9, situacao="faltou")
         agendar(dia(27, 2), 9, situacao="faltou")  # last month: not in this month's rate
 
-        for data, concluida, paciente in [
+        for data, concluida, patient in [
             (HOJE, False, maria),
             (dia(1), False, maria),
             (dia(2), True, maria),
@@ -81,10 +81,10 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             (dia(10), False, maria),
         ]:
             Recall.objects.create(
-                paciente=paciente, data=data, descricao="Revisão", concluida=concluida
+                patient=patient, data=data, descricao="Revisão", concluida=concluida
             )
 
-        for paciente, validade, situacao in [
+        for patient, validade, situacao in [
             (maria, dia(8), Estimate.Situacao.ABERTO),
             (maria, dia(20), Estimate.Situacao.ABERTO),
             (maria, dia(6), Estimate.Situacao.APROVADO),
@@ -92,7 +92,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             (maria, dia(4), Estimate.Situacao.ABERTO),
         ]:
             Estimate.objects.create(
-                paciente=paciente, data=dia(1), validade=validade, situacao=situacao
+                patient=patient, data=dia(1), validade=validade, situacao=situacao
             )
 
         caixa = FinancialAccount.objects.get(nome="Caixa")
@@ -101,14 +101,14 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         def lancar(tipo, valor, parcelas, vencimento, categoria, **campos):
             lancamento = financeiro.criar_lancamento(
-                clinica=clinica_a,
+                clinic=clinica_a,
                 tipo=tipo,
                 descricao="Teste",
                 categoria=categoria,
                 valor_total=Decimal(valor),
                 parcelas=parcelas,
                 primeiro_vencimento=vencimento,
-                usuario=usuarios["admin"],
+                user=usuarios["admin"],
                 **campos,
             )
             return list(lancamento.parcelas.order_by("numero"))
@@ -116,7 +116,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         def pagar(parcela, valor, data, forma="pix"):
             financeiro.receber(
                 parcela,
-                usuario=usuarios["admin"],
+                user=usuarios["admin"],
                 valor=Decimal(valor),
                 data=data,
                 forma=forma,
@@ -125,10 +125,10 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         # Due 05/01, 05/02 (overdue) and today; the first one is paid today.
         primeira, _segunda, _terceira = lancar(
-            Entry.Tipo.RECEBER, "300", 3, dia(5, 1), receita, paciente=maria
+            Entry.Tipo.RECEBER, "300", 3, dia(5, 1), receita, patient=maria
         )
         pagar(primeira, "100", HOJE)
-        [fevereiro] = lancar(Entry.Tipo.RECEBER, "200", 1, dia(3, 2), receita, paciente=joao)
+        [fevereiro] = lancar(Entry.Tipo.RECEBER, "200", 1, dia(3, 2), receita, patient=joao)
         pagar(fevereiro, "200", dia(3, 2), forma="dinheiro")
         [conta_de_luz] = lancar(Entry.Tipo.PAGAR, "50", 1, HOJE, despesa, pessoa="Luz")
         pagar(conta_de_luz, "50", HOJE)
@@ -137,7 +137,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         CashRegister.objects.create(
             conta=caixa, valor_abertura=Decimal("0"), aberto_por=usuarios["admin"]
         )
-    return {"clinica": clinica_a, **usuarios}
+    return {"clinic": clinica_a, **usuarios}
 
 
 def inicio(cenario, cliente_de, quem):
@@ -151,7 +151,7 @@ def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
     assert len(dia_["lista"]) == 6 and dia_["mostrar_profissional"]
     assert (dia_["pacientes"], dia_["compareceram"], dia_["faltaram"]) == (4, 1, 1)
     assert (dia_["desmarcaram"], dia_["a_seguir"], dia_["sem_marcacao"]) == (1, 1, 1)
-    assert dia_["proximo"].paciente.nome == "João Paciente"  # 10:00–11:00, still going on
+    assert dia_["proximo"].patient.nome == "João Paciente"  # 10:00–11:00, still going on
     # Month so far: came 08:00 today and on the 3rd; missed 09:00 today and on the 4th.
     assert (dia_["faltas_mes"], dia_["marcados_mes"]) == (50, 4)
 
@@ -186,7 +186,7 @@ def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
 def test_profissional_ve_so_a_propria_agenda_e_nenhum_valor(cenario, cliente_de):
     resposta = inicio(cenario, cliente_de, "dra")
     painel = resposta.context["painel"]
-    assert {a.profissional.nome for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
+    assert {a.practitioner.nome for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
     assert not painel["agenda"]["mostrar_profissional"]
     assert painel["agenda"]["proximo"].inicio.astimezone().hour == 11
     assert "recebimentos" not in painel and "financeiro" not in painel
@@ -228,10 +228,10 @@ def test_sem_clinica_nao_ha_resumo(cenario, criar_usuario, cliente_de):
 
 
 def test_saudacao_pela_hora(monkeypatch, criar_usuario, cliente_de):
-    usuario = criar_usuario("maria")
+    user = criar_usuario("maria")
     for hora, saudacao in [(7, "Bom dia"), (13, "Boa tarde"), (20, "Boa noite")]:
         momento = timezone.make_aware(datetime.datetime(2031, 3, 5, hora))
         monkeypatch.setattr(timezone, "now", lambda momento=momento: momento)
         # Logged in at the patched time, so the session is not seen as expired.
-        conteudo = cliente_de(usuario).get(reverse("home")).content.decode()
+        conteudo = cliente_de(user).get(reverse("home")).content.decode()
         assert f"{saudacao}, maria" in conteudo

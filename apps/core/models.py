@@ -139,8 +139,8 @@ class Clinic(models.Model):
     agenda_intervalo = models.PositiveSmallIntegerField(
         _("duração de cada horário"), choices=INTERVALOS, default=30
     )
-    criada_em = models.DateTimeField(_("criada em"), auto_now_add=True)
-    alterada_em = models.DateTimeField(_("alterada em"), auto_now=True)
+    created_at = models.DateTimeField(_("criada em"), auto_now_add=True, db_column="criada_em")
+    updated_at = models.DateTimeField(_("alterada em"), auto_now=True, db_column="alterada_em")
 
     class Meta:
         db_table = "core_clinica"
@@ -189,7 +189,7 @@ class Clinic(models.Model):
         # before a request has selected a clinic. Missing/unknown modules fail closed.
         if self.pk is None or codigo not in ModuloClinico.values:
             return False
-        return ClinicModule.todos.filter(clinica=self, codigo=codigo, ativo=True).exists()
+        return ClinicModule.todos.filter(clinic=self, codigo=codigo, ativo=True).exists()
 
     @classmethod
     def unica(cls):
@@ -236,7 +236,7 @@ class ClinicModule(ModeloDaClinica):
         verbose_name_plural = _("módulos da clínica")
         ordering = ["codigo"]
         constraints = [
-            models.UniqueConstraint(fields=["clinica", "codigo"], name="modulo_unico_por_clinica"),
+            models.UniqueConstraint(fields=["clinic", "codigo"], name="modulo_unico_por_clinica"),
             models.CheckConstraint(
                 condition=models.Q(codigo__in=ModuloClinico.values),
                 name="modulo_clinico_conhecido",
@@ -260,34 +260,39 @@ class Papel(models.TextChoices):
 class Membership(models.Model):
     """Membership of a user in a clinic, with a role."""
 
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="vinculos",
         verbose_name=_("usuário"),
+        db_column="usuario_id",
     )
-    clinica = models.ForeignKey(
-        Clinic, on_delete=models.CASCADE, related_name="vinculos", verbose_name=_("clínica")
+    clinic = models.ForeignKey(
+        Clinic,
+        on_delete=models.CASCADE,
+        related_name="vinculos",
+        verbose_name=_("clínica"),
+        db_column="clinica_id",
     )
     papel = models.CharField(_("perfil"), max_length=20, choices=Papel.choices)
     ativo = models.BooleanField(_("ativo"), default=True)
-    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "core_vinculo"
         verbose_name = _("vínculo com clínica")
         verbose_name_plural = _("vínculos com clínicas")
-        ordering = ["clinica__nome", "usuario__username"]
+        ordering = ["clinic__nome", "user__username"]
         constraints = [
             models.UniqueConstraint(
-                fields=["usuario", "clinica"],
+                fields=["user", "clinic"],
                 name="vinculo_unico_por_clinica",
                 violation_error_message=_("Este usuário já está vinculado a esta clínica."),
             ),
         ]
 
     def __str__(self):
-        return f"{self.usuario} em {self.clinica} ({self.get_papel_display()})"
+        return f"{self.user} em {self.clinic} ({self.get_papel_display()})"
 
 
 class Backup(models.Model):

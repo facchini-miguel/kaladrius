@@ -8,6 +8,6 @@ class AuditoriaMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        usuario = request.user if request.user.is_authenticated else None
-        with contexto(usuario, ip_da_requisicao(request)):
+        user = request.user if request.user.is_authenticated else None
+        with contexto(user, ip_da_requisicao(request)):
             return self.get_response(request)

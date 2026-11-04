@@ -25,8 +25,8 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
 
 
-def criar_paciente(clinica, **dados):
-    with usar_clinica(clinica):
+def criar_paciente(clinic, **dados):
+    with usar_clinica(clinic):
         return Patient.objects.create(**{"nome": "Paciente", **dados})
 
 
@@ -110,12 +110,12 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get(nome="Maria da Silva")
-    assert resposta.url == reverse("patients:record", args=[paciente.pk])
-    assert paciente.cpf_cnpj == "52998224725"
-    assert paciente.telefone_celular == "48999990000"
-    assert paciente.cep == "88010000"
-    assert paciente.cidade.nome == "Florianópolis"
+        patient = Patient.objects.get(nome="Maria da Silva")
+    assert resposta.url == reverse("patients:record", args=[patient.pk])
+    assert patient.cpf_cnpj == "52998224725"
+    assert patient.telefone_celular == "48999990000"
+    assert patient.cep == "88010000"
+    assert patient.cidade.nome == "Florianópolis"
 
 
 def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
@@ -132,9 +132,9 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get(nome="Empresa X")
-    assert paciente.cpf_cnpj == "12ABC34501DE35"
-    assert paciente.rg == "" and paciente.sexo == ""  # individual-only fields are cleared
+        patient = Patient.objects.get(nome="Empresa X")
+    assert patient.cpf_cnpj == "12ABC34501DE35"
+    assert patient.rg == "" and patient.sexo == ""  # individual-only fields are cleared
 
 
 @pytest.mark.parametrize(
@@ -171,8 +171,8 @@ def test_cpf_repetido_na_mesma_clinica_e_recusado_mas_vale_em_outra(admin_a, cli
 
 
 def test_edicao_mantem_as_cidades_da_uf(admin_a, clinica_a):
-    paciente = criar_paciente(clinica_a, uf_id=SC, cidade_id=FLORIANOPOLIS)
-    conteudo = admin_a.get(reverse("patients:edit", args=[paciente.pk])).content.decode()
+    patient = criar_paciente(clinica_a, uf_id=SC, cidade_id=FLORIANOPOLIS)
+    conteudo = admin_a.get(reverse("patients:edit", args=[patient.pk])).content.decode()
     assert f'<option value="{FLORIANOPOLIS}" selected>Florianópolis</option>' in conteudo
 
 
@@ -228,51 +228,51 @@ def test_lista_e_busca_nao_mostram_outra_clinica(admin_a, clinica_b):
 def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
     papel, clinica_a, criar_usuario, cliente_de
 ):
-    paciente = criar_paciente(clinica_a, nome="Paciente")
+    patient = criar_paciente(clinica_a, nome="Paciente")
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     assert cliente.post(reverse("patients:new"), dados_formulario()).status_code == 302
-    assert cliente.get(reverse("patients:edit", args=[paciente.pk])).status_code == 200
-    assert cliente.post(reverse("patients:archive", args=[paciente.pk])).status_code == 403
-    assert cliente.post(reverse("patients:delete", args=[paciente.pk])).status_code == 403
+    assert cliente.get(reverse("patients:edit", args=[patient.pk])).status_code == 200
+    assert cliente.post(reverse("patients:archive", args=[patient.pk])).status_code == 403
+    assert cliente.post(reverse("patients:delete", args=[patient.pk])).status_code == 403
     assert ">Arquivar<" not in cliente.get(reverse("patients:list")).content.decode()
 
 
 def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de):
-    paciente = criar_paciente(clinica_a, nome="Paciente Arquivável")
+    patient = criar_paciente(clinica_a, nome="Paciente Arquivável")
     # Not archived yet: permanent deletion is not available.
-    assert admin_a.post(reverse("patients:delete", args=[paciente.pk])).status_code == 404
-    assert admin_a.post(reverse("patients:archive", args=[paciente.pk])).status_code == 302
-    paciente.refresh_from_db()
-    assert paciente.arquivado and paciente.arquivado_por.username == "admin_a"
+    assert admin_a.post(reverse("patients:delete", args=[patient.pk])).status_code == 404
+    assert admin_a.post(reverse("patients:archive", args=[patient.pk])).status_code == 302
+    patient.refresh_from_db()
+    assert patient.arquivado and patient.arquivado_por.username == "admin_a"
 
     lista = reverse("patients:list")
-    for situacao, esperado in (("todos", []), ("arquivados", [paciente])):
+    for situacao, esperado in (("todos", []), ("arquivados", [patient])):
         assert list(admin_a.get(lista, {"situacao": situacao}).context["pagina"]) == esperado
-    ficha = admin_a.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    ficha = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Restaurar" in ficha and "Excluir definitivamente" in ficha
-    assert admin_a.get(reverse("patients:edit", args=[paciente.pk])).status_code == 404
+    assert admin_a.get(reverse("patients:edit", args=[patient.pk])).status_code == 404
 
-    admin_a.post(reverse("patients:restore", args=[paciente.pk]))
-    paciente.refresh_from_db()
-    assert not paciente.arquivado and paciente.arquivado_por is None
+    admin_a.post(reverse("patients:restore", args=[patient.pk]))
+    patient.refresh_from_db()
+    assert not patient.arquivado and patient.arquivado_por is None
 
 
 def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
-    paciente = criar_paciente(
+    patient = criar_paciente(
         clinica_a, nome="Fulano Escondido", cpf_cnpj="52998224725", arquivado=True
     )
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
     lista = reverse("patients:list")
     for situacao in ("ativos", "todos", "arquivados"):
         assert "Escondido" not in cliente.get(lista, {"situacao": situacao}).content.decode()
-    assert cliente.get(reverse("patients:record", args=[paciente.pk])).status_code == 404
+    assert cliente.get(reverse("patients:record", args=[patient.pk])).status_code == 404
     # The same CPF cannot be registered again: the message points to the administrator.
     resposta = cliente.post(reverse("patients:new"), dados_formulario(cpf_cnpj="529.982.247-25"))
     assert "paciente arquivado" in resposta.content.decode()
 
 
 def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
-    paciente = criar_paciente(
+    patient = criar_paciente(
         clinica_a,
         nome="Maria",
         cpf_cnpj="52998224725",
@@ -280,7 +280,7 @@ def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
         cidade_id=FLORIANOPOLIS,
         uf_id=SC,
     )
-    conteudo = admin_a.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    conteudo = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "529.982.247-25" in conteudo
     assert "(48) 99999-0000" in conteudo
     assert "Florianópolis/SC" in conteudo
@@ -301,21 +301,21 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     from apps.finance import services
     from apps.finance.models import Category, Entry, FinancialAccount
 
-    paciente = criar_paciente(clinica_a, nome="Paciente Devedor")
-    usuario = django_user_model.objects.get(username="admin_a")
+    patient = criar_paciente(clinica_a, nome="Paciente Devedor")
+    user = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
         lancamento = services.criar_lancamento(
-            clinica=clinica_a,
+            clinic=clinica_a,
             tipo=Entry.Tipo.RECEBER,
             descricao="Tratamento",
             categoria=Category.objects.get(nome="Tratamento"),
             valor_total=Decimal("300"),
             parcelas=2,
             primeiro_vencimento=datetime.date(2031, 3, 5),
-            usuario=usuario,
-            paciente=paciente,
+            user=user,
+            patient=patient,
         )
-    url = reverse("patients:archive", args=[paciente.pk])
+    url = reverse("patients:archive", args=[patient.pk])
     pagina = admin_a.get(url)
     assert [p.numero for p in pagina.context["abertas"]] == [1, 2]
     conteudo = pagina.content.decode()
@@ -323,14 +323,14 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     assert 'btn btn-secondary">Arquivar<' not in conteudo
     resposta = admin_a.post(url, follow=True)
     assert "Resolva as contas em aberto" in resposta.content.decode()
-    paciente.refresh_from_db()
-    assert not paciente.arquivado
+    patient.refresh_from_db()
+    assert not patient.arquivado
 
     def receber(parcela):
         with usar_clinica(clinica_a):
             services.receber(
                 parcela,
-                usuario=usuario,
+                user=user,
                 valor=Decimal("150"),
                 data=datetime.date(2031, 3, 5),
                 forma="pix",
@@ -343,5 +343,5 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     assert [p.numero for p in admin_a.get(url).context["abertas"]] == [2]
     receber(segunda)
     assert admin_a.post(url).status_code == 302
-    paciente.refresh_from_db()
-    assert paciente.arquivado
+    patient.refresh_from_db()
+    assert patient.arquivado

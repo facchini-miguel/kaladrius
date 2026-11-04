@@ -59,9 +59,10 @@ def test_endereco_antigo_redireciona_para_o_novo(client, nome, antigo):
     assert resposta.url != antigo
     # The ids go along; nothing Portuguese is left in the new address (the help pages' slugs
     # are page names, kept for the old in-system help).
-    for chave in ("pk", "paciente", "item"):
+    # The argument names changed too (decision 161: `paciente` is now `patient`).
+    for chave, antiga in (("pk", "pk"), ("patient", "paciente"), ("item", "item")):
         if chave in destino.kwargs:
-            assert str(destino.kwargs[chave]) == EXEMPLOS[f"<int:{chave}>"]
+            assert str(destino.kwargs[chave]) == EXEMPLOS[f"<int:{antiga}>"]
     if not nome.startswith("ajuda:"):
         caminho = resposta.url.split("?")[0]
         assert not re.search(
