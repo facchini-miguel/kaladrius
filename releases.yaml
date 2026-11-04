@@ -4,6 +4,62 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.56.0
+  data: 2026-11-04
+  titulo:
+    pt-br: Endereços em inglês
+    en: Addresses in English
+    es: Direcciones en inglés
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Os endereços das telas agora são em inglês, como `/patients/` e `/schedule/` (antes
+          `/pacientes/` e `/agenda/`). Favoritos, links em e-mails e telas abertas antes da
+          atualização continuam funcionando: os endereços antigos levam sozinhos aos novos. As
+          telas continuam em português.
+        en: >
+          The pages' addresses are now in English, such as `/patients/` and `/schedule/`
+          (before, `/pacientes/` and `/agenda/`). Bookmarks, links in e-mails and pages opened
+          before the update still work: the old addresses lead to the new ones by themselves.
+          The screens stay in Portuguese.
+        es: >
+          Las direcciones de las pantallas ahora están en inglés, como `/patients/` y
+          `/schedule/` (antes `/pacientes/` y `/agenda/`). Los marcadores, los enlaces en
+          correos y las pantallas abiertas antes de la actualización siguen funcionando: las
+          direcciones antiguas llevan solas a las nuevas. Las pantallas siguen en portugués.
+    - tipo: melhoria
+      modulo: Auditoria
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Nos detalhes da auditoria, cada campo alterado aparece pelo nome da tela (por exemplo
+          "profissão"), e não mais pelo nome interno do sistema ("profissao").
+        en: >
+          In the audit details, each changed field shows its name as on screen (for example
+          "occupation"), no longer the system's internal name.
+        es: >
+          En los detalles de la auditoría, cada campo cambiado aparece con su nombre de la
+          pantalla (por ejemplo "profesión"), y ya no con el nombre interno del sistema.
+    - tipo: melhoria
+      modulo: Sistema
+      publico: []
+      texto:
+        pt-br: >
+          API: `/api/v1/version` e `/api/v1/health`, com campos em inglês; `/api/v1/versao` e
+          `/api/v1/saude` continuam respondendo como antes. Os modelos do código têm nomes em
+          inglês, sem mudar o banco de dados (decisões 155 a 157).
+        en: >
+          API: `/api/v1/version` and `/api/v1/health`, with English fields; `/api/v1/versao`
+          and `/api/v1/saude` still answer as before. The code's models have English names,
+          with no change to the database (decisions 155 to 157).
+        es: >
+          API: `/api/v1/version` y `/api/v1/health`, con campos en inglés; `/api/v1/versao` y
+          `/api/v1/saude` siguen respondiendo como antes. Los modelos del código tienen nombres
+          en inglés, sin cambiar la base de datos (decisiones 155 a 157).
+
 - versao: 0.55.0
   data: 2026-11-03
   titulo:
