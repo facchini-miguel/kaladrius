@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.54.1** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.55.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: em desenvolvimento, em uso de demonstração. **Para conhecer, comece por https://www.facchini.eti.br/kaladrius/**: a página tem os acessos de demonstração de cada perfil (recepção, profissional, financeiro, administrador da clínica), as telas e todos os links. A demonstração roda no Google Cloud free tier, somente IPv6; veja [Produção de referência](https://kaladrius-docs.facchini.eti.br/pt-BR/project/production).
 
@@ -47,7 +47,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 | Anonimizar os dados de uma clínica para usá-los como teste (irreversível) | `docker compose exec app python manage.py anonimizar_clinica --clinica "Nome" --confirmar` |
 | Simular agenda e rechamadas atuais numa clínica de **teste** | `docker compose exec app python manage.py simular_movimento --clinica "Nome" --confirmar` |
 | Título e texto da *Release* do GitHub (em inglês) | `docker compose exec app python manage.py notas_release X.Y.Z [--titulo]` |
-| Testar a recuperação de um backup (baixa e restaura num PostgreSQL temporário) | `deploy/testar_backup.sh [arquivo.dump]` |
+| Testar a recuperação de um backup (baixa e restaura num PostgreSQL temporário) | `deploy/test_backup.sh [arquivo.dump]` |
 | Testes (com cobertura, mínimo de 90%) | `docker compose exec app pytest --cov` |
 | Lint | `docker compose exec app ruff check .` |
 | Formatar código | `docker compose exec app ruff format .` |

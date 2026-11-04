@@ -1,0 +1,7 @@
+[Unit]
+Description=Kaladrius: server health sample (processor, memory, disk, network)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/health.sh --collect

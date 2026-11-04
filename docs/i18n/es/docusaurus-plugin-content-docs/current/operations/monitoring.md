@@ -25,13 +25,13 @@ El propio servidor puede avisarle mediante [Healthchecks.io](https://healthcheck
 
 | Variable en el `.env` | Verificación | Período / tolerancia | Avisa cuando |
 |---|---|---|---|
-| `MONITOR_SISTEMA_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por cada una de sus direcciones (todos los nombres de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
+| `MONITOR_SYSTEM_URL` | Sistema funcionando | 5 min / 10 min | El sistema, abierto por internet por cada una de sus direcciones (todos los nombres de `SITE_HOSTNAME`), no responde, o su base no responde (`/api/v1/saude`) |
 | `MONITOR_BACKUP_URL` | Respaldo diario | 1 día / 2 h | El respaldo diario falla o no corre |
-| `MONITOR_DEMONSTRACAO_URL` | Reinicio de la demostración (solo en el servidor de la demostración) | 1 día / 2 horas | El reinicio diario de la demostración (07:30 UTC) falla o no corre |
-| `MONITOR_RESTAURACAO_URL` | Restauración del respaldo | 7 días / 1 día | La prueba semanal de restauración (domingos, 07:00 UTC: el respaldo más nuevo restaurado en una base descartable) falla |
-| `MONITOR_ATUALIZACAO_URL` | Actualización automática | 5 min / 15 min | Las actualizaciones automáticas fallan o dejan de correr |
-| `MONITOR_RECURSOS_URL` | Disco y memoria | 5 min / 15 min | La memoria, el swap o el disco llegan al nivel crítico |
-| `MONITOR_CERTIFICADO_URL` | Certificado HTTPS | 1 día / 2 h | Faltan menos de 14 días para que venza el certificado de alguna dirección (`SITE_HOSTNAME` y `DOCS_HOSTNAME`) (Caddy lo renueva unos 30 días antes) |
+| `MONITOR_DEMO_URL` | Reinicio de la demostración (solo en el servidor de la demostración) | 1 día / 2 horas | El reinicio diario de la demostración (07:30 UTC) falla o no corre |
+| `MONITOR_RESTORE_URL` | Restauración del respaldo | 7 días / 1 día | La prueba semanal de restauración (domingos, 07:00 UTC: el respaldo más nuevo restaurado en una base descartable) falla |
+| `MONITOR_UPDATE_URL` | Actualización automática | 5 min / 15 min | Las actualizaciones automáticas fallan o dejan de correr |
+| `MONITOR_RESOURCES_URL` | Disco y memoria | 5 min / 15 min | La memoria, el swap o el disco llegan al nivel crítico |
+| `MONITOR_CERTIFICATE_URL` | Certificado HTTPS | 1 día / 2 h | Faltan menos de 14 días para que venza el certificado de alguna dirección (`SITE_HOSTNAME` y `DOCS_HOSTNAME`) (Caddy lo renueva unos 30 días antes) |
 | `MONITOR_DOCS_URL` | Documentación funcionando | 5 min / 10 min | Este sitio de documentación, cuando el servidor lo corre, no responde en alguna de sus direcciones (todos los nombres de `DOCS_HOSTNAME`) |
 
 Se le avisa cuando una señal informa una falla o **deja de llegar**, lo que también cubre el servidor entero apagado. Sin estas variables, no se envía nada.
@@ -47,9 +47,9 @@ Los superusuarios ven un aviso arriba de las pantallas cuando:
 
 ## Salud del sistema (instalación en Google Cloud)
 
-Cada 5 minutos, `deploy/servidor/saude.sh --coletar` lee procesador, memoria, swap, disco, red, carga y la memoria y el procesador de cada contenedor, y agrega una línea a `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, unos 1,5 MB). Todos lo ven en **Ayuda > Salud del sistema**, con gráficos de las últimas horas y días; las tablas de la base y el comando del servidor se muestran solo a los superusuarios. La app solo lee el archivo; no tiene acceso a Docker.
+Cada 5 minutos, `deploy/server/health.sh --collect` lee procesador, memoria, swap, disco, red, carga y la memoria y el procesador de cada contenedor, y agrega una línea a `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, unos 1,5 MB). Todos lo ven en **Ayuda > Salud del sistema**, con gráficos de las últimas horas y días; las tablas de la base y el comando del servidor se muestran solo a los superusuarios. La app solo lee el archivo; no tiene acceso a Docker.
 
-En el servidor, `sudo /opt/kaladrius/bin/saude.sh` muestra un informe: ahora, últimas 24 horas, contenedores y tareas programadas.
+En el servidor, `sudo /opt/kaladrius/bin/health.sh` muestra un informe: ahora, últimas 24 horas, contenedores y tareas programadas.
 
 ## Logs
 

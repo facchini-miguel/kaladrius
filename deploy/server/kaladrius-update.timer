@@ -1,5 +1,5 @@
 [Unit]
-Description=Kaladrius: verifica atualizações a cada 5 minutos
+Description=Kaladrius: check for updates every 5 minutes
 
 [Timer]
 OnBootSec=2min

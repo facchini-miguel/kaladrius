@@ -1,13 +1,13 @@
-# Linux packages of Kaladrius (decision 140), built by deploy/pacote/gerar.sh with nFPM
+# Linux packages of Kaladrius (decision 140), built by deploy/package/build.sh with nFPM
 # (https://nfpm.goreleaser.com) from the repository's root: one .deb (Debian 13+, Ubuntu
 # 24.04+), one .rpm (Fedora, RHEL, Rocky Linux, AlmaLinux, openSUSE) and one .pkg.tar.zst
 # (Arch Linux, CachyOS) of shell scripts and
 # configuration. The system itself is the public image of the same version, pinned by digest
-# in release/pacote-linux; amd64 only, like the image.
+# in release/linux-package; amd64 only, like the image.
 name: kaladrius
 arch: amd64
 platform: linux
-version: ${VERSAO}
+version: ${VERSION}
 version_schema: semver
 release: "1"
 section: misc
@@ -21,29 +21,29 @@ description: |-
   Patients, schedule, medical records, budgets, finances and the clinic's team, in a web app
   for the clinic's internal network or the internet. Runs in Docker containers (PostgreSQL,
   Caddy with HTTPS), with daily backups, a weekly restore test and automatic rollback of a
-  failed update. After installing: sudo kaladrius configurar
+  failed update. After installing: sudo kaladrius configure
 
 contents:
-  - src: deploy/pacote/kaladrius
+  - src: deploy/package/kaladrius
     dst: /opt/kaladrius/bin/kaladrius
     file_info: {mode: 0755}
   - src: /opt/kaladrius/bin/kaladrius
     dst: /usr/bin/kaladrius
     type: symlink
-  - src: deploy/servidor/comum.sh
-    dst: /opt/kaladrius/bin/comum.sh
+  - src: deploy/server/common.sh
+    dst: /opt/kaladrius/bin/common.sh
     file_info: {mode: 0644}
-  - src: deploy/servidor/atualizar.sh
-    dst: /opt/kaladrius/bin/atualizar.sh
+  - src: deploy/server/update.sh
+    dst: /opt/kaladrius/bin/update.sh
     file_info: {mode: 0755}
-  - src: deploy/servidor/backup.sh
+  - src: deploy/server/backup.sh
     dst: /opt/kaladrius/bin/backup.sh
     file_info: {mode: 0755}
-  - src: deploy/servidor/saude.sh
-    dst: /opt/kaladrius/bin/saude.sh
+  - src: deploy/server/health.sh
+    dst: /opt/kaladrius/bin/health.sh
     file_info: {mode: 0755}
-  - src: deploy/servidor/testar_restauracao.sh
-    dst: /opt/kaladrius/bin/testar_restauracao.sh
+  - src: deploy/server/test_restore.sh
+    dst: /opt/kaladrius/bin/test_restore.sh
     file_info: {mode: 0755}
   - src: deploy/docker-compose.prod.yml
     dst: /opt/kaladrius/release/docker-compose.prod.yml
@@ -51,36 +51,36 @@ contents:
   - src: deploy/Caddyfile
     dst: /opt/kaladrius/release/Caddyfile
     file_info: {mode: 0644}
-  # VERSAO and IMAGEM (with its digest), written by gerar.sh.
-  - src: dist/pacote-linux
-    dst: /opt/kaladrius/release/pacote-linux
+  # VERSION and IMAGE (with its digest), written by build.sh.
+  - src: dist/linux-package
+    dst: /opt/kaladrius/release/linux-package
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-backup.service
+  - src: deploy/server/kaladrius-backup.service
     dst: /usr/lib/systemd/system/kaladrius-backup.service
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-backup.timer
+  - src: deploy/server/kaladrius-backup.timer
     dst: /usr/lib/systemd/system/kaladrius-backup.timer
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-saude.service
-    dst: /usr/lib/systemd/system/kaladrius-saude.service
+  - src: deploy/server/kaladrius-health.service
+    dst: /usr/lib/systemd/system/kaladrius-health.service
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-saude.timer
-    dst: /usr/lib/systemd/system/kaladrius-saude.timer
+  - src: deploy/server/kaladrius-health.timer
+    dst: /usr/lib/systemd/system/kaladrius-health.timer
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-restauracao.service
-    dst: /usr/lib/systemd/system/kaladrius-restauracao.service
+  - src: deploy/server/kaladrius-restore-test.service
+    dst: /usr/lib/systemd/system/kaladrius-restore-test.service
     file_info: {mode: 0644}
-  - src: deploy/servidor/kaladrius-restauracao.timer
-    dst: /usr/lib/systemd/system/kaladrius-restauracao.timer
+  - src: deploy/server/kaladrius-restore-test.timer
+    dst: /usr/lib/systemd/system/kaladrius-restore-test.timer
     file_info: {mode: 0644}
   # The package repository's apt source and .repo file (decision 142), which
-  # depois_de_instalar.sh copies when the repository is not configured yet.
-  - src: deploy/pacote/repositorio/kaladrius.sources
-    dst: /opt/kaladrius/repositorio/kaladrius.sources
+  # post_install.sh copies when the repository is not configured yet.
+  - src: deploy/package/repository/kaladrius.sources
+    dst: /opt/kaladrius/repository/kaladrius.sources
     file_info: {mode: 0644}
     packager: deb
-  - src: deploy/pacote/repositorio/kaladrius.repo
-    dst: /opt/kaladrius/repositorio/kaladrius.repo
+  - src: deploy/package/repository/kaladrius.repo
+    dst: /opt/kaladrius/repository/kaladrius.repo
     file_info: {mode: 0644}
     packager: rpm
   - src: LICENSE
@@ -93,15 +93,15 @@ contents:
     packager: rpm
 
 scripts:
-  postinstall: deploy/pacote/depois_de_instalar.sh
-  preremove: deploy/pacote/antes_de_remover.sh
-  postremove: deploy/pacote/depois_de_remover.sh
+  postinstall: deploy/package/post_install.sh
+  preremove: deploy/package/pre_remove.sh
+  postremove: deploy/package/post_remove.sh
 
 # pacman runs post_upgrade, not post_install, on an update: the same script (it updates the
 # system when there is a .env).
 archlinux:
   scripts:
-    postupgrade: deploy/pacote/depois_de_instalar.sh
+    postupgrade: deploy/package/post_install.sh
 
 recommends:
   - whiptail

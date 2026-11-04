@@ -44,13 +44,18 @@ Google cobra el IPv4 público de las VM (US$ 0,005/hora, cerca de US$ 3,65/mes; 
 | Alerta de presupuesto | R$ 5 (avisos en 10 %, 50 % y 100 %) | Gratis |
 
 ## Cómo funciona el servidor
-- `deploy/servidor/instalar.sh` es el *startup script* de la VM: instala Docker, crea 1 GB de swap, instala las tareas programadas de systemd y levanta el sistema. Puede volver a ejecutarse sin problema.
-- `deploy/servidor/atualizar.sh` (cada 5 min): descarga la imagen `latest`; si es distinta de la última instalada con éxito (`/opt/kaladrius/imagem-instalada`), extrae los archivos de `deploy/` de la imagen, actualiza las tareas de systemd y reinicia los contenedores. Si algo falla, lo intenta de nuevo en la siguiente vuelta. Las migraciones se ejecutan al iniciar la app.
-- `deploy/servidor/backup.sh` (diario): `pg_dump` enviado a Cloud Storage y registrado en el sistema; después, elimina los intentos de acceso rechazados con más de 30 días (`aplicar_retencao`). Si falla, systemd lo intenta de nuevo cada 20 minutos (hasta 4 intentos en 3 horas). Si la última copia registrada tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas.
-- `deploy/servidor/saude.sh --coletar` (cada 5 min, desde la 0.22.0): lee procesador, memoria, swap, disco, red y carga con comandos de Linux (`/proc`, `df`) y la memoria y el procesador de cada contenedor (`docker stats`), y agrega una línea en `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, cerca de 1,5 MB). La app lee ese archivo solo en modo lectura y muestra **Administración > Salud del sistema** a los superusuarios, con un aviso arriba de las pantallas si la recolección se detiene o si la memoria, el swap o el disco llegan al nivel crítico. La app no tiene acceso a Docker. Sin argumentos, `saude.sh` muestra un informe en la terminal.
+- `deploy/server/install.sh` es el *startup script* de la VM: instala Docker, crea 1 GB de swap, instala las tareas programadas de systemd y levanta el sistema. Puede volver a ejecutarse sin problema.
+- `deploy/server/update.sh` (cada 5 min): descarga la imagen `latest`; si es distinta de la última instalada con éxito (`/opt/kaladrius/installed-image`), extrae los archivos de `deploy/` de la imagen, actualiza las tareas de systemd y reinicia los contenedores. Si algo falla, lo intenta de nuevo en la siguiente vuelta. Las migraciones se ejecutan al iniciar la app.
+- `deploy/server/backup.sh` (diario): `pg_dump` enviado a Cloud Storage y registrado en el sistema; después, elimina los intentos de acceso rechazados con más de 30 días (`aplicar_retencao`). Si falla, systemd lo intenta de nuevo cada 20 minutos (hasta 4 intentos en 3 horas). Si la última copia registrada tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas.
+- `deploy/server/health.sh --collect` (cada 5 min, desde la 0.22.0): lee procesador, memoria, swap, disco, red y carga con comandos de Linux (`/proc`, `df`) y la memoria y el procesador de cada contenedor (`docker stats`), y agrega una línea en `/opt/kaladrius/saude/amostras.jsonl` (7 días guardados, cerca de 1,5 MB). La app lee ese archivo solo en modo lectura y muestra **Administración > Salud del sistema** a los superusuarios, con un aviso arriba de las pantallas si la recolección se detiene o si la memoria, el swap o el disco llegan al nivel crítico. La app no tiene acceso a Docker. Sin argumentos, `health.sh` muestra un informe en la terminal.
 - El compose de producción lee las variables `${...}` del `.env`, enlazado a su lado (`/opt/kaladrius/release/.env` → `../.env`). Solo la app recibe el archivo completo.
 - Configuración y contraseñas: `/opt/kaladrius/.env` (solo root). Copia local en `.env.producao`, ignorada por Git.
 - Sin claves guardadas: la VM y el CI usan tokens temporales de Google.
+- **Nombres de la decisión 147 (0.55.0).** Los scripts, las tareas programadas, los archivos de estado y las variables del `.env` tienen nombres en inglés. La primera actualización a la 0.55.0 la hace el `atualizar.sh` anterior del servidor, que carga `deploy/servidor/comum.sh` de la imagen nueva: ese puente pasa el servidor a los nombres nuevos (`migrate_legacy_names` en `common.sh`; las unidades y los scripts antiguos van a `/opt/kaladrius/legacy/`, el `.env` antiguo queda como `.env.before-147`). El startup script de la VM, en sus metadatos, todavía es el `instalar.sh` antiguo, que sigue funcionando por el mismo puente y por `bin/atualizar.sh` (un atajo a `update.sh`). Reemplácelo, y el puente puede borrarse después de la siguiente actualización:
+  ```bash
+  gcloud compute instances add-metadata kaladrius --zone=us-east1-b \
+    --metadata-from-file startup-script=deploy/server/install.sh
+  ```
 
 ## Tareas comunes
 
@@ -65,11 +70,11 @@ sudo docker compose -f docker-compose.prod.yml logs -f app
 sudo docker compose -f docker-compose.prod.yml exec app python manage.py <comando>
 
 # Forzar la actualización ahora / copia de seguridad ahora
-sudo /opt/kaladrius/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/update.sh --force
 sudo /opt/kaladrius/bin/backup.sh
 
 # Salud del servidor: ahora, últimas 24 horas, contenedores y tareas programadas
-sudo /opt/kaladrius/bin/saude.sh
+sudo /opt/kaladrius/bin/health.sh
 
 # Listar las copias de seguridad (en su máquina)
 gcloud storage ls -l gs://kaladrius-backups/
@@ -79,11 +84,11 @@ gcloud storage ls -l gs://kaladrius-backups/
 Lo normal es deshacer el commit (`git revert`) en una rama y hacer el merge en `main` por pull request (`main` no acepta otra cosa, decisión 141; el admin puede enviarlo directo, saltándose el ruleset): el CI publica una imagen nueva y la VM la instala en hasta 5 minutos después del merge. En una emergencia, se puede fijar una imagen antigua en la VM (cada versión tiene la etiqueta `X.Y.Z`, que nunca cambia, y cada commit la etiqueta con los 12 primeros caracteres del SHA):
 
 ```bash
-sudo systemctl stop kaladrius-atualizar.timer   # si no, la VM vuelve a latest en 5 min
+sudo systemctl stop kaladrius-update.timer   # si no, la VM vuelve a latest en 5 min
 cd /opt/kaladrius/release
-sudo IMAGEM_APP=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
+sudo APP_IMAGE=us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:0.7.0 \
   docker compose -f docker-compose.prod.yml up -d app
-# Después de corregir y publicar: sudo systemctl start kaladrius-atualizar.timer
+# Después de corregir y publicar: sudo systemctl start kaladrius-update.timer
 ```
 Las migraciones no se deshacen: una versión antigua solo funciona si las migraciones nuevas son compatibles con ella (agregar tablas, o campos que pueden quedar vacíos o tienen `db_default`, por ejemplo; el informe de migraciones de cada pull request marca el resto, decisión 139).
 
@@ -99,8 +104,8 @@ sudo docker compose -f docker-compose.prod.yml exec -T db sh -c 'pg_restore --cl
 Una copia solo vale si vuelve. La prueba se ejecuta en su máquina, en un PostgreSQL temporal: descarga la copia, la restaura (falla ante cualquier error), muestra cuántos registros hay en cada tabla y la última migración, y borra todo al final. No toca el servidor ni la base de desarrollo.
 
 ```bash
-deploy/testar_backup.sh                   # la copia más reciente
-deploy/testar_backup.sh <archivo>.dump    # una específica
+deploy/test_backup.sh                   # la copia más reciente
+deploy/test_backup.sh <archivo>.dump    # una específica
 ```
 Hecho el 27/10/2026 con la copia del 26/10 (datos ficticios de esa época): restaurada sin errores en 9 segundos. La misma prueba mostró que la copia automática de ese día había fallado (el servidor estaba entre la 0.7.0 y la 0.8.0, sin el enlace del `.env`) y que el aviso en la web no aparecía cuando **nunca** se había registrado una copia; desde la 0.17.1 los superusuarios también ven ese caso (`DJANGO_BACKUP_MONITORADO`, activado por defecto cuando `DJANGO_DEBUG` está desactivado).
 
@@ -121,10 +126,10 @@ Todos los días a las 07:30 UTC (04:30 en Brasilia, después del respaldo) el se
 
 ```bash
 echo 'DJANGO_DEMONSTRACAO=1' | sudo tee -a /opt/kaladrius/.env
-sudo /opt/kaladrius/bin/reiniciar_demonstracao.sh --salvar-base
+sudo /opt/kaladrius/bin/reset_demo.sh --save-base
 ```
 
-Las cuentas de los **administradores del sistema** (superusuarios) se mantienen en el reinicio (decisión 118): contraseña, correo, idioma, verificación en dos pasos y códigos de recuperación quedan como estaban. El resto de la configuración **del titular** (la de la clínica, por ejemplo) vuelve a la base: después de cambiar una que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demonstracao.service`.
+Las cuentas de los **administradores del sistema** (superusuarios) se mantienen en el reinicio (decisión 118): contraseña, correo, idioma, verificación en dos pasos y códigos de recuperación quedan como estaban. El resto de la configuración **del titular** (la de la clínica, por ejemplo) vuelve a la base: después de cambiar una que debe quedar, guarde la base de nuevo (`--salvar-base`). Para reiniciar en el momento: `sudo systemctl start kaladrius-demo-reset.service`.
 
 ## Cuidados
 - **Datos reales de pacientes:** los datos quedan en EE. UU. (exigencia del free tier). Antes del uso real, revisar la LGPD (transferencia internacional, art. 33) o migrar a la región de São Paulo (paga).

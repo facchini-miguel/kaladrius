@@ -33,10 +33,10 @@ def env_lista(nome, padrao=""):
 
 
 DEBUG = env_bool("DJANGO_DEBUG")
-# Production servers run daily backups (deploy/servidor/backup.sh): superusers are warned
+# Production servers run daily backups (deploy/server/backup.sh): superusers are warned
 # when none was recorded recently, or none at all. Development has no backups.
 BACKUP_MONITORADO = env_bool("DJANGO_BACKUP_MONITORADO", padrao=not DEBUG)
-# Health samples written every 5 minutes by deploy/servidor/saude.sh (decision 056):
+# Health samples written every 5 minutes by deploy/server/health.sh (decision 056):
 # superusers are warned when they stop or a resource is critical.
 SAUDE_MONITORADA = env_bool("DJANGO_SAUDE_MONITORADA", padrao=not DEBUG)
 SAUDE_DIR = env("DJANGO_SAUDE_DIR", "/saude")

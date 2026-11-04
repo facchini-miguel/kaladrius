@@ -4523,10 +4523,10 @@ msgstr "7 días"
 
 msgid ""
 "Ainda não há amostras. No servidor, a coleta roda a cada 5 minutos "
-"(kaladrius-saude.timer); em desenvolvimento, não há coleta."
+"(kaladrius-health.timer); em desenvolvimento, não há coleta."
 msgstr ""
 "Todavía no hay muestras. En el servidor, la recolección corre cada 5 minutos "
-"(kaladrius-saude.timer); en desarrollo no hay recolección."
+"(kaladrius-health.timer); en desarrollo no hay recolección."
 
 #, python-format
 msgid "A coleta parou: a última amostra é de %(momento)s."

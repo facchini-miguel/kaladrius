@@ -11,7 +11,7 @@ from apps.monitoramento import saude
 class Command(BaseCommand):
     help = (
         "Prints the last 24 hours of server health (from the samples of "
-        "deploy/servidor/saude.sh) and the last backup. Used by saude.sh's report."
+        "deploy/server/health.sh) and the last backup. Used by health.sh's report."
     )
 
     def handle(self, *args, **options):

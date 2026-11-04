@@ -17,9 +17,9 @@ La instalación de referencia de Kaladrius funciona en el **free tier** de Googl
 
 Además de lo que tiene el [servidor propio](docker-compose.md), esta instalación incluye:
 
-- **Actualización automática:** cada 5 minutos la VM busca una imagen nueva; si la hay, la instala y reinicia (`deploy/servidor/atualizar.sh`).
-- **Backup diario** a las 06:00 UTC en Cloud Storage, registrado en el sistema, con reintentos (`deploy/servidor/backup.sh`).
-- **Salud del servidor** cada 5 minutos (procesador, memoria, swap, disco, red, contenedores), mostrada a todos en **Ayuda > Salud del sistema** (`deploy/servidor/saude.sh`).
+- **Actualización automática:** cada 5 minutos la VM busca una imagen nueva; si la hay, la instala y reinicia (`deploy/server/update.sh`).
+- **Backup diario** a las 06:00 UTC en Cloud Storage, registrado en el sistema, con reintentos (`deploy/server/backup.sh`).
+- **Salud del servidor** cada 5 minutos (procesador, memoria, swap, disco, red, contenedores), mostrada a todos en **Ayuda > Salud del sistema** (`deploy/server/health.sh`).
 - **1 GB de swap**, necesario con 1 GB de RAM.
 - Ninguna contraseña ni clave de Google guardada: la VM y el CI usan tokens temporales.
 
@@ -45,7 +45,7 @@ La página [Producción de referencia](../project/production.md) registra cada r
 2. **Red.** Una VPC con subred en la región del free tier e **IPv6 externa**; reserve la IPv6 como fija (gratis). Firewall: TCP 80/443 y UDP 443 desde `::/0`, ICMPv6, y SSH (22) solo desde el rango de IAP `35.235.240.0/20`.
 3. **Registro y bucket.** Un repositorio en Artifact Registry para la imagen y un bucket privado en Cloud Storage con regla de borrado a los 30 días.
 4. **Cuentas de servicio.** Una para la VM (lee imágenes, escribe backups) y una para GitHub Actions mediante Workload Identity Federation (publica imágenes), limitada a su repositorio y a la rama `main`.
-5. **VM.** `e2-micro`, disco standard, sin IPv4 externa, con `deploy/servidor/instalar.sh` como **startup script**. Instala Docker, crea el swap, instala las tareas programadas de systemd e inicia el sistema.
+5. **VM.** `e2-micro`, disco standard, sin IPv4 externa, con `deploy/server/install.sh` como **startup script**. Instala Docker, crea el swap, instala las tareas programadas de systemd e inicia el sistema.
 6. **Configuración.** Cree `/opt/kaladrius/.env` (solo root) con los valores de [Configuración](../configuration.md), incluidos `SITE_HOSTNAME` y `DUCKDNS_TOKEN`.
 7. **Dominio.** Cree el subdominio en DuckDNS y apúntelo a la IPv6:
    ```bash
@@ -67,9 +67,9 @@ gcloud compute ssh <vm> --zone=<zona> --tunnel-through-iap
 cd /opt/kaladrius/release
 sudo docker compose -f docker-compose.prod.yml ps
 sudo docker compose -f docker-compose.prod.yml logs -f app
-sudo /opt/kaladrius/bin/atualizar.sh --forcar   # actualizar ahora
+sudo /opt/kaladrius/bin/update.sh --force   # actualizar ahora
 sudo /opt/kaladrius/bin/backup.sh               # backup ahora
-sudo /opt/kaladrius/bin/saude.sh                # informe de la salud del servidor
+sudo /opt/kaladrius/bin/health.sh                # informe de la salud del servidor
 ```
 
 ## Cuidados

@@ -14,7 +14,7 @@ RETENCAO_LOGIN_FALHOU = datetime.timedelta(days=30)
 class Command(BaseCommand):
     help = (
         "Deletes failed login records older than 30 days (audit log and django-axes). "
-        "Run daily by deploy/servidor/backup.sh."
+        "Run daily by deploy/server/backup.sh."
     )
 
     def handle(self, *args, **options):

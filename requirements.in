@@ -1,6 +1,6 @@
 # The libraries the system uses directly (decision 136). requirements.txt is generated from
 # this file with every dependency pinned and hashed; after changing it, run
-# deploy/gerar_lock.sh (CI fails while the lock does not match).
+# deploy/lock.sh (CI fails while the lock does not match).
 Django==6.1.2
 django-ninja==1.7.3
 psycopg[binary]==3.3.6

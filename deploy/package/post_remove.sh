@@ -17,7 +17,7 @@ rm -f /opt/kaladrius/release/.env
 if [ "${1:-}" = purge ]; then
   rm -f "$ETC/apt/sources.list.d/kaladrius.sources"
 fi
-cat <<'TEXTO'
+cat <<'TEXT'
 
   Kaladrius removido. Os dados foram mantidos / Los datos se mantuvieron / The data was kept:
     /opt/kaladrius/.env, /var/backups/kaladrius, volume Docker kaladrius_pgdata
@@ -26,10 +26,10 @@ cat <<'TEXTO'
     sudo docker volume rm kaladrius_pgdata kaladrius_caddy_data kaladrius_caddy_config
     sudo rm -r /opt/kaladrius /var/backups/kaladrius
 
-TEXTO
-for arquivo in "$ETC/apt/sources.list.d/kaladrius.sources" "$ETC/yum.repos.d/kaladrius.repo" \
+TEXT
+for file in "$ETC/apt/sources.list.d/kaladrius.sources" "$ETC/yum.repos.d/kaladrius.repo" \
   "$ETC/zypp/repos.d/kaladrius.repo"; do
-  if [ -e "$arquivo" ]; then
-    printf '  %s\n    sudo rm %s\n\n' "Repositório de pacotes / Repositorio de paquetes / Package repository:" "$arquivo"
+  if [ -e "$file" ]; then
+    printf '  %s\n    sudo rm %s\n\n' "Repositório de pacotes / Repositorio de paquetes / Package repository:" "$file"
   fi
 done

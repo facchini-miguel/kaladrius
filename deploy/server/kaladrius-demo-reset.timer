@@ -1,0 +1,9 @@
+[Unit]
+Description=Kaladrius: demo reset every day at 07:30 UTC (after the backup)
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
