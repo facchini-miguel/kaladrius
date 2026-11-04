@@ -27,7 +27,7 @@ def superusuario(client, django_user_model):
 def test_manual_e_politica_do_site_em_cada_idioma(pasta):
     manual = documents.DOCS / pasta / "manual"
     paginas = {arquivo.stem for arquivo in manual.glob("*.md")}
-    assert {"inicio", "agenda", "pacientes", "privacidade"} <= paginas, pasta
+    assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
 
 
 def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_user_model):
