@@ -27,8 +27,8 @@ O Kaladrius guarda dados de saúde, o tipo mais sensível de dado pessoal. Esta 
 
 ## Privacidade (LGPD)
 
-- **Política de privacidade** no sistema, em `/privacidade/`, nos três idiomas: o que é tratado, para quê, com qual base legal, quem tem acesso, onde fica guardado, por quanto tempo e os direitos do paciente. Adapte-a à sua clínica: a clínica é a controladora dos dados. Veja [Política de privacidade](manual/privacidade.md).
-- **Pacientes arquivados** saem das listas e buscas; o administrador pode **excluir definitivamente** o paciente que pedir, mantendo a agenda e o financeiro sem a identificação dele. Veja [Pacientes](manual/pacientes.md).
+- **Política de privacidade** no sistema, em `/privacidade/`, nos três idiomas: o que é tratado, para quê, com qual base legal, quem tem acesso, onde fica guardado, por quanto tempo e os direitos do paciente. Adapte-a à sua clínica: a clínica é a controladora dos dados. Veja [Política de privacidade](manual/privacy.md).
+- **Pacientes arquivados** saem das listas e buscas; o administrador pode **excluir definitivamente** o paciente que pedir, mantendo a agenda e o financeiro sem a identificação dele. Veja [Pacientes](manual/patients.md).
 - **Retenção:** tentativas de entrada recusadas são apagadas depois de 30 dias; os backups no Google Cloud, depois de 30 dias.
 - **Sem rastreamento:** só os cookies de sessão e de segurança; sem analytics, sem scripts de terceiros.
 

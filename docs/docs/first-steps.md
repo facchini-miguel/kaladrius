@@ -16,7 +16,7 @@ One installation serves **one clinic**. To serve another clinic, install the sys
 
 ## 2. Create the clinic's administrator
 
-In **Records > Team > New member**, create the person with the role **Administrator**. See [Team](manual/equipe.md).
+In **Records > Team > New member**, create the person with the role **Administrator**. See [Team](manual/team.md).
 
 ## 3. Hand it over to the clinic
 
@@ -24,12 +24,12 @@ From here on, the clinic's administrator does everything inside the system, with
 
 | Step | Where | Manual |
 |---|---|---|
-| Clinic details and schedule hours | **Records > Clinic settings** | [Clinic settings](manual/clinica.md) |
-| Team (front desk, practitioners, administrators) | **Records > Team** | [Team](manual/equipe.md) |
-| Practitioners and their schedule colors | **Records > Practitioners** | [Team](manual/equipe.md) |
-| Appointment types | **Records > Appointment types** | [Clinic settings](manual/clinica.md) |
-| Procedure price list | **Records > Procedure price list** | [Estimates](manual/orcamentos.md) |
-| Finance categories and accounts | **Records > Categories** and **Records > Accounts** | [Finance](manual/financeiro.md) |
+| Clinic details and schedule hours | **Records > Clinic settings** | [Clinic settings](manual/clinic.md) |
+| Team (front desk, practitioners, administrators) | **Records > Team** | [Team](manual/team.md) |
+| Practitioners and their schedule colors | **Records > Practitioners** | [Team](manual/team.md) |
+| Appointment types | **Records > Appointment types** | [Clinic settings](manual/clinic.md) |
+| Procedure price list | **Records > Procedure price list** | [Estimates](manual/estimates.md) |
+| Finance categories and accounts | **Records > Categories** and **Records > Accounts** | [Finance](manual/finance.md) |
 
 ## Roles
 
@@ -37,9 +37,9 @@ From here on, the clinic's administrator does everything inside the system, with
 |---|---|
 | **Administrator** | Everything in the clinic: team, practitioners, settings, payables, cash flow, reports, audit log and archived patients |
 | **Front desk** | Every practitioner's schedule, patients, estimates, recalls, receiving and the daily cash |
-| **Practitioner** | Only their own schedule, patients, estimates, recalls and the [medical record](manual/prontuario.md); no clinic money |
+| **Practitioner** | Only their own schedule, patients, estimates, recalls and the [medical record](manual/medical-record.md); no clinic money |
 
-Buttons a person cannot use are not shown. See [Getting started](manual/inicio.md#roles).
+Buttons a person cannot use are not shown. See [Getting started](manual/getting-started.md#roles).
 
 ## Importing from another system
 

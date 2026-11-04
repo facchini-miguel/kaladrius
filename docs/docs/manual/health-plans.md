@@ -4,7 +4,7 @@ sidebar_position: 3.7
 
 # Health plans
 
-The **Health plans** module keeps the plans the clinic accepts and each patient's card. It can be turned off in the [clinic settings](clinica.md) by clinics that only see private patients.
+The **Health plans** module keeps the plans the clinic accepts and each patient's card. It can be turned off in the [clinic settings](clinic.md) by clinics that only see private patients.
 
 ## Registering a health plan
 In **Records > Health plans**, click **New health plan** and fill in the name and, if there is one, the **insurer registration** of the clinic's country (in Brazil the ANS, 6 digits; in the United States the Payer ID; in Argentina the RNOS; in South Africa the CMS number), the phone and notes. Countries without an insurer registry do not show the field. The same name cannot be registered twice. To stop accepting a plan without losing the history, edit it and uncheck **active**: it leaves the list of new cards, and the existing cards stay.

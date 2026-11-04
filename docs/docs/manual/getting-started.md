@@ -41,8 +41,8 @@ What you see depends on your role in the clinic:
 | Role | Can |
 |---|---|
 | **Front desk** | Every practitioner's schedule, patients (no archiving), recalls and birthdays |
-| **Practitioner** | Only their own schedule, patients (no archiving), recalls, birthdays and the [medical record](prontuario.md) |
-| **Finance** | All of [finance](financeiro.md): receivables and payables, payments and receipts, cash desk, cash flow, reports, commissions and bank statements; patients, estimates and practitioners only to look at. No schedule, recalls or medical record |
+| **Practitioner** | Only their own schedule, patients (no archiving), recalls, birthdays and the [medical record](medical-record.md) |
+| **Finance** | All of [finance](finance.md): receivables and payables, payments and receipts, cash desk, cash flow, reports, commissions and bank statements; patients, estimates and practitioners only to look at. No schedule, recalls or medical record |
 | **Clinic administrator** | Everything, including finance, team, practitioners, appointment types, clinic settings, audit log and archived patients; the medical record only when also a practitioner |
 | **System administrator** | Everything in the clinic, including the medical record |
 

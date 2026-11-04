@@ -61,4 +61,4 @@ kaladrius logs -f db       # base de datos
 
 ## Auditoría
 
-Lo que las personas hicieron dentro del sistema (quién creó, cambió, eliminó o abrió cada registro, cuándo y desde dónde) está en **Registros > Auditoría**, para el administrador de la clínica. Vea [Configuración de la clínica](../manual/clinica.md).
+Lo que las personas hicieron dentro del sistema (quién creó, cambió, eliminó o abrió cada registro, cuándo y desde dónde) está en **Registros > Auditoría**, para el administrador de la clínica. Vea [Configuración de la clínica](../manual/clinic.md).

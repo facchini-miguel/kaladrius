@@ -4,7 +4,7 @@ sidebar_position: 6.5
 
 # Personal
 
-El módulo **Personal** guarda los empleados de la clínica, sus salarios y las horas extras y ausencias de cada mes, y convierte los sueldos del mes en cuentas por pagar en el [financiero](financeiro.md). Solo lo ven el administrador y el perfil Financiero. Puede desactivarse en la [configuración de la clínica](clinica.md) y necesita Financiero activo.
+El módulo **Personal** guarda los empleados de la clínica, sus salarios y las horas extras y ausencias de cada mes, y convierte los sueldos del mes en cuentas por pagar en el [financiero](finance.md). Solo lo ven el administrador y el perfil Financiero. Puede desactivarse en la [configuración de la clínica](clinic.md) y necesita Financiero activo.
 
 Las cargas sociales, vacaciones y aguinaldo **no** se calculan: quedan con el contador o con el sistema de sueldos.
 

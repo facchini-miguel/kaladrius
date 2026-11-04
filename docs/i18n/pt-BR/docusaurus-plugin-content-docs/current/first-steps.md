@@ -16,7 +16,7 @@ Uma instalação atende **uma clínica**. Para atender outra clínica, instale o
 
 ## 2. Crie o administrador da clínica
 
-Em **Cadastros > Equipe > Novo membro**, crie a pessoa com o perfil **Administrador**. Veja [Equipe](manual/equipe.md).
+Em **Cadastros > Equipe > Novo membro**, crie a pessoa com o perfil **Administrador**. Veja [Equipe](manual/team.md).
 
 ## 3. Entregue para a clínica
 
@@ -24,12 +24,12 @@ Daqui em diante, o administrador da clínica faz tudo dentro do sistema, sem o `
 
 | Passo | Onde | Manual |
 |---|---|---|
-| Dados da clínica e horário da agenda | **Cadastros > Configurações da clínica** | [Configurações da clínica](manual/clinica.md) |
-| Equipe (recepção, profissionais, administradores) | **Cadastros > Equipe** | [Equipe](manual/equipe.md) |
-| Profissionais e as cores na agenda | **Cadastros > Profissionais** | [Equipe](manual/equipe.md) |
-| Tipos de atendimento | **Cadastros > Tipos de atendimento** | [Configurações da clínica](manual/clinica.md) |
-| Tabela de procedimentos | **Cadastros > Tabela de procedimentos** | [Orçamentos](manual/orcamentos.md) |
-| Categorias e contas do financeiro | **Cadastros > Categorias** e **Cadastros > Contas** | [Financeiro](manual/financeiro.md) |
+| Dados da clínica e horário da agenda | **Cadastros > Configurações da clínica** | [Configurações da clínica](manual/clinic.md) |
+| Equipe (recepção, profissionais, administradores) | **Cadastros > Equipe** | [Equipe](manual/team.md) |
+| Profissionais e as cores na agenda | **Cadastros > Profissionais** | [Equipe](manual/team.md) |
+| Tipos de atendimento | **Cadastros > Tipos de atendimento** | [Configurações da clínica](manual/clinic.md) |
+| Tabela de procedimentos | **Cadastros > Tabela de procedimentos** | [Orçamentos](manual/estimates.md) |
+| Categorias e contas do financeiro | **Cadastros > Categorias** e **Cadastros > Contas** | [Financeiro](manual/finance.md) |
 
 ## Perfis
 
@@ -37,9 +37,9 @@ Daqui em diante, o administrador da clínica faz tudo dentro do sistema, sem o `
 |---|---|
 | **Administrador** | Tudo na clínica: equipe, profissionais, configurações, contas a pagar, fluxo de caixa, relatórios, auditoria e pacientes arquivados |
 | **Recepção** | Agenda de todos os profissionais, pacientes, orçamentos, rechamadas, recebimentos e caixa do dia |
-| **Profissional** | Só a própria agenda, pacientes, orçamentos, rechamadas e o [prontuário](manual/prontuario.md); nenhum valor da clínica |
+| **Profissional** | Só a própria agenda, pacientes, orçamentos, rechamadas e o [prontuário](manual/medical-record.md); nenhum valor da clínica |
 
-Os botões que a pessoa não pode usar não aparecem. Veja [Primeiros passos do manual](manual/inicio.md#perfis).
+Os botões que a pessoa não pode usar não aparecem. Veja [Primeiros passos do manual](manual/getting-started.md#perfis).
 
 ## Importar de outro sistema
 

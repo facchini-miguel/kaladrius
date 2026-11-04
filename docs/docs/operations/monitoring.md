@@ -61,4 +61,4 @@ kaladrius logs -f db       # database
 
 ## Audit log
 
-What people did inside the system (who created, changed, deleted or opened each record, when and from where) is in **Records > Audit log**, for the clinic administrator. See [Clinic settings](../manual/clinica.md).
+What people did inside the system (who created, changed, deleted or opened each record, when and from where) is in **Records > Audit log**, for the clinic administrator. See [Clinic settings](../manual/clinic.md).

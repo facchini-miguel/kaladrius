@@ -5,16 +5,32 @@ from apps.core.models import Clinica
 
 from . import documents
 
+# The user manual's pages, by the names the in-system help used (before 0.27.0) and the site
+# used until decision 151.
+PAGINAS = {
+    "inicio": "getting-started",
+    "agenda": "schedule",
+    "clinica": "clinic",
+    "convenios": "health-plans",
+    "equipe": "team",
+    "financeiro": "finance",
+    "orcamentos": "estimates",
+    "pacientes": "patients",
+    "pessoal": "staff",
+    "prontuario": "medical-record",
+    "rechamadas": "recalls",
+}
+
 
 def para_o_site(request, pagina=None, caminho=None):
     """Old in-system help addresses (before 0.27.0) now open the documentation site."""
     if pagina == "privacidade":
         return redirect("privacidade")
     if pagina is not None:
-        return redirect(documents.url_do_site(f"manual/{pagina}"))
+        return redirect(documents.url_do_site(f"manual/{PAGINAS.get(pagina, pagina)}"))
     if caminho is not None:
         return redirect(documents.url_do_site())
-    return redirect(documents.url_do_site("manual/inicio"))
+    return redirect(documents.url_do_site("manual/getting-started"))
 
 
 def privacidade(request):
