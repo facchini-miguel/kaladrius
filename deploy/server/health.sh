@@ -89,10 +89,11 @@ report() {
   echo
   echo "== Scheduled tasks"
   systemctl list-timers 'kaladrius-*' --no-pager | head -n -3
-  if systemctl --failed --no-legend 'kaladrius-*' | grep . >/dev/null; then
+  # list-units: systemd 257 (Debian 13) takes `systemctl --failed PATTERN`'s pattern for a verb.
+  if systemctl list-units --failed --no-legend 'kaladrius-*' | grep . >/dev/null; then
     echo
     echo "!! Failed:"
-    systemctl --failed --no-legend 'kaladrius-*'
+    systemctl list-units --failed --no-legend 'kaladrius-*'
   fi
 }
 
