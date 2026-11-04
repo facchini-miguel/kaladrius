@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_noop
 
 from .forms import ClinicaAdminForm
-from .models import Backup, Clinica, Usuario, Vinculo
+from .models import Backup, Clinic, Membership, Usuario
 
 
 def _somente_superusuario(request):
@@ -19,19 +19,19 @@ gettext_noop("- Select an option -")
 
 
 class VinculoNaClinicaInline(admin.TabularInline):
-    model = Vinculo
+    model = Membership
     fk_name = "clinica"
     extra = 0
     autocomplete_fields = ["usuario"]
 
 
 class VinculoDoUsuarioInline(admin.TabularInline):
-    model = Vinculo
+    model = Membership
     fk_name = "usuario"
     extra = 0
 
 
-@admin.register(Clinica)
+@admin.register(Clinic)
 class ClinicaAdmin(admin.ModelAdmin):
     form = ClinicaAdminForm
     list_display = ["nome", "documento", "ativa", "agenda_inicio", "agenda_fim", "agenda_intervalo"]
@@ -42,7 +42,7 @@ class ClinicaAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # One installation, one clinic (decision 069): the first one is registered on the
         # first access (core:cadastrar_clinica).
-        return super().has_add_permission(request) and not Clinica.objects.exists()
+        return super().has_add_permission(request) and not Clinic.objects.exists()
 
 
 @admin.register(Usuario)
@@ -50,7 +50,7 @@ class UsuarioAdmin(UserAdmin):
     inlines = [VinculoDoUsuarioInline]
 
 
-@admin.register(Vinculo)
+@admin.register(Membership)
 class VinculoAdmin(admin.ModelAdmin):
     list_display = ["usuario", "clinica", "papel", "ativo"]
     list_filter = ["papel", "ativo", "clinica"]

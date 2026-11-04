@@ -9,14 +9,14 @@ from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.estimates.models import Orcamento
+from apps.estimates.models import Estimate
 from apps.finance import services as financeiro
-from apps.finance.models import Caixa, Categoria, Conta, Lancamento
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.finance.models import CashRegister, Category, Entry, FinancialAccount
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
-from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.schedule.models import Appointment, AppointmentType
 
 pytestmark = pytest.mark.django_db
 
@@ -40,20 +40,20 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         "dra": criar_usuario("dra", clinica_a, Papel.PROFISSIONAL),
     }
     with usar_clinica(clinica_a):
-        Profissional.objects.filter(pk=ana.pk).update(usuario=usuarios["dra"])
-        tipo = TipoAtendimento.objects.get(nome="Cirurgia")
-        maria = Paciente.objects.create(
+        Practitioner.objects.filter(pk=ana.pk).update(usuario=usuarios["dra"])
+        tipo = AppointmentType.objects.get(nome="Cirurgia")
+        maria = Patient.objects.create(
             nome="Maria Paciente",
             data_nascimento=dia(5, 3).replace(year=1990),
             telefone_celular="11987654321",
         )
-        joao = Paciente.objects.create(nome="João Paciente")
-        arquivado = Paciente.objects.create(
+        joao = Patient.objects.create(nome="João Paciente")
+        arquivado = Patient.objects.create(
             nome="Paciente Arquivado", arquivado=True, data_nascimento=dia(5).replace(year=1980)
         )
 
         def agendar(data, hora, profissional=ana, paciente=maria, situacao="agendado"):
-            Agendamento.objects.create(
+            Appointment.objects.create(
                 profissional=profissional,
                 tipo=tipo,
                 paciente=paciente,
@@ -85,19 +85,19 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             )
 
         for paciente, validade, situacao in [
-            (maria, dia(8), Orcamento.Situacao.ABERTO),
-            (maria, dia(20), Orcamento.Situacao.ABERTO),
-            (maria, dia(6), Orcamento.Situacao.APROVADO),
-            (arquivado, dia(6), Orcamento.Situacao.ABERTO),
-            (maria, dia(4), Orcamento.Situacao.ABERTO),
+            (maria, dia(8), Estimate.Situacao.ABERTO),
+            (maria, dia(20), Estimate.Situacao.ABERTO),
+            (maria, dia(6), Estimate.Situacao.APROVADO),
+            (arquivado, dia(6), Estimate.Situacao.ABERTO),
+            (maria, dia(4), Estimate.Situacao.ABERTO),
         ]:
-            Orcamento.objects.create(
+            Estimate.objects.create(
                 paciente=paciente, data=dia(1), validade=validade, situacao=situacao
             )
 
-        caixa = Conta.objects.get(nome="Caixa")
-        receita = Categoria.objects.get(nome="Tratamento")
-        despesa = Categoria.objects.get(nome="Outras despesas")
+        caixa = FinancialAccount.objects.get(nome="Caixa")
+        receita = Category.objects.get(nome="Tratamento")
+        despesa = Category.objects.get(nome="Outras despesas")
 
         def lancar(tipo, valor, parcelas, vencimento, categoria, **campos):
             lancamento = financeiro.criar_lancamento(
@@ -125,16 +125,18 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         # Due 05/01, 05/02 (overdue) and today; the first one is paid today.
         primeira, _segunda, _terceira = lancar(
-            Lancamento.Tipo.RECEBER, "300", 3, dia(5, 1), receita, paciente=maria
+            Entry.Tipo.RECEBER, "300", 3, dia(5, 1), receita, paciente=maria
         )
         pagar(primeira, "100", HOJE)
-        [fevereiro] = lancar(Lancamento.Tipo.RECEBER, "200", 1, dia(3, 2), receita, paciente=joao)
+        [fevereiro] = lancar(Entry.Tipo.RECEBER, "200", 1, dia(3, 2), receita, paciente=joao)
         pagar(fevereiro, "200", dia(3, 2), forma="dinheiro")
-        [conta_de_luz] = lancar(Lancamento.Tipo.PAGAR, "50", 1, HOJE, despesa, pessoa="Luz")
+        [conta_de_luz] = lancar(Entry.Tipo.PAGAR, "50", 1, HOJE, despesa, pessoa="Luz")
         pagar(conta_de_luz, "50", HOJE)
-        lancar(Lancamento.Tipo.PAGAR, "80", 1, dia(10), despesa, pessoa="Aluguel")
-        lancar(Lancamento.Tipo.PAGAR, "999", 1, dia(20), despesa, pessoa="Longe")
-        Caixa.objects.create(conta=caixa, valor_abertura=Decimal("0"), aberto_por=usuarios["admin"])
+        lancar(Entry.Tipo.PAGAR, "80", 1, dia(10), despesa, pessoa="Aluguel")
+        lancar(Entry.Tipo.PAGAR, "999", 1, dia(20), despesa, pessoa="Longe")
+        CashRegister.objects.create(
+            conta=caixa, valor_abertura=Decimal("0"), aberto_por=usuarios["admin"]
+        )
     return {"clinica": clinica_a, **usuarios}
 
 

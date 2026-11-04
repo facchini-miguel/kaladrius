@@ -8,7 +8,7 @@ from django.utils import translation
 
 from apps.core.isolation import clinica_atual, isolamento_ativo
 
-from .models import RegistroAuditoria
+from .models import AuditEntry
 
 _usuario = ContextVar("auditoria_usuario", default=None)
 _ip = ContextVar("auditoria_ip", default=None)
@@ -38,7 +38,7 @@ def registrar(
         # Rows without a clinic of their own (user accounts) are filed under the clinic
         # where the change was made, so the clinic administrator sees it in the audit log.
         clinica = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
-    return RegistroAuditoria.objects.create(
+    return AuditEntry.objects.create(
         acao=acao,
         clinica_id=getattr(clinica, "pk", clinica),
         usuario=usuario,
@@ -71,7 +71,7 @@ def anonimizar(modelo, ids):
     the values and the record description go.
     """
     nome = nome_do_modelo(modelo)
-    registros = RegistroAuditoria.objects.filter(modelo=nome, objeto_id__in=[str(i) for i in ids])
+    registros = AuditEntry.objects.filter(modelo=nome, objeto_id__in=[str(i) for i in ids])
     for registro in registros:
         registro.objeto_descricao = f"{nome} {registro.objeto_id} (dados removidos)"
         registro.alteracoes = {campo: [REMOVIDO, REMOVIDO] for campo in registro.alteracoes}
@@ -79,8 +79,8 @@ def anonimizar(modelo, ids):
 
 
 def _clinica_de(objeto):
-    from apps.core.models import Clinica
+    from apps.core.models import Clinic
 
-    if isinstance(objeto, Clinica):
+    if isinstance(objeto, Clinic):
         return objeto.pk
     return getattr(objeto, "clinica_id", None)

@@ -9,7 +9,7 @@ class Recall(ModeloDaClinica):
     """A recall: a date to contact a patient again (e.g. six-month check-up)."""
 
     paciente = models.ForeignKey(
-        "pacientes.Paciente",
+        "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="rechamadas",
         verbose_name=_("paciente"),

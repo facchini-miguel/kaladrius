@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
-from apps.core.models import Clinica
+from apps.core.models import Clinic
 from apps.core.ordering import ALFABETICA
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
@@ -28,7 +28,7 @@ def validade_padrao():
     return timezone.localdate() + datetime.timedelta(days=VALIDADE_PADRAO)
 
 
-class Procedimento(ModeloDaClinica):
+class Procedure(ModeloDaClinica):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
     nome = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA)
@@ -36,7 +36,7 @@ class Procedimento(ModeloDaClinica):
     codigo = models.CharField(_("código"), max_length=20, blank=True)
     valor = models.DecimalField(_("valor"), **DINHEIRO)
     categoria = models.ForeignKey(
-        "financeiro.Categoria",
+        "financeiro.Category",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -47,6 +47,7 @@ class Procedimento(ModeloDaClinica):
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
+        db_table = "orcamentos_procedimento"
         verbose_name = _("procedimento")
         verbose_name_plural = _("procedimentos")
         ordering = ["nome"]
@@ -59,20 +60,20 @@ class Procedimento(ModeloDaClinica):
         return self.nome
 
 
-class Orcamento(ModeloDaClinica):
+class Estimate(ModeloDaClinica):
     class Situacao(models.TextChoices):
         ABERTO = "aberto", pgettext_lazy("orçamento", "Em aberto")
         APROVADO = "aprovado", _("Aprovado")
         RECUSADO = "recusado", _("Recusado")
 
     paciente = models.ForeignKey(
-        "pacientes.Paciente",
+        "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="orcamentos",
         verbose_name=_("paciente"),
     )
     profissional = models.ForeignKey(
-        "profissionais.Profissional",
+        "profissionais.Practitioner",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -87,7 +88,7 @@ class Orcamento(ModeloDaClinica):
     desconto = models.DecimalField(_("desconto"), default=Decimal("0.00"), **DINHEIRO)
     observacoes = models.TextField(_("observações"), blank=True)
     lancamento = models.OneToOneField(
-        "financeiro.Lancamento",
+        "financeiro.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -115,6 +116,7 @@ class Orcamento(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "orcamentos_orcamento"
         verbose_name = _("orçamento")
         verbose_name_plural = _("orçamentos")
         ordering = ["-data", "-pk"]
@@ -143,12 +145,12 @@ class Orcamento(ModeloDaClinica):
         return sorted({dente for item in self.itens.all() for dente in item.lista_dentes})
 
 
-class ItemOrcamento(ModeloDaClinica):
+class EstimateItem(ModeloDaClinica):
     orcamento = models.ForeignKey(
-        Orcamento, on_delete=models.CASCADE, related_name="itens", verbose_name=_("orçamento")
+        Estimate, on_delete=models.CASCADE, related_name="itens", verbose_name=_("orçamento")
     )
     procedimento = models.ForeignKey(
-        Procedimento,
+        Procedure,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -169,6 +171,7 @@ class ItemOrcamento(ModeloDaClinica):
     valor_unitario = models.DecimalField(_("valor unitário"), **DINHEIRO)
 
     class Meta:
+        db_table = "orcamentos_itemorcamento"
         verbose_name = _("item do orçamento")
         verbose_name_plural = _("itens do orçamento")
         ordering = ["pk"]
@@ -184,7 +187,7 @@ class ItemOrcamento(ModeloDaClinica):
         self._conferir_clinica()
         if self.orcamento.clinica_id != self.clinica_id:
             raise ClinicaDiferente("The estimate belongs to another clinic.")
-        clinica = Clinica.objects.select_for_update().get(pk=self.clinica_id)
+        clinica = Clinic.objects.select_for_update().get(pk=self.clinica_id)
         anterior = (
             type(self).objects.filter(pk=self.pk).values("dentes", "faces").first()
             if self.pk is not None

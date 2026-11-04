@@ -4,7 +4,7 @@ from axes.models import AccessAttempt
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 
 # Failed logins hold the username typed (personal data, sometimes a mistyped password):
 # kept only long enough to investigate an attack (decision 045).
@@ -19,8 +19,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         limite = timezone.now() - RETENCAO_LOGIN_FALHOU
-        auditoria, _ = RegistroAuditoria.objects.filter(
-            acao=RegistroAuditoria.Acao.LOGIN_FALHOU, momento__lt=limite
+        auditoria, _ = AuditEntry.objects.filter(
+            acao=AuditEntry.Acao.LOGIN_FALHOU, momento__lt=limite
         ).delete()
         tentativas, _ = AccessAttempt.objects.filter(attempt_time__lt=limite).delete()
         self.stdout.write(

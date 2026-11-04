@@ -17,7 +17,7 @@ from apps.core.isolation import usar_clinica
 from apps.core.middleware import ClinicaAtualMiddleware
 from apps.core.models import Papel
 from apps.core.validators import normalizar_telefone
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from tests.test_core import dados_clinica
 
 pytestmark = pytest.mark.django_db
@@ -135,7 +135,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     # The English flag, with or without the hash of the collected static files (CI).
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(
+        paciente = Patient.objects.create(
             nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
         )
     ficha = cliente.get(reverse("patients:record", args=[paciente.pk])).content.decode()
@@ -208,7 +208,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Oliver Fictício")
+        paciente = Patient.objects.get(nome="Oliver Fictício")
     assert (paciente.telefone_celular, paciente.whatsapp, paciente.cep) == (
         "7700900123",
         "7700900123",
@@ -235,15 +235,15 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     clinic's time zone, so a browser in another zone shows the same times as the rest."""
     import zoneinfo
 
-    from apps.schedule.models import Agendamento, TipoAtendimento
+    from apps.schedule.models import Appointment, AppointmentType
 
     no_pais(clinica_a, "GB")
     ana = criar_profissional(clinica_a, "Dr. Fictício de Londres")
     londres = zoneinfo.ZoneInfo("Europe/London")
     with usar_clinica(clinica_a):
-        Agendamento.objects.create(
+        Appointment.objects.create(
             profissional=ana,
-            tipo=TipoAtendimento.objects.first(),
+            tipo=AppointmentType.objects.first(),
             descricao="Horário fictício",
             inicio=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
             fim=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),

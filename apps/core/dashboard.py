@@ -9,14 +9,14 @@ import datetime
 from django.db.models import Count, Sum
 from django.utils import timezone
 
-from apps.estimates.models import Orcamento
+from apps.estimates.models import Estimate
 from apps.finance import services as financeiro
-from apps.finance.models import ZERO, Caixa, Lancamento, Parcela
+from apps.finance.models import ZERO, CashRegister, Entry, Installment
 from apps.finance.payment_methods import rotulos as rotulos_das_formas
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
-from apps.schedule.models import Agendamento
+from apps.schedule.models import Appointment
 
 from .permissions import Acao, Modulo, pode, so_a_propria_agenda
 
@@ -54,7 +54,7 @@ def _agenda(request, hoje):
         .order_by("inicio", "profissional__nome")
     )
     pacientes = [a for a in do_dia if a.paciente_id]
-    situacao = Agendamento.Situacao
+    situacao = Appointment.Situacao
     contagem = {valor: 0 for valor in situacao.values}
     for agendamento in pacientes:
         contagem[agendamento.situacao] += 1
@@ -102,7 +102,7 @@ def _rechamadas(hoje):
 def _aniversariantes(hoje):
     return [
         (paciente, hoje.year - paciente.data_nascimento.year)
-        for paciente in Paciente.objects.filter(
+        for paciente in Patient.objects.filter(
             ativo=True,
             arquivado=False,
             data_nascimento__month=hoje.month,
@@ -113,8 +113,8 @@ def _aniversariantes(hoje):
 
 def _orcamentos(hoje):
     return list(
-        Orcamento.objects.filter(
-            situacao=Orcamento.Situacao.ABERTO,
+        Estimate.objects.filter(
+            situacao=Estimate.Situacao.ABERTO,
             validade__gte=hoje,
             validade__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
             paciente__arquivado=False,
@@ -132,7 +132,7 @@ def _soma_dos_saldos(parcelas):
 
 def _recebimentos(hoje):
     recebidos = financeiro.pagamentos_validos().filter(
-        data=hoje, parcela__lancamento__tipo=Lancamento.Tipo.RECEBER
+        data=hoje, parcela__lancamento__tipo=Entry.Tipo.RECEBER
     )
     formas = rotulos_das_formas()
     por_forma = [
@@ -143,14 +143,16 @@ def _recebimentos(hoje):
         .order_by("-total")
     ]
     a_receber, parcelas = _soma_dos_saldos(
-        Parcela.objects.abertas().filter(lancamento__tipo=Lancamento.Tipo.RECEBER, vencimento=hoje)
+        Installment.objects.abertas().filter(lancamento__tipo=Entry.Tipo.RECEBER, vencimento=hoje)
     )
     return {
         "recebido": sum((total for _forma, total in por_forma), start=ZERO),
         "por_forma": por_forma,
         "a_receber": a_receber,
         "parcelas_a_receber": parcelas,
-        "caixas": list(Caixa.objects.filter(fechado_em__isnull=True).select_related("conta")),
+        "caixas": list(
+            CashRegister.objects.filter(fechado_em__isnull=True).select_related("conta")
+        ),
     }
 
 
@@ -163,13 +165,13 @@ def _financeiro(hoje):
     inicio_anterior = fim_anterior.replace(day=1)
     ate_anterior = inicio_anterior.replace(day=min(hoje.day, fim_anterior.day))
     recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
-    abertas = Parcela.objects.abertas()
+    abertas = Installment.objects.abertas()
     vencido, parcelas_vencidas = _soma_dos_saldos(
-        abertas.filter(lancamento__tipo=Lancamento.Tipo.RECEBER, vencimento__lt=hoje)
+        abertas.filter(lancamento__tipo=Entry.Tipo.RECEBER, vencimento__lt=hoje)
     )
     a_pagar, contas_a_pagar = _soma_dos_saldos(
         abertas.filter(
-            lancamento__tipo=Lancamento.Tipo.PAGAR,
+            lancamento__tipo=Entry.Tipo.PAGAR,
             vencimento__lte=hoje + datetime.timedelta(days=DIAS_A_PAGAR),
         )
     )

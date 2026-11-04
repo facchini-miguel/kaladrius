@@ -107,14 +107,14 @@ def test_situacoes_em_aberto_concordam_em_espanhol():
     from django.utils import translation
     from django.utils.translation import pgettext
 
-    from apps.estimates.models import Orcamento
+    from apps.estimates.models import Estimate
 
     with translation.override("es"):
-        assert str(Orcamento.Situacao.ABERTO.label) == "Abierto"
+        assert str(Estimate.Situacao.ABERTO.label) == "Abierto"
         assert pgettext("parcela", "Em aberto") == "Abierta"
         assert pgettext("valor", "Em aberto") == "Pendiente"
     with translation.override("en"):
-        assert str(Orcamento.Situacao.ABERTO.label) == "Open"
+        assert str(Estimate.Situacao.ABERTO.label) == "Open"
 
 
 def test_horario_em_ingles_sem_ponto_duplo():

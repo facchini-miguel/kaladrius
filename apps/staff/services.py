@@ -9,9 +9,9 @@ from django.utils.translation import gettext as _
 
 from apps.core.ordering import chave_alfabetica
 from apps.finance import services as financeiro
-from apps.finance.models import Lancamento
+from apps.finance.models import Entry
 
-from .models import Folha, Funcionario, hora_extra_sugerida
+from .models import Employee, Payroll, hora_extra_sugerida
 
 
 def competencia_de(data):
@@ -31,12 +31,12 @@ def preparar(competencia):
     """
     fim = fim_do_mes(competencia)
     trabalhando = (
-        Funcionario.objects.filter(ativo=True)
+        Employee.objects.filter(ativo=True)
         .exclude(admissao__gt=fim)
         .exclude(desligamento__lt=competencia)
     )
     folhas = list(
-        Folha.objects.filter(competencia=competencia).select_related("funcionario", "lancamento")
+        Payroll.objects.filter(competencia=competencia).select_related("funcionario", "lancamento")
     )
     existentes = {f.funcionario_id for f in folhas}
     for funcionario in trabalhando:
@@ -44,7 +44,7 @@ def preparar(competencia):
         if funcionario.pk in existentes or salario is None:
             continue
         folhas.append(
-            Folha(
+            Payroll(
                 funcionario=funcionario,
                 competencia=competencia,
                 salario=salario,
@@ -59,7 +59,7 @@ def lancar(folhas, *, categoria, vencimento, usuario):
     """Turn the sheets not yet launched into payables, one per employee."""
     lancadas = 0
     for folha in folhas:
-        folha = Folha.objects.select_for_update().select_related("funcionario").get(pk=folha.pk)
+        folha = Payroll.objects.select_for_update().select_related("funcionario").get(pk=folha.pk)
         if folha.lancada:
             continue
         if folha.total <= 0:
@@ -69,7 +69,7 @@ def lancar(folhas, *, categoria, vencimento, usuario):
         mes = f"{folha.competencia:%m/%Y}"
         folha.lancamento = financeiro.criar_lancamento(
             clinica=folha.funcionario.clinica,
-            tipo=Lancamento.Tipo.PAGAR,
+            tipo=Entry.Tipo.PAGAR,
             pessoa=folha.funcionario.nome,
             descricao=_("Salário %(mes)s") % {"mes": mes},
             categoria=categoria,

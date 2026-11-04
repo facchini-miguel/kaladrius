@@ -8,9 +8,9 @@ from django.urls import reverse
 
 from apps.core.countries import PAISES
 from apps.core.isolation import usar_clinica
-from apps.estimates.models import Procedimento
+from apps.estimates.models import Procedure
 from apps.health_plans import insurance
-from apps.health_plans.models import Carteirinha, Convenio
+from apps.health_plans.models import HealthPlan, MemberCard
 from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
 from tests.test_health_plans import admin, carteirinha, convenio, paciente  # noqa: F401
 
@@ -54,7 +54,7 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     dados = {"nome": "Fictitious Dental", "registro": "ab-123", "ativo": "on"}
     assert admin.post(reverse("health_plans:new"), dados).status_code == 302
     with usar_clinica(clinica_a):
-        assert Convenio.objects.get().registro == "AB123"
+        assert HealthPlan.objects.get().registro == "AB123"
     assert "Payer ID" in admin.get(reverse("health_plans:list")).content.decode()
     # The United Kingdom has no insurer registry: no field and no column.
     mudar_pais(clinica_a, "GB")
@@ -74,7 +74,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, paciente, convenio, admin):  
     dados = carteirinha(convenio, numero="W123456789", grupo="G-100")
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
-        assert Carteirinha.objects.get().grupo == "G-100"
+        assert MemberCard.objects.get().grupo == "G-100"
     ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
@@ -92,7 +92,7 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     assert "codigo" in cliente.post(url, {**dados, "codigo": "123"}).context["form"].errors
     assert cliente.post(url, {**dados, "codigo": "8510.0099"}).status_code == 302
     with usar_clinica(clinica):
-        assert Procedimento.objects.get(nome="Restauração").codigo == "85100099"
+        assert Procedure.objects.get(nome="Restauração").codigo == "85100099"
     orcamento = criar_orcamento(cenario, cliente)
     incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk)
     with usar_clinica(clinica):

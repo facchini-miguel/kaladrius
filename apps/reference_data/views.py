@@ -62,7 +62,7 @@ def opcoes_cidades(request):
 def sugestoes_endereco(request):
     """<datalist>s of a city's neighborhoods and streets for the patient form (decision 100):
     the known ones plus the ones the clinic already typed for other patients there."""
-    from apps.patients.models import Paciente
+    from apps.patients.models import Patient
 
     codigo = request.GET.get("cidade", "")
     bairros, logradouros = set(), set()
@@ -70,7 +70,7 @@ def sugestoes_endereco(request):
         cidade = int(codigo)
         bairros.update(Neighborhood.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
         logradouros.update(Street.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
-        da_clinica = Paciente.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
+        da_clinica = Patient.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
         for bairro, logradouro in da_clinica.distinct():
             bairros.add(bairro)
             logradouros.add(logradouro)

@@ -12,26 +12,26 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from apps.core.isolation import ModeloDaClinica
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
-from apps.schedule.models import Agendamento
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
+from apps.schedule.models import Appointment
 
 # The anamnesis fields, in the order they are written and shown.
 CAMPOS_DA_ANAMNESE = ["queixa_principal", "historia", "antecedentes", "exame_fisico", "conduta"]
 
 
-class Atendimento(ModeloDaClinica):
+class Visit(ModeloDaClinica):
     paciente = models.ForeignKey(
-        Paciente, on_delete=models.PROTECT, related_name="atendimentos", verbose_name=_("paciente")
+        Patient, on_delete=models.PROTECT, related_name="atendimentos", verbose_name=_("paciente")
     )
     profissional = models.ForeignKey(
-        Profissional,
+        Practitioner,
         on_delete=models.PROTECT,
         related_name="atendimentos",
         verbose_name=_("profissional"),
     )
     agendamento = models.OneToOneField(
-        Agendamento,
+        Appointment,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -63,6 +63,7 @@ class Atendimento(ModeloDaClinica):
     )
 
     class Meta:
+        db_table = "prontuario_atendimento"
         verbose_name = _("atendimento")
         verbose_name_plural = _("atendimentos")
         ordering = ["-data", "-pk"]
@@ -75,15 +76,15 @@ class Atendimento(ModeloDaClinica):
         return self.finalizado_em is not None
 
 
-class Adendo(ModeloDaClinica):
+class Addendum(ModeloDaClinica):
     """A correction or note added to a finalized visit, which itself never changes."""
 
     atendimento = models.ForeignKey(
-        Atendimento, on_delete=models.PROTECT, related_name="adendos", verbose_name=_("atendimento")
+        Visit, on_delete=models.PROTECT, related_name="adendos", verbose_name=_("atendimento")
     )
     texto = models.TextField(_("adendo"))
     profissional = models.ForeignKey(
-        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
@@ -91,6 +92,7 @@ class Adendo(ModeloDaClinica):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "prontuario_adendo"
         verbose_name = _("adendo")
         verbose_name_plural = _("adendos")
         ordering = ["criado_em", "pk"]
@@ -99,7 +101,7 @@ class Adendo(ModeloDaClinica):
         return f"{self.atendimento} – {_('adendo')}"
 
 
-class Atestado(ModeloDaClinica):
+class Certificate(ModeloDaClinica):
     """A medical certificate issued in a visit (0.30.0, decision 082). Never changed or
     deleted after issued; it can be printed again."""
 
@@ -108,7 +110,7 @@ class Atestado(ModeloDaClinica):
         AFASTAMENTO = "afastamento", _("Afastamento")
 
     atendimento = models.ForeignKey(
-        Atendimento,
+        Visit,
         on_delete=models.PROTECT,
         related_name="atestados",
         verbose_name=_("atendimento"),
@@ -128,7 +130,7 @@ class Atestado(ModeloDaClinica):
         help_text=_("Aparece no atestado. Por exemplo: deve permanecer em repouso."),
     )
     profissional = models.ForeignKey(
-        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
@@ -136,6 +138,7 @@ class Atestado(ModeloDaClinica):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "prontuario_atestado"
         verbose_name = _("atestado")
         verbose_name_plural = _("atestados")
         ordering = ["criado_em", "pk"]
@@ -144,12 +147,12 @@ class Atestado(ModeloDaClinica):
         return f"{self.atendimento} – {self.get_tipo_display()}"
 
 
-class Receita(ModeloDaClinica):
+class Prescription(ModeloDaClinica):
     """A simple prescription issued in a visit (0.30.0, decision 082): free text, one item
     per line. Controlled drugs need the official forms, which the system does not issue."""
 
     atendimento = models.ForeignKey(
-        Atendimento,
+        Visit,
         on_delete=models.PROTECT,
         related_name="receitas",
         verbose_name=_("atendimento"),
@@ -159,7 +162,7 @@ class Receita(ModeloDaClinica):
         help_text=_("Um item por linha: medicamento, dose e como usar."),
     )
     profissional = models.ForeignKey(
-        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
@@ -167,6 +170,7 @@ class Receita(ModeloDaClinica):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "prontuario_receita"
         # "Receita" is also revenue in Finance: a context keeps the translations apart.
         verbose_name = pgettext_lazy("prescrição", "receita")
         verbose_name_plural = pgettext_lazy("prescrição", "receitas")
@@ -176,11 +180,11 @@ class Receita(ModeloDaClinica):
         return f"{self.atendimento} – {pgettext_lazy('prescrição', 'receita')}"
 
 
-class PedidoDeExames(ModeloDaClinica):
+class ExamRequest(ModeloDaClinica):
     """An exam request issued in a visit (0.31.0, decision 083): one exam per line."""
 
     atendimento = models.ForeignKey(
-        Atendimento,
+        Visit,
         on_delete=models.PROTECT,
         related_name="pedidos_de_exames",
         verbose_name=_("atendimento"),
@@ -190,7 +194,7 @@ class PedidoDeExames(ModeloDaClinica):
         _("indicação clínica"), blank=True, help_text=_("Aparece no pedido.")
     )
     profissional = models.ForeignKey(
-        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
@@ -198,6 +202,7 @@ class PedidoDeExames(ModeloDaClinica):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "prontuario_pedidodeexames"
         verbose_name = _("pedido de exames")
         verbose_name_plural = _("pedidos de exames")
         ordering = ["criado_em", "pk"]
@@ -206,7 +211,7 @@ class PedidoDeExames(ModeloDaClinica):
         return f"{self.atendimento} – {_('pedido de exames')}"
 
 
-class Anexo(ModeloDaClinica):
+class Attachment(ModeloDaClinica):
     """A file kept in a visit: exam results, photos, reports (0.31.0, decision 083).
 
     Stored in the database, so the daily backup and the weekly restore test cover it, and
@@ -214,7 +219,7 @@ class Anexo(ModeloDaClinica):
     """
 
     atendimento = models.ForeignKey(
-        Atendimento, on_delete=models.PROTECT, related_name="anexos", verbose_name=_("atendimento")
+        Visit, on_delete=models.PROTECT, related_name="anexos", verbose_name=_("atendimento")
     )
     descricao = models.CharField(
         _("descrição"), max_length=200, blank=True, help_text=_("Por exemplo: hemograma de março.")
@@ -224,7 +229,7 @@ class Anexo(ModeloDaClinica):
     tamanho = models.PositiveIntegerField()
     conteudo = models.BinaryField()
     profissional = models.ForeignKey(
-        Profissional, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
     )
     criado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
@@ -232,6 +237,7 @@ class Anexo(ModeloDaClinica):
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "prontuario_anexo"
         verbose_name = _("anexo")
         verbose_name_plural = _("anexos")
         ordering = ["criado_em", "pk"]

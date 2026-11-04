@@ -106,7 +106,7 @@ class ModeloDaClinica(models.Model):
     """Base class for every model that belongs to a clinic."""
 
     clinica = models.ForeignKey(
-        "core.Clinica",
+        "core.Clinic",
         on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("clínica"),

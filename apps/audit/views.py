@@ -8,7 +8,7 @@ from django.utils.http import urlencode
 
 from apps.core.permissions import Acao, Modulo, exige_permissao
 
-from .models import RegistroAuditoria
+from .models import AuditEntry
 from .record import nome_do_modelo
 
 POR_PAGINA = 100
@@ -26,17 +26,17 @@ def tipos_de_registro():
     (logged by hand). Asking the database took most of the page's time once the log had
     hundreds of thousands of entries (volume test, decision 108)."""
     from apps.medical_records.models import (
-        Adendo,
-        Anexo,
-        Atendimento,
-        Atestado,
-        PedidoDeExames,
-        Receita,
+        Addendum,
+        Attachment,
+        Certificate,
+        ExamRequest,
+        Prescription,
+        Visit,
     )
 
     from .signals import AUDITADOS
 
-    documentos = [Atendimento, Adendo, Atestado, Receita, PedidoDeExames, Anexo]
+    documentos = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
     return sorted({nome_do_modelo(modelo) for modelo in [*AUDITADOS, *documentos]})
 
 
@@ -69,7 +69,7 @@ def campos_alterados(registro):
 @exige_permissao(Modulo.AUDITORIA, Acao.VER)
 def lista(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
-    registros = RegistroAuditoria.objects.filter(clinica=request.clinica)
+    registros = AuditEntry.objects.filter(clinica=request.clinica)
     filtros = {
         "q": request.GET.get("q", "").strip(),
         "acao": request.GET.get("acao", ""),
@@ -84,7 +84,7 @@ def lista(request):
             | Q(objeto_descricao__icontains=filtros["q"])
             | Q(objeto_id=filtros["q"])
         )
-    if filtros["acao"] in RegistroAuditoria.Acao.values:
+    if filtros["acao"] in AuditEntry.Acao.values:
         registros = registros.filter(acao=filtros["acao"])
     if filtros["modelo"]:
         registros = registros.filter(modelo=filtros["modelo"])
@@ -102,7 +102,7 @@ def lista(request):
             "pagina": pagina,
             "filtros": filtros,
             "parametros": urlencode(filtros),
-            "acoes": RegistroAuditoria.Acao.choices,
+            "acoes": AuditEntry.Acao.choices,
             "modelos": modelos,
         },
     )

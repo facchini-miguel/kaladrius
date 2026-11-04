@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 
 from apps.core import countries, legislation
-from apps.core.models import Clinica
+from apps.core.models import Clinic
 
 from . import documents
 
@@ -39,7 +39,7 @@ def privacidade(request):
     The privacy contact is the clinic's: the user's clinic, or the installation's clinic
     for anyone else (one installation serves one clinic, decision 069).
     """
-    clinica = getattr(request, "clinica", None) or Clinica.unica()
+    clinica = getattr(request, "clinica", None) or Clinic.unica()
     titulo, html = documents.privacidade()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
     pais = countries.pais_da_clinica(clinica)

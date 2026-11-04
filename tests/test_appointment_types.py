@@ -2,9 +2,9 @@ import pytest
 from django.urls import reverse
 
 from apps.core.isolation import usar_clinica
-from apps.core.models import Clinica, Papel
+from apps.core.models import Clinic, Papel
 from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
-from apps.schedule.models import TIPOS_PADRAO, TipoAtendimento
+from apps.schedule.models import TIPOS_PADRAO, AppointmentType
 
 pytestmark = pytest.mark.django_db
 
@@ -12,23 +12,23 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize(
     ("area", "esperados"),
     [
-        (Clinica.Area.ODONTOLOGIA, TIPOS_DE_ATENDIMENTO),
-        (Clinica.Area.MEDICINA, TIPOS_PADRAO),
-        (Clinica.Area.OUTRA, TIPOS_PADRAO),
+        (Clinic.Area.ODONTOLOGIA, TIPOS_DE_ATENDIMENTO),
+        (Clinic.Area.MEDICINA, TIPOS_PADRAO),
+        (Clinic.Area.OUTRA, TIPOS_PADRAO),
     ],
 )
 def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
     # Decision 080: dental types for the Odontologia area, general ones for the others.
-    clinica = Clinica.objects.create(nome="Nova", area=area)
+    clinica = Clinic.objects.create(nome="Nova", area=area)
     with usar_clinica(clinica):
-        tipos = {t.nome: t.cor for t in TipoAtendimento.objects.all()}
+        tipos = {t.nome: t.cor for t in AppointmentType.objects.all()}
     assert tipos == dict(esperados)
 
 
 def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
     with usar_clinica(clinica_b):
-        TipoAtendimento.objects.create(nome="Exclusivo da B", cor="#000000")
-        de_b = TipoAtendimento.objects.get(nome="Cirurgia")
+        AppointmentType.objects.create(nome="Exclusivo da B", cor="#000000")
+        de_b = AppointmentType.objects.get(nome="Cirurgia")
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     conteudo = cliente.get(reverse("schedule:types")).content.decode()
     assert "Cirurgia" in conteudo
@@ -52,14 +52,14 @@ def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usu
     resposta = cliente.post(reverse("schedule:type_new"), {"nome": "Retorno", "cor": "#112233"})
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        TipoAtendimento.objects.create(nome="Retorno", cor="#445566")
+        AppointmentType.objects.create(nome="Retorno", cor="#445566")
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_recepcao_e_profissional_so_consultam(papel, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     with usar_clinica(clinica_a):
-        tipo = TipoAtendimento.objects.first()
+        tipo = AppointmentType.objects.first()
     assert cliente.get(reverse("schedule:types")).status_code == 200
     assert cliente.get(reverse("schedule:type_new")).status_code == 403
     assert cliente.post(reverse("schedule:type_delete", args=[tipo.pk])).status_code == 403

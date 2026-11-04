@@ -6,13 +6,13 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
-Acao = RegistroAuditoria.Acao
+Acao = AuditEntry.Acao
 
 
 @pytest.fixture
@@ -21,13 +21,13 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
 
 
 def ultimos(**filtros):
-    return list(RegistroAuditoria.objects.filter(**filtros).order_by("pk"))
+    return list(AuditEntry.objects.filter(**filtros).order_by("pk"))
 
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
     admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Maria")
+        paciente = Patient.objects.get(nome="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
     assert criacao.usuario_nome == "admin_a"
     assert criacao.clinica_id == clinica_a.pk
@@ -56,7 +56,7 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
         {"tipo": "PF", "nome": "Maria Sigilosa", "ativo": "on", "cpf_cnpj": "52998224725"},
     )
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Maria Sigilosa")
+        paciente = Patient.objects.get(nome="Maria Sigilosa")
     admin_a.get(reverse("patients:record", args=[paciente.pk]))
     admin_a.post(reverse("patients:archive", args=[paciente.pk]))
     admin_a.post(reverse("patients:delete", args=[paciente.pk]))
@@ -76,14 +76,14 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Sem mudança")
+        paciente = Patient.objects.create(nome="Sem mudança")
         paciente.save()
     assert not ultimos(acao=Acao.ALTERAR, modelo="Paciente")
 
 
 def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Consultado")
+        paciente = Patient.objects.create(nome="Consultado")
     admin_a.get(reverse("patients:record", args=[paciente.pk]))
     [visualizacao] = ultimos(acao=Acao.VISUALIZAR)
     assert visualizacao.objeto_descricao == "Consultado"
@@ -106,7 +106,7 @@ def test_senha_nunca_e_gravada(criar_usuario):
     usuario = criar_usuario("joao")
     usuario.set_password("nova-senha-secreta-123")
     usuario.save()
-    registros = RegistroAuditoria.objects.filter(modelo="Usuário")
+    registros = AuditEntry.objects.filter(modelo="Usuário")
     texto = " ".join(str(r.alteracoes) for r in registros)
     assert "argon2" not in texto and "nova-senha" not in texto
     [alteracao] = registros.filter(acao=Acao.ALTERAR)
@@ -115,9 +115,9 @@ def test_senha_nunca_e_gravada(criar_usuario):
 
 def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
     with usar_clinica(clinica_a):
-        Paciente.objects.create(nome="Paciente da A")
+        Patient.objects.create(nome="Paciente da A")
     with usar_clinica(clinica_b):
-        Paciente.objects.create(nome="Paciente da B")
+        Patient.objects.create(nome="Paciente da B")
     conteudo = admin_a.get(reverse("audit:list"), {"modelo": "Paciente"}).content.decode()
     assert "Paciente da A" in conteudo
     assert "Paciente da B" not in conteudo
@@ -133,14 +133,14 @@ def test_somente_administrador_ve_a_auditoria(papel, clinica_a, criar_usuario, c
 def test_admin_do_django_e_somente_leitura(django_user_model, client):
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     client.force_login(root)
-    assert client.get(reverse("admin:auditoria_registroauditoria_changelist")).status_code == 200
-    assert client.get(reverse("admin:auditoria_registroauditoria_add")).status_code == 403
+    assert client.get(reverse("admin:auditoria_auditentry_changelist")).status_code == 200
+    assert client.get(reverse("admin:auditoria_auditentry_add")).status_code == 403
 
 
 def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
     usuario = criar_usuario("temporario")
     usuario.delete()
-    assert RegistroAuditoria.objects.filter(objeto_descricao="temporario").exists()
+    assert AuditEntry.objects.filter(objeto_descricao="temporario").exists()
 
 
 def test_retencao_apaga_so_tentativas_recusadas_antigas():
@@ -148,14 +148,14 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
     recente = timezone.now() - datetime.timedelta(days=29)
     for momento in (antigo, recente):
         for acao in (Acao.LOGIN_FALHOU, Acao.LOGIN):
-            registro = RegistroAuditoria.objects.create(acao=acao)
-            RegistroAuditoria.objects.filter(pk=registro.pk).update(momento=momento)
+            registro = AuditEntry.objects.create(acao=acao)
+            AuditEntry.objects.filter(pk=registro.pk).update(momento=momento)
         tentativa = AccessAttempt.objects.create(username="quem", failures_since_start=1)
         AccessAttempt.objects.filter(pk=tentativa.pk).update(attempt_time=momento)
 
     call_command("apply_retention")
 
-    restantes = RegistroAuditoria.objects.values_list("acao", "momento")
+    restantes = AuditEntry.objects.values_list("acao", "momento")
     assert sorted(acao for acao, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]
     assert all(m == recente for acao, m in restantes if acao == Acao.LOGIN_FALHOU)
     assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]
@@ -164,10 +164,10 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
 def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_a):
     """Decision 156: the page shows the field's label, not its name in the code, so renaming a
     field (or its column-keeping rename) does not change what the clinic reads."""
-    from apps.audit.models import RegistroAuditoria
+    from apps.audit.models import AuditEntry
 
     admin_a.post(reverse("patients:new"), {"tipo": "PF", "nome": "Maria", "ativo": "on"})
-    RegistroAuditoria.objects.create(
+    AuditEntry.objects.create(
         clinica=clinica_a,
         acao=Acao.ALTERAR,
         modelo="Paciente",

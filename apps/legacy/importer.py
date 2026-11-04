@@ -20,10 +20,10 @@ from django.core.validators import validate_email
 from django.db import transaction
 from django.utils import timezone
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 from apps.core.isolation import sem_isolamento
-from apps.core.models import Clinica
+from apps.core.models import Clinic
 from apps.core.validators import (
     cnpj_valido,
     cpf_valido,
@@ -31,11 +31,11 @@ from apps.core.validators import (
     normalizar_cnpj,
     somente_digitos,
 )
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
 from apps.reference_data.models import City, MaritalStatus, State
-from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.schedule.models import Appointment, AppointmentType
 
 from .dump import ler_tabelas
 
@@ -61,7 +61,7 @@ class ImportacaoRecusada(Exception):
 
 @dataclass
 class Relatorio:
-    clinica: Clinica | None = None
+    clinica: Clinic | None = None
     profissionais: int = 0
     tipos_criados: int = 0
     pacientes: int = 0
@@ -119,7 +119,7 @@ def _documento(bruto, tipo):
     if not documento:
         return "", None
     so_digitos = documento.isascii() and documento.isdigit()
-    if tipo == Paciente.Tipo.FISICA:
+    if tipo == Patient.Tipo.FISICA:
         if so_digitos and 8 <= len(documento) <= 11:
             documento = documento.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
@@ -180,14 +180,14 @@ class _Importador:
     # --- Steps -------------------------------------------------------------------
 
     def _clinica(self):
-        clinica = Clinica.objects.filter(nome=self.nome_clinica).first()
-        if clinica is not None and Paciente.objects.filter(clinica=clinica).exists():
+        clinica = Clinic.objects.filter(nome=self.nome_clinica).first()
+        if clinica is not None and Patient.objects.filter(clinica=clinica).exists():
             raise ImportacaoRecusada(
                 f"A clínica “{self.nome_clinica}” já tem pacientes. A importação só é feita "
                 "numa clínica nova ou vazia, para não duplicar dados."
             )
         if clinica is None:
-            clinica = Clinica.objects.create(nome=self.nome_clinica)  # gets the default types
+            clinica = Clinic.objects.create(nome=self.nome_clinica)  # gets the default types
         self.relatorio.clinica = clinica
         return clinica
 
@@ -195,12 +195,12 @@ class _Importador:
         mapa = {}
         for linha in self.t.get("dentistas", []):
             nome = _texto(linha["nome"]).lstrip("_ ").strip() or f"Profissional {linha['id']}"
-            mapa[linha["id"]] = Profissional.objects.create(clinica=clinica, nome=nome[:200])
+            mapa[linha["id"]] = Practitioner.objects.create(clinica=clinica, nome=nome[:200])
         self.relatorio.profissionais = len(mapa)
         return mapa
 
     def _tipos(self, clinica):
-        existentes = {_chave(t.nome): t for t in TipoAtendimento.objects.filter(clinica=clinica)}
+        existentes = {_chave(t.nome): t for t in AppointmentType.objects.filter(clinica=clinica)}
         mapa = {}
         for linha in self.t.get("agenda_cor", []):
             nome = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
@@ -208,7 +208,7 @@ class _Importador:
             if tipo is None:
                 cor = _texto(linha["cor"])
                 cor = cor if re.fullmatch(r"#[0-9a-fA-F]{6}", cor) else "#0d6efd"
-                tipo = TipoAtendimento.objects.create(clinica=clinica, nome=nome, cor=cor.lower())
+                tipo = AppointmentType.objects.create(clinica=clinica, nome=nome, cor=cor.lower())
                 existentes[_chave(nome)] = tipo
                 self.relatorio.tipos_criados += 1
             mapa[linha["id"]] = tipo
@@ -217,7 +217,7 @@ class _Importador:
     def _paciente(self, linha, clinica, cidades, estados_civis, logradouros, bairros, usados):
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {linha['id']}"]
-        tipo = Paciente.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Paciente.Tipo.FISICA
+        tipo = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
         nome = _texto(linha["nome"]) or f"Sem nome (código {linha['id']})"
 
         documento, original = _documento(linha["cpf_cnpj"], tipo)
@@ -289,8 +289,8 @@ class _Importador:
             if _texto(linha[legado]):
                 extras.append(f"{rotulo}: {_texto(linha[legado])}")
 
-        pf = tipo == Paciente.Tipo.FISICA
-        paciente = Paciente(
+        pf = tipo == Patient.Tipo.FISICA
+        paciente = Patient(
             clinica=clinica,
             tipo=tipo,
             nome=_cabe(nome, 200, "Nome completo", extras),
@@ -338,7 +338,7 @@ class _Importador:
             )
             for linha in sorted(self.t.get("pessoas", []), key=lambda linha: linha["id"])
         ]
-        Paciente.objects.bulk_create([paciente for _, paciente, _ in pares], batch_size=500)
+        Patient.objects.bulk_create([paciente for _, paciente, _ in pares], batch_size=500)
         # Keep the original registration date (auto_now_add only fills it on creation).
         com_data = []
         for _, paciente, cadastro in pares:
@@ -347,7 +347,7 @@ class _Importador:
                     datetime.datetime.combine(cadastro, datetime.time(12))
                 )
                 com_data.append(paciente)
-        Paciente.objects.bulk_update(com_data, ["criado_em"], batch_size=500)
+        Patient.objects.bulk_update(com_data, ["criado_em"], batch_size=500)
         self.relatorio.pacientes = len(pares)
         return {codigo: paciente for codigo, paciente, _ in pares}
 
@@ -372,7 +372,7 @@ class _Importador:
                 descricao = f"{descricao}\n[Sistema antigo: horário de término corrigido]".strip()
                 avisos["Agendamento com término antes do início (corrigido para 30 min)"] += 1
             novos.append(
-                Agendamento(
+                Appointment(
                     clinica=profissional.clinica,
                     profissional=profissional,
                     tipo=tipo,
@@ -389,7 +389,7 @@ class _Importador:
                 continue
             ultimo_fim[agendamento.profissional.pk] = agendamento.fim
             aceitos.append(agendamento)
-        Agendamento.objects.bulk_create(aceitos, batch_size=1000)
+        Appointment.objects.bulk_create(aceitos, batch_size=1000)
         self.relatorio.agendamentos = len(aceitos)
         if aceitos:
             self._ampliar_horario(aceitos[0].clinica, aceitos)
@@ -455,7 +455,7 @@ class _Importador:
             self._rechamadas(pacientes)
             r = self.relatorio
             registrar(
-                RegistroAuditoria.Acao.CRIAR,
+                AuditEntry.Acao.CRIAR,
                 clinica=clinica,
                 descricao=(
                     f"Importação do sistema antigo: {r.pacientes} pacientes, "

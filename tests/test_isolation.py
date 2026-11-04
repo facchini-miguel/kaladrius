@@ -10,7 +10,7 @@ from apps.core.isolation import (
     usar_clinica,
 )
 from apps.core.models import Papel
-from apps.practitioners.models import Profissional
+from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
 
@@ -33,39 +33,39 @@ def test_todo_modelo_de_clinica_usa_o_gerenciador_isolado_como_padrao():
 def test_sem_clinica_atual_falha_em_vez_de_mostrar_tudo(clinica_a, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     with pytest.raises(SemClinicaAtual):
-        list(Profissional.objects.all())
+        list(Practitioner.objects.all())
     with pytest.raises(SemClinicaAtual):
-        Profissional.objects.count()
+        Practitioner.objects.count()
 
 
 def test_consulta_ve_somente_a_clinica_atual(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with usar_clinica(clinica_a):
-        assert [p.nome for p in Profissional.objects.all()] == ["Dra. A"]
+        assert [p.nome for p in Practitioner.objects.all()] == ["Dra. A"]
     with usar_clinica(clinica_b):
-        assert [p.nome for p in Profissional.objects.all()] == ["Dr. B"]
+        assert [p.nome for p in Practitioner.objects.all()] == ["Dr. B"]
 
 
 def test_busca_por_id_de_outra_clinica_nao_encontra(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
-    with usar_clinica(clinica_a), pytest.raises(Profissional.DoesNotExist):
-        Profissional.objects.get(pk=de_b.pk)
+    with usar_clinica(clinica_a), pytest.raises(Practitioner.DoesNotExist):
+        Practitioner.objects.get(pk=de_b.pk)
 
 
 def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with usar_clinica(clinica_a):
-        Profissional.objects.update(ativo=False)
-        Profissional.objects.all().delete()
+        Practitioner.objects.update(ativo=False)
+        Practitioner.objects.all().delete()
     with usar_clinica(clinica_b):
-        assert Profissional.objects.get().ativo is True
+        assert Practitioner.objects.get().ativo is True
 
 
 def test_novo_registro_recebe_a_clinica_atual(clinica_a):
     with usar_clinica(clinica_a):
-        profissional = Profissional.objects.create(nome="Dra. A")
+        profissional = Practitioner.objects.create(nome="Dra. A")
     assert profissional.clinica == clinica_a
 
 
@@ -78,19 +78,19 @@ def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, cr
         with pytest.raises(ClinicaDiferente):
             de_b.delete()
     with usar_clinica(clinica_b):
-        assert Profissional.objects.get(pk=de_b.pk).nome == "Dr. B"
+        assert Practitioner.objects.get(pk=de_b.pk).nome == "Dr. B"
 
 
 def test_criar_sem_clinica_atual_falha():
     with pytest.raises(SemClinicaAtual):
-        Profissional(nome="Sem clínica").save()
+        Practitioner(nome="Sem clínica").save()
 
 
 def test_sem_isolamento_ve_todas_as_clinicas(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with sem_isolamento():
-        assert Profissional.objects.count() == 2
+        assert Practitioner.objects.count() == 2
 
 
 # --- HTTP level ------------------------------------------------------------------
@@ -117,7 +117,7 @@ def test_url_com_id_de_outra_clinica_da_404(
     assert cliente.get(url).status_code == 404
     assert cliente.post(url, {"nome": "Invadido", "cor": "#000000"}).status_code == 404
     with usar_clinica(clinica_b):
-        assert Profissional.objects.get(pk=de_b.pk).nome == "Dr. B"
+        assert Practitioner.objects.get(pk=de_b.pk).nome == "Dr. B"
 
 
 def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
@@ -174,4 +174,4 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     )
     assert resposta.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):
-        assert not Profissional.objects.filter(nome="Dr. Novo").exists()
+        assert not Practitioner.objects.filter(nome="Dr. Novo").exists()

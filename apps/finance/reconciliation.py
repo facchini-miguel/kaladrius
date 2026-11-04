@@ -17,15 +17,15 @@ from django.utils.translation import gettext as _
 
 from . import ofx, services
 from .models import (
-    ImportacaoExtrato,
-    Lancamento,
-    MovimentoCaixa,
-    Pagamento,
-    TransacaoBancaria,
+    BankTransaction,
+    CashMovement,
+    Entry,
+    Payment,
+    StatementImport,
 )
 
 JANELA = datetime.timedelta(days=10)
-Situacao = TransacaoBancaria.Situacao
+Situacao = BankTransaction.Situacao
 
 
 @transaction.atomic
@@ -34,7 +34,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
     extrato = ofx.ler(conteudo)
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
-    importacao = ImportacaoExtrato.objects.create(
+    importacao = StatementImport.objects.create(
         clinica=conta.clinica,
         conta=conta,
         arquivo=nome_arquivo[:200],
@@ -48,14 +48,14 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         criado_por=usuario,
     )
     existentes = set(
-        TransacaoBancaria.objects.filter(
+        BankTransaction.objects.filter(
             conta=conta, fitid__in=[t.fitid for t in extrato.transacoes]
         ).values_list("fitid", flat=True)
     )
     # In bulk (a statement can have hundreds of lines): the audit log records the import.
-    TransacaoBancaria.objects.bulk_create(
+    BankTransaction.objects.bulk_create(
         [
-            TransacaoBancaria(
+            BankTransaction(
                 clinica=conta.clinica,
                 conta=conta,
                 importacao=importacao,
@@ -71,7 +71,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
         ignore_conflicts=True,  # another import of the same file at the same moment
     )
     # Counted in the database: with ignore_conflicts, bulk_create returns skipped rows too.
-    importacao.novas = TransacaoBancaria.objects.filter(importacao=importacao).count()
+    importacao.novas = BankTransaction.objects.filter(importacao=importacao).count()
     importacao.repetidas = len(extrato.transacoes) - importacao.novas
     importacao.save(update_fields=["novas", "repetidas"])
     return importacao
@@ -80,7 +80,7 @@ def importar(conta, *, nome_arquivo, conteudo, usuario):
 def outra_conta_no_banco(importacao):
     """The bank account number of an earlier import into the same account, if different."""
     anterior = (
-        ImportacaoExtrato.objects.filter(conta=importacao.conta)
+        StatementImport.objects.filter(conta=importacao.conta)
         .exclude(pk=importacao.pk)
         .exclude(conta_no_banco="")
         .first()
@@ -111,12 +111,12 @@ def candidatos(transacoes):
     de = min(t.data for t in pendentes) - JANELA
     ate = max(t.data for t in pendentes) + JANELA
     pagamentos = list(
-        Pagamento.objects.filter(
+        Payment.objects.filter(
             conta_id__in=contas, estornado=False, transacao__isnull=True, data__range=(de, ate)
         ).select_related("parcela__lancamento__paciente")
     )
     movimentos = list(
-        MovimentoCaixa.objects.filter(
+        CashMovement.objects.filter(
             outra_conta_id__in=contas,
             transacao__isnull=True,
             criado_em__date__range=(de, ate),
@@ -125,9 +125,9 @@ def candidatos(transacoes):
     resultado = {}
     for t in pendentes:
         valor = abs(t.valor)
-        tipo = Lancamento.Tipo.RECEBER if t.entrada else Lancamento.Tipo.PAGAR
+        tipo = Entry.Tipo.RECEBER if t.entrada else Entry.Tipo.PAGAR
         # Money taken out of the drawer into the bank is a credit there, and vice versa.
-        tipo_movimento = MovimentoCaixa.Tipo.RETIRADA if t.entrada else MovimentoCaixa.Tipo.REFORCO
+        tipo_movimento = CashMovement.Tipo.RETIRADA if t.entrada else CashMovement.Tipo.REFORCO
         lista = []
         for p in pagamentos:
             lancamento = p.parcela.lancamento
@@ -161,7 +161,7 @@ def candidatos(transacoes):
 
 
 def _vincular(transacao, candidato, usuario):
-    if isinstance(candidato.objeto, Pagamento):
+    if isinstance(candidato.objeto, Payment):
         transacao.pagamento = candidato.objeto
     else:
         transacao.movimento = candidato.objeto
@@ -177,7 +177,7 @@ def _vincular(transacao, candidato, usuario):
 
 
 def _pendente(transacao):
-    transacao = TransacaoBancaria.objects.select_for_update().get(pk=transacao.pk)
+    transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
     if transacao.situacao != Situacao.PENDENTE:
         raise ValidationError(_("Esta transação já foi conciliada ou ignorada."))
     return transacao
@@ -197,7 +197,7 @@ def conciliar(transacao, chave, *, usuario):
 def conciliar_unicos(importacao, *, usuario):
     """Reconcile every pending line with exactly one candidate that no other line wants."""
     transacoes = list(
-        TransacaoBancaria.objects.select_for_update().filter(
+        BankTransaction.objects.select_for_update().filter(
             importacao=importacao, situacao=Situacao.PENDENTE
         )
     )
@@ -218,7 +218,7 @@ def criar_lancamento(transacao, *, descricao, categoria, pessoa, forma, usuario)
     transacao = _pendente(transacao)
     lancamento = services.criar_lancamento(
         clinica=transacao.clinica,
-        tipo=Lancamento.Tipo.RECEBER if transacao.entrada else Lancamento.Tipo.PAGAR,
+        tipo=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
         pessoa=pessoa or descricao,
         descricao=descricao,
         categoria=categoria,
@@ -252,7 +252,7 @@ def ignorar(transacao, *, motivo, usuario):
 @transaction.atomic
 def desfazer(transacao):
     """Back to pending. An entry created from the line stays (cancel it if it was wrong)."""
-    transacao = TransacaoBancaria.objects.select_for_update().get(pk=transacao.pk)
+    transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
     transacao.situacao = Situacao.PENDENTE
     transacao.pagamento = None
     transacao.movimento = None

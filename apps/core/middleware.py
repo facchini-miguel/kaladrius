@@ -5,7 +5,7 @@ from django.utils import timezone, translation
 
 from . import countries
 from .isolation import sem_isolamento, usar_clinica
-from .models import Clinica, Vinculo
+from .models import Clinic, Membership
 
 
 def resolver_clinica(request):
@@ -17,7 +17,7 @@ def resolver_clinica(request):
     """
     usuario = request.user
     vinculo = (
-        Vinculo.objects.filter(usuario=usuario, ativo=True, clinica__ativa=True)
+        Membership.objects.filter(usuario=usuario, ativo=True, clinica__ativa=True)
         .select_related("clinica")
         .order_by("clinica_id")
         .first()
@@ -25,7 +25,7 @@ def resolver_clinica(request):
     if vinculo is not None:
         return vinculo.clinica, vinculo
     if usuario.is_superuser:
-        return Clinica.unica(), None
+        return Clinic.unica(), None
     return None, None
 
 

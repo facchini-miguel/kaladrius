@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import FormularioBootstrap
 
-from .models import CAMPOS_DA_ANAMNESE, Adendo, Atendimento, Atestado, PedidoDeExames, Receita
+from .models import CAMPOS_DA_ANAMNESE, Addendum, Certificate, ExamRequest, Prescription, Visit
 
 
 class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
@@ -22,7 +22,7 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = Atendimento
+        model = Visit
         fields = ["data", *CAMPOS_DA_ANAMNESE]
         widgets = {
             "data": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
@@ -32,14 +32,14 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
 
 class AdendoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Adendo
+        model = Addendum
         fields = ["texto"]
         widgets = {"texto": forms.Textarea(attrs={"rows": 3})}
 
 
 class AtestadoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Atestado
+        model = Certificate
         fields = ["tipo", "data", "hora_inicio", "hora_fim", "dias", "observacao"]
         widgets = {
             "tipo": forms.RadioSelect,
@@ -51,7 +51,7 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        if dados.get("tipo") == Atestado.Tipo.AFASTAMENTO:
+        if dados.get("tipo") == Certificate.Tipo.AFASTAMENTO:
             if not dados.get("dias"):
                 self.add_error("dias", _("Informe quantos dias de afastamento."))
         else:
@@ -64,14 +64,14 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
 
 class ReceitaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Receita
+        model = Prescription
         fields = ["prescricao"]
         widgets = {"prescricao": forms.Textarea(attrs={"rows": 8})}
 
 
 class PedidoDeExamesForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = PedidoDeExames
+        model = ExamRequest
         fields = ["exames", "indicacao"]
         widgets = {
             "exames": forms.Textarea(attrs={"rows": 8}),

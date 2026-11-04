@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 
 from . import dashboard
 from .forms import ClinicaForm, NovaClinicaForm, TrocaSenhaForm
-from .models import Clinica
+from .models import Clinic
 from .permissions import Acao, Modulo, exige_permissao
 
 
@@ -47,7 +47,7 @@ def cadastrar_clinica(request):
     only one (decision 069), so once it exists this page sends to the home page."""
     if not request.user.is_superuser:
         raise PermissionDenied
-    if Clinica.objects.exists():
+    if Clinic.objects.exists():
         return redirect("home")
     form = NovaClinicaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():

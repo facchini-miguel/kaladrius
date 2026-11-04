@@ -14,7 +14,7 @@ from apps.core.forms import FormularioBootstrap
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.core.ordering import chave_alfabetica
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
 
@@ -63,7 +63,7 @@ def test_numero_ambiguo_continua_recusado():
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Paciente Fictício")
+        paciente = Patient.objects.create(nome="Paciente Fictício")
     for url in (
         reverse("patients:new"),
         reverse("patients:related_new", args=[paciente.pk]),
@@ -90,8 +90,8 @@ def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
     """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
     with usar_clinica(clinica_a):
         for nome in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
-            Paciente.objects.create(nome=nome)
-        nomes = list(Paciente.objects.values_list("nome", flat=True))
+            Patient.objects.create(nome=nome)
+        nomes = list(Patient.objects.values_list("nome", flat=True))
     assert nomes == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
 
 
@@ -113,7 +113,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     )
     assert 'class="odontograma-rolagem"' in html
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Paciente Fictício")
+        paciente = Patient.objects.create(nome="Paciente Fictício")
     ficha = recepcao.get(reverse("patients:print", args=[paciente.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
 

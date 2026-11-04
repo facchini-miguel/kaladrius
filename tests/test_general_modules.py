@@ -14,16 +14,17 @@ from apps.core.isolation import usar_clinica
 from apps.core.models import (
     ESPECIALIDADES,
     MODULOS_GERAIS,
-    Clinica,
+    Clinic,
+    ClinicModule,
     ModuloClinico,
-    ModuloDaClinica,
     Papel,
 )
 from apps.core.modules import configurar
 from apps.core.templatetags.formats import whatsapp
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
+from tests.test_modules_migration import estado_do_banco
 
 pytestmark = pytest.mark.django_db
 
@@ -37,7 +38,7 @@ def sem(*desligados):
 @pytest.fixture
 def paciente(clinica_a):
     with usar_clinica(clinica_a):
-        return Paciente.objects.create(nome="Paciente fictício dos módulos")
+        return Patient.objects.create(nome="Paciente fictício dos módulos")
 
 
 @pytest.fixture
@@ -47,7 +48,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
     with usar_clinica(clinica_a):
-        ligados = set(ModuloDaClinica.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
     assert ligados == MODULOS_GERAIS | {M.ODONTOLOGIA}
     assert ESPECIALIDADES.isdisjoint(MODULOS_GERAIS)
 
@@ -91,7 +92,7 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 ):
     usuario = criar_usuario("prof_gerais", clinica_a, Papel.PROFISSIONAL)
     with usar_clinica(clinica_a):
-        Profissional.objects.create(nome="Profissional fictício", usuario=usuario)
+        Practitioner.objects.create(nome="Profissional fictício", usuario=usuario)
     url = reverse("medical_records:new", args=[paciente.pk])
     cliente = cliente_de(usuario)
     assert cliente.get(url).status_code == 200
@@ -161,7 +162,7 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        ligados = set(ModuloDaClinica.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
     assert ligados == {M.MEDICINA, M.AGENDA, M.PRONTUARIO}
     pagina = admin.get(reverse("clinic_settings")).content.decode()
     assert "Especialidades" in pagina and "Módulos" in pagina
@@ -174,9 +175,9 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
         {"nome": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
     )
     assert resposta.status_code == 302
-    clinica = Clinica.objects.get()
+    clinica = Clinic.objects.get()
     with usar_clinica(clinica):
-        ligados = set(ModuloDaClinica.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
     assert ligados == MODULOS_GERAIS | {M.MEDICINA}
 
 
@@ -194,8 +195,7 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
     anterior = [("core", "0010_modulos_clinicos")]
     try:
         executor.migrate(anterior)
-        estado = [folha for folha in folhas if folha[0] != "core"] + anterior
-        apps = executor.loader.project_state(estado).apps
+        apps = estado_do_banco()
         Antiga = apps.get_model("core", "Clinica")
         ModuloAntigo = apps.get_model("core", "ModuloDaClinica")
         clinica = Antiga.objects.create(nome="Clínica fictícia antiga", area="medicina")
@@ -229,7 +229,7 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     )
     assert resposta.status_code == 302, resposta.context["form"].errors
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get(nome="Paciente fictícia do WhatsApp")
+        paciente = Patient.objects.get(nome="Paciente fictícia do WhatsApp")
     assert paciente.whatsapp == "48999990000"
     ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
     assert 'href="https://wa.me/5548999990000"' in ficha

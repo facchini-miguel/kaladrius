@@ -22,7 +22,7 @@ ZERO = Decimal("0.00")
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 
 
-class Conta(ModeloDaClinica):
+class FinancialAccount(ModeloDaClinica):
     """Where the money goes: the cash drawer, a bank account, the card machine."""
 
     class Tipo(models.TextChoices):
@@ -41,6 +41,7 @@ class Conta(ModeloDaClinica):
     ativa = models.BooleanField(_("ativa"), default=True)
 
     class Meta:
+        db_table = "financeiro_conta"
         verbose_name = _("conta")
         verbose_name_plural = _("contas")
         ordering = ["nome"]
@@ -55,7 +56,7 @@ class TipoFinanceiro(models.TextChoices):
     DESPESA = "despesa", _("Despesa")
 
 
-class GrupoContabil(ModeloDaClinica):
+class AccountGroup(ModeloDaClinica):
     """A node of the chart of accounts (decision 097, legacy Medical grupocontabil):
     groups hold subgroups and categories; entries go to the categories (the leaves)."""
 
@@ -80,6 +81,7 @@ class GrupoContabil(ModeloDaClinica):
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
+        db_table = "financeiro_grupocontabil"
         verbose_name = _("grupo contábil")
         verbose_name_plural = _("grupos contábeis")
         ordering = ["tipo", "codigo", "nome"]
@@ -106,7 +108,7 @@ class GrupoContabil(ModeloDaClinica):
         return ".".join(map(str, codigos)) if None not in codigos else ""
 
 
-class Categoria(ModeloDaClinica):
+class Category(ModeloDaClinica):
     """Grouping of income and expenses for the reports."""
 
     Tipo = TipoFinanceiro
@@ -114,7 +116,7 @@ class Categoria(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA)
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     grupo = models.ForeignKey(
-        GrupoContabil,
+        AccountGroup,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -124,6 +126,7 @@ class Categoria(ModeloDaClinica):
     ativa = models.BooleanField(_("ativa"), default=True)
 
     class Meta:
+        db_table = "financeiro_categoria"
         verbose_name = _("categoria")
         verbose_name_plural = _("categorias")
         ordering = ["tipo", "nome"]
@@ -135,7 +138,7 @@ class Categoria(ModeloDaClinica):
         return self.nome
 
 
-class CentroCusto(ModeloDaClinica):
+class CostCenter(ModeloDaClinica):
     """Who in the clinic an entry is for (decision 095): a room, a specialty, the office.
 
     Optional on every entry, one per entry (no split across centers yet).
@@ -145,6 +148,7 @@ class CentroCusto(ModeloDaClinica):
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
+        db_table = "financeiro_centrocusto"
         verbose_name = _("centro de custo")
         verbose_name_plural = _("centros de custo")
         ordering = ["nome"]
@@ -157,28 +161,28 @@ class CentroCusto(ModeloDaClinica):
 
 
 # Accounts and categories every new clinic starts with (it can add, rename or deactivate).
-CONTAS_PADRAO = [("Caixa", Conta.Tipo.DINHEIRO), ("Banco", Conta.Tipo.BANCO)]
+CONTAS_PADRAO = [("Caixa", FinancialAccount.Tipo.DINHEIRO), ("Banco", FinancialAccount.Tipo.BANCO)]
 CATEGORIAS_PADRAO = [
-    ("Tratamento", Categoria.Tipo.RECEITA),
-    ("Consulta", Categoria.Tipo.RECEITA),
-    ("Outras receitas", Categoria.Tipo.RECEITA),
-    ("Aluguel", Categoria.Tipo.DESPESA),
-    ("Material odontológico", Categoria.Tipo.DESPESA),
-    ("Laboratório de prótese", Categoria.Tipo.DESPESA),
-    ("Salários e encargos", Categoria.Tipo.DESPESA),
-    ("Comissões", Categoria.Tipo.DESPESA),
-    ("Impostos", Categoria.Tipo.DESPESA),
-    ("Água, luz e internet", Categoria.Tipo.DESPESA),
-    ("Manutenção", Categoria.Tipo.DESPESA),
-    ("Outras despesas", Categoria.Tipo.DESPESA),
+    ("Tratamento", Category.Tipo.RECEITA),
+    ("Consulta", Category.Tipo.RECEITA),
+    ("Outras receitas", Category.Tipo.RECEITA),
+    ("Aluguel", Category.Tipo.DESPESA),
+    ("Material odontológico", Category.Tipo.DESPESA),
+    ("Laboratório de prótese", Category.Tipo.DESPESA),
+    ("Salários e encargos", Category.Tipo.DESPESA),
+    ("Comissões", Category.Tipo.DESPESA),
+    ("Impostos", Category.Tipo.DESPESA),
+    ("Água, luz e internet", Category.Tipo.DESPESA),
+    ("Manutenção", Category.Tipo.DESPESA),
+    ("Outras despesas", Category.Tipo.DESPESA),
 ]
 # A basic chart of accounts for new clinics (decision 097): code, group and its categories.
 PLANO_PADRAO = {
-    Categoria.Tipo.RECEITA: [
+    Category.Tipo.RECEITA: [
         (1, "Atendimentos", ["Tratamento", "Consulta"]),
         (2, "Outras receitas", ["Outras receitas"]),
     ],
-    Categoria.Tipo.DESPESA: [
+    Category.Tipo.DESPESA: [
         (1, "Ocupação", ["Aluguel", "Água, luz e internet", "Manutenção"]),
         (2, "Pessoal", ["Salários e encargos", "Comissões"]),
         (3, "Materiais e laboratório", ["Material odontológico", "Laboratório de prótese"]),
@@ -191,25 +195,26 @@ PLANO_PADRAO = {
 def criar_padroes(clinica):
     """Default accounts and categories for a clinic that has none."""
     with sem_isolamento():
-        if not Conta.objects.filter(clinica=clinica).exists():
-            Conta.objects.bulk_create(
-                Conta(clinica=clinica, nome=nome, tipo=tipo) for nome, tipo in CONTAS_PADRAO
+        if not FinancialAccount.objects.filter(clinica=clinica).exists():
+            FinancialAccount.objects.bulk_create(
+                FinancialAccount(clinica=clinica, nome=nome, tipo=tipo)
+                for nome, tipo in CONTAS_PADRAO
             )
-        if not Categoria.objects.filter(clinica=clinica).exists():
+        if not Category.objects.filter(clinica=clinica).exists():
             grupo_de = {}
             for tipo, linhas in PLANO_PADRAO.items():
                 for codigo, nome, categorias in linhas:
-                    grupo = GrupoContabil.objects.create(
+                    grupo = AccountGroup.objects.create(
                         clinica=clinica, tipo=tipo, codigo=codigo, nome=nome
                     )
                     grupo_de.update({(tipo, categoria): grupo for categoria in categorias})
-            Categoria.objects.bulk_create(
-                Categoria(clinica=clinica, nome=nome, tipo=tipo, grupo=grupo_de.get((tipo, nome)))
+            Category.objects.bulk_create(
+                Category(clinica=clinica, nome=nome, tipo=tipo, grupo=grupo_de.get((tipo, nome)))
                 for nome, tipo in CATEGORIAS_PADRAO
             )
 
 
-class Fornecedor(ModeloDaClinica):
+class Supplier(ModeloDaClinica):
     """Who the clinic buys from or pays (decision 093), picked on a payable."""
 
     class Tipo(models.TextChoices):
@@ -235,6 +240,7 @@ class Fornecedor(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "financeiro_fornecedor"
         verbose_name = _("fornecedor")
         verbose_name_plural = _("fornecedores")
         ordering = ["nome"]
@@ -255,7 +261,7 @@ class Fornecedor(ModeloDaClinica):
         return "empresa" if self.tipo == self.Tipo.JURIDICA else "pessoa"
 
 
-class Lancamento(ModeloDaClinica):
+class Entry(ModeloDaClinica):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
     class Tipo(models.TextChoices):
@@ -265,10 +271,10 @@ class Lancamento(ModeloDaClinica):
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     descricao = models.CharField(_("descrição"), max_length=200)
     categoria = models.ForeignKey(
-        Categoria, on_delete=models.PROTECT, related_name="+", verbose_name=_("categoria")
+        Category, on_delete=models.PROTECT, related_name="+", verbose_name=_("categoria")
     )
     centro_custo = models.ForeignKey(
-        CentroCusto,
+        CostCenter,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -276,7 +282,7 @@ class Lancamento(ModeloDaClinica):
         verbose_name=_("centro de custo"),
     )
     paciente = models.ForeignKey(
-        "pacientes.Paciente",
+        "pacientes.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -287,7 +293,7 @@ class Lancamento(ModeloDaClinica):
     # registered supplier it holds the supplier's name, so lists and reports need no join.
     pessoa = models.CharField(_("pagador"), max_length=200, blank=True)
     fornecedor = models.ForeignKey(
-        Fornecedor,
+        Supplier,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -295,7 +301,7 @@ class Lancamento(ModeloDaClinica):
         verbose_name=_("fornecedor"),
     )
     profissional = models.ForeignKey(
-        "profissionais.Profissional",
+        "profissionais.Practitioner",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -329,6 +335,7 @@ class Lancamento(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "financeiro_lancamento"
         verbose_name = _("lançamento")
         verbose_name_plural = _("lançamentos")
         ordering = ["-data", "-pk"]
@@ -367,9 +374,9 @@ class ParcelaQuerySet(models.QuerySet):
         return self.com_saldo().filter(saldo__gt=0, lancamento__cancelado=False)
 
 
-class Parcela(ModeloDaClinica):
+class Installment(ModeloDaClinica):
     lancamento = models.ForeignKey(
-        Lancamento, on_delete=models.CASCADE, related_name="parcelas", verbose_name=_("lançamento")
+        Entry, on_delete=models.CASCADE, related_name="parcelas", verbose_name=_("lançamento")
     )
     numero = models.PositiveSmallIntegerField(_("número"))
     vencimento = models.DateField(_("vencimento"))
@@ -380,6 +387,7 @@ class Parcela(ModeloDaClinica):
     todos = models.Manager()  # noqa: DJ012
 
     class Meta:
+        db_table = "financeiro_parcela"
         verbose_name = _("parcela")
         verbose_name_plural = _("parcelas")
         ordering = ["vencimento", "numero"]
@@ -400,7 +408,7 @@ class Parcela(ModeloDaClinica):
         return pago, self.valor - pago
 
 
-class Pagamento(ModeloDaClinica):
+class Payment(ModeloDaClinica):
     """Money received (or paid) for an installment. Partial payments are allowed.
 
     `valor` is what changed hands; `juros` (late fee, typed by hand) is included in it and
@@ -435,7 +443,7 @@ class Pagamento(ModeloDaClinica):
             return em_uso(pais)
 
     parcela = models.ForeignKey(
-        Parcela, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")
+        Installment, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")
     )
     data = models.DateField(_("data"), default=timezone.localdate)
     valor = models.DecimalField(_("valor recebido"), **DINHEIRO)
@@ -448,7 +456,7 @@ class Pagamento(ModeloDaClinica):
     desconto = models.DecimalField(_("desconto"), default=ZERO, **DINHEIRO)
     forma = models.CharField(_("forma de pagamento"), max_length=15, choices=Forma.choices)
     conta = models.ForeignKey(
-        Conta, on_delete=models.PROTECT, related_name="+", verbose_name=_("conta")
+        FinancialAccount, on_delete=models.PROTECT, related_name="+", verbose_name=_("conta")
     )
     # Card details only: never the card number.
     cartao_bandeira = models.CharField(_("bandeira do cartão"), max_length=30, blank=True)
@@ -471,7 +479,7 @@ class Pagamento(ModeloDaClinica):
     # Practitioner commission (0.19.0): the commission that paid this receipt out, and the
     # one that deducted it again after it was reversed.
     comissao = models.ForeignKey(
-        "Comissao",
+        "Commission",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -479,7 +487,7 @@ class Pagamento(ModeloDaClinica):
         verbose_name=_("comissão"),
     )
     comissao_estorno = models.ForeignKey(
-        "Comissao",
+        "Commission",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -497,6 +505,7 @@ class Pagamento(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "financeiro_pagamento"
         verbose_name = _("pagamento")
         verbose_name_plural = _("pagamentos")
         ordering = ["-data", "-pk"]
@@ -522,7 +531,7 @@ class Pagamento(ModeloDaClinica):
         return self.valor - self.juros + self.desconto
 
 
-class Caixa(ModeloDaClinica):
+class CashRegister(ModeloDaClinica):
     """A cash drawer session (0.17.0): opened with a counted amount, closed with another.
 
     While open, payments registered into its account, withdrawals and top-ups make up the
@@ -531,7 +540,7 @@ class Caixa(ModeloDaClinica):
     """
 
     conta = models.ForeignKey(
-        Conta, on_delete=models.PROTECT, related_name="caixas", verbose_name=_("conta")
+        FinancialAccount, on_delete=models.PROTECT, related_name="caixas", verbose_name=_("conta")
     )
     aberto_em = models.DateTimeField(_("aberto em"), default=timezone.now)
     aberto_por = models.ForeignKey(
@@ -558,6 +567,7 @@ class Caixa(ModeloDaClinica):
     observacao = models.CharField(_("observação"), max_length=200, blank=True)
 
     class Meta:
+        db_table = "financeiro_caixa"
         verbose_name = _("caixa")
         verbose_name_plural = _("caixas")
         ordering = ["-aberto_em"]
@@ -586,7 +596,7 @@ class Caixa(ModeloDaClinica):
         return self.valor_contado - self.valor_esperado
 
 
-class MovimentoCaixa(ModeloDaClinica):
+class CashMovement(ModeloDaClinica):
     """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
 
     class Tipo(models.TextChoices):
@@ -594,12 +604,12 @@ class MovimentoCaixa(ModeloDaClinica):
         REFORCO = "reforco", _("Reforço")
 
     caixa = models.ForeignKey(
-        Caixa, on_delete=models.PROTECT, related_name="movimentos", verbose_name=_("caixa")
+        CashRegister, on_delete=models.PROTECT, related_name="movimentos", verbose_name=_("caixa")
     )
     tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
     valor = models.DecimalField(_("valor"), **DINHEIRO)
     outra_conta = models.ForeignKey(
-        Conta,
+        FinancialAccount,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -618,6 +628,7 @@ class MovimentoCaixa(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "financeiro_movimentocaixa"
         verbose_name = _("movimento de caixa")
         verbose_name_plural = _("movimentos de caixa")
         ordering = ["criado_em"]
@@ -629,7 +640,7 @@ class MovimentoCaixa(ModeloDaClinica):
         return f"{self.get_tipo_display()} {self.valor}"
 
 
-class Comissao(ModeloDaClinica):
+class Commission(ModeloDaClinica):
     """A practitioner commission paid out (0.19.0, decision 053).
 
     It covers every receipt of the practitioner's receivables up to `ate` not covered
@@ -638,7 +649,7 @@ class Comissao(ModeloDaClinica):
     """
 
     profissional = models.ForeignKey(
-        "profissionais.Profissional",
+        "profissionais.Practitioner",
         on_delete=models.PROTECT,
         related_name="comissoes",
         verbose_name=_("profissional"),
@@ -649,7 +660,7 @@ class Comissao(ModeloDaClinica):
     estornos = models.DecimalField(_("comissão de estornos descontada"), default=ZERO, **DINHEIRO)
     valor = models.DecimalField(_("valor da comissão"), **DINHEIRO)
     lancamento = models.OneToOneField(
-        Lancamento,
+        Entry,
         on_delete=models.PROTECT,
         related_name="comissao",
         verbose_name=_("lançamento a pagar"),
@@ -666,6 +677,7 @@ class Comissao(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "financeiro_comissao"
         verbose_name = _("comissão")
         verbose_name_plural = _("comissões")
         ordering = ["-criado_em"]
@@ -682,17 +694,18 @@ class Comissao(ModeloDaClinica):
         return self.valor + self.estornos
 
 
-class Planejamento(ModeloDaClinica):
+class Planning(ModeloDaClinica):
     """The year's goal for a group of the chart of accounts (decision 098, legacy Medical
     planejamento_estrategico): how much to receive or spend, compared with what was paid."""
 
     ano = models.PositiveSmallIntegerField(_("ano"))
     grupo = models.ForeignKey(
-        GrupoContabil, on_delete=models.PROTECT, related_name="+", verbose_name=_("grupo")
+        AccountGroup, on_delete=models.PROTECT, related_name="+", verbose_name=_("grupo")
     )
     valor = models.DecimalField(_("meta"), **DINHEIRO)
 
     class Meta:
+        db_table = "financeiro_planejamento"
         verbose_name = _("meta do planejamento")
         verbose_name_plural = _("metas do planejamento")
         ordering = ["ano", "grupo"]
@@ -707,7 +720,7 @@ class Planejamento(ModeloDaClinica):
         return f"{self.ano} · {self.grupo}"
 
 
-class Fechamento(ModeloDaClinica):
+class BookClosing(ModeloDaClinica):
     """Finance closed up to a date (decision 096), so the reports given to the accountant
     do not change: no payment dated on or before it can be recorded or reversed.
 
@@ -728,6 +741,7 @@ class Fechamento(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "financeiro_fechamento"
         verbose_name = _("fechamento do financeiro")
         verbose_name_plural = _("fechamentos do financeiro")
         ordering = ["-criado_em", "-pk"]
@@ -736,11 +750,14 @@ class Fechamento(ModeloDaClinica):
         return f"{self.ate:%d/%m/%Y}" if self.ate else str(_("Aberto"))
 
 
-class ImportacaoExtrato(ModeloDaClinica):
+class StatementImport(ModeloDaClinica):
     """One OFX file imported into a bank account (0.20.0, decision 054)."""
 
     conta = models.ForeignKey(
-        Conta, on_delete=models.PROTECT, related_name="importacoes", verbose_name=_("conta")
+        FinancialAccount,
+        on_delete=models.PROTECT,
+        related_name="importacoes",
+        verbose_name=_("conta"),
     )
     arquivo = models.CharField(_("arquivo"), max_length=200)
     banco = models.CharField(_("código do banco"), max_length=20, blank=True)
@@ -767,6 +784,7 @@ class ImportacaoExtrato(ModeloDaClinica):
     criado_em = models.DateTimeField(_("importado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "financeiro_importacaoextrato"
         verbose_name = _("importação de extrato")
         verbose_name_plural = _("importações de extrato")
         ordering = ["-criado_em"]
@@ -775,7 +793,7 @@ class ImportacaoExtrato(ModeloDaClinica):
         return f"{self.conta} {self.arquivo}"
 
 
-class TransacaoBancaria(ModeloDaClinica):
+class BankTransaction(ModeloDaClinica):
     """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
 
     class Situacao(models.TextChoices):
@@ -784,10 +802,13 @@ class TransacaoBancaria(ModeloDaClinica):
         IGNORADA = "ignorada", _("Ignorada")
 
     conta = models.ForeignKey(
-        Conta, on_delete=models.PROTECT, related_name="transacoes", verbose_name=_("conta")
+        FinancialAccount,
+        on_delete=models.PROTECT,
+        related_name="transacoes",
+        verbose_name=_("conta"),
     )
     importacao = models.ForeignKey(
-        ImportacaoExtrato,
+        StatementImport,
         on_delete=models.PROTECT,
         related_name="transacoes",
         verbose_name=_("importação"),
@@ -803,7 +824,7 @@ class TransacaoBancaria(ModeloDaClinica):
         _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.PENDENTE
     )
     pagamento = models.OneToOneField(
-        Pagamento,
+        Payment,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -811,7 +832,7 @@ class TransacaoBancaria(ModeloDaClinica):
         verbose_name=_("pagamento"),
     )
     movimento = models.OneToOneField(
-        MovimentoCaixa,
+        CashMovement,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -830,6 +851,7 @@ class TransacaoBancaria(ModeloDaClinica):
     conciliado_em = models.DateTimeField(_("conciliado em"), null=True, blank=True)
 
     class Meta:
+        db_table = "financeiro_transacaobancaria"
         verbose_name = _("transação bancária")
         verbose_name_plural = _("transações bancárias")
         ordering = ["data", "pk"]

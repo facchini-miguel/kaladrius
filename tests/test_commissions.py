@@ -10,9 +10,9 @@ from django.utils import timezone
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
 from apps.finance import commissions, services
-from apps.finance.models import Categoria, Comissao, Conta, Lancamento, Pagamento
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.finance.models import Category, Commission, Entry, FinancialAccount, Payment
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
 HOJE = timezone.localdate()
@@ -23,12 +23,12 @@ ONTEM = HOJE - datetime.timedelta(days=1)
 def cenario(clinica_a, criar_usuario, cliente_de):
     admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="Paulo Paciente")
-        dra = Profissional.objects.create(nome="Dra. Ana", comissao_percentual=Decimal("40"))
-        dr = Profissional.objects.create(nome="Dr. Beto")
-        tratamento = Categoria.objects.get(nome="Tratamento")
-        caixa = Conta.objects.get(nome="Caixa")
-        categoria = Categoria.objects.get(nome="Comissões")
+        paciente = Patient.objects.create(nome="Paulo Paciente")
+        dra = Practitioner.objects.create(nome="Dra. Ana", comissao_percentual=Decimal("40"))
+        dr = Practitioner.objects.create(nome="Dr. Beto")
+        tratamento = Category.objects.get(nome="Tratamento")
+        caixa = FinancialAccount.objects.get(nome="Caixa")
+        categoria = Category.objects.get(nome="Comissões")
     return {
         "clinica": clinica_a,
         "paciente": paciente,
@@ -50,7 +50,7 @@ def receber(cenario, valor, profissional, data=ONTEM, juros="0"):
     with usar_clinica(cenario["clinica"]):
         lancamento = services.criar_lancamento(
             clinica=cenario["clinica"],
-            tipo=Lancamento.Tipo.RECEBER,
+            tipo=Entry.Tipo.RECEBER,
             paciente=cenario["paciente"],
             profissional=profissional,
             descricao="Tratamento",
@@ -94,21 +94,21 @@ def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
     receber(cenario, "300.00", cenario["dra"])
     resposta = pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        comissao = Comissao.objects.get()
+        comissao = Commission.objects.get()
         lancamento = comissao.lancamento
         assert resposta.url == reverse("finance:entry", args=[lancamento.pk])
         assert (lancamento.tipo, lancamento.valor_total, lancamento.pessoa) == (
-            Lancamento.Tipo.PAGAR,
+            Entry.Tipo.PAGAR,
             Decimal("120.00"),
             "Dra. Ana",
         )
         assert lancamento.categoria.nome == "Comissões"
-        assert Pagamento.objects.get().comissao == comissao
+        assert Payment.objects.get().comissao == comissao
         assert commissions.pendente(cenario["dra"], HOJE)["valor"] == 0
     # Paying again finds nothing.
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        assert Comissao.objects.count() == 1
+        assert Commission.objects.count() == 1
     # Only new receipts make up the next one.
     receber(cenario, "50.00", cenario["dra"], data=HOJE)
     with usar_clinica(cenario["clinica"]):
@@ -120,7 +120,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
     pagar_comissao(cenario, cenario["dra"])
     # The percentage changes, but the deduction uses the one it was paid with (40%).
     with usar_clinica(cenario["clinica"]):
-        Profissional.objects.filter(pk=cenario["dra"].pk).update(comissao_percentual=10)
+        Practitioner.objects.filter(pk=cenario["dra"].pk).update(comissao_percentual=10)
         cenario["dra"].refresh_from_db()
         services.estornar(pagamento, motivo="Pix devolvido", usuario=cenario["admin"])
     receber(cenario, "1000.00", cenario["dra"], data=HOJE)
@@ -140,7 +140,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
     receber(cenario, "500.00", cenario["dra"], data=HOJE)
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        segunda = Comissao.objects.latest("pk")
+        segunda = Commission.objects.latest("pk")
         assert (segunda.bruta, segunda.estornos, segunda.valor) == (
             Decimal("150.00"),
             Decimal("120.00"),
@@ -157,14 +157,14 @@ def test_cancelar_a_despesa_desfaz_a_comissao(cenario):
     receber(cenario, "300.00", cenario["dra"])
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        comissao = Comissao.objects.get()
+        comissao = Commission.objects.get()
     cenario["cliente"].post(
         reverse("finance:cancel", args=[comissao.lancamento_id]), {"motivo": "Errado"}
     )
     comissao.refresh_from_db()
     assert comissao.cancelada
     with usar_clinica(cenario["clinica"]):
-        assert not Pagamento.objects.filter(comissao__isnull=False).exists()
+        assert not Payment.objects.filter(comissao__isnull=False).exists()
         assert commissions.pendente(cenario["dra"], HOJE)["valor"] == Decimal("120.00")
 
 
@@ -213,12 +213,12 @@ def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
     pagamento = receber(cenario, "100.00", cenario["dra"])  # 40.00 in C1
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        primeira = Comissao.objects.get()
+        primeira = Commission.objects.get()
         services.estornar(pagamento, motivo="Pix devolvido", usuario=cenario["admin"])
     receber(cenario, "300.00", cenario["dra"], data=HOJE)  # 120.00 - 40.00 in C2
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinica"]):
-        segunda = Comissao.objects.exclude(pk=primeira.pk).get()
+        segunda = Commission.objects.exclude(pk=primeira.pk).get()
     cancelar = reverse("finance:cancel", args=[primeira.lancamento_id])
     resposta = cenario["cliente"].post(cancelar, {"motivo": "Errado"}, follow=True)
     assert "Cancele aquela antes" in resposta.content.decode()

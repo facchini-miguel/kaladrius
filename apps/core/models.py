@@ -49,7 +49,7 @@ class Usuario(AbstractUser):
         super().save(*args, **kwargs)
 
 
-class Clinica(models.Model):
+class Clinic(models.Model):
     """A clinic: the tenant that owns patients, schedules and the rest of the data."""
 
     INTERVALOS = [
@@ -143,6 +143,7 @@ class Clinica(models.Model):
     alterada_em = models.DateTimeField(_("alterada em"), auto_now=True)
 
     class Meta:
+        db_table = "core_clinica"
         verbose_name = _("clínica")
         verbose_name_plural = _("clínicas")
         ordering = ["nome"]
@@ -188,7 +189,7 @@ class Clinica(models.Model):
         # before a request has selected a clinic. Missing/unknown modules fail closed.
         if self.pk is None or codigo not in ModuloClinico.values:
             return False
-        return ModuloDaClinica.todos.filter(clinica=self, codigo=codigo, ativo=True).exists()
+        return ClinicModule.todos.filter(clinica=self, codigo=codigo, ativo=True).exists()
 
     @classmethod
     def unica(cls):
@@ -225,11 +226,12 @@ DEPENDENCIAS = {
 }
 
 
-class ModuloDaClinica(ModeloDaClinica):
+class ClinicModule(ModeloDaClinica):
     codigo = models.CharField(_("módulo"), max_length=20, choices=ModuloClinico.choices)
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
+        db_table = "core_modulodaclinica"
         verbose_name = _("módulo da clínica")
         verbose_name_plural = _("módulos da clínica")
         ordering = ["codigo"]
@@ -255,7 +257,7 @@ class Papel(models.TextChoices):
     FINANCEIRO = "financeiro", _("Financeiro")
 
 
-class Vinculo(models.Model):
+class Membership(models.Model):
     """Membership of a user in a clinic, with a role."""
 
     usuario = models.ForeignKey(
@@ -265,13 +267,14 @@ class Vinculo(models.Model):
         verbose_name=_("usuário"),
     )
     clinica = models.ForeignKey(
-        Clinica, on_delete=models.CASCADE, related_name="vinculos", verbose_name=_("clínica")
+        Clinic, on_delete=models.CASCADE, related_name="vinculos", verbose_name=_("clínica")
     )
     papel = models.CharField(_("perfil"), max_length=20, choices=Papel.choices)
     ativo = models.BooleanField(_("ativo"), default=True)
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "core_vinculo"
         verbose_name = _("vínculo com clínica")
         verbose_name_plural = _("vínculos com clínicas")
         ordering = ["clinica__nome", "usuario__username"]

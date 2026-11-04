@@ -9,25 +9,25 @@ import datetime
 
 from django.utils import timezone
 
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
 
-from .models import Agendamento, TipoAtendimento
+from .models import Appointment, AppointmentType
 from .services import momento
 
 MOTIVOS_RECHAMADA = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
 
 
 def _pacientes(clinica):
-    return list(Paciente.objects.filter(clinica=clinica, ativo=True, arquivado=False))
+    return list(Patient.objects.filter(clinica=clinica, ativo=True, arquivado=False))
 
 
 def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, ocupacao=0.6):
     """Fill about `ocupacao` of the free weekday slots around today. Returns how many."""
-    profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+    profissionais = list(Practitioner.objects.filter(clinica=clinica, ativo=True))
     tipos = list(
-        TipoAtendimento.objects.filter(clinica=clinica, ativo=True).exclude(
+        AppointmentType.objects.filter(clinica=clinica, ativo=True).exclude(
             nome__in=["Liberado", "Ocupado"]
         )
     )
@@ -41,7 +41,7 @@ def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, oc
         segunda + datetime.timedelta(days=n) for n in range(7 * (semanas_antes + semanas_depois))
     ]
     ocupados = {}
-    for profissional_id, inicio, fim in Agendamento.objects.filter(
+    for profissional_id, inicio, fim in Appointment.objects.filter(
         clinica=clinica,
         inicio__lt=momento(dias[-1], datetime.time(23, 59)),
         fim__gt=momento(dias[0], datetime.time(0)),
@@ -70,7 +70,7 @@ def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, oc
                     continue
                 com_paciente = sorteio.random() < 0.9
                 novos.append(
-                    Agendamento(
+                    Appointment(
                         clinica=clinica,
                         profissional=profissional,
                         tipo=sorteio.choice(tipos),
@@ -82,20 +82,20 @@ def simular_agendamentos(clinica, sorteio, semanas_antes=2, semanas_depois=4, oc
                     )
                 )
                 atual = fim
-    Agendamento.objects.bulk_create(novos, batch_size=1000)
+    Appointment.objects.bulk_create(novos, batch_size=1000)
     return len(novos)
 
 
 def _situacao(sorteio, inicio):
     """Past appointments: most patients came, some missed or cancelled (0.24.0)."""
     if inicio > timezone.now():
-        return Agendamento.Situacao.AGENDADO
+        return Appointment.Situacao.AGENDADO
     sorteado = sorteio.random()
     if sorteado < 0.82:
-        return Agendamento.Situacao.COMPARECEU
+        return Appointment.Situacao.COMPARECEU
     if sorteado < 0.92:
-        return Agendamento.Situacao.FALTOU
-    return Agendamento.Situacao.DESMARCOU
+        return Appointment.Situacao.FALTOU
+    return Appointment.Situacao.DESMARCOU
 
 
 def simular_rechamadas(clinica, sorteio, quantidade=80, dias_antes=30, dias_depois=60):
@@ -141,19 +141,19 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
     from decimal import Decimal
 
     from apps.finance import services
-    from apps.finance.models import Categoria, CentroCusto, Conta, Lancamento, Pagamento
+    from apps.finance.models import Category, CostCenter, Entry, FinancialAccount, Payment
 
     pacientes = _pacientes(clinica)
-    categorias = list(Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.RECEITA))
-    contas = list(Conta.objects.filter(clinica=clinica, ativa=True))
-    profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+    categorias = list(Category.objects.filter(clinica=clinica, tipo=Category.Tipo.RECEITA))
+    contas = list(FinancialAccount.objects.filter(clinica=clinica, ativa=True))
+    profissionais = list(Practitioner.objects.filter(clinica=clinica, ativo=True))
     if not (pacientes and categorias and contas):
         return 0, 0
     hoje = timezone.localdate()
-    formas = [forma for forma, _rotulo in Pagamento.Forma.em_uso(clinica.pais)]
+    formas = [forma for forma, _rotulo in Payment.Forma.em_uso(clinica.pais)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
-        nome: CentroCusto.objects.get_or_create(clinica=clinica, nome=nome)[0]
+        nome: CostCenter.objects.get_or_create(clinica=clinica, nome=nome)[0]
         for nome in ("Atendimento", "Administrativo")
     }
     criados = 0
@@ -161,7 +161,7 @@ def simular_financeiro(clinica, sorteio, quantidade=60, usuario=None):
         data = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
         lancamento = services.criar_lancamento(
             clinica=clinica,
-            tipo=Lancamento.Tipo.RECEBER,
+            tipo=Entry.Tipo.RECEBER,
             paciente=sorteio.choice(pacientes),
             descricao=sorteio.choice(DESCRICOES_FINANCEIRAS),
             categoria=sorteio.choice(categorias),
@@ -206,14 +206,14 @@ def _simular_despesas(clinica, sorteio, contas, usuario, centros):
 
     from apps.finance import payment_methods as metodos
     from apps.finance import services
-    from apps.finance.models import Categoria, Fornecedor, Lancamento
+    from apps.finance.models import Category, Entry, Supplier
 
     # Bills are paid the way the clinic's country pays them (decision 123).
     do_pais = metodos.do_pais(clinica.pais).codigos
     contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
     formas = [forma for forma in contas_a_pagar if forma in do_pais]
     categorias = {
-        c.nome: c for c in Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.DESPESA)
+        c.nome: c for c in Category.objects.filter(clinica=clinica, tipo=Category.Tipo.DESPESA)
     }
     hoje = timezone.localdate()
     inicio = services.somar_meses(hoje.replace(day=10), -2)
@@ -223,10 +223,10 @@ def _simular_despesas(clinica, sorteio, contas, usuario, centros):
             continue
         parcelas = meses or sorteio.choice([1, 2, 3])
         valor = Decimal(valor)
-        cadastro, _criado = Fornecedor.objects.get_or_create(clinica=clinica, nome=fornecedor)
+        cadastro, _criado = Supplier.objects.get_or_create(clinica=clinica, nome=fornecedor)
         lancamento = services.criar_lancamento(
             clinica=clinica,
-            tipo=Lancamento.Tipo.PAGAR,
+            tipo=Entry.Tipo.PAGAR,
             fornecedor=cadastro,
             pessoa=fornecedor,
             descricao=descricao,
@@ -275,23 +275,23 @@ def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
     from apps.dentistry.teeth import DENTES_PERMANENTES
     from apps.estimates import services
     from apps.estimates.models import (
-        ItemOrcamento,
-        Orcamento,
-        Procedimento,
+        Estimate,
+        EstimateItem,
+        Procedure,
     )
-    from apps.finance.models import Categoria
+    from apps.finance.models import Category
 
-    tratamento = Categoria.objects.filter(clinica=clinica, nome="Tratamento").first()
-    if not Procedimento.objects.filter(clinica=clinica).exists():
-        Procedimento.objects.bulk_create(
-            Procedimento(clinica=clinica, nome=nome, valor=Decimal(valor), categoria=tratamento)
+    tratamento = Category.objects.filter(clinica=clinica, nome="Tratamento").first()
+    if not Procedure.objects.filter(clinica=clinica).exists():
+        Procedure.objects.bulk_create(
+            Procedure(clinica=clinica, nome=nome, valor=Decimal(valor), categoria=tratamento)
             for nome, valor in PROCEDIMENTOS_EXEMPLO
         )
-    procedimentos = list(Procedimento.objects.filter(clinica=clinica, ativo=True))
+    procedimentos = list(Procedure.objects.filter(clinica=clinica, ativo=True))
     pacientes = _pacientes(clinica)
-    profissionais = list(Profissional.objects.filter(clinica=clinica, ativo=True))
+    profissionais = list(Practitioner.objects.filter(clinica=clinica, ativo=True))
     categoria = (
-        tratamento or Categoria.objects.filter(clinica=clinica, tipo=Categoria.Tipo.RECEITA).first()
+        tratamento or Category.objects.filter(clinica=clinica, tipo=Category.Tipo.RECEITA).first()
     )
     if not (procedimentos and pacientes and categoria):
         return 0
@@ -299,7 +299,7 @@ def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
     hoje = timezone.localdate()
     for _ in range(quantidade):
         data = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
-        orcamento = Orcamento.objects.create(
+        orcamento = Estimate.objects.create(
             clinica=clinica,
             paciente=sorteio.choice(pacientes),
             profissional=sorteio.choice(profissionais) if profissionais else None,
@@ -309,7 +309,7 @@ def simular_orcamentos(clinica, sorteio, quantidade=20, usuario=None):
         )
         for procedimento in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
             escolhidos = sorted(sorteio.sample(dentes, sorteio.randint(0, 3)))
-            ItemOrcamento.objects.create(
+            EstimateItem.objects.create(
                 clinica=clinica,
                 orcamento=orcamento,
                 procedimento=procedimento,
@@ -338,16 +338,16 @@ def simular_comissoes(clinica, sorteio, usuario=None):
     from decimal import Decimal
 
     from apps.finance import commissions
-    from apps.finance.models import Categoria
+    from apps.finance.models import Category
 
-    categoria = Categoria.objects.filter(
-        clinica=clinica, tipo=Categoria.Tipo.DESPESA, nome="Comissões"
+    categoria = Category.objects.filter(
+        clinica=clinica, tipo=Category.Tipo.DESPESA, nome="Comissões"
     ).first()
     if categoria is None:
         return 0
     fim_do_mes_passado = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
     pagas = 0
-    for profissional in Profissional.objects.filter(clinica=clinica, ativo=True):
+    for profissional in Practitioner.objects.filter(clinica=clinica, ativo=True):
         if not profissional.comissao_percentual:
             profissional.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
             profissional.save(update_fields=["comissao_percentual"])

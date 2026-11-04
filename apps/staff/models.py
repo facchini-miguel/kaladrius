@@ -22,7 +22,7 @@ ADICIONAL_HORA_EXTRA = Decimal("1.5")
 DIAS_POR_MES = Decimal(30)
 
 
-class Funcionario(ModeloDaClinica):
+class Employee(ModeloDaClinica):
     nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
     # The country's employee document (decision 121); the name stayed from Brazil.
     cpf = models.CharField(_("documento"), max_length=20, blank=True)
@@ -36,6 +36,7 @@ class Funcionario(ModeloDaClinica):
     alterado_em = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
+        db_table = "pessoal_funcionario"
         verbose_name = _("funcionário")
         verbose_name_plural = _("funcionários")
         ordering = ["nome"]
@@ -58,11 +59,11 @@ class Funcionario(ModeloDaClinica):
         return salario.valor if salario else None
 
 
-class Salario(ModeloDaClinica):
+class Salary(ModeloDaClinica):
     """One salary change: the history the legacy kept in salario_fixo_hist."""
 
     funcionario = models.ForeignKey(
-        Funcionario,
+        Employee,
         on_delete=models.CASCADE,
         related_name="salarios",
         verbose_name=_("funcionário"),
@@ -80,6 +81,7 @@ class Salario(ModeloDaClinica):
     criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
+        db_table = "pessoal_salario"
         verbose_name = _("salário")
         verbose_name_plural = _("salários")
         ordering = ["-desde", "-pk"]
@@ -91,7 +93,7 @@ class Salario(ModeloDaClinica):
         return f"{self.funcionario} {self.valor} ({self.desde:%d/%m/%Y})"
 
 
-class Folha(ModeloDaClinica):
+class Payroll(ModeloDaClinica):
     """An employee's pay for one month: salary, overtime and absences.
 
     Once launched it becomes a payable (`lancamento`) and is no longer edited here; to
@@ -99,7 +101,7 @@ class Folha(ModeloDaClinica):
     """
 
     funcionario = models.ForeignKey(
-        Funcionario, on_delete=models.PROTECT, related_name="folhas", verbose_name=_("funcionário")
+        Employee, on_delete=models.PROTECT, related_name="folhas", verbose_name=_("funcionário")
     )
     competencia = models.DateField(_("competência"), help_text=_("O primeiro dia do mês."))
     salario = models.DecimalField(_("salário"), **DINHEIRO)
@@ -110,7 +112,7 @@ class Folha(ModeloDaClinica):
     faltas = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
     observacao = models.CharField(_("observação"), max_length=200, blank=True)
     lancamento = models.OneToOneField(
-        "financeiro.Lancamento",
+        "financeiro.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -119,6 +121,7 @@ class Folha(ModeloDaClinica):
     )
 
     class Meta:
+        db_table = "pessoal_folha"
         verbose_name = _("folha do mês")
         verbose_name_plural = _("folhas do mês")
         ordering = ["-competencia", "funcionario__nome"]

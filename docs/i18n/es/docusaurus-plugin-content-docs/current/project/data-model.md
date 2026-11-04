@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Modelo de datos
 
-Los nombres del código están pasando al inglés (decisiones 155 y 156): los modelos ya citados aquí en inglés ya pasaron; los otros, y los campos, aún tienen sus nombres en portugués. La base de datos mantiene los nombres de tablas y columnas.
+Los nombres del código están pasando al inglés (decisiones 155 a 157): los modelos ya están en inglés; los campos aún tienen sus nombres en portugués. La base de datos mantiene los nombres de tablas y columnas.
 
 ## Principio multiclínica
 - Toda información de una clínica tiene una clave `clinica`. Ninguna consulta se hace sin filtrar por la clínica actual.
@@ -18,9 +18,9 @@ Los nombres del código están pasando al inglés (decisiones 155 y 156): los mo
 ### Plataforma
 | Entidad | Campos principales | Observación |
 |---|---|---|
-| `Clinica` | nombre, documento (CPF/CNPJ), contacto, activa, configuración de la agenda (inicio, fin, duración del horario) | El *tenant* |
+| `Clinic` | nombre, documento (CPF/CNPJ), contacto, activa, configuración de la agenda (inicio, fin, duración del horario) | El *tenant* |
 | `Usuario` | usuario, nombre, correo, contraseña (Argon2), activo, idioma | Usuario de Django |
-| `Vinculo` | usuario, clínica, perfil, activo | Un usuario puede trabajar en más de una clínica |
+| `Membership` | usuario, clínica, perfil, activo | Un usuario puede trabajar en más de una clínica |
 
 ### Perfiles y permisos (reemplaza `sist_pessoasgrupos` / `sist_modulosperm`)
 | Perfil | Equivalente en el sistema antiguo | Acceso por defecto |
@@ -52,11 +52,11 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 ### Clínica
 | Entidad | Campos principales | Sistema antiguo |
 |---|---|---|
-| `Paciente` | clínica, tipo (PF/PJ), nombre, razón social, CPF/CNPJ, RG, inscripción estatal, sexo, estado civil, nacimiento, profesión, responsable, teléfonos (casa, trabajo, celular), WhatsApp, correo, dirección (CEP, estado, ciudad, barrio, calle, número, complemento), observaciones, activo, archivado (con fecha y quién archivó), fechas de creación y modificación | `pessoas` |
-| `PessoaRelacionada` (decisión 101) | clínica, paciente, vínculo (madre, padre, responsable legal, cónyuge, hijo, hermano, abuelo, nieto, otro pariente, contacto de emergencia, contacto), otro paciente de la clínica **o** un nombre, teléfono, observación | `id_pessoas_relac` |
-| `Profissional` | clínica, nombre, registro profesional (CRO/CRM…), color, comisión (%, desde la 0.19), activo, usuario (opcional) | `dentistas` |
-| `TipoAtendimento` | clínica, nombre, color, activo | `agenda_cor` (Cirugía, Prótesis…) |
-| `Agendamento` | clínica, profesional, tipo, inicio y fin (fecha y hora), paciente (opcional), descripción, situación (agendada, asistió, faltó, canceló; desde la 0.24), serie (repetición), creado por | `agendax` |
+| `Patient` | clínica, tipo (PF/PJ), nombre, razón social, CPF/CNPJ, RG, inscripción estatal, sexo, estado civil, nacimiento, profesión, responsable, teléfonos (casa, trabajo, celular), WhatsApp, correo, dirección (CEP, estado, ciudad, barrio, calle, número, complemento), observaciones, activo, archivado (con fecha y quién archivó), fechas de creación y modificación | `pessoas` |
+| `RelatedPerson` (decisión 101) | clínica, paciente, vínculo (madre, padre, responsable legal, cónyuge, hijo, hermano, abuelo, nieto, otro pariente, contacto de emergencia, contacto), otro paciente de la clínica **o** un nombre, teléfono, observación | `id_pessoas_relac` |
+| `Practitioner` | clínica, nombre, registro profesional (CRO/CRM…), color, comisión (%, desde la 0.19), activo, usuario (opcional) | `dentistas` |
+| `AppointmentType` | clínica, nombre, color, activo | `agenda_cor` (Cirugía, Prótesis…) |
+| `Appointment` | clínica, profesional, tipo, inicio y fin (fecha y hora), paciente (opcional), descripción, situación (agendada, asistió, faltó, canceló; desde la 0.24), serie (repetición), creado por | `agendax` |
 | `Recall` (rellamada) | clínica, paciente, fecha, descripción, completado, creado por | `agenda` (is_rechamada) |
 
 ### Referencia (globales)
@@ -65,26 +65,26 @@ El módulo "Usuarios de la clínica" es la pantalla **Registros > Equipo** (vers
 ### Financiero (versión 0.15.0)
 | Entidad | Campos principales | Observación |
 |---|---|---|
-| `Conta` (cuenta) | clínica, nombre, tipo (efectivo, banco, terminal de tarjetas), saldo inicial (0.16.0), activa | Dónde entra el dinero. Toda clínica empieza con Caixa (caja) y Banco |
-| `Categoria` (categoría) | clínica, nombre, tipo (ingreso, gasto), activa | Toda clínica empieza con 3 de ingresos y 8 de gastos; el administrador registra otras |
-| `Lancamento` (cuenta por cobrar o por pagar) | clínica, tipo (por cobrar, por pagar), descripción, categoría, paciente (opcional) o pagador como texto, profesional (opcional), valor total, fecha, observaciones, cancelado (con motivo, cuándo y quién), creado por | Nunca se elimina: se cancela |
-| `Parcela` (cuota) | clínica, cuenta, número, vencimiento, valor | Lo pagado y el saldo se calculan a partir de los pagos |
-| `Pagamento` (pago) | clínica, cuota, fecha, valor cobrado, intereses y multa (incluidos en el valor), descuento (solo administrador), forma (cada país ofrece las suyas, decisión 123: efectivo, Pix, débito, crédito, tarjeta HSA/FSA, transferencia, billetera digital, débito automático, boleto, BPAY, cheque, financiamiento al paciente), cuenta, marca, cuotas y código de la transacción de la tarjeta, observación, revertido (con motivo, cuándo y quién), cobrado por | Se descuenta de la cuota: valor − intereses + descuento. Nunca guarda el número de la tarjeta |
+| `FinancialAccount` (cuenta) | clínica, nombre, tipo (efectivo, banco, terminal de tarjetas), saldo inicial (0.16.0), activa | Dónde entra el dinero. Toda clínica empieza con Caixa (caja) y Banco |
+| `Category` (categoría) | clínica, nombre, tipo (ingreso, gasto), activa | Toda clínica empieza con 3 de ingresos y 8 de gastos; el administrador registra otras |
+| `Entry` (cuenta por cobrar o por pagar) | clínica, tipo (por cobrar, por pagar), descripción, categoría, paciente (opcional) o pagador como texto, profesional (opcional), valor total, fecha, observaciones, cancelado (con motivo, cuándo y quién), creado por | Nunca se elimina: se cancela |
+| `Installment` (cuota) | clínica, cuenta, número, vencimiento, valor | Lo pagado y el saldo se calculan a partir de los pagos |
+| `Payment` (pago) | clínica, cuota, fecha, valor cobrado, intereses y multa (incluidos en el valor), descuento (solo administrador), forma (cada país ofrece las suyas, decisión 123: efectivo, Pix, débito, crédito, tarjeta HSA/FSA, transferencia, billetera digital, débito automático, boleto, BPAY, cheque, financiamiento al paciente), cuenta, marca, cuotas y código de la transacción de la tarjeta, observación, revertido (con motivo, cuándo y quién), cobrado por | Se descuenta de la cuota: valor − intereses + descuento. Nunca guarda el número de la tarjeta |
 
-| `Caixa` (caja) | clínica, cuenta, abierta el/por, valor contado en la apertura, cerrada el/por, valor esperado y contado en el cierre, observación | Caja del día (0.17.0). Una abierta por cuenta; lo esperado se guarda al cerrar, para que reversiones posteriores no cambien una caja cerrada |
-| `MovimentoCaixa` (movimiento de caja) | clínica, caja, tipo (retiro, refuerzo), valor, otra cuenta (opcional), motivo, creado por | Un retiro a otra cuenta (depósito en el banco) mueve el saldo entre las cuentas; sin otra cuenta, el dinero sale o entra al sistema y aparece en el flujo de caja |
-| `Comissao` (comisión) | clínica, profesional, cobros hasta, porcentaje, valor cobrado, comisión de reversiones descontada, valor, cuenta por pagar, cancelada, creado por | Desde la 0.19. Los pagos cubiertos apuntan a ella (`Pagamento.comissao`), y la reversión de uno de ellos, descontada después, apunta a la comisión que la descontó (`Pagamento.comissao_estorno`); así ningún cobro se comisiona dos veces. Cancelar la cuenta por pagar cancela la comisión y libera los pagos |
-| `ImportacaoExtrato` (importación de extracto) | clínica, cuenta, archivo, código del banco, cuenta en el banco, inicio, fin, saldo en el banco y fecha, transacciones nuevas y ya importadas, importado por/el | Desde la 0.20. El archivo OFX no se guarda, solo las transacciones |
-| `TransacaoBancaria` (transacción bancaria) | clínica, cuenta, importación, identificador en el banco (FITID), fecha, valor (positivo entra, negativo sale), descripción, tipo en el banco, situación (pendiente, conciliada, ignorada), pago o movimiento de caja (como máximo uno), motivo, conciliado por/el | Única por cuenta e identificador: reimportar no duplica. Un pago solo se concilia con una transacción; si se revierte, la transacción vuelve a pendiente |
+| `CashRegister` (caja) | clínica, cuenta, abierta el/por, valor contado en la apertura, cerrada el/por, valor esperado y contado en el cierre, observación | Caja del día (0.17.0). Una abierta por cuenta; lo esperado se guarda al cerrar, para que reversiones posteriores no cambien una caja cerrada |
+| `CashMovement` (movimiento de caja) | clínica, caja, tipo (retiro, refuerzo), valor, otra cuenta (opcional), motivo, creado por | Un retiro a otra cuenta (depósito en el banco) mueve el saldo entre las cuentas; sin otra cuenta, el dinero sale o entra al sistema y aparece en el flujo de caja |
+| `Commission` (comisión) | clínica, profesional, cobros hasta, porcentaje, valor cobrado, comisión de reversiones descontada, valor, cuenta por pagar, cancelada, creado por | Desde la 0.19. Los pagos cubiertos apuntan a ella (`Pagamento.comissao`), y la reversión de uno de ellos, descontada después, apunta a la comisión que la descontó (`Pagamento.comissao_estorno`); así ningún cobro se comisiona dos veces. Cancelar la cuenta por pagar cancela la comisión y libera los pagos |
+| `StatementImport` (importación de extracto) | clínica, cuenta, archivo, código del banco, cuenta en el banco, inicio, fin, saldo en el banco y fecha, transacciones nuevas y ya importadas, importado por/el | Desde la 0.20. El archivo OFX no se guarda, solo las transacciones |
+| `BankTransaction` (transacción bancaria) | clínica, cuenta, importación, identificador en el banco (FITID), fecha, valor (positivo entra, negativo sale), descripción, tipo en el banco, situación (pendiente, conciliada, ignorada), pago o movimiento de caja (como máximo uno), motivo, conciliado por/el | Única por cuenta e identificador: reimportar no duplica. Un pago solo se concilia con una transacción; si se revierte, la transacción vuelve a pendiente |
 
-Las cuentas por pagar (0.16.0) usan las mismas entidades. Desde la 0.37.0, la cuenta por pagar puede tener un `Fornecedor` registrado (persona física o jurídica, CPF/CNPJ único en la clínica, teléfono, WhatsApp, correo, activo), cuyo nombre también se copia en el campo del pagador; un pago suelto sigue aceptando el nombre escrito. La app `pessoal` (decisión 099) tiene `Funcionario` (empleado), `Salario` (historial de salarios desde una fecha) y `Folha` (los sueldos de un mes por empleado: salario, cantidad y valor de las horas extras, días de ausencia y la cuenta por pagar en la que se registró). Las metas del año son filas `Planejamento` (año, grupo, valor; decisión 098). Las categorías pueden pertenecer a un `GrupoContabil` (plan de cuentas: nombre, tipo, grupo superior y código opcionales, activo; decisión 097). El registro también puede tener un `CentroCusto` (centro de costo: nombre, activo; uno por registro, opcional, decisión 095). Los convenios (app `convenios`, 0.37.0) son `Convenio` (nombre, registro en la ANS, teléfono, activo) y la `Carteirinha` (credencial) del paciente (convenio, plan, número único en el convenio, validez, titular, activa). El saldo de cada cuenta es el saldo inicial más lo que entró menos lo que salió (pagos no revertidos). Valores en `Decimal` con 2 decimales. La cuota se bloquea en la base al cobrar, para que dos personas no paguen la misma cuota por encima del saldo. En la eliminación definitiva de un paciente, sus cuentas quedan (historial contable) con el pagador "Paciente excluído (código N)", y su auditoría pierde los datos personales.
+Las cuentas por pagar (0.16.0) usan las mismas entidades. Desde la 0.37.0, la cuenta por pagar puede tener un `Supplier` registrado (persona física o jurídica, CPF/CNPJ único en la clínica, teléfono, WhatsApp, correo, activo), cuyo nombre también se copia en el campo del pagador; un pago suelto sigue aceptando el nombre escrito. La app `pessoal` (decisión 099) tiene `Employee` (empleado), `Salary` (historial de salarios desde una fecha) y `Payroll` (los sueldos de un mes por empleado: salario, cantidad y valor de las horas extras, días de ausencia y la cuenta por pagar en la que se registró). Las metas del año son filas `Planning` (año, grupo, valor; decisión 098). Las categorías pueden pertenecer a un `AccountGroup` (plan de cuentas: nombre, tipo, grupo superior y código opcionales, activo; decisión 097). El registro también puede tener un `CostCenter` (centro de costo: nombre, activo; uno por registro, opcional, decisión 095). Los convenios (app `convenios`, 0.37.0) son `HealthPlan` (nombre, registro en la ANS, teléfono, activo) y la `MemberCard` (credencial) del paciente (convenio, plan, número único en el convenio, validez, titular, activa). El saldo de cada cuenta es el saldo inicial más lo que entró menos lo que salió (pagos no revertidos). Valores en `Decimal` con 2 decimales. La cuota se bloquea en la base al cobrar, para que dos personas no paguen la misma cuota por encima del saldo. En la eliminación definitiva de un paciente, sus cuentas quedan (historial contable) con el pagador "Paciente excluído (código N)", y su auditoría pierde los datos personales.
 
 ### Presupuestos (versión 0.18.0)
 | Entidad | Campos principales | Observación |
 |---|---|---|
-| `Procedimento` (procedimiento) | clínica, nombre, código (en la codificación del país: TUSS, CDT…, decisión 125), valor, categoría de ingreso, activo | Tabla de precios de la clínica |
-| `Orcamento` (presupuesto) | clínica, paciente, profesional, fecha, validez, situación (abierto, aprobado, rechazado), descuento (solo administrador), observaciones, cuenta por cobrar, aprobado o rechazado el/por, creado por | Al aprobarse, pasa a ser un `Lancamento` por cobrar y ya no cambia |
-| `ItemOrcamento` (ítem del presupuesto) | clínica, presupuesto, procedimiento (opcional), descripción, código (copiado del procedimiento), dientes (FDI, separados por coma; mostrados en la numeración de la clínica, decisión 122), caras o región, cantidad, valor unitario | Descripción y valor copiados de la tabla en el momento; cambiar la tabla no modifica los presupuestos |
+| `Procedure` (procedimiento) | clínica, nombre, código (en la codificación del país: TUSS, CDT…, decisión 125), valor, categoría de ingreso, activo | Tabla de precios de la clínica |
+| `Estimate` (presupuesto) | clínica, paciente, profesional, fecha, validez, situación (abierto, aprobado, rechazado), descuento (solo administrador), observaciones, cuenta por cobrar, aprobado o rechazado el/por, creado por | Al aprobarse, pasa a ser un `Entry` por cobrar y ya no cambia |
+| `EstimateItem` (ítem del presupuesto) | clínica, presupuesto, procedimiento (opcional), descripción, código (copiado del procedimiento), dientes (FDI, separados por coma; mostrados en la numeración de la clínica, decisión 122), caras o región, cantidad, valor unitario | Descripción y valor copiados de la tabla en el momento; cambiar la tabla no modifica los presupuestos |
 
 En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los dientes son datos de salud) y su auditoría pierde los datos personales.
 
@@ -92,16 +92,16 @@ En la eliminación definitiva de un paciente, sus presupuestos se eliminan (los 
 | Entidad | Uso |
 |---|---|
 | Versiones | Se leen del archivo `releases.yaml` (no están en la base de datos). Ver [versionado-y-versiones.md](versioning.md) |
-| `RegistroAuditoria` | Quién creó, modificó o eliminó qué y cuándo (LGPD) |
+| `AuditEntry` | Quién creó, modificó o eliminó qué y cuándo (LGPD) |
 | `Backup` | Cada copia de seguridad diaria enviada a Cloud Storage, registrada por el servidor. Si la última tiene más de 26 horas, los superusuarios ven un aviso en la parte superior de las pantallas |
 
 ## Agenda
-- `Agendamento` guarda el inicio y el fin como fecha y hora con huso horario. Las citas de una misma repetición semanal comparten el campo `serie`.
+- `Appointment` guarda el inicio y el fin como fecha y hora con huso horario. Las citas de una misma repetición semanal comparten el campo `serie`.
 - Reglas: horarios alineados con la duración configurada de la clínica y dentro del horario de atención; sin superposición para el mismo profesional (los horarios contiguos están permitidos).
 - La superposición se verifica en el formulario (con un mensaje que dice con quién es el conflicto) **y** por una *exclusion constraint* de PostgreSQL (`btree_gist`), que vale incluso con dos personas guardando al mismo tiempo. Las citas **canceladas** (0.24) quedan fuera de ambas verificaciones: siguen en el historial, pero liberan el horario.
 
 ## Auditoría (LGPD)
-- `RegistroAuditoria` (`apps/audit`) guarda **quién**, **cuándo**, **desde qué IP**, **qué acción** y, en los cambios, el **antes y después** de cada campo.
+- `AuditEntry` (`apps/audit`) guarda **quién**, **cuándo**, **desde qué IP**, **qué acción** y, en los cambios, el **antes y después** de cada campo.
 - Se registra automáticamente (señales de Django): crear, modificar y eliminar Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clínica, Vínculo y Usuario. También: abrir la ficha de un paciente, entrar, salir e intentos de acceso rechazados.
 - **Nunca** guarda contraseñas ni su hash (el cambio de contraseña aparece solo como "cambiada").
 - Los registros guardan los códigos de clínica y usuario sin clave foránea rígida: el historial sobrevive a la eliminación de un usuario o una clínica. No se pueden editar ni eliminar (admin de solo lectura), con una excepción: los intentos de acceso rechazados, que guardan el usuario escrito, se eliminan después de 30 días con el comando `apply_retention`, que el servidor ejecuta todos los días junto con la copia de seguridad (decisión 045). En las copias, duran 30 días más. En la eliminación definitiva de un paciente, sus registros pierden los datos personales (ver abajo).

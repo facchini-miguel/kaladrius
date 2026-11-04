@@ -5,25 +5,25 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.forms import FormularioBootstrap
 from apps.dentistry.teeth import DENTES_VALIDOS
 from apps.finance.forms import DATA, _campo_dinheiro, _formas_com_vazio
-from apps.finance.models import Categoria, Conta
+from apps.finance.models import Category, FinancialAccount
 from apps.health_plans import insurance
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 
-from .models import ItemOrcamento, Orcamento, Procedimento
+from .models import Estimate, EstimateItem, Procedure
 
 
 class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
     valor = _campo_dinheiro(_("Valor"))
 
     class Meta:
-        model = Procedimento
+        model = Procedure
         fields = ["nome", "codigo", "valor", "categoria", "ativo"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["categoria"].queryset = Categoria.objects.filter(
-            tipo=Categoria.Tipo.RECEITA, ativa=True
+        self.fields["categoria"].queryset = Category.objects.filter(
+            tipo=Category.Tipo.RECEITA, ativa=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
         self.codificacao = insurance.do_pais().procedimento
@@ -40,14 +40,14 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean_nome(self):
         nome = self.cleaned_data["nome"]
-        if Procedimento.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
+        if Procedure.objects.filter(nome=nome).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um procedimento com este nome."))
         return nome
 
 
 class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
-        model = Orcamento
+        model = Estimate
         fields = ["paciente", "profissional", "data", "validade", "observacoes"]
         widgets = {
             "paciente": forms.HiddenInput,
@@ -58,9 +58,9 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["paciente"].queryset = Paciente.objects.filter(arquivado=False)
+        self.fields["paciente"].queryset = Patient.objects.filter(arquivado=False)
         self.fields["paciente"].error_messages["required"] = _("Escolha o paciente.")
-        self.fields["profissional"].queryset = Profissional.objects.filter(ativo=True)
+        self.fields["profissional"].queryset = Practitioner.objects.filter(ativo=True)
 
     def clean(self):
         dados = super().clean()
@@ -75,14 +75,14 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
     valor_unitario = _campo_dinheiro(_("Valor unitário"), obrigatorio=False)
 
     class Meta:
-        model = ItemOrcamento
+        model = EstimateItem
         fields = ["procedimento", "descricao", "dentes", "faces", "quantidade", "valor_unitario"]
         widgets = {"dentes": forms.HiddenInput}
 
     def __init__(self, *args, odontologia=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.odontologia = odontologia
-        self.fields["procedimento"].queryset = Procedimento.objects.filter(ativo=True)
+        self.fields["procedimento"].queryset = Procedure.objects.filter(ativo=True)
         self.fields["descricao"].required = False
         if not odontologia:
             # Teeth and faces belong to the dental module (decision 080).
@@ -128,21 +128,23 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     primeiro_vencimento = forms.DateField(
         label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
     )
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Categoria.objects.none())
+    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(label=_("Conta"), queryset=Conta.objects.none(), required=False)
+    conta = forms.ModelChoiceField(
+        label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["categoria"].queryset = Categoria.objects.filter(
-            tipo=Categoria.Tipo.RECEITA, ativa=True
+        self.fields["categoria"].queryset = Category.objects.filter(
+            tipo=Category.Tipo.RECEITA, ativa=True
         )
-        self.fields["conta"].queryset = Conta.objects.filter(ativa=True)
+        self.fields["conta"].queryset = FinancialAccount.objects.filter(ativa=True)
 
     def clean(self):
         dados = super().clean()

@@ -1,20 +1,20 @@
 import pytest
 
 from apps.core.isolation import usar_clinica
-from apps.core.models import Clinica, Papel, Vinculo
-from apps.practitioners.models import Profissional
+from apps.core.models import Clinic, Membership, Papel
+from apps.practitioners.models import Practitioner
 
 SENHA = "senha-de-teste-123"
 
 
 @pytest.fixture
 def clinica_a(db):
-    return Clinica.objects.create(nome="Clínica A")
+    return Clinic.objects.create(nome="Clínica A")
 
 
 @pytest.fixture
 def clinica_b(db):
-    return Clinica.objects.create(nome="Clínica B")
+    return Clinic.objects.create(nome="Clínica B")
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def criar_usuario(django_user_model):
     def criar(username, clinica=None, papel=Papel.RECEPCAO, **extra):
         usuario = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
         if clinica is not None:
-            Vinculo.objects.create(usuario=usuario, clinica=clinica, papel=papel)
+            Membership.objects.create(usuario=usuario, clinica=clinica, papel=papel)
         return usuario
 
     return criar
@@ -36,7 +36,7 @@ def criar_profissional():
 
     def criar(clinica, nome, **extra):
         with usar_clinica(clinica):
-            return Profissional.objects.create(nome=nome, **extra)
+            return Practitioner.objects.create(nome=nome, **extra)
 
     return criar
 

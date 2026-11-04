@@ -18,27 +18,27 @@ from apps.core import modules
 from apps.core.models import ModuloClinico
 from apps.core.permissions import Acao, Modulo, exige_permissao, pode
 from apps.dentistry.teeth import odontograma
-from apps.finance.models import Categoria
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
+from apps.finance.models import Category
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
 
 from . import services
 from .forms import AprovarForm, DescontoForm, ItemForm, OrcamentoForm, ProcedimentoForm
-from .models import Orcamento, Procedimento
+from .models import Estimate, Procedure
 
 POR_PAGINA = 50
 
 
 def _orcamentos():
     # Archived patients leave the team's screens (decision 046).
-    return Orcamento.objects.filter(paciente__arquivado=False).select_related(
+    return Estimate.objects.filter(paciente__arquivado=False).select_related(
         "paciente", "profissional"
     )
 
 
 def _aberto(request, pk):
     orcamento = get_object_or_404(_orcamentos(), pk=pk)
-    if orcamento.situacao != Orcamento.Situacao.ABERTO:
+    if orcamento.situacao != Estimate.Situacao.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("estimates:detail", pk=orcamento.pk)
     return orcamento, None
@@ -58,10 +58,10 @@ def _liberar_se_desligado(request, item):
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def lista(request):
-    situacao = request.GET.get("situacao", Orcamento.Situacao.ABERTO)
+    situacao = request.GET.get("situacao", Estimate.Situacao.ABERTO)
     busca = request.GET.get("q", "").strip()
     orcamentos = _orcamentos().prefetch_related("itens")
-    if situacao in Orcamento.Situacao.values:
+    if situacao in Estimate.Situacao.values:
         orcamentos = orcamentos.filter(situacao=situacao)
     if busca:
         orcamentos = orcamentos.filter(paciente__nome__unaccent__icontains=busca)
@@ -73,7 +73,7 @@ def lista(request):
             "pagina": pagina,
             "situacao": situacao,
             "busca": busca,
-            "situacoes": Orcamento.Situacao.choices,
+            "situacoes": Estimate.Situacao.choices,
             "parametros": urlencode({"situacao": situacao, "q": busca}),
         },
     )
@@ -86,7 +86,7 @@ def novo(request):
     if codigo.isdecimal():
         inicial["paciente"] = codigo
     # A practitioner writes estimates in their own name by default.
-    proprio = Profissional.objects.filter(usuario=request.user, ativo=True).first()
+    proprio = Practitioner.objects.filter(usuario=request.user, ativo=True).first()
     if proprio is not None:
         inicial["profissional"] = proprio.pk
     form = OrcamentoForm(request.POST or None, initial=inicial)
@@ -97,7 +97,7 @@ def novo(request):
         return redirect("estimates:detail", pk=orcamento.pk)
     valor_paciente = form["paciente"].value()
     paciente = (
-        Paciente.objects.filter(pk=valor_paciente, arquivado=False).first()
+        Patient.objects.filter(pk=valor_paciente, arquivado=False).first()
         if str(valor_paciente or "").isdecimal()
         else None
     )
@@ -124,7 +124,7 @@ def editar(request, pk):
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
-    aberto = orcamento.situacao == Orcamento.Situacao.ABERTO
+    aberto = orcamento.situacao == Estimate.Situacao.ABERTO
     odontologia = _odontologia(request)
     if odontologia:
         modules.marcar_se_desligado(request, ModuloClinico.ODONTOLOGIA)
@@ -231,7 +231,7 @@ def aprovar(request, pk):
     categoria = (
         item.procedimento.categoria
         if item and item.procedimento and item.procedimento.categoria
-        else Categoria.objects.filter(tipo=Categoria.Tipo.RECEITA, ativa=True).first()
+        else Category.objects.filter(tipo=Category.Tipo.RECEITA, ativa=True).first()
     )
     form = AprovarForm(request.POST or None, initial={"categoria": categoria})
     if request.method == "POST" and form.is_valid():
@@ -289,13 +289,13 @@ def procedimentos(request):
     return render(
         request,
         "estimates/procedures.html",
-        {"procedimentos": Procedimento.objects.select_related("categoria")},
+        {"procedimentos": Procedure.objects.select_related("categoria")},
     )
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.ALTERAR)
 def procedimento_form(request, pk=None):
-    procedimento = get_object_or_404(Procedimento.objects, pk=pk) if pk else Procedimento()
+    procedimento = get_object_or_404(Procedure.objects, pk=pk) if pk else Procedure()
     form = ProcedimentoForm(request.POST or None, instance=procedimento)
     if request.method == "POST" and form.is_valid():
         form.save()

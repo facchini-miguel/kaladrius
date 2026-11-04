@@ -5,10 +5,10 @@ from django.core.management import CommandError, call_command
 from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
-from apps.schedule.models import Agendamento, TipoAtendimento
+from apps.schedule.models import Appointment, AppointmentType
 
 
 @pytest.fixture
@@ -16,13 +16,13 @@ def cenario(clinica_a, criar_profissional):
     hoje = timezone.localdate()
     ana = criar_profissional(clinica_a, "Dra. Ana")
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(
+        paciente = Patient.objects.create(
             nome="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
         )
-        tipo = TipoAtendimento.objects.first()
+        tipo = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
         semana = [
-            Agendamento.objects.create(
+            Appointment.objects.create(
                 profissional=ana,
                 tipo=tipo,
                 paciente=paciente,
@@ -53,17 +53,17 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=17)), confirmar=True)
     with usar_clinica(cenario["clinica"]):
-        for agendamento in Agendamento.objects.all():
+        for agendamento in Appointment.objects.all():
             inicio, fim = antes[agendamento.pk]
             assert agendamento.inicio - inicio == datetime.timedelta(days=14)
             assert agendamento.fim - fim == datetime.timedelta(days=14)
             assert agendamento.inicio.weekday() == inicio.weekday()
         assert Recall.objects.get().data == hoje - datetime.timedelta(days=6)
-        assert Paciente.objects.get().data_nascimento == datetime.date(1980, 5, 17)
+        assert Patient.objects.get().data_nascimento == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
-            primeiro = Agendamento.objects.first()
-            Agendamento.objects.create(
+            primeiro = Appointment.objects.first()
+            Appointment.objects.create(
                 profissional=primeiro.profissional,
                 tipo=primeiro.tipo,
                 inicio=primeiro.inicio,

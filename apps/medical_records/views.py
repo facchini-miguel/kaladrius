@@ -9,13 +9,13 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 from apps.core import modules
 from apps.core.models import ModuloClinico
-from apps.patients.models import Paciente
-from apps.practitioners.models import Profissional
-from apps.schedule.models import Agendamento
+from apps.patients.models import Patient
+from apps.practitioners.models import Practitioner
+from apps.schedule.models import Appointment
 
 from .forms import (
     AdendoForm,
@@ -25,10 +25,10 @@ from .forms import (
     PedidoDeExamesForm,
     ReceitaForm,
 )
-from .models import CAMPOS_DA_ANAMNESE, Anexo, Atendimento, Atestado, PedidoDeExames, Receita
+from .models import CAMPOS_DA_ANAMNESE, Attachment, Certificate, ExamRequest, Prescription, Visit
 from .permissions import acessa_prontuario, administra_prontuario, profissional_do_usuario
 
-Acao = RegistroAuditoria.Acao
+Acao = AuditEntry.Acao
 # The audit log names the changed fields but never copies clinical text (decision 081).
 SIGILO = "(conteúdo clínico)"
 
@@ -65,18 +65,18 @@ def _finalizar(request, atendimento):
 
 @exige_profissional
 def novo(request, profissional, paciente):
-    paciente = get_object_or_404(Paciente.objects, pk=paciente, arquivado=False)
+    paciente = get_object_or_404(Patient.objects, pk=paciente, arquivado=False)
     agendamento = None
     codigo = request.POST.get("agendamento") or request.GET.get("agendamento") or ""
     if codigo.isdecimal():
-        agendamento = get_object_or_404(Agendamento.objects, pk=codigo, paciente=paciente)
-        existente = Atendimento.objects.filter(agendamento=agendamento).first()
+        agendamento = get_object_or_404(Appointment.objects, pk=codigo, paciente=paciente)
+        existente = Visit.objects.filter(agendamento=agendamento).first()
         if existente is not None:
             return redirect("medical_records:visit", pk=existente.pk)
     inicial = {"data": agendamento.inicio if agendamento else timezone.now()}
     profissionais = None
     if administra_prontuario(request):
-        profissionais = Profissional.objects.filter(ativo=True)
+        profissionais = Practitioner.objects.filter(ativo=True)
         inicial["profissional"] = agendamento.profissional if agendamento else profissional
     form = AtendimentoForm(request.POST or None, initial=inicial, profissionais=profissionais)
     if request.method == "POST" and form.is_valid():
@@ -104,7 +104,7 @@ def novo(request, profissional, paciente):
 @exige_profissional
 def atendimento(request, profissional, pk):
     atendimento = get_object_or_404(
-        Atendimento.objects.select_related("paciente", "profissional", "agendamento"), pk=pk
+        Visit.objects.select_related("paciente", "profissional", "agendamento"), pk=pk
     )
     # Only its author (or the system administrator) changes a visit, until it is finalized.
     administra = administra_prontuario(request)
@@ -160,7 +160,7 @@ def _campos(atendimento):
 
 def _do_autor(request, profissional, pk):
     """The visit, if the user is its author or the system administrator."""
-    atendimento = get_object_or_404(Atendimento.objects.select_related("paciente"), pk=pk)
+    atendimento = get_object_or_404(Visit.objects.select_related("paciente"), pk=pk)
     do_autor = profissional is not None and atendimento.profissional_id == profissional.pk
     if not (do_autor or administra_prontuario(request)):
         raise PermissionDenied
@@ -171,9 +171,7 @@ def _do_autor(request, profissional, pk):
 def imprimir(request, profissional, pk):
     """The finalized visit, ready to print and sign (without a digital signature, the
     printed and signed copy is the legal record)."""
-    atendimento = get_object_or_404(
-        Atendimento.objects.select_related("paciente", "profissional"), pk=pk
-    )
+    atendimento = get_object_or_404(Visit.objects.select_related("paciente", "profissional"), pk=pk)
     if not atendimento.finalizado:
         raise PermissionDenied
     registrar(Acao.VISUALIZAR, atendimento, descricao=f"{atendimento} (impressão)")
@@ -246,7 +244,7 @@ def receita_nova(request, profissional, pk):
 @exige_profissional
 def atestado(request, profissional, pk):
     atestado = get_object_or_404(
-        Atestado.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+        Certificate.objects.select_related("atendimento__paciente", "profissional"), pk=pk
     )
     registrar(Acao.VISUALIZAR, atestado)
     return render(request, "medical_records/certificate.html", {"atestado": atestado})
@@ -255,7 +253,7 @@ def atestado(request, profissional, pk):
 @exige_profissional
 def receita(request, profissional, pk):
     receita = get_object_or_404(
-        Receita.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+        Prescription.objects.select_related("atendimento__paciente", "profissional"), pk=pk
     )
     registrar(Acao.VISUALIZAR, receita)
     linhas = [linha for linha in receita.prescricao.splitlines() if linha.strip()]
@@ -267,7 +265,7 @@ def receita(request, profissional, pk):
 @require_POST
 @exige_profissional
 def adendo(request, profissional, pk):
-    atendimento = get_object_or_404(Atendimento.objects, pk=pk)
+    atendimento = get_object_or_404(Visit.objects, pk=pk)
     if not atendimento.finalizado:
         raise PermissionDenied  # before finalizing, the author simply edits the visit
     form = AdendoForm(request.POST)
@@ -314,7 +312,7 @@ def pedido_de_exames_novo(request, profissional, pk):
 @exige_profissional
 def pedido_de_exames(request, profissional, pk):
     pedido = get_object_or_404(
-        PedidoDeExames.objects.select_related("atendimento__paciente", "profissional"), pk=pk
+        ExamRequest.objects.select_related("atendimento__paciente", "profissional"), pk=pk
     )
     registrar(Acao.VISUALIZAR, pedido)
     linhas = [linha for linha in pedido.exames.splitlines() if linha.strip()]
@@ -327,14 +325,14 @@ def pedido_de_exames(request, profissional, pk):
 @exige_profissional
 def anexo_enviar(request, profissional, pk):
     """Any practitioner adds files to a visit, even a finalized one (results arrive later)."""
-    atendimento = get_object_or_404(Atendimento.objects, pk=pk)
+    atendimento = get_object_or_404(Visit.objects, pk=pk)
     if request.user.demonstracao:
         messages.error(request, _("Contas de demonstração não enviam anexos."))
         return redirect("medical_records:visit", pk=atendimento.pk)
     form = AnexoForm(request.POST, request.FILES)
     if form.is_valid():
         arquivo = form.cleaned_data["arquivo"]
-        anexo = Anexo.objects.create(
+        anexo = Attachment.objects.create(
             atendimento=atendimento,
             descricao=form.cleaned_data["descricao"],
             nome=arquivo.name[:255],
@@ -358,7 +356,7 @@ def anexo_enviar(request, profissional, pk):
 
 @exige_profissional
 def anexo(request, profissional, pk):
-    anexo = get_object_or_404(Anexo.objects.select_related("atendimento"), pk=pk)
+    anexo = get_object_or_404(Attachment.objects.select_related("atendimento"), pk=pk)
     registrar(Acao.VISUALIZAR, anexo, descricao=f"{anexo.atendimento} – {_('anexo')}")
     resposta = HttpResponse(bytes(anexo.conteudo), content_type=anexo.tipo)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
@@ -373,7 +371,9 @@ def anexo(request, profissional, pk):
 def anexo_remover(request, profissional, pk):
     """Who sent a file (or the system administrator) removes it while the visit is still a
     draft; afterwards it stays."""
-    anexo = get_object_or_404(Anexo.objects.select_related("atendimento").defer("conteudo"), pk=pk)
+    anexo = get_object_or_404(
+        Attachment.objects.select_related("atendimento").defer("conteudo"), pk=pk
+    )
     quem_enviou = anexo.criado_por_id == request.user.pk
     if anexo.atendimento.finalizado or not (quem_enviou or administra_prontuario(request)):
         raise PermissionDenied

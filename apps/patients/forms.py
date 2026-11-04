@@ -10,7 +10,7 @@ from apps.core.forms import FormularioBootstrap, campo_documento, documento_por_
 from apps.core.validators import normalizar_telefone
 from apps.reference_data.models import City, State
 
-from .models import Paciente, PessoaRelacionada
+from .models import Patient, RelatedPerson
 
 
 class UFField(forms.ModelChoiceField):
@@ -47,7 +47,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     telefone_comercial = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
 
     class Meta:
-        model = Paciente
+        model = Patient
         fields = [
             "tipo",
             "nome",
@@ -166,7 +166,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
         do_tipo = (
-            self.documentos.empresa if tipo == Paciente.Tipo.JURIDICA else self.documentos.paciente
+            self.documentos.empresa if tipo == Patient.Tipo.JURIDICA else self.documentos.paciente
         )
         documento = ""
         if do_tipo is not None:
@@ -181,7 +181,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
         if documento:
             # The clinic is not a form field, so the unique constraint is checked here.
-            outro = Paciente.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
+            outro = Patient.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
             if outro is not None and outro.arquivado:
                 self.add_error(
                     "cpf_cnpj",
@@ -196,7 +196,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
-        if tipo == Paciente.Tipo.JURIDICA:
+        if tipo == Patient.Tipo.JURIDICA:
             for campo in ["rg", "sexo", "estado_civil", "profissao", "responsavel"]:
                 dados[campo] = None if campo == "estado_civil" else ""
             dados["data_nascimento"] = None
@@ -216,7 +216,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
     telefone = _campo_texto(_("Telefone"), 16, inputmode="tel")
 
     class Meta:
-        model = PessoaRelacionada
+        model = RelatedPerson
         fields = ["vinculo", "outro_paciente", "nome", "telefone", "observacao"]
         widgets = {"outro_paciente": forms.HiddenInput}
         help_texts = {"nome": _("Só para quem não é paciente da clínica.")}
@@ -226,7 +226,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         self.instance.paciente = paciente
         if self.instance.clinica_id is None:
             self.instance.clinica_id = paciente.clinica_id
-        self.fields["outro_paciente"].queryset = Paciente.objects.exclude(pk=paciente.pk)
+        self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=paciente.pk)
 
     def clean_telefone(self):
         return normalizar_telefone(self.cleaned_data.get("telefone"))
@@ -241,7 +241,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         dados["nome"] = nome
         if (
             outro
-            and PessoaRelacionada.objects.filter(
+            and RelatedPerson.objects.filter(
                 paciente=self.instance.paciente, outro_paciente=outro, vinculo=dados.get("vinculo")
             )
             .exclude(pk=self.instance.pk)

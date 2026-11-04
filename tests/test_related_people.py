@@ -4,15 +4,15 @@ import pytest
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import nome_do_modelo
 from apps.core.isolation import ClinicaDiferente, sem_isolamento, usar_clinica
 from apps.core.models import Papel
-from apps.patients.models import Paciente, PessoaRelacionada
+from apps.patients.models import Patient, RelatedPerson
 
 pytestmark = pytest.mark.django_db
 
-MAE = PessoaRelacionada.Vinculo.MAE
+MAE = RelatedPerson.Relationship.MAE
 
 
 @pytest.fixture
@@ -23,8 +23,8 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def familia(clinica_a):
     with usar_clinica(clinica_a):
-        filha = Paciente.objects.create(nome="Ana Fictícia")
-        mae = Paciente.objects.create(nome="Rosa Fictícia", whatsapp="54999990001")
+        filha = Patient.objects.create(nome="Ana Fictícia")
+        mae = Patient.objects.create(nome="Rosa Fictícia", whatsapp="54999990001")
         return filha, mae
 
 
@@ -36,7 +36,7 @@ def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, 
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        vinculo = PessoaRelacionada.objects.get()
+        vinculo = RelatedPerson.objects.get()
     assert vinculo.telefone_exibido == "54999990001"  # the other patient's own phone
     ficha_filha = recepcao.get(reverse("patients:record", args=[filha.pk])).content.decode()
     assert "Mãe:" in ficha_filha and "Rosa Fictícia" in ficha_filha
@@ -48,7 +48,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, recepcao):
     filha, _ = familia
     url = reverse("patients:related_new", args=[filha.pk])
     dados = {
-        "vinculo": PessoaRelacionada.Vinculo.EMERGENCIA,
+        "vinculo": RelatedPerson.Relationship.EMERGENCIA,
         "outro_paciente": "",
         "nome": "Contato Inventado",
         "telefone": "(54) 99999-0002",
@@ -56,7 +56,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, recepcao):
     }
     assert recepcao.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
-        contato = PessoaRelacionada.objects.get()
+        contato = RelatedPerson.objects.get()
     assert (contato.telefone, contato.nome_exibido) == ("54999990002", "Contato Inventado")
     impressa = recepcao.get(reverse("patients:print", args=[filha.pk])).content.decode()
     assert "Contato Inventado" in impressa and "Contato de emergência" in impressa
@@ -68,7 +68,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, recepcao):
     assert recepcao.get(reverse("patients:related_remove", args=[contato.pk])).status_code == 302
     remover = recepcao.post(reverse("patients:related_remove", args=[contato.pk]))
     assert remover.status_code == 302
-    assert not PessoaRelacionada.todos.exists()
+    assert not RelatedPerson.todos.exists()
 
 
 @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ def test_validacoes(dados, campo, familia, recepcao):
 def test_vinculo_repetido(clinica_a, familia, recepcao):
     filha, mae = familia
     with usar_clinica(clinica_a):
-        PessoaRelacionada.objects.create(paciente=filha, outro_paciente=mae, vinculo=MAE)
+        RelatedPerson.objects.create(paciente=filha, outro_paciente=mae, vinculo=MAE)
     resposta = recepcao.post(
         reverse("patients:related_new", args=[filha.pk]),
         {"vinculo": MAE, "outro_paciente": mae.pk},
@@ -104,21 +104,21 @@ def test_vinculo_repetido(clinica_a, familia, recepcao):
 def test_banco_exige_paciente_ou_nome(clinica_a, familia):
     filha, _ = familia
     with usar_clinica(clinica_a), pytest.raises(IntegrityError), transaction.atomic():
-        PessoaRelacionada.objects.create(paciente=filha, vinculo=MAE)
+        RelatedPerson.objects.create(paciente=filha, vinculo=MAE)
 
 
 def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia):
     filha, _ = familia
     with usar_clinica(clinica_b):
-        outra = Paciente.objects.create(nome="De outra clínica")
+        outra = Patient.objects.create(nome="De outra clínica")
     with sem_isolamento(), pytest.raises(ClinicaDiferente):
-        PessoaRelacionada(paciente=filha, outro_paciente=outra, vinculo=MAE).save()
+        RelatedPerson(paciente=filha, outro_paciente=outra, vinculo=MAE).save()
 
 
 def test_outra_clinica_nao_ve_nem_altera(clinica_a, clinica_b, familia, criar_usuario, cliente_de):
     filha, _ = familia
     with usar_clinica(clinica_a):
-        contato = PessoaRelacionada.objects.create(paciente=filha, vinculo=MAE, nome="Fictícia")
+        contato = RelatedPerson.objects.create(paciente=filha, vinculo=MAE, nome="Fictícia")
     intruso = cliente_de(criar_usuario("recepcao_b_rel", clinica_b, Papel.RECEPCAO))
     assert intruso.get(reverse("patients:related_edit", args=[contato.pk])).status_code == 404
     assert intruso.get(reverse("patients:related_new", args=[filha.pk])).status_code == 404
@@ -139,17 +139,17 @@ def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
 ):
     filha, mae = familia
     with usar_clinica(clinica_a):
-        de_filha = PessoaRelacionada.objects.create(
-            paciente=filha, vinculo=PessoaRelacionada.Vinculo.EMERGENCIA, nome="NOME-SIGILOSO"
+        de_filha = RelatedPerson.objects.create(
+            paciente=filha, vinculo=RelatedPerson.Relationship.EMERGENCIA, nome="NOME-SIGILOSO"
         )
-        PessoaRelacionada.objects.create(paciente=mae, outro_paciente=filha, vinculo=MAE)
+        RelatedPerson.objects.create(paciente=mae, outro_paciente=filha, vinculo=MAE)
         filha.arquivado = True
         filha.save()
     admin = cliente_de(criar_usuario("admin_rel", clinica_a, Papel.ADMIN))
     assert admin.post(reverse("patients:delete", args=[filha.pk])).status_code == 302
-    assert not PessoaRelacionada.todos.exists()
-    registros = RegistroAuditoria.objects.filter(
-        modelo=nome_do_modelo(PessoaRelacionada), objeto_id=str(de_filha.pk)
+    assert not RelatedPerson.todos.exists()
+    registros = AuditEntry.objects.filter(
+        modelo=nome_do_modelo(RelatedPerson), objeto_id=str(de_filha.pk)
     )
     assert registros.exists()
     assert "NOME-SIGILOSO" not in str(list(registros.values()))

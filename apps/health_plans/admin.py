@@ -1,16 +1,16 @@
 from django.contrib import admin
 
-from .models import Carteirinha, Convenio
+from .models import HealthPlan, MemberCard
 
 
-@admin.register(Convenio)
+@admin.register(HealthPlan)
 class ConvenioAdmin(admin.ModelAdmin):
     list_display = ["nome", "registro", "ativo", "clinica"]
     list_filter = ["clinica", "ativo"]
     search_fields = ["nome", "registro"]
 
 
-@admin.register(Carteirinha)
+@admin.register(MemberCard)
 class CarteirinhaAdmin(admin.ModelAdmin):
     list_display = ["paciente", "convenio", "plano", "numero", "validade", "ativa"]
     list_filter = ["clinica", "convenio", "ativa"]

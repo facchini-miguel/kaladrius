@@ -11,7 +11,7 @@ from apps.core.models import Papel
 from apps.core.templatetags.formats import whatsapp
 from apps.core.validators import nono_digito, normalizar_telefone
 from apps.legacy.anonymization import _mesmo_tamanho
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 
 
 @pytest.mark.parametrize(
@@ -60,7 +60,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.get()
+        paciente = Patient.objects.get()
     assert (paciente.telefone_celular, paciente.whatsapp, paciente.telefone_residencial) == (
         "54981234567",
         "54981234567",

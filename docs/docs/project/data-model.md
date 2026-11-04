@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Data model
 
-The code's names are being moved to English (decisions 155 and 156): the models named here in English already are; the others, and the fields, still have their Portuguese names. The database keeps its table and column names. See the glossary in README.md.
+The code's names are being moved to English (decisions 155 to 157): the models are already in English; the fields still have their Portuguese names. The database keeps its table and column names. See the glossary in README.md.
 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinica` key. No query runs without filtering by the current clinic.
@@ -18,9 +18,9 @@ The code's names are being moved to English (decisions 155 and 156): the models 
 ### Platform
 | Entity | Main fields | Notes |
 |---|---|---|
-| `Clinica` | name, document (CPF/CNPJ), contact, active, schedule settings (start, end, slot length) | The tenant |
+| `Clinic` | name, document (CPF/CNPJ), contact, active, schedule settings (start, end, slot length) | The tenant |
 | `Usuario` | login, name, email, password (Argon2), active, language | Django user |
-| `Vinculo` | user, clinic, role, active | A user can work at more than one clinic |
+| `Membership` | user, clinic, role, active | A user can work at more than one clinic |
 
 ### Roles and permissions (replaces `sist_pessoasgrupos` / `sist_modulosperm`)
 | Role | Legacy equivalent | Default access |
@@ -52,11 +52,11 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 ### Clinic
 | Entity | Main fields | Legacy table |
 |---|---|---|
-| `Paciente` (patient) | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), WhatsApp, email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
-| `PessoaRelacionada` (related person, decision 101) | clinic, patient, relationship (mother, father, legal guardian, spouse, child, sibling, grandparent, grandchild, other relative, emergency contact, contact), another patient of the clinic **or** a name, phone, note | `id_pessoas_relac` |
-| `Profissional` (practitioner) | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
-| `TipoAtendimento` (appointment type) | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
-| `Agendamento` (appointment) | clinic, practitioner, type, start and end (date and time), patient (optional), description, status (booked, came, missed, cancelled; since 0.24), series (recurrence), created by | `agendax` |
+| `Patient` | clinic, type (individual/company), name, company name, CPF/CNPJ, ID card, state registration, sex, marital status, birth date, occupation, guardian, phones (home, work, mobile), WhatsApp, email, address (postal code, state, city, district, street, number, complement), notes, active, archived (with when and by whom), created/updated timestamps | `pessoas` |
+| `RelatedPerson` (decision 101) | clinic, patient, relationship (mother, father, legal guardian, spouse, child, sibling, grandparent, grandchild, other relative, emergency contact, contact), another patient of the clinic **or** a name, phone, note | `id_pessoas_relac` |
+| `Practitioner` | clinic, name, professional license (CRO/CRM…), color, commission (%, since 0.19), active, user (optional) | `dentistas` |
+| `AppointmentType` | clinic, name, color, active | `agenda_cor` (Surgery, Prosthetics…) |
+| `Appointment` | clinic, practitioner, type, start and end (date and time), patient (optional), description, status (booked, came, missed, cancelled; since 0.24), series (recurrence), created by | `agendax` |
 | `Recall` | clinic, patient, date, description, done, created by | `agenda` (is_rechamada) |
 
 ### Reference (global)
@@ -65,26 +65,26 @@ The "Clinic users" module is the **Records > Team** screen (version 0.8.0): the 
 ### Finance (version 0.15.0)
 | Entity | Main fields | Notes |
 |---|---|---|
-| `Conta` (account) | clinic, name, type (cash, bank, card machine), initial balance (0.16.0), active | Where the money goes. Every clinic starts with Caixa (cash) and Banco (bank) |
-| `Categoria` (category) | clinic, name, type (income, expense), active | Every clinic starts with 3 income and 8 expense categories; administrators add others |
-| `Lancamento` (entry) | clinic, type (receivable, payable), description, category, patient (optional) or payer as text, practitioner (optional), total, date, notes, cancelled (with reason, when and who), created by | Never deleted: cancelled |
-| `Parcela` (installment) | clinic, entry, number, due date, amount | Paid amount and balance are computed from the payments |
-| `Pagamento` (payment) | clinic, installment, date, amount received, interest and late fee (included in the amount), discount (administrators only), method (each country offers its own, decision 123: cash, Pix, debit, credit, HSA/FSA card, transfer, digital wallet, direct debit, boleto, BPAY, check, patient financing), account, card brand, installments and transaction code, note, reversed (with reason, when and who), received by | Deducted from the installment: amount − interest + discount. Never stores the card number |
+| `FinancialAccount` | clinic, name, type (cash, bank, card machine), initial balance (0.16.0), active | Where the money goes. Every clinic starts with Caixa (cash) and Banco (bank) |
+| `Category` | clinic, name, type (income, expense), active | Every clinic starts with 3 income and 8 expense categories; administrators add others |
+| `Entry` | clinic, type (receivable, payable), description, category, patient (optional) or payer as text, practitioner (optional), total, date, notes, cancelled (with reason, when and who), created by | Never deleted: cancelled |
+| `Installment` | clinic, entry, number, due date, amount | Paid amount and balance are computed from the payments |
+| `Payment` | clinic, installment, date, amount received, interest and late fee (included in the amount), discount (administrators only), method (each country offers its own, decision 123: cash, Pix, debit, credit, HSA/FSA card, transfer, digital wallet, direct debit, boleto, BPAY, check, patient financing), account, card brand, installments and transaction code, note, reversed (with reason, when and who), received by | Deducted from the installment: amount − interest + discount. Never stores the card number |
 
-| `Caixa` (cash drawer) | clinic, account, opened at/by, amount counted at opening, closed at/by, expected and counted amounts at closing, note | Daily cash (0.17.0). One open per account; the expected amount is stored at closing, so later reversals do not change a closed drawer |
-| `MovimentoCaixa` (drawer movement) | clinic, drawer, type (withdrawal, top-up), amount, other account (optional), reason, created by | A withdrawal to another account (bank deposit) moves the balance between accounts; without another account, the money leaves or enters the system and shows in the cash flow |
-| `Comissao` (commission) | clinic, practitioner, receipts up to, percentage, amount received, commission of reversals deducted, amount, payable, cancelled, created by | Since 0.19. The payments covered point to it (`Pagamento.comissao`), and the reversal of one of them, deducted later, points to the commission that deducted it (`Pagamento.comissao_estorno`); so no receipt is paid out twice. Cancelling the payable cancels the commission and frees the payments |
-| `ImportacaoExtrato` (statement import) | clinic, account, file, bank code, bank account, start, end, bank balance and date, new and already imported transactions, imported by/at | Since 0.20. The OFX file is not kept, only the transactions |
-| `TransacaoBancaria` (bank transaction) | clinic, account, import, bank identifier (FITID), date, amount (positive in, negative out), description, bank type, status (pending, reconciled, ignored), payment or drawer movement (at most one), reason, reconciled by/at | Unique per account and identifier: importing again does not duplicate. A payment reconciles with one transaction only; once reversed, the transaction goes back to pending |
+| `CashRegister` | clinic, account, opened at/by, amount counted at opening, closed at/by, expected and counted amounts at closing, note | Daily cash (0.17.0). One open per account; the expected amount is stored at closing, so later reversals do not change a closed drawer |
+| `CashMovement` | clinic, drawer, type (withdrawal, top-up), amount, other account (optional), reason, created by | A withdrawal to another account (bank deposit) moves the balance between accounts; without another account, the money leaves or enters the system and shows in the cash flow |
+| `Commission` | clinic, practitioner, receipts up to, percentage, amount received, commission of reversals deducted, amount, payable, cancelled, created by | Since 0.19. The payments covered point to it (`Pagamento.comissao`), and the reversal of one of them, deducted later, points to the commission that deducted it (`Pagamento.comissao_estorno`); so no receipt is paid out twice. Cancelling the payable cancels the commission and frees the payments |
+| `StatementImport` | clinic, account, file, bank code, bank account, start, end, bank balance and date, new and already imported transactions, imported by/at | Since 0.20. The OFX file is not kept, only the transactions |
+| `BankTransaction` | clinic, account, import, bank identifier (FITID), date, amount (positive in, negative out), description, bank type, status (pending, reconciled, ignored), payment or drawer movement (at most one), reason, reconciled by/at | Unique per account and identifier: importing again does not duplicate. A payment reconciles with one transaction only; once reversed, the transaction goes back to pending |
 
-Payables (0.16.0) use the same entities. Since 0.37.0 a payable may link a registered `Fornecedor` (supplier: individual or company, CPF/CNPJ unique per clinic, phone, WhatsApp, e-mail, active), whose name is also copied to the payer field; a one-off payment still takes a typed name. The `pessoal` app (decision 099) has `Funcionario` (employee), `Salario` (salary history from a date) and `Folha` (one month's pay per employee: salary, overtime hours and rate, days of absence, and the payable it was launched as). Yearly goals are `Planejamento` rows (year, group, amount; decision 098). Categories may belong to a `GrupoContabil` (chart of accounts: name, type, optional parent group and code, active; decision 097). An entry may also have a `CentroCusto` (cost center: name, active; one per entry, optional, decision 095). Health plans (`convenios` app, 0.37.0) are `Convenio` (name, ANS registration, phone, active) and the patient's `Carteirinha` (plan, plan type, card number unique per plan, valid until, holder, active). Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
+Payables (0.16.0) use the same entities. Since 0.37.0 a payable may link a registered `Supplier`, whose name is also copied to the payer field; a one-off payment still takes a typed name. The `pessoal` app (decision 099) has `Employee`, `Salary` and `Payroll`. Yearly goals are `Planning` rows (year, group, amount; decision 098). Categories may belong to a `AccountGroup`. An entry may also have a `CostCenter`. Health plans (`convenios` app, 0.37.0) are `HealthPlan` and the patient's `MemberCard`. Each account's balance is the initial balance plus money in minus money out (non-reversed payments). Amounts are `Decimal` with 2 places. The installment row is locked when receiving, so two people cannot pay the same installment beyond its balance. When a patient is permanently deleted, their entries stay (accounting history) with the payer "Paciente excluído (código N)", and their audit entries lose the personal data.
 
 ### Estimates (version 0.18.0)
 | Entity | Main fields | Notes |
 |---|---|---|
-| `Procedimento` (procedure) | clinic, name, code (in the country's coding: TUSS, CDT…, decision 125), price, income category, active | The clinic's price list |
-| `Orcamento` (estimate) | clinic, patient, practitioner, date, validity, status (open, approved, refused), discount (administrators only), notes, receivable, approved or refused at/by, created by | Once approved, it becomes a receivable `Lancamento` and no longer changes |
-| `ItemOrcamento` (estimate item) | clinic, estimate, procedure (optional), description, code (copied from the procedure), teeth (FDI, comma-separated; shown in the clinic's numbering, decision 122), surfaces or region, quantity, unit price | Description and price copied from the list at the time; changing the list does not change estimates |
+| `Procedure` | clinic, name, code (in the country's coding: TUSS, CDT…, decision 125), price, income category, active | The clinic's price list |
+| `Estimate` | clinic, patient, practitioner, date, validity, status (open, approved, refused), discount (administrators only), notes, receivable, approved or refused at/by, created by | Once approved, it becomes a receivable `Entry` and no longer changes |
+| `EstimateItem` | clinic, estimate, procedure (optional), description, code (copied from the procedure), teeth (FDI, comma-separated; shown in the clinic's numbering, decision 122), surfaces or region, quantity, unit price | Description and price copied from the list at the time; changing the list does not change estimates |
 
 When a patient is permanently deleted, their estimates are deleted (teeth are health data) and their audit entries lose the personal data.
 
@@ -92,16 +92,16 @@ When a patient is permanently deleted, their estimates are deleted (teeth are he
 | Entity | Purpose |
 |---|---|
 | Releases | Read from `releases.yaml` (not stored in the database). See [versioning-and-releases.md](versioning.md) |
-| `RegistroAuditoria` (audit log) | Who created, changed or deleted what and when (LGPD) |
+| `AuditEntry` | Who created, changed or deleted what and when (LGPD) |
 | `Backup` | Each daily backup sent to Cloud Storage, recorded by the server. If the newest is older than 26 hours, superusers see a warning at the top of every screen |
 
 ## Schedule
-- `Agendamento` stores start and end as timezone-aware datetimes. Appointments of the same weekly recurrence share the `serie` field.
+- `Appointment` stores start and end as timezone-aware datetimes. Appointments of the same weekly recurrence share the `serie` field.
 - Rules: times aligned to the clinic's slot length and within opening hours; no overlap for the same practitioner (back-to-back slots are allowed).
 - Overlaps are checked in the form (with a message saying who conflicts) **and** by a PostgreSQL exclusion constraint (`btree_gist`), which holds even when two people save at the same time. **Cancelled** appointments (0.24) are left out of both checks: they stay in the history but free the slot.
 
 ## Audit log (LGPD)
-- `RegistroAuditoria` (`apps/audit`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
+- `AuditEntry` (`apps/audit`) stores **who**, **when**, **from which IP**, **which action** and, for changes, the **before and after** of each field.
 - Recorded automatically (Django signals): create, change and delete of Paciente, Agendamento, Rechamada, Profissional, TipoAtendimento, Clinica, Vinculo and Usuario. Also: opening a patient record, log in, log out and refused login attempts.
 - **Never** stores passwords or their hash (a password change only shows as "changed").
 - Entries keep clinic and user ids without a hard foreign key: history survives deleting a user or clinic. They cannot be edited or deleted (read-only admin), with one exception: refused login attempts, which hold the username typed, are deleted after 30 days by the `apply_retention` command, run daily by the server together with the backup (decision 045). In the backups they last another 30 days. When a patient is permanently deleted, their entries lose the personal data (see below).

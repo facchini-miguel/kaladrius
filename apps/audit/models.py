@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class RegistroAuditoria(models.Model):
+class AuditEntry(models.Model):
     """Who did what, when and from where (LGPD accountability). Never edited or deleted,
     except failed logins, deleted after 30 days by the apply_retention command, and the
     personal data of a patient deleted at their request (registro.anonimizar).
@@ -26,7 +26,7 @@ class RegistroAuditoria(models.Model):
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
     clinica = models.ForeignKey(
-        "core.Clinica",
+        "core.Clinic",
         on_delete=models.DO_NOTHING,
         db_constraint=False,
         null=True,
@@ -53,6 +53,7 @@ class RegistroAuditoria(models.Model):
     ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
+        db_table = "auditoria_registroauditoria"
         verbose_name = _("registro de auditoria")
         verbose_name_plural = _("registros de auditoria")
         ordering = ["-momento", "-pk"]

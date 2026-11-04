@@ -11,9 +11,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from apps.account import services as conta_servicos
-from apps.audit.models import RegistroAuditoria
+from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
-from apps.core.models import Vinculo
+from apps.core.models import Membership
 from apps.core.permissions import Acao, Modulo, exige_permissao
 
 from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_exclusiva
@@ -22,14 +22,14 @@ from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_excl
 def _vinculo(request, pk):
     """A membership of the current clinic (404 for other clinics)."""
     return get_object_or_404(
-        Vinculo.objects.select_related("usuario"), pk=pk, clinica=request.clinica
+        Membership.objects.select_related("usuario"), pk=pk, clinica=request.clinica
     )
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.VER)
 def lista(request):
     vinculos = (
-        Vinculo.objects.filter(clinica=request.clinica)
+        Membership.objects.filter(clinica=request.clinica)
         .select_related("usuario")
         .order_by("-ativo", "usuario__first_name", "usuario__username")
     )
@@ -119,7 +119,7 @@ def duas_etapas(request, pk):
     ):
         conta_servicos.desativar(usuario)
         registrar(
-            RegistroAuditoria.Acao.ALTERAR,
+            AuditEntry.Acao.ALTERAR,
             usuario,
             descricao=f"{usuario}: verificação em duas etapas removida pelo administrador",
         )

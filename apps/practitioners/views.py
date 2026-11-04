@@ -6,24 +6,24 @@ from django.utils.translation import gettext as _
 from apps.core.permissions import Acao, Modulo, exige_permissao
 
 from .forms import ProfissionalForm
-from .models import Profissional
+from .models import Practitioner
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.VER)
 def lista(request):
-    profissionais = Profissional.objects.select_related("usuario")
+    profissionais = Practitioner.objects.select_related("usuario")
     return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.CRIAR)
 def novo(request):
-    return _formulario(request, Profissional())
+    return _formulario(request, Practitioner())
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.ALTERAR)
 def editar(request, pk):
     # Profissional.objects only sees the current clinic: other clinics' ids give 404.
-    return _formulario(request, get_object_or_404(Profissional.objects, pk=pk))
+    return _formulario(request, get_object_or_404(Practitioner.objects, pk=pk))
 
 
 def _formulario(request, profissional):
@@ -37,7 +37,7 @@ def _formulario(request, profissional):
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.EXCLUIR)
 def excluir(request, pk):
-    profissional = get_object_or_404(Profissional.objects, pk=pk)
+    profissional = get_object_or_404(Practitioner.objects, pk=pk)
     if request.method == "POST":
         try:
             profissional.delete()

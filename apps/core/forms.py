@@ -9,7 +9,7 @@ from django.utils.formats import date_format, get_format
 from django.utils.translation import gettext_lazy as _
 
 from . import countries, currencies, identification
-from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinica, ModuloClinico, ModuloDaClinica
+from .models import ESPECIALIDADES, MODULOS_GERAIS, Clinic, ClinicModule, ModuloClinico
 from .modules import configurar, faltando, iniciais
 
 
@@ -144,7 +144,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         ligados = set(
-            ModuloDaClinica.todos.filter(clinica=self.instance, ativo=True).values_list(
+            ClinicModule.todos.filter(clinica=self.instance, ativo=True).values_list(
                 "codigo", flat=True
             )
             if self.instance.pk
@@ -255,7 +255,7 @@ class ClinicaForm(ModulosClinicosForm):
     documento = campo_documento()
 
     class Meta:
-        model = Clinica
+        model = Clinic
         fields = [
             "nome",
             "area",
@@ -306,7 +306,7 @@ class ClinicaForm(ModulosClinicosForm):
 
         Past appointments are not checked: the history may have other hours.
         """
-        from apps.schedule.models import Agendamento
+        from apps.schedule.models import Appointment
 
         def minutos(hora):
             return hora.hour * 60 + hora.minute
@@ -316,7 +316,7 @@ class ClinicaForm(ModulosClinicosForm):
             return None
         # Django Admin runs without the request's clinic isolation. Validate only the
         # clinic being edited, including when this form is used outside a request.
-        futuros = Agendamento.todos.filter(clinica=self.instance, fim__gt=timezone.now()).order_by(
+        futuros = Appointment.todos.filter(clinica=self.instance, fim__gt=timezone.now()).order_by(
             "inicio"
         )
         for comeca, termina in futuros.values_list("inicio", "fim"):
@@ -351,7 +351,7 @@ class NovaClinicaForm(ModulosClinicosForm):
         return super().save(commit)
 
     class Meta:
-        model = Clinica
+        model = Clinic
         fields = [
             "nome",
             "area",

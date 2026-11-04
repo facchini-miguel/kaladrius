@@ -10,7 +10,7 @@ from apps.core import legislation
 from apps.core.countries import PAISES
 from apps.core.isolation import usar_clinica
 from apps.finance import services
-from apps.finance.models import Lancamento
+from apps.finance.models import Entry
 from tests.test_finance import HOJE, cenario, entrar, parcelas_de  # noqa: F401
 
 pytestmark = pytest.mark.django_db
@@ -60,7 +60,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     with usar_clinica(clinica):
         lancamento = services.criar_lancamento(
             clinica=clinica,
-            tipo=Lancamento.Tipo.RECEBER,
+            tipo=Entry.Tipo.RECEBER,
             paciente=cenario["paciente"],
             descricao="Limpeza",
             categoria=cenario["categoria"],

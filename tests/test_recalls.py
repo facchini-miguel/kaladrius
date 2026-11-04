@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
 from apps.core.models import Papel
-from apps.patients.models import Paciente
+from apps.patients.models import Patient
 from apps.recalls.models import Recall
 
 pytestmark = pytest.mark.django_db
@@ -16,7 +16,7 @@ DIA = datetime.date(2031, 3, 5)
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        paciente = Paciente.objects.create(nome="João Rechamada")
+        paciente = Patient.objects.create(nome="João Rechamada")
     return {
         "clinica": clinica_a,
         "paciente": paciente,
@@ -92,7 +92,7 @@ def test_filtros_da_lista(cenario):
     criar(clinica, paciente, DIA)
     criar(clinica, paciente, DIA + datetime.timedelta(days=30), concluida=True)
     with usar_clinica(clinica):
-        outro = Paciente.objects.create(nome="Ana Outra")
+        outro = Patient.objects.create(nome="Ana Outra")
     criar(clinica, outro, DIA + datetime.timedelta(days=60))
     url = reverse("recalls:list")
 
@@ -133,7 +133,7 @@ def test_agenda_recebe_as_urls_de_rechamadas(cenario, criar_profissional):
 
 def test_isolamento(cenario, clinica_b):
     with usar_clinica(clinica_b):
-        paciente_b = Paciente.objects.create(nome="Paciente B")
+        paciente_b = Patient.objects.create(nome="Paciente B")
     de_b = criar(clinica_b, paciente_b)
     cliente = cenario["cliente"]
     assert cliente.get(reverse("recalls:edit", args=[de_b.pk])).status_code == 404
@@ -174,12 +174,12 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 def test_aniversariantes_do_mes(cenario):
     clinica = cenario["clinica"]
     with usar_clinica(clinica):
-        Paciente.objects.create(nome="Março 20", data_nascimento=datetime.date(1990, 3, 20))
-        Paciente.objects.create(nome="Março 2", data_nascimento=datetime.date(2000, 3, 2))
-        Paciente.objects.create(
+        Patient.objects.create(nome="Março 20", data_nascimento=datetime.date(1990, 3, 20))
+        Patient.objects.create(nome="Março 2", data_nascimento=datetime.date(2000, 3, 2))
+        Patient.objects.create(
             nome="Inativo", data_nascimento=datetime.date(1990, 3, 1), ativo=False
         )
-        Paciente.objects.create(nome="Nascido em abril", data_nascimento=datetime.date(1990, 4, 1))
+        Patient.objects.create(nome="Nascido em abril", data_nascimento=datetime.date(1990, 4, 1))
     resposta = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
     assert [p.nome for p, _ in resposta.context["linhas"]] == ["Março 2", "Março 20"]
     assert "Nascido em abril" not in resposta.content.decode()

@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.core.isolation import usar_clinica
-from apps.core.models import Clinica
+from apps.core.models import Clinic
 from apps.finance import services
-from apps.finance.models import Conta, Lancamento, Pagamento
+from apps.finance.models import Entry, FinancialAccount, Payment
 
 # Lines a bank shows that the clinic never recorded: (description, amount).
 EXTRAS = [
@@ -38,22 +38,22 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, clinica, conta, dias, **options):
-        alvo = Clinica.objects.filter(nome=clinica).first()
+        alvo = Clinic.objects.filter(nome=clinica).first()
         if alvo is None:
             raise CommandError(f"Clínica “{clinica}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         hoje = timezone.localdate()
         inicio = hoje - datetime.timedelta(days=dias)
         with usar_clinica(alvo):
-            alvo_conta = Conta.objects.filter(nome=conta).first()
+            alvo_conta = FinancialAccount.objects.filter(nome=conta).first()
             if alvo_conta is None:
                 raise CommandError(f"Conta “{conta}” não encontrada.")
             linhas = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
-            for p in Pagamento.objects.filter(
+            for p in Payment.objects.filter(
                 conta=alvo_conta, estornado=False, data__range=(inicio, hoje)
             ).select_related("parcela__lancamento"):
-                entrada = p.parcela.lancamento.tipo == Lancamento.Tipo.RECEBER
+                entrada = p.parcela.lancamento.tipo == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
                     fora += p.valor if entrada else -p.valor
                     continue

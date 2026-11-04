@@ -55,7 +55,7 @@ deploy/           production compose, Caddyfile, server scripts
 docs/             this documentation site: installation, user manual, decisions
 ```
 
-Code names follow the domain in **Portuguese** (`Paciente`, `Agendamento`), with comments in English. Each clinic's data carries a `clinica` key, and the managers filter by the clinic in use.
+Code names are in **English**: the models already (`Patient`, `Appointment`, decisions 156 and 157); fields, functions and variables still have Portuguese names, moving to English next. Comments are in English; the screens are in Portuguese, with translations. Each clinic's data carries a `clinica` key, and the managers filter by the clinic in use.
 
 ## Decisions
 
