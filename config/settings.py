@@ -18,10 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def env(name, padrao=None):
-    valor = os.environ.get(name, padrao)
-    if valor is None:
+    value = os.environ.get(name, padrao)
+    if value is None:
         raise ImproperlyConfigured(f"Missing required environment variable: {name}")
-    return valor
+    return value
 
 
 def env_bool(name, padrao=False):

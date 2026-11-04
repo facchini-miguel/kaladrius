@@ -74,9 +74,9 @@ class Relatorio:
 _MOJIBAKE = re.compile("[\u00c2\u00c3][\u0080-\u00bf]")
 
 
-def _texto(valor):
+def _texto(value):
     """Clean text: fixes UTF-8 read as Latin-1 ("JoÃ£o") and normalizes line breaks."""
-    texto = "" if valor is None else str(valor)
+    texto = "" if value is None else str(value)
     texto = _MOJIBAKE.sub(lambda m: m.group().encode("latin-1").decode("utf-8"), texto)
     return texto.replace("\r\n", "\n").replace("\r", "\n").strip()
 
@@ -87,22 +87,22 @@ def _chave(texto):
     return re.sub(r"[^a-z0-9]", "", sem_acentos.lower())
 
 
-def _data(valor):
+def _data(value):
     try:
-        return datetime.date.fromisoformat(str(valor))
+        return datetime.date.fromisoformat(str(value))
     except ValueError:
         return None  # MySQL "0000-00-00"
 
 
-def _hora(valor):
+def _hora(value):
     try:
-        return datetime.time.fromisoformat(str(valor))
+        return datetime.time.fromisoformat(str(value))
     except ValueError:
         return None
 
 
-def _email(valor):
-    email = _texto(valor)
+def _email(value):
+    email = _texto(value)
     if not email:
         return "", None
     try:
@@ -112,14 +112,14 @@ def _email(valor):
     return email, None
 
 
-def _documento(bruto, tipo):
+def _documento(bruto, kind):
     """(valid document, None) or ("", original text) when it cannot be used."""
     original = _texto(bruto)
     documento = normalizar_cnpj(original)
     if not documento:
         return "", None
     so_digitos = documento.isascii() and documento.isdigit()
-    if tipo == Patient.Tipo.FISICA:
+    if kind == Patient.Tipo.FISICA:
         if so_digitos and 8 <= len(documento) <= 11:
             documento = documento.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
@@ -129,12 +129,12 @@ def _documento(bruto, tipo):
     return (documento, None) if cnpj_valido(documento) else ("", original)
 
 
-def _cabe(valor, tamanho, rotulo, extras):
+def _cabe(value, tamanho, rotulo, extras):
     """The value if it fits the field; otherwise it goes in full to the notes."""
-    if len(valor) <= tamanho:
-        return valor
-    extras.append(f"{rotulo}: {valor}")
-    return valor[:tamanho]
+    if len(value) <= tamanho:
+        return value
+    extras.append(f"{rotulo}: {value}")
+    return value[:tamanho]
 
 
 class _Importador:
@@ -172,9 +172,9 @@ class _Importador:
         tipos = {t["id"]: _texto(t["nome"]).title() for t in self.t.get("tipo_endereco", [])}
         resultado = {}
         for linha in self.t.get("logradouro", []):
-            tipo = tipos.get(linha["id_tipo_endereco"], "")
+            kind = tipos.get(linha["id_tipo_endereco"], "")
             name = _texto(linha["nome"])
-            resultado[linha["id"]] = f"{tipo} {name}" if tipo and tipo != "Outros" else name
+            resultado[linha["id"]] = f"{kind} {name}" if kind and kind != "Outros" else name
         return resultado
 
     # --- Steps -------------------------------------------------------------------
@@ -204,23 +204,23 @@ class _Importador:
         mapa = {}
         for linha in self.t.get("agenda_cor", []):
             name = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
-            tipo = existentes.get(_chave(name))
-            if tipo is None:
+            kind = existentes.get(_chave(name))
+            if kind is None:
                 cor = _texto(linha["cor"])
                 cor = cor if re.fullmatch(r"#[0-9a-fA-F]{6}", cor) else "#0d6efd"
-                tipo = AppointmentType.objects.create(clinic=clinic, name=name, cor=cor.lower())
-                existentes[_chave(name)] = tipo
+                kind = AppointmentType.objects.create(clinic=clinic, name=name, cor=cor.lower())
+                existentes[_chave(name)] = kind
                 self.relatorio.tipos_criados += 1
-            mapa[linha["id"]] = tipo
+            mapa[linha["id"]] = kind
         return mapa
 
     def _paciente(self, linha, clinic, cidades, estados_civis, logradouros, bairros, usados):
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {linha['id']}"]
-        tipo = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
+        kind = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
         name = _texto(linha["nome"]) or f"Sem nome (código {linha['id']})"
 
-        documento, original = _documento(linha["cpf_cnpj"], tipo)
+        documento, original = _documento(linha["cpf_cnpj"], kind)
         if documento and documento in usados:
             documento, original = "", _texto(linha["cpf_cnpj"])
             avisos["CPF/CNPJ repetido (guardado nas observações)"] += 1
@@ -289,10 +289,10 @@ class _Importador:
             if _texto(linha[legado]):
                 extras.append(f"{rotulo}: {_texto(linha[legado])}")
 
-        pf = tipo == Patient.Tipo.FISICA
+        pf = kind == Patient.Tipo.FISICA
         patient = Patient(
             clinic=clinic,
-            tipo=tipo,
+            kind=kind,
             name=_cabe(name, 200, "Nome completo", extras),
             razao_social=""
             if pf
@@ -356,15 +356,15 @@ class _Importador:
         novos = []
         for linha in sorted(self.t.get("agendax", []), key=lambda linha: linha["id"]):
             practitioner = profissionais.get(linha["id_dentista"])
-            tipo = tipos.get(linha["id_cor"])
+            kind = tipos.get(linha["id_cor"])
             dia = _data(linha["data_marcar"])
             inicio, fim = _hora(linha["hora_inicial"]), _hora(linha["hora_final"])
-            if None in (practitioner, tipo, dia, inicio, fim):
+            if None in (practitioner, kind, dia, inicio, fim):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
-            description = _texto(linha["descricao"]) or tipo.name
+            description = _texto(linha["descricao"]) or kind.name
             inicio = timezone.make_aware(datetime.datetime.combine(dia, inicio))
             fim = timezone.make_aware(datetime.datetime.combine(dia, fim))
             if fim <= inicio:
@@ -377,7 +377,7 @@ class _Importador:
                 Appointment(
                     clinic=practitioner.clinic,
                     practitioner=practitioner,
-                    tipo=tipo,
+                    kind=kind,
                     inicio=inicio,
                     fim=fim,
                     description=description,

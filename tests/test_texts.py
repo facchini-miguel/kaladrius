@@ -25,7 +25,7 @@ def recepcao(clinica_a, criar_usuario, cliente_de):
 
 
 class _Exemplo(FormularioBootstrap, forms.Form):
-    valor = forms.DecimalField(max_digits=12, decimal_places=2, localize=True, required=False)
+    amount = forms.DecimalField(max_digits=12, decimal_places=2, localize=True, required=False)
     fixa = forms.ChoiceField(choices=[("", "- Select an option -"), ("a", "A")])
     agrupada = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
 
@@ -37,7 +37,7 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
 
 
 @pytest.mark.parametrize(
-    ("idioma", "digitado", "valor"),
+    ("idioma", "digitado", "amount"),
     [
         ("pt-br", "1.234.567,89", "1234567.89"),
         ("pt-br", "R$ 1.500,00", "1500.00"),
@@ -49,16 +49,16 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
         ("en", "1,500", "1500"),
     ],
 )
-def test_numeros_com_separador_de_milhar(idioma, digitado, valor):
+def test_numeros_com_separador_de_milhar(idioma, digitado, amount):
     with translation.override(idioma):
-        form = _Exemplo({"fixa": "a", "agrupada": "b", "valor": digitado})
+        form = _Exemplo({"fixa": "a", "agrupada": "b", "amount": digitado})
         assert form.is_valid(), form.errors
-    assert form.cleaned_data["valor"] == Decimal(valor)
+    assert form.cleaned_data["amount"] == Decimal(amount)
 
 
 def test_numero_ambiguo_continua_recusado():
     with translation.override("pt-br"):
-        assert not _Exemplo({"fixa": "a", "agrupada": "b", "valor": "1,500"}).is_valid()
+        assert not _Exemplo({"fixa": "a", "agrupada": "b", "amount": "1,500"}).is_valid()
 
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):

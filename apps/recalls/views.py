@@ -18,9 +18,9 @@ POR_PAGINA = 50
 SITUACOES = {"pendentes": {"concluida": False}, "concluidas": {"concluida": True}, "todas": {}}
 
 
-def _data(valor):
+def _data(value):
     try:
-        return datetime.date.fromisoformat(valor or "")
+        return datetime.date.fromisoformat(value or "")
     except ValueError:
         return None
 
@@ -34,11 +34,11 @@ def _voltar(request, padrao="recalls:list"):
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
 def lista(request):
-    situacao = request.GET.get("situacao", "pendentes")
+    status = request.GET.get("status", "pendentes")
     busca = request.GET.get("q", "").strip()
     de, ate = _data(request.GET.get("de")), _data(request.GET.get("ate"))
     rechamadas = Recall.objects.select_related("patient").filter(
-        **SITUACOES.get(situacao, SITUACOES["pendentes"]), patient__arquivado=False
+        **SITUACOES.get(status, SITUACOES["pendentes"]), patient__arquivado=False
     )
     if busca:
         rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
@@ -49,7 +49,7 @@ def lista(request):
     pagina = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
     filtros = {
         "q": busca,
-        "situacao": situacao,
+        "status": status,
         "de": de.isoformat() if de else "",
         "ate": ate.isoformat() if ate else "",
     }

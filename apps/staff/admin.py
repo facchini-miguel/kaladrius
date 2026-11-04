@@ -14,4 +14,4 @@ class FuncionarioAdmin(admin.ModelAdmin):
 class FolhaAdmin(admin.ModelAdmin):
     list_display = ["funcionario", "competencia", "salario", "horas_extras", "faltas"]
     list_filter = ["clinic", "competencia"]
-    raw_id_fields = ["funcionario", "lancamento"]
+    raw_id_fields = ["funcionario", "entry"]

@@ -133,6 +133,6 @@ class LancarForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        despesas = Category.objects.filter(tipo=Category.Tipo.DESPESA, active=True)
+        despesas = Category.objects.filter(kind=Category.Tipo.DESPESA, active=True)
         self.fields["categoria"].queryset = despesas
         self.fields["categoria"].initial = despesas.filter(name="Salários e encargos").first()

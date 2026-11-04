@@ -6,7 +6,7 @@
 {% block conteudo %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:entry' lancamento.pk %}">{% translate "Voltar ao lançamento" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' entry.pk %}">{% translate "Voltar ao lançamento" %}</a>
 </div>
 
 <div class="recibo bg-white border rounded p-4 position-relative">
@@ -21,22 +21,22 @@
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "RECIBO" %}</div>
       <div class="small">{% translate "Nº" %} {{ pagamento.pk }}</div>
-      <div class="fs-5 mt-1">{{ pagamento.valor|moeda }}</div>
+      <div class="fs-5 mt-1">{{ pagamento.amount|moeda }}</div>
     </div>
   </div>
   <p class="fs-6">
-    {% if lancamento.patient.cpf_cnpj %}
-    {% blocktranslate with nome=lancamento.nome_pessoa sigla=lancamento.patient.cpf_cnpj|sigla_documento:lancamento.patient.papel_documento documento=lancamento.patient.cpf_cnpj|documento:lancamento.patient.papel_documento valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% if entry.patient.cpf_cnpj %}
+    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.cpf_cnpj|sigla_documento:entry.patient.papel_documento documento=entry.patient.cpf_cnpj|documento:entry.patient.papel_documento valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
-    {% blocktranslate with nome=lancamento.nome_pessoa valor=pagamento.valor|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=entry.nome_pessoa valor=pagamento.amount|moeda %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}
-    {% blocktranslate with descricao=lancamento.description numero=pagamento.parcela.number total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
+    {% blocktranslate with descricao=entry.description numero=pagamento.parcela.number total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
   </p>
   <ul class="list-unstyled small mb-4">
     <li>{% translate "Forma de pagamento" %}: {{ pagamento.get_forma_display }}{% if pagamento.cartao_bandeira %} ({{ pagamento.cartao_bandeira }}{% if pagamento.cartao_parcelas %}, {% blocktranslate count n=pagamento.cartao_parcelas %}{{ n }} parcela no cartão{% plural %}{{ n }} parcelas no cartão{% endblocktranslate %}{% endif %}){% endif %}</li>
     {% if pagamento.juros %}<li>{% translate "Juros e multa incluídos" %}: {{ pagamento.juros|moeda }}</li>{% endif %}
     {% if pagamento.desconto %}<li>{% translate "Desconto" %}: {{ pagamento.desconto|moeda }}</li>{% endif %}
-    {% if lancamento.practitioner %}<li>{% translate "Profissional" %}: {{ lancamento.practitioner.name }}{% if lancamento.practitioner.registro %} ({{ lancamento.practitioner.registro }}){% endif %}</li>{% endif %}
+    {% if entry.practitioner %}<li>{% translate "Profissional" %}: {{ entry.practitioner.name }}{% if entry.practitioner.registro %} ({{ entry.practitioner.registro }}){% endif %}</li>{% endif %}
     {% if pagamento.note %}<li>{{ pagamento.note }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">

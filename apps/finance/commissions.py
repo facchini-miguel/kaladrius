@@ -22,15 +22,15 @@ from .models import ZERO, Commission, Entry, Payment
 CENTAVO = Decimal("0.01")
 
 
-def percentual_de(valor, percentual):
-    return (valor * percentual / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+def percentual_de(amount, percentual):
+    return (amount * percentual / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
 
 def _recebimentos(practitioner):
     return Payment.objects.filter(
-        parcela__lancamento__tipo=Entry.Tipo.RECEBER,
-        parcela__lancamento__practitioner=practitioner,
-    ).select_related("parcela__lancamento__patient")
+        parcela__entry__kind=Entry.Tipo.RECEBER,
+        parcela__entry__practitioner=practitioner,
+    ).select_related("parcela__entry__patient")
 
 
 def _creditos(practitioner, ate):
@@ -46,7 +46,7 @@ def _debitos(practitioner):
         .order_by("data", "pk")
     )
     for debito in debitos:
-        debito.comissao_devolvida = percentual_de(debito.valor, debito.comissao.percentual)
+        debito.comissao_devolvida = percentual_de(debito.amount, debito.comissao.percentual)
     return debitos
 
 
@@ -54,7 +54,7 @@ def pendente(practitioner, ate):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
     creditos = list(_creditos(practitioner, ate).order_by("data", "pk"))
     debitos = _debitos(practitioner)
-    recebido = sum((p.valor for p in creditos), start=ZERO)
+    recebido = sum((p.amount for p in creditos), start=ZERO)
     bruta = percentual_de(recebido, practitioner.comissao_percentual)
     estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
     return {
@@ -64,7 +64,7 @@ def pendente(practitioner, ate):
         "recebido": recebido,
         "bruta": bruta,
         "estornos": estornos,
-        "valor": bruta - estornos,
+        "amount": bruta - estornos,
     }
 
 
@@ -76,7 +76,7 @@ def resumo(ate):
     """
     linhas = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
-        totais = _creditos(practitioner, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
+        totais = _creditos(practitioner, ate).aggregate(recebido=Sum("amount"), quantos=Count("pk"))
         debitos = _debitos(practitioner)
         if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
             continue
@@ -89,7 +89,7 @@ def resumo(ate):
                 "recebido": recebido,
                 "bruta": bruta,
                 "estornos": estornos,
-                "valor": bruta - estornos,
+                "amount": bruta - estornos,
             }
         )
     return linhas
@@ -101,17 +101,17 @@ def pagar(practitioner, *, ate, vencimento, categoria, user):
     # Locking the practitioner serializes two people paying the same commission at once.
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
     calculo = pendente(practitioner, ate)
-    if calculo["valor"] <= 0:
+    if calculo["amount"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
-    lancamento = services.criar_lancamento(
+    entry = services.criar_lancamento(
         clinic=practitioner.clinic,
-        tipo=Entry.Tipo.PAGAR,
+        kind=Entry.Tipo.PAGAR,
         pessoa=practitioner.name,
         practitioner=practitioner,
         description=_("Comissão de %(nome)s até %(data)s")
         % {"nome": practitioner.name, "data": date_format(ate, "SHORT_DATE_FORMAT")},
         categoria=categoria,
-        valor_total=calculo["valor"],
+        valor_total=calculo["amount"],
         parcelas=1,
         primeiro_vencimento=vencimento,
         user=user,
@@ -123,8 +123,8 @@ def pagar(practitioner, *, ate, vencimento, categoria, user):
         percentual=practitioner.comissao_percentual,
         recebido=calculo["recebido"],
         estornos=calculo["estornos"],
-        valor=calculo["valor"],
-        lancamento=lancamento,
+        amount=calculo["amount"],
+        entry=entry,
         created_by=user,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.

@@ -54,7 +54,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ["practitioner", "tipo", "patient", "description"]
+        fields = ["practitioner", "kind", "patient", "description"]
         widgets = {
             "patient": forms.HiddenInput,
             "description": forms.Textarea(attrs={"rows": 3}),
@@ -74,10 +74,10 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.fields["practitioner"].queryset = profissionais.filter(
             Q(active=True) | Q(pk=agendamento.practitioner_id)
         )
-        self.fields["tipo"].queryset = AppointmentType.objects.filter(
-            Q(active=True) | Q(pk=agendamento.tipo_id)
+        self.fields["kind"].queryset = AppointmentType.objects.filter(
+            Q(active=True) | Q(pk=agendamento.kind_id)
         )
-        self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
+        self.fields["kind"].label_from_instance = lambda kind: kind.nome_exibido
         self.fields["patient"].queryset = Patient.objects.all()
 
         passo = clinic.agenda_intervalo * 60
@@ -156,11 +156,11 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.instance.inicio, self.instance.fim = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
         if not dados.get("patient") or (
-            self.instance.situacao in marcado and data > timezone.localdate()
+            self.instance.status in marcado and data > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
             # came or missed it yet.
-            self.instance.situacao = Appointment.Situacao.AGENDADO
+            self.instance.status = Appointment.Situacao.AGENDADO
         if self.instance.desmarcado:
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
             return dados

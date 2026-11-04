@@ -3,5 +3,5 @@
     <a href="{% url 'schedule:calendar' %}?practitioner={{ agendamento.practitioner_id }}&amp;data={{ agendamento.inicio|date:'Y-m-d' }}">{{ agendamento.inicio|date:"SHORT_DATETIME_FORMAT" }}</a>
     · {{ agendamento.practitioner.name }}
   </span>
-  <span class="legenda-tipo small" style="background-color: {{ agendamento.tipo.cor }}">{{ agendamento.tipo.nome_exibido }}</span>
+  <span class="legenda-tipo small" style="background-color: {{ agendamento.kind.cor }}">{{ agendamento.kind.nome_exibido }}</span>
 </li>

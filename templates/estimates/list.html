@@ -14,9 +14,9 @@
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Buscar' %}"></div>
   <div class="col-6 col-md-3">
-    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
-      {% for valor, name in situacoes %}<option value="{{ valor }}"{% if valor == situacao %} selected{% endif %}>{{ name }}</option>{% endfor %}
-      <option value="todos"{% if situacao == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
+      {% for value, name in situacoes %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>

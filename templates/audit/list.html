@@ -12,7 +12,7 @@
   <div class="col-6 col-md-2">
     <select name="acao" class="form-select" aria-label="{% translate 'Ação' %}">
       <option value="">{% translate "Todas as ações" %}</option>
-      {% for valor, rotulo in acoes %}<option value="{{ valor }}"{% if filtros.acao == valor %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      {% for value, rotulo in acoes %}<option value="{{ value }}"{% if filtros.acao == value %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">

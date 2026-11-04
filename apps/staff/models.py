@@ -56,7 +56,7 @@ class Employee(ModeloDaClinica):
     def salario_em(self, data):
         """The salary in force on `data` (the newest one starting on or before it)."""
         salario = self.salarios.filter(desde__lte=data).order_by("-desde", "-pk").first()
-        return salario.valor if salario else None
+        return salario.amount if salario else None
 
 
 class Salary(ModeloDaClinica):
@@ -68,7 +68,7 @@ class Salary(ModeloDaClinica):
         related_name="salarios",
         verbose_name=_("funcionário"),
     )
-    valor = models.DecimalField(_("salário"), **DINHEIRO)
+    amount = models.DecimalField(_("salário"), **DINHEIRO, db_column="valor")
     desde = models.DateField(_("desde"))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -87,11 +87,11 @@ class Salary(ModeloDaClinica):
         verbose_name_plural = _("salários")
         ordering = ["-desde", "-pk"]
         constraints = [
-            models.CheckConstraint(condition=Q(valor__gt=0), name="salario_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="salario_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.funcionario} {self.valor} ({self.desde:%d/%m/%Y})"
+        return f"{self.funcionario} {self.amount} ({self.desde:%d/%m/%Y})"
 
 
 class Payroll(ModeloDaClinica):
@@ -112,13 +112,14 @@ class Payroll(ModeloDaClinica):
     valor_hora_extra = models.DecimalField(_("valor da hora extra"), **DINHEIRO, default=Decimal(0))
     faltas = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
     note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
-    lancamento = models.OneToOneField(
+    entry = models.OneToOneField(
         "financeiro.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="folha",
         verbose_name=_("conta a pagar"),
+        db_column="lancamento_id",
     )
 
     class Meta:
@@ -158,7 +159,7 @@ class Payroll(ModeloDaClinica):
 
     @property
     def lancada(self):
-        return self.lancamento_id is not None and not self.lancamento.cancelado
+        return self.entry_id is not None and not self.entry.cancelado
 
 
 def hora_extra_sugerida(salario):

@@ -192,10 +192,10 @@ medical_records/prescription.html  saude_alerta
 medical_records/print.html  backup_atrasado
 medical_records/print.html  backup_nenhum
 medical_records/print.html  saude_alerta
-medical_records/visit.html  atendimento
 medical_records/visit.html  backup_atrasado
 medical_records/visit.html  backup_nenhum
 medical_records/visit.html  saude_alerta
+medical_records/visit.html  visit
 monitoring/health.html  backup_atrasado
 monitoring/health.html  backup_nenhum
 monitoring/health.html  saude_alerta

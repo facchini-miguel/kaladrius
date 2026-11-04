@@ -14,16 +14,16 @@ from .models import Estimate, EstimateItem, Procedure
 
 
 class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
-    valor = _campo_dinheiro(_("Valor"))
+    amount = _campo_dinheiro(_("Valor"))
 
     class Meta:
         model = Procedure
-        fields = ["name", "code", "valor", "categoria", "active"]
+        fields = ["name", "code", "amount", "categoria", "active"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["categoria"].queryset = Category.objects.filter(
-            tipo=Category.Tipo.RECEITA, active=True
+            kind=Category.Tipo.RECEITA, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
         self.codificacao = insurance.do_pais().procedimento
@@ -113,7 +113,7 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
             if procedimento is None:
                 self.add_error("valor_unitario", _("Informe o valor."))
             else:
-                dados["valor_unitario"] = procedimento.valor
+                dados["valor_unitario"] = procedimento.amount
         return dados
 
 
@@ -142,7 +142,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["categoria"].queryset = Category.objects.filter(
-            tipo=Category.Tipo.RECEITA, active=True
+            kind=Category.Tipo.RECEITA, active=True
         )
         self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
 

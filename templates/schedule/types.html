@@ -18,20 +18,20 @@
       <tr><th>{% translate "Cor" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr>
     </thead>
     <tbody>
-      {% for tipo in tipos %}
+      {% for kind in tipos %}
       <tr>
-        <td><span class="amostra-cor" style="background-color: {{ tipo.cor }}" title="{{ tipo.cor }}"></span></td>
-        <td>{{ tipo.nome_exibido }}</td>
+        <td><span class="amostra-cor" style="background-color: {{ kind.cor }}" title="{{ kind.cor }}"></span></td>
+        <td>{{ kind.nome_exibido }}</td>
         <td>
-          {% if tipo.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if kind.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if pode.cadastros.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' tipo.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' kind.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.cadastros.excluir %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' tipo.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' kind.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>
       </tr>

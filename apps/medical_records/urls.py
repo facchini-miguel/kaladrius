@@ -6,7 +6,7 @@ app_name = "medical_records"
 
 urlpatterns = [
     path("patients/<int:patient>/new/", views.novo, name="new"),
-    path("<int:pk>/", views.atendimento, name="visit"),
+    path("<int:pk>/", views.visit, name="visit"),
     path("<int:pk>/addendum/", views.adendo, name="addendum"),
     path("<int:pk>/print/", views.imprimir, name="print"),
     path("<int:pk>/certificate/", views.atestado_novo, name="certificate_new"),

@@ -19,7 +19,7 @@ def _antes(app, nome):
 
 
 def _tipos(alertas):
-    return [alerta.tipo for alerta in alertas]
+    return [alerta.kind for alerta in alertas]
 
 
 def _alertas(operacao):

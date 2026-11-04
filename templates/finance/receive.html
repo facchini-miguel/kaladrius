@@ -6,12 +6,12 @@
 {% block conteudo %}
 <h1 class="h3 mb-1">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
-  {{ parcela.lancamento.nome_pessoa }} · {{ parcela.lancamento.description }} ·
+  {{ parcela.entry.nome_pessoa }} · {{ parcela.entry.description }} ·
   {% blocktranslate with numero=parcela.number total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
   {% blocktranslate with vencimento=parcela.vencimento|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
 </p>
 <div class="alert alert-light border">
-  {% translate "Valor da parcela" %}: <strong>{{ parcela.valor|moeda }}</strong> ·
+  {% translate "Valor da parcela" %}: <strong>{{ parcela.amount|moeda }}</strong> ·
   {% translate "Já pago" %}: {{ parcela.pago|moeda }} ·
   {% translate "Falta" %}: <strong>{{ parcela.saldo|moeda }}</strong>
 </div>
@@ -21,7 +21,7 @@
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
   <div class="row">
     <div class="col-md-4">{% with campo=form.data %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.valor %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.juros %}{% include "includes/field.html" %}{% endwith %}</div>
     {% if pode_desconto %}<div class="col-md-4">{% with campo=form.desconto %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
     <div class="col-md-4">{% with campo=form.forma %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -39,6 +39,6 @@
   {% with campo=form.note %}{% include "includes/field.html" %}{% endwith %}
   {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
   <button type="submit" class="btn btn-success">{% translate "Registrar pagamento" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:entry' parcela.lancamento_id %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' parcela.entry_id %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

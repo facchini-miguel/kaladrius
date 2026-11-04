@@ -29,10 +29,10 @@ class Codigo:
     padrao: str = ""  # regular expression for the whole code, letters in upper case
     exemplo: str = ""
 
-    def limpar(self, valor):
+    def limpar(self, value):
         """The code without spaces, dots or dashes, in upper case; ValidationError if it does
         not follow the format."""
-        code = re.sub(r"[\s.\-/]", "", valor or "").upper()
+        code = re.sub(r"[\s.\-/]", "", value or "").upper()
         if code and self.padrao and not re.fullmatch(self.padrao, code):
             raise ValidationError(
                 _("%(nome)s: formato inválido. Exemplo: %(exemplo)s.")

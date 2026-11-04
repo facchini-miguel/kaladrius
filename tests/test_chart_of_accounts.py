@@ -35,7 +35,7 @@ def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
         assert str(aluguel.grupo) == "1 Ocupação"
         assert Category.objects.get(name="Comissões").grupo.name == "Pessoal"
         assert not Category.objects.filter(grupo=None).exists()
-        assert AccountGroup.objects.filter(tipo="receita").count() == 2
+        assert AccountGroup.objects.filter(kind="receita").count() == 2
 
 
 def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
@@ -44,7 +44,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
         reverse("finance:group_new"),
         {
             "name": "Equipe da recepção",
-            "tipo": "despesa",
+            "kind": "despesa",
             "pai": pessoal.pk,
             "code": 1,
             "active": "on",
@@ -57,7 +57,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
         salarios = Category.objects.get(name="Salários e encargos")
     editar = admin.post(
         reverse("finance:catalog_edit", args=["categories", salarios.pk]),
-        {"name": salarios.name, "tipo": "despesa", "grupo": sub.pk, "active": "on"},
+        {"name": salarios.name, "kind": "despesa", "grupo": sub.pk, "active": "on"},
     )
     assert editar.status_code == 302
     pagina = admin.get(reverse("finance:chart_of_accounts")).content.decode()
@@ -68,13 +68,13 @@ def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
     pessoal = grupo(clinica_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
-        dados = {"name": name, "tipo": "despesa", "pai": pessoal.pk, "code": "", "active": "on"}
+        dados = {"name": name, "kind": "despesa", "pai": pessoal.pk, "code": "", "active": "on"}
         assert admin.post(reverse("finance:group_new"), dados).status_code == 302
     with usar_clinica(clinica_a):
         assert grupo(clinica_a, "Equipe A").number == "2.1"
         assert grupo(clinica_a, "Equipe B").number == "2.2"
     # A new top group goes after the five of the basic plan.
-    topo = {"name": "Investimentos", "tipo": "despesa", "pai": "", "code": "", "active": "on"}
+    topo = {"name": "Investimentos", "kind": "despesa", "pai": "", "code": "", "active": "on"}
     assert admin.post(reverse("finance:group_new"), topo).status_code == 302
     with usar_clinica(clinica_a):
         assert grupo(clinica_a, "Investimentos").number == "6"
@@ -84,16 +84,16 @@ def test_validacoes_do_grupo(clinica_a, admin):
     pessoal = grupo(clinica_a, "Pessoal")
     atendimentos = grupo(clinica_a, "Atendimentos")
     url = reverse("finance:group_new")
-    misturado = admin.post(url, {"name": "X", "tipo": "despesa", "pai": atendimentos.pk})
+    misturado = admin.post(url, {"name": "X", "kind": "despesa", "pai": atendimentos.pk})
     assert "pai" in misturado.context["form"].errors
-    repetido = admin.post(url, {"name": "pessoal", "tipo": "despesa"})
+    repetido = admin.post(url, {"name": "pessoal", "kind": "despesa"})
     assert "name" in repetido.context["form"].errors
     # A group cannot go under itself or under one of its subgroups.
     with usar_clinica(clinica_a):
-        sub = AccountGroup.objects.create(name="Sub", tipo="despesa", pai=pessoal)
+        sub = AccountGroup.objects.create(name="Sub", kind="despesa", pai=pessoal)
     ciclo = admin.post(
         reverse("finance:group_edit", args=[pessoal.pk]),
-        {"name": "Pessoal", "tipo": "despesa", "pai": sub.pk},
+        {"name": "Pessoal", "kind": "despesa", "pai": sub.pk},
     )
     assert "pai" in ciclo.context["form"].errors
 
@@ -103,7 +103,7 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
         reverse("finance:catalog_new", args=["categories"]),
         {
             "name": "Exames",
-            "tipo": "receita",
+            "kind": "receita",
             "grupo": grupo(clinica_a, "Pessoal").pk,
             "active": "on",
         },
@@ -114,30 +114,30 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
 def test_relatorio_soma_os_subgrupos(clinica_a, admin):
     with usar_clinica(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", tipo="despesa", pai=pessoal, code=1)
+        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", pai=pessoal, code=1)
         salarios = Category.objects.get(name="Salários e encargos")
         salarios.grupo = sub
         salarios.save()
-        avulsa = Category.objects.create(name="Despesa avulsa", tipo="despesa")
+        avulsa = Category.objects.create(name="Despesa avulsa", kind="despesa")
         caixa = FinancialAccount.objects.get(name="Caixa")
-        for categoria, valor in (
+        for categoria, amount in (
             (salarios, "1000"),
             (Category.objects.get(name="Comissões"), "300"),
             (avulsa, "50"),
         ):
-            lancamento = services.criar_lancamento(
+            entry = services.criar_lancamento(
                 clinic=clinica_a,
-                tipo=Entry.Tipo.PAGAR,
+                kind=Entry.Tipo.PAGAR,
                 pessoa="Fictício",
                 description="Pagamento",
                 categoria=categoria,
-                valor_total=Decimal(valor),
+                valor_total=Decimal(amount),
                 parcelas=1,
                 primeiro_vencimento=HOJE,
                 user=None,
             )
-            parcela = lancamento.parcelas.get()
-            services.receber(parcela, user=None, valor=parcela.valor, forma="pix", conta=caixa)
+            parcela = entry.parcelas.get()
+            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert [(n, name, str(v)) for n, name, v in relatorio["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),

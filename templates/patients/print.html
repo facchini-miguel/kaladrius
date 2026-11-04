@@ -26,7 +26,7 @@
   <div class="row">
     <div class="col-12 col-sm-6">
       <dl class="row mb-0 small">
-        {% if patient.tipo == "PJ" %}
+        {% if patient.kind == "PJ" %}
         <dt class="col-5">{% translate "Razão social" %}</dt><dd class="col-7">{{ patient.razao_social|default:"—" }}</dd>
         {% if documentos_do_pais.empresa or patient.cpf_cnpj %}<dt class="col-5">{{ patient.cpf_cnpj|sigla_documento:"empresa" }}</dt><dd class="col-7">{{ patient.cpf_cnpj|documento:"empresa"|default:"—" }}</dd>{% endif %}
         {% if no_brasil or patient.inscricao_estadual %}<dt class="col-5">{% translate "Inscrição estadual" %}</dt><dd class="col-7">{{ patient.inscricao_estadual|default:"—" }}</dd>{% endif %}

@@ -13,7 +13,7 @@
   <div class="card mb-3">
     <div class="card-header">{% translate "Identificação" %}</div>
     <div class="card-body row">
-      <div class="col-12">{% with campo=form.tipo %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-12">{% with campo=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6 so-pj">{% with campo=form.razao_social %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-3">{% with campo=form.cpf_cnpj %}{% include "includes/field.html" %}{% endwith %}</div>

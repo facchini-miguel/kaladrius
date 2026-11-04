@@ -25,7 +25,7 @@ def ultimos(**filtros):
 
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
-    admin_a.post(reverse("patients:new"), {"tipo": "PF", "name": "Maria", "active": "on"})
+    admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Maria")
     [criacao] = ultimos(acao=Acao.CRIAR, modelo="Paciente")
@@ -37,7 +37,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
 
     admin_a.post(
         reverse("patients:edit", args=[patient.pk]),
-        {"tipo": "PF", "name": "Maria Souza", "active": "on", "profissao": "Professora"},
+        {"kind": "PF", "name": "Maria Souza", "active": "on", "profissao": "Professora"},
     )
     [alteracao] = ultimos(acao=Acao.ALTERAR, modelo="Paciente")
     assert alteracao.alteracoes == {
@@ -53,7 +53,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
 def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
     admin_a.post(
         reverse("patients:new"),
-        {"tipo": "PF", "name": "Maria Sigilosa", "active": "on", "cpf_cnpj": "52998224725"},
+        {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "cpf_cnpj": "52998224725"},
     )
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Maria Sigilosa")
@@ -166,7 +166,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
     field (or its column-keeping rename) does not change what the clinic reads."""
     from apps.audit.models import AuditEntry
 
-    admin_a.post(reverse("patients:new"), {"tipo": "PF", "name": "Maria", "active": "on"})
+    admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
     AuditEntry.objects.create(
         clinic=clinica_a,
         acao=Acao.ALTERAR,

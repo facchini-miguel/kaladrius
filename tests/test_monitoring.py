@@ -69,10 +69,10 @@ def amostra_em_ingles(minutos_atras, **valores):
     """The same sample with the fields health.sh writes since decision 149."""
     antiga = json.loads(amostra(minutos_atras, **valores))
     nomes = {interno: campo for campo, interno in health.CAMPOS.items()}
-    nova = {nomes.get(chave, chave): valor for chave, valor in antiga.items()}
+    nova = {nomes.get(chave, chave): value for chave, value in antiga.items()}
     nomes_container = {interno: campo for campo, interno in health.CAMPOS_CONTAINER.items()}
     nova["containers"] = [
-        {nomes_container.get(chave, chave): valor for chave, valor in c.items()}
+        {nomes_container.get(chave, chave): value for chave, value in c.items()}
         for c in antiga["containers"]
     ]
     return json.dumps(nova)

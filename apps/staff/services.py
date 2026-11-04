@@ -36,7 +36,7 @@ def preparar(competencia):
         .exclude(desligamento__lt=competencia)
     )
     folhas = list(
-        Payroll.objects.filter(competencia=competencia).select_related("funcionario", "lancamento")
+        Payroll.objects.filter(competencia=competencia).select_related("funcionario", "entry")
     )
     existentes = {f.funcionario_id for f in folhas}
     for funcionario in trabalhando:
@@ -67,9 +67,9 @@ def lancar(folhas, *, categoria, vencimento, user):
                 _("O total de %(nome)s precisa ser maior que zero.") % {"nome": folha.funcionario}
             )
         mes = f"{folha.competencia:%m/%Y}"
-        folha.lancamento = financeiro.criar_lancamento(
+        folha.entry = financeiro.criar_lancamento(
             clinic=folha.funcionario.clinic,
-            tipo=Entry.Tipo.PAGAR,
+            kind=Entry.Tipo.PAGAR,
             pessoa=folha.funcionario.name,
             description=_("Salário %(mes)s") % {"mes": mes},
             categoria=categoria,
@@ -84,7 +84,7 @@ def lancar(folhas, *, categoria, vencimento, user):
             primeiro_vencimento=vencimento,
             user=user,
         )
-        folha.save(update_fields=["lancamento"])
+        folha.save(update_fields=["entry"])
         lancadas += 1
     return lancadas
 

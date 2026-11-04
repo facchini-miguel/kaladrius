@@ -31,14 +31,14 @@ def criar_paciente(clinic, **dados):
 
 
 def dados_formulario(**extra):
-    return {"tipo": "PF", "name": "Maria da Silva", "active": "on", **extra}
+    return {"kind": "PF", "name": "Maria da Silva", "active": "on", **extra}
 
 
 # --- Validators and formats ------------------------------------------------------
 
 
 @pytest.mark.parametrize(
-    ("valor", "esperado"),
+    ("amount", "esperado"),
     [
         (CPF, True),
         ("52998224725", True),
@@ -47,12 +47,12 @@ def dados_formulario(**extra):
         ("123", False),
     ],
 )
-def test_validacao_de_cpf(valor, esperado):
-    assert cpf_valido(valor) is esperado
+def test_validacao_de_cpf(amount, esperado):
+    assert cpf_valido(amount) is esperado
 
 
 @pytest.mark.parametrize(
-    ("valor", "esperado"),
+    ("amount", "esperado"),
     [
         (CNPJ, True),
         ("11.222.333/0001-82", False),
@@ -62,8 +62,8 @@ def test_validacao_de_cpf(valor, esperado):
         ("00000000000000", False),
     ],
 )
-def test_validacao_de_cnpj_numerico_e_alfanumerico(valor, esperado):
-    assert cnpj_valido(valor) is esperado
+def test_validacao_de_cnpj_numerico_e_alfanumerico(amount, esperado):
+    assert cnpj_valido(amount) is esperado
 
 
 def test_filtros_de_formatacao():
@@ -122,7 +122,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     resposta = admin_a.post(
         reverse("patients:new"),
         dados_formulario(
-            tipo="PJ",
+            kind="PJ",
             name="Empresa X",
             razao_social="Empresa X Ltda.",
             cpf_cnpj=CNPJ_ALFANUMERICO,
@@ -141,7 +141,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
     ("dados", "campo", "mensagem"),
     [
         ({"cpf_cnpj": "529.982.247-24"}, "cpf_cnpj", "CPF: número inválido"),
-        ({"tipo": "PJ", "cpf_cnpj": CPF}, "cpf_cnpj", "CNPJ: número inválido"),
+        ({"kind": "PJ", "cpf_cnpj": CPF}, "cpf_cnpj", "CNPJ: número inválido"),
         ({"telefone_celular": "9999-0000"}, "telefone_celular", "Informe o DDD"),
         ({"cep": "123"}, "cep", "8 dígitos"),
         ({"data_nascimento": "2999-01-01"}, "data_nascimento", "futuro"),
@@ -196,15 +196,15 @@ def test_busca_por_nome_sem_acento_codigo_e_cpf(admin_a, clinica_a):
 def test_filtros_de_tipo_e_situacao(admin_a, clinica_a):
     criar_paciente(clinica_a, name="Ativo PF")
     criar_paciente(clinica_a, name="Inativo PF", active=False)
-    criar_paciente(clinica_a, name="Empresa", tipo="PJ")
+    criar_paciente(clinica_a, name="Empresa", kind="PJ")
     url = reverse("patients:list")
 
     def nomes(**params):
         return sorted(p.name for p in admin_a.get(url, params).context["pagina"])
 
     assert nomes() == ["Ativo PF", "Empresa"]
-    assert nomes(situacao="inativos") == ["Inativo PF"]
-    assert nomes(situacao="todos", tipo="PJ") == ["Empresa"]
+    assert nomes(status="inativos") == ["Inativo PF"]
+    assert nomes(status="todos", kind="PJ") == ["Empresa"]
 
 
 # --- Isolation and permissions ---------------------------------------------------
@@ -246,8 +246,8 @@ def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de)
     assert patient.arquivado and patient.arquivado_por.username == "admin_a"
 
     lista = reverse("patients:list")
-    for situacao, esperado in (("todos", []), ("arquivados", [patient])):
-        assert list(admin_a.get(lista, {"situacao": situacao}).context["pagina"]) == esperado
+    for status, esperado in (("todos", []), ("arquivados", [patient])):
+        assert list(admin_a.get(lista, {"status": status}).context["pagina"]) == esperado
     ficha = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Restaurar" in ficha and "Excluir definitivamente" in ficha
     assert admin_a.get(reverse("patients:edit", args=[patient.pk])).status_code == 404
@@ -263,8 +263,8 @@ def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
     )
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
     lista = reverse("patients:list")
-    for situacao in ("ativos", "todos", "arquivados"):
-        assert "Escondido" not in cliente.get(lista, {"situacao": situacao}).content.decode()
+    for status in ("ativos", "todos", "arquivados"):
+        assert "Escondido" not in cliente.get(lista, {"status": status}).content.decode()
     assert cliente.get(reverse("patients:record", args=[patient.pk])).status_code == 404
     # The same CPF cannot be registered again: the message points to the administrator.
     resposta = cliente.post(reverse("patients:new"), dados_formulario(cpf_cnpj="529.982.247-25"))
@@ -304,9 +304,9 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     patient = criar_paciente(clinica_a, name="Paciente Devedor")
     user = django_user_model.objects.get(username="admin_a")
     with usar_clinica(clinica_a):
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=clinica_a,
-            tipo=Entry.Tipo.RECEBER,
+            kind=Entry.Tipo.RECEBER,
             description="Tratamento",
             categoria=Category.objects.get(name="Tratamento"),
             valor_total=Decimal("300"),
@@ -319,7 +319,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     pagina = admin_a.get(url)
     assert [p.number for p in pagina.context["abertas"]] == [1, 2]
     conteudo = pagina.content.decode()
-    assert reverse("finance:entry", args=[lancamento.pk]) in conteudo
+    assert reverse("finance:entry", args=[entry.pk]) in conteudo
     assert 'btn btn-secondary">Arquivar<' not in conteudo
     resposta = admin_a.post(url, follow=True)
     assert "Resolva as contas em aberto" in resposta.content.decode()
@@ -331,14 +331,14 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
             services.receber(
                 parcela,
                 user=user,
-                valor=Decimal("150"),
+                amount=Decimal("150"),
                 data=datetime.date(2031, 3, 5),
                 forma="pix",
                 conta=FinancialAccount.objects.get(name="Caixa"),
             )
 
     with usar_clinica(clinica_a):
-        primeira, segunda = lancamento.parcelas.order_by("number")
+        primeira, segunda = entry.parcelas.order_by("number")
     receber(primeira)
     assert [p.number for p in admin_a.get(url).context["abertas"]] == [2]
     receber(segunda)

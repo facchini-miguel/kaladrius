@@ -16,14 +16,14 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagame
     """Approve an open estimate: creates the receivable (and, optionally, pays the 1st
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
     orcamento = Estimate.objects.select_for_update().get(pk=orcamento.pk)
-    if orcamento.situacao != Estimate.Situacao.ABERTO:
+    if orcamento.status != Estimate.Situacao.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser aprovado."))
     total = orcamento.total
     if total <= 0:
         raise ValidationError(_("O orçamento não tem valor a receber."))
-    lancamento = financeiro.criar_lancamento(
+    entry = financeiro.criar_lancamento(
         clinic=orcamento.clinic,
-        tipo=Entry.Tipo.RECEBER,
+        kind=Entry.Tipo.RECEBER,
         patient=orcamento.patient,
         practitioner=orcamento.practitioner,
         description=_("Orçamento nº %(numero)s") % {"numero": orcamento.pk},
@@ -34,23 +34,23 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, categoria, user, pagame
         user=user,
     )
     if pagamento:
-        primeira = lancamento.parcelas.order_by("number").first()
-        financeiro.receber(primeira, user=user, valor=primeira.valor, **pagamento)
-    orcamento.situacao = Estimate.Situacao.APROVADO
-    orcamento.lancamento = lancamento
+        primeira = entry.parcelas.order_by("number").first()
+        financeiro.receber(primeira, user=user, amount=primeira.amount, **pagamento)
+    orcamento.status = Estimate.Situacao.APROVADO
+    orcamento.entry = entry
     orcamento.decidido_em = timezone.now()
     orcamento.decidido_por = user
     orcamento.save()
-    return lancamento
+    return entry
 
 
 @transaction.atomic
 def recusar(orcamento, *, user):
     # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
     orcamento = Estimate.objects.select_for_update().get(pk=orcamento.pk)
-    if orcamento.situacao != Estimate.Situacao.ABERTO:
+    if orcamento.status != Estimate.Situacao.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
-    orcamento.situacao = Estimate.Situacao.RECUSADO
+    orcamento.status = Estimate.Situacao.RECUSADO
     orcamento.decidido_em = timezone.now()
     orcamento.decidido_por = user
     orcamento.save()

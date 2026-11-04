@@ -43,7 +43,7 @@ ALTERADA = "changes a migration production already applied"
 
 @dataclass
 class Alerta:
-    tipo: str
+    kind: str
     texto: str
 
 
@@ -316,7 +316,7 @@ def ida_e_volta(chaves):
 def _linhas_da_migracao(migracao, com_sql):
     linhas = [f"### `{migracao.chave}`"]
     linhas += [
-        f"- {description}" + "".join(f" — ⚠️ {a.tipo}" for a in alertas_op)
+        f"- {description}" + "".join(f" — ⚠️ {a.kind}" for a in alertas_op)
         for description, alertas_op in migracao.operacoes
     ]
     if com_sql:
@@ -366,7 +366,7 @@ def _markdown(migracoes, falhas, alteradas, com_sql):
     if alertas or alteradas:
         linhas.append("### ⚠️ Needs attention")
         linhas += _alteradas(alteradas)
-        linhas += [f"- **{m.chave}** — {a.tipo}: {a.texto}" for m, a in alertas]
+        linhas += [f"- **{m.chave}** — {a.kind}: {a.texto}" for m, a in alertas]
     else:
         linhas.append("✅ No operation deletes data or breaks the previous version.")
     linhas.append("")

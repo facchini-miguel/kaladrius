@@ -48,16 +48,16 @@ def exige_profissional(view):
     return protegida
 
 
-def _auditar(acao, atendimento, campos):
+def _auditar(acao, visit, campos):
     if campos:
-        registrar(acao, atendimento, alteracoes={campo: [SIGILO, SIGILO] for campo in campos})
+        registrar(acao, visit, alteracoes={campo: [SIGILO, SIGILO] for campo in campos})
 
 
-def _finalizar(request, atendimento):
-    atendimento.finalizado_em = timezone.now()
-    atendimento.finalizado_por = request.user
-    atendimento.save(update_fields=["finalizado_em", "finalizado_por", "updated_at"])
-    registrar(Acao.ALTERAR, atendimento, alteracoes={"finalizado": [None, "sim"]})
+def _finalizar(request, visit):
+    visit.finalizado_em = timezone.now()
+    visit.finalizado_por = request.user
+    visit.save(update_fields=["finalizado_em", "finalizado_por", "updated_at"])
+    registrar(Acao.ALTERAR, visit, alteracoes={"finalizado": [None, "sim"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
     )
@@ -80,20 +80,18 @@ def novo(request, practitioner, patient):
         inicial["practitioner"] = agendamento.practitioner if agendamento else practitioner
     form = AtendimentoForm(request.POST or None, initial=inicial, profissionais=profissionais)
     if request.method == "POST" and form.is_valid():
-        atendimento = form.save(commit=False)
-        atendimento.patient = patient
-        atendimento.practitioner = form.cleaned_data.get("practitioner") or practitioner
-        atendimento.agendamento = agendamento
-        atendimento.created_by = request.user
-        atendimento.save()
-        _auditar(
-            Acao.CRIAR, atendimento, [c for c in CAMPOS_DA_ANAMNESE if getattr(atendimento, c)]
-        )
+        visit = form.save(commit=False)
+        visit.patient = patient
+        visit.practitioner = form.cleaned_data.get("practitioner") or practitioner
+        visit.agendamento = agendamento
+        visit.created_by = request.user
+        visit.save()
+        _auditar(Acao.CRIAR, visit, [c for c in CAMPOS_DA_ANAMNESE if getattr(visit, c)])
         if request.POST.get("acao") == "finalizar":
-            _finalizar(request, atendimento)
+            _finalizar(request, visit)
         else:
             messages.success(request, _("Atendimento salvo."))
-        return redirect("medical_records:visit", pk=atendimento.pk)
+        return redirect("medical_records:visit", pk=visit.pk)
     return render(
         request,
         "medical_records/visit.html",
@@ -102,95 +100,95 @@ def novo(request, practitioner, patient):
 
 
 @exige_profissional
-def atendimento(request, practitioner, pk):
-    atendimento = get_object_or_404(
+def visit(request, practitioner, pk):
+    visit = get_object_or_404(
         Visit.objects.select_related("patient", "practitioner", "agendamento"), pk=pk
     )
     # Only its author (or the system administrator) changes a visit, until it is finalized.
     administra = administra_prontuario(request)
-    do_autor = practitioner is not None and atendimento.practitioner_id == practitioner.pk
-    editavel = not atendimento.finalizado and (do_autor or administra)
-    form = AtendimentoForm(request.POST or None, instance=atendimento) if editavel else None
+    do_autor = practitioner is not None and visit.practitioner_id == practitioner.pk
+    editavel = not visit.finalizado and (do_autor or administra)
+    form = AtendimentoForm(request.POST or None, instance=visit) if editavel else None
     if request.method == "POST":
         if not editavel:
             raise PermissionDenied
         if form.is_valid():
             alterados = list(form.changed_data)
             form.save()
-            _auditar(Acao.ALTERAR, atendimento, alterados)
+            _auditar(Acao.ALTERAR, visit, alterados)
             if request.POST.get("acao") == "finalizar":
-                _finalizar(request, atendimento)
+                _finalizar(request, visit)
             else:
                 messages.success(request, _("Atendimento salvo."))
-            return redirect("medical_records:visit", pk=atendimento.pk)
+            return redirect("medical_records:visit", pk=visit.pk)
     else:
-        registrar(Acao.VISUALIZAR, atendimento)
+        registrar(Acao.VISUALIZAR, visit)
     return render(
         request,
         "medical_records/visit.html",
         {
-            "atendimento": atendimento,
-            "patient": atendimento.patient,
-            "agendamento": atendimento.agendamento,
+            "visit": visit,
+            "patient": visit.patient,
+            "agendamento": visit.agendamento,
             "form": form,
             "editavel": editavel,
-            "campos": _campos(atendimento),
-            "adendos": atendimento.adendos.select_related("practitioner"),
-            "adendo_form": AdendoForm() if atendimento.finalizado else None,
+            "campos": _campos(visit),
+            "adendos": visit.adendos.select_related("practitioner"),
+            "adendo_form": AdendoForm() if visit.finalizado else None,
             # Certificates and prescriptions are issued by the visit's author (decision 082).
             "emite_documentos": do_autor or administra,
             "administra": administra,
-            "atestados": atendimento.atestados.all(),
-            "receitas": atendimento.receitas.all(),
-            "pedidos": atendimento.pedidos_de_exames.all(),
+            "atestados": visit.atestados.all(),
+            "receitas": visit.receitas.all(),
+            "pedidos": visit.pedidos_de_exames.all(),
             # Never the file contents in a list.
-            "anexos": atendimento.anexos.defer("conteudo").select_related("practitioner"),
+            "anexos": visit.anexos.defer("conteudo").select_related("practitioner"),
             "anexo_form": AnexoForm(),
-            "remove_anexos": not atendimento.finalizado,
+            "remove_anexos": not visit.finalizado,
         },
     )
 
 
-def _campos(atendimento):
+def _campos(visit):
     return [
-        (atendimento._meta.get_field(campo).verbose_name, getattr(atendimento, campo))
+        (visit._meta.get_field(campo).verbose_name, getattr(visit, campo))
         for campo in CAMPOS_DA_ANAMNESE
     ]
 
 
 def _do_autor(request, practitioner, pk):
     """The visit, if the user is its author or the system administrator."""
-    atendimento = get_object_or_404(Visit.objects.select_related("patient"), pk=pk)
-    do_autor = practitioner is not None and atendimento.practitioner_id == practitioner.pk
+    visit = get_object_or_404(Visit.objects.select_related("patient"), pk=pk)
+    do_autor = practitioner is not None and visit.practitioner_id == practitioner.pk
     if not (do_autor or administra_prontuario(request)):
         raise PermissionDenied
-    return atendimento
+    return visit
 
 
 @exige_profissional
 def imprimir(request, practitioner, pk):
     """The finalized visit, ready to print and sign (without a digital signature, the
     printed and signed copy is the legal record)."""
-    atendimento = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
-    if not atendimento.finalizado:
+    visit = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
+    if not visit.finalizado:
         raise PermissionDenied
-    registrar(Acao.VISUALIZAR, atendimento, description=f"{atendimento} (impressão)")
+    registrar(Acao.VISUALIZAR, visit, description=f"{visit} (impressão)")
     return render(
         request,
         "medical_records/print.html",
         {
-            "atendimento": atendimento,
-            "campos": _campos(atendimento),
-            "adendos": atendimento.adendos.select_related("practitioner"),
+            "visit": visit,
+            "campos": _campos(visit),
+            "adendos": visit.adendos.select_related("practitioner"),
         },
     )
 
 
 @exige_profissional
 def atestado_novo(request, practitioner, pk):
-    atendimento = _do_autor(request, practitioner, pk)
-    agendamento = atendimento.agendamento
-    momento = timezone.localtime(agendamento.inicio if agendamento else atendimento.data)
+    visit = _do_autor(request, practitioner, pk)
+    agendamento = visit.agendamento
+    momento = timezone.localtime(agendamento.inicio if agendamento else visit.data)
     inicial = {
         "data": momento.date(),
         "hora_inicio": momento.time().replace(second=0, microsecond=0),
@@ -199,15 +197,15 @@ def atestado_novo(request, practitioner, pk):
     form = AtestadoForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
         atestado = form.save(commit=False)
-        atestado.atendimento = atendimento
-        atestado.practitioner = atendimento.practitioner
+        atestado.visit = visit
+        atestado.practitioner = visit.practitioner
         atestado.created_by = request.user
         atestado.save()
         registrar(
             Acao.CRIAR,
             atestado,
             alteracoes={
-                "tipo": [None, atestado.tipo],
+                "kind": [None, atestado.kind],
                 "dias": [None, atestado.dias],
                 **({"note": [None, SIGILO]} if atestado.note else {}),
             },
@@ -217,18 +215,18 @@ def atestado_novo(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "atendimento": atendimento, "titulo": _("Emitir atestado")},
+        {"form": form, "visit": visit, "titulo": _("Emitir atestado")},
     )
 
 
 @exige_profissional
 def receita_nova(request, practitioner, pk):
-    atendimento = _do_autor(request, practitioner, pk)
+    visit = _do_autor(request, practitioner, pk)
     form = ReceitaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         receita = form.save(commit=False)
-        receita.atendimento = atendimento
-        receita.practitioner = atendimento.practitioner
+        receita.visit = visit
+        receita.practitioner = visit.practitioner
         receita.created_by = request.user
         receita.save()
         registrar(Acao.CRIAR, receita, alteracoes={"prescricao": [None, SIGILO]})
@@ -237,14 +235,14 @@ def receita_nova(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "atendimento": atendimento, "titulo": _("Emitir receita")},
+        {"form": form, "visit": visit, "titulo": _("Emitir receita")},
     )
 
 
 @exige_profissional
 def atestado(request, practitioner, pk):
     atestado = get_object_or_404(
-        Certificate.objects.select_related("atendimento__patient", "practitioner"), pk=pk
+        Certificate.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     registrar(Acao.VISUALIZAR, atestado)
     return render(request, "medical_records/certificate.html", {"atestado": atestado})
@@ -253,7 +251,7 @@ def atestado(request, practitioner, pk):
 @exige_profissional
 def receita(request, practitioner, pk):
     receita = get_object_or_404(
-        Prescription.objects.select_related("atendimento__patient", "practitioner"), pk=pk
+        Prescription.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     registrar(Acao.VISUALIZAR, receita)
     linhas = [linha for linha in receita.prescricao.splitlines() if linha.strip()]
@@ -265,31 +263,31 @@ def receita(request, practitioner, pk):
 @require_POST
 @exige_profissional
 def adendo(request, practitioner, pk):
-    atendimento = get_object_or_404(Visit.objects, pk=pk)
-    if not atendimento.finalizado:
+    visit = get_object_or_404(Visit.objects, pk=pk)
+    if not visit.finalizado:
         raise PermissionDenied  # before finalizing, the author simply edits the visit
     form = AdendoForm(request.POST)
     if form.is_valid():
         adendo = form.save(commit=False)
-        adendo.atendimento = atendimento
-        adendo.practitioner = practitioner or atendimento.practitioner
+        adendo.visit = visit
+        adendo.practitioner = practitioner or visit.practitioner
         adendo.created_by = request.user
         adendo.save()
         registrar(Acao.CRIAR, adendo, alteracoes={"texto": [None, SIGILO]})
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
-    return redirect("medical_records:visit", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=visit.pk)
 
 
 @exige_profissional
 def pedido_de_exames_novo(request, practitioner, pk):
-    atendimento = _do_autor(request, practitioner, pk)
+    visit = _do_autor(request, practitioner, pk)
     form = PedidoDeExamesForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         pedido = form.save(commit=False)
-        pedido.atendimento = atendimento
-        pedido.practitioner = atendimento.practitioner
+        pedido.visit = visit
+        pedido.practitioner = visit.practitioner
         pedido.created_by = request.user
         pedido.save()
         registrar(
@@ -305,14 +303,14 @@ def pedido_de_exames_novo(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "atendimento": atendimento, "titulo": _("Pedir exames")},
+        {"form": form, "visit": visit, "titulo": _("Pedir exames")},
     )
 
 
 @exige_profissional
 def pedido_de_exames(request, practitioner, pk):
     pedido = get_object_or_404(
-        ExamRequest.objects.select_related("atendimento__patient", "practitioner"), pk=pk
+        ExamRequest.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     registrar(Acao.VISUALIZAR, pedido)
     linhas = [linha for linha in pedido.exames.splitlines() if linha.strip()]
@@ -325,40 +323,40 @@ def pedido_de_exames(request, practitioner, pk):
 @exige_profissional
 def anexo_enviar(request, practitioner, pk):
     """Any practitioner adds files to a visit, even a finalized one (results arrive later)."""
-    atendimento = get_object_or_404(Visit.objects, pk=pk)
+    visit = get_object_or_404(Visit.objects, pk=pk)
     if request.user.demonstracao:
         messages.error(request, _("Contas de demonstração não enviam anexos."))
-        return redirect("medical_records:visit", pk=atendimento.pk)
+        return redirect("medical_records:visit", pk=visit.pk)
     form = AnexoForm(request.POST, request.FILES)
     if form.is_valid():
         arquivo = form.cleaned_data["arquivo"]
         anexo = Attachment.objects.create(
-            atendimento=atendimento,
+            visit=visit,
             description=form.cleaned_data["description"],
             name=arquivo.name[:255],
-            tipo=arquivo.tipo_conferido,
+            kind=arquivo.tipo_conferido,
             tamanho=arquivo.size,
             conteudo=arquivo.read(),
-            practitioner=practitioner or atendimento.practitioner,
+            practitioner=practitioner or visit.practitioner,
             created_by=request.user,
         )
         registrar(
             Acao.CRIAR,
             anexo,
-            description=f"{atendimento} – {_('anexo')}",
+            description=f"{visit} – {_('anexo')}",
             alteracoes={"arquivo": [None, SIGILO]},
         )
         messages.success(request, _("Anexo incluído."))
     else:
         messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
-    return redirect("medical_records:visit", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=visit.pk)
 
 
 @exige_profissional
 def anexo(request, practitioner, pk):
-    anexo = get_object_or_404(Attachment.objects.select_related("atendimento"), pk=pk)
-    registrar(Acao.VISUALIZAR, anexo, description=f"{anexo.atendimento} – {_('anexo')}")
-    resposta = HttpResponse(bytes(anexo.conteudo), content_type=anexo.tipo)
+    anexo = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
+    registrar(Acao.VISUALIZAR, anexo, description=f"{anexo.visit} – {_('anexo')}")
+    resposta = HttpResponse(bytes(anexo.conteudo), content_type=anexo.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
     name = "".join(c for c in anexo.name if c.isalnum() or c in "._- ") or "anexo"
     resposta["Content-Disposition"] = f'inline; filename="{name}"'
@@ -371,19 +369,17 @@ def anexo(request, practitioner, pk):
 def anexo_remover(request, practitioner, pk):
     """Who sent a file (or the system administrator) removes it while the visit is still a
     draft; afterwards it stays."""
-    anexo = get_object_or_404(
-        Attachment.objects.select_related("atendimento").defer("conteudo"), pk=pk
-    )
+    anexo = get_object_or_404(Attachment.objects.select_related("visit").defer("conteudo"), pk=pk)
     quem_enviou = anexo.created_by_id == request.user.pk
-    if anexo.atendimento.finalizado or not (quem_enviou or administra_prontuario(request)):
+    if anexo.visit.finalizado or not (quem_enviou or administra_prontuario(request)):
         raise PermissionDenied
-    atendimento = anexo.atendimento
+    visit = anexo.visit
     registrar(
         Acao.EXCLUIR,
         anexo,
-        description=f"{atendimento} – {_('anexo')}",
+        description=f"{visit} – {_('anexo')}",
         alteracoes={"arquivo": [SIGILO, None]},
     )
     anexo.delete()
     messages.success(request, _("Anexo removido."))
-    return redirect("medical_records:visit", pk=atendimento.pk)
+    return redirect("medical_records:visit", pk=visit.pk)

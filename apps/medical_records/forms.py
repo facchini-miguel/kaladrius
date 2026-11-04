@@ -40,9 +40,9 @@ class AdendoForm(FormularioBootstrap, forms.ModelForm):
 class AtestadoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ["tipo", "data", "hora_inicio", "hora_fim", "dias", "note"]
+        fields = ["kind", "data", "hora_inicio", "hora_fim", "dias", "note"]
         widgets = {
-            "tipo": forms.RadioSelect,
+            "kind": forms.RadioSelect,
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "hora_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "hora_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
@@ -51,7 +51,7 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        if dados.get("tipo") == Certificate.Tipo.AFASTAMENTO:
+        if dados.get("kind") == Certificate.Tipo.AFASTAMENTO:
             if not dados.get("dias"):
                 self.add_error("dias", _("Informe quantos dias de afastamento."))
         else:
@@ -104,10 +104,10 @@ class AnexoForm(FormularioBootstrap, forms.Form):
             raise forms.ValidationError(_("O arquivo passa de 10 MB."))
         inicio = arquivo.read(8)
         arquivo.seek(0)
-        tipo = next(
-            (tipo for assinatura, tipo in ASSINATURAS if inicio.startswith(assinatura)), None
+        kind = next(
+            (kind for assinatura, kind in ASSINATURAS if inicio.startswith(assinatura)), None
         )
-        if tipo is None:
+        if kind is None:
             raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
-        arquivo.tipo_conferido = tipo
+        arquivo.tipo_conferido = kind
         return arquivo

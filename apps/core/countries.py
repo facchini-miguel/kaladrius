@@ -312,8 +312,8 @@ _CEP = {
 }
 
 
-def normalizar_cep(valor, pais):
-    cep = re.sub(r"[\s\-.]", "", valor or "").upper()
+def normalizar_cep(value, pais):
+    cep = re.sub(r"[\s\-.]", "", value or "").upper()
     if not cep:
         return ""
     padrao, mensagem = _CEP.get(pais, _CEP[PADRAO])

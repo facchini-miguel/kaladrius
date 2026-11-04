@@ -23,9 +23,9 @@ class ArquivoInvalido(ValueError):
 class Transacao:
     fitid: str
     data: datetime.date
-    valor: Decimal  # positive = money in, negative = money out
+    amount: Decimal  # positive = money in, negative = money out
     description: str
-    tipo: str
+    kind: str
 
 
 @dataclass
@@ -60,23 +60,23 @@ def _campo(bloco, tag):
     return achado.group(1).strip() if achado else ""
 
 
-def _data(valor):
+def _data(value):
     """OFX dates start with YYYYMMDD (time and time zone may follow)."""
     try:
-        return datetime.date(int(valor[0:4]), int(valor[4:6]), int(valor[6:8]))
+        return datetime.date(int(value[0:4]), int(value[4:6]), int(value[6:8]))
     except (ValueError, IndexError):
         return None
 
 
-def _valor(valor):
-    valor = valor.replace(" ", "")
-    if "," in valor and ("." not in valor or valor.rfind(",") > valor.rfind(".")):
+def _valor(value):
+    value = value.replace(" ", "")
+    if "," in value and ("." not in value or value.rfind(",") > value.rfind(".")):
         # Some banks write 1234,56 or even 1.234,56 (the OFX standard has no thousands).
-        valor = valor.replace(".", "").replace(",", ".")
-    elif "," in valor:  # 1,234.56
-        valor = valor.replace(",", "")
+        value = value.replace(".", "").replace(",", ".")
+    elif "," in value:  # 1,234.56
+        value = value.replace(",", "")
     try:
-        return Decimal(valor).quantize(Decimal("0.01"))
+        return Decimal(value).quantize(Decimal("0.01"))
     except InvalidOperation:
         return None
 
@@ -90,11 +90,11 @@ def ler(conteudo: bytes) -> Extrato:
     ignoradas = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", texto, re.IGNORECASE | re.DOTALL):
         data = _data(_campo(bloco, "DTPOSTED"))
-        valor = _valor(_campo(bloco, "TRNAMT"))
-        if data is None or valor is None:
+        amount = _valor(_campo(bloco, "TRNAMT"))
+        if data is None or amount is None:
             ignoradas += 1
             continue
-        if valor == 0:  # nothing moved (some banks list balance lines this way)
+        if amount == 0:  # nothing moved (some banks list balance lines this way)
             continue
         memo = _campo(bloco, "MEMO")
         name = _campo(bloco, "NAME")
@@ -104,7 +104,7 @@ def ler(conteudo: bytes) -> Extrato:
         fitid = (
             _campo(bloco, "FITID")
             or hashlib.sha1(  # noqa: S324 (an id, not security)
-                f"{data}|{valor}|{description}".encode()
+                f"{data}|{amount}|{description}".encode()
             ).hexdigest()
         )
         # Some banks repeat a FITID inside the same file: keep both transactions.
@@ -115,9 +115,9 @@ def ler(conteudo: bytes) -> Extrato:
             Transacao(
                 fitid=fitid[:120],
                 data=data,
-                valor=valor,
+                amount=amount,
                 description=description[:200],
-                tipo=_campo(bloco, "TRNTYPE")[:20],
+                kind=_campo(bloco, "TRNTYPE")[:20],
             )
         )
     saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", texto, re.I | re.S)

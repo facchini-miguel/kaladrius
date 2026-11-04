@@ -12,10 +12,10 @@
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-4"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Nome do paciente' %}"></div>
   <div class="col-6 col-md-2">
-    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="pendentes"{% if filtros.situacao == "pendentes" %} selected{% endif %}>{% translate "Pendentes" %}</option>
-      <option value="concluidas"{% if filtros.situacao == "concluidas" %} selected{% endif %}>{% translate "Concluídas" %}</option>
-      <option value="todas"{% if filtros.situacao == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
+      <option value="pendentes"{% if filtros.status == "pendentes" %} selected{% endif %}>{% translate "Pendentes" %}</option>
+      <option value="concluidas"{% if filtros.status == "concluidas" %} selected{% endif %}>{% translate "Concluídas" %}</option>
+      <option value="todas"{% if filtros.status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>

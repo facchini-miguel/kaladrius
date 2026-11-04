@@ -42,7 +42,7 @@
           <td>{{ folha.horas_extras }}</td>
           <td class="text-nowrap">{{ folha.valor_hora_extra|moeda }}</td>
           <td>{{ folha.faltas }}</td>
-          <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
         </tr>

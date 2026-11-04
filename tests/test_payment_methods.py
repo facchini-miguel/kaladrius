@@ -63,14 +63,14 @@ def test_cheque_com_a_grafia_de_cada_ingles():
 
 def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     mudar_pais(cenario, "PE")
-    lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, lancamento)[0]
+    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
+    parcela = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[parcela.pk])
     admin = entrar(cenario, "admin")
     pagina = admin.get(url).content.decode()
     assert 'value="carteira"' in pagina and "Yape, Plin" in pagina
     assert 'value="pix"' not in pagina and 'value="boleto"' not in pagina
-    dados = {"data": HOJE.isoformat(), "valor": "100", "conta": cenario["caixa"].pk}
+    dados = {"data": HOJE.isoformat(), "amount": "100", "conta": cenario["caixa"].pk}
     assert "forma" in admin.post(url, {**dados, "forma": "pix"}).context["form"].errors
     assert admin.post(url, {**dados, "forma": "carteira"}).status_code == 302
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
@@ -83,8 +83,8 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
 
 
 def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
-    lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, lancamento)[0]
+    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
+    parcela = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[parcela.pk])
     admin = entrar(cenario, "admin")
     form = admin.get(url).context["form"]
@@ -96,7 +96,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     assert "NSU" not in str(form.fields["cartao_codigo"].label)
     dados = {
         "data": HOJE.isoformat(),
-        "valor": "100",
+        "amount": "100",
         "conta": cenario["caixa"].pk,
         "forma": "hsa",
         "cartao_bandeira": "Visa",
@@ -112,12 +112,12 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
 
 
 def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
-    lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
-    parcela = parcelas_de(cenario, lancamento)[0]
+    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
+    parcela = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[parcela.pk])
     dados = {
         "data": HOJE.isoformat(),
-        "valor": "100",
+        "amount": "100",
         "conta": cenario["caixa"].pk,
         "forma": "pix",
         "cartao_bandeira": "Visa",
@@ -135,12 +135,12 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 
 
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
-    lancamento = lancamento_com(cenario, valor="100.00", parcelas=1)
+    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
         pagamento = services.receber(
-            parcelas_de(cenario, lancamento)[0],
+            parcelas_de(cenario, entry)[0],
             user=cenario["admin"],
-            valor=Decimal("100"),
+            amount=Decimal("100"),
             forma="pix",
             conta=cenario["caixa"],
         )

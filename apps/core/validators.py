@@ -9,13 +9,13 @@ from . import countries
 validar_cor = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
 
 
-def somente_digitos(valor):
-    return re.sub(r"\D", "", valor or "")
+def somente_digitos(value):
+    return re.sub(r"\D", "", value or "")
 
 
-def normalizar_cnpj(valor):
+def normalizar_cnpj(value):
     """Strip punctuation and uppercase. CNPJs may be alphanumeric since July 2026."""
-    return re.sub(r"[^0-9A-Za-z]", "", valor or "").upper()
+    return re.sub(r"[^0-9A-Za-z]", "", value or "").upper()
 
 
 def cpf_valido(cpf):
@@ -47,13 +47,13 @@ def cnpj_valido(cnpj):
     return True
 
 
-def validar_cpf(valor):
-    if not cpf_valido(valor):
+def validar_cpf(value):
+    if not cpf_valido(value):
         raise ValidationError(_("CPF inválido."))
 
 
-def validar_cnpj(valor):
-    if not cnpj_valido(valor):
+def validar_cnpj(value):
+    if not cnpj_valido(value):
         raise ValidationError(_("CNPJ inválido."))
 
 
@@ -92,7 +92,7 @@ def nono_digito(number):
     return number
 
 
-def normalizar_telefone(valor, pais=None):
+def normalizar_telefone(value, pais=None):
     """A phone of the clinic's country as stored digits, or ValidationError.
 
     Brazil: DDD + number. Accepts what people type: punctuation, a leading 0 (carrier prefix)
@@ -102,9 +102,9 @@ def normalizar_telefone(valor, pais=None):
     """
     pais = pais or countries.pais_da_clinica()
     if pais != "BR":
-        digitos = somente_digitos(valor)
+        digitos = somente_digitos(value)
         return countries.normalizar_telefone_internacional(digitos, pais) if digitos else ""
-    number = somente_digitos(valor).lstrip("0")
+    number = somente_digitos(value).lstrip("0")
     if len(number) in (12, 13) and number.startswith("55"):
         number = number[2:]
     if not number:

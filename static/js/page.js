@@ -15,7 +15,7 @@
   // example of the chosen type's document ("CPF" or "CNPJ") and hides when that type has none
   // in the clinic's country.
   function documentos(form) {
-    const tipo = form.querySelector("input[name=tipo]:checked")?.value || "PF";
+    const tipo = form.querySelector("input[name=kind]:checked")?.value || "PF";
     const sufixo = tipo === "PJ" ? "Pj" : "Pf";
     form.querySelectorAll("input[data-rotulo-pf]").forEach((campo) => {
       const rotulo = campo.dataset["rotulo" + sufixo];
@@ -32,7 +32,7 @@
     if (form.querySelector("input[data-rotulo-pf]")) documentos(form);
   });
   document.addEventListener("change", (evento) => {
-    if (evento.target.matches("input[name=tipo]") && evento.target.form) documentos(evento.target.form);
+    if (evento.target.matches("input[name=kind]") && evento.target.form) documentos(evento.target.form);
   });
 
   // Every password field gets an eye button to show or hide what was typed.

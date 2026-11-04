@@ -59,17 +59,17 @@ def somar_meses(data, meses):
 @transaction.atomic
 def criar_lancamento(*, parcelas, primeiro_vencimento, user, **campos):
     """Create an entry with `parcelas` monthly installments from `primeiro_vencimento`."""
-    lancamento = Entry.objects.create(created_by=user, **campos)
+    entry = Entry.objects.create(created_by=user, **campos)
     # One by one (at most 48), not bulk_create, so the audit log records each installment.
-    for number, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1):
+    for number, amount in enumerate(dividir(entry.valor_total, parcelas), start=1):
         Installment.objects.create(
-            clinic=lancamento.clinic,
-            lancamento=lancamento,
+            clinic=entry.clinic,
+            entry=entry,
             number=number,
             vencimento=somar_meses(primeiro_vencimento, number - 1),
-            valor=valor,
+            amount=amount,
         )
-    return lancamento
+    return entry
 
 
 @transaction.atomic
@@ -78,10 +78,8 @@ def receber(parcela, *, user, **campos):
 
     The installment row is locked, so two people receiving at once cannot overpay it.
     """
-    parcela = (
-        Installment.objects.select_for_update().select_related("lancamento").get(pk=parcela.pk)
-    )
-    if parcela.lancamento.cancelado:
+    parcela = Installment.objects.select_for_update().select_related("entry").get(pk=parcela.pk)
+    if parcela.entry.cancelado:
         raise ValidationError(_("Este lançamento foi cancelado."))
     pagamento = Payment(clinic=parcela.clinic, parcela=parcela, created_by=user, **campos)
     conferir_periodo(pagamento.clinic_id, pagamento.data)
@@ -113,7 +111,7 @@ def estornar(pagamento, *, motivo, user):
     # so the audit log records it).
     for transacao in BankTransaction.objects.filter(pagamento=pagamento):
         transacao.pagamento = None
-        transacao.situacao = BankTransaction.Situacao.PENDENTE
+        transacao.status = BankTransaction.Situacao.PENDENTE
         transacao.conciliado_por = None
         transacao.conciliado_em = None
         transacao.save()
@@ -121,28 +119,28 @@ def estornar(pagamento, *, motivo, user):
 
 
 @transaction.atomic
-def cancelar(lancamento, *, motivo, user):
+def cancelar(entry, *, motivo, user):
     """Cancel an entry. Payments must be reversed first (they are real money).
 
     The entry row is locked: receber() locks it too (through its installment), so a
     payment cannot be recorded while the entry is being cancelled.
     """
-    lancamento = Entry.objects.select_for_update().get(pk=lancamento.pk)
-    if lancamento.cancelado:
+    entry = Entry.objects.select_for_update().get(pk=entry.pk)
+    if entry.cancelado:
         raise ValidationError(_("Este lançamento já foi cancelado."))
-    if Payment.objects.filter(parcela__lancamento=lancamento, estornado=False).exists():
+    if Payment.objects.filter(parcela__entry=entry, estornado=False).exists():
         raise ValidationError(
             _("Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar.")
         )
-    comissao = Commission.objects.filter(lancamento=lancamento, cancelada=False).first()
+    comissao = Commission.objects.filter(entry=entry, cancelada=False).first()
     if comissao is not None:
         commissions.liberar(comissao)  # raises ValidationError when it cannot be undone
-    lancamento.cancelado = True
-    lancamento.cancelado_em = timezone.now()
-    lancamento.cancelado_por = user
-    lancamento.motivo_cancelamento = motivo
-    lancamento.save()
-    return lancamento
+    entry.cancelado = True
+    entry.cancelado_em = timezone.now()
+    entry.cancelado_por = user
+    entry.motivo_cancelamento = motivo
+    entry.save()
+    return entry
 
 
 # --- Closing the books (decision 096) -------------------------------------------------
@@ -202,10 +200,10 @@ def reabrir(clinic, ate, *, motivo, user):
     )
 
 
-def situacao(parcela, hoje=None):
+def status(parcela, hoje=None):
     """Status of an installment annotated with com_saldo() (code, label)."""
     hoje = hoje or timezone.localdate()
-    if parcela.lancamento.cancelado:
+    if parcela.entry.cancelado:
         return "cancelada", _("Cancelada")
     if parcela.saldo <= 0:
         return "paga", _("Paga")
@@ -227,13 +225,13 @@ def devedores(hoje=None):
     # installments, and full objects took tens of MB per request (volume test, decision 108).
     parcelas = (
         Installment.objects.abertas()
-        .filter(lancamento__tipo=Entry.Tipo.RECEBER)
+        .filter(entry__kind=Entry.Tipo.RECEBER)
         .values(
             "vencimento",
             "saldo",
-            "lancamento__patient_id",
-            "lancamento__patient__name",
-            "lancamento__pessoa",
+            "entry__patient_id",
+            "entry__patient__name",
+            "entry__pessoa",
         )
     )
     linhas = defaultdict(
@@ -247,12 +245,12 @@ def devedores(hoje=None):
         }
     )
     for parcela in parcelas:
-        patient_id = parcela["lancamento__patient_id"]
-        pessoa = parcela["lancamento__pessoa"]
+        patient_id = parcela["entry__patient_id"]
+        pessoa = parcela["entry__pessoa"]
         chave = ("patient", patient_id) if patient_id else ("pessoa", pessoa.strip().lower())
         linha = linhas[chave]
         linha["patient_id"] = patient_id
-        linha["name"] = parcela["lancamento__patient__name"] if patient_id else pessoa
+        linha["name"] = parcela["entry__patient__name"] if patient_id else pessoa
         vencimento, saldo = parcela["vencimento"], parcela["saldo"]
         if vencimento >= hoje:
             linha["a_vencer"] += saldo
@@ -275,8 +273,8 @@ def resumo_do_paciente(patient, hoje=None):
     hoje = hoje or timezone.localdate()
     abertas = list(
         Installment.objects.abertas()
-        .filter(lancamento__patient=patient, lancamento__tipo=Entry.Tipo.RECEBER)
-        .select_related("lancamento")
+        .filter(entry__patient=patient, entry__kind=Entry.Tipo.RECEBER)
+        .select_related("entry")
         .order_by("vencimento")
     )
     return {
@@ -284,8 +282,8 @@ def resumo_do_paciente(patient, hoje=None):
         "vencido": sum((p.saldo for p in abertas if p.vencimento < hoje), start=ZERO),
         "a_vencer": sum((p.saldo for p in abertas if p.vencimento >= hoje), start=ZERO),
         "pagamentos": list(
-            Payment.objects.filter(parcela__lancamento__patient=patient)
-            .select_related("parcela__lancamento", "conta")
+            Payment.objects.filter(parcela__entry__patient=patient)
+            .select_related("parcela__entry", "conta")
             .order_by("-data", "-pk")[:5]
         ),
     }
@@ -294,13 +292,13 @@ def resumo_do_paciente(patient, hoje=None):
 # --- Cash flow and reports (0.16.0) ------------------------------------------------------
 
 
-def _sinal(tipo):
+def _sinal(kind):
     """Receivables bring money in (+), payables take it out (-)."""
-    return 1 if tipo == Entry.Tipo.RECEBER else -1
+    return 1 if kind == Entry.Tipo.RECEBER else -1
 
 
 def pagamentos_validos():
-    return Payment.objects.filter(estornado=False, parcela__lancamento__cancelado=False)
+    return Payment.objects.filter(estornado=False, parcela__entry__cancelado=False)
 
 
 def saldos_das_contas(ate=None):
@@ -314,22 +312,22 @@ def saldos_das_contas(ate=None):
     if ate is not None:
         pagamentos = pagamentos.filter(data__lte=ate)
     movimento = defaultdict(lambda: ZERO)
-    for conta_id, tipo, total in (
+    for conta_id, kind, total in (
         pagamentos.order_by()
-        .values_list("conta_id", "parcela__lancamento__tipo")
-        .annotate(total=Sum("valor"))
+        .values_list("conta_id", "parcela__entry__kind")
+        .annotate(total=Sum("amount"))
     ):
-        movimento[conta_id] += _sinal(tipo) * total
+        movimento[conta_id] += _sinal(kind) * total
     movimentos = CashMovement.objects.all()
     if ate is not None:
         movimentos = movimentos.filter(created_at__date__lte=ate)
-    for conta_id, outra_id, tipo, total in (
+    for conta_id, outra_id, kind, total in (
         movimentos.order_by()
-        .values_list("caixa__conta_id", "outra_conta_id", "tipo")
-        .annotate(total=Sum("valor"))
+        .values_list("caixa__conta_id", "outra_conta_id", "kind")
+        .annotate(total=Sum("amount"))
     ):
         # A withdrawal leaves the drawer (into the other account, if any); a top-up enters it.
-        sinal = -1 if tipo == CashMovement.Tipo.RETIRADA else 1
+        sinal = -1 if kind == CashMovement.Tipo.RETIRADA else 1
         movimento[conta_id] += sinal * total
         if outra_id:
             movimento[outra_id] -= sinal * total
@@ -359,32 +357,32 @@ def fluxo_de_caixa(de, ate, por_mes=False, hoje=None):
             "saidas_previstas": ZERO,
         }
     )
-    for data, tipo, valor in (
+    for data, kind, amount in (
         pagamentos_validos()
         .filter(data__gte=de, data__lte=ate)
-        .values_list("data", "parcela__lancamento__tipo", "valor")
+        .values_list("data", "parcela__entry__kind", "amount")
     ):
-        linhas[chave(data)]["entradas" if tipo == Entry.Tipo.RECEBER else "saidas"] += valor
+        linhas[chave(data)]["entradas" if kind == Entry.Tipo.RECEBER else "saidas"] += amount
     # Drawer movements to or from outside the system (moves between accounts net to zero).
-    for momento, tipo, valor in CashMovement.objects.filter(
+    for momento, kind, amount in CashMovement.objects.filter(
         outra_conta__isnull=True, created_at__date__gte=de, created_at__date__lte=ate
-    ).values_list("created_at", "tipo", "valor"):
+    ).values_list("created_at", "kind", "amount"):
         data = timezone.localtime(momento).date()
-        linhas[chave(data)]["saidas" if tipo == CashMovement.Tipo.RETIRADA else "entradas"] += valor
+        linhas[chave(data)]["saidas" if kind == CashMovement.Tipo.RETIRADA else "entradas"] += (
+            amount
+        )
     for parcela in (
         Installment.objects.abertas()
         .filter(vencimento__gte=de, vencimento__lte=ate)
-        .select_related("lancamento")
+        .select_related("entry")
     ):
         campo = (
-            "entradas_previstas"
-            if parcela.lancamento.tipo == Entry.Tipo.RECEBER
-            else "saidas_previstas"
+            "entradas_previstas" if parcela.entry.kind == Entry.Tipo.RECEBER else "saidas_previstas"
         )
         linhas[chave(parcela.vencimento)][campo] += parcela.saldo
 
     anterior = de - datetime.timedelta(days=1)
-    saldo_inicial = sum((valor for _conta, valor in saldos_das_contas(ate=anterior)), start=ZERO)
+    saldo_inicial = sum((amount for _conta, amount in saldos_das_contas(ate=anterior)), start=ZERO)
     saldo = saldo_inicial
     resultado = []
     for data in sorted(linhas):
@@ -421,8 +419,8 @@ def recebido_e_pago(de, ate):
         pagamentos_validos()
         .filter(data__gte=de, data__lte=ate)
         .order_by()
-        .values_list("parcela__lancamento__tipo")
-        .annotate(total=Sum("valor"))
+        .values_list("parcela__entry__kind")
+        .annotate(total=Sum("amount"))
     )
     return totais.get(Entry.Tipo.RECEBER, ZERO), totais.get(Entry.Tipo.PAGAR, ZERO)
 
@@ -430,11 +428,11 @@ def recebido_e_pago(de, ate):
 def relatorio(de, ate):
     """Money received and paid in the period, grouped for the reports page."""
     pagamentos = pagamentos_validos().filter(data__gte=de, data__lte=ate)
-    recebidos = pagamentos.filter(parcela__lancamento__tipo=Entry.Tipo.RECEBER)
-    pagos = pagamentos.filter(parcela__lancamento__tipo=Entry.Tipo.PAGAR)
+    recebidos = pagamentos.filter(parcela__entry__kind=Entry.Tipo.RECEBER)
+    pagos = pagamentos.filter(parcela__entry__kind=Entry.Tipo.PAGAR)
 
     def agrupar(consulta, campo, rotulo=None):
-        grupos = consulta.order_by().values_list(campo).annotate(total=Sum("valor"))
+        grupos = consulta.order_by().values_list(campo).annotate(total=Sum("amount"))
         linhas = [((rotulo or {}).get(chave, chave), total) for chave, total in grupos]
         return sorted(linhas, key=lambda linha: -linha[1])
 
@@ -442,14 +440,14 @@ def relatorio(de, ate):
         return consulta.aggregate(total=Coalesce(Sum(campo), ZERO, output_field=DINHEIRO))["total"]
 
     formas = rotulos_das_formas()
-    total_recebido = somar(recebidos, "valor")
-    total_pago = somar(pagos, "valor")
+    total_recebido = somar(recebidos, "amount")
+    total_pago = somar(pagos, "amount")
     # The chart of accounts (decision 097) only once the clinic has groups.
     grupos = AccountGroup.objects.exists()
     # Cost centers (decision 095) only once the clinic has registered one.
     centros = CostCenter.objects.exists()
     sem_centro = {None: _("Sem centro de custo")}
-    centro = "parcela__lancamento__centro_custo__name"
+    centro = "parcela__entry__centro_custo__name"
     return {
         "grupos": grupos,
         "por_grupo": arvore_por_grupo(recebidos, Category.Tipo.RECEITA) if grupos else [],
@@ -458,9 +456,9 @@ def relatorio(de, ate):
         "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
         "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
         "por_forma": agrupar(recebidos, "forma", formas),
-        "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__name"),
-        "por_profissional": agrupar(recebidos, "parcela__lancamento__practitioner__name"),
-        "despesas_por_categoria": agrupar(pagos, "parcela__lancamento__categoria__name"),
+        "por_categoria": agrupar(recebidos, "parcela__entry__categoria__name"),
+        "por_profissional": agrupar(recebidos, "parcela__entry__practitioner__name"),
+        "despesas_por_categoria": agrupar(pagos, "parcela__entry__categoria__name"),
         "total_recebido": total_recebido,
         "total_pago": total_pago,
         "resultado": total_recebido - total_pago,
@@ -496,35 +494,35 @@ def em_ordem_de_arvore(grupos):
     return saida
 
 
-def totais_por_grupo(pagamentos, tipo):
+def totais_por_grupo(pagamentos, kind):
     """Payments summed by group, each group including its subgroups.
 
     Returns (groups of the type, {group id: total}, total of categories outside any group).
     """
     por_categoria = dict(
         pagamentos.order_by()
-        .values_list("parcela__lancamento__categoria_id")
-        .annotate(total=Sum("valor"))
+        .values_list("parcela__entry__categoria_id")
+        .annotate(total=Sum("amount"))
     )
-    grupo_da_categoria = dict(Category.objects.filter(tipo=tipo).values_list("pk", "grupo_id"))
-    grupos = ligar_grupos(AccountGroup.objects.filter(tipo=tipo))
+    grupo_da_categoria = dict(Category.objects.filter(kind=kind).values_list("pk", "grupo_id"))
+    grupos = ligar_grupos(AccountGroup.objects.filter(kind=kind))
     pai = {grupo.pk: grupo.pai_id for grupo in grupos}
     totais = defaultdict(lambda: ZERO)
     sem_grupo = ZERO
-    for categoria_id, valor in por_categoria.items():
+    for categoria_id, amount in por_categoria.items():
         grupo_id = grupo_da_categoria.get(categoria_id)
         if grupo_id is None:
-            sem_grupo += valor
+            sem_grupo += amount
         while grupo_id is not None:
-            totais[grupo_id] += valor
+            totais[grupo_id] += amount
             grupo_id = pai.get(grupo_id)
     return grupos, totais, sem_grupo
 
 
-def arvore_por_grupo(pagamentos, tipo):
+def arvore_por_grupo(pagamentos, kind):
     """(level, name, total) rows in tree order for the reports, groups without money left
     out, and a last row for the categories outside any group."""
-    grupos, totais, sem_grupo = totais_por_grupo(pagamentos, tipo)
+    grupos, totais, sem_grupo = totais_por_grupo(pagamentos, kind)
     linhas = [
         (nivel, str(grupo), totais[grupo.pk])
         for nivel, grupo in em_ordem_de_arvore(grupos)
@@ -557,15 +555,15 @@ def planejamento(ano, hoje=None):
     that have one, so a goal and its subgroups' goals are not counted twice.
     """
     fracao = fracao_do_ano(ano, hoje)
-    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "valor"))
+    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "amount"))
     pagamentos = pagamentos_validos().filter(data__year=ano)
     secoes = []
-    for tipo, rotulo, lancamentos in (
+    for kind, rotulo, lancamentos in (
         (Category.Tipo.RECEITA, _("Receitas"), Entry.Tipo.RECEBER),
         (Category.Tipo.DESPESA, _("Despesas"), Entry.Tipo.PAGAR),
     ):
         grupos, totais, sem_grupo = totais_por_grupo(
-            pagamentos.filter(parcela__lancamento__tipo=lancamentos), tipo
+            pagamentos.filter(parcela__entry__kind=lancamentos), kind
         )
         linhas, meta_total, cobertos = [], ZERO, set()
         for nivel, grupo in em_ordem_de_arvore(grupos):
@@ -589,14 +587,14 @@ def planejamento(ano, hoje=None):
                     "em_dia": None
                     if not meta
                     else realizado >= esperado
-                    if tipo == Category.Tipo.RECEITA
+                    if kind == Category.Tipo.RECEITA
                     else realizado <= esperado,
                 }
             )
         realizado_total = sum((totais[g.pk] for g in grupos if g.pai_id is None), ZERO) + sem_grupo
         secoes.append(
             {
-                "tipo": tipo,
+                "kind": kind,
                 "rotulo": rotulo,
                 "linhas": linhas,
                 "sem_grupo": sem_grupo,
@@ -611,9 +609,9 @@ def planejamento(ano, hoje=None):
 @transaction.atomic
 def salvar_metas(ano, valores):
     """{group: goal or None}: saves the goals, removing the ones left blank."""
-    for grupo, valor in valores.items():
-        if valor:
-            Planning.objects.update_or_create(ano=ano, grupo=grupo, defaults={"valor": valor})
+    for grupo, amount in valores.items():
+        if amount:
+            Planning.objects.update_or_create(ano=ano, grupo=grupo, defaults={"amount": amount})
         else:
             Planning.objects.filter(ano=ano, grupo=grupo).delete()
 
@@ -625,7 +623,7 @@ def copiar_metas(ano):
     copiadas = 0
     for anterior in Planning.objects.filter(ano=ano - 1).exclude(grupo_id__in=existentes):
         # One by one, not bulk_create, so the audit log records each goal.
-        Planning.objects.create(ano=ano, grupo_id=anterior.grupo_id, valor=anterior.valor)
+        Planning.objects.create(ano=ano, grupo_id=anterior.grupo_id, amount=anterior.amount)
         copiadas += 1
     return copiadas
 
@@ -638,11 +636,11 @@ def caixa_aberto(conta):
 
 
 @transaction.atomic
-def abrir_caixa(conta, *, valor, user):
+def abrir_caixa(conta, *, amount, user):
     if caixa_aberto(conta) is not None:
         raise ValidationError(_("O caixa desta conta já está aberto."))
     return CashRegister.objects.create(
-        clinic=conta.clinic, conta=conta, valor_abertura=valor, aberto_por=user
+        clinic=conta.clinic, conta=conta, valor_abertura=amount, aberto_por=user
     )
 
 
@@ -656,21 +654,23 @@ def resumo_do_caixa(caixa):
     pagamentos = list(
         pagamentos_validos()
         .filter(conta=caixa.conta, created_at__gte=caixa.aberto_em, created_at__lte=fim)
-        .select_related("parcela__lancamento__patient")
+        .select_related("parcela__entry__patient")
         .order_by("created_at")
     )
     movimentos = list(caixa.movimentos.select_related("outra_conta", "created_by"))
     entradas = sum(
-        (p.valor for p in pagamentos if p.parcela.lancamento.tipo == Entry.Tipo.RECEBER),
+        (p.amount for p in pagamentos if p.parcela.entry.kind == Entry.Tipo.RECEBER),
         start=ZERO,
     )
     saidas = sum(
-        (p.valor for p in pagamentos if p.parcela.lancamento.tipo == Entry.Tipo.PAGAR),
+        (p.amount for p in pagamentos if p.parcela.entry.kind == Entry.Tipo.PAGAR),
         start=ZERO,
     )
-    reforcos = sum((m.valor for m in movimentos if m.tipo == CashMovement.Tipo.REFORCO), start=ZERO)
+    reforcos = sum(
+        (m.amount for m in movimentos if m.kind == CashMovement.Tipo.REFORCO), start=ZERO
+    )
     retiradas = sum(
-        (m.valor for m in movimentos if m.tipo == CashMovement.Tipo.RETIRADA), start=ZERO
+        (m.amount for m in movimentos if m.kind == CashMovement.Tipo.RETIRADA), start=ZERO
     )
     return {
         "pagamentos": pagamentos,
@@ -684,19 +684,19 @@ def resumo_do_caixa(caixa):
 
 
 @transaction.atomic
-def movimentar_caixa(caixa, *, tipo, valor, motivo, user, outra_conta=None):
+def movimentar_caixa(caixa, *, kind, amount, motivo, user, outra_conta=None):
     caixa = CashRegister.objects.select_for_update().get(pk=caixa.pk)
     if not caixa.aberto:
         raise ValidationError(_("Este caixa já foi fechado."))
     if outra_conta is not None and outra_conta.pk == caixa.conta_id:
         raise ValidationError(_("Escolha uma conta diferente da do caixa."))
-    if tipo == CashMovement.Tipo.RETIRADA and valor > resumo_do_caixa(caixa)["esperado"]:
+    if kind == CashMovement.Tipo.RETIRADA and amount > resumo_do_caixa(caixa)["esperado"]:
         raise ValidationError(_("A retirada passa do valor que deveria estar no caixa."))
     return CashMovement.objects.create(
         clinic=caixa.clinic,
         caixa=caixa,
-        tipo=tipo,
-        valor=valor,
+        kind=kind,
+        amount=amount,
         motivo=motivo,
         outra_conta=outra_conta,
         created_by=user,

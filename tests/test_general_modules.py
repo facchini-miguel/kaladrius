@@ -223,7 +223,7 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
 def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     resposta = admin.post(
         reverse("patients:new"),
-        {"tipo": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
+        {"kind": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
     )
     assert resposta.status_code == 302, resposta.context["form"].errors
     with usar_clinica(clinica_a):

@@ -16,7 +16,7 @@
   <tbody>
     {% for parcela in abertas %}
     <tr>
-      <td><a href="{% url 'finance:entry' parcela.lancamento.pk %}">{{ parcela.lancamento.description }}</a> <span class="text-body-secondary small">{{ parcela.number }}/{{ parcela.lancamento.parcelas.count }}</span></td>
+      <td><a href="{% url 'finance:entry' parcela.entry.pk %}">{{ parcela.entry.description }}</a> <span class="text-body-secondary small">{{ parcela.number }}/{{ parcela.entry.parcelas.count }}</span></td>
       <td>{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
       <td class="text-end">{{ parcela.saldo|moeda }}</td>
     </tr>

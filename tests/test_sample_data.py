@@ -31,9 +31,9 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
         assert Practitioner.objects.count() == 5
         assert Practitioner.objects.get(name="Dra. Ana Souza").user.username == "dra.ana"
         assert Patient.objects.count() == 30  # not duplicated on the 2nd run
-        assert Patient.objects.filter(tipo=Patient.Tipo.JURIDICA).count() == 1
+        assert Patient.objects.filter(kind=Patient.Tipo.JURIDICA).count() == 1
         for patient in Patient.objects.exclude(cpf_cnpj=""):
-            valido = cpf_valido if patient.tipo == Patient.Tipo.FISICA else cnpj_valido
+            valido = cpf_valido if patient.kind == Patient.Tipo.FISICA else cnpj_valido
             assert valido(patient.cpf_cnpj), patient.cpf_cnpj
         assert not Patient.objects.exclude(email__endswith="@example.com").exists()
         assert Appointment.objects.count() > 0  # created once, not duplicated

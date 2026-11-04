@@ -100,9 +100,9 @@ def test_filtros_da_lista(cenario):
         return [r.patient.name for r in cenario["cliente"].get(url, params).context["pagina"]]
 
     assert nomes() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
-    assert nomes(situacao="concluidas") == ["João Rechamada"]
-    assert nomes(situacao="todas", q="ana") == ["Ana Outra"]
-    assert nomes(situacao="todas", de="2031-03-06", ate="2031-04-30") == ["João Rechamada"]
+    assert nomes(status="concluidas") == ["João Rechamada"]
+    assert nomes(status="todas", q="ana") == ["Ana Outra"]
+    assert nomes(status="todas", de="2031-03-06", ate="2031-04-30") == ["João Rechamada"]
 
 
 def test_situacao_atrasada(cenario):
@@ -138,7 +138,7 @@ def test_isolamento(cenario, clinica_b):
     cliente = cenario["cliente"]
     assert cliente.get(reverse("recalls:edit", args=[de_b.pk])).status_code == 404
     assert cliente.post(reverse("recalls:complete", args=[de_b.pk])).status_code == 404
-    assert len(cliente.get(reverse("recalls:list"), {"situacao": "todas"}).context["pagina"]) == 0
+    assert len(cliente.get(reverse("recalls:list"), {"status": "todas"}).context["pagina"]) == 0
     resposta = cliente.post(
         reverse("recalls:new"),
         {"patient": paciente_b.pk, "data": DIA.isoformat(), "description": "x"},

@@ -189,12 +189,12 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
     assert bia.cpf_cnpj == "" and "CPF/CNPJ no sistema antigo: 11111111112" in bia.notes
 
     empresa = dados(clinic, Patient, name="Empresa Teste")[0]
-    assert (empresa.tipo, empresa.cpf_cnpj) == ("PJ", "11222333000181")
+    assert (empresa.kind, empresa.cpf_cnpj) == ("PJ", "11222333000181")
     assert (empresa.razao_social, empresa.inscricao_estadual) == ("Empresa Teste Ltda", "123")
 
 
 @pytest.mark.parametrize(
-    ("bruto", "tipo", "esperado"),
+    ("bruto", "kind", "esperado"),
     [
         ("012.345.678-90", Patient.Tipo.FISICA, ("01234567890", None)),
         ("12345678-90", Patient.Tipo.FISICA, ("01234567890", None)),
@@ -205,8 +205,8 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
         ("1222333000128", Patient.Tipo.JURIDICA, ("01222333000128", None)),
     ],
 )
-def test_documento(bruto, tipo, esperado):
-    assert _documento(bruto, tipo) == esperado
+def test_documento(bruto, kind, esperado):
+    assert _documento(bruto, kind) == esperado
 
 
 def test_agenda_e_rechamadas(importado):
@@ -300,8 +300,8 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     texto = str([vars(p) for p in pacientes])
     assert not [trecho for trecho in originais if trecho in texto]
     for velho, novo in zip(antes["pacientes"], pacientes, strict=True):
-        assert (novo.tipo, novo.sexo, novo.active, novo.cidade_id) == (
-            velho.tipo,
+        assert (novo.kind, novo.sexo, novo.active, novo.cidade_id) == (
+            velho.kind,
             velho.sexo,
             velho.active,
             velho.cidade_id,
@@ -341,7 +341,7 @@ def test_anonimizacao_dos_fornecedores(importado):
     _, clinic = importado
     with usar_clinica(clinic):
         pessoa = Supplier.objects.create(
-            tipo=Supplier.Tipo.FISICA,
+            kind=Supplier.Tipo.FISICA,
             name="Fulana Fornecedora",
             cpf_cnpj="52998224725",
             phone="4833334444",
@@ -349,11 +349,11 @@ def test_anonimizacao_dos_fornecedores(importado):
             notes="Indicada pela Fulana",
         )
         empresa = Supplier.objects.create(name="Dental Fictícia", whatsapp="48999990000")
-        categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
+        categoria = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
         for fornecedor in (pessoa, empresa):
             services.criar_lancamento(
                 clinic=clinic,
-                tipo=Entry.Tipo.PAGAR,
+                kind=Entry.Tipo.PAGAR,
                 fornecedor=fornecedor,
                 pessoa=fornecedor.name,
                 description="Compra",
@@ -372,8 +372,8 @@ def test_anonimizacao_dos_fornecedores(importado):
     assert empresa.name == "Dental Fictícia"  # a company name is not personal data
     assert len(empresa.whatsapp) == 11 and empresa.whatsapp != "48999990000"
     # Payables keep showing their supplier's (new) name.
-    for lancamento in dados(clinic, Entry, tipo=Entry.Tipo.PAGAR):
-        assert lancamento.pessoa == lancamento.fornecedor.name
+    for entry in dados(clinic, Entry, kind=Entry.Tipo.PAGAR):
+        assert entry.pessoa == entry.fornecedor.name
 
 
 def test_anonimizacao_das_carteirinhas(importado):
@@ -399,17 +399,17 @@ def test_anonimizacao_dos_funcionarios(importado):
         funcionaria = Employee.objects.create(
             name="Fulana Funcionária", cpf="52998224725", phone="4833334444"
         )
-        Salary.objects.create(funcionario=funcionaria, valor=Decimal("2000"), desde=HOJE)
+        Salary.objects.create(funcionario=funcionaria, amount=Decimal("2000"), desde=HOJE)
         folha = Payroll.objects.create(
             funcionario=funcionaria,
             competencia=HOJE.replace(day=1),
             salario=Decimal("2000"),
             note="Atestado da Fulana",
         )
-        categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
-        folha.lancamento = services.criar_lancamento(
+        categoria = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
+        folha.entry = services.criar_lancamento(
             clinic=clinic,
-            tipo=Entry.Tipo.PAGAR,
+            kind=Entry.Tipo.PAGAR,
             pessoa=funcionaria.name,
             description="Salário",
             categoria=categoria,
@@ -425,5 +425,5 @@ def test_anonimizacao_dos_funcionarios(importado):
     assert "Fulana" not in funcionaria.name and funcionaria.cpf == ""
     assert len(funcionaria.phone) == 10 and folha.note == ""
     with usar_clinica(clinic):
-        assert Entry.objects.get(pk=folha.lancamento_id).pessoa == funcionaria.name
+        assert Entry.objects.get(pk=folha.entry_id).pessoa == funcionaria.name
         assert funcionaria.salario_em(HOJE) == Decimal("2000")

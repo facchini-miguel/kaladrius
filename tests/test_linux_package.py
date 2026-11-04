@@ -43,9 +43,9 @@ def test_cada_tarefa_agendada_roda_um_script_do_pacote():
     destinos = {destino for _origem, destino in conteudo()}
     unidades = [d for d in destinos if d.startswith("/usr/lib/systemd/system/")]
     assert {Path(u).name for u in unidades} == {
-        f"kaladrius-{name}.{tipo}"
+        f"kaladrius-{name}.{kind}"
         for name in ("backup", "health", "restore-test")
-        for tipo in ("service", "timer")
+        for kind in ("service", "timer")
     }
     for unidade in unidades:
         if unidade.endswith(".service"):

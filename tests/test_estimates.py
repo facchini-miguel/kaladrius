@@ -24,9 +24,9 @@ def cenario(clinica_a, criar_usuario, cliente_de):
         patient = Patient.objects.create(name="Joana Sorriso")
         tratamento = Category.objects.get(name="Tratamento")
         canal = Procedure.objects.create(
-            name="Tratamento de canal", valor=Decimal("1200"), categoria=tratamento
+            name="Tratamento de canal", amount=Decimal("1200"), categoria=tratamento
         )
-        restauracao = Procedure.objects.create(name="Restauração", valor=Decimal("250"))
+        restauracao = Procedure.objects.create(name="Restauração", amount=Decimal("250"))
     return {
         "clinic": clinica_a,
         "patient": patient,
@@ -125,10 +125,10 @@ def test_quem_escreve_o_orcamento_da_desconto(cenario):
     recepcao.post(url, {"desconto": "200"})
     orcamento.refresh_from_db()
     assert orcamento.desconto == Decimal("200.00")
-    for quem, valor in [("practitioner", "150"), ("admin", "100")]:
-        entrar(cenario, quem).post(url, {"desconto": valor})
+    for quem, amount in [("practitioner", "150"), ("admin", "100")]:
+        entrar(cenario, quem).post(url, {"desconto": amount})
         orcamento.refresh_from_db()
-        assert orcamento.desconto == Decimal(valor)
+        assert orcamento.desconto == Decimal(amount)
 
 
 def test_aprovar_vira_lancamento_a_receber(cenario):
@@ -153,23 +153,23 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
         },
     )
     orcamento.refresh_from_db()
-    lancamento = orcamento.lancamento
-    assert resposta.url == reverse("finance:entry", args=[lancamento.pk])
-    assert orcamento.situacao == Estimate.Situacao.APROVADO
-    assert (lancamento.tipo, lancamento.valor_total) == (
+    entry = orcamento.entry
+    assert resposta.url == reverse("finance:entry", args=[entry.pk])
+    assert orcamento.status == Estimate.Situacao.APROVADO
+    assert (entry.kind, entry.valor_total) == (
         Entry.Tipo.RECEBER,
         Decimal("1000.00"),
     )
     with usar_clinica(cenario["clinic"]):
-        assert lancamento.parcelas.count() == 4
-        assert lancamento.patient == cenario["patient"]
+        assert entry.parcelas.count() == 4
+        assert entry.patient == cenario["patient"]
     # Once approved, nothing changes any more.
     incluir(recepcao, orcamento, procedimento=cenario["restauracao"].pk)
     with usar_clinica(cenario["clinic"]):
         assert orcamento.itens.count() == 1
     assert recepcao.post(reverse("estimates:decline", args=[orcamento.pk])).status_code == 302
     orcamento.refresh_from_db()
-    assert orcamento.situacao == Estimate.Situacao.APROVADO
+    assert orcamento.status == Estimate.Situacao.APROVADO
 
 
 def test_profissional_nao_aprova(cenario):
@@ -187,11 +187,11 @@ def test_recusar_e_imprimir(cenario):
     assert "ORÇAMENTO" in pagina and "Joana Sorriso" in pagina and "selecionado" in pagina
     cliente.post(reverse("estimates:decline", args=[orcamento.pk]))
     orcamento.refresh_from_db()
-    assert orcamento.situacao == Estimate.Situacao.RECUSADO
+    assert orcamento.status == Estimate.Situacao.RECUSADO
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with usar_clinica(cenario["clinic"]), pytest.raises(ValidationError):
         services.recusar(orcamento, user=None)
-    lista = cliente.get(reverse("estimates:list"), {"situacao": "recusado"})
+    lista = cliente.get(reverse("estimates:list"), {"status": "recusado"})
     assert list(lista.context["pagina"]) == [orcamento]
 
 
@@ -212,9 +212,9 @@ def test_tabela_de_procedimentos_so_o_admin_altera(cenario):
     admin = entrar(cenario, "admin")
     url = reverse("estimates:procedure_new")
     assert (
-        admin.post(url, {"name": "Clareamento", "valor": "900", "active": "on"}).status_code == 302
+        admin.post(url, {"name": "Clareamento", "amount": "900", "active": "on"}).status_code == 302
     )
-    assert "Já existe" in admin.post(url, {"name": "Clareamento", "valor": "1"}).content.decode()
+    assert "Já existe" in admin.post(url, {"name": "Clareamento", "amount": "1"}).content.decode()
 
 
 def test_exclusao_definitiva_apaga_os_orcamentos(cenario):

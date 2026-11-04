@@ -75,20 +75,20 @@ from .ofx import ArquivoInvalido
 
 POR_PAGINA = 50
 SITUACOES = {
-    "abertas": Q(saldo__gt=0, lancamento__cancelado=False),
-    "vencidas": Q(saldo__gt=0, lancamento__cancelado=False),  # + due date before today
-    "pagas": Q(saldo__lte=0, lancamento__cancelado=False),
+    "abertas": Q(saldo__gt=0, entry__cancelado=False),
+    "vencidas": Q(saldo__gt=0, entry__cancelado=False),  # + due date before today
+    "pagas": Q(saldo__lte=0, entry__cancelado=False),
     "todas": Q(),
 }
 
 
-def _modulo(tipo):
-    return Modulo.RECEBIMENTOS if tipo == Entry.Tipo.RECEBER else Modulo.FINANCEIRO
+def _modulo(kind):
+    return Modulo.RECEBIMENTOS if kind == Entry.Tipo.RECEBER else Modulo.FINANCEIRO
 
 
-def _exigir(request, tipo, acao):
+def _exigir(request, kind, acao):
     """Payables need the Financeiro module (administrators) for the same action."""
-    if not pode(request, _modulo(tipo), acao):
+    if not pode(request, _modulo(kind), acao):
         raise PermissionDenied
 
 
@@ -102,38 +102,38 @@ def pagar_lista(request):
     return _lista(request, Entry.Tipo.PAGAR)
 
 
-def _lista(request, tipo):
+def _lista(request, kind):
     hoje = timezone.localdate()
-    situacao = request.GET.get("situacao", "abertas")
+    status = request.GET.get("status", "abertas")
     busca = request.GET.get("q", "").strip()
     parcelas = (
         Installment.objects.com_saldo()
-        .filter(lancamento__tipo=tipo)
-        .select_related("lancamento__patient", "lancamento")
-        .filter(SITUACOES.get(situacao, SITUACOES["abertas"]))
+        .filter(entry__kind=kind)
+        .select_related("entry__patient", "entry")
+        .filter(SITUACOES.get(status, SITUACOES["abertas"]))
     )
-    if situacao == "vencidas":
+    if status == "vencidas":
         parcelas = parcelas.filter(vencimento__lt=hoje)
     if busca:
         parcelas = parcelas.filter(
-            Q(lancamento__patient__name__unaccent__icontains=busca)
-            | Q(lancamento__pessoa__unaccent__icontains=busca)
-            | Q(lancamento__description__unaccent__icontains=busca)
+            Q(entry__patient__name__unaccent__icontains=busca)
+            | Q(entry__pessoa__unaccent__icontains=busca)
+            | Q(entry__description__unaccent__icontains=busca)
         )
     parcelas = parcelas.order_by("vencimento", "pk")
     pagina = Paginator(parcelas, POR_PAGINA).get_page(request.GET.get("pagina"))
     for parcela in pagina:
-        parcela.situacao = services.situacao(parcela, hoje)
+        parcela.status = services.status(parcela, hoje)
     return render(
         request,
         "finance/list.html",
         {
-            "tipo": tipo,
-            "pagar": tipo == Entry.Tipo.PAGAR,
+            "kind": kind,
+            "pagar": kind == Entry.Tipo.PAGAR,
             "pagina": pagina,
-            "situacao": situacao,
+            "status": status,
             "busca": busca,
-            "parametros": urlencode({"situacao": situacao, "q": busca}),
+            "parametros": urlencode({"status": status, "q": busca}),
         },
     )
 
@@ -150,9 +150,9 @@ def lancamento_novo(request):
     form = LancamentoReceberForm(request.POST or None, initial=inicial, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=request.clinic,
-            tipo=Entry.Tipo.RECEBER,
+            kind=Entry.Tipo.RECEBER,
             patient=dados["patient"],
             pessoa="" if dados["patient"] else dados["pessoa"].strip(),
             description=dados["description"],
@@ -166,18 +166,18 @@ def lancamento_novo(request):
             user=request.user,
         )
         if dados["recebido_agora"]:
-            primeira = lancamento.parcelas.order_by("number").first()
+            primeira = entry.parcelas.order_by("number").first()
             pagamento = services.receber(
                 primeira,
                 user=request.user,
-                valor=primeira.valor,
+                amount=primeira.amount,
                 forma=dados["forma"],
                 conta=dados["conta"],
             )
             messages.success(request, _("Lançamento criado e 1ª parcela recebida."))
             return redirect("finance:receipt", pk=pagamento.pk)
         messages.success(request, _("Lançamento criado."))
-        return redirect("finance:entry", pk=lancamento.pk)
+        return redirect("finance:entry", pk=entry.pk)
     if patient is None and form["patient"].value():
         patient = Patient.objects.filter(pk=form["patient"].value()).first()
     return render(request, "finance/entry_form.html", {"form": form, "patient": patient})
@@ -192,9 +192,9 @@ def despesa_nova(request):
     )
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=request.clinic,
-            tipo=Entry.Tipo.PAGAR,
+            kind=Entry.Tipo.PAGAR,
             fornecedor=dados["fornecedor"],
             pessoa=dados["pessoa"].strip(),
             description=dados["description"],
@@ -207,73 +207,71 @@ def despesa_nova(request):
             user=request.user,
         )
         if dados["pago_agora"]:
-            primeira = lancamento.parcelas.order_by("number").first()
+            primeira = entry.parcelas.order_by("number").first()
             services.receber(
                 primeira,
                 user=request.user,
-                valor=primeira.valor,
+                amount=primeira.amount,
                 forma=dados["forma"],
                 conta=dados["conta"],
             )
         messages.success(request, _("Despesa lançada."))
-        return redirect("finance:entry", pk=lancamento.pk)
+        return redirect("finance:entry", pk=entry.pk)
     return render(request, "finance/expense_form.html", {"form": form})
 
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
-def lancamento(request, pk):
-    lancamento = get_object_or_404(
+def entry(request, pk):
+    entry = get_object_or_404(
         Entry.objects.select_related("patient", "categoria", "centro_custo", "practitioner"),
         pk=pk,
     )
-    _exigir(request, lancamento.tipo, Acao.VER)
+    _exigir(request, entry.kind, Acao.VER)
     hoje = timezone.localdate()
-    parcelas = list(
-        Installment.objects.com_saldo().filter(lancamento=lancamento).select_related("lancamento")
-    )
-    pagamentos = Payment.objects.filter(parcela__lancamento=lancamento).select_related(
+    parcelas = list(Installment.objects.com_saldo().filter(entry=entry).select_related("entry"))
+    pagamentos = Payment.objects.filter(parcela__entry=entry).select_related(
         "parcela", "conta", "created_by"
     )
     for parcela in parcelas:
-        parcela.situacao = services.situacao(parcela, hoje)
+        parcela.status = services.status(parcela, hoje)
         parcela.lista_pagamentos = [p for p in pagamentos if p.parcela_id == parcela.pk]
     return render(
         request,
         "finance/entry.html",
         {
-            "lancamento": lancamento,
-            "pagar": lancamento.tipo == Entry.Tipo.PAGAR,
-            "pode_alterar": pode(request, _modulo(lancamento.tipo), Acao.CRIAR),
-            "pode_excluir": pode(request, _modulo(lancamento.tipo), Acao.EXCLUIR),
+            "entry": entry,
+            "pagar": entry.kind == Entry.Tipo.PAGAR,
+            "pode_alterar": pode(request, _modulo(entry.kind), Acao.CRIAR),
+            "pode_excluir": pode(request, _modulo(entry.kind), Acao.EXCLUIR),
             "parcelas": parcelas,
             "total_pago": sum(p.pago for p in parcelas),
-            "total_saldo": sum(p.saldo for p in parcelas) if not lancamento.cancelado else 0,
-            "comissao": Commission.objects.filter(lancamento=lancamento).first(),
+            "total_saldo": sum(p.saldo for p in parcelas) if not entry.cancelado else 0,
+            "comissao": Commission.objects.filter(entry=entry).first(),
         },
     )
 
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.EXCLUIR)
 def lancamento_cancelar(request, pk):
-    lancamento = get_object_or_404(Entry.objects, pk=pk, cancelado=False)
-    _exigir(request, lancamento.tipo, Acao.EXCLUIR)
+    entry = get_object_or_404(Entry.objects, pk=pk, cancelado=False)
+    _exigir(request, entry.kind, Acao.EXCLUIR)
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.cancelar(lancamento, motivo=form.cleaned_data["motivo"], user=request.user)
+            services.cancelar(entry, motivo=form.cleaned_data["motivo"], user=request.user)
         except ValidationError as erro:
             messages.error(request, erro.messages[0])
         else:
             messages.success(request, _("Lançamento cancelado."))
-        return redirect("finance:entry", pk=lancamento.pk)
+        return redirect("finance:entry", pk=entry.pk)
     return render(
         request,
         "finance/reason.html",
         {
             "form": form,
             "titulo": _("Cancelar lançamento"),
-            "objeto": lancamento,
-            "voltar": lancamento.pk,
+            "objeto": entry,
+            "voltar": entry.pk,
         },
     )
 
@@ -281,29 +279,29 @@ def lancamento_cancelar(request, pk):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
 def receber(request, pk):
     parcela = get_object_or_404(
-        Installment.objects.com_saldo().select_related("lancamento__patient"),
+        Installment.objects.com_saldo().select_related("entry__patient"),
         pk=pk,
-        lancamento__cancelado=False,
+        entry__cancelado=False,
     )
-    _exigir(request, parcela.lancamento.tipo, Acao.CRIAR)
-    pagar = parcela.lancamento.tipo == Entry.Tipo.PAGAR
+    _exigir(request, parcela.entry.kind, Acao.CRIAR)
+    pagar = parcela.entry.kind == Entry.Tipo.PAGAR
     if parcela.saldo <= 0:
         messages.info(request, _("Esta parcela já está paga."))
-        return redirect("finance:entry", pk=parcela.lancamento_id)
+        return redirect("finance:entry", pk=parcela.entry_id)
     pode_desconto = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
     conta_padrao = FinancialAccount.objects.filter(
-        active=True, tipo=FinancialAccount.Tipo.DINHEIRO
+        active=True, kind=FinancialAccount.Tipo.DINHEIRO
     ).first()
     form = ReceberForm(
         request.POST or None,
-        initial={"valor": parcela.saldo, "data": timezone.localdate(), "conta": conta_padrao},
+        initial={"amount": parcela.saldo, "data": timezone.localdate(), "conta": conta_padrao},
         pode_dar_desconto=pode_desconto,
     )
     if pagar:
-        form.fields["valor"].label = _("Valor pago")
+        form.fields["amount"].label = _("Valor pago")
         form.fields["juros"].help_text = _("Já incluídos no valor pago.")
     if request.method == "POST" and form.is_valid():
-        dados = {campo: valor for campo, valor in form.cleaned_data.items() if campo in form.fields}
+        dados = {campo: value for campo, value in form.cleaned_data.items() if campo in form.fields}
         dados.setdefault("desconto", 0)
         dados["juros"] = dados.get("juros") or 0
         try:
@@ -313,7 +311,7 @@ def receber(request, pk):
         else:
             messages.success(request, _("Pagamento registrado."))
             if pagar:
-                return redirect("finance:entry", pk=parcela.lancamento_id)
+                return redirect("finance:entry", pk=parcela.entry_id)
             return redirect("finance:receipt", pk=pagamento.pk)
     return render(
         request,
@@ -321,7 +319,7 @@ def receber(request, pk):
         {
             "form": form,
             "parcela": parcela,
-            "total_parcelas": parcela.lancamento.parcelas.count(),
+            "total_parcelas": parcela.entry.parcelas.count(),
             "pode_desconto": pode_desconto,
             "pagar": pagar,
         },
@@ -332,21 +330,21 @@ def receber(request, pk):
 def recibo(request, pk):
     pagamento = get_object_or_404(
         Payment.objects.select_related(
-            "parcela__lancamento__patient",
-            "parcela__lancamento__practitioner",
+            "parcela__entry__patient",
+            "parcela__entry__practitioner",
             "conta",
             "created_by",
         ),
         pk=pk,
-        parcela__lancamento__tipo=Entry.Tipo.RECEBER,
+        parcela__entry__kind=Entry.Tipo.RECEBER,
     )
     return render(
         request,
         "finance/receipt.html",
         {
             "pagamento": pagamento,
-            "lancamento": pagamento.parcela.lancamento,
-            "total_parcelas": pagamento.parcela.lancamento.parcelas.count(),
+            "entry": pagamento.parcela.entry,
+            "total_parcelas": pagamento.parcela.entry.parcelas.count(),
             # Where a tax document is required, the receipt says it does not replace it.
             "documento_fiscal": legislation.do_pais().fiscal,
         },
@@ -356,9 +354,9 @@ def recibo(request, pk):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.EXCLUIR)
 def estornar(request, pk):
     pagamento = get_object_or_404(
-        Payment.objects.select_related("parcela__lancamento"), pk=pk, estornado=False
+        Payment.objects.select_related("parcela__entry"), pk=pk, estornado=False
     )
-    _exigir(request, pagamento.parcela.lancamento.tipo, Acao.EXCLUIR)
+    _exigir(request, pagamento.parcela.entry.kind, Acao.EXCLUIR)
     form = MotivoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -367,7 +365,7 @@ def estornar(request, pk):
             messages.error(request, erro.messages[0])
         else:
             messages.success(request, _("Pagamento estornado."))
-        return redirect("finance:entry", pk=pagamento.parcela.lancamento_id)
+        return redirect("finance:entry", pk=pagamento.parcela.entry_id)
     return render(
         request,
         "finance/reason.html",
@@ -378,11 +376,11 @@ def estornar(request, pk):
             "objeto": " · ".join(
                 [
                     str(pagamento.parcela),
-                    moeda(pagamento.valor),
+                    moeda(pagamento.amount),
                     date_format(pagamento.data, "SHORT_DATE_FORMAT"),
                 ]
             ),
-            "voltar": pagamento.parcela.lancamento_id,
+            "voltar": pagamento.parcela.entry_id,
         },
     )
 
@@ -417,7 +415,7 @@ def devedores(request):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def caixa(request):
     """The drawer of a cash account: its open session, or the form to open it."""
-    contas = list(FinancialAccount.objects.filter(tipo=FinancialAccount.Tipo.DINHEIRO, active=True))
+    contas = list(FinancialAccount.objects.filter(kind=FinancialAccount.Tipo.DINHEIRO, active=True))
     escolhida = request.GET.get("conta", "")
     conta = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
     if conta is not None:
@@ -433,7 +431,7 @@ def caixa(request):
         if form.is_valid():
             try:
                 novo = services.abrir_caixa(
-                    conta, valor=form.cleaned_data["valor"], user=request.user
+                    conta, amount=form.cleaned_data["amount"], user=request.user
                 )
             except ValidationError as erro:
                 messages.error(request, erro.messages[0])
@@ -476,15 +474,15 @@ MOVIMENTOS_NA_URL = {
 
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
-def caixa_movimento(request, pk, tipo):
+def caixa_movimento(request, pk, kind):
     sessao = get_object_or_404(CashRegister.objects.select_related("conta"), pk=pk, fechado_em=None)
-    if tipo not in MOVIMENTOS_NA_URL:
+    if kind not in MOVIMENTOS_NA_URL:
         raise Http404
-    tipo = MOVIMENTOS_NA_URL[tipo]
+    kind = MOVIMENTOS_NA_URL[kind]
     form = MovimentoCaixaForm(request.POST or None, caixa=sessao)
     if request.method == "POST" and form.is_valid():
         try:
-            services.movimentar_caixa(sessao, tipo=tipo, user=request.user, **form.cleaned_data)
+            services.movimentar_caixa(sessao, kind=kind, user=request.user, **form.cleaned_data)
         except ValidationError as erro:
             form.add_error(None, erro.messages[0])
         else:
@@ -493,7 +491,7 @@ def caixa_movimento(request, pk, tipo):
     return render(
         request,
         "finance/cash_form.html",
-        {"caixa": sessao, "form": form, "titulo": CashMovement.Tipo(tipo).label},
+        {"caixa": sessao, "form": form, "titulo": CashMovement.Tipo(kind).label},
     )
 
 
@@ -584,7 +582,7 @@ def planejamento(request):
     ano = min(max(ano, 2000), hoje.year + 5)
     pode_alterar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
     grupos = services.ligar_grupos(AccountGroup.objects.filter(active=True))
-    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "valor"))
+    metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "amount"))
     form = PlanejamentoForm(request.POST or None, grupos=grupos, metas=metas)
     if request.method == "POST":
         if not pode_alterar:
@@ -712,11 +710,11 @@ def plano_contas(request):
     grupos = services.ligar_grupos(AccountGroup.objects.all())
     categorias = list(Category.objects.all())
     arvores = []
-    for tipo, rotulo in Category.Tipo.choices:
+    for kind, rotulo in Category.Tipo.choices:
         linhas = []
 
-        def descer(pai_id, nivel, tipo=tipo, linhas=linhas):
-            for grupo in (g for g in grupos if g.tipo == tipo and g.pai_id == pai_id):
+        def descer(pai_id, nivel, kind=kind, linhas=linhas):
+            for grupo in (g for g in grupos if g.kind == kind and g.pai_id == pai_id):
                 linhas.append({"nivel": nivel, "grupo": grupo})
                 linhas.extend(
                     {"nivel": nivel + 1, "categoria": c}
@@ -726,14 +724,14 @@ def plano_contas(request):
                 descer(grupo.pk, nivel + 1)
 
         descer(None, 0)
-        sem_grupo = [c for c in categorias if c.tipo == tipo and c.grupo_id is None]
+        sem_grupo = [c for c in categorias if c.kind == kind and c.grupo_id is None]
         arvores.append({"rotulo": rotulo, "linhas": linhas, "sem_grupo": sem_grupo})
     return render(request, "finance/chart_of_accounts.html", {"arvores": arvores})
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
 def grupo_novo(request):
-    return _grupo_form(request, AccountGroup(tipo=request.GET.get("tipo") or None))
+    return _grupo_form(request, AccountGroup(kind=request.GET.get("kind") or None))
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
@@ -777,14 +775,14 @@ def fornecedor(request, pk):
     hoje = timezone.localdate()
     parcelas = list(
         Installment.objects.com_saldo()
-        .filter(lancamento__fornecedor=fornecedor)
-        .select_related("lancamento")
+        .filter(entry__fornecedor=fornecedor)
+        .select_related("entry")
         .order_by("-vencimento", "-pk")[:POR_PAGINA]
     )
     for parcela in parcelas:
-        parcela.situacao = services.situacao(parcela, hoje)
+        parcela.status = services.status(parcela, hoje)
     em_aberto = sum(
-        (p.saldo for p in Installment.objects.abertas().filter(lancamento__fornecedor=fornecedor)),
+        (p.saldo for p in Installment.objects.abertas().filter(entry__fornecedor=fornecedor)),
         start=ZERO,
     )
     return render(
@@ -834,7 +832,7 @@ def comissoes_lista(request):
             "ate": ate,
             "linhas": commissions.resumo(ate),
             "sem_percentual": Practitioner.objects.filter(active=True, comissao_percentual=0),
-            "historico": Commission.objects.select_related("practitioner", "lancamento")[:30],
+            "historico": Commission.objects.select_related("practitioner", "entry")[:30],
         },
     )
 
@@ -859,8 +857,8 @@ def comissao_pagar(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     ate = _ate(request)
     padrao = (
-        Category.objects.filter(tipo=Category.Tipo.DESPESA, name="Comissões", active=True).first()
-        or Category.objects.filter(tipo=Category.Tipo.DESPESA, active=True).first()
+        Category.objects.filter(kind=Category.Tipo.DESPESA, name="Comissões", active=True).first()
+        or Category.objects.filter(kind=Category.Tipo.DESPESA, active=True).first()
     )
     form = PagarComissaoForm(request.POST or None, initial={"categoria": padrao})
     if request.method == "POST" and form.is_valid():
@@ -872,7 +870,7 @@ def comissao_pagar(request, pk):
             messages.error(request, erro.messages[0])
             return redirect(f"{reverse('finance:commissions')}?ate={ate.isoformat()}")
         messages.success(request, _("Comissão lançada em A pagar."))
-        return redirect("finance:entry", pk=comissao.lancamento_id)
+        return redirect("finance:entry", pk=comissao.entry_id)
     return render(
         request,
         "finance/commission_pay.html",
@@ -882,18 +880,16 @@ def comissao_pagar(request, pk):
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
 def comissao(request, pk):
-    comissao = get_object_or_404(
-        Commission.objects.select_related("practitioner", "lancamento"), pk=pk
-    )
-    pagamentos = comissao.pagamentos.select_related("parcela__lancamento__patient").order_by(
+    comissao = get_object_or_404(Commission.objects.select_related("practitioner", "entry"), pk=pk)
+    pagamentos = comissao.pagamentos.select_related("parcela__entry__patient").order_by(
         "data", "pk"
     )
     estornos = comissao.pagamentos_estornados.select_related(
-        "parcela__lancamento__patient", "comissao"
+        "parcela__entry__patient", "comissao"
     ).order_by("data", "pk")
     for estorno in estornos:
         estorno.comissao_devolvida = commissions.percentual_de(
-            estorno.valor, estorno.comissao.percentual
+            estorno.amount, estorno.comissao.percentual
         )
     return render(
         request,
@@ -957,7 +953,7 @@ def extratos(request):
                 return redirect("finance:statement", pk=importacao.pk)
     importacoes = StatementImport.objects.select_related("conta", "created_by")
     pendentes = dict(
-        BankTransaction.objects.filter(situacao=BankTransaction.Situacao.PENDENTE)
+        BankTransaction.objects.filter(status=BankTransaction.Situacao.PENDENTE)
         .values("importacao")
         .annotate(n=Count("pk"))
         .values_list("importacao", "n")
@@ -973,7 +969,7 @@ def extrato(request, pk):
     importacao = get_object_or_404(StatementImport.objects.select_related("conta"), pk=pk)
     transacoes = list(
         importacao.transacoes.select_related(
-            "pagamento__parcela__lancamento__patient", "movimento__caixa__conta"
+            "pagamento__parcela__entry__patient", "movimento__caixa__conta"
         )
     )
     por_transacao = reconciliation.candidatos(transacoes)
@@ -986,7 +982,7 @@ def extrato(request, pk):
         {
             "importacao": importacao,
             "transacoes": transacoes,
-            "pendentes": sum(t.situacao == BankTransaction.Situacao.PENDENTE for t in transacoes),
+            "pendentes": sum(t.status == BankTransaction.Situacao.PENDENTE for t in transacoes),
             "unicos": sum(len(t.candidatos) == 1 for t in transacoes),
             "saldo_sistema": saldo_sistema,
             "diferenca": importacao.saldo - saldo_sistema if saldo_sistema is not None else None,

@@ -50,35 +50,35 @@ def _agenda(request, hoje):
     visiveis = agenda.agendamentos_visiveis(request)
     do_dia = list(
         visiveis.filter(inicio__date=hoje)
-        .select_related("patient", "practitioner", "tipo")
+        .select_related("patient", "practitioner", "kind")
         .order_by("inicio", "practitioner__name")
     )
     pacientes = [a for a in do_dia if a.patient_id]
-    situacao = Appointment.Situacao
-    contagem = {valor: 0 for valor in situacao.values}
+    status = Appointment.Situacao
+    contagem = {value: 0 for value in status.values}
     for agendamento in pacientes:
-        contagem[agendamento.situacao] += 1
-    pendentes = [a for a in pacientes if a.situacao == situacao.AGENDADO]
+        contagem[agendamento.status] += 1
+    pendentes = [a for a in pacientes if a.status == status.AGENDADO]
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(
         visiveis.filter(
             inicio__date__gte=hoje.replace(day=1),
             inicio__date__lte=hoje,
-            situacao__in=[situacao.COMPARECEU, situacao.FALTOU],
+            status__in=[status.COMPARECEU, status.FALTOU],
         )
         .order_by()
-        .values_list("situacao")
+        .values_list("status")
         .annotate(total=Count("pk"))
     )
-    vieram, faltaram = marcados.get(situacao.COMPARECEU, 0), marcados.get(situacao.FALTOU, 0)
+    vieram, faltaram = marcados.get(status.COMPARECEU, 0), marcados.get(status.FALTOU, 0)
     return {
         "lista": do_dia,
         # A practitioner sees only their own schedule, so the column would repeat their name.
         "mostrar_profissional": not so_a_propria_agenda(request),
-        "pacientes": len(pacientes) - contagem[situacao.DESMARCOU],
-        "compareceram": contagem[situacao.COMPARECEU],
-        "faltaram": contagem[situacao.FALTOU],
-        "desmarcaram": contagem[situacao.DESMARCOU],
+        "pacientes": len(pacientes) - contagem[status.DESMARCOU],
+        "compareceram": contagem[status.COMPARECEU],
+        "faltaram": contagem[status.FALTOU],
+        "desmarcaram": contagem[status.DESMARCOU],
         "a_seguir": sum(1 for a in pendentes if a.inicio > agora),
         "sem_marcacao": sum(1 for a in pendentes if a.inicio <= agora),
         "proximo": next((a for a in pendentes if a.fim > agora), None),
@@ -114,7 +114,7 @@ def _aniversariantes(hoje):
 def _orcamentos(hoje):
     return list(
         Estimate.objects.filter(
-            situacao=Estimate.Situacao.ABERTO,
+            status=Estimate.Situacao.ABERTO,
             validade__gte=hoje,
             validade__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
             patient__arquivado=False,
@@ -132,18 +132,18 @@ def _soma_dos_saldos(parcelas):
 
 def _recebimentos(hoje):
     recebidos = financeiro.pagamentos_validos().filter(
-        data=hoje, parcela__lancamento__tipo=Entry.Tipo.RECEBER
+        data=hoje, parcela__entry__kind=Entry.Tipo.RECEBER
     )
     formas = rotulos_das_formas()
     por_forma = [
         (formas.get(forma, forma), total)
         for forma, total in recebidos.order_by()
         .values_list("forma")
-        .annotate(total=Sum("valor"))
+        .annotate(total=Sum("amount"))
         .order_by("-total")
     ]
     a_receber, parcelas = _soma_dos_saldos(
-        Installment.objects.abertas().filter(lancamento__tipo=Entry.Tipo.RECEBER, vencimento=hoje)
+        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, vencimento=hoje)
     )
     return {
         "recebido": sum((total for _forma, total in por_forma), start=ZERO),
@@ -167,11 +167,11 @@ def _financeiro(hoje):
     recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
     abertas = Installment.objects.abertas()
     vencido, parcelas_vencidas = _soma_dos_saldos(
-        abertas.filter(lancamento__tipo=Entry.Tipo.RECEBER, vencimento__lt=hoje)
+        abertas.filter(entry__kind=Entry.Tipo.RECEBER, vencimento__lt=hoje)
     )
     a_pagar, contas_a_pagar = _soma_dos_saldos(
         abertas.filter(
-            lancamento__tipo=Entry.Tipo.PAGAR,
+            entry__kind=Entry.Tipo.PAGAR,
             vencimento__lte=hoje + datetime.timedelta(days=DIAS_A_PAGAR),
         )
     )

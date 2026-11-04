@@ -75,8 +75,8 @@ def ordenar(dentes, numeracao=None):
         return sorted(dentes)
 
     def chave(dente):
-        valor = _universal(dente) if dente in DENTES_VALIDOS else 99
-        return (isinstance(valor, str), str(valor).zfill(2))
+        value = _universal(dente) if dente in DENTES_VALIDOS else 99
+        return (isinstance(value, str), str(value).zfill(2))
 
     return sorted(dentes, key=chave)
 

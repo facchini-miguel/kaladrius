@@ -46,9 +46,9 @@ def _ler(linha):
     try:
         amostra = json.loads(linha)
         if "time" in amostra:
-            amostra = {CAMPOS.get(chave, chave): valor for chave, valor in amostra.items()}
+            amostra = {CAMPOS.get(chave, chave): value for chave, value in amostra.items()}
             amostra["containers"] = [
-                {CAMPOS_CONTAINER.get(chave, chave): valor for chave, valor in c.items()}
+                {CAMPOS_CONTAINER.get(chave, chave): value for chave, value in c.items()}
                 for c in amostra.get("containers", [])
             ]
         amostra["momento"] = parse_datetime(amostra["momento"])
@@ -93,11 +93,11 @@ def ultima():
     return None
 
 
-def nivel(chave, valor):
+def nivel(chave, value):
     atencao, critico = LIMITES[chave]
-    if valor >= critico:
+    if value >= critico:
         return "critico"
-    if valor >= atencao:
+    if value >= atencao:
         return "atencao"
     return "ok"
 
@@ -205,8 +205,8 @@ def grafico(
             return largura / 2
         return (momento - inicio).total_seconds() / duracao * largura
 
-    def y(valor):
-        return altura - margem - min(valor, topo) / topo * (altura - 2 * margem)
+    def y(value):
+        return altura - margem - min(value, topo) / topo * (altura - 2 * margem)
 
     partes = [
         f'<svg viewBox="0 0 {largura} {altura}" preserveAspectRatio="none" class="grafico" '
@@ -221,13 +221,13 @@ def grafico(
     for chave, classe in reversed(series):
         trechos, atual, anterior = [], [], None
         for amostra in lista:
-            valor = amostra.get(chave)
-            if valor is None:
+            value = amostra.get(chave)
+            if value is None:
                 continue
             if anterior is not None and amostra["momento"] - anterior > LACUNA and atual:
                 trechos.append(atual)
                 atual = []
-            atual.append(f"{x(amostra['momento']):.1f},{y(valor):.1f}")
+            atual.append(f"{x(amostra['momento']):.1f},{y(value):.1f}")
             anterior = amostra["momento"]
         if atual:
             trechos.append(atual)

@@ -21,6 +21,6 @@
       <div class="small">{% blocktranslate with data=comissao.created_at|date:"SHORT_DATE_FORMAT" %}lançada em {{ data }}{% endblocktranslate %}</div>
     </div>
   </div>
-  {% include "finance/_commission_items.html" with recebido=comissao.recebido bruta=comissao.bruta valor=comissao.valor percentual=comissao.percentual %}
+  {% include "finance/_commission_items.html" with recebido=comissao.recebido bruta=comissao.bruta amount=comissao.amount percentual=comissao.percentual %}
 </div>
 {% endblock %}

@@ -61,9 +61,9 @@ def importar(conta, *, nome_arquivo, conteudo, user):
                 importacao=importacao,
                 fitid=t.fitid,
                 data=t.data,
-                valor=t.valor,
+                amount=t.amount,
                 description=t.description,
-                tipo=t.tipo,
+                kind=t.kind,
             )
             for t in extrato.transacoes
             if t.fitid not in existentes
@@ -104,7 +104,7 @@ class Candidato:
 
 def candidatos(transacoes):
     """{transaction pk: [Candidato, closest date first]} for the pending transactions."""
-    pendentes = [t for t in transacoes if t.situacao == Situacao.PENDENTE]
+    pendentes = [t for t in transacoes if t.status == Situacao.PENDENTE]
     if not pendentes:
         return {}
     contas = {t.conta_id for t in pendentes}
@@ -113,7 +113,7 @@ def candidatos(transacoes):
     pagamentos = list(
         Payment.objects.filter(
             conta_id__in=contas, estornado=False, transacao__isnull=True, data__range=(de, ate)
-        ).select_related("parcela__lancamento__patient")
+        ).select_related("parcela__entry__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
@@ -124,24 +124,24 @@ def candidatos(transacoes):
     )
     resultado = {}
     for t in pendentes:
-        valor = abs(t.valor)
-        tipo = Entry.Tipo.RECEBER if t.entrada else Entry.Tipo.PAGAR
+        amount = abs(t.amount)
+        kind = Entry.Tipo.RECEBER if t.entrada else Entry.Tipo.PAGAR
         # Money taken out of the drawer into the bank is a credit there, and vice versa.
         tipo_movimento = CashMovement.Tipo.RETIRADA if t.entrada else CashMovement.Tipo.REFORCO
         lista = []
         for p in pagamentos:
-            lancamento = p.parcela.lancamento
+            entry = p.parcela.entry
             if (
                 p.conta_id == t.conta_id
-                and p.valor == valor
-                and lancamento.tipo == tipo
+                and p.amount == amount
+                and entry.kind == kind
                 and abs(p.data - t.data) <= JANELA
             ):
                 lista.append(
                     Candidato(
                         f"p{p.pk}",
                         p.data,
-                        f"{lancamento.nome_pessoa} · {lancamento.description}",
+                        f"{entry.nome_pessoa} · {entry.description}",
                         p,
                     )
                 )
@@ -149,13 +149,13 @@ def candidatos(transacoes):
             data = timezone.localtime(m.created_at).date()
             if (
                 m.outra_conta_id == t.conta_id
-                and m.valor == valor
-                and m.tipo == tipo_movimento
+                and m.amount == amount
+                and m.kind == tipo_movimento
                 and abs(data - t.data) <= JANELA
             ):
                 lista.append(
                     Candidato(
-                        f"m{m.pk}", data, f"{m.caixa.conta} · {m.get_tipo_display()}: {m.motivo}", m
+                        f"m{m.pk}", data, f"{m.caixa.conta} · {m.get_kind_display()}: {m.motivo}", m
                     )
                 )
         lista.sort(key=lambda c: (abs(c.data - t.data), c.data, c.chave))
@@ -168,7 +168,7 @@ def _vincular(transacao, candidato, user):
         transacao.pagamento = candidato.objeto
     else:
         transacao.movimento = candidato.objeto
-    transacao.situacao = Situacao.CONCILIADA
+    transacao.status = Situacao.CONCILIADA
     transacao.conciliado_por = user
     transacao.conciliado_em = timezone.now()
     try:
@@ -181,7 +181,7 @@ def _vincular(transacao, candidato, user):
 
 def _pendente(transacao):
     transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
-    if transacao.situacao != Situacao.PENDENTE:
+    if transacao.status != Situacao.PENDENTE:
         raise ValidationError(_("Esta transação já foi conciliada ou ignorada."))
     return transacao
 
@@ -201,7 +201,7 @@ def conciliar_unicos(importacao, *, user):
     """Reconcile every pending line with exactly one candidate that no other line wants."""
     transacoes = list(
         BankTransaction.objects.select_for_update().filter(
-            importacao=importacao, situacao=Situacao.PENDENTE
+            importacao=importacao, status=Situacao.PENDENTE
         )
     )
     por_transacao = candidatos(transacoes)
@@ -219,33 +219,33 @@ def conciliar_unicos(importacao, *, user):
 def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
     transacao = _pendente(transacao)
-    lancamento = services.criar_lancamento(
+    entry = services.criar_lancamento(
         clinic=transacao.clinic,
-        tipo=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
+        kind=Entry.Tipo.RECEBER if transacao.entrada else Entry.Tipo.PAGAR,
         pessoa=pessoa or description,
         description=description,
         categoria=categoria,
-        valor_total=abs(transacao.valor),
+        valor_total=abs(transacao.amount),
         parcelas=1,
         primeiro_vencimento=transacao.data,
         user=user,
     )
     pagamento = services.receber(
-        lancamento.parcelas.get(),
+        entry.parcelas.get(),
         user=user,
-        valor=abs(transacao.valor),
+        amount=abs(transacao.amount),
         forma=forma,
         conta=transacao.conta,
         data=transacao.data,
     )
     _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.data, "", pagamento), user)
-    return lancamento
+    return entry
 
 
 @transaction.atomic
 def ignorar(transacao, *, motivo, user):
     transacao = _pendente(transacao)
-    transacao.situacao = Situacao.IGNORADA
+    transacao.status = Situacao.IGNORADA
     transacao.motivo = motivo
     transacao.conciliado_por = user
     transacao.conciliado_em = timezone.now()
@@ -256,7 +256,7 @@ def ignorar(transacao, *, motivo, user):
 def desfazer(transacao):
     """Back to pending. An entry created from the line stays (cancel it if it was wrong)."""
     transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
-    transacao.situacao = Situacao.PENDENTE
+    transacao.status = Situacao.PENDENTE
     transacao.pagamento = None
     transacao.movimento = None
     transacao.motivo = ""
