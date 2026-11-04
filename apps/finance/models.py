@@ -116,13 +116,14 @@ class Category(ModeloDaClinica):
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
     kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
-    grupo = models.ForeignKey(
+    group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="categorias",
         verbose_name=_("grupo"),
+        db_column="grupo_id",
     )
     active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
 
@@ -205,12 +206,12 @@ def criar_padroes(clinic):
             grupo_de = {}
             for kind, linhas in PLANO_PADRAO.items():
                 for code, name, categorias in linhas:
-                    grupo = AccountGroup.objects.create(
+                    group = AccountGroup.objects.create(
                         clinic=clinic, kind=kind, code=code, name=name
                     )
-                    grupo_de.update({(kind, categoria): grupo for categoria in categorias})
+                    grupo_de.update({(kind, category): group for category in categorias})
             Category.objects.bulk_create(
-                Category(clinic=clinic, name=name, kind=kind, grupo=grupo_de.get((kind, name)))
+                Category(clinic=clinic, name=name, kind=kind, group=grupo_de.get((kind, name)))
                 for name, kind in CATEGORIAS_PADRAO
             )
 
@@ -232,9 +233,11 @@ class Supplier(ModeloDaClinica):
         db_collation=ALFABETICA,
         db_column="nome",
     )
-    razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
+    legal_name = models.CharField(
+        _("razão social"), max_length=200, blank=True, db_column="razao_social"
+    )
     # The country's tax document (decision 121); the name stayed from Brazil.
-    cpf_cnpj = models.CharField(_("documento"), max_length=20, blank=True)
+    tax_id = models.CharField(_("documento"), max_length=20, blank=True, db_column="cpf_cnpj")
     phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
     whatsapp = models.CharField(_("WhatsApp"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
@@ -250,8 +253,8 @@ class Supplier(ModeloDaClinica):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "cpf_cnpj"],
-                condition=~Q(cpf_cnpj=""),
+                fields=["clinic", "tax_id"],
+                condition=~Q(tax_id=""),
                 name="fornecedor_cpf_cnpj_unico_por_clinica",
             ),
         ]
@@ -274,8 +277,12 @@ class Entry(ModeloDaClinica):
 
     kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
-    categoria = models.ForeignKey(
-        Category, on_delete=models.PROTECT, related_name="+", verbose_name=_("categoria")
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("categoria"),
+        db_column="categoria_id",
     )
     centro_custo = models.ForeignKey(
         CostCenter,
@@ -364,7 +371,7 @@ class ParcelaQuerySet(models.QuerySet):
     def com_saldo(self):
         """Annotate pago (principal paid by non-reversed payments) and saldo."""
         principal = ExpressionWrapper(
-            F("pagamentos__amount") - F("pagamentos__juros") + F("pagamentos__desconto"),
+            F("pagamentos__amount") - F("pagamentos__juros") + F("pagamentos__discount"),
             output_field=DecimalField(**DINHEIRO),
         )
         pago = Coalesce(
@@ -462,7 +469,7 @@ class Payment(ModeloDaClinica):
         help_text=_("Já incluídos no valor recebido."),
         **DINHEIRO,
     )
-    desconto = models.DecimalField(_("desconto"), default=ZERO, **DINHEIRO)
+    discount = models.DecimalField(_("desconto"), default=ZERO, **DINHEIRO, db_column="desconto")
     forma = models.CharField(_("forma de pagamento"), max_length=15, choices=Forma.choices)
     account = models.ForeignKey(
         FinancialAccount,
@@ -527,7 +534,7 @@ class Payment(ModeloDaClinica):
             models.CheckConstraint(condition=Q(amount__gt=0), name="pagamento_valor_positivo"),
             models.CheckConstraint(condition=Q(juros__gte=0), name="pagamento_juros_positivo"),
             models.CheckConstraint(
-                condition=Q(desconto__gte=0), name="pagamento_desconto_positivo"
+                condition=Q(discount__gte=0), name="pagamento_desconto_positivo"
             ),
         ]
 
@@ -542,7 +549,7 @@ class Payment(ModeloDaClinica):
 
     @property
     def principal(self):
-        return self.amount - self.juros + self.desconto
+        return self.amount - self.juros + self.discount
 
 
 class CashRegister(ModeloDaClinica):
@@ -635,7 +642,7 @@ class CashMovement(ModeloDaClinica):
         verbose_name=_("outra conta"),
         help_text=_("Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."),
     )
-    motivo = models.CharField(_("motivo"), max_length=200)
+    reason = models.CharField(_("motivo"), max_length=200, db_column="motivo")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -674,7 +681,7 @@ class Commission(ModeloDaClinica):
         verbose_name=_("profissional"),
         db_column="profissional_id",
     )
-    ate = models.DateField(_("recebimentos até"))
+    until = models.DateField(_("recebimentos até"), db_column="ate")
     percentual = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
     recebido = models.DecimalField(_("valor recebido"), **DINHEIRO)
     estornos = models.DecimalField(_("comissão de estornos descontada"), default=ZERO, **DINHEIRO)
@@ -708,7 +715,7 @@ class Commission(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.practitioner} {self.ate:%d/%m/%Y}"
+        return f"{self.practitioner} {self.until:%d/%m/%Y}"
 
     @property
     def bruta(self):
@@ -721,8 +728,12 @@ class Planning(ModeloDaClinica):
     planejamento_estrategico): how much to receive or spend, compared with what was paid."""
 
     ano = models.PositiveSmallIntegerField(_("ano"))
-    grupo = models.ForeignKey(
-        AccountGroup, on_delete=models.PROTECT, related_name="+", verbose_name=_("grupo")
+    group = models.ForeignKey(
+        AccountGroup,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("grupo"),
+        db_column="grupo_id",
     )
     amount = models.DecimalField(_("meta"), **DINHEIRO, db_column="valor")
 
@@ -730,16 +741,16 @@ class Planning(ModeloDaClinica):
         db_table = "financeiro_planejamento"
         verbose_name = _("meta do planejamento")
         verbose_name_plural = _("metas do planejamento")
-        ordering = ["ano", "grupo"]
+        ordering = ["ano", "group"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "ano", "grupo"], name="planejamento_unico_por_grupo"
+                fields=["clinic", "ano", "group"], name="planejamento_unico_por_grupo"
             ),
             models.CheckConstraint(condition=Q(amount__gt=0), name="planejamento_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.ano} · {self.grupo}"
+        return f"{self.ano} · {self.group}"
 
 
 class BookClosing(ModeloDaClinica):
@@ -750,8 +761,8 @@ class BookClosing(ModeloDaClinica):
     reopening has an earlier date (or none: everything open) and a reason.
     """
 
-    ate = models.DateField(_("fechado até"), null=True, blank=True)
-    motivo = models.CharField(_("motivo"), max_length=200, blank=True)
+    until = models.DateField(_("fechado até"), null=True, blank=True, db_column="ate")
+    reason = models.CharField(_("motivo"), max_length=200, blank=True, db_column="motivo")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -770,7 +781,7 @@ class BookClosing(ModeloDaClinica):
         ordering = ["-created_at", "-pk"]
 
     def __str__(self):
-        return f"{self.ate:%d/%m/%Y}" if self.ate else str(_("Aberto"))
+        return f"{self.until:%d/%m/%Y}" if self.until else str(_("Aberto"))
 
 
 class StatementImport(ModeloDaClinica):
@@ -783,11 +794,11 @@ class StatementImport(ModeloDaClinica):
         verbose_name=_("conta"),
         db_column="conta_id",
     )
-    arquivo = models.CharField(_("arquivo"), max_length=200)
+    file = models.CharField(_("arquivo"), max_length=200, db_column="arquivo")
     banco = models.CharField(_("código do banco"), max_length=20, blank=True)
     conta_no_banco = models.CharField(_("conta no banco"), max_length=40, blank=True)
-    inicio = models.DateField(_("início"), null=True, blank=True)
-    fim = models.DateField(_("fim"), null=True, blank=True)
+    start = models.DateField(_("início"), null=True, blank=True, db_column="inicio")
+    end = models.DateField(_("fim"), null=True, blank=True, db_column="fim")
     saldo = models.DecimalField(_("saldo no banco"), null=True, blank=True, **DINHEIRO)
     saldo_em = models.DateField(_("saldo em"), null=True, blank=True)
     novas = models.PositiveIntegerField(_("transações novas"), default=0)
@@ -815,7 +826,7 @@ class StatementImport(ModeloDaClinica):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.account} {self.arquivo}"
+        return f"{self.account} {self.file}"
 
 
 class BankTransaction(ModeloDaClinica):
@@ -874,7 +885,7 @@ class BankTransaction(ModeloDaClinica):
         related_name="transacao",
         verbose_name=_("movimento do caixa"),
     )
-    motivo = models.CharField(_("motivo"), max_length=200, blank=True)
+    reason = models.CharField(_("motivo"), max_length=200, blank=True, db_column="motivo")
     conciliado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

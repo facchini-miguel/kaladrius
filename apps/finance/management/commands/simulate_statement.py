@@ -43,7 +43,7 @@ class Command(BaseCommand):
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         hoje = timezone.localdate()
-        inicio = hoje - datetime.timedelta(days=dias)
+        start = hoje - datetime.timedelta(days=dias)
         with usar_clinica(alvo):
             alvo_conta = FinancialAccount.objects.filter(name=account).first()
             if alvo_conta is None:
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             linhas = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
-                account=alvo_conta, estornado=False, date__range=(inicio, hoje)
+                account=alvo_conta, estornado=False, date__range=(start, hoje)
             ).select_related("parcela__entry"):
                 entrada = p.parcela.entry.kind == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
@@ -61,17 +61,17 @@ class Command(BaseCommand):
                 description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
                 linhas.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
-                date = inicio + datetime.timedelta(days=sorteio.randint(0, dias))
+                date = start + datetime.timedelta(days=sorteio.randint(0, dias))
                 linhas.append(
                     (date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}")
                 )
             linhas.sort()
-            saldo = dict(services.saldos_das_contas(ate=hoje)).get(alvo_conta)
+            saldo = dict(services.saldos_das_contas(until=hoje)).get(alvo_conta)
         # The bank balance: what the system has plus the extras minus what is not there yet.
         saldo = (saldo or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
-        self.stdout.write(self._ofx(linhas, inicio, hoje, saldo))
+        self.stdout.write(self._ofx(linhas, start, hoje, saldo))
 
-    def _ofx(self, linhas, inicio, fim, saldo):
+    def _ofx(self, linhas, start, end, saldo):
         transacoes = "".join(
             "<STMTTRN>\n"
             f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
@@ -87,8 +87,8 @@ class Command(BaseCommand):
             "CHARSET:NONE\nCOMPRESSION:NONE\nOLDFILEUID:NONE\nNEWFILEUID:NONE\n\n"
             "<OFX>\n<BANKMSGSRSV1>\n<STMTTRNRS>\n<STMTRS>\n<CURDEF>BRL\n"
             "<BANKACCTFROM>\n<BANKID>999\n<ACCTID>12345-6\n<ACCTTYPE>CHECKING\n</BANKACCTFROM>\n"
-            f"<BANKTRANLIST>\n<DTSTART>{inicio:%Y%m%d}\n<DTEND>{fim:%Y%m%d}\n"
+            f"<BANKTRANLIST>\n<DTSTART>{start:%Y%m%d}\n<DTEND>{end:%Y%m%d}\n"
             f"{transacoes}</BANKTRANLIST>\n"
-            f"<LEDGERBAL>\n<BALAMT>{saldo}\n<DTASOF>{fim:%Y%m%d}\n</LEDGERBAL>\n"
+            f"<LEDGERBAL>\n<BALAMT>{saldo}\n<DTASOF>{end:%Y%m%d}\n</LEDGERBAL>\n"
             "</STMTRS>\n</STMTTRNRS>\n</BANKMSGSRSV1>\n</OFX>\n"
         )

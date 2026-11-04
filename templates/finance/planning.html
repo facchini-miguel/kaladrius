@@ -32,7 +32,7 @@
       <tbody>
         {% for linha in secao.linhas %}
         <tr>
-          <td style="padding-left: {{ linha.nivel|add:1 }}rem;"{% if linha.nivel == 0 %} class="fw-semibold"{% endif %}>{{ linha.grupo }}</td>
+          <td style="padding-left: {{ linha.nivel|add:1 }}rem;"{% if linha.nivel == 0 %} class="fw-semibold"{% endif %}>{{ linha.group }}</td>
           <td class="text-end">
             {% if linha.campo %}
             {{ linha.campo }}{% for erro in linha.campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}

@@ -22,8 +22,8 @@
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ fornecedor.get_kind_display }}</dd>
-          {% if fornecedor.razao_social %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ fornecedor.razao_social }}</dd>{% endif %}
-          {% with sigla=fornecedor.cpf_cnpj|sigla_documento:fornecedor.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
+          {% if fornecedor.legal_name %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ fornecedor.legal_name }}</dd>{% endif %}
+          {% with sigla=fornecedor.tax_id|sigla_documento:fornecedor.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ fornecedor.tax_id|documento:fornecedor.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ fornecedor.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ fornecedor.email|default:"—" }}</dd>

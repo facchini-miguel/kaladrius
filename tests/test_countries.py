@@ -190,7 +190,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Papel.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
-    assert 'name="uf"' not in formulario and 'name="cidade_nome"' in formulario
+    assert 'name="state"' not in formulario and 'name="cidade_nome"' in formulario
     assert "Código postal" in formulario
 
     resposta = admin.post(
@@ -223,7 +223,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
 def test_paciente_no_brasil_continua_com_cpf_e_cidades(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_brasil", clinica_a, Papel.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'name="cpf_cnpj"' in formulario and 'name="uf"' in formulario
+    assert 'name="tax_id"' in formulario and 'name="state"' in formulario
     assert 'name="cidade_nome"' not in formulario and ">CEP" in formulario
 
 
@@ -245,8 +245,8 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
             practitioner=ana,
             kind=AppointmentType.objects.first(),
             description="Horário fictício",
-            inicio=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
-            fim=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),
+            start=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
+            end=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),
         )
     cliente = cliente_de(criar_usuario("recepcao_agenda_londres", clinica_a, Papel.RECEPCAO))
     eventos = cliente.get(

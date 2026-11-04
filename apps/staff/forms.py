@@ -128,11 +128,11 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
 
 
 class LancarForm(FormularioBootstrap, forms.Form):
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
+    category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     vencimento = forms.DateField(label=_("Vencimento"), widget=DATA)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         despesas = Category.objects.filter(kind=Category.Tipo.DESPESA, active=True)
-        self.fields["categoria"].queryset = despesas
-        self.fields["categoria"].initial = despesas.filter(name="Salários e encargos").first()
+        self.fields["category"].queryset = despesas
+        self.fields["category"].initial = despesas.filter(name="Salários e encargos").first()

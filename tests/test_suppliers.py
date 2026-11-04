@@ -21,7 +21,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def fornecedor(clinica_a):
     with usar_clinica(clinica_a):
-        return Supplier.objects.create(name="Dental Fictícia", cpf_cnpj=CNPJ)
+        return Supplier.objects.create(name="Dental Fictícia", tax_id=CNPJ)
 
 
 def dados(**extra):
@@ -30,12 +30,12 @@ def dados(**extra):
 
 def despesa(clinic, **extra):
     with usar_clinica(clinic):
-        categoria = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
+        category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
     return {
         "fornecedor": "",
         "pessoa": "",
         "description": "Material fictício",
-        "categoria": categoria.pk,
+        "category": category.pk,
         "amount": "450",
         "modo": "dividir",
         "parcelas": 3,
@@ -48,12 +48,12 @@ def despesa(clinic, **extra):
 def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     resposta = admin.post(
         reverse("finance:supplier_new"),
-        dados(cpf_cnpj="11.222.333/0001-81", phone="(48) 3333-4444", whatsapp="48 99999-0000"),
+        dados(tax_id="11.222.333/0001-81", phone="(48) 3333-4444", whatsapp="48 99999-0000"),
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         criado = Supplier.objects.get()
-    assert (criado.cpf_cnpj, criado.phone, criado.whatsapp) == (
+    assert (criado.tax_id, criado.phone, criado.whatsapp) == (
         CNPJ,
         "4833334444",
         "48999990000",
@@ -64,8 +64,8 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
 @pytest.mark.parametrize(
     ("extra", "campo"),
     [
-        ({"cpf_cnpj": "11.222.333/0001-00"}, "cpf_cnpj"),
-        ({"kind": "PF", "cpf_cnpj": "111.111.111-11"}, "cpf_cnpj"),
+        ({"tax_id": "11.222.333/0001-00"}, "tax_id"),
+        ({"kind": "PF", "tax_id": "111.111.111-11"}, "tax_id"),
         ({"phone": "1234"}, "phone"),
         ({"name": ""}, "name"),
     ],
@@ -77,11 +77,11 @@ def test_validacoes_do_cadastro(extra, campo, admin):
 
 
 def test_documento_repetido_e_recusado(fornecedor, admin):
-    resposta = admin.post(reverse("finance:supplier_new"), dados(cpf_cnpj=CNPJ))
-    assert "cpf_cnpj" in resposta.context["form"].errors
+    resposta = admin.post(reverse("finance:supplier_new"), dados(tax_id=CNPJ))
+    assert "tax_id" in resposta.context["form"].errors
     editar = admin.post(
         reverse("finance:supplier_edit", args=[fornecedor.pk]),
-        dados(name="Dental Fictícia Renomeada", cpf_cnpj=CNPJ),
+        dados(name="Dental Fictícia Renomeada", tax_id=CNPJ),
     )
     assert editar.status_code == 302
 

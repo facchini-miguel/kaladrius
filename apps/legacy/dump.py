@@ -16,9 +16,9 @@ class DumpInvalido(ValueError):
     pass
 
 
-def _valores(texto, inicio):
+def _valores(texto, start):
     """Parse "(...), (...);" from `inicio`. Returns (rows, position after the ';')."""
-    linhas, linha, i, n = [], None, inicio, len(texto)
+    linhas, linha, i, n = [], None, start, len(texto)
     while i < n:
         c = texto[i]
         if c in " \t\r\n,":
@@ -48,17 +48,17 @@ def _valores(texto, inicio):
                     i += 1
                     break
                 else:
-                    fim = i
-                    while fim < n and texto[fim] not in "\\'":
-                        fim += 1
-                    partes.append(texto[i:fim])
-                    i = fim
+                    end = i
+                    while end < n and texto[end] not in "\\'":
+                        end += 1
+                    partes.append(texto[i:end])
+                    i = end
             linha.append("".join(partes))
         else:
-            fim = i
-            while fim < n and texto[fim] not in ",)":
-                fim += 1
-            bruto = texto[i:fim].strip()
+            end = i
+            while end < n and texto[end] not in ",)":
+                end += 1
+            bruto = texto[i:end].strip()
             if bruto.upper() == "NULL":
                 linha.append(None)
             else:
@@ -66,7 +66,7 @@ def _valores(texto, inicio):
                     linha.append(float(bruto) if "." in bruto else int(bruto))
                 except ValueError as erro:
                     raise DumpInvalido(f"Valor inválido: {bruto!r}") from erro
-            i = fim
+            i = end
     raise DumpInvalido("Fim do arquivo dentro de um INSERT.")
 
 

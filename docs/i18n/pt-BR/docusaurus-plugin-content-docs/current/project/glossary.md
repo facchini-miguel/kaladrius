@@ -67,7 +67,7 @@ Os nomes do código estão passando do português para o inglês (decisões 155 
 
 ## Campos, primeiro lote
 
-Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` e `criado_por` (decisão 160), `paciente`, `profissional` e `usuario` (decisão 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` e `numero` (decisão 163), `tipo`, `valor`, `situacao`, `atendimento` e `lancamento` (decisão 164), `data` e `conta` (decisão 165; também as variáveis locais com esses nomes exatos, como `clinica` → `clinic`). Depois, os campos próprios de cada app e, por último, as funções e variáveis.
+Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` e `criado_por` (decisão 160), `paciente`, `profissional` e `usuario` (decisão 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` e `numero` (decisão 163), `tipo`, `valor`, `situacao`, `atendimento` e `lancamento` (decisão 164), `data` e `conta` (decisão 165), os 19 nomes depois de `conta` na tabela (decisão 166; também as variáveis locais com esses nomes exatos, como `clinica` → `clinic`). Depois, os campos próprios de cada app e, por último, as funções e variáveis.
 
 | Antes | Depois |
 |---|---|
@@ -93,6 +93,24 @@ Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`
 | `atendimento` | `visit` |
 | `lancamento` | `entry` |
 | `conta` | `account` |
+| `arquivo` | `file` |
+| `ate` | `until` |
+| `bairro` | `neighborhood` |
+| `categoria` | `category` |
+| `cidade` | `city` |
+| `cor` | `color` |
+| `cpf_cnpj` | `tax_id` |
+| `desconto` | `discount` |
+| `inicio`, `fim` | `start`, `end` |
+| `funcionario` | `employee` |
+| `grupo` | `group` |
+| `momento` | `timestamp` |
+| `motivo` | `reason` |
+| `razao_social` | `legal_name` |
+| `registro` | `registration` |
+| `tamanho` | `size` |
+| `uf` | `state` |
+| `validade` | `valid_until` |
 
 ## O que fica em português
 

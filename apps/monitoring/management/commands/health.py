@@ -48,8 +48,7 @@ class Command(BaseCommand):
         if backup is None:
             self.stdout.write("Último backup: nenhum registrado")
         else:
-            horas = (timezone.now() - backup.momento).total_seconds() / 3600
+            horas = (timezone.now() - backup.timestamp).total_seconds() / 3600
             self.stdout.write(
-                f"Último backup: {backup.arquivo} ({filesizeformat(backup.tamanho)}), "
-                f"há {horas:.0f} h"
+                f"Último backup: {backup.file} ({filesizeformat(backup.size)}), há {horas:.0f} h"
             )

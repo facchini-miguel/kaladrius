@@ -89,8 +89,8 @@ def servidor(tmp_path):
             (tmp_path / lugar / name.replace("/", "_").replace(":", "_")).write_text(ident + "\n")
 
         def id_local(self, name):
-            arquivo = tmp_path / "imagens" / name.replace("/", "_").replace(":", "_")
-            return arquivo.read_text().strip() if arquivo.exists() else None
+            file = tmp_path / "imagens" / name.replace("/", "_").replace(":", "_")
+            return file.read_text().strip() if file.exists() else None
 
         def saude(self, *respostas):
             (tmp_path / "saude").write_text("".join(f"{r}\n" for r in respostas))
@@ -112,8 +112,8 @@ def servidor(tmp_path):
             return resultado.returncode, (tmp_path / "log").read_text().splitlines()
 
         def ler(self, name):
-            arquivo = tmp_path / name
-            return arquivo.read_text().split() if arquivo.exists() else None
+            file = tmp_path / name
+            return file.read_text().split() if file.exists() else None
 
     s = Servidor()
     # Installed and running: app A and docs D; the registry has the same.

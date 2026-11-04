@@ -102,7 +102,7 @@ def test_filtros_da_lista(cenario):
     assert nomes() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
     assert nomes(status="concluidas") == ["João Rechamada"]
     assert nomes(status="todas", q="ana") == ["Ana Outra"]
-    assert nomes(status="todas", de="2031-03-06", ate="2031-04-30") == ["João Rechamada"]
+    assert nomes(status="todas", de="2031-03-06", until="2031-04-30") == ["João Rechamada"]
 
 
 def test_situacao_atrasada(cenario):

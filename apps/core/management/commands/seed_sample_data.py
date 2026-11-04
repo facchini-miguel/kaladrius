@@ -92,12 +92,12 @@ class Command(BaseCommand):
                     Membership.objects.get_or_create(
                         user=user, clinic=clinic, defaults={"papel": papel}
                     )
-                for name, registro, cor, username in dados["profissionais"]:
+                for name, registration, color, username in dados["profissionais"]:
                     user = get_user_model().objects.filter(username=username).first()
                     Practitioner.objects.get_or_create(
                         clinic=clinic,
                         name=name,
-                        defaults={"registro": registro, "cor": cor, "user": user},
+                        defaults={"registration": registration, "color": color, "user": user},
                     )
 
             total_pacientes = sum(self._pacientes(clinic, pacientes) for clinic in clinicas)
@@ -143,7 +143,7 @@ class Command(BaseCommand):
 
         fake = Faker("pt_BR")
         fake.seed_instance(clinic.pk)  # same data every time for the same clinic
-        cidades = list(City.objects.filter(uf__sigla="SC"))
+        cidades = list(City.objects.filter(state__sigla="SC"))
         estados_civis = list(MaritalStatus.objects.all())
         documentos = set()
         novos = []
@@ -159,26 +159,26 @@ class Command(BaseCommand):
             if documento in documentos:
                 documento = ""
             documentos.add(documento)
-            cidade = fake.random_element(cidades)
+            city = fake.random_element(cidades)
             celular = f"489{fake.numerify('########')}"
             patient = Patient(
                 clinic=clinic,
                 kind=Patient.Tipo.JURIDICA if juridica else Patient.Tipo.FISICA,
                 name=name,
-                cpf_cnpj=documento,
+                tax_id=documento,
                 telefone_celular=celular,
                 whatsapp=celular,
                 email=f"paciente{clinic.pk}.{number}@example.com",
                 cep=f"88{fake.numerify('######')}",
-                uf_id=cidade.uf_id,
-                cidade=cidade,
-                bairro=fake.bairro(),
+                state_id=city.state_id,
+                city=city,
+                neighborhood=fake.neighborhood(),
                 logradouro=fake.street_name(),
                 number=fake.building_number(),
                 active=fake.boolean(95),
             )
             if juridica:
-                patient.razao_social = f"{name} Ltda."
+                patient.legal_name = f"{name} Ltda."
             else:
                 patient.sexo = sexo
                 patient.data_nascimento = fake.date_of_birth(minimum_age=0, maximum_age=90)
@@ -193,8 +193,8 @@ class Command(BaseCommand):
         """Two made-up health plans and a card for about a third of the patients."""
         sorteio = random.Random(clinic.pk + 2000)  # noqa: S311 (fake data, not security)
         convenios = [
-            HealthPlan.objects.create(clinic=clinic, name=name, registro=registro)
-            for name, registro in (("Saúde Exemplo", "000001"), ("Plano Fictício", "000002"))
+            HealthPlan.objects.create(clinic=clinic, name=name, registration=registration)
+            for name, registration in (("Saúde Exemplo", "000001"), ("Plano Fictício", "000002"))
         ]
         hoje = timezone.localdate()
         MemberCard.objects.bulk_create(
@@ -204,7 +204,7 @@ class Command(BaseCommand):
                 convenio=sorteio.choice(convenios),
                 plano=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
                 number=f"{number:012d}",
-                validade=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
+                valid_until=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
             )
             for number, patient in enumerate(pacientes, start=1)
             if sorteio.random() < 0.35
@@ -219,11 +219,11 @@ class Command(BaseCommand):
             ("Lúcia Andrade (fictícia)", "Recepcionista", "2200.00"),
             ("Paulo Teixeira (fictício)", "Auxiliar de saúde bucal", "2500.00"),
         ):
-            funcionario = Employee.objects.create(
+            employee = Employee.objects.create(
                 clinic=clinic, name=name, cargo=cargo, admissao=admissao
             )
             Salary.objects.create(
-                clinic=clinic, funcionario=funcionario, amount=Decimal(salario), desde=admissao
+                clinic=clinic, employee=employee, amount=Decimal(salario), desde=admissao
             )
 
     def _relacionados(self, clinic):

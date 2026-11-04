@@ -35,7 +35,7 @@ class Procedure(ModeloDaClinica):
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
     code = models.CharField(_("código"), max_length=20, blank=True, db_column="codigo")
     amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
-    categoria = models.ForeignKey(
+    category = models.ForeignKey(
         "financeiro.Category",
         on_delete=models.PROTECT,
         null=True,
@@ -43,6 +43,7 @@ class Procedure(ModeloDaClinica):
         related_name="+",
         verbose_name=_("categoria"),
         help_text=_("Categoria de receita usada quando o orçamento é aprovado."),
+        db_column="categoria_id",
     )
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
@@ -83,7 +84,7 @@ class Estimate(ModeloDaClinica):
         db_column="profissional_id",
     )
     date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
-    validade = models.DateField(_("válido até"), default=validade_padrao)
+    valid_until = models.DateField(_("válido até"), default=validade_padrao, db_column="validade")
     status = models.CharField(
         _("situação"),
         max_length=10,
@@ -91,7 +92,9 @@ class Estimate(ModeloDaClinica):
         default=Situacao.ABERTO,
         db_column="situacao",
     )
-    desconto = models.DecimalField(_("desconto"), default=Decimal("0.00"), **DINHEIRO)
+    discount = models.DecimalField(
+        _("desconto"), default=Decimal("0.00"), **DINHEIRO, db_column="desconto"
+    )
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     entry = models.OneToOneField(
         "financeiro.Entry",
@@ -129,7 +132,7 @@ class Estimate(ModeloDaClinica):
         verbose_name_plural = _("orçamentos")
         ordering = ["-date", "-pk"]
         constraints = [
-            models.CheckConstraint(condition=Q(desconto__gte=0), name="orcamento_desconto"),
+            models.CheckConstraint(condition=Q(discount__gte=0), name="orcamento_desconto"),
         ]
 
     def __str__(self):
@@ -141,11 +144,11 @@ class Estimate(ModeloDaClinica):
 
     @property
     def total(self):
-        return max(self.subtotal - self.desconto, Decimal("0.00"))
+        return max(self.subtotal - self.discount, Decimal("0.00"))
 
     @property
     def vencido(self):
-        return self.status == self.Situacao.ABERTO and self.validade < timezone.localdate()
+        return self.status == self.Situacao.ABERTO and self.valid_until < timezone.localdate()
 
     @property
     def dentes(self):

@@ -22,22 +22,22 @@ from .models import Employee, Payroll, Salary
 def lista(request):
     funcionarios = list(Employee.objects.all())
     hoje = timezone.localdate()
-    for funcionario in funcionarios:
-        funcionario.salario_atual = funcionario.salario_em(hoje)
+    for employee in funcionarios:
+        employee.salario_atual = employee.salario_em(hoje)
     return render(request, "staff/list.html", {"funcionarios": funcionarios})
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
-def funcionario(request, pk):
-    funcionario = get_object_or_404(Employee.objects, pk=pk)
+def employee(request, pk):
+    employee = get_object_or_404(Employee.objects, pk=pk)
     return render(
         request,
         "staff/employee.html",
         {
-            "funcionario": funcionario,
-            "salarios": funcionario.salarios.select_related("created_by"),
-            "folhas": funcionario.folhas.select_related("entry")[:24],
-            "salario_atual": funcionario.salario_em(timezone.localdate()),
+            "employee": employee,
+            "salarios": employee.salarios.select_related("created_by"),
+            "folhas": employee.folhas.select_related("entry")[:24],
+            "salario_atual": employee.salario_em(timezone.localdate()),
         },
     )
 
@@ -56,16 +56,16 @@ def _formulario(request, instancia):
     form = FuncionarioForm(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
-            funcionario = form.save()
+            employee = form.save()
             if form.cleaned_data.get("salario"):
                 Salary.objects.create(
-                    funcionario=funcionario,
+                    employee=employee,
                     amount=form.cleaned_data["salario"],
                     desde=form.cleaned_data["salario_desde"],
                     created_by=request.user,
                 )
-        messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.name})
-        return redirect("staff:employee", pk=funcionario.pk)
+        messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
+        return redirect("staff:employee", pk=employee.pk)
     return render(request, "staff/form.html", {"form": form, "instancia": instancia})
 
 
@@ -80,7 +80,7 @@ def folha(request):
         services.preparar(competencia)
         if pode_alterar
         else list(
-            Payroll.objects.filter(competencia=competencia).select_related("funcionario", "entry")
+            Payroll.objects.filter(competencia=competencia).select_related("employee", "entry")
         )
     )
     dados = request.POST if request.method == "POST" else None
@@ -90,7 +90,7 @@ def folha(request):
             None
             if f.lancada or not pode_alterar
             # By employee: a sheet not saved yet has no pk.
-            else FolhaForm(dados, instance=f, prefix=f"f{f.funcionario_id}"),
+            else FolhaForm(dados, instance=f, prefix=f"f{f.employee_id}"),
         )
         for f in folhas
     ]
@@ -113,7 +113,7 @@ def folha(request):
                 try:
                     lancadas = services.lancar(
                         [f for f, form in linhas if form is not None],
-                        categoria=lancar_form.cleaned_data["categoria"],
+                        category=lancar_form.cleaned_data["category"],
                         vencimento=lancar_form.cleaned_data["vencimento"],
                         user=request.user,
                     )

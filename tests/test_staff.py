@@ -29,13 +29,13 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def ana(clinica_a):
     with usar_clinica(clinica_a):
-        funcionario = Employee.objects.create(
+        employee = Employee.objects.create(
             name="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
         )
         Salary.objects.create(
-            funcionario=funcionario, amount=Decimal("2200"), desde=datetime.date(2025, 3, 1)
+            employee=employee, amount=Decimal("2200"), desde=datetime.date(2025, 3, 1)
         )
-        return funcionario
+        return employee
 
 
 def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
@@ -92,17 +92,17 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
             name="Admitido depois", admissao=datetime.date(2026, 11, 3)
         )
         Salary.objects.create(
-            funcionario=futuro, amount=Decimal("2000"), desde=datetime.date(2026, 11, 3)
+            employee=futuro, amount=Decimal("2000"), desde=datetime.date(2026, 11, 3)
         )
         saiu = Employee.objects.create(
             name="Desligado antes", desligamento=datetime.date(2026, 9, 30)
         )
         Salary.objects.create(
-            funcionario=saiu, amount=Decimal("2000"), desde=datetime.date(2025, 1, 1)
+            employee=saiu, amount=Decimal("2000"), desde=datetime.date(2025, 1, 1)
         )
         Employee.objects.create(name="Sem salário")
         folhas = services.preparar(OUTUBRO)
-    assert [f.funcionario.name for f in folhas] == ["Ana Fictícia"]
+    assert [f.employee.name for f in folhas] == ["Ana Fictícia"]
     folha = folhas[0]
     assert folha.salario == Decimal("2200") and folha.valor_hora_extra == hora_extra_sugerida(
         Decimal("2200")
@@ -141,13 +141,13 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert folha.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", dados).status_code == 302
     with usar_clinica(clinica_a):
-        folha = Payroll.objects.get(funcionario=ana, competencia=OUTUBRO)
+        folha = Payroll.objects.get(employee=ana, competencia=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
-        categoria = pagina.context["lancar_form"].fields["categoria"].initial
-    assert categoria.name == "Salários e encargos"
+        category = pagina.context["lancar_form"].fields["category"].initial
+    assert category.name == "Salários e encargos"
     resposta = admin.post(
         f"{FOLHA}?mes=2026-10",
-        {**dados, "acao": "lancar", "categoria": categoria.pk, "vencimento": "2026-11-05"},
+        {**dados, "acao": "lancar", "category": category.pk, "vencimento": "2026-11-05"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
@@ -165,12 +165,12 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     with usar_clinica(clinica_a):
         assert (
             services.lancar(
-                [folha], categoria=categoria, vencimento=datetime.date(2026, 11, 5), user=None
+                [folha], category=category, vencimento=datetime.date(2026, 11, 5), user=None
             )
             == 0
         )
         # Cancelling the payable in finance opens the line again.
-        financeiro.cancelar(entry, motivo="Refazer", user=None)
+        financeiro.cancelar(entry, reason="Refazer", user=None)
         folha.refresh_from_db()
         assert not folha.lancada
 
@@ -181,7 +181,7 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
         folha.faltas = 30
         folha.save()
         with pytest.raises(ValidationError, match="maior que zero"):
-            services.lancar([folha], categoria=None, vencimento=OUTUBRO, user=None)
+            services.lancar([folha], category=None, vencimento=OUTUBRO, user=None)
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])

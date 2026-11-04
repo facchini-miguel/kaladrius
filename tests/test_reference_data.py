@@ -13,12 +13,12 @@ def test_dados_oficiais_carregados_pela_migracao():
     assert Bank.objects.filter(code=1).get().nome_curto == "BCO DO BRASIL S.A."
     assert MaritalStatus.objects.count() == 6
     assert City.objects.get(code=4205407).name == "Florianópolis"
-    assert City.objects.get(code=4205407).uf.sigla == "SC"
+    assert City.objects.get(code=4205407).state.sigla == "SC"
 
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.get(reverse("reference_data:cities"), {"uf": 42, "q": "florianopolis"})
+    resposta = cliente.get(reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"})
     conteudo = resposta.content.decode()
     assert resposta.status_code == 200
     assert "Florianópolis" in conteudo
@@ -33,18 +33,18 @@ def test_lista_de_bancos_busca_por_codigo(clinica_a, criar_usuario, cliente_de):
 
 def test_paginacao_preserva_os_filtros(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    conteudo = cliente.get(reverse("reference_data:cities"), {"uf": 31}).content.decode()  # MG
-    assert "uf=31&amp;q=&amp;pagina=2" in conteudo
+    conteudo = cliente.get(reverse("reference_data:cities"), {"state": 31}).content.decode()  # MG
+    assert "state=31&amp;q=&amp;pagina=2" in conteudo
 
 
 def test_opcoes_de_cidades_para_o_select_encadeado(client, criar_usuario):
     url = reverse("reference_data:city_options")
-    assert client.get(url, {"uf": 42}).status_code == 302  # login required
+    assert client.get(url, {"state": 42}).status_code == 302  # login required
     client.force_login(criar_usuario("qualquer"))
-    conteudo = client.get(url, {"uf": 42}).content.decode()
+    conteudo = client.get(url, {"state": 42}).content.decode()
     assert '<option value="4205407">Florianópolis</option>' in conteudo
     assert "São Paulo" not in conteudo
-    assert client.get(url, {"uf": "x"}).content.decode().count("<option") == 1
+    assert client.get(url, {"state": "x"}).content.decode().count("<option") == 1
 
 
 def test_tabelas_de_referencia_exigem_clinica(criar_usuario, cliente_de):

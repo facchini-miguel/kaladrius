@@ -21,17 +21,17 @@ def cliente(clinica_a, criar_usuario, cliente_de):
 
 
 def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_model):
-    inicio = reverse("home")
-    assert "Pacientes" in cliente.get(inicio).content.decode()
+    start = reverse("home")
+    assert "Pacientes" in cliente.get(start).content.decode()
 
     resposta = cliente.post(
-        reverse("change_language"), {"idioma": "en", "next": inicio}, follow=True
+        reverse("change_language"), {"idioma": "en", "next": start}, follow=True
     )
     pagina = resposta.content.decode()
     assert '<html lang="en">' in pagina
     assert "Patients" in pagina and "Recalls" in pagina and "Log out" in pagina
     assert django_user_model.objects.get(username="maria").idioma == "en"
-    assert resposta.redirect_chain[-1][0] == inicio
+    assert resposta.redirect_chain[-1][0] == start
     assert cliente.cookies[settings.LANGUAGE_COOKIE_NAME].value == "en"
 
     cliente.post(reverse("change_language"), {"idioma": "es"})
@@ -124,9 +124,9 @@ def test_horario_em_ingles_sem_ponto_duplo():
     from django.utils import translation
     from django.utils.formats import date_format
 
-    momento = datetime.datetime(2026, 10, 31, 23, 15)
+    timestamp = datetime.datetime(2026, 10, 31, 23, 15)
     with translation.override("en"):
-        assert date_format(momento, "SHORT_DATETIME_FORMAT") == "10/31/2026 11:15 PM"
-        assert date_format(momento, "TIME_FORMAT") == "11:15 PM"
+        assert date_format(timestamp, "SHORT_DATETIME_FORMAT") == "10/31/2026 11:15 PM"
+        assert date_format(timestamp, "TIME_FORMAT") == "11:15 PM"
     with translation.override("pt-br"):
-        assert date_format(momento, "SHORT_DATETIME_FORMAT") == "31/10/2026 23:15"
+        assert date_format(timestamp, "SHORT_DATETIME_FORMAT") == "31/10/2026 23:15"

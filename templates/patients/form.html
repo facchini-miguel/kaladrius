@@ -15,8 +15,8 @@
     <div class="card-body row">
       <div class="col-12">{% with campo=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6 so-pj">{% with campo=form.razao_social %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3">{% with campo=form.cpf_cnpj %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6 so-pj">{% with campo=form.legal_name %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with campo=form.tax_id %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.rg %}{# Brazil only (decision 117) #}
       <div class="col-md-3 so-pj">{% with campo=form.inscricao_estadual %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-3 so-pf">{% with campo=form.rg %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -44,9 +44,9 @@
     <div class="card-header">{% translate "Endereço" %}</div>
     <div class="card-body row">
       <div class="col-md-2">{% with campo=form.cep %}{% include "includes/field.html" %}{% endwith %}</div>
-      {% if form.uf %}
-      <div class="col-md-4">{% with campo=form.uf %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.cidade %}{% include "includes/field.html" %}{% endwith %}<div id="sugestoes-endereco"></div></div>
+      {% if form.state %}
+      <div class="col-md-4">{% with campo=form.state %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.city %}{% include "includes/field.html" %}{% endwith %}<div id="sugestoes-endereco"></div></div>
       {% else %}{# outside Brazil: typed state and city (decision 117) #}
       <div class="col-md-4">{% with campo=form.estado_nome %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.cidade_nome %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -54,7 +54,7 @@
       <div class="col-md-6">{% with campo=form.logradouro %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-2">{% with campo=form.number %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.complemento %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.bairro %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.neighborhood %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
   </div>
 

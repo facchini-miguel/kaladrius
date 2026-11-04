@@ -56,8 +56,8 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
                 self.add_error("dias", _("Informe quantos dias de afastamento."))
         else:
             dados["dias"] = None
-        inicio, fim = dados.get("hora_inicio"), dados.get("hora_fim")
-        if inicio and fim and fim <= inicio:
+        start, end = dados.get("hora_inicio"), dados.get("hora_fim")
+        if start and end and end <= start:
             self.add_error("hora_fim", _("O horário final precisa ser depois do inicial."))
         return dados
 
@@ -90,7 +90,7 @@ ASSINATURAS = [
 
 
 class AnexoForm(FormularioBootstrap, forms.Form):
-    arquivo = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
+    file = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
     description = forms.CharField(
         label=_("Descrição"),
         max_length=200,
@@ -98,16 +98,16 @@ class AnexoForm(FormularioBootstrap, forms.Form):
         help_text=_("Por exemplo: hemograma de março."),
     )
 
-    def clean_arquivo(self):
-        arquivo = self.cleaned_data["arquivo"]
-        if arquivo.size > TAMANHO_MAXIMO_DO_ANEXO:
+    def clean_file(self):
+        file = self.cleaned_data["file"]
+        if file.size > TAMANHO_MAXIMO_DO_ANEXO:
             raise forms.ValidationError(_("O arquivo passa de 10 MB."))
-        inicio = arquivo.read(8)
-        arquivo.seek(0)
+        start = file.read(8)
+        file.seek(0)
         kind = next(
-            (kind for assinatura, kind in ASSINATURAS if inicio.startswith(assinatura)), None
+            (kind for assinatura, kind in ASSINATURAS if start.startswith(assinatura)), None
         )
         if kind is None:
             raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
-        arquivo.tipo_conferido = kind
-        return arquivo
+        file.tipo_conferido = kind
+        return file

@@ -67,7 +67,7 @@ The code's names are moving from Portuguese to English (decisions 155 to 159); t
 
 ## Fields, first batch
 
-The names that repeat across the models, in four parts. **Done:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` and `criado_por` (decision 160), `paciente`, `profissional` and `usuario` (decision 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` and `numero` (decision 163), `tipo`, `valor`, `situacao`, `atendimento` and `lancamento` (decision 164), `data` and `conta` (decision 165; local variables with these exact names too, such as `clinica` → `clinic`). Then each app's own fields, and last the functions and variables.
+The names that repeat across the models, in four parts. **Done:** `clinica`, `criado_em`/`criada_em`, `alterado_em`/`alterada_em` and `criado_por` (decision 160), `paciente`, `profissional` and `usuario` (decision 161), `nome`, `ativo`/`ativa`, `codigo`, `descricao`, `observacoes`, `observacao`, `telefone` and `numero` (decision 163), `tipo`, `valor`, `situacao`, `atendimento` and `lancamento` (decision 164), `data` and `conta` (decision 165), the 19 names after `conta` in the table (decision 166; local variables with these exact names too, such as `clinica` → `clinic`). Then each app's own fields, and last the functions and variables.
 
 | Before | After |
 |---|---|
@@ -93,6 +93,24 @@ The names that repeat across the models, in four parts. **Done:** `clinica`, `cr
 | `atendimento` | `visit` |
 | `lancamento` | `entry` |
 | `conta` | `account` |
+| `arquivo` | `file` |
+| `ate` | `until` |
+| `bairro` | `neighborhood` |
+| `categoria` | `category` |
+| `cidade` | `city` |
+| `cor` | `color` |
+| `cpf_cnpj` | `tax_id` |
+| `desconto` | `discount` |
+| `inicio`, `fim` | `start`, `end` |
+| `funcionario` | `employee` |
+| `grupo` | `group` |
+| `momento` | `timestamp` |
+| `motivo` | `reason` |
+| `razao_social` | `legal_name` |
+| `registro` | `registration` |
+| `tamanho` | `size` |
+| `uf` | `state` |
+| `validade` | `valid_until` |
 
 ## What stays in Portuguese
 

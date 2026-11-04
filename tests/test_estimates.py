@@ -24,7 +24,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
         patient = Patient.objects.create(name="Joana Sorriso")
         tratamento = Category.objects.get(name="Tratamento")
         canal = Procedure.objects.create(
-            name="Tratamento de canal", amount=Decimal("1200"), categoria=tratamento
+            name="Tratamento de canal", amount=Decimal("1200"), category=tratamento
         )
         restauracao = Procedure.objects.create(name="Restauração", amount=Decimal("250"))
     return {
@@ -50,7 +50,7 @@ def criar_orcamento(cenario, cliente):
             "patient": cenario["patient"].pk,
             "practitioner": "",
             "date": HOJE.isoformat(),
-            "validade": HOJE.isoformat(),
+            "valid_until": HOJE.isoformat(),
             "notes": "",
         },
     )
@@ -119,16 +119,16 @@ def test_quem_escreve_o_orcamento_da_desconto(cenario):
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk)
     url = reverse("estimates:discount", args=[orcamento.pk])
     assert recepcao.get(reverse("estimates:detail", args=[orcamento.pk])).context["desconto_form"]
-    recepcao.post(url, {"desconto": "5000"})  # more than the total: refused
+    recepcao.post(url, {"discount": "5000"})  # more than the total: refused
     orcamento.refresh_from_db()
-    assert orcamento.desconto == 0
-    recepcao.post(url, {"desconto": "200"})
+    assert orcamento.discount == 0
+    recepcao.post(url, {"discount": "200"})
     orcamento.refresh_from_db()
-    assert orcamento.desconto == Decimal("200.00")
+    assert orcamento.discount == Decimal("200.00")
     for quem, amount in [("practitioner", "150"), ("admin", "100")]:
-        entrar(cenario, quem).post(url, {"desconto": amount})
+        entrar(cenario, quem).post(url, {"discount": amount})
         orcamento.refresh_from_db()
-        assert orcamento.desconto == Decimal(amount)
+        assert orcamento.discount == Decimal(amount)
 
 
 def test_aprovar_vira_lancamento_a_receber(cenario):
@@ -136,17 +136,17 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     orcamento = criar_orcamento(cenario, recepcao)
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk)
     with usar_clinica(cenario["clinic"]):
-        Estimate.objects.filter(pk=orcamento.pk).update(desconto=Decimal("200"))
+        Estimate.objects.filter(pk=orcamento.pk).update(discount=Decimal("200"))
         caixa = FinancialAccount.objects.get(name="Caixa")
     url = reverse("estimates:approve", args=[orcamento.pk])
     # The category comes from the first procedure.
-    assert recepcao.get(url).context["form"].initial["categoria"] == cenario["canal"].categoria
+    assert recepcao.get(url).context["form"].initial["category"] == cenario["canal"].category
     resposta = recepcao.post(
         url,
         {
             "parcelas": 4,
             "primeiro_vencimento": HOJE.isoformat(),
-            "categoria": cenario["canal"].categoria.pk,
+            "category": cenario["canal"].category.pk,
             "recebido_agora": "on",
             "forma": "pix",
             "account": caixa.pk,

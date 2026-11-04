@@ -36,7 +36,7 @@ def _voltar(request, padrao="recalls:list"):
 def lista(request):
     status = request.GET.get("status", "pendentes")
     busca = request.GET.get("q", "").strip()
-    de, ate = _data(request.GET.get("de")), _data(request.GET.get("ate"))
+    de, until = _data(request.GET.get("de")), _data(request.GET.get("until"))
     rechamadas = Recall.objects.select_related("patient").filter(
         **SITUACOES.get(status, SITUACOES["pendentes"]), patient__arquivado=False
     )
@@ -44,14 +44,14 @@ def lista(request):
         rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
     if de:
         rechamadas = rechamadas.filter(date__gte=de)
-    if ate:
-        rechamadas = rechamadas.filter(date__lte=ate)
+    if until:
+        rechamadas = rechamadas.filter(date__lte=until)
     pagina = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
     filtros = {
         "q": busca,
         "status": status,
         "de": de.isoformat() if de else "",
-        "ate": ate.isoformat() if ate else "",
+        "until": until.isoformat() if until else "",
     }
     return render(
         request,
@@ -138,12 +138,12 @@ def excluir(request, pk):
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
 def resumo(request):
     """Number of pending recalls per day, for the schedule day headers."""
-    de, ate = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
-    if de is None or ate is None or not 0 < (ate - de).days <= 62:
+    de, until = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
+    if de is None or until is None or not 0 < (until - de).days <= 62:
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        concluida=False, date__gte=de, date__lt=ate, patient__arquivado=False
+        concluida=False, date__gte=de, date__lt=until, patient__arquivado=False
     )
     for date in pendentes.values_list("date", flat=True):
         contagem[date.isoformat()] = contagem.get(date.isoformat(), 0) + 1

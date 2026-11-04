@@ -26,8 +26,8 @@ def cenario(clinica_a, criar_profissional):
                 practitioner=ana,
                 kind=kind,
                 patient=patient,
-                inicio=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(9)),
-                fim=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(10)),
+                start=agenda.timestamp(hoje - datetime.timedelta(days=d), datetime.time(9)),
+                end=agenda.timestamp(hoje - datetime.timedelta(days=d), datetime.time(10)),
             )
             for d in (21, 14)
         ]
@@ -49,15 +49,15 @@ def test_so_no_servidor_de_demonstracao(cenario, settings):
 def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     settings.DEMO = True
     hoje = timezone.localdate()
-    antes = {a.pk: (a.inicio, a.fim) for a in cenario["agenda"]}
+    antes = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=17)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
         for agendamento in Appointment.objects.all():
-            inicio, fim = antes[agendamento.pk]
-            assert agendamento.inicio - inicio == datetime.timedelta(days=14)
-            assert agendamento.fim - fim == datetime.timedelta(days=14)
-            assert agendamento.inicio.weekday() == inicio.weekday()
+            start, end = antes[agendamento.pk]
+            assert agendamento.start - start == datetime.timedelta(days=14)
+            assert agendamento.end - end == datetime.timedelta(days=14)
+            assert agendamento.start.weekday() == start.weekday()
         assert Recall.objects.get().date == hoje - datetime.timedelta(days=6)
         assert Patient.objects.get().data_nascimento == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
@@ -66,8 +66,8 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             Appointment.objects.create(
                 practitioner=primeiro.practitioner,
                 kind=primeiro.kind,
-                inicio=primeiro.inicio,
-                fim=primeiro.fim,
+                start=primeiro.start,
+                end=primeiro.end,
             )
 
 

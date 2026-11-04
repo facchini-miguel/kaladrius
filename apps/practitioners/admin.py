@@ -5,6 +5,6 @@ from .models import Practitioner
 
 @admin.register(Practitioner)
 class ProfissionalAdmin(admin.ModelAdmin):
-    list_display = ["name", "clinic", "registro", "active"]
+    list_display = ["name", "clinic", "registration", "active"]
     list_filter = ["clinic", "active"]
-    search_fields = ["name", "registro"]
+    search_fields = ["name", "registration"]

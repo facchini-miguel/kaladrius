@@ -70,7 +70,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
         reverse("practitioners:new"),
-        {"name": "Dr. Novo", "registro": "CRM 1", "cor": "#123456", "active": "on"},
+        {"name": "Dr. Novo", "registration": "CRM 1", "color": "#123456", "active": "on"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
@@ -79,7 +79,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
 
     cliente.post(
         reverse("practitioners:edit", args=[practitioner.pk]),
-        {"name": "Dr. Renomeado", "cor": "#654321"},
+        {"name": "Dr. Renomeado", "color": "#654321"},
     )
     practitioner.refresh_from_db()
     assert practitioner.name == "Dr. Renomeado"
@@ -92,7 +92,7 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
 
 def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("practitioners:new"), {"name": "X", "cor": "#zzzzzz"})
+    resposta = cliente.post(reverse("practitioners:new"), {"name": "X", "color": "#zzzzzz"})
     assert resposta.status_code == 200
     assert "#RRGGBB" in resposta.content.decode()
 
@@ -109,8 +109,8 @@ def test_superusuario_entra_direto_na_clinica_da_instalacao(
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
     assert cliente.get(reverse("practitioners:edit", args=[practitioner.pk])).status_code == 200
-    inicio = cliente.get(reverse("home")).content.decode()
-    assert "Clínica A" in inicio and "Escolha" not in inicio
+    start = cliente.get(reverse("home")).content.decode()
+    assert "Clínica A" in start and "Escolha" not in start
 
 
 def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_user_model):
@@ -192,5 +192,5 @@ def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario,
         "estimates:new",
     ):
         assert cliente.get(reverse(name)).status_code in (302, 403), name
-    inicio = cliente.get(reverse("home"))
-    assert inicio.status_code == 200
+    start = cliente.get(reverse("home"))
+    assert start.status_code == 200

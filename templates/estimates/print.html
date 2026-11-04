@@ -19,11 +19,11 @@
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "ORÇAMENTO" %}</div>
       <div class="small">{% translate "Nº" %} {{ orcamento.pk }} · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }}</div>
-      <div class="small">{% blocktranslate with validade=orcamento.validade|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}</div>
+      <div class="small">{% blocktranslate with validade=orcamento.valid_until|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}</div>
     </div>
   </div>
   <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ orcamento.patient.name }}</p>
-  {% if orcamento.practitioner %}<p><strong>{% translate "Profissional" %}:</strong> {{ orcamento.practitioner.name }}{% if orcamento.practitioner.registro %} ({{ orcamento.practitioner.registro }}){% endif %}</p>{% endif %}
+  {% if orcamento.practitioner %}<p><strong>{% translate "Profissional" %}:</strong> {{ orcamento.practitioner.name }}{% if orcamento.practitioner.registration %} ({{ orcamento.practitioner.registration }}){% endif %}</p>{% endif %}
   {% if selecionados %}<div class="mb-3">{% include "dentistry/_odontogram.html" with interativo=False %}</div>{% endif %}
   <div class="table-responsive">
   <table class="table table-sm">
@@ -34,9 +34,9 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      {% if orcamento.desconto %}
+      {% if orcamento.discount %}
       <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|moeda }}</td></tr>
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.desconto|moeda }}</td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.discount|moeda }}</td></tr>
       {% endif %}
       <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
     </tfoot>

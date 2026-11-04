@@ -155,10 +155,10 @@ def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model
     assert "Nenhum backup do banco foi registrado" in client.get(reverse("home")).content.decode()
 
     call_command("record_backup", "kaladrius-x.dump", "1024")
-    assert Backup.objects.get().tamanho == 1024
+    assert Backup.objects.get().size == 1024
     assert "backups diários pararam" not in client.get(reverse("home")).content.decode()
 
-    Backup.objects.update(momento=timezone.now() - datetime.timedelta(hours=27))
+    Backup.objects.update(timestamp=timezone.now() - datetime.timedelta(hours=27))
     assert "backups diários pararam" in client.get(reverse("home")).content.decode()
     client.force_login(comum)
     assert "backups diários pararam" not in client.get(reverse("home")).content.decode()
@@ -217,12 +217,12 @@ def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_
         practitioner = Practitioner.objects.create(name="Dra. Teste")
         kind = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
-        inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
+        start = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
         Appointment.objects.create(
             practitioner=practitioner,
             kind=kind,
-            inicio=inicio,
-            fim=inicio + datetime.timedelta(hours=1),
+            start=start,
+            end=start + datetime.timedelta(hours=1),
         )
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))

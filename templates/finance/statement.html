@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{% translate "Extrato bancário" %} · {{ importacao.account }}</h1>
-    <span class="text-body-secondary">{{ importacao.inicio|date:"SHORT_DATE_FORMAT" }} – {{ importacao.fim|date:"SHORT_DATE_FORMAT" }} · {{ importacao.arquivo }}{% if importacao.conta_no_banco %} · {% blocktranslate with conta=importacao.conta_no_banco %}conta {{ conta }} no banco{% endblocktranslate %}{% endif %}</span>
+    <span class="text-body-secondary">{{ importacao.start|date:"SHORT_DATE_FORMAT" }} – {{ importacao.end|date:"SHORT_DATE_FORMAT" }} · {{ importacao.file }}{% if importacao.conta_no_banco %} · {% blocktranslate with conta=importacao.conta_no_banco %}conta {{ conta }} no banco{% endblocktranslate %}{% endif %}</span>
   </div>
   <a class="btn btn-link" href="{% url 'finance:statements' %}">{% translate "Voltar" %}</a>
 </div>
@@ -45,7 +45,7 @@
             {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.entry_id %}">{{ t.pagamento.parcela.entry.nome_pessoa }} · {{ t.pagamento.parcela.entry.description }}</a> ({{ t.pagamento.date|date:"SHORT_DATE_FORMAT" }})
             {% elif t.movimento %}<a href="{% url 'finance:cash_detail' t.movimento.caixa_id %}">{{ t.movimento.caixa.account }} · {{ t.movimento.get_kind_display }}</a>{% endif %}
           {% elif t.status == "ignorada" %}
-            <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.motivo }}
+            <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.reason }}
           {% else %}
             {% if pode.financeiro.alterar %}
             {% if t.candidatos %}
@@ -63,7 +63,7 @@
               {% if pode.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
               <form method="post" action="{% url 'finance:transaction' t.pk 'ignore' %}" class="d-flex gap-1">
                 {% csrf_token %}
-                <input type="text" name="motivo" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
+                <input type="text" name="reason" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">{% translate "Ignorar" %}</button>
               </form>
             </div>

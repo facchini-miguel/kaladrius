@@ -15,13 +15,13 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Nome" %}</th><th>{% translate "Cargo" %}</th><th>{% translate "Admissão" %}</th><th class="text-end">{% translate "Salário atual" %}</th><th>{% translate "Situação" %}</th></tr></thead>
     <tbody>
-      {% for funcionario in funcionarios %}
+      {% for employee in funcionarios %}
       <tr>
-        <td><a href="{% url 'staff:employee' funcionario.pk %}">{{ funcionario.name }}</a></td>
-        <td>{{ funcionario.cargo|default:"—" }}</td>
-        <td>{{ funcionario.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
-        <td class="text-end text-nowrap">{{ funcionario.salario_atual|moeda|default:"—" }}</td>
-        <td>{% if funcionario.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td><a href="{% url 'staff:employee' employee.pk %}">{{ employee.name }}</a></td>
+        <td>{{ employee.cargo|default:"—" }}</td>
+        <td>{{ employee.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+        <td class="text-end text-nowrap">{{ employee.salario_atual|moeda|default:"—" }}</td>
+        <td>{% if employee.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum funcionário cadastrado." %}</td></tr>

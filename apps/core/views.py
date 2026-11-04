@@ -26,7 +26,7 @@ def _saudacao():
 
 
 @login_required
-def inicio(request):
+def start(request):
     contexto = {"saudacao": _saudacao()}
     if request.clinic is not None:
         contexto["painel"] = dashboard.montar(request)

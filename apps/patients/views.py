@@ -50,10 +50,10 @@ def _visiveis(request):
 def filtrar(pacientes, busca, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if busca:
-        filtro = Q(name__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(legal_name__unaccent__icontains=busca)
         documento = normalizar_cnpj(busca)
         if len(documento) >= 3 and not any(c.isspace() for c in busca.strip()):
-            filtro |= Q(cpf_cnpj__startswith=documento)
+            filtro |= Q(tax_id__startswith=documento)
         if busca.isdecimal() and len(busca) <= 9:
             filtro |= Q(pk=int(busca))
         pacientes = pacientes.filter(filtro)
@@ -69,7 +69,7 @@ def lista(request):
     status = request.GET.get("status", "ativos")
     if status == "arquivados" and not _ve_arquivados(request):
         status = "ativos"
-    pacientes = filtrar(Patient.objects.select_related("cidade__uf"), busca, kind, status)
+    pacientes = filtrar(Patient.objects.select_related("city__state"), busca, kind, status)
     pagina = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -88,7 +88,7 @@ def lista(request):
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
 def ficha(request, pk):
     patient = get_object_or_404(
-        _visiveis(request).select_related("cidade__uf", "estado_civil", "arquivado_por"), pk=pk
+        _visiveis(request).select_related("city__state", "estado_civil", "arquivado_por"), pk=pk
     )
     # LGPD: access to a patient's record (health data) is logged.
     registrar(AuditEntry.Acao.VISUALIZAR, patient)
@@ -119,7 +119,7 @@ def imprimir(request, pk):
     """The registration sheet, ready to print or save as PDF (as the legacy Medical's
     fichapaciente_imp): identification, contact, address and health plan cards."""
     patient = get_object_or_404(
-        _visiveis(request).select_related("cidade__uf", "estado_civil"), pk=pk
+        _visiveis(request).select_related("city__state", "estado_civil"), pk=pk
     )
     registrar(AuditEntry.Acao.VISUALIZAR, patient)  # LGPD, as the record
     carteirinhas = (
@@ -153,8 +153,8 @@ def _historico(request, patient):
     )
     agora = timezone.now()
     return {
-        "proximos": list(deste.filter(fim__gt=agora).order_by("inicio")[:HISTORICO]),
-        "anteriores": list(deste.filter(fim__lte=agora).order_by("-inicio")[:HISTORICO]),
+        "proximos": list(deste.filter(end__gt=agora).order_by("start")[:HISTORICO]),
+        "anteriores": list(deste.filter(end__lte=agora).order_by("-start")[:HISTORICO]),
         "total": deste.count(),
     }
 

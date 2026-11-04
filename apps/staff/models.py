@@ -62,11 +62,12 @@ class Employee(ModeloDaClinica):
 class Salary(ModeloDaClinica):
     """One salary change: the history the legacy kept in salario_fixo_hist."""
 
-    funcionario = models.ForeignKey(
+    employee = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
         related_name="salarios",
         verbose_name=_("funcionário"),
+        db_column="funcionario_id",
     )
     amount = models.DecimalField(_("salário"), **DINHEIRO, db_column="valor")
     desde = models.DateField(_("desde"))
@@ -91,7 +92,7 @@ class Salary(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.funcionario} {self.amount} ({self.desde:%d/%m/%Y})"
+        return f"{self.employee} {self.amount} ({self.desde:%d/%m/%Y})"
 
 
 class Payroll(ModeloDaClinica):
@@ -101,8 +102,12 @@ class Payroll(ModeloDaClinica):
     redo it, cancel the payable in finance first.
     """
 
-    funcionario = models.ForeignKey(
-        Employee, on_delete=models.PROTECT, related_name="folhas", verbose_name=_("funcionário")
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.PROTECT,
+        related_name="folhas",
+        verbose_name=_("funcionário"),
+        db_column="funcionario_id",
     )
     competencia = models.DateField(_("competência"), help_text=_("O primeiro dia do mês."))
     salario = models.DecimalField(_("salário"), **DINHEIRO)
@@ -126,22 +131,22 @@ class Payroll(ModeloDaClinica):
         db_table = "pessoal_folha"
         verbose_name = _("folha do mês")
         verbose_name_plural = _("folhas do mês")
-        ordering = ["-competencia", "funcionario__name"]
+        ordering = ["-competencia", "employee__name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "funcionario", "competencia"], name="folha_unica_por_mes"
+                fields=["clinic", "employee", "competencia"], name="folha_unica_por_mes"
             ),
             models.CheckConstraint(condition=Q(competencia__day=1), name="folha_competencia_dia_1"),
         ]
 
     def __str__(self):
-        return f"{self.funcionario} {self.competencia:%m/%Y}"
+        return f"{self.employee} {self.competencia:%m/%Y}"
 
     def save(self, *args, **kwargs):
         self._conferir_clinica()
         if self.clinic_id is None:  # without isolation (commands)
-            self.clinic_id = self.funcionario.clinic_id
-        if self.funcionario.clinic_id != self.clinic_id:
+            self.clinic_id = self.employee.clinic_id
+        if self.employee.clinic_id != self.clinic_id:
             raise ClinicaDiferente("The employee must be of this clinic.")
         super().save(*args, **kwargs)
 

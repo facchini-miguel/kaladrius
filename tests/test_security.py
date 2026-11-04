@@ -129,9 +129,9 @@ def test_templates_sem_script_inline_nem_eventos():
         r"<script(?![^>]*\b(src=|type=\"application/json\"))|\son[a-z]+=|\bhx-on", re.I
     )
     problemas = [
-        f"{arquivo.relative_to(PASTA_TEMPLATES)}: {achado.group(0)}"
-        for arquivo in PASTA_TEMPLATES.rglob("*.html")
-        for achado in proibidos.finditer(arquivo.read_text(encoding="utf-8"))
+        f"{file.relative_to(PASTA_TEMPLATES)}: {achado.group(0)}"
+        for file in PASTA_TEMPLATES.rglob("*.html")
+        for achado in proibidos.finditer(file.read_text(encoding="utf-8"))
     ]
     assert problemas == []
 

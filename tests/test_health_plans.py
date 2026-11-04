@@ -32,7 +32,7 @@ def patient(clinica_a):
 @pytest.fixture
 def convenio(clinica_a):
     with usar_clinica(clinica_a):
-        return HealthPlan.objects.create(name="Saúde Exemplo", registro="000001")
+        return HealthPlan.objects.create(name="Saúde Exemplo", registration="000001")
 
 
 def carteirinha(convenio, **extra):
@@ -42,12 +42,12 @@ def carteirinha(convenio, **extra):
 def test_cadastro_do_convenio(clinica_a, admin):
     resposta = admin.post(
         reverse("health_plans:new"),
-        {"name": " Plano Fictício ", "registro": "00.000-2", "phone": "", "active": "on"},
+        {"name": " Plano Fictício ", "registration": "00.000-2", "phone": "", "active": "on"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         criado = HealthPlan.objects.get()
-    assert (criado.name, criado.registro) == ("Plano Fictício", "000002")
+    assert (criado.name, criado.registration) == ("Plano Fictício", "000002")
     assert "Plano Fictício" in admin.get(reverse("health_plans:list")).content.decode()
 
 
@@ -55,7 +55,7 @@ def test_cadastro_do_convenio(clinica_a, admin):
     ("dados", "campo"),
     [
         ({"name": "saúde exemplo"}, "name"),
-        ({"name": "Outro", "registro": "123"}, "registro"),
+        ({"name": "Outro", "registration": "123"}, "registration"),
         ({"name": "Outro", "phone": "99"}, "phone"),
     ],
 )
@@ -67,7 +67,7 @@ def test_validacoes_do_convenio(dados, campo, convenio, admin):
 def test_carteirinha_na_ficha_com_validade(clinica_a, patient, convenio, admin):
     url = reverse("health_plans:card_new", args=[patient.pk])
     vencida = (HOJE - datetime.timedelta(days=1)).isoformat()
-    resposta = admin.post(url, carteirinha(convenio, number=" 0099 ", validade=vencida))
+    resposta = admin.post(url, carteirinha(convenio, number=" 0099 ", valid_until=vencida))
     assert resposta.url == reverse("patients:record", args=[patient.pk])
     with usar_clinica(clinica_a):
         criada = MemberCard.objects.get()

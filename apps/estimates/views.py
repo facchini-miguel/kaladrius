@@ -138,7 +138,7 @@ def detalhe(request, pk):
             "aberto": aberto,
             "item_form": ItemForm(odontologia=odontologia),
             "odontologia_habilitada": odontologia,
-            "desconto_form": DescontoForm(initial={"desconto": orcamento.desconto})
+            "desconto_form": DescontoForm(initial={"discount": orcamento.discount})
             if pode_desconto and aberto
             else None,
             "pode_aprovar": aberto
@@ -189,12 +189,12 @@ def item_remover(request, pk, item):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    registro = get_object_or_404(orcamento.itens, pk=item)
-    if (registro.dentes or registro.faces) and not _odontologia(request):
+    record = get_object_or_404(orcamento.itens, pk=item)
+    if (record.dentes or record.faces) and not _odontologia(request):
         raise PermissionDenied
-    _liberar_se_desligado(request, registro)
+    _liberar_se_desligado(request, record)
     try:
-        registro.delete()
+        record.delete()
     except ValidationError as erro:
         messages.error(request, erro.messages[0])
     else:
@@ -204,17 +204,17 @@ def item_remover(request, pk, item):
 
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
-def desconto(request, pk):
+def discount(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
     form = DescontoForm(request.POST)
     if form.is_valid():
-        value = form.cleaned_data["desconto"] or 0
+        value = form.cleaned_data["discount"] or 0
         if value > orcamento.subtotal:
             messages.error(request, _("O desconto passa do total do orçamento."))
         else:
-            orcamento.desconto = value
+            orcamento.discount = value
             orcamento.save()
             messages.success(request, _("Desconto aplicado."))
     return redirect("estimates:detail", pk=orcamento.pk)
@@ -227,13 +227,13 @@ def aprovar(request, pk):
     orcamento, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    item = orcamento.itens.select_related("procedimento__categoria").first()
-    categoria = (
-        item.procedimento.categoria
-        if item and item.procedimento and item.procedimento.categoria
+    item = orcamento.itens.select_related("procedimento__category").first()
+    category = (
+        item.procedimento.category
+        if item and item.procedimento and item.procedimento.category
         else Category.objects.filter(kind=Category.Tipo.RECEITA, active=True).first()
     )
-    form = AprovarForm(request.POST or None, initial={"categoria": categoria})
+    form = AprovarForm(request.POST or None, initial={"category": category})
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
         pagamento = (
@@ -246,7 +246,7 @@ def aprovar(request, pk):
                 orcamento,
                 parcelas=dados["parcelas"],
                 primeiro_vencimento=dados["primeiro_vencimento"],
-                categoria=dados["categoria"],
+                category=dados["category"],
                 user=request.user,
                 pagamento=pagamento,
             )
@@ -291,7 +291,7 @@ def procedimentos(request):
     return render(
         request,
         "estimates/procedures.html",
-        {"procedimentos": Procedure.objects.select_related("categoria")},
+        {"procedimentos": Procedure.objects.select_related("category")},
     )
 
 

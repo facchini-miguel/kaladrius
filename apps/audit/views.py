@@ -56,13 +56,13 @@ def _rotulos():
     return rotulos
 
 
-def campos_alterados(registro):
+def campos_alterados(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
-    rotulos = _rotulos().get(registro.modelo, {})
+    rotulos = _rotulos().get(record.modelo, {})
     return [
         (rotulos.get(campo, campo), valores[0], valores[1])
-        for campo, valores in registro.alteracoes.items()
+        for campo, valores in record.alteracoes.items()
     ]
 
 
@@ -75,7 +75,7 @@ def lista(request):
         "acao": request.GET.get("acao", ""),
         "modelo": request.GET.get("modelo", ""),
         "de": request.GET.get("de", ""),
-        "ate": request.GET.get("ate", ""),
+        "until": request.GET.get("until", ""),
     }
     modelos = tipos_de_registro()
     if filtros["q"]:
@@ -89,12 +89,12 @@ def lista(request):
     if filtros["modelo"]:
         registros = registros.filter(modelo=filtros["modelo"])
     if de := _data(filtros["de"]):
-        registros = registros.filter(momento__date__gte=de)
-    if ate := _data(filtros["ate"]):
-        registros = registros.filter(momento__date__lte=ate)
+        registros = registros.filter(timestamp__date__gte=de)
+    if until := _data(filtros["until"]):
+        registros = registros.filter(timestamp__date__lte=until)
     pagina = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
-    for registro in pagina:
-        registro.campos = campos_alterados(registro)
+    for record in pagina:
+        record.campos = campos_alterados(record)
     return render(
         request,
         "audit/list.html",

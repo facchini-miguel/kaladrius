@@ -1,3 +1,3 @@
 {% load i18n %}<option value="">{% translate "Selecione a cidade" %}</option>
-{% for cidade in cidades %}<option value="{{ cidade.code }}">{{ cidade.name }}</option>
+{% for city in cidades %}<option value="{{ city.code }}">{{ city.name }}</option>
 {% endfor %}

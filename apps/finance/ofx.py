@@ -32,8 +32,8 @@ class Transacao:
 class Extrato:
     banco: str
     account: str
-    inicio: datetime.date | None
-    fim: datetime.date | None
+    start: datetime.date | None
+    end: datetime.date | None
     saldo: Decimal | None
     saldo_em: datetime.date | None
     transacoes: list
@@ -125,8 +125,8 @@ def ler(conteudo: bytes) -> Extrato:
     return Extrato(
         banco=_campo(texto, "BANKID")[:20],
         account=_campo(texto, "ACCTID")[:40],
-        inicio=_data(_campo(texto, "DTSTART")),
-        fim=_data(_campo(texto, "DTEND")),
+        start=_data(_campo(texto, "DTSTART")),
+        end=_data(_campo(texto, "DTEND")),
         saldo=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
         saldo_em=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,

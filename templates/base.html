@@ -194,7 +194,7 @@
     {% endif %}
     {% if backup_atrasado %}
     <div class="alert alert-danger d-print-none" role="alert">
-      {% blocktranslate with momento=backup_atrasado.momento|date:"SHORT_DATETIME_FORMAT" %}O último backup do banco foi em {{ momento }}: os backups diários pararam.{% endblocktranslate %}
+      {% blocktranslate with momento=backup_atrasado.timestamp|date:"SHORT_DATETIME_FORMAT" %}O último backup do banco foi em {{ momento }}: os backups diários pararam.{% endblocktranslate %}
       {% translate "Veja no servidor:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}

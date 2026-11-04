@@ -8,7 +8,7 @@ class RegistroAuditoriaAdmin(admin.ModelAdmin):
     """Read-only: audit entries are never created, changed or deleted by hand."""
 
     list_display = [
-        "momento",
+        "timestamp",
         "usuario_nome",
         "acao",
         "modelo",
@@ -18,7 +18,7 @@ class RegistroAuditoriaAdmin(admin.ModelAdmin):
     ]
     list_filter = ["acao", "modelo"]
     search_fields = ["usuario_nome", "objeto_descricao", "objeto_id"]
-    date_hierarchy = "momento"
+    date_hierarchy = "timestamp"
 
     def has_add_permission(self, request):
         return False

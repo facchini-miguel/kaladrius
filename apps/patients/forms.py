@@ -36,10 +36,10 @@ def _campo_texto(label, max_length, **attrs):
 
 
 class PacienteForm(FormularioBootstrap, forms.ModelForm):
-    uf = UFField(queryset=State.objects.all(), required=False, label=_("UF"))
-    cidade = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
+    state = UFField(queryset=State.objects.all(), required=False, label=_("UF"))
+    city = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
     # The country's document (decision 121), typed with punctuation, stored compact.
-    cpf_cnpj = campo_documento()
+    tax_id = campo_documento()
     cep = _campo_texto(_("CEP"), 10)
     telefone_celular = _campo_texto(_("Celular"), 16, inputmode="tel")
     whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
@@ -51,8 +51,8 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         fields = [
             "kind",
             "name",
-            "razao_social",
-            "cpf_cnpj",
+            "legal_name",
+            "tax_id",
             "inscricao_estadual",
             "rg",
             "sexo",
@@ -66,11 +66,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "telefone_comercial",
             "email",
             "cep",
-            "uf",
-            "cidade",
+            "state",
+            "city",
             "estado_nome",
             "cidade_nome",
-            "bairro",
+            "neighborhood",
             "logradouro",
             "number",
             "complemento",
@@ -85,7 +85,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
     # Brazilian fields; outside Brazil the state and city are typed (decision 117) and the
     # document is the country's (decision 121).
-    SO_NO_BRASIL = ["inscricao_estadual", "rg", "uf", "cidade"]
+    SO_NO_BRASIL = ["inscricao_estadual", "rg", "state", "city"]
     FORA_DO_BRASIL = ["estado_nome", "cidade_nome"]
 
     def __init__(self, *args, clinic, **kwargs):
@@ -96,7 +96,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         self.fields["cep"].label = countries.rotulo_cep(self.pais)
         self.documentos = identification.do_pais(self.pais)
         documento_por_tipo(
-            self.fields["cpf_cnpj"],
+            self.fields["tax_id"],
             self.documentos.paciente,
             self.documentos.empresa,
             self["kind"].value(),
@@ -108,7 +108,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         self.fields["cep"].widget.attrs["inputmode"] = "numeric"
 
         # Chained selects: the city list depends on the chosen state (HTMX).
-        self.fields["uf"].widget.attrs.update(
+        self.fields["state"].widget.attrs.update(
             {
                 "hx-get": reverse("reference_data:city_options"),
                 "hx-target": "#id_cidade",
@@ -117,7 +117,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         )
         # Known neighborhoods and streets of the chosen city as suggestions (decision 100);
         # anything else can still be typed.
-        self.fields["cidade"].widget.attrs.update(
+        self.fields["city"].widget.attrs.update(
             {
                 "hx-get": reverse("reference_data:address_suggestions"),
                 "hx-target": "#sugestoes-endereco",
@@ -125,14 +125,16 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             }
         )
         for campo, lista in (
-            ("bairro", "bairros-sugeridos"),
+            ("neighborhood", "bairros-sugeridos"),
             ("logradouro", "logradouros-sugeridos"),
         ):
             self.fields[campo].widget.attrs.update({"list": lista, "autocomplete": "off"})
-        uf_id = self.data.get(self.add_prefix("uf")) if self.is_bound else self.instance.uf_id
-        self.fields["cidade"].queryset = (
-            City.objects.filter(uf_id=int(uf_id))
-            if str(uf_id or "").isdecimal()
+        state_id = (
+            self.data.get(self.add_prefix("state")) if self.is_bound else self.instance.state_id
+        )
+        self.fields["city"].queryset = (
+            City.objects.filter(state_id=int(state_id))
+            if str(state_id or "").isdecimal()
             else City.objects.none()
         )
 
@@ -171,20 +173,18 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         documento = ""
         if do_tipo is not None:
             try:
-                documento = identification.limpar(
-                    dados.get("cpf_cnpj", ""), [do_tipo], do_tipo.sigla
-                )
+                documento = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
             except ValidationError as erro:
-                self.add_error("cpf_cnpj", erro)
-        if "cpf_cnpj" in dados:
-            dados["cpf_cnpj"] = documento
+                self.add_error("tax_id", erro)
+        if "tax_id" in dados:
+            dados["tax_id"] = documento
 
         if documento:
             # The clinic is not a form field, so the unique constraint is checked here.
-            outro = Patient.objects.filter(cpf_cnpj=documento).exclude(pk=self.instance.pk).first()
+            outro = Patient.objects.filter(tax_id=documento).exclude(pk=self.instance.pk).first()
             if outro is not None and outro.arquivado:
                 self.add_error(
-                    "cpf_cnpj",
+                    "tax_id",
                     _(
                         "Este documento é de um paciente arquivado. Peça ao administrador "
                         "da clínica para restaurá-lo."
@@ -192,7 +192,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 )
             elif outro is not None:
                 self.add_error(
-                    "cpf_cnpj", _("Já existe um paciente com este documento nesta clínica.")
+                    "tax_id", _("Já existe um paciente com este documento nesta clínica.")
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
@@ -201,12 +201,12 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 dados[campo] = None if campo == "estado_civil" else ""
             dados["data_nascimento"] = None
         else:
-            dados["razao_social"] = ""
+            dados["legal_name"] = ""
             dados["inscricao_estadual"] = ""
 
-        cidade, uf = dados.get("cidade"), dados.get("uf")
-        if cidade is not None and cidade.uf_id != getattr(uf, "pk", None):
-            self.add_error("cidade", _("A cidade não pertence à UF escolhida."))
+        city, state = dados.get("city"), dados.get("state")
+        if city is not None and city.state_id != getattr(state, "pk", None):
+            self.add_error("city", _("A cidade não pertence à UF escolhida."))
         return dados
 
 

@@ -49,9 +49,9 @@ def _agenda(request, hoje):
     agora = timezone.now()
     visiveis = agenda.agendamentos_visiveis(request)
     do_dia = list(
-        visiveis.filter(inicio__date=hoje)
+        visiveis.filter(start__date=hoje)
         .select_related("patient", "practitioner", "kind")
-        .order_by("inicio", "practitioner__name")
+        .order_by("start", "practitioner__name")
     )
     pacientes = [a for a in do_dia if a.patient_id]
     status = Appointment.Situacao
@@ -62,8 +62,8 @@ def _agenda(request, hoje):
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(
         visiveis.filter(
-            inicio__date__gte=hoje.replace(day=1),
-            inicio__date__lte=hoje,
+            start__date__gte=hoje.replace(day=1),
+            start__date__lte=hoje,
             status__in=[status.COMPARECEU, status.FALTOU],
         )
         .order_by()
@@ -79,9 +79,9 @@ def _agenda(request, hoje):
         "compareceram": contagem[status.COMPARECEU],
         "faltaram": contagem[status.FALTOU],
         "desmarcaram": contagem[status.DESMARCOU],
-        "a_seguir": sum(1 for a in pendentes if a.inicio > agora),
-        "sem_marcacao": sum(1 for a in pendentes if a.inicio <= agora),
-        "proximo": next((a for a in pendentes if a.fim > agora), None),
+        "a_seguir": sum(1 for a in pendentes if a.start > agora),
+        "sem_marcacao": sum(1 for a in pendentes if a.start <= agora),
+        "proximo": next((a for a in pendentes if a.end > agora), None),
         "agora": agora,
         "faltas_mes": round(100 * faltaram / (vieram + faltaram)) if vieram + faltaram else None,
         "marcados_mes": vieram + faltaram,
@@ -115,13 +115,13 @@ def _orcamentos(hoje):
     return list(
         Estimate.objects.filter(
             status=Estimate.Situacao.ABERTO,
-            validade__gte=hoje,
-            validade__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
+            valid_until__gte=hoje,
+            valid_until__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
             patient__arquivado=False,
         )
         .select_related("patient")
         .prefetch_related("itens")
-        .order_by("validade", "patient__name")
+        .order_by("valid_until", "patient__name")
     )
 
 

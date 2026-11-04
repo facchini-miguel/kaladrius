@@ -18,11 +18,11 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Procedure
-        fields = ["name", "code", "amount", "categoria", "active"]
+        fields = ["name", "code", "amount", "category", "active"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["categoria"].queryset = Category.objects.filter(
+        self.fields["category"].queryset = Category.objects.filter(
             kind=Category.Tipo.RECEITA, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
@@ -48,11 +48,11 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Estimate
-        fields = ["patient", "practitioner", "date", "validade", "notes"]
+        fields = ["patient", "practitioner", "date", "valid_until", "notes"]
         widgets = {
             "patient": forms.HiddenInput,
             "date": DATA,
-            "validade": DATA,
+            "valid_until": DATA,
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
 
@@ -64,8 +64,8 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        if dados.get("date") and dados.get("validade") and dados["validade"] < dados["date"]:
-            self.add_error("validade", _("A validade não pode ser antes da data do orçamento."))
+        if dados.get("date") and dados.get("valid_until") and dados["valid_until"] < dados["date"]:
+            self.add_error("valid_until", _("A validade não pode ser antes da data do orçamento."))
         return dados
 
 
@@ -118,7 +118,7 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
 
 
 class DescontoForm(FormularioBootstrap, forms.Form):
-    desconto = _campo_dinheiro(_("Desconto no total"), obrigatorio=False)
+    discount = _campo_dinheiro(_("Desconto no total"), obrigatorio=False)
 
 
 class AprovarForm(FormularioBootstrap, forms.Form):
@@ -128,7 +128,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
     primeiro_vencimento = forms.DateField(
         label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
     )
-    categoria = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
+    category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     forma = forms.ChoiceField(
         label=_("Forma de pagamento"),
@@ -141,7 +141,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["categoria"].queryset = Category.objects.filter(
+        self.fields["category"].queryset = Category.objects.filter(
             kind=Category.Tipo.RECEITA, active=True
         )
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)

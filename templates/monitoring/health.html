@@ -42,9 +42,9 @@
         </div>
         {% if grafico.svg %}{{ grafico.svg }}{% else %}<p class="text-body-secondary small">{% translate "Poucas amostras para o gráfico." %}</p>{% endif %}
         <div class="d-flex justify-content-between small text-body-secondary">
-          <span>{% if periodo == "7d" %}{{ inicio|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ inicio|time:"H:i" }}{% endif %}</span>
+          <span>{% if periodo == "7d" %}{{ start|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ start|time:"H:i" }}{% endif %}</span>
           <span>{% for classe, legenda in grafico.legendas %}<span class="legenda {{ classe }}"></span> {{ legenda }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
-          <span>{% if periodo == "7d" %}{{ fim|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ fim|time:"H:i" }}{% endif %}</span>
+          <span>{% if periodo == "7d" %}{{ end|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ end|time:"H:i" }}{% endif %}</span>
         </div>
       </div>
     </div>
@@ -75,18 +75,18 @@
   </div>
   {% endif %}
   <div class="col-lg-6">
-    <h2 class="h5">{% blocktranslate with tamanho=banco.tamanho|filesizeformat %}Banco de dados · {{ tamanho }}{% endblocktranslate %}</h2>
+    <h2 class="h5">{% blocktranslate with tamanho=banco.size|filesizeformat %}Banco de dados · {{ tamanho }}{% endblocktranslate %}</h2>
     {% if user.is_superuser %}
     <table class="table table-sm bg-white">
       <thead><tr><th>{% translate "Maiores tabelas" %}</th><th class="text-end">{% translate "Registros" %}</th><th class="text-end">{% translate "Tamanho" %}</th></tr></thead>
       <tbody>
         {% for tabela in banco.tabelas %}
-        <tr><td><code>{{ tabela.name }}</code></td><td class="text-end">{{ tabela.registros }}</td><td class="text-end">{{ tabela.tamanho|filesizeformat }}</td></tr>
+        <tr><td><code>{{ tabela.name }}</code></td><td class="text-end">{{ tabela.registros }}</td><td class="text-end">{{ tabela.size|filesizeformat }}</td></tr>
         {% endfor %}
       </tbody>
     </table>
     {% endif %}
-    <p class="small">{% if backup %}{% blocktranslate with momento=backup.momento|date:"SHORT_DATETIME_FORMAT" tamanho=backup.tamanho|filesizeformat %}Último backup: {{ momento }} ({{ tamanho }}).{% endblocktranslate %}{% else %}{% translate "Nenhum backup registrado." %}{% endif %}</p>
+    <p class="small">{% if backup %}{% blocktranslate with momento=backup.timestamp|date:"SHORT_DATETIME_FORMAT" tamanho=backup.size|filesizeformat %}Último backup: {{ momento }} ({{ tamanho }}).{% endblocktranslate %}{% else %}{% translate "Nenhum backup registrado." %}{% endif %}</p>
   </div>
 </div>
 

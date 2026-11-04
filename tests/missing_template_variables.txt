@@ -87,7 +87,7 @@ finance/catalog_list.html  backup_nenhum
 finance/catalog_list.html  saude_alerta
 finance/chart_of_accounts.html  backup_atrasado
 finance/chart_of_accounts.html  backup_nenhum
-finance/chart_of_accounts.html  linha.grupo
+finance/chart_of_accounts.html  linha.group
 finance/chart_of_accounts.html  saude_alerta
 finance/closing.html  backup_atrasado
 finance/closing.html  backup_nenhum
@@ -212,7 +212,7 @@ patients/delete.html  saude_alerta
 patients/form.html  backup_atrasado
 patients/form.html  backup_nenhum
 patients/form.html  form.rg
-patients/form.html  form.uf
+patients/form.html  form.state
 patients/form.html  saude_alerta
 patients/list.html  backup_atrasado
 patients/list.html  backup_nenhum

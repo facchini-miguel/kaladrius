@@ -11,7 +11,7 @@ from .models import HealthPlan, MemberCard
 class ConvenioForm(FormularioBootstrap, forms.ModelForm):
     # Typed with punctuation, stored without it (ANS: the 6 digits). Only in the countries
     # whose insurers have a registry (decision 125).
-    registro = forms.CharField(max_length=30, required=False)
+    registration = forms.CharField(max_length=30, required=False)
     phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -21,7 +21,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = HealthPlan
-        fields = ["name", "registro", "phone", "notes", "active"]
+        fields = ["name", "registration", "phone", "notes", "active"]
         widgets = {"notes": forms.Textarea(attrs={"rows": 3})}
 
     def __init__(self, *args, clinic, **kwargs):
@@ -31,13 +31,13 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
         do_pais = insurance.do_pais(clinic.pais)
         if do_pais.tipos:
             self.fields["name"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
-        self.registro = do_pais.registro
-        if self.registro is None:
-            del self.fields["registro"]
+        self.registration = do_pais.registration
+        if self.registration is None:
+            del self.fields["registration"]
         else:
-            self.fields["registro"].label = insurance.rotulo_do_registro(clinic.pais)
-            if self.registro.exemplo:
-                self.fields["registro"].widget.attrs["placeholder"] = self.registro.exemplo
+            self.fields["registration"].label = insurance.rotulo_do_registro(clinic.pais)
+            if self.registration.exemplo:
+                self.fields["registration"].widget.attrs["placeholder"] = self.registration.exemplo
 
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
@@ -45,11 +45,11 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             raise forms.ValidationError(_("Já existe um convênio com este nome."))
         return name
 
-    def clean_registro(self):
-        registro = self.registro.limpar(self.cleaned_data.get("registro"))
-        if len(registro) > 20:
+    def clean_registration(self):
+        registration = self.registration.limpar(self.cleaned_data.get("registration"))
+        if len(registration) > 20:
             raise forms.ValidationError(_("Use no máximo 20 caracteres."))
-        return registro
+        return registration
 
     def clean_phone(self):
         return normalizar_telefone(self.cleaned_data.get("phone"))
@@ -62,13 +62,13 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             "convenio",
             "plano",
             "number",
-            "grupo",
+            "group",
             "beneficiario",
-            "validade",
+            "valid_until",
             "titular",
             "active",
         ]
-        widgets = {"validade": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
+        widgets = {"valid_until": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,7 +81,7 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             _("Número da carteirinha"), do_pais.number
         )
         for campo, local, rotulo in (
-            ("grupo", do_pais.grupo, _("Número do grupo")),
+            ("group", do_pais.group, _("Número do grupo")),
             ("beneficiario", do_pais.beneficiario, _("Código do beneficiário")),
         ):
             if local or getattr(self.instance, campo):

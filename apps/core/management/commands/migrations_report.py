@@ -425,11 +425,11 @@ class Command(BaseCommand):
         falhas = ida_e_volta(chaves) if testar_volta and chaves else None
         relatorio = markdown(analisadas, falhas, alteradas)
         if saida:
-            with open(saida, "w", encoding="utf-8") as arquivo:
-                arquivo.write(relatorio)
+            with open(saida, "w", encoding="utf-8") as file:
+                file.write(relatorio)
         if comentario:
-            with open(comentario, "w", encoding="utf-8") as arquivo:
-                arquivo.write(markdown(analisadas, falhas, alteradas, limite=LIMITE_COMENTARIO))
+            with open(comentario, "w", encoding="utf-8") as file:
+                file.write(markdown(analisadas, falhas, alteradas, limite=LIMITE_COMENTARIO))
         self.stdout.write(relatorio)
         if falhas:
             raise CommandError("O teste de ida e volta falhou.")

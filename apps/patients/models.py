@@ -30,14 +30,17 @@ class Patient(ModeloDaClinica):
         db_collation=ALFABETICA,
         db_column="nome",
     )
-    razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
+    legal_name = models.CharField(
+        _("razão social"), max_length=200, blank=True, db_column="razao_social"
+    )
     # The country's document of an individual or a company (decision 121); the name stayed from
     # Brazil.
-    cpf_cnpj = models.CharField(
+    tax_id = models.CharField(
         _("documento"),
         max_length=20,
         blank=True,
         help_text=_("Pode ser digitado com ou sem pontuação."),
+        db_column="cpf_cnpj",
     )
     rg = models.CharField(_("RG"), max_length=20, blank=True)
     inscricao_estadual = models.CharField(_("inscrição estadual"), max_length=20, blank=True)
@@ -73,26 +76,28 @@ class Patient(ModeloDaClinica):
 
     # Brazil: 8 digits; other countries (decision 117): up to a 9-digit ZIP+4.
     cep = models.CharField(_("CEP"), max_length=9, blank=True)
-    uf = models.ForeignKey(
+    state = models.ForeignKey(
         "referencias.State",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("UF"),
+        db_column="uf_id",
     )
-    cidade = models.ForeignKey(
+    city = models.ForeignKey(
         "referencias.City",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("cidade"),
+        db_column="cidade_id",
     )
     # Outside Brazil the national state and city tables (IBGE) do not apply: typed text.
     estado_nome = models.CharField(_("estado ou província"), max_length=60, blank=True)
     cidade_nome = models.CharField(_("cidade"), max_length=100, blank=True)
-    bairro = models.CharField(_("bairro"), max_length=100, blank=True)
+    neighborhood = models.CharField(_("bairro"), max_length=100, blank=True, db_column="bairro")
     logradouro = models.CharField(
         _("endereço"), max_length=200, blank=True, help_text=_("Rua, avenida…")
     )
@@ -124,12 +129,12 @@ class Patient(ModeloDaClinica):
         ordering = ["name"]
         indexes = [
             models.Index(fields=["clinic", "name"], name="paciente_clinica_nome"),
-            models.Index(fields=["clinic", "cpf_cnpj"], name="paciente_clinica_cpf_cnpj"),
+            models.Index(fields=["clinic", "tax_id"], name="paciente_clinica_cpf_cnpj"),
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "cpf_cnpj"],
-                condition=~models.Q(cpf_cnpj=""),
+                fields=["clinic", "tax_id"],
+                condition=~models.Q(tax_id=""),
                 name="paciente_cpf_cnpj_unico_por_clinica",
             ),
         ]
@@ -159,8 +164,8 @@ class Patient(ModeloDaClinica):
     def cidade_estado(self):
         """City and state as written on the record: from the national tables in Brazil, typed
         anywhere else (decision 117)."""
-        if self.cidade_id:
-            return f"{self.cidade.name}/{self.cidade.uf.sigla}"
+        if self.city_id:
+            return f"{self.city.name}/{self.city.state.sigla}"
         return ", ".join(parte for parte in (self.cidade_nome, self.estado_nome) if parte)
 
     @property

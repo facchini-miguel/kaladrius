@@ -55,7 +55,7 @@ def backup(request):
     ultimo = Backup.objects.first()
     if ultimo is None:
         return {"backup_nenhum": True}
-    if timezone.now() - ultimo.momento <= BACKUP_ATRASADO_APOS:
+    if timezone.now() - ultimo.timestamp <= BACKUP_ATRASADO_APOS:
         return {}
     return {"backup_atrasado": ultimo}
 

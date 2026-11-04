@@ -53,8 +53,8 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
             practitioner=ana,
             kind=AppointmentType.objects.first(),
             patient=patient,
-            inicio=agenda.momento(datetime.date(2031, 3, 5), datetime.time(10)),
-            fim=agenda.momento(datetime.date(2031, 3, 5), datetime.time(11)),
+            start=agenda.timestamp(datetime.date(2031, 3, 5), datetime.time(10)),
+            end=agenda.timestamp(datetime.date(2031, 3, 5), datetime.time(11)),
         )
     return {
         "clinic": clinica_a,
@@ -215,8 +215,8 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     assert "5 de março de 2031" in pagina  # month in lower case, as in running text
     with usar_clinica(cenario["clinic"]):
         assert visit.atestados.count() == 2
-    registro = AuditEntry.objects.filter(modelo="Atestado").latest("pk")
-    assert "Repouso" not in str(registro.alteracoes)
+    record = AuditEntry.objects.filter(modelo="Atestado").latest("pk")
+    assert "Repouso" not in str(record.alteracoes)
 
     # Only the visit's author issues documents; other practitioners print them.
     assert cenario["dr"].get(url).status_code == 403
@@ -237,8 +237,8 @@ def test_receita_uma_linha_por_item(cenario):
     assert "RECEITUÁRIO" in pagina.content.decode()
     ficha = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
     assert resposta.url in ficha.content.decode()
-    registro = AuditEntry.objects.filter(modelo="Receita").latest("pk")
-    assert "Paracetamol" not in str(registro.alteracoes)
+    record = AuditEntry.objects.filter(modelo="Receita").latest("pk")
+    assert "Paracetamol" not in str(record.alteracoes)
 
 
 def test_pedido_de_exames(cenario):
@@ -251,8 +251,8 @@ def test_pedido_de_exames(cenario):
     assert pagina.context["linhas"] == ["Hemograma completo", "Glicemia de jejum"]
     assert "PEDIDO DE EXAMES" in pagina.content.decode() and "Rotina" in pagina.content.decode()
     assert cenario["dr"].get(url).status_code == 403  # only the visit's author issues
-    registro = AuditEntry.objects.filter(modelo="Pedido de exames").latest("pk")
-    assert "Hemograma" not in str(registro.alteracoes)
+    record = AuditEntry.objects.filter(modelo="Pedido de exames").latest("pk")
+    assert "Hemograma" not in str(record.alteracoes)
 
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
@@ -266,7 +266,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     visit = registrar(cenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
     enviar = lambda quem, name, conteudo: cenario[quem].post(  # noqa: E731
-        url, {"arquivo": SimpleUploadedFile(name, conteudo), "description": "Raio-X"}, follow=True
+        url, {"file": SimpleUploadedFile(name, conteudo), "description": "Raio-X"}, follow=True
     )
     # Checked by the content, not the name: an HTML page named .png is refused.
     assert (
@@ -275,22 +275,21 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     grande = b"%PDF-" + b"0" * (10 * 1024 * 1024)
     assert "passa de 10 MB" in enviar("dra", "laudo.pdf", grande).content.decode()
     assert (
-        cenario["recepcao"].post(url, {"arquivo": SimpleUploadedFile("x.png", PNG)}).status_code
-        == 403
+        cenario["recepcao"].post(url, {"file": SimpleUploadedFile("x.png", PNG)}).status_code == 403
     )
 
     enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
     with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()
-    assert (anexo.kind, anexo.tamanho, anexo.practitioner.name) == (
+    assert (anexo.kind, anexo.size, anexo.practitioner.name) == (
         "image/png",
         len(PNG),
         "Dr. Bruno",
     )
 
-    arquivo = cenario["dra"].get(reverse("medical_records:attachment", args=[anexo.pk]))
-    assert arquivo.content == PNG and arquivo["Content-Type"] == "image/png"
-    assert arquivo["Cache-Control"] == "private, no-store"
+    file = cenario["dra"].get(reverse("medical_records:attachment", args=[anexo.pk]))
+    assert file.content == PNG and file["Content-Type"] == "image/png"
+    assert file["Cache-Control"] == "private, no-store"
     assert (
         cenario["recepcao"].get(reverse("medical_records:attachment", args=[anexo.pk])).status_code
         == 403
@@ -309,8 +308,8 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
 
     visit = registrar(cenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
-    cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("a.png", PNG)})
-    cenario["dra"].post(url, {"arquivo": SimpleUploadedFile("b.png", PNG)})
+    cenario["dra"].post(url, {"file": SimpleUploadedFile("a.png", PNG)})
+    cenario["dra"].post(url, {"file": SimpleUploadedFile("b.png", PNG)})
     with usar_clinica(cenario["clinic"]):
         primeiro, segundo = Attachment.objects.order_by("pk")
     remover = lambda anexo: reverse("medical_records:attachment_remove", args=[anexo.pk])  # noqa: E731
@@ -346,7 +345,7 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     assert root.post(url, {**ANAMNESE, "conduta": "Retorno em 15 dias"}).status_code == 302
     anexo_url = reverse("medical_records:attachment_upload", args=[visit.pk])
     cenario["dra"].post(
-        anexo_url, {"arquivo": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
+        anexo_url, {"file": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
     )
     with usar_clinica(cenario["clinic"]):
         anexo = Attachment.objects.get()

@@ -29,8 +29,12 @@ class State(models.Model):
 class City(models.Model):
     code = models.PositiveIntegerField(_("código IBGE"), primary_key=True, db_column="codigo")
     name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
-    uf = models.ForeignKey(
-        State, on_delete=models.PROTECT, related_name="cidades", verbose_name=_("UF")
+    state = models.ForeignKey(
+        State,
+        on_delete=models.PROTECT,
+        related_name="cidades",
+        verbose_name=_("UF"),
+        db_column="uf_id",
     )
 
     class Meta:
@@ -38,10 +42,10 @@ class City(models.Model):
         verbose_name = _("cidade")
         verbose_name_plural = _("cidades")
         ordering = ["name"]
-        indexes = [models.Index(fields=["uf", "name"], name="cidade_uf_nome")]
+        indexes = [models.Index(fields=["state", "name"], name="cidade_uf_nome")]
 
     def __str__(self):
-        return f"{self.name} - {self.uf.sigla}"
+        return f"{self.name} - {self.state.sigla}"
 
 
 class Bank(models.Model):
@@ -84,8 +88,12 @@ class Neighborhood(models.Model):
     """Known neighborhoods of a city (decision 100): general address data, not about any
     person, suggested on the patient form. The first ones came from the legacy Odonto."""
 
-    cidade = models.ForeignKey(
-        City, on_delete=models.CASCADE, related_name="bairros", verbose_name=_("cidade")
+    city = models.ForeignKey(
+        City,
+        on_delete=models.CASCADE,
+        related_name="bairros",
+        verbose_name=_("cidade"),
+        db_column="cidade_id",
     )
     name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
 
@@ -95,7 +103,7 @@ class Neighborhood(models.Model):
         verbose_name_plural = _("bairros")
         ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["cidade", "name"], name="bairro_unico_por_cidade")
+            models.UniqueConstraint(fields=["city", "name"], name="bairro_unico_por_cidade")
         ]
 
     def __str__(self):
@@ -105,16 +113,21 @@ class Neighborhood(models.Model):
 class Street(models.Model):
     """A known street of a city, with its type in the name (\"Rua…\", \"Avenida…\")."""
 
-    cidade = models.ForeignKey(
-        City, on_delete=models.CASCADE, related_name="logradouros", verbose_name=_("cidade")
+    city = models.ForeignKey(
+        City,
+        on_delete=models.CASCADE,
+        related_name="logradouros",
+        verbose_name=_("cidade"),
+        db_column="cidade_id",
     )
-    bairro = models.ForeignKey(
+    neighborhood = models.ForeignKey(
         Neighborhood,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="logradouros",
         verbose_name=_("bairro"),
+        db_column="bairro_id",
     )
     name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
 
@@ -125,7 +138,7 @@ class Street(models.Model):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["cidade", "bairro", "name"], name="logradouro_unico_por_bairro"
+                fields=["city", "neighborhood", "name"], name="logradouro_unico_por_bairro"
             )
         ]
 

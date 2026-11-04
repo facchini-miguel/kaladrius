@@ -26,7 +26,7 @@ def superusuario(client, django_user_model):
 @pytest.mark.parametrize("pasta", documents.PASTAS.values())
 def test_manual_e_politica_do_site_em_cada_idioma(pasta):
     manual = documents.DOCS / pasta / "manual"
-    paginas = {arquivo.stem for arquivo in manual.glob("*.md")}
+    paginas = {file.stem for file in manual.glob("*.md")}
     assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
 
 
@@ -106,15 +106,15 @@ def test_logo_na_barra_na_entrada_e_na_aba(client, recepcao):
     entrada = client.get(reverse("login")).content.decode()
     assert "logo-entrada" in entrada and "img/favicon" in entrada
     assert "logo-barra" in recepcao.get(reverse("home")).content.decode()
-    for arquivo in ("logo.svg", "favicon.svg"):
-        assert (documents.DOCS.parent / "static" / "img" / arquivo).is_file()
+    for file in ("logo.svg", "favicon.svg"):
+        assert (documents.DOCS.parent / "static" / "img" / file).is_file()
 
 
 def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, recepcao):
     entrada = client.get(reverse("login")).content.decode()
     assert "<title>Entrar · Kaladrius</title>" in entrada
     assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entrada
-    inicio = recepcao.get(reverse("home")).content.decode()
-    assert "Kaladrius · versão" in inicio
-    for pagina in (entrada, inicio):
+    start = recepcao.get(reverse("home")).content.decode()
+    assert "Kaladrius · versão" in start
+    for pagina in (entrada, start):
         assert "Medical System" not in pagina

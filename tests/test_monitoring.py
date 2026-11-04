@@ -17,10 +17,10 @@ MB = 2**20
 
 
 def amostra(minutos_atras, *, disponivel=400, swap_livre=900, disco=5, rede=0, cpu=5.0):
-    momento = timezone.now() - datetime.timedelta(minutes=minutos_atras)
+    timestamp = timezone.now() - datetime.timedelta(minutes=minutos_atras)
     return json.dumps(
         {
-            "momento": momento.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "momento": timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "cpu": cpu,
             "cpu_roubada": 0.5,
             "carga": [0.1, 0.1, 0.1],
@@ -134,7 +134,7 @@ def test_tela_com_amostras(pasta, superusuario):
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "app" in conteudo and "Maiores tabelas" in conteudo
     assert pagina.context["periodo"] == "1h"  # the default
-    assert pagina.context["fim"] - pagina.context["inicio"] == datetime.timedelta(hours=1)
+    assert pagina.context["end"] - pagina.context["start"] == datetime.timedelta(hours=1)
 
 
 def test_tela_sem_amostras(settings, tmp_path, superusuario):
@@ -192,8 +192,8 @@ def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     svg = health.grafico(
         health.amostras(),
         [("cpu", "linha-1")],
-        inicio=agora - datetime.timedelta(hours=1),
-        fim=agora,
+        start=agora - datetime.timedelta(hours=1),
+        end=agora,
         maximo=100,
     )
     # 10 minutes of samples on a 1-hour axis: the line starts near the right end.

@@ -9,7 +9,7 @@
     <h1 class="h3 mb-0">{{ entry.description }}</h1>
     <span class="text-body-secondary">
       {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if entry.patient_id %}<a href="{% url 'patients:record' entry.patient_id %}">{{ entry.patient.name }}</a>{% elif entry.fornecedor_id %}<a href="{% url 'finance:supplier' entry.fornecedor_id %}">{{ entry.pessoa }}</a>{% else %}{{ entry.pessoa }}{% endif %}
-      · {{ entry.categoria }}{% if entry.centro_custo %} · {{ entry.centro_custo }}{% endif %}{% if entry.practitioner %} · {{ entry.practitioner.name }}{% endif %}
+      · {{ entry.category }}{% if entry.centro_custo %} · {{ entry.centro_custo }}{% endif %}{% if entry.practitioner %} · {{ entry.practitioner.name }}{% endif %}
       {% if comissao %} · <a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato da comissão" %}</a>{% endif %}
       · {{ entry.date|date:"SHORT_DATE_FORMAT" }}
     </span>

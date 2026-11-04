@@ -24,7 +24,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_plano", clinica_a, Papel.ADMIN))
 
 
-def grupo(clinic, name, **extra):
+def group(clinic, name, **extra):
     with usar_clinica(clinic):
         return AccountGroup.objects.get(name=name, **extra)
 
@@ -32,14 +32,14 @@ def grupo(clinic, name, **extra):
 def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
     with usar_clinica(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
-        assert str(aluguel.grupo) == "1 Ocupação"
-        assert Category.objects.get(name="Comissões").grupo.name == "Pessoal"
-        assert not Category.objects.filter(grupo=None).exists()
+        assert str(aluguel.group) == "1 Ocupação"
+        assert Category.objects.get(name="Comissões").group.name == "Pessoal"
+        assert not Category.objects.filter(group=None).exists()
         assert AccountGroup.objects.filter(kind="receita").count() == 2
 
 
 def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
-    pessoal = grupo(clinica_a, "Pessoal")
+    pessoal = group(clinica_a, "Pessoal")
     resposta = admin.post(
         reverse("finance:group_new"),
         {
@@ -51,13 +51,13 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
         },
     )
     assert resposta.status_code == 302
-    sub = grupo(clinica_a, "Equipe da recepção")
+    sub = group(clinica_a, "Equipe da recepção")
     with usar_clinica(clinica_a):
         assert sub.number == "2.1"
         salarios = Category.objects.get(name="Salários e encargos")
     editar = admin.post(
         reverse("finance:catalog_edit", args=["categories", salarios.pk]),
-        {"name": salarios.name, "kind": "despesa", "grupo": sub.pk, "active": "on"},
+        {"name": salarios.name, "kind": "despesa", "group": sub.pk, "active": "on"},
     )
     assert editar.status_code == 302
     pagina = admin.get(reverse("finance:chart_of_accounts")).content.decode()
@@ -66,23 +66,23 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
 
 def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
-    pessoal = grupo(clinica_a, "Pessoal")
+    pessoal = group(clinica_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
         dados = {"name": name, "kind": "despesa", "pai": pessoal.pk, "code": "", "active": "on"}
         assert admin.post(reverse("finance:group_new"), dados).status_code == 302
     with usar_clinica(clinica_a):
-        assert grupo(clinica_a, "Equipe A").number == "2.1"
-        assert grupo(clinica_a, "Equipe B").number == "2.2"
+        assert group(clinica_a, "Equipe A").number == "2.1"
+        assert group(clinica_a, "Equipe B").number == "2.2"
     # A new top group goes after the five of the basic plan.
     topo = {"name": "Investimentos", "kind": "despesa", "pai": "", "code": "", "active": "on"}
     assert admin.post(reverse("finance:group_new"), topo).status_code == 302
     with usar_clinica(clinica_a):
-        assert grupo(clinica_a, "Investimentos").number == "6"
+        assert group(clinica_a, "Investimentos").number == "6"
 
 
 def test_validacoes_do_grupo(clinica_a, admin):
-    pessoal = grupo(clinica_a, "Pessoal")
-    atendimentos = grupo(clinica_a, "Atendimentos")
+    pessoal = group(clinica_a, "Pessoal")
+    atendimentos = group(clinica_a, "Atendimentos")
     url = reverse("finance:group_new")
     misturado = admin.post(url, {"name": "X", "kind": "despesa", "pai": atendimentos.pk})
     assert "pai" in misturado.context["form"].errors
@@ -104,11 +104,11 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
         {
             "name": "Exames",
             "kind": "receita",
-            "grupo": grupo(clinica_a, "Pessoal").pk,
+            "group": group(clinica_a, "Pessoal").pk,
             "active": "on",
         },
     )
-    assert "grupo" in resposta.context["form"].errors
+    assert "group" in resposta.context["form"].errors
 
 
 def test_relatorio_soma_os_subgrupos(clinica_a, admin):
@@ -116,11 +116,11 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
         pessoal = AccountGroup.objects.get(name="Pessoal")
         sub = AccountGroup.objects.create(name="Recepção", kind="despesa", pai=pessoal, code=1)
         salarios = Category.objects.get(name="Salários e encargos")
-        salarios.grupo = sub
+        salarios.group = sub
         salarios.save()
         avulsa = Category.objects.create(name="Despesa avulsa", kind="despesa")
         caixa = FinancialAccount.objects.get(name="Caixa")
-        for categoria, amount in (
+        for category, amount in (
             (salarios, "1000"),
             (Category.objects.get(name="Comissões"), "300"),
             (avulsa, "50"),
@@ -130,7 +130,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
                 kind=Entry.Tipo.PAGAR,
                 pessoa="Fictício",
                 description="Pagamento",
-                categoria=categoria,
+                category=category,
                 valor_total=Decimal(amount),
                 parcelas=1,
                 primeiro_vencimento=HOJE,

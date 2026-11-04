@@ -59,8 +59,8 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
                 patient=patient,
                 description="" if patient else "Bloqueado",
                 status=status,
-                inicio=agenda.momento(date, datetime.time(hora)),
-                fim=agenda.momento(date, datetime.time(hora + 1)),
+                start=agenda.timestamp(date, datetime.time(hora)),
+                end=agenda.timestamp(date, datetime.time(hora + 1)),
             )
 
         agendar(HOJE, 8, status="compareceu")
@@ -84,25 +84,27 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
                 patient=patient, date=date, description="Revisão", concluida=concluida
             )
 
-        for patient, validade, status in [
+        for patient, valid_until, status in [
             (maria, dia(8), Estimate.Situacao.ABERTO),
             (maria, dia(20), Estimate.Situacao.ABERTO),
             (maria, dia(6), Estimate.Situacao.APROVADO),
             (arquivado, dia(6), Estimate.Situacao.ABERTO),
             (maria, dia(4), Estimate.Situacao.ABERTO),
         ]:
-            Estimate.objects.create(patient=patient, date=dia(1), validade=validade, status=status)
+            Estimate.objects.create(
+                patient=patient, date=dia(1), valid_until=valid_until, status=status
+            )
 
         caixa = FinancialAccount.objects.get(name="Caixa")
         receita = Category.objects.get(name="Tratamento")
         despesa = Category.objects.get(name="Outras despesas")
 
-        def lancar(kind, amount, parcelas, vencimento, categoria, **campos):
+        def lancar(kind, amount, parcelas, vencimento, category, **campos):
             entry = financeiro.criar_lancamento(
                 clinic=clinica_a,
                 kind=kind,
                 description="Teste",
-                categoria=categoria,
+                category=category,
                 valor_total=Decimal(amount),
                 parcelas=parcelas,
                 primeiro_vencimento=vencimento,
@@ -138,12 +140,12 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
     return {"clinic": clinica_a, **usuarios}
 
 
-def inicio(cenario, cliente_de, quem):
+def start(cenario, cliente_de, quem):
     return cliente_de(cenario[quem]).get(reverse("home"))
 
 
 def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
-    resposta = inicio(cenario, cliente_de, "recepcao")
+    resposta = start(cenario, cliente_de, "recepcao")
     painel = resposta.context["painel"]
     dia_ = painel["agenda"]
     assert len(dia_["lista"]) == 6 and dia_["mostrar_profissional"]
@@ -168,7 +170,7 @@ def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
 
 
 def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
-    painel = inicio(cenario, cliente_de, "admin").context["painel"]
+    painel = start(cenario, cliente_de, "admin").context["painel"]
     fin = painel["financeiro"]
     assert fin["pago_hoje"] == Decimal("50") and fin["resultado_hoje"] == Decimal("50")
     assert (fin["recebido_mes"], fin["pago_mes"]) == (Decimal("100"), Decimal("50"))
@@ -182,11 +184,11 @@ def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
 
 
 def test_profissional_ve_so_a_propria_agenda_e_nenhum_valor(cenario, cliente_de):
-    resposta = inicio(cenario, cliente_de, "dra")
+    resposta = start(cenario, cliente_de, "dra")
     painel = resposta.context["painel"]
     assert {a.practitioner.name for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
     assert not painel["agenda"]["mostrar_profissional"]
-    assert painel["agenda"]["proximo"].inicio.astimezone().hour == 11
+    assert painel["agenda"]["proximo"].start.astimezone().hour == 11
     assert "recebimentos" not in painel and "financeiro" not in painel
     # Estimates show their totals (practitioners write them), but no money of the clinic.
     conteudo = resposta.content.decode()
@@ -194,12 +196,12 @@ def test_profissional_ve_so_a_propria_agenda_e_nenhum_valor(cenario, cliente_de)
 
 
 def test_listas_de_rechamadas_aniversariantes_e_orcamentos(cenario, cliente_de):
-    painel = inicio(cenario, cliente_de, "recepcao").context["painel"]
+    painel = start(cenario, cliente_de, "recepcao").context["painel"]
     rechamadas = painel["rechamadas"]
     assert [r.date for r in rechamadas["lista"]] == [dia(1), HOJE]
     assert (rechamadas["total"], rechamadas["atrasadas"]) == (2, 1)
     assert [(p.name, idade) for p, idade in painel["aniversariantes"]] == [("Maria Paciente", 41)]
-    assert [o.validade for o in painel["orcamentos"]] == [dia(8)]
+    assert [o.valid_until for o in painel["orcamentos"]] == [dia(8)]
 
 
 def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_de):
@@ -228,8 +230,8 @@ def test_sem_clinica_nao_ha_resumo(cenario, criar_usuario, cliente_de):
 def test_saudacao_pela_hora(monkeypatch, criar_usuario, cliente_de):
     user = criar_usuario("maria")
     for hora, saudacao in [(7, "Bom dia"), (13, "Boa tarde"), (20, "Boa noite")]:
-        momento = timezone.make_aware(datetime.datetime(2031, 3, 5, hora))
-        monkeypatch.setattr(timezone, "now", lambda momento=momento: momento)
+        timestamp = timezone.make_aware(datetime.datetime(2031, 3, 5, hora))
+        monkeypatch.setattr(timezone, "now", lambda timestamp=timestamp: timestamp)
         # Logged in at the patched time, so the session is not seen as expired.
         conteudo = cliente_de(user).get(reverse("home")).content.decode()
         assert f"{saudacao}, maria" in conteudo

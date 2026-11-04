@@ -56,14 +56,14 @@ def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
 
 def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissional):  # noqa: F811
     clinic = cenario["clinic"]
-    dra = criar_profissional(clinic, "Dra. Fictícia", registro="CRO-SP 12345")
+    dra = criar_profissional(clinic, "Dra. Fictícia", registration="CRO-SP 12345")
     with usar_clinica(clinic):
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.RECEBER,
             patient=cenario["patient"],
             description="Limpeza",
-            categoria=cenario["categoria"],
+            category=cenario["category"],
             practitioner=dra,
             valor_total=Decimal("100"),
             parcelas=1,
