@@ -231,10 +231,10 @@
     </p>
     {% if financeiro.abertas %}
     <ul class="list-unstyled small mb-2">
-      {% for parcela in financeiro.abertas %}
+      {% for installment in financeiro.abertas %}
       <li>
-        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.entry_id %}">{{ parcela.entry.description }}</a> ({{ parcela.number }}) · {{ parcela.saldo|moeda }}
-        {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
+        {{ installment.due_date|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> ({{ installment.number }}) · {{ installment.balance|moeda }}
+        {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' installment.pk %}">{% translate "receber" %}</a>{% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -242,8 +242,8 @@
     {% if financeiro.pagamentos %}
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
-      {% for pagamento in financeiro.pagamentos %}
-      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.date|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
+      {% for payment in financeiro.pagamentos %}
+      <li{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|moeda }} · {{ payment.get_method_display }} · <a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>
     {% endif %}

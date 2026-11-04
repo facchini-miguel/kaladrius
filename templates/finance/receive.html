@@ -6,14 +6,14 @@
 {% block conteudo %}
 <h1 class="h3 mb-1">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
-  {{ parcela.entry.nome_pessoa }} · {{ parcela.entry.description }} ·
-  {% blocktranslate with numero=parcela.number total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
-  {% blocktranslate with vencimento=parcela.vencimento|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
+  {{ installment.entry.nome_pessoa }} · {{ installment.entry.description }} ·
+  {% blocktranslate with numero=installment.number total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
+  {% blocktranslate with vencimento=installment.due_date|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
 </p>
 <div class="alert alert-light border">
-  {% translate "Valor da parcela" %}: <strong>{{ parcela.amount|moeda }}</strong> ·
-  {% translate "Já pago" %}: {{ parcela.pago|moeda }} ·
-  {% translate "Falta" %}: <strong>{{ parcela.saldo|moeda }}</strong>
+  {% translate "Valor da parcela" %}: <strong>{{ installment.amount|moeda }}</strong> ·
+  {% translate "Já pago" %}: {{ installment.pago|moeda }} ·
+  {% translate "Falta" %}: <strong>{{ installment.balance|moeda }}</strong>
 </div>
 
 <form method="post" style="max-width: 44rem;" novalidate>
@@ -22,23 +22,23 @@
   <div class="row">
     <div class="col-md-4">{% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.juros %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.interest %}{% include "includes/field.html" %}{% endwith %}</div>
     {% if pode_desconto %}<div class="col-md-4">{% with campo=form.discount %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
-    <div class="col-md-4">{% with campo=form.forma %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with campo=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
   <fieldset class="border rounded p-3 mb-3">
     <legend class="fs-6 float-none w-auto px-2 mb-0">{% translate "Só para cartão" %}</legend>
     <div class="row">
-      <div class="col-md-4">{% with campo=form.cartao_bandeira %}{% include "includes/field.html" %}{% endwith %}</div>
-      {% if "cartao_parcelas" in form.fields %}<div class="col-md-4">{% with campo=form.cartao_parcelas %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
-      <div class="col-md-4">{% with campo=form.cartao_codigo %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with campo=form.card_brand %}{% include "includes/field.html" %}{% endwith %}</div>
+      {% if "cartao_parcelas" in form.fields %}<div class="col-md-4">{% with campo=form.card_installments %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+      <div class="col-md-4">{% with campo=form.card_transaction_code %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
     <p class="text-body-secondary small mb-0">{% if "cartao_parcelas" in form.fields %}{% translate "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a parcela fica paga. Nunca anote o número do cartão." %}{% else %}{% translate "Nunca anote o número do cartão." %}{% endif %}</p>
   </fieldset>
   {% with campo=form.note %}{% include "includes/field.html" %}{% endwith %}
   {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
   <button type="submit" class="btn btn-success">{% translate "Registrar pagamento" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:entry' parcela.entry_id %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:entry' installment.entry_id %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

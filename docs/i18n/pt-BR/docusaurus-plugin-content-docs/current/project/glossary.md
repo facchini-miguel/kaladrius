@@ -112,6 +112,63 @@ Os nomes que se repetem entre os modelos, em quatro partes. **Feito:** `clinica`
 | `uf` | `state` |
 | `validade` | `valid_until` |
 
+## Campos de cada app
+
+Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão 167).
+
+### Financeiro (`financeiro`)
+
+| Antes | Depois |
+|---|---|
+| `saldo_inicial` | `opening_balance` |
+| `pai` | `parent` |
+| `centro_custo` | `cost_center` |
+| `pessoa` | `payer` |
+| `fornecedor` | `supplier` |
+| `valor_total` | `total_amount` |
+| `cancelado`, `cancelada` | `cancelled` |
+| `cancelado_em` | `cancelled_at` |
+| `cancelado_por` | `cancelled_by` |
+| `motivo_cancelamento` | `cancellation_reason` |
+| `vencimento` | `due_date` |
+| `parcela` | `installment` |
+| `juros` | `interest` |
+| `forma` | `method` |
+| `cartao_bandeira` | `card_brand` |
+| `cartao_parcelas` | `card_installments` |
+| `cartao_codigo` | `card_transaction_code` |
+| `estornado` | `reversed` |
+| `estornado_em` | `reversed_at` |
+| `estornado_por` | `reversed_by` |
+| `motivo_estorno` | `reversal_reason` |
+| `comissao` | `commission` |
+| `comissao_estorno` | `commission_reversal` |
+| `aberto_em` | `opened_at` |
+| `aberto_por` | `opened_by` |
+| `valor_abertura` | `opening_amount` |
+| `fechado_em` | `closed_at` |
+| `fechado_por` | `closed_by` |
+| `valor_esperado` | `expected_amount` |
+| `valor_contado` | `counted_amount` |
+| `caixa` | `cash_register` |
+| `outra_conta` | `other_account` |
+| `percentual` | `percentage` |
+| `recebido` | `received_amount` |
+| `estornos` | `reversal_deduction` |
+| `ano` | `year` |
+| `banco` | `bank_code` |
+| `conta_no_banco` | `bank_account_number` |
+| `saldo` | `balance` |
+| `saldo_em` | `balance_date` |
+| `novas` | `new_transactions` |
+| `repetidas` | `duplicate_transactions` |
+| `ignoradas` | `unreadable_transactions` |
+| `importacao` | `statement_import` |
+| `pagamento` | `payment` |
+| `movimento` | `cash_movement` |
+| `conciliado_por` | `reconciled_by` |
+| `conciliado_em` | `reconciled_at` |
+
 ## O que fica em português
 
 - **Valores gravados no banco**: os valores das escolhas (`"PF"`, `"conciliada"`, `"retirada"`), os códigos dos módulos (`"rechamadas"`), as chaves dentro de campos JSON (as alterações da auditoria, configurações). Só muda o nome das constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), não o valor.

@@ -147,25 +147,25 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert category.name == "Salários e encargos"
     resposta = admin.post(
         f"{FOLHA}?mes=2026-10",
-        {**dados, "acao": "lancar", "category": category.pk, "vencimento": "2026-11-05"},
+        {**dados, "acao": "lancar", "category": category.pk, "due_date": "2026-11-05"},
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         folha.refresh_from_db()
         entry = folha.entry
-        assert (entry.kind, entry.pessoa, entry.valor_total) == (
+        assert (entry.kind, entry.payer, entry.total_amount) == (
             Entry.Tipo.PAGAR,
             "Ana Fictícia",
             Decimal("2276.67"),
         )
-        assert entry.parcelas.get().vencimento == datetime.date(2026, 11, 5)
+        assert entry.parcelas.get().due_date == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
     linha = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
     assert linha[1] is None
     with usar_clinica(clinica_a):
         assert (
             services.lancar(
-                [folha], category=category, vencimento=datetime.date(2026, 11, 5), user=None
+                [folha], category=category, due_date=datetime.date(2026, 11, 5), user=None
             )
             == 0
         )
@@ -181,7 +181,7 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
         folha.faltas = 30
         folha.save()
         with pytest.raises(ValidationError, match="maior que zero"):
-            services.lancar([folha], category=None, vencimento=OUTUBRO, user=None)
+            services.lancar([folha], category=None, due_date=OUTUBRO, user=None)
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])

@@ -236,8 +236,8 @@ def aprovar(request, pk):
     form = AprovarForm(request.POST or None, initial={"category": category})
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
-        pagamento = (
-            {"forma": dados["forma"], "account": dados["account"]}
+        payment = (
+            {"method": dados["method"], "account": dados["account"]}
             if dados["recebido_agora"]
             else None
         )
@@ -248,7 +248,7 @@ def aprovar(request, pk):
                 primeiro_vencimento=dados["primeiro_vencimento"],
                 category=dados["category"],
                 user=request.user,
-                pagamento=pagamento,
+                payment=payment,
             )
         except ValidationError as erro:
             form.add_error(None, erro.messages[0])

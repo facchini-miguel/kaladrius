@@ -9,13 +9,13 @@
   {% csrf_token %}
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
   {% include "includes/patient_search.html" with campo=form.patient patient=patient %}
-  {% with campo=form.pessoa %}{% include "includes/field.html" %}{% endwith %}
+  {% with campo=form.payer %}{% include "includes/field.html" %}{% endwith %}
   <div class="row">
     <div class="col-md-8">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-4">{% with campo=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
-    {% if form.centro_custo %}<div class="col-md-6">{% with campo=form.centro_custo %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+    {% if form.cost_center %}<div class="col-md-6">{% with campo=form.cost_center %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
     <div class="col-md-6">{% with campo=form.practitioner %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-6">{% with campo=form.valor_total %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with campo=form.total_amount %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.parcelas %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.primeiro_vencimento %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
@@ -24,7 +24,7 @@
     <div class="card-body">
       {% with campo=form.recebido_agora %}{% include "includes/field.html" %}{% endwith %}
       <div class="row">
-        <div class="col-md-6">{% with campo=form.forma %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with campo=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-6">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
       <p class="text-body-secondary small mb-0">{% translate "Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre em seguida." %}</p>

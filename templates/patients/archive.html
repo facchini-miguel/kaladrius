@@ -14,11 +14,11 @@
 <table class="table table-sm bg-white" style="max-width: 44rem;">
   <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" context "valor" %}</th></tr></thead>
   <tbody>
-    {% for parcela in abertas %}
+    {% for installment in abertas %}
     <tr>
-      <td><a href="{% url 'finance:entry' parcela.entry.pk %}">{{ parcela.entry.description }}</a> <span class="text-body-secondary small">{{ parcela.number }}/{{ parcela.entry.parcelas.count }}</span></td>
-      <td>{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
-      <td class="text-end">{{ parcela.saldo|moeda }}</td>
+      <td><a href="{% url 'finance:entry' installment.entry.pk %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">{{ installment.number }}/{{ installment.entry.parcelas.count }}</span></td>
+      <td>{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
+      <td class="text-end">{{ installment.balance|moeda }}</td>
     </tr>
     {% endfor %}
   </tbody>

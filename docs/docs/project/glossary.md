@@ -112,6 +112,63 @@ The names that repeat across the models, in four parts. **Done:** `clinica`, `cr
 | `uf` | `state` |
 | `validade` | `valid_until` |
 
+## Fields of each app
+
+Each app's own fields, one app at a time. **Done:** finance (decision 167).
+
+### Finance (`financeiro`)
+
+| Before | After |
+|---|---|
+| `saldo_inicial` | `opening_balance` |
+| `pai` | `parent` |
+| `centro_custo` | `cost_center` |
+| `pessoa` | `payer` |
+| `fornecedor` | `supplier` |
+| `valor_total` | `total_amount` |
+| `cancelado`, `cancelada` | `cancelled` |
+| `cancelado_em` | `cancelled_at` |
+| `cancelado_por` | `cancelled_by` |
+| `motivo_cancelamento` | `cancellation_reason` |
+| `vencimento` | `due_date` |
+| `parcela` | `installment` |
+| `juros` | `interest` |
+| `forma` | `method` |
+| `cartao_bandeira` | `card_brand` |
+| `cartao_parcelas` | `card_installments` |
+| `cartao_codigo` | `card_transaction_code` |
+| `estornado` | `reversed` |
+| `estornado_em` | `reversed_at` |
+| `estornado_por` | `reversed_by` |
+| `motivo_estorno` | `reversal_reason` |
+| `comissao` | `commission` |
+| `comissao_estorno` | `commission_reversal` |
+| `aberto_em` | `opened_at` |
+| `aberto_por` | `opened_by` |
+| `valor_abertura` | `opening_amount` |
+| `fechado_em` | `closed_at` |
+| `fechado_por` | `closed_by` |
+| `valor_esperado` | `expected_amount` |
+| `valor_contado` | `counted_amount` |
+| `caixa` | `cash_register` |
+| `outra_conta` | `other_account` |
+| `percentual` | `percentage` |
+| `recebido` | `received_amount` |
+| `estornos` | `reversal_deduction` |
+| `ano` | `year` |
+| `banco` | `bank_code` |
+| `conta_no_banco` | `bank_account_number` |
+| `saldo` | `balance` |
+| `saldo_em` | `balance_date` |
+| `novas` | `new_transactions` |
+| `repetidas` | `duplicate_transactions` |
+| `ignoradas` | `unreadable_transactions` |
+| `importacao` | `statement_import` |
+| `pagamento` | `payment` |
+| `movimento` | `cash_movement` |
+| `conciliado_por` | `reconciled_by` |
+| `conciliado_em` | `reconciled_at` |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.

@@ -188,7 +188,7 @@ def arquivar(request, pk):
         Installment.objects.abertas()
         .filter(entry__patient=patient)
         .select_related("entry")
-        .order_by("vencimento", "pk")
+        .order_by("due_date", "pk")
     )
     if abertas:
         if request.method == "POST":
@@ -264,7 +264,7 @@ def excluir(request, pk):
             Installment.objects.filter(entry__in=ids_lancamentos).values_list("pk", flat=True)
         )
         ids_pagamentos = list(
-            Payment.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)
+            Payment.objects.filter(installment__in=ids_parcelas).values_list("pk", flat=True)
         )
         orcamentos = Estimate.objects.filter(patient=patient)
         ids_orcamentos = list(orcamentos.values_list("pk", flat=True))
@@ -277,7 +277,7 @@ def excluir(request, pk):
         with transaction.atomic():
             orcamentos.delete()  # items go with them (cascade)
             agendamentos.update(patient=None, description=excluido)
-            lancamentos.update(patient=None, pessoa=excluido, notes="")
+            lancamentos.update(patient=None, payer=excluido, notes="")
             Payment.objects.filter(pk__in=ids_pagamentos).update(note="")
             rechamadas.delete()
             carteirinhas.delete()

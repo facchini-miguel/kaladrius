@@ -49,10 +49,10 @@
     <tbody>
       {% for item in historico %}
       <tr>
-        <td><a href="{% url 'finance:cash_detail' item.pk %}">{{ item.aberto_em|date:"SHORT_DATETIME_FORMAT" }}</a></td>
-        <td>{{ item.fechado_em|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
-        <td class="text-end">{{ item.valor_esperado|moeda|default:"—" }}</td>
-        <td class="text-end">{{ item.valor_contado|moeda|default:"—" }}</td>
+        <td><a href="{% url 'finance:cash_detail' item.pk %}">{{ item.opened_at|date:"SHORT_DATETIME_FORMAT" }}</a></td>
+        <td>{{ item.closed_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
+        <td class="text-end">{{ item.expected_amount|moeda|default:"—" }}</td>
+        <td class="text-end">{{ item.counted_amount|moeda|default:"—" }}</td>
         <td class="text-end{% if item.diferenca %} text-danger fw-semibold{% endif %}">{% if item.diferenca is not None %}{{ item.diferenca|moeda }}{% else %}—{% endif %}</td>
       </tr>
       {% endfor %}

@@ -9,14 +9,14 @@
   {% csrf_token %}
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
   <div class="row">
-    <div class="col-md-6">{% with campo=form.fornecedor %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with campo=form.supplier %}{% include "includes/field.html" %}{% endwith %}</div>
     <div class="col-md-6">{% with campo=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
-  {% with campo=form.pessoa %}{% include "includes/field.html" %}{% endwith %}
+  {% with campo=form.payer %}{% include "includes/field.html" %}{% endwith %}
   <p class="text-body-secondary small"><a href="{% url 'finance:supplier_new' %}">{% translate "Cadastrar um fornecedor novo" %}</a></p>
   <div class="row">
-    <div class="col-md-{% if form.centro_custo %}8{% else %}12{% endif %}">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-    {% if form.centro_custo %}<div class="col-md-4">{% with campo=form.centro_custo %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+    <div class="col-md-{% if form.cost_center %}8{% else %}12{% endif %}">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
+    {% if form.cost_center %}<div class="col-md-4">{% with campo=form.cost_center %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
   </div>
   <div class="row">
     <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -30,7 +30,7 @@
     <div class="card-body">
       {% with campo=form.pago_agora %}{% include "includes/field.html" %}{% endwith %}
       <div class="row">
-        <div class="col-md-6">{% with campo=form.forma %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with campo=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-6">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
     </div>

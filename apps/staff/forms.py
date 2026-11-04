@@ -129,7 +129,7 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
 
 class LancarForm(FormularioBootstrap, forms.Form):
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
-    vencimento = forms.DateField(label=_("Vencimento"), widget=DATA)
+    due_date = forms.DateField(label=_("Vencimento"), widget=DATA)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

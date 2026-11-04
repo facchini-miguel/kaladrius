@@ -45,22 +45,22 @@
       </tr>
     </thead>
     <tbody>
-      {% for parcela in pagina %}
+      {% for installment in pagina %}
       <tr>
-        <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-nowrap">{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
         <td>
-          {% if parcela.entry.patient_id %}<a href="{% url 'patients:record' parcela.entry.patient_id %}">{{ parcela.entry.patient.name }}</a>
-          {% elif parcela.entry.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.entry.fornecedor_id %}">{{ parcela.entry.pessoa }}</a>
-          {% else %}{{ parcela.entry.pessoa }}{% endif %}
+          {% if installment.entry.patient_id %}<a href="{% url 'patients:record' installment.entry.patient_id %}">{{ installment.entry.patient.name }}</a>
+          {% elif installment.entry.supplier_id %}<a href="{% url 'finance:supplier' installment.entry.supplier_id %}">{{ installment.entry.payer }}</a>
+          {% else %}{{ installment.entry.payer }}{% endif %}
         </td>
-        <td><a href="{% url 'finance:entry' parcela.entry_id %}">{{ parcela.entry.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
-        <td class="text-end text-nowrap">{{ parcela.amount|moeda }}</td>
-        <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
-        <td>{% include "finance/_status.html" with status=parcela.status %}</td>
+        <td><a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">({{ installment.number }})</span></td>
+        <td class="text-end text-nowrap">{{ installment.amount|moeda }}</td>
+        <td class="text-end text-nowrap">{% if installment.balance > 0 %}{{ installment.balance|moeda }}{% else %}—{% endif %}</td>
+        <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="text-end text-nowrap">
-          {% if parcela.saldo > 0 and not parcela.entry.cancelado %}
-          {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Pagar" %}</a>
-          {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Receber" %}</a>{% endif %}
+          {% if installment.balance > 0 and not installment.entry.cancelled %}
+          {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Pagar" %}</a>
+          {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Receber" %}</a>{% endif %}
           {% endif %}
         </td>
       </tr>

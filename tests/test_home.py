@@ -95,32 +95,32 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
                 patient=patient, date=dia(1), valid_until=valid_until, status=status
             )
 
-        caixa = FinancialAccount.objects.get(name="Caixa")
+        cash_register = FinancialAccount.objects.get(name="Caixa")
         receita = Category.objects.get(name="Tratamento")
         despesa = Category.objects.get(name="Outras despesas")
 
-        def lancar(kind, amount, parcelas, vencimento, category, **campos):
+        def lancar(kind, amount, parcelas, due_date, category, **campos):
             entry = financeiro.criar_lancamento(
                 clinic=clinica_a,
                 kind=kind,
                 description="Teste",
                 category=category,
-                valor_total=Decimal(amount),
+                total_amount=Decimal(amount),
                 parcelas=parcelas,
-                primeiro_vencimento=vencimento,
+                primeiro_vencimento=due_date,
                 user=usuarios["admin"],
                 **campos,
             )
             return list(entry.parcelas.order_by("number"))
 
-        def pagar(parcela, amount, date, forma="pix"):
+        def pagar(installment, amount, date, method="pix"):
             financeiro.receber(
-                parcela,
+                installment,
                 user=usuarios["admin"],
                 amount=Decimal(amount),
                 date=date,
-                forma=forma,
-                account=caixa,
+                method=method,
+                account=cash_register,
             )
 
         # Due 05/01, 05/02 (overdue) and today; the first one is paid today.
@@ -129,13 +129,13 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         )
         pagar(primeira, "100", HOJE)
         [fevereiro] = lancar(Entry.Tipo.RECEBER, "200", 1, dia(3, 2), receita, patient=joao)
-        pagar(fevereiro, "200", dia(3, 2), forma="dinheiro")
-        [conta_de_luz] = lancar(Entry.Tipo.PAGAR, "50", 1, HOJE, despesa, pessoa="Luz")
+        pagar(fevereiro, "200", dia(3, 2), method="dinheiro")
+        [conta_de_luz] = lancar(Entry.Tipo.PAGAR, "50", 1, HOJE, despesa, payer="Luz")
         pagar(conta_de_luz, "50", HOJE)
-        lancar(Entry.Tipo.PAGAR, "80", 1, dia(10), despesa, pessoa="Aluguel")
-        lancar(Entry.Tipo.PAGAR, "999", 1, dia(20), despesa, pessoa="Longe")
+        lancar(Entry.Tipo.PAGAR, "80", 1, dia(10), despesa, payer="Aluguel")
+        lancar(Entry.Tipo.PAGAR, "999", 1, dia(20), despesa, payer="Longe")
         CashRegister.objects.create(
-            account=caixa, valor_abertura=Decimal("0"), aberto_por=usuarios["admin"]
+            account=cash_register, opening_amount=Decimal("0"), opened_by=usuarios["admin"]
         )
     return {"clinic": clinica_a, **usuarios}
 
@@ -159,7 +159,7 @@ def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
     assert recebimentos["recebido"] == Decimal("100")
     assert recebimentos["por_forma"] == [("Pix", Decimal("100"))]
     assert (recebimentos["a_receber"], recebimentos["parcelas_a_receber"]) == (Decimal("100"), 1)
-    assert [caixa.account.name for caixa in recebimentos["caixas"]] == ["Caixa"]
+    assert [cash_register.account.name for cash_register in recebimentos["caixas"]] == ["Caixa"]
     assert "financeiro" not in painel
 
     conteudo = resposta.content.decode()

@@ -51,9 +51,9 @@ class Command(BaseCommand):
             linhas = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
-                account=alvo_conta, estornado=False, date__range=(start, hoje)
-            ).select_related("parcela__entry"):
-                entrada = p.parcela.entry.kind == Entry.Tipo.RECEBER
+                account=alvo_conta, reversed=False, date__range=(start, hoje)
+            ).select_related("installment__entry"):
+                entrada = p.installment.entry.kind == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
                     fora += p.amount if entrada else -p.amount
                     continue
@@ -66,12 +66,12 @@ class Command(BaseCommand):
                     (date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}")
                 )
             linhas.sort()
-            saldo = dict(services.saldos_das_contas(until=hoje)).get(alvo_conta)
+            balance = dict(services.saldos_das_contas(until=hoje)).get(alvo_conta)
         # The bank balance: what the system has plus the extras minus what is not there yet.
-        saldo = (saldo or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
-        self.stdout.write(self._ofx(linhas, start, hoje, saldo))
+        balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
+        self.stdout.write(self._ofx(linhas, start, hoje, balance))
 
-    def _ofx(self, linhas, start, end, saldo):
+    def _ofx(self, linhas, start, end, balance):
         transacoes = "".join(
             "<STMTTRN>\n"
             f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
@@ -89,6 +89,6 @@ class Command(BaseCommand):
             "<BANKACCTFROM>\n<BANKID>999\n<ACCTID>12345-6\n<ACCTTYPE>CHECKING\n</BANKACCTFROM>\n"
             f"<BANKTRANLIST>\n<DTSTART>{start:%Y%m%d}\n<DTEND>{end:%Y%m%d}\n"
             f"{transacoes}</BANKTRANLIST>\n"
-            f"<LEDGERBAL>\n<BALAMT>{saldo}\n<DTASOF>{end:%Y%m%d}\n</LEDGERBAL>\n"
+            f"<LEDGERBAL>\n<BALAMT>{balance}\n<DTASOF>{end:%Y%m%d}\n</LEDGERBAL>\n"
             "</STMTRS>\n</STMTTRNRS>\n</BANKMSGSRSV1>\n</OFX>\n"
         )

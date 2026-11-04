@@ -21,8 +21,8 @@
       <tr>
         <td>{{ linha.practitioner.name }}{% if not linha.practitioner.active %} <span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         <td class="text-end">{{ linha.practitioner.comissao_percentual|floatformat:"-2" }}%</td>
-        <td class="text-end text-nowrap">{{ linha.recebido|moeda }}</td>
-        <td class="text-end text-nowrap">{% if linha.estornos %}− {{ linha.estornos|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap">{{ linha.received_amount|moeda }}</td>
+        <td class="text-end text-nowrap">{% if linha.reversal_deduction %}− {{ linha.reversal_deduction|moeda }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold">{{ linha.amount|moeda }}</td>
         <td class="text-end text-nowrap">
           {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' linha.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
@@ -47,13 +47,13 @@
   <table class="table table-sm table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Lançada em" %}</th><th>{% translate "Profissional" %}</th><th>{% translate "Recebimentos até" %}</th><th class="text-end">{% translate "Valor" %}</th><th></th></tr></thead>
     <tbody>
-      {% for comissao in historico %}
+      {% for commission in historico %}
       <tr>
-        <td class="text-nowrap">{{ comissao.created_at|date:"SHORT_DATE_FORMAT" }}</td>
-        <td>{{ comissao.practitioner.name }}</td>
-        <td class="text-nowrap">{{ comissao.until|date:"SHORT_DATE_FORMAT" }}</td>
-        <td class="text-end text-nowrap">{% if comissao.cancelada %}<s>{{ comissao.amount|moeda }}</s> <span class="badge text-bg-secondary">{% translate "Cancelada" %}</span>{% else %}{{ comissao.amount|moeda }}{% endif %}</td>
-        <td class="text-end text-nowrap"><a href="{% url 'finance:commission' comissao.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'finance:entry' comissao.entry_id %}">{% translate "A pagar" %}</a></td>
+        <td class="text-nowrap">{{ commission.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+        <td>{{ commission.practitioner.name }}</td>
+        <td class="text-nowrap">{{ commission.until|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-end text-nowrap">{% if commission.cancelled %}<s>{{ commission.amount|moeda }}</s> <span class="badge text-bg-secondary">{% translate "Cancelada" %}</span>{% else %}{{ commission.amount|moeda }}{% endif %}</td>
+        <td class="text-end text-nowrap"><a href="{% url 'finance:commission' commission.pk %}">{% translate "Extrato" %}</a> · <a href="{% url 'finance:entry' commission.entry_id %}">{% translate "A pagar" %}</a></td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma comissão lançada ainda." %}</td></tr>

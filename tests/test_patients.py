@@ -309,7 +309,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
             kind=Entry.Tipo.RECEBER,
             description="Tratamento",
             category=Category.objects.get(name="Tratamento"),
-            valor_total=Decimal("300"),
+            total_amount=Decimal("300"),
             parcelas=2,
             primeiro_vencimento=datetime.date(2031, 3, 5),
             user=user,
@@ -326,14 +326,14 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     patient.refresh_from_db()
     assert not patient.arquivado
 
-    def receber(parcela):
+    def receber(installment):
         with usar_clinica(clinica_a):
             services.receber(
-                parcela,
+                installment,
                 user=user,
                 amount=Decimal("150"),
                 date=datetime.date(2031, 3, 5),
-                forma="pix",
+                method="pix",
                 account=FinancialAccount.objects.get(name="Caixa"),
             )
 

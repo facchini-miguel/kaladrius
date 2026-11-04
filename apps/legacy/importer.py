@@ -279,9 +279,9 @@ class _Importador:
         saldo = float(linha["saldo"] or 0)
         if saldo:
             extras.append(f"Saldo: R$ {saldo:.2f}".replace(".", ","))
-        pagamento = _data(linha["data_pgto"])
-        if pagamento:
-            extras.append(f"Último pagamento: {pagamento:%d/%m/%Y}")
+        payment = _data(linha["data_pgto"])
+        if payment:
+            extras.append(f"Último pagamento: {payment:%d/%m/%Y}")
         if _texto(linha["agencia"]) or _texto(linha["conta"]):
             extras.append(
                 f"Banco {linha['id_banco']}, agência {_texto(linha['agencia'])}, "

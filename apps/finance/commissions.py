@@ -22,20 +22,20 @@ from .models import ZERO, Commission, Entry, Payment
 CENTAVO = Decimal("0.01")
 
 
-def percentual_de(amount, percentual):
-    return (amount * percentual / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+def percentual_de(amount, percentage):
+    return (amount * percentage / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
 
 def _recebimentos(practitioner):
     return Payment.objects.filter(
-        parcela__entry__kind=Entry.Tipo.RECEBER,
-        parcela__entry__practitioner=practitioner,
-    ).select_related("parcela__entry__patient")
+        installment__entry__kind=Entry.Tipo.RECEBER,
+        installment__entry__practitioner=practitioner,
+    ).select_related("installment__entry__patient")
 
 
 def _creditos(practitioner, until):
     return _recebimentos(practitioner).filter(
-        estornado=False, comissao__isnull=True, date__lte=until
+        reversed=False, commission__isnull=True, date__lte=until
     )
 
 
@@ -43,12 +43,12 @@ def _debitos(practitioner):
     """Receipts already commissioned and then reversed, not discounted yet (a few)."""
     debitos = list(
         _recebimentos(practitioner)
-        .filter(estornado=True, comissao__isnull=False, comissao_estorno__isnull=True)
-        .select_related("comissao")
+        .filter(reversed=True, commission__isnull=False, commission_reversal__isnull=True)
+        .select_related("commission")
         .order_by("date", "pk")
     )
     for debito in debitos:
-        debito.comissao_devolvida = percentual_de(debito.amount, debito.comissao.percentual)
+        debito.comissao_devolvida = percentual_de(debito.amount, debito.commission.percentage)
     return debitos
 
 
@@ -56,17 +56,17 @@ def pendente(practitioner, until):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
     creditos = list(_creditos(practitioner, until).order_by("date", "pk"))
     debitos = _debitos(practitioner)
-    recebido = sum((p.amount for p in creditos), start=ZERO)
-    bruta = percentual_de(recebido, practitioner.comissao_percentual)
-    estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
+    received_amount = sum((p.amount for p in creditos), start=ZERO)
+    bruta = percentual_de(received_amount, practitioner.comissao_percentual)
+    reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
     return {
         "practitioner": practitioner,
         "creditos": creditos,
         "debitos": debitos,
-        "recebido": recebido,
+        "received_amount": received_amount,
         "bruta": bruta,
-        "estornos": estornos,
-        "amount": bruta - estornos,
+        "reversal_deduction": reversal_deduction,
+        "amount": bruta - reversal_deduction,
     }
 
 
@@ -79,28 +79,28 @@ def resumo(until):
     linhas = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
         totais = _creditos(practitioner, until).aggregate(
-            recebido=Sum("amount"), quantos=Count("pk")
+            received_amount=Sum("amount"), quantos=Count("pk")
         )
         debitos = _debitos(practitioner)
         if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
             continue
-        recebido = totais["recebido"] or ZERO
-        bruta = percentual_de(recebido, practitioner.comissao_percentual)
-        estornos = sum((p.comissao_devolvida for p in debitos), start=ZERO)
+        received_amount = totais["received_amount"] or ZERO
+        bruta = percentual_de(received_amount, practitioner.comissao_percentual)
+        reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
         linhas.append(
             {
                 "practitioner": practitioner,
-                "recebido": recebido,
+                "received_amount": received_amount,
                 "bruta": bruta,
-                "estornos": estornos,
-                "amount": bruta - estornos,
+                "reversal_deduction": reversal_deduction,
+                "amount": bruta - reversal_deduction,
             }
         )
     return linhas
 
 
 @transaction.atomic
-def pagar(practitioner, *, until, vencimento, category, user):
+def pagar(practitioner, *, until, due_date, category, user):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
@@ -110,38 +110,38 @@ def pagar(practitioner, *, until, vencimento, category, user):
     entry = services.criar_lancamento(
         clinic=practitioner.clinic,
         kind=Entry.Tipo.PAGAR,
-        pessoa=practitioner.name,
+        payer=practitioner.name,
         practitioner=practitioner,
         description=_("Comissão de %(nome)s até %(data)s")
         % {"nome": practitioner.name, "data": date_format(until, "SHORT_DATE_FORMAT")},
         category=category,
-        valor_total=calculo["amount"],
+        total_amount=calculo["amount"],
         parcelas=1,
-        primeiro_vencimento=vencimento,
+        primeiro_vencimento=due_date,
         user=user,
     )
-    comissao = Commission.objects.create(
+    commission = Commission.objects.create(
         clinic=practitioner.clinic,
         practitioner=practitioner,
         until=until,
-        percentual=practitioner.comissao_percentual,
-        recebido=calculo["recebido"],
-        estornos=calculo["estornos"],
+        percentage=practitioner.comissao_percentual,
+        received_amount=calculo["received_amount"],
+        reversal_deduction=calculo["reversal_deduction"],
         amount=calculo["amount"],
         entry=entry,
         created_by=user,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.
-    for pagamento in calculo["creditos"]:
-        pagamento.comissao = comissao
-        pagamento.save(update_fields=["comissao"])
-    for pagamento in calculo["debitos"]:
-        pagamento.comissao_estorno = comissao
-        pagamento.save(update_fields=["comissao_estorno"])
-    return comissao
+    for payment in calculo["creditos"]:
+        payment.commission = commission
+        payment.save(update_fields=["commission"])
+    for payment in calculo["debitos"]:
+        payment.commission_reversal = commission
+        payment.save(update_fields=["commission_reversal"])
+    return commission
 
 
-def liberar(comissao):
+def liberar(commission):
     """Undo a commission whose payable was cancelled: its receipts become pending again.
 
     Refused while a later commission deducted the reversal of one of its receipts: that
@@ -149,10 +149,10 @@ def liberar(comissao):
     """
     descontou = (
         Commission.objects.filter(
-            cancelada=False,
-            pagamentos_estornados__comissao=comissao,
+            cancelled=False,
+            pagamentos_estornados__commission=commission,
         )
-        .exclude(pk=comissao.pk)
+        .exclude(pk=commission.pk)
         .order_by("until")
         .first()
     )
@@ -165,11 +165,11 @@ def liberar(comissao):
             % {"data": date_format(descontou.until, "SHORT_DATE_FORMAT")}
         )
     # One by one (not .update()), so the audit log records each change.
-    for pagamento in Payment.objects.filter(comissao=comissao):
-        pagamento.comissao = None
-        pagamento.save(update_fields=["comissao"])
-    for pagamento in Payment.objects.filter(comissao_estorno=comissao):
-        pagamento.comissao_estorno = None
-        pagamento.save(update_fields=["comissao_estorno"])
-    comissao.cancelada = True
-    comissao.save(update_fields=["cancelada"])
+    for payment in Payment.objects.filter(commission=commission):
+        payment.commission = None
+        payment.save(update_fields=["commission"])
+    for payment in Payment.objects.filter(commission_reversal=commission):
+        payment.commission_reversal = None
+        payment.save(update_fields=["commission_reversal"])
+    commission.cancelled = True
+    commission.save(update_fields=["cancelled"])
