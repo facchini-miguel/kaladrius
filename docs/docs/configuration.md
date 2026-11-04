@@ -60,7 +60,7 @@ After the first login you can remove `DJANGO_ADMIN_PASSWORD` from the file.
 | Variable | Default | What it does |
 |---|---|---|
 | `SITE_HOSTNAME` | **required** | Domain(s) Caddy serves and gets the HTTPS certificate for, separated by commas, e.g. `clinic.example.com, www.clinic.example.com` |
-| `IMAGEM_APP` | the reference installation's registry | Docker image of the app, e.g. `kaladrius:latest` when you build it yourself |
+| `APP_IMAGE` | the reference installation's registry | Docker image of the app, e.g. `kaladrius:latest` when you build it yourself |
 
 ## Development only
 

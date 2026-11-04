@@ -9,7 +9,7 @@ Kaladrius follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`
 
 ## Linux package
 
-With the package repository (added by hand, or by the downloaded `.deb` or `.rpm` when installed), with the system's own updates: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`. On Arch Linux and CachyOS, or without the repository, download the new version's package from the [releases page](https://github.com/facchini-miguel/kaladrius/releases) and install it over the installed one (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). It has the same automatic rollback as the Google Cloud installation (below): a version that does not answer within 5 minutes is undone and the previous one keeps running; `sudo kaladrius estado` shows it. See [Linux package](../installation/linux-package.md#updates).
+With the package repository (added by hand, or by the downloaded `.deb` or `.rpm` when installed), with the system's own updates: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` or `sudo zypper update`. On Arch Linux and CachyOS, or without the repository, download the new version's package from the [releases page](https://github.com/facchini-miguel/kaladrius/releases) and install it over the installed one (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). It has the same automatic rollback as the Google Cloud installation (below): a version that does not answer within 5 minutes is undone and the previous one keeps running; `sudo kaladrius status` shows it. See [Linux package](../installation/linux-package.md#updates).
 
 ## Own server
 
@@ -28,10 +28,10 @@ Make a [backup](backup-restore.md) before upgrading; it is the only way back if 
 Nothing to do: the VM installs every new image published by the CI within 5 minutes. To install now:
 
 ```bash
-sudo /opt/kaladrius/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/update.sh --force
 ```
 
-**Automatic rollback:** after starting a new version, the VM waits up to 5 minutes for the system to answer its health page (`/api/v1/saude`, with the database). If it does not, the VM puts back the version of the last successful update (kept as the `app:anterior` image) with its Compose file and Caddyfile, so a new Caddy or PostgreSQL image is undone too, records the new one as refused, so it is not installed again until a newer version is published, and the "automatic update" monitor reports the failure until then. `--forcar` tries the refused version again. A migration the new version already applied is not undone: when the previous version does not work with it, restore the backup.
+**Automatic rollback:** after starting a new version, the VM waits up to 5 minutes for the system to answer its health page (`/api/v1/saude`, with the database). If it does not, the VM puts back the version of the last successful update (kept as the `app:previous` image) with its Compose file and Caddyfile, so a new Caddy or PostgreSQL image is undone too, records the new one as refused, so it is not installed again until a newer version is published, and the "automatic update" monitor reports the failure until then. `--forcar` tries the refused version again. A migration the new version already applied is not undone: when the previous version does not work with it, restore the backup.
 
 ## Going back to an earlier version
 
@@ -49,11 +49,11 @@ kaladrius up -d
 On Google Cloud, stop the automatic updates first, or the VM goes back to the newest image within 5 minutes:
 
 ```bash
-sudo systemctl stop kaladrius-atualizar.timer
+sudo systemctl stop kaladrius-update.timer
 cd /opt/kaladrius/release
-sudo IMAGEM_APP=<registry>/app:0.24.1 docker compose -f docker-compose.prod.yml up -d app
+sudo APP_IMAGE=<registry>/app:0.24.1 docker compose -f docker-compose.prod.yml up -d app
 # after the fix is published:
-sudo systemctl start kaladrius-atualizar.timer
+sudo systemctl start kaladrius-update.timer
 ```
 
 Every version has an image tag `X.Y.Z` that never changes.

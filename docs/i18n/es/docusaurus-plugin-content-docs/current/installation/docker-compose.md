@@ -62,7 +62,7 @@ DJANGO_ADMIN_PASSWORD=<una contraseña fuerte>
 # Usado por Caddy para el certificado HTTPS
 SITE_HOSTNAME=clinica.ejemplo.com
 # La imagen construida en el paso 4
-IMAGEM_APP=kaladrius:latest
+APP_IMAGE=kaladrius:latest
 # La recolección de la salud del servidor solo existe en la instalación de Google Cloud
 DJANGO_SAUDE_MONITORADA=0
 ```
@@ -80,7 +80,7 @@ sudo docker build -t kaladrius:latest .
 ```
 
 :::tip O use la imagen publicada
-Cada versión también se publica en `ghcr.io/facchini-miguel/kaladrius` (etiquetas `latest` y el número de versión, como `0.27.2`). Póngala en `IMAGEM_APP` en el `.env` y saltee este paso; para actualizar, `kaladrius pull app` y después `kaladrius up -d`.
+Cada versión también se publica en `ghcr.io/facchini-miguel/kaladrius` (etiquetas `latest` y el número de versión, como `0.27.2`). Póngala en `APP_IMAGE` en el `.env` y saltee este paso; para actualizar, `kaladrius pull app` y después `kaladrius up -d`.
 :::
 
 ## 5. Inicie el sistema

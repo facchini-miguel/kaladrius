@@ -9,7 +9,7 @@ O Kaladrius segue o [versionamento semântico](https://semver.org/lang/pt-BR/): 
 
 ## Pacote Linux
 
-Com o repositório de pacotes (adicionado à mão, ou pelo `.deb` ou `.rpm` baixado ao ser instalado), com as atualizações do próprio sistema: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`. No Arch Linux e no CachyOS, ou sem o repositório, baixe o pacote da versão nova na [página de releases](https://github.com/facchini-miguel/kaladrius/releases) e instale por cima do instalado (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). Ele tem a mesma volta automática da instalação no Google Cloud (abaixo): uma versão que não responde em 5 minutos é desfeita e a anterior continua no ar; o `sudo kaladrius estado` mostra isso. Veja [Pacote Linux](../installation/linux-package.md#atualizações).
+Com o repositório de pacotes (adicionado à mão, ou pelo `.deb` ou `.rpm` baixado ao ser instalado), com as atualizações do próprio sistema: `sudo apt update && sudo apt upgrade`, `sudo dnf upgrade` ou `sudo zypper update`. No Arch Linux e no CachyOS, ou sem o repositório, baixe o pacote da versão nova na [página de releases](https://github.com/facchini-miguel/kaladrius/releases) e instale por cima do instalado (`sudo apt install ./kaladrius_X.Y.Z-1_amd64.deb`, `sudo dnf install ./kaladrius-X.Y.Z-1.x86_64.rpm`). Ele tem a mesma volta automática da instalação no Google Cloud (abaixo): uma versão que não responde em 5 minutos é desfeita e a anterior continua no ar; o `sudo kaladrius status` mostra isso. Veja [Pacote Linux](../installation/linux-package.md#atualizações).
 
 ## Servidor próprio
 
@@ -28,10 +28,10 @@ Faça um [backup](backup-restore.md) antes de atualizar; é o único caminho de 
 Nada a fazer: a VM instala cada imagem nova publicada pelo CI em até 5 minutos. Para instalar agora:
 
 ```bash
-sudo /opt/kaladrius/bin/atualizar.sh --forcar
+sudo /opt/kaladrius/bin/update.sh --force
 ```
 
-**Volta automática:** depois de subir uma versão nova, a VM espera até 5 minutos o sistema responder a página de saúde (`/api/v1/saude`, com o banco). Se não responder, a VM põe de volta a versão da última atualização bem-sucedida (guardada como a imagem `app:anterior`) com o seu Compose e o seu Caddyfile, então uma imagem nova do Caddy ou do PostgreSQL também é desfeita, anota a nova como recusada, para não instalá-la de novo até sair uma versão mais nova, e o monitor "atualização automática" avisa da falha até lá. O `--forcar` tenta de novo a versão recusada. Uma migração que a versão nova já aplicou não é desfeita: se a versão anterior não funcionar com ela, restaure o backup.
+**Volta automática:** depois de subir uma versão nova, a VM espera até 5 minutos o sistema responder a página de saúde (`/api/v1/saude`, com o banco). Se não responder, a VM põe de volta a versão da última atualização bem-sucedida (guardada como a imagem `app:previous`) com o seu Compose e o seu Caddyfile, então uma imagem nova do Caddy ou do PostgreSQL também é desfeita, anota a nova como recusada, para não instalá-la de novo até sair uma versão mais nova, e o monitor "atualização automática" avisa da falha até lá. O `--forcar` tenta de novo a versão recusada. Uma migração que a versão nova já aplicou não é desfeita: se a versão anterior não funcionar com ela, restaure o backup.
 
 ## Voltar para uma versão anterior
 
@@ -49,11 +49,11 @@ kaladrius up -d
 No Google Cloud, pare antes a atualização automática, senão a VM volta para a imagem mais nova em 5 minutos:
 
 ```bash
-sudo systemctl stop kaladrius-atualizar.timer
+sudo systemctl stop kaladrius-update.timer
 cd /opt/kaladrius/release
-sudo IMAGEM_APP=<registro>/app:0.24.1 docker compose -f docker-compose.prod.yml up -d app
+sudo APP_IMAGE=<registro>/app:0.24.1 docker compose -f docker-compose.prod.yml up -d app
 # depois de publicar a correção:
-sudo systemctl start kaladrius-atualizar.timer
+sudo systemctl start kaladrius-update.timer
 ```
 
 Cada versão tem uma tag de imagem `X.Y.Z` que nunca muda.

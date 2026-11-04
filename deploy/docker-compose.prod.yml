@@ -1,4 +1,4 @@
-# Production stack on the Compute Engine VM. Managed by deploy/servidor/atualizar.sh.
+# Production stack on the Compute Engine VM. Managed by deploy/server/update.sh.
 # ${VAR} values come from /opt/kaladrius/.env (linked as .env next to this file).
 # Only the app receives the whole file; the other services get just what they need.
 name: kaladrius
@@ -22,7 +22,8 @@ services:
       retries: 10
 
   app:
-    image: ${IMAGEM_APP:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:latest}
+    # IMAGEM_APP and IMAGEM_DOCS: the names before decision 147, still read.
+    image: ${APP_IMAGE:-${IMAGEM_APP:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/app:latest}}
     restart: unless-stopped
     env_file: ../.env
     depends_on:
@@ -31,14 +32,14 @@ services:
     # Only reachable from the VM itself (Caddy); never published to the internet.
     ports:
       - "127.0.0.1:8000:8000"
-    # Server health samples written by deploy/servidor/saude.sh (read-only for the app).
+    # Server health samples written by deploy/server/health.sh (read-only for the app).
     volumes:
       - ../saude:/saude:ro
 
   # Documentation site (docs/, decisions 067 and 073). Optional: runs only with COMPOSE_PROFILES=docs
   # and DOCS_HOSTNAME in .env.
   docs:
-    image: ${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs:latest}
+    image: ${DOCS_IMAGE:-${IMAGEM_DOCS:-us-east1-docker.pkg.dev/medical-system-facchini/kaladrius/docs:latest}}
     profiles: [docs]
     restart: unless-stopped
     ports:

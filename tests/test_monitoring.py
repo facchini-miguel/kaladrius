@@ -1,4 +1,4 @@
-"""Server health page (0.22.0): samples from deploy/servidor/saude.sh."""
+"""Server health page (0.22.0): samples from deploy/server/health.sh."""
 
 import datetime
 import json
@@ -99,7 +99,7 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
     assert pagina.status_code == 200
     conteudo = pagina.content.decode()
     assert "<svg" in conteudo and "Nenhum backup registrado" in conteudo
-    assert "Maiores tabelas" not in conteudo and "saude.sh" not in conteudo
+    assert "Maiores tabelas" not in conteudo and "health.sh" not in conteudo
 
 
 def test_tela_com_amostras(pasta, superusuario):

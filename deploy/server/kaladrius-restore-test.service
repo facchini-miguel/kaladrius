@@ -1,0 +1,7 @@
+[Unit]
+Description=Kaladrius: restore the newest backup into a throwaway copy and check it
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kaladrius/bin/test_restore.sh

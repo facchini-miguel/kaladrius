@@ -65,7 +65,7 @@ Regla: **no usar dependencias GPL/AGPL**, para mantener libre la elección de li
 | `app` | Imagen construida en la máquina, código montado como volumen, servidor de desarrollo de Django (recarga al guardar) | Imagen de Artifact Registry con Gunicorn, accesible solo en `127.0.0.1:8000` |
 | `caddy` | — | caddy:2-alpine en la red del host: HTTPS automático (Let's Encrypt) y proxy hacia la app |
 
-En producción, solo la app recibe el `.env` completo; la base de datos recibe solo las variables de Postgres y Caddy, solo el nombre del sitio. Los nombres de los proyectos son distintos (`medical-system-dev` en local, `medical-system` en la VM), para que los dos nunca compartan contenedores ni volúmenes en la misma máquina. En los dos casos la app ejecuta las migraciones al iniciar y lee la configuración del `.env`. La copia de seguridad no es un servicio de Compose: un *timer* de systemd en la VM ejecuta `deploy/servidor/backup.sh` todos los días (`pg_dump` → Cloud Storage). Detalles en [despliegue.md](production.md).
+En producción, solo la app recibe el `.env` completo; la base de datos recibe solo las variables de Postgres y Caddy, solo el nombre del sitio. Los nombres de los proyectos son distintos (`medical-system-dev` en local, `medical-system` en la VM), para que los dos nunca compartan contenedores ni volúmenes en la misma máquina. En los dos casos la app ejecuta las migraciones al iniciar y lee la configuración del `.env`. La copia de seguridad no es un servicio de Compose: un *timer* de systemd en la VM ejecuta `deploy/server/backup.sh` todos los días (`pg_dump` → Cloud Storage). Detalles en [despliegue.md](production.md).
 
 ## Infraestructura
 
