@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Modelo de dados
 
-Os nomes do código estão passando para o inglês (decisões 155 a 157): os modelos já estão em inglês; os campos ainda têm os nomes em português. O banco mantém os nomes das tabelas e colunas.
+Os nomes do código estão passando para o inglês (decisões 155 a 157): os modelos já estão em inglês; os campos ainda têm os nomes em português. O banco mantém os nomes das tabelas e colunas. O [glossário](glossary.md) lista os nomes, antes e depois.
 
 ## Princípio multi-clínica
 - Toda informação de uma clínica tem uma chave `clinica`. Nenhuma consulta é feita sem filtrar pela clínica atual.
