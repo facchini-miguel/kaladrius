@@ -798,9 +798,7 @@ def _fornecedor_form(request, instancia):
         fornecedor = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
         return redirect("financeiro:fornecedor", pk=fornecedor.pk)
-    return render(
-        request, "finance/supplier_form.html", {"form": form, "instancia": instancia}
-    )
+    return render(request, "finance/supplier_form.html", {"form": form, "instancia": instancia})
 
 
 # --- Practitioner commission (0.19.0) --------------------------------------------------
@@ -1034,6 +1032,4 @@ def transacao_lancamento(request, pk):
         else:
             messages.success(request, _("Lançamento criado e conciliado."))
         return _voltar_ao_extrato(transacao)
-    return render(
-        request, "finance/transaction_entry.html", {"form": form, "transacao": transacao}
-    )
+    return render(request, "finance/transaction_entry.html", {"form": form, "transacao": transacao})
