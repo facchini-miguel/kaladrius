@@ -58,7 +58,7 @@ export default {
       colorMode: { respectPrefersColorScheme: true },
       navbar: {
         title: "Kaladrius",
-        logo: { alt: "Kaladrius", src: "img/logo.svg", srcDark: "img/logo-escuro.svg" },
+        logo: { alt: "Kaladrius", src: "img/logo.svg", srcDark: "img/logo-dark.svg" },
         items: [
           { type: "docSidebar", sidebarId: "docs", position: "left", label: "Docs" },
           { to: "/manual/getting-started", position: "left", label: "User manual" },

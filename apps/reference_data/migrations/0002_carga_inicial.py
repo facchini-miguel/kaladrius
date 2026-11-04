@@ -6,7 +6,7 @@ from pathlib import Path
 from django.contrib.postgres.operations import UnaccentExtension
 from django.db import migrations
 
-DADOS = Path(__file__).resolve().parent.parent / "dados"
+DADOS = Path(__file__).resolve().parent.parent / "data"
 
 ESTADOS_CIVIS = [
     "Solteiro(a)",
@@ -28,12 +28,12 @@ def carregar(apps, schema_editor):
     Banco = apps.get_model("referencias", "Banco")
     EstadoCivil = apps.get_model("referencias", "EstadoCivil")
 
-    UF.objects.bulk_create(UF(**uf) for uf in _ler("ufs"))
+    UF.objects.bulk_create(UF(**uf) for uf in _ler("states"))
     Cidade.objects.bulk_create(
-        (Cidade(codigo=c["codigo"], nome=c["nome"], uf_id=c["uf"]) for c in _ler("cidades")),
+        (Cidade(codigo=c["codigo"], nome=c["nome"], uf_id=c["uf"]) for c in _ler("cities")),
         batch_size=1000,
     )
-    Banco.objects.bulk_create(Banco(**banco) for banco in _ler("bancos"))
+    Banco.objects.bulk_create(Banco(**banco) for banco in _ler("banks"))
     EstadoCivil.objects.bulk_create(
         EstadoCivil(nome=nome, ordem=ordem) for ordem, nome in enumerate(ESTADOS_CIVIS, start=1)
     )

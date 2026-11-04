@@ -7,16 +7,16 @@ from pathlib import Path
 from django.db import migrations, models
 
 
-DADOS = Path(__file__).resolve().parent.parent / "dados"
+DADOS = Path(__file__).resolve().parent.parent / "data"
 
 
 def carregar(apps, schema_editor):
-    """Neighborhoods and streets from the legacy Odonto (enderecos.json, decision 100)."""
+    """Neighborhoods and streets from the legacy Odonto (addresses.json, decision 100)."""
     Bairro = apps.get_model("referencias", "Bairro")
     Logradouro = apps.get_model("referencias", "Logradouro")
     Cidade = apps.get_model("referencias", "Cidade")
     existentes = set(Cidade.objects.values_list("codigo", flat=True))
-    for item in json.loads((DADOS / "enderecos.json").read_text(encoding="utf-8")):
+    for item in json.loads((DADOS / "addresses.json").read_text(encoding="utf-8")):
         if item["cidade"] not in existentes:
             continue
         bairro, _ = Bairro.objects.get_or_create(cidade_id=item["cidade"], nome=item["bairro"])
