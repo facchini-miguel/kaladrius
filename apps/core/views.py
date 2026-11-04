@@ -30,7 +30,7 @@ def inicio(request):
     contexto = {"saudacao": _saudacao()}
     if request.clinica is not None:
         contexto["painel"] = dashboard.montar(request)
-    return render(request, "core/inicio.html", contexto)
+    return render(request, "core/home.html", contexto)
 
 
 def _destino_seguro(request, destino):
@@ -56,14 +56,14 @@ def cadastrar_clinica(request):
             request, _("Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe.")
         )
         return redirect("inicio")
-    return render(request, "core/cadastrar_clinica.html", {"form": form})
+    return render(request, "core/register_clinic.html", {"form": form})
 
 
 class TrocarSenhaView(PasswordChangeView):
     """Any logged-in user can change their own password (keeps the session open)."""
 
     form_class = TrocaSenhaForm
-    template_name = "core/trocar_senha.html"
+    template_name = "core/change_password.html"
     success_url = reverse_lazy("inicio")
 
     def dispatch(self, request, *args, **kwargs):
@@ -90,7 +90,7 @@ def configuracoes(request):
                 % {"moeda": form.instance.get_moeda_display()},
             )
         return redirect("configuracoes")
-    return render(request, "core/configuracoes.html", {"form": form})
+    return render(request, "core/settings.html", {"form": form})
 
 
 @login_required

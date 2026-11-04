@@ -108,7 +108,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     from apps.dentistry.teeth import DENTES_DECIDUOS, DENTES_PERMANENTES
 
     html = render_to_string(
-        "odontologia/_odontograma.html",
+        "dentistry/_odontogram.html",
         {"permanentes": DENTES_PERMANENTES, "deciduos": DENTES_DECIDUOS, "interativo": True},
     )
     assert 'class="odontograma-rolagem"' in html

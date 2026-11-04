@@ -1,4 +1,4 @@
-// Patient search-as-you-type (templates/includes/busca_paciente.html), works in pages and modals.
+// Patient search-as-you-type (templates/includes/patient_search.html), works in pages and modals.
 (function () {
   "use strict";
   document.addEventListener("click", (evento) => {

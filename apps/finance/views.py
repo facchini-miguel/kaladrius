@@ -126,7 +126,7 @@ def _lista(request, tipo):
         parcela.situacao = services.situacao(parcela, hoje)
     return render(
         request,
-        "financeiro/lista.html",
+        "finance/list.html",
         {
             "tipo": tipo,
             "pagar": tipo == Lancamento.Tipo.PAGAR,
@@ -180,7 +180,7 @@ def lancamento_novo(request):
         return redirect("financeiro:lancamento", pk=lancamento.pk)
     if paciente is None and form["paciente"].value():
         paciente = Paciente.objects.filter(pk=form["paciente"].value()).first()
-    return render(request, "financeiro/lancamento_form.html", {"form": form, "paciente": paciente})
+    return render(request, "finance/entry_form.html", {"form": form, "paciente": paciente})
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
@@ -217,7 +217,7 @@ def despesa_nova(request):
             )
         messages.success(request, _("Despesa lançada."))
         return redirect("financeiro:lancamento", pk=lancamento.pk)
-    return render(request, "financeiro/despesa_form.html", {"form": form})
+    return render(request, "finance/expense_form.html", {"form": form})
 
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
@@ -239,7 +239,7 @@ def lancamento(request, pk):
         parcela.lista_pagamentos = [p for p in pagamentos if p.parcela_id == parcela.pk]
     return render(
         request,
-        "financeiro/lancamento.html",
+        "finance/entry.html",
         {
             "lancamento": lancamento,
             "pagar": lancamento.tipo == Lancamento.Tipo.PAGAR,
@@ -268,7 +268,7 @@ def lancamento_cancelar(request, pk):
         return redirect("financeiro:lancamento", pk=lancamento.pk)
     return render(
         request,
-        "financeiro/motivo.html",
+        "finance/reason.html",
         {
             "form": form,
             "titulo": _("Cancelar lançamento"),
@@ -315,7 +315,7 @@ def receber(request, pk):
             return redirect("financeiro:recibo", pk=pagamento.pk)
     return render(
         request,
-        "financeiro/receber.html",
+        "finance/receive.html",
         {
             "form": form,
             "parcela": parcela,
@@ -340,7 +340,7 @@ def recibo(request, pk):
     )
     return render(
         request,
-        "financeiro/recibo.html",
+        "finance/receipt.html",
         {
             "pagamento": pagamento,
             "lancamento": pagamento.parcela.lancamento,
@@ -368,7 +368,7 @@ def estornar(request, pk):
         return redirect("financeiro:lancamento", pk=pagamento.parcela.lancamento_id)
     return render(
         request,
-        "financeiro/motivo.html",
+        "finance/reason.html",
         {
             "form": form,
             "titulo": _("Estornar pagamento"),
@@ -398,7 +398,7 @@ def devedores(request):
     pagina = Paginator(encontrados, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
-        "financeiro/devedores.html",
+        "finance/debtors.html",
         {
             "pagina": pagina,
             "busca": busca,
@@ -441,7 +441,7 @@ def caixa(request):
     historico = Caixa.objects.filter(conta=conta).select_related("aberto_por", "fechado_por")[:30]
     return render(
         request,
-        "financeiro/caixa.html",
+        "finance/cash.html",
         {
             "contas": contas,
             "conta": conta,
@@ -459,7 +459,7 @@ def caixa_detalhe(request, pk):
     )
     return render(
         request,
-        "financeiro/caixa_detalhe.html",
+        "finance/cash_detail.html",
         {"caixa": sessao, "resumo": services.resumo_do_caixa(sessao)},
     )
 
@@ -480,7 +480,7 @@ def caixa_movimento(request, pk, tipo):
             return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
     return render(
         request,
-        "financeiro/caixa_form.html",
+        "finance/cash_form.html",
         {"caixa": sessao, "form": form, "titulo": MovimentoCaixa.Tipo(tipo).label},
     )
 
@@ -495,7 +495,7 @@ def caixa_fechar(request, pk):
         return redirect("financeiro:caixa_detalhe", pk=sessao.pk)
     return render(
         request,
-        "financeiro/caixa_form.html",
+        "finance/cash_form.html",
         {
             "caixa": sessao,
             "form": form,
@@ -532,7 +532,7 @@ def fluxo_de_caixa(request):
     por_mes = request.GET.get("agrupar") == "mes"
     return render(
         request,
-        "financeiro/fluxo.html",
+        "finance/cash_flow.html",
         {
             "de": de,
             "ate": ate,
@@ -548,7 +548,7 @@ def relatorios(request):
     de, ate = _periodo(request)
     return render(
         request,
-        "financeiro/relatorios.html",
+        "finance/reports.html",
         {
             "de": de,
             "ate": ate,
@@ -600,7 +600,7 @@ def planejamento(request):
                 linha["campo"] = form[PlanejamentoForm.nome(linha["grupo"])]
     return render(
         request,
-        "financeiro/planejamento.html",
+        "finance/planning.html",
         {
             **dados,
             "form": form,
@@ -645,7 +645,7 @@ def fechamento(request):
         return redirect("financeiro:fechamento")
     return render(
         request,
-        "financeiro/fechamento.html",
+        "finance/closing.html",
         {
             "fechado_ate": services.fechado_ate(request.clinica.pk),
             "historico": Fechamento.objects.select_related("criado_por")[:30],
@@ -670,7 +670,7 @@ def cadastro_lista(request, cadastro):
     modelo, _form = CADASTROS[cadastro]
     return render(
         request,
-        "financeiro/cadastro_lista.html",
+        "finance/catalog_list.html",
         {"cadastro": cadastro, "itens": modelo.objects.all(), "modelo": modelo._meta},
     )
 
@@ -686,7 +686,7 @@ def cadastro_form(request, cadastro, pk=None):
         return redirect("financeiro:cadastro", cadastro=cadastro)
     return render(
         request,
-        "financeiro/cadastro_form.html",
+        "finance/catalog_form.html",
         {"form": form, "cadastro": cadastro, "instancia": instancia, "modelo": modelo._meta},
     )
 
@@ -716,7 +716,7 @@ def plano_contas(request):
         descer(None, 0)
         sem_grupo = [c for c in categorias if c.tipo == tipo and c.grupo_id is None]
         arvores.append({"rotulo": rotulo, "linhas": linhas, "sem_grupo": sem_grupo})
-    return render(request, "financeiro/plano_contas.html", {"arvores": arvores})
+    return render(request, "finance/chart_of_accounts.html", {"arvores": arvores})
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
@@ -735,7 +735,7 @@ def _grupo_form(request, instancia):
         grupo = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.nome})
         return redirect("financeiro:plano_contas")
-    return render(request, "financeiro/grupo_form.html", {"form": form, "instancia": instancia})
+    return render(request, "finance/group_form.html", {"form": form, "instancia": instancia})
 
 
 # --- Suppliers (decision 093) ---------------------------------------------------------
@@ -754,7 +754,7 @@ def fornecedores(request):
     pagina = Paginator(lista, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
-        "financeiro/fornecedores.html",
+        "finance/suppliers.html",
         {"pagina": pagina, "busca": busca, "parametros": urlencode({"q": busca})},
     )
 
@@ -777,7 +777,7 @@ def fornecedor(request, pk):
     )
     return render(
         request,
-        "financeiro/fornecedor.html",
+        "finance/supplier.html",
         {"fornecedor": fornecedor, "parcelas": parcelas, "em_aberto": em_aberto},
     )
 
@@ -798,9 +798,7 @@ def _fornecedor_form(request, instancia):
         fornecedor = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
         return redirect("financeiro:fornecedor", pk=fornecedor.pk)
-    return render(
-        request, "financeiro/fornecedor_form.html", {"form": form, "instancia": instancia}
-    )
+    return render(request, "finance/supplier_form.html", {"form": form, "instancia": instancia})
 
 
 # --- Practitioner commission (0.19.0) --------------------------------------------------
@@ -819,7 +817,7 @@ def comissoes_lista(request):
     ate = _ate(request)
     return render(
         request,
-        "financeiro/comissoes.html",
+        "finance/commissions.html",
         {
             "ate": ate,
             "linhas": commissions.resumo(ate),
@@ -839,7 +837,7 @@ def comissao_percentual(request, pk):
         return redirect("financeiro:comissoes")
     return render(
         request,
-        "financeiro/comissao_percentual.html",
+        "finance/commission_percentage.html",
         {"form": form, "profissional": profissional},
     )
 
@@ -865,7 +863,7 @@ def comissao_pagar(request, pk):
         return redirect("financeiro:lancamento", pk=comissao.lancamento_id)
     return render(
         request,
-        "financeiro/comissao_pagar.html",
+        "finance/commission_pay.html",
         {"form": form, "calculo": commissions.pendente(profissional, ate), "ate": ate},
     )
 
@@ -887,7 +885,7 @@ def comissao(request, pk):
         )
     return render(
         request,
-        "financeiro/comissao.html",
+        "finance/commission.html",
         {"comissao": comissao, "pagamentos": pagamentos, "estornos": estornos},
     )
 
@@ -955,7 +953,7 @@ def extratos(request):
     pagina = Paginator(importacoes, 30).get_page(request.GET.get("pagina"))
     for importacao in pagina:
         importacao.pendentes = pendentes.get(importacao.pk, 0)
-    return render(request, "financeiro/extratos.html", {"form": form, "pagina": pagina})
+    return render(request, "finance/statements.html", {"form": form, "pagina": pagina})
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
@@ -972,7 +970,7 @@ def extrato(request, pk):
     saldo_sistema = reconciliation.saldo_no_sistema(importacao)
     return render(
         request,
-        "financeiro/extrato.html",
+        "finance/statement.html",
         {
             "importacao": importacao,
             "transacoes": transacoes,
@@ -1034,6 +1032,4 @@ def transacao_lancamento(request, pk):
         else:
             messages.success(request, _("Lançamento criado e conciliado."))
         return _voltar_ao_extrato(transacao)
-    return render(
-        request, "financeiro/transacao_lancamento.html", {"form": form, "transacao": transacao}
-    )
+    return render(request, "finance/transaction_entry.html", {"form": form, "transacao": transacao})

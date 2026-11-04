@@ -24,7 +24,7 @@ def lista(request):
     hoje = timezone.localdate()
     for funcionario in funcionarios:
         funcionario.salario_atual = funcionario.salario_em(hoje)
-    return render(request, "pessoal/lista.html", {"funcionarios": funcionarios})
+    return render(request, "staff/list.html", {"funcionarios": funcionarios})
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
@@ -32,7 +32,7 @@ def funcionario(request, pk):
     funcionario = get_object_or_404(Funcionario.objects, pk=pk)
     return render(
         request,
-        "pessoal/funcionario.html",
+        "staff/employee.html",
         {
             "funcionario": funcionario,
             "salarios": funcionario.salarios.select_related("criado_por"),
@@ -66,7 +66,7 @@ def _formulario(request, instancia):
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.nome})
         return redirect("pessoal:funcionario", pk=funcionario.pk)
-    return render(request, "pessoal/form.html", {"form": form, "instancia": instancia})
+    return render(request, "staff/form.html", {"form": form, "instancia": instancia})
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
@@ -136,7 +136,7 @@ def folha(request):
     proximo = services.fim_do_mes(competencia) + datetime.timedelta(days=1)
     return render(
         request,
-        "pessoal/folha.html",
+        "staff/payroll.html",
         {
             "competencia": competencia,
             "linhas": linhas,

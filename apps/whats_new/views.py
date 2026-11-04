@@ -24,6 +24,6 @@ def lista(request):
 
     return render(
         request,
-        "novidades/lista.html",
+        "whats_new/list.html",
         {"versoes": versoes, "modulos": modulos, "modulo": modulo},
     )

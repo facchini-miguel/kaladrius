@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block titulo %}{% translate "Bancos" %} · {{ nome_sistema }}{% endblock %}
+
+{% block conteudo %}
+<h1 class="h3 mb-3">{% translate "Bancos" %}</h1>
+<p class="text-body-secondary">{% translate "Instituições financeiras conforme a lista pública do Banco Central." %}</p>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-9">
+    <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Nome ou código do banco' %}" aria-label="{% translate 'Nome ou código do banco' %}">
+  </div>
+  <div class="col-sm-3">
+    <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover bg-white">
+    <thead><tr><th>{% translate "Código" %}</th><th>{% translate "Nome" %}</th><th>{% translate "ISPB" %}</th></tr></thead>
+    <tbody>
+      {% for banco in pagina %}
+      <tr>
+        <td>{% if banco.codigo is not None %}{{ banco.codigo|stringformat:"03d" }}{% else %}—{% endif %}</td>
+        <td>{{ banco.nome }}</td>
+        <td>{{ banco.ispb }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-body-secondary">{% translate "Nenhum banco encontrado." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/pagination.html" %}
+{% endblock %}
