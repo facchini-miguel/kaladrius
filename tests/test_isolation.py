@@ -175,3 +175,18 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     assert resposta.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):
         assert not Practitioner.objects.filter(name="Dr. Novo").exists()
+
+
+def test_nao_liga_o_mesmo_usuario_a_dois_profissionais(
+    clinica_a, criar_usuario, criar_profissional, cliente_de
+):
+    colega = criar_usuario("colega_a", clinica_a)
+    criar_profissional(clinica_a, "Dra. Primeira", user=colega)
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    resposta = cliente.post(
+        reverse("practitioners:new"),
+        {"name": "Dr. Segundo", "cor": "#123456", "user": colega.pk, "active": "on"},
+    )
+    assert "já está ligado a outro profissional" in resposta.content.decode()
+    with usar_clinica(clinica_a):
+        assert not Practitioner.objects.filter(name="Dr. Segundo").exists()

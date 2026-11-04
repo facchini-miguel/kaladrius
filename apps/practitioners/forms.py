@@ -29,7 +29,7 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
             .distinct()
         )
 
-    def clean_usuario(self):
+    def clean_user(self):
         user = self.cleaned_data.get("user")
         if user is not None:
             outros = Practitioner.objects.filter(user=user).exclude(pk=self.instance.pk)
