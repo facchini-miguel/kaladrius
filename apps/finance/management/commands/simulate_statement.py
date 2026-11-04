@@ -52,18 +52,18 @@ class Command(BaseCommand):
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
                 conta=alvo_conta, estornado=False, data__range=(inicio, hoje)
-            ).select_related("parcela__lancamento"):
-                entrada = p.parcela.lancamento.tipo == Entry.Tipo.RECEBER
+            ).select_related("parcela__entry"):
+                entrada = p.parcela.entry.kind == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
-                    fora += p.valor if entrada else -p.valor
+                    fora += p.amount if entrada else -p.amount
                     continue
                 data = min(p.data + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), hoje)
                 description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
-                linhas.append((data, p.valor if entrada else -p.valor, description, f"P{p.pk}"))
-            for number, (description, valor) in enumerate(EXTRAS):
+                linhas.append((data, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
+            for number, (description, amount) in enumerate(EXTRAS):
                 data = inicio + datetime.timedelta(days=sorteio.randint(0, dias))
                 linhas.append(
-                    (data, valor, description, f"X{alvo_conta.pk}-{data:%Y%m%d}-{number}")
+                    (data, amount, description, f"X{alvo_conta.pk}-{data:%Y%m%d}-{number}")
                 )
             linhas.sort()
             saldo = dict(services.saldos_das_contas(ate=hoje)).get(alvo_conta)
@@ -74,13 +74,13 @@ class Command(BaseCommand):
     def _ofx(self, linhas, inicio, fim, saldo):
         transacoes = "".join(
             "<STMTTRN>\n"
-            f"<TRNTYPE>{'CREDIT' if valor > 0 else 'DEBIT'}\n"
+            f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
             f"<DTPOSTED>{data:%Y%m%d}120000[-3:BRT]\n"
-            f"<TRNAMT>{valor}\n"
+            f"<TRNAMT>{amount}\n"
             f"<FITID>{fitid}\n"
             f"<MEMO>{description}\n"
             "</STMTTRN>\n"
-            for data, valor, description, fitid in linhas
+            for data, amount, description, fitid in linhas
         )
         return (
             "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\n"

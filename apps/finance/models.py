@@ -31,7 +31,7 @@ class FinancialAccount(ModeloDaClinica):
         CARTAO = "cartao", _("Maquininha de cartão")
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     saldo_inicial = models.DecimalField(
         _("saldo inicial"),
         default=ZERO,
@@ -63,7 +63,7 @@ class AccountGroup(ModeloDaClinica):
     Tipo = TipoFinanceiro
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     pai = models.ForeignKey(
         "self",
         on_delete=models.PROTECT,
@@ -85,10 +85,10 @@ class AccountGroup(ModeloDaClinica):
         db_table = "financeiro_grupocontabil"
         verbose_name = _("grupo contábil")
         verbose_name_plural = _("grupos contábeis")
-        ordering = ["tipo", "code", "name"]
+        ordering = ["kind", "code", "name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "tipo", "pai", "name"], name="grupo_contabil_unico"
+                fields=["clinic", "kind", "pai", "name"], name="grupo_contabil_unico"
             )
         ]
 
@@ -115,7 +115,7 @@ class Category(ModeloDaClinica):
     Tipo = TipoFinanceiro
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     grupo = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
@@ -130,9 +130,9 @@ class Category(ModeloDaClinica):
         db_table = "financeiro_categoria"
         verbose_name = _("categoria")
         verbose_name_plural = _("categorias")
-        ordering = ["tipo", "name"]
+        ordering = ["kind", "name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "tipo", "name"], name="categoria_unica")
+            models.UniqueConstraint(fields=["clinic", "kind", "name"], name="categoria_unica")
         ]
 
     def __str__(self):
@@ -198,20 +198,20 @@ def criar_padroes(clinic):
     with sem_isolamento():
         if not FinancialAccount.objects.filter(clinic=clinic).exists():
             FinancialAccount.objects.bulk_create(
-                FinancialAccount(clinic=clinic, name=name, tipo=tipo)
-                for name, tipo in CONTAS_PADRAO
+                FinancialAccount(clinic=clinic, name=name, kind=kind)
+                for name, kind in CONTAS_PADRAO
             )
         if not Category.objects.filter(clinic=clinic).exists():
             grupo_de = {}
-            for tipo, linhas in PLANO_PADRAO.items():
+            for kind, linhas in PLANO_PADRAO.items():
                 for code, name, categorias in linhas:
                     grupo = AccountGroup.objects.create(
-                        clinic=clinic, tipo=tipo, code=code, name=name
+                        clinic=clinic, kind=kind, code=code, name=name
                     )
-                    grupo_de.update({(tipo, categoria): grupo for categoria in categorias})
+                    grupo_de.update({(kind, categoria): grupo for categoria in categorias})
             Category.objects.bulk_create(
-                Category(clinic=clinic, name=name, tipo=tipo, grupo=grupo_de.get((tipo, name)))
-                for name, tipo in CATEGORIAS_PADRAO
+                Category(clinic=clinic, name=name, kind=kind, grupo=grupo_de.get((kind, name)))
+                for name, kind in CATEGORIAS_PADRAO
             )
 
 
@@ -222,7 +222,9 @@ class Supplier(ModeloDaClinica):
         FISICA = "PF", _("Pessoa física")
         JURIDICA = "PJ", _("Pessoa jurídica")
 
-    tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.JURIDICA)
+    kind = models.CharField(
+        _("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.JURIDICA, db_column="tipo"
+    )
     name = models.CharField(
         _("nome"),
         max_length=200,
@@ -260,7 +262,7 @@ class Supplier(ModeloDaClinica):
     @property
     def papel_documento(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.tipo == self.Tipo.JURIDICA else "pessoa"
+        return "empresa" if self.kind == self.Tipo.JURIDICA else "pessoa"
 
 
 class Entry(ModeloDaClinica):
@@ -270,7 +272,7 @@ class Entry(ModeloDaClinica):
         RECEBER = "receber", _("A receber")
         PAGAR = "pagar", _("A pagar")
 
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
     categoria = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name="+", verbose_name=_("categoria")
@@ -362,7 +364,7 @@ class ParcelaQuerySet(models.QuerySet):
     def com_saldo(self):
         """Annotate pago (principal paid by non-reversed payments) and saldo."""
         principal = ExpressionWrapper(
-            F("pagamentos__valor") - F("pagamentos__juros") + F("pagamentos__desconto"),
+            F("pagamentos__amount") - F("pagamentos__juros") + F("pagamentos__desconto"),
             output_field=DecimalField(**DINHEIRO),
         )
         pago = Coalesce(
@@ -371,21 +373,25 @@ class ParcelaQuerySet(models.QuerySet):
             output_field=DecimalField(**DINHEIRO),
         )
         return self.annotate(pago=pago).annotate(
-            saldo=ExpressionWrapper(F("valor") - F("pago"), output_field=DecimalField(**DINHEIRO))
+            saldo=ExpressionWrapper(F("amount") - F("pago"), output_field=DecimalField(**DINHEIRO))
         )
 
     def abertas(self):
         """Installments still owed (positive balance) of entries not cancelled."""
-        return self.com_saldo().filter(saldo__gt=0, lancamento__cancelado=False)
+        return self.com_saldo().filter(saldo__gt=0, entry__cancelado=False)
 
 
 class Installment(ModeloDaClinica):
-    lancamento = models.ForeignKey(
-        Entry, on_delete=models.CASCADE, related_name="parcelas", verbose_name=_("lançamento")
+    entry = models.ForeignKey(
+        Entry,
+        on_delete=models.CASCADE,
+        related_name="parcelas",
+        verbose_name=_("lançamento"),
+        db_column="lancamento_id",
     )
     number = models.PositiveSmallIntegerField(_("número"), db_column="numero")
     vencimento = models.DateField(_("vencimento"))
-    valor = models.DecimalField(_("valor"), **DINHEIRO)
+    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
 
     # Same isolation as every clinic model, plus the balance helpers.
     objects = ClinicaManager.from_queryset(ParcelaQuerySet)()
@@ -398,17 +404,17 @@ class Installment(ModeloDaClinica):
         ordering = ["vencimento", "number"]
         indexes = [models.Index(fields=["clinic", "vencimento"], name="parcela_clinica_vencimento")]
         constraints = [
-            models.UniqueConstraint(fields=["lancamento", "number"], name="parcela_numero_unico"),
-            models.CheckConstraint(condition=Q(valor__gt=0), name="parcela_valor_positivo"),
+            models.UniqueConstraint(fields=["entry", "number"], name="parcela_numero_unico"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="parcela_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.lancamento.description} {self.number}/{self.lancamento.parcelas.count()}"
+        return f"{self.entry.description} {self.number}/{self.entry.parcelas.count()}"
 
     def valores(self):
         """(principal paid, balance) computed from the payments (not annotated)."""
         pago = sum((p.principal for p in self.pagamentos.all() if not p.estornado), start=ZERO)
-        return pago, self.valor - pago
+        return pago, self.amount - pago
 
 
 class Payment(ModeloDaClinica):
@@ -449,7 +455,7 @@ class Payment(ModeloDaClinica):
         Installment, on_delete=models.PROTECT, related_name="pagamentos", verbose_name=_("parcela")
     )
     data = models.DateField(_("data"), default=timezone.localdate)
-    valor = models.DecimalField(_("valor recebido"), **DINHEIRO)
+    amount = models.DecimalField(_("valor recebido"), **DINHEIRO, db_column="valor")
     juros = models.DecimalField(
         _("juros e multa"),
         default=ZERO,
@@ -514,7 +520,7 @@ class Payment(ModeloDaClinica):
         verbose_name_plural = _("pagamentos")
         ordering = ["-data", "-pk"]
         constraints = [
-            models.CheckConstraint(condition=Q(valor__gt=0), name="pagamento_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="pagamento_valor_positivo"),
             models.CheckConstraint(condition=Q(juros__gte=0), name="pagamento_juros_positivo"),
             models.CheckConstraint(
                 condition=Q(desconto__gte=0), name="pagamento_desconto_positivo"
@@ -522,7 +528,7 @@ class Payment(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.parcela} – {self.valor}"
+        return f"{self.parcela} – {self.amount}"
 
     def get_forma_display(self):
         """The method's name in the clinic's country ("Transferência (SPEI)" in Mexico)."""
@@ -532,7 +538,7 @@ class Payment(ModeloDaClinica):
 
     @property
     def principal(self):
-        return self.valor - self.juros + self.desconto
+        return self.amount - self.juros + self.desconto
 
 
 class CashRegister(ModeloDaClinica):
@@ -610,8 +616,8 @@ class CashMovement(ModeloDaClinica):
     caixa = models.ForeignKey(
         CashRegister, on_delete=models.PROTECT, related_name="movimentos", verbose_name=_("caixa")
     )
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices)
-    valor = models.DecimalField(_("valor"), **DINHEIRO)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
+    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
     outra_conta = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
@@ -638,11 +644,11 @@ class CashMovement(ModeloDaClinica):
         verbose_name_plural = _("movimentos de caixa")
         ordering = ["created_at"]
         constraints = [
-            models.CheckConstraint(condition=Q(valor__gt=0), name="movimento_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="movimento_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.get_tipo_display()} {self.valor}"
+        return f"{self.get_kind_display()} {self.amount}"
 
 
 class Commission(ModeloDaClinica):
@@ -664,12 +670,13 @@ class Commission(ModeloDaClinica):
     percentual = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
     recebido = models.DecimalField(_("valor recebido"), **DINHEIRO)
     estornos = models.DecimalField(_("comissão de estornos descontada"), default=ZERO, **DINHEIRO)
-    valor = models.DecimalField(_("valor da comissão"), **DINHEIRO)
-    lancamento = models.OneToOneField(
+    amount = models.DecimalField(_("valor da comissão"), **DINHEIRO, db_column="valor")
+    entry = models.OneToOneField(
         Entry,
         on_delete=models.PROTECT,
         related_name="comissao",
         verbose_name=_("lançamento a pagar"),
+        db_column="lancamento_id",
     )
     cancelada = models.BooleanField(_("cancelada"), default=False)
     created_by = models.ForeignKey(
@@ -689,7 +696,7 @@ class Commission(ModeloDaClinica):
         verbose_name_plural = _("comissões")
         ordering = ["-created_at"]
         constraints = [
-            models.CheckConstraint(condition=Q(valor__gt=0), name="comissao_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="comissao_valor_positivo"),
         ]
 
     def __str__(self):
@@ -698,7 +705,7 @@ class Commission(ModeloDaClinica):
     @property
     def bruta(self):
         """Commission on the receipts, before deducting reversals."""
-        return self.valor + self.estornos
+        return self.amount + self.estornos
 
 
 class Planning(ModeloDaClinica):
@@ -709,7 +716,7 @@ class Planning(ModeloDaClinica):
     grupo = models.ForeignKey(
         AccountGroup, on_delete=models.PROTECT, related_name="+", verbose_name=_("grupo")
     )
-    valor = models.DecimalField(_("meta"), **DINHEIRO)
+    amount = models.DecimalField(_("meta"), **DINHEIRO, db_column="valor")
 
     class Meta:
         db_table = "financeiro_planejamento"
@@ -720,7 +727,7 @@ class Planning(ModeloDaClinica):
             models.UniqueConstraint(
                 fields=["clinic", "ano", "grupo"], name="planejamento_unico_por_grupo"
             ),
-            models.CheckConstraint(condition=Q(valor__gt=0), name="planejamento_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="planejamento_valor_positivo"),
         ]
 
     def __str__(self):
@@ -824,15 +831,22 @@ class BankTransaction(ModeloDaClinica):
     )
     fitid = models.CharField(_("identificador no banco"), max_length=120)
     data = models.DateField(_("data"))
-    valor = models.DecimalField(
-        _("valor"), help_text=_("Positivo: entrada; negativo: saída."), **DINHEIRO
+    amount = models.DecimalField(
+        _("valor"),
+        help_text=_("Positivo: entrada; negativo: saída."),
+        **DINHEIRO,
+        db_column="valor",
     )
     description = models.CharField(
         _("descrição"), max_length=200, blank=True, db_column="descricao"
     )
-    tipo = models.CharField(_("tipo no banco"), max_length=20, blank=True)
-    situacao = models.CharField(
-        _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.PENDENTE
+    kind = models.CharField(_("tipo no banco"), max_length=20, blank=True, db_column="tipo")
+    status = models.CharField(
+        _("situação"),
+        max_length=10,
+        choices=Situacao.choices,
+        default=Situacao.PENDENTE,
+        db_column="situacao",
     )
     pagamento = models.OneToOneField(
         Payment,
@@ -875,8 +889,8 @@ class BankTransaction(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.data:%d/%m/%Y} {self.valor} {self.description}"
+        return f"{self.data:%d/%m/%Y} {self.amount} {self.description}"
 
     @property
     def entrada(self):
-        return self.valor > 0
+        return self.amount > 0

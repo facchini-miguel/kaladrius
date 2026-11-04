@@ -18,7 +18,7 @@
         {% if cadastro == "cost-centers" %}
         <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         {% else %}
-        <td>{{ item.get_tipo_display }}</td>
+        <td>{{ item.get_kind_display }}</td>
         {% if cadastro == "categories" %}<td>{{ item.grupo|default:"—" }}</td>{% endif %}
         <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
         {% endif %}

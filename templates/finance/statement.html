@@ -38,13 +38,13 @@
       <tr id="t{{ t.pk }}">
         <td class="text-nowrap">{{ t.data|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ t.description }}</td>
-        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.valor|moeda }}</td>
+        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.amount|moeda }}</td>
         <td>
-          {% if t.situacao == "conciliada" %}
+          {% if t.status == "conciliada" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
-            {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.description }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
-            {% elif t.movimento %}<a href="{% url 'finance:cash_detail' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_tipo_display }}</a>{% endif %}
-          {% elif t.situacao == "ignorada" %}
+            {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.entry_id %}">{{ t.pagamento.parcela.entry.nome_pessoa }} · {{ t.pagamento.parcela.entry.description }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
+            {% elif t.movimento %}<a href="{% url 'finance:cash_detail' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_kind_display }}</a>{% endif %}
+          {% elif t.status == "ignorada" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.motivo }}
           {% else %}
             {% if pode.financeiro.alterar %}
@@ -71,7 +71,7 @@
             <span class="badge text-bg-warning">{% translate "Pendente" %}</span>
             {% endif %}
           {% endif %}
-          {% if t.situacao != "pendente" and pode.financeiro.alterar %}
+          {% if t.status != "pendente" and pode.financeiro.alterar %}
           <form method="post" action="{% url 'finance:transaction' t.pk 'undo' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
           {% endif %}
         </td>

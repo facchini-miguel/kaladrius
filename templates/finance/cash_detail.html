@@ -49,17 +49,17 @@
       {% for pagamento in resumo.pagamentos %}
       <tr>
         <td class="text-nowrap">{{ pagamento.created_at|date:"TIME_FORMAT" }}</td>
-        <td><a href="{% url 'finance:entry' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.description }}</a></td>
+        <td><a href="{% url 'finance:entry' pagamento.parcela.entry_id %}">{{ pagamento.parcela.entry.nome_pessoa }} · {{ pagamento.parcela.entry.description }}</a></td>
         <td>{{ pagamento.get_forma_display }}</td>
-        <td class="text-end text-nowrap {% if pagamento.parcela.lancamento.tipo == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.valor|moeda }}</td>
+        <td class="text-end text-nowrap {% if pagamento.parcela.entry.kind == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.amount|moeda }}</td>
       </tr>
       {% endfor %}
       {% for movimento in resumo.movimentos %}
       <tr>
         <td class="text-nowrap">{{ movimento.created_at|date:"TIME_FORMAT" }}</td>
-        <td>{{ movimento.get_tipo_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.name }}){% endif %}</td>
+        <td>{{ movimento.get_kind_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.name }}){% endif %}</td>
         <td>—</td>
-        <td class="text-end text-nowrap {% if movimento.tipo == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.valor|moeda }}</td>
+        <td class="text-end text-nowrap {% if movimento.kind == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.amount|moeda }}</td>
       </tr>
       {% endfor %}
       {% if not resumo.pagamentos and not resumo.movimentos %}

@@ -49,7 +49,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Patient
         fields = [
-            "tipo",
+            "kind",
             "name",
             "razao_social",
             "cpf_cnpj",
@@ -78,7 +78,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "active",
         ]
         widgets = {
-            "tipo": forms.RadioSelect,
+            "kind": forms.RadioSelect,
             "data_nascimento": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "notes": forms.Textarea(attrs={"rows": 4}),
         }
@@ -99,7 +99,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             self.fields["cpf_cnpj"],
             self.documentos.paciente,
             self.documentos.empresa,
-            self["tipo"].value(),
+            self["kind"].value(),
         )
         for campo in self.FORA_DO_BRASIL if self.pais == "BR" else self.SO_NO_BRASIL:
             del self.fields[campo]
@@ -162,11 +162,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        tipo = dados.get("tipo")
+        kind = dados.get("kind")
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
         do_tipo = (
-            self.documentos.empresa if tipo == Patient.Tipo.JURIDICA else self.documentos.paciente
+            self.documentos.empresa if kind == Patient.Tipo.JURIDICA else self.documentos.paciente
         )
         documento = ""
         if do_tipo is not None:
@@ -196,7 +196,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
-        if tipo == Patient.Tipo.JURIDICA:
+        if kind == Patient.Tipo.JURIDICA:
             for campo in ["rg", "sexo", "estado_civil", "profissao", "responsavel"]:
                 dados[campo] = None if campo == "estado_civil" else ""
             dados["data_nascimento"] = None

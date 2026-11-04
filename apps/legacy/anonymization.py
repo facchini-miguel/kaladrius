@@ -71,14 +71,14 @@ class Resultado:
     registros_apagados: int = 0
 
 
-def _mesmo_tamanho(valor, fake):
+def _mesmo_tamanho(value, fake):
     """Fake digits like the original, keeping the area code (DDD) of phones.
 
     A mobile stays a mobile with the ninth digit (DDD + 9 + 8 digits) and a landline starts
     with 2 to 5, as in Anatel's plan: random digits made "mobiles" with 8 digits that
     WhatsApp links cannot open.
     """
-    digitos = somente_digitos(valor)
+    digitos = somente_digitos(value)
     if not digitos:
         return ""
     if len(digitos) < 10:
@@ -106,7 +106,7 @@ class _Anonimizador:
         if not patient.cpf_cnpj:
             return ""
         while True:
-            gerar = fake_data.cnpj if patient.tipo == Patient.Tipo.JURIDICA else fake_data.cpf
+            gerar = fake_data.cnpj if patient.kind == Patient.Tipo.JURIDICA else fake_data.cpf
             documento = gerar(self.fake)
             if documento not in usados:
                 usados.add(documento)
@@ -126,7 +126,7 @@ class _Anonimizador:
         Patient.objects.filter(clinic=self.clinic).update(cpf_cnpj="")
         usados = set()
         for number, p in enumerate(pacientes, start=1):
-            if p.tipo == Patient.Tipo.JURIDICA:
+            if p.kind == Patient.Tipo.JURIDICA:
                 p.name = fake.company()[:200]
                 p.razao_social = f"{p.name} Ltda."[:200] if p.razao_social else ""
             else:
@@ -172,16 +172,16 @@ class _Anonimizador:
         ]
         Patient.objects.bulk_update(pacientes, campos, batch_size=500)
         self.resultado.pacientes = len(pacientes)
-        return [p.name for p in pacientes if p.tipo == Patient.Tipo.FISICA]
+        return [p.name for p in pacientes if p.kind == Patient.Tipo.FISICA]
 
     def agendamentos(self, nomes):
-        agendamentos = list(Appointment.objects.filter(clinic=self.clinic).select_related("tipo"))
+        agendamentos = list(Appointment.objects.filter(clinic=self.clinic).select_related("kind"))
         for agendamento in agendamentos:
             # Blocked slots ("Ocupado") hold no personal data; the rest named the patient
             # and the procedure in free text.
-            if agendamento.description and agendamento.description != agendamento.tipo.name:
+            if agendamento.description and agendamento.description != agendamento.kind.name:
                 name = self.sorte.choice(nomes) if nomes else self._nome(self.sorte.choice("FM"))
-                agendamento.description = f"{name} - {agendamento.tipo.name}"
+                agendamento.description = f"{name} - {agendamento.kind.name}"
         Appointment.objects.bulk_update(agendamentos, ["description"], batch_size=1000)
         self.resultado.agendamentos = len(agendamentos)
 
@@ -227,17 +227,17 @@ class _Anonimizador:
         Payroll.objects.filter(clinic=self.clinic).update(note="")
         for folha in (
             Payroll.objects.filter(clinic=self.clinic)
-            .exclude(lancamento=None)
-            .select_related("funcionario", "lancamento")
+            .exclude(entry=None)
+            .select_related("funcionario", "entry")
         ):
-            Entry.objects.filter(pk=folha.lancamento_id).update(pessoa=folha.funcionario.name)
+            Entry.objects.filter(pk=folha.entry_id).update(pessoa=folha.funcionario.name)
 
     def fornecedores(self):
         """A supplier who is a person is personal data; any supplier's contacts may be."""
         fake = self.fake
         fornecedores = list(Supplier.objects.filter(clinic=self.clinic))
         for number, f in enumerate(fornecedores, start=1):
-            if f.tipo == Supplier.Tipo.FISICA:
+            if f.kind == Supplier.Tipo.FISICA:
                 f.name = self._nome(self.sorte.choice("FM"))
                 f.razao_social = ""
                 f.cpf_cnpj = ""
@@ -256,20 +256,20 @@ class _Anonimizador:
         lancamentos = list(
             Entry.objects.filter(clinic=self.clinic).select_related("categoria", "fornecedor")
         )
-        for lancamento in lancamentos:
-            lancamento.description = lancamento.categoria.name
-            if lancamento.fornecedor_id:
-                lancamento.pessoa = lancamento.fornecedor.name
+        for entry in lancamentos:
+            entry.description = entry.categoria.name
+            if entry.fornecedor_id:
+                entry.pessoa = entry.fornecedor.name
             else:
-                lancamento.pessoa = self._nome(self.sorte.choice("FM")) if lancamento.pessoa else ""
-            lancamento.notes = ""
+                entry.pessoa = self._nome(self.sorte.choice("FM")) if entry.pessoa else ""
+            entry.notes = ""
         Entry.objects.bulk_update(lancamentos, ["description", "pessoa", "notes"], batch_size=500)
         Payment.objects.filter(clinic=self.clinic).update(note="", cartao_codigo="")
         CashRegister.objects.filter(clinic=self.clinic).update(note="")
         Estimate.objects.filter(clinic=self.clinic).update(notes="")
         CashMovement.objects.filter(clinic=self.clinic).update(motivo="-")
         # Bank lines name who paid (Pix): keep only the bank's transaction type.
-        BankTransaction.objects.filter(clinic=self.clinic).update(description=F("tipo"), motivo="")
+        BankTransaction.objects.filter(clinic=self.clinic).update(description=F("kind"), motivo="")
 
     def auditoria(self):
         """Entries about these records held the original values: they go."""

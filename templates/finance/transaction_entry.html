@@ -5,7 +5,7 @@
 
 {% block conteudo %}
 <h1 class="h3 mb-1">{% translate "Criar lançamento" %}</h1>
-<p class="text-body-secondary mb-4">{{ transacao.data|date:"SHORT_DATE_FORMAT" }} · {{ transacao.description }} · <span class="{% if transacao.entrada %}text-success{% else %}text-danger{% endif %}">{{ transacao.valor|moeda }}</span> · {{ transacao.conta }}</p>
+<p class="text-body-secondary mb-4">{{ transacao.data|date:"SHORT_DATE_FORMAT" }} · {{ transacao.description }} · <span class="{% if transacao.entrada %}text-success{% else %}text-danger{% endif %}">{{ transacao.amount|moeda }}</span> · {{ transacao.conta }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}

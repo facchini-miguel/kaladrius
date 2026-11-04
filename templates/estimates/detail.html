@@ -21,7 +21,7 @@
     <form method="post" action="{% url 'estimates:decline' orcamento.pk %}">{% csrf_token %}<button type="submit" class="btn btn-outline-danger">{% translate "Recusar" %}</button></form>
     {% endif %}
     {% if pode_aprovar %}<a class="btn btn-success" href="{% url 'estimates:approve' orcamento.pk %}">{% translate "Aprovar" %}</a>{% endif %}
-    {% if orcamento.lancamento_id and pode.recebimentos.ver %}<a class="btn btn-outline-success" href="{% url 'finance:entry' orcamento.lancamento_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
+    {% if orcamento.entry_id and pode.recebimentos.ver %}<a class="btn btn-outline-success" href="{% url 'finance:entry' orcamento.entry_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
   </div>
 </div>
 

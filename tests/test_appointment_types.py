@@ -59,10 +59,10 @@ def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usu
 def test_recepcao_e_profissional_so_consultam(papel, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     with usar_clinica(clinica_a):
-        tipo = AppointmentType.objects.first()
+        kind = AppointmentType.objects.first()
     assert cliente.get(reverse("schedule:types")).status_code == 200
     assert cliente.get(reverse("schedule:type_new")).status_code == 403
-    assert cliente.post(reverse("schedule:type_delete", args=[tipo.pk])).status_code == 403
+    assert cliente.post(reverse("schedule:type_delete", args=[kind.pk])).status_code == 403
     conteudo = cliente.get(reverse("schedule:types")).content.decode()
     assert "Novo tipo" not in conteudo
 

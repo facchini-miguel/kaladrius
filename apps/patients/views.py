@@ -47,7 +47,7 @@ def _visiveis(request):
     return Patient.objects.filter(arquivado=False)
 
 
-def filtrar(pacientes, busca, tipo, situacao):
+def filtrar(pacientes, busca, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if busca:
         filtro = Q(name__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
@@ -57,19 +57,19 @@ def filtrar(pacientes, busca, tipo, situacao):
         if busca.isdecimal() and len(busca) <= 9:
             filtro |= Q(pk=int(busca))
         pacientes = pacientes.filter(filtro)
-    if tipo in Patient.Tipo.values:
-        pacientes = pacientes.filter(tipo=tipo)
-    return pacientes.filter(SITUACOES.get(situacao, SITUACOES["ativos"]))
+    if kind in Patient.Tipo.values:
+        pacientes = pacientes.filter(kind=kind)
+    return pacientes.filter(SITUACOES.get(status, SITUACOES["ativos"]))
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
 def lista(request):
     busca = request.GET.get("q", "").strip()
-    tipo = request.GET.get("tipo", "")
-    situacao = request.GET.get("situacao", "ativos")
-    if situacao == "arquivados" and not _ve_arquivados(request):
-        situacao = "ativos"
-    pacientes = filtrar(Patient.objects.select_related("cidade__uf"), busca, tipo, situacao)
+    kind = request.GET.get("kind", "")
+    status = request.GET.get("status", "ativos")
+    if status == "arquivados" and not _ve_arquivados(request):
+        status = "ativos"
+    pacientes = filtrar(Patient.objects.select_related("cidade__uf"), busca, kind, status)
     pagina = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -77,10 +77,10 @@ def lista(request):
         {
             "pagina": pagina,
             "busca": busca,
-            "tipo": tipo,
-            "situacao": situacao,
+            "kind": kind,
+            "status": status,
             "tipos": Patient.Tipo.choices,
-            "parametros": urlencode({"q": busca, "tipo": tipo, "situacao": situacao}),
+            "parametros": urlencode({"q": busca, "kind": kind, "status": status}),
         },
     )
 
@@ -149,7 +149,7 @@ def _historico(request, patient):
     deste = (
         agendamentos_visiveis(request)
         .filter(patient=patient)
-        .select_related("practitioner", "tipo")
+        .select_related("practitioner", "kind")
     )
     agora = timezone.now()
     return {
@@ -186,8 +186,8 @@ def arquivar(request, pk):
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
     abertas = list(
         Installment.objects.abertas()
-        .filter(lancamento__patient=patient)
-        .select_related("lancamento")
+        .filter(entry__patient=patient)
+        .select_related("entry")
         .order_by("vencimento", "pk")
     )
     if abertas:
@@ -261,7 +261,7 @@ def excluir(request, pk):
         lancamentos = Entry.objects.filter(patient=patient)
         ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
         ids_parcelas = list(
-            Installment.objects.filter(lancamento__in=ids_lancamentos).values_list("pk", flat=True)
+            Installment.objects.filter(entry__in=ids_lancamentos).values_list("pk", flat=True)
         )
         ids_pagamentos = list(
             Payment.objects.filter(parcela__in=ids_parcelas).values_list("pk", flat=True)

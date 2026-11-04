@@ -14,9 +14,9 @@ from .record import nome_do_modelo
 POR_PAGINA = 100
 
 
-def _data(valor):
+def _data(value):
     try:
-        return datetime.date.fromisoformat(valor or "")
+        return datetime.date.fromisoformat(value or "")
     except ValueError:
         return None
 

@@ -21,7 +21,7 @@
       <div class="card-header">{% translate "Dados" %}</div>
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ fornecedor.get_tipo_display }}</dd>
+          <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ fornecedor.get_kind_display }}</dd>
           {% if fornecedor.razao_social %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ fornecedor.razao_social }}</dd>{% endif %}
           {% with sigla=fornecedor.cpf_cnpj|sigla_documento:fornecedor.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ fornecedor.phone|phone|default:"—" }}</dd>
@@ -60,10 +60,10 @@
         {% for parcela in parcelas %}
         <tr>
           <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
-          <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
-          <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
-          <td class="text-end text-nowrap">{% if parcela.saldo > 0 and not parcela.lancamento.cancelado %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
-          <td>{% include "finance/_status.html" with situacao=parcela.situacao %}</td>
+          <td><a href="{% url 'finance:entry' parcela.entry_id %}">{{ parcela.entry.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
+          <td class="text-end text-nowrap">{{ parcela.amount|moeda }}</td>
+          <td class="text-end text-nowrap">{% if parcela.saldo > 0 and not parcela.entry.cancelado %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
+          <td>{% include "finance/_status.html" with status=parcela.status %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma conta deste fornecedor ainda." %}</td></tr>

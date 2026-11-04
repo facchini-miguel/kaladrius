@@ -1,6 +1,6 @@
-{% load i18n %}{% with name=atestado.atendimento.patient.name %}
+{% load i18n %}{% with name=atestado.visit.patient.name %}
   <p class="fs-6 lh-lg mt-4">
-    {% if atestado.tipo == "afastamento" %}
+    {% if atestado.kind == "afastamento" %}
     {% blocktranslate count dias=atestado.dias with nome=name %}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dia de afastamento das suas atividades, a partir dessa data.{% plural %}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dias de afastamento das suas atividades, a partir dessa data.{% endblocktranslate %}
     {% elif atestado.hora_inicio and atestado.hora_fim %}
     {% blocktranslate with nome=name inicio=atestado.hora_inicio|time:"H:i" fim=atestado.hora_fim|time:"H:i"%}Atesto, para os devidos fins, que {{ nome }} esteve em atendimento nesta clínica em {{ data }}, das {{ inicio }} às {{ fim }}.{% endblocktranslate %}

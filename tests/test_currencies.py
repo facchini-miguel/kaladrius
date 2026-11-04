@@ -47,8 +47,8 @@ def test_valor_invalido_fica_vazio():
 
 
 def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
-    modelo = Template("{% load formats %}{{ valor|moeda }} {% simbolo_moeda %}")
-    contexto = Context({"valor": VALOR})
+    modelo = Template("{% load formats %}{{ amount|moeda }} {% simbolo_moeda %}")
+    contexto = Context({"amount": VALOR})
     with translation.override("pt-br"):
         assert modelo.render(contexto) == "R$ 1.234,56 R$"  # no current clinic: the real
         clinica_a.moeda = "EUR"

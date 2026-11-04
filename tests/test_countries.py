@@ -26,8 +26,8 @@ pytestmark = pytest.mark.django_db
 def no_pais(clinic, pais, **extra):
     clinic.pais = pais
     clinic.fuso_horario = extra.pop("fuso", countries.PAISES[pais].fusos[0])
-    for campo, valor in extra.items():
-        setattr(clinic, campo, valor)
+    for campo, value in extra.items():
+        setattr(clinic, campo, value)
     clinic.save()
     return clinic
 
@@ -196,7 +196,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     resposta = admin.post(
         reverse("patients:new"),
         {
-            "tipo": "PF",
+            "kind": "PF",
             "name": "Oliver Fictício",
             "active": "on",
             "telefone_celular": "07700 900123",
@@ -243,7 +243,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     with usar_clinica(clinica_a):
         Appointment.objects.create(
             practitioner=ana,
-            tipo=AppointmentType.objects.first(),
+            kind=AppointmentType.objects.first(),
             description="Horário fictício",
             inicio=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
             fim=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),
@@ -324,7 +324,7 @@ def test_codigo_postal_latino_invalido(pais, digitado):
 
 
 @pytest.mark.parametrize(
-    ("pais", "variante", "valor"),
+    ("pais", "variante", "value"),
     [
         ("MX", "es-mx", "$ 1,234.56"),
         ("AR", "es-ar", "$ 1.234,56"),
@@ -337,7 +337,7 @@ def test_codigo_postal_latino_invalido(pais, digitado):
         ("EC", "es-ec", "US$ 1.234,56"),
     ],
 )
-def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
+def test_espanhol_de_cada_pais(pais, variante, value, clinica_a, criar_usuario):
     """Spanish with each country's numbers and its currency, texts from the es catalog."""
     from apps.core import currencies
 
@@ -346,7 +346,7 @@ def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
     with translation.override("es"):
         assert _durante_requisicao(user)["idioma"] == variante
     with translation.override(variante):
-        assert currencies.formatar(Decimal("1234.56"), countries.PAISES[pais].moeda) == valor
+        assert currencies.formatar(Decimal("1234.56"), countries.PAISES[pais].moeda) == value
         assert translation.gettext("Rechamadas") == "Recordatorios"
 
 

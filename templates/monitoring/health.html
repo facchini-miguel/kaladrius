@@ -19,10 +19,10 @@
 {% if parada %}<div class="alert alert-danger">{% blocktranslate with momento=ultima.momento|date:"SHORT_DATETIME_FORMAT" %}A coleta parou: a última amostra é de {{ momento }}.{% endblocktranslate %}</div>{% endif %}
 
 <div class="row g-3 mb-4">
-  {% include "monitoring/_card.html" with titulo=_("Processador") nivel=niveis.cpu valor=ultima.cpu detalhe=ultima.carga.0 tipo="cpu" %}
-  {% include "monitoring/_card.html" with titulo=_("Memória") nivel=niveis.memoria valor=ultima.memoria_pct usado=ultima.memoria_usada total=ultima.memoria_total tipo="bytes" %}
-  {% include "monitoring/_card.html" with titulo=_("Swap") nivel=niveis.swap valor=ultima.swap_pct usado=ultima.swap_usado total=ultima.swap_total tipo="bytes" %}
-  {% include "monitoring/_card.html" with titulo=_("Disco") nivel=niveis.disco valor=ultima.disco_pct usado=ultima.disco_usado total=ultima.disco_total tipo="bytes" %}
+  {% include "monitoring/_card.html" with titulo=_("Processador") nivel=niveis.cpu value=ultima.cpu detalhe=ultima.carga.0 kind="cpu" %}
+  {% include "monitoring/_card.html" with titulo=_("Memória") nivel=niveis.memoria value=ultima.memoria_pct usado=ultima.memoria_usada total=ultima.memoria_total kind="bytes" %}
+  {% include "monitoring/_card.html" with titulo=_("Swap") nivel=niveis.swap value=ultima.swap_pct usado=ultima.swap_usado total=ultima.swap_total kind="bytes" %}
+  {% include "monitoring/_card.html" with titulo=_("Disco") nivel=niveis.disco value=ultima.disco_pct usado=ultima.disco_usado total=ultima.disco_total kind="bytes" %}
 </div>
 <p class="text-body-secondary small">
   {% blocktranslate with momento=ultima.momento|date:"SHORT_DATETIME_FORMAT" %}Última amostra: {{ momento }}.{% endblocktranslate %}

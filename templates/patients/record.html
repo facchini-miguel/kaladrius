@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{{ patient.name }}</h1>
-    <span class="text-body-secondary">{% translate "Código" %} {{ patient.pk }} · {{ patient.get_tipo_display }}</span>
+    <span class="text-body-secondary">{% translate "Código" %} {{ patient.pk }} · {{ patient.get_kind_display }}</span>
     {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
     {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
   </div>
@@ -43,7 +43,7 @@
       <div class="card-header">{% translate "Identificação" %}</div>
       <div class="card-body">
         <dl class="row mb-0">
-          {% if patient.tipo == "PJ" %}
+          {% if patient.kind == "PJ" %}
           <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.razao_social|default:"—" }}</dd>
           {% if documentos_do_pais.empresa or patient.cpf_cnpj %}<dt class="col-sm-5">{{ patient.cpf_cnpj|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.cpf_cnpj|documento:"empresa"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.inscricao_estadual %}<dt class="col-sm-5">{% translate "Inscrição estadual" %}</dt><dd class="col-sm-7">{{ patient.inscricao_estadual|default:"—" }}</dd>{% endif %}
@@ -128,10 +128,10 @@
     {% if not patient.arquivado %}<a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:new' patient.pk %}">{% translate "Novo atendimento" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
-    {% for atendimento in prontuario %}
+    {% for visit in prontuario %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'medical_records:visit' atendimento.pk %}">{{ atendimento.data|date:"SHORT_DATETIME_FORMAT" }} · {{ atendimento.practitioner.name }}</a>
-      {% if atendimento.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
+      <a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.data|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</a>
+      {% if visit.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhum atendimento registrado." %}</li>
@@ -233,7 +233,7 @@
     <ul class="list-unstyled small mb-2">
       {% for parcela in financeiro.abertas %}
       <li>
-        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> ({{ parcela.number }}) · {{ parcela.saldo|moeda }}
+        {{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' parcela.entry_id %}">{{ parcela.entry.description }}</a> ({{ parcela.number }}) · {{ parcela.saldo|moeda }}
         {% if pode.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "receber" %}</a>{% endif %}
       </li>
       {% endfor %}
@@ -243,7 +243,7 @@
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
       {% for pagamento in financeiro.pagamentos %}
-      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.valor|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
+      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>
     {% endif %}

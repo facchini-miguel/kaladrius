@@ -117,12 +117,12 @@ def test_conta_de_demonstracao_nao_envia_anexos(demonstracao):
         patient = Patient.objects.create(name="Maria Paciente")
     cliente.post(reverse("medical_records:new", args=[patient.pk]), ANAMNESE)
     with usar_clinica(demonstracao["clinic"]):
-        atendimento = Visit.objects.get()
-    pagina = cliente.get(reverse("medical_records:visit", args=[atendimento.pk])).content.decode()
+        visit = Visit.objects.get()
+    pagina = cliente.get(reverse("medical_records:visit", args=[visit.pk])).content.decode()
     assert "Contas de demonstração não enviam anexos." in pagina
     assert "anexo_enviar" not in pagina and 'enctype="multipart/form-data"' not in pagina
     resposta = cliente.post(
-        reverse("medical_records:attachment_upload", args=[atendimento.pk]),
+        reverse("medical_records:attachment_upload", args=[visit.pk]),
         {"arquivo": SimpleUploadedFile("x.png", PNG)},
         follow=True,
     )

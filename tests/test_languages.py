@@ -66,10 +66,10 @@ def test_login_segue_o_idioma_do_navegador(client):
 
 def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(idioma="en")
-    resposta = cliente.post(reverse("patients:new"), {"tipo": "PF", "name": "", "active": "on"})
+    resposta = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
     assert "This field is required." in resposta.content.decode()
     resposta = cliente.post(
-        reverse("patients:new"), {"tipo": "PF", "name": "Ana", "active": "on"}, follow=True
+        reverse("patients:new"), {"kind": "PF", "name": "Ana", "active": "on"}, follow=True
     )
     assert "Patient Ana saved." in resposta.content.decode()
 

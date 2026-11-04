@@ -20,7 +20,9 @@ class Patient(ModeloDaClinica):
         MASCULINO = "M", _("Masculino")
         OUTRO = "O", _("Outro")
 
-    tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.FISICA)
+    kind = models.CharField(
+        _("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.FISICA, db_column="tipo"
+    )
     name = models.CharField(
         _("nome"),
         max_length=200,
@@ -138,7 +140,7 @@ class Patient(ModeloDaClinica):
     @property
     def papel_documento(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.tipo == self.Tipo.JURIDICA else "paciente"
+        return "empresa" if self.kind == self.Tipo.JURIDICA else "paciente"
 
     @property
     def idade(self):

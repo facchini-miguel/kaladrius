@@ -52,17 +52,17 @@ def moeda_da_clinica():
     return getattr(clinic, "moeda", None) or PADRAO
 
 
-def formatar(valor, code=None):
+def formatar(value, code=None):
     """The amount with the currency symbol, e.g. R$ 1.234,56 · US$ 1,234.56 · 1.234,56 €.
     The euro goes after the number in languages with a decimal comma (Portugal, Spain)."""
     try:
-        valor = Decimal(valor)
+        value = Decimal(value)
     except (InvalidOperation, TypeError, ValueError):
         return ""
     _nome, simbolo, casas = MOEDAS.get(code or moeda_da_clinica(), MOEDAS[PADRAO])
     # Rounded like money (Django's number_format just cuts the extra decimals).
-    valor = valor.quantize(Decimal(1).scaleb(-casas), rounding=ROUND_HALF_UP)
-    number = number_format(valor, casas, force_grouping=True)
+    value = value.quantize(Decimal(1).scaleb(-casas), rounding=ROUND_HALF_UP)
+    number = number_format(value, casas, force_grouping=True)
     if simbolo == "€" and get_format("DECIMAL_SEPARATOR") == ",":
         return f"{number} {simbolo}"
     return f"{simbolo} {number}"

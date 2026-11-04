@@ -19,12 +19,12 @@ def cenario(clinica_a, criar_profissional):
         patient = Patient.objects.create(
             name="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
         )
-        tipo = AppointmentType.objects.first()
+        kind = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
         semana = [
             Appointment.objects.create(
                 practitioner=ana,
-                tipo=tipo,
+                kind=kind,
                 patient=patient,
                 inicio=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(9)),
                 fim=agenda.momento(hoje - datetime.timedelta(days=d), datetime.time(10)),
@@ -65,7 +65,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             primeiro = Appointment.objects.first()
             Appointment.objects.create(
                 practitioner=primeiro.practitioner,
-                tipo=primeiro.tipo,
+                kind=primeiro.kind,
                 inicio=primeiro.inicio,
                 fim=primeiro.fim,
             )

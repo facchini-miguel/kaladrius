@@ -41,7 +41,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
     }
     with usar_clinica(clinica_a):
         Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
-        tipo = AppointmentType.objects.get(name="Cirurgia")
+        kind = AppointmentType.objects.get(name="Cirurgia")
         maria = Patient.objects.create(
             name="Maria Paciente",
             data_nascimento=dia(5, 3).replace(year=1990),
@@ -52,26 +52,26 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             name="Paciente Arquivado", arquivado=True, data_nascimento=dia(5).replace(year=1980)
         )
 
-        def agendar(data, hora, practitioner=ana, patient=maria, situacao="agendado"):
+        def agendar(data, hora, practitioner=ana, patient=maria, status="agendado"):
             Appointment.objects.create(
                 practitioner=practitioner,
-                tipo=tipo,
+                kind=kind,
                 patient=patient,
                 description="" if patient else "Bloqueado",
-                situacao=situacao,
+                status=status,
                 inicio=agenda.momento(data, datetime.time(hora)),
                 fim=agenda.momento(data, datetime.time(hora + 1)),
             )
 
-        agendar(HOJE, 8, situacao="compareceu")
-        agendar(HOJE, 9, situacao="faltou")
+        agendar(HOJE, 8, status="compareceu")
+        agendar(HOJE, 9, status="faltou")
         agendar(HOJE, 10, practitioner=bruno, patient=joao)  # started, nobody marked it
         agendar(HOJE, 11)
-        agendar(HOJE, 14, situacao="desmarcou")
+        agendar(HOJE, 14, status="desmarcou")
         agendar(HOJE, 16, patient=None)
-        agendar(dia(3), 9, situacao="compareceu")
-        agendar(dia(4), 9, situacao="faltou")
-        agendar(dia(27, 2), 9, situacao="faltou")  # last month: not in this month's rate
+        agendar(dia(3), 9, status="compareceu")
+        agendar(dia(4), 9, status="faltou")
+        agendar(dia(27, 2), 9, status="faltou")  # last month: not in this month's rate
 
         for data, concluida, patient in [
             (HOJE, False, maria),
@@ -84,40 +84,38 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
                 patient=patient, data=data, description="Revisão", concluida=concluida
             )
 
-        for patient, validade, situacao in [
+        for patient, validade, status in [
             (maria, dia(8), Estimate.Situacao.ABERTO),
             (maria, dia(20), Estimate.Situacao.ABERTO),
             (maria, dia(6), Estimate.Situacao.APROVADO),
             (arquivado, dia(6), Estimate.Situacao.ABERTO),
             (maria, dia(4), Estimate.Situacao.ABERTO),
         ]:
-            Estimate.objects.create(
-                patient=patient, data=dia(1), validade=validade, situacao=situacao
-            )
+            Estimate.objects.create(patient=patient, data=dia(1), validade=validade, status=status)
 
         caixa = FinancialAccount.objects.get(name="Caixa")
         receita = Category.objects.get(name="Tratamento")
         despesa = Category.objects.get(name="Outras despesas")
 
-        def lancar(tipo, valor, parcelas, vencimento, categoria, **campos):
-            lancamento = financeiro.criar_lancamento(
+        def lancar(kind, amount, parcelas, vencimento, categoria, **campos):
+            entry = financeiro.criar_lancamento(
                 clinic=clinica_a,
-                tipo=tipo,
+                kind=kind,
                 description="Teste",
                 categoria=categoria,
-                valor_total=Decimal(valor),
+                valor_total=Decimal(amount),
                 parcelas=parcelas,
                 primeiro_vencimento=vencimento,
                 user=usuarios["admin"],
                 **campos,
             )
-            return list(lancamento.parcelas.order_by("number"))
+            return list(entry.parcelas.order_by("number"))
 
-        def pagar(parcela, valor, data, forma="pix"):
+        def pagar(parcela, amount, data, forma="pix"):
             financeiro.receber(
                 parcela,
                 user=usuarios["admin"],
-                valor=Decimal(valor),
+                amount=Decimal(amount),
                 data=data,
                 forma=forma,
                 conta=caixa,
@@ -214,7 +212,7 @@ def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_
     assert resposta.url == reverse("home")
     proximo = painel["agenda"]["proximo"]
     resposta = cliente.post(
-        reverse("schedule:status", args=[proximo.pk]), {"situacao": "compareceu"}, follow=True
+        reverse("schedule:status", args=[proximo.pk]), {"status": "compareceu"}, follow=True
     )
     assert "João Paciente compareceu." in resposta.content.decode()
     assert resposta.context["painel"]["agenda"]["compareceram"] == 2

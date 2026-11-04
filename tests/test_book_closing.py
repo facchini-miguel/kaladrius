@@ -29,9 +29,9 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def parcela(clinica_a):
     with usar_clinica(clinica_a):
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=clinica_a,
-            tipo=Entry.Tipo.RECEBER,
+            kind=Entry.Tipo.RECEBER,
             pessoa="Pagador fictício",
             description="Consulta",
             categoria=Category.objects.get(name="Consulta"),
@@ -40,15 +40,15 @@ def parcela(clinica_a):
             primeiro_vencimento=ANTEONTEM,
             user=None,
         )
-        return lancamento.parcelas.get()
+        return entry.parcelas.get()
 
 
-def receber(clinic, parcela, data, valor="100"):
+def receber(clinic, parcela, data, amount="100"):
     with usar_clinica(clinic):
         return services.receber(
             parcela,
             user=None,
-            valor=Decimal(valor),
+            amount=Decimal(amount),
             data=data,
             forma="pix",
             conta=FinancialAccount.objects.get(name="Caixa"),
@@ -75,7 +75,7 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, parcela, admin):
         reverse("finance:receive_installment", args=[parcela.pk]),
         {
             "data": ONTEM.isoformat(),
-            "valor": "100",
+            "amount": "100",
             "forma": "pix",
             "conta": FinancialAccount.todos.get(clinic=clinica_a, name="Caixa").pk,
         },

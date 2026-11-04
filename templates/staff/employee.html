@@ -34,7 +34,7 @@
       <div class="card-header">{% translate "Histórico de salários" %}</div>
       <ul class="list-group list-group-flush">
         {% for salario in salarios %}
-        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salario.desde|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salario.valor|moeda }}</strong></li>
+        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salario.desde|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salario.amount|moeda }}</strong></li>
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum salário registrado." %}</li>
         {% endfor %}
@@ -56,7 +56,7 @@
           <td class="text-end text-nowrap">{{ folha.horas_extras }} h · {{ folha.valor_horas_extras|moeda }}</td>
           <td class="text-end text-nowrap">{{ folha.faltas }} · − {{ folha.desconto_faltas|moeda }}</td>
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
-          <td>{% if folha.lancada %}<a href="{% url 'finance:entry' folha.lancamento_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
+          <td>{% if folha.lancada %}<a href="{% url 'finance:entry' folha.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma folha ainda." %}</td></tr>

@@ -25,18 +25,18 @@ def fornecedor(clinica_a):
 
 
 def dados(**extra):
-    return {"tipo": "PJ", "name": "Laboratório Fictício", "active": "on", **extra}
+    return {"kind": "PJ", "name": "Laboratório Fictício", "active": "on", **extra}
 
 
 def despesa(clinic, **extra):
     with usar_clinica(clinic):
-        categoria = Category.objects.filter(tipo=Category.Tipo.DESPESA).first()
+        categoria = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
     return {
         "fornecedor": "",
         "pessoa": "",
         "description": "Material fictício",
         "categoria": categoria.pk,
-        "valor": "450",
+        "amount": "450",
         "modo": "dividir",
         "parcelas": 3,
         "primeiro_vencimento": "2031-01-10",
@@ -65,7 +65,7 @@ def test_cadastro_normaliza_documento_e_contatos(clinica_a, admin):
     ("extra", "campo"),
     [
         ({"cpf_cnpj": "11.222.333/0001-00"}, "cpf_cnpj"),
-        ({"tipo": "PF", "cpf_cnpj": "111.111.111-11"}, "cpf_cnpj"),
+        ({"kind": "PF", "cpf_cnpj": "111.111.111-11"}, "cpf_cnpj"),
         ({"phone": "1234"}, "phone"),
         ({"name": ""}, "name"),
     ],
@@ -94,9 +94,9 @@ def test_despesa_com_fornecedor_guarda_o_nome_e_aparece_na_ficha(clinica_a, forn
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        lancamento = Entry.objects.get()
-    assert lancamento.fornecedor == fornecedor
-    assert lancamento.pessoa == "Dental Fictícia"
+        entry = Entry.objects.get()
+    assert entry.fornecedor == fornecedor
+    assert entry.pessoa == "Dental Fictícia"
     ficha = admin.get(reverse("finance:supplier", args=[fornecedor.pk]))
     assert len(ficha.context["parcelas"]) == 3
     assert str(ficha.context["em_aberto"]) == "450.00"
@@ -109,8 +109,8 @@ def test_despesa_avulsa_sem_fornecedor_continua_valendo(clinica_a, admin):
     resposta = admin.post(reverse("finance:expense_new"), despesa(clinica_a, pessoa="Feira"))
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        lancamento = Entry.objects.get()
-    assert (lancamento.fornecedor, lancamento.pessoa) == (None, "Feira")
+        entry = Entry.objects.get()
+    assert (entry.fornecedor, entry.pessoa) == (None, "Feira")
 
 
 def test_despesa_exige_fornecedor_ou_nome(clinica_a, admin):

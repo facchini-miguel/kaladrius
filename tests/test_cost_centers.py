@@ -37,7 +37,7 @@ def despesa(clinic, **extra):
         "pessoa": "Imobiliária fictícia",
         "description": "Aluguel",
         "categoria": categoria.pk,
-        "valor": "1000",
+        "amount": "1000",
         "modo": "dividir",
         "parcelas": 1,
         "primeiro_vencimento": HOJE.isoformat(),
@@ -98,8 +98,8 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         assert Entry.objects.filter(centro_custo=centro).count() == 2
-        lancamento = Entry.objects.get(tipo=Entry.Tipo.PAGAR)
-    pagina = admin.get(reverse("finance:entry", args=[lancamento.pk])).content.decode()
+        entry = Entry.objects.get(kind=Entry.Tipo.PAGAR)
+    pagina = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
     assert "Ortodontia" in pagina
     # Without a center the entry still saves (the field is optional).
     assert admin.post(reverse("finance:expense_new"), despesa(clinica_a)).status_code == 302
@@ -109,21 +109,21 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
     with usar_clinica(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
         caixa = FinancialAccount.objects.get(name="Caixa")
-        for valor, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
-            lancamento = services.criar_lancamento(
+        for amount, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
+            entry = services.criar_lancamento(
                 clinic=clinica_a,
-                tipo=Entry.Tipo.PAGAR,
+                kind=Entry.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
                 description="Compra",
                 categoria=aluguel,
                 centro_custo=centro_custo,
-                valor_total=valor,
+                valor_total=amount,
                 parcelas=1,
                 primeiro_vencimento=HOJE,
                 user=None,
             )
-            parcela = lancamento.parcelas.get()
-            services.receber(parcela, user=None, valor=parcela.valor, forma="pix", conta=caixa)
+            parcela = entry.parcelas.get()
+            services.receber(parcela, user=None, amount=parcela.amount, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert relatorio["centros"]
     assert {name: str(total) for name, total in relatorio["despesas_por_centro"]} == {

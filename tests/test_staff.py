@@ -33,7 +33,7 @@ def ana(clinica_a):
             name="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
         )
         Salary.objects.create(
-            funcionario=funcionario, valor=Decimal("2200"), desde=datetime.date(2025, 3, 1)
+            funcionario=funcionario, amount=Decimal("2200"), desde=datetime.date(2025, 3, 1)
         )
         return funcionario
 
@@ -92,13 +92,13 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
             name="Admitido depois", admissao=datetime.date(2026, 11, 3)
         )
         Salary.objects.create(
-            funcionario=futuro, valor=Decimal("2000"), desde=datetime.date(2026, 11, 3)
+            funcionario=futuro, amount=Decimal("2000"), desde=datetime.date(2026, 11, 3)
         )
         saiu = Employee.objects.create(
             name="Desligado antes", desligamento=datetime.date(2026, 9, 30)
         )
         Salary.objects.create(
-            funcionario=saiu, valor=Decimal("2000"), desde=datetime.date(2025, 1, 1)
+            funcionario=saiu, amount=Decimal("2000"), desde=datetime.date(2025, 1, 1)
         )
         Employee.objects.create(name="Sem salário")
         folhas = services.preparar(OUTUBRO)
@@ -152,13 +152,13 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         folha.refresh_from_db()
-        lancamento = folha.lancamento
-        assert (lancamento.tipo, lancamento.pessoa, lancamento.valor_total) == (
+        entry = folha.entry
+        assert (entry.kind, entry.pessoa, entry.valor_total) == (
             Entry.Tipo.PAGAR,
             "Ana Fictícia",
             Decimal("2276.67"),
         )
-        assert lancamento.parcelas.get().vencimento == datetime.date(2026, 11, 5)
+        assert entry.parcelas.get().vencimento == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
     linha = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
     assert linha[1] is None
@@ -170,7 +170,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
             == 0
         )
         # Cancelling the payable in finance opens the line again.
-        financeiro.cancelar(lancamento, motivo="Refazer", user=None)
+        financeiro.cancelar(entry, motivo="Refazer", user=None)
         folha.refresh_from_db()
         assert not folha.lancada
 

@@ -34,7 +34,7 @@ class Procedure(ModeloDaClinica):
     name = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA, db_column="nome")
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
     code = models.CharField(_("código"), max_length=20, blank=True, db_column="codigo")
-    valor = models.DecimalField(_("valor"), **DINHEIRO)
+    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
     categoria = models.ForeignKey(
         "financeiro.Category",
         on_delete=models.PROTECT,
@@ -53,7 +53,7 @@ class Procedure(ModeloDaClinica):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "name"], name="procedimento_unico"),
-            models.CheckConstraint(condition=Q(valor__gte=0), name="procedimento_valor"),
+            models.CheckConstraint(condition=Q(amount__gte=0), name="procedimento_valor"),
         ]
 
     def __str__(self):
@@ -84,18 +84,23 @@ class Estimate(ModeloDaClinica):
     )
     data = models.DateField(_("data"), default=timezone.localdate)
     validade = models.DateField(_("válido até"), default=validade_padrao)
-    situacao = models.CharField(
-        _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.ABERTO
+    status = models.CharField(
+        _("situação"),
+        max_length=10,
+        choices=Situacao.choices,
+        default=Situacao.ABERTO,
+        db_column="situacao",
     )
     desconto = models.DecimalField(_("desconto"), default=Decimal("0.00"), **DINHEIRO)
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
-    lancamento = models.OneToOneField(
+    entry = models.OneToOneField(
         "financeiro.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="orcamento",
         verbose_name=_("lançamento a receber"),
+        db_column="lancamento_id",
     )
     decidido_em = models.DateTimeField(_("aprovado ou recusado em"), null=True, blank=True)
     decidido_por = models.ForeignKey(
@@ -140,7 +145,7 @@ class Estimate(ModeloDaClinica):
 
     @property
     def vencido(self):
-        return self.situacao == self.Situacao.ABERTO and self.validade < timezone.localdate()
+        return self.status == self.Situacao.ABERTO and self.validade < timezone.localdate()
 
     @property
     def dentes(self):

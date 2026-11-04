@@ -73,10 +73,10 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
                     Appointment(
                         clinic=clinic,
                         practitioner=practitioner,
-                        tipo=sorteio.choice(tipos),
+                        kind=sorteio.choice(tipos),
                         patient=sorteio.choice(pacientes) if com_paciente else None,
                         description="" if com_paciente else "Horário bloqueado",
-                        situacao=_situacao(sorteio, atual) if com_paciente else "agendado",
+                        status=_situacao(sorteio, atual) if com_paciente else "agendado",
                         inicio=atual,
                         fim=fim,
                     )
@@ -144,7 +144,7 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     from apps.finance.models import Category, CostCenter, Entry, FinancialAccount, Payment
 
     pacientes = _pacientes(clinic)
-    categorias = list(Category.objects.filter(clinic=clinic, tipo=Category.Tipo.RECEITA))
+    categorias = list(Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA))
     contas = list(FinancialAccount.objects.filter(clinic=clinic, active=True))
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     if not (pacientes and categorias and contas):
@@ -159,9 +159,9 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
     criados = 0
     for _ in range(quantidade):
         data = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=clinic,
-            tipo=Entry.Tipo.RECEBER,
+            kind=Entry.Tipo.RECEBER,
             patient=sorteio.choice(pacientes),
             description=sorteio.choice(DESCRICOES_FINANCEIRAS),
             categoria=sorteio.choice(categorias),
@@ -173,12 +173,12 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
             primeiro_vencimento=data,
             user=user,
         )
-        for parcela in lancamento.parcelas.all():
+        for parcela in entry.parcelas.all():
             if parcela.vencimento <= hoje and sorteio.random() < 0.8:
                 services.receber(
                     parcela,
                     user=user,
-                    valor=parcela.valor,
+                    amount=parcela.amount,
                     data=parcela.vencimento,
                     forma=sorteio.choice(formas),
                     conta=sorteio.choice(contas),
@@ -213,20 +213,20 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
     formas = [forma for forma in contas_a_pagar if forma in do_pais]
     categorias = {
-        c.name: c for c in Category.objects.filter(clinic=clinic, tipo=Category.Tipo.DESPESA)
+        c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Tipo.DESPESA)
     }
     hoje = timezone.localdate()
     inicio = services.somar_meses(hoje.replace(day=10), -2)
     criadas = 0
-    for fornecedor, description, categoria, valor, meses in DESPESAS_SIMULADAS:
+    for fornecedor, description, categoria, amount, meses in DESPESAS_SIMULADAS:
         if categoria not in categorias:
             continue
         parcelas = meses or sorteio.choice([1, 2, 3])
-        valor = Decimal(valor)
+        amount = Decimal(amount)
         cadastro, _criado = Supplier.objects.get_or_create(clinic=clinic, name=fornecedor)
-        lancamento = services.criar_lancamento(
+        entry = services.criar_lancamento(
             clinic=clinic,
-            tipo=Entry.Tipo.PAGAR,
+            kind=Entry.Tipo.PAGAR,
             fornecedor=cadastro,
             pessoa=fornecedor,
             description=description,
@@ -234,18 +234,18 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
             centro_custo=centros[
                 "Atendimento" if categoria in DESPESAS_DO_ATENDIMENTO else "Administrativo"
             ],
-            valor_total=valor * parcelas if meses else valor,
+            valor_total=amount * parcelas if meses else amount,
             data=inicio,
             parcelas=parcelas,
             primeiro_vencimento=inicio if meses else hoje - datetime.timedelta(days=20),
             user=user,
         )
-        for parcela in lancamento.parcelas.all():
+        for parcela in entry.parcelas.all():
             if parcela.vencimento <= hoje and sorteio.random() < 0.9:
                 services.receber(
                     parcela,
                     user=user,
-                    valor=parcela.valor,
+                    amount=parcela.amount,
                     data=parcela.vencimento,
                     forma=sorteio.choice(formas),
                     conta=sorteio.choice(contas),
@@ -284,14 +284,14 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
     tratamento = Category.objects.filter(clinic=clinic, name="Tratamento").first()
     if not Procedure.objects.filter(clinic=clinic).exists():
         Procedure.objects.bulk_create(
-            Procedure(clinic=clinic, name=name, valor=Decimal(valor), categoria=tratamento)
-            for name, valor in PROCEDIMENTOS_EXEMPLO
+            Procedure(clinic=clinic, name=name, amount=Decimal(amount), categoria=tratamento)
+            for name, amount in PROCEDIMENTOS_EXEMPLO
         )
     procedimentos = list(Procedure.objects.filter(clinic=clinic, active=True))
     pacientes = _pacientes(clinic)
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     categoria = (
-        tratamento or Category.objects.filter(clinic=clinic, tipo=Category.Tipo.RECEITA).first()
+        tratamento or Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA).first()
     )
     if not (procedimentos and pacientes and categoria):
         return 0
@@ -316,7 +316,7 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
                 description=procedimento.name,
                 dentes=",".join(str(d) for d in escolhidos),
                 quantidade=max(len(escolhidos), 1),
-                valor_unitario=procedimento.valor,
+                valor_unitario=procedimento.amount,
             )
         sorte = sorteio.random()
         if sorte < 0.4:
@@ -341,7 +341,7 @@ def simular_comissoes(clinic, sorteio, user=None):
     from apps.finance.models import Category
 
     categoria = Category.objects.filter(
-        clinic=clinic, tipo=Category.Tipo.DESPESA, name="Comissões"
+        clinic=clinic, kind=Category.Tipo.DESPESA, name="Comissões"
     ).first()
     if categoria is None:
         return 0
@@ -352,7 +352,7 @@ def simular_comissoes(clinic, sorteio, user=None):
             practitioner.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
             practitioner.save(update_fields=["comissao_percentual"])
         # Runs without isolation (like the command); the practitioner pins the clinic.
-        if commissions.pendente(practitioner, fim_do_mes_passado)["valor"] > 0:
+        if commissions.pendente(practitioner, fim_do_mes_passado)["amount"] > 0:
             commissions.pagar(
                 practitioner,
                 ate=fim_do_mes_passado,

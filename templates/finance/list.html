@@ -21,11 +21,11 @@
     <input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% if pagar %}{% translate 'Fornecedor ou descrição' %}{% else %}{% translate 'Paciente, pagador ou descrição' %}{% endif %}" aria-label="{% translate 'Buscar' %}">
   </div>
   <div class="col-6 col-md-3">
-    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="abertas"{% if situacao == "abertas" %} selected{% endif %}>{% translate "Em aberto" %}</option>
-      <option value="vencidas"{% if situacao == "vencidas" %} selected{% endif %}>{% translate "Vencidas" %}</option>
-      <option value="pagas"{% if situacao == "pagas" %} selected{% endif %}>{% translate "Pagas" %}</option>
-      <option value="todas"{% if situacao == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
+      <option value="abertas"{% if status == "abertas" %} selected{% endif %}>{% translate "Em aberto" %}</option>
+      <option value="vencidas"{% if status == "vencidas" %} selected{% endif %}>{% translate "Vencidas" %}</option>
+      <option value="pagas"{% if status == "pagas" %} selected{% endif %}>{% translate "Pagas" %}</option>
+      <option value="todas"{% if status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
@@ -49,16 +49,16 @@
       <tr>
         <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
         <td>
-          {% if parcela.lancamento.patient_id %}<a href="{% url 'patients:record' parcela.lancamento.patient_id %}">{{ parcela.lancamento.patient.name }}</a>
-          {% elif parcela.lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.lancamento.fornecedor_id %}">{{ parcela.lancamento.pessoa }}</a>
-          {% else %}{{ parcela.lancamento.pessoa }}{% endif %}
+          {% if parcela.entry.patient_id %}<a href="{% url 'patients:record' parcela.entry.patient_id %}">{{ parcela.entry.patient.name }}</a>
+          {% elif parcela.entry.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.entry.fornecedor_id %}">{{ parcela.entry.pessoa }}</a>
+          {% else %}{{ parcela.entry.pessoa }}{% endif %}
         </td>
-        <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
-        <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
+        <td><a href="{% url 'finance:entry' parcela.entry_id %}">{{ parcela.entry.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
+        <td class="text-end text-nowrap">{{ parcela.amount|moeda }}</td>
         <td class="text-end text-nowrap">{% if parcela.saldo > 0 %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
-        <td>{% include "finance/_status.html" with situacao=parcela.situacao %}</td>
+        <td>{% include "finance/_status.html" with status=parcela.status %}</td>
         <td class="text-end text-nowrap">
-          {% if parcela.saldo > 0 and not parcela.lancamento.cancelado %}
+          {% if parcela.saldo > 0 and not parcela.entry.cancelado %}
           {% if pagar and pode.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Pagar" %}</a>
           {% elif not pagar and pode.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' parcela.pk %}">{% translate "Receber" %}</a>{% endif %}
           {% endif %}

@@ -161,7 +161,7 @@ def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
     with usar_clinica(clinica_b):
         Appointment.objects.create(
             practitioner=practitioner,
-            tipo=AppointmentType.objects.first(),
+            kind=AppointmentType.objects.first(),
             inicio=inicio,
             fim=inicio + datetime.timedelta(minutes=30),
         )

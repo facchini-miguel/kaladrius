@@ -27,13 +27,13 @@ SEGUNDA = datetime.date(2031, 3, 3)
 def cenario(clinica_a, criar_profissional, criar_usuario, cliente_de):
     """Clinic A with two practitioners, a type, a patient and a front desk user."""
     with usar_clinica(clinica_a):
-        tipo = AppointmentType.objects.get(name="Cirurgia")
+        kind = AppointmentType.objects.get(name="Cirurgia")
         patient = Patient.objects.create(name="Maria Paciente")
     return {
         "clinic": clinica_a,
         "ana": criar_profissional(clinica_a, "Dra. Ana"),
         "bruno": criar_profissional(clinica_a, "Dr. Bruno"),
-        "tipo": tipo,
+        "kind": kind,
         "patient": patient,
         "cliente": cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO)),
     }
@@ -42,7 +42,7 @@ def cenario(clinica_a, criar_profissional, criar_usuario, cliente_de):
 def dados(cenario, **extra):
     return {
         "practitioner": cenario["ana"].pk,
-        "tipo": cenario["tipo"].pk,
+        "kind": cenario["kind"].pk,
         "patient": cenario["patient"].pk,
         "description": "",
         "data": SEGUNDA.isoformat(),
@@ -160,7 +160,7 @@ def test_banco_de_dados_impede_sobreposicao(cenario):
     with usar_clinica(cenario["clinic"]):
         intervalos = services.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10))
         modelo = Appointment(
-            practitioner=cenario["ana"], tipo=cenario["tipo"], description="Primeiro"
+            practitioner=cenario["ana"], kind=cenario["kind"], description="Primeiro"
         )
         services.criar(modelo, intervalos, None)
         sobreposto = services.ocorrencias(SEGUNDA, datetime.time(9, 30), datetime.time(10, 30))
@@ -190,7 +190,7 @@ def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cena
     agendar(cenario)
     [agendamento] = agendamentos(cenario)
     cliente = cenario["cliente"]
-    cliente.post(reverse("schedule:status", args=[agendamento.pk]), {"situacao": "desmarcou"})
+    cliente.post(reverse("schedule:status", args=[agendamento.pk]), {"status": "desmarcou"})
     janela = cliente.get(reverse("schedule:edit", args=[agendamento.pk])).content.decode()
     assert "Agendar outro paciente neste horário" in janela
     assert (
@@ -205,7 +205,7 @@ def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cena
     novo = cliente.post(reverse("schedule:new"), dados(cenario, patient=outro.pk))
     assert novo.status_code == 204
     with usar_clinica(cenario["clinic"]):
-        nomes = sorted((a.patient.name, a.situacao) for a in Appointment.objects.all())
+        nomes = sorted((a.patient.name, a.status) for a in Appointment.objects.all())
     assert nomes == [("Maria Paciente", "desmarcou"), ("Outro Paciente", "agendado")]
 
 
@@ -273,7 +273,7 @@ def test_eventos_do_periodo_em_json(cenario):
     assert evento["title"] == "Maria Paciente"
     assert evento["start"].startswith(f"{SEGUNDA}T09:00:00")
     assert evento["backgroundColor"] == "#f7a5a5"
-    assert evento["extendedProps"]["tipo"] == "Cirurgia"
+    assert evento["extendedProps"]["kind"] == "Cirurgia"
 
 
 def test_eventos_com_parametros_invalidos(cenario):
@@ -323,7 +323,7 @@ def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissio
         tipo_b = AppointmentType.objects.get(name="Cirurgia")
         paciente_b = Patient.objects.create(name="Paciente B")
         [agendamento_b] = services.criar(
-            Appointment(practitioner=de_b, tipo=tipo_b, patient=paciente_b),
+            Appointment(practitioner=de_b, kind=tipo_b, patient=paciente_b),
             services.ocorrencias(SEGUNDA, datetime.time(9), datetime.time(10)),
             None,
         )
@@ -335,8 +335,8 @@ def test_agenda_de_outra_clinica_e_invisivel(cenario, clinica_b, criar_profissio
     assert eventos == []
     assert cliente.get(reverse("schedule:edit", args=[agendamento_b.pk])).status_code == 404
     # Ids from another clinic are not accepted in the form either.
-    resposta = agendar(cenario, practitioner=de_b.pk, tipo=tipo_b.pk, patient=paciente_b.pk)
-    assert set(resposta.context["form"].errors) >= {"practitioner", "tipo", "patient"}
+    resposta = agendar(cenario, practitioner=de_b.pk, kind=tipo_b.pk, patient=paciente_b.pk)
+    assert set(resposta.context["form"].errors) >= {"practitioner", "kind", "patient"}
 
 
 def cliente_da_dra_ana(cenario, criar_usuario, cliente_de):
@@ -431,7 +431,7 @@ def test_ficha_mostra_proximos_e_anteriores(cenario, criar_usuario, cliente_de):
     with usar_clinica(cenario["clinic"]):
         Appointment.objects.create(
             practitioner=cenario["ana"],
-            tipo=cenario["tipo"],
+            kind=cenario["kind"],
             patient=cenario["patient"],
             inicio=services.momento(passado, datetime.time(9)),
             fim=services.momento(passado, datetime.time(10)),
@@ -464,7 +464,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         Patient.objects.create(name="Arquivado", arquivado=True)
         existente = Appointment.objects.create(
             practitioner=cenario["ana"],
-            tipo=cenario["tipo"],
+            kind=cenario["kind"],
             inicio=services.momento(hoje, datetime.time(9)),
             fim=services.momento(hoje, datetime.time(10)),
             description="Real",
@@ -480,7 +480,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
             practitioner=cenario["ana"], inicio__lt=existente.fim, fim__gt=existente.inicio
         ).exists()
         assert not novos.filter(patient__arquivado=True).exists()
-        assert novos.filter(tipo__name="Ocupado").count() == 0
+        assert novos.filter(kind__name="Ocupado").count() == 0
         assert Recall.objects.count() == 80
         assert not Recall.objects.filter(patient__arquivado=True).exists()
         # Cheques are not used anymore, not even in made-up data.
@@ -508,7 +508,7 @@ def agendamento_em(cenario, dia, hora=9, patient=True, practitioner="ana"):
     with usar_clinica(cenario["clinic"]):
         return Appointment.objects.create(
             practitioner=cenario[practitioner],
-            tipo=cenario["tipo"],
+            kind=cenario["kind"],
             patient=cenario["patient"] if patient else None,
             description="" if patient else "Bloqueado",
             inicio=services.momento(dia, datetime.time(hora)),
@@ -516,16 +516,16 @@ def agendamento_em(cenario, dia, hora=9, patient=True, practitioner="ana"):
         )
 
 
-def marcar(cenario, agendamento, situacao, htmx=True, cliente=None):
+def marcar(cenario, agendamento, status, htmx=True, cliente=None):
     cabecalhos = {"HTTP_HX_REQUEST": "true"} if htmx else {}
     return (cliente or cenario["cliente"]).post(
-        reverse("schedule:status", args=[agendamento.pk]), {"situacao": situacao}, **cabecalhos
+        reverse("schedule:status", args=[agendamento.pk]), {"status": status}, **cabecalhos
     )
 
 
 def situacao_de(cenario, agendamento):
     with usar_clinica(cenario["clinic"]):
-        return Appointment.objects.get(pk=agendamento.pk).situacao
+        return Appointment.objects.get(pk=agendamento.pk).status
 
 
 def test_marca_comparecimento_e_falta_a_partir_do_dia(cenario):
@@ -631,7 +631,7 @@ def test_eventos_trazem_a_situacao(cenario):
     )
     [evento] = resposta.json()
     assert evento["classNames"] == ["situacao-faltou"]
-    assert evento["extendedProps"]["situacao_nome"] == "Faltou"
+    assert evento["extendedProps"]["status_name"] == "Faltou"
 
 
 def test_tipos_padrao_aparecem_no_idioma_do_usuario(cenario):

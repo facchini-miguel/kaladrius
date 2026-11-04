@@ -416,8 +416,8 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
             "INSERT INTO django_migrations (app, name, applied) "
             "VALUES ('account', '0001_initial', now())"
         )
-    tipo = ContentType.objects.create(app_label="account", model="duasetapas")
-    Permission.objects.create(content_type=tipo, codename="view_duasetapas", name="x")
+    kind = ContentType.objects.create(app_label="account", model="duasetapas")
+    Permission.objects.create(content_type=kind, codename="view_duasetapas", name="x")
 
     with connection.schema_editor() as editor:
         migracao.remover(apps, editor)

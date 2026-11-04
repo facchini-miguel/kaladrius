@@ -5,10 +5,10 @@
   const form = document.getElementById("form-paciente");
   if (!form) return;
   function atualizar() {
-    const tipo = form.querySelector("input[name=tipo]:checked")?.value || "PF";
+    const tipo = form.querySelector("input[name=kind]:checked")?.value || "PF";
     form.querySelectorAll(".so-pf").forEach((el) => { el.hidden = tipo !== "PF"; });
     form.querySelectorAll(".so-pj").forEach((el) => { el.hidden = tipo !== "PJ"; });
   }
-  form.querySelectorAll("input[name=tipo]").forEach((el) => el.addEventListener("change", atualizar));
+  form.querySelectorAll("input[name=kind]").forEach((el) => el.addEventListener("change", atualizar));
   atualizar();
 })();

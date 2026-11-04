@@ -51,15 +51,15 @@ def _exigir(condicao):
 
 
 def _regex(padrao):
-    def validar(valor):
-        _exigir(re.fullmatch(padrao, valor))
+    def validar(value):
+        _exigir(re.fullmatch(padrao, value))
 
     return validar
 
 
-def _milhares(valor):
+def _milhares(value):
     """1234567 → 1.234.567 (identity numbers in Spanish-speaking countries)."""
-    return f"{int(valor):,}".replace(",", ".")
+    return f"{int(value):,}".replace(",", ".")
 
 
 @dataclass(frozen=True)
@@ -70,20 +70,20 @@ class Documento:
     formatar: object = None  # compact (and valid) value → as written; None: as stored
     letras: str = ""  # characters kept besides A-Z and 0-9 (Mexico's Ñ and &)
 
-    def normalizar(self, valor):
-        return re.sub(f"[^0-9A-Z{self.letras}]", "", (valor or "").upper())
+    def normalizar(self, value):
+        return re.sub(f"[^0-9A-Z{self.letras}]", "", (value or "").upper())
 
-    def valido(self, valor):
+    def valido(self, value):
         try:
-            self.validar(valor)
+            self.validar(value)
         except (stdnum_erros.ValidationError, _Invalido, ValueError):
             return False
         return True
 
-    def escrever(self, valor):
-        if not (valor and self.formatar and self.valido(valor)):
-            return valor or ""
-        return self.formatar(valor)
+    def escrever(self, value):
+        if not (value and self.formatar and self.valido(value)):
+            return value or ""
+        return self.formatar(value)
 
 
 PAPEIS = ("paciente", "funcionario", "pessoa", "empresa")
@@ -116,12 +116,12 @@ class Documentos:
 
 
 # ---- Brazil: the system's own rules (apps/core/validators.py).
-def _cpf(valor):
-    _exigir(valor.isdigit() and cpf_valido(valor))
+def _cpf(value):
+    _exigir(value.isdigit() and cpf_valido(value))
 
 
-def _cnpj(valor):
-    _exigir(cnpj_valido(valor))
+def _cnpj(value):
+    _exigir(cnpj_valido(value))
 
 
 def _escrever_cpf(v):
@@ -138,9 +138,9 @@ CNPJ = Documento("CNPJ", "00.000.000/0000-00", _cnpj, _escrever_cnpj)
 
 # ---- Mexico. The RFC's check digit is not checked: many issued RFCs fail it (python-stdnum).
 def _rfc(tamanho):
-    def validar(valor):
-        _exigir(len(valor) == tamanho)
-        rfc.validate(valor)
+    def validar(value):
+        _exigir(len(value) == tamanho)
+        rfc.validate(value)
 
     return validar
 
@@ -166,9 +166,9 @@ RUC_PE = Documento("RUC", "20512333797", pe_ruc.validate)
 
 
 # ---- Uruguay: the cédula's last digit checks the others (weights 2987634).
-def _cedula_uy(valor):
-    _exigir(re.fullmatch(r"\d{6,8}", valor))
-    number = valor.zfill(8)
+def _cedula_uy(value):
+    _exigir(re.fullmatch(r"\d{6,8}", value))
+    number = value.zfill(8)
     soma = sum(int(d) * p for d, p in zip(number[:7], (2, 9, 8, 7, 6, 3, 4), strict=True))
     _exigir((10 - soma % 10) % 10 == int(number[7]))
 
@@ -222,10 +222,10 @@ BN = Documento("Business Number", "123456782 RT0001", bn.validate, _escrever_bn)
 # ---- Australia: the Medicare card number checks its 9th digit (weights 13791379); the 10th
 # is the card's issue number and an 11th the person's position on the card. The tax file
 # number is not kept: the law restricts who may record it.
-def _medicare(valor):
-    _exigir(re.fullmatch(r"[2-6]\d{9,10}", valor))
-    soma = sum(int(d) * p for d, p in zip(valor[:8], (1, 3, 7, 9, 1, 3, 7, 9), strict=True))
-    _exigir(soma % 10 == int(valor[8]))
+def _medicare(value):
+    _exigir(re.fullmatch(r"[2-6]\d{9,10}", value))
+    soma = sum(int(d) * p for d, p in zip(value[:8], (1, 3, 7, 9, 1, 3, 7, 9), strict=True))
+    _exigir(soma % 10 == int(value[8]))
 
 
 def _escrever_medicare(v):
@@ -273,31 +273,31 @@ def papeis(texto):
     return tuple(p.strip() for p in (texto or "").split(",") if p.strip()) or PAPEIS
 
 
-def identificar(valor, papeis_=None, pais=None):
+def identificar(value, papeis_=None, pais=None):
     """The document of these roles (all of them by default) this value is valid as."""
     for documento in do_pais(pais).de(*(papeis_ or PAPEIS)):
-        if documento.valido(valor):
+        if documento.valido(value):
             return documento
     return None
 
 
-def escrever(valor, papeis_=None, pais=None):
+def escrever(value, papeis_=None, pais=None):
     """The stored value written the country's way. In Brazil, as always, by its length."""
-    valor = valor or ""
+    value = value or ""
     if (pais or countries.pais_da_clinica()) == "BR":
-        if len(valor) == 11:
-            return _escrever_cpf(valor)
-        if len(valor) == 14:
-            return _escrever_cnpj(valor)
-        return valor
-    documento = identificar(valor, papeis_, pais)
-    return documento.escrever(valor) if documento else valor
+        if len(value) == 11:
+            return _escrever_cpf(value)
+        if len(value) == 14:
+            return _escrever_cnpj(value)
+        return value
+    documento = identificar(value, papeis_, pais)
+    return documento.escrever(value) if documento else value
 
 
-def sigla(valor, papeis_=None, pais=None):
+def sigla(value, papeis_=None, pais=None):
     """The name of the document this value is ("CNPJ"), or of every one the roles may have
     ("CPF/CNPJ") when it is none of them."""
-    documento = identificar(valor, papeis_, pais) if valor else None
+    documento = identificar(value, papeis_, pais) if value else None
     if documento is not None:
         return documento.sigla
     return do_pais(pais).rotulo(*(papeis_ or PAPEIS))
@@ -307,15 +307,15 @@ def invalido(rotulo):
     return gettext("%(documento)s: número inválido.") % {"documento": rotulo}
 
 
-def limpar(valor, documentos, rotulo):
+def limpar(value, documentos, rotulo):
     """Normalize a typed value and check it is one of these documents; ValidationError if not.
 
     Returns the compact value ("" when empty).
     """
-    if not (valor or "").strip():
+    if not (value or "").strip():
         return ""
     for documento in documentos:
-        compacto = documento.normalizar(valor)
+        compacto = documento.normalizar(value)
         if documento.valido(compacto):
             return compacto
     raise ValidationError(invalido(rotulo))

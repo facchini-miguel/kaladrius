@@ -38,7 +38,7 @@ def _orcamentos():
 
 def _aberto(request, pk):
     orcamento = get_object_or_404(_orcamentos(), pk=pk)
-    if orcamento.situacao != Estimate.Situacao.ABERTO:
+    if orcamento.status != Estimate.Situacao.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("estimates:detail", pk=orcamento.pk)
     return orcamento, None
@@ -58,11 +58,11 @@ def _liberar_se_desligado(request, item):
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def lista(request):
-    situacao = request.GET.get("situacao", Estimate.Situacao.ABERTO)
+    status = request.GET.get("status", Estimate.Situacao.ABERTO)
     busca = request.GET.get("q", "").strip()
     orcamentos = _orcamentos().prefetch_related("itens")
-    if situacao in Estimate.Situacao.values:
-        orcamentos = orcamentos.filter(situacao=situacao)
+    if status in Estimate.Situacao.values:
+        orcamentos = orcamentos.filter(status=status)
     if busca:
         orcamentos = orcamentos.filter(patient__name__unaccent__icontains=busca)
     pagina = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
@@ -71,10 +71,10 @@ def lista(request):
         "estimates/list.html",
         {
             "pagina": pagina,
-            "situacao": situacao,
+            "status": status,
             "busca": busca,
             "situacoes": Estimate.Situacao.choices,
-            "parametros": urlencode({"situacao": situacao, "q": busca}),
+            "parametros": urlencode({"status": status, "q": busca}),
         },
     )
 
@@ -124,7 +124,7 @@ def editar(request, pk):
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def detalhe(request, pk):
     orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
-    aberto = orcamento.situacao == Estimate.Situacao.ABERTO
+    aberto = orcamento.status == Estimate.Situacao.ABERTO
     odontologia = _odontologia(request)
     if odontologia:
         modules.marcar_se_desligado(request, ModuloClinico.ODONTOLOGIA)
@@ -210,11 +210,11 @@ def desconto(request, pk):
         return resposta
     form = DescontoForm(request.POST)
     if form.is_valid():
-        valor = form.cleaned_data["desconto"] or 0
-        if valor > orcamento.subtotal:
+        value = form.cleaned_data["desconto"] or 0
+        if value > orcamento.subtotal:
             messages.error(request, _("O desconto passa do total do orçamento."))
         else:
-            orcamento.desconto = valor
+            orcamento.desconto = value
             orcamento.save()
             messages.success(request, _("Desconto aplicado."))
     return redirect("estimates:detail", pk=orcamento.pk)
@@ -231,7 +231,7 @@ def aprovar(request, pk):
     categoria = (
         item.procedimento.categoria
         if item and item.procedimento and item.procedimento.categoria
-        else Category.objects.filter(tipo=Category.Tipo.RECEITA, active=True).first()
+        else Category.objects.filter(kind=Category.Tipo.RECEITA, active=True).first()
     )
     form = AprovarForm(request.POST or None, initial={"categoria": categoria})
     if request.method == "POST" and form.is_valid():
@@ -240,7 +240,7 @@ def aprovar(request, pk):
             {"forma": dados["forma"], "conta": dados["conta"]} if dados["recebido_agora"] else None
         )
         try:
-            lancamento = services.aprovar(
+            entry = services.aprovar(
                 orcamento,
                 parcelas=dados["parcelas"],
                 primeiro_vencimento=dados["primeiro_vencimento"],
@@ -252,7 +252,7 @@ def aprovar(request, pk):
             form.add_error(None, erro.messages[0])
         else:
             messages.success(request, _("Orçamento aprovado e lançado em A receber."))
-            return redirect("finance:entry", pk=lancamento.pk)
+            return redirect("finance:entry", pk=entry.pk)
     return render(request, "estimates/approve.html", {"form": form, "orcamento": orcamento})
 
 

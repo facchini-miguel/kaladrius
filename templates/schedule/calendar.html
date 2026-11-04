@@ -31,8 +31,8 @@
 </div>
 {% else %}
 <div class="d-flex flex-wrap gap-1 mb-2 small" aria-label="{% translate 'Legenda dos tipos de atendimento' %}">
-  {% for tipo in tipos %}
-  <span class="legenda-tipo" style="background-color: {{ tipo.cor }}">{{ tipo.nome_exibido }}</span>
+  {% for kind in tipos %}
+  <span class="legenda-tipo" style="background-color: {{ kind.cor }}">{{ kind.nome_exibido }}</span>
   {% endfor %}
   <span class="text-body-secondary ms-2">{% translate "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)" %}</span>
 </div>

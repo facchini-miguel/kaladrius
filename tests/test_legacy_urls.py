@@ -44,8 +44,8 @@ def enderecos_antigos():
         if name in REGEX:
             yield from ((name, f"/{caminho}") for caminho in REGEX[name])
             continue
-        for conversor, valor in EXEMPLOS.items():
-            rota = rota.replace(conversor, valor)
+        for conversor, value in EXEMPLOS.items():
+            rota = rota.replace(conversor, value)
         assert "<" not in rota, linha
         yield name, f"/{rota}"
 

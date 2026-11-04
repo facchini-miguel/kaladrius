@@ -79,7 +79,7 @@ urlpatterns = [
     path("financeiro/caixa/", para("finance:cash")),
     path("financeiro/caixa/<int:pk>/", para("finance:cash_detail")),
     path("financeiro/caixa/<int:pk>/fechar/", para("finance:cash_close")),
-    path("financeiro/caixa/<int:pk>/<str:tipo>/", para("finance:cash_movement", {"tipo": CAIXA})),
+    path("financeiro/caixa/<int:pk>/<str:kind>/", para("finance:cash_movement", {"kind": CAIXA})),
     path("financeiro/relatorios/", para("finance:reports")),
     path("financeiro/fechamento/", para("finance:closing")),
     path("financeiro/planejamento/", para("finance:planning")),

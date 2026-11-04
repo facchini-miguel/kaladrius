@@ -18,20 +18,20 @@
            placeholder="{{ dica_busca }}" aria-label="{% translate 'Buscar paciente' %}">
   </div>
   <div class="col-6 col-md-2">
-    <select name="tipo" class="form-select" aria-label="{% translate 'Tipo' %}">
+    <select name="kind" class="form-select" aria-label="{% translate 'Tipo' %}">
       <option value="">{% translate "Todos os tipos" %}</option>
-      {% for valor, rotulo in tipos %}
-      <option value="{{ valor }}"{% if tipo == valor %} selected{% endif %}>{{ rotulo }}</option>
+      {% for value, rotulo in tipos %}
+      <option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ rotulo }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">
-    <select name="situacao" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="ativos"{% if situacao == "ativos" %} selected{% endif %}>{% translate "Ativos" %}</option>
-      <option value="inativos"{% if situacao == "inativos" %} selected{% endif %}>{% translate "Inativos" %}</option>
-      <option value="todos"{% if situacao == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
+      <option value="ativos"{% if status == "ativos" %} selected{% endif %}>{% translate "Ativos" %}</option>
+      <option value="inativos"{% if status == "inativos" %} selected{% endif %}>{% translate "Inativos" %}</option>
+      <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
       {% if pode.pacientes.excluir %}
-      <option value="arquivados"{% if situacao == "arquivados" %} selected{% endif %}>{% translate "Arquivados" %}</option>
+      <option value="arquivados"{% if status == "arquivados" %} selected{% endif %}>{% translate "Arquivados" %}</option>
       {% endif %}
     </select>
   </div>
@@ -60,7 +60,7 @@
         <td>{{ patient.pk }}</td>
         <td>
           <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
-          {% if patient.tipo == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
+          {% if patient.kind == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>

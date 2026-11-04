@@ -91,10 +91,10 @@ def _campos(modelo):
 
 
 def _valor(campo, instancia):
-    valor = campo.value_from_object(instancia)
-    if valor is None or isinstance(valor, bool | int | float | str):
-        return valor
-    return str(valor)
+    value = campo.value_from_object(instancia)
+    if value is None or isinstance(value, bool | int | float | str):
+        return value
+    return str(value)
 
 
 def _valores(instancia):
@@ -117,14 +117,14 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
     antes = getattr(instance, "_auditoria_antes", None)
     if created or antes is None:
         alteracoes = {
-            campo: [None, valor] for campo, valor in depois.items() if valor not in (None, "")
+            campo: [None, value] for campo, value in depois.items() if value not in (None, "")
         }
         registrar(Acao.CRIAR, instance, alteracoes=alteracoes)
         return
     alteracoes = {
-        campo: [antes.get(campo), valor]
-        for campo, valor in depois.items()
-        if antes.get(campo) != valor
+        campo: [antes.get(campo), value]
+        for campo, value in depois.items()
+        if antes.get(campo) != value
     }
     if getattr(instance, "_auditoria_senha", None) not in (
         None,
@@ -137,9 +137,9 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
 
 def depois_de_excluir(sender, instance, **kwargs):
     valores = {
-        campo: [valor, None]
-        for campo, valor in _valores(instance).items()
-        if valor not in (None, "")
+        campo: [value, None]
+        for campo, value in _valores(instance).items()
+        if value not in (None, "")
     }
     registrar(Acao.EXCLUIR, instance, alteracoes=valores)
 

@@ -86,7 +86,7 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     cliente = entrar(cenario, "admin")
     url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])
-    dados = {"name": "Restauração", "valor": "250,00", "categoria": "", "active": "on"}
+    dados = {"name": "Restauração", "amount": "250,00", "categoria": "", "active": "on"}
     form = cliente.get(url).context["form"]
     assert str(form.fields["code"].label) == "Código (TUSS)"
     assert "code" in cliente.post(url, {**dados, "code": "123"}).context["form"].errors

@@ -94,11 +94,12 @@ class Appointment(ModeloDaClinica):
         verbose_name=_("profissional"),
         db_column="profissional_id",
     )
-    tipo = models.ForeignKey(
+    kind = models.ForeignKey(
         AppointmentType,
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("tipo de atendimento"),
+        db_column="tipo_id",
     )
     inicio = models.DateTimeField(_("início"))
     fim = models.DateTimeField(_("fim"))
@@ -112,8 +113,12 @@ class Appointment(ModeloDaClinica):
         db_column="paciente_id",
     )
     description = models.TextField(_("descrição"), blank=True, db_column="descricao")
-    situacao = models.CharField(
-        _("situação"), max_length=10, choices=Situacao.choices, default=Situacao.AGENDADO
+    status = models.CharField(
+        _("situação"),
+        max_length=10,
+        choices=Situacao.choices,
+        default=Situacao.AGENDADO,
+        db_column="situacao",
     )
     # Appointments created together by "repeat N weeks" share the same series id.
     serie = models.UUIDField(_("série"), null=True, blank=True, editable=False)
@@ -152,7 +157,7 @@ class Appointment(ModeloDaClinica):
                     ("practitioner", RangeOperators.EQUAL),
                 ],
                 # A cancelled appointment does not hold the slot.
-                condition=~models.Q(situacao="desmarcou"),
+                condition=~models.Q(status="desmarcou"),
                 violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),
         ]
@@ -168,7 +173,7 @@ class Appointment(ModeloDaClinica):
 
     @property
     def desmarcado(self):
-        return self.situacao == self.Situacao.DESMARCOU
+        return self.status == self.Situacao.DESMARCOU
 
     @property
     def presenca_marcavel(self):

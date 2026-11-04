@@ -40,7 +40,7 @@ class Visit(ModeloDaClinica):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="atendimento",
+        related_name="visit",
         verbose_name=_("agendamento"),
     )
     data = models.DateTimeField(_("data do atendimento"), default=timezone.now)
@@ -87,8 +87,12 @@ class Visit(ModeloDaClinica):
 class Addendum(ModeloDaClinica):
     """A correction or note added to a finalized visit, which itself never changes."""
 
-    atendimento = models.ForeignKey(
-        Visit, on_delete=models.PROTECT, related_name="adendos", verbose_name=_("atendimento")
+    visit = models.ForeignKey(
+        Visit,
+        on_delete=models.PROTECT,
+        related_name="adendos",
+        verbose_name=_("atendimento"),
+        db_column="atendimento_id",
     )
     texto = models.TextField(_("adendo"))
     practitioner = models.ForeignKey(
@@ -113,7 +117,7 @@ class Addendum(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {_('adendo')}"
+        return f"{self.visit} – {_('adendo')}"
 
 
 class Certificate(ModeloDaClinica):
@@ -124,14 +128,19 @@ class Certificate(ModeloDaClinica):
         COMPARECIMENTO = "comparecimento", _("Comparecimento")
         AFASTAMENTO = "afastamento", _("Afastamento")
 
-    atendimento = models.ForeignKey(
+    visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
         related_name="atestados",
         verbose_name=_("atendimento"),
+        db_column="atendimento_id",
     )
-    tipo = models.CharField(
-        _("tipo"), max_length=20, choices=Tipo.choices, default=Tipo.COMPARECIMENTO
+    kind = models.CharField(
+        _("tipo"),
+        max_length=20,
+        choices=Tipo.choices,
+        default=Tipo.COMPARECIMENTO,
+        db_column="tipo",
     )
     data = models.DateField(_("data do atendimento"), default=timezone.localdate)
     hora_inicio = models.TimeField(_("das"), null=True, blank=True)
@@ -167,18 +176,19 @@ class Certificate(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {self.get_tipo_display()}"
+        return f"{self.visit} – {self.get_kind_display()}"
 
 
 class Prescription(ModeloDaClinica):
     """A simple prescription issued in a visit (0.30.0, decision 082): free text, one item
     per line. Controlled drugs need the official forms, which the system does not issue."""
 
-    atendimento = models.ForeignKey(
+    visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
         related_name="receitas",
         verbose_name=_("atendimento"),
+        db_column="atendimento_id",
     )
     prescricao = models.TextField(
         _("medicamentos e como usar"),
@@ -207,17 +217,18 @@ class Prescription(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {pgettext_lazy('prescrição', 'receita')}"
+        return f"{self.visit} – {pgettext_lazy('prescrição', 'receita')}"
 
 
 class ExamRequest(ModeloDaClinica):
     """An exam request issued in a visit (0.31.0, decision 083): one exam per line."""
 
-    atendimento = models.ForeignKey(
+    visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
         related_name="pedidos_de_exames",
         verbose_name=_("atendimento"),
+        db_column="atendimento_id",
     )
     exames = models.TextField(_("exames"), help_text=_("Um exame por linha."))
     indicacao = models.TextField(
@@ -245,7 +256,7 @@ class ExamRequest(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {_('pedido de exames')}"
+        return f"{self.visit} – {_('pedido de exames')}"
 
 
 class Attachment(ModeloDaClinica):
@@ -255,8 +266,12 @@ class Attachment(ModeloDaClinica):
     only ever served through a view that checks the user is a practitioner.
     """
 
-    atendimento = models.ForeignKey(
-        Visit, on_delete=models.PROTECT, related_name="anexos", verbose_name=_("atendimento")
+    visit = models.ForeignKey(
+        Visit,
+        on_delete=models.PROTECT,
+        related_name="anexos",
+        verbose_name=_("atendimento"),
+        db_column="atendimento_id",
     )
     description = models.CharField(
         _("descrição"),
@@ -266,7 +281,7 @@ class Attachment(ModeloDaClinica):
         db_column="descricao",
     )
     name = models.CharField(_("arquivo"), max_length=255, db_column="nome")
-    tipo = models.CharField(max_length=50)
+    kind = models.CharField(max_length=50, db_column="tipo")
     tamanho = models.PositiveIntegerField()
     conteudo = models.BinaryField()
     practitioner = models.ForeignKey(
@@ -291,4 +306,4 @@ class Attachment(ModeloDaClinica):
         ordering = ["created_at", "pk"]
 
     def __str__(self):
-        return f"{self.atendimento} – {self.description or self.name}"
+        return f"{self.visit} – {self.description or self.name}"

@@ -36,7 +36,7 @@ def funcionario(request, pk):
         {
             "funcionario": funcionario,
             "salarios": funcionario.salarios.select_related("created_by"),
-            "folhas": funcionario.folhas.select_related("lancamento")[:24],
+            "folhas": funcionario.folhas.select_related("entry")[:24],
             "salario_atual": funcionario.salario_em(timezone.localdate()),
         },
     )
@@ -60,7 +60,7 @@ def _formulario(request, instancia):
             if form.cleaned_data.get("salario"):
                 Salary.objects.create(
                     funcionario=funcionario,
-                    valor=form.cleaned_data["salario"],
+                    amount=form.cleaned_data["salario"],
                     desde=form.cleaned_data["salario_desde"],
                     created_by=request.user,
                 )
@@ -80,9 +80,7 @@ def folha(request):
         services.preparar(competencia)
         if pode_alterar
         else list(
-            Payroll.objects.filter(competencia=competencia).select_related(
-                "funcionario", "lancamento"
-            )
+            Payroll.objects.filter(competencia=competencia).select_related("funcionario", "entry")
         )
     )
     dados = request.POST if request.method == "POST" else None

@@ -215,12 +215,12 @@ def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, client
 def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. Teste")
-        tipo = AppointmentType.objects.first()
+        kind = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
         inicio = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
         Appointment.objects.create(
             practitioner=practitioner,
-            tipo=tipo,
+            kind=kind,
             inicio=inicio,
             fim=inicio + datetime.timedelta(hours=1),
         )

@@ -36,23 +36,23 @@ def tipo_editar(request, pk):
     return _formulario(request, get_object_or_404(AppointmentType.objects, pk=pk))
 
 
-def _formulario(request, tipo):
-    form = TipoAtendimentoForm(request.POST or None, instance=tipo, clinic=request.clinic)
+def _formulario(request, kind):
+    form = TipoAtendimentoForm(request.POST or None, instance=kind, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
-            request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": tipo.nome_exibido}
+            request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": kind.nome_exibido}
         )
         return redirect("schedule:types")
-    return render(request, "schedule/type_form.html", {"form": form, "tipo": tipo})
+    return render(request, "schedule/type_form.html", {"form": form, "kind": kind})
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.EXCLUIR)
 def tipo_excluir(request, pk):
-    tipo = get_object_or_404(AppointmentType.objects, pk=pk)
+    kind = get_object_or_404(AppointmentType.objects, pk=pk)
     if request.method == "POST":
         try:
-            tipo.delete()
+            kind.delete()
         except ProtectedError:
             messages.error(
                 request,
@@ -60,14 +60,14 @@ def tipo_excluir(request, pk):
                     "%(nome)s já foi usado em agendamentos e não pode ser excluído. "
                     "Desmarque “ativo” para escondê-lo."
                 )
-                % {"nome": tipo.nome_exibido},
+                % {"nome": kind.nome_exibido},
             )
         else:
             messages.success(
-                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": tipo.nome_exibido}
+                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": kind.nome_exibido}
             )
         return redirect("schedule:types")
-    return render(request, "schedule/type_delete.html", {"tipo": tipo})
+    return render(request, "schedule/type_delete.html", {"kind": kind})
 
 
 # --- Schedule ----------------------------------------------------------------------
@@ -177,7 +177,7 @@ def eventos(request):
     agendamentos = (
         services.agendamentos_visiveis(request)
         .filter(practitioner_id=int(practitioner), inicio__lt=fim, fim__gt=inicio)
-        .select_related("tipo", "patient")
+        .select_related("kind", "patient")
     )
     return JsonResponse(
         [
@@ -186,15 +186,15 @@ def eventos(request):
                 "title": agendamento.titulo,
                 "start": _relogio(agendamento.inicio),
                 "end": _relogio(agendamento.fim),
-                "backgroundColor": agendamento.tipo.cor,
-                "borderColor": agendamento.tipo.cor,
+                "backgroundColor": agendamento.kind.cor,
+                "borderColor": agendamento.kind.cor,
                 "textColor": "#212529",
-                "classNames": [f"situacao-{agendamento.situacao}"],
+                "classNames": [f"situacao-{agendamento.status}"],
                 "extendedProps": {
-                    "tipo": agendamento.tipo.nome_exibido,
+                    "kind": agendamento.kind.nome_exibido,
                     "description": agendamento.description,
-                    "situacao": agendamento.situacao,
-                    "situacao_nome": agendamento.get_situacao_display(),
+                    "status": agendamento.status,
+                    "status_name": agendamento.get_status_display(),
                     "url": reverse("schedule:edit", args=[agendamento.pk]),
                 },
             }
@@ -272,13 +272,13 @@ MENSAGENS_SITUACAO = {
 
 @require_POST
 @exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
-def situacao(request, pk):
+def status(request, pk):
     """Came / missed / cancelled, from the appointment window or the home page."""
     agendamento = get_object_or_404(
         services.agendamentos_visiveis(request).select_related("patient", "practitioner"), pk=pk
     )
     try:
-        services.marcar(agendamento, request.POST.get("situacao", ""))
+        services.marcar(agendamento, request.POST.get("status", ""))
     except ValidationError as erro:
         if request.headers.get("HX-Request"):
             # Back to the appointment window, with the reason.
@@ -292,7 +292,7 @@ def situacao(request, pk):
             return render(request, "schedule/_form.html", contexto)
         messages.error(request, erro.messages[0])
         return redirect("home")
-    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.patient.name}
+    mensagem = MENSAGENS_SITUACAO[agendamento.status] % {"nome": agendamento.patient.name}
     if request.headers.get("HX-Request"):
         return _resposta_sucesso(mensagem)
     messages.success(request, mensagem)

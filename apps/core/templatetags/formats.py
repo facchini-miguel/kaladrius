@@ -9,17 +9,17 @@ register = template.Library()
 
 
 @register.filter
-def documento(valor, papeis=""):
+def documento(value, papeis=""):
     """A document written the country's way: 123.456.789-09, 12-3456789, 943 476 5919. The
     roles ("paciente", "empresa,pessoa"; see apps/core/identification.py) say which documents
     it may be; all of the country's by default."""
-    return identification.escrever(valor, identification.papeis(papeis))
+    return identification.escrever(value, identification.papeis(papeis))
 
 
 @register.filter
-def sigla_documento(valor, papeis=""):
+def sigla_documento(value, papeis=""):
     """The name of the document this value is ("CNPJ"), or every one the roles may have."""
-    return identification.sigla(valor, identification.papeis(papeis))
+    return identification.sigla(value, identification.papeis(papeis))
 
 
 @register.simple_tag
@@ -29,45 +29,45 @@ def rotulo_documento(*papeis):
 
 
 @register.filter
-def phone(valor):
-    valor = valor or ""
+def phone(value):
+    value = value or ""
     pais = countries.pais_da_clinica()
     if pais != "BR":
-        return countries.formatar_telefone(valor, pais)
-    if len(valor) == 11:
-        return f"({valor[:2]}) {valor[2:7]}-{valor[7:]}"
-    if len(valor) == 10:
-        return f"({valor[:2]}) {valor[2:6]}-{valor[6:]}"
-    return valor
+        return countries.formatar_telefone(value, pais)
+    if len(value) == 11:
+        return f"({value[:2]}) {value[2:7]}-{value[7:]}"
+    if len(value) == 10:
+        return f"({value[:2]}) {value[2:6]}-{value[6:]}"
+    return value
 
 
 @register.filter
-def whatsapp(valor):
+def whatsapp(value):
     """Link that opens a WhatsApp chat: DDD and number in Brazil, the national number with the
     country code elsewhere (decision 117)."""
-    valor = valor or ""
+    value = value or ""
     pais = countries.pais_da_clinica()
     if pais != "BR":
-        return countries.link_whatsapp(valor, pais)
-    return f"https://wa.me/55{valor}" if len(valor) in (10, 11) else ""
+        return countries.link_whatsapp(value, pais)
+    return f"https://wa.me/55{value}" if len(value) in (10, 11) else ""
 
 
 @register.filter
-def cep(valor):
-    valor = valor or ""
+def cep(value):
+    value = value or ""
     pais = countries.pais_da_clinica()
     if pais != "BR":
-        return countries.formatar_cep(valor, pais)
-    if len(valor) == 8:
-        return f"{valor[:5]}-{valor[5:]}"
-    return valor
+        return countries.formatar_cep(value, pais)
+    if len(value) == 8:
+        return f"{value[:5]}-{value[5:]}"
+    return value
 
 
 @register.filter
-def moeda(valor):
+def moeda(value):
     """Amount in the clinic's currency with the separators of the current language
     (R$ 1.234,56 · US$ 1,234.56 · 1.234,56 €; see apps/core/currencies.py)."""
-    return currencies.formatar(valor)
+    return currencies.formatar(value)
 
 
 @register.simple_tag
