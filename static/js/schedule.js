@@ -21,7 +21,7 @@
   function abrirNovo(inicio, fim) {
     const params = new URLSearchParams({
       practitioner: config.practitioner,
-      data: dataISO(inicio),
+      date: dataISO(inicio),
       inicio: hora(inicio),
       fim: hora(fim),
     });
@@ -59,7 +59,7 @@
             botao.className = `btn btn-sm btn-link ${marcador.classe} p-0 ms-1`;
             botao.title = `${total} ${marcador.titulo}`;
             botao.textContent = `${marcador.icone} ${total}`;
-            botao.addEventListener("click", () => abrirModal(`${marcador.dia}?data=${dia}`));
+            botao.addEventListener("click", () => abrirModal(`${marcador.dia}?date=${dia}`));
             celula.appendChild(botao);
           });
         });
@@ -71,7 +71,7 @@
     timeZone: "UTC",
     now: config.agora,
     initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
-    initialDate: config.data || undefined,
+    initialDate: config.date || undefined,
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },
     firstDay: 1,
     allDaySlot: false,

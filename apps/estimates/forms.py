@@ -48,10 +48,10 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
 class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Estimate
-        fields = ["patient", "practitioner", "data", "validade", "notes"]
+        fields = ["patient", "practitioner", "date", "validade", "notes"]
         widgets = {
             "patient": forms.HiddenInput,
-            "data": DATA,
+            "date": DATA,
             "validade": DATA,
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
@@ -64,7 +64,7 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        if dados.get("data") and dados.get("validade") and dados["validade"] < dados["data"]:
+        if dados.get("date") and dados.get("validade") and dados["validade"] < dados["date"]:
             self.add_error("validade", _("A validade não pode ser antes da data do orçamento."))
         return dados
 
@@ -135,7 +135,7 @@ class AprovarForm(FormularioBootstrap, forms.Form):
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(
+    account = forms.ModelChoiceField(
         label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
     )
 
@@ -144,12 +144,12 @@ class AprovarForm(FormularioBootstrap, forms.Form):
         self.fields["categoria"].queryset = Category.objects.filter(
             kind=Category.Tipo.RECEITA, active=True
         )
-        self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
 
     def clean(self):
         dados = super().clean()
         if dados.get("recebido_agora"):
-            for campo in ("forma", "conta"):
+            for campo in ("forma", "account"):
                 if not dados.get(campo):
                     self.add_error(campo, _("Informe para registrar o pagamento."))
         return dados

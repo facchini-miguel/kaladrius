@@ -23,9 +23,9 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Visit
-        fields = ["data", *CAMPOS_DA_ANAMNESE]
+        fields = ["date", *CAMPOS_DA_ANAMNESE]
         widgets = {
-            "data": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+            "date": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
             **{campo: forms.Textarea(attrs={"rows": 4}) for campo in CAMPOS_DA_ANAMNESE},
         }
 
@@ -40,10 +40,10 @@ class AdendoForm(FormularioBootstrap, forms.ModelForm):
 class AtestadoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ["kind", "data", "hora_inicio", "hora_fim", "dias", "note"]
+        fields = ["kind", "date", "hora_inicio", "hora_fim", "dias", "note"]
         widgets = {
             "kind": forms.RadioSelect,
-            "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "hora_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "hora_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "note": forms.Textarea(attrs={"rows": 3}),

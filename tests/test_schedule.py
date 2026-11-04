@@ -45,7 +45,7 @@ def dados(cenario, **extra):
         "kind": cenario["kind"].pk,
         "patient": cenario["patient"].pk,
         "description": "",
-        "data": SEGUNDA.isoformat(),
+        "date": SEGUNDA.isoformat(),
         "hora_inicio": "09:00",
         "hora_fim": "10:00",
         "repeticoes": 1,
@@ -147,7 +147,7 @@ def test_horarios_encostados_e_outro_profissional_nao_conflitam(cenario):
 
 def test_repeticao_com_conflito_nao_grava_nenhuma(cenario):
     terceira_semana = SEGUNDA + datetime.timedelta(weeks=2)
-    agendar(cenario, data=terceira_semana.isoformat())
+    agendar(cenario, date=terceira_semana.isoformat())
     resposta = agendar(cenario, repeticoes=4)
     assert resposta.status_code == 200
     assert terceira_semana.strftime("%d/%m") in erros(resposta)
@@ -194,7 +194,7 @@ def test_horario_desmarcado_recebe_outro_paciente_sem_apagar_quem_desmarcou(cena
     janela = cliente.get(reverse("schedule:edit", args=[agendamento.pk])).content.decode()
     assert "Agendar outro paciente neste horário" in janela
     assert (
-        f"{reverse('schedule:new')}?practitioner={cenario['ana'].pk}&amp;data={SEGUNDA}" in janela
+        f"{reverse('schedule:new')}?practitioner={cenario['ana'].pk}&amp;date={SEGUNDA}" in janela
     )
     with usar_clinica(cenario["clinic"]):
         outro = Patient.objects.create(name="Outro Paciente")
@@ -260,7 +260,7 @@ def test_exclusao_definitiva_tira_o_paciente_dos_agendamentos(cenario, criar_usu
 
 def test_eventos_do_periodo_em_json(cenario):
     agendar(cenario)
-    agendar(cenario, data=(SEGUNDA + datetime.timedelta(weeks=1)).isoformat())
+    agendar(cenario, date=(SEGUNDA + datetime.timedelta(weeks=1)).isoformat())
     resposta = cenario["cliente"].get(
         reverse("schedule:events"),
         {
@@ -294,7 +294,7 @@ def test_aniversariantes_no_periodo(cenario):
         {"start": f"{SEGUNDA}T00:00:00", "end": f"{SEGUNDA + datetime.timedelta(days=7)}T00:00:00"},
     )
     assert resposta.json() == {"2031-03-05": 1}
-    lista = cenario["cliente"].get(reverse("schedule:birthdays_today"), {"data": "2031-03-05"})
+    lista = cenario["cliente"].get(reverse("schedule:birthdays_today"), {"date": "2031-03-05"})
     assert "Aniversariante" in lista.content.decode()
     assert "completa 41 anos" in lista.content.decode()
 
@@ -600,7 +600,7 @@ def test_remarcar_para_o_futuro_ou_tirar_o_paciente_limpa_a_presenca(cenario):
         cenario,
         patient="",
         description="Bloqueado",
-        data=hoje.isoformat(),
+        date=hoje.isoformat(),
         hora_inicio="11:00",
         hora_fim="12:00",
     )

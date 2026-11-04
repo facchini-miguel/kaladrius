@@ -129,7 +129,7 @@ def calendario(request):
         "inicio": clinic.agenda_inicio.strftime("%H:%M:%S"),
         "fim": clinic.agenda_fim.strftime("%H:%M:%S"),
         "intervalo": clinic.agenda_intervalo,
-        "data": request.GET.get("data") or _data_lembrada(request),
+        "date": request.GET.get("date") or _data_lembrada(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "idioma": get_language(),
         # "Now" on the clinic's wall clock: the calendar runs in UTC mode (decision 117).
@@ -210,7 +210,7 @@ def novo(request):
         campo: request.GET[parametro]
         for campo, parametro in [
             ("practitioner", "practitioner"),
-            ("data", "data"),
+            ("date", "date"),
             ("hora_inicio", "inicio"),
             ("hora_fim", "fim"),
         ]
@@ -358,7 +358,7 @@ def aniversariantes(request):
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def aniversariantes_dia(request):
     try:
-        dia = datetime.date.fromisoformat(request.GET.get("data", ""))
+        dia = datetime.date.fromisoformat(request.GET.get("date", ""))
     except ValueError:
         return HttpResponse(_("Data inválida."), status=400)
     aniversariantes = [

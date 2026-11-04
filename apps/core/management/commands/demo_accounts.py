@@ -90,7 +90,7 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f"Contas prontas: {recepcao.username} (recepção), {practitioner.username} "
                 f"(profissional, agenda de {cadastro.name})"
-                + "".join(f", {conta.username}" for conta in outras)
+                + "".join(f", {account.username}" for account in outras)
                 + "."
             )
         )

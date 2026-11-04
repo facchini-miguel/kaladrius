@@ -112,11 +112,11 @@ class _Anonimizador:
                 usados.add(documento)
                 return documento
 
-    def _nascimento(self, data):
-        if data is None:
+    def _nascimento(self, date):
+        if date is None:
             return None
         dias = self.sorte.randint(-DESLOCAMENTO_NASCIMENTO, DESLOCAMENTO_NASCIMENTO)
-        return min(data + datetime.timedelta(days=dias), self.hoje)
+        return min(date + datetime.timedelta(days=dias), self.hoje)
 
     def pacientes(self):
         fake = self.fake

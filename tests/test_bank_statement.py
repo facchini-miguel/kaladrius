@@ -60,14 +60,14 @@ OFX_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 def test_le_ofx_sgml_em_windows_1252():
     extrato = ofx.ler(OFX_SGML)
-    assert (extrato.banco, extrato.conta) == ("341", "98765-4")
+    assert (extrato.banco, extrato.account) == ("341", "98765-4")
     assert (extrato.inicio, extrato.fim) == (
         datetime.date(2026, 10, 1),
         datetime.date(2026, 10, 10),
     )
     assert (extrato.saldo, extrato.saldo_em) == (Decimal("1640.10"), datetime.date(2026, 10, 10))
     primeira, segunda = extrato.transacoes[:2]
-    assert (primeira.fitid, primeira.data, primeira.amount) == (
+    assert (primeira.fitid, primeira.date, primeira.amount) == (
         "A1",
         datetime.date(2026, 10, 6),
         Decimal("300.00"),
@@ -112,7 +112,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     }
 
 
-def pago(cenario, amount, data, kind=Entry.Tipo.RECEBER, conta=None):
+def pago(cenario, amount, date, kind=Entry.Tipo.RECEBER, account=None):
     with usar_clinica(cenario["clinic"]):
         receber = kind == Entry.Tipo.RECEBER
         entry = services.criar_lancamento(
@@ -124,7 +124,7 @@ def pago(cenario, amount, data, kind=Entry.Tipo.RECEBER, conta=None):
             categoria=cenario["receita"] if receber else cenario["despesa"],
             valor_total=Decimal(amount),
             parcelas=1,
-            primeiro_vencimento=data,
+            primeiro_vencimento=date,
             user=cenario["admin"],
         )
         return services.receber(
@@ -132,15 +132,15 @@ def pago(cenario, amount, data, kind=Entry.Tipo.RECEBER, conta=None):
             user=cenario["admin"],
             amount=Decimal(amount),
             forma="pix",
-            conta=conta or cenario["banco"],
-            data=data,
+            account=account or cenario["banco"],
+            date=date,
         )
 
 
 def importar(cenario, conteudo=OFX_SGML):
     resposta = cenario["cliente"].post(
         reverse("finance:statements"),
-        {"conta": cenario["banco"].pk, "arquivo": SimpleUploadedFile("extrato.ofx", conteudo)},
+        {"account": cenario["banco"].pk, "arquivo": SimpleUploadedFile("extrato.ofx", conteudo)},
     )
     with usar_clinica(cenario["clinic"]):
         importacao = StatementImport.objects.latest("pk")
@@ -164,7 +164,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
     recebido = pago(cenario, "300.00", DIA)  # A1: one candidate
     pago(cenario, "120.00", DIA, kind=Entry.Tipo.PAGAR)  # A4: two candidates
     pago(cenario, "120.00", DIA + datetime.timedelta(days=1), kind=Entry.Tipo.PAGAR)
-    pago(cenario, "500.00", DIA, conta=cenario["caixa"])  # A3: other account, no match
+    pago(cenario, "500.00", DIA, account=cenario["caixa"])  # A3: other account, no match
     pago(cenario, "39.90", DIA)  # A2 is money out: a receipt does not match it
     importacao = importar(cenario)
     pagina = cenario["cliente"].get(reverse("finance:statement", args=[importacao.pk]))
@@ -176,7 +176,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
     # The user picks one of the two by hand.
     with usar_clinica(cenario["clinic"]):
         opcoes = reconciliation.candidatos([a4])[a4.pk]
-    assert len(opcoes) == 2 and opcoes[0].data == DIA + datetime.timedelta(days=1)  # closest first
+    assert len(opcoes) == 2 and opcoes[0].date == DIA + datetime.timedelta(days=1)  # closest first
     cenario["cliente"].post(
         reverse("finance:transaction", args=[a4.pk, "reconcile"]), {"chave": opcoes[1].chave}
     )
@@ -193,7 +193,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
 def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
     with usar_clinica(cenario["clinic"]):
         caixa = CashRegister.objects.create(
-            clinic=cenario["clinic"], conta=cenario["caixa"], valor_abertura=Decimal("600")
+            clinic=cenario["clinic"], account=cenario["caixa"], valor_abertura=Decimal("600")
         )
         movimento = CashMovement.objects.create(
             clinic=cenario["clinic"],
@@ -239,7 +239,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
             Decimal("39.90"),
             "Banco Itaú",
         )
-        assert (a2.pagamento.data, a2.pagamento.conta) == (
+        assert (a2.pagamento.date, a2.pagamento.account) == (
             datetime.date(2026, 10, 7),
             cenario["banco"],
         )
@@ -279,7 +279,7 @@ def test_saldo_do_banco_comparado_com_o_sistema(cenario):
 def test_arquivo_invalido_e_permissoes(cenario):
     resposta = cenario["cliente"].post(
         reverse("finance:statements"),
-        {"conta": cenario["banco"].pk, "arquivo": SimpleUploadedFile("x.ofx", b"nada")},
+        {"account": cenario["banco"].pk, "arquivo": SimpleUploadedFile("x.ofx", b"nada")},
     )
     assert "não é um extrato OFX" in resposta.content.decode()
     importacao = importar(cenario)
@@ -327,7 +327,7 @@ def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
     assert extrato.ignoradas == 2  # bad date, bad amount (zero amounts are not counted)
     resposta = cenario["cliente"].post(
         reverse("finance:statements"),
-        {"conta": cenario["banco"].pk, "arquivo": SimpleUploadedFile("extrato.ofx", conteudo)},
+        {"account": cenario["banco"].pk, "arquivo": SimpleUploadedFile("extrato.ofx", conteudo)},
         follow=True,
     )
     pagina = resposta.content.decode()

@@ -154,7 +154,7 @@ def test_pagamento_na_hora_abre_o_recibo(cenario):
             valor_total="150,50",
             recebido_agora="on",
             forma=Payment.Forma.PIX,
-            conta=cenario["caixa"].pk,
+            account=cenario["caixa"].pk,
         ),
         follow=True,
     )
@@ -169,7 +169,7 @@ def test_pagamento_parcial_juros_e_saldo(cenario):
     primeira = parcelas_de(cenario, entry)[0]
     cliente = entrar(cenario, "recepcao")
     url = reverse("finance:receive_installment", args=[primeira.pk])
-    dados = {"data": HOJE.isoformat(), "forma": "dinheiro", "conta": cenario["caixa"].pk}
+    dados = {"date": HOJE.isoformat(), "forma": "dinheiro", "account": cenario["caixa"].pk}
     # 60 received, 10 of them late fee: the installment goes down by 50.
     assert cliente.post(url, {**dados, "amount": "60", "juros": "10"}).status_code == 302
     primeira = parcelas_de(cenario, entry)[0]
@@ -186,7 +186,7 @@ def test_desconto_so_para_o_administrador(cenario):
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     parcela = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[parcela.pk])
-    dados = {"data": HOJE.isoformat(), "forma": "pix", "conta": cenario["caixa"].pk}
+    dados = {"date": HOJE.isoformat(), "forma": "pix", "account": cenario["caixa"].pk}
 
     recepcao = entrar(cenario, "recepcao")
     assert "desconto" not in recepcao.get(url).context["form"].fields
@@ -207,7 +207,7 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="pix",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
     recepcao = entrar(cenario, "recepcao")
     estornar = reverse("finance:reverse_payment", args=[pagamento.pk])
@@ -343,7 +343,7 @@ def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
             user=cenario["admin"],
             amount=Decimal("10.00"),
             forma="pix",
-            conta=FinancialAccount.objects.get(name="Caixa"),
+            account=FinancialAccount.objects.get(name="Caixa"),
             note="Pago pela Joana",
         )
         Patient.objects.filter(pk=cenario["patient"].pk).update(arquivado=True)
@@ -398,7 +398,7 @@ def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
     admin = entrar(cenario, "admin")
     admin.post(
         reverse("finance:expense_new"),
-        despesa(cenario, parcelas=2, pago_agora="on", forma="pix", conta=cenario["caixa"].pk),
+        despesa(cenario, parcelas=2, pago_agora="on", forma="pix", account=cenario["caixa"].pk),
     )
     with usar_clinica(cenario["clinic"]):
         entry = Entry.objects.get()
@@ -406,10 +406,10 @@ def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
     resposta = admin.post(
         reverse("finance:receive_installment", args=[segunda.pk]),
         {
-            "data": HOJE.isoformat(),
+            "date": HOJE.isoformat(),
             "amount": "3000",
             "forma": "boleto",
-            "conta": cenario["caixa"].pk,
+            "account": cenario["caixa"].pk,
         },
     )
     # Paying a bill goes back to the entry (receipts are only for money received).
@@ -448,9 +448,9 @@ def test_saldo_das_contas_com_saldo_inicial(cenario):
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="dinheiro",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
-        saldos = dict((conta.name, saldo) for conta, saldo in services.saldos_das_contas())
+        saldos = dict((account.name, saldo) for account, saldo in services.saldos_das_contas())
     assert saldos == {"Caixa": Decimal("50.00"), "Banco": Decimal("0.00")}
     # A negative initial balance is accepted in the form (overdrawn bank).
     admin = entrar(cenario, "admin")
@@ -476,8 +476,8 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="pix",
-            conta=cenario["caixa"],
-            data=datetime.date(2031, 3, 5),
+            account=cenario["caixa"],
+            date=datetime.date(2031, 3, 5),
         )
         aluguel = services.criar_lancamento(
             clinic=cenario["clinic"],
@@ -492,7 +492,7 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
         )
         fluxo = services.fluxo_de_caixa(de, ate, hoje=datetime.date(2031, 3, 1))
     assert fluxo["saldo_inicial"] == Decimal("1000.00")
-    linhas = {linha["data"]: linha for linha in fluxo["linhas"]}
+    linhas = {linha["date"]: linha for linha in fluxo["linhas"]}
     assert linhas[datetime.date(2031, 3, 5)]["entradas"] == Decimal("100.00")
     assert linhas[datetime.date(2031, 3, 10)]["saidas_previstas"] == Decimal("300.00")
     # 2nd receivable installment due 2031-04-05: outside the period.
@@ -512,7 +512,7 @@ def test_relatorio_por_forma_categoria_e_profissional(cenario):
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="pix",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
         relatorio = services.relatorio(HOJE, HOJE)
     assert relatorio["por_forma"] == [("Pix", Decimal("100.00"))]
@@ -558,10 +558,10 @@ def test_caixa_do_dia_completo(cenario):
             user=cenario["recepcao"],
             amount=Decimal("40"),
             forma="dinheiro",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
         services.receber(
-            segunda, user=cenario["recepcao"], amount=Decimal("40"), forma="pix", conta=banco
+            segunda, user=cenario["recepcao"], amount=Decimal("40"), forma="pix", account=banco
         )
 
     url = lambda name, *args: reverse(f"finance:{name}", args=[caixa.pk, *args])  # noqa: E731
@@ -617,7 +617,7 @@ def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
             user=cenario["admin"],
             amount=Decimal("50"),
             forma="dinheiro",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
         services.fechar_caixa(caixa, valor_contado=Decimal("50"), note="", user=cenario["admin"])
         services.estornar(pagamento, motivo="erro", user=cenario["admin"])
@@ -650,7 +650,12 @@ def test_cheque_nao_e_mais_oferecido(cenario):
         assert 'value="pix"' in pagina and 'value="cheque"' not in pagina, url
     recusado = admin.post(
         reverse("finance:receive_installment", args=[parcela.pk]),
-        {"data": "2026-10-30", "amount": "100,00", "forma": "cheque", "conta": cenario["caixa"].pk},
+        {
+            "date": "2026-10-30",
+            "amount": "100,00",
+            "forma": "cheque",
+            "account": cenario["caixa"].pk,
+        },
     )
     assert "forma" in recusado.context["form"].errors
     with usar_clinica(cenario["clinic"]):
@@ -659,7 +664,7 @@ def test_cheque_nao_e_mais_oferecido(cenario):
             user=cenario["admin"],
             amount=Decimal("100"),
             forma="cheque",
-            conta=cenario["caixa"],
+            account=cenario["caixa"],
         )
     assert antigo.get_forma_display() == "Cheque"
 

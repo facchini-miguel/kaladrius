@@ -73,7 +73,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(
+    account = forms.ModelChoiceField(
         label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
     )
 
@@ -103,7 +103,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
             kind=Category.Tipo.RECEITA, active=True
         )
         self.fields["practitioner"].queryset = Practitioner.objects.filter(active=True)
-        self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
         _centros_de_custo(self)
 
     def clean(self):
@@ -113,7 +113,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         if dados.get("valor_total") is not None and dados["valor_total"] <= 0:
             self.add_error("valor_total", _("Informe um valor maior que zero."))
         if dados.get("recebido_agora"):
-            for campo in ("forma", "conta"):
+            for campo in ("forma", "account"):
                 if not dados.get(campo):
                     self.add_error(campo, _("Informe para registrar o pagamento."))
         return dados
@@ -147,7 +147,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         choices=_formas_com_vazio,
         required=False,
     )
-    conta = forms.ModelChoiceField(
+    account = forms.ModelChoiceField(
         label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
     )
 
@@ -166,7 +166,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         self.fields["categoria"].queryset = Category.objects.filter(
             kind=Category.Tipo.DESPESA, active=True
         )
-        self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
         _centros_de_custo(self)
 
     def clean(self):
@@ -178,7 +178,7 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         if dados.get("amount") is not None and dados["amount"] <= 0:
             self.add_error("amount", _("Informe um valor maior que zero."))
         if dados.get("pago_agora"):
-            for campo in ("forma", "conta"):
+            for campo in ("forma", "account"):
                 if not dados.get(campo):
                     self.add_error(campo, _("Informe para registrar o pagamento."))
         return dados
@@ -319,23 +319,23 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Payment
         fields = [
-            "data",
+            "date",
             "amount",
             "juros",
             "desconto",
             "forma",
-            "conta",
+            "account",
             "cartao_bandeira",
             "cartao_parcelas",
             "cartao_codigo",
             "note",
         ]
-        widgets = {"data": DATA}
+        widgets = {"date": DATA}
 
     def __init__(self, *args, pode_dar_desconto, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["forma"].choices = _formas_com_vazio()
-        self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
         if not pode_dar_desconto:
             del self.fields["desconto"]
         # Card installments and the transaction code's local name (NSU) depend on the country.
@@ -506,7 +506,7 @@ class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
     def __init__(self, *args, caixa, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["outra_conta"].queryset = FinancialAccount.objects.filter(active=True).exclude(
-            pk=caixa.conta_id
+            pk=caixa.account_id
         )
 
     def clean_amount(self):
@@ -548,7 +548,7 @@ TAMANHO_MAXIMO_OFX = 5 * 1024 * 1024
 
 
 class ImportarExtratoForm(FormularioBootstrap, forms.Form):
-    conta = forms.ModelChoiceField(label=_("Conta"), queryset=FinancialAccount.objects.none())
+    account = forms.ModelChoiceField(label=_("Conta"), queryset=FinancialAccount.objects.none())
     arquivo = forms.FileField(
         label=_("Arquivo OFX"),
         help_text=_("Exporte no site ou aplicativo do banco, no formato OFX (Money)."),
@@ -557,12 +557,12 @@ class ImportarExtratoForm(FormularioBootstrap, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["conta"].queryset = FinancialAccount.objects.filter(active=True)
+        self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
         banco = FinancialAccount.objects.filter(
             active=True, kind=FinancialAccount.Tipo.BANCO
         ).first()
         if banco is not None:
-            self.fields["conta"].initial = banco.pk
+            self.fields["account"].initial = banco.pk
 
     def clean_arquivo(self):
         arquivo = self.cleaned_data["arquivo"]

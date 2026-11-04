@@ -29,19 +29,19 @@ Situacao = BankTransaction.Situacao
 
 
 @transaction.atomic
-def importar(conta, *, nome_arquivo, conteudo, user):
+def importar(account, *, nome_arquivo, conteudo, user):
     """Read an OFX file into `conta`. Lines imported before (same bank id) are skipped."""
     extrato = ofx.ler(conteudo)
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
     importacao = StatementImport.objects.create(
-        clinic=conta.clinic,
-        conta=conta,
+        clinic=account.clinic,
+        account=account,
         arquivo=nome_arquivo[:200],
         banco=extrato.banco,
-        conta_no_banco=extrato.conta,
-        inicio=extrato.inicio or min(t.data for t in extrato.transacoes),
-        fim=extrato.fim or max(t.data for t in extrato.transacoes),
+        conta_no_banco=extrato.account,
+        inicio=extrato.inicio or min(t.date for t in extrato.transacoes),
+        fim=extrato.fim or max(t.date for t in extrato.transacoes),
         saldo=extrato.saldo,
         saldo_em=extrato.saldo_em or extrato.fim,
         ignoradas=extrato.ignoradas,
@@ -49,18 +49,18 @@ def importar(conta, *, nome_arquivo, conteudo, user):
     )
     existentes = set(
         BankTransaction.objects.filter(
-            conta=conta, fitid__in=[t.fitid for t in extrato.transacoes]
+            account=account, fitid__in=[t.fitid for t in extrato.transacoes]
         ).values_list("fitid", flat=True)
     )
     # In bulk (a statement can have hundreds of lines): the audit log records the import.
     BankTransaction.objects.bulk_create(
         [
             BankTransaction(
-                clinic=conta.clinic,
-                conta=conta,
+                clinic=account.clinic,
+                account=account,
                 importacao=importacao,
                 fitid=t.fitid,
-                data=t.data,
+                date=t.date,
                 amount=t.amount,
                 description=t.description,
                 kind=t.kind,
@@ -80,7 +80,7 @@ def importar(conta, *, nome_arquivo, conteudo, user):
 def outra_conta_no_banco(importacao):
     """The bank account number of an earlier import into the same account, if different."""
     anterior = (
-        StatementImport.objects.filter(conta=importacao.conta)
+        StatementImport.objects.filter(account=importacao.account)
         .exclude(pk=importacao.pk)
         .exclude(conta_no_banco="")
         .first()
@@ -97,7 +97,7 @@ def outra_conta_no_banco(importacao):
 @dataclass
 class Candidato:
     chave: str  # "p<pk>" for a payment, "m<pk>" for a drawer movement
-    data: datetime.date
+    date: datetime.date
     description: str
     objeto: object
 
@@ -107,12 +107,12 @@ def candidatos(transacoes):
     pendentes = [t for t in transacoes if t.status == Situacao.PENDENTE]
     if not pendentes:
         return {}
-    contas = {t.conta_id for t in pendentes}
-    de = min(t.data for t in pendentes) - JANELA
-    ate = max(t.data for t in pendentes) + JANELA
+    contas = {t.account_id for t in pendentes}
+    de = min(t.date for t in pendentes) - JANELA
+    ate = max(t.date for t in pendentes) + JANELA
     pagamentos = list(
         Payment.objects.filter(
-            conta_id__in=contas, estornado=False, transacao__isnull=True, data__range=(de, ate)
+            account_id__in=contas, estornado=False, transacao__isnull=True, date__range=(de, ate)
         ).select_related("parcela__entry__patient")
     )
     movimentos = list(
@@ -120,7 +120,7 @@ def candidatos(transacoes):
             outra_conta_id__in=contas,
             transacao__isnull=True,
             created_at__date__range=(de, ate),
-        ).select_related("caixa__conta")
+        ).select_related("caixa__account")
     )
     resultado = {}
     for t in pendentes:
@@ -132,33 +132,36 @@ def candidatos(transacoes):
         for p in pagamentos:
             entry = p.parcela.entry
             if (
-                p.conta_id == t.conta_id
+                p.account_id == t.account_id
                 and p.amount == amount
                 and entry.kind == kind
-                and abs(p.data - t.data) <= JANELA
+                and abs(p.date - t.date) <= JANELA
             ):
                 lista.append(
                     Candidato(
                         f"p{p.pk}",
-                        p.data,
+                        p.date,
                         f"{entry.nome_pessoa} · {entry.description}",
                         p,
                     )
                 )
         for m in movimentos:
-            data = timezone.localtime(m.created_at).date()
+            date = timezone.localtime(m.created_at).date()
             if (
-                m.outra_conta_id == t.conta_id
+                m.outra_conta_id == t.account_id
                 and m.amount == amount
                 and m.kind == tipo_movimento
-                and abs(data - t.data) <= JANELA
+                and abs(date - t.date) <= JANELA
             ):
                 lista.append(
                     Candidato(
-                        f"m{m.pk}", data, f"{m.caixa.conta} · {m.get_kind_display()}: {m.motivo}", m
+                        f"m{m.pk}",
+                        date,
+                        f"{m.caixa.account} · {m.get_kind_display()}: {m.motivo}",
+                        m,
                     )
                 )
-        lista.sort(key=lambda c: (abs(c.data - t.data), c.data, c.chave))
+        lista.sort(key=lambda c: (abs(c.date - t.date), c.date, c.chave))
         resultado[t.pk] = lista
     return resultado
 
@@ -227,7 +230,7 @@ def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
         categoria=categoria,
         valor_total=abs(transacao.amount),
         parcelas=1,
-        primeiro_vencimento=transacao.data,
+        primeiro_vencimento=transacao.date,
         user=user,
     )
     pagamento = services.receber(
@@ -235,10 +238,10 @@ def criar_lancamento(transacao, *, description, categoria, pessoa, forma, user):
         user=user,
         amount=abs(transacao.amount),
         forma=forma,
-        conta=transacao.conta,
-        data=transacao.data,
+        account=transacao.account,
+        date=transacao.date,
     )
-    _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.data, "", pagamento), user)
+    _vincular(transacao, Candidato(f"p{pagamento.pk}", pagamento.date, "", pagamento), user)
     return entry
 
 
@@ -269,7 +272,7 @@ def saldo_no_sistema(importacao):
     """The system's balance of the account on the bank balance date (None without one)."""
     if importacao.saldo is None or importacao.saldo_em is None:
         return None
-    for conta, saldo in services.saldos_das_contas(ate=importacao.saldo_em):
-        if conta.pk == importacao.conta_id:
+    for account, saldo in services.saldos_das_contas(ate=importacao.saldo_em):
+        if account.pk == importacao.account_id:
             return saldo
     return None

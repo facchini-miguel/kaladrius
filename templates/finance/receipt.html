@@ -40,7 +40,7 @@
     {% if pagamento.note %}<li>{{ pagamento.note }}</li>{% endif %}
   </ul>
   <div class="d-flex flex-wrap gap-4 justify-content-between align-items-end">
-    <div class="text-nowrap">{{ pagamento.data|date:"DATE_FORMAT" }}</div>
+    <div class="text-nowrap">{{ pagamento.date|date:"DATE_FORMAT" }}</div>
     <div class="text-center" style="min-width: min(18rem, 100%);">
       <div class="border-top pt-1">{{ clinica_atual.name }}</div>
       {% if pagamento.created_by %}<div class="small text-body-secondary">{% blocktranslate with nome=pagamento.created_by.get_full_name|default:pagamento.created_by.username %}Recebido por {{ nome }}{% endblocktranslate %}</div>{% endif %}

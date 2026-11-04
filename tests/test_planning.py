@@ -28,7 +28,7 @@ def grupo(clinic, name):
         return AccountGroup.objects.get(name=name)
 
 
-def pagar(clinic, categoria, amount, data=HOJE):
+def pagar(clinic, categoria, amount, date=HOJE):
     with usar_clinica(clinic):
         entry = services.criar_lancamento(
             clinic=clinic,
@@ -38,7 +38,7 @@ def pagar(clinic, categoria, amount, data=HOJE):
             categoria=Category.objects.get(name=categoria),
             valor_total=Decimal(amount),
             parcelas=1,
-            primeiro_vencimento=data,
+            primeiro_vencimento=date,
             user=None,
         )
         parcela = entry.parcelas.get()
@@ -46,9 +46,9 @@ def pagar(clinic, categoria, amount, data=HOJE):
             parcela,
             user=None,
             amount=parcela.amount,
-            data=data,
+            date=date,
             forma="pix",
-            conta=FinancialAccount.objects.get(name="Caixa"),
+            account=FinancialAccount.objects.get(name="Caixa"),
         )
 
 
@@ -85,7 +85,7 @@ def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
         Planning.objects.create(ano=HOJE.year, grupo=ocupacao, amount=Decimal("1000"))
     pagar(clinica_a, "Aluguel", "250")
     pagar(clinica_a, "Manutenção", "50")
-    pagar(clinica_a, "Aluguel", "999", data=datetime.date(HOJE.year - 1, 6, 1))  # other year
+    pagar(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
     despesas = admin.get(f"{URL}?ano={HOJE.year}").context["secoes"][1]
     linha = next(linha for linha in despesas["linhas"] if linha["grupo"] == ocupacao)
     assert (linha["realizado"], linha["percentual"]) == (Decimal("300.00"), 30)

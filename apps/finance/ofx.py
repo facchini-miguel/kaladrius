@@ -22,7 +22,7 @@ class ArquivoInvalido(ValueError):
 @dataclass
 class Transacao:
     fitid: str
-    data: datetime.date
+    date: datetime.date
     amount: Decimal  # positive = money in, negative = money out
     description: str
     kind: str
@@ -31,7 +31,7 @@ class Transacao:
 @dataclass
 class Extrato:
     banco: str
-    conta: str
+    account: str
     inicio: datetime.date | None
     fim: datetime.date | None
     saldo: Decimal | None
@@ -89,9 +89,9 @@ def ler(conteudo: bytes) -> Extrato:
     vistos = {}
     ignoradas = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", texto, re.IGNORECASE | re.DOTALL):
-        data = _data(_campo(bloco, "DTPOSTED"))
+        date = _data(_campo(bloco, "DTPOSTED"))
         amount = _valor(_campo(bloco, "TRNAMT"))
-        if data is None or amount is None:
+        if date is None or amount is None:
             ignoradas += 1
             continue
         if amount == 0:  # nothing moved (some banks list balance lines this way)
@@ -104,7 +104,7 @@ def ler(conteudo: bytes) -> Extrato:
         fitid = (
             _campo(bloco, "FITID")
             or hashlib.sha1(  # noqa: S324 (an id, not security)
-                f"{data}|{amount}|{description}".encode()
+                f"{date}|{amount}|{description}".encode()
             ).hexdigest()
         )
         # Some banks repeat a FITID inside the same file: keep both transactions.
@@ -114,7 +114,7 @@ def ler(conteudo: bytes) -> Extrato:
         transacoes.append(
             Transacao(
                 fitid=fitid[:120],
-                data=data,
+                date=date,
                 amount=amount,
                 description=description[:200],
                 kind=_campo(bloco, "TRNTYPE")[:20],
@@ -124,7 +124,7 @@ def ler(conteudo: bytes) -> Extrato:
     saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
     return Extrato(
         banco=_campo(texto, "BANKID")[:20],
-        conta=_campo(texto, "ACCTID")[:40],
+        account=_campo(texto, "ACCTID")[:40],
         inicio=_data(_campo(texto, "DTSTART")),
         fim=_data(_campo(texto, "DTEND")),
         saldo=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,

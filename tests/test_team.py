@@ -35,8 +35,8 @@ def dados_novo(**extra):
     }
 
 
-def dados_edicao(papel=Papel.RECEPCAO, active=True, **conta):
-    dados = {"vinculo-papel": papel, **{f"conta-{k}": v for k, v in conta.items()}}
+def dados_edicao(papel=Papel.RECEPCAO, active=True, **account):
+    dados = {"vinculo-papel": papel, **{f"conta-{k}": v for k, v in account.items()}}
     if active:
         dados["vinculo-active"] = "on"
     return dados

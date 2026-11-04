@@ -155,10 +155,10 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         return self._limpar_telefone("telefone_comercial")
 
     def clean_data_nascimento(self):
-        data = self.cleaned_data.get("data_nascimento")
-        if data and data > datetime.date.today():
+        date = self.cleaned_data.get("data_nascimento")
+        if date and date > datetime.date.today():
             raise forms.ValidationError(_("A data de nascimento não pode estar no futuro."))
-        return data
+        return date
 
     def clean(self):
         dados = super().clean()

@@ -130,7 +130,7 @@
   <ul class="list-group list-group-flush">
     {% for visit in prontuario %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.data|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</a>
+      <a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.date|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</a>
       {% if visit.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
     </li>
     {% empty %}
@@ -180,7 +180,7 @@
   <ul class="list-group list-group-flush">
     {% for orcamento in orcamentos %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.data|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
+      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|moeda }}</span>
       {% include "estimates/_status.html" %}
     </li>
     {% empty %}
@@ -243,7 +243,7 @@
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
       {% for pagamento in financeiro.pagamentos %}
-      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.data|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
+      <li{% if pagamento.estornado %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ pagamento.date|date:"SHORT_DATE_FORMAT" }} · {{ pagamento.amount|moeda }} · {{ pagamento.get_forma_display }} · <a href="{% url 'finance:receipt' pagamento.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -260,7 +260,7 @@
   <ul class="list-group list-group-flush">
     {% for rechamada in rechamadas %}
     <li class="list-group-item d-flex justify-content-between">
-      <span>{{ rechamada.data|date:"SHORT_DATE_FORMAT" }} · {{ rechamada.description }}</span>
+      <span>{{ rechamada.date|date:"SHORT_DATE_FORMAT" }} · {{ rechamada.description }}</span>
       {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
     </li>
     {% empty %}

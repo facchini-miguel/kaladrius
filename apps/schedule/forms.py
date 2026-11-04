@@ -34,7 +34,7 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
 
 
 class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
-    data = forms.DateField(
+    date = forms.DateField(
         label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )
     hora_inicio = forms.TimeField(
@@ -92,7 +92,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             del self.fields["repeticoes"]  # recurrence only applies when creating
             inicio = timezone.localtime(agendamento.inicio)
             self.initial.update(
-                data=inicio.date(),
+                date=inicio.date(),
                 hora_inicio=inicio.time(),
                 hora_fim=timezone.localtime(agendamento.fim).time(),
             )
@@ -104,8 +104,8 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        data, hora_inicio, hora_fim = (
-            dados.get("data"),
+        date, hora_inicio, hora_fim = (
+            dados.get("date"),
             dados.get("hora_inicio"),
             dados.get("hora_fim"),
         )
@@ -125,7 +125,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
                     "use “Agendar outro paciente neste horário”."
                 ),
             )
-        if None in (data, hora_inicio, hora_fim) or self.errors:
+        if None in (date, hora_inicio, hora_fim) or self.errors:
             return dados
 
         clinic = self.clinic
@@ -151,12 +151,12 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             return dados
 
         self.intervalos = services.ocorrencias(
-            data, hora_inicio, hora_fim, dados.get("repeticoes") or 1
+            date, hora_inicio, hora_fim, dados.get("repeticoes") or 1
         )
         self.instance.inicio, self.instance.fim = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
         if not dados.get("patient") or (
-            self.instance.status in marcado and data > timezone.localdate()
+            self.instance.status in marcado and date > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
             # came or missed it yet.

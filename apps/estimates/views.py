@@ -237,7 +237,9 @@ def aprovar(request, pk):
     if request.method == "POST" and form.is_valid():
         dados = form.cleaned_data
         pagamento = (
-            {"forma": dados["forma"], "conta": dados["conta"]} if dados["recebido_agora"] else None
+            {"forma": dados["forma"], "account": dados["account"]}
+            if dados["recebido_agora"]
+            else None
         )
         try:
             entry = services.aprovar(

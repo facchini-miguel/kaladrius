@@ -26,12 +26,12 @@ def cenario(clinica_a, criar_usuario, cliente_de):
 
 def rechamadas(clinic):
     with usar_clinica(clinic):
-        return list(Recall.objects.order_by("data"))
+        return list(Recall.objects.order_by("date"))
 
 
-def criar(clinic, patient, data=DIA, **extra):
+def criar(clinic, patient, date=DIA, **extra):
     with usar_clinica(clinic):
-        return Recall.objects.create(patient=patient, data=data, description="Revisão", **extra)
+        return Recall.objects.create(patient=patient, date=date, description="Revisão", **extra)
 
 
 def test_cria_rechamada(cenario):
@@ -39,7 +39,7 @@ def test_cria_rechamada(cenario):
         reverse("recalls:new"),
         {
             "patient": cenario["patient"].pk,
-            "data": DIA.isoformat(),
+            "date": DIA.isoformat(),
             "description": "Revisão 6 meses",
         },
     )
@@ -51,7 +51,7 @@ def test_cria_rechamada(cenario):
 
 def test_paciente_e_obrigatorio(cenario):
     resposta = cenario["cliente"].post(
-        reverse("recalls:new"), {"data": DIA.isoformat(), "description": "x"}
+        reverse("recalls:new"), {"date": DIA.isoformat(), "description": "x"}
     )
     assert "Escolha o paciente" in resposta.content.decode()
 
@@ -66,7 +66,7 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
         reverse("recalls:new"),
         {
             "patient": cenario["patient"].pk,
-            "data": DIA.isoformat(),
+            "date": DIA.isoformat(),
             "description": "x",
             "next": ficha,
         },
@@ -121,7 +121,7 @@ def test_resumo_e_lista_do_dia_para_a_agenda(cenario):
         {"start": "2031-03-03T00:00:00-03:00", "end": "2031-03-10T00:00:00-03:00"},
     )
     assert resumo.json() == {"2031-03-05": 2}
-    dia = cenario["cliente"].get(reverse("recalls:today"), {"data": "2031-03-05"}).content.decode()
+    dia = cenario["cliente"].get(reverse("recalls:today"), {"date": "2031-03-05"}).content.decode()
     assert dia.count("João Rechamada") == 3
 
 
@@ -141,7 +141,7 @@ def test_isolamento(cenario, clinica_b):
     assert len(cliente.get(reverse("recalls:list"), {"status": "todas"}).context["pagina"]) == 0
     resposta = cliente.post(
         reverse("recalls:new"),
-        {"patient": paciente_b.pk, "data": DIA.isoformat(), "description": "x"},
+        {"patient": paciente_b.pk, "date": DIA.isoformat(), "description": "x"},
     )
     assert "patient" in resposta.context["form"].errors
 
@@ -159,7 +159,7 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
     admin = cliente_de(criar_usuario("admin", cenario["clinic"], Papel.ADMIN))
     admin.post(reverse("patients:archive", args=[cenario["patient"].pk]))
     assert "Maria" not in admin.get(reverse("recalls:list")).content.decode()
-    dia = admin.get(reverse("recalls:today"), {"data": rechamada.data.isoformat()})
+    dia = admin.get(reverse("recalls:today"), {"date": rechamada.date.isoformat()})
     assert "Maria" not in dia.content.decode()
 
     # Permanent deletion takes the recalls with it.
@@ -195,7 +195,7 @@ def test_aniversariantes_exige_permissao_e_clinica(criar_usuario, cliente_de):
 
 def test_paciente_adulterado_no_formulario_mostra_erro(cenario):
     resposta = cenario["cliente"].post(
-        reverse("recalls:new"), {"patient": "abc", "data": "2031-03-05", "description": "x"}
+        reverse("recalls:new"), {"patient": "abc", "date": "2031-03-05", "description": "x"}
     )
     assert resposta.status_code == 200
     assert resposta.context["form"].errors["patient"]

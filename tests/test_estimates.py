@@ -49,7 +49,7 @@ def criar_orcamento(cenario, cliente):
         {
             "patient": cenario["patient"].pk,
             "practitioner": "",
-            "data": HOJE.isoformat(),
+            "date": HOJE.isoformat(),
             "validade": HOJE.isoformat(),
             "notes": "",
         },
@@ -149,7 +149,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
             "categoria": cenario["canal"].categoria.pk,
             "recebido_agora": "on",
             "forma": "pix",
-            "conta": caixa.pk,
+            "account": caixa.pk,
         },
     )
     orcamento.refresh_from_db()

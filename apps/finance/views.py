@@ -172,7 +172,7 @@ def lancamento_novo(request):
                 user=request.user,
                 amount=primeira.amount,
                 forma=dados["forma"],
-                conta=dados["conta"],
+                account=dados["account"],
             )
             messages.success(request, _("Lançamento criado e 1ª parcela recebida."))
             return redirect("finance:receipt", pk=pagamento.pk)
@@ -213,7 +213,7 @@ def despesa_nova(request):
                 user=request.user,
                 amount=primeira.amount,
                 forma=dados["forma"],
-                conta=dados["conta"],
+                account=dados["account"],
             )
         messages.success(request, _("Despesa lançada."))
         return redirect("finance:entry", pk=entry.pk)
@@ -230,7 +230,7 @@ def entry(request, pk):
     hoje = timezone.localdate()
     parcelas = list(Installment.objects.com_saldo().filter(entry=entry).select_related("entry"))
     pagamentos = Payment.objects.filter(parcela__entry=entry).select_related(
-        "parcela", "conta", "created_by"
+        "parcela", "account", "created_by"
     )
     for parcela in parcelas:
         parcela.status = services.status(parcela, hoje)
@@ -294,7 +294,7 @@ def receber(request, pk):
     ).first()
     form = ReceberForm(
         request.POST or None,
-        initial={"amount": parcela.saldo, "data": timezone.localdate(), "conta": conta_padrao},
+        initial={"amount": parcela.saldo, "date": timezone.localdate(), "account": conta_padrao},
         pode_dar_desconto=pode_desconto,
     )
     if pagar:
@@ -332,7 +332,7 @@ def recibo(request, pk):
         Payment.objects.select_related(
             "parcela__entry__patient",
             "parcela__entry__practitioner",
-            "conta",
+            "account",
             "created_by",
         ),
         pk=pk,
@@ -377,7 +377,7 @@ def estornar(request, pk):
                 [
                     str(pagamento.parcela),
                     moeda(pagamento.amount),
-                    date_format(pagamento.data, "SHORT_DATE_FORMAT"),
+                    date_format(pagamento.date, "SHORT_DATE_FORMAT"),
                 ]
             ),
             "voltar": pagamento.parcela.entry_id,
@@ -416,29 +416,29 @@ def devedores(request):
 def caixa(request):
     """The drawer of a cash account: its open session, or the form to open it."""
     contas = list(FinancialAccount.objects.filter(kind=FinancialAccount.Tipo.DINHEIRO, active=True))
-    escolhida = request.GET.get("conta", "")
-    conta = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
-    if conta is not None:
-        aberto = services.caixa_aberto(conta)
+    escolhida = request.GET.get("account", "")
+    account = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
+    if account is not None:
+        aberto = services.caixa_aberto(account)
         if aberto is not None:
             return redirect("finance:cash_detail", pk=aberto.pk)
-    saldo = dict(services.saldos_das_contas()).get(conta) if conta else None
+    saldo = dict(services.saldos_das_contas()).get(account) if account else None
     # Empty on purpose: the opening amount is what is counted, not the system balance.
     form = AbrirCaixaForm(request.POST or None)
-    if request.method == "POST" and conta is not None:
+    if request.method == "POST" and account is not None:
         if not pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR):
             raise PermissionDenied
         if form.is_valid():
             try:
                 novo = services.abrir_caixa(
-                    conta, amount=form.cleaned_data["amount"], user=request.user
+                    account, amount=form.cleaned_data["amount"], user=request.user
                 )
             except ValidationError as erro:
                 messages.error(request, erro.messages[0])
-                return redirect(f"{request.path}?conta={conta.pk}")
+                return redirect(f"{request.path}?account={account.pk}")
             messages.success(request, _("Caixa aberto."))
             return redirect("finance:cash_detail", pk=novo.pk)
-    historico = CashRegister.objects.filter(conta=conta).select_related(
+    historico = CashRegister.objects.filter(account=account).select_related(
         "aberto_por", "fechado_por"
     )[:30]
     return render(
@@ -446,7 +446,7 @@ def caixa(request):
         "finance/cash.html",
         {
             "contas": contas,
-            "conta": conta,
+            "account": account,
             "form": form,
             "saldo_sistema": saldo,
             "historico": historico,
@@ -457,7 +457,7 @@ def caixa(request):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def caixa_detalhe(request, pk):
     sessao = get_object_or_404(
-        CashRegister.objects.select_related("conta", "aberto_por", "fechado_por"), pk=pk
+        CashRegister.objects.select_related("account", "aberto_por", "fechado_por"), pk=pk
     )
     return render(
         request,
@@ -475,7 +475,9 @@ MOVIMENTOS_NA_URL = {
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
 def caixa_movimento(request, pk, kind):
-    sessao = get_object_or_404(CashRegister.objects.select_related("conta"), pk=pk, fechado_em=None)
+    sessao = get_object_or_404(
+        CashRegister.objects.select_related("account"), pk=pk, fechado_em=None
+    )
     if kind not in MOVIMENTOS_NA_URL:
         raise Http404
     kind = MOVIMENTOS_NA_URL[kind]
@@ -497,7 +499,9 @@ def caixa_movimento(request, pk, kind):
 
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
 def caixa_fechar(request, pk):
-    sessao = get_object_or_404(CashRegister.objects.select_related("conta"), pk=pk, fechado_em=None)
+    sessao = get_object_or_404(
+        CashRegister.objects.select_related("account"), pk=pk, fechado_em=None
+    )
     form = FecharCaixaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         services.fechar_caixa(sessao, user=request.user, **form.cleaned_data)
@@ -882,11 +886,11 @@ def comissao_pagar(request, pk):
 def comissao(request, pk):
     comissao = get_object_or_404(Commission.objects.select_related("practitioner", "entry"), pk=pk)
     pagamentos = comissao.pagamentos.select_related("parcela__entry__patient").order_by(
-        "data", "pk"
+        "date", "pk"
     )
     estornos = comissao.pagamentos_estornados.select_related(
         "parcela__entry__patient", "comissao"
-    ).order_by("data", "pk")
+    ).order_by("date", "pk")
     for estorno in estornos:
         estorno.comissao_devolvida = commissions.percentual_de(
             estorno.amount, estorno.comissao.percentual
@@ -911,7 +915,7 @@ def extratos(request):
             arquivo = form.cleaned_data["arquivo"]
             try:
                 importacao = reconciliation.importar(
-                    form.cleaned_data["conta"],
+                    form.cleaned_data["account"],
                     nome_arquivo=arquivo.name,
                     conteudo=arquivo.read(),
                     user=request.user,
@@ -946,12 +950,12 @@ def extratos(request):
                         )
                         % {
                             "nova": importacao.conta_no_banco,
-                            "conta": importacao.conta,
+                            "conta": importacao.account,
                             "antiga": outra,
                         },
                     )
                 return redirect("finance:statement", pk=importacao.pk)
-    importacoes = StatementImport.objects.select_related("conta", "created_by")
+    importacoes = StatementImport.objects.select_related("account", "created_by")
     pendentes = dict(
         BankTransaction.objects.filter(status=BankTransaction.Situacao.PENDENTE)
         .values("importacao")
@@ -966,10 +970,10 @@ def extratos(request):
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.VER)
 def extrato(request, pk):
-    importacao = get_object_or_404(StatementImport.objects.select_related("conta"), pk=pk)
+    importacao = get_object_or_404(StatementImport.objects.select_related("account"), pk=pk)
     transacoes = list(
         importacao.transacoes.select_related(
-            "pagamento__parcela__entry__patient", "movimento__caixa__conta"
+            "pagamento__parcela__entry__patient", "movimento__caixa__account"
         )
     )
     por_transacao = reconciliation.candidatos(transacoes)
@@ -1026,7 +1030,7 @@ def transacao_acao(request, pk, acao):
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.CRIAR)
 def transacao_lancamento(request, pk):
-    transacao = get_object_or_404(BankTransaction.objects.select_related("conta"), pk=pk)
+    transacao = get_object_or_404(BankTransaction.objects.select_related("account"), pk=pk)
     form = LancamentoDaTransacaoForm(
         request.POST or None,
         entrada=transacao.entrada,

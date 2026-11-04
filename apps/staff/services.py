@@ -14,8 +14,8 @@ from apps.finance.models import Entry
 from .models import Employee, Payroll, hora_extra_sugerida
 
 
-def competencia_de(data):
-    return data.replace(day=1)
+def competencia_de(date):
+    return date.replace(day=1)
 
 
 def fim_do_mes(competencia):

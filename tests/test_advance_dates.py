@@ -32,7 +32,7 @@ def cenario(clinica_a, criar_profissional):
             for d in (21, 14)
         ]
         rechamada = Recall.objects.create(
-            patient=patient, data=hoje - datetime.timedelta(days=20), description="Limpeza"
+            patient=patient, date=hoje - datetime.timedelta(days=20), description="Limpeza"
         )
     return {"clinic": clinica_a, "patient": patient, "agenda": semana, "rechamada": rechamada}
 
@@ -58,7 +58,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             assert agendamento.inicio - inicio == datetime.timedelta(days=14)
             assert agendamento.fim - fim == datetime.timedelta(days=14)
             assert agendamento.inicio.weekday() == inicio.weekday()
-        assert Recall.objects.get().data == hoje - datetime.timedelta(days=6)
+        assert Recall.objects.get().date == hoje - datetime.timedelta(days=6)
         assert Patient.objects.get().data_nascimento == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
@@ -76,4 +76,4 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     hoje = timezone.localdate()
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
-        assert Recall.objects.get().data == hoje - datetime.timedelta(days=20)
+        assert Recall.objects.get().date == hoje - datetime.timedelta(days=20)

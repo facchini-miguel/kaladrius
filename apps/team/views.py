@@ -56,12 +56,12 @@ def editar(request, pk):
     exclusiva = conta_exclusiva(user, request.clinic)
     dados = request.POST or None
     form = VinculoForm(dados, instance=vinculo, editor=request.user, prefix="vinculo")
-    conta = ContaForm(dados, instance=user, prefix="conta") if exclusiva else None
-    if request.method == "POST" and form.is_valid() and (conta is None or conta.is_valid()):
+    account = ContaForm(dados, instance=user, prefix="conta") if exclusiva else None
+    if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
             form.save()
-            if conta is not None:
-                conta.save()
+            if account is not None:
+                account.save()
         messages.success(
             request, _("Dados de %(nome)s salvos.") % {"nome": user.get_full_name() or user}
         )
@@ -72,7 +72,7 @@ def editar(request, pk):
         {
             "vinculo": vinculo,
             "form": form,
-            "conta": conta,
+            "account": account,
             "exclusiva": exclusiva,
             "duas_etapas": conta_servicos.ativa_para(user),
         },

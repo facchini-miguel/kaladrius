@@ -43,7 +43,7 @@ class Visit(ModeloDaClinica):
         related_name="visit",
         verbose_name=_("agendamento"),
     )
-    data = models.DateTimeField(_("data do atendimento"), default=timezone.now)
+    date = models.DateTimeField(_("data do atendimento"), default=timezone.now, db_column="data")
     queixa_principal = models.TextField(_("queixa principal"), blank=True)
     historia = models.TextField(_("história da doença atual"), blank=True)
     antecedentes = models.TextField(
@@ -74,10 +74,10 @@ class Visit(ModeloDaClinica):
         db_table = "prontuario_atendimento"
         verbose_name = _("atendimento")
         verbose_name_plural = _("atendimentos")
-        ordering = ["-data", "-pk"]
+        ordering = ["-date", "-pk"]
 
     def __str__(self):
-        return f"{self.patient} – {timezone.localtime(self.data):%d/%m/%Y %H:%M}"
+        return f"{self.patient} – {timezone.localtime(self.date):%d/%m/%Y %H:%M}"
 
     @property
     def finalizado(self):
@@ -142,7 +142,7 @@ class Certificate(ModeloDaClinica):
         default=Tipo.COMPARECIMENTO,
         db_column="tipo",
     )
-    data = models.DateField(_("data do atendimento"), default=timezone.localdate)
+    date = models.DateField(_("data do atendimento"), default=timezone.localdate, db_column="data")
     hora_inicio = models.TimeField(_("das"), null=True, blank=True)
     hora_fim = models.TimeField(_("às"), null=True, blank=True)
     dias = models.PositiveSmallIntegerField(

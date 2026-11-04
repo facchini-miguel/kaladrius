@@ -140,7 +140,7 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="h6 mb-0">{% translate "Agenda de hoje" %}</h2>
-        <a class="small" href="{% url 'schedule:calendar' %}?data={{ painel.hoje|date:'Y-m-d' }}">{% translate "Abrir na agenda" %}</a>
+        <a class="small" href="{% url 'schedule:calendar' %}?date={{ painel.hoje|date:'Y-m-d' }}">{% translate "Abrir na agenda" %}</a>
       </div>
       {% if agenda.lista %}
       <div class="table-responsive">
@@ -211,7 +211,7 @@
       </div>
       <div class="card-body">
         {% for caixa in receb.caixas %}
-        <p class="mb-1"><span class="badge text-bg-success">{% translate "aberto" %}</span> {{ caixa.conta.name }} <span class="text-body-secondary small">{% blocktranslate with hora=caixa.aberto_em|time:"H:i" %}desde {{ hora }}{% endblocktranslate %}</span></p>
+        <p class="mb-1"><span class="badge text-bg-success">{% translate "aberto" %}</span> {{ caixa.account.name }} <span class="text-body-secondary small">{% blocktranslate with hora=caixa.aberto_em|time:"H:i" %}desde {{ hora }}{% endblocktranslate %}</span></p>
         {% empty %}
         <p class="mb-1"><span class="badge text-bg-secondary">{% translate "fechado" %}</span> {% translate "Nenhum caixa aberto." %}</p>
         {% endfor %}
@@ -240,7 +240,7 @@
         <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
           <div class="small">
             <div>{{ rechamada.patient.name }}{% if rechamada.patient.telefone_celular %} · <span class="text-nowrap">{{ rechamada.patient.telefone_celular|phone }}</span>{% endif %}{% if rechamada.patient.whatsapp %} · <a class="text-nowrap" href="{{ rechamada.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
-            <div class="text-body-secondary">{{ rechamada.description }}{% if rechamada.data < painel.hoje %} · <span class="text-danger">{% blocktranslate with data=rechamada.data|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
+            <div class="text-body-secondary">{{ rechamada.description }}{% if rechamada.date < painel.hoje %} · <span class="text-danger">{% blocktranslate with data=rechamada.date|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
           {% if pode.rechamadas.alterar %}
           <form method="post" action="{% url 'recalls:complete' rechamada.pk %}">

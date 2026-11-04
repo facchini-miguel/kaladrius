@@ -82,7 +82,7 @@ class Estimate(ModeloDaClinica):
         verbose_name=_("profissional"),
         db_column="profissional_id",
     )
-    data = models.DateField(_("data"), default=timezone.localdate)
+    date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
     validade = models.DateField(_("válido até"), default=validade_padrao)
     status = models.CharField(
         _("situação"),
@@ -127,7 +127,7 @@ class Estimate(ModeloDaClinica):
         db_table = "orcamentos_orcamento"
         verbose_name = _("orçamento")
         verbose_name_plural = _("orçamentos")
-        ordering = ["-data", "-pk"]
+        ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(desconto__gte=0), name="orcamento_desconto"),
         ]

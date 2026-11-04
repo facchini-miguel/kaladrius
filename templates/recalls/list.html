@@ -30,13 +30,13 @@
     <tbody>
       {% for rechamada in pagina %}
       <tr>
-        <td class="text-nowrap">{{ rechamada.data|date:"SHORT_DATE_FORMAT" }}</td>
+        <td class="text-nowrap">{{ rechamada.date|date:"SHORT_DATE_FORMAT" }}</td>
         <td><a href="{% url 'patients:record' rechamada.patient_id %}">{{ rechamada.patient.name }}</a></td>
         <td>{{ rechamada.description }}</td>
         <td>
           {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
-          {% elif rechamada.data < hoje %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
-          {% elif rechamada.data == hoje %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
+          {% elif rechamada.date < hoje %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
+          {% elif rechamada.date == hoje %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">

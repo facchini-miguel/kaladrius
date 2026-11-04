@@ -27,10 +27,10 @@ def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, recepcao, criar_pro
     eventos = recepcao.get(reverse("schedule:events"), {**semana, "practitioner": practitioner.pk})
     assert eventos.status_code == 200
     configuracao = recepcao.get(reverse("schedule:calendar")).context["configuracao"]
-    assert configuracao["data"] == "2026-03-05"  # middle of the week on the screen
+    assert configuracao["date"] == "2026-03-05"  # middle of the week on the screen
     # An explicit date still wins.
-    explicita = recepcao.get(reverse("schedule:calendar"), {"data": "2026-04-01"})
-    assert explicita.context["configuracao"]["data"] == "2026-04-01"
+    explicita = recepcao.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
+    assert explicita.context["configuracao"]["date"] == "2026-04-01"
 
 
 def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
@@ -38,7 +38,7 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
     ontem = timezone.localdate() - datetime.timedelta(days=1)
     sessao["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
     sessao.save()
-    assert recepcao.get(reverse("schedule:calendar")).context["configuracao"]["data"] == ""
+    assert recepcao.get(reverse("schedule:calendar")).context["configuracao"]["date"] == ""
 
 
 def test_ficha_cadastral_impressa(clinica_a, recepcao):
