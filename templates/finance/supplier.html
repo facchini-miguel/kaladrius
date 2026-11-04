@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ fornecedor.nome }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ fornecedor.name }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">
-    {{ fornecedor.nome }}
-    {% if not fornecedor.ativo %}<span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}
+    {{ fornecedor.name }}
+    {% if not fornecedor.active %}<span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}
   </h1>
   <div class="d-flex gap-2">
-    {% if pode.financeiro.criar and fornecedor.ativo %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?fornecedor={{ fornecedor.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if pode.financeiro.criar and fornecedor.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?fornecedor={{ fornecedor.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
     {% if pode.financeiro.alterar %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' fornecedor.pk %}">{% translate "Editar" %}</a>{% endif %}
   </div>
 </div>
@@ -24,11 +24,11 @@
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ fornecedor.get_tipo_display }}</dd>
           {% if fornecedor.razao_social %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ fornecedor.razao_social }}</dd>{% endif %}
           {% with sigla=fornecedor.cpf_cnpj|sigla_documento:fornecedor.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ fornecedor.cpf_cnpj|documento:fornecedor.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
-          <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ fornecedor.telefone|telefone|default:"—" }}</dd>
-          <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|telefone }}</a>{% else %}—{% endif %}</dd>
+          <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ fornecedor.phone|phone|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if fornecedor.whatsapp %}<a href="{{ fornecedor.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ fornecedor.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ fornecedor.email|default:"—" }}</dd>
         </dl>
-        {% if fornecedor.observacoes %}<p class="mt-3 mb-0 text-body-secondary">{{ fornecedor.observacoes|linebreaksbr }}</p>{% endif %}
+        {% if fornecedor.notes %}<p class="mt-3 mb-0 text-body-secondary">{{ fornecedor.notes|linebreaksbr }}</p>{% endif %}
       </div>
     </div>
   </div>
@@ -60,7 +60,7 @@
         {% for parcela in parcelas %}
         <tr>
           <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
-          <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.descricao }}</a> <span class="text-body-secondary small">({{ parcela.numero }})</span></td>
+          <td><a href="{% url 'finance:entry' parcela.lancamento_id %}">{{ parcela.lancamento.description }}</a> <span class="text-body-secondary small">({{ parcela.number }})</span></td>
           <td class="text-end text-nowrap">{{ parcela.valor|moeda }}</td>
           <td class="text-end text-nowrap">{% if parcela.saldo > 0 and not parcela.lancamento.cancelado %}{{ parcela.saldo|moeda }}{% else %}—{% endif %}</td>
           <td>{% include "finance/_status.html" with situacao=parcela.situacao %}</td>

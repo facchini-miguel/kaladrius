@@ -23,11 +23,11 @@
     <tbody>
       {% for convenio in convenios %}
       <tr>
-        <td>{{ convenio.nome }}</td>
+        <td>{{ convenio.name }}</td>
         {% if rotulo_do_registro %}<td>{{ convenio.registro|default:"—" }}</td>{% endif %}
-        <td class="text-nowrap">{{ convenio.telefone|telefone|default:"—" }}</td>
+        <td class="text-nowrap">{{ convenio.phone|phone|default:"—" }}</td>
         <td class="text-end">{{ convenio.pacientes }}</td>
-        <td>{% if convenio.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td>{% if convenio.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         <td class="text-end">{% if pode.convenios.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' convenio.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}

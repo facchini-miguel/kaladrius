@@ -62,7 +62,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             clinic=clinic,
             tipo=Entry.Tipo.RECEBER,
             patient=cenario["patient"],
-            descricao="Limpeza",
+            description="Limpeza",
             categoria=cenario["categoria"],
             practitioner=dra,
             valor_total=Decimal("100"),

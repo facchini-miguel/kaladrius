@@ -9,7 +9,7 @@ register = template.Library()
 
 @register.filter
 def nome_dente(dente):
-    return teeth.nome(dente)
+    return teeth.name(dente)
 
 
 @register.simple_tag

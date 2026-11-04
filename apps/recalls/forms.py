@@ -10,7 +10,7 @@ from .models import Recall
 class RechamadaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Recall
-        fields = ["patient", "data", "descricao", "concluida"]
+        fields = ["patient", "data", "description", "concluida"]
         widgets = {
             "patient": forms.HiddenInput,
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),

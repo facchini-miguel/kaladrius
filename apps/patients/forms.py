@@ -15,14 +15,14 @@ from .models import Patient, RelatedPerson
 
 class UFField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return f"{obj.sigla} - {obj.nome}"
+        return f"{obj.sigla} - {obj.name}"
 
 
 class CidadeField(forms.ModelChoiceField):
     """City select labeled by name only (the state is chosen in the field beside it)."""
 
     def label_from_instance(self, obj):
-        return obj.nome
+        return obj.name
 
 
 def _campo_texto(label, max_length, **attrs):
@@ -50,7 +50,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         model = Patient
         fields = [
             "tipo",
-            "nome",
+            "name",
             "razao_social",
             "cpf_cnpj",
             "inscricao_estadual",
@@ -72,15 +72,15 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             "cidade_nome",
             "bairro",
             "logradouro",
-            "numero",
+            "number",
             "complemento",
-            "observacoes",
-            "ativo",
+            "notes",
+            "active",
         ]
         widgets = {
             "tipo": forms.RadioSelect,
             "data_nascimento": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "observacoes": forms.Textarea(attrs={"rows": 4}),
+            "notes": forms.Textarea(attrs={"rows": 4}),
         }
 
     # Brazilian fields; outside Brazil the state and city are typed (decision 117) and the
@@ -139,8 +139,8 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
     def clean_cep(self):
         return countries.normalizar_cep(self.cleaned_data.get("cep"), self.pais)
 
-    def _limpar_telefone(self, nome):
-        return normalizar_telefone(self.cleaned_data.get(nome), self.pais)
+    def _limpar_telefone(self, name):
+        return normalizar_telefone(self.cleaned_data.get(name), self.pais)
 
     def clean_telefone_celular(self):
         return self._limpar_telefone("telefone_celular")
@@ -213,13 +213,13 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
 class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
     """A relative or contact (decision 101): another patient of the clinic, or a name."""
 
-    telefone = _campo_texto(_("Telefone"), 16, inputmode="tel")
+    phone = _campo_texto(_("Telefone"), 16, inputmode="tel")
 
     class Meta:
         model = RelatedPerson
-        fields = ["vinculo", "outro_paciente", "nome", "telefone", "observacao"]
+        fields = ["vinculo", "outro_paciente", "name", "phone", "note"]
         widgets = {"outro_paciente": forms.HiddenInput}
-        help_texts = {"nome": _("Só para quem não é paciente da clínica.")}
+        help_texts = {"name": _("Só para quem não é paciente da clínica.")}
 
     def __init__(self, *args, patient, **kwargs):
         super().__init__(*args, **kwargs)
@@ -228,17 +228,17 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
             self.instance.clinic_id = patient.clinic_id
         self.fields["outro_paciente"].queryset = Patient.objects.exclude(pk=patient.pk)
 
-    def clean_telefone(self):
-        return normalizar_telefone(self.cleaned_data.get("telefone"))
+    def clean_phone(self):
+        return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
         dados = super().clean()
-        outro, nome = dados.get("outro_paciente"), dados.get("nome", "").strip()
-        if outro and nome:
-            self.add_error("nome", _("Escolha um paciente ou digite um nome, não os dois."))
-        elif not outro and not nome:
-            self.add_error("nome", _("Escolha um paciente da clínica ou digite o nome."))
-        dados["nome"] = nome
+        outro, name = dados.get("outro_paciente"), dados.get("name", "").strip()
+        if outro and name:
+            self.add_error("name", _("Escolha um paciente ou digite um nome, não os dois."))
+        elif not outro and not name:
+            self.add_error("name", _("Escolha um paciente da clínica ou digite o nome."))
+        dados["name"] = name
         if (
             outro
             and RelatedPerson.objects.filter(

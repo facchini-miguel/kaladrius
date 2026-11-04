@@ -24,7 +24,7 @@ class Transacao:
     fitid: str
     data: datetime.date
     valor: Decimal  # positive = money in, negative = money out
-    descricao: str
+    description: str
     tipo: str
 
 
@@ -97,14 +97,14 @@ def ler(conteudo: bytes) -> Extrato:
         if valor == 0:  # nothing moved (some banks list balance lines this way)
             continue
         memo = _campo(bloco, "MEMO")
-        nome = _campo(bloco, "NAME")
-        descricao = " · ".join(dict.fromkeys(p for p in (nome, memo) if p)) or _campo(
+        name = _campo(bloco, "NAME")
+        description = " · ".join(dict.fromkeys(p for p in (name, memo) if p)) or _campo(
             bloco, "TRNTYPE"
         )
         fitid = (
             _campo(bloco, "FITID")
             or hashlib.sha1(  # noqa: S324 (an id, not security)
-                f"{data}|{valor}|{descricao}".encode()
+                f"{data}|{valor}|{description}".encode()
             ).hexdigest()
         )
         # Some banks repeat a FITID inside the same file: keep both transactions.
@@ -116,7 +116,7 @@ def ler(conteudo: bytes) -> Extrato:
                 fitid=fitid[:120],
                 data=data,
                 valor=valor,
-                descricao=descricao[:200],
+                description=description[:200],
                 tipo=_campo(bloco, "TRNTYPE")[:20],
             )
         )

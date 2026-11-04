@@ -21,7 +21,7 @@ def cidades(request):
     if uf.isdecimal():
         cidades = cidades.filter(uf_id=int(uf))
     if busca:
-        cidades = cidades.filter(nome__unaccent__icontains=busca)
+        cidades = cidades.filter(name__unaccent__icontains=busca)
     pagina = Paginator(cidades, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -41,9 +41,9 @@ def bancos(request):
     busca = request.GET.get("q", "").strip()
     bancos = Bank.objects.all()
     if busca:
-        filtro = Q(nome__unaccent__icontains=busca) | Q(nome_curto__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(nome_curto__unaccent__icontains=busca)
         if busca.isdecimal():
-            filtro |= Q(codigo=int(busca))
+            filtro |= Q(code=int(busca))
         bancos = bancos.filter(filtro)
     pagina = Paginator(bancos, POR_PAGINA).get_page(request.GET.get("pagina"))
     contexto = {"busca": busca, "pagina": pagina, "parametros": urlencode({"q": busca})}
@@ -64,12 +64,12 @@ def sugestoes_endereco(request):
     the known ones plus the ones the clinic already typed for other patients there."""
     from apps.patients.models import Patient
 
-    codigo = request.GET.get("cidade", "")
+    code = request.GET.get("cidade", "")
     bairros, logradouros = set(), set()
-    if codigo.isdecimal():
-        cidade = int(codigo)
-        bairros.update(Neighborhood.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
-        logradouros.update(Street.objects.filter(cidade_id=cidade).values_list("nome", flat=True))
+    if code.isdecimal():
+        cidade = int(code)
+        bairros.update(Neighborhood.objects.filter(cidade_id=cidade).values_list("name", flat=True))
+        logradouros.update(Street.objects.filter(cidade_id=cidade).values_list("name", flat=True))
         da_clinica = Patient.objects.filter(cidade_id=cidade).values_list("bairro", "logradouro")
         for bairro, logradouro in da_clinica.distinct():
             bairros.add(bairro)

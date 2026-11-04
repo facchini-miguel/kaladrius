@@ -18,7 +18,7 @@ class TwoFactor(models.Model):
         db_column="usuario_id",
     )
     segredo = models.CharField(_("segredo"), max_length=64, editable=False)
-    ativa = models.BooleanField(_("ativa"), default=False)
+    active = models.BooleanField(_("ativa"), default=False, db_column="ativa")
     ativada_em = models.DateTimeField(_("ativada em"), null=True, blank=True)
     # The last 30-second step accepted, so the same code cannot be used twice.
     ultimo_passo = models.BigIntegerField(default=0, editable=False)

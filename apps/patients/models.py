@@ -21,11 +21,12 @@ class Patient(ModeloDaClinica):
         OUTRO = "O", _("Outro")
 
     tipo = models.CharField(_("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.FISICA)
-    nome = models.CharField(
+    name = models.CharField(
         _("nome"),
         max_length=200,
         help_text=_("Para pessoa jurídica, o nome fantasia."),
         db_collation=ALFABETICA,
+        db_column="nome",
     )
     razao_social = models.CharField(_("razão social"), max_length=200, blank=True)
     # The country's document of an individual or a company (decision 121); the name stayed from
@@ -93,11 +94,11 @@ class Patient(ModeloDaClinica):
     logradouro = models.CharField(
         _("endereço"), max_length=200, blank=True, help_text=_("Rua, avenida…")
     )
-    numero = models.CharField(_("número"), max_length=10, blank=True)
+    number = models.CharField(_("número"), max_length=10, blank=True, db_column="numero")
     complemento = models.CharField(_("complemento"), max_length=100, blank=True)
 
-    observacoes = models.TextField(_("observações"), blank=True)
-    ativo = models.BooleanField(_("ativo"), default=True)
+    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     # Archiving replaces deleting: the patient leaves every screen of the team but keeps
     # their history (schedule, recalls, audit). Only clinic administrators see archived
     # patients, and can restore them (decision 046).
@@ -118,9 +119,9 @@ class Patient(ModeloDaClinica):
         db_table = "pacientes_paciente"
         verbose_name = _("paciente")
         verbose_name_plural = _("pacientes")
-        ordering = ["nome"]
+        ordering = ["name"]
         indexes = [
-            models.Index(fields=["clinic", "nome"], name="paciente_clinica_nome"),
+            models.Index(fields=["clinic", "name"], name="paciente_clinica_nome"),
             models.Index(fields=["clinic", "cpf_cnpj"], name="paciente_clinica_cpf_cnpj"),
         ]
         constraints = [
@@ -132,7 +133,7 @@ class Patient(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name
 
     @property
     def papel_documento(self):
@@ -157,7 +158,7 @@ class Patient(ModeloDaClinica):
         """City and state as written on the record: from the national tables in Brazil, typed
         anywhere else (decision 117)."""
         if self.cidade_id:
-            return f"{self.cidade.nome}/{self.cidade.uf.sigla}"
+            return f"{self.cidade.name}/{self.cidade.uf.sigla}"
         return ", ".join(parte for parte in (self.cidade_nome, self.estado_nome) if parte)
 
     @property
@@ -202,9 +203,9 @@ class RelatedPerson(ModeloDaClinica):
         related_name="relacionado_a",
         verbose_name=_("paciente da clínica"),
     )
-    nome = models.CharField(_("nome"), max_length=200, blank=True)
-    telefone = models.CharField(_("telefone"), max_length=11, blank=True)
-    observacao = models.CharField(_("observação"), max_length=200, blank=True)
+    name = models.CharField(_("nome"), max_length=200, blank=True, db_column="nome")
+    phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
+    note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
@@ -214,7 +215,7 @@ class RelatedPerson(ModeloDaClinica):
         ordering = ["pk"]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(outro_paciente__isnull=False) | ~models.Q(nome=""),
+                condition=models.Q(outro_paciente__isnull=False) | ~models.Q(name=""),
                 name="relacionada_paciente_ou_nome",
             ),
             models.CheckConstraint(
@@ -243,11 +244,11 @@ class RelatedPerson(ModeloDaClinica):
 
     @property
     def nome_exibido(self):
-        return self.outro_paciente.nome if self.outro_paciente_id else self.nome
+        return self.outro_paciente.name if self.outro_paciente_id else self.name
 
     @property
     def telefone_exibido(self):
-        if self.telefone or not self.outro_paciente_id:
-            return self.telefone
+        if self.phone or not self.outro_paciente_id:
+            return self.phone
         outro = self.outro_paciente
         return outro.whatsapp or outro.telefone_celular or outro.telefone_residencial

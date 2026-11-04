@@ -152,17 +152,17 @@ class _Importador:
         ufs = {uf.sigla: uf for uf in State.objects.all()}
         ibge = defaultdict(dict)
         for cidade in City.objects.select_related("uf"):
-            ibge[cidade.uf.sigla][_chave(cidade.nome)] = cidade
+            ibge[cidade.uf.sigla][_chave(cidade.name)] = cidade
         resultado = {}
         for linha in self.t.get("cidade", []):
             id_uf = str(linha["id_uf"] or "")
             sigla = ufs_legado.get(int(id_uf)) if id_uf.isdecimal() else None
-            nome = _texto(linha["cidade"])
-            resultado[linha["id"]] = (ufs.get(sigla), ibge[sigla].get(_chave(nome)), nome, sigla)
+            name = _texto(linha["cidade"])
+            resultado[linha["id"]] = (ufs.get(sigla), ibge[sigla].get(_chave(name)), name, sigla)
         return resultado
 
     def _estados_civis(self):
-        novos = {_chave(e.nome)[:5]: e for e in MaritalStatus.objects.all()}
+        novos = {_chave(e.name)[:5]: e for e in MaritalStatus.objects.all()}
         return {
             linha["id"]: novos.get(_chave(linha["nome"])[:5])
             for linha in self.t.get("pessoas_estado_civil", [])
@@ -173,43 +173,43 @@ class _Importador:
         resultado = {}
         for linha in self.t.get("logradouro", []):
             tipo = tipos.get(linha["id_tipo_endereco"], "")
-            nome = _texto(linha["nome"])
-            resultado[linha["id"]] = f"{tipo} {nome}" if tipo and tipo != "Outros" else nome
+            name = _texto(linha["nome"])
+            resultado[linha["id"]] = f"{tipo} {name}" if tipo and tipo != "Outros" else name
         return resultado
 
     # --- Steps -------------------------------------------------------------------
 
     def _clinica(self):
-        clinic = Clinic.objects.filter(nome=self.nome_clinica).first()
+        clinic = Clinic.objects.filter(name=self.nome_clinica).first()
         if clinic is not None and Patient.objects.filter(clinic=clinic).exists():
             raise ImportacaoRecusada(
                 f"A clínica “{self.nome_clinica}” já tem pacientes. A importação só é feita "
                 "numa clínica nova ou vazia, para não duplicar dados."
             )
         if clinic is None:
-            clinic = Clinic.objects.create(nome=self.nome_clinica)  # gets the default types
+            clinic = Clinic.objects.create(name=self.nome_clinica)  # gets the default types
         self.relatorio.clinic = clinic
         return clinic
 
     def _profissionais(self, clinic):
         mapa = {}
         for linha in self.t.get("dentistas", []):
-            nome = _texto(linha["nome"]).lstrip("_ ").strip() or f"Profissional {linha['id']}"
-            mapa[linha["id"]] = Practitioner.objects.create(clinic=clinic, nome=nome[:200])
+            name = _texto(linha["nome"]).lstrip("_ ").strip() or f"Profissional {linha['id']}"
+            mapa[linha["id"]] = Practitioner.objects.create(clinic=clinic, name=name[:200])
         self.relatorio.profissionais = len(mapa)
         return mapa
 
     def _tipos(self, clinic):
-        existentes = {_chave(t.nome): t for t in AppointmentType.objects.filter(clinic=clinic)}
+        existentes = {_chave(t.name): t for t in AppointmentType.objects.filter(clinic=clinic)}
         mapa = {}
         for linha in self.t.get("agenda_cor", []):
-            nome = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
-            tipo = existentes.get(_chave(nome))
+            name = _texto(linha["nome"])[:60] or f"Tipo {linha['id']}"
+            tipo = existentes.get(_chave(name))
             if tipo is None:
                 cor = _texto(linha["cor"])
                 cor = cor if re.fullmatch(r"#[0-9a-fA-F]{6}", cor) else "#0d6efd"
-                tipo = AppointmentType.objects.create(clinic=clinic, nome=nome, cor=cor.lower())
-                existentes[_chave(nome)] = tipo
+                tipo = AppointmentType.objects.create(clinic=clinic, name=name, cor=cor.lower())
+                existentes[_chave(name)] = tipo
                 self.relatorio.tipos_criados += 1
             mapa[linha["id"]] = tipo
         return mapa
@@ -218,7 +218,7 @@ class _Importador:
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {linha['id']}"]
         tipo = Patient.Tipo.JURIDICA if linha["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
-        nome = _texto(linha["nome"]) or f"Sem nome (código {linha['id']})"
+        name = _texto(linha["nome"]) or f"Sem nome (código {linha['id']})"
 
         documento, original = _documento(linha["cpf_cnpj"], tipo)
         if documento and documento in usados:
@@ -237,16 +237,16 @@ class _Importador:
             ("telefone_comercial", "fone_com"),
             ("telefone_celular", "fone_cel"),
         ):
-            numero = somente_digitos(linha[legado])
-            if len(numero) > 11:
+            number = somente_digitos(linha[legado])
+            if len(number) > 11:
                 extras.append(f"Telefone ({legado}): {linha[legado]}")
-                numero = ""
-            elif numero and len(numero) < 10:
+                number = ""
+            elif number and len(number) < 10:
                 avisos["Telefones sem DDD (mantidos como estavam)"] += 1
-            if len(numero) == 11 and numero.startswith("0"):  # carrier prefix: 0 + DDD
-                numero = numero[1:]
+            if len(number) == 11 and number.startswith("0"):  # carrier prefix: 0 + DDD
+                number = number[1:]
             # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
-            telefones[campo] = nono_digito(numero)
+            telefones[campo] = nono_digito(number)
         if _texto(linha["fone_fax"]):
             extras.append(f"Fax: {_texto(linha['fone_fax'])}")
 
@@ -293,7 +293,7 @@ class _Importador:
         patient = Patient(
             clinic=clinic,
             tipo=tipo,
-            nome=_cabe(nome, 200, "Nome completo", extras),
+            name=_cabe(name, 200, "Nome completo", extras),
             razao_social=""
             if pf
             else _cabe(_texto(linha["razao_social"]), 200, "Razão social", extras),
@@ -313,14 +313,14 @@ class _Importador:
             cidade=cidade,
             bairro=_cabe(bairros.get(linha["id_bairrocomunidade"], ""), 100, "Bairro", extras),
             logradouro=_cabe(logradouros.get(linha["id_logradouro"], ""), 200, "Endereço", extras),
-            numero=_cabe(_texto(linha["endereco_num"]), 10, "Número", extras),
+            number=_cabe(_texto(linha["endereco_num"]), 10, "Número", extras),
             complemento=_cabe(_texto(linha["endereco_compl"]), 100, "Complemento", extras),
-            ativo=linha["ativo"] != "N",
+            active=linha["ativo"] != "N",
             **telefones,
         )
-        observacoes = _texto(linha["obs"])
+        notes = _texto(linha["obs"])
         bloco = "[Sistema antigo]\n" + "\n".join(extras)
-        patient.observacoes = f"{observacoes}\n\n{bloco}" if observacoes else bloco
+        patient.notes = f"{notes}\n\n{bloco}" if notes else bloco
         return patient, _data(linha["data_cadast"])
 
     def _pacientes(self, clinic):
@@ -349,7 +349,7 @@ class _Importador:
                 com_data.append(patient)
         Patient.objects.bulk_update(com_data, ["created_at"], batch_size=500)
         self.relatorio.pacientes = len(pares)
-        return {codigo: patient for codigo, patient, _ in pares}
+        return {code: patient for code, patient, _ in pares}
 
     def _agendamentos(self, profissionais, tipos):
         avisos = self.relatorio.avisos
@@ -364,12 +364,14 @@ class _Importador:
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
-            descricao = _texto(linha["descricao"]) or tipo.nome
+            description = _texto(linha["descricao"]) or tipo.name
             inicio = timezone.make_aware(datetime.datetime.combine(dia, inicio))
             fim = timezone.make_aware(datetime.datetime.combine(dia, fim))
             if fim <= inicio:
                 fim = inicio + DURACAO_MINIMA
-                descricao = f"{descricao}\n[Sistema antigo: horário de término corrigido]".strip()
+                description = (
+                    f"{description}\n[Sistema antigo: horário de término corrigido]".strip()
+                )
                 avisos["Agendamento com término antes do início (corrigido para 30 min)"] += 1
             novos.append(
                 Appointment(
@@ -378,7 +380,7 @@ class _Importador:
                     tipo=tipo,
                     inicio=inicio,
                     fim=fim,
-                    descricao=descricao,
+                    description=description,
                 )
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
@@ -427,18 +429,18 @@ class _Importador:
             if patient is None or dia is None:
                 avisos["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
                 continue
-            descricao = _texto(linha["descricao"]) or "Rechamada"
-            if len(descricao) > 200:
-                patient.observacoes += f"\nRechamada de {dia:%d/%m/%Y}: {descricao}"
-                patient.save(update_fields=["observacoes"])
-                descricao = descricao[:199] + "…"
+            description = _texto(linha["descricao"]) or "Rechamada"
+            if len(description) > 200:
+                patient.notes += f"\nRechamada de {dia:%d/%m/%Y}: {description}"
+                patient.save(update_fields=["notes"])
+                description = description[:199] + "…"
             # The legacy system had no "done" flag: past recalls are considered handled.
             novas.append(
                 Recall(
                     clinic=patient.clinic,
                     patient=patient,
                     data=dia,
-                    descricao=descricao,
+                    description=description,
                     concluida=dia < self.hoje,
                 )
             )
@@ -457,7 +459,7 @@ class _Importador:
             registrar(
                 AuditEntry.Acao.CRIAR,
                 clinic=clinic,
-                descricao=(
+                description=(
                     f"Importação do sistema antigo: {r.pacientes} pacientes, "
                     f"{r.agendamentos} agendamentos, {r.rechamadas} rechamadas"
                 ),

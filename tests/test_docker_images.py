@@ -106,12 +106,12 @@ def test_scripts_e_ci_nao_usam_tag_solta():
     for arquivo in _arquivos("*.sh", "*.yml", "*.yaml"):
         if "compose" in arquivo.name or arquivo.name == "releases.yaml":
             continue
-        for numero, linha in enumerate(arquivo.read_text().splitlines(), 1):
-            codigo = linha.split(" #", 1)[0]
-            if codigo.lstrip().startswith("#"):
+        for number, linha in enumerate(arquivo.read_text().splitlines(), 1):
+            code = linha.split(" #", 1)[0]
+            if code.lstrip().startswith("#"):
                 continue
             local = arquivo.relative_to(RAIZ)
-            achados += [f"{local}:{numero}: {m[0]}" for m in solta.finditer(codigo)]
+            achados += [f"{local}:{number}: {m[0]}" for m in solta.finditer(code)]
     assert not achados, achados
 
 

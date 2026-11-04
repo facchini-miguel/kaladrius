@@ -17,7 +17,7 @@ def cenario(clinica_a, criar_profissional):
     ana = criar_profissional(clinica_a, "Dra. Ana")
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
-            nome="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
+            name="Maria Paciente", data_nascimento=datetime.date(1980, 5, 17)
         )
         tipo = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
@@ -32,7 +32,7 @@ def cenario(clinica_a, criar_profissional):
             for d in (21, 14)
         ]
         rechamada = Recall.objects.create(
-            patient=patient, data=hoje - datetime.timedelta(days=20), descricao="Limpeza"
+            patient=patient, data=hoje - datetime.timedelta(days=20), description="Limpeza"
         )
     return {"clinic": clinica_a, "patient": patient, "agenda": semana, "rechamada": rechamada}
 

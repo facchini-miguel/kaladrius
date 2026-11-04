@@ -23,7 +23,7 @@
         <td><span class="amostra-cor" style="background-color: {{ tipo.cor }}" title="{{ tipo.cor }}"></span></td>
         <td>{{ tipo.nome_exibido }}</td>
         <td>
-          {% if tipo.ativo %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if tipo.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">

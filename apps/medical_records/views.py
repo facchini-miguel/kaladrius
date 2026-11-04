@@ -67,16 +67,16 @@ def _finalizar(request, atendimento):
 def novo(request, practitioner, patient):
     patient = get_object_or_404(Patient.objects, pk=patient, arquivado=False)
     agendamento = None
-    codigo = request.POST.get("agendamento") or request.GET.get("agendamento") or ""
-    if codigo.isdecimal():
-        agendamento = get_object_or_404(Appointment.objects, pk=codigo, patient=patient)
+    code = request.POST.get("agendamento") or request.GET.get("agendamento") or ""
+    if code.isdecimal():
+        agendamento = get_object_or_404(Appointment.objects, pk=code, patient=patient)
         existente = Visit.objects.filter(agendamento=agendamento).first()
         if existente is not None:
             return redirect("medical_records:visit", pk=existente.pk)
     inicial = {"data": agendamento.inicio if agendamento else timezone.now()}
     profissionais = None
     if administra_prontuario(request):
-        profissionais = Practitioner.objects.filter(ativo=True)
+        profissionais = Practitioner.objects.filter(active=True)
         inicial["practitioner"] = agendamento.practitioner if agendamento else practitioner
     form = AtendimentoForm(request.POST or None, initial=inicial, profissionais=profissionais)
     if request.method == "POST" and form.is_valid():
@@ -174,7 +174,7 @@ def imprimir(request, practitioner, pk):
     atendimento = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
     if not atendimento.finalizado:
         raise PermissionDenied
-    registrar(Acao.VISUALIZAR, atendimento, descricao=f"{atendimento} (impressão)")
+    registrar(Acao.VISUALIZAR, atendimento, description=f"{atendimento} (impressão)")
     return render(
         request,
         "medical_records/print.html",
@@ -209,7 +209,7 @@ def atestado_novo(request, practitioner, pk):
             alteracoes={
                 "tipo": [None, atestado.tipo],
                 "dias": [None, atestado.dias],
-                **({"observacao": [None, SIGILO]} if atestado.observacao else {}),
+                **({"note": [None, SIGILO]} if atestado.note else {}),
             },
         )
         messages.success(request, _("Atestado emitido."))
@@ -334,8 +334,8 @@ def anexo_enviar(request, practitioner, pk):
         arquivo = form.cleaned_data["arquivo"]
         anexo = Attachment.objects.create(
             atendimento=atendimento,
-            descricao=form.cleaned_data["descricao"],
-            nome=arquivo.name[:255],
+            description=form.cleaned_data["description"],
+            name=arquivo.name[:255],
             tipo=arquivo.tipo_conferido,
             tamanho=arquivo.size,
             conteudo=arquivo.read(),
@@ -345,7 +345,7 @@ def anexo_enviar(request, practitioner, pk):
         registrar(
             Acao.CRIAR,
             anexo,
-            descricao=f"{atendimento} – {_('anexo')}",
+            description=f"{atendimento} – {_('anexo')}",
             alteracoes={"arquivo": [None, SIGILO]},
         )
         messages.success(request, _("Anexo incluído."))
@@ -357,11 +357,11 @@ def anexo_enviar(request, practitioner, pk):
 @exige_profissional
 def anexo(request, practitioner, pk):
     anexo = get_object_or_404(Attachment.objects.select_related("atendimento"), pk=pk)
-    registrar(Acao.VISUALIZAR, anexo, descricao=f"{anexo.atendimento} – {_('anexo')}")
+    registrar(Acao.VISUALIZAR, anexo, description=f"{anexo.atendimento} – {_('anexo')}")
     resposta = HttpResponse(bytes(anexo.conteudo), content_type=anexo.tipo)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
-    nome = "".join(c for c in anexo.nome if c.isalnum() or c in "._- ") or "anexo"
-    resposta["Content-Disposition"] = f'inline; filename="{nome}"'
+    name = "".join(c for c in anexo.name if c.isalnum() or c in "._- ") or "anexo"
+    resposta["Content-Disposition"] = f'inline; filename="{name}"'
     resposta["Cache-Control"] = "private, no-store"
     return resposta
 
@@ -381,7 +381,7 @@ def anexo_remover(request, practitioner, pk):
     registrar(
         Acao.EXCLUIR,
         anexo,
-        descricao=f"{atendimento} – {_('anexo')}",
+        description=f"{atendimento} – {_('anexo')}",
         alteracoes={"arquivo": [SIGILO, None]},
     )
     anexo.delete()

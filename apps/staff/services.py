@@ -31,7 +31,7 @@ def preparar(competencia):
     """
     fim = fim_do_mes(competencia)
     trabalhando = (
-        Employee.objects.filter(ativo=True)
+        Employee.objects.filter(active=True)
         .exclude(admissao__gt=fim)
         .exclude(desligamento__lt=competencia)
     )
@@ -51,7 +51,7 @@ def preparar(competencia):
                 valor_hora_extra=hora_extra_sugerida(salario),
             )
         )
-    return sorted(folhas, key=lambda f: chave_alfabetica(f.funcionario.nome))
+    return sorted(folhas, key=lambda f: chave_alfabetica(f.funcionario.name))
 
 
 @transaction.atomic
@@ -70,10 +70,10 @@ def lancar(folhas, *, categoria, vencimento, user):
         folha.lancamento = financeiro.criar_lancamento(
             clinic=folha.funcionario.clinic,
             tipo=Entry.Tipo.PAGAR,
-            pessoa=folha.funcionario.nome,
-            descricao=_("Salário %(mes)s") % {"mes": mes},
+            pessoa=folha.funcionario.name,
+            description=_("Salário %(mes)s") % {"mes": mes},
             categoria=categoria,
-            observacoes=_("Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s.")
+            notes=_("Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s.")
             % {
                 "salario": folha.salario,
                 "extras": folha.valor_horas_extras,

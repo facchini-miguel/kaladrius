@@ -16,8 +16,11 @@ class Recall(ModeloDaClinica):
         db_column="paciente_id",
     )
     data = models.DateField(_("data"))
-    descricao = models.CharField(
-        _("descrição"), max_length=200, help_text=_("Ex.: revisão de 6 meses.")
+    description = models.CharField(
+        _("descrição"),
+        max_length=200,
+        help_text=_("Ex.: revisão de 6 meses."),
+        db_column="descricao",
     )
     concluida = models.BooleanField(_("concluída"), default=False)
     created_by = models.ForeignKey(
@@ -36,7 +39,7 @@ class Recall(ModeloDaClinica):
         db_table = "rechamadas_rechamada"
         verbose_name = _("rechamada")
         verbose_name_plural = _("rechamadas")
-        ordering = ["data", "patient__nome"]
+        ordering = ["data", "patient__name"]
         indexes = [models.Index(fields=["clinic", "data"], name="rechamada_clinica_data")]
 
     def __str__(self):

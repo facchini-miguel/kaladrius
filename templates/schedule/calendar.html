@@ -11,7 +11,7 @@
     <label for="profissional" class="visually-hidden">{% translate "Profissional" %}</label>
     <select name="practitioner" id="profissional" class="form-select" data-enviar-ao-mudar>
       {% for item in profissionais %}
-      <option value="{{ item.pk }}"{% if item.pk == practitioner.pk %} selected{% endif %}>{{ item.nome }}</option>
+      <option value="{{ item.pk }}"{% if item.pk == practitioner.pk %} selected{% endif %}>{{ item.name }}</option>
       {% endfor %}
     </select>
     <label for="ir-para-data" class="visually-hidden">{% translate "Ir para a data" %}</label>

@@ -41,7 +41,7 @@ def lista(request):
         **SITUACOES.get(situacao, SITUACOES["pendentes"]), patient__arquivado=False
     )
     if busca:
-        rechamadas = rechamadas.filter(patient__nome__unaccent__icontains=busca)
+        rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
     if de:
         rechamadas = rechamadas.filter(data__gte=de)
     if ate:
@@ -85,15 +85,15 @@ def _formulario(request, rechamada, inicial):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
-            request, _("Rechamada de %(nome)s salva.") % {"nome": rechamada.patient.nome}
+            request, _("Rechamada de %(nome)s salva.") % {"nome": rechamada.patient.name}
         )
         return _voltar(request)
     patient = rechamada.patient if rechamada.patient_id else form["patient"].value()
-    if patient and not hasattr(patient, "nome"):
+    if patient and not hasattr(patient, "name"):
         # Raw value from the hidden field: may be anything when the request is tampered with.
-        codigo = str(patient)
+        code = str(patient)
         consulta = form.fields["patient"].queryset
-        patient = consulta.filter(pk=int(codigo)).first() if codigo.isdecimal() else None
+        patient = consulta.filter(pk=int(code)).first() if code.isdecimal() else None
     return render(
         request,
         "recalls/form.html",
@@ -116,7 +116,7 @@ def concluir(request, pk):
         mensagem = _("Rechamada de %(nome)s concluída.")
     else:
         mensagem = _("Rechamada de %(nome)s reaberta.")
-    messages.success(request, mensagem % {"nome": rechamada.patient.nome})
+    messages.success(request, mensagem % {"nome": rechamada.patient.name})
     return _voltar(request)
 
 
@@ -126,7 +126,7 @@ def excluir(request, pk):
     if request.method == "POST":
         rechamada.delete()
         messages.success(
-            request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.patient.nome}
+            request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.patient.name}
         )
         return _voltar(request)
     return render(request, "recalls/delete.html", {"rechamada": rechamada})

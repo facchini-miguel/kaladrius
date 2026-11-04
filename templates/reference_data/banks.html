@@ -22,8 +22,8 @@
     <tbody>
       {% for banco in pagina %}
       <tr>
-        <td>{% if banco.codigo is not None %}{{ banco.codigo|stringformat:"03d" }}{% else %}—{% endif %}</td>
-        <td>{{ banco.nome }}</td>
+        <td>{% if banco.code is not None %}{{ banco.code|stringformat:"03d" }}{% else %}—{% endif %}</td>
+        <td>{{ banco.name }}</td>
         <td>{{ banco.ispb }}</td>
       </tr>
       {% empty %}

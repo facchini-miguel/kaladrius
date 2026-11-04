@@ -28,7 +28,9 @@ def ip_da_requisicao(request):
     return request.META.get("REMOTE_ADDR") or None
 
 
-def registrar(acao, objeto=None, *, clinic=None, alteracoes=None, user=None, ip=None, descricao=""):
+def registrar(
+    acao, objeto=None, *, clinic=None, alteracoes=None, user=None, ip=None, description=""
+):
     user = user if user is not None else _usuario.get()
     if user is not None and not getattr(user, "is_authenticated", False):
         user = None
@@ -43,7 +45,7 @@ def registrar(acao, objeto=None, *, clinic=None, alteracoes=None, user=None, ip=
         usuario_nome=user.get_username() if user else "",
         modelo=nome_do_modelo(type(objeto)) if objeto is not None else "",
         objeto_id=str(objeto.pk) if objeto is not None and objeto.pk is not None else "",
-        objeto_descricao=(descricao or (str(objeto) if objeto is not None else ""))[:200],
+        objeto_descricao=(description or (str(objeto) if objeto is not None else ""))[:200],
         alteracoes=alteracoes or {},
         ip=ip if ip is not None else _ip.get(),
     )
@@ -68,10 +70,10 @@ def anonimizar(modelo, ids):
     Who did what and when, the record code and the names of the changed fields stay;
     the values and the record description go.
     """
-    nome = nome_do_modelo(modelo)
-    registros = AuditEntry.objects.filter(modelo=nome, objeto_id__in=[str(i) for i in ids])
+    name = nome_do_modelo(modelo)
+    registros = AuditEntry.objects.filter(modelo=name, objeto_id__in=[str(i) for i in ids])
     for registro in registros:
-        registro.objeto_descricao = f"{nome} {registro.objeto_id} (dados removidos)"
+        registro.objeto_descricao = f"{name} {registro.objeto_id} (dados removidos)"
         registro.alteracoes = {campo: [REMOVIDO, REMOVIDO] for campo in registro.alteracoes}
         registro.save(update_fields=["objeto_descricao", "alteracoes"])
 

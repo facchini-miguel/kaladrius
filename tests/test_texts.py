@@ -63,7 +63,7 @@ def test_numero_ambiguo_continua_recusado():
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Paciente Fictício")
+        patient = Patient.objects.create(name="Paciente Fictício")
     for url in (
         reverse("patients:new"),
         reverse("patients:related_new", args=[patient.pk]),
@@ -89,9 +89,9 @@ def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(recepcao):
 def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
     """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
     with usar_clinica(clinica_a):
-        for nome in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
-            Patient.objects.create(nome=nome)
-        nomes = list(Patient.objects.values_list("nome", flat=True))
+        for name in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
+            Patient.objects.create(name=name)
+        nomes = list(Patient.objects.values_list("name", flat=True))
     assert nomes == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
 
 
@@ -113,7 +113,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     )
     assert 'class="odontograma-rolagem"' in html
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Paciente Fictício")
+        patient = Patient.objects.create(name="Paciente Fictício")
     ficha = recepcao.get(reverse("patients:print", args=[patient.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
 

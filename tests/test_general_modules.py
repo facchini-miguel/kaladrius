@@ -38,7 +38,7 @@ def sem(*desligados):
 @pytest.fixture
 def patient(clinica_a):
     with usar_clinica(clinica_a):
-        return Patient.objects.create(nome="Paciente fictício dos módulos")
+        return Patient.objects.create(name="Paciente fictício dos módulos")
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
     with usar_clinica(clinica_a):
-        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
     assert ligados == MODULOS_GERAIS | {M.ODONTOLOGIA}
     assert ESPECIALIDADES.isdisjoint(MODULOS_GERAIS)
 
@@ -92,7 +92,7 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 ):
     user = criar_usuario("prof_gerais", clinica_a, Papel.PROFISSIONAL)
     with usar_clinica(clinica_a):
-        Practitioner.objects.create(nome="Profissional fictício", user=user)
+        Practitioner.objects.create(name="Profissional fictício", user=user)
     url = reverse("medical_records:new", args=[patient.pk])
     cliente = cliente_de(user)
     assert cliente.get(url).status_code == 200
@@ -111,7 +111,7 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, patient):
     with usar_clinica(clinica_a):
         Recall.objects.create(
-            patient=patient, data=datetime.date(2026, 11, 10), descricao="Retorno"
+            patient=patient, data=datetime.date(2026, 11, 10), description="Retorno"
         )
     configurar(clinica_a, sem(M.RECHAMADAS))
     assert admin.get(reverse("recalls:list")).status_code == 403
@@ -132,7 +132,7 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
     with pytest.raises(ValidationError):
         configurar(clinica_a, sem(M.FINANCEIRO))
     dados = {
-        "nome": "Clínica fictícia",
+        "name": "Clínica fictícia",
         "area": "odontologia",
         "agenda_inicio": "08:00",
         "agenda_fim": "18:00",
@@ -151,7 +151,7 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
     resposta = admin.post(
         reverse("clinic_settings"),
         {
-            "nome": "Clínica fictícia",
+            "name": "Clínica fictícia",
             "area": "medicina",
             "agenda_inicio": "08:00",
             "agenda_fim": "18:00",
@@ -162,7 +162,7 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
     assert ligados == {M.MEDICINA, M.AGENDA, M.PRONTUARIO}
     pagina = admin.get(reverse("clinic_settings")).content.decode()
     assert "Especialidades" in pagina and "Módulos" in pagina
@@ -172,12 +172,12 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
     cliente = cliente_de(django_user_model.objects.create_superuser("root_primeira"))
     resposta = cliente.post(
         reverse("register_clinic"),
-        {"nome": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
+        {"name": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
     )
     assert resposta.status_code == 302
     clinic = Clinic.objects.get()
     with usar_clinica(clinic):
-        ligados = set(ClinicModule.objects.filter(ativo=True).values_list("codigo", flat=True))
+        ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
     assert ligados == MODULOS_GERAIS | {M.MEDICINA}
 
 
@@ -223,11 +223,11 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
 def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     resposta = admin.post(
         reverse("patients:new"),
-        {"tipo": "PF", "nome": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
+        {"tipo": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
     )
     assert resposta.status_code == 302, resposta.context["form"].errors
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Paciente fictícia do WhatsApp")
+        patient = Patient.objects.get(name="Paciente fictícia do WhatsApp")
     assert patient.whatsapp == "48999990000"
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert 'href="https://wa.me/5548999990000"' in ficha

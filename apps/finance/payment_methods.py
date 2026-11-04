@@ -91,26 +91,26 @@ def do_pais(pais=None):
 _INGLES_COM_CHEQUE = {pais.ingles for pais in countries.PAISES.values()} - {"en"}
 
 
-def rotulo(codigo, pais=None):
+def rotulo(code, pais=None):
     """The method's name in the country: "Transferência (SPEI)" in Mexico."""
     from .models import Payment
 
-    nome = dict(Payment.Forma.choices).get(codigo, codigo)
-    if codigo == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
-        nome = "Cheque"
-    local = do_pais(pais).nomes.get(codigo)
-    if not local or local.lower() == str(nome).lower():  # "Direct debit" in English
-        return str(nome)
-    return f"{nome} ({local})"
+    name = dict(Payment.Forma.choices).get(code, code)
+    if code == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
+        name = "Cheque"
+    local = do_pais(pais).nomes.get(code)
+    if not local or local.lower() == str(name).lower():  # "Direct debit" in English
+        return str(name)
+    return f"{name} ({local})"
 
 
 def em_uso(pais=None):
     """(code, name) of the methods offered when recording a payment."""
-    return [(codigo, rotulo(codigo, pais)) for codigo in do_pais(pais).codigos]
+    return [(code, rotulo(code, pais)) for code in do_pais(pais).codigos]
 
 
 def rotulos(pais=None):
     """code → name of every method, for the reports (old payments included)."""
     from .models import Payment
 
-    return {codigo: rotulo(codigo, pais) for codigo in Payment.Forma.values}
+    return {code: rotulo(code, pais) for code in Payment.Forma.values}

@@ -4,7 +4,7 @@
 {% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.nome %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
 
 <form method="post" novalidate id="form-paciente">
   {% csrf_token %}
@@ -14,7 +14,7 @@
     <div class="card-header">{% translate "Identificação" %}</div>
     <div class="card-body row">
       <div class="col-12">{% with campo=form.tipo %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.nome %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with campo=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6 so-pj">{% with campo=form.razao_social %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-3">{% with campo=form.cpf_cnpj %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.rg %}{# Brazil only (decision 117) #}
@@ -52,7 +52,7 @@
       <div class="col-md-6">{% with campo=form.cidade_nome %}{% include "includes/field.html" %}{% endwith %}</div>
       {% endif %}
       <div class="col-md-6">{% with campo=form.logradouro %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-2">{% with campo=form.numero %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-2">{% with campo=form.number %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.complemento %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.bairro %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
@@ -61,8 +61,8 @@
   <div class="card mb-3">
     <div class="card-header">{% translate "Observações" %}</div>
     <div class="card-body">
-      {% with campo=form.observacoes %}{% include "includes/field.html" %}{% endwith %}
-      {% with campo=form.ativo %}{% include "includes/field.html" %}{% endwith %}
+      {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
+      {% with campo=form.active %}{% include "includes/field.html" %}{% endwith %}
     </div>
   </div>
 

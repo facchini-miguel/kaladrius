@@ -13,7 +13,7 @@ from apps.core.validators import validar_cor
 class Practitioner(ModeloDaClinica):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
-    nome = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA)
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     registro = models.CharField(
         _("registro profissional"),
         max_length=30,
@@ -42,7 +42,7 @@ class Practitioner(ModeloDaClinica):
         validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
         help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
     )
-    ativo = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
     updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
 
@@ -50,8 +50,8 @@ class Practitioner(ModeloDaClinica):
         db_table = "profissionais_profissional"
         verbose_name = _("profissional")
         verbose_name_plural = _("profissionais")
-        ordering = ["nome"]
-        indexes = [models.Index(fields=["clinic", "nome"], name="profissional_clinica_nome")]
+        ordering = ["name"]
+        indexes = [models.Index(fields=["clinic", "name"], name="profissional_clinica_nome")]
         constraints = [
             models.UniqueConstraint(
                 fields=["clinic", "user"],
@@ -61,4 +61,4 @@ class Practitioner(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return self.nome
+        return self.name

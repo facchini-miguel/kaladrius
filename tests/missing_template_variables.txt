@@ -57,11 +57,11 @@ estimates/detail.html  backup_nenhum
 estimates/detail.html  saude_alerta
 estimates/list.html  backup_atrasado
 estimates/list.html  backup_nenhum
-estimates/list.html  orcamento.practitioner.nome
+estimates/list.html  orcamento.practitioner.name
 estimates/list.html  saude_alerta
 estimates/print.html  backup_atrasado
 estimates/print.html  backup_nenhum
-estimates/print.html  orcamento.practitioner.nome
+estimates/print.html  orcamento.practitioner.name
 estimates/print.html  saude_alerta
 estimates/procedure_form.html  backup_atrasado
 estimates/procedure_form.html  backup_nenhum
@@ -114,7 +114,7 @@ finance/entry_form.html  ajuda
 finance/entry_form.html  backup_atrasado
 finance/entry_form.html  backup_nenhum
 finance/entry_form.html  form.centro_custo
-finance/entry_form.html  patient.nome
+finance/entry_form.html  patient.name
 finance/entry_form.html  rotulo
 finance/entry_form.html  saude_alerta
 finance/expense_form.html  backup_atrasado
@@ -230,7 +230,7 @@ patients/record.html  prontuario
 patients/record.html  saude_alerta
 patients/related_form.html  backup_atrasado
 patients/related_form.html  backup_nenhum
-patients/related_form.html  patient.nome
+patients/related_form.html  patient.name
 patients/related_form.html  saude_alerta
 practitioners/delete.html  backup_atrasado
 practitioners/delete.html  backup_nenhum
@@ -245,7 +245,7 @@ practitioners/list.html  saude_alerta
 recalls/form.html  ajuda
 recalls/form.html  backup_atrasado
 recalls/form.html  backup_nenhum
-recalls/form.html  patient.nome
+recalls/form.html  patient.name
 recalls/form.html  rotulo
 recalls/form.html  saude_alerta
 recalls/list.html  backup_atrasado
@@ -271,7 +271,7 @@ registration/login.html  saude_alerta
 registration/login.html  versao_nova
 schedule/_form.html  erro_situacao
 schedule/_form.html  form.repeticoes
-schedule/_form.html  patient.nome
+schedule/_form.html  patient.name
 schedule/_form.html  rotulo
 schedule/calendar.html  backup_atrasado
 schedule/calendar.html  backup_nenhum

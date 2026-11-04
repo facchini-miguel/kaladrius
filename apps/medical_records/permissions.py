@@ -46,4 +46,4 @@ def _profissional(request):
         return None
     if vinculo is not None and vinculo.papel == Papel.RECEPCAO:
         return None
-    return Practitioner.objects.filter(user=user, ativo=True).first()
+    return Practitioner.objects.filter(user=user, active=True).first()

@@ -85,11 +85,11 @@ DDDS = {
 }
 
 
-def nono_digito(numero):
+def nono_digito(number):
     """An 8-digit mobile (DDD + number starting with 6 to 9) with the ninth digit added."""
-    if len(numero) == 10 and numero[2] in "6789":
-        return f"{numero[:2]}9{numero[2:]}"
-    return numero
+    if len(number) == 10 and number[2] in "6789":
+        return f"{number[:2]}9{number[2:]}"
+    return number
 
 
 def normalizar_telefone(valor, pais=None):
@@ -104,15 +104,15 @@ def normalizar_telefone(valor, pais=None):
     if pais != "BR":
         digitos = somente_digitos(valor)
         return countries.normalizar_telefone_internacional(digitos, pais) if digitos else ""
-    numero = somente_digitos(valor).lstrip("0")
-    if len(numero) in (12, 13) and numero.startswith("55"):
-        numero = numero[2:]
-    if not numero:
+    number = somente_digitos(valor).lstrip("0")
+    if len(number) in (12, 13) and number.startswith("55"):
+        number = number[2:]
+    if not number:
         return ""
-    if len(numero) not in (10, 11):
+    if len(number) not in (10, 11):
         raise ValidationError(_("Informe o DDD e o número (10 ou 11 dígitos)."))
-    if int(numero[:2]) not in DDDS:
-        raise ValidationError(_("O DDD %(ddd)s não existe.") % {"ddd": numero[:2]})
-    if len(numero) == 11 and numero[2] != "9":
+    if int(number[:2]) not in DDDS:
+        raise ValidationError(_("O DDD %(ddd)s não existe.") % {"ddd": number[:2]})
+    if len(number) == 11 and number[2] != "9":
         raise ValidationError(_("Com 11 dígitos, o número começa com 9 depois do DDD."))
-    return nono_digito(numero)
+    return nono_digito(number)

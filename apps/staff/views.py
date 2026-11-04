@@ -64,7 +64,7 @@ def _formulario(request, instancia):
                     desde=form.cleaned_data["salario_desde"],
                     created_by=request.user,
                 )
-        messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.nome})
+        messages.success(request, _("%(nome)s salvo.") % {"nome": funcionario.name})
         return redirect("staff:employee", pk=funcionario.pk)
     return render(request, "staff/form.html", {"form": form, "instancia": instancia})
 

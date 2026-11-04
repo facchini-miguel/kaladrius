@@ -51,7 +51,7 @@ def _agenda(request, hoje):
     do_dia = list(
         visiveis.filter(inicio__date=hoje)
         .select_related("patient", "practitioner", "tipo")
-        .order_by("inicio", "practitioner__nome")
+        .order_by("inicio", "practitioner__name")
     )
     pacientes = [a for a in do_dia if a.patient_id]
     situacao = Appointment.Situacao
@@ -93,7 +93,7 @@ def _rechamadas(hoje):
         concluida=False, data__lte=hoje, patient__arquivado=False
     ).select_related("patient")
     return {
-        "lista": list(pendentes.order_by("data", "patient__nome")[:LIMITE]),
+        "lista": list(pendentes.order_by("data", "patient__name")[:LIMITE]),
         "total": pendentes.count(),
         "atrasadas": pendentes.filter(data__lt=hoje).count(),
     }
@@ -103,11 +103,11 @@ def _aniversariantes(hoje):
     return [
         (patient, hoje.year - patient.data_nascimento.year)
         for patient in Patient.objects.filter(
-            ativo=True,
+            active=True,
             arquivado=False,
             data_nascimento__month=hoje.month,
             data_nascimento__day=hoje.day,
-        ).order_by("nome")
+        ).order_by("name")
     ]
 
 
@@ -121,7 +121,7 @@ def _orcamentos(hoje):
         )
         .select_related("patient")
         .prefetch_related("itens")
-        .order_by("validade", "patient__nome")
+        .order_by("validade", "patient__name")
     )
 
 

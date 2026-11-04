@@ -4,7 +4,7 @@
 {% block titulo %}{% translate "Excluir rechamada" %} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=rechamada.patient.nome data=rechamada.data|date:"SHORT_DATE_FORMAT" %}Excluir a rechamada de {{ nome }} ({{ data }})?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with nome=rechamada.patient.name data=rechamada.data|date:"SHORT_DATE_FORMAT" %}Excluir a rechamada de {{ nome }} ({{ data }})?{% endblocktranslate %}</h1>
 <p>{% translate "Esta ação não pode ser desfeita." %}</p>
 <form method="post">
   {% csrf_token %}

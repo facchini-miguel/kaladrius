@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Caixa do dia" %} · {{ caixa.conta.nome }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Caixa do dia" %} · {{ caixa.conta.name }} · {{ nome_sistema }}{% endblock %}
 
 {% block conteudo %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{% translate "Caixa do dia" %} · {{ caixa.conta.nome }}</h1>
+    <h1 class="h3 mb-0">{% translate "Caixa do dia" %} · {{ caixa.conta.name }}</h1>
     <span class="text-body-secondary">
       {% blocktranslate with momento=caixa.aberto_em|date:"SHORT_DATETIME_FORMAT" nome=caixa.aberto_por.get_full_name|default:caixa.aberto_por.username %}Aberto em {{ momento }} por {{ nome }}{% endblocktranslate %}
       {% if not caixa.aberto %} · {% blocktranslate with momento=caixa.fechado_em|date:"SHORT_DATETIME_FORMAT" nome=caixa.fechado_por.get_full_name|default:caixa.fechado_por.username %}fechado em {{ momento }} por {{ nome }}{% endblocktranslate %}{% endif %}
@@ -39,7 +39,7 @@
     </tbody>
   </table>
 </div>
-{% if caixa.observacao %}<p><strong>{% translate "Observação" %}:</strong> {{ caixa.observacao }}</p>{% endif %}
+{% if caixa.note %}<p><strong>{% translate "Observação" %}:</strong> {{ caixa.note }}</p>{% endif %}
 
 <h2 class="h5">{% translate "Movimentação" %}</h2>
 <div class="table-responsive">
@@ -49,7 +49,7 @@
       {% for pagamento in resumo.pagamentos %}
       <tr>
         <td class="text-nowrap">{{ pagamento.created_at|date:"TIME_FORMAT" }}</td>
-        <td><a href="{% url 'finance:entry' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.descricao }}</a></td>
+        <td><a href="{% url 'finance:entry' pagamento.parcela.lancamento_id %}">{{ pagamento.parcela.lancamento.nome_pessoa }} · {{ pagamento.parcela.lancamento.description }}</a></td>
         <td>{{ pagamento.get_forma_display }}</td>
         <td class="text-end text-nowrap {% if pagamento.parcela.lancamento.tipo == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ pagamento.valor|moeda }}</td>
       </tr>
@@ -57,7 +57,7 @@
       {% for movimento in resumo.movimentos %}
       <tr>
         <td class="text-nowrap">{{ movimento.created_at|date:"TIME_FORMAT" }}</td>
-        <td>{{ movimento.get_tipo_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.nome }}){% endif %}</td>
+        <td>{{ movimento.get_tipo_display }}: {{ movimento.motivo }}{% if movimento.outra_conta %} ({{ movimento.outra_conta.name }}){% endif %}</td>
         <td>—</td>
         <td class="text-end text-nowrap {% if movimento.tipo == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ movimento.valor|moeda }}</td>
       </tr>

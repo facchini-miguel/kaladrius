@@ -31,7 +31,7 @@ def lista(request):
     vinculos = (
         Membership.objects.filter(clinic=request.clinic)
         .select_related("user")
-        .order_by("-ativo", "user__first_name", "user__username")
+        .order_by("-active", "user__first_name", "user__username")
     )
     return render(request, "team/list.html", {"vinculos": vinculos})
 
@@ -117,7 +117,7 @@ def duas_etapas(request, pk):
         registrar(
             AuditEntry.Acao.ALTERAR,
             user,
-            descricao=f"{user}: verificação em duas etapas removida pelo administrador",
+            description=f"{user}: verificação em duas etapas removida pelo administrador",
         )
         messages.success(
             request,

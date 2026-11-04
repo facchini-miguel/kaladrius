@@ -16,7 +16,7 @@ DIA = datetime.date(2031, 3, 5)
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="João Rechamada")
+        patient = Patient.objects.create(name="João Rechamada")
     return {
         "clinic": clinica_a,
         "patient": patient,
@@ -31,7 +31,7 @@ def rechamadas(clinic):
 
 def criar(clinic, patient, data=DIA, **extra):
     with usar_clinica(clinic):
-        return Recall.objects.create(patient=patient, data=data, descricao="Revisão", **extra)
+        return Recall.objects.create(patient=patient, data=data, description="Revisão", **extra)
 
 
 def test_cria_rechamada(cenario):
@@ -40,18 +40,18 @@ def test_cria_rechamada(cenario):
         {
             "patient": cenario["patient"].pk,
             "data": DIA.isoformat(),
-            "descricao": "Revisão 6 meses",
+            "description": "Revisão 6 meses",
         },
     )
     assert resposta.status_code == 302
     [rechamada] = rechamadas(cenario["clinic"])
-    assert rechamada.descricao == "Revisão 6 meses" and not rechamada.concluida
+    assert rechamada.description == "Revisão 6 meses" and not rechamada.concluida
     assert rechamada.created_by.username == "recepcao"
 
 
 def test_paciente_e_obrigatorio(cenario):
     resposta = cenario["cliente"].post(
-        reverse("recalls:new"), {"data": DIA.isoformat(), "descricao": "x"}
+        reverse("recalls:new"), {"data": DIA.isoformat(), "description": "x"}
     )
     assert "Escolha o paciente" in resposta.content.decode()
 
@@ -67,7 +67,7 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
         {
             "patient": cenario["patient"].pk,
             "data": DIA.isoformat(),
-            "descricao": "x",
+            "description": "x",
             "next": ficha,
         },
     )
@@ -92,12 +92,12 @@ def test_filtros_da_lista(cenario):
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA + datetime.timedelta(days=30), concluida=True)
     with usar_clinica(clinic):
-        outro = Patient.objects.create(nome="Ana Outra")
+        outro = Patient.objects.create(name="Ana Outra")
     criar(clinic, outro, DIA + datetime.timedelta(days=60))
     url = reverse("recalls:list")
 
     def nomes(**params):
-        return [r.patient.nome for r in cenario["cliente"].get(url, params).context["pagina"]]
+        return [r.patient.name for r in cenario["cliente"].get(url, params).context["pagina"]]
 
     assert nomes() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
     assert nomes(situacao="concluidas") == ["João Rechamada"]
@@ -133,7 +133,7 @@ def test_agenda_recebe_as_urls_de_rechamadas(cenario, criar_profissional):
 
 def test_isolamento(cenario, clinica_b):
     with usar_clinica(clinica_b):
-        paciente_b = Patient.objects.create(nome="Paciente B")
+        paciente_b = Patient.objects.create(name="Paciente B")
     de_b = criar(clinica_b, paciente_b)
     cliente = cenario["cliente"]
     assert cliente.get(reverse("recalls:edit", args=[de_b.pk])).status_code == 404
@@ -141,7 +141,7 @@ def test_isolamento(cenario, clinica_b):
     assert len(cliente.get(reverse("recalls:list"), {"situacao": "todas"}).context["pagina"]) == 0
     resposta = cliente.post(
         reverse("recalls:new"),
-        {"patient": paciente_b.pk, "data": DIA.isoformat(), "descricao": "x"},
+        {"patient": paciente_b.pk, "data": DIA.isoformat(), "description": "x"},
     )
     assert "patient" in resposta.context["form"].errors
 
@@ -174,14 +174,14 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 def test_aniversariantes_do_mes(cenario):
     clinic = cenario["clinic"]
     with usar_clinica(clinic):
-        Patient.objects.create(nome="Março 20", data_nascimento=datetime.date(1990, 3, 20))
-        Patient.objects.create(nome="Março 2", data_nascimento=datetime.date(2000, 3, 2))
+        Patient.objects.create(name="Março 20", data_nascimento=datetime.date(1990, 3, 20))
+        Patient.objects.create(name="Março 2", data_nascimento=datetime.date(2000, 3, 2))
         Patient.objects.create(
-            nome="Inativo", data_nascimento=datetime.date(1990, 3, 1), ativo=False
+            name="Inativo", data_nascimento=datetime.date(1990, 3, 1), active=False
         )
-        Patient.objects.create(nome="Nascido em abril", data_nascimento=datetime.date(1990, 4, 1))
+        Patient.objects.create(name="Nascido em abril", data_nascimento=datetime.date(1990, 4, 1))
     resposta = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
-    assert [p.nome for p, _ in resposta.context["linhas"]] == ["Março 2", "Março 20"]
+    assert [p.name for p, _ in resposta.context["linhas"]] == ["Março 2", "Março 20"]
     assert "Nascido em abril" not in resposta.content.decode()
     hoje = timezone.localdate()
     padrao = cenario["cliente"].get(reverse("patients:birthdays"))
@@ -195,7 +195,7 @@ def test_aniversariantes_exige_permissao_e_clinica(criar_usuario, cliente_de):
 
 def test_paciente_adulterado_no_formulario_mostra_erro(cenario):
     resposta = cenario["cliente"].post(
-        reverse("recalls:new"), {"patient": "abc", "data": "2031-03-05", "descricao": "x"}
+        reverse("recalls:new"), {"patient": "abc", "data": "2031-03-05", "description": "x"}
     )
     assert resposta.status_code == 200
     assert resposta.context["form"].errors["patient"]

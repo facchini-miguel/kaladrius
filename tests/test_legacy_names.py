@@ -74,8 +74,8 @@ def test_migrar_o_env_so_troca_os_nomes(tmp_path):
 
 def test_migrar_os_arquivos_de_estado(tmp_path):
     dir_ = comum(tmp_path, "")
-    for nome in ("admin-criado", "sem-repositorio", "imagem-recusada"):
-        (dir_ / nome).write_text(nome)
+    for name in ("admin-criado", "sem-repositorio", "imagem-recusada"):
+        (dir_ / name).write_text(name)
     (dir_ / "demonstracao").mkdir()
     (dir_ / "demonstracao" / "base-data").write_text("2026-10-30")
     (dir_ / "anterior").mkdir()
@@ -102,8 +102,8 @@ def test_o_servidor_do_google_cloud_guarda_os_scripts_antigos(tmp_path):
     # scripts of 0.54 to legacy/bin; the old update lock, which no script takes, goes away.
     dir_ = comum(tmp_path, "")
     (dir_ / "bin").mkdir()
-    for nome in ("atualizar.sh", "comum.sh", "saude.sh", "update.sh"):
-        (dir_ / "bin" / nome).write_text(nome)
+    for name in ("atualizar.sh", "comum.sh", "saude.sh", "update.sh"):
+        (dir_ / "bin" / name).write_text(name)
     (dir_ / "atualizar.lock").write_text("")
     sistema = tmp_path / "systemd"
     sistema.mkdir()
@@ -170,8 +170,8 @@ def test_a_configuracao_le_o_nome_antigo_da_variavel(monkeypatch):
     # The app's variables of decision 149: the new name wins, the old one is read without it.
     from config.settings import env_renomeada
 
-    for nome in ("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
-        monkeypatch.delenv(nome, raising=False)
+    for name in ("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
+        monkeypatch.delenv(name, raising=False)
     assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
     assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", padrao=True) is True
     monkeypatch.setenv("DJANGO_PROXY_REVERSO", "1")

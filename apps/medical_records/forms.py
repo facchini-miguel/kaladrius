@@ -40,13 +40,13 @@ class AdendoForm(FormularioBootstrap, forms.ModelForm):
 class AtestadoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ["tipo", "data", "hora_inicio", "hora_fim", "dias", "observacao"]
+        fields = ["tipo", "data", "hora_inicio", "hora_fim", "dias", "note"]
         widgets = {
             "tipo": forms.RadioSelect,
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "hora_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "hora_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
-            "observacao": forms.Textarea(attrs={"rows": 3}),
+            "note": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
@@ -91,7 +91,7 @@ ASSINATURAS = [
 
 class AnexoForm(FormularioBootstrap, forms.Form):
     arquivo = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
-    descricao = forms.CharField(
+    description = forms.CharField(
         label=_("Descrição"),
         max_length=200,
         required=False,

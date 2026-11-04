@@ -37,12 +37,12 @@
       {% for t in transacoes %}
       <tr id="t{{ t.pk }}">
         <td class="text-nowrap">{{ t.data|date:"SHORT_DATE_FORMAT" }}</td>
-        <td>{{ t.descricao }}</td>
+        <td>{{ t.description }}</td>
         <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.valor|moeda }}</td>
         <td>
           {% if t.situacao == "conciliada" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
-            {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.descricao }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
+            {% if t.pagamento %}<a href="{% url 'finance:entry' t.pagamento.parcela.lancamento_id %}">{{ t.pagamento.parcela.lancamento.nome_pessoa }} · {{ t.pagamento.parcela.lancamento.description }}</a> ({{ t.pagamento.data|date:"SHORT_DATE_FORMAT" }})
             {% elif t.movimento %}<a href="{% url 'finance:cash_detail' t.movimento.caixa_id %}">{{ t.movimento.caixa.conta }} · {{ t.movimento.get_tipo_display }}</a>{% endif %}
           {% elif t.situacao == "ignorada" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.motivo }}
@@ -52,7 +52,7 @@
             <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
               <select name="chave" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
-                {% for c in t.candidatos %}<option value="{{ c.chave }}">{{ c.data|date:"SHORT_DATE_FORMAT" }} · {{ c.descricao }}</option>{% endfor %}
+                {% for c in t.candidatos %}<option value="{{ c.chave }}">{{ c.data|date:"SHORT_DATE_FORMAT" }} · {{ c.description }}</option>{% endfor %}
               </select>
               <button type="submit" class="btn btn-sm btn-success text-nowrap">{% translate "Conciliar" %}</button>
             </form>

@@ -81,7 +81,7 @@
       <thead><tr><th>{% translate "Maiores tabelas" %}</th><th class="text-end">{% translate "Registros" %}</th><th class="text-end">{% translate "Tamanho" %}</th></tr></thead>
       <tbody>
         {% for tabela in banco.tabelas %}
-        <tr><td><code>{{ tabela.nome }}</code></td><td class="text-end">{{ tabela.registros }}</td><td class="text-end">{{ tabela.tamanho|filesizeformat }}</td></tr>
+        <tr><td><code>{{ tabela.name }}</code></td><td class="text-end">{{ tabela.registros }}</td><td class="text-end">{{ tabela.tamanho|filesizeformat }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -9,7 +9,7 @@
   {% if contas|length > 1 %}
   <form method="get">
     <select name="conta" class="form-select" aria-label="{% translate 'Conta' %}" data-enviar-ao-mudar>
-      {% for item in contas %}<option value="{{ item.pk }}"{% if item.pk == conta.pk %} selected{% endif %}>{{ item.nome }}</option>{% endfor %}
+      {% for item in contas %}<option value="{{ item.pk }}"{% if item.pk == conta.pk %} selected{% endif %}>{{ item.name }}</option>{% endfor %}
     </select>
   </form>
   {% endif %}
@@ -20,7 +20,7 @@
 {% else %}
 <div class="card mb-4" style="max-width: 32rem;">
   <div class="card-body">
-    <h2 class="h5">{% blocktranslate with conta=conta.nome %}O caixa “{{ conta }}” está fechado{% endblocktranslate %}</h2>
+    <h2 class="h5">{% blocktranslate with conta=conta.name %}O caixa “{{ conta }}” está fechado{% endblocktranslate %}</h2>
     {% if pode.recebimentos.criar %}
     <form method="post" novalidate>
       {% csrf_token %}

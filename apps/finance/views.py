@@ -116,9 +116,9 @@ def _lista(request, tipo):
         parcelas = parcelas.filter(vencimento__lt=hoje)
     if busca:
         parcelas = parcelas.filter(
-            Q(lancamento__patient__nome__unaccent__icontains=busca)
+            Q(lancamento__patient__name__unaccent__icontains=busca)
             | Q(lancamento__pessoa__unaccent__icontains=busca)
-            | Q(lancamento__descricao__unaccent__icontains=busca)
+            | Q(lancamento__description__unaccent__icontains=busca)
         )
     parcelas = parcelas.order_by("vencimento", "pk")
     pagina = Paginator(parcelas, POR_PAGINA).get_page(request.GET.get("pagina"))
@@ -141,10 +141,10 @@ def _lista(request, tipo):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.CRIAR)
 def lancamento_novo(request):
     inicial = {}
-    codigo = request.GET.get("patient", "")
+    code = request.GET.get("patient", "")
     patient = None
-    if codigo.isdecimal():
-        patient = Patient.objects.filter(pk=int(codigo), arquivado=False).first()
+    if code.isdecimal():
+        patient = Patient.objects.filter(pk=int(code), arquivado=False).first()
         if patient is not None:
             inicial["patient"] = patient.pk
     form = LancamentoReceberForm(request.POST or None, initial=inicial, clinic=request.clinic)
@@ -155,18 +155,18 @@ def lancamento_novo(request):
             tipo=Entry.Tipo.RECEBER,
             patient=dados["patient"],
             pessoa="" if dados["patient"] else dados["pessoa"].strip(),
-            descricao=dados["descricao"],
+            description=dados["description"],
             categoria=dados["categoria"],
             centro_custo=dados.get("centro_custo"),
             practitioner=dados["practitioner"],
-            observacoes=dados["observacoes"],
+            notes=dados["notes"],
             valor_total=dados["valor_total"],
             parcelas=dados["parcelas"],
             primeiro_vencimento=dados["primeiro_vencimento"],
             user=request.user,
         )
         if dados["recebido_agora"]:
-            primeira = lancamento.parcelas.order_by("numero").first()
+            primeira = lancamento.parcelas.order_by("number").first()
             pagamento = services.receber(
                 primeira,
                 user=request.user,
@@ -197,17 +197,17 @@ def despesa_nova(request):
             tipo=Entry.Tipo.PAGAR,
             fornecedor=dados["fornecedor"],
             pessoa=dados["pessoa"].strip(),
-            descricao=dados["descricao"],
+            description=dados["description"],
             categoria=dados["categoria"],
             centro_custo=dados.get("centro_custo"),
-            observacoes=dados["observacoes"],
+            notes=dados["notes"],
             valor_total=form.valor_total(),
             parcelas=dados["parcelas"],
             primeiro_vencimento=dados["primeiro_vencimento"],
             user=request.user,
         )
         if dados["pago_agora"]:
-            primeira = lancamento.parcelas.order_by("numero").first()
+            primeira = lancamento.parcelas.order_by("number").first()
             services.receber(
                 primeira,
                 user=request.user,
@@ -292,7 +292,7 @@ def receber(request, pk):
         return redirect("finance:entry", pk=parcela.lancamento_id)
     pode_desconto = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
     conta_padrao = FinancialAccount.objects.filter(
-        ativa=True, tipo=FinancialAccount.Tipo.DINHEIRO
+        active=True, tipo=FinancialAccount.Tipo.DINHEIRO
     ).first()
     form = ReceberForm(
         request.POST or None,
@@ -394,7 +394,7 @@ def devedores(request):
     encontrados = linhas
     if busca:
         termo = chave_alfabetica(busca)
-        encontrados = [linha for linha in linhas if termo in chave_alfabetica(linha["nome"])]
+        encontrados = [linha for linha in linhas if termo in chave_alfabetica(linha["name"])]
     # A clinic with years of use has thousands of debtors: one page held them all (volume
     # test, decision 108). The totals still add up everyone.
     pagina = Paginator(encontrados, POR_PAGINA).get_page(request.GET.get("pagina"))
@@ -417,7 +417,7 @@ def devedores(request):
 @exige_permissao(Modulo.RECEBIMENTOS, Acao.VER)
 def caixa(request):
     """The drawer of a cash account: its open session, or the form to open it."""
-    contas = list(FinancialAccount.objects.filter(tipo=FinancialAccount.Tipo.DINHEIRO, ativa=True))
+    contas = list(FinancialAccount.objects.filter(tipo=FinancialAccount.Tipo.DINHEIRO, active=True))
     escolhida = request.GET.get("conta", "")
     conta = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
     if conta is not None:
@@ -583,7 +583,7 @@ def planejamento(request):
         ano = hoje.year
     ano = min(max(ano, 2000), hoje.year + 5)
     pode_alterar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR)
-    grupos = services.ligar_grupos(AccountGroup.objects.filter(ativo=True))
+    grupos = services.ligar_grupos(AccountGroup.objects.filter(active=True))
     metas = dict(Planning.objects.filter(ano=ano).values_list("grupo_id", "valor"))
     form = PlanejamentoForm(request.POST or None, grupos=grupos, metas=metas)
     if request.method == "POST":
@@ -608,8 +608,8 @@ def planejamento(request):
     dados = services.planejamento(ano)
     for secao in dados["secoes"]:
         for linha in secao["linhas"]:
-            if pode_alterar and linha["grupo"].ativo:
-                linha["campo"] = form[PlanejamentoForm.nome(linha["grupo"])]
+            if pode_alterar and linha["grupo"].active:
+                linha["campo"] = form[PlanejamentoForm.name(linha["grupo"])]
     return render(
         request,
         "finance/planning.html",
@@ -694,7 +694,7 @@ def cadastro_form(request, cadastro, pk=None):
     form = classe(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": form.instance.nome})
+        messages.success(request, _("%(nome)s salvo.") % {"nome": form.instance.name})
         return redirect("finance:catalog", cadastro=cadastro)
     return render(
         request,
@@ -745,7 +745,7 @@ def _grupo_form(request, instancia):
     form = GrupoContabilForm(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
         grupo = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.nome})
+        messages.success(request, _("%(nome)s salvo.") % {"nome": grupo.name})
         return redirect("finance:chart_of_accounts")
     return render(request, "finance/group_form.html", {"form": form, "instancia": instancia})
 
@@ -758,7 +758,7 @@ def fornecedores(request):
     busca = request.GET.get("q", "").strip()
     lista = Supplier.objects.all()
     if busca:
-        filtro = Q(nome__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(razao_social__unaccent__icontains=busca)
         documento = normalizar_cnpj(busca)
         if any(c.isdigit() for c in documento):
             filtro |= Q(cpf_cnpj__startswith=documento)
@@ -808,7 +808,7 @@ def _fornecedor_form(request, instancia):
     form = FornecedorForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         fornecedor = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.nome})
+        messages.success(request, _("%(nome)s salvo.") % {"nome": fornecedor.name})
         return redirect("finance:supplier", pk=fornecedor.pk)
     return render(request, "finance/supplier_form.html", {"form": form, "instancia": instancia})
 
@@ -833,7 +833,7 @@ def comissoes_lista(request):
         {
             "ate": ate,
             "linhas": commissions.resumo(ate),
-            "sem_percentual": Practitioner.objects.filter(ativo=True, comissao_percentual=0),
+            "sem_percentual": Practitioner.objects.filter(active=True, comissao_percentual=0),
             "historico": Commission.objects.select_related("practitioner", "lancamento")[:30],
         },
     )
@@ -845,7 +845,7 @@ def comissao_percentual(request, pk):
     form = PercentualComissaoForm(request.POST or None, instance=practitioner)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": practitioner.nome})
+        messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": practitioner.name})
         return redirect("finance:commissions")
     return render(
         request,
@@ -859,8 +859,8 @@ def comissao_pagar(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     ate = _ate(request)
     padrao = (
-        Category.objects.filter(tipo=Category.Tipo.DESPESA, nome="Comissões", ativa=True).first()
-        or Category.objects.filter(tipo=Category.Tipo.DESPESA, ativa=True).first()
+        Category.objects.filter(tipo=Category.Tipo.DESPESA, name="Comissões", active=True).first()
+        or Category.objects.filter(tipo=Category.Tipo.DESPESA, active=True).first()
     )
     form = PagarComissaoForm(request.POST or None, initial={"categoria": padrao})
     if request.method == "POST" and form.is_valid():
@@ -1034,7 +1034,7 @@ def transacao_lancamento(request, pk):
     form = LancamentoDaTransacaoForm(
         request.POST or None,
         entrada=transacao.entrada,
-        initial={"descricao": transacao.descricao},
+        initial={"description": transacao.description},
     )
     if request.method == "POST" and form.is_valid():
         try:

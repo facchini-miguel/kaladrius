@@ -23,12 +23,12 @@ ONTEM = HOJE - datetime.timedelta(days=1)
 def cenario(clinica_a, criar_usuario, cliente_de):
     admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Paulo Paciente")
-        dra = Practitioner.objects.create(nome="Dra. Ana", comissao_percentual=Decimal("40"))
-        dr = Practitioner.objects.create(nome="Dr. Beto")
-        tratamento = Category.objects.get(nome="Tratamento")
-        caixa = FinancialAccount.objects.get(nome="Caixa")
-        categoria = Category.objects.get(nome="Comissões")
+        patient = Patient.objects.create(name="Paulo Paciente")
+        dra = Practitioner.objects.create(name="Dra. Ana", comissao_percentual=Decimal("40"))
+        dr = Practitioner.objects.create(name="Dr. Beto")
+        tratamento = Category.objects.get(name="Tratamento")
+        caixa = FinancialAccount.objects.get(name="Caixa")
+        categoria = Category.objects.get(name="Comissões")
     return {
         "clinic": clinica_a,
         "patient": patient,
@@ -53,7 +53,7 @@ def receber(cenario, valor, practitioner, data=ONTEM, juros="0"):
             tipo=Entry.Tipo.RECEBER,
             patient=cenario["patient"],
             practitioner=practitioner,
-            descricao="Tratamento",
+            description="Tratamento",
             categoria=cenario["tratamento"],
             valor_total=Decimal(valor),
             parcelas=1,
@@ -102,7 +102,7 @@ def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
             Decimal("120.00"),
             "Dra. Ana",
         )
-        assert lancamento.categoria.nome == "Comissões"
+        assert lancamento.categoria.name == "Comissões"
         assert Payment.objects.get().comissao == comissao
         assert commissions.pendente(cenario["dra"], HOJE)["valor"] == 0
     # Paying again finds nothing.

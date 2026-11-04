@@ -29,12 +29,12 @@ def _campo_codigo(rotulo):
 
 
 class CodigoForm(FormularioBootstrap, forms.Form):
-    codigo = _campo_codigo(_("Código"))
+    code = _campo_codigo(_("Código"))
 
 
 class DesativarForm(FormularioBootstrap, forms.Form):
     senha = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
-    codigo = _campo_codigo(_("Código do aplicativo"))
+    code = _campo_codigo(_("Código do aplicativo"))
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,8 +44,8 @@ class DesativarForm(FormularioBootstrap, forms.Form):
         dados = super().clean()
         if dados.get("senha") and not self.user.check_password(dados["senha"]):
             self.add_error("senha", _("Senha incorreta."))
-        elif dados.get("codigo") and not services.verificar(self.user, dados["codigo"]):
-            self.add_error("codigo", _("Código incorreto."))
+        elif dados.get("code") and not services.verificar(self.user, dados["code"]):
+            self.add_error("code", _("Código incorreto."))
         return dados
 
 

@@ -45,8 +45,8 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
 
 def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
     pagina = cliente.get(reverse("home")).content.decode()
-    for codigo in ("pt-br", "en", "es"):
-        assert f"img/flags/{codigo}." in pagina  # CI serves hashed names (x.1a2b.svg)
+    for code in ("pt-br", "en", "es"):
+        assert f"img/flags/{code}." in pagina  # CI serves hashed names (x.1a2b.svg)
     # Its own menu, before the user's menu (between the clinic and the user name).
     assert pagina.index("seletor-idioma") < pagina.index(reverse("change_password"))
 
@@ -66,10 +66,10 @@ def test_login_segue_o_idioma_do_navegador(client):
 
 def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(idioma="en")
-    resposta = cliente.post(reverse("patients:new"), {"tipo": "PF", "nome": "", "ativo": "on"})
+    resposta = cliente.post(reverse("patients:new"), {"tipo": "PF", "name": "", "active": "on"})
     assert "This field is required." in resposta.content.decode()
     resposta = cliente.post(
-        reverse("patients:new"), {"tipo": "PF", "nome": "Ana", "ativo": "on"}, follow=True
+        reverse("patients:new"), {"tipo": "PF", "name": "Ana", "active": "on"}, follow=True
     )
     assert "Patient Ana saved." in resposta.content.decode()
 
@@ -94,7 +94,7 @@ def test_todos_os_textos_estao_traduzidos(idioma):
 
 
 def test_novidades_nos_tres_idiomas():
-    idiomas = {codigo for codigo, _nome in settings.LANGUAGES}
+    idiomas = {code for code, _nome in settings.LANGUAGES}
     for release in releases.todas():
         assert set(dict(release.titulos)) == idiomas or not release.titulo, release.versao
         for item in release.itens:

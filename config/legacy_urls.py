@@ -16,13 +16,13 @@ class RedirecionamentoPermanente(HttpResponseRedirect):
     status_code = 308
 
 
-def para(nome, valores=None):
+def para(name, valores=None):
     """A view that sends the old address to the URL named `nome`, with the same arguments."""
 
     def redirecionar(request, **kwargs):
         for chave, traducao in (valores or {}).items():
             kwargs[chave] = traducao[kwargs[chave]]
-        destino = reverse(nome, kwargs=kwargs)
+        destino = reverse(name, kwargs=kwargs)
         if request.META.get("QUERY_STRING"):
             destino += "?" + request.META["QUERY_STRING"]
         return RedirecionamentoPermanente(destino)

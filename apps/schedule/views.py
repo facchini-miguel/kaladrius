@@ -114,7 +114,7 @@ def _periodo(request):
 
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def calendario(request):
-    profissionais = list(services.profissionais_visiveis(request).filter(ativo=True))
+    profissionais = list(services.profissionais_visiveis(request).filter(active=True))
     escolhido = request.GET.get("practitioner") or request.session.get(SESSAO_PROFISSIONAL)
     practitioner = next(
         (p for p in profissionais if str(p.pk) == str(escolhido)),
@@ -154,7 +154,7 @@ def calendario(request):
         {
             "profissionais": profissionais,
             "practitioner": practitioner,
-            "tipos": AppointmentType.objects.filter(ativo=True),
+            "tipos": AppointmentType.objects.filter(active=True),
             "configuracao": configuracao,
             "so_a_propria": so_a_propria_agenda(request),
         },
@@ -192,7 +192,7 @@ def eventos(request):
                 "classNames": [f"situacao-{agendamento.situacao}"],
                 "extendedProps": {
                     "tipo": agendamento.tipo.nome_exibido,
-                    "descricao": agendamento.descricao,
+                    "description": agendamento.description,
                     "situacao": agendamento.situacao,
                     "situacao_nome": agendamento.get_situacao_display(),
                     "url": reverse("schedule:edit", args=[agendamento.pk]),
@@ -292,7 +292,7 @@ def situacao(request, pk):
             return render(request, "schedule/_form.html", contexto)
         messages.error(request, erro.messages[0])
         return redirect("home")
-    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.patient.nome}
+    mensagem = MENSAGENS_SITUACAO[agendamento.situacao] % {"nome": agendamento.patient.name}
     if request.headers.get("HX-Request"):
         return _resposta_sucesso(mensagem)
     messages.success(request, mensagem)
@@ -333,7 +333,7 @@ def _aniversariantes_em(dias):
     resultado = {dia: [] for dia in dias}
     if not dias:
         return resultado
-    pacientes = Patient.objects.filter(filtro, ativo=True, arquivado=False).order_by("nome")
+    pacientes = Patient.objects.filter(filtro, active=True, arquivado=False).order_by("name")
     por_mes_dia = {(dia.month, dia.day): dia for dia in dias}
     for patient in pacientes:
         nascimento = patient.data_nascimento

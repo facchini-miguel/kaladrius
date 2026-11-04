@@ -5,25 +5,25 @@ from .models import Bank, City, MaritalStatus, State
 
 @admin.register(State)
 class UFAdmin(admin.ModelAdmin):
-    list_display = ["sigla", "nome", "regiao", "codigo"]
+    list_display = ["sigla", "name", "regiao", "code"]
     list_filter = ["regiao"]
 
 
 @admin.register(City)
 class CidadeAdmin(admin.ModelAdmin):
-    list_display = ["nome", "uf", "codigo"]
+    list_display = ["name", "uf", "code"]
     list_filter = ["uf"]
-    search_fields = ["nome"]
+    search_fields = ["name"]
     list_select_related = ["uf"]
 
 
 @admin.register(Bank)
 class BancoAdmin(admin.ModelAdmin):
-    list_display = ["codigo", "nome_curto", "nome", "ispb"]
-    search_fields = ["nome", "nome_curto", "ispb"]
+    list_display = ["code", "nome_curto", "name", "ispb"]
+    search_fields = ["name", "nome_curto", "ispb"]
 
 
 @admin.register(MaritalStatus)
 class EstadoCivilAdmin(admin.ModelAdmin):
-    list_display = ["nome", "ordem"]
+    list_display = ["name", "ordem"]
     list_editable = ["ordem"]

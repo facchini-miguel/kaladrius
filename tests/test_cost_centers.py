@@ -27,32 +27,32 @@ def admin(clinica_a, criar_usuario, cliente_de):
 @pytest.fixture
 def centro(clinica_a):
     with usar_clinica(clinica_a):
-        return CostCenter.objects.create(nome="Ortodontia")
+        return CostCenter.objects.create(name="Ortodontia")
 
 
 def despesa(clinic, **extra):
     with usar_clinica(clinic):
-        categoria = Category.objects.get(nome="Aluguel")
+        categoria = Category.objects.get(name="Aluguel")
     return {
         "pessoa": "Imobiliária fictícia",
-        "descricao": "Aluguel",
+        "description": "Aluguel",
         "categoria": categoria.pk,
         "valor": "1000",
         "modo": "dividir",
         "parcelas": 1,
         "primeiro_vencimento": HOJE.isoformat(),
-        "observacoes": "",
+        "notes": "",
         **extra,
     }
 
 
 def test_cadastro_e_nome_repetido(clinica_a, admin):
     url = reverse("finance:catalog_new", args=["cost-centers"])
-    assert admin.post(url, {"nome": " Consultório 1 ", "ativo": "on"}).status_code == 302
+    assert admin.post(url, {"name": " Consultório 1 ", "active": "on"}).status_code == 302
     with usar_clinica(clinica_a):
-        assert CostCenter.objects.get().nome == "Consultório 1"
-    repetido = admin.post(url, {"nome": "consultório 1", "ativo": "on"})
-    assert "nome" in repetido.context["form"].errors
+        assert CostCenter.objects.get().name == "Consultório 1"
+    repetido = admin.post(url, {"name": "consultório 1", "active": "on"})
+    assert "name" in repetido.context["form"].errors
     lista = admin.get(reverse(URL, args=["cost-centers"])).content.decode()
     assert "Consultório 1" in lista and "Ativo" in lista
 
@@ -61,10 +61,10 @@ def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
     for rota in ("finance:entry_new", "finance:expense_new"):
         assert "centro_custo" not in admin.get(reverse(rota)).context["form"].fields
     with usar_clinica(clinica_a):
-        inativo = CostCenter.objects.create(nome="Desativado", ativo=False)
+        inativo = CostCenter.objects.create(name="Desativado", active=False)
     assert "centro_custo" not in admin.get(reverse("finance:expense_new")).context["form"].fields
     with usar_clinica(clinica_a):
-        CostCenter.objects.create(nome="Ativo")
+        CostCenter.objects.create(name="Ativo")
     campo = admin.get(reverse("finance:expense_new")).context["form"].fields["centro_custo"]
     with usar_clinica(clinica_a):
         assert inativo not in campo.queryset and campo.queryset.count() == 1
@@ -78,21 +78,21 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
         == 302
     )
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Paciente fictício do centro")
-        receita = Category.objects.get(nome="Tratamento")
+        patient = Patient.objects.create(name="Paciente fictício do centro")
+        receita = Category.objects.get(name="Tratamento")
     resposta = admin.post(
         reverse("finance:entry_new"),
         {
             "patient": patient.pk,
             "pessoa": "",
-            "descricao": "Aparelho",
+            "description": "Aparelho",
             "categoria": receita.pk,
             "centro_custo": centro.pk,
             "practitioner": "",
             "valor_total": "500",
             "parcelas": 1,
             "primeiro_vencimento": HOJE.isoformat(),
-            "observacoes": "",
+            "notes": "",
         },
     )
     assert resposta.status_code == 302
@@ -107,14 +107,14 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
 
 def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
     with usar_clinica(clinica_a):
-        aluguel = Category.objects.get(nome="Aluguel")
-        caixa = FinancialAccount.objects.get(nome="Caixa")
+        aluguel = Category.objects.get(name="Aluguel")
+        caixa = FinancialAccount.objects.get(name="Caixa")
         for valor, centro_custo in ((Decimal("300"), centro), (Decimal("200"), None)):
             lancamento = services.criar_lancamento(
                 clinic=clinica_a,
                 tipo=Entry.Tipo.PAGAR,
                 pessoa="Fornecedor fictício",
-                descricao="Compra",
+                description="Compra",
                 categoria=aluguel,
                 centro_custo=centro_custo,
                 valor_total=valor,
@@ -126,7 +126,7 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
             services.receber(parcela, user=None, valor=parcela.valor, forma="pix", conta=caixa)
     relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
     assert relatorio["centros"]
-    assert {nome: str(total) for nome, total in relatorio["despesas_por_centro"]} == {
+    assert {name: str(total) for name, total in relatorio["despesas_por_centro"]} == {
         "Ortodontia": "300.00",
         "Sem centro de custo": "200.00",
     }

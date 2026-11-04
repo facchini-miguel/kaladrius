@@ -69,7 +69,7 @@ def criar(modelo, intervalos, user):
             practitioner=modelo.practitioner,
             tipo=modelo.tipo,
             patient=modelo.patient,
-            descricao=modelo.descricao,
+            description=modelo.description,
             inicio=inicio,
             fim=fim,
             serie=serie,

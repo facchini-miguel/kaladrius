@@ -81,7 +81,7 @@ def ler_tabelas(texto, tabelas=None):
             continue
         if colunas is None:
             raise DumpInvalido(f"INSERT sem nomes de colunas na tabela {tabela}.")
-        nomes = [nome.strip().strip("`") for nome in colunas.split(",")]
+        nomes = [name.strip().strip("`") for name in colunas.split(",")]
         for linha in linhas:
             if len(linha) != len(nomes):
                 raise DumpInvalido(f"Linha com {len(linha)} valores em {tabela}.")

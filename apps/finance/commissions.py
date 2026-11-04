@@ -75,7 +75,7 @@ def resumo(ate):
     took seconds in a clinic with years of them (volume test, decision 108).
     """
     linhas = []
-    for practitioner in Practitioner.objects.order_by("-ativo", "nome"):
+    for practitioner in Practitioner.objects.order_by("-active", "name"):
         totais = _creditos(practitioner, ate).aggregate(recebido=Sum("valor"), quantos=Count("pk"))
         debitos = _debitos(practitioner)
         if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
@@ -106,10 +106,10 @@ def pagar(practitioner, *, ate, vencimento, categoria, user):
     lancamento = services.criar_lancamento(
         clinic=practitioner.clinic,
         tipo=Entry.Tipo.PAGAR,
-        pessoa=practitioner.nome,
+        pessoa=practitioner.name,
         practitioner=practitioner,
-        descricao=_("Comissão de %(nome)s até %(data)s")
-        % {"nome": practitioner.nome, "data": date_format(ate, "SHORT_DATE_FORMAT")},
+        description=_("Comissão de %(nome)s até %(data)s")
+        % {"nome": practitioner.name, "data": date_format(ate, "SHORT_DATE_FORMAT")},
         categoria=categoria,
         valor_total=calculo["valor"],
         parcelas=1,

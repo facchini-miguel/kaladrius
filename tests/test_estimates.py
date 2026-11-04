@@ -21,12 +21,12 @@ HOJE = timezone.localdate()
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
-        patient = Patient.objects.create(nome="Joana Sorriso")
-        tratamento = Category.objects.get(nome="Tratamento")
+        patient = Patient.objects.create(name="Joana Sorriso")
+        tratamento = Category.objects.get(name="Tratamento")
         canal = Procedure.objects.create(
-            nome="Tratamento de canal", valor=Decimal("1200"), categoria=tratamento
+            name="Tratamento de canal", valor=Decimal("1200"), categoria=tratamento
         )
-        restauracao = Procedure.objects.create(nome="Restauração", valor=Decimal("250"))
+        restauracao = Procedure.objects.create(name="Restauração", valor=Decimal("250"))
     return {
         "clinic": clinica_a,
         "patient": patient,
@@ -51,7 +51,7 @@ def criar_orcamento(cenario, cliente):
             "practitioner": "",
             "data": HOJE.isoformat(),
             "validade": HOJE.isoformat(),
-            "observacoes": "",
+            "notes": "",
         },
     )
     with usar_clinica(cenario["clinic"]):
@@ -64,7 +64,7 @@ def incluir(cliente, orcamento, **dados):
     return cliente.post(
         reverse("estimates:item_add", args=[orcamento.pk]),
         {
-            "descricao": "",
+            "description": "",
             "dentes": "",
             "faces": "",
             "quantidade": 1,
@@ -81,13 +81,13 @@ def test_profissional_monta_orcamento_com_dentes(cenario):
     incluir(
         cliente, orcamento, procedimento=cenario["restauracao"].pk, dentes="36, 11,11", quantidade=2
     )
-    incluir(cliente, orcamento, descricao="Moldagem", valor_unitario="80,00")
+    incluir(cliente, orcamento, description="Moldagem", valor_unitario="80,00")
     with usar_clinica(cenario["clinic"]):
         itens = list(orcamento.itens.order_by("pk"))
         orcamento.refresh_from_db()
         assert orcamento.total == Decimal("580.00")
         assert orcamento.dentes == [11, 36]
-    assert (itens[0].descricao, itens[0].dentes, itens[0].valor_unitario) == (
+    assert (itens[0].description, itens[0].dentes, itens[0].valor_unitario) == (
         "Restauração",
         "11,36",
         Decimal("250.00"),
@@ -137,7 +137,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     incluir(recepcao, orcamento, procedimento=cenario["canal"].pk)
     with usar_clinica(cenario["clinic"]):
         Estimate.objects.filter(pk=orcamento.pk).update(desconto=Decimal("200"))
-        caixa = FinancialAccount.objects.get(nome="Caixa")
+        caixa = FinancialAccount.objects.get(name="Caixa")
     url = reverse("estimates:approve", args=[orcamento.pk])
     # The category comes from the first procedure.
     assert recepcao.get(url).context["form"].initial["categoria"] == cenario["canal"].categoria
@@ -212,9 +212,9 @@ def test_tabela_de_procedimentos_so_o_admin_altera(cenario):
     admin = entrar(cenario, "admin")
     url = reverse("estimates:procedure_new")
     assert (
-        admin.post(url, {"nome": "Clareamento", "valor": "900", "ativo": "on"}).status_code == 302
+        admin.post(url, {"name": "Clareamento", "valor": "900", "active": "on"}).status_code == 302
     )
-    assert "Já existe" in admin.post(url, {"nome": "Clareamento", "valor": "1"}).content.decode()
+    assert "Já existe" in admin.post(url, {"name": "Clareamento", "valor": "1"}).content.decode()
 
 
 def test_exclusao_definitiva_apaga_os_orcamentos(cenario):

@@ -24,7 +24,7 @@ class ExigirDuasEtapasMiddleware:
         caminho = request.path_info
         if caminho.startswith((settings.STATIC_URL, "/admin/", "/api/")):
             return False
-        if caminho in {reverse(nome) for nome in LIVRES}:
+        if caminho in {reverse(name) for name in LIVRES}:
             return False
         if not services.obrigatoria(request):
             return False

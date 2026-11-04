@@ -49,7 +49,7 @@
   <table class="table table-sm bg-white">
     <tbody>
       {% for conta, saldo in contas %}
-      <tr><td>{{ conta.nome }}{% if not conta.ativa %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if saldo < 0 %} text-danger{% endif %}">{{ saldo|moeda }}</td></tr>
+      <tr><td>{{ conta.name }}{% if not conta.active %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if saldo < 0 %} text-danger{% endif %}">{{ saldo|moeda }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

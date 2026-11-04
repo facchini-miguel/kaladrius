@@ -5,7 +5,7 @@
 
 {% block conteudo %}
 <h1 class="h3 mb-3">{% translate "Verificação em duas etapas" %}</h1>
-{% if ativa %}
+{% if active %}
 <p><span class="badge text-bg-success">{% translate "Ativa" %}</span> {% translate "Ao entrar, depois da senha, o sistema pede o código do aplicativo autenticador." %}</p>
 <p class="text-body-secondary">{% blocktranslate count n=restantes %}Resta {{ n }} código de recuperação sem uso.{% plural %}Restam {{ n }} códigos de recuperação sem uso.{% endblocktranslate %}</p>
 <div class="row g-4">

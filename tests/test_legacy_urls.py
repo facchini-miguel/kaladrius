@@ -38,22 +38,22 @@ REGEX = {
 
 def enderecos_antigos():
     for linha in ANTES.read_text().splitlines():
-        nome, _, rota = linha.partition("  ")
-        if nome.startswith("api-v1:") or nome == "-:inicio" or not linha.strip():
+        name, _, rota = linha.partition("  ")
+        if name.startswith("api-v1:") or name == "-:inicio" or not linha.strip():
             continue  # the API keeps its old addresses itself; "" is still the home page
-        if nome in REGEX:
-            yield from ((nome, f"/{caminho}") for caminho in REGEX[nome])
+        if name in REGEX:
+            yield from ((name, f"/{caminho}") for caminho in REGEX[name])
             continue
         for conversor, valor in EXEMPLOS.items():
             rota = rota.replace(conversor, valor)
         assert "<" not in rota, linha
-        yield nome, f"/{rota}"
+        yield name, f"/{rota}"
 
 
-@pytest.mark.parametrize(("nome", "antigo"), list(enderecos_antigos()))
-def test_endereco_antigo_redireciona_para_o_novo(client, nome, antigo):
+@pytest.mark.parametrize(("name", "antigo"), list(enderecos_antigos()))
+def test_endereco_antigo_redireciona_para_o_novo(client, name, antigo):
     resposta = client.get(antigo)
-    assert resposta.status_code == RedirecionamentoPermanente.status_code, (nome, antigo)
+    assert resposta.status_code == RedirecionamentoPermanente.status_code, (name, antigo)
     destino = resolve(resposta.url)
     assert destino.func.__name__ != "redirecionar", (antigo, resposta.url)
     assert resposta.url != antigo
@@ -63,7 +63,7 @@ def test_endereco_antigo_redireciona_para_o_novo(client, nome, antigo):
     for chave, antiga in (("pk", "pk"), ("patient", "paciente"), ("item", "item")):
         if chave in destino.kwargs:
             assert str(destino.kwargs[chave]) == EXEMPLOS[f"<int:{antiga}>"]
-    if not nome.startswith("ajuda:"):
+    if not name.startswith("ajuda:"):
         caminho = resposta.url.split("?")[0]
         assert not re.search(
             r"/(conta|pacientes|agenda|financeiro|novo|editar|excluir|retirada|contas|conciliar)/",

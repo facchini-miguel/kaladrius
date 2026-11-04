@@ -50,13 +50,13 @@ class Alerta:
 @dataclass
 class Migracao:
     app: str
-    nome: str
+    name: str
     sql: str = ""
     operacoes: list = field(default_factory=list)  # (description, [Alerta])
 
     @property
     def chave(self):
-        return f"{self.app}.{self.nome}"
+        return f"{self.app}.{self.name}"
 
     @property
     def alertas(self):
@@ -111,9 +111,9 @@ def migracoes_do_diff(base):
     return sorted(novas), sorted(alteradas)
 
 
-def _campo(estado, app, modelo, nome):
+def _campo(estado, app, modelo, name):
     try:
-        return estado.apps.get_model(app, modelo)._meta.get_field(nome)
+        return estado.apps.get_model(app, modelo)._meta.get_field(name)
     except LookupError:
         return None
 
@@ -243,18 +243,18 @@ def analisar(chaves, loader=None):
     """A Migracao, with its SQL and the attention points of each operation, per (app, name)."""
     loader = loader or MigrationLoader(connection, ignore_no_migrations=True)
     resultado = []
-    for app, nome in chaves:
-        if (app, nome) not in loader.disk_migrations:
-            raise CommandError(f"Migração {app}.{nome} não encontrada.")
-        migracao = loader.disk_migrations[(app, nome)]
+    for app, name in chaves:
+        if (app, name) not in loader.disk_migrations:
+            raise CommandError(f"Migração {app}.{name} não encontrada.")
+        migracao = loader.disk_migrations[(app, name)]
         # The state right before this migration: every migration it depends on, not itself.
-        estado = loader.project_state((app, nome), at_end=False)
-        item = Migracao(app, nome)
+        estado = loader.project_state((app, name), at_end=False)
+        item = Migracao(app, name)
         for operacao in migracao.operations:
             item.operacoes.append((operacao.describe(), alertas_da_operacao(operacao, app, estado)))
             estado = _depois(operacao, app, estado)
         saida = StringIO()
-        call_command("sqlmigrate", app, nome, stdout=saida)
+        call_command("sqlmigrate", app, name, stdout=saida)
         item.sql = saida.getvalue().strip()
         resultado.append(item)
     return resultado
@@ -263,11 +263,11 @@ def analisar(chaves, loader=None):
 def banco_descartavel(conexao=connection):
     """--test-rollback undoes migrations: an AddField undone loses that column's data. Only on
     the test database or where DISPOSABLE_DATABASE=1 says the database is throwaway (CI)."""
-    nome = str(conexao.settings_dict["NAME"])
-    if os.environ.get("DISPOSABLE_DATABASE") == "1" or nome.startswith("test_"):
+    name = str(conexao.settings_dict["NAME"])
+    if os.environ.get("DISPOSABLE_DATABASE") == "1" or name.startswith("test_"):
         return
     raise CommandError(
-        f"--test-rollback desfaz migrações no banco {nome}, e os dados delas se perdem. Só num "
+        f"--test-rollback desfaz migrações no banco {name}, e os dados delas se perdem. Só num "
         "banco descartável: o de testes, ou com DISPOSABLE_DATABASE=1 (o CI)."
     )
 
@@ -291,7 +291,7 @@ def ida_e_volta(chaves):
         return [("applying every migration", _erro(erro))]
     falhas = []
     for app in sorted({app for app, _nome in chaves}):
-        primeira = min(nome for a, nome in chaves if a == app)
+        primeira = min(name for a, name in chaves if a == app)
         pais = [p.key for p in loader.graph.node_map[(app, primeira)].parents if p.key[0] == app]
         alvo = pais[0][1] if pais else "zero"
         try:
@@ -316,8 +316,8 @@ def ida_e_volta(chaves):
 def _linhas_da_migracao(migracao, com_sql):
     linhas = [f"### `{migracao.chave}`"]
     linhas += [
-        f"- {descricao}" + "".join(f" — ⚠️ {a.tipo}" for a in alertas_op)
-        for descricao, alertas_op in migracao.operacoes
+        f"- {description}" + "".join(f" — ⚠️ {a.tipo}" for a in alertas_op)
+        for description, alertas_op in migracao.operacoes
     ]
     if com_sql:
         linhas += ["", "<details><summary>SQL</summary>", "", "```sql", migracao.sql, "```", ""]
@@ -328,10 +328,10 @@ def _linhas_da_migracao(migracao, com_sql):
 def _alteradas(alteradas):
     feito = {"D": "deleted"}
     return [
-        f"- **{app}.{nome}** — {ALTERADA}: {feito.get(status, 'edited')}, but it is already in "
+        f"- **{app}.{name}** — {ALTERADA}: {feito.get(status, 'edited')}, but it is already in "
         "the base branch, and production never runs an applied migration again. Put the change "
         "in a new migration."
-        for app, nome, status in alteradas
+        for app, name, status in alteradas
     ]
 
 

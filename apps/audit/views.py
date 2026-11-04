@@ -51,8 +51,8 @@ def _rotulos():
     for modelo in AUDITADOS:
         campos = rotulos.setdefault(nome_do_modelo(modelo), {})
         for campo in modelo._meta.concrete_fields:
-            for nome in {campo.column, campo.column.removesuffix("_id"), campo.attname, campo.name}:
-                campos[nome] = campo.verbose_name
+            for name in {campo.column, campo.column.removesuffix("_id"), campo.attname, campo.name}:
+                campos[name] = campo.verbose_name
     return rotulos
 
 

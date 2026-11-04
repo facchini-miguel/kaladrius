@@ -24,20 +24,20 @@ def test_bairros_e_logradouros_do_odonto_carregados():
     assert Neighborhood.objects.count() == 70
     assert Neighborhood.objects.filter(cidade_id=CARLOS_BARBOSA).count() == 39
     assert Street.objects.count() == 316
-    assert Street.objects.filter(nome__startswith="Rua ").exists()
+    assert Street.objects.filter(name__startswith="Rua ").exists()
 
 
 def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinica_b, recepcao):
     with usar_clinica(clinica_a):
         Patient.objects.create(
-            nome="Paciente fictício A",
+            name="Paciente fictício A",
             cidade_id=CARLOS_BARBOSA,
             bairro="Bairro Novo Fictício",
             logradouro="Rua Inventada A",
         )
     with usar_clinica(clinica_b):
         Patient.objects.create(
-            nome="Paciente fictício B", cidade_id=CARLOS_BARBOSA, bairro="Bairro de Outra Clínica"
+            name="Paciente fictício B", cidade_id=CARLOS_BARBOSA, bairro="Bairro de Outra Clínica"
         )
     texto = recepcao.get(URL, {"cidade": CARLOS_BARBOSA}).content.decode()
     assert 'id="bairros-sugeridos"' in texto and 'value="Centro"' in texto

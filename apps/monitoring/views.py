@@ -61,8 +61,8 @@ def _banco():
             """
         )
         tabelas = [
-            {"nome": nome, "tamanho": tamanho_tabela, "registros": registros}
-            for nome, tamanho_tabela, registros in cursor.fetchall()
+            {"name": name, "tamanho": tamanho_tabela, "registros": registros}
+            for name, tamanho_tabela, registros in cursor.fetchall()
         ]
     return {"tamanho": tamanho, "tabelas": tabelas}
 

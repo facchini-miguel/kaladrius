@@ -9,12 +9,12 @@ SENHA = "senha-de-teste-123"
 
 @pytest.fixture
 def clinica_a(db):
-    return Clinic.objects.create(nome="Clínica A")
+    return Clinic.objects.create(name="Clínica A")
 
 
 @pytest.fixture
 def clinica_b(db):
-    return Clinic.objects.create(nome="Clínica B")
+    return Clinic.objects.create(name="Clínica B")
 
 
 @pytest.fixture
@@ -34,9 +34,9 @@ def criar_usuario(django_user_model):
 def criar_profissional():
     """Create a practitioner inside the given clinic."""
 
-    def criar(clinic, nome, **extra):
+    def criar(clinic, name, **extra):
         with usar_clinica(clinic):
-            return Practitioner.objects.create(nome=nome, **extra)
+            return Practitioner.objects.create(name=name, **extra)
 
     return criar
 

@@ -43,8 +43,8 @@ def test_cada_tarefa_agendada_roda_um_script_do_pacote():
     destinos = {destino for _origem, destino in conteudo()}
     unidades = [d for d in destinos if d.startswith("/usr/lib/systemd/system/")]
     assert {Path(u).name for u in unidades} == {
-        f"kaladrius-{nome}.{tipo}"
-        for nome in ("backup", "health", "restore-test")
+        f"kaladrius-{name}.{tipo}"
+        for name in ("backup", "health", "restore-test")
         for tipo in ("service", "timer")
     }
     for unidade in unidades:
@@ -200,8 +200,8 @@ def test_nenhum_script_confere_duas_condicoes_numa_linha_so():
     # restore test passed with no clinic restored until decision 140.
     padrao = re.compile(r"^\s*\[[^]]*\]\s*&&\s*\[[^]]*\]\s*$")
     for script in [*SERVIDOR.glob("*.sh"), *PACOTE.glob("*.sh"), PACOTE / "kaladrius"]:
-        for numero, linha in enumerate(script.read_text().splitlines(), 1):
-            assert not padrao.match(linha), f"{script.name}:{numero}: {linha.strip()}"
+        for number, linha in enumerate(script.read_text().splitlines(), 1):
+            assert not padrao.match(linha), f"{script.name}:{number}: {linha.strip()}"
 
 
 def test_nenhum_script_usa_grep_q_depois_de_um_cano():
@@ -209,8 +209,8 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
     # writing the rest (SIGPIPE): Kaladrius's own Caddy was taken for another program on 80/443.
     padrao = re.compile(r"\|\s*grep\s+-[a-zA-Z]*q")
     for script in [*SERVIDOR.glob("*.sh"), *PACOTE.glob("*.sh"), PACOTE / "kaladrius"]:
-        for numero, linha in enumerate(script.read_text().splitlines(), 1):
-            assert not padrao.search(linha), f"{script.name}:{numero}: {linha.strip()}"
+        for number, linha in enumerate(script.read_text().splitlines(), 1):
+            assert not padrao.search(linha), f"{script.name}:{number}: {linha.strip()}"
 
 
 @pytest.mark.parametrize(
@@ -305,8 +305,8 @@ def comum_com_imagens(tmp_path, imagens, recusada=None):
     """common.sh in package mode, with a fake `docker` that knows only `imagens` (name: id)."""
     comum = comum_em(tmp_path, pacote="VERSION=0.55.0\nIMAGE=kaladrius:nova\n")
     (tmp_path / "imagens").mkdir()
-    for nome, ident in imagens.items():
-        (tmp_path / "imagens" / nome.replace(":", "_")).write_text(ident)
+    for name, ident in imagens.items():
+        (tmp_path / "imagens" / name.replace(":", "_")).write_text(ident)
     (tmp_path / "path").mkdir()
     docker = tmp_path / "path" / "docker"
     docker.write_text(DOCKER_FALSO)

@@ -17,7 +17,7 @@ def resolver_clinica(request):
     """
     user = request.user
     vinculo = (
-        Membership.objects.filter(user=user, ativo=True, clinic__ativa=True)
+        Membership.objects.filter(user=user, active=True, clinic__active=True)
         .select_related("clinic")
         .order_by("clinic_id")
         .first()

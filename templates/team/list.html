@@ -34,7 +34,7 @@
         <td>{{ vinculo.get_papel_display }}</td>
         <td>{% if vinculo.user.last_login %}{{ vinculo.user.last_login|date:"SHORT_DATETIME_FORMAT" }}{% else %}{% translate "nunca" %}{% endif %}</td>
         <td>
-          {% if vinculo.ativo and vinculo.user.is_active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if vinculo.active and vinculo.user.is_active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Sem acesso" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">

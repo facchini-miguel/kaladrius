@@ -136,7 +136,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
-            nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
+            name="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
         )
     ficha = cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "25/12/2000" in ficha and "12/25/2000" not in ficha
@@ -197,8 +197,8 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
         reverse("patients:new"),
         {
             "tipo": "PF",
-            "nome": "Oliver Fictício",
-            "ativo": "on",
+            "name": "Oliver Fictício",
+            "active": "on",
             "telefone_celular": "07700 900123",
             "whatsapp": "+44 7700 900123",
             "cep": "sw1a 1aa",
@@ -208,7 +208,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        patient = Patient.objects.get(nome="Oliver Fictício")
+        patient = Patient.objects.get(name="Oliver Fictício")
     assert (patient.telefone_celular, patient.whatsapp, patient.cep) == (
         "7700900123",
         "7700900123",
@@ -244,7 +244,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
         Appointment.objects.create(
             practitioner=ana,
             tipo=AppointmentType.objects.first(),
-            descricao="Horário fictício",
+            description="Horário fictício",
             inicio=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
             fim=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),
         )

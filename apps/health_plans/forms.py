@@ -12,7 +12,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
     # Typed with punctuation, stored without it (ANS: the 6 digits). Only in the countries
     # whose insurers have a registry (decision 125).
     registro = forms.CharField(max_length=30, required=False)
-    telefone = forms.CharField(
+    phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
         required=False,
@@ -21,8 +21,8 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = HealthPlan
-        fields = ["nome", "registro", "telefone", "observacoes", "ativo"]
-        widgets = {"observacoes": forms.Textarea(attrs={"rows": 3})}
+        fields = ["name", "registro", "phone", "notes", "active"]
+        widgets = {"notes": forms.Textarea(attrs={"rows": 3})}
 
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,7 +30,7 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             self.instance.clinic = clinic
         do_pais = insurance.do_pais(clinic.pais)
         if do_pais.tipos:
-            self.fields["nome"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
+            self.fields["name"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
         self.registro = do_pais.registro
         if self.registro is None:
             del self.fields["registro"]
@@ -39,11 +39,11 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             if self.registro.exemplo:
                 self.fields["registro"].widget.attrs["placeholder"] = self.registro.exemplo
 
-    def clean_nome(self):
-        nome = self.cleaned_data["nome"].strip()
-        if HealthPlan.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk).exists():
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        if HealthPlan.objects.filter(name__iexact=name).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um convênio com este nome."))
-        return nome
+        return name
 
     def clean_registro(self):
         registro = self.registro.limpar(self.cleaned_data.get("registro"))
@@ -51,8 +51,8 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             raise forms.ValidationError(_("Use no máximo 20 caracteres."))
         return registro
 
-    def clean_telefone(self):
-        return normalizar_telefone(self.cleaned_data.get("telefone"))
+    def clean_phone(self):
+        return normalizar_telefone(self.cleaned_data.get("phone"))
 
 
 class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
@@ -61,12 +61,12 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         fields = [
             "convenio",
             "plano",
-            "numero",
+            "number",
             "grupo",
             "beneficiario",
             "validade",
             "titular",
-            "ativa",
+            "active",
         ]
         widgets = {"validade": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
@@ -77,8 +77,8 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             self.instance.clinic_id = patient.clinic_id
         # The card's fields and their local names in the clinic's country (decision 125).
         do_pais = insurance.do_pais(patient.clinic.pais)
-        self.fields["numero"].label = insurance.com_nome_local(
-            _("Número da carteirinha"), do_pais.numero
+        self.fields["number"].label = insurance.com_nome_local(
+            _("Número da carteirinha"), do_pais.number
         )
         for campo, local, rotulo in (
             ("grupo", do_pais.grupo, _("Número do grupo")),
@@ -89,22 +89,22 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             else:
                 del self.fields[campo]
         # Active plans, plus the card's own plan when it was deactivated later.
-        self.fields["convenio"].queryset = HealthPlan.objects.filter(ativo=True) | (
+        self.fields["convenio"].queryset = HealthPlan.objects.filter(active=True) | (
             HealthPlan.objects.filter(pk=self.instance.convenio_id)
         )
 
-    def clean_numero(self):
-        return self.cleaned_data["numero"].strip()
+    def clean_number(self):
+        return self.cleaned_data["number"].strip()
 
     def clean(self):
         dados = super().clean()
-        convenio, numero = dados.get("convenio"), dados.get("numero")
+        convenio, number = dados.get("convenio"), dados.get("number")
         if (
             convenio
-            and numero
-            and MemberCard.objects.filter(convenio=convenio, numero=numero)
+            and number
+            and MemberCard.objects.filter(convenio=convenio, number=number)
             .exclude(pk=self.instance.pk)
             .exists()
         ):
-            self.add_error("numero", _("Esta carteirinha já está cadastrada neste convênio."))
+            self.add_error("number", _("Esta carteirinha já está cadastrada neste convênio."))
         return dados

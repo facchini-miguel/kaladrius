@@ -16,7 +16,7 @@ from .models import Appointment, AppointmentType
 class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = AppointmentType
-        fields = ["nome", "cor", "ativo"]
+        fields = ["name", "cor", "active"]
         widgets = {"cor": forms.TextInput(attrs={"type": "color"})}
 
     def __init__(self, *args, clinic, **kwargs):
@@ -24,13 +24,13 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
 
-    def clean_nome(self):
+    def clean_name(self):
         # The clinic is not a form field, so the unique constraint must be checked here.
-        nome = self.cleaned_data["nome"].strip()
-        repetido = AppointmentType.objects.filter(nome__iexact=nome).exclude(pk=self.instance.pk)
+        name = self.cleaned_data["name"].strip()
+        repetido = AppointmentType.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
         if repetido.exists():
             raise forms.ValidationError(_("Já existe um tipo de atendimento com este nome."))
-        return nome
+        return name
 
 
 class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
@@ -54,10 +54,10 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ["practitioner", "tipo", "patient", "descricao"]
+        fields = ["practitioner", "tipo", "patient", "description"]
         widgets = {
             "patient": forms.HiddenInput,
-            "descricao": forms.Textarea(attrs={"rows": 3}),
+            "description": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, clinic, profissionais=None, **kwargs):
@@ -72,10 +72,10 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         if profissionais is None:
             profissionais = Practitioner.objects.all()
         self.fields["practitioner"].queryset = profissionais.filter(
-            Q(ativo=True) | Q(pk=agendamento.practitioner_id)
+            Q(active=True) | Q(pk=agendamento.practitioner_id)
         )
         self.fields["tipo"].queryset = AppointmentType.objects.filter(
-            Q(ativo=True) | Q(pk=agendamento.tipo_id)
+            Q(active=True) | Q(pk=agendamento.tipo_id)
         )
         self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
         self.fields["patient"].queryset = Patient.objects.all()
@@ -109,8 +109,8 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             dados.get("hora_inicio"),
             dados.get("hora_fim"),
         )
-        if not dados.get("patient") and not dados.get("descricao", "").strip():
-            self.add_error("descricao", _("Informe o paciente ou uma descrição."))
+        if not dados.get("patient") and not dados.get("description", "").strip():
+            self.add_error("description", _("Informe o paciente ou uma descrição."))
         patient = dados.get("patient")
         if (
             self.instance.pk

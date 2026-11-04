@@ -47,15 +47,15 @@ def numeracao_da_clinica():
 def _universal(dente):
     """1 to 32 from the upper right third molar around to the lower right one; baby teeth A to
     T in the same order."""
-    quadrante, numero = divmod(dente, 10)
+    quadrante, number = divmod(dente, 10)
     if quadrante <= 4:
-        return {1: 9 - numero, 2: 8 + numero, 3: 25 - numero, 4: 24 + numero}[quadrante]
+        return {1: 9 - number, 2: 8 + number, 3: 25 - number, 4: 24 + number}[quadrante]
     return LETRAS_UNIVERSAIS[
-        {5: 5 - numero, 6: 4 + numero, 7: 15 - numero, 8: 14 + numero}[quadrante]
+        {5: 5 - number, 6: 4 + number, 7: 15 - number, 8: 14 + number}[quadrante]
     ]
 
 
-def nome(dente, numeracao=None):
+def name(dente, numeracao=None):
     """The FDI tooth as the clinic writes it: 18 → "18", "1" (Universal) or "UR8" (Palmer)."""
     dente = int(dente)
     numeracao = numeracao or numeracao_da_clinica()
@@ -63,9 +63,9 @@ def nome(dente, numeracao=None):
         return str(dente)
     if numeracao == UNIVERSAL:
         return str(_universal(dente))
-    quadrante, numero = divmod(dente, 10)
+    quadrante, number = divmod(dente, 10)
     lado = _QUADRANTES_PALMER[(quadrante - 1) % 4 + 1]
-    return lado + (str(numero) if quadrante <= 4 else "ABCDE"[numero - 1])
+    return lado + (str(number) if quadrante <= 4 else "ABCDE"[number - 1])
 
 
 def ordenar(dentes, numeracao=None):

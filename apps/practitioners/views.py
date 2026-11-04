@@ -30,7 +30,7 @@ def _formulario(request, practitioner):
     form = ProfissionalForm(request.POST or None, instance=practitioner, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": practitioner.nome})
+        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": practitioner.name})
         return redirect("practitioners:list")
     return render(request, "practitioners/form.html", {"form": form, "practitioner": practitioner})
 
@@ -48,11 +48,11 @@ def excluir(request, pk):
                     "%(nome)s tem registros ligados e não pode ser excluído. "
                     "Desmarque “ativo” para escondê-lo."
                 )
-                % {"nome": practitioner.nome},
+                % {"nome": practitioner.name},
             )
         else:
             messages.success(
-                request, _("Profissional %(nome)s excluído.") % {"nome": practitioner.nome}
+                request, _("Profissional %(nome)s excluído.") % {"nome": practitioner.name}
             )
         return redirect("practitioners:list")
     return render(request, "practitioners/delete.html", {"practitioner": practitioner})

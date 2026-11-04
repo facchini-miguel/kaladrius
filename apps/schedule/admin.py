@@ -5,15 +5,15 @@ from .models import Appointment, AppointmentType
 
 @admin.register(AppointmentType)
 class TipoAtendimentoAdmin(admin.ModelAdmin):
-    list_display = ["nome", "clinic", "cor", "ativo"]
-    list_filter = ["clinic", "ativo"]
-    search_fields = ["nome"]
+    list_display = ["name", "clinic", "cor", "active"]
+    list_filter = ["clinic", "active"]
+    search_fields = ["name"]
 
 
 @admin.register(Appointment)
 class AgendamentoAdmin(admin.ModelAdmin):
     list_display = ["inicio", "fim", "practitioner", "patient", "tipo", "clinic"]
     list_filter = ["clinic", "practitioner", "tipo"]
-    search_fields = ["descricao", "patient__nome"]
+    search_fields = ["description", "patient__name"]
     date_hierarchy = "inicio"
     raw_id_fields = ["patient"]
