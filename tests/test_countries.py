@@ -98,7 +98,7 @@ def test_codigo_postal_invalido(pais, digitado):
 # --- Time zone and the English variant -------------------------------------------
 
 
-def _durante_requisicao(usuario):
+def _durante_requisicao(user):
     """Time zone and language active while a request of `usuario` runs."""
     visto = {}
 
@@ -108,21 +108,21 @@ def _durante_requisicao(usuario):
         return HttpResponse()
 
     request = RequestFactory().get("/")
-    request.user = usuario
+    request.user = user
     ClinicaAtualMiddleware(resposta)(request)
     return visto
 
 
 def test_fuso_e_ingles_do_pais_durante_a_requisicao(clinica_a, criar_usuario):
-    usuario = criar_usuario("recepcao_londres", clinica_a, Papel.RECEPCAO)
+    user = criar_usuario("recepcao_londres", clinica_a, Papel.RECEPCAO)
     no_pais(clinica_a, "GB")
     with translation.override("en"):
-        assert _durante_requisicao(usuario) == {"fuso": "Europe/London", "idioma": "en-gb"}
+        assert _durante_requisicao(user) == {"fuso": "Europe/London", "idioma": "en-gb"}
     with translation.override("pt-br"):  # only English has country variants
-        assert _durante_requisicao(usuario)["idioma"] == "pt-br"
+        assert _durante_requisicao(user)["idioma"] == "pt-br"
     no_pais(clinica_a, "US", fuso="America/Chicago")
     with translation.override("en"):
-        assert _durante_requisicao(usuario) == {"fuso": "America/Chicago", "idioma": "en"}
+        assert _durante_requisicao(user) == {"fuso": "America/Chicago", "idioma": "en"}
     assert timezone.get_current_timezone_name() == "America/Sao_Paulo"  # deactivated afterwards
 
 
@@ -135,14 +135,14 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     # The English flag, with or without the hash of the collected static files (CI).
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(
+        patient = Patient.objects.create(
             nome="Amelia Fictícia", data_nascimento=datetime.date(2000, 12, 25)
         )
-    ficha = cliente.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    ficha = cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "25/12/2000" in ficha and "12/25/2000" not in ficha
     no_pais(clinica_a, "US")
     assert (
-        "12/25/2000" in cliente.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+        "12/25/2000" in cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
     )
 
 
@@ -208,13 +208,13 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.get(nome="Oliver Fictício")
-    assert (paciente.telefone_celular, paciente.whatsapp, paciente.cep) == (
+        patient = Patient.objects.get(nome="Oliver Fictício")
+    assert (patient.telefone_celular, patient.whatsapp, patient.cep) == (
         "7700900123",
         "7700900123",
         "SW1A1AA",
     )
-    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "London, England" in ficha and "SW1A 1AA" in ficha
     assert "07700 900123" in ficha and "https://wa.me/447700900123" in ficha
     assert ">CPF<" not in ficha and ">RG<" not in ficha
@@ -242,7 +242,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     londres = zoneinfo.ZoneInfo("Europe/London")
     with usar_clinica(clinica_a):
         Appointment.objects.create(
-            profissional=ana,
+            practitioner=ana,
             tipo=AppointmentType.objects.first(),
             descricao="Horário fictício",
             inicio=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
@@ -251,7 +251,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     cliente = cliente_de(criar_usuario("recepcao_agenda_londres", clinica_a, Papel.RECEPCAO))
     eventos = cliente.get(
         reverse("schedule:events"),
-        {"profissional": ana.pk, "start": "2031-03-03T00:00:00Z", "end": "2031-03-04T00:00:00Z"},
+        {"practitioner": ana.pk, "start": "2031-03-03T00:00:00Z", "end": "2031-03-04T00:00:00Z"},
     ).json()
     assert [(e["start"], e["end"]) for e in eventos] == [
         ("2031-03-03T09:00:00", "2031-03-03T09:30:00")
@@ -341,10 +341,10 @@ def test_espanhol_de_cada_pais(pais, variante, valor, clinica_a, criar_usuario):
     """Spanish with each country's numbers and its currency, texts from the es catalog."""
     from apps.core import currencies
 
-    usuario = criar_usuario(f"recepcao_{pais.lower()}", clinica_a, Papel.RECEPCAO)
+    user = criar_usuario(f"recepcao_{pais.lower()}", clinica_a, Papel.RECEPCAO)
     no_pais(clinica_a, pais)
     with translation.override("es"):
-        assert _durante_requisicao(usuario)["idioma"] == variante
+        assert _durante_requisicao(user)["idioma"] == variante
     with translation.override(variante):
         assert currencies.formatar(Decimal("1234.56"), countries.PAISES[pais].moeda) == valor
         assert translation.gettext("Rechamadas") == "Recordatorios"

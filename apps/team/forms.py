@@ -6,7 +6,7 @@ from apps.core.forms import FormularioBootstrap
 from apps.core.models import Membership, Papel, Usuario
 
 
-def conta_exclusiva(usuario, clinic):
+def conta_exclusiva(user, clinic):
     """Whether the clinic administrator may manage the account itself (name, e-mail, password).
 
     Only for accounts used solely in this clinic: changing the password of someone who
@@ -14,9 +14,9 @@ def conta_exclusiva(usuario, clinic):
     take over access to the others.
     """
     return (
-        not usuario.is_superuser
-        and not usuario.is_staff
-        and not usuario.vinculos.exclude(clinic=clinic).exists()
+        not user.is_superuser
+        and not user.is_staff
+        and not user.vinculos.exclude(clinic=clinic).exists()
     )
 
 
@@ -35,12 +35,12 @@ class NovoMembroForm(FormularioBootstrap, UserCreationForm):
         self.fields["first_name"].required = True
 
     def save(self, commit=True):
-        usuario = super().save(commit=commit)
+        user = super().save(commit=commit)
         if commit:
             Membership.objects.create(
-                usuario=usuario, clinic=self.clinic, papel=self.cleaned_data["papel"]
+                user=user, clinic=self.clinic, papel=self.cleaned_data["papel"]
             )
-        return usuario
+        return user
 
 
 class VinculoForm(FormularioBootstrap, forms.ModelForm):
@@ -53,7 +53,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, editor, **kwargs):
         super().__init__(*args, **kwargs)
-        self.proprio = self.instance.usuario_id == editor.pk
+        self.proprio = self.instance.user_id == editor.pk
         if self.proprio:
             # Nobody removes their own administrator role or access by accident.
             for campo in self.fields.values():
@@ -70,7 +70,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
                 clinic_id=self.instance.clinic_id,
                 papel=Papel.ADMIN,
                 ativo=True,
-                usuario__is_active=True,
+                user__is_active=True,
             ).exclude(pk=self.instance.pk)
             if not outros.exists():
                 raise forms.ValidationError(

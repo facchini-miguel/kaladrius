@@ -23,7 +23,7 @@ ONTEM = HOJE - datetime.timedelta(days=1)
 def cenario(clinica_a, criar_usuario, cliente_de):
     admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
     with usar_clinica(clinica_a):
-        paciente = Patient.objects.create(nome="Paulo Paciente")
+        patient = Patient.objects.create(nome="Paulo Paciente")
         dra = Practitioner.objects.create(nome="Dra. Ana", comissao_percentual=Decimal("40"))
         dr = Practitioner.objects.create(nome="Dr. Beto")
         tratamento = Category.objects.get(nome="Tratamento")
@@ -31,7 +31,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
         categoria = Category.objects.get(nome="Comissões")
     return {
         "clinic": clinica_a,
-        "paciente": paciente,
+        "patient": patient,
         "dra": dra,
         "dr": dr,
         "tratamento": tratamento,
@@ -45,24 +45,24 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     }
 
 
-def receber(cenario, valor, profissional, data=ONTEM, juros="0"):
+def receber(cenario, valor, practitioner, data=ONTEM, juros="0"):
     """A receivable for `valor` paid in full on `data`."""
     with usar_clinica(cenario["clinic"]):
         lancamento = services.criar_lancamento(
             clinic=cenario["clinic"],
             tipo=Entry.Tipo.RECEBER,
-            paciente=cenario["paciente"],
-            profissional=profissional,
+            patient=cenario["patient"],
+            practitioner=practitioner,
             descricao="Tratamento",
             categoria=cenario["tratamento"],
             valor_total=Decimal(valor),
             parcelas=1,
             primeiro_vencimento=data,
-            usuario=cenario["admin"],
+            user=cenario["admin"],
         )
         return services.receber(
             lancamento.parcelas.get(),
-            usuario=cenario["admin"],
+            user=cenario["admin"],
             valor=Decimal(valor) + Decimal(juros),
             juros=Decimal(juros),
             forma="pix",
@@ -71,9 +71,9 @@ def receber(cenario, valor, profissional, data=ONTEM, juros="0"):
         )
 
 
-def pagar_comissao(cenario, profissional, ate=HOJE):
+def pagar_comissao(cenario, practitioner, ate=HOJE):
     return cenario["cliente"].post(
-        f"{reverse('finance:commission_pay', args=[profissional.pk])}?ate={ate.isoformat()}",
+        f"{reverse('finance:commission_pay', args=[practitioner.pk])}?ate={ate.isoformat()}",
         {"vencimento": HOJE.isoformat(), "categoria": cenario["categoria"].pk},
     )
 
@@ -122,7 +122,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
     with usar_clinica(cenario["clinic"]):
         Practitioner.objects.filter(pk=cenario["dra"].pk).update(comissao_percentual=10)
         cenario["dra"].refresh_from_db()
-        services.estornar(pagamento, motivo="Pix devolvido", usuario=cenario["admin"])
+        services.estornar(pagamento, motivo="Pix devolvido", user=cenario["admin"])
     receber(cenario, "1000.00", cenario["dra"], data=HOJE)
     with usar_clinica(cenario["clinic"]):
         calculo = commissions.pendente(cenario["dra"], HOJE)
@@ -132,7 +132,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
             Decimal("-20.00"),
         )
         # The list adds up in the database (volume test) and must agree with the detail.
-        linha = next(x for x in commissions.resumo(HOJE) if x["profissional"] == cenario["dra"])
+        linha = next(x for x in commissions.resumo(HOJE) if x["practitioner"] == cenario["dra"])
         chaves = ("recebido", "bruta", "estornos", "valor")
         assert [linha[c] for c in chaves] == [calculo[c] for c in chaves]
     # Nothing to pay while the deduction is larger: it waits for more receipts.
@@ -172,7 +172,7 @@ def test_telas_e_percentual(cenario):
     receber(cenario, "300.00", cenario["dra"])
     cliente = cenario["cliente"]
     pagina = cliente.get(reverse("finance:commissions"))
-    assert [linha["profissional"] for linha in pagina.context["linhas"]] == [cenario["dra"]]
+    assert [linha["practitioner"] for linha in pagina.context["linhas"]] == [cenario["dra"]]
     assert list(pagina.context["sem_percentual"]) == [cenario["dr"]]
     assert "R$ 120,00" in pagina.content.decode()
     url = reverse("finance:commission_percentage", args=[cenario["dr"].pk])
@@ -214,7 +214,7 @@ def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinic"]):
         primeira = Commission.objects.get()
-        services.estornar(pagamento, motivo="Pix devolvido", usuario=cenario["admin"])
+        services.estornar(pagamento, motivo="Pix devolvido", user=cenario["admin"])
     receber(cenario, "300.00", cenario["dra"], data=HOJE)  # 120.00 - 40.00 in C2
     pagar_comissao(cenario, cenario["dra"])
     with usar_clinica(cenario["clinic"]):

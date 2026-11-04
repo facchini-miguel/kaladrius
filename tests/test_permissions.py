@@ -28,25 +28,25 @@ def test_matriz_cobre_todos_os_papeis():
 def test_acesso_as_telas_de_profissionais_por_papel(
     papel, esperado, clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
-    profissional = criar_profissional(clinica_a, "Dra. A")
+    practitioner = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
     urls = {
         "lista": reverse("practitioners:list"),
         "novo": reverse("practitioners:new"),
-        "editar": reverse("practitioners:edit", args=[profissional.pk]),
-        "excluir": reverse("practitioners:delete", args=[profissional.pk]),
+        "editar": reverse("practitioners:edit", args=[practitioner.pk]),
+        "excluir": reverse("practitioners:delete", args=[practitioner.pk]),
     }
     for nome, url in urls.items():
         assert cliente.get(url).status_code == esperado[nome], nome
 
 
 def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profissional, cliente_de):
-    profissional = criar_profissional(clinica_a, "Dra. A")
+    practitioner = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
+    resposta = cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
     assert resposta.status_code == 403
     with usar_clinica(clinica_a):
-        assert Practitioner.objects.filter(pk=profissional.pk).exists()
+        assert Practitioner.objects.filter(pk=practitioner.pk).exists()
 
 
 def test_botoes_aparecem_conforme_a_permissao(
@@ -74,18 +74,18 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
-        profissional = Practitioner.objects.get(nome="Dr. Novo")
-    assert profissional.clinic == clinica_a
+        practitioner = Practitioner.objects.get(nome="Dr. Novo")
+    assert practitioner.clinic == clinica_a
 
     cliente.post(
-        reverse("practitioners:edit", args=[profissional.pk]),
+        reverse("practitioners:edit", args=[practitioner.pk]),
         {"nome": "Dr. Renomeado", "cor": "#654321"},
     )
-    profissional.refresh_from_db()
-    assert profissional.nome == "Dr. Renomeado"
-    assert profissional.ativo is False
+    practitioner.refresh_from_db()
+    assert practitioner.nome == "Dr. Renomeado"
+    assert practitioner.ativo is False
 
-    cliente.post(reverse("practitioners:delete", args=[profissional.pk]))
+    cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
     with usar_clinica(clinica_a):
         assert not Practitioner.objects.exists()
 
@@ -105,10 +105,10 @@ def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cl
 def test_superusuario_entra_direto_na_clinica_da_instalacao(
     clinica_a, criar_profissional, cliente_de, django_user_model
 ):
-    profissional = criar_profissional(clinica_a, "Dra. A")
+    practitioner = criar_profissional(clinica_a, "Dra. A")
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
-    assert cliente.get(reverse("practitioners:edit", args=[profissional.pk])).status_code == 200
+    assert cliente.get(reverse("practitioners:edit", args=[practitioner.pk])).status_code == 200
     inicio = cliente.get(reverse("home")).content.decode()
     assert "Clínica A" in inicio and "Escolha" not in inicio
 

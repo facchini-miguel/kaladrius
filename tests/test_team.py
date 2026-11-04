@@ -60,9 +60,9 @@ def test_lista_mostra_so_a_equipe_da_clinica(cliente_admin, clinica_a, clinica_b
 def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
     resposta = cliente_admin.post(reverse("team:new"), dados_novo())
     assert resposta.status_code == 302
-    vinculo = Membership.objects.get(usuario__username="carla")
+    vinculo = Membership.objects.get(user__username="carla")
     assert (vinculo.clinic, vinculo.papel, vinculo.ativo) == (clinica_a, Papel.RECEPCAO, True)
-    assert vinculo.usuario.check_password(NOVA_SENHA)
+    assert vinculo.user.check_password(NOVA_SENHA)
     # The account creation shows up in the clinic's audit log.
     assert AuditEntry.objects.filter(
         clinic=clinica_a, acao="criar", modelo="Usuário", objeto_descricao="carla"
@@ -165,7 +165,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
     cliente_admin, clinica_a, clinica_b, criar_usuario
 ):
     membro = criar_usuario("multi", clinica_a, first_name="Multi")
-    Membership.objects.create(usuario=membro, clinic=clinica_b, papel=Papel.ADMIN)
+    Membership.objects.create(user=membro, clinic=clinica_b, papel=Papel.ADMIN)
     vinculo = membro.vinculos.get(clinic=clinica_a)
 
     resposta = cliente_admin.post(
@@ -189,7 +189,7 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
 
 def test_nao_mexe_na_conta_de_superusuario(cliente_admin, clinica_a, django_user_model):
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    vinculo = Membership.objects.create(usuario=superusuario, clinic=clinica_a, papel=Papel.ADMIN)
+    vinculo = Membership.objects.create(user=superusuario, clinic=clinica_a, papel=Papel.ADMIN)
     cliente_admin.post(
         reverse("team:password", args=[vinculo.pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},

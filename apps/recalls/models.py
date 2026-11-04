@@ -8,11 +8,12 @@ from apps.core.isolation import ModeloDaClinica
 class Recall(ModeloDaClinica):
     """A recall: a date to contact a patient again (e.g. six-month check-up)."""
 
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="rechamadas",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     data = models.DateField(_("data"))
     descricao = models.CharField(
@@ -35,8 +36,8 @@ class Recall(ModeloDaClinica):
         db_table = "rechamadas_rechamada"
         verbose_name = _("rechamada")
         verbose_name_plural = _("rechamadas")
-        ordering = ["data", "paciente__nome"]
+        ordering = ["data", "patient__nome"]
         indexes = [models.Index(fields=["clinic", "data"], name="rechamada_clinica_data")]
 
     def __str__(self):
-        return f"{self.paciente} em {self.data:%d/%m/%Y}"
+        return f"{self.patient} em {self.data:%d/%m/%Y}"

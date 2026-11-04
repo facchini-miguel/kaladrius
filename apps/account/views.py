@@ -28,13 +28,13 @@ class EntrarView(auth_views.LoginView):
     authentication_form = EntrarForm
 
     def form_valid(self, form):
-        usuario = form.get_user()
-        if not services.ativa_para(usuario):
+        user = form.get_user()
+        if not services.ativa_para(user):
             return super().form_valid(form)
         # Password right: the code from the app comes next, before the session is opened.
         self.request.session[PENDENTE] = {
-            "usuario": usuario.pk,
-            "backend": usuario.backend,
+            "usuario": user.pk,
+            "backend": user.backend,
             "momento": time.time(),
             "tentativas": 0,
             "proximo": self.get_success_url(),
@@ -60,16 +60,16 @@ def codigo(request):
         request.session.pop(PENDENTE, None)
         messages.info(request, _("Entre de novo com o usuário e a senha."))
         return redirect("login")
-    usuario = get_user_model().objects.get(pk=pendente["usuario"])
+    user = get_user_model().objects.get(pk=pendente["usuario"])
     form = CodigoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        if services.verificar(usuario, form.cleaned_data["codigo"]):
+        if services.verificar(user, form.cleaned_data["codigo"]):
             del request.session[PENDENTE]
-            login(request, usuario, backend=pendente["backend"])
+            login(request, user, backend=pendente["backend"])
             return redirect(pendente["proximo"])
         # Counted by the login protection too, so codes cannot be tried without end.
         user_login_failed.send(
-            sender=__name__, credentials={"username": usuario.get_username()}, request=request
+            sender=__name__, credentials={"username": user.get_username()}, request=request
         )
         pendente["tentativas"] += 1
         if pendente["tentativas"] >= TENTATIVAS_CODIGO:
@@ -93,40 +93,40 @@ def ativo(request):
 def duas_etapas(request):
     """Turn two-step verification on (QR code) or off, and make new recovery codes."""
     # The real row, not the request's lazy user: the audit log needs its model.
-    usuario = get_user_model().objects.get(pk=request.user.pk)
-    if usuario.demonstracao:
+    user = get_user_model().objects.get(pk=request.user.pk)
+    if user.demonstracao:
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
         return redirect("home")
     acao = request.POST.get("acao")
     obrigatoria = services.obrigatoria(request)
-    if services.ativa_para(usuario):
+    if services.ativa_para(user):
         # Required by the clinic: it can only be renewed (new codes), not turned off.
         desativar = (
             None
             if obrigatoria
             else DesativarForm(
-                request.POST if acao == "desativar" else None, usuario=usuario, prefix="desativar"
+                request.POST if acao == "desativar" else None, user=user, prefix="desativar"
             )
         )
         novos = CodigoForm(request.POST if acao == "codigos" else None, prefix="codigos")
         if acao == "desativar" and desativar is not None and desativar.is_valid():
-            services.desativar(usuario)
+            services.desativar(user)
             registrar(
                 AuditEntry.Acao.ALTERAR,
-                usuario,
-                descricao=f"{usuario}: verificação em duas etapas desativada",
+                user,
+                descricao=f"{user}: verificação em duas etapas desativada",
             )
             messages.success(request, _("Verificação em duas etapas desativada."))
             return redirect("account:two_factor")
         if acao == "codigos" and novos.is_valid():
-            if services.verificar(usuario, novos.cleaned_data["codigo"]):
+            if services.verificar(user, novos.cleaned_data["codigo"]):
                 return render(
                     request,
                     "account/codes.html",
-                    {"codigos": services.novos_codigos(usuario)},
+                    {"codigos": services.novos_codigos(user)},
                 )
             novos.add_error("codigo", _("Código incorreto."))
-        restantes = usuario.codigos_recuperacao.filter(usado_em__isnull=True).count()
+        restantes = user.codigos_recuperacao.filter(usado_em__isnull=True).count()
         return render(
             request,
             "account/two_factor.html",
@@ -138,15 +138,15 @@ def duas_etapas(request):
                 "obrigatoria": obrigatoria,
             },
         )
-    dispositivo = services.preparar(usuario, novo=request.GET.get("novo") == "1")
+    dispositivo = services.preparar(user, novo=request.GET.get("novo") == "1")
     form = CodigoForm(request.POST if acao == "ativar" else None)
     if acao == "ativar" and form.is_valid():
         if services.verificar_app(dispositivo, form.cleaned_data["codigo"]):
             codigos = services.ativar(dispositivo)
             registrar(
                 AuditEntry.Acao.ALTERAR,
-                usuario,
-                descricao=f"{usuario}: verificação em duas etapas ativada",
+                user,
+                descricao=f"{user}: verificação em duas etapas ativada",
             )
             return render(request, "account/codes.html", {"codigos": codigos, "ativada": True})
         form.add_error("codigo", _("Código incorreto. Confira a hora do celular e tente de novo."))

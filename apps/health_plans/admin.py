@@ -12,7 +12,7 @@ class ConvenioAdmin(admin.ModelAdmin):
 
 @admin.register(MemberCard)
 class CarteirinhaAdmin(admin.ModelAdmin):
-    list_display = ["paciente", "convenio", "plano", "numero", "validade", "ativa"]
+    list_display = ["patient", "convenio", "plano", "numero", "validade", "ativa"]
     list_filter = ["clinic", "convenio", "ativa"]
-    search_fields = ["numero", "paciente__nome"]
-    raw_id_fields = ["paciente"]
+    search_fields = ["numero", "patient__nome"]
+    raw_id_fields = ["patient"]

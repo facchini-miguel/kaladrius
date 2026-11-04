@@ -117,7 +117,7 @@ def folha(request):
                         [f for f, form in linhas if form is not None],
                         categoria=lancar_form.cleaned_data["categoria"],
                         vencimento=lancar_form.cleaned_data["vencimento"],
-                        usuario=request.user,
+                        user=request.user,
                     )
                 except ValidationError as erro:
                     messages.error(request, erro.messages[0])

@@ -93,7 +93,7 @@ def test_validacoes(dados, campo, familia, recepcao):
 def test_vinculo_repetido(clinica_a, familia, recepcao):
     filha, mae = familia
     with usar_clinica(clinica_a):
-        RelatedPerson.objects.create(paciente=filha, outro_paciente=mae, vinculo=MAE)
+        RelatedPerson.objects.create(patient=filha, outro_paciente=mae, vinculo=MAE)
     resposta = recepcao.post(
         reverse("patients:related_new", args=[filha.pk]),
         {"vinculo": MAE, "outro_paciente": mae.pk},
@@ -104,7 +104,7 @@ def test_vinculo_repetido(clinica_a, familia, recepcao):
 def test_banco_exige_paciente_ou_nome(clinica_a, familia):
     filha, _ = familia
     with usar_clinica(clinica_a), pytest.raises(IntegrityError), transaction.atomic():
-        RelatedPerson.objects.create(paciente=filha, vinculo=MAE)
+        RelatedPerson.objects.create(patient=filha, vinculo=MAE)
 
 
 def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia):
@@ -112,13 +112,13 @@ def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia
     with usar_clinica(clinica_b):
         outra = Patient.objects.create(nome="De outra clínica")
     with sem_isolamento(), pytest.raises(ClinicaDiferente):
-        RelatedPerson(paciente=filha, outro_paciente=outra, vinculo=MAE).save()
+        RelatedPerson(patient=filha, outro_paciente=outra, vinculo=MAE).save()
 
 
 def test_outra_clinica_nao_ve_nem_altera(clinica_a, clinica_b, familia, criar_usuario, cliente_de):
     filha, _ = familia
     with usar_clinica(clinica_a):
-        contato = RelatedPerson.objects.create(paciente=filha, vinculo=MAE, nome="Fictícia")
+        contato = RelatedPerson.objects.create(patient=filha, vinculo=MAE, nome="Fictícia")
     intruso = cliente_de(criar_usuario("recepcao_b_rel", clinica_b, Papel.RECEPCAO))
     assert intruso.get(reverse("patients:related_edit", args=[contato.pk])).status_code == 404
     assert intruso.get(reverse("patients:related_new", args=[filha.pk])).status_code == 404
@@ -140,9 +140,9 @@ def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
     filha, mae = familia
     with usar_clinica(clinica_a):
         de_filha = RelatedPerson.objects.create(
-            paciente=filha, vinculo=RelatedPerson.Relationship.EMERGENCIA, nome="NOME-SIGILOSO"
+            patient=filha, vinculo=RelatedPerson.Relationship.EMERGENCIA, nome="NOME-SIGILOSO"
         )
-        RelatedPerson.objects.create(paciente=mae, outro_paciente=filha, vinculo=MAE)
+        RelatedPerson.objects.create(patient=mae, outro_paciente=filha, vinculo=MAE)
         filha.arquivado = True
         filha.save()
     admin = cliente_de(criar_usuario("admin_rel", clinica_a, Papel.ADMIN))

@@ -65,8 +65,8 @@ def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, cria
 
 def test_novo_registro_recebe_a_clinica_atual(clinica_a):
     with usar_clinica(clinica_a):
-        profissional = Practitioner.objects.create(nome="Dra. A")
-    assert profissional.clinic == clinica_a
+        practitioner = Practitioner.objects.create(nome="Dra. A")
+    assert practitioner.clinic == clinica_a
 
 
 def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, criar_profissional):
@@ -136,14 +136,14 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
 
 
 def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usuario, cliente_de):
-    usuario = criar_usuario("ana", clinica_a)
-    usuario.vinculos.update(ativo=False)
-    assert cliente_de(usuario).get(reverse("practitioners:list")).status_code == 403
+    user = criar_usuario("ana", clinica_a)
+    user.vinculos.update(ativo=False)
+    assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
 
-    usuario.vinculos.update(ativo=True)
+    user.vinculos.update(ativo=True)
     clinica_a.ativa = False
     clinica_a.save()
-    assert cliente_de(usuario).get(reverse("practitioners:list")).status_code == 403
+    assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
 
 
 def test_usuario_sem_clinica_ve_aviso(criar_usuario, cliente_de):
@@ -170,7 +170,7 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     resposta = cliente.post(
         reverse("practitioners:new"),
-        {"nome": "Dr. Novo", "cor": "#123456", "usuario": estranho.pk, "ativo": "on"},
+        {"nome": "Dr. Novo", "cor": "#123456", "user": estranho.pk, "ativo": "on"},
     )
     assert resposta.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):

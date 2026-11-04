@@ -39,12 +39,12 @@ def pagar(clinic, categoria, valor, data=HOJE):
             valor_total=Decimal(valor),
             parcelas=1,
             primeiro_vencimento=data,
-            usuario=None,
+            user=None,
         )
         parcela = lancamento.parcelas.get()
         services.receber(
             parcela,
-            usuario=None,
+            user=None,
             valor=parcela.valor,
             data=data,
             forma="pix",

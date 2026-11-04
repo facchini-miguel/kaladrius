@@ -165,12 +165,12 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     with usar_clinica(clinica_a):
         assert (
             services.lancar(
-                [folha], categoria=categoria, vencimento=datetime.date(2026, 11, 5), usuario=None
+                [folha], categoria=categoria, vencimento=datetime.date(2026, 11, 5), user=None
             )
             == 0
         )
         # Cancelling the payable in finance opens the line again.
-        financeiro.cancelar(lancamento, motivo="Refazer", usuario=None)
+        financeiro.cancelar(lancamento, motivo="Refazer", user=None)
         folha.refresh_from_db()
         assert not folha.lancada
 
@@ -181,7 +181,7 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
         folha.faltas = 30
         folha.save()
         with pytest.raises(ValidationError, match="maior que zero"):
-            services.lancar([folha], categoria=None, vencimento=OUTUBRO, usuario=None)
+            services.lancar([folha], categoria=None, vencimento=OUTUBRO, user=None)
 
 
 @pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])

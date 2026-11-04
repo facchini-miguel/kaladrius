@@ -43,11 +43,12 @@ class HealthPlan(ModeloDaClinica):
 class MemberCard(ModeloDaClinica):
     """A patient's card of a health plan."""
 
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="carteirinhas",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     convenio = models.ForeignKey(
         HealthPlan,
@@ -90,8 +91,8 @@ class MemberCard(ModeloDaClinica):
         # Having clinica_id on every row does not stop a link across clinics on its own.
         self._conferir_clinica()
         if self.clinic_id is None:  # without isolation (commands)
-            self.clinic_id = self.paciente.clinic_id
-        if {self.paciente.clinic_id, self.convenio.clinic_id} != {self.clinic_id}:
+            self.clinic_id = self.patient.clinic_id
+        if {self.patient.clinic_id, self.convenio.clinic_id} != {self.clinic_id}:
             raise ClinicaDiferente("The patient and the health plan must be of this clinic.")
         super().save(*args, **kwargs)
 

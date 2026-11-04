@@ -22,7 +22,7 @@ from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_excl
 def _vinculo(request, pk):
     """A membership of the current clinic (404 for other clinics)."""
     return get_object_or_404(
-        Membership.objects.select_related("usuario"), pk=pk, clinic=request.clinic
+        Membership.objects.select_related("user"), pk=pk, clinic=request.clinic
     )
 
 
@@ -30,8 +30,8 @@ def _vinculo(request, pk):
 def lista(request):
     vinculos = (
         Membership.objects.filter(clinic=request.clinic)
-        .select_related("usuario")
-        .order_by("-ativo", "usuario__first_name", "usuario__username")
+        .select_related("user")
+        .order_by("-ativo", "user__first_name", "user__username")
     )
     return render(request, "team/list.html", {"vinculos": vinculos})
 
@@ -41,9 +41,9 @@ def novo(request):
     form = NovoMembroForm(request.POST or None, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
-            usuario = form.save()
+            user = form.save()
         messages.success(
-            request, _("%(nome)s agora faz parte da equipe.") % {"nome": usuario.get_full_name()}
+            request, _("%(nome)s agora faz parte da equipe.") % {"nome": user.get_full_name()}
         )
         return redirect("team:list")
     return render(request, "team/new.html", {"form": form})
@@ -52,18 +52,18 @@ def novo(request):
 @exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
 def editar(request, pk):
     vinculo = _vinculo(request, pk)
-    usuario = vinculo.usuario
-    exclusiva = conta_exclusiva(usuario, request.clinic)
+    user = vinculo.user
+    exclusiva = conta_exclusiva(user, request.clinic)
     dados = request.POST or None
     form = VinculoForm(dados, instance=vinculo, editor=request.user, prefix="vinculo")
-    conta = ContaForm(dados, instance=usuario, prefix="conta") if exclusiva else None
+    conta = ContaForm(dados, instance=user, prefix="conta") if exclusiva else None
     if request.method == "POST" and form.is_valid() and (conta is None or conta.is_valid()):
         with transaction.atomic():
             form.save()
             if conta is not None:
                 conta.save()
         messages.success(
-            request, _("Dados de %(nome)s salvos.") % {"nome": usuario.get_full_name() or usuario}
+            request, _("Dados de %(nome)s salvos.") % {"nome": user.get_full_name() or user}
         )
         return redirect("team:list")
     return render(
@@ -74,7 +74,7 @@ def editar(request, pk):
             "form": form,
             "conta": conta,
             "exclusiva": exclusiva,
-            "duas_etapas": conta_servicos.ativa_para(usuario),
+            "duas_etapas": conta_servicos.ativa_para(user),
         },
     )
 
@@ -82,25 +82,25 @@ def editar(request, pk):
 @exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
 def senha(request, pk):
     vinculo = _vinculo(request, pk)
-    usuario = vinculo.usuario
-    if usuario == request.user:
+    user = vinculo.user
+    if user == request.user:
         return redirect("change_password")
-    if not conta_exclusiva(usuario, request.clinic):
+    if not conta_exclusiva(user, request.clinic):
         messages.error(
             request,
             _(
                 "%(nome)s também tem acesso a outra clínica ou à plataforma: "
                 "a senha só pode ser trocada pelo próprio usuário ou pelo suporte."
             )
-            % {"nome": usuario},
+            % {"nome": user},
         )
         return redirect("team:edit", pk=vinculo.pk)
-    form = SenhaForm(usuario, request.POST or None)
+    form = SenhaForm(user, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
             request,
-            _("Nova senha de %(nome)s definida.") % {"nome": usuario.get_full_name() or usuario},
+            _("Nova senha de %(nome)s definida.") % {"nome": user.get_full_name() or user},
         )
         return redirect("team:list")
     return render(request, "team/password.html", {"vinculo": vinculo, "form": form})
@@ -111,21 +111,17 @@ def duas_etapas(request, pk):
     """Remove a member's two-step verification (lost phone, decision 111); they turn it on
     again with a new QR code."""
     vinculo = _vinculo(request, pk)
-    usuario = vinculo.usuario
-    if (
-        request.method == "POST"
-        and usuario != request.user
-        and conta_exclusiva(usuario, request.clinic)
-    ):
-        conta_servicos.desativar(usuario)
+    user = vinculo.user
+    if request.method == "POST" and user != request.user and conta_exclusiva(user, request.clinic):
+        conta_servicos.desativar(user)
         registrar(
             AuditEntry.Acao.ALTERAR,
-            usuario,
-            descricao=f"{usuario}: verificação em duas etapas removida pelo administrador",
+            user,
+            descricao=f"{user}: verificação em duas etapas removida pelo administrador",
         )
         messages.success(
             request,
             _("Verificação em duas etapas de %(nome)s removida.")
-            % {"nome": usuario.get_full_name() or usuario},
+            % {"nome": user.get_full_name() or user},
         )
     return redirect("team:edit", pk=vinculo.pk)

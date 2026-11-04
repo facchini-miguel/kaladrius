@@ -48,8 +48,8 @@ def visiveis(request):
     """Modules the user reaches: the enabled ones, and every one for the system administrator
     (decision 115), who sees a turned-off module, marked as off, to maintain it or to try it
     before turning it on. The team never sees a turned-off module."""
-    usuario = getattr(request, "user", None)
-    if usuario is not None and usuario.is_superuser and getattr(request, "clinic", None):
+    user = getattr(request, "user", None)
+    if user is not None and user.is_superuser and getattr(request, "clinic", None):
         return frozenset(ModuloClinico.values)
     return habilitados(request)
 

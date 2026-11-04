@@ -186,11 +186,12 @@ class RelatedPerson(ModeloDaClinica):
         EMERGENCIA = "emergencia", _("Contato de emergência")
         CONTATO = "contato", _("Contato")
 
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
         related_name="relacionados",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
     vinculo = models.CharField(_("vínculo"), max_length=20, choices=Relationship.choices)
     outro_paciente = models.ForeignKey(
@@ -217,11 +218,11 @@ class RelatedPerson(ModeloDaClinica):
                 name="relacionada_paciente_ou_nome",
             ),
             models.CheckConstraint(
-                condition=~models.Q(outro_paciente=models.F("paciente")),
+                condition=~models.Q(outro_paciente=models.F("patient")),
                 name="relacionada_nao_e_o_proprio",
             ),
             models.UniqueConstraint(
-                fields=["paciente", "outro_paciente", "vinculo"],
+                fields=["patient", "outro_paciente", "vinculo"],
                 name="relacionada_unica",
             ),
         ]
@@ -232,8 +233,8 @@ class RelatedPerson(ModeloDaClinica):
     def save(self, *args, **kwargs):
         self._conferir_clinica()
         if self.clinic_id is None:  # without isolation (commands)
-            self.clinic_id = self.paciente.clinic_id
-        clinicas = {self.paciente.clinic_id}
+            self.clinic_id = self.patient.clinic_id
+        clinicas = {self.patient.clinic_id}
         if self.outro_paciente_id:
             clinicas.add(self.outro_paciente.clinic_id)
         if clinicas != {self.clinic_id}:

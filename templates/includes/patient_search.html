@@ -3,7 +3,7 @@
 <div class="mb-3 position-relative busca-paciente">
   <label class="form-label" for="busca-paciente">{% if rotulo %}{{ rotulo }}{% else %}{% translate "Paciente" %}{% endif %}{% if campo.field.required %} *{% endif %}</label>
   <input type="search" id="busca-paciente" class="form-control busca-paciente-texto{% if campo.errors %} is-invalid{% endif %}" autocomplete="off"
-         placeholder="{{ dica_busca }}" value="{{ paciente.nome|default:'' }}"
+         placeholder="{{ dica_busca }}" value="{{ patient.nome|default:'' }}"
          name="q" hx-get="{% url 'patients:suggestions' %}" hx-trigger="input changed delay:300ms"
          hx-target="next .busca-paciente-sugestoes">
   {{ campo }}

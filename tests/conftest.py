@@ -22,10 +22,10 @@ def criar_usuario(django_user_model):
     """Create a user, optionally linked to a clinic with a role."""
 
     def criar(username, clinic=None, papel=Papel.RECEPCAO, **extra):
-        usuario = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
+        user = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
         if clinic is not None:
-            Membership.objects.create(usuario=usuario, clinic=clinic, papel=papel)
-        return usuario
+            Membership.objects.create(user=user, clinic=clinic, papel=papel)
+        return user
 
     return criar
 
@@ -45,8 +45,8 @@ def criar_profissional():
 def cliente_de(client):
     """Log the test client in as the given user."""
 
-    def entrar(usuario):
-        client.force_login(usuario)
+    def entrar(user):
+        client.force_login(user)
         return client
 
     return entrar

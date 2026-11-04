@@ -20,7 +20,7 @@
 
   function abrirNovo(inicio, fim) {
     const params = new URLSearchParams({
-      profissional: config.profissional,
+      practitioner: config.practitioner,
       data: dataISO(inicio),
       inicio: hora(inicio),
       fim: hora(fim),
@@ -89,7 +89,7 @@
     selectMirror: true,
     // A cancelled appointment (desmarcado) stays visible but does not hold the slot.
     selectOverlap: (evento) => evento.extendedProps.situacao === "desmarcou",
-    events: { url: config.urls.eventos, extraParams: () => ({ profissional: config.profissional }) },
+    events: { url: config.urls.eventos, extraParams: () => ({ practitioner: config.practitioner }) },
     datesSet: marcarDias,
     select(info) {
       calendario.unselect();

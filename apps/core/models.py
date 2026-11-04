@@ -260,11 +260,12 @@ class Papel(models.TextChoices):
 class Membership(models.Model):
     """Membership of a user in a clinic, with a role."""
 
-    usuario = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="vinculos",
         verbose_name=_("usuário"),
+        db_column="usuario_id",
     )
     clinic = models.ForeignKey(
         Clinic,
@@ -281,17 +282,17 @@ class Membership(models.Model):
         db_table = "core_vinculo"
         verbose_name = _("vínculo com clínica")
         verbose_name_plural = _("vínculos com clínicas")
-        ordering = ["clinic__nome", "usuario__username"]
+        ordering = ["clinic__nome", "user__username"]
         constraints = [
             models.UniqueConstraint(
-                fields=["usuario", "clinic"],
+                fields=["user", "clinic"],
                 name="vinculo_unico_por_clinica",
                 violation_error_message=_("Este usuário já está vinculado a esta clínica."),
             ),
         ]
 
     def __str__(self):
-        return f"{self.usuario} em {self.clinic} ({self.get_papel_display()})"
+        return f"{self.user} em {self.clinic} ({self.get_papel_display()})"
 
 
 class Backup(models.Model):

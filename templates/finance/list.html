@@ -49,7 +49,7 @@
       <tr>
         <td class="text-nowrap">{{ parcela.vencimento|date:"SHORT_DATE_FORMAT" }}</td>
         <td>
-          {% if parcela.lancamento.paciente_id %}<a href="{% url 'patients:record' parcela.lancamento.paciente_id %}">{{ parcela.lancamento.paciente.nome }}</a>
+          {% if parcela.lancamento.patient_id %}<a href="{% url 'patients:record' parcela.lancamento.patient_id %}">{{ parcela.lancamento.patient.nome }}</a>
           {% elif parcela.lancamento.fornecedor_id %}<a href="{% url 'finance:supplier' parcela.lancamento.fornecedor_id %}">{{ parcela.lancamento.pessoa }}</a>
           {% else %}{{ parcela.lancamento.pessoa }}{% endif %}
         </td>

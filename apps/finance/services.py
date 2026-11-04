@@ -57,9 +57,9 @@ def somar_meses(data, meses):
 
 
 @transaction.atomic
-def criar_lancamento(*, parcelas, primeiro_vencimento, usuario, **campos):
+def criar_lancamento(*, parcelas, primeiro_vencimento, user, **campos):
     """Create an entry with `parcelas` monthly installments from `primeiro_vencimento`."""
-    lancamento = Entry.objects.create(created_by=usuario, **campos)
+    lancamento = Entry.objects.create(created_by=user, **campos)
     # One by one (at most 48), not bulk_create, so the audit log records each installment.
     for numero, valor in enumerate(dividir(lancamento.valor_total, parcelas), start=1):
         Installment.objects.create(
@@ -73,7 +73,7 @@ def criar_lancamento(*, parcelas, primeiro_vencimento, usuario, **campos):
 
 
 @transaction.atomic
-def receber(parcela, *, usuario, **campos):
+def receber(parcela, *, user, **campos):
     """Record a payment for an installment. Raises ValidationError if it exceeds the balance.
 
     The installment row is locked, so two people receiving at once cannot overpay it.
@@ -83,7 +83,7 @@ def receber(parcela, *, usuario, **campos):
     )
     if parcela.lancamento.cancelado:
         raise ValidationError(_("Este lançamento foi cancelado."))
-    pagamento = Payment(clinic=parcela.clinic, parcela=parcela, created_by=usuario, **campos)
+    pagamento = Payment(clinic=parcela.clinic, parcela=parcela, created_by=user, **campos)
     conferir_periodo(pagamento.clinic_id, pagamento.data)
     _pago, saldo = parcela.valores()
     if pagamento.principal <= 0:
@@ -98,14 +98,14 @@ def receber(parcela, *, usuario, **campos):
 
 
 @transaction.atomic
-def estornar(pagamento, *, motivo, usuario):
+def estornar(pagamento, *, motivo, user):
     pagamento = Payment.objects.select_for_update().get(pk=pagamento.pk)
     if pagamento.estornado:
         raise ValidationError(_("Este pagamento já foi estornado."))
     conferir_periodo(pagamento.clinic_id, pagamento.data)
     pagamento.estornado = True
     pagamento.estornado_em = timezone.now()
-    pagamento.estornado_por = usuario
+    pagamento.estornado_por = user
     pagamento.motivo_estorno = motivo
     # Only these fields: the commission links are set elsewhere and must not be overwritten.
     pagamento.save(update_fields=["estornado", "estornado_em", "estornado_por", "motivo_estorno"])
@@ -121,7 +121,7 @@ def estornar(pagamento, *, motivo, usuario):
 
 
 @transaction.atomic
-def cancelar(lancamento, *, motivo, usuario):
+def cancelar(lancamento, *, motivo, user):
     """Cancel an entry. Payments must be reversed first (they are real money).
 
     The entry row is locked: receber() locks it too (through its installment), so a
@@ -139,7 +139,7 @@ def cancelar(lancamento, *, motivo, usuario):
         commissions.liberar(comissao)  # raises ValidationError when it cannot be undone
     lancamento.cancelado = True
     lancamento.cancelado_em = timezone.now()
-    lancamento.cancelado_por = usuario
+    lancamento.cancelado_por = user
     lancamento.motivo_cancelamento = motivo
     lancamento.save()
     return lancamento
@@ -172,7 +172,7 @@ def conferir_periodo(clinic_id, data):
 
 
 @transaction.atomic
-def fechar(clinic, ate, *, usuario):
+def fechar(clinic, ate, *, user):
     """Close the books up to `ate` (at most yesterday: today's cash is still moving)."""
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     if ate >= timezone.localdate():
@@ -183,11 +183,11 @@ def fechar(clinic, ate, *, usuario):
             _("O financeiro já está fechado até %(ate)s. Para voltar, reabra o período.")
             % {"ate": date_format(atual, "SHORT_DATE_FORMAT")}
         )
-    return BookClosing.objects.create(clinic=clinic, ate=ate, created_by=usuario)
+    return BookClosing.objects.create(clinic=clinic, ate=ate, created_by=user)
 
 
 @transaction.atomic
-def reabrir(clinic, ate, *, motivo, usuario):
+def reabrir(clinic, ate, *, motivo, user):
     """Move the closing back to `ate` (None opens everything). A reason is required."""
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     atual = fechado_ate(clinic.pk)
@@ -198,7 +198,7 @@ def reabrir(clinic, ate, *, motivo, usuario):
     if not motivo.strip():
         raise ValidationError(_("Informe o motivo da reabertura."))
     return BookClosing.objects.create(
-        clinic=clinic, ate=ate, motivo=motivo.strip(), created_by=usuario
+        clinic=clinic, ate=ate, motivo=motivo.strip(), created_by=user
     )
 
 
@@ -231,14 +231,14 @@ def devedores(hoje=None):
         .values(
             "vencimento",
             "saldo",
-            "lancamento__paciente_id",
-            "lancamento__paciente__nome",
+            "lancamento__patient_id",
+            "lancamento__patient__nome",
             "lancamento__pessoa",
         )
     )
     linhas = defaultdict(
         lambda: {
-            "paciente_id": None,
+            "patient_id": None,
             "nome": "",
             "faixas": [ZERO] * (len(FAIXAS_DE_ATRASO) + 1),
             "vencido": ZERO,
@@ -247,12 +247,12 @@ def devedores(hoje=None):
         }
     )
     for parcela in parcelas:
-        paciente_id = parcela["lancamento__paciente_id"]
+        patient_id = parcela["lancamento__patient_id"]
         pessoa = parcela["lancamento__pessoa"]
-        chave = ("paciente", paciente_id) if paciente_id else ("pessoa", pessoa.strip().lower())
+        chave = ("patient", patient_id) if patient_id else ("pessoa", pessoa.strip().lower())
         linha = linhas[chave]
-        linha["paciente_id"] = paciente_id
-        linha["nome"] = parcela["lancamento__paciente__nome"] if paciente_id else pessoa
+        linha["patient_id"] = patient_id
+        linha["nome"] = parcela["lancamento__patient__nome"] if patient_id else pessoa
         vencimento, saldo = parcela["vencimento"], parcela["saldo"]
         if vencimento >= hoje:
             linha["a_vencer"] += saldo
@@ -270,12 +270,12 @@ def devedores(hoje=None):
     return sorted(resultado, key=lambda linha: (-linha["vencido"], chave_alfabetica(linha["nome"])))
 
 
-def resumo_do_paciente(paciente, hoje=None):
+def resumo_do_paciente(patient, hoje=None):
     """Open installments, totals and latest payments of a patient (for the record)."""
     hoje = hoje or timezone.localdate()
     abertas = list(
         Installment.objects.abertas()
-        .filter(lancamento__paciente=paciente, lancamento__tipo=Entry.Tipo.RECEBER)
+        .filter(lancamento__patient=patient, lancamento__tipo=Entry.Tipo.RECEBER)
         .select_related("lancamento")
         .order_by("vencimento")
     )
@@ -284,7 +284,7 @@ def resumo_do_paciente(paciente, hoje=None):
         "vencido": sum((p.saldo for p in abertas if p.vencimento < hoje), start=ZERO),
         "a_vencer": sum((p.saldo for p in abertas if p.vencimento >= hoje), start=ZERO),
         "pagamentos": list(
-            Payment.objects.filter(parcela__lancamento__paciente=paciente)
+            Payment.objects.filter(parcela__lancamento__patient=patient)
             .select_related("parcela__lancamento", "conta")
             .order_by("-data", "-pk")[:5]
         ),
@@ -459,7 +459,7 @@ def relatorio(de, ate):
         "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
         "por_forma": agrupar(recebidos, "forma", formas),
         "por_categoria": agrupar(recebidos, "parcela__lancamento__categoria__nome"),
-        "por_profissional": agrupar(recebidos, "parcela__lancamento__profissional__nome"),
+        "por_profissional": agrupar(recebidos, "parcela__lancamento__practitioner__nome"),
         "despesas_por_categoria": agrupar(pagos, "parcela__lancamento__categoria__nome"),
         "total_recebido": total_recebido,
         "total_pago": total_pago,
@@ -638,11 +638,11 @@ def caixa_aberto(conta):
 
 
 @transaction.atomic
-def abrir_caixa(conta, *, valor, usuario):
+def abrir_caixa(conta, *, valor, user):
     if caixa_aberto(conta) is not None:
         raise ValidationError(_("O caixa desta conta já está aberto."))
     return CashRegister.objects.create(
-        clinic=conta.clinic, conta=conta, valor_abertura=valor, aberto_por=usuario
+        clinic=conta.clinic, conta=conta, valor_abertura=valor, aberto_por=user
     )
 
 
@@ -656,7 +656,7 @@ def resumo_do_caixa(caixa):
     pagamentos = list(
         pagamentos_validos()
         .filter(conta=caixa.conta, created_at__gte=caixa.aberto_em, created_at__lte=fim)
-        .select_related("parcela__lancamento__paciente")
+        .select_related("parcela__lancamento__patient")
         .order_by("created_at")
     )
     movimentos = list(caixa.movimentos.select_related("outra_conta", "created_by"))
@@ -684,7 +684,7 @@ def resumo_do_caixa(caixa):
 
 
 @transaction.atomic
-def movimentar_caixa(caixa, *, tipo, valor, motivo, usuario, outra_conta=None):
+def movimentar_caixa(caixa, *, tipo, valor, motivo, user, outra_conta=None):
     caixa = CashRegister.objects.select_for_update().get(pk=caixa.pk)
     if not caixa.aberto:
         raise ValidationError(_("Este caixa já foi fechado."))
@@ -699,12 +699,12 @@ def movimentar_caixa(caixa, *, tipo, valor, motivo, usuario, outra_conta=None):
         valor=valor,
         motivo=motivo,
         outra_conta=outra_conta,
-        created_by=usuario,
+        created_by=user,
     )
 
 
 @transaction.atomic
-def fechar_caixa(caixa, *, valor_contado, observacao, usuario):
+def fechar_caixa(caixa, *, valor_contado, observacao, user):
     caixa = CashRegister.objects.select_for_update().get(pk=caixa.pk)
     if not caixa.aberto:
         raise ValidationError(_("Este caixa já foi fechado."))
@@ -712,6 +712,6 @@ def fechar_caixa(caixa, *, valor_contado, observacao, usuario):
     caixa.valor_contado = valor_contado
     caixa.observacao = observacao
     caixa.fechado_em = timezone.now()
-    caixa.fechado_por = usuario
+    caixa.fechado_por = user
     caixa.save()
     return caixa

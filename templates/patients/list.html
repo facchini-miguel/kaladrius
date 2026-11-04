@@ -55,28 +55,28 @@
       </tr>
     </thead>
     <tbody>
-      {% for paciente in pagina %}
+      {% for patient in pagina %}
       <tr>
-        <td>{{ paciente.pk }}</td>
+        <td>{{ patient.pk }}</td>
         <td>
-          <a href="{% url 'patients:record' paciente.pk %}">{{ paciente.nome }}</a>
-          {% if paciente.tipo == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
-          {% if not paciente.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
-          {% if paciente.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
+          <a href="{% url 'patients:record' patient.pk %}">{{ patient.nome }}</a>
+          {% if patient.tipo == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
+          {% if not patient.ativo %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
+          {% if patient.arquivado %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ paciente.cpf_cnpj|documento:paciente.papel_documento|default:"—" }}</td>
-        <td class="text-nowrap">{{ paciente.telefone_principal|telefone|default:"—" }}</td>
-        <td>{% if paciente.cidade %}{{ paciente.cidade.nome }}/{{ paciente.cidade.uf.sigla }}{% else %}—{% endif %}</td>
-        <td>{% if paciente.idade is not None %}{{ paciente.idade }}{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{{ patient.cpf_cnpj|documento:patient.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.telefone_principal|telefone|default:"—" }}</td>
+        <td>{% if patient.cidade %}{{ patient.cidade.nome }}/{{ patient.cidade.uf.sigla }}{% else %}—{% endif %}</td>
+        <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
-          {% if paciente.arquivado %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' paciente.pk %}">{% translate "Ver" %}</a>
+          {% if patient.arquivado %}
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>
           {% else %}
           {% if pode.pacientes.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' paciente.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' patient.pk %}">{% translate "Editar" %}</a>
           {% endif %}
           {% if pode.pacientes.excluir %}
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' paciente.pk %}">{% translate "Arquivar" %}</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' patient.pk %}">{% translate "Arquivar" %}</a>
           {% endif %}
           {% endif %}
         </td>

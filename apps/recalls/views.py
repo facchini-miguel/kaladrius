@@ -37,11 +37,11 @@ def lista(request):
     situacao = request.GET.get("situacao", "pendentes")
     busca = request.GET.get("q", "").strip()
     de, ate = _data(request.GET.get("de")), _data(request.GET.get("ate"))
-    rechamadas = Recall.objects.select_related("paciente").filter(
-        **SITUACOES.get(situacao, SITUACOES["pendentes"]), paciente__arquivado=False
+    rechamadas = Recall.objects.select_related("patient").filter(
+        **SITUACOES.get(situacao, SITUACOES["pendentes"]), patient__arquivado=False
     )
     if busca:
-        rechamadas = rechamadas.filter(paciente__nome__unaccent__icontains=busca)
+        rechamadas = rechamadas.filter(patient__nome__unaccent__icontains=busca)
     if de:
         rechamadas = rechamadas.filter(data__gte=de)
     if ate:
@@ -68,8 +68,8 @@ def lista(request):
 @exige_permissao(Modulo.RECHAMADAS, Acao.CRIAR)
 def novo(request):
     inicial = {"data": request.GET.get("data") or ""}
-    if request.GET.get("paciente", "").isdecimal():
-        inicial["paciente"] = request.GET["paciente"]
+    if request.GET.get("patient", "").isdecimal():
+        inicial["patient"] = request.GET["patient"]
     return _formulario(request, Recall(created_by=request.user), inicial)
 
 
@@ -85,22 +85,22 @@ def _formulario(request, rechamada, inicial):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
-            request, _("Rechamada de %(nome)s salva.") % {"nome": rechamada.paciente.nome}
+            request, _("Rechamada de %(nome)s salva.") % {"nome": rechamada.patient.nome}
         )
         return _voltar(request)
-    paciente = rechamada.paciente if rechamada.paciente_id else form["paciente"].value()
-    if paciente and not hasattr(paciente, "nome"):
+    patient = rechamada.patient if rechamada.patient_id else form["patient"].value()
+    if patient and not hasattr(patient, "nome"):
         # Raw value from the hidden field: may be anything when the request is tampered with.
-        codigo = str(paciente)
-        consulta = form.fields["paciente"].queryset
-        paciente = consulta.filter(pk=int(codigo)).first() if codigo.isdecimal() else None
+        codigo = str(patient)
+        consulta = form.fields["patient"].queryset
+        patient = consulta.filter(pk=int(codigo)).first() if codigo.isdecimal() else None
     return render(
         request,
         "recalls/form.html",
         {
             "form": form,
             "rechamada": rechamada,
-            "paciente": paciente,
+            "patient": patient,
             "next": request.GET.get("next", ""),
         },
     )
@@ -109,24 +109,24 @@ def _formulario(request, rechamada, inicial):
 @require_POST
 @exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
 def concluir(request, pk):
-    rechamada = get_object_or_404(Recall.objects.select_related("paciente"), pk=pk)
+    rechamada = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     rechamada.concluida = not rechamada.concluida
     rechamada.save(update_fields=["concluida", "updated_at"])
     if rechamada.concluida:
         mensagem = _("Rechamada de %(nome)s concluída.")
     else:
         mensagem = _("Rechamada de %(nome)s reaberta.")
-    messages.success(request, mensagem % {"nome": rechamada.paciente.nome})
+    messages.success(request, mensagem % {"nome": rechamada.patient.nome})
     return _voltar(request)
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.EXCLUIR)
 def excluir(request, pk):
-    rechamada = get_object_or_404(Recall.objects.select_related("paciente"), pk=pk)
+    rechamada = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     if request.method == "POST":
         rechamada.delete()
         messages.success(
-            request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.paciente.nome}
+            request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.patient.nome}
         )
         return _voltar(request)
     return render(request, "recalls/delete.html", {"rechamada": rechamada})
@@ -143,7 +143,7 @@ def resumo(request):
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        concluida=False, data__gte=de, data__lt=ate, paciente__arquivado=False
+        concluida=False, data__gte=de, data__lt=ate, patient__arquivado=False
     )
     for data in pendentes.values_list("data", flat=True):
         contagem[data.isoformat()] = contagem.get(data.isoformat(), 0) + 1
@@ -155,7 +155,5 @@ def do_dia(request):
     dia = _data(request.GET.get("data"))
     if dia is None:
         return HttpResponse(_("Data inválida."), status=400)
-    rechamadas = Recall.objects.filter(data=dia, paciente__arquivado=False).select_related(
-        "paciente"
-    )
+    rechamadas = Recall.objects.filter(data=dia, patient__arquivado=False).select_related("patient")
     return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})

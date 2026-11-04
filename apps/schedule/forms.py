@@ -54,9 +54,9 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ["profissional", "tipo", "paciente", "descricao"]
+        fields = ["practitioner", "tipo", "patient", "descricao"]
         widgets = {
-            "paciente": forms.HiddenInput,
+            "patient": forms.HiddenInput,
             "descricao": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -71,14 +71,14 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         # Inactive practitioners/types are hidden, except the ones already in use here.
         if profissionais is None:
             profissionais = Practitioner.objects.all()
-        self.fields["profissional"].queryset = profissionais.filter(
-            Q(ativo=True) | Q(pk=agendamento.profissional_id)
+        self.fields["practitioner"].queryset = profissionais.filter(
+            Q(ativo=True) | Q(pk=agendamento.practitioner_id)
         )
         self.fields["tipo"].queryset = AppointmentType.objects.filter(
             Q(ativo=True) | Q(pk=agendamento.tipo_id)
         )
         self.fields["tipo"].label_from_instance = lambda tipo: tipo.nome_exibido
-        self.fields["paciente"].queryset = Patient.objects.all()
+        self.fields["patient"].queryset = Patient.objects.all()
 
         passo = clinic.agenda_intervalo * 60
         for campo in ("hora_inicio", "hora_fim"):
@@ -109,17 +109,17 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             dados.get("hora_inicio"),
             dados.get("hora_fim"),
         )
-        if not dados.get("paciente") and not dados.get("descricao", "").strip():
+        if not dados.get("patient") and not dados.get("descricao", "").strip():
             self.add_error("descricao", _("Informe o paciente ou uma descrição."))
-        paciente = dados.get("paciente")
+        patient = dados.get("patient")
         if (
             self.instance.pk
             and self.instance.desmarcado
-            and (getattr(paciente, "pk", None) != self.instance.paciente_id)
+            and (getattr(patient, "pk", None) != self.instance.patient_id)
         ):
             # Changing the patient would overwrite the record that this one cancelled.
             self.add_error(
-                "paciente",
+                "patient",
                 _(
                     "Este agendamento foi desmarcado. Para pôr outro paciente neste horário, "
                     "use “Agendar outro paciente neste horário”."
@@ -155,7 +155,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         )
         self.instance.inicio, self.instance.fim = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
-        if not dados.get("paciente") or (
+        if not dados.get("patient") or (
             self.instance.situacao in marcado and data > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
@@ -165,7 +165,7 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
             return dados
         encontrados = services.conflitos(
-            dados["profissional"], self.intervalos, ignorar=self.instance.pk
+            dados["practitioner"], self.intervalos, ignorar=self.instance.pk
         )
         if encontrados:
             lista = "; ".join(

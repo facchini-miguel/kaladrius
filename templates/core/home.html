@@ -159,16 +159,16 @@
               <td class="text-nowrap">{{ agendamento.inicio|time:"H:i" }}–{{ agendamento.fim|time:"H:i" }}</td>
               <td>
                 <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.tipo.cor }}" title="{{ agendamento.tipo.nome_exibido }}"></span>
-                {% if agendamento.paciente_id %}
-                {% if pode.pacientes.ver %}<a href="{% url 'patients:record' agendamento.paciente_id %}">{{ agendamento.paciente.nome }}</a>{% else %}{{ agendamento.paciente.nome }}{% endif %}
+                {% if agendamento.patient_id %}
+                {% if pode.pacientes.ver %}<a href="{% url 'patients:record' agendamento.patient_id %}">{{ agendamento.patient.nome }}</a>{% else %}{{ agendamento.patient.nome }}{% endif %}
                 {% if agendamento == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if agendamento.inicio <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
                 <span class="text-body-secondary">{{ agendamento.titulo }}</span>
                 {% endif %}
               </td>
-              {% if agenda.mostrar_profissional %}<td class="small">{{ agendamento.profissional.nome }}</td>{% endif %}
+              {% if agenda.mostrar_profissional %}<td class="small">{{ agendamento.practitioner.nome }}</td>{% endif %}
               <td class="text-nowrap">
-                {% if agendamento.paciente_id %}
+                {% if agendamento.patient_id %}
                 {% if agendamento.situacao == "agendado" %}
                 {% if pode.agenda.alterar %}
                 <form method="post" action="{% url 'schedule:status' agendamento.pk %}" class="d-inline">
@@ -239,7 +239,7 @@
         {% for rechamada in rechamadas.lista %}
         <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
           <div class="small">
-            <div>{{ rechamada.paciente.nome }}{% if rechamada.paciente.telefone_celular %} · <span class="text-nowrap">{{ rechamada.paciente.telefone_celular|telefone }}</span>{% endif %}{% if rechamada.paciente.whatsapp %} · <a class="text-nowrap" href="{{ rechamada.paciente.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
+            <div>{{ rechamada.patient.nome }}{% if rechamada.patient.telefone_celular %} · <span class="text-nowrap">{{ rechamada.patient.telefone_celular|telefone }}</span>{% endif %}{% if rechamada.patient.whatsapp %} · <a class="text-nowrap" href="{{ rechamada.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
             <div class="text-body-secondary">{{ rechamada.descricao }}{% if rechamada.data < painel.hoje %} · <span class="text-danger">{% blocktranslate with data=rechamada.data|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
           {% if pode.rechamadas.alterar %}
@@ -263,10 +263,10 @@
     <div class="card">
       <div class="card-header"><h2 class="h6 mb-0">🎂 {% translate "Aniversariantes de hoje" %}</h2></div>
       <ul class="list-group list-group-flush">
-        {% for paciente, idade in painel.aniversariantes %}
+        {% for patient, idade in painel.aniversariantes %}
         <li class="list-group-item small">
-          {% if pode.pacientes.ver %}<a href="{% url 'patients:record' paciente.pk %}">{{ paciente.nome }}</a>{% else %}{{ paciente.nome }}{% endif %}
-          <span class="text-body-secondary">· {% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}{% if paciente.telefone_celular %} · {{ paciente.telefone_celular|telefone }}{% endif %}</span>
+          {% if pode.pacientes.ver %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.nome }}</a>{% else %}{{ patient.nome }}{% endif %}
+          <span class="text-body-secondary">· {% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}{% if patient.telefone_celular %} · {{ patient.telefone_celular|telefone }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>
@@ -282,7 +282,7 @@
       <ul class="list-group list-group-flush">
         {% for orcamento in painel.orcamentos %}
         <li class="list-group-item small d-flex justify-content-between gap-2">
-          <a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.paciente.nome }}</a>
+          <a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.nome }}</a>
           <span class="text-nowrap">{{ orcamento.total|moeda }} · {% if orcamento.validade == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.validade|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
         </li>
         {% endfor %}

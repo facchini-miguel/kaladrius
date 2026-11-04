@@ -21,14 +21,19 @@ CAMPOS_DA_ANAMNESE = ["queixa_principal", "historia", "antecedentes", "exame_fis
 
 
 class Visit(ModeloDaClinica):
-    paciente = models.ForeignKey(
-        Patient, on_delete=models.PROTECT, related_name="atendimentos", verbose_name=_("paciente")
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.PROTECT,
+        related_name="atendimentos",
+        verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         Practitioner,
         on_delete=models.PROTECT,
         related_name="atendimentos",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     agendamento = models.OneToOneField(
         Appointment,
@@ -72,7 +77,7 @@ class Visit(ModeloDaClinica):
         ordering = ["-data", "-pk"]
 
     def __str__(self):
-        return f"{self.paciente} – {timezone.localtime(self.data):%d/%m/%Y %H:%M}"
+        return f"{self.patient} – {timezone.localtime(self.data):%d/%m/%Y %H:%M}"
 
     @property
     def finalizado(self):
@@ -86,8 +91,12 @@ class Addendum(ModeloDaClinica):
         Visit, on_delete=models.PROTECT, related_name="adendos", verbose_name=_("atendimento")
     )
     texto = models.TextField(_("adendo"))
-    profissional = models.ForeignKey(
-        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    practitioner = models.ForeignKey(
+        Practitioner,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -135,8 +144,12 @@ class Certificate(ModeloDaClinica):
         blank=True,
         help_text=_("Aparece no atestado. Por exemplo: deve permanecer em repouso."),
     )
-    profissional = models.ForeignKey(
-        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    practitioner = models.ForeignKey(
+        Practitioner,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -170,8 +183,12 @@ class Prescription(ModeloDaClinica):
         _("medicamentos e como usar"),
         help_text=_("Um item por linha: medicamento, dose e como usar."),
     )
-    profissional = models.ForeignKey(
-        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    practitioner = models.ForeignKey(
+        Practitioner,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -205,8 +222,12 @@ class ExamRequest(ModeloDaClinica):
     indicacao = models.TextField(
         _("indicação clínica"), blank=True, help_text=_("Aparece no pedido.")
     )
-    profissional = models.ForeignKey(
-        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    practitioner = models.ForeignKey(
+        Practitioner,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -243,8 +264,12 @@ class Attachment(ModeloDaClinica):
     tipo = models.CharField(max_length=50)
     tamanho = models.PositiveIntegerField()
     conteudo = models.BinaryField()
-    profissional = models.ForeignKey(
-        Practitioner, on_delete=models.PROTECT, related_name="+", verbose_name=_("profissional")
+    practitioner = models.ForeignKey(
+        Practitioner,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

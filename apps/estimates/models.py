@@ -66,19 +66,21 @@ class Estimate(ModeloDaClinica):
         APROVADO = "aprovado", _("Aprovado")
         RECUSADO = "recusado", _("Recusado")
 
-    paciente = models.ForeignKey(
+    patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
         related_name="orcamentos",
         verbose_name=_("paciente"),
+        db_column="paciente_id",
     )
-    profissional = models.ForeignKey(
+    practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("profissional"),
+        db_column="profissional_id",
     )
     data = models.DateField(_("data"), default=timezone.localdate)
     validade = models.DateField(_("válido até"), default=validade_padrao)
@@ -126,7 +128,7 @@ class Estimate(ModeloDaClinica):
         ]
 
     def __str__(self):
-        return f"{self.pk} – {self.paciente}"
+        return f"{self.pk} – {self.patient}"
 
     @property
     def subtotal(self):

@@ -223,11 +223,11 @@ def test_agenda_e_rechamadas(importado):
     ]
     corrigido = agendamentos[1]
     assert corrigido.fim - corrigido.inicio == datetime.timedelta(minutes=30)
-    assert all(a.paciente is None for a in agendamentos)
+    assert all(a.patient is None for a in agendamentos)
     assert timezone.localtime(agendamentos[0].inicio).hour == 8
 
     rechamadas = dados(clinic, Recall)
-    assert [(r.paciente.nome, r.concluida) for r in rechamadas] == [
+    assert [(r.patient.nome, r.concluida) for r in rechamadas] == [
         ("João d'Ávila", True),  # past recall: considered handled
         ("Empresa Teste", False),
     ]
@@ -318,8 +318,8 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     assert len(joao.cpf_cnpj) == 11
 
     agendamentos = dados(clinic, Appointment)
-    assert [(a.inicio, a.fim, a.profissional_id) for a in agendamentos] == [
-        (a.inicio, a.fim, a.profissional_id) for a in antes["agendamentos"]
+    assert [(a.inicio, a.fim, a.practitioner_id) for a in agendamentos] == [
+        (a.inicio, a.fim, a.practitioner_id) for a in antes["agendamentos"]
     ]
     descricoes = [a.descricao for a in agendamentos]
     assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
@@ -364,7 +364,7 @@ def test_anonimizacao_dos_fornecedores(importado):
                 valor_total=Decimal("10"),
                 parcelas=1,
                 primeiro_vencimento=HOJE,
-                usuario=None,
+                user=None,
             )
     call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)
 
@@ -384,7 +384,7 @@ def test_anonimizacao_das_carteirinhas(importado):
     with usar_clinica(clinic):
         convenio = HealthPlan.objects.create(nome="Saúde Exemplo")
         MemberCard.objects.create(
-            paciente=Patient.objects.first(),
+            patient=Patient.objects.first(),
             convenio=convenio,
             plano="Básico",
             numero="98765",
@@ -419,7 +419,7 @@ def test_anonimizacao_dos_funcionarios(importado):
             valor_total=Decimal("2000"),
             parcelas=1,
             primeiro_vencimento=HOJE,
-            usuario=None,
+            user=None,
         )
         folha.save()
     call_command("anonymize_clinic", clinic=clinic.nome, confirmar=True)

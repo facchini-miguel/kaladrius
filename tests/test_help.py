@@ -35,9 +35,9 @@ def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_
     pagina = recepcao.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in pagina
     assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
-    usuario = django_user_model.objects.get(username="recepcao")
-    usuario.idioma = "en"
-    usuario.save()
+    user = django_user_model.objects.get(username="recepcao")
+    user.idioma = "en"
+    user.save()
     pagina = recepcao.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/manual/getting-started"' in pagina
 

@@ -18,12 +18,12 @@ from .models import Appointment
 def profissionais_visiveis(request):
     """Practitioners whose schedule the user may see and change (decision 044)."""
     if so_a_propria_agenda(request):
-        return Practitioner.objects.filter(usuario=request.user)
+        return Practitioner.objects.filter(user=request.user)
     return Practitioner.objects.all()
 
 
 def agendamentos_visiveis(request):
-    return Appointment.objects.filter(profissional__in=profissionais_visiveis(request))
+    return Appointment.objects.filter(practitioner__in=profissionais_visiveis(request))
 
 
 def momento(data, hora):
@@ -39,7 +39,7 @@ def ocorrencias(data, hora_inicio, hora_fim, repeticoes=1):
     ]
 
 
-def conflitos(profissional, intervalos, ignorar=None):
+def conflitos(practitioner, intervalos, ignorar=None):
     """Existing appointments of the practitioner that overlap any of the intervals.
 
     Cancelled ones (desmarcados) do not hold the slot.
@@ -47,16 +47,16 @@ def conflitos(profissional, intervalos, ignorar=None):
     sobreposicao = Q()
     for inicio, fim in intervalos:
         sobreposicao |= Q(inicio__lt=fim, fim__gt=inicio)
-    existentes = Appointment.objects.filter(sobreposicao, profissional=profissional).exclude(
+    existentes = Appointment.objects.filter(sobreposicao, practitioner=practitioner).exclude(
         situacao=Appointment.Situacao.DESMARCOU
     )
     if ignorar is not None:
         existentes = existentes.exclude(pk=ignorar)
-    return list(existentes.select_related("paciente").order_by("inicio"))
+    return list(existentes.select_related("patient").order_by("inicio"))
 
 
 @transaction.atomic
-def criar(modelo, intervalos, usuario):
+def criar(modelo, intervalos, user):
     """Create one appointment per interval, copying the fields of `modelo`.
 
     Raises IntegrityError if the database constraint finds an overlap (for example,
@@ -66,14 +66,14 @@ def criar(modelo, intervalos, usuario):
     criados = []
     for inicio, fim in intervalos:
         agendamento = Appointment(
-            profissional=modelo.profissional,
+            practitioner=modelo.practitioner,
             tipo=modelo.tipo,
-            paciente=modelo.paciente,
+            patient=modelo.patient,
             descricao=modelo.descricao,
             inicio=inicio,
             fim=fim,
             serie=serie,
-            created_by=usuario,
+            created_by=user,
         )
         agendamento.save()
         criados.append(agendamento)
@@ -89,7 +89,7 @@ def marcar(agendamento, situacao):
     """
     if situacao not in Appointment.Situacao.values:
         raise ValidationError(_("Situação inválida."))
-    if agendamento.paciente_id is None:
+    if agendamento.patient_id is None:
         raise ValidationError(_("Só agendamentos com paciente têm situação."))
     presenca = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
     if situacao in presenca and not agendamento.presenca_marcavel:
@@ -99,7 +99,7 @@ def marcar(agendamento, situacao):
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
     if agendamento.desmarcado and situacao != Appointment.Situacao.DESMARCOU:
         if conflitos(
-            agendamento.profissional, [(agendamento.inicio, agendamento.fim)], agendamento.pk
+            agendamento.practitioner, [(agendamento.inicio, agendamento.fim)], agendamento.pk
         ):
             raise ValidationError(ocupado)
     agendamento.situacao = situacao
