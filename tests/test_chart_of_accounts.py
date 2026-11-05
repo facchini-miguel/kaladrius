@@ -1,10 +1,10 @@
 """Chart of accounts (decision 097): groups in a tree, totals rolled up. Fictitious data."""
 
+import importlib
 from decimal import Decimal
 
 import pytest
 from django.db import connection
-from django.db.migrations.executor import MigrationExecutor
 from django.urls import reverse
 from django.utils import timezone
 
@@ -12,7 +12,7 @@ from apps.core.isolation import use_clinic
 from apps.core.models import Role
 from apps.finance import services
 from apps.finance.models import AccountGroup, Category, Entry, FinancialAccount
-from tests.test_modules_migration import estado_do_banco
+from tests.era import apps_at, tables_of_the_time
 
 pytestmark = pytest.mark.django_db
 
@@ -157,27 +157,28 @@ def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
     assert reception.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
-@pytest.mark.django_db(transaction=True)
 def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
-    executor = MigrationExecutor(connection)
-    folhas = executor.loader.graph.leaf_nodes()
-    previous = [("financeiro", "0011_fechamento")]
-    try:
-        executor.migrate(previous)
-        # Pessoal and the renames of decision 157 depend on the newer finance, so they were
-        # rolled back along with it.
-        apps = estado_do_banco()
-        clinic = apps.get_model("core", "Clinica").objects.create(nome="Clínica fictícia antiga")
-        Category = apps.get_model("financeiro", "Categoria")
-        Category.objects.create(clinica_id=clinic.pk, nome="Aluguel", tipo="despesa")
-        Category.objects.create(clinica_id=clinic.pk, nome="Aluguel da sala", tipo="despesa")
-        executor = MigrationExecutor(connection)
-        executor.migrate([("financeiro", "0012_plano_de_contas")])
-        novos = executor.loader.project_state([("financeiro", "0012_plano_de_contas")]).apps
-        Nova = novos.get_model("financeiro", "Categoria")
-        assert Nova.objects.get(clinica_id=clinic.pk, nome="Aluguel").grupo.nome == "Ocupação"
-        assert Nova.objects.get(clinica_id=clinic.pk, nome="Aluguel da sala").grupo is None
-        Grupo = novos.get_model("financeiro", "GrupoContabil")
-        assert Grupo.objects.filter(clinica_id=clinic.pk).count() == 7
-    finally:
-        MigrationExecutor(connection).migrate(folhas)
+    """Migration financeiro 0012 created the basic chart in the clinics that existed."""
+    from apps.core.models import Clinic
+
+    clinic = Clinic.objects.create(name="Clínica fictícia antiga")
+    with use_clinic(clinic):
+        # As the clinic was before 0012: categories and no chart of accounts.
+        Category.objects.all().delete()
+        AccountGroup.objects.all().delete()
+        Category.objects.create(name="Aluguel", kind="despesa")
+        Category.objects.create(name="Aluguel da sala", kind="despesa")
+    apps = apps_at(("financeiro", "0012_plano_de_contas"))
+    pares = [
+        (apps.get_model("core", "Clinica"), Clinic),
+        (apps.get_model("financeiro", "GrupoContabil"), AccountGroup),
+        (apps.get_model("financeiro", "Categoria"), Category),
+    ]
+    with tables_of_the_time(pares), connection.schema_editor() as editor:
+        importlib.import_module("apps.finance.migrations.0012_plano_de_contas").plano_basico(
+            apps, editor
+        )
+    with use_clinic(clinic):
+        assert Category.objects.get(name="Aluguel").group.name == "Ocupação"
+        assert Category.objects.get(name="Aluguel da sala").group is None
+        assert AccountGroup.objects.count() == 7

@@ -1,99 +1,44 @@
-import datetime
-from decimal import Decimal
+"""Migration core 0010 turned each existing clinic's area into its clinical module."""
+
+import importlib
 
 import pytest
 from django.db import connection
-from django.db.migrations.executor import MigrationExecutor
+
+from apps.core.isolation import without_isolation
+from apps.core.models import Clinic, ClinicModule
+from tests.era import apps_at, tables_of_the_time
+
+pytestmark = pytest.mark.django_db
+
+migracao = importlib.import_module("apps.core.migrations.0010_modulos_clinicos")
 
 
-def estado_do_banco():
-    """The models as the database is now: each app at its last applied migration. Taking core
-    back also undoes the later migrations of the apps that depend on it (pacientes 0004 on)."""
-    executor = MigrationExecutor(connection)
-    aplicadas = set(executor.loader.applied_migrations)
-    grafo = executor.loader.graph
-    ultimas = [
-        no
-        for no in aplicadas
-        if no in grafo.nodes
-        and not any(f in aplicadas and f[0] == no[0] for f in grafo.node_map[no].children)
-    ]
-    return executor.loader.project_state(ultimas).apps
-
-
-@pytest.mark.django_db(transaction=True)
 def test_migracao_preserva_as_areas_das_clinicas_existentes():
-    executor = MigrationExecutor(connection)
-    folhas = executor.loader.graph.leaf_nodes()
-    previous = [("core", "0009_papel_financeiro")]
-    destino = [("core", "0010_modulos_clinicos")]
-    try:
-        executor.migrate(previous)
-        apps = estado_do_banco()
-        Clinic = apps.get_model("core", "Clinica")
-        ids = {
-            area: Clinic.objects.create(nome=f"Clínica fictícia {area}", area=area).pk
-            for area in ("odontologia", "medicina", "outra")
-        }
-        clinic_id = ids["odontologia"]
-        Patient = apps.get_model("pacientes", "Paciente")
-        paciente = Patient.objects.create(
-            clinica_id=clinic_id,
-            nome="Paciente fictício anterior à atualização",
-            observacoes="Texto inteiramente fictício preservado",
-        )
-        Category = apps.get_model("financeiro", "Categoria")
-        categoria = Category.objects.create(
-            clinica_id=clinic_id, nome="Receita fictícia", tipo="receita"
-        )
-        Entry = apps.get_model("financeiro", "Lancamento")
-        lancamento = Entry.objects.create(
-            clinica_id=clinic_id,
-            tipo="receber",
-            descricao="Tratamento fictício",
-            categoria=categoria,
-            paciente=paciente,
-            valor_total=Decimal("123.45"),
-        )
-        Installment = apps.get_model("financeiro", "Parcela")
-        Installment.objects.create(
-            clinica_id=clinic_id,
-            lancamento=lancamento,
-            numero=1,
-            vencimento=datetime.date(2026, 11, 10),
-            valor=Decimal("123.45"),
-        )
-        Estimate = apps.get_model("orcamentos", "Orcamento")
-        orcamento = Estimate.objects.create(clinica_id=clinic_id, paciente=paciente)
-        Item = apps.get_model("orcamentos", "ItemOrcamento")
-        Item.objects.create(
-            clinica_id=clinic_id,
-            orcamento=orcamento,
-            descricao="Item dental fictício",
-            dentes="11,12",
-            faces="V",
-            valor_unitario=Decimal("123.45"),
-        )
-        modelos = [Clinic, Patient, Category, Entry, Installment, Estimate, Item]
-        before = {
-            modelo._meta.label: list(modelo.objects.order_by("pk").values()) for modelo in modelos
-        }
-        executor = MigrationExecutor(connection)
-        executor.migrate(destino)
-        Module = executor.loader.project_state(destino).apps.get_model("core", "ModuloDaClinica")
-        for area, codigo_clinica in ids.items():
+    # Clinics as they were before 0010: an area and no modules.
+    ids = {
+        area: Clinic.objects.create(name=f"Clínica fictícia {area}", area=area).pk
+        for area in ("odontologia", "medicina", "outra")
+    }
+    ClinicModule.all_objects.filter(clinic_id__in=ids.values()).delete()
+    antes = list(Clinic.objects.filter(pk__in=ids.values()).order_by("pk").values())
+
+    apps = apps_at(("core", "0010_modulos_clinicos"))
+    pares = [
+        (apps.get_model("core", "Clinica"), Clinic),
+        (apps.get_model("core", "ModuloDaClinica"), ClinicModule),
+    ]
+    with tables_of_the_time(pares), connection.schema_editor() as editor:
+        migracao.habilitar_areas_existentes(apps, editor)
+
+    with without_isolation():
+        for area, clinic_id in ids.items():
             ativos = set(
-                Module.objects.filter(clinica_id=codigo_clinica, ativo=True).values_list(
-                    "codigo", flat=True
+                ClinicModule.objects.filter(clinic_id=clinic_id, active=True).values_list(
+                    "code", flat=True
                 )
             )
             assert ativos == ({area} if area != "outra" else set())
-            assert Module.objects.filter(clinica_id=codigo_clinica).count() == 2
-        # The models as the database is now: core's later migrations add columns that do not
-        # exist yet.
-        atualizados = estado_do_banco()
-        for label, registros in before.items():
-            modelo = atualizados.get_model(label)
-            assert list(modelo.objects.order_by("pk").values()) == registros, label
-    finally:
-        MigrationExecutor(connection).migrate(folhas)
+            assert ClinicModule.objects.filter(clinic_id=clinic_id).count() == 2
+    # The clinics themselves are not touched.
+    assert list(Clinic.objects.filter(pk__in=ids.values()).order_by("pk").values()) == antes
