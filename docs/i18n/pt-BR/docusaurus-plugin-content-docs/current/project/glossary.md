@@ -324,7 +324,7 @@ Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão
 
 ## Funções e variáveis
 
-A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173), financeiro (decisão 174), agenda (decisão 175), pacientes, prontuário, orçamentos, pessoal, rechamadas, convênios, profissionais e equipe (decisão 176), legado, auditoria, conta, ajuda, odontologia, monitoramento e referências (decisão 177).
+A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173), financeiro (decisão 174), agenda (decisão 175), pacientes, prontuário, orçamentos, pessoal, rechamadas, convênios, profissionais e equipe (decisão 176), legado, auditoria, conta, ajuda, odontologia, monitoramento e referências (decisão 177), e as releases (decisão 178): os nomes do Python de todos os apps estão em inglês.
 
 ### Variáveis comuns
 
@@ -1122,6 +1122,38 @@ Renomeados só dentro do próprio app (palavras comuns):
 |---|---|
 | `cidades` | `cities` |
 | `bancos` | `banks` |
+
+### Releases (`novidades`)
+
+| Antes | Depois |
+|---|---|
+| `TIPOS` | `KINDS` |
+| `MODULOS` | `MODULES` |
+| `IDIOMA_ORIGEM` | `SOURCE_LANGUAGE` |
+| `PUBLICOS` | `AUDIENCES` |
+| `ORIGENS` | `SOURCES` |
+| `REPOSITORIO` | `REPOSITORY` |
+| `ReleasesInvalidas` | `InvalidReleases` |
+| `_no_idioma` | `_in_language` |
+| `url_pr` | `pr_url` |
+| `itens_para` | `items_for` |
+| `versao_para_tupla` | `version_tuple` |
+| `_textos` | `_texts` |
+| `_validar_item` | `_validate_item` |
+| `_validar_release` | `_validate_release` |
+| `ler_releases` | `read_releases` |
+| `versao_atual` | `current_version` |
+| `tem_novidade_para` | `has_news_for` |
+| `para_publico` | `for_audience` |
+| `listar_releases` | `list_releases` |
+| `novidades_router` | `whats_new_router` |
+| `todas` | `all_releases` |
+| `NovidadesConfig` | `WhatsNewConfig` |
+| `versao` (context processor) | `version_context` |
+| `chave` | `key` |
+| `lista` (view) | `whats_new_list` |
+
+A interface pública mantém os nomes: os campos da API (`versao`, `data`, `titulo`, `itens`, `tipo`, `tipo_nome`, `modulo`, `texto`, `origem`, `pr`) e os nomes de consulta (`publico`, `desde`), e as chaves do `releases.yaml`, que os atributos da release e a página espelham.
 
 ### Financeiro (`financeiro`): classes
 

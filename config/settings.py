@@ -129,7 +129,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "apps.whats_new.context_processors.versao",
+                "apps.whats_new.context_processors.version_context",
                 "apps.core.context_processors.clinic",
                 "apps.core.context_processors.backup",
                 "apps.monitoring.context_processors.health_alert",

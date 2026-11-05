@@ -47,11 +47,11 @@ class Usuario(AbstractUser):
         # A new person starts at the current version: "the system was updated" and forty
         # versions of history mean nothing to someone who just arrived (review, superuser).
         if self._state.adding and not self.last_seen_version:
-            from apps.whats_new.releases import ReleasesInvalidas, versao_atual
+            from apps.whats_new.releases import InvalidReleases, current_version
 
             try:
-                self.last_seen_version = versao_atual()
-            except ReleasesInvalidas:
+                self.last_seen_version = current_version()
+            except InvalidReleases:
                 pass
         super().save(*args, **kwargs)
 

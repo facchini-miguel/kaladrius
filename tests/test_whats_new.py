@@ -10,9 +10,9 @@ from apps.whats_new import releases
 @pytest.fixture
 def arquivo(tmp_path):
     def criar(conteudo):
-        caminho = tmp_path / "releases.yaml"
-        caminho.write_text(textwrap.dedent(conteudo), encoding="utf-8")
-        return caminho
+        path = tmp_path / "releases.yaml"
+        path.write_text(textwrap.dedent(conteudo), encoding="utf-8")
+        return path
 
     return criar
 
@@ -42,8 +42,8 @@ EXEMPLO = """
 
 def test_arquivo_do_projeto_e_valido():
     """Ensures the repository's releases.yaml is always valid (runs in CI)."""
-    versoes = releases.ler_releases(settings.RELEASES_ARQUIVO)
-    assert versoes
+    versions = releases.read_releases(settings.RELEASES_ARQUIVO)
+    assert versions
 
 
 @pytest.mark.parametrize(
@@ -56,32 +56,32 @@ def test_arquivo_do_projeto_e_valido():
 )
 def test_readme_mostra_a_versao_atual(arquivo, texto):
     readme = (settings.BASE_DIR / arquivo).read_text(encoding="utf-8")
-    assert texto.format(releases.versao_atual()) in readme, f"update the version in {arquivo}"
+    assert texto.format(releases.current_version()) in readme, f"update the version in {arquivo}"
 
 
 def test_versao_do_pyproject_igual_a_do_releases():
     import tomllib
 
     pyproject = tomllib.loads((settings.BASE_DIR / "pyproject.toml").read_text())
-    assert pyproject["project"]["version"] == releases.versao_atual()
+    assert pyproject["project"]["version"] == releases.current_version()
 
 
 def test_leitura_e_filtro_por_publico(arquivo, settings):
     settings.RELEASES_ARQUIVO = arquivo(EXEMPLO)
-    releases.todas.cache_clear()
+    releases.all_releases.cache_clear()
     try:
-        assert releases.versao_atual() == "1.5.0"
-        patient = releases.para_publico("paciente")
+        assert releases.current_version() == "1.5.0"
+        patient = releases.for_audience("paciente")
         assert [r.versao for r, _ in patient] == ["1.5.0"]
         assert [i.modulo for i in patient[0][1]] == ["Rechamadas"]
-        equipe_desde = releases.para_publico("equipe", desde="1.4.7")
+        equipe_desde = releases.for_audience("equipe", desde="1.4.7")
         assert [r.versao for r, _ in equipe_desde] == ["1.5.0"]
     finally:
-        releases.todas.cache_clear()
+        releases.all_releases.cache_clear()
 
 
 @pytest.mark.parametrize(
-    ("conteudo", "mensagem"),
+    ("conteudo", "message"),
     [
         ("- versao: 1.0\n  data: 2027-01-01\n  itens: []", "formato"),
         (
@@ -113,9 +113,9 @@ def test_leitura_e_filtro_por_publico(arquivo, settings):
         ),
     ],
 )
-def test_arquivo_invalido(arquivo, conteudo, mensagem):
-    with pytest.raises(releases.ReleasesInvalidas, match=mensagem):
-        releases.ler_releases(arquivo(conteudo))
+def test_arquivo_invalido(arquivo, conteudo, message):
+    with pytest.raises(releases.InvalidReleases, match=message):
+        releases.read_releases(arquivo(conteudo))
 
 
 @pytest.mark.django_db
@@ -123,7 +123,7 @@ def test_pagina_novidades(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     conteudo = client.get(reverse("whats_new")).content.decode()
-    assert f"Versão {releases.versao_atual()}" in conteudo
+    assert f"Versão {releases.current_version()}" in conteudo
     # Items with an empty publico are hidden from everyone
     assert "Estrutura do projeto, Docker" not in conteudo
 
@@ -135,20 +135,20 @@ def test_pagina_novidades_exige_login(client):
 
 @pytest.mark.django_db
 def test_api_releases(client):
-    resposta = client.get("/api/v1/releases?publico=paciente")
-    assert resposta.status_code == 200
-    dados = resposta.json()
+    response = client.get("/api/v1/releases?publico=paciente")
+    assert response.status_code == 200
+    data = response.json()
     # Only versions with patient-facing items are returned, newest first.
-    esperadas = [release.versao for release, _ in releases.para_publico("paciente")]
-    assert [versao["versao"] for versao in dados] == esperadas
-    modulos = {item["modulo"] for versao in dados for item in versao["itens"]}
+    esperadas = [release.versao for release, _ in releases.for_audience("paciente")]
+    assert [versao["versao"] for versao in data] == esperadas
+    modulos = {item["modulo"] for versao in data for item in versao["itens"]}
     assert "Acesso" not in modulos  # staff-only items never reach patients
 
 
 @pytest.mark.django_db
 def test_api_versao(client):
-    assert client.get("/api/v1/version").json() == {"version": releases.versao_atual()}
-    assert client.get("/api/v1/versao").json() == {"versao": releases.versao_atual()}
+    assert client.get("/api/v1/version").json() == {"version": releases.current_version()}
+    assert client.get("/api/v1/versao").json() == {"versao": releases.current_version()}
 
 
 DEPENDABOT = """
@@ -176,23 +176,23 @@ def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django
     from django.core.management import call_command
 
     settings.RELEASES_ARQUIVO = arquivo(DEPENDABOT)
-    releases.todas.cache_clear()
+    releases.all_releases.cache_clear()
     try:
         user = django_user_model.objects.create_user(username="bia", password="x-1234567890")
         client.force_login(user)
-        pagina = client.get(reverse("whats_new")).content.decode()
-        assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in pagina
-        assert 'target="_blank" rel="noopener noreferrer"' in pagina  # opens in a new tab
-        assert "Dependabot · #42" in pagina and pagina.count("Dependabot ·") == 1
-        dados = client.get("/api/v1/releases?publico=paciente").json()
-        assert [(i["origem"], i["pr"]) for i in dados[0]["itens"]] == [
+        page = client.get(reverse("whats_new")).content.decode()
+        assert 'href="https://github.com/facchini-miguel/kaladrius/pull/42"' in page
+        assert 'target="_blank" rel="noopener noreferrer"' in page  # opens in a new tab
+        assert "Dependabot · #42" in page and page.count("Dependabot ·") == 1
+        data = client.get("/api/v1/releases?publico=paciente").json()
+        assert [(i["origem"], i["pr"]) for i in data[0]["itens"]] == [
             ("Dependabot", 42),
             (None, None),
         ]
         saida = StringIO()
         call_command("release_notes", "2.0.0", stdout=saida)
-        linhas = saida.getvalue().splitlines()
-        assert linhas[0].endswith("Biblioteca atualizada. (Dependabot, #42)")
-        assert linhas[1].endswith("Feito pelo projeto.")
+        rows = saida.getvalue().splitlines()
+        assert rows[0].endswith("Biblioteca atualizada. (Dependabot, #42)")
+        assert rows[1].endswith("Feito pelo projeto.")
     finally:
-        releases.todas.cache_clear()
+        releases.all_releases.cache_clear()

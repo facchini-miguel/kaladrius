@@ -14,14 +14,14 @@ from django.conf import settings
 from django.utils.translation import get_language, gettext, gettext_noop
 from django.utils.translation import gettext_lazy as _
 
-TIPOS = {
+KINDS = {
     "novo": _("Novo"),
     "melhoria": _("Melhoria"),
     "correcao": _("Correção"),
     "seguranca": _("Segurança"),
 }
 # Modules named in releases.yaml, translated when shown (tests check every one is here).
-MODULOS = [
+MODULES = [
     gettext_noop("Acesso"),
     gettext_noop("Ajuda"),
     gettext_noop("Agenda"),
@@ -47,23 +47,23 @@ MODULOS = [
     gettext_noop("Tabelas base"),
     gettext_noop("Tipos de atendimento"),
 ]
-IDIOMA_ORIGEM = "pt-br"
-PUBLICOS = {"equipe", "paciente"}
+SOURCE_LANGUAGE = "pt-br"
+AUDIENCES = {"equipe", "paciente"}
 # Where an item came from (decision 133): no `origem` is a change made by the project; Dependabot
 # items carry the number of their pull request, so owner and readers tell them apart.
-ORIGENS = {"dependabot": "Dependabot"}
-REPOSITORIO = "https://github.com/facchini-miguel/kaladrius"
+SOURCES = {"dependabot": "Dependabot"}
+REPOSITORY = "https://github.com/facchini-miguel/kaladrius"
 _SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 
-class ReleasesInvalidas(ValueError):
+class InvalidReleases(ValueError):
     pass
 
 
-def _no_idioma(textos):
+def _in_language(textos):
     """The text in the active language, falling back to Portuguese."""
-    por_idioma = dict(textos)
-    return por_idioma.get(get_language()) or por_idioma.get(IDIOMA_ORIGEM, "")
+    by_language = dict(textos)
+    return by_language.get(get_language()) or by_language.get(SOURCE_LANGUAGE, "")
 
 
 @dataclass(frozen=True)
@@ -77,7 +77,7 @@ class Item:
 
     @property
     def tipo_nome(self):
-        return str(TIPOS[self.tipo])
+        return str(KINDS[self.tipo])
 
     @property
     def modulo_nome(self):
@@ -85,15 +85,15 @@ class Item:
 
     @property
     def texto(self):
-        return _no_idioma(self.textos)
+        return _in_language(self.textos)
 
     @property
     def origem_nome(self):
-        return ORIGENS.get(self.origem, "")
+        return SOURCES.get(self.origem, "")
 
     @property
-    def url_pr(self):
-        return f"{REPOSITORIO}/pull/{self.pr}" if self.pr else ""
+    def pr_url(self):
+        return f"{REPOSITORY}/pull/{self.pr}" if self.pr else ""
 
 
 @dataclass(frozen=True)
@@ -105,131 +105,131 @@ class Release:
 
     @property
     def titulo(self):
-        return _no_idioma(self.titulos)
+        return _in_language(self.titulos)
 
     @property
-    def chave(self):
-        return versao_para_tupla(self.versao)
+    def key(self):
+        return version_tuple(self.versao)
 
-    def itens_para(self, publico):
+    def items_for(self, publico):
         return tuple(item for item in self.itens if publico in item.publico)
 
 
-def versao_para_tupla(versao):
+def version_tuple(versao):
     encontrado = _SEMVER.match(str(versao))
     if not encontrado:
-        raise ReleasesInvalidas(f"Versão '{versao}' fora do formato MAIOR.MENOR.CORREÇÃO.")
+        raise InvalidReleases(f"Versão '{versao}' fora do formato MAIOR.MENOR.CORREÇÃO.")
     return tuple(int(parte) for parte in encontrado.groups())
 
 
-def _textos(valor, versao, campo):
+def _texts(value, versao, field):
     """A text as ((language, text), ...): a plain string is Portuguese; a mapping holds
     one text per language and must include Portuguese."""
-    if valor is None or isinstance(valor, str):
-        valor = {IDIOMA_ORIGEM: valor or ""}
-    if not isinstance(valor, dict):
-        raise ReleasesInvalidas(f"{versao}: '{campo}' deve ser um texto ou um texto por idioma.")
+    if value is None or isinstance(value, str):
+        value = {SOURCE_LANGUAGE: value or ""}
+    if not isinstance(value, dict):
+        raise InvalidReleases(f"{versao}: '{field}' deve ser um texto ou um texto por idioma.")
     idiomas = dict(settings.LANGUAGES)
     textos = []
-    for idioma, texto in valor.items():
+    for idioma, texto in value.items():
         if idioma not in idiomas:
-            raise ReleasesInvalidas(f"{versao}: idioma '{idioma}' desconhecido em '{campo}'.")
+            raise InvalidReleases(f"{versao}: idioma '{idioma}' desconhecido em '{field}'.")
         textos.append((idioma, " ".join(str(texto or "").split())))
-    if not dict(textos).get(IDIOMA_ORIGEM) and any(t for _i, t in textos):
-        raise ReleasesInvalidas(f"{versao}: '{campo}' precisa do texto em português.")
+    if not dict(textos).get(SOURCE_LANGUAGE) and any(t for _i, t in textos):
+        raise InvalidReleases(f"{versao}: '{field}' precisa do texto em português.")
     return tuple(textos)
 
 
-def _validar_item(bruto, versao):
-    if not isinstance(bruto, dict):
-        raise ReleasesInvalidas(f"{versao}: cada item deve ser um objeto.")
-    tipo = bruto.get("tipo")
-    if tipo not in TIPOS:
-        raise ReleasesInvalidas(f"{versao}: tipo '{tipo}' inválido. Use: {', '.join(TIPOS)}.")
-    modulo = str(bruto.get("modulo") or "").strip()
-    textos = _textos(bruto.get("texto"), versao, "texto")
-    if not modulo or not dict(textos).get(IDIOMA_ORIGEM):
-        raise ReleasesInvalidas(f"{versao}: todo item precisa de 'modulo' e 'texto'.")
-    publico = bruto.get("publico")
-    if not isinstance(publico, list) or not set(publico) <= PUBLICOS:
-        raise ReleasesInvalidas(
-            f"{versao}: 'publico' deve ser uma lista com {sorted(PUBLICOS)} (ou vazia)."
+def _validate_item(raw, versao):
+    if not isinstance(raw, dict):
+        raise InvalidReleases(f"{versao}: cada item deve ser um objeto.")
+    tipo = raw.get("tipo")
+    if tipo not in KINDS:
+        raise InvalidReleases(f"{versao}: tipo '{tipo}' inválido. Use: {', '.join(KINDS)}.")
+    modulo = str(raw.get("modulo") or "").strip()
+    textos = _texts(raw.get("texto"), versao, "texto")
+    if not modulo or not dict(textos).get(SOURCE_LANGUAGE):
+        raise InvalidReleases(f"{versao}: todo item precisa de 'modulo' e 'texto'.")
+    publico = raw.get("publico")
+    if not isinstance(publico, list) or not set(publico) <= AUDIENCES:
+        raise InvalidReleases(
+            f"{versao}: 'publico' deve ser uma lista com {sorted(AUDIENCES)} (ou vazia)."
         )
-    origem = bruto.get("origem") or ""
-    if origem and origem not in ORIGENS:
-        raise ReleasesInvalidas(f"{versao}: origem '{origem}' inválida. Use: {', '.join(ORIGENS)}.")
-    pr = bruto.get("pr")
+    origem = raw.get("origem") or ""
+    if origem and origem not in SOURCES:
+        raise InvalidReleases(f"{versao}: origem '{origem}' inválida. Use: {', '.join(SOURCES)}.")
+    pr = raw.get("pr")
     if pr is not None and (not isinstance(pr, int) or isinstance(pr, bool) or pr < 1):
-        raise ReleasesInvalidas(f"{versao}: 'pr' deve ser o número do pull request.")
+        raise InvalidReleases(f"{versao}: 'pr' deve ser o número do pull request.")
     if origem and pr is None:
-        raise ReleasesInvalidas(f"{versao}: um item do {ORIGENS[origem]} precisa do 'pr'.")
+        raise InvalidReleases(f"{versao}: um item do {SOURCES[origem]} precisa do 'pr'.")
     return Item(
         tipo=tipo, modulo=modulo, publico=tuple(publico), textos=textos, origem=origem, pr=pr
     )
 
 
-def _validar_release(bruto):
-    if not isinstance(bruto, dict):
-        raise ReleasesInvalidas("Cada versão deve ser um objeto.")
-    versao = str(bruto.get("versao", ""))
-    versao_para_tupla(versao)
-    data = bruto.get("data")
+def _validate_release(raw):
+    if not isinstance(raw, dict):
+        raise InvalidReleases("Cada versão deve ser um objeto.")
+    versao = str(raw.get("versao", ""))
+    version_tuple(versao)
+    data = raw.get("data")
     if not isinstance(data, datetime.date):
-        raise ReleasesInvalidas(f"{versao}: 'data' deve estar no formato AAAA-MM-DD.")
-    itens = bruto.get("itens")
+        raise InvalidReleases(f"{versao}: 'data' deve estar no formato AAAA-MM-DD.")
+    itens = raw.get("itens")
     if not isinstance(itens, list) or not itens:
-        raise ReleasesInvalidas(f"{versao}: a versão precisa de pelo menos um item.")
+        raise InvalidReleases(f"{versao}: a versão precisa de pelo menos um item.")
     return Release(
         versao=versao,
         data=data,
-        titulos=_textos(bruto.get("titulo"), versao, "titulo"),
-        itens=tuple(_validar_item(item, versao) for item in itens),
+        titulos=_texts(raw.get("titulo"), versao, "titulo"),
+        itens=tuple(_validate_item(item, versao) for item in itens),
     )
 
 
-def ler_releases(caminho):
+def read_releases(path):
     """Read and validate the file. Versions must be ordered from newest to oldest."""
-    conteudo = yaml.safe_load(Path(caminho).read_text(encoding="utf-8"))
+    conteudo = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(conteudo, list) or not conteudo:
-        raise ReleasesInvalidas("O arquivo deve conter uma lista com pelo menos uma versão.")
-    releases = [_validar_release(bruto) for bruto in conteudo]
-    for mais_nova, anterior in zip(releases, releases[1:], strict=False):
-        if mais_nova.chave <= anterior.chave:
-            raise ReleasesInvalidas(
-                f"Ordem inválida: {mais_nova.versao} deveria ser maior que {anterior.versao}."
+        raise InvalidReleases("O arquivo deve conter uma lista com pelo menos uma versão.")
+    releases = [_validate_release(raw) for raw in conteudo]
+    for mais_nova, previous in zip(releases, releases[1:], strict=False):
+        if mais_nova.key <= previous.key:
+            raise InvalidReleases(
+                f"Ordem inválida: {mais_nova.versao} deveria ser maior que {previous.versao}."
             )
-        if mais_nova.data < anterior.data:
-            raise ReleasesInvalidas(
-                f"Data inválida: {mais_nova.versao} tem data anterior à de {anterior.versao}."
+        if mais_nova.data < previous.data:
+            raise InvalidReleases(
+                f"Data inválida: {mais_nova.versao} tem data anterior à de {previous.versao}."
             )
     return tuple(releases)
 
 
 @lru_cache(maxsize=1)
-def todas():
-    return ler_releases(settings.RELEASES_ARQUIVO)
+def all_releases():
+    return read_releases(settings.RELEASES_ARQUIVO)
 
 
-def versao_atual():
-    return todas()[0].versao
+def current_version():
+    return all_releases()[0].versao
 
 
-def tem_novidade_para(ultima_vista, publico="equipe"):
+def has_news_for(last_seen, publico="equipe"):
     """Whether there are release notes for the audience newer than the last version seen."""
     try:
-        return bool(para_publico(publico, desde=ultima_vista or None))
-    except ReleasesInvalidas:
+        return bool(for_audience(publico, desde=last_seen or None))
+    except InvalidReleases:
         return True
 
 
-def para_publico(publico, desde=None):
+def for_audience(publico, desde=None):
     """Versions with items for the audience, newest first, optionally only after `desde`."""
-    minimo = versao_para_tupla(desde) if desde else None
+    minimo = version_tuple(desde) if desde else None
     resultado = []
-    for release in todas():
-        if minimo is not None and release.chave <= minimo:
+    for release in all_releases():
+        if minimo is not None and release.key <= minimo:
             continue
-        itens = release.itens_para(publico)
+        itens = release.items_for(publico)
         if itens:
             resultado.append((release, itens))
     return resultado
