@@ -15,7 +15,7 @@ from apps.schedule.models import Appointment
 pytestmark = pytest.mark.django_db
 
 
-def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
+def test_populate_sample_data_is_idempotent(settings, monkeypatch):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     call_command("seed_sample_data", pacientes=30)
@@ -43,14 +43,14 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
         )
 
 
-def test_popular_dados_teste_exige_debug(settings, monkeypatch):
+def test_populate_sample_data_requires_debug(settings, monkeypatch):
     settings.DEBUG = False
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     with pytest.raises(CommandError):
         call_command("seed_sample_data")
 
 
-def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, criar_usuario):
+def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, criar_usuario):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     call_command("seed_sample_data", pacientes=5)
@@ -78,7 +78,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     ).exists()
 
 
-def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
+def test_fake_occupation_fits_the_field_uncut():
     """Faker 40's pt_BR job list has titles over 100 characters: another one is drawn."""
     from apps.core import fake_data
 
@@ -91,7 +91,7 @@ def test_profissao_ficticia_cabe_no_campo_sem_ser_cortada():
     assert fake_data.occupation(Falso()) == "Dentista"
 
 
-def test_documento_ficticio_sempre_valido():
+def test_fake_document_always_valid():
     """Faker 40 can, rarely, make up a CPF with all digits equal: another one is drawn."""
     from apps.core import fake_data
 

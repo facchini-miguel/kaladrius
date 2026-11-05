@@ -38,7 +38,7 @@ def ana(clinica_a):
         return employee
 
 
-def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
+def test_registration_with_salary_and_raise_in_history(clinica_a, admin):
     response = admin.post(
         reverse("staff:new"),
         {
@@ -80,13 +80,13 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
         ({"hired_on": "2026-05-01", "left_on": "2026-04-01"}, "left_on"),
     ],
 )
-def test_validacoes_do_cadastro(data, field, admin):
+def test_registration_validations(data, field, admin):
     base = {"name": "Fictício", "salary": "2000", "active": "on"}
     response = admin.post(reverse("staff:new"), {**base, **data})
     assert field in response.context["form"].errors
 
 
-def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
+def test_payroll_prepares_the_month_employees(clinica_a, ana):
     with use_clinic(clinica_a):
         futuro = Employee.objects.create(
             name="Admitido depois", hired_on=datetime.date(2026, 11, 3)
@@ -107,14 +107,14 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
     ) == Decimal("15.00")
 
 
-def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
+def test_viewing_a_month_saves_no_payroll(clinica_a, ana, admin):
     for month in ("2026-10", "2030-01"):
         assert admin.get(FOLHA, {"mes": month}).status_code == 200
     with use_clinic(clinica_a):
         assert not Payroll.objects.exists()
 
 
-def test_calculo_do_total():
+def test_total_calculation():
     payroll = Payroll(
         salary=Decimal("3000"),
         overtime_hours=Decimal("10"),
@@ -126,7 +126,7 @@ def test_calculo_do_total():
     assert payroll.total == Decimal("3004.50")
 
 
-def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
+def test_save_and_post_to_finance(clinica_a, ana, admin):
     page = admin.get(FOLHA, {"mes": "2026-10"})
     payroll, form = page.context["linhas"][0]
     prefixo = form.prefix
@@ -173,7 +173,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         assert not payroll.is_posted
 
 
-def test_total_zero_nao_e_lancado(clinica_a, ana):
+def test_zero_total_is_not_posted(clinica_a, ana):
     with use_clinic(clinica_a):
         payroll = services.prepare(OUTUBRO)[0]
         payroll.absences = 30
@@ -183,20 +183,18 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
-def test_so_administrador_e_financeiro_veem_salarios(
-    role, clinica_a, ana, criar_usuario, cliente_de
-):
+def test_only_admin_and_finance_see_salaries(role, clinica_a, ana, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("sem_pessoal", clinica_a, role))
     for url in (FOLHA, reverse("staff:list"), reverse("staff:employee", args=[ana.pk])):
         assert cliente.get(url).status_code == 403, url
 
 
-def test_perfil_financeiro_lanca_a_folha(clinica_a, ana, criar_usuario, cliente_de):
+def test_finance_role_posts_payroll(clinica_a, ana, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("fin_pessoal", clinica_a, Role.FINANCE))
     assert cliente.get(FOLHA).status_code == 200
 
 
-def test_modulo_pessoal_liga_desliga_e_depende_do_financeiro(clinica_a, admin):
+def test_staff_module_on_off_and_depends_on_finance(clinica_a, admin):
     assert reverse("staff:payroll") in admin.get(reverse("home")).content.decode()
     configure(clinica_a, GENERAL_MODULES - {ModuleCode.STAFF})
     assert admin.get(FOLHA).status_code == 403

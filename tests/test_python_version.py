@@ -11,7 +11,7 @@ import pytest
 RAIZ = Path(__file__).resolve().parent.parent
 
 
-def test_versao_do_python_em_um_lugar_so():
+def test_python_version_in_one_place():
     versao = (RAIZ / ".python-version").read_text().strip()
     assert re.fullmatch(r"3\.\d+", versao)
     dockerfile = (RAIZ / "Dockerfile").read_text()

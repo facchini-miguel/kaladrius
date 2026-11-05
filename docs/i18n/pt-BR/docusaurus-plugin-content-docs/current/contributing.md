@@ -28,7 +28,7 @@ docker compose exec app python manage.py makemigrations --check
 - **Pastas e módulos dos apps com nome em inglês** (`apps/patients/`, `apps/core/countries.py`). Cada app mantém o seu **label** em português (`label = "pacientes"` no `apps.py`), o nome pelo qual as tabelas do banco, as migrações e as permissões o conhecem, e os arquivos de migração mantêm os seus nomes: a produção os tem registrados (decisão 145).
 - **Comandos de gerenciamento com nome em inglês**, opções incluídas (`python manage.py seed_sample_data --patients 50`) (decisão 148).
 - **Templates com nome em inglês**, numa pasta com o nome do seu app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); os nomes do próprio Django ficam (`base.html`, `403.html`, `registration/login.html`) (decisão 146).
-- **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144).
+- **Arquivos de teste com nome em inglês**, pelo que testam (`tests/test_patients.py`, `tests/test_schedule.py`), mesmo quando o módulo testado tem nome em português (decisão 144). As funções de teste também, dizendo o que conferem (`test_duplicate_cpf_refused_in_same_clinic_but_allowed_in_another`); os textos que o teste procura na tela continuam em português (decisão 181).
 - **Todo texto da tela** é escrito em português no código e traduzido em `locale/en` e `locale/es`:
   ```bash
   docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests

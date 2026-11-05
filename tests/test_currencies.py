@@ -36,17 +36,17 @@ VALOR = Decimal("1234.56")
         ("UYU", "es", "$U 1\u00a0234,56"),
     ],
 )
-def test_simbolo_da_moeda_e_separadores_do_idioma(code, language, esperado):
+def test_currency_symbol_and_language_separators(code, language, esperado):
     with translation.override(language):
         assert currencies.format_amount(VALOR, code) == esperado
 
 
-def test_valor_invalido_fica_vazio():
+def test_invalid_amount_stays_empty():
     assert currencies.format_amount(None, "USD") == ""
     assert currencies.format_amount("abc", "USD") == ""
 
 
-def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
+def test_filter_uses_the_current_clinic_currency(clinica_a):
     modelo = Template("{% load formats %}{{ amount|currency }} {% currency_symbol %}")
     context = Context({"amount": VALOR})
     with translation.override("pt-br"):
@@ -56,7 +56,7 @@ def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
             assert modelo.render(context) == "1.234,56 € €"
 
 
-def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario, cliente_de):
+def test_admin_picks_currency_and_amounts_show_in_it(clinica_a, criar_usuario, cliente_de):
     assert clinica_a.currency == "BRL"  # existing and new clinics start with the real
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     assert "Dólar americano (US$, USD)" in admin.get(reverse("clinic_settings")).content.decode()
@@ -77,13 +77,13 @@ def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario,
     assert "Nenhum valor já lançado foi convertido" not in response.content.decode()
 
 
-def test_moeda_desconhecida_e_recusada(clinica_a, criar_usuario, cliente_de):
+def test_unknown_currency_is_refused(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     response = admin.post(reverse("clinic_settings"), dados_clinica(currency="XXX"))
     assert response.status_code == 200 and "currency" in response.context["form"].errors
 
 
-def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
+def test_only_admin_changes_the_currency(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_a", clinica_a, Role.FRONT_DESK))
     assert (
         reception.post(reverse("clinic_settings"), dados_clinica(currency="EUR")).status_code == 403
@@ -95,19 +95,19 @@ def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
 @pytest.mark.parametrize(
     "digitado", ["US$ 1.500,00", "€ 1.500", "1.500 €", "$U 1.500,00", "S/ 1500"]
 )
-def test_valor_digitado_com_simbolo_de_qualquer_moeda(digitado):
+def test_amount_typed_with_any_currency_symbol(digitado):
     with translation.override("pt-br"):
         assert LocalizedDecimalField(decimal_places=2, localize=True).clean(digitado) == Decimal(
             "1500.00"
         )
 
 
-def test_texto_que_nao_e_valor_continua_recusado():
+def test_text_that_is_not_an_amount_is_still_refused():
     with translation.override("pt-br"), pytest.raises(forms.ValidationError):
         LocalizedDecimalField(decimal_places=2, localize=True).clean("abc")
 
 
-def test_formulario_sem_a_moeda_mantem_a_atual(clinica_a, criar_usuario, cliente_de):
+def test_form_without_currency_keeps_the_current(clinica_a, criar_usuario, cliente_de):
     """A settings page opened before the update does not send the currency."""
     clinica_a.currency = "EUR"
     clinica_a.save(update_fields=["currency"])

@@ -28,7 +28,7 @@ def content():
     return re.findall(r"- src: (\S+)\n\s+dst: (\S+)", NFPM)
 
 
-def test_todo_arquivo_do_pacote_existe():
+def test_every_package_file_exists():
     for source, _destino in content():
         if (
             source.startswith("/") or source == "dist/linux-package"
@@ -39,7 +39,7 @@ def test_todo_arquivo_do_pacote_existe():
         assert (RAIZ / script).is_file(), script
 
 
-def test_cada_tarefa_agendada_roda_um_script_do_pacote():
+def test_each_scheduled_task_runs_a_package_script():
     destinos = {destino for _origem, destino in content()}
     unidades = [d for d in destinos if d.startswith("/usr/lib/systemd/system/")]
     assert {Path(u).name for u in unidades} == {
@@ -54,7 +54,7 @@ def test_cada_tarefa_agendada_roda_um_script_do_pacote():
             assert executavel in destinos, (unidade, executavel)
 
 
-def test_o_pacote_liga_as_tarefas_que_traz():
+def test_package_enables_the_tasks_it_ships():
     comum = (SERVIDOR / "common.sh").read_text()
     bloco = comum.split("if installed_by_package; then  # its units came with the package")[1]
     ligadas = set(re.findall(r"kaladrius-[a-z-]+\.timer", bloco.split("return 0")[0]))
@@ -93,7 +93,7 @@ def avaliar(comum, expressao, ambiente=None):
 IMAGEM = "ghcr.io/facchini-miguel/kaladrius:0.54.0@sha256:abc"
 
 
-def test_modo_pacote_usa_a_imagem_fixada_por_digest(tmp_path):
+def test_package_mode_uses_image_pinned_by_digest(tmp_path):
     comum = comum_em(tmp_path, pacote=f"VERSION=0.54.0\nIMAGE={IMAGEM}\n")
     assert avaliar(comum, 'echo "$APP_IMAGE|$DOCS_IMAGE|$PACKAGE_VERSION|$REGISTRY"') == (
         f"{IMAGEM}||0.54.0|ghcr.io"
@@ -105,7 +105,7 @@ def test_modo_pacote_usa_a_imagem_fixada_por_digest(tmp_path):
     assert avaliar(comum, "registry_login && echo sem-login") == "sem-login"
 
 
-def test_modo_pacote_aceita_outra_imagem(tmp_path):
+def test_package_mode_accepts_another_image(tmp_path):
     comum = comum_em(
         tmp_path, pacote=f"VERSION=0.54.0\nIMAGE={IMAGEM}\n", env="KALADRIUS_IMAGE=k:teste\n"
     )
@@ -113,7 +113,7 @@ def test_modo_pacote_aceita_outra_imagem(tmp_path):
     assert avaliar(comum, 'echo "$APP_IMAGE"', {"KALADRIUS_IMAGE": "outra:1"}) == "outra:1"
 
 
-def test_sem_pacote_segue_o_google_cloud(tmp_path):
+def test_without_package_follows_google_cloud(tmp_path):
     comum = comum_em(tmp_path)
     # Google Cloud copies the whole deploy/ folder of the image to release/, the package's
     # sources included: they must not switch on the package mode.
@@ -135,7 +135,7 @@ def test_sem_pacote_segue_o_google_cloud(tmp_path):
         ("kaladrius:teste", "kaladrius"),
     ],
 )
-def test_repositorio_de(tmp_path, referencia, repositorio):
+def test_repository_of(tmp_path, referencia, repositorio):
     assert avaliar(comum_em(tmp_path), f'repository_of "{referencia}"') == repositorio
 
 
@@ -143,7 +143,7 @@ def test_repositorio_de(tmp_path, referencia, repositorio):
     ("acesso", "esperado"),
     [("internal-network", "sim"), ("rede-interna", "sim"), ("internet", "nao")],
 )
-def test_rede_interna(tmp_path, acesso, esperado):
+def test_internal_network(tmp_path, acesso, esperado):
     comum = comum_em(tmp_path, env=f"KALADRIUS_ACCESS={acesso}\n")
     assert avaliar(comum, "internal_network && echo sim || echo nao") == esperado
 
@@ -172,7 +172,7 @@ def kaladrius(tmp_path, *args, language="C"):
         ("C", "makes a backup now"),
     ],
 )
-def test_ajuda_no_idioma_do_servidor(tmp_path, language, trecho):
+def test_help_in_the_server_language(tmp_path, language, trecho):
     resultado = kaladrius(tmp_path, "help", language=language)
     assert resultado.returncode == 0, resultado.stderr
     assert trecho in resultado.stdout
@@ -180,22 +180,22 @@ def test_ajuda_no_idioma_do_servidor(tmp_path, language, trecho):
 
 
 @pytest.mark.parametrize("comando", ["ajuda", "ayuda", "--help"])
-def test_ajuda_em_outros_nomes(tmp_path, comando):
+def test_help_under_other_names(tmp_path, comando):
     assert kaladrius(tmp_path, comando).returncode == 0
 
 
-def test_comando_desconhecido_falha(tmp_path):
+def test_unknown_command_fails(tmp_path):
     assert kaladrius(tmp_path, "nao-existe").returncode == 2
 
 
 @pytest.mark.skipif(os.geteuid() == 0, reason="running as root")
-def test_configurar_exige_root(tmp_path):
+def test_configure_requires_root(tmp_path):
     resultado = kaladrius(tmp_path, "configure", "--access", "internal-network")
     assert resultado.returncode == 1
     assert "sudo kaladrius configure" in resultado.stderr
 
 
-def test_nenhum_script_confere_duas_condicoes_numa_linha_so():
+def test_no_script_checks_two_conditions_on_one_line():
     # `[ a ] && [ b ]` alone on a line does not stop a `set -e` script when `a` fails: the
     # restore test passed with no clinic restored until decision 140.
     default = re.compile(r"^\s*\[[^]]*\]\s*&&\s*\[[^]]*\]\s*$")
@@ -204,7 +204,7 @@ def test_nenhum_script_confere_duas_condicoes_numa_linha_so():
             assert not default.match(row), f"{script.name}:{number}: {row.strip()}"
 
 
-def test_nenhum_script_usa_grep_q_depois_de_um_cano():
+def test_no_script_uses_grep_q_after_a_pipe():
     # With pipefail, `cmd | grep -q x` fails when grep exits at the first match and `cmd` dies
     # writing the rest (SIGPIPE): Kaladrius's own Caddy was taken for another program on 80/443.
     default = re.compile(r"\|\s*grep\s+-[a-zA-Z]*q")
@@ -225,14 +225,14 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
         ("clinica.exemplo.com", False),
     ],
 )
-def test_eh_ipv4(tmp_path, address, is_valid):
+def test_is_ipv4(tmp_path, address, is_valid):
     resultado = funcao_do_comando(
         tmp_path, f'is_ipv4 "{address}" && echo sim || echo nao', {"PATH": "/usr/bin:/bin"}
     )
     assert resultado.stdout.strip() == ("sim" if is_valid else "nao"), resultado.stderr
 
 
-def test_configurar_de_novo_grava_o_novo_usuario_do_administrador(tmp_path):
+def test_configuring_again_saves_the_new_admin_user(tmp_path):
     # A first run that did not finish wrote .env; the user name typed on the next run is the
     # one created, so .env (read by `kaladrius senha`) must say the same.
     expressao = (
@@ -246,7 +246,7 @@ def test_configurar_de_novo_grava_o_novo_usuario_do_administrador(tmp_path):
     assert resultado.stdout.splitlines() == ["1", "suporte", "", "192.168.0.11"]
 
 
-def test_pasta_dos_backups(tmp_path):
+def test_backups_folder(tmp_path):
     assert avaliar(comum_em(tmp_path / "a"), "backup_dir") == "/var/backups/kaladrius"
     outra = comum_em(tmp_path / "b", env="KALADRIUS_BACKUP_DIR=/srv/copias\n")
     assert avaliar(outra, "backup_dir") == "/srv/copias"
@@ -255,13 +255,13 @@ def test_pasta_dos_backups(tmp_path):
     assert avaliar(antiga, "backup_dir") == "/srv/antigas"
 
 
-def test_caddy_nunca_recebe_o_endereco_da_documentacao_vazio():
+def test_caddy_never_gets_an_empty_docs_address():
     # An empty address makes the Caddyfile's docs block invalid and Caddy does not start.
     compose = (RAIZ / "deploy" / "docker-compose.prod.yml").read_text()
     assert "DOCS_HOSTNAME: ${DOCS_HOSTNAME:-docs.localhost}" in compose
 
 
-def test_remover_o_pacote_nunca_apaga_os_dados():
+def test_removing_the_package_never_deletes_data():
     # The database, the backups and the .env stay; the help printed after a removal shows the
     # commands, for a person to decide (indented lines of the message).
     for script in ("pre_remove.sh", "post_remove.sh"):
@@ -277,7 +277,7 @@ def test_remover_o_pacote_nunca_apaga_os_dados():
                 }, row
 
 
-def test_o_site_e_conferido_pelo_proprio_servidor(tmp_path):
+def test_site_is_checked_by_the_server_itself(tmp_path):
     # A clinic's router often has no "hairpin NAT": from inside, the clinic's public address
     # never answers, and a good new version would be refused.
     pacote = f"VERSION=0.54.0\nIMAGE={IMAGEM}\n"
@@ -321,7 +321,7 @@ def comum_com_imagens(tmp_path, imagens, recusada=None):
 VERSAO_NO_AR = 'echo "$APP_IMAGE $COMPOSE_PATH"'
 
 
-def test_depois_de_um_rollback_os_comandos_seguem_na_versao_anterior(tmp_path):
+def test_after_rollback_commands_stay_on_previous_version(tmp_path):
     comum, ambiente = comum_com_imagens(
         tmp_path, {"kaladrius:nova": "B", "kaladrius:previous": "A"}, recusada="B"
     )
@@ -332,7 +332,7 @@ def test_depois_de_um_rollback_os_comandos_seguem_na_versao_anterior(tmp_path):
     )
 
 
-def test_atualizar_decide_a_versao_sozinho(tmp_path):
+def test_update_picks_the_version_alone(tmp_path):
     # update.sh compares the package's image with the refused one: it must see the package's.
     comum, ambiente = comum_com_imagens(
         tmp_path, {"kaladrius:nova": "B", "kaladrius:previous": "A"}, recusada="B"
@@ -344,7 +344,7 @@ def test_atualizar_decide_a_versao_sozinho(tmp_path):
     )
 
 
-def test_anterior_sem_a_copia_do_compose_usa_o_do_pacote(tmp_path):
+def test_previous_without_compose_copy_uses_the_package_one(tmp_path):
     comum, ambiente = comum_com_imagens(
         tmp_path, {"kaladrius:nova": "B", "kaladrius:previous": "A"}, recusada="B"
     )
@@ -361,14 +361,14 @@ def test_anterior_sem_a_copia_do_compose_usa_o_do_pacote(tmp_path):
         ({"kaladrius:nova": "B"}, "B"),  # a first installation that did not come up
     ],
 )
-def test_sem_rollback_os_comandos_usam_a_versao_do_pacote(tmp_path, imagens, recusada):
+def test_without_rollback_commands_use_package_version(tmp_path, imagens, recusada):
     comum, ambiente = comum_com_imagens(tmp_path, imagens, recusada)
     assert avaliar(comum, VERSAO_NO_AR, ambiente) == (
         f"kaladrius:nova {tmp_path}/release/docker-compose.prod.yml"
     )
 
 
-def test_a_versao_que_subiu_guarda_o_compose_e_o_caddyfile(tmp_path):
+def test_started_version_keeps_compose_and_caddyfile(tmp_path):
     comum = comum_em(tmp_path, pacote=f"VERSION=0.54.0\nIMAGE={IMAGEM}\n")
     (tmp_path / "release" / "docker-compose.prod.yml").write_text("compose 0.54.0")
     (tmp_path / "release" / "Caddyfile").write_text("caddy 0.54.0")
@@ -410,7 +410,7 @@ esac
 """
 
 
-def test_endereco_local_numa_rede_sem_saida(tmp_path):
+def test_local_address_on_a_network_without_route(tmp_path):
     (tmp_path / "path").mkdir()
     ip = tmp_path / "path" / "ip"
     ip.write_text(IP_SEM_ROTA)
@@ -422,7 +422,7 @@ def test_endereco_local_numa_rede_sem_saida(tmp_path):
     assert resultado.stdout == "192.168.0.10"
 
 
-def test_endereco_local_sem_endereco_nenhum_nao_falha(tmp_path):
+def test_local_address_without_any_address_does_not_fail(tmp_path):
     (tmp_path / "path").mkdir()
     ip = tmp_path / "path" / "ip"
     ip.write_text("#!/bin/sh\nexit 2\n")
@@ -463,7 +463,7 @@ def falsos(pasta, *comandos):
         ("failed-upgrade", False),
     ],
 )
-def test_remover_para_o_sistema_so_numa_remocao(tmp_path, argumento, remove):
+def test_remove_stops_the_system_only_on_removal(tmp_path, argumento, remove):
     chamadas, ambiente = falsos(tmp_path / "path", "systemctl", "docker")
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(PACOTE / "pre_remove.sh"), argumento],
@@ -477,7 +477,7 @@ def test_remover_para_o_sistema_so_numa_remocao(tmp_path, argumento, remove):
     assert desligou is remove, chamadas.read_text()
 
 
-def test_cada_formato_tem_as_dependencias_de_docker():
+def test_each_format_has_the_docker_dependencies():
     # Each package format names Docker and Docker Compose in its own distributions' words.
     for formato in ("deb", "rpm", "archlinux"):
         bloco = re.search(rf"^  {formato}:\n((?:    .*\n)+)", NFPM, re.M).group(1)
@@ -485,7 +485,7 @@ def test_cada_formato_tem_as_dependencias_de_docker():
         assert "docker" in dependencias and "compose" in dependencias, formato
 
 
-def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
+def test_text_mode_password_keeps_spaces(tmp_path):
     # Without whiptail (openSUSE, Arch Linux) the password is read as typed, spaces included.
     bin_ = tmp_path / "bin"
     bin_.mkdir()
@@ -509,7 +509,7 @@ def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
 
 
 @pytest.mark.parametrize("language", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
-def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, language):
+def test_help_explains_both_ways_to_update(tmp_path, language):
     # With the package repository (which the package adds), the system's updates; on Arch
     # Linux or without it, the next version's package from the releases.
     saida = kaladrius(tmp_path, "help", language=language).stdout
@@ -518,7 +518,7 @@ def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, language):
     assert "github.com/facchini-miguel/kaladrius/releases" in saida
 
 
-def test_certificado_com_o_caddy_parado_nao_deixa_arquivo(tmp_path):
+def test_certificate_with_caddy_stopped_leaves_no_file(tmp_path):
     destino = tmp_path / "kaladrius-certificate.crt"
     expressao = (
         "require_root() { :; }; compose() { return 1; }; "
@@ -565,7 +565,7 @@ def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None, configu
     return resultado.stdout, chamadas.read_text()
 
 
-def test_instalar_de_novo_sem_administrador_volta_as_perguntas(tmp_path):
+def test_reinstall_without_admin_asks_again(tmp_path):
     # A first `configure` that stopped after writing .env: installing the package again must not
     # bring the system up with no account to log in.
     saida, chamadas = depois_de_instalar(tmp_path, "1", admin_criado=False)
@@ -573,13 +573,13 @@ def test_instalar_de_novo_sem_administrador_volta_as_perguntas(tmp_path):
     assert "sudo kaladrius configure" in saida
 
 
-def test_atualizar_o_pacote_configurado_sobe_a_versao_nova(tmp_path):
+def test_updating_configured_package_starts_new_version(tmp_path):
     _saida, chamadas = depois_de_instalar(tmp_path, "2", admin_criado=True)
     assert "update.sh --force" in chamadas
     assert "systemd-run" not in chamadas
 
 
-def test_no_pacman_a_atualizacao_leva_as_variaveis(tmp_path):
+def test_pacman_update_carries_the_variables(tmp_path):
     # pacman: update.sh runs as its own systemd unit, which starts with a clean environment. The
     # names of 0.54 and earlier (decision 147) still work, and go along under the new ones.
     for ambiente in (
@@ -603,7 +603,7 @@ def test_no_pacman_a_atualizacao_leva_as_variaveis(tmp_path):
         (24 * 30, True),  # a month later no backup at all is a failure: a disk not mounted?
     ],
 )
-def test_teste_de_restauracao_sem_backup(tmp_path, admin_criado_ha_horas, falha):
+def test_restore_test_without_backup(tmp_path, admin_criado_ha_horas, falha):
     comum_em(
         tmp_path,
         pacote=f"VERSION=0.54.0\nIMAGE={IMAGEM}\n",
@@ -640,7 +640,7 @@ def test_teste_de_restauracao_sem_backup(tmp_path, admin_criado_ha_horas, falha)
 
 
 @pytest.mark.parametrize("comando", ["start", "restart"])
-def test_iniciar_sem_administrador_manda_terminar_a_configuracao(tmp_path, comando):
+def test_start_without_admin_asks_to_finish_setup(tmp_path, comando):
     # A setup that stopped before the administrator: starting the system would leave nobody
     # able to log in. `logs` and `stop` still work, to see why.
     expressao = (
@@ -676,7 +676,7 @@ def impressao_digital(armadura):
     return hashlib.sha1(b"\x99" + len(pacote).to_bytes(2) + pacote).hexdigest().upper()  # noqa: S324
 
 
-def test_o_repositorio_que_o_pacote_traz_e_o_publicado():
+def test_shipped_repository_is_the_published_one():
     # The apt source carries the key in Signed-By (deb822: one space before each line, "." for
     # an empty one); both files point to the software's own folder on packages.facchini.eti.br.
     fonte = (PACOTE / "repository" / "kaladrius.sources").read_text()
@@ -706,7 +706,7 @@ def test_o_repositorio_que_o_pacote_traz_e_o_publicado():
         ("0.55.0-1", ["apt/sources.list.d", "yum.repos.d"], None),  # Arch Linux: none
     ],
 )
-def test_o_pacote_adiciona_o_repositorio(tmp_path, argumento, pastas, esperado):
+def test_package_adds_the_repository(tmp_path, argumento, pastas, esperado):
     for pasta in pastas:
         (tmp_path / "etc" / pasta).mkdir(parents=True)
     saida, _chamadas = depois_de_instalar(tmp_path, argumento, admin_criado=True)
@@ -720,7 +720,7 @@ def test_o_pacote_adiciona_o_repositorio(tmp_path, argumento, pastas, esperado):
         assert "package repository added" in saida
 
 
-def test_o_repositorio_ja_configurado_nao_e_adicionado_de_novo(tmp_path):
+def test_configured_repository_is_not_added_again(tmp_path):
     # By hand under another name, or the file of an earlier installation, as the person left it.
     fontes = tmp_path / "etc" / "apt" / "sources.list.d"
     fontes.mkdir(parents=True)
@@ -738,7 +738,7 @@ def test_o_repositorio_ja_configurado_nao_e_adicionado_de_novo(tmp_path):
     assert "package repository added" not in saida
 
 
-def test_sem_repositorio_por_escolha_tambem_nas_proximas_instalacoes(tmp_path):
+def test_no_repository_by_choice_also_on_later_installs(tmp_path):
     fontes = tmp_path / "etc" / "apt" / "sources.list.d"
     fontes.mkdir(parents=True)
     depois_de_instalar(
@@ -749,7 +749,7 @@ def test_sem_repositorio_por_escolha_tambem_nas_proximas_instalacoes(tmp_path):
     assert not list(fontes.iterdir())
 
 
-def test_a_primeira_instalacao_ja_adiciona_o_repositorio(tmp_path):
+def test_first_install_already_adds_the_repository(tmp_path):
     # Before `configure`: the server is on the repository even if the setup never finishes.
     fontes = tmp_path / "etc" / "apt" / "sources.list.d"
     fontes.mkdir(parents=True)
@@ -761,7 +761,7 @@ def test_a_primeira_instalacao_ja_adiciona_o_repositorio(tmp_path):
 
 
 @pytest.mark.parametrize(("argumento", "fica"), [("remove", True), ("purge", False)])
-def test_remover_mantem_o_repositorio_e_purge_apaga(tmp_path, argumento, fica):
+def test_remove_keeps_repository_and_purge_deletes(tmp_path, argumento, fica):
     fontes = tmp_path / "etc" / "apt" / "sources.list.d"
     fontes.mkdir(parents=True)
     (fontes / "kaladrius.sources").write_text("Types: deb\n")
@@ -801,7 +801,7 @@ echo "${rest[*]}" >>"$CALLS"
         ("registrar_backup", "registrar_backup a.dump 10"),
     ],
 )
-def test_manage_usa_o_nome_antigo_so_num_app_que_nao_o_conhece(tmp_path, conhecidos, esperado):
+def test_manage_uses_old_name_only_in_app_that_lacks_it(tmp_path, conhecidos, esperado):
     comum = comum_em(tmp_path)
     (tmp_path / "path").mkdir()
     docker = tmp_path / "path" / "docker"
@@ -827,7 +827,7 @@ case "$*" in *"/api/v1/saude"*) exit 0 ;; *) exit 22 ;; esac
 @pytest.mark.parametrize(
     ("curl", "responde"), [(CURL_SO_O_ANTIGO, "sim"), ("#!/bin/sh\nexit 22\n", "nao")]
 )
-def test_a_saude_pelo_endereco_novo_ou_pelo_antigo(tmp_path, curl, responde):
+def test_health_by_new_or_old_address(tmp_path, curl, responde):
     comum = comum_em(tmp_path)
     (tmp_path / "path").mkdir()
     falso = tmp_path / "path" / "curl"

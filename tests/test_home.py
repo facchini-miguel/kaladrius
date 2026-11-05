@@ -142,7 +142,7 @@ def start(cenario, cliente_de, quem):
     return cliente_de(cenario[quem]).get(reverse("home"))
 
 
-def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
+def test_reception_sees_the_day_without_expenses(cenario, cliente_de):
     response = start(cenario, cliente_de, "recepcao")
     painel = response.context["painel"]
     dia_ = painel["agenda"]
@@ -167,7 +167,7 @@ def test_recepcao_ve_o_dia_sem_as_despesas(cenario, cliente_de):
     assert reverse("schedule:status", args=[dia_["proximo"].pk]) in content
 
 
-def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
+def test_admin_sees_day_and_month_result(cenario, cliente_de):
     painel = start(cenario, cliente_de, "admin").context["painel"]
     fin = painel["financeiro"]
     assert fin["pago_hoje"] == Decimal("50") and fin["resultado_hoje"] == Decimal("50")
@@ -181,7 +181,7 @@ def test_administrador_ve_resultado_do_dia_e_do_mes(cenario, cliente_de):
     assert fin["saldo_contas"] == Decimal("250")
 
 
-def test_profissional_ve_so_a_propria_agenda_e_nenhum_valor(cenario, cliente_de):
+def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de):
     response = start(cenario, cliente_de, "dra")
     painel = response.context["painel"]
     assert {a.practitioner.name for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
@@ -193,7 +193,7 @@ def test_profissional_ve_so_a_propria_agenda_e_nenhum_valor(cenario, cliente_de)
     assert "Recebido hoje" not in content and "Caixa do dia" not in content
 
 
-def test_listas_de_rechamadas_aniversariantes_e_orcamentos(cenario, cliente_de):
+def test_lists_of_recalls_birthdays_and_estimates(cenario, cliente_de):
     painel = start(cenario, cliente_de, "recepcao").context["painel"]
     rechamadas = painel["rechamadas"]
     assert [r.date for r in rechamadas["lista"]] == [day(1), HOJE]
@@ -202,7 +202,7 @@ def test_listas_de_rechamadas_aniversariantes_e_orcamentos(cenario, cliente_de):
     assert [o.valid_until for o in painel["orcamentos"]] == [day(8)]
 
 
-def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_de):
+def test_completing_recall_and_marking_attendance_return_home(cenario, cliente_de):
     cliente = cliente_de(cenario["recepcao"])
     painel = cliente.get(reverse("home")).context["painel"]
     rechamada = painel["rechamadas"]["lista"][0]
@@ -219,13 +219,13 @@ def test_concluir_rechamada_e_marcar_presenca_voltam_ao_inicio(cenario, cliente_
     assert response.context["painel"]["rechamadas"]["total"] == 1
 
 
-def test_sem_clinica_nao_ha_resumo(cenario, criar_usuario, cliente_de):
+def test_no_clinic_means_no_summary(cenario, criar_usuario, cliente_de):
     response = cliente_de(criar_usuario("solto")).get(reverse("home"))
     assert "painel" not in response.context
     assert "não tem acesso a nenhuma clínica ativa" in response.content.decode()
 
 
-def test_saudacao_pela_hora(monkeypatch, criar_usuario, cliente_de):
+def test_greeting_by_time_of_day(monkeypatch, criar_usuario, cliente_de):
     user = criar_usuario("maria")
     for hour, saudacao in [(7, "Bom dia"), (13, "Boa tarde"), (20, "Boa noite")]:
         timestamp = timezone.make_aware(datetime.datetime(2031, 3, 5, hour))

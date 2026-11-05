@@ -9,7 +9,7 @@ used to mark the renamed ones).
 from django.apps import apps
 
 
-def test_campo_renomeado_tem_rotulo_proprio():
+def test_renamed_field_has_its_own_label():
     sem_rotulo = [
         f"{modelo._meta.label}.{field.name}"
         for modelo in apps.get_models()

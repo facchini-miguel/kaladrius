@@ -30,7 +30,7 @@ class _Exemplo(BootstrapForm, forms.Form):
     agrupada = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
 
 
-def test_opcao_em_branco_das_listas_fixas_vira_traco():
+def test_blank_option_of_fixed_lists_becomes_dash():
     form = _Exemplo()
     assert form.fields["fixa"].choices == [("", "—"), ("a", "A")]
     assert form.fields["agrupada"].choices == [("Grupo", [("b", "B")])]  # untouched
@@ -49,19 +49,19 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
         ("en", "1,500", "1500"),
     ],
 )
-def test_numeros_com_separador_de_milhar(language, digitado, amount):
+def test_numbers_with_thousands_separator(language, digitado, amount):
     with translation.override(language):
         form = _Exemplo({"fixa": "a", "agrupada": "b", "amount": digitado})
         assert form.is_valid(), form.errors
     assert form.cleaned_data["amount"] == Decimal(amount)
 
 
-def test_numero_ambiguo_continua_recusado():
+def test_ambiguous_number_is_still_refused():
     with translation.override("pt-br"):
         assert not _Exemplo({"fixa": "a", "agrupada": "b", "amount": "1,500"}).is_valid()
 
 
-def test_formularios_da_recepcao_sem_ingles(clinica_a, reception):
+def test_reception_forms_without_english(clinica_a, reception):
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     for url in (
@@ -73,7 +73,7 @@ def test_formularios_da_recepcao_sem_ingles(clinica_a, reception):
         assert '<option value="" selected>—</option>' in page, url
 
 
-def test_meses_em_minuscula_no_portugues():
+def test_months_lowercase_in_portuguese():
     day = datetime.date(2026, 10, 30)
     with translation.override("pt-br"):
         assert date_format(day, "DATE_FORMAT") == "30 de outubro de 2026"
@@ -81,12 +81,12 @@ def test_meses_em_minuscula_no_portugues():
         assert date_format(day, "DATE_FORMAT") == "30 de octubre de 2026"
 
 
-def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(reception):
+def test_birthday_month_list_starts_capitalized(reception):
     page = reception.get(reverse("patients:birthdays"), {"mes": 10}).content.decode()
     assert ">Outubro</option>" in page
 
 
-def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
+def test_alphabetical_order_with_accents_and_lowercase(clinica_a):
     """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
     with use_clinic(clinica_a):
         for name in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
@@ -95,12 +95,12 @@ def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
     assert nomes == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
 
 
-def test_chave_alfabetica_ignora_acento_e_caixa():
+def test_alphabetical_key_ignores_accent_and_case():
     nomes = ["Zeca", "Érica", "ana", "Água", "Beto"]
     assert sorted(nomes, key=alphabetical_key) == ["Água", "ana", "Beto", "Érica", "Zeca"]
 
 
-def test_telas_cabem_no_celular(clinica_a, reception):
+def test_screens_fit_on_a_phone(clinica_a, reception):
     """Review stage 5 (phone, 390 px): the dental chart scrolls in its own box and the
     printed registration sheet stacks its two columns on a narrow screen."""
     from django.template.loader import render_to_string
@@ -118,7 +118,7 @@ def test_telas_cabem_no_celular(clinica_a, reception):
     assert 'class="col-12 col-sm-6"' in patient_record and 'class="col-6"' not in patient_record
 
 
-def test_painel_do_django_sem_ingles(client, django_user_model):
+def test_django_admin_without_english(client, django_user_model):
     """Review (superuser): the admin's action and filter lists showed Django 6.1's
     "- Select an option -" in English."""
     super_usuario = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")

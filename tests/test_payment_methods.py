@@ -22,7 +22,7 @@ def mudar_pais(data, country):
     clinic.save()
 
 
-def test_cada_pais_tem_as_suas_formas():
+def test_each_country_has_its_methods():
     assert set(payment_methods.METHODS) == set(COUNTRIES)
     for country, for_country in payment_methods.METHODS.items():
         assert len(set(for_country.codigos)) == len(for_country.codigos), country
@@ -31,7 +31,7 @@ def test_cada_pais_tem_as_suas_formas():
         assert set(for_country.nomes) <= set(for_country.codigos), country
 
 
-def test_nomes_locais_entre_parenteses():
+def test_local_names_in_parentheses():
     with translation.override("pt-br"):
         assert payment_methods.label("transferencia", "MX") == "Transferência (SPEI)"
         assert payment_methods.label("carteira", "PE") == "Carteira digital (Yape, Plin)"
@@ -51,7 +51,7 @@ def test_nomes_locais_entre_parenteses():
         assert payment_methods.label("debito_auto", "ZA") == "Direct debit (debit order)"
 
 
-def test_cheque_com_a_grafia_de_cada_ingles():
+def test_check_spelled_per_english_variant():
     with translation.override("en"):
         assert payment_methods.label("cheque", "US") == "Check"
     for variante in ("en-gb", "en-ca", "en-au", "en-za"):
@@ -61,7 +61,7 @@ def test_cheque_com_a_grafia_de_cada_ingles():
         assert payment_methods.label("cheque", "MX") == "Cheque"
 
 
-def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
+def test_form_offers_the_country_methods(cenario):  # noqa: F811
     mudar_pais(cenario, "PE")
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
@@ -82,7 +82,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     assert 'value="carteira"' in nova and 'value="pix"' not in nova
 
 
-def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
+def test_card_without_installments_in_united_states(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
@@ -113,7 +113,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     assert payment.card_installments is None
 
 
-def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
+def test_card_details_only_for_card(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
@@ -136,7 +136,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     )
 
 
-def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
+def test_old_payment_shows_method_the_country_no_longer_offers(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     with use_clinic(cenario["clinic"]), translation.override("pt-br"):
         payment = services.receive(

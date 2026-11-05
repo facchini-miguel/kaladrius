@@ -14,13 +14,13 @@ from apps.schedule.models import Appointment, AppointmentType
 pytestmark = pytest.mark.django_db
 
 
-def test_inicio_exige_login(client):
+def test_home_requires_login(client):
     response = client.get(reverse("home"))
     assert response.status_code == 302
     assert reverse("login") in response.url
 
 
-def test_login_e_inicio(client, django_user_model):
+def test_login_and_home(client, django_user_model):
     django_user_model.objects.create_user(username="maria", password="senha-de-teste-123")
     response = client.post(
         reverse("login"), {"username": "maria", "password": "senha-de-teste-123"}, follow=True
@@ -29,25 +29,25 @@ def test_login_e_inicio(client, django_user_model):
     assert ", maria" in response.content.decode()
 
 
-def test_rodape_mostra_autor_e_versao(client):
+def test_footer_shows_author_and_version(client):
     content = client.get(reverse("login")).content.decode()
     assert "Desenvolvido por Miguel Facchini" in content
     assert "versão" in content
 
 
-def test_login_com_senha_errada(client, django_user_model):
+def test_login_with_wrong_password(client, django_user_model):
     django_user_model.objects.create_user(username="maria", password="senha-de-teste-123")
     response = client.post(reverse("login"), {"username": "maria", "password": "errada"})
     assert response.status_code == 200
     assert "Usuário ou senha incorretos" in response.content.decode()
 
 
-def test_senha_usa_argon2(django_user_model):
+def test_password_uses_argon2(django_user_model):
     user = django_user_model.objects.create_user(username="joao", password="senha-de-teste-123")
     assert user.password.startswith("argon2")
 
 
-def test_criar_admin(monkeypatch):
+def test_create_admin(monkeypatch):
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
     call_command("create_admin")
@@ -60,7 +60,7 @@ def test_criar_admin(monkeypatch):
     assert get_user_model().objects.filter(username="admin").count() == 1
 
 
-def test_criar_admin_falha_se_existir(monkeypatch):
+def test_create_admin_fails_if_exists(monkeypatch):
     # The Linux package's installer tells the user that the password typed was not used.
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
@@ -73,7 +73,7 @@ def test_criar_admin_falha_se_existir(monkeypatch):
 
 
 @pytest.mark.parametrize("password", ["curta1", "1234567890123", "password123"])
-def test_criar_admin_recusa_senha_fraca(monkeypatch, password):
+def test_create_admin_refuses_weak_password(monkeypatch, password):
     # The Linux package's installer shows the reasons and asks again (decision 140).
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", password)
@@ -82,13 +82,13 @@ def test_criar_admin_recusa_senha_fraca(monkeypatch, password):
     assert not get_user_model().objects.filter(username="admin").exists()
 
 
-def test_criar_admin_sem_senha(monkeypatch):
+def test_create_admin_without_password(monkeypatch):
     monkeypatch.delenv("DJANGO_ADMIN_PASSWORD", raising=False)
     with pytest.raises(CommandError):
         call_command("create_admin")
 
 
-def test_logout_exige_post(client, django_user_model):
+def test_logout_requires_post(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     assert client.get(reverse("logout")).status_code == 405
@@ -96,7 +96,7 @@ def test_logout_exige_post(client, django_user_model):
     assert client.get(reverse("home")).status_code == 302
 
 
-def test_usuario_troca_a_propria_senha(client, django_user_model):
+def test_user_changes_own_password(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     assert "Trocar senha" in client.get(reverse("home")).content.decode()
@@ -116,7 +116,7 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
     assert client.get(reverse("home")).status_code == 200
 
 
-def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
+def test_password_change_requires_current_password(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     response = client.post(
@@ -132,12 +132,12 @@ def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
     assert user.check_password("senha-de-teste-123")
 
 
-def test_sem_recuperacao_de_senha_por_email(client):
+def test_no_password_recovery_by_email(client):
     # No e-mail is configured, so the reset pages would never deliver anything.
     assert client.get("/account/password_reset/").status_code == 404
 
 
-def test_aviso_de_backup_atrasado_so_para_superusuario(client, django_user_model, settings):
+def test_late_backup_warning_only_for_superuser(client, django_user_model, settings):
     import datetime
 
     from django.utils import timezone
@@ -183,7 +183,7 @@ def dados_clinica(**extra):
     }
 
 
-def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente_de):
+def test_admin_changes_clinic_settings(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     assert "Configurações da clínica" in cliente.get(reverse("home")).content.decode()
     assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
@@ -198,7 +198,7 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
-def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente_de):
+def test_only_admin_changes_settings(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("clinic_settings")).status_code == 403
 
@@ -212,7 +212,7 @@ def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente
         ({"schedule_interval": 60, "schedule_start": "08:30"}, "ficaria fora"),  # misaligned
     ],
 )
-def test_configuracoes_invalidas(extra, error, clinica_a, criar_usuario, cliente_de):
+def test_invalid_settings(extra, error, clinica_a, criar_usuario, cliente_de):
     with use_clinic(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. Teste")
         kind = AppointmentType.objects.first()
@@ -230,7 +230,7 @@ def test_configuracoes_invalidas(extra, error, clinica_a, criar_usuario, cliente
     assert error in response.content.decode()
 
 
-def test_todo_app_declara_o_proprio_label():
+def test_every_app_declares_its_own_label():
     """Without one, Django takes the folder's name for the label, and renaming the folder would
     leave the database's tables behind (decision 154: the account app, ex-conta)."""
     from django.apps import apps

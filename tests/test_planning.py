@@ -60,11 +60,11 @@ def pay(clinic, category, amount, date=HOJE):
         (datetime.date(2026, 1, 1), Decimal(1) / Decimal(365)),
     ],
 )
-def test_fracao_do_ano(today, esperado):
+def test_fraction_of_the_year(today, esperado):
     assert services.year_fraction(2026, today) == esperado
 
 
-def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
+def test_save_targets_in_brazilian_format(clinica_a, admin):
     ocupacao = group(clinica_a, "Ocupação")
     # With the thousands dot, as people type it (review stage 3: it was refused).
     response = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
@@ -79,7 +79,7 @@ def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
         assert not Planning.objects.exists()
 
 
-def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
+def test_actual_and_percentage_summing_subgroups(clinica_a, admin):
     with use_clinic(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         Planning.objects.create(year=HOJE.year, group=ocupacao, amount=Decimal("1000"))
@@ -92,7 +92,7 @@ def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
     assert despesas["meta"] == Decimal("1000") and despesas["realizado"] == Decimal("300.00")
 
 
-def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
+def test_subgroup_target_does_not_count_twice(clinica_a):
     with use_clinic(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
         sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal)
@@ -106,7 +106,7 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
     assert despesas["esperado"] == Decimal("5700.00")
 
 
-def test_em_dia_para_receita_e_despesa(clinica_a):
+def test_on_track_for_revenue_and_expense(clinica_a):
     with use_clinic(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Atendimentos"), amount=Decimal("1200")
@@ -121,7 +121,7 @@ def test_em_dia_para_receita_e_despesa(clinica_a):
     assert receita["em_dia"] is False and despesa["em_dia"] is True
 
 
-def test_copiar_metas_do_ano_anterior(clinica_a, admin):
+def test_copy_targets_from_previous_year(clinica_a, admin):
     with use_clinic(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         impostos = AccountGroup.objects.get(name="Impostos")
@@ -138,10 +138,10 @@ def test_copiar_metas_do_ano_anterior(clinica_a, admin):
     assert deste_ano == {"Ocupação": Decimal("900.00"), "Impostos": Decimal("400.00")}
 
 
-def test_ano_invalido_volta_para_o_atual(admin):
+def test_invalid_year_falls_back_to_current(admin):
     assert admin.get(URL, {"year": "abc"}).context["year"] == HOJE.year
 
 
-def test_permissoes(clinica_a, criar_usuario, cliente_de):
+def test_permissions(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Role.FRONT_DESK))
     assert reception.get(URL).status_code == 403

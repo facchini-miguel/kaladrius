@@ -24,13 +24,13 @@ def superusuario(client, django_user_model):
 
 
 @pytest.mark.parametrize("pasta", documents.FOLDERS.values())
-def test_manual_e_politica_do_site_em_cada_idioma(pasta):
+def test_site_manual_and_policy_in_each_language(pasta):
     manual = documents.DOCS / pasta / "manual"
     paginas = {file.stem for file in manual.glob("*.md")}
     assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
 
 
-def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(reception, settings, django_user_model):
+def test_help_menu_opens_site_in_user_language(reception, settings, django_user_model):
     settings.DOCS_URL = "https://docs.exemplo.test/"
     page = reception.get(reverse("home")).content.decode()
     assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in page
@@ -42,7 +42,7 @@ def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(reception, settings, django
     assert 'href="https://docs.exemplo.test/manual/getting-started"' in page
 
 
-def test_enderecos_antigos_da_ajuda_levam_ao_site(reception, settings):
+def test_old_help_addresses_lead_to_the_site(reception, settings):
     settings.DOCS_URL = "https://docs.exemplo.test"
     site = "https://docs.exemplo.test/pt-BR/"
     assert reception.get(reverse("help:index")).url == site + "manual/getting-started"
@@ -52,14 +52,14 @@ def test_enderecos_antigos_da_ajuda_levam_ao_site(reception, settings):
     assert reception.get(reverse("help:manual", args=["privacidade"])).url == reverse("privacy")
 
 
-def test_lista_logo_depois_de_um_paragrafo_vira_lista():
+def test_list_right_after_a_paragraph_becomes_a_list():
     text = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
     resultado = documents._split_lists(text)
     assert resultado.startswith("Texto:\n\n- um\n- dois")
     assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
 
 
-def test_notas_da_release_do_github_em_ingles():
+def test_github_release_notes_in_english():
     saida = StringIO()
     call_command("release_notes", "0.7.0", "--title", stdout=saida)
     assert saida.getvalue().strip() == "0.7.0 – Audit log and security (end of phase 1)"
@@ -70,7 +70,7 @@ def test_notas_da_release_do_github_em_ingles():
         call_command("release_notes", "9.9.9")
 
 
-def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinica_a):
+def test_public_privacy_policy_with_clinic_contact(client, clinica_a):
     clinica_a.email = "privacidade@sorriso.com.br"
     clinica_a.save()
     login = client.get(reverse("login")).content.decode()
@@ -82,13 +82,13 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
     assert clinica_a.name in page and "privacidade@sorriso.com.br" in page
 
 
-def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, reception):
+def test_policy_with_the_installation_clinic_contact(client, clinica_a, reception):
     assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
     reception.logout()
     assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
 
 
-def test_politica_sem_clinica_cadastrada(client):
+def test_policy_without_registered_clinic(client):
     page = client.get(reverse("privacy"))
     assert page.context["clinic"] is None
     assert "Fale com a clínica que atende você." in page.content.decode()
@@ -97,12 +97,12 @@ def test_politica_sem_clinica_cadastrada(client):
 @pytest.mark.parametrize(
     ("language", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
 )
-def test_politica_nos_tres_idiomas(client, language, titulo):
+def test_policy_in_the_three_languages(client, language, titulo):
     page = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=language).content.decode()
     assert f"<h1>{titulo}</h1>" in page
 
 
-def test_logo_na_barra_na_entrada_e_na_aba(client, reception):
+def test_logo_in_bar_login_and_tab(client, reception):
     entrada = client.get(reverse("login")).content.decode()
     assert "logo-entrada" in entrada and "img/favicon" in entrada
     assert "logo-barra" in reception.get(reverse("home")).content.decode()
@@ -110,7 +110,7 @@ def test_logo_na_barra_na_entrada_e_na_aba(client, reception):
         assert (documents.DOCS.parent / "static" / "img" / file).is_file()
 
 
-def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, reception):
+def test_system_name_in_login_bar_and_tab(client, reception):
     entrada = client.get(reverse("login")).content.decode()
     assert "<title>Entrar · Kaladrius</title>" in entrada
     assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entrada

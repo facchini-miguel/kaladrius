@@ -55,7 +55,7 @@ def receive(clinic, installment, date, amount="100"):
         )
 
 
-def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, installment, admin):
+def test_closing_locks_payments_and_reversals_in_the_period(clinica_a, installment, admin):
     old = receive(clinica_a, installment, ANTEONTEM)
     assert admin.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
     with use_clinic(clinica_a):
@@ -68,7 +68,7 @@ def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, installment, a
     assert receive(clinica_a, installment, HOJE).pk
 
 
-def test_receber_pela_tela_mostra_o_erro(clinica_a, installment, admin):
+def test_receiving_on_screen_shows_the_error(clinica_a, installment, admin):
     with use_clinic(clinica_a):
         services.close_books(clinica_a, ONTEM, user=None)
     response = admin.post(
@@ -88,12 +88,12 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, installment, admin):
     ("until", "message"),
     [(HOJE, "ontem"), (HOJE + datetime.timedelta(days=3), "ontem")],
 )
-def test_nao_fecha_hoje_nem_o_futuro(clinica_a, until, message):
+def test_does_not_close_today_or_the_future(clinica_a, until, message):
     with use_clinic(clinica_a), pytest.raises(ValidationError, match=message):
         services.close_books(clinica_a, until, user=None)
 
 
-def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
+def test_close_again_only_forward_and_reopen_with_reason(clinica_a, admin):
     with use_clinic(clinica_a):
         services.close_books(clinica_a, ANTEONTEM, user=None)
         with pytest.raises(ValidationError, match="já está fechado"):
@@ -116,19 +116,19 @@ def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
     assert "Lançamento esquecido" in page and "O financeiro está aberto" in page
 
 
-def test_cada_clinica_tem_o_seu_fechamento(clinica_a, clinica_b):
+def test_each_clinic_has_its_own_closing(clinica_a, clinica_b):
     with use_clinic(clinica_a):
         services.close_books(clinica_a, ONTEM, user=None)
     assert services.closed_until(clinica_b.pk) is None
 
 
-def test_relatorio_mostra_o_fechamento(clinica_a, admin):
+def test_report_shows_the_closing(clinica_a, admin):
     with use_clinic(clinica_a):
         services.close_books(clinica_a, ONTEM, user=None)
     assert "Financeiro fechado até" in admin.get(reverse("finance:reports")).content.decode()
 
 
-def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):
+def test_who_can_see_close_and_reopen(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_fechamento", clinica_a, Role.FRONT_DESK))
     assert reception.get(URL).status_code == 403
     financeiro = cliente_de(criar_usuario("fin_fechamento", clinica_a, Role.FINANCE))
@@ -136,7 +136,7 @@ def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):
     assert financeiro.post(URL, {"acao": "outra"}).status_code == 403
 
 
-def test_demonstracao_so_consulta(clinica_a, criar_usuario, cliente_de):
+def test_demo_only_views(clinica_a, criar_usuario, cliente_de):
     demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Role.ADMIN, demo=True))
     page = demo.get(URL)
     assert page.status_code == 200 and page.context["fechar_form"] is None

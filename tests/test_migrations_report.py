@@ -27,7 +27,7 @@ def _alertas(operacao):
 
 
 @pytest.mark.django_db
-def test_operacoes_que_apagam_ou_quebram_a_volta():
+def test_operations_that_delete_or_break_rollback():
     remover = migrations.RemoveField("carteirinha", "titular")
     assert _alertas(remover) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
     # The previous version still queries the dropped table: every page using it would fail.
@@ -38,7 +38,7 @@ def test_operacoes_que_apagam_ou_quebram_a_volta():
 
 
 @pytest.mark.django_db
-def test_renomear_mantendo_tabela_e_coluna_nao_alerta():
+def test_rename_keeping_table_and_column_does_not_warn():
     """Decision 156: renamed in the code only, the table and column kept, nothing reaches the
     database; the previous version still works."""
     before = _antes(*HEALTH_PLANS)
@@ -62,7 +62,7 @@ def test_renomear_mantendo_tabela_e_coluna_nao_alerta():
 
 
 @pytest.mark.django_db
-def test_operacoes_sem_volta_e_campos_alterados():
+def test_irreversible_operations_and_altered_fields():
     sem_volta = migrations.RunPython(lambda apps, schema: None)
     assert _alertas(sem_volta) == [relatorio.NO_ROLLBACK]
     com_volta = migrations.RunPython(lambda a, s: None, migrations.RunPython.noop)
@@ -84,7 +84,7 @@ def test_operacoes_sem_volta_e_campos_alterados():
 
 
 @pytest.mark.django_db
-def test_alterar_uma_chave_estrangeira():
+def test_altering_a_foreign_key():
     """A ForeignKey changed only in on_delete/related_name: same column, nothing to flag. It used
     to crash: the field of the operation is not attached to a model, its related model is a
     string and it has no db_type."""
@@ -99,7 +99,7 @@ def test_alterar_uma_chave_estrangeira():
 
 
 @pytest.mark.django_db
-def test_coluna_obrigatoria_nova():
+def test_new_required_column():
     """The previous version's inserts leave a new column out: NOT NULL with no database default
     makes them fail (Django's Python default only fills the existing rows)."""
     is_required = migrations.AddField(
@@ -117,7 +117,7 @@ def test_coluna_obrigatoria_nova():
 
 
 @pytest.mark.django_db
-def test_separate_database_and_state_e_inspecionado():
+def test_separate_database_and_state_is_inspected():
     """Only the database operations reach the database: a column dropped there is flagged."""
     escondida = migrations.SeparateDatabaseAndState(
         database_operations=[migrations.RemoveField("carteirinha", "titular")],
@@ -131,7 +131,7 @@ def test_separate_database_and_state_e_inspecionado():
 
 
 @pytest.mark.django_db
-def test_relatorio_de_uma_migracao_real():
+def test_report_of_a_real_migration():
     """convenios.0003 renamed registro_ans and added two required columns with no database
     default: the previous version would not work with it."""
     (migracao,) = relatorio.analyze([HEALTH_PLANS])
@@ -143,11 +143,11 @@ def test_relatorio_de_uma_migracao_real():
     assert "Back and forth tested" in texto and "```sql" in texto
 
 
-def test_relatorio_sem_migracoes():
+def test_report_without_migrations():
     assert "No new migration" in relatorio.markdown([])
 
 
-def test_relatorio_de_migracao_ja_aplicada_alterada():
+def test_report_of_altered_applied_migration():
     texto = relatorio.markdown(
         [], alteradas=[("convenios", "0003_x", "M"), ("core", "0001_y", "D")]
     )
@@ -157,7 +157,7 @@ def test_relatorio_de_migracao_ja_aplicada_alterada():
     assert "the database does not change" not in texto
 
 
-def test_comentario_cabe_no_limite_do_github():
+def test_comment_fits_github_limit():
     """GitHub refuses a comment over 65,536 characters: the SQL is left out first, then cut."""
     grande = relatorio.MigrationEntry("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
     grande.operacoes = [("Add field x", [])]
@@ -173,7 +173,7 @@ def test_comentario_cabe_no_limite_do_github():
     assert len(cortado) <= relatorio.COMMENT_LIMIT and cortado.endswith("summary)\n")
 
 
-def test_migracoes_do_diff_le_o_git(monkeypatch):
+def test_diff_migrations_reads_git(monkeypatch):
     """Folders become labels (apps/health_plans is "convenios", decision 145), and a migration
     moved with its folder is unchanged when its text is the same, edited when it is not."""
     saida = (
@@ -212,7 +212,7 @@ def test_migracoes_do_diff_le_o_git(monkeypatch):
     )
 
 
-def test_migracoes_do_diff_quando_o_git_falha(monkeypatch):
+def test_diff_migrations_when_git_fails(monkeypatch):
     def git(args, **kwargs):
         return subprocess.CompletedProcess(args, 128, stdout="", stderr="unknown revision")
 
@@ -221,7 +221,7 @@ def test_migracoes_do_diff_quando_o_git_falha(monkeypatch):
         relatorio.migrations_from_diff("origin/nada")
 
 
-def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):
+def test_round_trip_only_on_disposable_database(monkeypatch):
     """--test-rollback undoes migrations: never on a database with real data."""
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     producao = SimpleNamespace(settings_dict={"NAME": "kaladrius"})
@@ -233,7 +233,7 @@ def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_comando_recusa_testar_volta_fora_do_banco_descartavel(monkeypatch):
+def test_command_refuses_rollback_test_outside_disposable_database(monkeypatch):
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     monkeypatch.setitem(connection.settings_dict, "NAME", "kaladrius")
     chamadas = []
@@ -246,7 +246,7 @@ def test_comando_recusa_testar_volta_fora_do_banco_descartavel(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_ida_e_volta_com_falha_ao_reaplicar(monkeypatch):
+def test_round_trip_failing_to_reapply(monkeypatch):
     """When undoing fails and applying again fails too, the failures are reported, not raised:
     the report must still be written and say why."""
     chamadas = []
@@ -268,7 +268,7 @@ def test_ida_e_volta_com_falha_ao_reaplicar(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_ida_e_volta_quando_nem_aplica(monkeypatch):
+def test_round_trip_when_it_does_not_even_apply(monkeypatch):
     """A migration that conflicts with the base branch fails on the first migrate."""
 
     def migrar(*args):
@@ -281,7 +281,7 @@ def test_ida_e_volta_quando_nem_aplica(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_ida_e_volta_de_uma_migracao_real(monkeypatch):
+def test_round_trip_of_a_real_migration(monkeypatch):
     """Everything applied, the app taken back to before its first new migration, applied
     again. The migrations themselves go back and forth in the CI job that runs this report on
     every pull request with migrations (decision 180): here, only the steps."""
@@ -292,7 +292,7 @@ def test_ida_e_volta_de_uma_migracao_real(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_comando_completo_com_ida_e_volta(tmp_path, monkeypatch):
+def test_full_command_with_round_trip(tmp_path, monkeypatch):
     """The command as CI runs it (it once failed: an option hid the function of the same name).
     The migrations' real back and forth is the CI job's (decision 180)."""
     from django.core.management import call_command

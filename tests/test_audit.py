@@ -24,7 +24,7 @@ def ultimos(**filters):
     return list(AuditEntry.objects.filter(**filters).order_by("pk"))
 
 
-def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
+def test_creation_change_and_deletion_are_logged(admin_a, clinica_a):
     admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
     with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Maria")
@@ -50,7 +50,7 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
     assert arquivamento.changes["archived"] == [False, True]
 
 
-def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinica_a):
+def test_permanent_deletion_removes_personal_data_from_audit(admin_a, clinica_a):
     admin_a.post(
         reverse("patients:new"),
         {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "tax_id": "52998224725"},
@@ -79,14 +79,14 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     assert f"Paciente {patient.pk}: dados pessoais excluídos a pedido do titular" in page
 
 
-def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
+def test_saving_without_changes_logs_nothing(clinica_a):
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Sem mudança")
         patient.save()
     assert not ultimos(action=Action.CHANGE, model_name="Paciente")
 
 
-def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
+def test_opening_the_record_is_logged(admin_a, clinica_a):
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Consultado")
     admin_a.get(reverse("patients:record", args=[patient.pk]))
@@ -95,7 +95,7 @@ def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
     assert visualizacao.user_name == "admin_a"
 
 
-def test_login_e_tentativa_recusada_ficam_registrados(client, criar_usuario):
+def test_login_and_refused_attempt_are_logged(client, criar_usuario):
     criar_usuario("maria")
     client.post(reverse("login"), {"username": "maria", "password": "errada"})
     [falha] = ultimos(action=Action.LOGIN_FAILED)
@@ -107,7 +107,7 @@ def test_login_e_tentativa_recusada_ficam_registrados(client, criar_usuario):
     assert entrada.user_name == "maria"
 
 
-def test_senha_nunca_e_gravada(criar_usuario):
+def test_password_is_never_stored(criar_usuario):
     user = criar_usuario("joao")
     user.set_password("nova-senha-secreta-123")
     user.save()
@@ -118,7 +118,7 @@ def test_senha_nunca_e_gravada(criar_usuario):
     assert alteracao.changes == {"senha": ["(oculta)", "(alterada)"]}
 
 
-def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
+def test_screen_shows_only_the_current_clinic(admin_a, clinica_a, clinica_b):
     with use_clinic(clinica_a):
         Patient.objects.create(name="Paciente da A")
     with use_clinic(clinica_b):
@@ -129,26 +129,26 @@ def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
-def test_somente_administrador_ve_a_auditoria(role, clinica_a, criar_usuario, cliente_de):
+def test_only_admin_sees_the_audit(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("audit:list")).status_code == 403
     assert "Auditoria" not in cliente.get(reverse("home")).content.decode()
 
 
-def test_admin_do_django_e_somente_leitura(django_user_model, client):
+def test_django_admin_is_read_only(django_user_model, client):
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     client.force_login(root)
     assert client.get(reverse("admin:auditoria_auditentry_changelist")).status_code == 200
     assert client.get(reverse("admin:auditoria_auditentry_add")).status_code == 403
 
 
-def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
+def test_user_deletion_keeps_the_history(criar_usuario):
     user = criar_usuario("temporario")
     user.delete()
     assert AuditEntry.objects.filter(object_repr="temporario").exists()
 
 
-def test_retencao_apaga_so_tentativas_recusadas_antigas():
+def test_retention_deletes_only_old_refused_attempts():
     old = timezone.now() - datetime.timedelta(days=31)
     recente = timezone.now() - datetime.timedelta(days=29)
     for timestamp in (old, recente):
@@ -170,7 +170,7 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
     assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]
 
 
-def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_a):
+def test_screen_shows_field_label_also_by_old_name(admin_a, clinica_a):
     """Decision 156: the page shows the field's label, not its name in the code, so renaming a
     field (or its column-keeping rename) does not change what the clinic reads."""
     from apps.audit.models import AuditEntry

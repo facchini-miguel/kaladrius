@@ -51,7 +51,7 @@ def enderecos_antigos():
 
 
 @pytest.mark.parametrize(("name", "old"), list(enderecos_antigos()))
-def test_endereco_antigo_redireciona_para_o_novo(client, name, old):
+def test_old_address_redirects_to_the_new(client, name, old):
     response = client.get(old)
     assert response.status_code == RedirecionamentoPermanente.status_code, (name, old)
     destino = resolve(response.url)
@@ -71,7 +71,7 @@ def test_endereco_antigo_redireciona_para_o_novo(client, name, old):
         ), path
 
 
-def test_o_redirecionamento_mantem_a_query_string_e_o_metodo(client):
+def test_redirect_keeps_query_string_and_method(client):
     response = client.get("/pacientes/?busca=Ana&pagina=2")
     assert response.url == "/patients/?busca=Ana&pagina=2"
     # 308: a form opened before the update and sent after it is sent again to the new address.

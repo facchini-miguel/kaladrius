@@ -45,7 +45,7 @@ def carteirinha(health_plan, **extra):
     }
 
 
-def test_cadastro_do_convenio(clinica_a, admin):
+def test_health_plan_registration(clinica_a, admin):
     response = admin.post(
         reverse("health_plans:new"),
         {"name": " Plano Fictício ", "registration": "00.000-2", "phone": "", "active": "on"},
@@ -65,12 +65,12 @@ def test_cadastro_do_convenio(clinica_a, admin):
         ({"name": "Outro", "phone": "99"}, "phone"),
     ],
 )
-def test_validacoes_do_convenio(data, field, health_plan, admin):
+def test_health_plan_validations(data, field, health_plan, admin):
     response = admin.post(reverse("health_plans:new"), data)
     assert field in response.context["form"].errors
 
 
-def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admin):
+def test_member_card_on_record_with_expiry(clinica_a, patient, health_plan, admin):
     url = reverse("health_plans:card_new", args=[patient.pk])
     is_expired = (HOJE - datetime.timedelta(days=1)).isoformat()
     response = admin.post(url, carteirinha(health_plan, number=" 0099 ", valid_until=is_expired))
@@ -94,12 +94,12 @@ def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admi
     assert edit_health_plan.status_code == 302
 
 
-def test_paciente_sem_carteirinha_e_particular(patient, admin):
+def test_patient_without_card_is_private(patient, admin):
     patient_record = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Particular" in patient_record
 
 
-def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
+def test_inactive_plan_hidden_from_new_card_but_kept_on_existing(
     clinica_a, patient, health_plan, admin
 ):
     with use_clinic(clinica_a):
@@ -121,7 +121,7 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
         (Role.FINANCE, 200, 403),
     ],
 )
-def test_permissoes_por_papel(
+def test_permissions_by_role(
     role, ver, criar, clinica_a, patient, health_plan, criar_usuario, cliente_de
 ):
     cliente = cliente_de(criar_usuario("papel_convenios", clinica_a, role))
@@ -129,7 +129,7 @@ def test_permissoes_por_papel(
     assert cliente.get(reverse("health_plans:card_new", args=[patient.pk])).status_code == (criar)
 
 
-def test_modulo_desligado(clinica_a, patient, health_plan, admin):
+def test_module_off(clinica_a, patient, health_plan, admin):
     assert reverse("health_plans:list") in admin.get(reverse("home")).content.decode()
     configure(clinica_a, GENERAL_MODULES - {ModuleCode.HEALTH_PLANS})
     assert admin.get(reverse("health_plans:list")).status_code == 403
@@ -138,7 +138,7 @@ def test_modulo_desligado(clinica_a, patient, health_plan, admin):
     assert patient_record.context.get("carteirinhas") is None
 
 
-def test_carteirinha_nao_liga_paciente_e_convenio_de_clinicas_diferentes(
+def test_card_does_not_link_patient_and_plan_of_different_clinics(
     clinica_a, clinica_b, health_plan
 ):
     with use_clinic(clinica_b):
@@ -147,7 +147,7 @@ def test_carteirinha_nao_liga_paciente_e_convenio_de_clinicas_diferentes(
         MemberCard.objects.create(patient=de_outra, health_plan=health_plan, number="9")
 
 
-def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, health_plan, admin):
+def test_lgpd_deletion_deletes_the_cards(clinica_a, patient, health_plan, admin):
     with use_clinic(clinica_a):
         criada = MemberCard.objects.create(
             patient=patient, health_plan=health_plan, number="CARTEIRINHA-SIGILOSA"

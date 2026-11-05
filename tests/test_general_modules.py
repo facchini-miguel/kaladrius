@@ -46,7 +46,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_gerais", clinica_a, Role.ADMIN))
 
 
-def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
+def test_new_clinic_starts_with_all_general_modules(clinica_a):
     with use_clinic(clinica_a):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
     assert ligados == GENERAL_MODULES | {M.DENTISTRY}
@@ -62,7 +62,7 @@ def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
         (M.FINANCE, "finance:receivables", "/finance/"),
     ],
 )
-def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
+def test_module_off_hides_menu_and_refuses_url(
     modulo, rota, texto_do_menu, clinica_a, admin, django_user_model, cliente_de
 ):
     desligados = {modulo, M.ESTIMATES, M.STAFF} if modulo == M.FINANCE else {modulo}
@@ -79,7 +79,7 @@ def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
     assert texto_do_menu in menu and ">desligado</span>" in menu
 
 
-def test_orcamentos_desligado(clinica_a, admin, patient):
+def test_estimates_off(clinica_a, admin, patient):
     configure(clinica_a, sem(M.ESTIMATES))
     assert admin.get(reverse("estimates:list")).status_code == 403
     patient_record = admin.get(reverse("patients:record", args=[patient.pk]))
@@ -87,7 +87,7 @@ def test_orcamentos_desligado(clinica_a, admin, patient):
     assert "Novo orçamento" not in patient_record.content.decode()
 
 
-def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
+def test_records_off_blocks_practitioner_and_superuser_sees_it_marked(
     clinica_a, patient, criar_usuario, django_user_model, cliente_de
 ):
     user = criar_usuario("prof_gerais", clinica_a, Role.PRACTITIONER)
@@ -108,7 +108,7 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
     assert "O módulo Prontuário está desligado nesta clínica" in page.content.decode()
 
 
-def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, patient):
+def test_turning_off_keeps_data_and_turning_on_shows_again(clinica_a, admin, patient):
     with use_clinic(clinica_a):
         Recall.objects.create(
             patient=patient, date=datetime.date(2026, 11, 10), description="Retorno"
@@ -121,14 +121,14 @@ def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, pat
     assert "Retorno" in admin.get(reverse("recalls:list")).content.decode()
 
 
-def test_so_o_nucleo_ligado_sem_resumo_vazio(clinica_a, admin):
+def test_only_core_on_without_empty_summary(clinica_a, admin):
     """Review stage 4: with every optional module off, "Resumo do dia" stood alone."""
     configure(clinica_a, set())
     page = admin.get(reverse("home")).content.decode()
     assert "Resumo do dia" not in page and "Novo paciente" in page
 
 
-def test_orcamentos_precisa_do_financeiro(clinica_a):
+def test_estimates_needs_finance(clinica_a):
     with pytest.raises(ValidationError):
         configure(clinica_a, sem(M.FINANCE))
     data = {
@@ -147,7 +147,7 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
     assert ClinicForm(data, instance=clinica_a).is_valid()
 
 
-def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
+def test_settings_save_the_general_modules(clinica_a, admin):
     response = admin.post(
         reverse("clinic_settings"),
         {
@@ -168,7 +168,7 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
     assert "Especialidades" in page and "Módulos" in page
 
 
-def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_model, cliente_de):
+def test_first_clinic_registration_turns_on_all_general_modules(django_user_model, cliente_de):
     cliente = cliente_de(django_user_model.objects.create_superuser("root_primeira"))
     response = cliente.post(
         reverse("register_clinic"),
@@ -181,14 +181,14 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
     assert ligados == GENERAL_MODULES | {M.MEDICINE}
 
 
-def test_permissoes_leem_os_modulos_uma_vez_por_requisicao(admin):
+def test_permissions_read_modules_once_per_request(admin):
     with CaptureQueriesContext(connection) as consultas:
         assert admin.get(reverse("home")).status_code == 200
     modulos = [q for q in consultas if 'FROM "core_clinic_module"' in q["sql"]]
     assert len(modulos) == 1
 
 
-def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
+def test_migration_turns_on_general_modules_of_existing_clinics():
     """Migration core 0011 turned on the general modules of the clinics that existed."""
     clinic = Clinic.objects.create(name="Clínica fictícia antiga", area="medicina")
     with without_isolation():
@@ -218,7 +218,7 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
         assert ClinicModule.objects.filter(clinic=clinic).count() == len(ModuleCode) - 1
 
 
-def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
+def test_whatsapp_in_registration_and_record(clinica_a, admin):
     response = admin.post(
         reverse("patients:new"),
         {"kind": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
@@ -232,7 +232,7 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     assert whatsapp("123") == "" and whatsapp("") == ""
 
 
-def test_modulo_ligado_nao_mostra_aviso_ao_superusuario(clinica_a, django_user_model, cliente_de):
+def test_module_on_shows_no_warning_to_superuser(clinica_a, django_user_model, cliente_de):
     root = cliente_de(django_user_model.objects.create_superuser("root_ligado"))
     for page in (reverse("home"), reverse("schedule:calendar")):
         content = root.get(page).content.decode()

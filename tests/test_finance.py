@@ -81,7 +81,7 @@ def parcelas_de(cenario, entry):
 # --- Rules -----------------------------------------------------------------------------
 
 
-def test_divisao_em_parcelas_e_vencimentos_mensais():
+def test_split_into_installments_with_monthly_due_dates():
     assert services.split(Decimal("100.00"), 3) == [
         Decimal("33.34"),
         Decimal("33.33"),
@@ -91,7 +91,7 @@ def test_divisao_em_parcelas_e_vencimentos_mensais():
     assert services.add_months(datetime.date(2031, 11, 15), 3) == datetime.date(2032, 2, 15)
 
 
-def test_clinica_nova_recebe_contas_e_categorias_padrao():
+def test_new_clinic_gets_default_accounts_and_categories():
     clinic = Clinic.objects.create(name="Clínica Nova")
     with use_clinic(clinic):
         assert set(FinancialAccount.objects.values_list("name", flat=True)) == {"Caixa", "Banco"}
@@ -99,7 +99,7 @@ def test_clinica_nova_recebe_contas_e_categorias_padrao():
         assert Category.objects.filter(kind=Category.Kind.EXPENSE).count() == 9
 
 
-def test_moeda_no_formato_do_idioma():
+def test_currency_in_the_language_format():
     modelo = Template("{% load formats %}{{ amount|currency }}")
     with translation.override("pt-br"):
         assert modelo.render(Context({"amount": Decimal("1234.5")})) == "R$ 1.234,50"
@@ -111,7 +111,7 @@ def test_moeda_no_formato_do_idioma():
 # --- Entries and payments --------------------------------------------------------------
 
 
-def test_recepcao_lanca_parcelado(cenario):
+def test_reception_enters_installments(cenario):
     cliente = entrar(cenario, "recepcao")
     response = cliente.post(reverse("finance:entry_new"), new(cenario))
     assert response.status_code == 302
@@ -136,13 +136,13 @@ def test_recepcao_lanca_parcelado(cenario):
         ({"parcelas": 0}, "parcelas"),
     ],
 )
-def test_validacoes_do_lancamento(cenario, extra, field):
+def test_entry_validations(cenario, extra, field):
     response = entrar(cenario, "recepcao").post(reverse("finance:entry_new"), new(cenario, **extra))
     assert response.status_code == 200
     assert field in response.context["form"].errors
 
 
-def test_pagamento_na_hora_abre_o_recibo(cenario):
+def test_immediate_payment_opens_the_receipt(cenario):
     cliente = entrar(cenario, "recepcao")
     response = cliente.post(
         reverse("finance:entry_new"),
@@ -162,7 +162,7 @@ def test_pagamento_na_hora_abre_o_recibo(cenario):
         assert Installment.objects.unpaid().count() == 0
 
 
-def test_pagamento_parcial_juros_e_saldo(cenario):
+def test_partial_payment_interest_and_balance(cenario):
     entry = lancamento_com(cenario)
     primeira = parcelas_de(cenario, entry)[0]
     cliente = entrar(cenario, "recepcao")
@@ -180,7 +180,7 @@ def test_pagamento_parcial_juros_e_saldo(cenario):
     assert parcelas_de(cenario, entry)[0].balance == 0
 
 
-def test_desconto_so_para_o_administrador(cenario):
+def test_discount_only_for_admin(cenario):
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
@@ -196,7 +196,7 @@ def test_desconto_so_para_o_administrador(cenario):
     assert parcelas_de(cenario, entry)[0].balance == 0
 
 
-def test_estorno_e_cancelamento_so_do_administrador(cenario):
+def test_reversal_and_cancellation_only_by_admin(cenario):
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     with use_clinic(cenario["clinic"]):
@@ -241,7 +241,7 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
         assert not Installment.objects.unpaid().exists()
 
 
-def test_devedores_por_tempo_de_atraso(cenario):
+def test_debtors_by_time_overdue(cenario):
     lancamento_com(
         cenario, amount="200.00", parcelas=2, due_date=HOJE - datetime.timedelta(days=45)
     )
@@ -264,7 +264,7 @@ def test_devedores_por_tempo_de_atraso(cenario):
     assert "Maria Devedora" in page and "R$ 270,00" in page
 
 
-def test_lista_a_receber_e_filtros(cenario):
+def test_receivables_list_and_filters(cenario):
     lancamento_com(cenario, amount="90.00", parcelas=3, due_date=HOJE - datetime.timedelta(days=40))
     cliente = entrar(cenario, "recepcao")
     results = reverse("finance:receivables")
@@ -274,7 +274,7 @@ def test_lista_a_receber_e_filtros(cenario):
     assert len(cliente.get(results, {"q": "ninguem"}).context["pagina"]) == 0
 
 
-def test_ficha_mostra_o_financeiro_do_paciente(cenario):
+def test_record_shows_patient_finance(cenario):
     lancamento_com(cenario, amount="80.00", parcelas=2, due_date=HOJE - datetime.timedelta(days=5))
     url = reverse("patients:record", args=[cenario["patient"].pk])
     response = entrar(cenario, "recepcao").get(url)
@@ -287,20 +287,20 @@ def test_ficha_mostra_o_financeiro_do_paciente(cenario):
 # --- Permissions, isolation, records -----------------------------------------------------
 
 
-def test_profissional_nao_acessa_o_financeiro(cenario):
+def test_practitioner_cannot_access_finance(cenario):
     cliente = entrar(cenario, "practitioner")
     assert cliente.get(reverse("finance:receivables")).status_code == 403
     assert cliente.get(reverse("finance:debtors")).status_code == 403
     assert reverse("finance:receivables") not in cliente.get(reverse("home")).content.decode()
 
 
-def test_recepcao_nao_mexe_em_categorias_e_contas(cenario):
+def test_reception_cannot_touch_categories_and_accounts(cenario):
     cliente = entrar(cenario, "recepcao")
     assert cliente.get(reverse("finance:catalog", args=["categories"])).status_code == 403
     assert cliente.get(reverse("finance:catalog_new", args=["accounts"])).status_code == 403
 
 
-def test_admin_cadastra_categorias_e_contas(cenario):
+def test_admin_registers_categories_and_accounts(cenario):
     cliente = entrar(cenario, "admin")
     url = reverse("finance:catalog_new", args=["categories"])
     assert (
@@ -319,14 +319,14 @@ def test_admin_cadastra_categorias_e_contas(cenario):
     assert cliente.get("/finance/something-else/").status_code == 404
 
 
-def test_lancamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
+def test_entry_of_another_clinic_gives_404(cenario, clinica_b, criar_usuario, cliente_de):
     entry = lancamento_com(cenario)
     other = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:entry", args=[entry.pk])).status_code == 404
     assert other.get(reverse("finance:receivables")).context["pagina"].paginator.count == 0
 
 
-def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
+def test_permanent_deletion_keeps_entry_without_patient(cenario):
     entry = lancamento_com(cenario)
     with use_clinic(cenario["clinic"]):
         Entry.objects.filter(pk=entry.pk).update(notes="Mãe: Joana, 9999-0000")
@@ -369,7 +369,7 @@ def despesa(cenario, **extra):
     }
 
 
-def test_despesa_fixa_mensal_e_parcelada(cenario):
+def test_fixed_monthly_and_installment_expense(cenario):
     admin = entrar(cenario, "admin")
     assert admin.post(reverse("finance:expense_new"), despesa(cenario)).status_code == 302
     admin.post(
@@ -386,7 +386,7 @@ def test_despesa_fixa_mensal_e_parcelada(cenario):
         assert [p.amount for p in cadeira.parcelas.order_by("number")] == [Decimal("300.00")] * 3
 
 
-def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
+def test_expense_paid_at_once_and_installment_payment(cenario):
     admin = entrar(cenario, "admin")
     admin.post(
         reverse("finance:expense_new"),
@@ -411,7 +411,7 @@ def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
     assert all(p.balance == 0 for p in parcelas_de(cenario, entry))
 
 
-def test_recepcao_nao_ve_contas_a_pagar(cenario):
+def test_reception_does_not_see_payables(cenario):
     admin = entrar(cenario, "admin")
     admin.post(reverse("finance:expense_new"), despesa(cenario, parcelas=1))
     with use_clinic(cenario["clinic"]):
@@ -430,7 +430,7 @@ def test_recepcao_nao_ve_contas_a_pagar(cenario):
     assert reverse("finance:payables") not in reception.get(reverse("home")).content.decode()
 
 
-def test_saldo_das_contas_com_saldo_inicial(cenario):
+def test_account_balance_with_opening_balance(cenario):
     with use_clinic(cenario["clinic"]):
         FinancialAccount.objects.filter(pk=cenario["cash_register"].pk).update(
             opening_balance=Decimal("-50.00")
@@ -455,7 +455,7 @@ def test_saldo_das_contas_com_saldo_inicial(cenario):
     assert response.status_code == 302
 
 
-def test_fluxo_de_caixa_realizado_e_previsto(cenario):
+def test_cash_flow_actual_and_forecast(cenario):
     since = datetime.date(2031, 3, 1)
     until = datetime.date(2031, 3, 31)
     recebivel = lancamento_com(
@@ -498,7 +498,7 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
     assert response.status_code == 200 and response.context["por_mes"]
 
 
-def test_relatorio_por_forma_categoria_e_profissional(cenario):
+def test_report_by_method_category_and_practitioner(cenario):
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     with use_clinic(cenario["clinic"]):
         payment = services.receive(
@@ -521,7 +521,7 @@ def test_relatorio_por_forma_categoria_e_profissional(cenario):
     )
 
 
-def test_listas_de_escolha_sem_texto_em_ingles(cenario):
+def test_choice_lists_without_english_text(cenario):
     page = entrar(cenario, "admin").get(reverse("finance:expense_new")).content.decode()
     assert "Select an option" not in page
 
@@ -529,7 +529,7 @@ def test_listas_de_escolha_sem_texto_em_ingles(cenario):
 # --- Daily cash drawer (0.17.0) -----------------------------------------------------------
 
 
-def test_caixa_do_dia_completo(cenario):
+def test_full_daily_cash(cenario):
     from apps.finance.models import CashMovement, CashRegister
 
     with use_clinic(cenario["clinic"]):
@@ -601,11 +601,11 @@ def test_caixa_do_dia_completo(cenario):
         assert CashMovement.objects.count() == 2
 
 
-def test_profissional_nao_opera_o_caixa(cenario):
+def test_practitioner_does_not_operate_cash(cenario):
     assert entrar(cenario, "practitioner").get(reverse("finance:cash")).status_code == 403
 
 
-def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
+def test_closed_cash_does_not_change_with_later_reversal(cenario):
     with use_clinic(cenario["clinic"]):
         cash_register = services.open_register(
             cenario["cash_register"], amount=Decimal("0"), user=cenario["admin"]
@@ -628,7 +628,7 @@ def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
 
 
 @pytest.mark.parametrize("digitado", ["1.500,00", "R$ 1.500,00", "1500,00", "1.500"])
-def test_valor_com_ponto_de_milhar(cenario, digitado):
+def test_amount_with_thousands_dot(cenario, digitado):
     """Review stage 3: "1.500,00", as people write it, was refused ("Informe um número")."""
     response = entrar(cenario, "admin").post(
         reverse("finance:entry_new"), new(cenario, total_amount=digitado, parcelas=1)
@@ -638,7 +638,7 @@ def test_valor_com_ponto_de_milhar(cenario, digitado):
         assert Entry.objects.get().total_amount == Decimal("1500.00")
 
 
-def test_cheque_nao_e_mais_oferecido(cenario):
+def test_check_is_no_longer_offered(cenario):
     """The owner: cheques are not used anymore. A cheque recorded before keeps its name."""
     entry = lancamento_com(cenario)
     installment = parcelas_de(cenario, entry)[0]
@@ -671,7 +671,7 @@ def test_cheque_nao_e_mais_oferecido(cenario):
     assert old.get_method_display() == "Cheque"
 
 
-def test_devedores_paginados_e_com_busca(cenario):
+def test_debtors_paginated_and_searchable(cenario):
     """Volume test: thousands of debtors filled a single page of several MB."""
     with use_clinic(cenario["clinic"]):
         for n in range(55):

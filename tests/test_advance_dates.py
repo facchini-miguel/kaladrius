@@ -37,7 +37,7 @@ def cenario(clinica_a, criar_profissional):
     return {"clinic": clinica_a, "patient": patient, "agenda": week, "rechamada": rechamada}
 
 
-def test_so_no_servidor_de_demonstracao(cenario, settings):
+def test_only_on_the_demo_server(cenario, settings):
     settings.DEMO = False
     with pytest.raises(CommandError, match="DJANGO_DEMO"):
         call_command("advance_dates", desde="2026-01-01", confirmar=True)
@@ -46,7 +46,7 @@ def test_so_no_servidor_de_demonstracao(cenario, settings):
         call_command("advance_dates", desde="2026-01-01")
 
 
-def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
+def test_advances_whole_weeks_and_keeps_birth_dates(cenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
     before = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
@@ -71,7 +71,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
             )
 
 
-def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
+def test_less_than_a_week_changes_nothing(cenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
     call_command("advance_dates", desde=str(today - datetime.timedelta(days=6)), confirmar=True)
@@ -79,7 +79,7 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
         assert Recall.objects.get().date == today - datetime.timedelta(days=20)
 
 
-def test_as_datas_fixas_existem():
+def test_the_fixed_dates_exist():
     """A field renamed without updating FIXAS would silently start to move (a birth date)."""
     from django.apps import apps
 

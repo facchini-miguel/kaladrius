@@ -22,7 +22,7 @@ def mudar_pais(clinic, country):
     clinic.save()
 
 
-def test_cada_pais_tem_as_suas_regras():
+def test_each_country_has_its_rules():
     assert set(insurance.INSURERS) == set(COUNTRIES)
     for country, regras in insurance.INSURERS.items():
         for code in (regras.registration, regras.procedure):
@@ -31,7 +31,7 @@ def test_cada_pais_tem_as_suas_regras():
                 assert re.fullmatch(code.default, code.example), country
 
 
-def test_codigo_limpo_e_conferido():
+def test_code_cleaned_and_checked():
     cdt = insurance.for_country("US").procedure
     assert cdt.clean_value(" d1110 ") == "D1110"
     with pytest.raises(Exception, match="CDT"):
@@ -42,7 +42,7 @@ def test_codigo_limpo_e_conferido():
     )  # free format
 
 
-def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
+def test_insurer_registration_by_country(clinica_a, admin):  # noqa: F811
     form = admin.get(reverse("health_plans:new")).context["form"]
     assert str(form.fields["registration"].label) == "Registro da operadora (ANS)"
     mudar_pais(clinica_a, "US")
@@ -64,7 +64,7 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     assert "Registro da operadora" not in admin.get(reverse("health_plans:list")).content.decode()
 
 
-def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):  # noqa: F811
+def test_card_fields_by_country(clinica_a, patient, health_plan, admin):  # noqa: F811
     url = reverse("health_plans:card_new", args=[patient.pk])
     fields = admin.get(url).context["form"].fields
     assert "group" not in fields and "member_code" not in fields  # Brazil
@@ -84,7 +84,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):
     assert str(fields["member_code"].label) == "Código do beneficiário (dependant code)"
 
 
-def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
+def test_procedure_code_goes_to_the_estimate(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     cliente = entrar(cenario, "admin")
     url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])

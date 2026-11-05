@@ -40,7 +40,7 @@ EXEMPLO = """
 """
 
 
-def test_arquivo_do_projeto_e_valido():
+def test_project_file_is_valid():
     """Ensures the repository's releases.yaml is always valid (runs in CI)."""
     versions = releases.read_releases(settings.RELEASES_ARQUIVO)
     assert versions
@@ -54,19 +54,19 @@ def test_arquivo_do_projeto_e_valido():
         ("README.es.md", "Versión actual: {}"),
     ],
 )
-def test_readme_mostra_a_versao_atual(arquivo, texto):
+def test_readme_shows_current_version(arquivo, texto):
     readme = (settings.BASE_DIR / arquivo).read_text(encoding="utf-8")
     assert texto.format(releases.current_version()) in readme, f"update the version in {arquivo}"
 
 
-def test_versao_do_pyproject_igual_a_do_releases():
+def test_pyproject_version_equals_releases():
     import tomllib
 
     pyproject = tomllib.loads((settings.BASE_DIR / "pyproject.toml").read_text())
     assert pyproject["project"]["version"] == releases.current_version()
 
 
-def test_leitura_e_filtro_por_publico(arquivo, settings):
+def test_reading_and_filtering_by_audience(arquivo, settings):
     settings.RELEASES_ARQUIVO = arquivo(EXEMPLO)
     releases.all_releases.cache_clear()
     try:
@@ -113,13 +113,13 @@ def test_leitura_e_filtro_por_publico(arquivo, settings):
         ),
     ],
 )
-def test_arquivo_invalido(arquivo, conteudo, message):
+def test_invalid_file(arquivo, conteudo, message):
     with pytest.raises(releases.InvalidReleases, match=message):
         releases.read_releases(arquivo(conteudo))
 
 
 @pytest.mark.django_db
-def test_pagina_novidades(client, django_user_model):
+def test_whats_new_page(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     conteudo = client.get(reverse("whats_new")).content.decode()
@@ -129,7 +129,7 @@ def test_pagina_novidades(client, django_user_model):
 
 
 @pytest.mark.django_db
-def test_pagina_novidades_exige_login(client):
+def test_whats_new_page_requires_login(client):
     assert client.get(reverse("whats_new")).status_code == 302
 
 
@@ -146,7 +146,7 @@ def test_api_releases(client):
 
 
 @pytest.mark.django_db
-def test_api_versao(client):
+def test_api_version(client):
     assert client.get("/api/v1/version").json() == {"version": releases.current_version()}
     assert client.get("/api/v1/versao").json() == {"versao": releases.current_version()}
 
@@ -169,7 +169,7 @@ DEPENDABOT = """
 
 
 @pytest.mark.django_db
-def test_itens_do_dependabot_aparecem_marcados(arquivo, settings, client, django_user_model):
+def test_dependabot_items_show_marked(arquivo, settings, client, django_user_model):
     """Decision 133: Dependabot's items say so, with their pull request; the project's do not."""
     from io import StringIO
 

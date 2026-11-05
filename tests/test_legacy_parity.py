@@ -21,7 +21,7 @@ def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao_paridade", clinica_a, Role.FRONT_DESK))
 
 
-def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, reception, criar_profissional):
+def test_schedule_returns_to_the_week_that_was_open(clinica_a, reception, criar_profissional):
     practitioner = criar_profissional(clinica_a, "Profissional fictício")
     week = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
     eventos = reception.get(reverse("schedule:events"), {**week, "practitioner": practitioner.pk})
@@ -33,7 +33,7 @@ def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, reception, criar_pr
     assert explicita.context["configuracao"]["date"] == "2026-04-01"
 
 
-def test_no_dia_seguinte_a_agenda_abre_hoje(reception):
+def test_next_day_schedule_opens_today(reception):
     session = reception.session
     ontem = timezone.localdate() - datetime.timedelta(days=1)
     session["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
@@ -41,7 +41,7 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(reception):
     assert reception.get(reverse("schedule:calendar")).context["configuracao"]["date"] == ""
 
 
-def test_ficha_cadastral_impressa(clinica_a, reception):
+def test_printed_registration_record(clinica_a, reception):
     with use_clinic(clinica_a):
         patient = Patient.objects.create(
             name="Paciente fictícia da ficha",
@@ -71,7 +71,7 @@ def test_ficha_cadastral_impressa(clinica_a, reception):
     )  # the record and the print
 
 
-def test_ficha_impressa_respeita_permissao(clinica_a, criar_usuario, cliente_de):
+def test_printed_record_respects_permission(clinica_a, criar_usuario, cliente_de):
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente fictício sem acesso")
     sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))

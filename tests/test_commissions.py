@@ -78,7 +78,7 @@ def pagar_comissao(cenario, practitioner, until=HOJE):
     )
 
 
-def test_calculo_inclui_juros_e_ignora_outros_profissionais(cenario):
+def test_calculation_includes_interest_and_ignores_other_practitioners(cenario):
     receive(cenario, "100.00", cenario["dra"], interest="10.00")
     receive(cenario, "250.55", cenario["dra"])
     receive(cenario, "999.00", cenario["dr"])  # other practitioner
@@ -90,7 +90,7 @@ def test_calculo_inclui_juros_e_ignora_outros_profissionais(cenario):
     assert calculo["amount"] == Decimal("144.22")  # 40% of 360.55, rounded half up
 
 
-def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
+def test_paying_creates_expense_and_never_pays_twice(cenario):
     receive(cenario, "300.00", cenario["dra"])
     response = pagar_comissao(cenario, cenario["dra"])
     with use_clinic(cenario["clinic"]):
@@ -115,7 +115,7 @@ def test_pagar_cria_despesa_e_nao_paga_duas_vezes(cenario):
         assert commissions.pending(cenario["dra"], HOJE)["amount"] == Decimal("20.00")
 
 
-def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
+def test_reversal_after_payment_is_deducted_from_the_next(cenario):
     payment = receive(cenario, "300.00", cenario["dra"])
     pagar_comissao(cenario, cenario["dra"])
     # The percentage changes, but the deduction uses the one it was paid with (40%).
@@ -153,7 +153,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
     assert list(statement.context["reversal_deduction"]) == [payment]
 
 
-def test_cancelar_a_despesa_desfaz_a_comissao(cenario):
+def test_cancelling_the_expense_undoes_the_commission(cenario):
     receive(cenario, "300.00", cenario["dra"])
     pagar_comissao(cenario, cenario["dra"])
     with use_clinic(cenario["clinic"]):
@@ -168,7 +168,7 @@ def test_cancelar_a_despesa_desfaz_a_comissao(cenario):
         assert commissions.pending(cenario["dra"], HOJE)["amount"] == Decimal("120.00")
 
 
-def test_telas_e_percentual(cenario):
+def test_screens_and_percentage(cenario):
     receive(cenario, "300.00", cenario["dra"])
     cliente = cenario["cliente"]
     page = cliente.get(reverse("finance:commissions"))
@@ -187,7 +187,7 @@ def test_telas_e_percentual(cenario):
     assert cliente.get(reverse("finance:commissions"), {"until": futuro}).context["until"] == HOJE
 
 
-def test_so_o_administrador(cenario):
+def test_only_the_admin(cenario):
     reception = cenario["cliente_de"](cenario["recepcao"])
     assert reception.get(reverse("finance:commissions")).status_code == 403
     assert (
@@ -203,12 +203,12 @@ def test_so_o_administrador(cenario):
     )
 
 
-def test_profissional_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
+def test_practitioner_of_another_clinic_gives_404(cenario, clinica_b, criar_usuario, cliente_de):
     other = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:commission_pay", args=[cenario["dra"].pk])).status_code == 404
 
 
-def test_nao_cancela_comissao_cujo_estorno_ja_foi_descontado_em_outra(cenario):
+def test_does_not_cancel_commission_whose_reversal_was_deducted_elsewhere(cenario):
     """Cancelling C1 after C2 deducted a reversal of C1 would lose that amount for good."""
     payment = receive(cenario, "100.00", cenario["dra"])  # 40.00 in C1
     pagar_comissao(cenario, cenario["dra"])

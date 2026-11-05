@@ -11,7 +11,7 @@ from apps.practitioners.models import Practitioner
 pytestmark = pytest.mark.django_db
 
 
-def test_matriz_cobre_todos_os_papeis():
+def test_matrix_covers_all_roles():
     assert set(MATRIX) == set(Role)
     assert all(acoes == frozenset(Action) for acoes in MATRIX[Role.ADMIN].values())
     assert set(MATRIX[Role.ADMIN]) == set(Module)
@@ -25,7 +25,7 @@ def test_matriz_cobre_todos_os_papeis():
         (Role.PRACTITIONER, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
     ],
 )
-def test_acesso_as_telas_de_profissionais_por_papel(
+def test_practitioner_screens_access_by_role(
     role, esperado, clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
     practitioner = criar_profissional(clinica_a, "Dra. A")
@@ -40,7 +40,9 @@ def test_acesso_as_telas_de_profissionais_por_papel(
         assert cliente.get(url).status_code == esperado[name], name
 
 
-def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profissional, cliente_de):
+def test_reception_cannot_delete_even_by_post(
+    clinica_a, criar_usuario, criar_profissional, cliente_de
+):
     practitioner = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     response = cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
@@ -49,9 +51,7 @@ def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profis
         assert Practitioner.objects.filter(pk=practitioner.pk).exists()
 
 
-def test_botoes_aparecem_conforme_a_permissao(
-    clinica_a, criar_usuario, criar_profissional, cliente_de
-):
+def test_buttons_follow_the_permission(clinica_a, criar_usuario, criar_profissional, cliente_de):
     criar_profissional(clinica_a, "Dra. A")
     reception = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     content = reception.get(reverse("practitioners:list")).content.decode()
@@ -66,7 +66,7 @@ def test_botoes_aparecem_conforme_a_permissao(
     assert ">Excluir<" in content
 
 
-def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_de):
+def test_clinic_admin_creates_edits_and_deletes(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Role.ADMIN))
     response = cliente.post(
         reverse("practitioners:new"),
@@ -90,19 +90,19 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
         assert not Practitioner.objects.exists()
 
 
-def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
+def test_invalid_color_is_refused(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Role.ADMIN))
     response = cliente.post(reverse("practitioners:new"), {"name": "X", "color": "#zzzzzz"})
     assert response.status_code == 200
     assert "#RRGGBB" in response.content.decode()
 
 
-def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cliente_de):
+def test_menu_shows_practitioners_only_with_permission(clinica_a, criar_usuario, cliente_de):
     com_clinica = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     assert "Profissionais</a>" in com_clinica.get(reverse("home")).content.decode()
 
 
-def test_superusuario_entra_direto_na_clinica_da_instalacao(
+def test_superuser_goes_straight_to_the_installation_clinic(
     clinica_a, criar_profissional, cliente_de, django_user_model
 ):
     practitioner = criar_profissional(clinica_a, "Dra. A")
@@ -113,7 +113,7 @@ def test_superusuario_entra_direto_na_clinica_da_instalacao(
     assert "Clínica A" in start and "Escolha" not in start
 
 
-def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_user_model):
+def test_first_access_registers_the_clinic(cliente_de, criar_usuario, django_user_model):
     from apps.core.models import Clinic
 
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
@@ -142,9 +142,7 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     assert cliente_de(criar_usuario("ana")).get(reverse("register_clinic")).status_code == 403
 
 
-def test_admin_do_django_so_para_superusuario(
-    clinica_a, criar_usuario, cliente_de, django_user_model
-):
+def test_django_admin_only_for_superuser(clinica_a, criar_usuario, cliente_de, django_user_model):
     staff = criar_usuario("staff", clinica_a, Role.ADMIN, is_staff=True)
     response = cliente_de(staff).get(reverse("admin:index"))
     assert response.status_code == 302  # sent to the admin login
@@ -153,7 +151,7 @@ def test_admin_do_django_so_para_superusuario(
     assert cliente_de(root).get(reverse("admin:index")).status_code == 200
 
 
-def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
+def test_django_admin_lists_practitioners_of_all_clinics(
     clinica_a, clinica_b, criar_profissional, cliente_de, django_user_model
 ):
     criar_profissional(clinica_a, "Dra. A")
@@ -167,7 +165,7 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
     assert "Dra. A" in content and "Dr. B" in content
 
 
-def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario, cliente_de):
+def test_finance_role_sees_finance_and_nothing_else(clinica_a, criar_usuario, cliente_de):
     """Decision 088: all of finance; patients, estimates and records only to look at."""
     cliente = cliente_de(criar_usuario("financeiro", clinica_a, Role.FINANCE))
     for name in (
