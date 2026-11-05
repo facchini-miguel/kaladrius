@@ -4,6 +4,48 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.59.0
+  data: 2026-11-05
+  titulo:
+    pt-br: Banco de dados em inglês
+    en: The database in English
+    es: Base de datos en inglés
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Manutenção interna: as tabelas do banco de dados foram reorganizadas. Nada muda no uso,
+          nas telas nem nos dados; a atualização leva alguns segundos a mais.
+        en: >
+          Internal maintenance: the database tables were reorganized. Nothing changes in use, on
+          the screens or in the data; the update takes a few more seconds.
+        es: >
+          Mantenimiento interno: las tablas de la base de datos se reorganizaron. Nada cambia en
+          el uso, en las pantallas ni en los datos; la actualización tarda unos segundos más.
+    - tipo: melhoria
+      modulo: Sistema
+      publico: []
+      texto:
+        pt-br: >
+          As tabelas, colunas, índices e restrições do banco têm nomes em inglês, e o modelo de
+          usuário é `User` (decisão 179). Ao contrário das versões anteriores, a versão de antes
+          não funciona sobre o banco atualizado: uma volta automática deixaria o sistema fora do
+          ar até a correção. Quem lê o banco por SQL (scripts, relatórios) usa os nomes novos.
+        en: >
+          The database's tables, columns, indexes and constraints have English names, and the
+          user model is `User` (decision 179). Unlike earlier versions, the version before does
+          not work on the updated database: an automatic rollback would leave the system down
+          until fixed. Anyone reading the database through SQL (scripts, reports) uses the new
+          names.
+        es: >
+          Las tablas, columnas, índices y restricciones de la base tienen nombres en inglés, y el
+          modelo de usuario es `User` (decisión 179). A diferencia de las versiones anteriores, la
+          versión de antes no funciona sobre la base actualizada: una vuelta automática dejaría el
+          sistema fuera de servicio hasta la corrección. Quien lee la base por SQL (scripts,
+          informes) usa los nombres nuevos.
+
 - versao: 0.58.0
   data: 2026-11-05
   titulo:
