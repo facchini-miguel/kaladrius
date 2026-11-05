@@ -280,16 +280,24 @@ def test_ida_e_volta_quando_nem_aplica(monkeypatch):
     ]
 
 
-@pytest.mark.django_db(transaction=True)
-def test_ida_e_volta_de_uma_migracao_real():
+@pytest.mark.django_db
+def test_ida_e_volta_de_uma_migracao_real(monkeypatch):
+    """Everything applied, the app taken back to before its first new migration, applied
+    again. The migrations themselves go back and forth in the CI job that runs this report on
+    every pull request with migrations (decision 180): here, only the steps."""
+    chamadas = []
+    monkeypatch.setattr(relatorio, "_migrate", lambda *args: chamadas.append(args))
     assert relatorio.round_trip([HEALTH_PLANS]) == []
+    assert chamadas == [(), ("convenios", "0002_ordem_alfabetica"), ()]
 
 
-@pytest.mark.django_db(transaction=True)
-def test_comando_completo_com_ida_e_volta(tmp_path):
-    """The command as CI runs it (it once failed: an option hid the function of the same name)."""
+@pytest.mark.django_db
+def test_comando_completo_com_ida_e_volta(tmp_path, monkeypatch):
+    """The command as CI runs it (it once failed: an option hid the function of the same name).
+    The migrations' real back and forth is the CI job's (decision 180)."""
     from django.core.management import call_command
 
+    monkeypatch.setattr(relatorio, "_migrate", lambda *args: None)
     arquivo, comentario = tmp_path / "relatorio.md", tmp_path / "comentario.md"
     saida = StringIO()
     call_command(

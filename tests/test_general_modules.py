@@ -1,16 +1,16 @@
 """General modules turned on and off by the clinic (decision 092), fictitious data only."""
 
 import datetime
+import importlib
 
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import connection
-from django.db.migrations.executor import MigrationExecutor
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.core.forms import ClinicForm
-from apps.core.isolation import use_clinic
+from apps.core.isolation import use_clinic, without_isolation
 from apps.core.models import (
     GENERAL_MODULES,
     SPECIALTIES,
@@ -24,7 +24,7 @@ from apps.core.templatetags.formats import whatsapp
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
-from tests.test_modules_migration import estado_do_banco
+from tests.era import apps_at, tables_of_the_time
 
 pytestmark = pytest.mark.django_db
 
@@ -188,36 +188,34 @@ def test_permissoes_leem_os_modulos_uma_vez_por_requisicao(admin):
     assert len(modulos) == 1
 
 
-@pytest.mark.django_db(transaction=True)
 def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
-    executor = MigrationExecutor(connection)
-    folhas = executor.loader.graph.leaf_nodes()
-    previous = [("core", "0010_modulos_clinicos")]
-    try:
-        executor.migrate(previous)
-        apps = estado_do_banco()
-        Antiga = apps.get_model("core", "Clinica")
-        ModuloAntigo = apps.get_model("core", "ModuloDaClinica")
-        clinic = Antiga.objects.create(nome="Clínica fictícia antiga", area="medicina")
-        ModuloAntigo.objects.bulk_create(
+    """Migration core 0011 turned on the general modules of the clinics that existed."""
+    clinic = Clinic.objects.create(name="Clínica fictícia antiga", area="medicina")
+    with without_isolation():
+        # As the clinic was after 0010: only the clinical modules.
+        ClinicModule.all_objects.filter(clinic=clinic).delete()
+        ClinicModule.all_objects.bulk_create(
             [
-                ModuloAntigo(clinica_id=clinic.pk, codigo="odontologia", ativo=False),
-                ModuloAntigo(clinica_id=clinic.pk, codigo="medicina", ativo=True),
+                ClinicModule(clinic=clinic, code="odontologia", active=False),
+                ClinicModule(clinic=clinic, code="medicina", active=True),
             ]
         )
-        executor = MigrationExecutor(connection)
-        executor.migrate([("core", "0011_modulos_gerais")])
-        Module = executor.loader.project_state([("core", "0011_modulos_gerais")]).apps.get_model(
-            "core", "ModuloDaClinica"
+    apps = apps_at(("core", "0011_modulos_gerais"))
+    pares = [
+        (apps.get_model("core", "Clinica"), Clinic),
+        (apps.get_model("core", "ModuloDaClinica"), ClinicModule),
+    ]
+    with tables_of_the_time(pares), connection.schema_editor() as editor:
+        importlib.import_module("apps.core.migrations.0011_modulos_gerais").ligar_modulos_gerais(
+            apps, editor
         )
+    with without_isolation():
         ligados = set(
-            Module.objects.filter(clinica_id=clinic.pk, ativo=True).values_list("codigo", flat=True)
+            ClinicModule.objects.filter(clinic=clinic, active=True).values_list("code", flat=True)
         )
         # Pessoal came later (core 0012), so it is not part of this step.
         assert ligados == {"medicina", *GENERAL_MODULES} - {"pessoal"}
-        assert Module.objects.filter(clinica_id=clinic.pk).count() == len(ModuleCode) - 1
-    finally:
-        MigrationExecutor(connection).migrate(folhas)
+        assert ClinicModule.objects.filter(clinic=clinic).count() == len(ModuleCode) - 1
 
 
 def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
