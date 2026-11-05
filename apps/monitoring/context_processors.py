@@ -3,19 +3,19 @@ from django.conf import settings
 from . import health
 
 
-def alerta(request):
+def health_alert(request):
     """For superusers on monitored servers: a warning when the health samples stop or
     memory, swap or disk reach the critical level."""
     user = getattr(request, "user", None)
     if user is None or not user.is_superuser or not settings.HEALTH_MONITORED:
         return {}
-    ultima = health.ultima()
-    if ultima is None:
+    latest = health.latest()
+    if latest is None:
         return {"saude_alerta": {"sem_coleta": True}}
-    if health.parada(ultima):
-        return {"saude_alerta": {"parada": ultima["momento"]}}
+    if health.stopped(latest):
+        return {"saude_alerta": {"parada": latest["momento"]}}
     # Not the processor: a busy moment is normal, and it does not break anything by itself.
     criticos = [
-        key for key, nivel in health.niveis(ultima).items() if nivel == "critico" and key != "cpu"
+        key for key, level in health.levels(latest).items() if level == "critico" and key != "cpu"
     ]
     return {"saude_alerta": {"criticos": criticos}} if criticos else {}

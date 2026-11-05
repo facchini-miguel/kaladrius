@@ -14,29 +14,29 @@ from django.utils.translation import get_language
 
 DOCS = Path(settings.BASE_DIR) / "docs"
 # Interface language -> the site's folder with that language's pages, and its URL prefix.
-PASTAS = {
+FOLDERS = {
     "pt-br": "i18n/pt-BR/docusaurus-plugin-content-docs/current",
     "en": "docs",
     "es": "i18n/es/docusaurus-plugin-content-docs/current",
 }
-PREFIXOS = {"pt-br": "/pt-BR", "en": "", "es": "/es"}
-IDIOMA_PADRAO = "pt-br"
+PREFIXES = {"pt-br": "/pt-BR", "en": "", "es": "/es"}
+DEFAULT_LANGUAGE = "pt-br"
 
 _FRONTMATTER = re.compile(r"\A---\n.*?\n---\n", re.S)
-_ITEM_DE_LISTA = re.compile(r"^\s*(?:[-*+] |\d+\. )")
+_LIST_ITEM = re.compile(r"^\s*(?:[-*+] |\d+\. )")
 
 
-def _idioma():
+def _language():
     language = get_language()
-    return language if language in PASTAS else IDIOMA_PADRAO
+    return language if language in FOLDERS else DEFAULT_LANGUAGE
 
 
-def url_do_site(path=""):
+def site_url(path=""):
     """Address of a page of the documentation site in the current language."""
-    return f"{settings.DOCS_URL.rstrip('/')}{PREFIXOS[_idioma()]}/{path}"
+    return f"{settings.DOCS_URL.rstrip('/')}{PREFIXES[_language()]}/{path}"
 
 
-def _separar_listas(text):
+def _split_lists(text):
     """Blank line before a list that follows a paragraph line, outside code blocks.
 
     GitHub and the site render such lists, but Python-Markdown needs the blank line.
@@ -47,9 +47,9 @@ def _separar_listas(text):
             em_codigo = not em_codigo
         elif (
             not em_codigo
-            and _ITEM_DE_LISTA.match(row)
+            and _LIST_ITEM.match(row)
             and previous.strip()
-            and not _ITEM_DE_LISTA.match(previous)
+            and not _LIST_ITEM.match(previous)
             and not previous.startswith((" ", "|", ">", "#"))
         ):
             rows.append("")
@@ -58,13 +58,11 @@ def _separar_listas(text):
     return "\n".join(rows)
 
 
-def privacidade():
+def privacy():
     """(title, HTML) of the privacy policy in the current language."""
-    file = DOCS / PASTAS[_idioma()] / "manual" / "privacy.md"
+    file = DOCS / FOLDERS[_language()] / "manual" / "privacy.md"
     text = _FRONTMATTER.sub("", file.read_text(encoding="utf-8"), count=1)
     titulo = next((row[2:].strip() for row in text.splitlines() if row.startswith("# ")), "")
-    html = markdown.markdown(
-        _separar_listas(text), extensions=["tables", "fenced_code", "sane_lists"]
-    )
+    html = markdown.markdown(_split_lists(text), extensions=["tables", "fenced_code", "sane_lists"])
     html = html.replace("<table>", '<table class="table table-sm table-bordered bg-white">')
     return titulo, html

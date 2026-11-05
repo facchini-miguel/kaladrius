@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.audit.models import AuditEntry
-from apps.audit.record import registrar
+from apps.audit.record import log_event
 from apps.core import modules
 from apps.core.models import ModuleCode
 from apps.patients.models import Patient
@@ -50,14 +50,14 @@ def requires_practitioner(view):
 
 def _audit(acao, visit, fields):
     if fields:
-        registrar(acao, visit, changes={field: [CONFIDENTIAL, CONFIDENTIAL] for field in fields})
+        log_event(acao, visit, changes={field: [CONFIDENTIAL, CONFIDENTIAL] for field in fields})
 
 
 def _finalize(request, visit):
     visit.finalized_at = timezone.now()
     visit.finalized_by = request.user
     visit.save(update_fields=["finalized_at", "finalized_by", "updated_at"])
-    registrar(Action.CHANGE, visit, changes={"finalizado": [None, "sim"]})
+    log_event(Action.CHANGE, visit, changes={"finalizado": [None, "sim"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
     )
@@ -122,7 +122,7 @@ def visit(request, practitioner, pk):
                 messages.success(request, _("Atendimento salvo."))
             return redirect("medical_records:visit", pk=visit.pk)
     else:
-        registrar(Action.VIEWED, visit)
+        log_event(Action.VIEWED, visit)
     return render(
         request,
         "medical_records/visit.html",
@@ -172,7 +172,7 @@ def print_visit(request, practitioner, pk):
     visit = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
     if not visit.is_finalized:
         raise PermissionDenied
-    registrar(Action.VIEWED, visit, description=f"{visit} (impressão)")
+    log_event(Action.VIEWED, visit, description=f"{visit} (impressão)")
     return render(
         request,
         "medical_records/print.html",
@@ -201,7 +201,7 @@ def new_certificate(request, practitioner, pk):
         certificate.practitioner = visit.practitioner
         certificate.created_by = request.user
         certificate.save()
-        registrar(
+        log_event(
             Action.CREATE,
             certificate,
             changes={
@@ -229,7 +229,7 @@ def new_prescription(request, practitioner, pk):
         prescription.practitioner = visit.practitioner
         prescription.created_by = request.user
         prescription.save()
-        registrar(Action.CREATE, prescription, changes={"medications": [None, CONFIDENTIAL]})
+        log_event(Action.CREATE, prescription, changes={"medications": [None, CONFIDENTIAL]})
         messages.success(request, _("Receita emitida."))
         return redirect("medical_records:prescription", pk=prescription.pk)
     return render(
@@ -244,7 +244,7 @@ def certificate(request, practitioner, pk):
     certificate = get_object_or_404(
         Certificate.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Action.VIEWED, certificate)
+    log_event(Action.VIEWED, certificate)
     return render(request, "medical_records/certificate.html", {"atestado": certificate})
 
 
@@ -253,7 +253,7 @@ def prescription(request, practitioner, pk):
     prescription = get_object_or_404(
         Prescription.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Action.VIEWED, prescription)
+    log_event(Action.VIEWED, prescription)
     rows = [row for row in prescription.medications.splitlines() if row.strip()]
     return render(
         request, "medical_records/prescription.html", {"receita": prescription, "linhas": rows}
@@ -273,7 +273,7 @@ def addendum(request, practitioner, pk):
         addendum.practitioner = practitioner or visit.practitioner
         addendum.created_by = request.user
         addendum.save()
-        registrar(Action.CREATE, addendum, changes={"text": [None, CONFIDENTIAL]})
+        log_event(Action.CREATE, addendum, changes={"text": [None, CONFIDENTIAL]})
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
@@ -290,7 +290,7 @@ def new_exam_request(request, practitioner, pk):
         pedido.practitioner = visit.practitioner
         pedido.created_by = request.user
         pedido.save()
-        registrar(
+        log_event(
             Action.CREATE,
             pedido,
             changes={
@@ -312,7 +312,7 @@ def exam_request(request, practitioner, pk):
     pedido = get_object_or_404(
         ExamRequest.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Action.VIEWED, pedido)
+    log_event(Action.VIEWED, pedido)
     rows = [row for row in pedido.exams.splitlines() if row.strip()]
     return render(request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": rows})
 
@@ -338,7 +338,7 @@ def upload_attachment(request, practitioner, pk):
             practitioner=practitioner or visit.practitioner,
             created_by=request.user,
         )
-        registrar(
+        log_event(
             Action.CREATE,
             attachment,
             description=f"{visit} – {_('anexo')}",
@@ -353,7 +353,7 @@ def upload_attachment(request, practitioner, pk):
 @requires_practitioner
 def attachment(request, practitioner, pk):
     attachment = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
-    registrar(Action.VIEWED, attachment, description=f"{attachment.visit} – {_('anexo')}")
+    log_event(Action.VIEWED, attachment, description=f"{attachment.visit} – {_('anexo')}")
     response = HttpResponse(bytes(attachment.content), content_type=attachment.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
     name = "".join(c for c in attachment.name if c.isalnum() or c in "._- ") or "anexo"
@@ -374,7 +374,7 @@ def remove_attachment(request, practitioner, pk):
     if attachment.visit.is_finalized or not (quem_enviou or manages_medical_records(request)):
         raise PermissionDenied
     visit = attachment.visit
-    registrar(
+    log_event(
         Action.DELETE,
         attachment,
         description=f"{visit} – {_('anexo')}",

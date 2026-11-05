@@ -15,14 +15,14 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        results = health.amostras(desde=timezone.now() - datetime.timedelta(hours=24))
+        results = health.samples(desde=timezone.now() - datetime.timedelta(hours=24))
         summary = health.summary(results)
         if summary is None:
             self.stdout.write("Sem amostras nas últimas 24 horas: a coleta está funcionando?")
         else:
-            ultima = results[-1]
+            latest = results[-1]
             self.stdout.write(
-                f"Amostras: {summary['amostras']} (a última às {ultima['momento']:%H:%M} UTC)"
+                f"Amostras: {summary['amostras']} (a última às {latest['momento']:%H:%M} UTC)"
             )
             self.stdout.write(
                 f"Processador: média {summary['cpu_media']:.1f}%, pico {summary['cpu_maxima']:.1f}%"
@@ -37,9 +37,9 @@ class Command(BaseCommand):
                 f"{filesizeformat(summary['enviado'])} enviados"
             )
             alerts = [
-                f"{key}: {nivel}" for key, nivel in health.niveis(ultima).items() if nivel != "ok"
+                f"{key}: {level}" for key, level in health.levels(latest).items() if level != "ok"
             ]
-            if health.parada(ultima):
+            if health.stopped(latest):
                 alerts.append("coleta parada")
             self.stdout.write("Alertas: " + (", ".join(alerts) if alerts else "nenhum"))
         backup = Backup.objects.first()

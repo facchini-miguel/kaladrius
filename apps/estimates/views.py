@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 from apps.core import modules
 from apps.core.models import ModuleCode
 from apps.core.permissions import Action, Module, can, requires_permission
-from apps.dentistry.teeth import odontograma
+from apps.dentistry.teeth import odontogram
 from apps.finance.models import Category
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
@@ -155,7 +155,7 @@ def _teeth(request, estimate):
     tem_historico = any(item.teeth or item.faces for item in estimate.itens.all())
     if not (_dentistry(request) or tem_historico):
         return {"mostrar_dentes": False}
-    return {"mostrar_dentes": True, **odontograma(estimate.teeth)}
+    return {"mostrar_dentes": True, **odontogram(estimate.teeth)}
 
 
 @require_POST

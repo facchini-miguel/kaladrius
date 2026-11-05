@@ -23,7 +23,7 @@ def superusuario(client, django_user_model):
     return client
 
 
-@pytest.mark.parametrize("pasta", documents.PASTAS.values())
+@pytest.mark.parametrize("pasta", documents.FOLDERS.values())
 def test_manual_e_politica_do_site_em_cada_idioma(pasta):
     manual = documents.DOCS / pasta / "manual"
     paginas = {file.stem for file in manual.glob("*.md")}
@@ -54,7 +54,7 @@ def test_enderecos_antigos_da_ajuda_levam_ao_site(reception, settings):
 
 def test_lista_logo_depois_de_um_paragrafo_vira_lista():
     text = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
-    resultado = documents._separar_listas(text)
+    resultado = documents._split_lists(text)
     assert resultado.startswith("Texto:\n\n- um\n- dois")
     assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
 

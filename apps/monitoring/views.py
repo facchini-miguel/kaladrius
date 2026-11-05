@@ -10,14 +10,14 @@ from apps.core.models import Backup
 
 from . import health
 
-PERIODOS = {
+PERIODS = {
     "1h": datetime.timedelta(hours=1),
     "24h": datetime.timedelta(hours=24),
     "7d": datetime.timedelta(days=7),
 }
 # (title, [(key, css class, legend)], fixed top of scale, unit). Memory and disk use 0-100%;
 # the processor follows the data (at least 10%), or 0.5% would be a flat line.
-GRAFICOS = [
+CHARTS = [
     (
         _("Processador"),
         [
@@ -49,7 +49,7 @@ GRAFICOS = [
 ]
 
 
-def _banco():
+def _database():
     """Database size and its largest tables."""
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_database_size(current_database())")
@@ -68,26 +68,26 @@ def _banco():
 
 
 @login_required
-def painel(request):
+def health_dashboard(request):
     """Server health for every logged-in user (0.26.0). The database tables and the server
     command are shown to superusers only."""
     periodo = request.GET.get("periodo", "1h")
-    if periodo not in PERIODOS:
+    if periodo not in PERIODS:
         periodo = "1h"
     # The time axis is the whole period, even while there are fewer samples.
     end = timezone.now()
-    start = end - PERIODOS[periodo]
-    results = health.com_rede(health.amostras(desde=start))
-    ultima = results[-1] if results else health.ultima()
+    start = end - PERIODS[periodo]
+    results = health.with_network(health.samples(desde=start))
+    latest = results[-1] if results else health.latest()
     graficos = []
-    for titulo, series, maximo, unidade in GRAFICOS:
+    for titulo, series, maximo, unidade in CHARTS:
         rows = [(key, classe) for key, classe, _legenda in series]
         piso, teto = (10, 100) if unidade == "%" else (None, None)
-        topo = health.topo_da_escala(results, rows, maximo, piso)
+        topo = health.scale_top(results, rows, maximo, piso)
         graficos.append(
             {
                 "titulo": titulo,
-                "svg": health.grafico(
+                "svg": health.chart(
                     results, rows, start=start, end=end, maximo=maximo, piso=piso, teto=teto
                 ),
                 "topo": min(topo, teto) if teto else topo,
@@ -102,15 +102,15 @@ def painel(request):
             "periodo": periodo,
             "start": start,
             "end": end,
-            "ultima": ultima,
-            "niveis": health.niveis(ultima) if ultima else {},
-            "parada": health.parada(ultima) if ultima else False,
-            "ligado_desde": ultima["momento"] - datetime.timedelta(seconds=ultima["ligado_ha"])
-            if ultima
+            "ultima": latest,
+            "niveis": health.levels(latest) if latest else {},
+            "parada": health.stopped(latest) if latest else False,
+            "ligado_desde": latest["momento"] - datetime.timedelta(seconds=latest["ligado_ha"])
+            if latest
             else None,
             "resumo": health.summary(results),
             "graficos": graficos,
-            "banco": _banco(),
+            "banco": _database(),
             "backup": Backup.objects.first(),
         },
     )

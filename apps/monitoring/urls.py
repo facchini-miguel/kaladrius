@@ -4,4 +4,4 @@ from . import views
 
 app_name = "monitoring"
 
-urlpatterns = [path("", views.painel, name="health")]
+urlpatterns = [path("", views.health_dashboard, name="health")]

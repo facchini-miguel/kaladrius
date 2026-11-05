@@ -8,11 +8,11 @@ from apps.core.forms import BootstrapForm
 from . import services
 
 
-class EntrarForm(AuthenticationForm):
+class LoginForm(AuthenticationForm):
     """The login, also refused after too many wrong attempts from the same address."""
 
     def clean(self):
-        if self.request is not None and services.endereco_bloqueado(self.request):
+        if self.request is not None and services.address_blocked(self.request):
             raise ValidationError(
                 _("Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."),
                 code="endereco_bloqueado",
@@ -20,7 +20,7 @@ class EntrarForm(AuthenticationForm):
         return super().clean()
 
 
-def _campo_codigo(label):
+def _code_field(label):
     return forms.CharField(
         label=label,
         max_length=20,
@@ -28,13 +28,13 @@ def _campo_codigo(label):
     )
 
 
-class CodigoForm(BootstrapForm, forms.Form):
-    code = _campo_codigo(_("Código"))
+class CodeForm(BootstrapForm, forms.Form):
+    code = _code_field(_("Código"))
 
 
-class DesativarForm(BootstrapForm, forms.Form):
+class DisableTwoFactorForm(BootstrapForm, forms.Form):
     senha = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
-    code = _campo_codigo(_("Código do aplicativo"))
+    code = _code_field(_("Código do aplicativo"))
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,17 +44,17 @@ class DesativarForm(BootstrapForm, forms.Form):
         data = super().clean()
         if data.get("senha") and not self.user.check_password(data["senha"]):
             self.add_error("senha", _("Senha incorreta."))
-        elif data.get("code") and not services.verificar(self.user, data["code"]):
+        elif data.get("code") and not services.verify(self.user, data["code"]):
             self.add_error("code", _("Código incorreto."))
         return data
 
 
-class RecuperarSenhaForm(BootstrapForm, PasswordResetForm):
+class RecoverPasswordForm(BootstrapForm, PasswordResetForm):
     """Password recovery by e-mail, never for the public demo logins."""
 
     def get_users(self, email):
         return (user for user in super().get_users(email) if not user.demo)
 
 
-class NovaSenhaForm(BootstrapForm, SetPasswordForm):
+class NewPasswordForm(BootstrapForm, SetPasswordForm):
     pass

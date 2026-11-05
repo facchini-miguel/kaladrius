@@ -19,7 +19,7 @@ def _antes(app, nome):
 
 
 def _tipos(alerts):
-    return [alerta.kind for alerta in alerts]
+    return [health_alert.kind for health_alert in alerts]
 
 
 def _alertas(operacao):
@@ -79,8 +79,8 @@ def test_operacoes_sem_volta_e_campos_alterados():
     ]
     # carteirinha.validade may be empty: made required, existing rows and the previous version
     # (which may still save it empty) fail.
-    obrigatoria = migrations.AlterField("carteirinha", "validade", models.DateField())
-    assert _alertas(obrigatoria) == [relatorio.REVIEW, relatorio.BREAKS_ROLLBACK]
+    is_required = migrations.AlterField("carteirinha", "validade", models.DateField())
+    assert _alertas(is_required) == [relatorio.REVIEW, relatorio.BREAKS_ROLLBACK]
 
 
 @pytest.mark.django_db
@@ -102,10 +102,10 @@ def test_alterar_uma_chave_estrangeira():
 def test_coluna_obrigatoria_nova():
     """The previous version's inserts leave a new column out: NOT NULL with no database default
     makes them fail (Django's Python default only fills the existing rows)."""
-    obrigatoria = migrations.AddField(
+    is_required = migrations.AddField(
         "convenio", "sigla", models.CharField(max_length=5, default="")
     )
-    assert _alertas(obrigatoria) == [relatorio.BREAKS_ROLLBACK]
+    assert _alertas(is_required) == [relatorio.BREAKS_ROLLBACK]
     vazia = migrations.AddField("convenio", "sigla", models.CharField(max_length=5, null=True))
     assert _alertas(vazia) == []
     com_padrao = migrations.AddField(

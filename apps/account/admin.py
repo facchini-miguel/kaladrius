@@ -4,7 +4,7 @@ from .models import TwoFactor
 
 
 @admin.register(TwoFactor)
-class DuasEtapasAdmin(admin.ModelAdmin):
+class TwoFactorAdmin(admin.ModelAdmin):
     """Superusers can remove someone's two-step verification (lost phone); the secret is
     never shown here."""
 

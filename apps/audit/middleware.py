@@ -1,7 +1,7 @@
-from .record import context, ip_da_requisicao
+from .record import context, request_ip
 
 
-class AuditoriaMiddleware:
+class AuditMiddleware:
     """Makes the current user and IP available to audit entries written during the request."""
 
     def __init__(self, get_response):
@@ -9,5 +9,5 @@ class AuditoriaMiddleware:
 
     def __call__(self, request):
         user = request.user if request.user.is_authenticated else None
-        with context(user, ip_da_requisicao(request)):
+        with context(user, request_ip(request)):
             return self.get_response(request)

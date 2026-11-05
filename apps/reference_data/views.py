@@ -13,16 +13,16 @@ PER_PAGE = 50
 
 
 @requires_permission(Module.CATALOGS, Action.VIEW)
-def cidades(request):
+def cities(request):
     ufs = State.objects.all()
     state = request.GET.get("state", "")
     search = request.GET.get("q", "").strip()
-    cidades = City.objects.select_related("state")
+    cities = City.objects.select_related("state")
     if state.isdecimal():
-        cidades = cidades.filter(state_id=int(state))
+        cities = cities.filter(state_id=int(state))
     if search:
-        cidades = cidades.filter(name__unaccent__icontains=search)
-    page = Paginator(cidades, PER_PAGE).get_page(request.GET.get("pagina"))
+        cities = cities.filter(name__unaccent__icontains=search)
+    page = Paginator(cities, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "reference_data/cities.html",
@@ -37,29 +37,29 @@ def cidades(request):
 
 
 @requires_permission(Module.CATALOGS, Action.VIEW)
-def bancos(request):
+def banks(request):
     search = request.GET.get("q", "").strip()
-    bancos = Bank.objects.all()
+    banks = Bank.objects.all()
     if search:
         filtro = Q(name__unaccent__icontains=search) | Q(short_name__unaccent__icontains=search)
         if search.isdecimal():
             filtro |= Q(code=int(search))
-        bancos = bancos.filter(filtro)
-    page = Paginator(bancos, PER_PAGE).get_page(request.GET.get("pagina"))
+        banks = banks.filter(filtro)
+    page = Paginator(banks, PER_PAGE).get_page(request.GET.get("pagina"))
     context = {"busca": search, "pagina": page, "parametros": urlencode({"q": search})}
     return render(request, "reference_data/banks.html", context)
 
 
 @login_required
-def opcoes_cidades(request):
+def city_options(request):
     """<option> list of a state's cities, for chained UF → city selects (HTMX)."""
     state = request.GET.get("state", "")
-    cidades = City.objects.filter(state_id=int(state)) if state.isdecimal() else City.objects.none()
-    return render(request, "reference_data/city_options.html", {"cidades": cidades})
+    cities = City.objects.filter(state_id=int(state)) if state.isdecimal() else City.objects.none()
+    return render(request, "reference_data/city_options.html", {"cidades": cities})
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
-def sugestoes_endereco(request):
+def address_suggestions(request):
     """<datalist>s of a city's neighborhoods and streets for the patient form (decision 100):
     the known ones plus the ones the clinic already typed for other patients there."""
     from apps.patients.models import Patient

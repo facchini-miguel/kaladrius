@@ -104,11 +104,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.core.middleware.UserLanguageMiddleware",
     "apps.core.middleware.CurrentClinicMiddleware",
-    "apps.audit.middleware.AuditoriaMiddleware",
+    "apps.audit.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # After the clinic is known: required two-step verification (decision 112).
-    "apps.account.middleware.ExigirDuasEtapasMiddleware",
+    "apps.account.middleware.RequireTwoFactorMiddleware",
     # Must be the last middleware (django-axes).
     "axes.middleware.AxesMiddleware",
 ]
@@ -132,10 +132,10 @@ TEMPLATES = [
                 "apps.whats_new.context_processors.versao",
                 "apps.core.context_processors.clinic",
                 "apps.core.context_processors.backup",
-                "apps.monitoring.context_processors.alerta",
+                "apps.monitoring.context_processors.health_alert",
                 "apps.core.context_processors.languages",
                 "apps.core.context_processors.inactivity",
-                "apps.help.context_processors.documentacao",
+                "apps.help.context_processors.documentation",
                 "apps.medical_records.context_processors.medical_records",
             ],
         },

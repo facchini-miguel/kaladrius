@@ -2,7 +2,7 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
 
-class ReferenciasConfig(AppConfig):
+class ReferenceDataConfig(AppConfig):
     name = "apps.reference_data"
     label = "referencias"
     verbose_name = _("Tabelas de referência")

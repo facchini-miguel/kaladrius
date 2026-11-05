@@ -60,7 +60,7 @@ class MigrationEntry:
 
     @property
     def alerts(self):
-        return [alerta for _descricao, alerts in self.operacoes for alerta in alerts]
+        return [health_alert for _descricao, alerts in self.operacoes for health_alert in alerts]
 
 
 def _labels():

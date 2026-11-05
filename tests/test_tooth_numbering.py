@@ -7,21 +7,21 @@ from django.urls import reverse
 from apps.core.forms import NewClinicForm
 from apps.core.isolation import use_clinic
 from apps.dentistry.teeth import (
-    DENTES_DECIDUOS,
-    DENTES_PERMANENTES,
     FDI,
     PALMER,
+    PERMANENT_TEETH,
+    PRIMARY_TEETH,
     UNIVERSAL,
     name,
-    ordenar,
+    sort_teeth,
 )
 from tests.test_core import dados_clinica
 from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
-PERMANENTES = [d for row in DENTES_PERMANENTES for d in row]
-DECIDUOS = [d for row in DENTES_DECIDUOS for d in row]
+PERMANENTES = [d for row in PERMANENT_TEETH for d in row]
+DECIDUOS = [d for row in PRIMARY_TEETH for d in row]
 
 
 @pytest.mark.parametrize(
@@ -56,14 +56,14 @@ def test_cada_dente_tem_um_nome_so():
 
 
 def test_ordem_da_numeracao():
-    assert [name(d, UNIVERSAL) for d in ordenar([85, 36, 11, 55, 18], UNIVERSAL)] == [
+    assert [name(d, UNIVERSAL) for d in sort_teeth([85, 36, 11, 55, 18], UNIVERSAL)] == [
         "1",
         "8",
         "19",
         "A",
         "T",
     ]
-    assert ordenar([36, 11], PALMER) == [11, 36]
+    assert sort_teeth([36, 11], PALMER) == [11, 36]
 
 
 def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):

@@ -17,7 +17,7 @@ from django.utils.safestring import mark_safe
 
 FILE_NAME = "samples.jsonl"
 # The fields of a sample and of each of its containers, as health.sh writes them: internal names.
-CAMPOS = {
+FIELDS = {
     "time": "momento",
     "cpu_steal": "cpu_roubada",
     "load": "carga",
@@ -30,25 +30,25 @@ CAMPOS = {
     "network_sent": "rede_enviado",
     "uptime": "ligado_ha",
 }
-CAMPOS_CONTAINER = {"name": "nome", "memory": "memoria", "memory_pct": "memoria_pct"}
-COLETA_PARADA_APOS = datetime.timedelta(minutes=20)
+CONTAINER_FIELDS = {"name": "nome", "memory": "memoria", "memory_pct": "memoria_pct"}
+COLLECTION_STOPPED_AFTER = datetime.timedelta(minutes=20)
 # A gap longer than this between samples breaks the chart line (collection was down).
-LACUNA = datetime.timedelta(minutes=15)
+GAP = datetime.timedelta(minutes=15)
 # % in use: (attention, critical).
-LIMITES = {"memoria": (85, 95), "swap": (50, 80), "disco": (80, 90), "cpu": (80, 95)}
+THRESHOLDS = {"memoria": (85, 95), "swap": (50, 80), "disco": (80, 90), "cpu": (80, 95)}
 
 
-def _arquivo():
+def _file():
     return Path(settings.HEALTH_DIR) / FILE_NAME
 
 
-def _ler(row):
+def _read(row):
     try:
         amostra = json.loads(row)
         if "time" in amostra:
-            amostra = {CAMPOS.get(key, key): value for key, value in amostra.items()}
+            amostra = {FIELDS.get(key, key): value for key, value in amostra.items()}
             amostra["containers"] = [
-                {CAMPOS_CONTAINER.get(key, key): value for key, value in c.items()}
+                {CONTAINER_FIELDS.get(key, key): value for key, value in c.items()}
                 for c in amostra.get("containers", [])
             ]
         amostra["momento"] = parse_datetime(amostra["momento"])
@@ -67,34 +67,34 @@ def _ler(row):
         return None  # a line cut while being written, or from an older format
 
 
-def amostras(desde=None):
+def samples(desde=None):
     """Samples in time order, optionally only those since `desde`."""
     try:
-        rows = _arquivo().read_text(encoding="utf-8").splitlines()
+        rows = _file().read_text(encoding="utf-8").splitlines()
     except OSError:
         return []
-    lidas = (_ler(row) for row in rows)
+    lidas = (_read(row) for row in rows)
     return [a for a in lidas if a is not None and (desde is None or a["momento"] >= desde)]
 
 
-def ultima():
+def latest():
     """The newest sample, reading only the end of the file (used on every superuser page)."""
     try:
-        with _arquivo().open("rb") as file:
+        with _file().open("rb") as file:
             file.seek(0, 2)
             file.seek(max(0, file.tell() - 16384))
             rows = file.read().decode("utf-8", errors="ignore").splitlines()
     except OSError:
         return None
     for row in reversed(rows):
-        amostra = _ler(row)
+        amostra = _read(row)
         if amostra is not None:
             return amostra
     return None
 
 
-def nivel(key, value):
-    atencao, critico = LIMITES[key]
+def level(key, value):
+    atencao, critico = THRESHOLDS[key]
     if value >= critico:
         return "critico"
     if value >= atencao:
@@ -102,20 +102,20 @@ def nivel(key, value):
     return "ok"
 
 
-def niveis(amostra):
+def levels(amostra):
     return {
-        "cpu": nivel("cpu", amostra["cpu"]),
-        "memoria": nivel("memoria", amostra["memoria_pct"]),
-        "swap": nivel("swap", amostra["swap_pct"]),
-        "disco": nivel("disco", amostra["disco_pct"]),
+        "cpu": level("cpu", amostra["cpu"]),
+        "memoria": level("memoria", amostra["memoria_pct"]),
+        "swap": level("swap", amostra["swap_pct"]),
+        "disco": level("disco", amostra["disco_pct"]),
     }
 
 
-def parada(amostra, now=None):
-    return (now or timezone.now()) - amostra["momento"] > COLETA_PARADA_APOS
+def stopped(amostra, now=None):
+    return (now or timezone.now()) - amostra["momento"] > COLLECTION_STOPPED_AFTER
 
 
-def com_rede(results):
+def with_network(results):
     """Add rede_entrada / rede_saida (bytes per second since the previous sample)."""
     previous = None
     for amostra in results:
@@ -136,7 +136,7 @@ def summary(results):
     """Average and peaks of a period (None without samples)."""
     if not results:
         return None
-    com_rede(results)
+    with_network(results)
     entradas = [a for a in results if a["rede_entrada"] is not None]
     return {
         "amostras": len(results),
@@ -161,7 +161,7 @@ def summary(results):
     }
 
 
-def topo_da_escala(results, series, maximo=None, piso=None):
+def scale_top(results, series, maximo=None, piso=None):
     """The value at the top of a chart: fixed (`maximo`), or following the data, at least
     `piso` and never above the `teto` of percentages (so 0.5% of CPU is still visible)."""
     if maximo:
@@ -171,7 +171,7 @@ def topo_da_escala(results, series, maximo=None, piso=None):
     return topo or 1
 
 
-def grafico(
+def chart(
     results,
     series,
     *,
@@ -195,7 +195,7 @@ def grafico(
     start = start or pontos[0]["momento"]
     end = end or pontos[-1]["momento"]
     duration = max((end - start).total_seconds(), 1)
-    topo = topo_da_escala(results, series, maximo, piso)
+    topo = scale_top(results, series, maximo, piso)
     if teto:
         topo = min(topo, teto)
     margem = 4  # lines at 0 or at the top stay visible
@@ -224,7 +224,7 @@ def grafico(
             value = amostra.get(key)
             if value is None:
                 continue
-            if previous is not None and amostra["momento"] - previous > LACUNA and current:
+            if previous is not None and amostra["momento"] - previous > GAP and current:
                 trechos.append(current)
                 current = []
             current.append(f"{x(amostra['momento']):.1f},{y(value):.1f}")

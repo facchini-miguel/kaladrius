@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BootstrapForm
-from apps.dentistry.teeth import DENTES_VALIDOS
+from apps.dentistry.teeth import VALID_TEETH
 from apps.finance.forms import DATE_INPUT, _methods_with_blank, _money_field
 from apps.finance.models import Category, FinancialAccount
 from apps.health_plans import insurance
@@ -91,7 +91,7 @@ class EstimateItemForm(BootstrapForm, forms.ModelForm):
     def clean_teeth(self):
         partes = [p.strip() for p in (self.cleaned_data.get("teeth") or "").split(",")]
         teeth = sorted({int(p) for p in partes if p.isdecimal()})
-        if any(d not in DENTES_VALIDOS for d in teeth):
+        if any(d not in VALID_TEETH for d in teeth):
             raise forms.ValidationError(_("Dente inválido."))
         return ",".join(str(d) for d in teeth)
 

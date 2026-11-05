@@ -9,19 +9,19 @@ from django.utils.http import urlencode
 from apps.core.permissions import Action, Module, requires_permission
 
 from .models import AuditEntry
-from .record import nome_do_modelo
+from .record import model_label
 
 PER_PAGE = 100
 
 
-def _data(value):
+def _date(value):
     try:
         return datetime.date.fromisoformat(value or "")
     except ValueError:
         return None
 
 
-def tipos_de_registro():
+def record_types():
     """Kinds of record in the filter: the audited models and the medical record documents
     (logged by hand). Asking the database took most of the page's time once the log had
     hundreds of thousands of entries (volume test, decision 108)."""
@@ -34,10 +34,10 @@ def tipos_de_registro():
         Visit,
     )
 
-    from .signals import AUDITADOS
+    from .signals import AUDITED
 
     documentos = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
-    return sorted({nome_do_modelo(model) for model in [*AUDITADOS, *documentos]})
+    return sorted({model_label(model) for model in [*AUDITED, *documentos]})
 
 
 @cache
@@ -45,18 +45,18 @@ def _labels():
     """For each kind of record, its fields' labels by every name an entry may have stored:
     the field's name, and its column (the name before decision 155's renaming, which keeps
     the database columns)."""
-    from .signals import AUDITADOS
+    from .signals import AUDITED
 
     rotulos = {}
-    for model in AUDITADOS:
-        fields = rotulos.setdefault(nome_do_modelo(model), {})
+    for model in AUDITED:
+        fields = rotulos.setdefault(model_label(model), {})
         for field in model._meta.concrete_fields:
             for name in {field.column, field.column.removesuffix("_id"), field.attname, field.name}:
                 fields[name] = field.verbose_name
     return rotulos
 
 
-def campos_alterados(record):
+def changed_fields(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
     rotulos = _labels().get(record.model_name, {})
@@ -67,7 +67,7 @@ def campos_alterados(record):
 
 
 @requires_permission(Module.AUDIT, Action.VIEW)
-def results(request):
+def audit_list(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
     registros = AuditEntry.objects.filter(clinic=request.clinic)
     filters = {
@@ -77,7 +77,7 @@ def results(request):
         "de": request.GET.get("de", ""),
         "until": request.GET.get("until", ""),
     }
-    modelos = tipos_de_registro()
+    modelos = record_types()
     if filters["q"]:
         registros = registros.filter(
             Q(user_name__icontains=filters["q"])
@@ -88,13 +88,13 @@ def results(request):
         registros = registros.filter(action=filters["action"])
     if filters["model_name"]:
         registros = registros.filter(model_name=filters["model_name"])
-    if since := _data(filters["de"]):
+    if since := _date(filters["de"]):
         registros = registros.filter(timestamp__date__gte=since)
-    if until := _data(filters["until"]):
+    if until := _date(filters["until"]):
         registros = registros.filter(timestamp__date__lte=until)
     page = Paginator(registros, PER_PAGE).get_page(request.GET.get("pagina"))
     for record in page:
-        record.fields = campos_alterados(record)
+        record.fields = changed_fields(record)
     return render(
         request,
         "audit/list.html",

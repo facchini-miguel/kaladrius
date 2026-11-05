@@ -10,7 +10,7 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
 from apps.audit.models import AuditEntry
-from apps.audit.record import anonimizar, registrar
+from apps.audit.record import anonymize, log_event
 from apps.core import legislation
 from apps.core.permissions import Action, Module, can, requires_permission
 from apps.core.validators import normalize_cnpj
@@ -92,7 +92,7 @@ def patient_record(request, pk):
         pk=pk,
     )
     # LGPD: access to a patient's record (health data) is logged.
-    registrar(AuditEntry.Action.VIEWED, patient)
+    log_event(AuditEntry.Action.VIEWED, patient)
     rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
     context = {"patient": patient, "rechamadas": rechamadas}
     if can(request, Module.SCHEDULE, Action.VIEW):
@@ -122,7 +122,7 @@ def print_patient(request, pk):
     patient = get_object_or_404(
         _visible_patients(request).select_related("city__state", "marital_status"), pk=pk
     )
-    registrar(AuditEntry.Action.VIEWED, patient)  # LGPD, as the record
+    log_event(AuditEntry.Action.VIEWED, patient)  # LGPD, as the record
     carteirinhas = (
         list(MemberCard.objects.filter(patient=patient, active=True).select_related("health_plan"))
         if can(request, Module.HEALTH_PLANS, Action.VIEW)
@@ -282,17 +282,17 @@ def delete_patient(request, pk):
             carteirinhas.delete()
             relacionadas.delete()
             patient.delete()
-            anonimizar(Patient, [code])
-            anonimizar(Appointment, ids_agendamentos)
-            anonimizar(Recall, ids_rechamadas)
-            anonimizar(MemberCard, ids_carteirinhas)
-            anonimizar(RelatedPerson, ids_relacionadas)
-            anonimizar(Entry, ids_lancamentos)
-            anonimizar(Installment, ids_parcelas)
-            anonimizar(Payment, ids_pagamentos)
-            anonimizar(Estimate, ids_orcamentos)
-            anonimizar(EstimateItem, ids_itens)
-            registrar(
+            anonymize(Patient, [code])
+            anonymize(Appointment, ids_agendamentos)
+            anonymize(Recall, ids_rechamadas)
+            anonymize(MemberCard, ids_carteirinhas)
+            anonymize(RelatedPerson, ids_relacionadas)
+            anonymize(Entry, ids_lancamentos)
+            anonymize(Installment, ids_parcelas)
+            anonymize(Payment, ids_pagamentos)
+            anonymize(Estimate, ids_orcamentos)
+            anonymize(EstimateItem, ids_itens)
+            log_event(
                 AuditEntry.Action.DELETE,
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
