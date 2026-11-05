@@ -28,11 +28,11 @@ def group(clinic, name):
         return AccountGroup.objects.get(name=name)
 
 
-def pagar(clinic, category, amount, date=HOJE):
+def pay(clinic, category, amount, date=HOJE):
     with use_clinic(clinic):
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=clinic,
-            kind=Entry.Tipo.PAGAR,
+            kind=Entry.Kind.PAYABLE,
             payer="Fictício",
             description="Despesa",
             category=Category.objects.get(name=category),
@@ -42,7 +42,7 @@ def pagar(clinic, category, amount, date=HOJE):
             user=None,
         )
         installment = entry.parcelas.get()
-        services.receber(
+        services.receive(
             installment,
             user=None,
             amount=installment.amount,
@@ -61,7 +61,7 @@ def pagar(clinic, category, amount, date=HOJE):
     ],
 )
 def test_fracao_do_ano(today, esperado):
-    assert services.fracao_do_ano(2026, today) == esperado
+    assert services.year_fraction(2026, today) == esperado
 
 
 def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
@@ -83,9 +83,9 @@ def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
     with use_clinic(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         Planning.objects.create(year=HOJE.year, group=ocupacao, amount=Decimal("1000"))
-    pagar(clinica_a, "Aluguel", "250")
-    pagar(clinica_a, "Manutenção", "50")
-    pagar(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
+    pay(clinica_a, "Aluguel", "250")
+    pay(clinica_a, "Manutenção", "50")
+    pay(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
     despesas = admin.get(f"{URL}?year={HOJE.year}").context["secoes"][1]
     row = next(row for row in despesas["linhas"] if row["group"] == ocupacao)
     assert (row["realizado"], row["percentage"]) == (Decimal("300.00"), 30)
@@ -101,7 +101,7 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
-        despesas = services.planejamento(2026, today=datetime.date(2026, 12, 31))["secoes"][1]
+        despesas = services.planning(2026, today=datetime.date(2026, 12, 31))["secoes"][1]
     assert despesas["meta"] == Decimal("5700")
     assert despesas["esperado"] == Decimal("5700.00")
 
@@ -114,7 +114,7 @@ def test_em_dia_para_receita_e_despesa(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
-        data = services.planejamento(2026, today=datetime.date(2026, 12, 31))
+        data = services.planning(2026, today=datetime.date(2026, 12, 31))
     receita = next(row for row in data["secoes"][0]["linhas"] if row["meta"])
     despesa = next(row for row in data["secoes"][1]["linhas"] if row["meta"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.

@@ -83,11 +83,11 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             Recall.objects.create(patient=patient, date=date, description="Revisão", done=done)
 
         for patient, valid_until, status in [
-            (maria, day(8), Estimate.Situacao.ABERTO),
-            (maria, day(20), Estimate.Situacao.ABERTO),
-            (maria, day(6), Estimate.Situacao.APROVADO),
-            (archived, day(6), Estimate.Situacao.ABERTO),
-            (maria, day(4), Estimate.Situacao.ABERTO),
+            (maria, day(8), Estimate.Status.ABERTO),
+            (maria, day(20), Estimate.Status.ABERTO),
+            (maria, day(6), Estimate.Status.APROVADO),
+            (archived, day(6), Estimate.Status.ABERTO),
+            (maria, day(4), Estimate.Status.ABERTO),
         ]:
             Estimate.objects.create(
                 patient=patient, date=day(1), valid_until=valid_until, status=status
@@ -98,7 +98,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         despesa = Category.objects.get(name="Outras despesas")
 
         def lancar(kind, amount, parcelas, due_date, category, **fields):
-            entry = financeiro.criar_lancamento(
+            entry = financeiro.create_entry(
                 clinic=clinica_a,
                 kind=kind,
                 description="Teste",
@@ -112,7 +112,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             return list(entry.parcelas.order_by("number"))
 
         def pagar(installment, amount, date, method="pix"):
-            financeiro.receber(
+            financeiro.receive(
                 installment,
                 user=usuarios["admin"],
                 amount=Decimal(amount),
@@ -123,15 +123,15 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
 
         # Due 05/01, 05/02 (overdue) and today; the first one is paid today.
         primeira, _segunda, _terceira = lancar(
-            Entry.Tipo.RECEBER, "300", 3, day(5, 1), receita, patient=maria
+            Entry.Kind.RECEIVABLE, "300", 3, day(5, 1), receita, patient=maria
         )
         pagar(primeira, "100", HOJE)
-        [fevereiro] = lancar(Entry.Tipo.RECEBER, "200", 1, day(3, 2), receita, patient=joao)
+        [fevereiro] = lancar(Entry.Kind.RECEIVABLE, "200", 1, day(3, 2), receita, patient=joao)
         pagar(fevereiro, "200", day(3, 2), method="dinheiro")
-        [conta_de_luz] = lancar(Entry.Tipo.PAGAR, "50", 1, HOJE, despesa, payer="Luz")
+        [conta_de_luz] = lancar(Entry.Kind.PAYABLE, "50", 1, HOJE, despesa, payer="Luz")
         pagar(conta_de_luz, "50", HOJE)
-        lancar(Entry.Tipo.PAGAR, "80", 1, day(10), despesa, payer="Aluguel")
-        lancar(Entry.Tipo.PAGAR, "999", 1, day(20), despesa, payer="Longe")
+        lancar(Entry.Kind.PAYABLE, "80", 1, day(10), despesa, payer="Aluguel")
+        lancar(Entry.Kind.PAYABLE, "999", 1, day(20), despesa, payer="Longe")
         CashRegister.objects.create(
             account=cash_register, opening_amount=Decimal("0"), opened_by=usuarios["admin"]
         )

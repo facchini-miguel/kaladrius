@@ -20,7 +20,7 @@ from apps.core.isolation import ClinicModel, WrongClinic
 from apps.core.models import Clinic
 from apps.core.ordering import ALPHABETICAL
 
-DINHEIRO = {"max_digits": 12, "decimal_places": 2}
+MONEY = {"max_digits": 12, "decimal_places": 2}
 VALIDADE_PADRAO = 30  # days
 
 
@@ -34,7 +34,7 @@ class Procedure(ClinicModel):
     name = models.CharField(_("nome"), max_length=120, db_collation=ALPHABETICAL, db_column="nome")
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
     code = models.CharField(_("código"), max_length=20, blank=True, db_column="codigo")
-    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("valor"), **MONEY, db_column="valor")
     category = models.ForeignKey(
         "financeiro.Category",
         on_delete=models.PROTECT,
@@ -62,7 +62,7 @@ class Procedure(ClinicModel):
 
 
 class Estimate(ClinicModel):
-    class Situacao(models.TextChoices):
+    class Status(models.TextChoices):
         ABERTO = "aberto", pgettext_lazy("orçamento", "Em aberto")
         APROVADO = "aprovado", _("Aprovado")
         RECUSADO = "recusado", _("Recusado")
@@ -88,12 +88,12 @@ class Estimate(ClinicModel):
     status = models.CharField(
         _("situação"),
         max_length=10,
-        choices=Situacao.choices,
-        default=Situacao.ABERTO,
+        choices=Status.choices,
+        default=Status.ABERTO,
         db_column="situacao",
     )
     discount = models.DecimalField(
-        _("desconto"), default=Decimal("0.00"), **DINHEIRO, db_column="desconto"
+        _("desconto"), default=Decimal("0.00"), **MONEY, db_column="desconto"
     )
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     entry = models.OneToOneField(
@@ -151,7 +151,7 @@ class Estimate(ClinicModel):
 
     @property
     def vencido(self):
-        return self.status == self.Situacao.ABERTO and self.valid_until < timezone.localdate()
+        return self.status == self.Status.ABERTO and self.valid_until < timezone.localdate()
 
     @property
     def teeth(self):
@@ -189,7 +189,7 @@ class EstimateItem(ClinicModel):
         help_text=_("Ex.: MOD, vestibular, arcada superior."),
     )
     quantity = models.PositiveSmallIntegerField(_("quantidade"), default=1, db_column="quantidade")
-    unit_price = models.DecimalField(_("valor unitário"), **DINHEIRO, db_column="valor_unitario")
+    unit_price = models.DecimalField(_("valor unitário"), **MONEY, db_column="valor_unitario")
 
     class Meta:
         db_table = "orcamentos_itemorcamento"

@@ -19,7 +19,7 @@ from apps.audit.record import registrar
 from . import services
 from .forms import CodigoForm, DesativarForm, EntrarForm, NovaSenhaForm, RecuperarSenhaForm
 
-PENDENTE = "duas_etapas_pendente"
+PENDING = "duas_etapas_pendente"
 VALIDADE_PENDENTE = 5 * 60  # seconds to type the code after the password
 TENTATIVAS_CODIGO = 5
 
@@ -32,7 +32,7 @@ class EntrarView(auth_views.LoginView):
         if not services.ativa_para(user):
             return super().form_valid(form)
         # Password right: the code from the app comes next, before the session is opened.
-        self.request.session[PENDENTE] = {
+        self.request.session[PENDING] = {
             "usuario": user.pk,
             "backend": user.backend,
             "momento": time.time(),
@@ -55,16 +55,16 @@ class EntrarView(auth_views.LoginView):
 
 def code(request):
     """Second step of the login: the 6-digit code of the app or a recovery code."""
-    pendente = request.session.get(PENDENTE)
+    pendente = request.session.get(PENDING)
     if not pendente or time.time() - pendente["momento"] > VALIDADE_PENDENTE:
-        request.session.pop(PENDENTE, None)
+        request.session.pop(PENDING, None)
         messages.info(request, _("Entre de novo com o usuário e a senha."))
         return redirect("login")
     user = get_user_model().objects.get(pk=pendente["usuario"])
     form = CodigoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if services.verificar(user, form.cleaned_data["code"]):
-            del request.session[PENDENTE]
+            del request.session[PENDING]
             login(request, user, backend=pendente["backend"])
             return redirect(pendente["proximo"])
         # Counted by the login protection too, so codes cannot be tried without end.
@@ -73,10 +73,10 @@ def code(request):
         )
         pendente["tentativas"] += 1
         if pendente["tentativas"] >= TENTATIVAS_CODIGO:
-            del request.session[PENDENTE]
+            del request.session[PENDING]
             messages.error(request, _("Muitos códigos errados. Entre de novo."))
             return redirect("login")
-        request.session[PENDENTE] = pendente
+        request.session[PENDING] = pendente
         form.add_error("code", _("Código incorreto."))
     return render(request, "account/code.html", {"form": form})
 

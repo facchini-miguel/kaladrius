@@ -38,21 +38,21 @@
       <tr id="t{{ t.pk }}">
         <td class="text-nowrap">{{ t.date|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ t.description }}</td>
-        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.amount|currency }}</td>
+        <td class="text-end text-nowrap {% if t.is_incoming %}text-success{% else %}text-danger{% endif %}">{{ t.amount|currency }}</td>
         <td>
           {% if t.status == "conciliada" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
-            {% if t.payment %}<a href="{% url 'finance:entry' t.payment.installment.entry_id %}">{{ t.payment.installment.entry.nome_pessoa }} · {{ t.payment.installment.entry.description }}</a> ({{ t.payment.date|date:"SHORT_DATE_FORMAT" }})
+            {% if t.payment %}<a href="{% url 'finance:entry' t.payment.installment.entry_id %}">{{ t.payment.installment.entry.payer_name }} · {{ t.payment.installment.entry.description }}</a> ({{ t.payment.date|date:"SHORT_DATE_FORMAT" }})
             {% elif t.cash_movement %}<a href="{% url 'finance:cash_detail' t.cash_movement.cash_register_id %}">{{ t.cash_movement.cash_register.account }} · {{ t.cash_movement.get_kind_display }}</a>{% endif %}
           {% elif t.status == "ignorada" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.reason }}
           {% else %}
             {% if pode.financeiro.alterar %}
-            {% if t.candidatos %}
+            {% if t.candidates %}
             <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
               <select name="chave" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
-                {% for c in t.candidatos %}<option value="{{ c.key }}">{{ c.date|date:"SHORT_DATE_FORMAT" }} · {{ c.description }}</option>{% endfor %}
+                {% for c in t.candidates %}<option value="{{ c.key }}">{{ c.date|date:"SHORT_DATE_FORMAT" }} · {{ c.description }}</option>{% endfor %}
               </select>
               <button type="submit" class="btn btn-sm btn-success text-nowrap">{% translate "Conciliar" %}</button>
             </form>

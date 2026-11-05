@@ -13,25 +13,25 @@ from django.utils import translation
 
 from apps.core import countries
 
-DINHEIRO = "dinheiro"
+CASH = "dinheiro"
 PIX = "pix"
-DEBITO = "debito"
-CREDITO = "credito"
-TRANSFERENCIA = "transferencia"
+DEBIT = "debito"
+CREDIT = "credito"
+TRANSFER = "transferencia"
 BOLETO = "boleto"
 CHEQUE = "cheque"
-CARTEIRA = "carteira"  # digital wallet or QR code
-DEBITO_AUTOMATICO = "debito_auto"  # direct debit, pre-authorized debit, debit order
+WALLET = "carteira"  # digital wallet or QR code
+DIRECT_DEBIT = "debito_auto"  # direct debit, pre-authorized debit, debit order
 HSA = "hsa"  # HSA/FSA card (United States)
-FINANCIAMENTO = "financiamento"  # patient financing
+FINANCING = "financiamento"  # patient financing
 BPAY = "bpay"  # bill payment (Australia)
 
 # Methods paid with a card: the card details (brand, transaction code) apply to them.
-CARTOES = frozenset({DEBITO, CREDITO, HSA})
+CARDS = frozenset({DEBIT, CREDIT, HSA})
 
 
 @dataclass(frozen=True)
-class Formas:
+class Methods:
     codigos: tuple
     nomes: dict = field(default_factory=dict)  # code → local systems, shown in parentheses
     parcelas_no_cartao: bool = True  # card payments split by the card issuer (cuotas)
@@ -39,43 +39,43 @@ class Formas:
 
 
 # Latin America: cash, cards (paid in installments, "cuotas"), transfer and the wallets.
-_LATINA = (DINHEIRO, DEBITO, CREDITO, TRANSFERENCIA, CARTEIRA)
+_LATIN = (CASH, DEBIT, CREDIT, TRANSFER, WALLET)
 
-FORMAS = {
-    "BR": Formas((DINHEIRO, PIX, DEBITO, CREDITO, TRANSFERENCIA, BOLETO), codigo_do_cartao="NSU"),
-    "MX": Formas((*_LATINA, CHEQUE), {TRANSFERENCIA: "SPEI", CARTEIRA: "Mercado Pago, CoDi"}),
-    "AR": Formas((*_LATINA, CHEQUE), {CARTEIRA: "Mercado Pago, MODO"}),
-    "CL": Formas((*_LATINA, CHEQUE), {DEBITO: "Redcompra", CARTEIRA: "Mercado Pago, MACH"}),
-    "CO": Formas(_LATINA, {TRANSFERENCIA: "PSE, Bre-B", CARTEIRA: "Nequi, Daviplata"}),
-    "PE": Formas(_LATINA, {CARTEIRA: "Yape, Plin"}),
-    "UY": Formas(_LATINA, {CARTEIRA: "Mercado Pago"}),
-    "PY": Formas(_LATINA, {TRANSFERENCIA: "SIPAP", CARTEIRA: "QR"}),
-    "BO": Formas(_LATINA, {CARTEIRA: "QR"}),
-    "EC": Formas(_LATINA, {CARTEIRA: "Deuna, QR"}),
+METHODS = {
+    "BR": Methods((CASH, PIX, DEBIT, CREDIT, TRANSFER, BOLETO), codigo_do_cartao="NSU"),
+    "MX": Methods((*_LATIN, CHEQUE), {TRANSFER: "SPEI", WALLET: "Mercado Pago, CoDi"}),
+    "AR": Methods((*_LATIN, CHEQUE), {WALLET: "Mercado Pago, MODO"}),
+    "CL": Methods((*_LATIN, CHEQUE), {DEBIT: "Redcompra", WALLET: "Mercado Pago, MACH"}),
+    "CO": Methods(_LATIN, {TRANSFER: "PSE, Bre-B", WALLET: "Nequi, Daviplata"}),
+    "PE": Methods(_LATIN, {WALLET: "Yape, Plin"}),
+    "UY": Methods(_LATIN, {WALLET: "Mercado Pago"}),
+    "PY": Methods(_LATIN, {TRANSFER: "SIPAP", WALLET: "QR"}),
+    "BO": Methods(_LATIN, {WALLET: "QR"}),
+    "EC": Methods(_LATIN, {WALLET: "Deuna, QR"}),
     # English-speaking countries: no card installments; cheques where they are still used.
-    "US": Formas(
-        (DINHEIRO, CHEQUE, DEBITO, CREDITO, HSA, TRANSFERENCIA, CARTEIRA, FINANCIAMENTO),
-        {TRANSFERENCIA: "ACH", CARTEIRA: "Zelle, Venmo"},
+    "US": Methods(
+        (CASH, CHEQUE, DEBIT, CREDIT, HSA, TRANSFER, WALLET, FINANCING),
+        {TRANSFER: "ACH", WALLET: "Zelle, Venmo"},
         parcelas_no_cartao=False,
     ),
-    "GB": Formas(
-        (DINHEIRO, DEBITO, CREDITO, TRANSFERENCIA, DEBITO_AUTOMATICO, CHEQUE),
-        {TRANSFERENCIA: "Faster Payments", DEBITO_AUTOMATICO: "Direct Debit"},
+    "GB": Methods(
+        (CASH, DEBIT, CREDIT, TRANSFER, DIRECT_DEBIT, CHEQUE),
+        {TRANSFER: "Faster Payments", DIRECT_DEBIT: "Direct Debit"},
         parcelas_no_cartao=False,
     ),
-    "CA": Formas(
-        (DINHEIRO, DEBITO, CREDITO, TRANSFERENCIA, DEBITO_AUTOMATICO, CHEQUE, FINANCIAMENTO),
-        {DEBITO: "Interac", TRANSFERENCIA: "Interac e-Transfer", DEBITO_AUTOMATICO: "PAD"},
+    "CA": Methods(
+        (CASH, DEBIT, CREDIT, TRANSFER, DIRECT_DEBIT, CHEQUE, FINANCING),
+        {DEBIT: "Interac", TRANSFER: "Interac e-Transfer", DIRECT_DEBIT: "PAD"},
         parcelas_no_cartao=False,
     ),
-    "AU": Formas(
-        (DINHEIRO, DEBITO, CREDITO, TRANSFERENCIA, BPAY, DEBITO_AUTOMATICO, FINANCIAMENTO),
-        {DEBITO: "EFTPOS", TRANSFERENCIA: "PayID"},
+    "AU": Methods(
+        (CASH, DEBIT, CREDIT, TRANSFER, BPAY, DIRECT_DEBIT, FINANCING),
+        {DEBIT: "EFTPOS", TRANSFER: "PayID"},
         parcelas_no_cartao=False,
     ),
-    "ZA": Formas(
-        (DINHEIRO, DEBITO, CREDITO, TRANSFERENCIA, CARTEIRA, DEBITO_AUTOMATICO),
-        {TRANSFERENCIA: "EFT", CARTEIRA: "SnapScan, Zapper", DEBITO_AUTOMATICO: "debit order"},
+    "ZA": Methods(
+        (CASH, DEBIT, CREDIT, TRANSFER, WALLET, DIRECT_DEBIT),
+        {TRANSFER: "EFT", WALLET: "SnapScan, Zapper", DIRECT_DEBIT: "debit order"},
         parcelas_no_cartao=False,
     ),
 }
@@ -83,20 +83,20 @@ FORMAS = {
 
 def for_country(country=None):
     """The methods of `pais`, or of the current clinic's country."""
-    return FORMAS.get(country or countries.clinic_country(), FORMAS[countries.DEFAULT])
+    return METHODS.get(country or countries.clinic_country(), METHODS[countries.DEFAULT])
 
 
 # The English variants other than the United States' (en-gb, en-ca, en-au, en-za) spell it
 # "cheque"; the English catalog has the American "check".
-_INGLES_COM_CHEQUE = {country.ingles for country in countries.COUNTRIES.values()} - {"en"}
+_ENGLISH_WITH_CHEQUE = {country.ingles for country in countries.COUNTRIES.values()} - {"en"}
 
 
 def label(code, country=None):
     """The method's name in the country: "Transferência (SPEI)" in Mexico."""
     from .models import Payment
 
-    name = dict(Payment.Forma.choices).get(code, code)
-    if code == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
+    name = dict(Payment.Method.choices).get(code, code)
+    if code == CHEQUE and translation.get_language() in _ENGLISH_WITH_CHEQUE:
         name = "Cheque"
     local = for_country(country).nomes.get(code)
     if not local or local.lower() == str(name).lower():  # "Direct debit" in English
@@ -104,13 +104,13 @@ def label(code, country=None):
     return f"{name} ({local})"
 
 
-def em_uso(country=None):
+def in_use(country=None):
     """(code, name) of the methods offered when recording a payment."""
     return [(code, label(code, country)) for code in for_country(country).codigos]
 
 
-def rotulos(country=None):
+def labels(country=None):
     """code → name of every method, for the reports (old payments included)."""
     from .models import Payment
 
-    return {code: label(code, country) for code in Payment.Forma.values}
+    return {code: label(code, country) for code in Payment.Method.values}

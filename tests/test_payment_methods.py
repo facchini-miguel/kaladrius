@@ -23,10 +23,10 @@ def mudar_pais(data, country):
 
 
 def test_cada_pais_tem_as_suas_formas():
-    assert set(payment_methods.FORMAS) == set(COUNTRIES)
-    for country, for_country in payment_methods.FORMAS.items():
+    assert set(payment_methods.METHODS) == set(COUNTRIES)
+    for country, for_country in payment_methods.METHODS.items():
         assert len(set(for_country.codigos)) == len(for_country.codigos), country
-        assert set(for_country.codigos) <= set(Payment.Forma.values), country
+        assert set(for_country.codigos) <= set(Payment.Method.values), country
         assert {"dinheiro", "credito", "transferencia"} <= set(for_country.codigos), country
         assert set(for_country.nomes) <= set(for_country.codigos), country
 
@@ -37,7 +37,7 @@ def test_nomes_locais_entre_parenteses():
         assert payment_methods.label("carteira", "PE") == "Carteira digital (Yape, Plin)"
         assert payment_methods.label("transferencia", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
-        assert [code for code, _nome in payment_methods.em_uso("BR")] == [
+        assert [code for code, _nome in payment_methods.in_use("BR")] == [
             "dinheiro",
             "pix",
             "debito",
@@ -76,8 +76,8 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     with use_clinic(cenario["clinic"]), translation.override("pt-br"):
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
-        relatorio = services.relatorio(HOJE, HOJE)
-    assert relatorio["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
+        report = services.report(HOJE, HOJE)
+    assert report["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
     nova = admin.get(reverse("finance:entry_new")).content.decode()
     assert 'value="carteira"' in nova and 'value="pix"' not in nova
 
@@ -139,7 +139,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     with use_clinic(cenario["clinic"]), translation.override("pt-br"):
-        payment = services.receber(
+        payment = services.receive(
             parcelas_de(cenario, entry)[0],
             user=cenario["admin"],
             amount=Decimal("100"),
@@ -148,4 +148,4 @@ def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noq
         )
         mudar_pais(cenario, "US")
         assert payment.get_method_display() == "Pix"
-        assert services.relatorio(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]
+        assert services.report(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]

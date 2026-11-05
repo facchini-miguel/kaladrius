@@ -14,8 +14,8 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.isolation import ClinicModel, WrongClinic
 from apps.core.ordering import ALPHABETICAL
 
-DINHEIRO = {"max_digits": 12, "decimal_places": 2}
-CENTAVO = Decimal("0.01")
+MONEY = {"max_digits": 12, "decimal_places": 2}
+CENT = Decimal("0.01")
 # Monthly hours of a 44-hour week (CLT) and the minimum overtime rate (+50%).
 HORAS_POR_MES = Decimal(220)
 ADICIONAL_HORA_EXTRA = Decimal("1.5")
@@ -51,7 +51,7 @@ class Employee(ClinicModel):
     def __str__(self):
         return self.name
 
-    papel_documento = "funcionario"  # see apps/core/identification.py
+    document_role = "funcionario"  # see apps/core/identification.py
 
     def salario_em(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""
@@ -73,7 +73,7 @@ class Salary(ClinicModel):
         verbose_name=_("funcionário"),
         db_column="funcionario_id",
     )
-    amount = models.DecimalField(_("salário"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("salário"), **MONEY, db_column="valor")
     effective_from = models.DateField(_("desde"), db_column="desde")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -116,7 +116,7 @@ class Payroll(ClinicModel):
     period = models.DateField(
         _("competência"), help_text=_("O primeiro dia do mês."), db_column="competencia"
     )
-    salary = models.DecimalField(_("salário"), **DINHEIRO, db_column="salario")
+    salary = models.DecimalField(_("salário"), **MONEY, db_column="salario")
     overtime_hours = models.DecimalField(
         _("horas extras"),
         max_digits=6,
@@ -125,7 +125,7 @@ class Payroll(ClinicModel):
         db_column="horas_extras",
     )
     overtime_rate = models.DecimalField(
-        _("valor da hora extra"), **DINHEIRO, default=Decimal(0), db_column="valor_hora_extra"
+        _("valor da hora extra"), **MONEY, default=Decimal(0), db_column="valor_hora_extra"
     )
     absences = models.PositiveSmallIntegerField(_("dias de falta"), default=0, db_column="faltas")
     note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
@@ -164,11 +164,11 @@ class Payroll(ClinicModel):
 
     @property
     def valor_horas_extras(self):
-        return (self.overtime_hours * self.overtime_rate).quantize(CENTAVO, ROUND_HALF_UP)
+        return (self.overtime_hours * self.overtime_rate).quantize(CENT, ROUND_HALF_UP)
 
     @property
     def desconto_faltas(self):
-        return (self.salary / DIAS_POR_MES * self.absences).quantize(CENTAVO, ROUND_HALF_UP)
+        return (self.salary / DIAS_POR_MES * self.absences).quantize(CENT, ROUND_HALF_UP)
 
     @property
     def total(self):
@@ -181,4 +181,4 @@ class Payroll(ClinicModel):
 
 def hora_extra_sugerida(salary):
     """Overtime hour from a monthly salary: salary / 220 hours x 1.5 (CLT minimum)."""
-    return (salary / HORAS_POR_MES * ADICIONAL_HORA_EXTRA).quantize(CENTAVO, ROUND_HALF_UP)
+    return (salary / HORAS_POR_MES * ADICIONAL_HORA_EXTRA).quantize(CENT, ROUND_HALF_UP)

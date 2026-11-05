@@ -53,7 +53,7 @@
         <td>{{ item.closed_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
         <td class="text-end">{{ item.expected_amount|currency|default:"—" }}</td>
         <td class="text-end">{{ item.counted_amount|currency|default:"—" }}</td>
-        <td class="text-end{% if item.diferenca %} text-danger fw-semibold{% endif %}">{% if item.diferenca is not None %}{{ item.diferenca|currency }}{% else %}—{% endif %}</td>
+        <td class="text-end{% if item.difference %} text-danger fw-semibold{% endif %}">{% if item.difference is not None %}{{ item.difference|currency }}{% else %}—{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>

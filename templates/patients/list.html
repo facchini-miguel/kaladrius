@@ -64,7 +64,7 @@
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ patient.tax_id|document:patient.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.tax_id|document:patient.document_role|default:"—" }}</td>
         <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
         <td>{% if patient.city %}{{ patient.city.name }}/{{ patient.city.state.abbreviation }}{% else %}—{% endif %}</td>
         <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>

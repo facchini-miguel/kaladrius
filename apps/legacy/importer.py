@@ -119,7 +119,7 @@ def _documento(bruto, kind):
     if not document:
         return "", None
     so_digitos = document.isascii() and document.isdigit()
-    if kind == Patient.Tipo.FISICA:
+    if kind == Patient.Kind.INDIVIDUAL:
         if so_digitos and 8 <= len(document) <= 11:
             document = document.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
@@ -222,7 +222,7 @@ class _Importador:
     def _paciente(self, row, clinic, cidades, estados_civis, logradouros, bairros, usados):
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {row['id']}"]
-        kind = Patient.Tipo.JURIDICA if row["tipo_pessoa"] == "J" else Patient.Tipo.FISICA
+        kind = Patient.Kind.COMPANY if row["tipo_pessoa"] == "J" else Patient.Kind.INDIVIDUAL
         name = _texto(row["nome"]) or f"Sem nome (código {row['id']})"
 
         document, original = _documento(row["cpf_cnpj"], kind)
@@ -296,7 +296,7 @@ class _Importador:
             if _texto(row[legado]):
                 extras.append(f"{label}: {_texto(row[legado])}")
 
-        pf = kind == Patient.Tipo.FISICA
+        pf = kind == Patient.Kind.INDIVIDUAL
         patient = Patient(
             clinic=clinic,
             kind=kind,

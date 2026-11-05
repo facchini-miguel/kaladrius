@@ -304,9 +304,9 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     patient = criar_paciente(clinica_a, name="Paciente Devedor")
     user = django_user_model.objects.get(username="admin_a")
     with use_clinic(clinica_a):
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=clinica_a,
-            kind=Entry.Tipo.RECEBER,
+            kind=Entry.Kind.RECEIVABLE,
             description="Tratamento",
             category=Category.objects.get(name="Tratamento"),
             total_amount=Decimal("300"),
@@ -328,7 +328,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
 
     def receber(installment):
         with use_clinic(clinica_a):
-            services.receber(
+            services.receive(
                 installment,
                 user=user,
                 amount=Decimal("150"),

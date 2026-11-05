@@ -26,9 +26,9 @@
   </div>
   <p class="fs-6">
     {% if entry.patient.tax_id %}
-    {% blocktranslate with nome=entry.nome_pessoa sigla=entry.patient.tax_id|document_abbreviation:entry.patient.papel_documento documento=entry.patient.tax_id|document:entry.patient.papel_documento valor=payment.amount|currency %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=entry.payer_name sigla=entry.patient.tax_id|document_abbreviation:entry.patient.document_role documento=entry.patient.tax_id|document:entry.patient.document_role valor=payment.amount|currency %}Recebemos de <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% else %}
-    {% blocktranslate with nome=entry.nome_pessoa valor=payment.amount|currency %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with nome=entry.payer_name valor=payment.amount|currency %}Recebemos de <strong>{{ nome }}</strong> a quantia de <strong>{{ valor }}</strong>,{% endblocktranslate %}
     {% endif %}
     {% blocktranslate with descricao=entry.description numero=payment.installment.number total=total_parcelas %}referente a {{ descricao }} (parcela {{ numero }} de {{ total }}){% endblocktranslate %}.
   </p>

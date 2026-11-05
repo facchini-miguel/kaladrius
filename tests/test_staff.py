@@ -152,7 +152,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         folha.refresh_from_db()
         entry = folha.entry
         assert (entry.kind, entry.payer, entry.total_amount) == (
-            Entry.Tipo.PAGAR,
+            Entry.Kind.PAYABLE,
             "Ana Fictícia",
             Decimal("2276.67"),
         )
@@ -168,7 +168,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
             == 0
         )
         # Cancelling the payable in finance opens the line again.
-        financeiro.cancelar(entry, reason="Refazer", user=None)
+        financeiro.cancel(entry, reason="Refazer", user=None)
         folha.refresh_from_db()
         assert not folha.lancada
 

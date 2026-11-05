@@ -263,10 +263,10 @@ def editar(request, pk):
 
 
 MENSAGENS_SITUACAO = {
-    Appointment.Situacao.AGENDADO: gettext_lazy("%(nome)s: marcação de presença desfeita."),
-    Appointment.Situacao.COMPARECEU: gettext_lazy("%(nome)s compareceu."),
-    Appointment.Situacao.FALTOU: gettext_lazy("%(nome)s faltou."),
-    Appointment.Situacao.DESMARCOU: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
+    Appointment.Status.AGENDADO: gettext_lazy("%(nome)s: marcação de presença desfeita."),
+    Appointment.Status.COMPARECEU: gettext_lazy("%(nome)s compareceu."),
+    Appointment.Status.FALTOU: gettext_lazy("%(nome)s faltou."),
+    Appointment.Status.DESMARCOU: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
 }
 
 

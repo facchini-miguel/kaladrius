@@ -11,7 +11,7 @@ from apps.core.permissions import Action, Module, requires_permission
 from .models import AuditEntry
 from .record import nome_do_modelo
 
-POR_PAGINA = 100
+PER_PAGE = 100
 
 
 def _data(value):
@@ -92,7 +92,7 @@ def results(request):
         registros = registros.filter(timestamp__date__gte=since)
     if until := _data(filters["until"]):
         registros = registros.filter(timestamp__date__lte=until)
-    page = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(registros, PER_PAGE).get_page(request.GET.get("pagina"))
     for record in page:
         record.fields = campos_alterados(record)
     return render(

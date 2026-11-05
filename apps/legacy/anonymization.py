@@ -106,7 +106,7 @@ class _Anonimizador:
         if not patient.tax_id:
             return ""
         while True:
-            gerar = fake_data.cnpj if patient.kind == Patient.Tipo.JURIDICA else fake_data.cpf
+            gerar = fake_data.cnpj if patient.kind == Patient.Kind.COMPANY else fake_data.cpf
             document = gerar(self.fake)
             if document not in usados:
                 usados.add(document)
@@ -126,7 +126,7 @@ class _Anonimizador:
         Patient.objects.filter(clinic=self.clinic).update(tax_id="")
         usados = set()
         for number, p in enumerate(pacientes, start=1):
-            if p.kind == Patient.Tipo.JURIDICA:
+            if p.kind == Patient.Kind.COMPANY:
                 p.name = fake.company()[:200]
                 p.legal_name = f"{p.name} Ltda."[:200] if p.legal_name else ""
             else:
@@ -172,7 +172,7 @@ class _Anonimizador:
         ]
         Patient.objects.bulk_update(pacientes, fields, batch_size=500)
         self.resultado.pacientes = len(pacientes)
-        return [p.name for p in pacientes if p.kind == Patient.Tipo.FISICA]
+        return [p.name for p in pacientes if p.kind == Patient.Kind.INDIVIDUAL]
 
     def agendamentos(self, nomes):
         agendamentos = list(Appointment.objects.filter(clinic=self.clinic).select_related("kind"))
@@ -237,7 +237,7 @@ class _Anonimizador:
         fake = self.fake
         fornecedores = list(Supplier.objects.filter(clinic=self.clinic))
         for number, f in enumerate(fornecedores, start=1):
-            if f.kind == Supplier.Tipo.FISICA:
+            if f.kind == Supplier.Kind.INDIVIDUAL:
                 f.name = self._nome(self.sorte.choice("FM"))
                 f.legal_name = ""
                 f.tax_id = ""

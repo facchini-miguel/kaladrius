@@ -14,8 +14,8 @@ from apps.core.permissions import Action, Module, requires_permission
 from .forms import RechamadaForm
 from .models import Recall
 
-POR_PAGINA = 50
-SITUACOES = {"pendentes": {"done": False}, "concluidas": {"done": True}, "todas": {}}
+PER_PAGE = 50
+STATUSES = {"pendentes": {"done": False}, "concluidas": {"done": True}, "todas": {}}
 
 
 def _data(value):
@@ -38,7 +38,7 @@ def results(request):
     search = request.GET.get("q", "").strip()
     since, until = _data(request.GET.get("de")), _data(request.GET.get("until"))
     rechamadas = Recall.objects.select_related("patient").filter(
-        **SITUACOES.get(status, SITUACOES["pendentes"]), patient__archived=False
+        **STATUSES.get(status, STATUSES["pendentes"]), patient__archived=False
     )
     if search:
         rechamadas = rechamadas.filter(patient__name__unaccent__icontains=search)
@@ -46,7 +46,7 @@ def results(request):
         rechamadas = rechamadas.filter(date__gte=since)
     if until:
         rechamadas = rechamadas.filter(date__lte=until)
-    page = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(rechamadas, PER_PAGE).get_page(request.GET.get("pagina"))
     filters = {
         "q": search,
         "status": status,

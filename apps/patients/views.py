@@ -16,7 +16,7 @@ from apps.core.permissions import Action, Module, can, requires_permission
 from apps.core.validators import normalize_cnpj
 from apps.estimates.models import Estimate, EstimateItem
 from apps.finance.models import Entry, Installment, Payment
-from apps.finance.services import resumo_do_paciente
+from apps.finance.services import patient_summary
 from apps.health_plans.models import MemberCard
 from apps.medical_records.models import Visit
 from apps.medical_records.permissions import acessa_prontuario
@@ -27,8 +27,8 @@ from apps.schedule.services import agendamentos_visiveis
 from .forms import PacienteForm, PessoaRelacionadaForm
 from .models import Patient, RelatedPerson
 
-POR_PAGINA = 50
-SITUACOES = {
+PER_PAGE = 50
+STATUSES = {
     "ativos": Q(active=True, archived=False),
     "inativos": Q(active=False, archived=False),
     "todos": Q(archived=False),
@@ -57,9 +57,9 @@ def filtrar(pacientes, search, kind, status):
         if search.isdecimal() and len(search) <= 9:
             filtro |= Q(pk=int(search))
         pacientes = pacientes.filter(filtro)
-    if kind in Patient.Tipo.values:
+    if kind in Patient.Kind.values:
         pacientes = pacientes.filter(kind=kind)
-    return pacientes.filter(SITUACOES.get(status, SITUACOES["ativos"]))
+    return pacientes.filter(STATUSES.get(status, STATUSES["ativos"]))
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
@@ -70,7 +70,7 @@ def results(request):
     if status == "arquivados" and not _ve_arquivados(request):
         status = "ativos"
     pacientes = filtrar(Patient.objects.select_related("city__state"), search, kind, status)
-    page = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(pacientes, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "patients/list.html",
@@ -79,7 +79,7 @@ def results(request):
             "busca": search,
             "kind": kind,
             "status": status,
-            "tipos": Patient.Tipo.choices,
+            "tipos": Patient.Kind.choices,
             "parametros": urlencode({"q": search, "kind": kind, "status": status}),
         },
     )
@@ -97,7 +97,7 @@ def ficha(request, pk):
     if can(request, Module.SCHEDULE, Action.VIEW):
         context["agendamentos"] = _historico(request, patient)
     if can(request, Module.RECEIVING, Action.VIEW):
-        context["financeiro"] = resumo_do_paciente(patient)
+        context["financeiro"] = patient_summary(patient)
     if can(request, Module.ESTIMATES, Action.VIEW):
         context["orcamentos"] = list(
             Estimate.objects.filter(patient=patient).prefetch_related("itens")[:10]
@@ -185,7 +185,7 @@ def arquivar(request, pk):
     # Not while the patient still owes or is owed money: the administrator first receives or
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
     abertas = list(
-        Installment.objects.abertas()
+        Installment.objects.unpaid()
         .filter(entry__patient=patient)
         .select_related("entry")
         .order_by("due_date", "pk")

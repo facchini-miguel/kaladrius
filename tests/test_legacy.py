@@ -200,13 +200,13 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
 @pytest.mark.parametrize(
     ("bruto", "kind", "esperado"),
     [
-        ("012.345.678-90", Patient.Tipo.FISICA, ("01234567890", None)),
-        ("12345678-90", Patient.Tipo.FISICA, ("01234567890", None)),
+        ("012.345.678-90", Patient.Kind.INDIVIDUAL, ("01234567890", None)),
+        ("12345678-90", Patient.Kind.INDIVIDUAL, ("01234567890", None)),
         # cpf_valido ignores letters: a CPF with junk is not taken as valid.
-        ("012.345.678-90X", Patient.Tipo.FISICA, ("", "012.345.678-90X")),
-        ("isento", Patient.Tipo.FISICA, ("", "isento")),
-        ("", Patient.Tipo.FISICA, ("", None)),
-        ("1222333000128", Patient.Tipo.JURIDICA, ("01222333000128", None)),
+        ("012.345.678-90X", Patient.Kind.INDIVIDUAL, ("", "012.345.678-90X")),
+        ("isento", Patient.Kind.INDIVIDUAL, ("", "isento")),
+        ("", Patient.Kind.INDIVIDUAL, ("", None)),
+        ("1222333000128", Patient.Kind.COMPANY, ("01222333000128", None)),
     ],
 )
 def test_documento(bruto, kind, esperado):
@@ -345,7 +345,7 @@ def test_anonimizacao_dos_fornecedores(importado):
     _, clinic = importado
     with use_clinic(clinic):
         pessoa = Supplier.objects.create(
-            kind=Supplier.Tipo.FISICA,
+            kind=Supplier.Kind.INDIVIDUAL,
             name="Fulana Fornecedora",
             tax_id="52998224725",
             phone="4833334444",
@@ -353,11 +353,11 @@ def test_anonimizacao_dos_fornecedores(importado):
             notes="Indicada pela Fulana",
         )
         empresa = Supplier.objects.create(name="Dental Fictícia", whatsapp="48999990000")
-        category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
+        category = Category.objects.filter(kind=Category.Kind.EXPENSE).first()
         for supplier in (pessoa, empresa):
-            services.criar_lancamento(
+            services.create_entry(
                 clinic=clinic,
-                kind=Entry.Tipo.PAGAR,
+                kind=Entry.Kind.PAYABLE,
                 supplier=supplier,
                 payer=supplier.name,
                 description="Compra",
@@ -376,7 +376,7 @@ def test_anonimizacao_dos_fornecedores(importado):
     assert empresa.name == "Dental Fictícia"  # a company name is not personal data
     assert len(empresa.whatsapp) == 11 and empresa.whatsapp != "48999990000"
     # Payables keep showing their supplier's (new) name.
-    for entry in data(clinic, Entry, kind=Entry.Tipo.PAGAR):
+    for entry in data(clinic, Entry, kind=Entry.Kind.PAYABLE):
         assert entry.payer == entry.supplier.name
 
 
@@ -413,10 +413,10 @@ def test_anonimizacao_dos_funcionarios(importado):
             salary=Decimal("2000"),
             note="Atestado da Fulana",
         )
-        category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
-        folha.entry = services.criar_lancamento(
+        category = Category.objects.filter(kind=Category.Kind.EXPENSE).first()
+        folha.entry = services.create_entry(
             clinic=clinic,
-            kind=Entry.Tipo.PAGAR,
+            kind=Entry.Kind.PAYABLE,
             payer=funcionaria.name,
             description="Salário",
             category=category,

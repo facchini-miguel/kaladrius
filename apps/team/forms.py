@@ -77,7 +77,7 @@ class VinculoForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class ContaForm(BootstrapForm, forms.ModelForm):
+class UserAccountForm(BootstrapForm, forms.ModelForm):
     """Name and e-mail of an account used only in this clinic."""
 
     class Meta:

@@ -15,12 +15,12 @@ from decimal import Decimal, InvalidOperation
 from django.utils.translation import gettext as _
 
 
-class ArquivoInvalido(ValueError):
+class InvalidFile(ValueError):
     pass
 
 
 @dataclass
-class Transacao:
+class Transaction:
     fitid: str
     date: datetime.date
     amount: Decimal  # positive = money in, negative = money out
@@ -29,7 +29,7 @@ class Transacao:
 
 
 @dataclass
-class Extrato:
+class Statement:
     bank_code: str
     account: str
     start: datetime.date | None
@@ -41,13 +41,13 @@ class Extrato:
     unreadable_transactions: int = 0
 
 
-def _texto(content: bytes) -> str:
+def _text(content: bytes) -> str:
     cabecalho = content[:500].decode("ascii", errors="ignore").upper()
     if "CHARSET:1252" in cabecalho or "ENCODING:USASCII" in cabecalho:
-        candidatos = ("cp1252", "utf-8")
+        candidates = ("cp1252", "utf-8")
     else:
-        candidatos = ("utf-8", "cp1252")
-    for codificacao in candidatos:
+        candidates = ("utf-8", "cp1252")
+    for codificacao in candidates:
         try:
             return content.decode(codificacao)
         except UnicodeDecodeError:
@@ -60,7 +60,7 @@ def _field(bloco, tag):
     return achado.group(1).strip() if achado else ""
 
 
-def _data(value):
+def _date(value):
     """OFX dates start with YYYYMMDD (time and time zone may follow)."""
     try:
         return datetime.date(int(value[0:4]), int(value[4:6]), int(value[6:8]))
@@ -68,7 +68,7 @@ def _data(value):
         return None
 
 
-def _valor(value):
+def _amount(value):
     value = value.replace(" ", "")
     if "," in value and ("." not in value or value.rfind(",") > value.rfind(".")):
         # Some banks write 1234,56 or even 1.234,56 (the OFX standard has no thousands).
@@ -81,16 +81,16 @@ def _valor(value):
         return None
 
 
-def ler(content: bytes) -> Extrato:
-    text = _texto(content)
+def read(content: bytes) -> Statement:
+    text = _text(content)
     if "<OFX>" not in text.upper():
-        raise ArquivoInvalido(_("O arquivo não é um extrato OFX."))
+        raise InvalidFile(_("O arquivo não é um extrato OFX."))
     transacoes = []
     vistos = {}
     unreadable_transactions = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", text, re.IGNORECASE | re.DOTALL):
-        date = _data(_field(bloco, "DTPOSTED"))
-        amount = _valor(_field(bloco, "TRNAMT"))
+        date = _date(_field(bloco, "DTPOSTED"))
+        amount = _amount(_field(bloco, "TRNAMT"))
         if date is None or amount is None:
             unreadable_transactions += 1
             continue
@@ -112,7 +112,7 @@ def ler(content: bytes) -> Extrato:
         if vistos[fitid] > 1:
             fitid = f"{fitid}#{vistos[fitid]}"
         transacoes.append(
-            Transacao(
+            Transaction(
                 fitid=fitid[:120],
                 date=date,
                 amount=amount,
@@ -122,13 +122,13 @@ def ler(content: bytes) -> Extrato:
         )
     saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", text, re.I | re.S)
     saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
-    return Extrato(
+    return Statement(
         bank_code=_field(text, "BANKID")[:20],
         account=_field(text, "ACCTID")[:40],
-        start=_data(_field(text, "DTSTART")),
-        end=_data(_field(text, "DTEND")),
-        balance=_valor(_field(saldo_texto, "BALAMT")) if saldo_texto else None,
-        balance_date=_data(_field(saldo_texto, "DTASOF")) if saldo_texto else None,
+        start=_date(_field(text, "DTSTART")),
+        end=_date(_field(text, "DTEND")),
+        balance=_amount(_field(saldo_texto, "BALAMT")) if saldo_texto else None,
+        balance_date=_date(_field(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,
         unreadable_transactions=unreadable_transactions,
     )

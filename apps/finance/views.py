@@ -33,25 +33,25 @@ from apps.practitioners.models import Practitioner
 
 from . import commissions, reconciliation, services
 from .forms import (
-    AbrirCaixaForm,
-    CategoriaForm,
-    CentroCustoForm,
-    ContaForm,
-    FecharCaixaForm,
-    FecharForm,
-    FornecedorForm,
-    GrupoContabilForm,
-    ImportarExtratoForm,
-    LancamentoDaTransacaoForm,
-    LancamentoPagarForm,
-    LancamentoReceberForm,
-    MotivoForm,
-    MovimentoCaixaForm,
-    PagarComissaoForm,
-    PercentualComissaoForm,
-    PlanejamentoForm,
-    ReabrirForm,
-    ReceberForm,
+    AccountGroupForm,
+    CashMovementForm,
+    CategoryForm,
+    CloseBooksForm,
+    CloseCashRegisterForm,
+    CommissionPercentageForm,
+    CostCenterForm,
+    FinancialAccountForm,
+    ImportStatementForm,
+    OpenCashRegisterForm,
+    PayableEntryForm,
+    PayCommissionForm,
+    PlanningForm,
+    ReasonForm,
+    ReceivableEntryForm,
+    ReceivePaymentForm,
+    ReopenBooksForm,
+    SupplierForm,
+    TransactionEntryForm,
 )
 from .models import (
     ZERO,
@@ -71,10 +71,10 @@ from .models import (
     StatementImport,
     Supplier,
 )
-from .ofx import ArquivoInvalido
+from .ofx import InvalidFile
 
-POR_PAGINA = 50
-SITUACOES = {
+PER_PAGE = 50
+STATUSES = {
     "abertas": Q(balance__gt=0, entry__cancelled=False),
     "vencidas": Q(balance__gt=0, entry__cancelled=False),  # + due date before today
     "pagas": Q(balance__lte=0, entry__cancelled=False),
@@ -82,35 +82,35 @@ SITUACOES = {
 }
 
 
-def _modulo(kind):
-    return Module.RECEIVING if kind == Entry.Tipo.RECEBER else Module.FINANCE
+def _module(kind):
+    return Module.RECEIVING if kind == Entry.Kind.RECEIVABLE else Module.FINANCE
 
 
 def _require(request, kind, acao):
     """Payables need the Financeiro module (administrators) for the same action."""
-    if not can(request, _modulo(kind), acao):
+    if not can(request, _module(kind), acao):
         raise PermissionDenied
 
 
 @requires_permission(Module.RECEIVING, Action.VIEW)
-def receber_lista(request):
-    return _lista(request, Entry.Tipo.RECEBER)
+def receivables(request):
+    return _entry_list(request, Entry.Kind.RECEIVABLE)
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def pagar_lista(request):
-    return _lista(request, Entry.Tipo.PAGAR)
+def payables(request):
+    return _entry_list(request, Entry.Kind.PAYABLE)
 
 
-def _lista(request, kind):
+def _entry_list(request, kind):
     today = timezone.localdate()
     status = request.GET.get("status", "abertas")
     search = request.GET.get("q", "").strip()
     parcelas = (
-        Installment.objects.com_saldo()
+        Installment.objects.with_balance()
         .filter(entry__kind=kind)
         .select_related("entry__patient", "entry")
-        .filter(SITUACOES.get(status, SITUACOES["abertas"]))
+        .filter(STATUSES.get(status, STATUSES["abertas"]))
     )
     if status == "vencidas":
         parcelas = parcelas.filter(due_date__lt=today)
@@ -121,7 +121,7 @@ def _lista(request, kind):
             | Q(entry__description__unaccent__icontains=search)
         )
     parcelas = parcelas.order_by("due_date", "pk")
-    page = Paginator(parcelas, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(parcelas, PER_PAGE).get_page(request.GET.get("pagina"))
     for installment in page:
         installment.status = services.status(installment, today)
     return render(
@@ -129,7 +129,7 @@ def _lista(request, kind):
         "finance/list.html",
         {
             "kind": kind,
-            "pagar": kind == Entry.Tipo.PAGAR,
+            "pagar": kind == Entry.Kind.PAYABLE,
             "pagina": page,
             "status": status,
             "busca": search,
@@ -139,7 +139,7 @@ def _lista(request, kind):
 
 
 @requires_permission(Module.RECEIVING, Action.CREATE)
-def lancamento_novo(request):
+def new_entry(request):
     inicial = {}
     code = request.GET.get("patient", "")
     patient = None
@@ -147,12 +147,12 @@ def lancamento_novo(request):
         patient = Patient.objects.filter(pk=int(code), archived=False).first()
         if patient is not None:
             inicial["patient"] = patient.pk
-    form = LancamentoReceberForm(request.POST or None, initial=inicial, clinic=request.clinic)
+    form = ReceivableEntryForm(request.POST or None, initial=inicial, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=request.clinic,
-            kind=Entry.Tipo.RECEBER,
+            kind=Entry.Kind.RECEIVABLE,
             patient=data["patient"],
             payer="" if data["patient"] else data["payer"].strip(),
             description=data["description"],
@@ -167,7 +167,7 @@ def lancamento_novo(request):
         )
         if data["recebido_agora"]:
             primeira = entry.parcelas.order_by("number").first()
-            payment = services.receber(
+            payment = services.receive(
                 primeira,
                 user=request.user,
                 amount=primeira.amount,
@@ -184,17 +184,17 @@ def lancamento_novo(request):
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
-def despesa_nova(request):
-    form = LancamentoPagarForm(
+def new_expense(request):
+    form = PayableEntryForm(
         request.POST or None,
         clinic=request.clinic,
         initial={"supplier": request.GET.get("supplier")},
     )
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=request.clinic,
-            kind=Entry.Tipo.PAGAR,
+            kind=Entry.Kind.PAYABLE,
             supplier=data["supplier"],
             payer=data["payer"].strip(),
             description=data["description"],
@@ -208,7 +208,7 @@ def despesa_nova(request):
         )
         if data["pago_agora"]:
             primeira = entry.parcelas.order_by("number").first()
-            services.receber(
+            services.receive(
                 primeira,
                 user=request.user,
                 amount=primeira.amount,
@@ -228,7 +228,7 @@ def entry(request, pk):
     )
     _require(request, entry.kind, Action.VIEW)
     today = timezone.localdate()
-    parcelas = list(Installment.objects.com_saldo().filter(entry=entry).select_related("entry"))
+    parcelas = list(Installment.objects.with_balance().filter(entry=entry).select_related("entry"))
     pagamentos = Payment.objects.filter(installment__entry=entry).select_related(
         "installment", "account", "created_by"
     )
@@ -240,9 +240,9 @@ def entry(request, pk):
         "finance/entry.html",
         {
             "entry": entry,
-            "pagar": entry.kind == Entry.Tipo.PAGAR,
-            "pode_alterar": can(request, _modulo(entry.kind), Action.CREATE),
-            "pode_excluir": can(request, _modulo(entry.kind), Action.DELETE),
+            "pagar": entry.kind == Entry.Kind.PAYABLE,
+            "pode_alterar": can(request, _module(entry.kind), Action.CREATE),
+            "pode_excluir": can(request, _module(entry.kind), Action.DELETE),
             "parcelas": parcelas,
             "total_pago": sum(p.pago for p in parcelas),
             "total_saldo": sum(p.balance for p in parcelas) if not entry.cancelled else 0,
@@ -252,13 +252,13 @@ def entry(request, pk):
 
 
 @requires_permission(Module.RECEIVING, Action.DELETE)
-def lancamento_cancelar(request, pk):
+def cancel_entry(request, pk):
     entry = get_object_or_404(Entry.objects, pk=pk, cancelled=False)
     _require(request, entry.kind, Action.DELETE)
-    form = MotivoForm(request.POST or None)
+    form = ReasonForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.cancelar(entry, reason=form.cleaned_data["reason"], user=request.user)
+            services.cancel(entry, reason=form.cleaned_data["reason"], user=request.user)
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
@@ -277,22 +277,22 @@ def lancamento_cancelar(request, pk):
 
 
 @requires_permission(Module.RECEIVING, Action.CREATE)
-def receber(request, pk):
+def receive(request, pk):
     installment = get_object_or_404(
-        Installment.objects.com_saldo().select_related("entry__patient"),
+        Installment.objects.with_balance().select_related("entry__patient"),
         pk=pk,
         entry__cancelled=False,
     )
     _require(request, installment.entry.kind, Action.CREATE)
-    pagar = installment.entry.kind == Entry.Tipo.PAGAR
+    pay = installment.entry.kind == Entry.Kind.PAYABLE
     if installment.balance <= 0:
         messages.info(request, _("Esta parcela já está paga."))
         return redirect("finance:entry", pk=installment.entry_id)
     pode_desconto = can(request, Module.FINANCE, Action.CHANGE)
     conta_padrao = FinancialAccount.objects.filter(
-        active=True, kind=FinancialAccount.Tipo.DINHEIRO
+        active=True, kind=FinancialAccount.Kind.CASH
     ).first()
-    form = ReceberForm(
+    form = ReceivePaymentForm(
         request.POST or None,
         initial={
             "amount": installment.balance,
@@ -301,7 +301,7 @@ def receber(request, pk):
         },
         pode_dar_desconto=pode_desconto,
     )
-    if pagar:
+    if pay:
         form.fields["amount"].label = _("Valor pago")
         form.fields["interest"].help_text = _("Já incluídos no valor pago.")
     if request.method == "POST" and form.is_valid():
@@ -309,12 +309,12 @@ def receber(request, pk):
         data.setdefault("discount", 0)
         data["interest"] = data.get("interest") or 0
         try:
-            payment = services.receber(installment, user=request.user, **data)
+            payment = services.receive(installment, user=request.user, **data)
         except ValidationError as error:
             form.add_error(None, error.messages[0])
         else:
             messages.success(request, _("Pagamento registrado."))
-            if pagar:
+            if pay:
                 return redirect("finance:entry", pk=installment.entry_id)
             return redirect("finance:receipt", pk=payment.pk)
     return render(
@@ -325,13 +325,13 @@ def receber(request, pk):
             "installment": installment,
             "total_parcelas": installment.entry.parcelas.count(),
             "pode_desconto": pode_desconto,
-            "pagar": pagar,
+            "pagar": pay,
         },
     )
 
 
 @requires_permission(Module.RECEIVING, Action.VIEW)
-def recibo(request, pk):
+def receipt(request, pk):
     payment = get_object_or_404(
         Payment.objects.select_related(
             "installment__entry__patient",
@@ -340,7 +340,7 @@ def recibo(request, pk):
             "created_by",
         ),
         pk=pk,
-        installment__entry__kind=Entry.Tipo.RECEBER,
+        installment__entry__kind=Entry.Kind.RECEIVABLE,
     )
     return render(
         request,
@@ -356,15 +356,15 @@ def recibo(request, pk):
 
 
 @requires_permission(Module.RECEIVING, Action.DELETE)
-def estornar(request, pk):
+def reverse_payment(request, pk):
     payment = get_object_or_404(
         Payment.objects.select_related("installment__entry"), pk=pk, reversed=False
     )
     _require(request, payment.installment.entry.kind, Action.DELETE)
-    form = MotivoForm(request.POST or None)
+    form = ReasonForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.estornar(payment, reason=form.cleaned_data["reason"], user=request.user)
+            services.reverse_payment(payment, reason=form.cleaned_data["reason"], user=request.user)
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
@@ -390,8 +390,8 @@ def estornar(request, pk):
 
 
 @requires_permission(Module.RECEIVING, Action.VIEW)
-def devedores(request):
-    rows = services.devedores()
+def debtors(request):
+    rows = services.debtors()
     search = request.GET.get("q", "").strip()
     encontrados = rows
     if search:
@@ -399,7 +399,7 @@ def devedores(request):
         encontrados = [row for row in rows if termo in alphabetical_key(row["name"])]
     # A clinic with years of use has thousands of debtors: one page held them all (volume
     # test, decision 108). The totals still add up everyone.
-    page = Paginator(encontrados, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(encontrados, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "finance/debtors.html",
@@ -419,22 +419,22 @@ def devedores(request):
 @requires_permission(Module.RECEIVING, Action.VIEW)
 def cash_register(request):
     """The drawer of a cash account: its open session, or the form to open it."""
-    contas = list(FinancialAccount.objects.filter(kind=FinancialAccount.Tipo.DINHEIRO, active=True))
+    contas = list(FinancialAccount.objects.filter(kind=FinancialAccount.Kind.CASH, active=True))
     escolhida = request.GET.get("account", "")
     account = next((c for c in contas if str(c.pk) == escolhida), contas[0] if contas else None)
     if account is not None:
-        aberto = services.caixa_aberto(account)
-        if aberto is not None:
-            return redirect("finance:cash_detail", pk=aberto.pk)
-    balance = dict(services.saldos_das_contas()).get(account) if account else None
+        is_open = services.open_cash_register(account)
+        if is_open is not None:
+            return redirect("finance:cash_detail", pk=is_open.pk)
+    balance = dict(services.account_balances()).get(account) if account else None
     # Empty on purpose: the opening amount is what is counted, not the system balance.
-    form = AbrirCaixaForm(request.POST or None)
+    form = OpenCashRegisterForm(request.POST or None)
     if request.method == "POST" and account is not None:
         if not can(request, Module.RECEIVING, Action.CREATE):
             raise PermissionDenied
         if form.is_valid():
             try:
-                new = services.abrir_caixa(
+                new = services.open_register(
                     account, amount=form.cleaned_data["amount"], user=request.user
                 )
             except ValidationError as error:
@@ -459,36 +459,36 @@ def cash_register(request):
 
 
 @requires_permission(Module.RECEIVING, Action.VIEW)
-def caixa_detalhe(request, pk):
+def cash_register_detail(request, pk):
     session = get_object_or_404(
         CashRegister.objects.select_related("account", "opened_by", "closed_by"), pk=pk
     )
     return render(
         request,
         "finance/cash_detail.html",
-        {"cash_register": session, "resumo": services.resumo_do_caixa(session)},
+        {"cash_register": session, "resumo": services.register_summary(session)},
     )
 
 
 # The kind of cash movement in the URL (decision 155) and the value the database stores.
-MOVIMENTOS_NA_URL = {
-    "withdrawal": CashMovement.Tipo.RETIRADA,
-    "top-up": CashMovement.Tipo.REFORCO,
+URL_MOVEMENTS = {
+    "withdrawal": CashMovement.Kind.WITHDRAWAL,
+    "top-up": CashMovement.Kind.TOP_UP,
 }
 
 
 @requires_permission(Module.RECEIVING, Action.CREATE)
-def caixa_movimento(request, pk, kind):
+def cash_movement_view(request, pk, kind):
     session = get_object_or_404(
         CashRegister.objects.select_related("account"), pk=pk, closed_at=None
     )
-    if kind not in MOVIMENTOS_NA_URL:
+    if kind not in URL_MOVEMENTS:
         raise Http404
-    kind = MOVIMENTOS_NA_URL[kind]
-    form = MovimentoCaixaForm(request.POST or None, cash_register=session)
+    kind = URL_MOVEMENTS[kind]
+    form = CashMovementForm(request.POST or None, cash_register=session)
     if request.method == "POST" and form.is_valid():
         try:
-            services.movimentar_caixa(session, kind=kind, user=request.user, **form.cleaned_data)
+            services.move_cash(session, kind=kind, user=request.user, **form.cleaned_data)
         except ValidationError as error:
             form.add_error(None, error.messages[0])
         else:
@@ -497,18 +497,18 @@ def caixa_movimento(request, pk, kind):
     return render(
         request,
         "finance/cash_form.html",
-        {"cash_register": session, "form": form, "titulo": CashMovement.Tipo(kind).label},
+        {"cash_register": session, "form": form, "titulo": CashMovement.Kind(kind).label},
     )
 
 
 @requires_permission(Module.RECEIVING, Action.CREATE)
-def caixa_fechar(request, pk):
+def close_cash_register(request, pk):
     session = get_object_or_404(
         CashRegister.objects.select_related("account"), pk=pk, closed_at=None
     )
-    form = FecharCaixaForm(request.POST or None)
+    form = CloseCashRegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        services.fechar_caixa(session, user=request.user, **form.cleaned_data)
+        services.close_register(session, user=request.user, **form.cleaned_data)
         messages.success(request, _("Caixa fechado."))
         return redirect("finance:cash_detail", pk=session.pk)
     return render(
@@ -518,7 +518,7 @@ def caixa_fechar(request, pk):
             "cash_register": session,
             "form": form,
             "titulo": _("Fechar caixa"),
-            "esperado": services.resumo_do_caixa(session)["esperado"],
+            "esperado": services.register_summary(session)["esperado"],
         },
     )
 
@@ -526,11 +526,11 @@ def caixa_fechar(request, pk):
 # --- Cash flow and reports (administrators) ---------------------------------------------
 
 
-def _periodo(request):
+def _period(request):
     """(de, ate) from the query string; the current month by default (at most 2 years)."""
     today = timezone.localdate()
     inicio_do_mes = today.replace(day=1)
-    fim_do_mes = services.somar_meses(inicio_do_mes, 1) - datetime.timedelta(days=1)
+    fim_do_mes = services.add_months(inicio_do_mes, 1) - datetime.timedelta(days=1)
     try:
         since = datetime.date.fromisoformat(request.GET.get("de", ""))
     except ValueError:
@@ -545,8 +545,8 @@ def _periodo(request):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def fluxo_de_caixa(request):
-    since, until = _periodo(request)
+def cash_flow(request):
+    since, until = _period(request)
     por_mes = request.GET.get("agrupar") == "mes"
     return render(
         request,
@@ -555,23 +555,23 @@ def fluxo_de_caixa(request):
             "de": since,
             "until": until,
             "por_mes": por_mes,
-            "fluxo": services.fluxo_de_caixa(since, until, por_mes=por_mes),
-            "contas": services.saldos_das_contas(),
+            "fluxo": services.cash_flow(since, until, por_mes=por_mes),
+            "contas": services.account_balances(),
         },
     )
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def relatorios(request):
-    since, until = _periodo(request)
+def reports(request):
+    since, until = _period(request)
     return render(
         request,
         "finance/reports.html",
         {
             "de": since,
             "until": until,
-            "relatorio": services.relatorio(since, until),
-            "fechado_ate": services.fechado_ate(request.clinic.pk),
+            "relatorio": services.report(since, until),
+            "fechado_ate": services.closed_until(request.clinic.pk),
         },
     )
 
@@ -580,7 +580,7 @@ def relatorios(request):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def planejamento(request):
+def planning(request):
     """Goals of the year per group of the chart of accounts, next to what was done."""
     today = timezone.localdate()
     try:
@@ -589,14 +589,14 @@ def planejamento(request):
         year = today.year
     year = min(max(year, 2000), today.year + 5)
     pode_alterar = can(request, Module.FINANCE, Action.CHANGE)
-    grupos = services.ligar_grupos(AccountGroup.objects.filter(active=True))
+    grupos = services.link_groups(AccountGroup.objects.filter(active=True))
     metas = dict(Planning.objects.filter(year=year).values_list("group_id", "amount"))
-    form = PlanejamentoForm(request.POST or None, grupos=grupos, metas=metas)
+    form = PlanningForm(request.POST or None, grupos=grupos, metas=metas)
     if request.method == "POST":
         if not pode_alterar:
             raise PermissionDenied
         if request.POST.get("acao") == "copiar":
-            copiadas = services.copiar_metas(year)
+            copiadas = services.copy_targets(year)
             messages.success(
                 request,
                 ngettext(
@@ -608,14 +608,14 @@ def planejamento(request):
             )
             return redirect(f"{reverse('finance:planning')}?year={year}")
         if form.is_valid():
-            services.salvar_metas(year, form.valores())
+            services.save_targets(year, form.paid_and_balance())
             messages.success(request, _("Planejamento salvo."))
             return redirect(f"{reverse('finance:planning')}?year={year}")
-    data = services.planejamento(year)
+    data = services.planning(year)
     for secao in data["secoes"]:
         for row in secao["linhas"]:
             if pode_alterar and row["group"].active:
-                row["campo"] = form[PlanejamentoForm.name(row["group"])]
+                row["campo"] = form[PlanningForm.name(row["group"])]
     return render(
         request,
         "finance/planning.html",
@@ -634,7 +634,7 @@ def planejamento(request):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def fechamento(request):
+def book_closing(request):
     """Close the books up to a date, or reopen them with a reason. Public demo logins only
     look: one visitor closing the books would block everyone else's payments."""
     demo = request.user.demo
@@ -644,15 +644,15 @@ def fechamento(request):
         acao = request.POST.get("acao")
         if not {"fechar": pode_fechar, "reabrir": pode_reabrir}.get(acao):
             raise PermissionDenied
-        form = (FecharForm if acao == "fechar" else ReabrirForm)(request.POST)
+        form = (CloseBooksForm if acao == "fechar" else ReopenBooksForm)(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             try:
                 if acao == "fechar":
-                    services.fechar(request.clinic, data["until"], user=request.user)
+                    services.close_books(request.clinic, data["until"], user=request.user)
                     messages.success(request, _("Financeiro fechado."))
                 else:
-                    services.reabrir(
+                    services.reopen_books(
                         request.clinic, data["until"], reason=data["reason"], user=request.user
                     )
                     messages.success(request, _("Período reaberto."))
@@ -665,10 +665,10 @@ def fechamento(request):
         request,
         "finance/closing.html",
         {
-            "fechado_ate": services.fechado_ate(request.clinic.pk),
+            "fechado_ate": services.closed_until(request.clinic.pk),
             "historico": BookClosing.objects.select_related("created_by")[:30],
-            "fechar_form": FecharForm() if pode_fechar else None,
-            "reabrir_form": ReabrirForm() if pode_reabrir else None,
+            "fechar_form": CloseBooksForm() if pode_fechar else None,
+            "reabrir_form": ReopenBooksForm() if pode_reabrir else None,
         },
     )
 
@@ -677,14 +677,14 @@ def fechamento(request):
 
 
 CATALOGS = {
-    "categories": (Category, CategoriaForm),
-    "accounts": (FinancialAccount, ContaForm),
-    "cost-centers": (CostCenter, CentroCustoForm),
+    "categories": (Category, CategoryForm),
+    "accounts": (FinancialAccount, FinancialAccountForm),
+    "cost-centers": (CostCenter, CostCenterForm),
 }
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def cadastro_lista(request, cadastro):
+def catalog_list(request, cadastro):
     modelo, _form = CATALOGS[cadastro]
     return render(
         request,
@@ -694,7 +694,7 @@ def cadastro_lista(request, cadastro):
 
 
 @requires_permission(Module.FINANCE, Action.CHANGE)
-def cadastro_form(request, cadastro, pk=None):
+def catalog_form(request, cadastro, pk=None):
     modelo, classe = CATALOGS[cadastro]
     instancia = get_object_or_404(modelo.objects, pk=pk) if pk else modelo()
     form = classe(request.POST or None, instance=instancia)
@@ -713,12 +713,12 @@ def cadastro_form(request, cadastro, pk=None):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def plano_contas(request):
+def chart_of_accounts(request):
     """The chart of accounts as a tree: groups, subgroups and their categories."""
-    grupos = services.ligar_grupos(AccountGroup.objects.all())
+    grupos = services.link_groups(AccountGroup.objects.all())
     categorias = list(Category.objects.all())
     arvores = []
-    for kind, label in Category.Tipo.choices:
+    for kind, label in Category.Kind.choices:
         rows = []
 
         def descer(parent_id, nivel, kind=kind, rows=rows):
@@ -738,17 +738,17 @@ def plano_contas(request):
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
-def grupo_novo(request):
-    return _grupo_form(request, AccountGroup(kind=request.GET.get("kind") or None))
+def new_group(request):
+    return _group_form(request, AccountGroup(kind=request.GET.get("kind") or None))
 
 
 @requires_permission(Module.FINANCE, Action.CHANGE)
-def grupo_editar(request, pk):
-    return _grupo_form(request, get_object_or_404(AccountGroup.objects, pk=pk))
+def edit_group(request, pk):
+    return _group_form(request, get_object_or_404(AccountGroup.objects, pk=pk))
 
 
-def _grupo_form(request, instancia):
-    form = GrupoContabilForm(request.POST or None, instance=instancia)
+def _group_form(request, instancia):
+    form = AccountGroupForm(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
         group = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": group.name})
@@ -760,7 +760,7 @@ def _grupo_form(request, instancia):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def fornecedores(request):
+def suppliers(request):
     search = request.GET.get("q", "").strip()
     results = Supplier.objects.all()
     if search:
@@ -769,7 +769,7 @@ def fornecedores(request):
         if any(c.isdigit() for c in document):
             filtro |= Q(tax_id__startswith=document)
         results = results.filter(filtro)
-    page = Paginator(results, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(results, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "finance/suppliers.html",
@@ -782,15 +782,15 @@ def supplier(request, pk):
     supplier = get_object_or_404(Supplier.objects, pk=pk)
     today = timezone.localdate()
     parcelas = list(
-        Installment.objects.com_saldo()
+        Installment.objects.with_balance()
         .filter(entry__supplier=supplier)
         .select_related("entry")
-        .order_by("-due_date", "-pk")[:POR_PAGINA]
+        .order_by("-due_date", "-pk")[:PER_PAGE]
     )
     for installment in parcelas:
         installment.status = services.status(installment, today)
     em_aberto = sum(
-        (p.balance for p in Installment.objects.abertas().filter(entry__supplier=supplier)),
+        (p.balance for p in Installment.objects.unpaid().filter(entry__supplier=supplier)),
         start=ZERO,
     )
     return render(
@@ -801,17 +801,17 @@ def supplier(request, pk):
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
-def fornecedor_novo(request):
-    return _fornecedor_form(request, Supplier())
+def new_supplier(request):
+    return _supplier_form(request, Supplier())
 
 
 @requires_permission(Module.FINANCE, Action.CHANGE)
-def fornecedor_editar(request, pk):
-    return _fornecedor_form(request, get_object_or_404(Supplier.objects, pk=pk))
+def edit_supplier(request, pk):
+    return _supplier_form(request, get_object_or_404(Supplier.objects, pk=pk))
 
 
-def _fornecedor_form(request, instancia):
-    form = FornecedorForm(request.POST or None, instance=instancia, clinic=request.clinic)
+def _supplier_form(request, instancia):
+    form = SupplierForm(request.POST or None, instance=instancia, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         supplier = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": supplier.name})
@@ -822,7 +822,7 @@ def _fornecedor_form(request, instancia):
 # --- Practitioner commission (0.19.0) --------------------------------------------------
 
 
-def _ate(request):
+def _until(request):
     today = timezone.localdate()
     try:
         return min(datetime.date.fromisoformat(request.GET.get("until", "")), today)
@@ -831,8 +831,8 @@ def _ate(request):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def comissoes_lista(request):
-    until = _ate(request)
+def commission_list(request):
+    until = _until(request)
     return render(
         request,
         "finance/commissions.html",
@@ -848,7 +848,7 @@ def comissoes_lista(request):
 @requires_permission(Module.FINANCE, Action.CHANGE)
 def commission_percentage(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
-    form = PercentualComissaoForm(request.POST or None, instance=practitioner)
+    form = CommissionPercentageForm(request.POST or None, instance=practitioner)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": practitioner.name})
@@ -861,17 +861,17 @@ def commission_percentage(request, pk):
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
-def comissao_pagar(request, pk):
+def pay_commission(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
-    until = _ate(request)
+    until = _until(request)
     default = (
-        Category.objects.filter(kind=Category.Tipo.DESPESA, name="Comissões", active=True).first()
-        or Category.objects.filter(kind=Category.Tipo.DESPESA, active=True).first()
+        Category.objects.filter(kind=Category.Kind.EXPENSE, name="Comissões", active=True).first()
+        or Category.objects.filter(kind=Category.Kind.EXPENSE, active=True).first()
     )
-    form = PagarComissaoForm(request.POST or None, initial={"category": default})
+    form = PayCommissionForm(request.POST or None, initial={"category": default})
     if request.method == "POST" and form.is_valid():
         try:
-            commission = commissions.pagar(
+            commission = commissions.pay(
                 practitioner, until=until, user=request.user, **form.cleaned_data
             )
         except ValidationError as error:
@@ -882,7 +882,7 @@ def comissao_pagar(request, pk):
     return render(
         request,
         "finance/commission_pay.html",
-        {"form": form, "calculo": commissions.pendente(practitioner, until), "until": until},
+        {"form": form, "calculo": commissions.pending(practitioner, until), "until": until},
     )
 
 
@@ -898,7 +898,7 @@ def commission(request, pk):
         "installment__entry__patient", "commission"
     ).order_by("date", "pk")
     for estorno in reversal_deduction:
-        estorno.comissao_devolvida = commissions.percentual_de(
+        estorno.comissao_devolvida = commissions.percentage_for(
             estorno.amount, estorno.commission.percentage
         )
     return render(
@@ -916,21 +916,21 @@ def commission(request, pk):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def extratos(request):
-    form = ImportarExtratoForm(request.POST or None, request.FILES or None)
+def statements(request):
+    form = ImportStatementForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
         if not can(request, Module.FINANCE, Action.CREATE):
             raise PermissionDenied
         if form.is_valid():
             file = form.cleaned_data["file"]
             try:
-                statement_import = reconciliation.importar(
+                statement_import = reconciliation.import_statement(
                     form.cleaned_data["account"],
                     nome_arquivo=file.name,
                     content=file.read(),
                     user=request.user,
                 )
-            except ArquivoInvalido as error:
+            except InvalidFile as error:
                 form.add_error("file", str(error))
             else:
                 messages.success(
@@ -953,7 +953,7 @@ def extratos(request):
                         )
                         % {"n": statement_import.unreadable_transactions},
                     )
-                outra = reconciliation.outra_conta_no_banco(statement_import)
+                outra = reconciliation.other_bank_account(statement_import)
                 if outra:
                     messages.warning(
                         request,
@@ -970,7 +970,7 @@ def extratos(request):
                 return redirect("finance:statement", pk=statement_import.pk)
     importacoes = StatementImport.objects.select_related("account", "created_by")
     pendentes = dict(
-        BankTransaction.objects.filter(status=BankTransaction.Situacao.PENDENTE)
+        BankTransaction.objects.filter(status=BankTransaction.Status.PENDING)
         .values("statement_import")
         .annotate(n=Count("pk"))
         .values_list("statement_import", "n")
@@ -982,25 +982,25 @@ def extratos(request):
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
-def extrato(request, pk):
+def statement(request, pk):
     statement_import = get_object_or_404(StatementImport.objects.select_related("account"), pk=pk)
     transacoes = list(
         statement_import.transacoes.select_related(
             "payment__installment__entry__patient", "cash_movement__cash_register__account"
         )
     )
-    por_transacao = reconciliation.candidatos(transacoes)
+    por_transacao = reconciliation.candidates(transacoes)
     for transacao in transacoes:
-        transacao.candidatos = por_transacao.get(transacao.pk, [])
-    saldo_sistema = reconciliation.saldo_no_sistema(statement_import)
+        transacao.candidates = por_transacao.get(transacao.pk, [])
+    saldo_sistema = reconciliation.system_balance(statement_import)
     return render(
         request,
         "finance/statement.html",
         {
             "statement_import": statement_import,
             "transacoes": transacoes,
-            "pendentes": sum(t.status == BankTransaction.Situacao.PENDENTE for t in transacoes),
-            "unicos": sum(len(t.candidatos) == 1 for t in transacoes),
+            "pendentes": sum(t.status == BankTransaction.Status.PENDING for t in transacoes),
+            "unicos": sum(len(t.candidates) == 1 for t in transacoes),
             "saldo_sistema": saldo_sistema,
             "diferenca": statement_import.balance - saldo_sistema
             if saldo_sistema is not None
@@ -1009,7 +1009,7 @@ def extrato(request, pk):
     )
 
 
-def _voltar_ao_extrato(transacao):
+def _back_to_statement(transacao):
     return redirect(
         f"{reverse('finance:statement', args=[transacao.statement_import_id])}#t{transacao.pk}"
     )
@@ -1017,46 +1017,46 @@ def _voltar_ao_extrato(transacao):
 
 @require_POST
 @requires_permission(Module.FINANCE, Action.CHANGE)
-def extrato_conciliar_unicos(request, pk):
+def statement_reconcile_unique(request, pk):
     statement_import = get_object_or_404(StatementImport.objects, pk=pk)
-    feitas = reconciliation.conciliar_unicos(statement_import, user=request.user)
+    feitas = reconciliation.reconcile_unique(statement_import, user=request.user)
     messages.success(request, _("%(n)s transações conciliadas.") % {"n": feitas})
     return redirect("finance:statement", pk=statement_import.pk)
 
 
 @require_POST
 @requires_permission(Module.FINANCE, Action.CHANGE)
-def transacao_acao(request, pk, acao):
+def transaction_action(request, pk, acao):
     transacao = get_object_or_404(BankTransaction.objects, pk=pk)
     try:
         if acao == "reconcile":
-            reconciliation.conciliar(transacao, request.POST.get("chave", ""), user=request.user)
+            reconciliation.reconcile(transacao, request.POST.get("chave", ""), user=request.user)
         elif acao == "ignore":
             reason = request.POST.get("reason", "").strip()[:200]
             if not reason:
                 raise ValidationError(_("Informe o motivo para ignorar a transação."))
-            reconciliation.ignorar(transacao, reason=reason, user=request.user)
+            reconciliation.ignore(transacao, reason=reason, user=request.user)
         else:
-            reconciliation.desfazer(transacao)
+            reconciliation.undo(transacao)
     except ValidationError as error:
         messages.error(request, error.messages[0])
-    return _voltar_ao_extrato(transacao)
+    return _back_to_statement(transacao)
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
-def transacao_lancamento(request, pk):
+def transaction_entry(request, pk):
     transacao = get_object_or_404(BankTransaction.objects.select_related("account"), pk=pk)
-    form = LancamentoDaTransacaoForm(
+    form = TransactionEntryForm(
         request.POST or None,
-        entrada=transacao.entrada,
+        is_incoming=transacao.is_incoming,
         initial={"description": transacao.description},
     )
     if request.method == "POST" and form.is_valid():
         try:
-            reconciliation.criar_lancamento(transacao, user=request.user, **form.cleaned_data)
+            reconciliation.create_entry(transacao, user=request.user, **form.cleaned_data)
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
             messages.success(request, _("Lançamento criado e conciliado."))
-        return _voltar_ao_extrato(transacao)
+        return _back_to_statement(transacao)
     return render(request, "finance/transaction_entry.html", {"form": form, "transacao": transacao})

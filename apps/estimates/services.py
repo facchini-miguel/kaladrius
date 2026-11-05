@@ -16,14 +16,14 @@ def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
     """Approve an open estimate: creates the receivable (and, optionally, pays the 1st
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
-    if estimate.status != Estimate.Situacao.ABERTO:
+    if estimate.status != Estimate.Status.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser aprovado."))
     total = estimate.total
     if total <= 0:
         raise ValidationError(_("O orçamento não tem valor a receber."))
-    entry = financeiro.criar_lancamento(
+    entry = financeiro.create_entry(
         clinic=estimate.clinic,
-        kind=Entry.Tipo.RECEBER,
+        kind=Entry.Kind.RECEIVABLE,
         patient=estimate.patient,
         practitioner=estimate.practitioner,
         description=_("Orçamento nº %(numero)s") % {"numero": estimate.pk},
@@ -35,8 +35,8 @@ def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
     )
     if payment:
         primeira = entry.parcelas.order_by("number").first()
-        financeiro.receber(primeira, user=user, amount=primeira.amount, **payment)
-    estimate.status = Estimate.Situacao.APROVADO
+        financeiro.receive(primeira, user=user, amount=primeira.amount, **payment)
+    estimate.status = Estimate.Status.APROVADO
     estimate.entry = entry
     estimate.decided_at = timezone.now()
     estimate.decided_by = user
@@ -48,9 +48,9 @@ def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
 def recusar(estimate, *, user):
     # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
-    if estimate.status != Estimate.Situacao.ABERTO:
+    if estimate.status != Estimate.Status.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
-    estimate.status = Estimate.Situacao.RECUSADO
+    estimate.status = Estimate.Status.RECUSADO
     estimate.decided_at = timezone.now()
     estimate.decided_by = user
     estimate.save()

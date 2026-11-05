@@ -58,9 +58,9 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     clinic = cenario["clinic"]
     dra = criar_profissional(clinic, "Dra. Fictícia", registration="CRO-SP 12345")
     with use_clinic(clinic):
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=clinic,
-            kind=Entry.Tipo.RECEBER,
+            kind=Entry.Kind.RECEIVABLE,
             patient=cenario["patient"],
             description="Limpeza",
             category=cenario["category"],
@@ -70,7 +70,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
             primeiro_vencimento=HOJE,
             user=cenario["admin"],
         )
-        payment = services.receber(
+        payment = services.receive(
             parcelas_de(cenario, entry)[0],
             user=cenario["admin"],
             amount=Decimal("100"),

@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BootstrapForm
 from apps.dentistry.teeth import DENTES_VALIDOS
-from apps.finance.forms import DATA, _campo_dinheiro, _formas_com_vazio
+from apps.finance.forms import DATE_INPUT, _methods_with_blank, _money_field
 from apps.finance.models import Category, FinancialAccount
 from apps.health_plans import insurance
 from apps.patients.models import Patient
@@ -14,7 +14,7 @@ from .models import Estimate, EstimateItem, Procedure
 
 
 class ProcedimentoForm(BootstrapForm, forms.ModelForm):
-    amount = _campo_dinheiro(_("Valor"))
+    amount = _money_field(_("Valor"))
 
     class Meta:
         model = Procedure
@@ -23,7 +23,7 @@ class ProcedimentoForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = Category.objects.filter(
-            kind=Category.Tipo.RECEITA, active=True
+            kind=Category.Kind.INCOME, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
         self.codificacao = insurance.for_country().procedure
@@ -51,8 +51,8 @@ class OrcamentoForm(BootstrapForm, forms.ModelForm):
         fields = ["patient", "practitioner", "date", "valid_until", "notes"]
         widgets = {
             "patient": forms.HiddenInput,
-            "date": DATA,
-            "valid_until": DATA,
+            "date": DATE_INPUT,
+            "valid_until": DATE_INPUT,
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
 
@@ -72,7 +72,7 @@ class OrcamentoForm(BootstrapForm, forms.ModelForm):
 class ItemForm(BootstrapForm, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
-    unit_price = _campo_dinheiro(_("Valor unitário"), obrigatorio=False)
+    unit_price = _money_field(_("Valor unitário"), obrigatorio=False)
 
     class Meta:
         model = EstimateItem
@@ -118,7 +118,7 @@ class ItemForm(BootstrapForm, forms.ModelForm):
 
 
 class DescontoForm(BootstrapForm, forms.Form):
-    discount = _campo_dinheiro(_("Desconto no total"), obrigatorio=False)
+    discount = _money_field(_("Desconto no total"), obrigatorio=False)
 
 
 class AprovarForm(BootstrapForm, forms.Form):
@@ -126,13 +126,13 @@ class AprovarForm(BootstrapForm, forms.Form):
         label=_("Número de parcelas"), min_value=1, max_value=48, initial=1
     )
     primeiro_vencimento = forms.DateField(
-        label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
+        label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=_formas_com_vazio,
+        choices=_methods_with_blank,
         required=False,
     )
     account = forms.ModelChoiceField(
@@ -142,7 +142,7 @@ class AprovarForm(BootstrapForm, forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = Category.objects.filter(
-            kind=Category.Tipo.RECEITA, active=True
+            kind=Category.Kind.INCOME, active=True
         )
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
 

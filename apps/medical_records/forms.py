@@ -51,7 +51,7 @@ class AtestadoForm(BootstrapForm, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if data.get("kind") == Certificate.Tipo.AFASTAMENTO:
+        if data.get("kind") == Certificate.Kind.AFASTAMENTO:
             if not data.get("days"):
                 self.add_error("days", _("Informe quantos dias de afastamento."))
         else:

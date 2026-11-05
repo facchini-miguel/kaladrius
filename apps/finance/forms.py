@@ -19,15 +19,15 @@ from .models import (
     Payment,
     Supplier,
 )
-from .services import ligar_grupos
+from .services import link_groups
 
 
-def _formas_com_vazio():
+def _methods_with_blank():
     """The clinic's country's payment methods (decision 123), after an empty choice."""
-    return [("", "—"), *Payment.Forma.em_uso()]
+    return [("", "—"), *Payment.Method.in_use()]
 
 
-def _campo_dinheiro(label, obrigatorio=True, minimo=0, **extra):
+def _money_field(label, obrigatorio=True, minimo=0, **extra):
     """Amount typed in the user's format (1.500,50 in Portuguese and Spanish)."""
     return LocalizedDecimalField(
         label=label,
@@ -41,10 +41,10 @@ def _campo_dinheiro(label, obrigatorio=True, minimo=0, **extra):
     )
 
 
-DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+DATE_INPUT = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-def _centros_de_custo(form):
+def _cost_centers(form):
     """The cost center field shows up only once the clinic has one (decision 095)."""
     centros = CostCenter.objects.filter(active=True)
     if centros.exists():
@@ -53,10 +53,10 @@ def _centros_de_custo(form):
         del form.fields["cost_center"]
 
 
-class LancamentoReceberForm(BootstrapForm, forms.ModelForm):
+class ReceivableEntryForm(BootstrapForm, forms.ModelForm):
     """New receivable, split into equal monthly installments (optionally paid now)."""
 
-    total_amount = _campo_dinheiro(_("Valor total"))
+    total_amount = _money_field(_("Valor total"))
     parcelas = forms.IntegerField(
         label=_("Número de parcelas"),
         min_value=1,
@@ -65,12 +65,12 @@ class LancamentoReceberForm(BootstrapForm, forms.ModelForm):
         help_text=_("Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."),
     )
     primeiro_vencimento = forms.DateField(
-        label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
+        label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
     recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=_formas_com_vazio,
+        choices=_methods_with_blank,
         required=False,
     )
     account = forms.ModelChoiceField(
@@ -97,14 +97,14 @@ class LancamentoReceberForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.clinic = clinic
-        self.instance.kind = Entry.Tipo.RECEBER
+        self.instance.kind = Entry.Kind.RECEIVABLE
         self.fields["patient"].queryset = Patient.objects.filter(archived=False)
         self.fields["category"].queryset = Category.objects.filter(
-            kind=Category.Tipo.RECEITA, active=True
+            kind=Category.Kind.INCOME, active=True
         )
         self.fields["practitioner"].queryset = Practitioner.objects.filter(active=True)
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
-        _centros_de_custo(self)
+        _cost_centers(self)
 
     def clean(self):
         data = super().clean()
@@ -119,32 +119,32 @@ class LancamentoReceberForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class LancamentoPagarForm(BootstrapForm, forms.ModelForm):
+class PayableEntryForm(BootstrapForm, forms.ModelForm):
     """New payable: one bill split into installments, or the same amount every month."""
 
-    DIVIDIR = "dividir"
-    REPETIR = "repetir"
+    SPLIT = "dividir"
+    REPEAT = "repetir"
 
-    amount = _campo_dinheiro(_("Valor"))
+    amount = _money_field(_("Valor"))
     modo = forms.ChoiceField(
         label=_("O valor é"),
         choices=[
-            (DIVIDIR, _("o total, dividido nas parcelas")),
-            (REPETIR, _("de cada mês (conta fixa, como o aluguel)")),
+            (SPLIT, _("o total, dividido nas parcelas")),
+            (REPEAT, _("de cada mês (conta fixa, como o aluguel)")),
         ],
-        initial=DIVIDIR,
+        initial=SPLIT,
         widget=forms.RadioSelect,
     )
     parcelas = forms.IntegerField(
         label=_("Número de parcelas ou de meses"), min_value=1, max_value=48, initial=1
     )
     primeiro_vencimento = forms.DateField(
-        label=_("Vencimento da 1ª parcela"), widget=DATA, initial=timezone.localdate
+        label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
     pago_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=_formas_com_vazio,
+        choices=_methods_with_blank,
         required=False,
     )
     account = forms.ModelChoiceField(
@@ -161,13 +161,13 @@ class LancamentoPagarForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.clinic = clinic
-        self.instance.kind = Entry.Tipo.PAGAR
+        self.instance.kind = Entry.Kind.PAYABLE
         self.fields["supplier"].queryset = Supplier.objects.filter(active=True)
         self.fields["category"].queryset = Category.objects.filter(
-            kind=Category.Tipo.DESPESA, active=True
+            kind=Category.Kind.EXPENSE, active=True
         )
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
-        _centros_de_custo(self)
+        _cost_centers(self)
 
     def clean(self):
         data = super().clean()
@@ -185,12 +185,12 @@ class LancamentoPagarForm(BootstrapForm, forms.ModelForm):
 
     def total_amount(self):
         data = self.cleaned_data
-        if data["modo"] == self.REPETIR:
+        if data["modo"] == self.REPEAT:
             return data["amount"] * data["parcelas"]
         return data["amount"]
 
 
-class FornecedorForm(BootstrapForm, forms.ModelForm):
+class SupplierForm(BootstrapForm, forms.ModelForm):
     """A supplier (decision 093). Documents and phones are typed with or without punctuation."""
 
     tax_id = document_field()
@@ -247,7 +247,7 @@ class FornecedorForm(BootstrapForm, forms.ModelForm):
     def clean(self):
         data = super().clean()
         # A type without a document in this country (an individual in the UK) keeps none.
-        juridica = data.get("kind") == Supplier.Tipo.JURIDICA
+        juridica = data.get("kind") == Supplier.Kind.COMPANY
         do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
         document = ""
         if do_tipo is not None:
@@ -267,7 +267,7 @@ class FornecedorForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class PlanejamentoForm(BootstrapForm, forms.Form):
+class PlanningForm(BootstrapForm, forms.Form):
     """One goal field per group of the chart of accounts (decision 098)."""
 
     def __init__(self, *args, grupos, metas, **kwargs):
@@ -275,7 +275,7 @@ class PlanejamentoForm(BootstrapForm, forms.Form):
         self.grupos = grupos
         for group in grupos:
             # Rendered by the field itself: it shows 1.000,00 in Portuguese and reads it back.
-            field = _campo_dinheiro(str(group), obrigatorio=False, initial=metas.get(group.pk))
+            field = _money_field(str(group), obrigatorio=False, initial=metas.get(group.pk))
             field.widget.attrs.update(
                 {"class": "form-control form-control-sm text-end", "aria-label": str(group)}
             )
@@ -285,36 +285,36 @@ class PlanejamentoForm(BootstrapForm, forms.Form):
     def name(group):
         return f"meta-{group.pk}"
 
-    def valores(self):
+    def paid_and_balance(self):
         return {group: self.cleaned_data.get(self.name(group)) for group in self.grupos}
 
 
-class FecharForm(BootstrapForm, forms.Form):
+class CloseBooksForm(BootstrapForm, forms.Form):
     until = forms.DateField(
         label=_("Fechar até"),
-        widget=DATA,
+        widget=DATE_INPUT,
         help_text=_("Último dia do período fechado (no máximo ontem)."),
     )
 
 
-class ReabrirForm(BootstrapForm, forms.Form):
+class ReopenBooksForm(BootstrapForm, forms.Form):
     until = forms.DateField(
         label=_("Deixar fechado até"),
-        widget=DATA,
+        widget=DATE_INPUT,
         required=False,
         help_text=_("Uma data anterior ao fechamento atual. Em branco, reabre tudo."),
     )
     reason = forms.CharField(label=_("Motivo"), max_length=200)
 
 
-class ReceberForm(BootstrapForm, forms.ModelForm):
+class ReceivePaymentForm(BootstrapForm, forms.ModelForm):
     """Payment of an installment. Discounts only for those allowed (administrators)."""
 
-    amount = _campo_dinheiro(_("Valor recebido"))
-    interest = _campo_dinheiro(
+    amount = _money_field(_("Valor recebido"))
+    interest = _money_field(
         _("Juros e multa"), obrigatorio=False, help_text=_("Já incluídos no valor recebido.")
     )
-    discount = _campo_dinheiro(_("Desconto"), obrigatorio=False)
+    discount = _money_field(_("Desconto"), obrigatorio=False)
 
     class Meta:
         model = Payment
@@ -330,11 +330,11 @@ class ReceberForm(BootstrapForm, forms.ModelForm):
             "card_transaction_code",
             "note",
         ]
-        widgets = {"date": DATA}
+        widgets = {"date": DATE_INPUT}
 
     def __init__(self, *args, pode_dar_desconto, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["method"].choices = _formas_com_vazio()
+        self.fields["method"].choices = _methods_with_blank()
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
         if not pode_dar_desconto:
             del self.fields["discount"]
@@ -355,26 +355,26 @@ class ReceberForm(BootstrapForm, forms.ModelForm):
         if data.get("amount") is not None and data["amount"] <= 0:
             self.add_error("amount", _("Informe um valor maior que zero."))
         if (
-            data.get("method") not in payment_methods.CARTOES
+            data.get("method") not in payment_methods.CARDS
             or "card_installments" not in self.fields
         ):
             data["card_installments"] = None
-        if data.get("method") not in payment_methods.CARTOES:
+        if data.get("method") not in payment_methods.CARDS:
             data["card_brand"] = data["card_transaction_code"] = ""
         return data
 
 
-class MotivoForm(BootstrapForm, forms.Form):
+class ReasonForm(BootstrapForm, forms.Form):
     reason = forms.CharField(label=_("Motivo"), max_length=200)
 
 
-def _grupos(excluir=()):
+def _groups(excluir=()):
     """Groups as choices, numbered without one query per level."""
-    grupos = ligar_grupos(AccountGroup.objects.exclude(pk__in=excluir))
+    grupos = link_groups(AccountGroup.objects.exclude(pk__in=excluir))
     return [("", "—"), *((g.pk, f"{g.get_kind_display()} · {g}") for g in grupos)]
 
 
-class GrupoContabilForm(BootstrapForm, forms.ModelForm):
+class AccountGroupForm(BootstrapForm, forms.ModelForm):
     """A group of the chart of accounts (decision 097)."""
 
     parent = forms.ModelChoiceField(
@@ -394,11 +394,11 @@ class GrupoContabilForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # A group cannot go under itself or under one of its own subgroups.
-        proibidos = {self.instance.pk, *self._descendentes()} if self.instance.pk else set()
+        proibidos = {self.instance.pk, *self._descendants()} if self.instance.pk else set()
         self.fields["parent"].queryset = AccountGroup.objects.exclude(pk__in=proibidos)
-        self.fields["parent"].choices = _grupos(excluir=proibidos)
+        self.fields["parent"].choices = _groups(excluir=proibidos)
 
-    def _descendentes(self):
+    def _descendants(self):
         encontrados, fila = set(), [self.instance.pk]
         while fila:
             filhos = set(AccountGroup.objects.filter(parent__in=fila).values_list("pk", flat=True))
@@ -429,7 +429,7 @@ class GrupoContabilForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class CategoriaForm(BootstrapForm, forms.ModelForm):
+class CategoryForm(BootstrapForm, forms.ModelForm):
     group = forms.ModelChoiceField(
         queryset=AccountGroup.objects.none(), required=False, label=_("Grupo")
     )
@@ -441,7 +441,7 @@ class CategoriaForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["group"].queryset = AccountGroup.objects.all()
-        self.fields["group"].choices = _grupos()
+        self.fields["group"].choices = _groups()
         self.fields["group"].help_text = _("Onde a categoria fica no plano de contas (opcional).")
 
     def clean(self):
@@ -455,7 +455,7 @@ class CategoriaForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class CentroCustoForm(BootstrapForm, forms.ModelForm):
+class CostCenterForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = CostCenter
         fields = ["name", "active"]
@@ -467,8 +467,8 @@ class CentroCustoForm(BootstrapForm, forms.ModelForm):
         return name
 
 
-class ContaForm(BootstrapForm, forms.ModelForm):
-    opening_balance = _campo_dinheiro(
+class FinancialAccountForm(BootstrapForm, forms.ModelForm):
+    opening_balance = _money_field(
         _("Saldo inicial"),
         obrigatorio=False,
         minimo=None,  # an overdrawn bank account starts negative
@@ -489,14 +489,14 @@ class ContaForm(BootstrapForm, forms.ModelForm):
         return name
 
 
-class AbrirCaixaForm(BootstrapForm, forms.Form):
-    amount = _campo_dinheiro(
+class OpenCashRegisterForm(BootstrapForm, forms.Form):
+    amount = _money_field(
         _("Valor contado na gaveta"), help_text=_("Conte o dinheiro antes de abrir o caixa.")
     )
 
 
-class MovimentoCaixaForm(BootstrapForm, forms.Form):
-    amount = _campo_dinheiro(_("Valor"))
+class CashMovementForm(BootstrapForm, forms.Form):
+    amount = _money_field(_("Valor"))
     other_account = forms.ModelChoiceField(
         label=_("Outra conta"),
         queryset=FinancialAccount.objects.none(),
@@ -518,8 +518,8 @@ class MovimentoCaixaForm(BootstrapForm, forms.Form):
         return amount
 
 
-class FecharCaixaForm(BootstrapForm, forms.Form):
-    counted_amount = _campo_dinheiro(_("Valor contado na gaveta"))
+class CloseCashRegisterForm(BootstrapForm, forms.Form):
+    counted_amount = _money_field(_("Valor contado na gaveta"))
     note = forms.CharField(
         label=_("Observação"),
         max_length=200,
@@ -528,28 +528,28 @@ class FecharCaixaForm(BootstrapForm, forms.Form):
     )
 
 
-class PercentualComissaoForm(BootstrapForm, forms.ModelForm):
+class CommissionPercentageForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Practitioner
         fields = ["commission_percentage"]
         localized_fields = ["commission_percentage"]
 
 
-class PagarComissaoForm(BootstrapForm, forms.Form):
-    due_date = forms.DateField(label=_("Vencimento"), widget=DATA, initial=timezone.localdate)
+class PayCommissionForm(BootstrapForm, forms.Form):
+    due_date = forms.DateField(label=_("Vencimento"), widget=DATE_INPUT, initial=timezone.localdate)
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = Category.objects.filter(
-            kind=Category.Tipo.DESPESA, active=True
+            kind=Category.Kind.EXPENSE, active=True
         )
 
 
-TAMANHO_MAXIMO_OFX = 5 * 1024 * 1024
+MAX_OFX_SIZE = 5 * 1024 * 1024
 
 
-class ImportarExtratoForm(BootstrapForm, forms.Form):
+class ImportStatementForm(BootstrapForm, forms.Form):
     account = forms.ModelChoiceField(label=_("Conta"), queryset=FinancialAccount.objects.none())
     file = forms.FileField(
         label=_("Arquivo OFX"),
@@ -560,20 +560,18 @@ class ImportarExtratoForm(BootstrapForm, forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
-        bank = FinancialAccount.objects.filter(
-            active=True, kind=FinancialAccount.Tipo.BANCO
-        ).first()
+        bank = FinancialAccount.objects.filter(active=True, kind=FinancialAccount.Kind.BANK).first()
         if bank is not None:
             self.fields["account"].initial = bank.pk
 
     def clean_file(self):
         file = self.cleaned_data["file"]
-        if file.size > TAMANHO_MAXIMO_OFX:
+        if file.size > MAX_OFX_SIZE:
             raise forms.ValidationError(_("O arquivo passa de 5 MB."))
         return file
 
 
-class LancamentoDaTransacaoForm(BootstrapForm, forms.Form):
+class TransactionEntryForm(BootstrapForm, forms.Form):
     """A new entry, already paid, for a statement line (a bank fee, an unrecorded Pix)."""
 
     description = forms.CharField(label=_("Descrição"), max_length=200)
@@ -586,11 +584,11 @@ class LancamentoDaTransacaoForm(BootstrapForm, forms.Form):
     )
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
-        choices=Payment.Forma.em_uso,
-        initial=Payment.Forma.TRANSFERENCIA,
+        choices=Payment.Method.in_use,
+        initial=Payment.Method.TRANSFER,
     )
 
-    def __init__(self, *args, entrada, **kwargs):
+    def __init__(self, *args, is_incoming, **kwargs):
         super().__init__(*args, **kwargs)
-        kind = Category.Tipo.RECEITA if entrada else Category.Tipo.DESPESA
+        kind = Category.Kind.INCOME if is_incoming else Category.Kind.EXPENSE
         self.fields["category"].queryset = Category.objects.filter(kind=kind, active=True)

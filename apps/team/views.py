@@ -16,7 +16,7 @@ from apps.audit.record import registrar
 from apps.core.models import Membership
 from apps.core.permissions import Action, Module, requires_permission
 
-from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_exclusiva
+from .forms import NovoMembroForm, SenhaForm, UserAccountForm, VinculoForm, conta_exclusiva
 
 
 def _vinculo(request, pk):
@@ -56,7 +56,7 @@ def editar(request, pk):
     exclusiva = conta_exclusiva(user, request.clinic)
     data = request.POST or None
     form = VinculoForm(data, instance=vinculo, editor=request.user, prefix="vinculo")
-    account = ContaForm(data, instance=user, prefix="conta") if exclusiva else None
+    account = UserAccountForm(data, instance=user, prefix="conta") if exclusiva else None
     if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
             form.save()

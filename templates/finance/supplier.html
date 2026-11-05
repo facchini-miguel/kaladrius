@@ -23,7 +23,7 @@
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ supplier.get_kind_display }}</dd>
           {% if supplier.legal_name %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ supplier.legal_name }}</dd>{% endif %}
-          {% with sigla=supplier.tax_id|document_abbreviation:supplier.papel_documento %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.papel_documento|default:"—" }}</dd>{% endif %}{% endwith %}
+          {% with sigla=supplier.tax_id|document_abbreviation:supplier.document_role %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ supplier.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ supplier.email|default:"—" }}</dd>
