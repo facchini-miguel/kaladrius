@@ -21,9 +21,9 @@ def test_todo_clean_de_campo_tem_o_seu_campo():
         # A base form may leave the field to the forms built on it.
         familia = [form, *_subclasses(form)]
         for nome in vars(form):
-            campo = nome.removeprefix("clean_")
+            field = nome.removeprefix("clean_")
             if nome.startswith("clean_") and not any(
-                campo in getattr(f, "base_fields", {}) for f in familia
+                field in getattr(f, "base_fields", {}) for f in familia
             ):
                 sem_campo.append(f"{form.__module__}.{form.__qualname__}.{nome}")
     assert not sem_campo

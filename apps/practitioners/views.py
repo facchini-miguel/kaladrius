@@ -10,13 +10,13 @@ from .models import Practitioner
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.VER)
-def lista(request):
+def results(request):
     profissionais = Practitioner.objects.select_related("user")
     return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
 @exige_permissao(Modulo.PROFISSIONAIS, Acao.CRIAR)
-def novo(request):
+def new(request):
     return _formulario(request, Practitioner())
 
 

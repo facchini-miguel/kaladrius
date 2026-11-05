@@ -29,12 +29,12 @@ def content():
 
 
 def test_todo_arquivo_do_pacote_existe():
-    for origem, _destino in content():
+    for source, _destino in content():
         if (
-            origem.startswith("/") or origem == "dist/linux-package"
+            source.startswith("/") or source == "dist/linux-package"
         ):  # a symlink; written by build.sh
             continue
-        assert (RAIZ / origem).is_file(), origem
+        assert (RAIZ / source).is_file(), source
     for script in re.findall(r"(?:postinstall|postupgrade|preremove|postremove): (\S+)", NFPM):
         assert (RAIZ / script).is_file(), script
 
@@ -118,11 +118,11 @@ def test_sem_pacote_segue_o_google_cloud(tmp_path):
     # Google Cloud copies the whole deploy/ folder of the image to release/, the package's
     # sources included: they must not switch on the package mode.
     shutil.copytree(PACOTE, tmp_path / "release" / "package")
-    app, docs, anterior = avaliar(
+    app, docs, previous = avaliar(
         comum, 'echo "$APP_IMAGE $DOCS_IMAGE $PREVIOUS_APP_IMAGE"'
     ).split()
     assert app.endswith("/kaladrius/app:latest") and docs.endswith("/kaladrius/docs:latest")
-    assert anterior.endswith("/kaladrius/app:previous")
+    assert previous.endswith("/kaladrius/app:previous")
 
 
 @pytest.mark.parametrize(
@@ -198,19 +198,19 @@ def test_configurar_exige_root(tmp_path):
 def test_nenhum_script_confere_duas_condicoes_numa_linha_so():
     # `[ a ] && [ b ]` alone on a line does not stop a `set -e` script when `a` fails: the
     # restore test passed with no clinic restored until decision 140.
-    padrao = re.compile(r"^\s*\[[^]]*\]\s*&&\s*\[[^]]*\]\s*$")
+    default = re.compile(r"^\s*\[[^]]*\]\s*&&\s*\[[^]]*\]\s*$")
     for script in [*SERVIDOR.glob("*.sh"), *PACOTE.glob("*.sh"), PACOTE / "kaladrius"]:
-        for number, linha in enumerate(script.read_text().splitlines(), 1):
-            assert not padrao.match(linha), f"{script.name}:{number}: {linha.strip()}"
+        for number, row in enumerate(script.read_text().splitlines(), 1):
+            assert not default.match(row), f"{script.name}:{number}: {row.strip()}"
 
 
 def test_nenhum_script_usa_grep_q_depois_de_um_cano():
     # With pipefail, `cmd | grep -q x` fails when grep exits at the first match and `cmd` dies
     # writing the rest (SIGPIPE): Kaladrius's own Caddy was taken for another program on 80/443.
-    padrao = re.compile(r"\|\s*grep\s+-[a-zA-Z]*q")
+    default = re.compile(r"\|\s*grep\s+-[a-zA-Z]*q")
     for script in [*SERVIDOR.glob("*.sh"), *PACOTE.glob("*.sh"), PACOTE / "kaladrius"]:
-        for number, linha in enumerate(script.read_text().splitlines(), 1):
-            assert not padrao.search(linha), f"{script.name}:{number}: {linha.strip()}"
+        for number, row in enumerate(script.read_text().splitlines(), 1):
+            assert not default.search(row), f"{script.name}:{number}: {row.strip()}"
 
 
 @pytest.mark.parametrize(
@@ -265,16 +265,16 @@ def test_remover_o_pacote_nunca_apaga_os_dados():
     # The database, the backups and the .env stay; the help printed after a removal shows the
     # commands, for a person to decide (indented lines of the message).
     for script in ("pre_remove.sh", "post_remove.sh"):
-        for linha in (PACOTE / script).read_text().splitlines():
-            if linha.lstrip().startswith(("#", "printf")) or linha.startswith("    sudo "):
+        for row in (PACOTE / script).read_text().splitlines():
+            if row.lstrip().startswith(("#", "printf")) or row.startswith("    sudo "):
                 continue
-            assert "volume rm" not in linha and "down -v" not in linha, linha
-            if re.search(r"\brm\b", linha):
+            assert "volume rm" not in row and "down -v" not in row, row
+            if re.search(r"\brm\b", row):
                 # The package repository's apt source (on a purge) is configuration, not data.
-                assert linha.strip() in {
+                assert row.strip() in {
                     "rm -f /opt/kaladrius/release/.env",
                     'rm -f "$ETC/apt/sources.list.d/kaladrius.sources"',
-                }, linha
+                }, row
 
 
 def test_o_site_e_conferido_pelo_proprio_servidor(tmp_path):
@@ -589,10 +589,10 @@ def test_no_pacman_a_atualizacao_leva_as_variaveis(tmp_path):
         _saida, chamadas = depois_de_instalar(
             tmp_path, "0.55.0-1", admin_criado=True, ambiente=ambiente
         )
-        linha = next(c for c in chamadas.splitlines() if c.startswith("systemd-run"))
-        assert "--setenv=KALADRIUS_IMAGE=kaladrius:teste" in linha
-        assert "--setenv=HEALTH_WAIT=60" in linha
-        assert "--unit=kaladrius-package-update" in linha
+        row = next(c for c in chamadas.splitlines() if c.startswith("systemd-run"))
+        assert "--setenv=KALADRIUS_IMAGE=kaladrius:teste" in row
+        assert "--setenv=HEALTH_WAIT=60" in row
+        assert "--unit=kaladrius-package-update" in row
 
 
 @pytest.mark.parametrize(
@@ -664,17 +664,15 @@ IMPRESSAO_DIGITAL = "9D3A0438FF6C00F91CA1A0ABA5C335B2EB367ABA"  # decision 142
 
 def impressao_digital(armadura):
     """The fingerprint of an ASCII-armored OpenPGP v4 public key: SHA-1 of its first packet."""
-    linhas = armadura.strip().splitlines()
-    corpo = linhas[linhas.index("") + 1 : -1]
-    dados = base64.b64decode("".join(linha for linha in corpo if not linha.startswith("=")))
-    if dados[0] & 0x40:  # new packet format
-        size, start = (
-            (dados[1], 2) if dados[1] < 192 else (((dados[1] - 192) << 8) + dados[2] + 192, 3)
-        )
+    rows = armadura.strip().splitlines()
+    corpo = rows[rows.index("") + 1 : -1]
+    data = base64.b64decode("".join(row for row in corpo if not row.startswith("=")))
+    if data[0] & 0x40:  # new packet format
+        size, start = (data[1], 2) if data[1] < 192 else (((data[1] - 192) << 8) + data[2] + 192, 3)
     else:  # old format: the length type in the low two bits
-        n = {0: 1, 1: 2, 2: 4}[dados[0] & 3]
-        size, start = int.from_bytes(dados[1 : 1 + n]), 1 + n
-    pacote = dados[start : start + size]
+        n = {0: 1, 1: 2, 2: 4}[data[0] & 3]
+        size, start = int.from_bytes(data[1 : 1 + n]), 1 + n
+    pacote = data[start : start + size]
     return hashlib.sha1(b"\x99" + len(pacote).to_bytes(2) + pacote).hexdigest().upper()  # noqa: S324
 
 
@@ -684,18 +682,18 @@ def test_o_repositorio_que_o_pacote_traz_e_o_publicado():
     fonte = (PACOTE / "repository" / "kaladrius.sources").read_text()
     assert "URIs: https://packages.facchini.eti.br/kaladrius/deb\n" in fonte
     assert "Suites: stable\nComponents: main\nArchitectures: amd64\n" in fonte
-    linhas = fonte.split("Signed-By:\n", 1)[1].splitlines()
-    chave = "\n".join("" if linha == " ." else linha.removeprefix(" ") for linha in linhas)
-    assert impressao_digital(chave) == IMPRESSAO_DIGITAL
+    rows = fonte.split("Signed-By:\n", 1)[1].splitlines()
+    key = "\n".join("" if row == " ." else row.removeprefix(" ") for row in rows)
+    assert impressao_digital(key) == IMPRESSAO_DIGITAL
     repo = (PACOTE / "repository" / "kaladrius.repo").read_text()
-    for linha in (
+    for row in (
         "baseurl=https://packages.facchini.eti.br/kaladrius/rpm",
         "gpgcheck=1",
         "repo_gpgcheck=1",
         "autorefresh=1",
         "gpgkey=https://packages.facchini.eti.br/facchini.asc",
     ):
-        assert linha in repo.splitlines()
+        assert row in repo.splitlines()
 
 
 @pytest.mark.parametrize(
@@ -717,8 +715,8 @@ def test_o_pacote_adiciona_o_repositorio(tmp_path, argumento, pastas, esperado):
     )
     assert adicionados == ([esperado] if esperado else [])
     if esperado:
-        origem = PACOTE / "repository" / Path(esperado).name
-        assert (tmp_path / "etc" / esperado).read_text() == origem.read_text()
+        source = PACOTE / "repository" / Path(esperado).name
+        assert (tmp_path / "etc" / esperado).read_text() == source.read_text()
         assert "package repository added" in saida
 
 

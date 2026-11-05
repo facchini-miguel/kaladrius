@@ -15,18 +15,18 @@ pytestmark = pytest.mark.django_db
 
 
 def test_inicio_exige_login(client):
-    resposta = client.get(reverse("home"))
-    assert resposta.status_code == 302
-    assert reverse("login") in resposta.url
+    response = client.get(reverse("home"))
+    assert response.status_code == 302
+    assert reverse("login") in response.url
 
 
 def test_login_e_inicio(client, django_user_model):
     django_user_model.objects.create_user(username="maria", password="senha-de-teste-123")
-    resposta = client.post(
+    response = client.post(
         reverse("login"), {"username": "maria", "password": "senha-de-teste-123"}, follow=True
     )
-    assert resposta.status_code == 200
-    assert ", maria" in resposta.content.decode()
+    assert response.status_code == 200
+    assert ", maria" in response.content.decode()
 
 
 def test_rodape_mostra_autor_e_versao(client):
@@ -37,9 +37,9 @@ def test_rodape_mostra_autor_e_versao(client):
 
 def test_login_com_senha_errada(client, django_user_model):
     django_user_model.objects.create_user(username="maria", password="senha-de-teste-123")
-    resposta = client.post(reverse("login"), {"username": "maria", "password": "errada"})
-    assert resposta.status_code == 200
-    assert "Usuário ou senha incorretos" in resposta.content.decode()
+    response = client.post(reverse("login"), {"username": "maria", "password": "errada"})
+    assert response.status_code == 200
+    assert "Usuário ou senha incorretos" in response.content.decode()
 
 
 def test_senha_usa_argon2(django_user_model):
@@ -66,17 +66,17 @@ def test_criar_admin_falha_se_existir(monkeypatch):
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "senha-forte-de-teste-123")
     call_command("create_admin", "--fail-if-exists")
     monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", "outra-senha-forte-456")
-    with pytest.raises(CommandError) as erro:
+    with pytest.raises(CommandError) as error:
         call_command("create_admin", "--fail-if-exists")
-    assert erro.value.returncode == 3
+    assert error.value.returncode == 3
     assert get_user_model().objects.get(username="admin").check_password("senha-forte-de-teste-123")
 
 
-@pytest.mark.parametrize("senha", ["curta1", "1234567890123", "password123"])
-def test_criar_admin_recusa_senha_fraca(monkeypatch, senha):
+@pytest.mark.parametrize("password", ["curta1", "1234567890123", "password123"])
+def test_criar_admin_recusa_senha_fraca(monkeypatch, password):
     # The Linux package's installer shows the reasons and asks again (decision 140).
     monkeypatch.setenv("DJANGO_ADMIN_USERNAME", "admin")
-    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", senha)
+    monkeypatch.setenv("DJANGO_ADMIN_PASSWORD", password)
     with pytest.raises(CommandError):
         call_command("create_admin")
     assert not get_user_model().objects.filter(username="admin").exists()
@@ -100,7 +100,7 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
     assert "Trocar senha" in client.get(reverse("home")).content.decode()
-    resposta = client.post(
+    response = client.post(
         reverse("change_password"),
         {
             "old_password": "senha-de-teste-123",
@@ -109,7 +109,7 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
         },
         follow=True,
     )
-    assert "Senha alterada." in resposta.content.decode()
+    assert "Senha alterada." in response.content.decode()
     user.refresh_from_db()
     assert user.check_password("outra-senha-forte-456")
     # The session stays open after the change.
@@ -119,7 +119,7 @@ def test_usuario_troca_a_propria_senha(client, django_user_model):
 def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
     user = django_user_model.objects.create_user(username="ana", password="senha-de-teste-123")
     client.force_login(user)
-    resposta = client.post(
+    response = client.post(
         reverse("change_password"),
         {
             "old_password": "errada",
@@ -127,7 +127,7 @@ def test_troca_de_senha_exige_a_senha_atual(client, django_user_model):
             "new_password2": "outra-senha-forte-456",
         },
     )
-    assert resposta.status_code == 200
+    assert response.status_code == 200
     user.refresh_from_db()
     assert user.check_password("senha-de-teste-123")
 
@@ -187,11 +187,11 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     assert "Configurações da clínica" in cliente.get(reverse("home")).content.decode()
     assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("clinic_settings"),
         dados_clinica(document="11.222.333/0001-81", schedule_interval=15),
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.name, clinica_a.document) == ("Clínica Atualizada", "11222333000181")
     assert (clinica_a.schedule_start, clinica_a.schedule_interval) == (datetime.time(8), 15)
@@ -204,7 +204,7 @@ def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente
 
 
 @pytest.mark.parametrize(
-    ("extra", "erro"),
+    ("extra", "error"),
     [
         ({"schedule_start": "18:00", "schedule_end": "08:00"}, "depois do início"),
         ({"document": "123"}, "CPF/CNPJ: número inválido"),
@@ -212,7 +212,7 @@ def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente
         ({"schedule_interval": 60, "schedule_start": "08:30"}, "ficaria fora"),  # misaligned
     ],
 )
-def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):
+def test_configuracoes_invalidas(extra, error, clinica_a, criar_usuario, cliente_de):
     with usar_clinica(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. Teste")
         kind = AppointmentType.objects.first()
@@ -225,9 +225,9 @@ def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_
             end=start + datetime.timedelta(hours=1),
         )
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))
-    assert resposta.status_code == 200
-    assert erro in resposta.content.decode()
+    response = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))
+    assert response.status_code == 200
+    assert error in response.content.decode()
 
 
 def test_todo_app_declara_o_proprio_label():

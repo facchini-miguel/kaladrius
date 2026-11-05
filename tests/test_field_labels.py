@@ -10,13 +10,13 @@ from django.apps import apps
 
 def test_campo_renomeado_tem_rotulo_proprio():
     sem_rotulo = [
-        f"{modelo._meta.label}.{campo.name}"
+        f"{modelo._meta.label}.{field.name}"
         for modelo in apps.get_models()
         if modelo.__module__.startswith("apps.")
-        for campo in modelo._meta.get_fields()
-        if getattr(campo, "concrete", False)
-        and not campo.auto_created
-        and getattr(campo, "db_column", None)
-        and str(campo.verbose_name) == campo.name.replace("_", " ")
+        for field in modelo._meta.get_fields()
+        if getattr(field, "concrete", False)
+        and not field.auto_created
+        and getattr(field, "db_column", None)
+        and str(field.verbose_name) == field.name.replace("_", " ")
     ]
     assert not sem_rotulo, f"label from the English name, give it a verbose_name: {sem_rotulo}"

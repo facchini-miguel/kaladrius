@@ -26,16 +26,16 @@ def agendamentos_visiveis(request):
     return Appointment.objects.filter(practitioner__in=profissionais_visiveis(request))
 
 
-def timestamp(date, hora):
+def timestamp(date, hour):
     """Aware datetime for a local date and time."""
-    return timezone.make_aware(datetime.datetime.combine(date, hora))
+    return timezone.make_aware(datetime.datetime.combine(date, hour))
 
 
 def ocorrencias(date, start_time, end_time, repeticoes=1):
     """(start, end) of each weekly occurrence, built from local date/time (DST-safe)."""
     return [
-        (timestamp(dia, start_time), timestamp(dia, end_time))
-        for dia in (date + datetime.timedelta(weeks=semana) for semana in range(repeticoes))
+        (timestamp(day, start_time), timestamp(day, end_time))
+        for day in (date + datetime.timedelta(weeks=week) for week in range(repeticoes))
     ]
 
 

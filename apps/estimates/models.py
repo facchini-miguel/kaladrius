@@ -209,12 +209,12 @@ class EstimateItem(ModeloDaClinica):
         if self.estimate.clinic_id != self.clinic_id:
             raise ClinicaDiferente("The estimate belongs to another clinic.")
         clinic = Clinic.objects.select_for_update().get(pk=self.clinic_id)
-        anterior = (
+        previous = (
             type(self).objects.filter(pk=self.pk).values("teeth", "faces").first()
             if self.pk is not None
             else None
         )
-        dental = self.teeth or self.faces or (anterior and any(anterior.values()))
+        dental = self.teeth or self.faces or (previous and any(previous.values()))
         # The view sets the flag only for the system administrator (decision 115).
         liberado = getattr(self, "odontologia_desligada_liberada", False)
         if dental and not clinic.odontologia and not liberado:

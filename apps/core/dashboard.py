@@ -28,28 +28,28 @@ DIAS_A_PAGAR = 7
 
 
 def montar(request):
-    hoje = timezone.localdate()
-    painel = {"hoje": hoje}
+    today = timezone.localdate()
+    painel = {"hoje": today}
     if pode(request, Modulo.AGENDA, Acao.VER):
-        painel["agenda"] = _agenda(request, hoje)
+        painel["agenda"] = _agenda(request, today)
     if pode(request, Modulo.RECHAMADAS, Acao.VER):
-        painel["rechamadas"] = _rechamadas(hoje)
+        painel["rechamadas"] = _rechamadas(today)
     if pode(request, Modulo.ANIVERSARIANTES, Acao.VER):
-        painel["aniversariantes"] = _aniversariantes(hoje)
+        painel["aniversariantes"] = _aniversariantes(today)
     if pode(request, Modulo.ORCAMENTOS, Acao.VER):
-        painel["orcamentos"] = _orcamentos(hoje)
+        painel["orcamentos"] = _orcamentos(today)
     if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
-        painel["recebimentos"] = _recebimentos(hoje)
+        painel["recebimentos"] = _recebimentos(today)
     if pode(request, Modulo.FINANCEIRO, Acao.VER):
-        painel["financeiro"] = _financeiro(hoje)
+        painel["financeiro"] = _financeiro(today)
     return painel
 
 
-def _agenda(request, hoje):
-    agora = timezone.now()
+def _agenda(request, today):
+    now = timezone.now()
     visiveis = agenda.agendamentos_visiveis(request)
     do_dia = list(
-        visiveis.filter(start__date=hoje)
+        visiveis.filter(start__date=today)
         .select_related("patient", "practitioner", "kind")
         .order_by("start", "practitioner__name")
     )
@@ -62,8 +62,8 @@ def _agenda(request, hoje):
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(
         visiveis.filter(
-            start__date__gte=hoje.replace(day=1),
-            start__date__lte=hoje,
+            start__date__gte=today.replace(day=1),
+            start__date__lte=today,
             status__in=[status.COMPARECEU, status.FALTOU],
         )
         .order_by()
@@ -79,44 +79,44 @@ def _agenda(request, hoje):
         "compareceram": contagem[status.COMPARECEU],
         "faltaram": contagem[status.FALTOU],
         "desmarcaram": contagem[status.DESMARCOU],
-        "a_seguir": sum(1 for a in pendentes if a.start > agora),
-        "sem_marcacao": sum(1 for a in pendentes if a.start <= agora),
-        "proximo": next((a for a in pendentes if a.end > agora), None),
-        "agora": agora,
+        "a_seguir": sum(1 for a in pendentes if a.start > now),
+        "sem_marcacao": sum(1 for a in pendentes if a.start <= now),
+        "proximo": next((a for a in pendentes if a.end > now), None),
+        "agora": now,
         "faltas_mes": round(100 * faltaram / (vieram + faltaram)) if vieram + faltaram else None,
         "marcados_mes": vieram + faltaram,
     }
 
 
-def _rechamadas(hoje):
+def _rechamadas(today):
     pendentes = Recall.objects.filter(
-        done=False, date__lte=hoje, patient__archived=False
+        done=False, date__lte=today, patient__archived=False
     ).select_related("patient")
     return {
         "lista": list(pendentes.order_by("date", "patient__name")[:LIMITE]),
         "total": pendentes.count(),
-        "atrasadas": pendentes.filter(date__lt=hoje).count(),
+        "atrasadas": pendentes.filter(date__lt=today).count(),
     }
 
 
-def _aniversariantes(hoje):
+def _aniversariantes(today):
     return [
-        (patient, hoje.year - patient.birth_date.year)
+        (patient, today.year - patient.birth_date.year)
         for patient in Patient.objects.filter(
             active=True,
             archived=False,
-            birth_date__month=hoje.month,
-            birth_date__day=hoje.day,
+            birth_date__month=today.month,
+            birth_date__day=today.day,
         ).order_by("name")
     ]
 
 
-def _orcamentos(hoje):
+def _orcamentos(today):
     return list(
         Estimate.objects.filter(
             status=Estimate.Situacao.ABERTO,
-            valid_until__gte=hoje,
-            valid_until__lte=hoje + datetime.timedelta(days=DIAS_ORCAMENTO),
+            valid_until__gte=today,
+            valid_until__lte=today + datetime.timedelta(days=DIAS_ORCAMENTO),
             patient__archived=False,
         )
         .select_related("patient")
@@ -130,9 +130,9 @@ def _soma_dos_saldos(parcelas):
     return sum(saldos, start=ZERO), len(saldos)
 
 
-def _recebimentos(hoje):
+def _recebimentos(today):
     recebidos = financeiro.pagamentos_validos().filter(
-        date=hoje, installment__entry__kind=Entry.Tipo.RECEBER
+        date=today, installment__entry__kind=Entry.Tipo.RECEBER
     )
     formas = rotulos_das_formas()
     por_forma = [
@@ -143,7 +143,7 @@ def _recebimentos(hoje):
         .order_by("-total")
     ]
     a_receber, parcelas = _soma_dos_saldos(
-        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, due_date=hoje)
+        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, due_date=today)
     )
     return {
         "recebido": sum((total for _forma, total in por_forma), start=ZERO),
@@ -156,23 +156,23 @@ def _recebimentos(hoje):
     }
 
 
-def _financeiro(hoje):
-    recebido_hoje, pago_hoje = financeiro.recebido_e_pago(hoje, hoje)
-    inicio_mes = hoje.replace(day=1)
-    recebido_mes, pago_mes = financeiro.recebido_e_pago(inicio_mes, hoje)
+def _financeiro(today):
+    recebido_hoje, pago_hoje = financeiro.recebido_e_pago(today, today)
+    inicio_mes = today.replace(day=1)
+    recebido_mes, pago_mes = financeiro.recebido_e_pago(inicio_mes, today)
     # The same days of last month (up to its last day, for the 31st).
     fim_anterior = inicio_mes - datetime.timedelta(days=1)
     inicio_anterior = fim_anterior.replace(day=1)
-    ate_anterior = inicio_anterior.replace(day=min(hoje.day, fim_anterior.day))
+    ate_anterior = inicio_anterior.replace(day=min(today.day, fim_anterior.day))
     recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
     abertas = Installment.objects.abertas()
     vencido, parcelas_vencidas = _soma_dos_saldos(
-        abertas.filter(entry__kind=Entry.Tipo.RECEBER, due_date__lt=hoje)
+        abertas.filter(entry__kind=Entry.Tipo.RECEBER, due_date__lt=today)
     )
     a_pagar, contas_a_pagar = _soma_dos_saldos(
         abertas.filter(
             entry__kind=Entry.Tipo.PAGAR,
-            due_date__lte=hoje + datetime.timedelta(days=DIAS_A_PAGAR),
+            due_date__lte=today + datetime.timedelta(days=DIAS_A_PAGAR),
         )
     )
     return {

@@ -17,37 +17,37 @@ NOME_SISTEMA = "Kaladrius"
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def env(name, padrao=None):
-    value = os.environ.get(name, padrao)
+def env(name, default=None):
+    value = os.environ.get(name, default)
     if value is None:
         raise ImproperlyConfigured(f"Missing required environment variable: {name}")
     return value
 
 
-def env_bool(name, padrao=False):
-    return env(name, "1" if padrao else "0").strip().lower() in {"1", "true", "sim", "yes"}
+def env_bool(name, default=False):
+    return env(name, "1" if default else "0").strip().lower() in {"1", "true", "sim", "yes"}
 
 
-def env_renomeada(name, antigo, padrao=False):
+def env_renomeada(name, old, default=False):
     """A yes/no variable by its name of decision 149, or by the one it had before (a .env of
     0.55 or earlier, or a person following older documentation)."""
-    return env_bool(name, padrao=env_bool(antigo, padrao=padrao))
+    return env_bool(name, default=env_bool(old, default=default))
 
 
-def env_lista(name, padrao=""):
-    return [item.strip() for item in env(name, padrao).split(",") if item.strip()]
+def env_lista(name, default=""):
+    return [item.strip() for item in env(name, default).split(",") if item.strip()]
 
 
 DEBUG = env_bool("DJANGO_DEBUG")
 # Production servers run daily backups (deploy/server/backup.sh): superusers are warned
 # when none was recorded recently, or none at all. Development has no backups.
 BACKUP_MONITORED = env_renomeada(
-    "DJANGO_BACKUP_MONITORED", "DJANGO_BACKUP_MONITORADO", padrao=not DEBUG
+    "DJANGO_BACKUP_MONITORED", "DJANGO_BACKUP_MONITORADO", default=not DEBUG
 )
 # Health samples written every 5 minutes by deploy/server/health.sh (decision 056):
 # superusers are warned when they stop or a resource is critical.
 HEALTH_MONITORED = env_renomeada(
-    "DJANGO_HEALTH_MONITORED", "DJANGO_SAUDE_MONITORADA", padrao=not DEBUG
+    "DJANGO_HEALTH_MONITORED", "DJANGO_SAUDE_MONITORADA", default=not DEBUG
 )
 # Inside the app container (docker-compose.prod.yml mounts the server's /opt/kaladrius/health).
 HEALTH_DIR = env("DJANGO_HEALTH_DIR", "/health")

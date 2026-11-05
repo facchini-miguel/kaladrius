@@ -20,9 +20,9 @@ class EntrarForm(AuthenticationForm):
         return super().clean()
 
 
-def _campo_codigo(rotulo):
+def _campo_codigo(label):
     return forms.CharField(
-        label=rotulo,
+        label=label,
         max_length=20,
         widget=forms.TextInput(attrs={"autocomplete": "one-time-code", "autofocus": True}),
     )
@@ -41,12 +41,12 @@ class DesativarForm(FormularioBootstrap, forms.Form):
         self.user = user
 
     def clean(self):
-        dados = super().clean()
-        if dados.get("senha") and not self.user.check_password(dados["senha"]):
+        data = super().clean()
+        if data.get("senha") and not self.user.check_password(data["senha"]):
             self.add_error("senha", _("Senha incorreta."))
-        elif dados.get("code") and not services.verificar(self.user, dados["code"]):
+        elif data.get("code") and not services.verificar(self.user, data["code"]):
             self.add_error("code", _("Código incorreto."))
-        return dados
+        return data
 
 
 class RecuperarSenhaForm(FormularioBootstrap, PasswordResetForm):

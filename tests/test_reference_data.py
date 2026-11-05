@@ -18,9 +18,9 @@ def test_dados_oficiais_carregados_pela_migracao():
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.get(reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"})
-    content = resposta.content.decode()
-    assert resposta.status_code == 200
+    response = cliente.get(reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"})
+    content = response.content.decode()
+    assert response.status_code == 200
     assert "Florianópolis" in content
     assert "1 cidade" in content
 

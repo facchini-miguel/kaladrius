@@ -50,9 +50,9 @@ def _exigir(condicao):
         raise _Invalido
 
 
-def _regex(padrao):
+def _regex(default):
     def validar(value):
-        _exigir(re.fullmatch(padrao, value))
+        _exigir(re.fullmatch(default, value))
 
     return validar
 
@@ -65,7 +65,7 @@ def _milhares(value):
 @dataclass(frozen=True)
 class Documento:
     sigla: str  # its official name, the same in every language
-    exemplo: str  # the field's placeholder, written the country's way
+    example: str  # the field's placeholder, written the country's way
     validar: object  # compact value → raises if invalid
     formatar: object = None  # compact (and valid) value → as written; None: as stored
     letras: str = ""  # characters kept besides A-Z and 0-9 (Mexico's Ñ and &)
@@ -101,7 +101,7 @@ class Documentos:
     def do_papel(self, role):
         return getattr(self, role) if role in PAPEIS else None
 
-    def de(self, *papeis):
+    def since(self, *papeis):
         """The documents of these roles, without repeats or Nones, in order."""
         vistos = []
         for role in papeis:
@@ -110,9 +110,9 @@ class Documentos:
                 vistos.append(document)
         return vistos
 
-    def rotulo(self, *papeis):
+    def label(self, *papeis):
         """ "CPF/CNPJ", "RUT", "EIN": the field's name for these roles."""
-        return "/".join(dict.fromkeys(d.sigla for d in self.de(*papeis)))
+        return "/".join(dict.fromkeys(d.sigla for d in self.since(*papeis)))
 
 
 # ---- Brazil: the system's own rules (apps/core/validators.py).
@@ -275,7 +275,7 @@ def papeis(text):
 
 def identificar(value, papeis_=None, country=None):
     """The document of these roles (all of them by default) this value is valid as."""
-    for document in do_pais(country).de(*(papeis_ or PAPEIS)):
+    for document in do_pais(country).since(*(papeis_ or PAPEIS)):
         if document.valido(value):
             return document
     return None
@@ -300,14 +300,14 @@ def sigla(value, papeis_=None, country=None):
     document = identificar(value, papeis_, country) if value else None
     if document is not None:
         return document.sigla
-    return do_pais(country).rotulo(*(papeis_ or PAPEIS))
+    return do_pais(country).label(*(papeis_ or PAPEIS))
 
 
-def invalido(rotulo):
-    return gettext("%(documento)s: número inválido.") % {"documento": rotulo}
+def invalido(label):
+    return gettext("%(documento)s: número inválido.") % {"documento": label}
 
 
-def limpar(value, documentos, rotulo):
+def limpar(value, documentos, label):
     """Normalize a typed value and check it is one of these documents; ValidationError if not.
 
     Returns the compact value ("" when empty).
@@ -318,4 +318,4 @@ def limpar(value, documentos, rotulo):
         compacto = document.normalizar(value)
         if document.valido(compacto):
             return compacto
-    raise ValidationError(invalido(rotulo))
+    raise ValidationError(invalido(label))

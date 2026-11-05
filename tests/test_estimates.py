@@ -44,7 +44,7 @@ def entrar(cenario, quem):
 
 
 def criar_orcamento(cenario, cliente):
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("estimates:new"),
         {
             "patient": cenario["patient"].pk,
@@ -56,11 +56,11 @@ def criar_orcamento(cenario, cliente):
     )
     with usar_clinica(cenario["clinic"]):
         estimate = Estimate.objects.latest("pk")
-    assert resposta.url == reverse("estimates:detail", args=[estimate.pk])
+    assert response.url == reverse("estimates:detail", args=[estimate.pk])
     return estimate
 
 
-def incluir(cliente, estimate, **dados):
+def incluir(cliente, estimate, **data):
     return cliente.post(
         reverse("estimates:item_add", args=[estimate.pk]),
         {
@@ -69,7 +69,7 @@ def incluir(cliente, estimate, **dados):
             "faces": "",
             "quantity": 1,
             "unit_price": "",
-            **dados,
+            **data,
         },
     )
 
@@ -91,36 +91,36 @@ def test_profissional_monta_orcamento_com_dentes(cenario):
         Decimal("250.00"),
     )
     assert itens[0].dentes_exibicao == "11, 36"
-    pagina = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
-    assert 'data-dente="36"' in pagina and "R$ 580,00" in pagina
+    page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
+    assert 'data-dente="36"' in page and "R$ 580,00" in page
 
 
 @pytest.mark.parametrize(
-    "dados",
+    "data",
     [
         {"teeth": "19"},  # no such tooth
         {"procedure": ""},  # neither procedure nor description
     ],
 )
-def test_itens_invalidos(cenario, dados):
+def test_itens_invalidos(cenario, data):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
-    incluir(cliente, estimate, **{"procedure": cenario["canal"].pk, **dados})
+    incluir(cliente, estimate, **{"procedure": cenario["canal"].pk, **data})
     with usar_clinica(cenario["clinic"]):
         assert not estimate.itens.exists()
 
 
 def test_quem_escreve_o_orcamento_da_desconto(cenario):
     # Front desk, practitioner and administrator (0.27.1, decision 074).
-    recepcao = entrar(cenario, "recepcao")
-    estimate = criar_orcamento(cenario, recepcao)
-    incluir(recepcao, estimate, procedure=cenario["canal"].pk)
+    reception = entrar(cenario, "recepcao")
+    estimate = criar_orcamento(cenario, reception)
+    incluir(reception, estimate, procedure=cenario["canal"].pk)
     url = reverse("estimates:discount", args=[estimate.pk])
-    assert recepcao.get(reverse("estimates:detail", args=[estimate.pk])).context["desconto_form"]
-    recepcao.post(url, {"discount": "5000"})  # more than the total: refused
+    assert reception.get(reverse("estimates:detail", args=[estimate.pk])).context["desconto_form"]
+    reception.post(url, {"discount": "5000"})  # more than the total: refused
     estimate.refresh_from_db()
     assert estimate.discount == 0
-    recepcao.post(url, {"discount": "200"})
+    reception.post(url, {"discount": "200"})
     estimate.refresh_from_db()
     assert estimate.discount == Decimal("200.00")
     for quem, amount in [("practitioner", "150"), ("admin", "100")]:
@@ -130,16 +130,16 @@ def test_quem_escreve_o_orcamento_da_desconto(cenario):
 
 
 def test_aprovar_vira_lancamento_a_receber(cenario):
-    recepcao = entrar(cenario, "recepcao")
-    estimate = criar_orcamento(cenario, recepcao)
-    incluir(recepcao, estimate, procedure=cenario["canal"].pk)
+    reception = entrar(cenario, "recepcao")
+    estimate = criar_orcamento(cenario, reception)
+    incluir(reception, estimate, procedure=cenario["canal"].pk)
     with usar_clinica(cenario["clinic"]):
         Estimate.objects.filter(pk=estimate.pk).update(discount=Decimal("200"))
         cash_register = FinancialAccount.objects.get(name="Caixa")
     url = reverse("estimates:approve", args=[estimate.pk])
     # The category comes from the first procedure.
-    assert recepcao.get(url).context["form"].initial["category"] == cenario["canal"].category
-    resposta = recepcao.post(
+    assert reception.get(url).context["form"].initial["category"] == cenario["canal"].category
+    response = reception.post(
         url,
         {
             "parcelas": 4,
@@ -152,7 +152,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     )
     estimate.refresh_from_db()
     entry = estimate.entry
-    assert resposta.url == reverse("finance:entry", args=[entry.pk])
+    assert response.url == reverse("finance:entry", args=[entry.pk])
     assert estimate.status == Estimate.Situacao.APROVADO
     assert (entry.kind, entry.total_amount) == (
         Entry.Tipo.RECEBER,
@@ -162,10 +162,10 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
         assert entry.parcelas.count() == 4
         assert entry.patient == cenario["patient"]
     # Once approved, nothing changes any more.
-    incluir(recepcao, estimate, procedure=cenario["restauracao"].pk)
+    incluir(reception, estimate, procedure=cenario["restauracao"].pk)
     with usar_clinica(cenario["clinic"]):
         assert estimate.itens.count() == 1
-    assert recepcao.post(reverse("estimates:decline", args=[estimate.pk])).status_code == 302
+    assert reception.post(reverse("estimates:decline", args=[estimate.pk])).status_code == 302
     estimate.refresh_from_db()
     assert estimate.status == Estimate.Situacao.APROVADO
 
@@ -181,16 +181,16 @@ def test_recusar_e_imprimir(cenario):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, procedure=cenario["canal"].pk, teeth="46")
-    pagina = cliente.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
-    assert "ORÇAMENTO" in pagina and "Joana Sorriso" in pagina and "selecionado" in pagina
+    page = cliente.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
+    assert "ORÇAMENTO" in page and "Joana Sorriso" in page and "selecionado" in page
     cliente.post(reverse("estimates:decline", args=[estimate.pk]))
     estimate.refresh_from_db()
     assert estimate.status == Estimate.Situacao.RECUSADO
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with usar_clinica(cenario["clinic"]), pytest.raises(ValidationError):
         services.recusar(estimate, user=None)
-    lista = cliente.get(reverse("estimates:list"), {"status": "recusado"})
-    assert list(lista.context["pagina"]) == [estimate]
+    results = cliente.get(reverse("estimates:list"), {"status": "recusado"})
+    assert list(results.context["pagina"]) == [estimate]
 
 
 def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
@@ -204,9 +204,9 @@ def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
 
 
 def test_tabela_de_procedimentos_so_o_admin_altera(cenario):
-    recepcao = entrar(cenario, "recepcao")
-    assert recepcao.get(reverse("estimates:procedures")).status_code == 200
-    assert recepcao.get(reverse("estimates:procedure_new")).status_code == 403
+    reception = entrar(cenario, "recepcao")
+    assert reception.get(reverse("estimates:procedures")).status_code == 200
+    assert reception.get(reverse("estimates:procedure_new")).status_code == 403
     admin = entrar(cenario, "admin")
     url = reverse("estimates:procedure_new")
     assert (
@@ -228,35 +228,35 @@ def test_exclusao_definitiva_apaga_os_orcamentos(cenario):
 
 def test_orcamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
     estimate = criar_orcamento(cenario, entrar(cenario, "recepcao"))
-    outro = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    assert outro.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
+    other = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
+    assert other.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
 
 
 def test_odontograma_so_na_area_odontologia(cenario):
     # Decision 080: teeth and faces belong to the dental module.
     from apps.core.models import Clinic
 
-    recepcao = entrar(cenario, "recepcao")
-    estimate = criar_orcamento(cenario, recepcao)
+    reception = entrar(cenario, "recepcao")
+    estimate = criar_orcamento(cenario, reception)
     detalhe = reverse("estimates:detail", args=[estimate.pk])
-    pagina = recepcao.get(detalhe)
-    assert pagina.context["mostrar_dentes"] and "odontograma" in pagina.content.decode()
-    assert "teeth" in pagina.context["item_form"].fields
+    page = reception.get(detalhe)
+    assert page.context["mostrar_dentes"] and "odontograma" in page.content.decode()
+    assert "teeth" in page.context["item_form"].fields
 
     from apps.core.models import MODULOS_GERAIS
     from apps.core.modules import configurar
 
     configurar(cenario["clinic"], {*MODULOS_GERAIS, Clinic.Area.MEDICINA})
-    pagina = recepcao.get(detalhe)
-    assert not pagina.context["mostrar_dentes"] and "odontograma" not in pagina.content.decode()
-    assert "teeth" not in pagina.context["item_form"].fields
-    incluir(recepcao, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
+    page = reception.get(detalhe)
+    assert not page.context["mostrar_dentes"] and "odontograma" not in page.content.decode()
+    assert "teeth" not in page.context["item_form"].fields
+    incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
     with usar_clinica(cenario["clinic"]):
         assert not estimate.itens.exists()  # forged fields are rejected, not discarded
     configurar(cenario["clinic"], {*MODULOS_GERAIS, Clinic.Area.ODONTOLOGIA})
-    incluir(recepcao, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
+    incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
     configurar(cenario["clinic"], {*MODULOS_GERAIS, Clinic.Area.MEDICINA})
-    pagina = recepcao.get(detalhe)
-    assert pagina.context["mostrar_dentes"] and "11" in pagina.content.decode()
-    impressao = recepcao.get(reverse("estimates:print", args=[estimate.pk]))
+    page = reception.get(detalhe)
+    assert page.context["mostrar_dentes"] and "11" in page.content.decode()
+    impressao = reception.get(reverse("estimates:print", args=[estimate.pk]))
     assert impressao.context["mostrar_dentes"]

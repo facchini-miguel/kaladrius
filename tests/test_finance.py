@@ -42,7 +42,7 @@ def entrar(cenario, quem):
     return cenario["cliente_de"](cenario[quem])
 
 
-def novo(cenario, **extra):
+def new(cenario, **extra):
     return {
         "patient": cenario["patient"].pk,
         "payer": "",
@@ -113,8 +113,8 @@ def test_moeda_no_formato_do_idioma():
 
 def test_recepcao_lanca_parcelado(cenario):
     cliente = entrar(cenario, "recepcao")
-    resposta = cliente.post(reverse("finance:entry_new"), novo(cenario))
-    assert resposta.status_code == 302
+    response = cliente.post(reverse("finance:entry_new"), new(cenario))
+    assert response.status_code == 302
     with usar_clinica(cenario["clinic"]):
         entry = Entry.objects.get()
         parcelas = list(entry.parcelas.order_by("number"))
@@ -128,7 +128,7 @@ def test_recepcao_lanca_parcelado(cenario):
 
 
 @pytest.mark.parametrize(
-    ("extra", "campo"),
+    ("extra", "field"),
     [
         ({"patient": "", "payer": ""}, "payer"),
         ({"total_amount": "0"}, "total_amount"),
@@ -136,19 +136,17 @@ def test_recepcao_lanca_parcelado(cenario):
         ({"parcelas": 0}, "parcelas"),
     ],
 )
-def test_validacoes_do_lancamento(cenario, extra, campo):
-    resposta = entrar(cenario, "recepcao").post(
-        reverse("finance:entry_new"), novo(cenario, **extra)
-    )
-    assert resposta.status_code == 200
-    assert campo in resposta.context["form"].errors
+def test_validacoes_do_lancamento(cenario, extra, field):
+    response = entrar(cenario, "recepcao").post(reverse("finance:entry_new"), new(cenario, **extra))
+    assert response.status_code == 200
+    assert field in response.context["form"].errors
 
 
 def test_pagamento_na_hora_abre_o_recibo(cenario):
     cliente = entrar(cenario, "recepcao")
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("finance:entry_new"),
-        novo(
+        new(
             cenario,
             parcelas=1,
             total_amount="150,50",
@@ -158,8 +156,8 @@ def test_pagamento_na_hora_abre_o_recibo(cenario):
         ),
         follow=True,
     )
-    pagina = resposta.content.decode()
-    assert "RECIBO" in pagina and "R$ 150,50" in pagina and "529.982.247-25" in pagina
+    page = response.content.decode()
+    assert "RECIBO" in page and "R$ 150,50" in page and "529.982.247-25" in page
     with usar_clinica(cenario["clinic"]):
         assert Installment.objects.abertas().count() == 0
 
@@ -169,16 +167,16 @@ def test_pagamento_parcial_juros_e_saldo(cenario):
     primeira = parcelas_de(cenario, entry)[0]
     cliente = entrar(cenario, "recepcao")
     url = reverse("finance:receive_installment", args=[primeira.pk])
-    dados = {"date": HOJE.isoformat(), "method": "dinheiro", "account": cenario["cash_register"].pk}
+    data = {"date": HOJE.isoformat(), "method": "dinheiro", "account": cenario["cash_register"].pk}
     # 60 received, 10 of them late fee: the installment goes down by 50.
-    assert cliente.post(url, {**dados, "amount": "60", "interest": "10"}).status_code == 302
+    assert cliente.post(url, {**data, "amount": "60", "interest": "10"}).status_code == 302
     primeira = parcelas_de(cenario, entry)[0]
     assert (primeira.pago, primeira.balance) == (Decimal("50.00"), Decimal("50.00"))
     assert services.status(primeira)[0] == "parcial"
     # Paying more than what is left is refused.
-    resposta = cliente.post(url, {**dados, "amount": "50,01"})
-    assert "passa do que falta" in resposta.content.decode()
-    cliente.post(url, {**dados, "amount": "50"})
+    response = cliente.post(url, {**data, "amount": "50,01"})
+    assert "passa do que falta" in response.content.decode()
+    cliente.post(url, {**data, "amount": "50"})
     assert parcelas_de(cenario, entry)[0].balance == 0
 
 
@@ -186,15 +184,15 @@ def test_desconto_so_para_o_administrador(cenario):
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
-    dados = {"date": HOJE.isoformat(), "method": "pix", "account": cenario["cash_register"].pk}
+    data = {"date": HOJE.isoformat(), "method": "pix", "account": cenario["cash_register"].pk}
 
-    recepcao = entrar(cenario, "recepcao")
-    assert "discount" not in recepcao.get(url).context["form"].fields
-    recepcao.post(url, {**dados, "amount": "90", "discount": "10"})  # discount ignored
+    reception = entrar(cenario, "recepcao")
+    assert "discount" not in reception.get(url).context["form"].fields
+    reception.post(url, {**data, "amount": "90", "discount": "10"})  # discount ignored
     assert parcelas_de(cenario, entry)[0].balance == Decimal("10.00")
 
     admin = entrar(cenario, "admin")
-    admin.post(url, {**dados, "amount": "5", "discount": "5"})
+    admin.post(url, {**data, "amount": "5", "discount": "5"})
     assert parcelas_de(cenario, entry)[0].balance == 0
 
 
@@ -209,16 +207,16 @@ def test_estorno_e_cancelamento_so_do_administrador(cenario):
             method="pix",
             account=cenario["cash_register"],
         )
-    recepcao = entrar(cenario, "recepcao")
+    reception = entrar(cenario, "recepcao")
     estornar = reverse("finance:reverse_payment", args=[payment.pk])
     cancelar = reverse("finance:cancel", args=[entry.pk])
-    assert recepcao.post(estornar, {"reason": "x"}).status_code == 403
-    assert recepcao.post(cancelar, {"reason": "x"}).status_code == 403
+    assert reception.post(estornar, {"reason": "x"}).status_code == 403
+    assert reception.post(cancelar, {"reason": "x"}).status_code == 403
 
     admin = entrar(cenario, "admin")
     # With an active payment the entry cannot be cancelled.
-    resposta = admin.post(cancelar, {"reason": "Desistiu"}, follow=True)
-    assert "Estorne os pagamentos" in resposta.content.decode()
+    response = admin.post(cancelar, {"reason": "Desistiu"}, follow=True)
+    assert "Estorne os pagamentos" in response.content.decode()
     # The page names the payment with the amount in reais (review stage 5: it read "100.00").
     assert "R$ 100,00" in admin.get(estornar).content.decode()
     admin.post(estornar, {"reason": "Pix devolvido"})
@@ -255,32 +253,32 @@ def test_devedores_por_tempo_de_atraso(cenario):
         patient=False,
     )
     with usar_clinica(cenario["clinic"]):
-        linhas = services.devedores()
-    assert [linha["name"] for linha in linhas] == ["Maria Devedora", "João Avulso"]
-    maria, joao = linhas
+        rows = services.devedores()
+    assert [row["name"] for row in rows] == ["Maria Devedora", "João Avulso"]
+    maria, joao = rows
     # 45 days late (31-60) and the next one 15 days late (up to 30).
     assert maria["faixas"] == [Decimal("100.00"), Decimal("100.00"), 0, 0]
     assert maria["vencido"] == Decimal("200.00")
     assert joao["faixas"][3] == Decimal("70.00")
-    pagina = entrar(cenario, "recepcao").get(reverse("finance:debtors")).content.decode()
-    assert "Maria Devedora" in pagina and "R$ 270,00" in pagina
+    page = entrar(cenario, "recepcao").get(reverse("finance:debtors")).content.decode()
+    assert "Maria Devedora" in page and "R$ 270,00" in page
 
 
 def test_lista_a_receber_e_filtros(cenario):
     lancamento_com(cenario, amount="90.00", parcelas=3, due_date=HOJE - datetime.timedelta(days=40))
     cliente = entrar(cenario, "recepcao")
-    lista = reverse("finance:receivables")
-    assert len(cliente.get(lista).context["pagina"]) == 3
-    assert len(cliente.get(lista, {"status": "vencidas"}).context["pagina"]) == 2
-    assert len(cliente.get(lista, {"q": "devedora"}).context["pagina"]) == 3
-    assert len(cliente.get(lista, {"q": "ninguem"}).context["pagina"]) == 0
+    results = reverse("finance:receivables")
+    assert len(cliente.get(results).context["pagina"]) == 3
+    assert len(cliente.get(results, {"status": "vencidas"}).context["pagina"]) == 2
+    assert len(cliente.get(results, {"q": "devedora"}).context["pagina"]) == 3
+    assert len(cliente.get(results, {"q": "ninguem"}).context["pagina"]) == 0
 
 
 def test_ficha_mostra_o_financeiro_do_paciente(cenario):
     lancamento_com(cenario, amount="80.00", parcelas=2, due_date=HOJE - datetime.timedelta(days=5))
     url = reverse("patients:record", args=[cenario["patient"].pk])
-    resposta = entrar(cenario, "recepcao").get(url)
-    financeiro = resposta.context["financeiro"]
+    response = entrar(cenario, "recepcao").get(url)
+    financeiro = response.context["financeiro"]
     assert (financeiro["vencido"], financeiro["a_vencer"]) == (Decimal("40.00"), Decimal("40.00"))
     # Practitioners do not see the finances.
     assert "financeiro" not in entrar(cenario, "practitioner").get(url).context
@@ -309,8 +307,8 @@ def test_admin_cadastra_categorias_e_contas(cenario):
         cliente.post(url, {"name": "Ortodontia", "kind": "receita", "active": "on"}).status_code
         == 302
     )
-    resposta = cliente.post(url, {"name": "Ortodontia", "kind": "receita", "active": "on"})
-    assert "Já existe" in resposta.content.decode()
+    response = cliente.post(url, {"name": "Ortodontia", "kind": "receita", "active": "on"})
+    assert "Já existe" in response.content.decode()
     cliente.post(
         reverse("finance:catalog_new", args=["accounts"]),
         {"name": "Maquininha", "kind": "cartao", "active": "on"},
@@ -323,9 +321,9 @@ def test_admin_cadastra_categorias_e_contas(cenario):
 
 def test_lancamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
     entry = lancamento_com(cenario)
-    outro = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    assert outro.get(reverse("finance:entry", args=[entry.pk])).status_code == 404
-    assert outro.get(reverse("finance:receivables")).context["pagina"].paginator.count == 0
+    other = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
+    assert other.get(reverse("finance:entry", args=[entry.pk])).status_code == 404
+    assert other.get(reverse("finance:receivables")).context["pagina"].paginator.count == 0
 
 
 def test_exclusao_definitiva_mantem_o_lancamento_sem_o_paciente(cenario):
@@ -399,7 +397,7 @@ def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
     with usar_clinica(cenario["clinic"]):
         entry = Entry.objects.get()
     segunda = parcelas_de(cenario, entry)[1]
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:receive_installment", args=[segunda.pk]),
         {
             "date": HOJE.isoformat(),
@@ -409,7 +407,7 @@ def test_despesa_paga_na_hora_e_pagamento_de_parcela(cenario):
         },
     )
     # Paying a bill goes back to the entry (receipts are only for money received).
-    assert resposta.url == reverse("finance:entry", args=[entry.pk])
+    assert response.url == reverse("finance:entry", args=[entry.pk])
     assert all(p.balance == 0 for p in parcelas_de(cenario, entry))
 
 
@@ -419,7 +417,7 @@ def test_recepcao_nao_ve_contas_a_pagar(cenario):
     with usar_clinica(cenario["clinic"]):
         entry = Entry.objects.get()
         installment = entry.parcelas.get()
-    recepcao = entrar(cenario, "recepcao")
+    reception = entrar(cenario, "recepcao")
     for url in (
         reverse("finance:payables"),
         reverse("finance:expense_new"),
@@ -428,8 +426,8 @@ def test_recepcao_nao_ve_contas_a_pagar(cenario):
         reverse("finance:entry", args=[entry.pk]),
         reverse("finance:receive_installment", args=[installment.pk]),
     ):
-        assert recepcao.get(url).status_code == 403, url
-    assert reverse("finance:payables") not in recepcao.get(reverse("home")).content.decode()
+        assert reception.get(url).status_code == 403, url
+    assert reverse("finance:payables") not in reception.get(reverse("home")).content.decode()
 
 
 def test_saldo_das_contas_com_saldo_inicial(cenario):
@@ -450,15 +448,15 @@ def test_saldo_das_contas_com_saldo_inicial(cenario):
     assert saldos == {"Caixa": Decimal("50.00"), "Banco": Decimal("0.00")}
     # A negative initial balance is accepted in the form (overdrawn bank).
     admin = entrar(cenario, "admin")
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:catalog_edit", args=["accounts", cenario["cash_register"].pk]),
         {"name": "Caixa", "kind": "dinheiro", "opening_balance": "-10,50", "active": "on"},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
 
 
 def test_fluxo_de_caixa_realizado_e_previsto(cenario):
-    de = datetime.date(2031, 3, 1)
+    since = datetime.date(2031, 3, 1)
     until = datetime.date(2031, 3, 31)
     recebivel = lancamento_com(
         cenario, amount="200.00", parcelas=2, due_date=datetime.date(2031, 3, 5)
@@ -486,18 +484,18 @@ def test_fluxo_de_caixa_realizado_e_previsto(cenario):
             primeiro_vencimento=datetime.date(2031, 3, 10),
             user=cenario["admin"],
         )
-        fluxo = services.fluxo_de_caixa(de, until, hoje=datetime.date(2031, 3, 1))
+        fluxo = services.fluxo_de_caixa(since, until, today=datetime.date(2031, 3, 1))
     assert fluxo["opening_balance"] == Decimal("1000.00")
-    linhas = {linha["date"]: linha for linha in fluxo["linhas"]}
-    assert linhas[datetime.date(2031, 3, 5)]["entradas"] == Decimal("100.00")
-    assert linhas[datetime.date(2031, 3, 10)]["saidas_previstas"] == Decimal("300.00")
+    rows = {row["date"]: row for row in fluxo["linhas"]}
+    assert rows[datetime.date(2031, 3, 5)]["entradas"] == Decimal("100.00")
+    assert rows[datetime.date(2031, 3, 10)]["saidas_previstas"] == Decimal("300.00")
     # 2nd receivable installment due 2031-04-05: outside the period.
     assert fluxo["saldo_final"] == Decimal("800.00")
     assert aluguel.total_amount == Decimal("300.00")
-    resposta = entrar(cenario, "admin").get(
+    response = entrar(cenario, "admin").get(
         reverse("finance:cash_flow"), {"de": "2031-03-01", "until": "2031-03-31", "agrupar": "mes"}
     )
-    assert resposta.status_code == 200 and resposta.context["por_mes"]
+    assert response.status_code == 200 and response.context["por_mes"]
 
 
 def test_relatorio_por_forma_categoria_e_profissional(cenario):
@@ -524,8 +522,8 @@ def test_relatorio_por_forma_categoria_e_profissional(cenario):
 
 
 def test_listas_de_escolha_sem_texto_em_ingles(cenario):
-    pagina = entrar(cenario, "admin").get(reverse("finance:expense_new")).content.decode()
-    assert "Select an option" not in pagina
+    page = entrar(cenario, "admin").get(reverse("finance:expense_new")).content.decode()
+    assert "Select an option" not in page
 
 
 # --- Daily cash drawer (0.17.0) -----------------------------------------------------------
@@ -536,14 +534,14 @@ def test_caixa_do_dia_completo(cenario):
 
     with usar_clinica(cenario["clinic"]):
         bank = FinancialAccount.objects.get(name="Banco")
-    recepcao = entrar(cenario, "recepcao")
-    assert recepcao.get(reverse("finance:cash")).status_code == 200
-    resposta = recepcao.post(reverse("finance:cash"), {"amount": "100,00"})
+    reception = entrar(cenario, "recepcao")
+    assert reception.get(reverse("finance:cash")).status_code == 200
+    response = reception.post(reverse("finance:cash"), {"amount": "100,00"})
     with usar_clinica(cenario["clinic"]):
         cash_register = CashRegister.objects.get()
-    assert resposta.url == reverse("finance:cash_detail", args=[cash_register.pk])
+    assert response.url == reverse("finance:cash_detail", args=[cash_register.pk])
     # Only one open drawer per account: the page goes straight to it.
-    assert recepcao.get(reverse("finance:cash")).url == resposta.url
+    assert reception.get(reverse("finance:cash")).url == response.url
 
     # A cash payment while the drawer is open enters it; a Pix into the bank does not.
     entry = lancamento_com(cenario, amount="80.00", parcelas=2)
@@ -561,28 +559,28 @@ def test_caixa_do_dia_completo(cenario):
         )
 
     url = lambda name, *args: reverse(f"finance:{name}", args=[cash_register.pk, *args])  # noqa: E731
-    recepcao.post(url("cash_movement", "top-up"), {"amount": "10", "reason": "Troco"})
-    recepcao.post(
+    reception.post(url("cash_movement", "top-up"), {"amount": "10", "reason": "Troco"})
+    reception.post(
         url("cash_movement", "withdrawal"),
         {"amount": "120", "reason": "Depósito", "other_account": bank.pk},
     )
     # A withdrawal larger than what should be in the drawer is refused.
-    resposta = recepcao.post(url("cash_movement", "withdrawal"), {"amount": "999", "reason": "x"})
-    assert "passa do valor" in resposta.content.decode()
+    response = reception.post(url("cash_movement", "withdrawal"), {"amount": "999", "reason": "x"})
+    assert "passa do valor" in response.content.decode()
 
     with usar_clinica(cenario["clinic"]):
-        resumo = services.resumo_do_caixa(cash_register)
+        summary = services.resumo_do_caixa(cash_register)
         saldos = dict((c.name, s) for c, s in services.saldos_das_contas())
-    assert (resumo["entradas"], resumo["reforcos"], resumo["retiradas"]) == (
+    assert (summary["entradas"], summary["reforcos"], summary["retiradas"]) == (
         Decimal("40.00"),
         Decimal("10.00"),
         Decimal("120.00"),
     )
-    assert resumo["esperado"] == Decimal("30.00")  # 100 + 40 + 10 - 120
+    assert summary["esperado"] == Decimal("30.00")  # 100 + 40 + 10 - 120
     # The deposit moved money from the drawer account to the bank.
     assert saldos == {"Caixa": Decimal("-70.00"), "Banco": Decimal("160.00")}
 
-    recepcao.post(url("cash_close"), {"counted_amount": "28,50", "note": "Faltou troco"})
+    reception.post(url("cash_close"), {"counted_amount": "28,50", "note": "Faltou troco"})
     cash_register.refresh_from_db()
     assert not cash_register.aberto and cash_register.closed_by == cenario["recepcao"]
     assert (
@@ -595,9 +593,9 @@ def test_caixa_do_dia_completo(cenario):
         Decimal("-1.50"),
     )
     # Closed: no more movements, and a new drawer can be opened.
-    assert recepcao.get(url("cash_close")).status_code == 404
-    assert recepcao.get(url("cash_movement", "other")).status_code == 404
-    recepcao.post(reverse("finance:cash"), {"amount": "28,50"})
+    assert reception.get(url("cash_close")).status_code == 404
+    assert reception.get(url("cash_movement", "other")).status_code == 404
+    reception.post(reverse("finance:cash"), {"amount": "28,50"})
     with usar_clinica(cenario["clinic"]):
         assert CashRegister.objects.filter(closed_at__isnull=True).count() == 1
         assert CashMovement.objects.count() == 2
@@ -632,10 +630,10 @@ def test_caixa_fechado_nao_muda_com_estorno_posterior(cenario):
 @pytest.mark.parametrize("digitado", ["1.500,00", "R$ 1.500,00", "1500,00", "1.500"])
 def test_valor_com_ponto_de_milhar(cenario, digitado):
     """Review stage 3: "1.500,00", as people write it, was refused ("Informe um número")."""
-    resposta = entrar(cenario, "admin").post(
-        reverse("finance:entry_new"), novo(cenario, total_amount=digitado, parcelas=1)
+    response = entrar(cenario, "admin").post(
+        reverse("finance:entry_new"), new(cenario, total_amount=digitado, parcelas=1)
     )
-    assert resposta.status_code == 302, resposta.context["form"].errors
+    assert response.status_code == 302, response.context["form"].errors
     with usar_clinica(cenario["clinic"]):
         assert Entry.objects.get().total_amount == Decimal("1500.00")
 
@@ -650,8 +648,8 @@ def test_cheque_nao_e_mais_oferecido(cenario):
         reverse("finance:entry_new"),
         reverse("finance:expense_new"),
     ):
-        pagina = admin.get(url).content.decode()
-        assert 'value="pix"' in pagina and 'value="cheque"' not in pagina, url
+        page = admin.get(url).content.decode()
+        assert 'value="pix"' in page and 'value="cheque"' not in page, url
     recusado = admin.post(
         reverse("finance:receive_installment", args=[installment.pk]),
         {
@@ -663,14 +661,14 @@ def test_cheque_nao_e_mais_oferecido(cenario):
     )
     assert "method" in recusado.context["form"].errors
     with usar_clinica(cenario["clinic"]):
-        antigo = services.receber(
+        old = services.receber(
             installment,
             user=cenario["admin"],
             amount=Decimal("100"),
             method="cheque",
             account=cenario["cash_register"],
         )
-    assert antigo.get_method_display() == "Cheque"
+    assert old.get_method_display() == "Cheque"
 
 
 def test_devedores_paginados_e_com_busca(cenario):
@@ -692,5 +690,5 @@ def test_devedores_paginados_e_com_busca(cenario):
     primeira = cliente.get(reverse("finance:debtors")).content.decode()
     assert "55 devedores" in primeira and "Página 1 de 2" in primeira
     assert "R$ 550,00" in primeira  # the totals still add up everyone
-    busca = cliente.get(reverse("finance:debtors"), {"q": "fictício 07"}).content.decode()
-    assert "Pagador Fictício 07" in busca and "Pagador Fictício 08" not in busca
+    search = cliente.get(reverse("finance:debtors"), {"q": "fictício 07"}).content.decode()
+    assert "Pagador Fictício 07" in search and "Pagador Fictício 08" not in search

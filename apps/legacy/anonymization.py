@@ -90,9 +90,9 @@ def _mesmo_tamanho(value, fake):
 
 
 class _Anonimizador:
-    def __init__(self, clinic, hoje):
+    def __init__(self, clinic, today):
         self.clinic = clinic
-        self.hoje = hoje
+        self.today = today
         # System randomness: nothing about the original data can be derived from a seed.
         self.sorte = random.SystemRandom()
         self.fake = Faker("pt_BR")
@@ -116,7 +116,7 @@ class _Anonimizador:
         if date is None:
             return None
         days = self.sorte.randint(-DESLOCAMENTO_NASCIMENTO, DESLOCAMENTO_NASCIMENTO)
-        return min(date + datetime.timedelta(days=days), self.hoje)
+        return min(date + datetime.timedelta(days=days), self.today)
 
     def pacientes(self):
         fake = self.fake
@@ -149,7 +149,7 @@ class _Anonimizador:
             p.number = fake.building_number()[:10] if p.number else ""
             p.complement = f"Apto {fake.random_int(1, 999)}" if p.complement else ""
             p.notes = self.sorte.choice(OBSERVACOES) if p.notes else ""
-        campos = [
+        fields = [
             "name",
             "legal_name",
             "tax_id",
@@ -170,7 +170,7 @@ class _Anonimizador:
             "complement",
             "notes",
         ]
-        Patient.objects.bulk_update(pacientes, campos, batch_size=500)
+        Patient.objects.bulk_update(pacientes, fields, batch_size=500)
         self.resultado.pacientes = len(pacientes)
         return [p.name for p in pacientes if p.kind == Patient.Tipo.FISICA]
 
@@ -292,10 +292,10 @@ class _Anonimizador:
         ]
         apagados, _ = AuditEntry.objects.filter(clinic=self.clinic, model_name__in=modelos).delete()
         # The import summary has no model but belongs to the same history.
-        resumo, _ = AuditEntry.objects.filter(
+        summary, _ = AuditEntry.objects.filter(
             clinic=self.clinic, object_repr__startswith="Importação do sistema antigo"
         ).delete()
-        self.resultado.registros_apagados = apagados + resumo
+        self.resultado.registros_apagados = apagados + summary
 
     def executar(self):
         with transaction.atomic(), sem_isolamento():
@@ -320,9 +320,9 @@ class _Anonimizador:
         return self.resultado
 
 
-def anonymize_clinic(nome_clinica, hoje=None):
+def anonymize_clinic(nome_clinica, today=None):
     with sem_isolamento():
         clinic = Clinic.objects.filter(name=nome_clinica).first()
     if clinic is None:
         raise ClinicaNaoEncontrada(f"Clínica “{nome_clinica}” não encontrada.")
-    return _Anonimizador(clinic, hoje or timezone.localdate()).executar()
+    return _Anonimizador(clinic, today or timezone.localdate()).executar()

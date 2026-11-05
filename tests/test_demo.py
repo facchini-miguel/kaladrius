@@ -23,21 +23,21 @@ def demo(clinica_a, criar_profissional, monkeypatch):
     return {"clinic": clinica_a, "bruno": bruno}
 
 
-def entrar(username, senha):
+def entrar(username, password):
     """Log in through the login page (axes needs a request), failing if the password is wrong."""
     cliente = Client()
-    resposta = cliente.post(reverse("login"), {"username": username, "password": senha})
-    assert resposta.status_code == 302, resposta.content.decode()[:300]
+    response = cliente.post(reverse("login"), {"username": username, "password": password})
+    assert response.status_code == 302, response.content.decode()[:300]
     return cliente
 
 
 def test_cria_as_duas_contas_com_os_perfis(demo):
     Usuario = get_user_model()
-    recepcao = Usuario.objects.get(username="demo.recepcao")
+    reception = Usuario.objects.get(username="demo.recepcao")
     practitioner = Usuario.objects.get(username="demo.profissional")
-    assert recepcao.demo and practitioner.demo
-    assert not (recepcao.is_staff or recepcao.is_superuser)
-    assert Membership.objects.get(user=recepcao).role == Papel.RECEPCAO
+    assert reception.demo and practitioner.demo
+    assert not (reception.is_staff or reception.is_superuser)
+    assert Membership.objects.get(user=reception).role == Papel.RECEPCAO
     assert Membership.objects.get(user=practitioner).role == Papel.PROFISSIONAL
     with usar_clinica(demo["clinic"]):
         assert Practitioner.objects.get(name="Dr. Bruno").user == practitioner
@@ -96,7 +96,7 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
 def test_conta_de_demonstracao_nao_troca_a_senha(demo):
     cliente = entrar("demo.recepcao", SENHAS["senha_recepcao"])
     assert "Trocar senha" not in cliente.get(reverse("home")).content.decode()
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("change_password"),
         {
             "old_password": SENHAS["senha_recepcao"],
@@ -105,7 +105,7 @@ def test_conta_de_demonstracao_nao_troca_a_senha(demo):
         },
         follow=True,
     )
-    assert "Contas de demonstração não trocam a senha." in resposta.content.decode()
+    assert "Contas de demonstração não trocam a senha." in response.content.decode()
     entrar("demo.recepcao", SENHAS["senha_recepcao"])
 
 
@@ -118,15 +118,15 @@ def test_conta_de_demonstracao_nao_envia_anexos(demo):
     cliente.post(reverse("medical_records:new", args=[patient.pk]), ANAMNESE)
     with usar_clinica(demo["clinic"]):
         visit = Visit.objects.get()
-    pagina = cliente.get(reverse("medical_records:visit", args=[visit.pk])).content.decode()
-    assert "Contas de demonstração não enviam anexos." in pagina
-    assert "anexo_enviar" not in pagina and 'enctype="multipart/form-data"' not in pagina
-    resposta = cliente.post(
+    page = cliente.get(reverse("medical_records:visit", args=[visit.pk])).content.decode()
+    assert "Contas de demonstração não enviam anexos." in page
+    assert "anexo_enviar" not in page and 'enctype="multipart/form-data"' not in page
+    response = cliente.post(
         reverse("medical_records:attachment_upload", args=[visit.pk]),
         {"file": SimpleUploadedFile("x.png", PNG)},
         follow=True,
     )
-    assert "Contas de demonstração não enviam anexos." in resposta.content.decode()
+    assert "Contas de demonstração não enviam anexos." in response.content.decode()
     with usar_clinica(demo["clinic"]):
         assert not Attachment.objects.exists()
 
@@ -146,11 +146,11 @@ def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
     )
     assert Membership.objects.get(user__username="demo.financeiro").role == Papel.FINANCEIRO
     admin = entrar("demo.admin", "demo-admin-1")
-    recepcao = get_user_model().objects.get(username="demo.recepcao")
-    vinculo = Membership.objects.get(user=recepcao)
+    reception = get_user_model().objects.get(username="demo.recepcao")
+    vinculo = Membership.objects.get(user=reception)
     # Sees the team, but cannot add members, edit them or reset their passwords.
-    lista = admin.get(reverse("team:list"))
-    assert lista.status_code == 200 and "Novo membro" not in lista.content.decode()
+    results = admin.get(reverse("team:list"))
+    assert results.status_code == 200 and "Novo membro" not in results.content.decode()
     assert admin.get(reverse("team:new")).status_code == 403
     assert admin.post(reverse("team:password", args=[vinculo.pk]), {}).status_code == 403
     assert admin.get(reverse("clinic_settings")).status_code == 403

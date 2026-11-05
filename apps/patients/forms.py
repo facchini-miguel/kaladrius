@@ -101,8 +101,8 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
             self.documentos.empresa,
             self["kind"].value(),
         )
-        for campo in self.FORA_DO_BRASIL if self.country == "BR" else self.SO_NO_BRASIL:
-            del self.fields[campo]
+        for field in self.FORA_DO_BRASIL if self.country == "BR" else self.SO_NO_BRASIL:
+            del self.fields[field]
         if self.country != "BR":
             return
         self.fields["postal_code"].widget.attrs["inputmode"] = "numeric"
@@ -124,11 +124,11 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                 "hx-trigger": "load, change",
             }
         )
-        for campo, lista in (
+        for field, results in (
             ("neighborhood", "bairros-sugeridos"),
             ("street", "logradouros-sugeridos"),
         ):
-            self.fields[campo].widget.attrs.update({"list": lista, "autocomplete": "off"})
+            self.fields[field].widget.attrs.update({"list": results, "autocomplete": "off"})
         state_id = (
             self.data.get(self.add_prefix("state")) if self.is_bound else self.instance.state_id
         )
@@ -163,8 +163,8 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         return date
 
     def clean(self):
-        dados = super().clean()
-        kind = dados.get("kind")
+        data = super().clean()
+        kind = data.get("kind")
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
         do_tipo = (
@@ -173,16 +173,16 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         document = ""
         if do_tipo is not None:
             try:
-                document = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
-            except ValidationError as erro:
-                self.add_error("tax_id", erro)
-        if "tax_id" in dados:
-            dados["tax_id"] = document
+                document = identification.limpar(data.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+            except ValidationError as error:
+                self.add_error("tax_id", error)
+        if "tax_id" in data:
+            data["tax_id"] = document
 
         if document:
             # The clinic is not a form field, so the unique constraint is checked here.
-            outro = Patient.objects.filter(tax_id=document).exclude(pk=self.instance.pk).first()
-            if outro is not None and outro.archived:
+            other = Patient.objects.filter(tax_id=document).exclude(pk=self.instance.pk).first()
+            if other is not None and other.archived:
                 self.add_error(
                     "tax_id",
                     _(
@@ -190,24 +190,24 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
                         "da clínica para restaurá-lo."
                     ),
                 )
-            elif outro is not None:
+            elif other is not None:
                 self.add_error(
                     "tax_id", _("Já existe um paciente com este documento nesta clínica.")
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
         if kind == Patient.Tipo.JURIDICA:
-            for campo in ["rg", "sex", "marital_status", "occupation", "guardian"]:
-                dados[campo] = None if campo == "marital_status" else ""
-            dados["birth_date"] = None
+            for field in ["rg", "sex", "marital_status", "occupation", "guardian"]:
+                data[field] = None if field == "marital_status" else ""
+            data["birth_date"] = None
         else:
-            dados["legal_name"] = ""
-            dados["state_registration"] = ""
+            data["legal_name"] = ""
+            data["state_registration"] = ""
 
-        city, state = dados.get("city"), dados.get("state")
+        city, state = data.get("city"), data.get("state")
         if city is not None and city.state_id != getattr(state, "pk", None):
             self.add_error("city", _("A cidade não pertence à UF escolhida."))
-        return dados
+        return data
 
 
 class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
@@ -232,22 +232,22 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
-        dados = super().clean()
-        outro, name = dados.get("other_patient"), dados.get("name", "").strip()
-        if outro and name:
+        data = super().clean()
+        other, name = data.get("other_patient"), data.get("name", "").strip()
+        if other and name:
             self.add_error("name", _("Escolha um paciente ou digite um nome, não os dois."))
-        elif not outro and not name:
+        elif not other and not name:
             self.add_error("name", _("Escolha um paciente da clínica ou digite o nome."))
-        dados["name"] = name
+        data["name"] = name
         if (
-            outro
+            other
             and RelatedPerson.objects.filter(
                 patient=self.instance.patient,
-                other_patient=outro,
-                relationship=dados.get("relationship"),
+                other_patient=other,
+                relationship=data.get("relationship"),
             )
             .exclude(pk=self.instance.pk)
             .exists()
         ):
             self.add_error("other_patient", _("Este vínculo já está cadastrado."))
-        return dados
+        return data

@@ -21,8 +21,8 @@ FORA = {".git", "node_modules", ".venv", "venv", "build", ".docusaurus"}
 
 def _arquivos(*padroes):
     vistos = set()
-    for padrao in padroes:
-        for file in sorted(RAIZ.rglob(padrao)):
+    for default in padroes:
+        for file in sorted(RAIZ.rglob(default)):
             if file not in vistos and not FORA.intersection(file.relative_to(RAIZ).parts):
                 vistos.add(file)
                 yield file
@@ -106,8 +106,8 @@ def test_scripts_e_ci_nao_usam_tag_solta():
     for file in _arquivos("*.sh", "*.yml", "*.yaml"):
         if "compose" in file.name or file.name == "releases.yaml":
             continue
-        for number, linha in enumerate(file.read_text().splitlines(), 1):
-            code = linha.split(" #", 1)[0]
+        for number, row in enumerate(file.read_text().splitlines(), 1):
+            code = row.split(" #", 1)[0]
             if code.lstrip().startswith("#"):
                 continue
             local = file.relative_to(RAIZ)

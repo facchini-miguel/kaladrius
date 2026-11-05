@@ -36,10 +36,10 @@ def dados_novo(**extra):
 
 
 def dados_edicao(role=Papel.RECEPCAO, active=True, **account):
-    dados = {"vinculo-role": role, **{f"conta-{k}": v for k, v in account.items()}}
+    data = {"vinculo-role": role, **{f"conta-{k}": v for k, v in account.items()}}
     if active:
-        dados["vinculo-active"] = "on"
-    return dados
+        data["vinculo-active"] = "on"
+    return data
 
 
 def test_so_o_administrador_da_clinica_acessa(clinica_a, criar_usuario, cliente_de):
@@ -58,8 +58,8 @@ def test_lista_mostra_so_a_equipe_da_clinica(cliente_admin, clinica_a, clinica_b
 
 
 def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
-    resposta = cliente_admin.post(reverse("team:new"), dados_novo())
-    assert resposta.status_code == 302
+    response = cliente_admin.post(reverse("team:new"), dados_novo())
+    assert response.status_code == 302
     vinculo = Membership.objects.get(user__username="carla")
     assert (vinculo.clinic, vinculo.role, vinculo.active) == (clinica_a, Papel.RECEPCAO, True)
     assert vinculo.user.check_password(NOVA_SENHA)
@@ -70,7 +70,7 @@ def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
 
 
 @pytest.mark.parametrize(
-    ("extra", "campo"),
+    ("extra", "field"),
     [
         ({"username": "admin_a"}, "username"),
         ({"password2": "diferente-123456"}, "password2"),
@@ -78,10 +78,10 @@ def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
         ({"first_name": ""}, "first_name"),
     ],
 )
-def test_validacoes_do_novo_membro(cliente_admin, extra, campo):
-    resposta = cliente_admin.post(reverse("team:new"), dados_novo(**extra))
-    assert resposta.status_code == 200
-    assert campo in resposta.context["form"].errors
+def test_validacoes_do_novo_membro(cliente_admin, extra, field):
+    response = cliente_admin.post(reverse("team:new"), dados_novo(**extra))
+    assert response.status_code == 200
+    assert field in response.context["form"].errors
 
 
 def test_altera_perfil_e_tira_acesso(cliente_admin, clinica_a, criar_usuario, cliente_de):
@@ -98,8 +98,8 @@ def test_altera_perfil_e_tira_acesso(cliente_admin, clinica_a, criar_usuario, cl
     vinculo.refresh_from_db()
     assert not vinculo.active
     # Without access the member no longer works in the clinic.
-    resposta = cliente_de(membro).get(reverse("patients:list"))
-    assert resposta.status_code == 403
+    response = cliente_de(membro).get(reverse("patients:list"))
+    assert response.status_code == 403
 
 
 def test_nao_altera_o_proprio_perfil(cliente_admin, admin_a):
@@ -119,8 +119,8 @@ def test_clinica_nao_fica_sem_administrador(
     superusuario = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(superusuario)
     vinculo = unico_admin.vinculos.get()
-    resposta = cliente.post(reverse("team:edit", args=[vinculo.pk]), dados_edicao(Papel.RECEPCAO))
-    assert "pelo menos um administrador ativo" in resposta.content.decode()
+    response = cliente.post(reverse("team:edit", args=[vinculo.pk]), dados_edicao(Papel.RECEPCAO))
+    assert "pelo menos um administrador ativo" in response.content.decode()
     vinculo.refresh_from_db()
     assert vinculo.role == Papel.ADMIN
 
@@ -131,14 +131,14 @@ def test_administrador_com_conta_desativada_nao_conta(
     desativado = criar_usuario("desativado", clinica_a, Papel.ADMIN, first_name="Desativado")
     desativado.is_active = False
     desativado.save()
-    outro = criar_usuario("outro_admin", clinica_a, Papel.ADMIN, first_name="Outro")
+    other = criar_usuario("outro_admin", clinica_a, Papel.ADMIN, first_name="Outro")
     # With "outro_admin" demoted, admin_a is still an active administrator.
-    url = reverse("team:edit", args=[outro.vinculos.get().pk])
+    url = reverse("team:edit", args=[other.vinculos.get().pk])
     assert cliente_admin.post(url, dados_edicao(first_name="Outro")).status_code == 302
 
     # Now admin_a cannot be demoted: the only other administrator cannot log in.
     form = VinculoForm(
-        {"role": Papel.RECEPCAO, "active": "on"}, instance=admin_a.vinculos.get(), editor=outro
+        {"role": Papel.RECEPCAO, "active": "on"}, instance=admin_a.vinculos.get(), editor=other
     )
     assert not form.is_valid()
     assert "pelo menos um administrador ativo" in str(form.errors)
@@ -152,11 +152,11 @@ def test_vinculo_de_outra_clinica_da_404(cliente_admin, clinica_b, criar_usuario
 
 def test_define_senha_de_membro_exclusivo_da_clinica(cliente_admin, clinica_a, criar_usuario):
     membro = criar_usuario("membro", clinica_a)
-    resposta = cliente_admin.post(
+    response = cliente_admin.post(
         reverse("team:password", args=[membro.vinculos.get().pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     membro.refresh_from_db()
     assert membro.check_password(NOVA_SENHA)
 
@@ -168,11 +168,11 @@ def test_nao_mexe_na_conta_de_quem_atua_em_outra_clinica(
     Membership.objects.create(user=membro, clinic=clinica_b, role=Papel.ADMIN)
     vinculo = membro.vinculos.get(clinic=clinica_a)
 
-    resposta = cliente_admin.post(
+    response = cliente_admin.post(
         reverse("team:password", args=[vinculo.pk]),
         {"new_password1": NOVA_SENHA, "new_password2": NOVA_SENHA},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     membro.refresh_from_db()
     assert not membro.check_password(NOVA_SENHA)
 
@@ -199,5 +199,5 @@ def test_nao_mexe_na_conta_de_superusuario(cliente_admin, clinica_a, django_user
 
 
 def test_propria_senha_vai_para_a_troca_de_senha(cliente_admin, admin_a):
-    resposta = cliente_admin.get(reverse("team:password", args=[admin_a.vinculos.get().pk]))
-    assert resposta.url == reverse("change_password")
+    response = cliente_admin.get(reverse("team:password", args=[admin_a.vinculos.get().pk]))
+    assert response.url == reverse("change_password")

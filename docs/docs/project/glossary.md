@@ -322,6 +322,66 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167), pati
 |---|---|
 | `serie` | `series` |
 
+## Functions and variables
+
+The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172).
+
+### Shared variables
+
+| Before | After |
+|---|---|
+| `resposta` | `response` |
+| `dados` | `data` |
+| `pagina` | `page` |
+| `linha` | `row` |
+| `linhas` | `rows` |
+| `campo` | `field` |
+| `campos` | `fields` |
+| `hoje` | `today` |
+| `recepcao` | `reception` |
+| `lista` | `results` |
+| `dia` | `day` |
+| `busca` | `search` |
+| `chave` | `key` |
+| `atual` | `current` |
+| `anterior` | `previous` |
+| `erro` | `error` |
+| `novo` | `new` |
+| `outro` | `other` |
+| `antes` | `before` |
+| `depois` | `after` |
+| `contexto` | `context` |
+| `rotulo` | `label` |
+| `antigo` | `old` |
+| `padrao` | `default` |
+| `mensagem` | `message` |
+| `caminho` | `path` |
+| `senha` | `password` |
+| `hora` | `hour` |
+| `origem` | `source` |
+| `agora` | `now` |
+| `mes` | `month` |
+| `sessao` | `session` |
+| `resumo` | `summary` |
+| `filtros` | `filters` |
+| `primeiro` | `first` |
+| `ultimo` | `last` |
+| `objeto` | `obj` |
+| `tabela` | `table` |
+| `tabelas` | `tables` |
+| `coluna` | `column` |
+| `limite` | `limit` |
+| `configuracao` | `config` |
+| `opcoes` | `options` |
+| `posicao` | `position` |
+| `semana` | `week` |
+| `aviso` | `warning` |
+| `duracao` | `duration` |
+| `exemplo` | `example` |
+| `de` | `since` |
+
+`itens` stays for now: it is also the estimate's reverse accessor and the releases' format.
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.

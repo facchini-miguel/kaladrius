@@ -34,13 +34,13 @@ class Command(BaseCommand):
                 text = sys.stdin.buffer.read().decode(codificacao)
             else:
                 text = Path(file).read_text(encoding=codificacao)
-        except (OSError, UnicodeDecodeError) as erro:
-            raise CommandError(f"Não foi possível ler o arquivo: {erro}") from erro
+        except (OSError, UnicodeDecodeError) as error:
+            raise CommandError(f"Não foi possível ler o arquivo: {error}") from error
 
         try:
             relatorio = importar(text, clinic)
-        except (DumpInvalido, ImportacaoRecusada) as erro:
-            raise CommandError(str(erro)) from erro
+        except (DumpInvalido, ImportacaoRecusada) as error:
+            raise CommandError(str(error)) from error
 
         self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.name}”:"))
         self.stdout.write(f"  Profissionais: {relatorio.profissionais}")
@@ -50,8 +50,8 @@ class Command(BaseCommand):
         self.stdout.write(f"  Rechamadas: {relatorio.rechamadas}")
         if relatorio.avisos:
             self.stdout.write("Avisos:")
-            for aviso, total in sorted(relatorio.avisos.items()):
-                self.stdout.write(f"  {total} × {aviso}")
+            for warning, total in sorted(relatorio.avisos.items()):
+                self.stdout.write(f"  {total} × {warning}")
         self.stdout.write(
             "Nenhum usuário foi importado: crie a equipe em Cadastros › Equipe "
             "(e vincule o administrador da clínica pelo admin do Django)."

@@ -15,31 +15,29 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        lista = health.amostras(desde=timezone.now() - datetime.timedelta(hours=24))
-        resumo = health.resumo(lista)
-        if resumo is None:
+        results = health.amostras(desde=timezone.now() - datetime.timedelta(hours=24))
+        summary = health.summary(results)
+        if summary is None:
             self.stdout.write("Sem amostras nas últimas 24 horas: a coleta está funcionando?")
         else:
-            ultima = lista[-1]
+            ultima = results[-1]
             self.stdout.write(
-                f"Amostras: {resumo['amostras']} (a última às {ultima['momento']:%H:%M} UTC)"
+                f"Amostras: {summary['amostras']} (a última às {ultima['momento']:%H:%M} UTC)"
             )
             self.stdout.write(
-                f"Processador: média {resumo['cpu_media']:.1f}%, pico {resumo['cpu_maxima']:.1f}%"
+                f"Processador: média {summary['cpu_media']:.1f}%, pico {summary['cpu_maxima']:.1f}%"
             )
             self.stdout.write(
-                f"Memória: pico {resumo['memoria_maxima']:.0f}% em uso; "
-                f"swap: pico {resumo['swap_maximo']:.0f}%"
+                f"Memória: pico {summary['memoria_maxima']:.0f}% em uso; "
+                f"swap: pico {summary['swap_maximo']:.0f}%"
             )
-            self.stdout.write(f"Disco: {resumo['disco']:.0f}% em uso")
+            self.stdout.write(f"Disco: {summary['disco']:.0f}% em uso")
             self.stdout.write(
-                f"Rede: {filesizeformat(resumo['recebido'])} recebidos, "
-                f"{filesizeformat(resumo['enviado'])} enviados"
+                f"Rede: {filesizeformat(summary['recebido'])} recebidos, "
+                f"{filesizeformat(summary['enviado'])} enviados"
             )
             alertas = [
-                f"{chave}: {nivel}"
-                for chave, nivel in health.niveis(ultima).items()
-                if nivel != "ok"
+                f"{key}: {nivel}" for key, nivel in health.niveis(ultima).items() if nivel != "ok"
             ]
             if health.parada(ultima):
                 alertas.append("coleta parada")

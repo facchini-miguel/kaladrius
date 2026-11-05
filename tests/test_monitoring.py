@@ -45,8 +45,8 @@ def pasta(tmp_path, settings):
     settings.HEALTH_DIR = str(tmp_path)
     settings.HEALTH_MONITORED = True
 
-    def gravar(*linhas):
-        (tmp_path / health.ARQUIVO).write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    def gravar(*rows):
+        (tmp_path / health.ARQUIVO).write_text("\n".join(rows) + "\n", encoding="utf-8")
 
     return gravar
 
@@ -68,11 +68,11 @@ def test_le_amostras_ignora_linha_cortada_e_calcula_percentuais(pasta):
 def amostra_em_ingles(minutos_atras, **valores):
     """The same sample with the fields health.sh writes since decision 149."""
     antiga = json.loads(amostra(minutos_atras, **valores))
-    nomes = {interno: campo for campo, interno in health.CAMPOS.items()}
-    nova = {nomes.get(chave, chave): value for chave, value in antiga.items()}
-    nomes_container = {interno: campo for campo, interno in health.CAMPOS_CONTAINER.items()}
+    nomes = {interno: field for field, interno in health.CAMPOS.items()}
+    nova = {nomes.get(key, key): value for key, value in antiga.items()}
+    nomes_container = {interno: field for field, interno in health.CAMPOS_CONTAINER.items()}
     nova["containers"] = [
-        {nomes_container.get(chave, chave): value for chave, value in c.items()}
+        {nomes_container.get(key, key): value for key, value in c.items()}
         for c in antiga["containers"]
     ]
     return json.dumps(nova)
@@ -91,10 +91,10 @@ def test_le_as_amostras_em_ingles_e_as_antigas(pasta):
 
 def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
     pasta(amostra(10, rede=0), amostra(5, rede=300_000), amostra(0, rede=1000))  # reboot
-    lista = health.com_rede(health.amostras())
-    assert lista[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
-    assert lista[2]["rede_entrada"] is None
-    assert health.resumo(lista)["recebido"] == pytest.approx(300_000, rel=0.01)
+    results = health.com_rede(health.amostras())
+    assert results[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
+    assert results[2]["rede_entrada"] is None
+    assert health.summary(results)["recebido"] == pytest.approx(300_000, rel=0.01)
 
 
 def test_niveis_e_coleta_parada(pasta):
@@ -117,11 +117,11 @@ def test_grafico_quebra_a_linha_na_lacuna(pasta):
 
 def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, cliente_de):
     pasta(amostra(5))
-    recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    assert 'href="/system/health/"' in recepcao.get(reverse("home")).content.decode()
-    pagina = recepcao.get(reverse("monitoring:health"))
-    assert pagina.status_code == 200
-    content = pagina.content.decode()
+    reception = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    assert 'href="/system/health/"' in reception.get(reverse("home")).content.decode()
+    page = reception.get(reverse("monitoring:health"))
+    assert page.status_code == 200
+    content = page.content.decode()
     assert "<svg" in content and "Nenhum backup registrado" in content
     assert "Maiores tabelas" not in content and "health.sh" not in content
 
@@ -129,22 +129,22 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
 def test_tela_com_amostras(pasta, superusuario):
     pasta(*(amostra(m, rede=m * 1000) for m in range(60, -1, -5)))
     for periodo in ("1h", "24h", "7d", "outro"):
-        pagina = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
-        assert pagina.status_code == 200
-    content = pagina.content.decode()
+        page = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
+        assert page.status_code == 200
+    content = page.content.decode()
     assert "<svg" in content and "app" in content and "Maiores tabelas" in content
-    assert pagina.context["periodo"] == "1h"  # the default
-    assert pagina.context["end"] - pagina.context["start"] == datetime.timedelta(hours=1)
+    assert page.context["periodo"] == "1h"  # the default
+    assert page.context["end"] - page.context["start"] == datetime.timedelta(hours=1)
 
 
 def test_tela_sem_amostras(settings, tmp_path, superusuario):
     settings.HEALTH_DIR = str(tmp_path / "nao-existe")
-    pagina = superusuario.get(reverse("monitoring:health")).content.decode()
-    assert "Ainda não há amostras" in pagina
+    page = superusuario.get(reverse("monitoring:health")).content.decode()
+    assert "Ainda não há amostras" in page
 
 
 @pytest.mark.parametrize(
-    ("linhas", "esperado"),
+    ("rows", "esperado"),
     [
         ([], {"sem_coleta": True}),
         ([amostra(60)], "parada"),
@@ -152,11 +152,11 @@ def test_tela_sem_amostras(settings, tmp_path, superusuario):
         ([amostra(1)], None),
     ],
 )
-def test_aviso_no_topo(pasta, superusuario, linhas, esperado):
-    if linhas:
-        pasta(*linhas)
-    contexto = superusuario.get(reverse("whats_new")).context
-    alerta = contexto.get("saude_alerta")
+def test_aviso_no_topo(pasta, superusuario, rows, esperado):
+    if rows:
+        pasta(*rows)
+    context = superusuario.get(reverse("whats_new")).context
+    alerta = context.get("saude_alerta")
     if esperado == "parada":
         assert "parada" in alerta
     else:
@@ -174,26 +174,26 @@ def test_comando_resume_as_24_horas(pasta):
 
 def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
     pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
-    lista = health.com_rede(health.amostras())
+    results = health.com_rede(health.amostras())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
-    assert health.topo_da_escala(lista, [("cpu", "linha-1")], piso=10) == 10
-    assert health.topo_da_escala(lista, [("cpu", "linha-1")], maximo=100) == 100
+    assert health.topo_da_escala(results, [("cpu", "linha-1")], piso=10) == 10
+    assert health.topo_da_escala(results, [("cpu", "linha-1")], maximo=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
-    svg = health.grafico(lista, [("rede_entrada", "linha-1")])
+    svg = health.grafico(results, [("rede_entrada", "linha-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = health.grafico(lista, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
+    svg = health.grafico(results, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
     assert svg.rindex("linha-1") > svg.rindex("linha-2")
 
 
 def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     pasta(amostra(10), amostra(5))
-    agora = timezone.now()
+    now = timezone.now()
     svg = health.grafico(
         health.amostras(),
         [("cpu", "linha-1")],
-        start=agora - datetime.timedelta(hours=1),
-        end=agora,
+        start=now - datetime.timedelta(hours=1),
+        end=now,
         maximo=100,
     )
     # 10 minutes of samples on a 1-hour axis: the line starts near the right end.
@@ -205,8 +205,8 @@ def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
     # Decision 079: the external monitor needs the database to answer, not only Django.
     from django.db import OperationalError
 
-    resposta = client.get("/api/v1/health")
-    assert resposta.status_code == 200 and resposta.json()["database"] is True
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200 and response.json()["database"] is True
     assert client.get("/api/v1/saude").json()["banco"] is True  # the old address (decision 155)
 
     import config.api
@@ -215,11 +215,11 @@ def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
         def __enter__(self):
             raise OperationalError("banco fora")
 
-        def __exit__(self, *erro):
+        def __exit__(self, *error):
             return False
 
     monkeypatch.setattr(config.api.connection, "cursor", lambda: CursorQuebrado())
-    resposta = client.get("/api/v1/health")
-    assert resposta.status_code == 503 and resposta.json() == {"database": False}
-    resposta = client.get("/api/v1/saude")
-    assert resposta.status_code == 503 and resposta.json() == {"banco": False}
+    response = client.get("/api/v1/health")
+    assert response.status_code == 503 and response.json() == {"database": False}
+    response = client.get("/api/v1/saude")
+    assert response.status_code == 503 and response.json() == {"banco": False}

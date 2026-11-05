@@ -42,10 +42,10 @@ class EntrarView(auth_views.LoginView):
         return redirect("account:code")
 
     def get_context_data(self, **kwargs):
-        contexto = super().get_context_data(**kwargs)
-        erros = contexto["form"].non_field_errors().as_data()
+        context = super().get_context_data(**kwargs)
+        erros = context["form"].non_field_errors().as_data()
         return {
-            **contexto,
+            **context,
             "endereco_bloqueado": any(e.code == "endereco_bloqueado" for e in erros),
             "recuperar_por_email": settings.RECUPERAR_SENHA_POR_EMAIL,
             "inatividade": self.request.GET.get("inatividade") == "1",
@@ -138,7 +138,7 @@ def duas_etapas(request):
                 "obrigatoria": obrigatoria,
             },
         )
-    dispositivo = services.preparar(user, novo=request.GET.get("novo") == "1")
+    dispositivo = services.preparar(user, new=request.GET.get("novo") == "1")
     form = CodigoForm(request.POST if acao == "ativar" else None)
     if acao == "ativar" and form.is_valid():
         if services.verificar_app(dispositivo, form.cleaned_data["code"]):

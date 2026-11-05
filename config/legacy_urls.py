@@ -20,8 +20,8 @@ def para(name, valores=None):
     """A view that sends the old address to the URL named `nome`, with the same arguments."""
 
     def redirecionar(request, **kwargs):
-        for chave, traducao in (valores or {}).items():
-            kwargs[chave] = traducao[kwargs[chave]]
+        for key, traducao in (valores or {}).items():
+            kwargs[key] = traducao[kwargs[key]]
         destino = reverse(name, kwargs=kwargs)
         if request.META.get("QUERY_STRING"):
             destino += "?" + request.META["QUERY_STRING"]
@@ -45,8 +45,8 @@ urlpatterns = [
     path("agenda/tipos/<int:pk>/excluir/", para("schedule:type_delete")),
     path("ajuda/", para("help:index")),
     path("ajuda/tecnica/", para("help:technical_index")),
-    path("ajuda/tecnica/<path:caminho>", para("help:technical")),
-    path("ajuda/<slug:pagina>/", para("help:manual")),
+    path("ajuda/tecnica/<path:path>", para("help:technical")),
+    path("ajuda/<slug:page>/", para("help:manual")),
     path("auditoria/", para("audit:list")),
     path("conta/login/codigo/", para("account:code")),
     path("conta/ativo/", para("account:active")),

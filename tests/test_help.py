@@ -13,7 +13,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def recepcao(clinica_a, criar_usuario, cliente_de):
+def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
 
 
@@ -30,26 +30,26 @@ def test_manual_e_politica_do_site_em_cada_idioma(pasta):
     assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
 
 
-def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(recepcao, settings, django_user_model):
+def test_menu_ajuda_abre_o_site_no_idioma_do_usuario(reception, settings, django_user_model):
     settings.DOCS_URL = "https://docs.exemplo.test/"
-    pagina = recepcao.get(reverse("home")).content.decode()
-    assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in pagina
-    assert 'href="https://docs.exemplo.test/pt-BR/"' in pagina
+    page = reception.get(reverse("home")).content.decode()
+    assert 'href="https://docs.exemplo.test/pt-BR/manual/getting-started"' in page
+    assert 'href="https://docs.exemplo.test/pt-BR/"' in page
     user = django_user_model.objects.get(username="recepcao")
     user.language = "en"
     user.save()
-    pagina = recepcao.get(reverse("home")).content.decode()
-    assert 'href="https://docs.exemplo.test/manual/getting-started"' in pagina
+    page = reception.get(reverse("home")).content.decode()
+    assert 'href="https://docs.exemplo.test/manual/getting-started"' in page
 
 
-def test_enderecos_antigos_da_ajuda_levam_ao_site(recepcao, settings):
+def test_enderecos_antigos_da_ajuda_levam_ao_site(reception, settings):
     settings.DOCS_URL = "https://docs.exemplo.test"
     site = "https://docs.exemplo.test/pt-BR/"
-    assert recepcao.get(reverse("help:index")).url == site + "manual/getting-started"
-    assert recepcao.get(reverse("help:manual", args=["agenda"])).url == site + "manual/schedule"
-    assert recepcao.get(reverse("help:technical_index")).url == site
-    assert recepcao.get(reverse("help:technical", args=["pt-BR/deploy.md"])).url == site
-    assert recepcao.get(reverse("help:manual", args=["privacidade"])).url == reverse("privacy")
+    assert reception.get(reverse("help:index")).url == site + "manual/getting-started"
+    assert reception.get(reverse("help:manual", args=["agenda"])).url == site + "manual/schedule"
+    assert reception.get(reverse("help:technical_index")).url == site
+    assert reception.get(reverse("help:technical", args=["pt-BR/deploy.md"])).url == site
+    assert reception.get(reverse("help:manual", args=["privacidade"])).url == reverse("privacy")
 
 
 def test_lista_logo_depois_de_um_paragrafo_vira_lista():
@@ -75,46 +75,46 @@ def test_politica_de_privacidade_publica_com_o_contato_da_clinica(client, clinic
     clinica_a.save()
     login = client.get(reverse("login")).content.decode()
     assert reverse("privacy") in login
-    resposta = client.get(reverse("privacy"))  # no login: patients do not log in
-    pagina = resposta.content.decode()
-    assert resposta.status_code == 200
-    assert "Política de privacidade" in pagina and "20 anos" in pagina
-    assert clinica_a.name in pagina and "privacidade@sorriso.com.br" in pagina
+    response = client.get(reverse("privacy"))  # no login: patients do not log in
+    page = response.content.decode()
+    assert response.status_code == 200
+    assert "Política de privacidade" in page and "20 anos" in page
+    assert clinica_a.name in page and "privacidade@sorriso.com.br" in page
 
 
-def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, recepcao):
-    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
-    recepcao.logout()
-    assert recepcao.get(reverse("privacy")).context["clinic"] == clinica_a
+def test_politica_com_o_contato_da_clinica_da_instalacao(client, clinica_a, reception):
+    assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
+    reception.logout()
+    assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
 
 
 def test_politica_sem_clinica_cadastrada(client):
-    pagina = client.get(reverse("privacy"))
-    assert pagina.context["clinic"] is None
-    assert "Fale com a clínica que atende você." in pagina.content.decode()
+    page = client.get(reverse("privacy"))
+    assert page.context["clinic"] is None
+    assert "Fale com a clínica que atende você." in page.content.decode()
 
 
 @pytest.mark.parametrize(
     ("language", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
 )
 def test_politica_nos_tres_idiomas(client, language, titulo):
-    pagina = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=language).content.decode()
-    assert f"<h1>{titulo}</h1>" in pagina
+    page = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=language).content.decode()
+    assert f"<h1>{titulo}</h1>" in page
 
 
-def test_logo_na_barra_na_entrada_e_na_aba(client, recepcao):
+def test_logo_na_barra_na_entrada_e_na_aba(client, reception):
     entrada = client.get(reverse("login")).content.decode()
     assert "logo-entrada" in entrada and "img/favicon" in entrada
-    assert "logo-barra" in recepcao.get(reverse("home")).content.decode()
+    assert "logo-barra" in reception.get(reverse("home")).content.decode()
     for file in ("logo.svg", "favicon.svg"):
         assert (documents.DOCS.parent / "static" / "img" / file).is_file()
 
 
-def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, recepcao):
+def test_nome_do_sistema_na_entrada_na_barra_e_na_aba(client, reception):
     entrada = client.get(reverse("login")).content.decode()
     assert "<title>Entrar · Kaladrius</title>" in entrada
     assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entrada
-    start = recepcao.get(reverse("home")).content.decode()
+    start = reception.get(reverse("home")).content.decode()
     assert "Kaladrius · versão" in start
-    for pagina in (entrada, start):
-        assert "Medical System" not in pagina
+    for page in (entrada, start):
+        assert "Medical System" not in page

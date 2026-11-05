@@ -36,8 +36,8 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
             del self.fields["registration"]
         else:
             self.fields["registration"].label = insurance.rotulo_do_registro(clinic.country)
-            if self.registration.exemplo:
-                self.fields["registration"].widget.attrs["placeholder"] = self.registration.exemplo
+            if self.registration.example:
+                self.fields["registration"].widget.attrs["placeholder"] = self.registration.example
 
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
@@ -80,14 +80,14 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         self.fields["number"].label = insurance.com_nome_local(
             _("Número da carteirinha"), do_pais.number
         )
-        for campo, local, rotulo in (
+        for field, local, label in (
             ("group", do_pais.group, _("Número do grupo")),
             ("member_code", do_pais.member_code, _("Código do beneficiário")),
         ):
-            if local or getattr(self.instance, campo):
-                self.fields[campo].label = insurance.com_nome_local(rotulo, local)
+            if local or getattr(self.instance, field):
+                self.fields[field].label = insurance.com_nome_local(label, local)
             else:
-                del self.fields[campo]
+                del self.fields[field]
         # Active plans, plus the card's own plan when it was deactivated later.
         self.fields["health_plan"].queryset = HealthPlan.objects.filter(active=True) | (
             HealthPlan.objects.filter(pk=self.instance.health_plan_id)
@@ -97,8 +97,8 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         return self.cleaned_data["number"].strip()
 
     def clean(self):
-        dados = super().clean()
-        health_plan, number = dados.get("health_plan"), dados.get("number")
+        data = super().clean()
+        health_plan, number = data.get("health_plan"), data.get("number")
         if (
             health_plan
             and number
@@ -107,4 +107,4 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
             .exists()
         ):
             self.add_error("number", _("Esta carteirinha já está cadastrada neste convênio."))
-        return dados
+        return data

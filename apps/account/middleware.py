@@ -21,10 +21,10 @@ class ExigirDuasEtapasMiddleware:
         return self.get_response(request)
 
     def _pendente(self, request):
-        caminho = request.path_info
-        if caminho.startswith((settings.STATIC_URL, "/admin/", "/api/")):
+        path = request.path_info
+        if path.startswith((settings.STATIC_URL, "/admin/", "/api/")):
             return False
-        if caminho in {reverse(name) for name in LIVRES}:
+        if path in {reverse(name) for name in LIVRES}:
             return False
         if not services.obrigatoria(request):
             return False

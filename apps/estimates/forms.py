@@ -28,8 +28,8 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
         self.codificacao = insurance.do_pais().procedure
         self.fields["code"].label = insurance.rotulo_do_codigo()
-        if self.codificacao and self.codificacao.exemplo:
-            self.fields["code"].widget.attrs["placeholder"] = self.codificacao.exemplo
+        if self.codificacao and self.codificacao.example:
+            self.fields["code"].widget.attrs["placeholder"] = self.codificacao.example
         self.fields["code"].help_text = _("Opcional. Vai para os orçamentos.")
 
     def clean_code(self):
@@ -63,10 +63,10 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
         self.fields["practitioner"].queryset = Practitioner.objects.filter(active=True)
 
     def clean(self):
-        dados = super().clean()
-        if dados.get("date") and dados.get("valid_until") and dados["valid_until"] < dados["date"]:
+        data = super().clean()
+        if data.get("date") and data.get("valid_until") and data["valid_until"] < data["date"]:
             self.add_error("valid_until", _("A validade não pode ser antes da data do orçamento."))
-        return dados
+        return data
 
 
 class ItemForm(FormularioBootstrap, forms.ModelForm):
@@ -96,25 +96,25 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
         return ",".join(str(d) for d in teeth)
 
     def clean(self):
-        dados = super().clean()
-        procedure = dados.get("procedure")
+        data = super().clean()
+        procedure = data.get("procedure")
         if not self.odontologia and any(
-            self.data.get(self.add_prefix(campo), "").strip() for campo in ("teeth", "faces")
+            self.data.get(self.add_prefix(field), "").strip() for field in ("teeth", "faces")
         ):
             raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
         # The procedure's code is copied, like its description and price.
         self.instance.code = procedure.code if procedure else ""
-        if not (dados.get("description") or "").strip():
+        if not (data.get("description") or "").strip():
             if procedure is None:
                 self.add_error("description", _("Escolha um procedimento ou descreva o item."))
             else:
-                dados["description"] = procedure.name
-        if dados.get("unit_price") is None:
+                data["description"] = procedure.name
+        if data.get("unit_price") is None:
             if procedure is None:
                 self.add_error("unit_price", _("Informe o valor."))
             else:
-                dados["unit_price"] = procedure.amount
-        return dados
+                data["unit_price"] = procedure.amount
+        return data
 
 
 class DescontoForm(FormularioBootstrap, forms.Form):
@@ -147,9 +147,9 @@ class AprovarForm(FormularioBootstrap, forms.Form):
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
 
     def clean(self):
-        dados = super().clean()
-        if dados.get("recebido_agora"):
-            for campo in ("method", "account"):
-                if not dados.get(campo):
-                    self.add_error(campo, _("Informe para registrar o pagamento."))
-        return dados
+        data = super().clean()
+        if data.get("recebido_agora"):
+            for field in ("method", "account"):
+                if not data.get(field):
+                    self.add_error(field, _("Informe para registrar o pagamento."))
+        return data

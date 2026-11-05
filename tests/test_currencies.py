@@ -48,12 +48,12 @@ def test_valor_invalido_fica_vazio():
 
 def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
     modelo = Template("{% load formats %}{{ amount|currency }} {% simbolo_moeda %}")
-    contexto = Context({"amount": VALOR})
+    context = Context({"amount": VALOR})
     with translation.override("pt-br"):
-        assert modelo.render(contexto) == "R$ 1.234,56 R$"  # no current clinic: the real
+        assert modelo.render(context) == "R$ 1.234,56 R$"  # no current clinic: the real
         clinica_a.currency = "EUR"
         with usar_clinica(clinica_a):
-            assert modelo.render(contexto) == "1.234,56 € €"
+            assert modelo.render(context) == "1.234,56 € €"
 
 
 def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario, cliente_de):
@@ -61,9 +61,9 @@ def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario,
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
     assert "Dólar americano (US$, USD)" in admin.get(reverse("clinic_settings")).content.decode()
 
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
-    pagina = resposta.content.decode()
-    assert "Nenhum valor já lançado foi convertido" in pagina
+    response = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
+    page = response.content.decode()
+    assert "Nenhum valor já lançado foi convertido" in page
     clinica_a.refresh_from_db()
     assert clinica_a.currency == "USD"
 
@@ -73,20 +73,20 @@ def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario,
 
     # Saving again without changing it does not repeat the warning.
     admin.post(reverse("change_language"), {"language": "pt-br"})
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
-    assert "Nenhum valor já lançado foi convertido" not in resposta.content.decode()
+    response = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
+    assert "Nenhum valor já lançado foi convertido" not in response.content.decode()
 
 
 def test_moeda_desconhecida_e_recusada(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = admin.post(reverse("clinic_settings"), dados_clinica(currency="XXX"))
-    assert resposta.status_code == 200 and "currency" in resposta.context["form"].errors
+    response = admin.post(reverse("clinic_settings"), dados_clinica(currency="XXX"))
+    assert response.status_code == 200 and "currency" in response.context["form"].errors
 
 
 def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
-    recepcao = cliente_de(criar_usuario("recepcao_a", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao_a", clinica_a, Papel.RECEPCAO))
     assert (
-        recepcao.post(reverse("clinic_settings"), dados_clinica(currency="EUR")).status_code == 403
+        reception.post(reverse("clinic_settings"), dados_clinica(currency="EUR")).status_code == 403
     )
     clinica_a.refresh_from_db()
     assert clinica_a.currency == "BRL"
@@ -110,8 +110,8 @@ def test_formulario_sem_a_moeda_mantem_a_atual(clinica_a, criar_usuario, cliente
     clinica_a.currency = "EUR"
     clinica_a.save(update_fields=["currency"])
     admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    dados = dados_clinica()
-    del dados["currency"]
-    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
+    data = dados_clinica()
+    del data["currency"]
+    assert admin.post(reverse("clinic_settings"), data).status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.currency == "EUR"

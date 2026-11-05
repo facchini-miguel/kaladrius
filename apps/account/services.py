@@ -56,12 +56,12 @@ def obrigatoria(request):
     return pode(request, Modulo.FINANCEIRO, Acao.VER) or acessa_prontuario(request)
 
 
-def preparar(user, novo=False):
+def preparar(user, new=False):
     """The person's not yet active device, with a secret to show as a QR code."""
     dispositivo, criado = TwoFactor.objects.get_or_create(
         user=user, defaults={"secret": pyotp.random_base32()}
     )
-    if novo and not criado and not dispositivo.active:
+    if new and not criado and not dispositivo.active:
         dispositivo.secret = pyotp.random_base32()
         dispositivo.save(update_fields=["secret"])
     return dispositivo
@@ -88,8 +88,8 @@ def verificar_app(dispositivo, code):
     if len(code) != 6:
         return False
     totp = pyotp.TOTP(dispositivo.secret)
-    agora = int(timezone.now().timestamp() // totp.interval)
-    for passo in (agora - 1, agora, agora + 1):
+    now = int(timezone.now().timestamp() // totp.interval)
+    for passo in (now - 1, now, now + 1):
         if passo > dispositivo.last_step and hmac.compare_digest(
             totp.at(passo * totp.interval), code
         ):

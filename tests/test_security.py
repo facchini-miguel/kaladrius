@@ -11,17 +11,17 @@ from apps.whats_new import releases
 pytestmark = pytest.mark.django_db
 
 
-def tentar(client, senha):
-    return client.post(reverse("login"), {"username": "maria", "password": senha})
+def tentar(client, password):
+    return client.post(reverse("login"), {"username": "maria", "password": password})
 
 
 def test_bloqueia_apos_5_senhas_erradas(client, criar_usuario):
     criar_usuario("maria")
     for _ in range(4):
         assert tentar(client, "errada").status_code == 200
-    resposta = tentar(client, "errada")
-    assert resposta.status_code == 429
-    assert "bloqueado temporariamente" in resposta.content.decode()
+    response = tentar(client, "errada")
+    assert response.status_code == 429
+    assert "bloqueado temporariamente" in response.content.decode()
     # Even the right password is refused while locked out.
     assert tentar(client, "senha-de-teste-123").status_code == 429
 
@@ -29,25 +29,25 @@ def test_bloqueia_apos_5_senhas_erradas(client, criar_usuario):
 def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario):
     criar_usuario("maria")
     for final in range(1, 5):
-        resposta = client.post(
+        response = client.post(
             reverse("login"),
             {"username": "maria", "password": "errada"},
             REMOTE_ADDR=f"2001:db8:1:{final}::{final}",
         )
-        assert resposta.status_code == 200
-    resposta = client.post(
+        assert response.status_code == 200
+    response = client.post(
         reverse("login"),
         {"username": "maria", "password": "errada"},
         REMOTE_ADDR="2001:db8:1:ffff::9",
     )
-    assert resposta.status_code == 429
+    assert response.status_code == 429
     # Another /48 network is not affected.
-    resposta = client.post(
+    response = client.post(
         reverse("login"),
         {"username": "maria", "password": "senha-de-teste-123"},
         REMOTE_ADDR="2001:db8:2::1",
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
 
 
 @pytest.mark.parametrize(
@@ -97,10 +97,10 @@ def test_aviso_de_versao_nova_ate_abrir_as_novidades(client, criar_usuario):
 
 def test_novidades_filtradas_por_modulo(client, criar_usuario):
     client.force_login(criar_usuario("maria"))
-    resposta = client.get(reverse("whats_new"), {"modulo": "Agenda"})
-    modulos = {item.modulo for _, itens in resposta.context["versoes"] for item in itens}
+    response = client.get(reverse("whats_new"), {"modulo": "Agenda"})
+    modulos = {item.modulo for _, itens in response.context["versoes"] for item in itens}
     assert modulos == {"Agenda"}
-    assert ("Pacientes", "Pacientes") in resposta.context["modulos"]
+    assert ("Pacientes", "Pacientes") in response.context["modulos"]
 
 
 def test_ip_real_atras_do_proxy(rf):
@@ -142,9 +142,9 @@ def test_documentacao_da_api_so_para_superusuario(client, criar_usuario):
     client.force_login(criar_usuario("maria"))
     assert client.get(docs).status_code == 302
     client.force_login(criar_usuario("dono", is_superuser=True, is_staff=True))
-    resposta = client.get(docs)
-    assert resposta.status_code == 200
-    assert "cdn" not in resposta.content.decode().lower()  # local files, allowed by the CSP
+    response = client.get(docs)
+    assert response.status_code == 200
+    assert "cdn" not in response.content.decode().lower()  # local files, allowed by the CSP
     # The endpoints themselves stay open to the app.
     client.logout()
     assert client.get(reverse("api-v1:versao")).status_code == 200

@@ -1,4 +1,4 @@
-from .record import contexto, ip_da_requisicao
+from .record import context, ip_da_requisicao
 
 
 class AuditoriaMiddleware:
@@ -9,5 +9,5 @@ class AuditoriaMiddleware:
 
     def __call__(self, request):
         user = request.user if request.user.is_authenticated else None
-        with contexto(user, ip_da_requisicao(request)):
+        with context(user, ip_da_requisicao(request)):
             return self.get_response(request)

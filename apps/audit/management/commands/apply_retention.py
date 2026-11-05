@@ -18,11 +18,11 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        limite = timezone.now() - RETENCAO_LOGIN_FALHOU
+        limit = timezone.now() - RETENCAO_LOGIN_FALHOU
         auditoria, _ = AuditEntry.objects.filter(
-            action=AuditEntry.Acao.LOGIN_FALHOU, timestamp__lt=limite
+            action=AuditEntry.Acao.LOGIN_FALHOU, timestamp__lt=limit
         ).delete()
-        tentativas, _ = AccessAttempt.objects.filter(attempt_time__lt=limite).delete()
+        tentativas, _ = AccessAttempt.objects.filter(attempt_time__lt=limit).delete()
         self.stdout.write(
             f"Tentativas de entrada recusadas apagadas: {auditoria} da auditoria, "
             f"{tentativas} do bloqueio de senhas."

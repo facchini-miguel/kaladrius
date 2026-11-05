@@ -5,7 +5,7 @@ from . import views
 app_name = "medical_records"
 
 urlpatterns = [
-    path("patients/<int:patient>/new/", views.novo, name="new"),
+    path("patients/<int:patient>/new/", views.new, name="new"),
     path("<int:pk>/", views.visit, name="visit"),
     path("<int:pk>/addendum/", views.adendo, name="addendum"),
     path("<int:pk>/print/", views.imprimir, name="print"),

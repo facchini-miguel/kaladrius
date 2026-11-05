@@ -22,9 +22,9 @@ def cpf_valido(cpf):
     cpf = somente_digitos(cpf)
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
-    for posicao in (9, 10):
-        soma = sum(int(cpf[i]) * (posicao + 1 - i) for i in range(posicao))
-        if (soma * 10 % 11) % 10 != int(cpf[posicao]):
+    for position in (9, 10):
+        soma = sum(int(cpf[i]) * (position + 1 - i) for i in range(position))
+        if (soma * 10 % 11) % 10 != int(cpf[position]):
             return False
     return True
 
@@ -40,9 +40,9 @@ def cnpj_valido(cnpj):
         return False
     valores = [ord(caractere) - 48 for caractere in cnpj]
     pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    for posicao, pesos_da_vez in ((12, pesos), (13, [6, *pesos])):
-        resto = sum(v * p for v, p in zip(valores[:posicao], pesos_da_vez, strict=True)) % 11
-        if (0 if resto < 2 else 11 - resto) != valores[posicao]:
+    for position, pesos_da_vez in ((12, pesos), (13, [6, *pesos])):
+        resto = sum(v * p for v, p in zip(valores[:position], pesos_da_vez, strict=True)) % 11
+        if (0 if resto < 2 else 11 - resto) != valores[position]:
             return False
     return True
 

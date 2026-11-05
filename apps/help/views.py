@@ -22,13 +22,13 @@ PAGINAS = {
 }
 
 
-def para_o_site(request, pagina=None, caminho=None):
+def para_o_site(request, page=None, path=None):
     """Old in-system help addresses (before 0.27.0) now open the documentation site."""
-    if pagina in ("privacidade", "privacy"):
+    if page in ("privacidade", "privacy"):
         return redirect("privacy")
-    if pagina is not None:
-        return redirect(documents.url_do_site(f"manual/{PAGINAS.get(pagina, pagina)}"))
-    if caminho is not None:
+    if page is not None:
+        return redirect(documents.url_do_site(f"manual/{PAGINAS.get(page, page)}"))
+    if path is not None:
         return redirect(documents.url_do_site())
     return redirect(documents.url_do_site("manual/getting-started"))
 
@@ -43,11 +43,11 @@ def privacidade(request):
     titulo, html = documents.privacidade()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
     country = countries.pais_da_clinica(clinic)
-    contexto = {"titulo": titulo, "html": html, "clinic": clinic}
+    context = {"titulo": titulo, "html": html, "clinic": clinic}
     if country != countries.PADRAO:
-        contexto.update(
+        context.update(
             country=countries.do_codigo(country).name,
             lei=legislation.do_pais(country),
             prazo_de_guarda=legislation.prazo_de_guarda(country),
         )
-    return render(request, "help/privacy.html", contexto)
+    return render(request, "help/privacy.html", context)

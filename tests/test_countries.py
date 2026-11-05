@@ -26,8 +26,8 @@ pytestmark = pytest.mark.django_db
 def no_pais(clinic, country, **extra):
     clinic.country = country
     clinic.time_zone = extra.pop("fuso", countries.PAISES[country].fusos[0])
-    for campo, value in extra.items():
-        setattr(clinic, campo, value)
+    for field, value in extra.items():
+        setattr(clinic, field, value)
     clinic.save()
     return clinic
 
@@ -102,14 +102,14 @@ def _durante_requisicao(user):
     """Time zone and language active while a request of `usuario` runs."""
     visto = {}
 
-    def resposta(request):
+    def response(request):
         visto["fuso"] = timezone.get_current_timezone_name()
         visto["language"] = translation.get_language()
         return HttpResponse()
 
     request = RequestFactory().get("/")
     request.user = user
-    ClinicaAtualMiddleware(resposta)(request)
+    ClinicaAtualMiddleware(response)(request)
     return visto
 
 
@@ -130,10 +130,10 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
     no_pais(clinica_a, "GB")
     cliente = cliente_de(criar_usuario("admin_londres", clinica_a, Papel.ADMIN))
     cliente.post(reverse("change_language"), {"language": "en"})
-    pagina = cliente.get(reverse("home")).content.decode()
-    assert '<html lang="en-gb">' in pagina
+    page = cliente.get(reverse("home")).content.decode()
+    assert '<html lang="en-gb">' in page
     # The English flag, with or without the hash of the collected static files (CI).
-    assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", pagina) and "Patients" in pagina
+    assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", page) and "Patients" in page
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
             name="Amelia Fictícia", birth_date=datetime.date(2000, 12, 25)
@@ -164,8 +164,8 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
     )
 
     # A currency chosen on purpose is kept when the country changes.
-    dados = dados_clinica(country="AU", currency="USD", time_zone="Australia/Perth")
-    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
+    data = dados_clinica(country="AU", currency="USD", time_zone="Australia/Perth")
+    assert admin.post(reverse("clinic_settings"), data).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.country, clinica_a.time_zone, clinica_a.currency) == (
         "AU",
@@ -176,10 +176,10 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
 
 def test_fuso_de_outro_pais_e_recusado(clinica_a, criar_usuario, cliente_de):
     admin = cliente_de(criar_usuario("admin_fuso", clinica_a, Papel.ADMIN))
-    resposta = admin.post(
+    response = admin.post(
         reverse("clinic_settings"), dados_clinica(country="ZA", time_zone="America/New_York")
     )
-    assert resposta.status_code == 200 and "time_zone" in resposta.context["form"].errors
+    assert response.status_code == 200 and "time_zone" in response.context["form"].errors
 
 
 # --- Patients outside Brazil -----------------------------------------------------
@@ -193,7 +193,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     assert 'name="state"' not in formulario and 'name="city_name"' in formulario
     assert "Código postal" in formulario
 
-    resposta = admin.post(
+    response = admin.post(
         reverse("patients:new"),
         {
             "kind": "PF",
@@ -206,7 +206,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
             "state_name": "England",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Oliver Fictício")
     assert (patient.mobile_phone, patient.whatsapp, patient.postal_code) == (
@@ -358,7 +358,7 @@ def test_pais_latino_no_formulario_ajusta_fuso_e_moeda(clinica_a, criar_usuario,
     clinica_a.refresh_from_db()
     assert (clinica_a.time_zone, clinica_a.currency) == ("America/Mexico_City", "MXN")
     # The screen sends the currency it shows (the clinic's, now the Mexican peso).
-    dados = dados_clinica(country="AR", currency="MXN", time_zone="America/Argentina/Mendoza")
-    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
+    data = dados_clinica(country="AR", currency="MXN", time_zone="America/Argentina/Mendoza")
+    assert admin.post(reverse("clinic_settings"), data).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.time_zone, clinica_a.currency) == ("America/Argentina/Mendoza", "ARS")

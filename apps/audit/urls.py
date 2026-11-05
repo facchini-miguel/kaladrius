@@ -4,4 +4,4 @@ from . import views
 
 app_name = "audit"
 
-urlpatterns = [path("", views.lista, name="list")]
+urlpatterns = [path("", views.results, name="list")]

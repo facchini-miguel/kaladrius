@@ -49,10 +49,10 @@ def _rotulos():
 
     rotulos = {}
     for model in AUDITADOS:
-        campos = rotulos.setdefault(nome_do_modelo(model), {})
-        for campo in model._meta.concrete_fields:
-            for name in {campo.column, campo.column.removesuffix("_id"), campo.attname, campo.name}:
-                campos[name] = campo.verbose_name
+        fields = rotulos.setdefault(nome_do_modelo(model), {})
+        for field in model._meta.concrete_fields:
+            for name in {field.column, field.column.removesuffix("_id"), field.attname, field.name}:
+                fields[name] = field.verbose_name
     return rotulos
 
 
@@ -61,16 +61,16 @@ def campos_alterados(record):
     model no longer has (or "senha") shows its stored name."""
     rotulos = _rotulos().get(record.model_name, {})
     return [
-        (rotulos.get(campo, campo), valores[0], valores[1])
-        for campo, valores in record.changes.items()
+        (rotulos.get(field, field), valores[0], valores[1])
+        for field, valores in record.changes.items()
     ]
 
 
 @exige_permissao(Modulo.AUDITORIA, Acao.VER)
-def lista(request):
+def results(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
     registros = AuditEntry.objects.filter(clinic=request.clinic)
-    filtros = {
+    filters = {
         "q": request.GET.get("q", "").strip(),
         "action": request.GET.get("action", ""),
         "model_name": request.GET.get("model_name", ""),
@@ -78,30 +78,30 @@ def lista(request):
         "until": request.GET.get("until", ""),
     }
     modelos = tipos_de_registro()
-    if filtros["q"]:
+    if filters["q"]:
         registros = registros.filter(
-            Q(user_name__icontains=filtros["q"])
-            | Q(object_repr__icontains=filtros["q"])
-            | Q(object_id=filtros["q"])
+            Q(user_name__icontains=filters["q"])
+            | Q(object_repr__icontains=filters["q"])
+            | Q(object_id=filters["q"])
         )
-    if filtros["action"] in AuditEntry.Acao.values:
-        registros = registros.filter(action=filtros["action"])
-    if filtros["model_name"]:
-        registros = registros.filter(model_name=filtros["model_name"])
-    if de := _data(filtros["de"]):
-        registros = registros.filter(timestamp__date__gte=de)
-    if until := _data(filtros["until"]):
+    if filters["action"] in AuditEntry.Acao.values:
+        registros = registros.filter(action=filters["action"])
+    if filters["model_name"]:
+        registros = registros.filter(model_name=filters["model_name"])
+    if since := _data(filters["de"]):
+        registros = registros.filter(timestamp__date__gte=since)
+    if until := _data(filters["until"]):
         registros = registros.filter(timestamp__date__lte=until)
-    pagina = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
-    for record in pagina:
-        record.campos = campos_alterados(record)
+    page = Paginator(registros, POR_PAGINA).get_page(request.GET.get("pagina"))
+    for record in page:
+        record.fields = campos_alterados(record)
     return render(
         request,
         "audit/list.html",
         {
-            "pagina": pagina,
-            "filtros": filtros,
-            "parametros": urlencode(filtros),
+            "pagina": page,
+            "filtros": filters,
+            "parametros": urlencode(filters),
             "acoes": AuditEntry.Acao.choices,
             "modelos": modelos,
         },

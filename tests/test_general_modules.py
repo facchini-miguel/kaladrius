@@ -72,9 +72,9 @@ def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
     assert admin.get(reverse(rota)).status_code == 403
     # The system administrator still reaches it, marked as off (decision 115).
     root = cliente_de(django_user_model.objects.create_superuser("root_gerais"))
-    pagina = root.get(reverse(rota))
-    assert pagina.status_code == 200
-    assert "está desligado nesta clínica" in pagina.content.decode()
+    page = root.get(reverse(rota))
+    assert page.status_code == 200
+    assert "está desligado nesta clínica" in page.content.decode()
     menu = root.get(reverse("home")).content.decode()
     assert texto_do_menu in menu and ">desligado</span>" in menu
 
@@ -103,9 +103,9 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
         not in cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
     )
     root = cliente_de(django_user_model.objects.create_superuser("root_prontuario"))
-    pagina = root.get(url)
-    assert pagina.status_code == 200
-    assert "O módulo Prontuário está desligado nesta clínica" in pagina.content.decode()
+    page = root.get(url)
+    assert page.status_code == 200
+    assert "O módulo Prontuário está desligado nesta clínica" in page.content.decode()
 
 
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, patient):
@@ -124,14 +124,14 @@ def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, pat
 def test_so_o_nucleo_ligado_sem_resumo_vazio(clinica_a, admin):
     """Review stage 4: with every optional module off, "Resumo do dia" stood alone."""
     configurar(clinica_a, set())
-    pagina = admin.get(reverse("home")).content.decode()
-    assert "Resumo do dia" not in pagina and "Novo paciente" in pagina
+    page = admin.get(reverse("home")).content.decode()
+    assert "Resumo do dia" not in page and "Novo paciente" in page
 
 
 def test_orcamentos_precisa_do_financeiro(clinica_a):
     with pytest.raises(ValidationError):
         configurar(clinica_a, sem(M.FINANCEIRO))
-    dados = {
+    data = {
         "name": "Clínica fictícia",
         "area": "odontologia",
         "schedule_start": "08:00",
@@ -140,15 +140,15 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
         "modulos": ["odontologia"],
         "modulos_gerais": sorted(sem(M.FINANCEIRO)),
     }
-    form = ClinicaForm(dados, instance=clinica_a)
+    form = ClinicaForm(data, instance=clinica_a)
     assert not form.is_valid()
     assert "modulos_gerais" in form.errors
-    dados["modulos_gerais"] = sorted(sem(M.FINANCEIRO, M.ORCAMENTOS, M.PESSOAL))
-    assert ClinicaForm(dados, instance=clinica_a).is_valid()
+    data["modulos_gerais"] = sorted(sem(M.FINANCEIRO, M.ORCAMENTOS, M.PESSOAL))
+    assert ClinicaForm(data, instance=clinica_a).is_valid()
 
 
 def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
-    resposta = admin.post(
+    response = admin.post(
         reverse("clinic_settings"),
         {
             "name": "Clínica fictícia",
@@ -160,21 +160,21 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
             "modulos_gerais": [M.AGENDA, M.PRONTUARIO],
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
     assert ligados == {M.MEDICINA, M.AGENDA, M.PRONTUARIO}
-    pagina = admin.get(reverse("clinic_settings")).content.decode()
-    assert "Especialidades" in pagina and "Módulos" in pagina
+    page = admin.get(reverse("clinic_settings")).content.decode()
+    assert "Especialidades" in page and "Módulos" in page
 
 
 def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_model, cliente_de):
     cliente = cliente_de(django_user_model.objects.create_superuser("root_primeira"))
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("register_clinic"),
         {"name": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     clinic = Clinic.objects.get()
     with usar_clinica(clinic):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
@@ -221,11 +221,11 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
 
 
 def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
-    resposta = admin.post(
+    response = admin.post(
         reverse("patients:new"),
         {"kind": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
     )
-    assert resposta.status_code == 302, resposta.context["form"].errors
+    assert response.status_code == 302, response.context["form"].errors
     with usar_clinica(clinica_a):
         patient = Patient.objects.get(name="Paciente fictícia do WhatsApp")
     assert patient.whatsapp == "48999990000"
@@ -236,7 +236,7 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
 
 def test_modulo_ligado_nao_mostra_aviso_ao_superusuario(clinica_a, django_user_model, cliente_de):
     root = cliente_de(django_user_model.objects.create_superuser("root_ligado"))
-    for pagina in (reverse("home"), reverse("schedule:calendar")):
-        content = root.get(pagina).content.decode()
+    for page in (reverse("home"), reverse("schedule:calendar")):
+        content = root.get(page).content.decode()
         assert "está desligado nesta clínica" not in content
         assert ">desligado</span>" not in content

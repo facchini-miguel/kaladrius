@@ -54,14 +54,14 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
         self.proprio = self.instance.user_id == editor.pk
         if self.proprio:
             # Nobody removes their own administrator role or access by accident.
-            for campo in self.fields.values():
-                campo.disabled = True
-                campo.help_text = _("Você não pode alterar o próprio perfil.")
+            for field in self.fields.values():
+                field.disabled = True
+                field.help_text = _("Você não pode alterar o próprio perfil.")
 
     def clean(self):
-        dados = super().clean()
+        data = super().clean()
         era_admin_ativo = self.initial.get("role") == Papel.ADMIN and self.initial.get("active")
-        continua_admin = dados.get("role") == Papel.ADMIN and dados.get("active")
+        continua_admin = data.get("role") == Papel.ADMIN and data.get("active")
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Membership.objects.filter(
@@ -74,7 +74,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
                 raise forms.ValidationError(
                     _("A clínica precisa de pelo menos um administrador ativo.")
                 )
-        return dados
+        return data
 
 
 class ContaForm(FormularioBootstrap, forms.ModelForm):

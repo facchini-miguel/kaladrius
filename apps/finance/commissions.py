@@ -70,13 +70,13 @@ def pendente(practitioner, until):
     }
 
 
-def resumo(until):
+def summary(until):
     """Pending commission of every practitioner with a percentage or something pending.
 
     Only the totals, added up by the database: loading every receipt not commissioned yet
     took seconds in a clinic with years of them (volume test, decision 108).
     """
-    linhas = []
+    rows = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
         totais = _creditos(practitioner, until).aggregate(
             received_amount=Sum("amount"), quantos=Count("pk")
@@ -87,7 +87,7 @@ def resumo(until):
         received_amount = totais["received_amount"] or ZERO
         bruta = percentual_de(received_amount, practitioner.commission_percentage)
         reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
-        linhas.append(
+        rows.append(
             {
                 "practitioner": practitioner,
                 "received_amount": received_amount,
@@ -96,7 +96,7 @@ def resumo(until):
                 "amount": bruta - reversal_deduction,
             }
         )
-    return linhas
+    return rows
 
 
 @transaction.atomic

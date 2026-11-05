@@ -41,7 +41,7 @@
           <details>
             <summary>{% blocktranslate count total=record.changes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
             <ul class="small mb-0">
-              {% for rotulo, antes, depois in record.campos %}
+              {% for rotulo, antes, depois in record.fields %}
               <li><strong>{{ rotulo }}</strong>: {{ antes|default_if_none:"—" }} → {{ depois|default_if_none:"—" }}</li>
               {% endfor %}
             </ul>

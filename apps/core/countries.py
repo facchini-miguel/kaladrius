@@ -202,7 +202,7 @@ _TELEFONE = {
 def normalizar_telefone_internacional(digitos, country):
     """National number of a phone outside Brazil from its digits, or ValidationError."""
     ddi = do_codigo(country).ddi
-    tamanhos, inicios, mensagem = _TELEFONE[country]
+    tamanhos, inicios, message = _TELEFONE[country]
     number = digitos
     if number.startswith("00"):  # international prefix typed
         number = number[2:]
@@ -222,7 +222,7 @@ def normalizar_telefone_internacional(digitos, country):
                 number = number[:area] + number[area + 2 :]
                 break
     if len(number) not in tamanhos or number[0] not in inicios:
-        raise ValidationError(mensagem)
+        raise ValidationError(message)
     return number
 
 
@@ -318,9 +318,9 @@ def normalizar_cep(value, country):
     postal_code = re.sub(r"[\s\-.]", "", value or "").upper()
     if not postal_code:
         return ""
-    padrao, mensagem = _CEP.get(country, _CEP[PADRAO])
-    if not re.fullmatch(padrao, postal_code):
-        raise ValidationError(mensagem)
+    default, message = _CEP.get(country, _CEP[PADRAO])
+    if not re.fullmatch(default, postal_code):
+        raise ValidationError(message)
     return postal_code
 
 

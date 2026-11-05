@@ -48,7 +48,7 @@ def test_link_do_whatsapp_com_ddd_e_nono_digito():
 @pytest.mark.django_db
 def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("patients:new"),
         {
             "kind": "PF",
@@ -58,7 +58,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
             "home_phone": "(54) 3461-3354",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         patient = Patient.objects.get()
     assert (patient.mobile_phone, patient.whatsapp, patient.home_phone) == (

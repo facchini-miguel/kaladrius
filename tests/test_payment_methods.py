@@ -16,8 +16,8 @@ from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_d
 pytestmark = pytest.mark.django_db
 
 
-def mudar_pais(dados, country):
-    clinic = dados["clinic"]
+def mudar_pais(data, country):
+    clinic = data["clinic"]
     clinic.country = country
     clinic.save()
 
@@ -33,9 +33,9 @@ def test_cada_pais_tem_as_suas_formas():
 
 def test_nomes_locais_entre_parenteses():
     with translation.override("pt-br"):
-        assert payment_methods.rotulo("transferencia", "MX") == "Transferência (SPEI)"
-        assert payment_methods.rotulo("carteira", "PE") == "Carteira digital (Yape, Plin)"
-        assert payment_methods.rotulo("transferencia", "BR") == "Transferência"
+        assert payment_methods.label("transferencia", "MX") == "Transferência (SPEI)"
+        assert payment_methods.label("carteira", "PE") == "Carteira digital (Yape, Plin)"
+        assert payment_methods.label("transferencia", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
         assert [code for code, _nome in payment_methods.em_uso("BR")] == [
             "dinheiro",
@@ -47,18 +47,18 @@ def test_nomes_locais_entre_parenteses():
         ]
     with translation.override("en"):
         # The local name is not repeated when it is the translated name itself.
-        assert payment_methods.rotulo("debito_auto", "GB") == "Direct debit"
-        assert payment_methods.rotulo("debito_auto", "ZA") == "Direct debit (debit order)"
+        assert payment_methods.label("debito_auto", "GB") == "Direct debit"
+        assert payment_methods.label("debito_auto", "ZA") == "Direct debit (debit order)"
 
 
 def test_cheque_com_a_grafia_de_cada_ingles():
     with translation.override("en"):
-        assert payment_methods.rotulo("cheque", "US") == "Check"
+        assert payment_methods.label("cheque", "US") == "Check"
     for variante in ("en-gb", "en-ca", "en-au", "en-za"):
         with translation.override(variante):
-            assert payment_methods.rotulo("cheque", "GB") == "Cheque", variante
+            assert payment_methods.label("cheque", "GB") == "Cheque", variante
     with translation.override("es"):
-        assert payment_methods.rotulo("cheque", "MX") == "Cheque"
+        assert payment_methods.label("cheque", "MX") == "Cheque"
 
 
 def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
@@ -67,12 +67,12 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
     admin = entrar(cenario, "admin")
-    pagina = admin.get(url).content.decode()
-    assert 'value="carteira"' in pagina and "Yape, Plin" in pagina
-    assert 'value="pix"' not in pagina and 'value="boleto"' not in pagina
-    dados = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["cash_register"].pk}
-    assert "method" in admin.post(url, {**dados, "method": "pix"}).context["form"].errors
-    assert admin.post(url, {**dados, "method": "carteira"}).status_code == 302
+    page = admin.get(url).content.decode()
+    assert 'value="carteira"' in page and "Yape, Plin" in page
+    assert 'value="pix"' not in page and 'value="boleto"' not in page
+    data = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["cash_register"].pk}
+    assert "method" in admin.post(url, {**data, "method": "pix"}).context["form"].errors
+    assert admin.post(url, {**data, "method": "carteira"}).status_code == 302
     with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
@@ -96,7 +96,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
     form = admin.get(url).context["form"]
     assert "card_installments" not in form.fields
     assert "NSU" not in str(form.fields["card_transaction_code"].label)
-    dados = {
+    data = {
         "date": HOJE.isoformat(),
         "amount": "100",
         "account": cenario["cash_register"].pk,
@@ -105,7 +105,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
         "card_installments": "3",
         "card_transaction_code": "A1B2",
     }
-    assert admin.post(url, dados).status_code == 302
+    assert admin.post(url, data).status_code == 302
     with usar_clinica(cenario["clinic"]):
         payment = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
@@ -117,7 +117,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
     installment = parcelas_de(cenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
-    dados = {
+    data = {
         "date": HOJE.isoformat(),
         "amount": "100",
         "account": cenario["cash_register"].pk,
@@ -126,7 +126,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
         "card_installments": "3",
         "card_transaction_code": "A1B2",
     }
-    assert entrar(cenario, "admin").post(url, dados).status_code == 302
+    assert entrar(cenario, "admin").post(url, data).status_code == 302
     with usar_clinica(cenario["clinic"]):
         payment = Payment.objects.get()
     assert (payment.card_brand, payment.card_installments, payment.card_transaction_code) == (

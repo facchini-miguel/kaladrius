@@ -43,8 +43,8 @@ def test_acesso_as_telas_de_profissionais_por_papel(
 def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profissional, cliente_de):
     practitioner = criar_profissional(clinica_a, "Dra. A")
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    resposta = cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
-    assert resposta.status_code == 403
+    response = cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
+    assert response.status_code == 403
     with usar_clinica(clinica_a):
         assert Practitioner.objects.filter(pk=practitioner.pk).exists()
 
@@ -53,8 +53,8 @@ def test_botoes_aparecem_conforme_a_permissao(
     clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
     criar_profissional(clinica_a, "Dra. A")
-    recepcao = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
-    content = recepcao.get(reverse("practitioners:list")).content.decode()
+    reception = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    content = reception.get(reverse("practitioners:list")).content.decode()
     assert "Novo profissional" not in content
     assert ">Editar<" not in content
     assert ">Excluir<" not in content
@@ -68,11 +68,11 @@ def test_botoes_aparecem_conforme_a_permissao(
 
 def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Novo", "registration": "CRM 1", "color": "#123456", "active": "on"},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         practitioner = Practitioner.objects.get(name="Dr. Novo")
     assert practitioner.clinic == clinica_a
@@ -92,9 +92,9 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
 
 def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("practitioners:new"), {"name": "X", "color": "#zzzzzz"})
-    assert resposta.status_code == 200
-    assert "#RRGGBB" in resposta.content.decode()
+    response = cliente.post(reverse("practitioners:new"), {"name": "X", "color": "#zzzzzz"})
+    assert response.status_code == 200
+    assert "#RRGGBB" in response.content.decode()
 
 
 def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cliente_de):
@@ -119,13 +119,13 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     cliente = cliente_de(root)
     # Without a clinic, the superuser is sent to register it.
-    resposta = cliente.get(reverse("practitioners:list"))
-    assert resposta.url == reverse("register_clinic")
+    response = cliente.get(reverse("practitioners:list"))
+    assert response.url == reverse("register_clinic")
 
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("register_clinic"), {"name": "Clínica Nova", "area": "medicina"}
     )
-    assert resposta.url == reverse("home")
+    assert response.url == reverse("home")
     assert list(Clinic.objects.values_list("name", "area")) == [("Clínica Nova", "medicina")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
     assert cliente.get(reverse("practitioners:list")).url == reverse("account:two_factor")
@@ -146,8 +146,8 @@ def test_admin_do_django_so_para_superusuario(
     clinica_a, criar_usuario, cliente_de, django_user_model
 ):
     staff = criar_usuario("staff", clinica_a, Papel.ADMIN, is_staff=True)
-    resposta = cliente_de(staff).get(reverse("admin:index"))
-    assert resposta.status_code == 302  # sent to the admin login
+    response = cliente_de(staff).get(reverse("admin:index"))
+    assert response.status_code == 302  # sent to the admin login
 
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     assert cliente_de(root).get(reverse("admin:index")).status_code == 200

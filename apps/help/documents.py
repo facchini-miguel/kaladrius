@@ -31,9 +31,9 @@ def _idioma():
     return language if language in PASTAS else IDIOMA_PADRAO
 
 
-def url_do_site(caminho=""):
+def url_do_site(path=""):
     """Address of a page of the documentation site in the current language."""
-    return f"{settings.DOCS_URL.rstrip('/')}{PREFIXOS[_idioma()]}/{caminho}"
+    return f"{settings.DOCS_URL.rstrip('/')}{PREFIXOS[_idioma()]}/{path}"
 
 
 def _separar_listas(text):
@@ -41,28 +41,28 @@ def _separar_listas(text):
 
     GitHub and the site render such lists, but Python-Markdown needs the blank line.
     """
-    linhas, em_codigo, anterior = [], False, ""
-    for linha in text.split("\n"):
-        if linha.lstrip().startswith("```"):
+    rows, em_codigo, previous = [], False, ""
+    for row in text.split("\n"):
+        if row.lstrip().startswith("```"):
             em_codigo = not em_codigo
         elif (
             not em_codigo
-            and _ITEM_DE_LISTA.match(linha)
-            and anterior.strip()
-            and not _ITEM_DE_LISTA.match(anterior)
-            and not anterior.startswith((" ", "|", ">", "#"))
+            and _ITEM_DE_LISTA.match(row)
+            and previous.strip()
+            and not _ITEM_DE_LISTA.match(previous)
+            and not previous.startswith((" ", "|", ">", "#"))
         ):
-            linhas.append("")
-        linhas.append(linha)
-        anterior = linha
-    return "\n".join(linhas)
+            rows.append("")
+        rows.append(row)
+        previous = row
+    return "\n".join(rows)
 
 
 def privacidade():
     """(title, HTML) of the privacy policy in the current language."""
     file = DOCS / PASTAS[_idioma()] / "manual" / "privacy.md"
     text = _FRONTMATTER.sub("", file.read_text(encoding="utf-8"), count=1)
-    titulo = next((linha[2:].strip() for linha in text.splitlines() if linha.startswith("# ")), "")
+    titulo = next((row[2:].strip() for row in text.splitlines() if row.startswith("# ")), "")
     html = markdown.markdown(
         _separar_listas(text), extensions=["tables", "fenced_code", "sane_lists"]
     )

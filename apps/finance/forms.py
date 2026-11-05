@@ -27,10 +27,10 @@ def _formas_com_vazio():
     return [("", "—"), *Payment.Forma.em_uso()]
 
 
-def _campo_dinheiro(rotulo, obrigatorio=True, minimo=0, **extra):
+def _campo_dinheiro(label, obrigatorio=True, minimo=0, **extra):
     """Amount typed in the user's format (1.500,50 in Portuguese and Spanish)."""
     return CampoDecimal(
-        label=rotulo,
+        label=label,
         max_digits=12,
         decimal_places=2,
         min_value=minimo,
@@ -107,16 +107,16 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         _centros_de_custo(self)
 
     def clean(self):
-        dados = super().clean()
-        if not dados.get("patient") and not (dados.get("payer") or "").strip():
+        data = super().clean()
+        if not data.get("patient") and not (data.get("payer") or "").strip():
             self.add_error("payer", _("Escolha o paciente ou informe quem paga."))
-        if dados.get("total_amount") is not None and dados["total_amount"] <= 0:
+        if data.get("total_amount") is not None and data["total_amount"] <= 0:
             self.add_error("total_amount", _("Informe um valor maior que zero."))
-        if dados.get("recebido_agora"):
-            for campo in ("method", "account"):
-                if not dados.get(campo):
-                    self.add_error(campo, _("Informe para registrar o pagamento."))
-        return dados
+        if data.get("recebido_agora"):
+            for field in ("method", "account"):
+                if not data.get(field):
+                    self.add_error(field, _("Informe para registrar o pagamento."))
+        return data
 
 
 class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
@@ -170,24 +170,24 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         _centros_de_custo(self)
 
     def clean(self):
-        dados = super().clean()
-        if dados.get("supplier"):
-            dados["payer"] = dados["supplier"].name
-        elif not (dados.get("payer") or "").strip():
+        data = super().clean()
+        if data.get("supplier"):
+            data["payer"] = data["supplier"].name
+        elif not (data.get("payer") or "").strip():
             self.add_error("supplier", _("Escolha o fornecedor ou informe para quem é."))
-        if dados.get("amount") is not None and dados["amount"] <= 0:
+        if data.get("amount") is not None and data["amount"] <= 0:
             self.add_error("amount", _("Informe um valor maior que zero."))
-        if dados.get("pago_agora"):
-            for campo in ("method", "account"):
-                if not dados.get(campo):
-                    self.add_error(campo, _("Informe para registrar o pagamento."))
-        return dados
+        if data.get("pago_agora"):
+            for field in ("method", "account"):
+                if not data.get(field):
+                    self.add_error(field, _("Informe para registrar o pagamento."))
+        return data
 
     def total_amount(self):
-        dados = self.cleaned_data
-        if dados["modo"] == self.REPETIR:
-            return dados["amount"] * dados["parcelas"]
-        return dados["amount"]
+        data = self.cleaned_data
+        if data["modo"] == self.REPETIR:
+            return data["amount"] * data["parcelas"]
+        return data["amount"]
 
 
 class FornecedorForm(FormularioBootstrap, forms.ModelForm):
@@ -245,24 +245,24 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         return self._telefone("whatsapp")
 
     def clean(self):
-        dados = super().clean()
+        data = super().clean()
         # A type without a document in this country (an individual in the UK) keeps none.
-        juridica = dados.get("kind") == Supplier.Tipo.JURIDICA
+        juridica = data.get("kind") == Supplier.Tipo.JURIDICA
         do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
         document = ""
         if do_tipo is not None:
             try:
-                document = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
-            except ValidationError as erro:
-                self.add_error("tax_id", erro)
-                return dados
-        dados["tax_id"] = document
+                document = identification.limpar(data.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+            except ValidationError as error:
+                self.add_error("tax_id", error)
+                return data
+        data["tax_id"] = document
         if (
             document
             and Supplier.objects.filter(tax_id=document).exclude(pk=self.instance.pk).exists()
         ):
             self.add_error("tax_id", _("Já existe um fornecedor com este documento."))
-        return dados
+        return data
 
 
 class PlanejamentoForm(FormularioBootstrap, forms.Form):
@@ -273,11 +273,11 @@ class PlanejamentoForm(FormularioBootstrap, forms.Form):
         self.grupos = grupos
         for group in grupos:
             # Rendered by the field itself: it shows 1.000,00 in Portuguese and reads it back.
-            campo = _campo_dinheiro(str(group), obrigatorio=False, initial=metas.get(group.pk))
-            campo.widget.attrs.update(
+            field = _campo_dinheiro(str(group), obrigatorio=False, initial=metas.get(group.pk))
+            field.widget.attrs.update(
                 {"class": "form-control form-control-sm text-end", "aria-label": str(group)}
             )
-            self.fields[self.name(group)] = campo
+            self.fields[self.name(group)] = field
 
     @staticmethod
     def name(group):
@@ -340,26 +340,26 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
         do_pais = payment_methods.do_pais()
         if not do_pais.parcelas_no_cartao:
             del self.fields["card_installments"]
-        rotulo = _("Código da transação")
+        label = _("Código da transação")
         if do_pais.codigo_do_cartao:
-            rotulo = f"{rotulo} ({do_pais.codigo_do_cartao})"
-        self.fields["card_transaction_code"].label = rotulo
+            label = f"{label} ({do_pais.codigo_do_cartao})"
+        self.fields["card_transaction_code"].label = label
 
     def clean(self):
-        dados = super().clean()
-        dados["interest"] = dados.get("interest") or 0
+        data = super().clean()
+        data["interest"] = data.get("interest") or 0
         if "discount" in self.fields:  # removed for those who may not give discounts
-            dados["discount"] = dados.get("discount") or 0
-        if dados.get("amount") is not None and dados["amount"] <= 0:
+            data["discount"] = data.get("discount") or 0
+        if data.get("amount") is not None and data["amount"] <= 0:
             self.add_error("amount", _("Informe um valor maior que zero."))
         if (
-            dados.get("method") not in payment_methods.CARTOES
+            data.get("method") not in payment_methods.CARTOES
             or "card_installments" not in self.fields
         ):
-            dados["card_installments"] = None
-        if dados.get("method") not in payment_methods.CARTOES:
-            dados["card_brand"] = dados["card_transaction_code"] = ""
-        return dados
+            data["card_installments"] = None
+        if data.get("method") not in payment_methods.CARTOES:
+            data["card_brand"] = data["card_transaction_code"] = ""
+        return data
 
 
 class MotivoForm(FormularioBootstrap, forms.Form):
@@ -405,17 +405,17 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
         return encontrados
 
     def clean(self):
-        dados = super().clean()
-        parent, kind = dados.get("parent"), dados.get("kind")
+        data = super().clean()
+        parent, kind = data.get("parent"), data.get("kind")
         if parent and kind and parent.kind != kind:
             self.add_error(
                 "parent", _("O grupo acima precisa ser do mesmo tipo (receita ou despesa).")
             )
-        name = (dados.get("name") or "").strip()
+        name = (data.get("name") or "").strip()
         repetido = AccountGroup.objects.filter(kind=kind, parent=parent, name__iexact=name)
         if name and repetido.exclude(pk=self.instance.pk).exists():
             self.add_error("name", _("Já existe um grupo com este nome neste lugar do plano."))
-        if dados.get("code") is None and kind:
+        if data.get("code") is None and kind:
             # Left blank where the neighbors are numbered: the next number, so the new group
             # reads "1.3" like the rest instead of having none (review stage 3).
             vizinhos = AccountGroup.objects.filter(kind=kind, parent=parent).exclude(
@@ -423,8 +423,8 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
             )
             codigos = [c for c in vizinhos.values_list("code", flat=True) if c is not None]
             if codigos or (parent is not None and parent.code is not None):
-                dados["code"] = max(codigos, default=0) + 1
-        return dados
+                data["code"] = max(codigos, default=0) + 1
+        return data
 
 
 class CategoriaForm(FormularioBootstrap, forms.ModelForm):
@@ -443,14 +443,14 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
         self.fields["group"].help_text = _("Onde a categoria fica no plano de contas (opcional).")
 
     def clean(self):
-        dados = super().clean()
-        group = dados.get("group")
-        if group and dados.get("kind") and group.kind != dados["kind"]:
+        data = super().clean()
+        group = data.get("group")
+        if group and data.get("kind") and group.kind != data["kind"]:
             self.add_error("group", _("O grupo precisa ser do mesmo tipo da categoria."))
-        repetida = Category.objects.filter(name=dados.get("name"), kind=dados.get("kind"))
+        repetida = Category.objects.filter(name=data.get("name"), kind=data.get("kind"))
         if repetida.exclude(pk=self.instance.pk).exists():
             self.add_error("name", _("Já existe uma categoria com este nome."))
-        return dados
+        return data
 
 
 class CentroCustoForm(FormularioBootstrap, forms.ModelForm):

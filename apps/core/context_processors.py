@@ -36,13 +36,15 @@ def clinic(request):
 def idiomas(request):
     """Languages for the top bar menu, each one named in itself ("English", "Español"):
     get_available_languages would translate the names into the current language."""
-    atual = translation.get_language()
+    current = translation.get_language()
     # A country's English (en-gb, en-au... decision 117) is still "English" in the menu.
-    base = next((code for code, _nome in settings.LANGUAGES if atual.split("-")[0] == code), atual)
+    base = next(
+        (code for code, _nome in settings.LANGUAGES if current.split("-")[0] == code), current
+    )
     return {
         "idiomas": settings.LANGUAGES,
         "idioma_base": base,
-        "idioma_nome": dict(settings.LANGUAGES).get(base, atual),
+        "idioma_nome": dict(settings.LANGUAGES).get(base, current),
     }
 
 
@@ -52,12 +54,12 @@ def backup(request):
     user = getattr(request, "user", None)
     if user is None or not user.is_superuser or not settings.BACKUP_MONITORED:
         return {}
-    ultimo = Backup.objects.first()
-    if ultimo is None:
+    last = Backup.objects.first()
+    if last is None:
         return {"backup_nenhum": True}
-    if timezone.now() - ultimo.timestamp <= BACKUP_ATRASADO_APOS:
+    if timezone.now() - last.timestamp <= BACKUP_ATRASADO_APOS:
         return {}
-    return {"backup_atrasado": ultimo}
+    return {"backup_atrasado": last}
 
 
 def inatividade(request):

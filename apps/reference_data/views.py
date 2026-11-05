@@ -16,38 +16,38 @@ POR_PAGINA = 50
 def cidades(request):
     ufs = State.objects.all()
     state = request.GET.get("state", "")
-    busca = request.GET.get("q", "").strip()
+    search = request.GET.get("q", "").strip()
     cidades = City.objects.select_related("state")
     if state.isdecimal():
         cidades = cidades.filter(state_id=int(state))
-    if busca:
-        cidades = cidades.filter(name__unaccent__icontains=busca)
-    pagina = Paginator(cidades, POR_PAGINA).get_page(request.GET.get("pagina"))
+    if search:
+        cidades = cidades.filter(name__unaccent__icontains=search)
+    page = Paginator(cidades, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
         "reference_data/cities.html",
         {
             "ufs": ufs,
             "state": state,
-            "busca": busca,
-            "pagina": pagina,
-            "parametros": urlencode({"state": state, "q": busca}),
+            "busca": search,
+            "pagina": page,
+            "parametros": urlencode({"state": state, "q": search}),
         },
     )
 
 
 @exige_permissao(Modulo.CADASTROS, Acao.VER)
 def bancos(request):
-    busca = request.GET.get("q", "").strip()
+    search = request.GET.get("q", "").strip()
     bancos = Bank.objects.all()
-    if busca:
-        filtro = Q(name__unaccent__icontains=busca) | Q(short_name__unaccent__icontains=busca)
-        if busca.isdecimal():
-            filtro |= Q(code=int(busca))
+    if search:
+        filtro = Q(name__unaccent__icontains=search) | Q(short_name__unaccent__icontains=search)
+        if search.isdecimal():
+            filtro |= Q(code=int(search))
         bancos = bancos.filter(filtro)
-    pagina = Paginator(bancos, POR_PAGINA).get_page(request.GET.get("pagina"))
-    contexto = {"busca": busca, "pagina": pagina, "parametros": urlencode({"q": busca})}
-    return render(request, "reference_data/banks.html", contexto)
+    page = Paginator(bancos, POR_PAGINA).get_page(request.GET.get("pagina"))
+    context = {"busca": search, "pagina": page, "parametros": urlencode({"q": search})}
+    return render(request, "reference_data/banks.html", context)
 
 
 @login_required

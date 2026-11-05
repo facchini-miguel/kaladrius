@@ -147,9 +147,9 @@ def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usua
 
 
 def test_usuario_sem_clinica_ve_aviso(criar_usuario, cliente_de):
-    resposta = cliente_de(criar_usuario("solto")).get(reverse("practitioners:list"))
-    assert resposta.status_code == 403
-    assert "não tem acesso a nenhuma clínica ativa" in resposta.content.decode()
+    response = cliente_de(criar_usuario("solto")).get(reverse("practitioners:list"))
+    assert response.status_code == 403
+    assert "não tem acesso a nenhuma clínica ativa" in response.content.decode()
 
 
 def test_formulario_so_oferece_usuarios_da_propria_clinica(
@@ -168,11 +168,11 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
 ):
     estranho = criar_usuario("estranho_b", clinica_b)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Novo", "color": "#123456", "user": estranho.pk, "active": "on"},
     )
-    assert resposta.status_code == 200  # form redisplayed with an error
+    assert response.status_code == 200  # form redisplayed with an error
     with usar_clinica(clinica_a):
         assert not Practitioner.objects.filter(name="Dr. Novo").exists()
 
@@ -183,10 +183,10 @@ def test_nao_liga_o_mesmo_usuario_a_dois_profissionais(
     colega = criar_usuario("colega_a", clinica_a)
     criar_profissional(clinica_a, "Dra. Primeira", user=colega)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Segundo", "color": "#123456", "user": colega.pk, "active": "on"},
     )
-    assert "já está ligado a outro profissional" in resposta.content.decode()
+    assert "já está ligado a outro profissional" in response.content.decode()
     with usar_clinica(clinica_a):
         assert not Practitioner.objects.filter(name="Dr. Segundo").exists()

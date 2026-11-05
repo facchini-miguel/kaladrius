@@ -5,8 +5,8 @@ from . import views
 app_name = "patients"
 
 urlpatterns = [
-    path("", views.lista, name="list"),
-    path("new/", views.novo, name="new"),
+    path("", views.results, name="list"),
+    path("new/", views.new, name="new"),
     path("suggestions/", views.sugestoes, name="suggestions"),
     path("birthdays/", views.aniversariantes, name="birthdays"),
     path("<int:pk>/", views.ficha, name="record"),

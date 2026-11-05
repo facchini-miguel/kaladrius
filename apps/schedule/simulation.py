@@ -35,8 +35,8 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
     if not (profissionais and tipos and pacientes):
         return 0
     passo = datetime.timedelta(minutes=clinic.schedule_interval)
-    hoje = timezone.localdate()
-    segunda = hoje - datetime.timedelta(days=hoje.weekday() + 7 * semanas_antes)
+    today = timezone.localdate()
+    segunda = today - datetime.timedelta(days=today.weekday() + 7 * semanas_antes)
     days = [
         segunda + datetime.timedelta(days=n) for n in range(7 * (semanas_antes + semanas_depois))
     ]
@@ -52,21 +52,21 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
         return all(end <= a or start >= b for a, b in ocupados.get(practitioner.pk, []))
 
     novos = []
-    for dia in days:
-        if dia.weekday() >= 5:
+    for day in days:
+        if day.weekday() >= 5:
             continue
         for practitioner in profissionais:
-            atual = timestamp(dia, clinic.schedule_start)
-            fim_do_dia = timestamp(dia, clinic.schedule_end)
-            while atual < fim_do_dia:
-                duracao = passo * sorteio.choice([1, 1, 2])
-                end = atual + duracao
+            current = timestamp(day, clinic.schedule_start)
+            fim_do_dia = timestamp(day, clinic.schedule_end)
+            while current < fim_do_dia:
+                duration = passo * sorteio.choice([1, 1, 2])
+                end = current + duration
                 if (
                     end > fim_do_dia
                     or sorteio.random() > ocupacao
-                    or not livre(practitioner, atual, end)
+                    or not livre(practitioner, current, end)
                 ):
-                    atual += passo
+                    current += passo
                     continue
                 com_paciente = sorteio.random() < 0.9
                 novos.append(
@@ -76,12 +76,12 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
                         kind=sorteio.choice(tipos),
                         patient=sorteio.choice(pacientes) if com_paciente else None,
                         description="" if com_paciente else "Horário bloqueado",
-                        status=_situacao(sorteio, atual) if com_paciente else "agendado",
-                        start=atual,
+                        status=_situacao(sorteio, current) if com_paciente else "agendado",
+                        start=current,
                         end=end,
                     )
                 )
-                atual = end
+                current = end
     Appointment.objects.bulk_create(novos, batch_size=1000)
     return len(novos)
 
@@ -103,17 +103,17 @@ def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=
     pacientes = _pacientes(clinic)
     if not pacientes:
         return 0
-    hoje = timezone.localdate()
+    today = timezone.localdate()
     novas = []
     for _ in range(quantity):
-        date = hoje + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
+        date = today + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
         novas.append(
             Recall(
                 clinic=clinic,
                 patient=sorteio.choice(pacientes),
                 date=date,
                 description=sorteio.choice(MOTIVOS_RECHAMADA),
-                done=date < hoje and sorteio.random() < 0.7,
+                done=date < today and sorteio.random() < 0.7,
             )
         )
     Recall.objects.bulk_create(novas)
@@ -149,7 +149,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     if not (pacientes and categorias and contas):
         return 0, 0
-    hoje = timezone.localdate()
+    today = timezone.localdate()
     formas = [method for method, _rotulo in Payment.Forma.em_uso(clinic.country)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
@@ -158,7 +158,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     }
     criados = 0
     for _ in range(quantity):
-        date = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
+        date = today - datetime.timedelta(days=sorteio.randint(0, 90))
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.RECEBER,
@@ -174,7 +174,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
             user=user,
         )
         for installment in entry.parcelas.all():
-            if installment.due_date <= hoje and sorteio.random() < 0.8:
+            if installment.due_date <= today and sorteio.random() < 0.8:
                 services.receber(
                     installment,
                     user=user,
@@ -215,8 +215,8 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     categorias = {
         c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Tipo.DESPESA)
     }
-    hoje = timezone.localdate()
-    start = services.somar_meses(hoje.replace(day=10), -2)
+    today = timezone.localdate()
+    start = services.somar_meses(today.replace(day=10), -2)
     criadas = 0
     for supplier, description, category, amount, meses in DESPESAS_SIMULADAS:
         if category not in categorias:
@@ -237,11 +237,11 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
             total_amount=amount * parcelas if meses else amount,
             date=start,
             parcelas=parcelas,
-            primeiro_vencimento=start if meses else hoje - datetime.timedelta(days=20),
+            primeiro_vencimento=start if meses else today - datetime.timedelta(days=20),
             user=user,
         )
         for installment in entry.parcelas.all():
-            if installment.due_date <= hoje and sorteio.random() < 0.9:
+            if installment.due_date <= today and sorteio.random() < 0.9:
                 services.receber(
                     installment,
                     user=user,
@@ -295,10 +295,10 @@ def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
     )
     if not (procedimentos and pacientes and category):
         return 0
-    teeth = [d for linha in DENTES_PERMANENTES for d in linha]
-    hoje = timezone.localdate()
+    teeth = [d for row in DENTES_PERMANENTES for d in row]
+    today = timezone.localdate()
     for _ in range(quantity):
-        date = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
+        date = today - datetime.timedelta(days=sorteio.randint(0, 60))
         estimate = Estimate.objects.create(
             clinic=clinic,
             patient=sorteio.choice(pacientes),
