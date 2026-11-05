@@ -96,7 +96,7 @@ sleep 5
 docker exec teste-backup createdb -U postgres restaurado
 docker cp <archivo>.dump teste-backup:/backup.dump
 docker exec teste-backup pg_restore -U postgres -d restaurado --no-owner --no-privileges --exit-on-error /backup.dump
-docker exec teste-backup psql -U postgres -d restaurado -c 'SELECT count(*) FROM pacientes_paciente'
+docker exec teste-backup psql -U postgres -d restaurado -c 'SELECT count(*) FROM patients_patient'
 docker rm -f teste-backup
 ```
 

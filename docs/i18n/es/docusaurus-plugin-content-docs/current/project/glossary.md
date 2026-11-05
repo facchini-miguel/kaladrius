@@ -9,7 +9,7 @@ Los nombres del código están pasando del portugués al inglés (decisiones 155
 ## Cómo se renombra un nombre
 
 - **Solo cambian identificadores**, leídos como tokens de Python y variables de plantilla, nunca como texto: los textos de las pantallas, los `_()` y los `{% translate %}` quedan como están.
-- **La base mantiene sus nombres**: el modelo mantiene su tabla (`Meta.db_table`), el campo su columna (`db_column`). Las migraciones no ejecutan SQL, y la versión anterior (la vuelta automática) sigue funcionando.
+- **La base sigue al código** (decisión 179): una tabla se llama `<app>_<modelo>` (`patients_patient`), una columna como su campo (`birth_date`), un índice o restricción por lo que hace (`appointment_no_overlap`). Hasta la decisión 179 los renombrados mantenían las tablas y columnas en portugués (`Meta.db_table`, `db_column`), para que la versión anterior siguiera funcionando.
 - **Un renombrado nunca choca**: un archivo que ya usa el nombre nuevo para otra cosa (una variable `date` junto a un campo `data`, el `type` de Python) se hace a mano.
 - **Un campo mantiene su etiqueta en portugués**: sin `verbose_name` Django arma la etiqueta a partir del nombre, así que un campo renombrado al inglés mostraría "created by" en las pantallas y en la auditoría. Un campo renombrado dice su propia etiqueta (`_("criado por")`); si no, una prueba falla (decisión 170).
 - **Las pruebas vigilan las plantillas**: una variable que una plantilla busca y no encuentra hace fallar la ejecución, salvo que esté en `tests/missing_template_variables.txt` (decisión 159). Un renombrado mantiene esa lista igual, con los nombres nuevos.
@@ -1350,7 +1350,6 @@ Las clases de enum `Tipo`, `Situacao` y `Forma` de todas las apps pasaron a `Kin
 ## Lo que queda en portugués
 
 - **Valores guardados en la base**: los valores de las opciones (`"PF"`, `"conciliada"`, `"retirada"`), los códigos de los módulos (`"rechamadas"`), las claves dentro de campos JSON (los cambios de la auditoría, configuraciones). Solo cambia el nombre de las constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), no su valor.
-- **Nombres de tablas y columnas**, y los labels de las apps (`pacientes`, `financeiro`…), que dan nombre a las tablas y migraciones.
+- **Los labels de las apps** (`pacientes`, `financeiro`…), que dan nombre a las migraciones y a los tipos de contenido (ya a ninguna tabla).
 - **Las migraciones antiguas**: describen el pasado, con los nombres de la época.
 - **Los textos del importador del Odonto heredado**: son los nombres de las tablas y columnas del sistema antiguo.
-- **`Usuario`**, el modelo de usuario (`AUTH_USER_MODEL`), por ahora: pide un plan propio.

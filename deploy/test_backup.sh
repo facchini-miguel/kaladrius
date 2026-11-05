@@ -41,7 +41,11 @@ SELECT t, (xpath('/row/c/text()', query_to_xml('SELECT count(*) AS c FROM ' || t
 FROM unnest(ARRAY[
   'core_clinica', 'core_usuario', 'core_vinculo', 'pacientes_paciente', 'profissionais_profissional',
   'agenda_agendamento', 'rechamadas_rechamada', 'financeiro_lancamento', 'financeiro_pagamento',
-  'financeiro_caixa', 'financeiro_comissao', 'financeiro_transacaobancaria', 'orcamentos_orcamento', 'auditoria_registroauditoria', 'core_backup'
+  'financeiro_caixa', 'financeiro_comissao', 'financeiro_transacaobancaria', 'orcamentos_orcamento', 'auditoria_registroauditoria', 'core_backup',
+  -- the same tables with their names since 0.59.0 (decision 179); a backup has one or the other
+  'core_clinic', 'core_user', 'core_membership', 'patients_patient', 'practitioners_practitioner',
+  'schedule_appointment', 'recalls_recall', 'finance_entry', 'finance_payment',
+  'finance_cash_register', 'finance_commission', 'finance_bank_transaction', 'estimates_estimate', 'audit_entry'
 ]) AS t
 WHERE to_regclass(t) IS NOT NULL;
 \echo

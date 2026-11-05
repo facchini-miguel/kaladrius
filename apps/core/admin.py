@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_noop
 
 from .forms import ClinicAdminForm
-from .models import Backup, Clinic, Membership, Usuario
+from .models import Backup, Clinic, Membership, User
 
 
 def _superuser_only(request):
@@ -52,7 +52,7 @@ class ClinicAdmin(admin.ModelAdmin):
         return super().has_add_permission(request) and not Clinic.objects.exists()
 
 
-@admin.register(Usuario)
+@admin.register(User)
 class ClinicUserAdmin(UserAdmin):
     inlines = [UserMembershipInline]
 

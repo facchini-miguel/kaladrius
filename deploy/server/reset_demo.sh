@@ -59,11 +59,11 @@ keep() {  # keep <file> <query>; \copy takes one line, so the query is joined fi
   db "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -qc \"\\copy ($query) TO STDOUT\"" \
     >"$accounts/$1" 2>/dev/null || : >"$accounts/$1"
 }
-keep users "SELECT username, password, email, idioma FROM core_usuario WHERE is_superuser"
-keep two_factor "SELECT u.username, d.segredo, d.ativa, d.ativada_em, d.ultimo_passo
-  FROM conta_duasetapas d JOIN core_usuario u ON u.id = d.usuario_id WHERE u.is_superuser"
-keep codes "SELECT u.username, c.resumo, c.usado_em
-  FROM conta_codigorecuperacao c JOIN core_usuario u ON u.id = c.usuario_id WHERE u.is_superuser"
+keep users "SELECT username, password, email, language FROM core_user WHERE is_superuser"
+keep two_factor "SELECT u.username, d.secret, d.active, d.activated_at, d.last_step
+  FROM account_two_factor d JOIN core_user u ON u.id = d.user_id WHERE u.is_superuser"
+keep codes "SELECT u.username, c.digest, c.used_at
+  FROM account_recovery_code c JOIN core_user u ON u.id = c.user_id WHERE u.is_superuser"
 
 compose stop app
 # A clean schema: tables created by later versions are not left behind; the app's migrate
@@ -73,41 +73,46 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 SQL
 db 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner --no-privileges --exit-on-error' < "$BASE"
-db 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -qc "\copy core_backup FROM STDIN"' < "$backups"
-sql <<'SQL'
-SELECT setval(pg_get_serial_sequence('core_backup', 'id'), COALESCE(MAX(id), 1)) FROM core_backup;
-SQL
 compose start app
 
-# The app applies pending migrations when it starts; wait until there are none left.
+# The app applies pending migrations when it starts; wait until there are none left. Only
+# then is the schema today's, whatever version saved the base (decision 179): what was kept
+# goes back after it.
 for _ in $(seq 1 60); do
   compose exec -T app python manage.py migrate --check >/dev/null 2>&1 && break
   sleep 5
 done
+sql <<'SQL'
+TRUNCATE core_backup;
+SQL
+db 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -qc "\copy core_backup FROM STDIN"' < "$backups"
+sql <<'SQL'
+SELECT setval(pg_get_serial_sequence('core_backup', 'id'), COALESCE(MAX(id), 1)) FROM core_backup;
+SQL
 # The system administrators get their accounts back (decision 118), matched by username.
 sql <<'SQL'
-CREATE TABLE _kept_users (username text, password text, email text, idioma text);
+CREATE TABLE _kept_users (username text, password text, email text, language text);
 CREATE TABLE _kept_two_factor (
-  username text, segredo text, ativa boolean, ativada_em timestamptz, ultimo_passo bigint
+  username text, secret text, active boolean, activated_at timestamptz, last_step bigint
 );
-CREATE TABLE _kept_codes (username text, resumo text, usado_em timestamptz);
+CREATE TABLE _kept_codes (username text, digest text, used_at timestamptz);
 SQL
 for table in users two_factor codes; do
   db "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -qc \"\\copy _kept_$table FROM STDIN\"" \
     <"$accounts/$table"
 done
 sql <<'SQL'
-UPDATE core_usuario u SET password = g.password, email = g.email, idioma = g.idioma
+UPDATE core_user u SET password = g.password, email = g.email, language = g.language
   FROM _kept_users g WHERE u.username = g.username;
-DELETE FROM conta_duasetapas WHERE usuario_id IN
-  (SELECT u.id FROM core_usuario u JOIN _kept_users g USING (username));
-INSERT INTO conta_duasetapas (segredo, ativa, ativada_em, ultimo_passo, usuario_id)
-  SELECT d.segredo, d.ativa, d.ativada_em, d.ultimo_passo, u.id
-  FROM _kept_two_factor d JOIN core_usuario u USING (username);
-DELETE FROM conta_codigorecuperacao WHERE usuario_id IN
-  (SELECT u.id FROM core_usuario u JOIN _kept_users g USING (username));
-INSERT INTO conta_codigorecuperacao (resumo, usado_em, usuario_id)
-  SELECT c.resumo, c.usado_em, u.id FROM _kept_codes c JOIN core_usuario u USING (username);
+DELETE FROM account_two_factor WHERE user_id IN
+  (SELECT u.id FROM core_user u JOIN _kept_users g USING (username));
+INSERT INTO account_two_factor (secret, active, activated_at, last_step, user_id)
+  SELECT d.secret, d.active, d.activated_at, d.last_step, u.id
+  FROM _kept_two_factor d JOIN core_user u USING (username);
+DELETE FROM account_recovery_code WHERE user_id IN
+  (SELECT u.id FROM core_user u JOIN _kept_users g USING (username));
+INSERT INTO account_recovery_code (digest, used_at, user_id)
+  SELECT c.digest, c.used_at, u.id FROM _kept_codes c JOIN core_user u USING (username);
 DROP TABLE _kept_users, _kept_two_factor, _kept_codes;
 SQL
 

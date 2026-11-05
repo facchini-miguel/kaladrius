@@ -4,12 +4,12 @@ sidebar_position: 3
 
 # Modelo de datos
 
-Los nombres del código están pasando al inglés (decisiones 155 a 157): los modelos ya están en inglés; los campos aún tienen sus nombres en portugués. La base de datos mantiene los nombres de tablas y columnas. El [glosario](glossary.md) lista los nombres, antes y después.
+Los nombres del código y de la base de datos están en inglés (decisiones 155 a 179): modelos, campos, tablas, columnas, índices y restricciones. Los valores guardados quedan en portugués (`"recepcao"`, `"dinheiro"`). El [glosario](glossary.md) lista los nombres, antes y después.
 
 ## Principio multiclínica
 - Toda información de una clínica tiene una clave `clinic` (columna `clinica_id`). Ninguna consulta se hace sin filtrar por la clínica actual.
 - El filtro se aplica de forma centralizada (middleware + managers), no a mano en cada pantalla.
-- **Falla cerrada:** todo modelo de la clínica hereda de `ModeloDaClinica` (`apps/core/isolation.py`). El manager por defecto filtra por la clínica actual y, si no hay clínica definida, **da error en lugar de mostrar datos**. El filtro se decide **cuando la consulta se ejecuta** (no cuando se arma), lo que permite declarar campos de formulario con datos de la clínica. Guardar o eliminar un registro de otra clínica también da error. El código de la plataforma que necesita ver todas las clínicas (admin de Django, comandos) usa `sem_isolamento()` de forma explícita.
+- **Falla cerrada:** todo modelo de la clínica hereda de `ClinicModel` (`apps/core/isolation.py`). El manager por defecto filtra por la clínica actual y, si no hay clínica definida, **da error en lugar de mostrar datos**. El filtro se decide **cuando la consulta se ejecuta** (no cuando se arma), lo que permite declarar campos de formulario con datos de la clínica. Guardar o eliminar un registro de otra clínica también da error. El código de la plataforma que necesita ver todas las clínicas (admin de Django, comandos) usa `without_isolation()` de forma explícita.
 - La clínica actual viene de la sesión y solo se acepta si el usuario tiene un vínculo activo con ella (o es superusuario). El admin de Django está restringido a los superusuarios de la plataforma.
 - Las tablas de referencia públicas (estado, ciudad, banco, estado civil) son **globales**, compartidas entre las clínicas.
 
@@ -19,7 +19,7 @@ Los nombres del código están pasando al inglés (decisiones 155 a 157): los mo
 | Entidad | Campos principales | Observación |
 |---|---|---|
 | `Clinic` | nombre, documento (CPF/CNPJ), contacto, activa, configuración de la agenda (inicio, fin, duración del horario) | El *tenant* |
-| `Usuario` | usuario, nombre, correo, contraseña (Argon2), activo, idioma | Usuario de Django |
+| `User` | usuario, nombre, correo, contraseña (Argon2), activo, idioma | Usuario de Django |
 | `Membership` | usuario, clínica, perfil, activo | Un usuario puede trabajar en más de una clínica |
 
 ### Perfiles y permisos (reemplaza `sist_pessoasgrupos` / `sist_modulosperm`)

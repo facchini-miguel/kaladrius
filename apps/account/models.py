@@ -15,20 +15,15 @@ class TwoFactor(models.Model):
         on_delete=models.CASCADE,
         related_name="duas_etapas",
         verbose_name=_("usuário"),
-        db_column="usuario_id",
     )
-    secret = models.CharField(_("segredo"), max_length=64, editable=False, db_column="segredo")
-    active = models.BooleanField(_("ativa"), default=False, db_column="ativa")
-    activated_at = models.DateTimeField(
-        _("ativada em"), null=True, blank=True, db_column="ativada_em"
-    )
+    secret = models.CharField(_("segredo"), max_length=64, editable=False)
+    active = models.BooleanField(_("ativa"), default=False)
+    activated_at = models.DateTimeField(_("ativada em"), null=True, blank=True)
     # The last 30-second step accepted, so the same code cannot be used twice.
-    last_step = models.BigIntegerField(
-        _("último passo"), default=0, editable=False, db_column="ultimo_passo"
-    )
+    last_step = models.BigIntegerField(_("último passo"), default=0, editable=False)
 
     class Meta:
-        db_table = "conta_duasetapas"
+        db_table = "account_two_factor"
         verbose_name = _("verificação em duas etapas")
         verbose_name_plural = _("verificações em duas etapas")
 
@@ -42,13 +37,12 @@ class RecoveryCode(models.Model):
         on_delete=models.CASCADE,
         related_name="codigos_recuperacao",
         verbose_name=_("usuário"),
-        db_column="usuario_id",
     )
-    digest = models.CharField(_("resumo"), max_length=64, editable=False, db_column="resumo")
-    used_at = models.DateTimeField(_("usado em"), null=True, blank=True, db_column="usado_em")
+    digest = models.CharField(_("resumo"), max_length=64, editable=False)
+    used_at = models.DateTimeField(_("usado em"), null=True, blank=True)
 
     class Meta:
-        db_table = "conta_codigorecuperacao"
+        db_table = "account_recovery_code"
         verbose_name = _("código de recuperação")
         verbose_name_plural = _("códigos de recuperação")
 

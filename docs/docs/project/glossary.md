@@ -9,7 +9,7 @@ The code's names are moving from Portuguese to English (decisions 155 to 159); t
 ## How a name is renamed
 
 - **Only identifiers change**, read as Python tokens and template variables, never as text: the screens' texts, `_()` and `{% translate %}` stay as they are.
-- **The database keeps its names**: a model keeps its table (`Meta.db_table`), a field its column (`db_column`). The migrations run no SQL, and the previous version (the automatic rollback) still works.
+- **The database follows the code** (decision 179): a table is named `<app>_<model>` (`patients_patient`), a column after its field (`birth_date`), an index or constraint after what it does (`appointment_no_overlap`). Until decision 179 the renames kept the Portuguese tables and columns (`Meta.db_table`, `db_column`), so that the previous version still worked.
 - **A rename never collides**: a file that already uses the new name for something else (a variable `date` beside a field `data`, `type` the built-in) is done by hand.
 - **A field keeps its Portuguese label**: without `verbose_name` Django builds the label from the name, so a field renamed to English would show "created by" on the screens and in the audit. A renamed field states its label (`_("criado por")`); a test fails the run otherwise (decision 170).
 - **The tests watch the templates**: a variable a template looks up and does not find fails the run, unless it is in `tests/missing_template_variables.txt` (decision 159). A rename keeps that list the same, with the new names.
@@ -1350,7 +1350,6 @@ The enum classes `Tipo`, `Situacao` and `Forma` of every app became `Kind`, `Sta
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.
-- **Table and column names**, and the app labels (`pacientes`, `financeiro`…), which name the tables and migrations.
+- **The app labels** (`pacientes`, `financeiro`…), which name the migrations and content types (no longer any table).
 - **The old migrations**: they describe the past, with the names of the time.
 - **The legacy Odonto importer's strings**: they are the old system's table and column names.
-- **`Usuario`**, the user model (`AUTH_USER_MODEL`), for now: it needs a plan of its own.

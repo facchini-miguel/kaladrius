@@ -135,32 +135,32 @@ class Migration(migrations.Migration):
             new_name='role',
         ),
         migrations.AlterField(
-            model_name='usuario',
+            model_name='user',
             name='idioma',
             field=models.CharField(blank=True, choices=[('pt-br', 'Português'), ('en', 'English'), ('es', 'Español')], db_column='idioma', help_text='Vazio: o idioma do navegador.', max_length=10, verbose_name='idioma'),
         ),
         migrations.RenameField(
-            model_name='usuario',
+            model_name='user',
             old_name='idioma',
             new_name='language',
         ),
         migrations.AlterField(
-            model_name='usuario',
+            model_name='user',
             name='ultima_versao_vista',
             field=models.CharField(blank=True, db_column='ultima_versao_vista', editable=False, max_length=20, verbose_name='última versão vista nas novidades'),
         ),
         migrations.RenameField(
-            model_name='usuario',
+            model_name='user',
             old_name='ultima_versao_vista',
             new_name='last_seen_version',
         ),
         migrations.AlterField(
-            model_name='usuario',
+            model_name='user',
             name='demonstracao',
             field=models.BooleanField(db_column='demonstracao', default=False, editable=False, verbose_name='conta de demonstração'),
         ),
         migrations.RenameField(
-            model_name='usuario',
+            model_name='user',
             old_name='demonstracao',
             new_name='demo',
         ),

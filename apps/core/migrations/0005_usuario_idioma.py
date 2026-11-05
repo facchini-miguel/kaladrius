@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='usuario',
+            model_name='user',
             name='idioma',
             field=models.CharField(blank=True, choices=[('pt-br', 'Português'), ('en', 'English'), ('es', 'Español')], help_text='Vazio: o idioma do navegador.', max_length=10, verbose_name='idioma'),
         ),

@@ -47,19 +47,17 @@ _DEFAULT_NAMES_FOR_TRANSLATION = [
 class AppointmentType(ClinicModel):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    color = models.CharField(
-        _("cor"), max_length=7, default="#0d6efd", validators=[validate_color], db_column="cor"
-    )
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
+    color = models.CharField(_("cor"), max_length=7, default="#0d6efd", validators=[validate_color])
+    active = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
-        db_table = "agenda_tipoatendimento"
+        db_table = "schedule_appointment_type"
         verbose_name = _("tipo de atendimento")
         verbose_name_plural = _("tipos de atendimento")
         ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "name"], name="tipo_atendimento_unico"),
+            models.UniqueConstraint(fields=["clinic", "name"], name="appointment_type_unique"),
         ]
 
     def __str__(self):
@@ -94,17 +92,15 @@ class Appointment(ClinicModel):
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("profissional"),
-        db_column="profissional_id",
     )
     kind = models.ForeignKey(
         AppointmentType,
         on_delete=models.PROTECT,
         related_name="agendamentos",
         verbose_name=_("tipo de atendimento"),
-        db_column="tipo_id",
     )
-    start = models.DateTimeField(_("início"), db_column="inicio")
-    end = models.DateTimeField(_("fim"), db_column="fim")
+    start = models.DateTimeField(_("início"))
+    end = models.DateTimeField(_("fim"))
     patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
@@ -112,18 +108,16 @@ class Appointment(ClinicModel):
         blank=True,
         related_name="agendamentos",
         verbose_name=_("paciente"),
-        db_column="paciente_id",
     )
-    description = models.TextField(_("descrição"), blank=True, db_column="descricao")
+    description = models.TextField(_("descrição"), blank=True)
     status = models.CharField(
         _("situação"),
         max_length=10,
         choices=Status.choices,
         default=Status.BOOKED,
-        db_column="situacao",
     )
     # Appointments created together by "repeat N weeks" share the same series id.
-    series = models.UUIDField(_("série"), null=True, blank=True, editable=False, db_column="serie")
+    series = models.UUIDField(_("série"), null=True, blank=True, editable=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -131,29 +125,28 @@ class Appointment(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "agenda_agendamento"
+        db_table = "schedule_appointment"
         verbose_name = _("agendamento")
         verbose_name_plural = _("agendamentos")
         ordering = ["start"]
         indexes = [
             models.Index(
-                fields=["clinic", "practitioner", "start"], name="agendamento_prof_inicio"
+                fields=["clinic", "practitioner", "start"], name="appointment_practitioner_start"
             ),
         ]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(start__lt=models.F("end")),
-                name="agendamento_inicio_antes_do_fim",
+                name="appointment_start_before_end",
             ),
             # Last line of defense against double booking, even under concurrent requests.
             ExclusionConstraint(
-                name="agendamento_sem_sobreposicao",
+                name="appointment_no_overlap",
                 expressions=[
                     (TsTzRange("start", "end", RangeBoundary()), RangeOperators.OVERLAPS),
                     ("practitioner", RangeOperators.EQUAL),

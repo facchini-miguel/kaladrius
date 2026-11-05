@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='usuario',
+            model_name='user',
             name='ultima_versao_vista',
             field=models.CharField(blank=True, editable=False, max_length=20, verbose_name='última versão vista nas novidades'),
         ),

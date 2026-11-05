@@ -34,7 +34,7 @@ from .models import AuditEntry
 from .record import log_event, request_ip
 
 Action = AuditEntry.Action
-Usuario = get_user_model()
+User = get_user_model()
 
 AUDITED = [
     Patient,
@@ -48,7 +48,7 @@ AUDITED = [
     Clinic,
     ClinicModule,
     Membership,
-    Usuario,
+    User,
     Supplier,
     Entry,
     Installment,

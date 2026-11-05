@@ -64,11 +64,12 @@ docker exec "$CONTAINER" pg_restore -U postgres -d restored --no-owner --no-priv
 # running (a stopped system does not make a good backup fail its test). When it runs, the count
 # must succeed: a failed query never skips the check. One check per line: a failing
 # `[ a ] && [ b ]` does not stop a `set -e` script.
-clinics=$(docker exec "$CONTAINER" psql -U postgres -d restored -tAc "SELECT count(*) FROM core_clinica")
+# A backup from before 0.59.0 still has the Portuguese table (decision 179).
+clinics=$(docker exec "$CONTAINER" psql -U postgres -d restored -tAc "SELECT (xpath('/row/c/text()', query_to_xml('SELECT count(*) AS c FROM ' || coalesce(to_regclass('core_clinic'), to_regclass('core_clinica'))::text, false, true, '')))[1]::text")
 migrations=$(docker exec "$CONTAINER" psql -U postgres -d restored -tAc "SELECT count(*) FROM django_migrations")
 require_clinic=$(installed_by_package || echo 1)
 if service_running db; then
-  in_system=$(compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT count(*) FROM core_clinica"' </dev/null)
+  in_system=$(compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT count(*) FROM core_clinic"' </dev/null)
   echo "Restored: $clinics clinic(s), $migrations migrations (the system has $in_system clinic(s))."
   if [ "$in_system" -ge 1 ]; then require_clinic=1; fi
 else

@@ -156,7 +156,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "core.Usuario"
+AUTH_USER_MODEL = "core.User"
 
 # django-axes must be the first backend so it can block locked-out logins.
 AUTHENTICATION_BACKENDS = [

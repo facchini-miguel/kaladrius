@@ -61,7 +61,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
         assert Recall.objects.get().date == today - datetime.timedelta(days=6)
         assert Patient.objects.get().birth_date == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
-        with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
+        with pytest.raises(Exception, match="appointment_no_overlap"):
             first = Appointment.objects.first()
             Appointment.objects.create(
                 practitioner=first.practitioner,

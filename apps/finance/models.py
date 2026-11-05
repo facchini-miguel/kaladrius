@@ -30,23 +30,24 @@ class FinancialAccount(ClinicModel):
         BANK = "banco", _("Banco")
         CARD = "cartao", _("Maquininha de cartão")
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
     opening_balance = models.DecimalField(
         _("saldo inicial"),
         default=ZERO,
         help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
         **MONEY,
-        db_column="saldo_inicial",
     )
-    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
+    active = models.BooleanField(_("ativa"), default=True)
 
     class Meta:
-        db_table = "financeiro_conta"
+        db_table = "finance_financial_account"
         verbose_name = _("conta")
         verbose_name_plural = _("contas")
         ordering = ["name"]
-        constraints = [models.UniqueConstraint(fields=["clinic", "name"], name="conta_unica")]
+        constraints = [
+            models.UniqueConstraint(fields=["clinic", "name"], name="financial_account_unique")
+        ]
 
     def __str__(self):
         return self.name
@@ -63,8 +64,8 @@ class AccountGroup(ClinicModel):
 
     Kind = FinancialKind
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
     parent = models.ForeignKey(
         "self",
         on_delete=models.PROTECT,
@@ -72,25 +73,23 @@ class AccountGroup(ClinicModel):
         blank=True,
         related_name="filhos",
         verbose_name=_("grupo acima"),
-        db_column="pai_id",
     )
     code = models.PositiveSmallIntegerField(
         _("código"),
         null=True,
         blank=True,
         help_text=_("Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."),
-        db_column="codigo",
     )
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
+    active = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
-        db_table = "financeiro_grupocontabil"
+        db_table = "finance_account_group"
         verbose_name = _("grupo contábil")
         verbose_name_plural = _("grupos contábeis")
         ordering = ["kind", "code", "name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "kind", "parent", "name"], name="grupo_contabil_unico"
+                fields=["clinic", "kind", "parent", "name"], name="account_group_unique"
             )
         ]
 
@@ -116,8 +115,8 @@ class Category(ClinicModel):
 
     Kind = FinancialKind
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
     group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
@@ -125,17 +124,16 @@ class Category(ClinicModel):
         blank=True,
         related_name="categorias",
         verbose_name=_("grupo"),
-        db_column="grupo_id",
     )
-    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
+    active = models.BooleanField(_("ativa"), default=True)
 
     class Meta:
-        db_table = "financeiro_categoria"
+        db_table = "finance_category"
         verbose_name = _("categoria")
         verbose_name_plural = _("categorias")
         ordering = ["kind", "name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "kind", "name"], name="categoria_unica")
+            models.UniqueConstraint(fields=["clinic", "kind", "name"], name="category_unique")
         ]
 
     def __str__(self):
@@ -148,16 +146,16 @@ class CostCenter(ClinicModel):
     Optional on every entry, one per entry (no split across centers yet).
     """
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL)
+    active = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
-        db_table = "financeiro_centrocusto"
+        db_table = "finance_cost_center"
         verbose_name = _("centro de custo")
         verbose_name_plural = _("centros de custo")
         ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "name"], name="centro_custo_unico")
+            models.UniqueConstraint(fields=["clinic", "name"], name="cost_center_unique")
         ]
 
     def __str__(self):
@@ -225,31 +223,26 @@ class Supplier(ClinicModel):
         INDIVIDUAL = "PF", _("Pessoa física")
         COMPANY = "PJ", _("Pessoa jurídica")
 
-    kind = models.CharField(
-        _("tipo"), max_length=2, choices=Kind.choices, default=Kind.COMPANY, db_column="tipo"
-    )
+    kind = models.CharField(_("tipo"), max_length=2, choices=Kind.choices, default=Kind.COMPANY)
     name = models.CharField(
         _("nome"),
         max_length=200,
         help_text=_("Para pessoa jurídica, o nome fantasia."),
         db_collation=ALPHABETICAL,
-        db_column="nome",
     )
-    legal_name = models.CharField(
-        _("razão social"), max_length=200, blank=True, db_column="razao_social"
-    )
+    legal_name = models.CharField(_("razão social"), max_length=200, blank=True)
     # The country's tax document (decision 121); the name stayed from Brazil.
-    tax_id = models.CharField(_("documento"), max_length=20, blank=True, db_column="cpf_cnpj")
-    phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
+    tax_id = models.CharField(_("documento"), max_length=20, blank=True)
+    phone = models.CharField(_("telefone"), max_length=11, blank=True)
     whatsapp = models.CharField(_("WhatsApp"), max_length=11, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
-    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    notes = models.TextField(_("observações"), blank=True)
+    active = models.BooleanField(_("ativo"), default=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "financeiro_fornecedor"
+        db_table = "finance_supplier"
         verbose_name = _("fornecedor")
         verbose_name_plural = _("fornecedores")
         ordering = ["name"]
@@ -257,7 +250,7 @@ class Supplier(ClinicModel):
             models.UniqueConstraint(
                 fields=["clinic", "tax_id"],
                 condition=~Q(tax_id=""),
-                name="fornecedor_cpf_cnpj_unico_por_clinica",
+                name="supplier_tax_id_unique_per_clinic",
             ),
         ]
 
@@ -277,14 +270,13 @@ class Entry(ClinicModel):
         RECEIVABLE = "receber", _("A receber")
         PAYABLE = "pagar", _("A pagar")
 
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
-    description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    description = models.CharField(_("descrição"), max_length=200)
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("categoria"),
-        db_column="categoria_id",
     )
     cost_center = models.ForeignKey(
         CostCenter,
@@ -293,7 +285,6 @@ class Entry(ClinicModel):
         blank=True,
         related_name="lancamentos",
         verbose_name=_("centro de custo"),
-        db_column="centro_custo_id",
     )
     patient = models.ForeignKey(
         "pacientes.Patient",
@@ -302,11 +293,10 @@ class Entry(ClinicModel):
         blank=True,
         related_name="lancamentos",
         verbose_name=_("paciente"),
-        db_column="paciente_id",
     )
     # Who pays (receivable without a registered patient) or the supplier (payable). With a
     # registered supplier it holds the supplier's name, so lists and reports need no join.
-    payer = models.CharField(_("pagador"), max_length=200, blank=True, db_column="pessoa")
+    payer = models.CharField(_("pagador"), max_length=200, blank=True)
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.PROTECT,
@@ -314,7 +304,6 @@ class Entry(ClinicModel):
         blank=True,
         related_name="lancamentos",
         verbose_name=_("fornecedor"),
-        db_column="fornecedor_id",
     )
     practitioner = models.ForeignKey(
         "profissionais.Practitioner",
@@ -324,15 +313,12 @@ class Entry(ClinicModel):
         related_name="+",
         verbose_name=_("profissional"),
         help_text=_("Quem fez o atendimento (opcional)."),
-        db_column="profissional_id",
     )
-    total_amount = models.DecimalField(_("valor total"), **MONEY, db_column="valor_total")
-    date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
-    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
-    cancelled = models.BooleanField(_("cancelado"), default=False, db_column="cancelado")
-    cancelled_at = models.DateTimeField(
-        _("cancelado em"), null=True, blank=True, db_column="cancelado_em"
-    )
+    total_amount = models.DecimalField(_("valor total"), **MONEY)
+    date = models.DateField(_("data"), default=timezone.localdate)
+    notes = models.TextField(_("observações"), blank=True)
+    cancelled = models.BooleanField(_("cancelado"), default=False)
+    cancelled_at = models.DateTimeField(_("cancelado em"), null=True, blank=True)
     cancelled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -340,11 +326,8 @@ class Entry(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("cancelado por"),
-        db_column="cancelado_por_id",
     )
-    cancellation_reason = models.CharField(
-        _("motivo do cancelamento"), max_length=200, blank=True, db_column="motivo_cancelamento"
-    )
+    cancellation_reason = models.CharField(_("motivo do cancelamento"), max_length=200, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -352,20 +335,17 @@ class Entry(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "financeiro_lancamento"
+        db_table = "finance_entry"
         verbose_name = _("lançamento")
         verbose_name_plural = _("lançamentos")
         ordering = ["-date", "-pk"]
         constraints = [
-            models.CheckConstraint(
-                condition=Q(total_amount__gt=0), name="lancamento_valor_positivo"
-            ),
+            models.CheckConstraint(condition=Q(total_amount__gt=0), name="entry_amount_positive"),
         ]
 
     def __str__(self):
@@ -403,25 +383,24 @@ class Installment(ClinicModel):
         on_delete=models.CASCADE,
         related_name="parcelas",
         verbose_name=_("lançamento"),
-        db_column="lancamento_id",
     )
-    number = models.PositiveSmallIntegerField(_("número"), db_column="numero")
-    due_date = models.DateField(_("vencimento"), db_column="vencimento")
-    amount = models.DecimalField(_("valor"), **MONEY, db_column="valor")
+    number = models.PositiveSmallIntegerField(_("número"))
+    due_date = models.DateField(_("vencimento"))
+    amount = models.DecimalField(_("valor"), **MONEY)
 
     # Same isolation as every clinic model, plus the balance helpers.
     objects = ClinicManager.from_queryset(InstallmentQuerySet)()
     all_objects = models.Manager()  # noqa: DJ012
 
     class Meta:
-        db_table = "financeiro_parcela"
+        db_table = "finance_installment"
         verbose_name = _("parcela")
         verbose_name_plural = _("parcelas")
         ordering = ["due_date", "number"]
-        indexes = [models.Index(fields=["clinic", "due_date"], name="parcela_clinica_vencimento")]
+        indexes = [models.Index(fields=["clinic", "due_date"], name="installment_clinic_due_date")]
         constraints = [
-            models.UniqueConstraint(fields=["entry", "number"], name="parcela_numero_unico"),
-            models.CheckConstraint(condition=Q(amount__gt=0), name="parcela_valor_positivo"),
+            models.UniqueConstraint(fields=["entry", "number"], name="installment_number_unique"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="installment_amount_positive"),
         ]
 
     def __str__(self):
@@ -472,43 +451,34 @@ class Payment(ClinicModel):
         on_delete=models.PROTECT,
         related_name="pagamentos",
         verbose_name=_("parcela"),
-        db_column="parcela_id",
     )
-    date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
-    amount = models.DecimalField(_("valor recebido"), **MONEY, db_column="valor")
+    date = models.DateField(_("data"), default=timezone.localdate)
+    amount = models.DecimalField(_("valor recebido"), **MONEY)
     interest = models.DecimalField(
         _("juros e multa"),
         default=ZERO,
         help_text=_("Já incluídos no valor recebido."),
         **MONEY,
-        db_column="juros",
     )
-    discount = models.DecimalField(_("desconto"), default=ZERO, **MONEY, db_column="desconto")
-    method = models.CharField(
-        _("forma de pagamento"), max_length=15, choices=Method.choices, db_column="forma"
-    )
+    discount = models.DecimalField(_("desconto"), default=ZERO, **MONEY)
+    method = models.CharField(_("forma de pagamento"), max_length=15, choices=Method.choices)
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("conta"),
-        db_column="conta_id",
     )
     # Card details only: never the card number.
-    card_brand = models.CharField(
-        _("bandeira do cartão"), max_length=30, blank=True, db_column="cartao_bandeira"
-    )
+    card_brand = models.CharField(_("bandeira do cartão"), max_length=30, blank=True)
     card_installments = models.PositiveSmallIntegerField(
-        _("parcelas no cartão"), null=True, blank=True, db_column="cartao_parcelas"
+        _("parcelas no cartão"), null=True, blank=True
     )
     card_transaction_code = models.CharField(
-        _("código da transação (NSU)"), max_length=40, blank=True, db_column="cartao_codigo"
+        _("código da transação (NSU)"), max_length=40, blank=True
     )
-    note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
-    reversed = models.BooleanField(_("estornado"), default=False, db_column="estornado")
-    reversed_at = models.DateTimeField(
-        _("estornado em"), null=True, blank=True, db_column="estornado_em"
-    )
+    note = models.CharField(_("observação"), max_length=200, blank=True)
+    reversed = models.BooleanField(_("estornado"), default=False)
+    reversed_at = models.DateTimeField(_("estornado em"), null=True, blank=True)
     reversed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -516,11 +486,8 @@ class Payment(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("estornado por"),
-        db_column="estornado_por_id",
     )
-    reversal_reason = models.CharField(
-        _("motivo do estorno"), max_length=200, blank=True, db_column="motivo_estorno"
-    )
+    reversal_reason = models.CharField(_("motivo do estorno"), max_length=200, blank=True)
     # Practitioner commission (0.19.0): the commission that paid this receipt out, and the
     # one that deducted it again after it was reversed.
     commission = models.ForeignKey(
@@ -530,7 +497,6 @@ class Payment(ClinicModel):
         blank=True,
         related_name="pagamentos",
         verbose_name=_("comissão"),
-        db_column="comissao_id",
     )
     commission_reversal = models.ForeignKey(
         "Commission",
@@ -539,7 +505,6 @@ class Payment(ClinicModel):
         blank=True,
         related_name="pagamentos_estornados",
         verbose_name=_("comissão que descontou o estorno"),
-        db_column="comissao_estorno_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -548,20 +513,21 @@ class Payment(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("recebido por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "financeiro_pagamento"
+        db_table = "finance_payment"
         verbose_name = _("pagamento")
         verbose_name_plural = _("pagamentos")
         ordering = ["-date", "-pk"]
         constraints = [
-            models.CheckConstraint(condition=Q(amount__gt=0), name="pagamento_valor_positivo"),
-            models.CheckConstraint(condition=Q(interest__gte=0), name="pagamento_juros_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="payment_amount_positive"),
             models.CheckConstraint(
-                condition=Q(discount__gte=0), name="pagamento_desconto_positivo"
+                condition=Q(interest__gte=0), name="payment_interest_not_negative"
+            ),
+            models.CheckConstraint(
+                condition=Q(discount__gte=0), name="payment_discount_not_negative"
             ),
         ]
 
@@ -592,21 +558,17 @@ class CashRegister(ClinicModel):
         on_delete=models.PROTECT,
         related_name="caixas",
         verbose_name=_("conta"),
-        db_column="conta_id",
     )
-    opened_at = models.DateTimeField(_("aberto em"), default=timezone.now, db_column="aberto_em")
+    opened_at = models.DateTimeField(_("aberto em"), default=timezone.now)
     opened_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="+",
         verbose_name=_("aberto por"),
-        db_column="aberto_por_id",
     )
-    opening_amount = models.DecimalField(
-        _("valor contado na abertura"), **MONEY, db_column="valor_abertura"
-    )
-    closed_at = models.DateTimeField(_("fechado em"), null=True, blank=True, db_column="fechado_em")
+    opening_amount = models.DecimalField(_("valor contado na abertura"), **MONEY)
+    closed_at = models.DateTimeField(_("fechado em"), null=True, blank=True)
     closed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -614,22 +576,18 @@ class CashRegister(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("fechado por"),
-        db_column="fechado_por_id",
     )
-    expected_amount = models.DecimalField(
-        _("valor esperado"), null=True, blank=True, **MONEY, db_column="valor_esperado"
-    )
+    expected_amount = models.DecimalField(_("valor esperado"), null=True, blank=True, **MONEY)
     counted_amount = models.DecimalField(
         _("valor contado no fechamento"),
         null=True,
         blank=True,
         **MONEY,
-        db_column="valor_contado",
     )
-    note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
+    note = models.CharField(_("observação"), max_length=200, blank=True)
 
     class Meta:
-        db_table = "financeiro_caixa"
+        db_table = "finance_cash_register"
         verbose_name = _("caixa")
         verbose_name_plural = _("caixas")
         ordering = ["-opened_at"]
@@ -637,10 +595,10 @@ class CashRegister(ClinicModel):
             models.UniqueConstraint(
                 fields=["account"],
                 condition=Q(closed_at__isnull=True),
-                name="um_caixa_aberto_por_conta",
+                name="one_open_cash_register_per_account",
             ),
             models.CheckConstraint(
-                condition=Q(opening_amount__gte=0), name="caixa_abertura_positiva"
+                condition=Q(opening_amount__gte=0), name="cash_register_opening_not_negative"
             ),
         ]
 
@@ -670,10 +628,9 @@ class CashMovement(ClinicModel):
         on_delete=models.PROTECT,
         related_name="movimentos",
         verbose_name=_("caixa"),
-        db_column="caixa_id",
     )
-    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
-    amount = models.DecimalField(_("valor"), **MONEY, db_column="valor")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    amount = models.DecimalField(_("valor"), **MONEY)
     other_account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
@@ -682,26 +639,24 @@ class CashMovement(ClinicModel):
         related_name="+",
         verbose_name=_("outra conta"),
         help_text=_("Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."),
-        db_column="outra_conta_id",
     )
-    reason = models.CharField(_("motivo"), max_length=200, db_column="motivo")
+    reason = models.CharField(_("motivo"), max_length=200)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name="+",
         verbose_name=_("criado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "financeiro_movimentocaixa"
+        db_table = "finance_cash_movement"
         verbose_name = _("movimento de caixa")
         verbose_name_plural = _("movimentos de caixa")
         ordering = ["created_at"]
         constraints = [
-            models.CheckConstraint(condition=Q(amount__gt=0), name="movimento_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="cash_movement_amount_positive"),
         ]
 
     def __str__(self):
@@ -721,25 +676,21 @@ class Commission(ClinicModel):
         on_delete=models.PROTECT,
         related_name="comissoes",
         verbose_name=_("profissional"),
-        db_column="profissional_id",
     )
-    until = models.DateField(_("recebimentos até"), db_column="ate")
-    percentage = models.DecimalField(
-        _("percentual"), max_digits=5, decimal_places=2, db_column="percentual"
-    )
-    received_amount = models.DecimalField(_("valor recebido"), **MONEY, db_column="recebido")
+    until = models.DateField(_("recebimentos até"))
+    percentage = models.DecimalField(_("percentual"), max_digits=5, decimal_places=2)
+    received_amount = models.DecimalField(_("valor recebido"), **MONEY)
     reversal_deduction = models.DecimalField(
-        _("comissão de estornos descontada"), default=ZERO, **MONEY, db_column="estornos"
+        _("comissão de estornos descontada"), default=ZERO, **MONEY
     )
-    amount = models.DecimalField(_("valor da comissão"), **MONEY, db_column="valor")
+    amount = models.DecimalField(_("valor da comissão"), **MONEY)
     entry = models.OneToOneField(
         Entry,
         on_delete=models.PROTECT,
         related_name="commission",
         verbose_name=_("lançamento a pagar"),
-        db_column="lancamento_id",
     )
-    cancelled = models.BooleanField(_("cancelada"), default=False, db_column="cancelada")
+    cancelled = models.BooleanField(_("cancelada"), default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -747,17 +698,16 @@ class Commission(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "financeiro_comissao"
+        db_table = "finance_commission"
         verbose_name = _("comissão")
         verbose_name_plural = _("comissões")
         ordering = ["-created_at"]
         constraints = [
-            models.CheckConstraint(condition=Q(amount__gt=0), name="comissao_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="commission_amount_positive"),
         ]
 
     def __str__(self):
@@ -773,26 +723,25 @@ class Planning(ClinicModel):
     """The year's goal for a group of the chart of accounts (decision 098, legacy Medical
     planejamento_estrategico): how much to receive or spend, compared with what was paid."""
 
-    year = models.PositiveSmallIntegerField(_("ano"), db_column="ano")
+    year = models.PositiveSmallIntegerField(_("ano"))
     group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("grupo"),
-        db_column="grupo_id",
     )
-    amount = models.DecimalField(_("meta"), **MONEY, db_column="valor")
+    amount = models.DecimalField(_("meta"), **MONEY)
 
     class Meta:
-        db_table = "financeiro_planejamento"
+        db_table = "finance_planning"
         verbose_name = _("meta do planejamento")
         verbose_name_plural = _("metas do planejamento")
         ordering = ["year", "group"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "year", "group"], name="planejamento_unico_por_grupo"
+                fields=["clinic", "year", "group"], name="planning_unique_per_group"
             ),
-            models.CheckConstraint(condition=Q(amount__gt=0), name="planejamento_valor_positivo"),
+            models.CheckConstraint(condition=Q(amount__gt=0), name="planning_amount_positive"),
         ]
 
     def __str__(self):
@@ -807,8 +756,8 @@ class BookClosing(ClinicModel):
     reopening has an earlier date (or none: everything open) and a reason.
     """
 
-    until = models.DateField(_("fechado até"), null=True, blank=True, db_column="ate")
-    reason = models.CharField(_("motivo"), max_length=200, blank=True, db_column="motivo")
+    until = models.DateField(_("fechado até"), null=True, blank=True)
+    reason = models.CharField(_("motivo"), max_length=200, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -816,12 +765,11 @@ class BookClosing(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("criado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "financeiro_fechamento"
+        db_table = "finance_book_closing"
         verbose_name = _("fechamento do financeiro")
         verbose_name_plural = _("fechamentos do financeiro")
         ordering = ["-created_at", "-pk"]
@@ -838,30 +786,20 @@ class StatementImport(ClinicModel):
         on_delete=models.PROTECT,
         related_name="importacoes",
         verbose_name=_("conta"),
-        db_column="conta_id",
     )
-    file = models.CharField(_("arquivo"), max_length=200, db_column="arquivo")
-    bank_code = models.CharField(_("código do banco"), max_length=20, blank=True, db_column="banco")
-    bank_account_number = models.CharField(
-        _("conta no banco"), max_length=40, blank=True, db_column="conta_no_banco"
-    )
-    start = models.DateField(_("início"), null=True, blank=True, db_column="inicio")
-    end = models.DateField(_("fim"), null=True, blank=True, db_column="fim")
-    balance = models.DecimalField(
-        _("saldo no banco"), null=True, blank=True, **MONEY, db_column="saldo"
-    )
-    balance_date = models.DateField(_("saldo em"), null=True, blank=True, db_column="saldo_em")
-    new_transactions = models.PositiveIntegerField(
-        _("transações novas"), default=0, db_column="novas"
-    )
-    duplicate_transactions = models.PositiveIntegerField(
-        _("transações já importadas"), default=0, db_column="repetidas"
-    )
+    file = models.CharField(_("arquivo"), max_length=200)
+    bank_code = models.CharField(_("código do banco"), max_length=20, blank=True)
+    bank_account_number = models.CharField(_("conta no banco"), max_length=40, blank=True)
+    start = models.DateField(_("início"), null=True, blank=True)
+    end = models.DateField(_("fim"), null=True, blank=True)
+    balance = models.DecimalField(_("saldo no banco"), null=True, blank=True, **MONEY)
+    balance_date = models.DateField(_("saldo em"), null=True, blank=True)
+    new_transactions = models.PositiveIntegerField(_("transações novas"), default=0)
+    duplicate_transactions = models.PositiveIntegerField(_("transações já importadas"), default=0)
     unreadable_transactions = models.PositiveIntegerField(
         _("transações ilegíveis"),
         default=0,
         help_text=_("Linhas do arquivo sem data ou valor que dê para ler: não foram importadas."),
-        db_column="ignoradas",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -870,12 +808,11 @@ class StatementImport(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("importado por"),
-        db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(_("importado em"), auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("importado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "financeiro_importacaoextrato"
+        db_table = "finance_statement_import"
         verbose_name = _("importação de extrato")
         verbose_name_plural = _("importações de extrato")
         ordering = ["-created_at"]
@@ -897,33 +834,27 @@ class BankTransaction(ClinicModel):
         on_delete=models.PROTECT,
         related_name="transacoes",
         verbose_name=_("conta"),
-        db_column="conta_id",
     )
     statement_import = models.ForeignKey(
         StatementImport,
         on_delete=models.PROTECT,
         related_name="transacoes",
         verbose_name=_("importação"),
-        db_column="importacao_id",
     )
     fitid = models.CharField(_("identificador no banco"), max_length=120)
-    date = models.DateField(_("data"), db_column="data")
+    date = models.DateField(_("data"))
     amount = models.DecimalField(
         _("valor"),
         help_text=_("Positivo: entrada; negativo: saída."),
         **MONEY,
-        db_column="valor",
     )
-    description = models.CharField(
-        _("descrição"), max_length=200, blank=True, db_column="descricao"
-    )
-    kind = models.CharField(_("tipo no banco"), max_length=20, blank=True, db_column="tipo")
+    description = models.CharField(_("descrição"), max_length=200, blank=True)
+    kind = models.CharField(_("tipo no banco"), max_length=20, blank=True)
     status = models.CharField(
         _("situação"),
         max_length=10,
         choices=Status.choices,
         default=Status.PENDING,
-        db_column="situacao",
     )
     payment = models.OneToOneField(
         Payment,
@@ -932,7 +863,6 @@ class BankTransaction(ClinicModel):
         blank=True,
         related_name="transacao",
         verbose_name=_("pagamento"),
-        db_column="pagamento_id",
     )
     cash_movement = models.OneToOneField(
         CashMovement,
@@ -941,9 +871,8 @@ class BankTransaction(ClinicModel):
         blank=True,
         related_name="transacao",
         verbose_name=_("movimento do caixa"),
-        db_column="movimento_id",
     )
-    reason = models.CharField(_("motivo"), max_length=200, blank=True, db_column="motivo")
+    reason = models.CharField(_("motivo"), max_length=200, blank=True)
     reconciled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -951,22 +880,21 @@ class BankTransaction(ClinicModel):
         blank=True,
         related_name="+",
         verbose_name=_("conciliado por"),
-        db_column="conciliado_por_id",
     )
-    reconciled_at = models.DateTimeField(
-        _("conciliado em"), null=True, blank=True, db_column="conciliado_em"
-    )
+    reconciled_at = models.DateTimeField(_("conciliado em"), null=True, blank=True)
 
     class Meta:
-        db_table = "financeiro_transacaobancaria"
+        db_table = "finance_bank_transaction"
         verbose_name = _("transação bancária")
         verbose_name_plural = _("transações bancárias")
         ordering = ["date", "pk"]
         constraints = [
-            models.UniqueConstraint(fields=["account", "fitid"], name="transacao_unica_por_conta"),
+            models.UniqueConstraint(
+                fields=["account", "fitid"], name="bank_transaction_unique_per_account"
+            ),
             models.CheckConstraint(
                 condition=~Q(payment__isnull=False, cash_movement__isnull=False),
-                name="transacao_um_vinculo",
+                name="bank_transaction_one_link",
             ),
         ]
 
