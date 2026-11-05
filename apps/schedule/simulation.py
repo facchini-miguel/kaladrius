@@ -16,23 +16,23 @@ from apps.recalls.models import Recall
 from .models import Appointment, AppointmentType
 from .services import timestamp
 
-MOTIVOS_RECHAMADA = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
+RECALL_REASONS = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
 
 
 def _patients(clinic):
     return list(Patient.objects.filter(clinic=clinic, active=True, archived=False))
 
 
-def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocupacao=0.6):
+def simulate_appointments(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocupacao=0.6):
     """Fill about `ocupacao` of the free weekday slots around today. Returns how many."""
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
-    tipos = list(
+    appointment_types = list(
         AppointmentType.objects.filter(clinic=clinic, active=True).exclude(
             name__in=["Liberado", "Ocupado"]
         )
     )
     pacientes = _patients(clinic)
-    if not (profissionais and tipos and pacientes):
+    if not (profissionais and appointment_types and pacientes):
         return 0
     passo = datetime.timedelta(minutes=clinic.schedule_interval)
     today = timezone.localdate()
@@ -73,10 +73,10 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
                     Appointment(
                         clinic=clinic,
                         practitioner=practitioner,
-                        kind=sorteio.choice(tipos),
+                        kind=sorteio.choice(appointment_types),
                         patient=sorteio.choice(pacientes) if com_paciente else None,
                         description="" if com_paciente else "Horário bloqueado",
-                        status=_situacao(sorteio, current) if com_paciente else "agendado",
+                        status=_status(sorteio, current) if com_paciente else "agendado",
                         start=current,
                         end=end,
                     )
@@ -86,19 +86,19 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
     return len(novos)
 
 
-def _situacao(sorteio, start):
+def _status(sorteio, start):
     """Past appointments: most patients came, some missed or cancelled (0.24.0)."""
     if start > timezone.now():
-        return Appointment.Status.AGENDADO
+        return Appointment.Status.BOOKED
     sorteado = sorteio.random()
     if sorteado < 0.82:
-        return Appointment.Status.COMPARECEU
+        return Appointment.Status.ATTENDED
     if sorteado < 0.92:
-        return Appointment.Status.FALTOU
-    return Appointment.Status.DESMARCOU
+        return Appointment.Status.MISSED
+    return Appointment.Status.CANCELLED
 
 
-def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
+def simulate_recalls(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
     """Recalls from `dias_antes` ago to `dias_depois` ahead; past ones mostly done."""
     pacientes = _patients(clinic)
     if not pacientes:
@@ -112,7 +112,7 @@ def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=
                 clinic=clinic,
                 patient=sorteio.choice(pacientes),
                 date=date,
-                description=sorteio.choice(MOTIVOS_RECHAMADA),
+                description=sorteio.choice(RECALL_REASONS),
                 done=date < today and sorteio.random() < 0.7,
             )
         )
@@ -120,7 +120,7 @@ def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=
     return len(novas)
 
 
-DESCRICOES_FINANCEIRAS = [
+FINANCE_DESCRIPTIONS = [
     "Limpeza",
     "Restauração",
     "Tratamento de canal",
@@ -132,7 +132,7 @@ DESCRICOES_FINANCEIRAS = [
 ]
 
 
-def simular_financeiro(clinic, sorteio, quantity=60, user=None):
+def simulate_finance(clinic, sorteio, quantity=60, user=None):
     """Fake receivables from 90 days ago to today, in 1 to 6 installments.
 
     Installments due in the past are mostly paid (some are left overdue, for the debtors
@@ -163,7 +163,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
             clinic=clinic,
             kind=Entry.Kind.RECEIVABLE,
             patient=sorteio.choice(pacientes),
-            description=sorteio.choice(DESCRICOES_FINANCEIRAS),
+            description=sorteio.choice(FINANCE_DESCRIPTIONS),
             category=sorteio.choice(categorias),
             cost_center=centros["Atendimento"],
             practitioner=sorteio.choice(profissionais) if profissionais else None,
@@ -184,11 +184,11 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
                     account=sorteio.choice(contas),
                 )
         criados += 1
-    return criados, _simular_despesas(clinic, sorteio, contas, user, centros)
+    return criados, _simulate_expenses(clinic, sorteio, contas, user, centros)
 
 
 # Fake payables: (supplier, description, category, amount, monthly repetitions or None).
-DESPESAS_SIMULADAS = [
+SIMULATED_EXPENSES = [
     ("Imobiliária Central", "Aluguel", "Aluguel", 3000, 6),
     ("Companhia de energia", "Água, luz e internet", "Água, luz e internet", 450, 6),
     ("Dental Suprimentos", "Material odontológico", "Material odontológico", 1350, None),
@@ -197,10 +197,10 @@ DESPESAS_SIMULADAS = [
 ]
 
 
-DESPESAS_DO_ATENDIMENTO = {"Material odontológico", "Laboratório de prótese"}
+VISIT_EXPENSES = {"Material odontológico", "Laboratório de prótese"}
 
 
-def _simular_despesas(clinic, sorteio, contas, user, centros):
+def _simulate_expenses(clinic, sorteio, contas, user, centros):
     """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
     from decimal import Decimal
 
@@ -218,7 +218,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     today = timezone.localdate()
     start = services.add_months(today.replace(day=10), -2)
     criadas = 0
-    for supplier, description, category, amount, meses in DESPESAS_SIMULADAS:
+    for supplier, description, category, amount, meses in SIMULATED_EXPENSES:
         if category not in categorias:
             continue
         parcelas = meses or sorteio.choice([1, 2, 3])
@@ -231,9 +231,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
             payer=supplier,
             description=description,
             category=categorias[category],
-            cost_center=centros[
-                "Atendimento" if category in DESPESAS_DO_ATENDIMENTO else "Administrativo"
-            ],
+            cost_center=centros["Atendimento" if category in VISIT_EXPENSES else "Administrativo"],
             total_amount=amount * parcelas if meses else amount,
             date=start,
             parcelas=parcelas,
@@ -255,7 +253,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
 
 
 # Example price list for a test clinic without one: (name, price).
-PROCEDIMENTOS_EXEMPLO = [
+SAMPLE_PROCEDURES = [
     ("Consulta de avaliação", 150),
     ("Limpeza (profilaxia)", 200),
     ("Restauração em resina", 250),
@@ -267,7 +265,7 @@ PROCEDIMENTOS_EXEMPLO = [
 ]
 
 
-def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
+def simulate_estimates(clinic, sorteio, quantity=20, user=None):
     """Fake estimates of the last 60 days: some approved (they become receivables), some
     refused, the rest open. Creates an example price list if the clinic has none."""
     from decimal import Decimal
@@ -285,7 +283,7 @@ def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
     if not Procedure.objects.filter(clinic=clinic).exists():
         Procedure.objects.bulk_create(
             Procedure(clinic=clinic, name=name, amount=Decimal(amount), category=tratamento)
-            for name, amount in PROCEDIMENTOS_EXEMPLO
+            for name, amount in SAMPLE_PROCEDURES
         )
     procedimentos = list(Procedure.objects.filter(clinic=clinic, active=True))
     pacientes = _patients(clinic)
@@ -332,7 +330,7 @@ def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
     return quantity
 
 
-def simular_comissoes(clinic, sorteio, user=None):
+def simulate_commissions(clinic, sorteio, user=None):
     """Give practitioners without one a commission percentage and pay out what each had
     pending up to the end of last month (test clinics only). Returns how many were paid."""
     from decimal import Decimal

@@ -18,7 +18,7 @@ from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
 from apps.reference_data.models import City, MaritalStatus
 from apps.schedule.models import Appointment
-from apps.schedule.simulation import simular_agendamentos, simular_rechamadas
+from apps.schedule.simulation import simulate_appointments, simulate_recalls
 from apps.staff.models import Employee, Salary
 
 # Fake data only. Names, registrations and e-mails are invented.
@@ -256,11 +256,11 @@ class Command(BaseCommand):
         if Appointment.objects.filter(clinic=clinic).exists():
             return 0
         sorteio = random.Random(clinic.pk)  # noqa: S311 (fake data, not security)
-        return simular_agendamentos(clinic, sorteio)
+        return simulate_appointments(clinic, sorteio)
 
     def _recalls(self, clinic):
         """About 80 recalls from 30 days ago to 60 days ahead; past ones mostly done."""
         if Recall.objects.filter(clinic=clinic).exists():
             return 0
         sorteio = random.Random(clinic.pk + 1000)  # noqa: S311 (fake data, not security)
-        return simular_rechamadas(clinic, sorteio)
+        return simulate_recalls(clinic, sorteio)

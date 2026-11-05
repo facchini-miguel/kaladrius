@@ -264,7 +264,7 @@ class RelatedPerson(ClinicModel):
         ]
 
     def __str__(self):
-        return f"{self.get_relationship_display()}: {self.nome_exibido}"
+        return f"{self.get_relationship_display()}: {self.display_name}"
 
     def save(self, *args, **kwargs):
         self._check_clinic()
@@ -278,7 +278,7 @@ class RelatedPerson(ClinicModel):
         super().save(*args, **kwargs)
 
     @property
-    def nome_exibido(self):
+    def display_name(self):
         return self.other_patient.name if self.other_patient_id else self.name
 
     @property

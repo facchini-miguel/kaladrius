@@ -78,7 +78,7 @@
     <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
     <tbody>
       {% for relacionada in relacionados %}
-      <tr><td>{{ relacionada.get_relationship_display }}</td><td>{{ relacionada.nome_exibido }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
+      <tr><td>{{ relacionada.get_relationship_display }}</td><td>{{ relacionada.display_name }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

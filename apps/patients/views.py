@@ -22,7 +22,7 @@ from apps.medical_records.models import Visit
 from apps.medical_records.permissions import acessa_prontuario
 from apps.recalls.models import Recall
 from apps.schedule.models import Appointment
-from apps.schedule.services import agendamentos_visiveis
+from apps.schedule.services import visible_appointments
 
 from .forms import PacienteForm, PessoaRelacionadaForm
 from .models import Patient, RelatedPerson
@@ -147,9 +147,7 @@ HISTORICO = 10  # appointments shown in each list of the patient record
 def _historico(request, patient):
     """The patient's next and latest appointments (practitioners: only their own)."""
     deste = (
-        agendamentos_visiveis(request)
-        .filter(patient=patient)
-        .select_related("practitioner", "kind")
+        visible_appointments(request).filter(patient=patient).select_related("practitioner", "kind")
     )
     now = timezone.now()
     return {
@@ -349,7 +347,7 @@ def relacionados_de(patient):
     """
     proprios = RelatedPerson.objects.filter(patient=patient).select_related("other_patient")
     inversos = RelatedPerson.objects.filter(other_patient=patient).select_related("patient")
-    return [(r, r.nome_exibido, r.other_patient, False) for r in proprios] + [
+    return [(r, r.display_name, r.other_patient, False) for r in proprios] + [
         (r, r.patient.name, r.patient, True) for r in inversos
     ]
 

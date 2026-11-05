@@ -3,10 +3,10 @@ from django.dispatch import receiver
 
 from apps.core.models import Clinic
 
-from .models import criar_tipos_padrao
+from .models import create_default_types
 
 
 @receiver(post_save, sender=Clinic, dispatch_uid="agenda_tipos_padrao")
-def tipos_padrao_para_clinica_nova(sender, instance, created, raw=False, **kwargs):
+def default_types_for_new_clinic(sender, instance, created, raw=False, **kwargs):
     if created and not raw:
-        criar_tipos_padrao(instance)
+        create_default_types(instance)
