@@ -83,11 +83,11 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             Recall.objects.create(patient=patient, date=date, description="Revisão", done=done)
 
         for patient, valid_until, status in [
-            (maria, day(8), Estimate.Status.ABERTO),
-            (maria, day(20), Estimate.Status.ABERTO),
-            (maria, day(6), Estimate.Status.APROVADO),
-            (archived, day(6), Estimate.Status.ABERTO),
-            (maria, day(4), Estimate.Status.ABERTO),
+            (maria, day(8), Estimate.Status.OPEN),
+            (maria, day(20), Estimate.Status.OPEN),
+            (maria, day(6), Estimate.Status.APPROVED),
+            (archived, day(6), Estimate.Status.OPEN),
+            (maria, day(4), Estimate.Status.OPEN),
         ]:
             Estimate.objects.create(
                 patient=patient, date=day(1), valid_until=valid_until, status=status
@@ -198,7 +198,7 @@ def test_listas_de_rechamadas_aniversariantes_e_orcamentos(cenario, cliente_de):
     rechamadas = painel["rechamadas"]
     assert [r.date for r in rechamadas["lista"]] == [day(1), HOJE]
     assert (rechamadas["total"], rechamadas["atrasadas"]) == (2, 1)
-    assert [(p.name, idade) for p, idade in painel["aniversariantes"]] == [("Maria Paciente", 41)]
+    assert [(p.name, age) for p, age in painel["aniversariantes"]] == [("Maria Paciente", 41)]
     assert [o.valid_until for o in painel["orcamentos"]] == [day(8)]
 
 

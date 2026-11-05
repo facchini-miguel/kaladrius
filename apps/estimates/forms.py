@@ -13,7 +13,7 @@ from apps.practitioners.models import Practitioner
 from .models import Estimate, EstimateItem, Procedure
 
 
-class ProcedimentoForm(BootstrapForm, forms.ModelForm):
+class ProcedureForm(BootstrapForm, forms.ModelForm):
     amount = _money_field(_("Valor"))
 
     class Meta:
@@ -27,7 +27,7 @@ class ProcedimentoForm(BootstrapForm, forms.ModelForm):
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
         self.codificacao = insurance.for_country().procedure
-        self.fields["code"].label = insurance.rotulo_do_codigo()
+        self.fields["code"].label = insurance.code_label()
         if self.codificacao and self.codificacao.example:
             self.fields["code"].widget.attrs["placeholder"] = self.codificacao.example
         self.fields["code"].help_text = _("Opcional. Vai para os orçamentos.")
@@ -45,7 +45,7 @@ class ProcedimentoForm(BootstrapForm, forms.ModelForm):
         return name
 
 
-class OrcamentoForm(BootstrapForm, forms.ModelForm):
+class EstimateForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Estimate
         fields = ["patient", "practitioner", "date", "valid_until", "notes"]
@@ -69,7 +69,7 @@ class OrcamentoForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class ItemForm(BootstrapForm, forms.ModelForm):
+class EstimateItemForm(BootstrapForm, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
     unit_price = _money_field(_("Valor unitário"), obrigatorio=False)
@@ -117,11 +117,11 @@ class ItemForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class DescontoForm(BootstrapForm, forms.Form):
+class DiscountForm(BootstrapForm, forms.Form):
     discount = _money_field(_("Desconto no total"), obrigatorio=False)
 
 
-class AprovarForm(BootstrapForm, forms.Form):
+class ApproveEstimateForm(BootstrapForm, forms.Form):
     parcelas = forms.IntegerField(
         label=_("Número de parcelas"), min_value=1, max_value=48, initial=1
     )

@@ -16,10 +16,10 @@ from apps.audit.record import registrar
 from apps.core.models import Membership
 from apps.core.permissions import Action, Module, requires_permission
 
-from .forms import NovoMembroForm, SenhaForm, UserAccountForm, VinculoForm, conta_exclusiva
+from .forms import MembershipForm, NewMemberForm, PasswordForm, UserAccountForm, exclusive_account
 
 
-def _vinculo(request, pk):
+def _membership(request, pk):
     """A membership of the current clinic (404 for other clinics)."""
     return get_object_or_404(
         Membership.objects.select_related("user"), pk=pk, clinic=request.clinic
@@ -27,7 +27,7 @@ def _vinculo(request, pk):
 
 
 @requires_permission(Module.USERS, Action.VIEW)
-def results(request):
+def member_list(request):
     vinculos = (
         Membership.objects.filter(clinic=request.clinic)
         .select_related("user")
@@ -37,8 +37,8 @@ def results(request):
 
 
 @requires_permission(Module.USERS, Action.CREATE)
-def new(request):
-    form = NovoMembroForm(request.POST or None, clinic=request.clinic)
+def new_member(request):
+    form = NewMemberForm(request.POST or None, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             user = form.save()
@@ -50,12 +50,12 @@ def new(request):
 
 
 @requires_permission(Module.USERS, Action.CHANGE)
-def editar(request, pk):
-    vinculo = _vinculo(request, pk)
+def edit_member(request, pk):
+    vinculo = _membership(request, pk)
     user = vinculo.user
-    exclusiva = conta_exclusiva(user, request.clinic)
+    exclusiva = exclusive_account(user, request.clinic)
     data = request.POST or None
-    form = VinculoForm(data, instance=vinculo, editor=request.user, prefix="vinculo")
+    form = MembershipForm(data, instance=vinculo, editor=request.user, prefix="vinculo")
     account = UserAccountForm(data, instance=user, prefix="conta") if exclusiva else None
     if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
@@ -81,11 +81,11 @@ def editar(request, pk):
 
 @requires_permission(Module.USERS, Action.CHANGE)
 def password(request, pk):
-    vinculo = _vinculo(request, pk)
+    vinculo = _membership(request, pk)
     user = vinculo.user
     if user == request.user:
         return redirect("change_password")
-    if not conta_exclusiva(user, request.clinic):
+    if not exclusive_account(user, request.clinic):
         messages.error(
             request,
             _(
@@ -95,7 +95,7 @@ def password(request, pk):
             % {"nome": user},
         )
         return redirect("team:edit", pk=vinculo.pk)
-    form = SenhaForm(user, request.POST or None)
+    form = PasswordForm(user, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
@@ -107,12 +107,16 @@ def password(request, pk):
 
 
 @requires_permission(Module.USERS, Action.CHANGE)
-def duas_etapas(request, pk):
+def two_factor(request, pk):
     """Remove a member's two-step verification (lost phone, decision 111); they turn it on
     again with a new QR code."""
-    vinculo = _vinculo(request, pk)
+    vinculo = _membership(request, pk)
     user = vinculo.user
-    if request.method == "POST" and user != request.user and conta_exclusiva(user, request.clinic):
+    if (
+        request.method == "POST"
+        and user != request.user
+        and exclusive_account(user, request.clinic)
+    ):
         conta_servicos.desativar(user)
         registrar(
             AuditEntry.Action.CHANGE,

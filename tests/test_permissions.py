@@ -131,7 +131,7 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
     assert cliente.get(reverse("practitioners:list")).url == reverse("account:two_factor")
     from apps.account import services as conta_servicos
 
-    conta_servicos.ativar(conta_servicos.preparar(root))
+    conta_servicos.ativar(conta_servicos.prepare(root))
     assert cliente.get(reverse("practitioners:list")).status_code == 200
     # Only one: the page and the Django admin no longer add clinics.
     assert cliente.get(reverse("register_clinic")).url == reverse("home")

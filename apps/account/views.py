@@ -90,7 +90,7 @@ def active(request):
 
 
 @login_required
-def duas_etapas(request):
+def two_factor(request):
     """Turn two-step verification on (QR code) or off, and make new recovery codes."""
     # The real row, not the request's lazy user: the audit log needs its model.
     user = get_user_model().objects.get(pk=request.user.pk)
@@ -138,7 +138,7 @@ def duas_etapas(request):
                 "obrigatoria": obrigatoria,
             },
         )
-    dispositivo = services.preparar(user, new=request.GET.get("novo") == "1")
+    dispositivo = services.prepare(user, new=request.GET.get("novo") == "1")
     form = CodigoForm(request.POST if acao == "ativar" else None)
     if acao == "ativar" and form.is_valid():
         if services.verificar_app(dispositivo, form.cleaned_data["code"]):

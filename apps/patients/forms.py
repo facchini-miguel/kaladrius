@@ -13,19 +13,19 @@ from apps.reference_data.models import City, State
 from .models import Patient, RelatedPerson
 
 
-class UFField(forms.ModelChoiceField):
+class StateField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.abbreviation} - {obj.name}"
 
 
-class CidadeField(forms.ModelChoiceField):
+class CityField(forms.ModelChoiceField):
     """City select labeled by name only (the state is chosen in the field beside it)."""
 
     def label_from_instance(self, obj):
         return obj.name
 
 
-def _campo_texto(label, max_length, **attrs):
+def _text_field(label, max_length, **attrs):
     """Optional text field that accepts punctuation; the value is normalized in clean_*()."""
     return forms.CharField(
         label=label,
@@ -35,16 +35,16 @@ def _campo_texto(label, max_length, **attrs):
     )
 
 
-class PacienteForm(BootstrapForm, forms.ModelForm):
-    state = UFField(queryset=State.objects.all(), required=False, label=_("UF"))
-    city = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
+class PatientForm(BootstrapForm, forms.ModelForm):
+    state = StateField(queryset=State.objects.all(), required=False, label=_("UF"))
+    city = CityField(queryset=City.objects.none(), required=False, label=_("Cidade"))
     # The country's document (decision 121), typed with punctuation, stored compact.
     tax_id = document_field()
-    postal_code = _campo_texto(_("CEP"), 10)
-    mobile_phone = _campo_texto(_("Celular"), 16, inputmode="tel")
-    whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
-    home_phone = _campo_texto(_("Telefone residencial"), 16, inputmode="tel")
-    work_phone = _campo_texto(_("Telefone comercial"), 16, inputmode="tel")
+    postal_code = _text_field(_("CEP"), 10)
+    mobile_phone = _text_field(_("Celular"), 16, inputmode="tel")
+    whatsapp = _text_field(_("WhatsApp"), 16, inputmode="tel")
+    home_phone = _text_field(_("Telefone residencial"), 16, inputmode="tel")
+    work_phone = _text_field(_("Telefone comercial"), 16, inputmode="tel")
 
     class Meta:
         model = Patient
@@ -85,8 +85,8 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
 
     # Brazilian fields; outside Brazil the state and city are typed (decision 117) and the
     # document is the country's (decision 121).
-    SO_NO_BRASIL = ["state_registration", "rg", "state", "city"]
-    FORA_DO_BRASIL = ["state_name", "city_name"]
+    BRAZIL_ONLY = ["state_registration", "rg", "state", "city"]
+    OUTSIDE_BRAZIL = ["state_name", "city_name"]
 
     def __init__(self, *args, clinic, **kwargs):
         super().__init__(*args, **kwargs)
@@ -101,7 +101,7 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
             self.documentos.empresa,
             self["kind"].value(),
         )
-        for field in self.FORA_DO_BRASIL if self.country == "BR" else self.SO_NO_BRASIL:
+        for field in self.OUTSIDE_BRAZIL if self.country == "BR" else self.BRAZIL_ONLY:
             del self.fields[field]
         if self.country != "BR":
             return
@@ -124,11 +124,11 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
                 "hx-trigger": "load, change",
             }
         )
-        for field, results in (
+        for field, patient_list in (
             ("neighborhood", "bairros-sugeridos"),
             ("street", "logradouros-sugeridos"),
         ):
-            self.fields[field].widget.attrs.update({"list": results, "autocomplete": "off"})
+            self.fields[field].widget.attrs.update({"list": patient_list, "autocomplete": "off"})
         state_id = (
             self.data.get(self.add_prefix("state")) if self.is_bound else self.instance.state_id
         )
@@ -141,20 +141,20 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
     def clean_postal_code(self):
         return countries.normalize_postal_code(self.cleaned_data.get("postal_code"), self.country)
 
-    def _limpar_telefone(self, name):
+    def _clean_phone(self, name):
         return normalize_phone(self.cleaned_data.get(name), self.country)
 
     def clean_mobile_phone(self):
-        return self._limpar_telefone("mobile_phone")
+        return self._clean_phone("mobile_phone")
 
     def clean_whatsapp(self):
-        return self._limpar_telefone("whatsapp")
+        return self._clean_phone("whatsapp")
 
     def clean_home_phone(self):
-        return self._limpar_telefone("home_phone")
+        return self._clean_phone("home_phone")
 
     def clean_work_phone(self):
-        return self._limpar_telefone("work_phone")
+        return self._clean_phone("work_phone")
 
     def clean_birth_date(self):
         date = self.cleaned_data.get("birth_date")
@@ -212,10 +212,10 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class PessoaRelacionadaForm(BootstrapForm, forms.ModelForm):
+class RelatedPersonForm(BootstrapForm, forms.ModelForm):
     """A relative or contact (decision 101): another patient of the clinic, or a name."""
 
-    phone = _campo_texto(_("Telefone"), 16, inputmode="tel")
+    phone = _text_field(_("Telefone"), 16, inputmode="tel")
 
     class Meta:
         model = RelatedPerson

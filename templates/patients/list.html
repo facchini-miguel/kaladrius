@@ -65,9 +65,9 @@
           {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ patient.tax_id|document:patient.document_role|default:"—" }}</td>
-        <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.main_phone|phone|default:"—" }}</td>
         <td>{% if patient.city %}{{ patient.city.name }}/{{ patient.city.state.abbreviation }}{% else %}—{% endif %}</td>
-        <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>
+        <td>{% if patient.age is not None %}{{ patient.age }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
           {% if patient.archived %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>

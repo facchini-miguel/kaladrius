@@ -57,9 +57,9 @@ def test_paciente_e_obrigatorio(cenario):
 
 
 def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
-    ficha = reverse("patients:record", args=[cenario["patient"].pk])
+    patient_record = reverse("patients:record", args=[cenario["patient"].pk])
     formulario = cenario["cliente"].get(
-        reverse("recalls:new"), {"patient": cenario["patient"].pk, "next": ficha}
+        reverse("recalls:new"), {"patient": cenario["patient"].pk, "next": patient_record}
     )
     assert "João Rechamada" in formulario.content.decode()
     response = cenario["cliente"].post(
@@ -68,11 +68,11 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
             "patient": cenario["patient"].pk,
             "date": DIA.isoformat(),
             "description": "x",
-            "next": ficha,
+            "next": patient_record,
         },
     )
-    assert response.url == ficha
-    assert "Revisão" not in cenario["cliente"].get(ficha).content.decode()  # shows "x"
+    assert response.url == patient_record
+    assert "Revisão" not in cenario["cliente"].get(patient_record).content.decode()  # shows "x"
 
 
 def test_concluir_e_reabrir(cenario):

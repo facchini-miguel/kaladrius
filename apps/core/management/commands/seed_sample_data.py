@@ -233,7 +233,7 @@ class Command(BaseCommand):
         )
         vinculos = RelatedPerson.Relationship
         for i, vinculo in zip(
-            range(0, 6, 2), (vinculos.MAE, vinculos.PAI, vinculos.CONJUGE), strict=False
+            range(0, 6, 2), (vinculos.MOTHER, vinculos.FATHER, vinculos.SPOUSE), strict=False
         ):
             if i + 1 < len(pacientes):
                 RelatedPerson.objects.create(
@@ -246,7 +246,7 @@ class Command(BaseCommand):
             RelatedPerson.objects.create(
                 clinic=clinic,
                 patient=patient,
-                relationship=vinculos.EMERGENCIA,
+                relationship=vinculos.EMERGENCY,
                 name=f"Contato fictício {n}",
                 phone=f"4899000000{n}",
             )

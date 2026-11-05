@@ -99,7 +99,7 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
     with use_clinic(clinic):
         item = estimate.itens.get()
         assert item.teeth == "18,36"  # always FDI in the database
-        assert item.dentes_exibicao == "1, 19"
+        assert item.teeth_display == "1, 19"
     page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
     assert 'data-dente="36"' in page and ">19</button>" in page

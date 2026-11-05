@@ -110,11 +110,11 @@ def test_situacoes_em_aberto_concordam_em_espanhol():
     from apps.estimates.models import Estimate
 
     with translation.override("es"):
-        assert str(Estimate.Status.ABERTO.label) == "Abierto"
+        assert str(Estimate.Status.OPEN.label) == "Abierto"
         assert pgettext("parcela", "Em aberto") == "Abierta"
         assert pgettext("valor", "Em aberto") == "Pendiente"
     with translation.override("en"):
-        assert str(Estimate.Status.ABERTO.label) == "Open"
+        assert str(Estimate.Status.OPEN.label) == "Open"
 
 
 def test_horario_em_ingles_sem_ponto_duplo():

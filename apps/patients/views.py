@@ -19,12 +19,12 @@ from apps.finance.models import Entry, Installment, Payment
 from apps.finance.services import patient_summary
 from apps.health_plans.models import MemberCard
 from apps.medical_records.models import Visit
-from apps.medical_records.permissions import acessa_prontuario
+from apps.medical_records.permissions import accesses_medical_records
 from apps.recalls.models import Recall
 from apps.schedule.models import Appointment
 from apps.schedule.services import visible_appointments
 
-from .forms import PacienteForm, PessoaRelacionadaForm
+from .forms import PatientForm, RelatedPersonForm
 from .models import Patient, RelatedPerson
 
 PER_PAGE = 50
@@ -36,18 +36,18 @@ STATUSES = {
 }
 
 
-def _ve_arquivados(request):
+def _sees_archived(request):
     """Archived patients are seen (and restored or deleted) only by who could delete."""
     return can(request, Module.PATIENTS, Action.DELETE)
 
 
-def _visiveis(request):
-    if _ve_arquivados(request):
+def _visible_patients(request):
+    if _sees_archived(request):
         return Patient.objects.all()
     return Patient.objects.filter(archived=False)
 
 
-def filtrar(pacientes, search, kind, status):
+def filter_patients(pacientes, search, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if search:
         filtro = Q(name__unaccent__icontains=search) | Q(legal_name__unaccent__icontains=search)
@@ -63,13 +63,13 @@ def filtrar(pacientes, search, kind, status):
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
-def results(request):
+def patient_list(request):
     search = request.GET.get("q", "").strip()
     kind = request.GET.get("kind", "")
     status = request.GET.get("status", "ativos")
-    if status == "arquivados" and not _ve_arquivados(request):
+    if status == "arquivados" and not _sees_archived(request):
         status = "ativos"
-    pacientes = filtrar(Patient.objects.select_related("city__state"), search, kind, status)
+    pacientes = filter_patients(Patient.objects.select_related("city__state"), search, kind, status)
     page = Paginator(pacientes, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
@@ -86,16 +86,17 @@ def results(request):
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
-def ficha(request, pk):
+def patient_record(request, pk):
     patient = get_object_or_404(
-        _visiveis(request).select_related("city__state", "marital_status", "archived_by"), pk=pk
+        _visible_patients(request).select_related("city__state", "marital_status", "archived_by"),
+        pk=pk,
     )
     # LGPD: access to a patient's record (health data) is logged.
     registrar(AuditEntry.Action.VIEWED, patient)
     rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
     context = {"patient": patient, "rechamadas": rechamadas}
     if can(request, Module.SCHEDULE, Action.VIEW):
-        context["agendamentos"] = _historico(request, patient)
+        context["agendamentos"] = _history(request, patient)
     if can(request, Module.RECEIVING, Action.VIEW):
         context["financeiro"] = patient_summary(patient)
     if can(request, Module.ESTIMATES, Action.VIEW):
@@ -106,8 +107,8 @@ def ficha(request, pk):
         context["carteirinhas"] = list(
             MemberCard.objects.filter(patient=patient).select_related("health_plan")
         )
-    context["relacionados"] = relacionados_de(patient)
-    if acessa_prontuario(request):
+    context["relacionados"] = related_of(patient)
+    if accesses_medical_records(request):
         context["prontuario"] = list(
             Visit.objects.filter(patient=patient).select_related("practitioner")
         )
@@ -115,11 +116,11 @@ def ficha(request, pk):
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
-def imprimir(request, pk):
+def print_patient(request, pk):
     """The registration sheet, ready to print or save as PDF (as the legacy Medical's
     fichapaciente_imp): identification, contact, address and health plan cards."""
     patient = get_object_or_404(
-        _visiveis(request).select_related("city__state", "marital_status"), pk=pk
+        _visible_patients(request).select_related("city__state", "marital_status"), pk=pk
     )
     registrar(AuditEntry.Action.VIEWED, patient)  # LGPD, as the record
     carteirinhas = (
@@ -141,35 +142,35 @@ def imprimir(request, pk):
     )
 
 
-HISTORICO = 10  # appointments shown in each list of the patient record
+HISTORY = 10  # appointments shown in each list of the patient record
 
 
-def _historico(request, patient):
+def _history(request, patient):
     """The patient's next and latest appointments (practitioners: only their own)."""
     deste = (
         visible_appointments(request).filter(patient=patient).select_related("practitioner", "kind")
     )
     now = timezone.now()
     return {
-        "proximos": list(deste.filter(end__gt=now).order_by("start")[:HISTORICO]),
-        "anteriores": list(deste.filter(end__lte=now).order_by("-start")[:HISTORICO]),
+        "proximos": list(deste.filter(end__gt=now).order_by("start")[:HISTORY]),
+        "anteriores": list(deste.filter(end__lte=now).order_by("-start")[:HISTORY]),
         "total": deste.count(),
     }
 
 
 @requires_permission(Module.PATIENTS, Action.CREATE)
-def new(request):
-    return _formulario(request, Patient())
+def new_patient(request):
+    return _patient_form(request, Patient())
 
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
-def editar(request, pk):
+def edit_patient(request, pk):
     # An archived patient is restored before being changed.
-    return _formulario(request, get_object_or_404(Patient.objects, pk=pk, archived=False))
+    return _patient_form(request, get_object_or_404(Patient.objects, pk=pk, archived=False))
 
 
-def _formulario(request, patient):
-    form = PacienteForm(request.POST or None, instance=patient, clinic=request.clinic)
+def _patient_form(request, patient):
+    form = PatientForm(request.POST or None, instance=patient, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         patient = form.save()
         messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": patient.name})
@@ -178,7 +179,7 @@ def _formulario(request, patient):
 
 
 @requires_permission(Module.PATIENTS, Action.DELETE)
-def arquivar(request, pk):
+def archive(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     # Not while the patient still owes or is owed money: the administrator first receives or
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
@@ -212,7 +213,7 @@ def arquivar(request, pk):
 
 
 @requires_permission(Module.PATIENTS, Action.DELETE)
-def restaurar(request, pk):
+def restore(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=True)
     if request.method == "POST":
         patient.archived = False
@@ -223,7 +224,7 @@ def restaurar(request, pk):
 
 
 @requires_permission(Module.PATIENTS, Action.DELETE)
-def excluir(request, pk):
+def delete_patient(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
     The appointments stay in the schedule without the patient (and without their notes),
@@ -307,20 +308,22 @@ def excluir(request, pk):
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
-def sugestoes(request):
+def suggestions(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     search = request.GET.get("q", "").strip()
     pacientes = (
-        filtrar(Patient.objects.all(), search, "", "ativos")[:10] if len(search) >= 2 else []
+        filter_patients(Patient.objects.all(), search, "", "ativos")[:10]
+        if len(search) >= 2
+        else []
     )
     return render(request, "patients/_suggestions.html", {"pacientes": pacientes})
 
 
-MESES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
+MONTH_NAMES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
 
 
 @requires_permission(Module.BIRTHDAYS, Action.VIEW)
-def aniversariantes(request):
+def birthdays(request):
     today = timezone.localdate()
     month = request.GET.get("mes", "")
     month = int(month) if month.isdecimal() and 1 <= int(month) <= 12 else today.month
@@ -332,14 +335,19 @@ def aniversariantes(request):
     return render(
         request,
         "patients/birthdays.html",
-        {"mes": month, "meses": list(enumerate(MESES, start=1)), "linhas": rows, "hoje": today},
+        {
+            "mes": month,
+            "meses": list(enumerate(MONTH_NAMES, start=1)),
+            "linhas": rows,
+            "hoje": today,
+        },
     )
 
 
 # --- Related people (decision 101) ------------------------------------------------------
 
 
-def relacionados_de(patient):
+def related_of(patient):
     """The patient's relatives and contacts, plus the patients who listed this one.
 
     Each item is (link, other person's name, the other patient or None, is_reverse); a
@@ -353,23 +361,23 @@ def relacionados_de(patient):
 
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
-def relacionado_novo(request, pk):
+def new_related_person(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
-    return _relacionado(request, patient, RelatedPerson())
+    return _related_person_form(request, patient, RelatedPerson())
 
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
-def relacionado_editar(request, pk):
+def edit_related_person(request, pk):
     relacionada = get_object_or_404(
         RelatedPerson.objects.select_related("patient", "other_patient"),
         pk=pk,
         patient__archived=False,
     )
-    return _relacionado(request, relacionada.patient, relacionada)
+    return _related_person_form(request, relacionada.patient, relacionada)
 
 
-def _relacionado(request, patient, instancia):
-    form = PessoaRelacionadaForm(request.POST or None, instance=instancia, patient=patient)
+def _related_person_form(request, patient, instancia):
+    form = RelatedPersonForm(request.POST or None, instance=instancia, patient=patient)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Pessoa relacionada salva."))
@@ -392,7 +400,7 @@ def _relacionado(request, patient, instancia):
 
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
-def relacionado_remover(request, pk):
+def remove_related_person(request, pk):
     relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, patient__archived=False)
     if request.method == "POST":
         patient = relacionada.patient_id

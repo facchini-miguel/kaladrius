@@ -3,10 +3,10 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BootstrapForm
 
-from .models import CAMPOS_DA_ANAMNESE, Addendum, Certificate, ExamRequest, Prescription, Visit
+from .models import ANAMNESIS_FIELDS, Addendum, Certificate, ExamRequest, Prescription, Visit
 
 
-class AtendimentoForm(BootstrapForm, forms.ModelForm):
+class VisitForm(BootstrapForm, forms.ModelForm):
     """With `profissionais`, a new visit also asks on behalf of which practitioner it is
     written (the system administrator, decision 087)."""
 
@@ -23,21 +23,21 @@ class AtendimentoForm(BootstrapForm, forms.ModelForm):
 
     class Meta:
         model = Visit
-        fields = ["date", *CAMPOS_DA_ANAMNESE]
+        fields = ["date", *ANAMNESIS_FIELDS]
         widgets = {
             "date": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
-            **{field: forms.Textarea(attrs={"rows": 4}) for field in CAMPOS_DA_ANAMNESE},
+            **{field: forms.Textarea(attrs={"rows": 4}) for field in ANAMNESIS_FIELDS},
         }
 
 
-class AdendoForm(BootstrapForm, forms.ModelForm):
+class AddendumForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Addendum
         fields = ["text"]
         widgets = {"text": forms.Textarea(attrs={"rows": 3})}
 
 
-class AtestadoForm(BootstrapForm, forms.ModelForm):
+class CertificateForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Certificate
         fields = ["kind", "date", "start_time", "end_time", "days", "note"]
@@ -51,7 +51,7 @@ class AtestadoForm(BootstrapForm, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if data.get("kind") == Certificate.Kind.AFASTAMENTO:
+        if data.get("kind") == Certificate.Kind.SICK_LEAVE:
             if not data.get("days"):
                 self.add_error("days", _("Informe quantos dias de afastamento."))
         else:
@@ -62,14 +62,14 @@ class AtestadoForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class ReceitaForm(BootstrapForm, forms.ModelForm):
+class PrescriptionForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Prescription
         fields = ["medications"]
         widgets = {"medications": forms.Textarea(attrs={"rows": 8})}
 
 
-class PedidoDeExamesForm(BootstrapForm, forms.ModelForm):
+class ExamRequestForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = ExamRequest
         fields = ["exams", "indication"]
@@ -81,15 +81,15 @@ class PedidoDeExamesForm(BootstrapForm, forms.ModelForm):
 
 # Attachments (decision 083): checked by their first bytes, not by the name or the type the
 # browser sends, so nothing else (HTML, scripts) is ever stored or served back.
-TAMANHO_MAXIMO_DO_ANEXO = 10 * 1024 * 1024
-ASSINATURAS = [
+MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
+SIGNATURES = [
     (b"%PDF-", "application/pdf"),
     (b"\xff\xd8\xff", "image/jpeg"),
     (b"\x89PNG\r\n\x1a\n", "image/png"),
 ]
 
 
-class AnexoForm(BootstrapForm, forms.Form):
+class AttachmentForm(BootstrapForm, forms.Form):
     file = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
     description = forms.CharField(
         label=_("Descrição"),
@@ -100,13 +100,11 @@ class AnexoForm(BootstrapForm, forms.Form):
 
     def clean_file(self):
         file = self.cleaned_data["file"]
-        if file.size > TAMANHO_MAXIMO_DO_ANEXO:
+        if file.size > MAX_ATTACHMENT_SIZE:
             raise forms.ValidationError(_("O arquivo passa de 10 MB."))
         start = file.read(8)
         file.seek(0)
-        kind = next(
-            (kind for assinatura, kind in ASSINATURAS if start.startswith(assinatura)), None
-        )
+        kind = next((kind for assinatura, kind in SIGNATURES if start.startswith(assinatura)), None)
         if kind is None:
             raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
         file.tipo_conferido = kind

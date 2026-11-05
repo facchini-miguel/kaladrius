@@ -30,7 +30,7 @@
     <thead><tr><th>{% translate "Procedimento" %}</th>{% if mostrar_dentes %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
     <tbody>
       {% for item in estimate.itens.all %}
-      <tr><td>{% if item.code %}{{ item.code }} · {% endif %}{{ item.description }}</td>{% if mostrar_dentes %}<td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td>{% endif %}<td class="text-end">{{ item.quantity }}</td><td class="text-end">{{ item.unit_price|currency }}</td><td class="text-end">{{ item.total|currency }}</td></tr>
+      <tr><td>{% if item.code %}{{ item.code }} · {% endif %}{{ item.description }}</td>{% if mostrar_dentes %}<td>{{ item.teeth_display|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td>{% endif %}<td class="text-end">{{ item.quantity }}</td><td class="text-end">{{ item.unit_price|currency }}</td><td class="text-end">{{ item.total|currency }}</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>

@@ -285,13 +285,13 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
             Procedure(clinic=clinic, name=name, amount=Decimal(amount), category=tratamento)
             for name, amount in SAMPLE_PROCEDURES
         )
-    procedimentos = list(Procedure.objects.filter(clinic=clinic, active=True))
+    procedures = list(Procedure.objects.filter(clinic=clinic, active=True))
     pacientes = _patients(clinic)
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     category = (
         tratamento or Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME).first()
     )
-    if not (procedimentos and pacientes and category):
+    if not (procedures and pacientes and category):
         return 0
     teeth = [d for row in DENTES_PERMANENTES for d in row]
     today = timezone.localdate()
@@ -305,7 +305,7 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
             valid_until=date + datetime.timedelta(days=30),
             created_by=user,
         )
-        for procedure in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
+        for procedure in sorteio.sample(procedures, sorteio.randint(1, 3)):
             escolhidos = sorted(sorteio.sample(teeth, sorteio.randint(0, 3)))
             EstimateItem.objects.create(
                 clinic=clinic,
@@ -318,7 +318,7 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
             )
         sorte = sorteio.random()
         if sorte < 0.4:
-            services.aprovar(
+            services.approve(
                 estimate,
                 parcelas=sorteio.choice([1, 2, 3, 4]),
                 primeiro_vencimento=date + datetime.timedelta(days=7),
@@ -326,7 +326,7 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
                 user=user,
             )
         elif sorte < 0.6:
-            services.recusar(estimate, user=user)
+            services.refuse(estimate, user=user)
     return quantity
 
 

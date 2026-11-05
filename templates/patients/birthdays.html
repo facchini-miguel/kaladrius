@@ -24,7 +24,7 @@
         <td>{{ patient.birth_date|date:"d/m" }}</td>
         <td><a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a></td>
         <td>{% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}</td>
-        <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.main_phone|phone|default:"—" }}</td>
         <td>{{ patient.email|default:"—" }}</td>
       </tr>
       {% empty %}

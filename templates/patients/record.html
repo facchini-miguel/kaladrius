@@ -52,7 +52,7 @@
           {% if no_brasil or patient.rg %}<dt class="col-sm-5">{% translate "RG" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Nascimento" %}</dt>
           <dd class="col-sm-7">
-            {% if patient.birth_date %}{{ patient.birth_date|date:"SHORT_DATE_FORMAT" }} ({% blocktranslate count idade=patient.idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}){% else %}—{% endif %}
+            {% if patient.birth_date %}{{ patient.birth_date|date:"SHORT_DATE_FORMAT" }} ({% blocktranslate count idade=patient.age %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}){% else %}—{% endif %}
           </dd>
           <dt class="col-sm-5">{% translate "Sexo" %}</dt><dd class="col-sm-7">{{ patient.get_sex_display|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "Estado civil" %}</dt><dd class="col-sm-7">{{ patient.marital_status|default:"—" }}</dd>
@@ -78,9 +78,9 @@
           <dd class="col-sm-7">
             {% if patient.street %}{{ patient.street }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complement %} - {{ patient.complement }}{% endif %}<br>{% endif %}
             {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
-            {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
+            {% if patient.city_state %}{{ patient.city_state }}<br>{% endif %}
             {% if patient.postal_code %}{% postal_code_label %} {{ patient.postal_code|postal_code }}{% endif %}
-            {% if not patient.street and not patient.cidade_estado and not patient.postal_code %}—{% endif %}
+            {% if not patient.street and not patient.city_state and not patient.postal_code %}—{% endif %}
           </dd>
         </dl>
       </div>
@@ -109,7 +109,7 @@
         {% else %}
         <strong>{{ relacionada.get_relationship_display }}:</strong>
         {% if outro %}<a href="{% url 'patients:record' outro.pk %}">{{ name }}</a>{% else %}{{ name }}{% endif %}
-        {% with phone=relacionada.telefone_exibido %}{% if phone %}· <span class="text-nowrap">{{ phone|phone }}</span>{% endif %}{% endwith %}
+        {% with phone=relacionada.display_phone %}{% if phone %}· <span class="text-nowrap">{{ phone|phone }}</span>{% endif %}{% endwith %}
         {% if relacionada.note %}<span class="small text-body-secondary">· {{ relacionada.note }}</span>{% endif %}
         {% endif %}
       </span>
@@ -131,7 +131,7 @@
     {% for visit in prontuario %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.date|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</a>
-      {% if visit.finalizado %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
+      {% if visit.is_finalized %}<span class="badge text-bg-light">{% translate "Finalizado" %}</span>{% else %}<span class="badge text-bg-warning">{% translate "Rascunho" %}</span>{% endif %}
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhum atendimento registrado." %}</li>
@@ -207,7 +207,7 @@
         {% if carteirinha.holder %}<span class="small">· {% translate "titular" %}: {{ carteirinha.holder }}</span>{% endif %}
       </span>
       <span class="text-nowrap">
-        {% if not carteirinha.active %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
+        {% if not carteirinha.active %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.is_expired %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
         {% if pode.convenios.alterar and not patient.archived %}<a class="btn btn-sm btn-link p-0 ms-2" href="{% url 'health_plans:card_edit' carteirinha.pk %}">{% translate "editar" %}</a>{% endif %}
       </span>
     </li>

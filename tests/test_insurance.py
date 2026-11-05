@@ -23,8 +23,8 @@ def mudar_pais(clinic, country):
 
 
 def test_cada_pais_tem_as_suas_regras():
-    assert set(insurance.SEGUROS) == set(COUNTRIES)
-    for country, regras in insurance.SEGUROS.items():
+    assert set(insurance.INSURERS) == set(COUNTRIES)
+    for country, regras in insurance.INSURERS.items():
         for code in (regras.registration, regras.procedure):
             if code and code.default:
                 # Every format has an example, and the example follows it.
@@ -77,8 +77,8 @@ def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):
     assert admin.post(url, data).status_code == 302
     with use_clinic(clinica_a):
         assert MemberCard.objects.get().group == "G-100"
-    ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert "W123456789" in ficha and "G-100" in ficha
+    patient_record = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert "W123456789" in patient_record and "G-100" in patient_record
     mudar_pais(clinica_a, "ZA")
     fields = admin.get(url).context["form"].fields
     assert str(fields["member_code"].label) == "Código do beneficiário (dependant code)"

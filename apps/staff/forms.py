@@ -12,7 +12,7 @@ from .models import Employee, Payroll
 DATE_INPUT = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-def _dinheiro(label, obrigatorio):
+def _money(label, obrigatorio):
     return LocalizedDecimalField(
         label=label,
         max_digits=12,
@@ -24,7 +24,7 @@ def _dinheiro(label, obrigatorio):
     )
 
 
-class FuncionarioForm(BootstrapForm, forms.ModelForm):
+class EmployeeForm(BootstrapForm, forms.ModelForm):
     """The employee and, on registering or on a raise, the salary from a date."""
 
     tax_id = document_field()  # the country's employee document (decision 121)
@@ -34,7 +34,7 @@ class FuncionarioForm(BootstrapForm, forms.ModelForm):
         required=False,
         widget=forms.TextInput({"inputmode": "tel"}),
     )
-    salary = _dinheiro(_("Salário"), obrigatorio=False)
+    salary = _money(_("Salário"), obrigatorio=False)
     salario_desde = forms.DateField(
         label=_("Salário a partir de"), widget=DATE_INPUT, required=False
     )
@@ -104,13 +104,13 @@ class FuncionarioForm(BootstrapForm, forms.ModelForm):
         return data
 
 
-class FolhaForm(BootstrapForm, forms.ModelForm):
+class PayrollForm(BootstrapForm, forms.ModelForm):
     """One employee's line of the month: overtime, absences and a note."""
 
     overtime_hours = LocalizedDecimalField(
         label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
-    overtime_rate = _dinheiro(_("Valor da hora extra"), obrigatorio=True)
+    overtime_rate = _money(_("Valor da hora extra"), obrigatorio=True)
 
     class Meta:
         model = Payroll
@@ -129,7 +129,7 @@ class FolhaForm(BootstrapForm, forms.ModelForm):
         return absences
 
 
-class LancarForm(BootstrapForm, forms.Form):
+class PostPayrollForm(BootstrapForm, forms.Form):
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     due_date = forms.DateField(label=_("Vencimento"), widget=DATE_INPUT)
 

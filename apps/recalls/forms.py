@@ -7,7 +7,7 @@ from apps.patients.models import Patient
 from .models import Recall
 
 
-class RechamadaForm(BootstrapForm, forms.ModelForm):
+class RecallForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Recall
         fields = ["patient", "date", "description", "done"]

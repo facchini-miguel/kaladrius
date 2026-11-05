@@ -30,9 +30,9 @@ ANAMNESE = {
 
 def cliente(user):
     """A client of its own for each user (the shared fixture logs one user at a time)."""
-    new = Client()
-    new.force_login(user)
-    return new
+    new_visit = Client()
+    new_visit.force_login(user)
+    return new_visit
 
 
 @pytest.fixture
@@ -74,15 +74,15 @@ def registrar(cenario, quem="dra", **extra):
 
 
 def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
-    new = reverse("medical_records:new", args=[cenario["patient"].pk])
-    ficha = reverse("patients:record", args=[cenario["patient"].pk])
+    new_visit = reverse("medical_records:new", args=[cenario["patient"].pk])
+    patient_record = reverse("patients:record", args=[cenario["patient"].pk])
     for quem in ("recepcao", "admin"):
-        assert cenario[quem].get(new).status_code == 403
-        assert "prontuario" not in cenario[quem].get(ficha).context
+        assert cenario[quem].get(new_visit).status_code == 403
+        assert "prontuario" not in cenario[quem].get(patient_record).context
     # The system administrator always reaches it (decision 087), the clinic administrator not.
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    assert cliente(root).get(new).status_code == 200
-    page = cenario["dra"].get(ficha)
+    assert cliente(root).get(new_visit).status_code == 200
+    page = cenario["dra"].get(patient_record)
     assert page.context["prontuario"] == [] and "Novo atendimento" in page.content.decode()
 
     # An administrator who is also a registered practitioner reaches it.
@@ -90,7 +90,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
         Practitioner.objects.create(
             name="Dr. Admin", user=django_user_model.objects.get(username="admin")
         )
-    assert cenario["admin"].get(new).status_code == 200
+    assert cenario["admin"].get(new_visit).status_code == 200
 
 
 def test_registrar_salvar_e_finalizar(cenario):
@@ -98,7 +98,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     visit = registrar(cenario, appointment=appointment.pk)
     assert (visit.practitioner, visit.appointment) == (cenario["ana"], appointment)
     assert visit.chief_complaint == ANAMNESE["chief_complaint"]
-    assert not visit.finalizado
+    assert not visit.is_finalized
     # The appointment leads to the same visit, never a second one.
     url_novo = reverse("medical_records:new", args=[cenario["patient"].pk])
     response = cenario["dra"].get(url_novo, {"appointment": appointment.pk})
@@ -107,7 +107,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     url = reverse("medical_records:visit", args=[visit.pk])
     cenario["dra"].post(url, {**ANAMNESE, "plan": "Retorno em 15 dias", "acao": "finalizar"})
     visit.refresh_from_db()
-    assert visit.finalizado and visit.plan == "Retorno em 15 dias"
+    assert visit.is_finalized and visit.plan == "Retorno em 15 dias"
 
     # Finalized: nobody changes it any more, corrections are addenda.
     assert cenario["dra"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
@@ -115,8 +115,8 @@ def test_registrar_salvar_e_finalizar(cenario):
     assert page.context["form"] is None and page.context["adendo_form"] is not None
     cenario["dr"].post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Exame ok"})
     with use_clinic(cenario["clinic"]):
-        adendo = visit.adendos.get()
-    assert adendo.text == "Exame ok" and adendo.practitioner.name == "Dr. Bruno"
+        addendum = visit.adendos.get()
+    assert addendum.text == "Exame ok" and addendum.practitioner.name == "Dr. Bruno"
     assert "Exame ok" in cenario["dra"].get(url).content.decode()
 
 
@@ -127,8 +127,8 @@ def test_rascunho_so_o_autor_altera(cenario):
     assert page.context["form"] is None and page.context["adendo_form"] is None
     assert cenario["dr"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
     # No addendum before it is finalized: the author edits the draft instead.
-    adendo = reverse("medical_records:addendum", args=[visit.pk])
-    assert cenario["dra"].post(adendo, {"text": "x"}).status_code == 403
+    addendum = reverse("medical_records:addendum", args=[visit.pk])
+    assert cenario["dra"].post(addendum, {"text": "x"}).status_code == 403
 
 
 def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
@@ -235,8 +235,8 @@ def test_receita_uma_linha_por_item(cenario):
         "Soro fisiológico nasal",
     ]
     assert "RECEITUÁRIO" in page.content.decode()
-    ficha = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
-    assert response.url in ficha.content.decode()
+    patient_record = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
+    assert response.url in patient_record.content.decode()
     record = AuditEntry.objects.filter(model_name="Receita").latest("pk")
     assert "Paracetamol" not in str(record.changes)
 
@@ -280,18 +280,20 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
 
     enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
     with use_clinic(cenario["clinic"]):
-        anexo = Attachment.objects.get()
-    assert (anexo.kind, anexo.size, anexo.practitioner.name) == (
+        attachment = Attachment.objects.get()
+    assert (attachment.kind, attachment.size, attachment.practitioner.name) == (
         "image/png",
         len(PNG),
         "Dr. Bruno",
     )
 
-    file = cenario["dra"].get(reverse("medical_records:attachment", args=[anexo.pk]))
+    file = cenario["dra"].get(reverse("medical_records:attachment", args=[attachment.pk]))
     assert file.content == PNG and file["Content-Type"] == "image/png"
     assert file["Cache-Control"] == "private, no-store"
     assert (
-        cenario["recepcao"].get(reverse("medical_records:attachment", args=[anexo.pk])).status_code
+        cenario["recepcao"]
+        .get(reverse("medical_records:attachment", args=[attachment.pk]))
+        .status_code
         == 403
     )
     assert "raio-x" not in str(
@@ -310,7 +312,7 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
     cenario["dra"].post(url, {"file": SimpleUploadedFile("b.png", PNG)})
     with use_clinic(cenario["clinic"]):
         first, segundo = Attachment.objects.order_by("pk")
-    remover = lambda anexo: reverse("medical_records:attachment_remove", args=[anexo.pk])  # noqa: E731
+    remover = lambda attachment: reverse("medical_records:attachment_remove", args=[attachment.pk])  # noqa: E731
     assert cenario["dr"].post(remover(first)).status_code == 403
     cenario["dra"].post(remover(first))
     cenario["dra"].post(
@@ -328,9 +330,9 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
     from apps.medical_records.models import Attachment, Certificate
 
     root = cliente(django_user_model.objects.create_superuser("root", password="x-12345678"))
-    new = reverse("medical_records:new", args=[cenario["patient"].pk])
-    assert 'name="practitioner"' in root.get(new).content.decode()
-    response = root.post(new, {**ANAMNESE, "practitioner": cenario["ana"].pk})
+    new_visit = reverse("medical_records:new", args=[cenario["patient"].pk])
+    assert 'name="practitioner"' in root.get(new_visit).content.decode()
+    response = root.post(new_visit, {**ANAMNESE, "practitioner": cenario["ana"].pk})
     assert response.status_code == 302
     with use_clinic(cenario["clinic"]):
         visit = Visit.objects.get()
@@ -346,9 +348,10 @@ def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
         anexo_url, {"file": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
     )
     with use_clinic(cenario["clinic"]):
-        anexo = Attachment.objects.get()
+        attachment = Attachment.objects.get()
     assert (
-        root.post(reverse("medical_records:attachment_remove", args=[anexo.pk])).status_code == 302
+        root.post(reverse("medical_records:attachment_remove", args=[attachment.pk])).status_code
+        == 302
     )
 
     root.post(url, {**ANAMNESE, "acao": "finalizar"})

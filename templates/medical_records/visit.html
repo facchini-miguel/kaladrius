@@ -14,7 +14,7 @@
     </div>
   </div>
   {% if visit %}
-  {% if visit.finalizado %}
+  {% if visit.is_finalized %}
   <span class="badge text-bg-success">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalizado em {{ momento }}{% endblocktranslate %}</span>
   {% else %}
   <span class="badge text-bg-warning">{% translate "Rascunho" %}</span>
@@ -45,7 +45,7 @@
     {% endfor %}
   </div>
 </div>
-{% if visit.finalizado %}
+{% if visit.is_finalized %}
 <p class="d-print-none"><a class="btn btn-outline-secondary btn-sm" href="{% url 'medical_records:print' visit.pk %}">{% translate "Imprimir atendimento" %}</a></p>
 {% else %}
 <p class="text-body-secondary small">{% translate "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar." %}</p>

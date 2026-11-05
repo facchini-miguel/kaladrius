@@ -5,29 +5,29 @@ from django.utils.translation import gettext as _
 
 from apps.core.permissions import Action, Module, requires_permission
 
-from .forms import ProfissionalForm
+from .forms import PractitionerForm
 from .models import Practitioner
 
 
 @requires_permission(Module.PRACTITIONERS, Action.VIEW)
-def results(request):
+def practitioner_list(request):
     profissionais = Practitioner.objects.select_related("user")
     return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
 @requires_permission(Module.PRACTITIONERS, Action.CREATE)
-def new(request):
-    return _formulario(request, Practitioner())
+def new_practitioner(request):
+    return _practitioner_form(request, Practitioner())
 
 
 @requires_permission(Module.PRACTITIONERS, Action.CHANGE)
-def editar(request, pk):
+def edit_practitioner(request, pk):
     # Profissional.objects only sees the current clinic: other clinics' ids give 404.
-    return _formulario(request, get_object_or_404(Practitioner.objects, pk=pk))
+    return _practitioner_form(request, get_object_or_404(Practitioner.objects, pk=pk))
 
 
-def _formulario(request, practitioner):
-    form = ProfissionalForm(request.POST or None, instance=practitioner, clinic=request.clinic)
+def _practitioner_form(request, practitioner):
+    form = PractitionerForm(request.POST or None, instance=practitioner, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": practitioner.name})
@@ -36,7 +36,7 @@ def _formulario(request, practitioner):
 
 
 @requires_permission(Module.PRACTITIONERS, Action.DELETE)
-def excluir(request, pk):
+def delete_practitioner(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     if request.method == "POST":
         try:

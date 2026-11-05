@@ -103,5 +103,5 @@ class MemberCard(ClinicModel):
         super().save(*args, **kwargs)
 
     @property
-    def vencida(self):
+    def is_expired(self):
         return self.valid_until is not None and self.valid_until < timezone.localdate()

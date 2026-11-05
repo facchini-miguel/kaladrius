@@ -15,10 +15,10 @@ class Patient(ClinicModel):
         INDIVIDUAL = "PF", _("Pessoa física")
         COMPANY = "PJ", _("Pessoa jurídica")
 
-    class Sexo(models.TextChoices):
-        FEMININO = "F", _("Feminino")
-        MASCULINO = "M", _("Masculino")
-        OUTRO = "O", _("Outro")
+    class Sex(models.TextChoices):
+        FEMALE = "F", _("Feminino")
+        MALE = "M", _("Masculino")
+        OTHER = "O", _("Outro")
 
     kind = models.CharField(
         _("tipo"), max_length=2, choices=Kind.choices, default=Kind.INDIVIDUAL, db_column="tipo"
@@ -47,7 +47,7 @@ class Patient(ClinicModel):
         _("inscrição estadual"), max_length=20, blank=True, db_column="inscricao_estadual"
     )
     sex = models.CharField(
-        _("sexo"), max_length=1, choices=Sexo.choices, blank=True, db_column="sexo"
+        _("sexo"), max_length=1, choices=Sex.choices, blank=True, db_column="sexo"
     )
     birth_date = models.DateField(
         _("data de nascimento"), null=True, blank=True, db_column="data_nascimento"
@@ -173,7 +173,7 @@ class Patient(ClinicModel):
         return "empresa" if self.kind == self.Kind.COMPANY else "paciente"
 
     @property
-    def idade(self):
+    def age(self):
         """Age in whole years, or None when the birth date is unknown."""
         if self.birth_date is None:
             return None
@@ -186,7 +186,7 @@ class Patient(ClinicModel):
         )
 
     @property
-    def cidade_estado(self):
+    def city_state(self):
         """City and state as written on the record: from the national tables in Brazil, typed
         anywhere else (decision 117)."""
         if self.city_id:
@@ -194,7 +194,7 @@ class Patient(ClinicModel):
         return ", ".join(parte for parte in (self.city_name, self.state_name) if parte)
 
     @property
-    def telefone_principal(self):
+    def main_phone(self):
         return self.mobile_phone or self.home_phone or self.work_phone
 
 
@@ -207,17 +207,17 @@ class RelatedPerson(ClinicModel):
     """
 
     class Relationship(models.TextChoices):
-        MAE = "mae", _("Mãe")
-        PAI = "pai", _("Pai")
-        RESPONSAVEL = "responsavel", _("Responsável legal")
-        CONJUGE = "conjuge", _("Cônjuge")
-        FILHO = "filho", _("Filho(a)")
-        IRMAO = "irmao", _("Irmão(ã)")
-        AVO = "avo", _("Avô/avó")
-        NETO = "neto", _("Neto(a)")
-        PARENTE = "parente", _("Outro parente")
-        EMERGENCIA = "emergencia", _("Contato de emergência")
-        CONTATO = "contato", _("Contato")
+        MOTHER = "mae", _("Mãe")
+        FATHER = "pai", _("Pai")
+        GUARDIAN = "responsavel", _("Responsável legal")
+        SPOUSE = "conjuge", _("Cônjuge")
+        CHILD = "filho", _("Filho(a)")
+        SIBLING = "irmao", _("Irmão(ã)")
+        GRANDPARENT = "avo", _("Avô/avó")
+        GRANDCHILD = "neto", _("Neto(a)")
+        RELATIVE = "parente", _("Outro parente")
+        EMERGENCY = "emergencia", _("Contato de emergência")
+        CONTACT = "contato", _("Contato")
 
     patient = models.ForeignKey(
         Patient,
@@ -282,7 +282,7 @@ class RelatedPerson(ClinicModel):
         return self.other_patient.name if self.other_patient_id else self.name
 
     @property
-    def telefone_exibido(self):
+    def display_phone(self):
         if self.phone or not self.other_patient_id:
             return self.phone
         other = self.other_patient

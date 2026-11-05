@@ -6,7 +6,7 @@ from apps.core.forms import BootstrapForm
 from apps.core.models import Membership, Role, Usuario
 
 
-def conta_exclusiva(user, clinic):
+def exclusive_account(user, clinic):
     """Whether the clinic administrator may manage the account itself (name, e-mail, password).
 
     Only for accounts used solely in this clinic: changing the password of someone who
@@ -20,7 +20,7 @@ def conta_exclusiva(user, clinic):
     )
 
 
-class NovoMembroForm(BootstrapForm, UserCreationForm):
+class NewMemberForm(BootstrapForm, UserCreationForm):
     """A new user account, created already linked to the current clinic with a role."""
 
     role = forms.ChoiceField(label=_("Perfil"), choices=Role.choices, initial=Role.FRONT_DESK)
@@ -41,7 +41,7 @@ class NovoMembroForm(BootstrapForm, UserCreationForm):
         return user
 
 
-class VinculoForm(BootstrapForm, forms.ModelForm):
+class MembershipForm(BootstrapForm, forms.ModelForm):
     """Role and access of a member in the current clinic."""
 
     class Meta:
@@ -89,5 +89,5 @@ class UserAccountForm(BootstrapForm, forms.ModelForm):
         self.fields["first_name"].required = True
 
 
-class SenhaForm(BootstrapForm, SetPasswordForm):
+class PasswordForm(BootstrapForm, SetPasswordForm):
     """New password set by the clinic administrator (the member's other sessions end)."""

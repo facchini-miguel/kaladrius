@@ -4,14 +4,14 @@ from .models import HealthPlan, MemberCard
 
 
 @admin.register(HealthPlan)
-class ConvenioAdmin(admin.ModelAdmin):
+class HealthPlanAdmin(admin.ModelAdmin):
     list_display = ["name", "registration", "active", "clinic"]
     list_filter = ["clinic", "active"]
     search_fields = ["name", "registration"]
 
 
 @admin.register(MemberCard)
-class CarteirinhaAdmin(admin.ModelAdmin):
+class MemberCardAdmin(admin.ModelAdmin):
     list_display = ["patient", "health_plan", "plan", "number", "valid_until", "active"]
     list_filter = ["clinic", "health_plan", "active"]
     search_fields = ["number", "patient__name"]

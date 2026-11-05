@@ -95,9 +95,9 @@ def test_despesa_com_fornecedor_guarda_o_nome_e_aparece_na_ficha(clinica_a, supp
         entry = Entry.objects.get()
     assert entry.supplier == supplier
     assert entry.payer == "Dental Fictícia"
-    ficha = admin.get(reverse("finance:supplier", args=[supplier.pk]))
-    assert len(ficha.context["parcelas"]) == 3
-    assert str(ficha.context["em_aberto"]) == "450.00"
+    patient_record = admin.get(reverse("finance:supplier", args=[supplier.pk]))
+    assert len(patient_record.context["parcelas"]) == 3
+    assert str(patient_record.context["em_aberto"]) == "450.00"
     results = admin.get(reverse("finance:payables")).content.decode()
     assert reverse("finance:supplier", args=[supplier.pk]) in results
     assert admin.get(reverse("finance:payables") + "?q=Dental").context["pagina"].paginator.count

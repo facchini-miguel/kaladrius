@@ -51,8 +51,8 @@ def test_ficha_cadastral_impressa(clinica_a, reception):
         )
         health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
         MemberCard.objects.create(patient=patient, health_plan=health_plan, number="123456")
-    ficha = reception.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert reverse("patients:print", args=[patient.pk]) in ficha
+    patient_record = reception.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert reverse("patients:print", args=[patient.pk]) in patient_record
     page = reception.get(reverse("patients:print", args=[patient.pk]))
     text = page.content.decode()
     for trecho in (

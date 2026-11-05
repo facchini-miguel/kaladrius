@@ -17,9 +17,9 @@ from apps.core.ordering import ALPHABETICAL
 MONEY = {"max_digits": 12, "decimal_places": 2}
 CENT = Decimal("0.01")
 # Monthly hours of a 44-hour week (CLT) and the minimum overtime rate (+50%).
-HORAS_POR_MES = Decimal(220)
-ADICIONAL_HORA_EXTRA = Decimal("1.5")
-DIAS_POR_MES = Decimal(30)
+HOURS_PER_MONTH = Decimal(220)
+OVERTIME_PREMIUM = Decimal("1.5")
+DAYS_PER_MONTH = Decimal(30)
 
 
 class Employee(ClinicModel):
@@ -53,7 +53,7 @@ class Employee(ClinicModel):
 
     document_role = "funcionario"  # see apps/core/identification.py
 
-    def salario_em(self, date):
+    def salary_on(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""
         salary = (
             self.salarios.filter(effective_from__lte=date)
@@ -163,22 +163,22 @@ class Payroll(ClinicModel):
         super().save(*args, **kwargs)
 
     @property
-    def valor_horas_extras(self):
+    def overtime_amount(self):
         return (self.overtime_hours * self.overtime_rate).quantize(CENT, ROUND_HALF_UP)
 
     @property
-    def desconto_faltas(self):
-        return (self.salary / DIAS_POR_MES * self.absences).quantize(CENT, ROUND_HALF_UP)
+    def absence_deduction(self):
+        return (self.salary / DAYS_PER_MONTH * self.absences).quantize(CENT, ROUND_HALF_UP)
 
     @property
     def total(self):
-        return self.salary + self.valor_horas_extras - self.desconto_faltas
+        return self.salary + self.overtime_amount - self.absence_deduction
 
     @property
-    def lancada(self):
+    def is_posted(self):
         return self.entry_id is not None and not self.entry.cancelled
 
 
-def hora_extra_sugerida(salary):
+def suggested_overtime_rate(salary):
     """Overtime hour from a monthly salary: salary / 220 hours x 1.5 (CLT minimum)."""
-    return (salary / HORAS_POR_MES * ADICIONAL_HORA_EXTRA).quantize(CENT, ROUND_HALF_UP)
+    return (salary / HOURS_PER_MONTH * OVERTIME_PREMIUM).quantize(CENT, ROUND_HALF_UP)

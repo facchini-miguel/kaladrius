@@ -233,8 +233,8 @@ def test_paciente_arquivado_some_das_sugestoes_mas_fica_na_agenda(
     agendar(cenario)
     with use_clinic(cenario["clinic"]):
         Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
-    sugestoes = cenario["cliente"].get(reverse("patients:suggestions"), {"q": "maria"})
-    assert "Maria Paciente" not in sugestoes.content.decode()
+    suggestions = cenario["cliente"].get(reverse("patients:suggestions"), {"q": "maria"})
+    assert "Maria Paciente" not in suggestions.content.decode()
     periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
     events = cenario["cliente"].get(
         reverse("schedule:events"), {**periodo, "practitioner": cenario["ana"].pk}

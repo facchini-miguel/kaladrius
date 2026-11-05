@@ -3,12 +3,12 @@ from apps.core.models import ModuleCode, Role
 from apps.practitioners.models import Practitioner
 
 
-def prontuario_habilitado(request):
+def medical_records_enabled(request):
     """The clinic has the medical record module on (decision 092)."""
     return ModuleCode.MEDICAL_RECORDS in modules.enabled(request)
 
 
-def administra_prontuario(request):
+def manages_medical_records(request):
     """The system administrator (superuser) sees and does everything in the medical record,
     writing on behalf of a practitioner (decision 087), even with the module turned off
     (decision 115). Clinic administrators do not."""
@@ -19,13 +19,13 @@ def administra_prontuario(request):
     )
 
 
-def acessa_prontuario(request):
-    return administra_prontuario(request) or (
-        prontuario_habilitado(request) and profissional_do_usuario(request) is not None
+def accesses_medical_records(request):
+    return manages_medical_records(request) or (
+        medical_records_enabled(request) and user_practitioner(request) is not None
     )
 
 
-def profissional_do_usuario(request):
+def user_practitioner(request):
     """The practitioner record of the logged-in user, or None (decision 081).
 
     Practitioners read and write the medical record: never the front desk, and a clinic
@@ -33,11 +33,11 @@ def profissional_do_usuario(request):
     Profissionais, linked to their user). The superuser always reaches it (decision 087).
     """
     if not hasattr(request, "_profissional_do_prontuario"):
-        request._profissional_do_prontuario = _profissional(request)
+        request._profissional_do_prontuario = _practitioner(request)
     return request._profissional_do_prontuario
 
 
-def _profissional(request):
+def _practitioner(request):
     user = request.user
     if not user.is_authenticated or getattr(request, "clinic", None) is None:
         return None

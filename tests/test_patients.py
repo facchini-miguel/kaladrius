@@ -88,10 +88,10 @@ def test_filtros_de_formatacao():
 def test_idade(clinica_a):
     today = datetime.date.today()
     nascimento = today.replace(year=today.year - 30)
-    assert criar_paciente(clinica_a, birth_date=nascimento).idade == 30
+    assert criar_paciente(clinica_a, birth_date=nascimento).age == 30
     amanha_ha_30_anos = nascimento + datetime.timedelta(days=1)
-    assert criar_paciente(clinica_a, birth_date=amanha_ha_30_anos).idade == 29
-    assert criar_paciente(clinica_a).idade is None
+    assert criar_paciente(clinica_a, birth_date=amanha_ha_30_anos).age == 29
+    assert criar_paciente(clinica_a).age is None
 
 
 # --- Form ------------------------------------------------------------------------
@@ -245,11 +245,11 @@ def test_admin_arquiva_e_restaura(admin_a, clinica_a, criar_usuario, cliente_de)
     patient.refresh_from_db()
     assert patient.archived and patient.archived_by.username == "admin_a"
 
-    results = reverse("patients:list")
+    patient_list = reverse("patients:list")
     for status, esperado in (("todos", []), ("arquivados", [patient])):
-        assert list(admin_a.get(results, {"status": status}).context["pagina"]) == esperado
-    ficha = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert "Restaurar" in ficha and "Excluir definitivamente" in ficha
+        assert list(admin_a.get(patient_list, {"status": status}).context["pagina"]) == esperado
+    patient_record = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert "Restaurar" in patient_record and "Excluir definitivamente" in patient_record
     assert admin_a.get(reverse("patients:edit", args=[patient.pk])).status_code == 404
 
     admin_a.post(reverse("patients:restore", args=[patient.pk]))
@@ -262,9 +262,9 @@ def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
         clinica_a, name="Fulano Escondido", tax_id="52998224725", archived=True
     )
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
-    results = reverse("patients:list")
+    patient_list = reverse("patients:list")
     for status in ("ativos", "todos", "arquivados"):
-        assert "Escondido" not in cliente.get(results, {"status": status}).content.decode()
+        assert "Escondido" not in cliente.get(patient_list, {"status": status}).content.decode()
     assert cliente.get(reverse("patients:record", args=[patient.pk])).status_code == 404
     # The same CPF cannot be registered again: the message points to the administrator.
     response = cliente.post(reverse("patients:new"), dados_formulario(tax_id="529.982.247-25"))
