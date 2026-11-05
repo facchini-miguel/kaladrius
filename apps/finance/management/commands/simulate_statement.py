@@ -42,36 +42,34 @@ class Command(BaseCommand):
         if alvo is None:
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
-        hoje = timezone.localdate()
-        start = hoje - datetime.timedelta(days=days)
+        today = timezone.localdate()
+        start = today - datetime.timedelta(days=days)
         with usar_clinica(alvo):
             alvo_conta = FinancialAccount.objects.filter(name=account).first()
             if alvo_conta is None:
                 raise CommandError(f"Conta “{account}” não encontrada.")
-            linhas = []
+            rows = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
-                account=alvo_conta, reversed=False, date__range=(start, hoje)
+                account=alvo_conta, reversed=False, date__range=(start, today)
             ).select_related("installment__entry"):
                 entrada = p.installment.entry.kind == Entry.Tipo.RECEBER
                 if sorteio.random() < 0.15:
                     fora += p.amount if entrada else -p.amount
                     continue
-                date = min(p.date + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), hoje)
+                date = min(p.date + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), today)
                 description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
-                linhas.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
+                rows.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
                 date = start + datetime.timedelta(days=sorteio.randint(0, days))
-                linhas.append(
-                    (date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}")
-                )
-            linhas.sort()
-            balance = dict(services.saldos_das_contas(until=hoje)).get(alvo_conta)
+                rows.append((date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}"))
+            rows.sort()
+            balance = dict(services.saldos_das_contas(until=today)).get(alvo_conta)
         # The bank balance: what the system has plus the extras minus what is not there yet.
         balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
-        self.stdout.write(self._ofx(linhas, start, hoje, balance))
+        self.stdout.write(self._ofx(rows, start, today, balance))
 
-    def _ofx(self, linhas, start, end, balance):
+    def _ofx(self, rows, start, end, balance):
         transacoes = "".join(
             "<STMTTRN>\n"
             f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
@@ -80,7 +78,7 @@ class Command(BaseCommand):
             f"<FITID>{fitid}\n"
             f"<MEMO>{description}\n"
             "</STMTTRN>\n"
-            for date, amount, description, fitid in linhas
+            for date, amount, description, fitid in rows
         )
         return (
             "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\n"

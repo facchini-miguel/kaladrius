@@ -60,11 +60,11 @@ def _banco():
             FROM pg_stat_user_tables ORDER BY 2 DESC LIMIT 8
             """
         )
-        tabelas = [
+        tables = [
             {"name": name, "size": tamanho_tabela, "registros": registros}
             for name, tamanho_tabela, registros in cursor.fetchall()
         ]
-    return {"size": size, "tabelas": tabelas}
+    return {"size": size, "tabelas": tables}
 
 
 @login_required
@@ -77,18 +77,18 @@ def painel(request):
     # The time axis is the whole period, even while there are fewer samples.
     end = timezone.now()
     start = end - PERIODOS[periodo]
-    lista = health.com_rede(health.amostras(desde=start))
-    ultima = lista[-1] if lista else health.ultima()
+    results = health.com_rede(health.amostras(desde=start))
+    ultima = results[-1] if results else health.ultima()
     graficos = []
     for titulo, series, maximo, unidade in GRAFICOS:
-        linhas = [(chave, classe) for chave, classe, _legenda in series]
+        rows = [(key, classe) for key, classe, _legenda in series]
         piso, teto = (10, 100) if unidade == "%" else (None, None)
-        topo = health.topo_da_escala(lista, linhas, maximo, piso)
+        topo = health.topo_da_escala(results, rows, maximo, piso)
         graficos.append(
             {
                 "titulo": titulo,
                 "svg": health.grafico(
-                    lista, linhas, start=start, end=end, maximo=maximo, piso=piso, teto=teto
+                    results, rows, start=start, end=end, maximo=maximo, piso=piso, teto=teto
                 ),
                 "topo": min(topo, teto) if teto else topo,
                 "unidade": unidade,
@@ -108,7 +108,7 @@ def painel(request):
             "ligado_desde": ultima["momento"] - datetime.timedelta(seconds=ultima["ligado_ha"])
             if ultima
             else None,
-            "resumo": health.resumo(lista),
+            "resumo": health.summary(results),
             "graficos": graficos,
             "banco": _banco(),
             "backup": Backup.objects.first(),

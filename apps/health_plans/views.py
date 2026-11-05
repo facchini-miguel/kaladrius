@@ -14,7 +14,7 @@ from .models import HealthPlan, MemberCard
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.VER)
-def lista(request):
+def results(request):
     convenios = HealthPlan.objects.annotate(
         pacientes=Count("carteirinhas", filter=Q(carteirinhas__active=True))
     )
@@ -26,7 +26,7 @@ def lista(request):
 
 
 @exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
-def novo(request):
+def new(request):
     return _convenio(request, HealthPlan())
 
 

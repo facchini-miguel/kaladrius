@@ -11,8 +11,8 @@ from django.utils import timezone
 FIXAS = {"pacientes.patient.birth_date", "core.backup.timestamp"}
 
 
-def _fixa(modelo, campo):
-    return f"{modelo._meta.label_lower}.{campo.name}" in FIXAS
+def _fixa(modelo, field):
+    return f"{modelo._meta.label_lower}.{field.name}" in FIXAS
 
 
 def campos_de_data():
@@ -20,13 +20,13 @@ def campos_de_data():
     for modelo in apps.get_models():
         if not modelo.__module__.startswith("apps.") or modelo._meta.proxy:
             continue
-        campos = [
-            campo
-            for campo in modelo._meta.local_concrete_fields
-            if isinstance(campo, models.DateField) and not _fixa(modelo, campo)
+        fields = [
+            field
+            for field in modelo._meta.local_concrete_fields
+            if isinstance(field, models.DateField) and not _fixa(modelo, field)
         ]
-        if campos:
-            yield modelo, campos
+        if fields:
+            yield modelo, fields
 
 
 class Command(BaseCommand):
@@ -50,40 +50,40 @@ class Command(BaseCommand):
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
             start = datetime.date.fromisoformat(desde)
-        except ValueError as erro:
-            raise CommandError(f"Data inválida: {desde}") from erro
+        except ValueError as error:
+            raise CommandError(f"Data inválida: {desde}") from error
         days = (timezone.localdate() - start).days // 7 * 7
         if days <= 0:
             self.stdout.write("Menos de uma semana: nada a avançar.")
             return
 
-        tabelas = list(campos_de_data())
+        tables = list(campos_de_data())
         # Moving everything at once would briefly overlap one appointment with the next
         # week's, so the no-double-booking constraint is set aside during the update.
         exclusoes = [
             (modelo, restricao)
-            for modelo, _campos in tabelas
+            for modelo, _campos in tables
             for restricao in modelo._meta.constraints
             if isinstance(restricao, ExclusionConstraint)
         ]
-        linhas = 0
+        rows = 0
         with connection.schema_editor() as editor:
             editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
             for modelo, restricao in exclusoes:
                 editor.remove_constraint(modelo, restricao)
-            for modelo, campos in tabelas:
+            for modelo, fields in tables:
                 atribuicoes = ", ".join(
                     f"{editor.quote_name(c.column)} = {editor.quote_name(c.column)} + "
                     + ("make_interval(days => %s)" if isinstance(c, models.DateTimeField) else "%s")
-                    for c in campos
+                    for c in fields
                 )
                 with connection.cursor() as cursor:
                     cursor.execute(
                         # Names come from the models, never from users; values are parameters.
                         f"UPDATE {editor.quote_name(modelo._meta.db_table)} SET {atribuicoes}",  # noqa: S608
-                        [days] * len(campos),
+                        [days] * len(fields),
                     )
-                    linhas += cursor.rowcount
+                    rows += cursor.rowcount
             # Deferred foreign key checks queued by the updates must run first: PostgreSQL
             # refuses ALTER TABLE on a table with pending trigger events.
             editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
@@ -92,6 +92,6 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Datas avançadas {days // 7} semana(s) ({days} dias): "
-                f"{linhas} registros em {len(tabelas)} tabelas."
+                f"{rows} registros em {len(tables)} tabelas."
             )
         )

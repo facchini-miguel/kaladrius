@@ -31,8 +31,8 @@ def test_operacoes_que_apagam_ou_quebram_a_volta():
     remover = migrations.RemoveField("carteirinha", "titular")
     assert _alertas(remover) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
     # The previous version still queries the dropped table: every page using it would fail.
-    tabela = migrations.DeleteModel("Carteirinha")
-    assert _alertas(tabela) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
+    table = migrations.DeleteModel("Carteirinha")
+    assert _alertas(table) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
     renomear = migrations.RenameField("convenio", "nome", "nome_novo")
     assert relatorio.QUEBRA_VOLTA in _alertas(renomear)
 
@@ -41,24 +41,24 @@ def test_operacoes_que_apagam_ou_quebram_a_volta():
 def test_renomear_mantendo_tabela_e_coluna_nao_alerta():
     """Decision 156: renamed in the code only, the table and column kept, nothing reaches the
     database; the previous version still works."""
-    antes = _antes(*CONVENIOS)
+    before = _antes(*CONVENIOS)
     fixar = migrations.AlterModelTable("convenio", "convenios_convenio")
-    assert relatorio.alertas_da_operacao(fixar, "convenios", antes) == []
-    antes = relatorio._depois(fixar, "convenios", antes)
+    assert relatorio.alertas_da_operacao(fixar, "convenios", before) == []
+    before = relatorio._depois(fixar, "convenios", before)
     modelo = migrations.RenameModel("Convenio", "HealthPlan")
-    assert relatorio.alertas_da_operacao(modelo, "convenios", antes) == []
+    assert relatorio.alertas_da_operacao(modelo, "convenios", before) == []
     # The table follows the model's name when it is not pinned: the previous version breaks.
     solto = migrations.RenameModel("Carteirinha", "Card")
-    assert _tipos(relatorio.alertas_da_operacao(solto, "convenios", antes)) == [
+    assert _tipos(relatorio.alertas_da_operacao(solto, "convenios", before)) == [
         relatorio.QUEBRA_VOLTA
     ]
-    antes = relatorio._depois(modelo, "convenios", antes)
-    coluna = migrations.AlterField(
+    before = relatorio._depois(modelo, "convenios", before)
+    column = migrations.AlterField(
         "healthplan", "nome", models.CharField(max_length=100, db_column="nome")
     )
-    antes = relatorio._depois(coluna, "convenios", antes)
-    campo = migrations.RenameField("healthplan", "nome", "name")
-    assert relatorio.alertas_da_operacao(campo, "convenios", antes) == []
+    before = relatorio._depois(column, "convenios", before)
+    field = migrations.RenameField("healthplan", "nome", "name")
+    assert relatorio.alertas_da_operacao(field, "convenios", before) == []
 
 
 @pytest.mark.django_db
@@ -88,14 +88,14 @@ def test_alterar_uma_chave_estrangeira():
     """A ForeignKey changed only in on_delete/related_name: same column, nothing to flag. It used
     to crash: the field of the operation is not attached to a model, its related model is a
     string and it has no db_type."""
-    chave = migrations.AlterField(
+    key = migrations.AlterField(
         "carteirinha",
         "convenio",
         models.ForeignKey(
             "convenios.convenio", on_delete=models.CASCADE, related_name="outras_carteirinhas"
         ),
     )
-    assert _alertas(chave) == []
+    assert _alertas(key) == []
 
 
 @pytest.mark.django_db
@@ -163,11 +163,11 @@ def test_comentario_cabe_no_limite_do_github():
     grande.operacoes = [("Add field x", [])]
     completo = relatorio.markdown([grande])
     assert len(completo) > relatorio.LIMITE_COMENTARIO and "```sql" in completo
-    curto = relatorio.markdown([grande], limite=relatorio.LIMITE_COMENTARIO)
+    curto = relatorio.markdown([grande], limit=relatorio.LIMITE_COMENTARIO)
     assert len(curto) <= relatorio.LIMITE_COMENTARIO
     assert "```sql" not in curto and "The SQL is left out" in curto and "Add field x" in curto
     muitas = [relatorio.Migracao("a", f"{n:04}_x", operacoes=[("y" * 1000, [])]) for n in range(80)]
-    cortado = relatorio.markdown(muitas, limite=relatorio.LIMITE_COMENTARIO)
+    cortado = relatorio.markdown(muitas, limit=relatorio.LIMITE_COMENTARIO)
     assert len(cortado) <= relatorio.LIMITE_COMENTARIO and cortado.endswith("summary)\n")
 
 

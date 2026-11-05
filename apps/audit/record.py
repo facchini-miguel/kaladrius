@@ -15,7 +15,7 @@ _ip = ContextVar("auditoria_ip", default=None)
 
 
 @contextlib.contextmanager
-def contexto(user, ip):
+def context(user, ip):
     tokens = (_usuario.set(user), _ip.set(ip))
     try:
         yield
@@ -28,24 +28,22 @@ def ip_da_requisicao(request):
     return request.META.get("REMOTE_ADDR") or None
 
 
-def registrar(
-    action, objeto=None, *, clinic=None, changes=None, user=None, ip=None, description=""
-):
+def registrar(action, obj=None, *, clinic=None, changes=None, user=None, ip=None, description=""):
     user = user if user is not None else _usuario.get()
     if user is not None and not getattr(user, "is_authenticated", False):
         user = None
-    if clinic is None and objeto is not None:
+    if clinic is None and obj is not None:
         # Rows without a clinic of their own (user accounts) are filed under the clinic
         # where the change was made, so the clinic administrator sees it in the audit log.
-        clinic = _clinica_de(objeto) or (clinica_atual() if isolamento_ativo() else None)
+        clinic = _clinica_de(obj) or (clinica_atual() if isolamento_ativo() else None)
     return AuditEntry.objects.create(
         action=action,
         clinic_id=getattr(clinic, "pk", clinic),
         user=user,
         user_name=user.get_username() if user else "",
-        model_name=nome_do_modelo(type(objeto)) if objeto is not None else "",
-        object_id=str(objeto.pk) if objeto is not None and objeto.pk is not None else "",
-        object_repr=(description or (str(objeto) if objeto is not None else ""))[:200],
+        model_name=nome_do_modelo(type(obj)) if obj is not None else "",
+        object_id=str(obj.pk) if obj is not None and obj.pk is not None else "",
+        object_repr=(description or (str(obj) if obj is not None else ""))[:200],
         changes=changes or {},
         ip=ip if ip is not None else _ip.get(),
     )
@@ -74,13 +72,13 @@ def anonimizar(model, ids):
     registros = AuditEntry.objects.filter(model_name=name, object_id__in=[str(i) for i in ids])
     for record in registros:
         record.object_repr = f"{name} {record.object_id} (dados removidos)"
-        record.changes = {campo: [REMOVIDO, REMOVIDO] for campo in record.changes}
+        record.changes = {field: [REMOVIDO, REMOVIDO] for field in record.changes}
         record.save(update_fields=["object_repr", "changes"])
 
 
-def _clinica_de(objeto):
+def _clinica_de(obj):
     from apps.core.models import Clinic
 
-    if isinstance(objeto, Clinic):
-        return objeto.pk
-    return getattr(objeto, "clinic_id", None)
+    if isinstance(obj, Clinic):
+        return obj.pk
+    return getattr(obj, "clinic_id", None)

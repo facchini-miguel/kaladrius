@@ -13,7 +13,7 @@ from apps.schedule.models import Appointment, AppointmentType
 
 @pytest.fixture
 def cenario(clinica_a, criar_profissional):
-    hoje = timezone.localdate()
+    today = timezone.localdate()
     ana = criar_profissional(clinica_a, "Dra. Ana")
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
@@ -21,20 +21,20 @@ def cenario(clinica_a, criar_profissional):
         )
         kind = AppointmentType.objects.first()
         # Same time, one week apart: moving one week at a time row by row would overlap.
-        semana = [
+        week = [
             Appointment.objects.create(
                 practitioner=ana,
                 kind=kind,
                 patient=patient,
-                start=agenda.timestamp(hoje - datetime.timedelta(days=d), datetime.time(9)),
-                end=agenda.timestamp(hoje - datetime.timedelta(days=d), datetime.time(10)),
+                start=agenda.timestamp(today - datetime.timedelta(days=d), datetime.time(9)),
+                end=agenda.timestamp(today - datetime.timedelta(days=d), datetime.time(10)),
             )
             for d in (21, 14)
         ]
         rechamada = Recall.objects.create(
-            patient=patient, date=hoje - datetime.timedelta(days=20), description="Limpeza"
+            patient=patient, date=today - datetime.timedelta(days=20), description="Limpeza"
         )
-    return {"clinic": clinica_a, "patient": patient, "agenda": semana, "rechamada": rechamada}
+    return {"clinic": clinica_a, "patient": patient, "agenda": week, "rechamada": rechamada}
 
 
 def test_so_no_servidor_de_demonstracao(cenario, settings):
@@ -48,35 +48,35 @@ def test_so_no_servidor_de_demonstracao(cenario, settings):
 
 def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     settings.DEMO = True
-    hoje = timezone.localdate()
-    antes = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
+    today = timezone.localdate()
+    before = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
-    call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=17)), confirmar=True)
+    call_command("advance_dates", desde=str(today - datetime.timedelta(days=17)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
         for appointment in Appointment.objects.all():
-            start, end = antes[appointment.pk]
+            start, end = before[appointment.pk]
             assert appointment.start - start == datetime.timedelta(days=14)
             assert appointment.end - end == datetime.timedelta(days=14)
             assert appointment.start.weekday() == start.weekday()
-        assert Recall.objects.get().date == hoje - datetime.timedelta(days=6)
+        assert Recall.objects.get().date == today - datetime.timedelta(days=6)
         assert Patient.objects.get().birth_date == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.
         with pytest.raises(Exception, match="agendamento_sem_sobreposicao"):
-            primeiro = Appointment.objects.first()
+            first = Appointment.objects.first()
             Appointment.objects.create(
-                practitioner=primeiro.practitioner,
-                kind=primeiro.kind,
-                start=primeiro.start,
-                end=primeiro.end,
+                practitioner=first.practitioner,
+                kind=first.kind,
+                start=first.start,
+                end=first.end,
             )
 
 
 def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     settings.DEMO = True
-    hoje = timezone.localdate()
-    call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=6)), confirmar=True)
+    today = timezone.localdate()
+    call_command("advance_dates", desde=str(today - datetime.timedelta(days=6)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
-        assert Recall.objects.get().date == hoje - datetime.timedelta(days=20)
+        assert Recall.objects.get().date == today - datetime.timedelta(days=20)
 
 
 def test_as_datas_fixas_existem():
@@ -86,6 +86,6 @@ def test_as_datas_fixas_existem():
     from apps.core.management.commands.advance_dates import FIXAS
 
     for nome in FIXAS:
-        label, modelo, campo = nome.split(".")
-        field = apps.get_model(label, modelo)._meta.get_field(campo)
-        assert field.get_internal_type() in ("DateField", "DateTimeField"), nome
+        label, modelo, field = nome.split(".")
+        model_field = apps.get_model(label, modelo)._meta.get_field(field)
+        assert model_field.get_internal_type() in ("DateField", "DateTimeField"), nome

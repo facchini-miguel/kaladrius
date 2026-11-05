@@ -43,15 +43,15 @@ def test_admin_cria_e_nome_repetido_e_recusado(clinica_a, criar_usuario, cliente
         cliente.post(url, {"name": "Retorno", "color": "#112233", "active": "on"}).status_code
         == 302
     )
-    resposta = cliente.post(url, {"name": "retorno", "color": "#112233"})
-    assert resposta.status_code == 200
-    assert "Já existe um tipo de atendimento com este nome" in resposta.content.decode()
+    response = cliente.post(url, {"name": "retorno", "color": "#112233"})
+    assert response.status_code == 200
+    assert "Já existe um tipo de atendimento com este nome" in response.content.decode()
 
 
 def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_b", clinica_b, Papel.ADMIN))
-    resposta = cliente.post(reverse("schedule:type_new"), {"name": "Retorno", "color": "#112233"})
-    assert resposta.status_code == 302
+    response = cliente.post(reverse("schedule:type_new"), {"name": "Retorno", "color": "#112233"})
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         AppointmentType.objects.create(name="Retorno", color="#445566")
 

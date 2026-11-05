@@ -24,19 +24,19 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
     start = reverse("home")
     assert "Pacientes" in cliente.get(start).content.decode()
 
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("change_language"), {"language": "en", "next": start}, follow=True
     )
-    pagina = resposta.content.decode()
-    assert '<html lang="en">' in pagina
-    assert "Patients" in pagina and "Recalls" in pagina and "Log out" in pagina
+    page = response.content.decode()
+    assert '<html lang="en">' in page
+    assert "Patients" in page and "Recalls" in page and "Log out" in page
     assert django_user_model.objects.get(username="maria").language == "en"
-    assert resposta.redirect_chain[-1][0] == start
+    assert response.redirect_chain[-1][0] == start
     assert cliente.cookies[settings.LANGUAGE_COOKIE_NAME].value == "en"
 
     cliente.post(reverse("change_language"), {"language": "es"})
-    pagina = cliente.get(reverse("patients:list")).content.decode()
-    assert "Nuevo paciente" in pagina and "Recordatorios" in pagina
+    page = cliente.get(reverse("patients:list")).content.decode()
+    assert "Nuevo paciente" in page and "Recordatorios" in page
 
     # Empty (or unknown): back to the browser's language.
     cliente.post(reverse("change_language"), {"language": "klingon"})
@@ -44,34 +44,34 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
 
 
 def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
-    pagina = cliente.get(reverse("home")).content.decode()
+    page = cliente.get(reverse("home")).content.decode()
     for code in ("pt-br", "en", "es"):
-        assert f"img/flags/{code}." in pagina  # CI serves hashed names (x.1a2b.svg)
+        assert f"img/flags/{code}." in page  # CI serves hashed names (x.1a2b.svg)
     # Its own menu, before the user's menu (between the clinic and the user name).
-    assert pagina.index("seletor-idioma") < pagina.index(reverse("change_password"))
+    assert page.index("seletor-idioma") < page.index(reverse("change_password"))
 
 
 def test_escolha_do_usuario_vale_mais_que_o_navegador(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="es")
-    pagina = cliente.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
-    assert any(saludo in pagina for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
+    page = cliente.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
+    assert any(saludo in page for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
 
 
 def test_login_segue_o_idioma_do_navegador(client):
-    pagina = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="es").content.decode()
-    assert "Contraseña" in pagina
-    pagina = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="en-US,en;q=0.9").content.decode()
-    assert "Password" in pagina
+    page = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="es").content.decode()
+    assert "Contraseña" in page
+    page = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="en-US,en;q=0.9").content.decode()
+    assert "Password" in page
 
 
 def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="en")
-    resposta = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
-    assert "This field is required." in resposta.content.decode()
-    resposta = cliente.post(
+    response = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
+    assert "This field is required." in response.content.decode()
+    response = cliente.post(
         reverse("patients:new"), {"kind": "PF", "name": "Ana", "active": "on"}, follow=True
     )
-    assert "Patient Ana saved." in resposta.content.decode()
+    assert "Patient Ana saved." in response.content.decode()
 
 
 def test_trocar_idioma_exige_post_e_login(client):

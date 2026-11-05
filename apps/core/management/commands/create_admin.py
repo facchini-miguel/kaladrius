@@ -21,10 +21,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         username = os.environ.get("DJANGO_ADMIN_USERNAME", "admin")
-        senha = os.environ.get("DJANGO_ADMIN_PASSWORD")
+        password = os.environ.get("DJANGO_ADMIN_PASSWORD")
         email = os.environ.get("DJANGO_ADMIN_EMAIL", "")
 
-        if not senha:
+        if not password:
             raise CommandError("Defina DJANGO_ADMIN_PASSWORD no .env antes de criar o admin.")
 
         Usuario = get_user_model()
@@ -35,9 +35,9 @@ class Command(BaseCommand):
             return
 
         try:
-            validate_password(senha, Usuario(username=username, email=email))
-        except ValidationError as erro:
-            raise CommandError(" ".join(erro.messages)) from erro
+            validate_password(password, Usuario(username=username, email=email))
+        except ValidationError as error:
+            raise CommandError(" ".join(error.messages)) from error
 
-        Usuario.objects.create_superuser(username=username, email=email, password=senha)
+        Usuario.objects.create_superuser(username=username, email=email, password=password)
         self.stdout.write(self.style.SUCCESS(f"Superusuário '{username}' criado."))

@@ -66,21 +66,21 @@ class FiltroClinicaAtual(models.Expression):
     output_field = models.BooleanField()
     conditional = True
 
-    def __init__(self, coluna=None):
+    def __init__(self, column=None):
         super().__init__()
-        self.coluna = coluna
+        self.column = column
 
     def get_source_expressions(self):
-        return [self.coluna] if self.coluna is not None else []
+        return [self.column] if self.column is not None else []
 
     def set_source_expressions(self, expressoes):
-        self.coluna = expressoes[0] if expressoes else None
+        self.column = expressoes[0] if expressoes else None
 
     def resolve_expression(
         self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
     ):
         copia = self.copy()
-        copia.coluna = models.F("clinic_id").resolve_expression(
+        copia.column = models.F("clinic_id").resolve_expression(
             query, allow_joins, reuse, summarize, for_save
         )
         return copia
@@ -91,8 +91,8 @@ class FiltroClinicaAtual(models.Expression):
         clinic = clinica_atual()
         if clinic is None:
             raise SemClinicaAtual("Clinic data queried with no current clinic set.")
-        coluna, parametros = compiler.compile(self.coluna)
-        return f"({coluna} = %s)", [*parametros, clinic.pk]
+        column, parametros = compiler.compile(self.column)
+        return f"({column} = %s)", [*parametros, clinic.pk]
 
 
 class ClinicaManager(models.Manager):
@@ -134,13 +134,13 @@ class ModeloDaClinica(models.Model):
         """Fill in the current clinic on new rows and block writes to other clinics."""
         if not isolamento_ativo():
             return
-        atual = clinica_atual()
-        if atual is None:
+        current = clinica_atual()
+        if current is None:
             raise SemClinicaAtual(f"{type(self).__name__}: no current clinic is set.")
         if self.clinic_id is None:
-            self.clinic = atual
-        elif self.clinic_id != atual.pk:
+            self.clinic = current
+        elif self.clinic_id != current.pk:
             raise ClinicaDiferente(
                 f"{type(self).__name__} {self.pk} belongs to clinic {self.clinic_id}, "
-                f"not to the current clinic {atual.pk}."
+                f"not to the current clinic {current.pk}."
             )

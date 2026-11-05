@@ -26,5 +26,5 @@ def occupation(fake):
     Faker 40 the pt_BR list has titles longer than the field."""
     from apps.patients.models import Patient
 
-    limite = Patient._meta.get_field("occupation").max_length
-    return next(titulo for titulo in iter(fake.job, None) if len(titulo) <= limite)
+    limit = Patient._meta.get_field("occupation").max_length
+    return next(titulo for titulo in iter(fake.job, None) if len(titulo) <= limit)

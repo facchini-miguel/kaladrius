@@ -12,9 +12,9 @@ from .models import Employee, Payroll
 DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-def _dinheiro(rotulo, obrigatorio):
+def _dinheiro(label, obrigatorio):
     return CampoDecimal(
-        label=rotulo,
+        label=label,
         max_digits=12,
         decimal_places=2,
         min_value=0,
@@ -63,7 +63,7 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
             del self.fields["tax_id"]
         else:
             self.fields["tax_id"].label = self.document.sigla
-            self.fields["tax_id"].widget.attrs["placeholder"] = self.document.exemplo
+            self.fields["tax_id"].widget.attrs["placeholder"] = self.document.example
         if self.instance.pk:
             self.fields["salary"].label = _("Novo salário")
             self.fields["salary"].help_text = _(
@@ -85,21 +85,21 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
         return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
-        dados = super().clean()
-        salary = dados.get("salary")
+        data = super().clean()
+        salary = data.get("salary")
         if salary is not None and salary <= 0:
             self.add_error("salary", _("Informe um valor maior que zero."))
-        if salary and not dados.get("salario_desde"):
+        if salary and not data.get("salario_desde"):
             if self.instance.pk:
                 self.add_error(
                     "salario_desde", _("Informe a partir de quando vale o novo salário.")
                 )
             else:
-                dados["salario_desde"] = dados.get("hired_on") or timezone.localdate()
-        hired_on, left_on = dados.get("hired_on"), dados.get("left_on")
+                data["salario_desde"] = data.get("hired_on") or timezone.localdate()
+        hired_on, left_on = data.get("hired_on"), data.get("left_on")
         if hired_on and left_on and left_on < hired_on:
             self.add_error("left_on", _("O desligamento não pode ser antes da admissão."))
-        return dados
+        return data
 
 
 class FolhaForm(FormularioBootstrap, forms.ModelForm):
@@ -116,8 +116,8 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for campo in self.fields.values():
-            campo.widget.attrs["class"] += " form-control-sm"
+        for field in self.fields.values():
+            field.widget.attrs["class"] += " form-control-sm"
         self.fields["absences"].widget.attrs["max"] = 31
 
     def clean_absences(self):

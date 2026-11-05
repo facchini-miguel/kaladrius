@@ -46,11 +46,11 @@ def carteirinha(health_plan, **extra):
 
 
 def test_cadastro_do_convenio(clinica_a, admin):
-    resposta = admin.post(
+    response = admin.post(
         reverse("health_plans:new"),
         {"name": " Plano Fictício ", "registration": "00.000-2", "phone": "", "active": "on"},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         criado = HealthPlan.objects.get()
     assert (criado.name, criado.registration) == ("Plano Fictício", "000002")
@@ -58,23 +58,23 @@ def test_cadastro_do_convenio(clinica_a, admin):
 
 
 @pytest.mark.parametrize(
-    ("dados", "campo"),
+    ("data", "field"),
     [
         ({"name": "saúde exemplo"}, "name"),
         ({"name": "Outro", "registration": "123"}, "registration"),
         ({"name": "Outro", "phone": "99"}, "phone"),
     ],
 )
-def test_validacoes_do_convenio(dados, campo, health_plan, admin):
-    resposta = admin.post(reverse("health_plans:new"), dados)
-    assert campo in resposta.context["form"].errors
+def test_validacoes_do_convenio(data, field, health_plan, admin):
+    response = admin.post(reverse("health_plans:new"), data)
+    assert field in response.context["form"].errors
 
 
 def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admin):
     url = reverse("health_plans:card_new", args=[patient.pk])
     vencida = (HOJE - datetime.timedelta(days=1)).isoformat()
-    resposta = admin.post(url, carteirinha(health_plan, number=" 0099 ", valid_until=vencida))
-    assert resposta.url == reverse("patients:record", args=[patient.pk])
+    response = admin.post(url, carteirinha(health_plan, number=" 0099 ", valid_until=vencida))
+    assert response.url == reverse("patients:record", args=[patient.pk])
     with usar_clinica(clinica_a):
         criada = MemberCard.objects.get()
     assert (criada.patient, criada.number, criada.vencida) == (patient, "0099", True)
@@ -82,9 +82,9 @@ def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admi
     assert "Saúde Exemplo" in ficha and "Vencida" in ficha
     # The same card number cannot belong to two patients of the same plan.
     with usar_clinica(clinica_a):
-        outro = Patient.objects.create(name="Outra paciente fictícia")
+        other = Patient.objects.create(name="Outra paciente fictícia")
     repetida = admin.post(
-        reverse("health_plans:card_new", args=[outro.pk]), carteirinha(health_plan, number="0099")
+        reverse("health_plans:card_new", args=[other.pk]), carteirinha(health_plan, number="0099")
     )
     assert "number" in repetida.context["form"].errors
     editar = admin.post(
@@ -154,8 +154,8 @@ def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, health_plan, ad
         )
         patient.archived = True
         patient.save()
-    resposta = admin.post(reverse("patients:delete", args=[patient.pk]))
-    assert resposta.status_code == 302
+    response = admin.post(reverse("patients:delete", args=[patient.pk]))
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         assert not MemberCard.objects.exists()
         assert HealthPlan.objects.filter(pk=health_plan.pk).exists()

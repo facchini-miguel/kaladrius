@@ -81,8 +81,8 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         self.fields["patient"].queryset = Patient.objects.all()
 
         passo = clinic.schedule_interval * 60
-        for campo in ("start_time", "end_time"):
-            self.fields[campo].widget.attrs.update(
+        for field in ("start_time", "end_time"):
+            self.fields[field].widget.attrs.update(
                 step=passo,
                 min=clinic.schedule_start.strftime("%H:%M"),
                 max=clinic.schedule_end.strftime("%H:%M"),
@@ -97,21 +97,21 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
                 end_time=timezone.localtime(appointment.end).time(),
             )
 
-    def _alinhado(self, hora):
+    def _alinhado(self, hour):
         start = self.clinic.schedule_start
-        minutos = (hora.hour * 60 + hora.minute) - (start.hour * 60 + start.minute)
-        return hora.second == 0 and minutos % self.clinic.schedule_interval == 0
+        minutos = (hour.hour * 60 + hour.minute) - (start.hour * 60 + start.minute)
+        return hour.second == 0 and minutos % self.clinic.schedule_interval == 0
 
     def clean(self):
-        dados = super().clean()
+        data = super().clean()
         date, start_time, end_time = (
-            dados.get("date"),
-            dados.get("start_time"),
-            dados.get("end_time"),
+            data.get("date"),
+            data.get("start_time"),
+            data.get("end_time"),
         )
-        if not dados.get("patient") and not dados.get("description", "").strip():
+        if not data.get("patient") and not data.get("description", "").strip():
             self.add_error("description", _("Informe o paciente ou uma descrição."))
-        patient = dados.get("patient")
+        patient = data.get("patient")
         if (
             self.instance.pk
             and self.instance.desmarcado
@@ -126,17 +126,17 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
                 ),
             )
         if None in (date, start_time, end_time) or self.errors:
-            return dados
+            return data
 
         clinic = self.clinic
         if end_time <= start_time:
             self.add_error("end_time", _("O fim deve ser depois do início."))
-            return dados
+            return data
         intervalo = clinic.schedule_interval
-        for campo, hora in (("start_time", start_time), ("end_time", end_time)):
-            if not self._alinhado(hora):
+        for field, hour in (("start_time", start_time), ("end_time", end_time)):
+            if not self._alinhado(hour):
                 self.add_error(
-                    campo, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
+                    field, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
                 )
         if start_time < clinic.schedule_start or end_time > clinic.schedule_end:
             self.add_error(
@@ -148,14 +148,14 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
                 },
             )
         if self.errors:
-            return dados
+            return data
 
         self.intervalos = services.ocorrencias(
-            date, start_time, end_time, dados.get("repeticoes") or 1
+            date, start_time, end_time, data.get("repeticoes") or 1
         )
         self.instance.start, self.instance.end = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
-        if not dados.get("patient") or (
+        if not data.get("patient") or (
             self.instance.status in marcado and date > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
@@ -163,18 +163,18 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
             self.instance.status = Appointment.Situacao.AGENDADO
         if self.instance.desmarcado:
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
-            return dados
+            return data
         encontrados = services.conflitos(
-            dados["practitioner"], self.intervalos, ignorar=self.instance.pk
+            data["practitioner"], self.intervalos, ignorar=self.instance.pk
         )
         if encontrados:
-            lista = "; ".join(
+            results = "; ".join(
                 f"{date_format(timezone.localtime(a.start), 'SHORT_DATETIME_FORMAT')} ({a.titulo})"
                 for a in encontrados[:5]
             )
             if len(encontrados) > 5:
-                lista += " " + _("e mais %(n)s") % {"n": len(encontrados) - 5}
+                results += " " + _("e mais %(n)s") % {"n": len(encontrados) - 5}
             raise forms.ValidationError(
-                _("Conflito de horário com: %(lista)s. Nada foi gravado.") % {"lista": lista}
+                _("Conflito de horário com: %(lista)s. Nada foi gravado.") % {"lista": results}
             )
-        return dados
+        return data

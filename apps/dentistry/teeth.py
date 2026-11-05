@@ -16,7 +16,7 @@ DENTES_DECIDUOS = [
     [55, 54, 53, 52, 51, 61, 62, 63, 64, 65],
     [85, 84, 83, 82, 81, 71, 72, 73, 74, 75],
 ]
-DENTES_VALIDOS = {d for linha in DENTES_PERMANENTES + DENTES_DECIDUOS for d in linha}
+DENTES_VALIDOS = {d for row in DENTES_PERMANENTES + DENTES_DECIDUOS for d in row}
 
 # How teeth are named on screen and paper (decision 122). They are always stored in FDI; the
 # clinic chooses the numbering, by default its country's (Universal in the United States).
@@ -74,11 +74,11 @@ def ordenar(teeth, numeracao=None):
     if numeracao != UNIVERSAL:
         return sorted(teeth)
 
-    def chave(dente):
+    def key(dente):
         value = _universal(dente) if dente in DENTES_VALIDOS else 99
         return (isinstance(value, str), str(value).zfill(2))
 
-    return sorted(teeth, key=chave)
+    return sorted(teeth, key=key)
 
 
 # Appointment types a new dental clinic starts with: the ones from the legacy system, with

@@ -47,15 +47,15 @@ def _visiveis(request):
     return Patient.objects.filter(archived=False)
 
 
-def filtrar(pacientes, busca, kind, status):
+def filtrar(pacientes, search, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
-    if busca:
-        filtro = Q(name__unaccent__icontains=busca) | Q(legal_name__unaccent__icontains=busca)
-        document = normalizar_cnpj(busca)
-        if len(document) >= 3 and not any(c.isspace() for c in busca.strip()):
+    if search:
+        filtro = Q(name__unaccent__icontains=search) | Q(legal_name__unaccent__icontains=search)
+        document = normalizar_cnpj(search)
+        if len(document) >= 3 and not any(c.isspace() for c in search.strip()):
             filtro |= Q(tax_id__startswith=document)
-        if busca.isdecimal() and len(busca) <= 9:
-            filtro |= Q(pk=int(busca))
+        if search.isdecimal() and len(search) <= 9:
+            filtro |= Q(pk=int(search))
         pacientes = pacientes.filter(filtro)
     if kind in Patient.Tipo.values:
         pacientes = pacientes.filter(kind=kind)
@@ -63,24 +63,24 @@ def filtrar(pacientes, busca, kind, status):
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
-def lista(request):
-    busca = request.GET.get("q", "").strip()
+def results(request):
+    search = request.GET.get("q", "").strip()
     kind = request.GET.get("kind", "")
     status = request.GET.get("status", "ativos")
     if status == "arquivados" and not _ve_arquivados(request):
         status = "ativos"
-    pacientes = filtrar(Patient.objects.select_related("city__state"), busca, kind, status)
-    pagina = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
+    pacientes = filtrar(Patient.objects.select_related("city__state"), search, kind, status)
+    page = Paginator(pacientes, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
         "patients/list.html",
         {
-            "pagina": pagina,
-            "busca": busca,
+            "pagina": page,
+            "busca": search,
             "kind": kind,
             "status": status,
             "tipos": Patient.Tipo.choices,
-            "parametros": urlencode({"q": busca, "kind": kind, "status": status}),
+            "parametros": urlencode({"q": search, "kind": kind, "status": status}),
         },
     )
 
@@ -93,25 +93,25 @@ def ficha(request, pk):
     # LGPD: access to a patient's record (health data) is logged.
     registrar(AuditEntry.Acao.VISUALIZAR, patient)
     rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
-    contexto = {"patient": patient, "rechamadas": rechamadas}
+    context = {"patient": patient, "rechamadas": rechamadas}
     if pode(request, Modulo.AGENDA, Acao.VER):
-        contexto["agendamentos"] = _historico(request, patient)
+        context["agendamentos"] = _historico(request, patient)
     if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
-        contexto["financeiro"] = resumo_do_paciente(patient)
+        context["financeiro"] = resumo_do_paciente(patient)
     if pode(request, Modulo.ORCAMENTOS, Acao.VER):
-        contexto["orcamentos"] = list(
+        context["orcamentos"] = list(
             Estimate.objects.filter(patient=patient).prefetch_related("itens")[:10]
         )
     if pode(request, Modulo.CONVENIOS, Acao.VER):
-        contexto["carteirinhas"] = list(
+        context["carteirinhas"] = list(
             MemberCard.objects.filter(patient=patient).select_related("health_plan")
         )
-    contexto["relacionados"] = relacionados_de(patient)
+    context["relacionados"] = relacionados_de(patient)
     if acessa_prontuario(request):
-        contexto["prontuario"] = list(
+        context["prontuario"] = list(
             Visit.objects.filter(patient=patient).select_related("practitioner")
         )
-    return render(request, "patients/record.html", contexto)
+    return render(request, "patients/record.html", context)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
@@ -151,16 +151,16 @@ def _historico(request, patient):
         .filter(patient=patient)
         .select_related("practitioner", "kind")
     )
-    agora = timezone.now()
+    now = timezone.now()
     return {
-        "proximos": list(deste.filter(end__gt=agora).order_by("start")[:HISTORICO]),
-        "anteriores": list(deste.filter(end__lte=agora).order_by("-start")[:HISTORICO]),
+        "proximos": list(deste.filter(end__gt=now).order_by("start")[:HISTORICO]),
+        "anteriores": list(deste.filter(end__lte=now).order_by("-start")[:HISTORICO]),
         "total": deste.count(),
     }
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.CRIAR)
-def novo(request):
+def new(request):
     return _formulario(request, Patient())
 
 
@@ -235,7 +235,7 @@ def excluir(request, pk):
     """
     patient = get_object_or_404(Patient.objects, pk=pk, archived=True)
     # The country's law and how long it keeps medical records (decision 124).
-    contexto = {
+    context = {
         "patient": patient,
         "lei": legislation.do_pais(),
         "prazo_de_guarda": legislation.prazo_de_guarda(),
@@ -246,7 +246,7 @@ def excluir(request, pk):
     if atendimentos:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
-        return render(request, "patients/delete.html", {**contexto, "atendimentos": atendimentos})
+        return render(request, "patients/delete.html", {**context, "atendimentos": atendimentos})
     if request.method == "POST":
         code = patient.pk
         agendamentos = Appointment.objects.filter(patient=patient)
@@ -305,14 +305,16 @@ def excluir(request, pk):
             _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": code},
         )
         return redirect(f"{reverse('patients:list')}?situacao=arquivados")
-    return render(request, "patients/delete.html", contexto)
+    return render(request, "patients/delete.html", context)
 
 
 @exige_permissao(Modulo.PACIENTES, Acao.VER)
 def sugestoes(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
-    busca = request.GET.get("q", "").strip()
-    pacientes = filtrar(Patient.objects.all(), busca, "", "ativos")[:10] if len(busca) >= 2 else []
+    search = request.GET.get("q", "").strip()
+    pacientes = (
+        filtrar(Patient.objects.all(), search, "", "ativos")[:10] if len(search) >= 2 else []
+    )
     return render(request, "patients/_suggestions.html", {"pacientes": pacientes})
 
 
@@ -321,18 +323,18 @@ MESES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
 
 @exige_permissao(Modulo.ANIVERSARIANTES, Acao.VER)
 def aniversariantes(request):
-    hoje = timezone.localdate()
-    mes = request.GET.get("mes", "")
-    mes = int(mes) if mes.isdecimal() and 1 <= int(mes) <= 12 else hoje.month
-    pacientes = Patient.objects.filter(active=True, archived=False, birth_date__month=mes).order_by(
-        "birth_date__day", "name"
-    )
-    ano = hoje.year if mes >= hoje.month else hoje.year + 1  # next birthday's year
-    linhas = [(patient, ano - patient.birth_date.year) for patient in pacientes]
+    today = timezone.localdate()
+    month = request.GET.get("mes", "")
+    month = int(month) if month.isdecimal() and 1 <= int(month) <= 12 else today.month
+    pacientes = Patient.objects.filter(
+        active=True, archived=False, birth_date__month=month
+    ).order_by("birth_date__day", "name")
+    ano = today.year if month >= today.month else today.year + 1  # next birthday's year
+    rows = [(patient, ano - patient.birth_date.year) for patient in pacientes]
     return render(
         request,
         "patients/birthdays.html",
-        {"mes": mes, "meses": list(enumerate(MESES, start=1)), "linhas": linhas, "hoje": hoje},
+        {"mes": month, "meses": list(enumerate(MESES, start=1)), "linhas": rows, "hoje": today},
     )
 
 
@@ -376,9 +378,9 @@ def _relacionado(request, patient, instancia):
         return redirect("patients:record", pk=patient.pk)
     # The patient chosen in the search box, shown again when the form comes back.
     if form.is_bound:
-        outro = form.cleaned_data.get("other_patient")
+        other = form.cleaned_data.get("other_patient")
     else:
-        outro = instancia.other_patient if instancia.other_patient_id else None
+        other = instancia.other_patient if instancia.other_patient_id else None
     return render(
         request,
         "patients/related_form.html",
@@ -386,7 +388,7 @@ def _relacionado(request, patient, instancia):
             "form": form,
             "patient": patient,
             "instancia": instancia,
-            "outro": outro,
+            "outro": other,
         },
     )
 

@@ -17,31 +17,31 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def recepcao(clinica_a, criar_usuario, cliente_de):
+def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao_paridade", clinica_a, Papel.RECEPCAO))
 
 
-def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, recepcao, criar_profissional):
+def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, reception, criar_profissional):
     practitioner = criar_profissional(clinica_a, "Profissional fictício")
-    semana = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
-    eventos = recepcao.get(reverse("schedule:events"), {**semana, "practitioner": practitioner.pk})
+    week = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
+    eventos = reception.get(reverse("schedule:events"), {**week, "practitioner": practitioner.pk})
     assert eventos.status_code == 200
-    configuracao = recepcao.get(reverse("schedule:calendar")).context["configuracao"]
-    assert configuracao["date"] == "2026-03-05"  # middle of the week on the screen
+    config = reception.get(reverse("schedule:calendar")).context["configuracao"]
+    assert config["date"] == "2026-03-05"  # middle of the week on the screen
     # An explicit date still wins.
-    explicita = recepcao.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
+    explicita = reception.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
     assert explicita.context["configuracao"]["date"] == "2026-04-01"
 
 
-def test_no_dia_seguinte_a_agenda_abre_hoje(recepcao):
-    sessao = recepcao.session
+def test_no_dia_seguinte_a_agenda_abre_hoje(reception):
+    session = reception.session
     ontem = timezone.localdate() - datetime.timedelta(days=1)
-    sessao["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
-    sessao.save()
-    assert recepcao.get(reverse("schedule:calendar")).context["configuracao"]["date"] == ""
+    session["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
+    session.save()
+    assert reception.get(reverse("schedule:calendar")).context["configuracao"]["date"] == ""
 
 
-def test_ficha_cadastral_impressa(clinica_a, recepcao):
+def test_ficha_cadastral_impressa(clinica_a, reception):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(
             name="Paciente fictícia da ficha",
@@ -51,10 +51,10 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
         )
         health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
         MemberCard.objects.create(patient=patient, health_plan=health_plan, number="123456")
-    ficha = recepcao.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    ficha = reception.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert reverse("patients:print", args=[patient.pk]) in ficha
-    pagina = recepcao.get(reverse("patients:print", args=[patient.pk]))
-    text = pagina.content.decode()
+    page = reception.get(reverse("patients:print", args=[patient.pk]))
+    text = page.content.decode()
     for trecho in (
         "FICHA CADASTRAL",
         "529.982.247-25",

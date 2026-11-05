@@ -23,7 +23,7 @@ from apps.schedule.models import Appointment, AppointmentType
 pytestmark = pytest.mark.django_db
 
 
-def configuracao(**extra):
+def config(**extra):
     return {
         "name": "Clínica fictícia",
         "area": "medicina",
@@ -51,8 +51,8 @@ def test_criacao_preserva_a_capacidade_da_area_original(area):
 )
 def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_modulos", clinica_a, Papel.ADMIN))
-    resposta = cliente.post(reverse("clinic_settings"), configuracao(modulos=codigos))
-    assert resposta.status_code == 302
+    response = cliente.post(reverse("clinic_settings"), config(modulos=codigos))
+    assert response.status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.area == "medicina"  # primary area does not dictate enabled modules
     assert clinica_a.odontologia == ("odontologia" in codigos)
@@ -62,20 +62,20 @@ def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, 
 @pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL, Papel.FINANCEIRO])
 def test_outros_papeis_nao_alteram_modulos(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario_modulos", clinica_a, role))
-    assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
+    assert cliente.post(reverse("clinic_settings"), config()).status_code == 403
     assert clinica_a.odontologia and not clinica_a.medicina
 
 
 def test_administrador_de_demo_nao_altera_modulos(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("demo_modulos", clinica_a, Papel.ADMIN, demo=True))
-    assert cliente.post(reverse("clinic_settings"), configuracao()).status_code == 403
+    assert cliente.post(reverse("clinic_settings"), config()).status_code == 403
     assert not clinica_a.medicina
 
 
 def test_modulo_desconhecido_nao_grava_nem_no_servico_nem_no_form(clinica_a):
     with pytest.raises(ValidationError):
         configurar(clinica_a, {"desconhecido"})
-    form = ClinicaForm(configuracao(modulos=["desconhecido"]), instance=clinica_a)
+    form = ClinicaForm(config(modulos=["desconhecido"]), instance=clinica_a)
     assert not form.is_valid() and "modulos" in form.errors
     assert clinica_a.odontologia and not clinica_a.modulo_habilitado("desconhecido")
 
@@ -90,10 +90,10 @@ def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_
 
 
 def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
-    antes = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("code", "pk"))
+    before = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("code", "pk"))
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
-    depois = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("code", "pk"))
-    assert antes == depois
+    after = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("code", "pk"))
+    assert before == after
     changes = AuditEntry.objects.filter(
         clinic=clinica_a, model_name="Módulo da clínica", action=AuditEntry.Acao.ALTERAR
     )
@@ -103,7 +103,7 @@ def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
 
 
 def test_campos_administrativos_e_commit_false_preservados(clinica_a):
-    form = ClinicaAdminForm(configuracao(active="on"), instance=clinica_a)
+    form = ClinicaAdminForm(config(active="on"), instance=clinica_a)
     assert "active" in form.fields and "modulos" in form.fields
     assert form.is_valid(), form.errors
     clinic = form.save(commit=False)
@@ -119,13 +119,13 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
     user = django_user_model.objects.create_superuser("root_config_ficticio")
     cliente = cliente_de(user)
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])
-    pagina = cliente.get(url)
-    assert pagina.status_code == 200
-    assert set(pagina.context["adminform"].form.initial["modulos"]) == {"odontologia"}
-    prefixo = pagina.context["inline_admin_formsets"][0].formset.prefix
-    resposta = cliente.post(
+    page = cliente.get(url)
+    assert page.status_code == 200
+    assert set(page.context["adminform"].form.initial["modulos"]) == {"odontologia"}
+    prefixo = page.context["inline_admin_formsets"][0].formset.prefix
+    response = cliente.post(
         url,
-        configuracao(
+        config(
             active="on",
             modulos=["medicina"],
             **{
@@ -137,7 +137,7 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
             },
         ),
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     assert clinica_a.medicina and not clinica_a.odontologia
     assert (
         AuditEntry.objects.filter(
@@ -168,11 +168,11 @@ def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
     cliente = cliente_de(django_user_model.objects.create_superuser("root_agenda_ficticio"))
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])
     form = cliente.get(url).context["adminform"].form
-    form = type(form)(configuracao(active="on"), instance=clinica_a)
+    form = type(form)(config(active="on"), instance=clinica_a)
     assert form.is_valid(), form.errors
-    outro = type(form)(configuracao(active="on"), instance=clinica_b)
-    assert not outro.is_valid()
-    assert "Ajuste os agendamentos futuros" in str(outro.non_field_errors())
+    other = type(form)(config(active="on"), instance=clinica_b)
+    assert not other.is_valid()
+    assert "Ajuste os agendamentos futuros" in str(other.non_field_errors())
 
 
 @pytest.fixture
@@ -199,9 +199,9 @@ def test_detalhe_nao_consulta_modulos_para_cada_item(
             novo_item(estimate, teeth="11").save()
     cliente = cliente_de(criar_usuario("recepcao_consultas", clinica_a, Papel.RECEPCAO))
     with CaptureQueriesContext(connection) as consultas:
-        resposta = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
-    assert resposta.status_code == 200
-    assert resposta.context["odontologia_habilitada"]
+        response = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
+    assert response.status_code == 200
+    assert response.context["odontologia_habilitada"]
     consultas_modulos = [q for q in consultas if 'FROM "core_modulodaclinica"' in q["sql"]]
     assert len(consultas_modulos) <= 2
 

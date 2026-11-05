@@ -20,21 +20,21 @@ def _nome(name):
 def _escolhidas(file):
     """Pins of a .in file (name -> version); -r/-c lines are followed by the lock itself."""
     pinos = {}
-    for linha in (RAIZ / file).read_text().splitlines():
-        if m := PINO.match(linha.strip()):
+    for row in (RAIZ / file).read_text().splitlines():
+        if m := PINO.match(row.strip()):
             pinos[_nome(m[1])] = m[2]
     return pinos
 
 
 def _lock(file):
     """Packages of a lock: name -> (version, sorted hashes)."""
-    pacotes, atual = {}, None
-    for linha in (RAIZ / file).read_text().splitlines():
-        if m := PINO.match(linha):
-            atual = _nome(m[1])
-            pacotes[atual] = (m[2], [])
-        elif atual and (h := re.search(r"--hash=(\S+)", linha)):
-            pacotes[atual][1].append(h[1])
+    pacotes, current = {}, None
+    for row in (RAIZ / file).read_text().splitlines():
+        if m := PINO.match(row):
+            current = _nome(m[1])
+            pacotes[current] = (m[2], [])
+        elif current and (h := re.search(r"--hash=(\S+)", row)):
+            pacotes[current][1].append(h[1])
     return {name: (versao, sorted(hashes)) for name, (versao, hashes) in pacotes.items()}
 
 

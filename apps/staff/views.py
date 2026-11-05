@@ -19,11 +19,11 @@ from .models import Employee, Payroll, Salary
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
-def lista(request):
+def results(request):
     funcionarios = list(Employee.objects.all())
-    hoje = timezone.localdate()
+    today = timezone.localdate()
     for employee in funcionarios:
-        employee.salario_atual = employee.salario_em(hoje)
+        employee.salario_atual = employee.salario_em(today)
     return render(request, "staff/list.html", {"funcionarios": funcionarios})
 
 
@@ -43,7 +43,7 @@ def employee(request, pk):
 
 
 @exige_permissao(Modulo.PESSOAL, Acao.CRIAR)
-def novo(request):
+def new(request):
     return _formulario(request, Employee())
 
 
@@ -72,8 +72,8 @@ def _formulario(request, instancia):
 @exige_permissao(Modulo.PESSOAL, Acao.VER)
 def folha(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
-    hoje = timezone.localdate()
-    period = services.mes_da_url(request.GET.get("mes"), hoje)
+    today = timezone.localdate()
+    period = services.mes_da_url(request.GET.get("mes"), today)
     url = f"{reverse('staff:payroll')}?mes={period:%Y-%m}"
     pode_alterar = pode(request, Modulo.PESSOAL, Acao.ALTERAR)
     folhas = (
@@ -81,25 +81,25 @@ def folha(request):
         if pode_alterar
         else list(Payroll.objects.filter(period=period).select_related("employee", "entry"))
     )
-    dados = request.POST if request.method == "POST" else None
-    linhas = [
+    data = request.POST if request.method == "POST" else None
+    rows = [
         (
             f,
             None
             if f.lancada or not pode_alterar
             # By employee: a sheet not saved yet has no pk.
-            else FolhaForm(dados, instance=f, prefix=f"f{f.employee_id}"),
+            else FolhaForm(data, instance=f, prefix=f"f{f.employee_id}"),
         )
         for f in folhas
     ]
     lancar_form = LancarForm(
-        dados if dados and dados.get("acao") == "lancar" else None,
+        data if data and data.get("acao") == "lancar" else None,
         initial={"due_date": services.fim_do_mes(period) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
         if not pode_alterar:
             return redirect(url)
-        formularios = [form for _folha, form in linhas if form is not None]
+        formularios = [form for _folha, form in rows if form is not None]
         if all(form.is_valid() for form in formularios):
             with transaction.atomic():
                 for form in formularios:
@@ -110,13 +110,13 @@ def folha(request):
             if lancar_form.is_valid():
                 try:
                     lancadas = services.lancar(
-                        [f for f, form in linhas if form is not None],
+                        [f for f, form in rows if form is not None],
                         category=lancar_form.cleaned_data["category"],
                         due_date=lancar_form.cleaned_data["due_date"],
                         user=request.user,
                     )
-                except ValidationError as erro:
-                    messages.error(request, erro.messages[0])
+                except ValidationError as error:
+                    messages.error(request, error.messages[0])
                 else:
                     messages.success(
                         request,
@@ -128,19 +128,19 @@ def folha(request):
                         % {"n": lancadas},
                     )
                     return redirect(url)
-    anterior = (period - datetime.timedelta(days=1)).replace(day=1)
+    previous = (period - datetime.timedelta(days=1)).replace(day=1)
     proximo = services.fim_do_mes(period) + datetime.timedelta(days=1)
     return render(
         request,
         "staff/payroll.html",
         {
             "period": period,
-            "linhas": linhas,
+            "linhas": rows,
             "lancar_form": lancar_form,
             "pode_alterar": pode_alterar,
-            "pendentes": any(form is not None for _folha, form in linhas),
+            "pendentes": any(form is not None for _folha, form in rows),
             "total": sum((f.total for f in folhas), start=0),
-            "anterior": anterior,
+            "anterior": previous,
             "proximo": proximo,
         },
     )

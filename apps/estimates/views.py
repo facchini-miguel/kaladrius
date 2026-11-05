@@ -57,30 +57,30 @@ def _liberar_se_desligado(request, item):
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
-def lista(request):
+def results(request):
     status = request.GET.get("status", Estimate.Situacao.ABERTO)
-    busca = request.GET.get("q", "").strip()
+    search = request.GET.get("q", "").strip()
     orcamentos = _orcamentos().prefetch_related("itens")
     if status in Estimate.Situacao.values:
         orcamentos = orcamentos.filter(status=status)
-    if busca:
-        orcamentos = orcamentos.filter(patient__name__unaccent__icontains=busca)
-    pagina = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
+    if search:
+        orcamentos = orcamentos.filter(patient__name__unaccent__icontains=search)
+    page = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
         request,
         "estimates/list.html",
         {
-            "pagina": pagina,
+            "pagina": page,
             "status": status,
-            "busca": busca,
+            "busca": search,
             "situacoes": Estimate.Situacao.choices,
-            "parametros": urlencode({"status": status, "q": busca}),
+            "parametros": urlencode({"status": status, "q": search}),
         },
     )
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.CRIAR)
-def novo(request):
+def new(request):
     inicial = {}
     code = request.GET.get("patient", "")
     if code.isdecimal():
@@ -106,9 +106,9 @@ def novo(request):
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def editar(request, pk):
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     form = OrcamentoForm(request.POST or None, instance=estimate)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -161,9 +161,9 @@ def _dentes(request, estimate):
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def item_adicionar(request, pk):
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     form = ItemForm(request.POST, odontologia=_odontologia(request))
     if form.is_valid():
         item = form.save(commit=False)
@@ -173,12 +173,12 @@ def item_adicionar(request, pk):
         _liberar_se_desligado(request, item)
         try:
             item.save()
-        except ValidationError as erro:
-            messages.error(request, erro.messages[0])
+        except ValidationError as error:
+            messages.error(request, error.messages[0])
         else:
             messages.success(request, _("Item incluído."))
     else:
-        erros = [str(erro) for lista in form.errors.values() for erro in lista]
+        erros = [str(error) for results in form.errors.values() for error in results]
         messages.error(request, " ".join(erros))
     return redirect("estimates:detail", pk=estimate.pk)
 
@@ -186,17 +186,17 @@ def item_adicionar(request, pk):
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def item_remover(request, pk, item):
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     record = get_object_or_404(estimate.itens, pk=item)
     if (record.teeth or record.faces) and not _odontologia(request):
         raise PermissionDenied
     _liberar_se_desligado(request, record)
     try:
         record.delete()
-    except ValidationError as erro:
-        messages.error(request, erro.messages[0])
+    except ValidationError as error:
+        messages.error(request, error.messages[0])
     else:
         messages.success(request, _("Item removido."))
     return redirect("estimates:detail", pk=estimate.pk)
@@ -205,9 +205,9 @@ def item_remover(request, pk, item):
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def discount(request, pk):
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     form = DescontoForm(request.POST)
     if form.is_valid():
         value = form.cleaned_data["discount"] or 0
@@ -224,9 +224,9 @@ def discount(request, pk):
 def aprovar(request, pk):
     if not pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR):
         raise PermissionDenied
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     item = estimate.itens.select_related("procedure__category").first()
     category = (
         item.procedure.category
@@ -235,23 +235,23 @@ def aprovar(request, pk):
     )
     form = AprovarForm(request.POST or None, initial={"category": category})
     if request.method == "POST" and form.is_valid():
-        dados = form.cleaned_data
+        data = form.cleaned_data
         payment = (
-            {"method": dados["method"], "account": dados["account"]}
-            if dados["recebido_agora"]
+            {"method": data["method"], "account": data["account"]}
+            if data["recebido_agora"]
             else None
         )
         try:
             entry = services.aprovar(
                 estimate,
-                parcelas=dados["parcelas"],
-                primeiro_vencimento=dados["primeiro_vencimento"],
-                category=dados["category"],
+                parcelas=data["parcelas"],
+                primeiro_vencimento=data["primeiro_vencimento"],
+                category=data["category"],
                 user=request.user,
                 payment=payment,
             )
-        except ValidationError as erro:
-            form.add_error(None, erro.messages[0])
+        except ValidationError as error:
+            form.add_error(None, error.messages[0])
         else:
             messages.success(request, _("Orçamento aprovado e lançado em A receber."))
             return redirect("finance:entry", pk=entry.pk)
@@ -261,13 +261,13 @@ def aprovar(request, pk):
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def recusar(request, pk):
-    estimate, resposta = _aberto(request, pk)
-    if resposta:
-        return resposta
+    estimate, response = _aberto(request, pk)
+    if response:
+        return response
     try:
         services.recusar(estimate, user=request.user)
-    except ValidationError as erro:  # approved or refused by someone else a moment ago
-        messages.error(request, erro.messages[0])
+    except ValidationError as error:  # approved or refused by someone else a moment ago
+        messages.error(request, error.messages[0])
     else:
         messages.success(request, _("Orçamento marcado como recusado."))
     return redirect("estimates:detail", pk=estimate.pk)

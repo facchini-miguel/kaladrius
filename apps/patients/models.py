@@ -177,12 +177,12 @@ class Patient(ModeloDaClinica):
         """Age in whole years, or None when the birth date is unknown."""
         if self.birth_date is None:
             return None
-        hoje = datetime.date.today()
+        today = datetime.date.today()
         nascimento = self.birth_date
         return (
-            hoje.year
+            today.year
             - nascimento.year
-            - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
+            - ((today.month, today.day) < (nascimento.month, nascimento.day))
         )
 
     @property
@@ -285,5 +285,5 @@ class RelatedPerson(ModeloDaClinica):
     def telefone_exibido(self):
         if self.phone or not self.other_patient_id:
             return self.phone
-        outro = self.other_patient
-        return outro.whatsapp or outro.mobile_phone or outro.home_phone
+        other = self.other_patient
+        return other.whatsapp or other.mobile_phone or other.home_phone

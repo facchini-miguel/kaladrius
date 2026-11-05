@@ -17,20 +17,20 @@ from .permissions import Acao, Modulo, exige_permissao
 
 
 def _saudacao():
-    hora = timezone.localtime().hour
-    if hora < 12:
+    hour = timezone.localtime().hour
+    if hour < 12:
         return _("Bom dia")
-    if hora < 18:
+    if hour < 18:
         return _("Boa tarde")
     return _("Boa noite")
 
 
 @login_required
 def start(request):
-    contexto = {"saudacao": _saudacao()}
+    context = {"saudacao": _saudacao()}
     if request.clinic is not None:
-        contexto["painel"] = dashboard.montar(request)
-    return render(request, "core/home.html", contexto)
+        context["painel"] = dashboard.montar(request)
+    return render(request, "core/home.html", context)
 
 
 def _destino_seguro(request, destino):
@@ -102,12 +102,12 @@ def trocar_idioma(request):
         language = ""
     request.user.language = language
     request.user.save(update_fields=["language"])
-    resposta = redirect(_destino_seguro(request, request.POST.get("next")))
+    response = redirect(_destino_seguro(request, request.POST.get("next")))
     # The cookie keeps the language on the login page of this browser too.
     if language:
-        resposta.set_cookie(
+        response.set_cookie(
             settings.LANGUAGE_COOKIE_NAME, language, max_age=365 * 24 * 3600, samesite="Lax"
         )
     else:
-        resposta.delete_cookie(settings.LANGUAGE_COOKIE_NAME)
-    return resposta
+        response.delete_cookie(settings.LANGUAGE_COOKIE_NAME)
+    return response

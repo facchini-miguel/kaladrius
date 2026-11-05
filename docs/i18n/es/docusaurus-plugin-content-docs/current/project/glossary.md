@@ -322,6 +322,66 @@ Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión
 |---|---|
 | `serie` | `series` |
 
+## Funciones y variables
+
+La última parte del plan (decisión 159): las funciones, métodos, clases, constantes y variables. **Aquí solo cambian nombres de Python**: las cadenas quedan, y con ellas las claves de contexto de las plantillas, los nombres de consulta, las claves de JSON y los valores guardados, con los que el nombre de una variable solo coincide. Los campos declarados de un formulario mantienen su nombre (son los nombres enviados), y los nombres que una URL pasa a la vista y el `parametrize` de una prueba siguen a los parámetros de la función. **Hecho:** las variables comunes a varias apps (decisión 172).
+
+### Variables comunes
+
+| Antes | Después |
+|---|---|
+| `resposta` | `response` |
+| `dados` | `data` |
+| `pagina` | `page` |
+| `linha` | `row` |
+| `linhas` | `rows` |
+| `campo` | `field` |
+| `campos` | `fields` |
+| `hoje` | `today` |
+| `recepcao` | `reception` |
+| `lista` | `results` |
+| `dia` | `day` |
+| `busca` | `search` |
+| `chave` | `key` |
+| `atual` | `current` |
+| `anterior` | `previous` |
+| `erro` | `error` |
+| `novo` | `new` |
+| `outro` | `other` |
+| `antes` | `before` |
+| `depois` | `after` |
+| `contexto` | `context` |
+| `rotulo` | `label` |
+| `antigo` | `old` |
+| `padrao` | `default` |
+| `mensagem` | `message` |
+| `caminho` | `path` |
+| `senha` | `password` |
+| `hora` | `hour` |
+| `origem` | `source` |
+| `agora` | `now` |
+| `mes` | `month` |
+| `sessao` | `session` |
+| `resumo` | `summary` |
+| `filtros` | `filters` |
+| `primeiro` | `first` |
+| `ultimo` | `last` |
+| `objeto` | `obj` |
+| `tabela` | `table` |
+| `tabelas` | `tables` |
+| `coluna` | `column` |
+| `limite` | `limit` |
+| `configuracao` | `config` |
+| `opcoes` | `options` |
+| `posicao` | `position` |
+| `semana` | `week` |
+| `aviso` | `warning` |
+| `duracao` | `duration` |
+| `exemplo` | `example` |
+| `de` | `since` |
+
+`itens` queda por ahora: también es el acceso inverso del presupuesto y el formato de las releases.
+
 ## Lo que queda en portugués
 
 - **Valores guardados en la base**: los valores de las opciones (`"PF"`, `"conciliada"`, `"retirada"`), los códigos de los módulos (`"rechamadas"`), las claves dentro de campos JSON (los cambios de la auditoría, configuraciones). Solo cambia el nombre de las constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), no su valor.

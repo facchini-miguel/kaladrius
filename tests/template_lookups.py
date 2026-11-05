@@ -23,8 +23,8 @@ def _registrando(self, context):
     try:
         return _original(self, context)
     except VariableDoesNotExist:
-        origem = getattr(getattr(context, "template", None), "origin", None)
-        encontradas.add(f"{getattr(origem, 'template_name', None) or '?'}  {self.var}")
+        source = getattr(getattr(context, "template", None), "origin", None)
+        encontradas.add(f"{getattr(source, 'template_name', None) or '?'}  {self.var}")
         raise
 
 
@@ -35,11 +35,11 @@ def instalar():
 def conferir(escrever):
     """At the end of the run: the new missing variables (an empty list when there are none)."""
     if os.environ.get("UPDATE_TEMPLATE_BASELINE") == "1":
-        LINHA_DE_BASE.write_text("".join(f"{linha}\n" for linha in sorted(encontradas)))
+        LINHA_DE_BASE.write_text("".join(f"{row}\n" for row in sorted(encontradas)))
         escrever(f"{LINHA_DE_BASE.name}: {len(encontradas)} entries written")
         return []
     base = set(LINHA_DE_BASE.read_text().splitlines())
     novas = sorted(encontradas - base)
-    for linha in novas:
-        escrever(f"template variable not found (not in {LINHA_DE_BASE.name}): {linha}")
+    for row in novas:
+        escrever(f"template variable not found (not in {LINHA_DE_BASE.name}): {row}")
     return novas

@@ -40,7 +40,7 @@ def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
 
 def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     pessoal = group(clinica_a, "Pessoal")
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:group_new"),
         {
             "name": "Equipe da recepção",
@@ -50,7 +50,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
             "active": "on",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     sub = group(clinica_a, "Equipe da recepção")
     with usar_clinica(clinica_a):
         assert sub.number == "2.1"
@@ -60,16 +60,16 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
         {"name": salarios.name, "kind": "despesa", "group": sub.pk, "active": "on"},
     )
     assert editar.status_code == 302
-    pagina = admin.get(reverse("finance:chart_of_accounts")).content.decode()
-    assert "2.1 Equipe da recepção" in pagina and "Salários e encargos" in pagina
+    page = admin.get(reverse("finance:chart_of_accounts")).content.decode()
+    assert "2.1 Equipe da recepção" in page and "Salários e encargos" in page
 
 
 def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
     pessoal = group(clinica_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
-        dados = {"name": name, "kind": "despesa", "parent": pessoal.pk, "code": "", "active": "on"}
-        assert admin.post(reverse("finance:group_new"), dados).status_code == 302
+        data = {"name": name, "kind": "despesa", "parent": pessoal.pk, "code": "", "active": "on"}
+        assert admin.post(reverse("finance:group_new"), data).status_code == 302
     with usar_clinica(clinica_a):
         assert group(clinica_a, "Equipe A").number == "2.1"
         assert group(clinica_a, "Equipe B").number == "2.2"
@@ -99,7 +99,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
 
 
 def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:catalog_new", args=["categories"]),
         {
             "name": "Exames",
@@ -108,7 +108,7 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
             "active": "on",
         },
     )
-    assert "group" in resposta.context["form"].errors
+    assert "group" in response.context["form"].errors
 
 
 def test_relatorio_soma_os_subgrupos(clinica_a, admin):
@@ -153,8 +153,8 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
 
 
 def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
-    recepcao = cliente_de(criar_usuario("recepcao_plano", clinica_a, Papel.RECEPCAO))
-    assert recepcao.get(reverse("finance:chart_of_accounts")).status_code == 403
+    reception = cliente_de(criar_usuario("recepcao_plano", clinica_a, Papel.RECEPCAO))
+    assert reception.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
 @pytest.mark.django_db(transaction=True)

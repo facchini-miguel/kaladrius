@@ -35,7 +35,7 @@ def criar(clinic, patient, date=DIA, **extra):
 
 
 def test_cria_rechamada(cenario):
-    resposta = cenario["cliente"].post(
+    response = cenario["cliente"].post(
         reverse("recalls:new"),
         {
             "patient": cenario["patient"].pk,
@@ -43,17 +43,17 @@ def test_cria_rechamada(cenario):
             "description": "Revisão 6 meses",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     [rechamada] = rechamadas(cenario["clinic"])
     assert rechamada.description == "Revisão 6 meses" and not rechamada.done
     assert rechamada.created_by.username == "recepcao"
 
 
 def test_paciente_e_obrigatorio(cenario):
-    resposta = cenario["cliente"].post(
+    response = cenario["cliente"].post(
         reverse("recalls:new"), {"date": DIA.isoformat(), "description": "x"}
     )
-    assert "Escolha o paciente" in resposta.content.decode()
+    assert "Escolha o paciente" in response.content.decode()
 
 
 def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
@@ -62,7 +62,7 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
         reverse("recalls:new"), {"patient": cenario["patient"].pk, "next": ficha}
     )
     assert "João Rechamada" in formulario.content.decode()
-    resposta = cenario["cliente"].post(
+    response = cenario["cliente"].post(
         reverse("recalls:new"),
         {
             "patient": cenario["patient"].pk,
@@ -71,7 +71,7 @@ def test_nova_a_partir_da_ficha_volta_para_a_ficha(cenario):
             "next": ficha,
         },
     )
-    assert resposta.url == ficha
+    assert response.url == ficha
     assert "Revisão" not in cenario["cliente"].get(ficha).content.decode()  # shows "x"
 
 
@@ -92,8 +92,8 @@ def test_filtros_da_lista(cenario):
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA + datetime.timedelta(days=30), done=True)
     with usar_clinica(clinic):
-        outro = Patient.objects.create(name="Ana Outra")
-    criar(clinic, outro, DIA + datetime.timedelta(days=60))
+        other = Patient.objects.create(name="Ana Outra")
+    criar(clinic, other, DIA + datetime.timedelta(days=60))
     url = reverse("recalls:list")
 
     def nomes(**params):
@@ -116,13 +116,13 @@ def test_resumo_e_lista_do_dia_para_a_agenda(cenario):
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA, done=True)
-    resumo = cenario["cliente"].get(
+    summary = cenario["cliente"].get(
         reverse("recalls:summary"),
         {"start": "2031-03-03T00:00:00-03:00", "end": "2031-03-10T00:00:00-03:00"},
     )
-    assert resumo.json() == {"2031-03-05": 2}
-    dia = cenario["cliente"].get(reverse("recalls:today"), {"date": "2031-03-05"}).content.decode()
-    assert dia.count("João Rechamada") == 3
+    assert summary.json() == {"2031-03-05": 2}
+    day = cenario["cliente"].get(reverse("recalls:today"), {"date": "2031-03-05"}).content.decode()
+    assert day.count("João Rechamada") == 3
 
 
 def test_agenda_recebe_as_urls_de_rechamadas(cenario, criar_profissional):
@@ -139,19 +139,19 @@ def test_isolamento(cenario, clinica_b):
     assert cliente.get(reverse("recalls:edit", args=[de_b.pk])).status_code == 404
     assert cliente.post(reverse("recalls:complete", args=[de_b.pk])).status_code == 404
     assert len(cliente.get(reverse("recalls:list"), {"status": "todas"}).context["pagina"]) == 0
-    resposta = cliente.post(
+    response = cliente.post(
         reverse("recalls:new"),
         {"patient": paciente_b.pk, "date": DIA.isoformat(), "description": "x"},
     )
-    assert "patient" in resposta.context["form"].errors
+    assert "patient" in response.context["form"].errors
 
 
 @pytest.mark.parametrize(("role", "exclui"), [(Papel.RECEPCAO, True), (Papel.PROFISSIONAL, False)])
 def test_permissao_de_excluir(role, exclui, cenario, criar_usuario, cliente_de):
     rechamada = criar(cenario["clinic"], cenario["patient"])
     cliente = cliente_de(criar_usuario("usuario", cenario["clinic"], role))
-    resposta = cliente.post(reverse("recalls:delete", args=[rechamada.pk]))
-    assert resposta.status_code == (302 if exclui else 403)
+    response = cliente.post(reverse("recalls:delete", args=[rechamada.pk]))
+    assert response.status_code == (302 if exclui else 403)
 
 
 def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario, cliente_de):
@@ -159,8 +159,8 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
     admin = cliente_de(criar_usuario("admin", cenario["clinic"], Papel.ADMIN))
     admin.post(reverse("patients:archive", args=[cenario["patient"].pk]))
     assert "Maria" not in admin.get(reverse("recalls:list")).content.decode()
-    dia = admin.get(reverse("recalls:today"), {"date": rechamada.date.isoformat()})
-    assert "Maria" not in dia.content.decode()
+    day = admin.get(reverse("recalls:today"), {"date": rechamada.date.isoformat()})
+    assert "Maria" not in day.content.decode()
 
     # Permanent deletion takes the recalls with it.
     admin.post(reverse("patients:delete", args=[cenario["patient"].pk]))
@@ -178,23 +178,23 @@ def test_aniversariantes_do_mes(cenario):
         Patient.objects.create(name="Março 2", birth_date=datetime.date(2000, 3, 2))
         Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 1), active=False)
         Patient.objects.create(name="Nascido em abril", birth_date=datetime.date(1990, 4, 1))
-    resposta = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
-    assert [p.name for p, _ in resposta.context["linhas"]] == ["Março 2", "Março 20"]
-    assert "Nascido em abril" not in resposta.content.decode()
-    hoje = timezone.localdate()
-    padrao = cenario["cliente"].get(reverse("patients:birthdays"))
-    assert padrao.context["mes"] == hoje.month
+    response = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
+    assert [p.name for p, _ in response.context["linhas"]] == ["Março 2", "Março 20"]
+    assert "Nascido em abril" not in response.content.decode()
+    today = timezone.localdate()
+    default = cenario["cliente"].get(reverse("patients:birthdays"))
+    assert default.context["mes"] == today.month
 
 
 def test_aniversariantes_exige_permissao_e_clinica(criar_usuario, cliente_de):
-    resposta = cliente_de(criar_usuario("solto")).get(reverse("patients:birthdays"))
-    assert resposta.status_code == 403
+    response = cliente_de(criar_usuario("solto")).get(reverse("patients:birthdays"))
+    assert response.status_code == 403
 
 
 def test_paciente_adulterado_no_formulario_mostra_erro(cenario):
-    resposta = cenario["cliente"].post(
+    response = cenario["cliente"].post(
         reverse("recalls:new"), {"patient": "abc", "date": "2031-03-05", "description": "x"}
     )
-    assert resposta.status_code == 200
-    assert resposta.context["form"].errors["patient"]
+    assert response.status_code == 200
+    assert response.context["form"].errors["patient"]
     assert rechamadas(cenario["clinic"]) == []

@@ -53,26 +53,26 @@ def pagar(clinic, category, amount, date=HOJE):
 
 
 @pytest.mark.parametrize(
-    ("hoje", "esperado"),
+    ("today", "esperado"),
     [
         (datetime.date(2025, 12, 31), Decimal(0)),
         (datetime.date(2027, 1, 1), Decimal(1)),
         (datetime.date(2026, 1, 1), Decimal(1) / Decimal(365)),
     ],
 )
-def test_fracao_do_ano(hoje, esperado):
-    assert services.fracao_do_ano(2026, hoje) == esperado
+def test_fracao_do_ano(today, esperado):
+    assert services.fracao_do_ano(2026, today) == esperado
 
 
 def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
     ocupacao = group(clinica_a, "Ocupação")
     # With the thousands dot, as people type it (review stage 3: it was refused).
-    resposta = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
-    assert resposta.status_code == 302
+    response = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         assert Planning.objects.get().amount == Decimal("12000.50")
-    pagina = admin.get(f"{URL}?year={HOJE.year}").content.decode()
-    assert 'value="12000,50"' in pagina  # shown back with a comma, not as 12000.50
+    page = admin.get(f"{URL}?year={HOJE.year}").content.decode()
+    assert 'value="12000,50"' in page  # shown back with a comma, not as 12000.50
     # Blank removes the goal.
     admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": ""})
     with usar_clinica(clinica_a):
@@ -87,8 +87,8 @@ def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
     pagar(clinica_a, "Manutenção", "50")
     pagar(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
     despesas = admin.get(f"{URL}?year={HOJE.year}").context["secoes"][1]
-    linha = next(linha for linha in despesas["linhas"] if linha["group"] == ocupacao)
-    assert (linha["realizado"], linha["percentage"]) == (Decimal("300.00"), 30)
+    row = next(row for row in despesas["linhas"] if row["group"] == ocupacao)
+    assert (row["realizado"], row["percentage"]) == (Decimal("300.00"), 30)
     assert despesas["meta"] == Decimal("1000") and despesas["realizado"] == Decimal("300.00")
 
 
@@ -101,7 +101,7 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
-        despesas = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))["secoes"][1]
+        despesas = services.planejamento(2026, today=datetime.date(2026, 12, 31))["secoes"][1]
     assert despesas["meta"] == Decimal("5700")
     assert despesas["esperado"] == Decimal("5700.00")
 
@@ -114,9 +114,9 @@ def test_em_dia_para_receita_e_despesa(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
-        dados = services.planejamento(2026, hoje=datetime.date(2026, 12, 31))
-    receita = next(linha for linha in dados["secoes"][0]["linhas"] if linha["meta"])
-    despesa = next(linha for linha in dados["secoes"][1]["linhas"] if linha["meta"])
+        data = services.planejamento(2026, today=datetime.date(2026, 12, 31))
+    receita = next(row for row in data["secoes"][0]["linhas"] if row["meta"])
+    despesa = next(row for row in data["secoes"][1]["linhas"] if row["meta"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.
     assert receita["em_dia"] is False and despesa["em_dia"] is True
 
@@ -128,8 +128,8 @@ def test_copiar_metas_do_ano_anterior(clinica_a, admin):
         Planning.objects.create(year=HOJE.year - 1, group=ocupacao, amount=Decimal("900"))
         Planning.objects.create(year=HOJE.year - 1, group=impostos, amount=Decimal("300"))
         Planning.objects.create(year=HOJE.year, group=impostos, amount=Decimal("400"))
-    pagina = admin.get(f"{URL}?year={HOJE.year}")
-    assert pagina.context["tem_metas_anteriores"]
+    page = admin.get(f"{URL}?year={HOJE.year}")
+    assert page.context["tem_metas_anteriores"]
     admin.post(f"{URL}?year={HOJE.year}", {"acao": "copiar"})
     with usar_clinica(clinica_a):
         deste_ano = dict(
@@ -143,5 +143,5 @@ def test_ano_invalido_volta_para_o_atual(admin):
 
 
 def test_permissoes(clinica_a, criar_usuario, cliente_de):
-    recepcao = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Papel.RECEPCAO))
-    assert recepcao.get(URL).status_code == 403
+    reception = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Papel.RECEPCAO))
+    assert reception.get(URL).status_code == 403

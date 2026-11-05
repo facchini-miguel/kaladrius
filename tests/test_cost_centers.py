@@ -53,8 +53,8 @@ def test_cadastro_e_nome_repetido(clinica_a, admin):
         assert CostCenter.objects.get().name == "Consultório 1"
     repetido = admin.post(url, {"name": "consultório 1", "active": "on"})
     assert "name" in repetido.context["form"].errors
-    lista = admin.get(reverse(URL, args=["cost-centers"])).content.decode()
-    assert "Consultório 1" in lista and "Ativo" in lista
+    results = admin.get(reverse(URL, args=["cost-centers"])).content.decode()
+    assert "Consultório 1" in results and "Ativo" in results
 
 
 def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
@@ -65,9 +65,9 @@ def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
     assert "cost_center" not in admin.get(reverse("finance:expense_new")).context["form"].fields
     with usar_clinica(clinica_a):
         CostCenter.objects.create(name="Ativo")
-    campo = admin.get(reverse("finance:expense_new")).context["form"].fields["cost_center"]
+    field = admin.get(reverse("finance:expense_new")).context["form"].fields["cost_center"]
     with usar_clinica(clinica_a):
-        assert inativo not in campo.queryset and campo.queryset.count() == 1
+        assert inativo not in field.queryset and field.queryset.count() == 1
 
 
 def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
@@ -80,7 +80,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(name="Paciente fictício do centro")
         receita = Category.objects.get(name="Tratamento")
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:entry_new"),
         {
             "patient": patient.pk,
@@ -95,12 +95,12 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
             "notes": "",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         assert Entry.objects.filter(cost_center=centro).count() == 2
         entry = Entry.objects.get(kind=Entry.Tipo.PAGAR)
-    pagina = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
-    assert "Ortodontia" in pagina
+    page = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
+    assert "Ortodontia" in page
     # Without a center the entry still saves (the field is optional).
     assert admin.post(reverse("finance:expense_new"), despesa(clinica_a)).status_code == 302
 
@@ -149,17 +149,17 @@ def test_relatorio_sem_centros_nao_mostra_os_quadros(admin):
 
 
 def test_recepcao_nao_cadastra(clinica_a, criar_usuario, cliente_de):
-    recepcao = cliente_de(criar_usuario("recepcao_centros", clinica_a, Papel.RECEPCAO))
-    assert recepcao.get(reverse(URL, args=["cost-centers"])).status_code == 403
+    reception = cliente_de(criar_usuario("recepcao_centros", clinica_a, Papel.RECEPCAO))
+    assert reception.get(reverse(URL, args=["cost-centers"])).status_code == 403
 
 
 def test_some_com_o_financeiro_desligado(clinica_a, admin):
-    lista = reverse(URL, args=["cost-centers"])
-    assert lista in admin.get(reverse("home")).content.decode()
+    results = reverse(URL, args=["cost-centers"])
+    assert results in admin.get(reverse("home")).content.decode()
     configurar(
         clinica_a,
         MODULOS_GERAIS
         - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS, ModuloClinico.PESSOAL},
     )
-    assert admin.get(lista).status_code == 403
-    assert lista not in admin.get(reverse("home")).content.decode()
+    assert admin.get(results).status_code == 403
+    assert results not in admin.get(reverse("home")).content.decode()

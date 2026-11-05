@@ -20,8 +20,8 @@ from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # no
 
 pytestmark = pytest.mark.django_db
 
-PERMANENTES = [d for linha in DENTES_PERMANENTES for d in linha]
-DECIDUOS = [d for linha in DENTES_DECIDUOS for d in linha]
+PERMANENTES = [d for row in DENTES_PERMANENTES for d in row]
+DECIDUOS = [d for row in DENTES_DECIDUOS for d in row]
 
 
 @pytest.mark.parametrize(
@@ -75,10 +75,10 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
     clinica_a.refresh_from_db()
     assert clinica_a.tooth_numbering == UNIVERSAL
     # Chosen on purpose, it stays when the country changes.
-    dados = dados_clinica(country="US", tooth_numbering=PALMER)
-    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
-    dados = dados_clinica(country="GB", tooth_numbering=PALMER)
-    assert admin.post(reverse("clinic_settings"), dados).status_code == 302
+    data = dados_clinica(country="US", tooth_numbering=PALMER)
+    assert admin.post(reverse("clinic_settings"), data).status_code == 302
+    data = dados_clinica(country="GB", tooth_numbering=PALMER)
+    assert admin.post(reverse("clinic_settings"), data).status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.tooth_numbering == PALMER
 
@@ -100,7 +100,7 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
         item = estimate.itens.get()
         assert item.teeth == "18,36"  # always FDI in the database
         assert item.dentes_exibicao == "1, 19"
-    pagina = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
+    page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
-    assert 'data-dente="36"' in pagina and ">19</button>" in pagina
-    assert "Numeração universal (Estados Unidos)." in pagina
+    assert 'data-dente="36"' in page and ">19</button>" in page
+    assert "Numeração universal (Estados Unidos)." in page

@@ -62,12 +62,12 @@ def lancar(folhas, *, category, due_date, user):
             raise ValidationError(
                 _("O total de %(nome)s precisa ser maior que zero.") % {"nome": folha.employee}
             )
-        mes = f"{folha.period:%m/%Y}"
+        month = f"{folha.period:%m/%Y}"
         folha.entry = financeiro.criar_lancamento(
             clinic=folha.employee.clinic,
             kind=Entry.Tipo.PAGAR,
             payer=folha.employee.name,
-            description=_("Salário %(mes)s") % {"mes": mes},
+            description=_("Salário %(mes)s") % {"mes": month},
             category=category,
             notes=_("Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s.")
             % {
@@ -85,9 +85,9 @@ def lancar(folhas, *, category, due_date, user):
     return lancadas
 
 
-def mes_da_url(text, hoje):
+def mes_da_url(text, today):
     """The month asked as YYYY-MM, or the current one."""
     try:
         return datetime.datetime.strptime(text or "", "%Y-%m").date()
     except ValueError:
-        return competencia_de(hoje)
+        return competencia_de(today)

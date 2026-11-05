@@ -25,48 +25,48 @@ def _data(value):
         return None
 
 
-def _voltar(request, padrao="recalls:list"):
+def _voltar(request, default="recalls:list"):
     destino = request.POST.get("next") or request.GET.get("next")
     if destino and url_has_allowed_host_and_scheme(destino, allowed_hosts={request.get_host()}):
         return redirect(destino)
-    return redirect(padrao)
+    return redirect(default)
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
-def lista(request):
+def results(request):
     status = request.GET.get("status", "pendentes")
-    busca = request.GET.get("q", "").strip()
-    de, until = _data(request.GET.get("de")), _data(request.GET.get("until"))
+    search = request.GET.get("q", "").strip()
+    since, until = _data(request.GET.get("de")), _data(request.GET.get("until"))
     rechamadas = Recall.objects.select_related("patient").filter(
         **SITUACOES.get(status, SITUACOES["pendentes"]), patient__archived=False
     )
-    if busca:
-        rechamadas = rechamadas.filter(patient__name__unaccent__icontains=busca)
-    if de:
-        rechamadas = rechamadas.filter(date__gte=de)
+    if search:
+        rechamadas = rechamadas.filter(patient__name__unaccent__icontains=search)
+    if since:
+        rechamadas = rechamadas.filter(date__gte=since)
     if until:
         rechamadas = rechamadas.filter(date__lte=until)
-    pagina = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
-    filtros = {
-        "q": busca,
+    page = Paginator(rechamadas, POR_PAGINA).get_page(request.GET.get("pagina"))
+    filters = {
+        "q": search,
         "status": status,
-        "de": de.isoformat() if de else "",
+        "de": since.isoformat() if since else "",
         "until": until.isoformat() if until else "",
     }
     return render(
         request,
         "recalls/list.html",
         {
-            "pagina": pagina,
-            "filtros": filtros,
-            "parametros": urlencode(filtros),
+            "pagina": page,
+            "filtros": filters,
+            "parametros": urlencode(filters),
             "hoje": timezone.localdate(),
         },
     )
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.CRIAR)
-def novo(request):
+def new(request):
     inicial = {"date": request.GET.get("date") or ""}
     if request.GET.get("patient", "").isdecimal():
         inicial["patient"] = request.GET["patient"]
@@ -113,10 +113,10 @@ def concluir(request, pk):
     rechamada.done = not rechamada.done
     rechamada.save(update_fields=["done", "updated_at"])
     if rechamada.done:
-        mensagem = _("Rechamada de %(nome)s concluída.")
+        message = _("Rechamada de %(nome)s concluída.")
     else:
-        mensagem = _("Rechamada de %(nome)s reaberta.")
-    messages.success(request, mensagem % {"nome": rechamada.patient.name})
+        message = _("Rechamada de %(nome)s reaberta.")
+    messages.success(request, message % {"nome": rechamada.patient.name})
     return _voltar(request)
 
 
@@ -136,14 +136,14 @@ def excluir(request, pk):
 
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
-def resumo(request):
+def summary(request):
     """Number of pending recalls per day, for the schedule day headers."""
-    de, until = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
-    if de is None or until is None or not 0 < (until - de).days <= 62:
+    since, until = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
+    if since is None or until is None or not 0 < (until - since).days <= 62:
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        done=False, date__gte=de, date__lt=until, patient__archived=False
+        done=False, date__gte=since, date__lt=until, patient__archived=False
     )
     for date in pendentes.values_list("date", flat=True):
         contagem[date.isoformat()] = contagem.get(date.isoformat(), 0) + 1
@@ -152,8 +152,8 @@ def resumo(request):
 
 @exige_permissao(Modulo.RECHAMADAS, Acao.VER)
 def do_dia(request):
-    dia = _data(request.GET.get("date"))
-    if dia is None:
+    day = _data(request.GET.get("date"))
+    if day is None:
         return HttpResponse(_("Data inválida."), status=400)
-    rechamadas = Recall.objects.filter(date=dia, patient__archived=False).select_related("patient")
-    return render(request, "recalls/_today.html", {"dia": dia, "rechamadas": rechamadas})
+    rechamadas = Recall.objects.filter(date=day, patient__archived=False).select_related("patient")
+    return render(request, "recalls/_today.html", {"dia": day, "rechamadas": rechamadas})

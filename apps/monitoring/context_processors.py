@@ -16,8 +16,6 @@ def alerta(request):
         return {"saude_alerta": {"parada": ultima["momento"]}}
     # Not the processor: a busy moment is normal, and it does not break anything by itself.
     criticos = [
-        chave
-        for chave, nivel in health.niveis(ultima).items()
-        if nivel == "critico" and chave != "cpu"
+        key for key, nivel in health.niveis(ultima).items() if nivel == "critico" and key != "cpu"
     ]
     return {"saude_alerta": {"criticos": criticos}} if criticos else {}

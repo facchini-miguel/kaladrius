@@ -83,27 +83,27 @@ def importar(account, *, nome_arquivo, content, user):
 
 def outra_conta_no_banco(statement_import):
     """The bank account number of an earlier import into the same account, if different."""
-    anterior = (
+    previous = (
         StatementImport.objects.filter(account=statement_import.account)
         .exclude(pk=statement_import.pk)
         .exclude(bank_account_number="")
         .first()
     )
     if (
-        anterior
+        previous
         and statement_import.bank_account_number
-        and anterior.bank_account_number != statement_import.bank_account_number
+        and previous.bank_account_number != statement_import.bank_account_number
     ):
-        return anterior.bank_account_number
+        return previous.bank_account_number
     return None
 
 
 @dataclass
 class Candidato:
-    chave: str  # "p<pk>" for a payment, "m<pk>" for a drawer movement
+    key: str  # "p<pk>" for a payment, "m<pk>" for a drawer movement
     date: datetime.date
     description: str
-    objeto: object
+    obj: object
 
 
 def candidatos(transacoes):
@@ -112,18 +112,21 @@ def candidatos(transacoes):
     if not pendentes:
         return {}
     contas = {t.account_id for t in pendentes}
-    de = min(t.date for t in pendentes) - JANELA
+    since = min(t.date for t in pendentes) - JANELA
     until = max(t.date for t in pendentes) + JANELA
     pagamentos = list(
         Payment.objects.filter(
-            account_id__in=contas, reversed=False, transacao__isnull=True, date__range=(de, until)
+            account_id__in=contas,
+            reversed=False,
+            transacao__isnull=True,
+            date__range=(since, until),
         ).select_related("installment__entry__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
             other_account_id__in=contas,
             transacao__isnull=True,
-            created_at__date__range=(de, until),
+            created_at__date__range=(since, until),
         ).select_related("cash_register__account")
     )
     resultado = {}
@@ -132,7 +135,7 @@ def candidatos(transacoes):
         kind = Entry.Tipo.RECEBER if t.entrada else Entry.Tipo.PAGAR
         # Money taken out of the drawer into the bank is a credit there, and vice versa.
         tipo_movimento = CashMovement.Tipo.RETIRADA if t.entrada else CashMovement.Tipo.REFORCO
-        lista = []
+        results = []
         for p in pagamentos:
             entry = p.installment.entry
             if (
@@ -141,7 +144,7 @@ def candidatos(transacoes):
                 and entry.kind == kind
                 and abs(p.date - t.date) <= JANELA
             ):
-                lista.append(
+                results.append(
                     Candidato(
                         f"p{p.pk}",
                         p.date,
@@ -157,7 +160,7 @@ def candidatos(transacoes):
                 and m.kind == tipo_movimento
                 and abs(date - t.date) <= JANELA
             ):
-                lista.append(
+                results.append(
                     Candidato(
                         f"m{m.pk}",
                         date,
@@ -165,16 +168,16 @@ def candidatos(transacoes):
                         m,
                     )
                 )
-        lista.sort(key=lambda c: (abs(c.date - t.date), c.date, c.chave))
-        resultado[t.pk] = lista
+        results.sort(key=lambda c: (abs(c.date - t.date), c.date, c.key))
+        resultado[t.pk] = results
     return resultado
 
 
 def _vincular(transacao, candidato, user):
-    if isinstance(candidato.objeto, Payment):
-        transacao.payment = candidato.objeto
+    if isinstance(candidato.obj, Payment):
+        transacao.payment = candidato.obj
     else:
-        transacao.cash_movement = candidato.objeto
+        transacao.cash_movement = candidato.obj
     transacao.status = Situacao.CONCILIADA
     transacao.reconciled_by = user
     transacao.reconciled_at = timezone.now()
@@ -194,10 +197,10 @@ def _pendente(transacao):
 
 
 @transaction.atomic
-def conciliar(transacao, chave, *, user):
+def conciliar(transacao, key, *, user):
     transacao = _pendente(transacao)
     for candidato in candidatos([transacao]).get(transacao.pk, []):
-        if candidato.chave == chave:
+        if candidato.key == key:
             _vincular(transacao, candidato, user)
             return transacao
     raise ValidationError(_("Esse lançamento não corresponde a esta transação."))
@@ -212,12 +215,12 @@ def conciliar_unicos(statement_import, *, user):
         )
     )
     por_transacao = candidatos(transacoes)
-    procurados = Counter(c.chave for lista in por_transacao.values() for c in lista)
+    procurados = Counter(c.key for results in por_transacao.values() for c in results)
     feitas = 0
     for t in transacoes:
-        lista = por_transacao.get(t.pk, [])
-        if len(lista) == 1 and procurados[lista[0].chave] == 1:
-            _vincular(t, lista[0], user)
+        results = por_transacao.get(t.pk, [])
+        if len(results) == 1 and procurados[results[0].key] == 1:
+            _vincular(t, results[0], user)
             feitas += 1
     return feitas
 

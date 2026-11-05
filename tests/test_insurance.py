@@ -26,9 +26,9 @@ def test_cada_pais_tem_as_suas_regras():
     assert set(insurance.SEGUROS) == set(PAISES)
     for country, regras in insurance.SEGUROS.items():
         for code in (regras.registration, regras.procedure):
-            if code and code.padrao:
+            if code and code.default:
                 # Every format has an example, and the example follows it.
-                assert re.fullmatch(code.padrao, code.exemplo), country
+                assert re.fullmatch(code.default, code.example), country
 
 
 def test_codigo_limpo_e_conferido():
@@ -51,8 +51,8 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
         reverse("health_plans:new"), {"name": "Fictitious Dental", "registration": "1"}
     )
     assert "registration" in recusado.context["form"].errors
-    dados = {"name": "Fictitious Dental", "registration": "ab-123", "active": "on"}
-    assert admin.post(reverse("health_plans:new"), dados).status_code == 302
+    data = {"name": "Fictitious Dental", "registration": "ab-123", "active": "on"}
+    assert admin.post(reverse("health_plans:new"), data).status_code == 302
     with usar_clinica(clinica_a):
         assert HealthPlan.objects.get().registration == "AB123"
     assert "Payer ID" in admin.get(reverse("health_plans:list")).content.decode()
@@ -64,33 +64,33 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
 
 def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):  # noqa: F811
     url = reverse("health_plans:card_new", args=[patient.pk])
-    campos = admin.get(url).context["form"].fields
-    assert "group" not in campos and "member_code" not in campos  # Brazil
+    fields = admin.get(url).context["form"].fields
+    assert "group" not in fields and "member_code" not in fields  # Brazil
     mudar_pais(clinica_a, "US")
-    campos = admin.get(url).context["form"].fields
-    assert str(campos["number"].label) == "Número da carteirinha (Member ID)"
-    assert str(campos["group"].label) == "Número do grupo (Group number)"
-    assert "member_code" not in campos
-    dados = carteirinha(health_plan, number="W123456789", group="G-100")
-    assert admin.post(url, dados).status_code == 302
+    fields = admin.get(url).context["form"].fields
+    assert str(fields["number"].label) == "Número da carteirinha (Member ID)"
+    assert str(fields["group"].label) == "Número do grupo (Group number)"
+    assert "member_code" not in fields
+    data = carteirinha(health_plan, number="W123456789", group="G-100")
+    assert admin.post(url, data).status_code == 302
     with usar_clinica(clinica_a):
         assert MemberCard.objects.get().group == "G-100"
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
-    campos = admin.get(url).context["form"].fields
-    assert str(campos["member_code"].label) == "Código do beneficiário (dependant code)"
+    fields = admin.get(url).context["form"].fields
+    assert str(fields["member_code"].label) == "Código do beneficiário (dependant code)"
 
 
 def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     cliente = entrar(cenario, "admin")
     url = reverse("estimates:procedure_edit", args=[cenario["restauracao"].pk])
-    dados = {"name": "Restauração", "amount": "250,00", "category": "", "active": "on"}
+    data = {"name": "Restauração", "amount": "250,00", "category": "", "active": "on"}
     form = cliente.get(url).context["form"]
     assert str(form.fields["code"].label) == "Código (TUSS)"
-    assert "code" in cliente.post(url, {**dados, "code": "123"}).context["form"].errors
-    assert cliente.post(url, {**dados, "code": "8510.0099"}).status_code == 302
+    assert "code" in cliente.post(url, {**data, "code": "123"}).context["form"].errors
+    assert cliente.post(url, {**data, "code": "8510.0099"}).status_code == 302
     with usar_clinica(clinic):
         assert Procedure.objects.get(name="Restauração").code == "85100099"
     estimate = criar_orcamento(cenario, cliente)

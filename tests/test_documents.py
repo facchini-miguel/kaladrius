@@ -38,10 +38,10 @@ def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
     for code, documentos in identification.DOCUMENTOS.items():
         if code == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
-        for document in documentos.de(*identification.PAPEIS):
-            compacto = document.normalizar(document.exemplo)
+        for document in documentos.since(*identification.PAPEIS):
+            compacto = document.normalizar(document.example)
             assert document.valido(compacto), (code, document.sigla)
-            assert document.escrever(compacto) in (document.exemplo, compacto), document.sigla
+            assert document.escrever(compacto) in (document.example, compacto), document.sigla
 
 
 @pytest.mark.parametrize(
@@ -133,11 +133,11 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     no_pais(clinica_a, "MX")
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="CURP"' in formulario and 'data-rotulo-pj="RFC"' in formulario
-    dados = {"kind": "PF", "name": "Paciente Ficticio", "active": "on"}
-    resposta = admin.post(reverse("patients:new"), {**dados, "tax_id": "BOXW310820HNERXN08"})
-    assert resposta.context["form"].errors["tax_id"] == ["CURP: número inválido."]
-    resposta = admin.post(reverse("patients:new"), {**dados, "tax_id": "boxw310820hnerxn09"})
-    assert resposta.status_code == 302
+    data = {"kind": "PF", "name": "Paciente Ficticio", "active": "on"}
+    response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN08"})
+    assert response.context["form"].errors["tax_id"] == ["CURP: número inválido."]
+    response = admin.post(reverse("patients:new"), {**data, "tax_id": "boxw310820hnerxn09"})
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         paciente = Patient.objects.get()
     assert paciente.tax_id == "BOXW310820HNERXN09"
@@ -145,8 +145,8 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     assert "CURP" in ficha and "BOXW310820HNERXN09" in ficha
 
     # The same document again is refused, as in Brazil.
-    resposta = admin.post(reverse("patients:new"), {**dados, "tax_id": "BOXW310820HNERXN09"})
-    assert "Já existe um paciente com este documento" in resposta.content.decode()
+    response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN09"})
+    assert "Já existe um paciente com este documento" in response.content.decode()
 
 
 def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin):
@@ -162,8 +162,8 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
         assert Patient.objects.get(name="John Fictitious").tax_id == ""
         acme = Patient.objects.get(name="Acme Fictitious")
     assert acme.tax_id == "911144442"
-    lista = admin.get(reverse("patients:list")).content.decode()
-    assert "91-1144442" in lista and "<th>EIN</th>" in lista
+    results = admin.get(reverse("patients:list")).content.decode()
+    assert "91-1144442" in results and "<th>EIN</th>" in results
 
 
 # --- The clinic --------------------------------------------------------------------
@@ -171,14 +171,14 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
 
 def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
     # The country and the document change together: the document is the new country's.
-    resposta = admin.post(
+    response = admin.post(
         reverse("clinic_settings"), dados_clinica(country="US", document="52998224725")
     )
-    assert resposta.context["form"].errors["document"] == ["EIN: número inválido."]
-    resposta = admin.post(
+    assert response.context["form"].errors["document"] == ["EIN: número inválido."]
+    response = admin.post(
         reverse("clinic_settings"), dados_clinica(country="US", document="911144442")
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.document == "911144442"
     assert (clinica_a.sigla_documento, clinica_a.documento_escrito) == ("EIN", "91-1144442")
@@ -186,8 +186,8 @@ def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
 
 def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
     for rfc in ("GODE561231GR8", "ABC680524P76"):
-        resposta = admin.post(reverse("clinic_settings"), dados_clinica(country="MX", document=rfc))
-        assert resposta.status_code == 302
+        response = admin.post(reverse("clinic_settings"), dados_clinica(country="MX", document=rfc))
+        assert response.status_code == 302
         clinica_a.refresh_from_db()
         assert (clinica_a.document, clinica_a.sigla_documento) == (rfc, "RFC")
 
@@ -198,8 +198,8 @@ def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
 def test_fornecedor_no_reino_unido(clinica_a, admin):
     no_pais(clinica_a, "GB")
     empresa = {"kind": "PJ", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
-    resposta = admin.post(reverse("finance:supplier_new"), empresa)
-    assert resposta.context["form"].errors["tax_id"] == ["Company number: número inválido."]
+    response = admin.post(reverse("finance:supplier_new"), empresa)
+    assert response.context["form"].errors["tax_id"] == ["Company number: número inválido."]
     empresa["tax_id"] = "01234567"
     assert admin.post(reverse("finance:supplier_new"), empresa).status_code == 302
     # A sole trader has no document in this table: nothing is kept.
@@ -212,10 +212,10 @@ def test_fornecedor_no_reino_unido(clinica_a, admin):
 
 def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     no_pais(clinica_a, "US")
-    dados = {"name": "Jane Fictitious", "salary": "3000", "active": "on"}
-    resposta = admin.post(reverse("staff:new"), {**dados, "tax_id": "000-12-3456"})
-    assert resposta.context["form"].errors["tax_id"] == ["SSN: número inválido."]
-    assert admin.post(reverse("staff:new"), {**dados, "tax_id": "536904399"}).status_code == 302
+    data = {"name": "Jane Fictitious", "salary": "3000", "active": "on"}
+    response = admin.post(reverse("staff:new"), {**data, "tax_id": "000-12-3456"})
+    assert response.context["form"].errors["tax_id"] == ["SSN: número inválido."]
+    assert admin.post(reverse("staff:new"), {**data, "tax_id": "536904399"}).status_code == 302
     with usar_clinica(clinica_a):
         jane = Employee.objects.get()
     assert jane.tax_id == "536904399"

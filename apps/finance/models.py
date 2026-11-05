@@ -99,10 +99,10 @@ class AccountGroup(ModeloDaClinica):
 
     def ancestrais(self):
         """From the top group down to the parent of this one."""
-        cadeia, atual = [], self.parent
-        while atual is not None:
-            cadeia.insert(0, atual)
-            atual = atual.parent
+        cadeia, current = [], self.parent
+        while current is not None:
+            cadeia.insert(0, current)
+            current = current.parent
         return cadeia
 
     @property
@@ -206,8 +206,8 @@ def criar_padroes(clinic):
             )
         if not Category.objects.filter(clinic=clinic).exists():
             grupo_de = {}
-            for kind, linhas in PLANO_PADRAO.items():
-                for code, name, categorias in linhas:
+            for kind, rows in PLANO_PADRAO.items():
+                for code, name, categorias in rows:
                     group = AccountGroup.objects.create(
                         clinic=clinic, kind=kind, code=code, name=name
                     )
@@ -572,9 +572,9 @@ class Payment(ModeloDaClinica):
 
     def get_method_display(self):
         """The method's name in the clinic's country ("Transferência (SPEI)" in Mexico)."""
-        from .payment_methods import rotulo
+        from .payment_methods import label
 
-        return rotulo(self.method)
+        return label(self.method)
 
     @property
     def principal(self):

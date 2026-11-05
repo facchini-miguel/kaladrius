@@ -38,15 +38,15 @@ def avaliar(dir_, expressao, ambiente=None):
 
 
 def test_env_value_le_os_dois_nomes(tmp_path):
-    antigo = comum(tmp_path / "a", "KALADRIUS_BACKUP_DIAS=7\nMONITOR_ATUALIZACAO_URL=u\n")
+    old = comum(tmp_path / "a", "KALADRIUS_BACKUP_DIAS=7\nMONITOR_ATUALIZACAO_URL=u\n")
     # A .env of 0.54, not migrated yet, read by the new names.
-    assert avaliar(antigo, "env_value KALADRIUS_BACKUP_DAYS") == "7"
-    assert avaliar(antigo, "env_value MONITOR_UPDATE_URL") == "u"
-    novo = comum(tmp_path / "b", "KALADRIUS_BACKUP_DAYS=9\nMONITOR_UPDATE_URL=v\n")
+    assert avaliar(old, "env_value KALADRIUS_BACKUP_DAYS") == "7"
+    assert avaliar(old, "env_value MONITOR_UPDATE_URL") == "u"
+    new = comum(tmp_path / "b", "KALADRIUS_BACKUP_DAYS=9\nMONITOR_UPDATE_URL=v\n")
     # A migrated .env, read by the old names (the scripts of 0.54 during the first update).
-    assert avaliar(novo, "env_value KALADRIUS_BACKUP_DIAS") == "9"
-    assert avaliar(novo, "env_value MONITOR_ATUALIZACAO_URL") == "v"
-    assert avaliar(novo, "env_value SITE_HOSTNAME") == ""
+    assert avaliar(new, "env_value KALADRIUS_BACKUP_DIAS") == "9"
+    assert avaliar(new, "env_value MONITOR_ATUALIZACAO_URL") == "v"
+    assert avaliar(new, "env_value SITE_HOSTNAME") == ""
 
 
 def test_migrar_o_env_so_troca_os_nomes(tmp_path):
@@ -147,7 +147,7 @@ def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
 
 
 @pytest.mark.parametrize(
-    ("antigo", "novo"),
+    ("old", "new"),
     [
         ("versao", "version"),
         ("ajuda", "help"),
@@ -156,13 +156,13 @@ def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
         pytest.param("testar-restauracao", "test-restore", marks=COMO_ROOT),
     ],
 )
-def test_os_comandos_antigos_ainda_funcionam(tmp_path, antigo, novo):
+def test_os_comandos_antigos_ainda_funcionam(tmp_path, old, new):
     from tests.test_linux_package import kaladrius
 
     for pasta in ("a", "b"):
         (tmp_path / pasta).mkdir()
-    a = kaladrius(tmp_path / "a", antigo)
-    b = kaladrius(tmp_path / "b", novo)
+    a = kaladrius(tmp_path / "a", old)
+    b = kaladrius(tmp_path / "b", new)
     assert (a.returncode, a.stdout, a.stderr) == (b.returncode, b.stdout, b.stderr)
 
 
@@ -173,7 +173,7 @@ def test_a_configuracao_le_o_nome_antigo_da_variavel(monkeypatch):
     for name in ("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
         monkeypatch.delenv(name, raising=False)
     assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
-    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", padrao=True) is True
+    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", default=True) is True
     monkeypatch.setenv("DJANGO_PROXY_REVERSO", "1")
     assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is True
     monkeypatch.setenv("DJANGO_REVERSE_PROXY", "0")

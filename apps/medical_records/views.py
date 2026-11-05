@@ -48,9 +48,9 @@ def exige_profissional(view):
     return protegida
 
 
-def _auditar(acao, visit, campos):
-    if campos:
-        registrar(acao, visit, changes={campo: [SIGILO, SIGILO] for campo in campos})
+def _auditar(acao, visit, fields):
+    if fields:
+        registrar(acao, visit, changes={field: [SIGILO, SIGILO] for field in fields})
 
 
 def _finalizar(request, visit):
@@ -64,7 +64,7 @@ def _finalizar(request, visit):
 
 
 @exige_profissional
-def novo(request, practitioner, patient):
+def new(request, practitioner, patient):
     patient = get_object_or_404(Patient.objects, pk=patient, archived=False)
     appointment = None
     code = request.POST.get("appointment") or request.GET.get("appointment") or ""
@@ -151,8 +151,8 @@ def visit(request, practitioner, pk):
 
 def _campos(visit):
     return [
-        (visit._meta.get_field(campo).verbose_name, getattr(visit, campo))
-        for campo in CAMPOS_DA_ANAMNESE
+        (visit._meta.get_field(field).verbose_name, getattr(visit, field))
+        for field in CAMPOS_DA_ANAMNESE
     ]
 
 
@@ -254,9 +254,9 @@ def receita(request, practitioner, pk):
         Prescription.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     registrar(Acao.VISUALIZAR, receita)
-    linhas = [linha for linha in receita.medications.splitlines() if linha.strip()]
+    rows = [row for row in receita.medications.splitlines() if row.strip()]
     return render(
-        request, "medical_records/prescription.html", {"receita": receita, "linhas": linhas}
+        request, "medical_records/prescription.html", {"receita": receita, "linhas": rows}
     )
 
 
@@ -313,10 +313,8 @@ def pedido_de_exames(request, practitioner, pk):
         ExamRequest.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     registrar(Acao.VISUALIZAR, pedido)
-    linhas = [linha for linha in pedido.exams.splitlines() if linha.strip()]
-    return render(
-        request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": linhas}
-    )
+    rows = [row for row in pedido.exams.splitlines() if row.strip()]
+    return render(request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": rows})
 
 
 @require_POST
@@ -356,12 +354,12 @@ def anexo_enviar(request, practitioner, pk):
 def anexo(request, practitioner, pk):
     anexo = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
     registrar(Acao.VISUALIZAR, anexo, description=f"{anexo.visit} – {_('anexo')}")
-    resposta = HttpResponse(bytes(anexo.content), content_type=anexo.kind)
+    response = HttpResponse(bytes(anexo.content), content_type=anexo.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
     name = "".join(c for c in anexo.name if c.isalnum() or c in "._- ") or "anexo"
-    resposta["Content-Disposition"] = f'inline; filename="{name}"'
-    resposta["Cache-Control"] = "private, no-store"
-    return resposta
+    response["Content-Disposition"] = f'inline; filename="{name}"'
+    response["Cache-Control"] = "private, no-store"
+    return response
 
 
 @require_POST

@@ -50,19 +50,19 @@ class FormularioBootstrap:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for campo in self.fields.values():
-            if type(campo) is forms.DecimalField:
-                campo.__class__ = CampoDecimal
+        for field in self.fields.values():
+            if type(field) is forms.DecimalField:
+                field.__class__ = CampoDecimal
             # Django 6.1's "- Select an option -" has no Portuguese translation yet: the
             # blank option of every list becomes a dash, from a table or fixed choices.
-            if isinstance(campo, forms.ModelChoiceField):
-                if campo.empty_label is not None:
-                    campo.empty_label = "—"
-            elif isinstance(campo, forms.ChoiceField):
-                opcoes = list(campo.choices)
-                if opcoes and opcoes[0][0] in ("", None) and not isinstance(opcoes[0][1], list):
-                    campo.choices = [("", "—"), *opcoes[1:]]
-            widget = campo.widget
+            if isinstance(field, forms.ModelChoiceField):
+                if field.empty_label is not None:
+                    field.empty_label = "—"
+            elif isinstance(field, forms.ChoiceField):
+                options = list(field.choices)
+                if options and options[0][0] in ("", None) and not isinstance(options[0][1], list):
+                    field.choices = [("", "—"), *options[1:]]
+            widget = field.widget
             if isinstance(
                 widget, forms.CheckboxInput | forms.RadioSelect | forms.CheckboxSelectMultiple
             ):
@@ -95,19 +95,19 @@ def campo_documento():
     )
 
 
-def documento_por_tipo(campo, individuo, empresa, kind):
+def documento_por_tipo(field, individuo, empresa, kind):
     """Name and example of a document field that depends on the person type: the document of
     an individual and of a company (either may be None, and then the field is hidden for that
     type). The page switches them when the type changes (static/js/page.js)."""
-    atual = empresa if kind == "PJ" else individuo
-    campo.label = (atual or individuo or empresa).sigla
-    campo.widget.attrs.update(
+    current = empresa if kind == "PJ" else individuo
+    field.label = (current or individuo or empresa).sigla
+    field.widget.attrs.update(
         {
             "data-rotulo-pf": individuo.sigla if individuo else "",
             "data-rotulo-pj": empresa.sigla if empresa else "",
-            "data-exemplo-pf": individuo.exemplo if individuo else "",
-            "data-exemplo-pj": empresa.exemplo if empresa else "",
-            "placeholder": atual.exemplo if atual else "",
+            "data-exemplo-pf": individuo.example if individuo else "",
+            "data-exemplo-pj": empresa.example if empresa else "",
+            "placeholder": current.example if current else "",
         }
     )
 
@@ -154,18 +154,18 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
         self.initial["modulos_gerais"] = sorted(ligados & MODULOS_GERAIS)
         # The screen always sends them; a page opened before the update does not, and then
         # the clinic keeps its currency, country and time zone (Brazil's for a new one).
-        for campo in ("currency", "country", "time_zone", "tooth_numbering"):
-            if campo in self.fields:
-                self.fields[campo].required = False
+        for field in ("currency", "country", "time_zone", "tooth_numbering"):
+            if field in self.fields:
+                self.fields[field].required = False
         # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
         # in Brazil, "EIN" in the United States... of the country chosen now.
         if "document" in self.fields:
             documentos = identification.do_pais(self._pais_escolhido())
-            self.documentos_da_clinica = documentos.de("pessoa", "empresa")
-            campo = self.fields["document"]
-            campo.label = documentos.rotulo("pessoa", "empresa")
-            campo.widget.attrs["placeholder"] = " · ".join(
-                d.exemplo for d in self.documentos_da_clinica
+            self.documentos_da_clinica = documentos.since("pessoa", "empresa")
+            field = self.fields["document"]
+            field.label = documentos.label("pessoa", "empresa")
+            field.widget.attrs["placeholder"] = " · ".join(
+                d.example for d in self.documentos_da_clinica
             )
 
     def clean_document(self):
@@ -186,14 +186,14 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
     def clean_country(self):
         return self.cleaned_data.get("country") or self.instance.country or countries.PADRAO
 
-    def _ajustar_ao_pais(self, dados):
+    def _ajustar_ao_pais(self, data):
         """Time zone and currency of a new country (decision 117): a time zone of another country
         is refused; left as it was, it becomes the new country's first. The currency follows the
         country when it was still the previous country's default and was not changed now."""
-        if "country" not in dados:
+        if "country" not in data:
             return
-        country = countries.do_codigo(dados["country"])
-        fuso = dados.get("time_zone")
+        country = countries.do_codigo(data["country"])
+        fuso = data.get("time_zone")
         if "time_zone" in self.fields and fuso and fuso not in country.fusos:
             if "time_zone" in self.changed_data:
                 self.add_error(
@@ -201,34 +201,34 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
                     _("Escolha um fuso horário de %(pais)s.") % {"pais": country.name},
                 )
             else:
-                dados["time_zone"] = country.fusos[0]
+                data["time_zone"] = country.fusos[0]
         elif not fuso:
-            atual = self.instance.time_zone
-            dados["time_zone"] = atual if atual in country.fusos else country.fusos[0]
-        anterior = countries.do_codigo(self.instance.country)
+            current = self.instance.time_zone
+            data["time_zone"] = current if current in country.fusos else country.fusos[0]
+        previous = countries.do_codigo(self.instance.country)
         if (
             "country" in self.changed_data
             and "currency" not in self.changed_data
-            and dados.get("currency") == anterior.currency
+            and data.get("currency") == previous.currency
         ):
-            dados["currency"] = country.currency
+            data["currency"] = country.currency
         # The tooth numbering too (decision 122); a new clinic, without the field, gets its
         # country's.
         if "tooth_numbering" not in self.fields:
             self.instance.tooth_numbering = country.numeracao
         else:
-            atual = self.instance.tooth_numbering or anterior.numeracao
-            escolhida = dados.get("tooth_numbering") or atual
-            if "country" in self.changed_data and escolhida == atual == anterior.numeracao:
+            current = self.instance.tooth_numbering or previous.numeracao
+            escolhida = data.get("tooth_numbering") or current
+            if "country" in self.changed_data and escolhida == current == previous.numeracao:
                 escolhida = country.numeracao
-            dados["tooth_numbering"] = escolhida
+            data["tooth_numbering"] = escolhida
 
     def _escolhidos(self):
         return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
 
     def clean(self):
-        dados = super().clean()
-        self._ajustar_ao_pais(dados)
+        data = super().clean()
+        self._ajustar_ao_pais(data)
         for modulo, precisa in faltando(self._escolhidos()).items():
             self.add_error(
                 "modulos_gerais",
@@ -238,7 +238,7 @@ class ModulosClinicosForm(FormularioBootstrap, forms.ModelForm):
                     "precisa": ", ".join(str(ModuloClinico(p).label) for p in sorted(precisa)),
                 },
             )
-        return dados
+        return data
 
     def _save_m2m(self):
         super()._save_m2m()
@@ -282,14 +282,14 @@ class ClinicaForm(ModulosClinicosForm):
         }
 
     def clean(self):
-        dados = super().clean()
-        start, end = dados.get("schedule_start"), dados.get("schedule_end")
-        intervalo = dados.get("schedule_interval")
+        data = super().clean()
+        start, end = data.get("schedule_start"), data.get("schedule_end")
+        intervalo = data.get("schedule_interval")
         if None in (start, end, intervalo):
-            return dados
+            return data
         if start >= end:
             self.add_error("schedule_end", _("O fim da agenda deve ser depois do início."))
-            return dados
+            return data
         problema = self._agendamento_fora(start, end, intervalo)
         if problema is not None:
             raise forms.ValidationError(
@@ -299,7 +299,7 @@ class ClinicaForm(ModulosClinicosForm):
                 )
                 % {"momento": date_format(problema, "SHORT_DATETIME_FORMAT")}
             )
-        return dados
+        return data
 
     def _agendamento_fora(self, start, end, intervalo):
         """Start of the first future appointment the new settings would leave out, if any.
@@ -308,8 +308,8 @@ class ClinicaForm(ModulosClinicosForm):
         """
         from apps.schedule.models import Appointment
 
-        def minutos(hora):
-            return hora.hour * 60 + hora.minute
+        def minutos(hour):
+            return hour.hour * 60 + hour.minute
 
         base = minutos(start)
         if self.instance.pk is None:

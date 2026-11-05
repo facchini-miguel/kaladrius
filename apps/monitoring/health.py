@@ -42,13 +42,13 @@ def _arquivo():
     return Path(settings.HEALTH_DIR) / ARQUIVO
 
 
-def _ler(linha):
+def _ler(row):
     try:
-        amostra = json.loads(linha)
+        amostra = json.loads(row)
         if "time" in amostra:
-            amostra = {CAMPOS.get(chave, chave): value for chave, value in amostra.items()}
+            amostra = {CAMPOS.get(key, key): value for key, value in amostra.items()}
             amostra["containers"] = [
-                {CAMPOS_CONTAINER.get(chave, chave): value for chave, value in c.items()}
+                {CAMPOS_CONTAINER.get(key, key): value for key, value in c.items()}
                 for c in amostra.get("containers", [])
             ]
         amostra["momento"] = parse_datetime(amostra["momento"])
@@ -70,10 +70,10 @@ def _ler(linha):
 def amostras(desde=None):
     """Samples in time order, optionally only those since `desde`."""
     try:
-        linhas = _arquivo().read_text(encoding="utf-8").splitlines()
+        rows = _arquivo().read_text(encoding="utf-8").splitlines()
     except OSError:
         return []
-    lidas = (_ler(linha) for linha in linhas)
+    lidas = (_ler(row) for row in rows)
     return [a for a in lidas if a is not None and (desde is None or a["momento"] >= desde)]
 
 
@@ -83,18 +83,18 @@ def ultima():
         with _arquivo().open("rb") as file:
             file.seek(0, 2)
             file.seek(max(0, file.tell() - 16384))
-            linhas = file.read().decode("utf-8", errors="ignore").splitlines()
+            rows = file.read().decode("utf-8", errors="ignore").splitlines()
     except OSError:
         return None
-    for linha in reversed(linhas):
-        amostra = _ler(linha)
+    for row in reversed(rows):
+        amostra = _ler(row)
         if amostra is not None:
             return amostra
     return None
 
 
-def nivel(chave, value):
-    atencao, critico = LIMITES[chave]
+def nivel(key, value):
+    atencao, critico = LIMITES[key]
     if value >= critico:
         return "critico"
     if value >= atencao:
@@ -111,68 +111,68 @@ def niveis(amostra):
     }
 
 
-def parada(amostra, agora=None):
-    return (agora or timezone.now()) - amostra["momento"] > COLETA_PARADA_APOS
+def parada(amostra, now=None):
+    return (now or timezone.now()) - amostra["momento"] > COLETA_PARADA_APOS
 
 
-def com_rede(lista):
+def com_rede(results):
     """Add rede_entrada / rede_saida (bytes per second since the previous sample)."""
-    anterior = None
-    for amostra in lista:
+    previous = None
+    for amostra in results:
         amostra["rede_entrada"] = amostra["rede_saida"] = None
-        if anterior is not None:
-            segundos = (amostra["momento"] - anterior["momento"]).total_seconds()
-            recebido = amostra["rede_recebido"] - anterior["rede_recebido"]
-            enviado = amostra["rede_enviado"] - anterior["rede_enviado"]
+        if previous is not None:
+            segundos = (amostra["momento"] - previous["momento"]).total_seconds()
+            recebido = amostra["rede_recebido"] - previous["rede_recebido"]
+            enviado = amostra["rede_enviado"] - previous["rede_enviado"]
             # Counters restart at zero when the server reboots.
             if 0 < segundos and recebido >= 0 and enviado >= 0:
                 amostra["rede_entrada"] = recebido / segundos
                 amostra["rede_saida"] = enviado / segundos
-        anterior = amostra
-    return lista
+        previous = amostra
+    return results
 
 
-def resumo(lista):
+def summary(results):
     """Average and peaks of a period (None without samples)."""
-    if not lista:
+    if not results:
         return None
-    com_rede(lista)
-    entradas = [a for a in lista if a["rede_entrada"] is not None]
+    com_rede(results)
+    entradas = [a for a in results if a["rede_entrada"] is not None]
     return {
-        "amostras": len(lista),
-        "start": lista[0]["momento"],
-        "end": lista[-1]["momento"],
-        "cpu_media": sum(a["cpu"] for a in lista) / len(lista),
-        "cpu_maxima": max(a["cpu"] for a in lista),
-        "memoria_maxima": max(a["memoria_pct"] for a in lista),
-        "swap_maximo": max(a["swap_pct"] for a in lista),
-        "disco": lista[-1]["disco_pct"],
+        "amostras": len(results),
+        "start": results[0]["momento"],
+        "end": results[-1]["momento"],
+        "cpu_media": sum(a["cpu"] for a in results) / len(results),
+        "cpu_maxima": max(a["cpu"] for a in results),
+        "memoria_maxima": max(a["memoria_pct"] for a in results),
+        "swap_maximo": max(a["swap_pct"] for a in results),
+        "disco": results[-1]["disco_pct"],
         "recebido": sum(
             a["rede_entrada"] * (a["momento"] - b["momento"]).total_seconds()
-            for b, a in zip(lista, lista[1:], strict=False)
+            for b, a in zip(results, results[1:], strict=False)
             if a["rede_entrada"] is not None
         ),
         "enviado": sum(
             a["rede_saida"] * (a["momento"] - b["momento"]).total_seconds()
-            for b, a in zip(lista, lista[1:], strict=False)
+            for b, a in zip(results, results[1:], strict=False)
             if a["rede_saida"] is not None
         ),
         "rede_maxima": max((a["rede_entrada"] + a["rede_saida"] for a in entradas), default=0),
     }
 
 
-def topo_da_escala(lista, series, maximo=None, piso=None):
+def topo_da_escala(results, series, maximo=None, piso=None):
     """The value at the top of a chart: fixed (`maximo`), or following the data, at least
     `piso` and never above the `teto` of percentages (so 0.5% of CPU is still visible)."""
     if maximo:
         return maximo
-    valores = [a[chave] for a in lista for chave, _ in series if a.get(chave) is not None]
+    valores = [a[key] for a in results for key, _ in series if a.get(key) is not None]
     topo = max(max(valores, default=0) * 1.2, piso or 0)
     return topo or 1
 
 
 def grafico(
-    lista,
+    results,
     series,
     *,
     start=None,
@@ -189,13 +189,13 @@ def grafico(
     Long gaps (collection down) break the lines; an isolated point becomes a dot. The
     scale is fixed with `maximo`, or follows the data (at least `piso`, at most `teto`).
     """
-    pontos = [a for a in lista if any(a.get(chave) is not None for chave, _ in series)]
+    pontos = [a for a in results if any(a.get(key) is not None for key, _ in series)]
     if not pontos:
         return ""
     start = start or pontos[0]["momento"]
     end = end or pontos[-1]["momento"]
-    duracao = max((end - start).total_seconds(), 1)
-    topo = topo_da_escala(lista, series, maximo, piso)
+    duration = max((end - start).total_seconds(), 1)
+    topo = topo_da_escala(results, series, maximo, piso)
     if teto:
         topo = min(topo, teto)
     margem = 4  # lines at 0 or at the top stay visible
@@ -203,7 +203,7 @@ def grafico(
     def x(timestamp):
         if end == start:
             return largura / 2
-        return (timestamp - start).total_seconds() / duracao * largura
+        return (timestamp - start).total_seconds() / duration * largura
 
     def y(value):
         return altura - margem - min(value, topo) / topo * (altura - 2 * margem)
@@ -218,19 +218,19 @@ def grafico(
         ),
     ]
     # The main series is drawn last, on top of the others.
-    for chave, classe in reversed(series):
-        trechos, atual, anterior = [], [], None
-        for amostra in lista:
-            value = amostra.get(chave)
+    for key, classe in reversed(series):
+        trechos, current, previous = [], [], None
+        for amostra in results:
+            value = amostra.get(key)
             if value is None:
                 continue
-            if anterior is not None and amostra["momento"] - anterior > LACUNA and atual:
-                trechos.append(atual)
-                atual = []
-            atual.append(f"{x(amostra['momento']):.1f},{y(value):.1f}")
-            anterior = amostra["momento"]
-        if atual:
-            trechos.append(atual)
+            if previous is not None and amostra["momento"] - previous > LACUNA and current:
+                trechos.append(current)
+                current = []
+            current.append(f"{x(amostra['momento']):.1f},{y(value):.1f}")
+            previous = amostra["momento"]
+        if current:
+            trechos.append(current)
         for trecho in trechos:
             if len(trecho) == 1:
                 px, py = trecho[0].split(",")

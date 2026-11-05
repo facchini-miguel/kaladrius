@@ -26,17 +26,17 @@ class Codigo:
     """A local code: its name and, where it has a fixed format, the pattern and an example."""
 
     name: str
-    padrao: str = ""  # regular expression for the whole code, letters in upper case
-    exemplo: str = ""
+    default: str = ""  # regular expression for the whole code, letters in upper case
+    example: str = ""
 
     def limpar(self, value):
         """The code without spaces, dots or dashes, in upper case; ValidationError if it does
         not follow the format."""
         code = re.sub(r"[\s.\-/]", "", value or "").upper()
-        if code and self.padrao and not re.fullmatch(self.padrao, code):
+        if code and self.default and not re.fullmatch(self.default, code):
             raise ValidationError(
                 _("%(nome)s: formato inválido. Exemplo: %(exemplo)s.")
-                % {"nome": self.name, "exemplo": self.exemplo}
+                % {"nome": self.name, "exemplo": self.example}
             )
         return code
 
@@ -107,9 +107,9 @@ def do_pais(country=None):
     return SEGUROS.get(country or countries.pais_da_clinica(), SEGUROS[countries.PADRAO])
 
 
-def com_nome_local(rotulo, local):
+def com_nome_local(label, local):
     """ "Número da carteirinha (Member ID)"; just the label without a local name."""
-    return f"{rotulo} ({local})" if local else str(rotulo)
+    return f"{label} ({local})" if local else str(label)
 
 
 def rotulo_do_registro(country=None):

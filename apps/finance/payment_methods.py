@@ -91,7 +91,7 @@ def do_pais(country=None):
 _INGLES_COM_CHEQUE = {country.ingles for country in countries.PAISES.values()} - {"en"}
 
 
-def rotulo(code, country=None):
+def label(code, country=None):
     """The method's name in the country: "Transferência (SPEI)" in Mexico."""
     from .models import Payment
 
@@ -106,11 +106,11 @@ def rotulo(code, country=None):
 
 def em_uso(country=None):
     """(code, name) of the methods offered when recording a payment."""
-    return [(code, rotulo(code, country)) for code in do_pais(country).codigos]
+    return [(code, label(code, country)) for code in do_pais(country).codigos]
 
 
 def rotulos(country=None):
     """code → name of every method, for the reports (old payments included)."""
     from .models import Payment
 
-    return {code: rotulo(code, country) for code in Payment.Forma.values}
+    return {code: label(code, country) for code in Payment.Forma.values}

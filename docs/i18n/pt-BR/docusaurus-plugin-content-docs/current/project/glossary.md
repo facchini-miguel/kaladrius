@@ -322,6 +322,66 @@ Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão
 |---|---|
 | `serie` | `series` |
 
+## Funções e variáveis
+
+A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172).
+
+### Variáveis comuns
+
+| Antes | Depois |
+|---|---|
+| `resposta` | `response` |
+| `dados` | `data` |
+| `pagina` | `page` |
+| `linha` | `row` |
+| `linhas` | `rows` |
+| `campo` | `field` |
+| `campos` | `fields` |
+| `hoje` | `today` |
+| `recepcao` | `reception` |
+| `lista` | `results` |
+| `dia` | `day` |
+| `busca` | `search` |
+| `chave` | `key` |
+| `atual` | `current` |
+| `anterior` | `previous` |
+| `erro` | `error` |
+| `novo` | `new` |
+| `outro` | `other` |
+| `antes` | `before` |
+| `depois` | `after` |
+| `contexto` | `context` |
+| `rotulo` | `label` |
+| `antigo` | `old` |
+| `padrao` | `default` |
+| `mensagem` | `message` |
+| `caminho` | `path` |
+| `senha` | `password` |
+| `hora` | `hour` |
+| `origem` | `source` |
+| `agora` | `now` |
+| `mes` | `month` |
+| `sessao` | `session` |
+| `resumo` | `summary` |
+| `filtros` | `filters` |
+| `primeiro` | `first` |
+| `ultimo` | `last` |
+| `objeto` | `obj` |
+| `tabela` | `table` |
+| `tabelas` | `tables` |
+| `coluna` | `column` |
+| `limite` | `limit` |
+| `configuracao` | `config` |
+| `opcoes` | `options` |
+| `posicao` | `position` |
+| `semana` | `week` |
+| `aviso` | `warning` |
+| `duracao` | `duration` |
+| `exemplo` | `example` |
+| `de` | `since` |
+
+`itens` fica por enquanto: também é o acesso reverso do orçamento e o formato das releases.
+
 ## O que fica em português
 
 - **Valores gravados no banco**: os valores das escolhas (`"PF"`, `"conciliada"`, `"retirada"`), os códigos dos módulos (`"rechamadas"`), as chaves dentro de campos JSON (as alterações da auditoria, configurações). Só muda o nome das constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), não o valor.

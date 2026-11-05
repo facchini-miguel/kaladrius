@@ -20,7 +20,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def recepcao(clinica_a, criar_usuario, cliente_de):
+def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao_textos", clinica_a, Papel.RECEPCAO))
 
 
@@ -61,29 +61,29 @@ def test_numero_ambiguo_continua_recusado():
         assert not _Exemplo({"fixa": "a", "agrupada": "b", "amount": "1,500"}).is_valid()
 
 
-def test_formularios_da_recepcao_sem_ingles(clinica_a, recepcao):
+def test_formularios_da_recepcao_sem_ingles(clinica_a, reception):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     for url in (
         reverse("patients:new"),
         reverse("patients:related_new", args=[patient.pk]),
     ):
-        pagina = recepcao.get(url).content.decode()
-        assert "Select an option" not in pagina, url
-        assert '<option value="" selected>—</option>' in pagina, url
+        page = reception.get(url).content.decode()
+        assert "Select an option" not in page, url
+        assert '<option value="" selected>—</option>' in page, url
 
 
 def test_meses_em_minuscula_no_portugues():
-    dia = datetime.date(2026, 10, 30)
+    day = datetime.date(2026, 10, 30)
     with translation.override("pt-br"):
-        assert date_format(dia, "DATE_FORMAT") == "30 de outubro de 2026"
+        assert date_format(day, "DATE_FORMAT") == "30 de outubro de 2026"
     with translation.override("es"):
-        assert date_format(dia, "DATE_FORMAT") == "30 de octubre de 2026"
+        assert date_format(day, "DATE_FORMAT") == "30 de octubre de 2026"
 
 
-def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(recepcao):
-    pagina = recepcao.get(reverse("patients:birthdays"), {"mes": 10}).content.decode()
-    assert ">Outubro</option>" in pagina
+def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(reception):
+    page = reception.get(reverse("patients:birthdays"), {"mes": 10}).content.decode()
+    assert ">Outubro</option>" in page
 
 
 def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
@@ -100,7 +100,7 @@ def test_chave_alfabetica_ignora_acento_e_caixa():
     assert sorted(nomes, key=chave_alfabetica) == ["Água", "ana", "Beto", "Érica", "Zeca"]
 
 
-def test_telas_cabem_no_celular(clinica_a, recepcao):
+def test_telas_cabem_no_celular(clinica_a, reception):
     """Review stage 5 (phone, 390 px): the dental chart scrolls in its own box and the
     printed registration sheet stacks its two columns on a narrow screen."""
     from django.template.loader import render_to_string
@@ -114,7 +114,7 @@ def test_telas_cabem_no_celular(clinica_a, recepcao):
     assert 'class="odontograma-rolagem"' in html
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
-    ficha = recepcao.get(reverse("patients:print", args=[patient.pk])).content.decode()
+    ficha = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
 
 
@@ -123,5 +123,5 @@ def test_painel_do_django_sem_ingles(client, django_user_model):
     "- Select an option -" in English."""
     super_usuario = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
     client.force_login(super_usuario)
-    pagina = client.get(reverse("admin:referencias_state_changelist")).content.decode()
-    assert "Select an option" not in pagina and "Selecione uma opção" in pagina
+    page = client.get(reverse("admin:referencias_state_changelist")).content.decode()
+    assert "Select an option" not in page and "Selecione uma opção" in page

@@ -39,7 +39,7 @@ def ana(clinica_a):
 
 
 def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
-    resposta = admin.post(
+    response = admin.post(
         reverse("staff:new"),
         {
             "name": "Bruno Fictício",
@@ -49,7 +49,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
             "active": "on",
         },
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         bruno = Employee.objects.get()
         assert bruno.tax_id == "52998224725"
@@ -73,17 +73,17 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
 
 
 @pytest.mark.parametrize(
-    ("dados", "campo"),
+    ("data", "field"),
     [
         ({"tax_id": "111.111.111-11"}, "tax_id"),
         ({"salary": ""}, "salary"),
         ({"hired_on": "2026-05-01", "left_on": "2026-04-01"}, "left_on"),
     ],
 )
-def test_validacoes_do_cadastro(dados, campo, admin):
+def test_validacoes_do_cadastro(data, field, admin):
     base = {"name": "Fictício", "salary": "2000", "active": "on"}
-    resposta = admin.post(reverse("staff:new"), {**base, **dados})
-    assert campo in resposta.context["form"].errors
+    response = admin.post(reverse("staff:new"), {**base, **data})
+    assert field in response.context["form"].errors
 
 
 def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
@@ -108,8 +108,8 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
 
 
 def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
-    for mes in ("2026-10", "2030-01"):
-        assert admin.get(FOLHA, {"mes": mes}).status_code == 200
+    for month in ("2026-10", "2030-01"):
+        assert admin.get(FOLHA, {"mes": month}).status_code == 200
     with usar_clinica(clinica_a):
         assert not Payroll.objects.exists()
 
@@ -127,27 +127,27 @@ def test_calculo_do_total():
 
 
 def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
-    pagina = admin.get(FOLHA, {"mes": "2026-10"})
-    folha, form = pagina.context["linhas"][0]
+    page = admin.get(FOLHA, {"mes": "2026-10"})
+    folha, form = page.context["linhas"][0]
     prefixo = form.prefix
-    dados = {
+    data = {
         f"{prefixo}-overtime_hours": "10",
         f"{prefixo}-overtime_rate": "15,00",
         f"{prefixo}-absences": "1",
         f"{prefixo}-observacao": "",
     }
     assert folha.pk is None  # looking at the month stored nothing
-    assert admin.post(f"{FOLHA}?mes=2026-10", dados).status_code == 302
+    assert admin.post(f"{FOLHA}?mes=2026-10", data).status_code == 302
     with usar_clinica(clinica_a):
         folha = Payroll.objects.get(employee=ana, period=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
-        category = pagina.context["lancar_form"].fields["category"].initial
+        category = page.context["lancar_form"].fields["category"].initial
     assert category.name == "Salários e encargos"
-    resposta = admin.post(
+    response = admin.post(
         f"{FOLHA}?mes=2026-10",
-        {**dados, "acao": "lancar", "category": category.pk, "due_date": "2026-11-05"},
+        {**data, "acao": "lancar", "category": category.pk, "due_date": "2026-11-05"},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         folha.refresh_from_db()
         entry = folha.entry
@@ -158,8 +158,8 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         )
         assert entry.parcelas.get().due_date == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
-    linha = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
-    assert linha[1] is None
+    row = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
+    assert row[1] is None
     with usar_clinica(clinica_a):
         assert (
             services.lancar(

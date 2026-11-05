@@ -20,8 +20,8 @@ def admin_a(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
 
 
-def ultimos(**filtros):
-    return list(AuditEntry.objects.filter(**filtros).order_by("pk"))
+def ultimos(**filters):
+    return list(AuditEntry.objects.filter(**filters).order_by("pk"))
 
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
@@ -75,8 +75,8 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
     assert criacao.changes["name"] == ["(removido)", "(removido)"]
     assert ultimos(object_repr__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
-    pagina = admin_a.get(reverse("audit:list")).content.decode()
-    assert f"Paciente {patient.pk}: dados pessoais excluídos a pedido do titular" in pagina
+    page = admin_a.get(reverse("audit:list")).content.decode()
+    assert f"Paciente {patient.pk}: dados pessoais excluídos a pedido do titular" in page
 
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
@@ -149,9 +149,9 @@ def test_exclusao_de_usuario_mantem_o_historico(criar_usuario):
 
 
 def test_retencao_apaga_so_tentativas_recusadas_antigas():
-    antigo = timezone.now() - datetime.timedelta(days=31)
+    old = timezone.now() - datetime.timedelta(days=31)
     recente = timezone.now() - datetime.timedelta(days=29)
-    for timestamp in (antigo, recente):
+    for timestamp in (old, recente):
         for action in (Acao.LOGIN_FALHOU, Acao.LOGIN):
             record = AuditEntry.objects.create(action=action)
             AuditEntry.objects.filter(pk=record.pk).update(timestamp=timestamp)
@@ -179,7 +179,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
         object_id="1",
         changes={"occupation": ["", "Professora"], "campo_que_saiu": [1, 2]},
     )
-    pagina = admin_a.get(reverse("audit:list")).content.decode()
-    assert "<strong>nome</strong>: — → Maria" in pagina
-    assert "<strong>profissão</strong>:  → Professora" in pagina
-    assert "<strong>campo_que_saiu</strong>: 1 → 2" in pagina
+    page = admin_a.get(reverse("audit:list")).content.decode()
+    assert "<strong>nome</strong>: — → Maria" in page
+    assert "<strong>profissão</strong>:  → Professora" in page
+    assert "<strong>campo_que_saiu</strong>: 1 → 2" in page

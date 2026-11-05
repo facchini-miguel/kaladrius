@@ -16,7 +16,7 @@ MAE = RelatedPerson.Relationship.MAE
 
 
 @pytest.fixture
-def recepcao(clinica_a, criar_usuario, cliente_de):
+def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao_relacionados", clinica_a, Papel.RECEPCAO))
 
 
@@ -28,51 +28,51 @@ def familia(clinica_a):
         return filha, mae
 
 
-def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, recepcao):
+def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, reception):
     filha, mae = familia
-    resposta = recepcao.post(
+    response = reception.post(
         reverse("patients:related_new", args=[filha.pk]),
         {"relationship": MAE, "other_patient": mae.pk, "name": "", "phone": "", "note": ""},
     )
-    assert resposta.status_code == 302
+    assert response.status_code == 302
     with usar_clinica(clinica_a):
         vinculo = RelatedPerson.objects.get()
     assert vinculo.telefone_exibido == "54999990001"  # the other patient's own phone
-    ficha_filha = recepcao.get(reverse("patients:record", args=[filha.pk])).content.decode()
+    ficha_filha = reception.get(reverse("patients:record", args=[filha.pk])).content.decode()
     assert "Mãe:" in ficha_filha and "Rosa Fictícia" in ficha_filha
-    ficha_mae = recepcao.get(reverse("patients:record", args=[mae.pk])).content.decode()
+    ficha_mae = reception.get(reverse("patients:record", args=[mae.pk])).content.decode()
     assert "Mãe de" in ficha_mae and "Ana Fictícia" in ficha_mae
 
 
-def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, recepcao):
+def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
     filha, _ = familia
     url = reverse("patients:related_new", args=[filha.pk])
-    dados = {
+    data = {
         "relationship": RelatedPerson.Relationship.EMERGENCIA,
         "other_patient": "",
         "name": "Contato Inventado",
         "phone": "(54) 99999-0002",
         "note": "Vizinha",
     }
-    assert recepcao.post(url, dados).status_code == 302
+    assert reception.post(url, data).status_code == 302
     with usar_clinica(clinica_a):
         contato = RelatedPerson.objects.get()
     assert (contato.phone, contato.nome_exibido) == ("54999990002", "Contato Inventado")
-    impressa = recepcao.get(reverse("patients:print", args=[filha.pk])).content.decode()
+    impressa = reception.get(reverse("patients:print", args=[filha.pk])).content.decode()
     assert "Contato Inventado" in impressa and "Contato de emergência" in impressa
     # Editing and removing.
     editar = reverse("patients:related_edit", args=[contato.pk])
-    assert recepcao.post(editar, {**dados, "note": "Tia"}).status_code == 302
+    assert reception.post(editar, {**data, "note": "Tia"}).status_code == 302
     contato.refresh_from_db()
     assert contato.note == "Tia"
-    assert recepcao.get(reverse("patients:related_remove", args=[contato.pk])).status_code == 302
-    remover = recepcao.post(reverse("patients:related_remove", args=[contato.pk]))
+    assert reception.get(reverse("patients:related_remove", args=[contato.pk])).status_code == 302
+    remover = reception.post(reverse("patients:related_remove", args=[contato.pk]))
     assert remover.status_code == 302
     assert not RelatedPerson.todos.exists()
 
 
 @pytest.mark.parametrize(
-    ("dados", "campo"),
+    ("data", "field"),
     [
         ({"name": "", "other_patient": ""}, "name"),
         ({"name": "Alguém", "other_patient": "MAE"}, "name"),
@@ -80,25 +80,25 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, recepcao):
         ({"name": "", "other_patient": "PROPRIO"}, "other_patient"),
     ],
 )
-def test_validacoes(dados, campo, familia, recepcao):
+def test_validacoes(data, field, familia, reception):
     filha, mae = familia
     trocas = {"MAE": mae.pk, "PROPRIO": filha.pk}
-    dados = {k: trocas.get(v, v) for k, v in dados.items()}
-    resposta = recepcao.post(
-        reverse("patients:related_new", args=[filha.pk]), {"relationship": MAE, **dados}
+    data = {k: trocas.get(v, v) for k, v in data.items()}
+    response = reception.post(
+        reverse("patients:related_new", args=[filha.pk]), {"relationship": MAE, **data}
     )
-    assert campo in resposta.context["form"].errors
+    assert field in response.context["form"].errors
 
 
-def test_vinculo_repetido(clinica_a, familia, recepcao):
+def test_vinculo_repetido(clinica_a, familia, reception):
     filha, mae = familia
     with usar_clinica(clinica_a):
         RelatedPerson.objects.create(patient=filha, other_patient=mae, relationship=MAE)
-    resposta = recepcao.post(
+    response = reception.post(
         reverse("patients:related_new", args=[filha.pk]),
         {"relationship": MAE, "other_patient": mae.pk},
     )
-    assert "other_patient" in resposta.context["form"].errors
+    assert "other_patient" in response.context["form"].errors
 
 
 def test_banco_exige_paciente_ou_nome(clinica_a, familia):
@@ -130,8 +130,8 @@ def test_financeiro_so_ve(clinica_a, familia, criar_usuario, cliente_de):
     ficha = financeiro.get(reverse("patients:record", args=[filha.pk])).content.decode()
     assert "Pessoas relacionadas" in ficha
     assert reverse("patients:related_new", args=[filha.pk]) not in ficha
-    novo = financeiro.get(reverse("patients:related_new", args=[filha.pk]))
-    assert novo.status_code == 403
+    new = financeiro.get(reverse("patients:related_new", args=[filha.pk]))
+    assert new.status_code == 403
 
 
 def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(

@@ -24,8 +24,8 @@ class Command(BaseCommand):
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
             r = anonymize_clinic(clinic)
-        except ClinicaNaoEncontrada as erro:
-            raise CommandError(str(erro)) from erro
+        except ClinicaNaoEncontrada as error:
+            raise CommandError(str(error)) from error
         self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinic}” anonimizados:"))
         self.stdout.write(f"  Pacientes: {r.pacientes}")
         self.stdout.write(f"  Agendamentos: {r.agendamentos}")

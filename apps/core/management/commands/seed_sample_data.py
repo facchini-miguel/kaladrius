@@ -73,8 +73,8 @@ class Command(BaseCommand):
             raise CommandError(
                 "Dados de teste só podem ser criados com DJANGO_DEBUG=1 (use --force para ignorar)."
             )
-        senha = os.environ.get("DJANGO_SEED_PASSWORD")
-        if not senha:
+        password = os.environ.get("DJANGO_SEED_PASSWORD")
+        if not password:
             raise CommandError(
                 "Defina DJANGO_SEED_PASSWORD no .env antes de criar os dados de teste."
             )
@@ -82,17 +82,15 @@ class Command(BaseCommand):
         criados = []
         with transaction.atomic(), sem_isolamento():
             clinicas = []
-            for dados in CLINICAS:
-                clinic, _ = Clinic.objects.get_or_create(
-                    name=dados["name"], defaults=dados["dados"]
-                )
+            for data in CLINICAS:
+                clinic, _ = Clinic.objects.get_or_create(name=data["name"], defaults=data["dados"])
                 clinicas.append(clinic)
-                for username, name, sobrenome, role in dados["usuarios"]:
-                    user = self._usuario(username, name, sobrenome, senha, criados)
+                for username, name, sobrenome, role in data["usuarios"]:
+                    user = self._usuario(username, name, sobrenome, password, criados)
                     Membership.objects.get_or_create(
                         user=user, clinic=clinic, defaults={"role": role}
                     )
-                for name, registration, color, username in dados["profissionais"]:
+                for name, registration, color, username in data["profissionais"]:
                     user = get_user_model().objects.filter(username=username).first()
                     Practitioner.objects.get_or_create(
                         clinic=clinic,
@@ -120,7 +118,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Nenhum usuário novo: os dados de teste já existiam.")
 
-    def _usuario(self, username, name, sobrenome, senha, criados):
+    def _usuario(self, username, name, sobrenome, password, criados):
         user, criado = get_user_model().objects.get_or_create(
             username=username,
             defaults={
@@ -130,7 +128,7 @@ class Command(BaseCommand):
             },
         )
         if criado:
-            user.set_password(senha)
+            user.set_password(password)
             user.save(update_fields=["password"])
             criados.append(username)
         return user
@@ -196,7 +194,7 @@ class Command(BaseCommand):
             HealthPlan.objects.create(clinic=clinic, name=name, registration=registration)
             for name, registration in (("Saúde Exemplo", "000001"), ("Plano Fictício", "000002"))
         ]
-        hoje = timezone.localdate()
+        today = timezone.localdate()
         MemberCard.objects.bulk_create(
             MemberCard(
                 clinic=clinic,
@@ -204,7 +202,7 @@ class Command(BaseCommand):
                 health_plan=sorteio.choice(convenios),
                 plan=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
                 number=f"{number:012d}",
-                valid_until=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
+                valid_until=today + datetime.timedelta(days=sorteio.randint(-60, 720)),
             )
             for number, patient in enumerate(pacientes, start=1)
             if sorteio.random() < 0.35

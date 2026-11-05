@@ -27,7 +27,7 @@ def _vinculo(request, pk):
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.VER)
-def lista(request):
+def results(request):
     vinculos = (
         Membership.objects.filter(clinic=request.clinic)
         .select_related("user")
@@ -37,7 +37,7 @@ def lista(request):
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.CRIAR)
-def novo(request):
+def new(request):
     form = NovoMembroForm(request.POST or None, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
@@ -54,9 +54,9 @@ def editar(request, pk):
     vinculo = _vinculo(request, pk)
     user = vinculo.user
     exclusiva = conta_exclusiva(user, request.clinic)
-    dados = request.POST or None
-    form = VinculoForm(dados, instance=vinculo, editor=request.user, prefix="vinculo")
-    account = ContaForm(dados, instance=user, prefix="conta") if exclusiva else None
+    data = request.POST or None
+    form = VinculoForm(data, instance=vinculo, editor=request.user, prefix="vinculo")
+    account = ContaForm(data, instance=user, prefix="conta") if exclusiva else None
     if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
             form.save()
@@ -80,7 +80,7 @@ def editar(request, pk):
 
 
 @exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
-def senha(request, pk):
+def password(request, pk):
     vinculo = _vinculo(request, pk)
     user = vinculo.user
     if user == request.user:

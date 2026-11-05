@@ -56,14 +56,14 @@ def receber(clinic, installment, date, amount="100"):
 
 
 def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, installment, admin):
-    antigo = receber(clinica_a, installment, ANTEONTEM)
+    old = receber(clinica_a, installment, ANTEONTEM)
     assert admin.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
     with usar_clinica(clinica_a):
         assert services.fechado_ate(clinica_a.pk) == ONTEM
     with pytest.raises(ValidationError, match="fechado"):
         receber(clinica_a, installment, ONTEM)
     with usar_clinica(clinica_a), pytest.raises(ValidationError, match="fechado"):
-        services.estornar(antigo, reason="erro", user=None)
+        services.estornar(old, reason="erro", user=None)
     # Today is never closed: money keeps coming in.
     assert receber(clinica_a, installment, HOJE).pk
 
@@ -71,7 +71,7 @@ def test_fechar_trava_pagamentos_e_estornos_no_periodo(clinica_a, installment, a
 def test_receber_pela_tela_mostra_o_erro(clinica_a, installment, admin):
     with usar_clinica(clinica_a):
         services.fechar(clinica_a, ONTEM, user=None)
-    resposta = admin.post(
+    response = admin.post(
         reverse("finance:receive_installment", args=[installment.pk]),
         {
             "date": ONTEM.isoformat(),
@@ -81,15 +81,15 @@ def test_receber_pela_tela_mostra_o_erro(clinica_a, installment, admin):
         },
         follow=True,
     )
-    assert "fechado até" in resposta.content.decode()
+    assert "fechado até" in response.content.decode()
 
 
 @pytest.mark.parametrize(
-    ("until", "mensagem"),
+    ("until", "message"),
     [(HOJE, "ontem"), (HOJE + datetime.timedelta(days=3), "ontem")],
 )
-def test_nao_fecha_hoje_nem_o_futuro(clinica_a, until, mensagem):
-    with usar_clinica(clinica_a), pytest.raises(ValidationError, match=mensagem):
+def test_nao_fecha_hoje_nem_o_futuro(clinica_a, until, message):
+    with usar_clinica(clinica_a), pytest.raises(ValidationError, match=message):
         services.fechar(clinica_a, until, user=None)
 
 
@@ -112,8 +112,8 @@ def test_fechar_de_novo_so_para_frente_e_reabrir_com_motivo(clinica_a, admin):
     with usar_clinica(clinica_a):
         assert services.fechado_ate(clinica_a.pk) is None
         assert BookClosing.objects.count() == 3
-    pagina = admin.get(URL).content.decode()
-    assert "Lançamento esquecido" in pagina and "O financeiro está aberto" in pagina
+    page = admin.get(URL).content.decode()
+    assert "Lançamento esquecido" in page and "O financeiro está aberto" in page
 
 
 def test_cada_clinica_tem_o_seu_fechamento(clinica_a, clinica_b):
@@ -129,8 +129,8 @@ def test_relatorio_mostra_o_fechamento(clinica_a, admin):
 
 
 def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):
-    recepcao = cliente_de(criar_usuario("recepcao_fechamento", clinica_a, Papel.RECEPCAO))
-    assert recepcao.get(URL).status_code == 403
+    reception = cliente_de(criar_usuario("recepcao_fechamento", clinica_a, Papel.RECEPCAO))
+    assert reception.get(URL).status_code == 403
     financeiro = cliente_de(criar_usuario("fin_fechamento", clinica_a, Papel.FINANCEIRO))
     assert financeiro.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
     assert financeiro.post(URL, {"acao": "outra"}).status_code == 403
@@ -138,8 +138,8 @@ def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):
 
 def test_demonstracao_so_consulta(clinica_a, criar_usuario, cliente_de):
     demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Papel.ADMIN, demo=True))
-    pagina = demo.get(URL)
-    assert pagina.status_code == 200 and pagina.context["fechar_form"] is None
+    page = demo.get(URL)
+    assert page.status_code == 200 and page.context["fechar_form"] is None
     assert demo.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 403
     with usar_clinica(clinica_a):
         assert not BookClosing.objects.exists()

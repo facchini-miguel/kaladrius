@@ -55,7 +55,7 @@ class Migracao:
     operacoes: list = field(default_factory=list)  # (description, [Alerta])
 
     @property
-    def chave(self):
+    def key(self):
         return f"{self.app}.{self.name}"
 
     @property
@@ -92,22 +92,22 @@ def migracoes_do_diff(base):
     the same migration: unchanged when its text is the same, edited (M) otherwise."""
     rotulos = _rotulos()
     novas, apagadas, alteradas = {}, {}, []
-    for linha in _git("diff", "--name-status", "--no-renames", f"{base}...HEAD").splitlines():
-        status, _tab, caminho = linha.partition("\t")
-        if not (m := ARQUIVO.match(caminho)):
+    for row in _git("diff", "--name-status", "--no-renames", f"{base}...HEAD").splitlines():
+        status, _tab, path = row.partition("\t")
+        if not (m := ARQUIVO.match(path)):
             continue
-        chave = (rotulos.get(m[1], m[1]), m[2])
+        key = (rotulos.get(m[1], m[1]), m[2])
         if status == "A":
-            novas[chave] = caminho
+            novas[key] = path
         elif status == "D":
-            apagadas[chave] = caminho
+            apagadas[key] = path
         else:
-            alteradas.append((*chave, status[:1]))
-    for chave in novas.keys() & apagadas.keys():
-        antes = _git("show", f"{base}:{apagadas.pop(chave)}")
-        if antes != _git("show", f"HEAD:{novas.pop(chave)}"):
-            alteradas.append((*chave, "M"))
-    alteradas += [(*chave, "D") for chave in apagadas]
+            alteradas.append((*key, status[:1]))
+    for key in novas.keys() & apagadas.keys():
+        before = _git("show", f"{base}:{apagadas.pop(key)}")
+        if before != _git("show", f"HEAD:{novas.pop(key)}"):
+            alteradas.append((*key, "M"))
+    alteradas += [(*key, "D") for key in apagadas]
     return sorted(novas), sorted(alteradas)
 
 
@@ -124,62 +124,62 @@ def _tabelas(estado, app, modelo):
         meta = estado.apps.get_model(app, modelo)._meta
     except LookupError:
         return None
-    return [meta.db_table, *(campo.m2m_db_table() for campo in meta.local_many_to_many)]
+    return [meta.db_table, *(model_field.m2m_db_table() for model_field in meta.local_many_to_many)]
 
 
-def _so_o_nome(operacao, app, antes):
+def _so_o_nome(operacao, app, before):
     """A rename that keeps the table and columns (decision 156: Meta.db_table, db_column): only
     the name in the code changes, the database and the previous version see nothing."""
-    depois = _depois(operacao, app, antes)
+    after = _depois(operacao, app, before)
     if isinstance(operacao, ops.RenameModel):
-        tabelas = _tabelas(antes, app, operacao.old_name), _tabelas(depois, app, operacao.new_name)
+        tables = _tabelas(before, app, operacao.old_name), _tabelas(after, app, operacao.new_name)
     elif isinstance(operacao, ops.AlterModelTable):
-        tabelas = _tabelas(antes, app, operacao.name), _tabelas(depois, app, operacao.name)
+        tables = _tabelas(before, app, operacao.name), _tabelas(after, app, operacao.name)
     else:  # RenameField
-        antigo = _campo(antes, app, operacao.model_name, operacao.old_name)
-        novo = _campo(depois, app, operacao.model_name, operacao.new_name)
-        tabelas = [getattr(antigo, "column", None)], [getattr(novo, "column", None)]
-    return None not in tabelas and tabelas[0] == tabelas[1]
+        old = _campo(before, app, operacao.model_name, operacao.old_name)
+        new = _campo(after, app, operacao.model_name, operacao.new_name)
+        tables = [getattr(old, "column", None)], [getattr(new, "column", None)]
+    return None not in tables and tables[0] == tables[1]
 
 
-def _depois(operacao, app, antes):
+def _depois(operacao, app, before):
     """The project state after `operacao`, leaving `antes` as it was."""
-    depois = antes.clone()
-    operacao.state_forwards(app, depois)
-    return depois
+    after = before.clone()
+    operacao.state_forwards(app, after)
+    return after
 
 
 def _so_aumenta(tipo_antigo, tipo_novo):
     """varchar(6) -> varchar(20): a longer text column keeps every value (a shorter one may not)."""
-    antigo = re.fullmatch(r"varchar\((\d+)\)", tipo_antigo or "")
-    novo = re.fullmatch(r"varchar\((\d+)\)", tipo_novo or "")
-    return bool(antigo and novo and int(novo[1]) >= int(antigo[1]))
+    old = re.fullmatch(r"varchar\((\d+)\)", tipo_antigo or "")
+    new = re.fullmatch(r"varchar\((\d+)\)", tipo_novo or "")
+    return bool(old and new and int(new[1]) >= int(old[1]))
 
 
-def _coluna_obrigatoria_sem_default(campo):
+def _coluna_obrigatoria_sem_default(model_field):
     """A column the previous version leaves out of its INSERTs and the database cannot fill:
     NOT NULL and no db_default (Django's Python `default` only fills the existing rows; the
     column is left with no default in the database)."""
     return (
-        not campo.many_to_many
-        and not isinstance(campo, models.GeneratedField)
-        and not campo.null
-        and campo.db_default is NOT_PROVIDED
+        not model_field.many_to_many
+        and not isinstance(model_field, models.GeneratedField)
+        and not model_field.null
+        and model_field.db_default is NOT_PROVIDED
     )
 
 
-def alertas_da_operacao(operacao, app, antes, conexao=connection):
+def alertas_da_operacao(operacao, app, before, conexao=connection):
     """What deserves attention in one operation, given the project state before it."""
     if isinstance(operacao, ops.SeparateDatabaseAndState):
         # Only its database operations touch the database; they run one after the other.
-        alertas, estado = [], antes
+        alertas, estado = [], before
         for sub in operacao.database_operations:
             alertas += alertas_da_operacao(sub, app, estado, conexao)
             estado = _depois(sub, app, estado)
         return alertas
     alertas = []
     if isinstance(operacao, ops.RenameModel | ops.AlterModelTable | ops.RenameField) and _so_o_nome(
-        operacao, app, antes
+        operacao, app, before
     ):
         pass
     elif isinstance(operacao, ops.RemoveField):
@@ -211,12 +211,12 @@ def alertas_da_operacao(operacao, app, antes, conexao=connection):
                 )
             )
     elif isinstance(operacao, ops.AlterField):
-        antigo = _campo(antes, app, operacao.model_name, operacao.name)
+        old = _campo(before, app, operacao.model_name, operacao.name)
         # The field as it is in the model after the change: operacao.field is not attached to a
         # model, and a ForeignKey's related model is still a string there (no db_type).
-        novo = _campo(_depois(operacao, app, antes), app, operacao.model_name, operacao.name)
-        if antigo is not None and novo is not None:
-            tipo_antigo, tipo_novo = antigo.db_type(conexao), novo.db_type(conexao)
+        new = _campo(_depois(operacao, app, before), app, operacao.model_name, operacao.name)
+        if old is not None and new is not None:
+            tipo_antigo, tipo_novo = old.db_type(conexao), new.db_type(conexao)
             if tipo_antigo != tipo_novo and not _so_aumenta(tipo_antigo, tipo_novo):
                 alertas.append(
                     Alerta(
@@ -225,7 +225,7 @@ def alertas_da_operacao(operacao, app, antes, conexao=connection):
                         f"{tipo_antigo} to {tipo_novo}",
                     )
                 )
-            if antigo.null and not novo.null:
+            if old.null and not new.null:
                 alertas.append(
                     Alerta(
                         REVISAR,
@@ -276,8 +276,8 @@ def _migrar(*args):
     call_command("migrate", *args, interactive=False, verbosity=0, stdout=StringIO())
 
 
-def _erro(erro):
-    return f"{type(erro).__name__}: {erro}"
+def _erro(error):
+    return f"{type(error).__name__}: {error}"
 
 
 def ida_e_volta(chaves):
@@ -287,8 +287,8 @@ def ida_e_volta(chaves):
     loader = MigrationLoader(connection, ignore_no_migrations=True)
     try:
         _migrar()
-    except Exception as erro:  # noqa: BLE001 (any failure is the answer)
-        return [("applying every migration", _erro(erro))]
+    except Exception as error:  # noqa: BLE001 (any failure is the answer)
+        return [("applying every migration", _erro(error))]
     falhas = []
     for app in sorted({app for app, _nome in chaves}):
         primeira = min(name for a, name in chaves if a == app)
@@ -297,8 +297,8 @@ def ida_e_volta(chaves):
         try:
             _migrar(app, alvo)
             _migrar()
-        except Exception as erro:  # noqa: BLE001
-            falhas.append((f"`{app}` back to `{alvo}` and forward again", _erro(erro)))
+        except Exception as error:  # noqa: BLE001
+            falhas.append((f"`{app}` back to `{alvo}` and forward again", _erro(error)))
             try:
                 _migrar()
             except Exception as erro_de_novo:  # noqa: BLE001
@@ -314,15 +314,15 @@ def ida_e_volta(chaves):
 
 
 def _linhas_da_migracao(migracao, com_sql):
-    linhas = [f"### `{migracao.chave}`"]
-    linhas += [
+    rows = [f"### `{migracao.key}`"]
+    rows += [
         f"- {description}" + "".join(f" — ⚠️ {a.kind}" for a in alertas_op)
         for description, alertas_op in migracao.operacoes
     ]
     if com_sql:
-        linhas += ["", "<details><summary>SQL</summary>", "", "```sql", migracao.sql, "```", ""]
-        linhas += ["</details>"]
-    return [*linhas, ""]
+        rows += ["", "<details><summary>SQL</summary>", "", "```sql", migracao.sql, "```", ""]
+        rows += ["</details>"]
+    return [*rows, ""]
 
 
 def _alteradas(alteradas):
@@ -335,60 +335,60 @@ def _alteradas(alteradas):
     ]
 
 
-def markdown(migracoes, falhas=None, alteradas=(), limite=None):
+def markdown(migracoes, falhas=None, alteradas=(), limit=None):
     """The report, in English, for the pull request comment and the CI summary. With `limite`
     (a comment's size), the SQL is left out when the report would be longer, and as a last
     resort the report is cut."""
     text = _markdown(migracoes, falhas, alteradas, com_sql=True)
-    if limite is None or len(text) <= limite:
+    if limit is None or len(text) <= limit:
         return text
     text = _markdown(migracoes, falhas, alteradas, com_sql=False)
-    if len(text) <= limite:
+    if len(text) <= limit:
         return text
     corte = "\n\n… (cut: the full report is in the run's summary)\n"
-    return text[: limite - len(corte)] + corte
+    return text[: limit - len(corte)] + corte
 
 
 def _markdown(migracoes, falhas, alteradas, com_sql):
-    linhas = ["## Database migrations in this pull request", ""]
+    rows = ["## Database migrations in this pull request", ""]
     if not migracoes and not alteradas:
-        return "\n".join([*linhas, "No new migration: the database does not change.", ""])
+        return "\n".join([*rows, "No new migration: the database does not change.", ""])
     alertas = [(m, a) for m in migracoes for a in m.alertas]
     if migracoes:
-        linhas.append(
+        rows.append(
             f"**{len(migracoes)} new migration(s)**, applied automatically when the new version "
             "starts (`python manage.py migrate`). The automatic rollback puts the previous code "
             "back but never undoes a migration."
         )
     else:
-        linhas.append("No new migration, but existing ones changed.")
-    linhas.append("")
+        rows.append("No new migration, but existing ones changed.")
+    rows.append("")
     if alertas or alteradas:
-        linhas.append("### ⚠️ Needs attention")
-        linhas += _alteradas(alteradas)
-        linhas += [f"- **{m.chave}** — {a.kind}: {a.text}" for m, a in alertas]
+        rows.append("### ⚠️ Needs attention")
+        rows += _alteradas(alteradas)
+        rows += [f"- **{m.key}** — {a.kind}: {a.text}" for m, a in alertas]
     else:
-        linhas.append("✅ No operation deletes data or breaks the previous version.")
-    linhas.append("")
+        rows.append("✅ No operation deletes data or breaks the previous version.")
+    rows.append("")
     if falhas is not None:
         if falhas:
-            linhas.append("### ❌ Back and forth")
-            linhas += [f"- {onde}: {erro}" for onde, erro in falhas]
+            rows.append("### ❌ Back and forth")
+            rows += [f"- {onde}: {error}" for onde, error in falhas]
         else:
-            linhas.append(
+            rows.append(
                 "✅ **Back and forth tested:** every new migration was applied, undone and "
                 "applied again on PostgreSQL."
             )
-        linhas.append("")
+        rows.append("")
     if migracoes and not com_sql:
-        linhas += [
+        rows += [
             "_The SQL is left out: the report is longer than a pull request comment allows. "
             "It is in full in the run's summary._",
             "",
         ]
     for migracao in migracoes:
-        linhas += _linhas_da_migracao(migracao, com_sql)
-    return "\n".join(linhas)
+        rows += _linhas_da_migracao(migracao, com_sql)
+    return "\n".join(rows)
 
 
 class Command(BaseCommand):
@@ -429,7 +429,7 @@ class Command(BaseCommand):
                 file.write(relatorio)
         if comentario:
             with open(comentario, "w", encoding="utf-8") as file:
-                file.write(markdown(analisadas, falhas, alteradas, limite=LIMITE_COMENTARIO))
+                file.write(markdown(analisadas, falhas, alteradas, limit=LIMITE_COMENTARIO))
         self.stdout.write(relatorio)
         if falhas:
             raise CommandError("O teste de ida e volta falhou.")

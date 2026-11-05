@@ -80,15 +80,15 @@ SESSAO_DATA = "agenda_data"
 
 def _data_lembrada(request):
     lembrada = request.session.get(SESSAO_DATA) or {}
-    hoje = timezone.localdate().isoformat()
-    return lembrada.get("data", "") if lembrada.get("em") == hoje else ""
+    today = timezone.localdate().isoformat()
+    return lembrada.get("data", "") if lembrada.get("em") == today else ""
 
 
-def _resposta_sucesso(mensagem):
+def _resposta_sucesso(message):
     """Empty HTMX response that tells the page to close the modal and reload events."""
-    resposta = HttpResponse(status=204)
-    resposta["HX-Trigger"] = json.dumps({"agendaAtualizada": {"mensagem": mensagem}})
-    return resposta
+    response = HttpResponse(status=204)
+    response["HX-Trigger"] = json.dumps({"agendaAtualizada": {"mensagem": message}})
+    return response
 
 
 def _relogio(timestamp):
@@ -124,7 +124,7 @@ def calendario(request):
         request.session[SESSAO_PROFISSIONAL] = practitioner.pk
     clinic = request.clinic
     ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
-    configuracao = {
+    config = {
         "practitioner": practitioner.pk if practitioner else None,
         "start": clinic.schedule_start.strftime("%H:%M:%S"),
         "end": clinic.schedule_end.strftime("%H:%M:%S"),
@@ -155,7 +155,7 @@ def calendario(request):
             "profissionais": profissionais,
             "practitioner": practitioner,
             "tipos": AppointmentType.objects.filter(active=True),
-            "configuracao": configuracao,
+            "configuracao": config,
             "so_a_propria": so_a_propria_agenda(request),
         },
     )
@@ -205,10 +205,10 @@ def eventos(request):
 
 
 @exige_permissao(Modulo.AGENDA, Acao.CRIAR)
-def novo(request):
+def new(request):
     inicial = {
-        campo: request.GET[parametro]
-        for campo, parametro in [
+        field: request.GET[parametro]
+        for field, parametro in [
             ("practitioner", "practitioner"),
             ("date", "date"),
             ("start_time", "start"),
@@ -279,7 +279,7 @@ def status(request, pk):
     )
     try:
         services.marcar(appointment, request.POST.get("status", ""))
-    except ValidationError as erro:
+    except ValidationError as error:
         if request.headers.get("HX-Request"):
             # Back to the appointment window, with the reason.
             appointment.refresh_from_db()
@@ -288,14 +288,14 @@ def status(request, pk):
                 clinic=request.clinic,
                 profissionais=services.profissionais_visiveis(request),
             )
-            contexto = {"form": form, "appointment": appointment, "erro_situacao": erro.messages[0]}
-            return render(request, "schedule/_form.html", contexto)
-        messages.error(request, erro.messages[0])
+            context = {"form": form, "appointment": appointment, "erro_situacao": error.messages[0]}
+            return render(request, "schedule/_form.html", context)
+        messages.error(request, error.messages[0])
         return redirect("home")
-    mensagem = MENSAGENS_SITUACAO[appointment.status] % {"nome": appointment.patient.name}
+    message = MENSAGENS_SITUACAO[appointment.status] % {"nome": appointment.patient.name}
     if request.headers.get("HX-Request"):
-        return _resposta_sucesso(mensagem)
-    messages.success(request, mensagem)
+        return _resposta_sucesso(message)
+    messages.success(request, message)
     return redirect("home")
 
 
@@ -328,13 +328,13 @@ def excluir(request, pk):
 def _aniversariantes_em(days):
     """{date: [patients]} for active patients whose birthday falls on the given days."""
     filtro = Q()
-    for dia in days:
-        filtro |= Q(birth_date__month=dia.month, birth_date__day=dia.day)
-    resultado = {dia: [] for dia in days}
+    for day in days:
+        filtro |= Q(birth_date__month=day.month, birth_date__day=day.day)
+    resultado = {day: [] for day in days}
     if not days:
         return resultado
     pacientes = Patient.objects.filter(filtro, active=True, archived=False).order_by("name")
-    por_mes_dia = {(dia.month, dia.day): dia for dia in days}
+    por_mes_dia = {(day.month, day.day): day for day in days}
     for patient in pacientes:
         nascimento = patient.birth_date
         resultado[por_mes_dia[(nascimento.month, nascimento.day)]].append(patient)
@@ -351,19 +351,23 @@ def aniversariantes(request):
     total_dias = (timezone.localdate(periodo[1]) - start).days
     days = [start + datetime.timedelta(days=n) for n in range(total_dias)]
     return JsonResponse(
-        {dia.isoformat(): len(lista) for dia, lista in _aniversariantes_em(days).items() if lista}
+        {
+            day.isoformat(): len(results)
+            for day, results in _aniversariantes_em(days).items()
+            if results
+        }
     )
 
 
 @exige_permissao(Modulo.AGENDA, Acao.VER)
 def aniversariantes_dia(request):
     try:
-        dia = datetime.date.fromisoformat(request.GET.get("date", ""))
+        day = datetime.date.fromisoformat(request.GET.get("date", ""))
     except ValueError:
         return HttpResponse(_("Data inválida."), status=400)
     aniversariantes = [
-        (patient, dia.year - patient.birth_date.year) for patient in _aniversariantes_em([dia])[dia]
+        (patient, day.year - patient.birth_date.year) for patient in _aniversariantes_em([day])[day]
     ]
     return render(
-        request, "schedule/_birthdays.html", {"dia": dia, "aniversariantes": aniversariantes}
+        request, "schedule/_birthdays.html", {"dia": day, "aniversariantes": aniversariantes}
     )

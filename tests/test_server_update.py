@@ -150,7 +150,7 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     servidor.saude(1, 0)  # B does not answer; A answers again
     code, log = servidor.rodar()
     assert code == 1
-    subidas = [linha for linha in log if linha.startswith("compose up")]
+    subidas = [row for row in log if row.startswith("compose up")]
     assert subidas == [
         "compose up -d --remove-orphans com B",
         "compose up -d --remove-orphans com A",
@@ -168,7 +168,7 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     # Next runs: the refused version is not tried again, and the monitor stays red.
     code, log = servidor.rodar()
     assert code == 0
-    assert not any(linha.startswith("compose") for linha in log)
+    assert not any(row.startswith("compose") for row in log)
     assert log == ["monitor MONITOR_UPDATE_URL fail"]
 
     # A newer version is tried, and once it comes up the refusal is gone.
@@ -225,7 +225,7 @@ def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
     servidor.saude(1)
     code, log = servidor.rodar()
     assert code == 1
-    assert [linha for linha in log if linha.startswith("compose up")] == [
+    assert [row for row in log if row.startswith("compose up")] == [
         "compose up -d --remove-orphans com B"
     ]
     assert servidor.ler("refused-image") == ["B", "D"]
@@ -265,7 +265,7 @@ def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor)
     code, log = servidor.rodar()
     assert code == 1
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
-    assert not [linha for linha in log if linha.startswith("compose")]
+    assert not [row for row in log if row.startswith("compose")]
 
 
 def test_o_nome_antigo_de_force_ainda_vale(servidor):

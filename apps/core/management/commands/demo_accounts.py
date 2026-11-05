@@ -63,14 +63,16 @@ class Command(BaseCommand):
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
             clinic = Clinic.objects.get(name=options["clinic"])
-        except Clinic.DoesNotExist as erro:
-            raise CommandError(f"Clínica não encontrada: {options['clinic']}") from erro
+        except Clinic.DoesNotExist as error:
+            raise CommandError(f"Clínica não encontrada: {options['clinic']}") from error
 
-        recepcao = self._conta(RECEPCAO, "Recepção", senhas[0], clinic, Papel.RECEPCAO)
+        reception = self._conta(RECEPCAO, "Recepção", senhas[0], clinic, Papel.RECEPCAO)
         practitioner = self._conta(
             PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
         )
-        outras = [self._conta(u, name, senha, clinic, role) for u, name, senha, role in extras]
+        outras = [
+            self._conta(u, name, password, clinic, role) for u, name, password, role in extras
+        ]
         with usar_clinica(clinic):
             cadastro = Practitioner.objects.filter(name=options["practitioner"]).first()
             if cadastro is None:
@@ -88,14 +90,14 @@ class Command(BaseCommand):
             cadastro.save(update_fields=["user"])
         self.stdout.write(
             self.style.SUCCESS(
-                f"Contas prontas: {recepcao.username} (recepção), {practitioner.username} "
+                f"Contas prontas: {reception.username} (recepção), {practitioner.username} "
                 f"(profissional, agenda de {cadastro.name})"
                 + "".join(f", {account.username}" for account in outras)
                 + "."
             )
         )
 
-    def _conta(self, username, name, senha, clinic, role):
+    def _conta(self, username, name, password, clinic, role):
         Usuario = get_user_model()
         user, _criado = Usuario.objects.get_or_create(username=username)
         user.first_name = name
@@ -103,7 +105,7 @@ class Command(BaseCommand):
         user.is_active = True
         user.is_staff = user.is_superuser = False
         user.demo = True
-        user.set_password(senha)
+        user.set_password(password)
         user.save()
         Membership.objects.update_or_create(
             user=user, clinic=clinic, defaults={"role": role, "active": True}

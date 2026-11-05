@@ -84,47 +84,47 @@ IGNORADOS = {
 
 def _campos(model):
     return [
-        campo
-        for campo in model._meta.concrete_fields
-        if not campo.primary_key and campo.attname not in IGNORADOS and campo.name not in IGNORADOS
+        field
+        for field in model._meta.concrete_fields
+        if not field.primary_key and field.attname not in IGNORADOS and field.name not in IGNORADOS
     ]
 
 
-def _valor(campo, instancia):
-    value = campo.value_from_object(instancia)
+def _valor(field, instancia):
+    value = field.value_from_object(instancia)
     if value is None or isinstance(value, bool | int | float | str):
         return value
     return str(value)
 
 
 def _valores(instancia):
-    return {campo.name: _valor(campo, instancia) for campo in _campos(type(instancia))}
+    return {field.name: _valor(field, instancia) for field in _campos(type(instancia))}
 
 
 def antes_de_salvar(sender, instance, raw=False, **kwargs):
     if raw or instance.pk is None:
         instance._auditoria_antes = None
         return
-    anterior = sender._base_manager.filter(pk=instance.pk).first()
-    instance._auditoria_antes = _valores(anterior) if anterior is not None else None
-    instance._auditoria_senha = getattr(anterior, "password", None)
+    previous = sender._base_manager.filter(pk=instance.pk).first()
+    instance._auditoria_antes = _valores(previous) if previous is not None else None
+    instance._auditoria_senha = getattr(previous, "password", None)
 
 
 def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, **kwargs):
     if raw:
         return
-    depois = _valores(instance)
-    antes = getattr(instance, "_auditoria_antes", None)
-    if created or antes is None:
+    after = _valores(instance)
+    before = getattr(instance, "_auditoria_antes", None)
+    if created or before is None:
         changes = {
-            campo: [None, value] for campo, value in depois.items() if value not in (None, "")
+            field: [None, value] for field, value in after.items() if value not in (None, "")
         }
         registrar(Acao.CRIAR, instance, changes=changes)
         return
     changes = {
-        campo: [antes.get(campo), value]
-        for campo, value in depois.items()
-        if antes.get(campo) != value
+        field: [before.get(field), value]
+        for field, value in after.items()
+        if before.get(field) != value
     }
     if getattr(instance, "_auditoria_senha", None) not in (
         None,
@@ -137,8 +137,8 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
 
 def depois_de_excluir(sender, instance, **kwargs):
     valores = {
-        campo: [value, None]
-        for campo, value in _valores(instance).items()
+        field: [value, None]
+        for field, value in _valores(instance).items()
         if value not in (None, "")
     }
     registrar(Acao.EXCLUIR, instance, changes=valores)

@@ -25,7 +25,7 @@ def sigla_documento(value, papeis=""):
 @register.simple_tag
 def rotulo_documento(*papeis):
     """The documents of these roles in the clinic's country: "CPF/CNPJ", "RUT", "EIN"."""
-    return identification.do_pais().rotulo(*(papeis or identification.PAPEIS))
+    return identification.do_pais().label(*(papeis or identification.PAPEIS))
 
 
 @register.filter

@@ -26,7 +26,7 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
         fields = ["date", *CAMPOS_DA_ANAMNESE]
         widgets = {
             "date": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
-            **{campo: forms.Textarea(attrs={"rows": 4}) for campo in CAMPOS_DA_ANAMNESE},
+            **{field: forms.Textarea(attrs={"rows": 4}) for field in CAMPOS_DA_ANAMNESE},
         }
 
 
@@ -50,16 +50,16 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
         }
 
     def clean(self):
-        dados = super().clean()
-        if dados.get("kind") == Certificate.Tipo.AFASTAMENTO:
-            if not dados.get("days"):
+        data = super().clean()
+        if data.get("kind") == Certificate.Tipo.AFASTAMENTO:
+            if not data.get("days"):
                 self.add_error("days", _("Informe quantos dias de afastamento."))
         else:
-            dados["days"] = None
-        start, end = dados.get("start_time"), dados.get("end_time")
+            data["days"] = None
+        start, end = data.get("start_time"), data.get("end_time")
         if start and end and end <= start:
             self.add_error("end_time", _("O horário final precisa ser depois do inicial."))
-        return dados
+        return data
 
 
 class ReceitaForm(FormularioBootstrap, forms.ModelForm):
