@@ -47,7 +47,7 @@ def build(request):
 
 def _schedule(request, today):
     now = timezone.now()
-    visible = agenda.agendamentos_visiveis(request)
+    visible = agenda.visible_appointments(request)
     do_dia = list(
         visible.filter(start__date=today)
         .select_related("patient", "practitioner", "kind")
@@ -58,27 +58,27 @@ def _schedule(request, today):
     contagem = {value: 0 for value in status.values}
     for appointment in pacientes:
         contagem[appointment.status] += 1
-    pendentes = [a for a in pacientes if a.status == status.AGENDADO]
+    pendentes = [a for a in pacientes if a.status == status.BOOKED]
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(
         visible.filter(
             start__date__gte=today.replace(day=1),
             start__date__lte=today,
-            status__in=[status.COMPARECEU, status.FALTOU],
+            status__in=[status.ATTENDED, status.MISSED],
         )
         .order_by()
         .values_list("status")
         .annotate(total=Count("pk"))
     )
-    vieram, faltaram = marcados.get(status.COMPARECEU, 0), marcados.get(status.FALTOU, 0)
+    vieram, faltaram = marcados.get(status.ATTENDED, 0), marcados.get(status.MISSED, 0)
     return {
         "lista": do_dia,
         # A practitioner sees only their own schedule, so the column would repeat their name.
         "mostrar_profissional": not own_schedule_only(request),
-        "pacientes": len(pacientes) - contagem[status.DESMARCOU],
-        "compareceram": contagem[status.COMPARECEU],
-        "faltaram": contagem[status.FALTOU],
-        "desmarcaram": contagem[status.DESMARCOU],
+        "pacientes": len(pacientes) - contagem[status.CANCELLED],
+        "compareceram": contagem[status.ATTENDED],
+        "faltaram": contagem[status.MISSED],
+        "desmarcaram": contagem[status.CANCELLED],
         "a_seguir": sum(1 for a in pendentes if a.start > now),
         "sem_marcacao": sum(1 for a in pendentes if a.start <= now),
         "proximo": next((a for a in pendentes if a.end > now), None),

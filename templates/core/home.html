@@ -155,15 +155,15 @@
           </thead>
           <tbody>
             {% for appointment in agenda.lista %}
-            <tr class="{% if appointment == agenda.proximo %}table-primary{% elif appointment.desmarcado %}text-body-secondary text-decoration-line-through{% endif %}">
+            <tr class="{% if appointment == agenda.proximo %}table-primary{% elif appointment.is_cancelled %}text-body-secondary text-decoration-line-through{% endif %}">
               <td class="text-nowrap">{{ appointment.start|time:"H:i" }}–{{ appointment.end|time:"H:i" }}</td>
               <td>
-                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ appointment.kind.color }}" title="{{ appointment.kind.nome_exibido }}"></span>
+                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ appointment.kind.color }}" title="{{ appointment.kind.display_name }}"></span>
                 {% if appointment.patient_id %}
                 {% if pode.pacientes.ver %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
                 {% if appointment == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if appointment.start <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
-                <span class="text-body-secondary">{{ appointment.titulo }}</span>
+                <span class="text-body-secondary">{{ appointment.title }}</span>
                 {% endif %}
               </td>
               {% if agenda.mostrar_profissional %}<td class="small">{{ appointment.practitioner.name }}</td>{% endif %}

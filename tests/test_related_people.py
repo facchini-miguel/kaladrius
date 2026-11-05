@@ -57,7 +57,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
     assert reception.post(url, data).status_code == 302
     with use_clinic(clinica_a):
         contato = RelatedPerson.objects.get()
-    assert (contato.phone, contato.nome_exibido) == ("54999990002", "Contato Inventado")
+    assert (contato.phone, contato.display_name) == ("54999990002", "Contato Inventado")
     impressa = reception.get(reverse("patients:print", args=[filha.pk])).content.decode()
     assert "Contato Inventado" in impressa and "Contato de emergência" in impressa
     # Editing and removing.

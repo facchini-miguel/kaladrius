@@ -6,11 +6,11 @@ from django.db import transaction
 from apps.core.isolation import without_isolation
 from apps.core.models import Clinic
 from apps.schedule.simulation import (
-    simular_agendamentos,
-    simular_comissoes,
-    simular_financeiro,
-    simular_orcamentos,
-    simular_rechamadas,
+    simulate_appointments,
+    simulate_commissions,
+    simulate_estimates,
+    simulate_finance,
+    simulate_recalls,
 )
 
 
@@ -67,13 +67,13 @@ class Command(BaseCommand):
             alvo = Clinic.objects.filter(name=clinic).first()
             if alvo is None:
                 raise CommandError(f"Clínica “{clinic}” não encontrada.")
-            agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)
-            criadas = simular_rechamadas(alvo, sorteio, quantity=rechamadas)
-            criados = simular_orcamentos(alvo, sorteio, quantity=orcamentos) if orcamentos else 0
+            agendamentos = 0 if sem_agenda else simulate_appointments(alvo, sorteio)
+            criadas = simulate_recalls(alvo, sorteio, quantity=rechamadas)
+            criados = simulate_estimates(alvo, sorteio, quantity=orcamentos) if orcamentos else 0
             receber, pagar = (
-                simular_financeiro(alvo, sorteio, quantity=lancamentos) if lancamentos else (0, 0)
+                simulate_finance(alvo, sorteio, quantity=lancamentos) if lancamentos else (0, 0)
             )
-            comissoes = simular_comissoes(alvo, sorteio)
+            comissoes = simulate_commissions(alvo, sorteio)
         self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinic}”:"))
         self.stdout.write(f"  Agendamentos fictícios: {agendamentos}")
         self.stdout.write(f"  Rechamadas fictícias: {criadas}")

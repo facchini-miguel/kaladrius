@@ -15,15 +15,15 @@ from apps.practitioners.models import Practitioner
 from .models import Appointment
 
 
-def profissionais_visiveis(request):
+def visible_practitioners(request):
     """Practitioners whose schedule the user may see and change (decision 044)."""
     if own_schedule_only(request):
         return Practitioner.objects.filter(user=request.user)
     return Practitioner.objects.all()
 
 
-def agendamentos_visiveis(request):
-    return Appointment.objects.filter(practitioner__in=profissionais_visiveis(request))
+def visible_appointments(request):
+    return Appointment.objects.filter(practitioner__in=visible_practitioners(request))
 
 
 def timestamp(date, hour):
@@ -31,7 +31,7 @@ def timestamp(date, hour):
     return timezone.make_aware(datetime.datetime.combine(date, hour))
 
 
-def ocorrencias(date, start_time, end_time, repeticoes=1):
+def occurrences(date, start_time, end_time, repeticoes=1):
     """(start, end) of each weekly occurrence, built from local date/time (DST-safe)."""
     return [
         (timestamp(day, start_time), timestamp(day, end_time))
@@ -39,7 +39,7 @@ def ocorrencias(date, start_time, end_time, repeticoes=1):
     ]
 
 
-def conflitos(practitioner, intervalos, ignorar=None):
+def conflicts(practitioner, intervalos, ignorar=None):
     """Existing appointments of the practitioner that overlap any of the intervals.
 
     Cancelled ones (desmarcados) do not hold the slot.
@@ -48,7 +48,7 @@ def conflitos(practitioner, intervalos, ignorar=None):
     for start, end in intervalos:
         sobreposicao |= Q(start__lt=end, end__gt=start)
     existentes = Appointment.objects.filter(sobreposicao, practitioner=practitioner).exclude(
-        status=Appointment.Status.DESMARCOU
+        status=Appointment.Status.CANCELLED
     )
     if ignorar is not None:
         existentes = existentes.exclude(pk=ignorar)
@@ -56,7 +56,7 @@ def conflitos(practitioner, intervalos, ignorar=None):
 
 
 @transaction.atomic
-def criar(modelo, intervalos, user):
+def create(modelo, intervalos, user):
     """Create one appointment per interval, copying the fields of `modelo`.
 
     Raises IntegrityError if the database constraint finds an overlap (for example,
@@ -81,7 +81,7 @@ def criar(modelo, intervalos, user):
 
 
 @transaction.atomic
-def marcar(appointment, status):
+def mark(appointment, status):
     """Record whether the patient came, missed or cancelled (0.24.0).
 
     Came or missed only from the day of the appointment on. Leaving "cancelled" takes the
@@ -91,14 +91,14 @@ def marcar(appointment, status):
         raise ValidationError(_("Situação inválida."))
     if appointment.patient_id is None:
         raise ValidationError(_("Só agendamentos com paciente têm situação."))
-    presenca = (Appointment.Status.COMPARECEU, Appointment.Status.FALTOU)
-    if status in presenca and not appointment.presenca_marcavel:
+    presenca = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)
+    if status in presenca and not appointment.attendance_markable:
         raise ValidationError(
             _("Comparecimento e falta só podem ser marcados a partir do dia do atendimento.")
         )
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
-    if appointment.desmarcado and status != Appointment.Status.DESMARCOU:
-        if conflitos(
+    if appointment.is_cancelled and status != Appointment.Status.CANCELLED:
+        if conflicts(
             appointment.practitioner, [(appointment.start, appointment.end)], appointment.pk
         ):
             raise ValidationError(ocupado)

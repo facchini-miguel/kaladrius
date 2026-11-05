@@ -4,7 +4,7 @@
 {% block titulo %}{% if kind.pk %}{% translate "Editar tipo de atendimento" %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with nome=kind.nome_exibido %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with nome=kind.display_name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo tipo de atendimento" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}

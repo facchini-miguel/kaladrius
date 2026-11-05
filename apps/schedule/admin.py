@@ -4,14 +4,14 @@ from .models import Appointment, AppointmentType
 
 
 @admin.register(AppointmentType)
-class TipoAtendimentoAdmin(admin.ModelAdmin):
+class AppointmentTypeAdmin(admin.ModelAdmin):
     list_display = ["name", "clinic", "color", "active"]
     list_filter = ["clinic", "active"]
     search_fields = ["name"]
 
 
 @admin.register(Appointment)
-class AgendamentoAdmin(admin.ModelAdmin):
+class AppointmentAdmin(admin.ModelAdmin):
     list_display = ["start", "end", "practitioner", "patient", "kind", "clinic"]
     list_filter = ["clinic", "practitioner", "kind"]
     search_fields = ["description", "patient__name"]

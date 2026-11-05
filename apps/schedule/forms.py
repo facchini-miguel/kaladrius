@@ -13,7 +13,7 @@ from . import services
 from .models import Appointment, AppointmentType
 
 
-class TipoAtendimentoForm(BootstrapForm, forms.ModelForm):
+class AppointmentTypeForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = AppointmentType
         fields = ["name", "color", "active"]
@@ -33,7 +33,7 @@ class TipoAtendimentoForm(BootstrapForm, forms.ModelForm):
         return name
 
 
-class AgendamentoForm(BootstrapForm, forms.ModelForm):
+class AppointmentForm(BootstrapForm, forms.ModelForm):
     date = forms.DateField(
         label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )
@@ -77,7 +77,7 @@ class AgendamentoForm(BootstrapForm, forms.ModelForm):
         self.fields["kind"].queryset = AppointmentType.objects.filter(
             Q(active=True) | Q(pk=appointment.kind_id)
         )
-        self.fields["kind"].label_from_instance = lambda kind: kind.nome_exibido
+        self.fields["kind"].label_from_instance = lambda kind: kind.display_name
         self.fields["patient"].queryset = Patient.objects.all()
 
         passo = clinic.schedule_interval * 60
@@ -97,7 +97,7 @@ class AgendamentoForm(BootstrapForm, forms.ModelForm):
                 end_time=timezone.localtime(appointment.end).time(),
             )
 
-    def _alinhado(self, hour):
+    def _aligned(self, hour):
         start = self.clinic.schedule_start
         minutos = (hour.hour * 60 + hour.minute) - (start.hour * 60 + start.minute)
         return hour.second == 0 and minutos % self.clinic.schedule_interval == 0
@@ -114,7 +114,7 @@ class AgendamentoForm(BootstrapForm, forms.ModelForm):
         patient = data.get("patient")
         if (
             self.instance.pk
-            and self.instance.desmarcado
+            and self.instance.is_cancelled
             and (getattr(patient, "pk", None) != self.instance.patient_id)
         ):
             # Changing the patient would overwrite the record that this one cancelled.
@@ -134,7 +134,7 @@ class AgendamentoForm(BootstrapForm, forms.ModelForm):
             return data
         intervalo = clinic.schedule_interval
         for field, hour in (("start_time", start_time), ("end_time", end_time)):
-            if not self._alinhado(hour):
+            if not self._aligned(hour):
                 self.add_error(
                     field, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
                 )
@@ -150,26 +150,26 @@ class AgendamentoForm(BootstrapForm, forms.ModelForm):
         if self.errors:
             return data
 
-        self.intervalos = services.ocorrencias(
+        self.intervalos = services.occurrences(
             date, start_time, end_time, data.get("repeticoes") or 1
         )
         self.instance.start, self.instance.end = self.intervalos[0]
-        marcado = (Appointment.Status.COMPARECEU, Appointment.Status.FALTOU)
+        marcado = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)
         if not data.get("patient") or (
             self.instance.status in marcado and date > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
             # came or missed it yet.
-            self.instance.status = Appointment.Status.AGENDADO
-        if self.instance.desmarcado:
+            self.instance.status = Appointment.Status.BOOKED
+        if self.instance.is_cancelled:
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
             return data
-        encontrados = services.conflitos(
+        encontrados = services.conflicts(
             data["practitioner"], self.intervalos, ignorar=self.instance.pk
         )
         if encontrados:
             results = "; ".join(
-                f"{date_format(timezone.localtime(a.start), 'SHORT_DATETIME_FORMAT')} ({a.titulo})"
+                f"{date_format(timezone.localtime(a.start), 'SHORT_DATETIME_FORMAT')} ({a.title})"
                 for a in encontrados[:5]
             )
             if len(encontrados) > 5:

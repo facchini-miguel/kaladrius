@@ -324,7 +324,7 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167), pati
 
 ## Functions and variables
 
-The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172), the core app (decision 173), finance (decision 174).
+The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172), the core app (decision 173), finance (decision 174), schedule (decision 175).
 
 ### Shared variables
 
@@ -629,6 +629,67 @@ The last part of the plan (decision 159): the functions, methods, classes, const
 | `trocar_idioma` | `change_language` |
 
 `Usuario` (the user model) keeps its name for now (see below).
+
+### Schedule (`agenda`)
+
+| Before | After |
+|---|---|
+| `TipoAtendimentoAdmin` | `AppointmentTypeAdmin` |
+| `AgendamentoAdmin` | `AppointmentAdmin` |
+| `AgendaConfig` | `ScheduleConfig` |
+| `TipoAtendimentoForm` | `AppointmentTypeForm` |
+| `AgendamentoForm` | `AppointmentForm` |
+| `_alinhado` | `_aligned` |
+| `TIPOS_PADRAO` | `DEFAULT_TYPES` |
+| `_NOMES_PADRAO_PARA_TRADUCAO` | `_DEFAULT_NAMES_FOR_TRANSLATION` |
+| `nome_exibido` | `display_name` |
+| `desmarcado` | `is_cancelled` |
+| `presenca_marcavel` | `attendance_markable` |
+| `AGENDADO` | `BOOKED` |
+| `COMPARECEU` | `ATTENDED` |
+| `FALTOU` | `MISSED` |
+| `DESMARCOU` | `CANCELLED` |
+| `criar_tipos_padrao` | `create_default_types` |
+| `profissionais_visiveis` | `visible_practitioners` |
+| `agendamentos_visiveis` | `visible_appointments` |
+| `ocorrencias` | `occurrences` |
+| `conflitos` | `conflicts` |
+| `tipos_padrao_para_clinica_nova` | `default_types_for_new_clinic` |
+| `MOTIVOS_RECHAMADA` | `RECALL_REASONS` |
+| `simular_agendamentos` | `simulate_appointments` |
+| `_situacao` | `_status` |
+| `simular_rechamadas` | `simulate_recalls` |
+| `DESCRICOES_FINANCEIRAS` | `FINANCE_DESCRIPTIONS` |
+| `simular_financeiro` | `simulate_finance` |
+| `DESPESAS_SIMULADAS` | `SIMULATED_EXPENSES` |
+| `DESPESAS_DO_ATENDIMENTO` | `VISIT_EXPENSES` |
+| `_simular_despesas` | `_simulate_expenses` |
+| `PROCEDIMENTOS_EXEMPLO` | `SAMPLE_PROCEDURES` |
+| `simular_orcamentos` | `simulate_estimates` |
+| `simular_comissoes` | `simulate_commissions` |
+| `tipo_novo` | `new_appointment_type` |
+| `tipo_editar` | `edit_appointment_type` |
+| `tipo_excluir` | `delete_appointment_type` |
+| `SESSAO_PROFISSIONAL` | `SESSION_PRACTITIONER` |
+| `SESSAO_DATA` | `SESSION_DATE` |
+| `_data_lembrada` | `_remembered_date` |
+| `_resposta_sucesso` | `_success_response` |
+| `_relogio` | `_clock` |
+| `MENSAGENS_SITUACAO` | `STATUS_MESSAGES` |
+| `_aniversariantes_em` | `_birthdays_on` |
+| `aniversariantes_dia` | `birthdays_on_day` |
+| `titulo` | `title` |
+| `criar` | `create` |
+| `marcar` | `mark` |
+| `_formulario` | `_type_form` |
+| `_periodo` | `_range` |
+| `editar` | `edit_appointment` |
+| `excluir` | `delete_appointment` |
+| `new` | `new_appointment` |
+| `tipos` | `appointment_types` |
+| `eventos` | `events` |
+| `calendario` | `calendar_view` |
+| `aniversariantes` | `birthdays` |
 
 ### Finance (`financeiro`): classes
 

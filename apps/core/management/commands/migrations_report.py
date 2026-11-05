@@ -149,10 +149,10 @@ def _after(operacao, app, before):
     return after
 
 
-def _only_grows(tipo_antigo, tipo_novo):
+def _only_grows(tipo_antigo, new_appointment_type):
     """varchar(6) -> varchar(20): a longer text column keeps every value (a shorter one may not)."""
     old = re.fullmatch(r"varchar\((\d+)\)", tipo_antigo or "")
-    new = re.fullmatch(r"varchar\((\d+)\)", tipo_novo or "")
+    new = re.fullmatch(r"varchar\((\d+)\)", new_appointment_type or "")
     return bool(old and new and int(new[1]) >= int(old[1]))
 
 
@@ -216,13 +216,15 @@ def operation_alerts(operacao, app, before, conexao=connection):
         # model, and a ForeignKey's related model is still a string there (no db_type).
         new = _field(_after(operacao, app, before), app, operacao.model_name, operacao.name)
         if old is not None and new is not None:
-            tipo_antigo, tipo_novo = old.db_type(conexao), new.db_type(conexao)
-            if tipo_antigo != tipo_novo and not _only_grows(tipo_antigo, tipo_novo):
+            tipo_antigo, new_appointment_type = old.db_type(conexao), new.db_type(conexao)
+            if tipo_antigo != new_appointment_type and not _only_grows(
+                tipo_antigo, new_appointment_type
+            ):
                 alerts.append(
                     Alert(
                         REVIEW,
                         f"changes `{operacao.model_name}.{operacao.name}` from "
-                        f"{tipo_antigo} to {tipo_novo}",
+                        f"{tipo_antigo} to {new_appointment_type}",
                     )
                 )
             if old.null and not new.null:

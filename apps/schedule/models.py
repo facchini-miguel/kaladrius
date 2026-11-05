@@ -14,7 +14,7 @@ from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
 # Appointment types a new clinic starts with (decision 080): the dental module's for the
 # Odontologia area, these for the others. Each clinic can rename, recolor, deactivate or
 # add types.
-TIPOS_PADRAO = [
+DEFAULT_TYPES = [
     ("Liberado", "#b9f1a7"),
     ("Consulta", "#e7a5f7"),
     ("Retorno", "#a7eef1"),
@@ -26,7 +26,7 @@ TIPOS_PADRAO = [
 
 # The default names are saved in Portuguese and shown in the user's language (see
 # TipoAtendimento.nome_exibido). This list only marks them for makemessages; it is never read.
-_NOMES_PADRAO_PARA_TRADUCAO = [
+_DEFAULT_NAMES_FOR_TRANSLATION = [
     pgettext_lazy("tipo de atendimento", "Liberado"),
     pgettext_lazy("tipo de atendimento", "Consulta"),
     pgettext_lazy("tipo de atendimento", "Retorno"),
@@ -66,7 +66,7 @@ class AppointmentType(ClinicModel):
         return self.name
 
     @property
-    def nome_exibido(self):
+    def display_name(self):
         """The name in the user's language when it is one of the default types; a name the
         clinic typed itself (or renamed) has no translation and is shown as saved."""
         return pgettext("tipo de atendimento", self.name)
@@ -83,11 +83,11 @@ class Appointment(ClinicModel):
     class Status(models.TextChoices):
         """Whether the patient came (0.24.0). Only appointments with a patient are marked."""
 
-        AGENDADO = "agendado", _("Agendado")
-        COMPARECEU = "compareceu", _("Compareceu")
-        FALTOU = "faltou", _("Faltou")
+        BOOKED = "agendado", _("Agendado")
+        ATTENDED = "compareceu", _("Compareceu")
+        MISSED = "faltou", _("Faltou")
         # Kept for the history and the no-show figures, but frees the time slot.
-        DESMARCOU = "desmarcou", _("Desmarcou")
+        CANCELLED = "desmarcou", _("Desmarcou")
 
     practitioner = models.ForeignKey(
         "profissionais.Practitioner",
@@ -119,7 +119,7 @@ class Appointment(ClinicModel):
         _("situação"),
         max_length=10,
         choices=Status.choices,
-        default=Status.AGENDADO,
+        default=Status.BOOKED,
         db_column="situacao",
     )
     # Appointments created together by "repeat N weeks" share the same series id.
@@ -165,30 +165,33 @@ class Appointment(ClinicModel):
         ]
 
     def __str__(self):
-        return f"{self.titulo} ({timezone.localtime(self.start):%d/%m/%Y %H:%M})"
+        return f"{self.title} ({timezone.localtime(self.start):%d/%m/%Y %H:%M})"
 
     @property
-    def titulo(self):
+    def title(self):
         if self.patient_id:
             return self.patient.name
         return (self.description.strip().splitlines() or [gettext("Horário reservado")])[0]
 
     @property
-    def desmarcado(self):
-        return self.status == self.Status.DESMARCOU
+    def is_cancelled(self):
+        return self.status == self.Status.CANCELLED
 
     @property
-    def presenca_marcavel(self):
+    def attendance_markable(self):
         """Came or missed can be marked from the day of the appointment on."""
         return timezone.localdate(self.start) <= timezone.localdate()
 
 
-def criar_tipos_padrao(clinic):
+def create_default_types(clinic):
     """Create the default appointment types for a clinic that has none."""
     with without_isolation():
         if AppointmentType.objects.filter(clinic=clinic).exists():
             return
-        tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.DENTISTRY else TIPOS_PADRAO
+        appointment_types = (
+            TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.DENTISTRY else DEFAULT_TYPES
+        )
         AppointmentType.objects.bulk_create(
-            AppointmentType(clinic=clinic, name=name, color=color) for name, color in tipos
+            AppointmentType(clinic=clinic, name=name, color=color)
+            for name, color in appointment_types
         )

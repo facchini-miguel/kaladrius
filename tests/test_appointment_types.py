@@ -4,7 +4,7 @@ from django.urls import reverse
 from apps.core.isolation import use_clinic
 from apps.core.models import Clinic, Role
 from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
-from apps.schedule.models import TIPOS_PADRAO, AppointmentType
+from apps.schedule.models import DEFAULT_TYPES, AppointmentType
 
 pytestmark = pytest.mark.django_db
 
@@ -13,16 +13,16 @@ pytestmark = pytest.mark.django_db
     ("area", "esperados"),
     [
         (Clinic.Area.DENTISTRY, TIPOS_DE_ATENDIMENTO),
-        (Clinic.Area.MEDICINE, TIPOS_PADRAO),
-        (Clinic.Area.OUTRA, TIPOS_PADRAO),
+        (Clinic.Area.MEDICINE, DEFAULT_TYPES),
+        (Clinic.Area.OUTRA, DEFAULT_TYPES),
     ],
 )
 def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
     # Decision 080: dental types for the Odontologia area, general ones for the others.
     clinic = Clinic.objects.create(name="Nova", area=area)
     with use_clinic(clinic):
-        tipos = {t.name: t.color for t in AppointmentType.objects.all()}
-    assert tipos == dict(esperados)
+        appointment_types = {t.name: t.color for t in AppointmentType.objects.all()}
+    assert appointment_types == dict(esperados)
 
 
 def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):

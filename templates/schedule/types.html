@@ -21,7 +21,7 @@
       {% for kind in tipos %}
       <tr>
         <td><span class="amostra-cor" style="background-color: {{ kind.color }}" title="{{ kind.color }}"></span></td>
-        <td>{{ kind.nome_exibido }}</td>
+        <td>{{ kind.display_name }}</td>
         <td>
           {% if kind.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}

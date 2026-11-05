@@ -3,5 +3,5 @@
     <a href="{% url 'schedule:calendar' %}?practitioner={{ appointment.practitioner_id }}&amp;date={{ appointment.start|date:'Y-m-d' }}">{{ appointment.start|date:"SHORT_DATETIME_FORMAT" }}</a>
     · {{ appointment.practitioner.name }}
   </span>
-  <span class="legenda-tipo small" style="background-color: {{ appointment.kind.color }}">{{ appointment.kind.nome_exibido }}</span>
+  <span class="legenda-tipo small" style="background-color: {{ appointment.kind.color }}">{{ appointment.kind.display_name }}</span>
 </li>
