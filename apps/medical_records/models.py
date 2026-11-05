@@ -69,10 +69,11 @@ class Visit(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(auto_now=True, db_column="alterado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
     finalized_at = models.DateTimeField(
         _("finalizado em"), null=True, blank=True, db_column="finalizado_em"
     )
@@ -82,6 +83,7 @@ class Visit(ModeloDaClinica):
         null=True,
         blank=True,
         related_name="+",
+        verbose_name=_("finalizado por"),
         db_column="finalizado_por_id",
     )
 
@@ -121,9 +123,10 @@ class Addendum(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_adendo"
@@ -184,9 +187,10 @@ class Certificate(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_atestado"
@@ -225,9 +229,10 @@ class Prescription(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_receita"
@@ -265,9 +270,10 @@ class ExamRequest(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_pedidodeexames"
@@ -301,9 +307,9 @@ class Attachment(ModeloDaClinica):
         db_column="descricao",
     )
     name = models.CharField(_("arquivo"), max_length=255, db_column="nome")
-    kind = models.CharField(max_length=50, db_column="tipo")
-    size = models.PositiveIntegerField(db_column="tamanho")
-    content = models.BinaryField(db_column="conteudo")
+    kind = models.CharField(_("tipo"), max_length=50, db_column="tipo")
+    size = models.PositiveIntegerField(_("tamanho"), db_column="tamanho")
+    content = models.BinaryField(_("conteúdo"), db_column="conteudo")
     practitioner = models.ForeignKey(
         Practitioner,
         on_delete=models.PROTECT,
@@ -315,9 +321,10 @@ class Attachment(ModeloDaClinica):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="+",
+        verbose_name=_("criado por"),
         db_column="criado_por_id",
     )
-    created_at = models.DateTimeField(auto_now_add=True, db_column="criado_em")
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 
     class Meta:
         db_table = "prontuario_anexo"

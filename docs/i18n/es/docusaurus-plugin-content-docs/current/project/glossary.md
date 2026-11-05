@@ -11,6 +11,7 @@ Los nombres del código están pasando del portugués al inglés (decisiones 155
 - **Solo cambian identificadores**, leídos como tokens de Python y variables de plantilla, nunca como texto: los textos de las pantallas, los `_()` y los `{% translate %}` quedan como están.
 - **La base mantiene sus nombres**: el modelo mantiene su tabla (`Meta.db_table`), el campo su columna (`db_column`). Las migraciones no ejecutan SQL, y la versión anterior (la vuelta automática) sigue funcionando.
 - **Un renombrado nunca choca**: un archivo que ya usa el nombre nuevo para otra cosa (una variable `date` junto a un campo `data`, el `type` de Python) se hace a mano.
+- **Un campo mantiene su etiqueta en portugués**: sin `verbose_name` Django arma la etiqueta a partir del nombre, así que un campo renombrado al inglés mostraría "created by" en las pantallas y en la auditoría. Un campo renombrado dice su propia etiqueta (`_("criado por")`); si no, una prueba falla (decisión 170).
 - **Las pruebas vigilan las plantillas**: una variable que una plantilla busca y no encuentra hace fallar la ejecución, salvo que esté en `tests/missing_template_variables.txt` (decisión 159). Un renombrado mantiene esa lista igual, con los nombres nuevos.
 
 ## Modelos (hecho)
