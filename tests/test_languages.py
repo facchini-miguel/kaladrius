@@ -95,11 +95,11 @@ def test_todos_os_textos_estao_traduzidos(language):
 
 def test_novidades_nos_tres_idiomas():
     languages = {code for code, _nome in settings.LANGUAGES}
-    for release in releases.todas():
+    for release in releases.all_releases():
         assert set(dict(release.titulos)) == languages or not release.titulo, release.versao
         for item in release.itens:
             assert set(dict(item.textos)) == languages, (release.versao, item.text)
-            assert item.modulo in releases.MODULOS, item.modulo
+            assert item.modulo in releases.MODULES, item.modulo
 
 
 def test_situacoes_em_aberto_concordam_em_espanhol():

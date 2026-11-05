@@ -24,7 +24,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, versao, idioma, titulo, **options):
-        release = next((r for r in releases.todas() if r.versao == versao), None)
+        release = next((r for r in releases.all_releases() if r.versao == versao), None)
         if release is None:
             raise CommandError(f"Versão {versao} não está no releases.yaml.")
         with translation.override(idioma):

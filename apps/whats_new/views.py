@@ -5,25 +5,25 @@ from . import releases
 
 
 @login_required
-def lista(request):
-    versoes = releases.para_publico("equipe")
-    modulos = sorted({(item.modulo, item.modulo_nome) for _, itens in versoes for item in itens})
+def whats_new_list(request):
+    versions = releases.for_audience("equipe")
+    modulos = sorted({(item.modulo, item.modulo_nome) for _, itens in versions for item in itens})
     modulo = request.GET.get("modulo", "")
     if modulo:
-        versoes = [
+        versions = [
             (release, tuple(item for item in itens if item.modulo == modulo))
-            for release, itens in versoes
+            for release, itens in versions
         ]
-        versoes = [(release, itens) for release, itens in versoes if itens]
+        versions = [(release, itens) for release, itens in versions if itens]
 
     # Opening this page clears the "new version" notice.
-    atual = releases.versao_atual()
-    if request.user.last_seen_version != atual:
-        request.user.last_seen_version = atual
+    current = releases.current_version()
+    if request.user.last_seen_version != current:
+        request.user.last_seen_version = current
         request.user.save(update_fields=["last_seen_version"])
 
     return render(
         request,
         "whats_new/list.html",
-        {"versoes": versoes, "modulos": modulos, "modulo": modulo},
+        {"versoes": versions, "modulos": modulos, "modulo": modulo},
     )

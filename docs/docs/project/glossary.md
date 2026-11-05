@@ -324,7 +324,7 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167), pati
 
 ## Functions and variables
 
-The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172), the core app (decision 173), finance (decision 174), schedule (decision 175), patients, medical records, estimates, staff, recalls, health plans, practitioners and team (decision 176), legacy, audit, account, help, dentistry, monitoring and reference data (decision 177).
+The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172), the core app (decision 173), finance (decision 174), schedule (decision 175), patients, medical records, estimates, staff, recalls, health plans, practitioners and team (decision 176), legacy, audit, account, help, dentistry, monitoring and reference data (decision 177), and the releases (decision 178): every app's Python names are in English.
 
 ### Shared variables
 
@@ -1122,6 +1122,38 @@ Renamed only inside their app (common words):
 |---|---|
 | `cidades` | `cities` |
 | `bancos` | `banks` |
+
+### Releases (`novidades`)
+
+| Before | After |
+|---|---|
+| `TIPOS` | `KINDS` |
+| `MODULOS` | `MODULES` |
+| `IDIOMA_ORIGEM` | `SOURCE_LANGUAGE` |
+| `PUBLICOS` | `AUDIENCES` |
+| `ORIGENS` | `SOURCES` |
+| `REPOSITORIO` | `REPOSITORY` |
+| `ReleasesInvalidas` | `InvalidReleases` |
+| `_no_idioma` | `_in_language` |
+| `url_pr` | `pr_url` |
+| `itens_para` | `items_for` |
+| `versao_para_tupla` | `version_tuple` |
+| `_textos` | `_texts` |
+| `_validar_item` | `_validate_item` |
+| `_validar_release` | `_validate_release` |
+| `ler_releases` | `read_releases` |
+| `versao_atual` | `current_version` |
+| `tem_novidade_para` | `has_news_for` |
+| `para_publico` | `for_audience` |
+| `listar_releases` | `list_releases` |
+| `novidades_router` | `whats_new_router` |
+| `todas` | `all_releases` |
+| `NovidadesConfig` | `WhatsNewConfig` |
+| `versao` (context processor) | `version_context` |
+| `chave` | `key` |
+| `lista` (view) | `whats_new_list` |
+
+The public interface keeps its names: the API's fields (`versao`, `data`, `titulo`, `itens`, `tipo`, `tipo_nome`, `modulo`, `texto`, `origem`, `pr`) and query names (`publico`, `desde`), and the keys of `releases.yaml`, which the release's attributes and the page mirror.
 
 ### Finance (`financeiro`): classes
 

@@ -26,7 +26,7 @@ class ReleaseOut(Schema):
 
 
 @router.get("/releases", response=list[ReleaseOut], auth=None)
-def listar_releases(
+def list_releases(
     request, publico: Literal["equipe", "paciente"] = "paciente", desde: str | None = None
 ):
     """Release notes per version, newest first, in the language of Accept-Language.
@@ -34,9 +34,9 @@ def listar_releases(
     Use `desde` to receive only the versions after the one the app already showed.
     """
     try:
-        versoes = releases.para_publico(publico, desde=desde)
-    except releases.ReleasesInvalidas as erro:
-        raise HttpError(400, str(erro)) from erro
+        versions = releases.for_audience(publico, desde=desde)
+    except releases.InvalidReleases as error:
+        raise HttpError(400, str(error)) from error
     return [
         ReleaseOut(
             versao=release.versao,
@@ -54,5 +54,5 @@ def listar_releases(
                 for i in itens
             ],
         )
-        for release, itens in versoes
+        for release, itens in versions
     ]
