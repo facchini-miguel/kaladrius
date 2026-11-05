@@ -839,14 +839,14 @@ def comissoes_lista(request):
         {
             "until": until,
             "linhas": commissions.resumo(until),
-            "sem_percentual": Practitioner.objects.filter(active=True, comissao_percentual=0),
+            "sem_percentual": Practitioner.objects.filter(active=True, commission_percentage=0),
             "historico": Commission.objects.select_related("practitioner", "entry")[:30],
         },
     )
 
 
 @exige_permissao(Modulo.FINANCEIRO, Acao.ALTERAR)
-def comissao_percentual(request, pk):
+def commission_percentage(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     form = PercentualComissaoForm(request.POST or None, instance=practitioner)
     if request.method == "POST" and form.is_valid():

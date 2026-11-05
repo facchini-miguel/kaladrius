@@ -62,7 +62,7 @@ def criar(modelo, intervalos, user):
     Raises IntegrityError if the database constraint finds an overlap (for example,
     another user booked the same slot a moment earlier); nothing is saved then.
     """
-    serie = uuid.uuid4() if len(intervalos) > 1 else None
+    series = uuid.uuid4() if len(intervalos) > 1 else None
     criados = []
     for start, end in intervalos:
         appointment = Appointment(
@@ -72,7 +72,7 @@ def criar(modelo, intervalos, user):
             description=modelo.description,
             start=start,
             end=end,
-            serie=serie,
+            series=series,
             created_by=user,
         )
         appointment.save()

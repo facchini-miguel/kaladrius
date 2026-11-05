@@ -37,7 +37,7 @@ def tipos_de_registro():
     from .signals import AUDITADOS
 
     documentos = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
-    return sorted({nome_do_modelo(modelo) for modelo in [*AUDITADOS, *documentos]})
+    return sorted({nome_do_modelo(model) for model in [*AUDITADOS, *documentos]})
 
 
 @cache
@@ -48,9 +48,9 @@ def _rotulos():
     from .signals import AUDITADOS
 
     rotulos = {}
-    for modelo in AUDITADOS:
-        campos = rotulos.setdefault(nome_do_modelo(modelo), {})
-        for campo in modelo._meta.concrete_fields:
+    for model in AUDITADOS:
+        campos = rotulos.setdefault(nome_do_modelo(model), {})
+        for campo in model._meta.concrete_fields:
             for name in {campo.column, campo.column.removesuffix("_id"), campo.attname, campo.name}:
                 campos[name] = campo.verbose_name
     return rotulos
@@ -59,10 +59,10 @@ def _rotulos():
 def campos_alterados(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
-    rotulos = _rotulos().get(record.modelo, {})
+    rotulos = _rotulos().get(record.model_name, {})
     return [
         (rotulos.get(campo, campo), valores[0], valores[1])
-        for campo, valores in record.alteracoes.items()
+        for campo, valores in record.changes.items()
     ]
 
 
@@ -72,22 +72,22 @@ def lista(request):
     registros = AuditEntry.objects.filter(clinic=request.clinic)
     filtros = {
         "q": request.GET.get("q", "").strip(),
-        "acao": request.GET.get("acao", ""),
-        "modelo": request.GET.get("modelo", ""),
+        "action": request.GET.get("action", ""),
+        "model_name": request.GET.get("model_name", ""),
         "de": request.GET.get("de", ""),
         "until": request.GET.get("until", ""),
     }
     modelos = tipos_de_registro()
     if filtros["q"]:
         registros = registros.filter(
-            Q(usuario_nome__icontains=filtros["q"])
-            | Q(objeto_descricao__icontains=filtros["q"])
-            | Q(objeto_id=filtros["q"])
+            Q(user_name__icontains=filtros["q"])
+            | Q(object_repr__icontains=filtros["q"])
+            | Q(object_id=filtros["q"])
         )
-    if filtros["acao"] in AuditEntry.Acao.values:
-        registros = registros.filter(acao=filtros["acao"])
-    if filtros["modelo"]:
-        registros = registros.filter(modelo=filtros["modelo"])
+    if filtros["action"] in AuditEntry.Acao.values:
+        registros = registros.filter(action=filtros["action"])
+    if filtros["model_name"]:
+        registros = registros.filter(model_name=filtros["model_name"])
     if de := _data(filtros["de"]):
         registros = registros.filter(timestamp__date__gte=de)
     if until := _data(filtros["until"]):

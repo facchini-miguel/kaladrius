@@ -80,14 +80,14 @@ def test_cria_agendamento_e_avisa_a_tela(cenario):
     [appointment] = agendamentos(cenario)
     assert appointment.patient == cenario["patient"]
     assert appointment.created_by.username == "recepcao"
-    assert appointment.serie is None
+    assert appointment.series is None
 
 
 def test_repeticao_semanal_cria_a_serie(cenario):
     assert agendar(cenario, repeticoes=4).status_code == 204
     criados = agendamentos(cenario)
     assert len(criados) == 4
-    assert len({a.serie for a in criados}) == 1 and criados[0].serie is not None
+    assert len({a.series for a in criados}) == 1 and criados[0].series is not None
     datas = [a.start.date() for a in criados]
     assert datas == [SEGUNDA + datetime.timedelta(weeks=n) for n in range(4)]
 

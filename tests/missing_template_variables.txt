@@ -57,11 +57,11 @@ estimates/detail.html  backup_nenhum
 estimates/detail.html  saude_alerta
 estimates/list.html  backup_atrasado
 estimates/list.html  backup_nenhum
-estimates/list.html  orcamento.practitioner.name
+estimates/list.html  estimate.practitioner.name
 estimates/list.html  saude_alerta
 estimates/print.html  backup_atrasado
 estimates/print.html  backup_nenhum
-estimates/print.html  orcamento.practitioner.name
+estimates/print.html  estimate.practitioner.name
 estimates/print.html  saude_alerta
 estimates/procedure_form.html  backup_atrasado
 estimates/procedure_form.html  backup_nenhum

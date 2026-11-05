@@ -126,7 +126,7 @@ def duas_etapas(request):
                     {"codigos": services.novos_codigos(user)},
                 )
             novos.add_error("code", _("Código incorreto."))
-        restantes = user.codigos_recuperacao.filter(usado_em__isnull=True).count()
+        restantes = user.codigos_recuperacao.filter(used_at__isnull=True).count()
         return render(
             request,
             "account/two_factor.html",
@@ -159,7 +159,7 @@ def duas_etapas(request):
             "obrigatoria": obrigatoria,
             "form": form,
             "qr": services.qr_svg(address),
-            "segredo": services.segredo_em_grupos(dispositivo.segredo),
+            "secret": services.segredo_em_grupos(dispositivo.secret),
         },
     )
 

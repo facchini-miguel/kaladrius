@@ -104,7 +104,7 @@ def ficha(request, pk):
         )
     if pode(request, Modulo.CONVENIOS, Acao.VER):
         contexto["carteirinhas"] = list(
-            MemberCard.objects.filter(patient=patient).select_related("convenio")
+            MemberCard.objects.filter(patient=patient).select_related("health_plan")
         )
     contexto["relacionados"] = relacionados_de(patient)
     if acessa_prontuario(request):
@@ -123,7 +123,7 @@ def imprimir(request, pk):
     )
     registrar(AuditEntry.Acao.VISUALIZAR, patient)  # LGPD, as the record
     carteirinhas = (
-        list(MemberCard.objects.filter(patient=patient, active=True).select_related("convenio"))
+        list(MemberCard.objects.filter(patient=patient, active=True).select_related("health_plan"))
         if pode(request, Modulo.CONVENIOS, Acao.VER)
         else None
     )
@@ -269,7 +269,7 @@ def excluir(request, pk):
         orcamentos = Estimate.objects.filter(patient=patient)
         ids_orcamentos = list(orcamentos.values_list("pk", flat=True))
         ids_itens = list(
-            EstimateItem.objects.filter(orcamento__in=ids_orcamentos).values_list("pk", flat=True)
+            EstimateItem.objects.filter(estimate__in=ids_orcamentos).values_list("pk", flat=True)
         )
         # Stored in Portuguese, like the rest of the data. Free-text notes may hold
         # personal data, so they go too; the amounts and dates stay (accounting history).

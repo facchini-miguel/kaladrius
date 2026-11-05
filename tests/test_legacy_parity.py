@@ -49,8 +49,8 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
             whatsapp="48999990000",
             notes="Prefere manhã",
         )
-        convenio = HealthPlan.objects.create(name="Saúde Exemplo")
-        MemberCard.objects.create(patient=patient, convenio=convenio, number="123456")
+        health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
+        MemberCard.objects.create(patient=patient, health_plan=health_plan, number="123456")
     ficha = recepcao.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert reverse("patients:print", args=[patient.pk]) in ficha
     pagina = recepcao.get(reverse("patients:print", args=[patient.pk]))
@@ -65,7 +65,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
         assert trecho in text, trecho
     assert (
         AuditEntry.objects.filter(
-            acao=AuditEntry.Acao.VISUALIZAR, objeto_id=str(patient.pk)
+            action=AuditEntry.Acao.VISUALIZAR, object_id=str(patient.pk)
         ).count()
         == 2
     )  # the record and the print

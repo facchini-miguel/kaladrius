@@ -149,7 +149,7 @@ def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
     assert admin.post(reverse("patients:delete", args=[filha.pk])).status_code == 302
     assert not RelatedPerson.todos.exists()
     registros = AuditEntry.objects.filter(
-        modelo=nome_do_modelo(RelatedPerson), objeto_id=str(de_filha.pk)
+        model_name=nome_do_modelo(RelatedPerson), object_id=str(de_filha.pk)
     )
     assert registros.exists()
     assert "NOME-SIGILOSO" not in str(list(registros.values()))

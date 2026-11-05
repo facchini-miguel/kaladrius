@@ -6,7 +6,7 @@
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Pagar comissão" %}</h1>
 <p class="text-body-secondary mb-3">{% blocktranslate with nome=calculo.practitioner.name data=until|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
-{% include "finance/_commission_items.html" with pagamentos=calculo.creditos reversal_deduction=calculo.debitos received_amount=calculo.received_amount bruta=calculo.bruta amount=calculo.amount percentage=calculo.practitioner.comissao_percentual %}
+{% include "finance/_commission_items.html" with pagamentos=calculo.creditos reversal_deduction=calculo.debitos received_amount=calculo.received_amount bruta=calculo.bruta amount=calculo.amount percentage=calculo.practitioner.commission_percentage %}
 <form method="post" class="row g-2 align-items-end" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   <div class="col-md-5">{% with campo=form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>

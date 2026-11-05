@@ -12,13 +12,13 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Nome" %}</th><th class="text-end">{% translate "Valor" %}</th><th>{% translate "Categoria" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
     <tbody>
-      {% for procedimento in procedimentos %}
+      {% for procedure in procedimentos %}
       <tr>
-        <td>{% if procedimento.code %}<span class="text-body-secondary small">{{ procedimento.code }}</span> {% endif %}{{ procedimento.name }}</td>
-        <td class="text-end text-nowrap">{{ procedimento.amount|currency }}</td>
-        <td>{{ procedimento.category|default:"—" }}</td>
-        <td>{% if procedimento.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
-        <td class="text-end">{% if pode.cadastros.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:procedure_edit' procedimento.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td>{% if procedure.code %}<span class="text-body-secondary small">{{ procedure.code }}</span> {% endif %}{{ procedure.name }}</td>
+        <td class="text-end text-nowrap">{{ procedure.amount|currency }}</td>
+        <td>{{ procedure.category|default:"—" }}</td>
+        <td>{% if procedure.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td class="text-end">{% if pode.cadastros.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:procedure_edit' procedure.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum procedimento cadastrado." %}</td></tr>

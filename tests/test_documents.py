@@ -212,19 +212,19 @@ def test_fornecedor_no_reino_unido(clinica_a, admin):
 
 def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     no_pais(clinica_a, "US")
-    dados = {"name": "Jane Fictitious", "salario": "3000", "active": "on"}
-    resposta = admin.post(reverse("staff:new"), {**dados, "cpf": "000-12-3456"})
-    assert resposta.context["form"].errors["cpf"] == ["SSN: número inválido."]
-    assert admin.post(reverse("staff:new"), {**dados, "cpf": "536904399"}).status_code == 302
+    dados = {"name": "Jane Fictitious", "salary": "3000", "active": "on"}
+    resposta = admin.post(reverse("staff:new"), {**dados, "tax_id": "000-12-3456"})
+    assert resposta.context["form"].errors["tax_id"] == ["SSN: número inválido."]
+    assert admin.post(reverse("staff:new"), {**dados, "tax_id": "536904399"}).status_code == 302
     with usar_clinica(clinica_a):
         jane = Employee.objects.get()
-    assert jane.cpf == "536904399"
+    assert jane.tax_id == "536904399"
     ficha = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
     assert "SSN" in ficha and "536-90-4399" in ficha
 
     # Australia: the tax file number is not recorded, so there is no field.
     no_pais(clinica_a, "AU")
-    assert 'name="cpf"' not in admin.get(reverse("staff:new")).content.decode()
+    assert 'name="tax_id"' not in admin.get(reverse("staff:new")).content.decode()
 
 
 def test_registro_profissional_com_exemplos_do_pais(clinica_a, admin):

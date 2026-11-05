@@ -132,8 +132,8 @@ class Command(BaseCommand):
             AuditEntry.objects.filter(clinic_id__in=ids_clinicas).delete()
             AuditEntry.objects.filter(user_id__in=ids_usuarios).delete()
             AuditEntry.objects.filter(
-                modelo__in=["Usuário", "Clínica"],
-                objeto_id__in=[str(i) for i in ids_usuarios + ids_clinicas],
+                model_name__in=["Usuário", "Clínica"],
+                object_id__in=[str(i) for i in ids_usuarios + ids_clinicas],
             ).delete()
             nomes_usuarios = [u.username for u in usuarios]
             AccessLog.objects.filter(username__in=nomes_usuarios).delete()

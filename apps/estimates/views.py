@@ -37,11 +37,11 @@ def _orcamentos():
 
 
 def _aberto(request, pk):
-    orcamento = get_object_or_404(_orcamentos(), pk=pk)
-    if orcamento.status != Estimate.Situacao.ABERTO:
+    estimate = get_object_or_404(_orcamentos(), pk=pk)
+    if estimate.status != Estimate.Situacao.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
-        return None, redirect("estimates:detail", pk=orcamento.pk)
-    return orcamento, None
+        return None, redirect("estimates:detail", pk=estimate.pk)
+    return estimate, None
 
 
 def _odontologia(request):
@@ -92,9 +92,9 @@ def novo(request):
     form = OrcamentoForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
         form.instance.created_by = request.user
-        orcamento = form.save()
+        estimate = form.save()
         messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
-        return redirect("estimates:detail", pk=orcamento.pk)
+        return redirect("estimates:detail", pk=estimate.pk)
     valor_paciente = form["patient"].value()
     patient = (
         Patient.objects.filter(pk=valor_paciente, archived=False).first()
@@ -106,25 +106,25 @@ def novo(request):
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def editar(request, pk):
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    form = OrcamentoForm(request.POST or None, instance=orcamento)
+    form = OrcamentoForm(request.POST or None, instance=estimate)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Orçamento salvo."))
-        return redirect("estimates:detail", pk=orcamento.pk)
+        return redirect("estimates:detail", pk=estimate.pk)
     return render(
         request,
         "estimates/form.html",
-        {"form": form, "patient": orcamento.patient, "orcamento": orcamento},
+        {"form": form, "patient": estimate.patient, "estimate": estimate},
     )
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def detalhe(request, pk):
-    orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
-    aberto = orcamento.status == Estimate.Situacao.ABERTO
+    estimate = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
+    aberto = estimate.status == Estimate.Situacao.ABERTO
     odontologia = _odontologia(request)
     if odontologia:
         modules.marcar_se_desligado(request, ModuloClinico.ODONTOLOGIA)
@@ -134,42 +134,42 @@ def detalhe(request, pk):
         request,
         "estimates/detail.html",
         {
-            "orcamento": orcamento,
+            "estimate": estimate,
             "aberto": aberto,
             "item_form": ItemForm(odontologia=odontologia),
             "odontologia_habilitada": odontologia,
-            "desconto_form": DescontoForm(initial={"discount": orcamento.discount})
+            "desconto_form": DescontoForm(initial={"discount": estimate.discount})
             if pode_desconto and aberto
             else None,
             "pode_aprovar": aberto
             and pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR)
             and pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR),
-            **_dentes(request, orcamento),
+            **_dentes(request, estimate),
         },
     )
 
 
-def _dentes(request, orcamento):
+def _dentes(request, estimate):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
-    tem_historico = any(item.dentes or item.faces for item in orcamento.itens.all())
+    tem_historico = any(item.teeth or item.faces for item in estimate.itens.all())
     if not (_odontologia(request) or tem_historico):
         return {"mostrar_dentes": False}
-    return {"mostrar_dentes": True, **odontograma(orcamento.dentes)}
+    return {"mostrar_dentes": True, **odontograma(estimate.teeth)}
 
 
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def item_adicionar(request, pk):
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
     form = ItemForm(request.POST, odontologia=_odontologia(request))
     if form.is_valid():
         item = form.save(commit=False)
-        item.orcamento = orcamento
+        item.estimate = estimate
         item.description = form.cleaned_data["description"]
-        item.valor_unitario = form.cleaned_data["valor_unitario"]
+        item.unit_price = form.cleaned_data["unit_price"]
         _liberar_se_desligado(request, item)
         try:
             item.save()
@@ -180,17 +180,17 @@ def item_adicionar(request, pk):
     else:
         erros = [str(erro) for lista in form.errors.values() for erro in lista]
         messages.error(request, " ".join(erros))
-    return redirect("estimates:detail", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=estimate.pk)
 
 
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def item_remover(request, pk, item):
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    record = get_object_or_404(orcamento.itens, pk=item)
-    if (record.dentes or record.faces) and not _odontologia(request):
+    record = get_object_or_404(estimate.itens, pk=item)
+    if (record.teeth or record.faces) and not _odontologia(request):
         raise PermissionDenied
     _liberar_se_desligado(request, record)
     try:
@@ -199,38 +199,38 @@ def item_remover(request, pk, item):
         messages.error(request, erro.messages[0])
     else:
         messages.success(request, _("Item removido."))
-    return redirect("estimates:detail", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=estimate.pk)
 
 
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def discount(request, pk):
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
     form = DescontoForm(request.POST)
     if form.is_valid():
         value = form.cleaned_data["discount"] or 0
-        if value > orcamento.subtotal:
+        if value > estimate.subtotal:
             messages.error(request, _("O desconto passa do total do orçamento."))
         else:
-            orcamento.discount = value
-            orcamento.save()
+            estimate.discount = value
+            estimate.save()
             messages.success(request, _("Desconto aplicado."))
-    return redirect("estimates:detail", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=estimate.pk)
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def aprovar(request, pk):
     if not pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR):
         raise PermissionDenied
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
-    item = orcamento.itens.select_related("procedimento__category").first()
+    item = estimate.itens.select_related("procedure__category").first()
     category = (
-        item.procedimento.category
-        if item and item.procedimento and item.procedimento.category
+        item.procedure.category
+        if item and item.procedure and item.procedure.category
         else Category.objects.filter(kind=Category.Tipo.RECEITA, active=True).first()
     )
     form = AprovarForm(request.POST or None, initial={"category": category})
@@ -243,7 +243,7 @@ def aprovar(request, pk):
         )
         try:
             entry = services.aprovar(
-                orcamento,
+                estimate,
                 parcelas=dados["parcelas"],
                 primeiro_vencimento=dados["primeiro_vencimento"],
                 category=dados["category"],
@@ -255,31 +255,31 @@ def aprovar(request, pk):
         else:
             messages.success(request, _("Orçamento aprovado e lançado em A receber."))
             return redirect("finance:entry", pk=entry.pk)
-    return render(request, "estimates/approve.html", {"form": form, "orcamento": orcamento})
+    return render(request, "estimates/approve.html", {"form": form, "estimate": estimate})
 
 
 @require_POST
 @exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
 def recusar(request, pk):
-    orcamento, resposta = _aberto(request, pk)
+    estimate, resposta = _aberto(request, pk)
     if resposta:
         return resposta
     try:
-        services.recusar(orcamento, user=request.user)
+        services.recusar(estimate, user=request.user)
     except ValidationError as erro:  # approved or refused by someone else a moment ago
         messages.error(request, erro.messages[0])
     else:
         messages.success(request, _("Orçamento marcado como recusado."))
-    return redirect("estimates:detail", pk=orcamento.pk)
+    return redirect("estimates:detail", pk=estimate.pk)
 
 
 @exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
 def imprimir(request, pk):
-    orcamento = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
+    estimate = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
     return render(
         request,
         "estimates/print.html",
-        {"orcamento": orcamento, **_dentes(request, orcamento)},
+        {"estimate": estimate, **_dentes(request, estimate)},
     )
 
 
@@ -297,8 +297,8 @@ def procedimentos(request):
 
 @exige_permissao(Modulo.CADASTROS, Acao.ALTERAR)
 def procedimento_form(request, pk=None):
-    procedimento = get_object_or_404(Procedure.objects, pk=pk) if pk else Procedure()
-    form = ProcedimentoForm(request.POST or None, instance=procedimento)
+    procedure = get_object_or_404(Procedure.objects, pk=pk) if pk else Procedure()
+    form = ProcedimentoForm(request.POST or None, instance=procedure)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.name})
@@ -306,5 +306,5 @@ def procedimento_form(request, pk=None):
     return render(
         request,
         "estimates/procedure_form.html",
-        {"form": form, "procedimento": procedimento},
+        {"form": form, "procedure": procedure},
     )

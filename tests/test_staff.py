@@ -30,10 +30,10 @@ def admin(clinica_a, criar_usuario, cliente_de):
 def ana(clinica_a):
     with usar_clinica(clinica_a):
         employee = Employee.objects.create(
-            name="Ana Fictícia", cargo="Recepcionista", admissao=datetime.date(2025, 3, 1)
+            name="Ana Fictícia", job_title="Recepcionista", hired_on=datetime.date(2025, 3, 1)
         )
         Salary.objects.create(
-            employee=employee, amount=Decimal("2200"), desde=datetime.date(2025, 3, 1)
+            employee=employee, amount=Decimal("2200"), effective_from=datetime.date(2025, 3, 1)
         )
         return employee
 
@@ -43,24 +43,24 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
         reverse("staff:new"),
         {
             "name": "Bruno Fictício",
-            "cpf": "529.982.247-25",
-            "admissao": "2026-01-05",
-            "salario": "3000",
+            "tax_id": "529.982.247-25",
+            "hired_on": "2026-01-05",
+            "salary": "3000",
             "active": "on",
         },
     )
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         bruno = Employee.objects.get()
-        assert bruno.cpf == "52998224725"
-        assert bruno.salarios.get().desde == datetime.date(2026, 1, 5)  # admission date
+        assert bruno.tax_id == "52998224725"
+        assert bruno.salarios.get().effective_from == datetime.date(2026, 1, 5)  # admission date
     aumento = admin.post(
         reverse("staff:edit", args=[bruno.pk]),
         {
             "name": "Bruno Fictício",
-            "cpf": "52998224725",
-            "admissao": "2026-01-05",
-            "salario": "3300",
+            "tax_id": "52998224725",
+            "hired_on": "2026-01-05",
+            "salary": "3300",
             "salario_desde": "2026-07-01",
             "active": "on",
         },
@@ -75,13 +75,13 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
 @pytest.mark.parametrize(
     ("dados", "campo"),
     [
-        ({"cpf": "111.111.111-11"}, "cpf"),
-        ({"salario": ""}, "salario"),
-        ({"admissao": "2026-05-01", "desligamento": "2026-04-01"}, "desligamento"),
+        ({"tax_id": "111.111.111-11"}, "tax_id"),
+        ({"salary": ""}, "salary"),
+        ({"hired_on": "2026-05-01", "left_on": "2026-04-01"}, "left_on"),
     ],
 )
 def test_validacoes_do_cadastro(dados, campo, admin):
-    base = {"name": "Fictício", "salario": "2000", "active": "on"}
+    base = {"name": "Fictício", "salary": "2000", "active": "on"}
     resposta = admin.post(reverse("staff:new"), {**base, **dados})
     assert campo in resposta.context["form"].errors
 
@@ -89,22 +89,20 @@ def test_validacoes_do_cadastro(dados, campo, admin):
 def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
     with usar_clinica(clinica_a):
         futuro = Employee.objects.create(
-            name="Admitido depois", admissao=datetime.date(2026, 11, 3)
+            name="Admitido depois", hired_on=datetime.date(2026, 11, 3)
         )
         Salary.objects.create(
-            employee=futuro, amount=Decimal("2000"), desde=datetime.date(2026, 11, 3)
+            employee=futuro, amount=Decimal("2000"), effective_from=datetime.date(2026, 11, 3)
         )
-        saiu = Employee.objects.create(
-            name="Desligado antes", desligamento=datetime.date(2026, 9, 30)
-        )
+        saiu = Employee.objects.create(name="Desligado antes", left_on=datetime.date(2026, 9, 30))
         Salary.objects.create(
-            employee=saiu, amount=Decimal("2000"), desde=datetime.date(2025, 1, 1)
+            employee=saiu, amount=Decimal("2000"), effective_from=datetime.date(2025, 1, 1)
         )
         Employee.objects.create(name="Sem salário")
         folhas = services.preparar(OUTUBRO)
     assert [f.employee.name for f in folhas] == ["Ana Fictícia"]
     folha = folhas[0]
-    assert folha.salario == Decimal("2200") and folha.valor_hora_extra == hora_extra_sugerida(
+    assert folha.salary == Decimal("2200") and folha.overtime_rate == hora_extra_sugerida(
         Decimal("2200")
     ) == Decimal("15.00")
 
@@ -118,10 +116,10 @@ def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
 
 def test_calculo_do_total():
     folha = Payroll(
-        salario=Decimal("3000"),
-        horas_extras=Decimal("10"),
-        valor_hora_extra=Decimal("20.45"),
-        faltas=2,
+        salary=Decimal("3000"),
+        overtime_hours=Decimal("10"),
+        overtime_rate=Decimal("20.45"),
+        absences=2,
     )
     assert folha.valor_horas_extras == Decimal("204.50")
     assert folha.desconto_faltas == Decimal("200.00")
@@ -133,15 +131,15 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     folha, form = pagina.context["linhas"][0]
     prefixo = form.prefix
     dados = {
-        f"{prefixo}-horas_extras": "10",
-        f"{prefixo}-valor_hora_extra": "15,00",
-        f"{prefixo}-faltas": "1",
+        f"{prefixo}-overtime_hours": "10",
+        f"{prefixo}-overtime_rate": "15,00",
+        f"{prefixo}-absences": "1",
         f"{prefixo}-observacao": "",
     }
     assert folha.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", dados).status_code == 302
     with usar_clinica(clinica_a):
-        folha = Payroll.objects.get(employee=ana, competencia=OUTUBRO)
+        folha = Payroll.objects.get(employee=ana, period=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         category = pagina.context["lancar_form"].fields["category"].initial
     assert category.name == "Salários e encargos"
@@ -178,7 +176,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
 def test_total_zero_nao_e_lancado(clinica_a, ana):
     with usar_clinica(clinica_a):
         folha = services.preparar(OUTUBRO)[0]
-        folha.faltas = 30
+        folha.absences = 30
         folha.save()
         with pytest.raises(ValidationError, match="maior que zero"):
             services.lancar([folha], category=None, due_date=OUTUBRO, user=None)

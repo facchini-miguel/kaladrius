@@ -34,7 +34,7 @@
         <td><a href="{% url 'patients:record' rechamada.patient_id %}">{{ rechamada.patient.name }}</a></td>
         <td>{{ rechamada.description }}</td>
         <td>
-          {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
+          {% if rechamada.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
           {% elif rechamada.date < hoje %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
           {% elif rechamada.date == hoje %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
@@ -43,7 +43,7 @@
           {% if pode.rechamadas.alterar %}
           <form method="post" action="{% url 'recalls:complete' rechamada.pk %}" class="d-inline">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" class="btn btn-sm btn-outline-success">{% if rechamada.concluida %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">{% if rechamada.done %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
           </form>
           <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' rechamada.pk %}">{% translate "Editar" %}</a>
           {% endif %}

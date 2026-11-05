@@ -57,11 +57,11 @@ def _formulario(request, instancia):
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             employee = form.save()
-            if form.cleaned_data.get("salario"):
+            if form.cleaned_data.get("salary"):
                 Salary.objects.create(
                     employee=employee,
-                    amount=form.cleaned_data["salario"],
-                    desde=form.cleaned_data["salario_desde"],
+                    amount=form.cleaned_data["salary"],
+                    effective_from=form.cleaned_data["salario_desde"],
                     created_by=request.user,
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
@@ -73,15 +73,13 @@ def _formulario(request, instancia):
 def folha(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
     hoje = timezone.localdate()
-    competencia = services.mes_da_url(request.GET.get("mes"), hoje)
-    url = f"{reverse('staff:payroll')}?mes={competencia:%Y-%m}"
+    period = services.mes_da_url(request.GET.get("mes"), hoje)
+    url = f"{reverse('staff:payroll')}?mes={period:%Y-%m}"
     pode_alterar = pode(request, Modulo.PESSOAL, Acao.ALTERAR)
     folhas = (
-        services.preparar(competencia)
+        services.preparar(period)
         if pode_alterar
-        else list(
-            Payroll.objects.filter(competencia=competencia).select_related("employee", "entry")
-        )
+        else list(Payroll.objects.filter(period=period).select_related("employee", "entry"))
     )
     dados = request.POST if request.method == "POST" else None
     linhas = [
@@ -96,7 +94,7 @@ def folha(request):
     ]
     lancar_form = LancarForm(
         dados if dados and dados.get("acao") == "lancar" else None,
-        initial={"due_date": services.fim_do_mes(competencia) + datetime.timedelta(days=5)},
+        initial={"due_date": services.fim_do_mes(period) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
         if not pode_alterar:
@@ -130,13 +128,13 @@ def folha(request):
                         % {"n": lancadas},
                     )
                     return redirect(url)
-    anterior = (competencia - datetime.timedelta(days=1)).replace(day=1)
-    proximo = services.fim_do_mes(competencia) + datetime.timedelta(days=1)
+    anterior = (period - datetime.timedelta(days=1)).replace(day=1)
+    proximo = services.fim_do_mes(period) + datetime.timedelta(days=1)
     return render(
         request,
         "staff/payroll.html",
         {
-            "competencia": competencia,
+            "period": period,
             "linhas": linhas,
             "lancar_form": lancar_form,
             "pode_alterar": pode_alterar,

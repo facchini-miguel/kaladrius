@@ -15,7 +15,7 @@ from .models import Patient, RelatedPerson
 
 class UFField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return f"{obj.sigla} - {obj.name}"
+        return f"{obj.abbreviation} - {obj.name}"
 
 
 class CidadeField(forms.ModelChoiceField):

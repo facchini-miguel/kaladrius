@@ -134,9 +134,9 @@ def test_rascunho_so_o_autor_altera(cenario):
 def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
     visit = registrar(cenario)
     cenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
-    registros = AuditEntry.objects.filter(modelo="Atendimento", objeto_id=visit.pk)
-    assert {r.acao for r in registros} == {"criar", "visualizar"}
-    content = str([r.alteracoes for r in registros])
+    registros = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
+    assert {r.action for r in registros} == {"criar", "visualizar"}
+    content = str([r.changes for r in registros])
     assert "(conteúdo clínico)" in content
     for text in ANAMNESE.values():
         if not text.startswith("2031"):
@@ -180,7 +180,7 @@ def test_imprimir_so_depois_de_finalizado(cenario):
     assert impressao.status_code == 200
     assert ANAMNESE["chief_complaint"] in content and "Dra. Ana" in content
     assert AuditEntry.objects.filter(
-        objeto_id=visit.pk, acao="visualizar", objeto_descricao__endswith="(impressão)"
+        object_id=visit.pk, action="visualizar", object_repr__endswith="(impressão)"
     ).exists()
     assert cenario["recepcao"].get(url).status_code == 403
 
@@ -215,8 +215,8 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     assert "5 de março de 2031" in pagina  # month in lower case, as in running text
     with usar_clinica(cenario["clinic"]):
         assert visit.atestados.count() == 2
-    record = AuditEntry.objects.filter(modelo="Atestado").latest("pk")
-    assert "Repouso" not in str(record.alteracoes)
+    record = AuditEntry.objects.filter(model_name="Atestado").latest("pk")
+    assert "Repouso" not in str(record.changes)
 
     # Only the visit's author issues documents; other practitioners print them.
     assert cenario["dr"].get(url).status_code == 403
@@ -237,8 +237,8 @@ def test_receita_uma_linha_por_item(cenario):
     assert "RECEITUÁRIO" in pagina.content.decode()
     ficha = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
     assert resposta.url in ficha.content.decode()
-    record = AuditEntry.objects.filter(modelo="Receita").latest("pk")
-    assert "Paracetamol" not in str(record.alteracoes)
+    record = AuditEntry.objects.filter(model_name="Receita").latest("pk")
+    assert "Paracetamol" not in str(record.changes)
 
 
 def test_pedido_de_exames(cenario):
@@ -251,8 +251,8 @@ def test_pedido_de_exames(cenario):
     assert pagina.context["linhas"] == ["Hemograma completo", "Glicemia de jejum"]
     assert "PEDIDO DE EXAMES" in pagina.content.decode() and "Rotina" in pagina.content.decode()
     assert cenario["dr"].get(url).status_code == 403  # only the visit's author issues
-    record = AuditEntry.objects.filter(modelo="Pedido de exames").latest("pk")
-    assert "Hemograma" not in str(record.alteracoes)
+    record = AuditEntry.objects.filter(model_name="Pedido de exames").latest("pk")
+    assert "Hemograma" not in str(record.changes)
 
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
@@ -295,9 +295,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
         == 403
     )
     assert "raio-x" not in str(
-        list(
-            AuditEntry.objects.filter(modelo="Anexo").values_list("objeto_descricao", "alteracoes")
-        )
+        list(AuditEntry.objects.filter(model_name="Anexo").values_list("object_repr", "changes"))
     )
 
 

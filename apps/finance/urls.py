@@ -53,7 +53,7 @@ urlpatterns = [
     path("commissions/<int:pk>/", views.commission, name="commission"),
     path(
         "commissions/practitioner/<int:pk>/",
-        views.comissao_percentual,
+        views.commission_percentage,
         name="commission_percentage",
     ),
     path("commissions/practitioner/<int:pk>/pay/", views.comissao_pagar, name="commission_pay"),

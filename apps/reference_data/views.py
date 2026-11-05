@@ -41,7 +41,7 @@ def bancos(request):
     busca = request.GET.get("q", "").strip()
     bancos = Bank.objects.all()
     if busca:
-        filtro = Q(name__unaccent__icontains=busca) | Q(nome_curto__unaccent__icontains=busca)
+        filtro = Q(name__unaccent__icontains=busca) | Q(short_name__unaccent__icontains=busca)
         if busca.isdecimal():
             filtro |= Q(code=int(busca))
         bancos = bancos.filter(filtro)

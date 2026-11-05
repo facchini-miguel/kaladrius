@@ -98,14 +98,14 @@ def _situacao(sorteio, start):
     return Appointment.Situacao.DESMARCOU
 
 
-def simular_rechamadas(clinic, sorteio, quantidade=80, dias_antes=30, dias_depois=60):
+def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
     """Recalls from `dias_antes` ago to `dias_depois` ahead; past ones mostly done."""
     pacientes = _pacientes(clinic)
     if not pacientes:
         return 0
     hoje = timezone.localdate()
     novas = []
-    for _ in range(quantidade):
+    for _ in range(quantity):
         date = hoje + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
         novas.append(
             Recall(
@@ -113,7 +113,7 @@ def simular_rechamadas(clinic, sorteio, quantidade=80, dias_antes=30, dias_depoi
                 patient=sorteio.choice(pacientes),
                 date=date,
                 description=sorteio.choice(MOTIVOS_RECHAMADA),
-                concluida=date < hoje and sorteio.random() < 0.7,
+                done=date < hoje and sorteio.random() < 0.7,
             )
         )
     Recall.objects.bulk_create(novas)
@@ -132,7 +132,7 @@ DESCRICOES_FINANCEIRAS = [
 ]
 
 
-def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
+def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     """Fake receivables from 90 days ago to today, in 1 to 6 installments.
 
     Installments due in the past are mostly paid (some are left overdue, for the debtors
@@ -157,7 +157,7 @@ def simular_financeiro(clinic, sorteio, quantidade=60, user=None):
         for name in ("Atendimento", "Administrativo")
     }
     criados = 0
-    for _ in range(quantidade):
+    for _ in range(quantity):
         date = hoje - datetime.timedelta(days=sorteio.randint(0, 90))
         entry = services.criar_lancamento(
             clinic=clinic,
@@ -267,7 +267,7 @@ PROCEDIMENTOS_EXEMPLO = [
 ]
 
 
-def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
+def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
     """Fake estimates of the last 60 days: some approved (they become receivables), some
     refused, the rest open. Creates an example price list if the clinic has none."""
     from decimal import Decimal
@@ -295,11 +295,11 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
     )
     if not (procedimentos and pacientes and category):
         return 0
-    dentes = [d for linha in DENTES_PERMANENTES for d in linha]
+    teeth = [d for linha in DENTES_PERMANENTES for d in linha]
     hoje = timezone.localdate()
-    for _ in range(quantidade):
+    for _ in range(quantity):
         date = hoje - datetime.timedelta(days=sorteio.randint(0, 60))
-        orcamento = Estimate.objects.create(
+        estimate = Estimate.objects.create(
             clinic=clinic,
             patient=sorteio.choice(pacientes),
             practitioner=sorteio.choice(profissionais) if profissionais else None,
@@ -307,29 +307,29 @@ def simular_orcamentos(clinic, sorteio, quantidade=20, user=None):
             valid_until=date + datetime.timedelta(days=30),
             created_by=user,
         )
-        for procedimento in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
-            escolhidos = sorted(sorteio.sample(dentes, sorteio.randint(0, 3)))
+        for procedure in sorteio.sample(procedimentos, sorteio.randint(1, 3)):
+            escolhidos = sorted(sorteio.sample(teeth, sorteio.randint(0, 3)))
             EstimateItem.objects.create(
                 clinic=clinic,
-                orcamento=orcamento,
-                procedimento=procedimento,
-                description=procedimento.name,
-                dentes=",".join(str(d) for d in escolhidos),
-                quantidade=max(len(escolhidos), 1),
-                valor_unitario=procedimento.amount,
+                estimate=estimate,
+                procedure=procedure,
+                description=procedure.name,
+                teeth=",".join(str(d) for d in escolhidos),
+                quantity=max(len(escolhidos), 1),
+                unit_price=procedure.amount,
             )
         sorte = sorteio.random()
         if sorte < 0.4:
             services.aprovar(
-                orcamento,
+                estimate,
                 parcelas=sorteio.choice([1, 2, 3, 4]),
                 primeiro_vencimento=date + datetime.timedelta(days=7),
                 category=category,
                 user=user,
             )
         elif sorte < 0.6:
-            services.recusar(orcamento, user=user)
-    return quantidade
+            services.recusar(estimate, user=user)
+    return quantity
 
 
 def simular_comissoes(clinic, sorteio, user=None):
@@ -348,9 +348,9 @@ def simular_comissoes(clinic, sorteio, user=None):
     fim_do_mes_passado = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
     pagas = 0
     for practitioner in Practitioner.objects.filter(clinic=clinic, active=True):
-        if not practitioner.comissao_percentual:
-            practitioner.comissao_percentual = Decimal(sorteio.choice([30, 35, 40]))
-            practitioner.save(update_fields=["comissao_percentual"])
+        if not practitioner.commission_percentage:
+            practitioner.commission_percentage = Decimal(sorteio.choice([30, 35, 40]))
+            practitioner.save(update_fields=["commission_percentage"])
         # Runs without isolation (like the command); the practitioner pins the clinic.
         if commissions.pendente(practitioner, fim_do_mes_passado)["amount"] > 0:
             commissions.pagar(

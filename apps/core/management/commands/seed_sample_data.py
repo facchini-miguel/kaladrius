@@ -135,19 +135,19 @@ class Command(BaseCommand):
             criados.append(username)
         return user
 
-    def _pacientes(self, clinic, quantidade):
+    def _pacientes(self, clinic, quantity):
         """Create fake patients for a clinic that has none. Returns how many were created."""
-        if quantidade <= 0 or Patient.objects.filter(clinic=clinic).exists():
+        if quantity <= 0 or Patient.objects.filter(clinic=clinic).exists():
             return 0
         from faker import Faker
 
         fake = Faker("pt_BR")
         fake.seed_instance(clinic.pk)  # same data every time for the same clinic
-        cidades = list(City.objects.filter(state__sigla="SC"))
+        cidades = list(City.objects.filter(state__abbreviation="SC"))
         estados_civis = list(MaritalStatus.objects.all())
         documentos = set()
         novos = []
-        for number in range(1, quantidade + 1):
+        for number in range(1, quantity + 1):
             juridica = number % 25 == 0  # about 4% companies
             if juridica:
                 name = fake.company()
@@ -201,8 +201,8 @@ class Command(BaseCommand):
             MemberCard(
                 clinic=clinic,
                 patient=patient,
-                convenio=sorteio.choice(convenios),
-                plano=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
+                health_plan=sorteio.choice(convenios),
+                plan=sorteio.choice(["Enfermaria", "Apartamento", "Básico"]),
                 number=f"{number:012d}",
                 valid_until=hoje + datetime.timedelta(days=sorteio.randint(-60, 720)),
             )
@@ -214,16 +214,16 @@ class Command(BaseCommand):
         """Two made-up employees with a salary, for the month's pay (decision 099)."""
         if Employee.objects.filter(clinic=clinic).exists():
             return
-        admissao = timezone.localdate().replace(day=1) - datetime.timedelta(days=400)
-        for name, cargo, salario in (
+        hired_on = timezone.localdate().replace(day=1) - datetime.timedelta(days=400)
+        for name, job_title, salario in (
             ("Lúcia Andrade (fictícia)", "Recepcionista", "2200.00"),
             ("Paulo Teixeira (fictício)", "Auxiliar de saúde bucal", "2500.00"),
         ):
             employee = Employee.objects.create(
-                clinic=clinic, name=name, cargo=cargo, admissao=admissao
+                clinic=clinic, name=name, job_title=job_title, hired_on=hired_on
             )
             Salary.objects.create(
-                clinic=clinic, employee=employee, amount=Decimal(salario), desde=admissao
+                clinic=clinic, employee=employee, amount=Decimal(salario), effective_from=hired_on
             )
 
     def _relacionados(self, clinic):

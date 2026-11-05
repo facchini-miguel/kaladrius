@@ -57,7 +57,7 @@ def pendente(practitioner, until):
     creditos = list(_creditos(practitioner, until).order_by("date", "pk"))
     debitos = _debitos(practitioner)
     received_amount = sum((p.amount for p in creditos), start=ZERO)
-    bruta = percentual_de(received_amount, practitioner.comissao_percentual)
+    bruta = percentual_de(received_amount, practitioner.commission_percentage)
     reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
     return {
         "practitioner": practitioner,
@@ -82,10 +82,10 @@ def resumo(until):
             received_amount=Sum("amount"), quantos=Count("pk")
         )
         debitos = _debitos(practitioner)
-        if not (practitioner.comissao_percentual or totais["quantos"] or debitos):
+        if not (practitioner.commission_percentage or totais["quantos"] or debitos):
             continue
         received_amount = totais["received_amount"] or ZERO
-        bruta = percentual_de(received_amount, practitioner.comissao_percentual)
+        bruta = percentual_de(received_amount, practitioner.commission_percentage)
         reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
         linhas.append(
             {
@@ -124,7 +124,7 @@ def pagar(practitioner, *, until, due_date, category, user):
         clinic=practitioner.clinic,
         practitioner=practitioner,
         until=until,
-        percentage=practitioner.comissao_percentual,
+        percentage=practitioner.commission_percentage,
         received_amount=calculo["received_amount"],
         reversal_deduction=calculo["reversal_deduction"],
         amount=calculo["amount"],

@@ -529,8 +529,8 @@ class FecharCaixaForm(FormularioBootstrap, forms.Form):
 class PercentualComissaoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Practitioner
-        fields = ["comissao_percentual"]
-        localized_fields = ["comissao_percentual"]
+        fields = ["commission_percentage"]
+        localized_fields = ["commission_percentage"]
 
 
 class PagarComissaoForm(FormularioBootstrap, forms.Form):

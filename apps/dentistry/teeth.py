@@ -68,17 +68,17 @@ def name(dente, numeracao=None):
     return lado + (str(number) if quadrante <= 4 else "ABCDE"[number - 1])
 
 
-def ordenar(dentes, numeracao=None):
+def ordenar(teeth, numeracao=None):
     """Teeth in the numbering's order: 1, 3, 14, A in Universal; FDI order otherwise."""
     numeracao = numeracao or numeracao_da_clinica()
     if numeracao != UNIVERSAL:
-        return sorted(dentes)
+        return sorted(teeth)
 
     def chave(dente):
         value = _universal(dente) if dente in DENTES_VALIDOS else 99
         return (isinstance(value, str), str(value).zfill(2))
 
-    return sorted(dentes, key=chave)
+    return sorted(teeth, key=chave)
 
 
 # Appointment types a new dental clinic starts with: the ones from the legacy system, with

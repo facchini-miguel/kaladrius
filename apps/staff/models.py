@@ -25,10 +25,10 @@ DIAS_POR_MES = Decimal(30)
 class Employee(ModeloDaClinica):
     name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
     # The country's employee document (decision 121); the name stayed from Brazil.
-    cpf = models.CharField(_("documento"), max_length=20, blank=True)
-    cargo = models.CharField(_("cargo"), max_length=100, blank=True)
-    admissao = models.DateField(_("admissão"), null=True, blank=True)
-    desligamento = models.DateField(_("desligamento"), null=True, blank=True)
+    tax_id = models.CharField(_("documento"), max_length=20, blank=True, db_column="cpf")
+    job_title = models.CharField(_("cargo"), max_length=100, blank=True, db_column="cargo")
+    hired_on = models.DateField(_("admissão"), null=True, blank=True, db_column="admissao")
+    left_on = models.DateField(_("desligamento"), null=True, blank=True, db_column="desligamento")
     phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
@@ -42,8 +42,8 @@ class Employee(ModeloDaClinica):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "cpf"],
-                condition=~Q(cpf=""),
+                fields=["clinic", "tax_id"],
+                condition=~Q(tax_id=""),
                 name="funcionario_cpf_unico_por_clinica",
             ),
         ]
@@ -55,8 +55,12 @@ class Employee(ModeloDaClinica):
 
     def salario_em(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""
-        salario = self.salarios.filter(desde__lte=date).order_by("-desde", "-pk").first()
-        return salario.amount if salario else None
+        salary = (
+            self.salarios.filter(effective_from__lte=date)
+            .order_by("-effective_from", "-pk")
+            .first()
+        )
+        return salary.amount if salary else None
 
 
 class Salary(ModeloDaClinica):
@@ -70,7 +74,7 @@ class Salary(ModeloDaClinica):
         db_column="funcionario_id",
     )
     amount = models.DecimalField(_("salário"), **DINHEIRO, db_column="valor")
-    desde = models.DateField(_("desde"))
+    effective_from = models.DateField(_("desde"), db_column="desde")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -86,13 +90,13 @@ class Salary(ModeloDaClinica):
         db_table = "pessoal_salario"
         verbose_name = _("salário")
         verbose_name_plural = _("salários")
-        ordering = ["-desde", "-pk"]
+        ordering = ["-effective_from", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="salario_valor_positivo"),
         ]
 
     def __str__(self):
-        return f"{self.employee} {self.amount} ({self.desde:%d/%m/%Y})"
+        return f"{self.employee} {self.amount} ({self.effective_from:%d/%m/%Y})"
 
 
 class Payroll(ModeloDaClinica):
@@ -109,13 +113,21 @@ class Payroll(ModeloDaClinica):
         verbose_name=_("funcionário"),
         db_column="funcionario_id",
     )
-    competencia = models.DateField(_("competência"), help_text=_("O primeiro dia do mês."))
-    salario = models.DecimalField(_("salário"), **DINHEIRO)
-    horas_extras = models.DecimalField(
-        _("horas extras"), max_digits=6, decimal_places=2, default=Decimal(0)
+    period = models.DateField(
+        _("competência"), help_text=_("O primeiro dia do mês."), db_column="competencia"
     )
-    valor_hora_extra = models.DecimalField(_("valor da hora extra"), **DINHEIRO, default=Decimal(0))
-    faltas = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
+    salary = models.DecimalField(_("salário"), **DINHEIRO, db_column="salario")
+    overtime_hours = models.DecimalField(
+        _("horas extras"),
+        max_digits=6,
+        decimal_places=2,
+        default=Decimal(0),
+        db_column="horas_extras",
+    )
+    overtime_rate = models.DecimalField(
+        _("valor da hora extra"), **DINHEIRO, default=Decimal(0), db_column="valor_hora_extra"
+    )
+    absences = models.PositiveSmallIntegerField(_("dias de falta"), default=0, db_column="faltas")
     note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
     entry = models.OneToOneField(
         "financeiro.Entry",
@@ -131,16 +143,16 @@ class Payroll(ModeloDaClinica):
         db_table = "pessoal_folha"
         verbose_name = _("folha do mês")
         verbose_name_plural = _("folhas do mês")
-        ordering = ["-competencia", "employee__name"]
+        ordering = ["-period", "employee__name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "employee", "competencia"], name="folha_unica_por_mes"
+                fields=["clinic", "employee", "period"], name="folha_unica_por_mes"
             ),
-            models.CheckConstraint(condition=Q(competencia__day=1), name="folha_competencia_dia_1"),
+            models.CheckConstraint(condition=Q(period__day=1), name="folha_competencia_dia_1"),
         ]
 
     def __str__(self):
-        return f"{self.employee} {self.competencia:%m/%Y}"
+        return f"{self.employee} {self.period:%m/%Y}"
 
     def save(self, *args, **kwargs):
         self._conferir_clinica()
@@ -152,21 +164,21 @@ class Payroll(ModeloDaClinica):
 
     @property
     def valor_horas_extras(self):
-        return (self.horas_extras * self.valor_hora_extra).quantize(CENTAVO, ROUND_HALF_UP)
+        return (self.overtime_hours * self.overtime_rate).quantize(CENTAVO, ROUND_HALF_UP)
 
     @property
     def desconto_faltas(self):
-        return (self.salario / DIAS_POR_MES * self.faltas).quantize(CENTAVO, ROUND_HALF_UP)
+        return (self.salary / DIAS_POR_MES * self.absences).quantize(CENTAVO, ROUND_HALF_UP)
 
     @property
     def total(self):
-        return self.salario + self.valor_horas_extras - self.desconto_faltas
+        return self.salary + self.valor_horas_extras - self.desconto_faltas
 
     @property
     def lancada(self):
         return self.entry_id is not None and not self.entry.cancelled
 
 
-def hora_extra_sugerida(salario):
+def hora_extra_sugerida(salary):
     """Overtime hour from a monthly salary: salary / 220 hours x 1.5 (CLT minimum)."""
-    return (salario / HORAS_POR_MES * ADICIONAL_HORA_EXTRA).quantize(CENTAVO, ROUND_HALF_UP)
+    return (salary / HORAS_POR_MES * ADICIONAL_HORA_EXTRA).quantize(CENTAVO, ROUND_HALF_UP)

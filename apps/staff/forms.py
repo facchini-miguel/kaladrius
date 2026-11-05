@@ -27,31 +27,31 @@ def _dinheiro(rotulo, obrigatorio):
 class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     """The employee and, on registering or on a raise, the salary from a date."""
 
-    cpf = campo_documento()  # the country's employee document (decision 121)
+    tax_id = campo_documento()  # the country's employee document (decision 121)
     phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
         required=False,
         widget=forms.TextInput({"inputmode": "tel"}),
     )
-    salario = _dinheiro(_("Salário"), obrigatorio=False)
+    salary = _dinheiro(_("Salário"), obrigatorio=False)
     salario_desde = forms.DateField(label=_("Salário a partir de"), widget=DATA, required=False)
 
     class Meta:
         model = Employee
         fields = [
             "name",
-            "cpf",
-            "cargo",
-            "admissao",
-            "desligamento",
+            "tax_id",
+            "job_title",
+            "hired_on",
+            "left_on",
             "phone",
             "notes",
             "active",
         ]
         widgets = {
-            "admissao": DATA,
-            "desligamento": DATA,
+            "hired_on": DATA,
+            "left_on": DATA,
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -60,71 +60,71 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
         # None in Australia: the law restricts who may record the tax file number.
         self.document = identification.do_pais().funcionario
         if self.document is None:
-            del self.fields["cpf"]
+            del self.fields["tax_id"]
         else:
-            self.fields["cpf"].label = self.document.sigla
-            self.fields["cpf"].widget.attrs["placeholder"] = self.document.exemplo
+            self.fields["tax_id"].label = self.document.sigla
+            self.fields["tax_id"].widget.attrs["placeholder"] = self.document.exemplo
         if self.instance.pk:
-            self.fields["salario"].label = _("Novo salário")
-            self.fields["salario"].help_text = _(
+            self.fields["salary"].label = _("Novo salário")
+            self.fields["salary"].help_text = _(
                 "Só para um aumento ou mudança: o anterior fica no histórico."
             )
         else:
-            self.fields["salario"].required = True
+            self.fields["salary"].required = True
             self.fields["salario_desde"].help_text = _("Em branco: a data de admissão ou hoje.")
 
-    def clean_cpf(self):
-        cpf = identification.limpar(
-            self.cleaned_data.get("cpf"), [self.document], self.document.sigla
+    def clean_tax_id(self):
+        tax_id = identification.limpar(
+            self.cleaned_data.get("tax_id"), [self.document], self.document.sigla
         )
-        if cpf and Employee.objects.filter(cpf=cpf).exclude(pk=self.instance.pk).exists():
+        if tax_id and Employee.objects.filter(tax_id=tax_id).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um funcionário com este documento."))
-        return cpf
+        return tax_id
 
     def clean_phone(self):
         return normalizar_telefone(self.cleaned_data.get("phone"))
 
     def clean(self):
         dados = super().clean()
-        salario = dados.get("salario")
-        if salario is not None and salario <= 0:
-            self.add_error("salario", _("Informe um valor maior que zero."))
-        if salario and not dados.get("salario_desde"):
+        salary = dados.get("salary")
+        if salary is not None and salary <= 0:
+            self.add_error("salary", _("Informe um valor maior que zero."))
+        if salary and not dados.get("salario_desde"):
             if self.instance.pk:
                 self.add_error(
                     "salario_desde", _("Informe a partir de quando vale o novo salário.")
                 )
             else:
-                dados["salario_desde"] = dados.get("admissao") or timezone.localdate()
-        admissao, desligamento = dados.get("admissao"), dados.get("desligamento")
-        if admissao and desligamento and desligamento < admissao:
-            self.add_error("desligamento", _("O desligamento não pode ser antes da admissão."))
+                dados["salario_desde"] = dados.get("hired_on") or timezone.localdate()
+        hired_on, left_on = dados.get("hired_on"), dados.get("left_on")
+        if hired_on and left_on and left_on < hired_on:
+            self.add_error("left_on", _("O desligamento não pode ser antes da admissão."))
         return dados
 
 
 class FolhaForm(FormularioBootstrap, forms.ModelForm):
     """One employee's line of the month: overtime, absences and a note."""
 
-    horas_extras = CampoDecimal(
+    overtime_hours = CampoDecimal(
         label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
-    valor_hora_extra = _dinheiro(_("Valor da hora extra"), obrigatorio=True)
+    overtime_rate = _dinheiro(_("Valor da hora extra"), obrigatorio=True)
 
     class Meta:
         model = Payroll
-        fields = ["horas_extras", "valor_hora_extra", "faltas", "note"]
+        fields = ["overtime_hours", "overtime_rate", "absences", "note"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for campo in self.fields.values():
             campo.widget.attrs["class"] += " form-control-sm"
-        self.fields["faltas"].widget.attrs["max"] = 31
+        self.fields["absences"].widget.attrs["max"] = 31
 
-    def clean_faltas(self):
-        faltas = self.cleaned_data["faltas"]
-        if faltas > 30:
+    def clean_absences(self):
+        absences = self.cleaned_data["absences"]
+        if absences > 30:
             raise forms.ValidationError(_("No máximo 30 dias de falta."))
-        return faltas
+        return absences
 
 
 class LancarForm(FormularioBootstrap, forms.Form):

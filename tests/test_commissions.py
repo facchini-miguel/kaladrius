@@ -24,7 +24,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(name="Paulo Paciente")
-        dra = Practitioner.objects.create(name="Dra. Ana", comissao_percentual=Decimal("40"))
+        dra = Practitioner.objects.create(name="Dra. Ana", commission_percentage=Decimal("40"))
         dr = Practitioner.objects.create(name="Dr. Beto")
         tratamento = Category.objects.get(name="Tratamento")
         cash_register = FinancialAccount.objects.get(name="Caixa")
@@ -120,7 +120,7 @@ def test_estorno_depois_de_pago_e_descontado_no_proximo(cenario):
     pagar_comissao(cenario, cenario["dra"])
     # The percentage changes, but the deduction uses the one it was paid with (40%).
     with usar_clinica(cenario["clinic"]):
-        Practitioner.objects.filter(pk=cenario["dra"].pk).update(comissao_percentual=10)
+        Practitioner.objects.filter(pk=cenario["dra"].pk).update(commission_percentage=10)
         cenario["dra"].refresh_from_db()
         services.estornar(payment, reason="Pix devolvido", user=cenario["admin"])
     receber(cenario, "1000.00", cenario["dra"], date=HOJE)
@@ -176,10 +176,10 @@ def test_telas_e_percentual(cenario):
     assert list(pagina.context["sem_percentual"]) == [cenario["dr"]]
     assert "R$ 120,00" in pagina.content.decode()
     url = reverse("finance:commission_percentage", args=[cenario["dr"].pk])
-    assert cliente.post(url, {"comissao_percentual": "101"}).status_code == 200  # > 100
-    cliente.post(url, {"comissao_percentual": "35,5"})
+    assert cliente.post(url, {"commission_percentage": "101"}).status_code == 200  # > 100
+    cliente.post(url, {"commission_percentage": "35,5"})
     cenario["dr"].refresh_from_db()
-    assert cenario["dr"].comissao_percentual == Decimal("35.50")
+    assert cenario["dr"].commission_percentage == Decimal("35.50")
     pagar = cliente.get(reverse("finance:commission_pay", args=[cenario["dra"].pk]))
     assert pagar.context["calculo"]["amount"] == Decimal("120.00")
     # A future cut-off date is not allowed: it becomes today.
@@ -197,7 +197,7 @@ def test_so_o_administrador(cenario):
     assert (
         recepcao.post(
             reverse("finance:commission_percentage", args=[cenario["dra"].pk]),
-            {"comissao_percentual": "90"},
+            {"commission_percentage": "90"},
         ).status_code
         == 403
     )

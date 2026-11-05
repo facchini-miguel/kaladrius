@@ -5,7 +5,7 @@
 
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Aprovar orçamento" %}</h1>
-<p class="text-body-secondary mb-4">{% blocktranslate with numero=orcamento.pk nome=orcamento.patient.name total=orcamento.total|currency %}Orçamento nº {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
+<p class="text-body-secondary mb-4">{% blocktranslate with numero=estimate.pk nome=estimate.patient.name total=estimate.total|currency %}Orçamento nº {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
@@ -23,6 +23,6 @@
   </div></div>
   <p class="text-body-secondary small">{% translate "O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não pode mais ser alterado." %}</p>
   <button type="submit" class="btn btn-success">{% translate "Aprovar" %}</button>
-  <a class="btn btn-link" href="{% url 'estimates:detail' orcamento.pk %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'estimates:detail' estimate.pk %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

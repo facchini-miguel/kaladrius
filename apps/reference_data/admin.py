@@ -5,8 +5,8 @@ from .models import Bank, City, MaritalStatus, State
 
 @admin.register(State)
 class UFAdmin(admin.ModelAdmin):
-    list_display = ["sigla", "name", "regiao", "code"]
-    list_filter = ["regiao"]
+    list_display = ["abbreviation", "name", "region", "code"]
+    list_filter = ["region"]
 
 
 @admin.register(City)
@@ -19,11 +19,11 @@ class CidadeAdmin(admin.ModelAdmin):
 
 @admin.register(Bank)
 class BancoAdmin(admin.ModelAdmin):
-    list_display = ["code", "nome_curto", "name", "ispb"]
-    search_fields = ["name", "nome_curto", "ispb"]
+    list_display = ["code", "short_name", "name", "ispb"]
+    search_fields = ["name", "short_name", "ispb"]
 
 
 @admin.register(MaritalStatus)
 class EstadoCivilAdmin(admin.ModelAdmin):
-    list_display = ["name", "ordem"]
-    list_editable = ["ordem"]
+    list_display = ["name", "sort_order"]
+    list_editable = ["sort_order"]

@@ -159,7 +159,7 @@ def test_paciente_completo(importado):
     assert joao.tax_id == "01234567890"  # leading zero restored
     assert (joao.sex, joao.birth_date) == ("M", datetime.date(1980, 2, 3))
     assert joao.marital_status.name == "Solteiro(a)"
-    assert joao.city.name == "Florianópolis" and joao.state.sigla == "SC"
+    assert joao.city.name == "Florianópolis" and joao.state.abbreviation == "SC"
     assert (joao.neighborhood, joao.street, joao.number) == (
         "Trindade",
         "Avenida Beira-Mar",
@@ -228,7 +228,7 @@ def test_agenda_e_rechamadas(importado):
     assert timezone.localtime(agendamentos[0].start).hour == 8
 
     rechamadas = dados(clinic, Recall)
-    assert [(r.patient.name, r.concluida) for r in rechamadas] == [
+    assert [(r.patient.name, r.done) for r in rechamadas] == [
         ("João d'Ávila", True),  # past recall: considered handled
         ("Empresa Teste", False),
     ]
@@ -236,8 +236,8 @@ def test_agenda_e_rechamadas(importado):
 
 def test_registro_na_auditoria_e_sem_usuarios(importado, django_user_model):
     _, clinic = importado
-    record = AuditEntry.objects.get(clinic=clinic, objeto_descricao__startswith="Importação")
-    assert "4 pacientes, 4 agendamentos, 2 rechamadas" in record.objeto_descricao
+    record = AuditEntry.objects.get(clinic=clinic, object_repr__startswith="Importação")
+    assert "4 pacientes, 4 agendamentos, 2 rechamadas" in record.object_repr
     assert not django_user_model.objects.exists()
 
 
@@ -331,9 +331,9 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
 
     # The audit no longer holds the original values; the anonymization is recorded.
     registros = AuditEntry.objects.filter(clinic=clinic)
-    assert not registros.filter(modelo="Paciente").exists()
-    assert not registros.filter(objeto_descricao__startswith="Importação").exists()
-    assert registros.filter(objeto_descricao__startswith="Dados anonimizados: 4 pacientes").exists()
+    assert not registros.filter(model_name="Paciente").exists()
+    assert not registros.filter(object_repr__startswith="Importação").exists()
+    assert registros.filter(object_repr__startswith="Dados anonimizados: 4 pacientes").exists()
 
 
 def test_anonimizar_clinica_inexistente(db):
@@ -383,31 +383,34 @@ def test_anonimizacao_dos_fornecedores(importado):
 def test_anonimizacao_das_carteirinhas(importado):
     _, clinic = importado
     with usar_clinica(clinic):
-        convenio = HealthPlan.objects.create(name="Saúde Exemplo")
+        health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
         MemberCard.objects.create(
             patient=Patient.objects.first(),
-            convenio=convenio,
-            plano="Básico",
+            health_plan=health_plan,
+            plan="Básico",
             number="98765",
-            titular="Fulano Titular",
+            holder="Fulano Titular",
         )
     call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
     (carteirinha,) = dados(clinic, MemberCard)
-    assert carteirinha.number != "98765" and "Fulano" not in carteirinha.titular
-    assert carteirinha.titular and (carteirinha.convenio, carteirinha.plano) == (convenio, "Básico")
+    assert carteirinha.number != "98765" and "Fulano" not in carteirinha.holder
+    assert carteirinha.holder and (carteirinha.health_plan, carteirinha.plan) == (
+        health_plan,
+        "Básico",
+    )
 
 
 def test_anonimizacao_dos_funcionarios(importado):
     _, clinic = importado
     with usar_clinica(clinic):
         funcionaria = Employee.objects.create(
-            name="Fulana Funcionária", cpf="52998224725", phone="4833334444"
+            name="Fulana Funcionária", tax_id="52998224725", phone="4833334444"
         )
-        Salary.objects.create(employee=funcionaria, amount=Decimal("2000"), desde=HOJE)
+        Salary.objects.create(employee=funcionaria, amount=Decimal("2000"), effective_from=HOJE)
         folha = Payroll.objects.create(
             employee=funcionaria,
-            competencia=HOJE.replace(day=1),
-            salario=Decimal("2000"),
+            period=HOJE.replace(day=1),
+            salary=Decimal("2000"),
             note="Atestado da Fulana",
         )
         category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
@@ -426,7 +429,7 @@ def test_anonimizacao_dos_funcionarios(importado):
     call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
     (funcionaria,) = dados(clinic, Employee)
     (folha,) = dados(clinic, Payroll)
-    assert "Fulana" not in funcionaria.name and funcionaria.cpf == ""
+    assert "Fulana" not in funcionaria.name and funcionaria.tax_id == ""
     assert len(funcionaria.phone) == 10 and folha.note == ""
     with usar_clinica(clinic):
         assert Entry.objects.get(pk=folha.entry_id).payer == funcionaria.name

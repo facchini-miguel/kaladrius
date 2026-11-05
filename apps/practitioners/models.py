@@ -39,13 +39,14 @@ class Practitioner(ModeloDaClinica):
         db_column="usuario_id",
     )
     # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
-    comissao_percentual = models.DecimalField(
+    commission_percentage = models.DecimalField(
         _("comissão (%)"),
         max_digits=5,
         decimal_places=2,
         default=Decimal("0"),
         validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
         help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
+        db_column="comissao_percentual",
     )
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")

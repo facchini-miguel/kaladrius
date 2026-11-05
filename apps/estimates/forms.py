@@ -26,7 +26,7 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
             kind=Category.Tipo.RECEITA, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
-        self.codificacao = insurance.do_pais().procedimento
+        self.codificacao = insurance.do_pais().procedure
         self.fields["code"].label = insurance.rotulo_do_codigo()
         if self.codificacao and self.codificacao.exemplo:
             self.fields["code"].widget.attrs["placeholder"] = self.codificacao.exemplo
@@ -72,48 +72,48 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
 class ItemForm(FormularioBootstrap, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
-    valor_unitario = _campo_dinheiro(_("Valor unitário"), obrigatorio=False)
+    unit_price = _campo_dinheiro(_("Valor unitário"), obrigatorio=False)
 
     class Meta:
         model = EstimateItem
-        fields = ["procedimento", "description", "dentes", "faces", "quantidade", "valor_unitario"]
-        widgets = {"dentes": forms.HiddenInput}
+        fields = ["procedure", "description", "teeth", "faces", "quantity", "unit_price"]
+        widgets = {"teeth": forms.HiddenInput}
 
     def __init__(self, *args, odontologia=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.odontologia = odontologia
-        self.fields["procedimento"].queryset = Procedure.objects.filter(active=True)
+        self.fields["procedure"].queryset = Procedure.objects.filter(active=True)
         self.fields["description"].required = False
         if not odontologia:
             # Teeth and faces belong to the dental module (decision 080).
-            del self.fields["dentes"], self.fields["faces"]
+            del self.fields["teeth"], self.fields["faces"]
 
-    def clean_dentes(self):
-        partes = [p.strip() for p in (self.cleaned_data.get("dentes") or "").split(",")]
-        dentes = sorted({int(p) for p in partes if p.isdecimal()})
-        if any(d not in DENTES_VALIDOS for d in dentes):
+    def clean_teeth(self):
+        partes = [p.strip() for p in (self.cleaned_data.get("teeth") or "").split(",")]
+        teeth = sorted({int(p) for p in partes if p.isdecimal()})
+        if any(d not in DENTES_VALIDOS for d in teeth):
             raise forms.ValidationError(_("Dente inválido."))
-        return ",".join(str(d) for d in dentes)
+        return ",".join(str(d) for d in teeth)
 
     def clean(self):
         dados = super().clean()
-        procedimento = dados.get("procedimento")
+        procedure = dados.get("procedure")
         if not self.odontologia and any(
-            self.data.get(self.add_prefix(campo), "").strip() for campo in ("dentes", "faces")
+            self.data.get(self.add_prefix(campo), "").strip() for campo in ("teeth", "faces")
         ):
             raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
         # The procedure's code is copied, like its description and price.
-        self.instance.code = procedimento.code if procedimento else ""
+        self.instance.code = procedure.code if procedure else ""
         if not (dados.get("description") or "").strip():
-            if procedimento is None:
+            if procedure is None:
                 self.add_error("description", _("Escolha um procedimento ou descreva o item."))
             else:
-                dados["description"] = procedimento.name
-        if dados.get("valor_unitario") is None:
-            if procedimento is None:
-                self.add_error("valor_unitario", _("Informe o valor."))
+                dados["description"] = procedure.name
+        if dados.get("unit_price") is None:
+            if procedure is None:
+                self.add_error("unit_price", _("Informe o valor."))
             else:
-                dados["valor_unitario"] = procedimento.amount
+                dados["unit_price"] = procedure.amount
         return dados
 
 

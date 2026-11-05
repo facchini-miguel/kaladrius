@@ -59,13 +59,13 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = MemberCard
         fields = [
-            "convenio",
-            "plano",
+            "health_plan",
+            "plan",
             "number",
             "group",
-            "beneficiario",
+            "member_code",
             "valid_until",
-            "titular",
+            "holder",
             "active",
         ]
         widgets = {"valid_until": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
@@ -82,15 +82,15 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         )
         for campo, local, rotulo in (
             ("group", do_pais.group, _("Número do grupo")),
-            ("beneficiario", do_pais.beneficiario, _("Código do beneficiário")),
+            ("member_code", do_pais.member_code, _("Código do beneficiário")),
         ):
             if local or getattr(self.instance, campo):
                 self.fields[campo].label = insurance.com_nome_local(rotulo, local)
             else:
                 del self.fields[campo]
         # Active plans, plus the card's own plan when it was deactivated later.
-        self.fields["convenio"].queryset = HealthPlan.objects.filter(active=True) | (
-            HealthPlan.objects.filter(pk=self.instance.convenio_id)
+        self.fields["health_plan"].queryset = HealthPlan.objects.filter(active=True) | (
+            HealthPlan.objects.filter(pk=self.instance.health_plan_id)
         )
 
     def clean_number(self):
@@ -98,11 +98,11 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        convenio, number = dados.get("convenio"), dados.get("number")
+        health_plan, number = dados.get("health_plan"), dados.get("number")
         if (
-            convenio
+            health_plan
             and number
-            and MemberCard.objects.filter(convenio=convenio, number=number)
+            and MemberCard.objects.filter(health_plan=health_plan, number=number)
             .exclude(pk=self.instance.pk)
             .exists()
         ):

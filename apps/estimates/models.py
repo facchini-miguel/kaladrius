@@ -101,18 +101,21 @@ class Estimate(ModeloDaClinica):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="orcamento",
+        related_name="estimate",
         verbose_name=_("lançamento a receber"),
         db_column="lancamento_id",
     )
-    decidido_em = models.DateTimeField(_("aprovado ou recusado em"), null=True, blank=True)
-    decidido_por = models.ForeignKey(
+    decided_at = models.DateTimeField(
+        _("aprovado ou recusado em"), null=True, blank=True, db_column="decidido_em"
+    )
+    decided_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("aprovado ou recusado por"),
+        db_column="decidido_por_id",
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -151,37 +154,42 @@ class Estimate(ModeloDaClinica):
         return self.status == self.Situacao.ABERTO and self.valid_until < timezone.localdate()
 
     @property
-    def dentes(self):
+    def teeth(self):
         """Every tooth in the estimate, for the dental chart."""
         return sorted({dente for item in self.itens.all() for dente in item.lista_dentes})
 
 
 class EstimateItem(ModeloDaClinica):
-    orcamento = models.ForeignKey(
-        Estimate, on_delete=models.CASCADE, related_name="itens", verbose_name=_("orçamento")
+    estimate = models.ForeignKey(
+        Estimate,
+        on_delete=models.CASCADE,
+        related_name="itens",
+        verbose_name=_("orçamento"),
+        db_column="orcamento_id",
     )
-    procedimento = models.ForeignKey(
+    procedure = models.ForeignKey(
         Procedure,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
         verbose_name=_("procedimento"),
+        db_column="procedimento_id",
     )
     description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
     code = models.CharField(
         _("código"), max_length=20, blank=True, db_column="codigo"
     )  # copied, like descricao
     # FDI tooth numbers separated by commas ("11,12"); empty for the whole mouth.
-    dentes = models.CharField(_("dentes"), max_length=200, blank=True)
+    teeth = models.CharField(_("dentes"), max_length=200, blank=True, db_column="dentes")
     faces = models.CharField(
         _("faces ou região"),
         max_length=60,
         blank=True,
         help_text=_("Ex.: MOD, vestibular, arcada superior."),
     )
-    quantidade = models.PositiveSmallIntegerField(_("quantidade"), default=1)
-    valor_unitario = models.DecimalField(_("valor unitário"), **DINHEIRO)
+    quantity = models.PositiveSmallIntegerField(_("quantidade"), default=1, db_column="quantidade")
+    unit_price = models.DecimalField(_("valor unitário"), **DINHEIRO, db_column="valor_unitario")
 
     class Meta:
         db_table = "orcamentos_itemorcamento"
@@ -189,8 +197,8 @@ class EstimateItem(ModeloDaClinica):
         verbose_name_plural = _("itens do orçamento")
         ordering = ["pk"]
         constraints = [
-            models.CheckConstraint(condition=Q(quantidade__gte=1), name="item_quantidade"),
-            models.CheckConstraint(condition=Q(valor_unitario__gte=0), name="item_valor"),
+            models.CheckConstraint(condition=Q(quantity__gte=1), name="item_quantidade"),
+            models.CheckConstraint(condition=Q(unit_price__gte=0), name="item_valor"),
         ]
 
     def __str__(self):
@@ -198,15 +206,15 @@ class EstimateItem(ModeloDaClinica):
 
     def _conferir_modulo(self):
         self._conferir_clinica()
-        if self.orcamento.clinic_id != self.clinic_id:
+        if self.estimate.clinic_id != self.clinic_id:
             raise ClinicaDiferente("The estimate belongs to another clinic.")
         clinic = Clinic.objects.select_for_update().get(pk=self.clinic_id)
         anterior = (
-            type(self).objects.filter(pk=self.pk).values("dentes", "faces").first()
+            type(self).objects.filter(pk=self.pk).values("teeth", "faces").first()
             if self.pk is not None
             else None
         )
-        dental = self.dentes or self.faces or (anterior and any(anterior.values()))
+        dental = self.teeth or self.faces or (anterior and any(anterior.values()))
         # The view sets the flag only for the system administrator (decision 115).
         liberado = getattr(self, "odontologia_desligada_liberada", False)
         if dental and not clinic.odontologia and not liberado:
@@ -224,7 +232,7 @@ class EstimateItem(ModeloDaClinica):
 
     @property
     def total(self):
-        return self.valor_unitario * self.quantidade
+        return self.unit_price * self.quantity
 
     @property
     def dentes_exibicao(self):
@@ -235,4 +243,4 @@ class EstimateItem(ModeloDaClinica):
 
     @property
     def lista_dentes(self):
-        return [int(d) for d in self.dentes.split(",") if d.strip().isdecimal()]
+        return [int(d) for d in self.teeth.split(",") if d.strip().isdecimal()]

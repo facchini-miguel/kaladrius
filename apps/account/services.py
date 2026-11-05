@@ -59,17 +59,17 @@ def obrigatoria(request):
 def preparar(user, novo=False):
     """The person's not yet active device, with a secret to show as a QR code."""
     dispositivo, criado = TwoFactor.objects.get_or_create(
-        user=user, defaults={"segredo": pyotp.random_base32()}
+        user=user, defaults={"secret": pyotp.random_base32()}
     )
     if novo and not criado and not dispositivo.active:
-        dispositivo.segredo = pyotp.random_base32()
-        dispositivo.save(update_fields=["segredo"])
+        dispositivo.secret = pyotp.random_base32()
+        dispositivo.save(update_fields=["secret"])
     return dispositivo
 
 
 def endereco_do_app(dispositivo):
     """The otpauth:// address the authenticator app reads from the QR code."""
-    return pyotp.TOTP(dispositivo.segredo).provisioning_uri(
+    return pyotp.TOTP(dispositivo.secret).provisioning_uri(
         name=dispositivo.user.get_username(), issuer_name=settings.NOME_SISTEMA
     )
 
@@ -78,8 +78,8 @@ def qr_svg(address):
     return segno.make(address, error="m").svg_inline(scale=5, dark="#212529", border=2)
 
 
-def segredo_em_grupos(segredo):
-    return " ".join(segredo[i : i + 4] for i in range(0, len(segredo), 4))
+def segredo_em_grupos(secret):
+    return " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
 
 
 def verificar_app(dispositivo, code):
@@ -87,14 +87,14 @@ def verificar_app(dispositivo, code):
     code = re.sub(r"\D", "", code or "")
     if len(code) != 6:
         return False
-    totp = pyotp.TOTP(dispositivo.segredo)
+    totp = pyotp.TOTP(dispositivo.secret)
     agora = int(timezone.now().timestamp() // totp.interval)
     for passo in (agora - 1, agora, agora + 1):
-        if passo > dispositivo.ultimo_passo and hmac.compare_digest(
+        if passo > dispositivo.last_step and hmac.compare_digest(
             totp.at(passo * totp.interval), code
         ):
-            dispositivo.ultimo_passo = passo
-            dispositivo.save(update_fields=["ultimo_passo"])
+            dispositivo.last_step = passo
+            dispositivo.save(update_fields=["last_step"])
             return True
     return False
 
@@ -112,18 +112,18 @@ def novos_codigos(user):
         "-".join("".join(secrets.choice(ALFABETO) for _ in range(4)) for _ in range(2))
         for _ in range(QUANTOS_CODIGOS)
     ]
-    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, resumo=_resumo(c)) for c in codigos)
+    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, digest=_resumo(c)) for c in codigos)
     return codigos
 
 
 def verificar_recuperacao(user, code):
     restante = RecoveryCode.objects.filter(
-        user=user, resumo=_resumo(code), usado_em__isnull=True
+        user=user, digest=_resumo(code), used_at__isnull=True
     ).first()
     if restante is None:
         return False
-    restante.usado_em = timezone.now()
-    restante.save(update_fields=["usado_em"])
+    restante.used_at = timezone.now()
+    restante.save(update_fields=["used_at"])
     return True
 
 
@@ -138,8 +138,8 @@ def verificar(user, code):
 @transaction.atomic
 def ativar(dispositivo):
     dispositivo.active = True
-    dispositivo.ativada_em = timezone.now()
-    dispositivo.save(update_fields=["active", "ativada_em"])
+    dispositivo.activated_at = timezone.now()
+    dispositivo.save(update_fields=["active", "activated_at"])
     return novos_codigos(dispositivo.user)
 
 

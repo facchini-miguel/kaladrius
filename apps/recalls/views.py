@@ -15,7 +15,7 @@ from .forms import RechamadaForm
 from .models import Recall
 
 POR_PAGINA = 50
-SITUACOES = {"pendentes": {"concluida": False}, "concluidas": {"concluida": True}, "todas": {}}
+SITUACOES = {"pendentes": {"done": False}, "concluidas": {"done": True}, "todas": {}}
 
 
 def _data(value):
@@ -110,9 +110,9 @@ def _formulario(request, rechamada, inicial):
 @exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
 def concluir(request, pk):
     rechamada = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
-    rechamada.concluida = not rechamada.concluida
-    rechamada.save(update_fields=["concluida", "updated_at"])
-    if rechamada.concluida:
+    rechamada.done = not rechamada.done
+    rechamada.save(update_fields=["done", "updated_at"])
+    if rechamada.done:
         mensagem = _("Rechamada de %(nome)s concluída.")
     else:
         mensagem = _("Rechamada de %(nome)s reaberta.")
@@ -143,7 +143,7 @@ def resumo(request):
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     contagem = {}
     pendentes = Recall.objects.filter(
-        concluida=False, date__gte=de, date__lt=until, patient__archived=False
+        done=False, date__gte=de, date__lt=until, patient__archived=False
     )
     for date in pendentes.values_list("date", flat=True):
         contagem[date.isoformat()] = contagem.get(date.isoformat(), 0) + 1

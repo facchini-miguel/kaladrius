@@ -17,11 +17,15 @@ class TwoFactor(models.Model):
         verbose_name=_("usuário"),
         db_column="usuario_id",
     )
-    segredo = models.CharField(_("segredo"), max_length=64, editable=False)
+    secret = models.CharField(_("segredo"), max_length=64, editable=False, db_column="segredo")
     active = models.BooleanField(_("ativa"), default=False, db_column="ativa")
-    ativada_em = models.DateTimeField(_("ativada em"), null=True, blank=True)
+    activated_at = models.DateTimeField(
+        _("ativada em"), null=True, blank=True, db_column="ativada_em"
+    )
     # The last 30-second step accepted, so the same code cannot be used twice.
-    ultimo_passo = models.BigIntegerField(default=0, editable=False)
+    last_step = models.BigIntegerField(
+        _("último passo"), default=0, editable=False, db_column="ultimo_passo"
+    )
 
     class Meta:
         db_table = "conta_duasetapas"
@@ -40,8 +44,8 @@ class RecoveryCode(models.Model):
         verbose_name=_("usuário"),
         db_column="usuario_id",
     )
-    resumo = models.CharField(max_length=64, editable=False)
-    usado_em = models.DateTimeField(_("usado em"), null=True, blank=True)
+    digest = models.CharField(_("resumo"), max_length=64, editable=False, db_column="resumo")
+    used_at = models.DateTimeField(_("usado em"), null=True, blank=True, db_column="usado_em")
 
     class Meta:
         db_table = "conta_codigorecuperacao"

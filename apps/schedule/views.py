@@ -306,19 +306,19 @@ def excluir(request, pk):
     )
     if request.method == "POST":
         excluidos = Appointment.objects.filter(pk=appointment.pk)
-        if request.POST.get("escopo") == "serie" and appointment.serie:
+        if request.POST.get("escopo") == "serie" and appointment.series:
             # This one and the following ones of the same series.
             excluidos = Appointment.objects.filter(
-                serie=appointment.serie, start__gte=appointment.start
+                series=appointment.series, start__gte=appointment.start
             )
         total, _ = excluidos.delete()
         return _resposta_sucesso(
             ngettext("Agendamento excluído.", "%(n)s agendamentos excluídos.", total) % {"n": total}
         )
     proximos = 0
-    if appointment.serie:
+    if appointment.series:
         proximos = Appointment.objects.filter(
-            serie=appointment.serie, start__gt=appointment.start
+            series=appointment.series, start__gt=appointment.start
         ).count()
     return render(
         request, "schedule/_delete.html", {"appointment": appointment, "proximos": proximos}

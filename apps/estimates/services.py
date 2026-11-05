@@ -12,21 +12,21 @@ from .models import Estimate
 
 
 @transaction.atomic
-def aprovar(orcamento, *, parcelas, primeiro_vencimento, category, user, payment=None):
+def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=None):
     """Approve an open estimate: creates the receivable (and, optionally, pays the 1st
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
-    orcamento = Estimate.objects.select_for_update().get(pk=orcamento.pk)
-    if orcamento.status != Estimate.Situacao.ABERTO:
+    estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
+    if estimate.status != Estimate.Situacao.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser aprovado."))
-    total = orcamento.total
+    total = estimate.total
     if total <= 0:
         raise ValidationError(_("O orçamento não tem valor a receber."))
     entry = financeiro.criar_lancamento(
-        clinic=orcamento.clinic,
+        clinic=estimate.clinic,
         kind=Entry.Tipo.RECEBER,
-        patient=orcamento.patient,
-        practitioner=orcamento.practitioner,
-        description=_("Orçamento nº %(numero)s") % {"numero": orcamento.pk},
+        patient=estimate.patient,
+        practitioner=estimate.practitioner,
+        description=_("Orçamento nº %(numero)s") % {"numero": estimate.pk},
         category=category,
         total_amount=total,
         parcelas=parcelas,
@@ -36,21 +36,21 @@ def aprovar(orcamento, *, parcelas, primeiro_vencimento, category, user, payment
     if payment:
         primeira = entry.parcelas.order_by("number").first()
         financeiro.receber(primeira, user=user, amount=primeira.amount, **payment)
-    orcamento.status = Estimate.Situacao.APROVADO
-    orcamento.entry = entry
-    orcamento.decidido_em = timezone.now()
-    orcamento.decidido_por = user
-    orcamento.save()
+    estimate.status = Estimate.Situacao.APROVADO
+    estimate.entry = entry
+    estimate.decided_at = timezone.now()
+    estimate.decided_by = user
+    estimate.save()
     return entry
 
 
 @transaction.atomic
-def recusar(orcamento, *, user):
+def recusar(estimate, *, user):
     # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
-    orcamento = Estimate.objects.select_for_update().get(pk=orcamento.pk)
-    if orcamento.status != Estimate.Situacao.ABERTO:
+    estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
+    if estimate.status != Estimate.Situacao.ABERTO:
         raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
-    orcamento.status = Estimate.Situacao.RECUSADO
-    orcamento.decidido_em = timezone.now()
-    orcamento.decidido_por = user
-    orcamento.save()
+    estimate.status = Estimate.Situacao.RECUSADO
+    estimate.decided_at = timezone.now()
+    estimate.decided_by = user
+    estimate.save()

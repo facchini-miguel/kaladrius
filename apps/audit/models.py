@@ -48,12 +48,20 @@ class AuditEntry(models.Model):
         db_column="usuario_id",
     )
     # Kept as text so the entry still says who it was if the user is deleted.
-    usuario_nome = models.CharField(_("usuário (texto)"), max_length=150, blank=True)
-    acao = models.CharField(_("ação"), max_length=20, choices=Acao.choices)
-    modelo = models.CharField(_("tipo de registro"), max_length=50, blank=True)
-    objeto_id = models.CharField(_("código do registro"), max_length=40, blank=True)
-    objeto_descricao = models.CharField(_("registro"), max_length=200, blank=True)
-    alteracoes = models.JSONField(_("alterações"), default=dict, blank=True)
+    user_name = models.CharField(
+        _("usuário (texto)"), max_length=150, blank=True, db_column="usuario_nome"
+    )
+    action = models.CharField(_("ação"), max_length=20, choices=Acao.choices, db_column="acao")
+    model_name = models.CharField(
+        _("tipo de registro"), max_length=50, blank=True, db_column="modelo"
+    )
+    object_id = models.CharField(
+        _("código do registro"), max_length=40, blank=True, db_column="objeto_id"
+    )
+    object_repr = models.CharField(
+        _("registro"), max_length=200, blank=True, db_column="objeto_descricao"
+    )
+    changes = models.JSONField(_("alterações"), default=dict, blank=True, db_column="alteracoes")
     ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
@@ -63,10 +71,10 @@ class AuditEntry(models.Model):
         ordering = ["-timestamp", "-pk"]
         indexes = [
             models.Index(fields=["clinic", "-timestamp"], name="auditoria_clinica_momento"),
-            models.Index(fields=["modelo", "objeto_id"], name="auditoria_objeto"),
+            models.Index(fields=["model_name", "object_id"], name="auditoria_objeto"),
         ]
 
     def __str__(self):
-        quem = self.usuario_nome or "sistema"
-        acao = self.get_acao_display()
-        return f"{self.timestamp:%d/%m/%Y %H:%M} {quem}: {acao} {self.objeto_descricao}"
+        quem = self.user_name or "sistema"
+        action = self.get_action_display()
+        return f"{self.timestamp:%d/%m/%Y %H:%M} {quem}: {action} {self.object_repr}"

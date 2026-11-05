@@ -44,7 +44,7 @@ def ligar_duas_etapas(user):
 
 
 def codigo_atual(dispositivo, deslocamento=0):
-    totp = pyotp.TOTP(dispositivo.segredo)
+    totp = pyotp.TOTP(dispositivo.secret)
     return totp.at(time.time() + deslocamento * totp.interval)
 
 
@@ -123,9 +123,9 @@ def test_ativar_com_qr_code(client, pessoa):
     text = resposta.content.decode()
     assert "Verificação em duas etapas ativada" in text
     assert RecoveryCode.objects.filter(user=pessoa).count() == 10
-    assert AuditEntry.objects.filter(objeto_descricao__contains="ativada").exists()
+    assert AuditEntry.objects.filter(object_repr__contains="ativada").exists()
     dispositivo.refresh_from_db()
-    assert dispositivo.active and dispositivo.segredo not in text
+    assert dispositivo.active and dispositivo.secret not in text
 
 
 def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
@@ -215,7 +215,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     assert "Remover a verificação em duas etapas" in pagina
     client.post(reverse("team:two_factor", args=[vinculo.pk]))
     assert not services.ativa_para(pessoa)
-    assert AuditEntry.objects.filter(objeto_descricao__contains="removida").exists()
+    assert AuditEntry.objects.filter(object_repr__contains="removida").exists()
 
 
 def test_conta_de_demonstracao_nao_ativa(client, pessoa):
@@ -360,34 +360,34 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
 
     so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
     nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
-    TwoFactor.objects.create(user=nas_duas, segredo="ORIGINAL", active=True)
-    RecoveryCode.objects.create(user=nas_duas, resumo="original")
+    TwoFactor.objects.create(user=nas_duas, secret="ORIGINAL", active=True)
+    RecoveryCode.objects.create(user=nas_duas, digest="original")
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(
                 f"CREATE TABLE account_{tabela} (LIKE conta_{tabela} INCLUDING DEFAULTS)"
             )
-        for user, segredo in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
+        for user, secret in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
             cursor.execute(
                 "INSERT INTO account_duasetapas (id, usuario_id, segredo, ativa, ultimo_passo) "
                 "VALUES (%s, %s, %s, true, 0)",
-                [user.pk + 1000, user.pk, segredo],
+                [user.pk + 1000, user.pk, secret],
             )
             cursor.execute(
                 "INSERT INTO account_codigorecuperacao (id, usuario_id, resumo) "
                 "VALUES (%s, %s, %s)",
-                [user.pk + 1000, user.pk, f"codigo-{segredo}"],
+                [user.pk + 1000, user.pk, f"codigo-{secret}"],
             )
     with connection.schema_editor() as editor:
         migracao.copiar(None, editor)
 
     # Saved only in account_*: copied. Already in conta_*: kept as it was.
-    assert TwoFactor.objects.get(user=so_na_account).segredo == "NOVO"
-    assert TwoFactor.objects.get(user=nas_duas).segredo == "ORIGINAL"
+    assert TwoFactor.objects.get(user=so_na_account).secret == "NOVO"
+    assert TwoFactor.objects.get(user=nas_duas).secret == "ORIGINAL"
     assert list(
-        RecoveryCode.objects.filter(user=so_na_account).values_list("resumo", flat=True)
+        RecoveryCode.objects.filter(user=so_na_account).values_list("digest", flat=True)
     ) == ["codigo-NOVO"]
-    assert list(RecoveryCode.objects.filter(user=nas_duas).values_list("resumo", flat=True)) == [
+    assert list(RecoveryCode.objects.filter(user=nas_duas).values_list("digest", flat=True)) == [
         "original"
     ]
 
@@ -408,7 +408,7 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
         migracao.remover(apps, editor)
 
     user = django_user_model.objects.create_user("com_duas_etapas", password="x")
-    TwoFactor.objects.create(user=user, segredo="FICA", active=True)
+    TwoFactor.objects.create(user=user, secret="FICA", active=True)
     with connection.cursor() as cursor:
         for tabela in ("duasetapas", "codigorecuperacao"):
             cursor.execute(f"CREATE TABLE account_{tabela} (LIKE conta_{tabela})")
@@ -430,5 +430,5 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
     assert linhas == 0
     assert not ContentType.objects.filter(app_label="account").exists()
     assert not Permission.objects.filter(codename="view_duasetapas").exists()
-    assert TwoFactor.objects.get(user=user).segredo == "FICA"
+    assert TwoFactor.objects.get(user=user).secret == "FICA"
     assert ContentType.objects.filter(app_label="conta", model="twofactor").exists()

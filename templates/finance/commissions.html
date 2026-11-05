@@ -20,7 +20,7 @@
       {% for linha in linhas %}
       <tr>
         <td>{{ linha.practitioner.name }}{% if not linha.practitioner.active %} <span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
-        <td class="text-end">{{ linha.practitioner.comissao_percentual|floatformat:"-2" }}%</td>
+        <td class="text-end">{{ linha.practitioner.commission_percentage|floatformat:"-2" }}%</td>
         <td class="text-end text-nowrap">{{ linha.received_amount|currency }}</td>
         <td class="text-end text-nowrap">{% if linha.reversal_deduction %}− {{ linha.reversal_deduction|currency }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold">{{ linha.amount|currency }}</td>
