@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if instancia.pk %}{{ instancia.name }}{% else %}{% translate "Novo grupo" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-4">{% if instancia.pk %}{{ instancia.name }}{% else %}{% translate "Novo grupo" %}{% endif %}</h1>
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}

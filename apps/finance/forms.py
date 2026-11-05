@@ -249,17 +249,17 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         # A type without a document in this country (an individual in the UK) keeps none.
         juridica = dados.get("kind") == Supplier.Tipo.JURIDICA
         do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
-        documento = ""
+        document = ""
         if do_tipo is not None:
             try:
-                documento = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+                document = identification.limpar(dados.get("tax_id", ""), [do_tipo], do_tipo.sigla)
             except ValidationError as erro:
                 self.add_error("tax_id", erro)
                 return dados
-        dados["tax_id"] = documento
+        dados["tax_id"] = document
         if (
-            documento
-            and Supplier.objects.filter(tax_id=documento).exclude(pk=self.instance.pk).exists()
+            document
+            and Supplier.objects.filter(tax_id=document).exclude(pk=self.instance.pk).exists()
         ):
             self.add_error("tax_id", _("Já existe um fornecedor com este documento."))
         return dados

@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Caixa do dia" %} · {{ cash_register.account.name }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{% translate "Caixa do dia" %} · {{ cash_register.account.name }}</h1>
@@ -26,15 +26,15 @@
 <div class="table-responsive mb-4" style="max-width: 36rem;">
   <table class="table table-sm bg-white mb-0">
     <tbody>
-      <tr><td>{% translate "Valor contado na abertura" %}</td><td class="text-end">{{ cash_register.opening_amount|moeda }}</td></tr>
-      <tr><td>{% translate "+ Recebimentos nesta conta" %}</td><td class="text-end text-success">{{ resumo.entradas|moeda }}</td></tr>
-      <tr><td>{% translate "− Despesas pagas por esta conta" %}</td><td class="text-end text-danger">{{ resumo.saidas|moeda }}</td></tr>
-      <tr><td>{% translate "+ Reforços" %}</td><td class="text-end text-success">{{ resumo.reforcos|moeda }}</td></tr>
-      <tr><td>{% translate "− Retiradas" %}</td><td class="text-end text-danger">{{ resumo.retiradas|moeda }}</td></tr>
-      <tr class="fw-semibold"><td>{% translate "Deve haver na gaveta" %}</td><td class="text-end">{% if cash_register.aberto %}{{ resumo.esperado|moeda }}{% else %}{{ cash_register.expected_amount|moeda }}{% endif %}</td></tr>
+      <tr><td>{% translate "Valor contado na abertura" %}</td><td class="text-end">{{ cash_register.opening_amount|currency }}</td></tr>
+      <tr><td>{% translate "+ Recebimentos nesta conta" %}</td><td class="text-end text-success">{{ resumo.entradas|currency }}</td></tr>
+      <tr><td>{% translate "− Despesas pagas por esta conta" %}</td><td class="text-end text-danger">{{ resumo.saidas|currency }}</td></tr>
+      <tr><td>{% translate "+ Reforços" %}</td><td class="text-end text-success">{{ resumo.reforcos|currency }}</td></tr>
+      <tr><td>{% translate "− Retiradas" %}</td><td class="text-end text-danger">{{ resumo.retiradas|currency }}</td></tr>
+      <tr class="fw-semibold"><td>{% translate "Deve haver na gaveta" %}</td><td class="text-end">{% if cash_register.aberto %}{{ resumo.esperado|currency }}{% else %}{{ cash_register.expected_amount|currency }}{% endif %}</td></tr>
       {% if not cash_register.aberto %}
-      <tr><td>{% translate "Contado no fechamento" %}</td><td class="text-end">{{ cash_register.counted_amount|moeda }}</td></tr>
-      <tr class="fw-semibold{% if cash_register.diferenca %} text-danger{% endif %}"><td>{% translate "Diferença" %}</td><td class="text-end">{{ cash_register.diferenca|moeda }}</td></tr>
+      <tr><td>{% translate "Contado no fechamento" %}</td><td class="text-end">{{ cash_register.counted_amount|currency }}</td></tr>
+      <tr class="fw-semibold{% if cash_register.diferenca %} text-danger{% endif %}"><td>{% translate "Diferença" %}</td><td class="text-end">{{ cash_register.diferenca|currency }}</td></tr>
       {% endif %}
     </tbody>
   </table>
@@ -51,7 +51,7 @@
         <td class="text-nowrap">{{ payment.created_at|date:"TIME_FORMAT" }}</td>
         <td><a href="{% url 'finance:entry' payment.installment.entry_id %}">{{ payment.installment.entry.nome_pessoa }} · {{ payment.installment.entry.description }}</a></td>
         <td>{{ payment.get_method_display }}</td>
-        <td class="text-end text-nowrap {% if payment.installment.entry.kind == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ payment.amount|moeda }}</td>
+        <td class="text-end text-nowrap {% if payment.installment.entry.kind == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ payment.amount|currency }}</td>
       </tr>
       {% endfor %}
       {% for cash_movement in resumo.movimentos %}
@@ -59,7 +59,7 @@
         <td class="text-nowrap">{{ cash_movement.created_at|date:"TIME_FORMAT" }}</td>
         <td>{{ cash_movement.get_kind_display }}: {{ cash_movement.reason }}{% if cash_movement.other_account %} ({{ cash_movement.other_account.name }}){% endif %}</td>
         <td>—</td>
-        <td class="text-end text-nowrap {% if cash_movement.kind == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ cash_movement.amount|moeda }}</td>
+        <td class="text-end text-nowrap {% if cash_movement.kind == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ cash_movement.amount|currency }}</td>
       </tr>
       {% endfor %}
       {% if not resumo.pagamentos and not resumo.movimentos %}

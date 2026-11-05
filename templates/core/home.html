@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block conteudo %}
+{% block content %}
 {% with name=user.get_full_name|default:user.username %}
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
   <div>
     <h1 class="h3 mb-1">{{ saudacao }}, {{ name }}</h1>
     <div class="text-body-secondary small">
       {% if painel %}{{ painel.hoje|date:"l"|capfirst }}, {{ painel.hoje|date:"DATE_FORMAT" }} · {% endif %}
-      {% if clinica_atual %}{{ clinica_atual.name }} · {% if vinculo_atual %}{{ vinculo_atual.get_papel_display }}{% else %}{% translate "Administrador da plataforma" %}{% endif %}{% endif %}
+      {% if clinica_atual %}{{ clinica_atual.name }} · {% if vinculo_atual %}{{ vinculo_atual.get_role_display }}{% else %}{% translate "Administrador da plataforma" %}{% endif %}{% endif %}
     </div>
   </div>
   {% if painel %}
@@ -73,9 +73,9 @@
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:cash' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "Recebido hoje" %}</div>
-      <div class="indicador-valor text-success">{{ receb.recebido|moeda }}</div>
+      <div class="indicador-valor text-success">{{ receb.recebido|currency }}</div>
       <div class="small text-body-secondary">
-        {% if receb.parcelas_a_receber %}{% blocktranslate count n=receb.parcelas_a_receber with valor=receb.a_receber|moeda %}Falta receber hoje: {{ valor }} ({{ n }} parcela){% plural %}Falta receber hoje: {{ valor }} ({{ n }} parcelas){% endblocktranslate %}{% else %}{% translate "Nenhuma parcela em aberto vence hoje." %}{% endif %}
+        {% if receb.parcelas_a_receber %}{% blocktranslate count n=receb.parcelas_a_receber with valor=receb.a_receber|currency %}Falta receber hoje: {{ valor }} ({{ n }} parcela){% plural %}Falta receber hoje: {{ valor }} ({{ n }} parcelas){% endblocktranslate %}{% else %}{% translate "Nenhuma parcela em aberto vence hoje." %}{% endif %}
       </div>
     </div></a>
   </div>
@@ -84,21 +84,21 @@
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:cash_flow' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "Pago hoje" %}</div>
-      <div class="indicador-valor text-danger">{{ fin.pago_hoje|moeda }}</div>
+      <div class="indicador-valor text-danger">{{ fin.pago_hoje|currency }}</div>
       <div class="small text-body-secondary">
-        {% translate "Resultado do dia:" %} <span class="{% if fin.resultado_hoje < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_hoje|moeda }}</span>
+        {% translate "Resultado do dia:" %} <span class="{% if fin.resultado_hoje < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_hoje|currency }}</span>
       </div>
     </div></a>
   </div>
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:reports' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "Resultado do mês até hoje" %}</div>
-      <div class="indicador-valor {% if fin.resultado_mes < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_mes|moeda }}</div>
+      <div class="indicador-valor {% if fin.resultado_mes < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_mes|currency }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate trimmed with recebido=fin.recebido_mes|moeda pago=fin.pago_mes|moeda %}
+        {% blocktranslate trimmed with recebido=fin.recebido_mes|currency pago=fin.pago_mes|currency %}
         Recebido {{ recebido }} − pago {{ pago }}
         {% endblocktranslate %}<br>
-        {% translate "Mesmo período do mês passado:" %} {{ fin.resultado_anterior|moeda }}
+        {% translate "Mesmo período do mês passado:" %} {{ fin.resultado_anterior|currency }}
         {% if fin.resultado_mes > fin.resultado_anterior %}<span class="text-success" title="{% translate 'Melhor que no mês passado' %}">▲</span>{% elif fin.resultado_mes < fin.resultado_anterior %}<span class="text-danger" title="{% translate 'Pior que no mês passado' %}">▼</span>{% endif %}
       </div>
     </div></a>
@@ -106,7 +106,7 @@
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:debtors' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "Vencido a receber" %}</div>
-      <div class="indicador-valor{% if fin.vencido %} text-danger{% endif %}">{{ fin.vencido|moeda }}</div>
+      <div class="indicador-valor{% if fin.vencido %} text-danger{% endif %}">{{ fin.vencido|currency }}</div>
       <div class="small text-body-secondary">
         {% blocktranslate count n=fin.parcelas_vencidas %}{{ n }} parcela em atraso · ver devedores{% plural %}{{ n }} parcelas em atraso · ver devedores{% endblocktranslate %}
       </div>
@@ -115,7 +115,7 @@
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:payables' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "A pagar em 7 dias" %}</div>
-      <div class="indicador-valor">{{ fin.a_pagar|moeda }}</div>
+      <div class="indicador-valor">{{ fin.a_pagar|currency }}</div>
       <div class="small text-body-secondary">
         {% blocktranslate count n=fin.contas_a_pagar %}{{ n }} conta, contando as atrasadas{% plural %}{{ n }} contas, contando as atrasadas{% endblocktranslate %}
       </div>
@@ -124,7 +124,7 @@
   <div class="col">
     <a class="card h-100 indicador text-decoration-none" href="{% url 'finance:cash_flow' %}"><div class="card-body">
       <div class="indicador-rotulo">{% translate "Saldo nas contas" %}</div>
-      <div class="indicador-valor{% if fin.saldo_contas < 0 %} text-danger{% endif %}">{{ fin.saldo_contas|moeda }}</div>
+      <div class="indicador-valor{% if fin.saldo_contas < 0 %} text-danger{% endif %}">{{ fin.saldo_contas|currency }}</div>
       <div class="small text-body-secondary">{% translate "Caixa, bancos e demais contas" %}</div>
     </div></a>
   </div>
@@ -154,33 +154,33 @@
             </tr>
           </thead>
           <tbody>
-            {% for agendamento in agenda.lista %}
-            <tr class="{% if agendamento == agenda.proximo %}table-primary{% elif agendamento.desmarcado %}text-body-secondary text-decoration-line-through{% endif %}">
-              <td class="text-nowrap">{{ agendamento.start|time:"H:i" }}–{{ agendamento.end|time:"H:i" }}</td>
+            {% for appointment in agenda.lista %}
+            <tr class="{% if appointment == agenda.proximo %}table-primary{% elif appointment.desmarcado %}text-body-secondary text-decoration-line-through{% endif %}">
+              <td class="text-nowrap">{{ appointment.start|time:"H:i" }}–{{ appointment.end|time:"H:i" }}</td>
               <td>
-                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ agendamento.kind.color }}" title="{{ agendamento.kind.nome_exibido }}"></span>
-                {% if agendamento.patient_id %}
-                {% if pode.pacientes.ver %}<a href="{% url 'patients:record' agendamento.patient_id %}">{{ agendamento.patient.name }}</a>{% else %}{{ agendamento.patient.name }}{% endif %}
-                {% if agendamento == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if agendamento.start <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
+                <span class="amostra-cor amostra-cor-pequena" style="background-color: {{ appointment.kind.color }}" title="{{ appointment.kind.nome_exibido }}"></span>
+                {% if appointment.patient_id %}
+                {% if pode.pacientes.ver %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
+                {% if appointment == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if appointment.start <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
-                <span class="text-body-secondary">{{ agendamento.titulo }}</span>
+                <span class="text-body-secondary">{{ appointment.titulo }}</span>
                 {% endif %}
               </td>
-              {% if agenda.mostrar_profissional %}<td class="small">{{ agendamento.practitioner.name }}</td>{% endif %}
+              {% if agenda.mostrar_profissional %}<td class="small">{{ appointment.practitioner.name }}</td>{% endif %}
               <td class="text-nowrap">
-                {% if agendamento.patient_id %}
-                {% if agendamento.status == "agendado" %}
+                {% if appointment.patient_id %}
+                {% if appointment.status == "agendado" %}
                 {% if pode.agenda.alterar %}
-                <form method="post" action="{% url 'schedule:status' agendamento.pk %}" class="d-inline">
+                <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-outline-success py-0" name="status" value="compareceu" title="{% translate 'Compareceu' %}">✓ <span class="d-none d-md-inline">{% translate "Compareceu" %}</span></button>
                   <button class="btn btn-sm btn-outline-danger py-0" name="status" value="faltou" title="{% translate 'Faltou' %}">✗ <span class="d-none d-md-inline">{% translate "Faltou" %}</span></button>
                 </form>
                 {% else %}<span class="text-body-secondary small">{% translate "Agendado" %}</span>{% endif %}
                 {% else %}
-                <span class="badge {% if agendamento.status == 'compareceu' %}text-bg-success{% elif agendamento.status == 'faltou' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ agendamento.get_status_display }}</span>
+                <span class="badge {% if appointment.status == 'compareceu' %}text-bg-success{% elif appointment.status == 'faltou' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ appointment.get_status_display }}</span>
                 {% if pode.agenda.alterar %}
-                <form method="post" action="{% url 'schedule:status' agendamento.pk %}" class="d-inline">
+                <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-link py-0" name="status" value="agendado">{% translate "desfazer" %}</button>
                 </form>
@@ -218,7 +218,7 @@
         {% if receb.por_forma %}
         <table class="table table-sm mb-0 mt-2 small">
           {% for method, total in receb.por_forma %}
-          <tr><td>{{ method }}</td><td class="text-end">{{ total|moeda }}</td></tr>
+          <tr><td>{{ method }}</td><td class="text-end">{{ total|currency }}</td></tr>
           {% endfor %}
         </table>
         {% endif %}
@@ -283,7 +283,7 @@
         {% for orcamento in painel.orcamentos %}
         <li class="list-group-item small d-flex justify-content-between gap-2">
           <a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.name }}</a>
-          <span class="text-nowrap">{{ orcamento.total|moeda }} · {% if orcamento.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
+          <span class="text-nowrap">{{ orcamento.total|currency }} · {% if orcamento.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>

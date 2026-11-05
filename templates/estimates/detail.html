@@ -3,7 +3,7 @@
 
 {% block titulo %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
@@ -37,8 +37,8 @@
         <td>{{ item.faces|default:"—" }}</td>
         {% endif %}
         <td class="text-end">{{ item.quantidade }}</td>
-        <td class="text-end text-nowrap">{{ item.valor_unitario|moeda }}</td>
-        <td class="text-end text-nowrap">{{ item.total|moeda }}</td>
+        <td class="text-end text-nowrap">{{ item.valor_unitario|currency }}</td>
+        <td class="text-end text-nowrap">{{ item.total|currency }}</td>
         <td class="text-end">{% if aberto and pode.orcamentos.alterar %}{% if odontologia_habilitada or not item.dentes and not item.faces %}<form method="post" action="{% url 'estimates:item_remove' orcamento.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>{% endif %}{% endif %}</td>
       </tr>
       {% empty %}
@@ -47,10 +47,10 @@
     </tbody>
     <tfoot>
       {% if orcamento.discount %}
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ orcamento.subtotal|moeda }}</td><td></td></tr>
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ orcamento.discount|moeda }}</td><td></td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ orcamento.subtotal|currency }}</td><td></td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ orcamento.discount|currency }}</td><td></td></tr>
       {% endif %}
-      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ orcamento.total|moeda }}</td><td></td></tr>
+      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ orcamento.total|currency }}</td><td></td></tr>
     </tfoot>
   </table>
 </div>

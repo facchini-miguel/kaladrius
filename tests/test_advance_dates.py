@@ -53,11 +53,11 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(hoje - datetime.timedelta(days=17)), confirmar=True)
     with usar_clinica(cenario["clinic"]):
-        for agendamento in Appointment.objects.all():
-            start, end = antes[agendamento.pk]
-            assert agendamento.start - start == datetime.timedelta(days=14)
-            assert agendamento.end - end == datetime.timedelta(days=14)
-            assert agendamento.start.weekday() == start.weekday()
+        for appointment in Appointment.objects.all():
+            start, end = antes[appointment.pk]
+            assert appointment.start - start == datetime.timedelta(days=14)
+            assert appointment.end - end == datetime.timedelta(days=14)
+            assert appointment.start.weekday() == start.weekday()
         assert Recall.objects.get().date == hoje - datetime.timedelta(days=6)
         assert Patient.objects.get().birth_date == datetime.date(1980, 5, 17)
         # The no-double-booking constraint is back.

@@ -3,9 +3,9 @@
 
 {% block titulo %}{% translate "Criar lançamento" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <h1 class="h3 mb-1">{% translate "Criar lançamento" %}</h1>
-<p class="text-body-secondary mb-4">{{ transacao.date|date:"SHORT_DATE_FORMAT" }} · {{ transacao.description }} · <span class="{% if transacao.entrada %}text-success{% else %}text-danger{% endif %}">{{ transacao.amount|moeda }}</span> · {{ transacao.account }}</p>
+<p class="text-body-secondary mb-4">{{ transacao.date|date:"SHORT_DATE_FORMAT" }} · {{ transacao.description }} · <span class="{% if transacao.entrada %}text-success{% else %}text-danger{% endif %}">{{ transacao.amount|currency }}</span> · {{ transacao.account }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}

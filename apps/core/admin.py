@@ -36,14 +36,14 @@ class ClinicaAdmin(admin.ModelAdmin):
     form = ClinicaAdminForm
     list_display = [
         "name",
-        "documento",
+        "document",
         "active",
-        "agenda_inicio",
-        "agenda_fim",
-        "agenda_intervalo",
+        "schedule_start",
+        "schedule_end",
+        "schedule_interval",
     ]
     list_filter = ["active"]
-    search_fields = ["name", "documento"]
+    search_fields = ["name", "document"]
     inlines = [VinculoNaClinicaInline]
 
     def has_add_permission(self, request):
@@ -59,8 +59,8 @@ class UsuarioAdmin(UserAdmin):
 
 @admin.register(Membership)
 class VinculoAdmin(admin.ModelAdmin):
-    list_display = ["user", "clinic", "papel", "active"]
-    list_filter = ["papel", "active", "clinic"]
+    list_display = ["user", "clinic", "role", "active"]
+    list_filter = ["role", "active", "clinic"]
     search_fields = ["user__username", "clinic__name"]
 
 

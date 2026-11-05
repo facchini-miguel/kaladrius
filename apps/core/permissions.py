@@ -119,9 +119,9 @@ def pode(request, modulo, acao):
     vinculo = getattr(request, "vinculo", None)
     if vinculo is None:
         return False
-    if user.demonstracao and modulo in SO_LEITURA_NA_DEMONSTRACAO and acao != Acao.VER:
+    if user.demo and modulo in SO_LEITURA_NA_DEMONSTRACAO and acao != Acao.VER:
         return False
-    return acao in MATRIZ.get(vinculo.papel, {}).get(modulo, frozenset())
+    return acao in MATRIZ.get(vinculo.role, {}).get(modulo, frozenset())
 
 
 def so_a_propria_agenda(request):
@@ -131,9 +131,7 @@ def so_a_propria_agenda(request):
     """
     vinculo = getattr(request, "vinculo", None)
     return (
-        not request.user.is_superuser
-        and vinculo is not None
-        and vinculo.papel == Papel.PROFISSIONAL
+        not request.user.is_superuser and vinculo is not None and vinculo.role == Papel.PROFISSIONAL
     )
 
 

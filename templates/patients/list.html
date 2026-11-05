@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Pacientes" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Pacientes" %}</h1>
   {% if pode.pacientes.criar %}
@@ -64,7 +64,7 @@
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
-        <td class="text-nowrap">{{ patient.tax_id|documento:patient.papel_documento|default:"—" }}</td>
+        <td class="text-nowrap">{{ patient.tax_id|document:patient.papel_documento|default:"—" }}</td>
         <td class="text-nowrap">{{ patient.telefone_principal|phone|default:"—" }}</td>
         <td>{% if patient.city %}{{ patient.city.name }}/{{ patient.city.state.sigla }}{% else %}—{% endif %}</td>
         <td>{% if patient.idade is not None %}{{ patient.idade }}{% else %}—{% endif %}</td>

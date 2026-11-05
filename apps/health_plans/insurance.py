@@ -103,8 +103,8 @@ SEGUROS = {
 }
 
 
-def do_pais(pais=None):
-    return SEGUROS.get(pais or countries.pais_da_clinica(), SEGUROS[countries.PADRAO])
+def do_pais(country=None):
+    return SEGUROS.get(country or countries.pais_da_clinica(), SEGUROS[countries.PADRAO])
 
 
 def com_nome_local(rotulo, local):
@@ -112,13 +112,13 @@ def com_nome_local(rotulo, local):
     return f"{rotulo} ({local})" if local else str(rotulo)
 
 
-def rotulo_do_registro(pais=None):
+def rotulo_do_registro(country=None):
     """ "Registro da operadora (ANS)", or "" where the country has no insurer registry."""
-    registration = do_pais(pais).registration
+    registration = do_pais(country).registration
     return com_nome_local(_("Registro da operadora"), registration.name) if registration else ""
 
 
-def rotulo_do_codigo(pais=None):
+def rotulo_do_codigo(country=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
-    procedimento = do_pais(pais).procedimento
+    procedimento = do_pais(country).procedimento
     return com_nome_local(_("Código"), procedimento.name if procedimento else "")

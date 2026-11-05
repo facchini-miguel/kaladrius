@@ -41,18 +41,18 @@ class Extrato:
     unreadable_transactions: int = 0
 
 
-def _texto(conteudo: bytes) -> str:
-    cabecalho = conteudo[:500].decode("ascii", errors="ignore").upper()
+def _texto(content: bytes) -> str:
+    cabecalho = content[:500].decode("ascii", errors="ignore").upper()
     if "CHARSET:1252" in cabecalho or "ENCODING:USASCII" in cabecalho:
         candidatos = ("cp1252", "utf-8")
     else:
         candidatos = ("utf-8", "cp1252")
     for codificacao in candidatos:
         try:
-            return conteudo.decode(codificacao)
+            return content.decode(codificacao)
         except UnicodeDecodeError:
             continue
-    return conteudo.decode("latin-1")
+    return content.decode("latin-1")
 
 
 def _campo(bloco, tag):
@@ -81,14 +81,14 @@ def _valor(value):
         return None
 
 
-def ler(conteudo: bytes) -> Extrato:
-    texto = _texto(conteudo)
-    if "<OFX>" not in texto.upper():
+def ler(content: bytes) -> Extrato:
+    text = _texto(content)
+    if "<OFX>" not in text.upper():
         raise ArquivoInvalido(_("O arquivo não é um extrato OFX."))
     transacoes = []
     vistos = {}
     unreadable_transactions = 0
-    for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", texto, re.IGNORECASE | re.DOTALL):
+    for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", text, re.IGNORECASE | re.DOTALL):
         date = _data(_campo(bloco, "DTPOSTED"))
         amount = _valor(_campo(bloco, "TRNAMT"))
         if date is None or amount is None:
@@ -120,13 +120,13 @@ def ler(conteudo: bytes) -> Extrato:
                 kind=_campo(bloco, "TRNTYPE")[:20],
             )
         )
-    saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", texto, re.I | re.S)
+    saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", text, re.I | re.S)
     saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
     return Extrato(
-        bank_code=_campo(texto, "BANKID")[:20],
-        account=_campo(texto, "ACCTID")[:40],
-        start=_data(_campo(texto, "DTSTART")),
-        end=_data(_campo(texto, "DTEND")),
+        bank_code=_campo(text, "BANKID")[:20],
+        account=_campo(text, "ACCTID")[:40],
+        start=_data(_campo(text, "DTSTART")),
+        end=_data(_campo(text, "DTEND")),
         balance=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
         balance_date=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,

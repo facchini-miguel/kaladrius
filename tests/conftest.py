@@ -21,10 +21,10 @@ def clinica_b(db):
 def criar_usuario(django_user_model):
     """Create a user, optionally linked to a clinic with a role."""
 
-    def criar(username, clinic=None, papel=Papel.RECEPCAO, **extra):
+    def criar(username, clinic=None, role=Papel.RECEPCAO, **extra):
         user = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
         if clinic is not None:
-            Membership.objects.create(user=user, clinic=clinic, papel=papel)
+            Membership.objects.create(user=user, clinic=clinic, role=role)
         return user
 
     return criar

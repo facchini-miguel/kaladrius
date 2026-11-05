@@ -3,7 +3,7 @@
 
 {% block titulo %}{% if pagar %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% if pagar %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %}</h1>
   <div class="d-flex gap-2">
@@ -54,8 +54,8 @@
           {% else %}{{ installment.entry.payer }}{% endif %}
         </td>
         <td><a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">({{ installment.number }})</span></td>
-        <td class="text-end text-nowrap">{{ installment.amount|moeda }}</td>
-        <td class="text-end text-nowrap">{% if installment.balance > 0 %}{{ installment.balance|moeda }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap">{{ installment.amount|currency }}</td>
+        <td class="text-end text-nowrap">{% if installment.balance > 0 %}{{ installment.balance|currency }}{% else %}—{% endif %}</td>
         <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="text-end text-nowrap">
           {% if installment.balance > 0 and not installment.entry.cancelled %}

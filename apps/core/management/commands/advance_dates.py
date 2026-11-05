@@ -52,8 +52,8 @@ class Command(BaseCommand):
             start = datetime.date.fromisoformat(desde)
         except ValueError as erro:
             raise CommandError(f"Data inválida: {desde}") from erro
-        dias = (timezone.localdate() - start).days // 7 * 7
-        if dias <= 0:
+        days = (timezone.localdate() - start).days // 7 * 7
+        if days <= 0:
             self.stdout.write("Menos de uma semana: nada a avançar.")
             return
 
@@ -81,7 +81,7 @@ class Command(BaseCommand):
                     cursor.execute(
                         # Names come from the models, never from users; values are parameters.
                         f"UPDATE {editor.quote_name(modelo._meta.db_table)} SET {atribuicoes}",  # noqa: S608
-                        [dias] * len(campos),
+                        [days] * len(campos),
                     )
                     linhas += cursor.rowcount
             # Deferred foreign key checks queued by the updates must run first: PostgreSQL
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 editor.add_constraint(modelo, restricao)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Datas avançadas {dias // 7} semana(s) ({dias} dias): "
+                f"Datas avançadas {days // 7} semana(s) ({days} dias): "
                 f"{linhas} registros em {len(tabelas)} tabelas."
             )
         )

@@ -137,7 +137,7 @@ def test_quem_pode_ver_fechar_e_reabrir(clinica_a, criar_usuario, cliente_de):
 
 
 def test_demonstracao_so_consulta(clinica_a, criar_usuario, cliente_de):
-    demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Papel.ADMIN, demonstracao=True))
+    demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Papel.ADMIN, demo=True))
     pagina = demo.get(URL)
     assert pagina.status_code == 200 and pagina.context["fechar_form"] is None
     assert demo.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 403

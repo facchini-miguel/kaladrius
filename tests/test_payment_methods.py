@@ -16,19 +16,19 @@ from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_d
 pytestmark = pytest.mark.django_db
 
 
-def mudar_pais(dados, pais):
+def mudar_pais(dados, country):
     clinic = dados["clinic"]
-    clinic.pais = pais
+    clinic.country = country
     clinic.save()
 
 
 def test_cada_pais_tem_as_suas_formas():
     assert set(payment_methods.FORMAS) == set(PAISES)
-    for pais, do_pais in payment_methods.FORMAS.items():
-        assert len(set(do_pais.codigos)) == len(do_pais.codigos), pais
-        assert set(do_pais.codigos) <= set(Payment.Forma.values), pais
-        assert {"dinheiro", "credito", "transferencia"} <= set(do_pais.codigos), pais
-        assert set(do_pais.nomes) <= set(do_pais.codigos), pais
+    for country, do_pais in payment_methods.FORMAS.items():
+        assert len(set(do_pais.codigos)) == len(do_pais.codigos), country
+        assert set(do_pais.codigos) <= set(Payment.Forma.values), country
+        assert {"dinheiro", "credito", "transferencia"} <= set(do_pais.codigos), country
+        assert set(do_pais.nomes) <= set(do_pais.codigos), country
 
 
 def test_nomes_locais_entre_parenteses():

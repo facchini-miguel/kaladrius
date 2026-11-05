@@ -100,7 +100,7 @@ def test_clinica_nova_recebe_contas_e_categorias_padrao():
 
 
 def test_moeda_no_formato_do_idioma():
-    modelo = Template("{% load formats %}{{ amount|moeda }}")
+    modelo = Template("{% load formats %}{{ amount|currency }}")
     with translation.override("pt-br"):
         assert modelo.render(Context({"amount": Decimal("1234.5")})) == "R$ 1.234,50"
     with translation.override("en"):

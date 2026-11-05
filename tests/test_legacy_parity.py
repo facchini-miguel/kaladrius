@@ -54,7 +54,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
     ficha = recepcao.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert reverse("patients:print", args=[patient.pk]) in ficha
     pagina = recepcao.get(reverse("patients:print", args=[patient.pk]))
-    texto = pagina.content.decode()
+    text = pagina.content.decode()
     for trecho in (
         "FICHA CADASTRAL",
         "529.982.247-25",
@@ -62,7 +62,7 @@ def test_ficha_cadastral_impressa(clinica_a, recepcao):
         "Saúde Exemplo",
         "Prefere manhã",
     ):
-        assert trecho in texto, trecho
+        assert trecho in text, trecho
     assert (
         AuditEntry.objects.filter(
             acao=AuditEntry.Acao.VISUALIZAR, objeto_id=str(patient.pk)

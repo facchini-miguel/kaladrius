@@ -70,7 +70,7 @@ class Command(BaseCommand):
         practitioner = self._conta(
             PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
         )
-        outras = [self._conta(u, name, senha, clinic, papel) for u, name, senha, papel in extras]
+        outras = [self._conta(u, name, senha, clinic, role) for u, name, senha, role in extras]
         with usar_clinica(clinic):
             cadastro = Practitioner.objects.filter(name=options["practitioner"]).first()
             if cadastro is None:
@@ -95,17 +95,17 @@ class Command(BaseCommand):
             )
         )
 
-    def _conta(self, username, name, senha, clinic, papel):
+    def _conta(self, username, name, senha, clinic, role):
         Usuario = get_user_model()
         user, _criado = Usuario.objects.get_or_create(username=username)
         user.first_name = name
         user.last_name = "(demonstração)"
         user.is_active = True
         user.is_staff = user.is_superuser = False
-        user.demonstracao = True
+        user.demo = True
         user.set_password(senha)
         user.save()
         Membership.objects.update_or_create(
-            user=user, clinic=clinic, defaults={"papel": papel, "active": True}
+            user=user, clinic=clinic, defaults={"role": role, "active": True}
         )
         return user

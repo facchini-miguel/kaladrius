@@ -5,7 +5,7 @@
       {% for name, value in linhas %}
       <tr>
         <td>{{ name|default:_("Sem profissional") }}</td>
-        <td class="text-end text-nowrap">{{ value|moeda }}</td>
+        <td class="text-end text-nowrap">{{ value|currency }}</td>
         <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio value total 100 %}%</td>
       </tr>
       {% empty %}

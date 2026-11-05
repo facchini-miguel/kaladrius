@@ -3,17 +3,17 @@
 
 {% block titulo %}{{ titulo }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="mx-auto" style="max-width: 52rem;">
   <div class="card mb-4">
     <div class="card-body">
       <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
       {% if clinic %}
       <div class="fs-5 fw-semibold">{{ clinic.name }}</div>
-      {% if clinic.documento %}<div class="small">{{ clinic.sigla_documento }}: {{ clinic.documento_escrito }}</div>{% endif %}
+      {% if clinic.document %}<div class="small">{{ clinic.sigla_documento }}: {{ clinic.documento_escrito }}</div>{% endif %}
       {% if clinic.email %}<div><a href="mailto:{{ clinic.email }}">{{ clinic.email }}</a></div>{% endif %}
       {% if clinic.phone %}<div>{{ clinic.phone }}</div>{% endif %}
-      {% if clinic.endereco %}<div class="small">{{ clinic.endereco }}</div>{% endif %}
+      {% if clinic.address %}<div class="small">{{ clinic.address }}</div>{% endif %}
       {% else %}
       <div>{% translate "Fale com a clínica que atende você." %}</div>
       {% endif %}
@@ -22,7 +22,7 @@
   {% if lei %}
   <div class="card border-primary mb-4">
     <div class="card-body">
-      <h2 class="h5">{% translate "País da clínica" %}: {{ pais }}</h2>
+      <h2 class="h5">{% translate "País da clínica" %}: {{ country }}</h2>
       <p>{% translate "Esta política foi escrita para a lei brasileira. Para esta clínica valem a lei e a autoridade abaixo: as referências à LGPD e à ANPD correspondem a elas, e os direitos da seção 8 são exercidos nos termos dessa lei." %}</p>
       <ul class="mb-0">
         <li>{% translate "Lei de proteção de dados" %}: {{ lei.lei }}</li>

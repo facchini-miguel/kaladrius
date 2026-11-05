@@ -140,10 +140,10 @@ def pago(cenario, amount, date, kind=Entry.Tipo.RECEBER, account=None):
         )
 
 
-def importar(cenario, conteudo=OFX_SGML):
+def importar(cenario, content=OFX_SGML):
     resposta = cenario["cliente"].post(
         reverse("finance:statements"),
-        {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", conteudo)},
+        {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", content)},
     )
     with usar_clinica(cenario["clinic"]):
         statement_import = StatementImport.objects.latest("pk")
@@ -318,7 +318,7 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
 
 
 def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
-    conteudo = OFX_SGML.replace(
+    content = OFX_SGML.replace(
         b"</BANKTRANLIST>",
         b"<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261009<TRNAMT>1.234,56<FITID>B1</STMTTRN>\n"
         b"<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261009<TRNAMT>2,345.67<FITID>B2</STMTTRN>\n"
@@ -326,7 +326,7 @@ def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
         b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261009<TRNAMT>abc<FITID>B4</STMTTRN>\n"
         b"</BANKTRANLIST>",
     )
-    extrato = ofx.ler(conteudo)
+    extrato = ofx.ler(content)
     valores = {t.fitid: t.amount for t in extrato.transacoes}
     assert (valores["B1"], valores["B2"]) == (Decimal("1234.56"), Decimal("2345.67"))
     assert (
@@ -334,7 +334,7 @@ def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
     )  # bad date, bad amount (zero amounts are not counted)
     resposta = cenario["cliente"].post(
         reverse("finance:statements"),
-        {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", conteudo)},
+        {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", content)},
         follow=True,
     )
     pagina = resposta.content.decode()

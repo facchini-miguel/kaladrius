@@ -37,7 +37,7 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
 
 
 @pytest.mark.parametrize(
-    ("idioma", "digitado", "amount"),
+    ("language", "digitado", "amount"),
     [
         ("pt-br", "1.234.567,89", "1234567.89"),
         ("pt-br", "R$ 1.500,00", "1500.00"),
@@ -49,8 +49,8 @@ def test_opcao_em_branco_das_listas_fixas_vira_traco():
         ("en", "1,500", "1500"),
     ],
 )
-def test_numeros_com_separador_de_milhar(idioma, digitado, amount):
-    with translation.override(idioma):
+def test_numeros_com_separador_de_milhar(language, digitado, amount):
+    with translation.override(language):
         form = _Exemplo({"fixa": "a", "agrupada": "b", "amount": digitado})
         assert form.is_valid(), form.errors
     assert form.cleaned_data["amount"] == Decimal(amount)

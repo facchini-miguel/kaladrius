@@ -11,11 +11,11 @@ PREFIXO_IPV6 = 48
 
 def ip_para_bloqueio(request):
     """REMOTE_ADDR for IPv4; the /48 network address for IPv6 (axes AXES_CLIENT_IP_CALLABLE)."""
-    endereco = request.META.get("REMOTE_ADDR") or ""
+    address = request.META.get("REMOTE_ADDR") or ""
     try:
-        ip = ipaddress.ip_address(endereco)
+        ip = ipaddress.ip_address(address)
     except ValueError:
-        return endereco or None
+        return address or None
     if ip.version == 6:
         if ip.ipv4_mapped is not None:
             return str(ip.ipv4_mapped)

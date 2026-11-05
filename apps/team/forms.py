@@ -23,7 +23,7 @@ def conta_exclusiva(user, clinic):
 class NovoMembroForm(FormularioBootstrap, UserCreationForm):
     """A new user account, created already linked to the current clinic with a role."""
 
-    papel = forms.ChoiceField(label=_("Perfil"), choices=Papel.choices, initial=Papel.RECEPCAO)
+    role = forms.ChoiceField(label=_("Perfil"), choices=Papel.choices, initial=Papel.RECEPCAO)
 
     class Meta(UserCreationForm.Meta):
         model = Usuario
@@ -37,9 +37,7 @@ class NovoMembroForm(FormularioBootstrap, UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit:
-            Membership.objects.create(
-                user=user, clinic=self.clinic, papel=self.cleaned_data["papel"]
-            )
+            Membership.objects.create(user=user, clinic=self.clinic, role=self.cleaned_data["role"])
         return user
 
 
@@ -48,7 +46,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     class Meta:
         model = Membership
-        fields = ["papel", "active"]
+        fields = ["role", "active"]
         labels = {"active": _("Acesso a esta clínica liberado")}
 
     def __init__(self, *args, editor, **kwargs):
@@ -62,13 +60,13 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        era_admin_ativo = self.initial.get("papel") == Papel.ADMIN and self.initial.get("active")
-        continua_admin = dados.get("papel") == Papel.ADMIN and dados.get("active")
+        era_admin_ativo = self.initial.get("role") == Papel.ADMIN and self.initial.get("active")
+        continua_admin = dados.get("role") == Papel.ADMIN and dados.get("active")
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Membership.objects.filter(
                 clinic_id=self.instance.clinic_id,
-                papel=Papel.ADMIN,
+                role=Papel.ADMIN,
                 active=True,
                 user__is_active=True,
             ).exclude(pk=self.instance.pk)

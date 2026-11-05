@@ -5,7 +5,7 @@
       {% for nivel, name, value in linhas %}
       <tr>
         <td style="padding-left: {{ nivel|add:1 }}rem;"{% if nivel == 0 %} class="fw-semibold"{% endif %}>{{ name }}</td>
-        <td class="text-end text-nowrap{% if nivel == 0 %} fw-semibold{% endif %}">{{ value|moeda }}</td>
+        <td class="text-end text-nowrap{% if nivel == 0 %} fw-semibold{% endif %}">{{ value|currency }}</td>
         <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio value total 100 %}%</td>
       </tr>
       {% empty %}

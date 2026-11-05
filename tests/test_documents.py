@@ -38,14 +38,14 @@ def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
     for code, documentos in identification.DOCUMENTOS.items():
         if code == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
-        for documento in documentos.de(*identification.PAPEIS):
-            compacto = documento.normalizar(documento.exemplo)
-            assert documento.valido(compacto), (code, documento.sigla)
-            assert documento.escrever(compacto) in (documento.exemplo, compacto), documento.sigla
+        for document in documentos.de(*identification.PAPEIS):
+            compacto = document.normalizar(document.exemplo)
+            assert document.valido(compacto), (code, document.sigla)
+            assert document.escrever(compacto) in (document.exemplo, compacto), document.sigla
 
 
 @pytest.mark.parametrize(
-    ("pais", "papel", "digitado", "escrito"),
+    ("country", "role", "digitado", "escrito"),
     [
         ("MX", "paciente", "boxw310820hnerxn09", "BOXW310820HNERXN09"),
         ("MX", "pessoa", "GODE-561231-GR8", "GODE561231GR8"),
@@ -77,14 +77,14 @@ def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
         ("ZA", "empresa", "2001/123456/07", "2001/123456/07"),
     ],
 )
-def test_documento_valido_e_escrito_do_jeito_do_pais(pais, papel, digitado, escrito):
-    documento = identification.do_pais(pais).do_papel(papel)
-    guardado = identification.limpar(digitado, [documento], documento.sigla)
-    assert identification.escrever(guardado, (papel,), pais) == escrito
+def test_documento_valido_e_escrito_do_jeito_do_pais(country, role, digitado, escrito):
+    document = identification.do_pais(country).do_papel(role)
+    guardado = identification.limpar(digitado, [document], document.sigla)
+    assert identification.escrever(guardado, (role,), country) == escrito
 
 
 @pytest.mark.parametrize(
-    ("pais", "papel", "digitado"),
+    ("country", "role", "digitado"),
     [
         ("MX", "paciente", "BOXW310820HNERXN08"),  # check digit
         ("MX", "empresa", "GODE561231GR8"),  # an individual's RFC is not a company's
@@ -102,10 +102,10 @@ def test_documento_valido_e_escrito_do_jeito_do_pais(pais, papel, digitado, escr
         ("ZA", "paciente", "7503305044088"),
     ],
 )
-def test_documento_invalido_e_recusado(pais, papel, digitado):
-    documento = identification.do_pais(pais).do_papel(papel)
+def test_documento_invalido_e_recusado(country, role, digitado):
+    document = identification.do_pais(country).do_papel(role)
     with pytest.raises(identification.ValidationError, match="número inválido"):
-        identification.limpar(digitado, [documento], documento.sigla)
+        identification.limpar(digitado, [document], document.sigla)
 
 
 def test_valor_que_nao_e_documento_do_pais_fica_como_esta():
@@ -118,12 +118,12 @@ def test_valor_que_nao_e_documento_do_pais_fica_como_esta():
 def test_filtros_dos_templates(clinica_a):
     no_pais(clinica_a, "AR")
     template = Template(
-        '{% load formats %}{{ a|documento:"paciente" }} · {{ b|documento }} · '
+        '{% load formats %}{{ a|document:"paciente" }} · {{ b|document }} · '
         '{{ b|sigla_documento:"empresa" }} · {% rotulo_documento "paciente" "empresa" %}'
     )
     with usar_clinica(clinica_a):
-        texto = template.render(Context({"a": "20123456", "b": "20123456786"}))
-    assert texto == "20.123.456 · 20-12345678-6 · CUIT · DNI/CUIT"
+        text = template.render(Context({"a": "20123456", "b": "20123456786"}))
+    assert text == "20.123.456 · 20-12345678-6 · CUIT · DNI/CUIT"
 
 
 # --- Patients ----------------------------------------------------------------------
@@ -172,24 +172,24 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
 def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
     # The country and the document change together: the document is the new country's.
     resposta = admin.post(
-        reverse("clinic_settings"), dados_clinica(pais="US", documento="52998224725")
+        reverse("clinic_settings"), dados_clinica(country="US", document="52998224725")
     )
-    assert resposta.context["form"].errors["documento"] == ["EIN: número inválido."]
+    assert resposta.context["form"].errors["document"] == ["EIN: número inválido."]
     resposta = admin.post(
-        reverse("clinic_settings"), dados_clinica(pais="US", documento="911144442")
+        reverse("clinic_settings"), dados_clinica(country="US", document="911144442")
     )
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
-    assert clinica_a.documento == "911144442"
+    assert clinica_a.document == "911144442"
     assert (clinica_a.sigla_documento, clinica_a.documento_escrito) == ("EIN", "91-1144442")
 
 
 def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
     for rfc in ("GODE561231GR8", "ABC680524P76"):
-        resposta = admin.post(reverse("clinic_settings"), dados_clinica(pais="MX", documento=rfc))
+        resposta = admin.post(reverse("clinic_settings"), dados_clinica(country="MX", document=rfc))
         assert resposta.status_code == 302
         clinica_a.refresh_from_db()
-        assert (clinica_a.documento, clinica_a.sigla_documento) == (rfc, "RFC")
+        assert (clinica_a.document, clinica_a.sigla_documento) == (rfc, "RFC")
 
 
 # --- Suppliers, staff and practitioners --------------------------------------------

@@ -68,7 +68,7 @@ def test_validacao_de_cnpj_numerico_e_alfanumerico(amount, esperado):
 
 def test_filtros_de_formatacao():
     template = Template(
-        "{% load formats %}{{ a|documento }} {{ b|documento }} "
+        "{% load formats %}{{ a|document }} {{ b|document }} "
         "{{ c|phone }} {{ d|phone }} {{ e|postal_code }}"
     )
     contexto = Context(
@@ -172,8 +172,8 @@ def test_cpf_repetido_na_mesma_clinica_e_recusado_mas_vale_em_outra(admin_a, cli
 
 def test_edicao_mantem_as_cidades_da_uf(admin_a, clinica_a):
     patient = criar_paciente(clinica_a, state_id=SC, city_id=FLORIANOPOLIS)
-    conteudo = admin_a.get(reverse("patients:edit", args=[patient.pk])).content.decode()
-    assert f'<option value="{FLORIANOPOLIS}" selected>Florianópolis</option>' in conteudo
+    content = admin_a.get(reverse("patients:edit", args=[patient.pk])).content.decode()
+    assert f'<option value="{FLORIANOPOLIS}" selected>Florianópolis</option>' in content
 
 
 # --- List and search -------------------------------------------------------------
@@ -224,12 +224,12 @@ def test_lista_e_busca_nao_mostram_outra_clinica(admin_a, clinica_b):
         assert len(pagina) == 0
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
-    papel, clinica_a, criar_usuario, cliente_de
+    role, clinica_a, criar_usuario, cliente_de
 ):
     patient = criar_paciente(clinica_a, name="Paciente")
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.post(reverse("patients:new"), dados_formulario()).status_code == 302
     assert cliente.get(reverse("patients:edit", args=[patient.pk])).status_code == 200
     assert cliente.post(reverse("patients:archive", args=[patient.pk])).status_code == 403
@@ -280,10 +280,10 @@ def test_ficha_mostra_dados_formatados(admin_a, clinica_a):
         city_id=FLORIANOPOLIS,
         state_id=SC,
     )
-    conteudo = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert "529.982.247-25" in conteudo
-    assert "(48) 99999-0000" in conteudo
-    assert "Florianópolis/SC" in conteudo
+    content = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert "529.982.247-25" in content
+    assert "(48) 99999-0000" in content
+    assert "Florianópolis/SC" in content
 
 
 @pytest.mark.parametrize("busca", ["²", "¹²³", "١٢"])
@@ -318,9 +318,9 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     url = reverse("patients:archive", args=[patient.pk])
     pagina = admin_a.get(url)
     assert [p.number for p in pagina.context["abertas"]] == [1, 2]
-    conteudo = pagina.content.decode()
-    assert reverse("finance:entry", args=[entry.pk]) in conteudo
-    assert 'btn btn-secondary">Arquivar<' not in conteudo
+    content = pagina.content.decode()
+    assert reverse("finance:entry", args=[entry.pk]) in content
+    assert 'btn btn-secondary">Arquivar<' not in content
     resposta = admin_a.post(url, follow=True)
     assert "Resolva as contas em aberto" in resposta.content.decode()
     patient.refresh_from_db()

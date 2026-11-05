@@ -134,11 +134,11 @@ def test_busca_por_nome_e_documento(supplier, admin):
     assert list(admin.get(url, {"q": "outro"}).context["pagina"]) == []
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_so_quem_cuida_do_financeiro_ve_fornecedores(
-    papel, supplier, clinica_a, criar_usuario, cliente_de
+    role, supplier, clinica_a, criar_usuario, cliente_de
 ):
-    cliente = cliente_de(criar_usuario("sem_financeiro", clinica_a, papel))
+    cliente = cliente_de(criar_usuario("sem_financeiro", clinica_a, role))
     for url in (
         reverse("finance:suppliers"),
         reverse("finance:supplier", args=[supplier.pk]),

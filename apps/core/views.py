@@ -67,7 +67,7 @@ class TrocarSenhaView(PasswordChangeView):
     success_url = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
-        if getattr(request.user, "demonstracao", False):
+        if getattr(request.user, "demo", False):
             messages.info(request, _("Contas de demonstração não trocam a senha."))
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
@@ -83,11 +83,11 @@ def configuracoes(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Configurações da clínica salvas."))
-        if "moeda" in form.changed_data:
+        if "currency" in form.changed_data:
             messages.info(
                 request,
                 _("Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi convertido.")
-                % {"moeda": form.instance.get_moeda_display()},
+                % {"moeda": form.instance.get_currency_display()},
             )
         return redirect("clinic_settings")
     return render(request, "core/settings.html", {"form": form})
@@ -97,16 +97,16 @@ def configuracoes(request):
 @require_POST
 def trocar_idioma(request):
     """Save the user's language (empty: follow the browser) and go back to the page."""
-    idioma = request.POST.get("idioma", "")
-    if idioma not in dict(settings.LANGUAGES):
-        idioma = ""
-    request.user.idioma = idioma
-    request.user.save(update_fields=["idioma"])
+    language = request.POST.get("language", "")
+    if language not in dict(settings.LANGUAGES):
+        language = ""
+    request.user.language = language
+    request.user.save(update_fields=["language"])
     resposta = redirect(_destino_seguro(request, request.POST.get("next")))
     # The cookie keeps the language on the login page of this browser too.
-    if idioma:
+    if language:
         resposta.set_cookie(
-            settings.LANGUAGE_COOKIE_NAME, idioma, max_age=365 * 24 * 3600, samesite="Lax"
+            settings.LANGUAGE_COOKIE_NAME, language, max_age=365 * 24 * 3600, samesite="Lax"
         )
     else:
         resposta.delete_cookie(settings.LANGUAGE_COOKIE_NAME)

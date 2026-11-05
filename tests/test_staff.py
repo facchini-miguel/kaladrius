@@ -184,11 +184,11 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
             services.lancar([folha], category=None, due_date=OUTUBRO, user=None)
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
 def test_so_administrador_e_financeiro_veem_salarios(
-    papel, clinica_a, ana, criar_usuario, cliente_de
+    role, clinica_a, ana, criar_usuario, cliente_de
 ):
-    cliente = cliente_de(criar_usuario("sem_pessoal", clinica_a, papel))
+    cliente = cliente_de(criar_usuario("sem_pessoal", clinica_a, role))
     for url in (FOLHA, reverse("staff:list"), reverse("staff:employee", args=[ana.pk])):
         assert cliente.get(url).status_code == 403, url
 

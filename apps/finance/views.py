@@ -26,7 +26,7 @@ from django.views.decorators.http import require_POST
 from apps.core import legislation
 from apps.core.ordering import chave_alfabetica
 from apps.core.permissions import Acao, Modulo, exige_permissao, pode
-from apps.core.templatetags.formats import moeda
+from apps.core.templatetags.formats import currency
 from apps.core.validators import normalizar_cnpj
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
@@ -380,7 +380,7 @@ def estornar(request, pk):
             "objeto": " · ".join(
                 [
                     str(payment.installment),
-                    moeda(payment.amount),
+                    currency(payment.amount),
                     date_format(payment.date, "SHORT_DATE_FORMAT"),
                 ]
             ),
@@ -637,9 +637,9 @@ def planejamento(request):
 def fechamento(request):
     """Close the books up to a date, or reopen them with a reason. Public demo logins only
     look: one visitor closing the books would block everyone else's payments."""
-    demonstracao = request.user.demonstracao
-    pode_fechar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR) and not demonstracao
-    pode_reabrir = pode(request, Modulo.FINANCEIRO, Acao.EXCLUIR) and not demonstracao
+    demo = request.user.demo
+    pode_fechar = pode(request, Modulo.FINANCEIRO, Acao.ALTERAR) and not demo
+    pode_reabrir = pode(request, Modulo.FINANCEIRO, Acao.EXCLUIR) and not demo
     if request.method == "POST":
         acao = request.POST.get("acao")
         if not {"fechar": pode_fechar, "reabrir": pode_reabrir}.get(acao):
@@ -765,9 +765,9 @@ def fornecedores(request):
     lista = Supplier.objects.all()
     if busca:
         filtro = Q(name__unaccent__icontains=busca) | Q(legal_name__unaccent__icontains=busca)
-        documento = normalizar_cnpj(busca)
-        if any(c.isdigit() for c in documento):
-            filtro |= Q(tax_id__startswith=documento)
+        document = normalizar_cnpj(busca)
+        if any(c.isdigit() for c in document):
+            filtro |= Q(tax_id__startswith=document)
         lista = lista.filter(filtro)
     pagina = Paginator(lista, POR_PAGINA).get_page(request.GET.get("pagina"))
     return render(
@@ -927,7 +927,7 @@ def extratos(request):
                 statement_import = reconciliation.importar(
                     form.cleaned_data["account"],
                     nome_arquivo=file.name,
-                    conteudo=file.read(),
+                    content=file.read(),
                     user=request.user,
                 )
             except ArquivoInvalido as erro:

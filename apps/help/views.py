@@ -42,12 +42,12 @@ def privacidade(request):
     clinic = getattr(request, "clinic", None) or Clinic.unica()
     titulo, html = documents.privacidade()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
-    pais = countries.pais_da_clinica(clinic)
+    country = countries.pais_da_clinica(clinic)
     contexto = {"titulo": titulo, "html": html, "clinic": clinic}
-    if pais != countries.PADRAO:
+    if country != countries.PADRAO:
         contexto.update(
-            pais=countries.do_codigo(pais).name,
-            lei=legislation.do_pais(pais),
-            prazo_de_guarda=legislation.prazo_de_guarda(pais),
+            country=countries.do_codigo(country).name,
+            lei=legislation.do_pais(country),
+            prazo_de_guarda=legislation.prazo_de_guarda(country),
         )
     return render(request, "help/privacy.html", contexto)

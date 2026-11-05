@@ -1,7 +1,7 @@
 {% load i18n %}<li class="list-group-item d-flex justify-content-between align-items-center gap-2">
   <span>
-    <a href="{% url 'schedule:calendar' %}?practitioner={{ agendamento.practitioner_id }}&amp;date={{ agendamento.start|date:'Y-m-d' }}">{{ agendamento.start|date:"SHORT_DATETIME_FORMAT" }}</a>
-    · {{ agendamento.practitioner.name }}
+    <a href="{% url 'schedule:calendar' %}?practitioner={{ appointment.practitioner_id }}&amp;date={{ appointment.start|date:'Y-m-d' }}">{{ appointment.start|date:"SHORT_DATETIME_FORMAT" }}</a>
+    · {{ appointment.practitioner.name }}
   </span>
-  <span class="legenda-tipo small" style="background-color: {{ agendamento.kind.color }}">{{ agendamento.kind.nome_exibido }}</span>
+  <span class="legenda-tipo small" style="background-color: {{ appointment.kind.color }}">{{ appointment.kind.nome_exibido }}</span>
 </li>

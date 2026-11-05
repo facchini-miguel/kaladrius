@@ -98,16 +98,16 @@ class Documentos:
     # Examples for the practitioner's professional registration (free text).
     registro_profissional: str = ""
 
-    def do_papel(self, papel):
-        return getattr(self, papel) if papel in PAPEIS else None
+    def do_papel(self, role):
+        return getattr(self, role) if role in PAPEIS else None
 
     def de(self, *papeis):
         """The documents of these roles, without repeats or Nones, in order."""
         vistos = []
-        for papel in papeis:
-            documento = self.do_papel(papel)
-            if documento is not None and documento not in vistos:
-                vistos.append(documento)
+        for role in papeis:
+            document = self.do_papel(role)
+            if document is not None and document not in vistos:
+                vistos.append(document)
         return vistos
 
     def rotulo(self, *papeis):
@@ -264,43 +264,43 @@ DOCUMENTOS = {
 }
 
 
-def do_pais(pais=None):
-    return DOCUMENTOS.get(pais or countries.pais_da_clinica(), DOCUMENTOS[countries.PADRAO])
+def do_pais(country=None):
+    return DOCUMENTOS.get(country or countries.pais_da_clinica(), DOCUMENTOS[countries.PADRAO])
 
 
-def papeis(texto):
+def papeis(text):
     """ "paciente,empresa" → ("paciente", "empresa"); empty: every role."""
-    return tuple(p.strip() for p in (texto or "").split(",") if p.strip()) or PAPEIS
+    return tuple(p.strip() for p in (text or "").split(",") if p.strip()) or PAPEIS
 
 
-def identificar(value, papeis_=None, pais=None):
+def identificar(value, papeis_=None, country=None):
     """The document of these roles (all of them by default) this value is valid as."""
-    for documento in do_pais(pais).de(*(papeis_ or PAPEIS)):
-        if documento.valido(value):
-            return documento
+    for document in do_pais(country).de(*(papeis_ or PAPEIS)):
+        if document.valido(value):
+            return document
     return None
 
 
-def escrever(value, papeis_=None, pais=None):
+def escrever(value, papeis_=None, country=None):
     """The stored value written the country's way. In Brazil, as always, by its length."""
     value = value or ""
-    if (pais or countries.pais_da_clinica()) == "BR":
+    if (country or countries.pais_da_clinica()) == "BR":
         if len(value) == 11:
             return _escrever_cpf(value)
         if len(value) == 14:
             return _escrever_cnpj(value)
         return value
-    documento = identificar(value, papeis_, pais)
-    return documento.escrever(value) if documento else value
+    document = identificar(value, papeis_, country)
+    return document.escrever(value) if document else value
 
 
-def sigla(value, papeis_=None, pais=None):
+def sigla(value, papeis_=None, country=None):
     """The name of the document this value is ("CNPJ"), or of every one the roles may have
     ("CPF/CNPJ") when it is none of them."""
-    documento = identificar(value, papeis_, pais) if value else None
-    if documento is not None:
-        return documento.sigla
-    return do_pais(pais).rotulo(*(papeis_ or PAPEIS))
+    document = identificar(value, papeis_, country) if value else None
+    if document is not None:
+        return document.sigla
+    return do_pais(country).rotulo(*(papeis_ or PAPEIS))
 
 
 def invalido(rotulo):
@@ -314,8 +314,8 @@ def limpar(value, documentos, rotulo):
     """
     if not (value or "").strip():
         return ""
-    for documento in documentos:
-        compacto = documento.normalizar(value)
-        if documento.valido(compacto):
+    for document in documentos:
+        compacto = document.normalizar(value)
+        if document.valido(compacto):
             return compacto
     raise ValidationError(invalido(rotulo))

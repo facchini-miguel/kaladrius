@@ -463,11 +463,11 @@ class Payment(ModeloDaClinica):
         BPAY = "bpay", "BPAY"
 
         @classmethod
-        def em_uso(cls, pais=None):
+        def em_uso(cls, country=None):
             """The methods offered when recording a payment, in the clinic's country."""
             from .payment_methods import em_uso
 
-            return em_uso(pais)
+            return em_uso(country)
 
     installment = models.ForeignKey(
         Installment,

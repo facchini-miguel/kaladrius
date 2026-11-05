@@ -98,7 +98,7 @@ def test_filtra_tabelas():
 
 
 @pytest.mark.parametrize(
-    "texto",
+    "text",
     [
         "INSERT INTO `t` (`a`) VALUES ('sem fim",
         "INSERT INTO `t` (`a`, `b`) VALUES (1);",
@@ -106,9 +106,9 @@ def test_filtra_tabelas():
         "INSERT INTO `t` (`a`) VALUES (abc);",
     ],
 )
-def test_dump_invalido(texto):
+def test_dump_invalido(text):
     with pytest.raises(DumpInvalido):
-        ler_tabelas(texto)
+        ler_tabelas(text)
 
 
 # --- Import ------------------------------------------------------------------------
@@ -139,7 +139,7 @@ def test_relatorio(importado):
 def test_horario_da_agenda_cobre_os_atendimentos(importado):
     relatorio, clinic = importado
     clinic.refresh_from_db()
-    assert (clinic.agenda_inicio, clinic.agenda_fim) == (datetime.time(7, 30), datetime.time(21))
+    assert (clinic.schedule_start, clinic.schedule_end) == (datetime.time(7, 30), datetime.time(21))
     assert any(aviso.startswith("Horário da agenda ampliado") for aviso in relatorio.avisos)
 
 
@@ -301,8 +301,8 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
         "Trindade",
         "Sistema antigo",
     ]
-    texto = str([vars(p) for p in pacientes])
-    assert not [trecho for trecho in originais if trecho in texto]
+    text = str([vars(p) for p in pacientes])
+    assert not [trecho for trecho in originais if trecho in text]
     for velho, novo in zip(antes["pacientes"], pacientes, strict=True):
         assert (novo.kind, novo.sex, novo.active, novo.city_id) == (
             velho.kind,

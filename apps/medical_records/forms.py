@@ -33,49 +33,49 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
 class AdendoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Addendum
-        fields = ["texto"]
-        widgets = {"texto": forms.Textarea(attrs={"rows": 3})}
+        fields = ["text"]
+        widgets = {"text": forms.Textarea(attrs={"rows": 3})}
 
 
 class AtestadoForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ["kind", "date", "hora_inicio", "hora_fim", "dias", "note"]
+        fields = ["kind", "date", "start_time", "end_time", "days", "note"]
         widgets = {
             "kind": forms.RadioSelect,
             "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "hora_inicio": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
-            "hora_fim": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "end_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "note": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
         dados = super().clean()
         if dados.get("kind") == Certificate.Tipo.AFASTAMENTO:
-            if not dados.get("dias"):
-                self.add_error("dias", _("Informe quantos dias de afastamento."))
+            if not dados.get("days"):
+                self.add_error("days", _("Informe quantos dias de afastamento."))
         else:
-            dados["dias"] = None
-        start, end = dados.get("hora_inicio"), dados.get("hora_fim")
+            dados["days"] = None
+        start, end = dados.get("start_time"), dados.get("end_time")
         if start and end and end <= start:
-            self.add_error("hora_fim", _("O horário final precisa ser depois do inicial."))
+            self.add_error("end_time", _("O horário final precisa ser depois do inicial."))
         return dados
 
 
 class ReceitaForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = Prescription
-        fields = ["prescricao"]
-        widgets = {"prescricao": forms.Textarea(attrs={"rows": 8})}
+        fields = ["medications"]
+        widgets = {"medications": forms.Textarea(attrs={"rows": 8})}
 
 
 class PedidoDeExamesForm(FormularioBootstrap, forms.ModelForm):
     class Meta:
         model = ExamRequest
-        fields = ["exames", "indicacao"]
+        fields = ["exams", "indication"]
         widgets = {
-            "exames": forms.Textarea(attrs={"rows": 8}),
-            "indicacao": forms.Textarea(attrs={"rows": 2}),
+            "exams": forms.Textarea(attrs={"rows": 8}),
+            "indication": forms.Textarea(attrs={"rows": 2}),
         }
 
 

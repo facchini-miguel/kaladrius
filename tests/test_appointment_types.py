@@ -30,9 +30,9 @@ def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cli
         AppointmentType.objects.create(name="Exclusivo da B", color="#000000")
         de_b = AppointmentType.objects.get(name="Cirurgia")
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
-    conteudo = cliente.get(reverse("schedule:types")).content.decode()
-    assert "Cirurgia" in conteudo
-    assert "Exclusivo da B" not in conteudo
+    content = cliente.get(reverse("schedule:types")).content.decode()
+    assert "Cirurgia" in content
+    assert "Exclusivo da B" not in content
     assert cliente.get(reverse("schedule:type_edit", args=[de_b.pk])).status_code == 404
 
 
@@ -56,21 +56,19 @@ def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usu
         AppointmentType.objects.create(name="Retorno", color="#445566")
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
-def test_recepcao_e_profissional_so_consultam(papel, clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+def test_recepcao_e_profissional_so_consultam(role, clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     with usar_clinica(clinica_a):
         kind = AppointmentType.objects.first()
     assert cliente.get(reverse("schedule:types")).status_code == 200
     assert cliente.get(reverse("schedule:type_new")).status_code == 403
     assert cliente.post(reverse("schedule:type_delete", args=[kind.pk])).status_code == 403
-    conteudo = cliente.get(reverse("schedule:types")).content.decode()
-    assert "Novo tipo" not in conteudo
+    content = cliente.get(reverse("schedule:types")).content.decode()
+    assert "Novo tipo" not in content
 
 
 def test_menu_cadastros(clinica_a, criar_usuario, cliente_de):
-    conteudo = (
-        cliente_de(criar_usuario("recepcao", clinica_a)).get(reverse("home")).content.decode()
-    )
+    content = cliente_de(criar_usuario("recepcao", clinica_a)).get(reverse("home")).content.decode()
     for item in ["Cadastros", "Profissionais", "Tipos de atendimento", "Cidades", "Bancos"]:
-        assert item in conteudo
+        assert item in content

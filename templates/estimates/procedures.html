@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Tabela de procedimentos" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Tabela de procedimentos" %}</h1>
   {% if pode.cadastros.criar %}<a class="btn btn-primary" href="{% url 'estimates:procedure_new' %}">{% translate "Novo procedimento" %}</a>{% endif %}
@@ -15,7 +15,7 @@
       {% for procedimento in procedimentos %}
       <tr>
         <td>{% if procedimento.code %}<span class="text-body-secondary small">{{ procedimento.code }}</span> {% endif %}{{ procedimento.name }}</td>
-        <td class="text-end text-nowrap">{{ procedimento.amount|moeda }}</td>
+        <td class="text-end text-nowrap">{{ procedimento.amount|currency }}</td>
         <td>{{ procedimento.category|default:"—" }}</td>
         <td>{% if procedimento.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         <td class="text-end">{% if pode.cadastros.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:procedure_edit' procedimento.pk %}">{% translate "Editar" %}</a>{% endif %}</td>

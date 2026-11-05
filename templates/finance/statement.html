@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Extrato bancário" %} · {{ statement_import.account }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{% translate "Extrato bancário" %} · {{ statement_import.account }}</h1>
@@ -15,9 +15,9 @@
 <div class="row g-3 mb-3">
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pendentes" %}</div><div class="fs-5">{{ pendentes }} / {{ transacoes|length }}</div></div></div></div>
   {% if statement_import.balance is not None %}
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with data=statement_import.balance_date|date:"SHORT_DATE_FORMAT" %}Saldo no banco em {{ data }}{% endblocktranslate %}</div><div class="fs-5">{{ statement_import.balance|moeda }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no sistema na mesma data" %}</div><div class="fs-5">{{ saldo_sistema|moeda }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if diferenca %} text-danger{% else %} text-success{% endif %}">{{ diferenca|moeda }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with data=statement_import.balance_date|date:"SHORT_DATE_FORMAT" %}Saldo no banco em {{ data }}{% endblocktranslate %}</div><div class="fs-5">{{ statement_import.balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no sistema na mesma data" %}</div><div class="fs-5">{{ saldo_sistema|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if diferenca %} text-danger{% else %} text-success{% endif %}">{{ diferenca|currency }}</div></div></div></div>
   {% endif %}
 </div>
 {% if statement_import.unreadable_transactions %}
@@ -38,7 +38,7 @@
       <tr id="t{{ t.pk }}">
         <td class="text-nowrap">{{ t.date|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ t.description }}</td>
-        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.amount|moeda }}</td>
+        <td class="text-end text-nowrap {% if t.entrada %}text-success{% else %}text-danger{% endif %}">{{ t.amount|currency }}</td>
         <td>
           {% if t.status == "conciliada" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>

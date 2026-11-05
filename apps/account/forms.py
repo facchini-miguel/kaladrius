@@ -53,7 +53,7 @@ class RecuperarSenhaForm(FormularioBootstrap, PasswordResetForm):
     """Password recovery by e-mail, never for the public demo logins."""
 
     def get_users(self, email):
-        return (user for user in super().get_users(email) if not user.demonstracao)
+        return (user for user in super().get_users(email) if not user.demo)
 
 
 class NovaSenhaForm(FormularioBootstrap, SetPasswordForm):

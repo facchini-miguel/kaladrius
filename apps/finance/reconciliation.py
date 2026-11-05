@@ -29,9 +29,9 @@ Situacao = BankTransaction.Situacao
 
 
 @transaction.atomic
-def importar(account, *, nome_arquivo, conteudo, user):
+def importar(account, *, nome_arquivo, content, user):
     """Read an OFX file into `conta`. Lines imported before (same bank id) are skipped."""
-    extrato = ofx.ler(conteudo)
+    extrato = ofx.ler(content)
     if not extrato.transacoes:
         raise ofx.ArquivoInvalido(_("O extrato não tem transações."))
     statement_import = StatementImport.objects.create(

@@ -25,22 +25,22 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
     assert "Pacientes" in cliente.get(start).content.decode()
 
     resposta = cliente.post(
-        reverse("change_language"), {"idioma": "en", "next": start}, follow=True
+        reverse("change_language"), {"language": "en", "next": start}, follow=True
     )
     pagina = resposta.content.decode()
     assert '<html lang="en">' in pagina
     assert "Patients" in pagina and "Recalls" in pagina and "Log out" in pagina
-    assert django_user_model.objects.get(username="maria").idioma == "en"
+    assert django_user_model.objects.get(username="maria").language == "en"
     assert resposta.redirect_chain[-1][0] == start
     assert cliente.cookies[settings.LANGUAGE_COOKIE_NAME].value == "en"
 
-    cliente.post(reverse("change_language"), {"idioma": "es"})
+    cliente.post(reverse("change_language"), {"language": "es"})
     pagina = cliente.get(reverse("patients:list")).content.decode()
     assert "Nuevo paciente" in pagina and "Recordatorios" in pagina
 
     # Empty (or unknown): back to the browser's language.
-    cliente.post(reverse("change_language"), {"idioma": "klingon"})
-    assert django_user_model.objects.get(username="maria").idioma == ""
+    cliente.post(reverse("change_language"), {"language": "klingon"})
+    assert django_user_model.objects.get(username="maria").language == ""
 
 
 def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
@@ -52,7 +52,7 @@ def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
 
 
 def test_escolha_do_usuario_vale_mais_que_o_navegador(cliente, django_user_model):
-    django_user_model.objects.filter(username="maria").update(idioma="es")
+    django_user_model.objects.filter(username="maria").update(language="es")
     pagina = cliente.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
     assert any(saludo in pagina for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
 
@@ -65,7 +65,7 @@ def test_login_segue_o_idioma_do_navegador(client):
 
 
 def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
-    django_user_model.objects.filter(username="maria").update(idioma="en")
+    django_user_model.objects.filter(username="maria").update(language="en")
     resposta = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
     assert "This field is required." in resposta.content.decode()
     resposta = cliente.post(
@@ -78,9 +78,9 @@ def test_trocar_idioma_exige_post_e_login(client):
     assert client.get(reverse("change_language")).status_code in (302, 405)
 
 
-@pytest.mark.parametrize("idioma", ["en", "es"])
-def test_todos_os_textos_estao_traduzidos(idioma):
-    po = (LOCALE / idioma / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_todos_os_textos_estao_traduzidos(language):
+    po = (LOCALE / language / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
     blocos = po.split("\n\n")[1:]
     # Long translations are wrapped: msgstr "" followed by "..." lines, so join them first.
     sem_traducao = [
@@ -98,7 +98,7 @@ def test_novidades_nos_tres_idiomas():
     for release in releases.todas():
         assert set(dict(release.titulos)) == idiomas or not release.titulo, release.versao
         for item in release.itens:
-            assert set(dict(item.textos)) == idiomas, (release.versao, item.texto)
+            assert set(dict(item.textos)) == idiomas, (release.versao, item.text)
             assert item.modulo in releases.MODULOS, item.modulo
 
 

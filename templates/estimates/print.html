@@ -3,7 +3,7 @@
 
 {% block titulo %}{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'estimates:detail' orcamento.pk %}">{% translate "Voltar" %}</a>
@@ -12,8 +12,8 @@
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>
-      {% if clinica_atual.documento %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
-      {% if clinica_atual.endereco %}<div class="small">{{ clinica_atual.endereco }}</div>{% endif %}
+      {% if clinica_atual.document %}<div class="small">{{ clinica_atual.sigla_documento }}: {{ clinica_atual.documento_escrito }}</div>{% endif %}
+      {% if clinica_atual.address %}<div class="small">{{ clinica_atual.address }}</div>{% endif %}
       {% if clinica_atual.phone %}<div class="small">{{ clinica_atual.phone }}</div>{% endif %}
     </div>
     <div class="text-end">
@@ -30,15 +30,15 @@
     <thead><tr><th>{% translate "Procedimento" %}</th>{% if mostrar_dentes %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th></tr></thead>
     <tbody>
       {% for item in orcamento.itens.all %}
-      <tr><td>{% if item.code %}{{ item.code }} · {% endif %}{{ item.description }}</td>{% if mostrar_dentes %}<td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td>{% endif %}<td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.valor_unitario|moeda }}</td><td class="text-end">{{ item.total|moeda }}</td></tr>
+      <tr><td>{% if item.code %}{{ item.code }} · {% endif %}{{ item.description }}</td>{% if mostrar_dentes %}<td>{{ item.dentes_exibicao|default:"—" }}</td><td>{{ item.faces|default:"—" }}</td>{% endif %}<td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.valor_unitario|currency }}</td><td class="text-end">{{ item.total|currency }}</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>
       {% if orcamento.discount %}
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|moeda }}</td></tr>
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.discount|moeda }}</td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end">{{ orcamento.subtotal|currency }}</td></tr>
+      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end">− {{ orcamento.discount|currency }}</td></tr>
       {% endif %}
-      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|moeda }}</td></tr>
+      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end">{{ orcamento.total|currency }}</td></tr>
     </tfoot>
   </table>
   </div>

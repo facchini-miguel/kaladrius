@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Folha do mês" %} {{ competencia|date:"m/Y" }} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
   <h1 class="h3 mb-0">{% blocktranslate with mes=competencia|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
   <div class="btn-group">
@@ -32,7 +32,7 @@
         {% for folha, form in linhas %}
         <tr>
           <td><a href="{% url 'staff:employee' folha.employee_id %}">{{ folha.employee.name }}</a></td>
-          <td class="text-end text-nowrap">{{ folha.salario|moeda }}</td>
+          <td class="text-end text-nowrap">{{ folha.salario|currency }}</td>
           {% if form %}
           <td>{{ form.horas_extras }}{% for erro in form.horas_extras.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
           <td>{{ form.valor_hora_extra }}{% for erro in form.valor_hora_extra.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
@@ -40,18 +40,18 @@
           <td>{{ form.note }}</td>
           {% else %}
           <td>{{ folha.horas_extras }}</td>
-          <td class="text-nowrap">{{ folha.valor_hora_extra|moeda }}</td>
+          <td class="text-nowrap">{{ folha.valor_hora_extra|currency }}</td>
           <td>{{ folha.faltas }}</td>
           <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
-          <td class="text-end text-nowrap fw-semibold">{{ folha.total|moeda }}</td>
+          <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if pode.pessoal.criar %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
         {% endfor %}
       </tbody>
       {% if linhas %}
-      <tfoot><tr class="fw-semibold"><td colspan="6">{% translate "Total do mês" %}</td><td class="text-end text-nowrap">{{ total|moeda }}</td></tr></tfoot>
+      <tfoot><tr class="fw-semibold"><td colspan="6">{% translate "Total do mês" %}</td><td class="text-end text-nowrap">{{ total|currency }}</td></tr></tfoot>
       {% endif %}
     </table>
   </div>

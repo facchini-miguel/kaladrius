@@ -1,25 +1,25 @@
-{% load i18n %}<form hx-post="{% if agendamento.pk %}{% url 'schedule:edit' agendamento.pk %}{% else %}{% url 'schedule:new' %}{% endif %}"
+{% load i18n %}<form hx-post="{% if appointment.pk %}{% url 'schedule:edit' appointment.pk %}{% else %}{% url 'schedule:new' %}{% endif %}"
       hx-target="#modal-conteudo" novalidate>
   {% csrf_token %}
   <div class="modal-header">
-    <h2 class="modal-title h5">{% if agendamento.pk %}{% translate "Editar agendamento" %}{% else %}{% translate "Novo agendamento" %}{% endif %}</h2>
+    <h2 class="modal-title h5">{% if appointment.pk %}{% translate "Editar agendamento" %}{% else %}{% translate "Novo agendamento" %}{% endif %}</h2>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
   </div>
   <div class="modal-body">
     {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
     {% if erro_situacao %}<div class="alert alert-danger">{{ erro_situacao }}</div>{% endif %}
-    {% if agendamento.pk and agendamento.patient_id %}
+    {% if appointment.pk and appointment.patient_id %}
     {% include "schedule/_status.html" %}
     {% endif %}
     <div class="row">
       <div class="col-md-6">{% with campo=form.practitioner %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with campo=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-4">{% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-6 col-md-4">{% with campo=form.hora_inicio %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-6 col-md-4">{% with campo=form.hora_fim %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-6 col-md-4">{% with campo=form.start_time %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-6 col-md-4">{% with campo=form.end_time %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-12">
         {% translate "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." as ajuda_paciente %}
-        {% include "includes/patient_search.html" with campo=form.patient patient=agendamento.patient ajuda=ajuda_paciente %}
+        {% include "includes/patient_search.html" with campo=form.patient patient=appointment.patient ajuda=ajuda_paciente %}
       </div>
       <div class="col-12">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.repeticoes %}
@@ -28,9 +28,9 @@
     </div>
   </div>
   <div class="modal-footer">
-    {% if agendamento.pk and pode.agenda.excluir %}
+    {% if appointment.pk and pode.agenda.excluir %}
     <button type="button" class="btn btn-outline-danger me-auto"
-            hx-get="{% url 'schedule:delete' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Excluir" %}</button>
+            hx-get="{% url 'schedule:delete' appointment.pk %}" hx-target="#modal-conteudo">{% translate "Excluir" %}</button>
     {% endif %}
     <button type="button" class="btn btn-link" data-bs-dismiss="modal">{% translate "Cancelar" %}</button>
     <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>

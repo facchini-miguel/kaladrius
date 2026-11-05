@@ -121,9 +121,9 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
     assert 'href="/system/health/"' in recepcao.get(reverse("home")).content.decode()
     pagina = recepcao.get(reverse("monitoring:health"))
     assert pagina.status_code == 200
-    conteudo = pagina.content.decode()
-    assert "<svg" in conteudo and "Nenhum backup registrado" in conteudo
-    assert "Maiores tabelas" not in conteudo and "health.sh" not in conteudo
+    content = pagina.content.decode()
+    assert "<svg" in content and "Nenhum backup registrado" in content
+    assert "Maiores tabelas" not in content and "health.sh" not in content
 
 
 def test_tela_com_amostras(pasta, superusuario):
@@ -131,8 +131,8 @@ def test_tela_com_amostras(pasta, superusuario):
     for periodo in ("1h", "24h", "7d", "outro"):
         pagina = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
         assert pagina.status_code == 200
-    conteudo = pagina.content.decode()
-    assert "<svg" in conteudo and "app" in conteudo and "Maiores tabelas" in conteudo
+    content = pagina.content.decode()
+    assert "<svg" in content and "app" in content and "Maiores tabelas" in content
     assert pagina.context["periodo"] == "1h"  # the default
     assert pagina.context["end"] - pagina.context["start"] == datetime.timedelta(hours=1)
 
@@ -167,9 +167,9 @@ def test_comando_resume_as_24_horas(pasta):
     pasta(amostra(10, cpu=4), amostra(5, cpu=8, disco=29))
     saida = StringIO()
     call_command("health", stdout=saida)
-    texto = saida.getvalue()
-    assert "Amostras: 2" in texto and "pico 8.0%" in texto
-    assert "disco: critico" in texto and "Último backup: nenhum registrado" in texto
+    text = saida.getvalue()
+    assert "Amostras: 2" in text and "pico 8.0%" in text
+    assert "disco: critico" in text and "Último backup: nenhum registrado" in text
 
 
 def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):

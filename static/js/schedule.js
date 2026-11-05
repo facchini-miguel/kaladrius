@@ -67,7 +67,7 @@
   }
 
   const calendario = new FullCalendar.Calendar(elementoCalendario, {
-    locale: config.idioma,
+    locale: config.language,
     timeZone: "UTC",
     now: config.agora,
     initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",

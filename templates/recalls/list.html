@@ -3,7 +3,7 @@
 
 {% block titulo %}{% translate "Rechamadas" %} · {{ nome_sistema }}{% endblock %}
 
-{% block conteudo %}
+{% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Rechamadas" %}</h1>
   {% if pode.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}

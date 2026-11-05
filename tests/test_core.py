@@ -30,9 +30,9 @@ def test_login_e_inicio(client, django_user_model):
 
 
 def test_rodape_mostra_autor_e_versao(client):
-    conteudo = client.get(reverse("login")).content.decode()
-    assert "Desenvolvido por Miguel Facchini" in conteudo
-    assert "versão" in conteudo
+    content = client.get(reverse("login")).content.decode()
+    assert "Desenvolvido por Miguel Facchini" in content
+    assert "versão" in content
 
 
 def test_login_com_senha_errada(client, django_user_model):
@@ -171,13 +171,13 @@ def dados_clinica(**extra):
     return {
         "name": "Clínica Atualizada",
         "area": "odontologia",
-        "documento": "",
+        "document": "",
         "email": "",
         "phone": "",
-        "agenda_inicio": "08:00",
-        "agenda_fim": "18:00",
-        "moeda": "BRL",
-        "agenda_intervalo": 30,
+        "schedule_start": "08:00",
+        "schedule_end": "18:00",
+        "currency": "BRL",
+        "schedule_interval": 30,
         "modulos_gerais": sorted(MODULOS_GERAIS),
         **extra,
     }
@@ -189,27 +189,27 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
     assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
     resposta = cliente.post(
         reverse("clinic_settings"),
-        dados_clinica(documento="11.222.333/0001-81", agenda_intervalo=15),
+        dados_clinica(document="11.222.333/0001-81", schedule_interval=15),
     )
     assert resposta.status_code == 302
     clinica_a.refresh_from_db()
-    assert (clinica_a.name, clinica_a.documento) == ("Clínica Atualizada", "11222333000181")
-    assert (clinica_a.agenda_inicio, clinica_a.agenda_intervalo) == (datetime.time(8), 15)
+    assert (clinica_a.name, clinica_a.document) == ("Clínica Atualizada", "11222333000181")
+    assert (clinica_a.schedule_start, clinica_a.schedule_interval) == (datetime.time(8), 15)
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
-def test_so_o_admin_altera_configuracoes(papel, clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("clinic_settings")).status_code == 403
 
 
 @pytest.mark.parametrize(
     ("extra", "erro"),
     [
-        ({"agenda_inicio": "18:00", "agenda_fim": "08:00"}, "depois do início"),
-        ({"documento": "123"}, "CPF/CNPJ: número inválido"),
-        ({"agenda_inicio": "10:00"}, "ficaria fora do novo horário"),  # 09:00 appointment
-        ({"agenda_intervalo": 60, "agenda_inicio": "08:30"}, "ficaria fora"),  # misaligned
+        ({"schedule_start": "18:00", "schedule_end": "08:00"}, "depois do início"),
+        ({"document": "123"}, "CPF/CNPJ: número inválido"),
+        ({"schedule_start": "10:00"}, "ficaria fora do novo horário"),  # 09:00 appointment
+        ({"schedule_interval": 60, "schedule_start": "08:30"}, "ficaria fora"),  # misaligned
     ],
 )
 def test_configuracoes_invalidas(extra, erro, clinica_a, criar_usuario, cliente_de):

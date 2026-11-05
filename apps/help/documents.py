@@ -27,8 +27,8 @@ _ITEM_DE_LISTA = re.compile(r"^\s*(?:[-*+] |\d+\. )")
 
 
 def _idioma():
-    idioma = get_language()
-    return idioma if idioma in PASTAS else IDIOMA_PADRAO
+    language = get_language()
+    return language if language in PASTAS else IDIOMA_PADRAO
 
 
 def url_do_site(caminho=""):
@@ -36,13 +36,13 @@ def url_do_site(caminho=""):
     return f"{settings.DOCS_URL.rstrip('/')}{PREFIXOS[_idioma()]}/{caminho}"
 
 
-def _separar_listas(texto):
+def _separar_listas(text):
     """Blank line before a list that follows a paragraph line, outside code blocks.
 
     GitHub and the site render such lists, but Python-Markdown needs the blank line.
     """
     linhas, em_codigo, anterior = [], False, ""
-    for linha in texto.split("\n"):
+    for linha in text.split("\n"):
         if linha.lstrip().startswith("```"):
             em_codigo = not em_codigo
         elif (
@@ -61,10 +61,10 @@ def _separar_listas(texto):
 def privacidade():
     """(title, HTML) of the privacy policy in the current language."""
     file = DOCS / PASTAS[_idioma()] / "manual" / "privacy.md"
-    texto = _FRONTMATTER.sub("", file.read_text(encoding="utf-8"), count=1)
-    titulo = next((linha[2:].strip() for linha in texto.splitlines() if linha.startswith("# ")), "")
+    text = _FRONTMATTER.sub("", file.read_text(encoding="utf-8"), count=1)
+    titulo = next((linha[2:].strip() for linha in text.splitlines() if linha.startswith("# ")), "")
     html = markdown.markdown(
-        _separar_listas(texto), extensions=["tables", "fenced_code", "sane_lists"]
+        _separar_listas(text), extensions=["tables", "fenced_code", "sane_lists"]
     )
     html = html.replace("<table>", '<table class="table table-sm table-bordered bg-white">')
     return titulo, html

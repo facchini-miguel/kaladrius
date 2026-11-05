@@ -37,11 +37,11 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
     date = forms.DateField(
         label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )
-    hora_inicio = forms.TimeField(
+    start_time = forms.TimeField(
         label=pgettext_lazy("hora", "Início"),
         widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
     )
-    hora_fim = forms.TimeField(
+    end_time = forms.TimeField(
         label=_("Fim"), widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
     )
     repeticoes = forms.IntegerField(
@@ -64,50 +64,50 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.clinic = clinic
         self.intervalos = []
-        agendamento = self.instance
-        if agendamento.clinic_id is None:
-            agendamento.clinic = clinic
+        appointment = self.instance
+        if appointment.clinic_id is None:
+            appointment.clinic = clinic
 
         # Inactive practitioners/types are hidden, except the ones already in use here.
         if profissionais is None:
             profissionais = Practitioner.objects.all()
         self.fields["practitioner"].queryset = profissionais.filter(
-            Q(active=True) | Q(pk=agendamento.practitioner_id)
+            Q(active=True) | Q(pk=appointment.practitioner_id)
         )
         self.fields["kind"].queryset = AppointmentType.objects.filter(
-            Q(active=True) | Q(pk=agendamento.kind_id)
+            Q(active=True) | Q(pk=appointment.kind_id)
         )
         self.fields["kind"].label_from_instance = lambda kind: kind.nome_exibido
         self.fields["patient"].queryset = Patient.objects.all()
 
-        passo = clinic.agenda_intervalo * 60
-        for campo in ("hora_inicio", "hora_fim"):
+        passo = clinic.schedule_interval * 60
+        for campo in ("start_time", "end_time"):
             self.fields[campo].widget.attrs.update(
                 step=passo,
-                min=clinic.agenda_inicio.strftime("%H:%M"),
-                max=clinic.agenda_fim.strftime("%H:%M"),
+                min=clinic.schedule_start.strftime("%H:%M"),
+                max=clinic.schedule_end.strftime("%H:%M"),
             )
 
-        if agendamento.pk:
+        if appointment.pk:
             del self.fields["repeticoes"]  # recurrence only applies when creating
-            start = timezone.localtime(agendamento.start)
+            start = timezone.localtime(appointment.start)
             self.initial.update(
                 date=start.date(),
-                hora_inicio=start.time(),
-                hora_fim=timezone.localtime(agendamento.end).time(),
+                start_time=start.time(),
+                end_time=timezone.localtime(appointment.end).time(),
             )
 
     def _alinhado(self, hora):
-        start = self.clinic.agenda_inicio
+        start = self.clinic.schedule_start
         minutos = (hora.hour * 60 + hora.minute) - (start.hour * 60 + start.minute)
-        return hora.second == 0 and minutos % self.clinic.agenda_intervalo == 0
+        return hora.second == 0 and minutos % self.clinic.schedule_interval == 0
 
     def clean(self):
         dados = super().clean()
-        date, hora_inicio, hora_fim = (
+        date, start_time, end_time = (
             dados.get("date"),
-            dados.get("hora_inicio"),
-            dados.get("hora_fim"),
+            dados.get("start_time"),
+            dados.get("end_time"),
         )
         if not dados.get("patient") and not dados.get("description", "").strip():
             self.add_error("description", _("Informe o paciente ou uma descrição."))
@@ -125,33 +125,33 @@ class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
                     "use “Agendar outro paciente neste horário”."
                 ),
             )
-        if None in (date, hora_inicio, hora_fim) or self.errors:
+        if None in (date, start_time, end_time) or self.errors:
             return dados
 
         clinic = self.clinic
-        if hora_fim <= hora_inicio:
-            self.add_error("hora_fim", _("O fim deve ser depois do início."))
+        if end_time <= start_time:
+            self.add_error("end_time", _("O fim deve ser depois do início."))
             return dados
-        intervalo = clinic.agenda_intervalo
-        for campo, hora in (("hora_inicio", hora_inicio), ("hora_fim", hora_fim)):
+        intervalo = clinic.schedule_interval
+        for campo, hora in (("start_time", start_time), ("end_time", end_time)):
             if not self._alinhado(hora):
                 self.add_error(
                     campo, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
                 )
-        if hora_inicio < clinic.agenda_inicio or hora_fim > clinic.agenda_fim:
+        if start_time < clinic.schedule_start or end_time > clinic.schedule_end:
             self.add_error(
                 None,
                 _("Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s).")
                 % {
-                    "inicio": f"{clinic.agenda_inicio:%H:%M}",
-                    "fim": f"{clinic.agenda_fim:%H:%M}",
+                    "inicio": f"{clinic.schedule_start:%H:%M}",
+                    "fim": f"{clinic.schedule_end:%H:%M}",
                 },
             )
         if self.errors:
             return dados
 
         self.intervalos = services.ocorrencias(
-            date, hora_inicio, hora_fim, dados.get("repeticoes") or 1
+            date, start_time, end_time, dados.get("repeticoes") or 1
         )
         self.instance.start, self.instance.end = self.intervalos[0]
         marcado = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)

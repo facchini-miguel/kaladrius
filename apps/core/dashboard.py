@@ -56,8 +56,8 @@ def _agenda(request, hoje):
     pacientes = [a for a in do_dia if a.patient_id]
     status = Appointment.Situacao
     contagem = {value: 0 for value in status.values}
-    for agendamento in pacientes:
-        contagem[agendamento.status] += 1
+    for appointment in pacientes:
+        contagem[appointment.status] += 1
     pendentes = [a for a in pacientes if a.status == status.AGENDADO]
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(

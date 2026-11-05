@@ -108,7 +108,7 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
 
 
 @pytest.mark.parametrize(
-    ("papel", "ver", "criar"),
+    ("role", "ver", "criar"),
     [
         (Papel.RECEPCAO, 200, 200),
         (Papel.PROFISSIONAL, 200, 403),
@@ -116,9 +116,9 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
     ],
 )
 def test_permissoes_por_papel(
-    papel, ver, criar, clinica_a, patient, convenio, criar_usuario, cliente_de
+    role, ver, criar, clinica_a, patient, convenio, criar_usuario, cliente_de
 ):
-    cliente = cliente_de(criar_usuario("papel_convenios", clinica_a, papel))
+    cliente = cliente_de(criar_usuario("papel_convenios", clinica_a, role))
     assert cliente.get(reverse("health_plans:list")).status_code == ver
     assert cliente.get(reverse("health_plans:card_new", args=[patient.pk])).status_code == (criar)
 

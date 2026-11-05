@@ -63,9 +63,9 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
 
     registros = ultimos(modelo="Paciente", objeto_id=str(patient.pk))
     assert {r.acao for r in registros} == {Acao.CRIAR, Acao.VISUALIZAR, Acao.ALTERAR, Acao.EXCLUIR}
-    texto = str([(r.objeto_descricao, r.alteracoes, r.usuario_nome) for r in registros])
-    assert "Sigilosa" not in texto and "52998224725" not in texto
-    assert "admin_a" in texto  # who did it stays
+    text = str([(r.objeto_descricao, r.alteracoes, r.usuario_nome) for r in registros])
+    assert "Sigilosa" not in text and "52998224725" not in text
+    assert "admin_a" in text  # who did it stays
     criacao = next(r for r in registros if r.acao == Acao.CRIAR)
     assert criacao.alteracoes["name"] == ["(removido)", "(removido)"]
     assert ultimos(objeto_descricao__contains="excluídos a pedido do titular")
@@ -107,8 +107,8 @@ def test_senha_nunca_e_gravada(criar_usuario):
     user.set_password("nova-senha-secreta-123")
     user.save()
     registros = AuditEntry.objects.filter(modelo="Usuário")
-    texto = " ".join(str(r.alteracoes) for r in registros)
-    assert "argon2" not in texto and "nova-senha" not in texto
+    text = " ".join(str(r.alteracoes) for r in registros)
+    assert "argon2" not in text and "nova-senha" not in text
     [alteracao] = registros.filter(acao=Acao.ALTERAR)
     assert alteracao.alteracoes == {"senha": ["(oculta)", "(alterada)"]}
 
@@ -118,14 +118,14 @@ def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
         Patient.objects.create(name="Paciente da A")
     with usar_clinica(clinica_b):
         Patient.objects.create(name="Paciente da B")
-    conteudo = admin_a.get(reverse("audit:list"), {"modelo": "Paciente"}).content.decode()
-    assert "Paciente da A" in conteudo
-    assert "Paciente da B" not in conteudo
+    content = admin_a.get(reverse("audit:list"), {"modelo": "Paciente"}).content.decode()
+    assert "Paciente da A" in content
+    assert "Paciente da B" not in content
 
 
-@pytest.mark.parametrize("papel", [Papel.RECEPCAO, Papel.PROFISSIONAL])
-def test_somente_administrador_ve_a_auditoria(papel, clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, papel))
+@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+def test_somente_administrador_ve_a_auditoria(role, clinica_a, criar_usuario, cliente_de):
+    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("audit:list")).status_code == 403
     assert "Auditoria" not in cliente.get(reverse("home")).content.decode()
 

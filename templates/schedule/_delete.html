@@ -1,11 +1,11 @@
-{% load i18n %}<form hx-post="{% url 'schedule:delete' agendamento.pk %}" hx-target="#modal-conteudo">
+{% load i18n %}<form hx-post="{% url 'schedule:delete' appointment.pk %}" hx-target="#modal-conteudo">
   {% csrf_token %}
   <div class="modal-header">
     <h2 class="modal-title h5">{% translate "Excluir agendamento?" %}</h2>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
   </div>
   <div class="modal-body">
-    <p class="mb-2"><strong>{{ agendamento.titulo }}</strong> · {% blocktranslate with inicio=agendamento.start|date:"SHORT_DATETIME_FORMAT" fim=agendamento.end|date:"TIME_FORMAT" %}{{ inicio }} às {{ fim }}{% endblocktranslate %}</p>
+    <p class="mb-2"><strong>{{ appointment.titulo }}</strong> · {% blocktranslate with inicio=appointment.start|date:"SHORT_DATETIME_FORMAT" fim=appointment.end|date:"TIME_FORMAT" %}{{ inicio }} às {{ fim }}{% endblocktranslate %}</p>
     {% if proximos %}
     <div class="form-check">
       <input class="form-check-input" type="radio" name="escopo" id="escopo-este" value="este" checked>
@@ -20,7 +20,7 @@
     {% endif %}
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-link" hx-get="{% url 'schedule:edit' agendamento.pk %}" hx-target="#modal-conteudo">{% translate "Voltar" %}</button>
+    <button type="button" class="btn btn-link" hx-get="{% url 'schedule:edit' appointment.pk %}" hx-target="#modal-conteudo">{% translate "Voltar" %}</button>
     <button type="submit" class="btn btn-danger">{% translate "Excluir" %}</button>
   </div>
 </form>

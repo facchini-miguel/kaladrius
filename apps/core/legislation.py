@@ -155,13 +155,13 @@ LEIS = {
 }
 
 
-def do_pais(pais=None):
-    return LEIS.get(pais or countries.pais_da_clinica(), LEIS[countries.PADRAO])
+def do_pais(country=None):
+    return LEIS.get(country or countries.pais_da_clinica(), LEIS[countries.PADRAO])
 
 
-def prazo_de_guarda(pais=None):
+def prazo_de_guarda(country=None):
     """One sentence on how long the country keeps health records, in the user's language."""
-    guarda = do_pais(pais).guarda
+    guarda = do_pais(country).guarda
     if guarda.anos and guarda.ate_idade:
         return _(
             "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "

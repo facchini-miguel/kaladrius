@@ -150,7 +150,7 @@
               <li>
                 <form method="post" action="{% url 'change_language' %}">
                   {% csrf_token %}
-                  <input type="hidden" name="idioma" value="{{ code }}">
+                  <input type="hidden" name="language" value="{{ code }}">
                   <input type="hidden" name="next" value="{{ request.get_full_path }}">
                   <button type="submit" class="dropdown-item d-flex align-items-center gap-2{% if code == idioma_base %} active{% endif %}" lang="{{ code }}">
                     <img class="bandeira" src="{% static 'img/flags/'|add:code|add:'.svg' %}" alt="" width="24" height="17">
@@ -166,7 +166,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.get_full_name|default:user.username }}</a>
             <ul class="dropdown-menu dropdown-menu-end">
-              {% if not user.demonstracao %}
+              {% if not user.demo %}
               <li><a class="dropdown-item" href="{% url 'change_password' %}">{% translate "Trocar senha" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'account:two_factor' %}">{% translate "Verificação em duas etapas" %}</a></li>
               <li><hr class="dropdown-divider"></li>
@@ -221,7 +221,7 @@
     {% for mensagem in messages %}
     <div class="alert alert-{{ mensagem.tags|default:'info' }} d-print-none" role="alert">{{ mensagem }}</div>
     {% endfor %}
-    {% block conteudo %}{% endblock %}
+    {% block content %}{% endblock %}
   </main>
 
   <footer class="rodape text-center text-body-secondary small py-3 d-print-none">

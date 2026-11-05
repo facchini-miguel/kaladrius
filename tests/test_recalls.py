@@ -146,10 +146,10 @@ def test_isolamento(cenario, clinica_b):
     assert "patient" in resposta.context["form"].errors
 
 
-@pytest.mark.parametrize(("papel", "exclui"), [(Papel.RECEPCAO, True), (Papel.PROFISSIONAL, False)])
-def test_permissao_de_excluir(papel, exclui, cenario, criar_usuario, cliente_de):
+@pytest.mark.parametrize(("role", "exclui"), [(Papel.RECEPCAO, True), (Papel.PROFISSIONAL, False)])
+def test_permissao_de_excluir(role, exclui, cenario, criar_usuario, cliente_de):
     rechamada = criar(cenario["clinic"], cenario["patient"])
-    cliente = cliente_de(criar_usuario("usuario", cenario["clinic"], papel))
+    cliente = cliente_de(criar_usuario("usuario", cenario["clinic"], role))
     resposta = cliente.post(reverse("recalls:delete", args=[rechamada.pk]))
     assert resposta.status_code == (302 if exclui else 403)
 

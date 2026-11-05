@@ -49,7 +49,7 @@ def moeda_da_clinica():
     from .isolation import clinica_atual
 
     clinic = clinica_atual()
-    return getattr(clinic, "moeda", None) or PADRAO
+    return getattr(clinic, "currency", None) or PADRAO
 
 
 def formatar(value, code=None):

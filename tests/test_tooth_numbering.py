@@ -70,28 +70,28 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
     from apps.core.models import Papel
 
     admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Papel.ADMIN))
-    assert clinica_a.numeracao_dentaria == FDI
-    assert admin.post(reverse("clinic_settings"), dados_clinica(pais="US")).status_code == 302
+    assert clinica_a.tooth_numbering == FDI
+    assert admin.post(reverse("clinic_settings"), dados_clinica(country="US")).status_code == 302
     clinica_a.refresh_from_db()
-    assert clinica_a.numeracao_dentaria == UNIVERSAL
+    assert clinica_a.tooth_numbering == UNIVERSAL
     # Chosen on purpose, it stays when the country changes.
-    dados = dados_clinica(pais="US", numeracao_dentaria=PALMER)
+    dados = dados_clinica(country="US", tooth_numbering=PALMER)
     assert admin.post(reverse("clinic_settings"), dados).status_code == 302
-    dados = dados_clinica(pais="GB", numeracao_dentaria=PALMER)
+    dados = dados_clinica(country="GB", tooth_numbering=PALMER)
     assert admin.post(reverse("clinic_settings"), dados).status_code == 302
     clinica_a.refresh_from_db()
-    assert clinica_a.numeracao_dentaria == PALMER
+    assert clinica_a.tooth_numbering == PALMER
 
 
 def test_clinica_nova_nos_estados_unidos_comeca_com_a_universal():
-    form = NovaClinicaForm({"name": "Smile Fictitious", "area": "odontologia", "pais": "US"})
+    form = NovaClinicaForm({"name": "Smile Fictitious", "area": "odontologia", "country": "US"})
     assert form.is_valid(), form.errors
-    assert form.instance.numeracao_dentaria == UNIVERSAL
+    assert form.instance.tooth_numbering == UNIVERSAL
 
 
 def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
     clinic = cenario["clinic"]
-    clinic.numeracao_dentaria = UNIVERSAL
+    clinic.tooth_numbering = UNIVERSAL
     clinic.save()
     cliente = entrar(cenario, "practitioner")
     orcamento = criar_orcamento(cenario, cliente)

@@ -23,13 +23,13 @@ BASH = shutil.which("bash")
 pytestmark = pytest.mark.skipif(not BASH, reason="needs bash")
 
 
-def conteudo():
+def content():
     """The (src, dst) pairs of the package's contents."""
     return re.findall(r"- src: (\S+)\n\s+dst: (\S+)", NFPM)
 
 
 def test_todo_arquivo_do_pacote_existe():
-    for origem, _destino in conteudo():
+    for origem, _destino in content():
         if (
             origem.startswith("/") or origem == "dist/linux-package"
         ):  # a symlink; written by build.sh
@@ -40,7 +40,7 @@ def test_todo_arquivo_do_pacote_existe():
 
 
 def test_cada_tarefa_agendada_roda_um_script_do_pacote():
-    destinos = {destino for _origem, destino in conteudo()}
+    destinos = {destino for _origem, destino in content()}
     unidades = [d for d in destinos if d.startswith("/usr/lib/systemd/system/")]
     assert {Path(u).name for u in unidades} == {
         f"kaladrius-{name}.{kind}"
@@ -49,8 +49,8 @@ def test_cada_tarefa_agendada_roda_um_script_do_pacote():
     }
     for unidade in unidades:
         if unidade.endswith(".service"):
-            texto = (SERVIDOR / Path(unidade).name).read_text()
-            executavel = re.search(r"^ExecStart=(\S+)", texto, re.M).group(1)
+            text = (SERVIDOR / Path(unidade).name).read_text()
+            executavel = re.search(r"^ExecStart=(\S+)", text, re.M).group(1)
             assert executavel in destinos, (unidade, executavel)
 
 
@@ -58,7 +58,7 @@ def test_o_pacote_liga_as_tarefas_que_traz():
     comum = (SERVIDOR / "common.sh").read_text()
     bloco = comum.split("if installed_by_package; then  # its units came with the package")[1]
     ligadas = set(re.findall(r"kaladrius-[a-z-]+\.timer", bloco.split("return 0")[0]))
-    trazidas = {Path(d).name for _o, d in conteudo() if d.endswith(".timer")}
+    trazidas = {Path(d).name for _o, d in content() if d.endswith(".timer")}
     assert ligadas == trazidas
     # Also when the package is installed again over a configured installation, before the
     # system is started: a removal disabled them, and the new version may not come up.
@@ -70,8 +70,8 @@ def test_o_pacote_liga_as_tarefas_que_traz():
 def comum_em(pasta, pacote=None, env=""):
     """common.sh with its DIR in a temporary folder."""
     (pasta / "release").mkdir(parents=True, exist_ok=True)
-    texto = (SERVIDOR / "common.sh").read_text().replace("DIR=/opt/kaladrius", f"DIR={pasta}", 1)
-    (pasta / "common.sh").write_text(texto)
+    text = (SERVIDOR / "common.sh").read_text().replace("DIR=/opt/kaladrius", f"DIR={pasta}", 1)
+    (pasta / "common.sh").write_text(text)
     if pacote is not None:
         (pasta / "release" / "linux-package").write_text(pacote)
     (pasta / ".env").write_text(env)
@@ -148,7 +148,7 @@ def test_rede_interna(tmp_path, acesso, esperado):
     assert avaliar(comum, "internal_network && echo sim || echo nao") == esperado
 
 
-def kaladrius(tmp_path, *args, idioma="C"):
+def kaladrius(tmp_path, *args, language="C"):
     """The `kaladrius` command as installed: beside common.sh, here with DIR in tmp_path."""
     bin_ = tmp_path / "bin"
     bin_.mkdir(exist_ok=True)
@@ -158,13 +158,13 @@ def kaladrius(tmp_path, *args, idioma="C"):
         [BASH, str(bin_ / "kaladrius"), *args],
         capture_output=True,
         text=True,
-        env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "LANG": idioma},
+        env={"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "LANG": language},
         timeout=30,
     )
 
 
 @pytest.mark.parametrize(
-    ("idioma", "trecho"),
+    ("language", "trecho"),
     [
         ("pt_BR.UTF-8", "faz um backup agora"),
         ("es_ES.UTF-8", "hace una copia de seguridad ahora"),
@@ -172,8 +172,8 @@ def kaladrius(tmp_path, *args, idioma="C"):
         ("C", "makes a backup now"),
     ],
 )
-def test_ajuda_no_idioma_do_servidor(tmp_path, idioma, trecho):
-    resultado = kaladrius(tmp_path, "help", idioma=idioma)
+def test_ajuda_no_idioma_do_servidor(tmp_path, language, trecho):
+    resultado = kaladrius(tmp_path, "help", language=language)
     assert resultado.returncode == 0, resultado.stderr
     assert trecho in resultado.stdout
     assert "sudo kaladrius configure" in resultado.stdout
@@ -214,7 +214,7 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
 
 
 @pytest.mark.parametrize(
-    ("endereco", "valido"),
+    ("address", "valido"),
     [
         ("192.168.0.10", True),
         ("10.0.0.255", True),
@@ -225,9 +225,9 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
         ("clinica.exemplo.com", False),
     ],
 )
-def test_eh_ipv4(tmp_path, endereco, valido):
+def test_eh_ipv4(tmp_path, address, valido):
     resultado = funcao_do_comando(
-        tmp_path, f'is_ipv4 "{endereco}" && echo sim || echo nao', {"PATH": "/usr/bin:/bin"}
+        tmp_path, f'is_ipv4 "{address}" && echo sim || echo nao', {"PATH": "/usr/bin:/bin"}
     )
     assert resultado.stdout.strip() == ("sim" if valido else "nao"), resultado.stderr
 
@@ -508,11 +508,11 @@ def test_senha_no_modo_texto_guarda_os_espacos(tmp_path):
     assert resultado.stdout == "  minha senha "
 
 
-@pytest.mark.parametrize("idioma", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
-def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, idioma):
+@pytest.mark.parametrize("language", ["pt_BR.UTF-8", "es_ES.UTF-8", "C"])
+def test_ajuda_explica_as_duas_formas_de_atualizar(tmp_path, language):
     # With the package repository (which the package adds), the system's updates; on Arch
     # Linux or without it, the next version's package from the releases.
-    saida = kaladrius(tmp_path, "help", idioma=idioma).stdout
+    saida = kaladrius(tmp_path, "help", language=language).stdout
     for comando in ("sudo apt upgrade", "sudo dnf upgrade", "sudo zypper update", "pacman -U"):
         assert comando in saida
     assert "github.com/facchini-miguel/kaladrius/releases" in saida
@@ -539,8 +539,8 @@ def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None, configu
     (dir_ / "bin").mkdir(exist_ok=True)
     shutil.copytree(PACOTE / "repository", dir_ / "repository", dirs_exist_ok=True)
     (dir_ / "release" / "linux-package").write_text(f"VERSION=0.55.0\nIMAGE={IMAGEM}\n")
-    texto = (SERVIDOR / "common.sh").read_text().replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
-    (dir_ / "bin" / "common.sh").write_text(texto)
+    text = (SERVIDOR / "common.sh").read_text().replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
+    (dir_ / "bin" / "common.sh").write_text(text)
     if configurado and not (dir_ / ".env").exists():
         (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\n")
     if admin_criado:
@@ -550,9 +550,9 @@ def depois_de_instalar(tmp_path, argumento, admin_criado, ambiente=None, configu
     update.write_text(REGISTRO_DE_CHAMADAS)
     update.chmod(0o755)
     script = tmp_path / "post_install.sh"
-    texto = (PACOTE / "post_install.sh").read_text()
-    texto = texto.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
-    script.write_text(texto.replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1))
+    text = (PACOTE / "post_install.sh").read_text()
+    text = text.replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
+    script.write_text(text.replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1))
     (tmp_path / "systemd").mkdir(exist_ok=True)
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(script), argumento],
@@ -768,10 +768,8 @@ def test_remover_mantem_o_repositorio_e_purge_apaga(tmp_path, argumento, fica):
     fontes.mkdir(parents=True)
     (fontes / "kaladrius.sources").write_text("Types: deb\n")
     script = tmp_path / "post_remove.sh"
-    texto = (
-        (PACOTE / "post_remove.sh").read_text().replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1)
-    )
-    script.write_text(texto.replace("rm -f /opt/kaladrius/", f"rm -f {tmp_path}/", 1))
+    text = (PACOTE / "post_remove.sh").read_text().replace("ETC=/etc", f"ETC={tmp_path / 'etc'}", 1)
+    script.write_text(text.replace("rm -f /opt/kaladrius/", f"rm -f {tmp_path}/", 1))
     _chamadas, ambiente = falsos(tmp_path / "path", "systemctl")
     resultado = subprocess.run(  # noqa: S603 (the package's own script)
         [shutil.which("sh"), str(script), argumento],

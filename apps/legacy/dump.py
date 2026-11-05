@@ -16,11 +16,11 @@ class DumpInvalido(ValueError):
     pass
 
 
-def _valores(texto, start):
+def _valores(text, start):
     """Parse "(...), (...);" from `inicio`. Returns (rows, position after the ';')."""
-    linhas, linha, i, n = [], None, start, len(texto)
+    linhas, linha, i, n = [], None, start, len(text)
     while i < n:
-        c = texto[i]
+        c = text[i]
         if c in " \t\r\n,":
             i += 1
         elif c == "(" and linha is None:
@@ -37,11 +37,11 @@ def _valores(texto, start):
             while True:
                 if i >= n:
                     raise DumpInvalido("Texto sem aspas de fechamento.")
-                c = texto[i]
+                c = text[i]
                 if c == "\\" and i + 1 < n:
-                    partes.append(_ESCAPES.get(texto[i + 1], texto[i + 1]))
+                    partes.append(_ESCAPES.get(text[i + 1], text[i + 1]))
                     i += 2
-                elif c == "'" and texto.startswith("''", i):
+                elif c == "'" and text.startswith("''", i):
                     partes.append("'")
                     i += 2
                 elif c == "'":
@@ -49,16 +49,16 @@ def _valores(texto, start):
                     break
                 else:
                     end = i
-                    while end < n and texto[end] not in "\\'":
+                    while end < n and text[end] not in "\\'":
                         end += 1
-                    partes.append(texto[i:end])
+                    partes.append(text[i:end])
                     i = end
             linha.append("".join(partes))
         else:
             end = i
-            while end < n and texto[end] not in ",)":
+            while end < n and text[end] not in ",)":
                 end += 1
-            bruto = texto[i:end].strip()
+            bruto = text[i:end].strip()
             if bruto.upper() == "NULL":
                 linha.append(None)
             else:
@@ -70,13 +70,13 @@ def _valores(texto, start):
     raise DumpInvalido("Fim do arquivo dentro de um INSERT.")
 
 
-def ler_tabelas(texto, tabelas=None):
+def ler_tabelas(text, tabelas=None):
     """{table: [row dict]} for every INSERT in the dump (optionally only some tables)."""
     resultado = defaultdict(list)
     posicao = 0
-    while encontrado := _INSERT.search(texto, posicao):
+    while encontrado := _INSERT.search(text, posicao):
         tabela, colunas = encontrado.group(1), encontrado.group(2)
-        linhas, posicao = _valores(texto, encontrado.end())
+        linhas, posicao = _valores(text, encontrado.end())
         if tabelas is not None and tabela not in tabelas:
             continue
         if colunas is None:
