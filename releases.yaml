@@ -4,6 +4,55 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.57.0
+  data: 2026-11-04
+  titulo:
+    pt-br: Nomes do código em inglês
+    en: The code's names in English
+    es: Nombres del código en inglés
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Em inglês e espanhol, o prontuário agora traduz três nomes de campo que apareciam em
+          português ("finalizado por", "tamanho" e "conteúdo"). Os endereços com filtros (por
+          exemplo a data da agenda) usam nomes novos; um favorito antigo abre a tela
+          normalmente, só sem o filtro.
+        en: >
+          In English and Spanish, the medical record now translates three field names that
+          showed in Portuguese ("finalized by", "size" and "content"). Addresses with filters
+          (for example the schedule's date) use new names; an old bookmark opens the page as
+          usual, only without the filter.
+        es: >
+          En inglés y español, la historia clínica ahora traduce tres nombres de campo que
+          aparecían en portugués ("finalizado por", "tamaño" y "contenido"). Las direcciones con
+          filtros (por ejemplo la fecha de la agenda) usan nombres nuevos; un marcador antiguo
+          abre la pantalla normalmente, solo sin el filtro.
+    - tipo: melhoria
+      modulo: Sistema
+      publico: []
+      texto:
+        pt-br: >
+          Todos os campos dos modelos têm nomes em inglês no código, sem mudar o banco de dados:
+          as tabelas e colunas mantêm os nomes, nenhuma migração roda SQL e a versão anterior
+          continua funcionando no banco atualizado (decisões 159 a 171). A atualização apaga as
+          tabelas antigas `account_*` do login em duas etapas, cujos dados já tinham sido
+          copiados (decisão 158).
+        en: >
+          Every model field has an English name in the code, with no change to the database:
+          tables and columns keep their names, no migration runs SQL and the previous version
+          still works on the updated database (decisions 159 to 171). The update deletes the old
+          `account_*` tables of the two-step login, whose data had already been copied
+          (decision 158).
+        es: >
+          Todos los campos de los modelos tienen nombres en inglés en el código, sin cambiar la
+          base de datos: las tablas y columnas mantienen sus nombres, ninguna migración ejecuta
+          SQL y la versión anterior sigue funcionando en la base actualizada (decisiones 159 a
+          171). La actualización borra las tablas antiguas `account_*` del inicio de sesión en
+          dos pasos, cuyos datos ya se habían copiado (decisión 158).
+
 - versao: 0.56.0
   data: 2026-11-04
   titulo:
