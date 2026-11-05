@@ -28,7 +28,7 @@
       <tr>
         <td>{{ practitioner.name }}</td>
         <td>{{ practitioner.registration|default:"—" }}</td>
-        <td><span class="amostra-cor" style="background-color: {{ practitioner.color }}" title="{{ practitioner.color }}"></span></td>
+        <td><span class="color-swatch" style="background-color: {{ practitioner.color }}" title="{{ practitioner.color }}"></span></td>
         <td>{{ practitioner.user.username|default:"—" }}</td>
         <td>
           {% if practitioner.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>

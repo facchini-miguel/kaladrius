@@ -209,11 +209,11 @@ def chart(
         return altura - margem - min(value, topo) / topo * (altura - 2 * margem)
 
     partes = [
-        f'<svg viewBox="0 0 {largura} {altura}" preserveAspectRatio="none" class="grafico" '
+        f'<svg viewBox="0 0 {largura} {altura}" preserveAspectRatio="none" class="chart" '
         f'role="img" aria-hidden="true">',
         *(
             f'<line x1="0" x2="{largura}" y1="{altura * f:.1f}" y2="{altura * f:.1f}" '
-            'class="grade"/>'
+            'class="grid-line"/>'
             for f in (0.25, 0.5, 0.75)
         ),
     ]

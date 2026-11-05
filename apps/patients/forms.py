@@ -111,7 +111,7 @@ class PatientForm(BootstrapForm, forms.ModelForm):
         self.fields["state"].widget.attrs.update(
             {
                 "hx-get": reverse("reference_data:city_options"),
-                "hx-target": "#id_cidade",
+                "hx-target": "#id_city",
                 "hx-trigger": "change",
             }
         )
@@ -120,13 +120,13 @@ class PatientForm(BootstrapForm, forms.ModelForm):
         self.fields["city"].widget.attrs.update(
             {
                 "hx-get": reverse("reference_data:address_suggestions"),
-                "hx-target": "#sugestoes-endereco",
+                "hx-target": "#address-suggestions",
                 "hx-trigger": "load, change",
             }
         )
         for field, patient_list in (
-            ("neighborhood", "bairros-sugeridos"),
-            ("street", "logradouros-sugeridos"),
+            ("neighborhood", "suggested-neighborhoods"),
+            ("street", "suggested-streets"),
         ):
             self.fields[field].widget.attrs.update({"list": patient_list, "autocomplete": "off"})
         state_id = (

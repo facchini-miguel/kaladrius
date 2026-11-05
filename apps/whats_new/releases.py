@@ -207,7 +207,7 @@ def read_releases(path):
 
 @lru_cache(maxsize=1)
 def all_releases():
-    return read_releases(settings.RELEASES_ARQUIVO)
+    return read_releases(settings.RELEASES_FILE)
 
 
 def current_version():

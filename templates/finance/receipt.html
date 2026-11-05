@@ -5,12 +5,12 @@
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
+  <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'finance:entry' entry.pk %}">{% translate "Voltar ao lançamento" %}</a>
 </div>
 
-<div class="recibo bg-white border rounded p-4 position-relative">
-  {% if payment.reversed %}<div class="recibo-estornado">{% translate "ESTORNADO" %}</div>{% endif %}
+<div class="receipt bg-white border rounded p-4 position-relative">
+  {% if payment.reversed %}<div class="receipt-reversed">{% translate "ESTORNADO" %}</div>{% endif %}
   <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
     <div>
       <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>

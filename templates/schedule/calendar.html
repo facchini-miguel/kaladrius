@@ -8,14 +8,14 @@
   <h1 class="h3 mb-0 me-3">{% translate "Agenda" %}</h1>
   {% if profissionais %}
   <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
-    <label for="profissional" class="visually-hidden">{% translate "Profissional" %}</label>
-    <select name="practitioner" id="profissional" class="form-select" data-enviar-ao-mudar>
+    <label for="practitioner" class="visually-hidden">{% translate "Profissional" %}</label>
+    <select name="practitioner" id="practitioner" class="form-select" data-submit-on-change>
       {% for item in profissionais %}
       <option value="{{ item.pk }}"{% if item.pk == practitioner.pk %} selected{% endif %}>{{ item.name }}</option>
       {% endfor %}
     </select>
-    <label for="ir-para-data" class="visually-hidden">{% translate "Ir para a data" %}</label>
-    <input type="date" id="ir-para-data" class="form-control" style="width: auto;" title="{% translate 'Ir para a data' %}">
+    <label for="go-to-date" class="visually-hidden">{% translate "Ir para a data" %}</label>
+    <input type="date" id="go-to-date" class="form-control" style="width: auto;" title="{% translate 'Ir para a data' %}">
   </form>
   {% endif %}
 </div>
@@ -32,25 +32,25 @@
 {% else %}
 <div class="d-flex flex-wrap gap-1 mb-2 small" aria-label="{% translate 'Legenda dos tipos de atendimento' %}">
   {% for kind in tipos %}
-  <span class="legenda-tipo" style="background-color: {{ kind.color }}">{{ kind.display_name }}</span>
+  <span class="type-legend" style="background-color: {{ kind.color }}">{{ kind.display_name }}</span>
   {% endfor %}
   <span class="text-body-secondary ms-2">{% translate "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)" %}</span>
 </div>
 
-<div id="aviso-agenda" class="alert alert-success py-2" role="status" hidden></div>
-<div id="calendario" class="bg-white p-2 rounded border"></div>
+<div id="schedule-notice" class="alert alert-success py-2" role="status" hidden></div>
+<div id="calendar" class="bg-white p-2 rounded border"></div>
 {% if pode.agenda.criar %}
 <p class="text-body-secondary small mt-2">{% translate "Clique ou toque em um horário livre (ou arraste sobre vários) para agendar." %}</p>
 {% endif %}
 {% endif %}
 
-<div class="modal fade" id="modal-agenda" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="schedule-modal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content" id="modal-conteudo"></div>
+    <div class="modal-content" id="schedule-modal-content"></div>
   </div>
 </div>
 
-{{ configuracao|json_script:"configuracao-agenda" }}
+{{ configuracao|json_script:"schedule-settings" }}
 {% endblock %}
 
 {% block scripts %}

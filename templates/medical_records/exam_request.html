@@ -5,10 +5,10 @@
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" data-imprimir>{% translate "Imprimir ou salvar em PDF" %}</button>
+  <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
   <a class="btn btn-link" href="{% url 'medical_records:visit' pedido.visit_id %}">{% translate "Voltar" %}</a>
 </div>
-<div class="recibo bg-white border rounded p-4" style="max-width: 48rem;">
+<div class="receipt bg-white border rounded p-4" style="max-width: 48rem;">
   {% translate "PEDIDO DE EXAMES" as titulo_documento %}
   {% include "medical_records/_header.html" with data_documento=pedido.created_at %}
   <p><strong>{% translate "Paciente" %}:</strong> {{ pedido.visit.patient.name }}</p>

@@ -135,7 +135,7 @@ def test_template_filters(clinica_a):
 def test_patient_in_mexico_with_curp(clinica_a, admin):
     no_pais(clinica_a, "MX")
     formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'data-rotulo-pf="CURP"' in formulario and 'data-rotulo-pj="RFC"' in formulario
+    assert 'data-label-pf="CURP"' in formulario and 'data-label-pj="RFC"' in formulario
     data = {"kind": "PF", "name": "Paciente Ficticio", "active": "on"}
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN08"})
     assert response.context["form"].errors["tax_id"] == ["CURP: número inválido."]
@@ -155,7 +155,7 @@ def test_patient_in_mexico_with_curp(clinica_a, admin):
 def test_patient_in_united_states_only_company_has_document(clinica_a, admin):
     no_pais(clinica_a, "US")
     formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'data-rotulo-pf=""' in formulario and 'data-rotulo-pj="EIN"' in formulario
+    assert 'data-label-pf=""' in formulario and 'data-label-pj="EIN"' in formulario
     # An individual: whatever was left in the hidden field is not kept.
     pessoa = {"kind": "PF", "name": "John Fictitious", "active": "on", "tax_id": "911144442"}
     assert admin.post(reverse("patients:new"), pessoa).status_code == 302

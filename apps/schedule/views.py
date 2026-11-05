@@ -189,7 +189,7 @@ def events(request):
                 "backgroundColor": appointment.kind.color,
                 "borderColor": appointment.kind.color,
                 "textColor": "#212529",
-                "classNames": [f"situacao-{appointment.status}"],
+                "classNames": [f"status-{appointment.status}"],
                 "extendedProps": {
                     "kind": appointment.kind.display_name,
                     "description": appointment.description,

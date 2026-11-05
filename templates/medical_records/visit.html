@@ -41,7 +41,7 @@
     <div class="small text-body-secondary mb-2">{{ visit.date|date:"SHORT_DATETIME_FORMAT" }}</div>
     {% for rotulo, value in campos %}
     <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>
-    <div class="texto-clinico">{{ value|default:"—"|linebreaksbr }}</div>
+    <div class="clinical-text">{{ value|default:"—"|linebreaksbr }}</div>
     {% endfor %}
   </div>
 </div>
@@ -57,7 +57,7 @@
 <div class="card mb-2" style="max-width: 52rem;">
   <div class="card-body py-2">
     <div class="small text-body-secondary">{{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.practitioner.name }}</div>
-    <div class="texto-clinico">{{ adendo.text|linebreaksbr }}</div>
+    <div class="clinical-text">{{ adendo.text|linebreaksbr }}</div>
   </div>
 </div>
 {% endfor %}

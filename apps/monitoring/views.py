@@ -21,8 +21,8 @@ CHARTS = [
     (
         _("Processador"),
         [
-            ("cpu", "linha-1", _("em uso")),
-            ("cpu_roubada", "linha-2", _("tomado por outras máquinas")),
+            ("cpu", "line-1", _("em uso")),
+            ("cpu_roubada", "line-2", _("tomado por outras máquinas")),
         ],
         None,
         "%",
@@ -30,18 +30,18 @@ CHARTS = [
     (
         _("Memória"),
         [
-            ("memoria_pct", "linha-1", _("memória em uso")),
-            ("swap_pct", "linha-2", _("swap em uso")),
+            ("memoria_pct", "line-1", _("memória em uso")),
+            ("swap_pct", "line-2", _("swap em uso")),
         ],
         100,
         "%",
     ),
-    (_("Disco"), [("disco_pct", "linha-1", _("em uso"))], 100, "%"),
+    (_("Disco"), [("disco_pct", "line-1", _("em uso"))], 100, "%"),
     (
         _("Rede"),
         [
-            ("rede_entrada", "linha-1", _("recebido por segundo")),
-            ("rede_saida", "linha-2", _("enviado por segundo")),
+            ("rede_entrada", "line-1", _("recebido por segundo")),
+            ("rede_saida", "line-2", _("enviado por segundo")),
         ],
         None,
         "bytes",

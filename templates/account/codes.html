@@ -11,7 +11,7 @@
   {% for code in codigos %}<li class="col">{{ code }}</li>{% endfor %}
 </ul>
 <p class="d-print-none">
-  <button type="button" class="btn btn-outline-secondary" data-imprimir>{% translate "Imprimir" %}</button>
+  <button type="button" class="btn btn-outline-secondary" data-print>{% translate "Imprimir" %}</button>
   <a class="btn btn-primary" href="{% url 'home' %}">{% translate "Já guardei" %}</a>
 </p>
 {% endblock %}

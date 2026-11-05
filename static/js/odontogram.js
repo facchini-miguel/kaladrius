@@ -1,17 +1,17 @@
 // Clickable dental chart (templates/dentistry/_odontogram.html): toggles teeth and keeps
-// the form's hidden "dentes" field and the quantity in sync.
+// the form's hidden "teeth" field and the quantity in sync.
 (function () {
   "use strict";
-  document.querySelectorAll(".odontograma-interativo").forEach((grafico) => {
+  document.querySelectorAll(".odontogram-interactive").forEach((grafico) => {
     const form = grafico.closest("form");
     const campo = form.querySelector("input[name=teeth]");
     const quantidade = form.querySelector("input[name=quantity]");
     grafico.addEventListener("click", (evento) => {
-      const dente = evento.target.closest("[data-dente]");
-      if (!dente) return;
-      const ligado = dente.classList.toggle("selecionado");
-      dente.setAttribute("aria-pressed", ligado ? "true" : "false");
-      const escolhidos = [...grafico.querySelectorAll(".dente.selecionado")].map((b) => b.dataset.dente);
+      const tooth = evento.target.closest("[data-tooth]");
+      if (!tooth) return;
+      const ligado = tooth.classList.toggle("selected");
+      tooth.setAttribute("aria-pressed", ligado ? "true" : "false");
+      const escolhidos = [...grafico.querySelectorAll(".tooth.selected")].map((b) => b.dataset.tooth);
       campo.value = escolhidos.join(",");
       if (quantidade && escolhidos.length) quantidade.value = escolhidos.length;
     });

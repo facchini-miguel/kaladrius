@@ -9,8 +9,8 @@ from config import legacy_urls
 
 from .api import api
 
-admin.site.site_header = f"{settings.NOME_SISTEMA}: administração"
-admin.site.site_title = settings.NOME_SISTEMA
+admin.site.site_header = f"{settings.SYSTEM_NAME}: administração"
+admin.site.site_title = settings.SYSTEM_NAME
 admin.site.index_title = "Administração"
 
 urlpatterns = [

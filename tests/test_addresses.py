@@ -1,5 +1,7 @@
 """Neighborhoods and streets as suggestions on the patient form (decision 100)."""
 
+import re
+
 import pytest
 from django.urls import reverse
 
@@ -42,7 +44,7 @@ def test_city_suggestions_plus_those_typed_by_the_clinic(clinica_a, clinica_b, r
             neighborhood="Bairro de Outra Clínica",
         )
     text = reception.get(URL, {"city": CARLOS_BARBOSA}).content.decode()
-    assert 'id="bairros-sugeridos"' in text and 'value="Centro"' in text
+    assert 'id="suggested-neighborhoods"' in text and 'value="Centro"' in text
     assert 'value="Bairro Novo Fictício"' in text and 'value="Rua Inventada A"' in text
     assert "Outra Clínica" not in text  # another clinic's patients stay private
 
@@ -54,8 +56,18 @@ def test_city_without_data_and_invalid_parameter(reception):
 
 def test_patient_form_wires_the_suggestions(reception):
     page = reception.get(reverse("patients:new")).content.decode()
-    assert 'list="bairros-sugeridos"' in page and 'list="logradouros-sugeridos"' in page
+    assert 'list="suggested-neighborhoods"' in page and 'list="suggested-streets"' in page
     assert reverse("reference_data:address_suggestions") in page
+
+
+def test_patient_form_htmx_targets_exist(reception):
+    """Each HTMX target of the form is on the page: after the field renames the state still
+    pointed at #id_cidade, so choosing a state no longer loaded its cities."""
+    page = reception.get(reverse("patients:new")).content.decode()
+    targets = re.findall(r'hx-target="#([\w-]+)"', page)
+    assert "id_city" in targets
+    for target in targets:
+        assert f'id="{target}"' in page, target
 
 
 def test_no_suggestions_without_login(client):

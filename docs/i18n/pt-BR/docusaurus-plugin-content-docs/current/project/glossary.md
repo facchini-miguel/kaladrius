@@ -1347,6 +1347,106 @@ A interface pública mantém os nomes: os campos da API (`versao`, `data`, `titu
 
 As classes de enum `Tipo`, `Situacao` e `Forma` de todos os apps viraram `Kind`, `Status` e `Method`, como os campos `kind`, `status`, `method`; os membros dos outros apps seguem com o app deles.
 
+## Configurações, classes CSS e ganchos do HTML (feito)
+
+As configurações de `config/settings.py` e os nomes que os templates, a folha de estilos e os scripts compartilham (decisão 182). Uma classe montada a partir de um valor gravado mantém o valor: `status-compareceu`, `kind-novo`. Os ids de campos de filtro com o nome da sua query (`de`, `agrupar`) esperam os nomes das queries.
+
+### Configurações
+
+| Antes | Depois |
+|---|---|
+| `NOME_SISTEMA` | `SYSTEM_NAME` |
+| `RELEASES_ARQUIVO` | `RELEASES_FILE` |
+| `INATIVIDADE_MINUTOS` | `IDLE_MINUTES` |
+| `RECUPERAR_SENHA_POR_EMAIL` | `PASSWORD_RECOVERY_BY_EMAIL` |
+| `env_renomeada` | `env_renamed` |
+| `env_lista` | `env_list` |
+
+### Classes CSS
+
+| Antes | Depois |
+|---|---|
+| `amostra-cor` | `color-swatch` |
+| `amostra-cor-pequena` | `color-swatch-small` |
+| `bandeira` | `flag` |
+| `busca-paciente` | `patient-search` |
+| `busca-paciente-sugestoes` | `patient-search-suggestions` |
+| `busca-paciente-texto` | `patient-search-text` |
+| `deciduos` | `primary-teeth` |
+| `dente` | `tooth` |
+| `documento` | `document` |
+| `grade` | `grid-line` |
+| `grafico` | `chart` |
+| `indicador` | `indicator` |
+| `indicador-rotulo` | `indicator-label` |
+| `indicador-valor` | `indicator-value` |
+| `legenda` | `legend` |
+| `legenda-tipo` | `type-legend` |
+| `linha-1` | `line-1` |
+| `linha-2` | `line-2` |
+| `logo-barra` | `logo-bar` |
+| `logo-entrada` | `logo-login` |
+| `meio` | `middle` |
+| `nome-clinica` | `clinic-name` |
+| `odontograma` | `odontogram` |
+| `odontograma-interativo` | `odontogram-interactive` |
+| `odontograma-linha` | `odontogram-row` |
+| `odontograma-rolagem` | `odontogram-scroll` |
+| `qr-codigo` | `qr-code` |
+| `recibo` | `receipt` |
+| `recibo-estornado` | `receipt-reversed` |
+| `rodape` | `site-footer` |
+| `selecionado` | `selected` |
+| `seletor-idioma` | `language-selector` |
+| `so-pf` | `pf-only` |
+| `so-pj` | `pj-only` |
+| `texto-clinico` | `clinical-text` |
+| `situacao-<valor>` | `status-<valor>` |
+| `tipo-<valor>` | `kind-<valor>` |
+| `saude-<nivel>` | `health-<nivel>` |
+
+### Ids do HTML
+
+| Antes | Depois |
+|---|---|
+| `aviso-agenda` | `schedule-notice` |
+| `bairros-sugeridos` | `suggested-neighborhoods` |
+| `busca-inicio` | `home-search` |
+| `configuracao-agenda` | `schedule-settings` |
+| `escopo-este` | `scope-this` |
+| `escopo-serie` | `scope-series` |
+| `form-paciente` | `patient-form` |
+| `form-sair` | `logout-form` |
+| `ir-para-data` | `go-to-date` |
+| `logradouros-sugeridos` | `suggested-streets` |
+| `modal-agenda` | `schedule-modal` |
+| `modal-conteudo` | `schedule-modal-content` |
+| `sugestoes-endereco` | `address-suggestions` |
+| `calendario` | `calendar` |
+| `ate` | `until` |
+| `profissional` | `practitioner` |
+
+### Atributos data-
+
+| Antes | Depois |
+|---|---|
+| `data-aviso-inatividade` | `data-idle-warning` |
+| `data-com-olho` | `data-password-toggle` |
+| `data-dente` | `data-tooth` |
+| `data-enviar-ao-mudar` | `data-submit-on-change` |
+| `data-exemplo-pf` | `data-example-pf` |
+| `data-exemplo-pj` | `data-example-pj` |
+| `data-imprimir` | `data-print` |
+| `data-inatividade` | `data-idle-minutes` |
+| `data-mostrar-senha` | `data-show-password` |
+| `data-ocultar-senha` | `data-hide-password` |
+| `data-paciente-id` | `data-patient-id` |
+| `data-paciente-nome` | `data-patient-name` |
+| `data-rotulo-pf` | `data-label-pf` |
+| `data-rotulo-pj` | `data-label-pj` |
+| `data-url-ativo` | `data-url-active` |
+| `data-url-saiu` | `data-url-logged-out` |
+
 ## O que fica em português
 
 - **Valores gravados no banco**: os valores das escolhas (`"PF"`, `"conciliada"`, `"retirada"`), os códigos dos módulos (`"rechamadas"`), as chaves dentro de campos JSON (as alterações da auditoria, configurações). Só muda o nome das constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), não o valor.

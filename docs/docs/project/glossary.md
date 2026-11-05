@@ -1347,6 +1347,106 @@ The public interface keeps its names: the API's fields (`versao`, `data`, `titul
 
 The enum classes `Tipo`, `Situacao` and `Forma` of every app became `Kind`, `Status` and `Method`, as their fields `kind`, `status`, `method`; the members of other apps follow with their app.
 
+## Settings, CSS classes and HTML hooks (done)
+
+The settings of `config/settings.py` and the names the templates, the stylesheet and the scripts share (decision 182). A class built from a stored value keeps the value: `status-compareceu`, `kind-novo`. The ids of filter fields named after their query (`de`, `agrupar`) wait for the query names.
+
+### Settings
+
+| Before | After |
+|---|---|
+| `NOME_SISTEMA` | `SYSTEM_NAME` |
+| `RELEASES_ARQUIVO` | `RELEASES_FILE` |
+| `INATIVIDADE_MINUTOS` | `IDLE_MINUTES` |
+| `RECUPERAR_SENHA_POR_EMAIL` | `PASSWORD_RECOVERY_BY_EMAIL` |
+| `env_renomeada` | `env_renamed` |
+| `env_lista` | `env_list` |
+
+### CSS classes
+
+| Before | After |
+|---|---|
+| `amostra-cor` | `color-swatch` |
+| `amostra-cor-pequena` | `color-swatch-small` |
+| `bandeira` | `flag` |
+| `busca-paciente` | `patient-search` |
+| `busca-paciente-sugestoes` | `patient-search-suggestions` |
+| `busca-paciente-texto` | `patient-search-text` |
+| `deciduos` | `primary-teeth` |
+| `dente` | `tooth` |
+| `documento` | `document` |
+| `grade` | `grid-line` |
+| `grafico` | `chart` |
+| `indicador` | `indicator` |
+| `indicador-rotulo` | `indicator-label` |
+| `indicador-valor` | `indicator-value` |
+| `legenda` | `legend` |
+| `legenda-tipo` | `type-legend` |
+| `linha-1` | `line-1` |
+| `linha-2` | `line-2` |
+| `logo-barra` | `logo-bar` |
+| `logo-entrada` | `logo-login` |
+| `meio` | `middle` |
+| `nome-clinica` | `clinic-name` |
+| `odontograma` | `odontogram` |
+| `odontograma-interativo` | `odontogram-interactive` |
+| `odontograma-linha` | `odontogram-row` |
+| `odontograma-rolagem` | `odontogram-scroll` |
+| `qr-codigo` | `qr-code` |
+| `recibo` | `receipt` |
+| `recibo-estornado` | `receipt-reversed` |
+| `rodape` | `site-footer` |
+| `selecionado` | `selected` |
+| `seletor-idioma` | `language-selector` |
+| `so-pf` | `pf-only` |
+| `so-pj` | `pj-only` |
+| `texto-clinico` | `clinical-text` |
+| `situacao-<valor>` | `status-<valor>` |
+| `tipo-<valor>` | `kind-<valor>` |
+| `saude-<nivel>` | `health-<nivel>` |
+
+### HTML ids
+
+| Before | After |
+|---|---|
+| `aviso-agenda` | `schedule-notice` |
+| `bairros-sugeridos` | `suggested-neighborhoods` |
+| `busca-inicio` | `home-search` |
+| `configuracao-agenda` | `schedule-settings` |
+| `escopo-este` | `scope-this` |
+| `escopo-serie` | `scope-series` |
+| `form-paciente` | `patient-form` |
+| `form-sair` | `logout-form` |
+| `ir-para-data` | `go-to-date` |
+| `logradouros-sugeridos` | `suggested-streets` |
+| `modal-agenda` | `schedule-modal` |
+| `modal-conteudo` | `schedule-modal-content` |
+| `sugestoes-endereco` | `address-suggestions` |
+| `calendario` | `calendar` |
+| `ate` | `until` |
+| `profissional` | `practitioner` |
+
+### data- attributes
+
+| Before | After |
+|---|---|
+| `data-aviso-inatividade` | `data-idle-warning` |
+| `data-com-olho` | `data-password-toggle` |
+| `data-dente` | `data-tooth` |
+| `data-enviar-ao-mudar` | `data-submit-on-change` |
+| `data-exemplo-pf` | `data-example-pf` |
+| `data-exemplo-pj` | `data-example-pj` |
+| `data-imprimir` | `data-print` |
+| `data-inatividade` | `data-idle-minutes` |
+| `data-mostrar-senha` | `data-show-password` |
+| `data-ocultar-senha` | `data-hide-password` |
+| `data-paciente-id` | `data-patient-id` |
+| `data-paciente-nome` | `data-patient-name` |
+| `data-rotulo-pf` | `data-label-pf` |
+| `data-rotulo-pj` | `data-label-pj` |
+| `data-url-ativo` | `data-url-active` |
+| `data-url-saiu` | `data-url-logged-out` |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.

@@ -111,7 +111,7 @@ def test_screens_fit_on_a_phone(clinica_a, reception):
         "dentistry/_odontogram.html",
         {"permanentes": PERMANENT_TEETH, "deciduos": PRIMARY_TEETH, "interativo": True},
     )
-    assert 'class="odontograma-rolagem"' in html
+    assert 'class="odontogram-scroll"' in html
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     patient_record = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()

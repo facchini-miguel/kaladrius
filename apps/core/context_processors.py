@@ -67,4 +67,4 @@ def inactivity(request):
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated:
         return {}
-    return {"inatividade_minutos": settings.INATIVIDADE_MINUTOS}
+    return {"inatividade_minutos": settings.IDLE_MINUTES}

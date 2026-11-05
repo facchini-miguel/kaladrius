@@ -7,8 +7,8 @@
 <h1 class="h3 mb-3">{% translate "Comissões" %}</h1>
 <form method="get" class="row g-2 align-items-end mb-3">
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="ate">{% translate "Recebimentos até" %}</label>
-    <input type="date" id="ate" name="until" value="{{ until|date:'Y-m-d' }}" class="form-control">
+    <label class="form-label small" for="until">{% translate "Recebimentos até" %}</label>
+    <input type="date" id="until" name="until" value="{{ until|date:'Y-m-d' }}" class="form-control">
   </div>
   <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>
 </form>
