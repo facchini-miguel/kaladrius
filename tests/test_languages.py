@@ -7,7 +7,7 @@ import pytest
 from django.conf import settings
 from django.urls import reverse
 
-from apps.core.models import Papel
+from apps.core.models import Role
 from apps.whats_new import releases
 
 pytestmark = pytest.mark.django_db
@@ -17,7 +17,7 @@ LOCALE = Path(settings.BASE_DIR) / "locale"
 
 @pytest.fixture
 def cliente(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("maria", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("maria", clinica_a, Role.ADMIN))
 
 
 def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_model):
@@ -94,11 +94,11 @@ def test_todos_os_textos_estao_traduzidos(language):
 
 
 def test_novidades_nos_tres_idiomas():
-    idiomas = {code for code, _nome in settings.LANGUAGES}
+    languages = {code for code, _nome in settings.LANGUAGES}
     for release in releases.todas():
-        assert set(dict(release.titulos)) == idiomas or not release.titulo, release.versao
+        assert set(dict(release.titulos)) == languages or not release.titulo, release.versao
         for item in release.itens:
-            assert set(dict(item.textos)) == idiomas, (release.versao, item.text)
+            assert set(dict(item.textos)) == languages, (release.versao, item.text)
             assert item.modulo in releases.MODULOS, item.modulo
 
 

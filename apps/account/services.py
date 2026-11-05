@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from apps.core.security import ip_para_bloqueio
+from apps.core.security import ip_for_lockout
 
 from .models import RecoveryCode, TwoFactor
 
@@ -29,7 +29,7 @@ ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I to confuse
 def tentativas_do_endereco(request):
     desde = timezone.now() - datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
     total = AccessAttempt.objects.filter(
-        ip_address=ip_para_bloqueio(request), attempt_time__gte=desde
+        ip_address=ip_for_lockout(request), attempt_time__gte=desde
     ).aggregate(total=Sum("failures_since_start"))["total"]
     return total or 0
 
@@ -45,7 +45,7 @@ def ativa_para(user):
 def obrigatoria(request):
     """Whether the clinic requires two-step verification from this person (decision 112):
     whoever reaches the medical record or the full finance, never the public demo logins."""
-    from apps.core.permissions import Acao, Modulo, pode
+    from apps.core.permissions import Action, Module, can
     from apps.medical_records.permissions import acessa_prontuario
 
     user, clinic = request.user, getattr(request, "clinic", None)
@@ -53,7 +53,7 @@ def obrigatoria(request):
         return False
     if not clinic.require_two_factor:
         return False
-    return pode(request, Modulo.FINANCEIRO, Acao.VER) or acessa_prontuario(request)
+    return can(request, Module.FINANCE, Action.VIEW) or acessa_prontuario(request)
 
 
 def preparar(user, new=False):

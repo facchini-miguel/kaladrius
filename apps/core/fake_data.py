@@ -1,24 +1,24 @@
 """Helpers for made-up data: the test and demo data (seed_sample_data) and the
 anonymization of imported data (apps/legacy/anonymization.py). Decision 131."""
 
-from apps.core.validators import cnpj_valido, cpf_valido, somente_digitos
+from apps.core.validators import digits_only, valid_cnpj, valid_cpf
 
 
-def _valido(gerar, valido):
+def _valid(gerar, is_valid):
     while True:
-        document = somente_digitos(gerar())
-        if valido(document):
+        document = digits_only(gerar())
+        if is_valid(document):
             return document
 
 
 def cpf(fake):
     """A CPF the system accepts: since Faker 40 one with all digits equal (000.000.000-00),
     which the Receita rejects, can come out, rarely."""
-    return _valido(fake.cpf, cpf_valido)
+    return _valid(fake.cpf, valid_cpf)
 
 
 def cnpj(fake):
-    return _valido(fake.cnpj, cnpj_valido)
+    return _valid(fake.cnpj, valid_cnpj)
 
 
 def occupation(fake):

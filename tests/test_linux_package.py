@@ -214,7 +214,7 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
 
 
 @pytest.mark.parametrize(
-    ("address", "valido"),
+    ("address", "is_valid"),
     [
         ("192.168.0.10", True),
         ("10.0.0.255", True),
@@ -225,11 +225,11 @@ def test_nenhum_script_usa_grep_q_depois_de_um_cano():
         ("clinica.exemplo.com", False),
     ],
 )
-def test_eh_ipv4(tmp_path, address, valido):
+def test_eh_ipv4(tmp_path, address, is_valid):
     resultado = funcao_do_comando(
         tmp_path, f'is_ipv4 "{address}" && echo sim || echo nao', {"PATH": "/usr/bin:/bin"}
     )
-    assert resultado.stdout.strip() == ("sim" if valido else "nao"), resultado.stderr
+    assert resultado.stdout.strip() == ("sim" if is_valid else "nao"), resultado.stderr
 
 
 def test_configurar_de_novo_grava_o_novo_usuario_do_administrador(tmp_path):

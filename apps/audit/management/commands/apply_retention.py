@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         limit = timezone.now() - RETENCAO_LOGIN_FALHOU
         auditoria, _ = AuditEntry.objects.filter(
-            action=AuditEntry.Acao.LOGIN_FALHOU, timestamp__lt=limit
+            action=AuditEntry.Action.LOGIN_FAILED, timestamp__lt=limit
         ).delete()
         tentativas, _ = AccessAttempt.objects.filter(attempt_time__lt=limit).delete()
         self.stdout.write(

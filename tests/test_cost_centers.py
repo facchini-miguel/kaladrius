@@ -6,9 +6,9 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modules import configurar
+from apps.core.isolation import use_clinic
+from apps.core.models import GENERAL_MODULES, ModuleCode, Role
+from apps.core.modules import configure
 from apps.finance import services
 from apps.finance.models import Category, CostCenter, Entry, FinancialAccount
 from apps.patients.models import Patient
@@ -21,17 +21,17 @@ URL = "finance:catalog"
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_centros", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_centros", clinica_a, Role.ADMIN))
 
 
 @pytest.fixture
 def centro(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         return CostCenter.objects.create(name="Ortodontia")
 
 
 def despesa(clinic, **extra):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         category = Category.objects.get(name="Aluguel")
     return {
         "payer": "Imobiliária fictícia",
@@ -49,7 +49,7 @@ def despesa(clinic, **extra):
 def test_cadastro_e_nome_repetido(clinica_a, admin):
     url = reverse("finance:catalog_new", args=["cost-centers"])
     assert admin.post(url, {"name": " Consultório 1 ", "active": "on"}).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert CostCenter.objects.get().name == "Consultório 1"
     repetido = admin.post(url, {"name": "consultório 1", "active": "on"})
     assert "name" in repetido.context["form"].errors
@@ -60,13 +60,13 @@ def test_cadastro_e_nome_repetido(clinica_a, admin):
 def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
     for rota in ("finance:entry_new", "finance:expense_new"):
         assert "cost_center" not in admin.get(reverse(rota)).context["form"].fields
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         inativo = CostCenter.objects.create(name="Desativado", active=False)
     assert "cost_center" not in admin.get(reverse("finance:expense_new")).context["form"].fields
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         CostCenter.objects.create(name="Ativo")
     field = admin.get(reverse("finance:expense_new")).context["form"].fields["cost_center"]
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert inativo not in field.queryset and field.queryset.count() == 1
 
 
@@ -77,7 +77,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
         ).status_code
         == 302
     )
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente fictício do centro")
         receita = Category.objects.get(name="Tratamento")
     response = admin.post(
@@ -96,7 +96,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
         },
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert Entry.objects.filter(cost_center=centro).count() == 2
         entry = Entry.objects.get(kind=Entry.Tipo.PAGAR)
     page = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
@@ -106,7 +106,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
 
 
 def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         for amount, cost_center in ((Decimal("300"), centro), (Decimal("200"), None)):
@@ -149,17 +149,16 @@ def test_relatorio_sem_centros_nao_mostra_os_quadros(admin):
 
 
 def test_recepcao_nao_cadastra(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_centros", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao_centros", clinica_a, Role.FRONT_DESK))
     assert reception.get(reverse(URL, args=["cost-centers"])).status_code == 403
 
 
 def test_some_com_o_financeiro_desligado(clinica_a, admin):
     results = reverse(URL, args=["cost-centers"])
     assert results in admin.get(reverse("home")).content.decode()
-    configurar(
+    configure(
         clinica_a,
-        MODULOS_GERAIS
-        - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS, ModuloClinico.PESSOAL},
+        GENERAL_MODULES - {ModuleCode.FINANCE, ModuleCode.ESTIMATES, ModuleCode.STAFF},
     )
     assert admin.get(results).status_code == 403
     assert results not in admin.get(reverse("home")).content.decode()

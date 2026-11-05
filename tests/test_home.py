@@ -7,8 +7,8 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.estimates.models import Estimate
 from apps.finance import services as financeiro
 from apps.finance.models import CashRegister, Category, Entry, FinancialAccount
@@ -35,11 +35,11 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
     ana = criar_profissional(clinica_a, "Dra. Ana")
     bruno = criar_profissional(clinica_a, "Dr. Bruno")
     usuarios = {
-        "admin": criar_usuario("admin", clinica_a, Papel.ADMIN),
-        "recepcao": criar_usuario("recepcao", clinica_a, Papel.RECEPCAO),
-        "dra": criar_usuario("dra", clinica_a, Papel.PROFISSIONAL),
+        "admin": criar_usuario("admin", clinica_a, Role.ADMIN),
+        "recepcao": criar_usuario("recepcao", clinica_a, Role.FRONT_DESK),
+        "dra": criar_usuario("dra", clinica_a, Role.PRACTITIONER),
     }
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
         kind = AppointmentType.objects.get(name="Cirurgia")
         maria = Patient.objects.create(

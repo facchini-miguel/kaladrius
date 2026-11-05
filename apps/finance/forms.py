@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import countries, identification
-from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento, documento_por_tipo
-from apps.core.validators import normalizar_telefone
+from apps.core.forms import BootstrapForm, LocalizedDecimalField, document_by_kind, document_field
+from apps.core.validators import normalize_phone
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 
@@ -29,7 +29,7 @@ def _formas_com_vazio():
 
 def _campo_dinheiro(label, obrigatorio=True, minimo=0, **extra):
     """Amount typed in the user's format (1.500,50 in Portuguese and Spanish)."""
-    return CampoDecimal(
+    return LocalizedDecimalField(
         label=label,
         max_digits=12,
         decimal_places=2,
@@ -53,7 +53,7 @@ def _centros_de_custo(form):
         del form.fields["cost_center"]
 
 
-class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
+class LancamentoReceberForm(BootstrapForm, forms.ModelForm):
     """New receivable, split into equal monthly installments (optionally paid now)."""
 
     total_amount = _campo_dinheiro(_("Valor total"))
@@ -119,7 +119,7 @@ class LancamentoReceberForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
+class LancamentoPagarForm(BootstrapForm, forms.ModelForm):
     """New payable: one bill split into installments, or the same amount every month."""
 
     DIVIDIR = "dividir"
@@ -190,10 +190,10 @@ class LancamentoPagarForm(FormularioBootstrap, forms.ModelForm):
         return data["amount"]
 
 
-class FornecedorForm(FormularioBootstrap, forms.ModelForm):
+class FornecedorForm(BootstrapForm, forms.ModelForm):
     """A supplier (decision 093). Documents and phones are typed with or without punctuation."""
 
-    tax_id = campo_documento()
+    tax_id = document_field()
     phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -227,8 +227,8 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         # The country's tax document of an individual or a company (decision 121).
-        self.documentos = identification.do_pais(countries.pais_da_clinica(clinic))
-        documento_por_tipo(
+        self.documentos = identification.for_country(countries.clinic_country(clinic))
+        document_by_kind(
             self.fields["tax_id"],
             self.documentos.pessoa,
             self.documentos.empresa,
@@ -236,7 +236,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         )
 
     def _telefone(self, name):
-        return normalizar_telefone(self.cleaned_data.get(name))
+        return normalize_phone(self.cleaned_data.get(name))
 
     def clean_phone(self):
         return self._telefone("phone")
@@ -252,7 +252,9 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         document = ""
         if do_tipo is not None:
             try:
-                document = identification.limpar(data.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+                document = identification.clean_value(
+                    data.get("tax_id", ""), [do_tipo], do_tipo.abbreviation
+                )
             except ValidationError as error:
                 self.add_error("tax_id", error)
                 return data
@@ -265,7 +267,7 @@ class FornecedorForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class PlanejamentoForm(FormularioBootstrap, forms.Form):
+class PlanejamentoForm(BootstrapForm, forms.Form):
     """One goal field per group of the chart of accounts (decision 098)."""
 
     def __init__(self, *args, grupos, metas, **kwargs):
@@ -287,7 +289,7 @@ class PlanejamentoForm(FormularioBootstrap, forms.Form):
         return {group: self.cleaned_data.get(self.name(group)) for group in self.grupos}
 
 
-class FecharForm(FormularioBootstrap, forms.Form):
+class FecharForm(BootstrapForm, forms.Form):
     until = forms.DateField(
         label=_("Fechar até"),
         widget=DATA,
@@ -295,7 +297,7 @@ class FecharForm(FormularioBootstrap, forms.Form):
     )
 
 
-class ReabrirForm(FormularioBootstrap, forms.Form):
+class ReabrirForm(BootstrapForm, forms.Form):
     until = forms.DateField(
         label=_("Deixar fechado até"),
         widget=DATA,
@@ -305,7 +307,7 @@ class ReabrirForm(FormularioBootstrap, forms.Form):
     reason = forms.CharField(label=_("Motivo"), max_length=200)
 
 
-class ReceberForm(FormularioBootstrap, forms.ModelForm):
+class ReceberForm(BootstrapForm, forms.ModelForm):
     """Payment of an installment. Discounts only for those allowed (administrators)."""
 
     amount = _campo_dinheiro(_("Valor recebido"))
@@ -337,12 +339,12 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
         if not pode_dar_desconto:
             del self.fields["discount"]
         # Card installments and the transaction code's local name (NSU) depend on the country.
-        do_pais = payment_methods.do_pais()
-        if not do_pais.parcelas_no_cartao:
+        for_country = payment_methods.for_country()
+        if not for_country.parcelas_no_cartao:
             del self.fields["card_installments"]
         label = _("Código da transação")
-        if do_pais.codigo_do_cartao:
-            label = f"{label} ({do_pais.codigo_do_cartao})"
+        if for_country.codigo_do_cartao:
+            label = f"{label} ({for_country.codigo_do_cartao})"
         self.fields["card_transaction_code"].label = label
 
     def clean(self):
@@ -362,7 +364,7 @@ class ReceberForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class MotivoForm(FormularioBootstrap, forms.Form):
+class MotivoForm(BootstrapForm, forms.Form):
     reason = forms.CharField(label=_("Motivo"), max_length=200)
 
 
@@ -372,7 +374,7 @@ def _grupos(excluir=()):
     return [("", "—"), *((g.pk, f"{g.get_kind_display()} · {g}") for g in grupos)]
 
 
-class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
+class GrupoContabilForm(BootstrapForm, forms.ModelForm):
     """A group of the chart of accounts (decision 097)."""
 
     parent = forms.ModelChoiceField(
@@ -427,7 +429,7 @@ class GrupoContabilForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class CategoriaForm(FormularioBootstrap, forms.ModelForm):
+class CategoriaForm(BootstrapForm, forms.ModelForm):
     group = forms.ModelChoiceField(
         queryset=AccountGroup.objects.none(), required=False, label=_("Grupo")
     )
@@ -453,7 +455,7 @@ class CategoriaForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class CentroCustoForm(FormularioBootstrap, forms.ModelForm):
+class CentroCustoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = CostCenter
         fields = ["name", "active"]
@@ -465,7 +467,7 @@ class CentroCustoForm(FormularioBootstrap, forms.ModelForm):
         return name
 
 
-class ContaForm(FormularioBootstrap, forms.ModelForm):
+class ContaForm(BootstrapForm, forms.ModelForm):
     opening_balance = _campo_dinheiro(
         _("Saldo inicial"),
         obrigatorio=False,
@@ -487,13 +489,13 @@ class ContaForm(FormularioBootstrap, forms.ModelForm):
         return name
 
 
-class AbrirCaixaForm(FormularioBootstrap, forms.Form):
+class AbrirCaixaForm(BootstrapForm, forms.Form):
     amount = _campo_dinheiro(
         _("Valor contado na gaveta"), help_text=_("Conte o dinheiro antes de abrir o caixa.")
     )
 
 
-class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
+class MovimentoCaixaForm(BootstrapForm, forms.Form):
     amount = _campo_dinheiro(_("Valor"))
     other_account = forms.ModelChoiceField(
         label=_("Outra conta"),
@@ -516,7 +518,7 @@ class MovimentoCaixaForm(FormularioBootstrap, forms.Form):
         return amount
 
 
-class FecharCaixaForm(FormularioBootstrap, forms.Form):
+class FecharCaixaForm(BootstrapForm, forms.Form):
     counted_amount = _campo_dinheiro(_("Valor contado na gaveta"))
     note = forms.CharField(
         label=_("Observação"),
@@ -526,14 +528,14 @@ class FecharCaixaForm(FormularioBootstrap, forms.Form):
     )
 
 
-class PercentualComissaoForm(FormularioBootstrap, forms.ModelForm):
+class PercentualComissaoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Practitioner
         fields = ["commission_percentage"]
         localized_fields = ["commission_percentage"]
 
 
-class PagarComissaoForm(FormularioBootstrap, forms.Form):
+class PagarComissaoForm(BootstrapForm, forms.Form):
     due_date = forms.DateField(label=_("Vencimento"), widget=DATA, initial=timezone.localdate)
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
 
@@ -547,7 +549,7 @@ class PagarComissaoForm(FormularioBootstrap, forms.Form):
 TAMANHO_MAXIMO_OFX = 5 * 1024 * 1024
 
 
-class ImportarExtratoForm(FormularioBootstrap, forms.Form):
+class ImportarExtratoForm(BootstrapForm, forms.Form):
     account = forms.ModelChoiceField(label=_("Conta"), queryset=FinancialAccount.objects.none())
     file = forms.FileField(
         label=_("Arquivo OFX"),
@@ -571,7 +573,7 @@ class ImportarExtratoForm(FormularioBootstrap, forms.Form):
         return file
 
 
-class LancamentoDaTransacaoForm(FormularioBootstrap, forms.Form):
+class LancamentoDaTransacaoForm(BootstrapForm, forms.Form):
     """A new entry, already paid, for a statement line (a bank fee, an unrecorded Pix)."""
 
     description = forms.CharField(label=_("Descrição"), max_length=200)

@@ -14,7 +14,7 @@ from apps.account import services as conta_servicos
 from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 from apps.core.models import Membership
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.permissions import Action, Module, requires_permission
 
 from .forms import ContaForm, NovoMembroForm, SenhaForm, VinculoForm, conta_exclusiva
 
@@ -26,7 +26,7 @@ def _vinculo(request, pk):
     )
 
 
-@exige_permissao(Modulo.USUARIOS, Acao.VER)
+@requires_permission(Module.USERS, Action.VIEW)
 def results(request):
     vinculos = (
         Membership.objects.filter(clinic=request.clinic)
@@ -36,7 +36,7 @@ def results(request):
     return render(request, "team/list.html", {"vinculos": vinculos})
 
 
-@exige_permissao(Modulo.USUARIOS, Acao.CRIAR)
+@requires_permission(Module.USERS, Action.CREATE)
 def new(request):
     form = NovoMembroForm(request.POST or None, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
@@ -49,7 +49,7 @@ def new(request):
     return render(request, "team/new.html", {"form": form})
 
 
-@exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
+@requires_permission(Module.USERS, Action.CHANGE)
 def editar(request, pk):
     vinculo = _vinculo(request, pk)
     user = vinculo.user
@@ -79,7 +79,7 @@ def editar(request, pk):
     )
 
 
-@exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
+@requires_permission(Module.USERS, Action.CHANGE)
 def password(request, pk):
     vinculo = _vinculo(request, pk)
     user = vinculo.user
@@ -106,7 +106,7 @@ def password(request, pk):
     return render(request, "team/password.html", {"vinculo": vinculo, "form": form})
 
 
-@exige_permissao(Modulo.USUARIOS, Acao.ALTERAR)
+@requires_permission(Module.USERS, Action.CHANGE)
 def duas_etapas(request, pk):
     """Remove a member's two-step verification (lost phone, decision 111); they turn it on
     again with a new QR code."""
@@ -115,7 +115,7 @@ def duas_etapas(request, pk):
     if request.method == "POST" and user != request.user and conta_exclusiva(user, request.clinic):
         conta_servicos.desativar(user)
         registrar(
-            AuditEntry.Acao.ALTERAR,
+            AuditEntry.Action.CHANGE,
             user,
             description=f"{user}: verificação em duas etapas removida pelo administrador",
         )

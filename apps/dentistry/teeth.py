@@ -39,9 +39,9 @@ _QUADRANTES_PALMER = {1: "UR", 2: "UL", 3: "LL", 4: "LR"}
 
 
 def numeracao_da_clinica():
-    from apps.core.isolation import clinica_atual
+    from apps.core.isolation import current_clinic
 
-    return getattr(clinica_atual(), "tooth_numbering", None) or FDI
+    return getattr(current_clinic(), "tooth_numbering", None) or FDI
 
 
 def _universal(dente):

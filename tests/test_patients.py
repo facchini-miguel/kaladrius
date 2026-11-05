@@ -4,9 +4,9 @@ import pytest
 from django.template import Context, Template
 from django.urls import reverse
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
-from apps.core.validators import cnpj_valido, cpf_valido
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
+from apps.core.validators import valid_cnpj, valid_cpf
 from apps.patients.models import Patient
 from apps.reference_data.models import City
 
@@ -22,11 +22,11 @@ SC = 42
 
 @pytest.fixture
 def admin_a(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
 
 
 def criar_paciente(clinic, **data):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return Patient.objects.create(**{"name": "Paciente", **data})
 
 
@@ -48,7 +48,7 @@ def dados_formulario(**extra):
     ],
 )
 def test_validacao_de_cpf(amount, esperado):
-    assert cpf_valido(amount) is esperado
+    assert valid_cpf(amount) is esperado
 
 
 @pytest.mark.parametrize(
@@ -63,7 +63,7 @@ def test_validacao_de_cpf(amount, esperado):
     ],
 )
 def test_validacao_de_cnpj_numerico_e_alfanumerico(amount, esperado):
-    assert cnpj_valido(amount) is esperado
+    assert valid_cnpj(amount) is esperado
 
 
 def test_filtros_de_formatacao():
@@ -109,7 +109,7 @@ def test_cadastro_normaliza_documentos_e_telefones(admin_a, clinica_a):
         ),
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Maria da Silva")
     assert response.url == reverse("patients:record", args=[patient.pk])
     assert patient.tax_id == "52998224725"
@@ -131,7 +131,7 @@ def test_pessoa_juridica_com_cnpj_alfanumerico(admin_a, clinica_a):
         ),
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Empresa X")
     assert patient.tax_id == "12ABC34501DE35"
     assert patient.rg == "" and patient.sex == ""  # individual-only fields are cleared
@@ -224,7 +224,7 @@ def test_lista_e_busca_nao_mostram_outra_clinica(admin_a, clinica_b):
         assert len(page) == 0
 
 
-@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
 def test_recepcao_e_profissional_cadastram_mas_nao_excluem(
     role, clinica_a, criar_usuario, cliente_de
 ):
@@ -261,7 +261,7 @@ def test_equipe_nao_ve_paciente_arquivado(clinica_a, criar_usuario, cliente_de):
     patient = criar_paciente(
         clinica_a, name="Fulano Escondido", tax_id="52998224725", archived=True
     )
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     results = reverse("patients:list")
     for status in ("ativos", "todos", "arquivados"):
         assert "Escondido" not in cliente.get(results, {"status": status}).content.decode()
@@ -303,7 +303,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
 
     patient = criar_paciente(clinica_a, name="Paciente Devedor")
     user = django_user_model.objects.get(username="admin_a")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         entry = services.criar_lancamento(
             clinic=clinica_a,
             kind=Entry.Tipo.RECEBER,
@@ -327,7 +327,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
     assert not patient.archived
 
     def receber(installment):
-        with usar_clinica(clinica_a):
+        with use_clinic(clinica_a):
             services.receber(
                 installment,
                 user=user,
@@ -337,7 +337,7 @@ def test_nao_arquiva_com_conta_em_aberto(admin_a, clinica_a, django_user_model):
                 account=FinancialAccount.objects.get(name="Caixa"),
             )
 
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         primeira, segunda = entry.parcelas.order_by("number")
     receber(primeira)
     assert [p.number for p in admin_a.get(url).context["abertas"]] == [2]

@@ -6,21 +6,21 @@ from contextvars import ContextVar
 from django.conf import settings
 from django.utils import translation
 
-from apps.core.isolation import clinica_atual, isolamento_ativo
+from apps.core.isolation import current_clinic, isolation_active
 
 from .models import AuditEntry
 
-_usuario = ContextVar("auditoria_usuario", default=None)
+_user = ContextVar("auditoria_usuario", default=None)
 _ip = ContextVar("auditoria_ip", default=None)
 
 
 @contextlib.contextmanager
 def context(user, ip):
-    tokens = (_usuario.set(user), _ip.set(ip))
+    tokens = (_user.set(user), _ip.set(ip))
     try:
         yield
     finally:
-        _usuario.reset(tokens[0])
+        _user.reset(tokens[0])
         _ip.reset(tokens[1])
 
 
@@ -29,13 +29,13 @@ def ip_da_requisicao(request):
 
 
 def registrar(action, obj=None, *, clinic=None, changes=None, user=None, ip=None, description=""):
-    user = user if user is not None else _usuario.get()
+    user = user if user is not None else _user.get()
     if user is not None and not getattr(user, "is_authenticated", False):
         user = None
     if clinic is None and obj is not None:
         # Rows without a clinic of their own (user accounts) are filed under the clinic
         # where the change was made, so the clinic administrator sees it in the audit log.
-        clinic = _clinica_de(obj) or (clinica_atual() if isolamento_ativo() else None)
+        clinic = _clinica_de(obj) or (current_clinic() if isolation_active() else None)
     return AuditEntry.objects.create(
         action=action,
         clinic_id=getattr(clinic, "pk", clinic),

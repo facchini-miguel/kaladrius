@@ -4,12 +4,12 @@ import pytest
 from django.urls import reverse
 
 from apps.core.isolation import (
-    ClinicaDiferente,
-    SemClinicaAtual,
-    sem_isolamento,
-    usar_clinica,
+    NoCurrentClinic,
+    WrongClinic,
+    use_clinic,
+    without_isolation,
 )
-from apps.core.models import Papel
+from apps.core.models import Role
 from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
@@ -21,75 +21,75 @@ pytestmark = pytest.mark.django_db
 def test_todo_modelo_de_clinica_usa_o_gerenciador_isolado_como_padrao():
     from django.apps import apps
 
-    from apps.core.isolation import ClinicaManager, ModeloDaClinica
+    from apps.core.isolation import ClinicManager, ClinicModel
 
-    modelos = [m for m in apps.get_models() if issubclass(m, ModeloDaClinica)]
+    modelos = [m for m in apps.get_models() if issubclass(m, ClinicModel)]
     assert modelos, "no clinic model found"
     for modelo in modelos:
-        assert isinstance(modelo._default_manager, ClinicaManager), modelo.__name__
-        assert isinstance(modelo.objects, ClinicaManager), modelo.__name__
+        assert isinstance(modelo._default_manager, ClinicManager), modelo.__name__
+        assert isinstance(modelo.objects, ClinicManager), modelo.__name__
 
 
 def test_sem_clinica_atual_falha_em_vez_de_mostrar_tudo(clinica_a, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
-    with pytest.raises(SemClinicaAtual):
+    with pytest.raises(NoCurrentClinic):
         list(Practitioner.objects.all())
-    with pytest.raises(SemClinicaAtual):
+    with pytest.raises(NoCurrentClinic):
         Practitioner.objects.count()
 
 
 def test_consulta_ve_somente_a_clinica_atual(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert [p.name for p in Practitioner.objects.all()] == ["Dra. A"]
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         assert [p.name for p in Practitioner.objects.all()] == ["Dr. B"]
 
 
 def test_busca_por_id_de_outra_clinica_nao_encontra(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
-    with usar_clinica(clinica_a), pytest.raises(Practitioner.DoesNotExist):
+    with use_clinic(clinica_a), pytest.raises(Practitioner.DoesNotExist):
         Practitioner.objects.get(pk=de_b.pk)
 
 
 def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Practitioner.objects.update(active=False)
         Practitioner.objects.all().delete()
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         assert Practitioner.objects.get().active is True
 
 
 def test_novo_registro_recebe_a_clinica_atual(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. A")
     assert practitioner.clinic == clinica_a
 
 
 def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         de_b.name = "Alterado"
-        with pytest.raises(ClinicaDiferente):
+        with pytest.raises(WrongClinic):
             de_b.save()
-        with pytest.raises(ClinicaDiferente):
+        with pytest.raises(WrongClinic):
             de_b.delete()
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
 def test_criar_sem_clinica_atual_falha():
-    with pytest.raises(SemClinicaAtual):
+    with pytest.raises(NoCurrentClinic):
         Practitioner(name="Sem clínica").save()
 
 
 def test_sem_isolamento_ve_todas_as_clinicas(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
-    with sem_isolamento():
+    with without_isolation():
         assert Practitioner.objects.count() == 2
 
 
@@ -112,11 +112,11 @@ def test_url_com_id_de_outra_clinica_da_404(
     rota, clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
     de_b = criar_profissional(clinica_b, "Dr. B")
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     url = reverse(rota, args=[de_b.pk])
     assert cliente.get(url).status_code == 404
     assert cliente.post(url, {"name": "Invadido", "color": "#000000"}).status_code == 404
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
@@ -157,7 +157,7 @@ def test_formulario_so_oferece_usuarios_da_propria_clinica(
 ):
     criar_usuario("colega_a", clinica_a)
     criar_usuario("estranho_b", clinica_b)
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     content = cliente.get(reverse("practitioners:new")).content.decode()
     assert "colega_a" in content
     assert "estranho_b" not in content
@@ -167,13 +167,13 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
     clinica_a, clinica_b, criar_usuario, cliente_de
 ):
     estranho = criar_usuario("estranho_b", clinica_b)
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Novo", "color": "#123456", "user": estranho.pk, "active": "on"},
     )
     assert response.status_code == 200  # form redisplayed with an error
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not Practitioner.objects.filter(name="Dr. Novo").exists()
 
 
@@ -182,11 +182,11 @@ def test_nao_liga_o_mesmo_usuario_a_dois_profissionais(
 ):
     colega = criar_usuario("colega_a", clinica_a)
     criar_profissional(clinica_a, "Dra. Primeira", user=colega)
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Segundo", "color": "#123456", "user": colega.pk, "active": "on"},
     )
     assert "já está ligado a outro profissional" in response.content.decode()
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not Practitioner.objects.filter(name="Dr. Segundo").exists()

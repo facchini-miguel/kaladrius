@@ -1,12 +1,12 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 
 from .models import CAMPOS_DA_ANAMNESE, Addendum, Certificate, ExamRequest, Prescription, Visit
 
 
-class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
+class AtendimentoForm(BootstrapForm, forms.ModelForm):
     """With `profissionais`, a new visit also asks on behalf of which practitioner it is
     written (the system administrator, decision 087)."""
 
@@ -30,14 +30,14 @@ class AtendimentoForm(FormularioBootstrap, forms.ModelForm):
         }
 
 
-class AdendoForm(FormularioBootstrap, forms.ModelForm):
+class AdendoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Addendum
         fields = ["text"]
         widgets = {"text": forms.Textarea(attrs={"rows": 3})}
 
 
-class AtestadoForm(FormularioBootstrap, forms.ModelForm):
+class AtestadoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Certificate
         fields = ["kind", "date", "start_time", "end_time", "days", "note"]
@@ -62,14 +62,14 @@ class AtestadoForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class ReceitaForm(FormularioBootstrap, forms.ModelForm):
+class ReceitaForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Prescription
         fields = ["medications"]
         widgets = {"medications": forms.Textarea(attrs={"rows": 8})}
 
 
-class PedidoDeExamesForm(FormularioBootstrap, forms.ModelForm):
+class PedidoDeExamesForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = ExamRequest
         fields = ["exams", "indication"]
@@ -89,7 +89,7 @@ ASSINATURAS = [
 ]
 
 
-class AnexoForm(FormularioBootstrap, forms.Form):
+class AnexoForm(BootstrapForm, forms.Form):
     file = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
     description = forms.CharField(
         label=_("Descrição"),

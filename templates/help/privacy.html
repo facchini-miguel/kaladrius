@@ -10,7 +10,7 @@
       <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
       {% if clinic %}
       <div class="fs-5 fw-semibold">{{ clinic.name }}</div>
-      {% if clinic.document %}<div class="small">{{ clinic.sigla_documento }}: {{ clinic.documento_escrito }}</div>{% endif %}
+      {% if clinic.document %}<div class="small">{{ clinic.document_abbreviation }}: {{ clinic.written_document }}</div>{% endif %}
       {% if clinic.email %}<div><a href="mailto:{{ clinic.email }}">{{ clinic.email }}</a></div>{% endif %}
       {% if clinic.phone %}<div>{{ clinic.phone }}</div>{% endif %}
       {% if clinic.address %}<div class="small">{{ clinic.address }}</div>{% endif %}

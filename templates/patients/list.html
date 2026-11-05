@@ -11,7 +11,7 @@
   {% endif %}
 </div>
 
-{% rotulo_documento "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, código ou {{ documentos }}{% endblocktranslate %}
+{% document_label "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, código ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
     <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
@@ -47,7 +47,7 @@
       <tr>
         <th>{% translate "Código" %}</th>
         <th>{% translate "Nome" %}</th>
-        <th>{% rotulo_documento "paciente" "empresa" %}</th>
+        <th>{% document_label "paciente" "empresa" %}</th>
         <th>{% translate "Telefone" %}</th>
         <th>{% translate "Cidade" %}</th>
         <th>{% translate "Idade" %}</th>

@@ -8,12 +8,12 @@ from django.core.management import CommandError, call_command
 from django.utils import timezone
 
 from apps.audit.models import AuditEntry
-from apps.core.isolation import usar_clinica
+from apps.core.isolation import use_clinic
 from apps.core.models import Clinic
 from apps.finance import services
 from apps.finance.models import Category, Entry, Supplier
 from apps.health_plans.models import HealthPlan, MemberCard
-from apps.legacy.anonymization import RECHAMADAS
+from apps.legacy.anonymization import RECALLS
 from apps.legacy.dump import DumpInvalido, ler_tabelas
 from apps.legacy.importer import ImportacaoRecusada, _documento, importar
 from apps.patients.models import Patient
@@ -121,7 +121,7 @@ def importado(db):
 
 
 def data(clinic, modelo, **filtro):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return list(modelo.objects.filter(**filtro).order_by("pk"))
 
 
@@ -254,7 +254,7 @@ def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
     def quebrar(self, pacientes):
         raise RuntimeError("falha no meio")
 
-    monkeypatch.setattr(importer._Importador, "_rechamadas", quebrar)
+    monkeypatch.setattr(importer._Importador, "_recalls", quebrar)
     with pytest.raises(RuntimeError):
         importar(DUMP, "Clínica Importada", today=HOJE)
     assert not Clinic.objects.filter(name="Clínica Importada").exists()
@@ -325,7 +325,7 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     descricoes = [a.description for a in agendamentos]
     assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
     assert not [d for d in descricoes if "Fulano" in d or "Até tarde" in d]
-    assert {r.description for r in data(clinic, Recall)} <= set(RECHAMADAS)
+    assert {r.description for r in data(clinic, Recall)} <= set(RECALLS)
     nomes = [p.name for p in data(clinic, Practitioner)]
     assert "Dr Teste" not in nomes and len(nomes) == len(before["profissionais"])
 
@@ -343,7 +343,7 @@ def test_anonimizar_clinica_inexistente(db):
 
 def test_anonimizacao_dos_fornecedores(importado):
     _, clinic = importado
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         pessoa = Supplier.objects.create(
             kind=Supplier.Tipo.FISICA,
             name="Fulana Fornecedora",
@@ -382,7 +382,7 @@ def test_anonimizacao_dos_fornecedores(importado):
 
 def test_anonimizacao_das_carteirinhas(importado):
     _, clinic = importado
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
         MemberCard.objects.create(
             patient=Patient.objects.first(),
@@ -402,7 +402,7 @@ def test_anonimizacao_das_carteirinhas(importado):
 
 def test_anonimizacao_dos_funcionarios(importado):
     _, clinic = importado
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         funcionaria = Employee.objects.create(
             name="Fulana Funcionária", tax_id="52998224725", phone="4833334444"
         )
@@ -431,6 +431,6 @@ def test_anonimizacao_dos_funcionarios(importado):
     (folha,) = data(clinic, Payroll)
     assert "Fulana" not in funcionaria.name and funcionaria.tax_id == ""
     assert len(funcionaria.phone) == 10 and folha.note == ""
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         assert Entry.objects.get(pk=folha.entry_id).payer == funcionaria.name
         assert funcionaria.salario_em(HOJE) == Decimal("2000")

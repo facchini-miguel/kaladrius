@@ -39,15 +39,15 @@ def privacidade(request):
     The privacy contact is the clinic's: the user's clinic, or the installation's clinic
     for anyone else (one installation serves one clinic, decision 069).
     """
-    clinic = getattr(request, "clinic", None) or Clinic.unica()
+    clinic = getattr(request, "clinic", None) or Clinic.single()
     titulo, html = documents.privacidade()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
-    country = countries.pais_da_clinica(clinic)
+    country = countries.clinic_country(clinic)
     context = {"titulo": titulo, "html": html, "clinic": clinic}
-    if country != countries.PADRAO:
+    if country != countries.DEFAULT:
         context.update(
-            country=countries.do_codigo(country).name,
-            lei=legislation.do_pais(country),
-            prazo_de_guarda=legislation.prazo_de_guarda(country),
+            country=countries.by_code(country).name,
+            lei=legislation.for_country(country),
+            prazo_de_guarda=legislation.retention_period(country),
         )
     return render(request, "help/privacy.html", context)

@@ -10,12 +10,12 @@ from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
-from apps.core.ordering import ALFABETICA
+from apps.core.isolation import ClinicModel, WrongClinic
+from apps.core.ordering import ALPHABETICAL
 
 
-class HealthPlan(ModeloDaClinica):
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
+class HealthPlan(ClinicModel):
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
     registration = models.CharField(
@@ -42,7 +42,7 @@ class HealthPlan(ModeloDaClinica):
         return self.name
 
 
-class MemberCard(ModeloDaClinica):
+class MemberCard(ClinicModel):
     """A patient's card of a health plan."""
 
     patient = models.ForeignKey(
@@ -95,11 +95,11 @@ class MemberCard(ModeloDaClinica):
 
     def save(self, *args, **kwargs):
         # Having clinica_id on every row does not stop a link across clinics on its own.
-        self._conferir_clinica()
+        self._check_clinic()
         if self.clinic_id is None:  # without isolation (commands)
             self.clinic_id = self.patient.clinic_id
         if {self.patient.clinic_id, self.health_plan.clinic_id} != {self.clinic_id}:
-            raise ClinicaDiferente("The patient and the health plan must be of this clinic.")
+            raise WrongClinic("The patient and the health plan must be of this clinic.")
         super().save(*args, **kwargs)
 
     @property

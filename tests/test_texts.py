@@ -10,10 +10,10 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.formats import date_format
 
-from apps.core.forms import FormularioBootstrap
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
-from apps.core.ordering import chave_alfabetica
+from apps.core.forms import BootstrapForm
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
+from apps.core.ordering import alphabetical_key
 from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
@@ -21,10 +21,10 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_textos", clinica_a, Papel.RECEPCAO))
+    return cliente_de(criar_usuario("recepcao_textos", clinica_a, Role.FRONT_DESK))
 
 
-class _Exemplo(FormularioBootstrap, forms.Form):
+class _Exemplo(BootstrapForm, forms.Form):
     amount = forms.DecimalField(max_digits=12, decimal_places=2, localize=True, required=False)
     fixa = forms.ChoiceField(choices=[("", "- Select an option -"), ("a", "A")])
     agrupada = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
@@ -62,7 +62,7 @@ def test_numero_ambiguo_continua_recusado():
 
 
 def test_formularios_da_recepcao_sem_ingles(clinica_a, reception):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     for url in (
         reverse("patients:new"),
@@ -88,7 +88,7 @@ def test_lista_de_meses_dos_aniversariantes_comeca_com_maiuscula(reception):
 
 def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
     """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         for name in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
             Patient.objects.create(name=name)
         nomes = list(Patient.objects.values_list("name", flat=True))
@@ -97,7 +97,7 @@ def test_ordem_alfabetica_com_acentos_e_minusculas(clinica_a):
 
 def test_chave_alfabetica_ignora_acento_e_caixa():
     nomes = ["Zeca", "Érica", "ana", "Água", "Beto"]
-    assert sorted(nomes, key=chave_alfabetica) == ["Água", "ana", "Beto", "Érica", "Zeca"]
+    assert sorted(nomes, key=alphabetical_key) == ["Água", "ana", "Beto", "Érica", "Zeca"]
 
 
 def test_telas_cabem_no_celular(clinica_a, reception):
@@ -112,7 +112,7 @@ def test_telas_cabem_no_celular(clinica_a, reception):
         {"permanentes": DENTES_PERMANENTES, "deciduos": DENTES_DECIDUOS, "interativo": True},
     )
     assert 'class="odontograma-rolagem"' in html
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     ficha = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha

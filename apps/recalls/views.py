@@ -9,7 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.permissions import Action, Module, requires_permission
 
 from .forms import RechamadaForm
 from .models import Recall
@@ -32,7 +32,7 @@ def _voltar(request, default="recalls:list"):
     return redirect(default)
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.VER)
+@requires_permission(Module.RECALLS, Action.VIEW)
 def results(request):
     status = request.GET.get("status", "pendentes")
     search = request.GET.get("q", "").strip()
@@ -65,7 +65,7 @@ def results(request):
     )
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.CRIAR)
+@requires_permission(Module.RECALLS, Action.CREATE)
 def new(request):
     inicial = {"date": request.GET.get("date") or ""}
     if request.GET.get("patient", "").isdecimal():
@@ -73,7 +73,7 @@ def new(request):
     return _formulario(request, Recall(created_by=request.user), inicial)
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
+@requires_permission(Module.RECALLS, Action.CHANGE)
 def editar(request, pk):
     return _formulario(request, get_object_or_404(Recall.objects, pk=pk), {})
 
@@ -107,7 +107,7 @@ def _formulario(request, rechamada, inicial):
 
 
 @require_POST
-@exige_permissao(Modulo.RECHAMADAS, Acao.ALTERAR)
+@requires_permission(Module.RECALLS, Action.CHANGE)
 def concluir(request, pk):
     rechamada = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     rechamada.done = not rechamada.done
@@ -120,7 +120,7 @@ def concluir(request, pk):
     return _voltar(request)
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.EXCLUIR)
+@requires_permission(Module.RECALLS, Action.DELETE)
 def excluir(request, pk):
     rechamada = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     if request.method == "POST":
@@ -135,7 +135,7 @@ def excluir(request, pk):
 # --- Schedule integration --------------------------------------------------------
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.VER)
+@requires_permission(Module.RECALLS, Action.VIEW)
 def summary(request):
     """Number of pending recalls per day, for the schedule day headers."""
     since, until = _data(request.GET.get("start", "")[:10]), _data(request.GET.get("end", "")[:10])
@@ -150,7 +150,7 @@ def summary(request):
     return JsonResponse(contagem)
 
 
-@exige_permissao(Modulo.RECHAMADAS, Acao.VER)
+@requires_permission(Module.RECALLS, Action.VIEW)
 def do_dia(request):
     day = _data(request.GET.get("date"))
     if day is None:

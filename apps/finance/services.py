@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 
 from apps.core.models import Clinic
-from apps.core.ordering import chave_alfabetica
+from apps.core.ordering import alphabetical_key
 
 from . import commissions
 from .models import (
@@ -153,7 +153,7 @@ def cancelar(entry, *, reason, user):
 def fechado_ate(clinic_id):
     """Last day of the clinic's closed period, or None. Explicit clinic: also called by
     commands that run without the request's isolation."""
-    last = BookClosing.todos.filter(clinic_id=clinic_id).first()  # newest first
+    last = BookClosing.all_objects.filter(clinic_id=clinic_id).first()  # newest first
     return last.until if last else None
 
 
@@ -269,7 +269,7 @@ def devedores(today=None):
         if row["mais_antigo"] is None or due_date < row["mais_antigo"]:
             row["mais_antigo"] = due_date
     resultado = [row for row in rows.values() if row["vencido"] or row["a_vencer"]]
-    return sorted(resultado, key=lambda row: (-row["vencido"], chave_alfabetica(row["name"])))
+    return sorted(resultado, key=lambda row: (-row["vencido"], alphabetical_key(row["name"])))
 
 
 def resumo_do_paciente(patient, today=None):
@@ -387,7 +387,7 @@ def fluxo_de_caixa(since, until, por_mes=False, today=None):
 
     previous = since - datetime.timedelta(days=1)
     opening_balance = sum(
-        (amount for _conta, amount in saldos_das_contas(until=previous)), start=ZERO
+        (amount for _account, amount in saldos_das_contas(until=previous)), start=ZERO
     )
     balance = opening_balance
     resultado = []

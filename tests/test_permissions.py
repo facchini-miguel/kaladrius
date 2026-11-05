@@ -3,26 +3,26 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
-from apps.core.permissions import MATRIZ, Acao, Modulo
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
+from apps.core.permissions import MATRIX, Action, Module
 from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
 
 
 def test_matriz_cobre_todos_os_papeis():
-    assert set(MATRIZ) == set(Papel)
-    assert all(acoes == frozenset(Acao) for acoes in MATRIZ[Papel.ADMIN].values())
-    assert set(MATRIZ[Papel.ADMIN]) == set(Modulo)
+    assert set(MATRIX) == set(Role)
+    assert all(acoes == frozenset(Action) for acoes in MATRIX[Role.ADMIN].values())
+    assert set(MATRIX[Role.ADMIN]) == set(Module)
 
 
 @pytest.mark.parametrize(
     ("role", "esperado"),
     [
-        (Papel.ADMIN, {"lista": 200, "novo": 200, "editar": 200, "excluir": 200}),
-        (Papel.RECEPCAO, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
-        (Papel.PROFISSIONAL, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
+        (Role.ADMIN, {"lista": 200, "novo": 200, "editar": 200, "excluir": 200}),
+        (Role.FRONT_DESK, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
+        (Role.PRACTITIONER, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
     ],
 )
 def test_acesso_as_telas_de_profissionais_por_papel(
@@ -42,10 +42,10 @@ def test_acesso_as_telas_de_profissionais_por_papel(
 
 def test_recepcao_nao_exclui_nem_por_post(clinica_a, criar_usuario, criar_profissional, cliente_de):
     practitioner = criar_profissional(clinica_a, "Dra. A")
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     response = cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
     assert response.status_code == 403
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert Practitioner.objects.filter(pk=practitioner.pk).exists()
 
 
@@ -53,13 +53,13 @@ def test_botoes_aparecem_conforme_a_permissao(
     clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
     criar_profissional(clinica_a, "Dra. A")
-    reception = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     content = reception.get(reverse("practitioners:list")).content.decode()
     assert "Novo profissional" not in content
     assert ">Editar<" not in content
     assert ">Excluir<" not in content
 
-    admin = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin", clinica_a, Role.ADMIN))
     content = admin.get(reverse("practitioners:list")).content.decode()
     assert "Novo profissional" in content
     assert ">Editar<" in content
@@ -67,13 +67,13 @@ def test_botoes_aparecem_conforme_a_permissao(
 
 
 def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin", clinica_a, Role.ADMIN))
     response = cliente.post(
         reverse("practitioners:new"),
         {"name": "Dr. Novo", "registration": "CRM 1", "color": "#123456", "active": "on"},
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         practitioner = Practitioner.objects.get(name="Dr. Novo")
     assert practitioner.clinic == clinica_a
 
@@ -86,19 +86,19 @@ def test_admin_da_clinica_cria_edita_e_exclui(clinica_a, criar_usuario, cliente_
     assert practitioner.active is False
 
     cliente.post(reverse("practitioners:delete", args=[practitioner.pk]))
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not Practitioner.objects.exists()
 
 
 def test_cor_invalida_e_recusada(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("admin", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin", clinica_a, Role.ADMIN))
     response = cliente.post(reverse("practitioners:new"), {"name": "X", "color": "#zzzzzz"})
     assert response.status_code == 200
     assert "#RRGGBB" in response.content.decode()
 
 
 def test_menu_mostra_profissionais_so_com_permissao(clinica_a, criar_usuario, cliente_de):
-    com_clinica = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    com_clinica = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     assert "Profissionais</a>" in com_clinica.get(reverse("home")).content.decode()
 
 
@@ -145,7 +145,7 @@ def test_primeiro_acesso_cadastra_a_clinica(cliente_de, criar_usuario, django_us
 def test_admin_do_django_so_para_superusuario(
     clinica_a, criar_usuario, cliente_de, django_user_model
 ):
-    staff = criar_usuario("staff", clinica_a, Papel.ADMIN, is_staff=True)
+    staff = criar_usuario("staff", clinica_a, Role.ADMIN, is_staff=True)
     response = cliente_de(staff).get(reverse("admin:index"))
     assert response.status_code == 302  # sent to the admin login
 
@@ -169,7 +169,7 @@ def test_admin_do_django_lista_profissionais_de_todas_as_clinicas(
 
 def test_perfil_financeiro_ve_o_financeiro_e_nada_mais(clinica_a, criar_usuario, cliente_de):
     """Decision 088: all of finance; patients, estimates and records only to look at."""
-    cliente = cliente_de(criar_usuario("financeiro", clinica_a, Papel.FINANCEIRO))
+    cliente = cliente_de(criar_usuario("financeiro", clinica_a, Role.FINANCE))
     for name in (
         "receivables",
         "payables",

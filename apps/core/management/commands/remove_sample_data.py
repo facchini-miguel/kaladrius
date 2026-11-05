@@ -5,7 +5,7 @@ from django.db import transaction
 
 from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
-from apps.core.isolation import sem_isolamento
+from apps.core.isolation import without_isolation
 from apps.core.models import Clinic, ClinicModule
 from apps.estimates.models import Estimate, EstimateItem, Procedure
 from apps.finance.models import (
@@ -40,11 +40,11 @@ from apps.recalls.models import Recall
 from apps.schedule.models import Appointment, AppointmentType
 from apps.staff.models import Employee, Payroll, Salary
 
-from .seed_sample_data import CLINICAS
+from .seed_sample_data import CLINICS
 
 # Test data created before 0.26.0 (two clinics and a user in both): removed too.
-CLINICAS_ANTIGAS = ["Clínica Bem Estar (teste)"]
-USUARIOS_ANTIGOS = ["admin.bemestar", "recepcao.bemestar", "recepcao.multi"]
+OLD_CLINICS = ["Clínica Bem Estar (teste)"]
+OLD_USERS = ["admin.bemestar", "recepcao.bemestar", "recepcao.multi"]
 
 
 class Command(BaseCommand):
@@ -65,10 +65,10 @@ class Command(BaseCommand):
     def handle(self, *args, confirmar=False, **options):
         if not confirmar:
             raise CommandError("Nada foi apagado: rode de novo com --confirm.")
-        nomes = [data["name"] for data in CLINICAS] + CLINICAS_ANTIGAS
-        usernames = [u[0] for data in CLINICAS for u in data["usuarios"]] + USUARIOS_ANTIGOS
+        nomes = [data["name"] for data in CLINICS] + OLD_CLINICS
+        usernames = [u[0] for data in CLINICS for u in data["usuarios"]] + OLD_USERS
 
-        with transaction.atomic(), sem_isolamento():
+        with transaction.atomic(), without_isolation():
             clinicas = list(Clinic.objects.filter(name__in=nomes))
             # Only users that work solely in the test clinics, never a platform account.
             usuarios = list(
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             AccessLog.objects.filter(username__in=nomes_usuarios).delete()
             AccessAttempt.objects.filter(username__in=nomes_usuarios).delete()
             registrar(
-                AuditEntry.Acao.EXCLUIR,
+                AuditEntry.Action.DELETE,
                 description=(
                     f"Dados de teste removidos: {len(clinicas)} clínicas, {pacientes} pacientes, "
                     f"{len(usuarios)} usuários"

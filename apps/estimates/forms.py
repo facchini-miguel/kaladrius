@@ -2,7 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 from apps.dentistry.teeth import DENTES_VALIDOS
 from apps.finance.forms import DATA, _campo_dinheiro, _formas_com_vazio
 from apps.finance.models import Category, FinancialAccount
@@ -13,7 +13,7 @@ from apps.practitioners.models import Practitioner
 from .models import Estimate, EstimateItem, Procedure
 
 
-class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
+class ProcedimentoForm(BootstrapForm, forms.ModelForm):
     amount = _campo_dinheiro(_("Valor"))
 
     class Meta:
@@ -26,7 +26,7 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
             kind=Category.Tipo.RECEITA, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
-        self.codificacao = insurance.do_pais().procedure
+        self.codificacao = insurance.for_country().procedure
         self.fields["code"].label = insurance.rotulo_do_codigo()
         if self.codificacao and self.codificacao.example:
             self.fields["code"].widget.attrs["placeholder"] = self.codificacao.example
@@ -35,7 +35,7 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
     def clean_code(self):
         code = (self.cleaned_data.get("code") or "").strip()
         if self.codificacao:
-            return self.codificacao.limpar(code)
+            return self.codificacao.clean_value(code)
         return code
 
     def clean_name(self):
@@ -45,7 +45,7 @@ class ProcedimentoForm(FormularioBootstrap, forms.ModelForm):
         return name
 
 
-class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
+class OrcamentoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Estimate
         fields = ["patient", "practitioner", "date", "valid_until", "notes"]
@@ -69,7 +69,7 @@ class OrcamentoForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class ItemForm(FormularioBootstrap, forms.ModelForm):
+class ItemForm(BootstrapForm, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
     unit_price = _campo_dinheiro(_("Valor unitário"), obrigatorio=False)
@@ -79,12 +79,12 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
         fields = ["procedure", "description", "teeth", "faces", "quantity", "unit_price"]
         widgets = {"teeth": forms.HiddenInput}
 
-    def __init__(self, *args, odontologia=True, **kwargs):
+    def __init__(self, *args, dentistry=True, **kwargs):
         super().__init__(*args, **kwargs)
-        self.odontologia = odontologia
+        self.dentistry = dentistry
         self.fields["procedure"].queryset = Procedure.objects.filter(active=True)
         self.fields["description"].required = False
-        if not odontologia:
+        if not dentistry:
             # Teeth and faces belong to the dental module (decision 080).
             del self.fields["teeth"], self.fields["faces"]
 
@@ -98,7 +98,7 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
     def clean(self):
         data = super().clean()
         procedure = data.get("procedure")
-        if not self.odontologia and any(
+        if not self.dentistry and any(
             self.data.get(self.add_prefix(field), "").strip() for field in ("teeth", "faces")
         ):
             raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
@@ -117,11 +117,11 @@ class ItemForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class DescontoForm(FormularioBootstrap, forms.Form):
+class DescontoForm(BootstrapForm, forms.Form):
     discount = _campo_dinheiro(_("Desconto no total"), obrigatorio=False)
 
 
-class AprovarForm(FormularioBootstrap, forms.Form):
+class AprovarForm(BootstrapForm, forms.Form):
     parcelas = forms.IntegerField(
         label=_("Número de parcelas"), min_value=1, max_value=48, initial=1
     )

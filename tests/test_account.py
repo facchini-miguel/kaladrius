@@ -15,7 +15,7 @@ from django.utils import timezone
 from apps.account import services
 from apps.account.models import RecoveryCode, TwoFactor
 from apps.audit.models import AuditEntry
-from apps.core.models import Papel
+from apps.core.models import Role
 
 pytestmark = pytest.mark.django_db
 SENHA = "Senha-Ficticia-2026!"
@@ -23,7 +23,7 @@ SENHA = "Senha-Ficticia-2026!"
 
 @pytest.fixture
 def pessoa(clinica_a, criar_usuario):
-    user = criar_usuario("pessoa_conta", clinica_a, Papel.RECEPCAO)
+    user = criar_usuario("pessoa_conta", clinica_a, Role.FRONT_DESK)
     user.set_password(SENHA)
     user.email = "pessoa@example.com"
     user.save()
@@ -208,7 +208,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     client, clinica_a, pessoa, criar_usuario
 ):
     ligar_duas_etapas(pessoa)
-    admin = criar_usuario("admin_conta", clinica_a, Papel.ADMIN)
+    admin = criar_usuario("admin_conta", clinica_a, Role.ADMIN)
     client.force_login(admin)
     vinculo = pessoa.vinculos.get()
     page = client.get(reverse("team:edit", args=[vinculo.pk])).content.decode()
@@ -274,9 +274,9 @@ def exigida(clinica_a):
 def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
     client, exigida, criar_usuario, criar_profissional
 ):
-    practitioner = criar_usuario("prof_exigida", exigida, Papel.PROFISSIONAL)
+    practitioner = criar_usuario("prof_exigida", exigida, Role.PRACTITIONER)
     criar_profissional(exigida, "Dra. Fictícia", user=practitioner)
-    financeiro = criar_usuario("fin_exigida", exigida, Papel.FINANCEIRO)
+    financeiro = criar_usuario("fin_exigida", exigida, Role.FINANCE)
     for user in (practitioner, financeiro):
         client.force_login(user)
         response = client.get(reverse("patients:list"))
@@ -289,10 +289,10 @@ def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
 
 
 def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuario):
-    reception = criar_usuario("rec_exigida", exigida, Papel.RECEPCAO)
+    reception = criar_usuario("rec_exigida", exigida, Role.FRONT_DESK)
     client.force_login(reception)
     assert client.get(reverse("patients:list")).status_code == 200
-    demo = criar_usuario("demo_exigida", exigida, Papel.ADMIN)
+    demo = criar_usuario("demo_exigida", exigida, Role.ADMIN)
     demo.demo = True
     demo.save(update_fields=["demo"])
     client.force_login(demo)
@@ -300,7 +300,7 @@ def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuari
 
 
 def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
-    admin = criar_usuario("admin_exigida", exigida, Papel.ADMIN)
+    admin = criar_usuario("admin_exigida", exigida, Role.ADMIN)
     admin.set_password(SENHA)
     admin.save()
     dispositivo, _ = ligar_duas_etapas(admin)
@@ -319,7 +319,7 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
 
 
 def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
-    client.force_login(criar_usuario("fin_livre", clinica_a, Papel.FINANCEIRO))
+    client.force_login(criar_usuario("fin_livre", clinica_a, Role.FINANCE))
     assert client.get(reverse("finance:receivables")).status_code == 200
 
 
@@ -334,12 +334,12 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
     super_usuario = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_usuario)
     client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicina"})
-    assert Clinic.unica().require_two_factor
+    assert Clinic.single().require_two_factor
     Clinic.objects.update(require_two_factor=False)
     # The migration runs with the models as they were then (Clinica, before decision 157).
     estado = MigrationLoader(connection).project_state(("core", "0013_exigir_duas_etapas")).apps
     importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(estado, None)
-    assert Clinic.unica().require_two_factor
+    assert Clinic.single().require_two_factor
 
 
 def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado(

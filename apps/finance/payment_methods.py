@@ -81,14 +81,14 @@ FORMAS = {
 }
 
 
-def do_pais(country=None):
+def for_country(country=None):
     """The methods of `pais`, or of the current clinic's country."""
-    return FORMAS.get(country or countries.pais_da_clinica(), FORMAS[countries.PADRAO])
+    return FORMAS.get(country or countries.clinic_country(), FORMAS[countries.DEFAULT])
 
 
 # The English variants other than the United States' (en-gb, en-ca, en-au, en-za) spell it
 # "cheque"; the English catalog has the American "check".
-_INGLES_COM_CHEQUE = {country.ingles for country in countries.PAISES.values()} - {"en"}
+_INGLES_COM_CHEQUE = {country.ingles for country in countries.COUNTRIES.values()} - {"en"}
 
 
 def label(code, country=None):
@@ -98,7 +98,7 @@ def label(code, country=None):
     name = dict(Payment.Forma.choices).get(code, code)
     if code == CHEQUE and translation.get_language() in _INGLES_COM_CHEQUE:
         name = "Cheque"
-    local = do_pais(country).nomes.get(code)
+    local = for_country(country).nomes.get(code)
     if not local or local.lower() == str(name).lower():  # "Direct debit" in English
         return str(name)
     return f"{name} ({local})"
@@ -106,7 +106,7 @@ def label(code, country=None):
 
 def em_uso(country=None):
     """(code, name) of the methods offered when recording a payment."""
-    return [(code, label(code, country)) for code in do_pais(country).codigos]
+    return [(code, label(code, country)) for code in for_country(country).codigos]
 
 
 def rotulos(country=None):

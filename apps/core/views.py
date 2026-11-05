@@ -11,12 +11,12 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from . import dashboard
-from .forms import ClinicaForm, NovaClinicaForm, TrocaSenhaForm
+from .forms import ChangePasswordForm, ClinicForm, NewClinicForm
 from .models import Clinic
-from .permissions import Acao, Modulo, exige_permissao
+from .permissions import Action, Module, requires_permission
 
 
-def _saudacao():
+def _greeting():
     hour = timezone.localtime().hour
     if hour < 12:
         return _("Bom dia")
@@ -27,13 +27,13 @@ def _saudacao():
 
 @login_required
 def start(request):
-    context = {"saudacao": _saudacao()}
+    context = {"saudacao": _greeting()}
     if request.clinic is not None:
-        context["painel"] = dashboard.montar(request)
+        context["painel"] = dashboard.build(request)
     return render(request, "core/home.html", context)
 
 
-def _destino_seguro(request, destino):
+def _safe_destination(request, destino):
     if destino and url_has_allowed_host_and_scheme(
         destino, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
@@ -42,14 +42,14 @@ def _destino_seguro(request, destino):
 
 
 @login_required
-def cadastrar_clinica(request):
+def register_clinic(request):
     """First access of a new installation: the superuser registers the clinic. There is
     only one (decision 069), so once it exists this page sends to the home page."""
     if not request.user.is_superuser:
         raise PermissionDenied
     if Clinic.objects.exists():
         return redirect("home")
-    form = NovaClinicaForm(request.POST or None)
+    form = NewClinicForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
@@ -59,10 +59,10 @@ def cadastrar_clinica(request):
     return render(request, "core/register_clinic.html", {"form": form})
 
 
-class TrocarSenhaView(PasswordChangeView):
+class ChangePasswordView(PasswordChangeView):
     """Any logged-in user can change their own password (keeps the session open)."""
 
-    form_class = TrocaSenhaForm
+    form_class = ChangePasswordForm
     template_name = "core/change_password.html"
     success_url = reverse_lazy("home")
 
@@ -77,9 +77,9 @@ class TrocarSenhaView(PasswordChangeView):
         return super().form_valid(form)
 
 
-@exige_permissao(Modulo.CLINICA, Acao.ALTERAR)
-def configuracoes(request):
-    form = ClinicaForm(request.POST or None, instance=request.clinic)
+@requires_permission(Module.CLINIC, Action.CHANGE)
+def clinic_settings(request):
+    form = ClinicForm(request.POST or None, instance=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Configurações da clínica salvas."))
@@ -95,14 +95,14 @@ def configuracoes(request):
 
 @login_required
 @require_POST
-def trocar_idioma(request):
+def change_language(request):
     """Save the user's language (empty: follow the browser) and go back to the page."""
     language = request.POST.get("language", "")
     if language not in dict(settings.LANGUAGES):
         language = ""
     request.user.language = language
     request.user.save(update_fields=["language"])
-    response = redirect(_destino_seguro(request, request.POST.get("next")))
+    response = redirect(_safe_destination(request, request.POST.get("next")))
     # The cookie keeps the language on the login page of this browser too.
     if language:
         response.set_cookie(

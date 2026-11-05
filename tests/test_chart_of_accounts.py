@@ -8,8 +8,8 @@ from django.db.migrations.executor import MigrationExecutor
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.finance import services
 from apps.finance.models import AccountGroup, Category, Entry, FinancialAccount
 from tests.test_modules_migration import estado_do_banco
@@ -21,16 +21,16 @@ HOJE = timezone.localdate()
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_plano", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_plano", clinica_a, Role.ADMIN))
 
 
 def group(clinic, name, **extra):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return AccountGroup.objects.get(name=name, **extra)
 
 
 def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
         assert str(aluguel.group) == "1 Ocupação"
         assert Category.objects.get(name="Comissões").group.name == "Pessoal"
@@ -52,7 +52,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     )
     assert response.status_code == 302
     sub = group(clinica_a, "Equipe da recepção")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert sub.number == "2.1"
         salarios = Category.objects.get(name="Salários e encargos")
     editar = admin.post(
@@ -70,13 +70,13 @@ def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
     for name in ("Equipe A", "Equipe B"):
         data = {"name": name, "kind": "despesa", "parent": pessoal.pk, "code": "", "active": "on"}
         assert admin.post(reverse("finance:group_new"), data).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert group(clinica_a, "Equipe A").number == "2.1"
         assert group(clinica_a, "Equipe B").number == "2.2"
     # A new top group goes after the five of the basic plan.
     topo = {"name": "Investimentos", "kind": "despesa", "parent": "", "code": "", "active": "on"}
     assert admin.post(reverse("finance:group_new"), topo).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert group(clinica_a, "Investimentos").number == "6"
 
 
@@ -89,7 +89,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
     repetido = admin.post(url, {"name": "pessoal", "kind": "despesa"})
     assert "name" in repetido.context["form"].errors
     # A group cannot go under itself or under one of its subgroups.
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         sub = AccountGroup.objects.create(name="Sub", kind="despesa", parent=pessoal)
     ciclo = admin.post(
         reverse("finance:group_edit", args=[pessoal.pk]),
@@ -112,7 +112,7 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
 
 
 def test_relatorio_soma_os_subgrupos(clinica_a, admin):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
         sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal, code=1)
         salarios = Category.objects.get(name="Salários e encargos")
@@ -153,7 +153,7 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
 
 
 def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_plano", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao_plano", clinica_a, Role.FRONT_DESK))
     assert reception.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
@@ -161,9 +161,9 @@ def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
 def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
     executor = MigrationExecutor(connection)
     folhas = executor.loader.graph.leaf_nodes()
-    anterior = [("financeiro", "0011_fechamento")]
+    previous = [("financeiro", "0011_fechamento")]
     try:
-        executor.migrate(anterior)
+        executor.migrate(previous)
         # Pessoal and the renames of decision 157 depend on the newer finance, so they were
         # rolled back along with it.
         apps = estado_do_banco()

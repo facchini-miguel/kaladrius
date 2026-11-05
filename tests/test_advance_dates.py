@@ -4,7 +4,7 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
+from apps.core.isolation import use_clinic
 from apps.patients.models import Patient
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
@@ -15,7 +15,7 @@ from apps.schedule.models import Appointment, AppointmentType
 def cenario(clinica_a, criar_profissional):
     today = timezone.localdate()
     ana = criar_profissional(clinica_a, "Dra. Ana")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(
             name="Maria Paciente", birth_date=datetime.date(1980, 5, 17)
         )
@@ -52,7 +52,7 @@ def test_avanca_semanas_inteiras_e_nao_mexe_no_nascimento(cenario, settings):
     before = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(today - datetime.timedelta(days=17)), confirmar=True)
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         for appointment in Appointment.objects.all():
             start, end = before[appointment.pk]
             assert appointment.start - start == datetime.timedelta(days=14)
@@ -75,7 +75,7 @@ def test_menos_de_uma_semana_nao_muda_nada(cenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
     call_command("advance_dates", desde=str(today - datetime.timedelta(days=6)), confirmar=True)
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         assert Recall.objects.get().date == today - datetime.timedelta(days=20)
 
 
@@ -83,9 +83,9 @@ def test_as_datas_fixas_existem():
     """A field renamed without updating FIXAS would silently start to move (a birth date)."""
     from django.apps import apps
 
-    from apps.core.management.commands.advance_dates import FIXAS
+    from apps.core.management.commands.advance_dates import FIXED
 
-    for nome in FIXAS:
+    for nome in FIXED:
         label, modelo, field = nome.split(".")
         model_field = apps.get_model(label, modelo)._meta.get_field(field)
         assert model_field.get_internal_type() in ("DateField", "DateTimeField"), nome

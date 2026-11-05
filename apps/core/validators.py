@@ -6,20 +6,20 @@ from django.utils.translation import gettext_lazy as _
 
 from . import countries
 
-validar_cor = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
+validate_color = RegexValidator(r"^#[0-9a-fA-F]{6}$", "Use uma cor no formato #RRGGBB.")
 
 
-def somente_digitos(value):
+def digits_only(value):
     return re.sub(r"\D", "", value or "")
 
 
-def normalizar_cnpj(value):
+def normalize_cnpj(value):
     """Strip punctuation and uppercase. CNPJs may be alphanumeric since July 2026."""
     return re.sub(r"[^0-9A-Za-z]", "", value or "").upper()
 
 
-def cpf_valido(cpf):
-    cpf = somente_digitos(cpf)
+def valid_cpf(cpf):
+    cpf = digits_only(cpf)
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
     for position in (9, 10):
@@ -29,13 +29,13 @@ def cpf_valido(cpf):
     return True
 
 
-def cnpj_valido(cnpj):
+def valid_cnpj(cnpj):
     """Validate numeric and alphanumeric CNPJs (Receita Federal, IN RFB 2.229/2024).
 
     The first 12 characters may be digits or letters; each one is worth its ASCII
     code minus 48. The two check digits are always numeric.
     """
-    cnpj = normalizar_cnpj(cnpj)
+    cnpj = normalize_cnpj(cnpj)
     if not re.fullmatch(r"[0-9A-Z]{12}[0-9]{2}", cnpj) or cnpj == cnpj[0] * 14:
         return False
     valores = [ord(caractere) - 48 for caractere in cnpj]
@@ -47,13 +47,13 @@ def cnpj_valido(cnpj):
     return True
 
 
-def validar_cpf(value):
-    if not cpf_valido(value):
+def validate_cpf(value):
+    if not valid_cpf(value):
         raise ValidationError(_("CPF inválido."))
 
 
-def validar_cnpj(value):
-    if not cnpj_valido(value):
+def validate_cnpj(value):
+    if not valid_cnpj(value):
         raise ValidationError(_("CNPJ inválido."))
 
 
@@ -85,14 +85,14 @@ DDDS = {
 }
 
 
-def nono_digito(number):
+def ninth_digit(number):
     """An 8-digit mobile (DDD + number starting with 6 to 9) with the ninth digit added."""
     if len(number) == 10 and number[2] in "6789":
         return f"{number[:2]}9{number[2:]}"
     return number
 
 
-def normalizar_telefone(value, country=None):
+def normalize_phone(value, country=None):
     """A phone of the clinic's country as stored digits, or ValidationError.
 
     Brazil: DDD + number. Accepts what people type: punctuation, a leading 0 (carrier prefix)
@@ -100,11 +100,11 @@ def normalizar_telefone(value, country=None):
     digit (Anatel's rule: landlines start with 2 to 5), so WhatsApp links work. Other countries
     (decision 117): the national number, see countries.normalizar_telefone_internacional.
     """
-    country = country or countries.pais_da_clinica()
+    country = country or countries.clinic_country()
     if country != "BR":
-        digitos = somente_digitos(value)
-        return countries.normalizar_telefone_internacional(digitos, country) if digitos else ""
-    number = somente_digitos(value).lstrip("0")
+        digitos = digits_only(value)
+        return countries.normalize_international_phone(digitos, country) if digitos else ""
+    number = digits_only(value).lstrip("0")
     if len(number) in (12, 13) and number.startswith("55"):
         number = number[2:]
     if not number:
@@ -115,4 +115,4 @@ def normalizar_telefone(value, country=None):
         raise ValidationError(_("O DDD %(ddd)s não existe.") % {"ddd": number[:2]})
     if len(number) == 11 and number[2] != "9":
         raise ValidationError(_("Com 11 dígitos, o número começa com 9 depois do DDD."))
-    return nono_digito(number)
+    return ninth_digit(number)

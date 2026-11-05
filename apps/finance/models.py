@@ -15,14 +15,14 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ClinicaManager, ModeloDaClinica, sem_isolamento
-from apps.core.ordering import ALFABETICA
+from apps.core.isolation import ClinicManager, ClinicModel, without_isolation
+from apps.core.ordering import ALPHABETICAL
 
 ZERO = Decimal("0.00")
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 
 
-class FinancialAccount(ModeloDaClinica):
+class FinancialAccount(ClinicModel):
     """Where the money goes: the cash drawer, a bank account, the card machine."""
 
     class Tipo(models.TextChoices):
@@ -30,7 +30,7 @@ class FinancialAccount(ModeloDaClinica):
         BANCO = "banco", _("Banco")
         CARTAO = "cartao", _("Maquininha de cartão")
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
     kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     opening_balance = models.DecimalField(
         _("saldo inicial"),
@@ -57,13 +57,13 @@ class TipoFinanceiro(models.TextChoices):
     DESPESA = "despesa", _("Despesa")
 
 
-class AccountGroup(ModeloDaClinica):
+class AccountGroup(ClinicModel):
     """A node of the chart of accounts (decision 097, legacy Medical grupocontabil):
     groups hold subgroups and categories; entries go to the categories (the leaves)."""
 
     Tipo = TipoFinanceiro
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
     kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     parent = models.ForeignKey(
         "self",
@@ -111,12 +111,12 @@ class AccountGroup(ModeloDaClinica):
         return ".".join(map(str, codigos)) if None not in codigos else ""
 
 
-class Category(ModeloDaClinica):
+class Category(ClinicModel):
     """Grouping of income and expenses for the reports."""
 
     Tipo = TipoFinanceiro
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
     kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
     group = models.ForeignKey(
         AccountGroup,
@@ -142,13 +142,13 @@ class Category(ModeloDaClinica):
         return self.name
 
 
-class CostCenter(ModeloDaClinica):
+class CostCenter(ClinicModel):
     """Who in the clinic an entry is for (decision 095): a room, a specialty, the office.
 
     Optional on every entry, one per entry (no split across centers yet).
     """
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
     class Meta:
@@ -198,7 +198,7 @@ PLANO_PADRAO = {
 
 def criar_padroes(clinic):
     """Default accounts and categories for a clinic that has none."""
-    with sem_isolamento():
+    with without_isolation():
         if not FinancialAccount.objects.filter(clinic=clinic).exists():
             FinancialAccount.objects.bulk_create(
                 FinancialAccount(clinic=clinic, name=name, kind=kind)
@@ -218,7 +218,7 @@ def criar_padroes(clinic):
             )
 
 
-class Supplier(ModeloDaClinica):
+class Supplier(ClinicModel):
     """Who the clinic buys from or pays (decision 093), picked on a payable."""
 
     class Tipo(models.TextChoices):
@@ -232,7 +232,7 @@ class Supplier(ModeloDaClinica):
         _("nome"),
         max_length=200,
         help_text=_("Para pessoa jurídica, o nome fantasia."),
-        db_collation=ALFABETICA,
+        db_collation=ALPHABETICAL,
         db_column="nome",
     )
     legal_name = models.CharField(
@@ -270,7 +270,7 @@ class Supplier(ModeloDaClinica):
         return "empresa" if self.kind == self.Tipo.JURIDICA else "pessoa"
 
 
-class Entry(ModeloDaClinica):
+class Entry(ClinicModel):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
     class Tipo(models.TextChoices):
@@ -399,7 +399,7 @@ class ParcelaQuerySet(models.QuerySet):
         return self.com_saldo().filter(balance__gt=0, entry__cancelled=False)
 
 
-class Installment(ModeloDaClinica):
+class Installment(ClinicModel):
     entry = models.ForeignKey(
         Entry,
         on_delete=models.CASCADE,
@@ -412,8 +412,8 @@ class Installment(ModeloDaClinica):
     amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
 
     # Same isolation as every clinic model, plus the balance helpers.
-    objects = ClinicaManager.from_queryset(ParcelaQuerySet)()
-    todos = models.Manager()  # noqa: DJ012
+    objects = ClinicManager.from_queryset(ParcelaQuerySet)()
+    all_objects = models.Manager()  # noqa: DJ012
 
     class Meta:
         db_table = "financeiro_parcela"
@@ -435,7 +435,7 @@ class Installment(ModeloDaClinica):
         return pago, self.amount - pago
 
 
-class Payment(ModeloDaClinica):
+class Payment(ClinicModel):
     """Money received (or paid) for an installment. Partial payments are allowed.
 
     `valor` is what changed hands; `juros` (late fee, typed by hand) is included in it and
@@ -581,7 +581,7 @@ class Payment(ModeloDaClinica):
         return self.amount - self.interest + self.discount
 
 
-class CashRegister(ModeloDaClinica):
+class CashRegister(ClinicModel):
     """A cash drawer session (0.17.0): opened with a counted amount, closed with another.
 
     While open, payments registered into its account, withdrawals and top-ups make up the
@@ -660,7 +660,7 @@ class CashRegister(ModeloDaClinica):
         return self.counted_amount - self.expected_amount
 
 
-class CashMovement(ModeloDaClinica):
+class CashMovement(ClinicModel):
     """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
 
     class Tipo(models.TextChoices):
@@ -710,7 +710,7 @@ class CashMovement(ModeloDaClinica):
         return f"{self.get_kind_display()} {self.amount}"
 
 
-class Commission(ModeloDaClinica):
+class Commission(ClinicModel):
     """A practitioner commission paid out (0.19.0, decision 053).
 
     It covers every receipt of the practitioner's receivables up to `ate` not covered
@@ -771,7 +771,7 @@ class Commission(ModeloDaClinica):
         return self.amount + self.reversal_deduction
 
 
-class Planning(ModeloDaClinica):
+class Planning(ClinicModel):
     """The year's goal for a group of the chart of accounts (decision 098, legacy Medical
     planejamento_estrategico): how much to receive or spend, compared with what was paid."""
 
@@ -801,7 +801,7 @@ class Planning(ModeloDaClinica):
         return f"{self.year} · {self.group}"
 
 
-class BookClosing(ModeloDaClinica):
+class BookClosing(ClinicModel):
     """Finance closed up to a date (decision 096), so the reports given to the accountant
     do not change: no payment dated on or before it can be recorded or reversed.
 
@@ -832,7 +832,7 @@ class BookClosing(ModeloDaClinica):
         return f"{self.until:%d/%m/%Y}" if self.until else str(_("Aberto"))
 
 
-class StatementImport(ModeloDaClinica):
+class StatementImport(ClinicModel):
     """One OFX file imported into a bank account (0.20.0, decision 054)."""
 
     account = models.ForeignKey(
@@ -886,7 +886,7 @@ class StatementImport(ModeloDaClinica):
         return f"{self.account} {self.file}"
 
 
-class BankTransaction(ModeloDaClinica):
+class BankTransaction(ClinicModel):
     """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
 
     class Situacao(models.TextChoices):

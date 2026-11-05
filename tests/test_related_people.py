@@ -6,8 +6,8 @@ from django.urls import reverse
 
 from apps.audit.models import AuditEntry
 from apps.audit.record import nome_do_modelo
-from apps.core.isolation import ClinicaDiferente, sem_isolamento, usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import WrongClinic, use_clinic, without_isolation
+from apps.core.models import Role
 from apps.patients.models import Patient, RelatedPerson
 
 pytestmark = pytest.mark.django_db
@@ -17,12 +17,12 @@ MAE = RelatedPerson.Relationship.MAE
 
 @pytest.fixture
 def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_relacionados", clinica_a, Papel.RECEPCAO))
+    return cliente_de(criar_usuario("recepcao_relacionados", clinica_a, Role.FRONT_DESK))
 
 
 @pytest.fixture
 def familia(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         filha = Patient.objects.create(name="Ana Fictícia")
         mae = Patient.objects.create(name="Rosa Fictícia", whatsapp="54999990001")
         return filha, mae
@@ -35,7 +35,7 @@ def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, 
         {"relationship": MAE, "other_patient": mae.pk, "name": "", "phone": "", "note": ""},
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         vinculo = RelatedPerson.objects.get()
     assert vinculo.telefone_exibido == "54999990001"  # the other patient's own phone
     ficha_filha = reception.get(reverse("patients:record", args=[filha.pk])).content.decode()
@@ -55,7 +55,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
         "note": "Vizinha",
     }
     assert reception.post(url, data).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         contato = RelatedPerson.objects.get()
     assert (contato.phone, contato.nome_exibido) == ("54999990002", "Contato Inventado")
     impressa = reception.get(reverse("patients:print", args=[filha.pk])).content.decode()
@@ -68,7 +68,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
     assert reception.get(reverse("patients:related_remove", args=[contato.pk])).status_code == 302
     remover = reception.post(reverse("patients:related_remove", args=[contato.pk]))
     assert remover.status_code == 302
-    assert not RelatedPerson.todos.exists()
+    assert not RelatedPerson.all_objects.exists()
 
 
 @pytest.mark.parametrize(
@@ -92,7 +92,7 @@ def test_validacoes(data, field, familia, reception):
 
 def test_vinculo_repetido(clinica_a, familia, reception):
     filha, mae = familia
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         RelatedPerson.objects.create(patient=filha, other_patient=mae, relationship=MAE)
     response = reception.post(
         reverse("patients:related_new", args=[filha.pk]),
@@ -103,30 +103,30 @@ def test_vinculo_repetido(clinica_a, familia, reception):
 
 def test_banco_exige_paciente_ou_nome(clinica_a, familia):
     filha, _ = familia
-    with usar_clinica(clinica_a), pytest.raises(IntegrityError), transaction.atomic():
+    with use_clinic(clinica_a), pytest.raises(IntegrityError), transaction.atomic():
         RelatedPerson.objects.create(patient=filha, relationship=MAE)
 
 
 def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia):
     filha, _ = familia
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         outra = Patient.objects.create(name="De outra clínica")
-    with sem_isolamento(), pytest.raises(ClinicaDiferente):
+    with without_isolation(), pytest.raises(WrongClinic):
         RelatedPerson(patient=filha, other_patient=outra, relationship=MAE).save()
 
 
 def test_outra_clinica_nao_ve_nem_altera(clinica_a, clinica_b, familia, criar_usuario, cliente_de):
     filha, _ = familia
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         contato = RelatedPerson.objects.create(patient=filha, relationship=MAE, name="Fictícia")
-    intruso = cliente_de(criar_usuario("recepcao_b_rel", clinica_b, Papel.RECEPCAO))
+    intruso = cliente_de(criar_usuario("recepcao_b_rel", clinica_b, Role.FRONT_DESK))
     assert intruso.get(reverse("patients:related_edit", args=[contato.pk])).status_code == 404
     assert intruso.get(reverse("patients:related_new", args=[filha.pk])).status_code == 404
 
 
 def test_financeiro_so_ve(clinica_a, familia, criar_usuario, cliente_de):
     filha, _ = familia
-    financeiro = cliente_de(criar_usuario("fin_rel", clinica_a, Papel.FINANCEIRO))
+    financeiro = cliente_de(criar_usuario("fin_rel", clinica_a, Role.FINANCE))
     ficha = financeiro.get(reverse("patients:record", args=[filha.pk])).content.decode()
     assert "Pessoas relacionadas" in ficha
     assert reverse("patients:related_new", args=[filha.pk]) not in ficha
@@ -138,16 +138,16 @@ def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
     clinica_a, familia, criar_usuario, cliente_de
 ):
     filha, mae = familia
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         de_filha = RelatedPerson.objects.create(
             patient=filha, relationship=RelatedPerson.Relationship.EMERGENCIA, name="NOME-SIGILOSO"
         )
         RelatedPerson.objects.create(patient=mae, other_patient=filha, relationship=MAE)
         filha.archived = True
         filha.save()
-    admin = cliente_de(criar_usuario("admin_rel", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_rel", clinica_a, Role.ADMIN))
     assert admin.post(reverse("patients:delete", args=[filha.pk])).status_code == 302
-    assert not RelatedPerson.todos.exists()
+    assert not RelatedPerson.all_objects.exists()
     registros = AuditEntry.objects.filter(
         model_name=nome_do_modelo(RelatedPerson), object_id=str(de_filha.pk)
     )

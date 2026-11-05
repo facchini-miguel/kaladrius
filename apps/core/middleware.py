@@ -4,11 +4,11 @@ from django.urls import reverse
 from django.utils import timezone, translation
 
 from . import countries
-from .isolation import sem_isolamento, usar_clinica
+from .isolation import use_clinic, without_isolation
 from .models import Clinic, Membership
 
 
-def resolver_clinica(request):
+def resolve_clinic(request):
     """Return (clinic, membership) for the request.
 
     One installation serves one clinic (decision 069), so nobody chooses: a user works in
@@ -25,11 +25,11 @@ def resolver_clinica(request):
     if vinculo is not None:
         return vinculo.clinic, vinculo
     if user.is_superuser:
-        return Clinic.unica(), None
+        return Clinic.single(), None
     return None, None
 
 
-class ClinicaAtualMiddleware:
+class CurrentClinicMiddleware:
     """Sets request.clinica / request.vinculo and the isolation context for the request."""
 
     def __init__(self, get_response):
@@ -41,33 +41,33 @@ class ClinicaAtualMiddleware:
         if request.path_info.startswith(reverse("admin:index")):
             # The Django admin is restricted to platform superusers (see core/admin.py)
             # and works across every clinic.
-            with sem_isolamento():
+            with without_isolation():
                 return self.get_response(request)
         if request.user.is_authenticated:
-            request.clinic, request.vinculo = resolver_clinica(request)
+            request.clinic, request.vinculo = resolve_clinic(request)
         if request.clinic is not None:
-            _usar_pais_da_clinica(request, request.clinic)
+            _use_clinic_country(request, request.clinic)
         try:
-            with usar_clinica(request.clinic):
+            with use_clinic(request.clinic):
                 return self.get_response(request)
         finally:
             timezone.deactivate()
 
 
-def _usar_pais_da_clinica(request, clinic):
+def _use_clinic_country(request, clinic):
     """The clinic's time zone, and the English variant of its country for dates and times
     (decision 117): an English-speaking user of a British clinic gets 31/10/2026."""
     try:
         timezone.activate(zoneinfo.ZoneInfo(clinic.time_zone))
     except (zoneinfo.ZoneInfoNotFoundError, ValueError):
         pass  # an unknown zone keeps settings.TIME_ZONE
-    variante = countries.variante_do_idioma(translation.get_language(), clinic.country)
+    variante = countries.language_variant(translation.get_language(), clinic.country)
     if variante:
         translation.activate(variante)
         request.LANGUAGE_CODE = variante
 
 
-class ProxyReversoMiddleware:
+class ReverseProxyMiddleware:
     """Use the client IP reported by the reverse proxy (Caddy) as REMOTE_ADDR.
 
     Only enabled with DJANGO_REVERSE_PROXY=1, where the app port is reachable solely
@@ -85,7 +85,7 @@ class ProxyReversoMiddleware:
         return self.get_response(request)
 
 
-class IdiomaDoUsuarioMiddleware:
+class UserLanguageMiddleware:
     """Activate the language chosen by the logged-in user (after LocaleMiddleware)."""
 
     def __init__(self, get_response):

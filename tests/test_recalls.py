@@ -4,8 +4,8 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.patients.models import Patient
 from apps.recalls.models import Recall
 
@@ -15,22 +15,22 @@ DIA = datetime.date(2031, 3, 5)
 
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="João Rechamada")
     return {
         "clinic": clinica_a,
         "patient": patient,
-        "cliente": cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO)),
+        "cliente": cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK)),
     }
 
 
 def rechamadas(clinic):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return list(Recall.objects.order_by("date"))
 
 
 def criar(clinic, patient, date=DIA, **extra):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return Recall.objects.create(patient=patient, date=date, description="Revisão", **extra)
 
 
@@ -91,7 +91,7 @@ def test_filtros_da_lista(cenario):
     clinic, patient = cenario["clinic"], cenario["patient"]
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA + datetime.timedelta(days=30), done=True)
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         other = Patient.objects.create(name="Ana Outra")
     criar(clinic, other, DIA + datetime.timedelta(days=60))
     url = reverse("recalls:list")
@@ -132,7 +132,7 @@ def test_agenda_recebe_as_urls_de_rechamadas(cenario, criar_profissional):
 
 
 def test_isolamento(cenario, clinica_b):
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         paciente_b = Patient.objects.create(name="Paciente B")
     de_b = criar(clinica_b, paciente_b)
     cliente = cenario["cliente"]
@@ -146,7 +146,7 @@ def test_isolamento(cenario, clinica_b):
     assert "patient" in response.context["form"].errors
 
 
-@pytest.mark.parametrize(("role", "exclui"), [(Papel.RECEPCAO, True), (Papel.PROFISSIONAL, False)])
+@pytest.mark.parametrize(("role", "exclui"), [(Role.FRONT_DESK, True), (Role.PRACTITIONER, False)])
 def test_permissao_de_excluir(role, exclui, cenario, criar_usuario, cliente_de):
     rechamada = criar(cenario["clinic"], cenario["patient"])
     cliente = cliente_de(criar_usuario("usuario", cenario["clinic"], role))
@@ -156,7 +156,7 @@ def test_permissao_de_excluir(role, exclui, cenario, criar_usuario, cliente_de):
 
 def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario, cliente_de):
     rechamada = criar(cenario["clinic"], cenario["patient"])
-    admin = cliente_de(criar_usuario("admin", cenario["clinic"], Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin", cenario["clinic"], Role.ADMIN))
     admin.post(reverse("patients:archive", args=[cenario["patient"].pk]))
     assert "Maria" not in admin.get(reverse("recalls:list")).content.decode()
     day = admin.get(reverse("recalls:today"), {"date": rechamada.date.isoformat()})
@@ -164,7 +164,7 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 
     # Permanent deletion takes the recalls with it.
     admin.post(reverse("patients:delete", args=[cenario["patient"].pk]))
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         assert not Recall.objects.exists()
 
 
@@ -173,7 +173,7 @@ def test_rechamadas_de_paciente_arquivado_saem_das_telas(cenario, criar_usuario,
 
 def test_aniversariantes_do_mes(cenario):
     clinic = cenario["clinic"]
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         Patient.objects.create(name="Março 20", birth_date=datetime.date(1990, 3, 20))
         Patient.objects.create(name="Março 2", birth_date=datetime.date(2000, 3, 2))
         Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 1), active=False)

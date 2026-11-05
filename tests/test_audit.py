@@ -7,17 +7,17 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.audit.models import AuditEntry
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
-Acao = AuditEntry.Acao
+Action = AuditEntry.Action
 
 
 @pytest.fixture
 def admin_a(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
 
 
 def ultimos(**filters):
@@ -26,9 +26,9 @@ def ultimos(**filters):
 
 def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
     admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Maria")
-    [criacao] = ultimos(action=Acao.CRIAR, model_name="Paciente")
+    [criacao] = ultimos(action=Action.CREATE, model_name="Paciente")
     assert criacao.user_name == "admin_a"
     assert criacao.clinic_id == clinica_a.pk
     assert criacao.object_id == str(patient.pk)
@@ -39,14 +39,14 @@ def test_criacao_alteracao_e_exclusao_ficam_registradas(admin_a, clinica_a):
         reverse("patients:edit", args=[patient.pk]),
         {"kind": "PF", "name": "Maria Souza", "active": "on", "occupation": "Professora"},
     )
-    [alteracao] = ultimos(action=Acao.ALTERAR, model_name="Paciente")
+    [alteracao] = ultimos(action=Action.CHANGE, model_name="Paciente")
     assert alteracao.changes == {
         "name": ["Maria", "Maria Souza"],
         "occupation": ["", "Professora"],
     }
 
     admin_a.post(reverse("patients:archive", args=[patient.pk]))
-    [arquivamento] = ultimos(action=Acao.ALTERAR, model_name="Paciente")[1:]
+    [arquivamento] = ultimos(action=Action.CHANGE, model_name="Paciente")[1:]
     assert arquivamento.changes["archived"] == [False, True]
 
 
@@ -55,7 +55,7 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
         reverse("patients:new"),
         {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "tax_id": "52998224725"},
     )
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Maria Sigilosa")
     admin_a.get(reverse("patients:record", args=[patient.pk]))
     admin_a.post(reverse("patients:archive", args=[patient.pk]))
@@ -63,15 +63,15 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
 
     registros = ultimos(model_name="Paciente", object_id=str(patient.pk))
     assert {r.action for r in registros} == {
-        Acao.CRIAR,
-        Acao.VISUALIZAR,
-        Acao.ALTERAR,
-        Acao.EXCLUIR,
+        Action.CREATE,
+        Action.VIEWED,
+        Action.CHANGE,
+        Action.DELETE,
     }
     text = str([(r.object_repr, r.changes, r.user_name) for r in registros])
     assert "Sigilosa" not in text and "52998224725" not in text
     assert "admin_a" in text  # who did it stays
-    criacao = next(r for r in registros if r.action == Acao.CRIAR)
+    criacao = next(r for r in registros if r.action == Action.CREATE)
     assert criacao.changes["name"] == ["(removido)", "(removido)"]
     assert ultimos(object_repr__contains="excluídos a pedido do titular")
     # The erasure shows in the clinic's own audit log (review stage 4).
@@ -80,17 +80,17 @@ def test_exclusao_definitiva_tira_os_dados_pessoais_da_auditoria(admin_a, clinic
 
 
 def test_salvar_sem_mudancas_nao_gera_registro(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Sem mudança")
         patient.save()
-    assert not ultimos(action=Acao.ALTERAR, model_name="Paciente")
+    assert not ultimos(action=Action.CHANGE, model_name="Paciente")
 
 
 def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Consultado")
     admin_a.get(reverse("patients:record", args=[patient.pk]))
-    [visualizacao] = ultimos(action=Acao.VISUALIZAR)
+    [visualizacao] = ultimos(action=Action.VIEWED)
     assert visualizacao.object_repr == "Consultado"
     assert visualizacao.user_name == "admin_a"
 
@@ -98,12 +98,12 @@ def test_abrir_a_ficha_fica_registrado(admin_a, clinica_a):
 def test_login_e_tentativa_recusada_ficam_registrados(client, criar_usuario):
     criar_usuario("maria")
     client.post(reverse("login"), {"username": "maria", "password": "errada"})
-    [falha] = ultimos(action=Acao.LOGIN_FALHOU)
+    [falha] = ultimos(action=Action.LOGIN_FAILED)
     assert falha.object_repr == "usuário informado: maria"
     assert "errada" not in str(falha.changes) + falha.object_repr
 
     client.post(reverse("login"), {"username": "maria", "password": "senha-de-teste-123"})
-    [entrada] = ultimos(action=Acao.LOGIN)
+    [entrada] = ultimos(action=Action.LOGIN)
     assert entrada.user_name == "maria"
 
 
@@ -114,21 +114,21 @@ def test_senha_nunca_e_gravada(criar_usuario):
     registros = AuditEntry.objects.filter(model_name="Usuário")
     text = " ".join(str(r.changes) for r in registros)
     assert "argon2" not in text and "nova-senha" not in text
-    [alteracao] = registros.filter(action=Acao.ALTERAR)
+    [alteracao] = registros.filter(action=Action.CHANGE)
     assert alteracao.changes == {"senha": ["(oculta)", "(alterada)"]}
 
 
 def test_tela_mostra_somente_a_clinica_atual(admin_a, clinica_a, clinica_b):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Patient.objects.create(name="Paciente da A")
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         Patient.objects.create(name="Paciente da B")
     content = admin_a.get(reverse("audit:list"), {"model_name": "Paciente"}).content.decode()
     assert "Paciente da A" in content
     assert "Paciente da B" not in content
 
 
-@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
 def test_somente_administrador_ve_a_auditoria(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("audit:list")).status_code == 403
@@ -152,7 +152,7 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
     old = timezone.now() - datetime.timedelta(days=31)
     recente = timezone.now() - datetime.timedelta(days=29)
     for timestamp in (old, recente):
-        for action in (Acao.LOGIN_FALHOU, Acao.LOGIN):
+        for action in (Action.LOGIN_FAILED, Action.LOGIN):
             record = AuditEntry.objects.create(action=action)
             AuditEntry.objects.filter(pk=record.pk).update(timestamp=timestamp)
         tentativa = AccessAttempt.objects.create(username="quem", failures_since_start=1)
@@ -161,8 +161,12 @@ def test_retencao_apaga_so_tentativas_recusadas_antigas():
     call_command("apply_retention")
 
     restantes = AuditEntry.objects.values_list("action", "timestamp")
-    assert sorted(action for action, _ in restantes) == [Acao.LOGIN, Acao.LOGIN, Acao.LOGIN_FALHOU]
-    assert all(m == recente for action, m in restantes if action == Acao.LOGIN_FALHOU)
+    assert sorted(action for action, _ in restantes) == [
+        Action.LOGIN,
+        Action.LOGIN,
+        Action.LOGIN_FAILED,
+    ]
+    assert all(m == recente for action, m in restantes if action == Action.LOGIN_FAILED)
     assert list(AccessAttempt.objects.values_list("attempt_time", flat=True)) == [recente]
 
 
@@ -174,7 +178,7 @@ def test_tela_mostra_o_rotulo_do_campo_tambem_pelo_nome_antigo(admin_a, clinica_
     admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
     AuditEntry.objects.create(
         clinic=clinica_a,
-        action=Acao.ALTERAR,
+        action=Action.CHANGE,
         model_name="Paciente",
         object_id="1",
         changes={"occupation": ["", "Professora"], "campo_que_saiu": [1, 2]},

@@ -3,8 +3,8 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.patients.models import Patient
 from apps.reference_data.models import Neighborhood, Street
 
@@ -16,7 +16,7 @@ URL = reverse("reference_data:address_suggestions")
 
 @pytest.fixture
 def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_enderecos", clinica_a, Papel.RECEPCAO))
+    return cliente_de(criar_usuario("recepcao_enderecos", clinica_a, Role.FRONT_DESK))
 
 
 def test_bairros_e_logradouros_do_odonto_carregados():
@@ -28,14 +28,14 @@ def test_bairros_e_logradouros_do_odonto_carregados():
 
 
 def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinica_b, reception):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Patient.objects.create(
             name="Paciente fictício A",
             city_id=CARLOS_BARBOSA,
             neighborhood="Bairro Novo Fictício",
             street="Rua Inventada A",
         )
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         Patient.objects.create(
             name="Paciente fictício B",
             city_id=CARLOS_BARBOSA,

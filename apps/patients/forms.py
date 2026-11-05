@@ -6,8 +6,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import countries, identification
-from apps.core.forms import FormularioBootstrap, campo_documento, documento_por_tipo
-from apps.core.validators import normalizar_telefone
+from apps.core.forms import BootstrapForm, document_by_kind, document_field
+from apps.core.validators import normalize_phone
 from apps.reference_data.models import City, State
 
 from .models import Patient, RelatedPerson
@@ -35,11 +35,11 @@ def _campo_texto(label, max_length, **attrs):
     )
 
 
-class PacienteForm(FormularioBootstrap, forms.ModelForm):
+class PacienteForm(BootstrapForm, forms.ModelForm):
     state = UFField(queryset=State.objects.all(), required=False, label=_("UF"))
     city = CidadeField(queryset=City.objects.none(), required=False, label=_("Cidade"))
     # The country's document (decision 121), typed with punctuation, stored compact.
-    tax_id = campo_documento()
+    tax_id = document_field()
     postal_code = _campo_texto(_("CEP"), 10)
     mobile_phone = _campo_texto(_("Celular"), 16, inputmode="tel")
     whatsapp = _campo_texto(_("WhatsApp"), 16, inputmode="tel")
@@ -92,10 +92,10 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
-        self.country = countries.pais_da_clinica(clinic)
-        self.fields["postal_code"].label = countries.rotulo_cep(self.country)
-        self.documentos = identification.do_pais(self.country)
-        documento_por_tipo(
+        self.country = countries.clinic_country(clinic)
+        self.fields["postal_code"].label = countries.postal_code_label(self.country)
+        self.documentos = identification.for_country(self.country)
+        document_by_kind(
             self.fields["tax_id"],
             self.documentos.paciente,
             self.documentos.empresa,
@@ -139,10 +139,10 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         )
 
     def clean_postal_code(self):
-        return countries.normalizar_cep(self.cleaned_data.get("postal_code"), self.country)
+        return countries.normalize_postal_code(self.cleaned_data.get("postal_code"), self.country)
 
     def _limpar_telefone(self, name):
-        return normalizar_telefone(self.cleaned_data.get(name), self.country)
+        return normalize_phone(self.cleaned_data.get(name), self.country)
 
     def clean_mobile_phone(self):
         return self._limpar_telefone("mobile_phone")
@@ -173,7 +173,9 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         document = ""
         if do_tipo is not None:
             try:
-                document = identification.limpar(data.get("tax_id", ""), [do_tipo], do_tipo.sigla)
+                document = identification.clean_value(
+                    data.get("tax_id", ""), [do_tipo], do_tipo.abbreviation
+                )
             except ValidationError as error:
                 self.add_error("tax_id", error)
         if "tax_id" in data:
@@ -210,7 +212,7 @@ class PacienteForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
+class PessoaRelacionadaForm(BootstrapForm, forms.ModelForm):
     """A relative or contact (decision 101): another patient of the clinic, or a name."""
 
     phone = _campo_texto(_("Telefone"), 16, inputmode="tel")
@@ -229,7 +231,7 @@ class PessoaRelacionadaForm(FormularioBootstrap, forms.ModelForm):
         self.fields["other_patient"].queryset = Patient.objects.exclude(pk=patient.pk)
 
     def clean_phone(self):
-        return normalizar_telefone(self.cleaned_data.get("phone"))
+        return normalize_phone(self.cleaned_data.get("phone"))
 
     def clean(self):
         data = super().clean()

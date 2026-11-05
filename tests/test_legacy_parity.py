@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.audit.models import AuditEntry
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.health_plans.models import HealthPlan, MemberCard
 from apps.patients.models import Patient
 
@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_paridade", clinica_a, Papel.RECEPCAO))
+    return cliente_de(criar_usuario("recepcao_paridade", clinica_a, Role.FRONT_DESK))
 
 
 def test_agenda_volta_na_semana_que_estava_aberta(clinica_a, reception, criar_profissional):
@@ -42,7 +42,7 @@ def test_no_dia_seguinte_a_agenda_abre_hoje(reception):
 
 
 def test_ficha_cadastral_impressa(clinica_a, reception):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(
             name="Paciente fictícia da ficha",
             tax_id="52998224725",
@@ -65,14 +65,14 @@ def test_ficha_cadastral_impressa(clinica_a, reception):
         assert trecho in text, trecho
     assert (
         AuditEntry.objects.filter(
-            action=AuditEntry.Acao.VISUALIZAR, object_id=str(patient.pk)
+            action=AuditEntry.Action.VIEWED, object_id=str(patient.pk)
         ).count()
         == 2
     )  # the record and the print
 
 
 def test_ficha_impressa_respeita_permissao(clinica_a, criar_usuario, cliente_de):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente fictício sem acesso")
     sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))
     assert sem_vinculo.get(reverse("patients:print", args=[patient.pk])).status_code in (

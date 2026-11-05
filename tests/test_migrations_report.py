@@ -11,76 +11,76 @@ from django.db.migrations.loader import MigrationLoader
 
 from apps.core.management.commands import migrations_report as relatorio
 
-CONVENIOS = ("convenios", "0003_seguros_de_cada_pais")
+HEALTH_PLANS = ("convenios", "0003_seguros_de_cada_pais")
 
 
 def _antes(app, nome):
     return MigrationLoader(connection).project_state((app, nome), at_end=False)
 
 
-def _tipos(alertas):
-    return [alerta.kind for alerta in alertas]
+def _tipos(alerts):
+    return [alerta.kind for alerta in alerts]
 
 
 def _alertas(operacao):
-    return _tipos(relatorio.alertas_da_operacao(operacao, "convenios", _antes(*CONVENIOS)))
+    return _tipos(relatorio.operation_alerts(operacao, "convenios", _antes(*HEALTH_PLANS)))
 
 
 @pytest.mark.django_db
 def test_operacoes_que_apagam_ou_quebram_a_volta():
     remover = migrations.RemoveField("carteirinha", "titular")
-    assert _alertas(remover) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
+    assert _alertas(remover) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
     # The previous version still queries the dropped table: every page using it would fail.
     table = migrations.DeleteModel("Carteirinha")
-    assert _alertas(table) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
+    assert _alertas(table) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
     renomear = migrations.RenameField("convenio", "nome", "nome_novo")
-    assert relatorio.QUEBRA_VOLTA in _alertas(renomear)
+    assert relatorio.BREAKS_ROLLBACK in _alertas(renomear)
 
 
 @pytest.mark.django_db
 def test_renomear_mantendo_tabela_e_coluna_nao_alerta():
     """Decision 156: renamed in the code only, the table and column kept, nothing reaches the
     database; the previous version still works."""
-    before = _antes(*CONVENIOS)
+    before = _antes(*HEALTH_PLANS)
     fixar = migrations.AlterModelTable("convenio", "convenios_convenio")
-    assert relatorio.alertas_da_operacao(fixar, "convenios", before) == []
-    before = relatorio._depois(fixar, "convenios", before)
+    assert relatorio.operation_alerts(fixar, "convenios", before) == []
+    before = relatorio._after(fixar, "convenios", before)
     modelo = migrations.RenameModel("Convenio", "HealthPlan")
-    assert relatorio.alertas_da_operacao(modelo, "convenios", before) == []
+    assert relatorio.operation_alerts(modelo, "convenios", before) == []
     # The table follows the model's name when it is not pinned: the previous version breaks.
     solto = migrations.RenameModel("Carteirinha", "Card")
-    assert _tipos(relatorio.alertas_da_operacao(solto, "convenios", before)) == [
-        relatorio.QUEBRA_VOLTA
+    assert _tipos(relatorio.operation_alerts(solto, "convenios", before)) == [
+        relatorio.BREAKS_ROLLBACK
     ]
-    before = relatorio._depois(modelo, "convenios", before)
+    before = relatorio._after(modelo, "convenios", before)
     column = migrations.AlterField(
         "healthplan", "nome", models.CharField(max_length=100, db_column="nome")
     )
-    before = relatorio._depois(column, "convenios", before)
+    before = relatorio._after(column, "convenios", before)
     field = migrations.RenameField("healthplan", "nome", "name")
-    assert relatorio.alertas_da_operacao(field, "convenios", before) == []
+    assert relatorio.operation_alerts(field, "convenios", before) == []
 
 
 @pytest.mark.django_db
 def test_operacoes_sem_volta_e_campos_alterados():
     sem_volta = migrations.RunPython(lambda apps, schema: None)
-    assert _alertas(sem_volta) == [relatorio.SEM_VOLTA]
+    assert _alertas(sem_volta) == [relatorio.NO_ROLLBACK]
     com_volta = migrations.RunPython(lambda a, s: None, migrations.RunPython.noop)
     assert _alertas(com_volta) == []
     # convenio.nome is varchar(200): shorter or another type deserve a look.
     assert _alertas(migrations.AlterField("convenio", "nome", models.CharField(max_length=50))) == [
-        relatorio.REVISAR
+        relatorio.REVIEW
     ]
     assert (
         _alertas(migrations.AlterField("convenio", "nome", models.CharField(max_length=300))) == []
     )
     assert _alertas(migrations.AlterField("convenio", "nome", models.IntegerField())) == [
-        relatorio.REVISAR
+        relatorio.REVIEW
     ]
     # carteirinha.validade may be empty: made required, existing rows and the previous version
     # (which may still save it empty) fail.
     obrigatoria = migrations.AlterField("carteirinha", "validade", models.DateField())
-    assert _alertas(obrigatoria) == [relatorio.REVISAR, relatorio.QUEBRA_VOLTA]
+    assert _alertas(obrigatoria) == [relatorio.REVIEW, relatorio.BREAKS_ROLLBACK]
 
 
 @pytest.mark.django_db
@@ -105,7 +105,7 @@ def test_coluna_obrigatoria_nova():
     obrigatoria = migrations.AddField(
         "convenio", "sigla", models.CharField(max_length=5, default="")
     )
-    assert _alertas(obrigatoria) == [relatorio.QUEBRA_VOLTA]
+    assert _alertas(obrigatoria) == [relatorio.BREAKS_ROLLBACK]
     vazia = migrations.AddField("convenio", "sigla", models.CharField(max_length=5, null=True))
     assert _alertas(vazia) == []
     com_padrao = migrations.AddField(
@@ -123,7 +123,7 @@ def test_separate_database_and_state_e_inspecionado():
         database_operations=[migrations.RemoveField("carteirinha", "titular")],
         state_operations=[],
     )
-    assert _alertas(escondida) == [relatorio.APAGA, relatorio.QUEBRA_VOLTA]
+    assert _alertas(escondida) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
     so_estado = migrations.SeparateDatabaseAndState(
         state_operations=[migrations.RemoveField("carteirinha", "titular")]
     )
@@ -134,10 +134,10 @@ def test_separate_database_and_state_e_inspecionado():
 def test_relatorio_de_uma_migracao_real():
     """convenios.0003 renamed registro_ans and added two required columns with no database
     default: the previous version would not work with it."""
-    (migracao,) = relatorio.analisar([CONVENIOS])
+    (migracao,) = relatorio.analyze([HEALTH_PLANS])
     assert 'RENAME COLUMN "registro_ans" TO "registro"' in migracao.sql
     # varchar 6 -> 20 is fine; the rename and carteirinha.grupo and .beneficiario are not.
-    assert _tipos(migracao.alertas) == [relatorio.QUEBRA_VOLTA] * 3
+    assert _tipos(migracao.alerts) == [relatorio.BREAKS_ROLLBACK] * 3
     texto = relatorio.markdown([migracao], falhas=[])
     assert "### ⚠️ Needs attention" in texto and "convenios.0003_seguros_de_cada_pais" in texto
     assert "Back and forth tested" in texto and "```sql" in texto
@@ -152,23 +152,25 @@ def test_relatorio_de_migracao_ja_aplicada_alterada():
         [], alteradas=[("convenios", "0003_x", "M"), ("core", "0001_y", "D")]
     )
     assert "### ⚠️ Needs attention" in texto
-    assert f"**convenios.0003_x** — {relatorio.ALTERADA}: edited" in texto
-    assert f"**core.0001_y** — {relatorio.ALTERADA}: deleted" in texto
+    assert f"**convenios.0003_x** — {relatorio.CHANGED}: edited" in texto
+    assert f"**core.0001_y** — {relatorio.CHANGED}: deleted" in texto
     assert "the database does not change" not in texto
 
 
 def test_comentario_cabe_no_limite_do_github():
     """GitHub refuses a comment over 65,536 characters: the SQL is left out first, then cut."""
-    grande = relatorio.Migracao("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
+    grande = relatorio.MigrationEntry("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
     grande.operacoes = [("Add field x", [])]
     completo = relatorio.markdown([grande])
-    assert len(completo) > relatorio.LIMITE_COMENTARIO and "```sql" in completo
-    curto = relatorio.markdown([grande], limit=relatorio.LIMITE_COMENTARIO)
-    assert len(curto) <= relatorio.LIMITE_COMENTARIO
+    assert len(completo) > relatorio.COMMENT_LIMIT and "```sql" in completo
+    curto = relatorio.markdown([grande], limit=relatorio.COMMENT_LIMIT)
+    assert len(curto) <= relatorio.COMMENT_LIMIT
     assert "```sql" not in curto and "The SQL is left out" in curto and "Add field x" in curto
-    muitas = [relatorio.Migracao("a", f"{n:04}_x", operacoes=[("y" * 1000, [])]) for n in range(80)]
-    cortado = relatorio.markdown(muitas, limit=relatorio.LIMITE_COMENTARIO)
-    assert len(cortado) <= relatorio.LIMITE_COMENTARIO and cortado.endswith("summary)\n")
+    muitas = [
+        relatorio.MigrationEntry("a", f"{n:04}_x", operacoes=[("y" * 1000, [])]) for n in range(80)
+    ]
+    cortado = relatorio.markdown(muitas, limit=relatorio.COMMENT_LIMIT)
+    assert len(cortado) <= relatorio.COMMENT_LIMIT and cortado.endswith("summary)\n")
 
 
 def test_migracoes_do_diff_le_o_git(monkeypatch):
@@ -200,7 +202,7 @@ def test_migracoes_do_diff_le_o_git(monkeypatch):
         return subprocess.CompletedProcess(args, 0, stdout=saida, stderr="")
 
     monkeypatch.setattr(relatorio.subprocess, "run", git)
-    assert relatorio.migracoes_do_diff("origin/main") == (
+    assert relatorio.migrations_from_diff("origin/main") == (
         [("convenios", "0004_x"), ("core", "0019_y")],
         [
             ("agenda", "0003_agendamento", "M"),
@@ -216,7 +218,7 @@ def test_migracoes_do_diff_quando_o_git_falha(monkeypatch):
 
     monkeypatch.setattr(relatorio.subprocess, "run", git)
     with pytest.raises(CommandError, match="unknown revision"):
-        relatorio.migracoes_do_diff("origin/nada")
+        relatorio.migrations_from_diff("origin/nada")
 
 
 def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):
@@ -224,10 +226,10 @@ def test_ida_e_volta_so_num_banco_descartavel(monkeypatch):
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     producao = SimpleNamespace(settings_dict={"NAME": "kaladrius"})
     with pytest.raises(CommandError, match="banco descartável"):
-        relatorio.banco_descartavel(producao)
-    relatorio.banco_descartavel(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
+        relatorio.disposable_database(producao)
+    relatorio.disposable_database(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
     monkeypatch.setenv("DISPOSABLE_DATABASE", "1")
-    relatorio.banco_descartavel(producao)
+    relatorio.disposable_database(producao)
 
 
 @pytest.mark.django_db
@@ -235,7 +237,7 @@ def test_comando_recusa_testar_volta_fora_do_banco_descartavel(monkeypatch):
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     monkeypatch.setitem(connection.settings_dict, "NAME", "kaladrius")
     chamadas = []
-    monkeypatch.setattr(relatorio, "analisar", lambda chaves: chamadas.append(chaves) or [])
+    monkeypatch.setattr(relatorio, "analyze", lambda chaves: chamadas.append(chaves) or [])
     from django.core.management import call_command
 
     with pytest.raises(CommandError, match="banco descartável"):
@@ -254,9 +256,9 @@ def test_ida_e_volta_com_falha_ao_reaplicar(monkeypatch):
         if len(chamadas) > 1:
             raise RuntimeError(f"falhou {len(chamadas)}")
 
-    monkeypatch.setattr(relatorio, "_migrar", migrar)
-    falhas = relatorio.ida_e_volta([CONVENIOS, ("core", "0001_initial")])
-    assert [onde for onde, _erro in falhas] == [
+    monkeypatch.setattr(relatorio, "_migrate", migrar)
+    falhas = relatorio.round_trip([HEALTH_PLANS, ("core", "0001_initial")])
+    assert [onde for onde, _error in falhas] == [
         "`convenios` back to `0002_ordem_alfabetica` and forward again",
         "applying every migration again after that failure (the database is left half-migrated: "
         "the remaining apps were not tested)",
@@ -272,15 +274,15 @@ def test_ida_e_volta_quando_nem_aplica(monkeypatch):
     def migrar(*args):
         raise RuntimeError("conflito")
 
-    monkeypatch.setattr(relatorio, "_migrar", migrar)
-    assert relatorio.ida_e_volta([CONVENIOS]) == [
+    monkeypatch.setattr(relatorio, "_migrate", migrar)
+    assert relatorio.round_trip([HEALTH_PLANS]) == [
         ("applying every migration", "RuntimeError: conflito")
     ]
 
 
 @pytest.mark.django_db(transaction=True)
 def test_ida_e_volta_de_uma_migracao_real():
-    assert relatorio.ida_e_volta([CONVENIOS]) == []
+    assert relatorio.round_trip([HEALTH_PLANS]) == []
 
 
 @pytest.mark.django_db(transaction=True)
@@ -292,7 +294,7 @@ def test_comando_completo_com_ida_e_volta(tmp_path):
     saida = StringIO()
     call_command(
         "migrations_report",
-        f"{CONVENIOS[0]}.{CONVENIOS[1]}",
+        f"{HEALTH_PLANS[0]}.{HEALTH_PLANS[1]}",
         testar_volta=True,
         saida=str(arquivo),
         comentario=str(comentario),

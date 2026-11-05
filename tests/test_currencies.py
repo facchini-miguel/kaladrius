@@ -10,9 +10,9 @@ from django.urls import reverse
 from django.utils import translation
 
 from apps.core import currencies
-from apps.core.forms import CampoDecimal
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.forms import LocalizedDecimalField
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from tests.test_core import dados_clinica
 
 pytestmark = pytest.mark.django_db
@@ -38,27 +38,27 @@ VALOR = Decimal("1234.56")
 )
 def test_simbolo_da_moeda_e_separadores_do_idioma(code, language, esperado):
     with translation.override(language):
-        assert currencies.formatar(VALOR, code) == esperado
+        assert currencies.format_amount(VALOR, code) == esperado
 
 
 def test_valor_invalido_fica_vazio():
-    assert currencies.formatar(None, "USD") == ""
-    assert currencies.formatar("abc", "USD") == ""
+    assert currencies.format_amount(None, "USD") == ""
+    assert currencies.format_amount("abc", "USD") == ""
 
 
 def test_filtro_usa_a_moeda_da_clinica_atual(clinica_a):
-    modelo = Template("{% load formats %}{{ amount|currency }} {% simbolo_moeda %}")
+    modelo = Template("{% load formats %}{{ amount|currency }} {% currency_symbol %}")
     context = Context({"amount": VALOR})
     with translation.override("pt-br"):
         assert modelo.render(context) == "R$ 1.234,56 R$"  # no current clinic: the real
         clinica_a.currency = "EUR"
-        with usar_clinica(clinica_a):
+        with use_clinic(clinica_a):
             assert modelo.render(context) == "1.234,56 € €"
 
 
 def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario, cliente_de):
     assert clinica_a.currency == "BRL"  # existing and new clinics start with the real
-    admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     assert "Dólar americano (US$, USD)" in admin.get(reverse("clinic_settings")).content.decode()
 
     response = admin.post(reverse("clinic_settings"), dados_clinica(currency="USD"), follow=True)
@@ -78,13 +78,13 @@ def test_admin_escolhe_a_moeda_e_valores_aparecem_nela(clinica_a, criar_usuario,
 
 
 def test_moeda_desconhecida_e_recusada(clinica_a, criar_usuario, cliente_de):
-    admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     response = admin.post(reverse("clinic_settings"), dados_clinica(currency="XXX"))
     assert response.status_code == 200 and "currency" in response.context["form"].errors
 
 
 def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_a", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao_a", clinica_a, Role.FRONT_DESK))
     assert (
         reception.post(reverse("clinic_settings"), dados_clinica(currency="EUR")).status_code == 403
     )
@@ -97,19 +97,21 @@ def test_so_o_administrador_muda_a_moeda(clinica_a, criar_usuario, cliente_de):
 )
 def test_valor_digitado_com_simbolo_de_qualquer_moeda(digitado):
     with translation.override("pt-br"):
-        assert CampoDecimal(decimal_places=2, localize=True).clean(digitado) == Decimal("1500.00")
+        assert LocalizedDecimalField(decimal_places=2, localize=True).clean(digitado) == Decimal(
+            "1500.00"
+        )
 
 
 def test_texto_que_nao_e_valor_continua_recusado():
     with translation.override("pt-br"), pytest.raises(forms.ValidationError):
-        CampoDecimal(decimal_places=2, localize=True).clean("abc")
+        LocalizedDecimalField(decimal_places=2, localize=True).clean("abc")
 
 
 def test_formulario_sem_a_moeda_mantem_a_atual(clinica_a, criar_usuario, cliente_de):
     """A settings page opened before the update does not send the currency."""
     clinica_a.currency = "EUR"
     clinica_a.save(update_fields=["currency"])
-    admin = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     data = dados_clinica()
     del data["currency"]
     assert admin.post(reverse("clinic_settings"), data).status_code == 302

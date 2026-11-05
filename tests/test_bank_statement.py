@@ -7,8 +7,8 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.finance import ofx, reconciliation, services
 from apps.finance.models import (
     BankTransaction,
@@ -94,8 +94,8 @@ def test_arquivo_que_nao_e_ofx():
 
 @pytest.fixture
 def cenario(clinica_a, criar_usuario, cliente_de):
-    admin = criar_usuario("admin", clinica_a, Papel.ADMIN)
-    with usar_clinica(clinica_a):
+    admin = criar_usuario("admin", clinica_a, Role.ADMIN)
+    with use_clinic(clinica_a):
         bank = FinancialAccount.objects.get(name="Banco")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         patient = Patient.objects.create(name="José Paciente")
@@ -116,7 +116,7 @@ def cenario(clinica_a, criar_usuario, cliente_de):
 
 
 def pago(cenario, amount, date, kind=Entry.Tipo.RECEBER, account=None):
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         receber = kind == Entry.Tipo.RECEBER
         entry = services.criar_lancamento(
             clinic=cenario["clinic"],
@@ -145,14 +145,14 @@ def importar(cenario, content=OFX_SGML):
         reverse("finance:statements"),
         {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", content)},
     )
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         statement_import = StatementImport.objects.latest("pk")
     assert response.url == reverse("finance:statement", args=[statement_import.pk])
     return statement_import
 
 
 def transacao(cenario, fitid):
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         return BankTransaction.objects.get(fitid=fitid)
 
 
@@ -177,7 +177,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
     assert (a1.status, a1.payment) == (BankTransaction.Situacao.CONCILIADA, received_amount)
     assert a4.status == BankTransaction.Situacao.PENDENTE
     # The user picks one of the two by hand.
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         options = reconciliation.candidatos([a4])[a4.pk]
     assert len(options) == 2 and options[0].date == DIA + datetime.timedelta(
         days=1
@@ -196,7 +196,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
 
 
 def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         cash_register = CashRegister.objects.create(
             clinic=cenario["clinic"],
             account=cenario["cash_register"],
@@ -226,7 +226,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
     a2 = transacao(cenario, "A2")
     url = reverse("finance:transaction_entry", args=[a2.pk])
     formulario = cenario["cliente"].get(url).context["form"]
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         tipos = set(formulario.fields["category"].queryset.values_list("kind", flat=True))
     assert tipos == {Category.Tipo.DESPESA}
     cenario["cliente"].post(
@@ -239,7 +239,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
         },
     )
     a2 = transacao(cenario, "A2")
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         entry = a2.payment.installment.entry
         assert (entry.kind, entry.total_amount, entry.payer) == (
             Entry.Tipo.PAGAR,
@@ -265,14 +265,14 @@ def test_estorno_volta_a_transacao_para_pendente(cenario):
     received_amount = pago(cenario, "300.00", DIA)
     statement_import = importar(cenario)
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[statement_import.pk]))
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         services.estornar(received_amount, reason="Devolvido", user=cenario["admin"])
     a1 = transacao(cenario, "A1")
     assert (a1.status, a1.payment) == (BankTransaction.Situacao.PENDENTE, None)
 
 
 def test_saldo_do_banco_comparado_com_o_sistema(cenario):
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         FinancialAccount.objects.filter(pk=cenario["bank"].pk).update(
             opening_balance=Decimal("1000")
         )
@@ -291,7 +291,7 @@ def test_arquivo_invalido_e_permissoes(cenario):
     assert "não é um extrato OFX" in response.content.decode()
     statement_import = importar(cenario)
     reception = cenario["cliente_de"](
-        cenario["criar_usuario"]("recepcao", cenario["clinic"], Papel.RECEPCAO)
+        cenario["criar_usuario"]("recepcao", cenario["clinic"], Role.FRONT_DESK)
     )
     assert reception.get(reverse("finance:statements")).status_code == 403
     assert (
@@ -301,7 +301,7 @@ def test_arquivo_invalido_e_permissoes(cenario):
 
 def test_extrato_de_outra_clinica_da_404(cenario, clinica_b):
     statement_import = importar(cenario)
-    other = cenario["cliente_de"](cenario["criar_usuario"]("admin_b", clinica_b, Papel.ADMIN))
+    other = cenario["cliente_de"](cenario["criar_usuario"]("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:statement", args=[statement_import.pk])).status_code == 404
 
 
@@ -343,6 +343,6 @@ def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
     )
     page = response.content.decode()
     assert "2 linhas do arquivo não tinham data ou valor legível" in page
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         statement_import = StatementImport.objects.get()
     assert (statement_import.new_transactions, statement_import.unreadable_transactions) == (6, 2)

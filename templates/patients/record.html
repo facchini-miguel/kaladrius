@@ -45,10 +45,10 @@
         <dl class="row mb-0">
           {% if patient.kind == "PJ" %}
           <dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ patient.legal_name|default:"—" }}</dd>
-          {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"empresa"|default:"—" }}</dd>{% endif %}
+          {% if documentos_do_pais.empresa or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"empresa" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"empresa"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.state_registration %}<dt class="col-sm-5">{% translate "Inscrição estadual" %}</dt><dd class="col-sm-7">{{ patient.state_registration|default:"—" }}</dd>{% endif %}
           {% else %}
-          {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|sigla_documento:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"paciente"|default:"—" }}</dd>{% endif %}
+          {% if documentos_do_pais.paciente or patient.tax_id %}<dt class="col-sm-5">{{ patient.tax_id|document_abbreviation:"paciente" }}</dt><dd class="col-sm-7">{{ patient.tax_id|document:"paciente"|default:"—" }}</dd>{% endif %}
           {% if no_brasil or patient.rg %}<dt class="col-sm-5">{% translate "RG" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Nascimento" %}</dt>
           <dd class="col-sm-7">
@@ -79,7 +79,7 @@
             {% if patient.street %}{{ patient.street }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complement %} - {{ patient.complement }}{% endif %}<br>{% endif %}
             {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
             {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
-            {% if patient.postal_code %}{% rotulo_cep %} {{ patient.postal_code|postal_code }}{% endif %}
+            {% if patient.postal_code %}{% postal_code_label %} {{ patient.postal_code|postal_code }}{% endif %}
             {% if not patient.street and not patient.cidade_estado and not patient.postal_code %}—{% endif %}
           </dd>
         </dl>

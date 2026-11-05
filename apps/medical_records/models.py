@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from apps.core.isolation import ModeloDaClinica
+from apps.core.isolation import ClinicModel
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.schedule.models import Appointment
@@ -26,7 +26,7 @@ CAMPOS_DA_ANAMNESE = [
 ]
 
 
-class Visit(ModeloDaClinica):
+class Visit(ClinicModel):
     patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
@@ -101,7 +101,7 @@ class Visit(ModeloDaClinica):
         return self.finalized_at is not None
 
 
-class Addendum(ModeloDaClinica):
+class Addendum(ClinicModel):
     """A correction or note added to a finalized visit, which itself never changes."""
 
     visit = models.ForeignKey(
@@ -138,7 +138,7 @@ class Addendum(ModeloDaClinica):
         return f"{self.visit} – {_('adendo')}"
 
 
-class Certificate(ModeloDaClinica):
+class Certificate(ClinicModel):
     """A medical certificate issued in a visit (0.30.0, decision 082). Never changed or
     deleted after issued; it can be printed again."""
 
@@ -202,7 +202,7 @@ class Certificate(ModeloDaClinica):
         return f"{self.visit} – {self.get_kind_display()}"
 
 
-class Prescription(ModeloDaClinica):
+class Prescription(ClinicModel):
     """A simple prescription issued in a visit (0.30.0, decision 082): free text, one item
     per line. Controlled drugs need the official forms, which the system does not issue."""
 
@@ -245,7 +245,7 @@ class Prescription(ModeloDaClinica):
         return f"{self.visit} – {pgettext_lazy('prescrição', 'receita')}"
 
 
-class ExamRequest(ModeloDaClinica):
+class ExamRequest(ClinicModel):
     """An exam request issued in a visit (0.31.0, decision 083): one exam per line."""
 
     visit = models.ForeignKey(
@@ -285,7 +285,7 @@ class ExamRequest(ModeloDaClinica):
         return f"{self.visit} – {_('pedido de exames')}"
 
 
-class Attachment(ModeloDaClinica):
+class Attachment(ClinicModel):
     """A file kept in a visit: exam results, photos, reports (0.31.0, decision 083).
 
     Stored in the database, so the daily backup and the weekly restore test cover it, and

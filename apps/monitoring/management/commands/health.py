@@ -36,12 +36,12 @@ class Command(BaseCommand):
                 f"Rede: {filesizeformat(summary['recebido'])} recebidos, "
                 f"{filesizeformat(summary['enviado'])} enviados"
             )
-            alertas = [
+            alerts = [
                 f"{key}: {nivel}" for key, nivel in health.niveis(ultima).items() if nivel != "ok"
             ]
             if health.parada(ultima):
-                alertas.append("coleta parada")
-            self.stdout.write("Alertas: " + (", ".join(alertas) if alertas else "nenhum"))
+                alerts.append("coleta parada")
+            self.stdout.write("Alertas: " + (", ".join(alerts) if alerts else "nenhum"))
         backup = Backup.objects.first()
         if backup is None:
             self.stdout.write("Último backup: nenhum registrado")

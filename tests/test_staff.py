@@ -7,9 +7,9 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modules import configurar
+from apps.core.isolation import use_clinic
+from apps.core.models import GENERAL_MODULES, ModuleCode, Role
+from apps.core.modules import configure
 from apps.finance import services as financeiro
 from apps.finance.models import Entry
 from apps.staff import services
@@ -23,12 +23,12 @@ FOLHA = reverse("staff:payroll")
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_pessoal", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_pessoal", clinica_a, Role.ADMIN))
 
 
 @pytest.fixture
 def ana(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         employee = Employee.objects.create(
             name="Ana Fictícia", job_title="Recepcionista", hired_on=datetime.date(2025, 3, 1)
         )
@@ -50,7 +50,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
         },
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         bruno = Employee.objects.get()
         assert bruno.tax_id == "52998224725"
         assert bruno.salarios.get().effective_from == datetime.date(2026, 1, 5)  # admission date
@@ -66,7 +66,7 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
         },
     )
     assert aumento.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert bruno.salario_em(datetime.date(2026, 6, 30)) == Decimal("3000")
         assert bruno.salario_em(datetime.date(2026, 7, 1)) == Decimal("3300")
         assert bruno.salarios.count() == 2
@@ -87,7 +87,7 @@ def test_validacoes_do_cadastro(data, field, admin):
 
 
 def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         futuro = Employee.objects.create(
             name="Admitido depois", hired_on=datetime.date(2026, 11, 3)
         )
@@ -110,7 +110,7 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
 def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
     for month in ("2026-10", "2030-01"):
         assert admin.get(FOLHA, {"mes": month}).status_code == 200
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not Payroll.objects.exists()
 
 
@@ -138,7 +138,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     }
     assert folha.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", data).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         folha = Payroll.objects.get(employee=ana, period=OUTUBRO)
         assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         category = page.context["lancar_form"].fields["category"].initial
@@ -148,7 +148,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         {**data, "acao": "lancar", "category": category.pk, "due_date": "2026-11-05"},
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         folha.refresh_from_db()
         entry = folha.entry
         assert (entry.kind, entry.payer, entry.total_amount) == (
@@ -160,7 +160,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     # A launched line is read-only and is not launched twice.
     row = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
     assert row[1] is None
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert (
             services.lancar(
                 [folha], category=category, due_date=datetime.date(2026, 11, 5), user=None
@@ -174,7 +174,7 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
 
 
 def test_total_zero_nao_e_lancado(clinica_a, ana):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         folha = services.preparar(OUTUBRO)[0]
         folha.absences = 30
         folha.save()
@@ -182,7 +182,7 @@ def test_total_zero_nao_e_lancado(clinica_a, ana):
             services.lancar([folha], category=None, due_date=OUTUBRO, user=None)
 
 
-@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
 def test_so_administrador_e_financeiro_veem_salarios(
     role, clinica_a, ana, criar_usuario, cliente_de
 ):
@@ -192,13 +192,13 @@ def test_so_administrador_e_financeiro_veem_salarios(
 
 
 def test_perfil_financeiro_lanca_a_folha(clinica_a, ana, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("fin_pessoal", clinica_a, Papel.FINANCEIRO))
+    cliente = cliente_de(criar_usuario("fin_pessoal", clinica_a, Role.FINANCE))
     assert cliente.get(FOLHA).status_code == 200
 
 
 def test_modulo_pessoal_liga_desliga_e_depende_do_financeiro(clinica_a, admin):
     assert reverse("staff:payroll") in admin.get(reverse("home")).content.decode()
-    configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.PESSOAL})
+    configure(clinica_a, GENERAL_MODULES - {ModuleCode.STAFF})
     assert admin.get(FOLHA).status_code == 403
     with pytest.raises(ValidationError):
-        configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.FINANCEIRO, ModuloClinico.ORCAMENTOS})
+        configure(clinica_a, GENERAL_MODULES - {ModuleCode.FINANCE, ModuleCode.ESTIMATES})

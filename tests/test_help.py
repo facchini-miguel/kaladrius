@@ -6,7 +6,7 @@ import pytest
 from django.core.management import CommandError, call_command
 from django.urls import reverse
 
-from apps.core.models import Papel
+from apps.core.models import Role
 from apps.help import documents
 
 pytestmark = pytest.mark.django_db
@@ -14,7 +14,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    return cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
 
 
 @pytest.fixture

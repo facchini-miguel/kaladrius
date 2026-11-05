@@ -7,7 +7,7 @@ from the JSON files in apps/reference_data/data/.
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.ordering import ALFABETICA
+from apps.core.ordering import ALPHABETICAL
 
 
 class State(models.Model):
@@ -28,7 +28,7 @@ class State(models.Model):
 
 class City(models.Model):
     code = models.PositiveIntegerField(_("código IBGE"), primary_key=True, db_column="codigo")
-    name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=100, db_collation=ALPHABETICAL, db_column="nome")
     state = models.ForeignKey(
         State,
         on_delete=models.PROTECT,
@@ -53,7 +53,7 @@ class Bank(models.Model):
     code = models.PositiveSmallIntegerField(
         _("código"), null=True, blank=True, unique=True, db_column="codigo"
     )
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
     short_name = models.CharField(_("nome curto"), max_length=100, db_column="nome_curto")
 
     class Meta:
@@ -70,7 +70,7 @@ class Bank(models.Model):
 
 class MaritalStatus(models.Model):
     name = models.CharField(
-        _("nome"), max_length=30, unique=True, db_collation=ALFABETICA, db_column="nome"
+        _("nome"), max_length=30, unique=True, db_collation=ALPHABETICAL, db_column="nome"
     )
     sort_order = models.PositiveSmallIntegerField(_("ordem"), default=0, db_column="ordem")
 
@@ -95,7 +95,7 @@ class Neighborhood(models.Model):
         verbose_name=_("cidade"),
         db_column="cidade_id",
     )
-    name = models.CharField(_("nome"), max_length=100, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=100, db_collation=ALPHABETICAL, db_column="nome")
 
     class Meta:
         db_table = "referencias_bairro"
@@ -129,7 +129,7 @@ class Street(models.Model):
         verbose_name=_("bairro"),
         db_column="bairro_id",
     )
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
 
     class Meta:
         db_table = "referencias_logradouro"

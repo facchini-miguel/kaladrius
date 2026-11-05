@@ -6,8 +6,8 @@ import re
 import pytest
 from django.urls import reverse
 
-from apps.core.countries import PAISES
-from apps.core.isolation import usar_clinica
+from apps.core.countries import COUNTRIES
+from apps.core.isolation import use_clinic
 from apps.estimates.models import Procedure
 from apps.health_plans import insurance
 from apps.health_plans.models import HealthPlan, MemberCard
@@ -23,7 +23,7 @@ def mudar_pais(clinic, country):
 
 
 def test_cada_pais_tem_as_suas_regras():
-    assert set(insurance.SEGUROS) == set(PAISES)
+    assert set(insurance.SEGUROS) == set(COUNTRIES)
     for country, regras in insurance.SEGUROS.items():
         for code in (regras.registration, regras.procedure):
             if code and code.default:
@@ -32,12 +32,14 @@ def test_cada_pais_tem_as_suas_regras():
 
 
 def test_codigo_limpo_e_conferido():
-    cdt = insurance.do_pais("US").procedure
-    assert cdt.limpar(" d1110 ") == "D1110"
+    cdt = insurance.for_country("US").procedure
+    assert cdt.clean_value(" d1110 ") == "D1110"
     with pytest.raises(Exception, match="CDT"):
-        cdt.limpar("1110")
-    assert insurance.do_pais("BR").registration.limpar("00.000-2") == "000002"
-    assert insurance.do_pais("AR").registration.limpar("1-0040-7") == "100407"  # free format
+        cdt.clean_value("1110")
+    assert insurance.for_country("BR").registration.clean_value("00.000-2") == "000002"
+    assert (
+        insurance.for_country("AR").registration.clean_value("1-0040-7") == "100407"
+    )  # free format
 
 
 def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
@@ -53,7 +55,7 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     assert "registration" in recusado.context["form"].errors
     data = {"name": "Fictitious Dental", "registration": "ab-123", "active": "on"}
     assert admin.post(reverse("health_plans:new"), data).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert HealthPlan.objects.get().registration == "AB123"
     assert "Payer ID" in admin.get(reverse("health_plans:list")).content.decode()
     # The United Kingdom has no insurer registry: no field and no column.
@@ -73,7 +75,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):
     assert "member_code" not in fields
     data = carteirinha(health_plan, number="W123456789", group="G-100")
     assert admin.post(url, data).status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert MemberCard.objects.get().group == "G-100"
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "W123456789" in ficha and "G-100" in ficha
@@ -91,11 +93,11 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     assert str(form.fields["code"].label) == "Código (TUSS)"
     assert "code" in cliente.post(url, {**data, "code": "123"}).context["form"].errors
     assert cliente.post(url, {**data, "code": "8510.0099"}).status_code == 302
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         assert Procedure.objects.get(name="Restauração").code == "85100099"
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, procedure=cenario["restauracao"].pk)
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         assert estimate.itens.get().code == "85100099"
     impresso = cliente.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
     assert "85100099 · Restauração" in impresso

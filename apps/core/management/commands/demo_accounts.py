@@ -4,13 +4,13 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Clinic, Membership, Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Clinic, Membership, Role
 from apps.practitioners.models import Practitioner
 
-RECEPCAO = "demo.recepcao"
-PROFISSIONAL = "demo.profissional"
-FINANCEIRO = "demo.financeiro"
+FRONT_DESK = "demo.recepcao"
+PRACTITIONER = "demo.profissional"
+FINANCE = "demo.financeiro"
 ADMIN = "demo.admin"
 
 
@@ -54,8 +54,8 @@ class Command(BaseCommand):
         semente = os.environ.get("DJANGO_SEED_PASSWORD")
         senhas = (options["senha_recepcao"], options["senha_profissional"])
         extras = [
-            (FINANCEIRO, "Financeiro", options.get("senha_financeiro"), Papel.FINANCEIRO),
-            (ADMIN, "Administrador", options.get("senha_admin"), Papel.ADMIN),
+            (FINANCE, "Financeiro", options.get("senha_financeiro"), Role.FINANCE),
+            (ADMIN, "Administrador", options.get("senha_admin"), Role.ADMIN),
         ]
         extras = [extra for extra in extras if extra[2]]
         if semente and semente in (*senhas, *(extra[2] for extra in extras)):
@@ -66,14 +66,14 @@ class Command(BaseCommand):
         except Clinic.DoesNotExist as error:
             raise CommandError(f"Clínica não encontrada: {options['clinic']}") from error
 
-        reception = self._conta(RECEPCAO, "Recepção", senhas[0], clinic, Papel.RECEPCAO)
-        practitioner = self._conta(
-            PROFISSIONAL, "Profissional", senhas[1], clinic, Papel.PROFISSIONAL
+        reception = self._account(FRONT_DESK, "Recepção", senhas[0], clinic, Role.FRONT_DESK)
+        practitioner = self._account(
+            PRACTITIONER, "Profissional", senhas[1], clinic, Role.PRACTITIONER
         )
         outras = [
-            self._conta(u, name, password, clinic, role) for u, name, password, role in extras
+            self._account(u, name, password, clinic, role) for u, name, password, role in extras
         ]
-        with usar_clinica(clinic):
+        with use_clinic(clinic):
             cadastro = Practitioner.objects.filter(name=options["practitioner"]).first()
             if cadastro is None:
                 if not options["criar_profissional"]:
@@ -97,7 +97,7 @@ class Command(BaseCommand):
             )
         )
 
-    def _conta(self, username, name, password, clinic, role):
+    def _account(self, username, name, password, clinic, role):
         Usuario = get_user_model()
         user, _criado = Usuario.objects.get_or_create(username=username)
         user.first_name = name

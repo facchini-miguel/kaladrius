@@ -9,10 +9,10 @@ constraints behave as before.
 
 import unicodedata
 
-ALFABETICA = "und-x-icu"
+ALPHABETICAL = "und-x-icu"
 
 
-def chave_alfabetica(text):
+def alphabetical_key(text):
     """Sort key for Python lists of names, matching the database order closely enough:
     accents and case are ignored."""
     sem_acento = unicodedata.normalize("NFKD", text or "")

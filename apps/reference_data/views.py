@@ -4,15 +4,15 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.utils.http import urlencode
 
-from apps.core.ordering import chave_alfabetica
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.ordering import alphabetical_key
+from apps.core.permissions import Action, Module, requires_permission
 
 from .models import Bank, City, Neighborhood, State, Street
 
 POR_PAGINA = 50
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.VER)
+@requires_permission(Module.CATALOGS, Action.VIEW)
 def cidades(request):
     ufs = State.objects.all()
     state = request.GET.get("state", "")
@@ -36,7 +36,7 @@ def cidades(request):
     )
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.VER)
+@requires_permission(Module.CATALOGS, Action.VIEW)
 def bancos(request):
     search = request.GET.get("q", "").strip()
     bancos = Bank.objects.all()
@@ -58,7 +58,7 @@ def opcoes_cidades(request):
     return render(request, "reference_data/city_options.html", {"cidades": cidades})
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.VER)
+@requires_permission(Module.PATIENTS, Action.VIEW)
 def sugestoes_endereco(request):
     """<datalist>s of a city's neighborhoods and streets for the patient form (decision 100):
     the known ones plus the ones the clinic already typed for other patients there."""
@@ -78,7 +78,7 @@ def sugestoes_endereco(request):
         request,
         "reference_data/address_suggestions.html",
         {
-            "bairros": sorted(filter(None, bairros), key=chave_alfabetica),
-            "logradouros": sorted(filter(None, logradouros), key=chave_alfabetica),
+            "bairros": sorted(filter(None, bairros), key=alphabetical_key),
+            "logradouros": sorted(filter(None, logradouros), key=alphabetical_key),
         },
     )

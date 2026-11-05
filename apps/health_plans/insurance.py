@@ -29,7 +29,7 @@ class Codigo:
     default: str = ""  # regular expression for the whole code, letters in upper case
     example: str = ""
 
-    def limpar(self, value):
+    def clean_value(self, value):
         """The code without spaces, dots or dashes, in upper case; ValidationError if it does
         not follow the format."""
         code = re.sub(r"[\s.\-/]", "", value or "").upper()
@@ -103,8 +103,8 @@ SEGUROS = {
 }
 
 
-def do_pais(country=None):
-    return SEGUROS.get(country or countries.pais_da_clinica(), SEGUROS[countries.PADRAO])
+def for_country(country=None):
+    return SEGUROS.get(country or countries.clinic_country(), SEGUROS[countries.DEFAULT])
 
 
 def com_nome_local(label, local):
@@ -114,11 +114,11 @@ def com_nome_local(label, local):
 
 def rotulo_do_registro(country=None):
     """ "Registro da operadora (ANS)", or "" where the country has no insurer registry."""
-    registration = do_pais(country).registration
+    registration = for_country(country).registration
     return com_nome_local(_("Registro da operadora"), registration.name) if registration else ""
 
 
 def rotulo_do_codigo(country=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
-    procedure = do_pais(country).procedure
+    procedure = for_country(country).procedure
     return com_nome_local(_("Código"), procedure.name if procedure else "")

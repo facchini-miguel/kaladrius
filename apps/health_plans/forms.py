@@ -1,14 +1,14 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
-from apps.core.validators import normalizar_telefone
+from apps.core.forms import BootstrapForm
+from apps.core.validators import normalize_phone
 
 from . import insurance
 from .models import HealthPlan, MemberCard
 
 
-class ConvenioForm(FormularioBootstrap, forms.ModelForm):
+class ConvenioForm(BootstrapForm, forms.ModelForm):
     # Typed with punctuation, stored without it (ANS: the 6 digits). Only in the countries
     # whose insurers have a registry (decision 125).
     registration = forms.CharField(max_length=30, required=False)
@@ -28,10 +28,12 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
-        do_pais = insurance.do_pais(clinic.country)
-        if do_pais.tipos:
-            self.fields["name"].help_text = _("Por exemplo: %(tipos)s.") % {"tipos": do_pais.tipos}
-        self.registration = do_pais.registration
+        for_country = insurance.for_country(clinic.country)
+        if for_country.tipos:
+            self.fields["name"].help_text = _("Por exemplo: %(tipos)s.") % {
+                "tipos": for_country.tipos
+            }
+        self.registration = for_country.registration
         if self.registration is None:
             del self.fields["registration"]
         else:
@@ -46,16 +48,16 @@ class ConvenioForm(FormularioBootstrap, forms.ModelForm):
         return name
 
     def clean_registration(self):
-        registration = self.registration.limpar(self.cleaned_data.get("registration"))
+        registration = self.registration.clean_value(self.cleaned_data.get("registration"))
         if len(registration) > 20:
             raise forms.ValidationError(_("Use no máximo 20 caracteres."))
         return registration
 
     def clean_phone(self):
-        return normalizar_telefone(self.cleaned_data.get("phone"))
+        return normalize_phone(self.cleaned_data.get("phone"))
 
 
-class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
+class CarteirinhaForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = MemberCard
         fields = [
@@ -76,13 +78,13 @@ class CarteirinhaForm(FormularioBootstrap, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic_id = patient.clinic_id
         # The card's fields and their local names in the clinic's country (decision 125).
-        do_pais = insurance.do_pais(patient.clinic.country)
+        for_country = insurance.for_country(patient.clinic.country)
         self.fields["number"].label = insurance.com_nome_local(
-            _("Número da carteirinha"), do_pais.number
+            _("Número da carteirinha"), for_country.number
         )
         for field, local, label in (
-            ("group", do_pais.group, _("Número do grupo")),
-            ("member_code", do_pais.member_code, _("Código do beneficiário")),
+            ("group", for_country.group, _("Número do grupo")),
+            ("member_code", for_country.member_code, _("Código do beneficiário")),
         ):
             if local or getattr(self.instance, field):
                 self.fields[field].label = insurance.com_nome_local(label, local)

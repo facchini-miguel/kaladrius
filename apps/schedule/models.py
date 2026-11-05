@@ -6,9 +6,9 @@ from django.utils import timezone
 from django.utils.translation import gettext, pgettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ModeloDaClinica, sem_isolamento
-from apps.core.ordering import ALFABETICA
-from apps.core.validators import validar_cor
+from apps.core.isolation import ClinicModel, without_isolation
+from apps.core.ordering import ALPHABETICAL
+from apps.core.validators import validate_color
 from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
 
 # Appointment types a new clinic starts with (decision 080): the dental module's for the
@@ -44,12 +44,12 @@ _NOMES_PADRAO_PARA_TRADUCAO = [
 ]
 
 
-class AppointmentType(ModeloDaClinica):
+class AppointmentType(ClinicModel):
     """Kind of appointment (surgery, first visit...). Its color paints the schedule."""
 
-    name = models.CharField(_("nome"), max_length=60, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
     color = models.CharField(
-        _("cor"), max_length=7, default="#0d6efd", validators=[validar_cor], db_column="cor"
+        _("cor"), max_length=7, default="#0d6efd", validators=[validate_color], db_column="cor"
     )
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
@@ -77,7 +77,7 @@ class TsTzRange(models.Func):
     output_field = DateTimeRangeField()
 
 
-class Appointment(ModeloDaClinica):
+class Appointment(ClinicModel):
     """An appointment in a practitioner's schedule."""
 
     class Situacao(models.TextChoices):
@@ -185,10 +185,10 @@ class Appointment(ModeloDaClinica):
 
 def criar_tipos_padrao(clinic):
     """Create the default appointment types for a clinic that has none."""
-    with sem_isolamento():
+    with without_isolation():
         if AppointmentType.objects.filter(clinic=clinic).exists():
             return
-        tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.ODONTOLOGIA else TIPOS_PADRAO
+        tipos = TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.DENTISTRY else TIPOS_PADRAO
         AppointmentType.objects.bulk_create(
             AppointmentType(clinic=clinic, name=name, color=color) for name, color in tipos
         )

@@ -18,9 +18,9 @@ from faker import Faker
 from apps.audit.models import AuditEntry
 from apps.audit.record import nome_do_modelo, registrar
 from apps.core import fake_data
-from apps.core.isolation import sem_isolamento
+from apps.core.isolation import without_isolation
 from apps.core.models import Clinic
-from apps.core.validators import somente_digitos
+from apps.core.validators import digits_only
 from apps.estimates.models import Estimate
 from apps.finance.models import (
     BankTransaction,
@@ -47,7 +47,7 @@ OBSERVACOES = [
     "Hipertenso, em acompanhamento médico.",
     "Retorno combinado para revisão semestral.",
 ]
-RECHAMADAS = [
+RECALLS = [
     "Revisão semestral",
     "Retorno",
     "Limpeza",
@@ -78,7 +78,7 @@ def _mesmo_tamanho(value, fake):
     with 2 to 5, as in Anatel's plan: random digits made "mobiles" with 8 digits that
     WhatsApp links cannot open.
     """
-    digitos = somente_digitos(value)
+    digitos = digits_only(value)
     if not digitos:
         return ""
     if len(digitos) < 10:
@@ -196,7 +196,7 @@ class _Anonimizador:
     def rechamadas(self):
         rechamadas = list(Recall.objects.filter(clinic=self.clinic))
         for rechamada in rechamadas:
-            rechamada.description = self.sorte.choice(RECHAMADAS)
+            rechamada.description = self.sorte.choice(RECALLS)
         Recall.objects.bulk_update(rechamadas, ["description"])
         self.resultado.rechamadas = len(rechamadas)
 
@@ -298,7 +298,7 @@ class _Anonimizador:
         self.resultado.registros_apagados = apagados + summary
 
     def executar(self):
-        with transaction.atomic(), sem_isolamento():
+        with transaction.atomic(), without_isolation():
             nomes = self.pacientes()
             self.agendamentos(nomes)
             self.fornecedores()
@@ -310,7 +310,7 @@ class _Anonimizador:
             self.auditoria()
             r = self.resultado
             registrar(
-                AuditEntry.Acao.ALTERAR,
+                AuditEntry.Action.CHANGE,
                 clinic=self.clinic,
                 description=(
                     f"Dados anonimizados: {r.pacientes} pacientes, {r.agendamentos} agendamentos, "
@@ -321,7 +321,7 @@ class _Anonimizador:
 
 
 def anonymize_clinic(nome_clinica, today=None):
-    with sem_isolamento():
+    with without_isolation():
         clinic = Clinic.objects.filter(name=nome_clinica).first()
     if clinic is None:
         raise ClinicaNaoEncontrada(f"Clínica “{nome_clinica}” não encontrada.")

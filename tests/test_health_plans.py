@@ -7,9 +7,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.audit.models import AuditEntry
-from apps.core.isolation import ClinicaDiferente, usar_clinica
-from apps.core.models import MODULOS_GERAIS, ModuloClinico, Papel
-from apps.core.modules import configurar
+from apps.core.isolation import WrongClinic, use_clinic
+from apps.core.models import GENERAL_MODULES, ModuleCode, Role
+from apps.core.modules import configure
 from apps.health_plans.models import HealthPlan, MemberCard
 from apps.patients.models import Patient
 
@@ -20,18 +20,18 @@ HOJE = timezone.localdate()
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_convenios", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_convenios", clinica_a, Role.ADMIN))
 
 
 @pytest.fixture
 def patient(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         return Patient.objects.create(name="Paciente fictícia do convênio")
 
 
 @pytest.fixture
 def health_plan(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         return HealthPlan.objects.create(name="Saúde Exemplo", registration="000001")
 
 
@@ -51,7 +51,7 @@ def test_cadastro_do_convenio(clinica_a, admin):
         {"name": " Plano Fictício ", "registration": "00.000-2", "phone": "", "active": "on"},
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         criado = HealthPlan.objects.get()
     assert (criado.name, criado.registration) == ("Plano Fictício", "000002")
     assert "Plano Fictício" in admin.get(reverse("health_plans:list")).content.decode()
@@ -75,13 +75,13 @@ def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admi
     vencida = (HOJE - datetime.timedelta(days=1)).isoformat()
     response = admin.post(url, carteirinha(health_plan, number=" 0099 ", valid_until=vencida))
     assert response.url == reverse("patients:record", args=[patient.pk])
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         criada = MemberCard.objects.get()
     assert (criada.patient, criada.number, criada.vencida) == (patient, "0099", True)
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Saúde Exemplo" in ficha and "Vencida" in ficha
     # The same card number cannot belong to two patients of the same plan.
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         other = Patient.objects.create(name="Outra paciente fictícia")
     repetida = admin.post(
         reverse("health_plans:card_new", args=[other.pk]), carteirinha(health_plan, number="0099")
@@ -102,13 +102,13 @@ def test_paciente_sem_carteirinha_e_particular(patient, admin):
 def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
     clinica_a, patient, health_plan, admin
 ):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         existente = MemberCard.objects.create(patient=patient, health_plan=health_plan, number="1")
         health_plan.active = False
         health_plan.save()
     nova = admin.get(reverse("health_plans:card_new", args=[patient.pk])).context["form"]
     antiga = admin.get(reverse("health_plans:card_edit", args=[existente.pk])).context["form"]
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert health_plan not in nova.fields["health_plan"].queryset
         assert health_plan in antiga.fields["health_plan"].queryset
 
@@ -116,9 +116,9 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
 @pytest.mark.parametrize(
     ("role", "ver", "criar"),
     [
-        (Papel.RECEPCAO, 200, 200),
-        (Papel.PROFISSIONAL, 200, 403),
-        (Papel.FINANCEIRO, 200, 403),
+        (Role.FRONT_DESK, 200, 200),
+        (Role.PRACTITIONER, 200, 403),
+        (Role.FINANCE, 200, 403),
     ],
 )
 def test_permissoes_por_papel(
@@ -131,7 +131,7 @@ def test_permissoes_por_papel(
 
 def test_modulo_desligado(clinica_a, patient, health_plan, admin):
     assert reverse("health_plans:list") in admin.get(reverse("home")).content.decode()
-    configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.CONVENIOS})
+    configure(clinica_a, GENERAL_MODULES - {ModuleCode.HEALTH_PLANS})
     assert admin.get(reverse("health_plans:list")).status_code == 403
     assert reverse("health_plans:list") not in admin.get(reverse("home")).content.decode()
     ficha = admin.get(reverse("patients:record", args=[patient.pk]))
@@ -141,14 +141,14 @@ def test_modulo_desligado(clinica_a, patient, health_plan, admin):
 def test_carteirinha_nao_liga_paciente_e_convenio_de_clinicas_diferentes(
     clinica_a, clinica_b, health_plan
 ):
-    with usar_clinica(clinica_b):
+    with use_clinic(clinica_b):
         de_outra = Patient.objects.create(name="Paciente fictício B")
-    with usar_clinica(clinica_b), pytest.raises(ClinicaDiferente):
+    with use_clinic(clinica_b), pytest.raises(WrongClinic):
         MemberCard.objects.create(patient=de_outra, health_plan=health_plan, number="9")
 
 
 def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, health_plan, admin):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         criada = MemberCard.objects.create(
             patient=patient, health_plan=health_plan, number="CARTEIRINHA-SIGILOSA"
         )
@@ -156,7 +156,7 @@ def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, health_plan, ad
         patient.save()
     response = admin.post(reverse("patients:delete", args=[patient.pk]))
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not MemberCard.objects.exists()
         assert HealthPlan.objects.filter(pk=health_plan.pk).exists()
     registros = AuditEntry.objects.filter(model_name="Carteirinha", object_id=str(criada.pk))

@@ -3,24 +3,24 @@ from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.permissions import Action, Module, requires_permission
 
 from .forms import ProfissionalForm
 from .models import Practitioner
 
 
-@exige_permissao(Modulo.PROFISSIONAIS, Acao.VER)
+@requires_permission(Module.PRACTITIONERS, Action.VIEW)
 def results(request):
     profissionais = Practitioner.objects.select_related("user")
     return render(request, "practitioners/list.html", {"profissionais": profissionais})
 
 
-@exige_permissao(Modulo.PROFISSIONAIS, Acao.CRIAR)
+@requires_permission(Module.PRACTITIONERS, Action.CREATE)
 def new(request):
     return _formulario(request, Practitioner())
 
 
-@exige_permissao(Modulo.PROFISSIONAIS, Acao.ALTERAR)
+@requires_permission(Module.PRACTITIONERS, Action.CHANGE)
 def editar(request, pk):
     # Profissional.objects only sees the current clinic: other clinics' ids give 404.
     return _formulario(request, get_object_or_404(Practitioner.objects, pk=pk))
@@ -35,7 +35,7 @@ def _formulario(request, practitioner):
     return render(request, "practitioners/form.html", {"form": form, "practitioner": practitioner})
 
 
-@exige_permissao(Modulo.PROFISSIONAIS, Acao.EXCLUIR)
+@requires_permission(Module.PRACTITIONERS, Action.DELETE)
 def excluir(request, pk):
     practitioner = get_object_or_404(Practitioner.objects, pk=pk)
     if request.method == "POST":

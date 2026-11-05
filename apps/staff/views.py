@@ -11,14 +11,14 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
-from apps.core.permissions import Acao, Modulo, exige_permissao, pode
+from apps.core.permissions import Action, Module, can, requires_permission
 
 from . import services
 from .forms import FolhaForm, FuncionarioForm, LancarForm
 from .models import Employee, Payroll, Salary
 
 
-@exige_permissao(Modulo.PESSOAL, Acao.VER)
+@requires_permission(Module.STAFF, Action.VIEW)
 def results(request):
     funcionarios = list(Employee.objects.all())
     today = timezone.localdate()
@@ -27,7 +27,7 @@ def results(request):
     return render(request, "staff/list.html", {"funcionarios": funcionarios})
 
 
-@exige_permissao(Modulo.PESSOAL, Acao.VER)
+@requires_permission(Module.STAFF, Action.VIEW)
 def employee(request, pk):
     employee = get_object_or_404(Employee.objects, pk=pk)
     return render(
@@ -42,12 +42,12 @@ def employee(request, pk):
     )
 
 
-@exige_permissao(Modulo.PESSOAL, Acao.CRIAR)
+@requires_permission(Module.STAFF, Action.CREATE)
 def new(request):
     return _formulario(request, Employee())
 
 
-@exige_permissao(Modulo.PESSOAL, Acao.ALTERAR)
+@requires_permission(Module.STAFF, Action.CHANGE)
 def editar(request, pk):
     return _formulario(request, get_object_or_404(Employee.objects, pk=pk))
 
@@ -69,13 +69,13 @@ def _formulario(request, instancia):
     return render(request, "staff/form.html", {"form": form, "instancia": instancia})
 
 
-@exige_permissao(Modulo.PESSOAL, Acao.VER)
+@requires_permission(Module.STAFF, Action.VIEW)
 def folha(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
     today = timezone.localdate()
     period = services.mes_da_url(request.GET.get("mes"), today)
     url = f"{reverse('staff:payroll')}?mes={period:%Y-%m}"
-    pode_alterar = pode(request, Modulo.PESSOAL, Acao.ALTERAR)
+    pode_alterar = can(request, Module.STAFF, Action.CHANGE)
     folhas = (
         services.preparar(period)
         if pode_alterar
