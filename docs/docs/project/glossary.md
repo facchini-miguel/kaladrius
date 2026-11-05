@@ -324,7 +324,7 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167), pati
 
 ## Functions and variables
 
-The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172).
+The last part of the plan (decision 159): the functions, methods, classes, constants and variables. **Only Python names change** here: the strings stay, so do the templates' context keys, the query names, the JSON keys and the stored values, which a variable's name only happens to match. A form's declared fields keep their names (they are the posted names); the names a URL passes to its view and a test's `parametrize` names follow the function's parameters. **Done:** the variables shared by many apps (decision 172), the core app (decision 173).
 
 ### Shared variables
 
@@ -381,6 +381,254 @@ The last part of the plan (decision 159): the functions, methods, classes, const
 | `de` | `since` |
 
 `itens` stays for now: it is also the estimate's reverse accessor and the releases' format.
+
+### Core (`core`): classes
+
+| Before | After |
+|---|---|
+| `VinculoNaClinicaInline` | `ClinicMembershipInline` |
+| `VinculoDoUsuarioInline` | `UserMembershipInline` |
+| `ClinicaAdmin` | `ClinicAdmin` |
+| `UsuarioAdmin` | `ClinicUserAdmin` |
+| `VinculoAdmin` | `MembershipAdmin` |
+| `Pais` | `Country` |
+| `Documento` | `Document` |
+| `Documentos` | `Documents` |
+| `_Invalido` | `_Invalid` |
+| `Guarda` | `Retention` |
+| `Legislacao` | `Legislation` |
+| `SemClinicaAtual` | `NoCurrentClinic` |
+| `ClinicaDiferente` | `WrongClinic` |
+| `FiltroClinicaAtual` | `CurrentClinicFilter` |
+| `ClinicaManager` | `ClinicManager` |
+| `ModeloDaClinica` | `ClinicModel` |
+| `CampoDecimal` | `LocalizedDecimalField` |
+| `FormularioBootstrap` | `BootstrapForm` |
+| `TrocaSenhaForm` | `ChangePasswordForm` |
+| `ModulosClinicosForm` | `ClinicModulesForm` |
+| `ClinicaForm` | `ClinicForm` |
+| `NovaClinicaForm` | `NewClinicForm` |
+| `ClinicaAdminForm` | `ClinicAdminForm` |
+| `Alerta` | `Alert` |
+| `Migracao` | `MigrationEntry` |
+| `ClinicaAtualMiddleware` | `CurrentClinicMiddleware` |
+| `ProxyReversoMiddleware` | `ReverseProxyMiddleware` |
+| `IdiomaDoUsuarioMiddleware` | `UserLanguageMiddleware` |
+| `ModuloClinico` | `ModuleCode` |
+| `Papel` | `Role` |
+| `Modulo` | `Module` |
+| `Acao` | `Action` |
+| `TrocarSenhaView` | `ChangePasswordView` |
+
+### Core: enum members
+
+| Before | After |
+|---|---|
+| `RECEPCAO` | `FRONT_DESK` |
+| `PROFISSIONAL` | `PRACTITIONER` |
+| `FINANCEIRO` | `FINANCE` |
+| `ODONTOLOGIA` | `DENTISTRY` |
+| `MEDICINA` | `MEDICINE` |
+| `AGENDA` | `SCHEDULE` |
+| `PRONTUARIO` | `MEDICAL_RECORDS` |
+| `ORCAMENTOS` | `ESTIMATES` |
+| `RECHAMADAS` | `RECALLS` |
+| `ANIVERSARIANTES` | `BIRTHDAYS` |
+| `CONVENIOS` | `HEALTH_PLANS` |
+| `PESSOAL` | `STAFF` |
+| `PACIENTES` | `PATIENTS` |
+| `PROFISSIONAIS` | `PRACTITIONERS` |
+| `CADASTROS` | `CATALOGS` |
+| `USUARIOS` | `USERS` |
+| `CLINICA` | `CLINIC` |
+| `AUDITORIA` | `AUDIT` |
+| `RECEBIMENTOS` | `RECEIVING` |
+| `VER` | `VIEW` |
+| `CRIAR` | `CREATE` |
+| `ALTERAR` | `CHANGE` |
+| `EXCLUIR` | `DELETE` |
+| `VISUALIZAR` | `VIEWED` |
+| `LOGIN_FALHOU` | `LOGIN_FAILED` |
+
+### Core: constants
+
+| Before | After |
+|---|---|
+| `BACKUP_ATRASADO_APOS` | `BACKUP_LATE_AFTER` |
+| `PADRAO` | `DEFAULT` |
+| `PAISES` | `COUNTRIES` |
+| `ESCOLHAS` | `CHOICES` |
+| `ESCOLHAS_FUSO` | `TIME_ZONE_CHOICES` |
+| `FUSO_PADRAO` | `DEFAULT_TIME_ZONE` |
+| `_DEZ_DIGITOS` | `_TEN_DIGITS` |
+| `_TELEFONE` | `_PHONE` |
+| `_CEP` | `_POSTAL_CODE` |
+| `MOEDAS` | `CURRENCIES` |
+| `SIMBOLOS` | `SYMBOLS` |
+| `LIMITE` | `LIMIT` |
+| `DIAS_ORCAMENTO` | `ESTIMATE_DAYS` |
+| `DIAS_A_PAGAR` | `PAYABLE_DAYS` |
+| `PAPEIS` | `DOCUMENT_ROLES` |
+| `DOCUMENTOS` | `DOCUMENTS` |
+| `ESTADO` | `STATE` |
+| `PROVINCIA` | `PROVINCE` |
+| `LEIS` | `LAWS` |
+| `FIXAS` | `FIXED` |
+| `ARQUIVO` | `FILE_NAME` |
+| `LIMITE_COMENTARIO` | `COMMENT_LIMIT` |
+| `APAGA` | `DELETES` |
+| `QUEBRA_VOLTA` | `BREAKS_ROLLBACK` |
+| `SEM_VOLTA` | `NO_ROLLBACK` |
+| `REVISAR` | `REVIEW` |
+| `ALTERADA` | `CHANGED` |
+| `CLINICAS_ANTIGAS` | `OLD_CLINICS` |
+| `USUARIOS_ANTIGOS` | `OLD_USERS` |
+| `CLINICAS` | `CLINICS` |
+| `ESPECIALIDADES` | `SPECIALTIES` |
+| `MODULOS_GERAIS` | `GENERAL_MODULES` |
+| `DEPENDENCIAS` | `DEPENDENCIES` |
+| `ALFABETICA` | `ALPHABETICAL` |
+| `_TODAS` | `_ALL` |
+| `_VER` | `_VIEW` |
+| `_SEM_EXCLUIR` | `_NO_DELETE` |
+| `MATRIZ` | `MATRIX` |
+| `SO_LEITURA_NA_DEMONSTRACAO` | `READ_ONLY_IN_DEMO` |
+| `MODULO_DA_CLINICA` | `CLINIC_MODULE` |
+| `PREFIXO_IPV6` | `IPV6_PREFIX` |
+| `INTERVALOS` | `INTERVALS` |
+| `RFC_PESSOA` | `RFC_PERSON` |
+| `RFC_EMPRESA` | `RFC_COMPANY` |
+
+### Core: functions and methods
+
+| Before | After |
+|---|---|
+| `_somente_superusuario` | `_superuser_only` |
+| `idiomas` | `languages` |
+| `inatividade` | `inactivity` |
+| `_cidade` | `_city` |
+| `pais_da_clinica` | `clinic_country` |
+| `do_codigo` | `by_code` |
+| `variante_do_idioma` | `language_variant` |
+| `normalizar_telefone_internacional` | `normalize_international_phone` |
+| `formatar_telefone` | `format_phone` |
+| `_formatar_telefone_latino` | `_format_latin_phone` |
+| `link_whatsapp` | `whatsapp_link` |
+| `normalizar_cep` | `normalize_postal_code` |
+| `formatar_cep` | `format_postal_code` |
+| `rotulo_cep` | `postal_code_label` |
+| `moeda_da_clinica` | `clinic_currency` |
+| `formatar` | `format_amount` |
+| `simbolo` | `symbol` |
+| `montar` | `build` |
+| `_agenda` | `_schedule` |
+| `_rechamadas` | `_recalls` |
+| `_aniversariantes` | `_birthdays` |
+| `_orcamentos` | `_estimates` |
+| `_soma_dos_saldos` | `_sum_of_balances` |
+| `_recebimentos` | `_receipts` |
+| `_financeiro` | `_finance` |
+| `_valido` | `_valid` |
+| `_opcoes` | `_options` |
+| `_sem_milhar` | `_without_thousands` |
+| `campo_documento` | `document_field` |
+| `documento_por_tipo` | `document_by_kind` |
+| `_pais_escolhido` | `_chosen_country` |
+| `_ajustar_ao_pais` | `_adjust_to_country` |
+| `_escolhidos` | `_chosen` |
+| `_agendamento_fora` | `_appointment_outside` |
+| `_exigir` | `_require` |
+| `_milhares` | `_thousands` |
+| `normalizar` | `normalize` |
+| `valido` | `is_valid` |
+| `escrever` | `write` |
+| `do_papel` | `for_role` |
+| `_escrever_cpf` | `_write_cpf` |
+| `_escrever_cnpj` | `_write_cnpj` |
+| `_escrever_cedula_uy` | `_write_cedula_uy` |
+| `_escrever_bn` | `_write_bn` |
+| `_escrever_medicare` | `_write_medicare` |
+| `do_pais` | `for_country` |
+| `papeis` | `roles` |
+| `identificar` | `identify` |
+| `sigla` | `abbreviation` |
+| `invalido` | `invalid` |
+| `limpar` | `clean_value` |
+| `_clinica_atual` | `_current_clinic` |
+| `_isolamento_desligado` | `_isolation_off` |
+| `clinica_atual` | `current_clinic` |
+| `isolamento_ativo` | `isolation_active` |
+| `usar_clinica` | `use_clinic` |
+| `sem_isolamento` | `without_isolation` |
+| `todos` | `all_objects` |
+| `_conferir_clinica` | `_check_clinic` |
+| `prazo_de_guarda` | `retention_period` |
+| `_fixa` | `_is_fixed` |
+| `campos_de_data` | `date_fields` |
+| `_conta` | `_account` |
+| `_rotulos` | `_labels` |
+| `migracoes_do_diff` | `migrations_from_diff` |
+| `_campo` | `_field` |
+| `_tabelas` | `_tables` |
+| `_so_o_nome` | `_name_only` |
+| `_depois` | `_after` |
+| `_so_aumenta` | `_only_grows` |
+| `_coluna_obrigatoria_sem_default` | `_required_column_without_default` |
+| `alertas_da_operacao` | `operation_alerts` |
+| `analisar` | `analyze` |
+| `banco_descartavel` | `disposable_database` |
+| `_migrar` | `_migrate` |
+| `_erro` | `_error` |
+| `ida_e_volta` | `round_trip` |
+| `_linhas_da_migracao` | `_migration_lines` |
+| `_alteradas` | `_changed` |
+| `alertas` | `alerts` |
+| `_usuario` | `_user` |
+| `_pacientes` | `_patients` |
+| `_carteirinhas` | `_member_cards` |
+| `_funcionarios` | `_employees` |
+| `_relacionados` | `_related_people` |
+| `_agendamentos` | `_appointments` |
+| `resolver_clinica` | `resolve_clinic` |
+| `_usar_pais_da_clinica` | `_use_clinic_country` |
+| `sigla_documento` | `document_abbreviation` |
+| `documento_escrito` | `written_document` |
+| `odontologia` | `dentistry` |
+| `medicina` | `medicine` |
+| `modulo_habilitado` | `module_enabled` |
+| `unica` | `single` |
+| `iniciais` | `initial` |
+| `faltando` | `missing` |
+| `habilitados` | `enabled` |
+| `visiveis` | `visible` |
+| `desligados_visiveis` | `visible_disabled` |
+| `marcar_se_desligado` | `mark_if_disabled` |
+| `configurar` | `configure` |
+| `chave_alfabetica` | `alphabetical_key` |
+| `pode` | `can` |
+| `so_a_propria_agenda` | `own_schedule_only` |
+| `tabela_permissoes` | `permissions_table` |
+| `exige_permissao` | `requires_permission` |
+| `ip_para_bloqueio` | `ip_for_lockout` |
+| `modulos_para_clinica_nova` | `modules_for_new_clinic` |
+| `rotulo_documento` | `document_label` |
+| `simbolo_moeda` | `currency_symbol` |
+| `validar_cor` | `validate_color` |
+| `somente_digitos` | `digits_only` |
+| `normalizar_cnpj` | `normalize_cnpj` |
+| `cpf_valido` | `valid_cpf` |
+| `cnpj_valido` | `valid_cnpj` |
+| `validar_cpf` | `validate_cpf` |
+| `validar_cnpj` | `validate_cnpj` |
+| `nono_digito` | `ninth_digit` |
+| `normalizar_telefone` | `normalize_phone` |
+| `_saudacao` | `_greeting` |
+| `_destino_seguro` | `_safe_destination` |
+| `cadastrar_clinica` | `register_clinic` |
+| `configuracoes` | `clinic_settings` |
+| `trocar_idioma` | `change_language` |
+
+`Usuario` (the user model) keeps its name for now (see below).
 
 ## What stays in Portuguese
 

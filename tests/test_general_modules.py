@@ -9,17 +9,17 @@ from django.db.migrations.executor import MigrationExecutor
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from apps.core.forms import ClinicaForm
-from apps.core.isolation import usar_clinica
+from apps.core.forms import ClinicForm
+from apps.core.isolation import use_clinic
 from apps.core.models import (
-    ESPECIALIDADES,
-    MODULOS_GERAIS,
+    GENERAL_MODULES,
+    SPECIALTIES,
     Clinic,
     ClinicModule,
-    ModuloClinico,
-    Papel,
+    ModuleCode,
+    Role,
 )
-from apps.core.modules import configurar
+from apps.core.modules import configure
 from apps.core.templatetags.formats import whatsapp
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
@@ -28,46 +28,46 @@ from tests.test_modules_migration import estado_do_banco
 
 pytestmark = pytest.mark.django_db
 
-M = ModuloClinico
+M = ModuleCode
 
 
 def sem(*desligados):
-    return MODULOS_GERAIS - set(desligados)
+    return GENERAL_MODULES - set(desligados)
 
 
 @pytest.fixture
 def patient(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         return Patient.objects.create(name="Paciente fictício dos módulos")
 
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_gerais", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_gerais", clinica_a, Role.ADMIN))
 
 
 def test_clinica_nova_comeca_com_todos_os_modulos_gerais(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
-    assert ligados == MODULOS_GERAIS | {M.ODONTOLOGIA}
-    assert ESPECIALIDADES.isdisjoint(MODULOS_GERAIS)
+    assert ligados == GENERAL_MODULES | {M.DENTISTRY}
+    assert SPECIALTIES.isdisjoint(GENERAL_MODULES)
 
 
 @pytest.mark.parametrize(
     ("modulo", "rota", "texto_do_menu"),
     [
-        (M.AGENDA, "schedule:calendar", 'href="/schedule/"'),
-        (M.RECHAMADAS, "recalls:list", 'href="/recalls/"'),
-        (M.ANIVERSARIANTES, "patients:birthdays", "/birthdays/"),
-        (M.FINANCEIRO, "finance:receivables", "/finance/"),
+        (M.SCHEDULE, "schedule:calendar", 'href="/schedule/"'),
+        (M.RECALLS, "recalls:list", 'href="/recalls/"'),
+        (M.BIRTHDAYS, "patients:birthdays", "/birthdays/"),
+        (M.FINANCE, "finance:receivables", "/finance/"),
     ],
 )
 def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
     modulo, rota, texto_do_menu, clinica_a, admin, django_user_model, cliente_de
 ):
-    desligados = {modulo, M.ORCAMENTOS, M.PESSOAL} if modulo == M.FINANCEIRO else {modulo}
+    desligados = {modulo, M.ESTIMATES, M.STAFF} if modulo == M.FINANCE else {modulo}
     assert texto_do_menu in admin.get(reverse("home")).content.decode()
-    configurar(clinica_a, sem(*desligados))
+    configure(clinica_a, sem(*desligados))
     assert texto_do_menu not in admin.get(reverse("home")).content.decode()
     assert admin.get(reverse(rota)).status_code == 403
     # The system administrator still reaches it, marked as off (decision 115).
@@ -80,7 +80,7 @@ def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
 
 
 def test_orcamentos_desligado(clinica_a, admin, patient):
-    configurar(clinica_a, sem(M.ORCAMENTOS))
+    configure(clinica_a, sem(M.ESTIMATES))
     assert admin.get(reverse("estimates:list")).status_code == 403
     ficha = admin.get(reverse("patients:record", args=[patient.pk]))
     assert ficha.context.get("orcamentos") is None
@@ -90,13 +90,13 @@ def test_orcamentos_desligado(clinica_a, admin, patient):
 def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
     clinica_a, patient, criar_usuario, django_user_model, cliente_de
 ):
-    user = criar_usuario("prof_gerais", clinica_a, Papel.PROFISSIONAL)
-    with usar_clinica(clinica_a):
+    user = criar_usuario("prof_gerais", clinica_a, Role.PRACTITIONER)
+    with use_clinic(clinica_a):
         Practitioner.objects.create(name="Profissional fictício", user=user)
     url = reverse("medical_records:new", args=[patient.pk])
     cliente = cliente_de(user)
     assert cliente.get(url).status_code == 200
-    configurar(clinica_a, sem(M.PRONTUARIO))
+    configure(clinica_a, sem(M.MEDICAL_RECORDS))
     assert cliente.get(url).status_code == 403
     assert (
         "Novo atendimento"
@@ -109,28 +109,28 @@ def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
 
 
 def test_desligar_nao_apaga_dados_e_religar_mostra_de_novo(clinica_a, admin, patient):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Recall.objects.create(
             patient=patient, date=datetime.date(2026, 11, 10), description="Retorno"
         )
-    configurar(clinica_a, sem(M.RECHAMADAS))
+    configure(clinica_a, sem(M.RECALLS))
     assert admin.get(reverse("recalls:list")).status_code == 403
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert Recall.objects.count() == 1
-    configurar(clinica_a, MODULOS_GERAIS)
+    configure(clinica_a, GENERAL_MODULES)
     assert "Retorno" in admin.get(reverse("recalls:list")).content.decode()
 
 
 def test_so_o_nucleo_ligado_sem_resumo_vazio(clinica_a, admin):
     """Review stage 4: with every optional module off, "Resumo do dia" stood alone."""
-    configurar(clinica_a, set())
+    configure(clinica_a, set())
     page = admin.get(reverse("home")).content.decode()
     assert "Resumo do dia" not in page and "Novo paciente" in page
 
 
 def test_orcamentos_precisa_do_financeiro(clinica_a):
     with pytest.raises(ValidationError):
-        configurar(clinica_a, sem(M.FINANCEIRO))
+        configure(clinica_a, sem(M.FINANCE))
     data = {
         "name": "Clínica fictícia",
         "area": "odontologia",
@@ -138,13 +138,13 @@ def test_orcamentos_precisa_do_financeiro(clinica_a):
         "schedule_end": "18:00",
         "schedule_interval": 30,
         "modulos": ["odontologia"],
-        "modulos_gerais": sorted(sem(M.FINANCEIRO)),
+        "modulos_gerais": sorted(sem(M.FINANCE)),
     }
-    form = ClinicaForm(data, instance=clinica_a)
+    form = ClinicForm(data, instance=clinica_a)
     assert not form.is_valid()
     assert "modulos_gerais" in form.errors
-    data["modulos_gerais"] = sorted(sem(M.FINANCEIRO, M.ORCAMENTOS, M.PESSOAL))
-    assert ClinicaForm(data, instance=clinica_a).is_valid()
+    data["modulos_gerais"] = sorted(sem(M.FINANCE, M.ESTIMATES, M.STAFF))
+    assert ClinicForm(data, instance=clinica_a).is_valid()
 
 
 def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
@@ -157,13 +157,13 @@ def test_configuracoes_salvam_os_modulos_gerais(clinica_a, admin):
             "schedule_end": "18:00",
             "schedule_interval": 30,
             "modulos": ["medicina"],
-            "modulos_gerais": [M.AGENDA, M.PRONTUARIO],
+            "modulos_gerais": [M.SCHEDULE, M.MEDICAL_RECORDS],
         },
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
-    assert ligados == {M.MEDICINA, M.AGENDA, M.PRONTUARIO}
+    assert ligados == {M.MEDICINE, M.SCHEDULE, M.MEDICAL_RECORDS}
     page = admin.get(reverse("clinic_settings")).content.decode()
     assert "Especialidades" in page and "Módulos" in page
 
@@ -176,9 +176,9 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
     )
     assert response.status_code == 302
     clinic = Clinic.objects.get()
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         ligados = set(ClinicModule.objects.filter(active=True).values_list("code", flat=True))
-    assert ligados == MODULOS_GERAIS | {M.MEDICINA}
+    assert ligados == GENERAL_MODULES | {M.MEDICINE}
 
 
 def test_permissoes_leem_os_modulos_uma_vez_por_requisicao(admin):
@@ -192,9 +192,9 @@ def test_permissoes_leem_os_modulos_uma_vez_por_requisicao(admin):
 def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
     executor = MigrationExecutor(connection)
     folhas = executor.loader.graph.leaf_nodes()
-    anterior = [("core", "0010_modulos_clinicos")]
+    previous = [("core", "0010_modulos_clinicos")]
     try:
-        executor.migrate(anterior)
+        executor.migrate(previous)
         apps = estado_do_banco()
         Antiga = apps.get_model("core", "Clinica")
         ModuloAntigo = apps.get_model("core", "ModuloDaClinica")
@@ -207,15 +207,15 @@ def test_migracao_liga_os_modulos_gerais_das_clinicas_existentes():
         )
         executor = MigrationExecutor(connection)
         executor.migrate([("core", "0011_modulos_gerais")])
-        Modulo = executor.loader.project_state([("core", "0011_modulos_gerais")]).apps.get_model(
+        Module = executor.loader.project_state([("core", "0011_modulos_gerais")]).apps.get_model(
             "core", "ModuloDaClinica"
         )
         ligados = set(
-            Modulo.objects.filter(clinica_id=clinic.pk, ativo=True).values_list("codigo", flat=True)
+            Module.objects.filter(clinica_id=clinic.pk, ativo=True).values_list("codigo", flat=True)
         )
         # Pessoal came later (core 0012), so it is not part of this step.
-        assert ligados == {"medicina", *MODULOS_GERAIS} - {"pessoal"}
-        assert Modulo.objects.filter(clinica_id=clinic.pk).count() == len(ModuloClinico) - 1
+        assert ligados == {"medicina", *GENERAL_MODULES} - {"pessoal"}
+        assert Module.objects.filter(clinica_id=clinic.pk).count() == len(ModuleCode) - 1
     finally:
         MigrationExecutor(connection).migrate(folhas)
 
@@ -226,7 +226,7 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
         {"kind": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
     )
     assert response.status_code == 302, response.context["form"].errors
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Paciente fictícia do WhatsApp")
     assert patient.whatsapp == "48999990000"
     ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()

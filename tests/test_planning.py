@@ -7,8 +7,8 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.finance import services
 from apps.finance.models import AccountGroup, Category, Entry, FinancialAccount, Planning
 
@@ -20,16 +20,16 @@ URL = reverse("finance:planning")
 
 @pytest.fixture
 def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_planejamento", clinica_a, Papel.ADMIN))
+    return cliente_de(criar_usuario("admin_planejamento", clinica_a, Role.ADMIN))
 
 
 def group(clinic, name):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         return AccountGroup.objects.get(name=name)
 
 
 def pagar(clinic, category, amount, date=HOJE):
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         entry = services.criar_lancamento(
             clinic=clinic,
             kind=Entry.Tipo.PAGAR,
@@ -69,18 +69,18 @@ def test_salvar_metas_no_formato_brasileiro(clinica_a, admin):
     # With the thousands dot, as people type it (review stage 3: it was refused).
     response = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert Planning.objects.get().amount == Decimal("12000.50")
     page = admin.get(f"{URL}?year={HOJE.year}").content.decode()
     assert 'value="12000,50"' in page  # shown back with a comma, not as 12000.50
     # Blank removes the goal.
     admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": ""})
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         assert not Planning.objects.exists()
 
 
 def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         Planning.objects.create(year=HOJE.year, group=ocupacao, amount=Decimal("1000"))
     pagar(clinica_a, "Aluguel", "250")
@@ -93,7 +93,7 @@ def test_realizado_e_percentual_somando_os_subgrupos(clinica_a, admin):
 
 
 def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
         sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal)
         Planning.objects.create(year=2026, group=pessoal, amount=Decimal("5000"))
@@ -107,7 +107,7 @@ def test_meta_de_subgrupo_nao_conta_duas_vezes(clinica_a):
 
 
 def test_em_dia_para_receita_e_despesa(clinica_a):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Atendimentos"), amount=Decimal("1200")
         )
@@ -122,7 +122,7 @@ def test_em_dia_para_receita_e_despesa(clinica_a):
 
 
 def test_copiar_metas_do_ano_anterior(clinica_a, admin):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         ocupacao = AccountGroup.objects.get(name="Ocupação")
         impostos = AccountGroup.objects.get(name="Impostos")
         Planning.objects.create(year=HOJE.year - 1, group=ocupacao, amount=Decimal("900"))
@@ -131,7 +131,7 @@ def test_copiar_metas_do_ano_anterior(clinica_a, admin):
     page = admin.get(f"{URL}?year={HOJE.year}")
     assert page.context["tem_metas_anteriores"]
     admin.post(f"{URL}?year={HOJE.year}", {"acao": "copiar"})
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         deste_ano = dict(
             Planning.objects.filter(year=HOJE.year).values_list("group__name", "amount")
         )
@@ -143,5 +143,5 @@ def test_ano_invalido_volta_para_o_atual(admin):
 
 
 def test_permissoes(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Role.FRONT_DESK))
     assert reception.get(URL).status_code == 403

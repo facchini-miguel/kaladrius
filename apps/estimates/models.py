@@ -16,9 +16,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
+from apps.core.isolation import ClinicModel, WrongClinic
 from apps.core.models import Clinic
-from apps.core.ordering import ALFABETICA
+from apps.core.ordering import ALPHABETICAL
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 VALIDADE_PADRAO = 30  # days
@@ -28,10 +28,10 @@ def validade_padrao():
     return timezone.localdate() + datetime.timedelta(days=VALIDADE_PADRAO)
 
 
-class Procedure(ModeloDaClinica):
+class Procedure(ClinicModel):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
-    name = models.CharField(_("nome"), max_length=120, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=120, db_collation=ALPHABETICAL, db_column="nome")
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
     code = models.CharField(_("código"), max_length=20, blank=True, db_column="codigo")
     amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
@@ -61,7 +61,7 @@ class Procedure(ModeloDaClinica):
         return self.name
 
 
-class Estimate(ModeloDaClinica):
+class Estimate(ClinicModel):
     class Situacao(models.TextChoices):
         ABERTO = "aberto", pgettext_lazy("orçamento", "Em aberto")
         APROVADO = "aprovado", _("Aprovado")
@@ -159,7 +159,7 @@ class Estimate(ModeloDaClinica):
         return sorted({dente for item in self.itens.all() for dente in item.lista_dentes})
 
 
-class EstimateItem(ModeloDaClinica):
+class EstimateItem(ClinicModel):
     estimate = models.ForeignKey(
         Estimate,
         on_delete=models.CASCADE,
@@ -205,9 +205,9 @@ class EstimateItem(ModeloDaClinica):
         return self.description
 
     def _conferir_modulo(self):
-        self._conferir_clinica()
+        self._check_clinic()
         if self.estimate.clinic_id != self.clinic_id:
-            raise ClinicaDiferente("The estimate belongs to another clinic.")
+            raise WrongClinic("The estimate belongs to another clinic.")
         clinic = Clinic.objects.select_for_update().get(pk=self.clinic_id)
         previous = (
             type(self).objects.filter(pk=self.pk).values("teeth", "faces").first()
@@ -217,7 +217,7 @@ class EstimateItem(ModeloDaClinica):
         dental = self.teeth or self.faces or (previous and any(previous.values()))
         # The view sets the flag only for the system administrator (decision 115).
         liberado = getattr(self, "odontologia_desligada_liberada", False)
-        if dental and not clinic.odontologia and not liberado:
+        if dental and not clinic.dentistry and not liberado:
             raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
 
     @transaction.atomic

@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from apps.core.models import Papel
+from apps.core.models import Role
 from apps.reference_data.models import Bank, City, MaritalStatus, State
 
 pytestmark = pytest.mark.django_db
@@ -17,7 +17,7 @@ def test_dados_oficiais_carregados_pela_migracao():
 
 
 def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     response = cliente.get(reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"})
     content = response.content.decode()
     assert response.status_code == 200
@@ -26,13 +26,13 @@ def test_lista_de_cidades_filtra_por_uf_e_ignora_acentos(clinica_a, criar_usuari
 
 
 def test_lista_de_bancos_busca_por_codigo(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     content = cliente.get(reverse("reference_data:banks"), {"q": "341"}).content.decode()
     assert "ITAÚ" in content.upper()
 
 
 def test_paginacao_preserva_os_filtros(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     content = cliente.get(reverse("reference_data:cities"), {"state": 31}).content.decode()  # MG
     assert "state=31&amp;q=&amp;pagina=2" in content
 

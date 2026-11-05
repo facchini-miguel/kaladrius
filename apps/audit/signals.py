@@ -33,7 +33,7 @@ from apps.staff.models import Employee, Payroll, Salary
 from .models import AuditEntry
 from .record import ip_da_requisicao, registrar
 
-Acao = AuditEntry.Acao
+Action = AuditEntry.Action
 Usuario = get_user_model()
 
 AUDITADOS = [
@@ -119,7 +119,7 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
         changes = {
             field: [None, value] for field, value in after.items() if value not in (None, "")
         }
-        registrar(Acao.CRIAR, instance, changes=changes)
+        registrar(Action.CREATE, instance, changes=changes)
         return
     changes = {
         field: [before.get(field), value]
@@ -132,7 +132,7 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
     ):
         changes["senha"] = ["(oculta)", "(alterada)"]  # the hash itself is never stored
     if changes:
-        registrar(Acao.ALTERAR, instance, changes=changes)
+        registrar(Action.CHANGE, instance, changes=changes)
 
 
 def depois_de_excluir(sender, instance, **kwargs):
@@ -141,7 +141,7 @@ def depois_de_excluir(sender, instance, **kwargs):
         for field, value in _valores(instance).items()
         if value not in (None, "")
     }
-    registrar(Acao.EXCLUIR, instance, changes=valores)
+    registrar(Action.DELETE, instance, changes=valores)
 
 
 for model in AUDITADOS:
@@ -152,13 +152,15 @@ for model in AUDITADOS:
 
 
 def _entrou(sender, request, user, **kwargs):
-    registrar(Acao.LOGIN, user=user, ip=ip_da_requisicao(request), description=user.get_username())
+    registrar(
+        Action.LOGIN, user=user, ip=ip_da_requisicao(request), description=user.get_username()
+    )
 
 
 def _saiu(sender, request, user, **kwargs):
     if user is not None:
         registrar(
-            Acao.LOGOUT, user=user, ip=ip_da_requisicao(request), description=user.get_username()
+            Action.LOGOUT, user=user, ip=ip_da_requisicao(request), description=user.get_username()
         )
 
 
@@ -166,7 +168,7 @@ def _falhou(sender, credentials, request=None, **kwargs):
     # Only the username is kept; the password typed is never stored.
     name = str(credentials.get("username", ""))[:150]
     registrar(
-        Acao.LOGIN_FALHOU,
+        Action.LOGIN_FAILED,
         ip=ip_da_requisicao(request) if request is not None else None,
         description=f"usuário informado: {name}",
     )

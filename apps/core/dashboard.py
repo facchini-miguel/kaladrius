@@ -18,38 +18,38 @@ from apps.recalls.models import Recall
 from apps.schedule import services as agenda
 from apps.schedule.models import Appointment
 
-from .permissions import Acao, Modulo, pode, so_a_propria_agenda
+from .permissions import Action, Module, can, own_schedule_only
 
 # How many lines each list shows before the "see all" link.
-LIMITE = 8
+LIMIT = 8
 # Estimates whose validity ends within this many days.
-DIAS_ORCAMENTO = 7
-DIAS_A_PAGAR = 7
+ESTIMATE_DAYS = 7
+PAYABLE_DAYS = 7
 
 
-def montar(request):
+def build(request):
     today = timezone.localdate()
     painel = {"hoje": today}
-    if pode(request, Modulo.AGENDA, Acao.VER):
-        painel["agenda"] = _agenda(request, today)
-    if pode(request, Modulo.RECHAMADAS, Acao.VER):
-        painel["rechamadas"] = _rechamadas(today)
-    if pode(request, Modulo.ANIVERSARIANTES, Acao.VER):
-        painel["aniversariantes"] = _aniversariantes(today)
-    if pode(request, Modulo.ORCAMENTOS, Acao.VER):
-        painel["orcamentos"] = _orcamentos(today)
-    if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
-        painel["recebimentos"] = _recebimentos(today)
-    if pode(request, Modulo.FINANCEIRO, Acao.VER):
-        painel["financeiro"] = _financeiro(today)
+    if can(request, Module.SCHEDULE, Action.VIEW):
+        painel["agenda"] = _schedule(request, today)
+    if can(request, Module.RECALLS, Action.VIEW):
+        painel["rechamadas"] = _recalls(today)
+    if can(request, Module.BIRTHDAYS, Action.VIEW):
+        painel["aniversariantes"] = _birthdays(today)
+    if can(request, Module.ESTIMATES, Action.VIEW):
+        painel["orcamentos"] = _estimates(today)
+    if can(request, Module.RECEIVING, Action.VIEW):
+        painel["recebimentos"] = _receipts(today)
+    if can(request, Module.FINANCE, Action.VIEW):
+        painel["financeiro"] = _finance(today)
     return painel
 
 
-def _agenda(request, today):
+def _schedule(request, today):
     now = timezone.now()
-    visiveis = agenda.agendamentos_visiveis(request)
+    visible = agenda.agendamentos_visiveis(request)
     do_dia = list(
-        visiveis.filter(start__date=today)
+        visible.filter(start__date=today)
         .select_related("patient", "practitioner", "kind")
         .order_by("start", "practitioner__name")
     )
@@ -61,7 +61,7 @@ def _agenda(request, today):
     pendentes = [a for a in pacientes if a.status == status.AGENDADO]
     # No-show rate of the month so far, over the appointments someone marked.
     marcados = dict(
-        visiveis.filter(
+        visible.filter(
             start__date__gte=today.replace(day=1),
             start__date__lte=today,
             status__in=[status.COMPARECEU, status.FALTOU],
@@ -74,7 +74,7 @@ def _agenda(request, today):
     return {
         "lista": do_dia,
         # A practitioner sees only their own schedule, so the column would repeat their name.
-        "mostrar_profissional": not so_a_propria_agenda(request),
+        "mostrar_profissional": not own_schedule_only(request),
         "pacientes": len(pacientes) - contagem[status.DESMARCOU],
         "compareceram": contagem[status.COMPARECEU],
         "faltaram": contagem[status.FALTOU],
@@ -88,18 +88,18 @@ def _agenda(request, today):
     }
 
 
-def _rechamadas(today):
+def _recalls(today):
     pendentes = Recall.objects.filter(
         done=False, date__lte=today, patient__archived=False
     ).select_related("patient")
     return {
-        "lista": list(pendentes.order_by("date", "patient__name")[:LIMITE]),
+        "lista": list(pendentes.order_by("date", "patient__name")[:LIMIT]),
         "total": pendentes.count(),
         "atrasadas": pendentes.filter(date__lt=today).count(),
     }
 
 
-def _aniversariantes(today):
+def _birthdays(today):
     return [
         (patient, today.year - patient.birth_date.year)
         for patient in Patient.objects.filter(
@@ -111,12 +111,12 @@ def _aniversariantes(today):
     ]
 
 
-def _orcamentos(today):
+def _estimates(today):
     return list(
         Estimate.objects.filter(
             status=Estimate.Situacao.ABERTO,
             valid_until__gte=today,
-            valid_until__lte=today + datetime.timedelta(days=DIAS_ORCAMENTO),
+            valid_until__lte=today + datetime.timedelta(days=ESTIMATE_DAYS),
             patient__archived=False,
         )
         .select_related("patient")
@@ -125,12 +125,12 @@ def _orcamentos(today):
     )
 
 
-def _soma_dos_saldos(parcelas):
+def _sum_of_balances(parcelas):
     saldos = list(parcelas.values_list("balance", flat=True))
     return sum(saldos, start=ZERO), len(saldos)
 
 
-def _recebimentos(today):
+def _receipts(today):
     recebidos = financeiro.pagamentos_validos().filter(
         date=today, installment__entry__kind=Entry.Tipo.RECEBER
     )
@@ -142,7 +142,7 @@ def _recebimentos(today):
         .annotate(total=Sum("amount"))
         .order_by("-total")
     ]
-    a_receber, parcelas = _soma_dos_saldos(
+    a_receber, parcelas = _sum_of_balances(
         Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, due_date=today)
     )
     return {
@@ -156,7 +156,7 @@ def _recebimentos(today):
     }
 
 
-def _financeiro(today):
+def _finance(today):
     recebido_hoje, pago_hoje = financeiro.recebido_e_pago(today, today)
     inicio_mes = today.replace(day=1)
     recebido_mes, pago_mes = financeiro.recebido_e_pago(inicio_mes, today)
@@ -166,13 +166,13 @@ def _financeiro(today):
     ate_anterior = inicio_anterior.replace(day=min(today.day, fim_anterior.day))
     recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
     abertas = Installment.objects.abertas()
-    vencido, parcelas_vencidas = _soma_dos_saldos(
+    vencido, parcelas_vencidas = _sum_of_balances(
         abertas.filter(entry__kind=Entry.Tipo.RECEBER, due_date__lt=today)
     )
-    a_pagar, contas_a_pagar = _soma_dos_saldos(
+    a_pagar, contas_a_pagar = _sum_of_balances(
         abertas.filter(
             entry__kind=Entry.Tipo.PAGAR,
-            due_date__lte=today + datetime.timedelta(days=DIAS_A_PAGAR),
+            due_date__lte=today + datetime.timedelta(days=PAYABLE_DAYS),
         )
     )
     return {
@@ -189,6 +189,6 @@ def _financeiro(today):
         "a_pagar": a_pagar,
         "contas_a_pagar": contas_a_pagar,
         "saldo_contas": sum(
-            (saldo for _conta, saldo in financeiro.saldos_das_contas()), start=ZERO
+            (saldo for _account, saldo in financeiro.saldos_das_contas()), start=ZERO
         ),
     }

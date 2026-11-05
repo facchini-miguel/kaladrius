@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.dentistry.teeth import FDI, NUMERACOES
 
 from . import countries, currencies
-from .isolation import ModeloDaClinica
+from .isolation import ClinicModel
 
 
 class Usuario(AbstractUser):
@@ -59,7 +59,7 @@ class Usuario(AbstractUser):
 class Clinic(models.Model):
     """A clinic: the tenant that owns patients, schedules and the rest of the data."""
 
-    INTERVALOS = [
+    INTERVALS = [
         (10, _("10 minutos")),
         (15, _("15 minutos")),
         (20, _("20 minutos")),
@@ -70,8 +70,8 @@ class Clinic(models.Model):
     class Area(models.TextChoices):
         """Primary area, kept for classification and the initial appointment types."""
 
-        ODONTOLOGIA = "odontologia", _("Odontologia")
-        MEDICINA = "medicina", _("Medicina")
+        DENTISTRY = "odontologia", _("Odontologia")
+        MEDICINE = "medicina", _("Medicina")
         OUTRA = "outra", _("Outra área da saúde")
 
     name = models.CharField(_("nome"), max_length=200, db_column="nome")
@@ -79,7 +79,7 @@ class Clinic(models.Model):
         _("área principal"),
         max_length=20,
         choices=Area.choices,
-        default=Area.ODONTOLOGIA,
+        default=Area.DENTISTRY,
         help_text=_(
             "Define os tipos iniciais de atendimento. As especialidades e os módulos são "
             "escolhidos abaixo e podem ser usados juntos."
@@ -99,8 +99,8 @@ class Clinic(models.Model):
     currency = models.CharField(
         _("moeda"),
         max_length=3,
-        choices=currencies.ESCOLHAS,
-        default=currencies.PADRAO,
+        choices=currencies.CHOICES,
+        default=currencies.DEFAULT,
         help_text=_(
             "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
             "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
@@ -110,8 +110,8 @@ class Clinic(models.Model):
     country = models.CharField(
         _("país"),
         max_length=2,
-        choices=countries.ESCOLHAS,
-        default=countries.PADRAO,
+        choices=countries.CHOICES,
+        default=countries.DEFAULT,
         help_text=_(
             "Define o fuso horário disponível, o formato de telefones, códigos postais e "
             "datas em inglês, e a moeda sugerida."
@@ -121,8 +121,8 @@ class Clinic(models.Model):
     time_zone = models.CharField(
         _("fuso horário"),
         max_length=40,
-        choices=countries.ESCOLHAS_FUSO,
-        default=countries.FUSO_PADRAO,
+        choices=countries.TIME_ZONE_CHOICES,
+        default=countries.DEFAULT_TIME_ZONE,
         help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
         db_column="fuso_horario",
     )
@@ -154,7 +154,7 @@ class Clinic(models.Model):
         _("fim da agenda"), default=datetime.time(20, 0), db_column="agenda_fim"
     )
     schedule_interval = models.PositiveSmallIntegerField(
-        _("duração de cada horário"), choices=INTERVALOS, default=30, db_column="agenda_intervalo"
+        _("duração de cada horário"), choices=INTERVALS, default=30, db_column="agenda_intervalo"
     )
     created_at = models.DateTimeField(_("criada em"), auto_now_add=True, db_column="criada_em")
     updated_at = models.DateTimeField(_("alterada em"), auto_now=True, db_column="alterada_em")
@@ -181,71 +181,71 @@ class Clinic(models.Model):
         return super().save(*args, **kwargs)
 
     @property
-    def sigla_documento(self):
+    def document_abbreviation(self):
         """The name of its document, in its country: "CNPJ", "EIN" (decision 121)."""
-        from .identification import sigla
+        from .identification import abbreviation
 
-        return sigla(self.document, ("pessoa", "empresa"), self.country)
-
-    @property
-    def documento_escrito(self):
-        from .identification import escrever
-
-        return escrever(self.document, ("pessoa", "empresa"), self.country)
+        return abbreviation(self.document, ("pessoa", "empresa"), self.country)
 
     @property
-    def odontologia(self):
-        return self.modulo_habilitado(ModuloClinico.ODONTOLOGIA)
+    def written_document(self):
+        from .identification import write
+
+        return write(self.document, ("pessoa", "empresa"), self.country)
 
     @property
-    def medicina(self):
-        return self.modulo_habilitado(ModuloClinico.MEDICINA)
+    def dentistry(self):
+        return self.module_enabled(ModuleCode.DENTISTRY)
 
-    def modulo_habilitado(self, code):
+    @property
+    def medicine(self):
+        return self.module_enabled(ModuleCode.MEDICINE)
+
+    def module_enabled(self, code):
         # Explicit clinic filtering: this property is also used during clinic creation,
         # before a request has selected a clinic. Missing/unknown modules fail closed.
-        if self.pk is None or code not in ModuloClinico.values:
+        if self.pk is None or code not in ModuleCode.values:
             return False
-        return ClinicModule.todos.filter(clinic=self, code=code, active=True).exists()
+        return ClinicModule.all_objects.filter(clinic=self, code=code, active=True).exists()
 
     @classmethod
-    def unica(cls):
+    def single(cls):
         """The clinic of this installation (decision 069: one installation, one clinic)."""
         return cls.objects.filter(active=True).order_by("pk").first()
 
 
-class ModuloClinico(models.TextChoices):
+class ModuleCode(models.TextChoices):
     """Parts of the system the clinic administrator turns on or off (decision 092).
 
     Patients, practitioners, the team, the base tables, the clinic settings and the audit
     log are the core: always on, so they are not listed here.
     """
 
-    ODONTOLOGIA = "odontologia", _("Odontologia")
-    MEDICINA = "medicina", _("Medicina")
-    AGENDA = "agenda", _("Agenda")
-    PRONTUARIO = "prontuario", _("Prontuário")
-    ORCAMENTOS = "orcamentos", _("Orçamentos")
-    FINANCEIRO = "financeiro", _("Financeiro")
-    RECHAMADAS = "rechamadas", _("Rechamadas")
-    ANIVERSARIANTES = "aniversariantes", _("Aniversariantes")
-    CONVENIOS = "convenios", _("Convênios")
-    PESSOAL = "pessoal", _("Pessoal")
+    DENTISTRY = "odontologia", _("Odontologia")
+    MEDICINE = "medicina", _("Medicina")
+    SCHEDULE = "agenda", _("Agenda")
+    MEDICAL_RECORDS = "prontuario", _("Prontuário")
+    ESTIMATES = "orcamentos", _("Orçamentos")
+    FINANCE = "financeiro", _("Financeiro")
+    RECALLS = "rechamadas", _("Rechamadas")
+    BIRTHDAYS = "aniversariantes", _("Aniversariantes")
+    HEALTH_PLANS = "convenios", _("Convênios")
+    STAFF = "pessoal", _("Pessoal")
 
 
-ESPECIALIDADES = frozenset({ModuloClinico.ODONTOLOGIA, ModuloClinico.MEDICINA})
-MODULOS_GERAIS = frozenset(ModuloClinico) - ESPECIALIDADES
+SPECIALTIES = frozenset({ModuleCode.DENTISTRY, ModuleCode.MEDICINE})
+GENERAL_MODULES = frozenset(ModuleCode) - SPECIALTIES
 # An approved estimate becomes a receivable and a month's pay becomes a payable, so both
 # need finance turned on.
-DEPENDENCIAS = {
-    ModuloClinico.ORCAMENTOS: frozenset({ModuloClinico.FINANCEIRO}),
-    ModuloClinico.PESSOAL: frozenset({ModuloClinico.FINANCEIRO}),
+DEPENDENCIES = {
+    ModuleCode.ESTIMATES: frozenset({ModuleCode.FINANCE}),
+    ModuleCode.STAFF: frozenset({ModuleCode.FINANCE}),
 }
 
 
-class ClinicModule(ModeloDaClinica):
+class ClinicModule(ClinicModel):
     code = models.CharField(
-        _("módulo"), max_length=20, choices=ModuloClinico.choices, db_column="codigo"
+        _("módulo"), max_length=20, choices=ModuleCode.choices, db_column="codigo"
     )
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
 
@@ -257,7 +257,7 @@ class ClinicModule(ModeloDaClinica):
         constraints = [
             models.UniqueConstraint(fields=["clinic", "code"], name="modulo_unico_por_clinica"),
             models.CheckConstraint(
-                condition=models.Q(code__in=ModuloClinico.values),
+                condition=models.Q(code__in=ModuleCode.values),
                 name="modulo_clinico_conhecido",
             ),
         ]
@@ -266,14 +266,14 @@ class ClinicModule(ModeloDaClinica):
         return self.get_code_display()
 
 
-class Papel(models.TextChoices):
+class Role(models.TextChoices):
     """A user's role inside one clinic. Permissions per role live in permissions.py."""
 
     ADMIN = "admin", _("Administrador da clínica")
-    RECEPCAO = "recepcao", _("Recepção")
-    PROFISSIONAL = "profissional", _("Profissional")
+    FRONT_DESK = "recepcao", _("Recepção")
+    PRACTITIONER = "profissional", _("Profissional")
     # Finance only (0.35.0, decision 088): accounts, entries, cash desk, reports.
-    FINANCEIRO = "financeiro", _("Financeiro")
+    FINANCE = "financeiro", _("Financeiro")
 
 
 class Membership(models.Model):
@@ -293,7 +293,7 @@ class Membership(models.Model):
         verbose_name=_("clínica"),
         db_column="clinica_id",
     )
-    role = models.CharField(_("perfil"), max_length=20, choices=Papel.choices, db_column="papel")
+    role = models.CharField(_("perfil"), max_length=20, choices=Role.choices, db_column="papel")
     active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
     created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
 

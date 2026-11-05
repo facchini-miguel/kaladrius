@@ -22,14 +22,14 @@ from django.utils import timezone
 
 from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
-from apps.core.isolation import sem_isolamento
+from apps.core.isolation import without_isolation
 from apps.core.models import Clinic
 from apps.core.validators import (
-    cnpj_valido,
-    cpf_valido,
-    nono_digito,
-    normalizar_cnpj,
-    somente_digitos,
+    digits_only,
+    ninth_digit,
+    normalize_cnpj,
+    valid_cnpj,
+    valid_cpf,
 )
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
@@ -115,7 +115,7 @@ def _email(value):
 def _documento(bruto, kind):
     """(valid document, None) or ("", original text) when it cannot be used."""
     original = _texto(bruto)
-    document = normalizar_cnpj(original)
+    document = normalize_cnpj(original)
     if not document:
         return "", None
     so_digitos = document.isascii() and document.isdigit()
@@ -123,10 +123,10 @@ def _documento(bruto, kind):
         if so_digitos and 8 <= len(document) <= 11:
             document = document.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
-        return (document, None) if so_digitos and cpf_valido(document) else ("", original)
+        return (document, None) if so_digitos and valid_cpf(document) else ("", original)
     if so_digitos and 12 <= len(document) <= 14:
         document = document.zfill(14)
-    return (document, None) if cnpj_valido(document) else ("", original)
+    return (document, None) if valid_cnpj(document) else ("", original)
 
 
 def _cabe(value, size, label, extras):
@@ -156,9 +156,14 @@ class _Importador:
         resultado = {}
         for row in self.t.get("cidade", []):
             id_uf = str(row["id_uf"] or "")
-            sigla = ufs_legado.get(int(id_uf)) if id_uf.isdecimal() else None
+            abbreviation = ufs_legado.get(int(id_uf)) if id_uf.isdecimal() else None
             name = _texto(row["cidade"])
-            resultado[row["id"]] = (ufs.get(sigla), ibge[sigla].get(_chave(name)), name, sigla)
+            resultado[row["id"]] = (
+                ufs.get(abbreviation),
+                ibge[abbreviation].get(_chave(name)),
+                name,
+                abbreviation,
+            )
         return resultado
 
     def _estados_civis(self):
@@ -237,7 +242,7 @@ class _Importador:
             ("work_phone", "fone_com"),
             ("mobile_phone", "fone_cel"),
         ):
-            number = somente_digitos(row[legado])
+            number = digits_only(row[legado])
             if len(number) > 11:
                 extras.append(f"Telefone ({legado}): {row[legado]}")
                 number = ""
@@ -246,7 +251,7 @@ class _Importador:
             if len(number) == 11 and number.startswith("0"):  # carrier prefix: 0 + DDD
                 number = number[1:]
             # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
-            telefones[phone_field] = nono_digito(number)
+            telefones[phone_field] = ninth_digit(number)
         if _texto(row["fone_fax"]):
             extras.append(f"Fax: {_texto(row['fone_fax'])}")
 
@@ -255,7 +260,7 @@ class _Importador:
             extras.append(f"E-mail no sistema antigo: {email_invalido}")
             avisos["E-mail inválido (guardado nas observações)"] += 1
 
-        postal_code = somente_digitos(row["cep"])
+        postal_code = digits_only(row["cep"])
         if postal_code and len(postal_code) != 8:
             extras.append(f"CEP no sistema antigo: {row['cep']}")
             avisos["CEP incompleto (guardado nas observações)"] += 1
@@ -263,9 +268,11 @@ class _Importador:
 
         state = city = None
         if row["id_cidade"]:
-            state, city, nome_cidade, sigla = cidades.get(row["id_cidade"], (None, None, "", None))
+            state, city, nome_cidade, abbreviation = cidades.get(
+                row["id_cidade"], (None, None, "", None)
+            )
             if city is None:
-                extras.append(f"Cidade no sistema antigo: {nome_cidade}/{sigla or '?'}")
+                extras.append(f"Cidade no sistema antigo: {nome_cidade}/{abbreviation or '?'}")
                 avisos["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
 
         sex = row["sexo"] if row["sexo"] in ("F", "M") else ""
@@ -321,7 +328,7 @@ class _Importador:
         patient.notes = f"{notes}\n\n{bloco}" if notes else bloco
         return patient, _data(row["data_cadast"])
 
-    def _pacientes(self, clinic):
+    def _patients(self, clinic):
         cidades = self._cidades()
         estados_civis = self._estados_civis()
         logradouros = self._logradouros()
@@ -347,7 +354,7 @@ class _Importador:
         self.relatorio.pacientes = len(pares)
         return {code: patient for code, patient, _ in pares}
 
-    def _agendamentos(self, profissionais, tipos):
+    def _appointments(self, profissionais, tipos):
         avisos = self.relatorio.avisos
         novos = []
         for row in sorted(self.t.get("agendax", []), key=lambda row: row["id"]):
@@ -414,7 +421,7 @@ class _Importador:
                 "(havia atendimentos fora do padrão)"
             ] += 1
 
-    def _rechamadas(self, pacientes):
+    def _recalls(self, pacientes):
         avisos = self.relatorio.avisos
         novas = []
         for row in self.t.get("agenda", []):
@@ -444,16 +451,16 @@ class _Importador:
         self.relatorio.rechamadas = len(novas)
 
     def executar(self):
-        with transaction.atomic(), sem_isolamento():
+        with transaction.atomic(), without_isolation():
             clinic = self._clinica()
             profissionais = self._profissionais(clinic)
             tipos = self._tipos(clinic)
-            pacientes = self._pacientes(clinic)
-            self._agendamentos(profissionais, tipos)
-            self._rechamadas(pacientes)
+            pacientes = self._patients(clinic)
+            self._appointments(profissionais, tipos)
+            self._recalls(pacientes)
             r = self.relatorio
             registrar(
-                AuditEntry.Acao.CRIAR,
+                AuditEntry.Action.CREATE,
                 clinic=clinic,
                 description=(
                     f"Importação do sistema antigo: {r.pacientes} pacientes, "

@@ -32,14 +32,14 @@ def instalar():
     Variable._resolve_lookup = _registrando
 
 
-def conferir(escrever):
+def conferir(write):
     """At the end of the run: the new missing variables (an empty list when there are none)."""
     if os.environ.get("UPDATE_TEMPLATE_BASELINE") == "1":
         LINHA_DE_BASE.write_text("".join(f"{row}\n" for row in sorted(encontradas)))
-        escrever(f"{LINHA_DE_BASE.name}: {len(encontradas)} entries written")
+        write(f"{LINHA_DE_BASE.name}: {len(encontradas)} entries written")
         return []
     base = set(LINHA_DE_BASE.read_text().splitlines())
     novas = sorted(encontradas - base)
     for row in novas:
-        escrever(f"template variable not found (not in {LINHA_DE_BASE.name}): {row}")
+        write(f"template variable not found (not in {LINHA_DE_BASE.name}): {row}")
     return novas

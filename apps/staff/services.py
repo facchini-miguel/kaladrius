@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext as _
 
-from apps.core.ordering import chave_alfabetica
+from apps.core.ordering import alphabetical_key
 from apps.finance import services as financeiro
 from apps.finance.models import Entry
 
@@ -47,7 +47,7 @@ def preparar(period):
                 overtime_rate=hora_extra_sugerida(salary),
             )
         )
-    return sorted(folhas, key=lambda f: chave_alfabetica(f.employee.name))
+    return sorted(folhas, key=lambda f: alphabetical_key(f.employee.name))
 
 
 @transaction.atomic

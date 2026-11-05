@@ -13,10 +13,10 @@ from django.urls import reverse
 from django.utils import timezone, translation
 
 from apps.core import countries
-from apps.core.isolation import usar_clinica
-from apps.core.middleware import ClinicaAtualMiddleware
-from apps.core.models import Papel
-from apps.core.validators import normalizar_telefone
+from apps.core.isolation import use_clinic
+from apps.core.middleware import CurrentClinicMiddleware
+from apps.core.models import Role
+from apps.core.validators import normalize_phone
 from apps.patients.models import Patient
 from tests.test_core import dados_clinica
 
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 def no_pais(clinic, country, **extra):
     clinic.country = country
-    clinic.time_zone = extra.pop("fuso", countries.PAISES[country].fusos[0])
+    clinic.time_zone = extra.pop("fuso", countries.COUNTRIES[country].fusos[0])
     for field, value in extra.items():
         setattr(clinic, field, value)
     clinic.save()
@@ -50,9 +50,9 @@ def no_pais(clinic, country, **extra):
     ],
 )
 def test_telefone_de_cada_pais(country, digitado, guardado, exibido, whatsapp):
-    assert normalizar_telefone(digitado, country) == guardado
-    assert countries.formatar_telefone(guardado, country) == exibido
-    assert countries.link_whatsapp(guardado, country) == whatsapp
+    assert normalize_phone(digitado, country) == guardado
+    assert countries.format_phone(guardado, country) == exibido
+    assert countries.whatsapp_link(guardado, country) == whatsapp
 
 
 @pytest.mark.parametrize(
@@ -61,12 +61,12 @@ def test_telefone_de_cada_pais(country, digitado, guardado, exibido, whatsapp):
 )
 def test_telefone_invalido_no_pais(country, digitado):
     with pytest.raises(ValidationError):
-        normalizar_telefone(digitado, country)
+        normalize_phone(digitado, country)
 
 
 def test_telefone_brasileiro_continua_igual(clinica_a):
-    with usar_clinica(clinica_a):
-        assert normalizar_telefone("(48) 8888-7777") == "48988887777"  # ninth digit added
+    with use_clinic(clinica_a):
+        assert normalize_phone("(48) 8888-7777") == "48988887777"  # ninth digit added
 
 
 # --- Postal codes ----------------------------------------------------------------
@@ -85,14 +85,14 @@ def test_telefone_brasileiro_continua_igual(clinica_a):
     ],
 )
 def test_codigo_postal_de_cada_pais(country, digitado, guardado, exibido):
-    assert countries.normalizar_cep(digitado, country) == guardado
-    assert countries.formatar_cep(guardado, country) == exibido
+    assert countries.normalize_postal_code(digitado, country) == guardado
+    assert countries.format_postal_code(guardado, country) == exibido
 
 
 @pytest.mark.parametrize(("country", "digitado"), [("US", "1000"), ("CA", "12345"), ("GB", "XYZ")])
 def test_codigo_postal_invalido(country, digitado):
     with pytest.raises(ValidationError):
-        countries.normalizar_cep(digitado, country)
+        countries.normalize_postal_code(digitado, country)
 
 
 # --- Time zone and the English variant -------------------------------------------
@@ -109,12 +109,12 @@ def _durante_requisicao(user):
 
     request = RequestFactory().get("/")
     request.user = user
-    ClinicaAtualMiddleware(response)(request)
+    CurrentClinicMiddleware(response)(request)
     return visto
 
 
 def test_fuso_e_ingles_do_pais_durante_a_requisicao(clinica_a, criar_usuario):
-    user = criar_usuario("recepcao_londres", clinica_a, Papel.RECEPCAO)
+    user = criar_usuario("recepcao_londres", clinica_a, Role.FRONT_DESK)
     no_pais(clinica_a, "GB")
     with translation.override("en"):
         assert _durante_requisicao(user) == {"fuso": "Europe/London", "language": "en-gb"}
@@ -128,13 +128,13 @@ def test_fuso_e_ingles_do_pais_durante_a_requisicao(clinica_a, criar_usuario):
 
 def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
-    cliente = cliente_de(criar_usuario("admin_londres", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_londres", clinica_a, Role.ADMIN))
     cliente.post(reverse("change_language"), {"language": "en"})
     page = cliente.get(reverse("home")).content.decode()
     assert '<html lang="en-gb">' in page
     # The English flag, with or without the hash of the collected static files (CI).
     assert re.search(r"flags/en(\.[0-9a-f]+)?\.svg", page) and "Patients" in page
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.create(
             name="Amelia Fictícia", birth_date=datetime.date(2000, 12, 25)
         )
@@ -150,7 +150,7 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
 
 
 def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de):
-    admin = cliente_de(criar_usuario("admin_pais", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_pais", clinica_a, Role.ADMIN))
     assert admin.post(reverse("clinic_settings"), dados_clinica(country="GB")).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.country, clinica_a.time_zone, clinica_a.currency) == (
@@ -175,7 +175,7 @@ def test_trocar_o_pais_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de)
 
 
 def test_fuso_de_outro_pais_e_recusado(clinica_a, criar_usuario, cliente_de):
-    admin = cliente_de(criar_usuario("admin_fuso", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_fuso", clinica_a, Role.ADMIN))
     response = admin.post(
         reverse("clinic_settings"), dados_clinica(country="ZA", time_zone="America/New_York")
     )
@@ -187,7 +187,7 @@ def test_fuso_de_outro_pais_e_recusado(clinica_a, criar_usuario, cliente_de):
 
 def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
-    admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Role.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
     assert 'name="state"' not in formulario and 'name="city_name"' in formulario
@@ -207,7 +207,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
         },
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Oliver Fictício")
     assert (patient.mobile_phone, patient.whatsapp, patient.postal_code) == (
         "7700900123",
@@ -221,7 +221,7 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
 
 
 def test_paciente_no_brasil_continua_com_cpf_e_cidades(clinica_a, criar_usuario, cliente_de):
-    admin = cliente_de(criar_usuario("admin_brasil", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_brasil", clinica_a, Role.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'name="tax_id"' in formulario and 'name="state"' in formulario
     assert 'name="city_name"' not in formulario and ">CEP" in formulario
@@ -240,7 +240,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     no_pais(clinica_a, "GB")
     ana = criar_profissional(clinica_a, "Dr. Fictício de Londres")
     londres = zoneinfo.ZoneInfo("Europe/London")
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         Appointment.objects.create(
             practitioner=ana,
             kind=AppointmentType.objects.first(),
@@ -248,7 +248,7 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
             start=datetime.datetime(2031, 3, 3, 9, 0, tzinfo=londres),
             end=datetime.datetime(2031, 3, 3, 9, 30, tzinfo=londres),
         )
-    cliente = cliente_de(criar_usuario("recepcao_agenda_londres", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao_agenda_londres", clinica_a, Role.FRONT_DESK))
     eventos = cliente.get(
         reverse("schedule:events"),
         {"practitioner": ana.pk, "start": "2031-03-03T00:00:00Z", "end": "2031-03-04T00:00:00Z"},
@@ -284,9 +284,9 @@ def test_agenda_mostra_a_hora_da_clinica_seja_qual_for_o_navegador(
     ],
 )
 def test_telefone_da_america_latina(country, digitado, guardado, exibido, whatsapp):
-    assert normalizar_telefone(digitado, country) == guardado
-    assert countries.formatar_telefone(guardado, country) == exibido
-    assert countries.link_whatsapp(guardado, country) == whatsapp
+    assert normalize_phone(digitado, country) == guardado
+    assert countries.format_phone(guardado, country) == exibido
+    assert countries.whatsapp_link(guardado, country) == whatsapp
 
 
 @pytest.mark.parametrize(
@@ -295,7 +295,7 @@ def test_telefone_da_america_latina(country, digitado, guardado, exibido, whatsa
 )
 def test_telefone_latino_invalido(country, digitado):
     with pytest.raises(ValidationError):
-        normalizar_telefone(digitado, country)
+        normalize_phone(digitado, country)
 
 
 @pytest.mark.parametrize(
@@ -314,7 +314,7 @@ def test_telefone_latino_invalido(country, digitado):
     ],
 )
 def test_codigo_postal_da_america_latina(country, digitado, guardado):
-    assert countries.normalizar_cep(digitado, country) == guardado
+    assert countries.normalize_postal_code(digitado, country) == guardado
 
 
 @pytest.mark.parametrize(
@@ -322,7 +322,7 @@ def test_codigo_postal_da_america_latina(country, digitado, guardado):
 )
 def test_codigo_postal_latino_invalido(country, digitado):
     with pytest.raises(ValidationError):
-        countries.normalizar_cep(digitado, country)
+        countries.normalize_postal_code(digitado, country)
 
 
 @pytest.mark.parametrize(
@@ -343,17 +343,20 @@ def test_espanhol_de_cada_pais(country, variante, value, clinica_a, criar_usuari
     """Spanish with each country's numbers and its currency, texts from the es catalog."""
     from apps.core import currencies
 
-    user = criar_usuario(f"recepcao_{country.lower()}", clinica_a, Papel.RECEPCAO)
+    user = criar_usuario(f"recepcao_{country.lower()}", clinica_a, Role.FRONT_DESK)
     no_pais(clinica_a, country)
     with translation.override("es"):
         assert _durante_requisicao(user)["language"] == variante
     with translation.override(variante):
-        assert currencies.formatar(Decimal("1234.56"), countries.PAISES[country].currency) == value
+        assert (
+            currencies.format_amount(Decimal("1234.56"), countries.COUNTRIES[country].currency)
+            == value
+        )
         assert translation.gettext("Rechamadas") == "Recordatorios"
 
 
 def test_pais_latino_no_formulario_ajusta_fuso_e_moeda(clinica_a, criar_usuario, cliente_de):
-    admin = cliente_de(criar_usuario("admin_mexico", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_mexico", clinica_a, Role.ADMIN))
     assert admin.post(reverse("clinic_settings"), dados_clinica(country="MX")).status_code == 302
     clinica_a.refresh_from_db()
     assert (clinica_a.time_zone, clinica_a.currency) == ("America/Mexico_City", "MXN")

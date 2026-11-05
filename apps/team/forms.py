@@ -2,8 +2,8 @@ from django import forms
 from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
-from apps.core.models import Membership, Papel, Usuario
+from apps.core.forms import BootstrapForm
+from apps.core.models import Membership, Role, Usuario
 
 
 def conta_exclusiva(user, clinic):
@@ -20,10 +20,10 @@ def conta_exclusiva(user, clinic):
     )
 
 
-class NovoMembroForm(FormularioBootstrap, UserCreationForm):
+class NovoMembroForm(BootstrapForm, UserCreationForm):
     """A new user account, created already linked to the current clinic with a role."""
 
-    role = forms.ChoiceField(label=_("Perfil"), choices=Papel.choices, initial=Papel.RECEPCAO)
+    role = forms.ChoiceField(label=_("Perfil"), choices=Role.choices, initial=Role.FRONT_DESK)
 
     class Meta(UserCreationForm.Meta):
         model = Usuario
@@ -41,7 +41,7 @@ class NovoMembroForm(FormularioBootstrap, UserCreationForm):
         return user
 
 
-class VinculoForm(FormularioBootstrap, forms.ModelForm):
+class VinculoForm(BootstrapForm, forms.ModelForm):
     """Role and access of a member in the current clinic."""
 
     class Meta:
@@ -60,13 +60,13 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        era_admin_ativo = self.initial.get("role") == Papel.ADMIN and self.initial.get("active")
-        continua_admin = data.get("role") == Papel.ADMIN and data.get("active")
+        era_admin_ativo = self.initial.get("role") == Role.ADMIN and self.initial.get("active")
+        continua_admin = data.get("role") == Role.ADMIN and data.get("active")
         if era_admin_ativo and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
             outros = Membership.objects.filter(
                 clinic_id=self.instance.clinic_id,
-                role=Papel.ADMIN,
+                role=Role.ADMIN,
                 active=True,
                 user__is_active=True,
             ).exclude(pk=self.instance.pk)
@@ -77,7 +77,7 @@ class VinculoForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class ContaForm(FormularioBootstrap, forms.ModelForm):
+class ContaForm(BootstrapForm, forms.ModelForm):
     """Name and e-mail of an account used only in this clinic."""
 
     class Meta:
@@ -89,5 +89,5 @@ class ContaForm(FormularioBootstrap, forms.ModelForm):
         self.fields["first_name"].required = True
 
 
-class SenhaForm(FormularioBootstrap, SetPasswordForm):
+class SenhaForm(BootstrapForm, SetPasswordForm):
     """New password set by the clinic administrator (the member's other sessions end)."""

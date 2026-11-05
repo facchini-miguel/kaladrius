@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
+from apps.core.isolation import use_clinic
 from apps.core.models import Clinic
 from apps.finance import services
 from apps.finance.models import Entry, FinancialAccount, Payment
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         sorteio = random.Random()  # noqa: S311 (fake data, not security)
         today = timezone.localdate()
         start = today - datetime.timedelta(days=days)
-        with usar_clinica(alvo):
+        with use_clinic(alvo):
             alvo_conta = FinancialAccount.objects.filter(name=account).first()
             if alvo_conta is None:
                 raise CommandError(f"Conta “{account}” não encontrada.")

@@ -15,8 +15,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core import modules
-from apps.core.models import ModuloClinico
-from apps.core.permissions import Acao, Modulo, exige_permissao, pode
+from apps.core.models import ModuleCode
+from apps.core.permissions import Action, Module, can, requires_permission
 from apps.dentistry.teeth import odontograma
 from apps.finance.models import Category
 from apps.patients.models import Patient
@@ -29,7 +29,7 @@ from .models import Estimate, Procedure
 POR_PAGINA = 50
 
 
-def _orcamentos():
+def _estimates():
     # Archived patients leave the team's screens (decision 046).
     return Estimate.objects.filter(patient__archived=False).select_related(
         "patient", "practitioner"
@@ -37,7 +37,7 @@ def _orcamentos():
 
 
 def _aberto(request, pk):
-    estimate = get_object_or_404(_orcamentos(), pk=pk)
+    estimate = get_object_or_404(_estimates(), pk=pk)
     if estimate.status != Estimate.Situacao.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("estimates:detail", pk=estimate.pk)
@@ -47,20 +47,20 @@ def _aberto(request, pk):
 def _odontologia(request):
     # The request's cached modules; the item's save() re-checks under the clinic lock. The
     # system administrator also gets the dental chart with Dentistry off (decision 115).
-    return ModuloClinico.ODONTOLOGIA in modules.visiveis(request)
+    return ModuleCode.DENTISTRY in modules.visible(request)
 
 
 def _liberar_se_desligado(request, item):
     """The system administrator writes dental items with Dentistry off; the page says so."""
-    if ModuloClinico.ODONTOLOGIA not in modules.habilitados(request) and _odontologia(request):
+    if ModuleCode.DENTISTRY not in modules.enabled(request) and _odontologia(request):
         item.odontologia_desligada_liberada = True
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
+@requires_permission(Module.ESTIMATES, Action.VIEW)
 def results(request):
     status = request.GET.get("status", Estimate.Situacao.ABERTO)
     search = request.GET.get("q", "").strip()
-    orcamentos = _orcamentos().prefetch_related("itens")
+    orcamentos = _estimates().prefetch_related("itens")
     if status in Estimate.Situacao.values:
         orcamentos = orcamentos.filter(status=status)
     if search:
@@ -79,7 +79,7 @@ def results(request):
     )
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.CRIAR)
+@requires_permission(Module.ESTIMATES, Action.CREATE)
 def new(request):
     inicial = {}
     code = request.GET.get("patient", "")
@@ -104,7 +104,7 @@ def new(request):
     return render(request, "estimates/form.html", {"form": form, "patient": patient})
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def editar(request, pk):
     estimate, response = _aberto(request, pk)
     if response:
@@ -121,29 +121,29 @@ def editar(request, pk):
     )
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
+@requires_permission(Module.ESTIMATES, Action.VIEW)
 def detalhe(request, pk):
-    estimate = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
+    estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
     aberto = estimate.status == Estimate.Situacao.ABERTO
-    odontologia = _odontologia(request)
-    if odontologia:
-        modules.marcar_se_desligado(request, ModuloClinico.ODONTOLOGIA)
+    dentistry = _odontologia(request)
+    if dentistry:
+        modules.mark_if_disabled(request, ModuleCode.DENTISTRY)
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
-    pode_desconto = pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR)
+    pode_desconto = can(request, Module.ESTIMATES, Action.CHANGE)
     return render(
         request,
         "estimates/detail.html",
         {
             "estimate": estimate,
             "aberto": aberto,
-            "item_form": ItemForm(odontologia=odontologia),
-            "odontologia_habilitada": odontologia,
+            "item_form": ItemForm(dentistry=dentistry),
+            "odontologia_habilitada": dentistry,
             "desconto_form": DescontoForm(initial={"discount": estimate.discount})
             if pode_desconto and aberto
             else None,
             "pode_aprovar": aberto
-            and pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR)
-            and pode(request, Modulo.ORCAMENTOS, Acao.ALTERAR),
+            and can(request, Module.RECEIVING, Action.CREATE)
+            and can(request, Module.ESTIMATES, Action.CHANGE),
             **_dentes(request, estimate),
         },
     )
@@ -159,12 +159,12 @@ def _dentes(request, estimate):
 
 
 @require_POST
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def item_adicionar(request, pk):
     estimate, response = _aberto(request, pk)
     if response:
         return response
-    form = ItemForm(request.POST, odontologia=_odontologia(request))
+    form = ItemForm(request.POST, dentistry=_odontologia(request))
     if form.is_valid():
         item = form.save(commit=False)
         item.estimate = estimate
@@ -184,7 +184,7 @@ def item_adicionar(request, pk):
 
 
 @require_POST
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def item_remover(request, pk, item):
     estimate, response = _aberto(request, pk)
     if response:
@@ -203,7 +203,7 @@ def item_remover(request, pk, item):
 
 
 @require_POST
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def discount(request, pk):
     estimate, response = _aberto(request, pk)
     if response:
@@ -220,9 +220,9 @@ def discount(request, pk):
     return redirect("estimates:detail", pk=estimate.pk)
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def aprovar(request, pk):
-    if not pode(request, Modulo.RECEBIMENTOS, Acao.CRIAR):
+    if not can(request, Module.RECEIVING, Action.CREATE):
         raise PermissionDenied
     estimate, response = _aberto(request, pk)
     if response:
@@ -259,7 +259,7 @@ def aprovar(request, pk):
 
 
 @require_POST
-@exige_permissao(Modulo.ORCAMENTOS, Acao.ALTERAR)
+@requires_permission(Module.ESTIMATES, Action.CHANGE)
 def recusar(request, pk):
     estimate, response = _aberto(request, pk)
     if response:
@@ -273,9 +273,9 @@ def recusar(request, pk):
     return redirect("estimates:detail", pk=estimate.pk)
 
 
-@exige_permissao(Modulo.ORCAMENTOS, Acao.VER)
+@requires_permission(Module.ESTIMATES, Action.VIEW)
 def imprimir(request, pk):
-    estimate = get_object_or_404(_orcamentos().prefetch_related("itens"), pk=pk)
+    estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
     return render(
         request,
         "estimates/print.html",
@@ -286,7 +286,7 @@ def imprimir(request, pk):
 # --- Procedure price list ---------------------------------------------------------------
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.VER)
+@requires_permission(Module.CATALOGS, Action.VIEW)
 def procedimentos(request):
     return render(
         request,
@@ -295,7 +295,7 @@ def procedimentos(request):
     )
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.ALTERAR)
+@requires_permission(Module.CATALOGS, Action.CHANGE)
 def procedimento_form(request, pk=None):
     procedure = get_object_or_404(Procedure.objects, pk=pk) if pk else Procedure()
     form = ProcedimentoForm(request.POST or None, instance=procedure)

@@ -102,8 +102,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "apps.core.middleware.IdiomaDoUsuarioMiddleware",
-    "apps.core.middleware.ClinicaAtualMiddleware",
+    "apps.core.middleware.UserLanguageMiddleware",
+    "apps.core.middleware.CurrentClinicMiddleware",
     "apps.audit.middleware.AuditoriaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -115,7 +115,7 @@ MIDDLEWARE = [
 
 # Behind Caddy in production: take the client IP from X-Forwarded-For (must run first).
 if env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
-    MIDDLEWARE.insert(0, "apps.core.middleware.ProxyReversoMiddleware")
+    MIDDLEWARE.insert(0, "apps.core.middleware.ReverseProxyMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
@@ -133,8 +133,8 @@ TEMPLATES = [
                 "apps.core.context_processors.clinic",
                 "apps.core.context_processors.backup",
                 "apps.monitoring.context_processors.alerta",
-                "apps.core.context_processors.idiomas",
-                "apps.core.context_processors.inatividade",
+                "apps.core.context_processors.languages",
+                "apps.core.context_processors.inactivity",
                 "apps.help.context_processors.documentacao",
                 "apps.medical_records.context_processors.prontuario",
             ],
@@ -171,7 +171,7 @@ AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = 1  # hours
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 # IPv6 clients are grouped by /48 network, so rotating addresses does not reset the count.
-AXES_CLIENT_IP_CALLABLE = "apps.core.security.ip_para_bloqueio"
+AXES_CLIENT_IP_CALLABLE = "apps.core.security.ip_for_lockout"
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = "registration/locked.html"
 

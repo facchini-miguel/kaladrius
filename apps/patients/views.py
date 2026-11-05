@@ -12,8 +12,8 @@ from django.utils.translation import gettext as _
 from apps.audit.models import AuditEntry
 from apps.audit.record import anonimizar, registrar
 from apps.core import legislation
-from apps.core.permissions import Acao, Modulo, exige_permissao, pode
-from apps.core.validators import normalizar_cnpj
+from apps.core.permissions import Action, Module, can, requires_permission
+from apps.core.validators import normalize_cnpj
 from apps.estimates.models import Estimate, EstimateItem
 from apps.finance.models import Entry, Installment, Payment
 from apps.finance.services import resumo_do_paciente
@@ -38,7 +38,7 @@ SITUACOES = {
 
 def _ve_arquivados(request):
     """Archived patients are seen (and restored or deleted) only by who could delete."""
-    return pode(request, Modulo.PACIENTES, Acao.EXCLUIR)
+    return can(request, Module.PATIENTS, Action.DELETE)
 
 
 def _visiveis(request):
@@ -51,7 +51,7 @@ def filtrar(pacientes, search, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if search:
         filtro = Q(name__unaccent__icontains=search) | Q(legal_name__unaccent__icontains=search)
-        document = normalizar_cnpj(search)
+        document = normalize_cnpj(search)
         if len(document) >= 3 and not any(c.isspace() for c in search.strip()):
             filtro |= Q(tax_id__startswith=document)
         if search.isdecimal() and len(search) <= 9:
@@ -62,7 +62,7 @@ def filtrar(pacientes, search, kind, status):
     return pacientes.filter(SITUACOES.get(status, SITUACOES["ativos"]))
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.VER)
+@requires_permission(Module.PATIENTS, Action.VIEW)
 def results(request):
     search = request.GET.get("q", "").strip()
     kind = request.GET.get("kind", "")
@@ -85,24 +85,24 @@ def results(request):
     )
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.VER)
+@requires_permission(Module.PATIENTS, Action.VIEW)
 def ficha(request, pk):
     patient = get_object_or_404(
         _visiveis(request).select_related("city__state", "marital_status", "archived_by"), pk=pk
     )
     # LGPD: access to a patient's record (health data) is logged.
-    registrar(AuditEntry.Acao.VISUALIZAR, patient)
+    registrar(AuditEntry.Action.VIEWED, patient)
     rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
     context = {"patient": patient, "rechamadas": rechamadas}
-    if pode(request, Modulo.AGENDA, Acao.VER):
+    if can(request, Module.SCHEDULE, Action.VIEW):
         context["agendamentos"] = _historico(request, patient)
-    if pode(request, Modulo.RECEBIMENTOS, Acao.VER):
+    if can(request, Module.RECEIVING, Action.VIEW):
         context["financeiro"] = resumo_do_paciente(patient)
-    if pode(request, Modulo.ORCAMENTOS, Acao.VER):
+    if can(request, Module.ESTIMATES, Action.VIEW):
         context["orcamentos"] = list(
             Estimate.objects.filter(patient=patient).prefetch_related("itens")[:10]
         )
-    if pode(request, Modulo.CONVENIOS, Acao.VER):
+    if can(request, Module.HEALTH_PLANS, Action.VIEW):
         context["carteirinhas"] = list(
             MemberCard.objects.filter(patient=patient).select_related("health_plan")
         )
@@ -114,17 +114,17 @@ def ficha(request, pk):
     return render(request, "patients/record.html", context)
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.VER)
+@requires_permission(Module.PATIENTS, Action.VIEW)
 def imprimir(request, pk):
     """The registration sheet, ready to print or save as PDF (as the legacy Medical's
     fichapaciente_imp): identification, contact, address and health plan cards."""
     patient = get_object_or_404(
         _visiveis(request).select_related("city__state", "marital_status"), pk=pk
     )
-    registrar(AuditEntry.Acao.VISUALIZAR, patient)  # LGPD, as the record
+    registrar(AuditEntry.Action.VIEWED, patient)  # LGPD, as the record
     carteirinhas = (
         list(MemberCard.objects.filter(patient=patient, active=True).select_related("health_plan"))
-        if pode(request, Modulo.CONVENIOS, Acao.VER)
+        if can(request, Module.HEALTH_PLANS, Action.VIEW)
         else None
     )
     return render(
@@ -159,12 +159,12 @@ def _historico(request, patient):
     }
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.CRIAR)
+@requires_permission(Module.PATIENTS, Action.CREATE)
 def new(request):
     return _formulario(request, Patient())
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+@requires_permission(Module.PATIENTS, Action.CHANGE)
 def editar(request, pk):
     # An archived patient is restored before being changed.
     return _formulario(request, get_object_or_404(Patient.objects, pk=pk, archived=False))
@@ -179,7 +179,7 @@ def _formulario(request, patient):
     return render(request, "patients/form.html", {"form": form, "patient": patient})
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
+@requires_permission(Module.PATIENTS, Action.DELETE)
 def arquivar(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     # Not while the patient still owes or is owed money: the administrator first receives or
@@ -213,7 +213,7 @@ def arquivar(request, pk):
     return render(request, "patients/archive.html", {"patient": patient})
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
+@requires_permission(Module.PATIENTS, Action.DELETE)
 def restaurar(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=True)
     if request.method == "POST":
@@ -224,7 +224,7 @@ def restaurar(request, pk):
     return redirect("patients:record", pk=patient.pk)
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.EXCLUIR)
+@requires_permission(Module.PATIENTS, Action.DELETE)
 def excluir(request, pk):
     """Permanent deletion, only for an archived patient who asked for it (LGPD, art. 18).
 
@@ -237,8 +237,8 @@ def excluir(request, pk):
     # The country's law and how long it keeps medical records (decision 124).
     context = {
         "patient": patient,
-        "lei": legislation.do_pais(),
-        "prazo_de_guarda": legislation.prazo_de_guarda(),
+        "lei": legislation.for_country(),
+        "prazo_de_guarda": legislation.retention_period(),
     }
     # The medical record must be kept (20 years in Brazil, Law 13.787/2018, decision 081): a
     # patient with one stays archived and is never permanently deleted, in any country.
@@ -294,7 +294,7 @@ def excluir(request, pk):
             anonimizar(Estimate, ids_orcamentos)
             anonimizar(EstimateItem, ids_itens)
             registrar(
-                AuditEntry.Acao.EXCLUIR,
+                AuditEntry.Action.DELETE,
                 # Filed under the clinic, so its administrator sees the erasure in the audit
                 # log (review stage 4: with no object, it had no clinic and stayed hidden).
                 clinic=request.clinic,
@@ -308,7 +308,7 @@ def excluir(request, pk):
     return render(request, "patients/delete.html", context)
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.VER)
+@requires_permission(Module.PATIENTS, Action.VIEW)
 def sugestoes(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     search = request.GET.get("q", "").strip()
@@ -321,7 +321,7 @@ def sugestoes(request):
 MESES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
 
 
-@exige_permissao(Modulo.ANIVERSARIANTES, Acao.VER)
+@requires_permission(Module.BIRTHDAYS, Action.VIEW)
 def aniversariantes(request):
     today = timezone.localdate()
     month = request.GET.get("mes", "")
@@ -354,13 +354,13 @@ def relacionados_de(patient):
     ]
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+@requires_permission(Module.PATIENTS, Action.CHANGE)
 def relacionado_novo(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     return _relacionado(request, patient, RelatedPerson())
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+@requires_permission(Module.PATIENTS, Action.CHANGE)
 def relacionado_editar(request, pk):
     relacionada = get_object_or_404(
         RelatedPerson.objects.select_related("patient", "other_patient"),
@@ -393,7 +393,7 @@ def _relacionado(request, patient, instancia):
     )
 
 
-@exige_permissao(Modulo.PACIENTES, Acao.ALTERAR)
+@requires_permission(Module.PATIENTS, Action.CHANGE)
 def relacionado_remover(request, pk):
     relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, patient__archived=False)
     if request.method == "POST":

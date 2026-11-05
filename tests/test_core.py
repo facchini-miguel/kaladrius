@@ -6,8 +6,8 @@ from django.core.management import CommandError, call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import MODULOS_GERAIS, Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import GENERAL_MODULES, Role
 from apps.practitioners.models import Practitioner
 from apps.schedule.models import Appointment, AppointmentType
 
@@ -178,13 +178,13 @@ def dados_clinica(**extra):
         "schedule_end": "18:00",
         "currency": "BRL",
         "schedule_interval": 30,
-        "modulos_gerais": sorted(MODULOS_GERAIS),
+        "modulos_gerais": sorted(GENERAL_MODULES),
         **extra,
     }
 
 
 def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     assert "Configurações da clínica" in cliente.get(reverse("home")).content.decode()
     assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
     response = cliente.post(
@@ -197,7 +197,7 @@ def test_admin_altera_configuracoes_da_clinica(clinica_a, criar_usuario, cliente
     assert (clinica_a.schedule_start, clinica_a.schedule_interval) == (datetime.time(8), 15)
 
 
-@pytest.mark.parametrize("role", [Papel.RECEPCAO, Papel.PROFISSIONAL])
+@pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
 def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     assert cliente.get(reverse("clinic_settings")).status_code == 403
@@ -213,7 +213,7 @@ def test_so_o_admin_altera_configuracoes(role, clinica_a, criar_usuario, cliente
     ],
 )
 def test_configuracoes_invalidas(extra, error, clinica_a, criar_usuario, cliente_de):
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. Teste")
         kind = AppointmentType.objects.first()
         amanha = timezone.localdate() + datetime.timedelta(days=1)
@@ -224,7 +224,7 @@ def test_configuracoes_invalidas(extra, error, clinica_a, criar_usuario, cliente
             start=start,
             end=start + datetime.timedelta(hours=1),
         )
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Papel.ADMIN))
+    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     response = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))
     assert response.status_code == 200
     assert error in response.content.decode()

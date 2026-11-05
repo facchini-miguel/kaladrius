@@ -13,13 +13,13 @@ class AuditEntry(models.Model):
     Views always filter by clinic explicitly.
     """
 
-    class Acao(models.TextChoices):
-        CRIAR = "criar", _("Criou")
-        ALTERAR = "alterar", _("Alterou")
-        EXCLUIR = "excluir", _("Excluiu")
-        VISUALIZAR = "visualizar", _("Visualizou")
+    class Action(models.TextChoices):
+        CREATE = "criar", _("Criou")
+        CHANGE = "alterar", _("Alterou")
+        DELETE = "excluir", _("Excluiu")
+        VIEWED = "visualizar", _("Visualizou")
         LOGIN = "login", _("Entrou no sistema")
-        LOGIN_FALHOU = "login_falhou", _("Tentativa de entrada recusada")
+        LOGIN_FAILED = "login_falhou", _("Tentativa de entrada recusada")
         LOGOUT = "logout", _("Saiu do sistema")
 
     timestamp = models.DateTimeField(
@@ -51,7 +51,7 @@ class AuditEntry(models.Model):
     user_name = models.CharField(
         _("usuário (texto)"), max_length=150, blank=True, db_column="usuario_nome"
     )
-    action = models.CharField(_("ação"), max_length=20, choices=Acao.choices, db_column="acao")
+    action = models.CharField(_("ação"), max_length=20, choices=Action.choices, db_column="acao")
     model_name = models.CharField(
         _("tipo de registro"), max_length=50, blank=True, db_column="modelo"
     )

@@ -1,13 +1,13 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 from apps.patients.models import Patient
 
 from .models import Recall
 
 
-class RechamadaForm(FormularioBootstrap, forms.ModelForm):
+class RechamadaForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Recall
         fields = ["patient", "date", "description", "done"]

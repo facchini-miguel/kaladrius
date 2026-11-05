@@ -11,8 +11,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
-from apps.core.ordering import ALFABETICA
+from apps.core.isolation import ClinicModel, WrongClinic
+from apps.core.ordering import ALPHABETICAL
 
 DINHEIRO = {"max_digits": 12, "decimal_places": 2}
 CENTAVO = Decimal("0.01")
@@ -22,8 +22,8 @@ ADICIONAL_HORA_EXTRA = Decimal("1.5")
 DIAS_POR_MES = Decimal(30)
 
 
-class Employee(ModeloDaClinica):
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
+class Employee(ClinicModel):
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
     # The country's employee document (decision 121); the name stayed from Brazil.
     tax_id = models.CharField(_("documento"), max_length=20, blank=True, db_column="cpf")
     job_title = models.CharField(_("cargo"), max_length=100, blank=True, db_column="cargo")
@@ -63,7 +63,7 @@ class Employee(ModeloDaClinica):
         return salary.amount if salary else None
 
 
-class Salary(ModeloDaClinica):
+class Salary(ClinicModel):
     """One salary change: the history the legacy kept in salario_fixo_hist."""
 
     employee = models.ForeignKey(
@@ -99,7 +99,7 @@ class Salary(ModeloDaClinica):
         return f"{self.employee} {self.amount} ({self.effective_from:%d/%m/%Y})"
 
 
-class Payroll(ModeloDaClinica):
+class Payroll(ClinicModel):
     """An employee's pay for one month: salary, overtime and absences.
 
     Once launched it becomes a payable (`lancamento`) and is no longer edited here; to
@@ -155,11 +155,11 @@ class Payroll(ModeloDaClinica):
         return f"{self.employee} {self.period:%m/%Y}"
 
     def save(self, *args, **kwargs):
-        self._conferir_clinica()
+        self._check_clinic()
         if self.clinic_id is None:  # without isolation (commands)
             self.clinic_id = self.employee.clinic_id
         if self.employee.clinic_id != self.clinic_id:
-            raise ClinicaDiferente("The employee must be of this clinic.")
+            raise WrongClinic("The employee must be of this clinic.")
         super().save(*args, **kwargs)
 
     @property

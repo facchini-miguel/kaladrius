@@ -60,9 +60,9 @@ def test_trocar_de_ipv6_na_mesma_rede_nao_zera_o_contador(client, criar_usuario)
     ],
 )
 def test_ip_para_bloqueio(rf, address, esperado):
-    from apps.core.security import ip_para_bloqueio
+    from apps.core.security import ip_for_lockout
 
-    assert ip_para_bloqueio(rf.get("/", REMOTE_ADDR=address)) == esperado
+    assert ip_for_lockout(rf.get("/", REMOTE_ADDR=address)) == esperado
 
 
 def test_login_certo_zera_o_contador(client, criar_usuario):
@@ -104,10 +104,10 @@ def test_novidades_filtradas_por_modulo(client, criar_usuario):
 
 
 def test_ip_real_atras_do_proxy(rf):
-    from apps.core.middleware import ProxyReversoMiddleware
+    from apps.core.middleware import ReverseProxyMiddleware
 
     request = rf.get("/", HTTP_X_FORWARDED_FOR="2804:abcd::1, 2001:db8::7", REMOTE_ADDR="::1")
-    ProxyReversoMiddleware(lambda r: None)(request)
+    ReverseProxyMiddleware(lambda r: None)(request)
     assert request.META["REMOTE_ADDR"] == "2001:db8::7"
 
 

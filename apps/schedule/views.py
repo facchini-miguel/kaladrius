@@ -13,7 +13,7 @@ from django.utils.translation import get_language, gettext_lazy, ngettext
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core.permissions import Acao, Modulo, exige_permissao, pode, so_a_propria_agenda
+from apps.core.permissions import Action, Module, can, own_schedule_only, requires_permission
 from apps.patients.models import Patient
 
 from . import services
@@ -21,17 +21,17 @@ from .forms import AgendamentoForm, TipoAtendimentoForm
 from .models import Appointment, AppointmentType
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.VER)
+@requires_permission(Module.CATALOGS, Action.VIEW)
 def tipos(request):
     return render(request, "schedule/types.html", {"tipos": AppointmentType.objects.all()})
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.CRIAR)
+@requires_permission(Module.CATALOGS, Action.CREATE)
 def tipo_novo(request):
     return _formulario(request, AppointmentType())
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.ALTERAR)
+@requires_permission(Module.CATALOGS, Action.CHANGE)
 def tipo_editar(request, pk):
     return _formulario(request, get_object_or_404(AppointmentType.objects, pk=pk))
 
@@ -47,7 +47,7 @@ def _formulario(request, kind):
     return render(request, "schedule/type_form.html", {"form": form, "kind": kind})
 
 
-@exige_permissao(Modulo.CADASTROS, Acao.EXCLUIR)
+@requires_permission(Module.CATALOGS, Action.DELETE)
 def tipo_excluir(request, pk):
     kind = get_object_or_404(AppointmentType.objects, pk=pk)
     if request.method == "POST":
@@ -112,7 +112,7 @@ def _periodo(request):
     return start, end
 
 
-@exige_permissao(Modulo.AGENDA, Acao.VER)
+@requires_permission(Module.SCHEDULE, Action.VIEW)
 def calendario(request):
     profissionais = list(services.profissionais_visiveis(request).filter(active=True))
     escolhido = request.GET.get("practitioner") or request.session.get(SESSAO_PROFISSIONAL)
@@ -123,7 +123,7 @@ def calendario(request):
     if practitioner is not None:
         request.session[SESSAO_PROFISSIONAL] = practitioner.pk
     clinic = request.clinic
-    ver_rechamadas = pode(request, Modulo.RECHAMADAS, Acao.VER)
+    ver_rechamadas = can(request, Module.RECALLS, Action.VIEW)
     config = {
         "practitioner": practitioner.pk if practitioner else None,
         "start": clinic.schedule_start.strftime("%H:%M:%S"),
@@ -138,7 +138,7 @@ def calendario(request):
             "aniversariantes": _("aniversariante(s)"),
             "rechamadas": _("rechamada(s) pendente(s)"),
         },
-        "pode": {acao: pode(request, Modulo.AGENDA, acao) for acao in ("criar", "alterar")},
+        "pode": {acao: can(request, Module.SCHEDULE, acao) for acao in ("criar", "alterar")},
         "urls": {
             "eventos": reverse("schedule:events"),
             "novo": reverse("schedule:new"),
@@ -156,12 +156,12 @@ def calendario(request):
             "practitioner": practitioner,
             "tipos": AppointmentType.objects.filter(active=True),
             "configuracao": config,
-            "so_a_propria": so_a_propria_agenda(request),
+            "so_a_propria": own_schedule_only(request),
         },
     )
 
 
-@exige_permissao(Modulo.AGENDA, Acao.VER)
+@requires_permission(Module.SCHEDULE, Action.VIEW)
 def eventos(request):
     periodo = _periodo(request)
     practitioner = request.GET.get("practitioner", "")
@@ -204,7 +204,7 @@ def eventos(request):
     )
 
 
-@exige_permissao(Modulo.AGENDA, Acao.CRIAR)
+@requires_permission(Module.SCHEDULE, Action.CREATE)
 def new(request):
     inicial = {
         field: request.GET[parametro]
@@ -238,7 +238,7 @@ def new(request):
     return render(request, "schedule/_form.html", {"form": form, "appointment": form.instance})
 
 
-@exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
+@requires_permission(Module.SCHEDULE, Action.CHANGE)
 def editar(request, pk):
     appointment = get_object_or_404(
         services.agendamentos_visiveis(request).select_related("patient"), pk=pk
@@ -271,7 +271,7 @@ MENSAGENS_SITUACAO = {
 
 
 @require_POST
-@exige_permissao(Modulo.AGENDA, Acao.ALTERAR)
+@requires_permission(Module.SCHEDULE, Action.CHANGE)
 def status(request, pk):
     """Came / missed / cancelled, from the appointment window or the home page."""
     appointment = get_object_or_404(
@@ -299,7 +299,7 @@ def status(request, pk):
     return redirect("home")
 
 
-@exige_permissao(Modulo.AGENDA, Acao.EXCLUIR)
+@requires_permission(Module.SCHEDULE, Action.DELETE)
 def excluir(request, pk):
     appointment = get_object_or_404(
         services.agendamentos_visiveis(request).select_related("patient"), pk=pk
@@ -341,7 +341,7 @@ def _aniversariantes_em(days):
     return resultado
 
 
-@exige_permissao(Modulo.AGENDA, Acao.VER)
+@requires_permission(Module.SCHEDULE, Action.VIEW)
 def aniversariantes(request):
     """Number of birthdays per day in the period shown by the calendar."""
     periodo = _periodo(request)
@@ -359,7 +359,7 @@ def aniversariantes(request):
     )
 
 
-@exige_permissao(Modulo.AGENDA, Acao.VER)
+@requires_permission(Module.SCHEDULE, Action.VIEW)
 def aniversariantes_dia(request):
     try:
         day = datetime.date.fromisoformat(request.GET.get("date", ""))

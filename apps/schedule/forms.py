@@ -5,7 +5,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 
@@ -13,7 +13,7 @@ from . import services
 from .models import Appointment, AppointmentType
 
 
-class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
+class TipoAtendimentoForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = AppointmentType
         fields = ["name", "color", "active"]
@@ -33,7 +33,7 @@ class TipoAtendimentoForm(FormularioBootstrap, forms.ModelForm):
         return name
 
 
-class AgendamentoForm(FormularioBootstrap, forms.ModelForm):
+class AgendamentoForm(BootstrapForm, forms.ModelForm):
     date = forms.DateField(
         label=_("Data"), widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
     )

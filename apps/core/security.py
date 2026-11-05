@@ -6,10 +6,10 @@ import ipaddress
 # so counting failures per full IPv6 address would let an attacker rotate addresses
 # and get unlimited attempts. Failures are counted per /48 network instead. Lockouts
 # are per username + network, so other users in the same network are not affected.
-PREFIXO_IPV6 = 48
+IPV6_PREFIX = 48
 
 
-def ip_para_bloqueio(request):
+def ip_for_lockout(request):
     """REMOTE_ADDR for IPv4; the /48 network address for IPv6 (axes AXES_CLIENT_IP_CALLABLE)."""
     address = request.META.get("REMOTE_ADDR") or ""
     try:
@@ -19,5 +19,5 @@ def ip_para_bloqueio(request):
     if ip.version == 6:
         if ip.ipv4_mapped is not None:
             return str(ip.ipv4_mapped)
-        return str(ipaddress.ip_network(f"{ip}/{PREFIXO_IPV6}", strict=False).network_address)
+        return str(ipaddress.ip_network(f"{ip}/{IPV6_PREFIX}", strict=False).network_address)
     return str(ip)

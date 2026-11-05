@@ -9,7 +9,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.core.models import Papel
+from apps.core.models import Role
 from apps.monitoring import health
 
 pytestmark = pytest.mark.django_db
@@ -46,7 +46,7 @@ def pasta(tmp_path, settings):
     settings.HEALTH_MONITORED = True
 
     def gravar(*rows):
-        (tmp_path / health.ARQUIVO).write_text("\n".join(rows) + "\n", encoding="utf-8")
+        (tmp_path / health.FILE_NAME).write_text("\n".join(rows) + "\n", encoding="utf-8")
 
     return gravar
 
@@ -117,7 +117,7 @@ def test_grafico_quebra_a_linha_na_lacuna(pasta):
 
 def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, cliente_de):
     pasta(amostra(5))
-    reception = cliente_de(criar_usuario("recepcao", clinica_a, Papel.RECEPCAO))
+    reception = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     assert 'href="/system/health/"' in reception.get(reverse("home")).content.decode()
     page = reception.get(reverse("monitoring:health"))
     assert page.status_code == 200

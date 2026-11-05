@@ -10,8 +10,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.core import fake_data
-from apps.core.isolation import sem_isolamento
-from apps.core.models import Clinic, Membership, Papel
+from apps.core.isolation import without_isolation
+from apps.core.models import Clinic, Membership, Role
 from apps.health_plans.models import HealthPlan, MemberCard
 from apps.patients.models import Patient, RelatedPerson
 from apps.practitioners.models import Practitioner
@@ -22,16 +22,16 @@ from apps.schedule.simulation import simular_agendamentos, simular_rechamadas
 from apps.staff.models import Employee, Salary
 
 # Fake data only. Names, registrations and e-mails are invented.
-CLINICAS = [
+CLINICS = [
     {
         "name": "Clínica Sorriso (teste)",
         "dados": {"phone": "(48) 3000-0001"},
         "usuarios": [
-            ("admin.sorriso", "Beatriz", "Lima", Papel.ADMIN),
-            ("recepcao.sorriso", "Carla", "Mendes", Papel.RECEPCAO),
-            ("financeiro.sorriso", "Diego", "Rocha", Papel.FINANCEIRO),
-            ("dra.ana", "Ana", "Souza", Papel.PROFISSIONAL),
-            ("dr.carlos", "Carlos", "Pereira", Papel.PROFISSIONAL),
+            ("admin.sorriso", "Beatriz", "Lima", Role.ADMIN),
+            ("recepcao.sorriso", "Carla", "Mendes", Role.FRONT_DESK),
+            ("financeiro.sorriso", "Diego", "Rocha", Role.FINANCE),
+            ("dra.ana", "Ana", "Souza", Role.PRACTITIONER),
+            ("dr.carlos", "Carlos", "Pereira", Role.PRACTITIONER),
         ],
         "profissionais": [
             ("Dra. Ana Souza", "CRO-SC 10001", "#0d6efd", "dra.ana"),
@@ -80,13 +80,13 @@ class Command(BaseCommand):
             )
 
         criados = []
-        with transaction.atomic(), sem_isolamento():
+        with transaction.atomic(), without_isolation():
             clinicas = []
-            for data in CLINICAS:
+            for data in CLINICS:
                 clinic, _ = Clinic.objects.get_or_create(name=data["name"], defaults=data["dados"])
                 clinicas.append(clinic)
                 for username, name, sobrenome, role in data["usuarios"]:
-                    user = self._usuario(username, name, sobrenome, password, criados)
+                    user = self._user(username, name, sobrenome, password, criados)
                     Membership.objects.get_or_create(
                         user=user, clinic=clinic, defaults={"role": role}
                     )
@@ -98,14 +98,14 @@ class Command(BaseCommand):
                         defaults={"registration": registration, "color": color, "user": user},
                     )
 
-            total_pacientes = sum(self._pacientes(clinic, pacientes) for clinic in clinicas)
+            total_pacientes = sum(self._patients(clinic, pacientes) for clinic in clinicas)
             total_agendamentos = 0
             if not sem_agenda:
-                total_agendamentos = sum(self._agendamentos(clinic) for clinic in clinicas)
-            total_rechamadas = sum(self._rechamadas(clinic) for clinic in clinicas)
+                total_agendamentos = sum(self._appointments(clinic) for clinic in clinicas)
+            total_rechamadas = sum(self._recalls(clinic) for clinic in clinicas)
             for clinic in clinicas:
-                self._funcionarios(clinic)
-                self._relacionados(clinic)
+                self._employees(clinic)
+                self._related_people(clinic)
 
         self.stdout.write(self.style.SUCCESS("Dados de teste prontos."))
         self.stdout.write(f"Pacientes fictícios criados: {total_pacientes}")
@@ -118,7 +118,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Nenhum usuário novo: os dados de teste já existiam.")
 
-    def _usuario(self, username, name, sobrenome, password, criados):
+    def _user(self, username, name, sobrenome, password, criados):
         user, criado = get_user_model().objects.get_or_create(
             username=username,
             defaults={
@@ -133,7 +133,7 @@ class Command(BaseCommand):
             criados.append(username)
         return user
 
-    def _pacientes(self, clinic, quantity):
+    def _patients(self, clinic, quantity):
         """Create fake patients for a clinic that has none. Returns how many were created."""
         if quantity <= 0 or Patient.objects.filter(clinic=clinic).exists():
             return 0
@@ -184,10 +184,10 @@ class Command(BaseCommand):
                 patient.occupation = fake_data.occupation(fake)
             novos.append(patient)
         Patient.objects.bulk_create(novos, batch_size=500)
-        self._carteirinhas(clinic, novos)
+        self._member_cards(clinic, novos)
         return len(novos)
 
-    def _carteirinhas(self, clinic, pacientes):
+    def _member_cards(self, clinic, pacientes):
         """Two made-up health plans and a card for about a third of the patients."""
         sorteio = random.Random(clinic.pk + 2000)  # noqa: S311 (fake data, not security)
         convenios = [
@@ -208,7 +208,7 @@ class Command(BaseCommand):
             if sorteio.random() < 0.35
         )
 
-    def _funcionarios(self, clinic):
+    def _employees(self, clinic):
         """Two made-up employees with a salary, for the month's pay (decision 099)."""
         if Employee.objects.filter(clinic=clinic).exists():
             return
@@ -224,7 +224,7 @@ class Command(BaseCommand):
                 clinic=clinic, employee=employee, amount=Decimal(salario), effective_from=hired_on
             )
 
-    def _relacionados(self, clinic):
+    def _related_people(self, clinic):
         """A few family links between made-up patients and outside contacts (decision 101)."""
         if RelatedPerson.objects.filter(clinic=clinic).exists():
             return
@@ -251,14 +251,14 @@ class Command(BaseCommand):
                 phone=f"4899000000{n}",
             )
 
-    def _agendamentos(self, clinic):
+    def _appointments(self, clinic):
         """Fill ~60% of the weekday slots from 2 weeks ago to 4 weeks ahead."""
         if Appointment.objects.filter(clinic=clinic).exists():
             return 0
         sorteio = random.Random(clinic.pk)  # noqa: S311 (fake data, not security)
         return simular_agendamentos(clinic, sorteio)
 
-    def _rechamadas(self, clinic):
+    def _recalls(self, clinic):
         """About 80 recalls from 30 days ago to 60 days ahead; past ones mostly done."""
         if Recall.objects.filter(clinic=clinic).exists():
             return 0

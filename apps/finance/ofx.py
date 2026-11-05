@@ -55,7 +55,7 @@ def _texto(content: bytes) -> str:
     return content.decode("latin-1")
 
 
-def _campo(bloco, tag):
+def _field(bloco, tag):
     achado = re.search(rf"<{tag}>([^<\r\n]*)", bloco, re.IGNORECASE)
     return achado.group(1).strip() if achado else ""
 
@@ -89,20 +89,20 @@ def ler(content: bytes) -> Extrato:
     vistos = {}
     unreadable_transactions = 0
     for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", text, re.IGNORECASE | re.DOTALL):
-        date = _data(_campo(bloco, "DTPOSTED"))
-        amount = _valor(_campo(bloco, "TRNAMT"))
+        date = _data(_field(bloco, "DTPOSTED"))
+        amount = _valor(_field(bloco, "TRNAMT"))
         if date is None or amount is None:
             unreadable_transactions += 1
             continue
         if amount == 0:  # nothing moved (some banks list balance lines this way)
             continue
-        memo = _campo(bloco, "MEMO")
-        name = _campo(bloco, "NAME")
-        description = " · ".join(dict.fromkeys(p for p in (name, memo) if p)) or _campo(
+        memo = _field(bloco, "MEMO")
+        name = _field(bloco, "NAME")
+        description = " · ".join(dict.fromkeys(p for p in (name, memo) if p)) or _field(
             bloco, "TRNTYPE"
         )
         fitid = (
-            _campo(bloco, "FITID")
+            _field(bloco, "FITID")
             or hashlib.sha1(  # noqa: S324 (an id, not security)
                 f"{date}|{amount}|{description}".encode()
             ).hexdigest()
@@ -117,18 +117,18 @@ def ler(content: bytes) -> Extrato:
                 date=date,
                 amount=amount,
                 description=description[:200],
-                kind=_campo(bloco, "TRNTYPE")[:20],
+                kind=_field(bloco, "TRNTYPE")[:20],
             )
         )
     saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", text, re.I | re.S)
     saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
     return Extrato(
-        bank_code=_campo(text, "BANKID")[:20],
-        account=_campo(text, "ACCTID")[:40],
-        start=_data(_campo(text, "DTSTART")),
-        end=_data(_campo(text, "DTEND")),
-        balance=_valor(_campo(saldo_texto, "BALAMT")) if saldo_texto else None,
-        balance_date=_data(_campo(saldo_texto, "DTASOF")) if saldo_texto else None,
+        bank_code=_field(text, "BANKID")[:20],
+        account=_field(text, "ACCTID")[:40],
+        start=_data(_field(text, "DTSTART")),
+        end=_data(_field(text, "DTEND")),
+        balance=_valor(_field(saldo_texto, "BALAMT")) if saldo_texto else None,
+        balance_date=_data(_field(saldo_texto, "DTASOF")) if saldo_texto else None,
         transacoes=transacoes,
         unreadable_transactions=unreadable_transactions,
     )

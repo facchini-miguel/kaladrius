@@ -5,15 +5,15 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ModeloDaClinica
-from apps.core.ordering import ALFABETICA
-from apps.core.validators import validar_cor
+from apps.core.isolation import ClinicModel
+from apps.core.ordering import ALPHABETICAL
+from apps.core.validators import validate_color
 
 
-class Practitioner(ModeloDaClinica):
+class Practitioner(ClinicModel):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
     registration = models.CharField(
         _("registro profissional"),
         max_length=30,
@@ -25,7 +25,7 @@ class Practitioner(ModeloDaClinica):
         _("cor na agenda"),
         max_length=7,
         default="#0d6efd",
-        validators=[validar_cor],
+        validators=[validate_color],
         db_column="cor",
     )
     user = models.ForeignKey(

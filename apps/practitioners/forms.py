@@ -3,12 +3,12 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import countries, identification
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 
 from .models import Practitioner
 
 
-class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
+class ProfissionalForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Practitioner
         fields = ["name", "registration", "color", "user", "active"]
@@ -19,7 +19,9 @@ class ProfissionalForm(FormularioBootstrap, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         # The registrations of the clinic's country as examples (decision 121).
-        exemplos = identification.do_pais(countries.pais_da_clinica(clinic)).registro_profissional
+        exemplos = identification.for_country(
+            countries.clinic_country(clinic)
+        ).registro_profissional
         self.fields["registration"].help_text = exemplos
         # Only users with an active membership in this clinic can be linked.
         self.fields["user"].queryset = (

@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
-ARQUIVO = "samples.jsonl"
+FILE_NAME = "samples.jsonl"
 # The fields of a sample and of each of its containers, as health.sh writes them: internal names.
 CAMPOS = {
     "time": "momento",
@@ -39,7 +39,7 @@ LIMITES = {"memoria": (85, 95), "swap": (50, 80), "disco": (80, 90), "cpu": (80,
 
 
 def _arquivo():
-    return Path(settings.HEALTH_DIR) / ARQUIVO
+    return Path(settings.HEALTH_DIR) / FILE_NAME
 
 
 def _ler(row):

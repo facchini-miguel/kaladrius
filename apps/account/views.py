@@ -112,7 +112,7 @@ def duas_etapas(request):
         if acao == "desativar" and desativar is not None and desativar.is_valid():
             services.desativar(user)
             registrar(
-                AuditEntry.Acao.ALTERAR,
+                AuditEntry.Action.CHANGE,
                 user,
                 description=f"{user}: verificação em duas etapas desativada",
             )
@@ -144,7 +144,7 @@ def duas_etapas(request):
         if services.verificar_app(dispositivo, form.cleaned_data["code"]):
             codigos = services.ativar(dispositivo)
             registrar(
-                AuditEntry.Acao.ALTERAR,
+                AuditEntry.Action.CHANGE,
                 user,
                 description=f"{user}: verificação em duas etapas ativada",
             )

@@ -4,8 +4,8 @@ FDI, Universal (United States, the default there) or Palmer."""
 import pytest
 from django.urls import reverse
 
-from apps.core.forms import NovaClinicaForm
-from apps.core.isolation import usar_clinica
+from apps.core.forms import NewClinicForm
+from apps.core.isolation import use_clinic
 from apps.dentistry.teeth import (
     DENTES_DECIDUOS,
     DENTES_PERMANENTES,
@@ -67,9 +67,9 @@ def test_ordem_da_numeracao():
 
 
 def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
-    from apps.core.models import Papel
+    from apps.core.models import Role
 
-    admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Papel.ADMIN))
+    admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Role.ADMIN))
     assert clinica_a.tooth_numbering == FDI
     assert admin.post(reverse("clinic_settings"), dados_clinica(country="US")).status_code == 302
     clinica_a.refresh_from_db()
@@ -84,7 +84,7 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
 
 
 def test_clinica_nova_nos_estados_unidos_comeca_com_a_universal():
-    form = NovaClinicaForm({"name": "Smile Fictitious", "area": "odontologia", "country": "US"})
+    form = NewClinicForm({"name": "Smile Fictitious", "area": "odontologia", "country": "US"})
     assert form.is_valid(), form.errors
     assert form.instance.tooth_numbering == UNIVERSAL
 
@@ -96,7 +96,7 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
     cliente = entrar(cenario, "practitioner")
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, procedure=cenario["restauracao"].pk, teeth="36,18")
-    with usar_clinica(clinic):
+    with use_clinic(clinic):
         item = estimate.itens.get()
         assert item.teeth == "18,36"  # always FDI in the database
         assert item.dentes_exibicao == "1, 19"

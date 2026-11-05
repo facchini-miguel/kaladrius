@@ -6,10 +6,10 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from faker import Faker
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Role
 from apps.core.templatetags.formats import whatsapp
-from apps.core.validators import nono_digito, normalizar_telefone
+from apps.core.validators import ninth_digit, normalize_phone
 from apps.legacy.anonymization import _mesmo_tamanho
 from apps.patients.models import Patient
 
@@ -26,19 +26,19 @@ from apps.patients.models import Patient
     ],
 )
 def test_normalizar_telefone(digitado, esperado):
-    assert normalizar_telefone(digitado) == esperado
+    assert normalize_phone(digitado) == esperado
 
 
 @pytest.mark.parametrize("digitado", ["(20) 3461-3354", "(54) 3123-45678", "123", "5491234"])
 def test_telefone_invalido(digitado):
     with pytest.raises(ValidationError):
-        normalizar_telefone(digitado)
+        normalize_phone(digitado)
 
 
 def test_nono_digito_so_em_celular():
-    assert nono_digito("5481234567") == "54981234567"
-    assert nono_digito("5434613354") == "5434613354"
-    assert nono_digito("99998888") == "99998888"  # no area code: left as it was
+    assert ninth_digit("5481234567") == "54981234567"
+    assert ninth_digit("5434613354") == "5434613354"
+    assert ninth_digit("99998888") == "99998888"  # no area code: left as it was
 
 
 def test_link_do_whatsapp_com_ddd_e_nono_digito():
@@ -47,7 +47,7 @@ def test_link_do_whatsapp_com_ddd_e_nono_digito():
 
 @pytest.mark.django_db
 def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Papel.RECEPCAO))
+    cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Role.FRONT_DESK))
     response = cliente.post(
         reverse("patients:new"),
         {
@@ -59,7 +59,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
         },
     )
     assert response.status_code == 302
-    with usar_clinica(clinica_a):
+    with use_clinic(clinica_a):
         patient = Patient.objects.get()
     assert (patient.mobile_phone, patient.whatsapp, patient.home_phone) == (
         "54981234567",

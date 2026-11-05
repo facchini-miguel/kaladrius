@@ -1,11 +1,11 @@
 from apps.core import modules
-from apps.core.models import ModuloClinico, Papel
+from apps.core.models import ModuleCode, Role
 from apps.practitioners.models import Practitioner
 
 
 def prontuario_habilitado(request):
     """The clinic has the medical record module on (decision 092)."""
-    return ModuloClinico.PRONTUARIO in modules.habilitados(request)
+    return ModuleCode.MEDICAL_RECORDS in modules.enabled(request)
 
 
 def administra_prontuario(request):
@@ -15,7 +15,7 @@ def administra_prontuario(request):
     return (
         request.user.is_authenticated
         and request.user.is_superuser
-        and ModuloClinico.PRONTUARIO in modules.visiveis(request)
+        and ModuleCode.MEDICAL_RECORDS in modules.visible(request)
     )
 
 
@@ -44,6 +44,6 @@ def _profissional(request):
     vinculo = getattr(request, "vinculo", None)
     if vinculo is None and not user.is_superuser:
         return None
-    if vinculo is not None and vinculo.role == Papel.RECEPCAO:
+    if vinculo is not None and vinculo.role == Role.FRONT_DESK:
         return None
     return Practitioner.objects.filter(user=user, active=True).first()

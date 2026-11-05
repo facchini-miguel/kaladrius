@@ -6,9 +6,9 @@ The query string goes along, and the values inside an address are translated."""
 from django.http import HttpResponseRedirect
 from django.urls import path, re_path, reverse
 
-CADASTROS = {"categorias": "categories", "contas": "accounts", "centros-de-custo": "cost-centers"}
+CATALOGS = {"categorias": "categories", "contas": "accounts", "centros-de-custo": "cost-centers"}
 ACOES = {"conciliar": "reconcile", "ignorar": "ignore", "desfazer": "undo"}
-CADASTRO = "|".join(CADASTROS)
+CADASTRO = "|".join(CATALOGS)
 CAIXA = {"retirada": "withdrawal", "reforco": "top-up"}
 
 
@@ -168,15 +168,15 @@ urlpatterns = [
     path("novidades/", para("whats_new")),
     re_path(
         r"^financeiro/(?P<cadastro>categorias|contas|centros-de-custo)/$",
-        para("finance:catalog", {"cadastro": CADASTROS}),
+        para("finance:catalog", {"cadastro": CATALOGS}),
     ),
     re_path(
         r"^financeiro/(?P<cadastro>categorias|contas|centros-de-custo)/novo/$",
-        para("finance:catalog_new", {"cadastro": CADASTROS}),
+        para("finance:catalog_new", {"cadastro": CATALOGS}),
     ),
     re_path(
         rf"^financeiro/(?P<cadastro>{CADASTRO})/(?P<pk>[0-9]+)/$",
-        para("finance:catalog_edit", {"cadastro": CADASTROS}),
+        para("finance:catalog_edit", {"cadastro": CATALOGS}),
     ),
     re_path(
         r"^financeiro/transacoes/(?P<pk>[0-9]+)/(?P<acao>conciliar|ignorar|desfazer)/$",

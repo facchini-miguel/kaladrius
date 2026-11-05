@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import identification
-from apps.core.forms import CampoDecimal, FormularioBootstrap, campo_documento
-from apps.core.validators import normalizar_telefone
+from apps.core.forms import BootstrapForm, LocalizedDecimalField, document_field
+from apps.core.validators import normalize_phone
 from apps.finance.models import Category
 
 from .models import Employee, Payroll
@@ -13,7 +13,7 @@ DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
 def _dinheiro(label, obrigatorio):
-    return CampoDecimal(
+    return LocalizedDecimalField(
         label=label,
         max_digits=12,
         decimal_places=2,
@@ -24,10 +24,10 @@ def _dinheiro(label, obrigatorio):
     )
 
 
-class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
+class FuncionarioForm(BootstrapForm, forms.ModelForm):
     """The employee and, on registering or on a raise, the salary from a date."""
 
-    tax_id = campo_documento()  # the country's employee document (decision 121)
+    tax_id = document_field()  # the country's employee document (decision 121)
     phone = forms.CharField(
         label=_("Telefone"),
         max_length=16,
@@ -58,11 +58,11 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # None in Australia: the law restricts who may record the tax file number.
-        self.document = identification.do_pais().funcionario
+        self.document = identification.for_country().funcionario
         if self.document is None:
             del self.fields["tax_id"]
         else:
-            self.fields["tax_id"].label = self.document.sigla
+            self.fields["tax_id"].label = self.document.abbreviation
             self.fields["tax_id"].widget.attrs["placeholder"] = self.document.example
         if self.instance.pk:
             self.fields["salary"].label = _("Novo salário")
@@ -74,15 +74,15 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
             self.fields["salario_desde"].help_text = _("Em branco: a data de admissão ou hoje.")
 
     def clean_tax_id(self):
-        tax_id = identification.limpar(
-            self.cleaned_data.get("tax_id"), [self.document], self.document.sigla
+        tax_id = identification.clean_value(
+            self.cleaned_data.get("tax_id"), [self.document], self.document.abbreviation
         )
         if tax_id and Employee.objects.filter(tax_id=tax_id).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("Já existe um funcionário com este documento."))
         return tax_id
 
     def clean_phone(self):
-        return normalizar_telefone(self.cleaned_data.get("phone"))
+        return normalize_phone(self.cleaned_data.get("phone"))
 
     def clean(self):
         data = super().clean()
@@ -102,10 +102,10 @@ class FuncionarioForm(FormularioBootstrap, forms.ModelForm):
         return data
 
 
-class FolhaForm(FormularioBootstrap, forms.ModelForm):
+class FolhaForm(BootstrapForm, forms.ModelForm):
     """One employee's line of the month: overtime, absences and a note."""
 
-    overtime_hours = CampoDecimal(
+    overtime_hours = LocalizedDecimalField(
         label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
     overtime_rate = _dinheiro(_("Valor da hora extra"), obrigatorio=True)
@@ -127,7 +127,7 @@ class FolhaForm(FormularioBootstrap, forms.ModelForm):
         return absences
 
 
-class LancarForm(FormularioBootstrap, forms.Form):
+class LancarForm(BootstrapForm, forms.Form):
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
     due_date = forms.DateField(label=_("Vencimento"), widget=DATA)
 

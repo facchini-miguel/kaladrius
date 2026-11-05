@@ -5,7 +5,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.permissions import Action, Module, requires_permission
 from apps.patients.models import Patient
 
 from . import insurance
@@ -13,7 +13,7 @@ from .forms import CarteirinhaForm, ConvenioForm
 from .models import HealthPlan, MemberCard
 
 
-@exige_permissao(Modulo.CONVENIOS, Acao.VER)
+@requires_permission(Module.HEALTH_PLANS, Action.VIEW)
 def results(request):
     convenios = HealthPlan.objects.annotate(
         pacientes=Count("carteirinhas", filter=Q(carteirinhas__active=True))
@@ -25,12 +25,12 @@ def results(request):
     )
 
 
-@exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
+@requires_permission(Module.HEALTH_PLANS, Action.CREATE)
 def new(request):
     return _convenio(request, HealthPlan())
 
 
-@exige_permissao(Modulo.CONVENIOS, Acao.ALTERAR)
+@requires_permission(Module.HEALTH_PLANS, Action.CHANGE)
 def editar(request, pk):
     return _convenio(request, get_object_or_404(HealthPlan.objects, pk=pk))
 
@@ -44,13 +44,13 @@ def _convenio(request, instancia):
     return render(request, "health_plans/form.html", {"form": form, "instancia": instancia})
 
 
-@exige_permissao(Modulo.CONVENIOS, Acao.CRIAR)
+@requires_permission(Module.HEALTH_PLANS, Action.CREATE)
 def carteirinha_nova(request, patient):
     patient = get_object_or_404(Patient.objects, pk=patient, archived=False)
     return _carteirinha(request, patient, MemberCard())
 
 
-@exige_permissao(Modulo.CONVENIOS, Acao.ALTERAR)
+@requires_permission(Module.HEALTH_PLANS, Action.CHANGE)
 def carteirinha_editar(request, pk):
     carteirinha = get_object_or_404(
         MemberCard.objects.select_related("patient"), pk=pk, patient__archived=False

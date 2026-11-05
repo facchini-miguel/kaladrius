@@ -8,14 +8,14 @@ from django.db import connection, models
 from django.utils import timezone
 
 # Dates about the person or the server, not the clinic's activity: they never move.
-FIXAS = {"pacientes.patient.birth_date", "core.backup.timestamp"}
+FIXED = {"pacientes.patient.birth_date", "core.backup.timestamp"}
 
 
-def _fixa(modelo, field):
-    return f"{modelo._meta.label_lower}.{field.name}" in FIXAS
+def _is_fixed(modelo, field):
+    return f"{modelo._meta.label_lower}.{field.name}" in FIXED
 
 
-def campos_de_data():
+def date_fields():
     """(model, [date fields]) of every table of the project's apps."""
     for modelo in apps.get_models():
         if not modelo.__module__.startswith("apps.") or modelo._meta.proxy:
@@ -23,7 +23,7 @@ def campos_de_data():
         fields = [
             field
             for field in modelo._meta.local_concrete_fields
-            if isinstance(field, models.DateField) and not _fixa(modelo, field)
+            if isinstance(field, models.DateField) and not _is_fixed(modelo, field)
         ]
         if fields:
             yield modelo, fields
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             self.stdout.write("Menos de uma semana: nada a avançar.")
             return
 
-        tables = list(campos_de_data())
+        tables = list(date_fields())
         # Moving everything at once would briefly overlap one appointment with the next
         # week's, so the no-double-booking constraint is set aside during the update.
         exclusoes = [

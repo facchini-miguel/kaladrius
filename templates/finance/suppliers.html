@@ -9,7 +9,7 @@
   {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
 </div>
 
-{% rotulo_documento "pessoa" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
+{% document_label "pessoa" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-8">
     <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
@@ -25,7 +25,7 @@
     <thead>
       <tr>
         <th>{% translate "Nome" %}</th>
-        <th>{% rotulo_documento "pessoa" "empresa" %}</th>
+        <th>{% document_label "pessoa" "empresa" %}</th>
         <th>{% translate "Telefone" %}</th>
         <th>{% translate "WhatsApp" %}</th>
         <th class="text-end">{% translate "Ações" %}</th>

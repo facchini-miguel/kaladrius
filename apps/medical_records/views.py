@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from apps.audit.models import AuditEntry
 from apps.audit.record import registrar
 from apps.core import modules
-from apps.core.models import ModuloClinico
+from apps.core.models import ModuleCode
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.schedule.models import Appointment
@@ -28,7 +28,7 @@ from .forms import (
 from .models import CAMPOS_DA_ANAMNESE, Attachment, Certificate, ExamRequest, Prescription, Visit
 from .permissions import acessa_prontuario, administra_prontuario, profissional_do_usuario
 
-Acao = AuditEntry.Acao
+Action = AuditEntry.Action
 # The audit log names the changed fields but never copies clinical text (decision 081).
 SIGILO = "(conteúdo clínico)"
 
@@ -42,7 +42,7 @@ def exige_profissional(view):
     def protegida(request, *args, **kwargs):
         if not acessa_prontuario(request):
             raise PermissionDenied
-        modules.marcar_se_desligado(request, ModuloClinico.PRONTUARIO)
+        modules.mark_if_disabled(request, ModuleCode.MEDICAL_RECORDS)
         return view(request, profissional_do_usuario(request), *args, **kwargs)
 
     return protegida
@@ -57,7 +57,7 @@ def _finalizar(request, visit):
     visit.finalized_at = timezone.now()
     visit.finalized_by = request.user
     visit.save(update_fields=["finalized_at", "finalized_by", "updated_at"])
-    registrar(Acao.ALTERAR, visit, changes={"finalizado": [None, "sim"]})
+    registrar(Action.CHANGE, visit, changes={"finalizado": [None, "sim"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
     )
@@ -86,7 +86,7 @@ def new(request, practitioner, patient):
         visit.appointment = appointment
         visit.created_by = request.user
         visit.save()
-        _auditar(Acao.CRIAR, visit, [c for c in CAMPOS_DA_ANAMNESE if getattr(visit, c)])
+        _auditar(Action.CREATE, visit, [c for c in CAMPOS_DA_ANAMNESE if getattr(visit, c)])
         if request.POST.get("acao") == "finalizar":
             _finalizar(request, visit)
         else:
@@ -115,14 +115,14 @@ def visit(request, practitioner, pk):
         if form.is_valid():
             alterados = list(form.changed_data)
             form.save()
-            _auditar(Acao.ALTERAR, visit, alterados)
+            _auditar(Action.CHANGE, visit, alterados)
             if request.POST.get("acao") == "finalizar":
                 _finalizar(request, visit)
             else:
                 messages.success(request, _("Atendimento salvo."))
             return redirect("medical_records:visit", pk=visit.pk)
     else:
-        registrar(Acao.VISUALIZAR, visit)
+        registrar(Action.VIEWED, visit)
     return render(
         request,
         "medical_records/visit.html",
@@ -172,7 +172,7 @@ def imprimir(request, practitioner, pk):
     visit = get_object_or_404(Visit.objects.select_related("patient", "practitioner"), pk=pk)
     if not visit.finalizado:
         raise PermissionDenied
-    registrar(Acao.VISUALIZAR, visit, description=f"{visit} (impressão)")
+    registrar(Action.VIEWED, visit, description=f"{visit} (impressão)")
     return render(
         request,
         "medical_records/print.html",
@@ -202,7 +202,7 @@ def atestado_novo(request, practitioner, pk):
         atestado.created_by = request.user
         atestado.save()
         registrar(
-            Acao.CRIAR,
+            Action.CREATE,
             atestado,
             changes={
                 "kind": [None, atestado.kind],
@@ -229,7 +229,7 @@ def receita_nova(request, practitioner, pk):
         receita.practitioner = visit.practitioner
         receita.created_by = request.user
         receita.save()
-        registrar(Acao.CRIAR, receita, changes={"medications": [None, SIGILO]})
+        registrar(Action.CREATE, receita, changes={"medications": [None, SIGILO]})
         messages.success(request, _("Receita emitida."))
         return redirect("medical_records:prescription", pk=receita.pk)
     return render(
@@ -244,7 +244,7 @@ def atestado(request, practitioner, pk):
     atestado = get_object_or_404(
         Certificate.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Acao.VISUALIZAR, atestado)
+    registrar(Action.VIEWED, atestado)
     return render(request, "medical_records/certificate.html", {"atestado": atestado})
 
 
@@ -253,7 +253,7 @@ def receita(request, practitioner, pk):
     receita = get_object_or_404(
         Prescription.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Acao.VISUALIZAR, receita)
+    registrar(Action.VIEWED, receita)
     rows = [row for row in receita.medications.splitlines() if row.strip()]
     return render(
         request, "medical_records/prescription.html", {"receita": receita, "linhas": rows}
@@ -273,7 +273,7 @@ def adendo(request, practitioner, pk):
         adendo.practitioner = practitioner or visit.practitioner
         adendo.created_by = request.user
         adendo.save()
-        registrar(Acao.CRIAR, adendo, changes={"text": [None, SIGILO]})
+        registrar(Action.CREATE, adendo, changes={"text": [None, SIGILO]})
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
@@ -291,7 +291,7 @@ def pedido_de_exames_novo(request, practitioner, pk):
         pedido.created_by = request.user
         pedido.save()
         registrar(
-            Acao.CRIAR,
+            Action.CREATE,
             pedido,
             changes={
                 "exams": [None, SIGILO],
@@ -312,7 +312,7 @@ def pedido_de_exames(request, practitioner, pk):
     pedido = get_object_or_404(
         ExamRequest.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    registrar(Acao.VISUALIZAR, pedido)
+    registrar(Action.VIEWED, pedido)
     rows = [row for row in pedido.exams.splitlines() if row.strip()]
     return render(request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": rows})
 
@@ -339,7 +339,7 @@ def anexo_enviar(request, practitioner, pk):
             created_by=request.user,
         )
         registrar(
-            Acao.CRIAR,
+            Action.CREATE,
             anexo,
             description=f"{visit} – {_('anexo')}",
             changes={"file": [None, SIGILO]},
@@ -353,7 +353,7 @@ def anexo_enviar(request, practitioner, pk):
 @exige_profissional
 def anexo(request, practitioner, pk):
     anexo = get_object_or_404(Attachment.objects.select_related("visit"), pk=pk)
-    registrar(Acao.VISUALIZAR, anexo, description=f"{anexo.visit} – {_('anexo')}")
+    registrar(Action.VIEWED, anexo, description=f"{anexo.visit} – {_('anexo')}")
     response = HttpResponse(bytes(anexo.content), content_type=anexo.kind)
     # Opened in the browser (only PDF, JPG and PNG are ever stored), never cached.
     name = "".join(c for c in anexo.name if c.isalnum() or c in "._- ") or "anexo"
@@ -373,7 +373,7 @@ def anexo_remover(request, practitioner, pk):
         raise PermissionDenied
     visit = anexo.visit
     registrar(
-        Acao.EXCLUIR,
+        Action.DELETE,
         anexo,
         description=f"{visit} – {_('anexo')}",
         changes={"file": [SIGILO, None]},

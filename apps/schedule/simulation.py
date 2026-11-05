@@ -19,7 +19,7 @@ from .services import timestamp
 MOTIVOS_RECHAMADA = ["Revisão de 6 meses", "Retorno pós-procedimento", "Limpeza", "Reavaliação"]
 
 
-def _pacientes(clinic):
+def _patients(clinic):
     return list(Patient.objects.filter(clinic=clinic, active=True, archived=False))
 
 
@@ -31,7 +31,7 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
             name__in=["Liberado", "Ocupado"]
         )
     )
-    pacientes = _pacientes(clinic)
+    pacientes = _patients(clinic)
     if not (profissionais and tipos and pacientes):
         return 0
     passo = datetime.timedelta(minutes=clinic.schedule_interval)
@@ -100,7 +100,7 @@ def _situacao(sorteio, start):
 
 def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
     """Recalls from `dias_antes` ago to `dias_depois` ahead; past ones mostly done."""
-    pacientes = _pacientes(clinic)
+    pacientes = _patients(clinic)
     if not pacientes:
         return 0
     today = timezone.localdate()
@@ -143,7 +143,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     from apps.finance import services
     from apps.finance.models import Category, CostCenter, Entry, FinancialAccount, Payment
 
-    pacientes = _pacientes(clinic)
+    pacientes = _patients(clinic)
     categorias = list(Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA))
     contas = list(FinancialAccount.objects.filter(clinic=clinic, active=True))
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
@@ -209,9 +209,9 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
     from apps.finance.models import Category, Entry, Supplier
 
     # Bills are paid the way the clinic's country pays them (decision 123).
-    do_pais = metodos.do_pais(clinic.country).codigos
+    for_country = metodos.for_country(clinic.country).codigos
     contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
-    formas = [method for method in contas_a_pagar if method in do_pais]
+    formas = [method for method in contas_a_pagar if method in for_country]
     categorias = {
         c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Tipo.DESPESA)
     }
@@ -288,7 +288,7 @@ def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
             for name, amount in PROCEDIMENTOS_EXEMPLO
         )
     procedimentos = list(Procedure.objects.filter(clinic=clinic, active=True))
-    pacientes = _pacientes(clinic)
+    pacientes = _patients(clinic)
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     category = (
         tratamento or Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA).first()

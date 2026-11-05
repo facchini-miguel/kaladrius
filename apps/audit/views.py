@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.utils.http import urlencode
 
-from apps.core.permissions import Acao, Modulo, exige_permissao
+from apps.core.permissions import Action, Module, requires_permission
 
 from .models import AuditEntry
 from .record import nome_do_modelo
@@ -41,7 +41,7 @@ def tipos_de_registro():
 
 
 @cache
-def _rotulos():
+def _labels():
     """For each kind of record, its fields' labels by every name an entry may have stored:
     the field's name, and its column (the name before decision 155's renaming, which keeps
     the database columns)."""
@@ -59,14 +59,14 @@ def _rotulos():
 def campos_alterados(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
-    rotulos = _rotulos().get(record.model_name, {})
+    rotulos = _labels().get(record.model_name, {})
     return [
         (rotulos.get(field, field), valores[0], valores[1])
         for field, valores in record.changes.items()
     ]
 
 
-@exige_permissao(Modulo.AUDITORIA, Acao.VER)
+@requires_permission(Module.AUDIT, Action.VIEW)
 def results(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
     registros = AuditEntry.objects.filter(clinic=request.clinic)
@@ -84,7 +84,7 @@ def results(request):
             | Q(object_repr__icontains=filters["q"])
             | Q(object_id=filters["q"])
         )
-    if filters["action"] in AuditEntry.Acao.values:
+    if filters["action"] in AuditEntry.Action.values:
         registros = registros.filter(action=filters["action"])
     if filters["model_name"]:
         registros = registros.filter(model_name=filters["model_name"])
@@ -102,7 +102,7 @@ def results(request):
             "pagina": page,
             "filtros": filters,
             "parametros": urlencode(filters),
-            "acoes": AuditEntry.Acao.choices,
+            "acoes": AuditEntry.Action.choices,
             "modelos": modelos,
         },
     )

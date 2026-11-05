@@ -21,12 +21,12 @@ from django.utils.translation import gettext as _
 
 from . import countries
 
-ESTADO = "estado"
-PROVINCIA = "provincia"
+STATE = "estado"
+PROVINCE = "provincia"
 
 
 @dataclass(frozen=True)
-class Guarda:
+class Retention:
     """How long health records are kept: `anos` after the last entry and, for minors, until
     the patient's `ate_idade` birthday if later; `varia` when each state or province sets it.
     """
@@ -38,130 +38,130 @@ class Guarda:
 
 
 @dataclass(frozen=True)
-class Legislacao:
+class Legislation:
     lei: str  # the data protection law, in full
     curta: str  # its short name, for warnings ("LGPD, art. 18")
     autoridade: str = ""
     site: str = ""
-    guarda: Guarda = Guarda()
+    guarda: Retention = Retention()
     fiscal: str = ""  # the tax document a receipt does not replace, where one is required
 
 
-LEIS = {
-    "BR": Legislacao(
+LAWS = {
+    "BR": Legislation(
         "Lei Geral de Proteção de Dados Pessoais (LGPD, Lei 13.709/2018)",
         "LGPD, art. 18",
         "Autoridade Nacional de Proteção de Dados (ANPD)",
         "https://www.gov.br/anpd",
-        Guarda(20, fonte="Lei 13.787/2018, art. 6º"),
+        Retention(20, fonte="Lei 13.787/2018, art. 6º"),
     ),
-    "MX": Legislacao(
+    "MX": Legislation(
         "Ley Federal de Protección de Datos Personales en Posesión de los Particulares (2025)",
         "LFPDPPP",
         "Secretaría Anticorrupción y Buen Gobierno",
-        guarda=Guarda(5, fonte="NOM-004-SSA3-2012"),
+        guarda=Retention(5, fonte="NOM-004-SSA3-2012"),
         fiscal="CFDI",
     ),
-    "AR": Legislacao(
+    "AR": Legislation(
         "Ley 25.326 de Protección de los Datos Personales",
         "Ley 25.326",
         "Agencia de Acceso a la Información Pública (AAIP)",
         "https://www.argentina.gob.ar/aaip",
-        Guarda(10, fonte="Ley 26.529, art. 18"),
+        Retention(10, fonte="Ley 26.529, art. 18"),
         "factura electrónica (ARCA)",
     ),
-    "CL": Legislacao(
+    "CL": Legislation(
         "Ley 19.628 sobre Protección de la Vida Privada, reformada por la Ley 21.719",
         "Ley 19.628",
         "Agencia de Protección de Datos Personales (Ley 21.719)",
-        guarda=Guarda(15, fonte="Ley 20.584, art. 13; Decreto 41/2012"),
+        guarda=Retention(15, fonte="Ley 20.584, art. 13; Decreto 41/2012"),
         fiscal="boleta o factura electrónica (SII)",
     ),
-    "CO": Legislacao(
+    "CO": Legislation(
         "Ley 1581 de 2012 de Protección de Datos Personales",
         "Ley 1581 de 2012",
         "Superintendencia de Industria y Comercio (SIC)",
         "https://www.sic.gov.co",
-        Guarda(15, fonte="Resolución 839 de 2017"),
+        Retention(15, fonte="Resolución 839 de 2017"),
         "factura electrónica (DIAN)",
     ),
-    "PE": Legislacao(
+    "PE": Legislation(
         "Ley 29733 de Protección de Datos Personales",
         "Ley 29733",
         "Autoridad Nacional de Protección de Datos Personales (MINJUSDH)",
-        guarda=Guarda(fonte="NTS 139-MINSA/2018/DGAIN"),
+        guarda=Retention(fonte="NTS 139-MINSA/2018/DGAIN"),
         fiscal="boleta o factura electrónica (SUNAT)",
     ),
-    "UY": Legislacao(
+    "UY": Legislation(
         "Ley 18.331 de Protección de Datos Personales",
         "Ley 18.331",
         "Unidad Reguladora y de Control de Datos Personales (URCDP)",
-        guarda=Guarda(fonte="Decreto 274/010; Decreto 355/982"),
+        guarda=Retention(fonte="Decreto 274/010; Decreto 355/982"),
         fiscal="comprobante fiscal electrónico (CFE, DGI)",
     ),
-    "PY": Legislacao(
+    "PY": Legislation(
         "Ley 7593/2025 de Protección de Datos Personales (aplicable desde noviembre de 2027)",
         "Ley 7593/2025",
         "Agencia Nacional de Protección de Datos Personales (MITIC)",
         fiscal="factura electrónica (SIFEN)",
     ),
-    "BO": Legislacao(
+    "BO": Legislation(
         "Constitución Política del Estado, arts. 21 y 130 (sin ley general de datos personales)",
         "Constitución, art. 130",
         fiscal="factura (SIN)",
     ),
-    "EC": Legislacao(
+    "EC": Legislation(
         "Ley Orgánica de Protección de Datos Personales (2021)",
         "LOPDP",
         "Superintendencia de Protección de Datos Personales",
-        guarda=Guarda(fonte="Acuerdo Ministerial 5216"),
+        guarda=Retention(fonte="Acuerdo Ministerial 5216"),
         fiscal="comprobante electrónico (SRI)",
     ),
-    "US": Legislacao(
+    "US": Legislation(
         "HIPAA Privacy and Security Rules, and state law",
         "HIPAA",
         "U.S. Department of Health and Human Services, Office for Civil Rights",
         "https://www.hhs.gov/ocr",
-        Guarda(varia=ESTADO),
+        Retention(varia=STATE),
     ),
-    "GB": Legislacao(
+    "GB": Legislation(
         "UK GDPR and Data Protection Act 2018",
         "UK GDPR",
         "Information Commissioner's Office (ICO)",
         "https://ico.org.uk",
-        Guarda(fonte="Records Management Code of Practice"),
+        Retention(fonte="Records Management Code of Practice"),
     ),
-    "CA": Legislacao(
+    "CA": Legislation(
         "PIPEDA and provincial health privacy laws (such as PHIPA in Ontario)",
         "PIPEDA",
         "Office of the Privacy Commissioner of Canada",
         "https://www.priv.gc.ca",
-        Guarda(varia=PROVINCIA),
+        Retention(varia=PROVINCE),
     ),
-    "AU": Legislacao(
+    "AU": Legislation(
         "Privacy Act 1988 (Australian Privacy Principles)",
         "Privacy Act 1988",
         "Office of the Australian Information Commissioner (OAIC)",
         "https://www.oaic.gov.au",
-        Guarda(varia=ESTADO),
+        Retention(varia=STATE),
     ),
-    "ZA": Legislacao(
+    "ZA": Legislation(
         "Protection of Personal Information Act (POPIA, Act 4 of 2013)",
         "POPIA",
         "Information Regulator",
         "https://inforegulator.org.za",
-        Guarda(6, 21, fonte="HPCSA, Booklet 9"),
+        Retention(6, 21, fonte="HPCSA, Booklet 9"),
     ),
 }
 
 
-def do_pais(country=None):
-    return LEIS.get(country or countries.pais_da_clinica(), LEIS[countries.PADRAO])
+def for_country(country=None):
+    return LAWS.get(country or countries.clinic_country(), LAWS[countries.DEFAULT])
 
 
-def prazo_de_guarda(country=None):
+def retention_period(country=None):
     """One sentence on how long the country keeps health records, in the user's language."""
-    guarda = do_pais(country).guarda
+    guarda = for_country(country).guarda
     if guarda.anos and guarda.ate_idade:
         return _(
             "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
@@ -173,9 +173,9 @@ def prazo_de_guarda(country=None):
             "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
             "registro (%(fonte)s)."
         ) % {"anos": guarda.anos, "fonte": guarda.fonte}
-    if guarda.varia == ESTADO:
+    if guarda.varia == STATE:
         return _("O prazo de guarda do prontuário é definido pela lei de cada estado.")
-    if guarda.varia == PROVINCIA:
+    if guarda.varia == PROVINCE:
         return _("O prazo de guarda do prontuário é definido pela lei de cada província.")
     if guarda.fonte:
         return _(

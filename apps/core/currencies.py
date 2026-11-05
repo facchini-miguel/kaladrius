@@ -12,11 +12,11 @@ from django.utils.formats import get_format, number_format
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
-PADRAO = "BRL"
+DEFAULT = "BRL"
 
 # ISO 4217 code: (name, symbol, decimals). The symbol is the one people write in the
 # currency's own country; "$" is enough because a clinic works in a single currency.
-MOEDAS = {
+CURRENCIES = {
     "BRL": (_("Real brasileiro"), "R$", 2),
     "USD": (_("Dólar americano"), "US$", 2),
     "EUR": (_("Euro"), "€", 2),
@@ -34,40 +34,40 @@ MOEDAS = {
     "BOB": (_("Boliviano"), "Bs", 2),
 }
 
-ESCOLHAS = [
-    (code, format_lazy("{} ({}, {})", name, simbolo, code))
-    for code, (name, simbolo, _casas) in MOEDAS.items()
+CHOICES = [
+    (code, format_lazy("{} ({}, {})", name, symbol, code))
+    for code, (name, symbol, _casas) in CURRENCIES.items()
 ]
 
 
 # Longest first, so "US$" goes before "$".
-SIMBOLOS = sorted({simbolo for _nome, simbolo, _casas in MOEDAS.values()}, key=len, reverse=True)
+SYMBOLS = sorted({symbol for _nome, symbol, _casas in CURRENCIES.values()}, key=len, reverse=True)
 
 
-def moeda_da_clinica():
+def clinic_currency():
     """Code of the current clinic's currency (the real when there is no current clinic)."""
-    from .isolation import clinica_atual
+    from .isolation import current_clinic
 
-    clinic = clinica_atual()
-    return getattr(clinic, "currency", None) or PADRAO
+    clinic = current_clinic()
+    return getattr(clinic, "currency", None) or DEFAULT
 
 
-def formatar(value, code=None):
+def format_amount(value, code=None):
     """The amount with the currency symbol, e.g. R$ 1.234,56 · US$ 1,234.56 · 1.234,56 €.
     The euro goes after the number in languages with a decimal comma (Portugal, Spain)."""
     try:
         value = Decimal(value)
     except (InvalidOperation, TypeError, ValueError):
         return ""
-    _nome, simbolo, casas = MOEDAS.get(code or moeda_da_clinica(), MOEDAS[PADRAO])
+    _nome, symbol, casas = CURRENCIES.get(code or clinic_currency(), CURRENCIES[DEFAULT])
     # Rounded like money (Django's number_format just cuts the extra decimals).
     value = value.quantize(Decimal(1).scaleb(-casas), rounding=ROUND_HALF_UP)
     number = number_format(value, casas, force_grouping=True)
-    if simbolo == "€" and get_format("DECIMAL_SEPARATOR") == ",":
-        return f"{number} {simbolo}"
-    return f"{simbolo} {number}"
+    if symbol == "€" and get_format("DECIMAL_SEPARATOR") == ",":
+        return f"{number} {symbol}"
+    return f"{symbol} {number}"
 
 
-def simbolo():
+def symbol():
     """Symbol of the current clinic's currency, for labels and examples."""
-    return MOEDAS.get(moeda_da_clinica(), MOEDAS[PADRAO])[1]
+    return CURRENCIES.get(clinic_currency(), CURRENCIES[DEFAULT])[1]

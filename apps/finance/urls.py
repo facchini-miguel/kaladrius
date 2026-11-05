@@ -4,7 +4,7 @@ from . import views
 
 app_name = "finance"
 
-CADASTROS = "|".join(views.CADASTROS)  # categories|accounts|cost-centers
+CATALOGS = "|".join(views.CATALOGS)  # categories|accounts|cost-centers
 
 urlpatterns = [
     path("receivables/", views.receber_lista, name="receivables"),
@@ -57,10 +57,10 @@ urlpatterns = [
         name="commission_percentage",
     ),
     path("commissions/practitioner/<int:pk>/pay/", views.comissao_pagar, name="commission_pay"),
-    re_path(rf"^(?P<cadastro>{CADASTROS})/$", views.cadastro_lista, name="catalog"),
-    re_path(rf"^(?P<cadastro>{CADASTROS})/new/$", views.cadastro_form, name="catalog_new"),
+    re_path(rf"^(?P<cadastro>{CATALOGS})/$", views.cadastro_lista, name="catalog"),
+    re_path(rf"^(?P<cadastro>{CATALOGS})/new/$", views.cadastro_form, name="catalog_new"),
     re_path(
-        rf"^(?P<cadastro>{CADASTROS})/(?P<pk>[0-9]+)/$",
+        rf"^(?P<cadastro>{CATALOGS})/(?P<pk>[0-9]+)/$",
         views.cadastro_form,
         name="catalog_edit",
     ),

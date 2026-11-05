@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, Set
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.forms import FormularioBootstrap
+from apps.core.forms import BootstrapForm
 
 from . import services
 
@@ -28,11 +28,11 @@ def _campo_codigo(label):
     )
 
 
-class CodigoForm(FormularioBootstrap, forms.Form):
+class CodigoForm(BootstrapForm, forms.Form):
     code = _campo_codigo(_("Código"))
 
 
-class DesativarForm(FormularioBootstrap, forms.Form):
+class DesativarForm(BootstrapForm, forms.Form):
     senha = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
     code = _campo_codigo(_("Código do aplicativo"))
 
@@ -49,12 +49,12 @@ class DesativarForm(FormularioBootstrap, forms.Form):
         return data
 
 
-class RecuperarSenhaForm(FormularioBootstrap, PasswordResetForm):
+class RecuperarSenhaForm(BootstrapForm, PasswordResetForm):
     """Password recovery by e-mail, never for the public demo logins."""
 
     def get_users(self, email):
         return (user for user in super().get_users(email) if not user.demo)
 
 
-class NovaSenhaForm(FormularioBootstrap, SetPasswordForm):
+class NovaSenhaForm(BootstrapForm, SetPasswordForm):
     pass

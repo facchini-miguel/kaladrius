@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.core.permissions import so_a_propria_agenda
+from apps.core.permissions import own_schedule_only
 from apps.practitioners.models import Practitioner
 
 from .models import Appointment
@@ -17,7 +17,7 @@ from .models import Appointment
 
 def profissionais_visiveis(request):
     """Practitioners whose schedule the user may see and change (decision 044)."""
-    if so_a_propria_agenda(request):
+    if own_schedule_only(request):
         return Practitioner.objects.filter(user=request.user)
     return Practitioner.objects.all()
 

@@ -12,11 +12,11 @@ from dataclasses import dataclass
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-PADRAO = "BR"
+DEFAULT = "BR"
 
 
 @dataclass(frozen=True)
-class Pais:
+class Country:
     name: str
     ddi: str  # international calling code, without "+"
     currency: str  # ISO 4217, see apps/core/currencies.py
@@ -26,8 +26,8 @@ class Pais:
     numeracao: str = "fdi"  # tooth numbering, see apps/dentistry/teeth.py (decision 122)
 
 
-PAISES = {
-    "BR": Pais(
+COUNTRIES = {
+    "BR": Country(
         _("Brasil"),
         "55",
         "BRL",
@@ -45,7 +45,7 @@ PAISES = {
     ),
     # Latin America (decision 120): Spanish with each country's numbers (1,234.56 in Mexico
     # and Peru, 1.234,56 in the others) and dates.
-    "MX": Pais(
+    "MX": Country(
         _("México"),
         "52",
         "MXN",
@@ -59,7 +59,7 @@ PAISES = {
         ),
         espanhol="es-mx",
     ),
-    "AR": Pais(
+    "AR": Country(
         _("Argentina"),
         "54",
         "ARS",
@@ -70,22 +70,22 @@ PAISES = {
         ),
         espanhol="es-ar",
     ),
-    "CL": Pais(
+    "CL": Country(
         _("Chile"),
         "56",
         "CLP",
         ("America/Santiago", "America/Punta_Arenas", "Pacific/Easter"),
         espanhol="es-cl",
     ),
-    "CO": Pais(_("Colômbia"), "57", "COP", ("America/Bogota",), espanhol="es-co"),
-    "PE": Pais(_("Peru"), "51", "PEN", ("America/Lima",), espanhol="es-pe"),
-    "UY": Pais(_("Uruguai"), "598", "UYU", ("America/Montevideo",), espanhol="es-uy"),
-    "PY": Pais(_("Paraguai"), "595", "PYG", ("America/Asuncion",), espanhol="es-py"),
-    "BO": Pais(_("Bolívia"), "591", "BOB", ("America/La_Paz",), espanhol="es-bo"),
-    "EC": Pais(
+    "CO": Country(_("Colômbia"), "57", "COP", ("America/Bogota",), espanhol="es-co"),
+    "PE": Country(_("Peru"), "51", "PEN", ("America/Lima",), espanhol="es-pe"),
+    "UY": Country(_("Uruguai"), "598", "UYU", ("America/Montevideo",), espanhol="es-uy"),
+    "PY": Country(_("Paraguai"), "595", "PYG", ("America/Asuncion",), espanhol="es-py"),
+    "BO": Country(_("Bolívia"), "591", "BOB", ("America/La_Paz",), espanhol="es-bo"),
+    "EC": Country(
         _("Equador"), "593", "USD", ("America/Guayaquil", "Pacific/Galapagos"), espanhol="es-ec"
     ),
-    "US": Pais(
+    "US": Country(
         _("Estados Unidos"),
         "1",
         "USD",
@@ -101,8 +101,8 @@ PAISES = {
         "en",
         numeracao="universal",
     ),
-    "GB": Pais(_("Reino Unido"), "44", "GBP", ("Europe/London",), "en-gb"),
-    "CA": Pais(
+    "GB": Country(_("Reino Unido"), "44", "GBP", ("Europe/London",), "en-gb"),
+    "CA": Country(
         _("Canadá"),
         "1",
         "CAD",
@@ -117,7 +117,7 @@ PAISES = {
         ),
         "en-ca",
     ),
-    "AU": Pais(
+    "AU": Country(
         _("Austrália"),
         "61",
         "AUD",
@@ -132,42 +132,42 @@ PAISES = {
         ),
         "en-au",
     ),
-    "ZA": Pais(_("África do Sul"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
+    "ZA": Country(_("África do Sul"), "27", "ZAR", ("Africa/Johannesburg",), "en-za"),
 }
 
-ESCOLHAS = [(code, country.name) for code, country in PAISES.items()]
+CHOICES = [(code, country.name) for code, country in COUNTRIES.items()]
 
 
-def _cidade(fuso):
+def _city(fuso):
     return fuso.split("/")[-1].replace("_", " ")
 
 
 # Grouped by country, named by the zone's city ("New York", "Sao Paulo").
-ESCOLHAS_FUSO = [
-    (country.name, [(f, _cidade(f)) for f in country.fusos]) for country in PAISES.values()
+TIME_ZONE_CHOICES = [
+    (country.name, [(f, _city(f)) for f in country.fusos]) for country in COUNTRIES.values()
 ]
-FUSO_PADRAO = PAISES[PADRAO].fusos[0]
+DEFAULT_TIME_ZONE = COUNTRIES[DEFAULT].fusos[0]
 
 
-def pais_da_clinica(clinic=None):
+def clinic_country(clinic=None):
     """Code of the clinic's country: the current clinic's when none is given, Brazil without
     one."""
     if clinic is None:
-        from .isolation import clinica_atual
+        from .isolation import current_clinic
 
-        clinic = clinica_atual()
-    return getattr(clinic, "country", None) or PADRAO
-
-
-def do_codigo(code):
-    return PAISES.get(code or PADRAO, PAISES[PADRAO])
+        clinic = current_clinic()
+    return getattr(clinic, "country", None) or DEFAULT
 
 
-def variante_do_idioma(language, country):
+def by_code(code):
+    return COUNTRIES.get(code or DEFAULT, COUNTRIES[DEFAULT])
+
+
+def language_variant(language, country):
     """The English or Spanish variant for the clinic's country ("en-gb", "es-mx"...), or None
     to keep `idioma`. Portuguese has no variants."""
     base = (language or "").split("-")[0]
-    variante = {"en": do_codigo(country).ingles, "es": do_codigo(country).espanhol}.get(base)
+    variante = {"en": by_code(country).ingles, "es": by_code(country).espanhol}.get(base)
     return None if variante in (None, language) else variante
 
 
@@ -175,20 +175,20 @@ def variante_do_idioma(language, country):
 # Stored as the national number (no country code, no trunk 0), which fits the 11 characters
 # of the existing fields: 8 to 10 digits. Brazil keeps validadores.normalizar_telefone.
 
-_DEZ_DIGITOS = _("Informe o código de área e o número (10 dígitos).")
-_TELEFONE = {
-    "MX": ((10,), "23456789", _DEZ_DIGITOS),
-    "AR": ((10,), "123", _DEZ_DIGITOS),
+_TEN_DIGITS = _("Informe o código de área e o número (10 dígitos).")
+_PHONE = {
+    "MX": ((10,), "23456789", _TEN_DIGITS),
+    "AR": ((10,), "123", _TEN_DIGITS),
     "CL": ((9,), "2345679", _("Informe o número com o código de área (9 dígitos).")),
-    "CO": ((10,), "36", _DEZ_DIGITOS),
+    "CO": ((10,), "36", _TEN_DIGITS),
     "PE": ((8, 9), "1456789", _("Informe o número com o código de área (8 ou 9 dígitos).")),
     "UY": ((8,), "249", _("Informe o número com o código de área (8 dígitos).")),
     "PY": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
     "BO": ((8,), "234567", _("Informe o número com o código de área (8 dígitos).")),
     "EC": ((8, 9), "2345679", _("Informe o número com o código de área (8 ou 9 dígitos).")),
     # country: (digits of the national number, its first digit, message)
-    "US": ((10,), "23456789", _DEZ_DIGITOS),
-    "CA": ((10,), "23456789", _DEZ_DIGITOS),
+    "US": ((10,), "23456789", _TEN_DIGITS),
+    "CA": ((10,), "23456789", _TEN_DIGITS),
     "GB": (
         (9, 10),
         "123578",
@@ -199,10 +199,10 @@ _TELEFONE = {
 }
 
 
-def normalizar_telefone_internacional(digitos, country):
+def normalize_international_phone(digitos, country):
     """National number of a phone outside Brazil from its digits, or ValidationError."""
-    ddi = do_codigo(country).ddi
-    tamanhos, inicios, message = _TELEFONE[country]
+    ddi = by_code(country).ddi
+    tamanhos, inicios, message = _PHONE[country]
     number = digitos
     if number.startswith("00"):  # international prefix typed
         number = number[2:]
@@ -226,7 +226,7 @@ def normalizar_telefone_internacional(digitos, country):
     return number
 
 
-def formatar_telefone(number, country):
+def format_phone(number, country):
     """A stored national number written the way the country writes it."""
     if not number:
         return ""
@@ -242,10 +242,10 @@ def formatar_telefone(number, country):
         return f"(0{number[0]}) {number[1:5]} {number[5:]}"
     if country == "ZA" and len(number) == 9:
         return f"0{number[:2]} {number[2:5]} {number[5:]}"
-    return _formatar_telefone_latino(number, country)
+    return _format_latin_phone(number, country)
 
 
-def _formatar_telefone_latino(n, country):
+def _format_latin_phone(n, country):
     size = len(n)
     if country == "MX" and size == 10:
         if n[:2] in ("55", "33", "81"):  # Mexico City, Guadalajara, Monterrey: 2-digit areas
@@ -280,18 +280,18 @@ def _formatar_telefone_latino(n, country):
     return n
 
 
-def link_whatsapp(number, country):
+def whatsapp_link(number, country):
     if not number:
         return ""
     # WhatsApp writes Argentine mobiles with a 9 after the country code.
-    ddi = "549" if country == "AR" else do_codigo(country).ddi
+    ddi = "549" if country == "AR" else by_code(country).ddi
     return f"https://wa.me/{ddi}{number}"
 
 
 # Postal codes ------------------------------------------------------------------------------
 # Stored without spaces or hyphens, letters in upper case (up to 9 characters: ZIP+4).
 
-_CEP = {
+_POSTAL_CODE = {
     "BR": (r"\d{8}", _("O CEP deve ter 8 dígitos.")),
     "US": (r"\d{5}(\d{4})?", _("O ZIP code tem 5 dígitos (ou 9, com a extensão).")),
     "CA": (r"[A-Z]\d[A-Z]\d[A-Z]\d", _("O código postal canadense tem o formato A1A 1A1.")),
@@ -314,17 +314,17 @@ _CEP = {
 }
 
 
-def normalizar_cep(value, country):
+def normalize_postal_code(value, country):
     postal_code = re.sub(r"[\s\-.]", "", value or "").upper()
     if not postal_code:
         return ""
-    default, message = _CEP.get(country, _CEP[PADRAO])
+    default, message = _POSTAL_CODE.get(country, _POSTAL_CODE[DEFAULT])
     if not re.fullmatch(default, postal_code):
         raise ValidationError(message)
     return postal_code
 
 
-def formatar_cep(postal_code, country):
+def format_postal_code(postal_code, country):
     if not postal_code:
         return ""
     if country == "BR" and len(postal_code) == 8:
@@ -336,6 +336,6 @@ def formatar_cep(postal_code, country):
     return postal_code
 
 
-def rotulo_cep(country):
+def postal_code_label(country):
     """Field label: "CEP" in Brazil, a postal code anywhere else."""
     return _("CEP") if country == "BR" else _("Código postal")

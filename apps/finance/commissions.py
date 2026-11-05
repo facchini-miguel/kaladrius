@@ -26,7 +26,7 @@ def percentual_de(amount, percentage):
     return (amount * percentage / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
 
-def _recebimentos(practitioner):
+def _receipts(practitioner):
     return Payment.objects.filter(
         installment__entry__kind=Entry.Tipo.RECEBER,
         installment__entry__practitioner=practitioner,
@@ -34,15 +34,13 @@ def _recebimentos(practitioner):
 
 
 def _creditos(practitioner, until):
-    return _recebimentos(practitioner).filter(
-        reversed=False, commission__isnull=True, date__lte=until
-    )
+    return _receipts(practitioner).filter(reversed=False, commission__isnull=True, date__lte=until)
 
 
 def _debitos(practitioner):
     """Receipts already commissioned and then reversed, not discounted yet (a few)."""
     debitos = list(
-        _recebimentos(practitioner)
+        _receipts(practitioner)
         .filter(reversed=True, commission__isnull=False, commission_reversal__isnull=True)
         .select_related("commission")
         .order_by("date", "pk")

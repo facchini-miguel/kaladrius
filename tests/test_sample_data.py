@@ -4,9 +4,9 @@ from django.core.management import CommandError, call_command
 from django.db.models import F
 
 from apps.audit.models import AuditEntry
-from apps.core.isolation import sem_isolamento
-from apps.core.models import Clinic, Membership, Papel
-from apps.core.validators import cnpj_valido, cpf_valido
+from apps.core.isolation import without_isolation
+from apps.core.models import Clinic, Membership, Role
+from apps.core.validators import valid_cnpj, valid_cpf
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
@@ -26,15 +26,15 @@ def test_popular_dados_teste_e_idempotente(settings, monkeypatch):
     assert get_user_model().objects.get(username="dr.carlos").check_password("senha-de-teste-123")
     assert Membership.objects.filter(user__username="dra.ana").count() == 1
     # One user per role, so every role can be tried (review stage 3).
-    assert set(Membership.objects.values_list("role", flat=True)) == set(Papel)
-    with sem_isolamento():
+    assert set(Membership.objects.values_list("role", flat=True)) == set(Role)
+    with without_isolation():
         assert Practitioner.objects.count() == 5
         assert Practitioner.objects.get(name="Dra. Ana Souza").user.username == "dra.ana"
         assert Patient.objects.count() == 30  # not duplicated on the 2nd run
         assert Patient.objects.filter(kind=Patient.Tipo.JURIDICA).count() == 1
         for patient in Patient.objects.exclude(tax_id=""):
-            valido = cpf_valido if patient.kind == Patient.Tipo.FISICA else cnpj_valido
-            assert valido(patient.tax_id), patient.tax_id
+            is_valid = valid_cpf if patient.kind == Patient.Tipo.FISICA else valid_cnpj
+            assert is_valid(patient.tax_id), patient.tax_id
         assert not Patient.objects.exclude(email__endswith="@example.com").exists()
         assert Appointment.objects.count() > 0  # created once, not duplicated
         assert Recall.objects.count() == 80  # not duplicated
@@ -58,7 +58,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     criar_usuario("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
     Membership.objects.create(user=get_user_model().objects.get(username="dra.ana"), clinic=real)
-    with sem_isolamento():
+    with without_isolation():
         Patient.objects.create(clinic=real, name="Paciente Real")
 
     with pytest.raises(CommandError):
@@ -68,7 +68,7 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
     assert list(Clinic.objects.values_list("name", flat=True)) == ["Clínica Real"]
     restantes = set(get_user_model().objects.values_list("username", flat=True))
     assert restantes == {"pessoa.real", "dra.ana"}
-    with sem_isolamento():
+    with without_isolation():
         assert list(Patient.objects.values_list("name", flat=True)) == ["Paciente Real"]
         assert not Appointment.objects.exists() and not Recall.objects.exists()
         assert set(Practitioner.objects.values_list("clinic", flat=True)) <= {real.pk}

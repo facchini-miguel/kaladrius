@@ -25,10 +25,10 @@ def estado_do_banco():
 def test_migracao_preserva_as_areas_das_clinicas_existentes():
     executor = MigrationExecutor(connection)
     folhas = executor.loader.graph.leaf_nodes()
-    anterior = [("core", "0009_papel_financeiro")]
+    previous = [("core", "0009_papel_financeiro")]
     destino = [("core", "0010_modulos_clinicos")]
     try:
-        executor.migrate(anterior)
+        executor.migrate(previous)
         apps = estado_do_banco()
         Clinic = apps.get_model("core", "Clinica")
         ids = {
@@ -75,24 +75,24 @@ def test_migracao_preserva_as_areas_das_clinicas_existentes():
             valor_unitario=Decimal("123.45"),
         )
         modelos = [Clinic, Patient, Category, Entry, Installment, Estimate, Item]
-        antes = {
+        before = {
             modelo._meta.label: list(modelo.objects.order_by("pk").values()) for modelo in modelos
         }
         executor = MigrationExecutor(connection)
         executor.migrate(destino)
-        Modulo = executor.loader.project_state(destino).apps.get_model("core", "ModuloDaClinica")
+        Module = executor.loader.project_state(destino).apps.get_model("core", "ModuloDaClinica")
         for area, codigo_clinica in ids.items():
             ativos = set(
-                Modulo.objects.filter(clinica_id=codigo_clinica, ativo=True).values_list(
+                Module.objects.filter(clinica_id=codigo_clinica, ativo=True).values_list(
                     "codigo", flat=True
                 )
             )
             assert ativos == ({area} if area != "outra" else set())
-            assert Modulo.objects.filter(clinica_id=codigo_clinica).count() == 2
+            assert Module.objects.filter(clinica_id=codigo_clinica).count() == 2
         # The models as the database is now: core's later migrations add columns that do not
         # exist yet.
         atualizados = estado_do_banco()
-        for label, registros in antes.items():
+        for label, registros in before.items():
             modelo = atualizados.get_model(label)
             assert list(modelo.objects.order_by("pk").values()) == registros, label
     finally:

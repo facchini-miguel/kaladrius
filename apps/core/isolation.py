@@ -15,47 +15,47 @@ from contextvars import ContextVar
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-_clinica_atual = ContextVar("clinica_atual", default=None)
-_isolamento_desligado = ContextVar("isolamento_desligado", default=False)
+_current_clinic = ContextVar("clinica_atual", default=None)
+_isolation_off = ContextVar("isolamento_desligado", default=False)
 
 
-class SemClinicaAtual(RuntimeError):
+class NoCurrentClinic(RuntimeError):
     """Clinic data was accessed while no current clinic was set."""
 
 
-class ClinicaDiferente(RuntimeError):
+class WrongClinic(RuntimeError):
     """A row from another clinic was about to be saved or deleted."""
 
 
-def clinica_atual():
-    return _clinica_atual.get()
+def current_clinic():
+    return _current_clinic.get()
 
 
-def isolamento_ativo():
-    return not _isolamento_desligado.get()
+def isolation_active():
+    return not _isolation_off.get()
 
 
 @contextlib.contextmanager
-def usar_clinica(clinic):
+def use_clinic(clinic):
     """Run the block with `clinica` as the current clinic."""
-    token = _clinica_atual.set(clinic)
+    token = _current_clinic.set(clinic)
     try:
         yield clinic
     finally:
-        _clinica_atual.reset(token)
+        _current_clinic.reset(token)
 
 
 @contextlib.contextmanager
-def sem_isolamento():
+def without_isolation():
     """Run the block with access to every clinic. Platform-level code only."""
-    token = _isolamento_desligado.set(True)
+    token = _isolation_off.set(True)
     try:
         yield
     finally:
-        _isolamento_desligado.reset(token)
+        _isolation_off.reset(token)
 
 
-class FiltroClinicaAtual(models.Expression):
+class CurrentClinicFilter(models.Expression):
     """WHERE condition "clinica_id = <current clinic>", resolved when the SQL is compiled.
 
     Deciding at execution time (not when the queryset is built) lets Django build
@@ -86,23 +86,23 @@ class FiltroClinicaAtual(models.Expression):
         return copia
 
     def as_sql(self, compiler, connection):
-        if not isolamento_ativo():
+        if not isolation_active():
             return "(1 = 1)", []
-        clinic = clinica_atual()
+        clinic = current_clinic()
         if clinic is None:
-            raise SemClinicaAtual("Clinic data queried with no current clinic set.")
+            raise NoCurrentClinic("Clinic data queried with no current clinic set.")
         column, parametros = compiler.compile(self.column)
         return f"({column} = %s)", [*parametros, clinic.pk]
 
 
-class ClinicaManager(models.Manager):
+class ClinicManager(models.Manager):
     """Default manager that only sees rows from the current clinic (checked on execution)."""
 
     def get_queryset(self):
-        return super().get_queryset().filter(FiltroClinicaAtual())
+        return super().get_queryset().filter(CurrentClinicFilter())
 
 
-class ModeloDaClinica(models.Model):
+class ClinicModel(models.Model):
     """Base class for every model that belongs to a clinic."""
 
     clinic = models.ForeignKey(
@@ -115,32 +115,32 @@ class ModeloDaClinica(models.Model):
 
     # The first manager declared is Django's default manager, so the isolated one must
     # come first. Do not reorder (a test checks this for every clinic model).
-    objects = ClinicaManager()
+    objects = ClinicManager()
     # Unfiltered access, for platform-level code that already uses sem_isolamento().
-    todos = models.Manager()  # noqa: DJ012
+    all_objects = models.Manager()  # noqa: DJ012
 
     class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
-        self._conferir_clinica()
+        self._check_clinic()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self._conferir_clinica()
+        self._check_clinic()
         return super().delete(*args, **kwargs)
 
-    def _conferir_clinica(self):
+    def _check_clinic(self):
         """Fill in the current clinic on new rows and block writes to other clinics."""
-        if not isolamento_ativo():
+        if not isolation_active():
             return
-        current = clinica_atual()
+        current = current_clinic()
         if current is None:
-            raise SemClinicaAtual(f"{type(self).__name__}: no current clinic is set.")
+            raise NoCurrentClinic(f"{type(self).__name__}: no current clinic is set.")
         if self.clinic_id is None:
             self.clinic = current
         elif self.clinic_id != current.pk:
-            raise ClinicaDiferente(
+            raise WrongClinic(
                 f"{type(self).__name__} {self.pk} belongs to clinic {self.clinic_id}, "
                 f"not to the current clinic {current.pk}."
             )

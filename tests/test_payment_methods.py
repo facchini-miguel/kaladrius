@@ -7,8 +7,8 @@ import pytest
 from django.urls import reverse
 from django.utils import translation
 
-from apps.core.countries import PAISES
-from apps.core.isolation import usar_clinica
+from apps.core.countries import COUNTRIES
+from apps.core.isolation import use_clinic
 from apps.finance import payment_methods, services
 from apps.finance.models import Payment
 from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
@@ -23,12 +23,12 @@ def mudar_pais(data, country):
 
 
 def test_cada_pais_tem_as_suas_formas():
-    assert set(payment_methods.FORMAS) == set(PAISES)
-    for country, do_pais in payment_methods.FORMAS.items():
-        assert len(set(do_pais.codigos)) == len(do_pais.codigos), country
-        assert set(do_pais.codigos) <= set(Payment.Forma.values), country
-        assert {"dinheiro", "credito", "transferencia"} <= set(do_pais.codigos), country
-        assert set(do_pais.nomes) <= set(do_pais.codigos), country
+    assert set(payment_methods.FORMAS) == set(COUNTRIES)
+    for country, for_country in payment_methods.FORMAS.items():
+        assert len(set(for_country.codigos)) == len(for_country.codigos), country
+        assert set(for_country.codigos) <= set(Payment.Forma.values), country
+        assert {"dinheiro", "credito", "transferencia"} <= set(for_country.codigos), country
+        assert set(for_country.nomes) <= set(for_country.codigos), country
 
 
 def test_nomes_locais_entre_parenteses():
@@ -73,7 +73,7 @@ def test_formulario_oferece_as_formas_do_pais(cenario):  # noqa: F811
     data = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["cash_register"].pk}
     assert "method" in admin.post(url, {**data, "method": "pix"}).context["form"].errors
     assert admin.post(url, {**data, "method": "carteira"}).status_code == 302
-    with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
+    with use_clinic(cenario["clinic"]), translation.override("pt-br"):
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
         relatorio = services.relatorio(HOJE, HOJE)
@@ -106,7 +106,7 @@ def test_cartao_sem_parcelas_nos_estados_unidos(cenario):  # noqa: F811
         "card_transaction_code": "A1B2",
     }
     assert admin.post(url, data).status_code == 302
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         payment = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
     assert (payment.card_brand, payment.card_transaction_code) == ("Visa", "A1B2")
@@ -127,7 +127,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
         "card_transaction_code": "A1B2",
     }
     assert entrar(cenario, "admin").post(url, data).status_code == 302
-    with usar_clinica(cenario["clinic"]):
+    with use_clinic(cenario["clinic"]):
         payment = Payment.objects.get()
     assert (payment.card_brand, payment.card_installments, payment.card_transaction_code) == (
         "",
@@ -138,7 +138,7 @@ def test_detalhes_do_cartao_so_para_cartao(cenario):  # noqa: F811
 
 def test_pagamento_antigo_mostra_a_forma_que_o_pais_nao_oferece(cenario):  # noqa: F811
     entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    with usar_clinica(cenario["clinic"]), translation.override("pt-br"):
+    with use_clinic(cenario["clinic"]), translation.override("pt-br"):
         payment = services.receber(
             parcelas_de(cenario, entry)[0],
             user=cenario["admin"],

@@ -4,11 +4,11 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.isolation import ClinicaDiferente, ModeloDaClinica
-from apps.core.ordering import ALFABETICA
+from apps.core.isolation import ClinicModel, WrongClinic
+from apps.core.ordering import ALPHABETICAL
 
 
-class Patient(ModeloDaClinica):
+class Patient(ClinicModel):
     """A patient: an individual (CPF) or a company (CNPJ)."""
 
     class Tipo(models.TextChoices):
@@ -27,7 +27,7 @@ class Patient(ModeloDaClinica):
         _("nome"),
         max_length=200,
         help_text=_("Para pessoa jurídica, o nome fantasia."),
-        db_collation=ALFABETICA,
+        db_collation=ALPHABETICAL,
         db_column="nome",
     )
     legal_name = models.CharField(
@@ -198,7 +198,7 @@ class Patient(ModeloDaClinica):
         return self.mobile_phone or self.home_phone or self.work_phone
 
 
-class RelatedPerson(ModeloDaClinica):
+class RelatedPerson(ClinicModel):
     """A relative or contact of a patient (decision 101, legacy `id_pessoas_relac`).
 
     Either another patient of the clinic (the link then shows on both records) or someone
@@ -267,14 +267,14 @@ class RelatedPerson(ModeloDaClinica):
         return f"{self.get_relationship_display()}: {self.nome_exibido}"
 
     def save(self, *args, **kwargs):
-        self._conferir_clinica()
+        self._check_clinic()
         if self.clinic_id is None:  # without isolation (commands)
             self.clinic_id = self.patient.clinic_id
         clinicas = {self.patient.clinic_id}
         if self.other_patient_id:
             clinicas.add(self.other_patient.clinic_id)
         if clinicas != {self.clinic_id}:
-            raise ClinicaDiferente("Both patients must be of this clinic.")
+            raise WrongClinic("Both patients must be of this clinic.")
         super().save(*args, **kwargs)
 
     @property

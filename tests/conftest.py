@@ -1,7 +1,7 @@
 import pytest
 
-from apps.core.isolation import usar_clinica
-from apps.core.models import Clinic, Membership, Papel
+from apps.core.isolation import use_clinic
+from apps.core.models import Clinic, Membership, Role
 from apps.practitioners.models import Practitioner
 
 SENHA = "senha-de-teste-123"
@@ -21,7 +21,7 @@ def clinica_b(db):
 def criar_usuario(django_user_model):
     """Create a user, optionally linked to a clinic with a role."""
 
-    def criar(username, clinic=None, role=Papel.RECEPCAO, **extra):
+    def criar(username, clinic=None, role=Role.FRONT_DESK, **extra):
         user = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
         if clinic is not None:
             Membership.objects.create(user=user, clinic=clinic, role=role)
@@ -35,7 +35,7 @@ def criar_profissional():
     """Create a practitioner inside the given clinic."""
 
     def criar(clinic, name, **extra):
-        with usar_clinica(clinic):
+        with use_clinic(clinic):
             return Practitioner.objects.create(name=name, **extra)
 
     return criar
@@ -63,6 +63,6 @@ def pytest_sessionfinish(session, exitstatus):
     from tests import template_lookups
 
     relatorio = session.config.pluginmanager.get_plugin("terminalreporter")
-    escrever = relatorio.write_line if relatorio else print
-    if template_lookups.conferir(escrever) and exitstatus == 0:
+    write = relatorio.write_line if relatorio else print
+    if template_lookups.conferir(write) and exitstatus == 0:
         session.exitstatus = 1
