@@ -5,10 +5,10 @@ from django.urls import reverse
 from . import services
 
 # Pages open to someone who still has to turn two-step verification on.
-LIVRES = ["account:two_factor", "account:active", "logout", "change_language", "privacy"]
+EXEMPT_PATHS = ["account:two_factor", "account:active", "logout", "change_language", "privacy"]
 
 
-class ExigirDuasEtapasMiddleware:
+class RequireTwoFactorMiddleware:
     """Sends whoever the clinic requires to use two-step verification, and has not turned it
     on yet, to the page with the QR code (decision 112)."""
 
@@ -24,8 +24,8 @@ class ExigirDuasEtapasMiddleware:
         path = request.path_info
         if path.startswith((settings.STATIC_URL, "/admin/", "/api/")):
             return False
-        if path in {reverse(name) for name in LIVRES}:
+        if path in {reverse(name) for name in EXEMPT_PATHS}:
             return False
-        if not services.obrigatoria(request):
+        if not services.is_required(request):
             return False
-        return not services.ativa_para(request.user)
+        return not services.active_for(request.user)

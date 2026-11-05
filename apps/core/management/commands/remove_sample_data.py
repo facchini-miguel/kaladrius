@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.audit.models import AuditEntry
-from apps.audit.record import registrar
+from apps.audit.record import log_event
 from apps.core.isolation import without_isolation
 from apps.core.models import Clinic, ClinicModule
 from apps.estimates.models import Estimate, EstimateItem, Procedure
@@ -138,7 +138,7 @@ class Command(BaseCommand):
             nomes_usuarios = [u.username for u in usuarios]
             AccessLog.objects.filter(username__in=nomes_usuarios).delete()
             AccessAttempt.objects.filter(username__in=nomes_usuarios).delete()
-            registrar(
+            log_event(
                 AuditEntry.Action.DELETE,
                 description=(
                     f"Dados de teste removidos: {len(clinicas)} clínicas, {pacientes} pacientes, "

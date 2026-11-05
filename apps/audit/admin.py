@@ -4,7 +4,7 @@ from .models import AuditEntry
 
 
 @admin.register(AuditEntry)
-class RegistroAuditoriaAdmin(admin.ModelAdmin):
+class AuditEntryAdmin(admin.ModelAdmin):
     """Read-only: audit entries are never created, changed or deleted by hand."""
 
     list_display = [

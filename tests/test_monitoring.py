@@ -59,18 +59,18 @@ def superusuario(client, django_user_model):
 
 def test_le_amostras_ignora_linha_cortada_e_calcula_percentuais(pasta):
     pasta(amostra(10, disponivel=250, swap_livre=750), '{"momento": "2026-10-27T1')
-    (lida,) = health.amostras()
+    (lida,) = health.samples()
     assert (lida["memoria_pct"], lida["swap_pct"]) == (75, 25)
     assert round(lida["disco_pct"]) == 17
-    assert health.ultima()["memoria_pct"] == 75
+    assert health.latest()["memoria_pct"] == 75
 
 
 def amostra_em_ingles(minutos_atras, **valores):
     """The same sample with the fields health.sh writes since decision 149."""
     antiga = json.loads(amostra(minutos_atras, **valores))
-    nomes = {interno: field for field, interno in health.CAMPOS.items()}
+    nomes = {interno: field for field, interno in health.FIELDS.items()}
     nova = {nomes.get(key, key): value for key, value in antiga.items()}
-    nomes_container = {interno: field for field, interno in health.CAMPOS_CONTAINER.items()}
+    nomes_container = {interno: field for field, interno in health.CONTAINER_FIELDS.items()}
     nova["containers"] = [
         {nomes_container.get(key, key): value for key, value in c.items()}
         for c in antiga["containers"]
@@ -81,17 +81,17 @@ def amostra_em_ingles(minutos_atras, **valores):
 def test_le_as_amostras_em_ingles_e_as_antigas(pasta):
     # The file keeps up to 7 days: right after the update, lines of both formats.
     pasta(amostra(20, disponivel=250), amostra_em_ingles(10, disponivel=250, swap_livre=750))
-    antiga, nova = health.amostras()
+    antiga, nova = health.samples()
     assert "time" in amostra_em_ingles(10)
     assert (nova["memoria_pct"], nova["swap_pct"]) == (75, 25)
     assert nova["momento"] > antiga["momento"]
     assert nova["containers"] == antiga["containers"]
-    assert health.ultima()["memoria_pct"] == 75
+    assert health.latest()["memoria_pct"] == 75
 
 
 def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
     pasta(amostra(10, rede=0), amostra(5, rede=300_000), amostra(0, rede=1000))  # reboot
-    results = health.com_rede(health.amostras())
+    results = health.with_network(health.samples())
     assert results[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
     assert results[2]["rede_entrada"] is None
     assert health.summary(results)["recebido"] == pytest.approx(300_000, rel=0.01)
@@ -99,19 +99,19 @@ def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
 
 def test_niveis_e_coleta_parada(pasta):
     pasta(amostra(30, disponivel=30, swap_livre=400, disco=28))
-    ultima = health.ultima()
-    assert health.niveis(ultima) == {
+    latest = health.latest()
+    assert health.levels(latest) == {
         "cpu": "ok",
         "memoria": "critico",
         "swap": "atencao",
         "disco": "critico",
     }
-    assert health.parada(ultima)
+    assert health.stopped(latest)
 
 
 def test_grafico_quebra_a_linha_na_lacuna(pasta):
     pasta(amostra(120), amostra(115), amostra(10), amostra(5))
-    svg = health.grafico(health.amostras(), [("cpu", "linha-1")], maximo=100)
+    svg = health.chart(health.samples(), [("cpu", "linha-1")], maximo=100)
     assert svg.count("<polyline") == 2
 
 
@@ -156,11 +156,11 @@ def test_aviso_no_topo(pasta, superusuario, rows, esperado):
     if rows:
         pasta(*rows)
     context = superusuario.get(reverse("whats_new")).context
-    alerta = context.get("saude_alerta")
+    health_alert = context.get("saude_alerta")
     if esperado == "parada":
-        assert "parada" in alerta
+        assert "parada" in health_alert
     else:
-        assert alerta == esperado
+        assert health_alert == esperado
 
 
 def test_comando_resume_as_24_horas(pasta):
@@ -174,23 +174,23 @@ def test_comando_resume_as_24_horas(pasta):
 
 def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
     pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
-    results = health.com_rede(health.amostras())
+    results = health.with_network(health.samples())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
-    assert health.topo_da_escala(results, [("cpu", "linha-1")], piso=10) == 10
-    assert health.topo_da_escala(results, [("cpu", "linha-1")], maximo=100) == 100
+    assert health.scale_top(results, [("cpu", "linha-1")], piso=10) == 10
+    assert health.scale_top(results, [("cpu", "linha-1")], maximo=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
-    svg = health.grafico(results, [("rede_entrada", "linha-1")])
+    svg = health.chart(results, [("rede_entrada", "linha-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = health.grafico(results, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
+    svg = health.chart(results, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
     assert svg.rindex("linha-1") > svg.rindex("linha-2")
 
 
 def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     pasta(amostra(10), amostra(5))
     now = timezone.now()
-    svg = health.grafico(
-        health.amostras(),
+    svg = health.chart(
+        health.samples(),
         [("cpu", "linha-1")],
         start=now - datetime.timedelta(hours=1),
         end=now,

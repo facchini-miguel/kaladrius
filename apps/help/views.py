@@ -7,7 +7,7 @@ from . import documents
 
 # The user manual's pages, by the names the in-system help used (before 0.27.0) and the site
 # used until decision 151.
-PAGINAS = {
+PAGES = {
     "inicio": "getting-started",
     "agenda": "schedule",
     "clinica": "clinic",
@@ -22,25 +22,25 @@ PAGINAS = {
 }
 
 
-def para_o_site(request, page=None, path=None):
+def to_site(request, page=None, path=None):
     """Old in-system help addresses (before 0.27.0) now open the documentation site."""
     if page in ("privacidade", "privacy"):
         return redirect("privacy")
     if page is not None:
-        return redirect(documents.url_do_site(f"manual/{PAGINAS.get(page, page)}"))
+        return redirect(documents.site_url(f"manual/{PAGES.get(page, page)}"))
     if path is not None:
-        return redirect(documents.url_do_site())
-    return redirect(documents.url_do_site("manual/getting-started"))
+        return redirect(documents.site_url())
+    return redirect(documents.site_url("manual/getting-started"))
 
 
-def privacidade(request):
+def privacy(request):
     """Privacy policy (0.21.0, decision 055): public, since patients do not log in.
 
     The privacy contact is the clinic's: the user's clinic, or the installation's clinic
     for anyone else (one installation serves one clinic, decision 069).
     """
     clinic = getattr(request, "clinic", None) or Clinic.single()
-    titulo, html = documents.privacidade()
+    titulo, html = documents.privacy()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
     country = countries.clinic_country(clinic)
     context = {"titulo": titulo, "html": html, "clinic": clinic}

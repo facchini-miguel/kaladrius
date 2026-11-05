@@ -5,8 +5,8 @@ from . import views
 app_name = "reference_data"
 
 urlpatterns = [
-    path("cities/", views.cidades, name="cities"),
-    path("cities/options/", views.opcoes_cidades, name="city_options"),
-    path("addresses/suggestions/", views.sugestoes_endereco, name="address_suggestions"),
-    path("banks/", views.bancos, name="banks"),
+    path("cities/", views.cities, name="cities"),
+    path("cities/options/", views.city_options, name="city_options"),
+    path("addresses/suggestions/", views.address_suggestions, name="address_suggestions"),
+    path("banks/", views.banks, name="banks"),
 ]

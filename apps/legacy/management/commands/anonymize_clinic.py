@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.legacy.anonymization import ClinicaNaoEncontrada, anonymize_clinic
+from apps.legacy.anonymization import ClinicNotFound, anonymize_clinic
 
 
 class Command(BaseCommand):
@@ -24,13 +24,13 @@ class Command(BaseCommand):
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
             r = anonymize_clinic(clinic)
-        except ClinicaNaoEncontrada as error:
+        except ClinicNotFound as error:
             raise CommandError(str(error)) from error
         self.stdout.write(self.style.SUCCESS(f"Dados da clínica “{clinic}” anonimizados:"))
-        self.stdout.write(f"  Pacientes: {r.pacientes}")
-        self.stdout.write(f"  Agendamentos: {r.agendamentos}")
-        self.stdout.write(f"  Rechamadas: {r.rechamadas}")
-        self.stdout.write(f"  Profissionais: {r.profissionais}")
+        self.stdout.write(f"  Pacientes: {r.patients}")
+        self.stdout.write(f"  Agendamentos: {r.appointments}")
+        self.stdout.write(f"  Rechamadas: {r.recalls}")
+        self.stdout.write(f"  Profissionais: {r.practitioners}")
         self.stdout.write(
             f"  Registros de auditoria com os dados originais apagados: {r.registros_apagados}"
         )

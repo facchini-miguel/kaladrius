@@ -270,7 +270,7 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
     refused, the rest open. Creates an example price list if the clinic has none."""
     from decimal import Decimal
 
-    from apps.dentistry.teeth import DENTES_PERMANENTES
+    from apps.dentistry.teeth import PERMANENT_TEETH
     from apps.estimates import services
     from apps.estimates.models import (
         Estimate,
@@ -293,7 +293,7 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
     )
     if not (procedures and pacientes and category):
         return 0
-    teeth = [d for row in DENTES_PERMANENTES for d in row]
+    teeth = [d for row in PERMANENT_TEETH for d in row]
     today = timezone.localdate()
     for _ in range(quantity):
         date = today - datetime.timedelta(days=sorteio.randint(0, 60))

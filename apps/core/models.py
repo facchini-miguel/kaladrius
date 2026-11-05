@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
-from apps.dentistry.teeth import FDI, NUMERACOES
+from apps.dentistry.teeth import FDI, NUMBERINGS
 
 from . import countries, currencies
 from .isolation import ClinicModel
@@ -129,7 +129,7 @@ class Clinic(models.Model):
     tooth_numbering = models.CharField(
         _("numeração dos dentes"),
         max_length=10,
-        choices=NUMERACOES,
+        choices=NUMBERINGS,
         default=FDI,
         help_text=_(
             "Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os "

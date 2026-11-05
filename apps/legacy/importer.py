@@ -21,7 +21,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.audit.models import AuditEntry
-from apps.audit.record import registrar
+from apps.audit.record import log_event
 from apps.core.isolation import without_isolation
 from apps.core.models import Clinic
 from apps.core.validators import (
@@ -37,9 +37,9 @@ from apps.recalls.models import Recall
 from apps.reference_data.models import City, MaritalStatus, State
 from apps.schedule.models import Appointment, AppointmentType
 
-from .dump import ler_tabelas
+from .dump import read_tables
 
-TABELAS = {
+TABLES = {
     "pessoas",
     "agendax",
     "agenda",
@@ -52,21 +52,21 @@ TABELAS = {
     "tipo_endereco",
     "pessoas_estado_civil",
 }
-DURACAO_MINIMA = datetime.timedelta(minutes=30)
+MIN_DURATION = datetime.timedelta(minutes=30)
 
 
-class ImportacaoRecusada(Exception):
+class ImportRefused(Exception):
     pass
 
 
 @dataclass
-class Relatorio:
+class Report:
     clinic: Clinic | None = None
-    profissionais: int = 0
+    practitioners: int = 0
     tipos_criados: int = 0
-    pacientes: int = 0
-    agendamentos: int = 0
-    rechamadas: int = 0
+    patients: int = 0
+    appointments: int = 0
+    recalls: int = 0
     avisos: Counter = field(default_factory=Counter)
 
 
@@ -74,27 +74,27 @@ class Relatorio:
 _MOJIBAKE = re.compile("[\u00c2\u00c3][\u0080-\u00bf]")
 
 
-def _texto(value):
+def _text(value):
     """Clean text: fixes UTF-8 read as Latin-1 ("JoÃ£o") and normalizes line breaks."""
     text = "" if value is None else str(value)
     text = _MOJIBAKE.sub(lambda m: m.group().encode("latin-1").decode("utf-8"), text)
     return text.replace("\r\n", "\n").replace("\r", "\n").strip()
 
 
-def _chave(text):
+def _key(text):
     """Comparison key: no accents, lowercase, only letters and digits."""
-    sem_acentos = unicodedata.normalize("NFKD", _texto(text)).encode("ascii", "ignore").decode()
+    sem_acentos = unicodedata.normalize("NFKD", _text(text)).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]", "", sem_acentos.lower())
 
 
-def _data(value):
+def _date(value):
     try:
         return datetime.date.fromisoformat(str(value))
     except ValueError:
         return None  # MySQL "0000-00-00"
 
 
-def _hora(value):
+def _time(value):
     try:
         return datetime.time.fromisoformat(str(value))
     except ValueError:
@@ -102,7 +102,7 @@ def _hora(value):
 
 
 def _email(value):
-    email = _texto(value)
+    email = _text(value)
     if not email:
         return "", None
     try:
@@ -112,9 +112,9 @@ def _email(value):
     return email, None
 
 
-def _documento(bruto, kind):
+def _document(bruto, kind):
     """(valid document, None) or ("", original text) when it cannot be used."""
-    original = _texto(bruto)
+    original = _text(bruto)
     document = normalize_cnpj(original)
     if not document:
         return "", None
@@ -129,7 +129,7 @@ def _documento(bruto, kind):
     return (document, None) if valid_cnpj(document) else ("", original)
 
 
-def _cabe(value, size, label, extras):
+def _fits(value, size, label, extras):
     """The value if it fits the field; otherwise it goes in full to the notes."""
     if len(value) <= size:
         return value
@@ -137,57 +137,57 @@ def _cabe(value, size, label, extras):
     return value[:size]
 
 
-class _Importador:
+class _Importer:
     def __init__(self, tables, nome_clinica, today):
         self.t = tables
         self.nome_clinica = nome_clinica
         self.today = today
-        self.relatorio = Relatorio()
+        self.relatorio = Report()
 
     # --- Lookups -----------------------------------------------------------------
 
-    def _cidades(self):
+    def _cities(self):
         """Legacy city id → (UF, IBGE city or None, legacy name)."""
-        ufs_legado = {u["id"]: _texto(u["sigla"]).upper() for u in self.t.get("uf", [])}
+        ufs_legado = {u["id"]: _text(u["sigla"]).upper() for u in self.t.get("uf", [])}
         ufs = {state.abbreviation: state for state in State.objects.all()}
         ibge = defaultdict(dict)
         for city in City.objects.select_related("state"):
-            ibge[city.state.abbreviation][_chave(city.name)] = city
+            ibge[city.state.abbreviation][_key(city.name)] = city
         resultado = {}
         for row in self.t.get("cidade", []):
             id_uf = str(row["id_uf"] or "")
             abbreviation = ufs_legado.get(int(id_uf)) if id_uf.isdecimal() else None
-            name = _texto(row["cidade"])
+            name = _text(row["cidade"])
             resultado[row["id"]] = (
                 ufs.get(abbreviation),
-                ibge[abbreviation].get(_chave(name)),
+                ibge[abbreviation].get(_key(name)),
                 name,
                 abbreviation,
             )
         return resultado
 
-    def _estados_civis(self):
-        novos = {_chave(e.name)[:5]: e for e in MaritalStatus.objects.all()}
+    def _marital_statuses(self):
+        novos = {_key(e.name)[:5]: e for e in MaritalStatus.objects.all()}
         return {
-            row["id"]: novos.get(_chave(row["nome"])[:5])
+            row["id"]: novos.get(_key(row["nome"])[:5])
             for row in self.t.get("pessoas_estado_civil", [])
         }
 
-    def _logradouros(self):
-        tipos = {t["id"]: _texto(t["nome"]).title() for t in self.t.get("tipo_endereco", [])}
+    def _streets(self):
+        tipos = {t["id"]: _text(t["nome"]).title() for t in self.t.get("tipo_endereco", [])}
         resultado = {}
         for row in self.t.get("logradouro", []):
             kind = tipos.get(row["id_tipo_endereco"], "")
-            name = _texto(row["nome"])
+            name = _text(row["nome"])
             resultado[row["id"]] = f"{kind} {name}" if kind and kind != "Outros" else name
         return resultado
 
     # --- Steps -------------------------------------------------------------------
 
-    def _clinica(self):
+    def _clinic(self):
         clinic = Clinic.objects.filter(name=self.nome_clinica).first()
         if clinic is not None and Patient.objects.filter(clinic=clinic).exists():
-            raise ImportacaoRecusada(
+            raise ImportRefused(
                 f"A clínica “{self.nome_clinica}” já tem pacientes. A importação só é feita "
                 "numa clínica nova ou vazia, para não duplicar dados."
             )
@@ -196,38 +196,38 @@ class _Importador:
         self.relatorio.clinic = clinic
         return clinic
 
-    def _profissionais(self, clinic):
+    def _practitioners(self, clinic):
         mapa = {}
         for row in self.t.get("dentistas", []):
-            name = _texto(row["nome"]).lstrip("_ ").strip() or f"Profissional {row['id']}"
+            name = _text(row["nome"]).lstrip("_ ").strip() or f"Profissional {row['id']}"
             mapa[row["id"]] = Practitioner.objects.create(clinic=clinic, name=name[:200])
-        self.relatorio.profissionais = len(mapa)
+        self.relatorio.practitioners = len(mapa)
         return mapa
 
-    def _tipos(self, clinic):
-        existentes = {_chave(t.name): t for t in AppointmentType.objects.filter(clinic=clinic)}
+    def _types(self, clinic):
+        existentes = {_key(t.name): t for t in AppointmentType.objects.filter(clinic=clinic)}
         mapa = {}
         for row in self.t.get("agenda_cor", []):
-            name = _texto(row["nome"])[:60] or f"Tipo {row['id']}"
-            kind = existentes.get(_chave(name))
+            name = _text(row["nome"])[:60] or f"Tipo {row['id']}"
+            kind = existentes.get(_key(name))
             if kind is None:
-                color = _texto(row["cor"])
+                color = _text(row["cor"])
                 color = color if re.fullmatch(r"#[0-9a-fA-F]{6}", color) else "#0d6efd"
                 kind = AppointmentType.objects.create(clinic=clinic, name=name, color=color.lower())
-                existentes[_chave(name)] = kind
+                existentes[_key(name)] = kind
                 self.relatorio.tipos_criados += 1
             mapa[row["id"]] = kind
         return mapa
 
-    def _paciente(self, row, clinic, cidades, estados_civis, logradouros, bairros, usados):
+    def _patient(self, row, clinic, cidades, estados_civis, logradouros, bairros, usados):
         avisos = self.relatorio.avisos
         extras = [f"Código no sistema antigo: {row['id']}"]
         kind = Patient.Kind.COMPANY if row["tipo_pessoa"] == "J" else Patient.Kind.INDIVIDUAL
-        name = _texto(row["nome"]) or f"Sem nome (código {row['id']})"
+        name = _text(row["nome"]) or f"Sem nome (código {row['id']})"
 
-        document, original = _documento(row["cpf_cnpj"], kind)
+        document, original = _document(row["cpf_cnpj"], kind)
         if document and document in usados:
-            document, original = "", _texto(row["cpf_cnpj"])
+            document, original = "", _text(row["cpf_cnpj"])
             avisos["CPF/CNPJ repetido (guardado nas observações)"] += 1
         elif original:
             avisos["CPF/CNPJ inválido (guardado nas observações)"] += 1
@@ -252,8 +252,8 @@ class _Importador:
                 number = number[1:]
             # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
             telefones[phone_field] = ninth_digit(number)
-        if _texto(row["fone_fax"]):
-            extras.append(f"Fax: {_texto(row['fone_fax'])}")
+        if _text(row["fone_fax"]):
+            extras.append(f"Fax: {_text(row['fone_fax'])}")
 
         email, email_invalido = _email(row["email"])
         if email_invalido:
@@ -276,7 +276,7 @@ class _Importador:
                 avisos["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
 
         sex = row["sexo"] if row["sexo"] in ("F", "M") else ""
-        nascimento = _data(row["data_nasc"])
+        nascimento = _date(row["data_nasc"])
         if nascimento is not None and nascimento > self.today:
             extras.append(f"Data de nascimento no sistema antigo: {row['data_nasc']}")
             nascimento = None
@@ -284,60 +284,58 @@ class _Importador:
         saldo = float(row["saldo"] or 0)
         if saldo:
             extras.append(f"Saldo: R$ {saldo:.2f}".replace(".", ","))
-        payment = _data(row["data_pgto"])
+        payment = _date(row["data_pgto"])
         if payment:
             extras.append(f"Último pagamento: {payment:%d/%m/%Y}")
-        if _texto(row["agencia"]) or _texto(row["conta"]):
+        if _text(row["agencia"]) or _text(row["conta"]):
             extras.append(
-                f"Banco {row['id_banco']}, agência {_texto(row['agencia'])}, "
-                f"conta {_texto(row['conta'])}"
+                f"Banco {row['id_banco']}, agência {_text(row['agencia'])}, "
+                f"conta {_text(row['conta'])}"
             )
         for legado, label in (("homepage", "Site"), ("msn", "MSN"), ("rg_obs", "Obs. do RG")):
-            if _texto(row[legado]):
-                extras.append(f"{label}: {_texto(row[legado])}")
+            if _text(row[legado]):
+                extras.append(f"{label}: {_text(row[legado])}")
 
         pf = kind == Patient.Kind.INDIVIDUAL
         patient = Patient(
             clinic=clinic,
             kind=kind,
-            name=_cabe(name, 200, "Nome completo", extras),
-            legal_name=""
-            if pf
-            else _cabe(_texto(row["razao_social"]), 200, "Razão social", extras),
+            name=_fits(name, 200, "Nome completo", extras),
+            legal_name="" if pf else _fits(_text(row["razao_social"]), 200, "Razão social", extras),
             tax_id=document,
-            rg=_cabe(_texto(row["rg"]), 20, "RG", extras) if pf else "",
-            state_registration="" if pf else _cabe(_texto(row["insc_est"]), 20, "IE", extras),
+            rg=_fits(_text(row["rg"]), 20, "RG", extras) if pf else "",
+            state_registration="" if pf else _fits(_text(row["insc_est"]), 20, "IE", extras),
             sex=sex if pf else "",
             birth_date=nascimento if pf else None,
             marital_status=estados_civis.get(row["estado_civil"]) if pf else None,
-            occupation=_cabe(_texto(row["profissao"]), 100, "Profissão", extras) if pf else "",
-            guardian=_cabe(_texto(row["responsavel"]), 200, "Responsável", extras) if pf else "",
+            occupation=_fits(_text(row["profissao"]), 100, "Profissão", extras) if pf else "",
+            guardian=_fits(_text(row["responsavel"]), 200, "Responsável", extras) if pf else "",
             email=email,
             postal_code=postal_code,
             state=state,
             city=city,
-            neighborhood=_cabe(bairros.get(row["id_bairrocomunidade"], ""), 100, "Bairro", extras),
-            street=_cabe(logradouros.get(row["id_logradouro"], ""), 200, "Endereço", extras),
-            number=_cabe(_texto(row["endereco_num"]), 10, "Número", extras),
-            complement=_cabe(_texto(row["endereco_compl"]), 100, "Complemento", extras),
+            neighborhood=_fits(bairros.get(row["id_bairrocomunidade"], ""), 100, "Bairro", extras),
+            street=_fits(logradouros.get(row["id_logradouro"], ""), 200, "Endereço", extras),
+            number=_fits(_text(row["endereco_num"]), 10, "Número", extras),
+            complement=_fits(_text(row["endereco_compl"]), 100, "Complemento", extras),
             active=row["ativo"] != "N",
             **telefones,
         )
-        notes = _texto(row["obs"])
+        notes = _text(row["obs"])
         bloco = "[Sistema antigo]\n" + "\n".join(extras)
         patient.notes = f"{notes}\n\n{bloco}" if notes else bloco
-        return patient, _data(row["data_cadast"])
+        return patient, _date(row["data_cadast"])
 
     def _patients(self, clinic):
-        cidades = self._cidades()
-        estados_civis = self._estados_civis()
-        logradouros = self._logradouros()
-        bairros = {b["id"]: _texto(b["nome"]) for b in self.t.get("bairrocomunidade", [])}
+        cidades = self._cities()
+        estados_civis = self._marital_statuses()
+        logradouros = self._streets()
+        bairros = {b["id"]: _text(b["nome"]) for b in self.t.get("bairrocomunidade", [])}
         usados = set()
         pares = [
             (
                 row["id"],
-                *self._paciente(row, clinic, cidades, estados_civis, logradouros, bairros, usados),
+                *self._patient(row, clinic, cidades, estados_civis, logradouros, bairros, usados),
             )
             for row in sorted(self.t.get("pessoas", []), key=lambda row: row["id"])
         ]
@@ -351,27 +349,27 @@ class _Importador:
                 )
                 com_data.append(patient)
         Patient.objects.bulk_update(com_data, ["created_at"], batch_size=500)
-        self.relatorio.pacientes = len(pares)
+        self.relatorio.patients = len(pares)
         return {code: patient for code, patient, _ in pares}
 
-    def _appointments(self, profissionais, tipos):
+    def _appointments(self, practitioners, tipos):
         avisos = self.relatorio.avisos
         novos = []
         for row in sorted(self.t.get("agendax", []), key=lambda row: row["id"]):
-            practitioner = profissionais.get(row["id_dentista"])
+            practitioner = practitioners.get(row["id_dentista"])
             kind = tipos.get(row["id_cor"])
-            day = _data(row["data_marcar"])
-            start, end = _hora(row["hora_inicial"]), _hora(row["hora_final"])
+            day = _date(row["data_marcar"])
+            start, end = _time(row["hora_inicial"]), _time(row["hora_final"])
             if None in (practitioner, kind, day, start, end):
                 avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
-            description = _texto(row["descricao"]) or kind.name
+            description = _text(row["descricao"]) or kind.name
             start = timezone.make_aware(datetime.datetime.combine(day, start))
             end = timezone.make_aware(datetime.datetime.combine(day, end))
             if end <= start:
-                end = start + DURACAO_MINIMA
+                end = start + MIN_DURATION
                 description = (
                     f"{description}\n[Sistema antigo: horário de término corrigido]".strip()
                 )
@@ -395,11 +393,11 @@ class _Importador:
             ultimo_fim[appointment.practitioner.pk] = appointment.end
             aceitos.append(appointment)
         Appointment.objects.bulk_create(aceitos, batch_size=1000)
-        self.relatorio.agendamentos = len(aceitos)
+        self.relatorio.appointments = len(aceitos)
         if aceitos:
-            self._ampliar_horario(aceitos[0].clinic, aceitos)
+            self._widen_hours(aceitos[0].clinic, aceitos)
 
-    def _ampliar_horario(self, clinic, agendamentos):
+    def _widen_hours(self, clinic, appointments):
         """Widen the clinic's schedule hours so every imported appointment shows in the grid."""
         passo = clinic.schedule_interval
 
@@ -407,8 +405,8 @@ class _Importador:
             local = timezone.localtime(timestamp)
             return local.hour * 60 + local.minute
 
-        first = min(minutos(a.start) for a in agendamentos) // passo * passo
-        last = -(-max(minutos(a.end) or 24 * 60 for a in agendamentos) // passo) * passo
+        first = min(minutos(a.start) for a in appointments) // passo * passo
+        last = -(-max(minutos(a.end) or 24 * 60 for a in appointments) // passo) * passo
         start = min(clinic.schedule_start, datetime.time(first // 60, first % 60))
         end = clinic.schedule_end
         if last < 24 * 60:
@@ -421,18 +419,18 @@ class _Importador:
                 "(havia atendimentos fora do padrão)"
             ] += 1
 
-    def _recalls(self, pacientes):
+    def _recalls(self, patients):
         avisos = self.relatorio.avisos
         novas = []
         for row in self.t.get("agenda", []):
             if not row.get("is_rechamada"):
                 continue
-            patient = pacientes.get(row["id_pessoa"])
-            day = _data(row["data_marcar"])
+            patient = patients.get(row["id_pessoa"])
+            day = _date(row["data_marcar"])
             if patient is None or day is None:
                 avisos["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
                 continue
-            description = _texto(row["descricao"]) or "Rechamada"
+            description = _text(row["descricao"]) or "Rechamada"
             if len(description) > 200:
                 patient.notes += f"\nRechamada de {day:%d/%m/%Y}: {description}"
                 patient.save(update_fields=["notes"])
@@ -448,31 +446,31 @@ class _Importador:
                 )
             )
         Recall.objects.bulk_create(novas)
-        self.relatorio.rechamadas = len(novas)
+        self.relatorio.recalls = len(novas)
 
-    def executar(self):
+    def run(self):
         with transaction.atomic(), without_isolation():
-            clinic = self._clinica()
-            profissionais = self._profissionais(clinic)
-            tipos = self._tipos(clinic)
-            pacientes = self._patients(clinic)
-            self._appointments(profissionais, tipos)
-            self._recalls(pacientes)
+            clinic = self._clinic()
+            practitioners = self._practitioners(clinic)
+            tipos = self._types(clinic)
+            patients = self._patients(clinic)
+            self._appointments(practitioners, tipos)
+            self._recalls(patients)
             r = self.relatorio
-            registrar(
+            log_event(
                 AuditEntry.Action.CREATE,
                 clinic=clinic,
                 description=(
-                    f"Importação do sistema antigo: {r.pacientes} pacientes, "
-                    f"{r.agendamentos} agendamentos, {r.rechamadas} rechamadas"
+                    f"Importação do sistema antigo: {r.patients} pacientes, "
+                    f"{r.appointments} agendamentos, {r.recalls} rechamadas"
                 ),
             )
         return self.relatorio
 
 
-def importar(texto_do_dump, nome_clinica, today=None):
+def import_dump(texto_do_dump, nome_clinica, today=None):
     """Import a legacy dump into the clinic `nome_clinica` (created if needed). All or nothing."""
-    tables = ler_tabelas(texto_do_dump, TABELAS)
+    tables = read_tables(texto_do_dump, TABLES)
     if not tables.get("pessoas"):
-        raise ImportacaoRecusada("O arquivo não tem a tabela `pessoas` do sistema antigo.")
-    return _Importador(tables, nome_clinica, today or timezone.localdate()).executar()
+        raise ImportRefused("O arquivo não tem a tabela `pessoas` do sistema antigo.")
+    return _Importer(tables, nome_clinica, today or timezone.localdate()).run()

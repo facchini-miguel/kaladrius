@@ -10,7 +10,7 @@ from apps.core.isolation import use_clinic
 from apps.core.models import Role
 from apps.core.templatetags.formats import whatsapp
 from apps.core.validators import ninth_digit, normalize_phone
-from apps.legacy.anonymization import _mesmo_tamanho
+from apps.legacy.anonymization import _same_length
 from apps.patients.models import Patient
 
 
@@ -75,7 +75,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
 def test_anonimizacao_mantem_celular_e_fixo_validos():
     fake = Faker("pt_BR")
     for _ in range(50):
-        celular = _mesmo_tamanho("5484123456", fake)  # old mobile without the ninth digit
-        fixo = _mesmo_tamanho("5434613354", fake)
+        celular = _same_length("5484123456", fake)  # old mobile without the ninth digit
+        fixo = _same_length("5434613354", fake)
         assert len(celular) == 11 and celular.startswith("549")
         assert len(fixo) == 10 and fixo.startswith("54") and fixo[2] in "2345"

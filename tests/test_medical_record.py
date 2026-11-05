@@ -65,7 +65,7 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
     }
 
 
-def registrar(cenario, quem="dra", **extra):
+def log_event(cenario, quem="dra", **extra):
     url = reverse("medical_records:new", args=[cenario["patient"].pk])
     response = cenario[quem].post(url, {**ANAMNESE, **extra})
     assert response.status_code == 302, response.content.decode()[:500]
@@ -95,7 +95,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
 
 def test_registrar_salvar_e_finalizar(cenario):
     appointment = cenario["appointment"]
-    visit = registrar(cenario, appointment=appointment.pk)
+    visit = log_event(cenario, appointment=appointment.pk)
     assert (visit.practitioner, visit.appointment) == (cenario["ana"], appointment)
     assert visit.chief_complaint == ANAMNESE["chief_complaint"]
     assert not visit.is_finalized
@@ -121,7 +121,7 @@ def test_registrar_salvar_e_finalizar(cenario):
 
 
 def test_rascunho_so_o_autor_altera(cenario):
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:visit", args=[visit.pk])
     page = cenario["dr"].get(url)
     assert page.context["form"] is None and page.context["adendo_form"] is None
@@ -132,7 +132,7 @@ def test_rascunho_so_o_autor_altera(cenario):
 
 
 def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     cenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
     registros = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
     assert {r.action for r in registros} == {"criar", "visualizar"}
@@ -144,7 +144,7 @@ def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
 
 
 def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
-    registrar(cenario)
+    log_event(cenario)
     patient = cenario["patient"]
     with use_clinic(cenario["clinic"]):
         Patient.objects.filter(pk=patient.pk).update(archived=True, archived_at=timezone.now())
@@ -160,13 +160,13 @@ def test_agenda_leva_ao_atendimento_so_para_profissionais(cenario):
     editar = reverse("schedule:edit", args=[cenario["appointment"].pk])
     assert "Registrar atendimento" in cenario["dra"].get(editar).content.decode()
     assert "Registrar atendimento" not in cenario["recepcao"].get(editar).content.decode()
-    visit = registrar(cenario, appointment=cenario["appointment"].pk)
+    visit = log_event(cenario, appointment=cenario["appointment"].pk)
     page = cenario["dra"].get(editar).content.decode()
     assert reverse("medical_records:visit", args=[visit.pk]) in page
 
 
 def test_imprimir_so_depois_de_finalizado(cenario):
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:print", args=[visit.pk])
     assert cenario["dra"].get(url).status_code == 403
     page = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
@@ -186,7 +186,7 @@ def test_imprimir_so_depois_de_finalizado(cenario):
 
 
 def test_atestado_de_comparecimento_e_de_afastamento(cenario):
-    visit = registrar(cenario, appointment=cenario["appointment"].pk)
+    visit = log_event(cenario, appointment=cenario["appointment"].pk)
     url = reverse("medical_records:certificate_new", args=[visit.pk])
     # The appointment's times come filled in.
     formulario = cenario["dra"].get(url).context["form"]
@@ -225,7 +225,7 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
 
 
 def test_receita_uma_linha_por_item(cenario):
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:prescription_new", args=[visit.pk])
     medications = "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas\n\nSoro fisiológico nasal"
     response = cenario["dra"].post(url, {"medications": medications})
@@ -242,7 +242,7 @@ def test_receita_uma_linha_por_item(cenario):
 
 
 def test_pedido_de_exames(cenario):
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:exam_request_new", args=[visit.pk])
     response = cenario["dra"].post(
         url, {"exams": "Hemograma completo\nGlicemia de jejum", "indication": "Rotina"}
@@ -263,7 +263,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
 
     from apps.medical_records.models import Attachment
 
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
     enviar = lambda quem, name, content: cenario[quem].post(  # noqa: E731
         url, {"file": SimpleUploadedFile(name, content), "description": "Raio-X"}, follow=True
@@ -306,7 +306,7 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
 
     from apps.medical_records.models import Attachment
 
-    visit = registrar(cenario)
+    visit = log_event(cenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
     cenario["dra"].post(url, {"file": SimpleUploadedFile("a.png", PNG)})
     cenario["dra"].post(url, {"file": SimpleUploadedFile("b.png", PNG)})

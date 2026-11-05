@@ -8,25 +8,25 @@ changing the area hides or shows them without losing anything.
 from django.utils.translation import gettext_lazy as _
 
 # FDI two-digit tooth numbers, in the order of the dental chart (patient's right first).
-DENTES_PERMANENTES = [
+PERMANENT_TEETH = [
     [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28],
     [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38],
 ]
-DENTES_DECIDUOS = [
+PRIMARY_TEETH = [
     [55, 54, 53, 52, 51, 61, 62, 63, 64, 65],
     [85, 84, 83, 82, 81, 71, 72, 73, 74, 75],
 ]
-DENTES_VALIDOS = {d for row in DENTES_PERMANENTES + DENTES_DECIDUOS for d in row}
+VALID_TEETH = {d for row in PERMANENT_TEETH + PRIMARY_TEETH for d in row}
 
 # How teeth are named on screen and paper (decision 122). They are always stored in FDI; the
 # clinic chooses the numbering, by default its country's (Universal in the United States).
 FDI, UNIVERSAL, PALMER = "fdi", "universal", "palmer"
-NUMERACOES = [
+NUMBERINGS = [
     (FDI, _("FDI (11 a 48; dentes de leite 51 a 85)")),
     (UNIVERSAL, _("Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)")),
     (PALMER, _("Palmer (UR6, LL3; dentes de leite URE a LRE)")),
 ]
-LEGENDAS = {
+LEGENDS = {
     FDI: _("Numeração FDI."),
     UNIVERSAL: _("Numeração universal (Estados Unidos)."),
     PALMER: _(
@@ -34,11 +34,11 @@ LEGENDAS = {
         "LR inferior direito."
     ),
 }
-LETRAS_UNIVERSAIS = "ABCDEFGHIJKLMNOPQRST"
-_QUADRANTES_PALMER = {1: "UR", 2: "UL", 3: "LL", 4: "LR"}
+UNIVERSAL_LETTERS = "ABCDEFGHIJKLMNOPQRST"
+_PALMER_QUADRANTS = {1: "UR", 2: "UL", 3: "LL", 4: "LR"}
 
 
-def numeracao_da_clinica():
+def clinic_numbering():
     from apps.core.isolation import current_clinic
 
     return getattr(current_clinic(), "tooth_numbering", None) or FDI
@@ -50,7 +50,7 @@ def _universal(dente):
     quadrante, number = divmod(dente, 10)
     if quadrante <= 4:
         return {1: 9 - number, 2: 8 + number, 3: 25 - number, 4: 24 + number}[quadrante]
-    return LETRAS_UNIVERSAIS[
+    return UNIVERSAL_LETTERS[
         {5: 5 - number, 6: 4 + number, 7: 15 - number, 8: 14 + number}[quadrante]
     ]
 
@@ -58,24 +58,24 @@ def _universal(dente):
 def name(dente, numeracao=None):
     """The FDI tooth as the clinic writes it: 18 → "18", "1" (Universal) or "UR8" (Palmer)."""
     dente = int(dente)
-    numeracao = numeracao or numeracao_da_clinica()
-    if dente not in DENTES_VALIDOS or numeracao == FDI:
+    numeracao = numeracao or clinic_numbering()
+    if dente not in VALID_TEETH or numeracao == FDI:
         return str(dente)
     if numeracao == UNIVERSAL:
         return str(_universal(dente))
     quadrante, number = divmod(dente, 10)
-    lado = _QUADRANTES_PALMER[(quadrante - 1) % 4 + 1]
+    lado = _PALMER_QUADRANTS[(quadrante - 1) % 4 + 1]
     return lado + (str(number) if quadrante <= 4 else "ABCDE"[number - 1])
 
 
-def ordenar(teeth, numeracao=None):
+def sort_teeth(teeth, numeracao=None):
     """Teeth in the numbering's order: 1, 3, 14, A in Universal; FDI order otherwise."""
-    numeracao = numeracao or numeracao_da_clinica()
+    numeracao = numeracao or clinic_numbering()
     if numeracao != UNIVERSAL:
         return sorted(teeth)
 
     def key(dente):
-        value = _universal(dente) if dente in DENTES_VALIDOS else 99
+        value = _universal(dente) if dente in VALID_TEETH else 99
         return (isinstance(value, str), str(value).zfill(2))
 
     return sorted(teeth, key=key)
@@ -83,7 +83,7 @@ def ordenar(teeth, numeracao=None):
 
 # Appointment types a new dental clinic starts with: the ones from the legacy system, with
 # the same colors.
-TIPOS_DE_ATENDIMENTO = [
+APPOINTMENT_TYPES = [
     ("Liberado", "#b9f1a7"),
     ("Cirurgia", "#f7a5a5"),
     ("Dentística", "#f6f7a5"),
@@ -97,10 +97,10 @@ TIPOS_DE_ATENDIMENTO = [
 ]
 
 
-def odontograma(selecionados):
+def odontogram(selecionados):
     """Template context of the dental chart (templates/dentistry/_odontogram.html)."""
     return {
-        "permanentes": DENTES_PERMANENTES,
-        "deciduos": DENTES_DECIDUOS,
+        "permanentes": PERMANENT_TEETH,
+        "deciduos": PRIMARY_TEETH,
         "selecionados": selecionados,
     }

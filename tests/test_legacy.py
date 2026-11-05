@@ -14,8 +14,8 @@ from apps.finance import services
 from apps.finance.models import Category, Entry, Supplier
 from apps.health_plans.models import HealthPlan, MemberCard
 from apps.legacy.anonymization import RECALLS
-from apps.legacy.dump import DumpInvalido, ler_tabelas
-from apps.legacy.importer import ImportacaoRecusada, _documento, importar
+from apps.legacy.dump import InvalidDump, read_tables
+from apps.legacy.importer import ImportRefused, _document, import_dump
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
@@ -82,7 +82,7 @@ INSERT INTO `sist_usuarios` (`id`, `login`) VALUES (1, 'nao-importar');
 
 
 def test_le_valores_com_escapes_nulos_e_numeros():
-    tables = ler_tabelas(
+    tables = read_tables(
         "INSERT INTO `t` (`a`, `b`, `c`, `d`) VALUES "
         "(1, 'it''s \\'ok\\'\\n(x), y;', NULL, 2.5), (-3, '', 'z', 0);"
     )
@@ -93,7 +93,7 @@ def test_le_valores_com_escapes_nulos_e_numeros():
 
 
 def test_filtra_tabelas():
-    tables = ler_tabelas(DUMP, {"dentistas"})
+    tables = read_tables(DUMP, {"dentistas"})
     assert list(tables) == ["dentistas"]
 
 
@@ -107,8 +107,8 @@ def test_filtra_tabelas():
     ],
 )
 def test_dump_invalido(text):
-    with pytest.raises(DumpInvalido):
-        ler_tabelas(text)
+    with pytest.raises(InvalidDump):
+        read_tables(text)
 
 
 # --- Import ------------------------------------------------------------------------
@@ -116,7 +116,7 @@ def test_dump_invalido(text):
 
 @pytest.fixture
 def importado(db):
-    relatorio = importar(DUMP, "Clínica Importada", today=HOJE)
+    relatorio = import_dump(DUMP, "Clínica Importada", today=HOJE)
     return relatorio, relatorio.clinic
 
 
@@ -127,8 +127,8 @@ def data(clinic, modelo, **filtro):
 
 def test_relatorio(importado):
     relatorio, _ = importado
-    assert (relatorio.profissionais, relatorio.pacientes) == (2, 4)
-    assert (relatorio.agendamentos, relatorio.rechamadas, relatorio.tipos_criados) == (4, 2, 1)
+    assert (relatorio.practitioners, relatorio.patients) == (2, 4)
+    assert (relatorio.appointments, relatorio.recalls, relatorio.tipos_criados) == (4, 2, 1)
     avisos = relatorio.avisos
     assert avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] == 1
     assert avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] == 1
@@ -210,25 +210,25 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
     ],
 )
 def test_documento(bruto, kind, esperado):
-    assert _documento(bruto, kind) == esperado
+    assert _document(bruto, kind) == esperado
 
 
 def test_agenda_e_rechamadas(importado):
     _, clinic = importado
-    agendamentos = data(clinic, Appointment)
-    assert [a.description.splitlines()[0] for a in agendamentos] == [
+    appointments = data(clinic, Appointment)
+    assert [a.description.splitlines()[0] for a in appointments] == [
         "Fulano - extração",
         "Término igual ao início",
         "Cor Nova",  # no legacy description: the type name, so the slot stays editable
         "Até tarde",
     ]
-    corrigido = agendamentos[1]
+    corrigido = appointments[1]
     assert corrigido.end - corrigido.start == datetime.timedelta(minutes=30)
-    assert all(a.patient is None for a in agendamentos)
-    assert timezone.localtime(agendamentos[0].start).hour == 8
+    assert all(a.patient is None for a in appointments)
+    assert timezone.localtime(appointments[0].start).hour == 8
 
-    rechamadas = data(clinic, Recall)
-    assert [(r.patient.name, r.done) for r in rechamadas] == [
+    recalls = data(clinic, Recall)
+    assert [(r.patient.name, r.done) for r in recalls] == [
         ("João d'Ávila", True),  # past recall: considered handled
         ("Empresa Teste", False),
     ]
@@ -242,8 +242,8 @@ def test_registro_na_auditoria_e_sem_usuarios(importado, django_user_model):
 
 
 def test_nao_importa_duas_vezes_na_mesma_clinica(importado):
-    with pytest.raises(ImportacaoRecusada):
-        importar(DUMP, "Clínica Importada", today=HOJE)
+    with pytest.raises(ImportRefused):
+        import_dump(DUMP, "Clínica Importada", today=HOJE)
     _, clinic = importado
     assert len(data(clinic, Patient)) == 4
 
@@ -251,12 +251,12 @@ def test_nao_importa_duas_vezes_na_mesma_clinica(importado):
 def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
     from apps.legacy import importer
 
-    def quebrar(self, pacientes):
+    def quebrar(self, patients):
         raise RuntimeError("falha no meio")
 
-    monkeypatch.setattr(importer._Importador, "_recalls", quebrar)
+    monkeypatch.setattr(importer._Importer, "_recalls", quebrar)
     with pytest.raises(RuntimeError):
-        importar(DUMP, "Clínica Importada", today=HOJE)
+        import_dump(DUMP, "Clínica Importada", today=HOJE)
     assert not Clinic.objects.filter(name="Clínica Importada").exists()
 
 
@@ -286,8 +286,8 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
         call_command("anonymize_clinic", clinic=clinic.name)
     call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
 
-    pacientes = data(clinic, Patient)
-    assert [p.pk for p in pacientes] == [p.pk for p in before["pacientes"]]
+    patients = data(clinic, Patient)
+    assert [p.pk for p in patients] == [p.pk for p in before["pacientes"]]
     originais = [
         "Ávila",
         "Duplicada",
@@ -301,9 +301,9 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
         "Trindade",
         "Sistema antigo",
     ]
-    text = str([vars(p) for p in pacientes])
+    text = str([vars(p) for p in patients])
     assert not [trecho for trecho in originais if trecho in text]
-    for velho, new in zip(before["pacientes"], pacientes, strict=True):
+    for velho, new in zip(before["pacientes"], patients, strict=True):
         assert (new.kind, new.sex, new.active, new.city_id) == (
             velho.kind,
             velho.sex,
@@ -314,15 +314,15 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
         assert bool(new.home_phone) == bool(velho.home_phone)
         if velho.birth_date:
             assert abs((new.birth_date - velho.birth_date).days) <= 180
-    joao = next(p for p in pacientes if p.pk == before["pacientes"][0].pk)
+    joao = next(p for p in patients if p.pk == before["pacientes"][0].pk)
     assert joao.home_phone.startswith("48")  # area code kept
     assert len(joao.tax_id) == 11
 
-    agendamentos = data(clinic, Appointment)
-    assert [(a.start, a.end, a.practitioner_id) for a in agendamentos] == [
+    appointments = data(clinic, Appointment)
+    assert [(a.start, a.end, a.practitioner_id) for a in appointments] == [
         (a.start, a.end, a.practitioner_id) for a in before["agendamentos"]
     ]
-    descricoes = [a.description for a in agendamentos]
+    descricoes = [a.description for a in appointments]
     assert "Cor Nova" in descricoes  # blocked slot: no personal data, kept
     assert not [d for d in descricoes if "Fulano" in d or "Até tarde" in d]
     assert {r.description for r in data(clinic, Recall)} <= set(RECALLS)

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.legacy.dump import DumpInvalido
-from apps.legacy.importer import ImportacaoRecusada, importar
+from apps.legacy.dump import InvalidDump
+from apps.legacy.importer import ImportRefused, import_dump
 
 
 class Command(BaseCommand):
@@ -38,16 +38,16 @@ class Command(BaseCommand):
             raise CommandError(f"Não foi possível ler o arquivo: {error}") from error
 
         try:
-            relatorio = importar(text, clinic)
-        except (DumpInvalido, ImportacaoRecusada) as error:
+            relatorio = import_dump(text, clinic)
+        except (InvalidDump, ImportRefused) as error:
             raise CommandError(str(error)) from error
 
         self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.name}”:"))
-        self.stdout.write(f"  Profissionais: {relatorio.profissionais}")
+        self.stdout.write(f"  Profissionais: {relatorio.practitioners}")
         self.stdout.write(f"  Tipos de atendimento novos: {relatorio.tipos_criados}")
-        self.stdout.write(f"  Pacientes: {relatorio.pacientes}")
-        self.stdout.write(f"  Agendamentos: {relatorio.agendamentos}")
-        self.stdout.write(f"  Rechamadas: {relatorio.rechamadas}")
+        self.stdout.write(f"  Pacientes: {relatorio.patients}")
+        self.stdout.write(f"  Agendamentos: {relatorio.appointments}")
+        self.stdout.write(f"  Rechamadas: {relatorio.recalls}")
         if relatorio.avisos:
             self.stdout.write("Avisos:")
             for warning, total in sorted(relatorio.avisos.items()):

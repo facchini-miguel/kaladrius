@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 
 from apps.account import services as conta_servicos
 from apps.audit.models import AuditEntry
-from apps.audit.record import registrar
+from apps.audit.record import log_event
 from apps.core.models import Membership
 from apps.core.permissions import Action, Module, requires_permission
 
@@ -74,7 +74,7 @@ def edit_member(request, pk):
             "form": form,
             "account": account,
             "exclusiva": exclusiva,
-            "duas_etapas": conta_servicos.ativa_para(user),
+            "duas_etapas": conta_servicos.active_for(user),
         },
     )
 
@@ -117,8 +117,8 @@ def two_factor(request, pk):
         and user != request.user
         and exclusive_account(user, request.clinic)
     ):
-        conta_servicos.desativar(user)
-        registrar(
+        conta_servicos.deactivate(user)
+        log_event(
             AuditEntry.Action.CHANGE,
             user,
             description=f"{user}: verificação em duas etapas removida pelo administrador",

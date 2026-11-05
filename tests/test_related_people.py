@@ -5,7 +5,7 @@ from django.db import IntegrityError, transaction
 from django.urls import reverse
 
 from apps.audit.models import AuditEntry
-from apps.audit.record import nome_do_modelo
+from apps.audit.record import model_label
 from apps.core.isolation import WrongClinic, use_clinic, without_isolation
 from apps.core.models import Role
 from apps.patients.models import Patient, RelatedPerson
@@ -149,7 +149,7 @@ def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
     assert admin.post(reverse("patients:delete", args=[filha.pk])).status_code == 302
     assert not RelatedPerson.all_objects.exists()
     registros = AuditEntry.objects.filter(
-        model_name=nome_do_modelo(RelatedPerson), object_id=str(de_filha.pk)
+        model_name=model_label(RelatedPerson), object_id=str(de_filha.pk)
     )
     assert registros.exists()
     assert "NOME-SIGILOSO" not in str(list(registros.values()))

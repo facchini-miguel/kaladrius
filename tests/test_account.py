@@ -39,7 +39,7 @@ def entrar(client, user, password=SENHA, proximo=""):
 
 def ligar_duas_etapas(user):
     dispositivo = services.prepare(user)
-    codigos = services.ativar(dispositivo)
+    codigos = services.activate(dispositivo)
     return dispositivo, codigos
 
 
@@ -187,7 +187,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
         {"acao": "codigos", "codigos-code": codigo_atual(dispositivo)},
     )
     assert "Códigos de recuperação" in novos.content.decode()
-    assert not services.verificar_recuperacao(pessoa, antigos[1])  # old ones stop working
+    assert not services.verify_recovery(pessoa, antigos[1])  # old ones stop working
     errado = client.post(
         reverse("account:two_factor"),
         {"acao": "desativar", "desativar-senha": "errada", "desativar-code": "000000"},
@@ -201,7 +201,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
             "desativar-code": codigo_atual(dispositivo, deslocamento=1),
         },
     )
-    assert response.status_code == 302 and not services.ativa_para(pessoa)
+    assert response.status_code == 302 and not services.active_for(pessoa)
 
 
 def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
@@ -214,7 +214,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     page = client.get(reverse("team:edit", args=[vinculo.pk])).content.decode()
     assert "Remover a verificação em duas etapas" in page
     client.post(reverse("team:two_factor", args=[vinculo.pk]))
-    assert not services.ativa_para(pessoa)
+    assert not services.active_for(pessoa)
     assert AuditEntry.objects.filter(object_repr__contains="removida").exists()
 
 
@@ -315,7 +315,7 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
             "desativar-code": codigo_atual(dispositivo),
         },
     )
-    assert services.ativa_para(admin)
+    assert services.active_for(admin)
 
 
 def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):

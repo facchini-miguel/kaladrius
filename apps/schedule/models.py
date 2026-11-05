@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.isolation import ClinicModel, without_isolation
 from apps.core.ordering import ALPHABETICAL
 from apps.core.validators import validate_color
-from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
+from apps.dentistry.teeth import APPOINTMENT_TYPES
 
 # Appointment types a new clinic starts with (decision 080): the dental module's for the
 # Odontologia area, these for the others. Each clinic can rename, recolor, deactivate or
@@ -189,7 +189,7 @@ def create_default_types(clinic):
         if AppointmentType.objects.filter(clinic=clinic).exists():
             return
         appointment_types = (
-            TIPOS_DE_ATENDIMENTO if clinic.area == clinic.Area.DENTISTRY else DEFAULT_TYPES
+            APPOINTMENT_TYPES if clinic.area == clinic.Area.DENTISTRY else DEFAULT_TYPES
         )
         AppointmentType.objects.bulk_create(
             AppointmentType(clinic=clinic, name=name, color=color)

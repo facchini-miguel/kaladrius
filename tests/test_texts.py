@@ -105,11 +105,11 @@ def test_telas_cabem_no_celular(clinica_a, reception):
     printed registration sheet stacks its two columns on a narrow screen."""
     from django.template.loader import render_to_string
 
-    from apps.dentistry.teeth import DENTES_DECIDUOS, DENTES_PERMANENTES
+    from apps.dentistry.teeth import PERMANENT_TEETH, PRIMARY_TEETH
 
     html = render_to_string(
         "dentistry/_odontogram.html",
-        {"permanentes": DENTES_PERMANENTES, "deciduos": DENTES_DECIDUOS, "interativo": True},
+        {"permanentes": PERMANENT_TEETH, "deciduos": PRIMARY_TEETH, "interativo": True},
     )
     assert 'class="odontograma-rolagem"' in html
     with use_clinic(clinica_a):

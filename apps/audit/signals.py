@@ -31,12 +31,12 @@ from apps.schedule.models import Appointment, AppointmentType
 from apps.staff.models import Employee, Payroll, Salary
 
 from .models import AuditEntry
-from .record import ip_da_requisicao, registrar
+from .record import log_event, request_ip
 
 Action = AuditEntry.Action
 Usuario = get_user_model()
 
-AUDITADOS = [
+AUDITED = [
     Patient,
     Appointment,
     Recall,
@@ -72,7 +72,7 @@ AUDITADOS = [
     EstimateItem,
 ]
 # Never stored (secrets) or not worth storing (bookkeeping timestamps).
-IGNORADOS = {
+IGNORED = {
     "password",
     "last_login",
     "created_at",
@@ -86,40 +86,40 @@ def _campos(model):
     return [
         field
         for field in model._meta.concrete_fields
-        if not field.primary_key and field.attname not in IGNORADOS and field.name not in IGNORADOS
+        if not field.primary_key and field.attname not in IGNORED and field.name not in IGNORED
     ]
 
 
-def _valor(field, instancia):
+def _value(field, instancia):
     value = field.value_from_object(instancia)
     if value is None or isinstance(value, bool | int | float | str):
         return value
     return str(value)
 
 
-def _valores(instancia):
-    return {field.name: _valor(field, instancia) for field in _campos(type(instancia))}
+def _values(instancia):
+    return {field.name: _value(field, instancia) for field in _campos(type(instancia))}
 
 
-def antes_de_salvar(sender, instance, raw=False, **kwargs):
+def before_save(sender, instance, raw=False, **kwargs):
     if raw or instance.pk is None:
         instance._auditoria_antes = None
         return
     previous = sender._base_manager.filter(pk=instance.pk).first()
-    instance._auditoria_antes = _valores(previous) if previous is not None else None
+    instance._auditoria_antes = _values(previous) if previous is not None else None
     instance._auditoria_senha = getattr(previous, "password", None)
 
 
-def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, **kwargs):
+def after_save(sender, instance, created, raw=False, update_fields=None, **kwargs):
     if raw:
         return
-    after = _valores(instance)
+    after = _values(instance)
     before = getattr(instance, "_auditoria_antes", None)
     if created or before is None:
         changes = {
             field: [None, value] for field, value in after.items() if value not in (None, "")
         }
-        registrar(Action.CREATE, instance, changes=changes)
+        log_event(Action.CREATE, instance, changes=changes)
         return
     changes = {
         field: [before.get(field), value]
@@ -132,48 +132,44 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
     ):
         changes["senha"] = ["(oculta)", "(alterada)"]  # the hash itself is never stored
     if changes:
-        registrar(Action.CHANGE, instance, changes=changes)
+        log_event(Action.CHANGE, instance, changes=changes)
 
 
-def depois_de_excluir(sender, instance, **kwargs):
+def after_delete(sender, instance, **kwargs):
     valores = {
         field: [value, None]
-        for field, value in _valores(instance).items()
+        for field, value in _values(instance).items()
         if value not in (None, "")
     }
-    registrar(Action.DELETE, instance, changes=valores)
+    log_event(Action.DELETE, instance, changes=valores)
 
 
-for model in AUDITADOS:
+for model in AUDITED:
     uid = f"auditoria_{model._meta.label_lower}"
-    pre_save.connect(antes_de_salvar, sender=model, dispatch_uid=f"{uid}_pre")
-    post_save.connect(depois_de_salvar, sender=model, dispatch_uid=f"{uid}_post")
-    post_delete.connect(depois_de_excluir, sender=model, dispatch_uid=f"{uid}_delete")
+    pre_save.connect(before_save, sender=model, dispatch_uid=f"{uid}_pre")
+    post_save.connect(after_save, sender=model, dispatch_uid=f"{uid}_post")
+    post_delete.connect(after_delete, sender=model, dispatch_uid=f"{uid}_delete")
 
 
-def _entrou(sender, request, user, **kwargs):
-    registrar(
-        Action.LOGIN, user=user, ip=ip_da_requisicao(request), description=user.get_username()
-    )
+def _logged_in(sender, request, user, **kwargs):
+    log_event(Action.LOGIN, user=user, ip=request_ip(request), description=user.get_username())
 
 
-def _saiu(sender, request, user, **kwargs):
+def _logged_out(sender, request, user, **kwargs):
     if user is not None:
-        registrar(
-            Action.LOGOUT, user=user, ip=ip_da_requisicao(request), description=user.get_username()
-        )
+        log_event(Action.LOGOUT, user=user, ip=request_ip(request), description=user.get_username())
 
 
-def _falhou(sender, credentials, request=None, **kwargs):
+def _login_failed(sender, credentials, request=None, **kwargs):
     # Only the username is kept; the password typed is never stored.
     name = str(credentials.get("username", ""))[:150]
-    registrar(
+    log_event(
         Action.LOGIN_FAILED,
-        ip=ip_da_requisicao(request) if request is not None else None,
+        ip=request_ip(request) if request is not None else None,
         description=f"usuário informado: {name}",
     )
 
 
-user_logged_in.connect(_entrou, dispatch_uid="auditoria_login")
-user_logged_out.connect(_saiu, dispatch_uid="auditoria_logout")
-user_login_failed.connect(_falhou, dispatch_uid="auditoria_login_falhou")
+user_logged_in.connect(_logged_in, dispatch_uid="auditoria_login")
+user_logged_out.connect(_logged_out, dispatch_uid="auditoria_logout")
+user_login_failed.connect(_login_failed, dispatch_uid="auditoria_login_falhou")

@@ -8,10 +8,10 @@ register = template.Library()
 
 
 @register.filter
-def nome_dente(dente):
+def tooth_name(dente):
     return teeth.name(dente)
 
 
 @register.simple_tag
-def legenda_numeracao():
-    return teeth.LEGENDAS[teeth.numeracao_da_clinica()]
+def numbering_legend():
+    return teeth.LEGENDS[teeth.clinic_numbering()]

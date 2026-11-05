@@ -243,9 +243,9 @@ class EstimateItem(ClinicModel):
     @property
     def teeth_display(self):
         """In the clinic's numbering (decision 122): "18, 36" in FDI, "1, 19" in Universal."""
-        from apps.dentistry.teeth import name, ordenar
+        from apps.dentistry.teeth import name, sort_teeth
 
-        return ", ".join(name(d) for d in ordenar(self.teeth_list))
+        return ", ".join(name(d) for d in sort_teeth(self.teeth_list))
 
     @property
     def teeth_list(self):

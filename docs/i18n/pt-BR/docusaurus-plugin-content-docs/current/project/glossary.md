@@ -324,7 +324,7 @@ Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão
 
 ## Funções e variáveis
 
-A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173), financeiro (decisão 174), agenda (decisão 175), pacientes, prontuário, orçamentos, pessoal, rechamadas, convênios, profissionais e equipe (decisão 176).
+A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173), financeiro (decisão 174), agenda (decisão 175), pacientes, prontuário, orçamentos, pessoal, rechamadas, convênios, profissionais e equipe (decisão 176), legado, auditoria, conta, ajuda, odontologia, monitoramento e referências (decisão 177).
 
 ### Variáveis comuns
 
@@ -929,6 +929,199 @@ As views de cada app (renomeadas só dentro do app, pois o mesmo nome antigo era
 | `results` | `member_list` |
 | `new` | `new_member` |
 | `editar` | `edit_member` |
+
+### Legado, auditoria, conta, ajuda, odontologia, monitoramento, referências
+
+| Antes | Depois |
+|---|---|
+| `OBSERVACOES` | `NOTES` |
+| `DESLOCAMENTO_NASCIMENTO` | `BIRTH_DATE_SHIFT` |
+| `ClinicaNaoEncontrada` | `ClinicNotFound` |
+| `Resultado` | `Result` |
+| `_mesmo_tamanho` | `_same_length` |
+| `_Anonimizador` | `_Anonymizer` |
+| `LegadoConfig` | `LegacyConfig` |
+| `DumpInvalido` | `InvalidDump` |
+| `ler_tabelas` | `read_tables` |
+| `TABELAS` | `TABLES` |
+| `DURACAO_MINIMA` | `MIN_DURATION` |
+| `ImportacaoRecusada` | `ImportRefused` |
+| `Relatorio` | `Report` |
+| `_cabe` | `_fits` |
+| `_Importador` | `_Importer` |
+| `_estados_civis` | `_marital_statuses` |
+| `_logradouros` | `_streets` |
+| `_ampliar_horario` | `_widen_hours` |
+| `_nascimento` | `_birth_date` |
+| `RegistroAuditoriaAdmin` | `AuditEntryAdmin` |
+| `AuditoriaConfig` | `AuditConfig` |
+| `RETENCAO_LOGIN_FALHOU` | `FAILED_LOGIN_RETENTION` |
+| `AuditoriaMiddleware` | `AuditMiddleware` |
+| `ip_da_requisicao` | `request_ip` |
+| `registrar` | `log_event` |
+| `nome_do_modelo` | `model_label` |
+| `REMOVIDO` | `REMOVED` |
+| `anonimizar` | `anonymize` |
+| `_clinica_de` | `_clinic_of` |
+| `AUDITADOS` | `AUDITED` |
+| `IGNORADOS` | `IGNORED` |
+| `antes_de_salvar` | `before_save` |
+| `depois_de_salvar` | `after_save` |
+| `depois_de_excluir` | `after_delete` |
+| `_entrou` | `_logged_in` |
+| `_saiu` | `_logged_out` |
+| `_falhou` | `_login_failed` |
+| `tipos_de_registro` | `record_types` |
+| `campos_alterados` | `changed_fields` |
+| `DuasEtapasAdmin` | `TwoFactorAdmin` |
+| `ContaConfig` | `AccountConfig` |
+| `EntrarForm` | `LoginForm` |
+| `_campo_codigo` | `_code_field` |
+| `CodigoForm` | `CodeForm` |
+| `DesativarForm` | `DisableTwoFactorForm` |
+| `RecuperarSenhaForm` | `RecoverPasswordForm` |
+| `NovaSenhaForm` | `NewPasswordForm` |
+| `LIVRES` | `EXEMPT_PATHS` |
+| `ExigirDuasEtapasMiddleware` | `RequireTwoFactorMiddleware` |
+| `LIMITE_POR_ENDERECO` | `LIMIT_PER_ADDRESS` |
+| `QUANTOS_CODIGOS` | `CODE_COUNT` |
+| `ALFABETO` | `ALPHABET` |
+| `tentativas_do_endereco` | `address_attempts` |
+| `endereco_bloqueado` | `address_blocked` |
+| `ativa_para` | `active_for` |
+| `obrigatoria` | `is_required` |
+| `endereco_do_app` | `app_uri` |
+| `segredo_em_grupos` | `secret_in_groups` |
+| `verificar_app` | `verify_app` |
+| `_resumo` | `_digest` |
+| `novos_codigos` | `new_codes` |
+| `verificar_recuperacao` | `verify_recovery` |
+| `VALIDADE_PENDENTE` | `PENDING_VALIDITY` |
+| `TENTATIVAS_CODIGO` | `CODE_ATTEMPTS` |
+| `EntrarView` | `ClinicLoginView` |
+| `_com_email` | `_with_email` |
+| `recuperar_enviado` | `password_recover_sent` |
+| `nova_senha` | `new_password` |
+| `senha_redefinida` | `password_reset_done` |
+| `AjudaConfig` | `HelpConfig` |
+| `documentacao` | `documentation` |
+| `PASTAS` | `FOLDERS` |
+| `PREFIXOS` | `PREFIXES` |
+| `IDIOMA_PADRAO` | `DEFAULT_LANGUAGE` |
+| `_ITEM_DE_LISTA` | `_LIST_ITEM` |
+| `_idioma` | `_language` |
+| `url_do_site` | `site_url` |
+| `_separar_listas` | `_split_lists` |
+| `PAGINAS` | `PAGES` |
+| `para_o_site` | `to_site` |
+| `OdontologiaConfig` | `DentistryConfig` |
+| `DENTES_PERMANENTES` | `PERMANENT_TEETH` |
+| `DENTES_DECIDUOS` | `PRIMARY_TEETH` |
+| `DENTES_VALIDOS` | `VALID_TEETH` |
+| `NUMERACOES` | `NUMBERINGS` |
+| `LEGENDAS` | `LEGENDS` |
+| `LETRAS_UNIVERSAIS` | `UNIVERSAL_LETTERS` |
+| `_QUADRANTES_PALMER` | `_PALMER_QUADRANTS` |
+| `numeracao_da_clinica` | `clinic_numbering` |
+| `ordenar` | `sort_teeth` |
+| `TIPOS_DE_ATENDIMENTO` | `APPOINTMENT_TYPES` |
+| `odontograma` | `odontogram` |
+| `nome_dente` | `tooth_name` |
+| `legenda_numeracao` | `numbering_legend` |
+| `MonitoramentoConfig` | `MonitoringConfig` |
+| `alerta` | `health_alert` |
+| `CAMPOS` | `FIELDS` |
+| `CAMPOS_CONTAINER` | `CONTAINER_FIELDS` |
+| `COLETA_PARADA_APOS` | `COLLECTION_STOPPED_AFTER` |
+| `LACUNA` | `GAP` |
+| `LIMITES` | `THRESHOLDS` |
+| `com_rede` | `with_network` |
+| `topo_da_escala` | `scale_top` |
+| `PERIODOS` | `PERIODS` |
+| `GRAFICOS` | `CHARTS` |
+| `_banco` | `_database` |
+| `UFAdmin` | `StateAdmin` |
+| `CidadeAdmin` | `CityAdmin` |
+| `BancoAdmin` | `BankAdmin` |
+| `EstadoCivilAdmin` | `MaritalStatusAdmin` |
+| `ReferenciasConfig` | `ReferenceDataConfig` |
+| `opcoes_cidades` | `city_options` |
+| `sugestoes_endereco` | `address_suggestions` |
+
+Renomeados só dentro do próprio app (palavras comuns):
+
+`legacy`:
+
+| Antes | Depois |
+|---|---|
+| `pacientes` | `patients` |
+| `agendamentos` | `appointments` |
+| `carteirinhas` | `member_cards` |
+| `rechamadas` | `recalls` |
+| `profissionais` | `practitioners` |
+| `funcionarios` | `employees` |
+| `fornecedores` | `suppliers` |
+| `financeiro` | `finance` |
+| `auditoria` | `audit` |
+| `executar` | `run` |
+| `_nome` | `_name` |
+| `_texto` | `_text` |
+| `_chave` | `_key` |
+| `_data` | `_date` |
+| `_hora` | `_time` |
+| `_documento` | `_document` |
+| `importar` | `import_dump` |
+| `_clinica` | `_clinic` |
+| `_tipos` | `_types` |
+| `_paciente` | `_patient` |
+| `_cidades` | `_cities` |
+| `_profissionais` | `_practitioners` |
+| `_valores` | `_values` |
+
+`audit`:
+
+| Antes | Depois |
+|---|---|
+| `results` | `audit_list` |
+| `_data` | `_date` |
+| `_valor` | `_value` |
+| `_valores` | `_values` |
+
+`monitoring`:
+
+| Antes | Depois |
+|---|---|
+| `ultima` | `latest` |
+| `nivel` | `level` |
+| `niveis` | `levels` |
+| `parada` | `stopped` |
+| `amostras` | `samples` |
+| `grafico` | `chart` |
+| `painel` | `health_dashboard` |
+| `_arquivo` | `_file` |
+| `_ler` | `_read` |
+
+`account`:
+
+| Antes | Depois |
+|---|---|
+| `verificar` | `verify` |
+| `ativar` | `activate` |
+| `desativar` | `deactivate` |
+| `recuperar` | `password_recover` |
+
+`help`:
+
+| Antes | Depois |
+|---|---|
+| `privacidade` | `privacy` |
+
+`reference_data`:
+
+| Antes | Depois |
+|---|---|
+| `cidades` | `cities` |
+| `bancos` | `banks` |
 
 ### Financeiro (`financeiro`): classes
 

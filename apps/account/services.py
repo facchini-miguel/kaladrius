@@ -21,12 +21,12 @@ from .models import RecoveryCode, TwoFactor
 
 # Wrong logins from one address in the cooling-off time, whatever the username: stops someone
 # from trying a common password on many users (the per-user lock only counts 5 per user).
-LIMITE_POR_ENDERECO = 20
-QUANTOS_CODIGOS = 10
-ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I to confuse
+LIMIT_PER_ADDRESS = 20
+CODE_COUNT = 10
+ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I to confuse
 
 
-def tentativas_do_endereco(request):
+def address_attempts(request):
     desde = timezone.now() - datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
     total = AccessAttempt.objects.filter(
         ip_address=ip_for_lockout(request), attempt_time__gte=desde
@@ -34,15 +34,15 @@ def tentativas_do_endereco(request):
     return total or 0
 
 
-def endereco_bloqueado(request):
-    return tentativas_do_endereco(request) >= LIMITE_POR_ENDERECO
+def address_blocked(request):
+    return address_attempts(request) >= LIMIT_PER_ADDRESS
 
 
-def ativa_para(user):
+def active_for(user):
     return TwoFactor.objects.filter(user=user, active=True).exists()
 
 
-def obrigatoria(request):
+def is_required(request):
     """Whether the clinic requires two-step verification from this person (decision 112):
     whoever reaches the medical record or the full finance, never the public demo logins."""
     from apps.core.permissions import Action, Module, can
@@ -67,7 +67,7 @@ def prepare(user, new=False):
     return dispositivo
 
 
-def endereco_do_app(dispositivo):
+def app_uri(dispositivo):
     """The otpauth:// address the authenticator app reads from the QR code."""
     return pyotp.TOTP(dispositivo.secret).provisioning_uri(
         name=dispositivo.user.get_username(), issuer_name=settings.NOME_SISTEMA
@@ -78,11 +78,11 @@ def qr_svg(address):
     return segno.make(address, error="m").svg_inline(scale=5, dark="#212529", border=2)
 
 
-def segredo_em_grupos(secret):
+def secret_in_groups(secret):
     return " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
 
 
-def verificar_app(dispositivo, code):
+def verify_app(dispositivo, code):
     """A 6-digit code from the app, accepting the step before and after (clock drift)."""
     code = re.sub(r"\D", "", code or "")
     if len(code) != 6:
@@ -99,26 +99,26 @@ def verificar_app(dispositivo, code):
     return False
 
 
-def _resumo(code):
+def _digest(code):
     limpo = re.sub(r"[^A-Z0-9]", "", (code or "").upper())
     return hmac.new(settings.SECRET_KEY.encode(), limpo.encode(), hashlib.sha256).hexdigest()
 
 
 @transaction.atomic
-def novos_codigos(user):
+def new_codes(user):
     """Ten new recovery codes (the old ones stop working), shown once."""
     RecoveryCode.objects.filter(user=user).delete()
     codigos = [
-        "-".join("".join(secrets.choice(ALFABETO) for _ in range(4)) for _ in range(2))
-        for _ in range(QUANTOS_CODIGOS)
+        "-".join("".join(secrets.choice(ALPHABET) for _ in range(4)) for _ in range(2))
+        for _ in range(CODE_COUNT)
     ]
-    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, digest=_resumo(c)) for c in codigos)
+    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, digest=_digest(c)) for c in codigos)
     return codigos
 
 
-def verificar_recuperacao(user, code):
+def verify_recovery(user, code):
     restante = RecoveryCode.objects.filter(
-        user=user, digest=_resumo(code), used_at__isnull=True
+        user=user, digest=_digest(code), used_at__isnull=True
     ).first()
     if restante is None:
         return False
@@ -127,23 +127,23 @@ def verificar_recuperacao(user, code):
     return True
 
 
-def verificar(user, code):
+def verify(user, code):
     """The app's code or an unused recovery code."""
     dispositivo = TwoFactor.objects.filter(user=user, active=True).first()
     if dispositivo is None:
         return False
-    return verificar_app(dispositivo, code) or verificar_recuperacao(user, code)
+    return verify_app(dispositivo, code) or verify_recovery(user, code)
 
 
 @transaction.atomic
-def ativar(dispositivo):
+def activate(dispositivo):
     dispositivo.active = True
     dispositivo.activated_at = timezone.now()
     dispositivo.save(update_fields=["active", "activated_at"])
-    return novos_codigos(dispositivo.user)
+    return new_codes(dispositivo.user)
 
 
 @transaction.atomic
-def desativar(user):
+def deactivate(user):
     TwoFactor.objects.filter(user=user).delete()
     RecoveryCode.objects.filter(user=user).delete()

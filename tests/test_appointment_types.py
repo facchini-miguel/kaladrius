@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from apps.core.isolation import use_clinic
 from apps.core.models import Clinic, Role
-from apps.dentistry.teeth import TIPOS_DE_ATENDIMENTO
+from apps.dentistry.teeth import APPOINTMENT_TYPES
 from apps.schedule.models import DEFAULT_TYPES, AppointmentType
 
 pytestmark = pytest.mark.django_db
@@ -12,7 +12,7 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize(
     ("area", "esperados"),
     [
-        (Clinic.Area.DENTISTRY, TIPOS_DE_ATENDIMENTO),
+        (Clinic.Area.DENTISTRY, APPOINTMENT_TYPES),
         (Clinic.Area.MEDICINE, DEFAULT_TYPES),
         (Clinic.Area.OUTRA, DEFAULT_TYPES),
     ],
