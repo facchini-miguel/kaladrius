@@ -4,12 +4,12 @@ sidebar_position: 3
 
 # Data model
 
-The code's names are being moved to English (decisions 155 to 157): the models are already in English; the fields still have their Portuguese names. The database keeps its table and column names. The [glossary](glossary.md) lists the names, before and after.
+The code's and the database's names are in English (decisions 155 to 179): models, fields, tables, columns, indexes and constraints. Stored values stay in Portuguese (`"recepcao"`, `"dinheiro"`). The [glossary](glossary.md) lists the names, before and after.
 
 ## Multi-tenancy principle
 - Every piece of clinic data has a `clinic` key (column `clinica_id`). No query runs without filtering by the current clinic.
 - The filter is applied centrally (middleware + managers), not by hand in each screen.
-- **Fail closed:** every clinic model inherits from `ModeloDaClinica` (`apps/core/isolation.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `sem_isolamento()`.
+- **Fail closed:** every clinic model inherits from `ClinicModel` (`apps/core/isolation.py`). Its default manager filters by the current clinic and, when no clinic is set, **raises an error instead of returning data**. The filter is decided **when the query runs** (not when it is built), so form fields can be declared over clinic data. Saving or deleting another clinic's row also raises. Platform code that needs every clinic (Django admin, management commands) opts in explicitly with `without_isolation()`.
 - The current clinic comes from the session and is only honored if the user has an active membership in it (or is a superuser). The Django admin is restricted to platform superusers.
 - Public reference tables (state, city, bank, marital status) are **global**, shared by all clinics.
 
@@ -19,7 +19,7 @@ The code's names are being moved to English (decisions 155 to 157): the models a
 | Entity | Main fields | Notes |
 |---|---|---|
 | `Clinic` | name, document (CPF/CNPJ), contact, active, schedule settings (start, end, slot length) | The tenant |
-| `Usuario` | login, name, email, password (Argon2), active, language | Django user |
+| `User` | login, name, email, password (Argon2), active, language | Django user |
 | `Membership` | user, clinic, role, active | A user can work at more than one clinic |
 
 ### Roles and permissions (replaces `sist_pessoasgrupos` / `sist_modulosperm`)

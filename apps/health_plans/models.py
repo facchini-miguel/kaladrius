@@ -15,26 +15,24 @@ from apps.core.ordering import ALPHABETICAL
 
 
 class HealthPlan(ClinicModel):
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
-    registration = models.CharField(
-        _("registro da operadora"), max_length=20, blank=True, db_column="registro"
-    )
-    phone = models.CharField(_("telefone"), max_length=11, blank=True, db_column="telefone")
-    notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    registration = models.CharField(_("registro da operadora"), max_length=20, blank=True)
+    phone = models.CharField(_("telefone"), max_length=11, blank=True)
+    notes = models.TextField(_("observações"), blank=True)
+    active = models.BooleanField(_("ativo"), default=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "convenios_convenio"
+        db_table = "health_plans_health_plan"
         verbose_name = _("convênio")
         verbose_name_plural = _("convênios")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                "clinic", Lower("name"), name="convenio_nome_unico_por_clinica"
+                "clinic", Lower("name"), name="health_plan_name_unique_per_clinic"
             ),
         ]
 
@@ -50,43 +48,38 @@ class MemberCard(ClinicModel):
         on_delete=models.PROTECT,
         related_name="carteirinhas",
         verbose_name=_("paciente"),
-        db_column="paciente_id",
     )
     health_plan = models.ForeignKey(
         HealthPlan,
         on_delete=models.PROTECT,
         related_name="carteirinhas",
         verbose_name=_("convênio"),
-        db_column="convenio_id",
     )
-    plan = models.CharField(_("plano"), max_length=100, blank=True, db_column="plano")
-    number = models.CharField(_("número da carteirinha"), max_length=30, db_column="numero")
+    plan = models.CharField(_("plano"), max_length=100, blank=True)
+    number = models.CharField(_("número da carteirinha"), max_length=30)
     # Only where the country's cards have them (seguros.py): the group or policy number of
     # North American cards, the patient's code on a family card.
-    group = models.CharField(_("número do grupo"), max_length=30, blank=True, db_column="grupo")
-    member_code = models.CharField(
-        _("código do beneficiário"), max_length=10, blank=True, db_column="beneficiario"
-    )
-    valid_until = models.DateField(_("validade"), null=True, blank=True, db_column="validade")
+    group = models.CharField(_("número do grupo"), max_length=30, blank=True)
+    member_code = models.CharField(_("código do beneficiário"), max_length=10, blank=True)
+    valid_until = models.DateField(_("validade"), null=True, blank=True)
     holder = models.CharField(
         _("titular"),
         max_length=200,
         blank=True,
         help_text=_("Se o paciente for dependente, o nome do titular do plano."),
-        db_column="titular",
     )
-    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    active = models.BooleanField(_("ativa"), default=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "convenios_carteirinha"
+        db_table = "health_plans_member_card"
         verbose_name = _("carteirinha")
         verbose_name_plural = _("carteirinhas")
         ordering = ["-active", "health_plan__name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["clinic", "health_plan", "number"], name="carteirinha_unica_por_convenio"
+                fields=["clinic", "health_plan", "number"], name="member_card_unique_per_plan"
             ),
         ]
 

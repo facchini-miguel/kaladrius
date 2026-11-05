@@ -22,9 +22,7 @@ class AuditEntry(models.Model):
         LOGIN_FAILED = "login_falhou", _("Tentativa de entrada recusada")
         LOGOUT = "logout", _("Saiu do sistema")
 
-    timestamp = models.DateTimeField(
-        _("quando"), auto_now_add=True, db_index=True, db_column="momento"
-    )
+    timestamp = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
     # No database constraint: history keeps the ids even after a clinic or user is
     # deleted, and writing an entry never blocks a deletion.
     clinic = models.ForeignKey(
@@ -35,7 +33,6 @@ class AuditEntry(models.Model):
         blank=True,
         related_name="+",
         verbose_name=_("clínica"),
-        db_column="clinica_id",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -45,33 +42,24 @@ class AuditEntry(models.Model):
         blank=True,
         related_name="+",
         verbose_name=_("usuário"),
-        db_column="usuario_id",
     )
     # Kept as text so the entry still says who it was if the user is deleted.
-    user_name = models.CharField(
-        _("usuário (texto)"), max_length=150, blank=True, db_column="usuario_nome"
-    )
-    action = models.CharField(_("ação"), max_length=20, choices=Action.choices, db_column="acao")
-    model_name = models.CharField(
-        _("tipo de registro"), max_length=50, blank=True, db_column="modelo"
-    )
-    object_id = models.CharField(
-        _("código do registro"), max_length=40, blank=True, db_column="objeto_id"
-    )
-    object_repr = models.CharField(
-        _("registro"), max_length=200, blank=True, db_column="objeto_descricao"
-    )
-    changes = models.JSONField(_("alterações"), default=dict, blank=True, db_column="alteracoes")
+    user_name = models.CharField(_("usuário (texto)"), max_length=150, blank=True)
+    action = models.CharField(_("ação"), max_length=20, choices=Action.choices)
+    model_name = models.CharField(_("tipo de registro"), max_length=50, blank=True)
+    object_id = models.CharField(_("código do registro"), max_length=40, blank=True)
+    object_repr = models.CharField(_("registro"), max_length=200, blank=True)
+    changes = models.JSONField(_("alterações"), default=dict, blank=True)
     ip = models.GenericIPAddressField(_("IP"), null=True, blank=True)
 
     class Meta:
-        db_table = "auditoria_registroauditoria"
+        db_table = "audit_entry"
         verbose_name = _("registro de auditoria")
         verbose_name_plural = _("registros de auditoria")
         ordering = ["-timestamp", "-pk"]
         indexes = [
-            models.Index(fields=["clinic", "-timestamp"], name="auditoria_clinica_momento"),
-            models.Index(fields=["model_name", "object_id"], name="auditoria_objeto"),
+            models.Index(fields=["clinic", "-timestamp"], name="audit_clinic_timestamp"),
+            models.Index(fields=["model_name", "object_id"], name="audit_object"),
         ]
 
     def __str__(self):

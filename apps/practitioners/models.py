@@ -13,20 +13,18 @@ from apps.core.validators import validate_color
 class Practitioner(ClinicModel):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)
     registration = models.CharField(
         _("registro profissional"),
         max_length=30,
         blank=True,
         help_text=_("CRO, CRM, CREFITO, CRP…"),
-        db_column="registro",
     )
     color = models.CharField(
         _("cor na agenda"),
         max_length=7,
         default="#0d6efd",
         validators=[validate_color],
-        db_column="cor",
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -36,7 +34,6 @@ class Practitioner(ClinicModel):
         related_name="profissionais",
         verbose_name=_("usuário de acesso"),
         help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
-        db_column="usuario_id",
     )
     # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
     commission_percentage = models.DecimalField(
@@ -46,23 +43,22 @@ class Practitioner(ClinicModel):
         default=Decimal("0"),
         validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
         help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
-        db_column="comissao_percentual",
     )
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True, db_column="alterado_em")
+    active = models.BooleanField(_("ativo"), default=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
 
     class Meta:
-        db_table = "profissionais_profissional"
+        db_table = "practitioners_practitioner"
         verbose_name = _("profissional")
         verbose_name_plural = _("profissionais")
         ordering = ["name"]
-        indexes = [models.Index(fields=["clinic", "name"], name="profissional_clinica_nome")]
+        indexes = [models.Index(fields=["clinic", "name"], name="practitioner_clinic_name")]
         constraints = [
             models.UniqueConstraint(
                 fields=["clinic", "user"],
                 condition=models.Q(user__isnull=False),
-                name="profissional_usuario_unico_por_clinica",
+                name="practitioner_user_unique_per_clinic",
             ),
         ]
 

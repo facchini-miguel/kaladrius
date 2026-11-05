@@ -202,7 +202,7 @@ def test_detalhe_nao_consulta_modulos_para_cada_item(
         response = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
     assert response.status_code == 200
     assert response.context["odontologia_habilitada"]
-    consultas_modulos = [q for q in consultas if 'FROM "core_modulodaclinica"' in q["sql"]]
+    consultas_modulos = [q for q in consultas if 'FROM "core_clinic_module"' in q["sql"]]
     assert len(consultas_modulos) <= 2
 
 

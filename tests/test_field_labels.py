@@ -1,8 +1,9 @@
 """A renamed field keeps a Portuguese label (decision 170).
 
 Without verbose_name, Django builds the label from the field's name: once the name is English
-("created_by"), the screens and the audit show "created by". Every field whose column was
-pinned by a rename (db_column) must therefore say its label itself.
+("created_by"), the screens and the audit show "created by". Every field of the project's
+models must therefore say its label itself (decision 179 removed the db_column pins that
+used to mark the renamed ones).
 """
 
 from django.apps import apps

@@ -184,7 +184,7 @@ def test_cadastro_da_primeira_clinica_liga_todos_os_modulos_gerais(django_user_m
 def test_permissoes_leem_os_modulos_uma_vez_por_requisicao(admin):
     with CaptureQueriesContext(connection) as consultas:
         assert admin.get(reverse("home")).status_code == 200
-    modulos = [q for q in consultas if 'FROM "core_modulodaclinica"' in q["sql"]]
+    modulos = [q for q in consultas if 'FROM "core_clinic_module"' in q["sql"]]
     assert len(modulos) == 1
 
 

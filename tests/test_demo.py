@@ -32,9 +32,9 @@ def entrar(username, password):
 
 
 def test_cria_as_duas_contas_com_os_perfis(demo):
-    Usuario = get_user_model()
-    reception = Usuario.objects.get(username="demo.recepcao")
-    practitioner = Usuario.objects.get(username="demo.profissional")
+    User = get_user_model()
+    reception = User.objects.get(username="demo.recepcao")
+    practitioner = User.objects.get(username="demo.profissional")
     assert reception.demo and practitioner.demo
     assert not (reception.is_staff or reception.is_superuser)
     assert Membership.objects.get(user=reception).role == Role.FRONT_DESK

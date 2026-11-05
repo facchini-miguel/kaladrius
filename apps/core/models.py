@@ -11,7 +11,7 @@ from . import countries, currencies
 from .isolation import ClinicModel
 
 
-class Usuario(AbstractUser):
+class User(AbstractUser):
     """System user.
 
     Custom model from day one so new fields can be added later without painful
@@ -24,22 +24,19 @@ class Usuario(AbstractUser):
         choices=settings.LANGUAGES,
         blank=True,
         help_text=_("Vazio: o idioma do navegador."),
-        db_column="idioma",
     )
     last_seen_version = models.CharField(
         _("última versão vista nas novidades"),
         max_length=20,
         blank=True,
         editable=False,
-        db_column="ultima_versao_vista",
     )
     # Public demo login (0.32.0, decision 085): its password is published, so it cannot
     # change it (nobody locks the others out) nor upload attachments (no file hosting).
-    demo = models.BooleanField(
-        _("conta de demonstração"), default=False, editable=False, db_column="demonstracao"
-    )
+    demo = models.BooleanField(_("conta de demonstração"), default=False, editable=False)
 
     class Meta:
+        db_table = "core_user"
         verbose_name = _("usuário")
         verbose_name_plural = _("usuários")
 
@@ -74,7 +71,7 @@ class Clinic(models.Model):
         MEDICINE = "medicina", _("Medicina")
         OUTRA = "outra", _("Outra área da saúde")
 
-    name = models.CharField(_("nome"), max_length=200, db_column="nome")
+    name = models.CharField(_("nome"), max_length=200)
     area = models.CharField(
         _("área principal"),
         max_length=20,
@@ -86,15 +83,14 @@ class Clinic(models.Model):
         ),
     )
     # The country's tax document, an individual's or a company's (decision 121).
-    document = models.CharField(_("documento"), max_length=20, blank=True, db_column="documento")
+    document = models.CharField(_("documento"), max_length=20, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
-    phone = models.CharField(_("telefone"), max_length=20, blank=True, db_column="telefone")
+    phone = models.CharField(_("telefone"), max_length=20, blank=True)
     address = models.CharField(
         _("endereço"),
         max_length=250,
         blank=True,
         help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
-        db_column="endereco",
     )
     currency = models.CharField(
         _("moeda"),
@@ -105,7 +101,6 @@ class Clinic(models.Model):
             "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
             "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
         ),
-        db_column="moeda",
     )
     country = models.CharField(
         _("país"),
@@ -116,7 +111,6 @@ class Clinic(models.Model):
             "Define o fuso horário disponível, o formato de telefones, códigos postais e "
             "datas em inglês, e a moeda sugerida."
         ),
-        db_column="pais",
     )
     time_zone = models.CharField(
         _("fuso horário"),
@@ -124,7 +118,6 @@ class Clinic(models.Model):
         choices=countries.TIME_ZONE_CHOICES,
         default=countries.DEFAULT_TIME_ZONE,
         help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
-        db_column="fuso_horario",
     )
     tooth_numbering = models.CharField(
         _("numeração dos dentes"),
@@ -135,9 +128,8 @@ class Clinic(models.Model):
             "Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os "
             "dentes já registrados continuam os mesmos."
         ),
-        db_column="numeracao_dentaria",
     )
-    active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
+    active = models.BooleanField(_("ativa"), default=True)
     require_two_factor = models.BooleanField(
         _("exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"),
         default=False,
@@ -145,29 +137,24 @@ class Clinic(models.Model):
             "Profissionais com prontuário, administradores e o financeiro só usam o sistema "
             "depois de ativar o código do aplicativo autenticador. A recepção não é obrigada."
         ),
-        db_column="exigir_duas_etapas",
     )
-    schedule_start = models.TimeField(
-        _("início da agenda"), default=datetime.time(7, 30), db_column="agenda_inicio"
-    )
-    schedule_end = models.TimeField(
-        _("fim da agenda"), default=datetime.time(20, 0), db_column="agenda_fim"
-    )
+    schedule_start = models.TimeField(_("início da agenda"), default=datetime.time(7, 30))
+    schedule_end = models.TimeField(_("fim da agenda"), default=datetime.time(20, 0))
     schedule_interval = models.PositiveSmallIntegerField(
-        _("duração de cada horário"), choices=INTERVALS, default=30, db_column="agenda_intervalo"
+        _("duração de cada horário"), choices=INTERVALS, default=30
     )
-    created_at = models.DateTimeField(_("criada em"), auto_now_add=True, db_column="criada_em")
-    updated_at = models.DateTimeField(_("alterada em"), auto_now=True, db_column="alterada_em")
+    created_at = models.DateTimeField(_("criada em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("alterada em"), auto_now=True)
 
     class Meta:
-        db_table = "core_clinica"
+        db_table = "core_clinic"
         verbose_name = _("clínica")
         verbose_name_plural = _("clínicas")
         ordering = ["name"]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(schedule_start__lt=models.F("schedule_end")),
-                name="clinica_agenda_inicio_antes_do_fim",
+                name="clinic_schedule_start_before_end",
                 violation_error_message=_("O início da agenda deve ser antes do fim."),
             ),
         ]
@@ -244,21 +231,19 @@ DEPENDENCIES = {
 
 
 class ClinicModule(ClinicModel):
-    code = models.CharField(
-        _("módulo"), max_length=20, choices=ModuleCode.choices, db_column="codigo"
-    )
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
+    code = models.CharField(_("módulo"), max_length=20, choices=ModuleCode.choices)
+    active = models.BooleanField(_("ativo"), default=True)
 
     class Meta:
-        db_table = "core_modulodaclinica"
+        db_table = "core_clinic_module"
         verbose_name = _("módulo da clínica")
         verbose_name_plural = _("módulos da clínica")
         ordering = ["code"]
         constraints = [
-            models.UniqueConstraint(fields=["clinic", "code"], name="modulo_unico_por_clinica"),
+            models.UniqueConstraint(fields=["clinic", "code"], name="clinic_module_unique"),
             models.CheckConstraint(
                 condition=models.Q(code__in=ModuleCode.values),
-                name="modulo_clinico_conhecido",
+                name="clinic_module_known",
             ),
         ]
 
@@ -284,28 +269,26 @@ class Membership(models.Model):
         on_delete=models.CASCADE,
         related_name="vinculos",
         verbose_name=_("usuário"),
-        db_column="usuario_id",
     )
     clinic = models.ForeignKey(
         Clinic,
         on_delete=models.CASCADE,
         related_name="vinculos",
         verbose_name=_("clínica"),
-        db_column="clinica_id",
     )
-    role = models.CharField(_("perfil"), max_length=20, choices=Role.choices, db_column="papel")
-    active = models.BooleanField(_("ativo"), default=True, db_column="ativo")
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True, db_column="criado_em")
+    role = models.CharField(_("perfil"), max_length=20, choices=Role.choices)
+    active = models.BooleanField(_("ativo"), default=True)
+    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
 
     class Meta:
-        db_table = "core_vinculo"
+        db_table = "core_membership"
         verbose_name = _("vínculo com clínica")
         verbose_name_plural = _("vínculos com clínicas")
         ordering = ["clinic__name", "user__username"]
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "clinic"],
-                name="vinculo_unico_por_clinica",
+                name="membership_unique_per_clinic",
                 violation_error_message=_("Este usuário já está vinculado a esta clínica."),
             ),
         ]
@@ -321,11 +304,9 @@ class Backup(models.Model):
     how a failing backup gets noticed (the server has no e-mail or paid alerting).
     """
 
-    timestamp = models.DateTimeField(
-        _("quando"), auto_now_add=True, db_index=True, db_column="momento"
-    )
-    file = models.CharField(_("arquivo"), max_length=200, db_column="arquivo")
-    size = models.PositiveBigIntegerField(_("tamanho (bytes)"), db_column="tamanho")
+    timestamp = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
+    file = models.CharField(_("arquivo"), max_length=200)
+    size = models.PositiveBigIntegerField(_("tamanho (bytes)"))
 
     class Meta:
         verbose_name = _("backup")

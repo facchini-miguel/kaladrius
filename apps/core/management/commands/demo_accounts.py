@@ -98,8 +98,8 @@ class Command(BaseCommand):
         )
 
     def _account(self, username, name, password, clinic, role):
-        Usuario = get_user_model()
-        user, _criado = Usuario.objects.get_or_create(username=username)
+        User = get_user_model()
+        user, _criado = User.objects.get_or_create(username=username)
         user.first_name = name
         user.last_name = "(demonstração)"
         user.is_active = True

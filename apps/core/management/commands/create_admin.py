@@ -27,17 +27,17 @@ class Command(BaseCommand):
         if not password:
             raise CommandError("Defina DJANGO_ADMIN_PASSWORD no .env antes de criar o admin.")
 
-        Usuario = get_user_model()
-        if Usuario.objects.filter(username=username).exists():
+        User = get_user_model()
+        if User.objects.filter(username=username).exists():
             if options["falhar_se_existir"]:
                 raise CommandError(f"O usuário '{username}' já existe.", returncode=3)
             self.stdout.write(f"O usuário '{username}' já existe. Nada foi alterado.")
             return
 
         try:
-            validate_password(password, Usuario(username=username, email=email))
+            validate_password(password, User(username=username, email=email))
         except ValidationError as error:
             raise CommandError(" ".join(error.messages)) from error
 
-        Usuario.objects.create_superuser(username=username, email=email, password=password)
+        User.objects.create_superuser(username=username, email=email, password=password)
         self.stdout.write(self.style.SUCCESS(f"Superusuário '{username}' criado."))

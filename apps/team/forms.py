@@ -3,7 +3,7 @@ from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BootstrapForm
-from apps.core.models import Membership, Role, Usuario
+from apps.core.models import Membership, Role, User
 
 
 def exclusive_account(user, clinic):
@@ -26,7 +26,7 @@ class NewMemberForm(BootstrapForm, UserCreationForm):
     role = forms.ChoiceField(label=_("Perfil"), choices=Role.choices, initial=Role.FRONT_DESK)
 
     class Meta(UserCreationForm.Meta):
-        model = Usuario
+        model = User
         fields = ["username", "first_name", "last_name", "email"]
 
     def __init__(self, *args, clinic, **kwargs):
@@ -81,7 +81,7 @@ class UserAccountForm(BootstrapForm, forms.ModelForm):
     """Name and e-mail of an account used only in this clinic."""
 
     class Meta:
-        model = Usuario
+        model = User
         fields = ["first_name", "last_name", "email"]
 
     def __init__(self, *args, **kwargs):

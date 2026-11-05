@@ -336,58 +336,71 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
     client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicina"})
     assert Clinic.single().require_two_factor
     Clinic.objects.update(require_two_factor=False)
-    # The migration runs with the models as they were then (Clinica, before decision 157).
+    # The migration runs with the models as they were then (Clinica, before decision 157), on
+    # the table of the time: a view gives today's table its old name and column (decision 179).
     estado = MigrationLoader(connection).project_state(("core", "0013_exigir_duas_etapas")).apps
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "CREATE VIEW core_clinica AS "
+            "SELECT id, require_two_factor AS exigir_duas_etapas FROM core_clinic"
+        )
     importlib.import_module("apps.core.migrations.0013_exigir_duas_etapas").ligar(estado, None)
+    with connection.cursor() as cursor:
+        cursor.execute("DROP VIEW core_clinica")
     assert Clinic.single().require_two_factor
 
 
-def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado(
-    django_user_model,
-):
-    """Decision 154: while the app ran as "account", its data went to account_* tables."""
+def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado():
+    """Decision 154: while the app ran as "account", its data went to account_* tables. The
+    migration ran on the tables of the time (conta_*, renamed by decision 179): the test builds
+    them as they were."""
     import importlib
 
     from django.db import connection
 
     migracao = importlib.import_module("apps.account.migrations.0002_back_from_account_tables")
-    assert TwoFactor._meta.db_table == "conta_duasetapas"
-    assert RecoveryCode._meta.db_table == "conta_codigorecuperacao"
-
+    colunas = {
+        "duasetapas": "id serial PRIMARY KEY, usuario_id bigint, segredo text, ativa boolean,"
+        " ativada_em timestamptz, ultimo_passo bigint",
+        "codigorecuperacao": "id serial PRIMARY KEY, usuario_id bigint, resumo text,"
+        " usado_em timestamptz",
+    }
+    with connection.cursor() as cursor:
+        for table, definicao in colunas.items():
+            cursor.execute(f"CREATE TABLE conta_{table} ({definicao})")
     # An installation that never ran as "account" has no such tables: nothing to do.
     with connection.schema_editor() as editor:
         migracao.copiar(None, editor)
 
-    so_na_account = django_user_model.objects.create_user("so_na_account", password="x")
-    nas_duas = django_user_model.objects.create_user("nas_duas", password="x")
-    TwoFactor.objects.create(user=nas_duas, secret="ORIGINAL", active=True)
-    RecoveryCode.objects.create(user=nas_duas, digest="original")
     with connection.cursor() as cursor:
-        for table in ("duasetapas", "codigorecuperacao"):
-            cursor.execute(f"CREATE TABLE account_{table} (LIKE conta_{table} INCLUDING DEFAULTS)")
-        for user, secret in ((so_na_account, "NOVO"), (nas_duas, "OUTRO")):
+        cursor.execute(
+            "INSERT INTO conta_duasetapas (usuario_id, segredo, ativa, ultimo_passo) "
+            "VALUES (2, 'ORIGINAL', true, 0)"
+        )
+        cursor.execute(
+            "INSERT INTO conta_codigorecuperacao (usuario_id, resumo) VALUES (2, 'original')"
+        )
+        for table, definicao in colunas.items():
+            cursor.execute(f"CREATE TABLE account_{table} ({definicao})")
+        for user, secret in ((1, "NOVO"), (2, "OUTRO")):
             cursor.execute(
-                "INSERT INTO account_duasetapas (id, usuario_id, segredo, ativa, ultimo_passo) "
-                "VALUES (%s, %s, %s, true, 0)",
-                [user.pk + 1000, user.pk, secret],
+                "INSERT INTO account_duasetapas (usuario_id, segredo, ativa, ultimo_passo) "
+                "VALUES (%s, %s, true, 0)",
+                [user, secret],
             )
             cursor.execute(
-                "INSERT INTO account_codigorecuperacao (id, usuario_id, resumo) "
-                "VALUES (%s, %s, %s)",
-                [user.pk + 1000, user.pk, f"codigo-{secret}"],
+                "INSERT INTO account_codigorecuperacao (usuario_id, resumo) VALUES (%s, %s)",
+                [user, f"codigo-{secret}"],
             )
     with connection.schema_editor() as editor:
         migracao.copiar(None, editor)
 
     # Saved only in account_*: copied. Already in conta_*: kept as it was.
-    assert TwoFactor.objects.get(user=so_na_account).secret == "NOVO"
-    assert TwoFactor.objects.get(user=nas_duas).secret == "ORIGINAL"
-    assert list(
-        RecoveryCode.objects.filter(user=so_na_account).values_list("digest", flat=True)
-    ) == ["codigo-NOVO"]
-    assert list(RecoveryCode.objects.filter(user=nas_duas).values_list("digest", flat=True)) == [
-        "original"
-    ]
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT usuario_id, segredo FROM conta_duasetapas ORDER BY usuario_id")
+        assert cursor.fetchall() == [(1, "NOVO"), (2, "ORIGINAL")]
+        cursor.execute("SELECT usuario_id, resumo FROM conta_codigorecuperacao ORDER BY usuario_id")
+        assert cursor.fetchall() == [(1, "codigo-NOVO"), (2, "original")]
 
 
 def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
@@ -407,9 +420,10 @@ def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
 
     user = django_user_model.objects.create_user("com_duas_etapas", password="x")
     TwoFactor.objects.create(user=user, secret="FICA", active=True)
+    novas = {"duasetapas": "account_two_factor", "codigorecuperacao": "account_recovery_code"}
     with connection.cursor() as cursor:
         for table in ("duasetapas", "codigorecuperacao"):
-            cursor.execute(f"CREATE TABLE account_{table} (LIKE conta_{table})")
+            cursor.execute(f"CREATE TABLE account_{table} (LIKE {novas[table]})")
         cursor.execute(
             "INSERT INTO django_migrations (app, name, applied) "
             "VALUES ('account', '0001_initial', now())"

@@ -43,8 +43,8 @@ def record_types():
 @cache
 def _labels():
     """For each kind of record, its fields' labels by every name an entry may have stored:
-    the field's name, and its column (the name before decision 155's renaming, which keeps
-    the database columns)."""
+    the field's name and column, and its Portuguese name from before decisions 160 to 171."""
+    from .old_names import OLD_FIELD_NAMES
     from .signals import AUDITED
 
     rotulos = {}
@@ -53,6 +53,8 @@ def _labels():
         for field in model._meta.concrete_fields:
             for name in {field.column, field.column.removesuffix("_id"), field.attname, field.name}:
                 fields[name] = field.verbose_name
+        for old, name in OLD_FIELD_NAMES.get(model._meta.label, {}).items():
+            fields.setdefault(old, model._meta.get_field(name).verbose_name)
     return rotulos
 
 
