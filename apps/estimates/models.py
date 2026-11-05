@@ -21,11 +21,15 @@ from apps.core.models import Clinic
 from apps.core.ordering import ALPHABETICAL
 
 MONEY = {"max_digits": 12, "decimal_places": 2}
-VALIDADE_PADRAO = 30  # days
+DEFAULT_VALIDITY = 30  # days
 
 
-def validade_padrao():
-    return timezone.localdate() + datetime.timedelta(days=VALIDADE_PADRAO)
+def default_valid_until():
+    return timezone.localdate() + datetime.timedelta(days=DEFAULT_VALIDITY)
+
+
+# The old name stays: the migrations that created the field reference it (decision 176).
+validade_padrao = default_valid_until
 
 
 class Procedure(ClinicModel):
@@ -63,9 +67,9 @@ class Procedure(ClinicModel):
 
 class Estimate(ClinicModel):
     class Status(models.TextChoices):
-        ABERTO = "aberto", pgettext_lazy("orçamento", "Em aberto")
-        APROVADO = "aprovado", _("Aprovado")
-        RECUSADO = "recusado", _("Recusado")
+        OPEN = "aberto", pgettext_lazy("orçamento", "Em aberto")
+        APPROVED = "aprovado", _("Aprovado")
+        REFUSED = "recusado", _("Recusado")
 
     patient = models.ForeignKey(
         "pacientes.Patient",
@@ -84,12 +88,14 @@ class Estimate(ClinicModel):
         db_column="profissional_id",
     )
     date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
-    valid_until = models.DateField(_("válido até"), default=validade_padrao, db_column="validade")
+    valid_until = models.DateField(
+        _("válido até"), default=default_valid_until, db_column="validade"
+    )
     status = models.CharField(
         _("situação"),
         max_length=10,
         choices=Status.choices,
-        default=Status.ABERTO,
+        default=Status.OPEN,
         db_column="situacao",
     )
     discount = models.DecimalField(
@@ -150,13 +156,13 @@ class Estimate(ClinicModel):
         return max(self.subtotal - self.discount, Decimal("0.00"))
 
     @property
-    def vencido(self):
-        return self.status == self.Status.ABERTO and self.valid_until < timezone.localdate()
+    def is_expired(self):
+        return self.status == self.Status.OPEN and self.valid_until < timezone.localdate()
 
     @property
     def teeth(self):
         """Every tooth in the estimate, for the dental chart."""
-        return sorted({dente for item in self.itens.all() for dente in item.lista_dentes})
+        return sorted({dente for item in self.itens.all() for dente in item.teeth_list})
 
 
 class EstimateItem(ClinicModel):
@@ -204,7 +210,7 @@ class EstimateItem(ClinicModel):
     def __str__(self):
         return self.description
 
-    def _conferir_modulo(self):
+    def _check_module(self):
         self._check_clinic()
         if self.estimate.clinic_id != self.clinic_id:
             raise WrongClinic("The estimate belongs to another clinic.")
@@ -222,12 +228,12 @@ class EstimateItem(ClinicModel):
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        self._conferir_modulo()
+        self._check_module()
         return super().save(*args, **kwargs)
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
-        self._conferir_modulo()
+        self._check_module()
         return super().delete(*args, **kwargs)
 
     @property
@@ -235,12 +241,12 @@ class EstimateItem(ClinicModel):
         return self.unit_price * self.quantity
 
     @property
-    def dentes_exibicao(self):
+    def teeth_display(self):
         """In the clinic's numbering (decision 122): "18, 36" in FDI, "1, 19" in Universal."""
         from apps.dentistry.teeth import name, ordenar
 
-        return ", ".join(name(d) for d in ordenar(self.lista_dentes))
+        return ", ".join(name(d) for d in ordenar(self.teeth_list))
 
     @property
-    def lista_dentes(self):
+    def teeth_list(self):
         return [int(d) for d in self.teeth.split(",") if d.strip().isdecimal()]

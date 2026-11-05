@@ -5,9 +5,9 @@ from . import views
 app_name = "staff"
 
 urlpatterns = [
-    path("", views.results, name="list"),
-    path("new/", views.new, name="new"),
+    path("", views.employee_list, name="list"),
+    path("new/", views.new_employee, name="new"),
     path("<int:pk>/", views.employee, name="employee"),
-    path("<int:pk>/edit/", views.editar, name="edit"),
-    path("payroll/", views.folha, name="payroll"),
+    path("<int:pk>/edit/", views.edit_employee, name="edit"),
+    path("payroll/", views.payroll, name="payroll"),
 ]

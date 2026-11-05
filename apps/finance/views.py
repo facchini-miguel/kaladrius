@@ -530,7 +530,7 @@ def _period(request):
     """(de, ate) from the query string; the current month by default (at most 2 years)."""
     today = timezone.localdate()
     inicio_do_mes = today.replace(day=1)
-    fim_do_mes = services.add_months(inicio_do_mes, 1) - datetime.timedelta(days=1)
+    end_of_month = services.add_months(inicio_do_mes, 1) - datetime.timedelta(days=1)
     try:
         since = datetime.date.fromisoformat(request.GET.get("de", ""))
     except ValueError:
@@ -538,9 +538,9 @@ def _period(request):
     try:
         until = datetime.date.fromisoformat(request.GET.get("until", ""))
     except ValueError:
-        until = fim_do_mes
+        until = end_of_month
     if until < since or (until - since).days > 731:
-        since, until = inicio_do_mes, fim_do_mes
+        since, until = inicio_do_mes, end_of_month
     return since, until
 
 

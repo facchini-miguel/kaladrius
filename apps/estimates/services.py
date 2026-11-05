@@ -12,11 +12,11 @@ from .models import Estimate
 
 
 @transaction.atomic
-def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=None):
+def approve(estimate, *, parcelas, primeiro_vencimento, category, user, payment=None):
     """Approve an open estimate: creates the receivable (and, optionally, pays the 1st
     installment with `pagamento` = {"forma": ..., "conta": ...}). Returns the receivable."""
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
-    if estimate.status != Estimate.Status.ABERTO:
+    if estimate.status != Estimate.Status.OPEN:
         raise ValidationError(_("Só um orçamento em aberto pode ser aprovado."))
     total = estimate.total
     if total <= 0:
@@ -36,7 +36,7 @@ def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
     if payment:
         primeira = entry.parcelas.order_by("number").first()
         financeiro.receive(primeira, user=user, amount=primeira.amount, **payment)
-    estimate.status = Estimate.Status.APROVADO
+    estimate.status = Estimate.Status.APPROVED
     estimate.entry = entry
     estimate.decided_at = timezone.now()
     estimate.decided_by = user
@@ -45,12 +45,12 @@ def aprovar(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
 
 
 @transaction.atomic
-def recusar(estimate, *, user):
+def refuse(estimate, *, user):
     # Locked like in aprovar(), so approving and refusing at once cannot both succeed.
     estimate = Estimate.objects.select_for_update().get(pk=estimate.pk)
-    if estimate.status != Estimate.Status.ABERTO:
+    if estimate.status != Estimate.Status.OPEN:
         raise ValidationError(_("Só um orçamento em aberto pode ser recusado."))
-    estimate.status = Estimate.Status.RECUSADO
+    estimate.status = Estimate.Status.REFUSED
     estimate.decided_at = timezone.now()
     estimate.decided_by = user
     estimate.save()

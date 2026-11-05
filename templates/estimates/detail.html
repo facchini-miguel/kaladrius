@@ -33,7 +33,7 @@
       <tr>
         <td>{% if item.code %}<span class="text-body-secondary small">{{ item.code }}</span> {% endif %}{{ item.description }}</td>
         {% if mostrar_dentes %}
-        <td>{{ item.dentes_exibicao|default:"—" }}</td>
+        <td>{{ item.teeth_display|default:"—" }}</td>
         <td>{{ item.faces|default:"—" }}</td>
         {% endif %}
         <td class="text-end">{{ item.quantity }}</td>

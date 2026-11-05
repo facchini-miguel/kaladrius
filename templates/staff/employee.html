@@ -53,10 +53,10 @@
         <tr>
           <td><a href="{% url 'staff:payroll' %}?mes={{ folha.period|date:'Y-m' }}">{{ folha.period|date:"m/Y" }}</a></td>
           <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.overtime_hours }} h · {{ folha.valor_horas_extras|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.absences }} · − {{ folha.desconto_faltas|currency }}</td>
+          <td class="text-end text-nowrap">{{ folha.overtime_hours }} h · {{ folha.overtime_amount|currency }}</td>
+          <td class="text-end text-nowrap">{{ folha.absences }} · − {{ folha.absence_deduction|currency }}</td>
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
-          <td>{% if folha.lancada %}<a href="{% url 'finance:entry' folha.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
+          <td>{% if folha.is_posted %}<a href="{% url 'finance:entry' folha.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma folha ainda." %}</td></tr>

@@ -52,9 +52,9 @@
         <dd class="col-7">
           {% if patient.street %}{{ patient.street }}{% if patient.number %}, {{ patient.number }}{% endif %}{% if patient.complement %} - {{ patient.complement }}{% endif %}<br>{% endif %}
           {% if patient.neighborhood %}{{ patient.neighborhood }}<br>{% endif %}
-          {% if patient.cidade_estado %}{{ patient.cidade_estado }}<br>{% endif %}
+          {% if patient.city_state %}{{ patient.city_state }}<br>{% endif %}
           {% if patient.postal_code %}{% postal_code_label %} {{ patient.postal_code|postal_code }}{% endif %}
-          {% if not patient.street and not patient.neighborhood and not patient.cidade_estado and not patient.postal_code %}—{% endif %}
+          {% if not patient.street and not patient.neighborhood and not patient.city_state and not patient.postal_code %}—{% endif %}
         </dd>
       </dl>
     </div>
@@ -78,7 +78,7 @@
     <thead><tr><th>{% translate "Vínculo" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Telefone" %}</th></tr></thead>
     <tbody>
       {% for relacionada in relacionados %}
-      <tr><td>{{ relacionada.get_relationship_display }}</td><td>{{ relacionada.display_name }}</td><td>{{ relacionada.telefone_exibido|phone|default:"—" }}</td></tr>
+      <tr><td>{{ relacionada.get_relationship_display }}</td><td>{{ relacionada.display_name }}</td><td>{{ relacionada.display_phone|phone|default:"—" }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

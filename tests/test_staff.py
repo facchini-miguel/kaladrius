@@ -13,7 +13,7 @@ from apps.core.modules import configure
 from apps.finance import services as financeiro
 from apps.finance.models import Entry
 from apps.staff import services
-from apps.staff.models import Employee, Payroll, Salary, hora_extra_sugerida
+from apps.staff.models import Employee, Payroll, Salary, suggested_overtime_rate
 
 pytestmark = pytest.mark.django_db
 
@@ -67,8 +67,8 @@ def test_cadastro_com_salario_e_aumento_no_historico(clinica_a, admin):
     )
     assert aumento.status_code == 302
     with use_clinic(clinica_a):
-        assert bruno.salario_em(datetime.date(2026, 6, 30)) == Decimal("3000")
-        assert bruno.salario_em(datetime.date(2026, 7, 1)) == Decimal("3300")
+        assert bruno.salary_on(datetime.date(2026, 6, 30)) == Decimal("3000")
+        assert bruno.salary_on(datetime.date(2026, 7, 1)) == Decimal("3300")
         assert bruno.salarios.count() == 2
 
 
@@ -99,10 +99,10 @@ def test_folha_prepara_os_funcionarios_do_mes(clinica_a, ana):
             employee=saiu, amount=Decimal("2000"), effective_from=datetime.date(2025, 1, 1)
         )
         Employee.objects.create(name="Sem salário")
-        folhas = services.preparar(OUTUBRO)
+        folhas = services.prepare(OUTUBRO)
     assert [f.employee.name for f in folhas] == ["Ana Fictícia"]
-    folha = folhas[0]
-    assert folha.salary == Decimal("2200") and folha.overtime_rate == hora_extra_sugerida(
+    payroll = folhas[0]
+    assert payroll.salary == Decimal("2200") and payroll.overtime_rate == suggested_overtime_rate(
         Decimal("2200")
     ) == Decimal("15.00")
 
@@ -115,20 +115,20 @@ def test_olhar_um_mes_nao_grava_folhas(clinica_a, ana, admin):
 
 
 def test_calculo_do_total():
-    folha = Payroll(
+    payroll = Payroll(
         salary=Decimal("3000"),
         overtime_hours=Decimal("10"),
         overtime_rate=Decimal("20.45"),
         absences=2,
     )
-    assert folha.valor_horas_extras == Decimal("204.50")
-    assert folha.desconto_faltas == Decimal("200.00")
-    assert folha.total == Decimal("3004.50")
+    assert payroll.overtime_amount == Decimal("204.50")
+    assert payroll.absence_deduction == Decimal("200.00")
+    assert payroll.total == Decimal("3004.50")
 
 
 def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     page = admin.get(FOLHA, {"mes": "2026-10"})
-    folha, form = page.context["linhas"][0]
+    payroll, form = page.context["linhas"][0]
     prefixo = form.prefix
     data = {
         f"{prefixo}-overtime_hours": "10",
@@ -136,11 +136,11 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
         f"{prefixo}-absences": "1",
         f"{prefixo}-observacao": "",
     }
-    assert folha.pk is None  # looking at the month stored nothing
+    assert payroll.pk is None  # looking at the month stored nothing
     assert admin.post(f"{FOLHA}?mes=2026-10", data).status_code == 302
     with use_clinic(clinica_a):
-        folha = Payroll.objects.get(employee=ana, period=OUTUBRO)
-        assert folha.total == Decimal("2276.67")  # 2200 + 150 − 73,33
+        payroll = Payroll.objects.get(employee=ana, period=OUTUBRO)
+        assert payroll.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         category = page.context["lancar_form"].fields["category"].initial
     assert category.name == "Salários e encargos"
     response = admin.post(
@@ -149,8 +149,8 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     )
     assert response.status_code == 302
     with use_clinic(clinica_a):
-        folha.refresh_from_db()
-        entry = folha.entry
+        payroll.refresh_from_db()
+        entry = payroll.entry
         assert (entry.kind, entry.payer, entry.total_amount) == (
             Entry.Kind.PAYABLE,
             "Ana Fictícia",
@@ -162,24 +162,24 @@ def test_salvar_e_lancar_no_financeiro(clinica_a, ana, admin):
     assert row[1] is None
     with use_clinic(clinica_a):
         assert (
-            services.lancar(
-                [folha], category=category, due_date=datetime.date(2026, 11, 5), user=None
+            services.post_payroll(
+                [payroll], category=category, due_date=datetime.date(2026, 11, 5), user=None
             )
             == 0
         )
         # Cancelling the payable in finance opens the line again.
         financeiro.cancel(entry, reason="Refazer", user=None)
-        folha.refresh_from_db()
-        assert not folha.lancada
+        payroll.refresh_from_db()
+        assert not payroll.is_posted
 
 
 def test_total_zero_nao_e_lancado(clinica_a, ana):
     with use_clinic(clinica_a):
-        folha = services.preparar(OUTUBRO)[0]
-        folha.absences = 30
-        folha.save()
+        payroll = services.prepare(OUTUBRO)[0]
+        payroll.absences = 30
+        payroll.save()
         with pytest.raises(ValidationError, match="maior que zero"):
-            services.lancar([folha], category=None, due_date=OUTUBRO, user=None)
+            services.post_payroll([payroll], category=None, due_date=OUTUBRO, user=None)
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])

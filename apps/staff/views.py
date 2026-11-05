@@ -14,16 +14,16 @@ from django.utils.translation import ngettext
 from apps.core.permissions import Action, Module, can, requires_permission
 
 from . import services
-from .forms import FolhaForm, FuncionarioForm, LancarForm
+from .forms import EmployeeForm, PayrollForm, PostPayrollForm
 from .models import Employee, Payroll, Salary
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
-def results(request):
+def employee_list(request):
     funcionarios = list(Employee.objects.all())
     today = timezone.localdate()
     for employee in funcionarios:
-        employee.salario_atual = employee.salario_em(today)
+        employee.salario_atual = employee.salary_on(today)
     return render(request, "staff/list.html", {"funcionarios": funcionarios})
 
 
@@ -37,23 +37,23 @@ def employee(request, pk):
             "employee": employee,
             "salarios": employee.salarios.select_related("created_by"),
             "folhas": employee.folhas.select_related("entry")[:24],
-            "salario_atual": employee.salario_em(timezone.localdate()),
+            "salario_atual": employee.salary_on(timezone.localdate()),
         },
     )
 
 
 @requires_permission(Module.STAFF, Action.CREATE)
-def new(request):
-    return _formulario(request, Employee())
+def new_employee(request):
+    return _employee_form(request, Employee())
 
 
 @requires_permission(Module.STAFF, Action.CHANGE)
-def editar(request, pk):
-    return _formulario(request, get_object_or_404(Employee.objects, pk=pk))
+def edit_employee(request, pk):
+    return _employee_form(request, get_object_or_404(Employee.objects, pk=pk))
 
 
-def _formulario(request, instancia):
-    form = FuncionarioForm(request.POST or None, instance=instancia)
+def _employee_form(request, instancia):
+    form = EmployeeForm(request.POST or None, instance=instancia)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             employee = form.save()
@@ -70,14 +70,14 @@ def _formulario(request, instancia):
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
-def folha(request):
+def payroll(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
     today = timezone.localdate()
-    period = services.mes_da_url(request.GET.get("mes"), today)
+    period = services.month_from_url(request.GET.get("mes"), today)
     url = f"{reverse('staff:payroll')}?mes={period:%Y-%m}"
     pode_alterar = can(request, Module.STAFF, Action.CHANGE)
     folhas = (
-        services.preparar(period)
+        services.prepare(period)
         if pode_alterar
         else list(Payroll.objects.filter(period=period).select_related("employee", "entry"))
     )
@@ -86,15 +86,15 @@ def folha(request):
         (
             f,
             None
-            if f.lancada or not pode_alterar
+            if f.is_posted or not pode_alterar
             # By employee: a sheet not saved yet has no pk.
-            else FolhaForm(data, instance=f, prefix=f"f{f.employee_id}"),
+            else PayrollForm(data, instance=f, prefix=f"f{f.employee_id}"),
         )
         for f in folhas
     ]
-    lancar_form = LancarForm(
+    lancar_form = PostPayrollForm(
         data if data and data.get("acao") == "lancar" else None,
-        initial={"due_date": services.fim_do_mes(period) + datetime.timedelta(days=5)},
+        initial={"due_date": services.end_of_month(period) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
         if not pode_alterar:
@@ -109,7 +109,7 @@ def folha(request):
                 return redirect(url)
             if lancar_form.is_valid():
                 try:
-                    lancadas = services.lancar(
+                    lancadas = services.post_payroll(
                         [f for f, form in rows if form is not None],
                         category=lancar_form.cleaned_data["category"],
                         due_date=lancar_form.cleaned_data["due_date"],
@@ -129,7 +129,7 @@ def folha(request):
                     )
                     return redirect(url)
     previous = (period - datetime.timedelta(days=1)).replace(day=1)
-    proximo = services.fim_do_mes(period) + datetime.timedelta(days=1)
+    proximo = services.end_of_month(period) + datetime.timedelta(days=1)
     return render(
         request,
         "staff/payroll.html",

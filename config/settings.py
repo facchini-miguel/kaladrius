@@ -136,7 +136,7 @@ TEMPLATES = [
                 "apps.core.context_processors.languages",
                 "apps.core.context_processors.inactivity",
                 "apps.help.context_processors.documentacao",
-                "apps.medical_records.context_processors.prontuario",
+                "apps.medical_records.context_processors.medical_records",
             ],
         },
     },

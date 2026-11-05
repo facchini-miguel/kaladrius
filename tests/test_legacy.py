@@ -433,4 +433,4 @@ def test_anonimizacao_dos_funcionarios(importado):
     assert len(funcionaria.phone) == 10 and folha.note == ""
     with use_clinic(clinic):
         assert Entry.objects.get(pk=folha.entry_id).payer == funcionaria.name
-        assert funcionaria.salario_em(HOJE) == Decimal("2000")
+        assert funcionaria.salary_on(HOJE) == Decimal("2000")

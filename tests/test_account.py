@@ -38,7 +38,7 @@ def entrar(client, user, password=SENHA, proximo=""):
 
 
 def ligar_duas_etapas(user):
-    dispositivo = services.preparar(user)
+    dispositivo = services.prepare(user)
     codigos = services.ativar(dispositivo)
     return dispositivo, codigos
 

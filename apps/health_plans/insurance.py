@@ -22,7 +22,7 @@ from apps.core import countries
 
 
 @dataclass(frozen=True)
-class Codigo:
+class CodeFormat:
     """A local code: its name and, where it has a fixed format, the pattern and an example."""
 
     name: str
@@ -42,83 +42,83 @@ class Codigo:
 
 
 @dataclass(frozen=True)
-class Seguros:
+class Insurers:
     tipos: str = ""  # the local kinds of plan, as examples for the plan's name
-    registration: Codigo | None = None  # the insurer's registry
+    registration: CodeFormat | None = None  # the insurer's registry
     number: str = ""  # local name of the card number
     group: str = ""  # local name of the group or policy number, where cards have one
     member_code: str = ""  # local name of the patient's code on a family card
-    procedure: Codigo | None = None  # the procedure coding
+    procedure: CodeFormat | None = None  # the procedure coding
 
 
-SEGUROS = {
-    "BR": Seguros(
-        registration=Codigo("ANS", r"\d{6}", "123456"),
-        procedure=Codigo("TUSS", r"\d{8}", "81000065"),
+INSURERS = {
+    "BR": Insurers(
+        registration=CodeFormat("ANS", r"\d{6}", "123456"),
+        procedure=CodeFormat("TUSS", r"\d{8}", "81000065"),
     ),
-    "MX": Seguros("aseguradoras de gastos médicos, planes dentales", number="número de póliza"),
-    "AR": Seguros(
+    "MX": Insurers("aseguradoras de gastos médicos, planes dentales", number="número de póliza"),
+    "AR": Insurers(
         "obras sociales, prepagas, PAMI",
-        registration=Codigo("RNOS"),
+        registration=CodeFormat("RNOS"),
         number="número de afiliado",
-        procedure=Codigo("nomenclador"),
+        procedure=CodeFormat("nomenclador"),
     ),
-    "CL": Seguros("Fonasa, Isapres, seguros dentales", procedure=Codigo("Fonasa")),
-    "CO": Seguros(
+    "CL": Insurers("Fonasa, Isapres, seguros dentales", procedure=CodeFormat("Fonasa")),
+    "CO": Insurers(
         "EPS, medicina prepagada, pólizas de salud",
-        procedure=Codigo("CUPS", r"[0-9A-Z]{6}", "232101"),
+        procedure=CodeFormat("CUPS", r"[0-9A-Z]{6}", "232101"),
     ),
-    "PE": Seguros("EPS, aseguradoras, SIS, EsSalud", procedure=Codigo("CPMS")),
-    "UY": Seguros("mutualistas (IAMC), seguros privados"),
-    "PY": Seguros("IPS, seguros privados, prepagas"),
-    "BO": Seguros("cajas de salud, seguros privados"),
-    "EC": Seguros("IESS, seguros privados, medicina prepagada"),
-    "US": Seguros(
+    "PE": Insurers("EPS, aseguradoras, SIS, EsSalud", procedure=CodeFormat("CPMS")),
+    "UY": Insurers("mutualistas (IAMC), seguros privados"),
+    "PY": Insurers("IPS, seguros privados, prepagas"),
+    "BO": Insurers("cajas de salud, seguros privados"),
+    "EC": Insurers("IESS, seguros privados, medicina prepagada"),
+    "US": Insurers(
         "dental insurance carriers (PPO, DHMO), Medicaid",
-        registration=Codigo("Payer ID", r"[0-9A-Z]{5,10}", "12345"),
+        registration=CodeFormat("Payer ID", r"[0-9A-Z]{5,10}", "12345"),
         number="Member ID",
         group="Group number",
-        procedure=Codigo("CDT", r"D\d{4}", "D1110"),
+        procedure=CodeFormat("CDT", r"D\d{4}", "D1110"),
     ),
-    "GB": Seguros("NHS, dental plans, private insurance", number="membership number"),
-    "CA": Seguros(
+    "GB": Insurers("NHS, dental plans, private insurance", number="membership number"),
+    "CA": Insurers(
         "insurance carriers, Canadian Dental Care Plan (CDCP)",
         number="certificate / ID number",
         group="group / policy number",
-        procedure=Codigo("USC&LS", r"\d{5}", "11101"),
+        procedure=CodeFormat("USC&LS", r"\d{5}", "11101"),
     ),
-    "AU": Seguros(
+    "AU": Insurers(
         "private health funds, Child Dental Benefits Schedule (Medicare)",
         number="membership number",
         member_code="patient number on the card",
-        procedure=Codigo("ADA item number", r"\d{3}", "114"),
+        procedure=CodeFormat("ADA item number", r"\d{3}", "114"),
     ),
-    "ZA": Seguros(
+    "ZA": Insurers(
         "medical aid schemes",
-        registration=Codigo("CMS"),
+        registration=CodeFormat("CMS"),
         number="membership number",
         member_code="dependant code",
-        procedure=Codigo("tariff code", r"\d{4}", "8101"),
+        procedure=CodeFormat("tariff code", r"\d{4}", "8101"),
     ),
 }
 
 
 def for_country(country=None):
-    return SEGUROS.get(country or countries.clinic_country(), SEGUROS[countries.DEFAULT])
+    return INSURERS.get(country or countries.clinic_country(), INSURERS[countries.DEFAULT])
 
 
-def com_nome_local(label, local):
+def with_local_name(label, local):
     """ "Número da carteirinha (Member ID)"; just the label without a local name."""
     return f"{label} ({local})" if local else str(label)
 
 
-def rotulo_do_registro(country=None):
+def registration_label(country=None):
     """ "Registro da operadora (ANS)", or "" where the country has no insurer registry."""
     registration = for_country(country).registration
-    return com_nome_local(_("Registro da operadora"), registration.name) if registration else ""
+    return with_local_name(_("Registro da operadora"), registration.name) if registration else ""
 
 
-def rotulo_do_codigo(country=None):
+def code_label(country=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
     procedure = for_country(country).procedure
-    return com_nome_local(_("Código"), procedure.name if procedure else "")
+    return with_local_name(_("Código"), procedure.name if procedure else "")

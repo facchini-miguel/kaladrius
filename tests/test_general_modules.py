@@ -82,9 +82,9 @@ def test_modulo_desligado_some_do_menu_e_a_url_e_recusada(
 def test_orcamentos_desligado(clinica_a, admin, patient):
     configure(clinica_a, sem(M.ESTIMATES))
     assert admin.get(reverse("estimates:list")).status_code == 403
-    ficha = admin.get(reverse("patients:record", args=[patient.pk]))
-    assert ficha.context.get("orcamentos") is None
-    assert "Novo orçamento" not in ficha.content.decode()
+    patient_record = admin.get(reverse("patients:record", args=[patient.pk]))
+    assert patient_record.context.get("orcamentos") is None
+    assert "Novo orçamento" not in patient_record.content.decode()
 
 
 def test_prontuario_desligado_bloqueia_profissional_e_o_superusuario_ve_marcado(
@@ -229,8 +229,8 @@ def test_whatsapp_no_cadastro_e_na_ficha(clinica_a, admin):
     with use_clinic(clinica_a):
         patient = Patient.objects.get(name="Paciente fictícia do WhatsApp")
     assert patient.whatsapp == "48999990000"
-    ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert 'href="https://wa.me/5548999990000"' in ficha
+    patient_record = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert 'href="https://wa.me/5548999990000"' in patient_record
     assert whatsapp("123") == "" and whatsapp("") == ""
 
 

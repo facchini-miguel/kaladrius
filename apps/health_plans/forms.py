@@ -8,7 +8,7 @@ from . import insurance
 from .models import HealthPlan, MemberCard
 
 
-class ConvenioForm(BootstrapForm, forms.ModelForm):
+class HealthPlanForm(BootstrapForm, forms.ModelForm):
     # Typed with punctuation, stored without it (ANS: the 6 digits). Only in the countries
     # whose insurers have a registry (decision 125).
     registration = forms.CharField(max_length=30, required=False)
@@ -37,7 +37,7 @@ class ConvenioForm(BootstrapForm, forms.ModelForm):
         if self.registration is None:
             del self.fields["registration"]
         else:
-            self.fields["registration"].label = insurance.rotulo_do_registro(clinic.country)
+            self.fields["registration"].label = insurance.registration_label(clinic.country)
             if self.registration.example:
                 self.fields["registration"].widget.attrs["placeholder"] = self.registration.example
 
@@ -57,7 +57,7 @@ class ConvenioForm(BootstrapForm, forms.ModelForm):
         return normalize_phone(self.cleaned_data.get("phone"))
 
 
-class CarteirinhaForm(BootstrapForm, forms.ModelForm):
+class MemberCardForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = MemberCard
         fields = [
@@ -79,7 +79,7 @@ class CarteirinhaForm(BootstrapForm, forms.ModelForm):
             self.instance.clinic_id = patient.clinic_id
         # The card's fields and their local names in the clinic's country (decision 125).
         for_country = insurance.for_country(patient.clinic.country)
-        self.fields["number"].label = insurance.com_nome_local(
+        self.fields["number"].label = insurance.with_local_name(
             _("Número da carteirinha"), for_country.number
         )
         for field, local, label in (
@@ -87,7 +87,7 @@ class CarteirinhaForm(BootstrapForm, forms.ModelForm):
             ("member_code", for_country.member_code, _("Código do beneficiário")),
         ):
             if local or getattr(self.instance, field):
-                self.fields[field].label = insurance.com_nome_local(label, local)
+                self.fields[field].label = insurance.with_local_name(label, local)
             else:
                 del self.fields[field]
         # Active plans, plus the card's own plan when it was deactivated later.

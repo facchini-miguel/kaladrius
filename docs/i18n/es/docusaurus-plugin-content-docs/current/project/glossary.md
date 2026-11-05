@@ -324,7 +324,7 @@ Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión
 
 ## Funciones y variables
 
-La última parte del plan (decisión 159): las funciones, métodos, clases, constantes y variables. **Aquí solo cambian nombres de Python**: las cadenas quedan, y con ellas las claves de contexto de las plantillas, los nombres de consulta, las claves de JSON y los valores guardados, con los que el nombre de una variable solo coincide. Los campos declarados de un formulario mantienen su nombre (son los nombres enviados), y los nombres que una URL pasa a la vista y el `parametrize` de una prueba siguen a los parámetros de la función. **Hecho:** las variables comunes a varias apps (decisión 172), la app core (decisión 173), finanzas (decisión 174), agenda (decisión 175).
+La última parte del plan (decisión 159): las funciones, métodos, clases, constantes y variables. **Aquí solo cambian nombres de Python**: las cadenas quedan, y con ellas las claves de contexto de las plantillas, los nombres de consulta, las claves de JSON y los valores guardados, con los que el nombre de una variable solo coincide. Los campos declarados de un formulario mantienen su nombre (son los nombres enviados), y los nombres que una URL pasa a la vista y el `parametrize` de una prueba siguen a los parámetros de la función. **Hecho:** las variables comunes a varias apps (decisión 172), la app core (decisión 173), finanzas (decisión 174), agenda (decisión 175), pacientes, historia clínica, presupuestos, personal, llamadas de control, seguros médicos, profesionales y equipo (decisión 176).
 
 ### Variables comunes
 
@@ -690,6 +690,245 @@ La última parte del plan (decisión 159): las funciones, métodos, clases, cons
 | `eventos` | `events` |
 | `calendario` | `calendar_view` |
 | `aniversariantes` | `birthdays` |
+
+### Pacientes, historia clínica, presupuestos, personal, llamadas de control, seguros médicos, profesionales, equipo
+
+| Antes | Después |
+|---|---|
+| `PacienteAdmin` | `PatientAdmin` |
+| `PacientesConfig` | `PatientsConfig` |
+| `UFField` | `StateField` |
+| `CidadeField` | `CityField` |
+| `_campo_texto` | `_text_field` |
+| `PacienteForm` | `PatientForm` |
+| `SO_NO_BRASIL` | `BRAZIL_ONLY` |
+| `FORA_DO_BRASIL` | `OUTSIDE_BRAZIL` |
+| `_limpar_telefone` | `_clean_phone` |
+| `PessoaRelacionadaForm` | `RelatedPersonForm` |
+| `idade` | `age` |
+| `cidade_estado` | `city_state` |
+| `telefone_principal` | `main_phone` |
+| `Sexo` | `Sex` |
+| `FEMININO` | `FEMALE` |
+| `MASCULINO` | `MALE` |
+| `OUTRO` | `OTHER` |
+| `telefone_exibido` | `display_phone` |
+| `MAE` | `MOTHER` |
+| `PAI` | `FATHER` |
+| `RESPONSAVEL` | `GUARDIAN` |
+| `CONJUGE` | `SPOUSE` |
+| `FILHO` | `CHILD` |
+| `IRMAO` | `SIBLING` |
+| `AVO` | `GRANDPARENT` |
+| `NETO` | `GRANDCHILD` |
+| `PARENTE` | `RELATIVE` |
+| `EMERGENCIA` | `EMERGENCY` |
+| `CONTATO` | `CONTACT` |
+| `_ve_arquivados` | `_sees_archived` |
+| `_visiveis` | `_visible_patients` |
+| `ficha` | `patient_record` |
+| `HISTORICO` | `HISTORY` |
+| `_historico` | `_history` |
+| `arquivar` | `archive` |
+| `restaurar` | `restore` |
+| `sugestoes` | `suggestions` |
+| `MESES` | `MONTH_NAMES` |
+| `relacionados_de` | `related_of` |
+| `relacionado_novo` | `new_related_person` |
+| `relacionado_editar` | `edit_related_person` |
+| `_relacionado` | `_related_person_form` |
+| `relacionado_remover` | `remove_related_person` |
+| `ProntuarioConfig` | `MedicalRecordsConfig` |
+| `AtendimentoForm` | `VisitForm` |
+| `AdendoForm` | `AddendumForm` |
+| `AtestadoForm` | `CertificateForm` |
+| `ReceitaForm` | `PrescriptionForm` |
+| `PedidoDeExamesForm` | `ExamRequestForm` |
+| `TAMANHO_MAXIMO_DO_ANEXO` | `MAX_ATTACHMENT_SIZE` |
+| `ASSINATURAS` | `SIGNATURES` |
+| `AnexoForm` | `AttachmentForm` |
+| `CAMPOS_DA_ANAMNESE` | `ANAMNESIS_FIELDS` |
+| `finalizado` | `is_finalized` |
+| `COMPARECIMENTO` | `ATTENDANCE` |
+| `AFASTAMENTO` | `SICK_LEAVE` |
+| `prontuario_habilitado` | `medical_records_enabled` |
+| `administra_prontuario` | `manages_medical_records` |
+| `acessa_prontuario` | `accesses_medical_records` |
+| `profissional_do_usuario` | `user_practitioner` |
+| `_profissional` | `_practitioner` |
+| `SIGILO` | `CONFIDENTIAL` |
+| `exige_profissional` | `requires_practitioner` |
+| `_auditar` | `_audit` |
+| `_finalizar` | `_finalize` |
+| `_do_autor` | `_by_author` |
+| `atestado_novo` | `new_certificate` |
+| `receita_nova` | `new_prescription` |
+| `pedido_de_exames_novo` | `new_exam_request` |
+| `anexo_enviar` | `upload_attachment` |
+| `anexo_remover` | `remove_attachment` |
+| `OrcamentosConfig` | `EstimatesConfig` |
+| `ProcedimentoForm` | `ProcedureForm` |
+| `OrcamentoForm` | `EstimateForm` |
+| `ItemForm` | `EstimateItemForm` |
+| `DescontoForm` | `DiscountForm` |
+| `AprovarForm` | `ApproveEstimateForm` |
+| `VALIDADE_PADRAO` | `DEFAULT_VALIDITY` |
+| `validade_padrao` | `default_valid_until` |
+| `ABERTO` | `OPEN` |
+| `APROVADO` | `APPROVED` |
+| `RECUSADO` | `REFUSED` |
+| `_conferir_modulo` | `_check_module` |
+| `dentes_exibicao` | `teeth_display` |
+| `lista_dentes` | `teeth_list` |
+| `_liberar_se_desligado` | `_allow_if_disabled` |
+| `item_adicionar` | `add_item` |
+| `item_remover` | `remove_item` |
+| `procedimentos` | `procedures` |
+| `procedimento_form` | `procedure_form` |
+| `FuncionarioAdmin` | `EmployeeAdmin` |
+| `FolhaAdmin` | `PayrollAdmin` |
+| `PessoalConfig` | `StaffConfig` |
+| `_dinheiro` | `_money` |
+| `FuncionarioForm` | `EmployeeForm` |
+| `FolhaForm` | `PayrollForm` |
+| `LancarForm` | `PostPayrollForm` |
+| `HORAS_POR_MES` | `HOURS_PER_MONTH` |
+| `ADICIONAL_HORA_EXTRA` | `OVERTIME_PREMIUM` |
+| `DIAS_POR_MES` | `DAYS_PER_MONTH` |
+| `salario_em` | `salary_on` |
+| `valor_horas_extras` | `overtime_amount` |
+| `desconto_faltas` | `absence_deduction` |
+| `lancada` | `is_posted` |
+| `hora_extra_sugerida` | `suggested_overtime_rate` |
+| `competencia_de` | `period_of` |
+| `fim_do_mes` | `end_of_month` |
+| `preparar` | `prepare` |
+| `mes_da_url` | `month_from_url` |
+| `RechamadaAdmin` | `RecallAdmin` |
+| `RechamadasConfig` | `RecallsConfig` |
+| `RechamadaForm` | `RecallForm` |
+| `ConvenioAdmin` | `HealthPlanAdmin` |
+| `CarteirinhaAdmin` | `MemberCardAdmin` |
+| `ConveniosConfig` | `HealthPlansConfig` |
+| `ConvenioForm` | `HealthPlanForm` |
+| `CarteirinhaForm` | `MemberCardForm` |
+| `Codigo` | `CodeFormat` |
+| `Seguros` | `Insurers` |
+| `SEGUROS` | `INSURERS` |
+| `com_nome_local` | `with_local_name` |
+| `rotulo_do_registro` | `registration_label` |
+| `rotulo_do_codigo` | `code_label` |
+| `vencida` | `is_expired` |
+| `carteirinha_nova` | `new_member_card` |
+| `carteirinha_editar` | `edit_member_card` |
+| `_carteirinha` | `_member_card_form` |
+| `ProfissionalAdmin` | `PractitionerAdmin` |
+| `ProfissionaisConfig` | `PractitionersConfig` |
+| `ProfissionalForm` | `PractitionerForm` |
+| `EquipeConfig` | `TeamConfig` |
+| `conta_exclusiva` | `exclusive_account` |
+| `NovoMembroForm` | `NewMemberForm` |
+| `VinculoForm` | `MembershipForm` |
+| `SenhaForm` | `PasswordForm` |
+| `_vinculo` | `_membership` |
+| `duas_etapas` | `two_factor` |
+
+Las vistas de cada app (renombradas solo dentro de la app, pues el mismo nombre antiguo era una vista distinta en cada una):
+
+`patients`:
+
+| Antes | Después |
+|---|---|
+| `results` | `patient_list` |
+| `new` | `new_patient` |
+| `editar` | `edit_patient` |
+| `excluir` | `delete_patient` |
+| `imprimir` | `print_patient` |
+| `_formulario` | `_patient_form` |
+| `filtrar` | `filter_patients` |
+| `aniversariantes` | `birthdays` |
+
+`medical_records`:
+
+| Antes | Después |
+|---|---|
+| `prontuario` | `medical_records` |
+| `new` | `new_visit` |
+| `imprimir` | `print_visit` |
+| `_campos` | `_fields` |
+| `atestado` | `certificate` |
+| `receita` | `prescription` |
+| `adendo` | `addendum` |
+| `pedido_de_exames` | `exam_request` |
+| `anexo` | `attachment` |
+
+`estimates`:
+
+| Antes | Después |
+|---|---|
+| `vencido` | `is_expired` |
+| `_aberto` | `_open_estimate` |
+| `_odontologia` | `_dentistry` |
+| `results` | `estimate_list` |
+| `new` | `new_estimate` |
+| `editar` | `edit_estimate` |
+| `detalhe` | `estimate_detail` |
+| `_dentes` | `_teeth` |
+| `aprovar` | `approve` |
+| `recusar` | `refuse` |
+| `imprimir` | `print_estimate` |
+
+`staff`:
+
+| Antes | Después |
+|---|---|
+| `lancar` | `post_payroll` |
+| `results` | `employee_list` |
+| `new` | `new_employee` |
+| `editar` | `edit_employee` |
+| `_formulario` | `_employee_form` |
+| `folha` | `payroll` |
+
+`recalls`:
+
+| Antes | Después |
+|---|---|
+| `_data` | `_date` |
+| `_voltar` | `_back` |
+| `results` | `recall_list` |
+| `new` | `new_recall` |
+| `editar` | `edit_recall` |
+| `_formulario` | `_recall_form` |
+| `concluir` | `complete` |
+| `excluir` | `delete_recall` |
+| `do_dia` | `of_day` |
+
+`health_plans`:
+
+| Antes | Después |
+|---|---|
+| `results` | `health_plan_list` |
+| `new` | `new_health_plan` |
+| `editar` | `edit_health_plan` |
+| `_convenio` | `_health_plan_form` |
+
+`practitioners`:
+
+| Antes | Después |
+|---|---|
+| `results` | `practitioner_list` |
+| `new` | `new_practitioner` |
+| `editar` | `edit_practitioner` |
+| `_formulario` | `_practitioner_form` |
+| `excluir` | `delete_practitioner` |
+
+`team`:
+
+| Antes | Después |
+|---|---|
+| `results` | `member_list` |
+| `new` | `new_member` |
+| `editar` | `edit_member` |
 
 ### Finanzas (`financeiro`): clases
 

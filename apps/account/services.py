@@ -46,17 +46,17 @@ def obrigatoria(request):
     """Whether the clinic requires two-step verification from this person (decision 112):
     whoever reaches the medical record or the full finance, never the public demo logins."""
     from apps.core.permissions import Action, Module, can
-    from apps.medical_records.permissions import acessa_prontuario
+    from apps.medical_records.permissions import accesses_medical_records
 
     user, clinic = request.user, getattr(request, "clinic", None)
     if not user.is_authenticated or user.demo or clinic is None:
         return False
     if not clinic.require_two_factor:
         return False
-    return can(request, Module.FINANCE, Action.VIEW) or acessa_prontuario(request)
+    return can(request, Module.FINANCE, Action.VIEW) or accesses_medical_records(request)
 
 
-def preparar(user, new=False):
+def prepare(user, new=False):
     """The person's not yet active device, with a secret to show as a QR code."""
     dispositivo, criado = TwoFactor.objects.get_or_create(
         user=user, defaults={"secret": pyotp.random_base32()}

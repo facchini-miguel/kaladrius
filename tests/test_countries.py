@@ -138,8 +138,8 @@ def test_datas_em_ingles_britanico_e_bandeira_inglesa(clinica_a, criar_usuario, 
         patient = Patient.objects.create(
             name="Amelia Fictícia", birth_date=datetime.date(2000, 12, 25)
         )
-    ficha = cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert "25/12/2000" in ficha and "12/25/2000" not in ficha
+    patient_record = cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert "25/12/2000" in patient_record and "12/25/2000" not in patient_record
     no_pais(clinica_a, "US")
     assert (
         "12/25/2000" in cliente.get(reverse("patients:record", args=[patient.pk])).content.decode()
@@ -214,10 +214,10 @@ def test_paciente_fora_do_brasil(clinica_a, criar_usuario, cliente_de):
         "7700900123",
         "SW1A1AA",
     )
-    ficha = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
-    assert "London, England" in ficha and "SW1A 1AA" in ficha
-    assert "07700 900123" in ficha and "https://wa.me/447700900123" in ficha
-    assert ">CPF<" not in ficha and ">RG<" not in ficha
+    patient_record = admin.get(reverse("patients:record", args=[patient.pk])).content.decode()
+    assert "London, England" in patient_record and "SW1A 1AA" in patient_record
+    assert "07700 900123" in patient_record and "https://wa.me/447700900123" in patient_record
+    assert ">CPF<" not in patient_record and ">RG<" not in patient_record
 
 
 def test_paciente_no_brasil_continua_com_cpf_e_cidades(clinica_a, criar_usuario, cliente_de):

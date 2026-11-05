@@ -8,7 +8,7 @@ from apps.core.forms import BootstrapForm
 from .models import Practitioner
 
 
-class ProfissionalForm(BootstrapForm, forms.ModelForm):
+class PractitionerForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Practitioner
         fields = ["name", "registration", "color", "user", "active"]

@@ -114,7 +114,7 @@ def _birthdays(today):
 def _estimates(today):
     return list(
         Estimate.objects.filter(
-            status=Estimate.Status.ABERTO,
+            status=Estimate.Status.OPEN,
             valid_until__gte=today,
             valid_until__lte=today + datetime.timedelta(days=ESTIMATE_DAYS),
             patient__archived=False,

@@ -42,7 +42,7 @@
           <td>{{ folha.overtime_hours }}</td>
           <td class="text-nowrap">{{ folha.overtime_rate|currency }}</td>
           <td>{{ folha.absences }}</td>
-          <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ folha.note|default:"—" }}{% if folha.is_posted %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
         </tr>

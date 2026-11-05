@@ -114,8 +114,8 @@ def test_telas_cabem_no_celular(clinica_a, reception):
     assert 'class="odontograma-rolagem"' in html
     with use_clinic(clinica_a):
         patient = Patient.objects.create(name="Paciente Fictício")
-    ficha = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()
-    assert 'class="col-12 col-sm-6"' in ficha and 'class="col-6"' not in ficha
+    patient_record = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()
+    assert 'class="col-12 col-sm-6"' in patient_record and 'class="col-6"' not in patient_record
 
 
 def test_painel_do_django_sem_ingles(client, django_user_model):

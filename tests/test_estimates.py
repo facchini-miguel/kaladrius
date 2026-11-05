@@ -90,7 +90,7 @@ def test_profissional_monta_orcamento_com_dentes(cenario):
         "11,36",
         Decimal("250.00"),
     )
-    assert itens[0].dentes_exibicao == "11, 36"
+    assert itens[0].teeth_display == "11, 36"
     page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     assert 'data-dente="36"' in page and "R$ 580,00" in page
 
@@ -153,7 +153,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     estimate.refresh_from_db()
     entry = estimate.entry
     assert response.url == reverse("finance:entry", args=[entry.pk])
-    assert estimate.status == Estimate.Status.APROVADO
+    assert estimate.status == Estimate.Status.APPROVED
     assert (entry.kind, entry.total_amount) == (
         Entry.Kind.RECEIVABLE,
         Decimal("1000.00"),
@@ -167,7 +167,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
         assert estimate.itens.count() == 1
     assert reception.post(reverse("estimates:decline", args=[estimate.pk])).status_code == 302
     estimate.refresh_from_db()
-    assert estimate.status == Estimate.Status.APROVADO
+    assert estimate.status == Estimate.Status.APPROVED
 
 
 def test_profissional_nao_aprova(cenario):
@@ -185,19 +185,19 @@ def test_recusar_e_imprimir(cenario):
     assert "ORÇAMENTO" in page and "Joana Sorriso" in page and "selecionado" in page
     cliente.post(reverse("estimates:decline", args=[estimate.pk]))
     estimate.refresh_from_db()
-    assert estimate.status == Estimate.Status.RECUSADO
+    assert estimate.status == Estimate.Status.REFUSED
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with use_clinic(cenario["clinic"]), pytest.raises(ValidationError):
-        services.recusar(estimate, user=None)
-    results = cliente.get(reverse("estimates:list"), {"status": "recusado"})
-    assert list(results.context["pagina"]) == [estimate]
+        services.refuse(estimate, user=None)
+    estimate_list = cliente.get(reverse("estimates:list"), {"status": "recusado"})
+    assert list(estimate_list.context["pagina"]) == [estimate]
 
 
 def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
-    ficha = cliente.get(reverse("patients:record", args=[cenario["patient"].pk]))
-    assert ficha.context["orcamentos"] == [estimate]
+    patient_record = cliente.get(reverse("patients:record", args=[cenario["patient"].pk]))
+    assert patient_record.context["orcamentos"] == [estimate]
     with use_clinic(cenario["clinic"]):
         Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     assert cliente.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
@@ -238,8 +238,8 @@ def test_odontograma_so_na_area_odontologia(cenario):
 
     reception = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, reception)
-    detalhe = reverse("estimates:detail", args=[estimate.pk])
-    page = reception.get(detalhe)
+    estimate_detail = reverse("estimates:detail", args=[estimate.pk])
+    page = reception.get(estimate_detail)
     assert page.context["mostrar_dentes"] and "odontograma" in page.content.decode()
     assert "teeth" in page.context["item_form"].fields
 
@@ -247,7 +247,7 @@ def test_odontograma_so_na_area_odontologia(cenario):
     from apps.core.modules import configure
 
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})
-    page = reception.get(detalhe)
+    page = reception.get(estimate_detail)
     assert not page.context["mostrar_dentes"] and "odontograma" not in page.content.decode()
     assert "teeth" not in page.context["item_form"].fields
     incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
@@ -256,7 +256,7 @@ def test_odontograma_so_na_area_odontologia(cenario):
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.DENTISTRY})
     incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})
-    page = reception.get(detalhe)
+    page = reception.get(estimate_detail)
     assert page.context["mostrar_dentes"] and "11" in page.content.decode()
     impressao = reception.get(reverse("estimates:print", args=[estimate.pk]))
     assert impressao.context["mostrar_dentes"]

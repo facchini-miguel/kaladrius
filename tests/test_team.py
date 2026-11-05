@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from apps.audit.models import AuditEntry
 from apps.core.models import Membership, Role
-from apps.team.forms import VinculoForm
+from apps.team.forms import MembershipForm
 
 pytestmark = pytest.mark.django_db
 
@@ -137,7 +137,7 @@ def test_administrador_com_conta_desativada_nao_conta(
     assert cliente_admin.post(url, dados_edicao(first_name="Outro")).status_code == 302
 
     # Now admin_a cannot be demoted: the only other administrator cannot log in.
-    form = VinculoForm(
+    form = MembershipForm(
         {"role": Role.FRONT_DESK, "active": "on"}, instance=admin_a.vinculos.get(), editor=other
     )
     assert not form.is_valid()

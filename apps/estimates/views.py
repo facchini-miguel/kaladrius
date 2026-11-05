@@ -23,7 +23,7 @@ from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 
 from . import services
-from .forms import AprovarForm, DescontoForm, ItemForm, OrcamentoForm, ProcedimentoForm
+from .forms import ApproveEstimateForm, DiscountForm, EstimateForm, EstimateItemForm, ProcedureForm
 from .models import Estimate, Procedure
 
 PER_PAGE = 50
@@ -36,29 +36,29 @@ def _estimates():
     )
 
 
-def _aberto(request, pk):
+def _open_estimate(request, pk):
     estimate = get_object_or_404(_estimates(), pk=pk)
-    if estimate.status != Estimate.Status.ABERTO:
+    if estimate.status != Estimate.Status.OPEN:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("estimates:detail", pk=estimate.pk)
     return estimate, None
 
 
-def _odontologia(request):
+def _dentistry(request):
     # The request's cached modules; the item's save() re-checks under the clinic lock. The
     # system administrator also gets the dental chart with Dentistry off (decision 115).
     return ModuleCode.DENTISTRY in modules.visible(request)
 
 
-def _liberar_se_desligado(request, item):
+def _allow_if_disabled(request, item):
     """The system administrator writes dental items with Dentistry off; the page says so."""
-    if ModuleCode.DENTISTRY not in modules.enabled(request) and _odontologia(request):
+    if ModuleCode.DENTISTRY not in modules.enabled(request) and _dentistry(request):
         item.odontologia_desligada_liberada = True
 
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
-def results(request):
-    status = request.GET.get("status", Estimate.Status.ABERTO)
+def estimate_list(request):
+    status = request.GET.get("status", Estimate.Status.OPEN)
     search = request.GET.get("q", "").strip()
     orcamentos = _estimates().prefetch_related("itens")
     if status in Estimate.Status.values:
@@ -80,7 +80,7 @@ def results(request):
 
 
 @requires_permission(Module.ESTIMATES, Action.CREATE)
-def new(request):
+def new_estimate(request):
     inicial = {}
     code = request.GET.get("patient", "")
     if code.isdecimal():
@@ -89,7 +89,7 @@ def new(request):
     proprio = Practitioner.objects.filter(user=request.user, active=True).first()
     if proprio is not None:
         inicial["practitioner"] = proprio.pk
-    form = OrcamentoForm(request.POST or None, initial=inicial)
+    form = EstimateForm(request.POST or None, initial=inicial)
     if request.method == "POST" and form.is_valid():
         form.instance.created_by = request.user
         estimate = form.save()
@@ -105,11 +105,11 @@ def new(request):
 
 
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
-def editar(request, pk):
-    estimate, response = _aberto(request, pk)
+def edit_estimate(request, pk):
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
-    form = OrcamentoForm(request.POST or None, instance=estimate)
+    form = EstimateForm(request.POST or None, instance=estimate)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Orçamento salvo."))
@@ -122,10 +122,10 @@ def editar(request, pk):
 
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
-def detalhe(request, pk):
+def estimate_detail(request, pk):
     estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
-    aberto = estimate.status == Estimate.Status.ABERTO
-    dentistry = _odontologia(request)
+    aberto = estimate.status == Estimate.Status.OPEN
+    dentistry = _dentistry(request)
     if dentistry:
         modules.mark_if_disabled(request, ModuleCode.DENTISTRY)
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
@@ -136,41 +136,41 @@ def detalhe(request, pk):
         {
             "estimate": estimate,
             "aberto": aberto,
-            "item_form": ItemForm(dentistry=dentistry),
+            "item_form": EstimateItemForm(dentistry=dentistry),
             "odontologia_habilitada": dentistry,
-            "desconto_form": DescontoForm(initial={"discount": estimate.discount})
+            "desconto_form": DiscountForm(initial={"discount": estimate.discount})
             if pode_desconto and aberto
             else None,
             "pode_aprovar": aberto
             and can(request, Module.RECEIVING, Action.CREATE)
             and can(request, Module.ESTIMATES, Action.CHANGE),
-            **_dentes(request, estimate),
+            **_teeth(request, estimate),
         },
     )
 
 
-def _dentes(request, estimate):
+def _teeth(request, estimate):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
     tem_historico = any(item.teeth or item.faces for item in estimate.itens.all())
-    if not (_odontologia(request) or tem_historico):
+    if not (_dentistry(request) or tem_historico):
         return {"mostrar_dentes": False}
     return {"mostrar_dentes": True, **odontograma(estimate.teeth)}
 
 
 @require_POST
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
-def item_adicionar(request, pk):
-    estimate, response = _aberto(request, pk)
+def add_item(request, pk):
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
-    form = ItemForm(request.POST, dentistry=_odontologia(request))
+    form = EstimateItemForm(request.POST, dentistry=_dentistry(request))
     if form.is_valid():
         item = form.save(commit=False)
         item.estimate = estimate
         item.description = form.cleaned_data["description"]
         item.unit_price = form.cleaned_data["unit_price"]
-        _liberar_se_desligado(request, item)
+        _allow_if_disabled(request, item)
         try:
             item.save()
         except ValidationError as error:
@@ -178,21 +178,21 @@ def item_adicionar(request, pk):
         else:
             messages.success(request, _("Item incluído."))
     else:
-        erros = [str(error) for results in form.errors.values() for error in results]
+        erros = [str(error) for estimate_list in form.errors.values() for error in estimate_list]
         messages.error(request, " ".join(erros))
     return redirect("estimates:detail", pk=estimate.pk)
 
 
 @require_POST
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
-def item_remover(request, pk, item):
-    estimate, response = _aberto(request, pk)
+def remove_item(request, pk, item):
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
     record = get_object_or_404(estimate.itens, pk=item)
-    if (record.teeth or record.faces) and not _odontologia(request):
+    if (record.teeth or record.faces) and not _dentistry(request):
         raise PermissionDenied
-    _liberar_se_desligado(request, record)
+    _allow_if_disabled(request, record)
     try:
         record.delete()
     except ValidationError as error:
@@ -205,10 +205,10 @@ def item_remover(request, pk, item):
 @require_POST
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
 def discount(request, pk):
-    estimate, response = _aberto(request, pk)
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
-    form = DescontoForm(request.POST)
+    form = DiscountForm(request.POST)
     if form.is_valid():
         value = form.cleaned_data["discount"] or 0
         if value > estimate.subtotal:
@@ -221,10 +221,10 @@ def discount(request, pk):
 
 
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
-def aprovar(request, pk):
+def approve(request, pk):
     if not can(request, Module.RECEIVING, Action.CREATE):
         raise PermissionDenied
-    estimate, response = _aberto(request, pk)
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
     item = estimate.itens.select_related("procedure__category").first()
@@ -233,7 +233,7 @@ def aprovar(request, pk):
         if item and item.procedure and item.procedure.category
         else Category.objects.filter(kind=Category.Kind.INCOME, active=True).first()
     )
-    form = AprovarForm(request.POST or None, initial={"category": category})
+    form = ApproveEstimateForm(request.POST or None, initial={"category": category})
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
         payment = (
@@ -242,7 +242,7 @@ def aprovar(request, pk):
             else None
         )
         try:
-            entry = services.aprovar(
+            entry = services.approve(
                 estimate,
                 parcelas=data["parcelas"],
                 primeiro_vencimento=data["primeiro_vencimento"],
@@ -260,12 +260,12 @@ def aprovar(request, pk):
 
 @require_POST
 @requires_permission(Module.ESTIMATES, Action.CHANGE)
-def recusar(request, pk):
-    estimate, response = _aberto(request, pk)
+def refuse(request, pk):
+    estimate, response = _open_estimate(request, pk)
     if response:
         return response
     try:
-        services.recusar(estimate, user=request.user)
+        services.refuse(estimate, user=request.user)
     except ValidationError as error:  # approved or refused by someone else a moment ago
         messages.error(request, error.messages[0])
     else:
@@ -274,12 +274,12 @@ def recusar(request, pk):
 
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
-def imprimir(request, pk):
+def print_estimate(request, pk):
     estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
     return render(
         request,
         "estimates/print.html",
-        {"estimate": estimate, **_dentes(request, estimate)},
+        {"estimate": estimate, **_teeth(request, estimate)},
     )
 
 
@@ -287,7 +287,7 @@ def imprimir(request, pk):
 
 
 @requires_permission(Module.CATALOGS, Action.VIEW)
-def procedimentos(request):
+def procedures(request):
     return render(
         request,
         "estimates/procedures.html",
@@ -296,9 +296,9 @@ def procedimentos(request):
 
 
 @requires_permission(Module.CATALOGS, Action.CHANGE)
-def procedimento_form(request, pk=None):
+def procedure_form(request, pk=None):
     procedure = get_object_or_404(Procedure.objects, pk=pk) if pk else Procedure()
-    form = ProcedimentoForm(request.POST or None, instance=procedure)
+    form = ProcedureForm(request.POST or None, instance=procedure)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Procedimento %(nome)s salvo.") % {"nome": form.instance.name})

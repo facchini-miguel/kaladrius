@@ -144,8 +144,8 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     with use_clinic(clinica_a):
         paciente = Patient.objects.get()
     assert paciente.tax_id == "BOXW310820HNERXN09"
-    ficha = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
-    assert "CURP" in ficha and "BOXW310820HNERXN09" in ficha
+    patient_record = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    assert "CURP" in patient_record and "BOXW310820HNERXN09" in patient_record
 
     # The same document again is refused, as in Brazil.
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN09"})
@@ -222,8 +222,8 @@ def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     with use_clinic(clinica_a):
         jane = Employee.objects.get()
     assert jane.tax_id == "536904399"
-    ficha = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
-    assert "SSN" in ficha and "536-90-4399" in ficha
+    patient_record = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
+    assert "SSN" in patient_record and "536-90-4399" in patient_record
 
     # Australia: the tax file number is not recorded, so there is no field.
     no_pais(clinica_a, "AU")

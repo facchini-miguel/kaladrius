@@ -17,7 +17,7 @@ from apps.practitioners.models import Practitioner
 from apps.schedule.models import Appointment
 
 # The anamnesis fields, in the order they are written and shown.
-CAMPOS_DA_ANAMNESE = [
+ANAMNESIS_FIELDS = [
     "chief_complaint",
     "present_illness",
     "medical_history",
@@ -97,7 +97,7 @@ class Visit(ClinicModel):
         return f"{self.patient} – {timezone.localtime(self.date):%d/%m/%Y %H:%M}"
 
     @property
-    def finalizado(self):
+    def is_finalized(self):
         return self.finalized_at is not None
 
 
@@ -143,8 +143,8 @@ class Certificate(ClinicModel):
     deleted after issued; it can be printed again."""
 
     class Kind(models.TextChoices):
-        COMPARECIMENTO = "comparecimento", _("Comparecimento")
-        AFASTAMENTO = "afastamento", _("Afastamento")
+        ATTENDANCE = "comparecimento", _("Comparecimento")
+        SICK_LEAVE = "afastamento", _("Afastamento")
 
     visit = models.ForeignKey(
         Visit,
@@ -157,7 +157,7 @@ class Certificate(ClinicModel):
         _("tipo"),
         max_length=20,
         choices=Kind.choices,
-        default=Kind.COMPARECIMENTO,
+        default=Kind.ATTENDANCE,
         db_column="tipo",
     )
     date = models.DateField(_("data do atendimento"), default=timezone.localdate, db_column="data")
