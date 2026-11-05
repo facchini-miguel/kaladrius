@@ -25,13 +25,13 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Nº" %}</th><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
     <tbody>
-      {% for orcamento in pagina %}
+      {% for estimate in pagina %}
       <tr>
-        <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.pk }}</a></td>
-        <td class="text-nowrap">{{ orcamento.date|date:"SHORT_DATE_FORMAT" }}</td>
-        <td><a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.name }}</a></td>
-        <td>{{ orcamento.practitioner.name|default:"—" }}</td>
-        <td class="text-end text-nowrap">{{ orcamento.total|currency }}</td>
+        <td><a href="{% url 'estimates:detail' estimate.pk %}">{{ estimate.pk }}</a></td>
+        <td class="text-nowrap">{{ estimate.date|date:"SHORT_DATE_FORMAT" }}</td>
+        <td><a href="{% url 'estimates:detail' estimate.pk %}">{{ estimate.patient.name }}</a></td>
+        <td>{{ estimate.practitioner.name|default:"—" }}</td>
+        <td class="text-end text-nowrap">{{ estimate.total|currency }}</td>
         <td>{% include "estimates/_status.html" %}</td>
       </tr>
       {% empty %}

@@ -65,7 +65,7 @@ def test_cria_membro_ja_vinculado_a_clinica(cliente_admin, clinica_a, client):
     assert vinculo.user.check_password(NOVA_SENHA)
     # The account creation shows up in the clinic's audit log.
     assert AuditEntry.objects.filter(
-        clinic=clinica_a, acao="criar", modelo="Usuário", objeto_descricao="carla"
+        clinic=clinica_a, action="criar", model_name="Usuário", object_repr="carla"
     ).exists()
 
 

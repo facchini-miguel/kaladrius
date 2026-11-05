@@ -45,7 +45,7 @@ def test_cria_rechamada(cenario):
     )
     assert resposta.status_code == 302
     [rechamada] = rechamadas(cenario["clinic"])
-    assert rechamada.description == "Revisão 6 meses" and not rechamada.concluida
+    assert rechamada.description == "Revisão 6 meses" and not rechamada.done
     assert rechamada.created_by.username == "recepcao"
 
 
@@ -81,16 +81,16 @@ def test_concluir_e_reabrir(cenario):
     assert cenario["cliente"].get(url).status_code == 405
     cenario["cliente"].post(url)
     rechamada.refresh_from_db()
-    assert rechamada.concluida
+    assert rechamada.done
     cenario["cliente"].post(url)
     rechamada.refresh_from_db()
-    assert not rechamada.concluida
+    assert not rechamada.done
 
 
 def test_filtros_da_lista(cenario):
     clinic, patient = cenario["clinic"], cenario["patient"]
     criar(clinic, patient, DIA)
-    criar(clinic, patient, DIA + datetime.timedelta(days=30), concluida=True)
+    criar(clinic, patient, DIA + datetime.timedelta(days=30), done=True)
     with usar_clinica(clinic):
         outro = Patient.objects.create(name="Ana Outra")
     criar(clinic, outro, DIA + datetime.timedelta(days=60))
@@ -115,7 +115,7 @@ def test_resumo_e_lista_do_dia_para_a_agenda(cenario):
     clinic, patient = cenario["clinic"], cenario["patient"]
     criar(clinic, patient, DIA)
     criar(clinic, patient, DIA)
-    criar(clinic, patient, DIA, concluida=True)
+    criar(clinic, patient, DIA, done=True)
     resumo = cenario["cliente"].get(
         reverse("recalls:summary"),
         {"start": "2031-03-03T00:00:00-03:00", "end": "2031-03-10T00:00:00-03:00"},

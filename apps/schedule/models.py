@@ -123,7 +123,7 @@ class Appointment(ModeloDaClinica):
         db_column="situacao",
     )
     # Appointments created together by "repeat N weeks" share the same series id.
-    serie = models.UUIDField(_("série"), null=True, blank=True, editable=False)
+    series = models.UUIDField(_("série"), null=True, blank=True, editable=False, db_column="serie")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

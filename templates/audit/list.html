@@ -10,15 +10,15 @@
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-3"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="{% translate 'Usuário, registro ou código' %}" aria-label="{% translate 'Buscar' %}"></div>
   <div class="col-6 col-md-2">
-    <select name="acao" class="form-select" aria-label="{% translate 'Ação' %}">
+    <select name="action" class="form-select" aria-label="{% translate 'Ação' %}">
       <option value="">{% translate "Todas as ações" %}</option>
-      {% for value, rotulo in acoes %}<option value="{{ value }}"{% if filtros.acao == value %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      {% for value, rotulo in acoes %}<option value="{{ value }}"{% if filtros.action == value %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">
-    <select name="modelo" class="form-select" aria-label="{% translate 'Tipo de registro' %}">
+    <select name="model_name" class="form-select" aria-label="{% translate 'Tipo de registro' %}">
       <option value="">{% translate "Todos os tipos" %}</option>
-      {% for item in modelos %}<option value="{{ item }}"{% if filtros.modelo == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+      {% for item in modelos %}<option value="{{ item }}"{% if filtros.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
@@ -33,13 +33,13 @@
       {% for record in pagina %}
       <tr>
         <td class="text-nowrap">{{ record.timestamp|date:"SHORT_DATETIME_FORMAT" }}</td>
-        <td>{% if record.usuario_nome %}{{ record.usuario_nome }}{% else %}{% translate "sistema" %}{% endif %}</td>
-        <td>{{ record.get_acao_display }}</td>
-        <td>{% if record.modelo %}<span class="text-body-secondary">{{ record.modelo }} {{ record.objeto_id }}:</span> {% endif %}{{ record.objeto_descricao }}</td>
+        <td>{% if record.user_name %}{{ record.user_name }}{% else %}{% translate "sistema" %}{% endif %}</td>
+        <td>{{ record.get_action_display }}</td>
+        <td>{% if record.model_name %}<span class="text-body-secondary">{{ record.model_name }} {{ record.object_id }}:</span> {% endif %}{{ record.object_repr }}</td>
         <td>
-          {% if record.alteracoes %}
+          {% if record.changes %}
           <details>
-            <summary>{% blocktranslate count total=record.alteracoes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
+            <summary>{% blocktranslate count total=record.changes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
             <ul class="small mb-0">
               {% for rotulo, antes, depois in record.campos %}
               <li><strong>{{ rotulo }}</strong>: {{ antes|default_if_none:"—" }} → {{ depois|default_if_none:"—" }}</li>

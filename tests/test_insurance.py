@@ -12,7 +12,7 @@ from apps.estimates.models import Procedure
 from apps.health_plans import insurance
 from apps.health_plans.models import HealthPlan, MemberCard
 from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
-from tests.test_health_plans import admin, carteirinha, convenio, patient  # noqa: F401
+from tests.test_health_plans import admin, carteirinha, health_plan, patient  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
@@ -25,14 +25,14 @@ def mudar_pais(clinic, country):
 def test_cada_pais_tem_as_suas_regras():
     assert set(insurance.SEGUROS) == set(PAISES)
     for country, regras in insurance.SEGUROS.items():
-        for code in (regras.registration, regras.procedimento):
+        for code in (regras.registration, regras.procedure):
             if code and code.padrao:
                 # Every format has an example, and the example follows it.
                 assert re.fullmatch(code.padrao, code.exemplo), country
 
 
 def test_codigo_limpo_e_conferido():
-    cdt = insurance.do_pais("US").procedimento
+    cdt = insurance.do_pais("US").procedure
     assert cdt.limpar(" d1110 ") == "D1110"
     with pytest.raises(Exception, match="CDT"):
         cdt.limpar("1110")
@@ -62,16 +62,16 @@ def test_registro_da_operadora_por_pais(clinica_a, admin):  # noqa: F811
     assert "Registro da operadora" not in admin.get(reverse("health_plans:list")).content.decode()
 
 
-def test_campos_da_carteirinha_por_pais(clinica_a, patient, convenio, admin):  # noqa: F811
+def test_campos_da_carteirinha_por_pais(clinica_a, patient, health_plan, admin):  # noqa: F811
     url = reverse("health_plans:card_new", args=[patient.pk])
     campos = admin.get(url).context["form"].fields
-    assert "group" not in campos and "beneficiario" not in campos  # Brazil
+    assert "group" not in campos and "member_code" not in campos  # Brazil
     mudar_pais(clinica_a, "US")
     campos = admin.get(url).context["form"].fields
     assert str(campos["number"].label) == "Número da carteirinha (Member ID)"
     assert str(campos["group"].label) == "Número do grupo (Group number)"
-    assert "beneficiario" not in campos
-    dados = carteirinha(convenio, number="W123456789", group="G-100")
+    assert "member_code" not in campos
+    dados = carteirinha(health_plan, number="W123456789", group="G-100")
     assert admin.post(url, dados).status_code == 302
     with usar_clinica(clinica_a):
         assert MemberCard.objects.get().group == "G-100"
@@ -79,7 +79,7 @@ def test_campos_da_carteirinha_por_pais(clinica_a, patient, convenio, admin):  #
     assert "W123456789" in ficha and "G-100" in ficha
     mudar_pais(clinica_a, "ZA")
     campos = admin.get(url).context["form"].fields
-    assert str(campos["beneficiario"].label) == "Código do beneficiário (dependant code)"
+    assert str(campos["member_code"].label) == "Código do beneficiário (dependant code)"
 
 
 def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
@@ -93,11 +93,11 @@ def test_codigo_do_procedimento_vai_para_o_orcamento(cenario):  # noqa: F811
     assert cliente.post(url, {**dados, "code": "8510.0099"}).status_code == 302
     with usar_clinica(clinic):
         assert Procedure.objects.get(name="Restauração").code == "85100099"
-    orcamento = criar_orcamento(cenario, cliente)
-    incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk)
+    estimate = criar_orcamento(cenario, cliente)
+    incluir(cliente, estimate, procedure=cenario["restauracao"].pk)
     with usar_clinica(clinic):
-        assert orcamento.itens.get().code == "85100099"
-    impresso = cliente.get(reverse("estimates:print", args=[orcamento.pk])).content.decode()
+        assert estimate.itens.get().code == "85100099"
+    impresso = cliente.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
     assert "85100099 · Restauração" in impresso
     # A country without one coding: just "Código", free text.
     mudar_pais(clinic, "UY")

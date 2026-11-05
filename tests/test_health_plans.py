@@ -30,13 +30,19 @@ def patient(clinica_a):
 
 
 @pytest.fixture
-def convenio(clinica_a):
+def health_plan(clinica_a):
     with usar_clinica(clinica_a):
         return HealthPlan.objects.create(name="Saúde Exemplo", registration="000001")
 
 
-def carteirinha(convenio, **extra):
-    return {"convenio": convenio.pk, "plano": "Básico", "number": "123", "active": "on", **extra}
+def carteirinha(health_plan, **extra):
+    return {
+        "health_plan": health_plan.pk,
+        "plan": "Básico",
+        "number": "123",
+        "active": "on",
+        **extra,
+    }
 
 
 def test_cadastro_do_convenio(clinica_a, admin):
@@ -59,15 +65,15 @@ def test_cadastro_do_convenio(clinica_a, admin):
         ({"name": "Outro", "phone": "99"}, "phone"),
     ],
 )
-def test_validacoes_do_convenio(dados, campo, convenio, admin):
+def test_validacoes_do_convenio(dados, campo, health_plan, admin):
     resposta = admin.post(reverse("health_plans:new"), dados)
     assert campo in resposta.context["form"].errors
 
 
-def test_carteirinha_na_ficha_com_validade(clinica_a, patient, convenio, admin):
+def test_carteirinha_na_ficha_com_validade(clinica_a, patient, health_plan, admin):
     url = reverse("health_plans:card_new", args=[patient.pk])
     vencida = (HOJE - datetime.timedelta(days=1)).isoformat()
-    resposta = admin.post(url, carteirinha(convenio, number=" 0099 ", valid_until=vencida))
+    resposta = admin.post(url, carteirinha(health_plan, number=" 0099 ", valid_until=vencida))
     assert resposta.url == reverse("patients:record", args=[patient.pk])
     with usar_clinica(clinica_a):
         criada = MemberCard.objects.get()
@@ -78,12 +84,12 @@ def test_carteirinha_na_ficha_com_validade(clinica_a, patient, convenio, admin):
     with usar_clinica(clinica_a):
         outro = Patient.objects.create(name="Outra paciente fictícia")
     repetida = admin.post(
-        reverse("health_plans:card_new", args=[outro.pk]), carteirinha(convenio, number="0099")
+        reverse("health_plans:card_new", args=[outro.pk]), carteirinha(health_plan, number="0099")
     )
     assert "number" in repetida.context["form"].errors
     editar = admin.post(
         reverse("health_plans:card_edit", args=[criada.pk]),
-        carteirinha(convenio, number="0099", plano="Apartamento"),
+        carteirinha(health_plan, number="0099", plan="Apartamento"),
     )
     assert editar.status_code == 302
 
@@ -94,17 +100,17 @@ def test_paciente_sem_carteirinha_e_particular(patient, admin):
 
 
 def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
-    clinica_a, patient, convenio, admin
+    clinica_a, patient, health_plan, admin
 ):
     with usar_clinica(clinica_a):
-        existente = MemberCard.objects.create(patient=patient, convenio=convenio, number="1")
-        convenio.active = False
-        convenio.save()
+        existente = MemberCard.objects.create(patient=patient, health_plan=health_plan, number="1")
+        health_plan.active = False
+        health_plan.save()
     nova = admin.get(reverse("health_plans:card_new", args=[patient.pk])).context["form"]
     antiga = admin.get(reverse("health_plans:card_edit", args=[existente.pk])).context["form"]
     with usar_clinica(clinica_a):
-        assert convenio not in nova.fields["convenio"].queryset
-        assert convenio in antiga.fields["convenio"].queryset
+        assert health_plan not in nova.fields["health_plan"].queryset
+        assert health_plan in antiga.fields["health_plan"].queryset
 
 
 @pytest.mark.parametrize(
@@ -116,14 +122,14 @@ def test_convenio_inativo_some_da_carteirinha_nova_mas_fica_na_existente(
     ],
 )
 def test_permissoes_por_papel(
-    role, ver, criar, clinica_a, patient, convenio, criar_usuario, cliente_de
+    role, ver, criar, clinica_a, patient, health_plan, criar_usuario, cliente_de
 ):
     cliente = cliente_de(criar_usuario("papel_convenios", clinica_a, role))
     assert cliente.get(reverse("health_plans:list")).status_code == ver
     assert cliente.get(reverse("health_plans:card_new", args=[patient.pk])).status_code == (criar)
 
 
-def test_modulo_desligado(clinica_a, patient, convenio, admin):
+def test_modulo_desligado(clinica_a, patient, health_plan, admin):
     assert reverse("health_plans:list") in admin.get(reverse("home")).content.decode()
     configurar(clinica_a, MODULOS_GERAIS - {ModuloClinico.CONVENIOS})
     assert admin.get(reverse("health_plans:list")).status_code == 403
@@ -133,18 +139,18 @@ def test_modulo_desligado(clinica_a, patient, convenio, admin):
 
 
 def test_carteirinha_nao_liga_paciente_e_convenio_de_clinicas_diferentes(
-    clinica_a, clinica_b, convenio
+    clinica_a, clinica_b, health_plan
 ):
     with usar_clinica(clinica_b):
         de_outra = Patient.objects.create(name="Paciente fictício B")
     with usar_clinica(clinica_b), pytest.raises(ClinicaDiferente):
-        MemberCard.objects.create(patient=de_outra, convenio=convenio, number="9")
+        MemberCard.objects.create(patient=de_outra, health_plan=health_plan, number="9")
 
 
-def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, convenio, admin):
+def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, health_plan, admin):
     with usar_clinica(clinica_a):
         criada = MemberCard.objects.create(
-            patient=patient, convenio=convenio, number="CARTEIRINHA-SIGILOSA"
+            patient=patient, health_plan=health_plan, number="CARTEIRINHA-SIGILOSA"
         )
         patient.archived = True
         patient.save()
@@ -152,7 +158,7 @@ def test_exclusao_lgpd_apaga_as_carteirinhas(clinica_a, patient, convenio, admin
     assert resposta.status_code == 302
     with usar_clinica(clinica_a):
         assert not MemberCard.objects.exists()
-        assert HealthPlan.objects.filter(pk=convenio.pk).exists()
-    registros = AuditEntry.objects.filter(modelo="Carteirinha", objeto_id=str(criada.pk))
+        assert HealthPlan.objects.filter(pk=health_plan.pk).exists()
+    registros = AuditEntry.objects.filter(model_name="Carteirinha", object_id=str(criada.pk))
     assert registros.exists()
     assert "CARTEIRINHA-SIGILOSA" not in str(list(registros.values()))

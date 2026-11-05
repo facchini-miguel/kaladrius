@@ -190,7 +190,7 @@ class Patient(ModeloDaClinica):
         """City and state as written on the record: from the national tables in Brazil, typed
         anywhere else (decision 117)."""
         if self.city_id:
-            return f"{self.city.name}/{self.city.state.sigla}"
+            return f"{self.city.name}/{self.city.state.abbreviation}"
         return ", ".join(parte for parte in (self.city_name, self.state_name) if parte)
 
     @property

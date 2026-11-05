@@ -9,15 +9,15 @@ class RegistroAuditoriaAdmin(admin.ModelAdmin):
 
     list_display = [
         "timestamp",
-        "usuario_nome",
-        "acao",
-        "modelo",
-        "objeto_descricao",
+        "user_name",
+        "action",
+        "model_name",
+        "object_repr",
         "clinic_id",
         "ip",
     ]
-    list_filter = ["acao", "modelo"]
-    search_fields = ["usuario_nome", "objeto_descricao", "objeto_id"]
+    list_filter = ["action", "model_name"]
+    search_fields = ["user_name", "object_repr", "object_id"]
     date_hierarchy = "timestamp"
 
     def has_add_permission(self, request):

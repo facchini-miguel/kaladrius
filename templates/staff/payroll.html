@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Folha do mês" %} {{ competencia|date:"m/Y" }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Folha do mês" %} {{ period|date:"m/Y" }} · {{ nome_sistema }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-  <h1 class="h3 mb-0">{% blocktranslate with mes=competencia|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
+  <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="?mes={{ anterior|date:'Y-m' }}">← {{ anterior|date:"m/Y" }}</a>
     <a class="btn btn-outline-secondary" href="?mes={{ proximo|date:'Y-m' }}">{{ proximo|date:"m/Y" }} →</a>
@@ -32,16 +32,16 @@
         {% for folha, form in linhas %}
         <tr>
           <td><a href="{% url 'staff:employee' folha.employee_id %}">{{ folha.employee.name }}</a></td>
-          <td class="text-end text-nowrap">{{ folha.salario|currency }}</td>
+          <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
           {% if form %}
-          <td>{{ form.horas_extras }}{% for erro in form.horas_extras.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
-          <td>{{ form.valor_hora_extra }}{% for erro in form.valor_hora_extra.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
-          <td>{{ form.faltas }}{% for erro in form.faltas.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
+          <td>{{ form.overtime_hours }}{% for erro in form.overtime_hours.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
+          <td>{{ form.overtime_rate }}{% for erro in form.overtime_rate.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
+          <td>{{ form.absences }}{% for erro in form.absences.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
           <td>{{ form.note }}</td>
           {% else %}
-          <td>{{ folha.horas_extras }}</td>
-          <td class="text-nowrap">{{ folha.valor_hora_extra|currency }}</td>
-          <td>{{ folha.faltas }}</td>
+          <td>{{ folha.overtime_hours }}</td>
+          <td class="text-nowrap">{{ folha.overtime_rate|currency }}</td>
+          <td>{{ folha.absences }}</td>
           <td>{{ folha.note|default:"—" }}{% if folha.lancada %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>

@@ -149,10 +149,10 @@ class _Importador:
     def _cidades(self):
         """Legacy city id → (UF, IBGE city or None, legacy name)."""
         ufs_legado = {u["id"]: _texto(u["sigla"]).upper() for u in self.t.get("uf", [])}
-        ufs = {state.sigla: state for state in State.objects.all()}
+        ufs = {state.abbreviation: state for state in State.objects.all()}
         ibge = defaultdict(dict)
         for city in City.objects.select_related("state"):
-            ibge[city.state.sigla][_chave(city.name)] = city
+            ibge[city.state.abbreviation][_chave(city.name)] = city
         resultado = {}
         for linha in self.t.get("cidade", []):
             id_uf = str(linha["id_uf"] or "")
@@ -443,7 +443,7 @@ class _Importador:
                     patient=patient,
                     date=dia,
                     description=description,
-                    concluida=dia < self.hoje,
+                    done=dia < self.hoje,
                 )
             )
         Recall.objects.bulk_create(novas)

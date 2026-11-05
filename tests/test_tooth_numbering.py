@@ -94,13 +94,13 @@ def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
     clinic.tooth_numbering = UNIVERSAL
     clinic.save()
     cliente = entrar(cenario, "practitioner")
-    orcamento = criar_orcamento(cenario, cliente)
-    incluir(cliente, orcamento, procedimento=cenario["restauracao"].pk, dentes="36,18")
+    estimate = criar_orcamento(cenario, cliente)
+    incluir(cliente, estimate, procedure=cenario["restauracao"].pk, teeth="36,18")
     with usar_clinica(clinic):
-        item = orcamento.itens.get()
-        assert item.dentes == "18,36"  # always FDI in the database
+        item = estimate.itens.get()
+        assert item.teeth == "18,36"  # always FDI in the database
         assert item.dentes_exibicao == "1, 19"
-    pagina = cliente.get(reverse("estimates:detail", args=[orcamento.pk])).content.decode()
+    pagina = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
     assert 'data-dente="36"' in pagina and ">19</button>" in pagina
     assert "Numeração universal (Estados Unidos)." in pagina

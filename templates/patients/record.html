@@ -178,9 +178,9 @@
     {% if pode.orcamentos.criar and not patient.archived %}<a class="btn btn-sm btn-outline-primary" href="{% url 'estimates:new' %}?patient={{ patient.pk }}">{% translate "Novo orçamento" %}</a>{% endif %}
   </div>
   <ul class="list-group list-group-flush">
-    {% for orcamento in orcamentos %}
+    {% for estimate in orcamentos %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-      <span><a href="{% url 'estimates:detail' orcamento.pk %}">{% blocktranslate with numero=orcamento.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ orcamento.date|date:"SHORT_DATE_FORMAT" }} · {{ orcamento.total|currency }}</span>
+      <span><a href="{% url 'estimates:detail' estimate.pk %}">{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}</a> · {{ estimate.date|date:"SHORT_DATE_FORMAT" }} · {{ estimate.total|currency }}</span>
       {% include "estimates/_status.html" %}
     </li>
     {% empty %}
@@ -200,11 +200,11 @@
     {% for carteirinha in carteirinhas %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2{% if not carteirinha.active %} text-body-secondary{% endif %}">
       <span>
-        <strong>{{ carteirinha.convenio.name }}</strong>{% if carteirinha.plano %} · {{ carteirinha.plano }}{% endif %} · {{ carteirinha.number }}
-        {% if carteirinha.beneficiario %}<span class="small">· {% translate "beneficiário" %} {{ carteirinha.beneficiario }}</span>{% endif %}
+        <strong>{{ carteirinha.health_plan.name }}</strong>{% if carteirinha.plan %} · {{ carteirinha.plan }}{% endif %} · {{ carteirinha.number }}
+        {% if carteirinha.member_code %}<span class="small">· {% translate "beneficiário" %} {{ carteirinha.member_code }}</span>{% endif %}
         {% if carteirinha.group %}<span class="small">· {% translate "grupo" %} {{ carteirinha.group }}</span>{% endif %}
         {% if carteirinha.valid_until %}<span class="small">· {% translate "validade" %} {{ carteirinha.valid_until|date:"SHORT_DATE_FORMAT" }}</span>{% endif %}
-        {% if carteirinha.titular %}<span class="small">· {% translate "titular" %}: {{ carteirinha.titular }}</span>{% endif %}
+        {% if carteirinha.holder %}<span class="small">· {% translate "titular" %}: {{ carteirinha.holder }}</span>{% endif %}
       </span>
       <span class="text-nowrap">
         {% if not carteirinha.active %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% elif carteirinha.vencida %}<span class="badge text-bg-danger">{% translate "Vencida" context "carteirinha" %}</span>{% endif %}
@@ -261,7 +261,7 @@
     {% for rechamada in rechamadas %}
     <li class="list-group-item d-flex justify-content-between">
       <span>{{ rechamada.date|date:"SHORT_DATE_FORMAT" }} · {{ rechamada.description }}</span>
-      {% if rechamada.concluida %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
+      {% if rechamada.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhuma rechamada." %}</li>

@@ -21,14 +21,14 @@
       </tr>
     </thead>
     <tbody>
-      {% for convenio in convenios %}
+      {% for health_plan in convenios %}
       <tr>
-        <td>{{ convenio.name }}</td>
-        {% if rotulo_do_registro %}<td>{{ convenio.registration|default:"—" }}</td>{% endif %}
-        <td class="text-nowrap">{{ convenio.phone|phone|default:"—" }}</td>
-        <td class="text-end">{{ convenio.pacientes }}</td>
-        <td>{% if convenio.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
-        <td class="text-end">{% if pode.convenios.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' convenio.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td>{{ health_plan.name }}</td>
+        {% if rotulo_do_registro %}<td>{{ health_plan.registration|default:"—" }}</td>{% endif %}
+        <td class="text-nowrap">{{ health_plan.phone|phone|default:"—" }}</td>
+        <td class="text-end">{{ health_plan.pacientes }}</td>
+        <td>{% if health_plan.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td class="text-end">{% if pode.convenios.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' health_plan.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum convênio cadastrado." %}</td></tr>

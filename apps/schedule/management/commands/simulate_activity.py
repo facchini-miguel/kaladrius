@@ -68,10 +68,10 @@ class Command(BaseCommand):
             if alvo is None:
                 raise CommandError(f"Clínica “{clinic}” não encontrada.")
             agendamentos = 0 if sem_agenda else simular_agendamentos(alvo, sorteio)
-            criadas = simular_rechamadas(alvo, sorteio, quantidade=rechamadas)
-            criados = simular_orcamentos(alvo, sorteio, quantidade=orcamentos) if orcamentos else 0
+            criadas = simular_rechamadas(alvo, sorteio, quantity=rechamadas)
+            criados = simular_orcamentos(alvo, sorteio, quantity=orcamentos) if orcamentos else 0
             receber, pagar = (
-                simular_financeiro(alvo, sorteio, quantidade=lancamentos) if lancamentos else (0, 0)
+                simular_financeiro(alvo, sorteio, quantity=lancamentos) if lancamentos else (0, 0)
             )
             comissoes = simular_comissoes(alvo, sorteio)
         self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinic}”:"))

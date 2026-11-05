@@ -94,12 +94,12 @@ def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     depois = dict(ClinicModule.todos.filter(clinic=clinica_a).values_list("code", "pk"))
     assert antes == depois
-    alteracoes = AuditEntry.objects.filter(
-        clinic=clinica_a, modelo="Módulo da clínica", acao=AuditEntry.Acao.ALTERAR
+    changes = AuditEntry.objects.filter(
+        clinic=clinica_a, model_name="Módulo da clínica", action=AuditEntry.Acao.ALTERAR
     )
-    assert alteracoes.count() == 2
+    assert changes.count() == 2
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
-    assert alteracoes.count() == 2
+    assert changes.count() == 2
 
 
 def test_campos_administrativos_e_commit_false_preservados(clinica_a):
@@ -143,8 +143,8 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
         AuditEntry.objects.filter(
             clinic=clinica_a,
             user=user,
-            modelo="Módulo da clínica",
-            acao=AuditEntry.Acao.ALTERAR,
+            model_name="Módulo da clínica",
+            action=AuditEntry.Acao.ALTERAR,
         ).count()
         == 2
     )
@@ -176,53 +176,53 @@ def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
 
 
 @pytest.fixture
-def orcamento(clinica_a):
+def estimate(clinica_a):
     with usar_clinica(clinica_a):
         patient = Patient.objects.create(name="Paciente inteiramente fictício")
         return Estimate.objects.create(patient=patient)
 
 
-def novo_item(orcamento, **extra):
+def novo_item(estimate, **extra):
     return EstimateItem(
-        orcamento=orcamento,
+        estimate=estimate,
         description="Procedimento fictício",
-        valor_unitario=Decimal("10"),
+        unit_price=Decimal("10"),
         **extra,
     )
 
 
 def test_detalhe_nao_consulta_modulos_para_cada_item(
-    clinica_a, orcamento, criar_usuario, cliente_de
+    clinica_a, estimate, criar_usuario, cliente_de
 ):
     with usar_clinica(clinica_a):
         for _ in range(4):
-            novo_item(orcamento, dentes="11").save()
+            novo_item(estimate, teeth="11").save()
     cliente = cliente_de(criar_usuario("recepcao_consultas", clinica_a, Papel.RECEPCAO))
     with CaptureQueriesContext(connection) as consultas:
-        resposta = cliente.get(reverse("estimates:detail", args=[orcamento.pk]))
+        resposta = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
     assert resposta.status_code == 200
     assert resposta.context["odontologia_habilitada"]
     consultas_modulos = [q for q in consultas if 'FROM "core_modulodaclinica"' in q["sql"]]
     assert len(consultas_modulos) <= 2
 
 
-def test_modelo_bloqueia_dentes_sem_depender_da_tela(clinica_a, orcamento):
+def test_modelo_bloqueia_dentes_sem_depender_da_tela(clinica_a, estimate):
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
         with pytest.raises(ValidationError):
-            novo_item(orcamento, dentes="11").save()
-        novo_item(orcamento).save()  # general estimates remain available
+            novo_item(estimate, teeth="11").save()
+        novo_item(estimate).save()  # general estimates remain available
         assert EstimateItem.objects.count() == 1
 
 
-def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, orcamento):
+def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, estimate):
     with usar_clinica(clinica_a):
-        item = novo_item(orcamento, dentes="11", faces="V")
+        item = novo_item(estimate, teeth="11", faces="V")
         item.save()
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     with usar_clinica(clinica_a):
-        assert EstimateItem.objects.get().dentes == "11"
-        item.dentes = item.faces = ""
+        assert EstimateItem.objects.get().teeth == "11"
+        item.teeth = item.faces = ""
         with pytest.raises(ValidationError):
             item.save()
         with pytest.raises(ValidationError):
@@ -234,32 +234,32 @@ def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, orcamento)
 
 
 def test_http_nao_remove_historico_quando_modulo_desativado(
-    clinica_a, orcamento, criar_usuario, cliente_de
+    clinica_a, estimate, criar_usuario, cliente_de
 ):
     with usar_clinica(clinica_a):
-        item = novo_item(orcamento, faces="Arcada superior")
+        item = novo_item(estimate, faces="Arcada superior")
         item.save()
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_modulos", clinica_a, Papel.RECEPCAO))
-    detalhe = cliente.get(reverse("estimates:detail", args=[orcamento.pk]))
+    detalhe = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
     assert detalhe.status_code == 200 and detalhe.context["mostrar_dentes"]
     assert "Arcada superior" in detalhe.content.decode()
     assert (
-        cliente.post(reverse("estimates:item_remove", args=[orcamento.pk, item.pk])).status_code
+        cliente.post(reverse("estimates:item_remove", args=[estimate.pk, item.pk])).status_code
         == 403
     )
     with usar_clinica(clinica_a):
         assert EstimateItem.objects.filter(pk=item.pk).exists()
 
 
-def test_item_nao_pode_vincular_orcamento_de_outra_clinica(clinica_b, orcamento):
+def test_item_nao_pode_vincular_orcamento_de_outra_clinica(clinica_b, estimate):
     with usar_clinica(clinica_b), pytest.raises(ClinicaDiferente):
-        novo_item(orcamento, dentes="11").save()
+        novo_item(estimate, teeth="11").save()
 
 
 @pytest.mark.parametrize("codigos", [[], ["medicina"], ["odontologia", "medicina"]])
 def test_prontuario_comum_nao_exige_modulo_especializado(
-    codigos, clinica_a, orcamento, criar_usuario, cliente_de
+    codigos, clinica_a, estimate, criar_usuario, cliente_de
 ):
     configurar(clinica_a, {*MODULOS_GERAIS, *codigos})
     user = criar_usuario("prof_modulos", clinica_a, Papel.PROFISSIONAL)
@@ -267,17 +267,17 @@ def test_prontuario_comum_nao_exige_modulo_especializado(
         Practitioner.objects.create(name="Profissional fictício", user=user)
     cliente = cliente_de(user)
     assert (
-        cliente.get(reverse("medical_records:new", args=[orcamento.patient_id])).status_code == 200
+        cliente.get(reverse("medical_records:new", args=[estimate.patient_id])).status_code == 200
     )
 
 
 def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
-    clinica_a, orcamento, criar_usuario, cliente_de
+    clinica_a, estimate, criar_usuario, cliente_de
 ):
     configurar(clinica_a, {*MODULOS_GERAIS, "odontologia", "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_sem_prontuario", clinica_a, Papel.RECEPCAO))
     assert (
-        cliente.get(reverse("medical_records:new", args=[orcamento.patient_id])).status_code == 403
+        cliente.get(reverse("medical_records:new", args=[estimate.patient_id])).status_code == 403
     )
 
 
@@ -296,32 +296,32 @@ def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
 
 
 def test_superusuario_usa_odontograma_com_odontologia_desligada(
-    clinica_a, orcamento, criar_usuario, django_user_model, cliente_de
+    clinica_a, estimate, criar_usuario, django_user_model, cliente_de
 ):
     """Decision 115: the system administrator still uses a turned-off specialty, marked as off;
     the team cannot."""
     configurar(clinica_a, {*MODULOS_GERAIS, "medicina"})
     item_dental = {
         "description": "Restauração fictícia",
-        "dentes": "36",
+        "teeth": "36",
         "faces": "O",
-        "quantidade": 1,
-        "valor_unitario": "100",
+        "quantity": 1,
+        "unit_price": "100",
     }
-    adicionar = reverse("estimates:item_add", args=[orcamento.pk])
+    adicionar = reverse("estimates:item_add", args=[estimate.pk])
 
     admin = cliente_de(criar_usuario("admin_odonto", clinica_a, Papel.ADMIN))
     admin.post(adicionar, item_dental)
     with usar_clinica(clinica_a):
-        assert not EstimateItem.objects.filter(dentes="36").exists()
+        assert not EstimateItem.objects.filter(teeth="36").exists()
 
     root = cliente_de(django_user_model.objects.create_superuser("root_odonto"))
-    detalhe = root.get(reverse("estimates:detail", args=[orcamento.pk]))
+    detalhe = root.get(reverse("estimates:detail", args=[estimate.pk]))
     assert detalhe.context["mostrar_dentes"]
     assert "O módulo Odontologia está desligado nesta clínica" in detalhe.content.decode()
     root.post(adicionar, item_dental)
     with usar_clinica(clinica_a):
-        item = EstimateItem.objects.get(dentes="36")
-    root.post(reverse("estimates:item_remove", args=[orcamento.pk, item.pk]))
+        item = EstimateItem.objects.get(teeth="36")
+    root.post(reverse("estimates:item_remove", args=[estimate.pk, item.pk]))
     with usar_clinica(clinica_a):
         assert not EstimateItem.objects.filter(pk=item.pk).exists()

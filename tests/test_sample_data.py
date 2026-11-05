@@ -72,9 +72,9 @@ def test_remover_dados_teste_nao_toca_nos_dados_reais(settings, monkeypatch, cri
         assert list(Patient.objects.values_list("name", flat=True)) == ["Paciente Real"]
         assert not Appointment.objects.exists() and not Recall.objects.exists()
         assert set(Practitioner.objects.values_list("clinic", flat=True)) <= {real.pk}
-    assert not AuditEntry.objects.filter(objeto_descricao__contains="(teste)").exists()
+    assert not AuditEntry.objects.filter(object_repr__contains="(teste)").exists()
     assert AuditEntry.objects.filter(
-        objeto_descricao__startswith="Dados de teste removidos: 1 clínicas"
+        object_repr__startswith="Dados de teste removidos: 1 clínicas"
     ).exists()
 
 

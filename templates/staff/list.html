@@ -18,8 +18,8 @@
       {% for employee in funcionarios %}
       <tr>
         <td><a href="{% url 'staff:employee' employee.pk %}">{{ employee.name }}</a></td>
-        <td>{{ employee.cargo|default:"—" }}</td>
-        <td>{{ employee.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+        <td>{{ employee.job_title|default:"—" }}</td>
+        <td>{{ employee.hired_on|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
         <td class="text-end text-nowrap">{{ employee.salario_atual|currency|default:"—" }}</td>
         <td>{% if employee.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
       </tr>

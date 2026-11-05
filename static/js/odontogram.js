@@ -4,8 +4,8 @@
   "use strict";
   document.querySelectorAll(".odontograma-interativo").forEach((grafico) => {
     const form = grafico.closest("form");
-    const campo = form.querySelector("input[name=dentes]");
-    const quantidade = form.querySelector("input[name=quantidade]");
+    const campo = form.querySelector("input[name=teeth]");
+    const quantidade = form.querySelector("input[name=quantity]");
     grafico.addEventListener("click", (evento) => {
       const dente = evento.target.closest("[data-dente]");
       if (!dente) return;

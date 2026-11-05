@@ -18,10 +18,10 @@
       <div class="card-header">{% translate "Dados" %}</div>
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ employee.cargo|default:"—" }}</dd>
-          {% if documentos_do_pais.funcionario or employee.cpf %}<dt class="col-sm-5">{{ employee.cpf|sigla_documento:"funcionario" }}</dt><dd class="col-sm-7">{{ employee.cpf|document:"funcionario"|default:"—" }}</dd>{% endif %}
-          <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ employee.admissao|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
-          {% if employee.desligamento %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ employee.desligamento|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
+          <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ employee.job_title|default:"—" }}</dd>
+          {% if documentos_do_pais.funcionario or employee.tax_id %}<dt class="col-sm-5">{{ employee.tax_id|sigla_documento:"funcionario" }}</dt><dd class="col-sm-7">{{ employee.tax_id|document:"funcionario"|default:"—" }}</dd>{% endif %}
+          <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ employee.hired_on|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+          {% if employee.left_on %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ employee.left_on|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ employee.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "Salário atual" %}</dt><dd class="col-sm-7">{{ salario_atual|currency|default:"—" }}</dd>
         </dl>
@@ -33,8 +33,8 @@
     <div class="card h-100">
       <div class="card-header">{% translate "Histórico de salários" %}</div>
       <ul class="list-group list-group-flush">
-        {% for salario in salarios %}
-        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salario.desde|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salario.amount|currency }}</strong></li>
+        {% for salary in salarios %}
+        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salary.effective_from|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salary.amount|currency }}</strong></li>
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum salário registrado." %}</li>
         {% endfor %}
@@ -51,10 +51,10 @@
       <tbody>
         {% for folha in folhas %}
         <tr>
-          <td><a href="{% url 'staff:payroll' %}?mes={{ folha.competencia|date:'Y-m' }}">{{ folha.competencia|date:"m/Y" }}</a></td>
-          <td class="text-end text-nowrap">{{ folha.salario|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.horas_extras }} h · {{ folha.valor_horas_extras|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.faltas }} · − {{ folha.desconto_faltas|currency }}</td>
+          <td><a href="{% url 'staff:payroll' %}?mes={{ folha.period|date:'Y-m' }}">{{ folha.period|date:"m/Y" }}</a></td>
+          <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
+          <td class="text-end text-nowrap">{{ folha.overtime_hours }} h · {{ folha.valor_horas_extras|currency }}</td>
+          <td class="text-end text-nowrap">{{ folha.absences }} · − {{ folha.desconto_faltas|currency }}</td>
           <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
           <td>{% if folha.lancada %}<a href="{% url 'finance:entry' folha.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
         </tr>

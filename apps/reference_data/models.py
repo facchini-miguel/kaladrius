@@ -12,18 +12,18 @@ from apps.core.ordering import ALFABETICA
 
 class State(models.Model):
     code = models.PositiveSmallIntegerField(_("código IBGE"), primary_key=True, db_column="codigo")
-    sigla = models.CharField(_("sigla"), max_length=2, unique=True)
+    abbreviation = models.CharField(_("sigla"), max_length=2, unique=True, db_column="sigla")
     name = models.CharField(_("nome"), max_length=50, db_column="nome")
-    regiao = models.CharField(_("região"), max_length=20)
+    region = models.CharField(_("região"), max_length=20, db_column="regiao")
 
     class Meta:
         db_table = "referencias_uf"
         verbose_name = _("UF")
         verbose_name_plural = _("UFs")
-        ordering = ["sigla"]
+        ordering = ["abbreviation"]
 
     def __str__(self):
-        return self.sigla
+        return self.abbreviation
 
 
 class City(models.Model):
@@ -45,7 +45,7 @@ class City(models.Model):
         indexes = [models.Index(fields=["state", "name"], name="cidade_uf_nome")]
 
     def __str__(self):
-        return f"{self.name} - {self.state.sigla}"
+        return f"{self.name} - {self.state.abbreviation}"
 
 
 class Bank(models.Model):
@@ -54,7 +54,7 @@ class Bank(models.Model):
         _("código"), null=True, blank=True, unique=True, db_column="codigo"
     )
     name = models.CharField(_("nome"), max_length=200, db_collation=ALFABETICA, db_column="nome")
-    nome_curto = models.CharField(_("nome curto"), max_length=100)
+    short_name = models.CharField(_("nome curto"), max_length=100, db_column="nome_curto")
 
     class Meta:
         db_table = "referencias_banco"
@@ -64,21 +64,21 @@ class Bank(models.Model):
 
     def __str__(self):
         if self.code is None:
-            return self.nome_curto
-        return f"{self.code:03d} - {self.nome_curto}"
+            return self.short_name
+        return f"{self.code:03d} - {self.short_name}"
 
 
 class MaritalStatus(models.Model):
     name = models.CharField(
         _("nome"), max_length=30, unique=True, db_collation=ALFABETICA, db_column="nome"
     )
-    ordem = models.PositiveSmallIntegerField(_("ordem"), default=0)
+    sort_order = models.PositiveSmallIntegerField(_("ordem"), default=0, db_column="ordem")
 
     class Meta:
         db_table = "referencias_estadocivil"
         verbose_name = _("estado civil")
         verbose_name_plural = _("estados civis")
-        ordering = ["ordem", "name"]
+        ordering = ["sort_order", "name"]
 
     def __str__(self):
         return self.name

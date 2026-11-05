@@ -41,11 +41,11 @@ DINHEIRO = DecimalField(max_digits=12, decimal_places=2)
 FAIXAS_DE_ATRASO = [30, 60, 90]
 
 
-def dividir(total, quantidade):
+def dividir(total, quantity):
     """Equal installments; the leftover cents go to the first one."""
-    base = (total / quantidade).quantize(CENTAVO, rounding=ROUND_DOWN)
-    valores = [base] * quantidade
-    valores[0] += total - base * quantidade
+    base = (total / quantity).quantize(CENTAVO, rounding=ROUND_DOWN)
+    valores = [base] * quantity
+    valores[0] += total - base * quantity
     return valores
 
 

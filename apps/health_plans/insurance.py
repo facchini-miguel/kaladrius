@@ -47,28 +47,28 @@ class Seguros:
     registration: Codigo | None = None  # the insurer's registry
     number: str = ""  # local name of the card number
     group: str = ""  # local name of the group or policy number, where cards have one
-    beneficiario: str = ""  # local name of the patient's code on a family card
-    procedimento: Codigo | None = None  # the procedure coding
+    member_code: str = ""  # local name of the patient's code on a family card
+    procedure: Codigo | None = None  # the procedure coding
 
 
 SEGUROS = {
     "BR": Seguros(
         registration=Codigo("ANS", r"\d{6}", "123456"),
-        procedimento=Codigo("TUSS", r"\d{8}", "81000065"),
+        procedure=Codigo("TUSS", r"\d{8}", "81000065"),
     ),
     "MX": Seguros("aseguradoras de gastos médicos, planes dentales", number="número de póliza"),
     "AR": Seguros(
         "obras sociales, prepagas, PAMI",
         registration=Codigo("RNOS"),
         number="número de afiliado",
-        procedimento=Codigo("nomenclador"),
+        procedure=Codigo("nomenclador"),
     ),
-    "CL": Seguros("Fonasa, Isapres, seguros dentales", procedimento=Codigo("Fonasa")),
+    "CL": Seguros("Fonasa, Isapres, seguros dentales", procedure=Codigo("Fonasa")),
     "CO": Seguros(
         "EPS, medicina prepagada, pólizas de salud",
-        procedimento=Codigo("CUPS", r"[0-9A-Z]{6}", "232101"),
+        procedure=Codigo("CUPS", r"[0-9A-Z]{6}", "232101"),
     ),
-    "PE": Seguros("EPS, aseguradoras, SIS, EsSalud", procedimento=Codigo("CPMS")),
+    "PE": Seguros("EPS, aseguradoras, SIS, EsSalud", procedure=Codigo("CPMS")),
     "UY": Seguros("mutualistas (IAMC), seguros privados"),
     "PY": Seguros("IPS, seguros privados, prepagas"),
     "BO": Seguros("cajas de salud, seguros privados"),
@@ -78,27 +78,27 @@ SEGUROS = {
         registration=Codigo("Payer ID", r"[0-9A-Z]{5,10}", "12345"),
         number="Member ID",
         group="Group number",
-        procedimento=Codigo("CDT", r"D\d{4}", "D1110"),
+        procedure=Codigo("CDT", r"D\d{4}", "D1110"),
     ),
     "GB": Seguros("NHS, dental plans, private insurance", number="membership number"),
     "CA": Seguros(
         "insurance carriers, Canadian Dental Care Plan (CDCP)",
         number="certificate / ID number",
         group="group / policy number",
-        procedimento=Codigo("USC&LS", r"\d{5}", "11101"),
+        procedure=Codigo("USC&LS", r"\d{5}", "11101"),
     ),
     "AU": Seguros(
         "private health funds, Child Dental Benefits Schedule (Medicare)",
         number="membership number",
-        beneficiario="patient number on the card",
-        procedimento=Codigo("ADA item number", r"\d{3}", "114"),
+        member_code="patient number on the card",
+        procedure=Codigo("ADA item number", r"\d{3}", "114"),
     ),
     "ZA": Seguros(
         "medical aid schemes",
         registration=Codigo("CMS"),
         number="membership number",
-        beneficiario="dependant code",
-        procedimento=Codigo("tariff code", r"\d{4}", "8101"),
+        member_code="dependant code",
+        procedure=Codigo("tariff code", r"\d{4}", "8101"),
     ),
 }
 
@@ -120,5 +120,5 @@ def rotulo_do_registro(country=None):
 
 def rotulo_do_codigo(country=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
-    procedimento = do_pais(country).procedimento
-    return com_nome_local(_("Código"), procedimento.name if procedimento else "")
+    procedure = do_pais(country).procedure
+    return com_nome_local(_("Código"), procedure.name if procedure else "")

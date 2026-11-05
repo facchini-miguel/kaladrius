@@ -190,8 +190,8 @@ class _Anonimizador:
         carteirinhas = list(MemberCard.objects.filter(clinic=self.clinic))
         for carteirinha in carteirinhas:
             carteirinha.number = f"{carteirinha.pk:012d}"
-            carteirinha.titular = self._nome(self.sorte.choice("FM")) if carteirinha.titular else ""
-        MemberCard.objects.bulk_update(carteirinhas, ["number", "titular"], batch_size=500)
+            carteirinha.holder = self._nome(self.sorte.choice("FM")) if carteirinha.holder else ""
+        MemberCard.objects.bulk_update(carteirinhas, ["number", "holder"], batch_size=500)
 
     def rechamadas(self):
         rechamadas = list(Recall.objects.filter(clinic=self.clinic))
@@ -218,11 +218,11 @@ class _Anonimizador:
         funcionarios = list(Employee.objects.filter(clinic=self.clinic))
         for employee in funcionarios:
             employee.name = self._nome(self.sorte.choice("FM"))
-            employee.cpf = ""
+            employee.tax_id = ""
             employee.phone = _mesmo_tamanho(employee.phone, fake)
             employee.notes = ""
         Employee.objects.bulk_update(
-            funcionarios, ["name", "cpf", "phone", "notes"], batch_size=500
+            funcionarios, ["name", "tax_id", "phone", "notes"], batch_size=500
         )
         Payroll.objects.filter(clinic=self.clinic).update(note="")
         for folha in (
@@ -290,10 +290,10 @@ class _Anonimizador:
                 Supplier,
             )
         ]
-        apagados, _ = AuditEntry.objects.filter(clinic=self.clinic, modelo__in=modelos).delete()
+        apagados, _ = AuditEntry.objects.filter(clinic=self.clinic, model_name__in=modelos).delete()
         # The import summary has no model but belongs to the same history.
         resumo, _ = AuditEntry.objects.filter(
-            clinic=self.clinic, objeto_descricao__startswith="Importação do sistema antigo"
+            clinic=self.clinic, object_repr__startswith="Importação do sistema antigo"
         ).delete()
         self.resultado.registros_apagados = apagados + resumo
 

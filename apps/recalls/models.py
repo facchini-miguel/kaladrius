@@ -22,7 +22,7 @@ class Recall(ModeloDaClinica):
         help_text=_("Ex.: revisão de 6 meses."),
         db_column="descricao",
     )
-    concluida = models.BooleanField(_("concluída"), default=False)
+    done = models.BooleanField(_("concluída"), default=False, db_column="concluida")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

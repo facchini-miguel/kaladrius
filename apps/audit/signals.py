@@ -82,10 +82,10 @@ IGNORADOS = {
 }
 
 
-def _campos(modelo):
+def _campos(model):
     return [
         campo
-        for campo in modelo._meta.concrete_fields
+        for campo in model._meta.concrete_fields
         if not campo.primary_key and campo.attname not in IGNORADOS and campo.name not in IGNORADOS
     ]
 
@@ -116,12 +116,12 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
     depois = _valores(instance)
     antes = getattr(instance, "_auditoria_antes", None)
     if created or antes is None:
-        alteracoes = {
+        changes = {
             campo: [None, value] for campo, value in depois.items() if value not in (None, "")
         }
-        registrar(Acao.CRIAR, instance, alteracoes=alteracoes)
+        registrar(Acao.CRIAR, instance, changes=changes)
         return
-    alteracoes = {
+    changes = {
         campo: [antes.get(campo), value]
         for campo, value in depois.items()
         if antes.get(campo) != value
@@ -130,9 +130,9 @@ def depois_de_salvar(sender, instance, created, raw=False, update_fields=None, *
         None,
         getattr(instance, "password", None),
     ):
-        alteracoes["senha"] = ["(oculta)", "(alterada)"]  # the hash itself is never stored
-    if alteracoes:
-        registrar(Acao.ALTERAR, instance, alteracoes=alteracoes)
+        changes["senha"] = ["(oculta)", "(alterada)"]  # the hash itself is never stored
+    if changes:
+        registrar(Acao.ALTERAR, instance, changes=changes)
 
 
 def depois_de_excluir(sender, instance, **kwargs):
@@ -141,14 +141,14 @@ def depois_de_excluir(sender, instance, **kwargs):
         for campo, value in _valores(instance).items()
         if value not in (None, "")
     }
-    registrar(Acao.EXCLUIR, instance, alteracoes=valores)
+    registrar(Acao.EXCLUIR, instance, changes=valores)
 
 
-for modelo in AUDITADOS:
-    uid = f"auditoria_{modelo._meta.label_lower}"
-    pre_save.connect(antes_de_salvar, sender=modelo, dispatch_uid=f"{uid}_pre")
-    post_save.connect(depois_de_salvar, sender=modelo, dispatch_uid=f"{uid}_post")
-    post_delete.connect(depois_de_excluir, sender=modelo, dispatch_uid=f"{uid}_delete")
+for model in AUDITADOS:
+    uid = f"auditoria_{model._meta.label_lower}"
+    pre_save.connect(antes_de_salvar, sender=model, dispatch_uid=f"{uid}_pre")
+    post_save.connect(depois_de_salvar, sender=model, dispatch_uid=f"{uid}_post")
+    post_delete.connect(depois_de_excluir, sender=model, dispatch_uid=f"{uid}_delete")
 
 
 def _entrou(sender, request, user, **kwargs):

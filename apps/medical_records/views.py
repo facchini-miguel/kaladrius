@@ -50,14 +50,14 @@ def exige_profissional(view):
 
 def _auditar(acao, visit, campos):
     if campos:
-        registrar(acao, visit, alteracoes={campo: [SIGILO, SIGILO] for campo in campos})
+        registrar(acao, visit, changes={campo: [SIGILO, SIGILO] for campo in campos})
 
 
 def _finalizar(request, visit):
     visit.finalized_at = timezone.now()
     visit.finalized_by = request.user
     visit.save(update_fields=["finalized_at", "finalized_by", "updated_at"])
-    registrar(Acao.ALTERAR, visit, alteracoes={"finalizado": [None, "sim"]})
+    registrar(Acao.ALTERAR, visit, changes={"finalizado": [None, "sim"]})
     messages.success(
         request, _("Atendimento finalizado. A partir de agora, correções são feitas por adendo.")
     )
@@ -204,7 +204,7 @@ def atestado_novo(request, practitioner, pk):
         registrar(
             Acao.CRIAR,
             atestado,
-            alteracoes={
+            changes={
                 "kind": [None, atestado.kind],
                 "days": [None, atestado.days],
                 **({"note": [None, SIGILO]} if atestado.note else {}),
@@ -229,7 +229,7 @@ def receita_nova(request, practitioner, pk):
         receita.practitioner = visit.practitioner
         receita.created_by = request.user
         receita.save()
-        registrar(Acao.CRIAR, receita, alteracoes={"medications": [None, SIGILO]})
+        registrar(Acao.CRIAR, receita, changes={"medications": [None, SIGILO]})
         messages.success(request, _("Receita emitida."))
         return redirect("medical_records:prescription", pk=receita.pk)
     return render(
@@ -273,7 +273,7 @@ def adendo(request, practitioner, pk):
         adendo.practitioner = practitioner or visit.practitioner
         adendo.created_by = request.user
         adendo.save()
-        registrar(Acao.CRIAR, adendo, alteracoes={"text": [None, SIGILO]})
+        registrar(Acao.CRIAR, adendo, changes={"text": [None, SIGILO]})
         messages.success(request, _("Adendo incluído."))
     else:
         messages.error(request, _("Escreva o adendo."))
@@ -293,7 +293,7 @@ def pedido_de_exames_novo(request, practitioner, pk):
         registrar(
             Acao.CRIAR,
             pedido,
-            alteracoes={
+            changes={
                 "exams": [None, SIGILO],
                 **({"indication": [None, SIGILO]} if pedido.indication else {}),
             },
@@ -344,7 +344,7 @@ def anexo_enviar(request, practitioner, pk):
             Acao.CRIAR,
             anexo,
             description=f"{visit} – {_('anexo')}",
-            alteracoes={"file": [None, SIGILO]},
+            changes={"file": [None, SIGILO]},
         )
         messages.success(request, _("Anexo incluído."))
     else:
@@ -378,7 +378,7 @@ def anexo_remover(request, practitioner, pk):
         Acao.EXCLUIR,
         anexo,
         description=f"{visit} – {_('anexo')}",
-        alteracoes={"file": [SIGILO, None]},
+        changes={"file": [SIGILO, None]},
     )
     anexo.delete()
     messages.success(request, _("Anexo removido."))

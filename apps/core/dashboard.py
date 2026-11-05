@@ -90,7 +90,7 @@ def _agenda(request, hoje):
 
 def _rechamadas(hoje):
     pendentes = Recall.objects.filter(
-        concluida=False, date__lte=hoje, patient__archived=False
+        done=False, date__lte=hoje, patient__archived=False
     ).select_related("patient")
     return {
         "lista": list(pendentes.order_by("date", "patient__name")[:LIMITE]),

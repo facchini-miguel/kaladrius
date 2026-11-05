@@ -280,10 +280,10 @@
         <a class="small" href="{% url 'estimates:list' %}">{% translate "Ver todos" %}</a>
       </div>
       <ul class="list-group list-group-flush">
-        {% for orcamento in painel.orcamentos %}
+        {% for estimate in painel.orcamentos %}
         <li class="list-group-item small d-flex justify-content-between gap-2">
-          <a href="{% url 'estimates:detail' orcamento.pk %}">{{ orcamento.patient.name }}</a>
-          <span class="text-nowrap">{{ orcamento.total|currency }} · {% if orcamento.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ orcamento.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
+          <a href="{% url 'estimates:detail' estimate.pk %}">{{ estimate.patient.name }}</a>
+          <span class="text-nowrap">{{ estimate.total|currency }} · {% if estimate.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ estimate.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>

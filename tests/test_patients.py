@@ -157,7 +157,7 @@ def test_validacoes_do_formulario(admin_a, dados, campo, mensagem):
 
 
 def test_cidade_precisa_ser_da_uf_escolhida(admin_a):
-    sao_paulo = City.objects.get(name="São Paulo", state__sigla="SP")
+    sao_paulo = City.objects.get(name="São Paulo", state__abbreviation="SP")
     resposta = admin_a.post(reverse("patients:new"), dados_formulario(state=SC, city=sao_paulo.pk))
     assert resposta.status_code == 200
     assert "city" in resposta.context["form"].errors

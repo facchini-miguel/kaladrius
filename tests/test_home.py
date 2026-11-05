@@ -73,16 +73,14 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
         agendar(dia(4), 9, status="faltou")
         agendar(dia(27, 2), 9, status="faltou")  # last month: not in this month's rate
 
-        for date, concluida, patient in [
+        for date, done, patient in [
             (HOJE, False, maria),
             (dia(1), False, maria),
             (dia(2), True, maria),
             (HOJE, False, archived),
             (dia(10), False, maria),
         ]:
-            Recall.objects.create(
-                patient=patient, date=date, description="Revisão", concluida=concluida
-            )
+            Recall.objects.create(patient=patient, date=date, description="Revisão", done=done)
 
         for patient, valid_until, status in [
             (maria, dia(8), Estimate.Situacao.ABERTO),
