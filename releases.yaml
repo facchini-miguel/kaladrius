@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.58.0
+  data: 2026-11-05
+  titulo:
+    pt-br: Funções e variáveis em inglês
+    en: Functions and variables in English
+    es: Funciones y variables en inglés
+  itens:
+    - tipo: melhoria
+      modulo: Geral
+      publico: [equipe]
+      texto:
+        pt-br: >
+          Manutenção interna: o código do sistema foi reorganizado. Nada muda no uso, nas telas
+          nem nos dados.
+        en: >
+          Internal maintenance: the system's code was reorganized. Nothing changes in use, on
+          the screens or in the data.
+        es: >
+          Mantenimiento interno: el código del sistema se reorganizó. Nada cambia en el uso, en
+          las pantallas ni en los datos.
+    - tipo: melhoria
+      modulo: Sistema
+      publico: []
+      texto:
+        pt-br: >
+          As funções, classes, constantes e variáveis do código têm nomes em inglês (decisões 172
+          a 178), sem mudar o banco de dados nem as telas. A API (`/api/v1/releases`,
+          `/api/v1/version`, `/api/v1/health`) responde como antes.
+        en: >
+          The code's functions, classes, constants and variables have English names (decisions
+          172 to 178), with no change to the database or the screens. The API
+          (`/api/v1/releases`, `/api/v1/version`, `/api/v1/health`) answers as before.
+        es: >
+          Las funciones, clases, constantes y variables del código tienen nombres en inglés
+          (decisiones 172 a 178), sin cambiar la base de datos ni las pantallas. La API
+          (`/api/v1/releases`, `/api/v1/version`, `/api/v1/health`) responde como antes.
+
 - versao: 0.57.0
   data: 2026-11-04
   titulo:
