@@ -11,6 +11,7 @@ Os nomes do código estão passando do português para o inglês (decisões 155 
 - **Só mudam identificadores**, lidos como tokens do Python e variáveis de template, nunca como texto: os textos das telas, os `_()` e os `{% translate %}` ficam como estão.
 - **O banco mantém seus nomes**: o modelo mantém a tabela (`Meta.db_table`), o campo a coluna (`db_column`). As migrações não rodam SQL, e a versão anterior (a volta automática) continua funcionando.
 - **Uma renomeação nunca colide**: um arquivo que já usa o nome novo para outra coisa (uma variável `date` ao lado de um campo `data`, o `type` do Python) é feito à mão.
+- **Um campo mantém o rótulo em português**: sem `verbose_name` o Django monta o rótulo a partir do nome, então um campo renomeado para inglês mostraria "created by" nas telas e na auditoria. Um campo renomeado diz o próprio rótulo (`_("criado por")`); senão um teste falha (decisão 170).
 - **Os testes vigiam os templates**: uma variável que um template procura e não acha faz a rodada falhar, a menos que esteja em `tests/missing_template_variables.txt` (decisão 159). Uma renomeação mantém essa lista igual, com os nomes novos.
 
 ## Modelos (feito)

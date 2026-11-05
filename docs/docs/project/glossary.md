@@ -11,6 +11,7 @@ The code's names are moving from Portuguese to English (decisions 155 to 159); t
 - **Only identifiers change**, read as Python tokens and template variables, never as text: the screens' texts, `_()` and `{% translate %}` stay as they are.
 - **The database keeps its names**: a model keeps its table (`Meta.db_table`), a field its column (`db_column`). The migrations run no SQL, and the previous version (the automatic rollback) still works.
 - **A rename never collides**: a file that already uses the new name for something else (a variable `date` beside a field `data`, `type` the built-in) is done by hand.
+- **A field keeps its Portuguese label**: without `verbose_name` Django builds the label from the name, so a field renamed to English would show "created by" on the screens and in the audit. A renamed field states its label (`_("criado por")`); a test fails the run otherwise (decision 170).
 - **The tests watch the templates**: a variable a template looks up and does not find fails the run, unless it is in `tests/missing_template_variables.txt` (decision 159). A rename keeps that list the same, with the new names.
 
 ## Models (done)

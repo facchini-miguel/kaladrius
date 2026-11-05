@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-03 21:55-0300\n"
+"POT-Creation-Date: 2026-11-04 21:54-0300\n"
 "PO-Revision-Date: 2026-10-27 12:00-0300\n"
 "Last-Translator: Kaladrius\n"
 "Language-Team: Español\n"
@@ -1836,6 +1836,9 @@ msgstr "conducta y plan"
 msgid "finalizado em"
 msgstr "finalizada el"
 
+msgid "finalizado por"
+msgstr "finalizado por"
+
 msgid "atendimento"
 msgstr "consulta"
 
@@ -1906,6 +1909,12 @@ msgstr "solicitud de exámenes"
 
 msgid "pedidos de exames"
 msgstr "solicitudes de exámenes"
+
+msgid "tamanho"
+msgstr "tamaño"
+
+msgid "conteúdo"
+msgstr "contenido"
 
 msgid "anexo"
 msgstr "adjunto"
