@@ -16,11 +16,11 @@ class ExigirDuasEtapasMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if self._pendente(request):
+        if self._pending(request):
             return redirect("account:two_factor")
         return self.get_response(request)
 
-    def _pendente(self, request):
+    def _pending(self, request):
         path = request.path_info
         if path.startswith((settings.STATIC_URL, "/admin/", "/api/")):
             return False

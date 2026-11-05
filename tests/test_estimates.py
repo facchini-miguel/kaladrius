@@ -153,9 +153,9 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     estimate.refresh_from_db()
     entry = estimate.entry
     assert response.url == reverse("finance:entry", args=[entry.pk])
-    assert estimate.status == Estimate.Situacao.APROVADO
+    assert estimate.status == Estimate.Status.APROVADO
     assert (entry.kind, entry.total_amount) == (
-        Entry.Tipo.RECEBER,
+        Entry.Kind.RECEIVABLE,
         Decimal("1000.00"),
     )
     with use_clinic(cenario["clinic"]):
@@ -167,7 +167,7 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
         assert estimate.itens.count() == 1
     assert reception.post(reverse("estimates:decline", args=[estimate.pk])).status_code == 302
     estimate.refresh_from_db()
-    assert estimate.status == Estimate.Situacao.APROVADO
+    assert estimate.status == Estimate.Status.APROVADO
 
 
 def test_profissional_nao_aprova(cenario):
@@ -185,7 +185,7 @@ def test_recusar_e_imprimir(cenario):
     assert "ORÇAMENTO" in page and "Joana Sorriso" in page and "selecionado" in page
     cliente.post(reverse("estimates:decline", args=[estimate.pk]))
     estimate.refresh_from_db()
-    assert estimate.status == Estimate.Situacao.RECUSADO
+    assert estimate.status == Estimate.Status.RECUSADO
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with use_clinic(cenario["clinic"]), pytest.raises(ValidationError):
         services.recusar(estimate, user=None)

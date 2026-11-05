@@ -125,9 +125,9 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
             (Category.objects.get(name="Comissões"), "300"),
             (avulsa, "50"),
         ):
-            entry = services.criar_lancamento(
+            entry = services.create_entry(
                 clinic=clinica_a,
-                kind=Entry.Tipo.PAGAR,
+                kind=Entry.Kind.PAYABLE,
                 payer="Fictício",
                 description="Pagamento",
                 category=category,
@@ -137,15 +137,15 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
                 user=None,
             )
             installment = entry.parcelas.get()
-            services.receber(
+            services.receive(
                 installment,
                 user=None,
                 amount=installment.amount,
                 method="pix",
                 account=cash_register,
             )
-    relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
-    assert [(n, name, str(v)) for n, name, v in relatorio["despesas_por_grupo"]] == [
+    report = admin.get(reverse("finance:reports")).context["relatorio"]
+    assert [(n, name, str(v)) for n, name, v in report["despesas_por_grupo"]] == [
         (0, "2 Pessoal", "1300.00"),
         (1, "2.1 Recepção", "1000.00"),
         (0, "Sem grupo", "50.00"),

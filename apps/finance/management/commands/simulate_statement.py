@@ -53,18 +53,18 @@ class Command(BaseCommand):
             for p in Payment.objects.filter(
                 account=alvo_conta, reversed=False, date__range=(start, today)
             ).select_related("installment__entry"):
-                entrada = p.installment.entry.kind == Entry.Tipo.RECEBER
+                is_incoming = p.installment.entry.kind == Entry.Kind.RECEIVABLE
                 if sorteio.random() < 0.15:
-                    fora += p.amount if entrada else -p.amount
+                    fora += p.amount if is_incoming else -p.amount
                     continue
                 date = min(p.date + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), today)
-                description = "PIX RECEBIDO" if entrada else "PAGAMENTO"
-                rows.append((date, p.amount if entrada else -p.amount, description, f"P{p.pk}"))
+                description = "PIX RECEBIDO" if is_incoming else "PAGAMENTO"
+                rows.append((date, p.amount if is_incoming else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
                 date = start + datetime.timedelta(days=sorteio.randint(0, days))
                 rows.append((date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}"))
             rows.sort()
-            balance = dict(services.saldos_das_contas(until=today)).get(alvo_conta)
+            balance = dict(services.account_balances(until=today)).get(alvo_conta)
         # The bank balance: what the system has plus the extras minus what is not there yet.
         balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
         self.stdout.write(self._ofx(rows, start, today, balance))

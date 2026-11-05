@@ -6,7 +6,7 @@
 {% block content %}
 <h1 class="h3 mb-1">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
-  {{ installment.entry.nome_pessoa }} · {{ installment.entry.description }} ·
+  {{ installment.entry.payer_name }} · {{ installment.entry.description }} ·
   {% blocktranslate with numero=installment.number total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
   {% blocktranslate with vencimento=installment.due_date|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
 </p>

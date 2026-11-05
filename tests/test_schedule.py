@@ -484,7 +484,7 @@ def test_simular_movimento_respeita_horarios_ocupados(cenario):
         assert not Recall.objects.filter(patient__archived=True).exists()
         # Cheques are not used anymore, not even in made-up data.
         assert Payment.objects.exists()
-        assert not Payment.objects.filter(method=Payment.Forma.CHEQUE).exists()
+        assert not Payment.objects.filter(method=Payment.Method.CHEQUE).exists()
 
 
 def test_simular_so_rechamadas(cenario):

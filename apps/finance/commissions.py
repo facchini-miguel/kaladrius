@@ -19,25 +19,25 @@ from apps.practitioners.models import Practitioner
 from . import services
 from .models import ZERO, Commission, Entry, Payment
 
-CENTAVO = Decimal("0.01")
+CENT = Decimal("0.01")
 
 
-def percentual_de(amount, percentage):
-    return (amount * percentage / 100).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+def percentage_for(amount, percentage):
+    return (amount * percentage / 100).quantize(CENT, rounding=ROUND_HALF_UP)
 
 
 def _receipts(practitioner):
     return Payment.objects.filter(
-        installment__entry__kind=Entry.Tipo.RECEBER,
+        installment__entry__kind=Entry.Kind.RECEIVABLE,
         installment__entry__practitioner=practitioner,
     ).select_related("installment__entry__patient")
 
 
-def _creditos(practitioner, until):
+def _credits(practitioner, until):
     return _receipts(practitioner).filter(reversed=False, commission__isnull=True, date__lte=until)
 
 
-def _debitos(practitioner):
+def _debits(practitioner):
     """Receipts already commissioned and then reversed, not discounted yet (a few)."""
     debitos = list(
         _receipts(practitioner)
@@ -46,25 +46,25 @@ def _debitos(practitioner):
         .order_by("date", "pk")
     )
     for debito in debitos:
-        debito.comissao_devolvida = percentual_de(debito.amount, debito.commission.percentage)
+        debito.comissao_devolvida = percentage_for(debito.amount, debito.commission.percentage)
     return debitos
 
 
-def pendente(practitioner, until):
+def pending(practitioner, until):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
-    creditos = list(_creditos(practitioner, until).order_by("date", "pk"))
-    debitos = _debitos(practitioner)
+    creditos = list(_credits(practitioner, until).order_by("date", "pk"))
+    debitos = _debits(practitioner)
     received_amount = sum((p.amount for p in creditos), start=ZERO)
-    bruta = percentual_de(received_amount, practitioner.commission_percentage)
+    gross = percentage_for(received_amount, practitioner.commission_percentage)
     reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
     return {
         "practitioner": practitioner,
         "creditos": creditos,
         "debitos": debitos,
         "received_amount": received_amount,
-        "bruta": bruta,
+        "bruta": gross,
         "reversal_deduction": reversal_deduction,
-        "amount": bruta - reversal_deduction,
+        "amount": gross - reversal_deduction,
     }
 
 
@@ -76,38 +76,38 @@ def summary(until):
     """
     rows = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
-        totais = _creditos(practitioner, until).aggregate(
+        totais = _credits(practitioner, until).aggregate(
             received_amount=Sum("amount"), quantos=Count("pk")
         )
-        debitos = _debitos(practitioner)
+        debitos = _debits(practitioner)
         if not (practitioner.commission_percentage or totais["quantos"] or debitos):
             continue
         received_amount = totais["received_amount"] or ZERO
-        bruta = percentual_de(received_amount, practitioner.commission_percentage)
+        gross = percentage_for(received_amount, practitioner.commission_percentage)
         reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
         rows.append(
             {
                 "practitioner": practitioner,
                 "received_amount": received_amount,
-                "bruta": bruta,
+                "bruta": gross,
                 "reversal_deduction": reversal_deduction,
-                "amount": bruta - reversal_deduction,
+                "amount": gross - reversal_deduction,
             }
         )
     return rows
 
 
 @transaction.atomic
-def pagar(practitioner, *, until, due_date, category, user):
+def pay(practitioner, *, until, due_date, category, user):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
-    calculo = pendente(practitioner, until)
+    calculo = pending(practitioner, until)
     if calculo["amount"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
-    entry = services.criar_lancamento(
+    entry = services.create_entry(
         clinic=practitioner.clinic,
-        kind=Entry.Tipo.PAGAR,
+        kind=Entry.Kind.PAYABLE,
         payer=practitioner.name,
         practitioner=practitioner,
         description=_("Comissão de %(nome)s até %(data)s")
@@ -139,7 +139,7 @@ def pagar(practitioner, *, until, due_date, category, user):
     return commission
 
 
-def liberar(commission):
+def release(commission):
     """Undo a commission whose payable was cancelled: its receipts become pending again.
 
     Refused while a later commission deducted the reversal of one of its receipts: that

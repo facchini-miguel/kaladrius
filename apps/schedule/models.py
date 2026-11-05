@@ -80,7 +80,7 @@ class TsTzRange(models.Func):
 class Appointment(ClinicModel):
     """An appointment in a practitioner's schedule."""
 
-    class Situacao(models.TextChoices):
+    class Status(models.TextChoices):
         """Whether the patient came (0.24.0). Only appointments with a patient are marked."""
 
         AGENDADO = "agendado", _("Agendado")
@@ -118,8 +118,8 @@ class Appointment(ClinicModel):
     status = models.CharField(
         _("situação"),
         max_length=10,
-        choices=Situacao.choices,
-        default=Situacao.AGENDADO,
+        choices=Status.choices,
+        default=Status.AGENDADO,
         db_column="situacao",
     )
     # Appointments created together by "repeat N weeks" share the same series id.
@@ -175,7 +175,7 @@ class Appointment(ClinicModel):
 
     @property
     def desmarcado(self):
-        return self.status == self.Situacao.DESMARCOU
+        return self.status == self.Status.DESMARCOU
 
     @property
     def presenca_marcavel(self):

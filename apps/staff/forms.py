@@ -9,7 +9,7 @@ from apps.finance.models import Category
 
 from .models import Employee, Payroll
 
-DATA = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
+DATE_INPUT = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
 def _dinheiro(label, obrigatorio):
@@ -35,7 +35,9 @@ class FuncionarioForm(BootstrapForm, forms.ModelForm):
         widget=forms.TextInput({"inputmode": "tel"}),
     )
     salary = _dinheiro(_("Salário"), obrigatorio=False)
-    salario_desde = forms.DateField(label=_("Salário a partir de"), widget=DATA, required=False)
+    salario_desde = forms.DateField(
+        label=_("Salário a partir de"), widget=DATE_INPUT, required=False
+    )
 
     class Meta:
         model = Employee
@@ -50,8 +52,8 @@ class FuncionarioForm(BootstrapForm, forms.ModelForm):
             "active",
         ]
         widgets = {
-            "hired_on": DATA,
-            "left_on": DATA,
+            "hired_on": DATE_INPUT,
+            "left_on": DATE_INPUT,
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -129,10 +131,10 @@ class FolhaForm(BootstrapForm, forms.ModelForm):
 
 class LancarForm(BootstrapForm, forms.Form):
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
-    due_date = forms.DateField(label=_("Vencimento"), widget=DATA)
+    due_date = forms.DateField(label=_("Vencimento"), widget=DATE_INPUT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        despesas = Category.objects.filter(kind=Category.Tipo.DESPESA, active=True)
+        despesas = Category.objects.filter(kind=Category.Kind.EXPENSE, active=True)
         self.fields["category"].queryset = despesas
         self.fields["category"].initial = despesas.filter(name="Salários e encargos").first()

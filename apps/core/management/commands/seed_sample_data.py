@@ -161,7 +161,7 @@ class Command(BaseCommand):
             celular = f"489{fake.numerify('########')}"
             patient = Patient(
                 clinic=clinic,
-                kind=Patient.Tipo.JURIDICA if juridica else Patient.Tipo.FISICA,
+                kind=Patient.Kind.COMPANY if juridica else Patient.Kind.INDIVIDUAL,
                 name=name,
                 tax_id=document,
                 mobile_phone=celular,
@@ -229,7 +229,7 @@ class Command(BaseCommand):
         if RelatedPerson.objects.filter(clinic=clinic).exists():
             return
         pacientes = list(
-            Patient.objects.filter(clinic=clinic, kind=Patient.Tipo.FISICA).order_by("pk")[:12]
+            Patient.objects.filter(clinic=clinic, kind=Patient.Kind.INDIVIDUAL).order_by("pk")[:12]
         )
         vinculos = RelatedPerson.Relationship
         for i, vinculo in zip(

@@ -48,7 +48,7 @@ def conflitos(practitioner, intervalos, ignorar=None):
     for start, end in intervalos:
         sobreposicao |= Q(start__lt=end, end__gt=start)
     existentes = Appointment.objects.filter(sobreposicao, practitioner=practitioner).exclude(
-        status=Appointment.Situacao.DESMARCOU
+        status=Appointment.Status.DESMARCOU
     )
     if ignorar is not None:
         existentes = existentes.exclude(pk=ignorar)
@@ -87,17 +87,17 @@ def marcar(appointment, status):
     Came or missed only from the day of the appointment on. Leaving "cancelled" takes the
     slot back, so it is refused if another appointment took it meanwhile.
     """
-    if status not in Appointment.Situacao.values:
+    if status not in Appointment.Status.values:
         raise ValidationError(_("Situação inválida."))
     if appointment.patient_id is None:
         raise ValidationError(_("Só agendamentos com paciente têm situação."))
-    presenca = (Appointment.Situacao.COMPARECEU, Appointment.Situacao.FALTOU)
+    presenca = (Appointment.Status.COMPARECEU, Appointment.Status.FALTOU)
     if status in presenca and not appointment.presenca_marcavel:
         raise ValidationError(
             _("Comparecimento e falta só podem ser marcados a partir do dia do atendimento.")
         )
     ocupado = _("Este horário já foi ocupado por outro agendamento. Desmarque aquele antes.")
-    if appointment.desmarcado and status != Appointment.Situacao.DESMARCOU:
+    if appointment.desmarcado and status != Appointment.Status.DESMARCOU:
         if conflitos(
             appointment.practitioner, [(appointment.start, appointment.end)], appointment.pk
         ):

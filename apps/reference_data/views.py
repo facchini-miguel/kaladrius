@@ -9,7 +9,7 @@ from apps.core.permissions import Action, Module, requires_permission
 
 from .models import Bank, City, Neighborhood, State, Street
 
-POR_PAGINA = 50
+PER_PAGE = 50
 
 
 @requires_permission(Module.CATALOGS, Action.VIEW)
@@ -22,7 +22,7 @@ def cidades(request):
         cidades = cidades.filter(state_id=int(state))
     if search:
         cidades = cidades.filter(name__unaccent__icontains=search)
-    page = Paginator(cidades, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(cidades, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "reference_data/cities.html",
@@ -45,7 +45,7 @@ def bancos(request):
         if search.isdecimal():
             filtro |= Q(code=int(search))
         bancos = bancos.filter(filtro)
-    page = Paginator(bancos, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(bancos, PER_PAGE).get_page(request.GET.get("pagina"))
     context = {"busca": search, "pagina": page, "parametros": urlencode({"q": search})}
     return render(request, "reference_data/banks.html", context)
 

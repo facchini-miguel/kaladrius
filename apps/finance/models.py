@@ -19,24 +19,24 @@ from apps.core.isolation import ClinicManager, ClinicModel, without_isolation
 from apps.core.ordering import ALPHABETICAL
 
 ZERO = Decimal("0.00")
-DINHEIRO = {"max_digits": 12, "decimal_places": 2}
+MONEY = {"max_digits": 12, "decimal_places": 2}
 
 
 class FinancialAccount(ClinicModel):
     """Where the money goes: the cash drawer, a bank account, the card machine."""
 
-    class Tipo(models.TextChoices):
-        DINHEIRO = "dinheiro", _("Dinheiro (caixa)")
-        BANCO = "banco", _("Banco")
-        CARTAO = "cartao", _("Maquininha de cartão")
+    class Kind(models.TextChoices):
+        CASH = "dinheiro", _("Dinheiro (caixa)")
+        BANK = "banco", _("Banco")
+        CARD = "cartao", _("Maquininha de cartão")
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
     opening_balance = models.DecimalField(
         _("saldo inicial"),
         default=ZERO,
         help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
-        **DINHEIRO,
+        **MONEY,
         db_column="saldo_inicial",
     )
     active = models.BooleanField(_("ativa"), default=True, db_column="ativa")
@@ -52,19 +52,19 @@ class FinancialAccount(ClinicModel):
         return self.name
 
 
-class TipoFinanceiro(models.TextChoices):
-    RECEITA = "receita", _("Receita")
-    DESPESA = "despesa", _("Despesa")
+class FinancialKind(models.TextChoices):
+    INCOME = "receita", _("Receita")
+    EXPENSE = "despesa", _("Despesa")
 
 
 class AccountGroup(ClinicModel):
     """A node of the chart of accounts (decision 097, legacy Medical grupocontabil):
     groups hold subgroups and categories; entries go to the categories (the leaves)."""
 
-    Tipo = TipoFinanceiro
+    Kind = FinancialKind
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
     parent = models.ForeignKey(
         "self",
         on_delete=models.PROTECT,
@@ -97,7 +97,7 @@ class AccountGroup(ClinicModel):
     def __str__(self):
         return f"{self.number} {self.name}" if self.number else self.name
 
-    def ancestrais(self):
+    def ancestors(self):
         """From the top group down to the parent of this one."""
         cadeia, current = [], self.parent
         while current is not None:
@@ -107,17 +107,17 @@ class AccountGroup(ClinicModel):
 
     @property
     def number(self):
-        codigos = [g.code for g in [*self.ancestrais(), self]]
+        codigos = [g.code for g in [*self.ancestors(), self]]
         return ".".join(map(str, codigos)) if None not in codigos else ""
 
 
 class Category(ClinicModel):
     """Grouping of income and expenses for the reports."""
 
-    Tipo = TipoFinanceiro
+    Kind = FinancialKind
 
     name = models.CharField(_("nome"), max_length=60, db_collation=ALPHABETICAL, db_column="nome")
-    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
     group = models.ForeignKey(
         AccountGroup,
         on_delete=models.PROTECT,
@@ -165,28 +165,28 @@ class CostCenter(ClinicModel):
 
 
 # Accounts and categories every new clinic starts with (it can add, rename or deactivate).
-CONTAS_PADRAO = [("Caixa", FinancialAccount.Tipo.DINHEIRO), ("Banco", FinancialAccount.Tipo.BANCO)]
-CATEGORIAS_PADRAO = [
-    ("Tratamento", Category.Tipo.RECEITA),
-    ("Consulta", Category.Tipo.RECEITA),
-    ("Outras receitas", Category.Tipo.RECEITA),
-    ("Aluguel", Category.Tipo.DESPESA),
-    ("Material odontológico", Category.Tipo.DESPESA),
-    ("Laboratório de prótese", Category.Tipo.DESPESA),
-    ("Salários e encargos", Category.Tipo.DESPESA),
-    ("Comissões", Category.Tipo.DESPESA),
-    ("Impostos", Category.Tipo.DESPESA),
-    ("Água, luz e internet", Category.Tipo.DESPESA),
-    ("Manutenção", Category.Tipo.DESPESA),
-    ("Outras despesas", Category.Tipo.DESPESA),
+DEFAULT_ACCOUNTS = [("Caixa", FinancialAccount.Kind.CASH), ("Banco", FinancialAccount.Kind.BANK)]
+DEFAULT_CATEGORIES = [
+    ("Tratamento", Category.Kind.INCOME),
+    ("Consulta", Category.Kind.INCOME),
+    ("Outras receitas", Category.Kind.INCOME),
+    ("Aluguel", Category.Kind.EXPENSE),
+    ("Material odontológico", Category.Kind.EXPENSE),
+    ("Laboratório de prótese", Category.Kind.EXPENSE),
+    ("Salários e encargos", Category.Kind.EXPENSE),
+    ("Comissões", Category.Kind.EXPENSE),
+    ("Impostos", Category.Kind.EXPENSE),
+    ("Água, luz e internet", Category.Kind.EXPENSE),
+    ("Manutenção", Category.Kind.EXPENSE),
+    ("Outras despesas", Category.Kind.EXPENSE),
 ]
 # A basic chart of accounts for new clinics (decision 097): code, group and its categories.
-PLANO_PADRAO = {
-    Category.Tipo.RECEITA: [
+DEFAULT_CHART = {
+    Category.Kind.INCOME: [
         (1, "Atendimentos", ["Tratamento", "Consulta"]),
         (2, "Outras receitas", ["Outras receitas"]),
     ],
-    Category.Tipo.DESPESA: [
+    Category.Kind.EXPENSE: [
         (1, "Ocupação", ["Aluguel", "Água, luz e internet", "Manutenção"]),
         (2, "Pessoal", ["Salários e encargos", "Comissões"]),
         (3, "Materiais e laboratório", ["Material odontológico", "Laboratório de prótese"]),
@@ -196,17 +196,17 @@ PLANO_PADRAO = {
 }
 
 
-def criar_padroes(clinic):
+def create_defaults(clinic):
     """Default accounts and categories for a clinic that has none."""
     with without_isolation():
         if not FinancialAccount.objects.filter(clinic=clinic).exists():
             FinancialAccount.objects.bulk_create(
                 FinancialAccount(clinic=clinic, name=name, kind=kind)
-                for name, kind in CONTAS_PADRAO
+                for name, kind in DEFAULT_ACCOUNTS
             )
         if not Category.objects.filter(clinic=clinic).exists():
             grupo_de = {}
-            for kind, rows in PLANO_PADRAO.items():
+            for kind, rows in DEFAULT_CHART.items():
                 for code, name, categorias in rows:
                     group = AccountGroup.objects.create(
                         clinic=clinic, kind=kind, code=code, name=name
@@ -214,19 +214,19 @@ def criar_padroes(clinic):
                     grupo_de.update({(kind, category): group for category in categorias})
             Category.objects.bulk_create(
                 Category(clinic=clinic, name=name, kind=kind, group=grupo_de.get((kind, name)))
-                for name, kind in CATEGORIAS_PADRAO
+                for name, kind in DEFAULT_CATEGORIES
             )
 
 
 class Supplier(ClinicModel):
     """Who the clinic buys from or pays (decision 093), picked on a payable."""
 
-    class Tipo(models.TextChoices):
-        FISICA = "PF", _("Pessoa física")
-        JURIDICA = "PJ", _("Pessoa jurídica")
+    class Kind(models.TextChoices):
+        INDIVIDUAL = "PF", _("Pessoa física")
+        COMPANY = "PJ", _("Pessoa jurídica")
 
     kind = models.CharField(
-        _("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.JURIDICA, db_column="tipo"
+        _("tipo"), max_length=2, choices=Kind.choices, default=Kind.COMPANY, db_column="tipo"
     )
     name = models.CharField(
         _("nome"),
@@ -265,19 +265,19 @@ class Supplier(ClinicModel):
         return self.name
 
     @property
-    def papel_documento(self):
+    def document_role(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.kind == self.Tipo.JURIDICA else "pessoa"
+        return "empresa" if self.kind == self.Kind.COMPANY else "pessoa"
 
 
 class Entry(ClinicModel):
     """An amount owed to the clinic (receivable) or by it (payable), in installments."""
 
-    class Tipo(models.TextChoices):
-        RECEBER = "receber", _("A receber")
-        PAGAR = "pagar", _("A pagar")
+    class Kind(models.TextChoices):
+        RECEIVABLE = "receber", _("A receber")
+        PAYABLE = "pagar", _("A pagar")
 
-    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
     description = models.CharField(_("descrição"), max_length=200, db_column="descricao")
     category = models.ForeignKey(
         Category,
@@ -326,7 +326,7 @@ class Entry(ClinicModel):
         help_text=_("Quem fez o atendimento (opcional)."),
         db_column="profissional_id",
     )
-    total_amount = models.DecimalField(_("valor total"), **DINHEIRO, db_column="valor_total")
+    total_amount = models.DecimalField(_("valor total"), **MONEY, db_column="valor_total")
     date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
     notes = models.TextField(_("observações"), blank=True, db_column="observacoes")
     cancelled = models.BooleanField(_("cancelado"), default=False, db_column="cancelado")
@@ -369,34 +369,32 @@ class Entry(ClinicModel):
         ]
 
     def __str__(self):
-        return f"{self.description} ({self.nome_pessoa})"
+        return f"{self.description} ({self.payer_name})"
 
     @property
-    def nome_pessoa(self):
+    def payer_name(self):
         return self.patient.name if self.patient_id else self.payer
 
 
-class ParcelaQuerySet(models.QuerySet):
-    def com_saldo(self):
+class InstallmentQuerySet(models.QuerySet):
+    def with_balance(self):
         """Annotate pago (principal paid by non-reversed payments) and saldo."""
         principal = ExpressionWrapper(
             F("pagamentos__amount") - F("pagamentos__interest") + F("pagamentos__discount"),
-            output_field=DecimalField(**DINHEIRO),
+            output_field=DecimalField(**MONEY),
         )
         pago = Coalesce(
             Sum(principal, filter=Q(pagamentos__reversed=False)),
             Value(ZERO),
-            output_field=DecimalField(**DINHEIRO),
+            output_field=DecimalField(**MONEY),
         )
         return self.annotate(pago=pago).annotate(
-            balance=ExpressionWrapper(
-                F("amount") - F("pago"), output_field=DecimalField(**DINHEIRO)
-            )
+            balance=ExpressionWrapper(F("amount") - F("pago"), output_field=DecimalField(**MONEY))
         )
 
-    def abertas(self):
+    def unpaid(self):
         """Installments still owed (positive balance) of entries not cancelled."""
-        return self.com_saldo().filter(balance__gt=0, entry__cancelled=False)
+        return self.with_balance().filter(balance__gt=0, entry__cancelled=False)
 
 
 class Installment(ClinicModel):
@@ -409,10 +407,10 @@ class Installment(ClinicModel):
     )
     number = models.PositiveSmallIntegerField(_("número"), db_column="numero")
     due_date = models.DateField(_("vencimento"), db_column="vencimento")
-    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("valor"), **MONEY, db_column="valor")
 
     # Same isolation as every clinic model, plus the balance helpers.
-    objects = ClinicManager.from_queryset(ParcelaQuerySet)()
+    objects = ClinicManager.from_queryset(InstallmentQuerySet)()
     all_objects = models.Manager()  # noqa: DJ012
 
     class Meta:
@@ -429,7 +427,7 @@ class Installment(ClinicModel):
     def __str__(self):
         return f"{self.entry.description} {self.number}/{self.entry.parcelas.count()}"
 
-    def valores(self):
+    def paid_and_balance(self):
         """(principal paid, balance) computed from the payments (not annotated)."""
         pago = sum((p.principal for p in self.pagamentos.all() if not p.reversed), start=ZERO)
         return pago, self.amount - pago
@@ -443,31 +441,31 @@ class Payment(ClinicModel):
     valor - juros + desconto.
     """
 
-    class Forma(models.TextChoices):
+    class Method(models.TextChoices):
         """Every method of every country; each country offers some (payment_methods.py, decision
         123)."""
 
-        DINHEIRO = "dinheiro", _("Dinheiro")
+        CASH = "dinheiro", _("Dinheiro")
         PIX = "pix", _("Pix")
-        DEBITO = "debito", _("Cartão de débito")
-        CREDITO = "credito", _("Cartão de crédito")
-        TRANSFERENCIA = "transferencia", _("Transferência")
+        DEBIT = "debito", _("Cartão de débito")
+        CREDIT = "credito", _("Cartão de crédito")
+        TRANSFER = "transferencia", _("Transferência")
         BOLETO = "boleto", _("Boleto")
         # No longer offered in Brazil (the owner: cheques are not used anymore); kept so
         # payments recorded as cheque there still show their method.
         CHEQUE = "cheque", _("Cheque")
-        CARTEIRA = "carteira", _("Carteira digital")
-        DEBITO_AUTOMATICO = "debito_auto", _("Débito automático")
+        WALLET = "carteira", _("Carteira digital")
+        DIRECT_DEBIT = "debito_auto", _("Débito automático")
         HSA = "hsa", _("Cartão HSA/FSA")
-        FINANCIAMENTO = "financiamento", _("Financiamento ao paciente")
+        FINANCING = "financiamento", _("Financiamento ao paciente")
         BPAY = "bpay", "BPAY"
 
         @classmethod
-        def em_uso(cls, country=None):
+        def in_use(cls, country=None):
             """The methods offered when recording a payment, in the clinic's country."""
-            from .payment_methods import em_uso
+            from .payment_methods import in_use
 
-            return em_uso(country)
+            return in_use(country)
 
     installment = models.ForeignKey(
         Installment,
@@ -477,17 +475,17 @@ class Payment(ClinicModel):
         db_column="parcela_id",
     )
     date = models.DateField(_("data"), default=timezone.localdate, db_column="data")
-    amount = models.DecimalField(_("valor recebido"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("valor recebido"), **MONEY, db_column="valor")
     interest = models.DecimalField(
         _("juros e multa"),
         default=ZERO,
         help_text=_("Já incluídos no valor recebido."),
-        **DINHEIRO,
+        **MONEY,
         db_column="juros",
     )
-    discount = models.DecimalField(_("desconto"), default=ZERO, **DINHEIRO, db_column="desconto")
+    discount = models.DecimalField(_("desconto"), default=ZERO, **MONEY, db_column="desconto")
     method = models.CharField(
-        _("forma de pagamento"), max_length=15, choices=Forma.choices, db_column="forma"
+        _("forma de pagamento"), max_length=15, choices=Method.choices, db_column="forma"
     )
     account = models.ForeignKey(
         FinancialAccount,
@@ -606,7 +604,7 @@ class CashRegister(ClinicModel):
         db_column="aberto_por_id",
     )
     opening_amount = models.DecimalField(
-        _("valor contado na abertura"), **DINHEIRO, db_column="valor_abertura"
+        _("valor contado na abertura"), **MONEY, db_column="valor_abertura"
     )
     closed_at = models.DateTimeField(_("fechado em"), null=True, blank=True, db_column="fechado_em")
     closed_by = models.ForeignKey(
@@ -619,13 +617,13 @@ class CashRegister(ClinicModel):
         db_column="fechado_por_id",
     )
     expected_amount = models.DecimalField(
-        _("valor esperado"), null=True, blank=True, **DINHEIRO, db_column="valor_esperado"
+        _("valor esperado"), null=True, blank=True, **MONEY, db_column="valor_esperado"
     )
     counted_amount = models.DecimalField(
         _("valor contado no fechamento"),
         null=True,
         blank=True,
-        **DINHEIRO,
+        **MONEY,
         db_column="valor_contado",
     )
     note = models.CharField(_("observação"), max_length=200, blank=True, db_column="observacao")
@@ -650,11 +648,11 @@ class CashRegister(ClinicModel):
         return f"{self.account} {timezone.localtime(self.opened_at):%d/%m/%Y %H:%M}"
 
     @property
-    def aberto(self):
+    def is_open(self):
         return self.closed_at is None
 
     @property
-    def diferenca(self):
+    def difference(self):
         if self.counted_amount is None or self.expected_amount is None:
             return None
         return self.counted_amount - self.expected_amount
@@ -663,9 +661,9 @@ class CashRegister(ClinicModel):
 class CashMovement(ClinicModel):
     """Withdrawal from or top-up of an open cash drawer, optionally to/from another account."""
 
-    class Tipo(models.TextChoices):
-        RETIRADA = "retirada", _("Retirada (sangria)")
-        REFORCO = "reforco", _("Reforço")
+    class Kind(models.TextChoices):
+        WITHDRAWAL = "retirada", _("Retirada (sangria)")
+        TOP_UP = "reforco", _("Reforço")
 
     cash_register = models.ForeignKey(
         CashRegister,
@@ -674,8 +672,8 @@ class CashMovement(ClinicModel):
         verbose_name=_("caixa"),
         db_column="caixa_id",
     )
-    kind = models.CharField(_("tipo"), max_length=10, choices=Tipo.choices, db_column="tipo")
-    amount = models.DecimalField(_("valor"), **DINHEIRO, db_column="valor")
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices, db_column="tipo")
+    amount = models.DecimalField(_("valor"), **MONEY, db_column="valor")
     other_account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
@@ -729,11 +727,11 @@ class Commission(ClinicModel):
     percentage = models.DecimalField(
         _("percentual"), max_digits=5, decimal_places=2, db_column="percentual"
     )
-    received_amount = models.DecimalField(_("valor recebido"), **DINHEIRO, db_column="recebido")
+    received_amount = models.DecimalField(_("valor recebido"), **MONEY, db_column="recebido")
     reversal_deduction = models.DecimalField(
-        _("comissão de estornos descontada"), default=ZERO, **DINHEIRO, db_column="estornos"
+        _("comissão de estornos descontada"), default=ZERO, **MONEY, db_column="estornos"
     )
-    amount = models.DecimalField(_("valor da comissão"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("valor da comissão"), **MONEY, db_column="valor")
     entry = models.OneToOneField(
         Entry,
         on_delete=models.PROTECT,
@@ -766,7 +764,7 @@ class Commission(ClinicModel):
         return f"{self.practitioner} {self.until:%d/%m/%Y}"
 
     @property
-    def bruta(self):
+    def gross(self):
         """Commission on the receipts, before deducting reversals."""
         return self.amount + self.reversal_deduction
 
@@ -783,7 +781,7 @@ class Planning(ClinicModel):
         verbose_name=_("grupo"),
         db_column="grupo_id",
     )
-    amount = models.DecimalField(_("meta"), **DINHEIRO, db_column="valor")
+    amount = models.DecimalField(_("meta"), **MONEY, db_column="valor")
 
     class Meta:
         db_table = "financeiro_planejamento"
@@ -850,7 +848,7 @@ class StatementImport(ClinicModel):
     start = models.DateField(_("início"), null=True, blank=True, db_column="inicio")
     end = models.DateField(_("fim"), null=True, blank=True, db_column="fim")
     balance = models.DecimalField(
-        _("saldo no banco"), null=True, blank=True, **DINHEIRO, db_column="saldo"
+        _("saldo no banco"), null=True, blank=True, **MONEY, db_column="saldo"
     )
     balance_date = models.DateField(_("saldo em"), null=True, blank=True, db_column="saldo_em")
     new_transactions = models.PositiveIntegerField(
@@ -889,10 +887,10 @@ class StatementImport(ClinicModel):
 class BankTransaction(ClinicModel):
     """A bank statement line, reconciled with a payment or a drawer movement, or ignored."""
 
-    class Situacao(models.TextChoices):
-        PENDENTE = "pendente", _("Pendente")
-        CONCILIADA = "conciliada", _("Conciliada")
-        IGNORADA = "ignorada", _("Ignorada")
+    class Status(models.TextChoices):
+        PENDING = "pendente", _("Pendente")
+        RECONCILED = "conciliada", _("Conciliada")
+        IGNORED = "ignorada", _("Ignorada")
 
     account = models.ForeignKey(
         FinancialAccount,
@@ -913,7 +911,7 @@ class BankTransaction(ClinicModel):
     amount = models.DecimalField(
         _("valor"),
         help_text=_("Positivo: entrada; negativo: saída."),
-        **DINHEIRO,
+        **MONEY,
         db_column="valor",
     )
     description = models.CharField(
@@ -923,8 +921,8 @@ class BankTransaction(ClinicModel):
     status = models.CharField(
         _("situação"),
         max_length=10,
-        choices=Situacao.choices,
-        default=Situacao.PENDENTE,
+        choices=Status.choices,
+        default=Status.PENDING,
         db_column="situacao",
     )
     payment = models.OneToOneField(
@@ -976,5 +974,5 @@ class BankTransaction(ClinicModel):
         return f"{self.date:%d/%m/%Y} {self.amount} {self.description}"
 
     @property
-    def entrada(self):
+    def is_incoming(self):
         return self.amount > 0

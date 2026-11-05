@@ -98,7 +98,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
     assert response.status_code == 302
     with use_clinic(clinica_a):
         assert Entry.objects.filter(cost_center=centro).count() == 2
-        entry = Entry.objects.get(kind=Entry.Tipo.PAGAR)
+        entry = Entry.objects.get(kind=Entry.Kind.PAYABLE)
     page = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
     assert "Ortodontia" in page
     # Without a center the entry still saves (the field is optional).
@@ -110,9 +110,9 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
         aluguel = Category.objects.get(name="Aluguel")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         for amount, cost_center in ((Decimal("300"), centro), (Decimal("200"), None)):
-            entry = services.criar_lancamento(
+            entry = services.create_entry(
                 clinic=clinica_a,
-                kind=Entry.Tipo.PAGAR,
+                kind=Entry.Kind.PAYABLE,
                 payer="Fornecedor fictício",
                 description="Compra",
                 category=aluguel,
@@ -123,16 +123,16 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
                 user=None,
             )
             installment = entry.parcelas.get()
-            services.receber(
+            services.receive(
                 installment,
                 user=None,
                 amount=installment.amount,
                 method="pix",
                 account=cash_register,
             )
-    relatorio = admin.get(reverse("finance:reports")).context["relatorio"]
-    assert relatorio["centros"]
-    assert {name: str(total) for name, total in relatorio["despesas_por_centro"]} == {
+    report = admin.get(reverse("finance:reports")).context["relatorio"]
+    assert report["centros"]
+    assert {name: str(total) for name, total in report["despesas_por_centro"]} == {
         "Ortodontia": "300.00",
         "Sem centro de custo": "200.00",
     }
@@ -143,9 +143,9 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
 
 
 def test_relatorio_sem_centros_nao_mostra_os_quadros(admin):
-    relatorio = admin.get(reverse("finance:reports"))
-    assert not relatorio.context["relatorio"]["centros"]
-    assert "por centro de custo" not in relatorio.content.decode()
+    report = admin.get(reverse("finance:reports"))
+    assert not report.context["relatorio"]["centros"]
+    assert "por centro de custo" not in report.content.decode()
 
 
 def test_recepcao_nao_cadastra(clinica_a, criar_usuario, cliente_de):

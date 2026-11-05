@@ -59,17 +59,17 @@ OFX_XML = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def test_le_ofx_sgml_em_windows_1252():
-    extrato = ofx.ler(OFX_SGML)
-    assert (extrato.bank_code, extrato.account) == ("341", "98765-4")
-    assert (extrato.start, extrato.end) == (
+    statement = ofx.read(OFX_SGML)
+    assert (statement.bank_code, statement.account) == ("341", "98765-4")
+    assert (statement.start, statement.end) == (
         datetime.date(2026, 10, 1),
         datetime.date(2026, 10, 10),
     )
-    assert (extrato.balance, extrato.balance_date) == (
+    assert (statement.balance, statement.balance_date) == (
         Decimal("1640.10"),
         datetime.date(2026, 10, 10),
     )
-    primeira, segunda = extrato.transacoes[:2]
+    primeira, segunda = statement.transacoes[:2]
     assert (primeira.fitid, primeira.date, primeira.amount) == (
         "A1",
         datetime.date(2026, 10, 6),
@@ -80,16 +80,16 @@ def test_le_ofx_sgml_em_windows_1252():
 
 
 def test_le_ofx_xml_com_fitid_repetido_ou_ausente():
-    extrato = ofx.ler(OFX_XML)
-    assert [t.description for t in extrato.transacoes] == ["Pix João", "Pix João", "Tarifa"]
-    fitids = [t.fitid for t in extrato.transacoes]
+    statement = ofx.read(OFX_XML)
+    assert [t.description for t in statement.transacoes] == ["Pix João", "Pix João", "Tarifa"]
+    fitids = [t.fitid for t in statement.transacoes]
     assert fitids[:2] == ["X", "X#2"] and len(fitids[2]) == 40  # zero amount skipped
-    assert extrato.balance is None
+    assert statement.balance is None
 
 
 def test_arquivo_que_nao_e_ofx():
-    with pytest.raises(ofx.ArquivoInvalido):
-        ofx.ler(b"data;valor\n2026-10-01;10")
+    with pytest.raises(ofx.InvalidFile):
+        ofx.read(b"data;valor\n2026-10-01;10")
 
 
 @pytest.fixture
@@ -115,22 +115,22 @@ def cenario(clinica_a, criar_usuario, cliente_de):
     }
 
 
-def pago(cenario, amount, date, kind=Entry.Tipo.RECEBER, account=None):
+def pago(cenario, amount, date, kind=Entry.Kind.RECEIVABLE, account=None):
     with use_clinic(cenario["clinic"]):
-        receber = kind == Entry.Tipo.RECEBER
-        entry = services.criar_lancamento(
+        receive = kind == Entry.Kind.RECEIVABLE
+        entry = services.create_entry(
             clinic=cenario["clinic"],
             kind=kind,
-            patient=cenario["patient"] if receber else None,
-            payer="" if receber else "Fornecedor",
-            description="Tratamento" if receber else "Conta",
-            category=cenario["receita"] if receber else cenario["despesa"],
+            patient=cenario["patient"] if receive else None,
+            payer="" if receive else "Fornecedor",
+            description="Tratamento" if receive else "Conta",
+            category=cenario["receita"] if receive else cenario["despesa"],
             total_amount=Decimal(amount),
             parcelas=1,
             primeiro_vencimento=date,
             user=cenario["admin"],
         )
-        return services.receber(
+        return services.receive(
             entry.parcelas.get(),
             user=cenario["admin"],
             amount=Decimal(amount),
@@ -140,7 +140,7 @@ def pago(cenario, amount, date, kind=Entry.Tipo.RECEBER, account=None):
         )
 
 
-def importar(cenario, content=OFX_SGML):
+def import_statement(cenario, content=OFX_SGML):
     response = cenario["cliente"].post(
         reverse("finance:statements"),
         {"account": cenario["bank"].pk, "file": SimpleUploadedFile("extrato.ofx", content)},
@@ -157,28 +157,28 @@ def transacao(cenario, fitid):
 
 
 def test_importar_de_novo_pula_as_repetidas(cenario):
-    primeira = importar(cenario)
-    segunda = importar(cenario)
+    primeira = import_statement(cenario)
+    segunda = import_statement(cenario)
     assert (primeira.new_transactions, primeira.duplicate_transactions) == (4, 0)
     assert (segunda.new_transactions, segunda.duplicate_transactions) == (0, 4)
 
 
 def test_conciliacao_automatica_so_quando_unica(cenario):
     received_amount = pago(cenario, "300.00", DIA)  # A1: one candidate
-    pago(cenario, "120.00", DIA, kind=Entry.Tipo.PAGAR)  # A4: two candidates
-    pago(cenario, "120.00", DIA + datetime.timedelta(days=1), kind=Entry.Tipo.PAGAR)
+    pago(cenario, "120.00", DIA, kind=Entry.Kind.PAYABLE)  # A4: two candidates
+    pago(cenario, "120.00", DIA + datetime.timedelta(days=1), kind=Entry.Kind.PAYABLE)
     pago(cenario, "500.00", DIA, account=cenario["cash_register"])  # A3: other account, no match
     pago(cenario, "39.90", DIA)  # A2 is money out: a receipt does not match it
-    statement_import = importar(cenario)
+    statement_import = import_statement(cenario)
     page = cenario["cliente"].get(reverse("finance:statement", args=[statement_import.pk]))
     assert page.context["unicos"] == 1
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[statement_import.pk]))
     a1, a4 = transacao(cenario, "A1"), transacao(cenario, "A4")
-    assert (a1.status, a1.payment) == (BankTransaction.Situacao.CONCILIADA, received_amount)
-    assert a4.status == BankTransaction.Situacao.PENDENTE
+    assert (a1.status, a1.payment) == (BankTransaction.Status.RECONCILED, received_amount)
+    assert a4.status == BankTransaction.Status.PENDING
     # The user picks one of the two by hand.
     with use_clinic(cenario["clinic"]):
-        options = reconciliation.candidatos([a4])[a4.pk]
+        options = reconciliation.candidates([a4])[a4.pk]
     assert len(options) == 2 and options[0].date == DIA + datetime.timedelta(
         days=1
     )  # closest first
@@ -205,7 +205,7 @@ def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
         cash_movement = CashMovement.objects.create(
             clinic=cenario["clinic"],
             cash_register=cash_register,
-            kind=CashMovement.Tipo.RETIRADA,
+            kind=CashMovement.Kind.WITHDRAWAL,
             amount=Decimal("500.00"),
             other_account=cenario["bank"],
             reason="Depósito",
@@ -213,7 +213,7 @@ def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
         CashMovement.objects.filter(pk=cash_movement.pk).update(
             created_at=datetime.datetime(2026, 10, 7, 15, tzinfo=datetime.UTC)
         )
-    importar(cenario)
+    import_statement(cenario)
     a3 = transacao(cenario, "A3")
     cenario["cliente"].post(
         reverse("finance:transaction", args=[a3.pk, "reconcile"]), {"chave": f"m{cash_movement.pk}"}
@@ -222,13 +222,13 @@ def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
 
 
 def test_criar_lancamento_ignorar_e_desfazer(cenario):
-    importar(cenario)
+    import_statement(cenario)
     a2 = transacao(cenario, "A2")
     url = reverse("finance:transaction_entry", args=[a2.pk])
     formulario = cenario["cliente"].get(url).context["form"]
     with use_clinic(cenario["clinic"]):
         tipos = set(formulario.fields["category"].queryset.values_list("kind", flat=True))
-    assert tipos == {Category.Tipo.DESPESA}
+    assert tipos == {Category.Kind.EXPENSE}
     cenario["cliente"].post(
         url,
         {
@@ -242,7 +242,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
     with use_clinic(cenario["clinic"]):
         entry = a2.payment.installment.entry
         assert (entry.kind, entry.total_amount, entry.payer) == (
-            Entry.Tipo.PAGAR,
+            Entry.Kind.PAYABLE,
             Decimal("39.90"),
             "Banco Itaú",
         )
@@ -251,24 +251,24 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
             cenario["bank"],
         )
     a3 = transacao(cenario, "A3")
-    ignorar = reverse("finance:transaction", args=[a3.pk, "ignore"])
-    cenario["cliente"].post(ignorar, {"reason": ""})  # a reason is required
-    assert transacao(cenario, "A3").status == BankTransaction.Situacao.PENDENTE
-    cenario["cliente"].post(ignorar, {"reason": "Transferência entre contas"})
+    ignore = reverse("finance:transaction", args=[a3.pk, "ignore"])
+    cenario["cliente"].post(ignore, {"reason": ""})  # a reason is required
+    assert transacao(cenario, "A3").status == BankTransaction.Status.PENDING
+    cenario["cliente"].post(ignore, {"reason": "Transferência entre contas"})
     assert transacao(cenario, "A3").reason == "Transferência entre contas"
     cenario["cliente"].post(reverse("finance:transaction", args=[a3.pk, "undo"]))
     a3 = transacao(cenario, "A3")
-    assert (a3.status, a3.reason) == (BankTransaction.Situacao.PENDENTE, "")
+    assert (a3.status, a3.reason) == (BankTransaction.Status.PENDING, "")
 
 
 def test_estorno_volta_a_transacao_para_pendente(cenario):
     received_amount = pago(cenario, "300.00", DIA)
-    statement_import = importar(cenario)
+    statement_import = import_statement(cenario)
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[statement_import.pk]))
     with use_clinic(cenario["clinic"]):
-        services.estornar(received_amount, reason="Devolvido", user=cenario["admin"])
+        services.reverse_payment(received_amount, reason="Devolvido", user=cenario["admin"])
     a1 = transacao(cenario, "A1")
-    assert (a1.status, a1.payment) == (BankTransaction.Situacao.PENDENTE, None)
+    assert (a1.status, a1.payment) == (BankTransaction.Status.PENDING, None)
 
 
 def test_saldo_do_banco_comparado_com_o_sistema(cenario):
@@ -277,7 +277,7 @@ def test_saldo_do_banco_comparado_com_o_sistema(cenario):
             opening_balance=Decimal("1000")
         )
     pago(cenario, "300.00", DIA)
-    statement_import = importar(cenario)
+    statement_import = import_statement(cenario)
     page = cenario["cliente"].get(reverse("finance:statement", args=[statement_import.pk]))
     assert page.context["saldo_sistema"] == Decimal("1300.00")
     assert page.context["diferenca"] == Decimal("340.10")
@@ -289,7 +289,7 @@ def test_arquivo_invalido_e_permissoes(cenario):
         {"account": cenario["bank"].pk, "file": SimpleUploadedFile("x.ofx", b"nada")},
     )
     assert "não é um extrato OFX" in response.content.decode()
-    statement_import = importar(cenario)
+    statement_import = import_statement(cenario)
     reception = cenario["cliente_de"](
         cenario["criar_usuario"]("recepcao", cenario["clinic"], Role.FRONT_DESK)
     )
@@ -300,7 +300,7 @@ def test_arquivo_invalido_e_permissoes(cenario):
 
 
 def test_extrato_de_outra_clinica_da_404(cenario, clinica_b):
-    statement_import = importar(cenario)
+    statement_import = import_statement(cenario)
     other = cenario["cliente_de"](cenario["criar_usuario"]("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:statement", args=[statement_import.pk])).status_code == 404
 
@@ -314,11 +314,11 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
     received_amount = pago(cenario, "250.00", timezone.localdate())
     saida = StringIO()
     call_command("simulate_statement", clinic=cenario["clinic"].name, stdout=saida)
-    extrato = ofx.ler(saida.getvalue().encode())
-    assert len(extrato.transacoes) in (4, 5)  # the bank extras, plus the payment (85%)
-    assert extrato.balance is not None
-    if len(extrato.transacoes) == 5:
-        assert f"P{received_amount.pk}" in [t.fitid for t in extrato.transacoes]
+    statement = ofx.read(saida.getvalue().encode())
+    assert len(statement.transacoes) in (4, 5)  # the bank extras, plus the payment (85%)
+    assert statement.balance is not None
+    if len(statement.transacoes) == 5:
+        assert f"P{received_amount.pk}" in [t.fitid for t in statement.transacoes]
 
 
 def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
@@ -330,11 +330,14 @@ def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
         b"<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20261009<TRNAMT>abc<FITID>B4</STMTTRN>\n"
         b"</BANKTRANLIST>",
     )
-    extrato = ofx.ler(content)
-    valores = {t.fitid: t.amount for t in extrato.transacoes}
-    assert (valores["B1"], valores["B2"]) == (Decimal("1234.56"), Decimal("2345.67"))
+    statement = ofx.read(content)
+    paid_and_balance = {t.fitid: t.amount for t in statement.transacoes}
+    assert (paid_and_balance["B1"], paid_and_balance["B2"]) == (
+        Decimal("1234.56"),
+        Decimal("2345.67"),
+    )
     assert (
-        extrato.unreadable_transactions == 2
+        statement.unreadable_transactions == 2
     )  # bad date, bad amount (zero amounts are not counted)
     response = cenario["cliente"].post(
         reverse("finance:statements"),

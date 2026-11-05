@@ -3,10 +3,10 @@ from django.dispatch import receiver
 
 from apps.core.models import Clinic
 
-from .models import criar_padroes
+from .models import create_defaults
 
 
 @receiver(post_save, sender=Clinic, dispatch_uid="financeiro_padroes")
-def padroes_para_clinica_nova(sender, instance, created, raw=False, **kwargs):
+def defaults_for_new_clinic(sender, instance, created, raw=False, **kwargs):
     if created and not raw:
-        criar_padroes(instance)
+        create_defaults(instance)

@@ -30,7 +30,7 @@ def data(**extra):
 
 def despesa(clinic, **extra):
     with use_clinic(clinic):
-        category = Category.objects.filter(kind=Category.Tipo.DESPESA).first()
+        category = Category.objects.filter(kind=Category.Kind.EXPENSE).first()
     return {
         "supplier": "",
         "payer": "",

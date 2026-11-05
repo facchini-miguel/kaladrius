@@ -26,7 +26,7 @@ from . import services
 from .forms import AprovarForm, DescontoForm, ItemForm, OrcamentoForm, ProcedimentoForm
 from .models import Estimate, Procedure
 
-POR_PAGINA = 50
+PER_PAGE = 50
 
 
 def _estimates():
@@ -38,7 +38,7 @@ def _estimates():
 
 def _aberto(request, pk):
     estimate = get_object_or_404(_estimates(), pk=pk)
-    if estimate.status != Estimate.Situacao.ABERTO:
+    if estimate.status != Estimate.Status.ABERTO:
         messages.error(request, _("Este orçamento já foi aprovado ou recusado."))
         return None, redirect("estimates:detail", pk=estimate.pk)
     return estimate, None
@@ -58,14 +58,14 @@ def _liberar_se_desligado(request, item):
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def results(request):
-    status = request.GET.get("status", Estimate.Situacao.ABERTO)
+    status = request.GET.get("status", Estimate.Status.ABERTO)
     search = request.GET.get("q", "").strip()
     orcamentos = _estimates().prefetch_related("itens")
-    if status in Estimate.Situacao.values:
+    if status in Estimate.Status.values:
         orcamentos = orcamentos.filter(status=status)
     if search:
         orcamentos = orcamentos.filter(patient__name__unaccent__icontains=search)
-    page = Paginator(orcamentos, POR_PAGINA).get_page(request.GET.get("pagina"))
+    page = Paginator(orcamentos, PER_PAGE).get_page(request.GET.get("pagina"))
     return render(
         request,
         "estimates/list.html",
@@ -73,7 +73,7 @@ def results(request):
             "pagina": page,
             "status": status,
             "busca": search,
-            "situacoes": Estimate.Situacao.choices,
+            "situacoes": Estimate.Status.choices,
             "parametros": urlencode({"status": status, "q": search}),
         },
     )
@@ -124,7 +124,7 @@ def editar(request, pk):
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def detalhe(request, pk):
     estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
-    aberto = estimate.status == Estimate.Situacao.ABERTO
+    aberto = estimate.status == Estimate.Status.ABERTO
     dentistry = _odontologia(request)
     if dentistry:
         modules.mark_if_disabled(request, ModuleCode.DENTISTRY)
@@ -231,7 +231,7 @@ def aprovar(request, pk):
     category = (
         item.procedure.category
         if item and item.procedure and item.procedure.category
-        else Category.objects.filter(kind=Category.Tipo.RECEITA, active=True).first()
+        else Category.objects.filter(kind=Category.Kind.INCOME, active=True).first()
     )
     form = AprovarForm(request.POST or None, initial={"category": category})
     if request.method == "POST" and form.is_valid():

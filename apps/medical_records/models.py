@@ -142,7 +142,7 @@ class Certificate(ClinicModel):
     """A medical certificate issued in a visit (0.30.0, decision 082). Never changed or
     deleted after issued; it can be printed again."""
 
-    class Tipo(models.TextChoices):
+    class Kind(models.TextChoices):
         COMPARECIMENTO = "comparecimento", _("Comparecimento")
         AFASTAMENTO = "afastamento", _("Afastamento")
 
@@ -156,8 +156,8 @@ class Certificate(ClinicModel):
     kind = models.CharField(
         _("tipo"),
         max_length=20,
-        choices=Tipo.choices,
-        default=Tipo.COMPARECIMENTO,
+        choices=Kind.choices,
+        default=Kind.COMPARECIMENTO,
         db_column="tipo",
     )
     date = models.DateField(_("data do atendimento"), default=timezone.localdate, db_column="data")

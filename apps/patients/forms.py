@@ -168,7 +168,7 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
         do_tipo = (
-            self.documentos.empresa if kind == Patient.Tipo.JURIDICA else self.documentos.paciente
+            self.documentos.empresa if kind == Patient.Kind.COMPANY else self.documentos.paciente
         )
         document = ""
         if do_tipo is not None:
@@ -198,7 +198,7 @@ class PacienteForm(BootstrapForm, forms.ModelForm):
                 )
 
         # Fields that only make sense for one person type are cleared for the other.
-        if kind == Patient.Tipo.JURIDICA:
+        if kind == Patient.Kind.COMPANY:
             for field in ["rg", "sex", "marital_status", "occupation", "guardian"]:
                 data[field] = None if field == "marital_status" else ""
             data["birth_date"] = None

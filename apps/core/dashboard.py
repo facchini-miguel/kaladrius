@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.estimates.models import Estimate
 from apps.finance import services as financeiro
 from apps.finance.models import ZERO, CashRegister, Entry, Installment
-from apps.finance.payment_methods import rotulos as rotulos_das_formas
+from apps.finance.payment_methods import labels as rotulos_das_formas
 from apps.patients.models import Patient
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
@@ -54,7 +54,7 @@ def _schedule(request, today):
         .order_by("start", "practitioner__name")
     )
     pacientes = [a for a in do_dia if a.patient_id]
-    status = Appointment.Situacao
+    status = Appointment.Status
     contagem = {value: 0 for value in status.values}
     for appointment in pacientes:
         contagem[appointment.status] += 1
@@ -114,7 +114,7 @@ def _birthdays(today):
 def _estimates(today):
     return list(
         Estimate.objects.filter(
-            status=Estimate.Situacao.ABERTO,
+            status=Estimate.Status.ABERTO,
             valid_until__gte=today,
             valid_until__lte=today + datetime.timedelta(days=ESTIMATE_DAYS),
             patient__archived=False,
@@ -131,8 +131,8 @@ def _sum_of_balances(parcelas):
 
 
 def _receipts(today):
-    recebidos = financeiro.pagamentos_validos().filter(
-        date=today, installment__entry__kind=Entry.Tipo.RECEBER
+    recebidos = financeiro.valid_payments().filter(
+        date=today, installment__entry__kind=Entry.Kind.RECEIVABLE
     )
     formas = rotulos_das_formas()
     por_forma = [
@@ -143,7 +143,7 @@ def _receipts(today):
         .order_by("-total")
     ]
     a_receber, parcelas = _sum_of_balances(
-        Installment.objects.abertas().filter(entry__kind=Entry.Tipo.RECEBER, due_date=today)
+        Installment.objects.unpaid().filter(entry__kind=Entry.Kind.RECEIVABLE, due_date=today)
     )
     return {
         "recebido": sum((total for _forma, total in por_forma), start=ZERO),
@@ -157,21 +157,21 @@ def _receipts(today):
 
 
 def _finance(today):
-    recebido_hoje, pago_hoje = financeiro.recebido_e_pago(today, today)
+    recebido_hoje, pago_hoje = financeiro.received_and_paid(today, today)
     inicio_mes = today.replace(day=1)
-    recebido_mes, pago_mes = financeiro.recebido_e_pago(inicio_mes, today)
+    recebido_mes, pago_mes = financeiro.received_and_paid(inicio_mes, today)
     # The same days of last month (up to its last day, for the 31st).
     fim_anterior = inicio_mes - datetime.timedelta(days=1)
     inicio_anterior = fim_anterior.replace(day=1)
     ate_anterior = inicio_anterior.replace(day=min(today.day, fim_anterior.day))
-    recebido_anterior, pago_anterior = financeiro.recebido_e_pago(inicio_anterior, ate_anterior)
-    abertas = Installment.objects.abertas()
+    recebido_anterior, pago_anterior = financeiro.received_and_paid(inicio_anterior, ate_anterior)
+    abertas = Installment.objects.unpaid()
     vencido, parcelas_vencidas = _sum_of_balances(
-        abertas.filter(entry__kind=Entry.Tipo.RECEBER, due_date__lt=today)
+        abertas.filter(entry__kind=Entry.Kind.RECEIVABLE, due_date__lt=today)
     )
     a_pagar, contas_a_pagar = _sum_of_balances(
         abertas.filter(
-            entry__kind=Entry.Tipo.PAGAR,
+            entry__kind=Entry.Kind.PAYABLE,
             due_date__lte=today + datetime.timedelta(days=PAYABLE_DAYS),
         )
     )
@@ -189,6 +189,6 @@ def _finance(today):
         "a_pagar": a_pagar,
         "contas_a_pagar": contas_a_pagar,
         "saldo_contas": sum(
-            (saldo for _account, saldo in financeiro.saldos_das_contas()), start=ZERO
+            (saldo for _account, saldo in financeiro.account_balances()), start=ZERO
         ),
     }

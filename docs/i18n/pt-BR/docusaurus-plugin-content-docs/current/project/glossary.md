@@ -324,7 +324,7 @@ Os campos próprios de cada app, um app por vez. **Feito:** financeiro (decisão
 
 ## Funções e variáveis
 
-A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173).
+A última parte do plano (decisão 159): as funções, métodos, classes, constantes e variáveis. **Aqui só mudam nomes do Python**: as strings ficam, e com elas as chaves de contexto dos templates, os nomes de consulta, as chaves de JSON e os valores gravados, com que o nome de uma variável só coincide. Os campos declarados de um formulário mantêm o nome (são os nomes postados), e os nomes que uma URL passa para a view e o `parametrize` de um teste acompanham os parâmetros da função. **Feito:** as variáveis comuns a vários apps (decisão 172), o app core (decisão 173), financeiro (decisão 174).
 
 ### Variáveis comuns
 
@@ -629,6 +629,198 @@ A última parte do plano (decisão 159): as funções, métodos, classes, consta
 | `trocar_idioma` | `change_language` |
 
 `Usuario` (o modelo de usuário) mantém o nome por enquanto (veja abaixo).
+
+### Financeiro (`financeiro`): classes
+
+| Antes | Depois |
+|---|---|
+| `FinanceiroConfig` | `FinanceConfig` |
+| `LancamentoReceberForm` | `ReceivableEntryForm` |
+| `LancamentoPagarForm` | `PayableEntryForm` |
+| `FornecedorForm` | `SupplierForm` |
+| `PlanejamentoForm` | `PlanningForm` |
+| `FecharForm` | `CloseBooksForm` |
+| `ReabrirForm` | `ReopenBooksForm` |
+| `ReceberForm` | `ReceivePaymentForm` |
+| `MotivoForm` | `ReasonForm` |
+| `GrupoContabilForm` | `AccountGroupForm` |
+| `CategoriaForm` | `CategoryForm` |
+| `CentroCustoForm` | `CostCenterForm` |
+| `ContaForm` | `FinancialAccountForm` |
+| `AbrirCaixaForm` | `OpenCashRegisterForm` |
+| `MovimentoCaixaForm` | `CashMovementForm` |
+| `FecharCaixaForm` | `CloseCashRegisterForm` |
+| `PercentualComissaoForm` | `CommissionPercentageForm` |
+| `PagarComissaoForm` | `PayCommissionForm` |
+| `ImportarExtratoForm` | `ImportStatementForm` |
+| `LancamentoDaTransacaoForm` | `TransactionEntryForm` |
+| `TipoFinanceiro` | `FinancialKind` |
+| `ParcelaQuerySet` | `InstallmentQuerySet` |
+| `ArquivoInvalido` | `InvalidFile` |
+| `Transacao` | `Transaction` |
+| `Extrato` | `Statement` |
+| `Formas` | `Methods` |
+| `Candidato` | `Candidate` |
+
+### Financeiro: classes e membros dos enums
+
+| Antes | Depois |
+|---|---|
+| `Tipo` | `Kind` |
+| `Situacao` | `Status` |
+| `Forma` | `Method` |
+| `BANCO` | `BANK` |
+| `CARTAO` | `CARD` |
+| `RECEITA` | `INCOME` |
+| `DESPESA` | `EXPENSE` |
+| `FISICA` | `INDIVIDUAL` |
+| `JURIDICA` | `COMPANY` |
+| `RECEBER` | `RECEIVABLE` |
+| `PAGAR` | `PAYABLE` |
+| `DINHEIRO` | `CASH` |
+| `DEBITO` | `DEBIT` |
+| `CREDITO` | `CREDIT` |
+| `TRANSFERENCIA` | `TRANSFER` |
+| `CARTEIRA` | `WALLET` |
+| `DEBITO_AUTOMATICO` | `DIRECT_DEBIT` |
+| `FINANCIAMENTO` | `FINANCING` |
+| `RETIRADA` | `WITHDRAWAL` |
+| `REFORCO` | `TOP_UP` |
+| `PENDENTE` | `PENDING` |
+| `CONCILIADA` | `RECONCILED` |
+| `IGNORADA` | `IGNORED` |
+
+### Financeiro: constantes
+
+| Antes | Depois |
+|---|---|
+| `CENTAVO` | `CENT` |
+| `DATA` | `DATE_INPUT` |
+| `DIVIDIR` | `SPLIT` |
+| `REPETIR` | `REPEAT` |
+| `TAMANHO_MAXIMO_OFX` | `MAX_OFX_SIZE` |
+| `CONTAS_PADRAO` | `DEFAULT_ACCOUNTS` |
+| `CATEGORIAS_PADRAO` | `DEFAULT_CATEGORIES` |
+| `PLANO_PADRAO` | `DEFAULT_CHART` |
+| `CARTOES` | `CARDS` |
+| `_LATINA` | `_LATIN` |
+| `FORMAS` | `METHODS` |
+| `_INGLES_COM_CHEQUE` | `_ENGLISH_WITH_CHEQUE` |
+| `JANELA` | `WINDOW` |
+| `FAIXAS_DE_ATRASO` | `OVERDUE_BRACKETS` |
+| `POR_PAGINA` | `PER_PAGE` |
+| `SITUACOES` | `STATUSES` |
+| `MOVIMENTOS_NA_URL` | `URL_MOVEMENTS` |
+
+### Financeiro: funções, métodos e views
+
+| Antes | Depois |
+|---|---|
+| `percentual_de` | `percentage_for` |
+| `_creditos` | `_credits` |
+| `_debitos` | `_debits` |
+| `pendente` | `pending` |
+| `pagar` | `pay` |
+| `liberar` | `release` |
+| `_formas_com_vazio` | `_methods_with_blank` |
+| `_campo_dinheiro` | `_money_field` |
+| `_centros_de_custo` | `_cost_centers` |
+| `_grupos` | `_groups` |
+| `_descendentes` | `_descendants` |
+| `ancestrais` | `ancestors` |
+| `criar_padroes` | `create_defaults` |
+| `papel_documento` | `document_role` |
+| `nome_pessoa` | `payer_name` |
+| `com_saldo` | `with_balance` |
+| `abertas` | `unpaid` |
+| `valores` | `paid_and_balance` |
+| `aberto` | `is_open` |
+| `diferenca` | `difference` |
+| `bruta` | `gross` |
+| `entrada` | `is_incoming` |
+| `_texto` | `_text` |
+| `_data` | `_date` |
+| `_valor` | `_amount` |
+| `ler` | `read` |
+| `em_uso` | `in_use` |
+| `rotulos` | `labels` |
+| `importar` | `import_statement` |
+| `outra_conta_no_banco` | `other_bank_account` |
+| `candidatos` | `candidates` |
+| `_vincular` | `_link` |
+| `_pendente` | `_pending` |
+| `conciliar` | `reconcile` |
+| `conciliar_unicos` | `reconcile_unique` |
+| `criar_lancamento` | `create_entry` |
+| `ignorar` | `ignore` |
+| `desfazer` | `undo` |
+| `saldo_no_sistema` | `system_balance` |
+| `dividir` | `split` |
+| `somar_meses` | `add_months` |
+| `receber` | `receive` |
+| `estornar` | `reverse_payment` |
+| `cancelar` | `cancel` |
+| `fechado_ate` | `closed_until` |
+| `conferir_periodo` | `check_period` |
+| `fechar` | `close_books` |
+| `reabrir` | `reopen_books` |
+| `devedores` | `debtors` |
+| `resumo_do_paciente` | `patient_summary` |
+| `_sinal` | `_sign` |
+| `pagamentos_validos` | `valid_payments` |
+| `saldos_das_contas` | `account_balances` |
+| `fluxo_de_caixa` | `cash_flow` |
+| `recebido_e_pago` | `received_and_paid` |
+| `relatorio` | `report` |
+| `ligar_grupos` | `link_groups` |
+| `em_ordem_de_arvore` | `in_tree_order` |
+| `totais_por_grupo` | `totals_by_group` |
+| `arvore_por_grupo` | `tree_by_group` |
+| `fracao_do_ano` | `year_fraction` |
+| `planejamento` | `planning` |
+| `salvar_metas` | `save_targets` |
+| `copiar_metas` | `copy_targets` |
+| `caixa_aberto` | `open_cash_register` |
+| `abrir_caixa` | `open_register` |
+| `resumo_do_caixa` | `register_summary` |
+| `movimentar_caixa` | `move_cash` |
+| `fechar_caixa` | `close_register` |
+| `padroes_para_clinica_nova` | `defaults_for_new_clinic` |
+| `_modulo` | `_module` |
+| `receber_lista` | `receivables` |
+| `pagar_lista` | `payables` |
+| `_lista` | `_entry_list` |
+| `lancamento_novo` | `new_entry` |
+| `despesa_nova` | `new_expense` |
+| `lancamento_cancelar` | `cancel_entry` |
+| `recibo` | `receipt` |
+| `caixa_detalhe` | `cash_register_detail` |
+| `caixa_movimento` | `cash_movement_view` |
+| `caixa_fechar` | `close_cash_register` |
+| `_periodo` | `_period` |
+| `relatorios` | `reports` |
+| `fechamento` | `book_closing` |
+| `cadastro_lista` | `catalog_list` |
+| `cadastro_form` | `catalog_form` |
+| `plano_contas` | `chart_of_accounts` |
+| `grupo_novo` | `new_group` |
+| `grupo_editar` | `edit_group` |
+| `_grupo_form` | `_group_form` |
+| `fornecedores` | `suppliers` |
+| `fornecedor_novo` | `new_supplier` |
+| `fornecedor_editar` | `edit_supplier` |
+| `_fornecedor_form` | `_supplier_form` |
+| `_ate` | `_until` |
+| `comissoes_lista` | `commission_list` |
+| `comissao_pagar` | `pay_commission` |
+| `extratos` | `statements` |
+| `extrato` | `statement` |
+| `_voltar_ao_extrato` | `_back_to_statement` |
+| `extrato_conciliar_unicos` | `statement_reconcile_unique` |
+| `transacao_acao` | `transaction_action` |
+| `transacao_lancamento` | `transaction_entry` |
+
+As classes de enum `Tipo`, `Situacao` e `Forma` de todos os apps viraram `Kind`, `Status` e `Method`, como os campos `kind`, `status`, `method`; os membros dos outros apps seguem com o app deles.
 
 ## O que fica em português
 

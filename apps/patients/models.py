@@ -11,9 +11,9 @@ from apps.core.ordering import ALPHABETICAL
 class Patient(ClinicModel):
     """A patient: an individual (CPF) or a company (CNPJ)."""
 
-    class Tipo(models.TextChoices):
-        FISICA = "PF", _("Pessoa física")
-        JURIDICA = "PJ", _("Pessoa jurídica")
+    class Kind(models.TextChoices):
+        INDIVIDUAL = "PF", _("Pessoa física")
+        COMPANY = "PJ", _("Pessoa jurídica")
 
     class Sexo(models.TextChoices):
         FEMININO = "F", _("Feminino")
@@ -21,7 +21,7 @@ class Patient(ClinicModel):
         OUTRO = "O", _("Outro")
 
     kind = models.CharField(
-        _("tipo"), max_length=2, choices=Tipo.choices, default=Tipo.FISICA, db_column="tipo"
+        _("tipo"), max_length=2, choices=Kind.choices, default=Kind.INDIVIDUAL, db_column="tipo"
     )
     name = models.CharField(
         _("nome"),
@@ -168,9 +168,9 @@ class Patient(ClinicModel):
         return self.name
 
     @property
-    def papel_documento(self):
+    def document_role(self):
         """Its document's role in apps/core/identification.py."""
-        return "empresa" if self.kind == self.Tipo.JURIDICA else "paciente"
+        return "empresa" if self.kind == self.Kind.COMPANY else "paciente"
 
     @property
     def idade(self):

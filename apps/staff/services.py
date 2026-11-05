@@ -63,9 +63,9 @@ def lancar(folhas, *, category, due_date, user):
                 _("O total de %(nome)s precisa ser maior que zero.") % {"nome": folha.employee}
             )
         month = f"{folha.period:%m/%Y}"
-        folha.entry = financeiro.criar_lancamento(
+        folha.entry = financeiro.create_entry(
             clinic=folha.employee.clinic,
-            kind=Entry.Tipo.PAGAR,
+            kind=Entry.Kind.PAYABLE,
             payer=folha.employee.name,
             description=_("Salário %(mes)s") % {"mes": month},
             category=category,

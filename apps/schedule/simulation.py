@@ -89,13 +89,13 @@ def simular_agendamentos(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocu
 def _situacao(sorteio, start):
     """Past appointments: most patients came, some missed or cancelled (0.24.0)."""
     if start > timezone.now():
-        return Appointment.Situacao.AGENDADO
+        return Appointment.Status.AGENDADO
     sorteado = sorteio.random()
     if sorteado < 0.82:
-        return Appointment.Situacao.COMPARECEU
+        return Appointment.Status.COMPARECEU
     if sorteado < 0.92:
-        return Appointment.Situacao.FALTOU
-    return Appointment.Situacao.DESMARCOU
+        return Appointment.Status.FALTOU
+    return Appointment.Status.DESMARCOU
 
 
 def simular_rechamadas(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
@@ -144,13 +144,13 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     from apps.finance.models import Category, CostCenter, Entry, FinancialAccount, Payment
 
     pacientes = _patients(clinic)
-    categorias = list(Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA))
+    categorias = list(Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME))
     contas = list(FinancialAccount.objects.filter(clinic=clinic, active=True))
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     if not (pacientes and categorias and contas):
         return 0, 0
     today = timezone.localdate()
-    formas = [method for method, _rotulo in Payment.Forma.em_uso(clinic.country)]
+    formas = [method for method, _rotulo in Payment.Method.in_use(clinic.country)]
     # Two cost centers (decision 095): the care itself and the office.
     centros = {
         name: CostCenter.objects.get_or_create(clinic=clinic, name=name)[0]
@@ -159,9 +159,9 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
     criados = 0
     for _ in range(quantity):
         date = today - datetime.timedelta(days=sorteio.randint(0, 90))
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=clinic,
-            kind=Entry.Tipo.RECEBER,
+            kind=Entry.Kind.RECEIVABLE,
             patient=sorteio.choice(pacientes),
             description=sorteio.choice(DESCRICOES_FINANCEIRAS),
             category=sorteio.choice(categorias),
@@ -175,7 +175,7 @@ def simular_financeiro(clinic, sorteio, quantity=60, user=None):
         )
         for installment in entry.parcelas.all():
             if installment.due_date <= today and sorteio.random() < 0.8:
-                services.receber(
+                services.receive(
                     installment,
                     user=user,
                     amount=installment.amount,
@@ -210,13 +210,13 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
 
     # Bills are paid the way the clinic's country pays them (decision 123).
     for_country = metodos.for_country(clinic.country).codigos
-    contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFERENCIA, metodos.DEBITO_AUTOMATICO)
+    contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFER, metodos.DIRECT_DEBIT)
     formas = [method for method in contas_a_pagar if method in for_country]
     categorias = {
-        c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Tipo.DESPESA)
+        c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Kind.EXPENSE)
     }
     today = timezone.localdate()
-    start = services.somar_meses(today.replace(day=10), -2)
+    start = services.add_months(today.replace(day=10), -2)
     criadas = 0
     for supplier, description, category, amount, meses in DESPESAS_SIMULADAS:
         if category not in categorias:
@@ -224,9 +224,9 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
         parcelas = meses or sorteio.choice([1, 2, 3])
         amount = Decimal(amount)
         cadastro, _criado = Supplier.objects.get_or_create(clinic=clinic, name=supplier)
-        entry = services.criar_lancamento(
+        entry = services.create_entry(
             clinic=clinic,
-            kind=Entry.Tipo.PAGAR,
+            kind=Entry.Kind.PAYABLE,
             supplier=cadastro,
             payer=supplier,
             description=description,
@@ -242,7 +242,7 @@ def _simular_despesas(clinic, sorteio, contas, user, centros):
         )
         for installment in entry.parcelas.all():
             if installment.due_date <= today and sorteio.random() < 0.9:
-                services.receber(
+                services.receive(
                     installment,
                     user=user,
                     amount=installment.amount,
@@ -291,7 +291,7 @@ def simular_orcamentos(clinic, sorteio, quantity=20, user=None):
     pacientes = _patients(clinic)
     profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
     category = (
-        tratamento or Category.objects.filter(clinic=clinic, kind=Category.Tipo.RECEITA).first()
+        tratamento or Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME).first()
     )
     if not (procedimentos and pacientes and category):
         return 0
@@ -341,7 +341,7 @@ def simular_comissoes(clinic, sorteio, user=None):
     from apps.finance.models import Category
 
     category = Category.objects.filter(
-        clinic=clinic, kind=Category.Tipo.DESPESA, name="Comissões"
+        clinic=clinic, kind=Category.Kind.EXPENSE, name="Comissões"
     ).first()
     if category is None:
         return 0
@@ -352,8 +352,8 @@ def simular_comissoes(clinic, sorteio, user=None):
             practitioner.commission_percentage = Decimal(sorteio.choice([30, 35, 40]))
             practitioner.save(update_fields=["commission_percentage"])
         # Runs without isolation (like the command); the practitioner pins the clinic.
-        if commissions.pendente(practitioner, fim_do_mes_passado)["amount"] > 0:
-            commissions.pagar(
+        if commissions.pending(practitioner, fim_do_mes_passado)["amount"] > 0:
+            commissions.pay(
                 practitioner,
                 until=fim_do_mes_passado,
                 due_date=fim_do_mes_passado + datetime.timedelta(days=5),
