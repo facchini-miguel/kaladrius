@@ -46,7 +46,7 @@ def despesa(clinic, **extra):
     }
 
 
-def test_cadastro_e_nome_repetido(clinica_a, admin):
+def test_registration_and_duplicate_name(clinica_a, admin):
     url = reverse("finance:catalog_new", args=["cost-centers"])
     assert admin.post(url, {"name": " Consultório 1 ", "active": "on"}).status_code == 302
     with use_clinic(clinica_a):
@@ -57,7 +57,7 @@ def test_cadastro_e_nome_repetido(clinica_a, admin):
     assert "Consultório 1" in results and "Ativo" in results
 
 
-def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
+def test_field_shows_only_with_a_registered_center(clinica_a, admin):
     for rota in ("finance:entry_new", "finance:expense_new"):
         assert "cost_center" not in admin.get(reverse(rota)).context["form"].fields
     with use_clinic(clinica_a):
@@ -70,7 +70,7 @@ def test_campo_so_aparece_com_centro_cadastrado(clinica_a, admin):
         assert inativo not in field.queryset and field.queryset.count() == 1
 
 
-def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
+def test_entries_keep_the_center(clinica_a, centro, admin):
     assert (
         admin.post(
             reverse("finance:expense_new"), despesa(clinica_a, cost_center=centro.pk)
@@ -105,7 +105,7 @@ def test_lancamentos_guardam_o_centro(clinica_a, centro, admin):
     assert admin.post(reverse("finance:expense_new"), despesa(clinica_a)).status_code == 302
 
 
-def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
+def test_report_by_cost_center(clinica_a, centro, admin):
     with use_clinic(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
         cash_register = FinancialAccount.objects.get(name="Caixa")
@@ -142,18 +142,18 @@ def test_relatorio_por_centro_de_custo(clinica_a, centro, admin):
     )
 
 
-def test_relatorio_sem_centros_nao_mostra_os_quadros(admin):
+def test_report_without_centers_hides_the_tables(admin):
     report = admin.get(reverse("finance:reports"))
     assert not report.context["relatorio"]["centros"]
     assert "por centro de custo" not in report.content.decode()
 
 
-def test_recepcao_nao_cadastra(clinica_a, criar_usuario, cliente_de):
+def test_reception_does_not_register(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_centros", clinica_a, Role.FRONT_DESK))
     assert reception.get(reverse(URL, args=["cost-centers"])).status_code == 403
 
 
-def test_some_com_o_financeiro_desligado(clinica_a, admin):
+def test_hidden_with_finance_off(clinica_a, admin):
     results = reverse(URL, args=["cost-centers"])
     assert results in admin.get(reverse("home")).content.decode()
     configure(

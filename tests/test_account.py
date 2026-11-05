@@ -51,7 +51,7 @@ def codigo_atual(dispositivo, deslocamento=0):
 # --- Idle time and the eye button ----------------------------------------------------------
 
 
-def test_sessao_termina_com_30_minutos_sem_uso(client, pessoa):
+def test_session_ends_after_30_idle_minutes(client, pessoa):
     assert settings.SESSION_COOKIE_AGE == 30 * 60 and settings.SESSION_SAVE_EVERY_REQUEST
     client.force_login(pessoa)
     page = client.get(reverse("home")).content.decode()
@@ -61,11 +61,11 @@ def test_sessao_termina_com_30_minutos_sem_uso(client, pessoa):
     assert "30 minutos sem uso" in saiu.content.decode()
 
 
-def test_ativo_sem_login_vai_para_o_login(client):
+def test_active_without_login_goes_to_login(client):
     assert client.get(reverse("account:active")).status_code == 302
 
 
-def test_campos_de_senha_ganham_o_olhinho(client):
+def test_password_fields_get_the_eye_toggle(client):
     page = client.get(reverse("login")).content.decode()
     assert 'data-mostrar-senha="Mostrar a senha"' in page
 
@@ -73,7 +73,7 @@ def test_campos_de_senha_ganham_o_olhinho(client):
 # --- Wrong logins per address ---------------------------------------------------------------
 
 
-def test_muitas_tentativas_do_mesmo_endereco_bloqueiam_qualquer_usuario(client, pessoa):
+def test_many_attempts_from_one_address_block_any_user(client, pessoa):
     for number in range(4):  # 4 usernames x 5 failures: 20 from 127.0.0.1
         AccessAttempt.objects.create(
             username=f"tentativa{number}",
@@ -92,7 +92,7 @@ def test_muitas_tentativas_do_mesmo_endereco_bloqueiam_qualquer_usuario(client, 
     assert "_auth_user_id" not in client.session
 
 
-def test_poucas_tentativas_do_endereco_nao_bloqueiam(client, pessoa):
+def test_few_attempts_from_the_address_do_not_block(client, pessoa):
     AccessAttempt.objects.create(
         username="outro",
         ip_address="127.0.0.1",
@@ -110,7 +110,7 @@ def test_poucas_tentativas_do_endereco_nao_bloqueiam(client, pessoa):
 # --- Two-step verification --------------------------------------------------------------------
 
 
-def test_ativar_com_qr_code(client, pessoa):
+def test_activate_with_qr_code(client, pessoa):
     client.force_login(pessoa)
     page = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in page and "otpauth" not in page  # the secret is in the QR, not text
@@ -128,7 +128,7 @@ def test_ativar_com_qr_code(client, pessoa):
     assert dispositivo.active and dispositivo.secret not in text
 
 
-def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
+def test_login_asks_for_the_code_after_the_password(client, pessoa):
     dispositivo, _ = ligar_duas_etapas(pessoa)
     response = entrar(client, pessoa, proximo=reverse("patients:list"))
     assert response.url == reverse("account:code")
@@ -147,7 +147,7 @@ def test_login_pede_o_codigo_depois_da_senha(client, pessoa):
     assert "Código incorreto" in repetido.content.decode()
 
 
-def test_codigo_de_recuperacao_vale_uma_vez(client, pessoa):
+def test_recovery_code_works_once(client, pessoa):
     _, codigos = ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
     assert client.post(reverse("account:code"), {"code": codigos[0].lower()}).status_code == 302
@@ -157,7 +157,7 @@ def test_codigo_de_recuperacao_vale_uma_vez(client, pessoa):
     assert "Código incorreto" in segunda.content.decode()
 
 
-def test_cinco_codigos_errados_voltam_ao_login(client, pessoa):
+def test_five_wrong_codes_return_to_login(client, pessoa):
     ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
     for _ in range(5):
@@ -168,7 +168,7 @@ def test_cinco_codigos_errados_voltam_ao_login(client, pessoa):
     assert "_auth_user_id" not in client.session and bloqueado.status_code != 302
 
 
-def test_passo_do_codigo_expira(client, pessoa):
+def test_code_step_expires(client, pessoa):
     dispositivo, _ = ligar_duas_etapas(pessoa)
     entrar(client, pessoa)
     session = client.session
@@ -179,7 +179,7 @@ def test_passo_do_codigo_expira(client, pessoa):
     )
 
 
-def test_desativar_e_gerar_novos_codigos(client, pessoa):
+def test_deactivate_and_generate_new_codes(client, pessoa):
     dispositivo, antigos = ligar_duas_etapas(pessoa)
     client.force_login(pessoa)
     novos = client.post(
@@ -204,9 +204,7 @@ def test_desativar_e_gerar_novos_codigos(client, pessoa):
     assert response.status_code == 302 and not services.active_for(pessoa)
 
 
-def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
-    client, clinica_a, pessoa, criar_usuario
-):
+def test_admin_removes_verification_of_who_lost_the_phone(client, clinica_a, pessoa, criar_usuario):
     ligar_duas_etapas(pessoa)
     admin = criar_usuario("admin_conta", clinica_a, Role.ADMIN)
     client.force_login(admin)
@@ -218,7 +216,7 @@ def test_administrador_remove_a_verificacao_de_quem_perdeu_o_celular(
     assert AuditEntry.objects.filter(object_repr__contains="removida").exists()
 
 
-def test_conta_de_demonstracao_nao_ativa(client, pessoa):
+def test_demo_account_does_not_activate(client, pessoa):
     pessoa.demo = True
     pessoa.save(update_fields=["demo"])
     client.force_login(pessoa)
@@ -229,13 +227,13 @@ def test_conta_de_demonstracao_nao_ativa(client, pessoa):
 # --- Password recovery by e-mail -------------------------------------------------------------
 
 
-def test_sem_email_configurado_nao_ha_recuperacao(client, settings):
+def test_no_email_configured_means_no_recovery(client, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = False
     assert client.get(reverse("account:recover")).status_code == 404
     assert "Esqueci minha senha" not in client.get(reverse("login")).content.decode()
 
 
-def test_recuperar_senha_por_email(client, pessoa, settings):
+def test_recover_password_by_email(client, pessoa, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     assert "Esqueci minha senha" in client.get(reverse("login")).content.decode()
@@ -252,7 +250,7 @@ def test_recuperar_senha_por_email(client, pessoa, settings):
     assert pessoa.check_password(nova)
 
 
-def test_conta_de_demonstracao_nao_recebe_email(client, pessoa, settings):
+def test_demo_account_gets_no_email(client, pessoa, settings):
     settings.RECUPERAR_SENHA_POR_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     pessoa.demo = True
@@ -271,7 +269,7 @@ def exigida(clinica_a):
     return clinica_a
 
 
-def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
+def test_records_or_finance_users_are_led_to_activate(
     client, exigida, criar_usuario, criar_profissional
 ):
     practitioner = criar_usuario("prof_exigida", exigida, Role.PRACTITIONER)
@@ -288,7 +286,7 @@ def test_quem_acessa_prontuario_ou_financeiro_e_levado_a_ativar(
         assert client.get(reverse("patients:list")).status_code == 200
 
 
-def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuario):
+def test_reception_and_demo_are_not_required(client, exigida, criar_usuario):
     reception = criar_usuario("rec_exigida", exigida, Role.FRONT_DESK)
     client.force_login(reception)
     assert client.get(reverse("patients:list")).status_code == 200
@@ -299,7 +297,7 @@ def test_recepcao_e_demonstracao_nao_sao_obrigadas(client, exigida, criar_usuari
     assert client.get(reverse("patients:list")).status_code == 200
 
 
-def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
+def test_required_cannot_be_deactivated(client, exigida, criar_usuario):
     admin = criar_usuario("admin_exigida", exigida, Role.ADMIN)
     admin.set_password(SENHA)
     admin.save()
@@ -318,12 +316,12 @@ def test_obrigatoria_nao_pode_ser_desativada(client, exigida, criar_usuario):
     assert services.active_for(admin)
 
 
-def test_sem_exigencia_ninguem_e_levado(client, clinica_a, criar_usuario):
+def test_without_requirement_nobody_is_led(client, clinica_a, criar_usuario):
     client.force_login(criar_usuario("fin_livre", clinica_a, Role.FINANCE))
     assert client.get(reverse("finance:receivables")).status_code == 200
 
 
-def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model, client):
+def test_new_clinic_starts_requiring_and_existing_was_turned_on(django_user_model, client):
     import importlib
 
     from django.db import connection
@@ -350,7 +348,7 @@ def test_clinica_nova_comeca_exigindo_e_a_existente_foi_ligada(django_user_model
     assert Clinic.single().require_two_factor
 
 
-def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_copiado():
+def test_account_tables_go_back_to_conta_and_account_data_is_copied():
     """Decision 154: while the app ran as "account", its data went to account_* tables. The
     migration ran on the tables of the time (conta_*, renamed by decision 179): the test builds
     them as they were."""
@@ -403,7 +401,7 @@ def test_tabelas_da_conta_voltam_a_ser_as_conta_e_o_que_foi_salvo_nas_account_e_
         assert cursor.fetchall() == [(1, "codigo-NOVO"), (2, "original")]
 
 
-def test_sobras_da_account_sao_removidas_e_a_conta_fica(django_user_model):
+def test_account_leftovers_are_removed_and_conta_stays(django_user_model):
     """Decision 158: the account_* tables, their migration row and content types go; conta_*
     stays as it is."""
     import importlib

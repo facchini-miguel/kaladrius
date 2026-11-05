@@ -25,28 +25,28 @@ from apps.patients.models import Patient
         ("", ""),
     ],
 )
-def test_normalizar_telefone(digitado, esperado):
+def test_normalize_phone(digitado, esperado):
     assert normalize_phone(digitado) == esperado
 
 
 @pytest.mark.parametrize("digitado", ["(20) 3461-3354", "(54) 3123-45678", "123", "5491234"])
-def test_telefone_invalido(digitado):
+def test_invalid_phone(digitado):
     with pytest.raises(ValidationError):
         normalize_phone(digitado)
 
 
-def test_nono_digito_so_em_celular():
+def test_ninth_digit_only_on_mobile():
     assert ninth_digit("5481234567") == "54981234567"
     assert ninth_digit("5434613354") == "5434613354"
     assert ninth_digit("99998888") == "99998888"  # no area code: left as it was
 
 
-def test_link_do_whatsapp_com_ddd_e_nono_digito():
+def test_whatsapp_link_with_area_code_and_ninth_digit():
     assert whatsapp("54991234567") == "https://wa.me/5554991234567"
 
 
 @pytest.mark.django_db
-def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, cliente_de):
+def test_patient_registration_fixes_the_mobile(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Role.FRONT_DESK))
     response = cliente.post(
         reverse("patients:new"),
@@ -72,7 +72,7 @@ def test_cadastro_do_paciente_corrige_o_celular(clinica_a, criar_usuario, client
     assert "whatsapp" in errado.context["form"].errors
 
 
-def test_anonimizacao_mantem_celular_e_fixo_validos():
+def test_anonymization_keeps_valid_mobile_and_landline():
     fake = Faker("pt_BR")
     for _ in range(50):
         celular = _same_length("5484123456", fake)  # old mobile without the ninth digit

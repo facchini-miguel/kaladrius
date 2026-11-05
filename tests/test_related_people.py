@@ -28,7 +28,7 @@ def familia(clinica_a):
         return filha, mae
 
 
-def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, reception):
+def test_link_to_another_patient_shows_on_both_records(clinica_a, familia, reception):
     filha, mae = familia
     response = reception.post(
         reverse("patients:related_new", args=[filha.pk]),
@@ -44,7 +44,7 @@ def test_vinculo_com_outro_paciente_aparece_nas_duas_fichas(clinica_a, familia, 
     assert "Mãe de" in ficha_mae and "Ana Fictícia" in ficha_mae
 
 
-def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
+def test_outside_contact_with_phone(clinica_a, familia, reception):
     filha, _ = familia
     url = reverse("patients:related_new", args=[filha.pk])
     data = {
@@ -80,7 +80,7 @@ def test_contato_de_fora_da_clinica_com_telefone(clinica_a, familia, reception):
         ({"name": "", "other_patient": "PROPRIO"}, "other_patient"),
     ],
 )
-def test_validacoes(data, field, familia, reception):
+def test_validations(data, field, familia, reception):
     filha, mae = familia
     trocas = {"MAE": mae.pk, "PROPRIO": filha.pk}
     data = {k: trocas.get(v, v) for k, v in data.items()}
@@ -90,7 +90,7 @@ def test_validacoes(data, field, familia, reception):
     assert field in response.context["form"].errors
 
 
-def test_vinculo_repetido(clinica_a, familia, reception):
+def test_duplicate_link(clinica_a, familia, reception):
     filha, mae = familia
     with use_clinic(clinica_a):
         RelatedPerson.objects.create(patient=filha, other_patient=mae, relationship=MOTHER)
@@ -101,13 +101,13 @@ def test_vinculo_repetido(clinica_a, familia, reception):
     assert "other_patient" in response.context["form"].errors
 
 
-def test_banco_exige_paciente_ou_nome(clinica_a, familia):
+def test_database_requires_patient_or_name(clinica_a, familia):
     filha, _ = familia
     with use_clinic(clinica_a), pytest.raises(IntegrityError), transaction.atomic():
         RelatedPerson.objects.create(patient=filha, relationship=MOTHER)
 
 
-def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia):
+def test_does_not_link_patients_of_different_clinics(clinica_a, clinica_b, familia):
     filha, _ = familia
     with use_clinic(clinica_b):
         outra = Patient.objects.create(name="De outra clínica")
@@ -115,7 +115,9 @@ def test_nao_liga_pacientes_de_clinicas_diferentes(clinica_a, clinica_b, familia
         RelatedPerson(patient=filha, other_patient=outra, relationship=MOTHER).save()
 
 
-def test_outra_clinica_nao_ve_nem_altera(clinica_a, clinica_b, familia, criar_usuario, cliente_de):
+def test_another_clinic_neither_sees_nor_changes(
+    clinica_a, clinica_b, familia, criar_usuario, cliente_de
+):
     filha, _ = familia
     with use_clinic(clinica_a):
         contato = RelatedPerson.objects.create(patient=filha, relationship=MOTHER, name="Fictícia")
@@ -124,7 +126,7 @@ def test_outra_clinica_nao_ve_nem_altera(clinica_a, clinica_b, familia, criar_us
     assert intruso.get(reverse("patients:related_new", args=[filha.pk])).status_code == 404
 
 
-def test_financeiro_so_ve(clinica_a, familia, criar_usuario, cliente_de):
+def test_finance_only_views(clinica_a, familia, criar_usuario, cliente_de):
     filha, _ = familia
     financeiro = cliente_de(criar_usuario("fin_rel", clinica_a, Role.FINANCE))
     patient_record = financeiro.get(reverse("patients:record", args=[filha.pk])).content.decode()
@@ -134,9 +136,7 @@ def test_financeiro_so_ve(clinica_a, familia, criar_usuario, cliente_de):
     assert new_patient.status_code == 403
 
 
-def test_exclusao_lgpd_apaga_os_vinculos_dos_dois_lados(
-    clinica_a, familia, criar_usuario, cliente_de
-):
+def test_lgpd_deletion_deletes_links_on_both_sides(clinica_a, familia, criar_usuario, cliente_de):
     filha, mae = familia
     with use_clinic(clinica_a):
         de_filha = RelatedPerson.objects.create(

@@ -125,13 +125,13 @@ def servidor(tmp_path):
     return s
 
 
-def test_sem_versao_nova_nada_muda(servidor):
+def test_no_new_version_changes_nothing(servidor):
     code, log = servidor.rodar()
     assert code == 0
     assert log == ["monitor MONITOR_UPDATE_URL ok"]
 
 
-def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
+def test_new_version_that_starts_becomes_the_next_previous(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(0)
     code, log = servidor.rodar()
@@ -145,7 +145,7 @@ def test_versao_nova_que_sobe_vira_a_anterior_da_proxima(servidor):
     assert servidor.ler("removidas") == ["A"]
 
 
-def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
+def test_new_version_that_fails_rolls_back_and_is_refused(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)  # B does not answer; A answers again
     code, log = servidor.rodar()
@@ -182,7 +182,7 @@ def test_versao_nova_que_nao_sobe_volta_a_anterior_e_fica_recusada(servidor):
     assert servidor.ler("removidas") == ["A", "B"]  # the old :previous and the refused one
 
 
-def test_duas_versoes_recusadas_seguidas_nao_ficam_no_disco(servidor):
+def test_two_refused_versions_in_a_row_do_not_stay_on_disk(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)
     servidor.rodar()
@@ -200,7 +200,7 @@ def test_duas_versoes_recusadas_seguidas_nao_ficam_no_disco(servidor):
     assert servidor.ler("removidas") == ["B", "A", "C"]
 
 
-def test_forcar_tenta_de_novo_a_versao_recusada(servidor):
+def test_force_retries_the_refused_version(servidor):
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)
     servidor.rodar()
@@ -211,14 +211,14 @@ def test_forcar_tenta_de_novo_a_versao_recusada(servidor):
     assert servidor.ler("installed-image") == ["B", "D"]
 
 
-def test_servidor_antigo_guarda_a_anterior_na_primeira_execucao(servidor):
+def test_old_server_keeps_previous_on_first_run(servidor):
     (servidor.dir / "imagens" / "registro_app_previous").unlink()
     code, _log = servidor.rodar()
     assert code == 0
     assert servidor.id_local("registro/app:previous") == "A"
 
 
-def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
+def test_without_saved_previous_warns_and_does_not_pretend_rollback(servidor):
     (servidor.dir / "imagens" / "registro_app_previous").unlink()
     (servidor.dir / "installed-image").write_text("X\nD\n")  # A was never confirmed
     servidor.imagem("remoto", "registro/app:latest", "B")
@@ -232,7 +232,7 @@ def test_sem_anterior_guardada_avisa_e_nao_finge_que_voltou(servidor):
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
 
 
-def test_pacote_linux_sem_documentacao_e_com_imagem_so_local(servidor):
+def test_linux_package_without_docs_and_local_only_image(servidor):
     # Installed from the Linux package (decision 140): no docs image, and an image already on
     # the server is enough when the registry does not have it (a test image, no internet).
     common = servidor.dir / "bin" / "common.sh"
@@ -249,7 +249,7 @@ def test_pacote_linux_sem_documentacao_e_com_imagem_so_local(servidor):
     assert servidor.ler("installed-image") == ["B"]
 
 
-def test_google_cloud_sem_o_registro_falha_e_avisa(servidor):
+def test_google_cloud_without_registry_fails_and_warns(servidor):
     # Only the Linux package goes on with the image already on the server: on Google Cloud the
     # update monitor reports a registry it cannot reach.
     (servidor.dir / "remoto" / "registro_app_latest").unlink()
@@ -258,7 +258,7 @@ def test_google_cloud_sem_o_registro_falha_e_avisa(servidor):
     assert log[-1] == "monitor MONITOR_UPDATE_URL fail"
 
 
-def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor):
+def test_package_without_image_in_registry_or_server_fails_and_warns(servidor):
     (servidor.dir / "linux-package").write_text("VERSION=0.54.0\n")
     for lugar in ("imagens", "remoto"):
         (servidor.dir / lugar / "registro_app_latest").unlink()
@@ -268,7 +268,7 @@ def test_pacote_sem_a_imagem_no_registro_nem_no_servidor_falha_e_avisa(servidor)
     assert not [row for row in log if row.startswith("compose")]
 
 
-def test_o_nome_antigo_de_force_ainda_vale(servidor):
+def test_old_force_name_still_works(servidor):
     # The VM's startup script of a server created before decision 147 still says --forcar.
     servidor.imagem("remoto", "registro/app:latest", "B")
     servidor.saude(1, 0)

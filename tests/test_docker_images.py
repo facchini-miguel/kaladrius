@@ -70,7 +70,7 @@ def _repositorio(imagem):
 IMAGENS = list(_imagens())
 
 
-def test_encontra_as_imagens_do_sistema():
+def test_finds_the_system_images():
     """The scan sees the system image and production's database and Caddy (the docs site's
     Dockerfile is not inside the system image, so it is not required)."""
     arquivos = {file for file, _imagem in IMAGENS}
@@ -80,11 +80,11 @@ def test_encontra_as_imagens_do_sistema():
 
 
 @pytest.mark.parametrize(("file", "imagem"), IMAGENS)
-def test_imagem_de_base_fixada_por_digest(file, imagem):
+def test_base_image_pinned_by_digest(file, imagem):
     assert DIGEST.search(imagem), f"{file}: {imagem} needs @sha256:<digest> (decision 138)"
 
 
-def test_mesma_imagem_nos_arquivos_do_compose():
+def test_same_image_in_the_compose_files():
     """Development and production run the same PostgreSQL. Only the Compose files are compared:
     Dependabot updates them in one pull request (the imagens-compose group), while the docs
     site's Caddy, in a Dockerfile, gets its own and may differ from production's for a while."""
@@ -96,7 +96,7 @@ def test_mesma_imagem_nos_arquivos_do_compose():
     assert not divergentes, divergentes
 
 
-def test_scripts_e_ci_nao_usam_tag_solta():
+def test_scripts_and_ci_use_no_loose_tag():
     """The scripts and workflows that start a base image (the restore tests, the lock
     generator, CI's PostgreSQL) read it, digest included, from the Dockerfile or the production
     Compose file, never by a bare tag such as postgres:16-alpine."""
@@ -125,7 +125,7 @@ def test_scripts_e_ci_nao_usam_tag_solta():
         ("FROM scratch\n# FROM nada:1\n", []),
     ],
 )
-def test_leitura_do_from(dockerfile, esperado):
+def test_reading_the_from_line(dockerfile, esperado):
     assert list(_from_do_dockerfile(dockerfile)) == esperado
 
 
@@ -138,5 +138,5 @@ def test_leitura_do_from(dockerfile, esperado):
         ("ghcr.io/x/y@sha256:abc", "ghcr.io/x/y"),
     ],
 )
-def test_repositorio(imagem, repositorio):
+def test_repository(imagem, repositorio):
     assert _repositorio(imagem) == repositorio

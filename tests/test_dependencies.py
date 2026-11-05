@@ -46,7 +46,7 @@ def _lock(file):
         ("deploy/pip-tools.in", "deploy/pip-tools.txt"),
     ],
 )
-def test_lock_tem_as_versoes_do_in(entrada, lock):
+def test_lock_has_the_versions_of_the_in_file(entrada, lock):
     pacotes = _lock(lock)
     escolhidas = _escolhidas(entrada)
     assert escolhidas
@@ -57,7 +57,7 @@ def test_lock_tem_as_versoes_do_in(entrada, lock):
     assert all(hashes for _, hashes in pacotes.values()), f"{lock} has a package without a hash"
 
 
-def test_locks_de_producao_e_de_desenvolvimento_concordam():
+def test_production_and_development_locks_agree():
     producao = _lock("requirements.txt")
     desenvolvimento = _lock("requirements-dev.txt")
     assert producao.keys() <= desenvolvimento.keys(), "production packages missing in the dev lock"
@@ -65,14 +65,14 @@ def test_locks_de_producao_e_de_desenvolvimento_concordam():
     assert not diferentes, f"version or hashes differ between the locks: {diferentes}"
 
 
-def test_ci_confere_os_locks():
+def test_ci_checks_the_locks():
     arquivo_ci = RAIZ / ".github" / "workflows" / "ci.yml"
     if not arquivo_ci.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
     assert "deploy/lock.sh --check" in arquivo_ci.read_text()
 
 
-def test_lint_a_cada_commit_usa_o_ruff_do_lock():
+def test_commit_lint_uses_the_locked_ruff():
     """Decision 137: the Lint workflow runs on every push and installs ruff from the lock,
     with its hashes, for the Python of .python-version."""
     file = RAIZ / ".github" / "workflows" / "lint.yml"

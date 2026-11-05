@@ -58,7 +58,7 @@ OFX_XML = """<?xml version="1.0" encoding="UTF-8"?>
 """.encode()
 
 
-def test_le_ofx_sgml_em_windows_1252():
+def test_reads_ofx_sgml_in_windows_1252():
     statement = ofx.read(OFX_SGML)
     assert (statement.bank_code, statement.account) == ("341", "98765-4")
     assert (statement.start, statement.end) == (
@@ -79,7 +79,7 @@ def test_le_ofx_sgml_em_windows_1252():
     assert segunda.amount == Decimal("-39.90")  # comma as decimal separator
 
 
-def test_le_ofx_xml_com_fitid_repetido_ou_ausente():
+def test_reads_ofx_xml_with_repeated_or_missing_fitid():
     statement = ofx.read(OFX_XML)
     assert [t.description for t in statement.transacoes] == ["Pix João", "Pix João", "Tarifa"]
     fitids = [t.fitid for t in statement.transacoes]
@@ -87,7 +87,7 @@ def test_le_ofx_xml_com_fitid_repetido_ou_ausente():
     assert statement.balance is None
 
 
-def test_arquivo_que_nao_e_ofx():
+def test_file_that_is_not_ofx():
     with pytest.raises(ofx.InvalidFile):
         ofx.read(b"data;valor\n2026-10-01;10")
 
@@ -156,14 +156,14 @@ def transacao(cenario, fitid):
         return BankTransaction.objects.get(fitid=fitid)
 
 
-def test_importar_de_novo_pula_as_repetidas(cenario):
+def test_importing_again_skips_repeated(cenario):
     primeira = import_statement(cenario)
     segunda = import_statement(cenario)
     assert (primeira.new_transactions, primeira.duplicate_transactions) == (4, 0)
     assert (segunda.new_transactions, segunda.duplicate_transactions) == (0, 4)
 
 
-def test_conciliacao_automatica_so_quando_unica(cenario):
+def test_automatic_reconciliation_only_when_unique(cenario):
     received_amount = pago(cenario, "300.00", DIA)  # A1: one candidate
     pago(cenario, "120.00", DIA, kind=Entry.Kind.PAYABLE)  # A4: two candidates
     pago(cenario, "120.00", DIA + datetime.timedelta(days=1), kind=Entry.Kind.PAYABLE)
@@ -195,7 +195,7 @@ def test_conciliacao_automatica_so_quando_unica(cenario):
     assert "não corresponde" in response.content.decode()
 
 
-def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
+def test_cash_deposit_reconciles_with_the_movement(cenario):
     with use_clinic(cenario["clinic"]):
         cash_register = CashRegister.objects.create(
             clinic=cenario["clinic"],
@@ -221,7 +221,7 @@ def test_deposito_do_caixa_concilia_com_o_movimento(cenario):
     assert transacao(cenario, "A3").cash_movement == cash_movement
 
 
-def test_criar_lancamento_ignorar_e_desfazer(cenario):
+def test_create_entry_ignore_and_undo(cenario):
     import_statement(cenario)
     a2 = transacao(cenario, "A2")
     url = reverse("finance:transaction_entry", args=[a2.pk])
@@ -261,7 +261,7 @@ def test_criar_lancamento_ignorar_e_desfazer(cenario):
     assert (a3.status, a3.reason) == (BankTransaction.Status.PENDING, "")
 
 
-def test_estorno_volta_a_transacao_para_pendente(cenario):
+def test_reversal_returns_transaction_to_pending(cenario):
     received_amount = pago(cenario, "300.00", DIA)
     statement_import = import_statement(cenario)
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[statement_import.pk]))
@@ -271,7 +271,7 @@ def test_estorno_volta_a_transacao_para_pendente(cenario):
     assert (a1.status, a1.payment) == (BankTransaction.Status.PENDING, None)
 
 
-def test_saldo_do_banco_comparado_com_o_sistema(cenario):
+def test_bank_balance_compared_with_the_system(cenario):
     with use_clinic(cenario["clinic"]):
         FinancialAccount.objects.filter(pk=cenario["bank"].pk).update(
             opening_balance=Decimal("1000")
@@ -283,7 +283,7 @@ def test_saldo_do_banco_comparado_com_o_sistema(cenario):
     assert page.context["diferenca"] == Decimal("340.10")
 
 
-def test_arquivo_invalido_e_permissoes(cenario):
+def test_invalid_file_and_permissions(cenario):
     response = cenario["cliente"].post(
         reverse("finance:statements"),
         {"account": cenario["bank"].pk, "file": SimpleUploadedFile("x.ofx", b"nada")},
@@ -299,13 +299,13 @@ def test_arquivo_invalido_e_permissoes(cenario):
     )
 
 
-def test_extrato_de_outra_clinica_da_404(cenario, clinica_b):
+def test_statement_of_another_clinic_gives_404(cenario, clinica_b):
     statement_import = import_statement(cenario)
     other = cenario["cliente_de"](cenario["criar_usuario"]("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:statement", args=[statement_import.pk])).status_code == 404
 
 
-def test_extrato_ficticio_para_clinica_de_teste(cenario):
+def test_fake_statement_for_test_clinic(cenario):
     from io import StringIO
 
     from django.core.management import call_command
@@ -321,7 +321,7 @@ def test_extrato_ficticio_para_clinica_de_teste(cenario):
         assert f"P{received_amount.pk}" in [t.fitid for t in statement.transacoes]
 
 
-def test_linhas_ilegiveis_sao_contadas_e_avisadas(cenario):
+def test_unreadable_lines_are_counted_and_reported(cenario):
     content = OFX_SGML.replace(
         b"</BANKTRANLIST>",
         b"<STMTTRN><TRNTYPE>CREDIT<DTPOSTED>20261009<TRNAMT>1.234,56<FITID>B1</STMTTRN>\n"

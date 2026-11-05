@@ -42,12 +42,12 @@ DECIDUOS = [d for row in PRIMARY_TEETH for d in row]
         (85, "T", "LRE"),
     ],
 )
-def test_nomes_de_cada_numeracao(fdi, universal, palmer):
+def test_names_of_each_numbering(fdi, universal, palmer):
     nomes = (name(fdi, FDI), name(fdi, UNIVERSAL), name(fdi, PALMER))
     assert nomes == (str(fdi), universal, palmer)
 
 
-def test_cada_dente_tem_um_nome_so():
+def test_each_tooth_has_one_name():
     for numeracao in (FDI, UNIVERSAL, PALMER):
         nomes = [name(d, numeracao) for d in PERMANENTES + DECIDUOS]
         assert len(set(nomes)) == 52, numeracao
@@ -55,7 +55,7 @@ def test_cada_dente_tem_um_nome_so():
     assert sorted(name(d, UNIVERSAL) for d in DECIDUOS) == list("ABCDEFGHIJKLMNOPQRST")
 
 
-def test_ordem_da_numeracao():
+def test_numbering_order():
     assert [name(d, UNIVERSAL) for d in sort_teeth([85, 36, 11, 55, 18], UNIVERSAL)] == [
         "1",
         "8",
@@ -66,7 +66,7 @@ def test_ordem_da_numeracao():
     assert sort_teeth([36, 11], PALMER) == [11, 36]
 
 
-def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
+def test_numbering_follows_the_country(clinica_a, criar_usuario, cliente_de):
     from apps.core.models import Role
 
     admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Role.ADMIN))
@@ -83,13 +83,13 @@ def test_numeracao_acompanha_o_pais(clinica_a, criar_usuario, cliente_de):
     assert clinica_a.tooth_numbering == PALMER
 
 
-def test_clinica_nova_nos_estados_unidos_comeca_com_a_universal():
+def test_new_clinic_in_united_states_starts_with_universal():
     form = NewClinicForm({"name": "Smile Fictitious", "area": "odontologia", "country": "US"})
     assert form.is_valid(), form.errors
     assert form.instance.tooth_numbering == UNIVERSAL
 
 
-def test_orcamento_mostra_a_numeracao_da_clinica(cenario):  # noqa: F811
+def test_estimate_shows_the_clinic_numbering(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     clinic.tooth_numbering = UNIVERSAL
     clinic.save()

@@ -14,7 +14,7 @@ pytestmark = pytest.mark.django_db
 migracao = importlib.import_module("apps.core.migrations.0010_modulos_clinicos")
 
 
-def test_migracao_preserva_as_areas_das_clinicas_existentes():
+def test_migration_keeps_areas_of_existing_clinics():
     # Clinics as they were before 0010: an area and no modules.
     ids = {
         area: Clinic.objects.create(name=f"Clínica fictícia {area}", area=area).pk

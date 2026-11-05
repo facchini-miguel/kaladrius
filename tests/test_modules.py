@@ -38,7 +38,7 @@ def config(**extra):
 
 
 @pytest.mark.parametrize("area", Clinic.Area.values)
-def test_criacao_preserva_a_capacidade_da_area_original(area):
+def test_creation_keeps_original_area_capability(area):
     clinic = Clinic.objects.create(name="Clínica fictícia", area=area)
     assert clinic.dentistry == (area == "odontologia")
     assert clinic.medicine == (area == "medicina")
@@ -49,7 +49,7 @@ def test_criacao_preserva_a_capacidade_da_area_original(area):
 @pytest.mark.parametrize(
     "codigos", [[], ["medicina"], ["odontologia"], ["odontologia", "medicina"]]
 )
-def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, cliente_de):
+def test_admin_sets_independent_areas(codigos, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_modulos", clinica_a, Role.ADMIN))
     response = cliente.post(reverse("clinic_settings"), config(modulos=codigos))
     assert response.status_code == 302
@@ -60,19 +60,19 @@ def test_admin_configura_areas_independentes(codigos, clinica_a, criar_usuario, 
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER, Role.FINANCE])
-def test_outros_papeis_nao_alteram_modulos(role, clinica_a, criar_usuario, cliente_de):
+def test_other_roles_do_not_change_modules(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario_modulos", clinica_a, role))
     assert cliente.post(reverse("clinic_settings"), config()).status_code == 403
     assert clinica_a.dentistry and not clinica_a.medicine
 
 
-def test_administrador_de_demo_nao_altera_modulos(clinica_a, criar_usuario, cliente_de):
+def test_demo_admin_does_not_change_modules(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("demo_modulos", clinica_a, Role.ADMIN, demo=True))
     assert cliente.post(reverse("clinic_settings"), config()).status_code == 403
     assert not clinica_a.medicine
 
 
-def test_modulo_desconhecido_nao_grava_nem_no_servico_nem_no_form(clinica_a):
+def test_unknown_module_saved_neither_in_service_nor_form(clinica_a):
     with pytest.raises(ValidationError):
         configure(clinica_a, {"desconhecido"})
     form = ClinicForm(config(modulos=["desconhecido"]), instance=clinica_a)
@@ -80,7 +80,7 @@ def test_modulo_desconhecido_nao_grava_nem_no_servico_nem_no_form(clinica_a):
     assert clinica_a.dentistry and not clinica_a.module_enabled("desconhecido")
 
 
-def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_b):
+def test_modules_are_isolated_and_query_without_clinic_fails(clinica_a, clinica_b):
     configure(clinica_b, {*GENERAL_MODULES, "medicina"})
     with use_clinic(clinica_a):
         assert set(ClinicModule.objects.values_list("clinic_id", flat=True)) == {clinica_a.pk}
@@ -89,7 +89,7 @@ def test_modulos_sao_isolados_e_a_consulta_sem_clinica_falha(clinica_a, clinica_
     assert clinica_a.dentistry and not clinica_b.dentistry
 
 
-def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
+def test_idempotent_reconfiguration_keeps_ids_and_logs_change(clinica_a):
     before = dict(ClinicModule.all_objects.filter(clinic=clinica_a).values_list("code", "pk"))
     configure(clinica_a, {*GENERAL_MODULES, "medicina"})
     after = dict(ClinicModule.all_objects.filter(clinic=clinica_a).values_list("code", "pk"))
@@ -102,7 +102,7 @@ def test_reconfiguracao_idempotente_preserva_ids_e_registra_mudanca(clinica_a):
     assert changes.count() == 2
 
 
-def test_campos_administrativos_e_commit_false_preservados(clinica_a):
+def test_admin_fields_and_commit_false_kept(clinica_a):
     form = ClinicAdminForm(config(active="on"), instance=clinica_a)
     assert "active" in form.fields and "modulos" in form.fields
     assert form.is_valid(), form.errors
@@ -113,9 +113,7 @@ def test_campos_administrativos_e_commit_false_preservados(clinica_a):
     assert clinic.medicine and clinic.dentistry
 
 
-def test_django_admin_salva_modulos_e_audita_o_superusuario(
-    clinica_a, django_user_model, cliente_de
-):
+def test_django_admin_saves_modules_and_audits_superuser(clinica_a, django_user_model, cliente_de):
     user = django_user_model.objects.create_superuser("root_config_ficticio")
     cliente = cliente_de(user)
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])
@@ -151,7 +149,7 @@ def test_django_admin_salva_modulos_e_audita_o_superusuario(
     assert cliente.get(reverse("admin:core_clinic_add")).status_code == 403
 
 
-def test_validacao_da_agenda_no_admin_considera_so_a_clinica_editada(
+def test_admin_schedule_validation_considers_only_edited_clinic(
     clinica_a, clinica_b, criar_profissional, django_user_model, cliente_de
 ):
     practitioner = criar_profissional(clinica_b, "Profissional fictício B")
@@ -191,9 +189,7 @@ def novo_item(estimate, **extra):
     )
 
 
-def test_detalhe_nao_consulta_modulos_para_cada_item(
-    clinica_a, estimate, criar_usuario, cliente_de
-):
+def test_detail_does_not_query_modules_per_item(clinica_a, estimate, criar_usuario, cliente_de):
     with use_clinic(clinica_a):
         for _ in range(4):
             novo_item(estimate, teeth="11").save()
@@ -206,7 +202,7 @@ def test_detalhe_nao_consulta_modulos_para_cada_item(
     assert len(consultas_modulos) <= 2
 
 
-def test_modelo_bloqueia_dentes_sem_depender_da_tela(clinica_a, estimate):
+def test_model_blocks_teeth_without_relying_on_screen(clinica_a, estimate):
     configure(clinica_a, {*GENERAL_MODULES, "medicina"})
     with use_clinic(clinica_a):
         with pytest.raises(ValidationError):
@@ -215,7 +211,7 @@ def test_modelo_bloqueia_dentes_sem_depender_da_tela(clinica_a, estimate):
         assert EstimateItem.objects.count() == 1
 
 
-def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, estimate):
+def test_dental_history_stays_readable_and_not_editable(clinica_a, estimate):
     with use_clinic(clinica_a):
         item = novo_item(estimate, teeth="11", faces="V")
         item.save()
@@ -233,7 +229,7 @@ def test_historico_dental_permanece_legivel_e_nao_editavel(clinica_a, estimate):
         item.delete()
 
 
-def test_http_nao_remove_historico_quando_modulo_desativado(
+def test_http_does_not_remove_history_when_module_off(
     clinica_a, estimate, criar_usuario, cliente_de
 ):
     with use_clinic(clinica_a):
@@ -252,13 +248,13 @@ def test_http_nao_remove_historico_quando_modulo_desativado(
         assert EstimateItem.objects.filter(pk=item.pk).exists()
 
 
-def test_item_nao_pode_vincular_orcamento_de_outra_clinica(clinica_b, estimate):
+def test_item_cannot_link_estimate_of_another_clinic(clinica_b, estimate):
     with use_clinic(clinica_b), pytest.raises(WrongClinic):
         novo_item(estimate, teeth="11").save()
 
 
 @pytest.mark.parametrize("codigos", [[], ["medicina"], ["odontologia", "medicina"]])
-def test_prontuario_comum_nao_exige_modulo_especializado(
+def test_common_record_does_not_require_specialized_module(
     codigos, clinica_a, estimate, criar_usuario, cliente_de
 ):
     configure(clinica_a, {*GENERAL_MODULES, *codigos})
@@ -271,7 +267,7 @@ def test_prontuario_comum_nao_exige_modulo_especializado(
     )
 
 
-def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
+def test_even_with_modules_on_reception_cannot_access_records(
     clinica_a, estimate, criar_usuario, cliente_de
 ):
     configure(clinica_a, {*GENERAL_MODULES, "odontologia", "medicina"})
@@ -281,9 +277,7 @@ def test_mesmo_com_modulos_habilitados_recepcao_nao_acessa_prontuario(
     )
 
 
-def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
-    clinica_a, django_user_model, cliente_de
-):
+def test_modules_do_not_enable_second_clinic_registration(clinica_a, django_user_model, cliente_de):
     configure(clinica_a, {*GENERAL_MODULES, "odontologia", "medicina"})
     cliente = cliente_de(django_user_model.objects.create_superuser("root_modulos"))
     assert (
@@ -295,7 +289,7 @@ def test_modulos_nao_habilitam_cadastro_de_segunda_clinica(
     assert Clinic.objects.count() == 1
 
 
-def test_superusuario_usa_odontograma_com_odontologia_desligada(
+def test_superuser_uses_odontogram_with_dentistry_off(
     clinica_a, estimate, criar_usuario, django_user_model, cliente_de
 ):
     """Decision 115: the system administrator still uses a turned-off specialty, marked as off;

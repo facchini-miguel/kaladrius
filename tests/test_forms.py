@@ -13,7 +13,7 @@ def _subclasses(classe):
         yield from _subclasses(sub)
 
 
-def test_todo_clean_de_campo_tem_o_seu_campo():
+def test_every_field_clean_has_its_field():
     sem_campo = []
     for form in set(_subclasses(forms.BaseForm)):
         if not form.__module__.startswith("apps."):

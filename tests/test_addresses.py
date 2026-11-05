@@ -19,7 +19,7 @@ def reception(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("recepcao_enderecos", clinica_a, Role.FRONT_DESK))
 
 
-def test_bairros_e_logradouros_do_odonto_carregados():
+def test_odonto_neighborhoods_and_streets_loaded():
     # 75 in the legacy, 5 of them registered twice in the same city.
     assert Neighborhood.objects.count() == 70
     assert Neighborhood.objects.filter(city_id=CARLOS_BARBOSA).count() == 39
@@ -27,7 +27,7 @@ def test_bairros_e_logradouros_do_odonto_carregados():
     assert Street.objects.filter(name__startswith="Rua ").exists()
 
 
-def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinica_b, reception):
+def test_city_suggestions_plus_those_typed_by_the_clinic(clinica_a, clinica_b, reception):
     with use_clinic(clinica_a):
         Patient.objects.create(
             name="Paciente fictício A",
@@ -47,16 +47,16 @@ def test_sugestoes_da_cidade_mais_as_ja_digitadas_pela_clinica(clinica_a, clinic
     assert "Outra Clínica" not in text  # another clinic's patients stay private
 
 
-def test_cidade_sem_dados_e_parametro_invalido(reception):
+def test_city_without_data_and_invalid_parameter(reception):
     assert "<option" not in reception.get(URL, {"city": "3550308"}).content.decode()
     assert reception.get(URL, {"city": "abc"}).status_code == 200
 
 
-def test_formulario_do_paciente_liga_as_sugestoes(reception):
+def test_patient_form_wires_the_suggestions(reception):
     page = reception.get(reverse("patients:new")).content.decode()
     assert 'list="bairros-sugeridos"' in page and 'list="logradouros-sugeridos"' in page
     assert reverse("reference_data:address_suggestions") in page
 
 
-def test_sem_login_nao_ve_sugestoes(client):
+def test_no_suggestions_without_login(client):
     assert client.get(URL, {"city": CARLOS_BARBOSA}).status_code == 302

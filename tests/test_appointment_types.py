@@ -17,7 +17,7 @@ pytestmark = pytest.mark.django_db
         (Clinic.Area.OUTRA, DEFAULT_TYPES),
     ],
 )
-def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
+def test_new_clinic_gets_the_types_of_its_area(area, esperados):
     # Decision 080: dental types for the Odontologia area, general ones for the others.
     clinic = Clinic.objects.create(name="Nova", area=area)
     with use_clinic(clinic):
@@ -25,7 +25,7 @@ def test_clinica_nova_recebe_os_tipos_da_sua_area(area, esperados):
     assert appointment_types == dict(esperados)
 
 
-def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
+def test_types_are_isolated_per_clinic(clinica_a, clinica_b, criar_usuario, cliente_de):
     with use_clinic(clinica_b):
         AppointmentType.objects.create(name="Exclusivo da B", color="#000000")
         de_b = AppointmentType.objects.get(name="Cirurgia")
@@ -36,7 +36,7 @@ def test_tipos_sao_isolados_por_clinica(clinica_a, clinica_b, criar_usuario, cli
     assert cliente.get(reverse("schedule:type_edit", args=[de_b.pk])).status_code == 404
 
 
-def test_admin_cria_e_nome_repetido_e_recusado(clinica_a, criar_usuario, cliente_de):
+def test_admin_creates_and_duplicate_name_is_refused(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
     url = reverse("schedule:type_new")
     assert (
@@ -48,7 +48,7 @@ def test_admin_cria_e_nome_repetido_e_recusado(clinica_a, criar_usuario, cliente
     assert "Já existe um tipo de atendimento com este nome" in response.content.decode()
 
 
-def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usuario, cliente_de):
+def test_same_name_is_allowed_in_another_clinic(clinica_a, clinica_b, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
     response = cliente.post(reverse("schedule:type_new"), {"name": "Retorno", "color": "#112233"})
     assert response.status_code == 302
@@ -57,7 +57,7 @@ def test_mesmo_nome_e_permitido_em_outra_clinica(clinica_a, clinica_b, criar_usu
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
-def test_recepcao_e_profissional_so_consultam(role, clinica_a, criar_usuario, cliente_de):
+def test_reception_and_practitioner_only_view(role, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
     with use_clinic(clinica_a):
         kind = AppointmentType.objects.first()
@@ -68,7 +68,7 @@ def test_recepcao_e_profissional_so_consultam(role, clinica_a, criar_usuario, cl
     assert "Novo tipo" not in content
 
 
-def test_menu_cadastros(clinica_a, criar_usuario, cliente_de):
+def test_registry_menu(clinica_a, criar_usuario, cliente_de):
     content = cliente_de(criar_usuario("recepcao", clinica_a)).get(reverse("home")).content.decode()
     for item in ["Cadastros", "Profissionais", "Tipos de atendimento", "Cidades", "Bancos"]:
         assert item in content

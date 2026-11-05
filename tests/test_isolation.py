@@ -18,7 +18,7 @@ pytestmark = pytest.mark.django_db
 # --- ORM level -------------------------------------------------------------------
 
 
-def test_todo_modelo_de_clinica_usa_o_gerenciador_isolado_como_padrao():
+def test_every_clinic_model_uses_isolated_manager_by_default():
     from django.apps import apps
 
     from apps.core.isolation import ClinicManager, ClinicModel
@@ -30,7 +30,7 @@ def test_todo_modelo_de_clinica_usa_o_gerenciador_isolado_como_padrao():
         assert isinstance(modelo.objects, ClinicManager), modelo.__name__
 
 
-def test_sem_clinica_atual_falha_em_vez_de_mostrar_tudo(clinica_a, criar_profissional):
+def test_no_current_clinic_fails_instead_of_showing_all(clinica_a, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     with pytest.raises(NoCurrentClinic):
         list(Practitioner.objects.all())
@@ -38,7 +38,7 @@ def test_sem_clinica_atual_falha_em_vez_de_mostrar_tudo(clinica_a, criar_profiss
         Practitioner.objects.count()
 
 
-def test_consulta_ve_somente_a_clinica_atual(clinica_a, clinica_b, criar_profissional):
+def test_query_sees_only_the_current_clinic(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with use_clinic(clinica_a):
@@ -47,13 +47,13 @@ def test_consulta_ve_somente_a_clinica_atual(clinica_a, clinica_b, criar_profiss
         assert [p.name for p in Practitioner.objects.all()] == ["Dr. B"]
 
 
-def test_busca_por_id_de_outra_clinica_nao_encontra(clinica_a, clinica_b, criar_profissional):
+def test_lookup_by_id_of_another_clinic_finds_nothing(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
     with use_clinic(clinica_a), pytest.raises(Practitioner.DoesNotExist):
         Practitioner.objects.get(pk=de_b.pk)
 
 
-def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, criar_profissional):
+def test_bulk_update_and_delete_respect_the_clinic(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with use_clinic(clinica_a):
@@ -63,13 +63,13 @@ def test_update_e_delete_em_massa_respeitam_a_clinica(clinica_a, clinica_b, cria
         assert Practitioner.objects.get().active is True
 
 
-def test_novo_registro_recebe_a_clinica_atual(clinica_a):
+def test_new_row_gets_the_current_clinic(clinica_a):
     with use_clinic(clinica_a):
         practitioner = Practitioner.objects.create(name="Dra. A")
     assert practitioner.clinic == clinica_a
 
 
-def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, criar_profissional):
+def test_does_not_save_or_delete_row_of_another_clinic(clinica_a, clinica_b, criar_profissional):
     de_b = criar_profissional(clinica_b, "Dr. B")
     with use_clinic(clinica_a):
         de_b.name = "Alterado"
@@ -81,12 +81,12 @@ def test_nao_salva_nem_exclui_registro_de_outra_clinica(clinica_a, clinica_b, cr
         assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
-def test_criar_sem_clinica_atual_falha():
+def test_create_without_current_clinic_fails():
     with pytest.raises(NoCurrentClinic):
         Practitioner(name="Sem clínica").save()
 
 
-def test_sem_isolamento_ve_todas_as_clinicas(clinica_a, clinica_b, criar_profissional):
+def test_without_isolation_sees_all_clinics(clinica_a, clinica_b, criar_profissional):
     criar_profissional(clinica_a, "Dra. A")
     criar_profissional(clinica_b, "Dr. B")
     with without_isolation():
@@ -96,7 +96,7 @@ def test_sem_isolamento_ve_todas_as_clinicas(clinica_a, clinica_b, criar_profiss
 # --- HTTP level ------------------------------------------------------------------
 
 
-def test_lista_mostra_somente_a_propria_clinica(
+def test_list_shows_only_own_clinic(
     clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
     criar_profissional(clinica_a, "Dra. Ana da Clínica A")
@@ -108,7 +108,7 @@ def test_lista_mostra_somente_a_propria_clinica(
 
 
 @pytest.mark.parametrize("rota", ["practitioners:edit", "practitioners:delete"])
-def test_url_com_id_de_outra_clinica_da_404(
+def test_url_with_id_of_another_clinic_gives_404(
     rota, clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
     de_b = criar_profissional(clinica_b, "Dr. B")
@@ -120,7 +120,7 @@ def test_url_com_id_de_outra_clinica_da_404(
         assert Practitioner.objects.get(pk=de_b.pk).name == "Dr. B"
 
 
-def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
+def test_each_user_works_in_the_clinic_of_own_membership(
     clinica_a, clinica_b, criar_usuario, criar_profissional, cliente_de
 ):
     # One installation serves one clinic (decision 069); the isolation still holds if the
@@ -135,7 +135,7 @@ def test_cada_usuario_trabalha_na_clinica_do_proprio_vinculo(
     assert "Profissional B" in content and "Profissional A" not in content
 
 
-def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usuario, cliente_de):
+def test_inactive_membership_or_clinic_give_no_access(clinica_a, criar_usuario, cliente_de):
     user = criar_usuario("ana", clinica_a)
     user.vinculos.update(active=False)
     assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
@@ -146,15 +146,13 @@ def test_vinculo_inativo_ou_clinica_inativa_nao_dao_acesso(clinica_a, criar_usua
     assert cliente_de(user).get(reverse("practitioners:list")).status_code == 403
 
 
-def test_usuario_sem_clinica_ve_aviso(criar_usuario, cliente_de):
+def test_user_without_clinic_sees_warning(criar_usuario, cliente_de):
     response = cliente_de(criar_usuario("solto")).get(reverse("practitioners:list"))
     assert response.status_code == 403
     assert "não tem acesso a nenhuma clínica ativa" in response.content.decode()
 
 
-def test_formulario_so_oferece_usuarios_da_propria_clinica(
-    clinica_a, clinica_b, criar_usuario, cliente_de
-):
+def test_form_only_offers_users_of_own_clinic(clinica_a, clinica_b, criar_usuario, cliente_de):
     criar_usuario("colega_a", clinica_a)
     criar_usuario("estranho_b", clinica_b)
     cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
@@ -163,7 +161,7 @@ def test_formulario_so_oferece_usuarios_da_propria_clinica(
     assert "estranho_b" not in content
 
 
-def test_nao_liga_usuario_de_outra_clinica_via_post(
+def test_does_not_link_user_of_another_clinic_via_post(
     clinica_a, clinica_b, criar_usuario, cliente_de
 ):
     estranho = criar_usuario("estranho_b", clinica_b)
@@ -177,7 +175,7 @@ def test_nao_liga_usuario_de_outra_clinica_via_post(
         assert not Practitioner.objects.filter(name="Dr. Novo").exists()
 
 
-def test_nao_liga_o_mesmo_usuario_a_dois_profissionais(
+def test_does_not_link_same_user_to_two_practitioners(
     clinica_a, criar_usuario, criar_profissional, cliente_de
 ):
     colega = criar_usuario("colega_a", clinica_a)

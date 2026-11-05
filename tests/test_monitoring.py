@@ -57,7 +57,7 @@ def superusuario(client, django_user_model):
     return client
 
 
-def test_le_amostras_ignora_linha_cortada_e_calcula_percentuais(pasta):
+def test_reads_samples_skips_cut_line_and_computes_percentages(pasta):
     pasta(amostra(10, disponivel=250, swap_livre=750), '{"momento": "2026-10-27T1')
     (lida,) = health.samples()
     assert (lida["memoria_pct"], lida["swap_pct"]) == (75, 25)
@@ -78,7 +78,7 @@ def amostra_em_ingles(minutos_atras, **valores):
     return json.dumps(nova)
 
 
-def test_le_as_amostras_em_ingles_e_as_antigas(pasta):
+def test_reads_english_and_old_samples(pasta):
     # The file keeps up to 7 days: right after the update, lines of both formats.
     pasta(amostra(20, disponivel=250), amostra_em_ingles(10, disponivel=250, swap_livre=750))
     antiga, nova = health.samples()
@@ -89,7 +89,7 @@ def test_le_as_amostras_em_ingles_e_as_antigas(pasta):
     assert health.latest()["memoria_pct"] == 75
 
 
-def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
+def test_network_per_second_and_server_restart(pasta):
     pasta(amostra(10, rede=0), amostra(5, rede=300_000), amostra(0, rede=1000))  # reboot
     results = health.with_network(health.samples())
     assert results[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
@@ -97,7 +97,7 @@ def test_rede_por_segundo_e_reinicio_do_servidor(pasta):
     assert health.summary(results)["recebido"] == pytest.approx(300_000, rel=0.01)
 
 
-def test_niveis_e_coleta_parada(pasta):
+def test_levels_and_stopped_collection(pasta):
     pasta(amostra(30, disponivel=30, swap_livre=400, disco=28))
     latest = health.latest()
     assert health.levels(latest) == {
@@ -109,13 +109,13 @@ def test_niveis_e_coleta_parada(pasta):
     assert health.stopped(latest)
 
 
-def test_grafico_quebra_a_linha_na_lacuna(pasta):
+def test_chart_breaks_the_line_at_the_gap(pasta):
     pasta(amostra(120), amostra(115), amostra(10), amostra(5))
     svg = health.chart(health.samples(), [("cpu", "linha-1")], maximo=100)
     assert svg.count("<polyline") == 2
 
 
-def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, cliente_de):
+def test_screen_for_everyone_without_technical_details(pasta, clinica_a, criar_usuario, cliente_de):
     pasta(amostra(5))
     reception = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     assert 'href="/system/health/"' in reception.get(reverse("home")).content.decode()
@@ -126,7 +126,7 @@ def test_tela_para_todos_sem_detalhes_tecnicos(pasta, clinica_a, criar_usuario, 
     assert "Maiores tabelas" not in content and "health.sh" not in content
 
 
-def test_tela_com_amostras(pasta, superusuario):
+def test_screen_with_samples(pasta, superusuario):
     pasta(*(amostra(m, rede=m * 1000) for m in range(60, -1, -5)))
     for periodo in ("1h", "24h", "7d", "outro"):
         page = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
@@ -137,7 +137,7 @@ def test_tela_com_amostras(pasta, superusuario):
     assert page.context["end"] - page.context["start"] == datetime.timedelta(hours=1)
 
 
-def test_tela_sem_amostras(settings, tmp_path, superusuario):
+def test_screen_without_samples(settings, tmp_path, superusuario):
     settings.HEALTH_DIR = str(tmp_path / "nao-existe")
     page = superusuario.get(reverse("monitoring:health")).content.decode()
     assert "Ainda não há amostras" in page
@@ -152,7 +152,7 @@ def test_tela_sem_amostras(settings, tmp_path, superusuario):
         ([amostra(1)], None),
     ],
 )
-def test_aviso_no_topo(pasta, superusuario, rows, esperado):
+def test_warning_at_the_top(pasta, superusuario, rows, esperado):
     if rows:
         pasta(*rows)
     context = superusuario.get(reverse("whats_new")).context
@@ -163,7 +163,7 @@ def test_aviso_no_topo(pasta, superusuario, rows, esperado):
         assert health_alert == esperado
 
 
-def test_comando_resume_as_24_horas(pasta):
+def test_command_summarizes_24_hours(pasta):
     pasta(amostra(10, cpu=4), amostra(5, cpu=8, disco=29))
     saida = StringIO()
     call_command("health", stdout=saida)
@@ -172,7 +172,7 @@ def test_comando_resume_as_24_horas(pasta):
     assert "disco: critico" in text and "Último backup: nenhum registrado" in text
 
 
-def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
+def test_scale_follows_data_and_lone_point_becomes_dot(pasta):
     pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
     results = health.with_network(health.samples())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
@@ -186,7 +186,7 @@ def test_escala_segue_os_dados_e_ponto_isolado_vira_bolinha(pasta):
     assert svg.rindex("linha-1") > svg.rindex("linha-2")
 
 
-def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
+def test_time_axis_is_the_whole_period(pasta):
     pasta(amostra(10), amostra(5))
     now = timezone.now()
     svg = health.chart(
@@ -201,7 +201,7 @@ def test_eixo_do_tempo_e_o_periodo_inteiro(pasta):
     assert 580 < primeiro_x < 620
 
 
-def test_saude_para_monitores_consulta_o_banco(client, monkeypatch):
+def test_health_for_monitors_queries_the_database(client, monkeypatch):
     # Decision 079: the external monitor needs the database to answer, not only Django.
     from django.db import OperationalError
 

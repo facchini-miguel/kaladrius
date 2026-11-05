@@ -73,7 +73,7 @@ def log_event(cenario, quem="dra", **extra):
         return Visit.objects.latest("pk")
 
 
-def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
+def test_only_practitioners_see_the_record(cenario, django_user_model):
     new_visit = reverse("medical_records:new", args=[cenario["patient"].pk])
     patient_record = reverse("patients:record", args=[cenario["patient"].pk])
     for quem in ("recepcao", "admin"):
@@ -93,7 +93,7 @@ def test_so_profissionais_veem_o_prontuario(cenario, django_user_model):
     assert cenario["admin"].get(new_visit).status_code == 200
 
 
-def test_registrar_salvar_e_finalizar(cenario):
+def test_register_save_and_finalize(cenario):
     appointment = cenario["appointment"]
     visit = log_event(cenario, appointment=appointment.pk)
     assert (visit.practitioner, visit.appointment) == (cenario["ana"], appointment)
@@ -120,7 +120,7 @@ def test_registrar_salvar_e_finalizar(cenario):
     assert "Exame ok" in cenario["dra"].get(url).content.decode()
 
 
-def test_rascunho_so_o_autor_altera(cenario):
+def test_only_author_changes_draft(cenario):
     visit = log_event(cenario)
     url = reverse("medical_records:visit", args=[visit.pk])
     page = cenario["dr"].get(url)
@@ -131,7 +131,7 @@ def test_rascunho_so_o_autor_altera(cenario):
     assert cenario["dra"].post(addendum, {"text": "x"}).status_code == 403
 
 
-def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
+def test_audit_logs_without_copying_clinical_text(cenario):
     visit = log_event(cenario)
     cenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
     registros = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
@@ -143,7 +143,7 @@ def test_auditoria_registra_sem_copiar_o_texto_clinico(cenario):
             assert text not in content
 
 
-def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
+def test_patient_with_record_is_not_deleted(cenario, django_user_model):
     log_event(cenario)
     patient = cenario["patient"]
     with use_clinic(cenario["clinic"]):
@@ -156,7 +156,7 @@ def test_paciente_com_prontuario_nao_e_excluido(cenario, django_user_model):
         assert Patient.objects.filter(pk=patient.pk).exists()
 
 
-def test_agenda_leva_ao_atendimento_so_para_profissionais(cenario):
+def test_schedule_leads_to_visit_only_for_practitioners(cenario):
     editar = reverse("schedule:edit", args=[cenario["appointment"].pk])
     assert "Registrar atendimento" in cenario["dra"].get(editar).content.decode()
     assert "Registrar atendimento" not in cenario["recepcao"].get(editar).content.decode()
@@ -165,7 +165,7 @@ def test_agenda_leva_ao_atendimento_so_para_profissionais(cenario):
     assert reverse("medical_records:visit", args=[visit.pk]) in page
 
 
-def test_imprimir_so_depois_de_finalizado(cenario):
+def test_print_only_after_finalized(cenario):
     visit = log_event(cenario)
     url = reverse("medical_records:print", args=[visit.pk])
     assert cenario["dra"].get(url).status_code == 403
@@ -185,7 +185,7 @@ def test_imprimir_so_depois_de_finalizado(cenario):
     assert cenario["recepcao"].get(url).status_code == 403
 
 
-def test_atestado_de_comparecimento_e_de_afastamento(cenario):
+def test_attendance_and_leave_certificates(cenario):
     visit = log_event(cenario, appointment=cenario["appointment"].pk)
     url = reverse("medical_records:certificate_new", args=[visit.pk])
     # The appointment's times come filled in.
@@ -224,7 +224,7 @@ def test_atestado_de_comparecimento_e_de_afastamento(cenario):
     assert cenario["recepcao"].get(response.url).status_code == 403
 
 
-def test_receita_uma_linha_por_item(cenario):
+def test_prescription_one_line_per_item(cenario):
     visit = log_event(cenario)
     url = reverse("medical_records:prescription_new", args=[visit.pk])
     medications = "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas\n\nSoro fisiológico nasal"
@@ -241,7 +241,7 @@ def test_receita_uma_linha_por_item(cenario):
     assert "Paracetamol" not in str(record.changes)
 
 
-def test_pedido_de_exames(cenario):
+def test_exam_request(cenario):
     visit = log_event(cenario)
     url = reverse("medical_records:exam_request_new", args=[visit.pk])
     response = cenario["dra"].post(
@@ -258,7 +258,7 @@ def test_pedido_de_exames(cenario):
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 
 
-def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
+def test_attachments_only_pdf_jpg_png_and_only_for_practitioners(cenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     from apps.medical_records.models import Attachment
@@ -301,7 +301,7 @@ def test_anexos_so_pdf_jpg_png_e_so_para_profissionais(cenario):
     )
 
 
-def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
+def test_attachment_removed_only_by_uploader_before_finalizing(cenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     from apps.medical_records.models import Attachment
@@ -323,7 +323,7 @@ def test_anexo_removido_so_por_quem_enviou_e_antes_de_finalizar(cenario):
         assert list(Attachment.objects.values_list("pk", flat=True)) == [segundo.pk]
 
 
-def test_administrador_do_sistema_ve_e_faz_tudo(cenario, django_user_model):
+def test_system_admin_sees_and_does_everything(cenario, django_user_model):
     """The superuser writes on behalf of a chosen practitioner and edits anyone's draft."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 

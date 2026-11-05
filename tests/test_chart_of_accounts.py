@@ -29,7 +29,7 @@ def group(clinic, name, **extra):
         return AccountGroup.objects.get(name=name, **extra)
 
 
-def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
+def test_new_clinic_starts_with_the_basic_chart(clinica_a):
     with use_clinic(clinica_a):
         aluguel = Category.objects.get(name="Aluguel")
         assert str(aluguel.group) == "1 Ocupação"
@@ -38,7 +38,7 @@ def test_clinica_nova_comeca_com_o_plano_basico(clinica_a):
         assert AccountGroup.objects.filter(kind="receita").count() == 2
 
 
-def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
+def test_numbered_subgroup_and_moved_category(clinica_a, admin):
     pessoal = group(clinica_a, "Pessoal")
     response = admin.post(
         reverse("finance:group_new"),
@@ -64,7 +64,7 @@ def test_subgrupo_numerado_e_categoria_movida(clinica_a, admin):
     assert "2.1 Equipe da recepção" in page and "Salários e encargos" in page
 
 
-def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
+def test_blank_code_gets_the_next_number(clinica_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
     pessoal = group(clinica_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
@@ -80,7 +80,7 @@ def test_codigo_em_branco_recebe_o_proximo_numero(clinica_a, admin):
         assert group(clinica_a, "Investimentos").number == "6"
 
 
-def test_validacoes_do_grupo(clinica_a, admin):
+def test_group_validations(clinica_a, admin):
     pessoal = group(clinica_a, "Pessoal")
     atendimentos = group(clinica_a, "Atendimentos")
     url = reverse("finance:group_new")
@@ -98,7 +98,7 @@ def test_validacoes_do_grupo(clinica_a, admin):
     assert "parent" in ciclo.context["form"].errors
 
 
-def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
+def test_category_cannot_join_group_of_another_kind(clinica_a, admin):
     response = admin.post(
         reverse("finance:catalog_new", args=["categories"]),
         {
@@ -111,7 +111,7 @@ def test_categoria_nao_entra_em_grupo_de_outro_tipo(clinica_a, admin):
     assert "group" in response.context["form"].errors
 
 
-def test_relatorio_soma_os_subgrupos(clinica_a, admin):
+def test_report_sums_the_subgroups(clinica_a, admin):
     with use_clinic(clinica_a):
         pessoal = AccountGroup.objects.get(name="Pessoal")
         sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal, code=1)
@@ -152,12 +152,12 @@ def test_relatorio_soma_os_subgrupos(clinica_a, admin):
     ]
 
 
-def test_quem_ve_o_plano(clinica_a, criar_usuario, cliente_de):
+def test_who_sees_the_chart(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_plano", clinica_a, Role.FRONT_DESK))
     assert reception.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
-def test_migracao_cria_o_plano_basico_nas_clinicas_existentes():
+def test_migration_creates_basic_chart_in_existing_clinics():
     """Migration financeiro 0012 created the basic chart in the clinics that existed."""
     from apps.core.models import Clinic
 

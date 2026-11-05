@@ -81,7 +81,7 @@ INSERT INTO `sist_usuarios` (`id`, `login`) VALUES (1, 'nao-importar');
 # --- Dump reader -------------------------------------------------------------------
 
 
-def test_le_valores_com_escapes_nulos_e_numeros():
+def test_reads_values_with_escapes_nulls_and_numbers():
     tables = read_tables(
         "INSERT INTO `t` (`a`, `b`, `c`, `d`) VALUES "
         "(1, 'it''s \\'ok\\'\\n(x), y;', NULL, 2.5), (-3, '', 'z', 0);"
@@ -92,7 +92,7 @@ def test_le_valores_com_escapes_nulos_e_numeros():
     ]
 
 
-def test_filtra_tabelas():
+def test_filters_tables():
     tables = read_tables(DUMP, {"dentistas"})
     assert list(tables) == ["dentistas"]
 
@@ -106,7 +106,7 @@ def test_filtra_tabelas():
         "INSERT INTO `t` (`a`) VALUES (abc);",
     ],
 )
-def test_dump_invalido(text):
+def test_invalid_dump(text):
     with pytest.raises(InvalidDump):
         read_tables(text)
 
@@ -125,7 +125,7 @@ def data(clinic, modelo, **filtro):
         return list(modelo.objects.filter(**filtro).order_by("pk"))
 
 
-def test_relatorio(importado):
+def test_report(importado):
     relatorio, _ = importado
     assert (relatorio.practitioners, relatorio.patients) == (2, 4)
     assert (relatorio.appointments, relatorio.recalls, relatorio.tipos_criados) == (4, 2, 1)
@@ -136,14 +136,14 @@ def test_relatorio(importado):
     assert avisos["Rechamada de paciente inexistente ou sem data (não importada)"] == 1
 
 
-def test_horario_da_agenda_cobre_os_atendimentos(importado):
+def test_schedule_hours_cover_the_appointments(importado):
     relatorio, clinic = importado
     clinic.refresh_from_db()
     assert (clinic.schedule_start, clinic.schedule_end) == (datetime.time(7, 30), datetime.time(21))
     assert any(warning.startswith("Horário da agenda ampliado") for warning in relatorio.avisos)
 
 
-def test_profissionais_e_tipos(importado):
+def test_practitioners_and_types(importado):
     _, clinic = importado
     assert [p.name for p in data(clinic, Practitioner)] == ["Dr Teste", "Consultório 2"]
     nomes = {t.name for t in data(clinic, AppointmentType)}
@@ -153,7 +153,7 @@ def test_profissionais_e_tipos(importado):
     assert nova.color == "#0d6efd"  # invalid legacy color replaced
 
 
-def test_paciente_completo(importado):
+def test_full_patient(importado):
     _, clinic = importado
     joao = data(clinic, Patient, name="João d'Ávila")[0]  # Latin-1 mojibake fixed
     assert joao.tax_id == "01234567890"  # leading zero restored
@@ -176,7 +176,7 @@ def test_paciente_completo(importado):
     assert timezone.localtime(joao.created_at).date() == datetime.date(2012, 4, 5)
 
 
-def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
+def test_data_that_does_not_fit_goes_to_notes(importado):
     _, clinic = importado
     ana = data(clinic, Patient, name="Ana Duplicada")[0]
     # Same CPF as João after restoring the leading zero: kept only in the notes.
@@ -209,11 +209,11 @@ def test_dados_que_nao_cabem_vao_para_as_observacoes(importado):
         ("1222333000128", Patient.Kind.COMPANY, ("01222333000128", None)),
     ],
 )
-def test_documento(bruto, kind, esperado):
+def test_document(bruto, kind, esperado):
     assert _document(bruto, kind) == esperado
 
 
-def test_agenda_e_rechamadas(importado):
+def test_schedule_and_recalls(importado):
     _, clinic = importado
     appointments = data(clinic, Appointment)
     assert [a.description.splitlines()[0] for a in appointments] == [
@@ -234,21 +234,21 @@ def test_agenda_e_rechamadas(importado):
     ]
 
 
-def test_registro_na_auditoria_e_sem_usuarios(importado, django_user_model):
+def test_audit_entry_and_no_users(importado, django_user_model):
     _, clinic = importado
     record = AuditEntry.objects.get(clinic=clinic, object_repr__startswith="Importação")
     assert "4 pacientes, 4 agendamentos, 2 rechamadas" in record.object_repr
     assert not django_user_model.objects.exists()
 
 
-def test_nao_importa_duas_vezes_na_mesma_clinica(importado):
+def test_does_not_import_twice_into_same_clinic(importado):
     with pytest.raises(ImportRefused):
         import_dump(DUMP, "Clínica Importada", today=HOJE)
     _, clinic = importado
     assert len(data(clinic, Patient)) == 4
 
 
-def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
+def test_failure_leaves_nothing_half_done(db, monkeypatch):
     from apps.legacy import importer
 
     def quebrar(self, patients):
@@ -260,7 +260,7 @@ def test_falha_nao_deixa_nada_pela_metade(db, monkeypatch):
     assert not Clinic.objects.filter(name="Clínica Importada").exists()
 
 
-def test_comando(db, tmp_path, capsys):
+def test_command(db, tmp_path, capsys):
     file = tmp_path / "dump.sql"
     file.write_text(DUMP, encoding="utf-8")
     call_command("import_legacy", str(file), clinic="Pelo Comando")
@@ -275,7 +275,7 @@ def test_comando(db, tmp_path, capsys):
 # --- Anonymization -----------------------------------------------------------------
 
 
-def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
+def test_anonymization_replaces_personal_data_and_keeps_structure(importado):
     _, clinic = importado
     before = {
         "pacientes": data(clinic, Patient),
@@ -336,12 +336,12 @@ def test_anonimizacao_troca_os_dados_pessoais_e_mantem_a_estrutura(importado):
     assert registros.filter(object_repr__startswith="Dados anonimizados: 4 pacientes").exists()
 
 
-def test_anonimizar_clinica_inexistente(db):
+def test_anonymize_missing_clinic(db):
     with pytest.raises(CommandError, match="não encontrada"):
         call_command("anonymize_clinic", clinic="Não existe", confirmar=True)
 
 
-def test_anonimizacao_dos_fornecedores(importado):
+def test_anonymization_of_suppliers(importado):
     _, clinic = importado
     with use_clinic(clinic):
         pessoa = Supplier.objects.create(
@@ -380,7 +380,7 @@ def test_anonimizacao_dos_fornecedores(importado):
         assert entry.payer == entry.supplier.name
 
 
-def test_anonimizacao_das_carteirinhas(importado):
+def test_anonymization_of_member_cards(importado):
     _, clinic = importado
     with use_clinic(clinic):
         health_plan = HealthPlan.objects.create(name="Saúde Exemplo")
@@ -400,7 +400,7 @@ def test_anonimizacao_das_carteirinhas(importado):
     )
 
 
-def test_anonimizacao_dos_funcionarios(importado):
+def test_anonymization_of_employees(importado):
     _, clinic = importado
     with use_clinic(clinic):
         funcionaria = Employee.objects.create(

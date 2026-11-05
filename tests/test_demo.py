@@ -31,7 +31,7 @@ def entrar(username, password):
     return cliente
 
 
-def test_cria_as_duas_contas_com_os_perfis(demo):
+def test_creates_both_accounts_with_their_roles(demo):
     User = get_user_model()
     reception = User.objects.get(username="demo.recepcao")
     practitioner = User.objects.get(username="demo.profissional")
@@ -53,7 +53,7 @@ def test_cria_as_duas_contas_com_os_perfis(demo):
     entrar("demo.recepcao", "outra-1")
 
 
-def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
+def test_refuses_sample_data_password_and_practitioner_with_another_user(
     demo, criar_usuario, clinica_a
 ):
     with pytest.raises(CommandError, match="DJANGO_SEED_PASSWORD"):
@@ -70,7 +70,7 @@ def test_recusa_a_senha_dos_dados_de_teste_e_profissional_com_outro_usuario(
         call_command("demo_accounts", clinic="Clínica A", practitioner="Dra. Ana", **SENHAS)
 
 
-def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
+def test_creates_the_practitioner_when_asked(clinica_a, monkeypatch):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")
     with pytest.raises(CommandError, match="--create-practitioner"):
         call_command("demo_accounts", clinic="Clínica A", practitioner="Dra. Demo", **SENHAS)
@@ -93,7 +93,7 @@ def test_cria_o_profissional_quando_pedido(clinica_a, monkeypatch):
     assert demo.user.username == "demo.profissional"
 
 
-def test_conta_de_demonstracao_nao_troca_a_senha(demo):
+def test_demo_account_cannot_change_password(demo):
     cliente = entrar("demo.recepcao", SENHAS["senha_recepcao"])
     assert "Trocar senha" not in cliente.get(reverse("home")).content.decode()
     response = cliente.post(
@@ -109,7 +109,7 @@ def test_conta_de_demonstracao_nao_troca_a_senha(demo):
     entrar("demo.recepcao", SENHAS["senha_recepcao"])
 
 
-def test_conta_de_demonstracao_nao_envia_anexos(demo):
+def test_demo_account_cannot_upload_attachments(demo):
     cliente = entrar("demo.profissional", SENHAS["senha_profissional"])
     with use_clinic(demo["clinic"]):
         from apps.patients.models import Patient
@@ -131,7 +131,7 @@ def test_conta_de_demonstracao_nao_envia_anexos(demo):
         assert not Attachment.objects.exists()
 
 
-def test_admin_e_financeiro_de_demonstracao_nao_mexem_na_equipe_nem_na_clinica(
+def test_demo_admin_and_finance_cannot_touch_team_or_clinic(
     clinica_a, criar_profissional, monkeypatch
 ):
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "semente-secreta")

@@ -20,7 +20,7 @@ def cliente(clinica_a, criar_usuario, cliente_de):
     return cliente_de(criar_usuario("maria", clinica_a, Role.ADMIN))
 
 
-def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_model):
+def test_user_picks_language_and_choice_is_saved(cliente, django_user_model):
     start = reverse("home")
     assert "Pacientes" in cliente.get(start).content.decode()
 
@@ -43,7 +43,7 @@ def test_usuario_escolhe_o_idioma_e_a_escolha_fica_salva(cliente, django_user_mo
     assert django_user_model.objects.get(username="maria").language == ""
 
 
-def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
+def test_language_selector_with_flags_in_the_bar(cliente):
     page = cliente.get(reverse("home")).content.decode()
     for code in ("pt-br", "en", "es"):
         assert f"img/flags/{code}." in page  # CI serves hashed names (x.1a2b.svg)
@@ -51,20 +51,20 @@ def test_seletor_de_idioma_com_bandeiras_na_barra(cliente):
     assert page.index("seletor-idioma") < page.index(reverse("change_password"))
 
 
-def test_escolha_do_usuario_vale_mais_que_o_navegador(cliente, django_user_model):
+def test_user_choice_beats_the_browser(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="es")
     page = cliente.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
     assert any(saludo in page for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
 
 
-def test_login_segue_o_idioma_do_navegador(client):
+def test_login_follows_browser_language(client):
     page = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="es").content.decode()
     assert "Contraseña" in page
     page = client.get(reverse("login"), HTTP_ACCEPT_LANGUAGE="en-US,en;q=0.9").content.decode()
     assert "Password" in page
 
 
-def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
+def test_messages_and_errors_translated(cliente, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="en")
     response = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
     assert "This field is required." in response.content.decode()
@@ -74,12 +74,12 @@ def test_mensagens_e_erros_traduzidos(cliente, django_user_model):
     assert "Patient Ana saved." in response.content.decode()
 
 
-def test_trocar_idioma_exige_post_e_login(client):
+def test_changing_language_requires_post_and_login(client):
     assert client.get(reverse("change_language")).status_code in (302, 405)
 
 
 @pytest.mark.parametrize("language", ["en", "es"])
-def test_todos_os_textos_estao_traduzidos(language):
+def test_all_texts_are_translated(language):
     po = (LOCALE / language / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
     blocos = po.split("\n\n")[1:]
     # Long translations are wrapped: msgstr "" followed by "..." lines, so join them first.
@@ -93,7 +93,7 @@ def test_todos_os_textos_estao_traduzidos(language):
     assert "#, fuzzy" not in po
 
 
-def test_novidades_nos_tres_idiomas():
+def test_whats_new_in_the_three_languages():
     languages = {code for code, _nome in settings.LANGUAGES}
     for release in releases.all_releases():
         assert set(dict(release.titulos)) == languages or not release.titulo, release.versao
@@ -102,7 +102,7 @@ def test_novidades_nos_tres_idiomas():
             assert item.modulo in releases.MODULES, item.modulo
 
 
-def test_situacoes_em_aberto_concordam_em_espanhol():
+def test_open_statuses_agree_in_spanish():
     """One Portuguese "Em aberto", a different Spanish word for each thing it describes."""
     from django.utils import translation
     from django.utils.translation import pgettext
@@ -117,7 +117,7 @@ def test_situacoes_em_aberto_concordam_em_espanhol():
         assert str(Estimate.Status.OPEN.label) == "Open"
 
 
-def test_horario_em_ingles_sem_ponto_duplo():
+def test_english_time_without_double_period():
     """Django's "p.m." made a sentence ending in a time end with two periods."""
     import datetime
 

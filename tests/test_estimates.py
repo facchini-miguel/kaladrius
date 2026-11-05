@@ -74,7 +74,7 @@ def incluir(cliente, estimate, **data):
     )
 
 
-def test_profissional_monta_orcamento_com_dentes(cenario):
+def test_practitioner_builds_estimate_with_teeth(cenario):
     cliente = entrar(cenario, "practitioner")
     estimate = criar_orcamento(cenario, cliente)
     # Description and price come from the price list; teeth are normalized.
@@ -102,7 +102,7 @@ def test_profissional_monta_orcamento_com_dentes(cenario):
         {"procedure": ""},  # neither procedure nor description
     ],
 )
-def test_itens_invalidos(cenario, data):
+def test_invalid_items(cenario, data):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, **{"procedure": cenario["canal"].pk, **data})
@@ -110,7 +110,7 @@ def test_itens_invalidos(cenario, data):
         assert not estimate.itens.exists()
 
 
-def test_quem_escreve_o_orcamento_da_desconto(cenario):
+def test_estimate_author_gives_discount(cenario):
     # Front desk, practitioner and administrator (0.27.1, decision 074).
     reception = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, reception)
@@ -129,7 +129,7 @@ def test_quem_escreve_o_orcamento_da_desconto(cenario):
         assert estimate.discount == Decimal(amount)
 
 
-def test_aprovar_vira_lancamento_a_receber(cenario):
+def test_approving_becomes_a_receivable(cenario):
     reception = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, reception)
     incluir(reception, estimate, procedure=cenario["canal"].pk)
@@ -170,14 +170,14 @@ def test_aprovar_vira_lancamento_a_receber(cenario):
     assert estimate.status == Estimate.Status.APPROVED
 
 
-def test_profissional_nao_aprova(cenario):
+def test_practitioner_does_not_approve(cenario):
     cliente = entrar(cenario, "practitioner")
     estimate = criar_orcamento(cenario, cliente)
     assert cliente.get(reverse("estimates:approve", args=[estimate.pk])).status_code == 403
     assert not cliente.get(reverse("estimates:detail", args=[estimate.pk])).context["pode_aprovar"]
 
 
-def test_recusar_e_imprimir(cenario):
+def test_refuse_and_print(cenario):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, procedure=cenario["canal"].pk, teeth="46")
@@ -193,7 +193,7 @@ def test_recusar_e_imprimir(cenario):
     assert list(estimate_list.context["pagina"]) == [estimate]
 
 
-def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
+def test_record_shows_estimates_and_archived_hides(cenario):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
     patient_record = cliente.get(reverse("patients:record", args=[cenario["patient"].pk]))
@@ -203,7 +203,7 @@ def test_ficha_mostra_orcamentos_e_arquivado_some(cenario):
     assert cliente.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
 
 
-def test_tabela_de_procedimentos_so_o_admin_altera(cenario):
+def test_only_admin_changes_procedure_table(cenario):
     reception = entrar(cenario, "recepcao")
     assert reception.get(reverse("estimates:procedures")).status_code == 200
     assert reception.get(reverse("estimates:procedure_new")).status_code == 403
@@ -215,7 +215,7 @@ def test_tabela_de_procedimentos_so_o_admin_altera(cenario):
     assert "Já existe" in admin.post(url, {"name": "Clareamento", "amount": "1"}).content.decode()
 
 
-def test_exclusao_definitiva_apaga_os_orcamentos(cenario):
+def test_permanent_deletion_deletes_the_estimates(cenario):
     admin = entrar(cenario, "admin")
     estimate = criar_orcamento(cenario, admin)
     incluir(admin, estimate, procedure=cenario["canal"].pk, teeth="11")
@@ -226,13 +226,13 @@ def test_exclusao_definitiva_apaga_os_orcamentos(cenario):
         assert not Estimate.objects.exists() and not EstimateItem.objects.exists()
 
 
-def test_orcamento_de_outra_clinica_da_404(cenario, clinica_b, criar_usuario, cliente_de):
+def test_estimate_of_another_clinic_gives_404(cenario, clinica_b, criar_usuario, cliente_de):
     estimate = criar_orcamento(cenario, entrar(cenario, "recepcao"))
     other = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
 
 
-def test_odontograma_so_na_area_odontologia(cenario):
+def test_odontogram_only_in_dentistry(cenario):
     # Decision 080: teeth and faces belong to the dental module.
     from apps.core.models import Clinic
 

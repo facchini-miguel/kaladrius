@@ -37,7 +37,7 @@ def avaliar(dir_, expressao, ambiente=None):
     return resultado.stdout.strip()
 
 
-def test_env_value_le_os_dois_nomes(tmp_path):
+def test_env_value_reads_both_names(tmp_path):
     old = comum(tmp_path / "a", "KALADRIUS_BACKUP_DIAS=7\nMONITOR_ATUALIZACAO_URL=u\n")
     # A .env of 0.54, not migrated yet, read by the new names.
     assert avaliar(old, "env_value KALADRIUS_BACKUP_DAYS") == "7"
@@ -49,7 +49,7 @@ def test_env_value_le_os_dois_nomes(tmp_path):
     assert avaliar(new, "env_value SITE_HOSTNAME") == ""
 
 
-def test_migrar_o_env_so_troca_os_nomes(tmp_path):
+def test_migrating_env_only_changes_names(tmp_path):
     env = (
         "# a comment\nDJANGO_SECRET_KEY=x=y\nKALADRIUS_ACESSO=rede-interna\n"
         "KALADRIUS_BACKUP_PASTA=/srv/b\nSITE_HOSTNAME=192.168.0.10\nIMAGEM_APP=k:1\n"
@@ -72,7 +72,7 @@ def test_migrar_o_env_so_troca_os_nomes(tmp_path):
     assert (dir_ / ".env.before-147").read_text() == env
 
 
-def test_migrar_os_arquivos_de_estado(tmp_path):
+def test_migrate_the_state_files(tmp_path):
     dir_ = comum(tmp_path, "")
     for name in ("admin-criado", "sem-repositorio", "imagem-recusada"):
         (dir_ / name).write_text(name)
@@ -97,7 +97,7 @@ def test_migrar_os_arquivos_de_estado(tmp_path):
     assert not (dir_ / "saude").exists()
 
 
-def test_o_servidor_do_google_cloud_guarda_os_scripts_antigos(tmp_path):
+def test_google_cloud_server_keeps_the_old_scripts(tmp_path):
     # The pointer bin/atualizar.sh, kept by 0.55 for the VM's old startup script, goes with the
     # scripts of 0.54 to legacy/bin; the old update lock, which no script takes, goes away.
     dir_ = comum(tmp_path, "")
@@ -117,7 +117,7 @@ def test_o_servidor_do_google_cloud_guarda_os_scripts_antigos(tmp_path):
     assert not (dir_ / "atualizar.lock").exists()
 
 
-def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
+def test_updated_old_package_migrates_before_deciding(tmp_path):
     # A clinic's 0.54 package updated to this one: admin-criado is read as admin-created, so the
     # update starts the system instead of asking the setup questions again; the timers of the
     # old package, whose unit files the package manager already removed, leave no links behind.
@@ -156,7 +156,7 @@ def test_o_pacote_antigo_atualizado_migra_antes_de_decidir(tmp_path):
         pytest.param("testar-restauracao", "test-restore", marks=COMO_ROOT),
     ],
 )
-def test_os_comandos_antigos_ainda_funcionam(tmp_path, old, new):
+def test_old_commands_still_work(tmp_path, old, new):
     from tests.test_linux_package import kaladrius
 
     for pasta in ("a", "b"):
@@ -166,7 +166,7 @@ def test_os_comandos_antigos_ainda_funcionam(tmp_path, old, new):
     assert (a.returncode, a.stdout, a.stderr) == (b.returncode, b.stdout, b.stderr)
 
 
-def test_a_configuracao_le_o_nome_antigo_da_variavel(monkeypatch):
+def test_settings_read_the_old_variable_name(monkeypatch):
     # The app's variables of decision 149: the new name wins, the old one is read without it.
     from config.settings import env_renomeada
 

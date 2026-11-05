@@ -26,7 +26,7 @@ def admin(clinica_a, criar_usuario, cliente_de):
 # --- The table of documents ------------------------------------------------------
 
 
-def test_todo_pais_tem_seus_documentos():
+def test_every_country_has_its_documents():
     assert identification.DOCUMENTS.keys() == countries.COUNTRIES.keys()
     for code, documentos in identification.DOCUMENTS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
@@ -34,7 +34,7 @@ def test_todo_pais_tem_seus_documentos():
         assert documentos.registro_profissional, code
 
 
-def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
+def test_field_examples_are_valid_and_written_as_the_system_writes():
     for code, documentos in identification.DOCUMENTS.items():
         if code == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
@@ -77,7 +77,7 @@ def test_os_exemplos_dos_campos_sao_validos_e_escritos_como_o_sistema_escreve():
         ("ZA", "empresa", "2001/123456/07", "2001/123456/07"),
     ],
 )
-def test_documento_valido_e_escrito_do_jeito_do_pais(country, role, digitado, escrito):
+def test_valid_document_is_written_the_country_way(country, role, digitado, escrito):
     document = identification.for_country(country).for_role(role)
     guardado = identification.clean_value(digitado, [document], document.abbreviation)
     assert identification.write(guardado, (role,), country) == escrito
@@ -102,13 +102,13 @@ def test_documento_valido_e_escrito_do_jeito_do_pais(country, role, digitado, es
         ("ZA", "paciente", "7503305044088"),
     ],
 )
-def test_documento_invalido_e_recusado(country, role, digitado):
+def test_invalid_document_is_refused(country, role, digitado):
     document = identification.for_country(country).for_role(role)
     with pytest.raises(identification.ValidationError, match="número inválido"):
         identification.clean_value(digitado, [document], document.abbreviation)
 
 
-def test_valor_que_nao_e_documento_do_pais_fica_como_esta():
+def test_value_that_is_not_a_country_document_stays_as_is():
     # A CPF kept from when the clinic was Brazilian, now in the United States.
     assert identification.write("52998224725", None, "US") == "52998224725"
     assert identification.abbreviation("52998224725", ("pessoa", "empresa"), "US") == "EIN"
@@ -118,7 +118,7 @@ def test_valor_que_nao_e_documento_do_pais_fica_como_esta():
     )
 
 
-def test_filtros_dos_templates(clinica_a):
+def test_template_filters(clinica_a):
     no_pais(clinica_a, "AR")
     template = Template(
         '{% load formats %}{{ a|document:"paciente" }} · {{ b|document }} · '
@@ -132,7 +132,7 @@ def test_filtros_dos_templates(clinica_a):
 # --- Patients ----------------------------------------------------------------------
 
 
-def test_paciente_no_mexico_com_curp(clinica_a, admin):
+def test_patient_in_mexico_with_curp(clinica_a, admin):
     no_pais(clinica_a, "MX")
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf="CURP"' in formulario and 'data-rotulo-pj="RFC"' in formulario
@@ -152,7 +152,7 @@ def test_paciente_no_mexico_com_curp(clinica_a, admin):
     assert "Já existe um paciente com este documento" in response.content.decode()
 
 
-def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin):
+def test_patient_in_united_states_only_company_has_document(clinica_a, admin):
     no_pais(clinica_a, "US")
     formulario = admin.get(reverse("patients:new")).content.decode()
     assert 'data-rotulo-pf=""' in formulario and 'data-rotulo-pj="EIN"' in formulario
@@ -172,7 +172,7 @@ def test_paciente_nos_estados_unidos_so_a_empresa_tem_documento(clinica_a, admin
 # --- The clinic --------------------------------------------------------------------
 
 
-def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
+def test_clinic_document_is_the_chosen_country_one(clinica_a, admin):
     # The country and the document change together: the document is the new country's.
     response = admin.post(
         reverse("clinic_settings"), dados_clinica(country="US", document="52998224725")
@@ -187,7 +187,7 @@ def test_documento_da_clinica_e_o_do_pais_escolhido(clinica_a, admin):
     assert (clinica_a.document_abbreviation, clinica_a.written_document) == ("EIN", "91-1144442")
 
 
-def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
+def test_clinic_in_mexico_accepts_person_or_company_rfc(clinica_a, admin):
     for rfc in ("GODE561231GR8", "ABC680524P76"):
         response = admin.post(reverse("clinic_settings"), dados_clinica(country="MX", document=rfc))
         assert response.status_code == 302
@@ -198,7 +198,7 @@ def test_clinica_no_mexico_aceita_rfc_de_pessoa_ou_de_empresa(clinica_a, admin):
 # --- Suppliers, staff and practitioners --------------------------------------------
 
 
-def test_fornecedor_no_reino_unido(clinica_a, admin):
+def test_supplier_in_the_united_kingdom(clinica_a, admin):
     no_pais(clinica_a, "GB")
     empresa = {"kind": "PJ", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
     response = admin.post(reverse("finance:supplier_new"), empresa)
@@ -213,7 +213,7 @@ def test_fornecedor_no_reino_unido(clinica_a, admin):
         assert Supplier.objects.get(name="John Plumber").tax_id == ""
 
 
-def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
+def test_employee_in_the_united_states_and_australia(clinica_a, admin):
     no_pais(clinica_a, "US")
     data = {"name": "Jane Fictitious", "salary": "3000", "active": "on"}
     response = admin.post(reverse("staff:new"), {**data, "tax_id": "000-12-3456"})
@@ -230,7 +230,7 @@ def test_funcionario_nos_estados_unidos_e_na_australia(clinica_a, admin):
     assert 'name="tax_id"' not in admin.get(reverse("staff:new")).content.decode()
 
 
-def test_registro_profissional_com_exemplos_do_pais(clinica_a, admin):
+def test_professional_registration_with_country_examples(clinica_a, admin):
     no_pais(clinica_a, "GB")
     assert "GDC, GMC" in admin.get(reverse("practitioners:new")).content.decode()
     no_pais(clinica_a, "BR")

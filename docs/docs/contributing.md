@@ -28,7 +28,7 @@ docker compose exec app python manage.py makemigrations --check
 - **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`). Each app keeps its Portuguese **label** (`label = "pacientes"` in `apps.py`), the name the database tables, the migrations and the permissions know it by, and migration files keep their names: production has them recorded (decision 145).
 - **Management commands named in English**, options included (`python manage.py seed_sample_data --patients 50`) (decision 148).
 - **Templates named in English**, in a folder named after their app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); Django's own names stay (`base.html`, `403.html`, `registration/login.html`) (decision 146).
-- **Test files named in English**, after what they test (`tests/test_patients.py`, `tests/test_schedule.py`), even when the module they test has a Portuguese name (decision 144).
+- **Test files named in English**, after what they test (`tests/test_patients.py`, `tests/test_schedule.py`), even when the module they test has a Portuguese name (decision 144). So are the test functions, saying what they check (`test_duplicate_cpf_refused_in_same_clinic_but_allowed_in_another`); the texts a test looks for on the screen stay in Portuguese (decision 181).
 - **Every text on screen** is written in Portuguese in the code and translated in `locale/en` and `locale/es`:
   ```bash
   docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests

@@ -16,7 +16,7 @@ from tests.test_finance import HOJE, cenario, entrar, parcelas_de  # noqa: F401
 pytestmark = pytest.mark.django_db
 
 
-def test_cada_pais_tem_a_sua_lei():
+def test_each_country_has_its_law():
     assert set(legislation.LAWS) == set(COUNTRIES)
     for country, lei in legislation.LAWS.items():
         assert lei.lei and lei.curta, country
@@ -27,7 +27,7 @@ def test_cada_pais_tem_a_sua_lei():
         assert not lei.site or lei.site.startswith("https://"), country
 
 
-def test_prazo_de_guarda_em_cada_situacao():
+def test_retention_period_in_each_case():
     with translation.override("pt-br"):
         assert legislation.retention_period("BR") == (
             "O prontuário deve ser guardado por pelo menos 20 anos depois do último registro "
@@ -44,7 +44,7 @@ def test_prazo_de_guarda_em_cada_situacao():
         assert "O prontuário" not in legislation.retention_period("CL")
 
 
-def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
+def test_privacy_shows_the_country_law(client, clinica_a):
     page = client.get(reverse("privacy")).content.decode()
     assert "País da clínica" not in page  # Brazil: the policy is already Brazilian
     clinica_a.country = "US"
@@ -54,7 +54,7 @@ def test_privacidade_mostra_a_lei_do_pais(client, clinica_a):
     assert 'href="https://www.hhs.gov/ocr"' in page and "lei de cada estado" in page
 
 
-def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissional):  # noqa: F811
+def test_receipt_says_it_does_not_replace_tax_document(cenario, criar_profissional):  # noqa: F811
     clinic = cenario["clinic"]
     dra = criar_profissional(clinic, "Dra. Fictícia", registration="CRO-SP 12345")
     with use_clinic(clinic):
@@ -88,7 +88,7 @@ def test_recibo_diz_que_nao_substitui_o_documento_fiscal(cenario, criar_profissi
     assert "Este recibo não substitui o documento fiscal (CFDI)." in page
 
 
-def test_exclusao_cita_a_lei_e_o_prazo_do_pais(cenario):  # noqa: F811
+def test_deletion_cites_country_law_and_period(cenario):  # noqa: F811
     clinic = cenario["clinic"]
     clinic.country = "CL"
     clinic.save()
