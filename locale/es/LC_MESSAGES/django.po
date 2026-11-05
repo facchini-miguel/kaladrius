@@ -1842,6 +1842,9 @@ msgstr "conducta y plan"
 msgid "finalizado em"
 msgstr "finalizada el"
 
+msgid "finalizado por"
+msgstr "finalizado por"
+
 msgid "atendimento"
 msgstr "consulta"
 
@@ -1912,6 +1915,12 @@ msgstr "solicitud de exámenes"
 
 msgid "pedidos de exames"
 msgstr "solicitudes de exámenes"
+
+msgid "tamanho"
+msgstr "tamaño"
+
+msgid "conteúdo"
+msgstr "contenido"
 
 msgid "anexo"
 msgstr "adjunto"

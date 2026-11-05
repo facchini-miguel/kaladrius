@@ -11,6 +11,7 @@ Los nombres del código están pasando del portugués al inglés (decisiones 155
 - **Solo cambian identificadores**, leídos como tokens de Python y variables de plantilla, nunca como texto: los textos de las pantallas, los `_()` y los `{% translate %}` quedan como están.
 - **La base mantiene sus nombres**: el modelo mantiene su tabla (`Meta.db_table`), el campo su columna (`db_column`). Las migraciones no ejecutan SQL, y la versión anterior (la vuelta automática) sigue funcionando.
 - **Un renombrado nunca choca**: un archivo que ya usa el nombre nuevo para otra cosa (una variable `date` junto a un campo `data`, el `type` de Python) se hace a mano.
+- **Un campo mantiene su etiqueta en portugués**: sin `verbose_name` Django arma la etiqueta a partir del nombre, así que un campo renombrado al inglés mostraría "created by" en las pantallas y en la auditoría. Un campo renombrado dice su propia etiqueta (`_("criado por")`); si no, una prueba falla (decisión 170).
 - **Las pruebas vigilan las plantillas**: una variable que una plantilla busca y no encuentra hace fallar la ejecución, salvo que esté en `tests/missing_template_variables.txt` (decisión 159). Un renombrado mantiene esa lista igual, con los nombres nuevos.
 
 ## Modelos (hecho)
@@ -114,7 +115,7 @@ Los nombres que se repiten entre los modelos, en cuatro partes. **Hecho:** `clin
 
 ## Campos de cada app
 
-Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167), pacientes (decisión 168), core e historia clínica (decisión 169).
+Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión 167), pacientes (decisión 168), core e historia clínica (decisión 169), y las otras nueve apps (decisión 171): todo campo de modelo tiene ahora nombre en inglés.
 
 ### Finanzas (`financeiro`)
 
@@ -236,6 +237,90 @@ Los campos propios de cada app, una app a la vez. **Hecho:** finanzas (decisión
 | `exames` | `exams` |
 | `indicacao` | `indication` |
 | `conteudo` | `content` |
+
+### Personal (`pessoal`)
+
+| Antes | Después |
+|---|---|
+| `cpf` | `tax_id` |
+| `cargo` | `job_title` |
+| `admissao` | `hired_on` |
+| `desligamento` | `left_on` |
+| `desde` | `effective_from` |
+| `competencia` | `period` |
+| `salario` | `salary` |
+| `horas_extras` | `overtime_hours` |
+| `valor_hora_extra` | `overtime_rate` |
+| `faltas` | `absences` |
+
+### Presupuestos (`orcamentos`)
+
+| Antes | Después |
+|---|---|
+| `decidido_em` | `decided_at` |
+| `decidido_por` | `decided_by` |
+| `orcamento` | `estimate` |
+| `procedimento` | `procedure` |
+| `dentes` | `teeth` |
+| `quantidade` | `quantity` |
+| `valor_unitario` | `unit_price` |
+
+### Auditoría (`auditoria`)
+
+| Antes | Después |
+|---|---|
+| `usuario_nome` | `user_name` |
+| `acao` | `action` |
+| `modelo` | `model_name` |
+| `objeto_id` | `object_id` |
+| `objeto_descricao` | `object_repr` |
+| `alteracoes` | `changes` |
+
+### Cuenta (inicio de sesión en dos pasos) (`conta`)
+
+| Antes | Después |
+|---|---|
+| `segredo` | `secret` |
+| `ativada_em` | `activated_at` |
+| `ultimo_passo` | `last_step` |
+| `resumo` | `digest` |
+| `usado_em` | `used_at` |
+
+### Seguros médicos (`convenios`)
+
+| Antes | Después |
+|---|---|
+| `convenio` | `health_plan` |
+| `plano` | `plan` |
+| `beneficiario` | `member_code` |
+| `titular` | `holder` |
+
+### Datos de referencia (`referencias`)
+
+| Antes | Después |
+|---|---|
+| `sigla` | `abbreviation` |
+| `regiao` | `region` |
+| `nome_curto` | `short_name` |
+| `ordem` | `sort_order` |
+
+### Profesionales (`profissionais`)
+
+| Antes | Después |
+|---|---|
+| `comissao_percentual` | `commission_percentage` |
+
+### Llamadas de control (`rechamadas`)
+
+| Antes | Después |
+|---|---|
+| `concluida` | `done` |
+
+### Agenda (`agenda`)
+
+| Antes | Después |
+|---|---|
+| `serie` | `series` |
 
 ## Lo que queda en portugués
 

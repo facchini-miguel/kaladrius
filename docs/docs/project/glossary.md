@@ -11,6 +11,7 @@ The code's names are moving from Portuguese to English (decisions 155 to 159); t
 - **Only identifiers change**, read as Python tokens and template variables, never as text: the screens' texts, `_()` and `{% translate %}` stay as they are.
 - **The database keeps its names**: a model keeps its table (`Meta.db_table`), a field its column (`db_column`). The migrations run no SQL, and the previous version (the automatic rollback) still works.
 - **A rename never collides**: a file that already uses the new name for something else (a variable `date` beside a field `data`, `type` the built-in) is done by hand.
+- **A field keeps its Portuguese label**: without `verbose_name` Django builds the label from the name, so a field renamed to English would show "created by" on the screens and in the audit. A renamed field states its label (`_("criado por")`); a test fails the run otherwise (decision 170).
 - **The tests watch the templates**: a variable a template looks up and does not find fails the run, unless it is in `tests/missing_template_variables.txt` (decision 159). A rename keeps that list the same, with the new names.
 
 ## Models (done)
@@ -114,7 +115,7 @@ The names that repeat across the models, in four parts. **Done:** `clinica`, `cr
 
 ## Fields of each app
 
-Each app's own fields, one app at a time. **Done:** finance (decision 167), patients (decision 168), core and medical records (decision 169).
+Each app's own fields, one app at a time. **Done:** finance (decision 167), patients (decision 168), core and medical records (decision 169), and the other nine apps (decision 171): every model field now has an English name.
 
 ### Finance (`financeiro`)
 
@@ -236,6 +237,90 @@ Each app's own fields, one app at a time. **Done:** finance (decision 167), pati
 | `exames` | `exams` |
 | `indicacao` | `indication` |
 | `conteudo` | `content` |
+
+### Staff (`pessoal`)
+
+| Before | After |
+|---|---|
+| `cpf` | `tax_id` |
+| `cargo` | `job_title` |
+| `admissao` | `hired_on` |
+| `desligamento` | `left_on` |
+| `desde` | `effective_from` |
+| `competencia` | `period` |
+| `salario` | `salary` |
+| `horas_extras` | `overtime_hours` |
+| `valor_hora_extra` | `overtime_rate` |
+| `faltas` | `absences` |
+
+### Estimates (`orcamentos`)
+
+| Before | After |
+|---|---|
+| `decidido_em` | `decided_at` |
+| `decidido_por` | `decided_by` |
+| `orcamento` | `estimate` |
+| `procedimento` | `procedure` |
+| `dentes` | `teeth` |
+| `quantidade` | `quantity` |
+| `valor_unitario` | `unit_price` |
+
+### Audit (`auditoria`)
+
+| Before | After |
+|---|---|
+| `usuario_nome` | `user_name` |
+| `acao` | `action` |
+| `modelo` | `model_name` |
+| `objeto_id` | `object_id` |
+| `objeto_descricao` | `object_repr` |
+| `alteracoes` | `changes` |
+
+### Account (two-step login) (`conta`)
+
+| Before | After |
+|---|---|
+| `segredo` | `secret` |
+| `ativada_em` | `activated_at` |
+| `ultimo_passo` | `last_step` |
+| `resumo` | `digest` |
+| `usado_em` | `used_at` |
+
+### Health plans (`convenios`)
+
+| Before | After |
+|---|---|
+| `convenio` | `health_plan` |
+| `plano` | `plan` |
+| `beneficiario` | `member_code` |
+| `titular` | `holder` |
+
+### Reference data (`referencias`)
+
+| Before | After |
+|---|---|
+| `sigla` | `abbreviation` |
+| `regiao` | `region` |
+| `nome_curto` | `short_name` |
+| `ordem` | `sort_order` |
+
+### Practitioners (`profissionais`)
+
+| Before | After |
+|---|---|
+| `comissao_percentual` | `commission_percentage` |
+
+### Recalls (`rechamadas`)
+
+| Before | After |
+|---|---|
+| `concluida` | `done` |
+
+### Schedule (`agenda`)
+
+| Before | After |
+|---|---|
+| `serie` | `series` |
 
 ## What stays in Portuguese
 
