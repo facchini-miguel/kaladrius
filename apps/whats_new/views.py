@@ -7,14 +7,14 @@ from . import releases
 @login_required
 def whats_new_list(request):
     versions = releases.for_audience("equipe")
-    modulos = sorted({(item.modulo, item.modulo_nome) for _, itens in versions for item in itens})
-    modulo = request.GET.get("module", "")
-    if modulo:
+    modules = sorted({(item.module, item.module_name) for _, items in versions for item in items})
+    module = request.GET.get("module", "")
+    if module:
         versions = [
-            (release, tuple(item for item in itens if item.modulo == modulo))
-            for release, itens in versions
+            (release, tuple(item for item in items if item.module == module))
+            for release, items in versions
         ]
-        versions = [(release, itens) for release, itens in versions if itens]
+        versions = [(release, items) for release, items in versions if items]
 
     # Opening this page clears the "new version" notice.
     current = releases.current_version()
@@ -25,5 +25,5 @@ def whats_new_list(request):
     return render(
         request,
         "whats_new/list.html",
-        {"versions": versions, "modules": modulos, "module": modulo},
+        {"versions": versions, "modules": modules, "module": module},
     )

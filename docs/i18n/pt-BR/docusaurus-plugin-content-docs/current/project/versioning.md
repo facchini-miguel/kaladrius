@@ -26,20 +26,22 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 - o número da versão exibido no rodapé do sistema;
 - as *Releases* do GitHub, em inglês (comando `release_notes`).
 
+Os textos das novidades são escritos nos **três idiomas da interface** (`pt-br`, `en`, `es`; decisão 049). Os nomes dos campos são em inglês (decisão 189); os valores (`novo`, `equipe`, os módulos) ficam em português.
+
 ### Formato
 
 ```yaml
-- versao: 1.5.0
-  data: 2027-03-10
-  titulo:
+- version: 1.5.0
+  date: 2027-03-10
+  title:
     pt-br: Lembretes de retorno no app
     en: Recall reminders in the app
     es: Recordatorios de regreso en la app
-  itens:
-    - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas    # um dos nomes de MODULOS em apps/whats_new/releases.py
-      publico: [equipe, paciente]
-      texto:
+  items:
+    - kind: novo            # novo | melhoria | correcao | seguranca
+      module: Rechamadas    # um dos nomes de MODULES em apps/whats_new/releases.py
+      audience: [equipe, paciente]
+      text:
         pt-br: >
           O paciente recebe no celular um aviso 7 dias antes da data de retorno.
         en: >
@@ -50,23 +52,23 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `versao` | sim | Número no formato `MAIOR.MENOR.CORREÇÃO` |
-| `data` | sim | Data da publicação (AAAA-MM-DD) |
-| `titulo` | não | Destaque da versão, numa frase, nos três idiomas |
-| `itens[].tipo` | sim | `novo`, `melhoria`, `correcao` ou `seguranca` |
-| `itens[].modulo` | sim | Área do sistema (Agenda, Pacientes…), em português; a tela mostra a tradução |
-| `itens[].publico` | sim | Quem vê o item: `equipe`, `paciente` ou ambos |
-| `itens[].origem` | não | `dependabot` para uma atualização proposta pelo Dependabot; fica de fora nas mudanças do próprio projeto (decisão 133) |
-| `itens[].pr` | com `origem` | Número do pull request; a página e a release do GitHub apontam para ele |
-| `itens[].texto` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar. Um texto por idioma (`pt-br`, `en`, `es`); um teste exige os três |
+| `version` | sim | Número no formato `MAIOR.MENOR.CORREÇÃO` |
+| `date` | sim | Data da publicação (AAAA-MM-DD) |
+| `title` | não | Destaque da versão, numa frase, nos três idiomas |
+| `items[].kind` | sim | `novo`, `melhoria`, `correcao` ou `seguranca` |
+| `items[].module` | sim | Área do sistema (Agenda, Pacientes…), em português; a tela mostra a tradução |
+| `items[].audience` | sim | Quem vê o item: `equipe`, `paciente` ou ambos |
+| `items[].source` | não | `dependabot` para uma atualização proposta pelo Dependabot; fica de fora nas mudanças do próprio projeto (decisão 133) |
+| `items[].pr` | com `source` | Número do pull request; a página e a release do GitHub apontam para ele |
+| `items[].text` | sim | **Poucas linhas**, em linguagem de usuário: o que mudou e como usar. Um texto por idioma (`pt-br`, `en`, `es`); um teste exige os três |
 
 ### Regras de escrita
 - Escrever para o **usuário**, não para o programador. Por exemplo, "A agenda agora mostra…", e não "Refatorado o componente X".
 - No máximo 3 linhas por item.
 - Correções de segurança não descrevem a falha, só que foi corrigida.
-- Itens só internos (infraestrutura, refatoração) não entram, ou entram com `publico: []`, e aí não aparecem para ninguém.
-- Pacientes só veem itens com `paciente` em `publico`.
-- Todo item de um pull request do Dependabot tem `origem: dependabot` e o `pr`: as Novidades mostram o selo "Dependabot · #N" e a release do GitHub acrescenta "(Dependabot, #N)", para separar as mudanças do titular das do Dependabot.
+- Itens só internos (infraestrutura, refatoração) não entram, ou entram com `audience: []`, e aí não aparecem para ninguém.
+- Pacientes só veem itens com `paciente` em `audience`.
+- Todo item de um pull request do Dependabot tem `source: dependabot` e o `pr`: as Novidades mostram o selo "Dependabot · #N" e a release do GitHub acrescenta "(Dependabot, #N)", para separar as mudanças do titular das do Dependabot.
 
 ## Como aparece
 
@@ -75,7 +77,7 @@ O arquivo [`../../releases.yaml`](https://github.com/facchini-miguel/kaladrius/b
 **App:** tela **Novidades** no menu e, ao abrir uma versão nova pela primeira vez, um resumo "O que há de novo". Usa o endpoint:
 
 ```
-GET /api/v1/releases?desde=1.4.0&publico=paciente
+GET /api/v1/releases?since=1.4.0&audience=paciente
 ```
 
 ## Processo para publicar uma versão

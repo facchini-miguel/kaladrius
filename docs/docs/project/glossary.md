@@ -1733,7 +1733,7 @@ The names the views and context processors give the templates, and the templates
 
 ## Keys inside the values (done)
 
-The keys of the dictionaries the services and views build for the pages (the home summary, the cash flow, the reports, the planning, the commissions, the cash register, the debtors, the server health), the attributes the views add to objects, and the fields of the legislation table (decision 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. The server health uses the names `health.sh` writes (`time`, `memory_total`…); lines of the old format, with Portuguese names, are still read. Kept: the module and action codes (`can.agenda.ver`), the document roles (`country_documents.paciente`), the fields of the release notes (they are the `releases.yaml` format and the `/api/v1/releases` API), the models' `related_name`s (`estimate.itens`), and the placeholders of translated texts (`%(anos)s`).
+The keys of the dictionaries the services and views build for the pages (the home summary, the cash flow, the reports, the planning, the commissions, the cash register, the debtors, the server health), the attributes the views add to objects, and the fields of the legislation table (decision 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. The server health uses the names `health.sh` writes (`time`, `memory_total`…); lines of the old format, with Portuguese names, are still read. Kept: the module and action codes (`can.agenda.ver`), the document roles (`country_documents.paciente`), the models' `related_name`s (`estimate.itens`), and the placeholders of translated texts (`%(anos)s`).
 
 ### Dictionary keys
 
@@ -1919,6 +1919,40 @@ The Python names the tests define (decision 188): the fixtures, the helpers, the
 | `receita` | `income` |
 | `recepcao` | `reception` |
 | `tratamento` | `treatment` |
+
+## Release notes fields (done)
+
+The fields of `releases.yaml`, of the code that reads it and of the `/api/v1/releases` API (decision 189). The values stay in Portuguese, like the stored ones: the kinds (`novo`, `melhoria`, `correcao`, `seguranca`), the audiences (`equipe`, `paciente`), the modules (`Agenda`) and `source: dependabot`. The API still accepts `publico` and `desde`; an entry written with the old fields is refused, naming the field to rename. The old `/api/v1/versao` stays as it was (decision 155).
+
+### `releases.yaml`
+
+| Before | After |
+|---|---|
+| `versao` | `version` |
+| `data` | `date` |
+| `titulo` | `title` |
+| `itens` | `items` |
+| `itens[].tipo` | `items[].kind` |
+| `itens[].modulo` | `items[].module` |
+| `itens[].publico` | `items[].audience` |
+| `itens[].texto` | `items[].text` |
+| `itens[].origem` | `items[].source` |
+
+### `/api/v1/releases`
+
+| Before | After |
+|---|---|
+| `versao` | `version` |
+| `data` | `date` |
+| `titulo` | `title` |
+| `itens` | `items` |
+| `tipo` | `kind` |
+| `tipo_nome` | `kind_name` |
+| `modulo` | `module` |
+| `texto` | `text` |
+| `origem` | `source` |
+| `?publico=` | `?audience=` |
+| `?desde=` | `?since=` |
 
 ## What stays in Portuguese
 
