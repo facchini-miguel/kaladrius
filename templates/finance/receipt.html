@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Recibo" %} {{ payment.pk }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Recibo" %} {{ payment.pk }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">

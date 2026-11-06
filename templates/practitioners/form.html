@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if practitioner.pk %}{% translate "Editar profissional" %}{% else %}{% translate "Novo profissional" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if practitioner.pk %}{% translate "Editar profissional" %}{% else %}{% translate "Novo profissional" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if practitioner.pk %}{% blocktranslate with nome=practitioner.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo profissional" %}{% endif %}</h1>

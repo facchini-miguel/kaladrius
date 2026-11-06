@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo grupo" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo grupo" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo grupo" %}{% endif %}</h1>

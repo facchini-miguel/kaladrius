@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static formats %}
 
-{% block titulo %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
+{% block title %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
