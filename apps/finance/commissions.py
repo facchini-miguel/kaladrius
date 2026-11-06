@@ -39,28 +39,28 @@ def _credits(practitioner, until):
 
 def _debits(practitioner):
     """Receipts already commissioned and then reversed, not discounted yet (a few)."""
-    debitos = list(
+    debits = list(
         _receipts(practitioner)
         .filter(reversed=True, commission__isnull=False, commission_reversal__isnull=True)
         .select_related("commission")
         .order_by("date", "pk")
     )
-    for debito in debitos:
-        debito.commission_returned = percentage_for(debito.amount, debito.commission.percentage)
-    return debitos
+    for debit in debits:
+        debit.commission_returned = percentage_for(debit.amount, debit.commission.percentage)
+    return debits
 
 
 def pending(practitioner, until):
     """What would be paid to the practitioner for receipts up to `ate`, receipt by receipt."""
-    creditos = list(_credits(practitioner, until).order_by("date", "pk"))
-    debitos = _debits(practitioner)
-    received_amount = sum((p.amount for p in creditos), start=ZERO)
+    credit_rows = list(_credits(practitioner, until).order_by("date", "pk"))
+    debits = _debits(practitioner)
+    received_amount = sum((p.amount for p in credit_rows), start=ZERO)
     gross = percentage_for(received_amount, practitioner.commission_percentage)
-    reversal_deduction = sum((p.commission_returned for p in debitos), start=ZERO)
+    reversal_deduction = sum((p.commission_returned for p in debits), start=ZERO)
     return {
         "practitioner": practitioner,
-        "credits": creditos,
-        "debits": debitos,
+        "credits": credit_rows,
+        "debits": debits,
         "received_amount": received_amount,
         "gross": gross,
         "reversal_deduction": reversal_deduction,
@@ -76,15 +76,15 @@ def summary(until):
     """
     rows = []
     for practitioner in Practitioner.objects.order_by("-active", "name"):
-        totais = _credits(practitioner, until).aggregate(
-            received_amount=Sum("amount"), quantos=Count("pk")
+        totals = _credits(practitioner, until).aggregate(
+            received_amount=Sum("amount"), how_many=Count("pk")
         )
-        debitos = _debits(practitioner)
-        if not (practitioner.commission_percentage or totais["quantos"] or debitos):
+        debits = _debits(practitioner)
+        if not (practitioner.commission_percentage or totals["how_many"] or debits):
             continue
-        received_amount = totais["received_amount"] or ZERO
+        received_amount = totals["received_amount"] or ZERO
         gross = percentage_for(received_amount, practitioner.commission_percentage)
-        reversal_deduction = sum((p.commission_returned for p in debitos), start=ZERO)
+        reversal_deduction = sum((p.commission_returned for p in debits), start=ZERO)
         rows.append(
             {
                 "practitioner": practitioner,
@@ -102,8 +102,8 @@ def pay(practitioner, *, until, due_date, category, user):
     """Create the payable for the pending commission and mark the receipts it covers."""
     # Locking the practitioner serializes two people paying the same commission at once.
     practitioner = Practitioner.objects.select_for_update().get(pk=practitioner.pk)
-    calculo = pending(practitioner, until)
-    if calculo["amount"] <= 0:
+    calculation = pending(practitioner, until)
+    if calculation["amount"] <= 0:
         raise ValidationError(_("Não há comissão a pagar até esta data."))
     entry = services.create_entry(
         clinic=practitioner.clinic,
@@ -113,9 +113,9 @@ def pay(practitioner, *, until, due_date, category, user):
         description=_("Comissão de %(nome)s até %(data)s")
         % {"nome": practitioner.name, "data": date_format(until, "SHORT_DATE_FORMAT")},
         category=category,
-        total_amount=calculo["amount"],
-        parcelas=1,
-        primeiro_vencimento=due_date,
+        total_amount=calculation["amount"],
+        installments=1,
+        first_due_date=due_date,
         user=user,
     )
     commission = Commission.objects.create(
@@ -123,17 +123,17 @@ def pay(practitioner, *, until, due_date, category, user):
         practitioner=practitioner,
         until=until,
         percentage=practitioner.commission_percentage,
-        received_amount=calculo["received_amount"],
-        reversal_deduction=calculo["reversal_deduction"],
-        amount=calculo["amount"],
+        received_amount=calculation["received_amount"],
+        reversal_deduction=calculation["reversal_deduction"],
+        amount=calculation["amount"],
         entry=entry,
         created_by=user,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.
-    for payment in calculo["credits"]:
+    for payment in calculation["credits"]:
         payment.commission = commission
         payment.save(update_fields=["commission"])
-    for payment in calculo["debits"]:
+    for payment in calculation["debits"]:
         payment.commission_reversal = commission
         payment.save(update_fields=["commission_reversal"])
     return commission
@@ -145,7 +145,7 @@ def release(commission):
     Refused while a later commission deducted the reversal of one of its receipts: that
     deduction only makes sense if this one was paid, so the later one is cancelled first.
     """
-    descontou = (
+    deducted = (
         Commission.objects.filter(
             cancelled=False,
             reversed_payments__commission=commission,
@@ -154,13 +154,13 @@ def release(commission):
         .order_by("until")
         .first()
     )
-    if descontou is not None:
+    if deducted is not None:
         raise ValidationError(
             _(
                 "Esta comissão não pode ser cancelada: o estorno de um recebimento dela já foi "
                 "descontado na comissão até %(data)s. Cancele aquela antes."
             )
-            % {"data": date_format(descontou.until, "SHORT_DATE_FORMAT")}
+            % {"data": date_format(deducted.until, "SHORT_DATE_FORMAT")}
         )
     # One by one (not .update()), so the audit log records each change.
     for payment in Payment.objects.filter(commission=commission):

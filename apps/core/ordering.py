@@ -15,5 +15,5 @@ ALPHABETICAL = "und-x-icu"
 def alphabetical_key(text):
     """Sort key for Python lists of names, matching the database order closely enough:
     accents and case are ignored."""
-    sem_acento = unicodedata.normalize("NFKD", text or "")
-    return "".join(c for c in sem_acento if not unicodedata.combining(c)).casefold()
+    unaccented = unicodedata.normalize("NFKD", text or "")
+    return "".join(c for c in unaccented if not unicodedata.combining(c)).casefold()

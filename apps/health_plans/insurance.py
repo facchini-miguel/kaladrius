@@ -43,7 +43,7 @@ class CodeFormat:
 
 @dataclass(frozen=True)
 class Insurers:
-    tipos: str = ""  # the local kinds of plan, as examples for the plan's name
+    kinds: str = ""  # the local kinds of plan, as examples for the plan's name
     registration: CodeFormat | None = None  # the insurer's registry
     number: str = ""  # local name of the card number
     group: str = ""  # local name of the group or policy number, where cards have one

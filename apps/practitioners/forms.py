@@ -19,10 +19,10 @@ class PractitionerForm(BootstrapForm, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         # The registrations of the clinic's country as examples (decision 121).
-        exemplos = identification.for_country(
+        examples = identification.for_country(
             countries.clinic_country(clinic)
-        ).registro_profissional
-        self.fields["registration"].help_text = exemplos
+        ).professional_registration
+        self.fields["registration"].help_text = examples
         # Only users with an active membership in this clinic can be linked.
         self.fields["user"].queryset = (
             get_user_model()
@@ -34,8 +34,8 @@ class PractitionerForm(BootstrapForm, forms.ModelForm):
     def clean_user(self):
         user = self.cleaned_data.get("user")
         if user is not None:
-            outros = Practitioner.objects.filter(user=user).exclude(pk=self.instance.pk)
-            if outros.exists():
+            others = Practitioner.objects.filter(user=user).exclude(pk=self.instance.pk)
+            if others.exists():
                 raise forms.ValidationError(
                     _("Este usuário já está ligado a outro profissional desta clínica.")
                 )

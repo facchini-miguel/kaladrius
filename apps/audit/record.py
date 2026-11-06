@@ -69,8 +69,8 @@ def anonymize(model, ids):
     the values and the record description go.
     """
     name = model_label(model)
-    registros = AuditEntry.objects.filter(model_name=name, object_id__in=[str(i) for i in ids])
-    for record in registros:
+    records = AuditEntry.objects.filter(model_name=name, object_id__in=[str(i) for i in ids])
+    for record in records:
         record.object_repr = f"{name} {record.object_id} (dados removidos)"
         record.changes = {field: [REMOVED, REMOVED] for field in record.changes}
         record.save(update_fields=["object_repr", "changes"])

@@ -43,10 +43,10 @@ class ClinicLoginView(auth_views.LoginView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        erros = context["form"].non_field_errors().as_data()
+        errors = context["form"].non_field_errors().as_data()
         return {
             **context,
-            "address_locked": any(e.code == "endereco_bloqueado" for e in erros),
+            "address_locked": any(e.code == "endereco_bloqueado" for e in errors),
             "recovery_by_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
             "idle": self.request.GET.get("idle") == "1",
             "minutos": settings.IDLE_MINUTES,
@@ -55,28 +55,28 @@ class ClinicLoginView(auth_views.LoginView):
 
 def code(request):
     """Second step of the login: the 6-digit code of the app or a recovery code."""
-    pendente = request.session.get(PENDING)
-    if not pendente or time.time() - pendente["momento"] > PENDING_VALIDITY:
+    pending_login = request.session.get(PENDING)
+    if not pending_login or time.time() - pending_login["momento"] > PENDING_VALIDITY:
         request.session.pop(PENDING, None)
         messages.info(request, _("Entre de novo com o usuário e a senha."))
         return redirect("login")
-    user = get_user_model().objects.get(pk=pendente["usuario"])
+    user = get_user_model().objects.get(pk=pending_login["usuario"])
     form = CodeForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if services.verify(user, form.cleaned_data["code"]):
             del request.session[PENDING]
-            login(request, user, backend=pendente["backend"])
-            return redirect(pendente["proximo"])
+            login(request, user, backend=pending_login["backend"])
+            return redirect(pending_login["proximo"])
         # Counted by the login protection too, so codes cannot be tried without end.
         user_login_failed.send(
             sender=__name__, credentials={"username": user.get_username()}, request=request
         )
-        pendente["tentativas"] += 1
-        if pendente["tentativas"] >= CODE_ATTEMPTS:
+        pending_login["tentativas"] += 1
+        if pending_login["tentativas"] >= CODE_ATTEMPTS:
             del request.session[PENDING]
             messages.error(request, _("Muitos códigos errados. Entre de novo."))
             return redirect("login")
-        request.session[PENDING] = pendente
+        request.session[PENDING] = pending_login
         form.add_error("code", _("Código incorreto."))
     return render(request, "account/code.html", {"form": form})
 
@@ -97,7 +97,7 @@ def two_factor(request):
     if user.demo:
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
         return redirect("home")
-    acao = request.POST.get("action")
+    action = request.POST.get("action")
     is_required = services.is_required(request)
     if services.active_for(user):
         # Required by the clinic: it can only be renewed (new codes), not turned off.
@@ -105,11 +105,11 @@ def two_factor(request):
             None
             if is_required
             else DisableTwoFactorForm(
-                request.POST if acao == "desativar" else None, user=user, prefix="disable"
+                request.POST if action == "desativar" else None, user=user, prefix="disable"
             )
         )
-        novos = CodeForm(request.POST if acao == "codigos" else None, prefix="codes")
-        if acao == "desativar" and deactivate is not None and deactivate.is_valid():
+        new_ones = CodeForm(request.POST if action == "codigos" else None, prefix="codes")
+        if action == "desativar" and deactivate is not None and deactivate.is_valid():
             services.deactivate(user)
             log_event(
                 AuditEntry.Action.CHANGE,
@@ -118,39 +118,39 @@ def two_factor(request):
             )
             messages.success(request, _("Verificação em duas etapas desativada."))
             return redirect("account:two_factor")
-        if acao == "codigos" and novos.is_valid():
-            if services.verify(user, novos.cleaned_data["code"]):
+        if action == "codigos" and new_ones.is_valid():
+            if services.verify(user, new_ones.cleaned_data["code"]):
                 return render(
                     request,
                     "account/codes.html",
                     {"codes": services.new_codes(user)},
                 )
-            novos.add_error("code", _("Código incorreto."))
-        restantes = user.recovery_codes.filter(used_at__isnull=True).count()
+            new_ones.add_error("code", _("Código incorreto."))
+        remaining_ones = user.recovery_codes.filter(used_at__isnull=True).count()
         return render(
             request,
             "account/two_factor.html",
             {
                 "active": True,
                 "disable_form": deactivate,
-                "codes_form": novos,
-                "remaining": restantes,
+                "codes_form": new_ones,
+                "remaining": remaining_ones,
                 "required": is_required,
             },
         )
-    dispositivo = services.prepare(user, new=request.GET.get("new") == "1")
-    form = CodeForm(request.POST if acao == "ativar" else None)
-    if acao == "ativar" and form.is_valid():
-        if services.verify_app(dispositivo, form.cleaned_data["code"]):
-            codigos = services.activate(dispositivo)
+    device = services.prepare(user, new=request.GET.get("new") == "1")
+    form = CodeForm(request.POST if action == "ativar" else None)
+    if action == "ativar" and form.is_valid():
+        if services.verify_app(device, form.cleaned_data["code"]):
+            codes = services.activate(device)
             log_event(
                 AuditEntry.Action.CHANGE,
                 user,
                 description=f"{user}: verificação em duas etapas ativada",
             )
-            return render(request, "account/codes.html", {"codes": codigos, "enabled": True})
+            return render(request, "account/codes.html", {"codes": codes, "enabled": True})
         form.add_error("code", _("Código incorreto. Confira a hora do celular e tente de novo."))
-    address = services.app_uri(dispositivo)
+    address = services.app_uri(device)
     return render(
         request,
         "account/two_factor.html",
@@ -159,7 +159,7 @@ def two_factor(request):
             "required": is_required,
             "form": form,
             "qr": services.qr_svg(address),
-            "secret": services.secret_in_groups(dispositivo.secret),
+            "secret": services.secret_in_groups(device.secret),
         },
     )
 
@@ -167,12 +167,12 @@ def two_factor(request):
 def _with_email(view):
     """Password recovery only exists where the installation can send e-mail."""
 
-    def protegida(request, *args, **kwargs):
+    def protected(request, *args, **kwargs):
         if not settings.PASSWORD_RECOVERY_BY_EMAIL:
             raise Http404
         return view(request, *args, **kwargs)
 
-    return protegida
+    return protected
 
 
 password_recover = _with_email(

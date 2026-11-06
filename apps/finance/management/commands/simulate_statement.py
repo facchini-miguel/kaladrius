@@ -38,39 +38,41 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, clinic, account, days, **options):
-        alvo = Clinic.objects.filter(name=clinic).first()
-        if alvo is None:
+        target = Clinic.objects.filter(name=clinic).first()
+        if target is None:
             raise CommandError(f"Clínica “{clinic}” não encontrada.")
-        sorteio = random.Random()  # noqa: S311 (fake data, not security)
+        rng = random.Random()  # noqa: S311 (fake data, not security)
         today = timezone.localdate()
         start = today - datetime.timedelta(days=days)
-        with use_clinic(alvo):
-            alvo_conta = FinancialAccount.objects.filter(name=account).first()
-            if alvo_conta is None:
+        with use_clinic(target):
+            target_account = FinancialAccount.objects.filter(name=account).first()
+            if target_account is None:
                 raise CommandError(f"Conta “{account}” não encontrada.")
             rows = []
             fora = Decimal("0")  # recorded in the system, not in the bank yet
             for p in Payment.objects.filter(
-                account=alvo_conta, reversed=False, date__range=(start, today)
+                account=target_account, reversed=False, date__range=(start, today)
             ).select_related("installment__entry"):
                 is_incoming = p.installment.entry.kind == Entry.Kind.RECEIVABLE
-                if sorteio.random() < 0.15:
+                if rng.random() < 0.15:
                     fora += p.amount if is_incoming else -p.amount
                     continue
-                date = min(p.date + datetime.timedelta(days=sorteio.choice([0, 0, 1, 2])), today)
+                date = min(p.date + datetime.timedelta(days=rng.choice([0, 0, 1, 2])), today)
                 description = "PIX RECEBIDO" if is_incoming else "PAGAMENTO"
                 rows.append((date, p.amount if is_incoming else -p.amount, description, f"P{p.pk}"))
             for number, (description, amount) in enumerate(EXTRAS):
-                date = start + datetime.timedelta(days=sorteio.randint(0, days))
-                rows.append((date, amount, description, f"X{alvo_conta.pk}-{date:%Y%m%d}-{number}"))
+                date = start + datetime.timedelta(days=rng.randint(0, days))
+                rows.append(
+                    (date, amount, description, f"X{target_account.pk}-{date:%Y%m%d}-{number}")
+                )
             rows.sort()
-            balance = dict(services.account_balances(until=today)).get(alvo_conta)
+            balance = dict(services.account_balances(until=today)).get(target_account)
         # The bank balance: what the system has plus the extras minus what is not there yet.
         balance = (balance or Decimal("0")) + sum(v for _, v in EXTRAS) - fora
         self.stdout.write(self._ofx(rows, start, today, balance))
 
     def _ofx(self, rows, start, end, balance):
-        transacoes = "".join(
+        transactions = "".join(
             "<STMTTRN>\n"
             f"<TRNTYPE>{'CREDIT' if amount > 0 else 'DEBIT'}\n"
             f"<DTPOSTED>{date:%Y%m%d}120000[-3:BRT]\n"
@@ -86,7 +88,7 @@ class Command(BaseCommand):
             "<OFX>\n<BANKMSGSRSV1>\n<STMTTRNRS>\n<STMTRS>\n<CURDEF>BRL\n"
             "<BANKACCTFROM>\n<BANKID>999\n<ACCTID>12345-6\n<ACCTTYPE>CHECKING\n</BANKACCTFROM>\n"
             f"<BANKTRANLIST>\n<DTSTART>{start:%Y%m%d}\n<DTEND>{end:%Y%m%d}\n"
-            f"{transacoes}</BANKTRANLIST>\n"
+            f"{transactions}</BANKTRANLIST>\n"
             f"<LEDGERBAL>\n<BALAMT>{balance}\n<DTASOF>{end:%Y%m%d}\n</LEDGERBAL>\n"
             "</STMTRS>\n</STMTTRNRS>\n</BANKMSGSRSV1>\n</OFX>\n"
         )

@@ -10,7 +10,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
-from apps.account import services as conta_servicos
+from apps.account import services as account_services
 from apps.audit.models import AuditEntry
 from apps.audit.record import log_event
 from apps.core.models import Membership
@@ -28,12 +28,12 @@ def _membership(request, pk):
 
 @requires_permission(Module.USERS, Action.VIEW)
 def member_list(request):
-    vinculos = (
+    memberships = (
         Membership.objects.filter(clinic=request.clinic)
         .select_related("user")
         .order_by("-active", "user__first_name", "user__username")
     )
-    return render(request, "team/list.html", {"memberships": vinculos})
+    return render(request, "team/list.html", {"memberships": memberships})
 
 
 @requires_permission(Module.USERS, Action.CREATE)
@@ -51,12 +51,12 @@ def new_member(request):
 
 @requires_permission(Module.USERS, Action.CHANGE)
 def edit_member(request, pk):
-    vinculo = _membership(request, pk)
-    user = vinculo.user
-    exclusiva = exclusive_account(user, request.clinic)
+    membership = _membership(request, pk)
+    user = membership.user
+    exclusive = exclusive_account(user, request.clinic)
     data = request.POST or None
-    form = MembershipForm(data, instance=vinculo, editor=request.user, prefix="vinculo")
-    account = UserAccountForm(data, instance=user, prefix="conta") if exclusiva else None
+    form = MembershipForm(data, instance=membership, editor=request.user, prefix="vinculo")
+    account = UserAccountForm(data, instance=user, prefix="conta") if exclusive else None
     if request.method == "POST" and form.is_valid() and (account is None or account.is_valid()):
         with transaction.atomic():
             form.save()
@@ -70,19 +70,19 @@ def edit_member(request, pk):
         request,
         "team/edit.html",
         {
-            "membership": vinculo,
+            "membership": membership,
             "form": form,
             "account": account,
-            "exclusive": exclusiva,
-            "two_factor": conta_servicos.active_for(user),
+            "exclusive": exclusive,
+            "two_factor": account_services.active_for(user),
         },
     )
 
 
 @requires_permission(Module.USERS, Action.CHANGE)
 def password(request, pk):
-    vinculo = _membership(request, pk)
-    user = vinculo.user
+    membership = _membership(request, pk)
+    user = membership.user
     if user == request.user:
         return redirect("change_password")
     if not exclusive_account(user, request.clinic):
@@ -94,7 +94,7 @@ def password(request, pk):
             )
             % {"nome": user},
         )
-        return redirect("team:edit", pk=vinculo.pk)
+        return redirect("team:edit", pk=membership.pk)
     form = PasswordForm(user, request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -103,21 +103,21 @@ def password(request, pk):
             _("Nova senha de %(nome)s definida.") % {"nome": user.get_full_name() or user},
         )
         return redirect("team:list")
-    return render(request, "team/password.html", {"membership": vinculo, "form": form})
+    return render(request, "team/password.html", {"membership": membership, "form": form})
 
 
 @requires_permission(Module.USERS, Action.CHANGE)
 def two_factor(request, pk):
     """Remove a member's two-step verification (lost phone, decision 111); they turn it on
     again with a new QR code."""
-    vinculo = _membership(request, pk)
-    user = vinculo.user
+    membership = _membership(request, pk)
+    user = membership.user
     if (
         request.method == "POST"
         and user != request.user
         and exclusive_account(user, request.clinic)
     ):
-        conta_servicos.deactivate(user)
+        account_services.deactivate(user)
         log_event(
             AuditEntry.Action.CHANGE,
             user,
@@ -128,4 +128,4 @@ def two_factor(request, pk):
             _("Verificação em duas etapas de %(nome)s removida.")
             % {"nome": user.get_full_name() or user},
         )
-    return redirect("team:edit", pk=vinculo.pk)
+    return redirect("team:edit", pk=membership.pk)

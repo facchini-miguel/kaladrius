@@ -18,12 +18,12 @@ def clinic(request):
         return {}
     return {
         "current_clinic": getattr(request, "clinic", None),
-        "current_membership": getattr(request, "vinculo", None),
+        "current_membership": getattr(request, "membership", None),
         "can": SimpleLazyObject(lambda: permissions_table(request)),
         # Turned-off modules the system administrator still sees (decision 115): marked in
         # the menu, and the page of one says so.
         "disabled_modules": SimpleLazyObject(lambda: modules.visible_disabled(request)),
-        "disabled_module": getattr(request, "modulo_desligado", None),
+        "disabled_module": getattr(request, "module_off", None),
         # Brazilian fields (RG, state registration, IBGE cities) are shown only in Brazil
         # (decision 117); the documents are the country's (decision 121).
         "in_brazil": countries.clinic_country(getattr(request, "clinic", None)) == "BR",

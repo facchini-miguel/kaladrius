@@ -23,97 +23,95 @@ def _patients(clinic):
     return list(Patient.objects.filter(clinic=clinic, active=True, archived=False))
 
 
-def simulate_appointments(clinic, sorteio, semanas_antes=2, semanas_depois=4, ocupacao=0.6):
+def simulate_appointments(clinic, rng, weeks_before=2, weeks_after=4, occupancy=0.6):
     """Fill about `ocupacao` of the free weekday slots around today. Returns how many."""
-    profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
+    practitioners = list(Practitioner.objects.filter(clinic=clinic, active=True))
     appointment_types = list(
         AppointmentType.objects.filter(clinic=clinic, active=True).exclude(
             name__in=["Liberado", "Ocupado"]
         )
     )
-    pacientes = _patients(clinic)
-    if not (profissionais and appointment_types and pacientes):
+    patients = _patients(clinic)
+    if not (practitioners and appointment_types and patients):
         return 0
-    passo = datetime.timedelta(minutes=clinic.schedule_interval)
+    step = datetime.timedelta(minutes=clinic.schedule_interval)
     today = timezone.localdate()
-    segunda = today - datetime.timedelta(days=today.weekday() + 7 * semanas_antes)
-    days = [
-        segunda + datetime.timedelta(days=n) for n in range(7 * (semanas_antes + semanas_depois))
-    ]
-    ocupados = {}
+    second = today - datetime.timedelta(days=today.weekday() + 7 * weeks_before)
+    days = [second + datetime.timedelta(days=n) for n in range(7 * (weeks_before + weeks_after))]
+    busy_slots = {}
     for practitioner_id, start, end in Appointment.objects.filter(
         clinic=clinic,
         start__lt=timestamp(days[-1], datetime.time(23, 59)),
         end__gt=timestamp(days[0], datetime.time(0)),
     ).values_list("practitioner_id", "start", "end"):
-        ocupados.setdefault(practitioner_id, []).append((start, end))
+        busy_slots.setdefault(practitioner_id, []).append((start, end))
 
-    def livre(practitioner, start, end):
-        return all(end <= a or start >= b for a, b in ocupados.get(practitioner.pk, []))
+    def free(practitioner, start, end):
+        return all(end <= a or start >= b for a, b in busy_slots.get(practitioner.pk, []))
 
-    novos = []
+    new_ones = []
     for day in days:
         if day.weekday() >= 5:
             continue
-        for practitioner in profissionais:
+        for practitioner in practitioners:
             current = timestamp(day, clinic.schedule_start)
-            fim_do_dia = timestamp(day, clinic.schedule_end)
-            while current < fim_do_dia:
-                duration = passo * sorteio.choice([1, 1, 2])
+            end_of_day = timestamp(day, clinic.schedule_end)
+            while current < end_of_day:
+                duration = step * rng.choice([1, 1, 2])
                 end = current + duration
                 if (
-                    end > fim_do_dia
-                    or sorteio.random() > ocupacao
-                    or not livre(practitioner, current, end)
+                    end > end_of_day
+                    or rng.random() > occupancy
+                    or not free(practitioner, current, end)
                 ):
-                    current += passo
+                    current += step
                     continue
-                com_paciente = sorteio.random() < 0.9
-                novos.append(
+                with_patient = rng.random() < 0.9
+                new_ones.append(
                     Appointment(
                         clinic=clinic,
                         practitioner=practitioner,
-                        kind=sorteio.choice(appointment_types),
-                        patient=sorteio.choice(pacientes) if com_paciente else None,
-                        description="" if com_paciente else "Horário bloqueado",
-                        status=_status(sorteio, current) if com_paciente else "agendado",
+                        kind=rng.choice(appointment_types),
+                        patient=rng.choice(patients) if with_patient else None,
+                        description="" if with_patient else "Horário bloqueado",
+                        status=_status(rng, current) if with_patient else "agendado",
                         start=current,
                         end=end,
                     )
                 )
                 current = end
-    Appointment.objects.bulk_create(novos, batch_size=1000)
-    return len(novos)
+    Appointment.objects.bulk_create(new_ones, batch_size=1000)
+    return len(new_ones)
 
 
-def _status(sorteio, start):
+def _status(rng, start):
     """Past appointments: most patients came, some missed or cancelled (0.24.0)."""
     if start > timezone.now():
         return Appointment.Status.BOOKED
-    sorteado = sorteio.random()
-    if sorteado < 0.82:
+    drawn = rng.random()
+    if drawn < 0.82:
         return Appointment.Status.ATTENDED
-    if sorteado < 0.92:
+    if drawn < 0.92:
         return Appointment.Status.MISSED
     return Appointment.Status.CANCELLED
 
 
-def simulate_recalls(clinic, sorteio, quantity=80, dias_antes=30, dias_depois=60):
+def simulate_recalls(clinic, rng, quantity=80, days_before=30, days_after=60):
     """Recalls from `dias_antes` ago to `dias_depois` ahead; past ones mostly done."""
-    pacientes = _patients(clinic)
-    if not pacientes:
+    patients = _patients(clinic)
+    if not patients:
         return 0
     today = timezone.localdate()
     novas = []
     for _ in range(quantity):
-        date = today + datetime.timedelta(days=sorteio.randint(-dias_antes, dias_depois))
+        date = today + datetime.timedelta(days=rng.randint(-days_before, days_after))
         novas.append(
             Recall(
                 clinic=clinic,
-                patient=sorteio.choice(pacientes),
+                patient=rng.choice(patients),
                 date=date,
-                description=sorteio.choice(RECALL_REASONS),
-                done=date < today and sorteio.random() < 0.7,
+                description=rng.choice(RECALL_REASONS),
+                done=date < today and rng.random() < 0.7,
             )
         )
     Recall.objects.bulk_create(novas)
@@ -132,7 +130,7 @@ FINANCE_DESCRIPTIONS = [
 ]
 
 
-def simulate_finance(clinic, sorteio, quantity=60, user=None):
+def simulate_finance(clinic, rng, quantity=60, user=None):
     """Fake receivables from 90 days ago to today, in 1 to 6 installments.
 
     Installments due in the past are mostly paid (some are left overdue, for the debtors
@@ -143,48 +141,48 @@ def simulate_finance(clinic, sorteio, quantity=60, user=None):
     from apps.finance import services
     from apps.finance.models import Category, CostCenter, Entry, FinancialAccount, Payment
 
-    pacientes = _patients(clinic)
-    categorias = list(Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME))
-    contas = list(FinancialAccount.objects.filter(clinic=clinic, active=True))
-    profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
-    if not (pacientes and categorias and contas):
+    patients = _patients(clinic)
+    categories = list(Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME))
+    accounts = list(FinancialAccount.objects.filter(clinic=clinic, active=True))
+    practitioners = list(Practitioner.objects.filter(clinic=clinic, active=True))
+    if not (patients and categories and accounts):
         return 0, 0
     today = timezone.localdate()
-    formas = [method for method, _rotulo in Payment.Method.in_use(clinic.country)]
+    methods = [method for method, _label in Payment.Method.in_use(clinic.country)]
     # Two cost centers (decision 095): the care itself and the office.
-    centros = {
+    cost_centers = {
         name: CostCenter.objects.get_or_create(clinic=clinic, name=name)[0]
         for name in ("Atendimento", "Administrativo")
     }
-    criados = 0
+    created_count = 0
     for _ in range(quantity):
-        date = today - datetime.timedelta(days=sorteio.randint(0, 90))
+        date = today - datetime.timedelta(days=rng.randint(0, 90))
         entry = services.create_entry(
             clinic=clinic,
             kind=Entry.Kind.RECEIVABLE,
-            patient=sorteio.choice(pacientes),
-            description=sorteio.choice(FINANCE_DESCRIPTIONS),
-            category=sorteio.choice(categorias),
-            cost_center=centros["Atendimento"],
-            practitioner=sorteio.choice(profissionais) if profissionais else None,
-            total_amount=Decimal(sorteio.randrange(150, 3000, 10)),
+            patient=rng.choice(patients),
+            description=rng.choice(FINANCE_DESCRIPTIONS),
+            category=rng.choice(categories),
+            cost_center=cost_centers["Atendimento"],
+            practitioner=rng.choice(practitioners) if practitioners else None,
+            total_amount=Decimal(rng.randrange(150, 3000, 10)),
             date=date,
-            parcelas=sorteio.choice([1, 1, 2, 3, 4, 6]),
-            primeiro_vencimento=date,
+            installments=rng.choice([1, 1, 2, 3, 4, 6]),
+            first_due_date=date,
             user=user,
         )
         for installment in entry.installments.all():
-            if installment.due_date <= today and sorteio.random() < 0.8:
+            if installment.due_date <= today and rng.random() < 0.8:
                 services.receive(
                     installment,
                     user=user,
                     amount=installment.amount,
                     date=installment.due_date,
-                    method=sorteio.choice(formas),
-                    account=sorteio.choice(contas),
+                    method=rng.choice(methods),
+                    account=rng.choice(accounts),
                 )
-        criados += 1
-    return criados, _simulate_expenses(clinic, sorteio, contas, user, centros)
+        created_count += 1
+    return created_count, _simulate_expenses(clinic, rng, accounts, user, cost_centers)
 
 
 # Fake payables: (supplier, description, category, amount, monthly repetitions or None).
@@ -200,56 +198,63 @@ SIMULATED_EXPENSES = [
 VISIT_EXPENSES = {"Material odontológico", "Laboratório de prótese"}
 
 
-def _simulate_expenses(clinic, sorteio, contas, user, centros):
+def _simulate_expenses(clinic, rng, accounts, user, cost_centers):
     """Monthly bills from 2 months ago to 3 months ahead and a few purchases (mostly paid)."""
     from decimal import Decimal
 
-    from apps.finance import payment_methods as metodos
+    from apps.finance import payment_methods as payment_methods
     from apps.finance import services
     from apps.finance.models import Category, Entry, Supplier
 
     # Bills are paid the way the clinic's country pays them (decision 123).
-    for_country = metodos.for_country(clinic.country).codigos
-    contas_a_pagar = (metodos.PIX, metodos.BOLETO, metodos.TRANSFER, metodos.DIRECT_DEBIT)
-    formas = [method for method in contas_a_pagar if method in for_country]
-    categorias = {
+    for_country = payment_methods.for_country(clinic.country).codes
+    bill_methods = (
+        payment_methods.PIX,
+        payment_methods.BOLETO,
+        payment_methods.TRANSFER,
+        payment_methods.DIRECT_DEBIT,
+    )
+    methods = [method for method in bill_methods if method in for_country]
+    categories = {
         c.name: c for c in Category.objects.filter(clinic=clinic, kind=Category.Kind.EXPENSE)
     }
     today = timezone.localdate()
     start = services.add_months(today.replace(day=10), -2)
-    criadas = 0
-    for supplier, description, category, amount, meses in SIMULATED_EXPENSES:
-        if category not in categorias:
+    created_recalls = 0
+    for supplier, description, category, amount, months in SIMULATED_EXPENSES:
+        if category not in categories:
             continue
-        parcelas = meses or sorteio.choice([1, 2, 3])
+        installments = months or rng.choice([1, 2, 3])
         amount = Decimal(amount)
-        cadastro, _criado = Supplier.objects.get_or_create(clinic=clinic, name=supplier)
+        record, _created = Supplier.objects.get_or_create(clinic=clinic, name=supplier)
         entry = services.create_entry(
             clinic=clinic,
             kind=Entry.Kind.PAYABLE,
-            supplier=cadastro,
+            supplier=record,
             payer=supplier,
             description=description,
-            category=categorias[category],
-            cost_center=centros["Atendimento" if category in VISIT_EXPENSES else "Administrativo"],
-            total_amount=amount * parcelas if meses else amount,
+            category=categories[category],
+            cost_center=cost_centers[
+                "Atendimento" if category in VISIT_EXPENSES else "Administrativo"
+            ],
+            total_amount=amount * installments if months else amount,
             date=start,
-            parcelas=parcelas,
-            primeiro_vencimento=start if meses else today - datetime.timedelta(days=20),
+            installments=installments,
+            first_due_date=start if months else today - datetime.timedelta(days=20),
             user=user,
         )
         for installment in entry.installments.all():
-            if installment.due_date <= today and sorteio.random() < 0.9:
+            if installment.due_date <= today and rng.random() < 0.9:
                 services.receive(
                     installment,
                     user=user,
                     amount=installment.amount,
                     date=installment.due_date,
-                    method=sorteio.choice(formas),
-                    account=sorteio.choice(contas),
+                    method=rng.choice(methods),
+                    account=rng.choice(accounts),
                 )
-        criadas += 1
-    return criadas
+        created_recalls += 1
+    return created_recalls
 
 
 # Example price list for a test clinic without one: (name, price).
@@ -265,7 +270,7 @@ SAMPLE_PROCEDURES = [
 ]
 
 
-def simulate_estimates(clinic, sorteio, quantity=20, user=None):
+def simulate_estimates(clinic, rng, quantity=20, user=None):
     """Fake estimates of the last 60 days: some approved (they become receivables), some
     refused, the rest open. Creates an example price list if the clinic has none."""
     from decimal import Decimal
@@ -279,58 +284,58 @@ def simulate_estimates(clinic, sorteio, quantity=20, user=None):
     )
     from apps.finance.models import Category
 
-    tratamento = Category.objects.filter(clinic=clinic, name="Tratamento").first()
+    treatment = Category.objects.filter(clinic=clinic, name="Tratamento").first()
     if not Procedure.objects.filter(clinic=clinic).exists():
         Procedure.objects.bulk_create(
-            Procedure(clinic=clinic, name=name, amount=Decimal(amount), category=tratamento)
+            Procedure(clinic=clinic, name=name, amount=Decimal(amount), category=treatment)
             for name, amount in SAMPLE_PROCEDURES
         )
     procedures = list(Procedure.objects.filter(clinic=clinic, active=True))
-    pacientes = _patients(clinic)
-    profissionais = list(Practitioner.objects.filter(clinic=clinic, active=True))
+    patients = _patients(clinic)
+    practitioners = list(Practitioner.objects.filter(clinic=clinic, active=True))
     category = (
-        tratamento or Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME).first()
+        treatment or Category.objects.filter(clinic=clinic, kind=Category.Kind.INCOME).first()
     )
-    if not (procedures and pacientes and category):
+    if not (procedures and patients and category):
         return 0
     teeth = [d for row in PERMANENT_TEETH for d in row]
     today = timezone.localdate()
     for _ in range(quantity):
-        date = today - datetime.timedelta(days=sorteio.randint(0, 60))
+        date = today - datetime.timedelta(days=rng.randint(0, 60))
         estimate = Estimate.objects.create(
             clinic=clinic,
-            patient=sorteio.choice(pacientes),
-            practitioner=sorteio.choice(profissionais) if profissionais else None,
+            patient=rng.choice(patients),
+            practitioner=rng.choice(practitioners) if practitioners else None,
             date=date,
             valid_until=date + datetime.timedelta(days=30),
             created_by=user,
         )
-        for procedure in sorteio.sample(procedures, sorteio.randint(1, 3)):
-            escolhidos = sorted(sorteio.sample(teeth, sorteio.randint(0, 3)))
+        for procedure in rng.sample(procedures, rng.randint(1, 3)):
+            chosen_ones = sorted(rng.sample(teeth, rng.randint(0, 3)))
             EstimateItem.objects.create(
                 clinic=clinic,
                 estimate=estimate,
                 procedure=procedure,
                 description=procedure.name,
-                teeth=",".join(str(d) for d in escolhidos),
-                quantity=max(len(escolhidos), 1),
+                teeth=",".join(str(d) for d in chosen_ones),
+                quantity=max(len(chosen_ones), 1),
                 unit_price=procedure.amount,
             )
-        sorte = sorteio.random()
-        if sorte < 0.4:
+        roll = rng.random()
+        if roll < 0.4:
             services.approve(
                 estimate,
-                parcelas=sorteio.choice([1, 2, 3, 4]),
-                primeiro_vencimento=date + datetime.timedelta(days=7),
+                installments=rng.choice([1, 2, 3, 4]),
+                first_due_date=date + datetime.timedelta(days=7),
                 category=category,
                 user=user,
             )
-        elif sorte < 0.6:
+        elif roll < 0.6:
             services.refuse(estimate, user=user)
     return quantity
 
 
-def simulate_commissions(clinic, sorteio, user=None):
+def simulate_commissions(clinic, rng, user=None):
     """Give practitioners without one a commission percentage and pay out what each had
     pending up to the end of last month (test clinics only). Returns how many were paid."""
     from decimal import Decimal
@@ -343,20 +348,20 @@ def simulate_commissions(clinic, sorteio, user=None):
     ).first()
     if category is None:
         return 0
-    fim_do_mes_passado = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
-    pagas = 0
+    end_of_last_month = timezone.localdate().replace(day=1) - datetime.timedelta(days=1)
+    paid_count = 0
     for practitioner in Practitioner.objects.filter(clinic=clinic, active=True):
         if not practitioner.commission_percentage:
-            practitioner.commission_percentage = Decimal(sorteio.choice([30, 35, 40]))
+            practitioner.commission_percentage = Decimal(rng.choice([30, 35, 40]))
             practitioner.save(update_fields=["commission_percentage"])
         # Runs without isolation (like the command); the practitioner pins the clinic.
-        if commissions.pending(practitioner, fim_do_mes_passado)["amount"] > 0:
+        if commissions.pending(practitioner, end_of_last_month)["amount"] > 0:
             commissions.pay(
                 practitioner,
-                until=fim_do_mes_passado,
-                due_date=fim_do_mes_passado + datetime.timedelta(days=5),
+                until=end_of_last_month,
+                due_date=end_of_last_month + datetime.timedelta(days=5),
                 category=category,
                 user=user,
             )
-            pagas += 1
-    return pagas
+            paid_count += 1
+    return paid_count

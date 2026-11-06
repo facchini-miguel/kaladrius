@@ -10,9 +10,9 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 
 from apps.estimates.models import Estimate
-from apps.finance import services as financeiro
+from apps.finance import services as finance_services
 from apps.finance.models import ZERO, CashRegister, Entry, Installment
-from apps.finance.payment_methods import labels as rotulos_das_formas
+from apps.finance.payment_methods import labels as method_labels
 from apps.patients.models import Patient
 from apps.recalls.models import Recall
 from apps.schedule import services as agenda
@@ -29,38 +29,38 @@ PAYABLE_DAYS = 7
 
 def build(request):
     today = timezone.localdate()
-    painel = {"today": today}
+    panel = {"today": today}
     if can(request, Module.SCHEDULE, Action.VIEW):
-        painel["schedule"] = _schedule(request, today)
+        panel["schedule"] = _schedule(request, today)
     if can(request, Module.RECALLS, Action.VIEW):
-        painel["recalls"] = _recalls(today)
+        panel["recalls"] = _recalls(today)
     if can(request, Module.BIRTHDAYS, Action.VIEW):
-        painel["birthdays"] = _birthdays(today)
+        panel["birthdays"] = _birthdays(today)
     if can(request, Module.ESTIMATES, Action.VIEW):
-        painel["estimates"] = _estimates(today)
+        panel["estimates"] = _estimates(today)
     if can(request, Module.RECEIVING, Action.VIEW):
-        painel["receipts"] = _receipts(today)
+        panel["receipts"] = _receipts(today)
     if can(request, Module.FINANCE, Action.VIEW):
-        painel["finance"] = _finance(today)
-    return painel
+        panel["finance"] = _finance(today)
+    return panel
 
 
 def _schedule(request, today):
     now = timezone.now()
     visible = agenda.visible_appointments(request)
-    do_dia = list(
+    of_the_day = list(
         visible.filter(start__date=today)
         .select_related("patient", "practitioner", "kind")
         .order_by("start", "practitioner__name")
     )
-    pacientes = [a for a in do_dia if a.patient_id]
+    patients = [a for a in of_the_day if a.patient_id]
     status = Appointment.Status
-    contagem = {value: 0 for value in status.values}
-    for appointment in pacientes:
-        contagem[appointment.status] += 1
-    pendentes = [a for a in pacientes if a.status == status.BOOKED]
+    counts = {value: 0 for value in status.values}
+    for appointment in patients:
+        counts[appointment.status] += 1
+    pending = [a for a in patients if a.status == status.BOOKED]
     # No-show rate of the month so far, over the appointments someone marked.
-    marcados = dict(
+    booked = dict(
         visible.filter(
             start__date__gte=today.replace(day=1),
             start__date__lte=today,
@@ -70,34 +70,34 @@ def _schedule(request, today):
         .values_list("status")
         .annotate(total=Count("pk"))
     )
-    vieram, faltaram = marcados.get(status.ATTENDED, 0), marcados.get(status.MISSED, 0)
+    attended, missed = booked.get(status.ATTENDED, 0), booked.get(status.MISSED, 0)
     return {
-        "items": do_dia,
+        "items": of_the_day,
         # A practitioner sees only their own schedule, so the column would repeat their name.
         "show_practitioner": not own_schedule_only(request),
-        "patients": len(pacientes) - contagem[status.CANCELLED],
-        "attended": contagem[status.ATTENDED],
-        "missed": contagem[status.MISSED],
-        "cancelled": contagem[status.CANCELLED],
-        "upcoming": sum(1 for a in pendentes if a.start > now),
-        "unmarked": sum(1 for a in pendentes if a.start <= now),
-        "next": next((a for a in pendentes if a.end > now), None),
+        "patients": len(patients) - counts[status.CANCELLED],
+        "attended": counts[status.ATTENDED],
+        "missed": counts[status.MISSED],
+        "cancelled": counts[status.CANCELLED],
+        "upcoming": sum(1 for a in pending if a.start > now),
+        "unmarked": sum(1 for a in pending if a.start <= now),
+        "next": next((a for a in pending if a.end > now), None),
         "now": now,
-        "missed_pct_month": round(100 * faltaram / (vieram + faltaram))
-        if vieram + faltaram
+        "missed_pct_month": round(100 * missed / (attended + missed))
+        if attended + missed
         else None,
-        "booked_month": vieram + faltaram,
+        "booked_month": attended + missed,
     }
 
 
 def _recalls(today):
-    pendentes = Recall.objects.filter(
+    pending = Recall.objects.filter(
         done=False, date__lte=today, patient__archived=False
     ).select_related("patient")
     return {
-        "items": list(pendentes.order_by("date", "patient__name")[:LIMIT]),
-        "total": pendentes.count(),
-        "late": pendentes.filter(date__lt=today).count(),
+        "items": list(pending.order_by("date", "patient__name")[:LIMIT]),
+        "total": pending.count(),
+        "late": pending.filter(date__lt=today).count(),
     }
 
 
@@ -127,31 +127,31 @@ def _estimates(today):
     )
 
 
-def _sum_of_balances(parcelas):
-    saldos = list(parcelas.values_list("balance", flat=True))
-    return sum(saldos, start=ZERO), len(saldos)
+def _sum_of_balances(installments):
+    balances = list(installments.values_list("balance", flat=True))
+    return sum(balances, start=ZERO), len(balances)
 
 
 def _receipts(today):
-    recebidos = financeiro.valid_payments().filter(
+    received_payments = finance_services.valid_payments().filter(
         date=today, installment__entry__kind=Entry.Kind.RECEIVABLE
     )
-    formas = rotulos_das_formas()
-    por_forma = [
-        (formas.get(method, method), total)
-        for method, total in recebidos.order_by()
+    methods = method_labels()
+    by_method = [
+        (methods.get(method, method), total)
+        for method, total in received_payments.order_by()
         .values_list("method")
         .annotate(total=Sum("amount"))
         .order_by("-total")
     ]
-    a_receber, parcelas = _sum_of_balances(
+    receivable, installments = _sum_of_balances(
         Installment.objects.unpaid().filter(entry__kind=Entry.Kind.RECEIVABLE, due_date=today)
     )
     return {
-        "received": sum((total for _forma, total in por_forma), start=ZERO),
-        "by_method": por_forma,
-        "receivable": a_receber,
-        "receivable_count": parcelas,
+        "received": sum((total for _method, total in by_method), start=ZERO),
+        "by_method": by_method,
+        "receivable": receivable,
+        "receivable_count": installments,
         "cash_registers": list(
             CashRegister.objects.filter(closed_at__isnull=True).select_related("account")
         ),
@@ -159,38 +159,40 @@ def _receipts(today):
 
 
 def _finance(today):
-    recebido_hoje, pago_hoje = financeiro.received_and_paid(today, today)
-    inicio_mes = today.replace(day=1)
-    recebido_mes, pago_mes = financeiro.received_and_paid(inicio_mes, today)
+    received_today, paid_today = finance_services.received_and_paid(today, today)
+    month_start = today.replace(day=1)
+    received_month, paid_month = finance_services.received_and_paid(month_start, today)
     # The same days of last month (up to its last day, for the 31st).
-    fim_anterior = inicio_mes - datetime.timedelta(days=1)
-    inicio_anterior = fim_anterior.replace(day=1)
-    ate_anterior = inicio_anterior.replace(day=min(today.day, fim_anterior.day))
-    recebido_anterior, pago_anterior = financeiro.received_and_paid(inicio_anterior, ate_anterior)
-    abertas = Installment.objects.unpaid()
-    vencido, parcelas_vencidas = _sum_of_balances(
-        abertas.filter(entry__kind=Entry.Kind.RECEIVABLE, due_date__lt=today)
+    previous_end = month_start - datetime.timedelta(days=1)
+    previous_start = previous_end.replace(day=1)
+    ate_anterior = previous_start.replace(day=min(today.day, previous_end.day))
+    received_previous, paid_previous = finance_services.received_and_paid(
+        previous_start, ate_anterior
     )
-    a_pagar, contas_a_pagar = _sum_of_balances(
-        abertas.filter(
+    unpaid = Installment.objects.unpaid()
+    overdue, overdue_installments = _sum_of_balances(
+        unpaid.filter(entry__kind=Entry.Kind.RECEIVABLE, due_date__lt=today)
+    )
+    payable, payable_count = _sum_of_balances(
+        unpaid.filter(
             entry__kind=Entry.Kind.PAYABLE,
             due_date__lte=today + datetime.timedelta(days=PAYABLE_DAYS),
         )
     )
     return {
-        "paid_today": pago_hoje,
-        "result_today": recebido_hoje - pago_hoje,
-        "received_month": recebido_mes,
-        "paid_month": pago_mes,
-        "result_month": recebido_mes - pago_mes,
-        "previous_result": recebido_anterior - pago_anterior,
-        "previous_start": inicio_anterior,
+        "paid_today": paid_today,
+        "result_today": received_today - paid_today,
+        "received_month": received_month,
+        "paid_month": paid_month,
+        "result_month": received_month - paid_month,
+        "previous_result": received_previous - paid_previous,
+        "previous_start": previous_start,
         "previous_until": ate_anterior,
-        "overdue": vencido,
-        "overdue_count": parcelas_vencidas,
-        "payable": a_pagar,
-        "payable_count": contas_a_pagar,
+        "overdue": overdue,
+        "overdue_count": overdue_installments,
+        "payable": payable,
+        "payable_count": payable_count,
         "account_balances": sum(
-            (saldo for _account, saldo in financeiro.account_balances()), start=ZERO
+            (balance for _account, balance in finance_services.account_balances()), start=ZERO
         ),
     }

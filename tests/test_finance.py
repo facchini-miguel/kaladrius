@@ -67,8 +67,8 @@ def entry_with(scenario, amount="300.00", installments=3, due_date=None, patient
             description="Prótese",
             category=scenario["category"],
             total_amount=Decimal(amount),
-            parcelas=installments,
-            primeiro_vencimento=due_date or TODAY,
+            installments=installments,
+            first_due_date=due_date or TODAY,
             user=scenario["admin"],
         )
 
@@ -501,8 +501,8 @@ def test_cash_flow_actual_and_forecast(scenario):
             description="Aluguel",
             category=Category.objects.get(name="Aluguel"),
             total_amount=Decimal("300.00"),
-            parcelas=1,
-            primeiro_vencimento=datetime.date(2031, 3, 10),
+            installments=1,
+            first_due_date=datetime.date(2031, 3, 10),
             user=scenario["admin"],
         )
         flow = services.cash_flow(since, until, today=datetime.date(2031, 3, 1))
@@ -704,8 +704,8 @@ def test_debtors_paginated_and_searchable(scenario):
                 description="Consulta",
                 category=scenario["category"],
                 total_amount=Decimal("10"),
-                parcelas=1,
-                primeiro_vencimento=TODAY - datetime.timedelta(days=10),
+                installments=1,
+                first_due_date=TODAY - datetime.timedelta(days=10),
                 user=scenario["admin"],
             )
     user_client = log_in(scenario, "reception")

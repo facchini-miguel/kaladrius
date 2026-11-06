@@ -18,8 +18,8 @@ pytestmark = pytest.mark.django_db
 def test_populate_sample_data_is_idempotent(settings, monkeypatch):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
-    call_command("seed_sample_data", pacientes=30)
-    call_command("seed_sample_data", pacientes=30)
+    call_command("seed_sample_data", patients=30)
+    call_command("seed_sample_data", patients=30)
 
     # One installation, one clinic (decision 069).
     assert Clinic.objects.count() == 1
@@ -53,7 +53,7 @@ def test_populate_sample_data_requires_debug(settings, monkeypatch):
 def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, create_user):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
-    call_command("seed_sample_data", pacientes=5)
+    call_command("seed_sample_data", patients=5)
     real = Clinic.objects.create(name="Clínica Real")
     create_user("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
@@ -63,7 +63,7 @@ def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, crea
 
     with pytest.raises(CommandError):
         call_command("remove_sample_data")
-    call_command("remove_sample_data", confirmar=True)
+    call_command("remove_sample_data", confirm=True)
 
     assert list(Clinic.objects.values_list("name", flat=True)) == ["Clínica Real"]
     remaining = set(get_user_model().objects.values_list("username", flat=True))

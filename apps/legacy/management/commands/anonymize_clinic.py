@@ -14,13 +14,13 @@ class Command(BaseCommand):
         parser.add_argument("--clinic", dest="clinic", required=True, help="Name of the clinic.")
         parser.add_argument(
             "--confirm",
-            dest="confirmar",
+            dest="confirm",
             action="store_true",
             help="Required: the change cannot be undone.",
         )
 
-    def handle(self, *args, clinic, confirmar, **options):
-        if not confirmar:
+    def handle(self, *args, clinic, confirm, **options):
+        if not confirm:
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
             r = anonymize_clinic(clinic)
@@ -32,5 +32,5 @@ class Command(BaseCommand):
         self.stdout.write(f"  Rechamadas: {r.recalls}")
         self.stdout.write(f"  Profissionais: {r.practitioners}")
         self.stdout.write(
-            f"  Registros de auditoria com os dados originais apagados: {r.registros_apagados}"
+            f"  Registros de auditoria com os dados originais apagados: {r.deleted_records}"
         )

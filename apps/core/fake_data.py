@@ -4,9 +4,9 @@ anonymization of imported data (apps/legacy/anonymization.py). Decision 131."""
 from apps.core.validators import digits_only, valid_cnpj, valid_cpf
 
 
-def _valid(gerar, is_valid):
+def _valid(generate, is_valid):
     while True:
-        document = digits_only(gerar())
+        document = digits_only(generate())
         if is_valid(document):
             return document
 
@@ -27,4 +27,4 @@ def occupation(fake):
     from apps.patients.models import Patient
 
     limit = Patient._meta.get_field("occupation").max_length
-    return next(titulo for titulo in iter(fake.job, None) if len(titulo) <= limit)
+    return next(title for title in iter(fake.job, None) if len(title) <= limit)

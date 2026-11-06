@@ -79,9 +79,9 @@ SESSION_DATE = "agenda_data"
 
 
 def _remembered_date(request):
-    lembrada = request.session.get(SESSION_DATE) or {}
+    remembered = request.session.get(SESSION_DATE) or {}
     today = timezone.localdate().isoformat()
-    return lembrada.get("data", "") if lembrada.get("em") == today else ""
+    return remembered.get("data", "") if remembered.get("em") == today else ""
 
 
 def _success_response(message):
@@ -114,16 +114,16 @@ def _range(request):
 
 @requires_permission(Module.SCHEDULE, Action.VIEW)
 def calendar_view(request):
-    profissionais = list(services.visible_practitioners(request).filter(active=True))
-    escolhido = request.GET.get("practitioner") or request.session.get(SESSION_PRACTITIONER)
+    practitioners = list(services.visible_practitioners(request).filter(active=True))
+    chosen_one = request.GET.get("practitioner") or request.session.get(SESSION_PRACTITIONER)
     practitioner = next(
-        (p for p in profissionais if str(p.pk) == str(escolhido)),
-        profissionais[0] if profissionais else None,
+        (p for p in practitioners if str(p.pk) == str(chosen_one)),
+        practitioners[0] if practitioners else None,
     )
     if practitioner is not None:
         request.session[SESSION_PRACTITIONER] = practitioner.pk
     clinic = request.clinic
-    ver_rechamadas = can(request, Module.RECALLS, Action.VIEW)
+    can_see_recalls = can(request, Module.RECALLS, Action.VIEW)
     config = {
         "practitioner": practitioner.pk if practitioner else None,
         "start": clinic.schedule_start.strftime("%H:%M:%S"),
@@ -147,15 +147,15 @@ def calendar_view(request):
             "new": reverse("schedule:new"),
             "birthdays": reverse("schedule:birthdays"),
             "birthdays_today": reverse("schedule:birthdays_today"),
-            "recalls": reverse("recalls:summary") if ver_rechamadas else None,
-            "recalls_today": reverse("recalls:today") if ver_rechamadas else None,
+            "recalls": reverse("recalls:summary") if can_see_recalls else None,
+            "recalls_today": reverse("recalls:today") if can_see_recalls else None,
         },
     }
     return render(
         request,
         "schedule/calendar.html",
         {
-            "practitioners": profissionais,
+            "practitioners": practitioners,
             "practitioner": practitioner,
             "types": AppointmentType.objects.filter(active=True),
             "schedule_settings": config,
@@ -166,18 +166,18 @@ def calendar_view(request):
 
 @requires_permission(Module.SCHEDULE, Action.VIEW)
 def events(request):
-    periodo = _range(request)
+    period = _range(request)
     practitioner = request.GET.get("practitioner", "")
-    if periodo is None or not practitioner.isdecimal():
+    if period is None or not practitioner.isdecimal():
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
-    start, end = periodo
+    start, end = period
     # The middle of the visible range falls inside the week (or month) on the screen.
-    meio = timezone.localtime(start + (end - start) / 2).date()
+    middle = timezone.localtime(start + (end - start) / 2).date()
     request.session[SESSION_DATE] = {
-        "data": meio.isoformat(),
+        "data": middle.isoformat(),
         "em": timezone.localdate().isoformat(),
     }
-    agendamentos = (
+    appointments = (
         services.visible_appointments(request)
         .filter(practitioner_id=int(practitioner), start__lt=end, end__gt=start)
         .select_related("kind", "patient")
@@ -201,7 +201,7 @@ def events(request):
                     "url": reverse("schedule:edit", args=[appointment.pk]),
                 },
             }
-            for appointment in agendamentos
+            for appointment in appointments
         ],
         safe=False,
     )
@@ -209,32 +209,32 @@ def events(request):
 
 @requires_permission(Module.SCHEDULE, Action.CREATE)
 def new_appointment(request):
-    inicial = {
-        field: request.GET[parametro]
-        for field, parametro in [
+    initial = {
+        field: request.GET[parameter]
+        for field, parameter in [
             ("practitioner", "practitioner"),
             ("date", "date"),
             ("start_time", "start"),
             ("end_time", "end"),
         ]
-        if request.GET.get(parametro)
+        if request.GET.get(parameter)
     }
     form = AppointmentForm(
         request.POST or None,
-        initial=inicial,
+        initial=initial,
         instance=Appointment(),
         clinic=request.clinic,
-        profissionais=services.visible_practitioners(request),
+        practitioners=services.visible_practitioners(request),
     )
     if request.method == "POST" and form.is_valid():
         try:
-            criados = services.create(form.instance, form.intervalos, request.user)
+            created_count = services.create(form.instance, form.intervals, request.user)
         except IntegrityError:
             form.add_error(
                 None, _("Outro agendamento acabou de ocupar este horário. Nada foi gravado.")
             )
         else:
-            total = len(criados)
+            total = len(created_count)
             return _success_response(
                 ngettext("Agendamento criado.", "%(n)s agendamentos criados.", total) % {"n": total}
             )
@@ -250,7 +250,7 @@ def edit_appointment(request, pk):
         request.POST or None,
         instance=appointment,
         clinic=request.clinic,
-        profissionais=services.visible_practitioners(request),
+        practitioners=services.visible_practitioners(request),
     )
     if request.method == "POST" and form.is_valid():
         try:
@@ -289,7 +289,7 @@ def status(request, pk):
             form = AppointmentForm(
                 instance=appointment,
                 clinic=request.clinic,
-                profissionais=services.visible_practitioners(request),
+                practitioners=services.visible_practitioners(request),
             )
             context = {"form": form, "appointment": appointment, "status_error": error.messages[0]}
             return render(request, "schedule/_form.html", context)
@@ -308,51 +308,51 @@ def delete_appointment(request, pk):
         services.visible_appointments(request).select_related("patient"), pk=pk
     )
     if request.method == "POST":
-        excluidos = Appointment.objects.filter(pk=appointment.pk)
+        excluded = Appointment.objects.filter(pk=appointment.pk)
         if request.POST.get("scope") == "serie" and appointment.series:
             # This one and the following ones of the same series.
-            excluidos = Appointment.objects.filter(
+            excluded = Appointment.objects.filter(
                 series=appointment.series, start__gte=appointment.start
             )
-        total, _ = excluidos.delete()
+        total, _ = excluded.delete()
         return _success_response(
             ngettext("Agendamento excluído.", "%(n)s agendamentos excluídos.", total) % {"n": total}
         )
-    proximos = 0
+    upcoming = 0
     if appointment.series:
-        proximos = Appointment.objects.filter(
+        upcoming = Appointment.objects.filter(
             series=appointment.series, start__gt=appointment.start
         ).count()
     return render(
-        request, "schedule/_delete.html", {"appointment": appointment, "following_count": proximos}
+        request, "schedule/_delete.html", {"appointment": appointment, "following_count": upcoming}
     )
 
 
 def _birthdays_on(days):
     """{date: [patients]} for active patients whose birthday falls on the given days."""
-    filtro = Q()
+    query_filter = Q()
     for day in days:
-        filtro |= Q(birth_date__month=day.month, birth_date__day=day.day)
-    resultado = {day: [] for day in days}
+        query_filter |= Q(birth_date__month=day.month, birth_date__day=day.day)
+    result = {day: [] for day in days}
     if not days:
-        return resultado
-    pacientes = Patient.objects.filter(filtro, active=True, archived=False).order_by("name")
-    por_mes_dia = {(day.month, day.day): day for day in days}
-    for patient in pacientes:
-        nascimento = patient.birth_date
-        resultado[por_mes_dia[(nascimento.month, nascimento.day)]].append(patient)
-    return resultado
+        return result
+    patients = Patient.objects.filter(query_filter, active=True, archived=False).order_by("name")
+    by_month_day = {(day.month, day.day): day for day in days}
+    for patient in patients:
+        birth_date = patient.birth_date
+        result[by_month_day[(birth_date.month, birth_date.day)]].append(patient)
+    return result
 
 
 @requires_permission(Module.SCHEDULE, Action.VIEW)
 def birthdays(request):
     """Number of birthdays per day in the period shown by the calendar."""
-    periodo = _range(request)
-    if periodo is None:
+    period = _range(request)
+    if period is None:
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
-    start = timezone.localdate(periodo[0])
-    total_dias = (timezone.localdate(periodo[1]) - start).days
-    days = [start + datetime.timedelta(days=n) for n in range(total_dias)]
+    start = timezone.localdate(period[0])
+    total_days = (timezone.localdate(period[1]) - start).days
+    days = [start + datetime.timedelta(days=n) for n in range(total_days)]
     return JsonResponse(
         {day.isoformat(): len(results) for day, results in _birthdays_on(days).items() if results}
     )

@@ -40,10 +40,10 @@ def privacy(request):
     for anyone else (one installation serves one clinic, decision 069).
     """
     clinic = getattr(request, "clinic", None) or Clinic.single()
-    titulo, html = documents.privacy()
+    title, html = documents.privacy()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
     country = countries.clinic_country(clinic)
-    context = {"title": titulo, "html": html, "clinic": clinic}
+    context = {"title": title, "html": html, "clinic": clinic}
     if country != countries.DEFAULT:
         context.update(
             country=countries.by_code(country).name,

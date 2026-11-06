@@ -12,7 +12,10 @@ from apps.practitioners.models import Practitioner
 
 from .test_medical_record import ANAMNESIS, PNG
 
-PASSWORDS = {"senha_recepcao": "demo-recepcao-1", "senha_profissional": "demo-profissional-1"}
+PASSWORDS = {
+    "front_desk_password": "demo-recepcao-1",
+    "practitioner_password": "demo-profissional-1",
+}
 
 
 @pytest.fixture
@@ -46,8 +49,8 @@ def test_creates_both_accounts_with_their_roles(demo):
         "demo_accounts",
         clinic="Clínica A",
         practitioner="Dr. Bruno",
-        senha_recepcao="outra-1",
-        senha_profissional="outra-2",
+        front_desk_password="outra-1",
+        practitioner_password="outra-2",
     )
     assert Membership.objects.filter(user__username__startswith="demo.").count() == 2
     log_in("demo.recepcao", "outra-1")
@@ -61,8 +64,8 @@ def test_refuses_sample_data_password_and_practitioner_with_another_user(
             "demo_accounts",
             clinic="Clínica A",
             practitioner="Dr. Bruno",
-            senha_recepcao="semente-secreta",
-            senha_profissional="x-1",
+            front_desk_password="semente-secreta",
+            practitioner_password="x-1",
         )
     with use_clinic(clinic_a):
         Practitioner.objects.create(name="Dra. Ana", user=create_user("dra.ana"))
@@ -78,14 +81,14 @@ def test_creates_the_practitioner_when_asked(clinic_a, monkeypatch):
         "demo_accounts",
         clinic="Clínica A",
         practitioner="Dra. Demo",
-        criar_profissional=True,
+        create_practitioner=True,
         **PASSWORDS,
     )
     call_command(  # running again reuses it
         "demo_accounts",
         clinic="Clínica A",
         practitioner="Dra. Demo",
-        criar_profissional=True,
+        create_practitioner=True,
         **PASSWORDS,
     )
     with use_clinic(clinic_a):
@@ -94,23 +97,23 @@ def test_creates_the_practitioner_when_asked(clinic_a, monkeypatch):
 
 
 def test_demo_account_cannot_change_password(demo):
-    user_client = log_in("demo.recepcao", PASSWORDS["senha_recepcao"])
+    user_client = log_in("demo.recepcao", PASSWORDS["front_desk_password"])
     assert "Trocar senha" not in user_client.get(reverse("home")).content.decode()
     response = user_client.post(
         reverse("change_password"),
         {
-            "old_password": PASSWORDS["senha_recepcao"],
+            "old_password": PASSWORDS["front_desk_password"],
             "new_password1": "Nova-senha-123!",
             "new_password2": "Nova-senha-123!",
         },
         follow=True,
     )
     assert "Contas de demonstração não trocam a senha." in response.content.decode()
-    log_in("demo.recepcao", PASSWORDS["senha_recepcao"])
+    log_in("demo.recepcao", PASSWORDS["front_desk_password"])
 
 
 def test_demo_account_cannot_upload_attachments(demo):
-    user_client = log_in("demo.profissional", PASSWORDS["senha_profissional"])
+    user_client = log_in("demo.profissional", PASSWORDS["practitioner_password"])
     with use_clinic(demo["clinic"]):
         from apps.patients.models import Patient
 
@@ -140,8 +143,8 @@ def test_demo_admin_and_finance_cannot_touch_team_or_clinic(
         "demo_accounts",
         clinic="Clínica A",
         practitioner="Dr. Bruno",
-        senha_financeiro="demo-financeiro-1",
-        senha_admin="demo-admin-1",
+        finance_password="demo-financeiro-1",
+        admin_password="demo-admin-1",
         **PASSWORDS,
     )
     assert Membership.objects.get(user__username="demo.financeiro").role == Role.FINANCE

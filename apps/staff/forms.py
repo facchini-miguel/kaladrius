@@ -12,13 +12,13 @@ from .models import Employee, Payroll
 DATE_INPUT = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-def _money(label, obrigatorio):
+def _money(label, required):
     return LocalizedDecimalField(
         label=label,
         max_digits=12,
         decimal_places=2,
         min_value=0,
-        required=obrigatorio,
+        required=required,
         localize=True,
         widget=forms.TextInput(attrs={"inputmode": "decimal"}),
     )
@@ -34,7 +34,7 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
         required=False,
         widget=forms.TextInput({"inputmode": "tel"}),
     )
-    salary = _money(_("Salário"), obrigatorio=False)
+    salary = _money(_("Salário"), required=False)
     salary_since = forms.DateField(
         label=_("Salário a partir de"), widget=DATE_INPUT, required=False
     )
@@ -108,7 +108,7 @@ class PayrollForm(BootstrapForm, forms.ModelForm):
     overtime_hours = LocalizedDecimalField(
         label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
-    overtime_rate = _money(_("Valor da hora extra"), obrigatorio=True)
+    overtime_rate = _money(_("Valor da hora extra"), required=True)
 
     class Meta:
         model = Payroll
@@ -133,6 +133,6 @@ class PostPayrollForm(BootstrapForm, forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        despesas = Category.objects.filter(kind=Category.Kind.EXPENSE, active=True)
-        self.fields["category"].queryset = despesas
-        self.fields["category"].initial = despesas.filter(name="Salários e encargos").first()
+        expenses = Category.objects.filter(kind=Category.Kind.EXPENSE, active=True)
+        self.fields["category"].queryset = expenses
+        self.fields["category"].initial = expenses.filter(name="Salários e encargos").first()

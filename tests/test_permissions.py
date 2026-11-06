@@ -129,9 +129,9 @@ def test_first_access_registers_the_clinic(client_for, create_user, django_user_
     assert list(Clinic.objects.values_list("name", "area")) == [("Clínica Nova", "medicina")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
     assert user_client.get(reverse("practitioners:list")).url == reverse("account:two_factor")
-    from apps.account import services as conta_servicos
+    from apps.account import services as account_services
 
-    conta_servicos.activate(conta_servicos.prepare(root))
+    account_services.activate(account_services.prepare(root))
     assert user_client.get(reverse("practitioners:list")).status_code == 200
     # Only one: the page and the Django admin no longer add clinics.
     assert user_client.get(reverse("register_clinic")).url == reverse("home")

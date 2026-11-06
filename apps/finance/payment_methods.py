@@ -32,17 +32,17 @@ CARDS = frozenset({DEBIT, CREDIT, HSA})
 
 @dataclass(frozen=True)
 class Methods:
-    codigos: tuple
-    nomes: dict = field(default_factory=dict)  # code → local systems, shown in parentheses
-    parcelas_no_cartao: bool = True  # card payments split by the card issuer (cuotas)
-    codigo_do_cartao: str = ""  # local name of the card transaction code (NSU in Brazil)
+    codes: tuple
+    names: dict = field(default_factory=dict)  # code → local systems, shown in parentheses
+    card_installments: bool = True  # card payments split by the card issuer (cuotas)
+    card_code: str = ""  # local name of the card transaction code (NSU in Brazil)
 
 
 # Latin America: cash, cards (paid in installments, "cuotas"), transfer and the wallets.
 _LATIN = (CASH, DEBIT, CREDIT, TRANSFER, WALLET)
 
 METHODS = {
-    "BR": Methods((CASH, PIX, DEBIT, CREDIT, TRANSFER, BOLETO), codigo_do_cartao="NSU"),
+    "BR": Methods((CASH, PIX, DEBIT, CREDIT, TRANSFER, BOLETO), card_code="NSU"),
     "MX": Methods((*_LATIN, CHEQUE), {TRANSFER: "SPEI", WALLET: "Mercado Pago, CoDi"}),
     "AR": Methods((*_LATIN, CHEQUE), {WALLET: "Mercado Pago, MODO"}),
     "CL": Methods((*_LATIN, CHEQUE), {DEBIT: "Redcompra", WALLET: "Mercado Pago, MACH"}),
@@ -56,27 +56,27 @@ METHODS = {
     "US": Methods(
         (CASH, CHEQUE, DEBIT, CREDIT, HSA, TRANSFER, WALLET, FINANCING),
         {TRANSFER: "ACH", WALLET: "Zelle, Venmo"},
-        parcelas_no_cartao=False,
+        card_installments=False,
     ),
     "GB": Methods(
         (CASH, DEBIT, CREDIT, TRANSFER, DIRECT_DEBIT, CHEQUE),
         {TRANSFER: "Faster Payments", DIRECT_DEBIT: "Direct Debit"},
-        parcelas_no_cartao=False,
+        card_installments=False,
     ),
     "CA": Methods(
         (CASH, DEBIT, CREDIT, TRANSFER, DIRECT_DEBIT, CHEQUE, FINANCING),
         {DEBIT: "Interac", TRANSFER: "Interac e-Transfer", DIRECT_DEBIT: "PAD"},
-        parcelas_no_cartao=False,
+        card_installments=False,
     ),
     "AU": Methods(
         (CASH, DEBIT, CREDIT, TRANSFER, BPAY, DIRECT_DEBIT, FINANCING),
         {DEBIT: "EFTPOS", TRANSFER: "PayID"},
-        parcelas_no_cartao=False,
+        card_installments=False,
     ),
     "ZA": Methods(
         (CASH, DEBIT, CREDIT, TRANSFER, WALLET, DIRECT_DEBIT),
         {TRANSFER: "EFT", WALLET: "SnapScan, Zapper", DIRECT_DEBIT: "debit order"},
-        parcelas_no_cartao=False,
+        card_installments=False,
     ),
 }
 
@@ -88,7 +88,7 @@ def for_country(country=None):
 
 # The English variants other than the United States' (en-gb, en-ca, en-au, en-za) spell it
 # "cheque"; the English catalog has the American "check".
-_ENGLISH_WITH_CHEQUE = {country.ingles for country in countries.COUNTRIES.values()} - {"en"}
+_ENGLISH_WITH_CHEQUE = {country.english for country in countries.COUNTRIES.values()} - {"en"}
 
 
 def label(code, country=None):
@@ -98,7 +98,7 @@ def label(code, country=None):
     name = dict(Payment.Method.choices).get(code, code)
     if code == CHEQUE and translation.get_language() in _ENGLISH_WITH_CHEQUE:
         name = "Cheque"
-    local = for_country(country).nomes.get(code)
+    local = for_country(country).names.get(code)
     if not local or local.lower() == str(name).lower():  # "Direct debit" in English
         return str(name)
     return f"{name} ({local})"
@@ -106,7 +106,7 @@ def label(code, country=None):
 
 def in_use(country=None):
     """(code, name) of the methods offered when recording a payment."""
-    return [(code, label(code, country)) for code in for_country(country).codigos]
+    return [(code, label(code, country)) for code in for_country(country).codes]
 
 
 def labels(country=None):

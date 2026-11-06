@@ -27,8 +27,8 @@ class AppointmentTypeForm(BootstrapForm, forms.ModelForm):
     def clean_name(self):
         # The clinic is not a form field, so the unique constraint must be checked here.
         name = self.cleaned_data["name"].strip()
-        repetido = AppointmentType.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
-        if repetido.exists():
+        repeated = AppointmentType.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
+        if repeated.exists():
             raise forms.ValidationError(_("Já existe um tipo de atendimento com este nome."))
         return name
 
@@ -60,18 +60,18 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             "description": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, clinic, profissionais=None, **kwargs):
+    def __init__(self, *args, clinic, practitioners=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.clinic = clinic
-        self.intervalos = []
+        self.intervals = []
         appointment = self.instance
         if appointment.clinic_id is None:
             appointment.clinic = clinic
 
         # Inactive practitioners/types are hidden, except the ones already in use here.
-        if profissionais is None:
-            profissionais = Practitioner.objects.all()
-        self.fields["practitioner"].queryset = profissionais.filter(
+        if practitioners is None:
+            practitioners = Practitioner.objects.all()
+        self.fields["practitioner"].queryset = practitioners.filter(
             Q(active=True) | Q(pk=appointment.practitioner_id)
         )
         self.fields["kind"].queryset = AppointmentType.objects.filter(
@@ -80,10 +80,10 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
         self.fields["kind"].label_from_instance = lambda kind: kind.display_name
         self.fields["patient"].queryset = Patient.objects.all()
 
-        passo = clinic.schedule_interval * 60
+        step = clinic.schedule_interval * 60
         for field in ("start_time", "end_time"):
             self.fields[field].widget.attrs.update(
-                step=passo,
+                step=step,
                 min=clinic.schedule_start.strftime("%H:%M"),
                 max=clinic.schedule_end.strftime("%H:%M"),
             )
@@ -99,8 +99,8 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
 
     def _aligned(self, hour):
         start = self.clinic.schedule_start
-        minutos = (hour.hour * 60 + hour.minute) - (start.hour * 60 + start.minute)
-        return hour.second == 0 and minutos % self.clinic.schedule_interval == 0
+        minutes = (hour.hour * 60 + hour.minute) - (start.hour * 60 + start.minute)
+        return hour.second == 0 and minutes % self.clinic.schedule_interval == 0
 
     def clean(self):
         data = super().clean()
@@ -132,11 +132,11 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
         if end_time <= start_time:
             self.add_error("end_time", _("O fim deve ser depois do início."))
             return data
-        intervalo = clinic.schedule_interval
+        interval = clinic.schedule_interval
         for field, hour in (("start_time", start_time), ("end_time", end_time)):
             if not self._aligned(hour):
                 self.add_error(
-                    field, _("Use horários de %(n)s em %(n)s minutos.") % {"n": intervalo}
+                    field, _("Use horários de %(n)s em %(n)s minutos.") % {"n": interval}
                 )
         if start_time < clinic.schedule_start or end_time > clinic.schedule_end:
             self.add_error(
@@ -150,13 +150,13 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
         if self.errors:
             return data
 
-        self.intervalos = services.occurrences(
+        self.intervals = services.occurrences(
             date, start_time, end_time, data.get("repetitions") or 1
         )
-        self.instance.start, self.instance.end = self.intervalos[0]
-        marcado = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)
+        self.instance.start, self.instance.end = self.intervals[0]
+        marked = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)
         if not data.get("patient") or (
-            self.instance.status in marcado and date > timezone.localdate()
+            self.instance.status in marked and date > timezone.localdate()
         ):
             # Without a patient there is nothing to mark; moved to a future day, nobody
             # came or missed it yet.
@@ -164,16 +164,14 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
         if self.instance.is_cancelled:
             # A cancelled appointment does not hold the slot, so it conflicts with nothing.
             return data
-        encontrados = services.conflicts(
-            data["practitioner"], self.intervalos, ignorar=self.instance.pk
-        )
-        if encontrados:
+        found = services.conflicts(data["practitioner"], self.intervals, ignore=self.instance.pk)
+        if found:
             results = "; ".join(
                 f"{date_format(timezone.localtime(a.start), 'SHORT_DATETIME_FORMAT')} ({a.title})"
-                for a in encontrados[:5]
+                for a in found[:5]
             )
-            if len(encontrados) > 5:
-                results += " " + _("e mais %(n)s") % {"n": len(encontrados) - 5}
+            if len(found) > 5:
+                results += " " + _("e mais %(n)s") % {"n": len(found) - 5}
             raise forms.ValidationError(
                 _("Conflito de horário com: %(lista)s. Nada foi gravado.") % {"lista": results}
             )

@@ -109,7 +109,7 @@ def test_levels_and_stopped_collection(folder):
 
 def test_chart_breaks_the_line_at_the_gap(folder):
     folder(sample(120), sample(115), sample(10), sample(5))
-    svg = health.chart(health.samples(), [("cpu", "line-1")], maximo=100)
+    svg = health.chart(health.samples(), [("cpu", "line-1")], maximum=100)
     assert svg.count("<polyline") == 2
 
 
@@ -161,6 +161,14 @@ def test_warning_at_the_top(folder, superuser, rows, expected):
         assert health_alert == expected
 
 
+def test_warning_names_the_critical_resource(folder, superuser):
+    # Decision 186 made the keys English; the warning compared them with the old words and
+    # called every resource "processador".
+    folder(sample(1, available=20, disk=29))
+    page = superuser.get(reverse("whats_new")).content.decode()
+    assert "recursos no limite: memória, disco." in page
+
+
 def test_command_summarizes_24_hours(folder):
     folder(sample(10, cpu=4), sample(5, cpu=8, disk=29))
     output = StringIO()
@@ -174,13 +182,13 @@ def test_scale_follows_data_and_lone_point_becomes_dot(folder):
     folder(sample(10, network=0, cpu=0.5), sample(5, network=1000, cpu=0.5))
     results = health.with_network(health.samples())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
-    assert health.scale_top(results, [("cpu", "line-1")], piso=10) == 10
-    assert health.scale_top(results, [("cpu", "line-1")], maximo=100) == 100
+    assert health.scale_top(results, [("cpu", "line-1")], floor=10) == 10
+    assert health.scale_top(results, [("cpu", "line-1")], maximum=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
     svg = health.chart(results, [("network_in", "line-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = health.chart(results, [("cpu", "line-1"), ("cpu_steal", "line-2")], piso=10)
+    svg = health.chart(results, [("cpu", "line-1"), ("cpu_steal", "line-2")], floor=10)
     assert svg.rindex("line-1") > svg.rindex("line-2")
 
 
@@ -192,7 +200,7 @@ def test_time_axis_is_the_whole_period(folder):
         [("cpu", "line-1")],
         start=now - datetime.timedelta(hours=1),
         end=now,
-        maximo=100,
+        maximum=100,
     )
     # 10 minutes of samples on a 1-hour axis: the line starts near the right end.
     first_x = float(svg.split('points="')[1].split(",")[0])

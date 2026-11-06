@@ -94,11 +94,11 @@ class PatientForm(BootstrapForm, forms.ModelForm):
             self.instance.clinic = clinic
         self.country = countries.clinic_country(clinic)
         self.fields["postal_code"].label = countries.postal_code_label(self.country)
-        self.documentos = identification.for_country(self.country)
+        self.documents = identification.for_country(self.country)
         document_by_kind(
             self.fields["tax_id"],
-            self.documentos.paciente,
-            self.documentos.empresa,
+            self.documents.paciente,
+            self.documents.empresa,
             self["kind"].value(),
         )
         for field in self.OUTSIDE_BRAZIL if self.country == "BR" else self.BRAZIL_ONLY:
@@ -167,14 +167,14 @@ class PatientForm(BootstrapForm, forms.ModelForm):
         kind = data.get("kind")
         # Checked here because it depends on the person type; a type without a document in
         # this country (an individual in the United States) keeps none.
-        do_tipo = (
-            self.documentos.empresa if kind == Patient.Kind.COMPANY else self.documentos.paciente
+        of_kind = (
+            self.documents.empresa if kind == Patient.Kind.COMPANY else self.documents.paciente
         )
         document = ""
-        if do_tipo is not None:
+        if of_kind is not None:
             try:
                 document = identification.clean_value(
-                    data.get("tax_id", ""), [do_tipo], do_tipo.abbreviation
+                    data.get("tax_id", ""), [of_kind], of_kind.abbreviation
                 )
             except ValidationError as error:
                 self.add_error("tax_id", error)

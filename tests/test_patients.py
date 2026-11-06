@@ -308,8 +308,8 @@ def test_does_not_archive_with_open_bill(admin_a, clinic_a, django_user_model):
             description="Tratamento",
             category=Category.objects.get(name="Tratamento"),
             total_amount=Decimal("300"),
-            parcelas=2,
-            primeiro_vencimento=datetime.date(2031, 3, 5),
+            installments=2,
+            first_due_date=datetime.date(2031, 3, 5),
             user=user,
             patient=patient,
         )

@@ -147,4 +147,4 @@ def test_api_docs_only_for_superuser(client, create_user):
     assert "cdn" not in response.content.decode().lower()  # local files, allowed by the CSP
     # The endpoints themselves stay open to the app.
     client.logout()
-    assert client.get(reverse("api-v1:versao")).status_code == 200
+    assert client.get(reverse("api-v1:version")).status_code == 200

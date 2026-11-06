@@ -44,38 +44,38 @@ def clinic_numbering():
     return getattr(current_clinic(), "tooth_numbering", None) or FDI
 
 
-def _universal(dente):
+def _universal(tooth):
     """1 to 32 from the upper right third molar around to the lower right one; baby teeth A to
     T in the same order."""
-    quadrante, number = divmod(dente, 10)
-    if quadrante <= 4:
-        return {1: 9 - number, 2: 8 + number, 3: 25 - number, 4: 24 + number}[quadrante]
+    quadrant, number = divmod(tooth, 10)
+    if quadrant <= 4:
+        return {1: 9 - number, 2: 8 + number, 3: 25 - number, 4: 24 + number}[quadrant]
     return UNIVERSAL_LETTERS[
-        {5: 5 - number, 6: 4 + number, 7: 15 - number, 8: 14 + number}[quadrante]
+        {5: 5 - number, 6: 4 + number, 7: 15 - number, 8: 14 + number}[quadrant]
     ]
 
 
-def name(dente, numeracao=None):
+def name(tooth, numbering=None):
     """The FDI tooth as the clinic writes it: 18 → "18", "1" (Universal) or "UR8" (Palmer)."""
-    dente = int(dente)
-    numeracao = numeracao or clinic_numbering()
-    if dente not in VALID_TEETH or numeracao == FDI:
-        return str(dente)
-    if numeracao == UNIVERSAL:
-        return str(_universal(dente))
-    quadrante, number = divmod(dente, 10)
-    lado = _PALMER_QUADRANTS[(quadrante - 1) % 4 + 1]
-    return lado + (str(number) if quadrante <= 4 else "ABCDE"[number - 1])
+    tooth = int(tooth)
+    numbering = numbering or clinic_numbering()
+    if tooth not in VALID_TEETH or numbering == FDI:
+        return str(tooth)
+    if numbering == UNIVERSAL:
+        return str(_universal(tooth))
+    quadrant, number = divmod(tooth, 10)
+    side = _PALMER_QUADRANTS[(quadrant - 1) % 4 + 1]
+    return side + (str(number) if quadrant <= 4 else "ABCDE"[number - 1])
 
 
-def sort_teeth(teeth, numeracao=None):
+def sort_teeth(teeth, numbering=None):
     """Teeth in the numbering's order: 1, 3, 14, A in Universal; FDI order otherwise."""
-    numeracao = numeracao or clinic_numbering()
-    if numeracao != UNIVERSAL:
+    numbering = numbering or clinic_numbering()
+    if numbering != UNIVERSAL:
         return sorted(teeth)
 
-    def key(dente):
-        value = _universal(dente) if dente in VALID_TEETH else 99
+    def key(tooth):
+        value = _universal(tooth) if tooth in VALID_TEETH else 99
         return (isinstance(value, str), str(value).zfill(2))
 
     return sorted(teeth, key=key)
@@ -97,10 +97,10 @@ APPOINTMENT_TYPES = [
 ]
 
 
-def odontogram(selecionados):
+def odontogram(selected):
     """Template context of the dental chart (templates/dentistry/_odontogram.html)."""
     return {
         "permanent_rows": PERMANENT_TEETH,
         "primary_rows": PRIMARY_TEETH,
-        "selected": selecionados,
+        "selected": selected,
     }

@@ -41,10 +41,12 @@ def banks(request):
     search = request.GET.get("q", "").strip()
     banks = Bank.objects.all()
     if search:
-        filtro = Q(name__unaccent__icontains=search) | Q(short_name__unaccent__icontains=search)
+        query_filter = Q(name__unaccent__icontains=search) | Q(
+            short_name__unaccent__icontains=search
+        )
         if search.isdecimal():
-            filtro |= Q(code=int(search))
-        banks = banks.filter(filtro)
+            query_filter |= Q(code=int(search))
+        banks = banks.filter(query_filter)
     page = Paginator(banks, PER_PAGE).get_page(request.GET.get("page"))
     context = {"search": search, "page": page, "query": urlencode({"q": search})}
     return render(request, "reference_data/banks.html", context)
@@ -65,20 +67,22 @@ def address_suggestions(request):
     from apps.patients.models import Patient
 
     code = request.GET.get("city", "")
-    bairros, logradouros = set(), set()
+    neighborhoods, streets = set(), set()
     if code.isdecimal():
         city = int(code)
-        bairros.update(Neighborhood.objects.filter(city_id=city).values_list("name", flat=True))
-        logradouros.update(Street.objects.filter(city_id=city).values_list("name", flat=True))
-        da_clinica = Patient.objects.filter(city_id=city).values_list("neighborhood", "street")
-        for neighborhood, street in da_clinica.distinct():
-            bairros.add(neighborhood)
-            logradouros.add(street)
+        neighborhoods.update(
+            Neighborhood.objects.filter(city_id=city).values_list("name", flat=True)
+        )
+        streets.update(Street.objects.filter(city_id=city).values_list("name", flat=True))
+        of_clinic = Patient.objects.filter(city_id=city).values_list("neighborhood", "street")
+        for neighborhood, street in of_clinic.distinct():
+            neighborhoods.add(neighborhood)
+            streets.add(street)
     return render(
         request,
         "reference_data/address_suggestions.html",
         {
-            "neighborhoods": sorted(filter(None, bairros), key=alphabetical_key),
-            "streets": sorted(filter(None, logradouros), key=alphabetical_key),
+            "neighborhoods": sorted(filter(None, neighborhoods), key=alphabetical_key),
+            "streets": sorted(filter(None, streets), key=alphabetical_key),
         },
     )

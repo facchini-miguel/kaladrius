@@ -38,7 +38,7 @@ urlpatterns = [
         name="transaction_entry",
     ),
     re_path(
-        r"^transactions/(?P<pk>[0-9]+)/(?P<acao>reconcile|ignore|undo)/$",
+        r"^transactions/(?P<pk>[0-9]+)/(?P<action>reconcile|ignore|undo)/$",
         views.transaction_action,
         name="transaction",
     ),
@@ -57,10 +57,10 @@ urlpatterns = [
         name="commission_percentage",
     ),
     path("commissions/practitioner/<int:pk>/pay/", views.pay_commission, name="commission_pay"),
-    re_path(rf"^(?P<cadastro>{CATALOGS})/$", views.catalog_list, name="catalog"),
-    re_path(rf"^(?P<cadastro>{CATALOGS})/new/$", views.catalog_form, name="catalog_new"),
+    re_path(rf"^(?P<catalog>{CATALOGS})/$", views.catalog_list, name="catalog"),
+    re_path(rf"^(?P<catalog>{CATALOGS})/new/$", views.catalog_form, name="catalog_new"),
     re_path(
-        rf"^(?P<cadastro>{CATALOGS})/(?P<pk>[0-9]+)/$",
+        rf"^(?P<catalog>{CATALOGS})/(?P<pk>[0-9]+)/$",
         views.catalog_form,
         name="catalog_edit",
     ),

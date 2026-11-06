@@ -63,6 +63,6 @@ class AuditEntry(models.Model):
         ]
 
     def __str__(self):
-        quem = self.user_name or "sistema"
+        who = self.user_name or "sistema"
         action = self.get_action_display()
-        return f"{self.timestamp:%d/%m/%Y %H:%M} {quem}: {action} {self.object_repr}"
+        return f"{self.timestamp:%d/%m/%Y %H:%M} {who}: {action} {self.object_repr}"

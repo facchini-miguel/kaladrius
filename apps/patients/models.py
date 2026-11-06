@@ -148,11 +148,11 @@ class Patient(ClinicModel):
         if self.birth_date is None:
             return None
         today = datetime.date.today()
-        nascimento = self.birth_date
+        birth_date = self.birth_date
         return (
             today.year
-            - nascimento.year
-            - ((today.month, today.day) < (nascimento.month, nascimento.day))
+            - birth_date.year
+            - ((today.month, today.day) < (birth_date.month, birth_date.day))
         )
 
     @property
@@ -161,7 +161,7 @@ class Patient(ClinicModel):
         anywhere else (decision 117)."""
         if self.city_id:
             return f"{self.city.name}/{self.city.state.abbreviation}"
-        return ", ".join(parte for parte in (self.city_name, self.state_name) if parte)
+        return ", ".join(part for part in (self.city_name, self.state_name) if part)
 
     @property
     def main_phone(self):
@@ -236,10 +236,10 @@ class RelatedPerson(ClinicModel):
         self._check_clinic()
         if self.clinic_id is None:  # without isolation (commands)
             self.clinic_id = self.patient.clinic_id
-        clinicas = {self.patient.clinic_id}
+        clinics = {self.patient.clinic_id}
         if self.other_patient_id:
-            clinicas.add(self.other_patient.clinic_id)
-        if clinicas != {self.clinic_id}:
+            clinics.add(self.other_patient.clinic_id)
+        if clinics != {self.clinic_id}:
             raise WrongClinic("Both patients must be of this clinic.")
         super().save(*args, **kwargs)
 

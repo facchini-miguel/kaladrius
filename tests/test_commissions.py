@@ -56,8 +56,8 @@ def receive(scenario, amount, practitioner, date=YESTERDAY, interest="0"):
             description="Tratamento",
             category=scenario["treatment"],
             total_amount=Decimal(amount),
-            parcelas=1,
-            primeiro_vencimento=date,
+            installments=1,
+            first_due_date=date,
             user=scenario["admin"],
         )
         return services.receive(

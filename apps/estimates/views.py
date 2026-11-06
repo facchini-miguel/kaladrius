@@ -53,19 +53,19 @@ def _dentistry(request):
 def _allow_if_disabled(request, item):
     """The system administrator writes dental items with Dentistry off; the page says so."""
     if ModuleCode.DENTISTRY not in modules.enabled(request) and _dentistry(request):
-        item.odontologia_desligada_liberada = True
+        item.dentistry_off_allowed = True
 
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def estimate_list(request):
     status = request.GET.get("status", Estimate.Status.OPEN)
     search = request.GET.get("q", "").strip()
-    orcamentos = _estimates().prefetch_related("items")
+    estimates = _estimates().prefetch_related("items")
     if status in Estimate.Status.values:
-        orcamentos = orcamentos.filter(status=status)
+        estimates = estimates.filter(status=status)
     if search:
-        orcamentos = orcamentos.filter(patient__name__unaccent__icontains=search)
-    page = Paginator(orcamentos, PER_PAGE).get_page(request.GET.get("page"))
+        estimates = estimates.filter(patient__name__unaccent__icontains=search)
+    page = Paginator(estimates, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "estimates/list.html",
@@ -81,24 +81,24 @@ def estimate_list(request):
 
 @requires_permission(Module.ESTIMATES, Action.CREATE)
 def new_estimate(request):
-    inicial = {}
+    initial = {}
     code = request.GET.get("patient", "")
     if code.isdecimal():
-        inicial["patient"] = code
+        initial["patient"] = code
     # A practitioner writes estimates in their own name by default.
-    proprio = Practitioner.objects.filter(user=request.user, active=True).first()
-    if proprio is not None:
-        inicial["practitioner"] = proprio.pk
-    form = EstimateForm(request.POST or None, initial=inicial)
+    own = Practitioner.objects.filter(user=request.user, active=True).first()
+    if own is not None:
+        initial["practitioner"] = own.pk
+    form = EstimateForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         form.instance.created_by = request.user
         estimate = form.save()
         messages.success(request, _("Orçamento criado. Agora inclua os procedimentos."))
         return redirect("estimates:detail", pk=estimate.pk)
-    valor_paciente = form["patient"].value()
+    patient_amount = form["patient"].value()
     patient = (
-        Patient.objects.filter(pk=valor_paciente, archived=False).first()
-        if str(valor_paciente or "").isdecimal()
+        Patient.objects.filter(pk=patient_amount, archived=False).first()
+        if str(patient_amount or "").isdecimal()
         else None
     )
     return render(request, "estimates/form.html", {"form": form, "patient": patient})
@@ -124,24 +124,24 @@ def edit_estimate(request, pk):
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def estimate_detail(request, pk):
     estimate = get_object_or_404(_estimates().prefetch_related("items"), pk=pk)
-    aberto = estimate.status == Estimate.Status.OPEN
+    is_open = estimate.status == Estimate.Status.OPEN
     dentistry = _dentistry(request)
     if dentistry:
         modules.mark_if_disabled(request, ModuleCode.DENTISTRY)
     # Whoever writes the estimate may also give a discount on its total (0.27.1, decision 074).
-    pode_desconto = can(request, Module.ESTIMATES, Action.CHANGE)
+    can_discount = can(request, Module.ESTIMATES, Action.CHANGE)
     return render(
         request,
         "estimates/detail.html",
         {
             "estimate": estimate,
-            "is_open": aberto,
+            "is_open": is_open,
             "item_form": EstimateItemForm(dentistry=dentistry),
             "dentistry_enabled": dentistry,
             "discount_form": DiscountForm(initial={"discount": estimate.discount})
-            if pode_desconto and aberto
+            if can_discount and is_open
             else None,
-            "can_approve": aberto
+            "can_approve": is_open
             and can(request, Module.RECEIVING, Action.CREATE)
             and can(request, Module.ESTIMATES, Action.CHANGE),
             **_teeth(request, estimate),
@@ -152,8 +152,8 @@ def estimate_detail(request, pk):
 def _teeth(request, estimate):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
-    tem_historico = any(item.teeth or item.faces for item in estimate.items.all())
-    if not (_dentistry(request) or tem_historico):
+    has_history = any(item.teeth or item.faces for item in estimate.items.all())
+    if not (_dentistry(request) or has_history):
         return {"show_teeth": False}
     return {"show_teeth": True, **odontogram(estimate.teeth)}
 
@@ -178,8 +178,8 @@ def add_item(request, pk):
         else:
             messages.success(request, _("Item incluído."))
     else:
-        erros = [str(error) for estimate_list in form.errors.values() for error in estimate_list]
-        messages.error(request, " ".join(erros))
+        errors = [str(error) for estimate_list in form.errors.values() for error in estimate_list]
+        messages.error(request, " ".join(errors))
     return redirect("estimates:detail", pk=estimate.pk)
 
 
@@ -242,8 +242,8 @@ def approve(request, pk):
         try:
             entry = services.approve(
                 estimate,
-                parcelas=data["installments"],
-                primeiro_vencimento=data["first_due_date"],
+                installments=data["installments"],
+                first_due_date=data["first_due_date"],
                 category=data["category"],
                 user=request.user,
                 payment=payment,

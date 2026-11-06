@@ -98,16 +98,16 @@ class AccountGroup(ClinicModel):
 
     def ancestors(self):
         """From the top group down to the parent of this one."""
-        cadeia, current = [], self.parent
+        chain, current = [], self.parent
         while current is not None:
-            cadeia.insert(0, current)
+            chain.insert(0, current)
             current = current.parent
-        return cadeia
+        return chain
 
     @property
     def number(self):
-        codigos = [g.code for g in [*self.ancestors(), self]]
-        return ".".join(map(str, codigos)) if None not in codigos else ""
+        codes = [g.code for g in [*self.ancestors(), self]]
+        return ".".join(map(str, codes)) if None not in codes else ""
 
 
 class Category(ClinicModel):
@@ -203,15 +203,15 @@ def create_defaults(clinic):
                 for name, kind in DEFAULT_ACCOUNTS
             )
         if not Category.objects.filter(clinic=clinic).exists():
-            grupo_de = {}
+            group_of = {}
             for kind, rows in DEFAULT_CHART.items():
-                for code, name, categorias in rows:
+                for code, name, categories in rows:
                     group = AccountGroup.objects.create(
                         clinic=clinic, kind=kind, code=code, name=name
                     )
-                    grupo_de.update({(kind, category): group for category in categorias})
+                    group_of.update({(kind, category): group for category in categories})
             Category.objects.bulk_create(
-                Category(clinic=clinic, name=name, kind=kind, group=grupo_de.get((kind, name)))
+                Category(clinic=clinic, name=name, kind=kind, group=group_of.get((kind, name)))
                 for name, kind in DEFAULT_CATEGORIES
             )
 
@@ -363,12 +363,12 @@ class InstallmentQuerySet(models.QuerySet):
             F("payments__amount") - F("payments__interest") + F("payments__discount"),
             output_field=DecimalField(**MONEY),
         )
-        pago = Coalesce(
+        paid = Coalesce(
             Sum(principal, filter=Q(payments__reversed=False)),
             Value(ZERO),
             output_field=DecimalField(**MONEY),
         )
-        return self.annotate(paid=pago).annotate(
+        return self.annotate(paid=paid).annotate(
             balance=ExpressionWrapper(F("amount") - F("paid"), output_field=DecimalField(**MONEY))
         )
 
@@ -408,8 +408,8 @@ class Installment(ClinicModel):
 
     def paid_and_balance(self):
         """(principal paid, balance) computed from the payments (not annotated)."""
-        pago = sum((p.principal for p in self.payments.all() if not p.reversed), start=ZERO)
-        return pago, self.amount - pago
+        paid = sum((p.principal for p in self.payments.all() if not p.reversed), start=ZERO)
+        return paid, self.amount - paid
 
 
 class Payment(ClinicModel):

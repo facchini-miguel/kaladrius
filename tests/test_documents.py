@@ -31,7 +31,7 @@ def test_every_country_has_its_documents():
     for code, documents in identification.DOCUMENTS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
         assert documents.empresa is not None, code
-        assert documents.registro_profissional, code
+        assert documents.professional_registration, code
 
 
 def test_field_examples_are_valid_and_written_as_the_system_writes():

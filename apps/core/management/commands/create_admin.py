@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         # The Linux package's installer (decision 140): the password just typed would be thrown
         # away without a word, so it tells the user instead.
-        parser.add_argument("--fail-if-exists", dest="falhar_se_existir", action="store_true")
+        parser.add_argument("--fail-if-exists", dest="fail_if_exists", action="store_true")
 
     def handle(self, *args, **options):
         username = os.environ.get("DJANGO_ADMIN_USERNAME", "admin")
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         User = get_user_model()
         if User.objects.filter(username=username).exists():
-            if options["falhar_se_existir"]:
+            if options["fail_if_exists"]:
                 raise CommandError(f"O usuário '{username}' já existe.", returncode=3)
             self.stdout.write(f"O usuário '{username}' já existe. Nada foi alterado.")
             return

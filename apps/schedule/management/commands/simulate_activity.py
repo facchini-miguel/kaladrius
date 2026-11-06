@@ -26,58 +26,56 @@ class Command(BaseCommand):
             "--clinic", dest="clinic", required=True, help="Name of the test clinic."
         )
         parser.add_argument(
-            "--recalls", dest="rechamadas", type=int, default=80, help="How many recalls."
+            "--recalls", dest="recalls", type=int, default=80, help="How many recalls."
         )
         parser.add_argument(
             "--no-schedule",
-            dest="sem_agenda",
+            dest="no_schedule",
             action="store_true",
             help="Only recalls, no appointments.",
         )
         parser.add_argument(
             "--entries",
-            dest="lancamentos",
+            dest="entries",
             type=int,
             default=60,
             help="Fake receivables of the last 90 days, plus fake bills (0 for none).",
         )
         parser.add_argument(
             "--estimates",
-            dest="orcamentos",
+            dest="estimates",
             type=int,
             default=20,
             help="Fake estimates of the last 60 days (0 for none).",
         )
         parser.add_argument(
             "--confirm",
-            dest="confirmar",
+            dest="confirm",
             action="store_true",
             help="Required: fake data is mixed with the clinic's data.",
         )
 
-    def handle(
-        self, *args, clinic, rechamadas, sem_agenda, lancamentos, orcamentos, confirmar, **options
-    ):
-        if not confirmar:
+    def handle(self, *args, clinic, recalls, no_schedule, entries, estimates, confirm, **options):
+        if not confirm:
             raise CommandError(
                 "Nada foi criado: rode de novo com --confirm (só em clínicas de teste)."
             )
-        sorteio = random.Random()  # noqa: S311 (fake data, not security)
+        rng = random.Random()  # noqa: S311 (fake data, not security)
         with transaction.atomic(), without_isolation():
-            alvo = Clinic.objects.filter(name=clinic).first()
-            if alvo is None:
+            target = Clinic.objects.filter(name=clinic).first()
+            if target is None:
                 raise CommandError(f"Clínica “{clinic}” não encontrada.")
-            agendamentos = 0 if sem_agenda else simulate_appointments(alvo, sorteio)
-            criadas = simulate_recalls(alvo, sorteio, quantity=rechamadas)
-            criados = simulate_estimates(alvo, sorteio, quantity=orcamentos) if orcamentos else 0
-            receber, pagar = (
-                simulate_finance(alvo, sorteio, quantity=lancamentos) if lancamentos else (0, 0)
+            appointments = 0 if no_schedule else simulate_appointments(target, rng)
+            created_recalls = simulate_recalls(target, rng, quantity=recalls)
+            created_count = simulate_estimates(target, rng, quantity=estimates) if estimates else 0
+            receivable_total, payable_total = (
+                simulate_finance(target, rng, quantity=entries) if entries else (0, 0)
             )
-            comissoes = simulate_commissions(alvo, sorteio)
+            commissions = simulate_commissions(target, rng)
         self.stdout.write(self.style.SUCCESS(f"Movimento simulado na clínica “{clinic}”:"))
-        self.stdout.write(f"  Agendamentos fictícios: {agendamentos}")
-        self.stdout.write(f"  Rechamadas fictícias: {criadas}")
-        self.stdout.write(f"  Lançamentos a receber fictícios: {receber}")
-        self.stdout.write(f"  Despesas fictícias: {pagar}")
-        self.stdout.write(f"  Orçamentos fictícios: {criados}")
-        self.stdout.write(f"  Comissões lançadas (até o fim do mês passado): {comissoes}")
+        self.stdout.write(f"  Agendamentos fictícios: {appointments}")
+        self.stdout.write(f"  Rechamadas fictícias: {created_recalls}")
+        self.stdout.write(f"  Lançamentos a receber fictícios: {receivable_total}")
+        self.stdout.write(f"  Despesas fictícias: {payable_total}")
+        self.stdout.write(f"  Orçamentos fictícios: {created_count}")
+        self.stdout.write(f"  Comissões lançadas (até o fim do mês passado): {commissions}")

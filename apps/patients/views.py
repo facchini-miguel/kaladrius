@@ -47,19 +47,21 @@ def _visible_patients(request):
     return Patient.objects.filter(archived=False)
 
 
-def filter_patients(pacientes, search, kind, status):
+def filter_patients(patients, search, kind, status):
     """Search by name/company name (accent-insensitive), CPF/CNPJ prefix or patient code."""
     if search:
-        filtro = Q(name__unaccent__icontains=search) | Q(legal_name__unaccent__icontains=search)
+        query_filter = Q(name__unaccent__icontains=search) | Q(
+            legal_name__unaccent__icontains=search
+        )
         document = normalize_cnpj(search)
         if len(document) >= 3 and not any(c.isspace() for c in search.strip()):
-            filtro |= Q(tax_id__startswith=document)
+            query_filter |= Q(tax_id__startswith=document)
         if search.isdecimal() and len(search) <= 9:
-            filtro |= Q(pk=int(search))
-        pacientes = pacientes.filter(filtro)
+            query_filter |= Q(pk=int(search))
+        patients = patients.filter(query_filter)
     if kind in Patient.Kind.values:
-        pacientes = pacientes.filter(kind=kind)
-    return pacientes.filter(STATUSES.get(status, STATUSES["ativos"]))
+        patients = patients.filter(kind=kind)
+    return patients.filter(STATUSES.get(status, STATUSES["ativos"]))
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
@@ -69,8 +71,8 @@ def patient_list(request):
     status = request.GET.get("status", "ativos")
     if status == "arquivados" and not _sees_archived(request):
         status = "ativos"
-    pacientes = filter_patients(Patient.objects.select_related("city__state"), search, kind, status)
-    page = Paginator(pacientes, PER_PAGE).get_page(request.GET.get("page"))
+    patients = filter_patients(Patient.objects.select_related("city__state"), search, kind, status)
+    page = Paginator(patients, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "patients/list.html",
@@ -93,8 +95,8 @@ def patient_record(request, pk):
     )
     # LGPD: access to a patient's record (health data) is logged.
     log_event(AuditEntry.Action.VIEWED, patient)
-    rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
-    context = {"patient": patient, "recalls": rechamadas}
+    recalls = Recall.objects.filter(patient=patient).order_by("-date")[:20]
+    context = {"patient": patient, "recalls": recalls}
     if can(request, Module.SCHEDULE, Action.VIEW):
         context["appointments"] = _history(request, patient)
     if can(request, Module.RECEIVING, Action.VIEW):
@@ -123,7 +125,7 @@ def print_patient(request, pk):
         _visible_patients(request).select_related("city__state", "marital_status"), pk=pk
     )
     log_event(AuditEntry.Action.VIEWED, patient)  # LGPD, as the record
-    carteirinhas = (
+    member_cards = (
         list(MemberCard.objects.filter(patient=patient, active=True).select_related("health_plan"))
         if can(request, Module.HEALTH_PLANS, Action.VIEW)
         else None
@@ -133,7 +135,7 @@ def print_patient(request, pk):
         "patients/print.html",
         {
             "patient": patient,
-            "plan_cards": carteirinhas,
+            "plan_cards": member_cards,
             "related_people": RelatedPerson.objects.filter(patient=patient).select_related(
                 "other_patient"
             ),
@@ -147,14 +149,14 @@ HISTORY = 10  # appointments shown in each list of the patient record
 
 def _history(request, patient):
     """The patient's next and latest appointments (practitioners: only their own)."""
-    deste = (
+    of_patient = (
         visible_appointments(request).filter(patient=patient).select_related("practitioner", "kind")
     )
     now = timezone.now()
     return {
-        "upcoming": list(deste.filter(end__gt=now).order_by("start")[:HISTORY]),
-        "past": list(deste.filter(end__lte=now).order_by("-start")[:HISTORY]),
-        "total": deste.count(),
+        "upcoming": list(of_patient.filter(end__gt=now).order_by("start")[:HISTORY]),
+        "past": list(of_patient.filter(end__lte=now).order_by("-start")[:HISTORY]),
+        "total": of_patient.count(),
     }
 
 
@@ -183,18 +185,18 @@ def archive(request, pk):
     patient = get_object_or_404(Patient.objects, pk=pk, archived=False)
     # Not while the patient still owes or is owed money: the administrator first receives or
     # cancels those entries (0.27.2, decision 075), so finance never lists archived patients.
-    abertas = list(
+    unpaid = list(
         Installment.objects.unpaid()
         .filter(entry__patient=patient)
         .select_related("entry")
         .order_by("due_date", "pk")
     )
-    if abertas:
+    if unpaid:
         if request.method == "POST":
             messages.error(
                 request, _("Resolva as contas em aberto do paciente antes de arquivá-lo.")
             )
-        return render(request, "patients/archive.html", {"patient": patient, "open_items": abertas})
+        return render(request, "patients/archive.html", {"patient": patient, "open_items": unpaid})
     if request.method == "POST":
         patient.archived = True
         patient.archived_at = timezone.now()
@@ -241,57 +243,57 @@ def delete_patient(request, pk):
     }
     # The medical record must be kept (20 years in Brazil, Law 13.787/2018, decision 081): a
     # patient with one stays archived and is never permanently deleted, in any country.
-    atendimentos = Visit.objects.filter(patient=patient).count()
-    if atendimentos:
+    visits = Visit.objects.filter(patient=patient).count()
+    if visits:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
-        return render(request, "patients/delete.html", {**context, "visits": atendimentos})
+        return render(request, "patients/delete.html", {**context, "visits": visits})
     if request.method == "POST":
         code = patient.pk
-        agendamentos = Appointment.objects.filter(patient=patient)
-        ids_agendamentos = list(agendamentos.values_list("pk", flat=True))
-        rechamadas = Recall.objects.filter(patient=patient)
-        ids_rechamadas = list(rechamadas.values_list("pk", flat=True))
-        carteirinhas = MemberCard.objects.filter(patient=patient)
-        ids_carteirinhas = list(carteirinhas.values_list("pk", flat=True))
+        appointments = Appointment.objects.filter(patient=patient)
+        appointment_ids = list(appointments.values_list("pk", flat=True))
+        recalls = Recall.objects.filter(patient=patient)
+        recall_ids = list(recalls.values_list("pk", flat=True))
+        member_cards = MemberCard.objects.filter(patient=patient)
+        member_card_ids = list(member_cards.values_list("pk", flat=True))
         # Their own relatives and contacts, and the links other patients made to them.
-        relacionadas = RelatedPerson.objects.filter(Q(patient=patient) | Q(other_patient=patient))
-        ids_relacionadas = list(relacionadas.values_list("pk", flat=True))
-        lancamentos = Entry.objects.filter(patient=patient)
-        ids_lancamentos = list(lancamentos.values_list("pk", flat=True))
-        ids_parcelas = list(
-            Installment.objects.filter(entry__in=ids_lancamentos).values_list("pk", flat=True)
+        related_people = RelatedPerson.objects.filter(Q(patient=patient) | Q(other_patient=patient))
+        related_person_ids = list(related_people.values_list("pk", flat=True))
+        entries = Entry.objects.filter(patient=patient)
+        entry_ids = list(entries.values_list("pk", flat=True))
+        installment_ids = list(
+            Installment.objects.filter(entry__in=entry_ids).values_list("pk", flat=True)
         )
-        ids_pagamentos = list(
-            Payment.objects.filter(installment__in=ids_parcelas).values_list("pk", flat=True)
+        payment_ids = list(
+            Payment.objects.filter(installment__in=installment_ids).values_list("pk", flat=True)
         )
-        orcamentos = Estimate.objects.filter(patient=patient)
-        ids_orcamentos = list(orcamentos.values_list("pk", flat=True))
-        ids_itens = list(
-            EstimateItem.objects.filter(estimate__in=ids_orcamentos).values_list("pk", flat=True)
+        estimates = Estimate.objects.filter(patient=patient)
+        estimate_ids = list(estimates.values_list("pk", flat=True))
+        item_ids = list(
+            EstimateItem.objects.filter(estimate__in=estimate_ids).values_list("pk", flat=True)
         )
         # Stored in Portuguese, like the rest of the data. Free-text notes may hold
         # personal data, so they go too; the amounts and dates stay (accounting history).
-        excluido = f"Paciente excluído (código {code})"
+        deleted_one = f"Paciente excluído (código {code})"
         with transaction.atomic():
-            orcamentos.delete()  # items go with them (cascade)
-            agendamentos.update(patient=None, description=excluido)
-            lancamentos.update(patient=None, payer=excluido, notes="")
-            Payment.objects.filter(pk__in=ids_pagamentos).update(note="")
-            rechamadas.delete()
-            carteirinhas.delete()
-            relacionadas.delete()
+            estimates.delete()  # items go with them (cascade)
+            appointments.update(patient=None, description=deleted_one)
+            entries.update(patient=None, payer=deleted_one, notes="")
+            Payment.objects.filter(pk__in=payment_ids).update(note="")
+            recalls.delete()
+            member_cards.delete()
+            related_people.delete()
             patient.delete()
             anonymize(Patient, [code])
-            anonymize(Appointment, ids_agendamentos)
-            anonymize(Recall, ids_rechamadas)
-            anonymize(MemberCard, ids_carteirinhas)
-            anonymize(RelatedPerson, ids_relacionadas)
-            anonymize(Entry, ids_lancamentos)
-            anonymize(Installment, ids_parcelas)
-            anonymize(Payment, ids_pagamentos)
-            anonymize(Estimate, ids_orcamentos)
-            anonymize(EstimateItem, ids_itens)
+            anonymize(Appointment, appointment_ids)
+            anonymize(Recall, recall_ids)
+            anonymize(MemberCard, member_card_ids)
+            anonymize(RelatedPerson, related_person_ids)
+            anonymize(Entry, entry_ids)
+            anonymize(Installment, installment_ids)
+            anonymize(Payment, payment_ids)
+            anonymize(Estimate, estimate_ids)
+            anonymize(EstimateItem, item_ids)
             log_event(
                 AuditEntry.Action.DELETE,
                 # Filed under the clinic, so its administrator sees the erasure in the audit
@@ -311,12 +313,12 @@ def delete_patient(request, pk):
 def suggestions(request):
     """Up to 10 active patients matching the text, for search-as-you-type fields (HTMX)."""
     search = request.GET.get("q", "").strip()
-    pacientes = (
+    patients = (
         filter_patients(Patient.objects.all(), search, "", "ativos")[:10]
         if len(search) >= 2
         else []
     )
-    return render(request, "patients/_suggestions.html", {"patients": pacientes})
+    return render(request, "patients/_suggestions.html", {"patients": patients})
 
 
 MONTH_NAMES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
@@ -327,11 +329,11 @@ def birthdays(request):
     today = timezone.localdate()
     month = request.GET.get("month", "")
     month = int(month) if month.isdecimal() and 1 <= int(month) <= 12 else today.month
-    pacientes = Patient.objects.filter(
+    patients = Patient.objects.filter(
         active=True, archived=False, birth_date__month=month
     ).order_by("birth_date__day", "name")
-    ano = today.year if month >= today.month else today.year + 1  # next birthday's year
-    rows = [(patient, ano - patient.birth_date.year) for patient in pacientes]
+    year = today.year if month >= today.month else today.year + 1  # next birthday's year
+    rows = [(patient, year - patient.birth_date.year) for patient in patients]
     return render(
         request,
         "patients/birthdays.html",
@@ -353,10 +355,10 @@ def related_of(patient):
     Each item is (link, other person's name, the other patient or None, is_reverse); a
     reverse link reads "Mãe de Ana" on the mother's record.
     """
-    proprios = RelatedPerson.objects.filter(patient=patient).select_related("other_patient")
-    inversos = RelatedPerson.objects.filter(other_patient=patient).select_related("patient")
-    return [(r, r.display_name, r.other_patient, False) for r in proprios] + [
-        (r, r.patient.name, r.patient, True) for r in inversos
+    own_ones = RelatedPerson.objects.filter(patient=patient).select_related("other_patient")
+    inverse = RelatedPerson.objects.filter(other_patient=patient).select_related("patient")
+    return [(r, r.display_name, r.other_patient, False) for r in own_ones] + [
+        (r, r.patient.name, r.patient, True) for r in inverse
     ]
 
 
@@ -368,16 +370,16 @@ def new_related_person(request, pk):
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
 def edit_related_person(request, pk):
-    relacionada = get_object_or_404(
+    related_person = get_object_or_404(
         RelatedPerson.objects.select_related("patient", "other_patient"),
         pk=pk,
         patient__archived=False,
     )
-    return _related_person_form(request, relacionada.patient, relacionada)
+    return _related_person_form(request, related_person.patient, related_person)
 
 
-def _related_person_form(request, patient, instancia):
-    form = RelatedPersonForm(request.POST or None, instance=instancia, patient=patient)
+def _related_person_form(request, patient, instance):
+    form = RelatedPersonForm(request.POST or None, instance=instance, patient=patient)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, _("Pessoa relacionada salva."))
@@ -386,14 +388,14 @@ def _related_person_form(request, patient, instancia):
     if form.is_bound:
         other = form.cleaned_data.get("other_patient")
     else:
-        other = instancia.other_patient if instancia.other_patient_id else None
+        other = instance.other_patient if instance.other_patient_id else None
     return render(
         request,
         "patients/related_form.html",
         {
             "form": form,
             "patient": patient,
-            "instance": instancia,
+            "instance": instance,
             "other": other,
         },
     )
@@ -401,10 +403,10 @@ def _related_person_form(request, patient, instancia):
 
 @requires_permission(Module.PATIENTS, Action.CHANGE)
 def remove_related_person(request, pk):
-    relacionada = get_object_or_404(RelatedPerson.objects, pk=pk, patient__archived=False)
+    related_person = get_object_or_404(RelatedPerson.objects, pk=pk, patient__archived=False)
     if request.method == "POST":
-        patient = relacionada.patient_id
-        relacionada.delete()
+        patient = related_person.patient_id
+        related_person.delete()
         messages.success(request, _("Pessoa relacionada removida."))
         return redirect("patients:record", pk=patient)
     return redirect("patients:related_edit", pk=pk)

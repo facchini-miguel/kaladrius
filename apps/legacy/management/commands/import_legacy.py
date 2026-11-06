@@ -23,34 +23,34 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--encoding",
-            dest="codificacao",
+            dest="encoding",
             default="utf-8",
             help="Dump encoding (default: utf-8).",
         )
 
-    def handle(self, *args, file, clinic, codificacao, **options):
+    def handle(self, *args, file, clinic, encoding, **options):
         try:
             if file == "-":
-                text = sys.stdin.buffer.read().decode(codificacao)
+                text = sys.stdin.buffer.read().decode(encoding)
             else:
-                text = Path(file).read_text(encoding=codificacao)
+                text = Path(file).read_text(encoding=encoding)
         except (OSError, UnicodeDecodeError) as error:
             raise CommandError(f"Não foi possível ler o arquivo: {error}") from error
 
         try:
-            relatorio = import_dump(text, clinic)
+            report = import_dump(text, clinic)
         except (InvalidDump, ImportRefused) as error:
             raise CommandError(str(error)) from error
 
-        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{relatorio.clinic.name}”:"))
-        self.stdout.write(f"  Profissionais: {relatorio.practitioners}")
-        self.stdout.write(f"  Tipos de atendimento novos: {relatorio.tipos_criados}")
-        self.stdout.write(f"  Pacientes: {relatorio.patients}")
-        self.stdout.write(f"  Agendamentos: {relatorio.appointments}")
-        self.stdout.write(f"  Rechamadas: {relatorio.recalls}")
-        if relatorio.avisos:
+        self.stdout.write(self.style.SUCCESS(f"Importado na clínica “{report.clinic.name}”:"))
+        self.stdout.write(f"  Profissionais: {report.practitioners}")
+        self.stdout.write(f"  Tipos de atendimento novos: {report.kinds_created}")
+        self.stdout.write(f"  Pacientes: {report.patients}")
+        self.stdout.write(f"  Agendamentos: {report.appointments}")
+        self.stdout.write(f"  Rechamadas: {report.recalls}")
+        if report.warnings:
             self.stdout.write("Avisos:")
-            for warning, total in sorted(relatorio.avisos.items()):
+            for warning, total in sorted(report.warnings.items()):
                 self.stdout.write(f"  {total} × {warning}")
         self.stdout.write(
             "Nenhum usuário foi importado: crie a equipe em Cadastros › Equipe "

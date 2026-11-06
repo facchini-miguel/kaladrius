@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from apps.account import views as conta_views
-from apps.help import views as ajuda_views
+from apps.account import views as account_views
+from apps.help import views as help_views
 from config import legacy_urls
 
 from .api import api
@@ -18,7 +18,7 @@ urlpatterns = [
     path("api/v1/", api.urls),
     # Login with a limit per address and two-step verification; password recovery by
     # e-mail where the installation has SMTP (apps.account, decision 111).
-    path("account/login/", conta_views.ClinicLoginView.as_view(), name="login"),
+    path("account/login/", account_views.ClinicLoginView.as_view(), name="login"),
     path("account/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("account/", include("apps.account.urls")),
     path("whats-new/", include("apps.whats_new.urls")),
@@ -32,7 +32,7 @@ urlpatterns = [
     path("audit/", include("apps.audit.urls")),
     path("team/", include("apps.team.urls")),
     path("help/", include("apps.help.urls")),
-    path("privacy/", ajuda_views.privacy, name="privacy"),
+    path("privacy/", help_views.privacy, name="privacy"),
     path("system/health/", include("apps.monitoring.urls")),
     path("finance/", include("apps.finance.urls")),
     path("estimates/", include("apps.estimates.urls")),

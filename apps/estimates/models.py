@@ -153,7 +153,7 @@ class Estimate(ClinicModel):
     @property
     def teeth(self):
         """Every tooth in the estimate, for the dental chart."""
-        return sorted({dente for item in self.items.all() for dente in item.teeth_list})
+        return sorted({tooth for item in self.items.all() for tooth in item.teeth_list})
 
 
 class EstimateItem(ClinicModel):
@@ -213,8 +213,8 @@ class EstimateItem(ClinicModel):
         )
         dental = self.teeth or self.faces or (previous and any(previous.values()))
         # The view sets the flag only for the system administrator (decision 115).
-        liberado = getattr(self, "odontologia_desligada_liberada", False)
-        if dental and not clinic.dentistry and not liberado:
+        allowed = getattr(self, "dentistry_off_allowed", False)
+        if dental and not clinic.dentistry and not allowed:
             raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
 
     @transaction.atomic

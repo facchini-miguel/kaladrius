@@ -40,10 +40,10 @@ def scenario(clinic_a, create_practitioner):
 def test_only_on_the_demo_server(scenario, settings):
     settings.DEMO = False
     with pytest.raises(CommandError, match="DJANGO_DEMO"):
-        call_command("advance_dates", desde="2026-01-01", confirmar=True)
+        call_command("advance_dates", since="2026-01-01", confirm=True)
     settings.DEMO = True
     with pytest.raises(CommandError, match="--confirm"):
-        call_command("advance_dates", desde="2026-01-01")
+        call_command("advance_dates", since="2026-01-01")
 
 
 def test_advances_whole_weeks_and_keeps_birth_dates(scenario, settings):
@@ -51,7 +51,7 @@ def test_advances_whole_weeks_and_keeps_birth_dates(scenario, settings):
     today = timezone.localdate()
     before = {a.pk: (a.start, a.end) for a in scenario["schedule"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
-    call_command("advance_dates", desde=str(today - datetime.timedelta(days=17)), confirmar=True)
+    call_command("advance_dates", since=str(today - datetime.timedelta(days=17)), confirm=True)
     with use_clinic(scenario["clinic"]):
         for appointment in Appointment.objects.all():
             start, end = before[appointment.pk]
@@ -74,7 +74,7 @@ def test_advances_whole_weeks_and_keeps_birth_dates(scenario, settings):
 def test_less_than_a_week_changes_nothing(scenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
-    call_command("advance_dates", desde=str(today - datetime.timedelta(days=6)), confirmar=True)
+    call_command("advance_dates", since=str(today - datetime.timedelta(days=6)), confirm=True)
     with use_clinic(scenario["clinic"]):
         assert Recall.objects.get().date == today - datetime.timedelta(days=20)
 

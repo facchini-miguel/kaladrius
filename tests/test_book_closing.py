@@ -36,8 +36,8 @@ def installment(clinic_a):
             description="Consulta",
             category=Category.objects.get(name="Consulta"),
             total_amount=Decimal("300"),
-            parcelas=1,
-            primeiro_vencimento=DAY_BEFORE_YESTERDAY,
+            installments=1,
+            first_due_date=DAY_BEFORE_YESTERDAY,
             user=None,
         )
         return entry.installments.get()

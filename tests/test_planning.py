@@ -37,8 +37,8 @@ def pay(clinic, category, amount, date=TODAY):
             description="Despesa",
             category=Category.objects.get(name=category),
             total_amount=Decimal(amount),
-            parcelas=1,
-            primeiro_vencimento=date,
+            installments=1,
+            first_due_date=date,
             user=None,
         )
         installment = entry.installments.get()

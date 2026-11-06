@@ -18,7 +18,7 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        results = health.samples(desde=timezone.now() - datetime.timedelta(hours=24))
+        results = health.samples(since=timezone.now() - datetime.timedelta(hours=24))
         summary = health.summary(results)
         if summary is None:
             self.stdout.write("Sem amostras nas últimas 24 horas: a coleta está funcionando?")
@@ -51,7 +51,7 @@ class Command(BaseCommand):
         if backup is None:
             self.stdout.write("Último backup: nenhum registrado")
         else:
-            horas = (timezone.now() - backup.timestamp).total_seconds() / 3600
+            hours = (timezone.now() - backup.timestamp).total_seconds() / 3600
             self.stdout.write(
-                f"Último backup: {backup.file} ({filesizeformat(backup.size)}), há {horas:.0f} h"
+                f"Último backup: {backup.file} ({filesizeformat(backup.size)}), há {hours:.0f} h"
             )
