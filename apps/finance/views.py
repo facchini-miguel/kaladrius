@@ -234,7 +234,7 @@ def entry(request, pk):
     )
     for installment in parcelas:
         installment.status = services.status(installment, today)
-        installment.lista_pagamentos = [p for p in pagamentos if p.installment_id == installment.pk]
+        installment.payment_list = [p for p in pagamentos if p.installment_id == installment.pk]
     return render(
         request,
         "finance/entry.html",
@@ -244,7 +244,7 @@ def entry(request, pk):
             "can_change": can(request, _module(entry.kind), Action.CREATE),
             "can_delete": can(request, _module(entry.kind), Action.DELETE),
             "installments": parcelas,
-            "total_paid": sum(p.pago for p in parcelas),
+            "total_paid": sum(p.paid for p in parcelas),
             "total_balance": sum(p.balance for p in parcelas) if not entry.cancelled else 0,
             "commission": Commission.objects.filter(entry=entry).first(),
         },
@@ -350,7 +350,7 @@ def receipt(request, pk):
             "entry": payment.installment.entry,
             "total_installments": payment.installment.entry.parcelas.count(),
             # Where a tax document is required, the receipt says it does not replace it.
-            "tax_document": legislation.for_country().fiscal,
+            "tax_document": legislation.for_country().tax_document,
         },
     )
 
@@ -407,8 +407,8 @@ def debtors(request):
             "page": page,
             "search": search,
             "query": urlencode({"q": search}),
-            "total_overdue": sum(row["vencido"] for row in rows),
-            "total_upcoming": sum(row["a_vencer"] for row in rows),
+            "total_overdue": sum(row["overdue"] for row in rows),
+            "total_upcoming": sum(row["not_yet_due"] for row in rows),
         },
     )
 
@@ -518,7 +518,7 @@ def close_cash_register(request, pk):
             "cash_register": session,
             "form": form,
             "title": _("Fechar caixa"),
-            "expected": services.register_summary(session)["esperado"],
+            "expected": services.register_summary(session)["expected"],
         },
     )
 
@@ -613,9 +613,9 @@ def planning(request):
             return redirect(f"{reverse('finance:planning')}?year={year}")
     data = services.planning(year)
     for secao in data["sections"]:
-        for row in secao["linhas"]:
+        for row in secao["rows"]:
             if pode_alterar and row["group"].active:
-                row["campo"] = form[PlanningForm.name(row["group"])]
+                row["field"] = form[PlanningForm.name(row["group"])]
     return render(
         request,
         "finance/planning.html",
@@ -723,9 +723,9 @@ def chart_of_accounts(request):
 
         def descer(parent_id, nivel, kind=kind, rows=rows):
             for group in (g for g in grupos if g.kind == kind and g.parent_id == parent_id):
-                rows.append({"nivel": nivel, "group": group})
+                rows.append({"level": nivel, "group": group})
                 rows.extend(
-                    {"nivel": nivel + 1, "category": c}
+                    {"level": nivel + 1, "category": c}
                     for c in categorias
                     if c.group_id == group.pk
                 )
@@ -733,7 +733,7 @@ def chart_of_accounts(request):
 
         descer(None, 0)
         sem_grupo = [c for c in categorias if c.kind == kind and c.group_id is None]
-        arvores.append({"rotulo": label, "linhas": rows, "sem_grupo": sem_grupo})
+        arvores.append({"label": label, "rows": rows, "ungrouped": sem_grupo})
     return render(request, "finance/chart_of_accounts.html", {"trees": arvores})
 
 
@@ -898,7 +898,7 @@ def commission(request, pk):
         "installment__entry__patient", "commission"
     ).order_by("date", "pk")
     for estorno in reversal_deduction:
-        estorno.comissao_devolvida = commissions.percentage_for(
+        estorno.commission_returned = commissions.percentage_for(
             estorno.amount, estorno.commission.percentage
         )
     return render(
@@ -977,7 +977,7 @@ def statements(request):
     )
     page = Paginator(importacoes, 30).get_page(request.GET.get("page"))
     for statement_import in page:
-        statement_import.pendentes = pendentes.get(statement_import.pk, 0)
+        statement_import.pending = pendentes.get(statement_import.pk, 0)
     return render(request, "finance/statements.html", {"form": form, "page": page})
 
 

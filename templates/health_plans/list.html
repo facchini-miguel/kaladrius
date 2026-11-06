@@ -26,7 +26,7 @@
         <td>{{ health_plan.name }}</td>
         {% if registration_label %}<td>{{ health_plan.registration|default:"—" }}</td>{% endif %}
         <td class="text-nowrap">{{ health_plan.phone|phone|default:"—" }}</td>
-        <td class="text-end">{{ health_plan.pacientes }}</td>
+        <td class="text-end">{{ health_plan.patient_count }}</td>
         <td>{% if health_plan.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
         <td class="text-end">{% if can.convenios.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' health_plan.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>

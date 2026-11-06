@@ -17,7 +17,7 @@
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   {% for section in sections %}
-  <h2 class="h5 mt-4">{{ section.rotulo }}</h2>
+  <h2 class="h5 mt-4">{{ section.label }}</h2>
   <div class="table-responsive">
     <table class="table table-sm align-middle bg-white">
       <thead>
@@ -30,31 +30,31 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in section.linhas %}
+        {% for row in section.rows %}
         <tr>
-          <td style="padding-left: {{ row.nivel|add:1 }}rem;"{% if row.nivel == 0 %} class="fw-semibold"{% endif %}>{{ row.group }}</td>
+          <td style="padding-left: {{ row.level|add:1 }}rem;"{% if row.level == 0 %} class="fw-semibold"{% endif %}>{{ row.group }}</td>
           <td class="text-end">
-            {% if row.campo %}
-            {{ row.campo }}{% for error in row.campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-            {% else %}{{ row.meta|currency|default:"—" }}{% endif %}
+            {% if row.field %}
+            {{ row.field }}{% for error in row.field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            {% else %}{{ row.target|currency|default:"—" }}{% endif %}
           </td>
-          <td class="text-end text-nowrap text-body-secondary">{{ row.esperado|currency|default:"—" }}</td>
-          <td class="text-end text-nowrap">{{ row.realizado|currency }}</td>
-          <td class="text-end">{% if row.percentage is not None %}<span class="badge {% if row.em_dia %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ row.percentage }}%</span>{% endif %}</td>
+          <td class="text-end text-nowrap text-body-secondary">{{ row.expected|currency|default:"—" }}</td>
+          <td class="text-end text-nowrap">{{ row.actual|currency }}</td>
+          <td class="text-end">{% if row.percentage is not None %}<span class="badge {% if row.on_track %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ row.percentage }}%</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></td></tr>
         {% endfor %}
-        {% if section.sem_grupo %}
-        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ section.sem_grupo|currency }}</td><td></td></tr>
+        {% if section.ungrouped %}
+        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ section.ungrouped|currency }}</td><td></td></tr>
         {% endif %}
       </tbody>
       <tfoot>
         <tr class="fw-semibold">
           <td>{% translate "Total" %}</td>
-          <td class="text-end text-nowrap">{{ section.meta|currency }}</td>
-          <td class="text-end text-nowrap">{{ section.esperado|currency }}</td>
-          <td class="text-end text-nowrap">{{ section.realizado|currency }}</td>
+          <td class="text-end text-nowrap">{{ section.target|currency }}</td>
+          <td class="text-end text-nowrap">{{ section.expected|currency }}</td>
+          <td class="text-end text-nowrap">{{ section.actual|currency }}</td>
           <td></td>
         </tr>
       </tfoot>

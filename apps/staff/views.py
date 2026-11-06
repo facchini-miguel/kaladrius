@@ -23,7 +23,7 @@ def employee_list(request):
     funcionarios = list(Employee.objects.all())
     today = timezone.localdate()
     for employee in funcionarios:
-        employee.salario_atual = employee.salary_on(today)
+        employee.current_salary = employee.salary_on(today)
     return render(request, "staff/list.html", {"employees": funcionarios})
 
 

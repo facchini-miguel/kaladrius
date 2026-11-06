@@ -150,7 +150,7 @@
     <div class="col-md-6">
       <div class="px-3 pt-2 small fw-semibold">{% translate "Próximos" %}</div>
       <ul class="list-group list-group-flush">
-        {% for appointment in appointments.proximos %}
+        {% for appointment in appointments.upcoming %}
         {% include "patients/_appointment.html" %}
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum agendamento futuro." %}</li>
@@ -160,7 +160,7 @@
     <div class="col-md-6 border-start">
       <div class="px-3 pt-2 small fw-semibold">{% translate "Anteriores (mais recentes primeiro)" %}</div>
       <ul class="list-group list-group-flush">
-        {% for appointment in appointments.anteriores %}
+        {% for appointment in appointments.past %}
         {% include "patients/_appointment.html" %}
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum agendamento anterior." %}</li>
@@ -226,12 +226,12 @@
   </div>
   <div class="card-body">
     <p class="mb-2">
-      {% translate "Vencido" %}: <strong class="{% if finance.vencido %}text-danger{% endif %}">{{ finance.vencido|currency }}</strong> ·
-      {% translate "A vencer" %}: <strong>{{ finance.a_vencer|currency }}</strong>
+      {% translate "Vencido" %}: <strong class="{% if finance.overdue %}text-danger{% endif %}">{{ finance.overdue|currency }}</strong> ·
+      {% translate "A vencer" %}: <strong>{{ finance.not_yet_due|currency }}</strong>
     </p>
-    {% if finance.abertas %}
+    {% if finance.unpaid %}
     <ul class="list-unstyled small mb-2">
-      {% for installment in finance.abertas %}
+      {% for installment in finance.unpaid %}
       <li>
         {{ installment.due_date|date:"SHORT_DATE_FORMAT" }} · <a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> ({{ installment.number }}) · {{ installment.balance|currency }}
         {% if can.recebimentos.criar %}· <a href="{% url 'finance:receive_installment' installment.pk %}">{% translate "receber" %}</a>{% endif %}
@@ -239,10 +239,10 @@
       {% endfor %}
     </ul>
     {% endif %}
-    {% if finance.pagamentos %}
+    {% if finance.payments %}
     <div class="small text-body-secondary">{% translate "Últimos pagamentos" %}:</div>
     <ul class="list-unstyled small mb-0">
-      {% for payment in finance.pagamentos %}
+      {% for payment in finance.payments %}
       <li{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>{{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|currency }} · {{ payment.get_method_display }} · <a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a></li>
       {% endfor %}
     </ul>

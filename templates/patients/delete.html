@@ -6,7 +6,7 @@
 {% block content %}
 <h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Excluir definitivamente {{ nome }}?{% endblocktranslate %}</h1>
 <div class="alert alert-warning">
-  {% blocktranslate with lei=law.curta %}Use só quando o próprio paciente pedir a exclusão dos seus dados ({{ lei }}). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento.{% endblocktranslate %} {{ retention_period }}
+  {% blocktranslate with lei=law.short_name %}Use só quando o próprio paciente pedir a exclusão dos seus dados ({{ lei }}). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento.{% endblocktranslate %} {{ retention_period }}
 </div>
 {% if visits %}
 <div class="alert alert-danger">

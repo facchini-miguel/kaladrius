@@ -16,7 +16,7 @@
   <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Pagador" %}</th><th>{% translate "Lançamento" %}</th><th class="text-end">{% translate "Valor recebido" %}</th><th class="text-end">{% translate "Comissão descontada" %}</th></tr></thead>
   <tbody>
     {% for payment in reversal_deduction %}
-    <tr><td class="text-nowrap">{{ payment.date|date:"SHORT_DATE_FORMAT" }}</td><td>{{ payment.installment.entry.payer_name }}</td><td>{{ payment.installment.entry.description }} ({{ payment.installment.number }})</td><td class="text-end text-nowrap">{{ payment.amount|currency }}</td><td class="text-end text-nowrap">− {{ payment.comissao_devolvida|currency }}</td></tr>
+    <tr><td class="text-nowrap">{{ payment.date|date:"SHORT_DATE_FORMAT" }}</td><td>{{ payment.installment.entry.payer_name }}</td><td>{{ payment.installment.entry.description }} ({{ payment.installment.number }})</td><td class="text-end text-nowrap">{{ payment.amount|currency }}</td><td class="text-end text-nowrap">− {{ payment.commission_returned|currency }}</td></tr>
     {% endfor %}
   </tbody>
 </table></div>

@@ -19,11 +19,11 @@ pytestmark = pytest.mark.django_db
 def test_each_country_has_its_law():
     assert set(legislation.LAWS) == set(COUNTRIES)
     for country, lei in legislation.LAWS.items():
-        assert lei.lei and lei.curta, country
-        guarda = lei.guarda
+        assert lei.name and lei.short_name, country
+        guarda = lei.retention
         # A period always names its source; "varies" never comes with a number.
-        assert not guarda.anos or guarda.fonte, country
-        assert not (guarda.varia and guarda.anos), country
+        assert not guarda.years or guarda.source, country
+        assert not (guarda.varies and guarda.years), country
         assert not lei.site or lei.site.startswith("https://"), country
 
 

@@ -19,10 +19,10 @@
   {% for tree in trees %}
   <div class="col-lg-6">
     <div class="card h-100">
-      <div class="card-header">{{ tree.rotulo }}</div>
+      <div class="card-header">{{ tree.label }}</div>
       <ul class="list-group list-group-flush">
-        {% for row in tree.linhas %}
-        <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ row.nivel|add:1 }}rem;">
+        {% for row in tree.rows %}
+        <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: {{ row.level|add:1 }}rem;">
           {% if row.group %}
           <span class="fw-semibold{% if not row.group.active %} text-body-secondary text-decoration-line-through{% endif %}">{{ row.group }}</span>
           {% if can.financeiro.alterar %}<a class="small" href="{% url 'finance:group_edit' row.group.pk %}">{% translate "editar" %}</a>{% endif %}
@@ -32,16 +32,16 @@
           {% endif %}
         </li>
         {% endfor %}
-        {% if tree.sem_grupo %}
+        {% if tree.ungrouped %}
         <li class="list-group-item text-body-secondary small">{% translate "Sem grupo" %}</li>
-        {% for category in tree.sem_grupo %}
+        {% for category in tree.ungrouped %}
         <li class="list-group-item d-flex justify-content-between align-items-center" style="padding-left: 2rem;">
           <span class="{% if not category.active %}text-body-secondary text-decoration-line-through{% endif %}">{{ category.name }}</span>
           {% if can.financeiro.alterar %}<a class="small" href="{% url 'finance:catalog_edit' 'categories' category.pk %}">{% translate "editar" %}</a>{% endif %}
         </li>
         {% endfor %}
         {% endif %}
-        {% if not tree.linhas and not tree.sem_grupo %}
+        {% if not tree.rows and not tree.ungrouped %}
         <li class="list-group-item text-body-secondary">{% translate "Nada cadastrado." %}</li>
         {% endif %}
       </ul>

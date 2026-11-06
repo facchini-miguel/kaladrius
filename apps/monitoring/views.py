@@ -22,7 +22,7 @@ CHARTS = [
         _("Processador"),
         [
             ("cpu", "line-1", _("em uso")),
-            ("cpu_roubada", "line-2", _("tomado por outras máquinas")),
+            ("cpu_steal", "line-2", _("tomado por outras máquinas")),
         ],
         None,
         "%",
@@ -30,18 +30,18 @@ CHARTS = [
     (
         _("Memória"),
         [
-            ("memoria_pct", "line-1", _("memória em uso")),
+            ("memory_pct", "line-1", _("memória em uso")),
             ("swap_pct", "line-2", _("swap em uso")),
         ],
         100,
         "%",
     ),
-    (_("Disco"), [("disco_pct", "line-1", _("em uso"))], 100, "%"),
+    (_("Disco"), [("disk_pct", "line-1", _("em uso"))], 100, "%"),
     (
         _("Rede"),
         [
-            ("rede_entrada", "line-1", _("recebido por segundo")),
-            ("rede_saida", "line-2", _("enviado por segundo")),
+            ("network_in", "line-1", _("recebido por segundo")),
+            ("network_out", "line-2", _("enviado por segundo")),
         ],
         None,
         "bytes",
@@ -61,10 +61,10 @@ def _database():
             """
         )
         tables = [
-            {"name": name, "size": tamanho_tabela, "registros": registros}
+            {"name": name, "size": tamanho_tabela, "row_count": registros}
             for name, tamanho_tabela, registros in cursor.fetchall()
         ]
-    return {"size": size, "tabelas": tables}
+    return {"size": size, "tables": tables}
 
 
 @login_required
@@ -86,13 +86,13 @@ def health_dashboard(request):
         topo = health.scale_top(results, rows, maximo, piso)
         graficos.append(
             {
-                "titulo": titulo,
+                "title": titulo,
                 "svg": health.chart(
                     results, rows, start=start, end=end, maximo=maximo, piso=piso, teto=teto
                 ),
-                "topo": min(topo, teto) if teto else topo,
-                "unidade": unidade,
-                "legendas": [(classe, legenda) for _chave, classe, legenda in series],
+                "top": min(topo, teto) if teto else topo,
+                "unit": unidade,
+                "legends": [(classe, legenda) for _chave, classe, legenda in series],
             }
         )
     return render(
@@ -105,7 +105,7 @@ def health_dashboard(request):
             "latest": latest,
             "levels": health.levels(latest) if latest else {},
             "stopped": health.stopped(latest) if latest else False,
-            "up_since": latest["momento"] - datetime.timedelta(seconds=latest["ligado_ha"])
+            "up_since": latest["time"] - datetime.timedelta(seconds=latest["uptime"])
             if latest
             else None,
             "summary": health.summary(results),

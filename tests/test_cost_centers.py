@@ -131,8 +131,8 @@ def test_report_by_cost_center(clinica_a, centro, admin):
                 account=cash_register,
             )
     report = admin.get(reverse("finance:reports")).context["report"]
-    assert report["centros"]
-    assert {name: str(total) for name, total in report["despesas_por_centro"]} == {
+    assert report["centers"]
+    assert {name: str(total) for name, total in report["expenses_by_center"]} == {
         "Ortodontia": "300.00",
         "Sem centro de custo": "200.00",
     }
@@ -144,7 +144,7 @@ def test_report_by_cost_center(clinica_a, centro, admin):
 
 def test_report_without_centers_hides_the_tables(admin):
     report = admin.get(reverse("finance:reports"))
-    assert not report.context["report"]["centros"]
+    assert not report.context["report"]["centers"]
     assert "por centro de custo" not in report.content.decode()
 
 

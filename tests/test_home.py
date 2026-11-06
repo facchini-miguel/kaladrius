@@ -145,49 +145,51 @@ def start(cenario, cliente_de, quem):
 def test_reception_sees_the_day_without_expenses(cenario, cliente_de):
     response = start(cenario, cliente_de, "recepcao")
     painel = response.context["dashboard"]
-    dia_ = painel["agenda"]
-    assert len(dia_["lista"]) == 6 and dia_["mostrar_profissional"]
-    assert (dia_["pacientes"], dia_["compareceram"], dia_["faltaram"]) == (4, 1, 1)
-    assert (dia_["desmarcaram"], dia_["a_seguir"], dia_["sem_marcacao"]) == (1, 1, 1)
-    assert dia_["proximo"].patient.name == "João Paciente"  # 10:00–11:00, still going on
+    dia_ = painel["schedule"]
+    assert len(dia_["items"]) == 6 and dia_["show_practitioner"]
+    assert (dia_["patients"], dia_["attended"], dia_["missed"]) == (4, 1, 1)
+    assert (dia_["cancelled"], dia_["upcoming"], dia_["unmarked"]) == (1, 1, 1)
+    assert dia_["next"].patient.name == "João Paciente"  # 10:00–11:00, still going on
     # Month so far: came 08:00 today and on the 3rd; missed 09:00 today and on the 4th.
-    assert (dia_["faltas_mes"], dia_["marcados_mes"]) == (50, 4)
+    assert (dia_["missed_pct_month"], dia_["booked_month"]) == (50, 4)
 
-    recebimentos = painel["recebimentos"]
-    assert recebimentos["recebido"] == Decimal("100")
-    assert recebimentos["por_forma"] == [("Pix", Decimal("100"))]
-    assert (recebimentos["a_receber"], recebimentos["parcelas_a_receber"]) == (Decimal("100"), 1)
-    assert [cash_register.account.name for cash_register in recebimentos["caixas"]] == ["Caixa"]
-    assert "financeiro" not in painel
+    recebimentos = painel["receipts"]
+    assert recebimentos["received"] == Decimal("100")
+    assert recebimentos["by_method"] == [("Pix", Decimal("100"))]
+    assert (recebimentos["receivable"], recebimentos["receivable_count"]) == (Decimal("100"), 1)
+    assert [cash_register.account.name for cash_register in recebimentos["cash_registers"]] == [
+        "Caixa"
+    ]
+    assert "finance" not in painel
 
     content = response.content.decode()
     assert "Bom dia, recepcao" in content
     assert "Recebido hoje" in content and "Pago hoje" not in content
     assert "Saldo nas contas" not in content
-    assert reverse("schedule:status", args=[dia_["proximo"].pk]) in content
+    assert reverse("schedule:status", args=[dia_["next"].pk]) in content
 
 
 def test_admin_sees_day_and_month_result(cenario, cliente_de):
     painel = start(cenario, cliente_de, "admin").context["dashboard"]
-    fin = painel["financeiro"]
-    assert fin["pago_hoje"] == Decimal("50") and fin["resultado_hoje"] == Decimal("50")
-    assert (fin["recebido_mes"], fin["pago_mes"]) == (Decimal("100"), Decimal("50"))
-    assert fin["resultado_mes"] == Decimal("50")
+    fin = painel["finance"]
+    assert fin["paid_today"] == Decimal("50") and fin["result_today"] == Decimal("50")
+    assert (fin["received_month"], fin["paid_month"]) == (Decimal("100"), Decimal("50"))
+    assert fin["result_month"] == Decimal("50")
     # Same days of February (1st to 5th): the 200 received on the 3rd.
-    assert (fin["inicio_anterior"], fin["ate_anterior"]) == (day(1, 2), day(5, 2))
-    assert fin["resultado_anterior"] == Decimal("200")
-    assert (fin["vencido"], fin["parcelas_vencidas"]) == (Decimal("100"), 1)
-    assert (fin["a_pagar"], fin["contas_a_pagar"]) == (Decimal("80"), 1)
-    assert fin["saldo_contas"] == Decimal("250")
+    assert (fin["previous_start"], fin["previous_until"]) == (day(1, 2), day(5, 2))
+    assert fin["previous_result"] == Decimal("200")
+    assert (fin["overdue"], fin["overdue_count"]) == (Decimal("100"), 1)
+    assert (fin["payable"], fin["payable_count"]) == (Decimal("80"), 1)
+    assert fin["account_balances"] == Decimal("250")
 
 
 def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de):
     response = start(cenario, cliente_de, "dra")
     painel = response.context["dashboard"]
-    assert {a.practitioner.name for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
-    assert not painel["agenda"]["mostrar_profissional"]
-    assert painel["agenda"]["proximo"].start.astimezone().hour == 11
-    assert "recebimentos" not in painel and "financeiro" not in painel
+    assert {a.practitioner.name for a in painel["schedule"]["items"]} == {"Dra. Ana"}
+    assert not painel["schedule"]["show_practitioner"]
+    assert painel["schedule"]["next"].start.astimezone().hour == 11
+    assert "receipts" not in painel and "finance" not in painel
     # Estimates show their totals (practitioners write them), but no money of the clinic.
     content = response.content.decode()
     assert "Recebido hoje" not in content and "Caixa do dia" not in content
@@ -195,28 +197,28 @@ def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de)
 
 def test_lists_of_recalls_birthdays_and_estimates(cenario, cliente_de):
     painel = start(cenario, cliente_de, "recepcao").context["dashboard"]
-    rechamadas = painel["rechamadas"]
-    assert [r.date for r in rechamadas["lista"]] == [day(1), HOJE]
-    assert (rechamadas["total"], rechamadas["atrasadas"]) == (2, 1)
-    assert [(p.name, age) for p, age in painel["aniversariantes"]] == [("Maria Paciente", 41)]
-    assert [o.valid_until for o in painel["orcamentos"]] == [day(8)]
+    rechamadas = painel["recalls"]
+    assert [r.date for r in rechamadas["items"]] == [day(1), HOJE]
+    assert (rechamadas["total"], rechamadas["late"]) == (2, 1)
+    assert [(p.name, age) for p, age in painel["birthdays"]] == [("Maria Paciente", 41)]
+    assert [o.valid_until for o in painel["estimates"]] == [day(8)]
 
 
 def test_completing_recall_and_marking_attendance_return_home(cenario, cliente_de):
     cliente = cliente_de(cenario["recepcao"])
     painel = cliente.get(reverse("home")).context["dashboard"]
-    rechamada = painel["rechamadas"]["lista"][0]
+    rechamada = painel["recalls"]["items"][0]
     response = cliente.post(
         reverse("recalls:complete", args=[rechamada.pk]), {"next": reverse("home")}
     )
     assert response.url == reverse("home")
-    proximo = painel["agenda"]["proximo"]
+    proximo = painel["schedule"]["next"]
     response = cliente.post(
         reverse("schedule:status", args=[proximo.pk]), {"status": "compareceu"}, follow=True
     )
     assert "João Paciente compareceu." in response.content.decode()
-    assert response.context["dashboard"]["agenda"]["compareceram"] == 2
-    assert response.context["dashboard"]["rechamadas"]["total"] == 1
+    assert response.context["dashboard"]["schedule"]["attended"] == 2
+    assert response.context["dashboard"]["recalls"]["total"] == 1
 
 
 def test_no_clinic_means_no_summary(cenario, criar_usuario, cliente_de):

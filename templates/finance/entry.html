@@ -59,7 +59,7 @@
         <td class="text-end text-nowrap">{% if installment.balance > 0 and not entry.cancelled %}{{ installment.balance|currency }}{% else %}—{% endif %}</td>
         <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="small">
-          {% for payment in installment.lista_pagamentos %}
+          {% for payment in installment.payment_list %}
           <div{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>
             {{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|currency }} · {{ payment.get_method_display }}
             {% if not payable %}<a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a>{% endif %}

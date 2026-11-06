@@ -358,7 +358,7 @@ class Entry(ClinicModel):
 
 class InstallmentQuerySet(models.QuerySet):
     def with_balance(self):
-        """Annotate pago (principal paid by non-reversed payments) and saldo."""
+        """Annotate paid (principal paid by non-reversed payments) and balance."""
         principal = ExpressionWrapper(
             F("pagamentos__amount") - F("pagamentos__interest") + F("pagamentos__discount"),
             output_field=DecimalField(**MONEY),
@@ -368,8 +368,8 @@ class InstallmentQuerySet(models.QuerySet):
             Value(ZERO),
             output_field=DecimalField(**MONEY),
         )
-        return self.annotate(pago=pago).annotate(
-            balance=ExpressionWrapper(F("amount") - F("pago"), output_field=DecimalField(**MONEY))
+        return self.annotate(paid=pago).annotate(
+            balance=ExpressionWrapper(F("amount") - F("paid"), output_field=DecimalField(**MONEY))
         )
 
     def unpaid(self):

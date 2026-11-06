@@ -46,7 +46,7 @@ def _debits(practitioner):
         .order_by("date", "pk")
     )
     for debito in debitos:
-        debito.comissao_devolvida = percentage_for(debito.amount, debito.commission.percentage)
+        debito.commission_returned = percentage_for(debito.amount, debito.commission.percentage)
     return debitos
 
 
@@ -56,13 +56,13 @@ def pending(practitioner, until):
     debitos = _debits(practitioner)
     received_amount = sum((p.amount for p in creditos), start=ZERO)
     gross = percentage_for(received_amount, practitioner.commission_percentage)
-    reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
+    reversal_deduction = sum((p.commission_returned for p in debitos), start=ZERO)
     return {
         "practitioner": practitioner,
-        "creditos": creditos,
-        "debitos": debitos,
+        "credits": creditos,
+        "debits": debitos,
         "received_amount": received_amount,
-        "bruta": gross,
+        "gross": gross,
         "reversal_deduction": reversal_deduction,
         "amount": gross - reversal_deduction,
     }
@@ -84,12 +84,12 @@ def summary(until):
             continue
         received_amount = totais["received_amount"] or ZERO
         gross = percentage_for(received_amount, practitioner.commission_percentage)
-        reversal_deduction = sum((p.comissao_devolvida for p in debitos), start=ZERO)
+        reversal_deduction = sum((p.commission_returned for p in debitos), start=ZERO)
         rows.append(
             {
                 "practitioner": practitioner,
                 "received_amount": received_amount,
-                "bruta": gross,
+                "gross": gross,
                 "reversal_deduction": reversal_deduction,
                 "amount": gross - reversal_deduction,
             }
@@ -130,10 +130,10 @@ def pay(practitioner, *, until, due_date, category, user):
         created_by=user,
     )
     # One by one (not .update()), so the audit log records which receipts it covered.
-    for payment in calculo["creditos"]:
+    for payment in calculo["credits"]:
         payment.commission = commission
         payment.save(update_fields=["commission"])
-    for payment in calculo["debitos"]:
+    for payment in calculo["debits"]:
         payment.commission_reversal = commission
         payment.save(update_fields=["commission_reversal"])
     return commission

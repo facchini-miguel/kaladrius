@@ -35,12 +35,12 @@ core/change_password.html  health_alert
 core/home.html  backup_late
 core/home.html  backup_missing
 core/home.html  dashboard
-core/home.html  dashboard.agenda
-core/home.html  dashboard.aniversariantes
-core/home.html  dashboard.financeiro
-core/home.html  dashboard.orcamentos
-core/home.html  dashboard.recebimentos
-core/home.html  dashboard.rechamadas
+core/home.html  dashboard.birthdays
+core/home.html  dashboard.estimates
+core/home.html  dashboard.finance
+core/home.html  dashboard.recalls
+core/home.html  dashboard.receipts
+core/home.html  dashboard.schedule
 core/home.html  health_alert
 core/no_clinic.html  backup_late
 core/no_clinic.html  backup_missing
@@ -303,5 +303,5 @@ team/new.html  health_alert
 whats_new/list.html  backup_late
 whats_new/list.html  backup_missing
 whats_new/list.html  health_alert
-whats_new/list.html  health_alert.parada
-whats_new/list.html  health_alert.sem_coleta
+whats_new/list.html  health_alert.no_samples
+whats_new/list.html  health_alert.stopped

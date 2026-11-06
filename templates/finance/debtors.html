@@ -35,10 +35,10 @@
       {% for row in page %}
       <tr>
         <td>{% if row.patient_id %}<a href="{% url 'patients:record' row.patient_id %}">{{ row.name }}</a>{% else %}{{ row.name }}{% endif %}</td>
-        <td class="text-end text-nowrap fw-semibold{% if row.vencido %} text-danger{% endif %}">{{ row.vencido|currency }}</td>
-        {% for value in row.faixas %}<td class="text-end text-nowrap">{% if value %}{{ value|currency }}{% else %}—{% endif %}</td>{% endfor %}
-        <td class="text-end text-nowrap">{% if row.a_vencer %}{{ row.a_vencer|currency }}{% else %}—{% endif %}</td>
-        <td class="text-nowrap">{{ row.mais_antigo|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+        <td class="text-end text-nowrap fw-semibold{% if row.overdue %} text-danger{% endif %}">{{ row.overdue|currency }}</td>
+        {% for value in row.brackets %}<td class="text-end text-nowrap">{% if value %}{{ value|currency }}{% else %}—{% endif %}</td>{% endfor %}
+        <td class="text-end text-nowrap">{% if row.not_yet_due %}{{ row.not_yet_due|currency }}{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{{ row.oldest|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
       </tr>
       {% empty %}
       <tr><td colspan="8" class="text-body-secondary">{% translate "Ninguém está devendo." %}</td></tr>

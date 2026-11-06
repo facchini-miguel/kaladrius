@@ -12,7 +12,7 @@
 </p>
 <div class="alert alert-light border">
   {% translate "Valor da parcela" %}: <strong>{{ installment.amount|currency }}</strong> ·
-  {% translate "Já pago" %}: {{ installment.pago|currency }} ·
+  {% translate "Já pago" %}: {{ installment.paid|currency }} ·
   {% translate "Falta" %}: <strong>{{ installment.balance|currency }}</strong>
 </div>
 

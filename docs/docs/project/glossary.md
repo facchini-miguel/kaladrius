@@ -1731,6 +1731,157 @@ The names the views and context processors give the templates, and the templates
 | `vinculos` | `memberships` |
 | `voltar` | `back_entry` |
 
+## Keys inside the values (done)
+
+The keys of the dictionaries the services and views build for the pages (the home summary, the cash flow, the reports, the planning, the commissions, the cash register, the debtors, the server health), the attributes the views add to objects, and the fields of the legislation table (decision 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. The server health uses the names `health.sh` writes (`time`, `memory_total`…); lines of the old format, with Portuguese names, are still read. Kept: the module and action codes (`can.agenda.ver`), the document roles (`country_documents.paciente`), the fields of the release notes (they are the `releases.yaml` format and the `/api/v1/releases` API), the models' `related_name`s (`estimate.itens`), and the placeholders of translated texts (`%(anos)s`).
+
+### Dictionary keys
+
+| Before | After |
+|---|---|
+| `a_pagar` | `payable` |
+| `a_receber` | `receivable` |
+| `a_seguir` | `upcoming` |
+| `a_vencer` | `not_yet_due` |
+| `abertas` | `unpaid` |
+| `agenda` | `schedule` |
+| `agora` | `now` |
+| `amostras` | `samples` |
+| `aniversariantes` | `birthdays` |
+| `anteriores` | `past` |
+| `ate_anterior` | `previous_until` |
+| `atrasadas` | `late` |
+| `atrasado` | `late` |
+| `bruta` | `gross` |
+| `caixas` | `cash_registers` |
+| `campo` | `field` |
+| `carga` | `load` |
+| `centros` | `centers` |
+| `compareceram` | `attended` |
+| `contas_a_pagar` | `payable_count` |
+| `cpu_maxima` | `cpu_max` |
+| `cpu_media` | `cpu_avg` |
+| `cpu_roubada` | `cpu_steal` |
+| `creditos` | `credits` |
+| `criticos` | `critical` |
+| `debitos` | `debits` |
+| `descontos` | `discounts` |
+| `desmarcaram` | `cancelled` |
+| `despesas_por_categoria` | `expenses_by_category` |
+| `despesas_por_centro` | `expenses_by_center` |
+| `despesas_por_grupo` | `expenses_by_group` |
+| `disco` | `disk` |
+| `disco_pct` | `disk_pct` |
+| `disco_total` | `disk_total` |
+| `disco_usado` | `disk_used` |
+| `em_dia` | `on_track` |
+| `entradas` | `incoming` |
+| `entradas_previstas` | `expected_incoming` |
+| `enviado` | `sent` |
+| `esperado` | `expected` |
+| `faixas` | `brackets` |
+| `faltaram` | `missed` |
+| `faltas_mes` | `missed_pct_month` |
+| `financeiro` | `finance` |
+| `fracao` | `fraction` |
+| `grupos` | `groups` |
+| `hoje` | `today` |
+| `inicio_anterior` | `previous_start` |
+| `legendas` | `legends` |
+| `ligado_ha` | `uptime` |
+| `linhas` | `rows` |
+| `lista` | `items` |
+| `mais_antigo` | `oldest` |
+| `marcados_mes` | `booked_month` |
+| `memoria` | `memory` |
+| `memoria_disponivel` | `memory_available` |
+| `memoria_maxima` | `memory_max` |
+| `memoria_pct` | `memory_pct` |
+| `memoria_total` | `memory_total` |
+| `memoria_usada` | `memory_used` |
+| `meta` | `target` |
+| `momento` | `time` |
+| `mostrar_profissional` | `show_practitioner` |
+| `movimentos` | `movements` |
+| `nivel` | `level` |
+| `nome` | `name` |
+| `orcamentos` | `estimates` |
+| `pacientes` | `patients` |
+| `pagamentos` | `payments` |
+| `pago_hoje` | `paid_today` |
+| `pago_mes` | `paid_month` |
+| `parada` | `stopped` |
+| `parcelas_a_receber` | `receivable_count` |
+| `parcelas_vencidas` | `overdue_count` |
+| `por_categoria` | `by_category` |
+| `por_centro` | `by_center` |
+| `por_forma` | `by_method` |
+| `por_grupo` | `by_group` |
+| `por_profissional` | `by_practitioner` |
+| `proximo` | `next` |
+| `proximos` | `upcoming` |
+| `realizado` | `actual` |
+| `recebido` | `received` |
+| `recebido_mes` | `received_month` |
+| `recebimentos` | `receipts` |
+| `rechamadas` | `recalls` |
+| `rede_entrada` | `network_in` |
+| `rede_enviado` | `network_sent` |
+| `rede_maxima` | `network_max` |
+| `rede_recebido` | `network_received` |
+| `rede_saida` | `network_out` |
+| `reforcos` | `top_ups` |
+| `registros` | `row_count` |
+| `resultado` | `result` |
+| `resultado_anterior` | `previous_result` |
+| `resultado_hoje` | `result_today` |
+| `resultado_mes` | `result_month` |
+| `retiradas` | `withdrawals` |
+| `rotulo` | `label` |
+| `saidas` | `outgoing` |
+| `saidas_previstas` | `expected_outgoing` |
+| `saldo_contas` | `account_balances` |
+| `saldo_final` | `closing_balance` |
+| `sem_coleta` | `no_samples` |
+| `sem_grupo` | `ungrouped` |
+| `sem_marcacao` | `unmarked` |
+| `swap_livre` | `swap_free` |
+| `swap_maximo` | `swap_max` |
+| `swap_usado` | `swap_used` |
+| `tabelas` | `tables` |
+| `titulo` | `title` |
+| `topo` | `top` |
+| `totais` | `totals` |
+| `total_pago` | `total_paid` |
+| `total_recebido` | `total_received` |
+| `unidade` | `unit` |
+| `vencido` | `overdue` |
+
+### Attributes added by the views
+
+| Before | After |
+|---|---|
+| `comissao_devolvida` | `commission_returned` |
+| `lista_pagamentos` | `payment_list` |
+| `pacientes` (`health_plan`)` | `patient_count` |
+| `pago` | `paid` |
+| `pendentes` | `pending` |
+| `salario_atual` | `current_salary` |
+
+### Legislation
+
+| Before | After |
+|---|---|
+| `anos` | `years` |
+| `ate_idade` | `until_age` |
+| `autoridade` | `authority` |
+| `curta` | `short_name` |
+| `fiscal` | `tax_document` |
+| `fonte` | `source` |
+| `guarda` | `retention` |
+| `lei` | `name` |
+| `varia` | `varies` |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.

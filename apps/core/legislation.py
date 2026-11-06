@@ -27,24 +27,24 @@ PROVINCE = "provincia"
 
 @dataclass(frozen=True)
 class Retention:
-    """How long health records are kept: `anos` after the last entry and, for minors, until
-    the patient's `ate_idade` birthday if later; `varia` when each state or province sets it.
+    """How long health records are kept: `years` after the last entry and, for minors, until
+    the patient's `until_age` birthday if later; `varies` when each state or province sets it.
     """
 
-    anos: int | None = None
-    ate_idade: int | None = None
-    fonte: str = ""
-    varia: str = ""
+    years: int | None = None
+    until_age: int | None = None
+    source: str = ""
+    varies: str = ""
 
 
 @dataclass(frozen=True)
 class Legislation:
-    lei: str  # the data protection law, in full
-    curta: str  # its short name, for warnings ("LGPD, art. 18")
-    autoridade: str = ""
+    name: str  # the data protection law, in full
+    short_name: str  # its short name, for warnings ("LGPD, art. 18")
+    authority: str = ""
     site: str = ""
-    guarda: Retention = Retention()
-    fiscal: str = ""  # the tax document a receipt does not replace, where one is required
+    retention: Retention = Retention()
+    tax_document: str = ""  # the tax document a receipt does not replace, where one is required
 
 
 LAWS = {
@@ -53,104 +53,104 @@ LAWS = {
         "LGPD, art. 18",
         "Autoridade Nacional de Proteção de Dados (ANPD)",
         "https://www.gov.br/anpd",
-        Retention(20, fonte="Lei 13.787/2018, art. 6º"),
+        Retention(20, source="Lei 13.787/2018, art. 6º"),
     ),
     "MX": Legislation(
         "Ley Federal de Protección de Datos Personales en Posesión de los Particulares (2025)",
         "LFPDPPP",
         "Secretaría Anticorrupción y Buen Gobierno",
-        guarda=Retention(5, fonte="NOM-004-SSA3-2012"),
-        fiscal="CFDI",
+        retention=Retention(5, source="NOM-004-SSA3-2012"),
+        tax_document="CFDI",
     ),
     "AR": Legislation(
         "Ley 25.326 de Protección de los Datos Personales",
         "Ley 25.326",
         "Agencia de Acceso a la Información Pública (AAIP)",
         "https://www.argentina.gob.ar/aaip",
-        Retention(10, fonte="Ley 26.529, art. 18"),
+        Retention(10, source="Ley 26.529, art. 18"),
         "factura electrónica (ARCA)",
     ),
     "CL": Legislation(
         "Ley 19.628 sobre Protección de la Vida Privada, reformada por la Ley 21.719",
         "Ley 19.628",
         "Agencia de Protección de Datos Personales (Ley 21.719)",
-        guarda=Retention(15, fonte="Ley 20.584, art. 13; Decreto 41/2012"),
-        fiscal="boleta o factura electrónica (SII)",
+        retention=Retention(15, source="Ley 20.584, art. 13; Decreto 41/2012"),
+        tax_document="boleta o factura electrónica (SII)",
     ),
     "CO": Legislation(
         "Ley 1581 de 2012 de Protección de Datos Personales",
         "Ley 1581 de 2012",
         "Superintendencia de Industria y Comercio (SIC)",
         "https://www.sic.gov.co",
-        Retention(15, fonte="Resolución 839 de 2017"),
+        Retention(15, source="Resolución 839 de 2017"),
         "factura electrónica (DIAN)",
     ),
     "PE": Legislation(
         "Ley 29733 de Protección de Datos Personales",
         "Ley 29733",
         "Autoridad Nacional de Protección de Datos Personales (MINJUSDH)",
-        guarda=Retention(fonte="NTS 139-MINSA/2018/DGAIN"),
-        fiscal="boleta o factura electrónica (SUNAT)",
+        retention=Retention(source="NTS 139-MINSA/2018/DGAIN"),
+        tax_document="boleta o factura electrónica (SUNAT)",
     ),
     "UY": Legislation(
         "Ley 18.331 de Protección de Datos Personales",
         "Ley 18.331",
         "Unidad Reguladora y de Control de Datos Personales (URCDP)",
-        guarda=Retention(fonte="Decreto 274/010; Decreto 355/982"),
-        fiscal="comprobante fiscal electrónico (CFE, DGI)",
+        retention=Retention(source="Decreto 274/010; Decreto 355/982"),
+        tax_document="comprobante fiscal electrónico (CFE, DGI)",
     ),
     "PY": Legislation(
         "Ley 7593/2025 de Protección de Datos Personales (aplicable desde noviembre de 2027)",
         "Ley 7593/2025",
         "Agencia Nacional de Protección de Datos Personales (MITIC)",
-        fiscal="factura electrónica (SIFEN)",
+        tax_document="factura electrónica (SIFEN)",
     ),
     "BO": Legislation(
         "Constitución Política del Estado, arts. 21 y 130 (sin ley general de datos personales)",
         "Constitución, art. 130",
-        fiscal="factura (SIN)",
+        tax_document="factura (SIN)",
     ),
     "EC": Legislation(
         "Ley Orgánica de Protección de Datos Personales (2021)",
         "LOPDP",
         "Superintendencia de Protección de Datos Personales",
-        guarda=Retention(fonte="Acuerdo Ministerial 5216"),
-        fiscal="comprobante electrónico (SRI)",
+        retention=Retention(source="Acuerdo Ministerial 5216"),
+        tax_document="comprobante electrónico (SRI)",
     ),
     "US": Legislation(
         "HIPAA Privacy and Security Rules, and state law",
         "HIPAA",
         "U.S. Department of Health and Human Services, Office for Civil Rights",
         "https://www.hhs.gov/ocr",
-        Retention(varia=STATE),
+        Retention(varies=STATE),
     ),
     "GB": Legislation(
         "UK GDPR and Data Protection Act 2018",
         "UK GDPR",
         "Information Commissioner's Office (ICO)",
         "https://ico.org.uk",
-        Retention(fonte="Records Management Code of Practice"),
+        Retention(source="Records Management Code of Practice"),
     ),
     "CA": Legislation(
         "PIPEDA and provincial health privacy laws (such as PHIPA in Ontario)",
         "PIPEDA",
         "Office of the Privacy Commissioner of Canada",
         "https://www.priv.gc.ca",
-        Retention(varia=PROVINCE),
+        Retention(varies=PROVINCE),
     ),
     "AU": Legislation(
         "Privacy Act 1988 (Australian Privacy Principles)",
         "Privacy Act 1988",
         "Office of the Australian Information Commissioner (OAIC)",
         "https://www.oaic.gov.au",
-        Retention(varia=STATE),
+        Retention(varies=STATE),
     ),
     "ZA": Legislation(
         "Protection of Personal Information Act (POPIA, Act 4 of 2013)",
         "POPIA",
         "Information Regulator",
         "https://inforegulator.org.za",
-        Retention(6, 21, fonte="HPCSA, Booklet 9"),
+        Retention(6, 21, source="HPCSA, Booklet 9"),
     ),
 }
 
@@ -161,25 +161,25 @@ def for_country(country=None):
 
 def retention_period(country=None):
     """One sentence on how long the country keeps health records, in the user's language."""
-    guarda = for_country(country).guarda
-    if guarda.anos and guarda.ate_idade:
+    retention = for_country(country).retention
+    if retention.years and retention.until_age:
         return _(
             "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
             "registro e, de menores de idade, até o paciente fazer %(idade)s anos, se for mais "
             "tarde (%(fonte)s)."
-        ) % {"anos": guarda.anos, "idade": guarda.ate_idade, "fonte": guarda.fonte}
-    if guarda.anos:
+        ) % {"anos": retention.years, "idade": retention.until_age, "fonte": retention.source}
+    if retention.years:
         return _(
             "O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
             "registro (%(fonte)s)."
-        ) % {"anos": guarda.anos, "fonte": guarda.fonte}
-    if guarda.varia == STATE:
+        ) % {"anos": retention.years, "fonte": retention.source}
+    if retention.varies == STATE:
         return _("O prazo de guarda do prontuário é definido pela lei de cada estado.")
-    if guarda.varia == PROVINCE:
+    if retention.varies == PROVINCE:
         return _("O prazo de guarda do prontuário é definido pela lei de cada província.")
-    if guarda.fonte:
+    if retention.source:
         return _(
             "O prazo de guarda do prontuário segue %(fonte)s: confira o prazo atual com a "
             "autoridade de saúde."
-        ) % {"fonte": guarda.fonte}
+        ) % {"fonte": retention.source}
     return _("Confira com a autoridade de saúde do país o prazo de guarda do prontuário.")

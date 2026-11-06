@@ -441,15 +441,15 @@ def test_record_shows_upcoming_and_past(cenario, criar_usuario, cliente_de):
 
     historico = cenario["cliente"].get(url).context["appointments"]
     assert historico["total"] == 3
-    assert [a.practitioner.name for a in historico["proximos"]] == ["Dra. Ana", "Dr. Bruno"]
-    assert [a.start.date() for a in historico["anteriores"]] == [passado]
+    assert [a.practitioner.name for a in historico["upcoming"]] == ["Dra. Ana", "Dr. Bruno"]
+    assert [a.start.date() for a in historico["past"]] == [passado]
 
     # Practitioners see only their own appointments in the record too.
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
     response = cliente.get(url)
     historico = response.context["appointments"]
     assert historico["total"] == 2
-    assert {a.practitioner.name for a in historico["proximos"]} == {"Dra. Ana"}
+    assert {a.practitioner.name for a in historico["upcoming"]} == {"Dra. Ana"}
     assert "?practitioner=" in response.content.decode()
 
 
