@@ -11,7 +11,7 @@ title: Monitoramento
 
 ```bash
 curl https://clinica.exemplo.com.br/api/v1/version
-# {"version": "0.60.1"}
+# {"version": "0.60.2"}
 ```
 
 Use em qualquer monitor de disponibilidade (UptimeRobot, Healthchecks, Uptime Kuma…) para ser avisado quando o sistema parar de responder.
