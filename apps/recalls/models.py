@@ -11,7 +11,7 @@ class Recall(ClinicModel):
     patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
-        related_name="rechamadas",
+        related_name="recalls",
         verbose_name=_("paciente"),
     )
     date = models.DateField(_("data"))

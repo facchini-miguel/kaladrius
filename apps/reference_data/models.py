@@ -32,7 +32,7 @@ class City(models.Model):
     state = models.ForeignKey(
         State,
         on_delete=models.PROTECT,
-        related_name="cidades",
+        related_name="cities",
         verbose_name=_("UF"),
     )
 
@@ -86,7 +86,7 @@ class Neighborhood(models.Model):
     city = models.ForeignKey(
         City,
         on_delete=models.CASCADE,
-        related_name="bairros",
+        related_name="neighborhoods",
         verbose_name=_("cidade"),
     )
     name = models.CharField(_("nome"), max_length=100, db_collation=ALPHABETICAL)
@@ -110,7 +110,7 @@ class Street(models.Model):
     city = models.ForeignKey(
         City,
         on_delete=models.CASCADE,
-        related_name="logradouros",
+        related_name="streets",
         verbose_name=_("cidade"),
     )
     neighborhood = models.ForeignKey(
@@ -118,7 +118,7 @@ class Street(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="logradouros",
+        related_name="streets",
         verbose_name=_("bairro"),
     )
     name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)

@@ -61,7 +61,7 @@ def receive(scenario, amount, practitioner, date=YESTERDAY, interest="0"):
             user=scenario["admin"],
         )
         return services.receive(
-            entry.parcelas.get(),
+            entry.installments.get(),
             user=scenario["admin"],
             amount=Decimal(amount) + Decimal(interest),
             interest=Decimal(interest),

@@ -115,7 +115,7 @@ def test_register_save_and_finalize(scenario):
     assert page.context["form"] is None and page.context["addendum_form"] is not None
     scenario["dr"].post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Exame ok"})
     with use_clinic(scenario["clinic"]):
-        addendum = visit.adendos.get()
+        addendum = visit.addenda.get()
     assert addendum.text == "Exame ok" and addendum.practitioner.name == "Dr. Bruno"
     assert "Exame ok" in scenario["dra"].get(url).content.decode()
 
@@ -214,7 +214,7 @@ def test_attendance_and_leave_certificates(scenario):
     assert "3 dias de afastamento" in page and "Repouso" in page
     assert "5 de março de 2031" in page  # month in lower case, as in running text
     with use_clinic(scenario["clinic"]):
-        assert visit.atestados.count() == 2
+        assert visit.certificates.count() == 2
     record = AuditEntry.objects.filter(model_name="Atestado").latest("pk")
     assert "Repouso" not in str(record.changes)
 
@@ -369,4 +369,4 @@ def test_system_admin_sees_and_does_everything(scenario, django_user_model):
         assert not Attachment.objects.exists()
     root.post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Correção"})
     with use_clinic(scenario["clinic"]):
-        assert visit.adendos.get().practitioner == scenario["ana"]
+        assert visit.addenda.get().practitioner == scenario["ana"]

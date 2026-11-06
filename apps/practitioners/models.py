@@ -31,7 +31,7 @@ class Practitioner(ClinicModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="profissionais",
+        related_name="practitioners",
         verbose_name=_("usuário de acesso"),
         help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
     )

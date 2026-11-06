@@ -26,7 +26,7 @@ class PractitionerForm(BootstrapForm, forms.ModelForm):
         # Only users with an active membership in this clinic can be linked.
         self.fields["user"].queryset = (
             get_user_model()
-            .objects.filter(vinculos__clinic=clinic, vinculos__active=True)
+            .objects.filter(memberships__clinic=clinic, memberships__active=True)
             .order_by("username")
             .distinct()
         )

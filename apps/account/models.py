@@ -13,7 +13,7 @@ class TwoFactor(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="duas_etapas",
+        related_name="two_factor",
         verbose_name=_("usuário"),
     )
     secret = models.CharField(_("segredo"), max_length=64, editable=False)
@@ -35,7 +35,7 @@ class RecoveryCode(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="codigos_recuperacao",
+        related_name="recovery_codes",
         verbose_name=_("usuário"),
     )
     digest = models.CharField(_("resumo"), max_length=64, editable=False)

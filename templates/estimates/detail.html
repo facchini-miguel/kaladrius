@@ -29,7 +29,7 @@
   <table class="table align-middle bg-white">
     <thead><tr><th>{% translate "Procedimento" %}</th>{% if show_teeth %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
     <tbody>
-      {% for item in estimate.itens.all %}
+      {% for item in estimate.items.all %}
       <tr>
         <td>{% if item.code %}<span class="text-body-secondary small">{{ item.code }}</span> {% endif %}{{ item.description }}</td>
         {% if show_teeth %}

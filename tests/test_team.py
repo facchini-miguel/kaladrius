@@ -90,7 +90,7 @@ def test_new_member_validations(clinic_admin_client, extra, field):
 
 def test_changes_role_and_removes_access(clinic_admin_client, clinic_a, create_user, client_for):
     member = create_user("membro", clinic_a, Role.FRONT_DESK, first_name="Membro")
-    membership = member.vinculos.get()
+    membership = member.memberships.get()
     url = reverse("team:edit", args=[membership.pk])
     clinic_admin_client.post(url, edit_data(Role.PRACTITIONER, first_name="Novo nome"))
     membership.refresh_from_db()
@@ -109,7 +109,7 @@ def test_changes_role_and_removes_access(clinic_admin_client, clinic_a, create_u
 
 
 def test_does_not_change_own_role(clinic_admin_client, admin_a):
-    membership = admin_a.vinculos.get()
+    membership = admin_a.memberships.get()
     clinic_admin_client.post(
         reverse("team:edit", args=[membership.pk]),
         edit_data(Role.FRONT_DESK, active=False, first_name="Admin"),
@@ -122,7 +122,7 @@ def test_clinic_is_never_left_without_admin(clinic_a, create_user, client_for, d
     only_admin = create_user("unico", clinic_a, Role.ADMIN, first_name="Único")
     superuser = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     user_client = client_for(superuser)
-    membership = only_admin.vinculos.get()
+    membership = only_admin.memberships.get()
     response = user_client.post(
         reverse("team:edit", args=[membership.pk]), edit_data(Role.FRONT_DESK)
     )
@@ -139,19 +139,19 @@ def test_admin_with_disabled_account_does_not_count(
     disabled.save()
     other = create_user("outro_admin", clinic_a, Role.ADMIN, first_name="Outro")
     # With "outro_admin" demoted, admin_a is still an active administrator.
-    url = reverse("team:edit", args=[other.vinculos.get().pk])
+    url = reverse("team:edit", args=[other.memberships.get().pk])
     assert clinic_admin_client.post(url, edit_data(first_name="Outro")).status_code == 302
 
     # Now admin_a cannot be demoted: the only other administrator cannot log in.
     form = MembershipForm(
-        {"role": Role.FRONT_DESK, "active": "on"}, instance=admin_a.vinculos.get(), editor=other
+        {"role": Role.FRONT_DESK, "active": "on"}, instance=admin_a.memberships.get(), editor=other
     )
     assert not form.is_valid()
     assert "pelo menos um administrador ativo" in str(form.errors)
 
 
 def test_membership_of_another_clinic_gives_404(clinic_admin_client, clinic_b, create_user):
-    membership = create_user("outro", clinic_b).vinculos.get()
+    membership = create_user("outro", clinic_b).memberships.get()
     assert clinic_admin_client.get(reverse("team:edit", args=[membership.pk])).status_code == 404
     assert (
         clinic_admin_client.get(reverse("team:password", args=[membership.pk])).status_code == 404
@@ -161,7 +161,7 @@ def test_membership_of_another_clinic_gives_404(clinic_admin_client, clinic_b, c
 def test_sets_password_of_clinic_only_member(clinic_admin_client, clinic_a, create_user):
     member = create_user("membro", clinic_a)
     response = clinic_admin_client.post(
-        reverse("team:password", args=[member.vinculos.get().pk]),
+        reverse("team:password", args=[member.memberships.get().pk]),
         {"new_password1": NEW_PASSWORD, "new_password2": NEW_PASSWORD},
     )
     assert response.status_code == 302
@@ -174,7 +174,7 @@ def test_does_not_touch_account_of_who_works_elsewhere(
 ):
     member = create_user("multi", clinic_a, first_name="Multi")
     Membership.objects.create(user=member, clinic=clinic_b, role=Role.ADMIN)
-    membership = member.vinculos.get(clinic=clinic_a)
+    membership = member.memberships.get(clinic=clinic_a)
 
     response = clinic_admin_client.post(
         reverse("team:password", args=[membership.pk]),
@@ -207,5 +207,7 @@ def test_does_not_touch_superuser_account(clinic_admin_client, clinic_a, django_
 
 
 def test_own_password_goes_to_password_change(clinic_admin_client, admin_a):
-    response = clinic_admin_client.get(reverse("team:password", args=[admin_a.vinculos.get().pk]))
+    response = clinic_admin_client.get(
+        reverse("team:password", args=[admin_a.memberships.get().pk])
+    )
     assert response.url == reverse("change_password")

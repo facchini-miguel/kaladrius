@@ -83,7 +83,7 @@ def test_practitioner_builds_estimate_with_teeth(scenario):
     )
     add_item(user_client, estimate, description="Moldagem", unit_price="80,00")
     with use_clinic(scenario["clinic"]):
-        items = list(estimate.itens.order_by("pk"))
+        items = list(estimate.items.order_by("pk"))
         estimate.refresh_from_db()
         assert estimate.total == Decimal("580.00")
         assert estimate.teeth == [11, 36]
@@ -109,7 +109,7 @@ def test_invalid_items(scenario, data):
     estimate = create_estimate(scenario, user_client)
     add_item(user_client, estimate, **{"procedure": scenario["channel"].pk, **data})
     with use_clinic(scenario["clinic"]):
-        assert not estimate.itens.exists()
+        assert not estimate.items.exists()
 
 
 def test_estimate_author_gives_discount(scenario):
@@ -161,12 +161,12 @@ def test_approving_becomes_a_receivable(scenario):
         Decimal("1000.00"),
     )
     with use_clinic(scenario["clinic"]):
-        assert entry.parcelas.count() == 4
+        assert entry.installments.count() == 4
         assert entry.patient == scenario["patient"]
     # Once approved, nothing changes any more.
     add_item(reception, estimate, procedure=scenario["restoration"].pk)
     with use_clinic(scenario["clinic"]):
-        assert estimate.itens.count() == 1
+        assert estimate.items.count() == 1
     assert reception.post(reverse("estimates:decline", args=[estimate.pk])).status_code == 302
     estimate.refresh_from_db()
     assert estimate.status == Estimate.Status.APPROVED
@@ -257,7 +257,7 @@ def test_odontogram_only_in_dentistry(scenario):
     assert "teeth" not in page.context["item_form"].fields
     add_item(reception, estimate, procedure=scenario["channel"].pk, teeth="11", faces="V")
     with use_clinic(scenario["clinic"]):
-        assert not estimate.itens.exists()  # forged fields are rejected, not discarded
+        assert not estimate.items.exists()  # forged fields are rejected, not discarded
     configure(scenario["clinic"], {*GENERAL_MODULES, Clinic.Area.DENTISTRY})
     add_item(reception, estimate, procedure=scenario["channel"].pk, teeth="11", faces="V")
     configure(scenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})

@@ -208,7 +208,7 @@ def test_admin_removes_verification_of_who_lost_the_phone(client, clinic_a, pers
     enable_two_factor(person)
     admin = create_user("admin_conta", clinic_a, Role.ADMIN)
     client.force_login(admin)
-    membership = person.vinculos.get()
+    membership = person.memberships.get()
     page = client.get(reverse("team:edit", args=[membership.pk])).content.decode()
     assert "Remover a verificação em duas etapas" in page
     client.post(reverse("team:two_factor", args=[membership.pk]))

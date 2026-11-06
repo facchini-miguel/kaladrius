@@ -666,7 +666,7 @@ def register_summary(cash_register):
         .select_related("installment__entry__patient")
         .order_by("created_at")
     )
-    movimentos = list(cash_register.movimentos.select_related("other_account", "created_by"))
+    movimentos = list(cash_register.movements.select_related("other_account", "created_by"))
     entradas = sum(
         (p.amount for p in pagamentos if p.installment.entry.kind == Entry.Kind.RECEIVABLE),
         start=ZERO,

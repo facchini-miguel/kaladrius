@@ -173,7 +173,7 @@ def simulate_finance(clinic, sorteio, quantity=60, user=None):
             primeiro_vencimento=date,
             user=user,
         )
-        for installment in entry.parcelas.all():
+        for installment in entry.installments.all():
             if installment.due_date <= today and sorteio.random() < 0.8:
                 services.receive(
                     installment,
@@ -238,7 +238,7 @@ def _simulate_expenses(clinic, sorteio, contas, user, centros):
             primeiro_vencimento=start if meses else today - datetime.timedelta(days=20),
             user=user,
         )
-        for installment in entry.parcelas.all():
+        for installment in entry.installments.all():
             if installment.due_date <= today and sorteio.random() < 0.9:
                 services.receive(
                     installment,

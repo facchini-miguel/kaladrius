@@ -126,7 +126,7 @@ def two_factor(request):
                     {"codes": services.new_codes(user)},
                 )
             novos.add_error("code", _("Código incorreto."))
-        restantes = user.codigos_recuperacao.filter(used_at__isnull=True).count()
+        restantes = user.recovery_codes.filter(used_at__isnull=True).count()
         return render(
             request,
             "account/two_factor.html",

@@ -131,7 +131,7 @@ def paid(scenario, amount, date, kind=Entry.Kind.RECEIVABLE, account=None):
             user=scenario["admin"],
         )
         return services.receive(
-            entry.parcelas.get(),
+            entry.installments.get(),
             user=scenario["admin"],
             amount=Decimal(amount),
             method="pix",

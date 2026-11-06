@@ -137,10 +137,10 @@ def test_each_user_works_in_the_clinic_of_own_membership(
 
 def test_inactive_membership_or_clinic_give_no_access(clinic_a, create_user, client_for):
     user = create_user("ana", clinic_a)
-    user.vinculos.update(active=False)
+    user.memberships.update(active=False)
     assert client_for(user).get(reverse("practitioners:list")).status_code == 403
 
-    user.vinculos.update(active=True)
+    user.memberships.update(active=True)
     clinic_a.active = False
     clinic_a.save()
     assert client_for(user).get(reverse("practitioners:list")).status_code == 403

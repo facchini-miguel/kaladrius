@@ -90,13 +90,13 @@ class Appointment(ClinicModel):
     practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
-        related_name="agendamentos",
+        related_name="appointments",
         verbose_name=_("profissional"),
     )
     kind = models.ForeignKey(
         AppointmentType,
         on_delete=models.PROTECT,
-        related_name="agendamentos",
+        related_name="appointments",
         verbose_name=_("tipo de atendimento"),
     )
     start = models.DateTimeField(_("início"))
@@ -106,7 +106,7 @@ class Appointment(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="agendamentos",
+        related_name="appointments",
         verbose_name=_("paciente"),
     )
     description = models.TextField(_("descrição"), blank=True)

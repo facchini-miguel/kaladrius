@@ -122,7 +122,7 @@ def _estimates(today):
             patient__archived=False,
         )
         .select_related("patient")
-        .prefetch_related("itens")
+        .prefetch_related("items")
         .order_by("valid_until", "patient__name")
     )
 

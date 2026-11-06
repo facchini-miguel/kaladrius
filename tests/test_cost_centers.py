@@ -122,7 +122,7 @@ def test_report_by_cost_center(clinic_a, center, admin):
                 primeiro_vencimento=TODAY,
                 user=None,
             )
-            installment = entry.parcelas.get()
+            installment = entry.installments.get()
             services.receive(
                 installment,
                 user=None,

@@ -117,7 +117,7 @@ def test_reception_enters_installments(scenario):
     assert response.status_code == 302
     with use_clinic(scenario["clinic"]):
         entry = Entry.objects.get()
-        installments = list(entry.parcelas.order_by("number"))
+        installments = list(entry.installments.order_by("number"))
     assert entry.created_by == scenario["reception"]
     assert [p.amount for p in installments] == [
         Decimal("33.34"),
@@ -348,7 +348,7 @@ def test_permanent_deletion_keeps_entry_without_patient(scenario):
     with use_clinic(scenario["clinic"]):
         Entry.objects.filter(pk=entry.pk).update(notes="Mãe: Joana, 9999-0000")
         payment = services.receive(
-            entry.parcelas.first(),
+            entry.installments.first(),
             user=scenario["admin"],
             amount=Decimal("10.00"),
             method="pix",
@@ -398,9 +398,9 @@ def test_fixed_monthly_and_installment_expense(scenario):
         chair = Entry.objects.get(description="Cadeira")
         assert rent.kind == Entry.Kind.PAYABLE
         assert rent.total_amount == Decimal("36000.00")
-        assert {p.amount for p in rent.parcelas.all()} == {Decimal("3000.00")}
-        assert rent.parcelas.count() == 12
-        assert [p.amount for p in chair.parcelas.order_by("number")] == [Decimal("300.00")] * 3
+        assert {p.amount for p in rent.installments.all()} == {Decimal("3000.00")}
+        assert rent.installments.count() == 12
+        assert [p.amount for p in chair.installments.order_by("number")] == [Decimal("300.00")] * 3
 
 
 def test_expense_paid_at_once_and_installment_payment(scenario):
@@ -437,7 +437,7 @@ def test_reception_does_not_see_payables(scenario):
     admin.post(reverse("finance:expense_new"), expense(scenario, installments=1))
     with use_clinic(scenario["clinic"]):
         entry = Entry.objects.get()
-        installment = entry.parcelas.get()
+        installment = entry.installments.get()
     reception = log_in(scenario, "reception")
     for url in (
         reverse("finance:payables"),

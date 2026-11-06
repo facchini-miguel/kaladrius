@@ -109,7 +109,7 @@ def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
                 user=users["admin"],
                 **fields,
             )
-            return list(entry.parcelas.order_by("number"))
+            return list(entry.installments.order_by("number"))
 
         def pay_(installment, amount, date, method="pix"):
             financeiro.receive(

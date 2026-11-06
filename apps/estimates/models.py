@@ -75,7 +75,7 @@ class Estimate(ClinicModel):
     patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
-        related_name="orcamentos",
+        related_name="estimates",
         verbose_name=_("paciente"),
     )
     practitioner = models.ForeignKey(
@@ -140,7 +140,7 @@ class Estimate(ClinicModel):
 
     @property
     def subtotal(self):
-        return sum((item.total for item in self.itens.all()), start=Decimal("0.00"))
+        return sum((item.total for item in self.items.all()), start=Decimal("0.00"))
 
     @property
     def total(self):
@@ -153,14 +153,14 @@ class Estimate(ClinicModel):
     @property
     def teeth(self):
         """Every tooth in the estimate, for the dental chart."""
-        return sorted({dente for item in self.itens.all() for dente in item.teeth_list})
+        return sorted({dente for item in self.items.all() for dente in item.teeth_list})
 
 
 class EstimateItem(ClinicModel):
     estimate = models.ForeignKey(
         Estimate,
         on_delete=models.CASCADE,
-        related_name="itens",
+        related_name="items",
         verbose_name=_("orçamento"),
     )
     procedure = models.ForeignKey(

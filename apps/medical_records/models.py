@@ -30,13 +30,13 @@ class Visit(ClinicModel):
     patient = models.ForeignKey(
         Patient,
         on_delete=models.PROTECT,
-        related_name="atendimentos",
+        related_name="visits",
         verbose_name=_("paciente"),
     )
     practitioner = models.ForeignKey(
         Practitioner,
         on_delete=models.PROTECT,
-        related_name="atendimentos",
+        related_name="visits",
         verbose_name=_("profissional"),
     )
     appointment = models.OneToOneField(
@@ -95,7 +95,7 @@ class Addendum(ClinicModel):
     visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
-        related_name="adendos",
+        related_name="addenda",
         verbose_name=_("atendimento"),
     )
     text = models.TextField(_("adendo"))
@@ -134,7 +134,7 @@ class Certificate(ClinicModel):
     visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
-        related_name="atestados",
+        related_name="certificates",
         verbose_name=_("atendimento"),
     )
     kind = models.CharField(
@@ -188,7 +188,7 @@ class Prescription(ClinicModel):
     visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
-        related_name="receitas",
+        related_name="prescriptions",
         verbose_name=_("atendimento"),
     )
     medications = models.TextField(
@@ -226,7 +226,7 @@ class ExamRequest(ClinicModel):
     visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
-        related_name="pedidos_de_exames",
+        related_name="exam_requests",
         verbose_name=_("atendimento"),
     )
     exams = models.TextField(_("exames"), help_text=_("Um exame por linha."))
@@ -267,7 +267,7 @@ class Attachment(ClinicModel):
     visit = models.ForeignKey(
         Visit,
         on_delete=models.PROTECT,
-        related_name="anexos",
+        related_name="attachments",
         verbose_name=_("atendimento"),
     )
     description = models.CharField(

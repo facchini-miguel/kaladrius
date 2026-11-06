@@ -46,13 +46,13 @@ class MemberCard(ClinicModel):
     patient = models.ForeignKey(
         "pacientes.Patient",
         on_delete=models.PROTECT,
-        related_name="carteirinhas",
+        related_name="member_cards",
         verbose_name=_("paciente"),
     )
     health_plan = models.ForeignKey(
         HealthPlan,
         on_delete=models.PROTECT,
-        related_name="carteirinhas",
+        related_name="member_cards",
         verbose_name=_("convênio"),
     )
     plan = models.CharField(_("plano"), max_length=100, blank=True)
