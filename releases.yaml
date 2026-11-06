@@ -4,6 +4,28 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.60.2
+  date: 2026-11-06
+  title:
+    pt-br: Agenda melhor no celular
+    en: A better schedule on phones
+    es: Agenda mejor en el celular
+  items:
+    - kind: correcao
+      module: Agenda
+      audience: [equipe]
+      text:
+        pt-br: >
+          No celular, a visão da semana mostra os dias de forma curta (S 2, T 3…), sem um invadir
+          o outro, e a agenda abre no dia de hoje, mesmo depois de ver a semana no computador.
+        en: >
+          On phones, the week view shows the days in short form (S 2, T 3…), without running into
+          each other, and the schedule opens on today, even after seeing the week on a computer.
+        es: >
+          En el celular, la vista de la semana muestra los días en forma corta (S 2, T 3…), sin que
+          uno invada al otro, y la agenda abre en el día de hoy, incluso después de ver la semana
+          en la computadora.
+
 - version: 0.60.1
   date: 2026-11-06
   title:
