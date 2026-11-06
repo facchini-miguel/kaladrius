@@ -7,7 +7,7 @@ from apps.whats_new.api import router as whats_new_router
 from apps.whats_new.releases import current_version
 
 api = NinjaAPI(
-    title=f"{settings.NOME_SISTEMA} API",
+    title=f"{settings.SYSTEM_NAME} API",
     version="1",
     description="API used by the mobile app (kaladrius-app).",
     urls_namespace="api-v1",

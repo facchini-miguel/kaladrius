@@ -104,8 +104,8 @@ def test_policy_in_the_three_languages(client, language, titulo):
 
 def test_logo_in_bar_login_and_tab(client, reception):
     entrada = client.get(reverse("login")).content.decode()
-    assert "logo-entrada" in entrada and "img/favicon" in entrada
-    assert "logo-barra" in reception.get(reverse("home")).content.decode()
+    assert "logo-login" in entrada and "img/favicon" in entrada
+    assert "logo-bar" in reception.get(reverse("home")).content.decode()
     for file in ("logo.svg", "favicon.svg"):
         assert (documents.DOCS.parent / "static" / "img" / file).is_file()
 

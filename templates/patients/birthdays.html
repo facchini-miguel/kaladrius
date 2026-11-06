@@ -7,7 +7,7 @@
 <h1 class="h3 mb-3">{% translate "Aniversariantes" %}</h1>
 <form method="get" class="row g-2 mb-3" style="max-width: 24rem;">
   <div class="col-8">
-    <select name="mes" class="form-select" aria-label="{% translate 'Mês' %}" data-enviar-ao-mudar>
+    <select name="mes" class="form-select" aria-label="{% translate 'Mês' %}" data-submit-on-change>
       {% for number, name in meses %}<option value="{{ number }}"{% if number == mes %} selected{% endif %}>{{ name|capfirst }}</option>{% endfor %}
     </select>
   </div>

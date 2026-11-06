@@ -92,7 +92,7 @@ def test_practitioner_builds_estimate_with_teeth(cenario):
     )
     assert itens[0].teeth_display == "11, 36"
     page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
-    assert 'data-dente="36"' in page and "R$ 580,00" in page
+    assert 'data-tooth="36"' in page and "R$ 580,00" in page
 
 
 @pytest.mark.parametrize(
@@ -182,7 +182,7 @@ def test_refuse_and_print(cenario):
     estimate = criar_orcamento(cenario, cliente)
     incluir(cliente, estimate, procedure=cenario["canal"].pk, teeth="46")
     page = cliente.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
-    assert "ORÇAMENTO" in page and "Joana Sorriso" in page and "selecionado" in page
+    assert "ORÇAMENTO" in page and "Joana Sorriso" in page and 'class="tooth selected' in page
     cliente.post(reverse("estimates:decline", args=[estimate.pk]))
     estimate.refresh_from_db()
     assert estimate.status == Estimate.Status.REFUSED
@@ -240,7 +240,7 @@ def test_odontogram_only_in_dentistry(cenario):
     estimate = criar_orcamento(cenario, reception)
     estimate_detail = reverse("estimates:detail", args=[estimate.pk])
     page = reception.get(estimate_detail)
-    assert page.context["mostrar_dentes"] and "odontograma" in page.content.decode()
+    assert page.context["mostrar_dentes"] and 'class="odontogram-scroll"' in page.content.decode()
     assert "teeth" in page.context["item_form"].fields
 
     from apps.core.models import GENERAL_MODULES
@@ -248,7 +248,8 @@ def test_odontogram_only_in_dentistry(cenario):
 
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})
     page = reception.get(estimate_detail)
-    assert not page.context["mostrar_dentes"] and "odontograma" not in page.content.decode()
+    assert not page.context["mostrar_dentes"]
+    assert 'class="odontogram-scroll"' not in page.content.decode()
     assert "teeth" not in page.context["item_form"].fields
     incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
     with use_clinic(cenario["clinic"]):

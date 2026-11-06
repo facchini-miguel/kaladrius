@@ -47,9 +47,9 @@ class ClinicLoginView(auth_views.LoginView):
         return {
             **context,
             "endereco_bloqueado": any(e.code == "endereco_bloqueado" for e in erros),
-            "recuperar_por_email": settings.RECUPERAR_SENHA_POR_EMAIL,
+            "recuperar_por_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
             "inatividade": self.request.GET.get("inatividade") == "1",
-            "minutos": settings.INATIVIDADE_MINUTOS,
+            "minutos": settings.IDLE_MINUTES,
         }
 
 
@@ -168,7 +168,7 @@ def _with_email(view):
     """Password recovery only exists where the installation can send e-mail."""
 
     def protegida(request, *args, **kwargs):
-        if not settings.RECUPERAR_SENHA_POR_EMAIL:
+        if not settings.PASSWORD_RECOVERY_BY_EMAIL:
             raise Http404
         return view(request, *args, **kwargs)
 
@@ -181,7 +181,7 @@ password_recover = _with_email(
         template_name="account/recover.html",
         email_template_name="account/recovery_email.txt",
         subject_template_name="account/recovery_email_subject.txt",
-        extra_email_context={"nome_sistema": settings.NOME_SISTEMA},
+        extra_email_context={"nome_sistema": settings.SYSTEM_NAME},
         success_url=reverse_lazy("account:recovery_sent"),
     )
 )

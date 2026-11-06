@@ -43,7 +43,7 @@
         {% if grafico.svg %}{{ grafico.svg }}{% else %}<p class="text-body-secondary small">{% translate "Poucas amostras para o gráfico." %}</p>{% endif %}
         <div class="d-flex justify-content-between small text-body-secondary">
           <span>{% if periodo == "7d" %}{{ start|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ start|time:"H:i" }}{% endif %}</span>
-          <span>{% for classe, legenda in grafico.legendas %}<span class="legenda {{ classe }}"></span> {{ legenda }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
+          <span>{% for classe, legenda in grafico.legendas %}<span class="legend {{ classe }}"></span> {{ legenda }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
           <span>{% if periodo == "7d" %}{{ end|date:"SHORT_DATETIME_FORMAT" }}{% else %}{{ end|time:"H:i" }}{% endif %}</span>
         </div>
       </div>

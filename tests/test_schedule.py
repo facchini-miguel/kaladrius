@@ -642,7 +642,7 @@ def test_events_carry_the_status(cenario):
         },
     )
     [evento] = response.json()
-    assert evento["classNames"] == ["situacao-faltou"]
+    assert evento["classNames"] == ["status-faltou"]
     assert evento["extendedProps"]["status_name"] == "Faltou"
 
 

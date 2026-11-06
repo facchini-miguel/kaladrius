@@ -55,7 +55,7 @@ def test_session_ends_after_30_idle_minutes(client, pessoa):
     assert settings.SESSION_COOKIE_AGE == 30 * 60 and settings.SESSION_SAVE_EVERY_REQUEST
     client.force_login(pessoa)
     page = client.get(reverse("home")).content.decode()
-    assert 'data-inatividade="30"' in page and reverse("account:active") in page
+    assert 'data-idle-minutes="30"' in page and reverse("account:active") in page
     assert client.get(reverse("account:active")).status_code == 204
     saiu = client.get(reverse("login"), {"inatividade": "1"})
     assert "30 minutos sem uso" in saiu.content.decode()
@@ -67,7 +67,7 @@ def test_active_without_login_goes_to_login(client):
 
 def test_password_fields_get_the_eye_toggle(client):
     page = client.get(reverse("login")).content.decode()
-    assert 'data-mostrar-senha="Mostrar a senha"' in page
+    assert 'data-show-password="Mostrar a senha"' in page
 
 
 # --- Wrong logins per address ---------------------------------------------------------------
@@ -228,13 +228,13 @@ def test_demo_account_does_not_activate(client, pessoa):
 
 
 def test_no_email_configured_means_no_recovery(client, settings):
-    settings.RECUPERAR_SENHA_POR_EMAIL = False
+    settings.PASSWORD_RECOVERY_BY_EMAIL = False
     assert client.get(reverse("account:recover")).status_code == 404
     assert "Esqueci minha senha" not in client.get(reverse("login")).content.decode()
 
 
 def test_recover_password_by_email(client, pessoa, settings):
-    settings.RECUPERAR_SENHA_POR_EMAIL = True
+    settings.PASSWORD_RECOVERY_BY_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     assert "Esqueci minha senha" in client.get(reverse("login")).content.decode()
     response = client.post(reverse("account:recover"), {"email": "pessoa@example.com"})
@@ -251,7 +251,7 @@ def test_recover_password_by_email(client, pessoa, settings):
 
 
 def test_demo_account_gets_no_email(client, pessoa, settings):
-    settings.RECUPERAR_SENHA_POR_EMAIL = True
+    settings.PASSWORD_RECOVERY_BY_EMAIL = True
     settings.MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
     pessoa.demo = True
     pessoa.save(update_fields=["demo"])

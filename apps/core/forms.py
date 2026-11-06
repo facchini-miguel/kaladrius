@@ -103,10 +103,10 @@ def document_by_kind(field, individuo, empresa, kind):
     field.label = (current or individuo or empresa).abbreviation
     field.widget.attrs.update(
         {
-            "data-rotulo-pf": individuo.abbreviation if individuo else "",
-            "data-rotulo-pj": empresa.abbreviation if empresa else "",
-            "data-exemplo-pf": individuo.example if individuo else "",
-            "data-exemplo-pj": empresa.example if empresa else "",
+            "data-label-pf": individuo.abbreviation if individuo else "",
+            "data-label-pj": empresa.abbreviation if empresa else "",
+            "data-example-pf": individuo.example if individuo else "",
+            "data-example-pj": empresa.example if empresa else "",
             "placeholder": current.example if current else "",
         }
     )

@@ -70,7 +70,7 @@ def prepare(user, new=False):
 def app_uri(dispositivo):
     """The otpauth:// address the authenticator app reads from the QR code."""
     return pyotp.TOTP(dispositivo.secret).provisioning_uri(
-        name=dispositivo.user.get_username(), issuer_name=settings.NOME_SISTEMA
+        name=dispositivo.user.get_username(), issuer_name=settings.SYSTEM_NAME
     )
 
 

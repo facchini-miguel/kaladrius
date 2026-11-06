@@ -189,7 +189,7 @@ def test_patient_outside_brazil(clinica_a, criar_usuario, cliente_de):
     no_pais(clinica_a, "GB")
     admin = cliente_de(criar_usuario("admin_paciente", clinica_a, Role.ADMIN))
     formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'data-rotulo-pf="NHS number"' in formulario and 'name="rg"' not in formulario
+    assert 'data-label-pf="NHS number"' in formulario and 'name="rg"' not in formulario
     assert 'name="state"' not in formulario and 'name="city_name"' in formulario
     assert "Código postal" in formulario
 

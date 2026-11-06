@@ -12,7 +12,7 @@ from django.utils.csp import CSP
 
 # Name shown to users (decisions 060 and 068). Google Cloud names that cannot be renamed
 # (project, backup bucket, network, identity provider) keep "medical-system" (decision 071).
-NOME_SISTEMA = "Kaladrius"
+SYSTEM_NAME = "Kaladrius"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,37 +28,37 @@ def env_bool(name, default=False):
     return env(name, "1" if default else "0").strip().lower() in {"1", "true", "sim", "yes"}
 
 
-def env_renomeada(name, old, default=False):
+def env_renamed(name, old, default=False):
     """A yes/no variable by its name of decision 149, or by the one it had before (a .env of
     0.55 or earlier, or a person following older documentation)."""
     return env_bool(name, default=env_bool(old, default=default))
 
 
-def env_lista(name, default=""):
+def env_list(name, default=""):
     return [item.strip() for item in env(name, default).split(",") if item.strip()]
 
 
 DEBUG = env_bool("DJANGO_DEBUG")
 # Production servers run daily backups (deploy/server/backup.sh): superusers are warned
 # when none was recorded recently, or none at all. Development has no backups.
-BACKUP_MONITORED = env_renomeada(
+BACKUP_MONITORED = env_renamed(
     "DJANGO_BACKUP_MONITORED", "DJANGO_BACKUP_MONITORADO", default=not DEBUG
 )
 # Health samples written every 5 minutes by deploy/server/health.sh (decision 056):
 # superusers are warned when they stop or a resource is critical.
-HEALTH_MONITORED = env_renomeada(
+HEALTH_MONITORED = env_renamed(
     "DJANGO_HEALTH_MONITORED", "DJANGO_SAUDE_MONITORADA", default=not DEBUG
 )
 # Inside the app container (docker-compose.prod.yml mounts the server's /opt/kaladrius/health).
 HEALTH_DIR = env("DJANGO_HEALTH_DIR", "/health")
 # Public demo server (decision 086): enables the nightly reset and advance_dates.
-DEMO = env_renomeada("DJANGO_DEMO", "DJANGO_DEMONSTRACAO")
+DEMO = env_renamed("DJANGO_DEMO", "DJANGO_DEMONSTRACAO")
 # The documentation site (docs/, decision 073): the Help menu links to it, in the user's
 # language. Every installation links to the official site, which documents the newest version.
 DOCS_URL = env("DJANGO_DOCS_URL", "https://kaladrius-docs.facchini.eti.br")
 SECRET_KEY = env("DJANGO_SECRET_KEY")
-ALLOWED_HOSTS = env_lista("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
-CSRF_TRUSTED_ORIGINS = env_lista("DJANGO_CSRF_TRUSTED_ORIGINS")
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -114,7 +114,7 @@ MIDDLEWARE = [
 ]
 
 # Behind Caddy in production: take the client IP from X-Forwarded-For (must run first).
-if env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
+if env_renamed("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
     MIDDLEWARE.insert(0, "apps.core.middleware.ReverseProxyMiddleware")
 
 ROOT_URLCONF = "config.urls"
@@ -234,26 +234,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MESSAGE_TAGS = {messages.ERROR: "danger"}
 
 # Version history file (What's new page, API and footer)
-RELEASES_ARQUIVO = BASE_DIR / "releases.yaml"
+RELEASES_FILE = BASE_DIR / "releases.yaml"
 
 # Session: ends after 30 minutes without use (renewed on every request; the page also
 # leaves by itself, decision 111) and when the browser closes.
-INATIVIDADE_MINUTOS = 30
-SESSION_COOKIE_AGE = INATIVIDADE_MINUTOS * 60
+IDLE_MINUTES = 30
+SESSION_COOKIE_AGE = IDLE_MINUTES * 60
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True
 
 # Password recovery by e-mail (decision 111): only when the installation has an SMTP server.
-_SERVIDOR_EMAIL = env("DJANGO_EMAIL_HOST", "")
-RECUPERAR_SENHA_POR_EMAIL = bool(_SERVIDOR_EMAIL)
-if _SERVIDOR_EMAIL:
+_EMAIL_HOST = env("DJANGO_EMAIL_HOST", "")
+PASSWORD_RECOVERY_BY_EMAIL = bool(_EMAIL_HOST)
+if _EMAIL_HOST:
     _EMAIL_SSL = env_bool("DJANGO_EMAIL_SSL", False)  # port 465; otherwise STARTTLS
     MAILERS = {
         "default": {
             "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
             "OPTIONS": {
-                "host": _SERVIDOR_EMAIL,
+                "host": _EMAIL_HOST,
                 "port": int(env("DJANGO_EMAIL_PORT", "587")),
                 "username": env("DJANGO_EMAIL_USER", ""),
                 "password": env("DJANGO_EMAIL_PASSWORD", ""),

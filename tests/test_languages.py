@@ -48,7 +48,7 @@ def test_language_selector_with_flags_in_the_bar(cliente):
     for code in ("pt-br", "en", "es"):
         assert f"img/flags/{code}." in page  # CI serves hashed names (x.1a2b.svg)
     # Its own menu, before the user's menu (between the clinic and the user name).
-    assert page.index("seletor-idioma") < page.index(reverse("change_password"))
+    assert page.index("language-selector") < page.index(reverse("change_password"))
 
 
 def test_user_choice_beats_the_browser(cliente, django_user_model):

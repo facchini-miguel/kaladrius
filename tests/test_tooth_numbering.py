@@ -102,5 +102,5 @@ def test_estimate_shows_the_clinic_numbering(cenario):  # noqa: F811
         assert item.teeth_display == "1, 19"
     page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
-    assert 'data-dente="36"' in page and ">19</button>" in page
+    assert 'data-tooth="36"' in page and ">19</button>" in page
     assert "Numeração universal (Estados Unidos)." in page

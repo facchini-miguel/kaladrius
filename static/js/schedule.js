@@ -2,14 +2,14 @@
 (function () {
   "use strict";
 
-  const elementoConfig = document.getElementById("configuracao-agenda");
-  const elementoCalendario = document.getElementById("calendario");
+  const elementoConfig = document.getElementById("schedule-settings");
+  const elementoCalendario = document.getElementById("calendar");
   if (!elementoConfig || !elementoCalendario) return;
 
   const config = JSON.parse(elementoConfig.textContent);
-  const modalEl = document.getElementById("modal-agenda");
+  const modalEl = document.getElementById("schedule-modal");
   const modal = new bootstrap.Modal(modalEl);
-  const aviso = document.getElementById("aviso-agenda");
+  const aviso = document.getElementById("schedule-notice");
   const pad = (n) => String(n).padStart(2, "0");
   // The calendar runs in UTC mode with the clinic's wall clock (decision 117): its dates carry
   // the clinic's times in their UTC fields, whatever the browser's time zone.
@@ -29,7 +29,7 @@
   }
 
   function abrirModal(url) {
-    htmx.ajax("GET", url, { target: "#modal-conteudo", swap: "innerHTML" }).then(() => modal.show());
+    htmx.ajax("GET", url, { target: "#schedule-modal-content", swap: "innerHTML" }).then(() => modal.show());
   }
 
   function mostrarAviso(texto) {
@@ -112,7 +112,7 @@
   });
   calendario.render();
 
-  const irParaData = document.getElementById("ir-para-data");
+  const irParaData = document.getElementById("go-to-date");
   if (irParaData) irParaData.addEventListener("change", () => irParaData.value && calendario.gotoDate(irParaData.value));
 
   // The server answers a successful save/delete with an "agendaAtualizada" HTMX event.

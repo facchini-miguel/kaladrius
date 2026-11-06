@@ -2,18 +2,18 @@
 (function () {
   "use strict";
   document.addEventListener("click", (evento) => {
-    const opcao = evento.target.closest("[data-paciente-id]");
+    const opcao = evento.target.closest("[data-patient-id]");
     if (!opcao) return;
-    const caixa = opcao.closest(".busca-paciente");
+    const caixa = opcao.closest(".patient-search");
     if (!caixa) return;
     evento.preventDefault();
-    caixa.querySelector("input[type=hidden]").value = opcao.dataset.pacienteId;
-    caixa.querySelector(".busca-paciente-texto").value = opcao.dataset.pacienteNome;
-    caixa.querySelector(".busca-paciente-sugestoes").innerHTML = "";
+    caixa.querySelector("input[type=hidden]").value = opcao.dataset.patientId;
+    caixa.querySelector(".patient-search-text").value = opcao.dataset.patientName;
+    caixa.querySelector(".patient-search-suggestions").innerHTML = "";
   });
   document.addEventListener("input", (evento) => {
     const texto = evento.target;
-    if (!texto.classList.contains("busca-paciente-texto") || texto.value) return;
-    texto.closest(".busca-paciente").querySelector("input[type=hidden]").value = "";
+    if (!texto.classList.contains("patient-search-text") || texto.value) return;
+    texto.closest(".patient-search").querySelector("input[type=hidden]").value = "";
   });
 })();

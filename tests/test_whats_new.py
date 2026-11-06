@@ -42,7 +42,7 @@ EXEMPLO = """
 
 def test_project_file_is_valid():
     """Ensures the repository's releases.yaml is always valid (runs in CI)."""
-    versions = releases.read_releases(settings.RELEASES_ARQUIVO)
+    versions = releases.read_releases(settings.RELEASES_FILE)
     assert versions
 
 
@@ -67,7 +67,7 @@ def test_pyproject_version_equals_releases():
 
 
 def test_reading_and_filtering_by_audience(arquivo, settings):
-    settings.RELEASES_ARQUIVO = arquivo(EXEMPLO)
+    settings.RELEASES_FILE = arquivo(EXEMPLO)
     releases.all_releases.cache_clear()
     try:
         assert releases.current_version() == "1.5.0"
@@ -175,7 +175,7 @@ def test_dependabot_items_show_marked(arquivo, settings, client, django_user_mod
 
     from django.core.management import call_command
 
-    settings.RELEASES_ARQUIVO = arquivo(DEPENDABOT)
+    settings.RELEASES_FILE = arquivo(DEPENDABOT)
     releases.all_releases.cache_clear()
     try:
         user = django_user_model.objects.create_user(username="bia", password="x-1234567890")

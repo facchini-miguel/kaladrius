@@ -2,13 +2,13 @@
 // attributes, because the Content-Security-Policy forbids inline scripts.
 (function () {
   "use strict";
-  // <select data-enviar-ao-mudar>: submit its form as soon as the choice changes.
+  // <select data-submit-on-change>: submit its form as soon as the choice changes.
   document.addEventListener("change", (evento) => {
-    if (evento.target.matches("[data-enviar-ao-mudar]")) evento.target.form.submit();
+    if (evento.target.matches("[data-submit-on-change]")) evento.target.form.submit();
   });
-  // <button data-imprimir>: open the print dialog.
+  // <button data-print>: open the print dialog.
   document.addEventListener("click", (evento) => {
-    if (evento.target.closest("[data-imprimir]")) window.print();
+    if (evento.target.closest("[data-print]")) window.print();
   });
 
   // A document that depends on the person type (decision 121): the field takes the name and
@@ -17,19 +17,19 @@
   function documentos(form) {
     const tipo = form.querySelector("input[name=kind]:checked")?.value || "PF";
     const sufixo = tipo === "PJ" ? "Pj" : "Pf";
-    form.querySelectorAll("input[data-rotulo-pf]").forEach((campo) => {
-      const rotulo = campo.dataset["rotulo" + sufixo];
+    form.querySelectorAll("input[data-label-pf]").forEach((campo) => {
+      const rotulo = campo.dataset["label" + sufixo];
       const caixa = campo.closest(".mb-3") || campo;
       const pai = caixa.parentElement;
       const alvo = pai && pai.children.length === 1 && /\bcol/.test(pai.className) ? pai : caixa;
       alvo.hidden = !rotulo;
       const nome = form.querySelector(`label[for="${campo.id}"]`);
       if (rotulo && nome) nome.textContent = rotulo;
-      campo.placeholder = campo.dataset["exemplo" + sufixo] || "";
+      campo.placeholder = campo.dataset["example" + sufixo] || "";
     });
   }
   document.querySelectorAll("form").forEach((form) => {
-    if (form.querySelector("input[data-rotulo-pf]")) documentos(form);
+    if (form.querySelector("input[data-label-pf]")) documentos(form);
   });
   document.addEventListener("change", (evento) => {
     if (evento.target.matches("input[name=kind]") && evento.target.form) documentos(evento.target.form);
@@ -40,8 +40,8 @@
   const OLHO_RISCADO = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M2.1 1.4 1.4 2.1l2.2 2.2C2.2 5.2 1.1 6.5.5 8c1.2 2.7 4 5 7.5 5 1.4 0 2.7-.4 3.8-1l2.1 2.1.7-.7L2.1 1.4ZM8 11.3A3.3 3.3 0 0 1 4.9 6.8l1.2 1.1a1.8 1.8 0 0 0 2 2l1.2 1.1c-.4.2-.9.3-1.3.3ZM8 3c-1 0-2 .2-2.8.6l1.3 1.3c.5-.2 1-.2 1.5-.2a3.3 3.3 0 0 1 3.3 3.3c0 .5-.1 1-.2 1.5l2 2c1.1-.9 1.9-2.1 2.4-3.5C14.3 5.3 11.5 3 8 3Z"/></svg>';
   const textos = document.body.dataset;
   function olhos(raiz) {
-    raiz.querySelectorAll("input[type=password]:not([data-com-olho])").forEach((campo) => {
-      campo.dataset.comOlho = "";
+    raiz.querySelectorAll("input[type=password]:not([data-password-toggle])").forEach((campo) => {
+      campo.dataset.passwordToggle = "";
       const grupo = document.createElement("div");
       grupo.className = "input-group";
       campo.parentNode.insertBefore(grupo, campo);
@@ -52,7 +52,7 @@
       const mostrar = (visivel) => {
         campo.type = visivel ? "text" : "password";
         botao.innerHTML = visivel ? OLHO_RISCADO : OLHO;
-        botao.title = visivel ? textos.ocultarSenha : textos.mostrarSenha;
+        botao.title = visivel ? textos.hidePassword : textos.showPassword;
         botao.setAttribute("aria-label", botao.title);
         botao.setAttribute("aria-pressed", String(visivel));
       };
@@ -70,7 +70,7 @@
   // Leave after some idle minutes, so patient data does not stay on an unattended screen
   // (decision 111). Using the page (mouse, keys, touch) tells the server now and then, so a
   // long text being typed does not lose the session; open tabs share the last activity.
-  const minutos = Number(textos.inatividade || 0);
+  const minutos = Number(textos.idleMinutes || 0);
   if (minutos) {
     const CHAVE = "kaladrius-atividade";
     const limite = minutos * 60000;
@@ -87,8 +87,8 @@
       if (avisado) { avisado.remove(); avisado = null; }
       if (agora - ultimoAviso > 5 * 60000) {
         ultimoAviso = agora;
-        fetch(textos.urlAtivo, { credentials: "same-origin" }).then((r) => {
-          if (r.redirected) window.location.href = textos.urlSaiu;
+        fetch(textos.urlActive, { credentials: "same-origin" }).then((r) => {
+          if (r.redirected) window.location.href = textos.urlLoggedOut;
         });
       }
     };
@@ -99,23 +99,23 @@
       if (saindo) return;
       if (parado >= limite) {
         saindo = true; // once: a slow answer must not be cut by a second submit
-        const sair = document.getElementById("form-sair");
+        const sair = document.getElementById("logout-form");
         if (sair) {
           const proximo = document.createElement("input");
           proximo.type = "hidden";
           proximo.name = "next";
-          proximo.value = textos.urlSaiu;
+          proximo.value = textos.urlLoggedOut;
           sair.appendChild(proximo);
           sair.submit();
         } else {
-          window.location.href = textos.urlSaiu;
+          window.location.href = textos.urlLoggedOut;
         }
       } else if (parado >= limite - 2 * 60000 && !avisado) {
         avisado = document.createElement("div");
         avisado.className = "alert alert-warning shadow position-fixed bottom-0 start-50 translate-middle-x mb-3";
         avisado.setAttribute("role", "alert");
         avisado.style.zIndex = 2000;
-        avisado.textContent = textos.avisoInatividade;
+        avisado.textContent = textos.idleWarning;
         document.body.appendChild(avisado);
       }
     }, 15000);

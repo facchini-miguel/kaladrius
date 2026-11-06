@@ -168,13 +168,13 @@ def test_old_commands_still_work(tmp_path, old, new):
 
 def test_settings_read_the_old_variable_name(monkeypatch):
     # The app's variables of decision 149: the new name wins, the old one is read without it.
-    from config.settings import env_renomeada
+    from config.settings import env_renamed
 
     for name in ("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO"):
         monkeypatch.delenv(name, raising=False)
-    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
-    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", default=True) is True
+    assert env_renamed("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
+    assert env_renamed("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO", default=True) is True
     monkeypatch.setenv("DJANGO_PROXY_REVERSO", "1")
-    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is True
+    assert env_renamed("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is True
     monkeypatch.setenv("DJANGO_REVERSE_PROXY", "0")
-    assert env_renomeada("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False
+    assert env_renamed("DJANGO_REVERSE_PROXY", "DJANGO_PROXY_REVERSO") is False

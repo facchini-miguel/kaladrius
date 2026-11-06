@@ -111,7 +111,7 @@ def test_levels_and_stopped_collection(pasta):
 
 def test_chart_breaks_the_line_at_the_gap(pasta):
     pasta(amostra(120), amostra(115), amostra(10), amostra(5))
-    svg = health.chart(health.samples(), [("cpu", "linha-1")], maximo=100)
+    svg = health.chart(health.samples(), [("cpu", "line-1")], maximo=100)
     assert svg.count("<polyline") == 2
 
 
@@ -176,14 +176,14 @@ def test_scale_follows_data_and_lone_point_becomes_dot(pasta):
     pasta(amostra(10, rede=0, cpu=0.5), amostra(5, rede=1000, cpu=0.5))
     results = health.with_network(health.samples())
     # 0.5% of CPU on a 0-100 scale would be a flat line: the top follows the data.
-    assert health.scale_top(results, [("cpu", "linha-1")], piso=10) == 10
-    assert health.scale_top(results, [("cpu", "linha-1")], maximo=100) == 100
+    assert health.scale_top(results, [("cpu", "line-1")], piso=10) == 10
+    assert health.scale_top(results, [("cpu", "line-1")], maximo=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
-    svg = health.chart(results, [("rede_entrada", "linha-1")])
+    svg = health.chart(results, [("rede_entrada", "line-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = health.chart(results, [("cpu", "linha-1"), ("cpu_roubada", "linha-2")], piso=10)
-    assert svg.rindex("linha-1") > svg.rindex("linha-2")
+    svg = health.chart(results, [("cpu", "line-1"), ("cpu_roubada", "line-2")], piso=10)
+    assert svg.rindex("line-1") > svg.rindex("line-2")
 
 
 def test_time_axis_is_the_whole_period(pasta):
@@ -191,7 +191,7 @@ def test_time_axis_is_the_whole_period(pasta):
     now = timezone.now()
     svg = health.chart(
         health.samples(),
-        [("cpu", "linha-1")],
+        [("cpu", "line-1")],
         start=now - datetime.timedelta(hours=1),
         end=now,
         maximo=100,
