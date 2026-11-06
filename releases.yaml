@@ -4,6 +4,41 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.60.1
+  date: 2026-11-06
+  title:
+    pt-br: Aviso de saúde do servidor corrigido
+    en: Server health warning fixed
+    es: Aviso de salud del servidor corregido
+  items:
+    - kind: correcao
+      module: Sistema
+      audience: [equipe]
+      text:
+        pt-br: >
+          O aviso de recursos no limite, no topo das páginas, voltou a dizer se o problema é
+          memória, swap, disco ou processador. Desde a versão 0.60.0 ele dizia sempre processador.
+        en: >
+          The resources-at-the-limit warning, at the top of the pages, again says whether the
+          problem is memory, swap, disk or processor. Since version 0.60.0 it always said processor.
+        es: >
+          El aviso de recursos al límite, en la parte superior de las páginas, vuelve a decir si el
+          problema es memoria, swap, disco o procesador. Desde la versión 0.60.0 siempre decía
+          procesador.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          Os 429 nomes internos que ainda estavam em português foram trocados para inglês (decisão
+          191). As opções dos comandos de manutenção não mudam.
+        en: >
+          The 429 internal names still in Portuguese are now in English (decision 191). The
+          maintenance commands' options do not change.
+        es: >
+          Los 429 nombres internos que seguían en portugués pasaron al inglés (decisión 191). Las
+          opciones de los comandos de mantenimiento no cambian.
+
 - version: 0.60.0
   date: 2026-11-06
   title:
