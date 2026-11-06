@@ -4,6 +4,56 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.60.0
+  date: 2026-11-06
+  title:
+    pt-br: Nomes internos em inglês
+    en: Internal names in English
+    es: Nombres internos en inglés
+  items:
+    - kind: melhoria
+      module: Geral
+      audience: [equipe]
+      text:
+        pt-br: >
+          Manutenção interna: nomes usados no código foram reorganizados. Nada muda no uso, nas
+          telas nem nos dados.
+        en: >
+          Internal maintenance: names used in the code were reorganized. Nothing changes in use,
+          on the screens or in the data.
+        es: >
+          Mantenimiento interno: se reorganizaron nombres usados en el código. Nada cambia en el
+          uso, en las pantallas ni en los datos.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          A API das novidades (/api/v1/releases) usa nomes em inglês nos campos e nos parâmetros
+          audience e since (decisão 189). Os parâmetros antigos publico e desde continuam valendo.
+        en: >
+          The release notes API (/api/v1/releases) uses English names in its fields and in the
+          audience and since parameters (decision 189). The old publico and desde parameters still
+          work.
+        es: >
+          La API de las novedades (/api/v1/releases) usa nombres en inglés en los campos y en los
+          parámetros audience y since (decisión 189). Los parámetros antiguos publico y desde siguen
+          valiendo.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          As variáveis do JavaScript, dos formulários, das telas e dos testes e as relações entre
+          os modelos estão em inglês (decisões 183 a 190). Os endereços antigos continuam valendo.
+        en: >
+          The names of JavaScript, form, screen and test variables and of the relations between
+          models are in English (decisions 183 to 190). The old addresses still work.
+        es: >
+          Los nombres de las variables de JavaScript, de los formularios, de las pantallas y de las
+          pruebas y las relaciones entre los modelos están en inglés (decisiones 183 a 190). Las
+          direcciones antiguas siguen valiendo.
+
 - version: 0.59.1
   date: 2026-11-05
   title:
