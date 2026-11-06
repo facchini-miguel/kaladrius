@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Extrato bancário" %} · {{ statement_import.account }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Extrato bancário" %} · {{ statement_import.account }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
@@ -13,20 +13,20 @@
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pendentes" %}</div><div class="fs-5">{{ pendentes }} / {{ transacoes|length }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pendentes" %}</div><div class="fs-5">{{ pending }} / {{ transactions|length }}</div></div></div></div>
   {% if statement_import.balance is not None %}
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with data=statement_import.balance_date|date:"SHORT_DATE_FORMAT" %}Saldo no banco em {{ data }}{% endblocktranslate %}</div><div class="fs-5">{{ statement_import.balance|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no sistema na mesma data" %}</div><div class="fs-5">{{ saldo_sistema|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if diferenca %} text-danger{% else %} text-success{% endif %}">{{ diferenca|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no sistema na mesma data" %}</div><div class="fs-5">{{ system_balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Diferença" %}</div><div class="fs-5{% if difference %} text-danger{% else %} text-success{% endif %}">{{ difference|currency }}</div></div></div></div>
   {% endif %}
 </div>
 {% if statement_import.unreadable_transactions %}
 <div class="alert alert-warning">{% blocktranslate count n=statement_import.unreadable_transactions %}{{ n }} linha do arquivo não tinha data ou valor legível e não foi importada. Confira no extrato do banco.{% plural %}{{ n }} linhas do arquivo não tinham data ou valor legível e não foram importadas. Confira no extrato do banco.{% endblocktranslate %}</div>
 {% endif %}
-{% if pendentes and unicos and pode.financeiro.alterar %}
+{% if pending and unique and can.financeiro.alterar %}
 <form method="post" action="{% url 'finance:statement_reconcile' statement_import.pk %}" class="mb-3">
   {% csrf_token %}
-  <button type="submit" class="btn btn-success">{% blocktranslate count n=unicos %}Conciliar {{ n }} transação com correspondência única{% plural %}Conciliar {{ n }} transações com correspondência única{% endblocktranslate %}</button>
+  <button type="submit" class="btn btn-success">{% blocktranslate count n=unique %}Conciliar {{ n }} transação com correspondência única{% plural %}Conciliar {{ n }} transações com correspondência única{% endblocktranslate %}</button>
 </form>
 {% endif %}
 
@@ -34,7 +34,7 @@
   <table class="table align-middle bg-white">
     <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Descrição no banco" %}</th><th class="text-end">{% translate "Valor" %}</th><th>{% translate "No sistema" %}</th></tr></thead>
     <tbody>
-      {% for t in transacoes %}
+      {% for t in transactions %}
       <tr id="t{{ t.pk }}">
         <td class="text-nowrap">{{ t.date|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ t.description }}</td>
@@ -47,7 +47,7 @@
           {% elif t.status == "ignorada" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.reason }}
           {% else %}
-            {% if pode.financeiro.alterar %}
+            {% if can.financeiro.alterar %}
             {% if t.candidates %}
             <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
@@ -60,7 +60,7 @@
             <span class="badge text-bg-warning">{% translate "Nada correspondente no sistema" %}</span>
             {% endif %}
             <div class="d-flex flex-wrap gap-2 align-items-center">
-              {% if pode.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
+              {% if can.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
               <form method="post" action="{% url 'finance:transaction' t.pk 'ignore' %}" class="d-flex gap-1">
                 {% csrf_token %}
                 <input type="text" name="reason" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
@@ -71,7 +71,7 @@
             <span class="badge text-bg-warning">{% translate "Pendente" %}</span>
             {% endif %}
           {% endif %}
-          {% if t.status != "pendente" and pode.financeiro.alterar %}
+          {% if t.status != "pendente" and can.financeiro.alterar %}
           <form method="post" action="{% url 'finance:transaction' t.pk 'undo' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
           {% endif %}
         </td>

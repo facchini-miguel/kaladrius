@@ -70,11 +70,11 @@ def estimate_list(request):
         request,
         "estimates/list.html",
         {
-            "pagina": page,
+            "page": page,
             "status": status,
-            "busca": search,
-            "situacoes": Estimate.Status.choices,
-            "parametros": urlencode({"status": status, "q": search}),
+            "search": search,
+            "statuses": Estimate.Status.choices,
+            "query": urlencode({"status": status, "q": search}),
         },
     )
 
@@ -135,13 +135,13 @@ def estimate_detail(request, pk):
         "estimates/detail.html",
         {
             "estimate": estimate,
-            "aberto": aberto,
+            "is_open": aberto,
             "item_form": EstimateItemForm(dentistry=dentistry),
-            "odontologia_habilitada": dentistry,
-            "desconto_form": DiscountForm(initial={"discount": estimate.discount})
+            "dentistry_enabled": dentistry,
+            "discount_form": DiscountForm(initial={"discount": estimate.discount})
             if pode_desconto and aberto
             else None,
-            "pode_aprovar": aberto
+            "can_approve": aberto
             and can(request, Module.RECEIVING, Action.CREATE)
             and can(request, Module.ESTIMATES, Action.CHANGE),
             **_teeth(request, estimate),
@@ -154,8 +154,8 @@ def _teeth(request, estimate):
     area for an estimate that already has teeth (changing the area hides nothing written)."""
     tem_historico = any(item.teeth or item.faces for item in estimate.itens.all())
     if not (_dentistry(request) or tem_historico):
-        return {"mostrar_dentes": False}
-    return {"mostrar_dentes": True, **odontogram(estimate.teeth)}
+        return {"show_teeth": False}
+    return {"show_teeth": True, **odontogram(estimate.teeth)}
 
 
 @require_POST
@@ -289,7 +289,7 @@ def procedures(request):
     return render(
         request,
         "estimates/procedures.html",
-        {"procedimentos": Procedure.objects.select_related("category")},
+        {"procedures": Procedure.objects.select_related("category")},
     )
 
 

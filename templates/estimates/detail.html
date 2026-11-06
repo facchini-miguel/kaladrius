@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static formats %}
 
-{% block titulo %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
@@ -16,85 +16,85 @@
   </div>
   <div class="d-flex flex-wrap gap-2">
     <a class="btn btn-outline-secondary" href="{% url 'estimates:print' estimate.pk %}">{% translate "Imprimir" %}</a>
-    {% if aberto and pode.orcamentos.alterar %}
+    {% if is_open and can.orcamentos.alterar %}
     <a class="btn btn-outline-primary" href="{% url 'estimates:edit' estimate.pk %}">{% translate "Editar" %}</a>
     <form method="post" action="{% url 'estimates:decline' estimate.pk %}">{% csrf_token %}<button type="submit" class="btn btn-outline-danger">{% translate "Recusar" %}</button></form>
     {% endif %}
-    {% if pode_aprovar %}<a class="btn btn-success" href="{% url 'estimates:approve' estimate.pk %}">{% translate "Aprovar" %}</a>{% endif %}
-    {% if estimate.entry_id and pode.recebimentos.ver %}<a class="btn btn-outline-success" href="{% url 'finance:entry' estimate.entry_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
+    {% if can_approve %}<a class="btn btn-success" href="{% url 'estimates:approve' estimate.pk %}">{% translate "Aprovar" %}</a>{% endif %}
+    {% if estimate.entry_id and can.recebimentos.ver %}<a class="btn btn-outline-success" href="{% url 'finance:entry' estimate.entry_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
   </div>
 </div>
 
 <div class="table-responsive">
   <table class="table align-middle bg-white">
-    <thead><tr><th>{% translate "Procedimento" %}</th>{% if mostrar_dentes %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
+    <thead><tr><th>{% translate "Procedimento" %}</th>{% if show_teeth %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
     <tbody>
       {% for item in estimate.itens.all %}
       <tr>
         <td>{% if item.code %}<span class="text-body-secondary small">{{ item.code }}</span> {% endif %}{{ item.description }}</td>
-        {% if mostrar_dentes %}
+        {% if show_teeth %}
         <td>{{ item.teeth_display|default:"—" }}</td>
         <td>{{ item.faces|default:"—" }}</td>
         {% endif %}
         <td class="text-end">{{ item.quantity }}</td>
         <td class="text-end text-nowrap">{{ item.unit_price|currency }}</td>
         <td class="text-end text-nowrap">{{ item.total|currency }}</td>
-        <td class="text-end">{% if aberto and pode.orcamentos.alterar %}{% if odontologia_habilitada or not item.teeth and not item.faces %}<form method="post" action="{% url 'estimates:item_remove' estimate.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>{% endif %}{% endif %}</td>
+        <td class="text-end">{% if is_open and can.orcamentos.alterar %}{% if dentistry_enabled or not item.teeth and not item.faces %}<form method="post" action="{% url 'estimates:item_remove' estimate.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>{% endif %}{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="{% if mostrar_dentes %}7{% else %}5{% endif %}" class="text-body-secondary">{% translate "Nenhum procedimento ainda." %}</td></tr>
+      <tr><td colspan="{% if show_teeth %}7{% else %}5{% endif %}" class="text-body-secondary">{% translate "Nenhum procedimento ainda." %}</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>
       {% if estimate.discount %}
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ estimate.subtotal|currency }}</td><td></td></tr>
-      <tr><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ estimate.discount|currency }}</td><td></td></tr>
+      <tr><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ estimate.subtotal|currency }}</td><td></td></tr>
+      <tr><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ estimate.discount|currency }}</td><td></td></tr>
       {% endif %}
-      <tr class="fw-semibold"><td colspan="{% if mostrar_dentes %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ estimate.total|currency }}</td><td></td></tr>
+      <tr class="fw-semibold"><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ estimate.total|currency }}</td><td></td></tr>
     </tfoot>
   </table>
 </div>
 {% if estimate.notes %}<p class="text-body-secondary">{{ estimate.notes|linebreaksbr }}</p>{% endif %}
 
-{% if mostrar_dentes and not odontologia_habilitada %}
+{% if show_teeth and not dentistry_enabled %}
 <h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
-{% include "dentistry/_odontogram.html" with interativo=False %}
+{% include "dentistry/_odontogram.html" with interactive=False %}
 {% endif %}
 
-{% if aberto and pode.orcamentos.alterar %}
+{% if is_open and can.orcamentos.alterar %}
 <div class="card mb-3">
   <div class="card-header">{% translate "Incluir procedimento" %}</div>
   <div class="card-body">
     <form method="post" action="{% url 'estimates:item_add' estimate.pk %}" novalidate>
       {% csrf_token %}
-      {% if odontologia_habilitada %}
-      {% include "dentistry/_odontogram.html" with selecionados=None interativo=True %}
+      {% if dentistry_enabled %}
+      {% include "dentistry/_odontogram.html" with selected=None interactive=True %}
       {{ item_form.teeth }}
       {% endif %}
       <div class="row mt-3">
-        <div class="col-md-4">{% with campo=item_form.procedure %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-4">{% with campo=item_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-        {% if odontologia_habilitada %}<div class="col-md-4">{% with campo=item_form.faces %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
-        <div class="col-6 col-md-2">{% with campo=item_form.quantity %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-6 col-md-3">{% with campo=item_form.unit_price %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-4">{% with field=item_form.procedure %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-4">{% with field=item_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
+        {% if dentistry_enabled %}<div class="col-md-4">{% with field=item_form.faces %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+        <div class="col-6 col-md-2">{% with field=item_form.quantity %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-6 col-md-3">{% with field=item_form.unit_price %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <p class="text-body-secondary small">{% if odontologia_habilitada %}{% translate "Clique nos dentes do procedimento (a quantidade acompanha)." %} {% endif %}{% translate "Sem descrição ou valor, valem os da tabela de procedimentos." %}</p>
+      <p class="text-body-secondary small">{% if dentistry_enabled %}{% translate "Clique nos dentes do procedimento (a quantidade acompanha)." %} {% endif %}{% translate "Sem descrição ou valor, valem os da tabela de procedimentos." %}</p>
       <button type="submit" class="btn btn-primary">{% translate "Incluir" %}</button>
     </form>
   </div>
 </div>
-{% elif mostrar_dentes and odontologia_habilitada %}
+{% elif show_teeth and dentistry_enabled %}
 <h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
-{% include "dentistry/_odontogram.html" with interativo=False %}
+{% include "dentistry/_odontogram.html" with interactive=False %}
 {% endif %}
 
-{% if desconto_form %}
+{% if discount_form %}
 <form method="post" action="{% url 'estimates:discount' estimate.pk %}" class="row g-2 align-items-end mb-3" style="max-width: 28rem;" novalidate>
   {% csrf_token %}
-  <div class="col-8">{% with campo=desconto_form.discount %}{% include "includes/field.html" %}{% endwith %}</div>
+  <div class="col-8">{% with field=discount_form.discount %}{% include "includes/field.html" %}{% endwith %}</div>
   <div class="col-4 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Aplicar" %}</button></div>
 </form>
 {% endif %}
 {% endblock %}
 
-{% block scripts %}{% if odontologia_habilitada %}<script src="{% static 'js/odontogram.js' %}"></script>{% endif %}{% endblock %}
+{% block scripts %}{% if dentistry_enabled %}<script src="{% static 'js/odontogram.js' %}"></script>{% endif %}{% endblock %}

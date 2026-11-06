@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Fechamento do financeiro" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Fechamento do financeiro" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Fechamento do financeiro" %}</h1>
 
-<div class="alert {% if fechado_ate %}alert-secondary{% else %}alert-light border{% endif %}">
-  {% if fechado_ate %}
-  {% blocktranslate with data=fechado_ate|date:"SHORT_DATE_FORMAT" %}Fechado até <strong>{{ data }}</strong>.{% endblocktranslate %}
+<div class="alert {% if closed_until %}alert-secondary{% else %}alert-light border{% endif %}">
+  {% if closed_until %}
+  {% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Fechado até <strong>{{ data }}</strong>.{% endblocktranslate %}
   {% translate "Pagamentos e estornos nessa data ou antes dela não podem mais ser registrados, e os relatórios desse período não mudam." %}
   {% else %}
   {% translate "O financeiro está aberto: qualquer data aceita pagamentos e estornos." %}
@@ -16,7 +16,7 @@
 </div>
 
 <div class="row g-3">
-  {% if fechar_form %}
+  {% if close_form %}
   <div class="col-lg-6">
     <div class="card h-100">
       <div class="card-header">{% translate "Fechar" %}</div>
@@ -25,14 +25,14 @@
         <form method="post" novalidate>
           {% csrf_token %}
           <input type="hidden" name="action" value="fechar">
-          {% with form=fechar_form %}{% include "includes/form.html" %}{% endwith %}
+          {% with form=close_form %}{% include "includes/form.html" %}{% endwith %}
           <button type="submit" class="btn btn-primary">{% translate "Fechar" %}</button>
         </form>
       </div>
     </div>
   </div>
   {% endif %}
-  {% if reabrir_form and fechado_ate %}
+  {% if reopen_form and closed_until %}
   <div class="col-lg-6">
     <div class="card h-100">
       <div class="card-header">{% translate "Reabrir" %}</div>
@@ -41,7 +41,7 @@
         <form method="post" novalidate>
           {% csrf_token %}
           <input type="hidden" name="action" value="reabrir">
-          {% with form=reabrir_form %}{% include "includes/form.html" %}{% endwith %}
+          {% with form=reopen_form %}{% include "includes/form.html" %}{% endwith %}
           <button type="submit" class="btn btn-outline-danger">{% translate "Reabrir" %}</button>
         </form>
       </div>
@@ -55,7 +55,7 @@
   <table class="table table-sm align-middle bg-white">
     <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Quem" %}</th><th>{% translate "Fechado até" %}</th><th>{% translate "Motivo" %}</th></tr></thead>
     <tbody>
-      {% for item in historico %}
+      {% for item in history %}
       <tr>
         <td class="text-nowrap">{{ item.created_at|date:"SHORT_DATETIME_FORMAT" }}</td>
         <td>{% if item.created_by %}{{ item.created_by.get_full_name|default:item.created_by.username }}{% else %}—{% endif %}</td>

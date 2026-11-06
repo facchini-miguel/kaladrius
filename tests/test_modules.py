@@ -197,7 +197,7 @@ def test_detail_does_not_query_modules_per_item(clinica_a, estimate, criar_usuar
     with CaptureQueriesContext(connection) as consultas:
         response = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
     assert response.status_code == 200
-    assert response.context["odontologia_habilitada"]
+    assert response.context["dentistry_enabled"]
     consultas_modulos = [q for q in consultas if 'FROM "core_clinic_module"' in q["sql"]]
     assert len(consultas_modulos) <= 2
 
@@ -238,7 +238,7 @@ def test_http_does_not_remove_history_when_module_off(
     configure(clinica_a, {*GENERAL_MODULES, "medicina"})
     cliente = cliente_de(criar_usuario("recepcao_modulos", clinica_a, Role.FRONT_DESK))
     detalhe = cliente.get(reverse("estimates:detail", args=[estimate.pk]))
-    assert detalhe.status_code == 200 and detalhe.context["mostrar_dentes"]
+    assert detalhe.status_code == 200 and detalhe.context["show_teeth"]
     assert "Arcada superior" in detalhe.content.decode()
     assert (
         cliente.post(reverse("estimates:item_remove", args=[estimate.pk, item.pk])).status_code
@@ -311,7 +311,7 @@ def test_superuser_uses_odontogram_with_dentistry_off(
 
     root = cliente_de(django_user_model.objects.create_superuser("root_odonto"))
     detalhe = root.get(reverse("estimates:detail", args=[estimate.pk]))
-    assert detalhe.context["mostrar_dentes"]
+    assert detalhe.context["show_teeth"]
     assert "O módulo Odontologia está desligado nesta clínica" in detalhe.content.decode()
     root.post(adicionar, item_dental)
     with use_clinic(clinica_a):

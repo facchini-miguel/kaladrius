@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Atendimento" %} · {{ patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Atendimento" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
@@ -24,7 +24,7 @@
 
 <p class="text-body-secondary small">{% translate "Prontuário: visível só para os profissionais da clínica (e o administrador do sistema) e guardado por 20 anos. Depois de finalizado, o atendimento não muda mais; correções são feitas por adendo." %}</p>
 
-{% if editavel %}
+{% if editable %}
 <form method="post" style="max-width: 52rem;" novalidate>
   {% csrf_token %}
   {% if appointment and not visit %}<input type="hidden" name="appointment" value="{{ appointment.pk }}">{% endif %}
@@ -39,8 +39,8 @@
 <div class="card mb-3" style="max-width: 52rem;">
   <div class="card-body">
     <div class="small text-body-secondary mb-2">{{ visit.date|date:"SHORT_DATETIME_FORMAT" }}</div>
-    {% for rotulo, value in campos %}
-    <h2 class="h6 fw-semibold mt-3 mb-1">{{ rotulo|capfirst }}</h2>
+    {% for label, value in fields %}
+    <h2 class="h6 fw-semibold mt-3 mb-1">{{ label|capfirst }}</h2>
     <div class="clinical-text">{{ value|default:"—"|linebreaksbr }}</div>
     {% endfor %}
   </div>
@@ -51,22 +51,22 @@
 <p class="text-body-secondary small">{% translate "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar." %}</p>
 {% endif %}
 
-{% if adendos %}
+{% if addenda %}
 <h2 class="h5 mt-4">{% translate "Adendos" %}</h2>
-{% for adendo in adendos %}
+{% for addendum in addenda %}
 <div class="card mb-2" style="max-width: 52rem;">
   <div class="card-body py-2">
-    <div class="small text-body-secondary">{{ adendo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ adendo.practitioner.name }}</div>
-    <div class="clinical-text">{{ adendo.text|linebreaksbr }}</div>
+    <div class="small text-body-secondary">{{ addendum.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ addendum.practitioner.name }}</div>
+    <div class="clinical-text">{{ addendum.text|linebreaksbr }}</div>
   </div>
 </div>
 {% endfor %}
 {% endif %}
 
-{% if adendo_form %}
+{% if addendum_form %}
 <form method="post" action="{% url 'medical_records:addendum' visit.pk %}" class="mt-3" style="max-width: 52rem;" novalidate>
   {% csrf_token %}
-  {% with campo=adendo_form.text %}{% include "includes/field.html" %}{% endwith %}
+  {% with field=addendum_form.text %}{% include "includes/field.html" %}{% endwith %}
   <button type="submit" class="btn btn-outline-primary">{% translate "Incluir adendo" %}</button>
 </form>
 {% endif %}
@@ -76,7 +76,7 @@
 <div class="card mt-4" style="max-width: 52rem;">
   <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
     {% translate "Documentos" %}
-    {% if emite_documentos %}
+    {% if issues_documents %}
     <span class="d-flex gap-2">
       <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:certificate_new' visit.pk %}">{% translate "Emitir atestado" %}</a>
       <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:prescription_new' visit.pk %}">{% translate "Emitir receita" %}</a>
@@ -85,30 +85,30 @@
     {% endif %}
   </div>
   <ul class="list-group list-group-flush">
-    {% for atestado in atestados %}
-    <li class="list-group-item"><a href="{% url 'medical_records:certificate' atestado.pk %}">{% translate "Atestado" %} · {{ atestado.get_kind_display }}{% if atestado.days %} ({% blocktranslate count dias=atestado.days %}{{ dias }} dia{% plural %}{{ dias }} dias{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ atestado.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    {% for certificate in certificates %}
+    <li class="list-group-item"><a href="{% url 'medical_records:certificate' certificate.pk %}">{% translate "Atestado" %} · {{ certificate.get_kind_display }}{% if certificate.days %} ({% blocktranslate count dias=certificate.days %}{{ dias }} dia{% plural %}{{ dias }} dias{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ certificate.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
-    {% for receita in receitas %}
-    <li class="list-group-item"><a href="{% url 'medical_records:prescription' receita.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ receita.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    {% for prescription in prescriptions %}
+    <li class="list-group-item"><a href="{% url 'medical_records:prescription' prescription.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ prescription.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
-    {% for pedido in pedidos %}
-    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' pedido.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ pedido.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    {% for exam_request in exam_requests %}
+    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' exam_request.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ exam_request.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
-    {% if not atestados and not receitas and not pedidos %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
+    {% if not certificates and not prescriptions and not exam_requests %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
   </ul>
 </div>
 
 <div class="card mt-3" style="max-width: 52rem;">
   <div class="card-header">{% translate "Anexos" %}</div>
   <ul class="list-group list-group-flush">
-    {% for anexo in anexos %}
+    {% for attachment in attachments %}
     <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
       <span>
-        <a href="{% url 'medical_records:attachment' anexo.pk %}" target="_blank" rel="noopener">{{ anexo.description|default:anexo.name }}</a>
-        <span class="text-body-secondary small">{{ anexo.size|filesizeformat }} · {{ anexo.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ anexo.practitioner.name }}</span>
+        <a href="{% url 'medical_records:attachment' attachment.pk %}" target="_blank" rel="noopener">{{ attachment.description|default:attachment.name }}</a>
+        <span class="text-body-secondary small">{{ attachment.size|filesizeformat }} · {{ attachment.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ attachment.practitioner.name }}</span>
       </span>
-      {% if remove_anexos and anexo.created_by_id == user.pk or remove_anexos and administra %}
-      <form method="post" action="{% url 'medical_records:attachment_remove' anexo.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
+      {% if can_remove_attachments and attachment.created_by_id == user.pk or can_remove_attachments and is_admin %}
+      <form method="post" action="{% url 'medical_records:attachment_remove' attachment.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
       {% endif %}
     </li>
     {% empty %}
@@ -121,8 +121,8 @@
     {% else %}
     <form method="post" action="{% url 'medical_records:attachment_upload' visit.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end" novalidate>
       {% csrf_token %}
-      <div class="col-md-5">{% with campo=anexo_form.file %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-5">{% with campo=anexo_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-5">{% with field=attachment_form.file %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-5">{% with field=attachment_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-2 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Anexar" %}</button></div>
     </form>
     {% endif %}

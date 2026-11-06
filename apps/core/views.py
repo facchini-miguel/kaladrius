@@ -27,9 +27,9 @@ def _greeting():
 
 @login_required
 def start(request):
-    context = {"saudacao": _greeting()}
+    context = {"greeting": _greeting()}
     if request.clinic is not None:
-        context["painel"] = dashboard.build(request)
+        context["dashboard"] = dashboard.build(request)
     return render(request, "core/home.html", context)
 
 

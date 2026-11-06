@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ supplier.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ supplier.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -10,8 +10,8 @@
     {% if not supplier.active %}<span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}
   </h1>
   <div class="d-flex gap-2">
-    {% if pode.financeiro.criar and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
-    {% if pode.financeiro.alterar %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if can.financeiro.criar and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if can.financeiro.alterar %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}
   </div>
 </div>
 
@@ -23,7 +23,7 @@
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Tipo" %}</dt><dd class="col-sm-7">{{ supplier.get_kind_display }}</dd>
           {% if supplier.legal_name %}<dt class="col-sm-5">{% translate "Razão social" %}</dt><dd class="col-sm-7">{{ supplier.legal_name }}</dd>{% endif %}
-          {% with sigla=supplier.tax_id|document_abbreviation:supplier.document_role %}{% if sigla %}<dt class="col-sm-5">{{ sigla }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</dd>{% endif %}{% endwith %}
+          {% with abbreviation=supplier.tax_id|document_abbreviation:supplier.document_role %}{% if abbreviation %}<dt class="col-sm-5">{{ abbreviation }}</dt><dd class="col-sm-7">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</dd>{% endif %}{% endwith %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ supplier.phone|phone|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "WhatsApp" %}</dt><dd class="col-sm-7">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</dd>
           <dt class="col-sm-5">{% translate "E-mail" %}</dt><dd class="col-sm-7">{{ supplier.email|default:"—" }}</dd>
@@ -36,7 +36,7 @@
     <div class="card h-100">
       <div class="card-header">{% translate "A pagar" %}</div>
       <div class="card-body">
-        <p class="h4 mb-0">{{ em_aberto|currency }}</p>
+        <p class="h4 mb-0">{{ outstanding|currency }}</p>
         <p class="text-body-secondary small mb-0">{% translate "em aberto, somando as parcelas ainda não pagas" %}</p>
       </div>
     </div>
@@ -57,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for installment in parcelas %}
+        {% for installment in installments %}
         <tr>
           <td class="text-nowrap">{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
           <td><a href="{% url 'finance:entry' installment.entry_id %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">({{ installment.number }})</span></td>

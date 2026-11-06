@@ -268,17 +268,17 @@ def test_receivables_list_and_filters(cenario):
     lancamento_com(cenario, amount="90.00", parcelas=3, due_date=HOJE - datetime.timedelta(days=40))
     cliente = entrar(cenario, "recepcao")
     results = reverse("finance:receivables")
-    assert len(cliente.get(results).context["pagina"]) == 3
-    assert len(cliente.get(results, {"status": "vencidas"}).context["pagina"]) == 2
-    assert len(cliente.get(results, {"q": "devedora"}).context["pagina"]) == 3
-    assert len(cliente.get(results, {"q": "ninguem"}).context["pagina"]) == 0
+    assert len(cliente.get(results).context["page"]) == 3
+    assert len(cliente.get(results, {"status": "vencidas"}).context["page"]) == 2
+    assert len(cliente.get(results, {"q": "devedora"}).context["page"]) == 3
+    assert len(cliente.get(results, {"q": "ninguem"}).context["page"]) == 0
 
 
 def test_record_shows_patient_finance(cenario):
     lancamento_com(cenario, amount="80.00", parcelas=2, due_date=HOJE - datetime.timedelta(days=5))
     url = reverse("patients:record", args=[cenario["patient"].pk])
     response = entrar(cenario, "recepcao").get(url)
-    financeiro = response.context["financeiro"]
+    financeiro = response.context["finance"]
     assert (financeiro["vencido"], financeiro["a_vencer"]) == (Decimal("40.00"), Decimal("40.00"))
     # Practitioners do not see the finances.
     assert "financeiro" not in entrar(cenario, "practitioner").get(url).context
@@ -323,7 +323,7 @@ def test_entry_of_another_clinic_gives_404(cenario, clinica_b, criar_usuario, cl
     entry = lancamento_com(cenario)
     other = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
     assert other.get(reverse("finance:entry", args=[entry.pk])).status_code == 404
-    assert other.get(reverse("finance:receivables")).context["pagina"].paginator.count == 0
+    assert other.get(reverse("finance:receivables")).context["page"].paginator.count == 0
 
 
 def test_permanent_deletion_keeps_entry_without_patient(cenario):

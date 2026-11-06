@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{{ modelo.verbose_name|capfirst }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ model.verbose_name|capfirst }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if instancia.pk %}{{ instancia.name }}{% else %}{{ modelo.verbose_name|capfirst }}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{{ model.verbose_name|capfirst }}{% endif %}</h1>
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:catalog' cadastro %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:catalog' catalog %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

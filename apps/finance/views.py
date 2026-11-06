@@ -129,11 +129,11 @@ def _entry_list(request, kind):
         "finance/list.html",
         {
             "kind": kind,
-            "pagar": kind == Entry.Kind.PAYABLE,
-            "pagina": page,
+            "payable": kind == Entry.Kind.PAYABLE,
+            "page": page,
             "status": status,
-            "busca": search,
-            "parametros": urlencode({"status": status, "q": search}),
+            "search": search,
+            "query": urlencode({"status": status, "q": search}),
         },
     )
 
@@ -240,12 +240,12 @@ def entry(request, pk):
         "finance/entry.html",
         {
             "entry": entry,
-            "pagar": entry.kind == Entry.Kind.PAYABLE,
-            "pode_alterar": can(request, _module(entry.kind), Action.CREATE),
-            "pode_excluir": can(request, _module(entry.kind), Action.DELETE),
-            "parcelas": parcelas,
-            "total_pago": sum(p.pago for p in parcelas),
-            "total_saldo": sum(p.balance for p in parcelas) if not entry.cancelled else 0,
+            "payable": entry.kind == Entry.Kind.PAYABLE,
+            "can_change": can(request, _module(entry.kind), Action.CREATE),
+            "can_delete": can(request, _module(entry.kind), Action.DELETE),
+            "installments": parcelas,
+            "total_paid": sum(p.pago for p in parcelas),
+            "total_balance": sum(p.balance for p in parcelas) if not entry.cancelled else 0,
             "commission": Commission.objects.filter(entry=entry).first(),
         },
     )
@@ -269,9 +269,9 @@ def cancel_entry(request, pk):
         "finance/reason.html",
         {
             "form": form,
-            "titulo": _("Cancelar lançamento"),
-            "objeto": entry,
-            "voltar": entry.pk,
+            "title": _("Cancelar lançamento"),
+            "subject": entry,
+            "back_entry": entry.pk,
         },
     )
 
@@ -323,9 +323,9 @@ def receive(request, pk):
         {
             "form": form,
             "installment": installment,
-            "total_parcelas": installment.entry.parcelas.count(),
-            "pode_desconto": pode_desconto,
-            "pagar": pay,
+            "total_installments": installment.entry.parcelas.count(),
+            "can_discount": pode_desconto,
+            "payable": pay,
         },
     )
 
@@ -348,9 +348,9 @@ def receipt(request, pk):
         {
             "payment": payment,
             "entry": payment.installment.entry,
-            "total_parcelas": payment.installment.entry.parcelas.count(),
+            "total_installments": payment.installment.entry.parcelas.count(),
             # Where a tax document is required, the receipt says it does not replace it.
-            "documento_fiscal": legislation.for_country().fiscal,
+            "tax_document": legislation.for_country().fiscal,
         },
     )
 
@@ -375,16 +375,16 @@ def reverse_payment(request, pk):
         "finance/reason.html",
         {
             "form": form,
-            "titulo": _("Estornar pagamento"),
+            "title": _("Estornar pagamento"),
             # Not str(pagamento): that has the raw amount ("1350.00"), for the audit log.
-            "objeto": " · ".join(
+            "subject": " · ".join(
                 [
                     str(payment.installment),
                     currency(payment.amount),
                     date_format(payment.date, "SHORT_DATE_FORMAT"),
                 ]
             ),
-            "voltar": payment.installment.entry_id,
+            "back_entry": payment.installment.entry_id,
         },
     )
 
@@ -404,11 +404,11 @@ def debtors(request):
         request,
         "finance/debtors.html",
         {
-            "pagina": page,
-            "busca": search,
-            "parametros": urlencode({"q": search}),
-            "total_vencido": sum(row["vencido"] for row in rows),
-            "total_a_vencer": sum(row["a_vencer"] for row in rows),
+            "page": page,
+            "search": search,
+            "query": urlencode({"q": search}),
+            "total_overdue": sum(row["vencido"] for row in rows),
+            "total_upcoming": sum(row["a_vencer"] for row in rows),
         },
     )
 
@@ -449,11 +449,11 @@ def cash_register(request):
         request,
         "finance/cash.html",
         {
-            "contas": contas,
+            "accounts": contas,
             "account": account,
             "form": form,
-            "saldo_sistema": balance,
-            "historico": historico,
+            "system_balance": balance,
+            "history": historico,
         },
     )
 
@@ -466,7 +466,7 @@ def cash_register_detail(request, pk):
     return render(
         request,
         "finance/cash_detail.html",
-        {"cash_register": session, "resumo": services.register_summary(session)},
+        {"cash_register": session, "summary": services.register_summary(session)},
     )
 
 
@@ -497,7 +497,7 @@ def cash_movement_view(request, pk, kind):
     return render(
         request,
         "finance/cash_form.html",
-        {"cash_register": session, "form": form, "titulo": CashMovement.Kind(kind).label},
+        {"cash_register": session, "form": form, "title": CashMovement.Kind(kind).label},
     )
 
 
@@ -517,8 +517,8 @@ def close_cash_register(request, pk):
         {
             "cash_register": session,
             "form": form,
-            "titulo": _("Fechar caixa"),
-            "esperado": services.register_summary(session)["esperado"],
+            "title": _("Fechar caixa"),
+            "expected": services.register_summary(session)["esperado"],
         },
     )
 
@@ -555,8 +555,8 @@ def cash_flow(request):
             "since": since,
             "until": until,
             "by_month": por_mes,
-            "fluxo": services.cash_flow(since, until, por_mes=por_mes),
-            "contas": services.account_balances(),
+            "flow": services.cash_flow(since, until, por_mes=por_mes),
+            "accounts": services.account_balances(),
         },
     )
 
@@ -570,8 +570,8 @@ def reports(request):
         {
             "since": since,
             "until": until,
-            "relatorio": services.report(since, until),
-            "fechado_ate": services.closed_until(request.clinic.pk),
+            "report": services.report(since, until),
+            "closed_until": services.closed_until(request.clinic.pk),
         },
     )
 
@@ -612,7 +612,7 @@ def planning(request):
             messages.success(request, _("Planejamento salvo."))
             return redirect(f"{reverse('finance:planning')}?year={year}")
     data = services.planning(year)
-    for secao in data["secoes"]:
+    for secao in data["sections"]:
         for row in secao["linhas"]:
             if pode_alterar and row["group"].active:
                 row["campo"] = form[PlanningForm.name(row["group"])]
@@ -622,10 +622,10 @@ def planning(request):
         {
             **data,
             "form": form,
-            "pode_alterar": pode_alterar,
-            "ano_anterior": year - 1,
-            "proximo_ano": year + 1,
-            "tem_metas_anteriores": Planning.objects.filter(year=year - 1).exists(),
+            "can_change": pode_alterar,
+            "previous_year": year - 1,
+            "next_year": year + 1,
+            "has_previous_targets": Planning.objects.filter(year=year - 1).exists(),
         },
     )
 
@@ -665,10 +665,10 @@ def book_closing(request):
         request,
         "finance/closing.html",
         {
-            "fechado_ate": services.closed_until(request.clinic.pk),
-            "historico": BookClosing.objects.select_related("created_by")[:30],
-            "fechar_form": CloseBooksForm() if pode_fechar else None,
-            "reabrir_form": ReopenBooksForm() if pode_reabrir else None,
+            "closed_until": services.closed_until(request.clinic.pk),
+            "history": BookClosing.objects.select_related("created_by")[:30],
+            "close_form": CloseBooksForm() if pode_fechar else None,
+            "reopen_form": ReopenBooksForm() if pode_reabrir else None,
         },
     )
 
@@ -689,7 +689,7 @@ def catalog_list(request, cadastro):
     return render(
         request,
         "finance/catalog_list.html",
-        {"cadastro": cadastro, "itens": modelo.objects.all(), "modelo": modelo._meta},
+        {"catalog": cadastro, "items": modelo.objects.all(), "model": modelo._meta},
     )
 
 
@@ -705,7 +705,7 @@ def catalog_form(request, cadastro, pk=None):
     return render(
         request,
         "finance/catalog_form.html",
-        {"form": form, "cadastro": cadastro, "instancia": instancia, "modelo": modelo._meta},
+        {"form": form, "catalog": cadastro, "instance": instancia, "model": modelo._meta},
     )
 
 
@@ -734,7 +734,7 @@ def chart_of_accounts(request):
         descer(None, 0)
         sem_grupo = [c for c in categorias if c.kind == kind and c.group_id is None]
         arvores.append({"rotulo": label, "linhas": rows, "sem_grupo": sem_grupo})
-    return render(request, "finance/chart_of_accounts.html", {"arvores": arvores})
+    return render(request, "finance/chart_of_accounts.html", {"trees": arvores})
 
 
 @requires_permission(Module.FINANCE, Action.CREATE)
@@ -753,7 +753,7 @@ def _group_form(request, instancia):
         group = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": group.name})
         return redirect("finance:chart_of_accounts")
-    return render(request, "finance/group_form.html", {"form": form, "instancia": instancia})
+    return render(request, "finance/group_form.html", {"form": form, "instance": instancia})
 
 
 # --- Suppliers (decision 093) ---------------------------------------------------------
@@ -773,7 +773,7 @@ def suppliers(request):
     return render(
         request,
         "finance/suppliers.html",
-        {"pagina": page, "busca": search, "parametros": urlencode({"q": search})},
+        {"page": page, "search": search, "query": urlencode({"q": search})},
     )
 
 
@@ -796,7 +796,7 @@ def supplier(request, pk):
     return render(
         request,
         "finance/supplier.html",
-        {"supplier": supplier, "parcelas": parcelas, "em_aberto": em_aberto},
+        {"supplier": supplier, "installments": parcelas, "outstanding": em_aberto},
     )
 
 
@@ -816,7 +816,7 @@ def _supplier_form(request, instancia):
         supplier = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": supplier.name})
         return redirect("finance:supplier", pk=supplier.pk)
-    return render(request, "finance/supplier_form.html", {"form": form, "instancia": instancia})
+    return render(request, "finance/supplier_form.html", {"form": form, "instance": instancia})
 
 
 # --- Practitioner commission (0.19.0) --------------------------------------------------
@@ -838,9 +838,9 @@ def commission_list(request):
         "finance/commissions.html",
         {
             "until": until,
-            "linhas": commissions.summary(until),
-            "sem_percentual": Practitioner.objects.filter(active=True, commission_percentage=0),
-            "historico": Commission.objects.select_related("practitioner", "entry")[:30],
+            "rows": commissions.summary(until),
+            "without_percentage": Practitioner.objects.filter(active=True, commission_percentage=0),
+            "history": Commission.objects.select_related("practitioner", "entry")[:30],
         },
     )
 
@@ -882,7 +882,7 @@ def pay_commission(request, pk):
     return render(
         request,
         "finance/commission_pay.html",
-        {"form": form, "calculo": commissions.pending(practitioner, until), "until": until},
+        {"form": form, "calculation": commissions.pending(practitioner, until), "until": until},
     )
 
 
@@ -906,7 +906,7 @@ def commission(request, pk):
         "finance/commission.html",
         {
             "commission": commission,
-            "pagamentos": pagamentos,
+            "payments": pagamentos,
             "reversal_deduction": reversal_deduction,
         },
     )
@@ -978,7 +978,7 @@ def statements(request):
     page = Paginator(importacoes, 30).get_page(request.GET.get("page"))
     for statement_import in page:
         statement_import.pendentes = pendentes.get(statement_import.pk, 0)
-    return render(request, "finance/statements.html", {"form": form, "pagina": page})
+    return render(request, "finance/statements.html", {"form": form, "page": page})
 
 
 @requires_permission(Module.FINANCE, Action.VIEW)
@@ -998,11 +998,11 @@ def statement(request, pk):
         "finance/statement.html",
         {
             "statement_import": statement_import,
-            "transacoes": transacoes,
-            "pendentes": sum(t.status == BankTransaction.Status.PENDING for t in transacoes),
-            "unicos": sum(len(t.candidates) == 1 for t in transacoes),
-            "saldo_sistema": saldo_sistema,
-            "diferenca": statement_import.balance - saldo_sistema
+            "transactions": transacoes,
+            "pending": sum(t.status == BankTransaction.Status.PENDING for t in transacoes),
+            "unique": sum(len(t.candidates) == 1 for t in transacoes),
+            "system_balance": saldo_sistema,
+            "difference": statement_import.balance - saldo_sistema
             if saldo_sistema is not None
             else None,
         },
@@ -1059,4 +1059,6 @@ def transaction_entry(request, pk):
         else:
             messages.success(request, _("Lançamento criado e conciliado."))
         return _back_to_statement(transacao)
-    return render(request, "finance/transaction_entry.html", {"form": form, "transacao": transacao})
+    return render(
+        request, "finance/transaction_entry.html", {"form": form, "transaction": transacao}
+    )

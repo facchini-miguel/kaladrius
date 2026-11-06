@@ -128,7 +128,7 @@ def test_total_calculation():
 
 def test_save_and_post_to_finance(clinica_a, ana, admin):
     page = admin.get(FOLHA, {"month": "2026-10"})
-    payroll, form = page.context["linhas"][0]
+    payroll, form = page.context["rows"][0]
     prefixo = form.prefix
     data = {
         f"{prefixo}-overtime_hours": "10",
@@ -141,7 +141,7 @@ def test_save_and_post_to_finance(clinica_a, ana, admin):
     with use_clinic(clinica_a):
         payroll = Payroll.objects.get(employee=ana, period=OUTUBRO)
         assert payroll.total == Decimal("2276.67")  # 2200 + 150 − 73,33
-        category = page.context["lancar_form"].fields["category"].initial
+        category = page.context["post_form"].fields["category"].initial
     assert category.name == "Salários e encargos"
     response = admin.post(
         f"{FOLHA}?month=2026-10",
@@ -158,7 +158,7 @@ def test_save_and_post_to_finance(clinica_a, ana, admin):
         )
         assert entry.parcelas.get().due_date == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
-    row = admin.get(FOLHA, {"month": "2026-10"}).context["linhas"][0]
+    row = admin.get(FOLHA, {"month": "2026-10"}).context["rows"][0]
     assert row[1] is None
     with use_clinic(clinica_a):
         assert (

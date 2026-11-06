@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Entrar" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Entrar" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
   <div class="col-sm-9 col-md-6 col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body p-4">
-        <div class="text-center text-primary mb-2">{% include "includes/logo.html" with classe="logo-login" %}</div>
-        <h1 class="h4 mb-4 text-center">{{ nome_sistema }}</h1>
+        <div class="text-center text-primary mb-2">{% include "includes/logo.html" with css_class="logo-login" %}</div>
+        <h1 class="h4 mb-4 text-center">{{ system_name }}</h1>
 
         {% if idle %}
         <div class="alert alert-info" role="status">{% blocktranslate %}Você saiu do sistema depois de {{ minutos }} minutos sem uso. Entre de novo para continuar.{% endblocktranslate %}</div>
         {% endif %}
-        {% if endereco_bloqueado %}
+        {% if address_locked %}
         <div class="alert alert-danger" role="alert">{% translate "Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora." %}</div>
         {% elif form.errors %}
         <div class="alert alert-danger" role="alert">{% translate "Usuário ou senha incorretos." %}</div>
@@ -38,7 +38,7 @@
           <input type="hidden" name="next" value="{{ next }}">
           <button type="submit" class="btn btn-primary w-100">{% translate "Entrar" %}</button>
         </form>
-        <p class="text-center small mt-3 mb-0">{% if recuperar_por_email %}<a href="{% url 'account:recover' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacy' %}">{% translate "Política de privacidade" %}</a></p>
+        <p class="text-center small mt-3 mb-0">{% if recovery_by_email %}<a href="{% url 'account:recover' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacy' %}">{% translate "Política de privacidade" %}</a></p>
       </div>
     </div>
   </div>

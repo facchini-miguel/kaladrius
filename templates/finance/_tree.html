@@ -1,11 +1,11 @@
 {% load i18n formats %}<div class="col-lg-6">
-  <h2 class="h6">{{ titulo }}</h2>
+  <h2 class="h6">{{ title }}</h2>
   <table class="table table-sm bg-white">
     <tbody>
-      {% for nivel, name, value in linhas %}
+      {% for level, name, value in rows %}
       <tr>
-        <td style="padding-left: {{ nivel|add:1 }}rem;"{% if nivel == 0 %} class="fw-semibold"{% endif %}>{{ name }}</td>
-        <td class="text-end text-nowrap{% if nivel == 0 %} fw-semibold{% endif %}">{{ value|currency }}</td>
+        <td style="padding-left: {{ level|add:1 }}rem;"{% if level == 0 %} class="fw-semibold"{% endif %}>{{ name }}</td>
+        <td class="text-end text-nowrap{% if level == 0 %} fw-semibold{% endif %}">{{ value|currency }}</td>
         <td class="text-end text-body-secondary small" style="width: 4rem;">{% widthratio value total 100 %}%</td>
       </tr>
       {% empty %}

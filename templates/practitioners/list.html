@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Profissionais" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Profissionais" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Profissionais" %}</h1>
-  {% if pode.profissionais.criar %}
+  {% if can.profissionais.criar %}
   <a class="btn btn-primary" href="{% url 'practitioners:new' %}">{% translate "Novo profissional" %}</a>
   {% endif %}
 </div>
@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for practitioner in profissionais %}
+      {% for practitioner in practitioners %}
       <tr>
         <td>{{ practitioner.name }}</td>
         <td>{{ practitioner.registration|default:"—" }}</td>
@@ -35,10 +35,10 @@
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if pode.profissionais.alterar %}
+          {% if can.profissionais.alterar %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' practitioner.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if pode.profissionais.excluir %}
+          {% if can.profissionais.excluir %}
           <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' practitioner.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>

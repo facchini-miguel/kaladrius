@@ -171,7 +171,7 @@ def test_automatic_reconciliation_only_when_unique(cenario):
     pago(cenario, "39.90", DIA)  # A2 is money out: a receipt does not match it
     statement_import = import_statement(cenario)
     page = cenario["cliente"].get(reverse("finance:statement", args=[statement_import.pk]))
-    assert page.context["unicos"] == 1
+    assert page.context["unique"] == 1
     cenario["cliente"].post(reverse("finance:statement_reconcile", args=[statement_import.pk]))
     a1, a4 = transacao(cenario, "A1"), transacao(cenario, "A4")
     assert (a1.status, a1.payment) == (BankTransaction.Status.RECONCILED, received_amount)
@@ -279,8 +279,8 @@ def test_bank_balance_compared_with_the_system(cenario):
     pago(cenario, "300.00", DIA)
     statement_import = import_statement(cenario)
     page = cenario["cliente"].get(reverse("finance:statement", args=[statement_import.pk]))
-    assert page.context["saldo_sistema"] == Decimal("1300.00")
-    assert page.context["diferenca"] == Decimal("340.10")
+    assert page.context["system_balance"] == Decimal("1300.00")
+    assert page.context["difference"] == Decimal("340.10")
 
 
 def test_invalid_file_and_permissions(cenario):

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Percentual de comissão" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Percentual de comissão" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% blocktranslate with nome=practitioner.name %}Comissão de {{ nome }}{% endblocktranslate %}</h1>

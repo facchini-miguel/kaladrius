@@ -1,12 +1,12 @@
-{% load i18n %}{% if pagina.paginator.num_pages > 1 %}
+{% load i18n %}{% if page.paginator.num_pages > 1 %}
 <nav aria-label="{% translate 'Paginação' %}">
   <ul class="pagination">
-    {% if pagina.has_previous %}
-    <li class="page-item"><a class="page-link" href="?{{ parametros }}&amp;page={{ pagina.previous_page_number }}">{% translate "Anterior" %}</a></li>
+    {% if page.has_previous %}
+    <li class="page-item"><a class="page-link" href="?{{ query }}&amp;page={{ page.previous_page_number }}">{% translate "Anterior" %}</a></li>
     {% endif %}
-    <li class="page-item disabled"><span class="page-link">{% blocktranslate with numero=pagina.number total=pagina.paginator.num_pages %}Página {{ numero }} de {{ total }}{% endblocktranslate %}</span></li>
-    {% if pagina.has_next %}
-    <li class="page-item"><a class="page-link" href="?{{ parametros }}&amp;page={{ pagina.next_page_number }}">{% translate "Próxima" %}</a></li>
+    <li class="page-item disabled"><span class="page-link">{% blocktranslate with numero=page.number total=page.paginator.num_pages %}Página {{ numero }} de {{ total }}{% endblocktranslate %}</span></li>
+    {% if page.has_next %}
+    <li class="page-item"><a class="page-link" href="?{{ query }}&amp;page={{ page.next_page_number }}">{% translate "Próxima" %}</a></li>
     {% endif %}
   </ul>
 </nav>

@@ -1,44 +1,44 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Relatórios" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Relatórios" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Relatórios financeiros" %}</h1>
 {% include "finance/_period.html" %}
 
 <div class="row g-3 mb-4">
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ relatorio.total_recebido|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ relatorio.total_pago|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if relatorio.resultado < 0 %} text-danger{% endif %}">{{ relatorio.resultado|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ report.total_recebido|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ report.total_pago|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if report.resultado < 0 %} text-danger{% endif %}">{{ report.resultado|currency }}</div></div></div></div>
 </div>
 
 <div class="row g-4">
-  {% translate "Recebido por forma de pagamento" as titulo1 %}
-  {% include "finance/_group.html" with titulo=titulo1 linhas=relatorio.por_forma total=relatorio.total_recebido %}
-  {% if relatorio.grupos %}
-  {% translate "Recebido por grupo do plano de contas" as titulo_g1 %}
-  {% include "finance/_tree.html" with titulo=titulo_g1 linhas=relatorio.por_grupo total=relatorio.total_recebido %}
-  {% translate "Despesas pagas por grupo do plano de contas" as titulo_g2 %}
-  {% include "finance/_tree.html" with titulo=titulo_g2 linhas=relatorio.despesas_por_grupo total=relatorio.total_pago %}
+  {% translate "Recebido por forma de pagamento" as title1 %}
+  {% include "finance/_group.html" with title=title1 rows=report.por_forma total=report.total_recebido %}
+  {% if report.grupos %}
+  {% translate "Recebido por grupo do plano de contas" as title_g1 %}
+  {% include "finance/_tree.html" with title=title_g1 rows=report.por_grupo total=report.total_recebido %}
+  {% translate "Despesas pagas por grupo do plano de contas" as title_g2 %}
+  {% include "finance/_tree.html" with title=title_g2 rows=report.despesas_por_grupo total=report.total_pago %}
   {% endif %}
-  {% translate "Recebido por categoria" as titulo2 %}
-  {% include "finance/_group.html" with titulo=titulo2 linhas=relatorio.por_categoria total=relatorio.total_recebido %}
-  {% translate "Recebido por profissional" as titulo3 %}
-  {% include "finance/_group.html" with titulo=titulo3 linhas=relatorio.por_profissional total=relatorio.total_recebido %}
-  {% translate "Despesas pagas por categoria" as titulo4 %}
-  {% include "finance/_group.html" with titulo=titulo4 linhas=relatorio.despesas_por_categoria total=relatorio.total_pago %}
-  {% if relatorio.centros %}
-  {% translate "Recebido por centro de custo" as titulo5 %}
-  {% include "finance/_group.html" with titulo=titulo5 linhas=relatorio.por_centro total=relatorio.total_recebido %}
-  {% translate "Despesas pagas por centro de custo" as titulo6 %}
-  {% include "finance/_group.html" with titulo=titulo6 linhas=relatorio.despesas_por_centro total=relatorio.total_pago %}
+  {% translate "Recebido por categoria" as title2 %}
+  {% include "finance/_group.html" with title=title2 rows=report.por_categoria total=report.total_recebido %}
+  {% translate "Recebido por profissional" as title3 %}
+  {% include "finance/_group.html" with title=title3 rows=report.por_profissional total=report.total_recebido %}
+  {% translate "Despesas pagas por categoria" as title4 %}
+  {% include "finance/_group.html" with title=title4 rows=report.despesas_por_categoria total=report.total_pago %}
+  {% if report.centros %}
+  {% translate "Recebido por centro de custo" as title5 %}
+  {% include "finance/_group.html" with title=title5 rows=report.por_centro total=report.total_recebido %}
+  {% translate "Despesas pagas por centro de custo" as title6 %}
+  {% include "finance/_group.html" with title=title6 rows=report.despesas_por_centro total=report.total_pago %}
   {% endif %}
 </div>
 <p class="text-body-secondary small mt-3">
   {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
-  {% if fechado_ate %}{% blocktranslate with data=fechado_ate|date:"SHORT_DATE_FORMAT" %}Financeiro fechado até {{ data }}: até essa data os valores não mudam mais.{% endblocktranslate %}{% endif %}
-  {% if relatorio.interest %}{% translate "Juros e multa recebidos" %}: {{ relatorio.interest|currency }}.{% endif %}
-  {% if relatorio.descontos %}{% translate "Descontos dados" %}: {{ relatorio.descontos|currency }}.{% endif %}
+  {% if closed_until %}{% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Financeiro fechado até {{ data }}: até essa data os valores não mudam mais.{% endblocktranslate %}{% endif %}
+  {% if report.interest %}{% translate "Juros e multa recebidos" %}: {{ report.interest|currency }}.{% endif %}
+  {% if report.descontos %}{% translate "Descontos dados" %}: {{ report.descontos|currency }}.{% endif %}
 </p>
 {% endblock %}

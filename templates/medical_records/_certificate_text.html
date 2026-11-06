@@ -1,9 +1,9 @@
-{% load i18n %}{% with name=atestado.visit.patient.name %}
+{% load i18n %}{% with name=certificate.visit.patient.name %}
   <p class="fs-6 lh-lg mt-4">
-    {% if atestado.kind == "afastamento" %}
-    {% blocktranslate count dias=atestado.days with data=date nome=name%}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dia de afastamento das suas atividades, a partir dessa data.{% plural %}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dias de afastamento das suas atividades, a partir dessa data.{% endblocktranslate %}
-    {% elif atestado.start_time and atestado.end_time %}
-    {% blocktranslate with data=date nome=name inicio=atestado.start_time|time:"H:i" fim=atestado.end_time|time:"H:i"%}Atesto, para os devidos fins, que {{ nome }} esteve em atendimento nesta clínica em {{ data }}, das {{ inicio }} às {{ fim }}.{% endblocktranslate %}
+    {% if certificate.kind == "afastamento" %}
+    {% blocktranslate count dias=certificate.days with data=date nome=name%}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dia de afastamento das suas atividades, a partir dessa data.{% plural %}Atesto, para os devidos fins, que {{ nome }} esteve sob meus cuidados em {{ data }} e necessita de {{ dias }} dias de afastamento das suas atividades, a partir dessa data.{% endblocktranslate %}
+    {% elif certificate.start_time and certificate.end_time %}
+    {% blocktranslate with data=date nome=name inicio=certificate.start_time|time:"H:i" fim=certificate.end_time|time:"H:i"%}Atesto, para os devidos fins, que {{ nome }} esteve em atendimento nesta clínica em {{ data }}, das {{ inicio }} às {{ fim }}.{% endblocktranslate %}
     {% else %}
     {% blocktranslate with data=date nome=name%}Atesto, para os devidos fins, que {{ nome }} esteve em atendimento nesta clínica em {{ data }}.{% endblocktranslate %}
     {% endif %}

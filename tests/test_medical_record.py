@@ -83,7 +83,7 @@ def test_only_practitioners_see_the_record(cenario, django_user_model):
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     assert cliente(root).get(new_visit).status_code == 200
     page = cenario["dra"].get(patient_record)
-    assert page.context["prontuario"] == [] and "Novo atendimento" in page.content.decode()
+    assert page.context["medical_record"] == [] and "Novo atendimento" in page.content.decode()
 
     # An administrator who is also a registered practitioner reaches it.
     with use_clinic(cenario["clinic"]):
@@ -112,7 +112,7 @@ def test_register_save_and_finalize(cenario):
     # Finalized: nobody changes it any more, corrections are addenda.
     assert cenario["dra"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
     page = cenario["dra"].get(url)
-    assert page.context["form"] is None and page.context["adendo_form"] is not None
+    assert page.context["form"] is None and page.context["addendum_form"] is not None
     cenario["dr"].post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Exame ok"})
     with use_clinic(cenario["clinic"]):
         addendum = visit.adendos.get()
@@ -124,7 +124,7 @@ def test_only_author_changes_draft(cenario):
     visit = log_event(cenario)
     url = reverse("medical_records:visit", args=[visit.pk])
     page = cenario["dr"].get(url)
-    assert page.context["form"] is None and page.context["adendo_form"] is None
+    assert page.context["form"] is None and page.context["addendum_form"] is None
     assert cenario["dr"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
     # No addendum before it is finalized: the author edits the draft instead.
     addendum = reverse("medical_records:addendum", args=[visit.pk])
@@ -150,7 +150,7 @@ def test_patient_with_record_is_not_deleted(cenario, django_user_model):
         Patient.objects.filter(pk=patient.pk).update(archived=True, archived_at=timezone.now())
     url = reverse("patients:delete", args=[patient.pk])
     page = cenario["admin"].get(url)
-    assert page.context["atendimentos"] == 1 and "20 anos" in page.content.decode()
+    assert page.context["visits"] == 1 and "20 anos" in page.content.decode()
     cenario["admin"].post(url)
     with use_clinic(cenario["clinic"]):
         assert Patient.objects.filter(pk=patient.pk).exists()
@@ -230,7 +230,7 @@ def test_prescription_one_line_per_item(cenario):
     medications = "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas\n\nSoro fisiológico nasal"
     response = cenario["dra"].post(url, {"medications": medications})
     page = cenario["dra"].get(response.url)
-    assert page.context["linhas"] == [
+    assert page.context["rows"] == [
         "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas",
         "Soro fisiológico nasal",
     ]
@@ -248,7 +248,7 @@ def test_exam_request(cenario):
         url, {"exams": "Hemograma completo\nGlicemia de jejum", "indication": "Rotina"}
     )
     page = cenario["dr"].get(response.url)
-    assert page.context["linhas"] == ["Hemograma completo", "Glicemia de jejum"]
+    assert page.context["rows"] == ["Hemograma completo", "Glicemia de jejum"]
     assert "PEDIDO DE EXAMES" in page.content.decode() and "Rotina" in page.content.decode()
     assert cenario["dr"].get(url).status_code == 403  # only the visit's author issues
     record = AuditEntry.objects.filter(model_name="Pedido de exames").latest("pk")

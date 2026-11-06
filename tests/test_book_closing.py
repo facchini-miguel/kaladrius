@@ -139,7 +139,7 @@ def test_who_can_see_close_and_reopen(clinica_a, criar_usuario, cliente_de):
 def test_demo_only_views(clinica_a, criar_usuario, cliente_de):
     demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Role.ADMIN, demo=True))
     page = demo.get(URL)
-    assert page.status_code == 200 and page.context["fechar_form"] is None
+    assert page.status_code == 200 and page.context["close_form"] is None
     assert demo.post(URL, {"action": "fechar", "until": ONTEM.isoformat()}).status_code == 403
     with use_clinic(clinica_a):
         assert not BookClosing.objects.exists()

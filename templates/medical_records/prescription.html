@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Receita" context "prescrição" %} · {{ receita.visit.patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Receita" context "prescrição" %} · {{ prescription.visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' receita.visit_id %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' prescription.visit_id %}">{% translate "Voltar" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 48rem;">
-  {% translate "RECEITUÁRIO" as titulo_documento %}
-  {% include "medical_records/_header.html" with data_documento=receita.created_at %}
-  <p><strong>{% translate "Paciente" %}:</strong> {{ receita.visit.patient.name }}</p>
+  {% translate "RECEITUÁRIO" as document_title %}
+  {% include "medical_records/_header.html" with document_date=prescription.created_at %}
+  <p><strong>{% translate "Paciente" %}:</strong> {{ prescription.visit.patient.name }}</p>
   <ol class="fs-6 lh-lg mt-3">
-    {% for linha in linhas %}<li>{{ linha }}</li>{% endfor %}
+    {% for row in rows %}<li>{{ row }}</li>{% endfor %}
   </ol>
-  {% include "medical_records/_signature.html" with practitioner=receita.practitioner %}
+  {% include "medical_records/_signature.html" with practitioner=prescription.practitioner %}
 </div>
 {% endblock %}

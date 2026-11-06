@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Funcionários" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Funcionários" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Funcionários" %}</h1>
   <div class="d-flex gap-2">
     <a class="btn btn-outline-primary" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}</a>
-    {% if pode.pessoal.criar %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
+    {% if can.pessoal.criar %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
   </div>
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Nome" %}</th><th>{% translate "Cargo" %}</th><th>{% translate "Admissão" %}</th><th class="text-end">{% translate "Salário atual" %}</th><th>{% translate "Situação" %}</th></tr></thead>
     <tbody>
-      {% for employee in funcionarios %}
+      {% for employee in employees %}
       <tr>
         <td><a href="{% url 'staff:employee' employee.pk %}">{{ employee.name }}</a></td>
         <td>{{ employee.job_title|default:"—" }}</td>

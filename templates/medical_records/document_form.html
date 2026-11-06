@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{{ titulo }} · {{ visit.patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ title }} · {{ visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{{ titulo }}</h1>
+<h1 class="h3 mb-1">{{ title }}</h1>
 <p class="text-body-secondary"><a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.patient.name }} · {{ visit.date|date:"SHORT_DATETIME_FORMAT" }}</a></p>
 <p class="text-body-secondary small">{% translate "Depois de emitido, o documento não muda; ele fica guardado no prontuário e pode ser impresso de novo." %}</p>
 <form method="post" style="max-width: 40rem;" novalidate>

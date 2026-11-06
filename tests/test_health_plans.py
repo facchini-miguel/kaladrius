@@ -135,7 +135,7 @@ def test_module_off(clinica_a, patient, health_plan, admin):
     assert admin.get(reverse("health_plans:list")).status_code == 403
     assert reverse("health_plans:list") not in admin.get(reverse("home")).content.decode()
     patient_record = admin.get(reverse("patients:record", args=[patient.pk]))
-    assert patient_record.context.get("carteirinhas") is None
+    assert patient_record.context.get("plan_cards") is None
 
 
 def test_card_does_not_link_patient_and_plan_of_different_clinics(

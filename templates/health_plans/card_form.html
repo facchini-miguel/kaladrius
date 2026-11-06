@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Carteirinha" %} · {{ patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Carteirinha" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% if instancia.pk %}{% translate "Carteirinha" %}{% else %}{% translate "Nova carteirinha" %}{% endif %}</h1>
+<h1 class="h3 mb-1">{% if instance.pk %}{% translate "Carteirinha" %}{% else %}{% translate "Nova carteirinha" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">{{ patient.name }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  {% if pode.convenios.criar %}<p class="text-body-secondary small">{% translate "O convênio não está na lista?" %} <a href="{% url 'health_plans:new' %}">{% translate "Cadastre o convênio" %}</a></p>{% endif %}
+  {% if can.convenios.criar %}<p class="text-body-secondary small">{% translate "O convênio não está na lista?" %} <a href="{% url 'health_plans:new' %}">{% translate "Cadastre o convênio" %}</a></p>{% endif %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
 </form>

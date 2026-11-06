@@ -1,8 +1,8 @@
 {% load i18n formats %}<div class="col-lg-6">
-  <h2 class="h6">{{ titulo }}</h2>
+  <h2 class="h6">{{ title }}</h2>
   <table class="table table-sm bg-white">
     <tbody>
-      {% for name, value in linhas %}
+      {% for name, value in rows %}
       <tr>
         <td>{{ name|default:_("Sem profissional") }}</td>
         <td class="text-end text-nowrap">{{ value|currency }}</td>

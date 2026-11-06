@@ -75,12 +75,12 @@ def patient_list(request):
         request,
         "patients/list.html",
         {
-            "pagina": page,
-            "busca": search,
+            "page": page,
+            "search": search,
             "kind": kind,
             "status": status,
-            "tipos": Patient.Kind.choices,
-            "parametros": urlencode({"q": search, "kind": kind, "status": status}),
+            "types": Patient.Kind.choices,
+            "query": urlencode({"q": search, "kind": kind, "status": status}),
         },
     )
 
@@ -94,22 +94,22 @@ def patient_record(request, pk):
     # LGPD: access to a patient's record (health data) is logged.
     log_event(AuditEntry.Action.VIEWED, patient)
     rechamadas = Recall.objects.filter(patient=patient).order_by("-date")[:20]
-    context = {"patient": patient, "rechamadas": rechamadas}
+    context = {"patient": patient, "recalls": rechamadas}
     if can(request, Module.SCHEDULE, Action.VIEW):
-        context["agendamentos"] = _history(request, patient)
+        context["appointments"] = _history(request, patient)
     if can(request, Module.RECEIVING, Action.VIEW):
-        context["financeiro"] = patient_summary(patient)
+        context["finance"] = patient_summary(patient)
     if can(request, Module.ESTIMATES, Action.VIEW):
-        context["orcamentos"] = list(
+        context["estimates"] = list(
             Estimate.objects.filter(patient=patient).prefetch_related("itens")[:10]
         )
     if can(request, Module.HEALTH_PLANS, Action.VIEW):
-        context["carteirinhas"] = list(
+        context["plan_cards"] = list(
             MemberCard.objects.filter(patient=patient).select_related("health_plan")
         )
-    context["relacionados"] = related_of(patient)
+    context["related_people"] = related_of(patient)
     if accesses_medical_records(request):
-        context["prontuario"] = list(
+        context["medical_record"] = list(
             Visit.objects.filter(patient=patient).select_related("practitioner")
         )
     return render(request, "patients/record.html", context)
@@ -133,11 +133,11 @@ def print_patient(request, pk):
         "patients/print.html",
         {
             "patient": patient,
-            "carteirinhas": carteirinhas,
-            "relacionados": RelatedPerson.objects.filter(patient=patient).select_related(
+            "plan_cards": carteirinhas,
+            "related_people": RelatedPerson.objects.filter(patient=patient).select_related(
                 "other_patient"
             ),
-            "hoje": timezone.localdate(),
+            "today": timezone.localdate(),
         },
     )
 
@@ -194,7 +194,7 @@ def archive(request, pk):
             messages.error(
                 request, _("Resolva as contas em aberto do paciente antes de arquivá-lo.")
             )
-        return render(request, "patients/archive.html", {"patient": patient, "abertas": abertas})
+        return render(request, "patients/archive.html", {"patient": patient, "open_items": abertas})
     if request.method == "POST":
         patient.archived = True
         patient.archived_at = timezone.now()
@@ -236,8 +236,8 @@ def delete_patient(request, pk):
     # The country's law and how long it keeps medical records (decision 124).
     context = {
         "patient": patient,
-        "lei": legislation.for_country(),
-        "prazo_de_guarda": legislation.retention_period(),
+        "law": legislation.for_country(),
+        "retention_period": legislation.retention_period(),
     }
     # The medical record must be kept (20 years in Brazil, Law 13.787/2018, decision 081): a
     # patient with one stays archived and is never permanently deleted, in any country.
@@ -245,7 +245,7 @@ def delete_patient(request, pk):
     if atendimentos:
         if request.method == "POST":
             messages.error(request, _("Paciente com prontuário não pode ser excluído."))
-        return render(request, "patients/delete.html", {**context, "atendimentos": atendimentos})
+        return render(request, "patients/delete.html", {**context, "visits": atendimentos})
     if request.method == "POST":
         code = patient.pk
         agendamentos = Appointment.objects.filter(patient=patient)
@@ -316,7 +316,7 @@ def suggestions(request):
         if len(search) >= 2
         else []
     )
-    return render(request, "patients/_suggestions.html", {"pacientes": pacientes})
+    return render(request, "patients/_suggestions.html", {"patients": pacientes})
 
 
 MONTH_NAMES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Django)
@@ -337,9 +337,9 @@ def birthdays(request):
         "patients/birthdays.html",
         {
             "month": month,
-            "meses": list(enumerate(MONTH_NAMES, start=1)),
-            "linhas": rows,
-            "hoje": today,
+            "months": list(enumerate(MONTH_NAMES, start=1)),
+            "rows": rows,
+            "today": today,
         },
     )
 
@@ -393,8 +393,8 @@ def _related_person_form(request, patient, instancia):
         {
             "form": form,
             "patient": patient,
-            "instancia": instancia,
-            "outro": other,
+            "instance": instancia,
+            "other": other,
         },
     )
 

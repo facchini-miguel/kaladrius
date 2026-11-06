@@ -97,7 +97,7 @@ def test_list_filters(cenario):
     url = reverse("recalls:list")
 
     def nomes(**params):
-        return [r.patient.name for r in cenario["cliente"].get(url, params).context["pagina"]]
+        return [r.patient.name for r in cenario["cliente"].get(url, params).context["page"]]
 
     assert nomes() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
     assert nomes(status="concluidas") == ["João Rechamada"]
@@ -127,7 +127,7 @@ def test_summary_and_day_list_for_schedule(cenario):
 
 def test_schedule_gets_recall_urls(cenario, criar_profissional):
     criar_profissional(cenario["clinic"], "Dra. A")
-    urls = cenario["cliente"].get(reverse("schedule:calendar")).context["configuracao"]["urls"]
+    urls = cenario["cliente"].get(reverse("schedule:calendar")).context["schedule_settings"]["urls"]
     assert urls["recalls"] == reverse("recalls:summary")
 
 
@@ -138,7 +138,7 @@ def test_isolation(cenario, clinica_b):
     cliente = cenario["cliente"]
     assert cliente.get(reverse("recalls:edit", args=[de_b.pk])).status_code == 404
     assert cliente.post(reverse("recalls:complete", args=[de_b.pk])).status_code == 404
-    assert len(cliente.get(reverse("recalls:list"), {"status": "todas"}).context["pagina"]) == 0
+    assert len(cliente.get(reverse("recalls:list"), {"status": "todas"}).context["page"]) == 0
     response = cliente.post(
         reverse("recalls:new"),
         {"patient": paciente_b.pk, "date": DIA.isoformat(), "description": "x"},
@@ -179,7 +179,7 @@ def test_birthdays_of_the_month(cenario):
         Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 1), active=False)
         Patient.objects.create(name="Nascido em abril", birth_date=datetime.date(1990, 4, 1))
     response = cenario["cliente"].get(reverse("patients:birthdays"), {"month": 3})
-    assert [p.name for p, _ in response.context["linhas"]] == ["Março 2", "Março 20"]
+    assert [p.name for p, _ in response.context["rows"]] == ["Março 2", "Março 20"]
     assert "Nascido em abril" not in response.content.decode()
     today = timezone.localdate()
     default = cenario["cliente"].get(reverse("patients:birthdays"))

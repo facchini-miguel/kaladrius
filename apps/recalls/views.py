@@ -57,10 +57,10 @@ def recall_list(request):
         request,
         "recalls/list.html",
         {
-            "pagina": page,
-            "filtros": filters,
-            "parametros": urlencode(filters),
-            "hoje": timezone.localdate(),
+            "page": page,
+            "filters": filters,
+            "query": urlencode(filters),
+            "today": timezone.localdate(),
         },
     )
 
@@ -99,7 +99,7 @@ def _recall_form(request, rechamada, inicial):
         "recalls/form.html",
         {
             "form": form,
-            "rechamada": rechamada,
+            "recall": rechamada,
             "patient": patient,
             "next": request.GET.get("next", ""),
         },
@@ -129,7 +129,7 @@ def delete_recall(request, pk):
             request, _("Rechamada de %(nome)s excluída.") % {"nome": rechamada.patient.name}
         )
         return _back(request)
-    return render(request, "recalls/delete.html", {"rechamada": rechamada})
+    return render(request, "recalls/delete.html", {"recall": rechamada})
 
 
 # --- Schedule integration --------------------------------------------------------
@@ -156,4 +156,4 @@ def of_day(request):
     if day is None:
         return HttpResponse(_("Data inválida."), status=400)
     rechamadas = Recall.objects.filter(date=day, patient__archived=False).select_related("patient")
-    return render(request, "recalls/_today.html", {"dia": day, "rechamadas": rechamadas})
+    return render(request, "recalls/_today.html", {"day": day, "recalls": rechamadas})

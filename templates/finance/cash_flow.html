@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Fluxo de caixa" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Fluxo de caixa" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Fluxo de caixa" %}</h1>
 {% include "finance/_period.html" with group=True %}
 
 <div class="row g-3 mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no início" %}</div><div class="fs-5">{{ fluxo.opening_balance|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Entradas (realizadas + previstas)" %}</div><div class="fs-5 text-success">{{ fluxo.totais.entradas|currency }} + {{ fluxo.totais.entradas_previstas|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saídas (realizadas + previstas)" %}</div><div class="fs-5 text-danger">{{ fluxo.totais.saidas|currency }} + {{ fluxo.totais.saidas_previstas|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo previsto no fim" %}</div><div class="fs-5{% if fluxo.saldo_final < 0 %} text-danger{% endif %}">{{ fluxo.saldo_final|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no início" %}</div><div class="fs-5">{{ flow.opening_balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Entradas (realizadas + previstas)" %}</div><div class="fs-5 text-success">{{ flow.totais.entradas|currency }} + {{ flow.totais.entradas_previstas|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saídas (realizadas + previstas)" %}</div><div class="fs-5 text-danger">{{ flow.totais.saidas|currency }} + {{ flow.totais.saidas_previstas|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo previsto no fim" %}</div><div class="fs-5{% if flow.saldo_final < 0 %} text-danger{% endif %}">{{ flow.saldo_final|currency }}</div></div></div></div>
 </div>
 
 <div class="table-responsive">
@@ -27,14 +27,14 @@
       </tr>
     </thead>
     <tbody>
-      {% for linha in fluxo.linhas %}
+      {% for row in flow.linhas %}
       <tr>
-        <td class="text-nowrap">{% if by_month %}{{ linha.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
-        <td class="text-end text-nowrap text-success">{% if linha.entradas %}{{ linha.entradas|currency }}{% endif %}</td>
-        <td class="text-end text-nowrap text-danger">{% if linha.saidas %}{{ linha.saidas|currency }}{% endif %}</td>
-        <td class="text-end text-nowrap text-body-secondary">{% if linha.entradas_previstas %}{{ linha.entradas_previstas|currency }}{% endif %}</td>
-        <td class="text-end text-nowrap text-body-secondary">{% if linha.saidas_previstas %}{{ linha.saidas_previstas|currency }}{% endif %}</td>
-        <td class="text-end text-nowrap fw-semibold{% if linha.balance < 0 %} text-danger{% endif %}">{{ linha.balance|currency }}</td>
+        <td class="text-nowrap">{% if by_month %}{{ row.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ row.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if row.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
+        <td class="text-end text-nowrap text-success">{% if row.entradas %}{{ row.entradas|currency }}{% endif %}</td>
+        <td class="text-end text-nowrap text-danger">{% if row.saidas %}{{ row.saidas|currency }}{% endif %}</td>
+        <td class="text-end text-nowrap text-body-secondary">{% if row.entradas_previstas %}{{ row.entradas_previstas|currency }}{% endif %}</td>
+        <td class="text-end text-nowrap text-body-secondary">{% if row.saidas_previstas %}{{ row.saidas_previstas|currency }}{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold{% if row.balance < 0 %} text-danger{% endif %}">{{ row.balance|currency }}</td>
       </tr>
       {% empty %}
       <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma movimentação no período." %}</td></tr>
@@ -48,7 +48,7 @@
 <div class="table-responsive" style="max-width: 32rem;">
   <table class="table table-sm bg-white">
     <tbody>
-      {% for account, balance in contas %}
+      {% for account, balance in accounts %}
       <tr><td>{{ account.name }}{% if not account.active %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if balance < 0 %} text-danger{% endif %}">{{ balance|currency }}</td></tr>
       {% endfor %}
     </tbody>

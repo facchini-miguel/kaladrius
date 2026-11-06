@@ -46,8 +46,8 @@ class ClinicLoginView(auth_views.LoginView):
         erros = context["form"].non_field_errors().as_data()
         return {
             **context,
-            "endereco_bloqueado": any(e.code == "endereco_bloqueado" for e in erros),
-            "recuperar_por_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
+            "address_locked": any(e.code == "endereco_bloqueado" for e in erros),
+            "recovery_by_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
             "idle": self.request.GET.get("idle") == "1",
             "minutos": settings.IDLE_MINUTES,
         }
@@ -123,7 +123,7 @@ def two_factor(request):
                 return render(
                     request,
                     "account/codes.html",
-                    {"codigos": services.new_codes(user)},
+                    {"codes": services.new_codes(user)},
                 )
             novos.add_error("code", _("Código incorreto."))
         restantes = user.codigos_recuperacao.filter(used_at__isnull=True).count()
@@ -132,10 +132,10 @@ def two_factor(request):
             "account/two_factor.html",
             {
                 "active": True,
-                "desativar": deactivate,
-                "novos": novos,
-                "restantes": restantes,
-                "obrigatoria": is_required,
+                "disable_form": deactivate,
+                "codes_form": novos,
+                "remaining": restantes,
+                "required": is_required,
             },
         )
     dispositivo = services.prepare(user, new=request.GET.get("new") == "1")
@@ -148,7 +148,7 @@ def two_factor(request):
                 user,
                 description=f"{user}: verificação em duas etapas ativada",
             )
-            return render(request, "account/codes.html", {"codigos": codigos, "ativada": True})
+            return render(request, "account/codes.html", {"codes": codigos, "enabled": True})
         form.add_error("code", _("Código incorreto. Confira a hora do celular e tente de novo."))
     address = services.app_uri(dispositivo)
     return render(
@@ -156,7 +156,7 @@ def two_factor(request):
         "account/two_factor.html",
         {
             "active": False,
-            "obrigatoria": is_required,
+            "required": is_required,
             "form": form,
             "qr": services.qr_svg(address),
             "secret": services.secret_in_groups(dispositivo.secret),
@@ -181,7 +181,7 @@ password_recover = _with_email(
         template_name="account/recover.html",
         email_template_name="account/recovery_email.txt",
         subject_template_name="account/recovery_email_subject.txt",
-        extra_email_context={"nome_sistema": settings.SYSTEM_NAME},
+        extra_email_context={"system_name": settings.SYSTEM_NAME},
         success_url=reverse_lazy("account:recovery_sent"),
     )
 )

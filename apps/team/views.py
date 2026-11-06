@@ -33,7 +33,7 @@ def member_list(request):
         .select_related("user")
         .order_by("-active", "user__first_name", "user__username")
     )
-    return render(request, "team/list.html", {"vinculos": vinculos})
+    return render(request, "team/list.html", {"memberships": vinculos})
 
 
 @requires_permission(Module.USERS, Action.CREATE)
@@ -70,11 +70,11 @@ def edit_member(request, pk):
         request,
         "team/edit.html",
         {
-            "vinculo": vinculo,
+            "membership": vinculo,
             "form": form,
             "account": account,
-            "exclusiva": exclusiva,
-            "duas_etapas": conta_servicos.active_for(user),
+            "exclusive": exclusiva,
+            "two_factor": conta_servicos.active_for(user),
         },
     )
 
@@ -103,7 +103,7 @@ def password(request, pk):
             _("Nova senha de %(nome)s definida.") % {"nome": user.get_full_name() or user},
         )
         return redirect("team:list")
-    return render(request, "team/password.html", {"vinculo": vinculo, "form": form})
+    return render(request, "team/password.html", {"membership": vinculo, "form": form})
 
 
 @requires_permission(Module.USERS, Action.CHANGE)

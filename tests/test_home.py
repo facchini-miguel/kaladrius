@@ -144,7 +144,7 @@ def start(cenario, cliente_de, quem):
 
 def test_reception_sees_the_day_without_expenses(cenario, cliente_de):
     response = start(cenario, cliente_de, "recepcao")
-    painel = response.context["painel"]
+    painel = response.context["dashboard"]
     dia_ = painel["agenda"]
     assert len(dia_["lista"]) == 6 and dia_["mostrar_profissional"]
     assert (dia_["pacientes"], dia_["compareceram"], dia_["faltaram"]) == (4, 1, 1)
@@ -168,7 +168,7 @@ def test_reception_sees_the_day_without_expenses(cenario, cliente_de):
 
 
 def test_admin_sees_day_and_month_result(cenario, cliente_de):
-    painel = start(cenario, cliente_de, "admin").context["painel"]
+    painel = start(cenario, cliente_de, "admin").context["dashboard"]
     fin = painel["financeiro"]
     assert fin["pago_hoje"] == Decimal("50") and fin["resultado_hoje"] == Decimal("50")
     assert (fin["recebido_mes"], fin["pago_mes"]) == (Decimal("100"), Decimal("50"))
@@ -183,7 +183,7 @@ def test_admin_sees_day_and_month_result(cenario, cliente_de):
 
 def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de):
     response = start(cenario, cliente_de, "dra")
-    painel = response.context["painel"]
+    painel = response.context["dashboard"]
     assert {a.practitioner.name for a in painel["agenda"]["lista"]} == {"Dra. Ana"}
     assert not painel["agenda"]["mostrar_profissional"]
     assert painel["agenda"]["proximo"].start.astimezone().hour == 11
@@ -194,7 +194,7 @@ def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de)
 
 
 def test_lists_of_recalls_birthdays_and_estimates(cenario, cliente_de):
-    painel = start(cenario, cliente_de, "recepcao").context["painel"]
+    painel = start(cenario, cliente_de, "recepcao").context["dashboard"]
     rechamadas = painel["rechamadas"]
     assert [r.date for r in rechamadas["lista"]] == [day(1), HOJE]
     assert (rechamadas["total"], rechamadas["atrasadas"]) == (2, 1)
@@ -204,7 +204,7 @@ def test_lists_of_recalls_birthdays_and_estimates(cenario, cliente_de):
 
 def test_completing_recall_and_marking_attendance_return_home(cenario, cliente_de):
     cliente = cliente_de(cenario["recepcao"])
-    painel = cliente.get(reverse("home")).context["painel"]
+    painel = cliente.get(reverse("home")).context["dashboard"]
     rechamada = painel["rechamadas"]["lista"][0]
     response = cliente.post(
         reverse("recalls:complete", args=[rechamada.pk]), {"next": reverse("home")}
@@ -215,8 +215,8 @@ def test_completing_recall_and_marking_attendance_return_home(cenario, cliente_d
         reverse("schedule:status", args=[proximo.pk]), {"status": "compareceu"}, follow=True
     )
     assert "João Paciente compareceu." in response.content.decode()
-    assert response.context["painel"]["agenda"]["compareceram"] == 2
-    assert response.context["painel"]["rechamadas"]["total"] == 1
+    assert response.context["dashboard"]["agenda"]["compareceram"] == 2
+    assert response.context["dashboard"]["rechamadas"]["total"] == 1
 
 
 def test_no_clinic_means_no_summary(cenario, criar_usuario, cliente_de):

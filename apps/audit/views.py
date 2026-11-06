@@ -101,10 +101,10 @@ def audit_list(request):
         request,
         "audit/list.html",
         {
-            "pagina": page,
-            "filtros": filters,
-            "parametros": urlencode(filters),
-            "acoes": AuditEntry.Action.choices,
-            "modelos": modelos,
+            "page": page,
+            "filters": filters,
+            "query": urlencode(filters),
+            "actions": AuditEntry.Action.choices,
+            "model_names": modelos,
         },
     )

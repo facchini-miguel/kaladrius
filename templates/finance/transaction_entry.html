@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Criar lançamento" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Criar lançamento" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Criar lançamento" %}</h1>
-<p class="text-body-secondary mb-4">{{ transacao.date|date:"SHORT_DATE_FORMAT" }} · {{ transacao.description }} · <span class="{% if transacao.is_incoming %}text-success{% else %}text-danger{% endif %}">{{ transacao.amount|currency }}</span> · {{ transacao.account }}</p>
+<p class="text-body-secondary mb-4">{{ transaction.date|date:"SHORT_DATE_FORMAT" }} · {{ transaction.description }} · <span class="{% if transaction.is_incoming %}text-success{% else %}text-danger{% endif %}">{{ transaction.amount|currency }}</span> · {{ transaction.account }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <p class="text-body-secondary small">{% if transacao.is_incoming %}{% translate "Cria um lançamento a receber já recebido nesta data e nesta conta, conciliado com a transação." %}{% else %}{% translate "Cria uma despesa já paga nesta data e nesta conta, conciliada com a transação." %}{% endif %}</p>
+  <p class="text-body-secondary small">{% if transaction.is_incoming %}{% translate "Cria um lançamento a receber já recebido nesta data e nesta conta, conciliado com a transação." %}{% else %}{% translate "Cria uma despesa já paga nesta data e nesta conta, conciliada com a transação." %}{% endif %}</p>
   <button type="submit" class="btn btn-primary">{% translate "Criar e conciliar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:statement' transacao.statement_import_id %}#t{{ transacao.pk }}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% url 'finance:statement' transaction.statement_import_id %}#t{{ transaction.pk }}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

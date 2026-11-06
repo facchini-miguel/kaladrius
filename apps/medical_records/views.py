@@ -95,7 +95,7 @@ def new_visit(request, practitioner, patient):
     return render(
         request,
         "medical_records/visit.html",
-        {"form": form, "patient": patient, "appointment": appointment, "editavel": True},
+        {"form": form, "patient": patient, "appointment": appointment, "editable": True},
     )
 
 
@@ -131,20 +131,20 @@ def visit(request, practitioner, pk):
             "patient": visit.patient,
             "appointment": visit.appointment,
             "form": form,
-            "editavel": editavel,
-            "campos": _fields(visit),
-            "adendos": visit.adendos.select_related("practitioner"),
-            "adendo_form": AddendumForm() if visit.is_finalized else None,
+            "editable": editavel,
+            "fields": _fields(visit),
+            "addenda": visit.adendos.select_related("practitioner"),
+            "addendum_form": AddendumForm() if visit.is_finalized else None,
             # Certificates and prescriptions are issued by the visit's author (decision 082).
-            "emite_documentos": do_autor or administra,
-            "administra": administra,
-            "atestados": visit.atestados.all(),
-            "receitas": visit.receitas.all(),
-            "pedidos": visit.pedidos_de_exames.all(),
+            "issues_documents": do_autor or administra,
+            "is_admin": administra,
+            "certificates": visit.atestados.all(),
+            "prescriptions": visit.receitas.all(),
+            "exam_requests": visit.pedidos_de_exames.all(),
             # Never the file contents in a list.
-            "anexos": visit.anexos.defer("content").select_related("practitioner"),
-            "anexo_form": AttachmentForm(),
-            "remove_anexos": not visit.is_finalized,
+            "attachments": visit.anexos.defer("content").select_related("practitioner"),
+            "attachment_form": AttachmentForm(),
+            "can_remove_attachments": not visit.is_finalized,
         },
     )
 
@@ -178,8 +178,8 @@ def print_visit(request, practitioner, pk):
         "medical_records/print.html",
         {
             "visit": visit,
-            "campos": _fields(visit),
-            "adendos": visit.adendos.select_related("practitioner"),
+            "fields": _fields(visit),
+            "addenda": visit.adendos.select_related("practitioner"),
         },
     )
 
@@ -215,7 +215,7 @@ def new_certificate(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "titulo": _("Emitir atestado")},
+        {"form": form, "visit": visit, "title": _("Emitir atestado")},
     )
 
 
@@ -235,7 +235,7 @@ def new_prescription(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "titulo": _("Emitir receita")},
+        {"form": form, "visit": visit, "title": _("Emitir receita")},
     )
 
 
@@ -245,7 +245,7 @@ def certificate(request, practitioner, pk):
         Certificate.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
     log_event(Action.VIEWED, certificate)
-    return render(request, "medical_records/certificate.html", {"atestado": certificate})
+    return render(request, "medical_records/certificate.html", {"certificate": certificate})
 
 
 @requires_practitioner
@@ -256,7 +256,7 @@ def prescription(request, practitioner, pk):
     log_event(Action.VIEWED, prescription)
     rows = [row for row in prescription.medications.splitlines() if row.strip()]
     return render(
-        request, "medical_records/prescription.html", {"receita": prescription, "linhas": rows}
+        request, "medical_records/prescription.html", {"prescription": prescription, "rows": rows}
     )
 
 
@@ -303,7 +303,7 @@ def new_exam_request(request, practitioner, pk):
     return render(
         request,
         "medical_records/document_form.html",
-        {"form": form, "visit": visit, "titulo": _("Pedir exames")},
+        {"form": form, "visit": visit, "title": _("Pedir exames")},
     )
 
 
@@ -314,7 +314,9 @@ def exam_request(request, practitioner, pk):
     )
     log_event(Action.VIEWED, pedido)
     rows = [row for row in pedido.exams.splitlines() if row.strip()]
-    return render(request, "medical_records/exam_request.html", {"pedido": pedido, "linhas": rows})
+    return render(
+        request, "medical_records/exam_request.html", {"exam_request": pedido, "rows": rows}
+    )
 
 
 @require_POST

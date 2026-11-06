@@ -185,7 +185,7 @@ def test_search_by_unaccented_name_code_and_cpf(admin_a, clinica_a):
     url = reverse("patients:list")
 
     def nomes(**params):
-        return [p.name for p in admin_a.get(url, params).context["pagina"]]
+        return [p.name for p in admin_a.get(url, params).context["page"]]
 
     assert nomes(q="joao conceicao") == ["João Conceição"]
     assert nomes(q="529.982") == ["João Conceição"]
@@ -200,7 +200,7 @@ def test_kind_and_status_filters(admin_a, clinica_a):
     url = reverse("patients:list")
 
     def nomes(**params):
-        return sorted(p.name for p in admin_a.get(url, params).context["pagina"])
+        return sorted(p.name for p in admin_a.get(url, params).context["page"])
 
     assert nomes() == ["Ativo PF", "Empresa"]
     assert nomes(status="inativos") == ["Inativo PF"]
@@ -220,7 +220,7 @@ def test_patient_of_another_clinic_gives_404(rota, admin_a, clinica_b):
 def test_list_and_search_do_not_show_another_clinic(admin_a, clinica_b):
     criar_paciente(clinica_b, name="Paciente da B", tax_id="52998224725")
     for search in ["", "Paciente da B", "52998224725"]:
-        page = admin_a.get(reverse("patients:list"), {"q": search}).context["pagina"]
+        page = admin_a.get(reverse("patients:list"), {"q": search}).context["page"]
         assert len(page) == 0
 
 
@@ -247,7 +247,7 @@ def test_admin_archives_and_restores(admin_a, clinica_a, criar_usuario, cliente_
 
     patient_list = reverse("patients:list")
     for status, esperado in (("todos", []), ("arquivados", [patient])):
-        assert list(admin_a.get(patient_list, {"status": status}).context["pagina"]) == esperado
+        assert list(admin_a.get(patient_list, {"status": status}).context["page"]) == esperado
     patient_record = admin_a.get(reverse("patients:record", args=[patient.pk])).content.decode()
     assert "Restaurar" in patient_record and "Excluir definitivamente" in patient_record
     assert admin_a.get(reverse("patients:edit", args=[patient.pk])).status_code == 404
@@ -317,7 +317,7 @@ def test_does_not_archive_with_open_bill(admin_a, clinica_a, django_user_model):
         )
     url = reverse("patients:archive", args=[patient.pk])
     page = admin_a.get(url)
-    assert [p.number for p in page.context["abertas"]] == [1, 2]
+    assert [p.number for p in page.context["open_items"]] == [1, 2]
     content = page.content.decode()
     assert reverse("finance:entry", args=[entry.pk]) in content
     assert 'btn btn-secondary">Arquivar<' not in content
@@ -340,7 +340,7 @@ def test_does_not_archive_with_open_bill(admin_a, clinica_a, django_user_model):
     with use_clinic(clinica_a):
         primeira, segunda = entry.parcelas.order_by("number")
     receber(primeira)
-    assert [p.number for p in admin_a.get(url).context["abertas"]] == [2]
+    assert [p.number for p in admin_a.get(url).context["open_items"]] == [2]
     receber(segunda)
     assert admin_a.post(url).status_code == 302
     patient.refresh_from_db()

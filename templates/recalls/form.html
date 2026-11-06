@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if recall.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if rechamada.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if recall.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %}</h1>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   <input type="hidden" name="next" value="{{ next }}">
-  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
-  {% include "includes/patient_search.html" with campo=form.patient patient=patient %}
-  {% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}
-  {% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}
-  {% if rechamada.pk %}{% with campo=form.done %}{% include "includes/field.html" %}{% endwith %}{% endif %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  {% include "includes/patient_search.html" with field=form.patient patient=patient %}
+  {% with field=form.date %}{% include "includes/field.html" %}{% endwith %}
+  {% with field=form.description %}{% include "includes/field.html" %}{% endwith %}
+  {% if recall.pk %}{% with field=form.done %}{% include "includes/field.html" %}{% endwith %}{% endif %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{{ next|default:'/rechamadas/' }}">{% translate "Cancelar" %}</a>
 </form>

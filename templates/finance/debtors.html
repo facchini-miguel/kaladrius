@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Devedores" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Devedores" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -9,14 +9,14 @@
   <a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "A receber" %}</a>
 </div>
 <div class="row g-3 mb-3">
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_vencido|currency }}</div></div></div></div>
-  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_a_vencer|currency }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Total vencido" %}</div><div class="fs-5 text-danger">{{ total_overdue|currency }}</div></div></div></div>
+  <div class="col-sm-6"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "A vencer" %}</div><div class="fs-5">{{ total_upcoming|currency }}</div></div></div></div>
 </div>
 <form method="get" class="row g-2 mb-2" role="search">
-  <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Paciente ou pagador' %}" aria-label="{% translate 'Paciente ou pagador' %}"></div>
+  <div class="col-sm-8 col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate 'Paciente ou pagador' %}" aria-label="{% translate 'Paciente ou pagador' %}"></div>
   <div class="col-auto"><button type="submit" class="btn btn-primary">{% translate "Buscar" %}</button></div>
 </form>
-<p class="text-body-secondary small mb-2">{% blocktranslate count n=pagina.paginator.count %}{{ n }} devedor{% plural %}{{ n }} devedores{% endblocktranslate %}</p>
+<p class="text-body-secondary small mb-2">{% blocktranslate count n=page.paginator.count %}{{ n }} devedor{% plural %}{{ n }} devedores{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
@@ -32,13 +32,13 @@
       </tr>
     </thead>
     <tbody>
-      {% for linha in pagina %}
+      {% for row in page %}
       <tr>
-        <td>{% if linha.patient_id %}<a href="{% url 'patients:record' linha.patient_id %}">{{ linha.name }}</a>{% else %}{{ linha.name }}{% endif %}</td>
-        <td class="text-end text-nowrap fw-semibold{% if linha.vencido %} text-danger{% endif %}">{{ linha.vencido|currency }}</td>
-        {% for value in linha.faixas %}<td class="text-end text-nowrap">{% if value %}{{ value|currency }}{% else %}—{% endif %}</td>{% endfor %}
-        <td class="text-end text-nowrap">{% if linha.a_vencer %}{{ linha.a_vencer|currency }}{% else %}—{% endif %}</td>
-        <td class="text-nowrap">{{ linha.mais_antigo|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
+        <td>{% if row.patient_id %}<a href="{% url 'patients:record' row.patient_id %}">{{ row.name }}</a>{% else %}{{ row.name }}{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold{% if row.vencido %} text-danger{% endif %}">{{ row.vencido|currency }}</td>
+        {% for value in row.faixas %}<td class="text-end text-nowrap">{% if value %}{{ value|currency }}{% else %}—{% endif %}</td>{% endfor %}
+        <td class="text-end text-nowrap">{% if row.a_vencer %}{{ row.a_vencer|currency }}{% else %}—{% endif %}</td>
+        <td class="text-nowrap">{{ row.mais_antigo|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
       </tr>
       {% empty %}
       <tr><td colspan="8" class="text-body-secondary">{% translate "Ninguém está devendo." %}</td></tr>

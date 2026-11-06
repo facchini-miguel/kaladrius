@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Atestado" %} · {{ atestado.visit.patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Atestado" %} · {{ certificate.visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' atestado.visit_id %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' certificate.visit_id %}">{% translate "Voltar" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 48rem;">
-  {% translate "ATESTADO" as titulo_documento %}
-  {% include "medical_records/_header.html" with data_documento=atestado.created_at %}
+  {% translate "ATESTADO" as document_title %}
+  {% include "medical_records/_header.html" with document_date=certificate.created_at %}
   {% get_current_language as language %}
   {# Month names are capitalized in Django's Portuguese dates, but not in running text. #}
-  {% if language == "pt-br" %}{% with data_longa=atestado.date|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with date=data_longa %}{% endwith %}
-  {% else %}{% include "medical_records/_certificate_text.html" with date=atestado.date|date:"DATE_FORMAT" %}{% endif %}
-  {% if atestado.note %}<p>{{ atestado.note|linebreaksbr }}</p>{% endif %}
-  {% include "medical_records/_signature.html" with practitioner=atestado.practitioner %}
+  {% if language == "pt-br" %}{% with long_date=certificate.date|date:"DATE_FORMAT"|lower %}{% include "medical_records/_certificate_text.html" with date=long_date %}{% endwith %}
+  {% else %}{% include "medical_records/_certificate_text.html" with date=certificate.date|date:"DATE_FORMAT" %}{% endif %}
+  {% if certificate.note %}<p>{{ certificate.note|linebreaksbr }}</p>{% endif %}
+  {% include "medical_records/_signature.html" with practitioner=certificate.practitioner %}
 </div>
 {% endblock %}

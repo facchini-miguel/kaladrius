@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if instancia.pk %}{{ instancia.name }}{% else %}{% translate "Novo funcionário" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo funcionário" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if instancia.pk %}{{ instancia.name }}{% else %}{% translate "Novo funcionário" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo funcionário" %}{% endif %}</h1>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if instancia.pk %}{% url 'staff:employee' instancia.pk %}{% else %}{% url 'staff:list' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <a class="btn btn-link" href="{% if instance.pk %}{% url 'staff:employee' instance.pk %}{% else %}{% url 'staff:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>
 {% endblock %}

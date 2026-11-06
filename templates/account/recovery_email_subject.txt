@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktranslate with sistema=nome_sistema %}{{ sistema }}: criar uma senha nova{% endblocktranslate %}
+{% load i18n %}{% blocktranslate with sistema=system_name %}{{ sistema }}: criar uma senha nova{% endblocktranslate %}

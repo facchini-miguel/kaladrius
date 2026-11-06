@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ titulo }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ title }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="mx-auto" style="max-width: 52rem;">
@@ -19,15 +19,15 @@
       {% endif %}
     </div>
   </div>
-  {% if lei %}
+  {% if law %}
   <div class="card border-primary mb-4">
     <div class="card-body">
       <h2 class="h5">{% translate "País da clínica" %}: {{ country }}</h2>
       <p>{% translate "Esta política foi escrita para a lei brasileira. Para esta clínica valem a lei e a autoridade abaixo: as referências à LGPD e à ANPD correspondem a elas, e os direitos da seção 8 são exercidos nos termos dessa lei." %}</p>
       <ul class="mb-0">
-        <li>{% translate "Lei de proteção de dados" %}: {{ lei.lei }}</li>
-        {% if lei.autoridade %}<li>{% translate "Autoridade" %}: {% if lei.site %}<a href="{{ lei.site }}" rel="noopener">{{ lei.autoridade }}</a>{% else %}{{ lei.autoridade }}{% endif %}</li>{% endif %}
-        <li>{{ prazo_de_guarda }}</li>
+        <li>{% translate "Lei de proteção de dados" %}: {{ law.lei }}</li>
+        {% if law.autoridade %}<li>{% translate "Autoridade" %}: {% if law.site %}<a href="{{ law.site }}" rel="noopener">{{ law.autoridade }}</a>{% else %}{{ law.autoridade }}{% endif %}</li>{% endif %}
+        <li>{{ retention_period }}</li>
       </ul>
     </div>
   </div>

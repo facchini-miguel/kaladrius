@@ -1,68 +1,68 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
 
 <form method="post" novalidate id="patient-form">
   {% csrf_token %}
-  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
 
   <div class="card mb-3">
     <div class="card-header">{% translate "Identificação" %}</div>
     <div class="card-body row">
-      <div class="col-12">{% with campo=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6 pj-only">{% with campo=form.legal_name %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3">{% with campo=form.tax_id %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-12">{% with field=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6 pj-only">{% with field=form.legal_name %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with field=form.tax_id %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.rg %}{# Brazil only (decision 117) #}
-      <div class="col-md-3 pj-only">{% with campo=form.state_registration %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3 pf-only">{% with campo=form.rg %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3 pj-only">{% with field=form.state_registration %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3 pf-only">{% with field=form.rg %}{% include "includes/field.html" %}{% endwith %}</div>
       {% endif %}
-      <div class="col-md-3 pf-only">{% with campo=form.birth_date %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3 pf-only">{% with campo=form.sex %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3 pf-only">{% with campo=form.marital_status %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6 pf-only">{% with campo=form.occupation %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6 pf-only">{% with campo=form.guardian %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3 pf-only">{% with field=form.birth_date %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3 pf-only">{% with field=form.sex %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3 pf-only">{% with field=form.marital_status %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6 pf-only">{% with field=form.occupation %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6 pf-only">{% with field=form.guardian %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-header">{% translate "Contato" %}</div>
     <div class="card-body row">
-      <div class="col-md-3">{% with campo=form.mobile_phone %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3">{% with campo=form.home_phone %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3">{% with campo=form.whatsapp %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-3">{% with campo=form.work_phone %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.email %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with field=form.mobile_phone %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with field=form.home_phone %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with field=form.whatsapp %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-3">{% with field=form.work_phone %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.email %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-header">{% translate "Endereço" %}</div>
     <div class="card-body row">
-      <div class="col-md-2">{% with campo=form.postal_code %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-2">{% with field=form.postal_code %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.state %}
-      <div class="col-md-4">{% with campo=form.state %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.city %}{% include "includes/field.html" %}{% endwith %}<div id="address-suggestions"></div></div>
+      <div class="col-md-4">{% with field=form.state %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.city %}{% include "includes/field.html" %}{% endwith %}<div id="address-suggestions"></div></div>
       {% else %}{# outside Brazil: typed state and city (decision 117) #}
-      <div class="col-md-4">{% with campo=form.state_name %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.city_name %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with field=form.state_name %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.city_name %}{% include "includes/field.html" %}{% endwith %}</div>
       {% endif %}
-      <div class="col-md-6">{% with campo=form.street %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-2">{% with campo=form.number %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-4">{% with campo=form.complement %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-6">{% with campo=form.neighborhood %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.street %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-2">{% with field=form.number %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with field=form.complement %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-6">{% with field=form.neighborhood %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
   </div>
 
   <div class="card mb-3">
     <div class="card-header">{% translate "Observações" %}</div>
     <div class="card-body">
-      {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
-      {% with campo=form.active %}{% include "includes/field.html" %}{% endwith %}
+      {% with field=form.notes %}{% include "includes/field.html" %}{% endwith %}
+      {% with field=form.active %}{% include "includes/field.html" %}{% endwith %}
     </div>
   </div>
 

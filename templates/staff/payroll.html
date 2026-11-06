@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Folha do mês" %} {{ period|date:"m/Y" }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Folha do mês" %} {{ period|date:"m/Y" }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
   <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
   <div class="btn-group">
-    <a class="btn btn-outline-secondary" href="?month={{ anterior|date:'Y-m' }}">← {{ anterior|date:"m/Y" }}</a>
-    <a class="btn btn-outline-secondary" href="?month={{ proximo|date:'Y-m' }}">{{ proximo|date:"m/Y" }} →</a>
+    <a class="btn btn-outline-secondary" href="?month={{ previous|date:'Y-m' }}">← {{ previous|date:"m/Y" }}</a>
+    <a class="btn btn-outline-secondary" href="?month={{ following|date:'Y-m' }}">{{ following|date:"m/Y" }} →</a>
   </div>
 </div>
 <p class="text-body-secondary small">{% translate "Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. Encargos, férias e 13º ficam com o contador." %}</p>
@@ -29,33 +29,33 @@
         </tr>
       </thead>
       <tbody>
-        {% for folha, form in linhas %}
+        {% for payslip, form in rows %}
         <tr>
-          <td><a href="{% url 'staff:employee' folha.employee_id %}">{{ folha.employee.name }}</a></td>
-          <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
+          <td><a href="{% url 'staff:employee' payslip.employee_id %}">{{ payslip.employee.name }}</a></td>
+          <td class="text-end text-nowrap">{{ payslip.salary|currency }}</td>
           {% if form %}
-          <td>{{ form.overtime_hours }}{% for erro in form.overtime_hours.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
-          <td>{{ form.overtime_rate }}{% for erro in form.overtime_rate.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
-          <td>{{ form.absences }}{% for erro in form.absences.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}</td>
+          <td>{{ form.overtime_hours }}{% for error in form.overtime_hours.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+          <td>{{ form.overtime_rate }}{% for error in form.overtime_rate.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+          <td>{{ form.absences }}{% for error in form.absences.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
           <td>{{ form.note }}</td>
           {% else %}
-          <td>{{ folha.overtime_hours }}</td>
-          <td class="text-nowrap">{{ folha.overtime_rate|currency }}</td>
-          <td>{{ folha.absences }}</td>
-          <td>{{ folha.note|default:"—" }}{% if folha.is_posted %} · <a href="{% url 'finance:entry' folha.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ payslip.overtime_hours }}</td>
+          <td class="text-nowrap">{{ payslip.overtime_rate|currency }}</td>
+          <td>{{ payslip.absences }}</td>
+          <td>{{ payslip.note|default:"—" }}{% if payslip.is_posted %} · <a href="{% url 'finance:entry' payslip.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
           {% endif %}
-          <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
+          <td class="text-end text-nowrap fw-semibold">{{ payslip.total|currency }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if pode.pessoal.criar %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
+        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if can.pessoal.criar %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
         {% endfor %}
       </tbody>
-      {% if linhas %}
+      {% if rows %}
       <tfoot><tr class="fw-semibold"><td colspan="6">{% translate "Total do mês" %}</td><td class="text-end text-nowrap">{{ total|currency }}</td></tr></tfoot>
       {% endif %}
     </table>
   </div>
-  {% if pode_alterar and pendentes %}
+  {% if can_change and pending %}
   <div class="d-flex flex-wrap gap-2 mb-4">
     <button type="submit" class="btn btn-outline-primary">{% translate "Salvar" %}</button>
   </div>
@@ -64,8 +64,8 @@
     <div class="card-body">
       <p class="text-body-secondary small">{% translate "Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta no financeiro." %}</p>
       <div class="row">
-        <div class="col-md-6">{% with campo=lancar_form.category %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-6">{% with campo=lancar_form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with field=post_form.category %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with field=post_form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
       <button type="submit" name="action" value="lancar" class="btn btn-primary">{% translate "Salvar e lançar no financeiro" %}</button>
     </div>

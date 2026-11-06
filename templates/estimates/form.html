@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if estimate %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if estimate %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}{% else %}{% translate "Novo orçamento" %}{% endif %}</h1>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
-  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
-  {% include "includes/patient_search.html" with campo=form.patient patient=patient %}
-  {% with campo=form.practitioner %}{% include "includes/field.html" %}{% endwith %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  {% include "includes/patient_search.html" with field=form.patient patient=patient %}
+  {% with field=form.practitioner %}{% include "includes/field.html" %}{% endwith %}
   <div class="row">
-    <div class="col-md-6">{% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-6">{% with campo=form.valid_until %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.valid_until %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
-  {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
+  {% with field=form.notes %}{% include "includes/field.html" %}{% endwith %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{% if estimate %}{% url 'estimates:detail' estimate.pk %}{% else %}{% url 'estimates:list' %}{% endif %}">{% translate "Cancelar" %}</a>
 </form>

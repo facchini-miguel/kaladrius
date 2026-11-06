@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ titulo }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ title }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{{ titulo }}</h1>
+<h1 class="h3 mb-1">{{ title }}</h1>
 <p class="text-body-secondary mb-4">{% translate "Caixa do dia" %} · {{ cash_register.account.name }}</p>
-{% if esperado is not None %}<div class="alert alert-light border" style="max-width: 32rem;">{% translate "Deve haver na gaveta" %}: <strong>{{ esperado|currency }}</strong></div>{% endif %}
+{% if expected is not None %}<div class="alert alert-light border" style="max-width: 32rem;">{% translate "Deve haver na gaveta" %}: <strong>{{ expected|currency }}</strong></div>{% endif %}
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}

@@ -1,53 +1,53 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Rechamadas" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Rechamadas" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Rechamadas" %}</h1>
-  {% if pode.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
+  {% if can.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
 </div>
 
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-4"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Nome do paciente' %}"></div>
+  <div class="col-md-4"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Nome do paciente' %}"></div>
   <div class="col-6 col-md-2">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="pendentes"{% if filtros.status == "pendentes" %} selected{% endif %}>{% translate "Pendentes" %}</option>
-      <option value="concluidas"{% if filtros.status == "concluidas" %} selected{% endif %}>{% translate "Concluídas" %}</option>
-      <option value="todas"{% if filtros.status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
+      <option value="pendentes"{% if filters.status == "pendentes" %} selected{% endif %}>{% translate "Pendentes" %}</option>
+      <option value="concluidas"{% if filters.status == "concluidas" %} selected{% endif %}>{% translate "Concluídas" %}</option>
+      <option value="todas"{% if filters.status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filtros.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
-  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filtros.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
   <div class="col-6 col-md-2"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
 </form>
 
-<p class="text-body-secondary small">{% blocktranslate count total=pagina.paginator.count %}{{ total }} rechamada{% plural %}{{ total }} rechamadas{% endblocktranslate %}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} rechamada{% plural %}{{ total }} rechamadas{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Descrição" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
     <tbody>
-      {% for rechamada in pagina %}
+      {% for recall in page %}
       <tr>
-        <td class="text-nowrap">{{ rechamada.date|date:"SHORT_DATE_FORMAT" }}</td>
-        <td><a href="{% url 'patients:record' rechamada.patient_id %}">{{ rechamada.patient.name }}</a></td>
-        <td>{{ rechamada.description }}</td>
+        <td class="text-nowrap">{{ recall.date|date:"SHORT_DATE_FORMAT" }}</td>
+        <td><a href="{% url 'patients:record' recall.patient_id %}">{{ recall.patient.name }}</a></td>
+        <td>{{ recall.description }}</td>
         <td>
-          {% if rechamada.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
-          {% elif rechamada.date < hoje %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
-          {% elif rechamada.date == hoje %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
+          {% if recall.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
+          {% elif recall.date < today %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
+          {% elif recall.date == today %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if pode.rechamadas.alterar %}
-          <form method="post" action="{% url 'recalls:complete' rechamada.pk %}" class="d-inline">
+          {% if can.rechamadas.alterar %}
+          <form method="post" action="{% url 'recalls:complete' recall.pk %}" class="d-inline">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" class="btn btn-sm btn-outline-success">{% if rechamada.done %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">{% if recall.done %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
           </form>
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' rechamada.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' recall.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if pode.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' rechamada.pk %}">{% translate "Excluir" %}</a>{% endif %}
+          {% if can.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' recall.pk %}">{% translate "Excluir" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}

@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Pacientes" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Pacientes" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Pacientes" %}</h1>
-  {% if pode.pacientes.criar %}
+  {% if can.pacientes.criar %}
   <a class="btn btn-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>
   {% endif %}
 </div>
 
-{% document_label "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, código ou {{ documentos }}{% endblocktranslate %}
+{% document_label "paciente" "empresa" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, código ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
-    <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
-           placeholder="{{ dica_busca }}" aria-label="{% translate 'Buscar paciente' %}">
+    <input type="search" name="q" value="{{ search }}" class="form-control" autofocus
+           placeholder="{{ search_hint }}" aria-label="{% translate 'Buscar paciente' %}">
   </div>
   <div class="col-6 col-md-2">
     <select name="kind" class="form-select" aria-label="{% translate 'Tipo' %}">
       <option value="">{% translate "Todos os tipos" %}</option>
-      {% for value, rotulo in tipos %}
-      <option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ rotulo }}</option>
+      {% for value, label in types %}
+      <option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
   </div>
@@ -30,7 +30,7 @@
       <option value="ativos"{% if status == "ativos" %} selected{% endif %}>{% translate "Ativos" %}</option>
       <option value="inativos"{% if status == "inativos" %} selected{% endif %}>{% translate "Inativos" %}</option>
       <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
-      {% if pode.pacientes.excluir %}
+      {% if can.pacientes.excluir %}
       <option value="arquivados"{% if status == "arquivados" %} selected{% endif %}>{% translate "Arquivados" %}</option>
       {% endif %}
     </select>
@@ -40,7 +40,7 @@
   </div>
 </form>
 
-<p class="text-body-secondary small">{% blocktranslate count total=pagina.paginator.count %}{{ total }} paciente{% plural %}{{ total }} pacientes{% endblocktranslate %}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} paciente{% plural %}{{ total }} pacientes{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
@@ -55,7 +55,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for patient in pagina %}
+      {% for patient in page %}
       <tr>
         <td>{{ patient.pk }}</td>
         <td>
@@ -72,10 +72,10 @@
           {% if patient.archived %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>
           {% else %}
-          {% if pode.pacientes.alterar %}
+          {% if can.pacientes.alterar %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' patient.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if pode.pacientes.excluir %}
+          {% if can.pacientes.excluir %}
           <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' patient.pk %}">{% translate "Arquivar" %}</a>
           {% endif %}
           {% endif %}

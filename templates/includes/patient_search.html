@@ -1,13 +1,13 @@
-{% load i18n formats %}{% comment %}Patient search-as-you-type. Expects: campo (the hidden "paciente" field), paciente (current patient or None); optional rotulo (label) and ajuda (help text).{% endcomment %}
-{% document_label "paciente" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Digite o nome, código ou {{ documentos }}{% endblocktranslate %}
+{% load i18n formats %}{% comment %}Patient search-as-you-type. Expects: field (the hidden "patient" field), patient (current patient or None); optional label and help_text.{% endcomment %}
+{% document_label "paciente" "empresa" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Digite o nome, código ou {{ documentos }}{% endblocktranslate %}
 <div class="mb-3 position-relative patient-search">
-  <label class="form-label" for="patient-search">{% if rotulo %}{{ rotulo }}{% else %}{% translate "Paciente" %}{% endif %}{% if campo.field.required %} *{% endif %}</label>
-  <input type="search" id="patient-search" class="form-control patient-search-text{% if campo.errors %} is-invalid{% endif %}" autocomplete="off"
-         placeholder="{{ dica_busca }}" value="{{ patient.name|default:'' }}"
+  <label class="form-label" for="patient-search">{% if label %}{{ label }}{% else %}{% translate "Paciente" %}{% endif %}{% if field.field.required %} *{% endif %}</label>
+  <input type="search" id="patient-search" class="form-control patient-search-text{% if field.errors %} is-invalid{% endif %}" autocomplete="off"
+         placeholder="{{ search_hint }}" value="{{ patient.name|default:'' }}"
          name="q" hx-get="{% url 'patients:suggestions' %}" hx-trigger="input changed delay:300ms"
          hx-target="next .patient-search-suggestions">
-  {{ campo }}
+  {{ field }}
   <div class="list-group position-absolute w-100 shadow-sm patient-search-suggestions" style="z-index: 10;"></div>
-  {% if ajuda %}<div class="form-text">{{ ajuda }}</div>{% endif %}
-  {% for erro in campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+  {% if help_text %}<div class="form-text">{{ help_text }}</div>{% endif %}
+  {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
 </div>

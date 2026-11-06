@@ -24,7 +24,7 @@ def employee_list(request):
     today = timezone.localdate()
     for employee in funcionarios:
         employee.salario_atual = employee.salary_on(today)
-    return render(request, "staff/list.html", {"funcionarios": funcionarios})
+    return render(request, "staff/list.html", {"employees": funcionarios})
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
@@ -35,9 +35,9 @@ def employee(request, pk):
         "staff/employee.html",
         {
             "employee": employee,
-            "salarios": employee.salarios.select_related("created_by"),
-            "folhas": employee.folhas.select_related("entry")[:24],
-            "salario_atual": employee.salary_on(timezone.localdate()),
+            "salaries": employee.salarios.select_related("created_by"),
+            "payslips": employee.folhas.select_related("entry")[:24],
+            "current_salary": employee.salary_on(timezone.localdate()),
         },
     )
 
@@ -66,7 +66,7 @@ def _employee_form(request, instancia):
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
         return redirect("staff:employee", pk=employee.pk)
-    return render(request, "staff/form.html", {"form": form, "instancia": instancia})
+    return render(request, "staff/form.html", {"form": form, "instance": instancia})
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
@@ -135,12 +135,12 @@ def payroll(request):
         "staff/payroll.html",
         {
             "period": period,
-            "linhas": rows,
-            "lancar_form": lancar_form,
-            "pode_alterar": pode_alterar,
-            "pendentes": any(form is not None for _folha, form in rows),
+            "rows": rows,
+            "post_form": lancar_form,
+            "can_change": pode_alterar,
+            "pending": any(form is not None for _folha, form in rows),
             "total": sum((f.total for f in folhas), start=0),
-            "anterior": previous,
-            "proximo": proximo,
+            "previous": previous,
+            "following": proximo,
         },
     )

@@ -25,5 +25,5 @@ def whats_new_list(request):
     return render(
         request,
         "whats_new/list.html",
-        {"versoes": versions, "modulos": modulos, "module": modulo},
+        {"versions": versions, "modules": modulos, "module": modulo},
     )
