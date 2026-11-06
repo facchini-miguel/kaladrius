@@ -22,19 +22,19 @@ class Command(BaseCommand):
         else:
             latest = results[-1]
             self.stdout.write(
-                f"Amostras: {summary['amostras']} (a última às {latest['momento']:%H:%M} UTC)"
+                f"Amostras: {summary['samples']} (a última às {latest['time']:%H:%M} UTC)"
             )
             self.stdout.write(
-                f"Processador: média {summary['cpu_media']:.1f}%, pico {summary['cpu_maxima']:.1f}%"
+                f"Processador: média {summary['cpu_avg']:.1f}%, pico {summary['cpu_max']:.1f}%"
             )
             self.stdout.write(
-                f"Memória: pico {summary['memoria_maxima']:.0f}% em uso; "
-                f"swap: pico {summary['swap_maximo']:.0f}%"
+                f"Memória: pico {summary['memory_max']:.0f}% em uso; "
+                f"swap: pico {summary['swap_max']:.0f}%"
             )
-            self.stdout.write(f"Disco: {summary['disco']:.0f}% em uso")
+            self.stdout.write(f"Disco: {summary['disk']:.0f}% em uso")
             self.stdout.write(
-                f"Rede: {filesizeformat(summary['recebido'])} recebidos, "
-                f"{filesizeformat(summary['enviado'])} enviados"
+                f"Rede: {filesizeformat(summary['received'])} recebidos, "
+                f"{filesizeformat(summary['sent'])} enviados"
             )
             alerts = [
                 f"{key}: {level}" for key, level in health.levels(latest).items() if level != "ok"

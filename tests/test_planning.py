@@ -87,9 +87,9 @@ def test_actual_and_percentage_summing_subgroups(clinica_a, admin):
     pay(clinica_a, "Manutenção", "50")
     pay(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
     despesas = admin.get(f"{URL}?year={HOJE.year}").context["sections"][1]
-    row = next(row for row in despesas["linhas"] if row["group"] == ocupacao)
-    assert (row["realizado"], row["percentage"]) == (Decimal("300.00"), 30)
-    assert despesas["meta"] == Decimal("1000") and despesas["realizado"] == Decimal("300.00")
+    row = next(row for row in despesas["rows"] if row["group"] == ocupacao)
+    assert (row["actual"], row["percentage"]) == (Decimal("300.00"), 30)
+    assert despesas["target"] == Decimal("1000") and despesas["actual"] == Decimal("300.00")
 
 
 def test_subgroup_target_does_not_count_twice(clinica_a):
@@ -102,8 +102,8 @@ def test_subgroup_target_does_not_count_twice(clinica_a):
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
         despesas = services.planning(2026, today=datetime.date(2026, 12, 31))["sections"][1]
-    assert despesas["meta"] == Decimal("5700")
-    assert despesas["esperado"] == Decimal("5700.00")
+    assert despesas["target"] == Decimal("5700")
+    assert despesas["expected"] == Decimal("5700.00")
 
 
 def test_on_track_for_revenue_and_expense(clinica_a):
@@ -115,10 +115,10 @@ def test_on_track_for_revenue_and_expense(clinica_a):
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
         data = services.planning(2026, today=datetime.date(2026, 12, 31))
-    receita = next(row for row in data["sections"][0]["linhas"] if row["meta"])
-    despesa = next(row for row in data["sections"][1]["linhas"] if row["meta"])
+    receita = next(row for row in data["sections"][0]["rows"] if row["target"])
+    despesa = next(row for row in data["sections"][1]["rows"] if row["target"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.
-    assert receita["em_dia"] is False and despesa["em_dia"] is True
+    assert receita["on_track"] is False and despesa["on_track"] is True
 
 
 def test_copy_targets_from_previous_year(clinica_a, admin):

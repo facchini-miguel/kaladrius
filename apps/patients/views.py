@@ -152,8 +152,8 @@ def _history(request, patient):
     )
     now = timezone.now()
     return {
-        "proximos": list(deste.filter(end__gt=now).order_by("start")[:HISTORY]),
-        "anteriores": list(deste.filter(end__lte=now).order_by("-start")[:HISTORY]),
+        "upcoming": list(deste.filter(end__gt=now).order_by("start")[:HISTORY]),
+        "past": list(deste.filter(end__lte=now).order_by("-start")[:HISTORY]),
         "total": deste.count(),
     }
 

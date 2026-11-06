@@ -200,9 +200,9 @@
     {% endif %}
     {% if health_alert %}
     <div class="alert alert-danger d-print-none" role="alert">
-      {% if health_alert.sem_coleta %}{% translate "A saúde do servidor não está sendo coletada." %}
-      {% elif health_alert.parada %}{% blocktranslate with momento=health_alert.parada|date:"SHORT_DATETIME_FORMAT" %}A coleta da saúde do servidor parou em {{ momento }}.{% endblocktranslate %}
-      {% else %}{% translate "O servidor está com recursos no limite:" %} {% for item in health_alert.criticos %}{% if item == "memoria" %}{% translate "memória" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disco" %}{% translate "disco" %}{% else %}{% translate "processador" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
+      {% if health_alert.no_samples %}{% translate "A saúde do servidor não está sendo coletada." %}
+      {% elif health_alert.stopped %}{% blocktranslate with momento=health_alert.stopped|date:"SHORT_DATETIME_FORMAT" %}A coleta da saúde do servidor parou em {{ momento }}.{% endblocktranslate %}
+      {% else %}{% translate "O servidor está com recursos no limite:" %} {% for item in health_alert.critical %}{% if item == "memoria" %}{% translate "memória" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disco" %}{% translate "disco" %}{% else %}{% translate "processador" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
       <a href="{% url 'monitoring:health' %}">{% translate "Ver a saúde do sistema" %}</a>
     </div>
     {% endif %}

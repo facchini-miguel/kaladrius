@@ -126,14 +126,14 @@ def test_reversal_after_payment_is_deducted_from_the_next(cenario):
     receive(cenario, "1000.00", cenario["dra"], date=HOJE)
     with use_clinic(cenario["clinic"]):
         calculo = commissions.pending(cenario["dra"], HOJE)
-        assert (calculo["bruta"], calculo["reversal_deduction"], calculo["amount"]) == (
+        assert (calculo["gross"], calculo["reversal_deduction"], calculo["amount"]) == (
             Decimal("100.00"),
             Decimal("120.00"),
             Decimal("-20.00"),
         )
         # The list adds up in the database (volume test) and must agree with the detail.
         row = next(x for x in commissions.summary(HOJE) if x["practitioner"] == cenario["dra"])
-        chaves = ("received_amount", "bruta", "reversal_deduction", "amount")
+        chaves = ("received_amount", "gross", "reversal_deduction", "amount")
         assert [row[c] for c in chaves] == [calculo[c] for c in chaves]
     # Nothing to pay while the deduction is larger: it waits for more receipts.
     pagar_comissao(cenario, cenario["dra"])

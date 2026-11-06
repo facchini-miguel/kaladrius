@@ -213,7 +213,7 @@ def status(installment, today=None):
         return "paga", _("Paga")
     if installment.due_date < today:
         return "vencida", _("Vencida")
-    if installment.pago > 0:
+    if installment.paid > 0:
         return "parcial", _("Paga em parte")
     return "aberta", pgettext("parcela", "Em aberto")
 
@@ -242,10 +242,10 @@ def debtors(today=None):
         lambda: {
             "patient_id": None,
             "name": "",
-            "faixas": [ZERO] * (len(OVERDUE_BRACKETS) + 1),
-            "vencido": ZERO,
-            "a_vencer": ZERO,
-            "mais_antigo": None,
+            "brackets": [ZERO] * (len(OVERDUE_BRACKETS) + 1),
+            "overdue": ZERO,
+            "not_yet_due": ZERO,
+            "oldest": None,
         }
     )
     for installment in parcelas:
@@ -257,19 +257,19 @@ def debtors(today=None):
         row["name"] = installment["entry__patient__name"] if patient_id else payer
         due_date, balance = installment["due_date"], installment["balance"]
         if due_date >= today:
-            row["a_vencer"] += balance
+            row["not_yet_due"] += balance
             continue
         atraso = (today - due_date).days
         faixa = next(
             (i for i, limit in enumerate(OVERDUE_BRACKETS) if atraso <= limit),
             len(OVERDUE_BRACKETS),
         )
-        row["faixas"][faixa] += balance
-        row["vencido"] += balance
-        if row["mais_antigo"] is None or due_date < row["mais_antigo"]:
-            row["mais_antigo"] = due_date
-    resultado = [row for row in rows.values() if row["vencido"] or row["a_vencer"]]
-    return sorted(resultado, key=lambda row: (-row["vencido"], alphabetical_key(row["name"])))
+        row["brackets"][faixa] += balance
+        row["overdue"] += balance
+        if row["oldest"] is None or due_date < row["oldest"]:
+            row["oldest"] = due_date
+    resultado = [row for row in rows.values() if row["overdue"] or row["not_yet_due"]]
+    return sorted(resultado, key=lambda row: (-row["overdue"], alphabetical_key(row["name"])))
 
 
 def patient_summary(patient, today=None):
@@ -282,10 +282,10 @@ def patient_summary(patient, today=None):
         .order_by("due_date")
     )
     return {
-        "abertas": unpaid,
-        "vencido": sum((p.balance for p in unpaid if p.due_date < today), start=ZERO),
-        "a_vencer": sum((p.balance for p in unpaid if p.due_date >= today), start=ZERO),
-        "pagamentos": list(
+        "unpaid": unpaid,
+        "overdue": sum((p.balance for p in unpaid if p.due_date < today), start=ZERO),
+        "not_yet_due": sum((p.balance for p in unpaid if p.due_date >= today), start=ZERO),
+        "payments": list(
             Payment.objects.filter(installment__entry__patient=patient)
             .select_related("installment__entry", "account")
             .order_by("-date", "-pk")[:5]
@@ -355,10 +355,10 @@ def cash_flow(since, until, por_mes=False, today=None):
 
     rows = defaultdict(
         lambda: {
-            "entradas": ZERO,
-            "saidas": ZERO,
-            "entradas_previstas": ZERO,
-            "saidas_previstas": ZERO,
+            "incoming": ZERO,
+            "outgoing": ZERO,
+            "expected_incoming": ZERO,
+            "expected_outgoing": ZERO,
         }
     )
     for date, kind, amount in (
@@ -366,22 +366,22 @@ def cash_flow(since, until, por_mes=False, today=None):
         .filter(date__gte=since, date__lte=until)
         .values_list("date", "installment__entry__kind", "amount")
     ):
-        rows[key(date)]["entradas" if kind == Entry.Kind.RECEIVABLE else "saidas"] += amount
+        rows[key(date)]["incoming" if kind == Entry.Kind.RECEIVABLE else "outgoing"] += amount
     # Drawer movements to or from outside the system (moves between accounts net to zero).
     for timestamp, kind, amount in CashMovement.objects.filter(
         other_account__isnull=True, created_at__date__gte=since, created_at__date__lte=until
     ).values_list("created_at", "kind", "amount"):
         date = timezone.localtime(timestamp).date()
-        rows[key(date)]["saidas" if kind == CashMovement.Kind.WITHDRAWAL else "entradas"] += amount
+        rows[key(date)]["outgoing" if kind == CashMovement.Kind.WITHDRAWAL else "incoming"] += amount
     for installment in (
         Installment.objects.unpaid()
         .filter(due_date__gte=since, due_date__lte=until)
         .select_related("entry")
     ):
         field = (
-            "entradas_previstas"
+            "expected_incoming"
             if installment.entry.kind == Entry.Kind.RECEIVABLE
-            else "saidas_previstas"
+            else "expected_outgoing"
         )
         rows[key(installment.due_date)][field] += installment.balance
 
@@ -394,23 +394,23 @@ def cash_flow(since, until, por_mes=False, today=None):
     for date in sorted(rows):
         row = rows[date]
         row["date"] = date
-        row["atrasado"] = (
-            not por_mes and date < today and (row["entradas_previstas"] or row["saidas_previstas"])
+        row["late"] = (
+            not por_mes and date < today and (row["expected_incoming"] or row["expected_outgoing"])
         )
         balance += (
-            row["entradas"] - row["saidas"] + row["entradas_previstas"] - row["saidas_previstas"]
+            row["incoming"] - row["outgoing"] + row["expected_incoming"] - row["expected_outgoing"]
         )
         row["balance"] = balance
         resultado.append(row)
     totais = {
         field: sum((row[field] for row in resultado), start=ZERO)
-        for field in ("entradas", "saidas", "entradas_previstas", "saidas_previstas")
+        for field in ("incoming", "outgoing", "expected_incoming", "expected_outgoing")
     }
     return {
-        "linhas": resultado,
-        "totais": totais,
+        "rows": resultado,
+        "totals": totais,
         "opening_balance": opening_balance,
-        "saldo_final": balance,
+        "closing_balance": balance,
     }
 
 
@@ -450,20 +450,20 @@ def report(since, until):
     sem_centro = {None: _("Sem centro de custo")}
     centro = "installment__entry__cost_center__name"
     return {
-        "grupos": grupos,
-        "por_grupo": tree_by_group(recebidos, Category.Kind.INCOME) if grupos else [],
-        "despesas_por_grupo": tree_by_group(pagos, Category.Kind.EXPENSE) if grupos else [],
-        "centros": centros,
-        "por_centro": agrupar(recebidos, centro, sem_centro) if centros else [],
-        "despesas_por_centro": agrupar(pagos, centro, sem_centro) if centros else [],
-        "por_forma": agrupar(recebidos, "method", formas),
-        "por_categoria": agrupar(recebidos, "installment__entry__category__name"),
-        "por_profissional": agrupar(recebidos, "installment__entry__practitioner__name"),
-        "despesas_por_categoria": agrupar(pagos, "installment__entry__category__name"),
-        "total_recebido": total_recebido,
-        "total_pago": total_pago,
-        "resultado": total_recebido - total_pago,
-        "descontos": somar(recebidos, "discount"),
+        "groups": grupos,
+        "by_group": tree_by_group(recebidos, Category.Kind.INCOME) if grupos else [],
+        "expenses_by_group": tree_by_group(pagos, Category.Kind.EXPENSE) if grupos else [],
+        "centers": centros,
+        "by_center": agrupar(recebidos, centro, sem_centro) if centros else [],
+        "expenses_by_center": agrupar(pagos, centro, sem_centro) if centros else [],
+        "by_method": agrupar(recebidos, "method", formas),
+        "by_category": agrupar(recebidos, "installment__entry__category__name"),
+        "by_practitioner": agrupar(recebidos, "installment__entry__practitioner__name"),
+        "expenses_by_category": agrupar(pagos, "installment__entry__category__name"),
+        "total_received": total_recebido,
+        "total_paid": total_pago,
+        "result": total_recebido - total_pago,
+        "discounts": somar(recebidos, "discount"),
         "interest": somar(recebidos, "interest"),
     }
 
@@ -578,14 +578,14 @@ def planning(year, today=None):
             esperado = (meta * fracao).quantize(CENT) if meta else None
             rows.append(
                 {
-                    "nivel": nivel,
+                    "level": nivel,
                     "group": group,
-                    "meta": meta,
-                    "realizado": realizado,
-                    "esperado": esperado,
+                    "target": meta,
+                    "actual": realizado,
+                    "expected": esperado,
                     "percentage": round(100 * realizado / meta) if meta else None,
                     # On track: income at or above where it should be, expenses at or below.
-                    "em_dia": None
+                    "on_track": None
                     if not meta
                     else realizado >= esperado
                     if kind == Category.Kind.INCOME
@@ -598,15 +598,15 @@ def planning(year, today=None):
         secoes.append(
             {
                 "kind": kind,
-                "rotulo": label,
-                "linhas": rows,
-                "sem_grupo": sem_grupo,
-                "meta": meta_total,
-                "esperado": (meta_total * fracao).quantize(CENT),
-                "realizado": realizado_total,
+                "label": label,
+                "rows": rows,
+                "ungrouped": sem_grupo,
+                "target": meta_total,
+                "expected": (meta_total * fracao).quantize(CENT),
+                "actual": realizado_total,
             }
         )
-    return {"year": year, "fracao": fracao, "sections": secoes}
+    return {"year": year, "fraction": fracao, "sections": secoes}
 
 
 @transaction.atomic
@@ -678,13 +678,13 @@ def register_summary(cash_register):
         (m.amount for m in movimentos if m.kind == CashMovement.Kind.WITHDRAWAL), start=ZERO
     )
     return {
-        "pagamentos": pagamentos,
-        "movimentos": movimentos,
-        "entradas": entradas,
-        "saidas": saidas,
-        "reforcos": reforcos,
-        "retiradas": retiradas,
-        "esperado": cash_register.opening_amount + entradas - saidas + reforcos - retiradas,
+        "payments": pagamentos,
+        "movements": movimentos,
+        "incoming": entradas,
+        "outgoing": saidas,
+        "top_ups": reforcos,
+        "withdrawals": retiradas,
+        "expected": cash_register.opening_amount + entradas - saidas + reforcos - retiradas,
     }
 
 
@@ -697,7 +697,7 @@ def move_cash(cash_register, *, kind, amount, reason, user, other_account=None):
         raise ValidationError(_("Escolha uma conta diferente da do caixa."))
     if (
         kind == CashMovement.Kind.WITHDRAWAL
-        and amount > register_summary(cash_register)["esperado"]
+        and amount > register_summary(cash_register)["expected"]
     ):
         raise ValidationError(_("A retirada passa do valor que deveria estar no caixa."))
     return CashMovement.objects.create(
@@ -716,7 +716,7 @@ def close_register(cash_register, *, counted_amount, note, user):
     cash_register = CashRegister.objects.select_for_update().get(pk=cash_register.pk)
     if not cash_register.is_open:
         raise ValidationError(_("Este caixa já foi fechado."))
-    cash_register.expected_amount = register_summary(cash_register)["esperado"]
+    cash_register.expected_amount = register_summary(cash_register)["expected"]
     cash_register.counted_amount = counted_amount
     cash_register.note = note
     cash_register.closed_at = timezone.now()

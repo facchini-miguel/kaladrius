@@ -60,19 +60,17 @@ def superusuario(client, django_user_model):
 def test_reads_samples_skips_cut_line_and_computes_percentages(pasta):
     pasta(amostra(10, disponivel=250, swap_livre=750), '{"momento": "2026-10-27T1')
     (lida,) = health.samples()
-    assert (lida["memoria_pct"], lida["swap_pct"]) == (75, 25)
-    assert round(lida["disco_pct"]) == 17
-    assert health.latest()["memoria_pct"] == 75
+    assert (lida["memory_pct"], lida["swap_pct"]) == (75, 25)
+    assert round(lida["disk_pct"]) == 17
+    assert health.latest()["memory_pct"] == 75
 
 
 def amostra_em_ingles(minutos_atras, **valores):
     """The same sample with the fields health.sh writes since decision 149."""
     antiga = json.loads(amostra(minutos_atras, **valores))
-    nomes = {interno: field for field, interno in health.FIELDS.items()}
-    nova = {nomes.get(key, key): value for key, value in antiga.items()}
-    nomes_container = {interno: field for field, interno in health.CONTAINER_FIELDS.items()}
+    nova = {health.OLD_FIELDS.get(key, key): value for key, value in antiga.items()}
     nova["containers"] = [
-        {nomes_container.get(key, key): value for key, value in c.items()}
+        {health.OLD_CONTAINER_FIELDS.get(key, key): value for key, value in c.items()}
         for c in antiga["containers"]
     ]
     return json.dumps(nova)
@@ -83,18 +81,18 @@ def test_reads_english_and_old_samples(pasta):
     pasta(amostra(20, disponivel=250), amostra_em_ingles(10, disponivel=250, swap_livre=750))
     antiga, nova = health.samples()
     assert "time" in amostra_em_ingles(10)
-    assert (nova["memoria_pct"], nova["swap_pct"]) == (75, 25)
-    assert nova["momento"] > antiga["momento"]
+    assert (nova["memory_pct"], nova["swap_pct"]) == (75, 25)
+    assert nova["time"] > antiga["time"]
     assert nova["containers"] == antiga["containers"]
-    assert health.latest()["memoria_pct"] == 75
+    assert health.latest()["memory_pct"] == 75
 
 
 def test_network_per_second_and_server_restart(pasta):
     pasta(amostra(10, rede=0), amostra(5, rede=300_000), amostra(0, rede=1000))  # reboot
     results = health.with_network(health.samples())
-    assert results[1]["rede_entrada"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
-    assert results[2]["rede_entrada"] is None
-    assert health.summary(results)["recebido"] == pytest.approx(300_000, rel=0.01)
+    assert results[1]["network_in"] == pytest.approx(1000, rel=0.01)  # 300 kB in 300 s
+    assert results[2]["network_in"] is None
+    assert health.summary(results)["received"] == pytest.approx(300_000, rel=0.01)
 
 
 def test_levels_and_stopped_collection(pasta):
@@ -102,9 +100,9 @@ def test_levels_and_stopped_collection(pasta):
     latest = health.latest()
     assert health.levels(latest) == {
         "cpu": "ok",
-        "memoria": "critico",
+        "memory": "critico",
         "swap": "atencao",
-        "disco": "critico",
+        "disk": "critico",
     }
     assert health.stopped(latest)
 
@@ -146,9 +144,9 @@ def test_screen_without_samples(settings, tmp_path, superusuario):
 @pytest.mark.parametrize(
     ("rows", "esperado"),
     [
-        ([], {"sem_coleta": True}),
-        ([amostra(60)], "parada"),
-        ([amostra(1, disponivel=20, cpu=99)], {"criticos": ["memoria"]}),  # not the CPU
+        ([], {"no_samples": True}),
+        ([amostra(60)], "stopped"),
+        ([amostra(1, disponivel=20, cpu=99)], {"critical": ["memory"]}),  # not the CPU
         ([amostra(1)], None),
     ],
 )
@@ -157,8 +155,8 @@ def test_warning_at_the_top(pasta, superusuario, rows, esperado):
         pasta(*rows)
     context = superusuario.get(reverse("whats_new")).context
     health_alert = context.get("health_alert")
-    if esperado == "parada":
-        assert "parada" in health_alert
+    if esperado == "stopped":
+        assert "stopped" in health_alert
     else:
         assert health_alert == esperado
 
@@ -169,7 +167,7 @@ def test_command_summarizes_24_hours(pasta):
     call_command("health", stdout=saida)
     text = saida.getvalue()
     assert "Amostras: 2" in text and "pico 8.0%" in text
-    assert "disco: critico" in text and "Último backup: nenhum registrado" in text
+    assert "disk: critico" in text and "Último backup: nenhum registrado" in text
 
 
 def test_scale_follows_data_and_lone_point_becomes_dot(pasta):
@@ -179,10 +177,10 @@ def test_scale_follows_data_and_lone_point_becomes_dot(pasta):
     assert health.scale_top(results, [("cpu", "line-1")], piso=10) == 10
     assert health.scale_top(results, [("cpu", "line-1")], maximo=100) == 100
     # Only the second sample has a network rate: one point, drawn as a dot.
-    svg = health.chart(results, [("rede_entrada", "line-1")])
+    svg = health.chart(results, [("network_in", "line-1")])
     assert "<circle" in svg and "<polyline" not in svg
     # The main series (first) is drawn last, on top.
-    svg = health.chart(results, [("cpu", "line-1"), ("cpu_roubada", "line-2")], piso=10)
+    svg = health.chart(results, [("cpu", "line-1"), ("cpu_steal", "line-2")], piso=10)
     assert svg.rindex("line-1") > svg.rindex("line-2")
 
 

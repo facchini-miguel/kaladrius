@@ -16,26 +16,27 @@ from django.utils.dateparse import parse_datetime
 from django.utils.safestring import mark_safe
 
 FILE_NAME = "samples.jsonl"
-# The fields of a sample and of each of its containers, as health.sh writes them: internal names.
-FIELDS = {
-    "time": "momento",
-    "cpu_steal": "cpu_roubada",
-    "load": "carga",
-    "memory_total": "memoria_total",
-    "memory_available": "memoria_disponivel",
-    "swap_free": "swap_livre",
-    "disk_total": "disco_total",
-    "disk_used": "disco_usado",
-    "network_received": "rede_recebido",
-    "network_sent": "rede_enviado",
-    "uptime": "ligado_ha",
+# health.sh writes the fields in English, and they are the names used here (decision 186). Lines
+# from before health.sh wrote English (no "time") carry the old Portuguese names.
+OLD_FIELDS = {
+    "momento": "time",
+    "cpu_roubada": "cpu_steal",
+    "carga": "load",
+    "memoria_total": "memory_total",
+    "memoria_disponivel": "memory_available",
+    "swap_livre": "swap_free",
+    "disco_total": "disk_total",
+    "disco_usado": "disk_used",
+    "rede_recebido": "network_received",
+    "rede_enviado": "network_sent",
+    "ligado_ha": "uptime",
 }
-CONTAINER_FIELDS = {"name": "nome", "memory": "memoria", "memory_pct": "memoria_pct"}
+OLD_CONTAINER_FIELDS = {"nome": "name", "memoria": "memory", "memoria_pct": "memory_pct"}
 COLLECTION_STOPPED_AFTER = datetime.timedelta(minutes=20)
 # A gap longer than this between samples breaks the chart line (collection was down).
 GAP = datetime.timedelta(minutes=15)
 # % in use: (attention, critical).
-THRESHOLDS = {"memoria": (85, 95), "swap": (50, 80), "disco": (80, 90), "cpu": (80, 95)}
+THRESHOLDS = {"memory": (85, 95), "swap": (50, 80), "disk": (80, 90), "cpu": (80, 95)}
 
 
 def _file():
@@ -45,23 +46,23 @@ def _file():
 def _read(row):
     try:
         amostra = json.loads(row)
-        if "time" in amostra:
-            amostra = {FIELDS.get(key, key): value for key, value in amostra.items()}
+        if "time" not in amostra:
+            amostra = {OLD_FIELDS.get(key, key): value for key, value in amostra.items()}
             amostra["containers"] = [
-                {CONTAINER_FIELDS.get(key, key): value for key, value in c.items()}
+                {OLD_CONTAINER_FIELDS.get(key, key): value for key, value in c.items()}
                 for c in amostra.get("containers", [])
             ]
-        amostra["momento"] = parse_datetime(amostra["momento"])
-        if amostra["momento"] is None:
+        amostra["time"] = parse_datetime(amostra["time"])
+        if amostra["time"] is None:
             return None
-        total = amostra["memoria_total"] or 1
-        amostra["memoria_usada"] = total - amostra["memoria_disponivel"]
-        amostra["memoria_pct"] = 100 * amostra["memoria_usada"] / total
-        amostra["swap_usado"] = amostra["swap_total"] - amostra["swap_livre"]
+        total = amostra["memory_total"] or 1
+        amostra["memory_used"] = total - amostra["memory_available"]
+        amostra["memory_pct"] = 100 * amostra["memory_used"] / total
+        amostra["swap_used"] = amostra["swap_total"] - amostra["swap_free"]
         amostra["swap_pct"] = (
-            100 * amostra["swap_usado"] / amostra["swap_total"] if amostra["swap_total"] else 0
+            100 * amostra["swap_used"] / amostra["swap_total"] if amostra["swap_total"] else 0
         )
-        amostra["disco_pct"] = 100 * amostra["disco_usado"] / (amostra["disco_total"] or 1)
+        amostra["disk_pct"] = 100 * amostra["disk_used"] / (amostra["disk_total"] or 1)
         return amostra
     except (ValueError, KeyError, TypeError):
         return None  # a line cut while being written, or from an older format
@@ -74,7 +75,7 @@ def samples(desde=None):
     except OSError:
         return []
     lidas = (_read(row) for row in rows)
-    return [a for a in lidas if a is not None and (desde is None or a["momento"] >= desde)]
+    return [a for a in lidas if a is not None and (desde is None or a["time"] >= desde)]
 
 
 def latest():
@@ -105,29 +106,29 @@ def level(key, value):
 def levels(amostra):
     return {
         "cpu": level("cpu", amostra["cpu"]),
-        "memoria": level("memoria", amostra["memoria_pct"]),
+        "memory": level("memory", amostra["memory_pct"]),
         "swap": level("swap", amostra["swap_pct"]),
-        "disco": level("disco", amostra["disco_pct"]),
+        "disk": level("disk", amostra["disk_pct"]),
     }
 
 
 def stopped(amostra, now=None):
-    return (now or timezone.now()) - amostra["momento"] > COLLECTION_STOPPED_AFTER
+    return (now or timezone.now()) - amostra["time"] > COLLECTION_STOPPED_AFTER
 
 
 def with_network(results):
-    """Add rede_entrada / rede_saida (bytes per second since the previous sample)."""
+    """Add network_in / network_out (bytes per second since the previous sample)."""
     previous = None
     for amostra in results:
-        amostra["rede_entrada"] = amostra["rede_saida"] = None
+        amostra["network_in"] = amostra["network_out"] = None
         if previous is not None:
-            segundos = (amostra["momento"] - previous["momento"]).total_seconds()
-            recebido = amostra["rede_recebido"] - previous["rede_recebido"]
-            enviado = amostra["rede_enviado"] - previous["rede_enviado"]
+            segundos = (amostra["time"] - previous["time"]).total_seconds()
+            recebido = amostra["network_received"] - previous["network_received"]
+            enviado = amostra["network_sent"] - previous["network_sent"]
             # Counters restart at zero when the server reboots.
             if 0 < segundos and recebido >= 0 and enviado >= 0:
-                amostra["rede_entrada"] = recebido / segundos
-                amostra["rede_saida"] = enviado / segundos
+                amostra["network_in"] = recebido / segundos
+                amostra["network_out"] = enviado / segundos
         previous = amostra
     return results
 
@@ -137,27 +138,27 @@ def summary(results):
     if not results:
         return None
     with_network(results)
-    entradas = [a for a in results if a["rede_entrada"] is not None]
+    entradas = [a for a in results if a["network_in"] is not None]
     return {
-        "amostras": len(results),
-        "start": results[0]["momento"],
-        "end": results[-1]["momento"],
-        "cpu_media": sum(a["cpu"] for a in results) / len(results),
-        "cpu_maxima": max(a["cpu"] for a in results),
-        "memoria_maxima": max(a["memoria_pct"] for a in results),
-        "swap_maximo": max(a["swap_pct"] for a in results),
-        "disco": results[-1]["disco_pct"],
-        "recebido": sum(
-            a["rede_entrada"] * (a["momento"] - b["momento"]).total_seconds()
+        "samples": len(results),
+        "start": results[0]["time"],
+        "end": results[-1]["time"],
+        "cpu_avg": sum(a["cpu"] for a in results) / len(results),
+        "cpu_max": max(a["cpu"] for a in results),
+        "memory_max": max(a["memory_pct"] for a in results),
+        "swap_max": max(a["swap_pct"] for a in results),
+        "disk": results[-1]["disk_pct"],
+        "received": sum(
+            a["network_in"] * (a["time"] - b["time"]).total_seconds()
             for b, a in zip(results, results[1:], strict=False)
-            if a["rede_entrada"] is not None
+            if a["network_in"] is not None
         ),
-        "enviado": sum(
-            a["rede_saida"] * (a["momento"] - b["momento"]).total_seconds()
+        "sent": sum(
+            a["network_out"] * (a["time"] - b["time"]).total_seconds()
             for b, a in zip(results, results[1:], strict=False)
-            if a["rede_saida"] is not None
+            if a["network_out"] is not None
         ),
-        "rede_maxima": max((a["rede_entrada"] + a["rede_saida"] for a in entradas), default=0),
+        "network_max": max((a["network_in"] + a["network_out"] for a in entradas), default=0),
     }
 
 
@@ -192,8 +193,8 @@ def chart(
     pontos = [a for a in results if any(a.get(key) is not None for key, _ in series)]
     if not pontos:
         return ""
-    start = start or pontos[0]["momento"]
-    end = end or pontos[-1]["momento"]
+    start = start or pontos[0]["time"]
+    end = end or pontos[-1]["time"]
     duration = max((end - start).total_seconds(), 1)
     topo = scale_top(results, series, maximo, piso)
     if teto:
@@ -224,11 +225,11 @@ def chart(
             value = amostra.get(key)
             if value is None:
                 continue
-            if previous is not None and amostra["momento"] - previous > GAP and current:
+            if previous is not None and amostra["time"] - previous > GAP and current:
                 trechos.append(current)
                 current = []
-            current.append(f"{x(amostra['momento']):.1f},{y(value):.1f}")
-            previous = amostra["momento"]
+            current.append(f"{x(amostra['time']):.1f},{y(value):.1f}")
+            previous = amostra["time"]
         if current:
             trechos.append(current)
         for trecho in trechos:

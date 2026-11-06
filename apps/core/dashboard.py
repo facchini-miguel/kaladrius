@@ -29,19 +29,19 @@ PAYABLE_DAYS = 7
 
 def build(request):
     today = timezone.localdate()
-    painel = {"hoje": today}
+    painel = {"today": today}
     if can(request, Module.SCHEDULE, Action.VIEW):
-        painel["agenda"] = _schedule(request, today)
+        painel["schedule"] = _schedule(request, today)
     if can(request, Module.RECALLS, Action.VIEW):
-        painel["rechamadas"] = _recalls(today)
+        painel["recalls"] = _recalls(today)
     if can(request, Module.BIRTHDAYS, Action.VIEW):
-        painel["aniversariantes"] = _birthdays(today)
+        painel["birthdays"] = _birthdays(today)
     if can(request, Module.ESTIMATES, Action.VIEW):
-        painel["orcamentos"] = _estimates(today)
+        painel["estimates"] = _estimates(today)
     if can(request, Module.RECEIVING, Action.VIEW):
-        painel["recebimentos"] = _receipts(today)
+        painel["receipts"] = _receipts(today)
     if can(request, Module.FINANCE, Action.VIEW):
-        painel["financeiro"] = _finance(today)
+        painel["finance"] = _finance(today)
     return painel
 
 
@@ -72,19 +72,21 @@ def _schedule(request, today):
     )
     vieram, faltaram = marcados.get(status.ATTENDED, 0), marcados.get(status.MISSED, 0)
     return {
-        "lista": do_dia,
+        "items": do_dia,
         # A practitioner sees only their own schedule, so the column would repeat their name.
-        "mostrar_profissional": not own_schedule_only(request),
-        "pacientes": len(pacientes) - contagem[status.CANCELLED],
-        "compareceram": contagem[status.ATTENDED],
-        "faltaram": contagem[status.MISSED],
-        "desmarcaram": contagem[status.CANCELLED],
-        "a_seguir": sum(1 for a in pendentes if a.start > now),
-        "sem_marcacao": sum(1 for a in pendentes if a.start <= now),
-        "proximo": next((a for a in pendentes if a.end > now), None),
-        "agora": now,
-        "faltas_mes": round(100 * faltaram / (vieram + faltaram)) if vieram + faltaram else None,
-        "marcados_mes": vieram + faltaram,
+        "show_practitioner": not own_schedule_only(request),
+        "patients": len(pacientes) - contagem[status.CANCELLED],
+        "attended": contagem[status.ATTENDED],
+        "missed": contagem[status.MISSED],
+        "cancelled": contagem[status.CANCELLED],
+        "upcoming": sum(1 for a in pendentes if a.start > now),
+        "unmarked": sum(1 for a in pendentes if a.start <= now),
+        "next": next((a for a in pendentes if a.end > now), None),
+        "now": now,
+        "missed_pct_month": round(100 * faltaram / (vieram + faltaram))
+        if vieram + faltaram
+        else None,
+        "booked_month": vieram + faltaram,
     }
 
 
@@ -93,9 +95,9 @@ def _recalls(today):
         done=False, date__lte=today, patient__archived=False
     ).select_related("patient")
     return {
-        "lista": list(pendentes.order_by("date", "patient__name")[:LIMIT]),
+        "items": list(pendentes.order_by("date", "patient__name")[:LIMIT]),
         "total": pendentes.count(),
-        "atrasadas": pendentes.filter(date__lt=today).count(),
+        "late": pendentes.filter(date__lt=today).count(),
     }
 
 
@@ -146,11 +148,11 @@ def _receipts(today):
         Installment.objects.unpaid().filter(entry__kind=Entry.Kind.RECEIVABLE, due_date=today)
     )
     return {
-        "recebido": sum((total for _forma, total in por_forma), start=ZERO),
-        "por_forma": por_forma,
-        "a_receber": a_receber,
-        "parcelas_a_receber": parcelas,
-        "caixas": list(
+        "received": sum((total for _forma, total in por_forma), start=ZERO),
+        "by_method": por_forma,
+        "receivable": a_receber,
+        "receivable_count": parcelas,
+        "cash_registers": list(
             CashRegister.objects.filter(closed_at__isnull=True).select_related("account")
         ),
     }
@@ -176,19 +178,19 @@ def _finance(today):
         )
     )
     return {
-        "pago_hoje": pago_hoje,
-        "resultado_hoje": recebido_hoje - pago_hoje,
-        "recebido_mes": recebido_mes,
-        "pago_mes": pago_mes,
-        "resultado_mes": recebido_mes - pago_mes,
-        "resultado_anterior": recebido_anterior - pago_anterior,
-        "inicio_anterior": inicio_anterior,
-        "ate_anterior": ate_anterior,
-        "vencido": vencido,
-        "parcelas_vencidas": parcelas_vencidas,
-        "a_pagar": a_pagar,
-        "contas_a_pagar": contas_a_pagar,
-        "saldo_contas": sum(
+        "paid_today": pago_hoje,
+        "result_today": recebido_hoje - pago_hoje,
+        "received_month": recebido_mes,
+        "paid_month": pago_mes,
+        "result_month": recebido_mes - pago_mes,
+        "previous_result": recebido_anterior - pago_anterior,
+        "previous_start": inicio_anterior,
+        "previous_until": ate_anterior,
+        "overdue": vencido,
+        "overdue_count": parcelas_vencidas,
+        "payable": a_pagar,
+        "payable_count": contas_a_pagar,
+        "account_balances": sum(
             (saldo for _account, saldo in financeiro.account_balances()), start=ZERO
         ),
     }

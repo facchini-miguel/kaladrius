@@ -25,8 +25,8 @@
       <h2 class="h5">{% translate "País da clínica" %}: {{ country }}</h2>
       <p>{% translate "Esta política foi escrita para a lei brasileira. Para esta clínica valem a lei e a autoridade abaixo: as referências à LGPD e à ANPD correspondem a elas, e os direitos da seção 8 são exercidos nos termos dessa lei." %}</p>
       <ul class="mb-0">
-        <li>{% translate "Lei de proteção de dados" %}: {{ law.lei }}</li>
-        {% if law.autoridade %}<li>{% translate "Autoridade" %}: {% if law.site %}<a href="{{ law.site }}" rel="noopener">{{ law.autoridade }}</a>{% else %}{{ law.autoridade }}{% endif %}</li>{% endif %}
+        <li>{% translate "Lei de proteção de dados" %}: {{ law.name }}</li>
+        {% if law.authority %}<li>{% translate "Autoridade" %}: {% if law.site %}<a href="{{ law.site }}" rel="noopener">{{ law.authority }}</a>{% else %}{{ law.authority }}{% endif %}</li>{% endif %}
         <li>{{ retention_period }}</li>
       </ul>
     </div>

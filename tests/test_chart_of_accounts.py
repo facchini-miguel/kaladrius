@@ -145,7 +145,7 @@ def test_report_sums_the_subgroups(clinica_a, admin):
                 account=cash_register,
             )
     report = admin.get(reverse("finance:reports")).context["report"]
-    assert [(n, name, str(v)) for n, name, v in report["despesas_por_grupo"]] == [
+    assert [(n, name, str(v)) for n, name, v in report["expenses_by_group"]] == [
         (0, "2 Pessoal", "1300.00"),
         (1, "2.1 Recepção", "1000.00"),
         (0, "Sem grupo", "50.00"),

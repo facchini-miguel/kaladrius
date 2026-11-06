@@ -77,7 +77,7 @@ def test_form_offers_the_country_methods(cenario):  # noqa: F811
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
         report = services.report(HOJE, HOJE)
-    assert report["por_forma"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
+    assert report["by_method"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
     nova = admin.get(reverse("finance:entry_new")).content.decode()
     assert 'value="carteira"' in nova and 'value="pix"' not in nova
 
@@ -148,4 +148,4 @@ def test_old_payment_shows_method_the_country_no_longer_offers(cenario):  # noqa
         )
         mudar_pais(cenario, "US")
         assert payment.get_method_display() == "Pix"
-        assert services.report(HOJE, HOJE)["por_forma"] == [("Pix", Decimal("100.00"))]
+        assert services.report(HOJE, HOJE)["by_method"] == [("Pix", Decimal("100.00"))]

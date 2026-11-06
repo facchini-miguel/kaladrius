@@ -171,7 +171,7 @@ def test_partial_payment_interest_and_balance(cenario):
     # 60 received, 10 of them late fee: the installment goes down by 50.
     assert cliente.post(url, {**data, "amount": "60", "interest": "10"}).status_code == 302
     primeira = parcelas_de(cenario, entry)[0]
-    assert (primeira.pago, primeira.balance) == (Decimal("50.00"), Decimal("50.00"))
+    assert (primeira.paid, primeira.balance) == (Decimal("50.00"), Decimal("50.00"))
     assert services.status(primeira)[0] == "parcial"
     # Paying more than what is left is refused.
     response = cliente.post(url, {**data, "amount": "50,01"})
@@ -257,9 +257,9 @@ def test_debtors_by_time_overdue(cenario):
     assert [row["name"] for row in rows] == ["Maria Devedora", "João Avulso"]
     maria, joao = rows
     # 45 days late (31-60) and the next one 15 days late (up to 30).
-    assert maria["faixas"] == [Decimal("100.00"), Decimal("100.00"), 0, 0]
-    assert maria["vencido"] == Decimal("200.00")
-    assert joao["faixas"][3] == Decimal("70.00")
+    assert maria["brackets"] == [Decimal("100.00"), Decimal("100.00"), 0, 0]
+    assert maria["overdue"] == Decimal("200.00")
+    assert joao["brackets"][3] == Decimal("70.00")
     page = entrar(cenario, "recepcao").get(reverse("finance:debtors")).content.decode()
     assert "Maria Devedora" in page and "R$ 270,00" in page
 
@@ -279,9 +279,12 @@ def test_record_shows_patient_finance(cenario):
     url = reverse("patients:record", args=[cenario["patient"].pk])
     response = entrar(cenario, "recepcao").get(url)
     financeiro = response.context["finance"]
-    assert (financeiro["vencido"], financeiro["a_vencer"]) == (Decimal("40.00"), Decimal("40.00"))
+    assert (financeiro["overdue"], financeiro["not_yet_due"]) == (
+        Decimal("40.00"),
+        Decimal("40.00"),
+    )
     # Practitioners do not see the finances.
-    assert "financeiro" not in entrar(cenario, "practitioner").get(url).context
+    assert "finance" not in entrar(cenario, "practitioner").get(url).context
 
 
 # --- Permissions, isolation, records -----------------------------------------------------
@@ -490,11 +493,11 @@ def test_cash_flow_actual_and_forecast(cenario):
         )
         fluxo = services.cash_flow(since, until, today=datetime.date(2031, 3, 1))
     assert fluxo["opening_balance"] == Decimal("1000.00")
-    rows = {row["date"]: row for row in fluxo["linhas"]}
-    assert rows[datetime.date(2031, 3, 5)]["entradas"] == Decimal("100.00")
-    assert rows[datetime.date(2031, 3, 10)]["saidas_previstas"] == Decimal("300.00")
+    rows = {row["date"]: row for row in fluxo["rows"]}
+    assert rows[datetime.date(2031, 3, 5)]["incoming"] == Decimal("100.00")
+    assert rows[datetime.date(2031, 3, 10)]["expected_outgoing"] == Decimal("300.00")
     # 2nd receivable installment due 2031-04-05: outside the period.
-    assert fluxo["saldo_final"] == Decimal("800.00")
+    assert fluxo["closing_balance"] == Decimal("800.00")
     assert aluguel.total_amount == Decimal("300.00")
     response = entrar(cenario, "admin").get(
         reverse("finance:cash_flow"), {"since": "2031-03-01", "until": "2031-03-31", "group": "mes"}
@@ -513,13 +516,13 @@ def test_report_by_method_category_and_practitioner(cenario):
             account=cenario["cash_register"],
         )
         report = services.report(HOJE, HOJE)
-    assert report["por_forma"] == [("Pix", Decimal("100.00"))]
-    assert report["por_categoria"] == [("Tratamento", Decimal("100.00"))]
-    assert report["resultado"] == Decimal("100.00")
+    assert report["by_method"] == [("Pix", Decimal("100.00"))]
+    assert report["by_category"] == [("Tratamento", Decimal("100.00"))]
+    assert report["result"] == Decimal("100.00")
     # Reversed payments leave the reports.
     with use_clinic(cenario["clinic"]):
         services.reverse_payment(payment, reason="erro", user=cenario["admin"])
-        assert services.report(HOJE, HOJE)["total_recebido"] == 0
+        assert services.report(HOJE, HOJE)["total_received"] == 0
     assert (
         entrar(cenario, "admin").get(reverse("finance:reports"), {"since": "lixo"}).status_code
         == 200
@@ -576,12 +579,12 @@ def test_full_daily_cash(cenario):
     with use_clinic(cenario["clinic"]):
         summary = services.register_summary(cash_register)
         saldos = dict((c.name, s) for c, s in services.account_balances())
-    assert (summary["entradas"], summary["reforcos"], summary["retiradas"]) == (
+    assert (summary["incoming"], summary["top_ups"], summary["withdrawals"]) == (
         Decimal("40.00"),
         Decimal("10.00"),
         Decimal("120.00"),
     )
-    assert summary["esperado"] == Decimal("30.00")  # 100 + 40 + 10 - 120
+    assert summary["expected"] == Decimal("30.00")  # 100 + 40 + 10 - 120
     # The deposit moved money from the drawer account to the bank.
     assert saldos == {"Caixa": Decimal("-70.00"), "Banco": Decimal("160.00")}
 

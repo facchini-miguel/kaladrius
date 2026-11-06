@@ -16,7 +16,7 @@ from .models import HealthPlan, MemberCard
 @requires_permission(Module.HEALTH_PLANS, Action.VIEW)
 def health_plan_list(request):
     convenios = HealthPlan.objects.annotate(
-        pacientes=Count("carteirinhas", filter=Q(carteirinhas__active=True))
+        patient_count=Count("carteirinhas", filter=Q(carteirinhas__active=True))
     )
     return render(
         request,
