@@ -37,9 +37,9 @@ def despesa(clinic, **extra):
         "description": "Material fictício",
         "category": category.pk,
         "amount": "450",
-        "modo": "dividir",
-        "parcelas": 3,
-        "primeiro_vencimento": "2031-01-10",
+        "mode": "dividir",
+        "installments": 3,
+        "first_due_date": "2031-01-10",
         "notes": "",
         **extra,
     }

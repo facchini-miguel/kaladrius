@@ -309,7 +309,7 @@ def delete_appointment(request, pk):
     )
     if request.method == "POST":
         excluidos = Appointment.objects.filter(pk=appointment.pk)
-        if request.POST.get("escopo") == "serie" and appointment.series:
+        if request.POST.get("scope") == "serie" and appointment.series:
             # This one and the following ones of the same series.
             excluidos = Appointment.objects.filter(
                 series=appointment.series, start__gte=appointment.start

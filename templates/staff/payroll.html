@@ -7,8 +7,8 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
   <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
   <div class="btn-group">
-    <a class="btn btn-outline-secondary" href="?mes={{ anterior|date:'Y-m' }}">← {{ anterior|date:"m/Y" }}</a>
-    <a class="btn btn-outline-secondary" href="?mes={{ proximo|date:'Y-m' }}">{{ proximo|date:"m/Y" }} →</a>
+    <a class="btn btn-outline-secondary" href="?month={{ anterior|date:'Y-m' }}">← {{ anterior|date:"m/Y" }}</a>
+    <a class="btn btn-outline-secondary" href="?month={{ proximo|date:'Y-m' }}">{{ proximo|date:"m/Y" }} →</a>
   </div>
 </div>
 <p class="text-body-secondary small">{% translate "Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. Encargos, férias e 13º ficam com o contador." %}</p>
@@ -67,7 +67,7 @@
         <div class="col-md-6">{% with campo=lancar_form.category %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-6">{% with campo=lancar_form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <button type="submit" name="acao" value="lancar" class="btn btn-primary">{% translate "Salvar e lançar no financeiro" %}</button>
+      <button type="submit" name="action" value="lancar" class="btn btn-primary">{% translate "Salvar e lançar no financeiro" %}</button>
     </div>
   </div>
   {% endif %}

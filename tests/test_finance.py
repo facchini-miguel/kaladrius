@@ -50,8 +50,8 @@ def new(cenario, **extra):
         "category": cenario["category"].pk,
         "practitioner": "",
         "total_amount": "100,00",
-        "parcelas": 3,
-        "primeiro_vencimento": "2031-01-31",
+        "installments": 3,
+        "first_due_date": "2031-01-31",
         "notes": "",
         **extra,
     }
@@ -132,8 +132,8 @@ def test_reception_enters_installments(cenario):
     [
         ({"patient": "", "payer": ""}, "payer"),
         ({"total_amount": "0"}, "total_amount"),
-        ({"recebido_agora": "on"}, "method"),
-        ({"parcelas": 0}, "parcelas"),
+        ({"received_now": "on"}, "method"),
+        ({"installments": 0}, "installments"),
     ],
 )
 def test_entry_validations(cenario, extra, field):
@@ -148,9 +148,9 @@ def test_immediate_payment_opens_the_receipt(cenario):
         reverse("finance:entry_new"),
         new(
             cenario,
-            parcelas=1,
+            installments=1,
             total_amount="150,50",
-            recebido_agora="on",
+            received_now="on",
             method=Payment.Method.PIX,
             account=cenario["cash_register"].pk,
         ),
@@ -361,9 +361,9 @@ def despesa(cenario, **extra):
         "description": "Aluguel",
         "category": aluguel.pk,
         "amount": "3.000,00".replace(".", ""),
-        "modo": "repetir",
-        "parcelas": 12,
-        "primeiro_vencimento": "2031-01-10",
+        "mode": "repetir",
+        "installments": 12,
+        "first_due_date": "2031-01-10",
         "notes": "",
         **extra,
     }
@@ -374,7 +374,7 @@ def test_fixed_monthly_and_installment_expense(cenario):
     assert admin.post(reverse("finance:expense_new"), despesa(cenario)).status_code == 302
     admin.post(
         reverse("finance:expense_new"),
-        despesa(cenario, description="Cadeira", modo="dividir", amount="900", parcelas=3),
+        despesa(cenario, description="Cadeira", mode="dividir", amount="900", installments=3),
     )
     with use_clinic(cenario["clinic"]):
         aluguel = Entry.objects.get(description="Aluguel")
@@ -391,7 +391,11 @@ def test_expense_paid_at_once_and_installment_payment(cenario):
     admin.post(
         reverse("finance:expense_new"),
         despesa(
-            cenario, parcelas=2, pago_agora="on", method="pix", account=cenario["cash_register"].pk
+            cenario,
+            installments=2,
+            paid_now="on",
+            method="pix",
+            account=cenario["cash_register"].pk,
         ),
     )
     with use_clinic(cenario["clinic"]):
@@ -413,7 +417,7 @@ def test_expense_paid_at_once_and_installment_payment(cenario):
 
 def test_reception_does_not_see_payables(cenario):
     admin = entrar(cenario, "admin")
-    admin.post(reverse("finance:expense_new"), despesa(cenario, parcelas=1))
+    admin.post(reverse("finance:expense_new"), despesa(cenario, installments=1))
     with use_clinic(cenario["clinic"]):
         entry = Entry.objects.get()
         installment = entry.parcelas.get()
@@ -493,9 +497,9 @@ def test_cash_flow_actual_and_forecast(cenario):
     assert fluxo["saldo_final"] == Decimal("800.00")
     assert aluguel.total_amount == Decimal("300.00")
     response = entrar(cenario, "admin").get(
-        reverse("finance:cash_flow"), {"de": "2031-03-01", "until": "2031-03-31", "agrupar": "mes"}
+        reverse("finance:cash_flow"), {"since": "2031-03-01", "until": "2031-03-31", "group": "mes"}
     )
-    assert response.status_code == 200 and response.context["por_mes"]
+    assert response.status_code == 200 and response.context["by_month"]
 
 
 def test_report_by_method_category_and_practitioner(cenario):
@@ -517,7 +521,8 @@ def test_report_by_method_category_and_practitioner(cenario):
         services.reverse_payment(payment, reason="erro", user=cenario["admin"])
         assert services.report(HOJE, HOJE)["total_recebido"] == 0
     assert (
-        entrar(cenario, "admin").get(reverse("finance:reports"), {"de": "lixo"}).status_code == 200
+        entrar(cenario, "admin").get(reverse("finance:reports"), {"since": "lixo"}).status_code
+        == 200
     )
 
 
@@ -631,7 +636,7 @@ def test_closed_cash_does_not_change_with_later_reversal(cenario):
 def test_amount_with_thousands_dot(cenario, digitado):
     """Review stage 3: "1.500,00", as people write it, was refused ("Informe um número")."""
     response = entrar(cenario, "admin").post(
-        reverse("finance:entry_new"), new(cenario, total_amount=digitado, parcelas=1)
+        reverse("finance:entry_new"), new(cenario, total_amount=digitado, installments=1)
     )
     assert response.status_code == 302, response.context["form"].errors
     with use_clinic(cenario["clinic"]):

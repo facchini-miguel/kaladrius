@@ -82,7 +82,7 @@ def test_months_lowercase_in_portuguese():
 
 
 def test_birthday_month_list_starts_capitalized(reception):
-    page = reception.get(reverse("patients:birthdays"), {"mes": 10}).content.decode()
+    page = reception.get(reverse("patients:birthdays"), {"month": 10}).content.decode()
     assert ">Outubro</option>" in page
 
 

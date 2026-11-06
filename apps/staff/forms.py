@@ -35,7 +35,7 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
         widget=forms.TextInput({"inputmode": "tel"}),
     )
     salary = _money(_("Salário"), obrigatorio=False)
-    salario_desde = forms.DateField(
+    salary_since = forms.DateField(
         label=_("Salário a partir de"), widget=DATE_INPUT, required=False
     )
 
@@ -73,7 +73,7 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
             )
         else:
             self.fields["salary"].required = True
-            self.fields["salario_desde"].help_text = _("Em branco: a data de admissão ou hoje.")
+            self.fields["salary_since"].help_text = _("Em branco: a data de admissão ou hoje.")
 
     def clean_tax_id(self):
         tax_id = identification.clean_value(
@@ -91,13 +91,11 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
         salary = data.get("salary")
         if salary is not None and salary <= 0:
             self.add_error("salary", _("Informe um valor maior que zero."))
-        if salary and not data.get("salario_desde"):
+        if salary and not data.get("salary_since"):
             if self.instance.pk:
-                self.add_error(
-                    "salario_desde", _("Informe a partir de quando vale o novo salário.")
-                )
+                self.add_error("salary_since", _("Informe a partir de quando vale o novo salário."))
             else:
-                data["salario_desde"] = data.get("hired_on") or timezone.localdate()
+                data["salary_since"] = data.get("hired_on") or timezone.localdate()
         hired_on, left_on = data.get("hired_on"), data.get("left_on")
         if hired_on and left_on and left_on < hired_on:
             self.add_error("left_on", _("O desligamento não pode ser antes da admissão."))

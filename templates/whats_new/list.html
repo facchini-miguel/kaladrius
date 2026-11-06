@@ -7,9 +7,9 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
   <h1 class="h3 mb-0">{% translate "Novidades" %}</h1>
   <form method="get">
-    <select name="modulo" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" data-submit-on-change>
+    <select name="module" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" data-submit-on-change>
       <option value="">{% translate "Todos os módulos" %}</option>
-      {% for valor, name in modulos %}<option value="{{ valor }}"{% if valor == modulo %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      {% for valor, name in modulos %}<option value="{{ valor }}"{% if valor == module %} selected{% endif %}>{{ name }}</option>{% endfor %}
     </select>
   </form>
 </div>

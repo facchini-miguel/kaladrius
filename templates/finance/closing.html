@@ -24,7 +24,7 @@
         <p class="text-body-secondary small">{% translate "Feche um período depois de conferir o caixa e entregar os relatórios ao contador." %}</p>
         <form method="post" novalidate>
           {% csrf_token %}
-          <input type="hidden" name="acao" value="fechar">
+          <input type="hidden" name="action" value="fechar">
           {% with form=fechar_form %}{% include "includes/form.html" %}{% endwith %}
           <button type="submit" class="btn btn-primary">{% translate "Fechar" %}</button>
         </form>
@@ -40,7 +40,7 @@
         <p class="text-body-secondary small">{% translate "Só para corrigir um erro. O motivo fica no histórico e na auditoria." %}</p>
         <form method="post" novalidate>
           {% csrf_token %}
-          <input type="hidden" name="acao" value="reabrir">
+          <input type="hidden" name="action" value="reabrir">
           {% with form=reabrir_form %}{% include "includes/form.html" %}{% endwith %}
           <button type="submit" class="btn btn-outline-danger">{% translate "Reabrir" %}</button>
         </form>

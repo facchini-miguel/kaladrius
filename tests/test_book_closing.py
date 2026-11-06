@@ -57,7 +57,7 @@ def receive(clinic, installment, date, amount="100"):
 
 def test_closing_locks_payments_and_reversals_in_the_period(clinica_a, installment, admin):
     old = receive(clinica_a, installment, ANTEONTEM)
-    assert admin.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
+    assert admin.post(URL, {"action": "fechar", "until": ONTEM.isoformat()}).status_code == 302
     with use_clinic(clinica_a):
         assert services.closed_until(clinica_a.pk) == ONTEM
     with pytest.raises(ValidationError, match="fechado"):
@@ -105,7 +105,7 @@ def test_close_again_only_forward_and_reopen_with_reason(clinica_a, admin):
             services.reopen_books(clinica_a, ONTEM, reason="erro", user=None)
     assert (
         admin.post(
-            URL, {"acao": "reabrir", "until": "", "reason": "Lançamento esquecido"}
+            URL, {"action": "reabrir", "until": "", "reason": "Lançamento esquecido"}
         ).status_code
         == 302
     )
@@ -132,14 +132,14 @@ def test_who_can_see_close_and_reopen(clinica_a, criar_usuario, cliente_de):
     reception = cliente_de(criar_usuario("recepcao_fechamento", clinica_a, Role.FRONT_DESK))
     assert reception.get(URL).status_code == 403
     financeiro = cliente_de(criar_usuario("fin_fechamento", clinica_a, Role.FINANCE))
-    assert financeiro.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 302
-    assert financeiro.post(URL, {"acao": "outra"}).status_code == 403
+    assert financeiro.post(URL, {"action": "fechar", "until": ONTEM.isoformat()}).status_code == 302
+    assert financeiro.post(URL, {"action": "outra"}).status_code == 403
 
 
 def test_demo_only_views(clinica_a, criar_usuario, cliente_de):
     demo = cliente_de(criar_usuario("demo_fechamento", clinica_a, Role.ADMIN, demo=True))
     page = demo.get(URL)
     assert page.status_code == 200 and page.context["fechar_form"] is None
-    assert demo.post(URL, {"acao": "fechar", "until": ONTEM.isoformat()}).status_code == 403
+    assert demo.post(URL, {"action": "fechar", "until": ONTEM.isoformat()}).status_code == 403
     with use_clinic(clinica_a):
         assert not BookClosing.objects.exists()

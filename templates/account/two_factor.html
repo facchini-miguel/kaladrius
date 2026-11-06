@@ -15,7 +15,7 @@
       <p class="small text-body-secondary">{% translate "Os códigos antigos param de funcionar." %}</p>
       <form method="post" novalidate>
         {% csrf_token %}
-        <input type="hidden" name="acao" value="codigos">
+        <input type="hidden" name="action" value="codigos">
         {% include "includes/form.html" with form=novos %}
         <button type="submit" class="btn btn-outline-primary">{% translate "Gerar novos códigos" %}</button>
       </form>
@@ -27,7 +27,7 @@
       <h2 class="h6">{% translate "Desativar" %}</h2>
       <form method="post" novalidate>
         {% csrf_token %}
-        <input type="hidden" name="acao" value="desativar">
+        <input type="hidden" name="action" value="desativar">
         {% include "includes/form.html" with form=desativar %}
         <button type="submit" class="btn btn-outline-danger">{% translate "Desativar a verificação em duas etapas" %}</button>
       </form>
@@ -49,13 +49,13 @@
   <div class="small">
     {% translate "Sem câmera? Digite esta chave no aplicativo:" %}<br>
     <code class="fs-6 user-select-all">{{ secret }}</code><br>
-    <a href="?novo=1">{% translate "Gerar outra chave" %}</a>
+    <a href="?new=1">{% translate "Gerar outra chave" %}</a>
   </div>
 </div>
 <ol start="3"><li>{% translate "Digite o código de 6 números que o aplicativo mostra:" %}</li></ol>
 <form method="post" style="max-width: 20rem;" novalidate>
   {% csrf_token %}
-  <input type="hidden" name="acao" value="ativar">
+  <input type="hidden" name="action" value="ativar">
   {% include "includes/form.html" %}
   <button type="submit" class="btn btn-primary">{% translate "Ativar" %}</button>
 </form>

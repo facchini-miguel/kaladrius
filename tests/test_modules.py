@@ -31,8 +31,8 @@ def config(**extra):
         "schedule_end": "20:00",
         "currency": "BRL",
         "schedule_interval": 30,
-        "modulos": ["odontologia", "medicina"],
-        "modulos_gerais": sorted(GENERAL_MODULES),
+        "modules": ["odontologia", "medicina"],
+        "general_modules": sorted(GENERAL_MODULES),
         **extra,
     }
 
@@ -51,7 +51,7 @@ def test_creation_keeps_original_area_capability(area):
 )
 def test_admin_sets_independent_areas(codigos, clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("admin_modulos", clinica_a, Role.ADMIN))
-    response = cliente.post(reverse("clinic_settings"), config(modulos=codigos))
+    response = cliente.post(reverse("clinic_settings"), config(modules=codigos))
     assert response.status_code == 302
     clinica_a.refresh_from_db()
     assert clinica_a.area == "medicina"  # primary area does not dictate enabled modules
@@ -75,8 +75,8 @@ def test_demo_admin_does_not_change_modules(clinica_a, criar_usuario, cliente_de
 def test_unknown_module_saved_neither_in_service_nor_form(clinica_a):
     with pytest.raises(ValidationError):
         configure(clinica_a, {"desconhecido"})
-    form = ClinicForm(config(modulos=["desconhecido"]), instance=clinica_a)
-    assert not form.is_valid() and "modulos" in form.errors
+    form = ClinicForm(config(modules=["desconhecido"]), instance=clinica_a)
+    assert not form.is_valid() and "modules" in form.errors
     assert clinica_a.dentistry and not clinica_a.module_enabled("desconhecido")
 
 
@@ -104,7 +104,7 @@ def test_idempotent_reconfiguration_keeps_ids_and_logs_change(clinica_a):
 
 def test_admin_fields_and_commit_false_kept(clinica_a):
     form = ClinicAdminForm(config(active="on"), instance=clinica_a)
-    assert "active" in form.fields and "modulos" in form.fields
+    assert "active" in form.fields and "modules" in form.fields
     assert form.is_valid(), form.errors
     clinic = form.save(commit=False)
     assert not clinic.medicine
@@ -119,13 +119,13 @@ def test_django_admin_saves_modules_and_audits_superuser(clinica_a, django_user_
     url = reverse("admin:core_clinic_change", args=[clinica_a.pk])
     page = cliente.get(url)
     assert page.status_code == 200
-    assert set(page.context["adminform"].form.initial["modulos"]) == {"odontologia"}
+    assert set(page.context["adminform"].form.initial["modules"]) == {"odontologia"}
     prefixo = page.context["inline_admin_formsets"][0].formset.prefix
     response = cliente.post(
         url,
         config(
             active="on",
-            modulos=["medicina"],
+            modules=["medicina"],
             **{
                 f"{prefixo}-TOTAL_FORMS": "0",
                 f"{prefixo}-INITIAL_FORMS": "0",

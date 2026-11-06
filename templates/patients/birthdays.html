@@ -7,8 +7,8 @@
 <h1 class="h3 mb-3">{% translate "Aniversariantes" %}</h1>
 <form method="get" class="row g-2 mb-3" style="max-width: 24rem;">
   <div class="col-8">
-    <select name="mes" class="form-select" aria-label="{% translate 'Mês' %}" data-submit-on-change>
-      {% for number, name in meses %}<option value="{{ number }}"{% if number == mes %} selected{% endif %}>{{ name|capfirst }}</option>{% endfor %}
+    <select name="month" class="form-select" aria-label="{% translate 'Mês' %}" data-submit-on-change>
+      {% for number, name in meses %}<option value="{{ number }}"{% if number == month %} selected{% endif %}>{{ name|capfirst }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-4"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>

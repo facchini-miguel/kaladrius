@@ -121,7 +121,7 @@ def _entry_list(request, kind):
             | Q(entry__description__unaccent__icontains=search)
         )
     parcelas = parcelas.order_by("due_date", "pk")
-    page = Paginator(parcelas, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(parcelas, PER_PAGE).get_page(request.GET.get("page"))
     for installment in page:
         installment.status = services.status(installment, today)
     return render(
@@ -161,11 +161,11 @@ def new_entry(request):
             practitioner=data["practitioner"],
             notes=data["notes"],
             total_amount=data["total_amount"],
-            parcelas=data["parcelas"],
-            primeiro_vencimento=data["primeiro_vencimento"],
+            parcelas=data["installments"],
+            primeiro_vencimento=data["first_due_date"],
             user=request.user,
         )
-        if data["recebido_agora"]:
+        if data["received_now"]:
             primeira = entry.parcelas.order_by("number").first()
             payment = services.receive(
                 primeira,
@@ -202,11 +202,11 @@ def new_expense(request):
             cost_center=data.get("cost_center"),
             notes=data["notes"],
             total_amount=form.total_amount(),
-            parcelas=data["parcelas"],
-            primeiro_vencimento=data["primeiro_vencimento"],
+            parcelas=data["installments"],
+            primeiro_vencimento=data["first_due_date"],
             user=request.user,
         )
-        if data["pago_agora"]:
+        if data["paid_now"]:
             primeira = entry.parcelas.order_by("number").first()
             services.receive(
                 primeira,
@@ -399,7 +399,7 @@ def debtors(request):
         encontrados = [row for row in rows if termo in alphabetical_key(row["name"])]
     # A clinic with years of use has thousands of debtors: one page held them all (volume
     # test, decision 108). The totals still add up everyone.
-    page = Paginator(encontrados, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(encontrados, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "finance/debtors.html",
@@ -527,12 +527,12 @@ def close_cash_register(request, pk):
 
 
 def _period(request):
-    """(de, ate) from the query string; the current month by default (at most 2 years)."""
+    """(since, until) from the query string; the current month by default (at most 2 years)."""
     today = timezone.localdate()
     inicio_do_mes = today.replace(day=1)
     end_of_month = services.add_months(inicio_do_mes, 1) - datetime.timedelta(days=1)
     try:
-        since = datetime.date.fromisoformat(request.GET.get("de", ""))
+        since = datetime.date.fromisoformat(request.GET.get("since", ""))
     except ValueError:
         since = inicio_do_mes
     try:
@@ -547,14 +547,14 @@ def _period(request):
 @requires_permission(Module.FINANCE, Action.VIEW)
 def cash_flow(request):
     since, until = _period(request)
-    por_mes = request.GET.get("agrupar") == "mes"
+    por_mes = request.GET.get("group") == "mes"
     return render(
         request,
         "finance/cash_flow.html",
         {
-            "de": since,
+            "since": since,
             "until": until,
-            "por_mes": por_mes,
+            "by_month": por_mes,
             "fluxo": services.cash_flow(since, until, por_mes=por_mes),
             "contas": services.account_balances(),
         },
@@ -568,7 +568,7 @@ def reports(request):
         request,
         "finance/reports.html",
         {
-            "de": since,
+            "since": since,
             "until": until,
             "relatorio": services.report(since, until),
             "fechado_ate": services.closed_until(request.clinic.pk),
@@ -595,7 +595,7 @@ def planning(request):
     if request.method == "POST":
         if not pode_alterar:
             raise PermissionDenied
-        if request.POST.get("acao") == "copiar":
+        if request.POST.get("action") == "copiar":
             copiadas = services.copy_targets(year)
             messages.success(
                 request,
@@ -641,7 +641,7 @@ def book_closing(request):
     pode_fechar = can(request, Module.FINANCE, Action.CHANGE) and not demo
     pode_reabrir = can(request, Module.FINANCE, Action.DELETE) and not demo
     if request.method == "POST":
-        acao = request.POST.get("acao")
+        acao = request.POST.get("action")
         if not {"fechar": pode_fechar, "reabrir": pode_reabrir}.get(acao):
             raise PermissionDenied
         form = (CloseBooksForm if acao == "fechar" else ReopenBooksForm)(request.POST)
@@ -769,7 +769,7 @@ def suppliers(request):
         if any(c.isdigit() for c in document):
             filtro |= Q(tax_id__startswith=document)
         results = results.filter(filtro)
-    page = Paginator(results, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(results, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "finance/suppliers.html",
@@ -975,7 +975,7 @@ def statements(request):
         .annotate(n=Count("pk"))
         .values_list("statement_import", "n")
     )
-    page = Paginator(importacoes, 30).get_page(request.GET.get("pagina"))
+    page = Paginator(importacoes, 30).get_page(request.GET.get("page"))
     for statement_import in page:
         statement_import.pendentes = pendentes.get(statement_import.pk, 0)
     return render(request, "finance/statements.html", {"form": form, "pagina": page})
@@ -1030,7 +1030,7 @@ def transaction_action(request, pk, acao):
     transacao = get_object_or_404(BankTransaction.objects, pk=pk)
     try:
         if acao == "reconcile":
-            reconciliation.reconcile(transacao, request.POST.get("chave", ""), user=request.user)
+            reconciliation.reconcile(transacao, request.POST.get("key", ""), user=request.user)
         elif acao == "ignore":
             reason = request.POST.get("reason", "").strip()[:200]
             if not reason:

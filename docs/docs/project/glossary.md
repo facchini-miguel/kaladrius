@@ -1349,7 +1349,7 @@ The enum classes `Tipo`, `Situacao` and `Forma` of every app became `Kind`, `Sta
 
 ## Settings, CSS classes and HTML hooks (done)
 
-The settings of `config/settings.py` and the names the templates, the stylesheet and the scripts share (decision 182). A class built from a stored value keeps the value: `status-compareceu`, `kind-novo`. The ids of filter fields named after their query (`de`, `agrupar`) wait for the query names.
+The settings of `config/settings.py` and the names the templates, the stylesheet and the scripts share (decision 182). A class built from a stored value keeps the value: `status-compareceu`, `kind-novo`. The ids of filter fields named after their query (`de`, `agrupar`) followed it in decision 184 (`since`, `group`).
 
 ### Settings
 
@@ -1478,6 +1478,48 @@ The local variables and functions of the scripts in `static/js` (`evento` → `e
 | `kaladrius-atividade` | `kaladrius-activity` | `localStorage` key of the last activity |
 | `aniversariantes` | `birthday-badge` | class of the birthdays badge |
 | `rechamadas` | `recall-badge` | class of the recalls badge |
+
+## Form fields and query names (done)
+
+The fields of forms that are not a model's field, the names the pages send in the address or in a form (`?de=` → `?since=`, `name="acao"` → `name="action"`) and the prefixes of the two-step verification forms (decision 184). Their values stay: `?group=mes`, `action=finalizar`, `scope=serie`, like the stored values. An address from before decision 155 is redirected with the old query names translated (`/financeiro/fluxo-de-caixa/?de=…&agrupar=mes` → `/finance/cash-flow/?since=…&group=mes`).
+
+### Form fields
+
+| Before | After |
+|---|---|
+| `senha` | `password` |
+| `salario_desde` | `salary_since` |
+| `parcelas` | `installments` |
+| `primeiro_vencimento` | `first_due_date` |
+| `recebido_agora` | `received_now` |
+| `pago_agora` | `paid_now` |
+| `modo` | `mode` |
+| `modulos` | `modules` |
+| `modulos_gerais` | `general_modules` |
+| `repeticoes` | `repetitions` |
+
+### Query and form names
+
+| Before | After |
+|---|---|
+| `pagina` | `page` |
+| `de` | `since` |
+| `mes` | `month` |
+| `periodo` | `period` |
+| `agrupar` | `group` |
+| `modulo` | `module` |
+| `novo` | `new` |
+| `inatividade` | `idle` |
+| `acao` | `action` |
+| `escopo` | `scope` |
+| `chave` | `key` |
+
+### Form prefixes
+
+| Before | After |
+|---|---|
+| `desativar` | `disable` |
+| `codigos` | `codes` |
 
 ## What stays in Portuguese
 

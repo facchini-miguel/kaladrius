@@ -5,7 +5,7 @@
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Fluxo de caixa" %}</h1>
-{% include "finance/_period.html" with agrupar=True %}
+{% include "finance/_period.html" with group=True %}
 
 <div class="row g-3 mb-3">
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no início" %}</div><div class="fs-5">{{ fluxo.opening_balance|currency }}</div></div></div></div>
@@ -18,7 +18,7 @@
   <table class="table table-sm table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% if por_mes %}{% translate "Mês" %}{% else %}{% translate "Dia" %}{% endif %}</th>
+        <th>{% if by_month %}{% translate "Mês" %}{% else %}{% translate "Dia" %}{% endif %}</th>
         <th class="text-end">{% translate "Entradas" %}</th>
         <th class="text-end">{% translate "Saídas" %}</th>
         <th class="text-end">{% translate "Entradas previstas" %}</th>
@@ -29,7 +29,7 @@
     <tbody>
       {% for linha in fluxo.linhas %}
       <tr>
-        <td class="text-nowrap">{% if por_mes %}{{ linha.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
+        <td class="text-nowrap">{% if by_month %}{{ linha.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ linha.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if linha.atrasado %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
         <td class="text-end text-nowrap text-success">{% if linha.entradas %}{{ linha.entradas|currency }}{% endif %}</td>
         <td class="text-end text-nowrap text-danger">{% if linha.saidas %}{{ linha.saidas|currency }}{% endif %}</td>
         <td class="text-end text-nowrap text-body-secondary">{% if linha.entradas_previstas %}{{ linha.entradas_previstas|currency }}{% endif %}</td>

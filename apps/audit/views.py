@@ -76,7 +76,7 @@ def audit_list(request):
         "q": request.GET.get("q", "").strip(),
         "action": request.GET.get("action", ""),
         "model_name": request.GET.get("model_name", ""),
-        "de": request.GET.get("de", ""),
+        "since": request.GET.get("since", ""),
         "until": request.GET.get("until", ""),
     }
     modelos = record_types()
@@ -90,11 +90,11 @@ def audit_list(request):
         registros = registros.filter(action=filters["action"])
     if filters["model_name"]:
         registros = registros.filter(model_name=filters["model_name"])
-    if since := _date(filters["de"]):
+    if since := _date(filters["since"]):
         registros = registros.filter(timestamp__date__gte=since)
     if until := _date(filters["until"]):
         registros = registros.filter(timestamp__date__lte=until)
-    page = Paginator(registros, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(registros, PER_PAGE).get_page(request.GET.get("page"))
     for record in page:
         record.fields = changed_fields(record)
     return render(

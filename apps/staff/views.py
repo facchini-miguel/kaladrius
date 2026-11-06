@@ -61,7 +61,7 @@ def _employee_form(request, instancia):
                 Salary.objects.create(
                     employee=employee,
                     amount=form.cleaned_data["salary"],
-                    effective_from=form.cleaned_data["salario_desde"],
+                    effective_from=form.cleaned_data["salary_since"],
                     created_by=request.user,
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
@@ -73,8 +73,8 @@ def _employee_form(request, instancia):
 def payroll(request):
     """The month's pay: one line per employee; save it, then launch it into finance."""
     today = timezone.localdate()
-    period = services.month_from_url(request.GET.get("mes"), today)
-    url = f"{reverse('staff:payroll')}?mes={period:%Y-%m}"
+    period = services.month_from_url(request.GET.get("month"), today)
+    url = f"{reverse('staff:payroll')}?month={period:%Y-%m}"
     pode_alterar = can(request, Module.STAFF, Action.CHANGE)
     folhas = (
         services.prepare(period)
@@ -93,7 +93,7 @@ def payroll(request):
         for f in folhas
     ]
     lancar_form = PostPayrollForm(
-        data if data and data.get("acao") == "lancar" else None,
+        data if data and data.get("action") == "lancar" else None,
         initial={"due_date": services.end_of_month(period) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
@@ -104,7 +104,7 @@ def payroll(request):
             with transaction.atomic():
                 for form in formularios:
                     form.save()
-            if request.POST.get("acao") != "lancar":
+            if request.POST.get("action") != "lancar":
                 messages.success(request, _("Folha salva."))
                 return redirect(url)
             if lancar_form.is_valid():

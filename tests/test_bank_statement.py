@@ -183,13 +183,13 @@ def test_automatic_reconciliation_only_when_unique(cenario):
         days=1
     )  # closest first
     cenario["cliente"].post(
-        reverse("finance:transaction", args=[a4.pk, "reconcile"]), {"chave": options[1].key}
+        reverse("finance:transaction", args=[a4.pk, "reconcile"]), {"key": options[1].key}
     )
     assert transacao(cenario, "A4").payment == options[1].obj
     # A payment already used is no longer offered, and a bogus key is refused.
     response = cenario["cliente"].post(
         reverse("finance:transaction", args=[transacao(cenario, "A3").pk, "reconcile"]),
-        {"chave": f"p{received_amount.pk}"},
+        {"key": f"p{received_amount.pk}"},
         follow=True,
     )
     assert "não corresponde" in response.content.decode()
@@ -216,7 +216,7 @@ def test_cash_deposit_reconciles_with_the_movement(cenario):
     import_statement(cenario)
     a3 = transacao(cenario, "A3")
     cenario["cliente"].post(
-        reverse("finance:transaction", args=[a3.pk, "reconcile"]), {"chave": f"m{cash_movement.pk}"}
+        reverse("finance:transaction", args=[a3.pk, "reconcile"]), {"key": f"m{cash_movement.pk}"}
     )
     assert transacao(cenario, "A3").cash_movement == cash_movement
 

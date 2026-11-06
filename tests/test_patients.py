@@ -290,7 +290,7 @@ def test_record_shows_formatted_data(admin_a, clinica_a):
 def test_search_with_non_ascii_digits_does_not_break(admin_a, clinica_a, search):
     criar_paciente(clinica_a, name="Maria")
     assert admin_a.get(reverse("patients:list"), {"q": search}).status_code == 200
-    assert admin_a.get(reverse("patients:birthdays"), {"mes": search}).status_code == 200
+    assert admin_a.get(reverse("patients:birthdays"), {"month": search}).status_code == 200
     assert admin_a.get(reverse("reference_data:city_options"), {"state": search}).status_code == 200
 
 

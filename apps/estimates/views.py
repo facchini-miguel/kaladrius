@@ -65,7 +65,7 @@ def estimate_list(request):
         orcamentos = orcamentos.filter(status=status)
     if search:
         orcamentos = orcamentos.filter(patient__name__unaccent__icontains=search)
-    page = Paginator(orcamentos, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(orcamentos, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "estimates/list.html",
@@ -237,15 +237,13 @@ def approve(request, pk):
     if request.method == "POST" and form.is_valid():
         data = form.cleaned_data
         payment = (
-            {"method": data["method"], "account": data["account"]}
-            if data["recebido_agora"]
-            else None
+            {"method": data["method"], "account": data["account"]} if data["received_now"] else None
         )
         try:
             entry = services.approve(
                 estimate,
-                parcelas=data["parcelas"],
-                primeiro_vencimento=data["primeiro_vencimento"],
+                parcelas=data["installments"],
+                primeiro_vencimento=data["first_due_date"],
                 category=data["category"],
                 user=request.user,
                 payment=payment,

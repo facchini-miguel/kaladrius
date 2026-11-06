@@ -36,7 +36,7 @@ def _back(request, default="recalls:list"):
 def recall_list(request):
     status = request.GET.get("status", "pendentes")
     search = request.GET.get("q", "").strip()
-    since, until = _date(request.GET.get("de")), _date(request.GET.get("until"))
+    since, until = _date(request.GET.get("since")), _date(request.GET.get("until"))
     rechamadas = Recall.objects.select_related("patient").filter(
         **STATUSES.get(status, STATUSES["pendentes"]), patient__archived=False
     )
@@ -46,11 +46,11 @@ def recall_list(request):
         rechamadas = rechamadas.filter(date__gte=since)
     if until:
         rechamadas = rechamadas.filter(date__lte=until)
-    page = Paginator(rechamadas, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(rechamadas, PER_PAGE).get_page(request.GET.get("page"))
     filters = {
         "q": search,
         "status": status,
-        "de": since.isoformat() if since else "",
+        "since": since.isoformat() if since else "",
         "until": until.isoformat() if until else "",
     }
     return render(

@@ -1349,7 +1349,7 @@ Las clases de enum `Tipo`, `Situacao` y `Forma` de todas las apps pasaron a `Kin
 
 ## Configuración, clases CSS y ganchos del HTML (hecho)
 
-La configuración de `config/settings.py` y los nombres que comparten las plantillas, la hoja de estilos y los scripts (decisión 182). Una clase armada a partir de un valor guardado mantiene el valor: `status-compareceu`, `kind-novo`. Los ids de campos de filtro con el nombre de su query (`de`, `agrupar`) esperan los nombres de las queries.
+La configuración de `config/settings.py` y los nombres que comparten las plantillas, la hoja de estilos y los scripts (decisión 182). Una clase armada a partir de un valor guardado mantiene el valor: `status-compareceu`, `kind-novo`. Los ids de campos de filtro con el nombre de su query (`de`, `agrupar`) siguieron a la query en la decisión 184 (`since`, `group`).
 
 ### Configuración
 
@@ -1478,6 +1478,48 @@ Las variables locales y funciones de los scripts de `static/js` (`evento` → `e
 | `kaladrius-atividade` | `kaladrius-activity` | clave del `localStorage` de la última actividad |
 | `aniversariantes` | `birthday-badge` | clase del marcador de cumpleaños |
 | `rechamadas` | `recall-badge` | clase del marcador de rellamadas |
+
+## Campos de formulario y nombres de consulta (hecho)
+
+Los campos de formulario que no son campo de modelo, los nombres que las pantallas envían en la dirección o en un formulario (`?de=` → `?since=`, `name="acao"` → `name="action"`) y los prefijos de los formularios de la verificación en dos pasos (decisión 184). Los valores quedan: `?group=mes`, `action=finalizar`, `scope=serie`, como los valores guardados. Una dirección de antes de la decisión 155 se redirige con los nombres antiguos de consulta traducidos (`/financeiro/fluxo-de-caixa/?de=…&agrupar=mes` → `/finance/cash-flow/?since=…&group=mes`).
+
+### Campos de formulario
+
+| Antes | Después |
+|---|---|
+| `senha` | `password` |
+| `salario_desde` | `salary_since` |
+| `parcelas` | `installments` |
+| `primeiro_vencimento` | `first_due_date` |
+| `recebido_agora` | `received_now` |
+| `pago_agora` | `paid_now` |
+| `modo` | `mode` |
+| `modulos` | `modules` |
+| `modulos_gerais` | `general_modules` |
+| `repeticoes` | `repetitions` |
+
+### Nombres de consulta y de formulario
+
+| Antes | Después |
+|---|---|
+| `pagina` | `page` |
+| `de` | `since` |
+| `mes` | `month` |
+| `periodo` | `period` |
+| `agrupar` | `group` |
+| `modulo` | `module` |
+| `novo` | `new` |
+| `inatividade` | `idle` |
+| `acao` | `action` |
+| `escopo` | `scope` |
+| `chave` | `key` |
+
+### Prefijos de formulario
+
+| Antes | Después |
+|---|---|
+| `desativar` | `disable` |
+| `codigos` | `codes` |
 
 ## Lo que queda en portugués
 

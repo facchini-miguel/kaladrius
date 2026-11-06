@@ -139,7 +139,7 @@ finance/receipt.html  saude_alerta
 finance/receive.html  backup_atrasado
 finance/receive.html  backup_nenhum
 finance/receive.html  saude_alerta
-finance/reports.html  agrupar
+finance/reports.html  group
 finance/reports.html  backup_atrasado
 finance/reports.html  backup_nenhum
 finance/reports.html  saude_alerta
@@ -270,7 +270,7 @@ registration/login.html  modulo_desligado
 registration/login.html  saude_alerta
 registration/login.html  versao_nova
 schedule/_form.html  erro_situacao
-schedule/_form.html  form.repeticoes
+schedule/_form.html  form.repetitions
 schedule/_form.html  patient.name
 schedule/_form.html  rotulo
 schedule/calendar.html  backup_atrasado

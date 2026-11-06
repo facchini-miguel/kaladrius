@@ -18,7 +18,7 @@
       <option value="todas"{% if filtros.status == "todas" %} selected{% endif %}>{% translate "Todas" %}</option>
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filtros.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
   <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filtros.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
   <div class="col-6 col-md-2"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
 </form>

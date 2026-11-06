@@ -137,13 +137,13 @@ def test_estimates_needs_finance(clinica_a):
         "schedule_start": "08:00",
         "schedule_end": "18:00",
         "schedule_interval": 30,
-        "modulos": ["odontologia"],
-        "modulos_gerais": sorted(sem(M.FINANCE)),
+        "modules": ["odontologia"],
+        "general_modules": sorted(sem(M.FINANCE)),
     }
     form = ClinicForm(data, instance=clinica_a)
     assert not form.is_valid()
-    assert "modulos_gerais" in form.errors
-    data["modulos_gerais"] = sorted(sem(M.FINANCE, M.ESTIMATES, M.STAFF))
+    assert "general_modules" in form.errors
+    data["general_modules"] = sorted(sem(M.FINANCE, M.ESTIMATES, M.STAFF))
     assert ClinicForm(data, instance=clinica_a).is_valid()
 
 
@@ -156,8 +156,8 @@ def test_settings_save_the_general_modules(clinica_a, admin):
             "schedule_start": "08:00",
             "schedule_end": "18:00",
             "schedule_interval": 30,
-            "modulos": ["medicina"],
-            "modulos_gerais": [M.SCHEDULE, M.MEDICAL_RECORDS],
+            "modules": ["medicina"],
+            "general_modules": [M.SCHEDULE, M.MEDICAL_RECORDS],
         },
     )
     assert response.status_code == 302
@@ -172,7 +172,7 @@ def test_first_clinic_registration_turns_on_all_general_modules(django_user_mode
     cliente = cliente_de(django_user_model.objects.create_superuser("root_primeira"))
     response = cliente.post(
         reverse("register_clinic"),
-        {"name": "Clínica fictícia", "area": "medicina", "modulos": ["medicina"]},
+        {"name": "Clínica fictícia", "area": "medicina", "modules": ["medicina"]},
     )
     assert response.status_code == 302
     clinic = Clinic.objects.get()

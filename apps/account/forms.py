@@ -33,7 +33,7 @@ class CodeForm(BootstrapForm, forms.Form):
 
 
 class DisableTwoFactorForm(BootstrapForm, forms.Form):
-    senha = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
+    password = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
     code = _code_field(_("Código do aplicativo"))
 
     def __init__(self, *args, user, **kwargs):
@@ -42,8 +42,8 @@ class DisableTwoFactorForm(BootstrapForm, forms.Form):
 
     def clean(self):
         data = super().clean()
-        if data.get("senha") and not self.user.check_password(data["senha"]):
-            self.add_error("senha", _("Senha incorreta."))
+        if data.get("password") and not self.user.check_password(data["password"]):
+            self.add_error("password", _("Senha incorreta."))
         elif data.get("code") and not services.verify(self.user, data["code"]):
             self.add_error("code", _("Código incorreto."))
         return data

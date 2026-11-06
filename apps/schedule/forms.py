@@ -44,7 +44,7 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
     end_time = forms.TimeField(
         label=_("Fim"), widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
     )
-    repeticoes = forms.IntegerField(
+    repetitions = forms.IntegerField(
         label=_("Repetir por quantas semanas"),
         min_value=1,
         max_value=52,
@@ -89,7 +89,7 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             )
 
         if appointment.pk:
-            del self.fields["repeticoes"]  # recurrence only applies when creating
+            del self.fields["repetitions"]  # recurrence only applies when creating
             start = timezone.localtime(appointment.start)
             self.initial.update(
                 date=start.date(),
@@ -151,7 +151,7 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             return data
 
         self.intervalos = services.occurrences(
-            date, start_time, end_time, data.get("repeticoes") or 1
+            date, start_time, end_time, data.get("repetitions") or 1
         )
         self.instance.start, self.instance.end = self.intervalos[0]
         marcado = (Appointment.Status.ATTENDED, Appointment.Status.MISSED)

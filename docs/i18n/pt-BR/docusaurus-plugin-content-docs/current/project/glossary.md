@@ -1349,7 +1349,7 @@ As classes de enum `Tipo`, `Situacao` e `Forma` de todos os apps viraram `Kind`,
 
 ## Configurações, classes CSS e ganchos do HTML (feito)
 
-As configurações de `config/settings.py` e os nomes que os templates, a folha de estilos e os scripts compartilham (decisão 182). Uma classe montada a partir de um valor gravado mantém o valor: `status-compareceu`, `kind-novo`. Os ids de campos de filtro com o nome da sua query (`de`, `agrupar`) esperam os nomes das queries.
+As configurações de `config/settings.py` e os nomes que os templates, a folha de estilos e os scripts compartilham (decisão 182). Uma classe montada a partir de um valor gravado mantém o valor: `status-compareceu`, `kind-novo`. Os ids de campos de filtro com o nome da sua query (`de`, `agrupar`) acompanharam a query na decisão 184 (`since`, `group`).
 
 ### Configurações
 
@@ -1478,6 +1478,48 @@ As variáveis locais e funções dos scripts de `static/js` (`evento` → `event
 | `kaladrius-atividade` | `kaladrius-activity` | chave do `localStorage` da última atividade |
 | `aniversariantes` | `birthday-badge` | classe do marcador de aniversariantes |
 | `rechamadas` | `recall-badge` | classe do marcador de rechamadas |
+
+## Campos de formulário e nomes de consulta (feito)
+
+Os campos de formulário que não são campo de modelo, os nomes que as telas mandam no endereço ou num formulário (`?de=` → `?since=`, `name="acao"` → `name="action"`) e os prefixos dos formulários da verificação em duas etapas (decisão 184). Os valores ficam: `?group=mes`, `action=finalizar`, `scope=serie`, como os valores gravados. Um endereço de antes da decisão 155 é redirecionado com os nomes antigos de consulta traduzidos (`/financeiro/fluxo-de-caixa/?de=…&agrupar=mes` → `/finance/cash-flow/?since=…&group=mes`).
+
+### Campos de formulário
+
+| Antes | Depois |
+|---|---|
+| `senha` | `password` |
+| `salario_desde` | `salary_since` |
+| `parcelas` | `installments` |
+| `primeiro_vencimento` | `first_due_date` |
+| `recebido_agora` | `received_now` |
+| `pago_agora` | `paid_now` |
+| `modo` | `mode` |
+| `modulos` | `modules` |
+| `modulos_gerais` | `general_modules` |
+| `repeticoes` | `repetitions` |
+
+### Nomes de consulta e de formulário
+
+| Antes | Depois |
+|---|---|
+| `pagina` | `page` |
+| `de` | `since` |
+| `mes` | `month` |
+| `periodo` | `period` |
+| `agrupar` | `group` |
+| `modulo` | `module` |
+| `novo` | `new` |
+| `inatividade` | `idle` |
+| `acao` | `action` |
+| `escopo` | `scope` |
+| `chave` | `key` |
+
+### Prefixos de formulário
+
+| Antes | Depois |
+|---|---|
+| `desativar` | `disable` |
+| `codigos` | `codes` |
 
 ## O que fica em português
 
