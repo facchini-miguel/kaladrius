@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "titulo" and "texto" have one text per language (pt-br, en, es).
 
+- versao: 0.59.1
+  data: 2026-11-05
+  titulo:
+    pt-br: Cidades de volta no cadastro de paciente
+    en: Cities back in the patient form
+    es: Ciudades de vuelta en el registro de paciente
+  itens:
+    - tipo: correcao
+      modulo: Pacientes
+      publico: [equipe]
+      texto:
+        pt-br: >
+          No cadastro de paciente, escolher a UF voltou a carregar a lista de cidades. Desde a
+          versão 0.57.0 a lista ficava vazia.
+        en: >
+          In the patient form, choosing the state loads the list of cities again. Since version
+          0.57.0 the list stayed empty.
+        es: >
+          En el registro de paciente, elegir el estado vuelve a cargar la lista de ciudades. Desde
+          la versión 0.57.0 la lista quedaba vacía.
+    - tipo: melhoria
+      modulo: Sistema
+      publico: []
+      texto:
+        pt-br: >
+          Os nomes dos testes, das configurações, das classes CSS e dos ganchos do HTML estão em
+          inglês (decisões 181 e 182). As variáveis de ambiente não mudam.
+        en: >
+          The names of tests, settings, CSS classes and HTML hooks are in English (decisions 181
+          and 182). The environment variables do not change.
+        es: >
+          Los nombres de las pruebas, de las configuraciones, de las clases CSS y de los ganchos
+          del HTML están en inglés (decisiones 181 y 182). Las variables de entorno no cambian.
+
 - versao: 0.59.0
   data: 2026-11-05
   titulo:
