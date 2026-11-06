@@ -1733,7 +1733,7 @@ Os nomes que as views e os processadores de contexto passam aos templates, e as 
 
 ## Chaves dentro dos valores (feito)
 
-As chaves dos dicionários que os serviços e as views montam para as telas (o resumo do início, o fluxo de caixa, os relatórios, o planejamento, as comissões, o caixa, os devedores, a saúde do servidor), os atributos que as views acrescentam aos objetos e os campos da tabela de legislação (decisão 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. A saúde do servidor usa os nomes que o `health.sh` grava (`time`, `memory_total`…); linhas do formato antigo, com nomes em português, continuam sendo lidas. Ficam: os códigos de módulo e de ação (`can.agenda.ver`), os papéis dos documentos (`country_documents.paciente`), os `related_name` dos modelos (`estimate.itens`) e os marcadores dos textos traduzidos (`%(anos)s`).
+As chaves dos dicionários que os serviços e as views montam para as telas (o resumo do início, o fluxo de caixa, os relatórios, o planejamento, as comissões, o caixa, os devedores, a saúde do servidor), os atributos que as views acrescentam aos objetos e os campos da tabela de legislação (decisão 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. A saúde do servidor usa os nomes que o `health.sh` grava (`time`, `memory_total`…); linhas do formato antigo, com nomes em português, continuam sendo lidas. Ficam: os códigos de módulo e de ação (`can.agenda.ver`), os papéis dos documentos (`country_documents.paciente`), e os marcadores dos textos traduzidos (`%(anos)s`).
 
 ### Chaves de dicionário
 
@@ -1953,6 +1953,48 @@ Os campos do `releases.yaml`, do código que o lê e da API `/api/v1/releases` (
 | `origem` | `source` |
 | `?publico=` | `?audience=` |
 | `?desde=` | `?since=` |
+
+## Nomes das relações reversas (feito)
+
+Os nomes das relações reversas, `related_name` (decisão 190): `estimate.itens` → `estimate.items`, `entry.parcelas` → `entry.installments`, `user.vinculos` → `user.memberships`, e o mesmo nas consultas (`vinculos__clinic` → `memberships__clinic`). Só muda o estado do Django: as 12 migrações `*_english_related_names` não geram SQL. Nomes parecidos que não são relações reversas ficam: os códigos de módulo (`can.orcamentos.ver`), os rótulos dos apps, os nomes no plural dos modelos mostrados na tela.
+
+| Antes | Depois |
+|---|---|
+| `adendos` | `addenda` |
+| `agendamentos` | `appointments` |
+| `anexos` | `attachments` |
+| `atendimentos` | `visits` |
+| `atestados` | `certificates` |
+| `bairros` | `neighborhoods` |
+| `caixas` | `cash_registers` |
+| `carteirinhas` | `member_cards` |
+| `categorias` | `categories` |
+| `cidades` | `cities` |
+| `codigos_recuperacao` | `recovery_codes` |
+| `comissoes` | `commissions` |
+| `duas_etapas` | `two_factor` |
+| `filhos` | `children` |
+| `folha` | `payroll` |
+| `folhas` | `payrolls` |
+| `importacoes` | `statement_imports` |
+| `itens` | `items` |
+| `lancamentos` | `entries` |
+| `logradouros` | `streets` |
+| `movimentos` | `movements` |
+| `orcamentos` | `estimates` |
+| `pagamentos` | `payments` |
+| `pagamentos_estornados` | `reversed_payments` |
+| `parcelas` | `installments` |
+| `pedidos_de_exames` | `exam_requests` |
+| `profissionais` | `practitioners` |
+| `receitas` | `prescriptions` |
+| `rechamadas` | `recalls` |
+| `relacionado_a` | `related_to` |
+| `relacionados` | `related_people` |
+| `salarios` | `salaries` |
+| `transacao` | `transaction` |
+| `transacoes` | `transactions` |
+| `vinculos` | `memberships` |
 
 ## O que fica em português
 
