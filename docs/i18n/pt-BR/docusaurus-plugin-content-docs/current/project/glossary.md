@@ -1523,7 +1523,7 @@ Os campos de formulário que não são campo de modelo, os nomes que as telas ma
 
 ## Nomes do contexto dos templates (feito)
 
-Os nomes que as views e os processadores de contexto passam aos templates, e as variáveis dos próprios templates (`{% for %}`, `{% with %}`, `as`), em todos os templates (decisão 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Ficam: as chaves dentro de um valor (`dashboard.rechamadas`, e os códigos de módulo e ação em `can.agenda.ver`), os nomes dos blocos dos templates (`{% block titulo %}`) e os marcadores dentro de `{% blocktranslate %}`, que fazem parte do texto traduzido; quando um vinha de um nome renomeado, a tag o liga ao novo (`{% blocktranslate with versao_sistema=system_version %}`).
+Os nomes que as views e os processadores de contexto passam aos templates, e as variáveis dos próprios templates (`{% for %}`, `{% with %}`, `as`), em todos os templates (decisão 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Ficam: as chaves dentro de um valor (`dashboard.rechamadas`, e os códigos de módulo e ação em `can.agenda.ver`), os marcadores dentro de `{% blocktranslate %}`, que fazem parte do texto traduzido; quando um vinha de um nome renomeado, a tag o liga ao novo (`{% blocktranslate with versao_sistema=system_version %}`). O bloco `titulo` virou `title` na decisão 187.
 
 | Antes | Depois |
 |---|---|

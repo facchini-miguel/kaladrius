@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Caixa do dia" %} · {{ cash_register.account.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Caixa do dia" %} · {{ cash_register.account.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">

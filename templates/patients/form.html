@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block titulo %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>

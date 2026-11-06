@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Pedido de exames" %} · {{ exam_request.visit.patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Pedido de exames" %} · {{ exam_request.visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">

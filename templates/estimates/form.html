@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if estimate %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if estimate %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}{% else %}{% translate "Novo orçamento" %}{% endif %}</h1>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% if recall.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if recall.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% if recall.pk %}{% translate "Editar rechamada" %}{% else %}{% translate "Nova rechamada" %}{% endif %}</h1>

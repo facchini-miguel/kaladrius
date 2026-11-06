@@ -1523,7 +1523,7 @@ Los campos de formulario que no son campo de modelo, los nombres que las pantall
 
 ## Nombres del contexto de las plantillas (hecho)
 
-Los nombres que las vistas y los procesadores de contexto pasan a las plantillas, y las variables de las propias plantillas (`{% for %}`, `{% with %}`, `as`), en todas las plantillas (decisión 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Quedan: las claves dentro de un valor (`dashboard.rechamadas`, y los códigos de módulo y acción en `can.agenda.ver`), los nombres de los bloques de las plantillas (`{% block titulo %}`) y los marcadores dentro de `{% blocktranslate %}`, que forman parte del texto traducido; cuando uno venía de un nombre renombrado, la etiqueta lo liga al nuevo (`{% blocktranslate with versao_sistema=system_version %}`).
+Los nombres que las vistas y los procesadores de contexto pasan a las plantillas, y las variables de las propias plantillas (`{% for %}`, `{% with %}`, `as`), en todas las plantillas (decisión 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Quedan: las claves dentro de un valor (`dashboard.rechamadas`, y los códigos de módulo y acción en `can.agenda.ver`), los marcadores dentro de `{% blocktranslate %}`, que forman parte del texto traducido; cuando uno venía de un nombre renombrado, la etiqueta lo liga al nuevo (`{% blocktranslate with versao_sistema=system_version %}`). El bloque `titulo` pasó a ser `title` en la decisión 187.
 
 | Antes | Después |
 |---|---|

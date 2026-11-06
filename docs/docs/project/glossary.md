@@ -1523,7 +1523,7 @@ The fields of forms that are not a model's field, the names the pages send in th
 
 ## Template context names (done)
 
-The names the views and context processors give the templates, and the templates' own variables (`{% for %}`, `{% with %}`, `as`), in all templates (decision 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Kept: the keys inside a value (`dashboard.rechamadas`, and the module and action codes in `can.agenda.ver`), the names of template blocks (`{% block titulo %}`) and the placeholders inside `{% blocktranslate %}`, which are part of the translated text; when one came from a renamed name the tag binds it (`{% blocktranslate with versao_sistema=system_version %}`).
+The names the views and context processors give the templates, and the templates' own variables (`{% for %}`, `{% with %}`, `as`), in all templates (decision 185): `{{ nome_sistema }}` → `{{ system_name }}`, `pode.agenda.ver` → `can.agenda.ver`, `pagina` → `page`. Kept: the keys inside a value (`dashboard.rechamadas`, and the module and action codes in `can.agenda.ver`), the placeholders inside `{% blocktranslate %}`, which are part of the translated text; when one came from a renamed name the tag binds it (`{% blocktranslate with versao_sistema=system_version %}`). The block `titulo` became `title` in decision 187.
 
 | Before | After |
 |---|---|
