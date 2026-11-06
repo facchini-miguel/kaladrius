@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Equipe" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Equipe" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Equipe" %}</h1>
-  {% if pode.usuarios.criar %}
+  {% if can.usuarios.criar %}
   <a class="btn btn-primary" href="{% url 'team:new' %}">{% translate "Novo membro" %}</a>
   {% endif %}
 </div>
@@ -24,22 +24,22 @@
       </tr>
     </thead>
     <tbody>
-      {% for vinculo in vinculos %}
+      {% for membership in memberships %}
       <tr>
         <td>
-          {{ vinculo.user.get_full_name|default:"—" }}
-          {% if vinculo.user == user %}<span class="badge text-bg-light">{% translate "você" %}</span>{% endif %}
+          {{ membership.user.get_full_name|default:"—" }}
+          {% if membership.user == user %}<span class="badge text-bg-light">{% translate "você" %}</span>{% endif %}
         </td>
-        <td>{{ vinculo.user.username }}</td>
-        <td>{{ vinculo.get_role_display }}</td>
-        <td>{% if vinculo.user.last_login %}{{ vinculo.user.last_login|date:"SHORT_DATETIME_FORMAT" }}{% else %}{% translate "nunca" %}{% endif %}</td>
+        <td>{{ membership.user.username }}</td>
+        <td>{{ membership.get_role_display }}</td>
+        <td>{% if membership.user.last_login %}{{ membership.user.last_login|date:"SHORT_DATETIME_FORMAT" }}{% else %}{% translate "nunca" %}{% endif %}</td>
         <td>
-          {% if vinculo.active and vinculo.user.is_active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
+          {% if membership.active and membership.user.is_active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
           {% else %}<span class="badge text-bg-secondary">{% translate "Sem acesso" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if pode.usuarios.alterar %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'team:edit' vinculo.pk %}">{% translate "Editar" %}</a>
+          {% if can.usuarios.alterar %}
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'team:edit' membership.pk %}">{% translate "Editar" %}</a>
           {% endif %}
         </td>
       </tr>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Novidades" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Novidades" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
@@ -9,12 +9,12 @@
   <form method="get">
     <select name="module" class="form-select" aria-label="{% translate 'Filtrar por módulo' %}" data-submit-on-change>
       <option value="">{% translate "Todos os módulos" %}</option>
-      {% for valor, name in modulos %}<option value="{{ valor }}"{% if valor == module %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      {% for value, name in modules %}<option value="{{ value }}"{% if value == module %} selected{% endif %}>{{ name }}</option>{% endfor %}
     </select>
   </form>
 </div>
 
-{% for release, itens in versoes %}
+{% for release, items in versions %}
 <section class="mb-4">
   <h2 class="h5 mb-1">
     {% blocktranslate with versao=release.versao %}Versão {{ versao }}{% endblocktranslate %}
@@ -22,7 +22,7 @@
   </h2>
   {% if release.titulo %}<p class="text-body-secondary mb-2">{{ release.titulo }}</p>{% endif %}
   <ul class="list-group">
-    {% for item in itens %}
+    {% for item in items %}
     <li class="list-group-item">
       <span class="badge kind-{{ item.tipo }} me-2">{{ item.tipo_nome }}</span>
       <strong>{{ item.modulo_nome }}:</strong> {{ item.texto }}

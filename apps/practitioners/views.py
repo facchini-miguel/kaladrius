@@ -12,7 +12,7 @@ from .models import Practitioner
 @requires_permission(Module.PRACTITIONERS, Action.VIEW)
 def practitioner_list(request):
     profissionais = Practitioner.objects.select_related("user")
-    return render(request, "practitioners/list.html", {"profissionais": profissionais})
+    return render(request, "practitioners/list.html", {"practitioners": profissionais})
 
 
 @requires_permission(Module.PRACTITIONERS, Action.CREATE)

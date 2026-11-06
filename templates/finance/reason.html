@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{{ titulo }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ title }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{{ titulo }}</h1>
-<p class="text-body-secondary mb-4">{{ objeto }}</p>
+<h1 class="h3 mb-1">{{ title }}</h1>
+<p class="text-body-secondary mb-4">{{ subject }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
   <p class="text-body-secondary small">{% translate "Nada é apagado: o registro fica marcado, com o motivo, e aparece na auditoria." %}</p>
-  <button type="submit" class="btn btn-danger">{{ titulo }}</button>
-  <a class="btn btn-link" href="{% url 'finance:entry' voltar %}">{% translate "Voltar" %}</a>
+  <button type="submit" class="btn btn-danger">{{ title }}</button>
+  <a class="btn btn-link" href="{% url 'finance:entry' back_entry %}">{% translate "Voltar" %}</a>
 </form>
 {% endblock %}

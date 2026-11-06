@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ entry.description }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ entry.description }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{{ entry.description }}</h1>
     <span class="text-body-secondary">
-      {% if pagar %}{% translate "Despesa" %} · {% endif %}{% if entry.patient_id %}<a href="{% url 'patients:record' entry.patient_id %}">{{ entry.patient.name }}</a>{% elif entry.supplier_id %}<a href="{% url 'finance:supplier' entry.supplier_id %}">{{ entry.payer }}</a>{% else %}{{ entry.payer }}{% endif %}
+      {% if payable %}{% translate "Despesa" %} · {% endif %}{% if entry.patient_id %}<a href="{% url 'patients:record' entry.patient_id %}">{{ entry.patient.name }}</a>{% elif entry.supplier_id %}<a href="{% url 'finance:supplier' entry.supplier_id %}">{{ entry.payer }}</a>{% else %}{{ entry.payer }}{% endif %}
       · {{ entry.category }}{% if entry.cost_center %} · {{ entry.cost_center }}{% endif %}{% if entry.practitioner %} · {{ entry.practitioner.name }}{% endif %}
       {% if commission %} · <a href="{% url 'finance:commission' commission.pk %}">{% translate "Extrato da comissão" %}</a>{% endif %}
       · {{ entry.date|date:"SHORT_DATE_FORMAT" }}
@@ -16,10 +16,10 @@
     {% if entry.cancelled %}<span class="badge text-bg-dark ms-1">{% translate "Cancelado" %}</span>{% endif %}
   </div>
   <div>
-    {% if pode_excluir and not entry.cancelled %}
+    {% if can_delete and not entry.cancelled %}
     <a class="btn btn-outline-danger" href="{% url 'finance:cancel' entry.pk %}">{% translate "Cancelar lançamento" %}</a>
     {% endif %}
-    <a class="btn btn-link" href="{% if pagar %}{% url 'finance:payables' %}{% else %}{% url 'finance:receivables' %}{% endif %}">{% translate "Voltar à lista" %}</a>
+    <a class="btn btn-link" href="{% if payable %}{% url 'finance:payables' %}{% else %}{% url 'finance:receivables' %}{% endif %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>
 
@@ -31,8 +31,8 @@
 
 <div class="row g-3 mb-3">
   <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Valor total" %}</div><div class="fs-5">{{ entry.total_amount|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-success">{{ total_pago|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_saldo > 0 %} text-danger{% endif %}">{{ total_saldo|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-success">{{ total_paid|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Falta" %}</div><div class="fs-5{% if total_balance > 0 %} text-danger{% endif %}">{{ total_balance|currency }}</div></div></div></div>
 </div>
 
 {% if entry.notes %}<p class="text-body-secondary">{{ entry.notes|linebreaksbr }}</p>{% endif %}
@@ -51,9 +51,9 @@
       </tr>
     </thead>
     <tbody>
-      {% for installment in parcelas %}
+      {% for installment in installments %}
       <tr>
-        <td>{{ installment.number }}/{{ parcelas|length }}</td>
+        <td>{{ installment.number }}/{{ installments|length }}</td>
         <td class="text-nowrap">{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
         <td class="text-end text-nowrap">{{ installment.amount|currency }}</td>
         <td class="text-end text-nowrap">{% if installment.balance > 0 and not entry.cancelled %}{{ installment.balance|currency }}{% else %}—{% endif %}</td>
@@ -62,14 +62,14 @@
           {% for payment in installment.lista_pagamentos %}
           <div{% if payment.reversed %} class="text-decoration-line-through text-body-secondary"{% endif %}>
             {{ payment.date|date:"SHORT_DATE_FORMAT" }} · {{ payment.amount|currency }} · {{ payment.get_method_display }}
-            {% if not pagar %}<a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a>{% endif %}
-            {% if pode_excluir and not payment.reversed %}· <a class="text-danger" href="{% url 'finance:reverse_payment' payment.pk %}">{% translate "estornar" %}</a>{% endif %}
+            {% if not payable %}<a href="{% url 'finance:receipt' payment.pk %}">{% translate "recibo" %}</a>{% endif %}
+            {% if can_delete and not payment.reversed %}· <a class="text-danger" href="{% url 'finance:reverse_payment' payment.pk %}">{% translate "estornar" %}</a>{% endif %}
           </div>
           {% empty %}—{% endfor %}
         </td>
         <td class="text-end">
-          {% if pode_alterar and installment.balance > 0 and not entry.cancelled %}
-          <a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</a>
+          {% if can_change and installment.balance > 0 and not entry.cancelled %}
+          <a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% if payable %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</a>
           {% endif %}
         </td>
       </tr>

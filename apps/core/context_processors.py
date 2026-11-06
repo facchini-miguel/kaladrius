@@ -17,17 +17,17 @@ def clinic(request):
     if user is None or not user.is_authenticated:
         return {}
     return {
-        "clinica_atual": getattr(request, "clinic", None),
-        "vinculo_atual": getattr(request, "vinculo", None),
-        "pode": SimpleLazyObject(lambda: permissions_table(request)),
+        "current_clinic": getattr(request, "clinic", None),
+        "current_membership": getattr(request, "vinculo", None),
+        "can": SimpleLazyObject(lambda: permissions_table(request)),
         # Turned-off modules the system administrator still sees (decision 115): marked in
         # the menu, and the page of one says so.
-        "modulos_desligados": SimpleLazyObject(lambda: modules.visible_disabled(request)),
-        "modulo_desligado": getattr(request, "modulo_desligado", None),
+        "disabled_modules": SimpleLazyObject(lambda: modules.visible_disabled(request)),
+        "disabled_module": getattr(request, "modulo_desligado", None),
         # Brazilian fields (RG, state registration, IBGE cities) are shown only in Brazil
         # (decision 117); the documents are the country's (decision 121).
-        "no_brasil": countries.clinic_country(getattr(request, "clinic", None)) == "BR",
-        "documentos_do_pais": identification.for_country(
+        "in_brazil": countries.clinic_country(getattr(request, "clinic", None)) == "BR",
+        "country_documents": identification.for_country(
             countries.clinic_country(getattr(request, "clinic", None))
         ),
     }
@@ -42,9 +42,9 @@ def languages(request):
         (code for code, _nome in settings.LANGUAGES if current.split("-")[0] == code), current
     )
     return {
-        "idiomas": settings.LANGUAGES,
-        "idioma_base": base,
-        "idioma_nome": dict(settings.LANGUAGES).get(base, current),
+        "languages": settings.LANGUAGES,
+        "base_language": base,
+        "language_name": dict(settings.LANGUAGES).get(base, current),
     }
 
 
@@ -56,10 +56,10 @@ def backup(request):
         return {}
     last = Backup.objects.first()
     if last is None:
-        return {"backup_nenhum": True}
+        return {"backup_missing": True}
     if timezone.now() - last.timestamp <= BACKUP_LATE_AFTER:
         return {}
-    return {"backup_atrasado": last}
+    return {"backup_late": last}
 
 
 def inactivity(request):
@@ -67,4 +67,4 @@ def inactivity(request):
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated:
         return {}
-    return {"inatividade_minutos": settings.IDLE_MINUTES}
+    return {"idle_minutes": settings.IDLE_MINUTES}

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Verificação em duas etapas" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Verificação em duas etapas" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Verificação em duas etapas" %}</h1>
 {% if active %}
 <p><span class="badge text-bg-success">{% translate "Ativa" %}</span> {% translate "Ao entrar, depois da senha, o sistema pede o código do aplicativo autenticador." %}</p>
-<p class="text-body-secondary">{% blocktranslate count n=restantes %}Resta {{ n }} código de recuperação sem uso.{% plural %}Restam {{ n }} códigos de recuperação sem uso.{% endblocktranslate %}</p>
+<p class="text-body-secondary">{% blocktranslate count n=remaining %}Resta {{ n }} código de recuperação sem uso.{% plural %}Restam {{ n }} códigos de recuperação sem uso.{% endblocktranslate %}</p>
 <div class="row g-4">
   <div class="col-md-6">
     <div class="card"><div class="card-body">
@@ -16,19 +16,19 @@
       <form method="post" novalidate>
         {% csrf_token %}
         <input type="hidden" name="action" value="codigos">
-        {% include "includes/form.html" with form=novos %}
+        {% include "includes/form.html" with form=codes_form %}
         <button type="submit" class="btn btn-outline-primary">{% translate "Gerar novos códigos" %}</button>
       </form>
     </div></div>
   </div>
-  {% if desativar %}
+  {% if disable_form %}
   <div class="col-md-6">
     <div class="card"><div class="card-body">
       <h2 class="h6">{% translate "Desativar" %}</h2>
       <form method="post" novalidate>
         {% csrf_token %}
         <input type="hidden" name="action" value="desativar">
-        {% include "includes/form.html" with form=desativar %}
+        {% include "includes/form.html" with form=disable_form %}
         <button type="submit" class="btn btn-outline-danger">{% translate "Desativar a verificação em duas etapas" %}</button>
       </form>
     </div></div>
@@ -38,7 +38,7 @@
   {% endif %}
 </div>
 {% else %}
-{% if obrigatoria %}<div class="alert alert-warning">{% translate "A clínica exige a verificação em duas etapas de quem acessa o prontuário ou o financeiro. Ative abaixo para continuar usando o sistema." %}</div>{% endif %}
+{% if required %}<div class="alert alert-warning">{% translate "A clínica exige a verificação em duas etapas de quem acessa o prontuário ou o financeiro. Ative abaixo para continuar usando o sistema." %}</div>{% endif %}
 <p>{% translate "Além da senha, o sistema passa a pedir um código que muda a cada 30 segundos, gerado por um aplicativo no seu celular (Google Authenticator, Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha não entra sem o celular." %}</p>
 <ol>
   <li>{% translate "Instale um aplicativo autenticador no celular." %}</li>

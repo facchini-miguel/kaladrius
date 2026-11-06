@@ -23,7 +23,7 @@ from .models import Appointment, AppointmentType
 
 @requires_permission(Module.CATALOGS, Action.VIEW)
 def appointment_types(request):
-    return render(request, "schedule/types.html", {"tipos": AppointmentType.objects.all()})
+    return render(request, "schedule/types.html", {"types": AppointmentType.objects.all()})
 
 
 @requires_permission(Module.CATALOGS, Action.CREATE)
@@ -155,11 +155,11 @@ def calendar_view(request):
         request,
         "schedule/calendar.html",
         {
-            "profissionais": profissionais,
+            "practitioners": profissionais,
             "practitioner": practitioner,
-            "tipos": AppointmentType.objects.filter(active=True),
-            "configuracao": config,
-            "so_a_propria": own_schedule_only(request),
+            "types": AppointmentType.objects.filter(active=True),
+            "schedule_settings": config,
+            "own_only": own_schedule_only(request),
         },
     )
 
@@ -291,7 +291,7 @@ def status(request, pk):
                 clinic=request.clinic,
                 profissionais=services.visible_practitioners(request),
             )
-            context = {"form": form, "appointment": appointment, "erro_situacao": error.messages[0]}
+            context = {"form": form, "appointment": appointment, "status_error": error.messages[0]}
             return render(request, "schedule/_form.html", context)
         messages.error(request, error.messages[0])
         return redirect("home")
@@ -324,7 +324,7 @@ def delete_appointment(request, pk):
             series=appointment.series, start__gt=appointment.start
         ).count()
     return render(
-        request, "schedule/_delete.html", {"appointment": appointment, "proximos": proximos}
+        request, "schedule/_delete.html", {"appointment": appointment, "following_count": proximos}
     )
 
 
@@ -367,4 +367,4 @@ def birthdays_on_day(request):
     birthdays = [
         (patient, day.year - patient.birth_date.year) for patient in _birthdays_on([day])[day]
     ]
-    return render(request, "schedule/_birthdays.html", {"dia": day, "aniversariantes": birthdays})
+    return render(request, "schedule/_birthdays.html", {"day": day, "birthdays": birthdays})

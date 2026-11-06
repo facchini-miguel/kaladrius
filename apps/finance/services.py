@@ -606,7 +606,7 @@ def planning(year, today=None):
                 "realizado": realizado_total,
             }
         )
-    return {"year": year, "fracao": fracao, "secoes": secoes}
+    return {"year": year, "fracao": fracao, "sections": secoes}
 
 
 @transaction.atomic

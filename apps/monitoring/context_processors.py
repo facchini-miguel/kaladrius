@@ -11,11 +11,11 @@ def health_alert(request):
         return {}
     latest = health.latest()
     if latest is None:
-        return {"saude_alerta": {"sem_coleta": True}}
+        return {"health_alert": {"sem_coleta": True}}
     if health.stopped(latest):
-        return {"saude_alerta": {"parada": latest["momento"]}}
+        return {"health_alert": {"parada": latest["momento"]}}
     # Not the processor: a busy moment is normal, and it does not break anything by itself.
     criticos = [
         key for key, level in health.levels(latest).items() if level == "critico" and key != "cpu"
     ]
-    return {"saude_alerta": {"criticos": criticos}} if criticos else {}
+    return {"health_alert": {"criticos": criticos}} if criticos else {}

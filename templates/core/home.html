@@ -5,30 +5,30 @@
 {% with name=user.get_full_name|default:user.username %}
 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
   <div>
-    <h1 class="h3 mb-1">{{ saudacao }}, {{ name }}</h1>
+    <h1 class="h3 mb-1">{{ greeting }}, {{ name }}</h1>
     <div class="text-body-secondary small">
-      {% if painel %}{{ painel.hoje|date:"l"|capfirst }}, {{ painel.hoje|date:"DATE_FORMAT" }} · {% endif %}
-      {% if clinica_atual %}{{ clinica_atual.name }} · {% if vinculo_atual %}{{ vinculo_atual.get_role_display }}{% else %}{% translate "Administrador da plataforma" %}{% endif %}{% endif %}
+      {% if dashboard %}{{ dashboard.hoje|date:"l"|capfirst }}, {{ dashboard.hoje|date:"DATE_FORMAT" }} · {% endif %}
+      {% if current_clinic %}{{ current_clinic.name }} · {% if current_membership %}{{ current_membership.get_role_display }}{% else %}{% translate "Administrador da plataforma" %}{% endif %}{% endif %}
     </div>
   </div>
-  {% if painel %}
+  {% if dashboard %}
   <div class="d-flex flex-wrap gap-2 d-print-none">
-    {% if pode.pacientes.ver %}
+    {% if can.pacientes.ver %}
     <form method="get" action="{% url 'patients:list' %}" class="d-flex" role="search">
       <label for="home-search" class="visually-hidden">{% translate "Buscar paciente" %}</label>
       <input type="search" id="home-search" name="q" class="form-control" placeholder="{% translate 'Buscar paciente' %}">
     </form>
     {% endif %}
-    {% if pode.agenda.ver %}<a class="btn btn-primary" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}</a>{% endif %}
-    {% if pode.pacientes.criar %}<a class="btn btn-outline-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>{% endif %}
-    {% if pode.orcamentos.criar %}<a class="btn btn-outline-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
-    {% if pode.recebimentos.ver %}<a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "Receber" %}</a>{% endif %}
+    {% if can.agenda.ver %}<a class="btn btn-primary" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}</a>{% endif %}
+    {% if can.pacientes.criar %}<a class="btn btn-outline-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>{% endif %}
+    {% if can.orcamentos.criar %}<a class="btn btn-outline-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if can.recebimentos.ver %}<a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "Receber" %}</a>{% endif %}
   </div>
   {% endif %}
 </div>
 {% endwith %}
 
-{% if not clinica_atual %}
+{% if not current_clinic %}
 {% if user.is_superuser %}
 <div class="alert alert-info">
   {% translate "Ainda não há clínica cadastrada." %} <a href="{% url 'register_clinic' %}">{% translate "Cadastre a sua clínica." %}</a>
@@ -40,91 +40,91 @@
 {% endif %}
 {% endif %}
 
-{% if painel %}
-{% with agenda=painel.agenda receb=painel.recebimentos fin=painel.financeiro %}
-{% if agenda or receb or fin %}
+{% if dashboard %}
+{% with schedule=dashboard.agenda receipts=dashboard.recebimentos finances=dashboard.financeiro %}
+{% if schedule or receipts or finances %}
 <h2 class="h6 text-uppercase text-body-secondary mb-2">{% translate "Resumo do dia" %}</h2>
 <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
-  {% if agenda %}
+  {% if schedule %}
   <div class="col">
     <div class="card h-100 indicator"><div class="card-body">
       <div class="indicator-label">{% translate "Pacientes agendados hoje" %}</div>
-      <div class="indicator-value">{{ agenda.pacientes }}</div>
+      <div class="indicator-value">{{ schedule.pacientes }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate trimmed with vieram=agenda.compareceram faltaram=agenda.faltaram seguir=agenda.a_seguir %}
+        {% blocktranslate trimmed with vieram=schedule.compareceram faltaram=schedule.faltaram seguir=schedule.a_seguir %}
         Compareceram: {{ vieram }} · faltaram: {{ faltaram }} · a seguir: {{ seguir }}
         {% endblocktranslate %}
-        {% if agenda.sem_marcacao %}<br><span class="text-warning-emphasis">{% blocktranslate count n=agenda.sem_marcacao %}{{ n }} já passou sem marcar presença{% plural %}{{ n }} já passaram sem marcar presença{% endblocktranslate %}</span>{% endif %}
+        {% if schedule.sem_marcacao %}<br><span class="text-warning-emphasis">{% blocktranslate count n=schedule.sem_marcacao %}{{ n }} já passou sem marcar presença{% plural %}{{ n }} já passaram sem marcar presença{% endblocktranslate %}</span>{% endif %}
       </div>
     </div></div>
   </div>
   <div class="col">
     <div class="card h-100 indicator"><div class="card-body">
       <div class="indicator-label">{% translate "Faltas no mês" %}</div>
-      <div class="indicator-value">{% if agenda.faltas_mes is None %}—{% else %}{{ agenda.faltas_mes }}%{% endif %}</div>
+      <div class="indicator-value">{% if schedule.faltas_mes is None %}—{% else %}{{ schedule.faltas_mes }}%{% endif %}</div>
       <div class="small text-body-secondary">
-        {% if agenda.marcados_mes %}{% blocktranslate count n=agenda.marcados_mes %}de {{ n }} atendimento com presença marcada{% plural %}de {{ n }} atendimentos com presença marcada{% endblocktranslate %}{% else %}{% translate "Marque quem compareceu ou faltou na agenda." %}{% endif %}
-        {% if agenda.desmarcaram %}<br>{% blocktranslate count n=agenda.desmarcaram %}{{ n }} desmarcou hoje{% plural %}{{ n }} desmarcaram hoje{% endblocktranslate %}{% endif %}
+        {% if schedule.marcados_mes %}{% blocktranslate count n=schedule.marcados_mes %}de {{ n }} atendimento com presença marcada{% plural %}de {{ n }} atendimentos com presença marcada{% endblocktranslate %}{% else %}{% translate "Marque quem compareceu ou faltou na agenda." %}{% endif %}
+        {% if schedule.desmarcaram %}<br>{% blocktranslate count n=schedule.desmarcaram %}{{ n }} desmarcou hoje{% plural %}{{ n }} desmarcaram hoje{% endblocktranslate %}{% endif %}
       </div>
     </div></div>
   </div>
   {% endif %}
-  {% if receb %}
+  {% if receipts %}
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:cash' %}"><div class="card-body">
       <div class="indicator-label">{% translate "Recebido hoje" %}</div>
-      <div class="indicator-value text-success">{{ receb.recebido|currency }}</div>
+      <div class="indicator-value text-success">{{ receipts.recebido|currency }}</div>
       <div class="small text-body-secondary">
-        {% if receb.parcelas_a_receber %}{% blocktranslate count n=receb.parcelas_a_receber with valor=receb.a_receber|currency %}Falta receber hoje: {{ valor }} ({{ n }} parcela){% plural %}Falta receber hoje: {{ valor }} ({{ n }} parcelas){% endblocktranslate %}{% else %}{% translate "Nenhuma parcela em aberto vence hoje." %}{% endif %}
+        {% if receipts.parcelas_a_receber %}{% blocktranslate count n=receipts.parcelas_a_receber with valor=receipts.a_receber|currency %}Falta receber hoje: {{ valor }} ({{ n }} parcela){% plural %}Falta receber hoje: {{ valor }} ({{ n }} parcelas){% endblocktranslate %}{% else %}{% translate "Nenhuma parcela em aberto vence hoje." %}{% endif %}
       </div>
     </div></a>
   </div>
   {% endif %}
-  {% if fin %}
+  {% if finances %}
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:cash_flow' %}"><div class="card-body">
       <div class="indicator-label">{% translate "Pago hoje" %}</div>
-      <div class="indicator-value text-danger">{{ fin.pago_hoje|currency }}</div>
+      <div class="indicator-value text-danger">{{ finances.pago_hoje|currency }}</div>
       <div class="small text-body-secondary">
-        {% translate "Resultado do dia:" %} <span class="{% if fin.resultado_hoje < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_hoje|currency }}</span>
+        {% translate "Resultado do dia:" %} <span class="{% if finances.resultado_hoje < 0 %}text-danger{% else %}text-success{% endif %}">{{ finances.resultado_hoje|currency }}</span>
       </div>
     </div></a>
   </div>
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:reports' %}"><div class="card-body">
       <div class="indicator-label">{% translate "Resultado do mês até hoje" %}</div>
-      <div class="indicator-value {% if fin.resultado_mes < 0 %}text-danger{% else %}text-success{% endif %}">{{ fin.resultado_mes|currency }}</div>
+      <div class="indicator-value {% if finances.resultado_mes < 0 %}text-danger{% else %}text-success{% endif %}">{{ finances.resultado_mes|currency }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate trimmed with recebido=fin.recebido_mes|currency pago=fin.pago_mes|currency %}
+        {% blocktranslate trimmed with recebido=finances.recebido_mes|currency pago=finances.pago_mes|currency %}
         Recebido {{ recebido }} − pago {{ pago }}
         {% endblocktranslate %}<br>
-        {% translate "Mesmo período do mês passado:" %} {{ fin.resultado_anterior|currency }}
-        {% if fin.resultado_mes > fin.resultado_anterior %}<span class="text-success" title="{% translate 'Melhor que no mês passado' %}">▲</span>{% elif fin.resultado_mes < fin.resultado_anterior %}<span class="text-danger" title="{% translate 'Pior que no mês passado' %}">▼</span>{% endif %}
+        {% translate "Mesmo período do mês passado:" %} {{ finances.resultado_anterior|currency }}
+        {% if finances.resultado_mes > finances.resultado_anterior %}<span class="text-success" title="{% translate 'Melhor que no mês passado' %}">▲</span>{% elif finances.resultado_mes < finances.resultado_anterior %}<span class="text-danger" title="{% translate 'Pior que no mês passado' %}">▼</span>{% endif %}
       </div>
     </div></a>
   </div>
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:debtors' %}"><div class="card-body">
       <div class="indicator-label">{% translate "Vencido a receber" %}</div>
-      <div class="indicator-value{% if fin.vencido %} text-danger{% endif %}">{{ fin.vencido|currency }}</div>
+      <div class="indicator-value{% if finances.vencido %} text-danger{% endif %}">{{ finances.vencido|currency }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate count n=fin.parcelas_vencidas %}{{ n }} parcela em atraso · ver devedores{% plural %}{{ n }} parcelas em atraso · ver devedores{% endblocktranslate %}
+        {% blocktranslate count n=finances.parcelas_vencidas %}{{ n }} parcela em atraso · ver devedores{% plural %}{{ n }} parcelas em atraso · ver devedores{% endblocktranslate %}
       </div>
     </div></a>
   </div>
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:payables' %}"><div class="card-body">
       <div class="indicator-label">{% translate "A pagar em 7 dias" %}</div>
-      <div class="indicator-value">{{ fin.a_pagar|currency }}</div>
+      <div class="indicator-value">{{ finances.a_pagar|currency }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate count n=fin.contas_a_pagar %}{{ n }} conta, contando as atrasadas{% plural %}{{ n }} contas, contando as atrasadas{% endblocktranslate %}
+        {% blocktranslate count n=finances.contas_a_pagar %}{{ n }} conta, contando as atrasadas{% plural %}{{ n }} contas, contando as atrasadas{% endblocktranslate %}
       </div>
     </div></a>
   </div>
   <div class="col">
     <a class="card h-100 indicator text-decoration-none" href="{% url 'finance:cash_flow' %}"><div class="card-body">
       <div class="indicator-label">{% translate "Saldo nas contas" %}</div>
-      <div class="indicator-value{% if fin.saldo_contas < 0 %} text-danger{% endif %}">{{ fin.saldo_contas|currency }}</div>
+      <div class="indicator-value{% if finances.saldo_contas < 0 %} text-danger{% endif %}">{{ finances.saldo_contas|currency }}</div>
       <div class="small text-body-secondary">{% translate "Caixa, bancos e demais contas" %}</div>
     </div></a>
   </div>
@@ -134,43 +134,43 @@
 {% endwith %}
 
 <div class="row g-4">
-  {% if painel.agenda %}
-  {% with agenda=painel.agenda %}
+  {% if dashboard.agenda %}
+  {% with schedule=dashboard.agenda %}
   <div class="col-lg-8">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="h6 mb-0">{% translate "Agenda de hoje" %}</h2>
-        <a class="small" href="{% url 'schedule:calendar' %}?date={{ painel.hoje|date:'Y-m-d' }}">{% translate "Abrir na agenda" %}</a>
+        <a class="small" href="{% url 'schedule:calendar' %}?date={{ dashboard.hoje|date:'Y-m-d' }}">{% translate "Abrir na agenda" %}</a>
       </div>
-      {% if agenda.lista %}
+      {% if schedule.lista %}
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0">
           <thead>
             <tr>
               <th scope="col">{% translate "Horário" %}</th>
               <th scope="col">{% translate "Paciente" %}</th>
-              {% if agenda.mostrar_profissional %}<th scope="col">{% translate "Profissional" %}</th>{% endif %}
+              {% if schedule.mostrar_profissional %}<th scope="col">{% translate "Profissional" %}</th>{% endif %}
               <th scope="col">{% translate "Situação" %}</th>
             </tr>
           </thead>
           <tbody>
-            {% for appointment in agenda.lista %}
-            <tr class="{% if appointment == agenda.proximo %}table-primary{% elif appointment.is_cancelled %}text-body-secondary text-decoration-line-through{% endif %}">
+            {% for appointment in schedule.lista %}
+            <tr class="{% if appointment == schedule.proximo %}table-primary{% elif appointment.is_cancelled %}text-body-secondary text-decoration-line-through{% endif %}">
               <td class="text-nowrap">{{ appointment.start|time:"H:i" }}–{{ appointment.end|time:"H:i" }}</td>
               <td>
                 <span class="color-swatch color-swatch-small" style="background-color: {{ appointment.kind.color }}" title="{{ appointment.kind.display_name }}"></span>
                 {% if appointment.patient_id %}
-                {% if pode.pacientes.ver %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
-                {% if appointment == agenda.proximo %}<span class="badge text-bg-primary ms-1">{% if appointment.start <= agenda.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
+                {% if can.pacientes.ver %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
+                {% if appointment == schedule.proximo %}<span class="badge text-bg-primary ms-1">{% if appointment.start <= schedule.agora %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
                 <span class="text-body-secondary">{{ appointment.title }}</span>
                 {% endif %}
               </td>
-              {% if agenda.mostrar_profissional %}<td class="small">{{ appointment.practitioner.name }}</td>{% endif %}
+              {% if schedule.mostrar_profissional %}<td class="small">{{ appointment.practitioner.name }}</td>{% endif %}
               <td class="text-nowrap">
                 {% if appointment.patient_id %}
                 {% if appointment.status == "agendado" %}
-                {% if pode.agenda.alterar %}
+                {% if can.agenda.alterar %}
                 <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-outline-success py-0" name="status" value="compareceu" title="{% translate 'Compareceu' %}">✓ <span class="d-none d-md-inline">{% translate "Compareceu" %}</span></button>
@@ -179,7 +179,7 @@
                 {% else %}<span class="text-body-secondary small">{% translate "Agendado" %}</span>{% endif %}
                 {% else %}
                 <span class="badge {% if appointment.status == 'compareceu' %}text-bg-success{% elif appointment.status == 'faltou' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ appointment.get_status_display }}</span>
-                {% if pode.agenda.alterar %}
+                {% if can.agenda.alterar %}
                 <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
                   <button class="btn btn-sm btn-link py-0" name="status" value="agendado">{% translate "desfazer" %}</button>
@@ -201,23 +201,23 @@
   {% endwith %}
   {% endif %}
 
-  <div class="{% if painel.agenda %}col-lg-4{% else %}col-12{% endif %} d-flex flex-column gap-4">
-    {% if painel.recebimentos %}
-    {% with receb=painel.recebimentos %}
+  <div class="{% if dashboard.agenda %}col-lg-4{% else %}col-12{% endif %} d-flex flex-column gap-4">
+    {% if dashboard.recebimentos %}
+    {% with receipts=dashboard.recebimentos %}
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="h6 mb-0">{% translate "Caixa do dia" %}</h2>
         <a class="small" href="{% url 'finance:cash' %}">{% translate "Abrir" %}</a>
       </div>
       <div class="card-body">
-        {% for cash_register in receb.caixas %}
+        {% for cash_register in receipts.caixas %}
         <p class="mb-1"><span class="badge text-bg-success">{% translate "aberto" %}</span> {{ cash_register.account.name }} <span class="text-body-secondary small">{% blocktranslate with hora=cash_register.opened_at|time:"H:i" %}desde {{ hora }}{% endblocktranslate %}</span></p>
         {% empty %}
         <p class="mb-1"><span class="badge text-bg-secondary">{% translate "fechado" %}</span> {% translate "Nenhum caixa aberto." %}</p>
         {% endfor %}
-        {% if receb.por_forma %}
+        {% if receipts.por_forma %}
         <table class="table table-sm mb-0 mt-2 small">
-          {% for method, total in receb.por_forma %}
+          {% for method, total in receipts.por_forma %}
           <tr><td>{{ method }}</td><td class="text-end">{{ total|currency }}</td></tr>
           {% endfor %}
         </table>
@@ -227,23 +227,23 @@
     {% endwith %}
     {% endif %}
 
-    {% if painel.rechamadas %}
-    {% with rechamadas=painel.rechamadas %}
+    {% if dashboard.rechamadas %}
+    {% with recalls=dashboard.rechamadas %}
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="h6 mb-0">{% translate "Rechamadas para fazer" %} <span class="badge text-bg-secondary">{{ rechamadas.total }}</span></h2>
+        <h2 class="h6 mb-0">{% translate "Rechamadas para fazer" %} <span class="badge text-bg-secondary">{{ recalls.total }}</span></h2>
         <a class="small" href="{% url 'recalls:list' %}">{% translate "Ver todas" %}</a>
       </div>
-      {% if rechamadas.lista %}
+      {% if recalls.lista %}
       <ul class="list-group list-group-flush">
-        {% for rechamada in rechamadas.lista %}
+        {% for recall in recalls.lista %}
         <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
           <div class="small">
-            <div>{{ rechamada.patient.name }}{% if rechamada.patient.mobile_phone %} · <span class="text-nowrap">{{ rechamada.patient.mobile_phone|phone }}</span>{% endif %}{% if rechamada.patient.whatsapp %} · <a class="text-nowrap" href="{{ rechamada.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
-            <div class="text-body-secondary">{{ rechamada.description }}{% if rechamada.date < painel.hoje %} · <span class="text-danger">{% blocktranslate with data=rechamada.date|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
+            <div>{{ recall.patient.name }}{% if recall.patient.mobile_phone %} · <span class="text-nowrap">{{ recall.patient.mobile_phone|phone }}</span>{% endif %}{% if recall.patient.whatsapp %} · <a class="text-nowrap" href="{{ recall.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
+            <div class="text-body-secondary">{{ recall.description }}{% if recall.date < dashboard.hoje %} · <span class="text-danger">{% blocktranslate with data=recall.date|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
-          {% if pode.rechamadas.alterar %}
-          <form method="post" action="{% url 'recalls:complete' rechamada.pk %}">
+          {% if can.rechamadas.alterar %}
+          <form method="post" action="{% url 'recalls:complete' recall.pk %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{% url 'home' %}">
             <button class="btn btn-sm btn-outline-success py-0" title="{% translate 'Marcar como concluída' %}">✓</button>
@@ -259,31 +259,31 @@
     {% endwith %}
     {% endif %}
 
-    {% if painel.aniversariantes %}
+    {% if dashboard.aniversariantes %}
     <div class="card">
       <div class="card-header"><h2 class="h6 mb-0">🎂 {% translate "Aniversariantes de hoje" %}</h2></div>
       <ul class="list-group list-group-flush">
-        {% for patient, idade in painel.aniversariantes %}
+        {% for patient, age in dashboard.aniversariantes %}
         <li class="list-group-item small">
-          {% if pode.pacientes.ver %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>{% else %}{{ patient.name }}{% endif %}
-          <span class="text-body-secondary">· {% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}{% if patient.mobile_phone %} · {{ patient.mobile_phone|phone }}{% endif %}</span>
+          {% if can.pacientes.ver %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>{% else %}{{ patient.name }}{% endif %}
+          <span class="text-body-secondary">· {% blocktranslate count idade=age %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}{% if patient.mobile_phone %} · {{ patient.mobile_phone|phone }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>
     </div>
     {% endif %}
 
-    {% if painel.orcamentos %}
+    {% if dashboard.orcamentos %}
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="h6 mb-0">{% translate "Orçamentos que vencem em 7 dias" %}</h2>
         <a class="small" href="{% url 'estimates:list' %}">{% translate "Ver todos" %}</a>
       </div>
       <ul class="list-group list-group-flush">
-        {% for estimate in painel.orcamentos %}
+        {% for estimate in dashboard.orcamentos %}
         <li class="list-group-item small d-flex justify-content-between gap-2">
           <a href="{% url 'estimates:detail' estimate.pk %}">{{ estimate.patient.name }}</a>
-          <span class="text-nowrap">{{ estimate.total|currency }} · {% if estimate.valid_until == painel.hoje %}{% translate "vence hoje" %}{% else %}{{ estimate.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
+          <span class="text-nowrap">{{ estimate.total|currency }} · {% if estimate.valid_until == dashboard.hoje %}{% translate "vence hoje" %}{% else %}{{ estimate.valid_until|date:"SHORT_DATE_FORMAT" }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>
@@ -294,6 +294,6 @@
 {% endif %}
 
 <p class="mt-4 small">
-  <a href="{% url 'whats_new' %}">{% blocktranslate %}Veja o que há de novo na versão {{ versao_sistema }}{% endblocktranslate %}</a>.
+  <a href="{% url 'whats_new' %}">{% blocktranslate with versao_sistema=system_version %}Veja o que há de novo na versão {{ versao_sistema }}{% endblocktranslate %}</a>.
 </p>
 {% endblock %}

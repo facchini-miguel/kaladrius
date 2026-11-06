@@ -1,37 +1,37 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Nova despesa" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Nova despesa" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-4">{% translate "Nova despesa" %}</h1>
 <form method="post" style="max-width: 44rem;" novalidate>
   {% csrf_token %}
-  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   <div class="row">
-    <div class="col-md-6">{% with campo=form.supplier %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-6">{% with campo=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.supplier %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
-  {% with campo=form.payer %}{% include "includes/field.html" %}{% endwith %}
+  {% with field=form.payer %}{% include "includes/field.html" %}{% endwith %}
   <p class="text-body-secondary small"><a href="{% url 'finance:supplier_new' %}">{% translate "Cadastrar um fornecedor novo" %}</a></p>
   <div class="row">
-    <div class="col-md-{% if form.cost_center %}8{% else %}12{% endif %}">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-    {% if form.cost_center %}<div class="col-md-4">{% with campo=form.cost_center %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+    <div class="col-md-{% if form.cost_center %}8{% else %}12{% endif %}">{% with field=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
+    {% if form.cost_center %}<div class="col-md-4">{% with field=form.cost_center %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
   </div>
   <div class="row">
-    <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-8">{% with campo=form.mode %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-6">{% with campo=form.installments %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-6">{% with campo=form.first_due_date %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with field=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-8">{% with field=form.mode %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.installments %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-6">{% with field=form.first_due_date %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
   <p class="text-body-secondary small">{% translate "Exemplo: aluguel de 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. Compra de 900 em 3 vezes → valor 900, “o total”, 3." %}</p>
-  {% with campo=form.notes %}{% include "includes/field.html" %}{% endwith %}
+  {% with field=form.notes %}{% include "includes/field.html" %}{% endwith %}
   <div class="card mb-3">
     <div class="card-body">
-      {% with campo=form.paid_now %}{% include "includes/field.html" %}{% endwith %}
+      {% with field=form.paid_now %}{% include "includes/field.html" %}{% endwith %}
       <div class="row">
-        <div class="col-md-6">{% with campo=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-6">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with field=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-6">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
     </div>
   </div>

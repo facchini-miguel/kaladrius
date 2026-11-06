@@ -116,7 +116,7 @@ def test_estimate_author_gives_discount(cenario):
     estimate = criar_orcamento(cenario, reception)
     incluir(reception, estimate, procedure=cenario["canal"].pk)
     url = reverse("estimates:discount", args=[estimate.pk])
-    assert reception.get(reverse("estimates:detail", args=[estimate.pk])).context["desconto_form"]
+    assert reception.get(reverse("estimates:detail", args=[estimate.pk])).context["discount_form"]
     reception.post(url, {"discount": "5000"})  # more than the total: refused
     estimate.refresh_from_db()
     assert estimate.discount == 0
@@ -174,7 +174,7 @@ def test_practitioner_does_not_approve(cenario):
     cliente = entrar(cenario, "practitioner")
     estimate = criar_orcamento(cenario, cliente)
     assert cliente.get(reverse("estimates:approve", args=[estimate.pk])).status_code == 403
-    assert not cliente.get(reverse("estimates:detail", args=[estimate.pk])).context["pode_aprovar"]
+    assert not cliente.get(reverse("estimates:detail", args=[estimate.pk])).context["can_approve"]
 
 
 def test_refuse_and_print(cenario):
@@ -190,14 +190,14 @@ def test_refuse_and_print(cenario):
     with use_clinic(cenario["clinic"]), pytest.raises(ValidationError):
         services.refuse(estimate, user=None)
     estimate_list = cliente.get(reverse("estimates:list"), {"status": "recusado"})
-    assert list(estimate_list.context["pagina"]) == [estimate]
+    assert list(estimate_list.context["page"]) == [estimate]
 
 
 def test_record_shows_estimates_and_archived_hides(cenario):
     cliente = entrar(cenario, "recepcao")
     estimate = criar_orcamento(cenario, cliente)
     patient_record = cliente.get(reverse("patients:record", args=[cenario["patient"].pk]))
-    assert patient_record.context["orcamentos"] == [estimate]
+    assert patient_record.context["estimates"] == [estimate]
     with use_clinic(cenario["clinic"]):
         Patient.objects.filter(pk=cenario["patient"].pk).update(archived=True)
     assert cliente.get(reverse("estimates:detail", args=[estimate.pk])).status_code == 404
@@ -240,7 +240,7 @@ def test_odontogram_only_in_dentistry(cenario):
     estimate = criar_orcamento(cenario, reception)
     estimate_detail = reverse("estimates:detail", args=[estimate.pk])
     page = reception.get(estimate_detail)
-    assert page.context["mostrar_dentes"] and 'class="odontogram-scroll"' in page.content.decode()
+    assert page.context["show_teeth"] and 'class="odontogram-scroll"' in page.content.decode()
     assert "teeth" in page.context["item_form"].fields
 
     from apps.core.models import GENERAL_MODULES
@@ -248,7 +248,7 @@ def test_odontogram_only_in_dentistry(cenario):
 
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})
     page = reception.get(estimate_detail)
-    assert not page.context["mostrar_dentes"]
+    assert not page.context["show_teeth"]
     assert 'class="odontogram-scroll"' not in page.content.decode()
     assert "teeth" not in page.context["item_form"].fields
     incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
@@ -258,6 +258,6 @@ def test_odontogram_only_in_dentistry(cenario):
     incluir(reception, estimate, procedure=cenario["canal"].pk, teeth="11", faces="V")
     configure(cenario["clinic"], {*GENERAL_MODULES, Clinic.Area.MEDICINE})
     page = reception.get(estimate_detail)
-    assert page.context["mostrar_dentes"] and "11" in page.content.decode()
+    assert page.context["show_teeth"] and "11" in page.content.decode()
     impressao = reception.get(reverse("estimates:print", args=[estimate.pk]))
-    assert impressao.context["mostrar_dentes"]
+    assert impressao.context["show_teeth"]

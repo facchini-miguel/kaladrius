@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Tipos de atendimento" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Tipos de atendimento" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Tipos de atendimento" %}</h1>
-  {% if pode.cadastros.criar %}
+  {% if can.cadastros.criar %}
   <a class="btn btn-primary" href="{% url 'schedule:type_new' %}">{% translate "Novo tipo" %}</a>
   {% endif %}
 </div>
@@ -18,7 +18,7 @@
       <tr><th>{% translate "Cor" %}</th><th>{% translate "Nome" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr>
     </thead>
     <tbody>
-      {% for kind in tipos %}
+      {% for kind in types %}
       <tr>
         <td><span class="color-swatch" style="background-color: {{ kind.color }}" title="{{ kind.color }}"></span></td>
         <td>{{ kind.display_name }}</td>
@@ -27,10 +27,10 @@
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if pode.cadastros.alterar %}
+          {% if can.cadastros.alterar %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' kind.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if pode.cadastros.excluir %}
+          {% if can.cadastros.excluir %}
           <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' kind.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>

@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Auditoria" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Auditoria" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Auditoria" %}</h1>
 <p class="text-body-secondary">{% translate "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros não podem ser alterados." %}</p>
 
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-3"><input type="search" name="q" value="{{ filtros.q }}" class="form-control" placeholder="{% translate 'Usuário, registro ou código' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-md-3"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Usuário, registro ou código' %}" aria-label="{% translate 'Buscar' %}"></div>
   <div class="col-6 col-md-2">
     <select name="action" class="form-select" aria-label="{% translate 'Ação' %}">
       <option value="">{% translate "Todas as ações" %}</option>
-      {% for value, rotulo in acoes %}<option value="{{ value }}"{% if filtros.action == value %} selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      {% for value, label in actions %}<option value="{{ value }}"{% if filters.action == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">
     <select name="model_name" class="form-select" aria-label="{% translate 'Tipo de registro' %}">
       <option value="">{% translate "Todos os tipos" %}</option>
-      {% for item in modelos %}<option value="{{ item }}"{% if filtros.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+      {% for item in model_names %}<option value="{{ item }}"{% if filters.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filtros.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
-  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filtros.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
   <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
 </form>
 
@@ -30,7 +30,7 @@
   <table class="table table-sm align-middle bg-white">
     <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demo %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
     <tbody>
-      {% for record in pagina %}
+      {% for record in page %}
       <tr>
         <td class="text-nowrap">{{ record.timestamp|date:"SHORT_DATETIME_FORMAT" }}</td>
         <td>{% if record.user_name %}{{ record.user_name }}{% else %}{% translate "sistema" %}{% endif %}</td>
@@ -41,8 +41,8 @@
           <details>
             <summary>{% blocktranslate count total=record.changes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
             <ul class="small mb-0">
-              {% for rotulo, antes, depois in record.fields %}
-              <li><strong>{{ rotulo }}</strong>: {{ antes|default_if_none:"—" }} → {{ depois|default_if_none:"—" }}</li>
+              {% for label, before, after in record.fields %}
+              <li><strong>{{ label }}</strong>: {{ before|default_if_none:"—" }} → {{ after|default_if_none:"—" }}</li>
               {% endfor %}
             </ul>
           </details>

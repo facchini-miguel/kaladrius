@@ -1,13 +1,13 @@
 {% load i18n %}<div class="modal-header">
-  <h2 class="modal-title h5">{% blocktranslate with dia=dia|date:"d/m" %}Rechamadas de {{ dia }}{% endblocktranslate %}</h2>
+  <h2 class="modal-title h5">{% blocktranslate with dia=day|date:"d/m" %}Rechamadas de {{ dia }}{% endblocktranslate %}</h2>
   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
 </div>
 <div class="modal-body">
   <ul class="list-group">
-    {% for rechamada in rechamadas %}
+    {% for recall in recalls %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <span><a href="{% url 'patients:record' rechamada.patient_id %}">{{ rechamada.patient.name }}</a> · {{ rechamada.description }}</span>
-      {% if rechamada.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% endif %}
+      <span><a href="{% url 'patients:record' recall.patient_id %}">{{ recall.patient.name }}</a> · {{ recall.description }}</span>
+      {% if recall.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>{% endif %}
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhuma rechamada neste dia." %}</li>
@@ -15,5 +15,5 @@
   </ul>
 </div>
 <div class="modal-footer">
-  <a class="btn btn-outline-primary" href="{% url 'recalls:list' %}?status=todas&amp;since={{ dia|date:'Y-m-d' }}&amp;until={{ dia|date:'Y-m-d' }}">{% translate "Abrir em Rechamadas" %}</a>
+  <a class="btn btn-outline-primary" href="{% url 'recalls:list' %}?status=todas&amp;since={{ day|date:'Y-m-d' }}&amp;until={{ day|date:'Y-m-d' }}">{% translate "Abrir em Rechamadas" %}</a>
 </div>

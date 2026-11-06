@@ -156,7 +156,7 @@ def test_warning_at_the_top(pasta, superusuario, rows, esperado):
     if rows:
         pasta(*rows)
     context = superusuario.get(reverse("whats_new")).context
-    health_alert = context.get("saude_alerta")
+    health_alert = context.get("health_alert")
     if esperado == "parada":
         assert "parada" in health_alert
     else:

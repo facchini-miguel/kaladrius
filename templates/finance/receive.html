@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% if payable %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% if pagar %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
+<h1 class="h3 mb-1">{% if payable %}{% translate "Pagar" %}{% else %}{% translate "Receber" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
   {{ installment.entry.payer_name }} · {{ installment.entry.description }} ·
-  {% blocktranslate with numero=installment.number total=total_parcelas %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
+  {% blocktranslate with numero=installment.number total=total_installments %}parcela {{ numero }} de {{ total }}{% endblocktranslate %} ·
   {% blocktranslate with vencimento=installment.due_date|date:"SHORT_DATE_FORMAT" %}vence em {{ vencimento }}{% endblocktranslate %}
 </p>
 <div class="alert alert-light border">
@@ -18,26 +18,26 @@
 
 <form method="post" style="max-width: 44rem;" novalidate>
   {% csrf_token %}
-  {% for erro in form.non_field_errors %}<div class="alert alert-danger">{{ erro }}</div>{% endfor %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   <div class="row">
-    <div class="col-md-4">{% with campo=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.interest %}{% include "includes/field.html" %}{% endwith %}</div>
-    {% if pode_desconto %}<div class="col-md-4">{% with campo=form.discount %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
-    <div class="col-md-4">{% with campo=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
-    <div class="col-md-4">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with field=form.date %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with field=form.amount %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with field=form.interest %}{% include "includes/field.html" %}{% endwith %}</div>
+    {% if can_discount %}<div class="col-md-4">{% with field=form.discount %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+    <div class="col-md-4">{% with field=form.method %}{% include "includes/field.html" %}{% endwith %}</div>
+    <div class="col-md-4">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
   <fieldset class="border rounded p-3 mb-3">
     <legend class="fs-6 float-none w-auto px-2 mb-0">{% translate "Só para cartão" %}</legend>
     <div class="row">
-      <div class="col-md-4">{% with campo=form.card_brand %}{% include "includes/field.html" %}{% endwith %}</div>
-      {% if "cartao_parcelas" in form.fields %}<div class="col-md-4">{% with campo=form.card_installments %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
-      <div class="col-md-4">{% with campo=form.card_transaction_code %}{% include "includes/field.html" %}{% endwith %}</div>
+      <div class="col-md-4">{% with field=form.card_brand %}{% include "includes/field.html" %}{% endwith %}</div>
+      {% if "cartao_parcelas" in form.fields %}<div class="col-md-4">{% with field=form.card_installments %}{% include "includes/field.html" %}{% endwith %}</div>{% endif %}
+      <div class="col-md-4">{% with field=form.card_transaction_code %}{% include "includes/field.html" %}{% endwith %}</div>
     </div>
     <p class="text-body-secondary small mb-0">{% if "cartao_parcelas" in form.fields %}{% translate "Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a parcela fica paga. Nunca anote o número do cartão." %}{% else %}{% translate "Nunca anote o número do cartão." %}{% endif %}</p>
   </fieldset>
-  {% with campo=form.note %}{% include "includes/field.html" %}{% endwith %}
-  {% if not pode_desconto %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
+  {% with field=form.note %}{% include "includes/field.html" %}{% endwith %}
+  {% if not can_discount %}<p class="text-body-secondary small">{% translate "Descontos só podem ser dados pelo administrador da clínica." %}</p>{% endif %}
   <button type="submit" class="btn btn-success">{% translate "Registrar pagamento" %}</button>
   <a class="btn btn-link" href="{% url 'finance:entry' installment.entry_id %}">{% translate "Cancelar" %}</a>
 </form>

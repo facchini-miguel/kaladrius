@@ -27,11 +27,11 @@ def cities(request):
         request,
         "reference_data/cities.html",
         {
-            "ufs": ufs,
+            "states": ufs,
             "state": state,
-            "busca": search,
-            "pagina": page,
-            "parametros": urlencode({"state": state, "q": search}),
+            "search": search,
+            "page": page,
+            "query": urlencode({"state": state, "q": search}),
         },
     )
 
@@ -46,7 +46,7 @@ def banks(request):
             filtro |= Q(code=int(search))
         banks = banks.filter(filtro)
     page = Paginator(banks, PER_PAGE).get_page(request.GET.get("page"))
-    context = {"busca": search, "pagina": page, "parametros": urlencode({"q": search})}
+    context = {"search": search, "page": page, "query": urlencode({"q": search})}
     return render(request, "reference_data/banks.html", context)
 
 
@@ -55,7 +55,7 @@ def city_options(request):
     """<option> list of a state's cities, for chained UF → city selects (HTMX)."""
     state = request.GET.get("state", "")
     cities = City.objects.filter(state_id=int(state)) if state.isdecimal() else City.objects.none()
-    return render(request, "reference_data/city_options.html", {"cidades": cities})
+    return render(request, "reference_data/city_options.html", {"cities": cities})
 
 
 @requires_permission(Module.PATIENTS, Action.VIEW)
@@ -78,7 +78,7 @@ def address_suggestions(request):
         request,
         "reference_data/address_suggestions.html",
         {
-            "bairros": sorted(filter(None, bairros), key=alphabetical_key),
-            "logradouros": sorted(filter(None, logradouros), key=alphabetical_key),
+            "neighborhoods": sorted(filter(None, bairros), key=alphabetical_key),
+            "streets": sorted(filter(None, logradouros), key=alphabetical_key),
         },
     )

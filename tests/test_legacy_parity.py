@@ -26,11 +26,11 @@ def test_schedule_returns_to_the_week_that_was_open(clinica_a, reception, criar_
     week = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
     eventos = reception.get(reverse("schedule:events"), {**week, "practitioner": practitioner.pk})
     assert eventos.status_code == 200
-    config = reception.get(reverse("schedule:calendar")).context["configuracao"]
+    config = reception.get(reverse("schedule:calendar")).context["schedule_settings"]
     assert config["date"] == "2026-03-05"  # middle of the week on the screen
     # An explicit date still wins.
     explicita = reception.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
-    assert explicita.context["configuracao"]["date"] == "2026-04-01"
+    assert explicita.context["schedule_settings"]["date"] == "2026-04-01"
 
 
 def test_next_day_schedule_opens_today(reception):
@@ -38,7 +38,7 @@ def test_next_day_schedule_opens_today(reception):
     ontem = timezone.localdate() - datetime.timedelta(days=1)
     session["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
     session.save()
-    assert reception.get(reverse("schedule:calendar")).context["configuracao"]["date"] == ""
+    assert reception.get(reverse("schedule:calendar")).context["schedule_settings"]["date"] == ""
 
 
 def test_printed_registration_record(clinica_a, reception):

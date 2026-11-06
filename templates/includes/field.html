@@ -1,23 +1,23 @@
 <div class="mb-3">
-  {% if campo.widget_type == "checkbox" %}
+  {% if field.widget_type == "checkbox" %}
   <div class="form-check">
-    {{ campo }}
-    <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {{ field }}
+    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
   </div>
-  {% elif campo.widget_type == "radioselect" or campo.widget_type == "checkboxselectmultiple" %}
-  <div class="form-label">{{ campo.label }}</div>
+  {% elif field.widget_type == "radioselect" or field.widget_type == "checkboxselectmultiple" %}
+  <div class="form-label">{{ field.label }}</div>
   <div>
-    {% for opcao in campo %}
+    {% for option in field %}
     <div class="form-check form-check-inline">
-      {{ opcao.tag }}
-      <label class="form-check-label" for="{{ opcao.id_for_label }}">{{ opcao.choice_label }}</label>
+      {{ option.tag }}
+      <label class="form-check-label" for="{{ option.id_for_label }}">{{ option.choice_label }}</label>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} *{% endif %}</label>
-  {{ campo }}
+  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+  {{ field }}
   {% endif %}
-  {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
-  {% for erro in campo.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+  {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+  {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
 </div>

@@ -98,9 +98,9 @@ def test_new_version_notice_until_whats_new_is_opened(client, criar_usuario):
 def test_whats_new_filtered_by_module(client, criar_usuario):
     client.force_login(criar_usuario("maria"))
     response = client.get(reverse("whats_new"), {"module": "Agenda"})
-    modulos = {item.modulo for _, itens in response.context["versoes"] for item in itens}
+    modulos = {item.modulo for _, itens in response.context["versions"] for item in itens}
     assert modulos == {"Agenda"}
-    assert ("Pacientes", "Pacientes") in response.context["modulos"]
+    assert ("Pacientes", "Pacientes") in response.context["modules"]
 
 
 def test_real_ip_behind_the_proxy(rf):

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block titulo %}{% translate "Agenda" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Agenda" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <h1 class="h3 mb-0 me-3">{% translate "Agenda" %}</h1>
-  {% if profissionais %}
+  {% if practitioners %}
   <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
     <label for="practitioner" class="visually-hidden">{% translate "Profissional" %}</label>
     <select name="practitioner" id="practitioner" class="form-select" data-submit-on-change>
-      {% for item in profissionais %}
+      {% for item in practitioners %}
       <option value="{{ item.pk }}"{% if item.pk == practitioner.pk %} selected{% endif %}>{{ item.name }}</option>
       {% endfor %}
     </select>
@@ -20,18 +20,18 @@
   {% endif %}
 </div>
 
-{% if not profissionais %}
+{% if not practitioners %}
 <div class="alert alert-info">
-  {% if so_a_propria %}
+  {% if own_only %}
   {% translate "Seu usuário ainda não está ligado a um cadastro de profissional ativo, então não há agenda para mostrar. Peça ao administrador da clínica para ligá-lo em Cadastros > Profissionais." %}
   {% else %}
   {% translate "Nenhum profissional ativo nesta clínica." %}
   {% endif %}
-  {% if pode.profissionais.criar %}<a href="{% url 'practitioners:new' %}">{% translate "Cadastre um profissional" %}</a> {% translate "para usar a agenda." %}{% endif %}
+  {% if can.profissionais.criar %}<a href="{% url 'practitioners:new' %}">{% translate "Cadastre um profissional" %}</a> {% translate "para usar a agenda." %}{% endif %}
 </div>
 {% else %}
 <div class="d-flex flex-wrap gap-1 mb-2 small" aria-label="{% translate 'Legenda dos tipos de atendimento' %}">
-  {% for kind in tipos %}
+  {% for kind in types %}
   <span class="type-legend" style="background-color: {{ kind.color }}">{{ kind.display_name }}</span>
   {% endfor %}
   <span class="text-body-secondary ms-2">{% translate "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)" %}</span>
@@ -39,7 +39,7 @@
 
 <div id="schedule-notice" class="alert alert-success py-2" role="status" hidden></div>
 <div id="calendar" class="bg-white p-2 rounded border"></div>
-{% if pode.agenda.criar %}
+{% if can.agenda.criar %}
 <p class="text-body-secondary small mt-2">{% translate "Clique ou toque em um horário livre (ou arraste sobre vários) para agendar." %}</p>
 {% endif %}
 {% endif %}
@@ -50,7 +50,7 @@
   </div>
 </div>
 
-{{ configuracao|json_script:"schedule-settings" }}
+{{ schedule_settings|json_script:"schedule-settings" }}
 {% endblock %}
 
 {% block scripts %}

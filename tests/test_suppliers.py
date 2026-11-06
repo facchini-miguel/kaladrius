@@ -96,11 +96,11 @@ def test_expense_with_supplier_keeps_name_and_shows_on_record(clinica_a, supplie
     assert entry.supplier == supplier
     assert entry.payer == "Dental Fictícia"
     patient_record = admin.get(reverse("finance:supplier", args=[supplier.pk]))
-    assert len(patient_record.context["parcelas"]) == 3
-    assert str(patient_record.context["em_aberto"]) == "450.00"
+    assert len(patient_record.context["installments"]) == 3
+    assert str(patient_record.context["outstanding"]) == "450.00"
     results = admin.get(reverse("finance:payables")).content.decode()
     assert reverse("finance:supplier", args=[supplier.pk]) in results
-    assert admin.get(reverse("finance:payables") + "?q=Dental").context["pagina"].paginator.count
+    assert admin.get(reverse("finance:payables") + "?q=Dental").context["page"].paginator.count
 
 
 def test_standalone_expense_without_supplier_still_works(clinica_a, admin):
@@ -124,14 +124,14 @@ def test_inactive_supplier_leaves_expense_but_stays_on_list(clinica_a, supplier,
     form = admin.get(reverse("finance:expense_new")).context["form"]
     with use_clinic(clinica_a):
         assert supplier not in form.fields["supplier"].queryset
-    assert supplier in admin.get(reverse("finance:suppliers")).context["pagina"]
+    assert supplier in admin.get(reverse("finance:suppliers")).context["page"]
 
 
 def test_search_by_name_and_document(supplier, admin):
     url = reverse("finance:suppliers")
-    assert list(admin.get(url, {"q": "dental ficticia"}).context["pagina"]) == [supplier]
-    assert list(admin.get(url, {"q": "11.222.333"}).context["pagina"]) == [supplier]
-    assert list(admin.get(url, {"q": "outro"}).context["pagina"]) == []
+    assert list(admin.get(url, {"q": "dental ficticia"}).context["page"]) == [supplier]
+    assert list(admin.get(url, {"q": "11.222.333"}).context["page"]) == [supplier]
+    assert list(admin.get(url, {"q": "outro"}).context["page"]) == []
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])

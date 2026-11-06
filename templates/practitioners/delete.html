@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Excluir profissional" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Excluir profissional" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% blocktranslate with nome=practitioner.name %}Excluir {{ nome }}?{% endblocktranslate %}</h1>

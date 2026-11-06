@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Comissões" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Comissões" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Comissões" %}</h1>
@@ -17,16 +17,16 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Percentual" %}</th><th class="text-end">{% translate "Recebido ainda não comissionado" %}</th><th class="text-end">{% translate "Estornos a descontar" %}</th><th class="text-end">{% translate "Comissão a pagar" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
     <tbody>
-      {% for linha in linhas %}
+      {% for row in rows %}
       <tr>
-        <td>{{ linha.practitioner.name }}{% if not linha.practitioner.active %} <span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
-        <td class="text-end">{{ linha.practitioner.commission_percentage|floatformat:"-2" }}%</td>
-        <td class="text-end text-nowrap">{{ linha.received_amount|currency }}</td>
-        <td class="text-end text-nowrap">{% if linha.reversal_deduction %}− {{ linha.reversal_deduction|currency }}{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap fw-semibold">{{ linha.amount|currency }}</td>
+        <td>{{ row.practitioner.name }}{% if not row.practitioner.active %} <span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td class="text-end">{{ row.practitioner.commission_percentage|floatformat:"-2" }}%</td>
+        <td class="text-end text-nowrap">{{ row.received_amount|currency }}</td>
+        <td class="text-end text-nowrap">{% if row.reversal_deduction %}− {{ row.reversal_deduction|currency }}{% else %}—{% endif %}</td>
+        <td class="text-end text-nowrap fw-semibold">{{ row.amount|currency }}</td>
         <td class="text-end text-nowrap">
-          {% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' linha.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
-          {% if pode.financeiro.criar and linha.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' linha.practitioner.pk %}?until={{ until|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
+          {% if can.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' row.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
+          {% if can.financeiro.criar and row.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' row.practitioner.pk %}?until={{ until|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}
@@ -35,9 +35,9 @@
     </tbody>
   </table>
 </div>
-{% if sem_percentual and pode.financeiro.alterar %}
+{% if without_percentage and can.financeiro.alterar %}
 <p class="small">{% translate "Sem percentual definido:" %}
-  {% for practitioner in sem_percentual %}<a href="{% url 'finance:commission_percentage' practitioner.pk %}">{{ practitioner.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+  {% for practitioner in without_percentage %}<a href="{% url 'finance:commission_percentage' practitioner.pk %}">{{ practitioner.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
 </p>
 {% endif %}
 <p class="text-body-secondary small">{% translate "A comissão é o percentual do profissional sobre o valor recebido dos lançamentos a receber em que ele aparece. Lançamentos sem profissional não entram. Cada recebimento é comissionado uma vez só; se for estornado depois de pago ao profissional, a comissão dele é descontada no próximo pagamento." %}</p>
@@ -47,7 +47,7 @@
   <table class="table table-sm table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Lançada em" %}</th><th>{% translate "Profissional" %}</th><th>{% translate "Recebimentos até" %}</th><th class="text-end">{% translate "Valor" %}</th><th></th></tr></thead>
     <tbody>
-      {% for commission in historico %}
+      {% for commission in history %}
       <tr>
         <td class="text-nowrap">{{ commission.created_at|date:"SHORT_DATE_FORMAT" }}</td>
         <td>{{ commission.practitioner.name }}</td>

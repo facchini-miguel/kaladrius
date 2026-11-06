@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Arquivar paciente" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Arquivar paciente" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Arquivar {{ nome }}?{% endblocktranslate %}</h1>
 <p>{% translate "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o histórico continuam guardados." %}</p>
 <p>{% translate "Só administradores da clínica veem os pacientes arquivados (na lista de pacientes, em Situação: Arquivados) e podem restaurá-los." %}</p>
-{% if abertas %}
+{% if open_items %}
 <div class="alert alert-warning">
   {% translate "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no financeiro e depois volte para arquivar." %}
 </div>
 <table class="table table-sm bg-white" style="max-width: 44rem;">
   <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" context "valor" %}</th></tr></thead>
   <tbody>
-    {% for installment in abertas %}
+    {% for installment in open_items %}
     <tr>
       <td><a href="{% url 'finance:entry' installment.entry.pk %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">{{ installment.number }}/{{ installment.entry.parcelas.count }}</span></td>
       <td>{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>

@@ -86,7 +86,7 @@ def test_actual_and_percentage_summing_subgroups(clinica_a, admin):
     pay(clinica_a, "Aluguel", "250")
     pay(clinica_a, "Manutenção", "50")
     pay(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
-    despesas = admin.get(f"{URL}?year={HOJE.year}").context["secoes"][1]
+    despesas = admin.get(f"{URL}?year={HOJE.year}").context["sections"][1]
     row = next(row for row in despesas["linhas"] if row["group"] == ocupacao)
     assert (row["realizado"], row["percentage"]) == (Decimal("300.00"), 30)
     assert despesas["meta"] == Decimal("1000") and despesas["realizado"] == Decimal("300.00")
@@ -101,7 +101,7 @@ def test_subgroup_target_does_not_count_twice(clinica_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
-        despesas = services.planning(2026, today=datetime.date(2026, 12, 31))["secoes"][1]
+        despesas = services.planning(2026, today=datetime.date(2026, 12, 31))["sections"][1]
     assert despesas["meta"] == Decimal("5700")
     assert despesas["esperado"] == Decimal("5700.00")
 
@@ -115,8 +115,8 @@ def test_on_track_for_revenue_and_expense(clinica_a):
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
         data = services.planning(2026, today=datetime.date(2026, 12, 31))
-    receita = next(row for row in data["secoes"][0]["linhas"] if row["meta"])
-    despesa = next(row for row in data["secoes"][1]["linhas"] if row["meta"])
+    receita = next(row for row in data["sections"][0]["linhas"] if row["meta"])
+    despesa = next(row for row in data["sections"][1]["linhas"] if row["meta"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.
     assert receita["em_dia"] is False and despesa["em_dia"] is True
 
@@ -129,7 +129,7 @@ def test_copy_targets_from_previous_year(clinica_a, admin):
         Planning.objects.create(year=HOJE.year - 1, group=impostos, amount=Decimal("300"))
         Planning.objects.create(year=HOJE.year, group=impostos, amount=Decimal("400"))
     page = admin.get(f"{URL}?year={HOJE.year}")
-    assert page.context["tem_metas_anteriores"]
+    assert page.context["has_previous_targets"]
     admin.post(f"{URL}?year={HOJE.year}", {"action": "copiar"})
     with use_clinic(clinica_a):
         deste_ano = dict(

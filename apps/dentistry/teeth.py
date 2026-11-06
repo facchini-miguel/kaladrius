@@ -100,7 +100,7 @@ APPOINTMENT_TYPES = [
 def odontogram(selecionados):
     """Template context of the dental chart (templates/dentistry/_odontogram.html)."""
     return {
-        "permanentes": PERMANENT_TEETH,
-        "deciduos": PRIMARY_TEETH,
-        "selecionados": selecionados,
+        "permanent_rows": PERMANENT_TEETH,
+        "primary_rows": PRIMARY_TEETH,
+        "selected": selecionados,
     }

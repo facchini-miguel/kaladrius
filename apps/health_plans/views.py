@@ -21,7 +21,7 @@ def health_plan_list(request):
     return render(
         request,
         "health_plans/list.html",
-        {"convenios": convenios, "rotulo_do_registro": insurance.registration_label()},
+        {"health_plans": convenios, "registration_label": insurance.registration_label()},
     )
 
 
@@ -41,7 +41,7 @@ def _health_plan_form(request, instancia):
         health_plan = form.save()
         messages.success(request, _("%(nome)s salvo.") % {"nome": health_plan.name})
         return redirect("health_plans:list")
-    return render(request, "health_plans/form.html", {"form": form, "instancia": instancia})
+    return render(request, "health_plans/form.html", {"form": form, "instance": instancia})
 
 
 @requires_permission(Module.HEALTH_PLANS, Action.CREATE)
@@ -67,5 +67,5 @@ def _member_card_form(request, patient, instancia):
     return render(
         request,
         "health_plans/card_form.html",
-        {"form": form, "patient": patient, "instancia": instancia},
+        {"form": form, "patient": patient, "instance": instancia},
     )

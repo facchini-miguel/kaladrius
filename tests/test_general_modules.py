@@ -83,7 +83,7 @@ def test_estimates_off(clinica_a, admin, patient):
     configure(clinica_a, sem(M.ESTIMATES))
     assert admin.get(reverse("estimates:list")).status_code == 403
     patient_record = admin.get(reverse("patients:record", args=[patient.pk]))
-    assert patient_record.context.get("orcamentos") is None
+    assert patient_record.context.get("estimates") is None
     assert "Novo orçamento" not in patient_record.content.decode()
 
 

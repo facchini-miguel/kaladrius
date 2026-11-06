@@ -303,7 +303,7 @@ def test_calendar_opens_on_chosen_practitioner(cenario):
         reverse("schedule:calendar"), {"practitioner": cenario["bruno"].pk}
     )
     assert page.context["practitioner"] == cenario["bruno"]
-    config = page.context["configuracao"]
+    config = page.context["schedule_settings"]
     assert config["interval"] == 30 and config["start"] == "07:30:00"
     assert config["can"] == {"create": True, "change": True}
     # The choice is remembered for the next visit.
@@ -360,11 +360,11 @@ def test_practitioner_sees_only_own_schedule(cenario, criar_usuario, cliente_de)
     [do_bruno] = agendamentos(cenario)
     # The front desk sees every practitioner (checked first: the test client is shared).
     response = cenario["cliente"].get(reverse("schedule:calendar"))
-    assert len(response.context["profissionais"]) == 2
+    assert len(response.context["practitioners"]) == 2
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
 
     response = cliente.get(reverse("schedule:calendar"), {"practitioner": cenario["bruno"].pk})
-    assert [p.name for p in response.context["profissionais"]] == ["Dra. Ana"]
+    assert [p.name for p in response.context["practitioners"]] == ["Dra. Ana"]
     assert response.context["practitioner"] == cenario["ana"]
     periodo = {"start": "2031-03-03T00:00:00", "end": "2031-03-10T00:00:00"}
     events = cliente.get(
@@ -384,7 +384,7 @@ def test_practitioner_sees_only_own_schedule(cenario, criar_usuario, cliente_de)
 def test_practitioner_without_linked_profile_sees_no_schedule(cenario, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("sem_cadastro", cenario["clinic"], Role.PRACTITIONER))
     response = cliente.get(reverse("schedule:calendar"))
-    assert response.context["profissionais"] == []
+    assert response.context["practitioners"] == []
     assert "não está ligado a um cadastro de profissional" in response.content.decode()
 
 
@@ -439,7 +439,7 @@ def test_record_shows_upcoming_and_past(cenario, criar_usuario, cliente_de):
     agendar(cenario, practitioner=cenario["bruno"].pk, start_time="11:00", end_time="12:00")
     url = reverse("patients:record", args=[cenario["patient"].pk])
 
-    historico = cenario["cliente"].get(url).context["agendamentos"]
+    historico = cenario["cliente"].get(url).context["appointments"]
     assert historico["total"] == 3
     assert [a.practitioner.name for a in historico["proximos"]] == ["Dra. Ana", "Dr. Bruno"]
     assert [a.start.date() for a in historico["anteriores"]] == [passado]
@@ -447,7 +447,7 @@ def test_record_shows_upcoming_and_past(cenario, criar_usuario, cliente_de):
     # Practitioners see only their own appointments in the record too.
     cliente = cliente_da_dra_ana(cenario, criar_usuario, cliente_de)
     response = cliente.get(url)
-    historico = response.context["agendamentos"]
+    historico = response.context["appointments"]
     assert historico["total"] == 2
     assert {a.practitioner.name for a in historico["proximos"]} == {"Dra. Ana"}
     assert "?practitioner=" in response.content.decode()
@@ -547,7 +547,7 @@ def test_marks_attendance_and_no_show_from_the_day(cenario):
     assert '"status": "faltou"' not in janela and '"status": "desmarcou"' in janela
     response = mark(cenario, futuro, "faltou")
     assert response.status_code == 200
-    assert "a partir do dia do atendimento" in response.context["erro_situacao"]
+    assert "a partir do dia do atendimento" in response.context["status_error"]
     assert situacao_de(cenario, futuro) == "agendado"
 
 
@@ -587,7 +587,7 @@ def test_cancelled_frees_the_slot(cenario):
     assert len(agendamentos(cenario)) == 2
     # Undoing the cancellation would double-book: refused.
     response = mark(cenario, first, "agendado")
-    assert "já foi ocupado" in response.context["erro_situacao"]
+    assert "já foi ocupado" in response.context["status_error"]
     assert situacao_de(cenario, first) == "desmarcou"
     # Editing the cancelled one does not conflict with the new one either.
     response = cenario["cliente"].post(

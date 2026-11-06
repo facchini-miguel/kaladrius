@@ -109,7 +109,7 @@ def test_screens_fit_on_a_phone(clinica_a, reception):
 
     html = render_to_string(
         "dentistry/_odontogram.html",
-        {"permanentes": PERMANENT_TEETH, "deciduos": PRIMARY_TEETH, "interativo": True},
+        {"permanent_rows": PERMANENT_TEETH, "primary_rows": PRIMARY_TEETH, "interactive": True},
     )
     assert 'class="odontogram-scroll"' in html
     with use_clinic(clinica_a):

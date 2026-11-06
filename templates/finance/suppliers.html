@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Fornecedores" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Fornecedores" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Fornecedores" %}</h1>
-  {% if pode.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
+  {% if can.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
 </div>
 
-{% document_label "pessoa" "empresa" as documentos %}{% blocktranslate asvar dica_busca %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
+{% document_label "pessoa" "empresa" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-8">
-    <input type="search" name="q" value="{{ busca }}" class="form-control" autofocus
-           placeholder="{{ dica_busca }}" aria-label="{% translate 'Buscar fornecedor' %}">
+    <input type="search" name="q" value="{{ search }}" class="form-control" autofocus
+           placeholder="{{ search_hint }}" aria-label="{% translate 'Buscar fornecedor' %}">
   </div>
   <div class="col-md-2">
     <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
@@ -32,7 +32,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for supplier in pagina %}
+      {% for supplier in page %}
       <tr>
         <td>
           <a href="{% url 'finance:supplier' supplier.pk %}">{{ supplier.name }}</a>
@@ -41,7 +41,7 @@
         <td class="text-nowrap">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</td>
         <td class="text-nowrap">{{ supplier.phone|phone|default:"—" }}</td>
         <td class="text-nowrap">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap">{% if pode.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end text-nowrap">{% if can.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum fornecedor encontrado." %}</td></tr>

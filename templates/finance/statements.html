@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Extrato bancário" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Extrato bancário" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Extrato bancário" %}</h1>
-{% if pode.financeiro.criar %}
+{% if can.financeiro.criar %}
 <div class="card mb-4" style="max-width: 44rem;">
   <div class="card-header">{% translate "Importar extrato (OFX)" %}</div>
   <div class="card-body">
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="row">
-        <div class="col-md-5">{% with campo=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
-        <div class="col-md-7">{% with campo=form.file %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-5">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
+        <div class="col-md-7">{% with field=form.file %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
       <p class="text-body-secondary small">{% translate "Transações já importadas antes são puladas, então pode importar períodos que se sobrepõem." %}</p>
       <button type="submit" class="btn btn-primary">{% translate "Importar" %}</button>
@@ -27,7 +27,7 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Importado em" %}</th><th>{% translate "Conta" %}</th><th>{% translate "Período" %}</th><th>{% translate "Arquivo" %}</th><th class="text-end">{% translate "Novas" %}</th><th class="text-end">{% translate "Pendentes" %}</th></tr></thead>
     <tbody>
-      {% for statement_import in pagina %}
+      {% for statement_import in page %}
       <tr>
         <td class="text-nowrap"><a href="{% url 'finance:statement' statement_import.pk %}">{{ statement_import.created_at|date:"SHORT_DATETIME_FORMAT" }}</a></td>
         <td>{{ statement_import.account }}</td>

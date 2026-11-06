@@ -1,6 +1,6 @@
-{% for erro in form.non_field_errors %}
-<div class="alert alert-danger">{{ erro }}</div>
+{% for error in form.non_field_errors %}
+<div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
-{% for campo in form %}
+{% for field in form %}
 {% include "includes/field.html" %}
 {% endfor %}

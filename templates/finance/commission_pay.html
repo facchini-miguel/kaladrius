@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Pagar comissão" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Pagar comissão" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Pagar comissão" %}</h1>
-<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculo.practitioner.name data=until|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
-{% include "finance/_commission_items.html" with pagamentos=calculo.creditos reversal_deduction=calculo.debitos received_amount=calculo.received_amount bruta=calculo.bruta amount=calculo.amount percentage=calculo.practitioner.commission_percentage %}
+<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculation.practitioner.name data=until|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
+{% include "finance/_commission_items.html" with payments=calculation.creditos reversal_deduction=calculation.debitos received_amount=calculation.received_amount gross=calculation.bruta amount=calculation.amount percentage=calculation.practitioner.commission_percentage %}
 <form method="post" class="row g-2 align-items-end" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
-  <div class="col-md-5">{% with campo=form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
-  <div class="col-md-7">{% with campo=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
+  <div class="col-md-5">{% with field=form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
+  <div class="col-md-7">{% with field=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
   <p class="text-body-secondary small">{% translate "A comissão vira uma despesa em A pagar, em nome do profissional; registre o pagamento lá. Cancelar essa despesa desfaz a comissão." %}</p>
-  <div><button type="submit" class="btn btn-success"{% if calculo.amount <= 0 %} disabled{% endif %}>{% translate "Lançar em A pagar" %}</button>
+  <div><button type="submit" class="btn btn-success"{% if calculation.amount <= 0 %} disabled{% endif %}>{% translate "Lançar em A pagar" %}</button>
   <a class="btn btn-link" href="{% url 'finance:commissions' %}?until={{ until|date:'Y-m-d' }}">{% translate "Cancelar" %}</a></div>
 </form>
 {% endblock %}

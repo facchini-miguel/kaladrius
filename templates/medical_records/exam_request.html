@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block titulo %}{% translate "Pedido de exames" %} · {{ pedido.visit.patient.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Pedido de exames" %} · {{ exam_request.visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
   <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' pedido.visit_id %}">{% translate "Voltar" %}</a>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' exam_request.visit_id %}">{% translate "Voltar" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 48rem;">
-  {% translate "PEDIDO DE EXAMES" as titulo_documento %}
-  {% include "medical_records/_header.html" with data_documento=pedido.created_at %}
-  <p><strong>{% translate "Paciente" %}:</strong> {{ pedido.visit.patient.name }}</p>
+  {% translate "PEDIDO DE EXAMES" as document_title %}
+  {% include "medical_records/_header.html" with document_date=exam_request.created_at %}
+  <p><strong>{% translate "Paciente" %}:</strong> {{ exam_request.visit.patient.name }}</p>
   <p class="mb-1">{% translate "Solicito:" %}</p>
   <ol class="fs-6 lh-lg">
-    {% for linha in linhas %}<li>{{ linha }}</li>{% endfor %}
+    {% for row in rows %}<li>{{ row }}</li>{% endfor %}
   </ol>
-  {% if pedido.indication %}<p><strong>{% translate "Indicação clínica" %}:</strong> {{ pedido.indication|linebreaksbr }}</p>{% endif %}
-  {% include "medical_records/_signature.html" with practitioner=pedido.practitioner %}
+  {% if exam_request.indication %}<p><strong>{% translate "Indicação clínica" %}:</strong> {{ exam_request.indication|linebreaksbr }}</p>{% endif %}
+  {% include "medical_records/_signature.html" with practitioner=exam_request.practitioner %}
 </div>
 {% endblock %}

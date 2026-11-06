@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{{ employee.name }} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{{ employee.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{{ employee.name }}{% if not employee.active %} <span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}</h1>
   <div class="d-flex gap-2">
-    {% if pode.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'staff:edit' employee.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if can.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'staff:edit' employee.pk %}">{% translate "Editar" %}</a>{% endif %}
     <a class="btn btn-link" href="{% url 'staff:list' %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>
@@ -19,11 +19,11 @@
       <div class="card-body">
         <dl class="row mb-0">
           <dt class="col-sm-5">{% translate "Cargo" %}</dt><dd class="col-sm-7">{{ employee.job_title|default:"—" }}</dd>
-          {% if documentos_do_pais.funcionario or employee.tax_id %}<dt class="col-sm-5">{{ employee.tax_id|document_abbreviation:"funcionario" }}</dt><dd class="col-sm-7">{{ employee.tax_id|document:"funcionario"|default:"—" }}</dd>{% endif %}
+          {% if country_documents.funcionario or employee.tax_id %}<dt class="col-sm-5">{{ employee.tax_id|document_abbreviation:"funcionario" }}</dt><dd class="col-sm-7">{{ employee.tax_id|document:"funcionario"|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Admissão" %}</dt><dd class="col-sm-7">{{ employee.hired_on|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
           {% if employee.left_on %}<dt class="col-sm-5">{% translate "Desligamento" %}</dt><dd class="col-sm-7">{{ employee.left_on|date:"SHORT_DATE_FORMAT" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Telefone" %}</dt><dd class="col-sm-7">{{ employee.phone|phone|default:"—" }}</dd>
-          <dt class="col-sm-5">{% translate "Salário atual" %}</dt><dd class="col-sm-7">{{ salario_atual|currency|default:"—" }}</dd>
+          <dt class="col-sm-5">{% translate "Salário atual" %}</dt><dd class="col-sm-7">{{ current_salary|currency|default:"—" }}</dd>
         </dl>
         {% if employee.notes %}<p class="mt-3 mb-0 text-body-secondary">{{ employee.notes|linebreaksbr }}</p>{% endif %}
       </div>
@@ -33,7 +33,7 @@
     <div class="card h-100">
       <div class="card-header">{% translate "Histórico de salários" %}</div>
       <ul class="list-group list-group-flush">
-        {% for salary in salarios %}
+        {% for salary in salaries %}
         <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salary.effective_from|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span><strong>{{ salary.amount|currency }}</strong></li>
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "Nenhum salário registrado." %}</li>
@@ -49,14 +49,14 @@
     <table class="table table-sm align-middle mb-0">
       <thead><tr><th>{% translate "Mês" %}</th><th class="text-end">{% translate "Salário" %}</th><th class="text-end">{% translate "Horas extras" %}</th><th class="text-end">{% translate "Faltas" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
       <tbody>
-        {% for folha in folhas %}
+        {% for payslip in payslips %}
         <tr>
-          <td><a href="{% url 'staff:payroll' %}?month={{ folha.period|date:'Y-m' }}">{{ folha.period|date:"m/Y" }}</a></td>
-          <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.overtime_hours }} h · {{ folha.overtime_amount|currency }}</td>
-          <td class="text-end text-nowrap">{{ folha.absences }} · − {{ folha.absence_deduction|currency }}</td>
-          <td class="text-end text-nowrap fw-semibold">{{ folha.total|currency }}</td>
-          <td>{% if folha.is_posted %}<a href="{% url 'finance:entry' folha.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
+          <td><a href="{% url 'staff:payroll' %}?month={{ payslip.period|date:'Y-m' }}">{{ payslip.period|date:"m/Y" }}</a></td>
+          <td class="text-end text-nowrap">{{ payslip.salary|currency }}</td>
+          <td class="text-end text-nowrap">{{ payslip.overtime_hours }} h · {{ payslip.overtime_amount|currency }}</td>
+          <td class="text-end text-nowrap">{{ payslip.absences }} · − {{ payslip.absence_deduction|currency }}</td>
+          <td class="text-end text-nowrap fw-semibold">{{ payslip.total|currency }}</td>
+          <td>{% if payslip.is_posted %}<a href="{% url 'finance:entry' payslip.entry_id %}">{% translate "No financeiro" %}</a>{% else %}<span class="text-body-secondary">{% translate "Em preparo" %}</span>{% endif %}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma folha ainda." %}</td></tr>

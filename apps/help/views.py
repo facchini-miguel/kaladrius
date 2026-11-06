@@ -43,11 +43,11 @@ def privacy(request):
     titulo, html = documents.privacy()
     # The policy is written for Brazilian law: elsewhere, the country's law comes first.
     country = countries.clinic_country(clinic)
-    context = {"titulo": titulo, "html": html, "clinic": clinic}
+    context = {"title": titulo, "html": html, "clinic": clinic}
     if country != countries.DEFAULT:
         context.update(
             country=countries.by_code(country).name,
-            lei=legislation.for_country(country),
-            prazo_de_guarda=legislation.retention_period(country),
+            law=legislation.for_country(country),
+            retention_period=legislation.retention_period(country),
         )
     return render(request, "help/privacy.html", context)

@@ -102,15 +102,15 @@ def health_dashboard(request):
             "period": periodo,
             "start": start,
             "end": end,
-            "ultima": latest,
-            "niveis": health.levels(latest) if latest else {},
-            "parada": health.stopped(latest) if latest else False,
-            "ligado_desde": latest["momento"] - datetime.timedelta(seconds=latest["ligado_ha"])
+            "latest": latest,
+            "levels": health.levels(latest) if latest else {},
+            "stopped": health.stopped(latest) if latest else False,
+            "up_since": latest["momento"] - datetime.timedelta(seconds=latest["ligado_ha"])
             if latest
             else None,
-            "resumo": health.summary(results),
-            "graficos": graficos,
-            "banco": _database(),
+            "summary": health.summary(results),
+            "charts": graficos,
+            "database": _database(),
             "backup": Backup.objects.first(),
         },
     )

@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Orçamentos" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Orçamentos" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Orçamentos" %}</h1>
   <div class="d-flex gap-2">
-    {% if pode.cadastros.ver %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
-    {% if pode.orcamentos.criar %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if can.cadastros.ver %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
+    {% if can.orcamentos.criar %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
   </div>
 </div>
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-6"><input type="search" name="q" value="{{ busca }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Buscar' %}"></div>
   <div class="col-6 col-md-3">
     <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      {% for value, name in situacoes %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ name }}</option>{% endfor %}
+      {% for value, name in statuses %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ name }}</option>{% endfor %}
       <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
     </select>
   </div>
@@ -25,7 +25,7 @@
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Nº" %}</th><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
     <tbody>
-      {% for estimate in pagina %}
+      {% for estimate in page %}
       <tr>
         <td><a href="{% url 'estimates:detail' estimate.pk %}">{{ estimate.pk }}</a></td>
         <td class="text-nowrap">{{ estimate.date|date:"SHORT_DATE_FORMAT" }}</td>

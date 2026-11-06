@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block titulo %}{% translate "Aniversariantes" %} · {{ nome_sistema }}{% endblock %}
+{% block titulo %}{% translate "Aniversariantes" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <h1 class="h3 mb-3">{% translate "Aniversariantes" %}</h1>
 <form method="get" class="row g-2 mb-3" style="max-width: 24rem;">
   <div class="col-8">
     <select name="month" class="form-select" aria-label="{% translate 'Mês' %}" data-submit-on-change>
-      {% for number, name in meses %}<option value="{{ number }}"{% if number == month %} selected{% endif %}>{{ name|capfirst }}</option>{% endfor %}
+      {% for number, name in months %}<option value="{{ number }}"{% if number == month %} selected{% endif %}>{{ name|capfirst }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-4"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>
 </form>
 
-<p class="text-body-secondary small">{% blocktranslate count total=linhas|length %}{{ total }} aniversariante (pacientes ativos){% plural %}{{ total }} aniversariantes (pacientes ativos){% endblocktranslate %}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=rows|length %}{{ total }} aniversariante (pacientes ativos){% plural %}{{ total }} aniversariantes (pacientes ativos){% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead><tr><th>{% translate "Dia" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Completa" %}</th><th>{% translate "Telefone" %}</th><th>{% translate "E-mail" %}</th></tr></thead>
     <tbody>
-      {% for patient, idade in linhas %}
-      <tr{% if patient.birth_date|date:"md" == hoje|date:"md" %} class="table-warning"{% endif %}>
+      {% for patient, age in rows %}
+      <tr{% if patient.birth_date|date:"md" == today|date:"md" %} class="table-warning"{% endif %}>
         <td>{{ patient.birth_date|date:"d/m" }}</td>
         <td><a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a></td>
-        <td>{% blocktranslate count idade=idade %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}</td>
+        <td>{% blocktranslate count idade=age %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}</td>
         <td class="text-nowrap">{{ patient.main_phone|phone|default:"—" }}</td>
         <td>{{ patient.email|default:"—" }}</td>
       </tr>

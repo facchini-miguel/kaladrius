@@ -1,13 +1,13 @@
 {% load i18n %}<div class="modal-header">
-  <h2 class="modal-title h5">{% blocktranslate with dia=dia|date:"d/m" %}Aniversariantes de {{ dia }}{% endblocktranslate %}</h2>
+  <h2 class="modal-title h5">{% blocktranslate with dia=day|date:"d/m" %}Aniversariantes de {{ dia }}{% endblocktranslate %}</h2>
   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
 </div>
 <div class="modal-body">
   <ul class="list-group">
-    {% for patient, idade in aniversariantes %}
+    {% for patient, age in birthdays %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
-      <span class="text-body-secondary">{% blocktranslate count idade=idade %}completa {{ idade }} ano{% plural %}completa {{ idade }} anos{% endblocktranslate %}</span>
+      <span class="text-body-secondary">{% blocktranslate count idade=age %}completa {{ idade }} ano{% plural %}completa {{ idade }} anos{% endblocktranslate %}</span>
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "Nenhum aniversariante neste dia." %}</li>

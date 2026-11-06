@@ -1,12 +1,12 @@
 {% load i18n formats %}<div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
   <div>
-    <div class="fs-5 fw-semibold">{{ clinica_atual.name }}</div>
-    {% if clinica_atual.document %}<div class="small">{{ clinica_atual.document_abbreviation }}: {{ clinica_atual.written_document }}</div>{% endif %}
-    {% if clinica_atual.address %}<div class="small">{{ clinica_atual.address }}</div>{% endif %}
-    {% if clinica_atual.phone %}<div class="small">{{ clinica_atual.phone }}</div>{% endif %}
+    <div class="fs-5 fw-semibold">{{ current_clinic.name }}</div>
+    {% if current_clinic.document %}<div class="small">{{ current_clinic.document_abbreviation }}: {{ current_clinic.written_document }}</div>{% endif %}
+    {% if current_clinic.address %}<div class="small">{{ current_clinic.address }}</div>{% endif %}
+    {% if current_clinic.phone %}<div class="small">{{ current_clinic.phone }}</div>{% endif %}
   </div>
   <div class="text-end">
-    <div class="fs-4 fw-semibold">{{ titulo_documento }}</div>
-    {% if data_documento %}<div class="small">{{ data_documento|date:"SHORT_DATE_FORMAT" }}</div>{% endif %}
+    <div class="fs-4 fw-semibold">{{ document_title }}</div>
+    {% if document_date %}<div class="small">{{ document_date|date:"SHORT_DATE_FORMAT" }}</div>{% endif %}
   </div>
 </div>

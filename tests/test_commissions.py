@@ -172,8 +172,8 @@ def test_screens_and_percentage(cenario):
     receive(cenario, "300.00", cenario["dra"])
     cliente = cenario["cliente"]
     page = cliente.get(reverse("finance:commissions"))
-    assert [row["practitioner"] for row in page.context["linhas"]] == [cenario["dra"]]
-    assert list(page.context["sem_percentual"]) == [cenario["dr"]]
+    assert [row["practitioner"] for row in page.context["rows"]] == [cenario["dra"]]
+    assert list(page.context["without_percentage"]) == [cenario["dr"]]
     assert "R$ 120,00" in page.content.decode()
     url = reverse("finance:commission_percentage", args=[cenario["dr"].pk])
     assert cliente.post(url, {"commission_percentage": "101"}).status_code == 200  # > 100
@@ -181,7 +181,7 @@ def test_screens_and_percentage(cenario):
     cenario["dr"].refresh_from_db()
     assert cenario["dr"].commission_percentage == Decimal("35.50")
     pay = cliente.get(reverse("finance:commission_pay", args=[cenario["dra"].pk]))
-    assert pay.context["calculo"]["amount"] == Decimal("120.00")
+    assert pay.context["calculation"]["amount"] == Decimal("120.00")
     # A future cut-off date is not allowed: it becomes today.
     futuro = (HOJE + datetime.timedelta(days=30)).isoformat()
     assert cliente.get(reverse("finance:commissions"), {"until": futuro}).context["until"] == HOJE
