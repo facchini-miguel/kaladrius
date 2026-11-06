@@ -10,13 +10,13 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parent.parent
-COMMON = RAIZ / "deploy" / "server" / "common.sh"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+COMMON = ROOT_DIR / "deploy" / "server" / "common.sh"
 # Run as root, these commands would reach the real Docker: they are compared only when refused.
-COMO_ROOT = pytest.mark.skipif(os.geteuid() == 0, reason="running as root")
+AS_ROOT = pytest.mark.skipif(os.geteuid() == 0, reason="running as root")
 
 
-def comum(tmp_path, env):
+def shared(tmp_path, env):
     dir_ = tmp_path / "opt"
     (dir_ / "release").mkdir(parents=True)
     text = COMMON.read_text().replace("DIR=/opt/kaladrius", f"DIR={dir_}", 1)
@@ -25,28 +25,28 @@ def comum(tmp_path, env):
     return dir_
 
 
-def avaliar(dir_, expressao, ambiente=None):
-    resultado = subprocess.run(  # noqa: S603 (the test's own script)
-        [shutil.which("bash"), "-c", f'source "{dir_}/common.sh"; {expressao}'],
+def evaluate(dir_, expression, environment=None):
+    result = subprocess.run(  # noqa: S603 (the test's own script)
+        [shutil.which("bash"), "-c", f'source "{dir_}/common.sh"; {expression}'],
         capture_output=True,
         text=True,
-        env={"PATH": "/usr/bin:/bin", **(ambiente or {})},
+        env={"PATH": "/usr/bin:/bin", **(environment or {})},
         timeout=30,
     )
-    assert resultado.returncode == 0, resultado.stderr
-    return resultado.stdout.strip()
+    assert result.returncode == 0, result.stderr
+    return result.stdout.strip()
 
 
 def test_env_value_reads_both_names(tmp_path):
-    old = comum(tmp_path / "a", "KALADRIUS_BACKUP_DIAS=7\nMONITOR_ATUALIZACAO_URL=u\n")
+    old = shared(tmp_path / "a", "KALADRIUS_BACKUP_DIAS=7\nMONITOR_ATUALIZACAO_URL=u\n")
     # A .env of 0.54, not migrated yet, read by the new names.
-    assert avaliar(old, "env_value KALADRIUS_BACKUP_DAYS") == "7"
-    assert avaliar(old, "env_value MONITOR_UPDATE_URL") == "u"
-    new = comum(tmp_path / "b", "KALADRIUS_BACKUP_DAYS=9\nMONITOR_UPDATE_URL=v\n")
+    assert evaluate(old, "env_value KALADRIUS_BACKUP_DAYS") == "7"
+    assert evaluate(old, "env_value MONITOR_UPDATE_URL") == "u"
+    new = shared(tmp_path / "b", "KALADRIUS_BACKUP_DAYS=9\nMONITOR_UPDATE_URL=v\n")
     # A migrated .env, read by the old names (the scripts of 0.54 during the first update).
-    assert avaliar(new, "env_value KALADRIUS_BACKUP_DIAS") == "9"
-    assert avaliar(new, "env_value MONITOR_ATUALIZACAO_URL") == "v"
-    assert avaliar(new, "env_value SITE_HOSTNAME") == ""
+    assert evaluate(new, "env_value KALADRIUS_BACKUP_DIAS") == "9"
+    assert evaluate(new, "env_value MONITOR_ATUALIZACAO_URL") == "v"
+    assert evaluate(new, "env_value SITE_HOSTNAME") == ""
 
 
 def test_migrating_env_only_changes_names(tmp_path):
@@ -55,10 +55,10 @@ def test_migrating_env_only_changes_names(tmp_path):
         "KALADRIUS_BACKUP_PASTA=/srv/b\nSITE_HOSTNAME=192.168.0.10\nIMAGEM_APP=k:1\n"
         "DJANGO_PROXY_REVERSO=1\n"
     )
-    dir_ = comum(tmp_path, env)
-    sistema = tmp_path / "systemd"
-    sistema.mkdir()
-    avaliar(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(sistema)})
+    dir_ = shared(tmp_path, env)
+    system = tmp_path / "systemd"
+    system.mkdir()
+    evaluate(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(system)})
     assert (dir_ / ".env").read_text() == (
         "# a comment\nDJANGO_SECRET_KEY=x=y\nKALADRIUS_ACCESS=internal-network\n"
         "KALADRIUS_BACKUP_DIR=/srv/b\nSITE_HOSTNAME=192.168.0.10\nAPP_IMAGE=k:1\n"
@@ -68,12 +68,12 @@ def test_migrating_env_only_changes_names(tmp_path):
     )
     assert (dir_ / ".env.before-147").read_text() == env
     # Again: nothing changes, and the copy of the original stays.
-    avaliar(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(sistema)})
+    evaluate(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(system)})
     assert (dir_ / ".env.before-147").read_text() == env
 
 
 def test_migrate_the_state_files(tmp_path):
-    dir_ = comum(tmp_path, "")
+    dir_ = shared(tmp_path, "")
     for name in ("admin-criado", "sem-repositorio", "imagem-recusada"):
         (dir_ / name).write_text(name)
     (dir_ / "demo").mkdir()
@@ -83,9 +83,9 @@ def test_migrate_the_state_files(tmp_path):
     (dir_ / "saude" / "amostras.jsonl").write_text('{"momento": "2026-11-03T10:00:00Z"}\n')
     (dir_ / "installed-image").write_text("ja-novo")  # never overwritten by an old one
     (dir_ / "imagem-instalada").write_text("velho")
-    sistema = tmp_path / "systemd"
-    sistema.mkdir()
-    avaliar(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(sistema)})
+    system = tmp_path / "systemd"
+    system.mkdir()
+    evaluate(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(system)})
     assert (dir_ / "admin-created").read_text() == "admin-criado"
     assert (dir_ / "no-repository").is_file()
     assert (dir_ / "refused-image").is_file()
@@ -100,14 +100,14 @@ def test_migrate_the_state_files(tmp_path):
 def test_google_cloud_server_keeps_the_old_scripts(tmp_path):
     # The pointer bin/atualizar.sh, kept by 0.55 for the VM's old startup script, goes with the
     # scripts of 0.54 to legacy/bin; the old update lock, which no script takes, goes away.
-    dir_ = comum(tmp_path, "")
+    dir_ = shared(tmp_path, "")
     (dir_ / "bin").mkdir()
     for name in ("atualizar.sh", "comum.sh", "saude.sh", "update.sh"):
         (dir_ / "bin" / name).write_text(name)
     (dir_ / "atualizar.lock").write_text("")
-    sistema = tmp_path / "systemd"
-    sistema.mkdir()
-    avaliar(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(sistema)})
+    system = tmp_path / "systemd"
+    system.mkdir()
+    evaluate(dir_, "migrate_legacy_names", {"SYSTEMD_DIR": str(system)})
     assert sorted(p.name for p in (dir_ / "bin").iterdir()) == ["update.sh"]
     assert sorted(p.name for p in (dir_ / "legacy" / "bin").iterdir()) == [
         "atualizar.sh",
@@ -121,7 +121,7 @@ def test_updated_old_package_migrates_before_deciding(tmp_path):
     # A clinic's 0.54 package updated to this one: admin-criado is read as admin-created, so the
     # update starts the system instead of asking the setup questions again; the timers of the
     # old package, whose unit files the package manager already removed, leave no links behind.
-    from tests.test_linux_package import depois_de_instalar
+    from tests.test_linux_package import after_install
 
     dir_ = tmp_path / "opt"
     dir_.mkdir()
@@ -129,20 +129,20 @@ def test_updated_old_package_migrates_before_deciding(tmp_path):
     (dir_ / ".env").write_text("SITE_HOSTNAME=192.168.0.10\nKALADRIUS_ACESSO=rede-interna\n")
     links = tmp_path / "systemd" / "timers.target.wants"
     links.mkdir(parents=True)
-    for unidade in ("saude", "restauracao"):
-        (links / f"kaladrius-{unidade}.timer").symlink_to(
-            f"/usr/lib/systemd/system/kaladrius-{unidade}.timer"
+    for unit in ("saude", "restauracao"):
+        (links / f"kaladrius-{unit}.timer").symlink_to(
+            f"/usr/lib/systemd/system/kaladrius-{unit}.timer"
         )
-    _saida, chamadas = depois_de_instalar(tmp_path, "configure", admin_criado=False)
-    assert "update.sh --force" in chamadas
+    _output, calls = after_install(tmp_path, "configure", created_admin=False)
+    assert "update.sh --force" in calls
     assert (dir_ / "admin-created").exists()
     assert "KALADRIUS_ACCESS=internal-network" in (dir_ / ".env").read_text()
     assert not list(links.iterdir())
-    assert "systemctl disable kaladrius-saude.timer" in chamadas
+    assert "systemctl disable kaladrius-saude.timer" in calls
     # Their service files already gone, the old timers fail on the reload: that state goes.
     assert (
         "systemctl reset-failed kaladrius-saude.timer kaladrius-saude.service "
-        "kaladrius-restauracao.timer kaladrius-restauracao.service" in chamadas
+        "kaladrius-restauracao.timer kaladrius-restauracao.service" in calls
     )
 
 
@@ -151,16 +151,16 @@ def test_updated_old_package_migrates_before_deciding(tmp_path):
     [
         ("versao", "version"),
         ("ajuda", "help"),
-        pytest.param("estado", "status", marks=COMO_ROOT),
-        pytest.param("parar", "stop", marks=COMO_ROOT),
-        pytest.param("testar-restauracao", "test-restore", marks=COMO_ROOT),
+        pytest.param("estado", "status", marks=AS_ROOT),
+        pytest.param("parar", "stop", marks=AS_ROOT),
+        pytest.param("testar-restauracao", "test-restore", marks=AS_ROOT),
     ],
 )
 def test_old_commands_still_work(tmp_path, old, new):
     from tests.test_linux_package import kaladrius
 
-    for pasta in ("a", "b"):
-        (tmp_path / pasta).mkdir()
+    for folder in ("a", "b"):
+        (tmp_path / folder).mkdir()
     a = kaladrius(tmp_path / "a", old)
     b = kaladrius(tmp_path / "b", new)
     assert (a.returncode, a.stdout, a.stderr) == (b.returncode, b.stdout, b.stderr)

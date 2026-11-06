@@ -17,32 +17,34 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_paridade", clinica_a, Role.FRONT_DESK))
+def reception(clinic_a, create_user, client_for):
+    return client_for(create_user("recepcao_paridade", clinic_a, Role.FRONT_DESK))
 
 
-def test_schedule_returns_to_the_week_that_was_open(clinica_a, reception, criar_profissional):
-    practitioner = criar_profissional(clinica_a, "Profissional fictício")
+def test_schedule_returns_to_the_week_that_was_open(clinic_a, reception, create_practitioner):
+    practitioner = create_practitioner(clinic_a, "Profissional fictício")
     week = {"start": "2026-03-02T00:00:00", "end": "2026-03-09T00:00:00"}
-    eventos = reception.get(reverse("schedule:events"), {**week, "practitioner": practitioner.pk})
-    assert eventos.status_code == 200
+    event_list = reception.get(
+        reverse("schedule:events"), {**week, "practitioner": practitioner.pk}
+    )
+    assert event_list.status_code == 200
     config = reception.get(reverse("schedule:calendar")).context["schedule_settings"]
     assert config["date"] == "2026-03-05"  # middle of the week on the screen
     # An explicit date still wins.
-    explicita = reception.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
-    assert explicita.context["schedule_settings"]["date"] == "2026-04-01"
+    explicit = reception.get(reverse("schedule:calendar"), {"date": "2026-04-01"})
+    assert explicit.context["schedule_settings"]["date"] == "2026-04-01"
 
 
 def test_next_day_schedule_opens_today(reception):
     session = reception.session
-    ontem = timezone.localdate() - datetime.timedelta(days=1)
-    session["agenda_data"] = {"data": "2026-03-05", "em": ontem.isoformat()}
+    yesterday = timezone.localdate() - datetime.timedelta(days=1)
+    session["agenda_data"] = {"data": "2026-03-05", "em": yesterday.isoformat()}
     session.save()
     assert reception.get(reverse("schedule:calendar")).context["schedule_settings"]["date"] == ""
 
 
-def test_printed_registration_record(clinica_a, reception):
-    with use_clinic(clinica_a):
+def test_printed_registration_record(clinic_a, reception):
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(
             name="Paciente fictícia da ficha",
             tax_id="52998224725",
@@ -55,14 +57,14 @@ def test_printed_registration_record(clinica_a, reception):
     assert reverse("patients:print", args=[patient.pk]) in patient_record
     page = reception.get(reverse("patients:print", args=[patient.pk]))
     text = page.content.decode()
-    for trecho in (
+    for excerpt in (
         "FICHA CADASTRAL",
         "529.982.247-25",
         "(48) 99999-0000",
         "Saúde Exemplo",
         "Prefere manhã",
     ):
-        assert trecho in text, trecho
+        assert excerpt in text, excerpt
     assert (
         AuditEntry.objects.filter(
             action=AuditEntry.Action.VIEWED, object_id=str(patient.pk)
@@ -71,11 +73,11 @@ def test_printed_registration_record(clinica_a, reception):
     )  # the record and the print
 
 
-def test_printed_record_respects_permission(clinica_a, criar_usuario, cliente_de):
-    with use_clinic(clinica_a):
+def test_printed_record_respects_permission(clinic_a, create_user, client_for):
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(name="Paciente fictício sem acesso")
-    sem_vinculo = cliente_de(criar_usuario("sem_vinculo_paridade"))
-    assert sem_vinculo.get(reverse("patients:print", args=[patient.pk])).status_code in (
+    without_membership = client_for(create_user("sem_vinculo_paridade"))
+    assert without_membership.get(reverse("patients:print", args=[patient.pk])).status_code in (
         302,
         403,
     )

@@ -21,8 +21,8 @@ from apps.schedule.models import Appointment, AppointmentType
 pytestmark = pytest.mark.django_db
 
 # A Wednesday, 10:30 in the clinic's time zone.
-HOJE = datetime.date(2031, 3, 5)
-AGORA = timezone.make_aware(datetime.datetime(2031, 3, 5, 10, 30))
+TODAY = datetime.date(2031, 3, 5)
+NOW = timezone.make_aware(datetime.datetime(2031, 3, 5, 10, 30))
 
 
 def day(number, month=3):
@@ -30,17 +30,17 @@ def day(number, month=3):
 
 
 @pytest.fixture
-def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
-    monkeypatch.setattr(timezone, "now", lambda: AGORA)
-    ana = criar_profissional(clinica_a, "Dra. Ana")
-    bruno = criar_profissional(clinica_a, "Dr. Bruno")
-    usuarios = {
-        "admin": criar_usuario("admin", clinica_a, Role.ADMIN),
-        "recepcao": criar_usuario("recepcao", clinica_a, Role.FRONT_DESK),
-        "dra": criar_usuario("dra", clinica_a, Role.PRACTITIONER),
+def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
+    monkeypatch.setattr(timezone, "now", lambda: NOW)
+    ana = create_practitioner(clinic_a, "Dra. Ana")
+    bruno = create_practitioner(clinic_a, "Dr. Bruno")
+    users = {
+        "admin": create_user("admin", clinic_a, Role.ADMIN),
+        "reception": create_user("recepcao", clinic_a, Role.FRONT_DESK),
+        "dra": create_user("dra", clinic_a, Role.PRACTITIONER),
     }
-    with use_clinic(clinica_a):
-        Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
+    with use_clinic(clinic_a):
+        Practitioner.objects.filter(pk=ana.pk).update(user=users["dra"])
         kind = AppointmentType.objects.get(name="Cirurgia")
         maria = Patient.objects.create(
             name="Maria Paciente",
@@ -52,7 +52,7 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             name="Paciente Arquivado", archived=True, birth_date=day(5).replace(year=1980)
         )
 
-        def agendar(date, hour, practitioner=ana, patient=maria, status="agendado"):
+        def book(date, hour, practitioner=ana, patient=maria, status="agendado"):
             Appointment.objects.create(
                 practitioner=practitioner,
                 kind=kind,
@@ -63,21 +63,21 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
                 end=agenda.timestamp(date, datetime.time(hour + 1)),
             )
 
-        agendar(HOJE, 8, status="compareceu")
-        agendar(HOJE, 9, status="faltou")
-        agendar(HOJE, 10, practitioner=bruno, patient=joao)  # started, nobody marked it
-        agendar(HOJE, 11)
-        agendar(HOJE, 14, status="desmarcou")
-        agendar(HOJE, 16, patient=None)
-        agendar(day(3), 9, status="compareceu")
-        agendar(day(4), 9, status="faltou")
-        agendar(day(27, 2), 9, status="faltou")  # last month: not in this month's rate
+        book(TODAY, 8, status="compareceu")
+        book(TODAY, 9, status="faltou")
+        book(TODAY, 10, practitioner=bruno, patient=joao)  # started, nobody marked it
+        book(TODAY, 11)
+        book(TODAY, 14, status="desmarcou")
+        book(TODAY, 16, patient=None)
+        book(day(3), 9, status="compareceu")
+        book(day(4), 9, status="faltou")
+        book(day(27, 2), 9, status="faltou")  # last month: not in this month's rate
 
         for date, done, patient in [
-            (HOJE, False, maria),
+            (TODAY, False, maria),
             (day(1), False, maria),
             (day(2), True, maria),
-            (HOJE, False, archived),
+            (TODAY, False, archived),
             (day(10), False, maria),
         ]:
             Recall.objects.create(patient=patient, date=date, description="Revisão", done=done)
@@ -94,27 +94,27 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             )
 
         cash_register = FinancialAccount.objects.get(name="Caixa")
-        receita = Category.objects.get(name="Tratamento")
-        despesa = Category.objects.get(name="Outras despesas")
+        income = Category.objects.get(name="Tratamento")
+        expense = Category.objects.get(name="Outras despesas")
 
-        def lancar(kind, amount, parcelas, due_date, category, **fields):
+        def post_entry(kind, amount, installments, due_date, category, **fields):
             entry = financeiro.create_entry(
-                clinic=clinica_a,
+                clinic=clinic_a,
                 kind=kind,
                 description="Teste",
                 category=category,
                 total_amount=Decimal(amount),
-                parcelas=parcelas,
+                parcelas=installments,
                 primeiro_vencimento=due_date,
-                user=usuarios["admin"],
+                user=users["admin"],
                 **fields,
             )
             return list(entry.parcelas.order_by("number"))
 
-        def pagar(installment, amount, date, method="pix"):
+        def pay_(installment, amount, date, method="pix"):
             financeiro.receive(
                 installment,
-                user=usuarios["admin"],
+                user=users["admin"],
                 amount=Decimal(amount),
                 date=date,
                 method=method,
@@ -122,116 +122,114 @@ def cenario(monkeypatch, clinica_a, criar_profissional, criar_usuario):
             )
 
         # Due 05/01, 05/02 (overdue) and today; the first one is paid today.
-        primeira, _segunda, _terceira = lancar(
-            Entry.Kind.RECEIVABLE, "300", 3, day(5, 1), receita, patient=maria
+        first_one, _second, _third = post_entry(
+            Entry.Kind.RECEIVABLE, "300", 3, day(5, 1), income, patient=maria
         )
-        pagar(primeira, "100", HOJE)
-        [fevereiro] = lancar(Entry.Kind.RECEIVABLE, "200", 1, day(3, 2), receita, patient=joao)
-        pagar(fevereiro, "200", day(3, 2), method="dinheiro")
-        [conta_de_luz] = lancar(Entry.Kind.PAYABLE, "50", 1, HOJE, despesa, payer="Luz")
-        pagar(conta_de_luz, "50", HOJE)
-        lancar(Entry.Kind.PAYABLE, "80", 1, day(10), despesa, payer="Aluguel")
-        lancar(Entry.Kind.PAYABLE, "999", 1, day(20), despesa, payer="Longe")
+        pay_(first_one, "100", TODAY)
+        [february] = post_entry(Entry.Kind.RECEIVABLE, "200", 1, day(3, 2), income, patient=joao)
+        pay_(february, "200", day(3, 2), method="dinheiro")
+        [power_bill] = post_entry(Entry.Kind.PAYABLE, "50", 1, TODAY, expense, payer="Luz")
+        pay_(power_bill, "50", TODAY)
+        post_entry(Entry.Kind.PAYABLE, "80", 1, day(10), expense, payer="Aluguel")
+        post_entry(Entry.Kind.PAYABLE, "999", 1, day(20), expense, payer="Longe")
         CashRegister.objects.create(
-            account=cash_register, opening_amount=Decimal("0"), opened_by=usuarios["admin"]
+            account=cash_register, opening_amount=Decimal("0"), opened_by=users["admin"]
         )
-    return {"clinic": clinica_a, **usuarios}
+    return {"clinic": clinic_a, **users}
 
 
-def start(cenario, cliente_de, quem):
-    return cliente_de(cenario[quem]).get(reverse("home"))
+def start(scenario, client_for, who):
+    return client_for(scenario[who]).get(reverse("home"))
 
 
-def test_reception_sees_the_day_without_expenses(cenario, cliente_de):
-    response = start(cenario, cliente_de, "recepcao")
-    painel = response.context["dashboard"]
-    dia_ = painel["schedule"]
-    assert len(dia_["items"]) == 6 and dia_["show_practitioner"]
-    assert (dia_["patients"], dia_["attended"], dia_["missed"]) == (4, 1, 1)
-    assert (dia_["cancelled"], dia_["upcoming"], dia_["unmarked"]) == (1, 1, 1)
-    assert dia_["next"].patient.name == "João Paciente"  # 10:00–11:00, still going on
+def test_reception_sees_the_day_without_expenses(scenario, client_for):
+    response = start(scenario, client_for, "reception")
+    dashboard = response.context["dashboard"]
+    day_ = dashboard["schedule"]
+    assert len(day_["items"]) == 6 and day_["show_practitioner"]
+    assert (day_["patients"], day_["attended"], day_["missed"]) == (4, 1, 1)
+    assert (day_["cancelled"], day_["upcoming"], day_["unmarked"]) == (1, 1, 1)
+    assert day_["next"].patient.name == "João Paciente"  # 10:00–11:00, still going on
     # Month so far: came 08:00 today and on the 3rd; missed 09:00 today and on the 4th.
-    assert (dia_["missed_pct_month"], dia_["booked_month"]) == (50, 4)
+    assert (day_["missed_pct_month"], day_["booked_month"]) == (50, 4)
 
-    recebimentos = painel["receipts"]
-    assert recebimentos["received"] == Decimal("100")
-    assert recebimentos["by_method"] == [("Pix", Decimal("100"))]
-    assert (recebimentos["receivable"], recebimentos["receivable_count"]) == (Decimal("100"), 1)
-    assert [cash_register.account.name for cash_register in recebimentos["cash_registers"]] == [
-        "Caixa"
-    ]
-    assert "finance" not in painel
+    receipts = dashboard["receipts"]
+    assert receipts["received"] == Decimal("100")
+    assert receipts["by_method"] == [("Pix", Decimal("100"))]
+    assert (receipts["receivable"], receipts["receivable_count"]) == (Decimal("100"), 1)
+    assert [cash_register.account.name for cash_register in receipts["cash_registers"]] == ["Caixa"]
+    assert "finance" not in dashboard
 
     content = response.content.decode()
     assert "Bom dia, recepcao" in content
     assert "Recebido hoje" in content and "Pago hoje" not in content
     assert "Saldo nas contas" not in content
-    assert reverse("schedule:status", args=[dia_["next"].pk]) in content
+    assert reverse("schedule:status", args=[day_["next"].pk]) in content
 
 
-def test_admin_sees_day_and_month_result(cenario, cliente_de):
-    painel = start(cenario, cliente_de, "admin").context["dashboard"]
-    fin = painel["finance"]
-    assert fin["paid_today"] == Decimal("50") and fin["result_today"] == Decimal("50")
-    assert (fin["received_month"], fin["paid_month"]) == (Decimal("100"), Decimal("50"))
-    assert fin["result_month"] == Decimal("50")
+def test_admin_sees_day_and_month_result(scenario, client_for):
+    dashboard = start(scenario, client_for, "admin").context["dashboard"]
+    fin_ = dashboard["finance"]
+    assert fin_["paid_today"] == Decimal("50") and fin_["result_today"] == Decimal("50")
+    assert (fin_["received_month"], fin_["paid_month"]) == (Decimal("100"), Decimal("50"))
+    assert fin_["result_month"] == Decimal("50")
     # Same days of February (1st to 5th): the 200 received on the 3rd.
-    assert (fin["previous_start"], fin["previous_until"]) == (day(1, 2), day(5, 2))
-    assert fin["previous_result"] == Decimal("200")
-    assert (fin["overdue"], fin["overdue_count"]) == (Decimal("100"), 1)
-    assert (fin["payable"], fin["payable_count"]) == (Decimal("80"), 1)
-    assert fin["account_balances"] == Decimal("250")
+    assert (fin_["previous_start"], fin_["previous_until"]) == (day(1, 2), day(5, 2))
+    assert fin_["previous_result"] == Decimal("200")
+    assert (fin_["overdue"], fin_["overdue_count"]) == (Decimal("100"), 1)
+    assert (fin_["payable"], fin_["payable_count"]) == (Decimal("80"), 1)
+    assert fin_["account_balances"] == Decimal("250")
 
 
-def test_practitioner_sees_only_own_schedule_and_no_amounts(cenario, cliente_de):
-    response = start(cenario, cliente_de, "dra")
-    painel = response.context["dashboard"]
-    assert {a.practitioner.name for a in painel["schedule"]["items"]} == {"Dra. Ana"}
-    assert not painel["schedule"]["show_practitioner"]
-    assert painel["schedule"]["next"].start.astimezone().hour == 11
-    assert "receipts" not in painel and "finance" not in painel
+def test_practitioner_sees_only_own_schedule_and_no_amounts(scenario, client_for):
+    response = start(scenario, client_for, "dra")
+    dashboard = response.context["dashboard"]
+    assert {a.practitioner.name for a in dashboard["schedule"]["items"]} == {"Dra. Ana"}
+    assert not dashboard["schedule"]["show_practitioner"]
+    assert dashboard["schedule"]["next"].start.astimezone().hour == 11
+    assert "receipts" not in dashboard and "finance" not in dashboard
     # Estimates show their totals (practitioners write them), but no money of the clinic.
     content = response.content.decode()
     assert "Recebido hoje" not in content and "Caixa do dia" not in content
 
 
-def test_lists_of_recalls_birthdays_and_estimates(cenario, cliente_de):
-    painel = start(cenario, cliente_de, "recepcao").context["dashboard"]
-    rechamadas = painel["recalls"]
-    assert [r.date for r in rechamadas["items"]] == [day(1), HOJE]
-    assert (rechamadas["total"], rechamadas["late"]) == (2, 1)
-    assert [(p.name, age) for p, age in painel["birthdays"]] == [("Maria Paciente", 41)]
-    assert [o.valid_until for o in painel["estimates"]] == [day(8)]
+def test_lists_of_recalls_birthdays_and_estimates(scenario, client_for):
+    dashboard = start(scenario, client_for, "reception").context["dashboard"]
+    recalls = dashboard["recalls"]
+    assert [r.date for r in recalls["items"]] == [day(1), TODAY]
+    assert (recalls["total"], recalls["late"]) == (2, 1)
+    assert [(p.name, age) for p, age in dashboard["birthdays"]] == [("Maria Paciente", 41)]
+    assert [o.valid_until for o in dashboard["estimates"]] == [day(8)]
 
 
-def test_completing_recall_and_marking_attendance_return_home(cenario, cliente_de):
-    cliente = cliente_de(cenario["recepcao"])
-    painel = cliente.get(reverse("home")).context["dashboard"]
-    rechamada = painel["recalls"]["items"][0]
-    response = cliente.post(
-        reverse("recalls:complete", args=[rechamada.pk]), {"next": reverse("home")}
+def test_completing_recall_and_marking_attendance_return_home(scenario, client_for):
+    user_client = client_for(scenario["reception"])
+    dashboard = user_client.get(reverse("home")).context["dashboard"]
+    recall = dashboard["recalls"]["items"][0]
+    response = user_client.post(
+        reverse("recalls:complete", args=[recall.pk]), {"next": reverse("home")}
     )
     assert response.url == reverse("home")
-    proximo = painel["schedule"]["next"]
-    response = cliente.post(
-        reverse("schedule:status", args=[proximo.pk]), {"status": "compareceu"}, follow=True
+    next_one = dashboard["schedule"]["next"]
+    response = user_client.post(
+        reverse("schedule:status", args=[next_one.pk]), {"status": "compareceu"}, follow=True
     )
     assert "João Paciente compareceu." in response.content.decode()
     assert response.context["dashboard"]["schedule"]["attended"] == 2
     assert response.context["dashboard"]["recalls"]["total"] == 1
 
 
-def test_no_clinic_means_no_summary(cenario, criar_usuario, cliente_de):
-    response = cliente_de(criar_usuario("solto")).get(reverse("home"))
+def test_no_clinic_means_no_summary(scenario, create_user, client_for):
+    response = client_for(create_user("solto")).get(reverse("home"))
     assert "painel" not in response.context
     assert "não tem acesso a nenhuma clínica ativa" in response.content.decode()
 
 
-def test_greeting_by_time_of_day(monkeypatch, criar_usuario, cliente_de):
-    user = criar_usuario("maria")
-    for hour, saudacao in [(7, "Bom dia"), (13, "Boa tarde"), (20, "Boa noite")]:
+def test_greeting_by_time_of_day(monkeypatch, create_user, client_for):
+    user = create_user("maria")
+    for hour, greeting in [(7, "Bom dia"), (13, "Boa tarde"), (20, "Boa noite")]:
         timestamp = timezone.make_aware(datetime.datetime(2031, 3, 5, hour))
         monkeypatch.setattr(timezone, "now", lambda timestamp=timestamp: timestamp)
         # Logged in at the patched time, so the session is not seen as expired.
-        content = cliente_de(user).get(reverse("home")).content.decode()
-        assert f"{saudacao}, maria" in content
+        content = client_for(user).get(reverse("home")).content.decode()
+        assert f"{greeting}, maria" in content

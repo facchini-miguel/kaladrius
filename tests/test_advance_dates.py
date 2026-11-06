@@ -12,10 +12,10 @@ from apps.schedule.models import Appointment, AppointmentType
 
 
 @pytest.fixture
-def cenario(clinica_a, criar_profissional):
+def scenario(clinic_a, create_practitioner):
     today = timezone.localdate()
-    ana = criar_profissional(clinica_a, "Dra. Ana")
-    with use_clinic(clinica_a):
+    ana = create_practitioner(clinic_a, "Dra. Ana")
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(
             name="Maria Paciente", birth_date=datetime.date(1980, 5, 17)
         )
@@ -31,13 +31,13 @@ def cenario(clinica_a, criar_profissional):
             )
             for d in (21, 14)
         ]
-        rechamada = Recall.objects.create(
+        recall = Recall.objects.create(
             patient=patient, date=today - datetime.timedelta(days=20), description="Limpeza"
         )
-    return {"clinic": clinica_a, "patient": patient, "agenda": week, "rechamada": rechamada}
+    return {"clinic": clinic_a, "patient": patient, "schedule": week, "rechamada": recall}
 
 
-def test_only_on_the_demo_server(cenario, settings):
+def test_only_on_the_demo_server(scenario, settings):
     settings.DEMO = False
     with pytest.raises(CommandError, match="DJANGO_DEMO"):
         call_command("advance_dates", desde="2026-01-01", confirmar=True)
@@ -46,13 +46,13 @@ def test_only_on_the_demo_server(cenario, settings):
         call_command("advance_dates", desde="2026-01-01")
 
 
-def test_advances_whole_weeks_and_keeps_birth_dates(cenario, settings):
+def test_advances_whole_weeks_and_keeps_birth_dates(scenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
-    before = {a.pk: (a.start, a.end) for a in cenario["agenda"]}
+    before = {a.pk: (a.start, a.end) for a in scenario["schedule"]}
     # 17 days ago: two whole weeks, so each appointment keeps its weekday.
     call_command("advance_dates", desde=str(today - datetime.timedelta(days=17)), confirmar=True)
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         for appointment in Appointment.objects.all():
             start, end = before[appointment.pk]
             assert appointment.start - start == datetime.timedelta(days=14)
@@ -71,11 +71,11 @@ def test_advances_whole_weeks_and_keeps_birth_dates(cenario, settings):
             )
 
 
-def test_less_than_a_week_changes_nothing(cenario, settings):
+def test_less_than_a_week_changes_nothing(scenario, settings):
     settings.DEMO = True
     today = timezone.localdate()
     call_command("advance_dates", desde=str(today - datetime.timedelta(days=6)), confirmar=True)
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         assert Recall.objects.get().date == today - datetime.timedelta(days=20)
 
 
@@ -85,7 +85,7 @@ def test_the_fixed_dates_exist():
 
     from apps.core.management.commands.advance_dates import FIXED
 
-    for nome in FIXED:
-        label, modelo, field = nome.split(".")
-        model_field = apps.get_model(label, modelo)._meta.get_field(field)
-        assert model_field.get_internal_type() in ("DateField", "DateTimeField"), nome
+    for name in FIXED:
+        label, template_, field = name.split(".")
+        model_field = apps.get_model(label, template_)._meta.get_field(field)
+        assert model_field.get_internal_type() in ("DateField", "DateTimeField"), name

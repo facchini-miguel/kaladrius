@@ -15,22 +15,22 @@ from apps.patients.models import Patient
 
 pytestmark = pytest.mark.django_db
 
-HOJE = timezone.localdate()
+TODAY = timezone.localdate()
 URL = "finance:catalog"
 
 
 @pytest.fixture
-def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_centros", clinica_a, Role.ADMIN))
+def admin(clinic_a, create_user, client_for):
+    return client_for(create_user("admin_centros", clinic_a, Role.ADMIN))
 
 
 @pytest.fixture
-def centro(clinica_a):
-    with use_clinic(clinica_a):
+def center(clinic_a):
+    with use_clinic(clinic_a):
         return CostCenter.objects.create(name="Ortodontia")
 
 
-def despesa(clinic, **extra):
+def expense(clinic, **extra):
     with use_clinic(clinic):
         category = Category.objects.get(name="Aluguel")
     return {
@@ -40,86 +40,86 @@ def despesa(clinic, **extra):
         "amount": "1000",
         "mode": "dividir",
         "installments": 1,
-        "first_due_date": HOJE.isoformat(),
+        "first_due_date": TODAY.isoformat(),
         "notes": "",
         **extra,
     }
 
 
-def test_registration_and_duplicate_name(clinica_a, admin):
+def test_registration_and_duplicate_name(clinic_a, admin):
     url = reverse("finance:catalog_new", args=["cost-centers"])
     assert admin.post(url, {"name": " Consultório 1 ", "active": "on"}).status_code == 302
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         assert CostCenter.objects.get().name == "Consultório 1"
-    repetido = admin.post(url, {"name": "consultório 1", "active": "on"})
-    assert "name" in repetido.context["form"].errors
+    repeated_one = admin.post(url, {"name": "consultório 1", "active": "on"})
+    assert "name" in repeated_one.context["form"].errors
     results = admin.get(reverse(URL, args=["cost-centers"])).content.decode()
     assert "Consultório 1" in results and "Ativo" in results
 
 
-def test_field_shows_only_with_a_registered_center(clinica_a, admin):
-    for rota in ("finance:entry_new", "finance:expense_new"):
-        assert "cost_center" not in admin.get(reverse(rota)).context["form"].fields
-    with use_clinic(clinica_a):
-        inativo = CostCenter.objects.create(name="Desativado", active=False)
+def test_field_shows_only_with_a_registered_center(clinic_a, admin):
+    for route in ("finance:entry_new", "finance:expense_new"):
+        assert "cost_center" not in admin.get(reverse(route)).context["form"].fields
+    with use_clinic(clinic_a):
+        inactive = CostCenter.objects.create(name="Desativado", active=False)
     assert "cost_center" not in admin.get(reverse("finance:expense_new")).context["form"].fields
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         CostCenter.objects.create(name="Ativo")
     field = admin.get(reverse("finance:expense_new")).context["form"].fields["cost_center"]
-    with use_clinic(clinica_a):
-        assert inativo not in field.queryset and field.queryset.count() == 1
+    with use_clinic(clinic_a):
+        assert inactive not in field.queryset and field.queryset.count() == 1
 
 
-def test_entries_keep_the_center(clinica_a, centro, admin):
+def test_entries_keep_the_center(clinic_a, center, admin):
     assert (
         admin.post(
-            reverse("finance:expense_new"), despesa(clinica_a, cost_center=centro.pk)
+            reverse("finance:expense_new"), expense(clinic_a, cost_center=center.pk)
         ).status_code
         == 302
     )
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(name="Paciente fictício do centro")
-        receita = Category.objects.get(name="Tratamento")
+        income = Category.objects.get(name="Tratamento")
     response = admin.post(
         reverse("finance:entry_new"),
         {
             "patient": patient.pk,
             "payer": "",
             "description": "Aparelho",
-            "category": receita.pk,
-            "cost_center": centro.pk,
+            "category": income.pk,
+            "cost_center": center.pk,
             "practitioner": "",
             "total_amount": "500",
             "installments": 1,
-            "first_due_date": HOJE.isoformat(),
+            "first_due_date": TODAY.isoformat(),
             "notes": "",
         },
     )
     assert response.status_code == 302
-    with use_clinic(clinica_a):
-        assert Entry.objects.filter(cost_center=centro).count() == 2
+    with use_clinic(clinic_a):
+        assert Entry.objects.filter(cost_center=center).count() == 2
         entry = Entry.objects.get(kind=Entry.Kind.PAYABLE)
     page = admin.get(reverse("finance:entry", args=[entry.pk])).content.decode()
     assert "Ortodontia" in page
     # Without a center the entry still saves (the field is optional).
-    assert admin.post(reverse("finance:expense_new"), despesa(clinica_a)).status_code == 302
+    assert admin.post(reverse("finance:expense_new"), expense(clinic_a)).status_code == 302
 
 
-def test_report_by_cost_center(clinica_a, centro, admin):
-    with use_clinic(clinica_a):
-        aluguel = Category.objects.get(name="Aluguel")
+def test_report_by_cost_center(clinic_a, center, admin):
+    with use_clinic(clinic_a):
+        rent = Category.objects.get(name="Aluguel")
         cash_register = FinancialAccount.objects.get(name="Caixa")
-        for amount, cost_center in ((Decimal("300"), centro), (Decimal("200"), None)):
+        for amount, cost_center in ((Decimal("300"), center), (Decimal("200"), None)):
             entry = services.create_entry(
-                clinic=clinica_a,
+                clinic=clinic_a,
                 kind=Entry.Kind.PAYABLE,
                 payer="Fornecedor fictício",
                 description="Compra",
-                category=aluguel,
+                category=rent,
                 cost_center=cost_center,
                 total_amount=amount,
                 parcelas=1,
-                primeiro_vencimento=HOJE,
+                primeiro_vencimento=TODAY,
                 user=None,
             )
             installment = entry.parcelas.get()
@@ -148,16 +148,16 @@ def test_report_without_centers_hides_the_tables(admin):
     assert "por centro de custo" not in report.content.decode()
 
 
-def test_reception_does_not_register(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_centros", clinica_a, Role.FRONT_DESK))
+def test_reception_does_not_register(clinic_a, create_user, client_for):
+    reception = client_for(create_user("recepcao_centros", clinic_a, Role.FRONT_DESK))
     assert reception.get(reverse(URL, args=["cost-centers"])).status_code == 403
 
 
-def test_hidden_with_finance_off(clinica_a, admin):
+def test_hidden_with_finance_off(clinic_a, admin):
     results = reverse(URL, args=["cost-centers"])
     assert results in admin.get(reverse("home")).content.decode()
     configure(
-        clinica_a,
+        clinic_a,
         GENERAL_MODULES - {ModuleCode.FINANCE, ModuleCode.ESTIMATES, ModuleCode.STAFF},
     )
     assert admin.get(results).status_code == 403

@@ -14,13 +14,13 @@ from apps.finance.models import AccountGroup, Category, Entry, FinancialAccount,
 
 pytestmark = pytest.mark.django_db
 
-HOJE = timezone.localdate()
+TODAY = timezone.localdate()
 URL = reverse("finance:planning")
 
 
 @pytest.fixture
-def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_planejamento", clinica_a, Role.ADMIN))
+def admin(clinic_a, create_user, client_for):
+    return client_for(create_user("admin_planejamento", clinic_a, Role.ADMIN))
 
 
 def group(clinic, name):
@@ -28,7 +28,7 @@ def group(clinic, name):
         return AccountGroup.objects.get(name=name)
 
 
-def pay(clinic, category, amount, date=HOJE):
+def pay(clinic, category, amount, date=TODAY):
     with use_clinic(clinic):
         entry = services.create_entry(
             clinic=clinic,
@@ -53,61 +53,61 @@ def pay(clinic, category, amount, date=HOJE):
 
 
 @pytest.mark.parametrize(
-    ("today", "esperado"),
+    ("today", "expected"),
     [
         (datetime.date(2025, 12, 31), Decimal(0)),
         (datetime.date(2027, 1, 1), Decimal(1)),
         (datetime.date(2026, 1, 1), Decimal(1) / Decimal(365)),
     ],
 )
-def test_fraction_of_the_year(today, esperado):
-    assert services.year_fraction(2026, today) == esperado
+def test_fraction_of_the_year(today, expected):
+    assert services.year_fraction(2026, today) == expected
 
 
-def test_save_targets_in_brazilian_format(clinica_a, admin):
-    ocupacao = group(clinica_a, "Ocupação")
+def test_save_targets_in_brazilian_format(clinic_a, admin):
+    occupation = group(clinic_a, "Ocupação")
     # With the thousands dot, as people type it (review stage 3: it was refused).
-    response = admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": "12.000,50"})
+    response = admin.post(f"{URL}?year={TODAY.year}", {f"meta-{occupation.pk}": "12.000,50"})
     assert response.status_code == 302
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         assert Planning.objects.get().amount == Decimal("12000.50")
-    page = admin.get(f"{URL}?year={HOJE.year}").content.decode()
+    page = admin.get(f"{URL}?year={TODAY.year}").content.decode()
     assert 'value="12000,50"' in page  # shown back with a comma, not as 12000.50
     # Blank removes the goal.
-    admin.post(f"{URL}?year={HOJE.year}", {f"meta-{ocupacao.pk}": ""})
-    with use_clinic(clinica_a):
+    admin.post(f"{URL}?year={TODAY.year}", {f"meta-{occupation.pk}": ""})
+    with use_clinic(clinic_a):
         assert not Planning.objects.exists()
 
 
-def test_actual_and_percentage_summing_subgroups(clinica_a, admin):
-    with use_clinic(clinica_a):
-        ocupacao = AccountGroup.objects.get(name="Ocupação")
-        Planning.objects.create(year=HOJE.year, group=ocupacao, amount=Decimal("1000"))
-    pay(clinica_a, "Aluguel", "250")
-    pay(clinica_a, "Manutenção", "50")
-    pay(clinica_a, "Aluguel", "999", date=datetime.date(HOJE.year - 1, 6, 1))  # other year
-    despesas = admin.get(f"{URL}?year={HOJE.year}").context["sections"][1]
-    row = next(row for row in despesas["rows"] if row["group"] == ocupacao)
+def test_actual_and_percentage_summing_subgroups(clinic_a, admin):
+    with use_clinic(clinic_a):
+        occupation = AccountGroup.objects.get(name="Ocupação")
+        Planning.objects.create(year=TODAY.year, group=occupation, amount=Decimal("1000"))
+    pay(clinic_a, "Aluguel", "250")
+    pay(clinic_a, "Manutenção", "50")
+    pay(clinic_a, "Aluguel", "999", date=datetime.date(TODAY.year - 1, 6, 1))  # other year
+    expenses = admin.get(f"{URL}?year={TODAY.year}").context["sections"][1]
+    row = next(row for row in expenses["rows"] if row["group"] == occupation)
     assert (row["actual"], row["percentage"]) == (Decimal("300.00"), 30)
-    assert despesas["target"] == Decimal("1000") and despesas["actual"] == Decimal("300.00")
+    assert expenses["target"] == Decimal("1000") and expenses["actual"] == Decimal("300.00")
 
 
-def test_subgroup_target_does_not_count_twice(clinica_a):
-    with use_clinic(clinica_a):
-        pessoal = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal)
-        Planning.objects.create(year=2026, group=pessoal, amount=Decimal("5000"))
+def test_subgroup_target_does_not_count_twice(clinic_a):
+    with use_clinic(clinic_a):
+        staff_ = AccountGroup.objects.get(name="Pessoal")
+        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=staff_)
+        Planning.objects.create(year=2026, group=staff_, amount=Decimal("5000"))
         Planning.objects.create(year=2026, group=sub, amount=Decimal("2000"))
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("700")
         )
-        despesas = services.planning(2026, today=datetime.date(2026, 12, 31))["sections"][1]
-    assert despesas["target"] == Decimal("5700")
-    assert despesas["expected"] == Decimal("5700.00")
+        expenses = services.planning(2026, today=datetime.date(2026, 12, 31))["sections"][1]
+    assert expenses["target"] == Decimal("5700")
+    assert expenses["expected"] == Decimal("5700.00")
 
 
-def test_on_track_for_revenue_and_expense(clinica_a):
-    with use_clinic(clinica_a):
+def test_on_track_for_revenue_and_expense(clinic_a):
+    with use_clinic(clinic_a):
         Planning.objects.create(
             year=2026, group=AccountGroup.objects.get(name="Atendimentos"), amount=Decimal("1200")
         )
@@ -115,33 +115,33 @@ def test_on_track_for_revenue_and_expense(clinica_a):
             year=2026, group=AccountGroup.objects.get(name="Impostos"), amount=Decimal("1200")
         )
         data = services.planning(2026, today=datetime.date(2026, 12, 31))
-    receita = next(row for row in data["sections"][0]["rows"] if row["target"])
-    despesa = next(row for row in data["sections"][1]["rows"] if row["target"])
+    income = next(row for row in data["sections"][0]["rows"] if row["target"])
+    expense = next(row for row in data["sections"][1]["rows"] if row["target"])
     # Nothing received yet: income is behind; nothing paid: expenses are within the goal.
-    assert receita["on_track"] is False and despesa["on_track"] is True
+    assert income["on_track"] is False and expense["on_track"] is True
 
 
-def test_copy_targets_from_previous_year(clinica_a, admin):
-    with use_clinic(clinica_a):
-        ocupacao = AccountGroup.objects.get(name="Ocupação")
-        impostos = AccountGroup.objects.get(name="Impostos")
-        Planning.objects.create(year=HOJE.year - 1, group=ocupacao, amount=Decimal("900"))
-        Planning.objects.create(year=HOJE.year - 1, group=impostos, amount=Decimal("300"))
-        Planning.objects.create(year=HOJE.year, group=impostos, amount=Decimal("400"))
-    page = admin.get(f"{URL}?year={HOJE.year}")
+def test_copy_targets_from_previous_year(clinic_a, admin):
+    with use_clinic(clinic_a):
+        occupation = AccountGroup.objects.get(name="Ocupação")
+        taxes = AccountGroup.objects.get(name="Impostos")
+        Planning.objects.create(year=TODAY.year - 1, group=occupation, amount=Decimal("900"))
+        Planning.objects.create(year=TODAY.year - 1, group=taxes, amount=Decimal("300"))
+        Planning.objects.create(year=TODAY.year, group=taxes, amount=Decimal("400"))
+    page = admin.get(f"{URL}?year={TODAY.year}")
     assert page.context["has_previous_targets"]
-    admin.post(f"{URL}?year={HOJE.year}", {"action": "copiar"})
-    with use_clinic(clinica_a):
-        deste_ano = dict(
-            Planning.objects.filter(year=HOJE.year).values_list("group__name", "amount")
+    admin.post(f"{URL}?year={TODAY.year}", {"action": "copiar"})
+    with use_clinic(clinic_a):
+        this_year = dict(
+            Planning.objects.filter(year=TODAY.year).values_list("group__name", "amount")
         )
-    assert deste_ano == {"Ocupação": Decimal("900.00"), "Impostos": Decimal("400.00")}
+    assert this_year == {"Ocupação": Decimal("900.00"), "Impostos": Decimal("400.00")}
 
 
 def test_invalid_year_falls_back_to_current(admin):
-    assert admin.get(URL, {"year": "abc"}).context["year"] == HOJE.year
+    assert admin.get(URL, {"year": "abc"}).context["year"] == TODAY.year
 
 
-def test_permissions(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_planejamento", clinica_a, Role.FRONT_DESK))
+def test_permissions(clinic_a, create_user, client_for):
+    reception = client_for(create_user("recepcao_planejamento", clinic_a, Role.FRONT_DESK))
     assert reception.get(URL).status_code == 403

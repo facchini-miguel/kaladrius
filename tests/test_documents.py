@@ -12,15 +12,15 @@ from apps.core.models import Role
 from apps.finance.models import Supplier
 from apps.patients.models import Patient
 from apps.staff.models import Employee
-from tests.test_core import dados_clinica
-from tests.test_countries import no_pais
+from tests.test_core import clinic_data
+from tests.test_countries import in_country
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_documentos", clinica_a, Role.ADMIN))
+def admin(clinic_a, create_user, client_for):
+    return client_for(create_user("admin_documentos", clinic_a, Role.ADMIN))
 
 
 # --- The table of documents ------------------------------------------------------
@@ -28,24 +28,24 @@ def admin(clinica_a, criar_usuario, cliente_de):
 
 def test_every_country_has_its_documents():
     assert identification.DOCUMENTS.keys() == countries.COUNTRIES.keys()
-    for code, documentos in identification.DOCUMENTS.items():
+    for code, documents in identification.DOCUMENTS.items():
         # Every country identifies a company (a company patient, the clinic, a supplier).
-        assert documentos.empresa is not None, code
-        assert documentos.registro_profissional, code
+        assert documents.empresa is not None, code
+        assert documents.registro_profissional, code
 
 
 def test_field_examples_are_valid_and_written_as_the_system_writes():
-    for code, documentos in identification.DOCUMENTS.items():
+    for code, documents in identification.DOCUMENTS.items():
         if code == "BR":
             continue  # Brazil shows the mask, 000.000.000-00
-        for document in documentos.of_roles(*identification.DOCUMENT_ROLES):
-            compacto = document.normalize(document.example)
-            assert document.is_valid(compacto), (code, document.abbreviation)
-            assert document.write(compacto) in (document.example, compacto), document.abbreviation
+        for document in documents.of_roles(*identification.DOCUMENT_ROLES):
+            compact = document.normalize(document.example)
+            assert document.is_valid(compact), (code, document.abbreviation)
+            assert document.write(compact) in (document.example, compact), document.abbreviation
 
 
 @pytest.mark.parametrize(
-    ("country", "role", "digitado", "escrito"),
+    ("country", "role", "typed", "written"),
     [
         ("MX", "paciente", "boxw310820hnerxn09", "BOXW310820HNERXN09"),
         ("MX", "pessoa", "GODE-561231-GR8", "GODE561231GR8"),
@@ -77,14 +77,14 @@ def test_field_examples_are_valid_and_written_as_the_system_writes():
         ("ZA", "empresa", "2001/123456/07", "2001/123456/07"),
     ],
 )
-def test_valid_document_is_written_the_country_way(country, role, digitado, escrito):
+def test_valid_document_is_written_the_country_way(country, role, typed, written):
     document = identification.for_country(country).for_role(role)
-    guardado = identification.clean_value(digitado, [document], document.abbreviation)
-    assert identification.write(guardado, (role,), country) == escrito
+    kept = identification.clean_value(typed, [document], document.abbreviation)
+    assert identification.write(kept, (role,), country) == written
 
 
 @pytest.mark.parametrize(
-    ("country", "role", "digitado"),
+    ("country", "role", "typed"),
     [
         ("MX", "paciente", "BOXW310820HNERXN08"),  # check digit
         ("MX", "empresa", "GODE561231GR8"),  # an individual's RFC is not a company's
@@ -102,10 +102,10 @@ def test_valid_document_is_written_the_country_way(country, role, digitado, escr
         ("ZA", "paciente", "7503305044088"),
     ],
 )
-def test_invalid_document_is_refused(country, role, digitado):
+def test_invalid_document_is_refused(country, role, typed):
     document = identification.for_country(country).for_role(role)
     with pytest.raises(identification.ValidationError, match="número inválido"):
-        identification.clean_value(digitado, [document], document.abbreviation)
+        identification.clean_value(typed, [document], document.abbreviation)
 
 
 def test_value_that_is_not_a_country_document_stays_as_is():
@@ -118,13 +118,13 @@ def test_value_that_is_not_a_country_document_stays_as_is():
     )
 
 
-def test_template_filters(clinica_a):
-    no_pais(clinica_a, "AR")
+def test_template_filters(clinic_a):
+    in_country(clinic_a, "AR")
     template = Template(
         '{% load formats %}{{ a|document:"paciente" }} · {{ b|document }} · '
         '{{ b|document_abbreviation:"empresa" }} · {% document_label "paciente" "empresa" %}'
     )
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         text = template.render(Context({"a": "20123456", "b": "20123456786"}))
     assert text == "20.123.456 · 20-12345678-6 · CUIT · DNI/CUIT"
 
@@ -132,19 +132,19 @@ def test_template_filters(clinica_a):
 # --- Patients ----------------------------------------------------------------------
 
 
-def test_patient_in_mexico_with_curp(clinica_a, admin):
-    no_pais(clinica_a, "MX")
-    formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'data-label-pf="CURP"' in formulario and 'data-label-pj="RFC"' in formulario
+def test_patient_in_mexico_with_curp(clinic_a, admin):
+    in_country(clinic_a, "MX")
+    form_page = admin.get(reverse("patients:new")).content.decode()
+    assert 'data-label-pf="CURP"' in form_page and 'data-label-pj="RFC"' in form_page
     data = {"kind": "PF", "name": "Paciente Ficticio", "active": "on"}
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN08"})
     assert response.context["form"].errors["tax_id"] == ["CURP: número inválido."]
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "boxw310820hnerxn09"})
     assert response.status_code == 302
-    with use_clinic(clinica_a):
-        paciente = Patient.objects.get()
-    assert paciente.tax_id == "BOXW310820HNERXN09"
-    patient_record = admin.get(reverse("patients:record", args=[paciente.pk])).content.decode()
+    with use_clinic(clinic_a):
+        patient_ = Patient.objects.get()
+    assert patient_.tax_id == "BOXW310820HNERXN09"
+    patient_record = admin.get(reverse("patients:record", args=[patient_.pk])).content.decode()
     assert "CURP" in patient_record and "BOXW310820HNERXN09" in patient_record
 
     # The same document again is refused, as in Brazil.
@@ -152,16 +152,16 @@ def test_patient_in_mexico_with_curp(clinica_a, admin):
     assert "Já existe um paciente com este documento" in response.content.decode()
 
 
-def test_patient_in_united_states_only_company_has_document(clinica_a, admin):
-    no_pais(clinica_a, "US")
-    formulario = admin.get(reverse("patients:new")).content.decode()
-    assert 'data-label-pf=""' in formulario and 'data-label-pj="EIN"' in formulario
+def test_patient_in_united_states_only_company_has_document(clinic_a, admin):
+    in_country(clinic_a, "US")
+    form_page = admin.get(reverse("patients:new")).content.decode()
+    assert 'data-label-pf=""' in form_page and 'data-label-pj="EIN"' in form_page
     # An individual: whatever was left in the hidden field is not kept.
-    pessoa = {"kind": "PF", "name": "John Fictitious", "active": "on", "tax_id": "911144442"}
-    assert admin.post(reverse("patients:new"), pessoa).status_code == 302
-    empresa = {"kind": "PJ", "name": "Acme Fictitious", "active": "on", "tax_id": "91-1144442"}
-    assert admin.post(reverse("patients:new"), empresa).status_code == 302
-    with use_clinic(clinica_a):
+    person = {"kind": "PF", "name": "John Fictitious", "active": "on", "tax_id": "911144442"}
+    assert admin.post(reverse("patients:new"), person).status_code == 302
+    company = {"kind": "PJ", "name": "Acme Fictitious", "active": "on", "tax_id": "91-1144442"}
+    assert admin.post(reverse("patients:new"), company).status_code == 302
+    with use_clinic(clinic_a):
         assert Patient.objects.get(name="John Fictitious").tax_id == ""
         acme = Patient.objects.get(name="Acme Fictitious")
     assert acme.tax_id == "911144442"
@@ -172,66 +172,66 @@ def test_patient_in_united_states_only_company_has_document(clinica_a, admin):
 # --- The clinic --------------------------------------------------------------------
 
 
-def test_clinic_document_is_the_chosen_country_one(clinica_a, admin):
+def test_clinic_document_is_the_chosen_country_one(clinic_a, admin):
     # The country and the document change together: the document is the new country's.
     response = admin.post(
-        reverse("clinic_settings"), dados_clinica(country="US", document="52998224725")
+        reverse("clinic_settings"), clinic_data(country="US", document="52998224725")
     )
     assert response.context["form"].errors["document"] == ["EIN: número inválido."]
     response = admin.post(
-        reverse("clinic_settings"), dados_clinica(country="US", document="911144442")
+        reverse("clinic_settings"), clinic_data(country="US", document="911144442")
     )
     assert response.status_code == 302
-    clinica_a.refresh_from_db()
-    assert clinica_a.document == "911144442"
-    assert (clinica_a.document_abbreviation, clinica_a.written_document) == ("EIN", "91-1144442")
+    clinic_a.refresh_from_db()
+    assert clinic_a.document == "911144442"
+    assert (clinic_a.document_abbreviation, clinic_a.written_document) == ("EIN", "91-1144442")
 
 
-def test_clinic_in_mexico_accepts_person_or_company_rfc(clinica_a, admin):
+def test_clinic_in_mexico_accepts_person_or_company_rfc(clinic_a, admin):
     for rfc in ("GODE561231GR8", "ABC680524P76"):
-        response = admin.post(reverse("clinic_settings"), dados_clinica(country="MX", document=rfc))
+        response = admin.post(reverse("clinic_settings"), clinic_data(country="MX", document=rfc))
         assert response.status_code == 302
-        clinica_a.refresh_from_db()
-        assert (clinica_a.document, clinica_a.document_abbreviation) == (rfc, "RFC")
+        clinic_a.refresh_from_db()
+        assert (clinic_a.document, clinic_a.document_abbreviation) == (rfc, "RFC")
 
 
 # --- Suppliers, staff and practitioners --------------------------------------------
 
 
-def test_supplier_in_the_united_kingdom(clinica_a, admin):
-    no_pais(clinica_a, "GB")
-    empresa = {"kind": "PJ", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
-    response = admin.post(reverse("finance:supplier_new"), empresa)
+def test_supplier_in_the_united_kingdom(clinic_a, admin):
+    in_country(clinic_a, "GB")
+    company = {"kind": "PJ", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
+    response = admin.post(reverse("finance:supplier_new"), company)
     assert response.context["form"].errors["tax_id"] == ["Company number: número inválido."]
-    empresa["tax_id"] = "01234567"
-    assert admin.post(reverse("finance:supplier_new"), empresa).status_code == 302
+    company["tax_id"] = "01234567"
+    assert admin.post(reverse("finance:supplier_new"), company).status_code == 302
     # A sole trader has no document in this table: nothing is kept.
-    pessoa = {"kind": "PF", "name": "John Plumber", "active": "on", "tax_id": "01234567"}
-    assert admin.post(reverse("finance:supplier_new"), pessoa).status_code == 302
-    with use_clinic(clinica_a):
+    person = {"kind": "PF", "name": "John Plumber", "active": "on", "tax_id": "01234567"}
+    assert admin.post(reverse("finance:supplier_new"), person).status_code == 302
+    with use_clinic(clinic_a):
         assert Supplier.objects.get(name="Dental Supplies Ltd").tax_id == "01234567"
         assert Supplier.objects.get(name="John Plumber").tax_id == ""
 
 
-def test_employee_in_the_united_states_and_australia(clinica_a, admin):
-    no_pais(clinica_a, "US")
+def test_employee_in_the_united_states_and_australia(clinic_a, admin):
+    in_country(clinic_a, "US")
     data = {"name": "Jane Fictitious", "salary": "3000", "active": "on"}
     response = admin.post(reverse("staff:new"), {**data, "tax_id": "000-12-3456"})
     assert response.context["form"].errors["tax_id"] == ["SSN: número inválido."]
     assert admin.post(reverse("staff:new"), {**data, "tax_id": "536904399"}).status_code == 302
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         jane = Employee.objects.get()
     assert jane.tax_id == "536904399"
     patient_record = admin.get(reverse("staff:employee", args=[jane.pk])).content.decode()
     assert "SSN" in patient_record and "536-90-4399" in patient_record
 
     # Australia: the tax file number is not recorded, so there is no field.
-    no_pais(clinica_a, "AU")
+    in_country(clinic_a, "AU")
     assert 'name="tax_id"' not in admin.get(reverse("staff:new")).content.decode()
 
 
-def test_professional_registration_with_country_examples(clinica_a, admin):
-    no_pais(clinica_a, "GB")
+def test_professional_registration_with_country_examples(clinic_a, admin):
+    in_country(clinic_a, "GB")
     assert "GDC, GMC" in admin.get(reverse("practitioners:new")).content.decode()
-    no_pais(clinica_a, "BR")
+    in_country(clinic_a, "BR")
     assert "CRO, CRM" in admin.get(reverse("practitioners:new")).content.decode()

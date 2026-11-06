@@ -16,12 +16,12 @@ from tests.era import apps_at, tables_of_the_time
 
 pytestmark = pytest.mark.django_db
 
-HOJE = timezone.localdate()
+TODAY = timezone.localdate()
 
 
 @pytest.fixture
-def admin(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("admin_plano", clinica_a, Role.ADMIN))
+def admin(clinic_a, create_user, client_for):
+    return client_for(create_user("admin_plano", clinic_a, Role.ADMIN))
 
 
 def group(clinic, name, **extra):
@@ -29,111 +29,111 @@ def group(clinic, name, **extra):
         return AccountGroup.objects.get(name=name, **extra)
 
 
-def test_new_clinic_starts_with_the_basic_chart(clinica_a):
-    with use_clinic(clinica_a):
-        aluguel = Category.objects.get(name="Aluguel")
-        assert str(aluguel.group) == "1 Ocupação"
+def test_new_clinic_starts_with_the_basic_chart(clinic_a):
+    with use_clinic(clinic_a):
+        rent = Category.objects.get(name="Aluguel")
+        assert str(rent.group) == "1 Ocupação"
         assert Category.objects.get(name="Comissões").group.name == "Pessoal"
         assert not Category.objects.filter(group=None).exists()
         assert AccountGroup.objects.filter(kind="receita").count() == 2
 
 
-def test_numbered_subgroup_and_moved_category(clinica_a, admin):
-    pessoal = group(clinica_a, "Pessoal")
+def test_numbered_subgroup_and_moved_category(clinic_a, admin):
+    staff_ = group(clinic_a, "Pessoal")
     response = admin.post(
         reverse("finance:group_new"),
         {
             "name": "Equipe da recepção",
             "kind": "despesa",
-            "parent": pessoal.pk,
+            "parent": staff_.pk,
             "code": 1,
             "active": "on",
         },
     )
     assert response.status_code == 302
-    sub = group(clinica_a, "Equipe da recepção")
-    with use_clinic(clinica_a):
+    sub = group(clinic_a, "Equipe da recepção")
+    with use_clinic(clinic_a):
         assert sub.number == "2.1"
-        salarios = Category.objects.get(name="Salários e encargos")
-    editar = admin.post(
-        reverse("finance:catalog_edit", args=["categories", salarios.pk]),
-        {"name": salarios.name, "kind": "despesa", "group": sub.pk, "active": "on"},
+        salaries = Category.objects.get(name="Salários e encargos")
+    edit = admin.post(
+        reverse("finance:catalog_edit", args=["categories", salaries.pk]),
+        {"name": salaries.name, "kind": "despesa", "group": sub.pk, "active": "on"},
     )
-    assert editar.status_code == 302
+    assert edit.status_code == 302
     page = admin.get(reverse("finance:chart_of_accounts")).content.decode()
     assert "2.1 Equipe da recepção" in page and "Salários e encargos" in page
 
 
-def test_blank_code_gets_the_next_number(clinica_a, admin):
+def test_blank_code_gets_the_next_number(clinic_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
-    pessoal = group(clinica_a, "Pessoal")
+    staff_ = group(clinic_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
-        data = {"name": name, "kind": "despesa", "parent": pessoal.pk, "code": "", "active": "on"}
+        data = {"name": name, "kind": "despesa", "parent": staff_.pk, "code": "", "active": "on"}
         assert admin.post(reverse("finance:group_new"), data).status_code == 302
-    with use_clinic(clinica_a):
-        assert group(clinica_a, "Equipe A").number == "2.1"
-        assert group(clinica_a, "Equipe B").number == "2.2"
+    with use_clinic(clinic_a):
+        assert group(clinic_a, "Equipe A").number == "2.1"
+        assert group(clinic_a, "Equipe B").number == "2.2"
     # A new top group goes after the five of the basic plan.
-    topo = {"name": "Investimentos", "kind": "despesa", "parent": "", "code": "", "active": "on"}
-    assert admin.post(reverse("finance:group_new"), topo).status_code == 302
-    with use_clinic(clinica_a):
-        assert group(clinica_a, "Investimentos").number == "6"
+    top = {"name": "Investimentos", "kind": "despesa", "parent": "", "code": "", "active": "on"}
+    assert admin.post(reverse("finance:group_new"), top).status_code == 302
+    with use_clinic(clinic_a):
+        assert group(clinic_a, "Investimentos").number == "6"
 
 
-def test_group_validations(clinica_a, admin):
-    pessoal = group(clinica_a, "Pessoal")
-    atendimentos = group(clinica_a, "Atendimentos")
+def test_group_validations(clinic_a, admin):
+    staff_ = group(clinic_a, "Pessoal")
+    visit_list = group(clinic_a, "Atendimentos")
     url = reverse("finance:group_new")
-    misturado = admin.post(url, {"name": "X", "kind": "despesa", "parent": atendimentos.pk})
-    assert "parent" in misturado.context["form"].errors
-    repetido = admin.post(url, {"name": "pessoal", "kind": "despesa"})
-    assert "name" in repetido.context["form"].errors
+    mixed = admin.post(url, {"name": "X", "kind": "despesa", "parent": visit_list.pk})
+    assert "parent" in mixed.context["form"].errors
+    repeated_one = admin.post(url, {"name": "pessoal", "kind": "despesa"})
+    assert "name" in repeated_one.context["form"].errors
     # A group cannot go under itself or under one of its subgroups.
-    with use_clinic(clinica_a):
-        sub = AccountGroup.objects.create(name="Sub", kind="despesa", parent=pessoal)
-    ciclo = admin.post(
-        reverse("finance:group_edit", args=[pessoal.pk]),
+    with use_clinic(clinic_a):
+        sub = AccountGroup.objects.create(name="Sub", kind="despesa", parent=staff_)
+    cycle = admin.post(
+        reverse("finance:group_edit", args=[staff_.pk]),
         {"name": "Pessoal", "kind": "despesa", "parent": sub.pk},
     )
-    assert "parent" in ciclo.context["form"].errors
+    assert "parent" in cycle.context["form"].errors
 
 
-def test_category_cannot_join_group_of_another_kind(clinica_a, admin):
+def test_category_cannot_join_group_of_another_kind(clinic_a, admin):
     response = admin.post(
         reverse("finance:catalog_new", args=["categories"]),
         {
             "name": "Exames",
             "kind": "receita",
-            "group": group(clinica_a, "Pessoal").pk,
+            "group": group(clinic_a, "Pessoal").pk,
             "active": "on",
         },
     )
     assert "group" in response.context["form"].errors
 
 
-def test_report_sums_the_subgroups(clinica_a, admin):
-    with use_clinic(clinica_a):
-        pessoal = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=pessoal, code=1)
-        salarios = Category.objects.get(name="Salários e encargos")
-        salarios.group = sub
-        salarios.save()
-        avulsa = Category.objects.create(name="Despesa avulsa", kind="despesa")
+def test_report_sums_the_subgroups(clinic_a, admin):
+    with use_clinic(clinic_a):
+        staff_ = AccountGroup.objects.get(name="Pessoal")
+        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=staff_, code=1)
+        salaries = Category.objects.get(name="Salários e encargos")
+        salaries.group = sub
+        salaries.save()
+        standalone = Category.objects.create(name="Despesa avulsa", kind="despesa")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         for category, amount in (
-            (salarios, "1000"),
+            (salaries, "1000"),
             (Category.objects.get(name="Comissões"), "300"),
-            (avulsa, "50"),
+            (standalone, "50"),
         ):
             entry = services.create_entry(
-                clinic=clinica_a,
+                clinic=clinic_a,
                 kind=Entry.Kind.PAYABLE,
                 payer="Fictício",
                 description="Pagamento",
                 category=category,
                 total_amount=Decimal(amount),
                 parcelas=1,
-                primeiro_vencimento=HOJE,
+                primeiro_vencimento=TODAY,
                 user=None,
             )
             installment = entry.parcelas.get()
@@ -152,8 +152,8 @@ def test_report_sums_the_subgroups(clinica_a, admin):
     ]
 
 
-def test_who_sees_the_chart(clinica_a, criar_usuario, cliente_de):
-    reception = cliente_de(criar_usuario("recepcao_plano", clinica_a, Role.FRONT_DESK))
+def test_who_sees_the_chart(clinic_a, create_user, client_for):
+    reception = client_for(create_user("recepcao_plano", clinic_a, Role.FRONT_DESK))
     assert reception.get(reverse("finance:chart_of_accounts")).status_code == 403
 
 
@@ -169,12 +169,12 @@ def test_migration_creates_basic_chart_in_existing_clinics():
         Category.objects.create(name="Aluguel", kind="despesa")
         Category.objects.create(name="Aluguel da sala", kind="despesa")
     apps = apps_at(("financeiro", "0012_plano_de_contas"))
-    pares = [
+    pairs_ = [
         (apps.get_model("core", "Clinica"), Clinic),
         (apps.get_model("financeiro", "GrupoContabil"), AccountGroup),
         (apps.get_model("financeiro", "Categoria"), Category),
     ]
-    with tables_of_the_time(pares), connection.schema_editor() as editor:
+    with tables_of_the_time(pairs_), connection.schema_editor() as editor:
         importlib.import_module("apps.finance.migrations.0012_plano_de_contas").plano_basico(
             apps, editor
         )

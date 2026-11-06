@@ -12,9 +12,9 @@ from config.legacy_urls import RedirecionamentoPermanente
 
 pytestmark = pytest.mark.django_db
 
-ANTES = Path(__file__).with_name("urls_before_decision_155.txt")
+BEFORE = Path(__file__).with_name("urls_before_decision_155.txt")
 # A value for each converter of the old routes.
-EXEMPLOS = {
+EXAMPLES = {
     "<int:pk>": "7",
     "<int:paciente>": "3",
     "<int:item>": "2",
@@ -36,33 +36,33 @@ REGEX = {
 }
 
 
-def enderecos_antigos():
-    for row in ANTES.read_text().splitlines():
-        name, _, rota = row.partition("  ")
+def old_addresses():
+    for row in BEFORE.read_text().splitlines():
+        name, _, route = row.partition("  ")
         if name.startswith("api-v1:") or name == "-:inicio" or not row.strip():
             continue  # the API keeps its old addresses itself; "" is still the home page
         if name in REGEX:
             yield from ((name, f"/{path}") for path in REGEX[name])
             continue
-        for conversor, value in EXEMPLOS.items():
-            rota = rota.replace(conversor, value)
-        assert "<" not in rota, row
-        yield name, f"/{rota}"
+        for converter, value in EXAMPLES.items():
+            route = route.replace(converter, value)
+        assert "<" not in route, row
+        yield name, f"/{route}"
 
 
-@pytest.mark.parametrize(("name", "old"), list(enderecos_antigos()))
+@pytest.mark.parametrize(("name", "old"), list(old_addresses()))
 def test_old_address_redirects_to_the_new(client, name, old):
     response = client.get(old)
     assert response.status_code == RedirecionamentoPermanente.status_code, (name, old)
-    destino = resolve(response.url)
-    assert destino.func.__name__ != "redirecionar", (old, response.url)
+    destination = resolve(response.url)
+    assert destination.func.__name__ != "redirecionar", (old, response.url)
     assert response.url != old
     # The ids go along; nothing Portuguese is left in the new address (the help pages' slugs
     # are page names, kept for the old in-system help).
     # The argument names changed too (decision 161: `paciente` is now `patient`).
-    for key, antiga in (("pk", "pk"), ("patient", "paciente"), ("item", "item")):
-        if key in destino.kwargs:
-            assert str(destino.kwargs[key]) == EXEMPLOS[f"<int:{antiga}>"]
+    for key, old_one in (("pk", "pk"), ("patient", "paciente"), ("item", "item")):
+        if key in destination.kwargs:
+            assert str(destination.kwargs[key]) == EXAMPLES[f"<int:{old_one}>"]
     if not name.startswith("ajuda:"):
         path = response.url.split("?")[0]
         assert not re.search(

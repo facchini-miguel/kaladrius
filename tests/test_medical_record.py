@@ -18,7 +18,7 @@ from apps.schedule.models import Appointment, AppointmentType
 
 pytestmark = pytest.mark.django_db
 
-ANAMNESE = {
+ANAMNESIS = {
     "date": "2031-03-05T10:00",
     "chief_complaint": "Dor de cabeça há 3 dias",
     "present_illness": "Piora à tarde",
@@ -28,7 +28,7 @@ ANAMNESE = {
 }
 
 
-def cliente(user):
+def user_client(user):
     """A client of its own for each user (the shared fixture logs one user at a time)."""
     new_visit = Client()
     new_visit.force_login(user)
@@ -36,18 +36,18 @@ def cliente(user):
 
 
 @pytest.fixture
-def cenario(clinica_a, criar_usuario, criar_profissional):
-    usuarios = {
-        "dra": criar_usuario("dra", clinica_a, Role.PRACTITIONER),
-        "dr": criar_usuario("dr", clinica_a, Role.PRACTITIONER),
-        "recepcao": criar_usuario("recepcao", clinica_a, Role.FRONT_DESK),
-        "admin": criar_usuario("admin", clinica_a, Role.ADMIN),
+def scenario(clinic_a, create_user, create_practitioner):
+    users = {
+        "dra": create_user("dra", clinic_a, Role.PRACTITIONER),
+        "dr": create_user("dr", clinic_a, Role.PRACTITIONER),
+        "reception": create_user("recepcao", clinic_a, Role.FRONT_DESK),
+        "admin": create_user("admin", clinic_a, Role.ADMIN),
     }
-    ana = criar_profissional(clinica_a, "Dra. Ana")
-    bruno = criar_profissional(clinica_a, "Dr. Bruno")
-    with use_clinic(clinica_a):
-        Practitioner.objects.filter(pk=ana.pk).update(user=usuarios["dra"])
-        Practitioner.objects.filter(pk=bruno.pk).update(user=usuarios["dr"])
+    ana = create_practitioner(clinic_a, "Dra. Ana")
+    bruno = create_practitioner(clinic_a, "Dr. Bruno")
+    with use_clinic(clinic_a):
+        Practitioner.objects.filter(pk=ana.pk).update(user=users["dra"])
+        Practitioner.objects.filter(pk=bruno.pk).update(user=users["dr"])
         patient = Patient.objects.create(name="Maria Paciente")
         appointment = Appointment.objects.create(
             practitioner=ana,
@@ -57,143 +57,143 @@ def cenario(clinica_a, criar_usuario, criar_profissional):
             end=agenda.timestamp(datetime.date(2031, 3, 5), datetime.time(11)),
         )
     return {
-        "clinic": clinica_a,
+        "clinic": clinic_a,
         "patient": patient,
         "appointment": appointment,
         "ana": ana,
-        **{name: cliente(user) for name, user in usuarios.items()},
+        **{name: user_client(user) for name, user in users.items()},
     }
 
 
-def log_event(cenario, quem="dra", **extra):
-    url = reverse("medical_records:new", args=[cenario["patient"].pk])
-    response = cenario[quem].post(url, {**ANAMNESE, **extra})
+def log_event(scenario, who="dra", **extra):
+    url = reverse("medical_records:new", args=[scenario["patient"].pk])
+    response = scenario[who].post(url, {**ANAMNESIS, **extra})
     assert response.status_code == 302, response.content.decode()[:500]
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         return Visit.objects.latest("pk")
 
 
-def test_only_practitioners_see_the_record(cenario, django_user_model):
-    new_visit = reverse("medical_records:new", args=[cenario["patient"].pk])
-    patient_record = reverse("patients:record", args=[cenario["patient"].pk])
-    for quem in ("recepcao", "admin"):
-        assert cenario[quem].get(new_visit).status_code == 403
-        assert "prontuario" not in cenario[quem].get(patient_record).context
+def test_only_practitioners_see_the_record(scenario, django_user_model):
+    new_visit = reverse("medical_records:new", args=[scenario["patient"].pk])
+    patient_record = reverse("patients:record", args=[scenario["patient"].pk])
+    for who in ("reception", "admin"):
+        assert scenario[who].get(new_visit).status_code == 403
+        assert "prontuario" not in scenario[who].get(patient_record).context
     # The system administrator always reaches it (decision 087), the clinic administrator not.
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    assert cliente(root).get(new_visit).status_code == 200
-    page = cenario["dra"].get(patient_record)
+    assert user_client(root).get(new_visit).status_code == 200
+    page = scenario["dra"].get(patient_record)
     assert page.context["medical_record"] == [] and "Novo atendimento" in page.content.decode()
 
     # An administrator who is also a registered practitioner reaches it.
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         Practitioner.objects.create(
             name="Dr. Admin", user=django_user_model.objects.get(username="admin")
         )
-    assert cenario["admin"].get(new_visit).status_code == 200
+    assert scenario["admin"].get(new_visit).status_code == 200
 
 
-def test_register_save_and_finalize(cenario):
-    appointment = cenario["appointment"]
-    visit = log_event(cenario, appointment=appointment.pk)
-    assert (visit.practitioner, visit.appointment) == (cenario["ana"], appointment)
-    assert visit.chief_complaint == ANAMNESE["chief_complaint"]
+def test_register_save_and_finalize(scenario):
+    appointment = scenario["appointment"]
+    visit = log_event(scenario, appointment=appointment.pk)
+    assert (visit.practitioner, visit.appointment) == (scenario["ana"], appointment)
+    assert visit.chief_complaint == ANAMNESIS["chief_complaint"]
     assert not visit.is_finalized
     # The appointment leads to the same visit, never a second one.
-    url_novo = reverse("medical_records:new", args=[cenario["patient"].pk])
-    response = cenario["dra"].get(url_novo, {"appointment": appointment.pk})
+    new_url = reverse("medical_records:new", args=[scenario["patient"].pk])
+    response = scenario["dra"].get(new_url, {"appointment": appointment.pk})
     assert response.url == reverse("medical_records:visit", args=[visit.pk])
 
     url = reverse("medical_records:visit", args=[visit.pk])
-    cenario["dra"].post(url, {**ANAMNESE, "plan": "Retorno em 15 dias", "action": "finalizar"})
+    scenario["dra"].post(url, {**ANAMNESIS, "plan": "Retorno em 15 dias", "action": "finalizar"})
     visit.refresh_from_db()
     assert visit.is_finalized and visit.plan == "Retorno em 15 dias"
 
     # Finalized: nobody changes it any more, corrections are addenda.
-    assert cenario["dra"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
-    page = cenario["dra"].get(url)
+    assert scenario["dra"].post(url, {**ANAMNESIS, "plan": "outra"}).status_code == 403
+    page = scenario["dra"].get(url)
     assert page.context["form"] is None and page.context["addendum_form"] is not None
-    cenario["dr"].post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Exame ok"})
-    with use_clinic(cenario["clinic"]):
+    scenario["dr"].post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Exame ok"})
+    with use_clinic(scenario["clinic"]):
         addendum = visit.adendos.get()
     assert addendum.text == "Exame ok" and addendum.practitioner.name == "Dr. Bruno"
-    assert "Exame ok" in cenario["dra"].get(url).content.decode()
+    assert "Exame ok" in scenario["dra"].get(url).content.decode()
 
 
-def test_only_author_changes_draft(cenario):
-    visit = log_event(cenario)
+def test_only_author_changes_draft(scenario):
+    visit = log_event(scenario)
     url = reverse("medical_records:visit", args=[visit.pk])
-    page = cenario["dr"].get(url)
+    page = scenario["dr"].get(url)
     assert page.context["form"] is None and page.context["addendum_form"] is None
-    assert cenario["dr"].post(url, {**ANAMNESE, "plan": "outra"}).status_code == 403
+    assert scenario["dr"].post(url, {**ANAMNESIS, "plan": "outra"}).status_code == 403
     # No addendum before it is finalized: the author edits the draft instead.
     addendum = reverse("medical_records:addendum", args=[visit.pk])
-    assert cenario["dra"].post(addendum, {"text": "x"}).status_code == 403
+    assert scenario["dra"].post(addendum, {"text": "x"}).status_code == 403
 
 
-def test_audit_logs_without_copying_clinical_text(cenario):
-    visit = log_event(cenario)
-    cenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
-    registros = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
-    assert {r.action for r in registros} == {"criar", "visualizar"}
-    content = str([r.changes for r in registros])
+def test_audit_logs_without_copying_clinical_text(scenario):
+    visit = log_event(scenario)
+    scenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
+    records = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
+    assert {r.action for r in records} == {"criar", "visualizar"}
+    content = str([r.changes for r in records])
     assert "(conteúdo clínico)" in content
-    for text in ANAMNESE.values():
+    for text in ANAMNESIS.values():
         if not text.startswith("2031"):
             assert text not in content
 
 
-def test_patient_with_record_is_not_deleted(cenario, django_user_model):
-    log_event(cenario)
-    patient = cenario["patient"]
-    with use_clinic(cenario["clinic"]):
+def test_patient_with_record_is_not_deleted(scenario, django_user_model):
+    log_event(scenario)
+    patient = scenario["patient"]
+    with use_clinic(scenario["clinic"]):
         Patient.objects.filter(pk=patient.pk).update(archived=True, archived_at=timezone.now())
     url = reverse("patients:delete", args=[patient.pk])
-    page = cenario["admin"].get(url)
+    page = scenario["admin"].get(url)
     assert page.context["visits"] == 1 and "20 anos" in page.content.decode()
-    cenario["admin"].post(url)
-    with use_clinic(cenario["clinic"]):
+    scenario["admin"].post(url)
+    with use_clinic(scenario["clinic"]):
         assert Patient.objects.filter(pk=patient.pk).exists()
 
 
-def test_schedule_leads_to_visit_only_for_practitioners(cenario):
-    editar = reverse("schedule:edit", args=[cenario["appointment"].pk])
-    assert "Registrar atendimento" in cenario["dra"].get(editar).content.decode()
-    assert "Registrar atendimento" not in cenario["recepcao"].get(editar).content.decode()
-    visit = log_event(cenario, appointment=cenario["appointment"].pk)
-    page = cenario["dra"].get(editar).content.decode()
+def test_schedule_leads_to_visit_only_for_practitioners(scenario):
+    edit = reverse("schedule:edit", args=[scenario["appointment"].pk])
+    assert "Registrar atendimento" in scenario["dra"].get(edit).content.decode()
+    assert "Registrar atendimento" not in scenario["reception"].get(edit).content.decode()
+    visit = log_event(scenario, appointment=scenario["appointment"].pk)
+    page = scenario["dra"].get(edit).content.decode()
     assert reverse("medical_records:visit", args=[visit.pk]) in page
 
 
-def test_print_only_after_finalized(cenario):
-    visit = log_event(cenario)
+def test_print_only_after_finalized(scenario):
+    visit = log_event(scenario)
     url = reverse("medical_records:print", args=[visit.pk])
-    assert cenario["dra"].get(url).status_code == 403
-    page = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
+    assert scenario["dra"].get(url).status_code == 403
+    page = scenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
     assert url not in page.content.decode()
-    cenario["dra"].post(
+    scenario["dra"].post(
         reverse("medical_records:visit", args=[visit.pk]),
-        {**ANAMNESE, "action": "finalizar"},
+        {**ANAMNESIS, "action": "finalizar"},
     )
-    impressao = cenario["dr"].get(url)
-    content = impressao.content.decode()
-    assert impressao.status_code == 200
-    assert ANAMNESE["chief_complaint"] in content and "Dra. Ana" in content
+    printout = scenario["dr"].get(url)
+    content = printout.content.decode()
+    assert printout.status_code == 200
+    assert ANAMNESIS["chief_complaint"] in content and "Dra. Ana" in content
     assert AuditEntry.objects.filter(
         object_id=visit.pk, action="visualizar", object_repr__endswith="(impressão)"
     ).exists()
-    assert cenario["recepcao"].get(url).status_code == 403
+    assert scenario["reception"].get(url).status_code == 403
 
 
-def test_attendance_and_leave_certificates(cenario):
-    visit = log_event(cenario, appointment=cenario["appointment"].pk)
+def test_attendance_and_leave_certificates(scenario):
+    visit = log_event(scenario, appointment=scenario["appointment"].pk)
     url = reverse("medical_records:certificate_new", args=[visit.pk])
     # The appointment's times come filled in.
-    formulario = cenario["dra"].get(url).context["form"]
-    assert formulario.initial["start_time"] == datetime.time(10)
-    assert formulario.initial["end_time"] == datetime.time(11)
+    form_page = scenario["dra"].get(url).context["form"]
+    assert form_page.initial["start_time"] == datetime.time(10)
+    assert form_page.initial["end_time"] == datetime.time(11)
 
-    response = cenario["dra"].post(
+    response = scenario["dra"].post(
         url,
         {
             "kind": "comparecimento",
@@ -202,55 +202,55 @@ def test_attendance_and_leave_certificates(cenario):
             "end_time": "11:00",
         },
     )
-    page = cenario["dra"].get(response.url).content.decode()
+    page = scenario["dra"].get(response.url).content.decode()
     assert "Maria Paciente" in page and "das 10:00 às 11:00" in page
 
-    sem_dias = cenario["dra"].post(url, {"kind": "afastamento", "date": "2031-03-05"})
-    assert "Informe quantos dias" in sem_dias.content.decode()
-    response = cenario["dra"].post(
+    without_days = scenario["dra"].post(url, {"kind": "afastamento", "date": "2031-03-05"})
+    assert "Informe quantos dias" in without_days.content.decode()
+    response = scenario["dra"].post(
         url, {"kind": "afastamento", "date": "2031-03-05", "days": "3", "note": "Repouso"}
     )
-    page = cenario["dra"].get(response.url).content.decode()
+    page = scenario["dra"].get(response.url).content.decode()
     assert "3 dias de afastamento" in page and "Repouso" in page
     assert "5 de março de 2031" in page  # month in lower case, as in running text
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         assert visit.atestados.count() == 2
     record = AuditEntry.objects.filter(model_name="Atestado").latest("pk")
     assert "Repouso" not in str(record.changes)
 
     # Only the visit's author issues documents; other practitioners print them.
-    assert cenario["dr"].get(url).status_code == 403
-    assert cenario["dr"].get(response.url).status_code == 200
-    assert cenario["recepcao"].get(response.url).status_code == 403
+    assert scenario["dr"].get(url).status_code == 403
+    assert scenario["dr"].get(response.url).status_code == 200
+    assert scenario["reception"].get(response.url).status_code == 403
 
 
-def test_prescription_one_line_per_item(cenario):
-    visit = log_event(cenario)
+def test_prescription_one_line_per_item(scenario):
+    visit = log_event(scenario)
     url = reverse("medical_records:prescription_new", args=[visit.pk])
     medications = "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas\n\nSoro fisiológico nasal"
-    response = cenario["dra"].post(url, {"medications": medications})
-    page = cenario["dra"].get(response.url)
+    response = scenario["dra"].post(url, {"medications": medications})
+    page = scenario["dra"].get(response.url)
     assert page.context["rows"] == [
         "Paracetamol 750 mg, 1 comprimido de 6 em 6 horas",
         "Soro fisiológico nasal",
     ]
     assert "RECEITUÁRIO" in page.content.decode()
-    patient_record = cenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
+    patient_record = scenario["dra"].get(reverse("medical_records:visit", args=[visit.pk]))
     assert response.url in patient_record.content.decode()
     record = AuditEntry.objects.filter(model_name="Receita").latest("pk")
     assert "Paracetamol" not in str(record.changes)
 
 
-def test_exam_request(cenario):
-    visit = log_event(cenario)
+def test_exam_request(scenario):
+    visit = log_event(scenario)
     url = reverse("medical_records:exam_request_new", args=[visit.pk])
-    response = cenario["dra"].post(
+    response = scenario["dra"].post(
         url, {"exams": "Hemograma completo\nGlicemia de jejum", "indication": "Rotina"}
     )
-    page = cenario["dr"].get(response.url)
+    page = scenario["dr"].get(response.url)
     assert page.context["rows"] == ["Hemograma completo", "Glicemia de jejum"]
     assert "PEDIDO DE EXAMES" in page.content.decode() and "Rotina" in page.content.decode()
-    assert cenario["dr"].get(url).status_code == 403  # only the visit's author issues
+    assert scenario["dr"].get(url).status_code == 403  # only the visit's author issues
     record = AuditEntry.objects.filter(model_name="Pedido de exames").latest("pk")
     assert "Hemograma" not in str(record.changes)
 
@@ -258,28 +258,27 @@ def test_exam_request(cenario):
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 
 
-def test_attachments_only_pdf_jpg_png_and_only_for_practitioners(cenario):
+def test_attachments_only_pdf_jpg_png_and_only_for_practitioners(scenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     from apps.medical_records.models import Attachment
 
-    visit = log_event(cenario)
+    visit = log_event(scenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
-    enviar = lambda quem, name, content: cenario[quem].post(  # noqa: E731
+    send = lambda who, name, content: scenario[who].post(  # noqa: E731
         url, {"file": SimpleUploadedFile(name, content), "description": "Raio-X"}, follow=True
     )
     # Checked by the content, not the name: an HTML page named .png is refused.
+    assert "Envie um arquivo PDF, JPG ou PNG" in send("dra", "foto.png", b"<html>").content.decode()
+    large = b"%PDF-" + b"0" * (10 * 1024 * 1024)
+    assert "passa de 10 MB" in send("dra", "laudo.pdf", large).content.decode()
     assert (
-        "Envie um arquivo PDF, JPG ou PNG" in enviar("dra", "foto.png", b"<html>").content.decode()
-    )
-    grande = b"%PDF-" + b"0" * (10 * 1024 * 1024)
-    assert "passa de 10 MB" in enviar("dra", "laudo.pdf", grande).content.decode()
-    assert (
-        cenario["recepcao"].post(url, {"file": SimpleUploadedFile("x.png", PNG)}).status_code == 403
+        scenario["reception"].post(url, {"file": SimpleUploadedFile("x.png", PNG)}).status_code
+        == 403
     )
 
-    enviar("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
-    with use_clinic(cenario["clinic"]):
+    send("dr", "raio-x paciente.png", PNG)  # another practitioner, results arrive later
+    with use_clinic(scenario["clinic"]):
         attachment = Attachment.objects.get()
     assert (attachment.kind, attachment.size, attachment.practitioner.name) == (
         "image/png",
@@ -287,11 +286,11 @@ def test_attachments_only_pdf_jpg_png_and_only_for_practitioners(cenario):
         "Dr. Bruno",
     )
 
-    file = cenario["dra"].get(reverse("medical_records:attachment", args=[attachment.pk]))
+    file = scenario["dra"].get(reverse("medical_records:attachment", args=[attachment.pk]))
     assert file.content == PNG and file["Content-Type"] == "image/png"
     assert file["Cache-Control"] == "private, no-store"
     assert (
-        cenario["recepcao"]
+        scenario["reception"]
         .get(reverse("medical_records:attachment", args=[attachment.pk]))
         .status_code
         == 403
@@ -301,60 +300,60 @@ def test_attachments_only_pdf_jpg_png_and_only_for_practitioners(cenario):
     )
 
 
-def test_attachment_removed_only_by_uploader_before_finalizing(cenario):
+def test_attachment_removed_only_by_uploader_before_finalizing(scenario):
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     from apps.medical_records.models import Attachment
 
-    visit = log_event(cenario)
+    visit = log_event(scenario)
     url = reverse("medical_records:attachment_upload", args=[visit.pk])
-    cenario["dra"].post(url, {"file": SimpleUploadedFile("a.png", PNG)})
-    cenario["dra"].post(url, {"file": SimpleUploadedFile("b.png", PNG)})
-    with use_clinic(cenario["clinic"]):
-        first, segundo = Attachment.objects.order_by("pk")
-    remover = lambda attachment: reverse("medical_records:attachment_remove", args=[attachment.pk])  # noqa: E731
-    assert cenario["dr"].post(remover(first)).status_code == 403
-    cenario["dra"].post(remover(first))
-    cenario["dra"].post(
-        reverse("medical_records:visit", args=[visit.pk]), {**ANAMNESE, "action": "finalizar"}
+    scenario["dra"].post(url, {"file": SimpleUploadedFile("a.png", PNG)})
+    scenario["dra"].post(url, {"file": SimpleUploadedFile("b.png", PNG)})
+    with use_clinic(scenario["clinic"]):
+        first, second_one = Attachment.objects.order_by("pk")
+    remove_ = lambda attachment: reverse("medical_records:attachment_remove", args=[attachment.pk])  # noqa: E731
+    assert scenario["dr"].post(remove_(first)).status_code == 403
+    scenario["dra"].post(remove_(first))
+    scenario["dra"].post(
+        reverse("medical_records:visit", args=[visit.pk]), {**ANAMNESIS, "action": "finalizar"}
     )
-    assert cenario["dra"].post(remover(segundo)).status_code == 403
-    with use_clinic(cenario["clinic"]):
-        assert list(Attachment.objects.values_list("pk", flat=True)) == [segundo.pk]
+    assert scenario["dra"].post(remove_(second_one)).status_code == 403
+    with use_clinic(scenario["clinic"]):
+        assert list(Attachment.objects.values_list("pk", flat=True)) == [second_one.pk]
 
 
-def test_system_admin_sees_and_does_everything(cenario, django_user_model):
+def test_system_admin_sees_and_does_everything(scenario, django_user_model):
     """The superuser writes on behalf of a chosen practitioner and edits anyone's draft."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 
     from apps.medical_records.models import Attachment, Certificate
 
-    root = cliente(django_user_model.objects.create_superuser("root", password="x-12345678"))
-    new_visit = reverse("medical_records:new", args=[cenario["patient"].pk])
+    root = user_client(django_user_model.objects.create_superuser("root", password="x-12345678"))
+    new_visit = reverse("medical_records:new", args=[scenario["patient"].pk])
     assert 'name="practitioner"' in root.get(new_visit).content.decode()
-    response = root.post(new_visit, {**ANAMNESE, "practitioner": cenario["ana"].pk})
+    response = root.post(new_visit, {**ANAMNESIS, "practitioner": scenario["ana"].pk})
     assert response.status_code == 302
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         visit = Visit.objects.get()
-    assert visit.practitioner == cenario["ana"]
+    assert visit.practitioner == scenario["ana"]
     assert visit.created_by.username == "root"  # the audit keeps who really wrote it
 
     # Another practitioner's draft (Dra. Ana's) can be edited by the superuser only.
     url = reverse("medical_records:visit", args=[visit.pk])
-    assert cenario["dr"].post(url, {**ANAMNESE, "plan": "x"}).status_code == 403
-    assert root.post(url, {**ANAMNESE, "plan": "Retorno em 15 dias"}).status_code == 302
-    anexo_url = reverse("medical_records:attachment_upload", args=[visit.pk])
-    cenario["dra"].post(
-        anexo_url, {"file": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
+    assert scenario["dr"].post(url, {**ANAMNESIS, "plan": "x"}).status_code == 403
+    assert root.post(url, {**ANAMNESIS, "plan": "Retorno em 15 dias"}).status_code == 302
+    attachment_url = reverse("medical_records:attachment_upload", args=[visit.pk])
+    scenario["dra"].post(
+        attachment_url, {"file": SimpleUploadedFile("x.png", PNG), "description": "Foto"}
     )
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         attachment = Attachment.objects.get()
     assert (
         root.post(reverse("medical_records:attachment_remove", args=[attachment.pk])).status_code
         == 302
     )
 
-    root.post(url, {**ANAMNESE, "action": "finalizar"})
+    root.post(url, {**ANAMNESIS, "action": "finalizar"})
     response = root.post(
         reverse("medical_records:certificate_new", args=[visit.pk]),
         {
@@ -365,9 +364,9 @@ def test_system_admin_sees_and_does_everything(cenario, django_user_model):
         },
     )
     assert response.status_code == 302
-    with use_clinic(cenario["clinic"]):
-        assert Certificate.objects.get().practitioner == cenario["ana"]
+    with use_clinic(scenario["clinic"]):
+        assert Certificate.objects.get().practitioner == scenario["ana"]
         assert not Attachment.objects.exists()
     root.post(reverse("medical_records:addendum", args=[visit.pk]), {"text": "Correção"})
-    with use_clinic(cenario["clinic"]):
-        assert visit.adendos.get().practitioner == cenario["ana"]
+    with use_clinic(scenario["clinic"]):
+        assert visit.adendos.get().practitioner == scenario["ana"]

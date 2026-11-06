@@ -11,20 +11,20 @@ from apps.core.countries import COUNTRIES
 from apps.core.isolation import use_clinic
 from apps.finance import services
 from apps.finance.models import Entry
-from tests.test_finance import HOJE, cenario, entrar, parcelas_de  # noqa: F401
+from tests.test_finance import TODAY, installments_of, log_in, scenario  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
 
 def test_each_country_has_its_law():
     assert set(legislation.LAWS) == set(COUNTRIES)
-    for country, lei in legislation.LAWS.items():
-        assert lei.name and lei.short_name, country
-        guarda = lei.retention
+    for country, law in legislation.LAWS.items():
+        assert law.name and law.short_name, country
+        retention = law.retention
         # A period always names its source; "varies" never comes with a number.
-        assert not guarda.years or guarda.source, country
-        assert not (guarda.varies and guarda.years), country
-        assert not lei.site or lei.site.startswith("https://"), country
+        assert not retention.years or retention.source, country
+        assert not (retention.varies and retention.years), country
+        assert not law.site or law.site.startswith("https://"), country
 
 
 def test_retention_period_in_each_case():
@@ -44,40 +44,40 @@ def test_retention_period_in_each_case():
         assert "O prontuário" not in legislation.retention_period("CL")
 
 
-def test_privacy_shows_the_country_law(client, clinica_a):
+def test_privacy_shows_the_country_law(client, clinic_a):
     page = client.get(reverse("privacy")).content.decode()
     assert "País da clínica" not in page  # Brazil: the policy is already Brazilian
-    clinica_a.country = "US"
-    clinica_a.save()
+    clinic_a.country = "US"
+    clinic_a.save()
     page = client.get(reverse("privacy")).content.decode()
     assert "País da clínica: Estados Unidos" in page and "HIPAA" in page
     assert 'href="https://www.hhs.gov/ocr"' in page and "lei de cada estado" in page
 
 
-def test_receipt_says_it_does_not_replace_tax_document(cenario, criar_profissional):  # noqa: F811
-    clinic = cenario["clinic"]
-    dra = criar_profissional(clinic, "Dra. Fictícia", registration="CRO-SP 12345")
+def test_receipt_says_it_does_not_replace_tax_document(scenario, create_practitioner):  # noqa: F811
+    clinic = scenario["clinic"]
+    dra = create_practitioner(clinic, "Dra. Fictícia", registration="CRO-SP 12345")
     with use_clinic(clinic):
         entry = services.create_entry(
             clinic=clinic,
             kind=Entry.Kind.RECEIVABLE,
-            patient=cenario["patient"],
+            patient=scenario["patient"],
             description="Limpeza",
-            category=cenario["category"],
+            category=scenario["category"],
             practitioner=dra,
             total_amount=Decimal("100"),
             parcelas=1,
-            primeiro_vencimento=HOJE,
-            user=cenario["admin"],
+            primeiro_vencimento=TODAY,
+            user=scenario["admin"],
         )
         payment = services.receive(
-            parcelas_de(cenario, entry)[0],
-            user=cenario["admin"],
+            installments_of(scenario, entry)[0],
+            user=scenario["admin"],
             amount=Decimal("100"),
             method="dinheiro",
-            account=cenario["cash_register"],
+            account=scenario["cash_register"],
         )
-    admin = entrar(cenario, "admin")
+    admin = log_in(scenario, "admin")
     url = reverse("finance:receipt", args=[payment.pk])
     page = admin.get(url).content.decode()
     assert "Dra. Fictícia (CRO-SP 12345)" in page
@@ -88,14 +88,14 @@ def test_receipt_says_it_does_not_replace_tax_document(cenario, criar_profission
     assert "Este recibo não substitui o documento fiscal (CFDI)." in page
 
 
-def test_deletion_cites_country_law_and_period(cenario):  # noqa: F811
-    clinic = cenario["clinic"]
+def test_deletion_cites_country_law_and_period(scenario):  # noqa: F811
+    clinic = scenario["clinic"]
     clinic.country = "CL"
     clinic.save()
-    patient = cenario["patient"]
+    patient = scenario["patient"]
     with use_clinic(clinic):
         patient.archived = True
         patient.save()
-    page = entrar(cenario, "admin").get(reverse("patients:delete", args=[patient.pk]))
+    page = log_in(scenario, "admin").get(reverse("patients:delete", args=[patient.pk]))
     text = page.content.decode()
     assert "(Ley 19.628)" in text and "15 anos" in text and "LGPD" not in text

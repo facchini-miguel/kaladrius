@@ -13,21 +13,21 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
+def reception(clinic_a, create_user, client_for):
+    return client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
 
 
 @pytest.fixture
-def superusuario(client, django_user_model):
+def superuser(client, django_user_model):
     client.force_login(django_user_model.objects.create_superuser("root", password="x-123456789"))
     return client
 
 
-@pytest.mark.parametrize("pasta", documents.FOLDERS.values())
-def test_site_manual_and_policy_in_each_language(pasta):
-    manual = documents.DOCS / pasta / "manual"
-    paginas = {file.stem for file in manual.glob("*.md")}
-    assert {"getting-started", "schedule", "patients", "privacy"} <= paginas, pasta
+@pytest.mark.parametrize("folder", documents.FOLDERS.values())
+def test_site_manual_and_policy_in_each_language(folder):
+    manual = documents.DOCS / folder / "manual"
+    pages = {file.stem for file in manual.glob("*.md")}
+    assert {"getting-started", "schedule", "patients", "privacy"} <= pages, folder
 
 
 def test_help_menu_opens_site_in_user_language(reception, settings, django_user_model):
@@ -54,38 +54,38 @@ def test_old_help_addresses_lead_to_the_site(reception, settings):
 
 def test_list_right_after_a_paragraph_becomes_a_list():
     text = "Texto:\n- um\n- dois\n\n```\nlinha:\n- dentro do codigo\n```"
-    resultado = documents._split_lists(text)
-    assert resultado.startswith("Texto:\n\n- um\n- dois")
-    assert "linha:\n- dentro do codigo" in resultado  # code blocks untouched
+    result = documents._split_lists(text)
+    assert result.startswith("Texto:\n\n- um\n- dois")
+    assert "linha:\n- dentro do codigo" in result  # code blocks untouched
 
 
 def test_github_release_notes_in_english():
-    saida = StringIO()
-    call_command("release_notes", "0.7.0", "--title", stdout=saida)
-    assert saida.getvalue().strip() == "0.7.0 – Audit log and security (end of phase 1)"
-    saida = StringIO()
-    call_command("release_notes", "0.7.0", stdout=saida)
-    assert saida.getvalue().startswith("- **New · Audit log:** The clinic administrator")
+    output = StringIO()
+    call_command("release_notes", "0.7.0", "--title", stdout=output)
+    assert output.getvalue().strip() == "0.7.0 – Audit log and security (end of phase 1)"
+    output = StringIO()
+    call_command("release_notes", "0.7.0", stdout=output)
+    assert output.getvalue().startswith("- **New · Audit log:** The clinic administrator")
     with pytest.raises(CommandError):
         call_command("release_notes", "9.9.9")
 
 
-def test_public_privacy_policy_with_clinic_contact(client, clinica_a):
-    clinica_a.email = "privacidade@sorriso.com.br"
-    clinica_a.save()
+def test_public_privacy_policy_with_clinic_contact(client, clinic_a):
+    clinic_a.email = "privacidade@sorriso.com.br"
+    clinic_a.save()
     login = client.get(reverse("login")).content.decode()
     assert reverse("privacy") in login
     response = client.get(reverse("privacy"))  # no login: patients do not log in
     page = response.content.decode()
     assert response.status_code == 200
     assert "Política de privacidade" in page and "20 anos" in page
-    assert clinica_a.name in page and "privacidade@sorriso.com.br" in page
+    assert clinic_a.name in page and "privacidade@sorriso.com.br" in page
 
 
-def test_policy_with_the_installation_clinic_contact(client, clinica_a, reception):
-    assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
+def test_policy_with_the_installation_clinic_contact(client, clinic_a, reception):
+    assert reception.get(reverse("privacy")).context["clinic"] == clinic_a
     reception.logout()
-    assert reception.get(reverse("privacy")).context["clinic"] == clinica_a
+    assert reception.get(reverse("privacy")).context["clinic"] == clinic_a
 
 
 def test_policy_without_registered_clinic(client):
@@ -95,26 +95,26 @@ def test_policy_without_registered_clinic(client):
 
 
 @pytest.mark.parametrize(
-    ("language", "titulo"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
+    ("language", "title"), [("en", "Privacy policy"), ("es", "Política de privacidad")]
 )
-def test_policy_in_the_three_languages(client, language, titulo):
+def test_policy_in_the_three_languages(client, language, title):
     page = client.get(reverse("privacy"), HTTP_ACCEPT_LANGUAGE=language).content.decode()
-    assert f"<h1>{titulo}</h1>" in page
+    assert f"<h1>{title}</h1>" in page
 
 
 def test_logo_in_bar_login_and_tab(client, reception):
-    entrada = client.get(reverse("login")).content.decode()
-    assert "logo-login" in entrada and "img/favicon" in entrada
+    entry_line = client.get(reverse("login")).content.decode()
+    assert "logo-login" in entry_line and "img/favicon" in entry_line
     assert "logo-bar" in reception.get(reverse("home")).content.decode()
     for file in ("logo.svg", "favicon.svg"):
         assert (documents.DOCS.parent / "static" / "img" / file).is_file()
 
 
 def test_system_name_in_login_bar_and_tab(client, reception):
-    entrada = client.get(reverse("login")).content.decode()
-    assert "<title>Entrar · Kaladrius</title>" in entrada
-    assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entrada
+    entry_line = client.get(reverse("login")).content.decode()
+    assert "<title>Entrar · Kaladrius</title>" in entry_line
+    assert '<h1 class="h4 mb-4 text-center">Kaladrius</h1>' in entry_line
     start = reception.get(reverse("home")).content.decode()
     assert "Kaladrius · versão" in start
-    for page in (entrada, start):
+    for page in (entry_line, start):
         assert "Medical System" not in page

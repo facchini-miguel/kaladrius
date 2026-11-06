@@ -16,37 +16,41 @@ def test_official_data_loaded_by_migration():
     assert City.objects.get(code=4205407).state.abbreviation == "SC"
 
 
-def test_city_list_filters_by_state_and_ignores_accents(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
-    response = cliente.get(reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"})
+def test_city_list_filters_by_state_and_ignores_accents(clinic_a, create_user, client_for):
+    user_client = client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
+    response = user_client.get(
+        reverse("reference_data:cities"), {"state": 42, "q": "florianopolis"}
+    )
     content = response.content.decode()
     assert response.status_code == 200
     assert "Florianópolis" in content
     assert "1 cidade" in content
 
 
-def test_bank_list_searches_by_code(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
-    content = cliente.get(reverse("reference_data:banks"), {"q": "341"}).content.decode()
+def test_bank_list_searches_by_code(clinic_a, create_user, client_for):
+    user_client = client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
+    content = user_client.get(reverse("reference_data:banks"), {"q": "341"}).content.decode()
     assert "ITAÚ" in content.upper()
 
 
-def test_pagination_keeps_filters(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
-    content = cliente.get(reverse("reference_data:cities"), {"state": 31}).content.decode()  # MG
+def test_pagination_keeps_filters(clinic_a, create_user, client_for):
+    user_client = client_for(create_user("recepcao", clinic_a, Role.FRONT_DESK))
+    content = user_client.get(
+        reverse("reference_data:cities"), {"state": 31}
+    ).content.decode()  # MG
     assert "state=31&amp;q=&amp;page=2" in content
 
 
-def test_city_options_for_chained_select(client, criar_usuario):
+def test_city_options_for_chained_select(client, create_user):
     url = reverse("reference_data:city_options")
     assert client.get(url, {"state": 42}).status_code == 302  # login required
-    client.force_login(criar_usuario("qualquer"))
+    client.force_login(create_user("qualquer"))
     content = client.get(url, {"state": 42}).content.decode()
     assert '<option value="4205407">Florianópolis</option>' in content
     assert "São Paulo" not in content
     assert client.get(url, {"state": "x"}).content.decode().count("<option") == 1
 
 
-def test_reference_tables_require_clinic(criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("solto"))
-    assert cliente.get(reverse("reference_data:cities")).status_code == 403
+def test_reference_tables_require_clinic(create_user, client_for):
+    user_client = client_for(create_user("solto"))
+    assert user_client.get(reverse("reference_data:cities")).status_code == 403
