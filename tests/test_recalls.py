@@ -128,7 +128,7 @@ def test_summary_and_day_list_for_schedule(cenario):
 def test_schedule_gets_recall_urls(cenario, criar_profissional):
     criar_profissional(cenario["clinic"], "Dra. A")
     urls = cenario["cliente"].get(reverse("schedule:calendar")).context["configuracao"]["urls"]
-    assert urls["rechamadas"] == reverse("recalls:summary")
+    assert urls["recalls"] == reverse("recalls:summary")
 
 
 def test_isolation(cenario, clinica_b):

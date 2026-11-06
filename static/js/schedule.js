@@ -2,74 +2,74 @@
 (function () {
   "use strict";
 
-  const elementoConfig = document.getElementById("schedule-settings");
-  const elementoCalendario = document.getElementById("calendar");
-  if (!elementoConfig || !elementoCalendario) return;
+  const settingsElement = document.getElementById("schedule-settings");
+  const calendarElement = document.getElementById("calendar");
+  if (!settingsElement || !calendarElement) return;
 
-  const config = JSON.parse(elementoConfig.textContent);
+  const config = JSON.parse(settingsElement.textContent);
   const modalEl = document.getElementById("schedule-modal");
   const modal = new bootstrap.Modal(modalEl);
-  const aviso = document.getElementById("schedule-notice");
+  const notice = document.getElementById("schedule-notice");
   const pad = (n) => String(n).padStart(2, "0");
   // The calendar runs in UTC mode with the clinic's wall clock (decision 117): its dates carry
   // the clinic's times in their UTC fields, whatever the browser's time zone.
-  const hora = (d) => `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
-  const dataISO = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+  const time = (d) => `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  const isoDate = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 
-  const toque = window.matchMedia("(pointer: coarse)").matches;
+  const touch = window.matchMedia("(pointer: coarse)").matches;
 
-  function abrirNovo(inicio, fim) {
+  function openNew(start, end) {
     const params = new URLSearchParams({
       practitioner: config.practitioner,
-      date: dataISO(inicio),
-      start: hora(inicio),
-      end: hora(fim),
+      date: isoDate(start),
+      start: time(start),
+      end: time(end),
     });
-    abrirModal(`${config.urls.novo}?${params}`);
+    openModal(`${config.urls.new}?${params}`);
   }
 
-  function abrirModal(url) {
+  function openModal(url) {
     htmx.ajax("GET", url, { target: "#schedule-modal-content", swap: "innerHTML" }).then(() => modal.show());
   }
 
-  function mostrarAviso(texto) {
-    aviso.textContent = texto;
-    aviso.hidden = false;
-    clearTimeout(mostrarAviso.timer);
-    mostrarAviso.timer = setTimeout(() => { aviso.hidden = true; }, 5000);
+  function showNotice(text) {
+    notice.textContent = text;
+    notice.hidden = false;
+    clearTimeout(showNotice.timer);
+    showNotice.timer = setTimeout(() => { notice.hidden = true; }, 5000);
   }
 
   // Badges in the day headers (birthdays and pending recalls), each opening a list.
-  const MARCADORES = [
-    { classe: "aniversariantes", icone: "🎂", titulo: config.textos.aniversariantes, resumo: config.urls.aniversariantes, dia: config.urls.aniversariantes_dia },
-    { classe: "rechamadas", icone: "📞", titulo: config.textos.rechamadas, resumo: config.urls.rechamadas, dia: config.urls.rechamadas_dia },
+  const BADGES = [
+    { cssClass: "birthday-badge", icon: "🎂", title: config.texts.birthdays, summary: config.urls.birthdays, day: config.urls.birthdays_today },
+    { cssClass: "recall-badge", icon: "📞", title: config.texts.recalls, summary: config.urls.recalls, day: config.urls.recalls_today },
   ];
 
-  function marcarDias(info) {
+  function markDays(info) {
     const params = new URLSearchParams({ start: info.startStr, end: info.endStr });
-    MARCADORES.filter((m) => m.resumo).forEach((marcador) => {
-      fetch(`${marcador.resumo}?${params}`)
-        .then((resposta) => (resposta.ok ? resposta.json() : {}))
-        .then((dias) => {
-          Object.entries(dias).forEach(([dia, total]) => {
-            const celula = elementoCalendario.querySelector(`.fc-col-header-cell[data-date="${dia}"] .fc-scrollgrid-sync-inner`);
-            if (!celula || celula.querySelector(`.${marcador.classe}`)) return;
-            const botao = document.createElement("button");
-            botao.type = "button";
-            botao.className = `btn btn-sm btn-link ${marcador.classe} p-0 ms-1`;
-            botao.title = `${total} ${marcador.titulo}`;
-            botao.textContent = `${marcador.icone} ${total}`;
-            botao.addEventListener("click", () => abrirModal(`${marcador.dia}?date=${dia}`));
-            celula.appendChild(botao);
+    BADGES.filter((m) => m.summary).forEach((badge) => {
+      fetch(`${badge.summary}?${params}`)
+        .then((response) => (response.ok ? response.json() : {}))
+        .then((days) => {
+          Object.entries(days).forEach(([day, total]) => {
+            const cell = calendarElement.querySelector(`.fc-col-header-cell[data-date="${day}"] .fc-scrollgrid-sync-inner`);
+            if (!cell || cell.querySelector(`.${badge.cssClass}`)) return;
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `btn btn-sm btn-link ${badge.cssClass} p-0 ms-1`;
+            button.title = `${total} ${badge.title}`;
+            button.textContent = `${badge.icon} ${total}`;
+            button.addEventListener("click", () => openModal(`${badge.day}?date=${day}`));
+            cell.appendChild(button);
           });
         });
     });
   }
 
-  const calendario = new FullCalendar.Calendar(elementoCalendario, {
+  const calendar = new FullCalendar.Calendar(calendarElement, {
     locale: config.language,
     timeZone: "UTC",
-    now: config.agora,
+    now: config.now,
     initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
     initialDate: config.date || undefined,
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },
@@ -77,49 +77,49 @@
     allDaySlot: false,
     slotMinTime: config.start,
     slotMaxTime: config.end,
-    slotDuration: { minutes: config.intervalo },
-    snapDuration: { minutes: config.intervalo },
-    slotLabelInterval: { minutes: config.intervalo },
+    slotDuration: { minutes: config.interval },
+    snapDuration: { minutes: config.interval },
+    slotLabelInterval: { minutes: config.interval },
     slotLabelFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
     eventTimeFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
     expandRows: true,
     height: "auto",
     nowIndicator: true,
-    selectable: config.pode.criar,
+    selectable: config.can.create,
     selectMirror: true,
     // A cancelled appointment (desmarcado) stays visible but does not hold the slot.
-    selectOverlap: (evento) => evento.extendedProps.status === "desmarcou",
-    events: { url: config.urls.eventos, extraParams: () => ({ practitioner: config.practitioner }) },
-    datesSet: marcarDias,
+    selectOverlap: (event) => event.extendedProps.status === "desmarcou",
+    events: { url: config.urls.events, extraParams: () => ({ practitioner: config.practitioner }) },
+    datesSet: markDays,
     select(info) {
-      calendario.unselect();
-      abrirNovo(info.start, info.end);
+      calendar.unselect();
+      openNew(info.start, info.end);
     },
     // Touch screens (phones, tablets): the calendar only selects after holding a finger for a
     // second, which nobody finds; a tap on a free slot opens the new appointment for that slot.
     dateClick(info) {
-      if (!config.pode.criar || !toque) return;
-      abrirNovo(info.date, new Date(info.date.getTime() + config.intervalo * 60000));
+      if (!config.can.create || !touch) return;
+      openNew(info.date, new Date(info.date.getTime() + config.interval * 60000));
     },
     eventClick(info) {
-      if (config.pode.alterar) abrirModal(info.event.extendedProps.url);
+      if (config.can.change) openModal(info.event.extendedProps.url);
     },
     eventDidMount(info) {
       const { kind, description, status, status_name } = info.event.extendedProps;
-      const marcada = status && status !== "agendado" ? status_name : "";
-      info.el.title = [kind, marcada, description].filter(Boolean).join(" · ");
+      const marked = status && status !== "agendado" ? status_name : "";
+      info.el.title = [kind, marked, description].filter(Boolean).join(" · ");
     },
   });
-  calendario.render();
+  calendar.render();
 
-  const irParaData = document.getElementById("go-to-date");
-  if (irParaData) irParaData.addEventListener("change", () => irParaData.value && calendario.gotoDate(irParaData.value));
+  const goToDate = document.getElementById("go-to-date");
+  if (goToDate) goToDate.addEventListener("change", () => goToDate.value && calendar.gotoDate(goToDate.value));
 
-  // The server answers a successful save/delete with an "agendaAtualizada" HTMX event.
-  document.body.addEventListener("agendaAtualizada", (evento) => {
+  // The server answers a successful save/delete with a "scheduleUpdated" HTMX event.
+  document.body.addEventListener("scheduleUpdated", (event) => {
     modal.hide();
-    calendario.refetchEvents();
-    if (evento.detail && evento.detail.mensagem) mostrarAviso(evento.detail.mensagem);
+    calendar.refetchEvents();
+    if (event.detail && event.detail.message) showNotice(event.detail.message);
   });
 
 })();

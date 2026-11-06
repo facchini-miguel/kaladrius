@@ -1447,6 +1447,38 @@ As configurações de `config/settings.py` e os nomes que os templates, a folha 
 | `data-url-ativo` | `data-url-active` |
 | `data-url-saiu` | `data-url-logged-out` |
 
+## Nomes dos scripts (feito)
+
+As variáveis locais e funções dos scripts de `static/js` (`evento` → `event`, `campo` → `field`, `abrirModal` → `openModal`) e os nomes que o script da agenda compartilha com o servidor (decisão 183). Os valores gravados que os scripts comparam ficam como estão (`"desmarcou"`, `"agendado"`).
+
+### Configuração da agenda (`schedule-settings`)
+
+| Antes | Depois |
+|---|---|
+| `intervalo` | `interval` |
+| `agora` | `now` |
+| `textos` | `texts` |
+| `textos.aniversariantes` | `texts.birthdays` |
+| `textos.rechamadas` | `texts.recalls` |
+| `pode.criar` | `can.create` |
+| `pode.alterar` | `can.change` |
+| `urls.eventos` | `urls.events` |
+| `urls.novo` | `urls.new` |
+| `urls.aniversariantes` | `urls.birthdays` |
+| `urls.aniversariantes_dia` | `urls.birthdays_today` |
+| `urls.rechamadas` | `urls.recalls` |
+| `urls.rechamadas_dia` | `urls.recalls_today` |
+
+### Evento, armazenamento e marcadores
+
+| Antes | Depois | Onde |
+|---|---|---|
+| `agendaAtualizada` | `scheduleUpdated` | evento HTMX que o servidor manda depois de salvar (`HX-Trigger`) |
+| `mensagem` | `message` | o texto dele |
+| `kaladrius-atividade` | `kaladrius-activity` | chave do `localStorage` da última atividade |
+| `aniversariantes` | `birthday-badge` | classe do marcador de aniversariantes |
+| `rechamadas` | `recall-badge` | classe do marcador de rechamadas |
+
 ## O que fica em português
 
 - **Valores gravados no banco**: os valores das escolhas (`"PF"`, `"conciliada"`, `"retirada"`), os códigos dos módulos (`"rechamadas"`), as chaves dentro de campos JSON (as alterações da auditoria, configurações). Só muda o nome das constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), não o valor.

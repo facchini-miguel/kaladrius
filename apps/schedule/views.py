@@ -87,7 +87,7 @@ def _remembered_date(request):
 def _success_response(message):
     """Empty HTMX response that tells the page to close the modal and reload events."""
     response = HttpResponse(status=204)
-    response["HX-Trigger"] = json.dumps({"agendaAtualizada": {"mensagem": message}})
+    response["HX-Trigger"] = json.dumps({"scheduleUpdated": {"message": message}})
     return response
 
 
@@ -128,24 +128,27 @@ def calendar_view(request):
         "practitioner": practitioner.pk if practitioner else None,
         "start": clinic.schedule_start.strftime("%H:%M:%S"),
         "end": clinic.schedule_end.strftime("%H:%M:%S"),
-        "intervalo": clinic.schedule_interval,
+        "interval": clinic.schedule_interval,
         "date": request.GET.get("date") or _remembered_date(request),
         # FullCalendar locale and the texts its script shows (badges in the day headers).
         "language": get_language(),
         # "Now" on the clinic's wall clock: the calendar runs in UTC mode (decision 117).
-        "agora": _clock(timezone.now()),
-        "textos": {
-            "aniversariantes": _("aniversariante(s)"),
-            "rechamadas": _("rechamada(s) pendente(s)"),
+        "now": _clock(timezone.now()),
+        "texts": {
+            "birthdays": _("aniversariante(s)"),
+            "recalls": _("rechamada(s) pendente(s)"),
         },
-        "pode": {acao: can(request, Module.SCHEDULE, acao) for acao in ("criar", "alterar")},
+        "can": {
+            "create": can(request, Module.SCHEDULE, Action.CREATE),
+            "change": can(request, Module.SCHEDULE, Action.CHANGE),
+        },
         "urls": {
-            "eventos": reverse("schedule:events"),
-            "novo": reverse("schedule:new"),
-            "aniversariantes": reverse("schedule:birthdays"),
-            "aniversariantes_dia": reverse("schedule:birthdays_today"),
-            "rechamadas": reverse("recalls:summary") if ver_rechamadas else None,
-            "rechamadas_dia": reverse("recalls:today") if ver_rechamadas else None,
+            "events": reverse("schedule:events"),
+            "new": reverse("schedule:new"),
+            "birthdays": reverse("schedule:birthdays"),
+            "birthdays_today": reverse("schedule:birthdays_today"),
+            "recalls": reverse("recalls:summary") if ver_rechamadas else None,
+            "recalls_today": reverse("recalls:today") if ver_rechamadas else None,
         },
     }
     return render(

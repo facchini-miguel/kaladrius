@@ -4,11 +4,11 @@
   "use strict";
   const form = document.getElementById("patient-form");
   if (!form) return;
-  function atualizar() {
-    const tipo = form.querySelector("input[name=kind]:checked")?.value || "PF";
-    form.querySelectorAll(".pf-only").forEach((el) => { el.hidden = tipo !== "PF"; });
-    form.querySelectorAll(".pj-only").forEach((el) => { el.hidden = tipo !== "PJ"; });
+  function update() {
+    const kind = form.querySelector("input[name=kind]:checked")?.value || "PF";
+    form.querySelectorAll(".pf-only").forEach((el) => { el.hidden = kind !== "PF"; });
+    form.querySelectorAll(".pj-only").forEach((el) => { el.hidden = kind !== "PJ"; });
   }
-  form.querySelectorAll("input[name=kind]").forEach((el) => el.addEventListener("change", atualizar));
-  atualizar();
+  form.querySelectorAll("input[name=kind]").forEach((el) => el.addEventListener("change", update));
+  update();
 })();

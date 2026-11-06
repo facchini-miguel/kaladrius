@@ -75,7 +75,7 @@ def test_creates_appointment_and_notifies_screen(cenario):
     response = agendar(cenario)
     assert response.status_code == 204
     assert json.loads(response["HX-Trigger"]) == {
-        "agendaAtualizada": {"mensagem": "Agendamento criado."}
+        "scheduleUpdated": {"message": "Agendamento criado."}
     }
     [appointment] = agendamentos(cenario)
     assert appointment.patient == cenario["patient"]
@@ -221,7 +221,7 @@ def test_delete_one_or_the_series_from_then_on(cenario, criar_usuario, cliente_d
     page = admin.get(reverse("schedule:delete", args=[criados[1].pk])).content.decode()
     assert "os próximos 2" in page
     response = admin.post(reverse("schedule:delete", args=[criados[1].pk]), {"escopo": "serie"})
-    assert json.loads(response["HX-Trigger"])["agendaAtualizada"]["mensagem"] == (
+    assert json.loads(response["HX-Trigger"])["scheduleUpdated"]["message"] == (
         "3 agendamentos excluídos."
     )
     assert agendamentos(cenario) == []
@@ -304,8 +304,8 @@ def test_calendar_opens_on_chosen_practitioner(cenario):
     )
     assert page.context["practitioner"] == cenario["bruno"]
     config = page.context["configuracao"]
-    assert config["intervalo"] == 30 and config["start"] == "07:30:00"
-    assert config["pode"] == {"criar": True, "alterar": True}
+    assert config["interval"] == 30 and config["start"] == "07:30:00"
+    assert config["can"] == {"create": True, "change": True}
     # The choice is remembered for the next visit.
     assert (
         cenario["cliente"].get(reverse("schedule:calendar")).context["practitioner"]
@@ -533,7 +533,7 @@ def test_marks_attendance_and_no_show_from_the_day(cenario):
     response = mark(cenario, appointment, "compareceu")
     assert response.status_code == 204
     assert json.loads(response["HX-Trigger"]) == {
-        "agendaAtualizada": {"mensagem": "Maria Paciente compareceu."}
+        "scheduleUpdated": {"message": "Maria Paciente compareceu."}
     }
     assert situacao_de(cenario, appointment) == "compareceu"
     assert mark(cenario, appointment, "agendado").status_code == 204
