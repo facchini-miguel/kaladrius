@@ -71,7 +71,7 @@ class AccountGroup(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="filhos",
+        related_name="children",
         verbose_name=_("grupo acima"),
     )
     code = models.PositiveSmallIntegerField(
@@ -122,7 +122,7 @@ class Category(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="categorias",
+        related_name="categories",
         verbose_name=_("grupo"),
     )
     active = models.BooleanField(_("ativa"), default=True)
@@ -283,7 +283,7 @@ class Entry(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="lancamentos",
+        related_name="entries",
         verbose_name=_("centro de custo"),
     )
     patient = models.ForeignKey(
@@ -291,7 +291,7 @@ class Entry(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="lancamentos",
+        related_name="entries",
         verbose_name=_("paciente"),
     )
     # Who pays (receivable without a registered patient) or the supplier (payable). With a
@@ -302,7 +302,7 @@ class Entry(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="lancamentos",
+        related_name="entries",
         verbose_name=_("fornecedor"),
     )
     practitioner = models.ForeignKey(
@@ -360,11 +360,11 @@ class InstallmentQuerySet(models.QuerySet):
     def with_balance(self):
         """Annotate paid (principal paid by non-reversed payments) and balance."""
         principal = ExpressionWrapper(
-            F("pagamentos__amount") - F("pagamentos__interest") + F("pagamentos__discount"),
+            F("payments__amount") - F("payments__interest") + F("payments__discount"),
             output_field=DecimalField(**MONEY),
         )
         pago = Coalesce(
-            Sum(principal, filter=Q(pagamentos__reversed=False)),
+            Sum(principal, filter=Q(payments__reversed=False)),
             Value(ZERO),
             output_field=DecimalField(**MONEY),
         )
@@ -381,7 +381,7 @@ class Installment(ClinicModel):
     entry = models.ForeignKey(
         Entry,
         on_delete=models.CASCADE,
-        related_name="parcelas",
+        related_name="installments",
         verbose_name=_("lançamento"),
     )
     number = models.PositiveSmallIntegerField(_("número"))
@@ -404,11 +404,11 @@ class Installment(ClinicModel):
         ]
 
     def __str__(self):
-        return f"{self.entry.description} {self.number}/{self.entry.parcelas.count()}"
+        return f"{self.entry.description} {self.number}/{self.entry.installments.count()}"
 
     def paid_and_balance(self):
         """(principal paid, balance) computed from the payments (not annotated)."""
-        pago = sum((p.principal for p in self.pagamentos.all() if not p.reversed), start=ZERO)
+        pago = sum((p.principal for p in self.payments.all() if not p.reversed), start=ZERO)
         return pago, self.amount - pago
 
 
@@ -449,7 +449,7 @@ class Payment(ClinicModel):
     installment = models.ForeignKey(
         Installment,
         on_delete=models.PROTECT,
-        related_name="pagamentos",
+        related_name="payments",
         verbose_name=_("parcela"),
     )
     date = models.DateField(_("data"), default=timezone.localdate)
@@ -495,7 +495,7 @@ class Payment(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="pagamentos",
+        related_name="payments",
         verbose_name=_("comissão"),
     )
     commission_reversal = models.ForeignKey(
@@ -503,7 +503,7 @@ class Payment(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="pagamentos_estornados",
+        related_name="reversed_payments",
         verbose_name=_("comissão que descontou o estorno"),
     )
     created_by = models.ForeignKey(
@@ -556,7 +556,7 @@ class CashRegister(ClinicModel):
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
-        related_name="caixas",
+        related_name="cash_registers",
         verbose_name=_("conta"),
     )
     opened_at = models.DateTimeField(_("aberto em"), default=timezone.now)
@@ -626,7 +626,7 @@ class CashMovement(ClinicModel):
     cash_register = models.ForeignKey(
         CashRegister,
         on_delete=models.PROTECT,
-        related_name="movimentos",
+        related_name="movements",
         verbose_name=_("caixa"),
     )
     kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
@@ -674,7 +674,7 @@ class Commission(ClinicModel):
     practitioner = models.ForeignKey(
         "profissionais.Practitioner",
         on_delete=models.PROTECT,
-        related_name="comissoes",
+        related_name="commissions",
         verbose_name=_("profissional"),
     )
     until = models.DateField(_("recebimentos até"))
@@ -784,7 +784,7 @@ class StatementImport(ClinicModel):
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
-        related_name="importacoes",
+        related_name="statement_imports",
         verbose_name=_("conta"),
     )
     file = models.CharField(_("arquivo"), max_length=200)
@@ -832,13 +832,13 @@ class BankTransaction(ClinicModel):
     account = models.ForeignKey(
         FinancialAccount,
         on_delete=models.PROTECT,
-        related_name="transacoes",
+        related_name="transactions",
         verbose_name=_("conta"),
     )
     statement_import = models.ForeignKey(
         StatementImport,
         on_delete=models.PROTECT,
-        related_name="transacoes",
+        related_name="transactions",
         verbose_name=_("importação"),
     )
     fitid = models.CharField(_("identificador no banco"), max_length=120)
@@ -861,7 +861,7 @@ class BankTransaction(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="transacao",
+        related_name="transaction",
         verbose_name=_("pagamento"),
     )
     cash_movement = models.OneToOneField(
@@ -869,7 +869,7 @@ class BankTransaction(ClinicModel):
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="transacao",
+        related_name="transaction",
         verbose_name=_("movimento do caixa"),
     )
     reason = models.CharField(_("motivo"), max_length=200, blank=True)

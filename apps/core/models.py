@@ -267,13 +267,13 @@ class Membership(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="vinculos",
+        related_name="memberships",
         verbose_name=_("usuário"),
     )
     clinic = models.ForeignKey(
         Clinic,
         on_delete=models.CASCADE,
-        related_name="vinculos",
+        related_name="memberships",
         verbose_name=_("clínica"),
     )
     role = models.CharField(_("perfil"), max_length=20, choices=Role.choices)

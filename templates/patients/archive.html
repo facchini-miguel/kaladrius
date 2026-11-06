@@ -16,7 +16,7 @@
   <tbody>
     {% for installment in open_items %}
     <tr>
-      <td><a href="{% url 'finance:entry' installment.entry.pk %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">{{ installment.number }}/{{ installment.entry.parcelas.count }}</span></td>
+      <td><a href="{% url 'finance:entry' installment.entry.pk %}">{{ installment.entry.description }}</a> <span class="text-body-secondary small">{{ installment.number }}/{{ installment.entry.installments.count }}</span></td>
       <td>{{ installment.due_date|date:"SHORT_DATE_FORMAT" }}</td>
       <td class="text-end">{{ installment.balance|currency }}</td>
     </tr>

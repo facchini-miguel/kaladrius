@@ -34,7 +34,7 @@ def approve(estimate, *, parcelas, primeiro_vencimento, category, user, payment=
         user=user,
     )
     if payment:
-        primeira = entry.parcelas.order_by("number").first()
+        primeira = entry.installments.order_by("number").first()
         financeiro.receive(primeira, user=user, amount=primeira.amount, **payment)
     estimate.status = Estimate.Status.APPROVED
     estimate.entry = entry

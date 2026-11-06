@@ -1733,7 +1733,7 @@ The names the views and context processors give the templates, and the templates
 
 ## Keys inside the values (done)
 
-The keys of the dictionaries the services and views build for the pages (the home summary, the cash flow, the reports, the planning, the commissions, the cash register, the debtors, the server health), the attributes the views add to objects, and the fields of the legislation table (decision 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. The server health uses the names `health.sh` writes (`time`, `memory_total`…); lines of the old format, with Portuguese names, are still read. Kept: the module and action codes (`can.agenda.ver`), the document roles (`country_documents.paciente`), the models' `related_name`s (`estimate.itens`), and the placeholders of translated texts (`%(anos)s`).
+The keys of the dictionaries the services and views build for the pages (the home summary, the cash flow, the reports, the planning, the commissions, the cash register, the debtors, the server health), the attributes the views add to objects, and the fields of the legislation table (decision 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. The server health uses the names `health.sh` writes (`time`, `memory_total`…); lines of the old format, with Portuguese names, are still read. Kept: the module and action codes (`can.agenda.ver`), the document roles (`country_documents.paciente`), and the placeholders of translated texts (`%(anos)s`).
 
 ### Dictionary keys
 
@@ -1953,6 +1953,48 @@ The fields of `releases.yaml`, of the code that reads it and of the `/api/v1/rel
 | `origem` | `source` |
 | `?publico=` | `?audience=` |
 | `?desde=` | `?since=` |
+
+## Related names (done)
+
+The names of the reverse relations, `related_name` (decision 190): `estimate.itens` → `estimate.items`, `entry.parcelas` → `entry.installments`, `user.vinculos` → `user.memberships`, and the same in queries (`vinculos__clinic` → `memberships__clinic`). Only Django's state changes: the 12 migrations `*_english_related_names` emit no SQL. Same-looking names that are not reverse relations stay: the module codes (`can.orcamentos.ver`), the apps' labels, the models' plural names shown on screen.
+
+| Before | After |
+|---|---|
+| `adendos` | `addenda` |
+| `agendamentos` | `appointments` |
+| `anexos` | `attachments` |
+| `atendimentos` | `visits` |
+| `atestados` | `certificates` |
+| `bairros` | `neighborhoods` |
+| `caixas` | `cash_registers` |
+| `carteirinhas` | `member_cards` |
+| `categorias` | `categories` |
+| `cidades` | `cities` |
+| `codigos_recuperacao` | `recovery_codes` |
+| `comissoes` | `commissions` |
+| `duas_etapas` | `two_factor` |
+| `filhos` | `children` |
+| `folha` | `payroll` |
+| `folhas` | `payrolls` |
+| `importacoes` | `statement_imports` |
+| `itens` | `items` |
+| `lancamentos` | `entries` |
+| `logradouros` | `streets` |
+| `movimentos` | `movements` |
+| `orcamentos` | `estimates` |
+| `pagamentos` | `payments` |
+| `pagamentos_estornados` | `reversed_payments` |
+| `parcelas` | `installments` |
+| `pedidos_de_exames` | `exam_requests` |
+| `profissionais` | `practitioners` |
+| `receitas` | `prescriptions` |
+| `rechamadas` | `recalls` |
+| `relacionado_a` | `related_to` |
+| `relacionados` | `related_people` |
+| `salarios` | `salaries` |
+| `transacao` | `transaction` |
+| `transacoes` | `transactions` |
+| `vinculos` | `memberships` |
 
 ## What stays in Portuguese
 

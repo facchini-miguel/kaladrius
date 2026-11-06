@@ -133,16 +133,16 @@ def visit(request, practitioner, pk):
             "form": form,
             "editable": editavel,
             "fields": _fields(visit),
-            "addenda": visit.adendos.select_related("practitioner"),
+            "addenda": visit.addenda.select_related("practitioner"),
             "addendum_form": AddendumForm() if visit.is_finalized else None,
             # Certificates and prescriptions are issued by the visit's author (decision 082).
             "issues_documents": do_autor or administra,
             "is_admin": administra,
-            "certificates": visit.atestados.all(),
-            "prescriptions": visit.receitas.all(),
-            "exam_requests": visit.pedidos_de_exames.all(),
+            "certificates": visit.certificates.all(),
+            "prescriptions": visit.prescriptions.all(),
+            "exam_requests": visit.exam_requests.all(),
             # Never the file contents in a list.
-            "attachments": visit.anexos.defer("content").select_related("practitioner"),
+            "attachments": visit.attachments.defer("content").select_related("practitioner"),
             "attachment_form": AttachmentForm(),
             "can_remove_attachments": not visit.is_finalized,
         },
@@ -179,7 +179,7 @@ def print_visit(request, practitioner, pk):
         {
             "visit": visit,
             "fields": _fields(visit),
-            "addenda": visit.adendos.select_related("practitioner"),
+            "addenda": visit.addenda.select_related("practitioner"),
         },
     )
 

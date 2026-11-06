@@ -98,7 +98,7 @@ def test_procedure_code_goes_to_the_estimate(scenario):  # noqa: F811
     estimate = create_estimate(scenario, user_client)
     add_item(user_client, estimate, procedure=scenario["restoration"].pk)
     with use_clinic(clinic):
-        assert estimate.itens.get().code == "85100099"
+        assert estimate.items.get().code == "85100099"
     printed = user_client.get(reverse("estimates:print", args=[estimate.pk])).content.decode()
     assert "85100099 · Restauração" in printed
     # A country without one coding: just "Código", free text.

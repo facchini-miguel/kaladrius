@@ -53,7 +53,7 @@ def test_registration_with_salary_and_raise_in_history(clinic_a, admin):
     with use_clinic(clinic_a):
         bruno = Employee.objects.get()
         assert bruno.tax_id == "52998224725"
-        assert bruno.salarios.get().effective_from == datetime.date(2026, 1, 5)  # admission date
+        assert bruno.salaries.get().effective_from == datetime.date(2026, 1, 5)  # admission date
     raise_amount = admin.post(
         reverse("staff:edit", args=[bruno.pk]),
         {
@@ -69,7 +69,7 @@ def test_registration_with_salary_and_raise_in_history(clinic_a, admin):
     with use_clinic(clinic_a):
         assert bruno.salary_on(datetime.date(2026, 6, 30)) == Decimal("3000")
         assert bruno.salary_on(datetime.date(2026, 7, 1)) == Decimal("3300")
-        assert bruno.salarios.count() == 2
+        assert bruno.salaries.count() == 2
 
 
 @pytest.mark.parametrize(
@@ -158,7 +158,7 @@ def test_save_and_post_to_finance(clinic_a, ana, admin):
             "Ana Fictícia",
             Decimal("2276.67"),
         )
-        assert entry.parcelas.get().due_date == datetime.date(2026, 11, 5)
+        assert entry.installments.get().due_date == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
     row = admin.get(PAYROLL, {"month": "2026-10"}).context["rows"][0]
     assert row[1] is None

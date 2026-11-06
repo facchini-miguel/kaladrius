@@ -97,7 +97,7 @@ def test_estimate_shows_the_clinic_numbering(scenario):  # noqa: F811
     estimate = create_estimate(scenario, user_client)
     add_item(user_client, estimate, procedure=scenario["restoration"].pk, teeth="36,18")
     with use_clinic(clinic):
-        item = estimate.itens.get()
+        item = estimate.items.get()
         assert item.teeth == "18,36"  # always FDI in the database
         assert item.teeth_display == "1, 19"
     page = user_client.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()

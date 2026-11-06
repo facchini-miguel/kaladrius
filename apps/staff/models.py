@@ -56,7 +56,7 @@ class Employee(ClinicModel):
     def salary_on(self, date):
         """The salary in force on `data` (the newest one starting on or before it)."""
         salary = (
-            self.salarios.filter(effective_from__lte=date)
+            self.salaries.filter(effective_from__lte=date)
             .order_by("-effective_from", "-pk")
             .first()
         )
@@ -69,7 +69,7 @@ class Salary(ClinicModel):
     employee = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
-        related_name="salarios",
+        related_name="salaries",
         verbose_name=_("funcionário"),
     )
     amount = models.DecimalField(_("salário"), **MONEY)
@@ -107,7 +107,7 @@ class Payroll(ClinicModel):
     employee = models.ForeignKey(
         Employee,
         on_delete=models.PROTECT,
-        related_name="folhas",
+        related_name="payrolls",
         verbose_name=_("funcionário"),
     )
     period = models.DateField(_("competência"), help_text=_("O primeiro dia do mês."))
@@ -126,7 +126,7 @@ class Payroll(ClinicModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="folha",
+        related_name="payroll",
         verbose_name=_("conta a pagar"),
     )
 

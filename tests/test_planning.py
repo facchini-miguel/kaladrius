@@ -41,7 +41,7 @@ def pay(clinic, category, amount, date=TODAY):
             primeiro_vencimento=date,
             user=None,
         )
-        installment = entry.parcelas.get()
+        installment = entry.installments.get()
         services.receive(
             installment,
             user=None,

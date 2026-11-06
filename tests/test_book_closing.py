@@ -40,7 +40,7 @@ def installment(clinic_a):
             primeiro_vencimento=DAY_BEFORE_YESTERDAY,
             user=None,
         )
-        return entry.parcelas.get()
+        return entry.installments.get()
 
 
 def receive(clinic, installment, date, amount="100"):

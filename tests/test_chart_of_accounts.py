@@ -136,7 +136,7 @@ def test_report_sums_the_subgroups(clinic_a, admin):
                 primeiro_vencimento=TODAY,
                 user=None,
             )
-            installment = entry.parcelas.get()
+            installment = entry.installments.get()
             services.receive(
                 installment,
                 user=None,

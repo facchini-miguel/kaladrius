@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 get_user_model()
                 .objects.filter(username__in=usernames, is_superuser=False, is_staff=False)
                 .exclude(
-                    vinculos__clinic__in=Clinic.objects.exclude(pk__in=[c.pk for c in clinicas])
+                    memberships__clinic__in=Clinic.objects.exclude(pk__in=[c.pk for c in clinicas])
                 )
             )
             pacientes = Patient.objects.filter(clinic__in=clinicas).count()

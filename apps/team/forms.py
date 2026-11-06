@@ -16,7 +16,7 @@ def exclusive_account(user, clinic):
     return (
         not user.is_superuser
         and not user.is_staff
-        and not user.vinculos.exclude(clinic=clinic).exists()
+        and not user.memberships.exclude(clinic=clinic).exists()
     )
 
 

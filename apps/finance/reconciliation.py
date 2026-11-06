@@ -118,14 +118,14 @@ def candidates(transacoes):
         Payment.objects.filter(
             account_id__in=contas,
             reversed=False,
-            transacao__isnull=True,
+            transaction__isnull=True,
             date__range=(since, until),
         ).select_related("installment__entry__patient")
     )
     movimentos = list(
         CashMovement.objects.filter(
             other_account_id__in=contas,
-            transacao__isnull=True,
+            transaction__isnull=True,
             created_at__date__range=(since, until),
         ).select_related("cash_register__account")
     )
@@ -241,7 +241,7 @@ def create_entry(transacao, *, description, category, payer, method, user):
         user=user,
     )
     payment = services.receive(
-        entry.parcelas.get(),
+        entry.installments.get(),
         user=user,
         amount=abs(transacao.amount),
         method=method,

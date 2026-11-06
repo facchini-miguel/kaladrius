@@ -192,7 +192,7 @@ class RelatedPerson(ClinicModel):
     patient = models.ForeignKey(
         Patient,
         on_delete=models.CASCADE,
-        related_name="relacionados",
+        related_name="related_people",
         verbose_name=_("paciente"),
     )
     relationship = models.CharField(_("vínculo"), max_length=20, choices=Relationship.choices)
@@ -201,7 +201,7 @@ class RelatedPerson(ClinicModel):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="relacionado_a",
+        related_name="related_to",
         verbose_name=_("paciente da clínica"),
     )
     name = models.CharField(_("nome"), max_length=200, blank=True)

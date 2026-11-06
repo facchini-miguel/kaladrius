@@ -60,7 +60,7 @@ def _allow_if_disabled(request, item):
 def estimate_list(request):
     status = request.GET.get("status", Estimate.Status.OPEN)
     search = request.GET.get("q", "").strip()
-    orcamentos = _estimates().prefetch_related("itens")
+    orcamentos = _estimates().prefetch_related("items")
     if status in Estimate.Status.values:
         orcamentos = orcamentos.filter(status=status)
     if search:
@@ -123,7 +123,7 @@ def edit_estimate(request, pk):
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def estimate_detail(request, pk):
-    estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
+    estimate = get_object_or_404(_estimates().prefetch_related("items"), pk=pk)
     aberto = estimate.status == Estimate.Status.OPEN
     dentistry = _dentistry(request)
     if dentistry:
@@ -152,7 +152,7 @@ def estimate_detail(request, pk):
 def _teeth(request, estimate):
     """Dental chart and tooth columns (decision 080): in the Odontologia area, and in any
     area for an estimate that already has teeth (changing the area hides nothing written)."""
-    tem_historico = any(item.teeth or item.faces for item in estimate.itens.all())
+    tem_historico = any(item.teeth or item.faces for item in estimate.items.all())
     if not (_dentistry(request) or tem_historico):
         return {"show_teeth": False}
     return {"show_teeth": True, **odontogram(estimate.teeth)}
@@ -189,7 +189,7 @@ def remove_item(request, pk, item):
     estimate, response = _open_estimate(request, pk)
     if response:
         return response
-    record = get_object_or_404(estimate.itens, pk=item)
+    record = get_object_or_404(estimate.items, pk=item)
     if (record.teeth or record.faces) and not _dentistry(request):
         raise PermissionDenied
     _allow_if_disabled(request, record)
@@ -227,7 +227,7 @@ def approve(request, pk):
     estimate, response = _open_estimate(request, pk)
     if response:
         return response
-    item = estimate.itens.select_related("procedure__category").first()
+    item = estimate.items.select_related("procedure__category").first()
     category = (
         item.procedure.category
         if item and item.procedure and item.procedure.category
@@ -273,7 +273,7 @@ def refuse(request, pk):
 
 @requires_permission(Module.ESTIMATES, Action.VIEW)
 def print_estimate(request, pk):
-    estimate = get_object_or_404(_estimates().prefetch_related("itens"), pk=pk)
+    estimate = get_object_or_404(_estimates().prefetch_related("items"), pk=pk)
     return render(
         request,
         "estimates/print.html",

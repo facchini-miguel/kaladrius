@@ -35,8 +35,8 @@ def employee(request, pk):
         "staff/employee.html",
         {
             "employee": employee,
-            "salaries": employee.salarios.select_related("created_by"),
-            "payslips": employee.folhas.select_related("entry")[:24],
+            "salaries": employee.salaries.select_related("created_by"),
+            "payslips": employee.payrolls.select_related("entry")[:24],
             "current_salary": employee.salary_on(timezone.localdate()),
         },
     )

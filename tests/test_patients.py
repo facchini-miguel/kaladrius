@@ -336,7 +336,7 @@ def test_does_not_archive_with_open_bill(admin_a, clinic_a, django_user_model):
             )
 
     with use_clinic(clinic_a):
-        first_one, second = entry.parcelas.order_by("number")
+        first_one, second = entry.installments.order_by("number")
     receive_(first_one)
     assert [p.number for p in admin_a.get(url).context["open_items"]] == [2]
     receive_(second)

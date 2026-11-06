@@ -101,7 +101,7 @@ def patient_record(request, pk):
         context["finance"] = patient_summary(patient)
     if can(request, Module.ESTIMATES, Action.VIEW):
         context["estimates"] = list(
-            Estimate.objects.filter(patient=patient).prefetch_related("itens")[:10]
+            Estimate.objects.filter(patient=patient).prefetch_related("items")[:10]
         )
     if can(request, Module.HEALTH_PLANS, Action.VIEW):
         context["plan_cards"] = list(

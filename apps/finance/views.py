@@ -166,7 +166,7 @@ def new_entry(request):
             user=request.user,
         )
         if data["received_now"]:
-            primeira = entry.parcelas.order_by("number").first()
+            primeira = entry.installments.order_by("number").first()
             payment = services.receive(
                 primeira,
                 user=request.user,
@@ -207,7 +207,7 @@ def new_expense(request):
             user=request.user,
         )
         if data["paid_now"]:
-            primeira = entry.parcelas.order_by("number").first()
+            primeira = entry.installments.order_by("number").first()
             services.receive(
                 primeira,
                 user=request.user,
@@ -323,7 +323,7 @@ def receive(request, pk):
         {
             "form": form,
             "installment": installment,
-            "total_installments": installment.entry.parcelas.count(),
+            "total_installments": installment.entry.installments.count(),
             "can_discount": pode_desconto,
             "payable": pay,
         },
@@ -348,7 +348,7 @@ def receipt(request, pk):
         {
             "payment": payment,
             "entry": payment.installment.entry,
-            "total_installments": payment.installment.entry.parcelas.count(),
+            "total_installments": payment.installment.entry.installments.count(),
             # Where a tax document is required, the receipt says it does not replace it.
             "tax_document": legislation.for_country().tax_document,
         },
@@ -891,10 +891,10 @@ def commission(request, pk):
     commission = get_object_or_404(
         Commission.objects.select_related("practitioner", "entry"), pk=pk
     )
-    pagamentos = commission.pagamentos.select_related("installment__entry__patient").order_by(
+    pagamentos = commission.payments.select_related("installment__entry__patient").order_by(
         "date", "pk"
     )
-    reversal_deduction = commission.pagamentos_estornados.select_related(
+    reversal_deduction = commission.reversed_payments.select_related(
         "installment__entry__patient", "commission"
     ).order_by("date", "pk")
     for estorno in reversal_deduction:
@@ -985,7 +985,7 @@ def statements(request):
 def statement(request, pk):
     statement_import = get_object_or_404(StatementImport.objects.select_related("account"), pk=pk)
     transacoes = list(
-        statement_import.transacoes.select_related(
+        statement_import.transactions.select_related(
             "payment__installment__entry__patient", "cash_movement__cash_register__account"
         )
     )

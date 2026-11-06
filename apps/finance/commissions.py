@@ -148,7 +148,7 @@ def release(commission):
     descontou = (
         Commission.objects.filter(
             cancelled=False,
-            pagamentos_estornados__commission=commission,
+            reversed_payments__commission=commission,
         )
         .exclude(pk=commission.pk)
         .order_by("until")
