@@ -41,12 +41,12 @@ def _split_lists(text):
 
     GitHub and the site render such lists, but Python-Markdown needs the blank line.
     """
-    rows, em_codigo, previous = [], False, ""
+    rows, as_code, previous = [], False, ""
     for row in text.split("\n"):
         if row.lstrip().startswith("```"):
-            em_codigo = not em_codigo
+            as_code = not as_code
         elif (
-            not em_codigo
+            not as_code
             and _LIST_ITEM.match(row)
             and previous.strip()
             and not _LIST_ITEM.match(previous)
@@ -62,7 +62,7 @@ def privacy():
     """(title, HTML) of the privacy policy in the current language."""
     file = DOCS / FOLDERS[_language()] / "manual" / "privacy.md"
     text = _FRONTMATTER.sub("", file.read_text(encoding="utf-8"), count=1)
-    titulo = next((row[2:].strip() for row in text.splitlines() if row.startswith("# ")), "")
+    title = next((row[2:].strip() for row in text.splitlines() if row.startswith("# ")), "")
     html = markdown.markdown(_split_lists(text), extensions=["tables", "fenced_code", "sane_lists"])
     html = html.replace("<table>", '<table class="table table-sm table-bordered bg-white">')
-    return titulo, html
+    return title, html

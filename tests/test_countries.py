@@ -25,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 def in_country(clinic, country, **extra):
     clinic.country = country
-    clinic.time_zone = extra.pop("fuso", countries.COUNTRIES[country].fusos[0])
+    clinic.time_zone = extra.pop("fuso", countries.COUNTRIES[country].time_zones[0])
     for field, value in extra.items():
         setattr(clinic, field, value)
     clinic.save()
@@ -120,7 +120,7 @@ def test_country_time_zone_and_english_during_the_request(clinic_a, create_user)
         assert _during_request(user) == {"fuso": "Europe/London", "language": "en-gb"}
     with translation.override("pt-br"):  # only English has country variants
         assert _during_request(user)["language"] == "pt-br"
-    in_country(clinic_a, "US", fuso="America/Chicago")
+    in_country(clinic_a, "US", time_zone="America/Chicago")
     with translation.override("en"):
         assert _during_request(user) == {"fuso": "America/Chicago", "language": "en"}
     assert timezone.get_current_timezone_name() == "America/Sao_Paulo"  # deactivated afterwards

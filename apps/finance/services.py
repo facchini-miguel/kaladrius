@@ -33,7 +33,7 @@ from .models import (
     Payment,
     Planning,
 )
-from .payment_methods import labels as rotulos_das_formas
+from .payment_methods import labels as method_labels
 
 CENT = Decimal("0.01")
 MONEY = DecimalField(max_digits=12, decimal_places=2)
@@ -49,9 +49,9 @@ def split(total, quantity):
     return paid_and_balance
 
 
-def add_months(date, meses):
+def add_months(date, months):
     """Same day N months later (the 31st becomes the last day of shorter months)."""
-    year, month = divmod(date.month - 1 + meses, 12)
+    year, month = divmod(date.month - 1 + months, 12)
     year, month = date.year + year, month + 1
     return date.replace(
         year=year, month=month, day=min(date.day, calendar.monthrange(year, month)[1])
@@ -59,16 +59,16 @@ def add_months(date, meses):
 
 
 @transaction.atomic
-def create_entry(*, parcelas, primeiro_vencimento, user, **fields):
+def create_entry(*, installments, first_due_date, user, **fields):
     """Create an entry with `parcelas` monthly installments from `primeiro_vencimento`."""
     entry = Entry.objects.create(created_by=user, **fields)
     # One by one (at most 48), not bulk_create, so the audit log records each installment.
-    for number, amount in enumerate(split(entry.total_amount, parcelas), start=1):
+    for number, amount in enumerate(split(entry.total_amount, installments), start=1):
         Installment.objects.create(
             clinic=entry.clinic,
             entry=entry,
             number=number,
-            due_date=add_months(primeiro_vencimento, number - 1),
+            due_date=add_months(first_due_date, number - 1),
             amount=amount,
         )
     return entry
@@ -87,7 +87,7 @@ def receive(installment, *, user, **fields):
         raise ValidationError(_("Este lançamento foi cancelado."))
     payment = Payment(clinic=installment.clinic, installment=installment, created_by=user, **fields)
     check_period(payment.clinic_id, payment.date)
-    _pago, balance = installment.paid_and_balance()
+    _paid, balance = installment.paid_and_balance()
     if payment.principal <= 0:
         raise ValidationError(_("O valor abatido da parcela precisa ser maior que zero."))
     if payment.principal > balance:
@@ -113,12 +113,12 @@ def reverse_payment(payment, *, reason, user):
     payment.save(update_fields=["reversed", "reversed_at", "reversed_by", "reversal_reason"])
     # A reversed payment no longer explains its bank statement line (saved, not .update(),
     # so the audit log records it).
-    for transacao in BankTransaction.objects.filter(payment=payment):
-        transacao.payment = None
-        transacao.status = BankTransaction.Status.PENDING
-        transacao.reconciled_by = None
-        transacao.reconciled_at = None
-        transacao.save()
+    for bank_transaction in BankTransaction.objects.filter(payment=payment):
+        bank_transaction.payment = None
+        bank_transaction.status = BankTransaction.Status.PENDING
+        bank_transaction.reconciled_by = None
+        bank_transaction.reconciled_at = None
+        bank_transaction.save()
     return payment
 
 
@@ -227,7 +227,7 @@ def debtors(today=None):
     today = today or timezone.localdate()
     # Plain values, not model instances: a clinic with years of use has thousands of open
     # installments, and full objects took tens of MB per request (volume test, decision 108).
-    parcelas = (
+    installments = (
         Installment.objects.unpaid()
         .filter(entry__kind=Entry.Kind.RECEIVABLE)
         .values(
@@ -248,7 +248,7 @@ def debtors(today=None):
             "oldest": None,
         }
     )
-    for installment in parcelas:
+    for installment in installments:
         patient_id = installment["entry__patient_id"]
         payer = installment["entry__payer"]
         key = ("patient", patient_id) if patient_id else ("payer", payer.strip().lower())
@@ -259,17 +259,17 @@ def debtors(today=None):
         if due_date >= today:
             row["not_yet_due"] += balance
             continue
-        atraso = (today - due_date).days
-        faixa = next(
-            (i for i, limit in enumerate(OVERDUE_BRACKETS) if atraso <= limit),
+        delay = (today - due_date).days
+        band = next(
+            (i for i, limit in enumerate(OVERDUE_BRACKETS) if delay <= limit),
             len(OVERDUE_BRACKETS),
         )
-        row["brackets"][faixa] += balance
+        row["brackets"][band] += balance
         row["overdue"] += balance
         if row["oldest"] is None or due_date < row["oldest"]:
             row["oldest"] = due_date
-    resultado = [row for row in rows.values() if row["overdue"] or row["not_yet_due"]]
-    return sorted(resultado, key=lambda row: (-row["overdue"], alphabetical_key(row["name"])))
+    result = [row for row in rows.values() if row["overdue"] or row["not_yet_due"]]
+    return sorted(result, key=lambda row: (-row["overdue"], alphabetical_key(row["name"])))
 
 
 def patient_summary(patient, today=None):
@@ -312,36 +312,36 @@ def account_balances(until=None):
     """
     from .models import FinancialAccount
 
-    pagamentos = valid_payments()
+    payments = valid_payments()
     if until is not None:
-        pagamentos = pagamentos.filter(date__lte=until)
+        payments = payments.filter(date__lte=until)
     cash_movement = defaultdict(lambda: ZERO)
     for account_id, kind, total in (
-        pagamentos.order_by()
+        payments.order_by()
         .values_list("account_id", "installment__entry__kind")
         .annotate(total=Sum("amount"))
     ):
         cash_movement[account_id] += _sign(kind) * total
-    movimentos = CashMovement.objects.all()
+    movements = CashMovement.objects.all()
     if until is not None:
-        movimentos = movimentos.filter(created_at__date__lte=until)
-    for account_id, outra_id, kind, total in (
-        movimentos.order_by()
+        movements = movements.filter(created_at__date__lte=until)
+    for account_id, other_id, kind, total in (
+        movements.order_by()
         .values_list("cash_register__account_id", "other_account_id", "kind")
         .annotate(total=Sum("amount"))
     ):
         # A withdrawal leaves the drawer (into the other account, if any); a top-up enters it.
-        sinal = -1 if kind == CashMovement.Kind.WITHDRAWAL else 1
-        cash_movement[account_id] += sinal * total
-        if outra_id:
-            cash_movement[outra_id] -= sinal * total
+        sign = -1 if kind == CashMovement.Kind.WITHDRAWAL else 1
+        cash_movement[account_id] += sign * total
+        if other_id:
+            cash_movement[other_id] -= sign * total
     return [
         (account, account.opening_balance + cash_movement[account.pk])
         for account in FinancialAccount.objects.all().order_by("name")
     ]
 
 
-def cash_flow(since, until, por_mes=False, today=None):
+def cash_flow(since, until, by_month=False, today=None):
     """Rows per day (or month) from `de` to `ate`.
 
     Actual = payments made (by payment date); expected = what is still open in the
@@ -351,7 +351,7 @@ def cash_flow(since, until, por_mes=False, today=None):
     today = today or timezone.localdate()
 
     def key(date):
-        return date.replace(day=1) if por_mes else date
+        return date.replace(day=1) if by_month else date
 
     rows = defaultdict(
         lambda: {
@@ -392,25 +392,25 @@ def cash_flow(since, until, por_mes=False, today=None):
         (amount for _account, amount in account_balances(until=previous)), start=ZERO
     )
     balance = opening_balance
-    resultado = []
+    result = []
     for date in sorted(rows):
         row = rows[date]
         row["date"] = date
         row["late"] = (
-            not por_mes and date < today and (row["expected_incoming"] or row["expected_outgoing"])
+            not by_month and date < today and (row["expected_incoming"] or row["expected_outgoing"])
         )
         balance += (
             row["incoming"] - row["outgoing"] + row["expected_incoming"] - row["expected_outgoing"]
         )
         row["balance"] = balance
-        resultado.append(row)
-    totais = {
-        field: sum((row[field] for row in resultado), start=ZERO)
+        result.append(row)
+    totals = {
+        field: sum((row[field] for row in result), start=ZERO)
         for field in ("incoming", "outgoing", "expected_incoming", "expected_outgoing")
     }
     return {
-        "rows": resultado,
-        "totals": totais,
+        "rows": result,
+        "totals": totals,
         "opening_balance": opening_balance,
         "closing_balance": balance,
     }
@@ -418,121 +418,125 @@ def cash_flow(since, until, por_mes=False, today=None):
 
 def received_and_paid(since, until):
     """(money received, money paid) from `de` to `ate`, in one query (home page, 0.24.0)."""
-    totais = dict(
+    totals = dict(
         valid_payments()
         .filter(date__gte=since, date__lte=until)
         .order_by()
         .values_list("installment__entry__kind")
         .annotate(total=Sum("amount"))
     )
-    return totais.get(Entry.Kind.RECEIVABLE, ZERO), totais.get(Entry.Kind.PAYABLE, ZERO)
+    return totals.get(Entry.Kind.RECEIVABLE, ZERO), totals.get(Entry.Kind.PAYABLE, ZERO)
 
 
 def report(since, until):
     """Money received and paid in the period, grouped for the reports page."""
-    pagamentos = valid_payments().filter(date__gte=since, date__lte=until)
-    recebidos = pagamentos.filter(installment__entry__kind=Entry.Kind.RECEIVABLE)
-    pagos = pagamentos.filter(installment__entry__kind=Entry.Kind.PAYABLE)
+    payments = valid_payments().filter(date__gte=since, date__lte=until)
+    received_payments = payments.filter(installment__entry__kind=Entry.Kind.RECEIVABLE)
+    paid_payments = payments.filter(installment__entry__kind=Entry.Kind.PAYABLE)
 
-    def agrupar(consulta, field, label=None):
-        grupos = consulta.order_by().values_list(field).annotate(total=Sum("amount"))
-        rows = [((label or {}).get(key, key), total) for key, total in grupos]
+    def group_by(query, field, label=None):
+        groups = query.order_by().values_list(field).annotate(total=Sum("amount"))
+        rows = [((label or {}).get(key, key), total) for key, total in groups]
         return sorted(rows, key=lambda row: -row[1])
 
-    def somar(consulta, field):
-        return consulta.aggregate(total=Coalesce(Sum(field), ZERO, output_field=MONEY))["total"]
+    def add_up(query, field):
+        return query.aggregate(total=Coalesce(Sum(field), ZERO, output_field=MONEY))["total"]
 
-    formas = rotulos_das_formas()
-    total_recebido = somar(recebidos, "amount")
-    total_pago = somar(pagos, "amount")
+    methods = method_labels()
+    total_received = add_up(received_payments, "amount")
+    total_paid = add_up(paid_payments, "amount")
     # The chart of accounts (decision 097) only once the clinic has groups.
-    grupos = AccountGroup.objects.exists()
+    groups = AccountGroup.objects.exists()
     # Cost centers (decision 095) only once the clinic has registered one.
-    centros = CostCenter.objects.exists()
-    sem_centro = {None: _("Sem centro de custo")}
-    centro = "installment__entry__cost_center__name"
+    cost_centers = CostCenter.objects.exists()
+    no_cost_center = {None: _("Sem centro de custo")}
+    cost_center = "installment__entry__cost_center__name"
     return {
-        "groups": grupos,
-        "by_group": tree_by_group(recebidos, Category.Kind.INCOME) if grupos else [],
-        "expenses_by_group": tree_by_group(pagos, Category.Kind.EXPENSE) if grupos else [],
-        "centers": centros,
-        "by_center": agrupar(recebidos, centro, sem_centro) if centros else [],
-        "expenses_by_center": agrupar(pagos, centro, sem_centro) if centros else [],
-        "by_method": agrupar(recebidos, "method", formas),
-        "by_category": agrupar(recebidos, "installment__entry__category__name"),
-        "by_practitioner": agrupar(recebidos, "installment__entry__practitioner__name"),
-        "expenses_by_category": agrupar(pagos, "installment__entry__category__name"),
-        "total_received": total_recebido,
-        "total_paid": total_pago,
-        "result": total_recebido - total_pago,
-        "discounts": somar(recebidos, "discount"),
-        "interest": somar(recebidos, "interest"),
+        "groups": groups,
+        "by_group": tree_by_group(received_payments, Category.Kind.INCOME) if groups else [],
+        "expenses_by_group": tree_by_group(paid_payments, Category.Kind.EXPENSE) if groups else [],
+        "centers": cost_centers,
+        "by_center": group_by(received_payments, cost_center, no_cost_center)
+        if cost_centers
+        else [],
+        "expenses_by_center": group_by(paid_payments, cost_center, no_cost_center)
+        if cost_centers
+        else [],
+        "by_method": group_by(received_payments, "method", methods),
+        "by_category": group_by(received_payments, "installment__entry__category__name"),
+        "by_practitioner": group_by(received_payments, "installment__entry__practitioner__name"),
+        "expenses_by_category": group_by(paid_payments, "installment__entry__category__name"),
+        "total_received": total_received,
+        "total_paid": total_paid,
+        "result": total_received - total_paid,
+        "discounts": add_up(received_payments, "discount"),
+        "interest": add_up(received_payments, "interest"),
     }
 
 
-def link_groups(consulta):
+def link_groups(query):
     """The groups with each parent set from the same list, so numbers like 2.1 are
     built without one query per level."""
-    grupos = list(consulta)
-    por_id = {group.pk: group for group in grupos}
-    for group in grupos:
-        if group.parent_id in por_id:
-            group.parent = por_id[group.parent_id]
-    return grupos
+    groups = list(query)
+    by_id = {group.pk: group for group in groups}
+    for group in groups:
+        if group.parent_id in by_id:
+            group.parent = by_id[group.parent_id]
+    return groups
 
 
-def in_tree_order(grupos):
+def in_tree_order(groups):
     """(level, group) pairs in chart order: each group followed by its subgroups."""
-    filhos = defaultdict(list)
-    for group in grupos:  # already in chart order (code, then name)
-        filhos[group.parent_id].append(group)
-    saida = []
+    children = defaultdict(list)
+    for group in groups:  # already in chart order (code, then name)
+        children[group.parent_id].append(group)
+    output = []
 
-    def descer(parent_id, nivel):
-        for group in filhos[parent_id]:
-            saida.append((nivel, group))
-            descer(group.pk, nivel + 1)
+    def walk_down(parent_id, level):
+        for group in children[parent_id]:
+            output.append((level, group))
+            walk_down(group.pk, level + 1)
 
-    descer(None, 0)
-    return saida
+    walk_down(None, 0)
+    return output
 
 
-def totals_by_group(pagamentos, kind):
+def totals_by_group(payments, kind):
     """Payments summed by group, each group including its subgroups.
 
     Returns (groups of the type, {group id: total}, total of categories outside any group).
     """
-    por_categoria = dict(
-        pagamentos.order_by()
+    by_category = dict(
+        payments.order_by()
         .values_list("installment__entry__category_id")
         .annotate(total=Sum("amount"))
     )
-    grupo_da_categoria = dict(Category.objects.filter(kind=kind).values_list("pk", "group_id"))
-    grupos = link_groups(AccountGroup.objects.filter(kind=kind))
-    parent = {group.pk: group.parent_id for group in grupos}
-    totais = defaultdict(lambda: ZERO)
-    sem_grupo = ZERO
-    for category_id, amount in por_categoria.items():
-        group_id = grupo_da_categoria.get(category_id)
+    category_group = dict(Category.objects.filter(kind=kind).values_list("pk", "group_id"))
+    groups = link_groups(AccountGroup.objects.filter(kind=kind))
+    parent = {group.pk: group.parent_id for group in groups}
+    totals = defaultdict(lambda: ZERO)
+    ungrouped = ZERO
+    for category_id, amount in by_category.items():
+        group_id = category_group.get(category_id)
         if group_id is None:
-            sem_grupo += amount
+            ungrouped += amount
         while group_id is not None:
-            totais[group_id] += amount
+            totals[group_id] += amount
             group_id = parent.get(group_id)
-    return grupos, totais, sem_grupo
+    return groups, totals, ungrouped
 
 
-def tree_by_group(pagamentos, kind):
+def tree_by_group(payments, kind):
     """(level, name, total) rows in tree order for the reports, groups without money left
     out, and a last row for the categories outside any group."""
-    grupos, totais, sem_grupo = totals_by_group(pagamentos, kind)
+    groups, totals, ungrouped = totals_by_group(payments, kind)
     rows = [
-        (nivel, str(group), totais[group.pk])
-        for nivel, group in in_tree_order(grupos)
-        if totais[group.pk]
+        (level, str(group), totals[group.pk])
+        for level, group in in_tree_order(groups)
+        if totals[group.pk]
     ]
-    if sem_grupo:
-        rows.append((0, _("Sem grupo"), sem_grupo))
+    if ungrouped:
+        rows.append((0, _("Sem grupo"), ungrouped))
     return rows
 
 
@@ -557,58 +561,56 @@ def planning(year, today=None):
     compared with where it should be. Section totals add the goals of the highest groups
     that have one, so a goal and its subgroups' goals are not counted twice.
     """
-    fracao = year_fraction(year, today)
-    metas = dict(Planning.objects.filter(year=year).values_list("group_id", "amount"))
-    pagamentos = valid_payments().filter(date__year=year)
-    secoes = []
-    for kind, label, lancamentos in (
+    fraction = year_fraction(year, today)
+    goals = dict(Planning.objects.filter(year=year).values_list("group_id", "amount"))
+    payments = valid_payments().filter(date__year=year)
+    sections = []
+    for kind, label, entries in (
         (Category.Kind.INCOME, _("Receitas"), Entry.Kind.RECEIVABLE),
         (Category.Kind.EXPENSE, _("Despesas"), Entry.Kind.PAYABLE),
     ):
-        grupos, totais, sem_grupo = totals_by_group(
-            pagamentos.filter(installment__entry__kind=lancamentos), kind
+        groups, totals, ungrouped = totals_by_group(
+            payments.filter(installment__entry__kind=entries), kind
         )
-        rows, meta_total, cobertos = [], ZERO, set()
-        for nivel, group in in_tree_order(grupos):
-            meta, realizado = metas.get(group.pk), totais[group.pk]
-            if not group.active and meta is None and not realizado:
+        rows, meta_total, covered = [], ZERO, set()
+        for level, group in in_tree_order(groups):
+            meta, actual = goals.get(group.pk), totals[group.pk]
+            if not group.active and meta is None and not actual:
                 continue
-            if meta and group.parent_id not in cobertos:
+            if meta and group.parent_id not in covered:
                 meta_total += meta
-            if meta or group.parent_id in cobertos:
-                cobertos.add(group.pk)
-            esperado = (meta * fracao).quantize(CENT) if meta else None
+            if meta or group.parent_id in covered:
+                covered.add(group.pk)
+            expected = (meta * fraction).quantize(CENT) if meta else None
             rows.append(
                 {
-                    "level": nivel,
+                    "level": level,
                     "group": group,
                     "target": meta,
-                    "actual": realizado,
-                    "expected": esperado,
-                    "percentage": round(100 * realizado / meta) if meta else None,
+                    "actual": actual,
+                    "expected": expected,
+                    "percentage": round(100 * actual / meta) if meta else None,
                     # On track: income at or above where it should be, expenses at or below.
                     "on_track": None
                     if not meta
-                    else realizado >= esperado
+                    else actual >= expected
                     if kind == Category.Kind.INCOME
-                    else realizado <= esperado,
+                    else actual <= expected,
                 }
             )
-        realizado_total = (
-            sum((totais[g.pk] for g in grupos if g.parent_id is None), ZERO) + sem_grupo
-        )
-        secoes.append(
+        actual_total = sum((totals[g.pk] for g in groups if g.parent_id is None), ZERO) + ungrouped
+        sections.append(
             {
                 "kind": kind,
                 "label": label,
                 "rows": rows,
-                "ungrouped": sem_grupo,
+                "ungrouped": ungrouped,
                 "target": meta_total,
-                "expected": (meta_total * fracao).quantize(CENT),
-                "actual": realizado_total,
+                "expected": (meta_total * fraction).quantize(CENT),
+                "actual": actual_total,
             }
         )
-    return {"year": year, "fraction": fracao, "sections": secoes}
+    return {"year": year, "fraction": fraction, "sections": sections}
 
 
 @transaction.atomic
@@ -624,13 +626,13 @@ def save_targets(year, paid_and_balance):
 @transaction.atomic
 def copy_targets(year):
     """Copy last year's goals into the groups still without a goal; returns how many."""
-    existentes = set(Planning.objects.filter(year=year).values_list("group_id", flat=True))
-    copiadas = 0
-    for previous in Planning.objects.filter(year=year - 1).exclude(group_id__in=existentes):
+    existing = set(Planning.objects.filter(year=year).values_list("group_id", flat=True))
+    copied = 0
+    for previous in Planning.objects.filter(year=year - 1).exclude(group_id__in=existing):
         # One by one, not bulk_create, so the audit log records each goal.
         Planning.objects.create(year=year, group_id=previous.group_id, amount=previous.amount)
-        copiadas += 1
-    return copiadas
+        copied += 1
+    return copied
 
 
 # --- Daily cash drawer (0.17.0) ----------------------------------------------------------
@@ -656,7 +658,7 @@ def register_summary(cash_register):
     typed in today for last week still lands in today's drawer.
     """
     end = cash_register.closed_at or timezone.now()
-    pagamentos = list(
+    payments = list(
         valid_payments()
         .filter(
             account=cash_register.account,
@@ -666,27 +668,27 @@ def register_summary(cash_register):
         .select_related("installment__entry__patient")
         .order_by("created_at")
     )
-    movimentos = list(cash_register.movements.select_related("other_account", "created_by"))
-    entradas = sum(
-        (p.amount for p in pagamentos if p.installment.entry.kind == Entry.Kind.RECEIVABLE),
+    movements = list(cash_register.movements.select_related("other_account", "created_by"))
+    inflows = sum(
+        (p.amount for p in payments if p.installment.entry.kind == Entry.Kind.RECEIVABLE),
         start=ZERO,
     )
-    saidas = sum(
-        (p.amount for p in pagamentos if p.installment.entry.kind == Entry.Kind.PAYABLE),
+    outflows = sum(
+        (p.amount for p in payments if p.installment.entry.kind == Entry.Kind.PAYABLE),
         start=ZERO,
     )
-    reforcos = sum((m.amount for m in movimentos if m.kind == CashMovement.Kind.TOP_UP), start=ZERO)
-    retiradas = sum(
-        (m.amount for m in movimentos if m.kind == CashMovement.Kind.WITHDRAWAL), start=ZERO
+    top_ups = sum((m.amount for m in movements if m.kind == CashMovement.Kind.TOP_UP), start=ZERO)
+    withdrawals = sum(
+        (m.amount for m in movements if m.kind == CashMovement.Kind.WITHDRAWAL), start=ZERO
     )
     return {
-        "payments": pagamentos,
-        "movements": movimentos,
-        "incoming": entradas,
-        "outgoing": saidas,
-        "top_ups": reforcos,
-        "withdrawals": retiradas,
-        "expected": cash_register.opening_amount + entradas - saidas + reforcos - retiradas,
+        "payments": payments,
+        "movements": movements,
+        "incoming": inflows,
+        "outgoing": outflows,
+        "top_ups": top_ups,
+        "withdrawals": withdrawals,
+        "expected": cash_register.opening_amount + inflows - outflows + top_ups - withdrawals,
     }
 
 

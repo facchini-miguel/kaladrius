@@ -14,7 +14,7 @@ pytestmark = pytest.mark.django_db
     [
         (Clinic.Area.DENTISTRY, APPOINTMENT_TYPES),
         (Clinic.Area.MEDICINE, DEFAULT_TYPES),
-        (Clinic.Area.OUTRA, DEFAULT_TYPES),
+        (Clinic.Area.OTHER, DEFAULT_TYPES),
     ],
 )
 def test_new_clinic_gets_the_types_of_its_area(area, expected_list):

@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from django.urls import resolve
 
-from config.legacy_urls import RedirecionamentoPermanente
+from config.legacy_urls import PermanentRedirect
 
 pytestmark = pytest.mark.django_db
 
@@ -53,7 +53,7 @@ def old_addresses():
 @pytest.mark.parametrize(("name", "old"), list(old_addresses()))
 def test_old_address_redirects_to_the_new(client, name, old):
     response = client.get(old)
-    assert response.status_code == RedirecionamentoPermanente.status_code, (name, old)
+    assert response.status_code == PermanentRedirect.status_code, (name, old)
     destination = resolve(response.url)
     assert destination.func.__name__ != "redirecionar", (old, response.url)
     assert response.url != old

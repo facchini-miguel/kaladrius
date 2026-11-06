@@ -26,16 +26,16 @@ class ProcedureForm(BootstrapForm, forms.ModelForm):
             kind=Category.Kind.INCOME, active=True
         )
         # The country's procedure coding (decision 125): TUSS, CDT, ADA item number...
-        self.codificacao = insurance.for_country().procedure
+        self.encoding = insurance.for_country().procedure
         self.fields["code"].label = insurance.code_label()
-        if self.codificacao and self.codificacao.example:
-            self.fields["code"].widget.attrs["placeholder"] = self.codificacao.example
+        if self.encoding and self.encoding.example:
+            self.fields["code"].widget.attrs["placeholder"] = self.encoding.example
         self.fields["code"].help_text = _("Opcional. Vai para os orçamentos.")
 
     def clean_code(self):
         code = (self.cleaned_data.get("code") or "").strip()
-        if self.codificacao:
-            return self.codificacao.clean_value(code)
+        if self.encoding:
+            return self.encoding.clean_value(code)
         return code
 
     def clean_name(self):
@@ -72,7 +72,7 @@ class EstimateForm(BootstrapForm, forms.ModelForm):
 class EstimateItemForm(BootstrapForm, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
-    unit_price = _money_field(_("Valor unitário"), obrigatorio=False)
+    unit_price = _money_field(_("Valor unitário"), required=False)
 
     class Meta:
         model = EstimateItem
@@ -89,8 +89,8 @@ class EstimateItemForm(BootstrapForm, forms.ModelForm):
             del self.fields["teeth"], self.fields["faces"]
 
     def clean_teeth(self):
-        partes = [p.strip() for p in (self.cleaned_data.get("teeth") or "").split(",")]
-        teeth = sorted({int(p) for p in partes if p.isdecimal()})
+        parts = [p.strip() for p in (self.cleaned_data.get("teeth") or "").split(",")]
+        teeth = sorted({int(p) for p in parts if p.isdecimal()})
         if any(d not in VALID_TEETH for d in teeth):
             raise forms.ValidationError(_("Dente inválido."))
         return ",".join(str(d) for d in teeth)
@@ -118,7 +118,7 @@ class EstimateItemForm(BootstrapForm, forms.ModelForm):
 
 
 class DiscountForm(BootstrapForm, forms.Form):
-    discount = _money_field(_("Desconto no total"), obrigatorio=False)
+    discount = _money_field(_("Desconto no total"), required=False)
 
 
 class ApproveEstimateForm(BootstrapForm, forms.Form):

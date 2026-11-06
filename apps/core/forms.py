@@ -36,13 +36,13 @@ class LocalizedDecimalField(forms.DecimalField):
             text = text.replace(symbol, "")
         text = re.sub(r"\s", "", text)
         decimal = get_format("DECIMAL_SEPARATOR")
-        milhar = "." if decimal == "," else ","
-        grupos = rf"-?\d{{1,3}}(\{milhar}\d{{3}})+"
-        if decimal in text or re.fullmatch(grupos, text):
+        thousands = "." if decimal == "," else ","
+        groups = rf"-?\d{{1,3}}(\{thousands}\d{{3}})+"
+        if decimal in text or re.fullmatch(groups, text):
             # "1.500,00" and "1.500": the dots group thousands.
-            return text.replace(milhar, "")
+            return text.replace(thousands, "")
         # "1500.00": a lone point is taken as the decimal mark, whatever the language.
-        return text if decimal == "," else text.replace(milhar, decimal)
+        return text if decimal == "," else text.replace(thousands, decimal)
 
 
 class BootstrapForm:
@@ -66,14 +66,14 @@ class BootstrapForm:
             if isinstance(
                 widget, forms.CheckboxInput | forms.RadioSelect | forms.CheckboxSelectMultiple
             ):
-                classe = "form-check-input"
+                css_class = "form-check-input"
             elif isinstance(widget, forms.Select):
-                classe = "form-select"
+                css_class = "form-select"
             elif getattr(widget, "input_type", None) == "color":
-                classe = "form-control form-control-color"
+                css_class = "form-control form-control-color"
             else:
-                classe = "form-control"
-            widget.attrs["class"] = f"{widget.attrs.get('class', '')} {classe}".strip()
+                css_class = "form-control"
+            widget.attrs["class"] = f"{widget.attrs.get('class', '')} {css_class}".strip()
 
     def full_clean(self):
         super().full_clean()
@@ -95,18 +95,18 @@ def document_field():
     )
 
 
-def document_by_kind(field, individuo, empresa, kind):
+def document_by_kind(field, individual, company, kind):
     """Name and example of a document field that depends on the person type: the document of
     an individual and of a company (either may be None, and then the field is hidden for that
     type). The page switches them when the type changes (static/js/page.js)."""
-    current = empresa if kind == "PJ" else individuo
-    field.label = (current or individuo or empresa).abbreviation
+    current = company if kind == "PJ" else individual
+    field.label = (current or individual or company).abbreviation
     field.widget.attrs.update(
         {
-            "data-label-pf": individuo.abbreviation if individuo else "",
-            "data-label-pj": empresa.abbreviation if empresa else "",
-            "data-example-pf": individuo.example if individuo else "",
-            "data-example-pj": empresa.example if empresa else "",
+            "data-label-pf": individual.abbreviation if individual else "",
+            "data-label-pj": company.abbreviation if company else "",
+            "data-example-pf": individual.example if individual else "",
+            "data-example-pj": company.example if company else "",
             "placeholder": current.example if current else "",
         }
     )
@@ -143,15 +143,15 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        ligados = set(
+        enabled = set(
             ClinicModule.all_objects.filter(clinic=self.instance, active=True).values_list(
                 "code", flat=True
             )
             if self.instance.pk
             else initial(self.instance.area)
         )
-        self.initial["modules"] = sorted(ligados & SPECIALTIES)
-        self.initial["general_modules"] = sorted(ligados & GENERAL_MODULES)
+        self.initial["modules"] = sorted(enabled & SPECIALTIES)
+        self.initial["general_modules"] = sorted(enabled & GENERAL_MODULES)
         # The screen always sends them; a page opened before the update does not, and then
         # the clinic keeps its currency, country and time zone (Brazil's for a new one).
         for field in ("currency", "country", "time_zone", "tooth_numbering"):
@@ -160,18 +160,16 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         # The country's tax document, an individual's or a company's (decision 121): "CPF/CNPJ"
         # in Brazil, "EIN" in the United States... of the country chosen now.
         if "document" in self.fields:
-            documentos = identification.for_country(self._chosen_country())
-            self.documentos_da_clinica = documentos.of_roles("pessoa", "empresa")
+            documents = identification.for_country(self._chosen_country())
+            self.clinic_documents = documents.of_roles("pessoa", "empresa")
             field = self.fields["document"]
-            field.label = documentos.label("pessoa", "empresa")
-            field.widget.attrs["placeholder"] = " · ".join(
-                d.example for d in self.documentos_da_clinica
-            )
+            field.label = documents.label("pessoa", "empresa")
+            field.widget.attrs["placeholder"] = " · ".join(d.example for d in self.clinic_documents)
 
     def clean_document(self):
         return identification.clean_value(
             self.cleaned_data.get("document", ""),
-            self.documentos_da_clinica,
+            self.clinic_documents,
             self.fields["document"].label,
         )
 
@@ -193,18 +191,18 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         if "country" not in data:
             return
         country = countries.by_code(data["country"])
-        fuso = data.get("time_zone")
-        if "time_zone" in self.fields and fuso and fuso not in country.fusos:
+        time_zone = data.get("time_zone")
+        if "time_zone" in self.fields and time_zone and time_zone not in country.time_zones:
             if "time_zone" in self.changed_data:
                 self.add_error(
                     "time_zone",
                     _("Escolha um fuso horário de %(pais)s.") % {"pais": country.name},
                 )
             else:
-                data["time_zone"] = country.fusos[0]
-        elif not fuso:
+                data["time_zone"] = country.time_zones[0]
+        elif not time_zone:
             current = self.instance.time_zone
-            data["time_zone"] = current if current in country.fusos else country.fusos[0]
+            data["time_zone"] = current if current in country.time_zones else country.time_zones[0]
         previous = countries.by_code(self.instance.country)
         if (
             "country" in self.changed_data
@@ -215,13 +213,13 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         # The tooth numbering too (decision 122); a new clinic, without the field, gets its
         # country's.
         if "tooth_numbering" not in self.fields:
-            self.instance.tooth_numbering = country.numeracao
+            self.instance.tooth_numbering = country.numbering
         else:
-            current = self.instance.tooth_numbering or previous.numeracao
-            escolhida = data.get("tooth_numbering") or current
-            if "country" in self.changed_data and escolhida == current == previous.numeracao:
-                escolhida = country.numeracao
-            data["tooth_numbering"] = escolhida
+            current = self.instance.tooth_numbering or previous.numbering
+            chosen = data.get("tooth_numbering") or current
+            if "country" in self.changed_data and chosen == current == previous.numbering:
+                chosen = country.numbering
+            data["tooth_numbering"] = chosen
 
     def _chosen(self):
         return {
@@ -232,13 +230,13 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
     def clean(self):
         data = super().clean()
         self._adjust_to_country(data)
-        for modulo, precisa in missing(self._chosen()).items():
+        for modulo, needs in missing(self._chosen()).items():
             self.add_error(
                 "general_modules",
                 _("%(modulo)s precisa de: %(precisa)s.")
                 % {
                     "modulo": ModuleCode(modulo).label,
-                    "precisa": ", ".join(str(ModuleCode(p).label) for p in sorted(precisa)),
+                    "precisa": ", ".join(str(ModuleCode(p).label) for p in sorted(needs)),
                 },
             )
         return data
@@ -287,50 +285,48 @@ class ClinicForm(ClinicModulesForm):
     def clean(self):
         data = super().clean()
         start, end = data.get("schedule_start"), data.get("schedule_end")
-        intervalo = data.get("schedule_interval")
-        if None in (start, end, intervalo):
+        interval = data.get("schedule_interval")
+        if None in (start, end, interval):
             return data
         if start >= end:
             self.add_error("schedule_end", _("O fim da agenda deve ser depois do início."))
             return data
-        problema = self._appointment_outside(start, end, intervalo)
-        if problema is not None:
+        problem = self._appointment_outside(start, end, interval)
+        if problem is not None:
             raise forms.ValidationError(
                 _(
                     "O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
                     "intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
                 )
-                % {"momento": date_format(problema, "SHORT_DATETIME_FORMAT")}
+                % {"momento": date_format(problem, "SHORT_DATETIME_FORMAT")}
             )
         return data
 
-    def _appointment_outside(self, start, end, intervalo):
+    def _appointment_outside(self, start, end, interval):
         """Start of the first future appointment the new settings would leave out, if any.
 
         Past appointments are not checked: the history may have other hours.
         """
         from apps.schedule.models import Appointment
 
-        def minutos(hour):
+        def minutes(hour):
             return hour.hour * 60 + hour.minute
 
-        base = minutos(start)
+        base = minutes(start)
         if self.instance.pk is None:
             return None
         # Django Admin runs without the request's clinic isolation. Validate only the
         # clinic being edited, including when this form is used outside a request.
-        futuros = Appointment.all_objects.filter(
+        future = Appointment.all_objects.filter(
             clinic=self.instance, end__gt=timezone.now()
         ).order_by("start")
-        for comeca, termina in futuros.values_list("start", "end"):
-            comeca, termina = timezone.localtime(comeca), timezone.localtime(termina)
-            horas = (comeca.time(), termina.time())
-            fora = comeca.time() < start or (
-                termina.time() > end and termina.time() != datetime.time(0)
-            )
-            desalinhado = any((minutos(h) - base) % intervalo or h.second for h in horas)
-            if fora or desalinhado:
-                return comeca
+        for starts, ends in future.values_list("start", "end"):
+            starts, ends = timezone.localtime(starts), timezone.localtime(ends)
+            hours = (starts.time(), ends.time())
+            fora = starts.time() < start or (ends.time() > end and ends.time() != datetime.time(0))
+            misaligned = any((minutes(h) - base) % interval or h.second for h in hours)
+            if fora or misaligned:
+                return starts
         return None
 
 

@@ -33,32 +33,32 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--create-practitioner",
-            dest="criar_profissional",
+            dest="create_practitioner",
             action="store_true",
             help="Create the practitioner when no one has that name (an empty schedule).",
         )
-        parser.add_argument("--front-desk-password", dest="senha_recepcao", required=True)
-        parser.add_argument("--practitioner-password", dest="senha_profissional", required=True)
+        parser.add_argument("--front-desk-password", dest="front_desk_password", required=True)
+        parser.add_argument("--practitioner-password", dest="practitioner_password", required=True)
         # Optional (decision 089); as demo logins, they only look at the team and settings.
         parser.add_argument(
-            "--finance-password", dest="senha_financeiro", help="Also create demo.financeiro."
+            "--finance-password", dest="finance_password", help="Also create demo.financeiro."
         )
         parser.add_argument(
             "--admin-password",
-            dest="senha_admin",
+            dest="admin_password",
             help="Also create demo.admin (clinic administrator).",
         )
 
     @transaction.atomic
     def handle(self, *args, **options):
-        semente = os.environ.get("DJANGO_SEED_PASSWORD")
-        senhas = (options["senha_recepcao"], options["senha_profissional"])
+        seed = os.environ.get("DJANGO_SEED_PASSWORD")
+        passwords = (options["front_desk_password"], options["practitioner_password"])
         extras = [
-            (FINANCE, "Financeiro", options.get("senha_financeiro"), Role.FINANCE),
-            (ADMIN, "Administrador", options.get("senha_admin"), Role.ADMIN),
+            (FINANCE, "Financeiro", options.get("finance_password"), Role.FINANCE),
+            (ADMIN, "Administrador", options.get("admin_password"), Role.ADMIN),
         ]
         extras = [extra for extra in extras if extra[2]]
-        if semente and semente in (*senhas, *(extra[2] for extra in extras)):
+        if seed and seed in (*passwords, *(extra[2] for extra in extras)):
             # The seed users (admin.sorriso included) share that password.
             raise CommandError("Não use a senha de DJANGO_SEED_PASSWORD nas contas públicas.")
         try:
@@ -66,40 +66,40 @@ class Command(BaseCommand):
         except Clinic.DoesNotExist as error:
             raise CommandError(f"Clínica não encontrada: {options['clinic']}") from error
 
-        reception = self._account(FRONT_DESK, "Recepção", senhas[0], clinic, Role.FRONT_DESK)
+        reception = self._account(FRONT_DESK, "Recepção", passwords[0], clinic, Role.FRONT_DESK)
         practitioner = self._account(
-            PRACTITIONER, "Profissional", senhas[1], clinic, Role.PRACTITIONER
+            PRACTITIONER, "Profissional", passwords[1], clinic, Role.PRACTITIONER
         )
-        outras = [
+        others = [
             self._account(u, name, password, clinic, role) for u, name, password, role in extras
         ]
         with use_clinic(clinic):
-            cadastro = Practitioner.objects.filter(name=options["practitioner"]).first()
-            if cadastro is None:
-                if not options["criar_profissional"]:
+            record = Practitioner.objects.filter(name=options["practitioner"]).first()
+            if record is None:
+                if not options["create_practitioner"]:
                     raise CommandError(
                         f"Profissional não encontrado: {options['practitioner']} "
                         "(use --create-practitioner para criar)"
                     )
-                cadastro = Practitioner.objects.create(name=options["practitioner"])
-            if cadastro.user_id not in (None, practitioner.pk):
+                record = Practitioner.objects.create(name=options["practitioner"])
+            if record.user_id not in (None, practitioner.pk):
                 raise CommandError(
-                    f"{cadastro.name} já tem outro usuário de acesso; escolha outro profissional."
+                    f"{record.name} já tem outro usuário de acesso; escolha outro profissional."
                 )
-            cadastro.user = practitioner
-            cadastro.save(update_fields=["user"])
+            record.user = practitioner
+            record.save(update_fields=["user"])
         self.stdout.write(
             self.style.SUCCESS(
                 f"Contas prontas: {reception.username} (recepção), {practitioner.username} "
-                f"(profissional, agenda de {cadastro.name})"
-                + "".join(f", {account.username}" for account in outras)
+                f"(profissional, agenda de {record.name})"
+                + "".join(f", {account.username}" for account in others)
                 + "."
             )
         )
 
     def _account(self, username, name, password, clinic, role):
         User = get_user_model()
-        user, _criado = User.objects.get_or_create(username=username)
+        user, _created = User.objects.get_or_create(username=username)
         user.first_name = name
         user.last_name = "(demonstração)"
         user.is_active = True

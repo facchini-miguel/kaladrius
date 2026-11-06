@@ -63,11 +63,11 @@ class ImportRefused(Exception):
 class Report:
     clinic: Clinic | None = None
     practitioners: int = 0
-    tipos_criados: int = 0
+    kinds_created: int = 0
     patients: int = 0
     appointments: int = 0
     recalls: int = 0
-    avisos: Counter = field(default_factory=Counter)
+    warnings: Counter = field(default_factory=Counter)
 
 
 # UTF-8 bytes of Portuguese letters read as Latin-1: "Ã£" instead of "ã", "Âº" instead of "º".
@@ -83,8 +83,8 @@ def _text(value):
 
 def _key(text):
     """Comparison key: no accents, lowercase, only letters and digits."""
-    sem_acentos = unicodedata.normalize("NFKD", _text(text)).encode("ascii", "ignore").decode()
-    return re.sub(r"[^a-z0-9]", "", sem_acentos.lower())
+    unaccented = unicodedata.normalize("NFKD", _text(text)).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]", "", unaccented.lower())
 
 
 def _date(value):
@@ -112,19 +112,19 @@ def _email(value):
     return email, None
 
 
-def _document(bruto, kind):
+def _document(raw, kind):
     """(valid document, None) or ("", original text) when it cannot be used."""
-    original = _text(bruto)
+    original = _text(raw)
     document = normalize_cnpj(original)
     if not document:
         return "", None
-    so_digitos = document.isascii() and document.isdigit()
+    all_digits = document.isascii() and document.isdigit()
     if kind == Patient.Kind.INDIVIDUAL:
-        if so_digitos and 8 <= len(document) <= 11:
+        if all_digits and 8 <= len(document) <= 11:
             document = document.zfill(11)  # leading zeros lost in the legacy system
         # cpf_valido ignores letters, so "123.456.789-09X" must be rejected here.
-        return (document, None) if so_digitos and valid_cpf(document) else ("", original)
-    if so_digitos and 12 <= len(document) <= 14:
+        return (document, None) if all_digits and valid_cpf(document) else ("", original)
+    if all_digits and 12 <= len(document) <= 14:
         document = document.zfill(14)
     return (document, None) if valid_cnpj(document) else ("", original)
 
@@ -138,152 +138,152 @@ def _fits(value, size, label, extras):
 
 
 class _Importer:
-    def __init__(self, tables, nome_clinica, today):
+    def __init__(self, tables, clinic_name, today):
         self.t = tables
-        self.nome_clinica = nome_clinica
+        self.clinic_name = clinic_name
         self.today = today
-        self.relatorio = Report()
+        self.report = Report()
 
     # --- Lookups -----------------------------------------------------------------
 
     def _cities(self):
         """Legacy city id → (UF, IBGE city or None, legacy name)."""
-        ufs_legado = {u["id"]: _text(u["sigla"]).upper() for u in self.t.get("uf", [])}
+        legacy_states = {u["id"]: _text(u["sigla"]).upper() for u in self.t.get("uf", [])}
         ufs = {state.abbreviation: state for state in State.objects.all()}
         ibge = defaultdict(dict)
         for city in City.objects.select_related("state"):
             ibge[city.state.abbreviation][_key(city.name)] = city
-        resultado = {}
+        result = {}
         for row in self.t.get("cidade", []):
             id_uf = str(row["id_uf"] or "")
-            abbreviation = ufs_legado.get(int(id_uf)) if id_uf.isdecimal() else None
+            abbreviation = legacy_states.get(int(id_uf)) if id_uf.isdecimal() else None
             name = _text(row["cidade"])
-            resultado[row["id"]] = (
+            result[row["id"]] = (
                 ufs.get(abbreviation),
                 ibge[abbreviation].get(_key(name)),
                 name,
                 abbreviation,
             )
-        return resultado
+        return result
 
     def _marital_statuses(self):
-        novos = {_key(e.name)[:5]: e for e in MaritalStatus.objects.all()}
+        new_ones = {_key(e.name)[:5]: e for e in MaritalStatus.objects.all()}
         return {
-            row["id"]: novos.get(_key(row["nome"])[:5])
+            row["id"]: new_ones.get(_key(row["nome"])[:5])
             for row in self.t.get("pessoas_estado_civil", [])
         }
 
     def _streets(self):
-        tipos = {t["id"]: _text(t["nome"]).title() for t in self.t.get("tipo_endereco", [])}
-        resultado = {}
+        kinds = {t["id"]: _text(t["nome"]).title() for t in self.t.get("tipo_endereco", [])}
+        result = {}
         for row in self.t.get("logradouro", []):
-            kind = tipos.get(row["id_tipo_endereco"], "")
+            kind = kinds.get(row["id_tipo_endereco"], "")
             name = _text(row["nome"])
-            resultado[row["id"]] = f"{kind} {name}" if kind and kind != "Outros" else name
-        return resultado
+            result[row["id"]] = f"{kind} {name}" if kind and kind != "Outros" else name
+        return result
 
     # --- Steps -------------------------------------------------------------------
 
     def _clinic(self):
-        clinic = Clinic.objects.filter(name=self.nome_clinica).first()
+        clinic = Clinic.objects.filter(name=self.clinic_name).first()
         if clinic is not None and Patient.objects.filter(clinic=clinic).exists():
             raise ImportRefused(
-                f"A clínica “{self.nome_clinica}” já tem pacientes. A importação só é feita "
+                f"A clínica “{self.clinic_name}” já tem pacientes. A importação só é feita "
                 "numa clínica nova ou vazia, para não duplicar dados."
             )
         if clinic is None:
-            clinic = Clinic.objects.create(name=self.nome_clinica)  # gets the default types
-        self.relatorio.clinic = clinic
+            clinic = Clinic.objects.create(name=self.clinic_name)  # gets the default types
+        self.report.clinic = clinic
         return clinic
 
     def _practitioners(self, clinic):
-        mapa = {}
+        mapping = {}
         for row in self.t.get("dentistas", []):
             name = _text(row["nome"]).lstrip("_ ").strip() or f"Profissional {row['id']}"
-            mapa[row["id"]] = Practitioner.objects.create(clinic=clinic, name=name[:200])
-        self.relatorio.practitioners = len(mapa)
-        return mapa
+            mapping[row["id"]] = Practitioner.objects.create(clinic=clinic, name=name[:200])
+        self.report.practitioners = len(mapping)
+        return mapping
 
     def _types(self, clinic):
-        existentes = {_key(t.name): t for t in AppointmentType.objects.filter(clinic=clinic)}
-        mapa = {}
+        existing = {_key(t.name): t for t in AppointmentType.objects.filter(clinic=clinic)}
+        mapping = {}
         for row in self.t.get("agenda_cor", []):
             name = _text(row["nome"])[:60] or f"Tipo {row['id']}"
-            kind = existentes.get(_key(name))
+            kind = existing.get(_key(name))
             if kind is None:
                 color = _text(row["cor"])
                 color = color if re.fullmatch(r"#[0-9a-fA-F]{6}", color) else "#0d6efd"
                 kind = AppointmentType.objects.create(clinic=clinic, name=name, color=color.lower())
-                existentes[_key(name)] = kind
-                self.relatorio.tipos_criados += 1
-            mapa[row["id"]] = kind
-        return mapa
+                existing[_key(name)] = kind
+                self.report.kinds_created += 1
+            mapping[row["id"]] = kind
+        return mapping
 
-    def _patient(self, row, clinic, cidades, estados_civis, logradouros, bairros, usados):
-        avisos = self.relatorio.avisos
+    def _patient(self, row, clinic, cities, marital_statuses, streets, neighborhoods, used):
+        warnings = self.report.warnings
         extras = [f"Código no sistema antigo: {row['id']}"]
         kind = Patient.Kind.COMPANY if row["tipo_pessoa"] == "J" else Patient.Kind.INDIVIDUAL
         name = _text(row["nome"]) or f"Sem nome (código {row['id']})"
 
         document, original = _document(row["cpf_cnpj"], kind)
-        if document and document in usados:
+        if document and document in used:
             document, original = "", _text(row["cpf_cnpj"])
-            avisos["CPF/CNPJ repetido (guardado nas observações)"] += 1
+            warnings["CPF/CNPJ repetido (guardado nas observações)"] += 1
         elif original:
-            avisos["CPF/CNPJ inválido (guardado nas observações)"] += 1
+            warnings["CPF/CNPJ inválido (guardado nas observações)"] += 1
         if original:
             extras.append(f"CPF/CNPJ no sistema antigo: {original}")
         if document:
-            usados.add(document)
+            used.add(document)
 
-        telefones = {}
-        for phone_field, legado in (
+        phones = {}
+        for phone_field, legacy in (
             ("home_phone", "fone_res"),
             ("work_phone", "fone_com"),
             ("mobile_phone", "fone_cel"),
         ):
-            number = digits_only(row[legado])
+            number = digits_only(row[legacy])
             if len(number) > 11:
-                extras.append(f"Telefone ({legado}): {row[legado]}")
+                extras.append(f"Telefone ({legacy}): {row[legacy]}")
                 number = ""
             elif number and len(number) < 10:
-                avisos["Telefones sem DDD (mantidos como estavam)"] += 1
+                warnings["Telefones sem DDD (mantidos como estavam)"] += 1
             if len(number) == 11 and number.startswith("0"):  # carrier prefix: 0 + DDD
                 number = number[1:]
             # The legacy predates the ninth mobile digit (2012-2016): old mobiles get it.
-            telefones[phone_field] = ninth_digit(number)
+            phones[phone_field] = ninth_digit(number)
         if _text(row["fone_fax"]):
             extras.append(f"Fax: {_text(row['fone_fax'])}")
 
-        email, email_invalido = _email(row["email"])
-        if email_invalido:
-            extras.append(f"E-mail no sistema antigo: {email_invalido}")
-            avisos["E-mail inválido (guardado nas observações)"] += 1
+        email, invalid_email = _email(row["email"])
+        if invalid_email:
+            extras.append(f"E-mail no sistema antigo: {invalid_email}")
+            warnings["E-mail inválido (guardado nas observações)"] += 1
 
         postal_code = digits_only(row["cep"])
         if postal_code and len(postal_code) != 8:
             extras.append(f"CEP no sistema antigo: {row['cep']}")
-            avisos["CEP incompleto (guardado nas observações)"] += 1
+            warnings["CEP incompleto (guardado nas observações)"] += 1
             postal_code = ""
 
         state = city = None
         if row["id_cidade"]:
-            state, city, nome_cidade, abbreviation = cidades.get(
+            state, city, city_name, abbreviation = cities.get(
                 row["id_cidade"], (None, None, "", None)
             )
             if city is None:
-                extras.append(f"Cidade no sistema antigo: {nome_cidade}/{abbreviation or '?'}")
-                avisos["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
+                extras.append(f"Cidade no sistema antigo: {city_name}/{abbreviation or '?'}")
+                warnings["Cidade não encontrada na lista do IBGE (guardada nas observações)"] += 1
 
         sex = row["sexo"] if row["sexo"] in ("F", "M") else ""
-        nascimento = _date(row["data_nasc"])
-        if nascimento is not None and nascimento > self.today:
+        birth_date = _date(row["data_nasc"])
+        if birth_date is not None and birth_date > self.today:
             extras.append(f"Data de nascimento no sistema antigo: {row['data_nasc']}")
-            nascimento = None
+            birth_date = None
 
-        saldo = float(row["saldo"] or 0)
-        if saldo:
-            extras.append(f"Saldo: R$ {saldo:.2f}".replace(".", ","))
+        balance = float(row["saldo"] or 0)
+        if balance:
+            extras.append(f"Saldo: R$ {balance:.2f}".replace(".", ","))
         payment = _date(row["data_pgto"])
         if payment:
             extras.append(f"Último pagamento: {payment:%d/%m/%Y}")
@@ -292,9 +292,9 @@ class _Importer:
                 f"Banco {row['id_banco']}, agência {_text(row['agencia'])}, "
                 f"conta {_text(row['conta'])}"
             )
-        for legado, label in (("homepage", "Site"), ("msn", "MSN"), ("rg_obs", "Obs. do RG")):
-            if _text(row[legado]):
-                extras.append(f"{label}: {_text(row[legado])}")
+        for legacy, label in (("homepage", "Site"), ("msn", "MSN"), ("rg_obs", "Obs. do RG")):
+            if _text(row[legacy]):
+                extras.append(f"{label}: {_text(row[legacy])}")
 
         pf = kind == Patient.Kind.INDIVIDUAL
         patient = Patient(
@@ -306,62 +306,64 @@ class _Importer:
             rg=_fits(_text(row["rg"]), 20, "RG", extras) if pf else "",
             state_registration="" if pf else _fits(_text(row["insc_est"]), 20, "IE", extras),
             sex=sex if pf else "",
-            birth_date=nascimento if pf else None,
-            marital_status=estados_civis.get(row["estado_civil"]) if pf else None,
+            birth_date=birth_date if pf else None,
+            marital_status=marital_statuses.get(row["estado_civil"]) if pf else None,
             occupation=_fits(_text(row["profissao"]), 100, "Profissão", extras) if pf else "",
             guardian=_fits(_text(row["responsavel"]), 200, "Responsável", extras) if pf else "",
             email=email,
             postal_code=postal_code,
             state=state,
             city=city,
-            neighborhood=_fits(bairros.get(row["id_bairrocomunidade"], ""), 100, "Bairro", extras),
-            street=_fits(logradouros.get(row["id_logradouro"], ""), 200, "Endereço", extras),
+            neighborhood=_fits(
+                neighborhoods.get(row["id_bairrocomunidade"], ""), 100, "Bairro", extras
+            ),
+            street=_fits(streets.get(row["id_logradouro"], ""), 200, "Endereço", extras),
             number=_fits(_text(row["endereco_num"]), 10, "Número", extras),
             complement=_fits(_text(row["endereco_compl"]), 100, "Complemento", extras),
             active=row["ativo"] != "N",
-            **telefones,
+            **phones,
         )
         notes = _text(row["obs"])
-        bloco = "[Sistema antigo]\n" + "\n".join(extras)
-        patient.notes = f"{notes}\n\n{bloco}" if notes else bloco
+        block = "[Sistema antigo]\n" + "\n".join(extras)
+        patient.notes = f"{notes}\n\n{block}" if notes else block
         return patient, _date(row["data_cadast"])
 
     def _patients(self, clinic):
-        cidades = self._cities()
-        estados_civis = self._marital_statuses()
-        logradouros = self._streets()
-        bairros = {b["id"]: _text(b["nome"]) for b in self.t.get("bairrocomunidade", [])}
-        usados = set()
+        cities = self._cities()
+        marital_statuses = self._marital_statuses()
+        streets = self._streets()
+        neighborhoods = {b["id"]: _text(b["nome"]) for b in self.t.get("bairrocomunidade", [])}
+        used = set()
         pares = [
             (
                 row["id"],
-                *self._patient(row, clinic, cidades, estados_civis, logradouros, bairros, usados),
+                *self._patient(row, clinic, cities, marital_statuses, streets, neighborhoods, used),
             )
             for row in sorted(self.t.get("pessoas", []), key=lambda row: row["id"])
         ]
         Patient.objects.bulk_create([patient for _, patient, _ in pares], batch_size=500)
         # Keep the original registration date (auto_now_add only fills it on creation).
         com_data = []
-        for _, patient, cadastro in pares:
-            if cadastro is not None:
+        for _, patient, record in pares:
+            if record is not None:
                 patient.created_at = timezone.make_aware(
-                    datetime.datetime.combine(cadastro, datetime.time(12))
+                    datetime.datetime.combine(record, datetime.time(12))
                 )
                 com_data.append(patient)
         Patient.objects.bulk_update(com_data, ["created_at"], batch_size=500)
-        self.relatorio.patients = len(pares)
+        self.report.patients = len(pares)
         return {code: patient for code, patient, _ in pares}
 
-    def _appointments(self, practitioners, tipos):
-        avisos = self.relatorio.avisos
-        novos = []
+    def _appointments(self, practitioners, kinds):
+        warnings = self.report.warnings
+        new_ones = []
         for row in sorted(self.t.get("agendax", []), key=lambda row: row["id"]):
             practitioner = practitioners.get(row["id_dentista"])
-            kind = tipos.get(row["id_cor"])
+            kind = kinds.get(row["id_cor"])
             day = _date(row["data_marcar"])
             start, end = _time(row["hora_inicial"]), _time(row["hora_final"])
             if None in (practitioner, kind, day, start, end):
-                avisos["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
+                warnings["Agendamento sem profissional, tipo ou data válidos (não importado)"] += 1
                 continue
             # Blocked slots ("Ocupado") had no description; the schedule form requires a
             # patient or a description, so the type name keeps them editable.
@@ -373,8 +375,8 @@ class _Importer:
                 description = (
                     f"{description}\n[Sistema antigo: horário de término corrigido]".strip()
                 )
-                avisos["Agendamento com término antes do início (corrigido para 30 min)"] += 1
-            novos.append(
+                warnings["Agendamento com término antes do início (corrigido para 30 min)"] += 1
+            new_ones.append(
                 Appointment(
                     clinic=practitioner.clinic,
                     practitioner=practitioner,
@@ -385,28 +387,30 @@ class _Importer:
                 )
             )
         # The database forbids overlaps for the same practitioner: drop (and count) them.
-        aceitos, ultimo_fim = [], {}
-        for appointment in sorted(novos, key=lambda a: (a.practitioner.pk, a.start)):
-            if appointment.start < ultimo_fim.get(appointment.practitioner.pk, appointment.start):
-                avisos["Agendamento sobreposto a outro do mesmo profissional (não importado)"] += 1
+        accepted, last_end = [], {}
+        for appointment in sorted(new_ones, key=lambda a: (a.practitioner.pk, a.start)):
+            if appointment.start < last_end.get(appointment.practitioner.pk, appointment.start):
+                warnings[
+                    "Agendamento sobreposto a outro do mesmo profissional (não importado)"
+                ] += 1
                 continue
-            ultimo_fim[appointment.practitioner.pk] = appointment.end
-            aceitos.append(appointment)
-        Appointment.objects.bulk_create(aceitos, batch_size=1000)
-        self.relatorio.appointments = len(aceitos)
-        if aceitos:
-            self._widen_hours(aceitos[0].clinic, aceitos)
+            last_end[appointment.practitioner.pk] = appointment.end
+            accepted.append(appointment)
+        Appointment.objects.bulk_create(accepted, batch_size=1000)
+        self.report.appointments = len(accepted)
+        if accepted:
+            self._widen_hours(accepted[0].clinic, accepted)
 
     def _widen_hours(self, clinic, appointments):
         """Widen the clinic's schedule hours so every imported appointment shows in the grid."""
-        passo = clinic.schedule_interval
+        step = clinic.schedule_interval
 
-        def minutos(timestamp):
+        def minutes(timestamp):
             local = timezone.localtime(timestamp)
             return local.hour * 60 + local.minute
 
-        first = min(minutos(a.start) for a in appointments) // passo * passo
-        last = -(-max(minutos(a.end) or 24 * 60 for a in appointments) // passo) * passo
+        first = min(minutes(a.start) for a in appointments) // step * step
+        last = -(-max(minutes(a.end) or 24 * 60 for a in appointments) // step) * step
         start = min(clinic.schedule_start, datetime.time(first // 60, first % 60))
         end = clinic.schedule_end
         if last < 24 * 60:
@@ -414,13 +418,13 @@ class _Importer:
         if (start, end) != (clinic.schedule_start, clinic.schedule_end):
             clinic.schedule_start, clinic.schedule_end = start, end
             clinic.save(update_fields=["schedule_start", "schedule_end"])
-            self.relatorio.avisos[
+            self.report.warnings[
                 f"Horário da agenda ampliado para {start:%H:%M}–{end:%H:%M} "
                 "(havia atendimentos fora do padrão)"
             ] += 1
 
     def _recalls(self, patients):
-        avisos = self.relatorio.avisos
+        warnings = self.report.warnings
         novas = []
         for row in self.t.get("agenda", []):
             if not row.get("is_rechamada"):
@@ -428,7 +432,7 @@ class _Importer:
             patient = patients.get(row["id_pessoa"])
             day = _date(row["data_marcar"])
             if patient is None or day is None:
-                avisos["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
+                warnings["Rechamada de paciente inexistente ou sem data (não importada)"] += 1
                 continue
             description = _text(row["descricao"]) or "Rechamada"
             if len(description) > 200:
@@ -446,17 +450,17 @@ class _Importer:
                 )
             )
         Recall.objects.bulk_create(novas)
-        self.relatorio.recalls = len(novas)
+        self.report.recalls = len(novas)
 
     def run(self):
         with transaction.atomic(), without_isolation():
             clinic = self._clinic()
             practitioners = self._practitioners(clinic)
-            tipos = self._types(clinic)
+            kinds = self._types(clinic)
             patients = self._patients(clinic)
-            self._appointments(practitioners, tipos)
+            self._appointments(practitioners, kinds)
             self._recalls(patients)
-            r = self.relatorio
+            r = self.report
             log_event(
                 AuditEntry.Action.CREATE,
                 clinic=clinic,
@@ -465,12 +469,12 @@ class _Importer:
                     f"{r.appointments} agendamentos, {r.recalls} rechamadas"
                 ),
             )
-        return self.relatorio
+        return self.report
 
 
-def import_dump(texto_do_dump, nome_clinica, today=None):
+def import_dump(dump_text, clinic_name, today=None):
     """Import a legacy dump into the clinic `nome_clinica` (created if needed). All or nothing."""
-    tables = read_tables(texto_do_dump, TABLES)
+    tables = read_tables(dump_text, TABLES)
     if not tables.get("pessoas"):
         raise ImportRefused("O arquivo não tem a tabela `pessoas` do sistema antigo.")
-    return _Importer(tables, nome_clinica, today or timezone.localdate()).run()
+    return _Importer(tables, clinic_name, today or timezone.localdate()).run()

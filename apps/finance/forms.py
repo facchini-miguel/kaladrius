@@ -27,14 +27,14 @@ def _methods_with_blank():
     return [("", "—"), *Payment.Method.in_use()]
 
 
-def _money_field(label, obrigatorio=True, minimo=0, **extra):
+def _money_field(label, required=True, minimum=0, **extra):
     """Amount typed in the user's format (1.500,50 in Portuguese and Spanish)."""
     return LocalizedDecimalField(
         label=label,
         max_digits=12,
         decimal_places=2,
-        min_value=minimo,
-        required=obrigatorio,
+        min_value=minimum,
+        required=required,
         localize=True,
         widget=forms.TextInput(attrs={"inputmode": "decimal"}),
         **extra,
@@ -46,9 +46,9 @@ DATE_INPUT = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 def _cost_centers(form):
     """The cost center field shows up only once the clinic has one (decision 095)."""
-    centros = CostCenter.objects.filter(active=True)
-    if centros.exists():
-        form.fields["cost_center"].queryset = centros
+    cost_centers = CostCenter.objects.filter(active=True)
+    if cost_centers.exists():
+        form.fields["cost_center"].queryset = cost_centers
     else:
         del form.fields["cost_center"]
 
@@ -227,33 +227,33 @@ class SupplierForm(BootstrapForm, forms.ModelForm):
         if self.instance.clinic_id is None:
             self.instance.clinic = clinic
         # The country's tax document of an individual or a company (decision 121).
-        self.documentos = identification.for_country(countries.clinic_country(clinic))
+        self.documents = identification.for_country(countries.clinic_country(clinic))
         document_by_kind(
             self.fields["tax_id"],
-            self.documentos.pessoa,
-            self.documentos.empresa,
+            self.documents.pessoa,
+            self.documents.empresa,
             self["kind"].value(),
         )
 
-    def _telefone(self, name):
+    def _phone(self, name):
         return normalize_phone(self.cleaned_data.get(name))
 
     def clean_phone(self):
-        return self._telefone("phone")
+        return self._phone("phone")
 
     def clean_whatsapp(self):
-        return self._telefone("whatsapp")
+        return self._phone("whatsapp")
 
     def clean(self):
         data = super().clean()
         # A type without a document in this country (an individual in the UK) keeps none.
-        juridica = data.get("kind") == Supplier.Kind.COMPANY
-        do_tipo = self.documentos.empresa if juridica else self.documentos.pessoa
+        is_company = data.get("kind") == Supplier.Kind.COMPANY
+        of_kind = self.documents.empresa if is_company else self.documents.pessoa
         document = ""
-        if do_tipo is not None:
+        if of_kind is not None:
             try:
                 document = identification.clean_value(
-                    data.get("tax_id", ""), [do_tipo], do_tipo.abbreviation
+                    data.get("tax_id", ""), [of_kind], of_kind.abbreviation
                 )
             except ValidationError as error:
                 self.add_error("tax_id", error)
@@ -270,12 +270,12 @@ class SupplierForm(BootstrapForm, forms.ModelForm):
 class PlanningForm(BootstrapForm, forms.Form):
     """One goal field per group of the chart of accounts (decision 098)."""
 
-    def __init__(self, *args, grupos, metas, **kwargs):
+    def __init__(self, *args, groups, goals, **kwargs):
         super().__init__(*args, **kwargs)
-        self.grupos = grupos
-        for group in grupos:
+        self.groups = groups
+        for group in groups:
             # Rendered by the field itself: it shows 1.000,00 in Portuguese and reads it back.
-            field = _money_field(str(group), obrigatorio=False, initial=metas.get(group.pk))
+            field = _money_field(str(group), required=False, initial=goals.get(group.pk))
             field.widget.attrs.update(
                 {"class": "form-control form-control-sm text-end", "aria-label": str(group)}
             )
@@ -286,7 +286,7 @@ class PlanningForm(BootstrapForm, forms.Form):
         return f"meta-{group.pk}"
 
     def paid_and_balance(self):
-        return {group: self.cleaned_data.get(self.name(group)) for group in self.grupos}
+        return {group: self.cleaned_data.get(self.name(group)) for group in self.groups}
 
 
 class CloseBooksForm(BootstrapForm, forms.Form):
@@ -312,9 +312,9 @@ class ReceivePaymentForm(BootstrapForm, forms.ModelForm):
 
     amount = _money_field(_("Valor recebido"))
     interest = _money_field(
-        _("Juros e multa"), obrigatorio=False, help_text=_("Já incluídos no valor recebido.")
+        _("Juros e multa"), required=False, help_text=_("Já incluídos no valor recebido.")
     )
-    discount = _money_field(_("Desconto"), obrigatorio=False)
+    discount = _money_field(_("Desconto"), required=False)
 
     class Meta:
         model = Payment
@@ -332,19 +332,19 @@ class ReceivePaymentForm(BootstrapForm, forms.ModelForm):
         ]
         widgets = {"date": DATE_INPUT}
 
-    def __init__(self, *args, pode_dar_desconto, **kwargs):
+    def __init__(self, *args, can_give_discount, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["method"].choices = _methods_with_blank()
         self.fields["account"].queryset = FinancialAccount.objects.filter(active=True)
-        if not pode_dar_desconto:
+        if not can_give_discount:
             del self.fields["discount"]
         # Card installments and the transaction code's local name (NSU) depend on the country.
         for_country = payment_methods.for_country()
-        if not for_country.parcelas_no_cartao:
+        if not for_country.card_installments:
             del self.fields["card_installments"]
         label = _("Código da transação")
-        if for_country.codigo_do_cartao:
-            label = f"{label} ({for_country.codigo_do_cartao})"
+        if for_country.card_code:
+            label = f"{label} ({for_country.card_code})"
         self.fields["card_transaction_code"].label = label
 
     def clean(self):
@@ -368,10 +368,10 @@ class ReasonForm(BootstrapForm, forms.Form):
     reason = forms.CharField(label=_("Motivo"), max_length=200)
 
 
-def _groups(excluir=()):
+def _groups(exclude=()):
     """Groups as choices, numbered without one query per level."""
-    grupos = link_groups(AccountGroup.objects.exclude(pk__in=excluir))
-    return [("", "—"), *((g.pk, f"{g.get_kind_display()} · {g}") for g in grupos)]
+    groups = link_groups(AccountGroup.objects.exclude(pk__in=exclude))
+    return [("", "—"), *((g.pk, f"{g.get_kind_display()} · {g}") for g in groups)]
 
 
 class AccountGroupForm(BootstrapForm, forms.ModelForm):
@@ -394,17 +394,19 @@ class AccountGroupForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # A group cannot go under itself or under one of its own subgroups.
-        proibidos = {self.instance.pk, *self._descendants()} if self.instance.pk else set()
-        self.fields["parent"].queryset = AccountGroup.objects.exclude(pk__in=proibidos)
-        self.fields["parent"].choices = _groups(excluir=proibidos)
+        forbidden = {self.instance.pk, *self._descendants()} if self.instance.pk else set()
+        self.fields["parent"].queryset = AccountGroup.objects.exclude(pk__in=forbidden)
+        self.fields["parent"].choices = _groups(exclude=forbidden)
 
     def _descendants(self):
-        encontrados, fila = set(), [self.instance.pk]
-        while fila:
-            filhos = set(AccountGroup.objects.filter(parent__in=fila).values_list("pk", flat=True))
-            fila = list(filhos - encontrados)
-            encontrados |= filhos
-        return encontrados
+        found, queue = set(), [self.instance.pk]
+        while queue:
+            children = set(
+                AccountGroup.objects.filter(parent__in=queue).values_list("pk", flat=True)
+            )
+            queue = list(children - found)
+            found |= children
+        return found
 
     def clean(self):
         data = super().clean()
@@ -414,18 +416,18 @@ class AccountGroupForm(BootstrapForm, forms.ModelForm):
                 "parent", _("O grupo acima precisa ser do mesmo tipo (receita ou despesa).")
             )
         name = (data.get("name") or "").strip()
-        repetido = AccountGroup.objects.filter(kind=kind, parent=parent, name__iexact=name)
-        if name and repetido.exclude(pk=self.instance.pk).exists():
+        repeated = AccountGroup.objects.filter(kind=kind, parent=parent, name__iexact=name)
+        if name and repeated.exclude(pk=self.instance.pk).exists():
             self.add_error("name", _("Já existe um grupo com este nome neste lugar do plano."))
         if data.get("code") is None and kind:
             # Left blank where the neighbors are numbered: the next number, so the new group
             # reads "1.3" like the rest instead of having none (review stage 3).
-            vizinhos = AccountGroup.objects.filter(kind=kind, parent=parent).exclude(
+            neighbors = AccountGroup.objects.filter(kind=kind, parent=parent).exclude(
                 pk=self.instance.pk
             )
-            codigos = [c for c in vizinhos.values_list("code", flat=True) if c is not None]
-            if codigos or (parent is not None and parent.code is not None):
-                data["code"] = max(codigos, default=0) + 1
+            codes = [c for c in neighbors.values_list("code", flat=True) if c is not None]
+            if codes or (parent is not None and parent.code is not None):
+                data["code"] = max(codes, default=0) + 1
         return data
 
 
@@ -449,8 +451,8 @@ class CategoryForm(BootstrapForm, forms.ModelForm):
         group = data.get("group")
         if group and data.get("kind") and group.kind != data["kind"]:
             self.add_error("group", _("O grupo precisa ser do mesmo tipo da categoria."))
-        repetida = Category.objects.filter(name=data.get("name"), kind=data.get("kind"))
-        if repetida.exclude(pk=self.instance.pk).exists():
+        repeated_one = Category.objects.filter(name=data.get("name"), kind=data.get("kind"))
+        if repeated_one.exclude(pk=self.instance.pk).exists():
             self.add_error("name", _("Já existe uma categoria com este nome."))
         return data
 
@@ -470,8 +472,8 @@ class CostCenterForm(BootstrapForm, forms.ModelForm):
 class FinancialAccountForm(BootstrapForm, forms.ModelForm):
     opening_balance = _money_field(
         _("Saldo inicial"),
-        obrigatorio=False,
-        minimo=None,  # an overdrawn bank account starts negative
+        required=False,
+        minimum=None,  # an overdrawn bank account starts negative
         help_text=_("Quanto havia na conta antes do primeiro lançamento no sistema."),
     )
 

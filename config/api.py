@@ -19,7 +19,7 @@ api = NinjaAPI(
 api.add_router("/", whats_new_router)
 
 
-def _banco_responde():
+def _database_answers():
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
@@ -37,7 +37,7 @@ def version(request):
 @api.get("/health", auth=None, tags=["System"])
 def health(request):
     """For uptime monitors: 200 only when the database answers too (decision 079)."""
-    if not _banco_responde():
+    if not _database_answers():
         return api.create_response(request, {"database": False}, status=503)
     return {"database": True, "version": current_version()}
 
@@ -45,12 +45,12 @@ def health(request):
 # The addresses and fields before decision 155, for monitors and scripts still using them: the
 # server scripts of the previous version check a rolled-back app through /saude.
 @api.get("/versao", auth=None, include_in_schema=False)
-def versao(request):
+def version_old(request):
     return {"versao": current_version()}
 
 
 @api.get("/saude", auth=None, include_in_schema=False)
-def saude(request):
-    if not _banco_responde():
+def health_old(request):
+    if not _database_answers():
         return api.create_response(request, {"banco": False}, status=503)
     return {"banco": True, "versao": current_version()}

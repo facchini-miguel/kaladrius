@@ -10,7 +10,7 @@ from django.urls import reverse
 from apps.core.isolation import use_clinic
 from apps.core.models import GENERAL_MODULES, ModuleCode, Role
 from apps.core.modules import configure
-from apps.finance import services as financeiro
+from apps.finance import services as finance_services
 from apps.finance.models import Entry
 from apps.staff import services
 from apps.staff.models import Employee, Payroll, Salary, suggested_overtime_rate
@@ -170,7 +170,7 @@ def test_save_and_post_to_finance(clinic_a, ana, admin):
             == 0
         )
         # Cancelling the payable in finance opens the line again.
-        financeiro.cancel(entry, reason="Refazer", user=None)
+        finance_services.cancel(entry, reason="Refazer", user=None)
         payroll.refresh_from_db()
         assert not payroll.is_posted
 

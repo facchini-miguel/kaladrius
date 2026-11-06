@@ -69,7 +69,7 @@ def test_reads_ofx_sgml_in_windows_1252():
         Decimal("1640.10"),
         datetime.date(2026, 10, 10),
     )
-    first_one, second = statement.transacoes[:2]
+    first_one, second = statement.transactions[:2]
     assert (first_one.fitid, first_one.date, first_one.amount) == (
         "A1",
         datetime.date(2026, 10, 6),
@@ -81,8 +81,8 @@ def test_reads_ofx_sgml_in_windows_1252():
 
 def test_reads_ofx_xml_with_repeated_or_missing_fitid():
     statement = ofx.read(OFX_XML)
-    assert [t.description for t in statement.transacoes] == ["Pix João", "Pix João", "Tarifa"]
-    fitids = [t.fitid for t in statement.transacoes]
+    assert [t.description for t in statement.transactions] == ["Pix João", "Pix João", "Tarifa"]
+    fitids = [t.fitid for t in statement.transactions]
     assert fitids[:2] == ["X", "X#2"] and len(fitids[2]) == 40  # zero amount skipped
     assert statement.balance is None
 
@@ -126,8 +126,8 @@ def paid(scenario, amount, date, kind=Entry.Kind.RECEIVABLE, account=None):
             description="Tratamento" if receive else "Conta",
             category=scenario["income"] if receive else scenario["expense"],
             total_amount=Decimal(amount),
-            parcelas=1,
-            primeiro_vencimento=date,
+            installments=1,
+            first_due_date=date,
             user=scenario["admin"],
         )
         return services.receive(
@@ -315,10 +315,10 @@ def test_fake_statement_for_test_clinic(scenario):
     output = StringIO()
     call_command("simulate_statement", clinic=scenario["clinic"].name, stdout=output)
     statement = ofx.read(output.getvalue().encode())
-    assert len(statement.transacoes) in (4, 5)  # the bank extras, plus the payment (85%)
+    assert len(statement.transactions) in (4, 5)  # the bank extras, plus the payment (85%)
     assert statement.balance is not None
-    if len(statement.transacoes) == 5:
-        assert f"P{received_amount.pk}" in [t.fitid for t in statement.transacoes]
+    if len(statement.transactions) == 5:
+        assert f"P{received_amount.pk}" in [t.fitid for t in statement.transactions]
 
 
 def test_unreadable_lines_are_counted_and_reported(scenario):
@@ -331,7 +331,7 @@ def test_unreadable_lines_are_counted_and_reported(scenario):
         b"</BANKTRANLIST>",
     )
     statement = ofx.read(content)
-    paid_and_balance = {t.fitid: t.amount for t in statement.transacoes}
+    paid_and_balance = {t.fitid: t.amount for t in statement.transactions}
     assert (paid_and_balance["B1"], paid_and_balance["B2"]) == (
         Decimal("1234.56"),
         Decimal("2345.67"),

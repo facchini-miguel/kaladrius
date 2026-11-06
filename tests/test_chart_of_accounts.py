@@ -132,8 +132,8 @@ def test_report_sums_the_subgroups(clinic_a, admin):
                 description="Pagamento",
                 category=category,
                 total_amount=Decimal(amount),
-                parcelas=1,
-                primeiro_vencimento=TODAY,
+                installments=1,
+                first_due_date=TODAY,
                 user=None,
             )
             installment = entry.installments.get()

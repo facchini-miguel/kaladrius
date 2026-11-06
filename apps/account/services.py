@@ -27,9 +27,9 @@ ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I to confuse
 
 
 def address_attempts(request):
-    desde = timezone.now() - datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
+    since = timezone.now() - datetime.timedelta(hours=settings.AXES_COOLOFF_TIME)
     total = AccessAttempt.objects.filter(
-        ip_address=ip_for_lockout(request), attempt_time__gte=desde
+        ip_address=ip_for_lockout(request), attempt_time__gte=since
     ).aggregate(total=Sum("failures_since_start"))["total"]
     return total or 0
 
@@ -58,19 +58,19 @@ def is_required(request):
 
 def prepare(user, new=False):
     """The person's not yet active device, with a secret to show as a QR code."""
-    dispositivo, criado = TwoFactor.objects.get_or_create(
+    device, created = TwoFactor.objects.get_or_create(
         user=user, defaults={"secret": pyotp.random_base32()}
     )
-    if new and not criado and not dispositivo.active:
-        dispositivo.secret = pyotp.random_base32()
-        dispositivo.save(update_fields=["secret"])
-    return dispositivo
+    if new and not created and not device.active:
+        device.secret = pyotp.random_base32()
+        device.save(update_fields=["secret"])
+    return device
 
 
-def app_uri(dispositivo):
+def app_uri(device):
     """The otpauth:// address the authenticator app reads from the QR code."""
-    return pyotp.TOTP(dispositivo.secret).provisioning_uri(
-        name=dispositivo.user.get_username(), issuer_name=settings.SYSTEM_NAME
+    return pyotp.TOTP(device.secret).provisioning_uri(
+        name=device.user.get_username(), issuer_name=settings.SYSTEM_NAME
     )
 
 
@@ -82,65 +82,63 @@ def secret_in_groups(secret):
     return " ".join(secret[i : i + 4] for i in range(0, len(secret), 4))
 
 
-def verify_app(dispositivo, code):
+def verify_app(device, code):
     """A 6-digit code from the app, accepting the step before and after (clock drift)."""
     code = re.sub(r"\D", "", code or "")
     if len(code) != 6:
         return False
-    totp = pyotp.TOTP(dispositivo.secret)
+    totp = pyotp.TOTP(device.secret)
     now = int(timezone.now().timestamp() // totp.interval)
-    for passo in (now - 1, now, now + 1):
-        if passo > dispositivo.last_step and hmac.compare_digest(
-            totp.at(passo * totp.interval), code
-        ):
-            dispositivo.last_step = passo
-            dispositivo.save(update_fields=["last_step"])
+    for step in (now - 1, now, now + 1):
+        if step > device.last_step and hmac.compare_digest(totp.at(step * totp.interval), code):
+            device.last_step = step
+            device.save(update_fields=["last_step"])
             return True
     return False
 
 
 def _digest(code):
-    limpo = re.sub(r"[^A-Z0-9]", "", (code or "").upper())
-    return hmac.new(settings.SECRET_KEY.encode(), limpo.encode(), hashlib.sha256).hexdigest()
+    clean = re.sub(r"[^A-Z0-9]", "", (code or "").upper())
+    return hmac.new(settings.SECRET_KEY.encode(), clean.encode(), hashlib.sha256).hexdigest()
 
 
 @transaction.atomic
 def new_codes(user):
     """Ten new recovery codes (the old ones stop working), shown once."""
     RecoveryCode.objects.filter(user=user).delete()
-    codigos = [
+    codes = [
         "-".join("".join(secrets.choice(ALPHABET) for _ in range(4)) for _ in range(2))
         for _ in range(CODE_COUNT)
     ]
-    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, digest=_digest(c)) for c in codigos)
-    return codigos
+    RecoveryCode.objects.bulk_create(RecoveryCode(user=user, digest=_digest(c)) for c in codes)
+    return codes
 
 
 def verify_recovery(user, code):
-    restante = RecoveryCode.objects.filter(
+    remaining = RecoveryCode.objects.filter(
         user=user, digest=_digest(code), used_at__isnull=True
     ).first()
-    if restante is None:
+    if remaining is None:
         return False
-    restante.used_at = timezone.now()
-    restante.save(update_fields=["used_at"])
+    remaining.used_at = timezone.now()
+    remaining.save(update_fields=["used_at"])
     return True
 
 
 def verify(user, code):
     """The app's code or an unused recovery code."""
-    dispositivo = TwoFactor.objects.filter(user=user, active=True).first()
-    if dispositivo is None:
+    device = TwoFactor.objects.filter(user=user, active=True).first()
+    if device is None:
         return False
-    return verify_app(dispositivo, code) or verify_recovery(user, code)
+    return verify_app(device, code) or verify_recovery(user, code)
 
 
 @transaction.atomic
-def activate(dispositivo):
-    dispositivo.active = True
-    dispositivo.activated_at = timezone.now()
-    dispositivo.save(update_fields=["active", "activated_at"])
-    return new_codes(dispositivo.user)
+def activate(device):
+    device.active = True
+    device.activated_at = timezone.now()
+    device.save(update_fields=["active", "activated_at"])
+    return new_codes(device.user)
 
 
 @transaction.atomic

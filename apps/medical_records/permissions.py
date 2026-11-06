@@ -32,18 +32,18 @@ def user_practitioner(request):
     administrator only when also registered as an active practitioner (Cadastros >
     Profissionais, linked to their user). The superuser always reaches it (decision 087).
     """
-    if not hasattr(request, "_profissional_do_prontuario"):
-        request._profissional_do_prontuario = _practitioner(request)
-    return request._profissional_do_prontuario
+    if not hasattr(request, "_record_practitioner"):
+        request._record_practitioner = _practitioner(request)
+    return request._record_practitioner
 
 
 def _practitioner(request):
     user = request.user
     if not user.is_authenticated or getattr(request, "clinic", None) is None:
         return None
-    vinculo = getattr(request, "vinculo", None)
-    if vinculo is None and not user.is_superuser:
+    membership = getattr(request, "membership", None)
+    if membership is None and not user.is_superuser:
         return None
-    if vinculo is not None and vinculo.role == Role.FRONT_DESK:
+    if membership is not None and membership.role == Role.FRONT_DESK:
         return None
     return Practitioner.objects.filter(user=user, active=True).first()

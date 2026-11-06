@@ -128,8 +128,8 @@ def data(clinic, template_, **filter_):
 def test_report(imported):
     report, _ = imported
     assert (report.practitioners, report.patients) == (2, 4)
-    assert (report.appointments, report.recalls, report.tipos_criados) == (4, 2, 1)
-    warnings = report.avisos
+    assert (report.appointments, report.recalls, report.kinds_created) == (4, 2, 1)
+    warnings = report.warnings
     assert warnings["Agendamento sem profissional, tipo ou data válidos (não importado)"] == 1
     assert warnings["Agendamento sobreposto a outro do mesmo profissional (não importado)"] == 1
     assert warnings["Agendamento com término antes do início (corrigido para 30 min)"] == 1
@@ -140,7 +140,7 @@ def test_schedule_hours_cover_the_appointments(imported):
     report, clinic = imported
     clinic.refresh_from_db()
     assert (clinic.schedule_start, clinic.schedule_end) == (datetime.time(7, 30), datetime.time(21))
-    assert any(warning.startswith("Horário da agenda ampliado") for warning in report.avisos)
+    assert any(warning.startswith("Horário da agenda ampliado") for warning in report.warnings)
 
 
 def test_practitioners_and_types(imported):
@@ -284,7 +284,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
     }
     with pytest.raises(CommandError):
         call_command("anonymize_clinic", clinic=clinic.name)
-    call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
+    call_command("anonymize_clinic", clinic=clinic.name, confirm=True)
 
     patients = data(clinic, Patient)
     assert [p.pk for p in patients] == [p.pk for p in before["pacientes"]]
@@ -338,7 +338,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
 
 def test_anonymize_missing_clinic(db):
     with pytest.raises(CommandError, match="não encontrada"):
-        call_command("anonymize_clinic", clinic="Não existe", confirmar=True)
+        call_command("anonymize_clinic", clinic="Não existe", confirm=True)
 
 
 def test_anonymization_of_suppliers(imported):
@@ -363,11 +363,11 @@ def test_anonymization_of_suppliers(imported):
                 description="Compra",
                 category=category,
                 total_amount=Decimal("10"),
-                parcelas=1,
-                primeiro_vencimento=TODAY,
+                installments=1,
+                first_due_date=TODAY,
                 user=None,
             )
-    call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
+    call_command("anonymize_clinic", clinic=clinic.name, confirm=True)
 
     person, company = data(clinic, Supplier)
     assert "Fulana" not in str(vars(person))
@@ -391,7 +391,7 @@ def test_anonymization_of_member_cards(imported):
             number="98765",
             holder="Fulano Titular",
         )
-    call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
+    call_command("anonymize_clinic", clinic=clinic.name, confirm=True)
     (plan_card,) = data(clinic, MemberCard)
     assert plan_card.number != "98765" and "Fulano" not in plan_card.holder
     assert plan_card.holder and (plan_card.health_plan, plan_card.plan) == (
@@ -421,12 +421,12 @@ def test_anonymization_of_employees(imported):
             description="Salário",
             category=category,
             total_amount=Decimal("2000"),
-            parcelas=1,
-            primeiro_vencimento=TODAY,
+            installments=1,
+            first_due_date=TODAY,
             user=None,
         )
         payslip.save()
-    call_command("anonymize_clinic", clinic=clinic.name, confirmar=True)
+    call_command("anonymize_clinic", clinic=clinic.name, confirm=True)
     (employee_woman,) = data(clinic, Employee)
     (payslip,) = data(clinic, Payroll)
     assert "Fulana" not in employee_woman.name and employee_woman.tax_id == ""

@@ -51,8 +51,8 @@ class MembershipForm(BootstrapForm, forms.ModelForm):
 
     def __init__(self, *args, editor, **kwargs):
         super().__init__(*args, **kwargs)
-        self.proprio = self.instance.user_id == editor.pk
-        if self.proprio:
+        self.own = self.instance.user_id == editor.pk
+        if self.own:
             # Nobody removes their own administrator role or access by accident.
             for field in self.fields.values():
                 field.disabled = True
@@ -60,17 +60,17 @@ class MembershipForm(BootstrapForm, forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        era_admin_ativo = self.initial.get("role") == Role.ADMIN and self.initial.get("active")
+        was_active_admin = self.initial.get("role") == Role.ADMIN and self.initial.get("active")
         continua_admin = data.get("role") == Role.ADMIN and data.get("active")
-        if era_admin_ativo and not continua_admin:
+        if was_active_admin and not continua_admin:
             # An account disabled for the whole platform cannot log in, so it does not count.
-            outros = Membership.objects.filter(
+            others = Membership.objects.filter(
                 clinic_id=self.instance.clinic_id,
                 role=Role.ADMIN,
                 active=True,
                 user__is_active=True,
             ).exclude(pk=self.instance.pk)
-            if not outros.exists():
+            if not others.exists():
                 raise forms.ValidationError(
                     _("A clínica precisa de pelo menos um administrador ativo.")
                 )

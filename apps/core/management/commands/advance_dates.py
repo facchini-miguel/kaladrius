@@ -11,22 +11,22 @@ from django.utils import timezone
 FIXED = {"pacientes.patient.birth_date", "core.backup.timestamp"}
 
 
-def _is_fixed(modelo, field):
-    return f"{modelo._meta.label_lower}.{field.name}" in FIXED
+def _is_fixed(model, field):
+    return f"{model._meta.label_lower}.{field.name}" in FIXED
 
 
 def date_fields():
     """(model, [date fields]) of every table of the project's apps."""
-    for modelo in apps.get_models():
-        if not modelo.__module__.startswith("apps.") or modelo._meta.proxy:
+    for model in apps.get_models():
+        if not model.__module__.startswith("apps.") or model._meta.proxy:
             continue
         fields = [
             field
-            for field in modelo._meta.local_concrete_fields
-            if isinstance(field, models.DateField) and not _is_fixed(modelo, field)
+            for field in model._meta.local_concrete_fields
+            if isinstance(field, models.DateField) and not _is_fixed(model, field)
         ]
         if fields:
-            yield modelo, fields
+            yield model, fields
 
 
 class Command(BaseCommand):
@@ -39,19 +39,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--since", dest="desde", required=True, help="Date the data refers to (YYYY-MM-DD)."
+            "--since", dest="since", required=True, help="Date the data refers to (YYYY-MM-DD)."
         )
-        parser.add_argument("--confirm", dest="confirmar", action="store_true", help="Required.")
+        parser.add_argument("--confirm", dest="confirm", action="store_true", help="Required.")
 
-    def handle(self, *args, desde, confirmar, **options):
+    def handle(self, *args, since, confirm, **options):
         if not settings.DEMO:
             raise CommandError("Só no servidor de demonstração (DJANGO_DEMO=1).")
-        if not confirmar:
+        if not confirm:
             raise CommandError("Nada foi alterado: rode de novo com --confirm.")
         try:
-            start = datetime.date.fromisoformat(desde)
+            start = datetime.date.fromisoformat(since)
         except ValueError as error:
-            raise CommandError(f"Data inválida: {desde}") from error
+            raise CommandError(f"Data inválida: {since}") from error
         days = (timezone.localdate() - start).days // 7 * 7
         if days <= 0:
             self.stdout.write("Menos de uma semana: nada a avançar.")
@@ -60,19 +60,19 @@ class Command(BaseCommand):
         tables = list(date_fields())
         # Moving everything at once would briefly overlap one appointment with the next
         # week's, so the no-double-booking constraint is set aside during the update.
-        exclusoes = [
-            (modelo, restricao)
-            for modelo, _campos in tables
-            for restricao in modelo._meta.constraints
-            if isinstance(restricao, ExclusionConstraint)
+        exclusions = [
+            (model, constraint)
+            for model, _campos in tables
+            for constraint in model._meta.constraints
+            if isinstance(constraint, ExclusionConstraint)
         ]
         rows = 0
         with connection.schema_editor() as editor:
             editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
-            for modelo, restricao in exclusoes:
-                editor.remove_constraint(modelo, restricao)
-            for modelo, fields in tables:
-                atribuicoes = ", ".join(
+            for model, constraint in exclusions:
+                editor.remove_constraint(model, constraint)
+            for model, fields in tables:
+                assignments = ", ".join(
                     f"{editor.quote_name(c.column)} = {editor.quote_name(c.column)} + "
                     + ("make_interval(days => %s)" if isinstance(c, models.DateTimeField) else "%s")
                     for c in fields
@@ -80,15 +80,15 @@ class Command(BaseCommand):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         # Names come from the models, never from users; values are parameters.
-                        f"UPDATE {editor.quote_name(modelo._meta.db_table)} SET {atribuicoes}",  # noqa: S608
+                        f"UPDATE {editor.quote_name(model._meta.db_table)} SET {assignments}",  # noqa: S608
                         [days] * len(fields),
                     )
                     rows += cursor.rowcount
             # Deferred foreign key checks queued by the updates must run first: PostgreSQL
             # refuses ALTER TABLE on a table with pending trigger events.
             editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
-            for modelo, restricao in exclusoes:
-                editor.add_constraint(modelo, restricao)
+            for model, constraint in exclusions:
+                editor.add_constraint(model, constraint)
         self.stdout.write(
             self.style.SUCCESS(
                 f"Datas avançadas {days // 7} semana(s) ({days} dias): "

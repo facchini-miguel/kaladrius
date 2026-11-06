@@ -29,27 +29,27 @@ Status = BankTransaction.Status
 
 
 @transaction.atomic
-def import_statement(account, *, nome_arquivo, content, user):
+def import_statement(account, *, file_name, content, user):
     """Read an OFX file into `conta`. Lines imported before (same bank id) are skipped."""
     statement = ofx.read(content)
-    if not statement.transacoes:
+    if not statement.transactions:
         raise ofx.InvalidFile(_("O extrato não tem transações."))
     statement_import = StatementImport.objects.create(
         clinic=account.clinic,
         account=account,
-        file=nome_arquivo[:200],
+        file=file_name[:200],
         bank_code=statement.bank_code,
         bank_account_number=statement.account,
-        start=statement.start or min(t.date for t in statement.transacoes),
-        end=statement.end or max(t.date for t in statement.transacoes),
+        start=statement.start or min(t.date for t in statement.transactions),
+        end=statement.end or max(t.date for t in statement.transactions),
         balance=statement.balance,
         balance_date=statement.balance_date or statement.end,
         unreadable_transactions=statement.unreadable_transactions,
         created_by=user,
     )
-    existentes = set(
+    existing = set(
         BankTransaction.objects.filter(
-            account=account, fitid__in=[t.fitid for t in statement.transacoes]
+            account=account, fitid__in=[t.fitid for t in statement.transactions]
         ).values_list("fitid", flat=True)
     )
     # In bulk (a statement can have hundreds of lines): the audit log records the import.
@@ -65,8 +65,8 @@ def import_statement(account, *, nome_arquivo, content, user):
                 description=t.description,
                 kind=t.kind,
             )
-            for t in statement.transacoes
-            if t.fitid not in existentes
+            for t in statement.transactions
+            if t.fitid not in existing
         ],
         ignore_conflicts=True,  # another import of the same file at the same moment
     )
@@ -75,7 +75,7 @@ def import_statement(account, *, nome_arquivo, content, user):
         statement_import=statement_import
     ).count()
     statement_import.duplicate_transactions = (
-        len(statement.transacoes) - statement_import.new_transactions
+        len(statement.transactions) - statement_import.new_transactions
     )
     statement_import.save(update_fields=["new_transactions", "duplicate_transactions"])
     return statement_import
@@ -106,37 +106,37 @@ class Candidate:
     obj: object
 
 
-def candidates(transacoes):
+def candidates(transactions):
     """{transaction pk: [Candidato, closest date first]} for the pending transactions."""
-    pendentes = [t for t in transacoes if t.status == Status.PENDING]
-    if not pendentes:
+    pending = [t for t in transactions if t.status == Status.PENDING]
+    if not pending:
         return {}
-    contas = {t.account_id for t in pendentes}
-    since = min(t.date for t in pendentes) - WINDOW
-    until = max(t.date for t in pendentes) + WINDOW
-    pagamentos = list(
+    accounts = {t.account_id for t in pending}
+    since = min(t.date for t in pending) - WINDOW
+    until = max(t.date for t in pending) + WINDOW
+    payments = list(
         Payment.objects.filter(
-            account_id__in=contas,
+            account_id__in=accounts,
             reversed=False,
             transaction__isnull=True,
             date__range=(since, until),
         ).select_related("installment__entry__patient")
     )
-    movimentos = list(
+    movements = list(
         CashMovement.objects.filter(
-            other_account_id__in=contas,
+            other_account_id__in=accounts,
             transaction__isnull=True,
             created_at__date__range=(since, until),
         ).select_related("cash_register__account")
     )
-    resultado = {}
-    for t in pendentes:
+    result = {}
+    for t in pending:
         amount = abs(t.amount)
         kind = Entry.Kind.RECEIVABLE if t.is_incoming else Entry.Kind.PAYABLE
         # Money taken out of the drawer into the bank is a credit there, and vice versa.
-        tipo_movimento = CashMovement.Kind.WITHDRAWAL if t.is_incoming else CashMovement.Kind.TOP_UP
+        movement_kind = CashMovement.Kind.WITHDRAWAL if t.is_incoming else CashMovement.Kind.TOP_UP
         results = []
-        for p in pagamentos:
+        for p in payments:
             entry = p.installment.entry
             if (
                 p.account_id == t.account_id
@@ -152,12 +152,12 @@ def candidates(transacoes):
                         p,
                     )
                 )
-        for m in movimentos:
+        for m in movements:
             date = timezone.localtime(m.created_at).date()
             if (
                 m.other_account_id == t.account_id
                 and m.amount == amount
-                and m.kind == tipo_movimento
+                and m.kind == movement_kind
                 and abs(date - t.date) <= WINDOW
             ):
                 results.append(
@@ -169,110 +169,110 @@ def candidates(transacoes):
                     )
                 )
         results.sort(key=lambda c: (abs(c.date - t.date), c.date, c.key))
-        resultado[t.pk] = results
-    return resultado
+        result[t.pk] = results
+    return result
 
 
-def _link(transacao, candidato, user):
-    if isinstance(candidato.obj, Payment):
-        transacao.payment = candidato.obj
+def _link(bank_transaction, candidate, user):
+    if isinstance(candidate.obj, Payment):
+        bank_transaction.payment = candidate.obj
     else:
-        transacao.cash_movement = candidato.obj
-    transacao.status = Status.RECONCILED
-    transacao.reconciled_by = user
-    transacao.reconciled_at = timezone.now()
+        bank_transaction.cash_movement = candidate.obj
+    bank_transaction.status = Status.RECONCILED
+    bank_transaction.reconciled_by = user
+    bank_transaction.reconciled_at = timezone.now()
     try:
         with transaction.atomic():
-            transacao.save()
+            bank_transaction.save()
     except IntegrityError:
         # Someone reconciled the same payment with another line a moment ago.
         raise ValidationError(_("Esse lançamento já foi conciliado com outra transação.")) from None
 
 
-def _pending(transacao):
-    transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
-    if transacao.status != Status.PENDING:
+def _pending(bank_transaction):
+    bank_transaction = BankTransaction.objects.select_for_update().get(pk=bank_transaction.pk)
+    if bank_transaction.status != Status.PENDING:
         raise ValidationError(_("Esta transação já foi conciliada ou ignorada."))
-    return transacao
+    return bank_transaction
 
 
 @transaction.atomic
-def reconcile(transacao, key, *, user):
-    transacao = _pending(transacao)
-    for candidato in candidates([transacao]).get(transacao.pk, []):
-        if candidato.key == key:
-            _link(transacao, candidato, user)
-            return transacao
+def reconcile(bank_transaction, key, *, user):
+    bank_transaction = _pending(bank_transaction)
+    for candidate in candidates([bank_transaction]).get(bank_transaction.pk, []):
+        if candidate.key == key:
+            _link(bank_transaction, candidate, user)
+            return bank_transaction
     raise ValidationError(_("Esse lançamento não corresponde a esta transação."))
 
 
 @transaction.atomic
 def reconcile_unique(statement_import, *, user):
     """Reconcile every pending line with exactly one candidate that no other line wants."""
-    transacoes = list(
+    transactions = list(
         BankTransaction.objects.select_for_update().filter(
             statement_import=statement_import, status=Status.PENDING
         )
     )
-    por_transacao = candidates(transacoes)
-    procurados = Counter(c.key for results in por_transacao.values() for c in results)
-    feitas = 0
-    for t in transacoes:
-        results = por_transacao.get(t.pk, [])
-        if len(results) == 1 and procurados[results[0].key] == 1:
+    by_transaction = candidates(transactions)
+    wanted = Counter(c.key for results in by_transaction.values() for c in results)
+    done = 0
+    for t in transactions:
+        results = by_transaction.get(t.pk, [])
+        if len(results) == 1 and wanted[results[0].key] == 1:
             _link(t, results[0], user)
-            feitas += 1
-    return feitas
+            done += 1
+    return done
 
 
 @transaction.atomic
-def create_entry(transacao, *, description, category, payer, method, user):
+def create_entry(bank_transaction, *, description, category, payer, method, user):
     """A new entry, already paid on the statement date, for a line the system did not know."""
-    transacao = _pending(transacao)
+    bank_transaction = _pending(bank_transaction)
     entry = services.create_entry(
-        clinic=transacao.clinic,
-        kind=Entry.Kind.RECEIVABLE if transacao.is_incoming else Entry.Kind.PAYABLE,
+        clinic=bank_transaction.clinic,
+        kind=Entry.Kind.RECEIVABLE if bank_transaction.is_incoming else Entry.Kind.PAYABLE,
         payer=payer or description,
         description=description,
         category=category,
-        total_amount=abs(transacao.amount),
-        parcelas=1,
-        primeiro_vencimento=transacao.date,
+        total_amount=abs(bank_transaction.amount),
+        installments=1,
+        first_due_date=bank_transaction.date,
         user=user,
     )
     payment = services.receive(
         entry.installments.get(),
         user=user,
-        amount=abs(transacao.amount),
+        amount=abs(bank_transaction.amount),
         method=method,
-        account=transacao.account,
-        date=transacao.date,
+        account=bank_transaction.account,
+        date=bank_transaction.date,
     )
-    _link(transacao, Candidate(f"p{payment.pk}", payment.date, "", payment), user)
+    _link(bank_transaction, Candidate(f"p{payment.pk}", payment.date, "", payment), user)
     return entry
 
 
 @transaction.atomic
-def ignore(transacao, *, reason, user):
-    transacao = _pending(transacao)
-    transacao.status = Status.IGNORED
-    transacao.reason = reason
-    transacao.reconciled_by = user
-    transacao.reconciled_at = timezone.now()
-    transacao.save()
+def ignore(bank_transaction, *, reason, user):
+    bank_transaction = _pending(bank_transaction)
+    bank_transaction.status = Status.IGNORED
+    bank_transaction.reason = reason
+    bank_transaction.reconciled_by = user
+    bank_transaction.reconciled_at = timezone.now()
+    bank_transaction.save()
 
 
 @transaction.atomic
-def undo(transacao):
+def undo(bank_transaction):
     """Back to pending. An entry created from the line stays (cancel it if it was wrong)."""
-    transacao = BankTransaction.objects.select_for_update().get(pk=transacao.pk)
-    transacao.status = Status.PENDING
-    transacao.payment = None
-    transacao.cash_movement = None
-    transacao.reason = ""
-    transacao.reconciled_by = None
-    transacao.reconciled_at = None
-    transacao.save()
+    bank_transaction = BankTransaction.objects.select_for_update().get(pk=bank_transaction.pk)
+    bank_transaction.status = Status.PENDING
+    bank_transaction.payment = None
+    bank_transaction.cash_movement = None
+    bank_transaction.reason = ""
+    bank_transaction.reconciled_by = None
+    bank_transaction.reconciled_at = None
+    bank_transaction.save()
 
 
 def system_balance(statement_import):

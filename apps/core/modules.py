@@ -18,21 +18,21 @@ def initial(area):
     return {area} & set(ModuleCode.values) | GENERAL_MODULES
 
 
-def missing(codigos):
+def missing(codes):
     """{module: missing modules it depends on} for the modules in `codigos`."""
-    codigos = set(codigos)
+    codes = set(codes)
     return {
-        modulo: precisa - codigos
-        for modulo, precisa in DEPENDENCIES.items()
-        if modulo in codigos and not precisa <= codigos
+        modulo: needs - codes
+        for modulo, needs in DEPENDENCIES.items()
+        if modulo in codes and not needs <= codes
     }
 
 
 def enabled(request):
     """Enabled module codes of the request's clinic, read once per request."""
-    if not hasattr(request, "_modulos_habilitados"):
+    if not hasattr(request, "_enabled_modules"):
         clinic = getattr(request, "clinic", None)
-        request._modulos_habilitados = (
+        request._enabled_modules = (
             frozenset(
                 ClinicModule.all_objects.filter(clinic=clinic, active=True).values_list(
                     "code", flat=True
@@ -41,7 +41,7 @@ def enabled(request):
             if clinic is not None and clinic.pk is not None
             else frozenset()
         )
-    return request._modulos_habilitados
+    return request._enabled_modules
 
 
 def visible(request):
@@ -62,21 +62,21 @@ def visible_disabled(request):
 def mark_if_disabled(request, code):
     """A page of a turned-off module that the system administrator opened: base.html warns."""
     if code and code not in enabled(request):
-        request.modulo_desligado = ModuleCode(code)
+        request.module_off = ModuleCode(code)
 
 
 @transaction.atomic
-def configure(clinic, codigos):
+def configure(clinic, codes):
     """Replace the enabled modules, retaining disabled rows and their audit history.
 
     `codigos` is the whole set to leave on. Called after the caller's authorization
     (clinic settings/admin). Clinic locking is shared with dental writes, so disabling
     cannot race a new specialized item.
     """
-    codigos = set(codigos)
-    if not codigos <= set(ModuleCode.values):
+    codes = set(codes)
+    if not codes <= set(ModuleCode.values):
         raise ValidationError(_("Módulo clínico desconhecido."))
-    if missing(codigos):
+    if missing(codes):
         raise ValidationError(_("Orçamentos e Pessoal precisam do Financeiro habilitado."))
     if clinic.pk is None:
         raise ValidationError(_("Cadastre a clínica antes de configurar os módulos."))
@@ -85,9 +85,9 @@ def configure(clinic, codigos):
     # remains isolated for queries from all the other modules.
     with without_isolation():
         for code in ModuleCode:
-            modulo, criado = ClinicModule.objects.get_or_create(
-                clinic=clinic, code=code, defaults={"active": code in codigos}
+            modulo, created = ClinicModule.objects.get_or_create(
+                clinic=clinic, code=code, defaults={"active": code in codes}
             )
-            if not criado and modulo.active != (code in codigos):
-                modulo.active = code in codigos
+            if not created and modulo.active != (code in codes):
+                modulo.active = code in codes
                 modulo.save(update_fields=["active"])

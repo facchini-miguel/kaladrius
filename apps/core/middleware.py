@@ -16,14 +16,14 @@ def resolve_clinic(request):
     the installation. Returns (None, None) when there is no clinic for the user.
     """
     user = request.user
-    vinculo = (
+    membership = (
         Membership.objects.filter(user=user, active=True, clinic__active=True)
         .select_related("clinic")
         .order_by("clinic_id")
         .first()
     )
-    if vinculo is not None:
-        return vinculo.clinic, vinculo
+    if membership is not None:
+        return membership.clinic, membership
     if user.is_superuser:
         return Clinic.single(), None
     return None, None
@@ -37,14 +37,14 @@ class CurrentClinicMiddleware:
 
     def __call__(self, request):
         request.clinic = None
-        request.vinculo = None
+        request.membership = None
         if request.path_info.startswith(reverse("admin:index")):
             # The Django admin is restricted to platform superusers (see core/admin.py)
             # and works across every clinic.
             with without_isolation():
                 return self.get_response(request)
         if request.user.is_authenticated:
-            request.clinic, request.vinculo = resolve_clinic(request)
+            request.clinic, request.membership = resolve_clinic(request)
         if request.clinic is not None:
             _use_clinic_country(request, request.clinic)
         try:
@@ -61,10 +61,10 @@ def _use_clinic_country(request, clinic):
         timezone.activate(zoneinfo.ZoneInfo(clinic.time_zone))
     except (zoneinfo.ZoneInfoNotFoundError, ValueError):
         pass  # an unknown zone keeps settings.TIME_ZONE
-    variante = countries.language_variant(translation.get_language(), clinic.country)
-    if variante:
-        translation.activate(variante)
-        request.LANGUAGE_CODE = variante
+    variant = countries.language_variant(translation.get_language(), clinic.country)
+    if variant:
+        translation.activate(variant)
+        request.LANGUAGE_CODE = variant
 
 
 class ReverseProxyMiddleware:
@@ -79,9 +79,9 @@ class ReverseProxyMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        encaminhado = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        if encaminhado:
-            request.META["REMOTE_ADDR"] = encaminhado.split(",")[-1].strip()
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if forwarded:
+            request.META["REMOTE_ADDR"] = forwarded.split(",")[-1].strip()
         return self.get_response(request)
 
 

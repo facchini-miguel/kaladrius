@@ -36,8 +36,8 @@ def record_types():
 
     from .signals import AUDITED
 
-    documentos = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
-    return sorted({model_label(model) for model in [*AUDITED, *documentos]})
+    documents = [Visit, Addendum, Certificate, Prescription, ExamRequest, Attachment]
+    return sorted({model_label(model) for model in [*AUDITED, *documents]})
 
 
 @cache
@@ -47,31 +47,30 @@ def _labels():
     from .old_names import OLD_FIELD_NAMES
     from .signals import AUDITED
 
-    rotulos = {}
+    labels = {}
     for model in AUDITED:
-        fields = rotulos.setdefault(model_label(model), {})
+        fields = labels.setdefault(model_label(model), {})
         for field in model._meta.concrete_fields:
             for name in {field.column, field.column.removesuffix("_id"), field.attname, field.name}:
                 fields[name] = field.verbose_name
         for old, name in OLD_FIELD_NAMES.get(model._meta.label, {}).items():
             fields.setdefault(old, model._meta.get_field(name).verbose_name)
-    return rotulos
+    return labels
 
 
 def changed_fields(record):
     """The entry's changes as (label, before, after), in the user's language. A field the
     model no longer has (or "senha") shows its stored name."""
-    rotulos = _labels().get(record.model_name, {})
+    labels = _labels().get(record.model_name, {})
     return [
-        (rotulos.get(field, field), valores[0], valores[1])
-        for field, valores in record.changes.items()
+        (labels.get(field, field), values[0], values[1]) for field, values in record.changes.items()
     ]
 
 
 @requires_permission(Module.AUDIT, Action.VIEW)
 def audit_list(request):
     # Always restricted to the current clinic: this model is not auto-isolated.
-    registros = AuditEntry.objects.filter(clinic=request.clinic)
+    records = AuditEntry.objects.filter(clinic=request.clinic)
     filters = {
         "q": request.GET.get("q", "").strip(),
         "action": request.GET.get("action", ""),
@@ -79,22 +78,22 @@ def audit_list(request):
         "since": request.GET.get("since", ""),
         "until": request.GET.get("until", ""),
     }
-    modelos = record_types()
+    model_list = record_types()
     if filters["q"]:
-        registros = registros.filter(
+        records = records.filter(
             Q(user_name__icontains=filters["q"])
             | Q(object_repr__icontains=filters["q"])
             | Q(object_id=filters["q"])
         )
     if filters["action"] in AuditEntry.Action.values:
-        registros = registros.filter(action=filters["action"])
+        records = records.filter(action=filters["action"])
     if filters["model_name"]:
-        registros = registros.filter(model_name=filters["model_name"])
+        records = records.filter(model_name=filters["model_name"])
     if since := _date(filters["since"]):
-        registros = registros.filter(timestamp__date__gte=since)
+        records = records.filter(timestamp__date__gte=since)
     if until := _date(filters["until"]):
-        registros = registros.filter(timestamp__date__lte=until)
-    page = Paginator(registros, PER_PAGE).get_page(request.GET.get("page"))
+        records = records.filter(timestamp__date__lte=until)
+    page = Paginator(records, PER_PAGE).get_page(request.GET.get("page"))
     for record in page:
         record.fields = changed_fields(record)
     return render(
@@ -105,6 +104,6 @@ def audit_list(request):
             "filters": filters,
             "query": urlencode(filters),
             "actions": AuditEntry.Action.choices,
-            "model_names": modelos,
+            "model_names": model_list,
         },
     )

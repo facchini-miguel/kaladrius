@@ -470,7 +470,7 @@ def test_simulate_activity_respects_taken_slots(scenario):
         )
     with pytest.raises(CommandError):
         call_command("simulate_activity", clinic=scenario["clinic"].name)
-    call_command("simulate_activity", clinic=scenario["clinic"].name, confirmar=True)
+    call_command("simulate_activity", clinic=scenario["clinic"].name, confirm=True)
 
     with use_clinic(scenario["clinic"]):
         new_items = Appointment.objects.exclude(pk=existing.pk)
@@ -491,9 +491,9 @@ def test_simulate_only_recalls(scenario):
     call_command(
         "simulate_activity",
         clinic=scenario["clinic"].name,
-        sem_agenda=True,
-        rechamadas=5,
-        confirmar=True,
+        no_schedule=True,
+        recalls=5,
+        confirm=True,
     )
     with use_clinic(scenario["clinic"]):
         assert not Appointment.objects.exists()

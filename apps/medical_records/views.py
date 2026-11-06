@@ -39,18 +39,18 @@ def requires_practitioner(view):
 
     @wraps(view)
     @login_required
-    def protegida(request, *args, **kwargs):
+    def protected(request, *args, **kwargs):
         if not accesses_medical_records(request):
             raise PermissionDenied
         modules.mark_if_disabled(request, ModuleCode.MEDICAL_RECORDS)
         return view(request, user_practitioner(request), *args, **kwargs)
 
-    return protegida
+    return protected
 
 
-def _audit(acao, visit, fields):
+def _audit(action, visit, fields):
     if fields:
-        log_event(acao, visit, changes={field: [CONFIDENTIAL, CONFIDENTIAL] for field in fields})
+        log_event(action, visit, changes={field: [CONFIDENTIAL, CONFIDENTIAL] for field in fields})
 
 
 def _finalize(request, visit):
@@ -70,15 +70,15 @@ def new_visit(request, practitioner, patient):
     code = request.POST.get("appointment") or request.GET.get("appointment") or ""
     if code.isdecimal():
         appointment = get_object_or_404(Appointment.objects, pk=code, patient=patient)
-        existente = Visit.objects.filter(appointment=appointment).first()
-        if existente is not None:
-            return redirect("medical_records:visit", pk=existente.pk)
-    inicial = {"date": appointment.start if appointment else timezone.now()}
-    profissionais = None
+        existing_one = Visit.objects.filter(appointment=appointment).first()
+        if existing_one is not None:
+            return redirect("medical_records:visit", pk=existing_one.pk)
+    initial = {"date": appointment.start if appointment else timezone.now()}
+    practitioners = None
     if manages_medical_records(request):
-        profissionais = Practitioner.objects.filter(active=True)
-        inicial["practitioner"] = appointment.practitioner if appointment else practitioner
-    form = VisitForm(request.POST or None, initial=inicial, profissionais=profissionais)
+        practitioners = Practitioner.objects.filter(active=True)
+        initial["practitioner"] = appointment.practitioner if appointment else practitioner
+    form = VisitForm(request.POST or None, initial=initial, practitioners=practitioners)
     if request.method == "POST" and form.is_valid():
         visit = form.save(commit=False)
         visit.patient = patient
@@ -105,17 +105,17 @@ def visit(request, practitioner, pk):
         Visit.objects.select_related("patient", "practitioner", "appointment"), pk=pk
     )
     # Only its author (or the system administrator) changes a visit, until it is finalized.
-    administra = manages_medical_records(request)
-    do_autor = practitioner is not None and visit.practitioner_id == practitioner.pk
-    editavel = not visit.is_finalized and (do_autor or administra)
+    manages = manages_medical_records(request)
+    by_author = practitioner is not None and visit.practitioner_id == practitioner.pk
+    editavel = not visit.is_finalized and (by_author or manages)
     form = VisitForm(request.POST or None, instance=visit) if editavel else None
     if request.method == "POST":
         if not editavel:
             raise PermissionDenied
         if form.is_valid():
-            alterados = list(form.changed_data)
+            changed_ones = list(form.changed_data)
             form.save()
-            _audit(Action.CHANGE, visit, alterados)
+            _audit(Action.CHANGE, visit, changed_ones)
             if request.POST.get("action") == "finalizar":
                 _finalize(request, visit)
             else:
@@ -136,8 +136,8 @@ def visit(request, practitioner, pk):
             "addenda": visit.addenda.select_related("practitioner"),
             "addendum_form": AddendumForm() if visit.is_finalized else None,
             # Certificates and prescriptions are issued by the visit's author (decision 082).
-            "issues_documents": do_autor or administra,
-            "is_admin": administra,
+            "issues_documents": by_author or manages,
+            "is_admin": manages,
             "certificates": visit.certificates.all(),
             "prescriptions": visit.prescriptions.all(),
             "exam_requests": visit.exam_requests.all(),
@@ -159,8 +159,8 @@ def _fields(visit):
 def _by_author(request, practitioner, pk):
     """The visit, if the user is its author or the system administrator."""
     visit = get_object_or_404(Visit.objects.select_related("patient"), pk=pk)
-    do_autor = practitioner is not None and visit.practitioner_id == practitioner.pk
-    if not (do_autor or manages_medical_records(request)):
+    by_author = practitioner is not None and visit.practitioner_id == practitioner.pk
+    if not (by_author or manages_medical_records(request)):
         raise PermissionDenied
     return visit
 
@@ -189,12 +189,12 @@ def new_certificate(request, practitioner, pk):
     visit = _by_author(request, practitioner, pk)
     appointment = visit.appointment
     timestamp = timezone.localtime(appointment.start if appointment else visit.date)
-    inicial = {
+    initial = {
         "date": timestamp.date(),
         "start_time": timestamp.time().replace(second=0, microsecond=0),
         "end_time": timezone.localtime(appointment.end).time() if appointment else None,
     }
-    form = CertificateForm(request.POST or None, initial=inicial)
+    form = CertificateForm(request.POST or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         certificate = form.save(commit=False)
         certificate.visit = visit
@@ -285,21 +285,21 @@ def new_exam_request(request, practitioner, pk):
     visit = _by_author(request, practitioner, pk)
     form = ExamRequestForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        pedido = form.save(commit=False)
-        pedido.visit = visit
-        pedido.practitioner = visit.practitioner
-        pedido.created_by = request.user
-        pedido.save()
+        exam_order = form.save(commit=False)
+        exam_order.visit = visit
+        exam_order.practitioner = visit.practitioner
+        exam_order.created_by = request.user
+        exam_order.save()
         log_event(
             Action.CREATE,
-            pedido,
+            exam_order,
             changes={
                 "exams": [None, CONFIDENTIAL],
-                **({"indication": [None, CONFIDENTIAL]} if pedido.indication else {}),
+                **({"indication": [None, CONFIDENTIAL]} if exam_order.indication else {}),
             },
         )
         messages.success(request, _("Pedido de exames emitido."))
-        return redirect("medical_records:exam_request", pk=pedido.pk)
+        return redirect("medical_records:exam_request", pk=exam_order.pk)
     return render(
         request,
         "medical_records/document_form.html",
@@ -309,13 +309,13 @@ def new_exam_request(request, practitioner, pk):
 
 @requires_practitioner
 def exam_request(request, practitioner, pk):
-    pedido = get_object_or_404(
+    exam_order = get_object_or_404(
         ExamRequest.objects.select_related("visit__patient", "practitioner"), pk=pk
     )
-    log_event(Action.VIEWED, pedido)
-    rows = [row for row in pedido.exams.splitlines() if row.strip()]
+    log_event(Action.VIEWED, exam_order)
+    rows = [row for row in exam_order.exams.splitlines() if row.strip()]
     return render(
-        request, "medical_records/exam_request.html", {"exam_request": pedido, "rows": rows}
+        request, "medical_records/exam_request.html", {"exam_request": exam_order, "rows": rows}
     )
 
 
@@ -334,7 +334,7 @@ def upload_attachment(request, practitioner, pk):
             visit=visit,
             description=form.cleaned_data["description"],
             name=file.name[:255],
-            kind=file.tipo_conferido,
+            kind=file.checked_kind,
             size=file.size,
             content=file.read(),
             practitioner=practitioner or visit.practitioner,
@@ -348,7 +348,7 @@ def upload_attachment(request, practitioner, pk):
         )
         messages.success(request, _("Anexo incluído."))
     else:
-        messages.error(request, " ".join(e for erros in form.errors.values() for e in erros))
+        messages.error(request, " ".join(e for errors in form.errors.values() for e in errors))
     return redirect("medical_records:visit", pk=visit.pk)
 
 
@@ -372,8 +372,8 @@ def remove_attachment(request, practitioner, pk):
     attachment = get_object_or_404(
         Attachment.objects.select_related("visit").defer("content"), pk=pk
     )
-    quem_enviou = attachment.created_by_id == request.user.pk
-    if attachment.visit.is_finalized or not (quem_enviou or manages_medical_records(request)):
+    sender = attachment.created_by_id == request.user.pk
+    if attachment.visit.is_finalized or not (sender or manages_medical_records(request)):
         raise PermissionDenied
     visit = attachment.visit
     log_event(

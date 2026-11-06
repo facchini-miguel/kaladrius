@@ -10,12 +10,12 @@ class VisitForm(BootstrapForm, forms.ModelForm):
     """With `profissionais`, a new visit also asks on behalf of which practitioner it is
     written (the system administrator, decision 087)."""
 
-    def __init__(self, *args, profissionais=None, **kwargs):
-        if profissionais is not None:
+    def __init__(self, *args, practitioners=None, **kwargs):
+        if practitioners is not None:
             # Before the mixin's __init__, so it gets the Bootstrap classes too.
             self.base_fields = {
                 "practitioner": forms.ModelChoiceField(
-                    queryset=profissionais, label=_("Profissional")
+                    queryset=practitioners, label=_("Profissional")
                 ),
                 **self.base_fields,
             }
@@ -104,8 +104,8 @@ class AttachmentForm(BootstrapForm, forms.Form):
             raise forms.ValidationError(_("O arquivo passa de 10 MB."))
         start = file.read(8)
         file.seek(0)
-        kind = next((kind for assinatura, kind in SIGNATURES if start.startswith(assinatura)), None)
+        kind = next((kind for signature, kind in SIGNATURES if start.startswith(signature)), None)
         if kind is None:
             raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
-        file.tipo_conferido = kind
+        file.checked_kind = kind
         return file

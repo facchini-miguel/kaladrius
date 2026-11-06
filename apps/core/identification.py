@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-from stdnum import exceptions as stdnum_erros
+from stdnum import exceptions as stdnum_errors
 from stdnum.ar import cuit, dni
 from stdnum.au import abn
 from stdnum.ca import bn, sin
@@ -45,16 +45,16 @@ class _Invalid(ValueError):
     pass
 
 
-def _require(condicao):
-    if not condicao:
+def _require(condition):
+    if not condition:
         raise _Invalid
 
 
 def _regex(default):
-    def validar(value):
+    def validate(value):
         _require(re.fullmatch(default, value))
 
-    return validar
+    return validate
 
 
 def _thousands(value):
@@ -66,17 +66,17 @@ def _thousands(value):
 class Document:
     abbreviation: str  # its official name, the same in every language
     example: str  # the field's placeholder, written the country's way
-    validar: object  # compact value → raises if invalid
+    validate: object  # compact value → raises if invalid
     format_amount: object = None  # compact (and valid) value → as written; None: as stored
-    letras: str = ""  # characters kept besides A-Z and 0-9 (Mexico's Ñ and &)
+    letters: str = ""  # characters kept besides A-Z and 0-9 (Mexico's Ñ and &)
 
     def normalize(self, value):
-        return re.sub(f"[^0-9A-Z{self.letras}]", "", (value or "").upper())
+        return re.sub(f"[^0-9A-Z{self.letters}]", "", (value or "").upper())
 
     def is_valid(self, value):
         try:
-            self.validar(value)
-        except (stdnum_erros.ValidationError, _Invalid, ValueError):
+            self.validate(value)
+        except (stdnum_errors.ValidationError, _Invalid, ValueError):
             return False
         return True
 
@@ -96,19 +96,19 @@ class Documents:
     pessoa: Document | None
     empresa: Document | None
     # Examples for the practitioner's professional registration (free text).
-    registro_profissional: str = ""
+    professional_registration: str = ""
 
     def for_role(self, role):
         return getattr(self, role) if role in DOCUMENT_ROLES else None
 
     def of_roles(self, *roles):
         """The documents of these roles, without repeats or Nones, in order."""
-        vistos = []
+        seen = []
         for role in roles:
             document = self.for_role(role)
-            if document is not None and document not in vistos:
-                vistos.append(document)
-        return vistos
+            if document is not None and document not in seen:
+                seen.append(document)
+        return seen
 
     def label(self, *roles):
         """ "CPF/CNPJ", "RUT", "EIN": the field's name for these roles."""
@@ -138,16 +138,16 @@ CNPJ = Document("CNPJ", "00.000.000/0000-00", _cnpj, _write_cnpj)
 
 # ---- Mexico. The RFC's check digit is not checked: many issued RFCs fail it (python-stdnum).
 def _rfc(size):
-    def validar(value):
+    def validate(value):
         _require(len(value) == size)
         rfc.validate(value)
 
-    return validar
+    return validate
 
 
 CURP = Document("CURP", "BOXW310820HNERXN09", curp.validate)
-RFC_PERSON = Document("RFC", "GODE561231GR8", _rfc(13), letras="Ñ&")
-RFC_COMPANY = Document("RFC", "ABC680524P76", _rfc(12), letras="Ñ&")
+RFC_PERSON = Document("RFC", "GODE561231GR8", _rfc(13), letters="Ñ&")
+RFC_COMPANY = Document("RFC", "ABC680524P76", _rfc(12), letters="Ñ&")
 
 # ---- Argentina: the DNI identifies people; the CUIT (or CUIL) is the tax number.
 DNI_AR = Document("DNI", "12.345.678", dni.validate, dni.format)
@@ -169,8 +169,8 @@ RUC_PE = Document("RUC", "20512333797", pe_ruc.validate)
 def _cedula_uy(value):
     _require(re.fullmatch(r"\d{6,8}", value))
     number = value.zfill(8)
-    soma = sum(int(d) * p for d, p in zip(number[:7], (2, 9, 8, 7, 6, 3, 4), strict=True))
-    _require((10 - soma % 10) % 10 == int(number[7]))
+    weighted_sum = sum(int(d) * p for d, p in zip(number[:7], (2, 9, 8, 7, 6, 3, 4), strict=True))
+    _require((10 - weighted_sum % 10) % 10 == int(number[7]))
 
 
 def _write_cedula_uy(v):
@@ -224,8 +224,8 @@ BN = Document("Business Number", "123456782 RT0001", bn.validate, _write_bn)
 # number is not kept: the law restricts who may record it.
 def _medicare(value):
     _require(re.fullmatch(r"[2-6]\d{9,10}", value))
-    soma = sum(int(d) * p for d, p in zip(value[:8], (1, 3, 7, 9, 1, 3, 7, 9), strict=True))
-    _require(soma % 10 == int(value[8]))
+    weighted_sum = sum(int(d) * p for d, p in zip(value[:8], (1, 3, 7, 9, 1, 3, 7, 9), strict=True))
+    _require(weighted_sum % 10 == int(value[8]))
 
 
 def _write_medicare(v):
@@ -273,15 +273,15 @@ def roles(text):
     return tuple(p.strip() for p in (text or "").split(",") if p.strip()) or DOCUMENT_ROLES
 
 
-def identify(value, papeis_=None, country=None):
+def identify(value, roles_=None, country=None):
     """The document of these roles (all of them by default) this value is valid as."""
-    for document in for_country(country).of_roles(*(papeis_ or DOCUMENT_ROLES)):
+    for document in for_country(country).of_roles(*(roles_ or DOCUMENT_ROLES)):
         if document.is_valid(value):
             return document
     return None
 
 
-def write(value, papeis_=None, country=None):
+def write(value, roles_=None, country=None):
     """The stored value written the country's way. In Brazil, as always, by its length."""
     value = value or ""
     if (country or countries.clinic_country()) == "BR":
@@ -290,32 +290,32 @@ def write(value, papeis_=None, country=None):
         if len(value) == 14:
             return _write_cnpj(value)
         return value
-    document = identify(value, papeis_, country)
+    document = identify(value, roles_, country)
     return document.write(value) if document else value
 
 
-def abbreviation(value, papeis_=None, country=None):
+def abbreviation(value, roles_=None, country=None):
     """The name of the document this value is ("CNPJ"), or of every one the roles may have
     ("CPF/CNPJ") when it is none of them."""
-    document = identify(value, papeis_, country) if value else None
+    document = identify(value, roles_, country) if value else None
     if document is not None:
         return document.abbreviation
-    return for_country(country).label(*(papeis_ or DOCUMENT_ROLES))
+    return for_country(country).label(*(roles_ or DOCUMENT_ROLES))
 
 
 def invalid(label):
     return gettext("%(documento)s: número inválido.") % {"documento": label}
 
 
-def clean_value(value, documentos, label):
+def clean_value(value, documents, label):
     """Normalize a typed value and check it is one of these documents; ValidationError if not.
 
     Returns the compact value ("" when empty).
     """
     if not (value or "").strip():
         return ""
-    for document in documentos:
-        compacto = document.normalize(value)
-        if document.is_valid(compacto):
-            return compacto
+    for document in documents:
+        compact = document.normalize(value)
+        if document.is_valid(compact):
+            return compact
     raise ValidationError(invalid(label))

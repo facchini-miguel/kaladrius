@@ -69,7 +69,7 @@ class Clinic(models.Model):
 
         DENTISTRY = "odontologia", _("Odontologia")
         MEDICINE = "medicina", _("Medicina")
-        OUTRA = "outra", _("Outra área da saúde")
+        OTHER = "outra", _("Outra área da saúde")
 
     name = models.CharField(_("nome"), max_length=200)
     area = models.CharField(

@@ -36,28 +36,28 @@ class Statement:
     end: datetime.date | None
     balance: Decimal | None
     balance_date: datetime.date | None
-    transacoes: list
+    transactions: list
     # Transaction blocks whose date or amount could not be read (reported to the user).
     unreadable_transactions: int = 0
 
 
 def _text(content: bytes) -> str:
-    cabecalho = content[:500].decode("ascii", errors="ignore").upper()
-    if "CHARSET:1252" in cabecalho or "ENCODING:USASCII" in cabecalho:
+    header = content[:500].decode("ascii", errors="ignore").upper()
+    if "CHARSET:1252" in header or "ENCODING:USASCII" in header:
         candidates = ("cp1252", "utf-8")
     else:
         candidates = ("utf-8", "cp1252")
-    for codificacao in candidates:
+    for encoding in candidates:
         try:
-            return content.decode(codificacao)
+            return content.decode(encoding)
         except UnicodeDecodeError:
             continue
     return content.decode("latin-1")
 
 
-def _field(bloco, tag):
-    achado = re.search(rf"<{tag}>([^<\r\n]*)", bloco, re.IGNORECASE)
-    return achado.group(1).strip() if achado else ""
+def _field(block, tag):
+    found_match = re.search(rf"<{tag}>([^<\r\n]*)", block, re.IGNORECASE)
+    return found_match.group(1).strip() if found_match else ""
 
 
 def _date(value):
@@ -85,50 +85,50 @@ def read(content: bytes) -> Statement:
     text = _text(content)
     if "<OFX>" not in text.upper():
         raise InvalidFile(_("O arquivo não é um extrato OFX."))
-    transacoes = []
-    vistos = {}
+    transactions = []
+    seen = {}
     unreadable_transactions = 0
-    for bloco in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", text, re.IGNORECASE | re.DOTALL):
-        date = _date(_field(bloco, "DTPOSTED"))
-        amount = _amount(_field(bloco, "TRNAMT"))
+    for block in re.findall(r"<STMTTRN>(.*?)</STMTTRN>", text, re.IGNORECASE | re.DOTALL):
+        date = _date(_field(block, "DTPOSTED"))
+        amount = _amount(_field(block, "TRNAMT"))
         if date is None or amount is None:
             unreadable_transactions += 1
             continue
         if amount == 0:  # nothing moved (some banks list balance lines this way)
             continue
-        memo = _field(bloco, "MEMO")
-        name = _field(bloco, "NAME")
+        memo = _field(block, "MEMO")
+        name = _field(block, "NAME")
         description = " · ".join(dict.fromkeys(p for p in (name, memo) if p)) or _field(
-            bloco, "TRNTYPE"
+            block, "TRNTYPE"
         )
         fitid = (
-            _field(bloco, "FITID")
+            _field(block, "FITID")
             or hashlib.sha1(  # noqa: S324 (an id, not security)
                 f"{date}|{amount}|{description}".encode()
             ).hexdigest()
         )
         # Some banks repeat a FITID inside the same file: keep both transactions.
-        vistos[fitid] = vistos.get(fitid, 0) + 1
-        if vistos[fitid] > 1:
-            fitid = f"{fitid}#{vistos[fitid]}"
-        transacoes.append(
+        seen[fitid] = seen.get(fitid, 0) + 1
+        if seen[fitid] > 1:
+            fitid = f"{fitid}#{seen[fitid]}"
+        transactions.append(
             Transaction(
                 fitid=fitid[:120],
                 date=date,
                 amount=amount,
                 description=description[:200],
-                kind=_field(bloco, "TRNTYPE")[:20],
+                kind=_field(block, "TRNTYPE")[:20],
             )
         )
-    saldo_bloco = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", text, re.I | re.S)
-    saldo_texto = saldo_bloco.group(1) if saldo_bloco else ""
+    balance_block = re.search(r"<LEDGERBAL>(.*?)(</LEDGERBAL>|<AVAILBAL>|$)", text, re.I | re.S)
+    balance_text = balance_block.group(1) if balance_block else ""
     return Statement(
         bank_code=_field(text, "BANKID")[:20],
         account=_field(text, "ACCTID")[:40],
         start=_date(_field(text, "DTSTART")),
         end=_date(_field(text, "DTEND")),
-        balance=_amount(_field(saldo_texto, "BALAMT")) if saldo_texto else None,
-        balance_date=_date(_field(saldo_texto, "DTASOF")) if saldo_texto else None,
-        transacoes=transacoes,
+        balance=_amount(_field(balance_text, "BALAMT")) if balance_text else None,
+        balance_date=_date(_field(balance_text, "DTASOF")) if balance_text else None,
+        transactions=transactions,
         unreadable_transactions=unreadable_transactions,
     )

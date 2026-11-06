@@ -73,17 +73,17 @@ class CurrentClinicFilter(models.Expression):
     def get_source_expressions(self):
         return [self.column] if self.column is not None else []
 
-    def set_source_expressions(self, expressoes):
-        self.column = expressoes[0] if expressoes else None
+    def set_source_expressions(self, expressions):
+        self.column = expressions[0] if expressions else None
 
     def resolve_expression(
         self, query=None, allow_joins=True, reuse=None, summarize=False, for_save=False
     ):
-        copia = self.copy()
-        copia.column = models.F("clinic_id").resolve_expression(
+        duplicate = self.copy()
+        duplicate.column = models.F("clinic_id").resolve_expression(
             query, allow_joins, reuse, summarize, for_save
         )
-        return copia
+        return duplicate
 
     def as_sql(self, compiler, connection):
         if not isolation_active():
@@ -91,8 +91,8 @@ class CurrentClinicFilter(models.Expression):
         clinic = current_clinic()
         if clinic is None:
             raise NoCurrentClinic("Clinic data queried with no current clinic set.")
-        column, parametros = compiler.compile(self.column)
-        return f"({column} = %s)", [*parametros, clinic.pk]
+        column, parameters = compiler.compile(self.column)
+        return f"({column} = %s)", [*parameters, clinic.pk]
 
 
 class ClinicManager(models.Manager):

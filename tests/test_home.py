@@ -10,7 +10,7 @@ from django.utils import timezone
 from apps.core.isolation import use_clinic
 from apps.core.models import Role
 from apps.estimates.models import Estimate
-from apps.finance import services as financeiro
+from apps.finance import services as finance_services
 from apps.finance.models import CashRegister, Category, Entry, FinancialAccount
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
@@ -98,21 +98,21 @@ def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
         expense = Category.objects.get(name="Outras despesas")
 
         def post_entry(kind, amount, installments, due_date, category, **fields):
-            entry = financeiro.create_entry(
+            entry = finance_services.create_entry(
                 clinic=clinic_a,
                 kind=kind,
                 description="Teste",
                 category=category,
                 total_amount=Decimal(amount),
-                parcelas=installments,
-                primeiro_vencimento=due_date,
+                installments=installments,
+                first_due_date=due_date,
                 user=users["admin"],
                 **fields,
             )
             return list(entry.installments.order_by("number"))
 
         def pay_(installment, amount, date, method="pix"):
-            financeiro.receive(
+            finance_services.receive(
                 installment,
                 user=users["admin"],
                 amount=Decimal(amount),

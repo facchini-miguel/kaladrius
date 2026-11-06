@@ -22,8 +22,8 @@ class Command(BaseCommand):
         auditoria, _ = AuditEntry.objects.filter(
             action=AuditEntry.Action.LOGIN_FAILED, timestamp__lt=limit
         ).delete()
-        tentativas, _ = AccessAttempt.objects.filter(attempt_time__lt=limit).delete()
+        attempts, _ = AccessAttempt.objects.filter(attempt_time__lt=limit).delete()
         self.stdout.write(
             f"Tentativas de entrada recusadas apagadas: {auditoria} da auditoria, "
-            f"{tentativas} do bloqueio de senhas."
+            f"{attempts} do bloqueio de senhas."
         )

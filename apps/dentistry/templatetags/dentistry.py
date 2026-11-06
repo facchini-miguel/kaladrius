@@ -8,8 +8,8 @@ register = template.Library()
 
 
 @register.filter
-def tooth_name(dente):
-    return teeth.name(dente)
+def tooth_name(tooth):
+    return teeth.name(tooth)
 
 
 @register.simple_tag

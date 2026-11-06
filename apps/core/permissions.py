@@ -107,7 +107,7 @@ CLINIC_MODULE = {
 }
 
 
-def can(request, modulo, acao):
+def can(request, modulo, action):
     """Whether the current user may perform `acao` on `modulo` in the current clinic."""
     user = request.user
     if not user.is_authenticated or getattr(request, "clinic", None) is None:
@@ -116,12 +116,12 @@ def can(request, modulo, acao):
         return False
     if user.is_superuser:
         return True
-    vinculo = getattr(request, "vinculo", None)
-    if vinculo is None:
+    membership = getattr(request, "membership", None)
+    if membership is None:
         return False
-    if user.demo and modulo in READ_ONLY_IN_DEMO and acao != Action.VIEW:
+    if user.demo and modulo in READ_ONLY_IN_DEMO and action != Action.VIEW:
         return False
-    return acao in MATRIX.get(vinculo.role, {}).get(modulo, frozenset())
+    return action in MATRIX.get(membership.role, {}).get(modulo, frozenset())
 
 
 def own_schedule_only(request):
@@ -129,36 +129,38 @@ def own_schedule_only(request):
 
     "Own" means the Profissional record linked to the user (Cadastros > Profissionais).
     """
-    vinculo = getattr(request, "vinculo", None)
+    membership = getattr(request, "membership", None)
     return (
-        not request.user.is_superuser and vinculo is not None and vinculo.role == Role.PRACTITIONER
+        not request.user.is_superuser
+        and membership is not None
+        and membership.role == Role.PRACTITIONER
     )
 
 
 def permissions_table(request):
     """All permissions as {modulo: {acao: bool}}, for use in templates."""
     return {
-        modulo.value: {acao.value: can(request, modulo, acao) for acao in Action}
+        modulo.value: {action.value: can(request, modulo, action) for action in Action}
         for modulo in Module
     }
 
 
-def requires_permission(modulo, acao):
+def requires_permission(modulo, action):
     """View decorator: requires login, a current clinic and the given permission."""
 
-    def decorador(view):
+    def decorator(view):
         @wraps(view)
         @login_required
-        def protegida(request, *args, **kwargs):
+        def protected(request, *args, **kwargs):
             if request.clinic is None:
                 if request.user.is_superuser:
                     return redirect("register_clinic")
                 return render(request, "core/no_clinic.html", status=403)
-            if not can(request, modulo, acao):
+            if not can(request, modulo, action):
                 raise PermissionDenied
             modules.mark_if_disabled(request, CLINIC_MODULE.get(modulo))
             return view(request, *args, **kwargs)
 
-        return protegida
+        return protected
 
-    return decorador
+    return decorator

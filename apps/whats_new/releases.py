@@ -147,10 +147,10 @@ ITEM_FIELDS = {"kind", "module", "audience", "text", "source", "pr"}
 
 
 def _known_fields(raw, fields, version):
-    desconhecidos = sorted(set(raw) - fields)
-    if desconhecidos:
+    unknown = sorted(set(raw) - fields)
+    if unknown:
         raise InvalidReleases(
-            f"{version}: campo(s) desconhecido(s): {', '.join(desconhecidos)}. "
+            f"{version}: campo(s) desconhecido(s): {', '.join(unknown)}. "
             f"Use: {', '.join(sorted(fields))}."
         )
 

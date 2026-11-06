@@ -9,7 +9,7 @@ from django.core.management.base import CommandError
 from django.db import connection, migrations, models
 from django.db.migrations.loader import MigrationLoader
 
-from apps.core.management.commands import migrations_report as relatorio
+from apps.core.management.commands import migrations_report as report
 
 HEALTH_PLANS = ("convenios", "0003_seguros_de_cada_pais")
 
@@ -23,18 +23,18 @@ def _types(alerts):
 
 
 def _alerts(operation):
-    return _types(relatorio.operation_alerts(operation, "convenios", _before(*HEALTH_PLANS)))
+    return _types(report.operation_alerts(operation, "convenios", _before(*HEALTH_PLANS)))
 
 
 @pytest.mark.django_db
 def test_operations_that_delete_or_break_rollback():
     remove_ = migrations.RemoveField("carteirinha", "titular")
-    assert _alerts(remove_) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
+    assert _alerts(remove_) == [report.DELETES, report.BREAKS_ROLLBACK]
     # The previous version still queries the dropped table: every page using it would fail.
     table = migrations.DeleteModel("Carteirinha")
-    assert _alerts(table) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
+    assert _alerts(table) == [report.DELETES, report.BREAKS_ROLLBACK]
     rename = migrations.RenameField("convenio", "nome", "nome_novo")
-    assert relatorio.BREAKS_ROLLBACK in _alerts(rename)
+    assert report.BREAKS_ROLLBACK in _alerts(rename)
 
 
 @pytest.mark.django_db
@@ -43,44 +43,44 @@ def test_rename_keeping_table_and_column_does_not_warn():
     database; the previous version still works."""
     before = _before(*HEALTH_PLANS)
     pin_ = migrations.AlterModelTable("convenio", "convenios_convenio")
-    assert relatorio.operation_alerts(pin_, "convenios", before) == []
-    before = relatorio._after(pin_, "convenios", before)
+    assert report.operation_alerts(pin_, "convenios", before) == []
+    before = report._after(pin_, "convenios", before)
     template_ = migrations.RenameModel("Convenio", "HealthPlan")
-    assert relatorio.operation_alerts(template_, "convenios", before) == []
+    assert report.operation_alerts(template_, "convenios", before) == []
     # The table follows the model's name when it is not pinned: the previous version breaks.
     loose_one = migrations.RenameModel("Carteirinha", "Card")
-    assert _types(relatorio.operation_alerts(loose_one, "convenios", before)) == [
-        relatorio.BREAKS_ROLLBACK
+    assert _types(report.operation_alerts(loose_one, "convenios", before)) == [
+        report.BREAKS_ROLLBACK
     ]
-    before = relatorio._after(template_, "convenios", before)
+    before = report._after(template_, "convenios", before)
     column = migrations.AlterField(
         "healthplan", "nome", models.CharField(max_length=100, db_column="nome")
     )
-    before = relatorio._after(column, "convenios", before)
+    before = report._after(column, "convenios", before)
     field = migrations.RenameField("healthplan", "nome", "name")
-    assert relatorio.operation_alerts(field, "convenios", before) == []
+    assert report.operation_alerts(field, "convenios", before) == []
 
 
 @pytest.mark.django_db
 def test_irreversible_operations_and_altered_fields():
     without_return = migrations.RunPython(lambda apps, schema: None)
-    assert _alerts(without_return) == [relatorio.NO_ROLLBACK]
+    assert _alerts(without_return) == [report.NO_ROLLBACK]
     with_return = migrations.RunPython(lambda a, s: None, migrations.RunPython.noop)
     assert _alerts(with_return) == []
     # convenio.nome is varchar(200): shorter or another type deserve a look.
     assert _alerts(migrations.AlterField("convenio", "nome", models.CharField(max_length=50))) == [
-        relatorio.REVIEW
+        report.REVIEW
     ]
     assert (
         _alerts(migrations.AlterField("convenio", "nome", models.CharField(max_length=300))) == []
     )
     assert _alerts(migrations.AlterField("convenio", "nome", models.IntegerField())) == [
-        relatorio.REVIEW
+        report.REVIEW
     ]
     # carteirinha.validade may be empty: made required, existing rows and the previous version
     # (which may still save it empty) fail.
     is_required = migrations.AlterField("carteirinha", "validade", models.DateField())
-    assert _alerts(is_required) == [relatorio.REVIEW, relatorio.BREAKS_ROLLBACK]
+    assert _alerts(is_required) == [report.REVIEW, report.BREAKS_ROLLBACK]
 
 
 @pytest.mark.django_db
@@ -105,7 +105,7 @@ def test_new_required_column():
     is_required = migrations.AddField(
         "convenio", "sigla", models.CharField(max_length=5, default="")
     )
-    assert _alerts(is_required) == [relatorio.BREAKS_ROLLBACK]
+    assert _alerts(is_required) == [report.BREAKS_ROLLBACK]
     empty = migrations.AddField("convenio", "sigla", models.CharField(max_length=5, null=True))
     assert _alerts(empty) == []
     with_default = migrations.AddField(
@@ -125,7 +125,7 @@ def test_separate_database_and_state_is_inspected():
         database_operations=[migrations.RemoveField("carteirinha", "titular")],
         state_operations=[],
     )
-    assert _alerts(hidden) == [relatorio.DELETES, relatorio.BREAKS_ROLLBACK]
+    assert _alerts(hidden) == [report.DELETES, report.BREAKS_ROLLBACK]
     state_only = migrations.SeparateDatabaseAndState(
         state_operations=[migrations.RemoveField("carteirinha", "titular")]
     )
@@ -136,43 +136,41 @@ def test_separate_database_and_state_is_inspected():
 def test_report_of_a_real_migration():
     """convenios.0003 renamed registro_ans and added two required columns with no database
     default: the previous version would not work with it."""
-    (migration,) = relatorio.analyze([HEALTH_PLANS])
+    (migration,) = report.analyze([HEALTH_PLANS])
     assert 'RENAME COLUMN "registro_ans" TO "registro"' in migration.sql
     # varchar 6 -> 20 is fine; the rename and carteirinha.grupo and .beneficiario are not.
-    assert _types(migration.alerts) == [relatorio.BREAKS_ROLLBACK] * 3
-    text_ = relatorio.markdown([migration], falhas=[])
+    assert _types(migration.alerts) == [report.BREAKS_ROLLBACK] * 3
+    text_ = report.markdown([migration], failures=[])
     assert "### ⚠️ Needs attention" in text_ and "convenios.0003_seguros_de_cada_pais" in text_
     assert "Back and forth tested" in text_ and "```sql" in text_
 
 
 def test_report_without_migrations():
-    assert "No new migration" in relatorio.markdown([])
+    assert "No new migration" in report.markdown([])
 
 
 def test_report_of_altered_applied_migration():
-    text_ = relatorio.markdown(
-        [], alteradas=[("convenios", "0003_x", "M"), ("core", "0001_y", "D")]
-    )
+    text_ = report.markdown([], changed=[("convenios", "0003_x", "M"), ("core", "0001_y", "D")])
     assert "### ⚠️ Needs attention" in text_
-    assert f"**convenios.0003_x** — {relatorio.CHANGED}: edited" in text_
-    assert f"**core.0001_y** — {relatorio.CHANGED}: deleted" in text_
+    assert f"**convenios.0003_x** — {report.CHANGED}: edited" in text_
+    assert f"**core.0001_y** — {report.CHANGED}: deleted" in text_
     assert "the database does not change" not in text_
 
 
 def test_comment_fits_github_limit():
     """GitHub refuses a comment over 65,536 characters: the SQL is left out first, then cut."""
-    large = relatorio.MigrationEntry("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
-    large.operacoes = [("Add field x", [])]
-    full = relatorio.markdown([large])
-    assert len(full) > relatorio.COMMENT_LIMIT and "```sql" in full
-    short = relatorio.markdown([large], limit=relatorio.COMMENT_LIMIT)
-    assert len(short) <= relatorio.COMMENT_LIMIT
+    large = report.MigrationEntry("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
+    large.operations = [("Add field x", [])]
+    full = report.markdown([large])
+    assert len(full) > report.COMMENT_LIMIT and "```sql" in full
+    short = report.markdown([large], limit=report.COMMENT_LIMIT)
+    assert len(short) <= report.COMMENT_LIMIT
     assert "```sql" not in short and "The SQL is left out" in short and "Add field x" in short
     many = [
-        relatorio.MigrationEntry("a", f"{n:04}_x", operacoes=[("y" * 1000, [])]) for n in range(80)
+        report.MigrationEntry("a", f"{n:04}_x", operations=[("y" * 1000, [])]) for n in range(80)
     ]
-    cut = relatorio.markdown(many, limit=relatorio.COMMENT_LIMIT)
-    assert len(cut) <= relatorio.COMMENT_LIMIT and cut.endswith("summary)\n")
+    cut = report.markdown(many, limit=report.COMMENT_LIMIT)
+    assert len(cut) <= report.COMMENT_LIMIT and cut.endswith("summary)\n")
 
 
 def test_diff_migrations_reads_git(monkeypatch):
@@ -203,8 +201,8 @@ def test_diff_migrations_reads_git(monkeypatch):
         assert args[1:4] == ["diff", "--name-status", "--no-renames"]
         return subprocess.CompletedProcess(args, 0, stdout=output, stderr="")
 
-    monkeypatch.setattr(relatorio.subprocess, "run", git)
-    assert relatorio.migrations_from_diff("origin/main") == (
+    monkeypatch.setattr(report.subprocess, "run", git)
+    assert report.migrations_from_diff("origin/main") == (
         [("convenios", "0004_x"), ("core", "0019_y")],
         [
             ("agenda", "0003_agendamento", "M"),
@@ -218,9 +216,9 @@ def test_diff_migrations_when_git_fails(monkeypatch):
     def git(args, **kwargs):
         return subprocess.CompletedProcess(args, 128, stdout="", stderr="unknown revision")
 
-    monkeypatch.setattr(relatorio.subprocess, "run", git)
+    monkeypatch.setattr(report.subprocess, "run", git)
     with pytest.raises(CommandError, match="unknown revision"):
-        relatorio.migrations_from_diff("origin/nada")
+        report.migrations_from_diff("origin/nada")
 
 
 def test_round_trip_only_on_disposable_database(monkeypatch):
@@ -228,10 +226,10 @@ def test_round_trip_only_on_disposable_database(monkeypatch):
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     production = SimpleNamespace(settings_dict={"NAME": "kaladrius"})
     with pytest.raises(CommandError, match="banco descartável"):
-        relatorio.disposable_database(production)
-    relatorio.disposable_database(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
+        report.disposable_database(production)
+    report.disposable_database(SimpleNamespace(settings_dict={"NAME": "test_kaladrius"}))
     monkeypatch.setenv("DISPOSABLE_DATABASE", "1")
-    relatorio.disposable_database(production)
+    report.disposable_database(production)
 
 
 @pytest.mark.django_db
@@ -239,11 +237,11 @@ def test_command_refuses_rollback_test_outside_disposable_database(monkeypatch):
     monkeypatch.delenv("DISPOSABLE_DATABASE", raising=False)
     monkeypatch.setitem(connection.settings_dict, "NAME", "kaladrius")
     calls = []
-    monkeypatch.setattr(relatorio, "analyze", lambda keys: calls.append(keys) or [])
+    monkeypatch.setattr(report, "analyze", lambda keys: calls.append(keys) or [])
     from django.core.management import call_command
 
     with pytest.raises(CommandError, match="banco descartável"):
-        call_command("migrations_report", "convenios.0003_x", testar_volta=True)
+        call_command("migrations_report", "convenios.0003_x", test_rollback=True)
     assert calls == []  # refused before anything ran
 
 
@@ -258,8 +256,8 @@ def test_round_trip_failing_to_reapply(monkeypatch):
         if len(calls) > 1:
             raise RuntimeError(f"falhou {len(calls)}")
 
-    monkeypatch.setattr(relatorio, "_migrate", migrate)
-    failures = relatorio.round_trip([HEALTH_PLANS, ("core", "0001_initial")])
+    monkeypatch.setattr(report, "_migrate", migrate)
+    failures = report.round_trip([HEALTH_PLANS, ("core", "0001_initial")])
     assert [where for where, _error in failures] == [
         "`convenios` back to `0002_ordem_alfabetica` and forward again",
         "applying every migration again after that failure (the database is left half-migrated: "
@@ -276,8 +274,8 @@ def test_round_trip_when_it_does_not_even_apply(monkeypatch):
     def migrate(*args):
         raise RuntimeError("conflito")
 
-    monkeypatch.setattr(relatorio, "_migrate", migrate)
-    assert relatorio.round_trip([HEALTH_PLANS]) == [
+    monkeypatch.setattr(report, "_migrate", migrate)
+    assert report.round_trip([HEALTH_PLANS]) == [
         ("applying every migration", "RuntimeError: conflito")
     ]
 
@@ -288,8 +286,8 @@ def test_round_trip_of_a_real_migration(monkeypatch):
     again. The migrations themselves go back and forth in the CI job that runs this report on
     every pull request with migrations (decision 180): here, only the steps."""
     calls = []
-    monkeypatch.setattr(relatorio, "_migrate", lambda *args: calls.append(args))
-    assert relatorio.round_trip([HEALTH_PLANS]) == []
+    monkeypatch.setattr(report, "_migrate", lambda *args: calls.append(args))
+    assert report.round_trip([HEALTH_PLANS]) == []
     assert calls == [(), ("convenios", "0002_ordem_alfabetica"), ()]
 
 
@@ -299,15 +297,15 @@ def test_full_command_with_round_trip(tmp_path, monkeypatch):
     The migrations' real back and forth is the CI job's (decision 180)."""
     from django.core.management import call_command
 
-    monkeypatch.setattr(relatorio, "_migrate", lambda *args: None)
+    monkeypatch.setattr(report, "_migrate", lambda *args: None)
     file_path, comment = tmp_path / "relatorio.md", tmp_path / "comentario.md"
     output = StringIO()
     call_command(
         "migrations_report",
         f"{HEALTH_PLANS[0]}.{HEALTH_PLANS[1]}",
-        testar_volta=True,
-        saida=str(file_path),
-        comentario=str(comment),
+        test_rollback=True,
+        output=str(file_path),
+        comment=str(comment),
         stdout=output,
     )
     assert "Back and forth tested" in file_path.read_text() == output.getvalue()

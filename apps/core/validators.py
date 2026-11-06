@@ -23,8 +23,8 @@ def valid_cpf(cpf):
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
     for position in (9, 10):
-        soma = sum(int(cpf[i]) * (position + 1 - i) for i in range(position))
-        if (soma * 10 % 11) % 10 != int(cpf[position]):
+        weighted_sum = sum(int(cpf[i]) * (position + 1 - i) for i in range(position))
+        if (weighted_sum * 10 % 11) % 10 != int(cpf[position]):
             return False
     return True
 
@@ -38,11 +38,11 @@ def valid_cnpj(cnpj):
     cnpj = normalize_cnpj(cnpj)
     if not re.fullmatch(r"[0-9A-Z]{12}[0-9]{2}", cnpj) or cnpj == cnpj[0] * 14:
         return False
-    valores = [ord(caractere) - 48 for caractere in cnpj]
+    values = [ord(character) - 48 for character in cnpj]
     pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    for position, pesos_da_vez in ((12, pesos), (13, [6, *pesos])):
-        resto = sum(v * p for v, p in zip(valores[:position], pesos_da_vez, strict=True)) % 11
-        if (0 if resto < 2 else 11 - resto) != valores[position]:
+    for position, weights in ((12, pesos), (13, [6, *pesos])):
+        remainder = sum(v * p for v, p in zip(values[:position], weights, strict=True)) % 11
+        if (0 if remainder < 2 else 11 - remainder) != values[position]:
             return False
     return True
 
@@ -102,8 +102,8 @@ def normalize_phone(value, country=None):
     """
     country = country or countries.clinic_country()
     if country != "BR":
-        digitos = digits_only(value)
-        return countries.normalize_international_phone(digitos, country) if digitos else ""
+        digits = digits_only(value)
+        return countries.normalize_international_phone(digits, country) if digits else ""
     number = digits_only(value).lstrip("0")
     if len(number) in (12, 13) and number.startswith("55"):
         number = number[2:]

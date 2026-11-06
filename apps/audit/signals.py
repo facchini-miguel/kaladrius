@@ -90,15 +90,15 @@ def _campos(model):
     ]
 
 
-def _value(field, instancia):
-    value = field.value_from_object(instancia)
+def _value(field, instance):
+    value = field.value_from_object(instance)
     if value is None or isinstance(value, bool | int | float | str):
         return value
     return str(value)
 
 
-def _values(instancia):
-    return {field.name: _value(field, instancia) for field in _campos(type(instancia))}
+def _values(instance):
+    return {field.name: _value(field, instance) for field in _campos(type(instance))}
 
 
 def before_save(sender, instance, raw=False, **kwargs):
@@ -107,7 +107,7 @@ def before_save(sender, instance, raw=False, **kwargs):
         return
     previous = sender._base_manager.filter(pk=instance.pk).first()
     instance._auditoria_antes = _values(previous) if previous is not None else None
-    instance._auditoria_senha = getattr(previous, "password", None)
+    instance._password_audit = getattr(previous, "password", None)
 
 
 def after_save(sender, instance, created, raw=False, update_fields=None, **kwargs):
@@ -126,7 +126,7 @@ def after_save(sender, instance, created, raw=False, update_fields=None, **kwarg
         for field, value in after.items()
         if before.get(field) != value
     }
-    if getattr(instance, "_auditoria_senha", None) not in (
+    if getattr(instance, "_password_audit", None) not in (
         None,
         getattr(instance, "password", None),
     ):
@@ -136,12 +136,12 @@ def after_save(sender, instance, created, raw=False, update_fields=None, **kwarg
 
 
 def after_delete(sender, instance, **kwargs):
-    valores = {
+    values = {
         field: [value, None]
         for field, value in _values(instance).items()
         if value not in (None, "")
     }
-    log_event(Action.DELETE, instance, changes=valores)
+    log_event(Action.DELETE, instance, changes=values)
 
 
 for model in AUDITED:

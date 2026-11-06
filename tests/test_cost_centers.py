@@ -118,8 +118,8 @@ def test_report_by_cost_center(clinic_a, center, admin):
                 category=rent,
                 cost_center=cost_center,
                 total_amount=amount,
-                parcelas=1,
-                primeiro_vencimento=TODAY,
+                installments=1,
+                first_due_date=TODAY,
                 user=None,
             )
             installment = entry.installments.get()

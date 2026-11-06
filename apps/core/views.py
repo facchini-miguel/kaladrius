@@ -33,11 +33,11 @@ def start(request):
     return render(request, "core/home.html", context)
 
 
-def _safe_destination(request, destino):
-    if destino and url_has_allowed_host_and_scheme(
-        destino, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+def _safe_destination(request, destination):
+    if destination and url_has_allowed_host_and_scheme(
+        destination, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
-        return destino
+        return destination
     return "home"
 
 

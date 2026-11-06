@@ -66,8 +66,8 @@ def test_receipt_says_it_does_not_replace_tax_document(scenario, create_practiti
             category=scenario["category"],
             practitioner=dra,
             total_amount=Decimal("100"),
-            parcelas=1,
-            primeiro_vencimento=TODAY,
+            installments=1,
+            first_due_date=TODAY,
             user=scenario["admin"],
         )
         payment = services.receive(

@@ -61,8 +61,8 @@ def _database():
             """
         )
         tables = [
-            {"name": name, "size": tamanho_tabela, "row_count": registros}
-            for name, tamanho_tabela, registros in cursor.fetchall()
+            {"name": name, "size": table_size, "row_count": records}
+            for name, table_size, records in cursor.fetchall()
         ]
     return {"size": size, "tables": tables}
 
@@ -71,35 +71,41 @@ def _database():
 def health_dashboard(request):
     """Server health for every logged-in user (0.26.0). The database tables and the server
     command are shown to superusers only."""
-    periodo = request.GET.get("period", "1h")
-    if periodo not in PERIODS:
-        periodo = "1h"
+    period = request.GET.get("period", "1h")
+    if period not in PERIODS:
+        period = "1h"
     # The time axis is the whole period, even while there are fewer samples.
     end = timezone.now()
-    start = end - PERIODS[periodo]
-    results = health.with_network(health.samples(desde=start))
+    start = end - PERIODS[period]
+    results = health.with_network(health.samples(since=start))
     latest = results[-1] if results else health.latest()
-    graficos = []
-    for titulo, series, maximo, unidade in CHARTS:
-        rows = [(key, classe) for key, classe, _legenda in series]
-        piso, teto = (10, 100) if unidade == "%" else (None, None)
-        topo = health.scale_top(results, rows, maximo, piso)
-        graficos.append(
+    charts = []
+    for title, series, maximum, unit in CHARTS:
+        rows = [(key, css_class) for key, css_class, _legend in series]
+        floor, ceiling = (10, 100) if unit == "%" else (None, None)
+        top = health.scale_top(results, rows, maximum, floor)
+        charts.append(
             {
-                "title": titulo,
+                "title": title,
                 "svg": health.chart(
-                    results, rows, start=start, end=end, maximo=maximo, piso=piso, teto=teto
+                    results,
+                    rows,
+                    start=start,
+                    end=end,
+                    maximum=maximum,
+                    floor=floor,
+                    ceiling=ceiling,
                 ),
-                "top": min(topo, teto) if teto else topo,
-                "unit": unidade,
-                "legends": [(classe, legenda) for _chave, classe, legenda in series],
+                "top": min(top, ceiling) if ceiling else top,
+                "unit": unit,
+                "legends": [(css_class, legend) for _key, css_class, legend in series],
             }
         )
     return render(
         request,
         "monitoring/health.html",
         {
-            "period": periodo,
+            "period": period,
             "start": start,
             "end": end,
             "latest": latest,
@@ -109,7 +115,7 @@ def health_dashboard(request):
             if latest
             else None,
             "summary": health.summary(results),
-            "charts": graficos,
+            "charts": charts,
             "database": _database(),
             "backup": Backup.objects.first(),
         },

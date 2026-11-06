@@ -25,10 +25,10 @@ def change_country(data, country):
 def test_each_country_has_its_methods():
     assert set(payment_methods.METHODS) == set(COUNTRIES)
     for country, for_country in payment_methods.METHODS.items():
-        assert len(set(for_country.codigos)) == len(for_country.codigos), country
-        assert set(for_country.codigos) <= set(Payment.Method.values), country
-        assert {"dinheiro", "credito", "transferencia"} <= set(for_country.codigos), country
-        assert set(for_country.nomes) <= set(for_country.codigos), country
+        assert len(set(for_country.codes)) == len(for_country.codes), country
+        assert set(for_country.codes) <= set(Payment.Method.values), country
+        assert {"dinheiro", "credito", "transferencia"} <= set(for_country.codes), country
+        assert set(for_country.names) <= set(for_country.codes), country
 
 
 def test_local_names_in_parentheses():

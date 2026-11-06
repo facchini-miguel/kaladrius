@@ -20,11 +20,11 @@ from .models import Employee, Payroll, Salary
 
 @requires_permission(Module.STAFF, Action.VIEW)
 def employee_list(request):
-    funcionarios = list(Employee.objects.all())
+    employees = list(Employee.objects.all())
     today = timezone.localdate()
-    for employee in funcionarios:
+    for employee in employees:
         employee.current_salary = employee.salary_on(today)
-    return render(request, "staff/list.html", {"employees": funcionarios})
+    return render(request, "staff/list.html", {"employees": employees})
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
@@ -52,8 +52,8 @@ def edit_employee(request, pk):
     return _employee_form(request, get_object_or_404(Employee.objects, pk=pk))
 
 
-def _employee_form(request, instancia):
-    form = EmployeeForm(request.POST or None, instance=instancia)
+def _employee_form(request, instance):
+    form = EmployeeForm(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             employee = form.save()
@@ -66,7 +66,7 @@ def _employee_form(request, instancia):
                 )
         messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
         return redirect("staff:employee", pk=employee.pk)
-    return render(request, "staff/form.html", {"form": form, "instance": instancia})
+    return render(request, "staff/form.html", {"form": form, "instance": instance})
 
 
 @requires_permission(Module.STAFF, Action.VIEW)
@@ -75,10 +75,10 @@ def payroll(request):
     today = timezone.localdate()
     period = services.month_from_url(request.GET.get("month"), today)
     url = f"{reverse('staff:payroll')}?month={period:%Y-%m}"
-    pode_alterar = can(request, Module.STAFF, Action.CHANGE)
-    folhas = (
+    can_change = can(request, Module.STAFF, Action.CHANGE)
+    payrolls = (
         services.prepare(period)
-        if pode_alterar
+        if can_change
         else list(Payroll.objects.filter(period=period).select_related("employee", "entry"))
     )
     data = request.POST if request.method == "POST" else None
@@ -86,33 +86,33 @@ def payroll(request):
         (
             f,
             None
-            if f.is_posted or not pode_alterar
+            if f.is_posted or not can_change
             # By employee: a sheet not saved yet has no pk.
             else PayrollForm(data, instance=f, prefix=f"f{f.employee_id}"),
         )
-        for f in folhas
+        for f in payrolls
     ]
-    lancar_form = PostPayrollForm(
+    post_form = PostPayrollForm(
         data if data and data.get("action") == "lancar" else None,
         initial={"due_date": services.end_of_month(period) + datetime.timedelta(days=5)},
     )
     if request.method == "POST":
-        if not pode_alterar:
+        if not can_change:
             return redirect(url)
-        formularios = [form for _folha, form in rows if form is not None]
-        if all(form.is_valid() for form in formularios):
+        form_list = [form for _payroll, form in rows if form is not None]
+        if all(form.is_valid() for form in form_list):
             with transaction.atomic():
-                for form in formularios:
+                for form in form_list:
                     form.save()
             if request.POST.get("action") != "lancar":
                 messages.success(request, _("Folha salva."))
                 return redirect(url)
-            if lancar_form.is_valid():
+            if post_form.is_valid():
                 try:
-                    lancadas = services.post_payroll(
+                    posted = services.post_payroll(
                         [f for f, form in rows if form is not None],
-                        category=lancar_form.cleaned_data["category"],
-                        due_date=lancar_form.cleaned_data["due_date"],
+                        category=post_form.cleaned_data["category"],
+                        due_date=post_form.cleaned_data["due_date"],
                         user=request.user,
                     )
                 except ValidationError as error:
@@ -123,24 +123,24 @@ def payroll(request):
                         ngettext(
                             "%(n)s conta a pagar criada no financeiro.",
                             "%(n)s contas a pagar criadas no financeiro.",
-                            lancadas,
+                            posted,
                         )
-                        % {"n": lancadas},
+                        % {"n": posted},
                     )
                     return redirect(url)
     previous = (period - datetime.timedelta(days=1)).replace(day=1)
-    proximo = services.end_of_month(period) + datetime.timedelta(days=1)
+    following = services.end_of_month(period) + datetime.timedelta(days=1)
     return render(
         request,
         "staff/payroll.html",
         {
             "period": period,
             "rows": rows,
-            "post_form": lancar_form,
-            "can_change": pode_alterar,
-            "pending": any(form is not None for _folha, form in rows),
-            "total": sum((f.total for f in folhas), start=0),
+            "post_form": post_form,
+            "can_change": can_change,
+            "pending": any(form is not None for _payroll, form in rows),
+            "total": sum((f.total for f in payrolls), start=0),
             "previous": previous,
-            "following": proximo,
+            "following": following,
         },
     )
