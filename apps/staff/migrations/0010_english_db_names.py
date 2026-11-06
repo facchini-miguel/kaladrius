@@ -9,8 +9,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0025_english_db_names"),
-        ("financeiro", "0025_english_db_names"),
-        ("pessoal", "0009_english_field_names_10"),
+        ("finance", "0025_english_db_names"),
+        ("staff", "0009_english_field_names_10"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="folhas",
-                to="pessoal.employee",
+                to="staff.employee",
                 verbose_name="funcionário",
             ),
         ),
@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="folha",
-                to="financeiro.entry",
+                to="finance.entry",
                 verbose_name="conta a pagar",
             ),
         ),
@@ -215,7 +215,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="salarios",
-                to="pessoal.employee",
+                to="staff.employee",
                 verbose_name="funcionário",
             ),
         ),

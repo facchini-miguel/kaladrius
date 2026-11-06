@@ -122,7 +122,7 @@ class Payroll(ClinicModel):
     absences = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
     note = models.CharField(_("observação"), max_length=200, blank=True)
     entry = models.OneToOneField(
-        "financeiro.Entry",
+        "finance.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

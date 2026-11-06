@@ -9,19 +9,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0011_english_field_names_6'),
-        ('auditoria', '0005_english_field_names_6'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0008_english_field_names_6'),
+        ('schedule', '0011_english_field_names_6'),
+        ('audit', '0005_english_field_names_6'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0008_english_field_names_6'),
         ('core', '0023_english_field_names_6'),
-        ('financeiro', '0024_english_field_names_7'),
-        ('orcamentos', '0010_english_field_names_6'),
-        ('pacientes', '0013_english_field_names_6'),
-        ('pessoal', '0008_english_field_names_6'),
-        ('profissionais', '0008_english_field_names_6'),
-        ('prontuario', '0010_english_field_names_6'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0007_english_field_names_6'),
+        ('finance', '0024_english_field_names_7'),
+        ('estimates', '0010_english_field_names_6'),
+        ('patients', '0013_english_field_names_6'),
+        ('staff', '0008_english_field_names_6'),
+        ('practitioners', '0008_english_field_names_6'),
+        ('medical_records', '0010_english_field_names_6'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0007_english_field_names_6'),
     ]
 
     operations = [
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='patient',
             name='estado_civil',
-            field=models.ForeignKey(blank=True, db_column='estado_civil_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='referencias.maritalstatus', verbose_name='estado civil'),
+            field=models.ForeignKey(blank=True, db_column='estado_civil_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='reference_data.maritalstatus', verbose_name='estado civil'),
         ),
         migrations.RenameField(
             model_name='patient',
@@ -208,7 +208,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='relatedperson',
             name='outro_paciente',
-            field=models.ForeignKey(blank=True, db_column='outro_paciente_id', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='relacionado_a', to='pacientes.patient', verbose_name='paciente da clínica'),
+            field=models.ForeignKey(blank=True, db_column='outro_paciente_id', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='relacionado_a', to='patients.patient', verbose_name='paciente da clínica'),
         ),
         migrations.RenameField(
             model_name='relatedperson',

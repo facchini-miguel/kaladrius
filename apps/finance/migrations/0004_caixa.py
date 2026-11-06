@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0003_conta_saldo_inicial'),
+        ('finance', '0003_conta_saldo_inicial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,10 +27,10 @@ class Migration(migrations.Migration):
                 ('observacao', models.CharField(blank=True, max_length=200, verbose_name='observação')),
                 ('aberto_por', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='aberto por')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='caixas', to='financeiro.conta', verbose_name='conta')),
+                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='caixas', to='finance.conta', verbose_name='conta')),
                 ('fechado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='fechado por')),
             ],
-            options={
+            options={'db_table': 'financeiro_caixa', 
                 'verbose_name': 'caixa',
                 'verbose_name_plural': 'caixas',
                 'ordering': ['-aberto_em'],
@@ -44,12 +44,12 @@ class Migration(migrations.Migration):
                 ('valor', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='valor')),
                 ('motivo', models.CharField(max_length=200, verbose_name='motivo')),
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
-                ('caixa', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movimentos', to='financeiro.caixa', verbose_name='caixa')),
+                ('caixa', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movimentos', to='finance.caixa', verbose_name='caixa')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('outra_conta', models.ForeignKey(blank=True, help_text='Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.conta', verbose_name='outra conta')),
+                ('outra_conta', models.ForeignKey(blank=True, help_text='Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.conta', verbose_name='outra conta')),
             ],
-            options={
+            options={'db_table': 'financeiro_movimentocaixa', 
                 'verbose_name': 'movimento de caixa',
                 'verbose_name_plural': 'movimentos de caixa',
                 'ordering': ['criado_em'],

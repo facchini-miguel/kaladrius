@@ -8,8 +8,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0025_english_db_names"),
-        ("pacientes", "0015_english_db_names"),
-        ("rechamadas", "0007_english_field_names_10"),
+        ("patients", "0015_english_db_names"),
+        ("recalls", "0007_english_field_names_10"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="rechamadas",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),

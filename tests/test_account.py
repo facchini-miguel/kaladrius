@@ -403,9 +403,9 @@ def test_account_tables_go_back_to_conta_and_account_data_is_copied():
         assert cursor.fetchall() == [(1, "codigo-NOVO"), (2, "original")]
 
 
-def test_account_leftovers_are_removed_and_conta_stays(django_user_model):
-    """Decision 158: the account_* tables, their migration row and content types go; conta_*
-    stays as it is."""
+def test_account_leftovers_are_removed_and_the_app_stays(django_user_model):
+    """Decision 158: the leftover account_* tables and content types go; the app's own stay.
+    Since decision 194 "account" is the app's label: its migration rows are its own and stay."""
     import importlib
 
     from django.apps import apps
@@ -439,8 +439,8 @@ def test_account_leftovers_are_removed_and_conta_stays(django_user_model):
         cursor.execute("SELECT count(*) FROM django_migrations WHERE app = 'account'")
         [(rows,)] = cursor.fetchall()
     assert not {"account_duasetapas", "account_codigorecuperacao"} & tables
-    assert rows == 0
-    assert not ContentType.objects.filter(app_label="account").exists()
+    assert rows > 1  # the app's own migrations, recorded under its label
+    assert not ContentType.objects.filter(app_label="account", model="duasetapas").exists()
     assert not Permission.objects.filter(codename="view_duasetapas").exists()
     assert TwoFactor.objects.get(user=user).secret == "FICA"
-    assert ContentType.objects.filter(app_label="conta", model="twofactor").exists()
+    assert ContentType.objects.filter(app_label="account", model="twofactor").exists()

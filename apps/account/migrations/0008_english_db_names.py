@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("conta", "0007_english_field_names_10"),
+        ("account", "0007_english_field_names_10"),
         ("core", "0025_english_db_names"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]

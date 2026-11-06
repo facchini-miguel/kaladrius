@@ -8,7 +8,7 @@ from django.db import connection, models
 from django.utils import timezone
 
 # Dates about the person or the server, not the clinic's activity: they never move.
-FIXED = {"pacientes.patient.birth_date", "core.backup.timestamp"}
+FIXED = {"patients.patient.birth_date", "core.backup.timestamp"}
 
 
 def _is_fixed(model, field):

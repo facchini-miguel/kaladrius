@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0008_extrato_ignoradas'),
+        ('finance', '0008_extrato_ignoradas'),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'financeiro_fornecedor', 
                 'verbose_name': 'fornecedor',
                 'verbose_name_plural': 'fornecedores',
                 'ordering': ['nome'],
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lancamento',
             name='fornecedor',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='financeiro.fornecedor', verbose_name='fornecedor'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='finance.fornecedor', verbose_name='fornecedor'),
         ),
         migrations.AddConstraint(
             model_name='fornecedor',

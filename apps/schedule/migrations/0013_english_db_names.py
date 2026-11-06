@@ -11,10 +11,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("agenda", "0012_english_field_names_10"),
+        ("schedule", "0012_english_field_names_10"),
         ("core", "0025_english_db_names"),
-        ("pacientes", "0015_english_db_names"),
-        ("profissionais", "0010_english_db_names"),
+        ("patients", "0015_english_db_names"),
+        ("practitioners", "0010_english_db_names"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="agendamentos",
-                to="agenda.appointmenttype",
+                to="schedule.appointmenttype",
                 verbose_name="tipo de atendimento",
             ),
         ),
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="agendamentos",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),
@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="agendamentos",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),

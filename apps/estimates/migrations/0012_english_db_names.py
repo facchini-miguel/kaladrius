@@ -11,10 +11,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0025_english_db_names"),
-        ("financeiro", "0025_english_db_names"),
-        ("orcamentos", "0011_english_field_names_10"),
-        ("pacientes", "0015_english_db_names"),
-        ("profissionais", "0010_english_db_names"),
+        ("finance", "0025_english_db_names"),
+        ("estimates", "0011_english_field_names_10"),
+        ("patients", "0015_english_db_names"),
+        ("practitioners", "0010_english_db_names"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="estimate",
-                to="financeiro.entry",
+                to="finance.entry",
                 verbose_name="lançamento a receber",
             ),
         ),
@@ -132,7 +132,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="orcamentos",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),
@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="itens",
-                to="orcamentos.estimate",
+                to="estimates.estimate",
                 verbose_name="orçamento",
             ),
         ),
@@ -212,7 +212,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="orcamentos.procedure",
+                to="estimates.procedure",
                 verbose_name="procedimento",
             ),
         ),
@@ -252,7 +252,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="financeiro.category",
+                to="finance.category",
                 verbose_name="categoria",
             ),
         ),

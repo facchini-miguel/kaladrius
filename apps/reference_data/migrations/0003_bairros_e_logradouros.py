@@ -12,9 +12,9 @@ DADOS = Path(__file__).resolve().parent.parent / "data"
 
 def carregar(apps, schema_editor):
     """Neighborhoods and streets from the legacy Odonto (addresses.json, decision 100)."""
-    Bairro = apps.get_model("referencias", "Bairro")
-    Logradouro = apps.get_model("referencias", "Logradouro")
-    Cidade = apps.get_model("referencias", "Cidade")
+    Bairro = apps.get_model("reference_data", "Bairro")
+    Logradouro = apps.get_model("reference_data", "Logradouro")
+    Cidade = apps.get_model("reference_data", "Cidade")
     existentes = set(Cidade.objects.values_list("codigo", flat=True))
     for item in json.loads((DADOS / "addresses.json").read_text(encoding="utf-8")):
         if item["cidade"] not in existentes:
@@ -28,13 +28,13 @@ def carregar(apps, schema_editor):
 
 def remover(apps, schema_editor):
     for modelo in ["Logradouro", "Bairro"]:
-        apps.get_model("referencias", modelo).objects.all().delete()
+        apps.get_model("reference_data", modelo).objects.all().delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('referencias', '0002_carga_inicial'),
+        ('reference_data', '0002_carga_inicial'),
     ]
 
     operations = [
@@ -43,9 +43,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nome', models.CharField(max_length=100, verbose_name='nome')),
-                ('cidade', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bairros', to='referencias.cidade', verbose_name='cidade')),
+                ('cidade', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bairros', to='reference_data.cidade', verbose_name='cidade')),
             ],
-            options={
+            options={'db_table': 'referencias_bairro', 
                 'verbose_name': 'bairro',
                 'verbose_name_plural': 'bairros',
                 'ordering': ['nome'],
@@ -56,10 +56,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nome', models.CharField(max_length=200, verbose_name='nome')),
-                ('bairro', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logradouros', to='referencias.bairro', verbose_name='bairro')),
-                ('cidade', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='logradouros', to='referencias.cidade', verbose_name='cidade')),
+                ('bairro', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logradouros', to='reference_data.bairro', verbose_name='bairro')),
+                ('cidade', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='logradouros', to='reference_data.cidade', verbose_name='cidade')),
             ],
-            options={
+            options={'db_table': 'referencias_logradouro', 
                 'verbose_name': 'logradouro',
                 'verbose_name_plural': 'logradouros',
                 'ordering': ['nome'],

@@ -11,26 +11,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0011_english_field_names_6'),
-        ('auditoria', '0005_english_field_names_6'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0008_english_field_names_6'),
+        ('schedule', '0011_english_field_names_6'),
+        ('audit', '0005_english_field_names_6'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0008_english_field_names_6'),
         ('core', '0023_english_field_names_6'),
-        ('financeiro', '0023_english_field_names_6'),
-        ('orcamentos', '0010_english_field_names_6'),
-        ('pacientes', '0013_english_field_names_6'),
-        ('pessoal', '0008_english_field_names_6'),
-        ('profissionais', '0008_english_field_names_6'),
-        ('prontuario', '0010_english_field_names_6'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0007_english_field_names_6'),
+        ('finance', '0023_english_field_names_6'),
+        ('estimates', '0010_english_field_names_6'),
+        ('patients', '0013_english_field_names_6'),
+        ('staff', '0008_english_field_names_6'),
+        ('practitioners', '0008_english_field_names_6'),
+        ('medical_records', '0010_english_field_names_6'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0007_english_field_names_6'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='accountgroup',
             name='pai',
-            field=models.ForeignKey(blank=True, db_column='pai_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filhos', to='financeiro.accountgroup', verbose_name='grupo acima'),
+            field=models.ForeignKey(blank=True, db_column='pai_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filhos', to='finance.accountgroup', verbose_name='grupo acima'),
         ),
         migrations.RenameField(
             model_name='accountgroup',
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='banktransaction',
             name='importacao',
-            field=models.ForeignKey(db_column='importacao_id', on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='financeiro.statementimport', verbose_name='importação'),
+            field=models.ForeignKey(db_column='importacao_id', on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='finance.statementimport', verbose_name='importação'),
         ),
         migrations.RenameField(
             model_name='banktransaction',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='banktransaction',
             name='pagamento',
-            field=models.OneToOneField(blank=True, db_column='pagamento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='financeiro.payment', verbose_name='pagamento'),
+            field=models.OneToOneField(blank=True, db_column='pagamento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='finance.payment', verbose_name='pagamento'),
         ),
         migrations.RenameField(
             model_name='banktransaction',
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='banktransaction',
             name='movimento',
-            field=models.OneToOneField(blank=True, db_column='movimento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='financeiro.cashmovement', verbose_name='movimento do caixa'),
+            field=models.OneToOneField(blank=True, db_column='movimento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='finance.cashmovement', verbose_name='movimento do caixa'),
         ),
         migrations.RenameField(
             model_name='banktransaction',
@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cashmovement',
             name='caixa',
-            field=models.ForeignKey(db_column='caixa_id', on_delete=django.db.models.deletion.PROTECT, related_name='movimentos', to='financeiro.cashregister', verbose_name='caixa'),
+            field=models.ForeignKey(db_column='caixa_id', on_delete=django.db.models.deletion.PROTECT, related_name='movimentos', to='finance.cashregister', verbose_name='caixa'),
         ),
         migrations.RenameField(
             model_name='cashmovement',
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='cashmovement',
             name='outra_conta',
-            field=models.ForeignKey(blank=True, db_column='outra_conta_id', help_text='Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.financialaccount', verbose_name='outra conta'),
+            field=models.ForeignKey(blank=True, db_column='outra_conta_id', help_text='Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.financialaccount', verbose_name='outra conta'),
         ),
         migrations.RenameField(
             model_name='cashmovement',
@@ -220,7 +220,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='entry',
             name='centro_custo',
-            field=models.ForeignKey(blank=True, db_column='centro_custo_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='financeiro.costcenter', verbose_name='centro de custo'),
+            field=models.ForeignKey(blank=True, db_column='centro_custo_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='finance.costcenter', verbose_name='centro de custo'),
         ),
         migrations.RenameField(
             model_name='entry',
@@ -240,7 +240,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='entry',
             name='fornecedor',
-            field=models.ForeignKey(blank=True, db_column='fornecedor_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='financeiro.supplier', verbose_name='fornecedor'),
+            field=models.ForeignKey(blank=True, db_column='fornecedor_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='finance.supplier', verbose_name='fornecedor'),
         ),
         migrations.RenameField(
             model_name='entry',
@@ -320,7 +320,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='parcela',
-            field=models.ForeignKey(db_column='parcela_id', on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='financeiro.installment', verbose_name='parcela'),
+            field=models.ForeignKey(db_column='parcela_id', on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='finance.installment', verbose_name='parcela'),
         ),
         migrations.RenameField(
             model_name='payment',
@@ -420,7 +420,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='comissao',
-            field=models.ForeignKey(blank=True, db_column='comissao_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='financeiro.commission', verbose_name='comissão'),
+            field=models.ForeignKey(blank=True, db_column='comissao_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='finance.commission', verbose_name='comissão'),
         ),
         migrations.RenameField(
             model_name='payment',
@@ -430,7 +430,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='comissao_estorno',
-            field=models.ForeignKey(blank=True, db_column='comissao_estorno_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos_estornados', to='financeiro.commission', verbose_name='comissão que descontou o estorno'),
+            field=models.ForeignKey(blank=True, db_column='comissao_estorno_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos_estornados', to='finance.commission', verbose_name='comissão que descontou o estorno'),
         ),
         migrations.RenameField(
             model_name='payment',
@@ -629,7 +629,7 @@ class Migration(migrations.Migration):
                 db_column="lancamento_id",
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="commission",
-                to="financeiro.entry",
+                to="finance.entry",
                 verbose_name="lançamento a pagar",
             ),
         ),

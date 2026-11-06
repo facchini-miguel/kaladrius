@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("referencias", "0008_english_field_names_10"),
+        ("reference_data", "0008_english_field_names_10"),
     ]
 
     operations = [
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="cidades",
-                to="referencias.state",
+                to="reference_data.state",
                 verbose_name="UF",
             ),
         ),
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="bairros",
-                to="referencias.city",
+                to="reference_data.city",
                 verbose_name="cidade",
             ),
         ),
@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="logradouros",
-                to="referencias.city",
+                to="reference_data.city",
                 verbose_name="cidade",
             ),
         ),
@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="logradouros",
-                to="referencias.neighborhood",
+                to="reference_data.neighborhood",
                 verbose_name="bairro",
             ),
         ),

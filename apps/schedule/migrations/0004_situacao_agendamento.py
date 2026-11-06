@@ -10,10 +10,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0003_agendamento'),
+        ('schedule', '0003_agendamento'),
         ('core', '0006_clinica_endereco'),
-        ('pacientes', '0002_paciente_arquivado'),
-        ('profissionais', '0002_comissao_percentual'),
+        ('patients', '0002_paciente_arquivado'),
+        ('practitioners', '0002_comissao_percentual'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

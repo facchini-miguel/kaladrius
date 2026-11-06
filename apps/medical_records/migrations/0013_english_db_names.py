@@ -8,11 +8,11 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("agenda", "0013_english_db_names"),
+        ("schedule", "0013_english_db_names"),
         ("core", "0025_english_db_names"),
-        ("pacientes", "0015_english_db_names"),
-        ("profissionais", "0010_english_db_names"),
-        ("prontuario", "0012_portuguese_labels"),
+        ("patients", "0015_english_db_names"),
+        ("practitioners", "0010_english_db_names"),
+        ("medical_records", "0012_portuguese_labels"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="adendos",
-                to="prontuario.visit",
+                to="medical_records.visit",
                 verbose_name="atendimento",
             ),
         ),
@@ -147,7 +147,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="anexos",
-                to="prontuario.visit",
+                to="medical_records.visit",
                 verbose_name="atendimento",
             ),
         ),
@@ -238,7 +238,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -253,7 +253,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="atestados",
-                to="prontuario.visit",
+                to="medical_records.visit",
                 verbose_name="atendimento",
             ),
         ),
@@ -300,7 +300,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -310,7 +310,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="pedidos_de_exames",
-                to="prontuario.visit",
+                to="medical_records.visit",
                 verbose_name="atendimento",
             ),
         ),
@@ -353,7 +353,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),
@@ -363,7 +363,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="receitas",
-                to="prontuario.visit",
+                to="medical_records.visit",
                 verbose_name="atendimento",
             ),
         ),
@@ -375,7 +375,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="visit",
-                to="agenda.appointment",
+                to="schedule.appointment",
                 verbose_name="agendamento",
             ),
         ),
@@ -448,7 +448,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="atendimentos",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),
@@ -468,7 +468,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="atendimentos",
-                to="profissionais.practitioner",
+                to="practitioners.practitioner",
                 verbose_name="profissional",
             ),
         ),

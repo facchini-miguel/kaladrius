@@ -8,26 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0009_english_field_names_3'),
-        ('auditoria', '0004_english_field_names_2'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0007_english_field_names_3'),
+        ('schedule', '0009_english_field_names_3'),
+        ('audit', '0004_english_field_names_2'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0007_english_field_names_3'),
         ('core', '0022_english_field_names_3'),
-        ('financeiro', '0020_english_field_names_3'),
-        ('orcamentos', '0007_english_field_names_3'),
-        ('pacientes', '0011_english_field_names_3'),
-        ('pessoal', '0006_english_field_names_3'),
-        ('profissionais', '0007_english_field_names_3'),
-        ('prontuario', '0007_english_field_names_3'),
-        ('rechamadas', '0005_english_field_names_3'),
-        ('referencias', '0006_english_field_names_3'),
+        ('finance', '0020_english_field_names_3'),
+        ('estimates', '0007_english_field_names_3'),
+        ('patients', '0011_english_field_names_3'),
+        ('staff', '0006_english_field_names_3'),
+        ('practitioners', '0007_english_field_names_3'),
+        ('medical_records', '0007_english_field_names_3'),
+        ('recalls', '0005_english_field_names_3'),
+        ('reference_data', '0006_english_field_names_3'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='addendum',
             name='atendimento',
-            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='adendos', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='adendos', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.RenameField(
             model_name='addendum',
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attachment',
             name='atendimento',
-            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='anexos', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='anexos', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.RenameField(
             model_name='attachment',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='certificate',
             name='atendimento',
-            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='atestados', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='atestados', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.RenameField(
             model_name='certificate',
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='examrequest',
             name='atendimento',
-            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='pedidos_de_exames', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='pedidos_de_exames', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.RenameField(
             model_name='examrequest',
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='prescription',
             name='atendimento',
-            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='receitas', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(db_column='atendimento_id', on_delete=django.db.models.deletion.PROTECT, related_name='receitas', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.RenameField(
             model_name='prescription',
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="visit",
-                to="agenda.appointment",
+                to="schedule.appointment",
                 verbose_name="agendamento",
             ),
         ),

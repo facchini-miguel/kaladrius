@@ -32,6 +32,6 @@ def copiar(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("conta", "0001_initial")]
+    dependencies = [("account", "0001_initial")]
 
     operations = [migrations.RunPython(copiar, migrations.RunPython.noop)]

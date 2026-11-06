@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0004_situacao_agendamento'),
+        ('schedule', '0004_situacao_agendamento'),
     ]
 
     operations = [

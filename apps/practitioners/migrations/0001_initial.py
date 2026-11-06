@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('usuario', models.ForeignKey(blank=True, help_text='Conta usada por este profissional para entrar no sistema (opcional).', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='profissionais', to=settings.AUTH_USER_MODEL, verbose_name='usuário de acesso')),
             ],
-            options={
+            options={'db_table': 'profissionais_profissional', 
                 'verbose_name': 'profissional',
                 'verbose_name_plural': 'profissionais',
                 'ordering': ['nome'],

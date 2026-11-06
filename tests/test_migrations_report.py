@@ -11,7 +11,7 @@ from django.db.migrations.loader import MigrationLoader
 
 from apps.core.management.commands import migrations_report as report
 
-HEALTH_PLANS = ("convenios", "0003_seguros_de_cada_pais")
+HEALTH_PLANS = ("health_plans", "0003_seguros_de_cada_pais")
 
 
 def _before(app, name):
@@ -23,7 +23,7 @@ def _types(alerts):
 
 
 def _alerts(operation):
-    return _types(report.operation_alerts(operation, "convenios", _before(*HEALTH_PLANS)))
+    return _types(report.operation_alerts(operation, "health_plans", _before(*HEALTH_PLANS)))
 
 
 @pytest.mark.django_db
@@ -43,22 +43,24 @@ def test_rename_keeping_table_and_column_does_not_warn():
     database; the previous version still works."""
     before = _before(*HEALTH_PLANS)
     pin_ = migrations.AlterModelTable("convenio", "convenios_convenio")
-    assert report.operation_alerts(pin_, "convenios", before) == []
-    before = report._after(pin_, "convenios", before)
+    assert report.operation_alerts(pin_, "health_plans", before) == []
+    before = report._after(pin_, "health_plans", before)
     template_ = migrations.RenameModel("Convenio", "HealthPlan")
-    assert report.operation_alerts(template_, "convenios", before) == []
+    assert report.operation_alerts(template_, "health_plans", before) == []
     # The table follows the model's name when it is not pinned: the previous version breaks.
+    # (Every old table is pinned since its first migration, decision 194: unpinned here.)
+    before = report._after(migrations.AlterModelTable("carteirinha", None), "health_plans", before)
     loose_one = migrations.RenameModel("Carteirinha", "Card")
-    assert _types(report.operation_alerts(loose_one, "convenios", before)) == [
+    assert _types(report.operation_alerts(loose_one, "health_plans", before)) == [
         report.BREAKS_ROLLBACK
     ]
-    before = report._after(template_, "convenios", before)
+    before = report._after(template_, "health_plans", before)
     column = migrations.AlterField(
         "healthplan", "nome", models.CharField(max_length=100, db_column="nome")
     )
-    before = report._after(column, "convenios", before)
+    before = report._after(column, "health_plans", before)
     field = migrations.RenameField("healthplan", "nome", "name")
-    assert report.operation_alerts(field, "convenios", before) == []
+    assert report.operation_alerts(field, "health_plans", before) == []
 
 
 @pytest.mark.django_db
@@ -92,7 +94,7 @@ def test_altering_a_foreign_key():
         "carteirinha",
         "convenio",
         models.ForeignKey(
-            "convenios.convenio", on_delete=models.CASCADE, related_name="outras_carteirinhas"
+            "health_plans.convenio", on_delete=models.CASCADE, related_name="outras_carteirinhas"
         ),
     )
     assert _alerts(key) == []
@@ -113,7 +115,7 @@ def test_new_required_column():
     )
     assert _alerts(with_default) == []
     many_items = migrations.AddField(
-        "convenio", "outros", models.ManyToManyField("convenios.convenio")
+        "convenio", "outros", models.ManyToManyField("health_plans.convenio")
     )
     assert _alerts(many_items) == []
 
@@ -134,14 +136,14 @@ def test_separate_database_and_state_is_inspected():
 
 @pytest.mark.django_db
 def test_report_of_a_real_migration():
-    """convenios.0003 renamed registro_ans and added two required columns with no database
+    """health_plans.0003 renamed registro_ans and added two required columns with no database
     default: the previous version would not work with it."""
     (migration,) = report.analyze([HEALTH_PLANS])
     assert 'RENAME COLUMN "registro_ans" TO "registro"' in migration.sql
     # varchar 6 -> 20 is fine; the rename and carteirinha.grupo and .beneficiario are not.
     assert _types(migration.alerts) == [report.BREAKS_ROLLBACK] * 3
     text_ = report.markdown([migration], failures=[])
-    assert "### ⚠️ Needs attention" in text_ and "convenios.0003_seguros_de_cada_pais" in text_
+    assert "### ⚠️ Needs attention" in text_ and "health_plans.0003_seguros_de_cada_pais" in text_
     assert "Back and forth tested" in text_ and "```sql" in text_
 
 
@@ -150,16 +152,16 @@ def test_report_without_migrations():
 
 
 def test_report_of_altered_applied_migration():
-    text_ = report.markdown([], changed=[("convenios", "0003_x", "M"), ("core", "0001_y", "D")])
+    text_ = report.markdown([], changed=[("health_plans", "0003_x", "M"), ("core", "0001_y", "D")])
     assert "### ⚠️ Needs attention" in text_
-    assert f"**convenios.0003_x** — {report.CHANGED}: edited" in text_
+    assert f"**health_plans.0003_x** — {report.CHANGED}: edited" in text_
     assert f"**core.0001_y** — {report.CHANGED}: deleted" in text_
     assert "the database does not change" not in text_
 
 
 def test_comment_fits_github_limit():
     """GitHub refuses a comment over 65,536 characters: the SQL is left out first, then cut."""
-    large = report.MigrationEntry("convenios", "0004_x", sql="SELECT 1;\n" * 10_000)
+    large = report.MigrationEntry("health_plans", "0004_x", sql="SELECT 1;\n" * 10_000)
     large.operations = [("Add field x", [])]
     full = report.markdown([large])
     assert len(full) > report.COMMENT_LIMIT and "```sql" in full
@@ -174,8 +176,9 @@ def test_comment_fits_github_limit():
 
 
 def test_diff_migrations_reads_git(monkeypatch):
-    """Folders become labels (apps/health_plans is "convenios", decision 145), and a migration
-    moved with its folder is unchanged when its text is the same, edited when it is not."""
+    """Folders become labels (the folders before decision 145, like apps/agenda, had the old
+    labels of the same apps: apps/agenda is "schedule"), and a migration moved with its folder
+    is unchanged when its text is the same, edited when it is not."""
     output = (
         "A\tapps/health_plans/migrations/0004_x.py\n"
         "M\tapps/core/forms.py\n"
@@ -203,11 +206,11 @@ def test_diff_migrations_reads_git(monkeypatch):
 
     monkeypatch.setattr(report.subprocess, "run", git)
     assert report.migrations_from_diff("origin/main") == (
-        [("convenios", "0004_x"), ("core", "0019_y")],
+        [("core", "0019_y"), ("health_plans", "0004_x")],
         [
-            ("agenda", "0003_agendamento", "M"),
-            ("convenios", "0003_seguros_de_cada_pais", "M"),
             ("core", "0002_z", "D"),
+            ("health_plans", "0003_seguros_de_cada_pais", "M"),
+            ("schedule", "0003_agendamento", "M"),
         ],
     )
 
@@ -241,7 +244,7 @@ def test_command_refuses_rollback_test_outside_disposable_database(monkeypatch):
     from django.core.management import call_command
 
     with pytest.raises(CommandError, match="banco descartável"):
-        call_command("migrations_report", "convenios.0003_x", test_rollback=True)
+        call_command("migrations_report", "health_plans.0003_x", test_rollback=True)
     assert calls == []  # refused before anything ran
 
 
@@ -257,14 +260,14 @@ def test_round_trip_failing_to_reapply(monkeypatch):
             raise RuntimeError(f"falhou {len(calls)}")
 
     monkeypatch.setattr(report, "_migrate", migrate)
-    failures = report.round_trip([HEALTH_PLANS, ("core", "0001_initial")])
+    failures = report.round_trip([HEALTH_PLANS, ("staff", "0001_initial")])
     assert [where for where, _error in failures] == [
-        "`convenios` back to `0002_ordem_alfabetica` and forward again",
+        "`health_plans` back to `0002_ordem_alfabetica` and forward again",
         "applying every migration again after that failure (the database is left half-migrated: "
         "the remaining apps were not tested)",
     ]
     assert failures[1][1] == "RuntimeError: falhou 3"
-    assert len(calls) == 3  # core was not tried on a half-migrated database
+    assert len(calls) == 3  # staff was not tried on a half-migrated database
 
 
 @pytest.mark.django_db
@@ -288,7 +291,7 @@ def test_round_trip_of_a_real_migration(monkeypatch):
     calls = []
     monkeypatch.setattr(report, "_migrate", lambda *args: calls.append(args))
     assert report.round_trip([HEALTH_PLANS]) == []
-    assert calls == [(), ("convenios", "0002_ordem_alfabetica"), ()]
+    assert calls == [(), ("health_plans", "0002_ordem_alfabetica"), ()]
 
 
 @pytest.mark.django_db

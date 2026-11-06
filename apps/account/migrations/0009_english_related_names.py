@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('conta', '0008_english_db_names'),
+        ('account', '0008_english_db_names'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

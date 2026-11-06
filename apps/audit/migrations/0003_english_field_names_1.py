@@ -8,19 +8,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0006_english_model_names'),
-        ('auditoria', '0002_english_model_names'),
-        ('conta', '0003_english_model_names'),
-        ('convenios', '0004_english_model_names'),
+        ('schedule', '0006_english_model_names'),
+        ('audit', '0002_english_model_names'),
+        ('account', '0003_english_model_names'),
+        ('health_plans', '0004_english_model_names'),
         ('core', '0019_english_model_names'),
-        ('financeiro', '0017_english_model_names'),
-        ('orcamentos', '0004_english_model_names'),
-        ('pacientes', '0008_english_model_names'),
-        ('pessoal', '0004_english_model_names'),
-        ('profissionais', '0004_english_model_names'),
-        ('prontuario', '0004_english_model_names'),
-        ('rechamadas', '0002_english_model_names'),
-        ('referencias', '0005_english_model_names'),
+        ('finance', '0017_english_model_names'),
+        ('estimates', '0004_english_model_names'),
+        ('patients', '0008_english_model_names'),
+        ('staff', '0004_english_model_names'),
+        ('practitioners', '0004_english_model_names'),
+        ('medical_records', '0004_english_model_names'),
+        ('recalls', '0002_english_model_names'),
+        ('reference_data', '0005_english_model_names'),
     ]
 
     operations = [

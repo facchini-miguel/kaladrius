@@ -3,5 +3,5 @@ from django.apps import AppConfig
 
 class MonitoringConfig(AppConfig):
     name = "apps.monitoring"
-    label = "monitoramento"
+    label = "monitoring"
     verbose_name = "Saúde do sistema"

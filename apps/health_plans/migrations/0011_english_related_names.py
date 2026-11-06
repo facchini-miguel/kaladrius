@@ -7,19 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('convenios', '0010_english_db_names'),
-        ('pacientes', '0016_english_related_names'),
+        ('health_plans', '0010_english_db_names'),
+        ('patients', '0016_english_related_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='membercard',
             name='health_plan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='member_cards', to='convenios.healthplan', verbose_name='convênio'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='member_cards', to='health_plans.healthplan', verbose_name='convênio'),
         ),
         migrations.AlterField(
             model_name='membercard',
             name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='member_cards', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='member_cards', to='patients.patient', verbose_name='paciente'),
         ),
     ]

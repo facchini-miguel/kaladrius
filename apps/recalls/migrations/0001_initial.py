@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0002_clinica_vinculo'),
-        ('pacientes', '0001_initial'),
+        ('patients', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,9 +27,9 @@ class Migration(migrations.Migration):
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='rechamadas', to='pacientes.paciente', verbose_name='paciente')),
+                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='rechamadas', to='patients.paciente', verbose_name='paciente')),
             ],
-            options={
+            options={'db_table': 'rechamadas_rechamada', 
                 'verbose_name': 'rechamada',
                 'verbose_name_plural': 'rechamadas',
                 'ordering': ['data', 'paciente__nome'],

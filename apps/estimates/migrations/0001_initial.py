@@ -14,9 +14,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0004_caixa'),
-        ('pacientes', '0002_paciente_arquivado'),
-        ('profissionais', '0001_initial'),
+        ('finance', '0004_caixa'),
+        ('patients', '0002_paciente_arquivado'),
+        ('practitioners', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -36,11 +36,11 @@ class Migration(migrations.Migration):
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
                 ('decidido_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='aprovado ou recusado por')),
-                ('lancamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='orcamento', to='financeiro.lancamento', verbose_name='lançamento a receber')),
-                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='orcamentos', to='pacientes.paciente', verbose_name='paciente')),
-                ('profissional', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='profissionais.profissional', verbose_name='profissional')),
+                ('lancamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='orcamento', to='finance.lancamento', verbose_name='lançamento a receber')),
+                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='orcamentos', to='patients.paciente', verbose_name='paciente')),
+                ('profissional', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'orcamentos_orcamento', 
                 'verbose_name': 'orçamento',
                 'verbose_name_plural': 'orçamentos',
                 'ordering': ['-data', '-pk'],
@@ -53,10 +53,10 @@ class Migration(migrations.Migration):
                 ('nome', models.CharField(max_length=120, verbose_name='nome')),
                 ('valor', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='valor')),
                 ('ativo', models.BooleanField(default=True, verbose_name='ativo')),
-                ('categoria', models.ForeignKey(blank=True, help_text='Categoria de receita usada quando o orçamento é aprovado.', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.categoria', verbose_name='categoria')),
+                ('categoria', models.ForeignKey(blank=True, help_text='Categoria de receita usada quando o orçamento é aprovado.', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.categoria', verbose_name='categoria')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'orcamentos_procedimento', 
                 'verbose_name': 'procedimento',
                 'verbose_name_plural': 'procedimentos',
                 'ordering': ['nome'],
@@ -72,10 +72,10 @@ class Migration(migrations.Migration):
                 ('quantidade', models.PositiveSmallIntegerField(default=1, verbose_name='quantidade')),
                 ('valor_unitario', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='valor unitário')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('orcamento', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itens', to='orcamentos.orcamento', verbose_name='orçamento')),
-                ('procedimento', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='orcamentos.procedimento', verbose_name='procedimento')),
+                ('orcamento', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itens', to='estimates.orcamento', verbose_name='orçamento')),
+                ('procedimento', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='estimates.procedimento', verbose_name='procedimento')),
             ],
-            options={
+            options={'db_table': 'orcamentos_itemorcamento', 
                 'verbose_name': 'item do orçamento',
                 'verbose_name_plural': 'itens do orçamento',
                 'ordering': ['pk'],

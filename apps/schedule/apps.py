@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class ScheduleConfig(AppConfig):
     name = "apps.schedule"
-    label = "agenda"
+    label = "schedule"
     verbose_name = _("Agenda")
 
     def ready(self):

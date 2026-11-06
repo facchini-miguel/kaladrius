@@ -44,7 +44,7 @@ class MemberCard(ClinicModel):
     """A patient's card of a health plan."""
 
     patient = models.ForeignKey(
-        "pacientes.Patient",
+        "patients.Patient",
         on_delete=models.PROTECT,
         related_name="member_cards",
         verbose_name=_("paciente"),

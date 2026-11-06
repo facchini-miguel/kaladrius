@@ -2,7 +2,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("pacientes", "0002_paciente_arquivado")]
+    dependencies = [("patients", "0002_paciente_arquivado")]
 
     operations = [
         migrations.AddField(

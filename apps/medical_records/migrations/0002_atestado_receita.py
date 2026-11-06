@@ -10,8 +10,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0007_clinica_area'),
-        ('profissionais', '0002_comissao_percentual'),
-        ('prontuario', '0001_initial'),
+        ('practitioners', '0002_comissao_percentual'),
+        ('medical_records', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,12 +27,12 @@ class Migration(migrations.Migration):
                 ('dias', models.PositiveSmallIntegerField(blank=True, help_text='Só para afastamento.', null=True, verbose_name='dias de afastamento')),
                 ('observacao', models.TextField(blank=True, help_text='Aparece no atestado. Por exemplo: deve permanecer em repouso.', verbose_name='observações')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atestados', to='prontuario.atendimento', verbose_name='atendimento')),
+                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atestados', to='medical_records.atendimento', verbose_name='atendimento')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='profissionais.profissional', verbose_name='profissional')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'prontuario_atestado', 
                 'verbose_name': 'atestado',
                 'verbose_name_plural': 'atestados',
                 'ordering': ['criado_em', 'pk'],
@@ -44,12 +44,12 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('prescricao', models.TextField(help_text='Um item por linha: medicamento, dose e como usar.', verbose_name='medicamentos e como usar')),
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='receitas', to='prontuario.atendimento', verbose_name='atendimento')),
+                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='receitas', to='medical_records.atendimento', verbose_name='atendimento')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='profissionais.profissional', verbose_name='profissional')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'prontuario_receita', 
                 'verbose_name': 'receita',
                 'verbose_name_plural': 'receitas',
                 'ordering': ['criado_em', 'pk'],

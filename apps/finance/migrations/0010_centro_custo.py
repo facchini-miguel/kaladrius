@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0009_fornecedor'),
+        ('finance', '0009_fornecedor'),
     ]
 
     operations = [
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('ativo', models.BooleanField(default=True, verbose_name='ativo')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'financeiro_centrocusto', 
                 'verbose_name': 'centro de custo',
                 'verbose_name_plural': 'centros de custo',
                 'ordering': ['nome'],
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lancamento',
             name='centro_custo',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='financeiro.centrocusto', verbose_name='centro de custo'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='finance.centrocusto', verbose_name='centro de custo'),
         ),
         migrations.AddConstraint(
             model_name='centrocusto',

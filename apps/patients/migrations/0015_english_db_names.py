@@ -8,8 +8,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0025_english_db_names"),
-        ("pacientes", "0014_english_field_names_8"),
-        ("referencias", "0009_english_db_names"),
+        ("patients", "0014_english_field_names_8"),
+        ("reference_data", "0009_english_db_names"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="referencias.city",
+                to="reference_data.city",
                 verbose_name="cidade",
             ),
         ),
@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="referencias.maritalstatus",
+                to="reference_data.maritalstatus",
                 verbose_name="estado civil",
             ),
         ),
@@ -217,7 +217,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="+",
-                to="referencias.state",
+                to="reference_data.state",
                 verbose_name="UF",
             ),
         ),
@@ -291,7 +291,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="relacionado_a",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente da clínica",
             ),
         ),
@@ -301,7 +301,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="relacionados",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),

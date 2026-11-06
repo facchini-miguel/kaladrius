@@ -88,7 +88,7 @@ class Appointment(ClinicModel):
         CANCELLED = "desmarcou", _("Desmarcou")
 
     practitioner = models.ForeignKey(
-        "profissionais.Practitioner",
+        "practitioners.Practitioner",
         on_delete=models.PROTECT,
         related_name="appointments",
         verbose_name=_("profissional"),
@@ -102,7 +102,7 @@ class Appointment(ClinicModel):
     start = models.DateTimeField(_("início"))
     end = models.DateTimeField(_("fim"))
     patient = models.ForeignKey(
-        "pacientes.Patient",
+        "patients.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,

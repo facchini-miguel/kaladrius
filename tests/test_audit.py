@@ -138,8 +138,8 @@ def test_only_admin_sees_the_audit(role, clinic_a, create_user, client_for):
 def test_django_admin_is_read_only(django_user_model, client):
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     client.force_login(root)
-    assert client.get(reverse("admin:auditoria_auditentry_changelist")).status_code == 200
-    assert client.get(reverse("admin:auditoria_auditentry_add")).status_code == 403
+    assert client.get(reverse("admin:audit_auditentry_changelist")).status_code == 200
+    assert client.get(reverse("admin:audit_auditentry_add")).status_code == 403
 
 
 def test_user_deletion_keeps_the_history(create_user):

@@ -5,7 +5,7 @@ class Migration(migrations.Migration):
     """Each country's insurance (decision 125): the ANS registry becomes the insurer's registry
     in the clinic's country, kept as it was."""
 
-    dependencies = [("convenios", "0002_ordem_alfabetica")]
+    dependencies = [("health_plans", "0002_ordem_alfabetica")]
 
     operations = [
         migrations.RenameField("convenio", "registro_ans", "registro"),

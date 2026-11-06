@@ -10,8 +10,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0004_caixa'),
-        ('profissionais', '0002_comissao_percentual'),
+        ('finance', '0004_caixa'),
+        ('practitioners', '0002_comissao_percentual'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -29,10 +29,10 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('lancamento', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, related_name='comissao', to='financeiro.lancamento', verbose_name='lançamento a pagar')),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='comissoes', to='profissionais.profissional', verbose_name='profissional')),
+                ('lancamento', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, related_name='comissao', to='finance.lancamento', verbose_name='lançamento a pagar')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='comissoes', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'financeiro_comissao', 
                 'verbose_name': 'comissão',
                 'verbose_name_plural': 'comissões',
                 'ordering': ['-criado_em'],
@@ -41,12 +41,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pagamento',
             name='comissao',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='financeiro.comissao', verbose_name='comissão'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='finance.comissao', verbose_name='comissão'),
         ),
         migrations.AddField(
             model_name='pagamento',
             name='comissao_estorno',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos_estornados', to='financeiro.comissao', verbose_name='comissão que descontou o estorno'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos_estornados', to='finance.comissao', verbose_name='comissão que descontou o estorno'),
         ),
         migrations.AddConstraint(
             model_name='comissao',

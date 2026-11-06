@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('referencias', '0003_bairros_e_logradouros'),
+        ('reference_data', '0003_bairros_e_logradouros'),
     ]
 
     operations = [
