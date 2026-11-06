@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('clinica', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('usuario', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='usuário')),
             ],
-            options={
+            options={'db_table': 'auditoria_registroauditoria', 
                 'verbose_name': 'registro de auditoria',
                 'verbose_name_plural': 'registros de auditoria',
                 'ordering': ['-momento', '-pk'],

@@ -8,26 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0011_english_field_names_6'),
-        ('auditoria', '0005_english_field_names_6'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0008_english_field_names_6'),
+        ('schedule', '0011_english_field_names_6'),
+        ('audit', '0005_english_field_names_6'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0008_english_field_names_6'),
         ('core', '0024_english_field_names_9'),
-        ('financeiro', '0024_english_field_names_7'),
-        ('orcamentos', '0010_english_field_names_6'),
-        ('pacientes', '0014_english_field_names_8'),
-        ('pessoal', '0008_english_field_names_6'),
-        ('profissionais', '0008_english_field_names_6'),
-        ('prontuario', '0011_english_field_names_9'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0007_english_field_names_6'),
+        ('finance', '0024_english_field_names_7'),
+        ('estimates', '0010_english_field_names_6'),
+        ('patients', '0014_english_field_names_8'),
+        ('staff', '0008_english_field_names_6'),
+        ('practitioners', '0008_english_field_names_6'),
+        ('medical_records', '0011_english_field_names_9'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0007_english_field_names_6'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='membercard',
             name='convenio',
-            field=models.ForeignKey(db_column='convenio_id', on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='convenios.healthplan', verbose_name='convênio'),
+            field=models.ForeignKey(db_column='convenio_id', on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='health_plans.healthplan', verbose_name='convênio'),
         ),
         migrations.RenameField(
             model_name='membercard',

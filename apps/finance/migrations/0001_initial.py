@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('pacientes', '0002_paciente_arquivado'),
-        ('profissionais', '0001_initial'),
+        ('patients', '0002_paciente_arquivado'),
+        ('practitioners', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('ativa', models.BooleanField(default=True, verbose_name='ativa')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'financeiro_categoria', 
                 'verbose_name': 'categoria',
                 'verbose_name_plural': 'categorias',
                 'ordering': ['tipo', 'nome'],
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('ativa', models.BooleanField(default=True, verbose_name='ativa')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'financeiro_conta', 
                 'verbose_name': 'conta',
                 'verbose_name_plural': 'contas',
                 'ordering': ['nome'],
@@ -65,13 +65,13 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('cancelado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='cancelado por')),
-                ('categoria', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.categoria', verbose_name='categoria')),
+                ('categoria', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.categoria', verbose_name='categoria')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('paciente', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='pacientes.paciente', verbose_name='paciente')),
-                ('profissional', models.ForeignKey(blank=True, help_text='Quem fez o atendimento (opcional).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='profissionais.profissional', verbose_name='profissional')),
+                ('paciente', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lancamentos', to='patients.paciente', verbose_name='paciente')),
+                ('profissional', models.ForeignKey(blank=True, help_text='Quem fez o atendimento (opcional).', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'financeiro_lancamento', 
                 'verbose_name': 'lançamento',
                 'verbose_name_plural': 'lançamentos',
                 'ordering': ['-data', '-pk'],
@@ -85,9 +85,9 @@ class Migration(migrations.Migration):
                 ('vencimento', models.DateField(verbose_name='vencimento')),
                 ('valor', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='valor')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('lancamento', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='parcelas', to='financeiro.lancamento', verbose_name='lançamento')),
+                ('lancamento', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='parcelas', to='finance.lancamento', verbose_name='lançamento')),
             ],
-            options={
+            options={'db_table': 'financeiro_parcela', 
                 'verbose_name': 'parcela',
                 'verbose_name_plural': 'parcelas',
                 'ordering': ['vencimento', 'numero'],
@@ -111,12 +111,12 @@ class Migration(migrations.Migration):
                 ('motivo_estorno', models.CharField(blank=True, max_length=200, verbose_name='motivo do estorno')),
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.conta', verbose_name='conta')),
+                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.conta', verbose_name='conta')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='recebido por')),
                 ('estornado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='estornado por')),
-                ('parcela', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='financeiro.parcela', verbose_name='parcela')),
+                ('parcela', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='pagamentos', to='finance.parcela', verbose_name='parcela')),
             ],
-            options={
+            options={'db_table': 'financeiro_pagamento', 
                 'verbose_name': 'pagamento',
                 'verbose_name_plural': 'pagamentos',
                 'ordering': ['-data', '-pk'],

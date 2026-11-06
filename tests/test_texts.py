@@ -123,5 +123,5 @@ def test_django_admin_without_english(client, django_user_model):
     "- Select an option -" in English."""
     super_user = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
     client.force_login(super_user)
-    page = client.get(reverse("admin:referencias_state_changelist")).content.decode()
+    page = client.get(reverse("admin:reference_data_state_changelist")).content.decode()
     assert "Select an option" not in page and "Selecione uma opção" in page

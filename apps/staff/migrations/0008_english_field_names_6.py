@@ -8,26 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0010_english_field_names_4'),
-        ('auditoria', '0004_english_field_names_2'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0007_english_field_names_3'),
+        ('schedule', '0010_english_field_names_4'),
+        ('audit', '0004_english_field_names_2'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0007_english_field_names_3'),
         ('core', '0022_english_field_names_3'),
-        ('financeiro', '0022_english_field_names_5'),
-        ('orcamentos', '0009_english_field_names_5'),
-        ('pacientes', '0012_english_field_names_4'),
-        ('pessoal', '0007_english_field_names_4'),
-        ('profissionais', '0007_english_field_names_3'),
-        ('prontuario', '0009_english_field_names_5'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0006_english_field_names_3'),
+        ('finance', '0022_english_field_names_5'),
+        ('estimates', '0009_english_field_names_5'),
+        ('patients', '0012_english_field_names_4'),
+        ('staff', '0007_english_field_names_4'),
+        ('practitioners', '0007_english_field_names_3'),
+        ('medical_records', '0009_english_field_names_5'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0006_english_field_names_3'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='payroll',
             name='funcionario',
-            field=models.ForeignKey(db_column='funcionario_id', on_delete=django.db.models.deletion.PROTECT, related_name='folhas', to='pessoal.employee', verbose_name='funcionário'),
+            field=models.ForeignKey(db_column='funcionario_id', on_delete=django.db.models.deletion.PROTECT, related_name='folhas', to='staff.employee', verbose_name='funcionário'),
         ),
         migrations.RenameField(
             model_name='payroll',
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='salary',
             name='funcionario',
-            field=models.ForeignKey(db_column='funcionario_id', on_delete=django.db.models.deletion.CASCADE, related_name='salarios', to='pessoal.employee', verbose_name='funcionário'),
+            field=models.ForeignKey(db_column='funcionario_id', on_delete=django.db.models.deletion.CASCADE, related_name='salarios', to='staff.employee', verbose_name='funcionário'),
         ),
         migrations.RenameField(
             model_name='salary',

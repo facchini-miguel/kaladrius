@@ -287,7 +287,7 @@ class Entry(ClinicModel):
         verbose_name=_("centro de custo"),
     )
     patient = models.ForeignKey(
-        "pacientes.Patient",
+        "patients.Patient",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -306,7 +306,7 @@ class Entry(ClinicModel):
         verbose_name=_("fornecedor"),
     )
     practitioner = models.ForeignKey(
-        "profissionais.Practitioner",
+        "practitioners.Practitioner",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -672,7 +672,7 @@ class Commission(ClinicModel):
     """
 
     practitioner = models.ForeignKey(
-        "profissionais.Practitioner",
+        "practitioners.Practitioner",
         on_delete=models.PROTECT,
         related_name="commissions",
         verbose_name=_("profissional"),

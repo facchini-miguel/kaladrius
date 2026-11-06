@@ -18,14 +18,18 @@ def remover(apps, schema_editor):
         for tabela in TABELAS:
             if tabela in existentes:
                 cursor.execute(f"DROP TABLE {conexao.ops.quote_name(tabela)}")
-        cursor.execute("DELETE FROM django_migrations WHERE app = %s", ["account"])
+    # Since decision 194 "account" is this app's own label: its migration rows stay (migrate's
+    # sync_labels already merged the leftovers into them), and only the leftovers' content types,
+    # under the models' old names, go.
     ContentType = apps.get_model("contenttypes", "ContentType")
-    ContentType.objects.using(schema_editor.connection.alias).filter(app_label="account").delete()
+    ContentType.objects.using(schema_editor.connection.alias).filter(
+        app_label="account", model__in=["codigorecuperacao", "duasetapas"]
+    ).delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("conta", "0004_english_field_names_2"),
+        ("account", "0004_english_field_names_2"),
         ("contenttypes", "0002_remove_content_type_name"),
         ("auth", "0012_alter_user_first_name_max_length"),
     ]

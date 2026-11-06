@@ -9,19 +9,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0011_english_field_names_6'),
-        ('auditoria', '0005_english_field_names_6'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0008_english_field_names_6'),
+        ('schedule', '0011_english_field_names_6'),
+        ('audit', '0005_english_field_names_6'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0008_english_field_names_6'),
         ('core', '0024_english_field_names_9'),
-        ('financeiro', '0024_english_field_names_7'),
-        ('orcamentos', '0010_english_field_names_6'),
-        ('pacientes', '0014_english_field_names_8'),
-        ('pessoal', '0008_english_field_names_6'),
-        ('profissionais', '0008_english_field_names_6'),
-        ('prontuario', '0011_english_field_names_9'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0007_english_field_names_6'),
+        ('finance', '0024_english_field_names_7'),
+        ('estimates', '0010_english_field_names_6'),
+        ('patients', '0014_english_field_names_8'),
+        ('staff', '0008_english_field_names_6'),
+        ('practitioners', '0008_english_field_names_6'),
+        ('medical_records', '0011_english_field_names_9'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0007_english_field_names_6'),
     ]
 
     operations = [
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='estimateitem',
             name='orcamento',
-            field=models.ForeignKey(db_column='orcamento_id', on_delete=django.db.models.deletion.CASCADE, related_name='itens', to='orcamentos.estimate', verbose_name='orçamento'),
+            field=models.ForeignKey(db_column='orcamento_id', on_delete=django.db.models.deletion.CASCADE, related_name='itens', to='estimates.estimate', verbose_name='orçamento'),
         ),
         migrations.RenameField(
             model_name='estimateitem',
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='estimateitem',
             name='procedimento',
-            field=models.ForeignKey(blank=True, db_column='procedimento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='orcamentos.procedure', verbose_name='procedimento'),
+            field=models.ForeignKey(blank=True, db_column='procedimento_id', null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='estimates.procedure', verbose_name='procedimento'),
         ),
         migrations.RenameField(
             model_name='estimateitem',
@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="estimate",
-                to="financeiro.entry",
+                to="finance.entry",
                 verbose_name="lançamento a receber",
             ),
         ),

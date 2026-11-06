@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class FinanceConfig(AppConfig):
     name = "apps.finance"
-    label = "financeiro"
+    label = "finance"
     verbose_name = _("Financeiro")
 
     def ready(self):

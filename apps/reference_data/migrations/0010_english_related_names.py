@@ -7,28 +7,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('referencias', '0009_english_db_names'),
+        ('reference_data', '0009_english_db_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='city',
             name='state',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cities', to='referencias.state', verbose_name='UF'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cities', to='reference_data.state', verbose_name='UF'),
         ),
         migrations.AlterField(
             model_name='neighborhood',
             name='city',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='neighborhoods', to='referencias.city', verbose_name='cidade'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='neighborhoods', to='reference_data.city', verbose_name='cidade'),
         ),
         migrations.AlterField(
             model_name='street',
             name='city',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='streets', to='referencias.city', verbose_name='cidade'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='streets', to='reference_data.city', verbose_name='cidade'),
         ),
         migrations.AlterField(
             model_name='street',
             name='neighborhood',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='streets', to='referencias.neighborhood', verbose_name='bairro'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='streets', to='reference_data.neighborhood', verbose_name='bairro'),
         ),
     ]

@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('ativo', models.BooleanField(default=True, verbose_name='ativo')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'agenda_tipoatendimento', 
                 'verbose_name': 'tipo de atendimento',
                 'verbose_name_plural': 'tipos de atendimento',
                 'ordering': ['nome'],

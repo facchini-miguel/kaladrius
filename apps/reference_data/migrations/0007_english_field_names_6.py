@@ -8,26 +8,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0010_english_field_names_4'),
-        ('auditoria', '0004_english_field_names_2'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0007_english_field_names_3'),
+        ('schedule', '0010_english_field_names_4'),
+        ('audit', '0004_english_field_names_2'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0007_english_field_names_3'),
         ('core', '0022_english_field_names_3'),
-        ('financeiro', '0022_english_field_names_5'),
-        ('orcamentos', '0009_english_field_names_5'),
-        ('pacientes', '0012_english_field_names_4'),
-        ('pessoal', '0007_english_field_names_4'),
-        ('profissionais', '0007_english_field_names_3'),
-        ('prontuario', '0009_english_field_names_5'),
-        ('rechamadas', '0006_english_field_names_5'),
-        ('referencias', '0006_english_field_names_3'),
+        ('finance', '0022_english_field_names_5'),
+        ('estimates', '0009_english_field_names_5'),
+        ('patients', '0012_english_field_names_4'),
+        ('staff', '0007_english_field_names_4'),
+        ('practitioners', '0007_english_field_names_3'),
+        ('medical_records', '0009_english_field_names_5'),
+        ('recalls', '0006_english_field_names_5'),
+        ('reference_data', '0006_english_field_names_3'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='city',
             name='uf',
-            field=models.ForeignKey(db_column='uf_id', on_delete=django.db.models.deletion.PROTECT, related_name='cidades', to='referencias.state', verbose_name='UF'),
+            field=models.ForeignKey(db_column='uf_id', on_delete=django.db.models.deletion.PROTECT, related_name='cidades', to='reference_data.state', verbose_name='UF'),
         ),
         migrations.RenameField(
             model_name='city',
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='neighborhood',
             name='cidade',
-            field=models.ForeignKey(db_column='cidade_id', on_delete=django.db.models.deletion.CASCADE, related_name='bairros', to='referencias.city', verbose_name='cidade'),
+            field=models.ForeignKey(db_column='cidade_id', on_delete=django.db.models.deletion.CASCADE, related_name='bairros', to='reference_data.city', verbose_name='cidade'),
         ),
         migrations.RenameField(
             model_name='neighborhood',
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='street',
             name='cidade',
-            field=models.ForeignKey(db_column='cidade_id', on_delete=django.db.models.deletion.CASCADE, related_name='logradouros', to='referencias.city', verbose_name='cidade'),
+            field=models.ForeignKey(db_column='cidade_id', on_delete=django.db.models.deletion.CASCADE, related_name='logradouros', to='reference_data.city', verbose_name='cidade'),
         ),
         migrations.RenameField(
             model_name='street',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='street',
             name='bairro',
-            field=models.ForeignKey(blank=True, db_column='bairro_id', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logradouros', to='referencias.neighborhood', verbose_name='bairro'),
+            field=models.ForeignKey(blank=True, db_column='bairro_id', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='logradouros', to='reference_data.neighborhood', verbose_name='bairro'),
         ),
         migrations.RenameField(
             model_name='street',

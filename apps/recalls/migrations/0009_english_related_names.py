@@ -7,14 +7,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pacientes', '0016_english_related_names'),
-        ('rechamadas', '0008_english_db_names'),
+        ('patients', '0016_english_related_names'),
+        ('recalls', '0008_english_db_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='recall',
             name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='recalls', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='recalls', to='patients.patient', verbose_name='paciente'),
         ),
     ]

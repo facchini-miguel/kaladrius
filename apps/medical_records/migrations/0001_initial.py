@@ -11,10 +11,10 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('agenda', '0004_situacao_agendamento'),
+        ('schedule', '0004_situacao_agendamento'),
         ('core', '0007_clinica_area'),
-        ('pacientes', '0002_paciente_arquivado'),
-        ('profissionais', '0002_comissao_percentual'),
+        ('patients', '0002_paciente_arquivado'),
+        ('practitioners', '0002_comissao_percentual'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -32,14 +32,14 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('alterado_em', models.DateTimeField(auto_now=True)),
                 ('finalizado_em', models.DateTimeField(blank=True, null=True, verbose_name='finalizado em')),
-                ('agendamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='atendimento', to='agenda.agendamento', verbose_name='agendamento')),
+                ('agendamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='atendimento', to='schedule.agendamento', verbose_name='agendamento')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL)),
                 ('finalizado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atendimentos', to='pacientes.paciente', verbose_name='paciente')),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atendimentos', to='profissionais.profissional', verbose_name='profissional')),
+                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atendimentos', to='patients.paciente', verbose_name='paciente')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='atendimentos', to='practitioners.profissional', verbose_name='profissional')),
             ],
-            options={
+            options={'db_table': 'prontuario_atendimento', 
                 'verbose_name': 'atendimento',
                 'verbose_name_plural': 'atendimentos',
                 'ordering': ['-data', '-pk'],
@@ -53,10 +53,10 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True)),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='profissionais.profissional', verbose_name='profissional')),
-                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='adendos', to='prontuario.atendimento', verbose_name='atendimento')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='practitioners.profissional', verbose_name='profissional')),
+                ('atendimento', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='adendos', to='medical_records.atendimento', verbose_name='atendimento')),
             ],
-            options={
+            options={'db_table': 'prontuario_adendo', 
                 'verbose_name': 'adendo',
                 'verbose_name_plural': 'adendos',
                 'ordering': ['criado_em', 'pk'],

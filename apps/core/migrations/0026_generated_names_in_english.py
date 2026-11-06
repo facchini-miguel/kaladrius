@@ -6,21 +6,21 @@ changes; going back leaves the new names, which do no harm."""
 
 from django.db import migrations
 
-# The project's app labels (decision 145 kept them): only their tables are renamed.
+# The project's app labels (English since decision 194): only their tables are renamed.
 LABELS = {
-    "agenda",
-    "auditoria",
-    "conta",
-    "convenios",
+    "account",
+    "audit",
     "core",
-    "financeiro",
-    "orcamentos",
-    "pacientes",
-    "pessoal",
-    "profissionais",
-    "prontuario",
-    "rechamadas",
-    "referencias",
+    "estimates",
+    "finance",
+    "health_plans",
+    "medical_records",
+    "patients",
+    "practitioners",
+    "recalls",
+    "reference_data",
+    "schedule",
+    "staff",
 }
 
 
@@ -101,19 +101,19 @@ def rename(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("conta", "0008_english_db_names"),
-        ("auditoria", "0007_english_db_names"),
+        ("account", "0008_english_db_names"),
+        ("audit", "0007_english_db_names"),
         ("core", "0025_english_db_names"),
-        ("orcamentos", "0012_english_db_names"),
-        ("financeiro", "0025_english_db_names"),
-        ("convenios", "0010_english_db_names"),
-        ("prontuario", "0013_english_db_names"),
-        ("pacientes", "0015_english_db_names"),
-        ("profissionais", "0010_english_db_names"),
-        ("rechamadas", "0008_english_db_names"),
-        ("referencias", "0009_english_db_names"),
-        ("agenda", "0013_english_db_names"),
-        ("pessoal", "0010_english_db_names"),
+        ("estimates", "0012_english_db_names"),
+        ("finance", "0025_english_db_names"),
+        ("health_plans", "0010_english_db_names"),
+        ("medical_records", "0013_english_db_names"),
+        ("patients", "0015_english_db_names"),
+        ("practitioners", "0010_english_db_names"),
+        ("recalls", "0008_english_db_names"),
+        ("reference_data", "0009_english_db_names"),
+        ("schedule", "0013_english_db_names"),
+        ("staff", "0010_english_db_names"),
     ]
 
     operations = [migrations.RunPython(rename, migrations.RunPython.noop, elidable=False)]

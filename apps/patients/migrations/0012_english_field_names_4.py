@@ -7,19 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0009_english_field_names_3'),
-        ('auditoria', '0004_english_field_names_2'),
-        ('conta', '0006_english_field_names_3'),
-        ('convenios', '0007_english_field_names_3'),
+        ('schedule', '0009_english_field_names_3'),
+        ('audit', '0004_english_field_names_2'),
+        ('account', '0006_english_field_names_3'),
+        ('health_plans', '0007_english_field_names_3'),
         ('core', '0022_english_field_names_3'),
-        ('financeiro', '0020_english_field_names_3'),
-        ('orcamentos', '0007_english_field_names_3'),
-        ('pacientes', '0011_english_field_names_3'),
-        ('pessoal', '0006_english_field_names_3'),
-        ('profissionais', '0007_english_field_names_3'),
-        ('prontuario', '0007_english_field_names_3'),
-        ('rechamadas', '0005_english_field_names_3'),
-        ('referencias', '0006_english_field_names_3'),
+        ('finance', '0020_english_field_names_3'),
+        ('estimates', '0007_english_field_names_3'),
+        ('patients', '0011_english_field_names_3'),
+        ('staff', '0006_english_field_names_3'),
+        ('practitioners', '0007_english_field_names_3'),
+        ('medical_records', '0007_english_field_names_3'),
+        ('recalls', '0005_english_field_names_3'),
+        ('reference_data', '0006_english_field_names_3'),
     ]
 
     operations = [

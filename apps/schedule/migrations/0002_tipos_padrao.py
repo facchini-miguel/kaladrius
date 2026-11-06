@@ -22,7 +22,7 @@ TIPOS_PADRAO = [
 
 def criar(apps, schema_editor):
     Clinica = apps.get_model("core", "Clinica")
-    TipoAtendimento = apps.get_model("agenda", "TipoAtendimento")
+    TipoAtendimento = apps.get_model("schedule", "TipoAtendimento")
     for clinica in Clinica.objects.all():
         if not TipoAtendimento.objects.filter(clinica=clinica).exists():
             TipoAtendimento.objects.bulk_create(
@@ -31,6 +31,6 @@ def criar(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("agenda", "0001_initial")]
+    dependencies = [("schedule", "0001_initial")]
 
     operations = [migrations.RunPython(criar, migrations.RunPython.noop)]

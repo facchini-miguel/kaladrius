@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orcamentos', '0002_ordem_alfabetica'),
+        ('estimates', '0002_ordem_alfabetica'),
     ]
 
     operations = [

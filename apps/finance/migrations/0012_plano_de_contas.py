@@ -24,8 +24,8 @@ def plano_basico(apps, schema_editor):
     """Existing clinics get the basic chart; categories still named as the defaults go
     into it, the others stay without a group. No amount changes."""
     Clinica = apps.get_model("core", "Clinica")
-    Grupo = apps.get_model("financeiro", "GrupoContabil")
-    Categoria = apps.get_model("financeiro", "Categoria")
+    Grupo = apps.get_model("finance", "GrupoContabil")
+    Categoria = apps.get_model("finance", "Categoria")
     alias = schema_editor.connection.alias
     for clinica_id in Clinica.objects.using(alias).values_list("pk", flat=True):
         if Grupo.objects.using(alias).filter(clinica_id=clinica_id).exists():
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0011_fechamento'),
+        ('finance', '0011_fechamento'),
     ]
 
     operations = [
@@ -57,9 +57,9 @@ class Migration(migrations.Migration):
                 ('codigo', models.PositiveSmallIntegerField(blank=True, help_text='Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1.', null=True, verbose_name='código')),
                 ('ativo', models.BooleanField(default=True, verbose_name='ativo')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('pai', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filhos', to='financeiro.grupocontabil', verbose_name='grupo acima')),
+                ('pai', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='filhos', to='finance.grupocontabil', verbose_name='grupo acima')),
             ],
-            options={
+            options={'db_table': 'financeiro_grupocontabil', 
                 'verbose_name': 'grupo contábil',
                 'verbose_name_plural': 'grupos contábeis',
                 'ordering': ['tipo', 'codigo', 'nome'],
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='categoria',
             name='grupo',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='categorias', to='financeiro.grupocontabil', verbose_name='grupo'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='categorias', to='finance.grupocontabil', verbose_name='grupo'),
         ),
         migrations.AddConstraint(
             model_name='grupocontabil',

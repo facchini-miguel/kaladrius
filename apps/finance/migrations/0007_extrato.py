@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0006_categoria_comissoes'),
+        ('finance', '0006_categoria_comissoes'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -29,10 +29,10 @@ class Migration(migrations.Migration):
                 ('repetidas', models.PositiveIntegerField(default=0, verbose_name='transações já importadas')),
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='importado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='importacoes', to='financeiro.conta', verbose_name='conta')),
+                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='importacoes', to='finance.conta', verbose_name='conta')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='importado por')),
             ],
-            options={
+            options={'db_table': 'financeiro_importacaoextrato', 
                 'verbose_name': 'importação de extrato',
                 'verbose_name_plural': 'importações de extrato',
                 'ordering': ['-criado_em'],
@@ -52,12 +52,12 @@ class Migration(migrations.Migration):
                 ('conciliado_em', models.DateTimeField(blank=True, null=True, verbose_name='conciliado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('conciliado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='conciliado por')),
-                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='financeiro.conta', verbose_name='conta')),
-                ('importacao', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='financeiro.importacaoextrato', verbose_name='importação')),
-                ('movimento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='financeiro.movimentocaixa', verbose_name='movimento do caixa')),
-                ('pagamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='financeiro.pagamento', verbose_name='pagamento')),
+                ('conta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='finance.conta', verbose_name='conta')),
+                ('importacao', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transacoes', to='finance.importacaoextrato', verbose_name='importação')),
+                ('movimento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='finance.movimentocaixa', verbose_name='movimento do caixa')),
+                ('pagamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transacao', to='finance.pagamento', verbose_name='pagamento')),
             ],
-            options={
+            options={'db_table': 'financeiro_transacaobancaria', 
                 'verbose_name': 'transação bancária',
                 'verbose_name_plural': 'transações bancárias',
                 'ordering': ['data', 'pk'],

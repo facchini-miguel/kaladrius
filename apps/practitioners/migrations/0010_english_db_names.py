@@ -10,7 +10,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0025_english_db_names"),
-        ("profissionais", "0009_english_field_names_10"),
+        ("practitioners", "0009_english_field_names_10"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

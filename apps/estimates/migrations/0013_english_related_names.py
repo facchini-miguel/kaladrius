@@ -7,19 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orcamentos', '0012_english_db_names'),
-        ('pacientes', '0016_english_related_names'),
+        ('estimates', '0012_english_db_names'),
+        ('patients', '0016_english_related_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='estimate',
             name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='estimates', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='estimates', to='patients.patient', verbose_name='paciente'),
         ),
         migrations.AlterField(
             model_name='estimateitem',
             name='estimate',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='orcamentos.estimate', verbose_name='orçamento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='estimates.estimate', verbose_name='orçamento'),
         ),
     ]

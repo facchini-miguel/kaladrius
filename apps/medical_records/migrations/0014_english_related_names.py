@@ -7,45 +7,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pacientes', '0016_english_related_names'),
-        ('profissionais', '0011_english_related_names'),
-        ('prontuario', '0013_english_db_names'),
+        ('patients', '0016_english_related_names'),
+        ('practitioners', '0011_english_related_names'),
+        ('medical_records', '0013_english_db_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='addendum',
             name='visit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='addenda', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='addenda', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.AlterField(
             model_name='attachment',
             name='visit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='attachments', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='attachments', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.AlterField(
             model_name='certificate',
             name='visit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='certificates', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='certificates', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.AlterField(
             model_name='examrequest',
             name='visit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='exam_requests', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='exam_requests', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.AlterField(
             model_name='prescription',
             name='visit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='prescriptions', to='prontuario.visit', verbose_name='atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='prescriptions', to='medical_records.visit', verbose_name='atendimento'),
         ),
         migrations.AlterField(
             model_name='visit',
             name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='visits', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='visits', to='patients.patient', verbose_name='paciente'),
         ),
         migrations.AlterField(
             model_name='visit',
             name='practitioner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='visits', to='profissionais.practitioner', verbose_name='profissional'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='visits', to='practitioners.practitioner', verbose_name='profissional'),
         ),
     ]

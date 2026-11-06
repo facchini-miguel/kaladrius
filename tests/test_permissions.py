@@ -159,7 +159,7 @@ def test_django_admin_lists_practitioners_of_all_clinics(
     root = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
     content = (
         client_for(root)
-        .get(reverse("admin:profissionais_practitioner_changelist"))
+        .get(reverse("admin:practitioners_practitioner_changelist"))
         .content.decode()
     )
     assert "Dra. A" in content and "Dr. B" in content

@@ -40,7 +40,7 @@ class Procedure(ClinicModel):
     code = models.CharField(_("código"), max_length=20, blank=True)
     amount = models.DecimalField(_("valor"), **MONEY)
     category = models.ForeignKey(
-        "financeiro.Category",
+        "finance.Category",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -73,13 +73,13 @@ class Estimate(ClinicModel):
         REFUSED = "recusado", _("Recusado")
 
     patient = models.ForeignKey(
-        "pacientes.Patient",
+        "patients.Patient",
         on_delete=models.PROTECT,
         related_name="estimates",
         verbose_name=_("paciente"),
     )
     practitioner = models.ForeignKey(
-        "profissionais.Practitioner",
+        "practitioners.Practitioner",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -97,7 +97,7 @@ class Estimate(ClinicModel):
     discount = models.DecimalField(_("desconto"), default=Decimal("0.00"), **MONEY)
     notes = models.TextField(_("observações"), blank=True)
     entry = models.OneToOneField(
-        "financeiro.Entry",
+        "finance.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

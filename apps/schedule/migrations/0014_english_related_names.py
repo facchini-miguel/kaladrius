@@ -7,25 +7,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0013_english_db_names'),
-        ('pacientes', '0016_english_related_names'),
-        ('profissionais', '0011_english_related_names'),
+        ('schedule', '0013_english_db_names'),
+        ('patients', '0016_english_related_names'),
+        ('practitioners', '0011_english_related_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='appointment',
             name='kind',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='agenda.appointmenttype', verbose_name='tipo de atendimento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='schedule.appointmenttype', verbose_name='tipo de atendimento'),
         ),
         migrations.AlterField(
             model_name='appointment',
             name='patient',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='patients.patient', verbose_name='paciente'),
         ),
         migrations.AlterField(
             model_name='appointment',
             name='practitioner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='profissionais.practitioner', verbose_name='profissional'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='appointments', to='practitioners.practitioner', verbose_name='profissional'),
         ),
     ]

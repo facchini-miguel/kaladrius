@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('prontuario', '0011_english_field_names_9'),
+        ('medical_records', '0011_english_field_names_9'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

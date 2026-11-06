@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0012_plano_de_contas'),
+        ('finance', '0012_plano_de_contas'),
     ]
 
     operations = [
@@ -19,9 +19,9 @@ class Migration(migrations.Migration):
                 ('ano', models.PositiveSmallIntegerField(verbose_name='ano')),
                 ('valor', models.DecimalField(decimal_places=2, max_digits=12, verbose_name='meta')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('grupo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='financeiro.grupocontabil', verbose_name='grupo')),
+                ('grupo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='finance.grupocontabil', verbose_name='grupo')),
             ],
-            options={
+            options={'db_table': 'financeiro_planejamento', 
                 'verbose_name': 'meta do planejamento',
                 'verbose_name_plural': 'metas do planejamento',
                 'ordering': ['ano', 'grupo'],

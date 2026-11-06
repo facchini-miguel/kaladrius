@@ -12,10 +12,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agenda', '0002_tipos_padrao'),
+        ('schedule', '0002_tipos_padrao'),
         ('core', '0002_clinica_vinculo'),
-        ('pacientes', '0001_initial'),
-        ('profissionais', '0001_initial'),
+        ('patients', '0001_initial'),
+        ('practitioners', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -34,11 +34,11 @@ class Migration(migrations.Migration):
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('paciente', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='pacientes.paciente', verbose_name='paciente')),
-                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='profissionais.profissional', verbose_name='profissional')),
-                ('tipo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='agenda.tipoatendimento', verbose_name='tipo de atendimento')),
+                ('paciente', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='patients.paciente', verbose_name='paciente')),
+                ('profissional', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='practitioners.profissional', verbose_name='profissional')),
+                ('tipo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='agendamentos', to='schedule.tipoatendimento', verbose_name='tipo de atendimento')),
             ],
-            options={
+            options={'db_table': 'agenda_agendamento', 
                 'verbose_name': 'agendamento',
                 'verbose_name_plural': 'agendamentos',
                 'ordering': ['inicio'],

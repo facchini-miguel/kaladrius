@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0013_planejamento'),
+        ('finance', '0013_planejamento'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'pessoal_funcionario', 
                 'verbose_name': 'funcionário',
                 'verbose_name_plural': 'funcionários',
                 'ordering': ['nome'],
@@ -50,10 +50,10 @@ class Migration(migrations.Migration):
                 ('faltas', models.PositiveSmallIntegerField(default=0, verbose_name='dias de falta')),
                 ('observacao', models.CharField(blank=True, max_length=200, verbose_name='observação')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('lancamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='folha', to='financeiro.lancamento', verbose_name='conta a pagar')),
-                ('funcionario', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='folhas', to='pessoal.funcionario', verbose_name='funcionário')),
+                ('lancamento', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='folha', to='finance.lancamento', verbose_name='conta a pagar')),
+                ('funcionario', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='folhas', to='staff.funcionario', verbose_name='funcionário')),
             ],
-            options={
+            options={'db_table': 'pessoal_folha', 
                 'verbose_name': 'folha do mês',
                 'verbose_name_plural': 'folhas do mês',
                 'ordering': ['-competencia', 'funcionario__nome'],
@@ -68,9 +68,9 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
-                ('funcionario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='salarios', to='pessoal.funcionario', verbose_name='funcionário')),
+                ('funcionario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='salarios', to='staff.funcionario', verbose_name='funcionário')),
             ],
-            options={
+            options={'db_table': 'pessoal_salario', 
                 'verbose_name': 'salário',
                 'verbose_name_plural': 'salários',
                 'ordering': ['-desde', '-pk'],

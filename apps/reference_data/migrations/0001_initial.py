@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('nome', models.CharField(max_length=200, verbose_name='nome')),
                 ('nome_curto', models.CharField(max_length=100, verbose_name='nome curto')),
             ],
-            options={
+            options={'db_table': 'referencias_banco', 
                 'verbose_name': 'banco',
                 'verbose_name_plural': 'bancos',
                 'ordering': [models.OrderBy(models.F('codigo'), nulls_last=True), 'nome'],
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('nome', models.CharField(max_length=30, unique=True, verbose_name='nome')),
                 ('ordem', models.PositiveSmallIntegerField(default=0, verbose_name='ordem')),
             ],
-            options={
+            options={'db_table': 'referencias_estadocivil', 
                 'verbose_name': 'estado civil',
                 'verbose_name_plural': 'estados civis',
                 'ordering': ['ordem', 'nome'],
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('nome', models.CharField(max_length=50, verbose_name='nome')),
                 ('regiao', models.CharField(max_length=20, verbose_name='região')),
             ],
-            options={
+            options={'db_table': 'referencias_uf', 
                 'verbose_name': 'UF',
                 'verbose_name_plural': 'UFs',
                 'ordering': ['sigla'],
@@ -58,9 +58,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('codigo', models.PositiveIntegerField(primary_key=True, serialize=False, verbose_name='código IBGE')),
                 ('nome', models.CharField(max_length=100, verbose_name='nome')),
-                ('uf', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cidades', to='referencias.uf', verbose_name='UF')),
+                ('uf', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cidades', to='reference_data.uf', verbose_name='UF')),
             ],
-            options={
+            options={'db_table': 'referencias_cidade', 
                 'verbose_name': 'cidade',
                 'verbose_name_plural': 'cidades',
                 'ordering': ['nome'],

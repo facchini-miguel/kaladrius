@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0002_clinica_vinculo'),
-        ('referencias', '0002_carga_inicial'),
+        ('reference_data', '0002_carga_inicial'),
     ]
 
     operations = [
@@ -41,12 +41,12 @@ class Migration(migrations.Migration):
                 ('ativo', models.BooleanField(default=True, verbose_name='ativo')),
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='cadastrado em')),
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
-                ('cidade', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='referencias.cidade', verbose_name='cidade')),
+                ('cidade', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='reference_data.cidade', verbose_name='cidade')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('estado_civil', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='referencias.estadocivil', verbose_name='estado civil')),
-                ('uf', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='referencias.uf', verbose_name='UF')),
+                ('estado_civil', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='reference_data.estadocivil', verbose_name='estado civil')),
+                ('uf', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='reference_data.uf', verbose_name='UF')),
             ],
-            options={
+            options={'db_table': 'pacientes_paciente', 
                 'verbose_name': 'paciente',
                 'verbose_name_plural': 'pacientes',
                 'ordering': ['nome'],

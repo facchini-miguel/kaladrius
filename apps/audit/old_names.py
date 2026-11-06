@@ -5,7 +5,7 @@ label of an old entry's field by this name. {model label: {old name: field}}.
 """
 
 OLD_FIELD_NAMES = {
-    "agenda.Appointment": {
+    "schedule.Appointment": {
         "alterado_em": "updated_at",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -19,13 +19,13 @@ OLD_FIELD_NAMES = {
         "situacao": "status",
         "tipo": "kind",
     },
-    "agenda.AppointmentType": {
+    "schedule.AppointmentType": {
         "ativo": "active",
         "clinica": "clinic",
         "cor": "color",
         "nome": "name",
     },
-    "auditoria.AuditEntry": {
+    "audit.AuditEntry": {
         "acao": "action",
         "alteracoes": "changes",
         "clinica": "clinic",
@@ -36,19 +36,19 @@ OLD_FIELD_NAMES = {
         "usuario": "user",
         "usuario_nome": "user_name",
     },
-    "conta.RecoveryCode": {
+    "account.RecoveryCode": {
         "resumo": "digest",
         "usado_em": "used_at",
         "usuario": "user",
     },
-    "conta.TwoFactor": {
+    "account.TwoFactor": {
         "ativa": "active",
         "ativada_em": "activated_at",
         "segredo": "secret",
         "ultimo_passo": "last_step",
         "usuario": "user",
     },
-    "convenios.HealthPlan": {
+    "health_plans.HealthPlan": {
         "alterado_em": "updated_at",
         "ativo": "active",
         "clinica": "clinic",
@@ -58,7 +58,7 @@ OLD_FIELD_NAMES = {
         "registro": "registration",
         "telefone": "phone",
     },
-    "convenios.MemberCard": {
+    "health_plans.MemberCard": {
         "alterado_em": "updated_at",
         "ativa": "active",
         "beneficiario": "member_code",
@@ -111,7 +111,7 @@ OLD_FIELD_NAMES = {
         "idioma": "language",
         "ultima_versao_vista": "last_seen_version",
     },
-    "financeiro.AccountGroup": {
+    "finance.AccountGroup": {
         "ativo": "active",
         "clinica": "clinic",
         "codigo": "code",
@@ -119,7 +119,7 @@ OLD_FIELD_NAMES = {
         "pai": "parent",
         "tipo": "kind",
     },
-    "financeiro.BankTransaction": {
+    "finance.BankTransaction": {
         "clinica": "clinic",
         "conciliado_em": "reconciled_at",
         "conciliado_por": "reconciled_by",
@@ -134,14 +134,14 @@ OLD_FIELD_NAMES = {
         "tipo": "kind",
         "valor": "amount",
     },
-    "financeiro.BookClosing": {
+    "finance.BookClosing": {
         "ate": "until",
         "clinica": "clinic",
         "criado_em": "created_at",
         "criado_por": "created_by",
         "motivo": "reason",
     },
-    "financeiro.CashMovement": {
+    "finance.CashMovement": {
         "caixa": "cash_register",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -151,7 +151,7 @@ OLD_FIELD_NAMES = {
         "tipo": "kind",
         "valor": "amount",
     },
-    "financeiro.CashRegister": {
+    "finance.CashRegister": {
         "aberto_em": "opened_at",
         "aberto_por": "opened_by",
         "clinica": "clinic",
@@ -163,14 +163,14 @@ OLD_FIELD_NAMES = {
         "valor_contado": "counted_amount",
         "valor_esperado": "expected_amount",
     },
-    "financeiro.Category": {
+    "finance.Category": {
         "ativa": "active",
         "clinica": "clinic",
         "grupo": "group",
         "nome": "name",
         "tipo": "kind",
     },
-    "financeiro.Commission": {
+    "finance.Commission": {
         "ate": "until",
         "cancelada": "cancelled",
         "clinica": "clinic",
@@ -183,12 +183,12 @@ OLD_FIELD_NAMES = {
         "recebido": "received_amount",
         "valor": "amount",
     },
-    "financeiro.CostCenter": {
+    "finance.CostCenter": {
         "ativo": "active",
         "clinica": "clinic",
         "nome": "name",
     },
-    "financeiro.Entry": {
+    "finance.Entry": {
         "alterado_em": "updated_at",
         "cancelado": "cancelled",
         "cancelado_em": "cancelled_at",
@@ -209,21 +209,21 @@ OLD_FIELD_NAMES = {
         "tipo": "kind",
         "valor_total": "total_amount",
     },
-    "financeiro.FinancialAccount": {
+    "finance.FinancialAccount": {
         "ativa": "active",
         "clinica": "clinic",
         "nome": "name",
         "saldo_inicial": "opening_balance",
         "tipo": "kind",
     },
-    "financeiro.Installment": {
+    "finance.Installment": {
         "clinica": "clinic",
         "lancamento": "entry",
         "numero": "number",
         "valor": "amount",
         "vencimento": "due_date",
     },
-    "financeiro.Payment": {
+    "finance.Payment": {
         "cartao_bandeira": "card_brand",
         "cartao_codigo": "card_transaction_code",
         "cartao_parcelas": "card_installments",
@@ -245,13 +245,13 @@ OLD_FIELD_NAMES = {
         "parcela": "installment",
         "valor": "amount",
     },
-    "financeiro.Planning": {
+    "finance.Planning": {
         "ano": "year",
         "clinica": "clinic",
         "grupo": "group",
         "valor": "amount",
     },
-    "financeiro.StatementImport": {
+    "finance.StatementImport": {
         "arquivo": "file",
         "banco": "bank_code",
         "clinica": "clinic",
@@ -267,7 +267,7 @@ OLD_FIELD_NAMES = {
         "saldo": "balance",
         "saldo_em": "balance_date",
     },
-    "financeiro.Supplier": {
+    "finance.Supplier": {
         "alterado_em": "updated_at",
         "ativo": "active",
         "clinica": "clinic",
@@ -279,7 +279,7 @@ OLD_FIELD_NAMES = {
         "telefone": "phone",
         "tipo": "kind",
     },
-    "orcamentos.Estimate": {
+    "estimates.Estimate": {
         "alterado_em": "updated_at",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -295,7 +295,7 @@ OLD_FIELD_NAMES = {
         "situacao": "status",
         "validade": "valid_until",
     },
-    "orcamentos.EstimateItem": {
+    "estimates.EstimateItem": {
         "clinica": "clinic",
         "codigo": "code",
         "dentes": "teeth",
@@ -305,7 +305,7 @@ OLD_FIELD_NAMES = {
         "quantidade": "quantity",
         "valor_unitario": "unit_price",
     },
-    "orcamentos.Procedure": {
+    "estimates.Procedure": {
         "ativo": "active",
         "categoria": "category",
         "clinica": "clinic",
@@ -313,7 +313,7 @@ OLD_FIELD_NAMES = {
         "nome": "name",
         "valor": "amount",
     },
-    "pacientes.Patient": {
+    "patients.Patient": {
         "alterado_em": "updated_at",
         "arquivado": "archived",
         "arquivado_em": "archived_at",
@@ -345,7 +345,7 @@ OLD_FIELD_NAMES = {
         "tipo": "kind",
         "uf": "state",
     },
-    "pacientes.RelatedPerson": {
+    "patients.RelatedPerson": {
         "clinica": "clinic",
         "criado_em": "created_at",
         "nome": "name",
@@ -355,7 +355,7 @@ OLD_FIELD_NAMES = {
         "telefone": "phone",
         "vinculo": "relationship",
     },
-    "pessoal.Employee": {
+    "staff.Employee": {
         "admissao": "hired_on",
         "alterado_em": "updated_at",
         "ativo": "active",
@@ -368,7 +368,7 @@ OLD_FIELD_NAMES = {
         "observacoes": "notes",
         "telefone": "phone",
     },
-    "pessoal.Payroll": {
+    "staff.Payroll": {
         "clinica": "clinic",
         "competencia": "period",
         "faltas": "absences",
@@ -379,7 +379,7 @@ OLD_FIELD_NAMES = {
         "salario": "salary",
         "valor_hora_extra": "overtime_rate",
     },
-    "pessoal.Salary": {
+    "staff.Salary": {
         "clinica": "clinic",
         "criado_em": "created_at",
         "criado_por": "created_by",
@@ -387,7 +387,7 @@ OLD_FIELD_NAMES = {
         "funcionario": "employee",
         "valor": "amount",
     },
-    "profissionais.Practitioner": {
+    "practitioners.Practitioner": {
         "alterado_em": "updated_at",
         "ativo": "active",
         "clinica": "clinic",
@@ -398,7 +398,7 @@ OLD_FIELD_NAMES = {
         "registro": "registration",
         "usuario": "user",
     },
-    "prontuario.Addendum": {
+    "medical_records.Addendum": {
         "atendimento": "visit",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -406,7 +406,7 @@ OLD_FIELD_NAMES = {
         "profissional": "practitioner",
         "texto": "text",
     },
-    "prontuario.Attachment": {
+    "medical_records.Attachment": {
         "atendimento": "visit",
         "clinica": "clinic",
         "conteudo": "content",
@@ -418,7 +418,7 @@ OLD_FIELD_NAMES = {
         "tamanho": "size",
         "tipo": "kind",
     },
-    "prontuario.Certificate": {
+    "medical_records.Certificate": {
         "atendimento": "visit",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -431,7 +431,7 @@ OLD_FIELD_NAMES = {
         "profissional": "practitioner",
         "tipo": "kind",
     },
-    "prontuario.ExamRequest": {
+    "medical_records.ExamRequest": {
         "atendimento": "visit",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -440,7 +440,7 @@ OLD_FIELD_NAMES = {
         "indicacao": "indication",
         "profissional": "practitioner",
     },
-    "prontuario.Prescription": {
+    "medical_records.Prescription": {
         "atendimento": "visit",
         "clinica": "clinic",
         "criado_em": "created_at",
@@ -448,7 +448,7 @@ OLD_FIELD_NAMES = {
         "prescricao": "medications",
         "profissional": "practitioner",
     },
-    "prontuario.Visit": {
+    "medical_records.Visit": {
         "agendamento": "appointment",
         "alterado_em": "updated_at",
         "antecedentes": "medical_history",
@@ -465,7 +465,7 @@ OLD_FIELD_NAMES = {
         "profissional": "practitioner",
         "queixa_principal": "chief_complaint",
     },
-    "rechamadas.Recall": {
+    "recalls.Recall": {
         "alterado_em": "updated_at",
         "clinica": "clinic",
         "concluida": "done",
@@ -475,31 +475,31 @@ OLD_FIELD_NAMES = {
         "descricao": "description",
         "paciente": "patient",
     },
-    "referencias.Bank": {
+    "reference_data.Bank": {
         "codigo": "code",
         "nome": "name",
         "nome_curto": "short_name",
     },
-    "referencias.City": {
+    "reference_data.City": {
         "codigo": "code",
         "nome": "name",
         "uf": "state",
     },
-    "referencias.MaritalStatus": {
+    "reference_data.MaritalStatus": {
         "nome": "name",
         "ordem": "sort_order",
     },
-    "referencias.Neighborhood": {
+    "reference_data.Neighborhood": {
         "cidade": "city",
         "nome": "name",
     },
-    "referencias.State": {
+    "reference_data.State": {
         "codigo": "code",
         "nome": "name",
         "regiao": "region",
         "sigla": "abbreviation",
     },
-    "referencias.Street": {
+    "reference_data.Street": {
         "bairro": "neighborhood",
         "cidade": "city",
         "nome": "name",

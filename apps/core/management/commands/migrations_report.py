@@ -7,7 +7,7 @@ be applied, undone and applied again. CI posts the report as a comment on the pu
 (.github/workflows/migrations.yml).
 
     python manage.py migrations_report --base origin/main [--test-rollback]
-    python manage.py migrations_report convenios.0003_seguros_de_cada_pais
+    python manage.py migrations_report health_plans.0003_seguros_de_cada_pais
 
 --test-rollback undoes migrations on the database it runs on, so it only runs on a throwaway
 one: the test database, or with DISPOSABLE_DATABASE=1, as in CI.
@@ -27,6 +27,8 @@ from django.db import connection, models
 from django.db.migrations import operations as ops
 from django.db.migrations.loader import MigrationLoader
 from django.db.models.fields import NOT_PROVIDED
+
+from apps.core.labels import LABELS
 
 FILE_NAME = re.compile(r"^apps/(\w+)/migrations/(\d{4}_\w+)\.py$")
 
@@ -64,13 +66,15 @@ class MigrationEntry:
 
 
 def _labels():
-    """The label of each app folder: apps/schedule keeps the label "agenda" (decision 145), and
-    the database, the migrations and production know an app by its label."""
-    return {
+    """The label of each app folder: the database, the migrations and production know an app by
+    its label. Since decision 194 it is the folder's name; the folders before decision 145
+    (apps/agenda…) had the old labels, which mean the same apps (apps/core/labels.py)."""
+    labels = {
         config.name.removeprefix("apps."): config.label
         for config in django_apps.get_app_configs()
         if config.name.startswith("apps.")
     }
+    return {**{old: labels.get(new, new) for old, new in LABELS.items()}, **labels}
 
 
 def _git(*args):

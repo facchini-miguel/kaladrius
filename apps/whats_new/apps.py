@@ -4,5 +4,5 @@ from django.utils.translation import gettext_lazy as _
 
 class WhatsNewConfig(AppConfig):
     name = "apps.whats_new"
-    label = "novidades"
+    label = "whats_new"
     verbose_name = _("Novidades")

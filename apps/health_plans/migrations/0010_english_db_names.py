@@ -7,9 +7,9 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("convenios", "0009_english_field_names_10"),
+        ("health_plans", "0009_english_field_names_10"),
         ("core", "0025_english_db_names"),
-        ("pacientes", "0015_english_db_names"),
+        ("patients", "0015_english_db_names"),
     ]
 
     operations = [
@@ -105,7 +105,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="carteirinhas",
-                to="convenios.healthplan",
+                to="health_plans.healthplan",
                 verbose_name="convênio",
             ),
         ),
@@ -137,7 +137,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="carteirinhas",
-                to="pacientes.patient",
+                to="patients.patient",
                 verbose_name="paciente",
             ),
         ),

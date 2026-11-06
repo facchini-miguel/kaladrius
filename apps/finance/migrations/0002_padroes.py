@@ -24,8 +24,8 @@ CATEGORIAS = [
 
 def criar(apps, schema_editor):
     Clinica = apps.get_model("core", "Clinica")
-    Conta = apps.get_model("financeiro", "Conta")
-    Categoria = apps.get_model("financeiro", "Categoria")
+    Conta = apps.get_model("finance", "Conta")
+    Categoria = apps.get_model("finance", "Categoria")
     for clinica in Clinica.objects.all():
         if not Conta.objects.filter(clinica=clinica).exists():
             Conta.objects.bulk_create(
@@ -38,6 +38,6 @@ def criar(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("financeiro", "0001_initial")]
+    dependencies = [("finance", "0001_initial")]
 
     operations = [migrations.RunPython(criar, migrations.RunPython.noop)]

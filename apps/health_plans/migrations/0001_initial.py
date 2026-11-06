@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('pacientes', '0003_paciente_whatsapp'),
+        ('patients', '0003_paciente_whatsapp'),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
             ],
-            options={
+            options={'db_table': 'convenios_convenio', 
                 'verbose_name': 'convênio',
                 'verbose_name_plural': 'convênios',
                 'ordering': ['nome'],
@@ -46,10 +46,10 @@ class Migration(migrations.Migration):
                 ('criado_em', models.DateTimeField(auto_now_add=True, verbose_name='criado em')),
                 ('alterado_em', models.DateTimeField(auto_now=True, verbose_name='alterado em')),
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
-                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='pacientes.paciente', verbose_name='paciente')),
-                ('convenio', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='convenios.convenio', verbose_name='convênio')),
+                ('paciente', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='patients.paciente', verbose_name='paciente')),
+                ('convenio', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='carteirinhas', to='health_plans.convenio', verbose_name='convênio')),
             ],
-            options={
+            options={'db_table': 'convenios_carteirinha', 
                 'verbose_name': 'carteirinha',
                 'verbose_name_plural': 'carteirinhas',
                 'ordering': ['-ativa', 'convenio__nome'],

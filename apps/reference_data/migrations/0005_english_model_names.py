@@ -8,8 +8,8 @@ class Migration(migrations.Migration):
     # After every migration that names these models the old way (the patient's city, state and
     # marital status): renamed before them, those would point to models that no longer exist.
     dependencies = [
-        ("referencias", "0004_ordem_alfabetica"),
-        ("pacientes", "0007_documento_do_pais"),
+        ("reference_data", "0004_ordem_alfabetica"),
+        ("patients", "0007_documento_do_pais"),
     ]
 
     operations = [

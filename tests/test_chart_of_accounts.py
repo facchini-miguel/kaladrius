@@ -168,11 +168,11 @@ def test_migration_creates_basic_chart_in_existing_clinics():
         AccountGroup.objects.all().delete()
         Category.objects.create(name="Aluguel", kind="despesa")
         Category.objects.create(name="Aluguel da sala", kind="despesa")
-    apps = apps_at(("financeiro", "0012_plano_de_contas"))
+    apps = apps_at(("finance", "0012_plano_de_contas"))
     pairs_ = [
         (apps.get_model("core", "Clinica"), Clinic),
-        (apps.get_model("financeiro", "GrupoContabil"), AccountGroup),
-        (apps.get_model("financeiro", "Categoria"), Category),
+        (apps.get_model("finance", "GrupoContabil"), AccountGroup),
+        (apps.get_model("finance", "Categoria"), Category),
     ]
     with tables_of_the_time(pairs_), connection.schema_editor() as editor:
         importlib.import_module("apps.finance.migrations.0012_plano_de_contas").plano_basico(

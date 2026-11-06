@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0006_clinica_endereco'),
-        ('financeiro', '0010_centro_custo'),
+        ('finance', '0010_centro_custo'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('clinica', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.clinica', verbose_name='clínica')),
                 ('criado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL, verbose_name='criado por')),
             ],
-            options={
+            options={'db_table': 'financeiro_fechamento', 
                 'verbose_name': 'fechamento do financeiro',
                 'verbose_name_plural': 'fechamentos do financeiro',
                 'ordering': ['-criado_em', '-pk'],

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('usado_em', models.DateTimeField(blank=True, null=True, verbose_name='usado em')),
                 ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='codigos_recuperacao', to=settings.AUTH_USER_MODEL, verbose_name='usuário')),
             ],
-            options={
+            options={'db_table': 'conta_codigorecuperacao', 
                 'verbose_name': 'código de recuperação',
                 'verbose_name_plural': 'códigos de recuperação',
             },
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('ultimo_passo', models.BigIntegerField(default=0, editable=False)),
                 ('usuario', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='duas_etapas', to=settings.AUTH_USER_MODEL, verbose_name='usuário')),
             ],
-            options={
+            options={'db_table': 'conta_duasetapas', 
                 'verbose_name': 'verificação em duas etapas',
                 'verbose_name_plural': 'verificações em duas etapas',
             },

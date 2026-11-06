@@ -4,5 +4,5 @@ from django.utils.translation import gettext_lazy as _
 
 class LegacyConfig(AppConfig):
     name = "apps.legacy"
-    label = "legado"
+    label = "legacy"
     verbose_name = _("Importação do sistema antigo")

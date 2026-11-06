@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.62.0
+  date: 2026-11-06
+  title:
+    pt-br: Nomes internos dos módulos em inglês
+    en: The modules' internal names in English
+    es: Nombres internos de los módulos en inglés
+  items:
+    - kind: melhoria
+      module: Geral
+      audience: [equipe]
+      text:
+        pt-br: >
+          Manutenção interna: os nomes internos dos módulos foram reorganizados. Nada muda no uso,
+          nas telas nem nos dados.
+        en: >
+          Internal maintenance: the modules' internal names were reorganized. Nothing changes in
+          use, on the screens or in the data.
+        es: >
+          Mantenimiento interno: se reorganizaron los nombres internos de los módulos. Nada cambia
+          en el uso, en las pantallas ni en los datos.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          Os labels dos apps são em inglês, os nomes das pastas (decisão 195). A atualização
+          renomeia as linhas de django_migrations e django_content_type; a volta para a 0.61.0 as
+          renomeia de volta.
+        en: >
+          The apps' labels are English, the folders' names (decision 195). The update renames the
+          rows of django_migrations and django_content_type; a rollback to 0.61.0 renames them
+          back.
+        es: >
+          Los labels de las apps están en inglés, los nombres de las carpetas (decisión 195). La
+          actualización renombra las filas de django_migrations y django_content_type; la vuelta a
+          la 0.61.0 las renombra de vuelta.
+
 - version: 0.61.0
   date: 2026-11-06
   title:

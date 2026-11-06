@@ -7,95 +7,95 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financeiro', '0025_english_db_names'),
-        ('pacientes', '0016_english_related_names'),
-        ('profissionais', '0011_english_related_names'),
+        ('finance', '0025_english_db_names'),
+        ('patients', '0016_english_related_names'),
+        ('practitioners', '0011_english_related_names'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='accountgroup',
             name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='children', to='financeiro.accountgroup', verbose_name='grupo acima'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='children', to='finance.accountgroup', verbose_name='grupo acima'),
         ),
         migrations.AlterField(
             model_name='banktransaction',
             name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactions', to='financeiro.financialaccount', verbose_name='conta'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactions', to='finance.financialaccount', verbose_name='conta'),
         ),
         migrations.AlterField(
             model_name='banktransaction',
             name='cash_movement',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transaction', to='financeiro.cashmovement', verbose_name='movimento do caixa'),
+            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transaction', to='finance.cashmovement', verbose_name='movimento do caixa'),
         ),
         migrations.AlterField(
             model_name='banktransaction',
             name='payment',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transaction', to='financeiro.payment', verbose_name='pagamento'),
+            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transaction', to='finance.payment', verbose_name='pagamento'),
         ),
         migrations.AlterField(
             model_name='banktransaction',
             name='statement_import',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactions', to='financeiro.statementimport', verbose_name='importação'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactions', to='finance.statementimport', verbose_name='importação'),
         ),
         migrations.AlterField(
             model_name='cashmovement',
             name='cash_register',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movements', to='financeiro.cashregister', verbose_name='caixa'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='movements', to='finance.cashregister', verbose_name='caixa'),
         ),
         migrations.AlterField(
             model_name='cashregister',
             name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cash_registers', to='financeiro.financialaccount', verbose_name='conta'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='cash_registers', to='finance.financialaccount', verbose_name='conta'),
         ),
         migrations.AlterField(
             model_name='category',
             name='group',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='categories', to='financeiro.accountgroup', verbose_name='grupo'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='categories', to='finance.accountgroup', verbose_name='grupo'),
         ),
         migrations.AlterField(
             model_name='commission',
             name='practitioner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='commissions', to='profissionais.practitioner', verbose_name='profissional'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='commissions', to='practitioners.practitioner', verbose_name='profissional'),
         ),
         migrations.AlterField(
             model_name='entry',
             name='cost_center',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='financeiro.costcenter', verbose_name='centro de custo'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='finance.costcenter', verbose_name='centro de custo'),
         ),
         migrations.AlterField(
             model_name='entry',
             name='patient',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='pacientes.patient', verbose_name='paciente'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='patients.patient', verbose_name='paciente'),
         ),
         migrations.AlterField(
             model_name='entry',
             name='supplier',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='financeiro.supplier', verbose_name='fornecedor'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entries', to='finance.supplier', verbose_name='fornecedor'),
         ),
         migrations.AlterField(
             model_name='installment',
             name='entry',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='installments', to='financeiro.entry', verbose_name='lançamento'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='installments', to='finance.entry', verbose_name='lançamento'),
         ),
         migrations.AlterField(
             model_name='payment',
             name='commission',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='payments', to='financeiro.commission', verbose_name='comissão'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='payments', to='finance.commission', verbose_name='comissão'),
         ),
         migrations.AlterField(
             model_name='payment',
             name='commission_reversal',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='reversed_payments', to='financeiro.commission', verbose_name='comissão que descontou o estorno'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='reversed_payments', to='finance.commission', verbose_name='comissão que descontou o estorno'),
         ),
         migrations.AlterField(
             model_name='payment',
             name='installment',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payments', to='financeiro.installment', verbose_name='parcela'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payments', to='finance.installment', verbose_name='parcela'),
         ),
         migrations.AlterField(
             model_name='statementimport',
             name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='statement_imports', to='financeiro.financialaccount', verbose_name='conta'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='statement_imports', to='finance.financialaccount', verbose_name='conta'),
         ),
     ]
