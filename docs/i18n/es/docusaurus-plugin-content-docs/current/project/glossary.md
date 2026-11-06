@@ -1733,7 +1733,7 @@ Los nombres que las vistas y los procesadores de contexto pasan a las plantillas
 
 ## Claves dentro de los valores (hecho)
 
-Las claves de los diccionarios que los servicios y las vistas arman para las pantallas (el resumen del inicio, el flujo de caja, los informes, la planificación, las comisiones, la caja, los deudores, la salud del servidor), los atributos que las vistas agregan a los objetos y los campos de la tabla de legislación (decisión 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. La salud del servidor usa los nombres que graba `health.sh` (`time`, `memory_total`…); las líneas del formato antiguo, con nombres en portugués, se siguen leyendo. Quedan: los códigos de módulo y de acción (`can.agenda.ver`), los papeles de los documentos (`country_documents.paciente`), los campos de las novedades (son el formato de `releases.yaml` y la API `/api/v1/releases`), los `related_name` de los modelos (`estimate.itens`) y los marcadores de los textos traducidos (`%(anos)s`).
+Las claves de los diccionarios que los servicios y las vistas arman para las pantallas (el resumen del inicio, el flujo de caja, los informes, la planificación, las comisiones, la caja, los deudores, la salud del servidor), los atributos que las vistas agregan a los objetos y los campos de la tabla de legislación (decisión 186): `dashboard.rechamadas` → `dashboard.recalls`, `row.vencido` → `row.overdue`, `law.curta` → `law.short_name`. La salud del servidor usa los nombres que graba `health.sh` (`time`, `memory_total`…); las líneas del formato antiguo, con nombres en portugués, se siguen leyendo. Quedan: los códigos de módulo y de acción (`can.agenda.ver`), los papeles de los documentos (`country_documents.paciente`), los `related_name` de los modelos (`estimate.itens`) y los marcadores de los textos traducidos (`%(anos)s`).
 
 ### Claves de diccionario
 
@@ -1919,6 +1919,40 @@ Los nombres de Python que definen las pruebas (decisión 188): las fixtures, las
 | `receita` | `income` |
 | `recepcao` | `reception` |
 | `tratamento` | `treatment` |
+
+## Campos de las novedades (hecho)
+
+Los campos de `releases.yaml`, del código que lo lee y de la API `/api/v1/releases` (decisión 189). Los valores quedan en portugués, como los guardados: los tipos (`novo`, `melhoria`, `correcao`, `seguranca`), los públicos (`equipe`, `paciente`), los módulos (`Agenda`) y `source: dependabot`. La API todavía acepta `publico` y `desde`; una entrada escrita con los campos antiguos se rechaza, con el nombre del campo a renombrar. El antiguo `/api/v1/versao` queda como estaba (decisión 155).
+
+### `releases.yaml`
+
+| Antes | Después |
+|---|---|
+| `versao` | `version` |
+| `data` | `date` |
+| `titulo` | `title` |
+| `itens` | `items` |
+| `itens[].tipo` | `items[].kind` |
+| `itens[].modulo` | `items[].module` |
+| `itens[].publico` | `items[].audience` |
+| `itens[].texto` | `items[].text` |
+| `itens[].origem` | `items[].source` |
+
+### `/api/v1/releases`
+
+| Antes | Después |
+|---|---|
+| `versao` | `version` |
+| `data` | `date` |
+| `titulo` | `title` |
+| `itens` | `items` |
+| `tipo` | `kind` |
+| `tipo_nome` | `kind_name` |
+| `modulo` | `module` |
+| `texto` | `text` |
+| `origem` | `source` |
+| `?publico=` | `?audience=` |
+| `?desde=` | `?since=` |
 
 ## Lo que queda en portugués
 

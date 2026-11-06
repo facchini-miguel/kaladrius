@@ -26,22 +26,22 @@ We follow [Semantic Versioning](https://semver.org/):
 - the version number shown in the footer;
 - the GitHub *Releases*, in English (`release_notes` command).
 
-Release note texts are written in the **three interface languages** (`pt-br`, `en`, `es`; decision 049). Field names stay in Portuguese, as in the file.
+Release note texts are written in the **three interface languages** (`pt-br`, `en`, `es`; decision 049). Field names are in English (decision 189); the values (`novo`, `equipe`, the modules) stay in Portuguese.
 
 ### Format
 
 ```yaml
-- versao: 1.5.0
-  data: 2027-03-10
-  titulo:
+- version: 1.5.0
+  date: 2027-03-10
+  title:
     pt-br: Lembretes de retorno no app
     en: Recall reminders in the app
     es: Recordatorios de regreso en la app
-  itens:
-    - tipo: novo            # novo | melhoria | correcao | seguranca
-      modulo: Rechamadas    # one of the MODULOS names in apps/whats_new/releases.py
-      publico: [equipe, paciente]
-      texto:
+  items:
+    - kind: novo            # novo | melhoria | correcao | seguranca
+      module: Rechamadas    # one of the MODULES names in apps/whats_new/releases.py
+      audience: [equipe, paciente]
+      text:
         pt-br: >
           O paciente recebe no celular um aviso 7 dias antes da data de retorno.
         en: >
@@ -52,23 +52,23 @@ Release note texts are written in the **three interface languages** (`pt-br`, `e
 
 | Field | Required | Description |
 |---|---|---|
-| `versao` | yes | Version in `MAJOR.MINOR.PATCH` format |
-| `data` | yes | Release date (YYYY-MM-DD) |
-| `titulo` | no | One-sentence highlight of the version, in the three languages |
-| `itens[].tipo` | yes | `novo` (new), `melhoria` (improvement), `correcao` (fix) or `seguranca` (security) |
-| `itens[].modulo` | yes | Area of the system (Agenda, Pacientes…), in Portuguese; the page shows the translation |
-| `itens[].publico` | yes | Who sees the item: `equipe` (staff), `paciente` (patient) or both |
-| `itens[].origem` | no | `dependabot` for an update proposed by Dependabot; left out for the project's own changes (decision 133) |
-| `itens[].pr` | with `origem` | Number of the pull request; the page and the GitHub release link to it |
-| `itens[].texto` | yes | **A few lines**, in user language: what changed and how to use it. One text per language (`pt-br`, `en`, `es`); a test requires all three |
+| `version` | yes | Version in `MAJOR.MINOR.PATCH` format |
+| `date` | yes | Release date (YYYY-MM-DD) |
+| `title` | no | One-sentence highlight of the version, in the three languages |
+| `items[].kind` | yes | `novo` (new), `melhoria` (improvement), `correcao` (fix) or `seguranca` (security) |
+| `items[].module` | yes | Area of the system (Agenda, Pacientes…), in Portuguese; the page shows the translation |
+| `items[].audience` | yes | Who sees the item: `equipe` (staff), `paciente` (patient) or both |
+| `items[].source` | no | `dependabot` for an update proposed by Dependabot; left out for the project's own changes (decision 133) |
+| `items[].pr` | with `source` | Number of the pull request; the page and the GitHub release link to it |
+| `items[].text` | yes | **A few lines**, in user language: what changed and how to use it. One text per language (`pt-br`, `en`, `es`); a test requires all three |
 
 ### Writing rules
 - Write for the **user**, not the developer. For example, "The schedule now shows…", not "Refactored component X".
 - At most 3 lines per item.
 - Security fixes do not describe the flaw, only that it was fixed.
-- Internal-only items (infrastructure, refactoring) are left out, or added with `publico: []`, which hides them from everyone.
-- Patients only see items with `paciente` in `publico`.
-- Every item from a Dependabot pull request has `origem: dependabot` and its `pr`: What's new shows a "Dependabot · #N" badge and the GitHub release adds "(Dependabot, #N)", so the owner's changes and Dependabot's are told apart.
+- Internal-only items (infrastructure, refactoring) are left out, or added with `audience: []`, which hides them from everyone.
+- Patients only see items with `paciente` in `audience`.
+- Every item from a Dependabot pull request has `source: dependabot` and its `pr`: What's new shows a "Dependabot · #N" badge and the GitHub release adds "(Dependabot, #N)", so the owner's changes and Dependabot's are told apart.
 
 ## How it is shown
 
@@ -77,7 +77,7 @@ Release note texts are written in the **three interface languages** (`pt-br`, `e
 **App:** a **What's new** screen in the menu and, on first launch of a new version, a "What's new" summary. It uses the endpoint:
 
 ```
-GET /api/v1/releases?desde=1.4.0&publico=paciente
+GET /api/v1/releases?since=1.4.0&audience=paciente
 ```
 
 ## Publishing a version

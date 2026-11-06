@@ -17,16 +17,16 @@
 {% for release, items in versions %}
 <section class="mb-4">
   <h2 class="h5 mb-1">
-    {% blocktranslate with versao=release.versao %}Versão {{ versao }}{% endblocktranslate %}
-    <small class="text-body-secondary fw-normal">· {{ release.data|date:"SHORT_DATE_FORMAT" }}</small>
+    {% blocktranslate with versao=release.version %}Versão {{ versao }}{% endblocktranslate %}
+    <small class="text-body-secondary fw-normal">· {{ release.date|date:"SHORT_DATE_FORMAT" }}</small>
   </h2>
-  {% if release.titulo %}<p class="text-body-secondary mb-2">{{ release.titulo }}</p>{% endif %}
+  {% if release.title %}<p class="text-body-secondary mb-2">{{ release.title }}</p>{% endif %}
   <ul class="list-group">
     {% for item in items %}
     <li class="list-group-item">
-      <span class="badge kind-{{ item.tipo }} me-2">{{ item.tipo_nome }}</span>
-      <strong>{{ item.modulo_nome }}:</strong> {{ item.texto }}
-      {% if item.origem %}<a class="badge text-bg-light border text-decoration-none ms-1" href="{{ item.pr_url }}" target="_blank" rel="noopener noreferrer" title="{% blocktranslate with origem=item.origem_nome pr=item.pr %}Atualização proposta pelo {{ origem }} (pull request #{{ pr }}){% endblocktranslate %}">{{ item.origem_nome }} · #{{ item.pr }}</a>{% endif %}
+      <span class="badge kind-{{ item.kind }} me-2">{{ item.kind_name }}</span>
+      <strong>{{ item.module_name }}:</strong> {{ item.text }}
+      {% if item.source %}<a class="badge text-bg-light border text-decoration-none ms-1" href="{{ item.pr_url }}" target="_blank" rel="noopener noreferrer" title="{% blocktranslate with origem=item.source_name pr=item.pr %}Atualização proposta pelo {{ origem }} (pull request #{{ pr }}){% endblocktranslate %}">{{ item.source_name }} · #{{ item.pr }}</a>{% endif %}
     </li>
     {% endfor %}
   </ul>

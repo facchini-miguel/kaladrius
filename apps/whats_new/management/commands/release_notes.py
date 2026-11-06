@@ -12,29 +12,29 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
-        parser.add_argument("versao", metavar="version", help="Version, e.g. 0.14.0.")
+        parser.add_argument("version", metavar="version", help="Version, e.g. 0.14.0.")
         parser.add_argument(
             "--language",
-            dest="idioma",
+            dest="language",
             default="en",
             choices=[c for c, _n in settings.LANGUAGES],
         )
         parser.add_argument(
-            "--title", dest="titulo", action="store_true", help="Print only the title."
+            "--title", dest="title", action="store_true", help="Print only the title."
         )
 
-    def handle(self, *args, versao, idioma, titulo, **options):
-        release = next((r for r in releases.all_releases() if r.versao == versao), None)
+    def handle(self, *args, version, language, title, **options):
+        release = next((r for r in releases.all_releases() if r.version == version), None)
         if release is None:
-            raise CommandError(f"Versão {versao} não está no releases.yaml.")
-        with translation.override(idioma):
-            if titulo:
-                name = f"{release.versao} – {release.titulo}" if release.titulo else release.versao
+            raise CommandError(f"Versão {version} não está no releases.yaml.")
+        with translation.override(language):
+            if title:
+                name = f"{release.version} – {release.title}" if release.title else release.version
                 self.stdout.write(name)
                 return
-            for item in release.itens:
+            for item in release.items:
                 # Dependabot items say so; on GitHub, "#6" links to the pull request.
-                origem = f" ({item.origem_nome}, #{item.pr})" if item.origem else ""
+                source = f" ({item.source_name}, #{item.pr})" if item.source else ""
                 self.stdout.write(
-                    f"- **{item.tipo_nome} · {item.modulo_nome}:** {item.texto}{origem}"
+                    f"- **{item.kind_name} · {item.module_name}:** {item.text}{source}"
                 )
