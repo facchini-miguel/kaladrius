@@ -35,6 +35,21 @@ def test_schedule_returns_to_the_week_that_was_open(clinic_a, reception, create_
     assert explicit.context["schedule_settings"]["date"] == "2026-04-01"
 
 
+def test_week_with_today_returns_to_today(clinic_a, reception, create_practitioner):
+    # Not to the middle of the week: on a phone the schedule opens on the day view, and a week
+    # seen on the computer would open it on Thursday.
+    practitioner = create_practitioner(clinic_a, "Profissional fictício")
+    today = timezone.localdate()
+    monday = today - datetime.timedelta(days=today.weekday())
+    week = {
+        "start": f"{monday.isoformat()}T00:00:00",
+        "end": f"{(monday + datetime.timedelta(days=7)).isoformat()}T00:00:00",
+    }
+    reception.get(reverse("schedule:events"), {**week, "practitioner": practitioner.pk})
+    config = reception.get(reverse("schedule:calendar")).context["schedule_settings"]
+    assert config["date"] == today.isoformat()
+
+
 def test_next_day_schedule_opens_today(reception):
     session = reception.session
     yesterday = timezone.localdate() - datetime.timedelta(days=1)

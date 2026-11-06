@@ -171,10 +171,14 @@ def events(request):
     if period is None or not practitioner.isdecimal():
         return JsonResponse({"erro": _("Parâmetros inválidos.")}, status=400)
     start, end = period
-    # The middle of the visible range falls inside the week (or month) on the screen.
-    middle = timezone.localtime(start + (end - start) / 2).date()
+    # The middle of the visible range falls inside the week (or month) on the screen; when the
+    # range holds today, today: the day view, the first one on a phone, then opens on it.
+    if start <= timezone.now() < end:
+        remembered = timezone.localdate()
+    else:
+        remembered = timezone.localtime(start + (end - start) / 2).date()
     request.session[SESSION_DATE] = {
-        "data": middle.isoformat(),
+        "data": remembered.isoformat(),
         "em": timezone.localdate().isoformat(),
     }
     appointments = (
