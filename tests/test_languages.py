@@ -16,15 +16,15 @@ LOCALE = Path(settings.BASE_DIR) / "locale"
 
 
 @pytest.fixture
-def cliente(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("maria", clinica_a, Role.ADMIN))
+def user_client(clinic_a, create_user, client_for):
+    return client_for(create_user("maria", clinic_a, Role.ADMIN))
 
 
-def test_user_picks_language_and_choice_is_saved(cliente, django_user_model):
+def test_user_picks_language_and_choice_is_saved(user_client, django_user_model):
     start = reverse("home")
-    assert "Pacientes" in cliente.get(start).content.decode()
+    assert "Pacientes" in user_client.get(start).content.decode()
 
-    response = cliente.post(
+    response = user_client.post(
         reverse("change_language"), {"language": "en", "next": start}, follow=True
     )
     page = response.content.decode()
@@ -32,29 +32,31 @@ def test_user_picks_language_and_choice_is_saved(cliente, django_user_model):
     assert "Patients" in page and "Recalls" in page and "Log out" in page
     assert django_user_model.objects.get(username="maria").language == "en"
     assert response.redirect_chain[-1][0] == start
-    assert cliente.cookies[settings.LANGUAGE_COOKIE_NAME].value == "en"
+    assert user_client.cookies[settings.LANGUAGE_COOKIE_NAME].value == "en"
 
-    cliente.post(reverse("change_language"), {"language": "es"})
-    page = cliente.get(reverse("patients:list")).content.decode()
+    user_client.post(reverse("change_language"), {"language": "es"})
+    page = user_client.get(reverse("patients:list")).content.decode()
     assert "Nuevo paciente" in page and "Recordatorios" in page
 
     # Empty (or unknown): back to the browser's language.
-    cliente.post(reverse("change_language"), {"language": "klingon"})
+    user_client.post(reverse("change_language"), {"language": "klingon"})
     assert django_user_model.objects.get(username="maria").language == ""
 
 
-def test_language_selector_with_flags_in_the_bar(cliente):
-    page = cliente.get(reverse("home")).content.decode()
+def test_language_selector_with_flags_in_the_bar(user_client):
+    page = user_client.get(reverse("home")).content.decode()
     for code in ("pt-br", "en", "es"):
         assert f"img/flags/{code}." in page  # CI serves hashed names (x.1a2b.svg)
     # Its own menu, before the user's menu (between the clinic and the user name).
     assert page.index("language-selector") < page.index(reverse("change_password"))
 
 
-def test_user_choice_beats_the_browser(cliente, django_user_model):
+def test_user_choice_beats_the_browser(user_client, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="es")
-    page = cliente.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
-    assert any(saludo in page for saludo in ("Buenos días", "Buenas tardes", "Buenas noches"))
+    page = user_client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").content.decode()
+    assert any(
+        greeting_es in page for greeting_es in ("Buenos días", "Buenas tardes", "Buenas noches")
+    )
 
 
 def test_login_follows_browser_language(client):
@@ -64,11 +66,11 @@ def test_login_follows_browser_language(client):
     assert "Password" in page
 
 
-def test_messages_and_errors_translated(cliente, django_user_model):
+def test_messages_and_errors_translated(user_client, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="en")
-    response = cliente.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
+    response = user_client.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
     assert "This field is required." in response.content.decode()
-    response = cliente.post(
+    response = user_client.post(
         reverse("patients:new"), {"kind": "PF", "name": "Ana", "active": "on"}, follow=True
     )
     assert "Patient Ana saved." in response.content.decode()
@@ -81,20 +83,20 @@ def test_changing_language_requires_post_and_login(client):
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_all_texts_are_translated(language):
     po = (LOCALE / language / "LC_MESSAGES" / "django.po").read_text(encoding="utf-8")
-    blocos = po.split("\n\n")[1:]
+    blocks = po.split("\n\n")[1:]
     # Long translations are wrapped: msgstr "" followed by "..." lines, so join them first.
-    sem_traducao = [
-        bloco
-        for bloco in blocos
-        for traducao in re.findall(r'^msgstr(?:\[\d\])? ((?:".*"\n?)+)', bloco, re.M)
-        if not "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', traducao))
+    without_translation = [
+        block
+        for block in blocks
+        for translated_text in re.findall(r'^msgstr(?:\[\d\])? ((?:".*"\n?)+)', block, re.M)
+        if not "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', translated_text))
     ]
-    assert not sem_traducao, sem_traducao[:3]
+    assert not without_translation, without_translation[:3]
     assert "#, fuzzy" not in po
 
 
 def test_whats_new_in_the_three_languages():
-    languages = {code for code, _nome in settings.LANGUAGES}
+    languages = {code for code, _name in settings.LANGUAGES}
     for release in releases.all_releases():
         assert set(dict(release.titulos)) == languages or not release.titulo, release.versao
         for item in release.itens:

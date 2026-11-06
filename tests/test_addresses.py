@@ -17,8 +17,8 @@ URL = reverse("reference_data:address_suggestions")
 
 
 @pytest.fixture
-def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_enderecos", clinica_a, Role.FRONT_DESK))
+def reception(clinic_a, create_user, client_for):
+    return client_for(create_user("recepcao_enderecos", clinic_a, Role.FRONT_DESK))
 
 
 def test_odonto_neighborhoods_and_streets_loaded():
@@ -29,15 +29,15 @@ def test_odonto_neighborhoods_and_streets_loaded():
     assert Street.objects.filter(name__startswith="Rua ").exists()
 
 
-def test_city_suggestions_plus_those_typed_by_the_clinic(clinica_a, clinica_b, reception):
-    with use_clinic(clinica_a):
+def test_city_suggestions_plus_those_typed_by_the_clinic(clinic_a, clinic_b, reception):
+    with use_clinic(clinic_a):
         Patient.objects.create(
             name="Paciente fictício A",
             city_id=CARLOS_BARBOSA,
             neighborhood="Bairro Novo Fictício",
             street="Rua Inventada A",
         )
-    with use_clinic(clinica_b):
+    with use_clinic(clinic_b):
         Patient.objects.create(
             name="Paciente fictício B",
             city_id=CARLOS_BARBOSA,

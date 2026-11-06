@@ -15,85 +15,85 @@ from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 
 pytestmark = pytest.mark.django_db
-HOJE = timezone.localdate()
-ONTEM = HOJE - datetime.timedelta(days=1)
+TODAY = timezone.localdate()
+YESTERDAY = TODAY - datetime.timedelta(days=1)
 
 
 @pytest.fixture
-def cenario(clinica_a, criar_usuario, cliente_de):
-    admin = criar_usuario("admin", clinica_a, Role.ADMIN)
-    with use_clinic(clinica_a):
+def scenario(clinic_a, create_user, client_for):
+    admin = create_user("admin", clinic_a, Role.ADMIN)
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(name="Paulo Paciente")
         dra = Practitioner.objects.create(name="Dra. Ana", commission_percentage=Decimal("40"))
         dr = Practitioner.objects.create(name="Dr. Beto")
-        tratamento = Category.objects.get(name="Tratamento")
+        treatment = Category.objects.get(name="Tratamento")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         category = Category.objects.get(name="Comissões")
     return {
-        "clinic": clinica_a,
+        "clinic": clinic_a,
         "patient": patient,
         "dra": dra,
         "dr": dr,
-        "tratamento": tratamento,
+        "treatment": treatment,
         "cash_register": cash_register,
         "category": category,
         "admin": admin,
-        "recepcao": criar_usuario("recepcao", clinica_a, Role.FRONT_DESK),
+        "reception": create_user("recepcao", clinic_a, Role.FRONT_DESK),
         # The test client is shared: log in as the administrator by default.
-        "cliente": cliente_de(admin),
-        "cliente_de": cliente_de,
+        "client": client_for(admin),
+        "client_for": client_for,
     }
 
 
-def receive(cenario, amount, practitioner, date=ONTEM, interest="0"):
+def receive(scenario, amount, practitioner, date=YESTERDAY, interest="0"):
     """A receivable for `valor` paid in full on `data`."""
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         entry = services.create_entry(
-            clinic=cenario["clinic"],
+            clinic=scenario["clinic"],
             kind=Entry.Kind.RECEIVABLE,
-            patient=cenario["patient"],
+            patient=scenario["patient"],
             practitioner=practitioner,
             description="Tratamento",
-            category=cenario["tratamento"],
+            category=scenario["treatment"],
             total_amount=Decimal(amount),
             parcelas=1,
             primeiro_vencimento=date,
-            user=cenario["admin"],
+            user=scenario["admin"],
         )
         return services.receive(
             entry.parcelas.get(),
-            user=cenario["admin"],
+            user=scenario["admin"],
             amount=Decimal(amount) + Decimal(interest),
             interest=Decimal(interest),
             method="pix",
-            account=cenario["cash_register"],
+            account=scenario["cash_register"],
             date=date,
         )
 
 
-def pagar_comissao(cenario, practitioner, until=HOJE):
-    return cenario["cliente"].post(
+def pay_commission(scenario, practitioner, until=TODAY):
+    return scenario["client"].post(
         f"{reverse('finance:commission_pay', args=[practitioner.pk])}?until={until.isoformat()}",
-        {"due_date": HOJE.isoformat(), "category": cenario["category"].pk},
+        {"due_date": TODAY.isoformat(), "category": scenario["category"].pk},
     )
 
 
-def test_calculation_includes_interest_and_ignores_other_practitioners(cenario):
-    receive(cenario, "100.00", cenario["dra"], interest="10.00")
-    receive(cenario, "250.55", cenario["dra"])
-    receive(cenario, "999.00", cenario["dr"])  # other practitioner
-    receive(cenario, "500.00", None)  # no practitioner: no commission
-    receive(cenario, "80.00", cenario["dra"], date=HOJE)  # after the cut-off date
-    with use_clinic(cenario["clinic"]):
-        calculo = commissions.pending(cenario["dra"], ONTEM)
-    assert calculo["received_amount"] == Decimal("360.55")
-    assert calculo["amount"] == Decimal("144.22")  # 40% of 360.55, rounded half up
+def test_calculation_includes_interest_and_ignores_other_practitioners(scenario):
+    receive(scenario, "100.00", scenario["dra"], interest="10.00")
+    receive(scenario, "250.55", scenario["dra"])
+    receive(scenario, "999.00", scenario["dr"])  # other practitioner
+    receive(scenario, "500.00", None)  # no practitioner: no commission
+    receive(scenario, "80.00", scenario["dra"], date=TODAY)  # after the cut-off date
+    with use_clinic(scenario["clinic"]):
+        calculation = commissions.pending(scenario["dra"], YESTERDAY)
+    assert calculation["received_amount"] == Decimal("360.55")
+    assert calculation["amount"] == Decimal("144.22")  # 40% of 360.55, rounded half up
 
 
-def test_paying_creates_expense_and_never_pays_twice(cenario):
-    receive(cenario, "300.00", cenario["dra"])
-    response = pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
+def test_paying_creates_expense_and_never_pays_twice(scenario):
+    receive(scenario, "300.00", scenario["dra"])
+    response = pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
         commission = Commission.objects.get()
         entry = commission.entry
         assert response.url == reverse("finance:entry", args=[entry.pk])
@@ -104,134 +104,136 @@ def test_paying_creates_expense_and_never_pays_twice(cenario):
         )
         assert entry.category.name == "Comissões"
         assert Payment.objects.get().commission == commission
-        assert commissions.pending(cenario["dra"], HOJE)["amount"] == 0
+        assert commissions.pending(scenario["dra"], TODAY)["amount"] == 0
     # Paying again finds nothing.
-    pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
+    pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
         assert Commission.objects.count() == 1
     # Only new receipts make up the next one.
-    receive(cenario, "50.00", cenario["dra"], date=HOJE)
-    with use_clinic(cenario["clinic"]):
-        assert commissions.pending(cenario["dra"], HOJE)["amount"] == Decimal("20.00")
+    receive(scenario, "50.00", scenario["dra"], date=TODAY)
+    with use_clinic(scenario["clinic"]):
+        assert commissions.pending(scenario["dra"], TODAY)["amount"] == Decimal("20.00")
 
 
-def test_reversal_after_payment_is_deducted_from_the_next(cenario):
-    payment = receive(cenario, "300.00", cenario["dra"])
-    pagar_comissao(cenario, cenario["dra"])
+def test_reversal_after_payment_is_deducted_from_the_next(scenario):
+    payment = receive(scenario, "300.00", scenario["dra"])
+    pay_commission(scenario, scenario["dra"])
     # The percentage changes, but the deduction uses the one it was paid with (40%).
-    with use_clinic(cenario["clinic"]):
-        Practitioner.objects.filter(pk=cenario["dra"].pk).update(commission_percentage=10)
-        cenario["dra"].refresh_from_db()
-        services.reverse_payment(payment, reason="Pix devolvido", user=cenario["admin"])
-    receive(cenario, "1000.00", cenario["dra"], date=HOJE)
-    with use_clinic(cenario["clinic"]):
-        calculo = commissions.pending(cenario["dra"], HOJE)
-        assert (calculo["gross"], calculo["reversal_deduction"], calculo["amount"]) == (
+    with use_clinic(scenario["clinic"]):
+        Practitioner.objects.filter(pk=scenario["dra"].pk).update(commission_percentage=10)
+        scenario["dra"].refresh_from_db()
+        services.reverse_payment(payment, reason="Pix devolvido", user=scenario["admin"])
+    receive(scenario, "1000.00", scenario["dra"], date=TODAY)
+    with use_clinic(scenario["clinic"]):
+        calculation = commissions.pending(scenario["dra"], TODAY)
+        assert (calculation["gross"], calculation["reversal_deduction"], calculation["amount"]) == (
             Decimal("100.00"),
             Decimal("120.00"),
             Decimal("-20.00"),
         )
         # The list adds up in the database (volume test) and must agree with the detail.
-        row = next(x for x in commissions.summary(HOJE) if x["practitioner"] == cenario["dra"])
-        chaves = ("received_amount", "gross", "reversal_deduction", "amount")
-        assert [row[c] for c in chaves] == [calculo[c] for c in chaves]
+        row = next(x for x in commissions.summary(TODAY) if x["practitioner"] == scenario["dra"])
+        keys = ("received_amount", "gross", "reversal_deduction", "amount")
+        assert [row[c] for c in keys] == [calculation[c] for c in keys]
     # Nothing to pay while the deduction is larger: it waits for more receipts.
-    pagar_comissao(cenario, cenario["dra"])
-    receive(cenario, "500.00", cenario["dra"], date=HOJE)
-    pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
-        segunda = Commission.objects.latest("pk")
-        assert (segunda.gross, segunda.reversal_deduction, segunda.amount) == (
+    pay_commission(scenario, scenario["dra"])
+    receive(scenario, "500.00", scenario["dra"], date=TODAY)
+    pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
+        second = Commission.objects.latest("pk")
+        assert (second.gross, second.reversal_deduction, second.amount) == (
             Decimal("150.00"),
             Decimal("120.00"),
             Decimal("30.00"),
         )
         payment.refresh_from_db()
-        assert payment.commission_reversal == segunda
-    statement = cenario["cliente"].get(reverse("finance:commission", args=[segunda.pk]))
+        assert payment.commission_reversal == second
+    statement = scenario["client"].get(reverse("finance:commission", args=[second.pk]))
     assert "Pix devolvido" not in statement.content.decode()  # reasons are not on the statement
     assert list(statement.context["reversal_deduction"]) == [payment]
 
 
-def test_cancelling_the_expense_undoes_the_commission(cenario):
-    receive(cenario, "300.00", cenario["dra"])
-    pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
+def test_cancelling_the_expense_undoes_the_commission(scenario):
+    receive(scenario, "300.00", scenario["dra"])
+    pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
         commission = Commission.objects.get()
-    cenario["cliente"].post(
+    scenario["client"].post(
         reverse("finance:cancel", args=[commission.entry_id]), {"reason": "Errado"}
     )
     commission.refresh_from_db()
     assert commission.cancelled
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         assert not Payment.objects.filter(commission__isnull=False).exists()
-        assert commissions.pending(cenario["dra"], HOJE)["amount"] == Decimal("120.00")
+        assert commissions.pending(scenario["dra"], TODAY)["amount"] == Decimal("120.00")
 
 
-def test_screens_and_percentage(cenario):
-    receive(cenario, "300.00", cenario["dra"])
-    cliente = cenario["cliente"]
-    page = cliente.get(reverse("finance:commissions"))
-    assert [row["practitioner"] for row in page.context["rows"]] == [cenario["dra"]]
-    assert list(page.context["without_percentage"]) == [cenario["dr"]]
+def test_screens_and_percentage(scenario):
+    receive(scenario, "300.00", scenario["dra"])
+    user_client = scenario["client"]
+    page = user_client.get(reverse("finance:commissions"))
+    assert [row["practitioner"] for row in page.context["rows"]] == [scenario["dra"]]
+    assert list(page.context["without_percentage"]) == [scenario["dr"]]
     assert "R$ 120,00" in page.content.decode()
-    url = reverse("finance:commission_percentage", args=[cenario["dr"].pk])
-    assert cliente.post(url, {"commission_percentage": "101"}).status_code == 200  # > 100
-    cliente.post(url, {"commission_percentage": "35,5"})
-    cenario["dr"].refresh_from_db()
-    assert cenario["dr"].commission_percentage == Decimal("35.50")
-    pay = cliente.get(reverse("finance:commission_pay", args=[cenario["dra"].pk]))
+    url = reverse("finance:commission_percentage", args=[scenario["dr"].pk])
+    assert user_client.post(url, {"commission_percentage": "101"}).status_code == 200  # > 100
+    user_client.post(url, {"commission_percentage": "35,5"})
+    scenario["dr"].refresh_from_db()
+    assert scenario["dr"].commission_percentage == Decimal("35.50")
+    pay = user_client.get(reverse("finance:commission_pay", args=[scenario["dra"].pk]))
     assert pay.context["calculation"]["amount"] == Decimal("120.00")
     # A future cut-off date is not allowed: it becomes today.
-    futuro = (HOJE + datetime.timedelta(days=30)).isoformat()
-    assert cliente.get(reverse("finance:commissions"), {"until": futuro}).context["until"] == HOJE
+    future = (TODAY + datetime.timedelta(days=30)).isoformat()
+    assert (
+        user_client.get(reverse("finance:commissions"), {"until": future}).context["until"] == TODAY
+    )
 
 
-def test_only_the_admin(cenario):
-    reception = cenario["cliente_de"](cenario["recepcao"])
+def test_only_the_admin(scenario):
+    reception = scenario["client_for"](scenario["reception"])
     assert reception.get(reverse("finance:commissions")).status_code == 403
     assert (
-        reception.post(reverse("finance:commission_pay", args=[cenario["dra"].pk])).status_code
+        reception.post(reverse("finance:commission_pay", args=[scenario["dra"].pk])).status_code
         == 403
     )
     assert (
         reception.post(
-            reverse("finance:commission_percentage", args=[cenario["dra"].pk]),
+            reverse("finance:commission_percentage", args=[scenario["dra"].pk]),
             {"commission_percentage": "90"},
         ).status_code
         == 403
     )
 
 
-def test_practitioner_of_another_clinic_gives_404(cenario, clinica_b, criar_usuario, cliente_de):
-    other = cliente_de(criar_usuario("admin_b", clinica_b, Role.ADMIN))
-    assert other.get(reverse("finance:commission_pay", args=[cenario["dra"].pk])).status_code == 404
-
-
-def test_does_not_cancel_commission_whose_reversal_was_deducted_elsewhere(cenario):
-    """Cancelling C1 after C2 deducted a reversal of C1 would lose that amount for good."""
-    payment = receive(cenario, "100.00", cenario["dra"])  # 40.00 in C1
-    pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
-        primeira = Commission.objects.get()
-        services.reverse_payment(payment, reason="Pix devolvido", user=cenario["admin"])
-    receive(cenario, "300.00", cenario["dra"], date=HOJE)  # 120.00 - 40.00 in C2
-    pagar_comissao(cenario, cenario["dra"])
-    with use_clinic(cenario["clinic"]):
-        segunda = Commission.objects.exclude(pk=primeira.pk).get()
-    cancel = reverse("finance:cancel", args=[primeira.entry_id])
-    response = cenario["cliente"].post(cancel, {"reason": "Errado"}, follow=True)
-    assert "Cancele aquela antes" in response.content.decode()
-    primeira.refresh_from_db()
-    payment.refresh_from_db()
-    assert not primeira.cancelled and not primeira.entry.cancelled
-    assert (payment.commission, payment.commission_reversal) == (primeira, segunda)
-    # In the right order both go, and everything is pending again.
-    cenario["cliente"].post(
-        reverse("finance:cancel", args=[segunda.entry_id]), {"reason": "Errado"}
+def test_practitioner_of_another_clinic_gives_404(scenario, clinic_b, create_user, client_for):
+    other = client_for(create_user("admin_b", clinic_b, Role.ADMIN))
+    assert (
+        other.get(reverse("finance:commission_pay", args=[scenario["dra"].pk])).status_code == 404
     )
-    cenario["cliente"].post(cancel, {"reason": "Errado"})
-    primeira.refresh_from_db()
-    assert primeira.cancelled
-    with use_clinic(cenario["clinic"]):
-        assert commissions.pending(cenario["dra"], HOJE)["amount"] == Decimal("120.00")
+
+
+def test_does_not_cancel_commission_whose_reversal_was_deducted_elsewhere(scenario):
+    """Cancelling C1 after C2 deducted a reversal of C1 would lose that amount for good."""
+    payment = receive(scenario, "100.00", scenario["dra"])  # 40.00 in C1
+    pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
+        first_one = Commission.objects.get()
+        services.reverse_payment(payment, reason="Pix devolvido", user=scenario["admin"])
+    receive(scenario, "300.00", scenario["dra"], date=TODAY)  # 120.00 - 40.00 in C2
+    pay_commission(scenario, scenario["dra"])
+    with use_clinic(scenario["clinic"]):
+        second = Commission.objects.exclude(pk=first_one.pk).get()
+    cancel = reverse("finance:cancel", args=[first_one.entry_id])
+    response = scenario["client"].post(cancel, {"reason": "Errado"}, follow=True)
+    assert "Cancele aquela antes" in response.content.decode()
+    first_one.refresh_from_db()
+    payment.refresh_from_db()
+    assert not first_one.cancelled and not first_one.entry.cancelled
+    assert (payment.commission, payment.commission_reversal) == (first_one, second)
+    # In the right order both go, and everything is pending again.
+    scenario["client"].post(reverse("finance:cancel", args=[second.entry_id]), {"reason": "Errado"})
+    scenario["client"].post(cancel, {"reason": "Errado"})
+    first_one.refresh_from_db()
+    assert first_one.cancelled
+    with use_clinic(scenario["clinic"]):
+        assert commissions.pending(scenario["dra"], TODAY)["amount"] == Decimal("120.00")

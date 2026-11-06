@@ -4,65 +4,65 @@ from apps.core.isolation import use_clinic
 from apps.core.models import Clinic, Membership, Role
 from apps.practitioners.models import Practitioner
 
-SENHA = "senha-de-teste-123"
+PASSWORD = "senha-de-teste-123"
 
 
 @pytest.fixture
-def clinica_a(db):
+def clinic_a(db):
     return Clinic.objects.create(name="Clínica A")
 
 
 @pytest.fixture
-def clinica_b(db):
+def clinic_b(db):
     return Clinic.objects.create(name="Clínica B")
 
 
 @pytest.fixture
-def criar_usuario(django_user_model):
+def create_user(django_user_model):
     """Create a user, optionally linked to a clinic with a role."""
 
-    def criar(username, clinic=None, role=Role.FRONT_DESK, **extra):
-        user = django_user_model.objects.create_user(username=username, password=SENHA, **extra)
+    def create(username, clinic=None, role=Role.FRONT_DESK, **extra):
+        user = django_user_model.objects.create_user(username=username, password=PASSWORD, **extra)
         if clinic is not None:
             Membership.objects.create(user=user, clinic=clinic, role=role)
         return user
 
-    return criar
+    return create
 
 
 @pytest.fixture
-def criar_profissional():
+def create_practitioner():
     """Create a practitioner inside the given clinic."""
 
-    def criar(clinic, name, **extra):
+    def create(clinic, name, **extra):
         with use_clinic(clinic):
             return Practitioner.objects.create(name=name, **extra)
 
-    return criar
+    return create
 
 
 @pytest.fixture
-def cliente_de(client):
+def client_for(client):
     """Log the test client in as the given user."""
 
-    def entrar(user):
+    def log_in(user):
         client.force_login(user)
         return client
 
-    return entrar
+    return log_in
 
 
 def pytest_sessionstart(session):
     from tests import template_lookups
 
-    template_lookups.instalar()
+    template_lookups.install()
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Fails the run on a template variable that is not found and was not before (decision 159)."""
     from tests import template_lookups
 
-    relatorio = session.config.pluginmanager.get_plugin("terminalreporter")
-    write = relatorio.write_line if relatorio else print
-    if template_lookups.conferir(write) and exitstatus == 0:
+    report = session.config.pluginmanager.get_plugin("terminalreporter")
+    write = report.write_line if report else print
+    if template_lookups.check(write) and exitstatus == 0:
         session.exitstatus = 1

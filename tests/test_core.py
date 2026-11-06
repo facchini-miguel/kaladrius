@@ -145,7 +145,7 @@ def test_late_backup_warning_only_for_superuser(client, django_user_model, setti
     from apps.core.models import Backup
 
     admin = django_user_model.objects.create_superuser("root", password="senha-de-teste-123")
-    comum = django_user_model.objects.create_user("ana", password="senha-de-teste-123")
+    shared = django_user_model.objects.create_user("ana", password="senha-de-teste-123")
     client.force_login(admin)
     # Development has no backups: no warning.
     settings.BACKUP_MONITORED = False
@@ -160,14 +160,14 @@ def test_late_backup_warning_only_for_superuser(client, django_user_model, setti
 
     Backup.objects.update(timestamp=timezone.now() - datetime.timedelta(hours=27))
     assert "backups diários pararam" in client.get(reverse("home")).content.decode()
-    client.force_login(comum)
+    client.force_login(shared)
     assert "backups diários pararam" not in client.get(reverse("home")).content.decode()
 
 
 # --- Clinic settings ---------------------------------------------------------------
 
 
-def dados_clinica(**extra):
+def clinic_data(**extra):
     return {
         "name": "Clínica Atualizada",
         "area": "odontologia",
@@ -183,24 +183,24 @@ def dados_clinica(**extra):
     }
 
 
-def test_admin_changes_clinic_settings(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
-    assert "Configurações da clínica" in cliente.get(reverse("home")).content.decode()
-    assert 'value="07:30"' in cliente.get(reverse("clinic_settings")).content.decode()
-    response = cliente.post(
+def test_admin_changes_clinic_settings(clinic_a, create_user, client_for):
+    user_client = client_for(create_user("admin_a", clinic_a, Role.ADMIN))
+    assert "Configurações da clínica" in user_client.get(reverse("home")).content.decode()
+    assert 'value="07:30"' in user_client.get(reverse("clinic_settings")).content.decode()
+    response = user_client.post(
         reverse("clinic_settings"),
-        dados_clinica(document="11.222.333/0001-81", schedule_interval=15),
+        clinic_data(document="11.222.333/0001-81", schedule_interval=15),
     )
     assert response.status_code == 302
-    clinica_a.refresh_from_db()
-    assert (clinica_a.name, clinica_a.document) == ("Clínica Atualizada", "11222333000181")
-    assert (clinica_a.schedule_start, clinica_a.schedule_interval) == (datetime.time(8), 15)
+    clinic_a.refresh_from_db()
+    assert (clinic_a.name, clinic_a.document) == ("Clínica Atualizada", "11222333000181")
+    assert (clinic_a.schedule_start, clinic_a.schedule_interval) == (datetime.time(8), 15)
 
 
 @pytest.mark.parametrize("role", [Role.FRONT_DESK, Role.PRACTITIONER])
-def test_only_admin_changes_settings(role, clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("usuario", clinica_a, role))
-    assert cliente.get(reverse("clinic_settings")).status_code == 403
+def test_only_admin_changes_settings(role, clinic_a, create_user, client_for):
+    user_client = client_for(create_user("usuario", clinic_a, role))
+    assert user_client.get(reverse("clinic_settings")).status_code == 403
 
 
 @pytest.mark.parametrize(
@@ -212,20 +212,20 @@ def test_only_admin_changes_settings(role, clinica_a, criar_usuario, cliente_de)
         ({"schedule_interval": 60, "schedule_start": "08:30"}, "ficaria fora"),  # misaligned
     ],
 )
-def test_invalid_settings(extra, error, clinica_a, criar_usuario, cliente_de):
-    with use_clinic(clinica_a):
+def test_invalid_settings(extra, error, clinic_a, create_user, client_for):
+    with use_clinic(clinic_a):
         practitioner = Practitioner.objects.create(name="Dra. Teste")
         kind = AppointmentType.objects.first()
-        amanha = timezone.localdate() + datetime.timedelta(days=1)
-        start = timezone.make_aware(datetime.datetime.combine(amanha, datetime.time(9)))
+        tomorrow = timezone.localdate() + datetime.timedelta(days=1)
+        start = timezone.make_aware(datetime.datetime.combine(tomorrow, datetime.time(9)))
         Appointment.objects.create(
             practitioner=practitioner,
             kind=kind,
             start=start,
             end=start + datetime.timedelta(hours=1),
         )
-    cliente = cliente_de(criar_usuario("admin_a", clinica_a, Role.ADMIN))
-    response = cliente.post(reverse("clinic_settings"), dados_clinica(**extra))
+    user_client = client_for(create_user("admin_a", clinic_a, Role.ADMIN))
+    response = user_client.post(reverse("clinic_settings"), clinic_data(**extra))
     assert response.status_code == 200
     assert error in response.content.decode()
 

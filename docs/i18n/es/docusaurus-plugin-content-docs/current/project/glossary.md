@@ -1882,6 +1882,44 @@ Las claves de los diccionarios que los servicios y las vistas arman para las pan
 | `lei` | `name` |
 | `varia` | `varies` |
 
+## Fixtures y variables de las pruebas (hecho)
+
+Los nombres de Python que definen las pruebas (decisión 188): las fixtures, las funciones auxiliares, sus parámetros, las variables locales, las constantes y las claves de los diccionarios `scenario`, unos 450 nombres en 62 archivos. Los datos ficticios quedan en portugués, como las pantallas (`"Maria Paciente"`, `"Clínica fictícia"`, los usuarios `recepcao` y `admin`), igual que los nombres que una prueba lee de los objetos del propio sistema (`release.versao`, `entry.parcelas`). Los compartidos:
+
+| Antes | Después |
+|---|---|
+| `HOJE` | `TODAY` |
+| `ONTEM` | `YESTERDAY` |
+| `agendar` | `book` |
+| `amostra` | `sample` |
+| `carteirinha` | `plan_card` |
+| `cenario` | `scenario` |
+| `cliente` | `user_client` |
+| `cliente_de` | `client_for` |
+| `clinica_a` | `clinic_a` |
+| `clinica_b` | `clinic_b` |
+| `criar_orcamento` | `create_estimate` |
+| `criar_profissional` | `create_practitioner` |
+| `criar_usuario` | `create_user` |
+| `dados_clinica` | `clinic_data` |
+| `entrar` | `log_in` |
+| `incluir` | `add_item` |
+| `lancamento_com` | `entry_with` |
+| `no_pais` | `in_country` |
+| `parcelas_de` | `installments_of` |
+
+### Claves de `scenario`
+
+| Antes | Después |
+|---|---|
+| `agenda` | `schedule` |
+| `canal` | `channel` |
+| `cliente` | `client` |
+| `despesa` | `expense` |
+| `receita` | `income` |
+| `recepcao` | `reception` |
+| `tratamento` | `treatment` |
+
 ## Lo que queda en portugués
 
 - **Valores guardados en la base**: los valores de las opciones (`"PF"`, `"conciliada"`, `"retirada"`), los códigos de los módulos (`"rechamadas"`), las claves dentro de campos JSON (los cambios de la auditoría, configuraciones). Solo cambia el nombre de las constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), no su valor.

@@ -7,23 +7,23 @@ from django import forms
 import config.urls  # noqa: F401 - imports every view, and so every form
 
 
-def _subclasses(classe):
-    for sub in classe.__subclasses__():
+def _subclasses(css_class):
+    for sub in css_class.__subclasses__():
         yield sub
         yield from _subclasses(sub)
 
 
 def test_every_field_clean_has_its_field():
-    sem_campo = []
+    without_field = []
     for form in set(_subclasses(forms.BaseForm)):
         if not form.__module__.startswith("apps."):
             continue
         # A base form may leave the field to the forms built on it.
-        familia = [form, *_subclasses(form)]
-        for nome in vars(form):
-            field = nome.removeprefix("clean_")
-            if nome.startswith("clean_") and not any(
-                field in getattr(f, "base_fields", {}) for f in familia
+        family = [form, *_subclasses(form)]
+        for name in vars(form):
+            field = name.removeprefix("clean_")
+            if name.startswith("clean_") and not any(
+                field in getattr(f, "base_fields", {}) for f in family
             ):
-                sem_campo.append(f"{form.__module__}.{form.__qualname__}.{nome}")
-    assert not sem_campo
+                without_field.append(f"{form.__module__}.{form.__qualname__}.{name}")
+    assert not without_field

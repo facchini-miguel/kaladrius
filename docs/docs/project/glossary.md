@@ -1882,6 +1882,44 @@ The keys of the dictionaries the services and views build for the pages (the hom
 | `lei` | `name` |
 | `varia` | `varies` |
 
+## Test fixtures and variables (done)
+
+The Python names the tests define (decision 188): the fixtures, the helpers, their parameters, the local variables, the constants and the keys of the `scenario` dictionaries, about 450 names in 62 files. The fictitious data stays in Portuguese, like the screens (`"Maria Paciente"`, `"Clínica fictícia"`, the users `recepcao` and `admin`), and so do the names a test reads from the system's own objects (`release.versao`, `entry.parcelas`). The shared ones:
+
+| Before | After |
+|---|---|
+| `HOJE` | `TODAY` |
+| `ONTEM` | `YESTERDAY` |
+| `agendar` | `book` |
+| `amostra` | `sample` |
+| `carteirinha` | `plan_card` |
+| `cenario` | `scenario` |
+| `cliente` | `user_client` |
+| `cliente_de` | `client_for` |
+| `clinica_a` | `clinic_a` |
+| `clinica_b` | `clinic_b` |
+| `criar_orcamento` | `create_estimate` |
+| `criar_profissional` | `create_practitioner` |
+| `criar_usuario` | `create_user` |
+| `dados_clinica` | `clinic_data` |
+| `entrar` | `log_in` |
+| `incluir` | `add_item` |
+| `lancamento_com` | `entry_with` |
+| `no_pais` | `in_country` |
+| `parcelas_de` | `installments_of` |
+
+### Keys of `scenario`
+
+| Before | After |
+|---|---|
+| `agenda` | `schedule` |
+| `canal` | `channel` |
+| `cliente` | `client` |
+| `despesa` | `expense` |
+| `receita` | `income` |
+| `recepcao` | `reception` |
+| `tratamento` | `treatment` |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.

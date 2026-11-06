@@ -15,7 +15,7 @@ from apps.patients.models import Patient
 
 
 @pytest.mark.parametrize(
-    ("digitado", "esperado"),
+    ("typed", "expected"),
     [
         ("(54) 99123-4567", "54991234567"),
         ("54 9123-4567", "54991234567"),  # old 8-digit mobile gets the ninth digit
@@ -25,14 +25,14 @@ from apps.patients.models import Patient
         ("", ""),
     ],
 )
-def test_normalize_phone(digitado, esperado):
-    assert normalize_phone(digitado) == esperado
+def test_normalize_phone(typed, expected):
+    assert normalize_phone(typed) == expected
 
 
-@pytest.mark.parametrize("digitado", ["(20) 3461-3354", "(54) 3123-45678", "123", "5491234"])
-def test_invalid_phone(digitado):
+@pytest.mark.parametrize("typed", ["(20) 3461-3354", "(54) 3123-45678", "123", "5491234"])
+def test_invalid_phone(typed):
     with pytest.raises(ValidationError):
-        normalize_phone(digitado)
+        normalize_phone(typed)
 
 
 def test_ninth_digit_only_on_mobile():
@@ -46,9 +46,9 @@ def test_whatsapp_link_with_area_code_and_ninth_digit():
 
 
 @pytest.mark.django_db
-def test_patient_registration_fixes_the_mobile(clinica_a, criar_usuario, cliente_de):
-    cliente = cliente_de(criar_usuario("recepcao_fones", clinica_a, Role.FRONT_DESK))
-    response = cliente.post(
+def test_patient_registration_fixes_the_mobile(clinic_a, create_user, client_for):
+    user_client = client_for(create_user("recepcao_fones", clinic_a, Role.FRONT_DESK))
+    response = user_client.post(
         reverse("patients:new"),
         {
             "kind": "PF",
@@ -59,23 +59,23 @@ def test_patient_registration_fixes_the_mobile(clinica_a, criar_usuario, cliente
         },
     )
     assert response.status_code == 302
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         patient = Patient.objects.get()
     assert (patient.mobile_phone, patient.whatsapp, patient.home_phone) == (
         "54981234567",
         "54981234567",
         "5434613354",
     )
-    errado = cliente.post(
+    wrong = user_client.post(
         reverse("patients:new"), {"kind": "PF", "name": "Outro", "whatsapp": "(20) 98123-4567"}
     )
-    assert "whatsapp" in errado.context["form"].errors
+    assert "whatsapp" in wrong.context["form"].errors
 
 
 def test_anonymization_keeps_valid_mobile_and_landline():
     fake = Faker("pt_BR")
     for _ in range(50):
-        celular = _same_length("5484123456", fake)  # old mobile without the ninth digit
-        fixo = _same_length("5434613354", fake)
-        assert len(celular) == 11 and celular.startswith("549")
-        assert len(fixo) == 10 and fixo.startswith("54") and fixo[2] in "2345"
+        mobile = _same_length("5484123456", fake)  # old mobile without the ninth digit
+        fixed_value = _same_length("5434613354", fake)
+        assert len(mobile) == 11 and mobile.startswith("549")
+        assert len(fixed_value) == 10 and fixed_value.startswith("54") and fixed_value[2] in "2345"

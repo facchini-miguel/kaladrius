@@ -14,32 +14,32 @@ from pathlib import Path
 
 from django.template.base import Variable, VariableDoesNotExist
 
-LINHA_DE_BASE = Path(__file__).with_name("missing_template_variables.txt")
-encontradas = set()
+BASELINE = Path(__file__).with_name("missing_template_variables.txt")
+found_ones = set()
 _original = Variable._resolve_lookup
 
 
-def _registrando(self, context):
+def _recording(self, context):
     try:
         return _original(self, context)
     except VariableDoesNotExist:
         source = getattr(getattr(context, "template", None), "origin", None)
-        encontradas.add(f"{getattr(source, 'template_name', None) or '?'}  {self.var}")
+        found_ones.add(f"{getattr(source, 'template_name', None) or '?'}  {self.var}")
         raise
 
 
-def instalar():
-    Variable._resolve_lookup = _registrando
+def install():
+    Variable._resolve_lookup = _recording
 
 
-def conferir(write):
+def check(write):
     """At the end of the run: the new missing variables (an empty list when there are none)."""
     if os.environ.get("UPDATE_TEMPLATE_BASELINE") == "1":
-        LINHA_DE_BASE.write_text("".join(f"{row}\n" for row in sorted(encontradas)))
-        write(f"{LINHA_DE_BASE.name}: {len(encontradas)} entries written")
+        BASELINE.write_text("".join(f"{row}\n" for row in sorted(found_ones)))
+        write(f"{BASELINE.name}: {len(found_ones)} entries written")
         return []
-    base = set(LINHA_DE_BASE.read_text().splitlines())
-    novas = sorted(encontradas - base)
-    for row in novas:
-        write(f"template variable not found (not in {LINHA_DE_BASE.name}): {row}")
-    return novas
+    base = set(BASELINE.read_text().splitlines())
+    new_ones = sorted(found_ones - base)
+    for row in new_ones:
+        write(f"template variable not found (not in {BASELINE.name}): {row}")
+    return new_ones

@@ -50,12 +50,12 @@ def test_populate_sample_data_requires_debug(settings, monkeypatch):
         call_command("seed_sample_data")
 
 
-def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, criar_usuario):
+def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, create_user):
     settings.DEBUG = True
     monkeypatch.setenv("DJANGO_SEED_PASSWORD", "senha-de-teste-123")
     call_command("seed_sample_data", pacientes=5)
     real = Clinic.objects.create(name="Clínica Real")
-    criar_usuario("pessoa.real", real)
+    create_user("pessoa.real", real)
     # A test username that also works in a real clinic is kept.
     Membership.objects.create(user=get_user_model().objects.get(username="dra.ana"), clinic=real)
     with without_isolation():
@@ -66,8 +66,8 @@ def test_remove_sample_data_does_not_touch_real_data(settings, monkeypatch, cria
     call_command("remove_sample_data", confirmar=True)
 
     assert list(Clinic.objects.values_list("name", flat=True)) == ["Clínica Real"]
-    restantes = set(get_user_model().objects.values_list("username", flat=True))
-    assert restantes == {"pessoa.real", "dra.ana"}
+    remaining = set(get_user_model().objects.values_list("username", flat=True))
+    assert remaining == {"pessoa.real", "dra.ana"}
     with without_isolation():
         assert list(Patient.objects.values_list("name", flat=True)) == ["Paciente Real"]
         assert not Appointment.objects.exists() and not Recall.objects.exists()
@@ -82,23 +82,23 @@ def test_fake_occupation_fits_the_field_uncut():
     """Faker 40's pt_BR job list has titles over 100 characters: another one is drawn."""
     from apps.core import fake_data
 
-    titulos = iter(["Especialista " * 10, "Dentista"])
+    titles = iter(["Especialista " * 10, "Dentista"])
 
-    class Falso:
+    class Fake:
         def job(self):
-            return next(titulos)
+            return next(titles)
 
-    assert fake_data.occupation(Falso()) == "Dentista"
+    assert fake_data.occupation(Fake()) == "Dentista"
 
 
 def test_fake_document_always_valid():
     """Faker 40 can, rarely, make up a CPF with all digits equal: another one is drawn."""
     from apps.core import fake_data
 
-    numeros = iter(["111.111.111-11", "529.982.247-25"])
+    numbers = iter(["111.111.111-11", "529.982.247-25"])
 
-    class Falso:
+    class Fake:
         def cpf(self):
-            return next(numeros)
+            return next(numbers)
 
-    assert fake_data.cpf(Falso()) == "52998224725"
+    assert fake_data.cpf(Fake()) == "52998224725"

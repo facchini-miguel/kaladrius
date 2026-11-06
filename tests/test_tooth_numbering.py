@@ -15,13 +15,13 @@ from apps.dentistry.teeth import (
     name,
     sort_teeth,
 )
-from tests.test_core import dados_clinica
-from tests.test_estimates import cenario, criar_orcamento, entrar, incluir  # noqa: F401
+from tests.test_core import clinic_data
+from tests.test_estimates import add_item, create_estimate, log_in, scenario  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
-PERMANENTES = [d for row in PERMANENT_TEETH for d in row]
-DECIDUOS = [d for row in PRIMARY_TEETH for d in row]
+PERMANENT = [d for row in PERMANENT_TEETH for d in row]
+DECIDUOUS = [d for row in PRIMARY_TEETH for d in row]
 
 
 @pytest.mark.parametrize(
@@ -43,16 +43,16 @@ DECIDUOS = [d for row in PRIMARY_TEETH for d in row]
     ],
 )
 def test_names_of_each_numbering(fdi, universal, palmer):
-    nomes = (name(fdi, FDI), name(fdi, UNIVERSAL), name(fdi, PALMER))
-    assert nomes == (str(fdi), universal, palmer)
+    names = (name(fdi, FDI), name(fdi, UNIVERSAL), name(fdi, PALMER))
+    assert names == (str(fdi), universal, palmer)
 
 
 def test_each_tooth_has_one_name():
-    for numeracao in (FDI, UNIVERSAL, PALMER):
-        nomes = [name(d, numeracao) for d in PERMANENTES + DECIDUOS]
-        assert len(set(nomes)) == 52, numeracao
-    assert sorted(int(name(d, UNIVERSAL)) for d in PERMANENTES) == list(range(1, 33))
-    assert sorted(name(d, UNIVERSAL) for d in DECIDUOS) == list("ABCDEFGHIJKLMNOPQRST")
+    for numbering in (FDI, UNIVERSAL, PALMER):
+        names = [name(d, numbering) for d in PERMANENT + DECIDUOUS]
+        assert len(set(names)) == 52, numbering
+    assert sorted(int(name(d, UNIVERSAL)) for d in PERMANENT) == list(range(1, 33))
+    assert sorted(name(d, UNIVERSAL) for d in DECIDUOUS) == list("ABCDEFGHIJKLMNOPQRST")
 
 
 def test_numbering_order():
@@ -66,21 +66,21 @@ def test_numbering_order():
     assert sort_teeth([36, 11], PALMER) == [11, 36]
 
 
-def test_numbering_follows_the_country(clinica_a, criar_usuario, cliente_de):
+def test_numbering_follows_the_country(clinic_a, create_user, client_for):
     from apps.core.models import Role
 
-    admin = cliente_de(criar_usuario("admin_numeracao", clinica_a, Role.ADMIN))
-    assert clinica_a.tooth_numbering == FDI
-    assert admin.post(reverse("clinic_settings"), dados_clinica(country="US")).status_code == 302
-    clinica_a.refresh_from_db()
-    assert clinica_a.tooth_numbering == UNIVERSAL
+    admin = client_for(create_user("admin_numeracao", clinic_a, Role.ADMIN))
+    assert clinic_a.tooth_numbering == FDI
+    assert admin.post(reverse("clinic_settings"), clinic_data(country="US")).status_code == 302
+    clinic_a.refresh_from_db()
+    assert clinic_a.tooth_numbering == UNIVERSAL
     # Chosen on purpose, it stays when the country changes.
-    data = dados_clinica(country="US", tooth_numbering=PALMER)
+    data = clinic_data(country="US", tooth_numbering=PALMER)
     assert admin.post(reverse("clinic_settings"), data).status_code == 302
-    data = dados_clinica(country="GB", tooth_numbering=PALMER)
+    data = clinic_data(country="GB", tooth_numbering=PALMER)
     assert admin.post(reverse("clinic_settings"), data).status_code == 302
-    clinica_a.refresh_from_db()
-    assert clinica_a.tooth_numbering == PALMER
+    clinic_a.refresh_from_db()
+    assert clinic_a.tooth_numbering == PALMER
 
 
 def test_new_clinic_in_united_states_starts_with_universal():
@@ -89,18 +89,18 @@ def test_new_clinic_in_united_states_starts_with_universal():
     assert form.instance.tooth_numbering == UNIVERSAL
 
 
-def test_estimate_shows_the_clinic_numbering(cenario):  # noqa: F811
-    clinic = cenario["clinic"]
+def test_estimate_shows_the_clinic_numbering(scenario):  # noqa: F811
+    clinic = scenario["clinic"]
     clinic.tooth_numbering = UNIVERSAL
     clinic.save()
-    cliente = entrar(cenario, "practitioner")
-    estimate = criar_orcamento(cenario, cliente)
-    incluir(cliente, estimate, procedure=cenario["restauracao"].pk, teeth="36,18")
+    user_client = log_in(scenario, "practitioner")
+    estimate = create_estimate(scenario, user_client)
+    add_item(user_client, estimate, procedure=scenario["restoration"].pk, teeth="36,18")
     with use_clinic(clinic):
         item = estimate.itens.get()
         assert item.teeth == "18,36"  # always FDI in the database
         assert item.teeth_display == "1, 19"
-    page = cliente.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
+    page = user_client.get(reverse("estimates:detail", args=[estimate.pk])).content.decode()
     # The chart posts FDI and shows the Universal number.
     assert 'data-tooth="36"' in page and ">19</button>" in page
     assert "Numeração universal (Estados Unidos)." in page

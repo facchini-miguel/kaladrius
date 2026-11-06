@@ -11,12 +11,12 @@ from apps.core.countries import COUNTRIES
 from apps.core.isolation import use_clinic
 from apps.finance import payment_methods, services
 from apps.finance.models import Payment
-from tests.test_finance import HOJE, cenario, entrar, lancamento_com, parcelas_de  # noqa: F401
+from tests.test_finance import TODAY, entry_with, installments_of, log_in, scenario  # noqa: F401
 
 pytestmark = pytest.mark.django_db
 
 
-def mudar_pais(data, country):
+def change_country(data, country):
     clinic = data["clinic"]
     clinic.country = country
     clinic.save()
@@ -37,7 +37,7 @@ def test_local_names_in_parentheses():
         assert payment_methods.label("carteira", "PE") == "Carteira digital (Yape, Plin)"
         assert payment_methods.label("transferencia", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
-        assert [code for code, _nome in payment_methods.in_use("BR")] == [
+        assert [code for code, _name in payment_methods.in_use("BR")] == [
             "dinheiro",
             "pix",
             "debito",
@@ -54,80 +54,80 @@ def test_local_names_in_parentheses():
 def test_check_spelled_per_english_variant():
     with translation.override("en"):
         assert payment_methods.label("cheque", "US") == "Check"
-    for variante in ("en-gb", "en-ca", "en-au", "en-za"):
-        with translation.override(variante):
-            assert payment_methods.label("cheque", "GB") == "Cheque", variante
+    for variant in ("en-gb", "en-ca", "en-au", "en-za"):
+        with translation.override(variant):
+            assert payment_methods.label("cheque", "GB") == "Cheque", variant
     with translation.override("es"):
         assert payment_methods.label("cheque", "MX") == "Cheque"
 
 
-def test_form_offers_the_country_methods(cenario):  # noqa: F811
-    mudar_pais(cenario, "PE")
-    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    installment = parcelas_de(cenario, entry)[0]
+def test_form_offers_the_country_methods(scenario):  # noqa: F811
+    change_country(scenario, "PE")
+    entry = entry_with(scenario, amount="100.00", installments=1)
+    installment = installments_of(scenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
-    admin = entrar(cenario, "admin")
+    admin = log_in(scenario, "admin")
     page = admin.get(url).content.decode()
     assert 'value="carteira"' in page and "Yape, Plin" in page
     assert 'value="pix"' not in page and 'value="boleto"' not in page
-    data = {"date": HOJE.isoformat(), "amount": "100", "account": cenario["cash_register"].pk}
+    data = {"date": TODAY.isoformat(), "amount": "100", "account": scenario["cash_register"].pk}
     assert "method" in admin.post(url, {**data, "method": "pix"}).context["form"].errors
     assert admin.post(url, {**data, "method": "carteira"}).status_code == 302
-    with use_clinic(cenario["clinic"]), translation.override("pt-br"):
+    with use_clinic(scenario["clinic"]), translation.override("pt-br"):
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
-        report = services.report(HOJE, HOJE)
+        report = services.report(TODAY, TODAY)
     assert report["by_method"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
-    nova = admin.get(reverse("finance:entry_new")).content.decode()
-    assert 'value="carteira"' in nova and 'value="pix"' not in nova
+    new_one = admin.get(reverse("finance:entry_new")).content.decode()
+    assert 'value="carteira"' in new_one and 'value="pix"' not in new_one
 
 
-def test_card_without_installments_in_united_states(cenario):  # noqa: F811
-    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    installment = parcelas_de(cenario, entry)[0]
+def test_card_without_installments_in_united_states(scenario):  # noqa: F811
+    entry = entry_with(scenario, amount="100.00", installments=1)
+    installment = installments_of(scenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
-    admin = entrar(cenario, "admin")
+    admin = log_in(scenario, "admin")
     form = admin.get(url).context["form"]
     assert "card_installments" in form.fields and "NSU" in str(
         form.fields["card_transaction_code"].label
     )
 
-    mudar_pais(cenario, "US")
+    change_country(scenario, "US")
     form = admin.get(url).context["form"]
     assert "card_installments" not in form.fields
     assert "NSU" not in str(form.fields["card_transaction_code"].label)
     data = {
-        "date": HOJE.isoformat(),
+        "date": TODAY.isoformat(),
         "amount": "100",
-        "account": cenario["cash_register"].pk,
+        "account": scenario["cash_register"].pk,
         "method": "hsa",
         "card_brand": "Visa",
         "card_installments": "3",
         "card_transaction_code": "A1B2",
     }
     assert admin.post(url, data).status_code == 302
-    with use_clinic(cenario["clinic"]):
+    with use_clinic(scenario["clinic"]):
         payment = Payment.objects.get()
     # An HSA/FSA card is a card: its details are kept, but not installments.
     assert (payment.card_brand, payment.card_transaction_code) == ("Visa", "A1B2")
     assert payment.card_installments is None
 
 
-def test_card_details_only_for_card(cenario):  # noqa: F811
-    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    installment = parcelas_de(cenario, entry)[0]
+def test_card_details_only_for_card(scenario):  # noqa: F811
+    entry = entry_with(scenario, amount="100.00", installments=1)
+    installment = installments_of(scenario, entry)[0]
     url = reverse("finance:receive_installment", args=[installment.pk])
     data = {
-        "date": HOJE.isoformat(),
+        "date": TODAY.isoformat(),
         "amount": "100",
-        "account": cenario["cash_register"].pk,
+        "account": scenario["cash_register"].pk,
         "method": "pix",
         "card_brand": "Visa",
         "card_installments": "3",
         "card_transaction_code": "A1B2",
     }
-    assert entrar(cenario, "admin").post(url, data).status_code == 302
-    with use_clinic(cenario["clinic"]):
+    assert log_in(scenario, "admin").post(url, data).status_code == 302
+    with use_clinic(scenario["clinic"]):
         payment = Payment.objects.get()
     assert (payment.card_brand, payment.card_installments, payment.card_transaction_code) == (
         "",
@@ -136,16 +136,16 @@ def test_card_details_only_for_card(cenario):  # noqa: F811
     )
 
 
-def test_old_payment_shows_method_the_country_no_longer_offers(cenario):  # noqa: F811
-    entry = lancamento_com(cenario, amount="100.00", parcelas=1)
-    with use_clinic(cenario["clinic"]), translation.override("pt-br"):
+def test_old_payment_shows_method_the_country_no_longer_offers(scenario):  # noqa: F811
+    entry = entry_with(scenario, amount="100.00", installments=1)
+    with use_clinic(scenario["clinic"]), translation.override("pt-br"):
         payment = services.receive(
-            parcelas_de(cenario, entry)[0],
-            user=cenario["admin"],
+            installments_of(scenario, entry)[0],
+            user=scenario["admin"],
             amount=Decimal("100"),
             method="pix",
-            account=cenario["cash_register"],
+            account=scenario["cash_register"],
         )
-        mudar_pais(cenario, "US")
+        change_country(scenario, "US")
         assert payment.get_method_display() == "Pix"
-        assert services.report(HOJE, HOJE)["by_method"] == [("Pix", Decimal("100.00"))]
+        assert services.report(TODAY, TODAY)["by_method"] == [("Pix", Decimal("100.00"))]

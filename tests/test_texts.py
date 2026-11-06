@@ -20,24 +20,24 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def reception(clinica_a, criar_usuario, cliente_de):
-    return cliente_de(criar_usuario("recepcao_textos", clinica_a, Role.FRONT_DESK))
+def reception(clinic_a, create_user, client_for):
+    return client_for(create_user("recepcao_textos", clinic_a, Role.FRONT_DESK))
 
 
-class _Exemplo(BootstrapForm, forms.Form):
+class _Example(BootstrapForm, forms.Form):
     amount = forms.DecimalField(max_digits=12, decimal_places=2, localize=True, required=False)
-    fixa = forms.ChoiceField(choices=[("", "- Select an option -"), ("a", "A")])
-    agrupada = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
+    fixed_one = forms.ChoiceField(choices=[("", "- Select an option -"), ("a", "A")])
+    grouped = forms.ChoiceField(choices=[("Grupo", [("b", "B")])])
 
 
 def test_blank_option_of_fixed_lists_becomes_dash():
-    form = _Exemplo()
-    assert form.fields["fixa"].choices == [("", "—"), ("a", "A")]
-    assert form.fields["agrupada"].choices == [("Grupo", [("b", "B")])]  # untouched
+    form = _Example()
+    assert form.fields["fixed_one"].choices == [("", "—"), ("a", "A")]
+    assert form.fields["grouped"].choices == [("Grupo", [("b", "B")])]  # untouched
 
 
 @pytest.mark.parametrize(
-    ("language", "digitado", "amount"),
+    ("language", "typed", "amount"),
     [
         ("pt-br", "1.234.567,89", "1234567.89"),
         ("pt-br", "R$ 1.500,00", "1500.00"),
@@ -49,20 +49,20 @@ def test_blank_option_of_fixed_lists_becomes_dash():
         ("en", "1,500", "1500"),
     ],
 )
-def test_numbers_with_thousands_separator(language, digitado, amount):
+def test_numbers_with_thousands_separator(language, typed, amount):
     with translation.override(language):
-        form = _Exemplo({"fixa": "a", "agrupada": "b", "amount": digitado})
+        form = _Example({"fixed_one": "a", "grouped": "b", "amount": typed})
         assert form.is_valid(), form.errors
     assert form.cleaned_data["amount"] == Decimal(amount)
 
 
 def test_ambiguous_number_is_still_refused():
     with translation.override("pt-br"):
-        assert not _Exemplo({"fixa": "a", "agrupada": "b", "amount": "1,500"}).is_valid()
+        assert not _Example({"fixed_one": "a", "grouped": "b", "amount": "1,500"}).is_valid()
 
 
-def test_reception_forms_without_english(clinica_a, reception):
-    with use_clinic(clinica_a):
+def test_reception_forms_without_english(clinic_a, reception):
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     for url in (
         reverse("patients:new"),
@@ -86,21 +86,21 @@ def test_birthday_month_list_starts_capitalized(reception):
     assert ">Outubro</option>" in page
 
 
-def test_alphabetical_order_with_accents_and_lowercase(clinica_a):
+def test_alphabetical_order_with_accents_and_lowercase(clinic_a):
     """The Alpine database sorted by bytes: "Água" went after "Zeca" (decision 103)."""
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         for name in ("Zeca Fictício", "Érica Fictícia", "ana Fictícia", "Água Fictícia", "Beto"):
             Patient.objects.create(name=name)
-        nomes = list(Patient.objects.values_list("name", flat=True))
-    assert nomes == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
+        names = list(Patient.objects.values_list("name", flat=True))
+    assert names == ["Água Fictícia", "ana Fictícia", "Beto", "Érica Fictícia", "Zeca Fictício"]
 
 
 def test_alphabetical_key_ignores_accent_and_case():
-    nomes = ["Zeca", "Érica", "ana", "Água", "Beto"]
-    assert sorted(nomes, key=alphabetical_key) == ["Água", "ana", "Beto", "Érica", "Zeca"]
+    names = ["Zeca", "Érica", "ana", "Água", "Beto"]
+    assert sorted(names, key=alphabetical_key) == ["Água", "ana", "Beto", "Érica", "Zeca"]
 
 
-def test_screens_fit_on_a_phone(clinica_a, reception):
+def test_screens_fit_on_a_phone(clinic_a, reception):
     """Review stage 5 (phone, 390 px): the dental chart scrolls in its own box and the
     printed registration sheet stacks its two columns on a narrow screen."""
     from django.template.loader import render_to_string
@@ -112,7 +112,7 @@ def test_screens_fit_on_a_phone(clinica_a, reception):
         {"permanent_rows": PERMANENT_TEETH, "primary_rows": PRIMARY_TEETH, "interactive": True},
     )
     assert 'class="odontogram-scroll"' in html
-    with use_clinic(clinica_a):
+    with use_clinic(clinic_a):
         patient = Patient.objects.create(name="Paciente Fictício")
     patient_record = reception.get(reverse("patients:print", args=[patient.pk])).content.decode()
     assert 'class="col-12 col-sm-6"' in patient_record and 'class="col-6"' not in patient_record
@@ -121,7 +121,7 @@ def test_screens_fit_on_a_phone(clinica_a, reception):
 def test_django_admin_without_english(client, django_user_model):
     """Review (superuser): the admin's action and filter lists showed Django 6.1's
     "- Select an option -" in English."""
-    super_usuario = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
-    client.force_login(super_usuario)
+    super_user = django_user_model.objects.create_superuser("super_textos", "s@example.com", "x")
+    client.force_login(super_user)
     page = client.get(reverse("admin:referencias_state_changelist")).content.decode()
     assert "Select an option" not in page and "Selecione uma opção" in page

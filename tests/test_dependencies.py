@@ -9,73 +9,73 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parent.parent
-PINO = re.compile(r"^([A-Za-z0-9._-]+)(?:\[[^\]]*\])?==([^\s\\;]+)")
+ROOT_DIR = Path(__file__).resolve().parent.parent
+PIN = re.compile(r"^([A-Za-z0-9._-]+)(?:\[[^\]]*\])?==([^\s\\;]+)")
 
 
-def _nome(name):
+def _name(name):
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-def _escolhidas(file):
+def _chosen(file):
     """Pins of a .in file (name -> version); -r/-c lines are followed by the lock itself."""
-    pinos = {}
-    for row in (RAIZ / file).read_text().splitlines():
-        if m := PINO.match(row.strip()):
-            pinos[_nome(m[1])] = m[2]
-    return pinos
+    pins = {}
+    for row in (ROOT_DIR / file).read_text().splitlines():
+        if m := PIN.match(row.strip()):
+            pins[_name(m[1])] = m[2]
+    return pins
 
 
 def _lock(file):
     """Packages of a lock: name -> (version, sorted hashes)."""
-    pacotes, current = {}, None
-    for row in (RAIZ / file).read_text().splitlines():
-        if m := PINO.match(row):
-            current = _nome(m[1])
-            pacotes[current] = (m[2], [])
+    packages, current = {}, None
+    for row in (ROOT_DIR / file).read_text().splitlines():
+        if m := PIN.match(row):
+            current = _name(m[1])
+            packages[current] = (m[2], [])
         elif current and (h := re.search(r"--hash=(\S+)", row)):
-            pacotes[current][1].append(h[1])
-    return {name: (versao, sorted(hashes)) for name, (versao, hashes) in pacotes.items()}
+            packages[current][1].append(h[1])
+    return {name: (version, sorted(hashes)) for name, (version, hashes) in packages.items()}
 
 
 @pytest.mark.parametrize(
-    "entrada,lock",
+    "entry_line,lock",
     [
         ("requirements.in", "requirements.txt"),
         ("requirements-dev.in", "requirements-dev.txt"),
         ("deploy/pip-tools.in", "deploy/pip-tools.txt"),
     ],
 )
-def test_lock_has_the_versions_of_the_in_file(entrada, lock):
-    pacotes = _lock(lock)
-    escolhidas = _escolhidas(entrada)
-    assert escolhidas
-    for name, versao in escolhidas.items():
-        assert name in pacotes, f"{name} not in {lock}: run deploy/lock.sh"
-        no_lock = pacotes[name][0]
-        assert no_lock == versao, f"{name}: {entrada} has {versao}, {lock} has {no_lock}"
-    assert all(hashes for _, hashes in pacotes.values()), f"{lock} has a package without a hash"
+def test_lock_has_the_versions_of_the_in_file(entry_line, lock):
+    packages = _lock(lock)
+    chosen = _chosen(entry_line)
+    assert chosen
+    for name, version in chosen.items():
+        assert name in packages, f"{name} not in {lock}: run deploy/lock.sh"
+        no_lock = packages[name][0]
+        assert no_lock == version, f"{name}: {entry_line} has {version}, {lock} has {no_lock}"
+    assert all(hashes for _, hashes in packages.values()), f"{lock} has a package without a hash"
 
 
 def test_production_and_development_locks_agree():
-    producao = _lock("requirements.txt")
-    desenvolvimento = _lock("requirements-dev.txt")
-    assert producao.keys() <= desenvolvimento.keys(), "production packages missing in the dev lock"
-    diferentes = [name for name, pino in producao.items() if desenvolvimento[name] != pino]
-    assert not diferentes, f"version or hashes differ between the locks: {diferentes}"
+    production = _lock("requirements.txt")
+    development = _lock("requirements-dev.txt")
+    assert production.keys() <= development.keys(), "production packages missing in the dev lock"
+    different = [name for name, pin in production.items() if development[name] != pin]
+    assert not different, f"version or hashes differ between the locks: {different}"
 
 
 def test_ci_checks_the_locks():
-    arquivo_ci = RAIZ / ".github" / "workflows" / "ci.yml"
-    if not arquivo_ci.exists():  # inside the image, which leaves .github out
+    ci_file = ROOT_DIR / ".github" / "workflows" / "ci.yml"
+    if not ci_file.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
-    assert "deploy/lock.sh --check" in arquivo_ci.read_text()
+    assert "deploy/lock.sh --check" in ci_file.read_text()
 
 
 def test_commit_lint_uses_the_locked_ruff():
     """Decision 137: the Lint workflow runs on every push and installs ruff from the lock,
     with its hashes, for the Python of .python-version."""
-    file = RAIZ / ".github" / "workflows" / "lint.yml"
+    file = ROOT_DIR / ".github" / "workflows" / "lint.yml"
     if not file.exists():  # inside the image, which leaves .github out
         pytest.skip(".github is not in the image")
     lint = file.read_text()
