@@ -372,7 +372,9 @@ def cash_flow(since, until, por_mes=False, today=None):
         other_account__isnull=True, created_at__date__gte=since, created_at__date__lte=until
     ).values_list("created_at", "kind", "amount"):
         date = timezone.localtime(timestamp).date()
-        rows[key(date)]["outgoing" if kind == CashMovement.Kind.WITHDRAWAL else "incoming"] += amount
+        rows[key(date)]["outgoing" if kind == CashMovement.Kind.WITHDRAWAL else "incoming"] += (
+            amount
+        )
     for installment in (
         Installment.objects.unpaid()
         .filter(due_date__gte=since, due_date__lte=until)

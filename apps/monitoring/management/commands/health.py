@@ -7,6 +7,9 @@ from django.utils import timezone
 from apps.core.models import Backup
 from apps.monitoring import health
 
+# The report keeps its Portuguese words (it was written with the old internal names).
+LABELS = {"cpu": "cpu", "memory": "memoria", "swap": "swap", "disk": "disco"}
+
 
 class Command(BaseCommand):
     help = (
@@ -37,7 +40,9 @@ class Command(BaseCommand):
                 f"{filesizeformat(summary['sent'])} enviados"
             )
             alerts = [
-                f"{key}: {level}" for key, level in health.levels(latest).items() if level != "ok"
+                f"{LABELS[key]}: {level}"
+                for key, level in health.levels(latest).items()
+                if level != "ok"
             ]
             if health.stopped(latest):
                 alerts.append("coleta parada")

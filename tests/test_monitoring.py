@@ -167,7 +167,7 @@ def test_command_summarizes_24_hours(pasta):
     call_command("health", stdout=saida)
     text = saida.getvalue()
     assert "Amostras: 2" in text and "pico 8.0%" in text
-    assert "disk: critico" in text and "Último backup: nenhum registrado" in text
+    assert "disco: critico" in text and "Último backup: nenhum registrado" in text
 
 
 def test_scale_follows_data_and_lone_point_becomes_dot(pasta):
