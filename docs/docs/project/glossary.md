@@ -2432,9 +2432,41 @@ The local variables, parameters, dataclass attributes, module aliases and comman
 | `vistos` | `seen` |
 | `vizinhos` | `neighbors` |
 
+## New apps (decision 193)
+
+A new app is born in English: its folder, its label (the same as the folder), models, fields, tables, URLs, API fields, migration names (`makemigrations --name`), choice values, tests and commands. As in the rest of the system, the screens' texts are Portuguese with translations (decision 049) and the fields state their Portuguese label (decision 170). `test_a_new_app_is_born_in_english` fails a new app whose label is not its folder's name.
+
+## App labels (in two versions)
+
+The label names an app in two of the database's tables, `django_migrations` (which migrations ran) and `django_content_type` (what permissions and the admin log point to, by id); no table name depends on it since decision 179. Decision 194 changes them in two versions, so that the automatic rollback keeps working:
+
+- **0.61.0**: `migrate` first renames those rows to the labels the code uses, in either direction (`apps/core/labels.py`; a model under both spellings is merged into the code's row). The labels are still Portuguese, so nothing changes yet.
+- **0.62.0**: the labels become English, and `migrate` renames the rows on the update. A rollback to 0.61.0 renames them back, and a backup or the demo's base from before is renamed when restored.
+
+| Before | After |
+|---|---|
+| `agenda` | `schedule` |
+| `ajuda` | `help` |
+| `auditoria` | `audit` |
+| `conta` | `account` |
+| `convenios` | `health_plans` |
+| `equipe` | `team` |
+| `financeiro` | `finance` |
+| `legado` | `legacy` |
+| `monitoramento` | `monitoring` |
+| `novidades` | `whats_new` |
+| `odontologia` | `dentistry` |
+| `orcamentos` | `estimates` |
+| `pacientes` | `patients` |
+| `pessoal` | `staff` |
+| `profissionais` | `practitioners` |
+| `prontuario` | `medical_records` |
+| `rechamadas` | `recalls` |
+| `referencias` | `reference_data` |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.
-- **The app labels** (`pacientes`, `financeiro`…), which name the migrations and content types (no longer any table).
+- **The app labels** (`pacientes`, `financeiro`…), which name the migrations and content types (no longer any table), until version 0.62.0 (decision 194).
 - **The old migrations**: they describe the past, with the names of the time.
 - **The legacy Odonto importer's strings**: they are the old system's table and column names.

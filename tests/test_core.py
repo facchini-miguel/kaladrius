@@ -238,3 +238,20 @@ def test_every_app_declares_its_own_label():
     for config in apps.get_app_configs():
         if config.name.startswith("apps."):
             assert "label" in type(config).__dict__, config.name
+
+
+def test_a_new_app_is_born_in_english():
+    """Decision 193: a new app's label is its folder's (English) name, so its tables, migrations
+    and permissions are English from the start."""
+    from django.apps import apps
+
+    from apps.core.labels import LABELS  # the labels from before the English names; only shrinks
+
+    for config in apps.get_app_configs():
+        if not config.name.startswith("apps."):
+            continue
+        folder = config.name.removeprefix("apps.")
+        if config.label in LABELS:
+            assert LABELS[config.label] == folder, config.name
+        else:
+            assert config.label == folder, f"{config.name}: label = {folder!r} (decision 193)"
