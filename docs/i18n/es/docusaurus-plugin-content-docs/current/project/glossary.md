@@ -2432,9 +2432,41 @@ Las variables locales, los parámetros, los atributos de dataclasses, los alias 
 | `vistos` | `seen` |
 | `vizinhos` | `neighbors` |
 
+## Apps nuevas (decisión 193)
+
+Una app nueva nace en inglés: la carpeta, el label (igual al nombre de la carpeta), los modelos, campos, tablas, URLs, campos de la API, nombres de las migraciones (`makemigrations --name`), valores de las opciones, pruebas y comandos. Como en el resto del sistema, los textos de las pantallas están en portugués con traducciones (decisión 049) y los campos dicen su etiqueta en portugués (decisión 170). `test_a_new_app_is_born_in_english` reprueba una app nueva cuyo label no sea el nombre de la carpeta.
+
+## Labels de las apps (en dos versiones)
+
+El label da nombre a una app en dos tablas de la base, `django_migrations` (qué migraciones corrieron) y `django_content_type` (a dónde apuntan, por el id, los permisos y el historial del admin); ningún nombre de tabla depende de él desde la decisión 179. La decisión 194 los cambia en dos versiones, para que la vuelta automática siga funcionando:
+
+- **0.61.0**: el `migrate` primero renombra esas filas a los labels que usa el código, en los dos sentidos (`apps/core/labels.py`; un modelo con las dos grafías se junta en la fila del código). Los labels siguen en portugués, así que todavía nada cambia.
+- **0.62.0**: los labels pasan al inglés, y el `migrate` renombra las filas en la actualización. Una vuelta a la 0.61.0 las renombra de vuelta, y un backup o la base de la demostración de antes se renombran al restaurarse.
+
+| Antes | Después |
+|---|---|
+| `agenda` | `schedule` |
+| `ajuda` | `help` |
+| `auditoria` | `audit` |
+| `conta` | `account` |
+| `convenios` | `health_plans` |
+| `equipe` | `team` |
+| `financeiro` | `finance` |
+| `legado` | `legacy` |
+| `monitoramento` | `monitoring` |
+| `novidades` | `whats_new` |
+| `odontologia` | `dentistry` |
+| `orcamentos` | `estimates` |
+| `pacientes` | `patients` |
+| `pessoal` | `staff` |
+| `profissionais` | `practitioners` |
+| `prontuario` | `medical_records` |
+| `rechamadas` | `recalls` |
+| `referencias` | `reference_data` |
+
 ## Lo que queda en portugués
 
 - **Valores guardados en la base**: los valores de las opciones (`"PF"`, `"conciliada"`, `"retirada"`), los códigos de los módulos (`"rechamadas"`), las claves dentro de campos JSON (los cambios de la auditoría, configuraciones). Solo cambia el nombre de las constantes (`Situacao.CONCILIADA` → `Status.RECONCILED`), no su valor.
-- **Los labels de las apps** (`pacientes`, `financeiro`…), que dan nombre a las migraciones y a los tipos de contenido (ya a ninguna tabla).
+- **Los labels de las apps** (`pacientes`, `financeiro`…), que dan nombre a las migraciones y a los tipos de contenido (ya a ninguna tabla), hasta la versión 0.62.0 (decisión 194).
 - **Las migraciones antiguas**: describen el pasado, con los nombres de la época.
 - **Los textos del importador del Odonto heredado**: son los nombres de las tablas y columnas del sistema antiguo.

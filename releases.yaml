@@ -4,6 +4,43 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.61.0
+  date: 2026-11-06
+  title:
+    pt-br: Preparação para a próxima versão
+    en: Getting ready for the next version
+    es: Preparación para la próxima versión
+  items:
+    - kind: melhoria
+      module: Geral
+      audience: [equipe]
+      text:
+        pt-br: >
+          Manutenção interna, que prepara a próxima versão. Nada muda no uso, nas telas nem nos
+          dados.
+        en: >
+          Internal maintenance that prepares the next version. Nothing changes in use, on the
+          screens or in the data.
+        es: >
+          Mantenimiento interno que prepara la próxima versión. Nada cambia en el uso, en las
+          pantallas ni en los datos.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          O migrate primeiro acerta os labels dos apps no banco para os do código, nos dois
+          sentidos, para a troca dos labels para inglês na 0.62.0 poder ser desfeita pela volta
+          automática (decisão 194). Apps novos nascem em inglês (decisão 193).
+        en: >
+          Migrate first renames the apps' labels in the database to the code's, in either
+          direction, so that the switch to English labels in 0.62.0 can be undone by the automatic
+          rollback (decision 194). New apps are born in English (decision 193).
+        es: >
+          El migrate primero ajusta los labels de las apps en la base a los del código, en los dos
+          sentidos, para que el cambio de los labels al inglés en la 0.62.0 pueda deshacerlo la
+          vuelta automática (decisión 194). Las apps nuevas nacen en inglés (decisión 193).
+
 - version: 0.60.2
   date: 2026-11-06
   title:
