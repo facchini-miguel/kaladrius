@@ -17,6 +17,9 @@
   const isoDate = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 
   const touch = window.matchMedia("(pointer: coarse)").matches;
+  // Below 768px (phones) the calendar opens on the day view; there the week's seven columns are
+  // too narrow for "seg. 02/11", which ran into each other: the day's initial and number.
+  const narrow = window.innerWidth < 768;
 
   function openNew(start, end) {
     const params = new URLSearchParams({
@@ -70,7 +73,8 @@
     locale: config.language,
     timeZone: "UTC",
     now: config.now,
-    initialView: window.innerWidth < 768 ? "timeGridDay" : "timeGridWeek",
+    initialView: narrow ? "timeGridDay" : "timeGridWeek",
+    views: narrow ? { timeGridWeek: { dayHeaderFormat: { weekday: "narrow", day: "numeric", omitCommas: true } } } : {},
     initialDate: config.date || undefined,
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,timeGridDay,listWeek" },
     firstDay: 1,

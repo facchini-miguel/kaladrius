@@ -48,6 +48,12 @@ a.indicator:hover { border-color: #0d6efd; }
   .fc .fc-header-toolbar .fc-toolbar-chunk:nth-child(2) { order: -1; width: 100%; text-align: center; }
   .fc .fc-toolbar-title { font-size: 1.25rem; }
 }
+/* Below 768px the week's day headers are short ("S 2", static/js/schedule.js): they and the
+   birthday and recall badges ("🎂 3") keep on one line in the narrow columns. */
+@media (max-width: 767.98px) {
+  .fc .fc-col-header-cell-cushion, .fc .birthday-badge, .fc .recall-badge { white-space: nowrap; }
+  .fc .fc-col-header-cell .birthday-badge, .fc .fc-col-header-cell .recall-badge { margin-left: 0 !important; }
+}
 
 /* Schedule: whether the patient came (0.24.0). */
 .fc-event.status-compareceu .fc-event-title::before { content: "✓ "; font-weight: 700; }
