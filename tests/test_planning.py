@@ -130,7 +130,7 @@ def test_copy_targets_from_previous_year(clinica_a, admin):
         Planning.objects.create(year=HOJE.year, group=impostos, amount=Decimal("400"))
     page = admin.get(f"{URL}?year={HOJE.year}")
     assert page.context["tem_metas_anteriores"]
-    admin.post(f"{URL}?year={HOJE.year}", {"acao": "copiar"})
+    admin.post(f"{URL}?year={HOJE.year}", {"action": "copiar"})
     with use_clinic(clinica_a):
         deste_ano = dict(
             Planning.objects.filter(year=HOJE.year).values_list("group__name", "amount")

@@ -142,10 +142,10 @@ def test_approving_becomes_a_receivable(cenario):
     response = reception.post(
         url,
         {
-            "parcelas": 4,
-            "primeiro_vencimento": HOJE.isoformat(),
+            "installments": 4,
+            "first_due_date": HOJE.isoformat(),
             "category": cenario["canal"].category.pk,
-            "recebido_agora": "on",
+            "received_now": "on",
             "method": "pix",
             "account": cash_register.pk,
         },

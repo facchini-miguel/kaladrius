@@ -22,8 +22,8 @@
         {% include "includes/patient_search.html" with campo=form.patient patient=appointment.patient ajuda=ajuda_paciente %}
       </div>
       <div class="col-12">{% with campo=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-      {% if form.repeticoes %}
-      <div class="col-md-6">{% with campo=form.repeticoes %}{% include "includes/field.html" %}{% endwith %}</div>
+      {% if form.repetitions %}
+      <div class="col-md-6">{% with campo=form.repetitions %}{% include "includes/field.html" %}{% endwith %}</div>
       {% endif %}
     </div>
   </div>

@@ -11,7 +11,7 @@
         <div class="text-center text-primary mb-2">{% include "includes/logo.html" with classe="logo-login" %}</div>
         <h1 class="h4 mb-4 text-center">{{ nome_sistema }}</h1>
 
-        {% if inatividade %}
+        {% if idle %}
         <div class="alert alert-info" role="status">{% blocktranslate %}Você saiu do sistema depois de {{ minutos }} minutos sem uso. Entre de novo para continuar.{% endblocktranslate %}</div>
         {% endif %}
         {% if endereco_bloqueado %}

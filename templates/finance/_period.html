@@ -1,18 +1,18 @@
 {% load i18n %}<form method="get" class="row g-2 align-items-end mb-3">
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="de">{% translate "De" %}</label>
-    <input type="date" id="de" name="de" value="{{ de|date:'Y-m-d' }}" class="form-control">
+    <label class="form-label small" for="since">{% translate "De" %}</label>
+    <input type="date" id="since" name="since" value="{{ since|date:'Y-m-d' }}" class="form-control">
   </div>
   <div class="col-6 col-md-3">
     <label class="form-label small" for="until">{% translate "Até" %}</label>
     <input type="date" id="until" name="until" value="{{ until|date:'Y-m-d' }}" class="form-control">
   </div>
-  {% if agrupar %}
+  {% if group %}
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="agrupar">{% translate "Agrupar por" %}</label>
-    <select id="agrupar" name="agrupar" class="form-select">
-      <option value="dia"{% if not por_mes %} selected{% endif %}>{% translate "Dia" %}</option>
-      <option value="mes"{% if por_mes %} selected{% endif %}>{% translate "Mês" %}</option>
+    <label class="form-label small" for="group">{% translate "Agrupar por" %}</label>
+    <select id="group" name="group" class="form-select">
+      <option value="dia"{% if not by_month %} selected{% endif %}>{% translate "Dia" %}</option>
+      <option value="mes"{% if by_month %} selected{% endif %}>{% translate "Mês" %}</option>
     </select>
   </div>
   {% endif %}

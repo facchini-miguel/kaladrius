@@ -30,8 +30,8 @@
   {% if appointment and not visit %}<input type="hidden" name="appointment" value="{{ appointment.pk }}">{% endif %}
   {% include "includes/form.html" %}
   <div class="d-flex flex-wrap gap-2">
-    <button type="submit" name="acao" value="salvar" class="btn btn-primary">{% translate "Salvar rascunho" %}</button>
-    <button type="submit" name="acao" value="finalizar" class="btn btn-outline-success">{% translate "Salvar e finalizar" %}</button>
+    <button type="submit" name="action" value="salvar" class="btn btn-primary">{% translate "Salvar rascunho" %}</button>
+    <button type="submit" name="action" value="finalizar" class="btn btn-outline-success">{% translate "Salvar e finalizar" %}</button>
     <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a>
   </div>
 </form>

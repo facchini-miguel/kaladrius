@@ -34,7 +34,7 @@ def test_bank_list_searches_by_code(clinica_a, criar_usuario, cliente_de):
 def test_pagination_keeps_filters(clinica_a, criar_usuario, cliente_de):
     cliente = cliente_de(criar_usuario("recepcao", clinica_a, Role.FRONT_DESK))
     content = cliente.get(reverse("reference_data:cities"), {"state": 31}).content.decode()  # MG
-    assert "state=31&amp;q=&amp;pagina=2" in content
+    assert "state=31&amp;q=&amp;page=2" in content
 
 
 def test_city_options_for_chained_select(client, criar_usuario):

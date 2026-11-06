@@ -72,8 +72,11 @@ def test_old_address_redirects_to_the_new(client, name, old):
 
 
 def test_redirect_keeps_query_string_and_method(client):
-    response = client.get("/pacientes/?busca=Ana&pagina=2")
-    assert response.url == "/patients/?busca=Ana&pagina=2"
+    response = client.get("/pacientes/?q=Ana&pagina=2")
+    assert response.url == "/patients/?q=Ana&page=2"
+    # The old filter names are translated (decision 184).
+    response = client.get("/financeiro/fluxo-de-caixa/?de=2031-03-01&ate=2031-03-31&agrupar=mes")
+    assert response.url == "/finance/cash-flow/?since=2031-03-01&until=2031-03-31&group=mes"
     # 308: a form opened before the update and sent after it is sent again to the new address.
     response = client.post("/conta/login/", {"username": "x"})
     assert response.status_code == 308 and response.url == "/account/login/"

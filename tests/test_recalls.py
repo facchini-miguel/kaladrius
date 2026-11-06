@@ -102,7 +102,7 @@ def test_list_filters(cenario):
     assert nomes() == ["João Rechamada", "Ana Outra"]  # pending, ordered by date
     assert nomes(status="concluidas") == ["João Rechamada"]
     assert nomes(status="todas", q="ana") == ["Ana Outra"]
-    assert nomes(status="todas", de="2031-03-06", until="2031-04-30") == ["João Rechamada"]
+    assert nomes(status="todas", since="2031-03-06", until="2031-04-30") == ["João Rechamada"]
 
 
 def test_overdue_status(cenario):
@@ -178,12 +178,12 @@ def test_birthdays_of_the_month(cenario):
         Patient.objects.create(name="Março 2", birth_date=datetime.date(2000, 3, 2))
         Patient.objects.create(name="Inativo", birth_date=datetime.date(1990, 3, 1), active=False)
         Patient.objects.create(name="Nascido em abril", birth_date=datetime.date(1990, 4, 1))
-    response = cenario["cliente"].get(reverse("patients:birthdays"), {"mes": 3})
+    response = cenario["cliente"].get(reverse("patients:birthdays"), {"month": 3})
     assert [p.name for p, _ in response.context["linhas"]] == ["Março 2", "Março 20"]
     assert "Nascido em abril" not in response.content.decode()
     today = timezone.localdate()
     default = cenario["cliente"].get(reverse("patients:birthdays"))
-    assert default.context["mes"] == today.month
+    assert default.context["month"] == today.month
 
 
 def test_birthdays_require_permission_and_clinic(criar_usuario, cliente_de):

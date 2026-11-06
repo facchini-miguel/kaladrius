@@ -57,7 +57,7 @@ def test_session_ends_after_30_idle_minutes(client, pessoa):
     page = client.get(reverse("home")).content.decode()
     assert 'data-idle-minutes="30"' in page and reverse("account:active") in page
     assert client.get(reverse("account:active")).status_code == 204
-    saiu = client.get(reverse("login"), {"inatividade": "1"})
+    saiu = client.get(reverse("login"), {"idle": "1"})
     assert "30 minutos sem uso" in saiu.content.decode()
 
 
@@ -115,10 +115,10 @@ def test_activate_with_qr_code(client, pessoa):
     page = client.get(reverse("account:two_factor")).content.decode()
     assert "<svg" in page and "otpauth" not in page  # the secret is in the QR, not text
     dispositivo = TwoFactor.objects.get(user=pessoa)
-    errado = client.post(reverse("account:two_factor"), {"acao": "ativar", "code": "000000"})
+    errado = client.post(reverse("account:two_factor"), {"action": "ativar", "code": "000000"})
     assert "Código incorreto" in errado.content.decode()
     response = client.post(
-        reverse("account:two_factor"), {"acao": "ativar", "code": codigo_atual(dispositivo)}
+        reverse("account:two_factor"), {"action": "ativar", "code": codigo_atual(dispositivo)}
     )
     text = response.content.decode()
     assert "Verificação em duas etapas ativada" in text
@@ -184,21 +184,21 @@ def test_deactivate_and_generate_new_codes(client, pessoa):
     client.force_login(pessoa)
     novos = client.post(
         reverse("account:two_factor"),
-        {"acao": "codigos", "codigos-code": codigo_atual(dispositivo)},
+        {"action": "codigos", "codes-code": codigo_atual(dispositivo)},
     )
     assert "Códigos de recuperação" in novos.content.decode()
     assert not services.verify_recovery(pessoa, antigos[1])  # old ones stop working
     errado = client.post(
         reverse("account:two_factor"),
-        {"acao": "desativar", "desativar-senha": "errada", "desativar-code": "000000"},
+        {"action": "desativar", "disable-password": "errada", "disable-code": "000000"},
     )
     assert "Senha incorreta" in errado.content.decode()
     response = client.post(
         reverse("account:two_factor"),
         {
-            "acao": "desativar",
-            "desativar-senha": SENHA,
-            "desativar-code": codigo_atual(dispositivo, deslocamento=1),
+            "action": "desativar",
+            "disable-password": SENHA,
+            "disable-code": codigo_atual(dispositivo, deslocamento=1),
         },
     )
     assert response.status_code == 302 and not services.active_for(pessoa)
@@ -308,9 +308,9 @@ def test_required_cannot_be_deactivated(client, exigida, criar_usuario):
     client.post(
         reverse("account:two_factor"),
         {
-            "acao": "desativar",
-            "desativar-senha": SENHA,
-            "desativar-code": codigo_atual(dispositivo),
+            "action": "desativar",
+            "disable-password": SENHA,
+            "disable-code": codigo_atual(dispositivo),
         },
     )
     assert services.active_for(admin)

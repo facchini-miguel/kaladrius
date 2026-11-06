@@ -61,7 +61,7 @@ def test_registration_with_salary_and_raise_in_history(clinica_a, admin):
             "tax_id": "52998224725",
             "hired_on": "2026-01-05",
             "salary": "3300",
-            "salario_desde": "2026-07-01",
+            "salary_since": "2026-07-01",
             "active": "on",
         },
     )
@@ -109,7 +109,7 @@ def test_payroll_prepares_the_month_employees(clinica_a, ana):
 
 def test_viewing_a_month_saves_no_payroll(clinica_a, ana, admin):
     for month in ("2026-10", "2030-01"):
-        assert admin.get(FOLHA, {"mes": month}).status_code == 200
+        assert admin.get(FOLHA, {"month": month}).status_code == 200
     with use_clinic(clinica_a):
         assert not Payroll.objects.exists()
 
@@ -127,7 +127,7 @@ def test_total_calculation():
 
 
 def test_save_and_post_to_finance(clinica_a, ana, admin):
-    page = admin.get(FOLHA, {"mes": "2026-10"})
+    page = admin.get(FOLHA, {"month": "2026-10"})
     payroll, form = page.context["linhas"][0]
     prefixo = form.prefix
     data = {
@@ -137,15 +137,15 @@ def test_save_and_post_to_finance(clinica_a, ana, admin):
         f"{prefixo}-observacao": "",
     }
     assert payroll.pk is None  # looking at the month stored nothing
-    assert admin.post(f"{FOLHA}?mes=2026-10", data).status_code == 302
+    assert admin.post(f"{FOLHA}?month=2026-10", data).status_code == 302
     with use_clinic(clinica_a):
         payroll = Payroll.objects.get(employee=ana, period=OUTUBRO)
         assert payroll.total == Decimal("2276.67")  # 2200 + 150 − 73,33
         category = page.context["lancar_form"].fields["category"].initial
     assert category.name == "Salários e encargos"
     response = admin.post(
-        f"{FOLHA}?mes=2026-10",
-        {**data, "acao": "lancar", "category": category.pk, "due_date": "2026-11-05"},
+        f"{FOLHA}?month=2026-10",
+        {**data, "action": "lancar", "category": category.pk, "due_date": "2026-11-05"},
     )
     assert response.status_code == 302
     with use_clinic(clinica_a):
@@ -158,7 +158,7 @@ def test_save_and_post_to_finance(clinica_a, ana, admin):
         )
         assert entry.parcelas.get().due_date == datetime.date(2026, 11, 5)
     # A launched line is read-only and is not launched twice.
-    row = admin.get(FOLHA, {"mes": "2026-10"}).context["linhas"][0]
+    row = admin.get(FOLHA, {"month": "2026-10"}).context["linhas"][0]
     assert row[1] is None
     with use_clinic(clinica_a):
         assert (

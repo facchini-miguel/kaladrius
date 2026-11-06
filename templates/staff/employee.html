@@ -51,7 +51,7 @@
       <tbody>
         {% for folha in folhas %}
         <tr>
-          <td><a href="{% url 'staff:payroll' %}?mes={{ folha.period|date:'Y-m' }}">{{ folha.period|date:"m/Y" }}</a></td>
+          <td><a href="{% url 'staff:payroll' %}?month={{ folha.period|date:'Y-m' }}">{{ folha.period|date:"m/Y" }}</a></td>
           <td class="text-end text-nowrap">{{ folha.salary|currency }}</td>
           <td class="text-end text-nowrap">{{ folha.overtime_hours }} h · {{ folha.overtime_amount|currency }}</td>
           <td class="text-end text-nowrap">{{ folha.absences }} · − {{ folha.absence_deduction|currency }}</td>

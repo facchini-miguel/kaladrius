@@ -122,14 +122,14 @@ class DiscountForm(BootstrapForm, forms.Form):
 
 
 class ApproveEstimateForm(BootstrapForm, forms.Form):
-    parcelas = forms.IntegerField(
+    installments = forms.IntegerField(
         label=_("Número de parcelas"), min_value=1, max_value=48, initial=1
     )
-    primeiro_vencimento = forms.DateField(
+    first_due_date = forms.DateField(
         label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
     category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
-    recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
+    received_now = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
         choices=_methods_with_blank,
@@ -148,7 +148,7 @@ class ApproveEstimateForm(BootstrapForm, forms.Form):
 
     def clean(self):
         data = super().clean()
-        if data.get("recebido_agora"):
+        if data.get("received_now"):
             for field in ("method", "account"):
                 if not data.get(field):
                     self.add_error(field, _("Informe para registrar o pagamento."))

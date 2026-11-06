@@ -15,5 +15,5 @@
   </ul>
 </div>
 <div class="modal-footer">
-  <a class="btn btn-outline-primary" href="{% url 'recalls:list' %}?status=todas&amp;de={{ dia|date:'Y-m-d' }}&amp;until={{ dia|date:'Y-m-d' }}">{% translate "Abrir em Rechamadas" %}</a>
+  <a class="btn btn-outline-primary" href="{% url 'recalls:list' %}?status=todas&amp;since={{ dia|date:'Y-m-d' }}&amp;until={{ dia|date:'Y-m-d' }}">{% translate "Abrir em Rechamadas" %}</a>
 </div>

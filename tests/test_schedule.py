@@ -49,7 +49,7 @@ def data(cenario, **extra):
         "date": SEGUNDA.isoformat(),
         "start_time": "09:00",
         "end_time": "10:00",
-        "repeticoes": 1,
+        "repetitions": 1,
         **extra,
     }
 
@@ -84,7 +84,7 @@ def test_creates_appointment_and_notifies_screen(cenario):
 
 
 def test_weekly_repeat_creates_the_series(cenario):
-    assert agendar(cenario, repeticoes=4).status_code == 204
+    assert agendar(cenario, repetitions=4).status_code == 204
     criados = agendamentos(cenario)
     assert len(criados) == 4
     assert len({a.series for a in criados}) == 1 and criados[0].series is not None
@@ -149,7 +149,7 @@ def test_adjacent_slots_and_other_practitioner_do_not_conflict(cenario):
 def test_repeat_with_conflict_saves_none(cenario):
     terceira_semana = SEGUNDA + datetime.timedelta(weeks=2)
     agendar(cenario, date=terceira_semana.isoformat())
-    response = agendar(cenario, repeticoes=4)
+    response = agendar(cenario, repetitions=4)
     assert response.status_code == 200
     assert terceira_semana.strftime("%d/%m") in erros(response)
     assert "Nada foi gravado" in erros(response)
@@ -178,7 +178,7 @@ def test_editing_moves_time_without_conflicting_with_itself(cenario):
     url = reverse("schedule:edit", args=[appointment.pk])
     formulario = cenario["cliente"].get(url)
     assert formulario.context["form"].initial["start_time"] == datetime.time(9)
-    assert "repeticoes" not in formulario.context["form"].fields
+    assert "repetitions" not in formulario.context["form"].fields
     response = cenario["cliente"].post(url, data(cenario, start_time="09:30", end_time="10:30"))
     assert response.status_code == 204
     appointment.refresh_from_db()
@@ -211,16 +211,16 @@ def test_cancelled_slot_takes_another_patient_keeping_who_cancelled(cenario):
 
 
 def test_delete_one_or_the_series_from_then_on(cenario, criar_usuario, cliente_de):
-    agendar(cenario, repeticoes=4)
+    agendar(cenario, repetitions=4)
     criados = agendamentos(cenario)
     admin = cliente_de(criar_usuario("admin", cenario["clinic"], Role.ADMIN))
 
-    admin.post(reverse("schedule:delete", args=[criados[0].pk]), {"escopo": "este"})
+    admin.post(reverse("schedule:delete", args=[criados[0].pk]), {"scope": "este"})
     assert len(agendamentos(cenario)) == 3
 
     page = admin.get(reverse("schedule:delete", args=[criados[1].pk])).content.decode()
     assert "os próximos 2" in page
-    response = admin.post(reverse("schedule:delete", args=[criados[1].pk]), {"escopo": "serie"})
+    response = admin.post(reverse("schedule:delete", args=[criados[1].pk]), {"scope": "serie"})
     assert json.loads(response["HX-Trigger"])["scheduleUpdated"]["message"] == (
         "3 agendamentos excluídos."
     )

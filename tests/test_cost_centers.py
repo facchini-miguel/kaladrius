@@ -38,9 +38,9 @@ def despesa(clinic, **extra):
         "description": "Aluguel",
         "category": category.pk,
         "amount": "1000",
-        "modo": "dividir",
-        "parcelas": 1,
-        "primeiro_vencimento": HOJE.isoformat(),
+        "mode": "dividir",
+        "installments": 1,
+        "first_due_date": HOJE.isoformat(),
         "notes": "",
         **extra,
     }
@@ -90,8 +90,8 @@ def test_entries_keep_the_center(clinica_a, centro, admin):
             "cost_center": centro.pk,
             "practitioner": "",
             "total_amount": "500",
-            "parcelas": 1,
-            "primeiro_vencimento": HOJE.isoformat(),
+            "installments": 1,
+            "first_due_date": HOJE.isoformat(),
             "notes": "",
         },
     )

@@ -48,7 +48,7 @@ class ClinicLoginView(auth_views.LoginView):
             **context,
             "endereco_bloqueado": any(e.code == "endereco_bloqueado" for e in erros),
             "recuperar_por_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
-            "inatividade": self.request.GET.get("inatividade") == "1",
+            "idle": self.request.GET.get("idle") == "1",
             "minutos": settings.IDLE_MINUTES,
         }
 
@@ -97,7 +97,7 @@ def two_factor(request):
     if user.demo:
         messages.info(request, _("Contas de demonstração não usam verificação em duas etapas."))
         return redirect("home")
-    acao = request.POST.get("acao")
+    acao = request.POST.get("action")
     is_required = services.is_required(request)
     if services.active_for(user):
         # Required by the clinic: it can only be renewed (new codes), not turned off.
@@ -105,10 +105,10 @@ def two_factor(request):
             None
             if is_required
             else DisableTwoFactorForm(
-                request.POST if acao == "desativar" else None, user=user, prefix="desativar"
+                request.POST if acao == "desativar" else None, user=user, prefix="disable"
             )
         )
-        novos = CodeForm(request.POST if acao == "codigos" else None, prefix="codigos")
+        novos = CodeForm(request.POST if acao == "codigos" else None, prefix="codes")
         if acao == "desativar" and deactivate is not None and deactivate.is_valid():
             services.deactivate(user)
             log_event(
@@ -138,7 +138,7 @@ def two_factor(request):
                 "obrigatoria": is_required,
             },
         )
-    dispositivo = services.prepare(user, new=request.GET.get("novo") == "1")
+    dispositivo = services.prepare(user, new=request.GET.get("new") == "1")
     form = CodeForm(request.POST if acao == "ativar" else None)
     if acao == "ativar" and form.is_valid():
         if services.verify_app(dispositivo, form.cleaned_data["code"]):

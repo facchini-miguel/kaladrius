@@ -71,7 +71,7 @@ def _database():
 def health_dashboard(request):
     """Server health for every logged-in user (0.26.0). The database tables and the server
     command are shown to superusers only."""
-    periodo = request.GET.get("periodo", "1h")
+    periodo = request.GET.get("period", "1h")
     if periodo not in PERIODS:
         periodo = "1h"
     # The time axis is the whole period, even while there are fewer samples.
@@ -99,7 +99,7 @@ def health_dashboard(request):
         request,
         "monitoring/health.html",
         {
-            "periodo": periodo,
+            "period": periodo,
             "start": start,
             "end": end,
             "ultima": latest,

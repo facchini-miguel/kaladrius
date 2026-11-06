@@ -129,11 +129,11 @@ def test_screen_for_everyone_without_technical_details(pasta, clinica_a, criar_u
 def test_screen_with_samples(pasta, superusuario):
     pasta(*(amostra(m, rede=m * 1000) for m in range(60, -1, -5)))
     for periodo in ("1h", "24h", "7d", "outro"):
-        page = superusuario.get(reverse("monitoring:health"), {"periodo": periodo})
+        page = superusuario.get(reverse("monitoring:health"), {"period": periodo})
         assert page.status_code == 200
     content = page.content.decode()
     assert "<svg" in content and "app" in content and "Maiores tabelas" in content
-    assert page.context["periodo"] == "1h"  # the default
+    assert page.context["period"] == "1h"  # the default
     assert page.context["end"] - page.context["start"] == datetime.timedelta(hours=1)
 
 

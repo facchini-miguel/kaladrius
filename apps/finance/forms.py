@@ -57,17 +57,17 @@ class ReceivableEntryForm(BootstrapForm, forms.ModelForm):
     """New receivable, split into equal monthly installments (optionally paid now)."""
 
     total_amount = _money_field(_("Valor total"))
-    parcelas = forms.IntegerField(
+    installments = forms.IntegerField(
         label=_("Número de parcelas"),
         min_value=1,
         max_value=48,
         initial=1,
         help_text=_("Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."),
     )
-    primeiro_vencimento = forms.DateField(
+    first_due_date = forms.DateField(
         label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
-    recebido_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
+    received_now = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
         choices=_methods_with_blank,
@@ -112,7 +112,7 @@ class ReceivableEntryForm(BootstrapForm, forms.ModelForm):
             self.add_error("payer", _("Escolha o paciente ou informe quem paga."))
         if data.get("total_amount") is not None and data["total_amount"] <= 0:
             self.add_error("total_amount", _("Informe um valor maior que zero."))
-        if data.get("recebido_agora"):
+        if data.get("received_now"):
             for field in ("method", "account"):
                 if not data.get(field):
                     self.add_error(field, _("Informe para registrar o pagamento."))
@@ -126,7 +126,7 @@ class PayableEntryForm(BootstrapForm, forms.ModelForm):
     REPEAT = "repetir"
 
     amount = _money_field(_("Valor"))
-    modo = forms.ChoiceField(
+    mode = forms.ChoiceField(
         label=_("O valor é"),
         choices=[
             (SPLIT, _("o total, dividido nas parcelas")),
@@ -135,13 +135,13 @@ class PayableEntryForm(BootstrapForm, forms.ModelForm):
         initial=SPLIT,
         widget=forms.RadioSelect,
     )
-    parcelas = forms.IntegerField(
+    installments = forms.IntegerField(
         label=_("Número de parcelas ou de meses"), min_value=1, max_value=48, initial=1
     )
-    primeiro_vencimento = forms.DateField(
+    first_due_date = forms.DateField(
         label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
     )
-    pago_agora = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
+    paid_now = forms.BooleanField(label=_("A 1ª parcela já foi paga"), required=False)
     method = forms.ChoiceField(
         label=_("Forma de pagamento"),
         choices=_methods_with_blank,
@@ -177,7 +177,7 @@ class PayableEntryForm(BootstrapForm, forms.ModelForm):
             self.add_error("supplier", _("Escolha o fornecedor ou informe para quem é."))
         if data.get("amount") is not None and data["amount"] <= 0:
             self.add_error("amount", _("Informe um valor maior que zero."))
-        if data.get("pago_agora"):
+        if data.get("paid_now"):
             for field in ("method", "account"):
                 if not data.get(field):
                     self.add_error(field, _("Informe para registrar o pagamento."))
@@ -185,8 +185,8 @@ class PayableEntryForm(BootstrapForm, forms.ModelForm):
 
     def total_amount(self):
         data = self.cleaned_data
-        if data["modo"] == self.REPEAT:
-            return data["amount"] * data["parcelas"]
+        if data["mode"] == self.REPEAT:
+            return data["amount"] * data["installments"]
         return data["amount"]
 
 

@@ -87,7 +87,7 @@ def new_visit(request, practitioner, patient):
         visit.created_by = request.user
         visit.save()
         _audit(Action.CREATE, visit, [c for c in ANAMNESIS_FIELDS if getattr(visit, c)])
-        if request.POST.get("acao") == "finalizar":
+        if request.POST.get("action") == "finalizar":
             _finalize(request, visit)
         else:
             messages.success(request, _("Atendimento salvo."))
@@ -116,7 +116,7 @@ def visit(request, practitioner, pk):
             alterados = list(form.changed_data)
             form.save()
             _audit(Action.CHANGE, visit, alterados)
-            if request.POST.get("acao") == "finalizar":
+            if request.POST.get("action") == "finalizar":
                 _finalize(request, visit)
             else:
                 messages.success(request, _("Atendimento salvo."))

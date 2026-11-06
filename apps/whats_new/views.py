@@ -8,7 +8,7 @@ from . import releases
 def whats_new_list(request):
     versions = releases.for_audience("equipe")
     modulos = sorted({(item.modulo, item.modulo_nome) for _, itens in versions for item in itens})
-    modulo = request.GET.get("modulo", "")
+    modulo = request.GET.get("module", "")
     if modulo:
         versions = [
             (release, tuple(item for item in itens if item.modulo == modulo))
@@ -25,5 +25,5 @@ def whats_new_list(request):
     return render(
         request,
         "whats_new/list.html",
-        {"versoes": versions, "modulos": modulos, "modulo": modulo},
+        {"versoes": versions, "modulos": modulos, "module": modulo},
     )

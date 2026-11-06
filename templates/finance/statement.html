@@ -51,7 +51,7 @@
             {% if t.candidates %}
             <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
-              <select name="chave" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
+              <select name="key" class="form-select form-select-sm" aria-label="{% translate 'Lançamento correspondente' %}">
                 {% for c in t.candidates %}<option value="{{ c.key }}">{{ c.date|date:"SHORT_DATE_FORMAT" }} · {{ c.description }}</option>{% endfor %}
               </select>
               <button type="submit" class="btn btn-sm btn-success text-nowrap">{% translate "Conciliar" %}</button>

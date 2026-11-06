@@ -1,15 +1,29 @@
 """The addresses before decision 155 (Portuguese), each a permanent redirect to its English one:
 bookmarks, links in e-mails and pages opened before an update keep working. 308, not 301: the
 method and body are kept, so a form opened before the update and sent after it still arrives.
-The query string goes along, and the values inside an address are translated."""
+The query string goes along, with the old filter names translated (decision 184), and the values
+inside an address are translated."""
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, QueryDict
 from django.urls import path, re_path, reverse
 
 CATALOGS = {"categorias": "categories", "contas": "accounts", "centros-de-custo": "cost-centers"}
 ACOES = {"conciliar": "reconcile", "ignorar": "ignore", "desfazer": "undo"}
 CADASTRO = "|".join(CATALOGS)
 CAIXA = {"retirada": "withdrawal", "reforco": "top-up"}
+# Old query names (decisions 166 and 184); their values did not change.
+QUERY_NAMES = {
+    "pagina": "page",
+    "de": "since",
+    "ate": "until",
+    "mes": "month",
+    "periodo": "period",
+    "agrupar": "group",
+    "modulo": "module",
+    "situacao": "status",
+    "data": "date",
+    "paciente": "patient",
+}
 
 
 class RedirecionamentoPermanente(HttpResponseRedirect):
@@ -23,8 +37,11 @@ def para(name, valores=None):
         for key, traducao in (valores or {}).items():
             kwargs[key] = traducao[kwargs[key]]
         destino = reverse(name, kwargs=kwargs)
-        if request.META.get("QUERY_STRING"):
-            destino += "?" + request.META["QUERY_STRING"]
+        if request.GET:
+            query = QueryDict(mutable=True)
+            for key, values in request.GET.lists():
+                query.setlist(QUERY_NAMES.get(key, key), values)
+            destino += "?" + query.urlencode()
         return RedirecionamentoPermanente(destino)
 
     return redirecionar

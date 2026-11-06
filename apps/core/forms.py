@@ -119,7 +119,7 @@ class ChangePasswordForm(BootstrapForm, PasswordChangeForm):
 class ClinicModulesForm(BootstrapForm, forms.ModelForm):
     """Specialties and general modules of the clinic (decision 092)."""
 
-    modulos = forms.MultipleChoiceField(
+    modules = forms.MultipleChoiceField(
         label=_("Especialidades"),
         choices=_options(SPECIALTIES),
         widget=forms.CheckboxSelectMultiple,
@@ -129,7 +129,7 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
             "saúde). Desativar não apaga o histórico."
         ),
     )
-    modulos_gerais = forms.MultipleChoiceField(
+    general_modules = forms.MultipleChoiceField(
         label=_("Módulos"),
         choices=_options(GENERAL_MODULES),
         widget=forms.CheckboxSelectMultiple,
@@ -150,8 +150,8 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
             if self.instance.pk
             else initial(self.instance.area)
         )
-        self.initial["modulos"] = sorted(ligados & SPECIALTIES)
-        self.initial["modulos_gerais"] = sorted(ligados & GENERAL_MODULES)
+        self.initial["modules"] = sorted(ligados & SPECIALTIES)
+        self.initial["general_modules"] = sorted(ligados & GENERAL_MODULES)
         # The screen always sends them; a page opened before the update does not, and then
         # the clinic keeps its currency, country and time zone (Brazil's for a new one).
         for field in ("currency", "country", "time_zone", "tooth_numbering"):
@@ -224,14 +224,17 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
             data["tooth_numbering"] = escolhida
 
     def _chosen(self):
-        return {*self.cleaned_data.get("modulos", ()), *self.cleaned_data.get("modulos_gerais", ())}
+        return {
+            *self.cleaned_data.get("modules", ()),
+            *self.cleaned_data.get("general_modules", ()),
+        }
 
     def clean(self):
         data = super().clean()
         self._adjust_to_country(data)
         for modulo, precisa in missing(self._chosen()).items():
             self.add_error(
-                "modulos_gerais",
+                "general_modules",
                 _("%(modulo)s precisa de: %(precisa)s.")
                 % {
                     "modulo": ModuleCode(modulo).label,
@@ -340,10 +343,10 @@ class NewClinicForm(ClinicModulesForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        del self.fields["modulos_gerais"]
+        del self.fields["general_modules"]
 
     def _chosen(self):
-        return {*self.cleaned_data.get("modulos", ()), *GENERAL_MODULES}
+        return {*self.cleaned_data.get("modules", ()), *GENERAL_MODULES}
 
     def save(self, commit=True):
         # A new installation starts requiring two-step verification (decision 112).

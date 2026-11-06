@@ -21,7 +21,7 @@
       {% for item in modelos %}<option value="{{ item }}"{% if filtros.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="de" value="{{ filtros.de }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filtros.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
   <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filtros.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
   <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
 </form>

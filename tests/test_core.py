@@ -178,7 +178,7 @@ def dados_clinica(**extra):
         "schedule_end": "18:00",
         "currency": "BRL",
         "schedule_interval": 30,
-        "modulos_gerais": sorted(GENERAL_MODULES),
+        "general_modules": sorted(GENERAL_MODULES),
         **extra,
     }
 

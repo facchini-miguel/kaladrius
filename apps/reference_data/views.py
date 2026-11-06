@@ -22,7 +22,7 @@ def cities(request):
         cities = cities.filter(state_id=int(state))
     if search:
         cities = cities.filter(name__unaccent__icontains=search)
-    page = Paginator(cities, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(cities, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "reference_data/cities.html",
@@ -45,7 +45,7 @@ def banks(request):
         if search.isdecimal():
             filtro |= Q(code=int(search))
         banks = banks.filter(filtro)
-    page = Paginator(banks, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(banks, PER_PAGE).get_page(request.GET.get("page"))
     context = {"busca": search, "pagina": page, "parametros": urlencode({"q": search})}
     return render(request, "reference_data/banks.html", context)
 

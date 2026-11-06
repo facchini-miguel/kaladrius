@@ -70,7 +70,7 @@ def patient_list(request):
     if status == "arquivados" and not _sees_archived(request):
         status = "ativos"
     pacientes = filter_patients(Patient.objects.select_related("city__state"), search, kind, status)
-    page = Paginator(pacientes, PER_PAGE).get_page(request.GET.get("pagina"))
+    page = Paginator(pacientes, PER_PAGE).get_page(request.GET.get("page"))
     return render(
         request,
         "patients/list.html",
@@ -325,7 +325,7 @@ MONTH_NAMES = [MONTHS[n] for n in range(1, 13)]  # translated month names (Djang
 @requires_permission(Module.BIRTHDAYS, Action.VIEW)
 def birthdays(request):
     today = timezone.localdate()
-    month = request.GET.get("mes", "")
+    month = request.GET.get("month", "")
     month = int(month) if month.isdecimal() and 1 <= int(month) <= 12 else today.month
     pacientes = Patient.objects.filter(
         active=True, archived=False, birth_date__month=month
@@ -336,7 +336,7 @@ def birthdays(request):
         request,
         "patients/birthdays.html",
         {
-            "mes": month,
+            "month": month,
             "meses": list(enumerate(MONTH_NAMES, start=1)),
             "linhas": rows,
             "hoje": today,
