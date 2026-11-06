@@ -1447,6 +1447,38 @@ The settings of `config/settings.py` and the names the templates, the stylesheet
 | `data-url-ativo` | `data-url-active` |
 | `data-url-saiu` | `data-url-logged-out` |
 
+## Script names (done)
+
+The local variables and functions of the scripts in `static/js` (`evento` → `event`, `campo` → `field`, `abrirModal` → `openModal`) and the names the schedule page's script shares with the server (decision 183). The stored values the scripts compare stay as they are (`"desmarcou"`, `"agendado"`).
+
+### Schedule settings (`schedule-settings`)
+
+| Before | After |
+|---|---|
+| `intervalo` | `interval` |
+| `agora` | `now` |
+| `textos` | `texts` |
+| `textos.aniversariantes` | `texts.birthdays` |
+| `textos.rechamadas` | `texts.recalls` |
+| `pode.criar` | `can.create` |
+| `pode.alterar` | `can.change` |
+| `urls.eventos` | `urls.events` |
+| `urls.novo` | `urls.new` |
+| `urls.aniversariantes` | `urls.birthdays` |
+| `urls.aniversariantes_dia` | `urls.birthdays_today` |
+| `urls.rechamadas` | `urls.recalls` |
+| `urls.rechamadas_dia` | `urls.recalls_today` |
+
+### Event, storage and badges
+
+| Before | After | Where |
+|---|---|---|
+| `agendaAtualizada` | `scheduleUpdated` | HTMX event the server sends after a save (`HX-Trigger`) |
+| `mensagem` | `message` | its text |
+| `kaladrius-atividade` | `kaladrius-activity` | `localStorage` key of the last activity |
+| `aniversariantes` | `birthday-badge` | class of the birthdays badge |
+| `rechamadas` | `recall-badge` | class of the recalls badge |
+
 ## What stays in Portuguese
 
 - **Values stored in the database**: the choices' values (`"PF"`, `"conciliada"`, `"retirada"`), module codes (`"rechamadas"`), the keys inside JSON fields (the audit's changes, settings). Only the constants' names change (`Situacao.CONCILIADA` → `Status.RECONCILED`), not their value.
