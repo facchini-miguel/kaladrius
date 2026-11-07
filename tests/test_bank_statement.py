@@ -235,7 +235,7 @@ def test_create_entry_ignore_and_undo(scenario):
             "description": "Tarifa bancária",
             "category": scenario["expense"].pk,
             "payer": "Banco Itaú",
-            "method": "transferencia",
+            "method": "transfer",
         },
     )
     a2 = transaction(scenario, "A2")

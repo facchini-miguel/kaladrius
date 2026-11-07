@@ -13,16 +13,16 @@
   </div>
   {% if dashboard %}
   <div class="d-flex flex-wrap gap-2 d-print-none">
-    {% if can.pacientes.ver %}
+    {% if can.patients.view %}
     <form method="get" action="{% url 'patients:list' %}" class="d-flex" role="search">
       <label for="home-search" class="visually-hidden">{% translate "Buscar paciente" %}</label>
       <input type="search" id="home-search" name="q" class="form-control" placeholder="{% translate 'Buscar paciente' %}">
     </form>
     {% endif %}
-    {% if can.agenda.ver %}<a class="btn btn-primary" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}</a>{% endif %}
-    {% if can.pacientes.criar %}<a class="btn btn-outline-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>{% endif %}
-    {% if can.orcamentos.criar %}<a class="btn btn-outline-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
-    {% if can.recebimentos.ver %}<a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "Receber" %}</a>{% endif %}
+    {% if can.schedule.view %}<a class="btn btn-primary" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}</a>{% endif %}
+    {% if can.patients.create %}<a class="btn btn-outline-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>{% endif %}
+    {% if can.estimates.create %}<a class="btn btn-outline-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if can.receiving.view %}<a class="btn btn-outline-primary" href="{% url 'finance:receivables' %}">{% translate "Receber" %}</a>{% endif %}
   </div>
   {% endif %}
 </div>
@@ -160,7 +160,7 @@
               <td>
                 <span class="color-swatch color-swatch-small" style="background-color: {{ appointment.kind.color }}" title="{{ appointment.kind.display_name }}"></span>
                 {% if appointment.patient_id %}
-                {% if can.pacientes.ver %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
+                {% if can.patients.view %}<a href="{% url 'patients:record' appointment.patient_id %}">{{ appointment.patient.name }}</a>{% else %}{{ appointment.patient.name }}{% endif %}
                 {% if appointment == schedule.next %}<span class="badge text-bg-primary ms-1">{% if appointment.start <= schedule.now %}{% translate "agora" %}{% else %}{% translate "próximo" %}{% endif %}</span>{% endif %}
                 {% else %}
                 <span class="text-body-secondary">{{ appointment.title }}</span>
@@ -169,20 +169,20 @@
               {% if schedule.show_practitioner %}<td class="small">{{ appointment.practitioner.name }}</td>{% endif %}
               <td class="text-nowrap">
                 {% if appointment.patient_id %}
-                {% if appointment.status == "agendado" %}
-                {% if can.agenda.alterar %}
+                {% if appointment.status == "booked" %}
+                {% if can.schedule.change %}
                 <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
-                  <button class="btn btn-sm btn-outline-success py-0" name="status" value="compareceu" title="{% translate 'Compareceu' %}">✓ <span class="d-none d-md-inline">{% translate "Compareceu" %}</span></button>
-                  <button class="btn btn-sm btn-outline-danger py-0" name="status" value="faltou" title="{% translate 'Faltou' %}">✗ <span class="d-none d-md-inline">{% translate "Faltou" %}</span></button>
+                  <button class="btn btn-sm btn-outline-success py-0" name="status" value="attended" title="{% translate 'Compareceu' %}">✓ <span class="d-none d-md-inline">{% translate "Compareceu" %}</span></button>
+                  <button class="btn btn-sm btn-outline-danger py-0" name="status" value="missed" title="{% translate 'Faltou' %}">✗ <span class="d-none d-md-inline">{% translate "Faltou" %}</span></button>
                 </form>
                 {% else %}<span class="text-body-secondary small">{% translate "Agendado" %}</span>{% endif %}
                 {% else %}
-                <span class="badge {% if appointment.status == 'compareceu' %}text-bg-success{% elif appointment.status == 'faltou' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ appointment.get_status_display }}</span>
-                {% if can.agenda.alterar %}
+                <span class="badge {% if appointment.status == 'attended' %}text-bg-success{% elif appointment.status == 'missed' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ appointment.get_status_display }}</span>
+                {% if can.schedule.change %}
                 <form method="post" action="{% url 'schedule:status' appointment.pk %}" class="d-inline">
                   {% csrf_token %}
-                  <button class="btn btn-sm btn-link py-0" name="status" value="agendado">{% translate "desfazer" %}</button>
+                  <button class="btn btn-sm btn-link py-0" name="status" value="booked">{% translate "desfazer" %}</button>
                 </form>
                 {% endif %}
                 {% endif %}
@@ -242,7 +242,7 @@
             <div>{{ recall.patient.name }}{% if recall.patient.mobile_phone %} · <span class="text-nowrap">{{ recall.patient.mobile_phone|phone }}</span>{% endif %}{% if recall.patient.whatsapp %} · <a class="text-nowrap" href="{{ recall.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
             <div class="text-body-secondary">{{ recall.description }}{% if recall.date < dashboard.today %} · <span class="text-danger">{% blocktranslate with data=recall.date|date:"SHORT_DATE_FORMAT" %}desde {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
-          {% if can.rechamadas.alterar %}
+          {% if can.recalls.change %}
           <form method="post" action="{% url 'recalls:complete' recall.pk %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{% url 'home' %}">
@@ -265,7 +265,7 @@
       <ul class="list-group list-group-flush">
         {% for patient, age in dashboard.birthdays %}
         <li class="list-group-item small">
-          {% if can.pacientes.ver %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>{% else %}{{ patient.name }}{% endif %}
+          {% if can.patients.view %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>{% else %}{{ patient.name }}{% endif %}
           <span class="text-body-secondary">· {% blocktranslate count idade=age %}{{ idade }} ano{% plural %}{{ idade }} anos{% endblocktranslate %}{% if patient.mobile_phone %} · {{ patient.mobile_phone|phone }}{% endif %}</span>
         </li>
         {% endfor %}

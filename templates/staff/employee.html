@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{{ employee.name }}{% if not employee.active %} <span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}</h1>
   <div class="d-flex gap-2">
-    {% if can.pessoal.alterar %}<a class="btn btn-primary" href="{% url 'staff:edit' employee.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if can.staff.change %}<a class="btn btn-primary" href="{% url 'staff:edit' employee.pk %}">{% translate "Editar" %}</a>{% endif %}
     <a class="btn btn-link" href="{% url 'staff:list' %}">{% translate "Voltar à lista" %}</a>
   </div>
 </div>

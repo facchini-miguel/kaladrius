@@ -82,11 +82,11 @@ class Appointment(ClinicModel):
     class Status(models.TextChoices):
         """Whether the patient came (0.24.0). Only appointments with a patient are marked."""
 
-        BOOKED = "agendado", _("Agendado")
-        ATTENDED = "compareceu", _("Compareceu")
-        MISSED = "faltou", _("Faltou")
+        BOOKED = "booked", _("Agendado")
+        ATTENDED = "attended", _("Compareceu")
+        MISSED = "missed", _("Faltou")
         # Kept for the history and the no-show figures, but frees the time slot.
-        CANCELLED = "desmarcou", _("Desmarcou")
+        CANCELLED = "cancelled", _("Desmarcou")
 
     practitioner = models.ForeignKey(
         "practitioners.Practitioner",
@@ -155,7 +155,7 @@ class Appointment(ClinicModel):
                 # A cancelled appointment does not hold the slot, in either spelling while the
                 # stored values change (decision 197).
                 condition=~models.Q(
-                    status__in=spellings("schedule.Appointment.status", "desmarcou")
+                    status__in=spellings("schedule.Appointment.status", "cancelled")
                 ),
                 violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),

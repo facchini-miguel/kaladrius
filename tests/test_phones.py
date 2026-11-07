@@ -51,7 +51,7 @@ def test_patient_registration_fixes_the_mobile(clinic_a, create_user, client_for
     response = user_client.post(
         reverse("patients:new"),
         {
-            "kind": "PF",
+            "kind": "individual",
             "name": "Paciente Fictício",
             "mobile_phone": "(54) 8123-4567",
             "whatsapp": "54 8123-4567",
@@ -67,7 +67,8 @@ def test_patient_registration_fixes_the_mobile(clinic_a, create_user, client_for
         "5434613354",
     )
     wrong = user_client.post(
-        reverse("patients:new"), {"kind": "PF", "name": "Outro", "whatsapp": "(20) 98123-4567"}
+        reverse("patients:new"),
+        {"kind": "individual", "name": "Outro", "whatsapp": "(20) 98123-4567"},
     )
     assert "whatsapp" in wrong.context["form"].errors
 

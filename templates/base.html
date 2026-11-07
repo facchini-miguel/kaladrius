@@ -20,39 +20,39 @@
       <div class="collapse navbar-collapse" id="menu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">{% translate "Início" %}</a></li>
-          {% if can.agenda.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}{% if "agenda" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+          {% if can.schedule.view %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'schedule:calendar' %}">{% translate "Agenda" %}{% if "schedule" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
           {% endif %}
-          {% if can.pacientes.ver or can.orcamentos.ver or can.aniversariantes.ver %}
+          {% if can.patients.view or can.estimates.view or can.birthdays.view %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Pacientes" %}</a>
             <ul class="dropdown-menu">
-              {% if can.pacientes.ver %}<li><a class="dropdown-item" href="{% url 'patients:list' %}">{% translate "Lista de pacientes" %}</a></li>{% endif %}
-              {% if can.orcamentos.ver %}<li><a class="dropdown-item" href="{% url 'estimates:list' %}">{% translate "Orçamentos" %}{% if "orcamentos" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
-              {% if can.aniversariantes.ver %}<li><a class="dropdown-item" href="{% url 'patients:birthdays' %}">{% translate "Aniversariantes" %}{% if "aniversariantes" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
+              {% if can.patients.view %}<li><a class="dropdown-item" href="{% url 'patients:list' %}">{% translate "Lista de pacientes" %}</a></li>{% endif %}
+              {% if can.estimates.view %}<li><a class="dropdown-item" href="{% url 'estimates:list' %}">{% translate "Orçamentos" %}{% if "estimates" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
+              {% if can.birthdays.view %}<li><a class="dropdown-item" href="{% url 'patients:birthdays' %}">{% translate "Aniversariantes" %}{% if "birthdays" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>{% endif %}
             </ul>
           </li>
           {% endif %}
-          {% if can.rechamadas.ver %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'recalls:list' %}">{% translate "Rechamadas" %}{% if "rechamadas" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+          {% if can.recalls.view %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'recalls:list' %}">{% translate "Rechamadas" %}{% if "recalls" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
           {% endif %}
 
-          {% if can.recebimentos.ver or can.financeiro.ver or can.pessoal.ver %}
+          {% if can.receiving.view or can.finance.view or can.staff.view %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}{% if "financeiro" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a>
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Financeiro" %}{% if "finance" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a>
             <ul class="dropdown-menu">
-              {% if can.recebimentos.ver %}
+              {% if can.receiving.view %}
               <li><a class="dropdown-item" href="{% url 'finance:receivables' %}">{% translate "A receber" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'finance:debtors' %}">{% translate "Devedores" %}</a></li>
-              {% if can.recebimentos.criar %}
+              {% if can.receiving.create %}
               <li><a class="dropdown-item" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a></li>
               {% endif %}
               <li><a class="dropdown-item" href="{% url 'finance:cash' %}">{% translate "Caixa do dia" %}</a></li>
               {% endif %}
-              {% if can.financeiro.ver %}
+              {% if can.finance.view %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'finance:payables' %}">{% translate "A pagar" %}</a></li>
-              {% if can.financeiro.criar %}
+              {% if can.finance.create %}
               <li><a class="dropdown-item" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a></li>
               {% endif %}
               <li><hr class="dropdown-divider"></li>
@@ -63,28 +63,28 @@
               <li><a class="dropdown-item" href="{% url 'finance:planning' %}">{% translate "Planejamento" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'finance:closing' %}">{% translate "Fechamento" %}</a></li>
               {% endif %}
-              {% if can.pessoal.ver %}
+              {% if can.staff.view %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}{% if "pessoal" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
-              <li><a class="dropdown-item" href="{% url 'staff:list' %}">{% translate "Funcionários" %}{% if "pessoal" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}{% if "staff" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'staff:list' %}">{% translate "Funcionários" %}{% if "staff" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
               {% endif %}
             </ul>
           </li>
           {% endif %}
-          {% if can.profissionais.ver or can.convenios.ver or can.cadastros.ver or can.usuarios.ver or can.auditoria.ver or can.clinic.alterar %}
+          {% if can.practitioners.view or can.health_plans.view or can.catalogs.view or can.users.view or can.audit.view or can.clinic.change %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate "Cadastros" %}</a>
             <ul class="dropdown-menu">
-              {% if can.profissionais.ver %}
+              {% if can.practitioners.view %}
               <li><a class="dropdown-item" href="{% url 'practitioners:list' %}">{% translate "Profissionais" %}</a></li>
               {% endif %}
-              {% if can.convenios.ver %}
-              <li><a class="dropdown-item" href="{% url 'health_plans:list' %}">{% translate "Convênios" %}{% if "convenios" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
+              {% if can.health_plans.view %}
+              <li><a class="dropdown-item" href="{% url 'health_plans:list' %}">{% translate "Convênios" %}{% if "health_plans" in disabled_modules %} {% include "includes/disabled.html" %}{% endif %}</a></li>
               {% endif %}
-              {% if can.usuarios.ver %}
+              {% if can.users.view %}
               <li><a class="dropdown-item" href="{% url 'team:list' %}">{% translate "Equipe" %}</a></li>
               {% endif %}
-              {% if can.cadastros.ver %}
+              {% if can.catalogs.view %}
               <li><a class="dropdown-item" href="{% url 'schedule:types' %}">{% translate "Tipos de atendimento" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a></li>
               <li><hr class="dropdown-divider"></li>
@@ -92,7 +92,7 @@
               <li><a class="dropdown-item" href="{% url 'reference_data:cities' %}">{% translate "Cidades" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'reference_data:banks' %}">{% translate "Bancos" %}</a></li>
               {% endif %}
-              {% if can.financeiro.ver %}
+              {% if can.finance.view %}
               <li><hr class="dropdown-divider"></li>
               <li><h6 class="dropdown-header">{% translate "Financeiro" %}</h6></li>
               <li><a class="dropdown-item" href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></li>
@@ -101,13 +101,13 @@
               <li><a class="dropdown-item" href="{% url 'finance:catalog' 'cost-centers' %}">{% translate "Centros de custo" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'finance:suppliers' %}">{% translate "Fornecedores" %}</a></li>
               {% endif %}
-              {% if can.clinic.alterar or can.auditoria.ver %}
+              {% if can.clinic.change or can.audit.view %}
               <li><hr class="dropdown-divider"></li>
               {% endif %}
-              {% if can.clinic.alterar %}
+              {% if can.clinic.change %}
               <li><a class="dropdown-item" href="{% url 'clinic_settings' %}">{% translate "Configurações da clínica" %}</a></li>
               {% endif %}
-              {% if can.auditoria.ver %}
+              {% if can.audit.view %}
               <li><a class="dropdown-item" href="{% url 'audit:list' %}">{% translate "Auditoria" %}</a></li>
               {% endif %}
             </ul>
@@ -215,7 +215,7 @@
     {% if disabled_module %}
     <div class="alert alert-warning d-print-none" role="status">
       {% blocktranslate with modulo=disabled_module.label %}O módulo {{ modulo }} está desligado nesta clínica: a equipe não o vê, só o administrador do sistema.{% endblocktranslate %}
-      {% if can.clinic.alterar %}<a href="{% url 'clinic_settings' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
+      {% if can.clinic.change %}<a href="{% url 'clinic_settings' %}">{% translate "Ligar nas Configurações da clínica" %}</a>{% endif %}
     </div>
     {% endif %}
     {% for message in messages %}

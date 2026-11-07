@@ -193,7 +193,7 @@ def test_refuse_and_print(scenario):
     # Deciding again (e.g. a stale page approving it meanwhile) is refused.
     with use_clinic(scenario["clinic"]), pytest.raises(ValidationError):
         services.refuse(estimate, user=None)
-    estimate_list = user_client.get(reverse("estimates:list"), {"status": "recusado"})
+    estimate_list = user_client.get(reverse("estimates:list"), {"status": "refused"})
     assert list(estimate_list.context["page"]) == [estimate]
 
 

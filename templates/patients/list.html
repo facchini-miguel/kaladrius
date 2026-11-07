@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Pacientes" %}</h1>
-  {% if can.pacientes.criar %}
+  {% if can.patients.create %}
   <a class="btn btn-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>
   {% endif %}
 </div>
@@ -30,7 +30,7 @@
       <option value="ativos"{% if status == "ativos" %} selected{% endif %}>{% translate "Ativos" %}</option>
       <option value="inativos"{% if status == "inativos" %} selected{% endif %}>{% translate "Inativos" %}</option>
       <option value="todos"{% if status == "todos" %} selected{% endif %}>{% translate "Todos" %}</option>
-      {% if can.pacientes.excluir %}
+      {% if can.patients.delete %}
       <option value="arquivados"{% if status == "arquivados" %} selected{% endif %}>{% translate "Arquivados" %}</option>
       {% endif %}
     </select>
@@ -60,7 +60,7 @@
         <td>{{ patient.pk }}</td>
         <td>
           <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
-          {% if patient.kind == "PJ" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
+          {% if patient.kind == "company" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
           {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
           {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
         </td>
@@ -72,10 +72,10 @@
           {% if patient.archived %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>
           {% else %}
-          {% if can.pacientes.alterar %}
+          {% if can.patients.change %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' patient.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if can.pacientes.excluir %}
+          {% if can.patients.delete %}
           <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' patient.pk %}">{% translate "Arquivar" %}</a>
           {% endif %}
           {% endif %}

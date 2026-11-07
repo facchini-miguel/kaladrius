@@ -12,8 +12,8 @@ class Patient(ClinicModel):
     """A patient: an individual (CPF) or a company (CNPJ)."""
 
     class Kind(models.TextChoices):
-        INDIVIDUAL = "PF", _("Pessoa física")
-        COMPANY = "PJ", _("Pessoa jurídica")
+        INDIVIDUAL = "individual", _("Pessoa física")
+        COMPANY = "company", _("Pessoa jurídica")
 
     class Sex(models.TextChoices):
         FEMALE = "F", _("Feminino")
@@ -177,17 +177,17 @@ class RelatedPerson(ClinicModel):
     """
 
     class Relationship(models.TextChoices):
-        MOTHER = "mae", _("Mãe")
-        FATHER = "pai", _("Pai")
-        GUARDIAN = "responsavel", _("Responsável legal")
-        SPOUSE = "conjuge", _("Cônjuge")
-        CHILD = "filho", _("Filho(a)")
-        SIBLING = "irmao", _("Irmão(ã)")
-        GRANDPARENT = "avo", _("Avô/avó")
-        GRANDCHILD = "neto", _("Neto(a)")
-        RELATIVE = "parente", _("Outro parente")
-        EMERGENCY = "emergencia", _("Contato de emergência")
-        CONTACT = "contato", _("Contato")
+        MOTHER = "mother", _("Mãe")
+        FATHER = "father", _("Pai")
+        GUARDIAN = "guardian", _("Responsável legal")
+        SPOUSE = "spouse", _("Cônjuge")
+        CHILD = "child", _("Filho(a)")
+        SIBLING = "sibling", _("Irmão(ã)")
+        GRANDPARENT = "grandparent", _("Avô/avó")
+        GRANDCHILD = "grandchild", _("Neto(a)")
+        RELATIVE = "relative", _("Outro parente")
+        EMERGENCY = "emergency", _("Contato de emergência")
+        CONTACT = "contact", _("Contato")
 
     patient = models.ForeignKey(
         Patient,

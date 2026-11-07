@@ -74,7 +74,7 @@ def test_receipt_says_it_does_not_replace_tax_document(scenario, create_practiti
             installments_of(scenario, entry)[0],
             user=scenario["admin"],
             amount=Decimal("100"),
-            method="dinheiro",
+            method="cash",
             account=scenario["cash_register"],
         )
     admin = log_in(scenario, "admin")

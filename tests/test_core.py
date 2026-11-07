@@ -170,7 +170,7 @@ def test_late_backup_warning_only_for_superuser(client, django_user_model, setti
 def clinic_data(**extra):
     return {
         "name": "Clínica Atualizada",
-        "area": "odontologia",
+        "area": "dentistry",
         "document": "",
         "email": "",
         "phone": "",

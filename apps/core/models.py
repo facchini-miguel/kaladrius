@@ -68,9 +68,9 @@ class Clinic(models.Model):
     class Area(models.TextChoices):
         """Primary area, kept for classification and the initial appointment types."""
 
-        DENTISTRY = "odontologia", _("Odontologia")
-        MEDICINE = "medicina", _("Medicina")
-        OTHER = "outra", _("Outra área da saúde")
+        DENTISTRY = "dentistry", _("Odontologia")
+        MEDICINE = "medicine", _("Medicina")
+        OTHER = "other", _("Outra área da saúde")
 
     name = models.CharField(_("nome"), max_length=200)
     area = models.CharField(
@@ -209,16 +209,16 @@ class ModuleCode(models.TextChoices):
     log are the core: always on, so they are not listed here.
     """
 
-    DENTISTRY = "odontologia", _("Odontologia")
-    MEDICINE = "medicina", _("Medicina")
-    SCHEDULE = "agenda", _("Agenda")
-    MEDICAL_RECORDS = "prontuario", _("Prontuário")
-    ESTIMATES = "orcamentos", _("Orçamentos")
-    FINANCE = "financeiro", _("Financeiro")
-    RECALLS = "rechamadas", _("Rechamadas")
-    BIRTHDAYS = "aniversariantes", _("Aniversariantes")
-    HEALTH_PLANS = "convenios", _("Convênios")
-    STAFF = "pessoal", _("Pessoal")
+    DENTISTRY = "dentistry", _("Odontologia")
+    MEDICINE = "medicine", _("Medicina")
+    SCHEDULE = "schedule", _("Agenda")
+    MEDICAL_RECORDS = "medical_records", _("Prontuário")
+    ESTIMATES = "estimates", _("Orçamentos")
+    FINANCE = "finance", _("Financeiro")
+    RECALLS = "recalls", _("Rechamadas")
+    BIRTHDAYS = "birthdays", _("Aniversariantes")
+    HEALTH_PLANS = "health_plans", _("Convênios")
+    STAFF = "staff", _("Pessoal")
 
 
 SPECIALTIES = frozenset({ModuleCode.DENTISTRY, ModuleCode.MEDICINE})
@@ -259,10 +259,10 @@ class Role(models.TextChoices):
     """A user's role inside one clinic. Permissions per role live in permissions.py."""
 
     ADMIN = "admin", _("Administrador da clínica")
-    FRONT_DESK = "recepcao", _("Recepção")
-    PRACTITIONER = "profissional", _("Profissional")
+    FRONT_DESK = "front_desk", _("Recepção")
+    PRACTITIONER = "practitioner", _("Profissional")
     # Finance only (0.35.0, decision 088): accounts, entries, cash desk, reports.
-    FINANCE = "financeiro", _("Financeiro")
+    FINANCE = "finance", _("Financeiro")
 
 
 class Membership(models.Model):

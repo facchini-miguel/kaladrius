@@ -19,32 +19,32 @@ from .models import ModuleCode, Role
 
 
 class Module(models.TextChoices):
-    PATIENTS = "pacientes", _("Pacientes")
-    SCHEDULE = "agenda", _("Agenda")
-    RECALLS = "rechamadas", _("Rechamadas")
-    BIRTHDAYS = "aniversariantes", _("Aniversariantes")
-    PRACTITIONERS = "profissionais", _("Profissionais")
-    CATALOGS = "cadastros", _("Tabelas base")
-    USERS = "usuarios", _("Usuários da clínica")
+    PATIENTS = "patients", _("Pacientes")
+    SCHEDULE = "schedule", _("Agenda")
+    RECALLS = "recalls", _("Rechamadas")
+    BIRTHDAYS = "birthdays", _("Aniversariantes")
+    PRACTITIONERS = "practitioners", _("Profissionais")
+    CATALOGS = "catalogs", _("Tabelas base")
+    USERS = "users", _("Usuários da clínica")
     CLINIC = "clinic", _("Configurações da clínica")
-    AUDIT = "auditoria", _("Auditoria")
+    AUDIT = "audit", _("Auditoria")
     # Receivables, receiving payments, receipts and debtors (front desk included).
-    RECEIVING = "recebimentos", _("Recebimentos")
+    RECEIVING = "receiving", _("Recebimentos")
     # Accounts, categories and (0.16) payables and cash flow: administrators only.
-    FINANCE = "financeiro", _("Financeiro")
+    FINANCE = "finance", _("Financeiro")
     # Treatment estimates (0.18.0): written by practitioners and the front desk.
-    ESTIMATES = "orcamentos", _("Orçamentos")
+    ESTIMATES = "estimates", _("Orçamentos")
     # Health plans and the patients' cards (decision 094).
-    HEALTH_PLANS = "convenios", _("Convênios")
+    HEALTH_PLANS = "health_plans", _("Convênios")
     # Staff, salaries and the month's pay (decision 099): administrators and Finance only.
-    STAFF = "pessoal", _("Pessoal")
+    STAFF = "staff", _("Pessoal")
 
 
 class Action(models.TextChoices):
-    VIEW = "ver", _("Ver")
-    CREATE = "criar", _("Criar")
-    CHANGE = "alterar", _("Alterar")
-    DELETE = "excluir", _("Excluir")
+    VIEW = "view", _("Ver")
+    CREATE = "create", _("Criar")
+    CHANGE = "change", _("Alterar")
+    DELETE = "delete", _("Excluir")
 
 
 _ALL = frozenset(Action)

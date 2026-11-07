@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Tipos de atendimento" %}</h1>
-  {% if can.cadastros.criar %}
+  {% if can.catalogs.create %}
   <a class="btn btn-primary" href="{% url 'schedule:type_new' %}">{% translate "Novo tipo" %}</a>
   {% endif %}
 </div>
@@ -27,10 +27,10 @@
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if can.cadastros.alterar %}
+          {% if can.catalogs.change %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'schedule:type_edit' kind.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if can.cadastros.excluir %}
+          {% if can.catalogs.delete %}
           <a class="btn btn-sm btn-outline-danger" href="{% url 'schedule:type_delete' kind.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>

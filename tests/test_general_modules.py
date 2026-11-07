@@ -21,6 +21,7 @@ from apps.core.models import (
 )
 from apps.core.modules import configure
 from apps.core.templatetags.formats import whatsapp
+from apps.core.values import VALUES
 from apps.patients.models import Patient
 from apps.practitioners.models import Practitioner
 from apps.recalls.models import Recall
@@ -133,11 +134,11 @@ def test_estimates_needs_finance(clinic_a):
         configure(clinic_a, without(M.FINANCE))
     data = {
         "name": "Clínica fictícia",
-        "area": "odontologia",
+        "area": "dentistry",
         "schedule_start": "08:00",
         "schedule_end": "18:00",
         "schedule_interval": 30,
-        "modules": ["odontologia"],
+        "modules": ["dentistry"],
         "general_modules": sorted(without(M.FINANCE)),
     }
     form = ClinicForm(data, instance=clinic_a)
@@ -152,11 +153,11 @@ def test_settings_save_the_general_modules(clinic_a, admin):
         reverse("clinic_settings"),
         {
             "name": "Clínica fictícia",
-            "area": "medicina",
+            "area": "medicine",
             "schedule_start": "08:00",
             "schedule_end": "18:00",
             "schedule_interval": 30,
-            "modules": ["medicina"],
+            "modules": ["medicine"],
             "general_modules": [M.SCHEDULE, M.MEDICAL_RECORDS],
         },
     )
@@ -172,7 +173,7 @@ def test_first_clinic_registration_turns_on_all_general_modules(django_user_mode
     user_client = client_for(django_user_model.objects.create_superuser("root_primeira"))
     response = user_client.post(
         reverse("register_clinic"),
-        {"name": "Clínica fictícia", "area": "medicina", "modules": ["medicina"]},
+        {"name": "Clínica fictícia", "area": "medicine", "modules": ["medicine"]},
     )
     assert response.status_code == 302
     clinic = Clinic.objects.get()
@@ -214,14 +215,20 @@ def test_migration_turns_on_general_modules_of_existing_clinics():
             ClinicModule.objects.filter(clinic=clinic, active=True).values_list("code", flat=True)
         )
         # Pessoal came later (core 0012), so it is not part of this step.
-        assert turned_on == {"medicina", *GENERAL_MODULES} - {"pessoal"}
+        # The migration wrote the codes of its time (decision 198).
+        codes = VALUES["core.ClinicModule.code"]
+        assert {codes.get(c, c) for c in turned_on} == {"medicine", *GENERAL_MODULES} - {"staff"}
         assert ClinicModule.objects.filter(clinic=clinic).count() == len(ModuleCode) - 1
 
 
 def test_whatsapp_in_registration_and_record(clinic_a, admin):
     response = admin.post(
         reverse("patients:new"),
-        {"kind": "PF", "name": "Paciente fictícia do WhatsApp", "whatsapp": "(48) 99999-0000"},
+        {
+            "kind": "individual",
+            "name": "Paciente fictícia do WhatsApp",
+            "whatsapp": "(48) 99999-0000",
+        },
     )
     assert response.status_code == 302, response.context["form"].errors
     with use_clinic(clinic_a):

@@ -68,10 +68,12 @@ def test_login_follows_browser_language(client):
 
 def test_messages_and_errors_translated(user_client, django_user_model):
     django_user_model.objects.filter(username="maria").update(language="en")
-    response = user_client.post(reverse("patients:new"), {"kind": "PF", "name": "", "active": "on"})
+    response = user_client.post(
+        reverse("patients:new"), {"kind": "individual", "name": "", "active": "on"}
+    )
     assert "This field is required." in response.content.decode()
     response = user_client.post(
-        reverse("patients:new"), {"kind": "PF", "name": "Ana", "active": "on"}, follow=True
+        reverse("patients:new"), {"kind": "individual", "name": "Ana", "active": "on"}, follow=True
     )
     assert "Patient Ana saved." in response.content.decode()
 

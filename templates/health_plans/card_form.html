@@ -9,7 +9,7 @@
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  {% if can.convenios.criar %}<p class="text-body-secondary small">{% translate "O convênio não está na lista?" %} <a href="{% url 'health_plans:new' %}">{% translate "Cadastre o convênio" %}</a></p>{% endif %}
+  {% if can.health_plans.create %}<p class="text-body-secondary small">{% translate "O convênio não está na lista?" %} <a href="{% url 'health_plans:new' %}">{% translate "Cadastre o convênio" %}</a></p>{% endif %}
   <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
   <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
 </form>

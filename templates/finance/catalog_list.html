@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{{ model.verbose_name_plural|capfirst }}</h1>
-  {% if can.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:catalog_new' catalog %}">{% translate "Novo" %}</a>{% endif %}
+  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:catalog_new' catalog %}">{% translate "Novo" %}</a>{% endif %}
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
@@ -22,7 +22,7 @@
         {% if catalog == "categories" %}<td>{{ item.group|default:"—" }}</td>{% endif %}
         <td>{% if item.active %}<span class="badge text-bg-success">{% translate "Ativa" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td>
         {% endif %}
-        <td class="text-end">{% if can.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:catalog_edit' catalog item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:catalog_edit' catalog item.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>

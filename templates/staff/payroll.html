@@ -47,7 +47,7 @@
           <td class="text-end text-nowrap fw-semibold">{{ payslip.total|currency }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if can.pessoal.criar %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
+        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if can.staff.create %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
         {% endfor %}
       </tbody>
       {% if rows %}

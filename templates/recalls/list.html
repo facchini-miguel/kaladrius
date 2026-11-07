@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Rechamadas" %}</h1>
-  {% if can.rechamadas.criar %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
+  {% if can.recalls.create %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
 </div>
 
 <form method="get" class="row g-2 mb-3">
@@ -40,14 +40,14 @@
           {% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if can.rechamadas.alterar %}
+          {% if can.recalls.change %}
           <form method="post" action="{% url 'recalls:complete' recall.pk %}" class="d-inline">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
             <button type="submit" class="btn btn-sm btn-outline-success">{% if recall.done %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
           </form>
           <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' recall.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if can.rechamadas.excluir %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' recall.pk %}">{% translate "Excluir" %}</a>{% endif %}
+          {% if can.recalls.delete %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' recall.pk %}">{% translate "Excluir" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}

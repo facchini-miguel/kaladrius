@@ -122,8 +122,8 @@ class ReceivableEntryForm(BootstrapForm, forms.ModelForm):
 class PayableEntryForm(BootstrapForm, forms.ModelForm):
     """New payable: one bill split into installments, or the same amount every month."""
 
-    SPLIT = "dividir"
-    REPEAT = "repetir"
+    SPLIT = "split"
+    REPEAT = "repeat"
 
     amount = _money_field(_("Valor"))
     mode = forms.ChoiceField(

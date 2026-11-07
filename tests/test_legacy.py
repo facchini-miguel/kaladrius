@@ -193,7 +193,7 @@ def test_data_that_does_not_fit_goes_to_notes(imported):
     assert bia.tax_id == "" and "CPF/CNPJ no sistema antigo: 11111111112" in bia.notes
 
     company = data(clinic, Patient, name="Empresa Teste")[0]
-    assert (company.kind, company.tax_id) == ("PJ", "11222333000181")
+    assert (company.kind, company.tax_id) == ("company", "11222333000181")
     assert (company.legal_name, company.state_registration) == ("Empresa Teste Ltda", "123")
 
 
@@ -278,16 +278,16 @@ def test_command(db, tmp_path, capsys):
 def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
     _, clinic = imported
     before = {
-        "pacientes": data(clinic, Patient),
+        "patients": data(clinic, Patient),
         "agendamentos": data(clinic, Appointment),
-        "profissionais": data(clinic, Practitioner),
+        "practitioners": data(clinic, Practitioner),
     }
     with pytest.raises(CommandError):
         call_command("anonymize_clinic", clinic=clinic.name)
     call_command("anonymize_clinic", clinic=clinic.name, confirm=True)
 
     patients = data(clinic, Patient)
-    assert [p.pk for p in patients] == [p.pk for p in before["pacientes"]]
+    assert [p.pk for p in patients] == [p.pk for p in before["patients"]]
     originals = [
         "Ávila",
         "Duplicada",
@@ -303,7 +303,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
     ]
     text = str([vars(p) for p in patients])
     assert not [excerpt for excerpt in originals if excerpt in text]
-    for old, new in zip(before["pacientes"], patients, strict=True):
+    for old, new in zip(before["patients"], patients, strict=True):
         assert (new.kind, new.sex, new.active, new.city_id) == (
             old.kind,
             old.sex,
@@ -314,7 +314,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
         assert bool(new.home_phone) == bool(old.home_phone)
         if old.birth_date:
             assert abs((new.birth_date - old.birth_date).days) <= 180
-    joao = next(p for p in patients if p.pk == before["pacientes"][0].pk)
+    joao = next(p for p in patients if p.pk == before["patients"][0].pk)
     assert joao.home_phone.startswith("48")  # area code kept
     assert len(joao.tax_id) == 11
 
@@ -327,7 +327,7 @@ def test_anonymization_replaces_personal_data_and_keeps_structure(imported):
     assert not [d for d in descriptions if "Fulano" in d or "Até tarde" in d]
     assert {r.description for r in data(clinic, Recall)} <= set(RECALLS)
     names = [p.name for p in data(clinic, Practitioner)]
-    assert "Dr Teste" not in names and len(names) == len(before["profissionais"])
+    assert "Dr Teste" not in names and len(names) == len(before["practitioners"])
 
     # The audit no longer holds the original values; the anonymization is recorded.
     records = AuditEntry.objects.filter(clinic=clinic)

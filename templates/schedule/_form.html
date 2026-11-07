@@ -28,7 +28,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    {% if appointment.pk and can.agenda.excluir %}
+    {% if appointment.pk and can.schedule.delete %}
     <button type="button" class="btn btn-outline-danger me-auto"
             hx-get="{% url 'schedule:delete' appointment.pk %}" hx-target="#schedule-modal-content">{% translate "Excluir" %}</button>
     {% endif %}

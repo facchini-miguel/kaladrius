@@ -14,7 +14,7 @@
     {% if cash_register.is_open %}<span class="badge text-bg-success ms-1">{% translate "Aberto" %}</span>{% else %}<span class="badge text-bg-secondary ms-1">{% translate "Fechado" %}</span>{% endif %}
   </div>
   <div class="d-flex flex-wrap gap-2">
-    {% if cash_register.is_open and can.recebimentos.criar %}
+    {% if cash_register.is_open and can.receiving.create %}
     <a class="btn btn-outline-danger" href="{% url 'finance:cash_movement' cash_register.pk 'withdrawal' %}">{% translate "Retirada (sangria)" %}</a>
     <a class="btn btn-outline-success" href="{% url 'finance:cash_movement' cash_register.pk 'top-up' %}">{% translate "Reforço" %}</a>
     <a class="btn btn-primary" href="{% url 'finance:cash_close' cash_register.pk %}">{% translate "Fechar caixa" %}</a>
@@ -51,7 +51,7 @@
         <td class="text-nowrap">{{ payment.created_at|date:"TIME_FORMAT" }}</td>
         <td><a href="{% url 'finance:entry' payment.installment.entry_id %}">{{ payment.installment.entry.payer_name }} · {{ payment.installment.entry.description }}</a></td>
         <td>{{ payment.get_method_display }}</td>
-        <td class="text-end text-nowrap {% if payment.installment.entry.kind == 'pagar' %}text-danger">− {% else %}text-success">{% endif %}{{ payment.amount|currency }}</td>
+        <td class="text-end text-nowrap {% if payment.installment.entry.kind == 'payable' %}text-danger">− {% else %}text-success">{% endif %}{{ payment.amount|currency }}</td>
       </tr>
       {% endfor %}
       {% for cash_movement in summary.movements %}
@@ -59,7 +59,7 @@
         <td class="text-nowrap">{{ cash_movement.created_at|date:"TIME_FORMAT" }}</td>
         <td>{{ cash_movement.get_kind_display }}: {{ cash_movement.reason }}{% if cash_movement.other_account %} ({{ cash_movement.other_account.name }}){% endif %}</td>
         <td>—</td>
-        <td class="text-end text-nowrap {% if cash_movement.kind == 'retirada' %}text-danger">− {% else %}text-success">{% endif %}{{ cash_movement.amount|currency }}</td>
+        <td class="text-end text-nowrap {% if cash_movement.kind == 'withdrawal' %}text-danger">− {% else %}text-success">{% endif %}{{ cash_movement.amount|currency }}</td>
       </tr>
       {% endfor %}
       {% if not summary.payments and not summary.movements %}

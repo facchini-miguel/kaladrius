@@ -14,12 +14,12 @@ class AuditEntry(models.Model):
     """
 
     class Action(models.TextChoices):
-        CREATE = "criar", _("Criou")
-        CHANGE = "alterar", _("Alterou")
-        DELETE = "excluir", _("Excluiu")
-        VIEWED = "visualizar", _("Visualizou")
+        CREATE = "create", _("Criou")
+        CHANGE = "change", _("Alterou")
+        DELETE = "delete", _("Excluiu")
+        VIEWED = "viewed", _("Visualizou")
         LOGIN = "login", _("Entrou no sistema")
-        LOGIN_FAILED = "login_falhou", _("Tentativa de entrada recusada")
+        LOGIN_FAILED = "login_failed", _("Tentativa de entrada recusada")
         LOGOUT = "logout", _("Saiu do sistema")
 
     timestamp = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)

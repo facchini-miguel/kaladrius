@@ -56,10 +56,10 @@ a.indicator:hover { border-color: #0d6efd; }
 }
 
 /* Schedule: whether the patient came (0.24.0). */
-.fc-event.status-compareceu .fc-event-title::before { content: "✓ "; font-weight: 700; }
-.fc-event.status-faltou .fc-event-title::before { content: "✗ "; font-weight: 700; color: #b02a37; }
-.fc-event.status-desmarcou { opacity: 0.45; }
-.fc-event.status-desmarcou .fc-event-title { text-decoration: line-through; }
+.fc-event.status-attended .fc-event-title::before { content: "✓ "; font-weight: 700; }
+.fc-event.status-missed .fc-event-title::before { content: "✗ "; font-weight: 700; color: #b02a37; }
+.fc-event.status-cancelled { opacity: 0.45; }
+.fc-event.status-cancelled .fc-event-title { text-decoration: line-through; }
 
 /* Language flags in the top bar and in the language menu. */
 .flag {

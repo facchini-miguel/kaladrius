@@ -13,17 +13,17 @@ from django.utils import translation
 
 from apps.core import countries
 
-CASH = "dinheiro"
+CASH = "cash"
 PIX = "pix"
-DEBIT = "debito"
-CREDIT = "credito"
-TRANSFER = "transferencia"
+DEBIT = "debit"
+CREDIT = "credit"
+TRANSFER = "transfer"
 BOLETO = "boleto"
 CHEQUE = "cheque"
-WALLET = "carteira"  # digital wallet or QR code
-DIRECT_DEBIT = "debito_auto"  # direct debit, pre-authorized debit, debit order
+WALLET = "wallet"  # digital wallet or QR code
+DIRECT_DEBIT = "direct_debit"  # direct debit, pre-authorized debit, debit order
 HSA = "hsa"  # HSA/FSA card (United States)
-FINANCING = "financiamento"  # patient financing
+FINANCING = "financing"  # patient financing
 BPAY = "bpay"  # bill payment (Australia)
 
 # Methods paid with a card: the card details (brand, transaction code) apply to them.

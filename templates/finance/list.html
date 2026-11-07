@@ -8,10 +8,10 @@
   <h1 class="h3 mb-0">{% if payable %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %}</h1>
   <div class="d-flex gap-2">
     {% if payable %}
-    {% if can.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a>{% endif %}
     {% else %}
     <a class="btn btn-outline-primary" href="{% url 'finance:debtors' %}">{% translate "Devedores" %}</a>
-    {% if can.recebimentos.criar %}<a class="btn btn-primary" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a>{% endif %}
+    {% if can.receiving.create %}<a class="btn btn-primary" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a>{% endif %}
     {% endif %}
   </div>
 </div>
@@ -59,8 +59,8 @@
         <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="text-end text-nowrap">
           {% if installment.balance > 0 and not installment.entry.cancelled %}
-          {% if payable and can.financeiro.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Pagar" %}</a>
-          {% elif not payable and can.recebimentos.criar %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Receber" %}</a>{% endif %}
+          {% if payable and can.finance.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Pagar" %}</a>
+          {% elif not payable and can.receiving.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Receber" %}</a>{% endif %}
           {% endif %}
         </td>
       </tr>

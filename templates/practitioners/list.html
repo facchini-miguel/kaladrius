@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Profissionais" %}</h1>
-  {% if can.profissionais.criar %}
+  {% if can.practitioners.create %}
   <a class="btn btn-primary" href="{% url 'practitioners:new' %}">{% translate "Novo profissional" %}</a>
   {% endif %}
 </div>
@@ -35,10 +35,10 @@
           {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
-          {% if can.profissionais.alterar %}
+          {% if can.practitioners.change %}
           <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' practitioner.pk %}">{% translate "Editar" %}</a>
           {% endif %}
-          {% if can.profissionais.excluir %}
+          {% if can.practitioners.delete %}
           <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' practitioner.pk %}">{% translate "Excluir" %}</a>
           {% endif %}
         </td>

@@ -35,7 +35,7 @@ def test_new_clinic_starts_with_the_basic_chart(clinic_a):
         assert str(rent.group) == "1 Ocupação"
         assert Category.objects.get(name="Comissões").group.name == "Pessoal"
         assert not Category.objects.filter(group=None).exists()
-        assert AccountGroup.objects.filter(kind="receita").count() == 2
+        assert AccountGroup.objects.filter(kind="income").count() == 2
 
 
 def test_numbered_subgroup_and_moved_category(clinic_a, admin):
@@ -44,7 +44,7 @@ def test_numbered_subgroup_and_moved_category(clinic_a, admin):
         reverse("finance:group_new"),
         {
             "name": "Equipe da recepção",
-            "kind": "despesa",
+            "kind": "expense",
             "parent": staff_.pk,
             "code": 1,
             "active": "on",
@@ -57,7 +57,7 @@ def test_numbered_subgroup_and_moved_category(clinic_a, admin):
         salaries = Category.objects.get(name="Salários e encargos")
     edit = admin.post(
         reverse("finance:catalog_edit", args=["categories", salaries.pk]),
-        {"name": salaries.name, "kind": "despesa", "group": sub.pk, "active": "on"},
+        {"name": salaries.name, "kind": "expense", "group": sub.pk, "active": "on"},
     )
     assert edit.status_code == 302
     page = admin.get(reverse("finance:chart_of_accounts")).content.decode()
@@ -68,13 +68,13 @@ def test_blank_code_gets_the_next_number(clinic_a, admin):
     """Review stage 3: a subgroup saved with a blank code had no number at all."""
     staff_ = group(clinic_a, "Pessoal")
     for name in ("Equipe A", "Equipe B"):
-        data = {"name": name, "kind": "despesa", "parent": staff_.pk, "code": "", "active": "on"}
+        data = {"name": name, "kind": "expense", "parent": staff_.pk, "code": "", "active": "on"}
         assert admin.post(reverse("finance:group_new"), data).status_code == 302
     with use_clinic(clinic_a):
         assert group(clinic_a, "Equipe A").number == "2.1"
         assert group(clinic_a, "Equipe B").number == "2.2"
     # A new top group goes after the five of the basic plan.
-    top = {"name": "Investimentos", "kind": "despesa", "parent": "", "code": "", "active": "on"}
+    top = {"name": "Investimentos", "kind": "expense", "parent": "", "code": "", "active": "on"}
     assert admin.post(reverse("finance:group_new"), top).status_code == 302
     with use_clinic(clinic_a):
         assert group(clinic_a, "Investimentos").number == "6"
@@ -84,16 +84,16 @@ def test_group_validations(clinic_a, admin):
     staff_ = group(clinic_a, "Pessoal")
     visit_list = group(clinic_a, "Atendimentos")
     url = reverse("finance:group_new")
-    mixed = admin.post(url, {"name": "X", "kind": "despesa", "parent": visit_list.pk})
+    mixed = admin.post(url, {"name": "X", "kind": "expense", "parent": visit_list.pk})
     assert "parent" in mixed.context["form"].errors
-    repeated_one = admin.post(url, {"name": "pessoal", "kind": "despesa"})
+    repeated_one = admin.post(url, {"name": "pessoal", "kind": "expense"})
     assert "name" in repeated_one.context["form"].errors
     # A group cannot go under itself or under one of its subgroups.
     with use_clinic(clinic_a):
-        sub = AccountGroup.objects.create(name="Sub", kind="despesa", parent=staff_)
+        sub = AccountGroup.objects.create(name="Sub", kind="expense", parent=staff_)
     cycle = admin.post(
         reverse("finance:group_edit", args=[staff_.pk]),
-        {"name": "Pessoal", "kind": "despesa", "parent": sub.pk},
+        {"name": "Pessoal", "kind": "expense", "parent": sub.pk},
     )
     assert "parent" in cycle.context["form"].errors
 
@@ -103,7 +103,7 @@ def test_category_cannot_join_group_of_another_kind(clinic_a, admin):
         reverse("finance:catalog_new", args=["categories"]),
         {
             "name": "Exames",
-            "kind": "receita",
+            "kind": "income",
             "group": group(clinic_a, "Pessoal").pk,
             "active": "on",
         },
@@ -114,11 +114,11 @@ def test_category_cannot_join_group_of_another_kind(clinic_a, admin):
 def test_report_sums_the_subgroups(clinic_a, admin):
     with use_clinic(clinic_a):
         staff_ = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=staff_, code=1)
+        sub = AccountGroup.objects.create(name="Recepção", kind="expense", parent=staff_, code=1)
         salaries = Category.objects.get(name="Salários e encargos")
         salaries.group = sub
         salaries.save()
-        standalone = Category.objects.create(name="Despesa avulsa", kind="despesa")
+        standalone = Category.objects.create(name="Despesa avulsa", kind="expense")
         cash_register = FinancialAccount.objects.get(name="Caixa")
         for category, amount in (
             (salaries, "1000"),
@@ -164,6 +164,7 @@ def test_migration_creates_basic_chart_in_existing_clinics():
     clinic = Clinic.objects.create(name="Clínica fictícia antiga")
     with use_clinic(clinic):
         # As the clinic was before 0012: categories and no chart of accounts.
+        # The values of its time (decision 198).
         Category.objects.all().delete()
         AccountGroup.objects.all().delete()
         Category.objects.create(name="Aluguel", kind="despesa")

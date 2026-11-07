@@ -136,7 +136,7 @@ def test_who_can_see_close_and_reopen(clinic_a, create_user, client_for):
         finance_user.post(URL, {"action": "fechar", "until": YESTERDAY.isoformat()}).status_code
         == 302
     )
-    assert finance_user.post(URL, {"action": "outra"}).status_code == 403
+    assert finance_user.post(URL, {"action": "other"}).status_code == 403
 
 
 def test_demo_only_views(clinic_a, create_user, client_for):

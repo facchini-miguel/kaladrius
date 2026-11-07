@@ -333,7 +333,7 @@ def test_new_clinic_starts_requiring_and_existing_was_turned_on(django_user_mode
 
     super_user = django_user_model.objects.create_superuser("instalador_t", "i@example.com", "x")
     client.force_login(super_user)
-    client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicina"})
+    client.post(reverse("register_clinic"), {"name": "Clínica Fictícia Nova", "area": "medicine"})
     assert Clinic.single().require_two_factor
     Clinic.objects.update(require_two_factor=False)
     # The migration runs with the models as they were then (Clinica, before decision 157), on

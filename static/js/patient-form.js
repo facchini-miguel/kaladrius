@@ -5,9 +5,9 @@
   const form = document.getElementById("patient-form");
   if (!form) return;
   function update() {
-    const kind = form.querySelector("input[name=kind]:checked")?.value || "PF";
-    form.querySelectorAll(".pf-only").forEach((el) => { el.hidden = kind !== "PF"; });
-    form.querySelectorAll(".pj-only").forEach((el) => { el.hidden = kind !== "PJ"; });
+    const kind = form.querySelector("input[name=kind]:checked")?.value || "individual";
+    form.querySelectorAll(".pf-only").forEach((el) => { el.hidden = kind !== "individual"; });
+    form.querySelectorAll(".pj-only").forEach((el) => { el.hidden = kind !== "company"; });
   }
   form.querySelectorAll("input[name=kind]").forEach((el) => el.addEventListener("change", update));
   update();
