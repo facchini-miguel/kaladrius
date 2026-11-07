@@ -141,10 +141,10 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
         if start_time < clinic.schedule_start or end_time > clinic.schedule_end:
             self.add_error(
                 None,
-                _("Outside the clinic's opening hours (%(inicio)s to %(fim)s).")
+                _("Outside the clinic's opening hours (%(start)s to %(end)s).")
                 % {
-                    "inicio": f"{clinic.schedule_start:%H:%M}",
-                    "fim": f"{clinic.schedule_end:%H:%M}",
+                    "start": f"{clinic.schedule_start:%H:%M}",
+                    "end": f"{clinic.schedule_end:%H:%M}",
                 },
             )
         if self.errors:
@@ -173,6 +173,6 @@ class AppointmentForm(BootstrapForm, forms.ModelForm):
             if len(found) > 5:
                 results += " " + _("and %(n)s more") % {"n": len(found) - 5}
             raise forms.ValidationError(
-                _("Time conflict with: %(lista)s. Nothing was saved.") % {"lista": results}
+                _("Time conflict with: %(list)s. Nothing was saved.") % {"list": results}
             )
         return data

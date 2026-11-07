@@ -1,5 +1,5 @@
 {% load i18n formats %}{% comment %}Patient search-as-you-type. Expects: field (the hidden "patient" field), patient (current patient or None); optional label and help_text.{% endcomment %}
-{% document_label "patient" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Type the name, code or {{ documentos }}{% endblocktranslate %}
+{% document_label "patient" "company" as documents %}{% blocktranslate with documents=documents asvar search_hint %}Type the name, code or {{ documents }}{% endblocktranslate %}
 <div class="mb-3 position-relative patient-search">
   <label class="form-label" for="patient-search">{% if label %}{{ label }}{% else %}{% translate "Patient" %}{% endif %}{% if field.field.required %} *{% endif %}</label>
   <input type="search" id="patient-search" class="form-control patient-search-text{% if field.errors %} is-invalid{% endif %}" autocomplete="off"

@@ -37,7 +37,7 @@
 </div>
 <p class="text-body-secondary small mt-3">
   {% translate "By payment date, without reversed and cancelled ones." %}
-  {% if closed_until %}{% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Finance closed up to {{ data }}: up to that date the amounts no longer change.{% endblocktranslate %}{% endif %}
+  {% if closed_until %}{% blocktranslate with date=closed_until|date:"SHORT_DATE_FORMAT" %}Finance closed up to {{ date }}: up to that date the amounts no longer change.{% endblocktranslate %}{% endif %}
   {% if report.interest %}{% translate "Interest and late fees received" %}: {{ report.interest|currency }}.{% endif %}
   {% if report.discounts %}{% translate "Discounts given" %}: {{ report.discounts|currency }}.{% endif %}
 </p>

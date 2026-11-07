@@ -49,7 +49,7 @@ class ClinicLoginView(auth_views.LoginView):
             "address_locked": any(e.code == "address_locked" for e in errors),
             "recovery_by_email": settings.PASSWORD_RECOVERY_BY_EMAIL,
             "idle": self.request.GET.get("idle") == "1",
-            "minutos": settings.IDLE_MINUTES,
+            "minutes": settings.IDLE_MINUTES,
         }
 
 

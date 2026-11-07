@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
+{% block title %}{% blocktranslate with number=estimate.pk %}Estimate no. {{ number }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
@@ -19,7 +19,7 @@
     <div class="text-end">
       <div class="fs-4 fw-semibold">{% translate "ESTIMATE" %}</div>
       <div class="small">{% translate "No." %} {{ estimate.pk }} · {{ estimate.date|date:"SHORT_DATE_FORMAT" }}</div>
-      <div class="small">{% blocktranslate with validade=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}valid until {{ validade }}{% endblocktranslate %}</div>
+      <div class="small">{% blocktranslate with valid_until=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}valid until {{ valid_until }}{% endblocktranslate %}</div>
     </div>
   </div>
   <p class="mb-1"><strong>{% translate "Patient" %}:</strong> {{ estimate.patient.name }}</p>

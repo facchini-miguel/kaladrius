@@ -34,7 +34,7 @@
       <div class="card-header">{% translate "Salary history" %}</div>
       <ul class="list-group list-group-flush">
         {% for salary in salaries %}
-        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with data=salary.effective_from|date:"SHORT_DATE_FORMAT" %}since {{ data }}{% endblocktranslate %}</span><strong>{{ salary.amount|currency }}</strong></li>
+        <li class="list-group-item d-flex justify-content-between"><span>{% blocktranslate with date=salary.effective_from|date:"SHORT_DATE_FORMAT" %}since {{ date }}{% endblocktranslate %}</span><strong>{{ salary.amount|currency }}</strong></li>
         {% empty %}
         <li class="list-group-item text-body-secondary">{% translate "No salary registered." %}</li>
         {% endfor %}

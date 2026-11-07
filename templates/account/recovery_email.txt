@@ -1,9 +1,9 @@
-{% load i18n %}{% blocktranslate with nome=user.get_full_name|default:user.get_username %}Hello, {{ nome }}.{% endblocktranslate %}
+{% load i18n %}{% blocktranslate with name=user.get_full_name|default:user.get_username %}Hello, {{ name }}.{% endblocktranslate %}
 
 {% translate "Someone asked for a new password for your account. To create it, open the link below (it works once, for 1 hour):" %}
 
 {{ protocol }}://{{ domain }}{% url 'account:new_password' uidb64=uid token=token %}
 
-{% blocktranslate with usuario=user.get_username %}Your username: {{ usuario }}{% endblocktranslate %}
+{% blocktranslate with user=user.get_username %}Your username: {{ user }}{% endblocktranslate %}
 
 {% translate "If it was not you, ignore this e-mail: the current password still works." %}

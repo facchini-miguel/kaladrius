@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-  <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Pay for {{ mes }}{% endblocktranslate %}</h1>
+  <h1 class="h3 mb-0">{% blocktranslate with month=period|date:"m/Y" %}Pay for {{ month }}{% endblocktranslate %}</h1>
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="?month={{ previous|date:'Y-m' }}">← {{ previous|date:"m/Y" }}</a>
     <a class="btn btn-outline-secondary" href="?month={{ following|date:'Y-m' }}">{{ following|date:"m/Y" }} →</a>

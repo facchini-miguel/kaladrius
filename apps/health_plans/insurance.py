@@ -35,8 +35,8 @@ class CodeFormat:
         code = re.sub(r"[\s.\-/]", "", value or "").upper()
         if code and self.default and not re.fullmatch(self.default, code):
             raise ValidationError(
-                _("%(nome)s: invalid format. Example: %(exemplo)s.")
-                % {"nome": self.name, "exemplo": self.example}
+                _("%(name)s: invalid format. Example: %(example)s.")
+                % {"name": self.name, "example": self.example}
             )
         return code
 

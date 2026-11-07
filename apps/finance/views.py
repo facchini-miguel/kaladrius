@@ -702,7 +702,7 @@ def catalog_form(request, catalog, pk=None):
     form = form_class(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("%(nome)s saved.") % {"nome": form.instance.name})
+        messages.success(request, _("%(name)s saved.") % {"name": form.instance.name})
         return redirect("finance:catalog", catalog=catalog)
     return render(
         request,
@@ -753,7 +753,7 @@ def _group_form(request, instance):
     form = AccountGroupForm(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
         group = form.save()
-        messages.success(request, _("%(nome)s saved.") % {"nome": group.name})
+        messages.success(request, _("%(name)s saved.") % {"name": group.name})
         return redirect("finance:chart_of_accounts")
     return render(request, "finance/group_form.html", {"form": form, "instance": instance})
 
@@ -818,7 +818,7 @@ def _supplier_form(request, instance):
     form = SupplierForm(request.POST or None, instance=instance, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         supplier = form.save()
-        messages.success(request, _("%(nome)s saved.") % {"nome": supplier.name})
+        messages.success(request, _("%(name)s saved.") % {"name": supplier.name})
         return redirect("finance:supplier", pk=supplier.pk)
     return render(request, "finance/supplier_form.html", {"form": form, "instance": instance})
 
@@ -855,7 +855,7 @@ def commission_percentage(request, pk):
     form = CommissionPercentageForm(request.POST or None, instance=practitioner)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Percentage of %(nome)s saved.") % {"nome": practitioner.name})
+        messages.success(request, _("Percentage of %(name)s saved.") % {"name": practitioner.name})
         return redirect("finance:commissions")
     return render(
         request,
@@ -940,12 +940,12 @@ def statements(request):
                 messages.success(
                     request,
                     _(
-                        "Statement imported: %(novas)s new transactions, %(repetidas)s already "
+                        "Statement imported: %(new_ones)s new transactions, %(repeated)s already "
                         "imported."
                     )
                     % {
-                        "novas": statement_import.new_transactions,
-                        "repetidas": statement_import.duplicate_transactions,
+                        "new_ones": statement_import.new_transactions,
+                        "repeated": statement_import.duplicate_transactions,
                     },
                 )
                 if statement_import.unreadable_transactions:
@@ -965,13 +965,13 @@ def statements(request):
                     messages.warning(
                         request,
                         _(
-                            "Warning: this file is from bank account %(nova)s, but the previous "
-                            "one imported into %(conta)s was from account %(antiga)s."
+                            "Warning: this file is from bank account %(new)s, but the previous "
+                            "one imported into %(account)s was from account %(old)s."
                         )
                         % {
-                            "nova": statement_import.bank_account_number,
-                            "conta": statement_import.account,
-                            "antiga": other,
+                            "new": statement_import.bank_account_number,
+                            "account": statement_import.account,
+                            "old": other,
                         },
                     )
                 return redirect("finance:statement", pk=statement_import.pk)

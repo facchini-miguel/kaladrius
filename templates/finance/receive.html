@@ -7,8 +7,8 @@
 <h1 class="h3 mb-1">{% if payable %}{% translate "Pay" %}{% else %}{% translate "Receive" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">
   {{ installment.entry.payer_name }} · {{ installment.entry.description }} ·
-  {% blocktranslate with numero=installment.number total=total_installments %}installment {{ numero }} of {{ total }}{% endblocktranslate %} ·
-  {% blocktranslate with vencimento=installment.due_date|date:"SHORT_DATE_FORMAT" %}due on {{ vencimento }}{% endblocktranslate %}
+  {% blocktranslate with number=installment.number total=total_installments %}installment {{ number }} of {{ total }}{% endblocktranslate %} ·
+  {% blocktranslate with due_date=installment.due_date|date:"SHORT_DATE_FORMAT" %}due on {{ due_date }}{% endblocktranslate %}
 </p>
 <div class="alert alert-light border">
   {% translate "Installment amount" %}: <strong>{{ installment.amount|currency }}</strong> ·

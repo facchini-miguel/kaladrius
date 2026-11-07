@@ -4,7 +4,7 @@
 {% block title %}{% if estimate %}{% translate "Edit estimate" %}{% else %}{% translate "New estimate" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %}{% else %}{% translate "New estimate" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with number=estimate.pk %}Estimate no. {{ number }}{% endblocktranslate %}{% else %}{% translate "New estimate" %}{% endif %}</h1>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}

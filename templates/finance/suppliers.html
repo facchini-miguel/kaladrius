@@ -9,7 +9,7 @@
   {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "New supplier" %}</a>{% endif %}
 </div>
 
-{% document_label "person" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Name, legal name or {{ documentos }}{% endblocktranslate %}
+{% document_label "person" "company" as documents %}{% blocktranslate with documents=documents asvar search_hint %}Name, legal name or {{ documents }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-8">
     <input type="search" name="q" value="{{ search }}" class="form-control" autofocus

@@ -11,7 +11,7 @@
   {% endif %}
 </div>
 
-{% document_label "patient" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Name, code or {{ documentos }}{% endblocktranslate %}
+{% document_label "patient" "company" as documents %}{% blocktranslate with documents=documents asvar search_hint %}Name, code or {{ documents }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
     <input type="search" name="q" value="{{ search }}" class="form-control" autofocus

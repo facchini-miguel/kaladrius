@@ -41,7 +41,7 @@ def _type_form(request, kind):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
-            request, _("Appointment type %(nome)s saved.") % {"nome": kind.display_name}
+            request, _("Appointment type %(name)s saved.") % {"name": kind.display_name}
         )
         return redirect("schedule:types")
     return render(request, "schedule/type_form.html", {"form": form, "kind": kind})
@@ -57,14 +57,14 @@ def delete_appointment_type(request, pk):
             messages.error(
                 request,
                 _(
-                    "%(nome)s has been used in appointments and cannot be deleted. Uncheck "
+                    "%(name)s has been used in appointments and cannot be deleted. Uncheck "
                     "“active” to hide it."
                 )
-                % {"nome": kind.display_name},
+                % {"name": kind.display_name},
             )
         else:
             messages.success(
-                request, _("Appointment type %(nome)s deleted.") % {"nome": kind.display_name}
+                request, _("Appointment type %(name)s deleted.") % {"name": kind.display_name}
             )
         return redirect("schedule:types")
     return render(request, "schedule/type_delete.html", {"kind": kind})
@@ -75,13 +75,13 @@ def delete_appointment_type(request, pk):
 SESSION_PRACTITIONER = "schedule_practitioner"
 # The week last looked at, as in the legacy system: leaving the schedule and coming back
 # shows it again. Only on the same day; the next day the schedule opens on today.
-SESSION_DATE = "agenda_data"
+SESSION_DATE = "schedule_date"
 
 
 def _remembered_date(request):
     remembered = request.session.get(SESSION_DATE) or {}
     today = timezone.localdate().isoformat()
-    return remembered.get("data", "") if remembered.get("em") == today else ""
+    return remembered.get("date", "") if remembered.get("on") == today else ""
 
 
 def _success_response(message):
@@ -178,8 +178,8 @@ def events(request):
     else:
         remembered = timezone.localtime(start + (end - start) / 2).date()
     request.session[SESSION_DATE] = {
-        "data": remembered.isoformat(),
-        "em": timezone.localdate().isoformat(),
+        "date": remembered.isoformat(),
+        "on": timezone.localdate().isoformat(),
     }
     appointments = (
         services.visible_appointments(request)
@@ -271,10 +271,10 @@ def edit_appointment(request, pk):
 
 
 STATUS_MESSAGES = {
-    Appointment.Status.BOOKED: gettext_lazy("%(nome)s: attendance mark undone."),
-    Appointment.Status.ATTENDED: gettext_lazy("%(nome)s came."),
-    Appointment.Status.MISSED: gettext_lazy("%(nome)s missed the appointment."),
-    Appointment.Status.CANCELLED: gettext_lazy("%(nome)s cancelled. The time slot is free."),
+    Appointment.Status.BOOKED: gettext_lazy("%(name)s: attendance mark undone."),
+    Appointment.Status.ATTENDED: gettext_lazy("%(name)s came."),
+    Appointment.Status.MISSED: gettext_lazy("%(name)s missed the appointment."),
+    Appointment.Status.CANCELLED: gettext_lazy("%(name)s cancelled. The time slot is free."),
 }
 
 
@@ -300,7 +300,7 @@ def status(request, pk):
             return render(request, "schedule/_form.html", context)
         messages.error(request, error.messages[0])
         return redirect("home")
-    message = STATUS_MESSAGES[appointment.status] % {"nome": appointment.patient.name}
+    message = STATUS_MESSAGES[appointment.status] % {"name": appointment.patient.name}
     if request.headers.get("HX-Request"):
         return _success_response(message)
     messages.success(request, message)

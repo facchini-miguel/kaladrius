@@ -4,7 +4,7 @@
 {% block title %}{% translate "Commission percentage" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% blocktranslate with nome=practitioner.name %}Commission of {{ nome }}{% endblocktranslate %}</h1>
+<h1 class="h3 mb-4">{% blocktranslate with name=practitioner.name %}Commission of {{ name }}{% endblocktranslate %}</h1>
 <form method="post" style="max-width: 24rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}

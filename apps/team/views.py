@@ -43,7 +43,7 @@ def new_member(request):
         with transaction.atomic():
             user = form.save()
         messages.success(
-            request, _("%(nome)s is now part of the team.") % {"nome": user.get_full_name()}
+            request, _("%(name)s is now part of the team.") % {"name": user.get_full_name()}
         )
         return redirect("team:list")
     return render(request, "team/new.html", {"form": form})
@@ -63,7 +63,7 @@ def edit_member(request, pk):
             if account is not None:
                 account.save()
         messages.success(
-            request, _("%(nome)s's details saved.") % {"nome": user.get_full_name() or user}
+            request, _("%(name)s's details saved.") % {"name": user.get_full_name() or user}
         )
         return redirect("team:list")
     return render(
@@ -89,10 +89,10 @@ def password(request, pk):
         messages.error(
             request,
             _(
-                "%(nome)s also has access to another clinic or to the platform: the password can "
+                "%(name)s also has access to another clinic or to the platform: the password can "
                 "only be changed by the user or by support."
             )
-            % {"nome": user},
+            % {"name": user},
         )
         return redirect("team:edit", pk=membership.pk)
     form = PasswordForm(user, request.POST or None)
@@ -100,7 +100,7 @@ def password(request, pk):
         form.save()
         messages.success(
             request,
-            _("New password set for %(nome)s.") % {"nome": user.get_full_name() or user},
+            _("New password set for %(name)s.") % {"name": user.get_full_name() or user},
         )
         return redirect("team:list")
     return render(request, "team/password.html", {"membership": membership, "form": form})
@@ -125,7 +125,7 @@ def two_factor(request, pk):
         )
         messages.success(
             request,
-            _("Two-step verification of %(nome)s removed.")
-            % {"nome": user.get_full_name() or user},
+            _("Two-step verification of %(name)s removed.")
+            % {"name": user.get_full_name() or user},
         )
     return redirect("team:edit", pk=membership.pk)

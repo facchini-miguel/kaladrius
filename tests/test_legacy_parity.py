@@ -53,7 +53,7 @@ def test_week_with_today_returns_to_today(clinic_a, reception, create_practition
 def test_next_day_schedule_opens_today(reception):
     session = reception.session
     yesterday = timezone.localdate() - datetime.timedelta(days=1)
-    session["agenda_data"] = {"data": "2026-03-05", "em": yesterday.isoformat()}
+    session["schedule_date"] = {"date": "2026-03-05", "on": yesterday.isoformat()}
     session.save()
     assert reception.get(reverse("schedule:calendar")).context["schedule_settings"]["date"] == ""
 

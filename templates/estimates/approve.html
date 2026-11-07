@@ -5,7 +5,7 @@
 
 {% block content %}
 <h1 class="h3 mb-1">{% translate "Approve estimate" %}</h1>
-<p class="text-body-secondary mb-4">{% blocktranslate with numero=estimate.pk nome=estimate.patient.name total=estimate.total|currency %}Estimate no. {{ numero }} · {{ nome }} · {{ total }}{% endblocktranslate %}</p>
+<p class="text-body-secondary mb-4">{% blocktranslate with number=estimate.pk name=estimate.patient.name total=estimate.total|currency %}Estimate no. {{ number }} · {{ name }} · {{ total }}{% endblocktranslate %}</p>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}

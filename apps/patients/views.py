@@ -175,7 +175,7 @@ def _patient_form(request, patient):
     form = PatientForm(request.POST or None, instance=patient, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         patient = form.save()
-        messages.success(request, _("Patient %(nome)s saved.") % {"nome": patient.name})
+        messages.success(request, _("Patient %(name)s saved.") % {"name": patient.name})
         return redirect("patients:record", pk=patient.pk)
     return render(request, "patients/form.html", {"form": form, "patient": patient})
 
@@ -203,10 +203,10 @@ def archive(request, pk):
         messages.success(
             request,
             _(
-                "Patient %(nome)s archived. The history is kept, and the patient can be restored "
+                "Patient %(name)s archived. The history is kept, and the patient can be restored "
                 "from the patient list, under Status: Archived."
             )
-            % {"nome": patient.name},
+            % {"name": patient.name},
         )
         return redirect("patients:list")
     return render(request, "patients/archive.html", {"patient": patient})
@@ -219,7 +219,7 @@ def restore(request, pk):
         patient.archived = False
         patient.archived_at = patient.archived_by = None
         patient.save()
-        messages.success(request, _("Patient %(nome)s restored.") % {"nome": patient.name})
+        messages.success(request, _("Patient %(name)s restored.") % {"name": patient.name})
     return redirect("patients:record", pk=patient.pk)
 
 
@@ -301,7 +301,7 @@ def delete_patient(request, pk):
             )
         messages.success(
             request,
-            _("The data of patient code %(codigo)s was deleted.") % {"codigo": code},
+            _("The data of patient code %(code)s was deleted.") % {"code": code},
         )
         return redirect(f"{reverse('patients:list')}?situacao=arquivados")
     return render(request, "patients/delete.html", context)

@@ -15,7 +15,7 @@
   </div>
   {% if visit %}
   {% if visit.is_finalized %}
-  <span class="badge text-bg-success">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalized on {{ momento }}{% endblocktranslate %}</span>
+  <span class="badge text-bg-success">{% blocktranslate with when=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalized on {{ when }}{% endblocktranslate %}</span>
   {% else %}
   <span class="badge text-bg-warning">{% translate "Draft" %}</span>
   {% endif %}
@@ -86,7 +86,7 @@
   </div>
   <ul class="list-group list-group-flush">
     {% for certificate in certificates %}
-    <li class="list-group-item"><a href="{% url 'medical_records:certificate' certificate.pk %}">{% translate "Certificate" %} · {{ certificate.get_kind_display }}{% if certificate.days %} ({% blocktranslate count dias=certificate.days %}{{ dias }} day{% plural %}{{ dias }} days{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ certificate.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:certificate' certificate.pk %}">{% translate "Certificate" %} · {{ certificate.get_kind_display }}{% if certificate.days %} ({% blocktranslate count days=certificate.days %}{{ days }} day{% plural %}{{ days }} days{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ certificate.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% for prescription in prescriptions %}
     <li class="list-group-item"><a href="{% url 'medical_records:prescription' prescription.pk %}">{% translate "Prescription" context "prescription" %}</a> <span class="text-body-secondary small">{{ prescription.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>

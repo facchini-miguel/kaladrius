@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
     <h1 class="h3 mb-0">{% translate "Bank statement" %} · {{ statement_import.account }}</h1>
-    <span class="text-body-secondary">{{ statement_import.start|date:"SHORT_DATE_FORMAT" }} – {{ statement_import.end|date:"SHORT_DATE_FORMAT" }} · {{ statement_import.file }}{% if statement_import.bank_account_number %} · {% blocktranslate with conta=statement_import.bank_account_number %}bank account {{ conta }}{% endblocktranslate %}{% endif %}</span>
+    <span class="text-body-secondary">{{ statement_import.start|date:"SHORT_DATE_FORMAT" }} – {{ statement_import.end|date:"SHORT_DATE_FORMAT" }} · {{ statement_import.file }}{% if statement_import.bank_account_number %} · {% blocktranslate with account=statement_import.bank_account_number %}bank account {{ account }}{% endblocktranslate %}{% endif %}</span>
   </div>
   <a class="btn btn-link" href="{% url 'finance:statements' %}">{% translate "Back" %}</a>
 </div>
@@ -15,7 +15,7 @@
 <div class="row g-3 mb-3">
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pending" context "plural" %}</div><div class="fs-5">{{ pending }} / {{ transactions|length }}</div></div></div></div>
   {% if statement_import.balance is not None %}
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with data=statement_import.balance_date|date:"SHORT_DATE_FORMAT" %}Bank balance on {{ data }}{% endblocktranslate %}</div><div class="fs-5">{{ statement_import.balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% blocktranslate with date=statement_import.balance_date|date:"SHORT_DATE_FORMAT" %}Bank balance on {{ date }}{% endblocktranslate %}</div><div class="fs-5">{{ statement_import.balance|currency }}</div></div></div></div>
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "System balance on the same date" %}</div><div class="fs-5">{{ system_balance|currency }}</div></div></div></div>
   <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Difference" %}</div><div class="fs-5{% if difference %} text-danger{% else %} text-success{% endif %}">{{ difference|currency }}</div></div></div></div>
   {% endif %}

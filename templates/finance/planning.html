@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-  <h1 class="h3 mb-0">{% blocktranslate with ano=year %}Planning {{ ano }}{% endblocktranslate %}</h1>
+  <h1 class="h3 mb-0">{% blocktranslate with year=year %}Planning {{ year }}{% endblocktranslate %}</h1>
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="?year={{ previous_year }}">← {{ previous_year }}</a>
     <a class="btn btn-outline-secondary" href="?year={{ next_year }}">{{ next_year }} →</a>
@@ -64,7 +64,7 @@
   {% if can_change %}
   <div class="d-flex flex-wrap gap-2">
     <button type="submit" class="btn btn-primary">{% translate "Save goals" %}</button>
-    {% if has_previous_targets %}<button type="submit" name="action" value="copy" class="btn btn-outline-secondary">{% blocktranslate with ano_anterior=previous_year %}Copy the goals of {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
+    {% if has_previous_targets %}<button type="submit" name="action" value="copy" class="btn btn-outline-secondary">{% blocktranslate with previous_year=previous_year %}Copy the goals of {{ previous_year }}{% endblocktranslate %}</button>{% endif %}
   </div>
   <p class="text-body-secondary small mt-2">{% translate "Leave a group without a goal blank. Copying only fills the groups that have no goal this year yet. The total adds the goals of the highest groups, without counting a subgroup's goal twice." %}</p>
   {% endif %}

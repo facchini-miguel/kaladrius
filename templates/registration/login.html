@@ -12,7 +12,7 @@
         <h1 class="h4 mb-4 text-center">{{ system_name }}</h1>
 
         {% if idle %}
-        <div class="alert alert-info" role="status">{% blocktranslate %}You were logged out after {{ minutos }} minutes without use. Log in again to continue.{% endblocktranslate %}</div>
+        <div class="alert alert-info" role="status">{% blocktranslate %}You were logged out after {{ minutes }} minutes without use. Log in again to continue.{% endblocktranslate %}</div>
         {% endif %}
         {% if address_locked %}
         <div class="alert alert-danger" role="alert">{% translate "Too many wrong attempts from this address. Try again in 1 hour." %}</div>

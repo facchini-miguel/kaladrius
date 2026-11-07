@@ -4,7 +4,7 @@
 {% block title %}{% translate "Delete practitioner" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=practitioner.name %}Delete {{ nome }}?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with name=practitioner.name %}Delete {{ name }}?{% endblocktranslate %}</h1>
 <p>{% translate "This action cannot be undone. To just hide the practitioner, edit and uncheck “active”." %}</p>
 <form method="post">
   {% csrf_token %}

@@ -5,7 +5,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate "Close" %}"></button>
   </div>
   <div class="modal-body">
-    <p class="mb-2"><strong>{{ appointment.title }}</strong> · {% blocktranslate with inicio=appointment.start|date:"SHORT_DATETIME_FORMAT" fim=appointment.end|date:"TIME_FORMAT" %}{{ inicio }} to {{ fim }}{% endblocktranslate %}</p>
+    <p class="mb-2"><strong>{{ appointment.title }}</strong> · {% blocktranslate with start=appointment.start|date:"SHORT_DATETIME_FORMAT" end=appointment.end|date:"TIME_FORMAT" %}{{ start }} to {{ end }}{% endblocktranslate %}</p>
     {% if following_count %}
     <div class="form-check">
       <input class="form-check-input" type="radio" name="scope" id="scope-this" value="this" checked>
@@ -13,7 +13,7 @@
     </div>
     <div class="form-check">
       <input class="form-check-input" type="radio" name="scope" id="scope-series" value="series">
-      <label class="form-check-label" for="scope-series">{% blocktranslate with proximos=following_count %}This one and the next {{ proximos }} of the same series{% endblocktranslate %}</label>
+      <label class="form-check-label" for="scope-series">{% blocktranslate with following=following_count %}This one and the next {{ following }} of the same series{% endblocktranslate %}</label>
     </div>
     {% else %}
     <p class="mb-0">{% translate "This action cannot be undone." %}</p>

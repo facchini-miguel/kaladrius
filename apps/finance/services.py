@@ -95,10 +95,10 @@ def receive(installment, *, user, **fields):
     if payment.principal > balance:
         raise ValidationError(
             _(
-                "The amount deducted (%(abatido)s) exceeds what is left of the installment "
-                "(%(saldo)s)."
+                "The amount deducted (%(deducted)s) exceeds what is left of the installment "
+                "(%(balance)s)."
             )
-            % {"abatido": payment.principal, "saldo": balance}
+            % {"deducted": payment.principal, "balance": balance}
         )
     payment.save()
     return payment
@@ -168,11 +168,11 @@ def check_period(clinic_id, date):
     if until is not None and date <= until:
         raise ValidationError(
             _(
-                "Finance is closed up to %(ate)s: payments and reversals on or before that date "
+                "Finance is closed up to %(until)s: payments and reversals on or before that date "
                 "cannot be recorded. Use a later date or ask the administrator to reopen the "
                 "period."
             )
-            % {"ate": date_format(until, "SHORT_DATE_FORMAT")}
+            % {"until": date_format(until, "SHORT_DATE_FORMAT")}
         )
 
 
@@ -187,8 +187,8 @@ def close_books(clinic, until, *, user):
     current = closed_until(clinic.pk)
     if current is not None and until <= current:
         raise ValidationError(
-            _("Finance is already closed up to %(ate)s. To go back, reopen the period.")
-            % {"ate": date_format(current, "SHORT_DATE_FORMAT")}
+            _("Finance is already closed up to %(until)s. To go back, reopen the period.")
+            % {"until": date_format(current, "SHORT_DATE_FORMAT")}
         )
     return BookClosing.objects.create(clinic=clinic, until=until, created_by=user)
 

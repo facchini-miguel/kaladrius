@@ -9,7 +9,7 @@
       <div class="progress mb-1" style="height: 6px;" role="progressbar" aria-valuenow="{{ value|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ title }}">
         <div class="progress-bar {% if level == 'critical' %}bg-danger{% elif level == 'warning' %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ value|floatformat:0 }}%"></div>
       </div>
-      <div class="small text-body-secondary">{% if kind == "cpu" %}{% blocktranslate with carga=detail %}load average: {{ carga }}{% endblocktranslate %}{% else %}{{ used|filesizeformat }} / {{ total|filesizeformat }}{% endif %}</div>
+      <div class="small text-body-secondary">{% if kind == "cpu" %}{% blocktranslate with load=detail %}load average: {{ load }}{% endblocktranslate %}{% else %}{{ used|filesizeformat }} / {{ total|filesizeformat }}{% endif %}</div>
     </div>
   </div>
 </div>

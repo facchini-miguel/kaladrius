@@ -20,12 +20,12 @@
 {% else %}
 <div class="card mb-4" style="max-width: 32rem;">
   <div class="card-body">
-    <h2 class="h5">{% blocktranslate with conta=account.name %}The “{{ conta }}” drawer is closed{% endblocktranslate %}</h2>
+    <h2 class="h5">{% blocktranslate with account=account.name %}The “{{ account }}” drawer is closed{% endblocktranslate %}</h2>
     {% if can.receiving.create %}
     <form method="post" novalidate>
       {% csrf_token %}
       {% include "includes/form.html" %}
-      {% if system_balance is not None %}<p class="text-body-secondary small">{% blocktranslate with saldo=system_balance|currency %}According to the system, the account has {{ saldo }}.{% endblocktranslate %}</p>{% endif %}
+      {% if system_balance is not None %}<p class="text-body-secondary small">{% blocktranslate with balance=system_balance|currency %}According to the system, the account has {{ balance }}.{% endblocktranslate %}</p>{% endif %}
       <button type="submit" class="btn btn-primary">{% translate "Open drawer" %}</button>
     </form>
     {% endif %}
