@@ -136,7 +136,7 @@ def test_patient_in_mexico_with_curp(clinic_a, admin):
     in_country(clinic_a, "MX")
     form_page = admin.get(reverse("patients:new")).content.decode()
     assert 'data-label-pf="CURP"' in form_page and 'data-label-pj="RFC"' in form_page
-    data = {"kind": "PF", "name": "Paciente Ficticio", "active": "on"}
+    data = {"kind": "individual", "name": "Paciente Ficticio", "active": "on"}
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "BOXW310820HNERXN08"})
     assert response.context["form"].errors["tax_id"] == ["CURP: número inválido."]
     response = admin.post(reverse("patients:new"), {**data, "tax_id": "boxw310820hnerxn09"})
@@ -157,9 +157,14 @@ def test_patient_in_united_states_only_company_has_document(clinic_a, admin):
     form_page = admin.get(reverse("patients:new")).content.decode()
     assert 'data-label-pf=""' in form_page and 'data-label-pj="EIN"' in form_page
     # An individual: whatever was left in the hidden field is not kept.
-    person = {"kind": "PF", "name": "John Fictitious", "active": "on", "tax_id": "911144442"}
+    person = {
+        "kind": "individual",
+        "name": "John Fictitious",
+        "active": "on",
+        "tax_id": "911144442",
+    }
     assert admin.post(reverse("patients:new"), person).status_code == 302
-    company = {"kind": "PJ", "name": "Acme Fictitious", "active": "on", "tax_id": "91-1144442"}
+    company = {"kind": "company", "name": "Acme Fictitious", "active": "on", "tax_id": "91-1144442"}
     assert admin.post(reverse("patients:new"), company).status_code == 302
     with use_clinic(clinic_a):
         assert Patient.objects.get(name="John Fictitious").tax_id == ""
@@ -200,13 +205,13 @@ def test_clinic_in_mexico_accepts_person_or_company_rfc(clinic_a, admin):
 
 def test_supplier_in_the_united_kingdom(clinic_a, admin):
     in_country(clinic_a, "GB")
-    company = {"kind": "PJ", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
+    company = {"kind": "company", "name": "Dental Supplies Ltd", "active": "on", "tax_id": "123"}
     response = admin.post(reverse("finance:supplier_new"), company)
     assert response.context["form"].errors["tax_id"] == ["Company number: número inválido."]
     company["tax_id"] = "01234567"
     assert admin.post(reverse("finance:supplier_new"), company).status_code == 302
     # A sole trader has no document in this table: nothing is kept.
-    person = {"kind": "PF", "name": "John Plumber", "active": "on", "tax_id": "01234567"}
+    person = {"kind": "individual", "name": "John Plumber", "active": "on", "tax_id": "01234567"}
     assert admin.post(reverse("finance:supplier_new"), person).status_code == 302
     with use_clinic(clinic_a):
         assert Supplier.objects.get(name="Dental Supplies Ltd").tax_id == "01234567"

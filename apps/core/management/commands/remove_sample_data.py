@@ -66,7 +66,7 @@ class Command(BaseCommand):
         if not confirm:
             raise CommandError("Nada foi apagado: rode de novo com --confirm.")
         names = [data["name"] for data in CLINICS] + OLD_CLINICS
-        usernames = [u[0] for data in CLINICS for u in data["usuarios"]] + OLD_USERS
+        usernames = [u[0] for data in CLINICS for u in data["users"]] + OLD_USERS
 
         with transaction.atomic(), without_isolation():
             clinics = list(Clinic.objects.filter(name__in=names))

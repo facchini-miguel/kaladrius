@@ -10,8 +10,8 @@
     {% if not supplier.active %}<span class="badge text-bg-secondary align-middle">{% translate "Inativo" %}</span>{% endif %}
   </h1>
   <div class="d-flex gap-2">
-    {% if can.financeiro.criar and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
-    {% if can.financeiro.alterar %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}
+    {% if can.finance.create and supplier.active %}<a class="btn btn-outline-primary" href="{% url 'finance:expense_new' %}?supplier={{ supplier.pk }}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if can.finance.change %}<a class="btn btn-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}
   </div>
 </div>
 

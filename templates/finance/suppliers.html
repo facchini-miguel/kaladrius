@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 mb-0">{% translate "Fornecedores" %}</h1>
-  {% if can.financeiro.criar %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
+  {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:supplier_new' %}">{% translate "Novo fornecedor" %}</a>{% endif %}
 </div>
 
 {% document_label "pessoa" "empresa" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, razão social ou {{ documentos }}{% endblocktranslate %}
@@ -41,7 +41,7 @@
         <td class="text-nowrap">{{ supplier.tax_id|document:supplier.document_role|default:"—" }}</td>
         <td class="text-nowrap">{{ supplier.phone|phone|default:"—" }}</td>
         <td class="text-nowrap">{% if supplier.whatsapp %}<a href="{{ supplier.whatsapp|whatsapp }}" target="_blank" rel="noopener">{{ supplier.whatsapp|phone }}</a>{% else %}—{% endif %}</td>
-        <td class="text-end text-nowrap">{% if can.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td class="text-end text-nowrap">{% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:supplier_edit' supplier.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
       <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum fornecedor encontrado." %}</td></tr>

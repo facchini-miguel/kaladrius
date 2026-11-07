@@ -38,7 +38,7 @@ def expense(clinic, **extra):
         "description": "Aluguel",
         "category": category.pk,
         "amount": "1000",
-        "mode": "dividir",
+        "mode": "split",
         "installments": 1,
         "first_due_date": TODAY.isoformat(),
         "notes": "",

@@ -31,7 +31,7 @@ def create_patient(clinic, **data):
 
 
 def form_data(**extra):
-    return {"kind": "PF", "name": "Maria da Silva", "active": "on", **extra}
+    return {"kind": "individual", "name": "Maria da Silva", "active": "on", **extra}
 
 
 # --- Validators and formats ------------------------------------------------------
@@ -122,7 +122,7 @@ def test_company_with_alphanumeric_cnpj(admin_a, clinic_a):
     response = admin_a.post(
         reverse("patients:new"),
         form_data(
-            kind="PJ",
+            kind="company",
             name="Empresa X",
             legal_name="Empresa X Ltda.",
             tax_id=CNPJ_ALPHANUMERIC,
@@ -141,7 +141,7 @@ def test_company_with_alphanumeric_cnpj(admin_a, clinic_a):
     ("data", "field", "message"),
     [
         ({"tax_id": "529.982.247-24"}, "tax_id", "CPF: número inválido"),
-        ({"kind": "PJ", "tax_id": CPF}, "tax_id", "CNPJ: número inválido"),
+        ({"kind": "company", "tax_id": CPF}, "tax_id", "CNPJ: número inválido"),
         ({"mobile_phone": "9999-0000"}, "mobile_phone", "Informe o DDD"),
         ({"postal_code": "123"}, "postal_code", "8 dígitos"),
         ({"birth_date": "2999-01-01"}, "birth_date", "futuro"),
@@ -196,7 +196,7 @@ def test_search_by_unaccented_name_code_and_cpf(admin_a, clinic_a):
 def test_kind_and_status_filters(admin_a, clinic_a):
     create_patient(clinic_a, name="Ativo PF")
     create_patient(clinic_a, name="Inativo PF", active=False)
-    create_patient(clinic_a, name="Empresa", kind="PJ")
+    create_patient(clinic_a, name="Empresa", kind="company")
     url = reverse("patients:list")
 
     def names(**params):
@@ -204,7 +204,7 @@ def test_kind_and_status_filters(admin_a, clinic_a):
 
     assert names() == ["Ativo PF", "Empresa"]
     assert names(status="inativos") == ["Inativo PF"]
-    assert names(status="todos", kind="PJ") == ["Empresa"]
+    assert names(status="todos", kind="company") == ["Empresa"]
 
 
 # --- Isolation and permissions ---------------------------------------------------

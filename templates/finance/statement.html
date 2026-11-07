@@ -23,7 +23,7 @@
 {% if statement_import.unreadable_transactions %}
 <div class="alert alert-warning">{% blocktranslate count n=statement_import.unreadable_transactions %}{{ n }} linha do arquivo não tinha data ou valor legível e não foi importada. Confira no extrato do banco.{% plural %}{{ n }} linhas do arquivo não tinham data ou valor legível e não foram importadas. Confira no extrato do banco.{% endblocktranslate %}</div>
 {% endif %}
-{% if pending and unique and can.financeiro.alterar %}
+{% if pending and unique and can.finance.change %}
 <form method="post" action="{% url 'finance:statement_reconcile' statement_import.pk %}" class="mb-3">
   {% csrf_token %}
   <button type="submit" class="btn btn-success">{% blocktranslate count n=unique %}Conciliar {{ n }} transação com correspondência única{% plural %}Conciliar {{ n }} transações com correspondência única{% endblocktranslate %}</button>
@@ -40,14 +40,14 @@
         <td>{{ t.description }}</td>
         <td class="text-end text-nowrap {% if t.is_incoming %}text-success{% else %}text-danger{% endif %}">{{ t.amount|currency }}</td>
         <td>
-          {% if t.status == "conciliada" %}
+          {% if t.status == "reconciled" %}
             <span class="badge text-bg-success">{% translate "Conciliada" %}</span>
             {% if t.payment %}<a href="{% url 'finance:entry' t.payment.installment.entry_id %}">{{ t.payment.installment.entry.payer_name }} · {{ t.payment.installment.entry.description }}</a> ({{ t.payment.date|date:"SHORT_DATE_FORMAT" }})
             {% elif t.cash_movement %}<a href="{% url 'finance:cash_detail' t.cash_movement.cash_register_id %}">{{ t.cash_movement.cash_register.account }} · {{ t.cash_movement.get_kind_display }}</a>{% endif %}
-          {% elif t.status == "ignorada" %}
+          {% elif t.status == "ignored" %}
             <span class="badge text-bg-secondary">{% translate "Ignorada" %}</span> {{ t.reason }}
           {% else %}
-            {% if can.financeiro.alterar %}
+            {% if can.finance.change %}
             {% if t.candidates %}
             <form method="post" action="{% url 'finance:transaction' t.pk 'reconcile' %}" class="d-flex gap-2 mb-1">
               {% csrf_token %}
@@ -60,7 +60,7 @@
             <span class="badge text-bg-warning">{% translate "Nada correspondente no sistema" %}</span>
             {% endif %}
             <div class="d-flex flex-wrap gap-2 align-items-center">
-              {% if can.financeiro.criar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
+              {% if can.finance.create %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:transaction_entry' t.pk %}">{% translate "Criar lançamento" %}</a>{% endif %}
               <form method="post" action="{% url 'finance:transaction' t.pk 'ignore' %}" class="d-flex gap-1">
                 {% csrf_token %}
                 <input type="text" name="reason" class="form-control form-control-sm" maxlength="200" required placeholder="{% translate 'Motivo' %}" aria-label="{% translate 'Motivo para ignorar' %}">
@@ -71,7 +71,7 @@
             <span class="badge text-bg-warning">{% translate "Pendente" %}</span>
             {% endif %}
           {% endif %}
-          {% if t.status != "pendente" and can.financeiro.alterar %}
+          {% if t.status != "pending" and can.finance.change %}
           <form method="post" action="{% url 'finance:transaction' t.pk 'undo' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link p-0 ms-1">{% translate "desfazer" %}</button></form>
           {% endif %}
         </td>

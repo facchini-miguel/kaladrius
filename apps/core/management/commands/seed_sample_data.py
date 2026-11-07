@@ -26,14 +26,14 @@ CLINICS = [
     {
         "name": "Clínica Sorriso (teste)",
         "dados": {"phone": "(48) 3000-0001"},
-        "usuarios": [
+        "users": [
             ("admin.sorriso", "Beatriz", "Lima", Role.ADMIN),
             ("recepcao.sorriso", "Carla", "Mendes", Role.FRONT_DESK),
             ("financeiro.sorriso", "Diego", "Rocha", Role.FINANCE),
             ("dra.ana", "Ana", "Souza", Role.PRACTITIONER),
             ("dr.carlos", "Carlos", "Pereira", Role.PRACTITIONER),
         ],
-        "profissionais": [
+        "practitioners": [
             ("Dra. Ana Souza", "CRO-SC 10001", "#0d6efd", "dra.ana"),
             ("Dr. Bruno Alves", "CRO-SC 10002", "#198754", None),
             ("Dr. Carlos Pereira", "CRM-SC 20001", "#dc3545", "dr.carlos"),
@@ -85,12 +85,12 @@ class Command(BaseCommand):
             for data in CLINICS:
                 clinic, _ = Clinic.objects.get_or_create(name=data["name"], defaults=data["dados"])
                 clinics.append(clinic)
-                for username, name, sobrenome, role in data["usuarios"]:
-                    user = self._user(username, name, sobrenome, password, created_count)
+                for username, name, last_name, role in data["users"]:
+                    user = self._user(username, name, last_name, password, created_count)
                     Membership.objects.get_or_create(
                         user=user, clinic=clinic, defaults={"role": role}
                     )
-                for name, registration, color, username in data["profissionais"]:
+                for name, registration, color, username in data["practitioners"]:
                     user = get_user_model().objects.filter(username=username).first()
                     Practitioner.objects.get_or_create(
                         clinic=clinic,
@@ -118,12 +118,12 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Nenhum usuário novo: os dados de teste já existiam.")
 
-    def _user(self, username, name, sobrenome, password, created_count):
+    def _user(self, username, name, last_name, password, created_count):
         user, created = get_user_model().objects.get_or_create(
             username=username,
             defaults={
                 "first_name": name,
-                "last_name": sobrenome,
+                "last_name": last_name,
                 "email": f"{username}@example.com",
             },
         )

@@ -52,7 +52,7 @@ def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
             name="Paciente Arquivado", archived=True, birth_date=day(5).replace(year=1980)
         )
 
-        def book(date, hour, practitioner=ana, patient=maria, status="agendado"):
+        def book(date, hour, practitioner=ana, patient=maria, status="booked"):
             Appointment.objects.create(
                 practitioner=practitioner,
                 kind=kind,
@@ -63,15 +63,15 @@ def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
                 end=agenda.timestamp(date, datetime.time(hour + 1)),
             )
 
-        book(TODAY, 8, status="compareceu")
-        book(TODAY, 9, status="faltou")
+        book(TODAY, 8, status="attended")
+        book(TODAY, 9, status="missed")
         book(TODAY, 10, practitioner=bruno, patient=joao)  # started, nobody marked it
         book(TODAY, 11)
-        book(TODAY, 14, status="desmarcou")
+        book(TODAY, 14, status="cancelled")
         book(TODAY, 16, patient=None)
-        book(day(3), 9, status="compareceu")
-        book(day(4), 9, status="faltou")
-        book(day(27, 2), 9, status="faltou")  # last month: not in this month's rate
+        book(day(3), 9, status="attended")
+        book(day(4), 9, status="missed")
+        book(day(27, 2), 9, status="missed")  # last month: not in this month's rate
 
         for date, done, patient in [
             (TODAY, False, maria),
@@ -127,7 +127,7 @@ def scenario(monkeypatch, clinic_a, create_practitioner, create_user):
         )
         pay_(first_one, "100", TODAY)
         [february] = post_entry(Entry.Kind.RECEIVABLE, "200", 1, day(3, 2), income, patient=joao)
-        pay_(february, "200", day(3, 2), method="dinheiro")
+        pay_(february, "200", day(3, 2), method="cash")
         [power_bill] = post_entry(Entry.Kind.PAYABLE, "50", 1, TODAY, expense, payer="Luz")
         pay_(power_bill, "50", TODAY)
         post_entry(Entry.Kind.PAYABLE, "80", 1, day(10), expense, payer="Aluguel")
@@ -212,7 +212,7 @@ def test_completing_recall_and_marking_attendance_return_home(scenario, client_f
     assert response.url == reverse("home")
     next_one = dashboard["schedule"]["next"]
     response = user_client.post(
-        reverse("schedule:status", args=[next_one.pk]), {"status": "compareceu"}, follow=True
+        reverse("schedule:status", args=[next_one.pk]), {"status": "attended"}, follow=True
     )
     assert "João Paciente compareceu." in response.content.decode()
     assert response.context["dashboard"]["schedule"]["attended"] == 2

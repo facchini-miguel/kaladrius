@@ -155,7 +155,7 @@ class Appointment(ClinicModel):
                 # A cancelled appointment does not hold the slot, in either spelling while the
                 # stored values change (decision 197).
                 condition=~models.Q(
-                    status__in=spellings("schedule.Appointment.status", "desmarcou")
+                    status__in=spellings("schedule.Appointment.status", "cancelled")
                 ),
                 violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),

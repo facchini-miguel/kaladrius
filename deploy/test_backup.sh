@@ -51,5 +51,5 @@ WHERE to_regclass(t) IS NOT NULL;
 \echo
 \echo 'Last migration of each app'
 SELECT app || ' | ' || max(name) FROM django_migrations
-WHERE app IN ('core', 'pacientes', 'agenda', 'financeiro', 'orcamentos') GROUP BY app ORDER BY app;
+WHERE app IN ('core', 'pacientes', 'agenda', 'financeiro', 'orcamentos', 'patients', 'schedule', 'finance', 'estimates') GROUP BY app ORDER BY app;
 SQL

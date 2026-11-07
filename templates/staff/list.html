@@ -8,7 +8,7 @@
   <h1 class="h3 mb-0">{% translate "Funcionários" %}</h1>
   <div class="d-flex gap-2">
     <a class="btn btn-outline-primary" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}</a>
-    {% if can.pessoal.criar %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
+    {% if can.staff.create %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
   </div>
 </div>
 <div class="table-responsive">

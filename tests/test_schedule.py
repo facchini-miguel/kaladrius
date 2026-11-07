@@ -191,7 +191,7 @@ def test_cancelled_slot_takes_another_patient_keeping_who_cancelled(scenario):
     book(scenario)
     [appointment] = appointment_list(scenario)
     user_client = scenario["client"]
-    user_client.post(reverse("schedule:status", args=[appointment.pk]), {"status": "desmarcou"})
+    user_client.post(reverse("schedule:status", args=[appointment.pk]), {"status": "cancelled"})
     window = user_client.get(reverse("schedule:edit", args=[appointment.pk])).content.decode()
     assert "Agendar outro paciente neste horário" in window
     assert (
@@ -207,7 +207,7 @@ def test_cancelled_slot_takes_another_patient_keeping_who_cancelled(scenario):
     assert new_appointment.status_code == 204
     with use_clinic(scenario["clinic"]):
         names = sorted((a.patient.name, a.status) for a in Appointment.objects.all())
-    assert names == [("Maria Paciente", "desmarcou"), ("Outro Paciente", "agendado")]
+    assert names == [("Maria Paciente", "cancelled"), ("Outro Paciente", "booked")]
 
 
 def test_delete_one_or_the_series_from_then_on(scenario, create_user, client_for):
@@ -530,25 +530,25 @@ def status_of(scenario, appointment):
 def test_marks_attendance_and_no_show_from_the_day(scenario):
     today = timezone.localdate()
     appointment = appointment_at(scenario, today)
-    response = mark(scenario, appointment, "compareceu")
+    response = mark(scenario, appointment, "attended")
     assert response.status_code == 204
     assert json.loads(response["HX-Trigger"]) == {
         "scheduleUpdated": {"message": "Maria Paciente compareceu."}
     }
-    assert status_of(scenario, appointment) == "compareceu"
-    assert mark(scenario, appointment, "agendado").status_code == 204
-    assert status_of(scenario, appointment) == "agendado"
+    assert status_of(scenario, appointment) == "attended"
+    assert mark(scenario, appointment, "booked").status_code == 204
+    assert status_of(scenario, appointment) == "booked"
 
     # The appointment window shows the buttons; a future one only offers "cancelled".
     window = scenario["client"].get(reverse("schedule:edit", args=[appointment.pk]))
     assert "Compareceu" in window.content.decode()
     future = appointment_at(scenario, MONDAY)
     window = scenario["client"].get(reverse("schedule:edit", args=[future.pk])).content.decode()
-    assert '"status": "faltou"' not in window and '"status": "desmarcou"' in window
-    response = mark(scenario, future, "faltou")
+    assert '"status": "missed"' not in window and '"status": "cancelled"' in window
+    response = mark(scenario, future, "missed")
     assert response.status_code == 200
     assert "a partir do dia do atendimento" in response.context["status_error"]
-    assert status_of(scenario, future) == "agendado"
+    assert status_of(scenario, future) == "booked"
 
 
 def test_status_button_sends_what_the_view_reads(scenario):
@@ -561,18 +561,18 @@ def test_status_button_sends_what_the_view_reads(scenario):
     assert button, "no Compareceu button in the window"
     response = scenario["client"].post(button[1], json.loads(button[2]), HTTP_HX_REQUEST="true")
     assert response.status_code == 204
-    assert status_of(scenario, appointment) == "compareceu"
+    assert status_of(scenario, appointment) == "attended"
 
 
 def test_invalid_status_and_slot_without_patient_are_refused(scenario):
     today = timezone.localdate()
     lockout = appointment_at(scenario, today, patient=False)
-    response = mark(scenario, lockout, "compareceu", htmx=False)
+    response = mark(scenario, lockout, "attended", htmx=False)
     assert response.status_code == 302 and response.url == reverse("home")
-    assert status_of(scenario, lockout) == "agendado"
+    assert status_of(scenario, lockout) == "booked"
     appointment = appointment_at(scenario, today, hour=11)
     mark(scenario, appointment, "chegou")
-    assert status_of(scenario, appointment) == "agendado"
+    assert status_of(scenario, appointment) == "booked"
     assert (
         scenario["client"].get(reverse("schedule:status", args=[appointment.pk])).status_code == 405
     )
@@ -581,14 +581,14 @@ def test_invalid_status_and_slot_without_patient_are_refused(scenario):
 def test_cancelled_frees_the_slot(scenario):
     book(scenario)
     [first] = appointment_list(scenario)
-    assert mark(scenario, first, "desmarcou").status_code == 204
+    assert mark(scenario, first, "cancelled").status_code == 204
     # The slot is free again for another patient, also for the database constraint.
     assert book(scenario).status_code == 204
     assert len(appointment_list(scenario)) == 2
     # Undoing the cancellation would double-book: refused.
-    response = mark(scenario, first, "agendado")
+    response = mark(scenario, first, "booked")
     assert "já foi ocupado" in response.context["status_error"]
-    assert status_of(scenario, first) == "desmarcou"
+    assert status_of(scenario, first) == "cancelled"
     # Editing the cancelled one does not conflict with the new one either.
     response = scenario["client"].post(
         reverse("schedule:edit", args=[first.pk]), data(scenario, description="Remarcar")
@@ -599,15 +599,15 @@ def test_cancelled_frees_the_slot(scenario):
 def test_rescheduling_to_future_or_removing_patient_clears_attendance(scenario):
     today = timezone.localdate()
     appointment = appointment_at(scenario, today)
-    mark(scenario, appointment, "faltou")
+    mark(scenario, appointment, "missed")
     response = scenario["client"].post(
         reverse("schedule:edit", args=[appointment.pk]), data(scenario)
     )
     assert response.status_code == 204
-    assert status_of(scenario, appointment) == "agendado"
+    assert status_of(scenario, appointment) == "booked"
 
     other = appointment_at(scenario, today, hour=11)
-    mark(scenario, other, "compareceu")
+    mark(scenario, other, "attended")
     without_patient = data(
         scenario,
         patient="",
@@ -617,7 +617,7 @@ def test_rescheduling_to_future_or_removing_patient_clears_attendance(scenario):
         end_time="12:00",
     )
     scenario["client"].post(reverse("schedule:edit", args=[other.pk]), without_patient)
-    assert status_of(scenario, other) == "agendado"
+    assert status_of(scenario, other) == "booked"
 
 
 def test_practitioner_marks_only_own_schedule(scenario, create_user, client_for):
@@ -625,13 +625,13 @@ def test_practitioner_marks_only_own_schedule(scenario, create_user, client_for)
     of_bruno = appointment_at(scenario, today, practitioner="bruno")
     of_ana = appointment_at(scenario, today)
     user_client = dra_ana_client(scenario, create_user, client_for)
-    assert mark(scenario, of_bruno, "compareceu", user_client=user_client).status_code == 404
-    assert mark(scenario, of_ana, "compareceu", user_client=user_client).status_code == 204
+    assert mark(scenario, of_bruno, "attended", user_client=user_client).status_code == 404
+    assert mark(scenario, of_ana, "attended", user_client=user_client).status_code == 204
 
 
 def test_events_carry_the_status(scenario):
     appointment = appointment_at(scenario, timezone.localdate())
-    mark(scenario, appointment, "faltou")
+    mark(scenario, appointment, "missed")
     today = timezone.localdate()
     response = scenario["client"].get(
         reverse("schedule:events"),
@@ -642,7 +642,7 @@ def test_events_carry_the_status(scenario):
         },
     )
     [event] = response.json()
-    assert event["classNames"] == ["status-faltou"]
+    assert event["classNames"] == ["status-missed"]
     assert event["extendedProps"]["status_name"] == "Faltou"
 
 

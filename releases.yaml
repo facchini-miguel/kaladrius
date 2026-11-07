@@ -4,6 +4,45 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.65.0
+  date: 2026-11-07
+  title:
+    pt-br: Códigos internos em inglês
+    en: Internal codes in English
+    es: Códigos internos en inglés
+  items:
+    - kind: melhoria
+      module: Geral
+      audience: [equipe]
+      text:
+        pt-br: >
+          Manutenção interna: os códigos que o sistema grava para as opções (situação da consulta,
+          forma de pagamento, papel na clínica…) foram reorganizados. Nada muda no uso, nas telas
+          nem nos dados.
+        en: >
+          Internal maintenance: the codes the system stores for the options (appointment status,
+          payment method, role in the clinic…) were reorganized. Nothing changes in use, on the
+          screens or in the data.
+        es: >
+          Mantenimiento interno: se reorganizaron los códigos que el sistema guarda para las
+          opciones (estado de la cita, forma de pago, rol en la clínica…). Nada cambia en el uso,
+          en las pantallas ni en los datos.
+    - kind: melhoria
+      module: Sistema
+      audience: []
+      text:
+        pt-br: >
+          Os valores gravados dos campos de opções e os códigos de permissão estão em inglês
+          (decisão 198). A atualização converte os valores; a volta para a 0.64.0 os converte de
+          volta.
+        en: >
+          The choice fields' stored values and the permission codes are English (decision 198).
+          The update converts the values; a rollback to 0.64.0 converts them back.
+        es: >
+          Los valores guardados de los campos de opciones y los códigos de permisos están en
+          inglés (decisión 198). La actualización convierte los valores; la vuelta a la 0.64.0 los
+          convierte de vuelta.
+
 - version: 0.64.0
   date: 2026-11-07
   title:

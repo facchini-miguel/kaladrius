@@ -135,7 +135,7 @@ def test_audit_logs_without_copying_clinical_text(scenario):
     visit = log_event(scenario)
     scenario["dr"].get(reverse("medical_records:visit", args=[visit.pk]))
     records = AuditEntry.objects.filter(model_name="Atendimento", object_id=visit.pk)
-    assert {r.action for r in records} == {"criar", "visualizar"}
+    assert {r.action for r in records} == {"create", "viewed"}
     content = str([r.changes for r in records])
     assert "(conteúdo clínico)" in content
     for text in ANAMNESIS.values():
@@ -180,7 +180,7 @@ def test_print_only_after_finalized(scenario):
     assert printout.status_code == 200
     assert ANAMNESIS["chief_complaint"] in content and "Dra. Ana" in content
     assert AuditEntry.objects.filter(
-        object_id=visit.pk, action="visualizar", object_repr__endswith="(impressão)"
+        object_id=visit.pk, action="viewed", object_repr__endswith="(impressão)"
     ).exists()
     assert scenario["reception"].get(url).status_code == 403
 
@@ -196,7 +196,7 @@ def test_attendance_and_leave_certificates(scenario):
     response = scenario["dra"].post(
         url,
         {
-            "kind": "comparecimento",
+            "kind": "attendance",
             "date": "2031-03-05",
             "start_time": "10:00",
             "end_time": "11:00",
@@ -205,10 +205,10 @@ def test_attendance_and_leave_certificates(scenario):
     page = scenario["dra"].get(response.url).content.decode()
     assert "Maria Paciente" in page and "das 10:00 às 11:00" in page
 
-    without_days = scenario["dra"].post(url, {"kind": "afastamento", "date": "2031-03-05"})
+    without_days = scenario["dra"].post(url, {"kind": "sick_leave", "date": "2031-03-05"})
     assert "Informe quantos dias" in without_days.content.decode()
     response = scenario["dra"].post(
-        url, {"kind": "afastamento", "date": "2031-03-05", "days": "3", "note": "Repouso"}
+        url, {"kind": "sick_leave", "date": "2031-03-05", "days": "3", "note": "Repouso"}
     )
     page = scenario["dra"].get(response.url).content.decode()
     assert "3 dias de afastamento" in page and "Repouso" in page
@@ -357,7 +357,7 @@ def test_system_admin_sees_and_does_everything(scenario, django_user_model):
     response = root.post(
         reverse("medical_records:certificate_new", args=[visit.pk]),
         {
-            "kind": "comparecimento",
+            "kind": "attendance",
             "date": "2031-03-05",
             "start_time": "10:00",
             "end_time": "11:00",

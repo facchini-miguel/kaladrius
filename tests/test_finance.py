@@ -175,7 +175,7 @@ def test_partial_payment_interest_and_balance(scenario):
     url = reverse("finance:receive_installment", args=[first_one.pk])
     data = {
         "date": TODAY.isoformat(),
-        "method": "dinheiro",
+        "method": "cash",
         "account": scenario["cash_register"].pk,
     }
     # 60 received, 10 of them late fee: the installment goes down by 50.
@@ -321,18 +321,18 @@ def test_admin_registers_categories_and_accounts(scenario):
     user_client = log_in(scenario, "admin")
     url = reverse("finance:catalog_new", args=["categories"])
     assert (
-        user_client.post(url, {"name": "Ortodontia", "kind": "receita", "active": "on"}).status_code
+        user_client.post(url, {"name": "Ortodontia", "kind": "income", "active": "on"}).status_code
         == 302
     )
-    response = user_client.post(url, {"name": "Ortodontia", "kind": "receita", "active": "on"})
+    response = user_client.post(url, {"name": "Ortodontia", "kind": "income", "active": "on"})
     assert "Já existe" in response.content.decode()
     user_client.post(
         reverse("finance:catalog_new", args=["accounts"]),
-        {"name": "Maquininha", "kind": "cartao", "active": "on"},
+        {"name": "Maquininha", "kind": "card", "active": "on"},
     )
     with use_clinic(scenario["clinic"]):
         assert Category.objects.filter(name="Ortodontia").exists()
-        assert FinancialAccount.objects.filter(name="Maquininha", kind="cartao").exists()
+        assert FinancialAccount.objects.filter(name="Maquininha", kind="card").exists()
     assert user_client.get("/finance/something-else/").status_code == 404
 
 
@@ -378,7 +378,7 @@ def expense(scenario, **extra):
         "description": "Aluguel",
         "category": rent.pk,
         "amount": "3.000,00".replace(".", ""),
-        "mode": "repetir",
+        "mode": "repeat",
         "installments": 12,
         "first_due_date": "2031-01-10",
         "notes": "",
@@ -391,7 +391,7 @@ def test_fixed_monthly_and_installment_expense(scenario):
     assert admin.post(reverse("finance:expense_new"), expense(scenario)).status_code == 302
     admin.post(
         reverse("finance:expense_new"),
-        expense(scenario, description="Cadeira", mode="dividir", amount="900", installments=3),
+        expense(scenario, description="Cadeira", mode="split", amount="900", installments=3),
     )
     with use_clinic(scenario["clinic"]):
         rent = Entry.objects.get(description="Aluguel")
@@ -462,7 +462,7 @@ def test_account_balance_with_opening_balance(scenario):
             installments_of(scenario, entry)[0],
             user=scenario["admin"],
             amount=Decimal("100"),
-            method="dinheiro",
+            method="cash",
             account=scenario["cash_register"],
         )
         balances = dict((account.name, balance) for account, balance in services.account_balances())
@@ -471,7 +471,7 @@ def test_account_balance_with_opening_balance(scenario):
     admin = log_in(scenario, "admin")
     response = admin.post(
         reverse("finance:catalog_edit", args=["accounts", scenario["cash_register"].pk]),
-        {"name": "Caixa", "kind": "dinheiro", "opening_balance": "-10,50", "active": "on"},
+        {"name": "Caixa", "kind": "cash", "opening_balance": "-10,50", "active": "on"},
     )
     assert response.status_code == 302
 
@@ -573,7 +573,7 @@ def test_full_daily_cash(scenario):
             first_one,
             user=scenario["reception"],
             amount=Decimal("40"),
-            method="dinheiro",
+            method="cash",
             account=scenario["cash_register"],
         )
         services.receive(
@@ -638,7 +638,7 @@ def test_closed_cash_does_not_change_with_later_reversal(scenario):
             installments_of(scenario, entry)[0],
             user=scenario["admin"],
             amount=Decimal("50"),
-            method="dinheiro",
+            method="cash",
             account=scenario["cash_register"],
         )
         services.close_register(

@@ -25,7 +25,7 @@ def last_ones(**filters):
 
 
 def test_creation_change_and_deletion_are_logged(admin_a, clinic_a):
-    admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
+    admin_a.post(reverse("patients:new"), {"kind": "individual", "name": "Maria", "active": "on"})
     with use_clinic(clinic_a):
         patient = Patient.objects.get(name="Maria")
     [creation] = last_ones(action=Action.CREATE, model_name="Paciente")
@@ -37,7 +37,7 @@ def test_creation_change_and_deletion_are_logged(admin_a, clinic_a):
 
     admin_a.post(
         reverse("patients:edit", args=[patient.pk]),
-        {"kind": "PF", "name": "Maria Souza", "active": "on", "occupation": "Professora"},
+        {"kind": "individual", "name": "Maria Souza", "active": "on", "occupation": "Professora"},
     )
     [change] = last_ones(action=Action.CHANGE, model_name="Paciente")
     assert change.changes == {
@@ -53,7 +53,7 @@ def test_creation_change_and_deletion_are_logged(admin_a, clinic_a):
 def test_permanent_deletion_removes_personal_data_from_audit(admin_a, clinic_a):
     admin_a.post(
         reverse("patients:new"),
-        {"kind": "PF", "name": "Maria Sigilosa", "active": "on", "tax_id": "52998224725"},
+        {"kind": "individual", "name": "Maria Sigilosa", "active": "on", "tax_id": "52998224725"},
     )
     with use_clinic(clinic_a):
         patient = Patient.objects.get(name="Maria Sigilosa")
@@ -175,7 +175,7 @@ def test_screen_shows_field_label_also_by_old_name(admin_a, clinic_a):
     field (or its column-keeping rename) does not change what the clinic reads."""
     from apps.audit.models import AuditEntry
 
-    admin_a.post(reverse("patients:new"), {"kind": "PF", "name": "Maria", "active": "on"})
+    admin_a.post(reverse("patients:new"), {"kind": "individual", "name": "Maria", "active": "on"})
     AuditEntry.objects.create(
         clinic=clinic_a,
         action=Action.CHANGE,

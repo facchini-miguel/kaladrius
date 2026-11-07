@@ -27,28 +27,28 @@ def test_each_country_has_its_methods():
     for country, for_country in payment_methods.METHODS.items():
         assert len(set(for_country.codes)) == len(for_country.codes), country
         assert set(for_country.codes) <= set(Payment.Method.values), country
-        assert {"dinheiro", "credito", "transferencia"} <= set(for_country.codes), country
+        assert {"cash", "credit", "transfer"} <= set(for_country.codes), country
         assert set(for_country.names) <= set(for_country.codes), country
 
 
 def test_local_names_in_parentheses():
     with translation.override("pt-br"):
-        assert payment_methods.label("transferencia", "MX") == "Transferência (SPEI)"
-        assert payment_methods.label("carteira", "PE") == "Carteira digital (Yape, Plin)"
-        assert payment_methods.label("transferencia", "BR") == "Transferência"
+        assert payment_methods.label("transfer", "MX") == "Transferência (SPEI)"
+        assert payment_methods.label("wallet", "PE") == "Carteira digital (Yape, Plin)"
+        assert payment_methods.label("transfer", "BR") == "Transferência"
         # Brazil keeps its methods, in the same order, and still no cheque.
         assert [code for code, _name in payment_methods.in_use("BR")] == [
-            "dinheiro",
+            "cash",
             "pix",
-            "debito",
-            "credito",
-            "transferencia",
+            "debit",
+            "credit",
+            "transfer",
             "boleto",
         ]
     with translation.override("en"):
         # The local name is not repeated when it is the translated name itself.
-        assert payment_methods.label("debito_auto", "GB") == "Direct debit"
-        assert payment_methods.label("debito_auto", "ZA") == "Direct debit (debit order)"
+        assert payment_methods.label("direct_debit", "GB") == "Direct debit"
+        assert payment_methods.label("direct_debit", "ZA") == "Direct debit (debit order)"
 
 
 def test_check_spelled_per_english_variant():
@@ -68,18 +68,18 @@ def test_form_offers_the_country_methods(scenario):  # noqa: F811
     url = reverse("finance:receive_installment", args=[installment.pk])
     admin = log_in(scenario, "admin")
     page = admin.get(url).content.decode()
-    assert 'value="carteira"' in page and "Yape, Plin" in page
+    assert 'value="wallet"' in page and "Yape, Plin" in page
     assert 'value="pix"' not in page and 'value="boleto"' not in page
     data = {"date": TODAY.isoformat(), "amount": "100", "account": scenario["cash_register"].pk}
     assert "method" in admin.post(url, {**data, "method": "pix"}).context["form"].errors
-    assert admin.post(url, {**data, "method": "carteira"}).status_code == 302
+    assert admin.post(url, {**data, "method": "wallet"}).status_code == 302
     with use_clinic(scenario["clinic"]), translation.override("pt-br"):
         payment = Payment.objects.get()
         assert payment.get_method_display() == "Carteira digital (Yape, Plin)"
         report = services.report(TODAY, TODAY)
     assert report["by_method"] == [("Carteira digital (Yape, Plin)", Decimal("100.00"))]
     new_one = admin.get(reverse("finance:entry_new")).content.decode()
-    assert 'value="carteira"' in new_one and 'value="pix"' not in new_one
+    assert 'value="wallet"' in new_one and 'value="pix"' not in new_one
 
 
 def test_card_without_installments_in_united_states(scenario):  # noqa: F811

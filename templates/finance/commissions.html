@@ -25,8 +25,8 @@
         <td class="text-end text-nowrap">{% if row.reversal_deduction %}− {{ row.reversal_deduction|currency }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap fw-semibold">{{ row.amount|currency }}</td>
         <td class="text-end text-nowrap">
-          {% if can.financeiro.alterar %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' row.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
-          {% if can.financeiro.criar and row.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' row.practitioner.pk %}?until={{ until|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
+          {% if can.finance.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'finance:commission_percentage' row.practitioner.pk %}">{% translate "Percentual" %}</a>{% endif %}
+          {% if can.finance.create and row.amount > 0 %}<a class="btn btn-sm btn-success" href="{% url 'finance:commission_pay' row.practitioner.pk %}?until={{ until|date:'Y-m-d' }}">{% translate "Pagar" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}
@@ -35,7 +35,7 @@
     </tbody>
   </table>
 </div>
-{% if without_percentage and can.financeiro.alterar %}
+{% if without_percentage and can.finance.change %}
 <p class="small">{% translate "Sem percentual definido:" %}
   {% for practitioner in without_percentage %}<a href="{% url 'finance:commission_percentage' practitioner.pk %}">{{ practitioner.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
 </p>

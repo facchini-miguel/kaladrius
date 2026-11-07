@@ -21,7 +21,7 @@
 <div class="card mb-4" style="max-width: 32rem;">
   <div class="card-body">
     <h2 class="h5">{% blocktranslate with conta=account.name %}O caixa “{{ conta }}” está fechado{% endblocktranslate %}</h2>
-    {% if can.recebimentos.criar %}
+    {% if can.receiving.create %}
     <form method="post" novalidate>
       {% csrf_token %}
       {% include "includes/form.html" %}

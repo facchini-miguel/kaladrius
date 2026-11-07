@@ -84,7 +84,7 @@ def test_numbering_follows_the_country(clinic_a, create_user, client_for):
 
 
 def test_new_clinic_in_united_states_starts_with_universal():
-    form = NewClinicForm({"name": "Smile Fictitious", "area": "odontologia", "country": "US"})
+    form = NewClinicForm({"name": "Smile Fictitious", "area": "dentistry", "country": "US"})
     assert form.is_valid(), form.errors
     assert form.instance.tooth_numbering == UNIVERSAL
 

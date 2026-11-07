@@ -197,7 +197,7 @@ def test_patient_outside_brazil(clinic_a, create_user, client_for):
     response = admin.post(
         reverse("patients:new"),
         {
-            "kind": "PF",
+            "kind": "individual",
             "name": "Oliver Fictício",
             "active": "on",
             "mobile_phone": "07700 900123",

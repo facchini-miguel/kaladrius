@@ -99,7 +99,7 @@ def document_by_kind(field, individual, company, kind):
     """Name and example of a document field that depends on the person type: the document of
     an individual and of a company (either may be None, and then the field is hidden for that
     type). The page switches them when the type changes (static/js/page.js)."""
-    current = company if kind == "PJ" else individual
+    current = company if kind == "company" else individual
     field.label = (current or individual or company).abbreviation
     field.widget.attrs.update(
         {

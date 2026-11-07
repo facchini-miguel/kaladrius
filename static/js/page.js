@@ -15,8 +15,8 @@
   // example of the chosen type's document ("CPF" or "CNPJ") and hides when that type has none
   // in the clinic's country.
   function documents(form) {
-    const kind = form.querySelector("input[name=kind]:checked")?.value || "PF";
-    const suffix = kind === "PJ" ? "Pj" : "Pf";
+    const kind = form.querySelector("input[name=kind]:checked")?.value || "individual";
+    const suffix = kind === "company" ? "Pj" : "Pf";
     form.querySelectorAll("input[data-label-pf]").forEach((field) => {
       const label = field.dataset["label" + suffix];
       const box = field.closest(".mb-3") || field;

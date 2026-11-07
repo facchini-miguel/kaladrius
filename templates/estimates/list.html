@@ -7,8 +7,8 @@
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
   <h1 class="h3 mb-0">{% translate "Orçamentos" %}</h1>
   <div class="d-flex gap-2">
-    {% if can.cadastros.ver %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
-    {% if can.orcamentos.criar %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if can.catalogs.view %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
+    {% if can.estimates.create %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
   </div>
 </div>
 <form method="get" class="row g-2 mb-3">

@@ -20,9 +20,9 @@ def test_matrix_covers_all_roles():
 @pytest.mark.parametrize(
     ("role", "expected"),
     [
-        (Role.ADMIN, {"lista": 200, "novo": 200, "editar": 200, "excluir": 200}),
-        (Role.FRONT_DESK, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
-        (Role.PRACTITIONER, {"lista": 200, "novo": 403, "editar": 403, "excluir": 403}),
+        (Role.ADMIN, {"list": 200, "new": 200, "edit": 200, "delete": 200}),
+        (Role.FRONT_DESK, {"list": 200, "new": 403, "edit": 403, "delete": 403}),
+        (Role.PRACTITIONER, {"list": 200, "new": 403, "edit": 403, "delete": 403}),
     ],
 )
 def test_practitioner_screens_access_by_role(
@@ -31,10 +31,10 @@ def test_practitioner_screens_access_by_role(
     practitioner = create_practitioner(clinic_a, "Dra. A")
     user_client = client_for(create_user("usuario", clinic_a, role))
     urls = {
-        "lista": reverse("practitioners:list"),
-        "novo": reverse("practitioners:new"),
-        "editar": reverse("practitioners:edit", args=[practitioner.pk]),
-        "excluir": reverse("practitioners:delete", args=[practitioner.pk]),
+        "list": reverse("practitioners:list"),
+        "new": reverse("practitioners:new"),
+        "edit": reverse("practitioners:edit", args=[practitioner.pk]),
+        "delete": reverse("practitioners:delete", args=[practitioner.pk]),
     }
     for name, url in urls.items():
         assert user_client.get(url).status_code == expected[name], name
@@ -123,10 +123,10 @@ def test_first_access_registers_the_clinic(client_for, create_user, django_user_
     assert response.url == reverse("register_clinic")
 
     response = user_client.post(
-        reverse("register_clinic"), {"name": "Clínica Nova", "area": "medicina"}
+        reverse("register_clinic"), {"name": "Clínica Nova", "area": "medicine"}
     )
     assert response.url == reverse("home")
-    assert list(Clinic.objects.values_list("name", "area")) == [("Clínica Nova", "medicina")]
+    assert list(Clinic.objects.values_list("name", "area")) == [("Clínica Nova", "medicine")]
     # A new clinic requires two-step verification (decision 112): the superuser turns it on.
     assert user_client.get(reverse("practitioners:list")).url == reverse("account:two_factor")
     from apps.account import services as account_services

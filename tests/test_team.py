@@ -69,7 +69,7 @@ def test_creates_member_already_linked_to_clinic(clinic_admin_client, clinic_a, 
     assert membership.user.check_password(NEW_PASSWORD)
     # The account creation shows up in the clinic's audit log.
     assert AuditEntry.objects.filter(
-        clinic=clinic_a, action="criar", model_name="Usuário", object_repr="carla"
+        clinic=clinic_a, action="create", model_name="Usuário", object_repr="carla"
     ).exists()
 
 

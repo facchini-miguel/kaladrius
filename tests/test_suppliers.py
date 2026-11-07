@@ -25,7 +25,7 @@ def supplier(clinic_a):
 
 
 def data(**extra):
-    return {"kind": "PJ", "name": "Laboratório Fictício", "active": "on", **extra}
+    return {"kind": "company", "name": "Laboratório Fictício", "active": "on", **extra}
 
 
 def expense(clinic, **extra):
@@ -37,7 +37,7 @@ def expense(clinic, **extra):
         "description": "Material fictício",
         "category": category.pk,
         "amount": "450",
-        "mode": "dividir",
+        "mode": "split",
         "installments": 3,
         "first_due_date": "2031-01-10",
         "notes": "",
@@ -65,7 +65,7 @@ def test_registration_normalizes_document_and_contacts(clinic_a, admin):
     ("extra", "field"),
     [
         ({"tax_id": "11.222.333/0001-00"}, "tax_id"),
-        ({"kind": "PF", "tax_id": "111.111.111-11"}, "tax_id"),
+        ({"kind": "individual", "tax_id": "111.111.111-11"}, "tax_id"),
         ({"phone": "1234"}, "phone"),
         ({"name": ""}, "name"),
     ],

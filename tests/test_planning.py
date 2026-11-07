@@ -95,7 +95,7 @@ def test_actual_and_percentage_summing_subgroups(clinic_a, admin):
 def test_subgroup_target_does_not_count_twice(clinic_a):
     with use_clinic(clinic_a):
         staff_ = AccountGroup.objects.get(name="Pessoal")
-        sub = AccountGroup.objects.create(name="Recepção", kind="despesa", parent=staff_)
+        sub = AccountGroup.objects.create(name="Recepção", kind="expense", parent=staff_)
         Planning.objects.create(year=2026, group=staff_, amount=Decimal("5000"))
         Planning.objects.create(year=2026, group=sub, amount=Decimal("2000"))
         Planning.objects.create(

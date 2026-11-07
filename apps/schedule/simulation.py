@@ -74,7 +74,7 @@ def simulate_appointments(clinic, rng, weeks_before=2, weeks_after=4, occupancy=
                         kind=rng.choice(appointment_types),
                         patient=rng.choice(patients) if with_patient else None,
                         description="" if with_patient else "Horário bloqueado",
-                        status=_status(rng, current) if with_patient else "agendado",
+                        status=_status(rng, current) if with_patient else "booked",
                         start=current,
                         end=end,
                     )
