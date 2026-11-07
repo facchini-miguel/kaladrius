@@ -23,7 +23,7 @@
       <tr{% if patient.birth_date|date:"md" == today|date:"md" %} class="table-warning"{% endif %}>
         <td>{{ patient.birth_date|date:"d/m" }}</td>
         <td><a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a></td>
-        <td>{% blocktranslate count idade=age %}{{ idade }} year{% plural %}{{ idade }} years{% endblocktranslate %}</td>
+        <td>{% blocktranslate count age=age %}{{ age }} year{% plural %}{{ age }} years{% endblocktranslate %}</td>
         <td class="text-nowrap">{{ patient.main_phone|phone|default:"—" }}</td>
         <td>{{ patient.email|default:"—" }}</td>
       </tr>

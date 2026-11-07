@@ -1,5 +1,5 @@
 {% load i18n %}<div class="modal-header">
-  <h2 class="modal-title h5">{% blocktranslate with dia=day|date:"d/m" %}Recalls on {{ dia }}{% endblocktranslate %}</h2>
+  <h2 class="modal-title h5">{% blocktranslate with day=day|date:"d/m" %}Recalls on {{ day }}{% endblocktranslate %}</h2>
   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate "Close" %}"></button>
 </div>
 <div class="modal-body">

@@ -1,11 +1,11 @@
 {% load i18n %}{% with name=certificate.visit.patient.name %}
   <p class="fs-6 lh-lg mt-4">
     {% if certificate.kind == "sick_leave" %}
-    {% blocktranslate count dias=certificate.days with data=date nome=name %}I certify that {{ nome }} was under my care on {{ data }} and needs {{ dias }} day of leave from their activities, starting on that date.{% plural %}I certify that {{ nome }} was under my care on {{ data }} and needs {{ dias }} days of leave from their activities, starting on that date.{% endblocktranslate %}
+    {% blocktranslate count days=certificate.days with date=date name=name %}I certify that {{ name }} was under my care on {{ date }} and needs {{ days }} day of leave from their activities, starting on that date.{% plural %}I certify that {{ name }} was under my care on {{ date }} and needs {{ days }} days of leave from their activities, starting on that date.{% endblocktranslate %}
     {% elif certificate.start_time and certificate.end_time %}
-    {% blocktranslate with data=date nome=name inicio=certificate.start_time|time:"H:i" fim=certificate.end_time|time:"H:i" %}I certify that {{ nome }} was seen at this clinic on {{ data }}, from {{ inicio }} to {{ fim }}.{% endblocktranslate %}
+    {% blocktranslate with date=date name=name start=certificate.start_time|time:"H:i" end=certificate.end_time|time:"H:i" %}I certify that {{ name }} was seen at this clinic on {{ date }}, from {{ start }} to {{ end }}.{% endblocktranslate %}
     {% else %}
-    {% blocktranslate with data=date nome=name %}I certify that {{ nome }} was seen at this clinic on {{ data }}.{% endblocktranslate %}
+    {% blocktranslate with date=date name=name %}I certify that {{ name }} was seen at this clinic on {{ date }}.{% endblocktranslate %}
     {% endif %}
   </p>
 {% endwith %}

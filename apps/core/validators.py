@@ -112,7 +112,9 @@ def normalize_phone(value, country=None):
     if len(number) not in (10, 11):
         raise ValidationError(_("Enter the area code and number (10 or 11 digits)."))
     if int(number[:2]) not in DDDS:
-        raise ValidationError(_("Area code %(ddd)s does not exist.") % {"ddd": number[:2]})
+        raise ValidationError(
+            _("Area code %(area_code)s does not exist.") % {"area_code": number[:2]}
+        )
     if len(number) == 11 and number[2] != "9":
         raise ValidationError(_("With 11 digits, the number starts with 9 after the area code."))
     return ninth_digit(number)

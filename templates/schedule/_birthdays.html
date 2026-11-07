@@ -1,5 +1,5 @@
 {% load i18n %}<div class="modal-header">
-  <h2 class="modal-title h5">{% blocktranslate with dia=day|date:"d/m" %}Birthdays on {{ dia }}{% endblocktranslate %}</h2>
+  <h2 class="modal-title h5">{% blocktranslate with day=day|date:"d/m" %}Birthdays on {{ day }}{% endblocktranslate %}</h2>
   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate "Close" %}"></button>
 </div>
 <div class="modal-body">
@@ -7,7 +7,7 @@
     {% for patient, age in birthdays %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
-      <span class="text-body-secondary">{% blocktranslate count idade=age %}turns {{ idade }}{% plural %}turns {{ idade }}{% endblocktranslate %}</span>
+      <span class="text-body-secondary">{% blocktranslate count age=age %}turns {{ age }}{% plural %}turns {{ age }}{% endblocktranslate %}</span>
     </li>
     {% empty %}
     <li class="list-group-item text-body-secondary">{% translate "No birthdays on this day." %}</li>

@@ -196,7 +196,7 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
             if "time_zone" in self.changed_data:
                 self.add_error(
                     "time_zone",
-                    _("Choose a time zone of %(pais)s.") % {"pais": country.name},
+                    _("Choose a time zone of %(country)s.") % {"country": country.name},
                 )
             else:
                 data["time_zone"] = country.time_zones[0]
@@ -233,10 +233,10 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         for modulo, needs in missing(self._chosen()).items():
             self.add_error(
                 "general_modules",
-                _("%(modulo)s needs: %(precisa)s.")
+                _("%(module)s needs: %(needs)s.")
                 % {
-                    "modulo": ModuleCode(modulo).label,
-                    "precisa": ", ".join(str(ModuleCode(p).label) for p in sorted(needs)),
+                    "module": ModuleCode(modulo).label,
+                    "needs": ", ".join(str(ModuleCode(p).label) for p in sorted(needs)),
                 },
             )
         return data
@@ -295,10 +295,10 @@ class ClinicForm(ClinicModulesForm):
         if problem is not None:
             raise forms.ValidationError(
                 _(
-                    "The appointment on %(momento)s would fall outside the new hours or slot "
+                    "The appointment on %(when)s would fall outside the new hours or slot "
                     "length. Adjust future appointments before changing the schedule."
                 )
-                % {"momento": date_format(problem, "SHORT_DATETIME_FORMAT")}
+                % {"when": date_format(problem, "SHORT_DATETIME_FORMAT")}
             )
         return data
 

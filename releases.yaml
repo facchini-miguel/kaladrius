@@ -4,6 +4,40 @@
 # The newest entry always goes at the top.
 # Texts are shown to users: "title" and "text" have one text per language (pt-br, en, es).
 
+- version: 0.68.0
+  date: 2026-11-07
+  title:
+    pt-br: Últimos nomes internos em inglês
+    en: The last internal names in English
+    es: Últimos nombres internos en inglés
+  items:
+    - kind: improvement
+      module: General
+      audience: [staff]
+      text:
+        pt-br: >
+          Manutenção interna: os últimos nomes internos foram reorganizados. Nada muda no uso, nas
+          telas nem nos dados.
+        en: >
+          Internal maintenance: the last internal names were reorganized. Nothing changes in use,
+          on the screens or in the data.
+        es: >
+          Mantenimiento interno: se reorganizaron los últimos nombres internos. Nada cambia en el
+          uso, en las pantallas ni en los datos.
+    - kind: improvement
+      module: System
+      audience: []
+      text:
+        pt-br: >
+          Os marcadores dentro dos textos traduzidos estão em inglês (%(name)s), e a data lembrada
+          da agenda na sessão também (decisão 201).
+        en: >
+          The placeholders inside the translated texts are English (%(name)s), and so is the
+          schedule's remembered date in the session (decision 201).
+        es: >
+          Los marcadores dentro de los textos traducidos están en inglés (%(name)s), y también la
+          fecha recordada de la agenda en la sesión (decisión 201).
+
 - version: 0.67.0
   date: 2026-11-07
   title:

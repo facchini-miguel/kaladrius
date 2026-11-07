@@ -4,7 +4,7 @@
 {% block title %}{% translate "Delete recall" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=recall.patient.name data=recall.date|date:"SHORT_DATE_FORMAT" %}Delete the recall for {{ nome }} ({{ data }})?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with name=recall.patient.name date=recall.date|date:"SHORT_DATE_FORMAT" %}Delete the recall for {{ name }} ({{ date }})?{% endblocktranslate %}</h1>
 <p>{% translate "This action cannot be undone." %}</p>
 <form method="post">
   {% csrf_token %}

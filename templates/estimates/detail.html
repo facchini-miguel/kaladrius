@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n static formats %}
 
-{% block title %}{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
+{% block title %}{% blocktranslate with number=estimate.pk %}Estimate no. {{ number }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
+    <h1 class="h3 mb-0">{% blocktranslate with number=estimate.pk %}Estimate no. {{ number }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
     <span class="text-body-secondary">
       <a href="{% url 'patients:record' estimate.patient_id %}">{{ estimate.patient.name }}</a>
       {% if estimate.practitioner %} · {{ estimate.practitioner.name }}{% endif %}
       · {{ estimate.date|date:"SHORT_DATE_FORMAT" }}
-      · {% blocktranslate with validade=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}valid until {{ validade }}{% endblocktranslate %}
+      · {% blocktranslate with valid_until=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}valid until {{ valid_until }}{% endblocktranslate %}
     </span>
   </div>
   <div class="d-flex flex-wrap gap-2">

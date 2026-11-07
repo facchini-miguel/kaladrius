@@ -8,8 +8,8 @@
   <div>
     <h1 class="h3 mb-0">{% translate "Daily cash" %} · {{ cash_register.account.name }}</h1>
     <span class="text-body-secondary">
-      {% blocktranslate with momento=cash_register.opened_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.opened_by.get_full_name|default:cash_register.opened_by.username %}Opened on {{ momento }} by {{ nome }}{% endblocktranslate %}
-      {% if not cash_register.is_open %} · {% blocktranslate with momento=cash_register.closed_at|date:"SHORT_DATETIME_FORMAT" nome=cash_register.closed_by.get_full_name|default:cash_register.closed_by.username %}closed on {{ momento }} by {{ nome }}{% endblocktranslate %}{% endif %}
+      {% blocktranslate with when=cash_register.opened_at|date:"SHORT_DATETIME_FORMAT" name=cash_register.opened_by.get_full_name|default:cash_register.opened_by.username %}Opened on {{ when }} by {{ name }}{% endblocktranslate %}
+      {% if not cash_register.is_open %} · {% blocktranslate with when=cash_register.closed_at|date:"SHORT_DATETIME_FORMAT" name=cash_register.closed_by.get_full_name|default:cash_register.closed_by.username %}closed on {{ when }} by {{ name }}{% endblocktranslate %}{% endif %}
     </span>
     {% if cash_register.is_open %}<span class="badge text-bg-success ms-1">{% translate "Open" %}</span>{% else %}<span class="badge text-bg-secondary ms-1">{% translate "Closed" %}</span>{% endif %}
   </div>

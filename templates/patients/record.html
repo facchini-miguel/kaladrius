@@ -31,8 +31,8 @@
 
 {% if patient.archived %}
 <div class="alert alert-secondary">
-  {% blocktranslate with momento=patient.archived_at|date:"SHORT_DATETIME_FORMAT" %}Archived on {{ momento }}.{% endblocktranslate %}
-  {% if patient.archived_by %}{% blocktranslate with nome=patient.archived_by.get_full_name|default:patient.archived_by.username %}By {{ nome }}.{% endblocktranslate %}{% endif %}
+  {% blocktranslate with when=patient.archived_at|date:"SHORT_DATETIME_FORMAT" %}Archived on {{ when }}.{% endblocktranslate %}
+  {% if patient.archived_by %}{% blocktranslate with name=patient.archived_by.get_full_name|default:patient.archived_by.username %}By {{ name }}.{% endblocktranslate %}{% endif %}
   {% translate "Only clinic administrators see this patient. Restore them to use them again in the schedule and recalls." %}
 </div>
 {% endif %}
@@ -52,7 +52,7 @@
           {% if in_brazil or patient.rg %}<dt class="col-sm-5">{% translate "ID card (RG)" %}</dt><dd class="col-sm-7">{{ patient.rg|default:"—" }}</dd>{% endif %}
           <dt class="col-sm-5">{% translate "Birth date" %}</dt>
           <dd class="col-sm-7">
-            {% if patient.birth_date %}{{ patient.birth_date|date:"SHORT_DATE_FORMAT" }} ({% blocktranslate count idade=patient.age %}{{ idade }} year{% plural %}{{ idade }} years{% endblocktranslate %}){% else %}—{% endif %}
+            {% if patient.birth_date %}{{ patient.birth_date|date:"SHORT_DATE_FORMAT" }} ({% blocktranslate count age=patient.age %}{{ age }} year{% plural %}{{ age }} years{% endblocktranslate %}){% else %}—{% endif %}
           </dd>
           <dt class="col-sm-5">{% translate "Sex" %}</dt><dd class="col-sm-7">{{ patient.get_sex_display|default:"—" }}</dd>
           <dt class="col-sm-5">{% translate "Marital status" %}</dt><dd class="col-sm-7">{{ patient.marital_status|default:"—" }}</dd>
@@ -105,7 +105,7 @@
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
       <span>
         {% if inverse %}
-        {% with relationship=related.get_relationship_display %}{% blocktranslate with vinculo=relationship %}{{ vinculo }} of{% endblocktranslate %} <a href="{% url 'patients:record' other.pk %}">{{ name }}</a>{% endwith %}
+        {% with relationship=related.get_relationship_display %}{% blocktranslate with membership=relationship %}{{ membership }} of{% endblocktranslate %} <a href="{% url 'patients:record' other.pk %}">{{ name }}</a>{% endwith %}
         {% else %}
         <strong>{{ related.get_relationship_display }}:</strong>
         {% if other %}<a href="{% url 'patients:record' other.pk %}">{{ name }}</a>{% else %}{{ name }}{% endif %}
@@ -180,7 +180,7 @@
   <ul class="list-group list-group-flush">
     {% for estimate in estimates %}
     <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-      <span><a href="{% url 'estimates:detail' estimate.pk %}">{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %}</a> · {{ estimate.date|date:"SHORT_DATE_FORMAT" }} · {{ estimate.total|currency }}</span>
+      <span><a href="{% url 'estimates:detail' estimate.pk %}">{% blocktranslate with number=estimate.pk %}Estimate no. {{ number }}{% endblocktranslate %}</a> · {{ estimate.date|date:"SHORT_DATE_FORMAT" }} · {{ estimate.total|currency }}</span>
       {% include "estimates/_status.html" %}
     </li>
     {% empty %}
@@ -271,6 +271,6 @@
 {% endif %}
 
 <p class="text-body-secondary small mt-3">
-  {% blocktranslate with criado=patient.created_at|date:"SHORT_DATETIME_FORMAT" alterado=patient.updated_at|date:"SHORT_DATETIME_FORMAT" %}Registered on {{ criado }} · changed on {{ alterado }}{% endblocktranslate %}
+  {% blocktranslate with created=patient.created_at|date:"SHORT_DATETIME_FORMAT" changed=patient.updated_at|date:"SHORT_DATETIME_FORMAT" %}Registered on {{ created }} · changed on {{ changed }}{% endblocktranslate %}
 </p>
 {% endblock %}

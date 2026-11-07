@@ -84,8 +84,8 @@ def clinic_settings(request):
         if "currency" in form.changed_data:
             messages.info(
                 request,
-                _("Amounts are now shown in %(moeda)s. No amount already entered was converted.")
-                % {"moeda": form.instance.get_currency_display()},
+                _("Amounts are now shown in %(currency)s. No amount already entered was converted.")
+                % {"currency": form.instance.get_currency_display()},
             )
         return redirect("clinic_settings")
     return render(request, "core/settings.html", {"form": form})

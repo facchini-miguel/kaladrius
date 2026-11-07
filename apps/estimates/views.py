@@ -299,7 +299,7 @@ def procedure_form(request, pk=None):
     form = ProcedureForm(request.POST or None, instance=procedure)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Procedure %(nome)s saved.") % {"nome": form.instance.name})
+        messages.success(request, _("Procedure %(name)s saved.") % {"name": form.instance.name})
         return redirect("estimates:procedures")
     return render(
         request,

@@ -110,8 +110,8 @@ def pay(practitioner, *, until, due_date, category, user):
         kind=Entry.Kind.PAYABLE,
         payer=practitioner.name,
         practitioner=practitioner,
-        description=_("Commission of %(nome)s up to %(data)s")
-        % {"nome": practitioner.name, "data": date_format(until, "SHORT_DATE_FORMAT")},
+        description=_("Commission of %(name)s up to %(date)s")
+        % {"name": practitioner.name, "date": date_format(until, "SHORT_DATE_FORMAT")},
         category=category,
         total_amount=calculation["amount"],
         installments=1,
@@ -158,9 +158,9 @@ def release(commission):
         raise ValidationError(
             _(
                 "This commission cannot be cancelled: the reversal of one of its receipts was "
-                "already deducted in the commission up to %(data)s. Cancel that one first."
+                "already deducted in the commission up to %(date)s. Cancel that one first."
             )
-            % {"data": date_format(deducted.until, "SHORT_DATE_FORMAT")}
+            % {"date": date_format(deducted.until, "SHORT_DATE_FORMAT")}
         )
     # One by one (not .update()), so the audit log records each change.
     for payment in Payment.objects.filter(commission=commission):

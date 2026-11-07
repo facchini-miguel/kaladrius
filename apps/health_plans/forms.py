@@ -30,8 +30,8 @@ class HealthPlanForm(BootstrapForm, forms.ModelForm):
             self.instance.clinic = clinic
         for_country = insurance.for_country(clinic.country)
         if for_country.kinds:
-            self.fields["name"].help_text = _("For example: %(tipos)s.") % {
-                "tipos": for_country.kinds
+            self.fields["name"].help_text = _("For example: %(kinds)s.") % {
+                "kinds": for_country.kinds
             }
         self.registration = for_country.registration
         if self.registration is None:

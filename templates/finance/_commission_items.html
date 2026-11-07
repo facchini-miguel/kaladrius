@@ -8,7 +8,7 @@
     {% endfor %}
   </tbody>
   <tfoot><tr class="fw-semibold"><td colspan="3" class="text-end">{% translate "Total received" %}</td><td class="text-end text-nowrap">{{ received_amount|currency }}</td></tr>
-  <tr class="fw-semibold"><td colspan="3" class="text-end">{% blocktranslate with percentual=percentage|floatformat:"-2" %}Commission ({{ percentual }}%){% endblocktranslate %}</td><td class="text-end text-nowrap">{{ gross|currency }}</td></tr></tfoot>
+  <tr class="fw-semibold"><td colspan="3" class="text-end">{% blocktranslate with percentage=percentage|floatformat:"-2" %}Commission ({{ percentage }}%){% endblocktranslate %}</td><td class="text-end text-nowrap">{{ gross|currency }}</td></tr></tfoot>
 </table></div>
 {% if reversal_deduction %}
 <h2 class="h6">{% translate "Reversals deducted (receipts already paid out and later reversed)" %}</h2>

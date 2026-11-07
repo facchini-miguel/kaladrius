@@ -64,7 +64,7 @@ def _employee_form(request, instance):
                     effective_from=form.cleaned_data["salary_since"],
                     created_by=request.user,
                 )
-        messages.success(request, _("%(nome)s saved.") % {"nome": employee.name})
+        messages.success(request, _("%(name)s saved.") % {"name": employee.name})
         return redirect("staff:employee", pk=employee.pk)
     return render(request, "staff/form.html", {"form": form, "instance": instance})
 

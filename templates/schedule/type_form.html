@@ -4,7 +4,7 @@
 {% block title %}{% if kind.pk %}{% translate "Edit appointment type" %}{% else %}{% translate "New appointment type" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with nome=kind.display_name %}Edit {{ nome }}{% endblocktranslate %}{% else %}{% translate "New appointment type" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if kind.pk %}{% blocktranslate with name=kind.display_name %}Edit {{ name }}{% endblocktranslate %}{% else %}{% translate "New appointment type" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}

@@ -4,7 +4,7 @@
 {% block title %}{% if practitioner.pk %}{% translate "Edit practitioner" %}{% else %}{% translate "New practitioner" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if practitioner.pk %}{% blocktranslate with nome=practitioner.name %}Edit {{ nome }}{% endblocktranslate %}{% else %}{% translate "New practitioner" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if practitioner.pk %}{% blocktranslate with name=practitioner.name %}Edit {{ name }}{% endblocktranslate %}{% else %}{% translate "New practitioner" %}{% endif %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}

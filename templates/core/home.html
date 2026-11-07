@@ -51,7 +51,7 @@
       <div class="indicator-label">{% translate "Patients booked today" %}</div>
       <div class="indicator-value">{{ schedule.patients }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate trimmed with vieram=schedule.attended faltaram=schedule.missed seguir=schedule.upcoming %}Came: {{ vieram }} · missed: {{ faltaram }} · still to come: {{ seguir }}{% endblocktranslate %}
+        {% blocktranslate trimmed with came=schedule.attended missing=schedule.missed next=schedule.upcoming %}Came: {{ came }} · missed: {{ missing }} · still to come: {{ next }}{% endblocktranslate %}
         {% if schedule.unmarked %}<br><span class="text-warning-emphasis">{% blocktranslate count n=schedule.unmarked %}{{ n }} already started without attendance marked{% plural %}{{ n }} already started without attendance marked{% endblocktranslate %}</span>{% endif %}
       </div>
     </div></div>
@@ -73,7 +73,7 @@
       <div class="indicator-label">{% translate "Received today" %}</div>
       <div class="indicator-value text-success">{{ receipts.received|currency }}</div>
       <div class="small text-body-secondary">
-        {% if receipts.receivable_count %}{% blocktranslate count n=receipts.receivable_count with valor=receipts.receivable|currency %}Still to receive today: {{ valor }} ({{ n }} installment){% plural %}Still to receive today: {{ valor }} ({{ n }} installments){% endblocktranslate %}{% else %}{% translate "No open installment is due today." %}{% endif %}
+        {% if receipts.receivable_count %}{% blocktranslate count n=receipts.receivable_count with amount=receipts.receivable|currency %}Still to receive today: {{ amount }} ({{ n }} installment){% plural %}Still to receive today: {{ amount }} ({{ n }} installments){% endblocktranslate %}{% else %}{% translate "No open installment is due today." %}{% endif %}
       </div>
     </div></a>
   </div>
@@ -93,7 +93,7 @@
       <div class="indicator-label">{% translate "Month-to-date result" %}</div>
       <div class="indicator-value {% if finances.result_month < 0 %}text-danger{% else %}text-success{% endif %}">{{ finances.result_month|currency }}</div>
       <div class="small text-body-secondary">
-        {% blocktranslate trimmed with recebido=finances.received_month|currency pago=finances.paid_month|currency %}Received {{ recebido }} − paid {{ pago }}{% endblocktranslate %}<br>
+        {% blocktranslate trimmed with received=finances.received_month|currency paid=finances.paid_month|currency %}Received {{ received }} − paid {{ paid }}{% endblocktranslate %}<br>
         {% translate "Same period last month:" %} {{ finances.previous_result|currency }}
         {% if finances.result_month > finances.previous_result %}<span class="text-success" title="{% translate "Better than last month" %}">▲</span>{% elif finances.result_month < finances.previous_result %}<span class="text-danger" title="{% translate "Worse than last month" %}">▼</span>{% endif %}
       </div>
@@ -207,7 +207,7 @@
       </div>
       <div class="card-body">
         {% for cash_register in receipts.cash_registers %}
-        <p class="mb-1"><span class="badge text-bg-success">{% translate "open" %}</span> {{ cash_register.account.name }} <span class="text-body-secondary small">{% blocktranslate with hora=cash_register.opened_at|time:"H:i" %}since {{ hora }}{% endblocktranslate %}</span></p>
+        <p class="mb-1"><span class="badge text-bg-success">{% translate "open" %}</span> {{ cash_register.account.name }} <span class="text-body-secondary small">{% blocktranslate with time=cash_register.opened_at|time:"H:i" %}since {{ time }}{% endblocktranslate %}</span></p>
         {% empty %}
         <p class="mb-1"><span class="badge text-bg-secondary">{% translate "closed" %}</span> {% translate "No drawer open." %}</p>
         {% endfor %}
@@ -236,7 +236,7 @@
         <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
           <div class="small">
             <div>{{ recall.patient.name }}{% if recall.patient.mobile_phone %} · <span class="text-nowrap">{{ recall.patient.mobile_phone|phone }}</span>{% endif %}{% if recall.patient.whatsapp %} · <a class="text-nowrap" href="{{ recall.patient.whatsapp|whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a>{% endif %}</div>
-            <div class="text-body-secondary">{{ recall.description }}{% if recall.date < dashboard.today %} · <span class="text-danger">{% blocktranslate with data=recall.date|date:"SHORT_DATE_FORMAT" %}since {{ data }}{% endblocktranslate %}</span>{% endif %}</div>
+            <div class="text-body-secondary">{{ recall.description }}{% if recall.date < dashboard.today %} · <span class="text-danger">{% blocktranslate with date=recall.date|date:"SHORT_DATE_FORMAT" %}since {{ date }}{% endblocktranslate %}</span>{% endif %}</div>
           </div>
           {% if can.recalls.change %}
           <form method="post" action="{% url 'recalls:complete' recall.pk %}">
@@ -262,7 +262,7 @@
         {% for patient, age in dashboard.birthdays %}
         <li class="list-group-item small">
           {% if can.patients.view %}<a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>{% else %}{{ patient.name }}{% endif %}
-          <span class="text-body-secondary">· {% blocktranslate count idade=age %}{{ idade }} year{% plural %}{{ idade }} years{% endblocktranslate %}{% if patient.mobile_phone %} · {{ patient.mobile_phone|phone }}{% endif %}</span>
+          <span class="text-body-secondary">· {% blocktranslate count age=age %}{{ age }} year{% plural %}{{ age }} years{% endblocktranslate %}{% if patient.mobile_phone %} · {{ patient.mobile_phone|phone }}{% endif %}</span>
         </li>
         {% endfor %}
       </ul>
@@ -290,6 +290,6 @@
 {% endif %}
 
 <p class="mt-4 small">
-  <a href="{% url 'whats_new' %}">{% blocktranslate with versao_sistema=system_version %}See what's new in version {{ versao_sistema }}{% endblocktranslate %}</a>.
+  <a href="{% url 'whats_new' %}">{% blocktranslate with system_version=system_version %}See what's new in version {{ system_version }}{% endblocktranslate %}</a>.
 </p>
 {% endblock %}

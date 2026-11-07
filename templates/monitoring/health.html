@@ -16,7 +16,7 @@
 {% if not latest %}
 <div class="alert alert-warning">{% translate "No samples yet. On the server, collection runs every 5 minutes (kaladrius-health.timer); in development there is no collection." %}</div>
 {% else %}
-{% if stopped %}<div class="alert alert-danger">{% blocktranslate with momento=latest.time|date:"SHORT_DATETIME_FORMAT" %}Collection stopped: the last sample is from {{ momento }}.{% endblocktranslate %}</div>{% endif %}
+{% if stopped %}<div class="alert alert-danger">{% blocktranslate with when=latest.time|date:"SHORT_DATETIME_FORMAT" %}Collection stopped: the last sample is from {{ when }}.{% endblocktranslate %}</div>{% endif %}
 
 <div class="row g-3 mb-4">
   {% include "monitoring/_card.html" with title=_("Processor") level=levels.cpu value=latest.cpu detail=latest.load.0 kind="cpu" %}
@@ -25,9 +25,9 @@
   {% include "monitoring/_card.html" with title=_("Disk") level=levels.disk value=latest.disk_pct used=latest.disk_used total=latest.disk_total kind="bytes" %}
 </div>
 <p class="text-body-secondary small">
-  {% blocktranslate with momento=latest.time|date:"SHORT_DATETIME_FORMAT" %}Last sample: {{ momento }}.{% endblocktranslate %}
-  {% blocktranslate with tempo=up_since|timesince %}Server up for {{ tempo }}.{% endblocktranslate %}
-  {% if summary %}{% blocktranslate with recebido=summary.received|filesizeformat enviado=summary.sent|filesizeformat %}Network in the period: {{ recebido }} received, {{ enviado }} sent.{% endblocktranslate %}{% endif %}
+  {% blocktranslate with when=latest.time|date:"SHORT_DATETIME_FORMAT" %}Last sample: {{ when }}.{% endblocktranslate %}
+  {% blocktranslate with duration=up_since|timesince %}Server up for {{ duration }}.{% endblocktranslate %}
+  {% if summary %}{% blocktranslate with received=summary.received|filesizeformat sent=summary.sent|filesizeformat %}Network in the period: {{ received }} received, {{ sent }} sent.{% endblocktranslate %}{% endif %}
 </p>
 
 {% if summary %}
@@ -52,7 +52,7 @@
   {% endfor %}
 </div>
 <p class="small">
-  {% blocktranslate with media=summary.cpu_avg|floatformat:1 pico=summary.cpu_max|floatformat:1 memoria=summary.memory_max|floatformat:0 swap=summary.swap_max|floatformat:0 %}In the period: processor averaging {{ media }}% with a peak of {{ pico }}%; memory peaking at {{ memoria }}% in use; swap peaking at {{ swap }}%.{% endblocktranslate %}
+  {% blocktranslate with average=summary.cpu_avg|floatformat:1 peak=summary.cpu_max|floatformat:1 memory=summary.memory_max|floatformat:0 swap=summary.swap_max|floatformat:0 %}In the period: processor averaging {{ average }}% with a peak of {{ peak }}%; memory peaking at {{ memory }}% in use; swap peaking at {{ swap }}%.{% endblocktranslate %}
 </p>
 {% endif %}
 
@@ -75,7 +75,7 @@
   </div>
   {% endif %}
   <div class="col-lg-6">
-    <h2 class="h5">{% blocktranslate with tamanho=database.size|filesizeformat %}Database · {{ tamanho }}{% endblocktranslate %}</h2>
+    <h2 class="h5">{% blocktranslate with size=database.size|filesizeformat %}Database · {{ size }}{% endblocktranslate %}</h2>
     {% if user.is_superuser %}
     <table class="table table-sm bg-white">
       <thead><tr><th>{% translate "Largest tables" %}</th><th class="text-end">{% translate "Rows" %}</th><th class="text-end">{% translate "Size" %}</th></tr></thead>
@@ -86,7 +86,7 @@
       </tbody>
     </table>
     {% endif %}
-    <p class="small">{% if backup %}{% blocktranslate with momento=backup.timestamp|date:"SHORT_DATETIME_FORMAT" tamanho=backup.size|filesizeformat %}Last backup: {{ momento }} ({{ tamanho }}).{% endblocktranslate %}{% else %}{% translate "No backup recorded." %}{% endif %}</p>
+    <p class="small">{% if backup %}{% blocktranslate with when=backup.timestamp|date:"SHORT_DATETIME_FORMAT" size=backup.size|filesizeformat %}Last backup: {{ when }} ({{ size }}).{% endblocktranslate %}{% else %}{% translate "No backup recorded." %}{% endif %}</p>
   </div>
 </div>
 

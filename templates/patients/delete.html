@@ -4,9 +4,9 @@
 {% block title %}{% translate "Delete patient" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Permanently delete {{ nome }}?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with name=patient.name %}Permanently delete {{ name }}?{% endblocktranslate %}</h1>
 <div class="alert alert-warning">
-  {% blocktranslate with lei=law.short_name %}Use only when the patient asks for their data to be deleted ({{ lei }}). To take them out of day-to-day use, keep them archived. First, check that the clinic is not required to keep the care records.{% endblocktranslate %} {{ retention_period }}
+  {% blocktranslate with law=law.short_name %}Use only when the patient asks for their data to be deleted ({{ law }}). To take them out of day-to-day use, keep them archived. First, check that the clinic is not required to keep the care records.{% endblocktranslate %} {{ retention_period }}
 </div>
 {% if visits %}
 <div class="alert alert-danger">

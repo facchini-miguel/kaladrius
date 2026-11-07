@@ -164,21 +164,21 @@ def retention_period(country=None):
     retention = for_country(country).retention
     if retention.years and retention.until_age:
         return _(
-            "Health records must be kept for at least %(anos)s years after the last entry "
-            "and, for minors, until the patient turns %(idade)s, if later (%(fonte)s)."
-        ) % {"anos": retention.years, "idade": retention.until_age, "fonte": retention.source}
+            "Health records must be kept for at least %(years)s years after the last entry "
+            "and, for minors, until the patient turns %(age)s, if later (%(source)s)."
+        ) % {"years": retention.years, "age": retention.until_age, "source": retention.source}
     if retention.years:
         return _(
-            "Health records must be kept for at least %(anos)s years after the last entry "
-            "(%(fonte)s)."
-        ) % {"anos": retention.years, "fonte": retention.source}
+            "Health records must be kept for at least %(years)s years after the last entry "
+            "(%(source)s)."
+        ) % {"years": retention.years, "source": retention.source}
     if retention.varies == STATE:
         return _("How long health records must be kept is set by each state's law.")
     if retention.varies == PROVINCE:
         return _("How long health records must be kept is set by each province's law.")
     if retention.source:
         return _(
-            "How long health records must be kept follows %(fonte)s: check the current period "
+            "How long health records must be kept follows %(source)s: check the current period "
             "with the health authority."
-        ) % {"fonte": retention.source}
+        ) % {"source": retention.source}
     return _("Check with the country's health authority how long health records must be kept.")

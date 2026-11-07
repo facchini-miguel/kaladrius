@@ -4,7 +4,7 @@
 {% block title %}{% translate "Delete appointment type" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=kind.display_name %}Delete {{ nome }}?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with name=kind.display_name %}Delete {{ name }}?{% endblocktranslate %}</h1>
 <p>{% translate "This action cannot be undone. To just hide the type, edit it and uncheck “active”." %}</p>
 <form method="post">
   {% csrf_token %}

@@ -8,7 +8,7 @@
 
 <div class="alert {% if closed_until %}alert-secondary{% else %}alert-light border{% endif %}">
   {% if closed_until %}
-  {% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Closed up to <strong>{{ data }}</strong>.{% endblocktranslate %}
+  {% blocktranslate with date=closed_until|date:"SHORT_DATE_FORMAT" %}Closed up to <strong>{{ date }}</strong>.{% endblocktranslate %}
   {% translate "Payments and reversals on or before that date can no longer be recorded, and the reports of that period do not change." %}
   {% else %}
   {% translate "Finance is open: any date accepts payments and reversals." %}

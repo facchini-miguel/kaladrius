@@ -84,7 +84,7 @@ def _recall_form(request, recall, initial):
     form = RecallForm(request.POST or None, instance=recall, initial=initial, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Recall for %(nome)s saved.") % {"nome": recall.patient.name})
+        messages.success(request, _("Recall for %(name)s saved.") % {"name": recall.patient.name})
         return _back(request)
     patient = recall.patient if recall.patient_id else form["patient"].value()
     if patient and not hasattr(patient, "name"):
@@ -111,10 +111,10 @@ def complete(request, pk):
     recall.done = not recall.done
     recall.save(update_fields=["done", "updated_at"])
     if recall.done:
-        message = _("Recall for %(nome)s marked as done.")
+        message = _("Recall for %(name)s marked as done.")
     else:
-        message = _("Recall for %(nome)s reopened.")
-    messages.success(request, message % {"nome": recall.patient.name})
+        message = _("Recall for %(name)s reopened.")
+    messages.success(request, message % {"name": recall.patient.name})
     return _back(request)
 
 
@@ -123,7 +123,7 @@ def delete_recall(request, pk):
     recall = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     if request.method == "POST":
         recall.delete()
-        messages.success(request, _("Recall for %(nome)s deleted.") % {"nome": recall.patient.name})
+        messages.success(request, _("Recall for %(name)s deleted.") % {"name": recall.patient.name})
         return _back(request)
     return render(request, "recalls/delete.html", {"recall": recall})
 

@@ -26,11 +26,11 @@
   </div>
   <p class="fs-6">
     {% if entry.patient.tax_id %}
-    {% blocktranslate with nome=entry.payer_name sigla=entry.patient.tax_id|document_abbreviation:entry.patient.document_role documento=entry.patient.tax_id|document:entry.patient.document_role valor=payment.amount|currency %}We received from <strong>{{ nome }}</strong> ({{ sigla }} {{ documento }}) the amount of <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with name=entry.payer_name abbreviation=entry.patient.tax_id|document_abbreviation:entry.patient.document_role document=entry.patient.tax_id|document:entry.patient.document_role amount=payment.amount|currency %}We received from <strong>{{ name }}</strong> ({{ abbreviation }} {{ document }}) the amount of <strong>{{ amount }}</strong>,{% endblocktranslate %}
     {% else %}
-    {% blocktranslate with nome=entry.payer_name valor=payment.amount|currency %}We received from <strong>{{ nome }}</strong> the amount of <strong>{{ valor }}</strong>,{% endblocktranslate %}
+    {% blocktranslate with name=entry.payer_name amount=payment.amount|currency %}We received from <strong>{{ name }}</strong> the amount of <strong>{{ amount }}</strong>,{% endblocktranslate %}
     {% endif %}
-    {% blocktranslate with descricao=entry.description numero=payment.installment.number total=total_installments %}for {{ descricao }} (installment {{ numero }} of {{ total }}){% endblocktranslate %}.
+    {% blocktranslate with description=entry.description number=payment.installment.number total=total_installments %}for {{ description }} (installment {{ number }} of {{ total }}){% endblocktranslate %}.
   </p>
   <ul class="list-unstyled small mb-4">
     <li>{% translate "Payment method" %}: {{ payment.get_method_display }}{% if payment.card_brand %} ({{ payment.card_brand }}{% if payment.card_installments %}, {% blocktranslate count n=payment.card_installments %}{{ n }} card installment{% plural %}{{ n }} card installments{% endblocktranslate %}{% endif %}){% endif %}</li>
@@ -43,9 +43,9 @@
     <div class="text-nowrap">{{ payment.date|date:"DATE_FORMAT" }}</div>
     <div class="text-center" style="min-width: min(18rem, 100%);">
       <div class="border-top pt-1">{{ current_clinic.name }}</div>
-      {% if payment.created_by %}<div class="small text-body-secondary">{% blocktranslate with nome=payment.created_by.get_full_name|default:payment.created_by.username %}Received by {{ nome }}{% endblocktranslate %}</div>{% endif %}
+      {% if payment.created_by %}<div class="small text-body-secondary">{% blocktranslate with name=payment.created_by.get_full_name|default:payment.created_by.username %}Received by {{ name }}{% endblocktranslate %}</div>{% endif %}
     </div>
   </div>
-  {% if tax_document %}<p class="small text-body-secondary border-top pt-2 mt-3 mb-0">{% blocktranslate with documento=tax_document %}This receipt does not replace the tax document ({{ documento }}).{% endblocktranslate %}</p>{% endif %}
+  {% if tax_document %}<p class="small text-body-secondary border-top pt-2 mt-3 mb-0">{% blocktranslate with document=tax_document %}This receipt does not replace the tax document ({{ document }}).{% endblocktranslate %}</p>{% endif %}
 </div>
 {% endblock %}

@@ -194,27 +194,27 @@
     {% endif %}
     {% if backup_late %}
     <div class="alert alert-danger d-print-none" role="alert">
-      {% blocktranslate with momento=backup_late.timestamp|date:"SHORT_DATETIME_FORMAT" %}The last database backup was on {{ momento }}: the daily backups have stopped.{% endblocktranslate %}
+      {% blocktranslate with when=backup_late.timestamp|date:"SHORT_DATETIME_FORMAT" %}The last database backup was on {{ when }}: the daily backups have stopped.{% endblocktranslate %}
       {% translate "Check on the server:" %} <code>sudo systemctl status kaladrius-backup</code>
     </div>
     {% endif %}
     {% if health_alert %}
     <div class="alert alert-danger d-print-none" role="alert">
       {% if health_alert.no_samples %}{% translate "The server's health is not being collected." %}
-      {% elif health_alert.stopped %}{% blocktranslate with momento=health_alert.stopped|date:"SHORT_DATETIME_FORMAT" %}The server health collection stopped at {{ momento }}.{% endblocktranslate %}
+      {% elif health_alert.stopped %}{% blocktranslate with when=health_alert.stopped|date:"SHORT_DATETIME_FORMAT" %}The server health collection stopped at {{ when }}.{% endblocktranslate %}
       {% else %}{% translate "The server is running out of:" %} {% for item in health_alert.critical %}{% if item == "memory" %}{% translate "memory" %}{% elif item == "swap" %}{% translate "swap" %}{% elif item == "disk" %}{% translate "disk" %}{% else %}{% translate "processor" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}
       <a href="{% url 'monitoring:health' %}">{% translate "See the system health" %}</a>
     </div>
     {% endif %}
     {% if new_version %}
     <div class="alert alert-info d-flex justify-content-between align-items-center d-print-none" role="status">
-      <span>{% blocktranslate with versao_sistema=system_version %}The system was updated to version {{ versao_sistema }}.{% endblocktranslate %}</span>
+      <span>{% blocktranslate with system_version=system_version %}The system was updated to version {{ system_version }}.{% endblocktranslate %}</span>
       <a class="btn btn-sm btn-info" href="{% url 'whats_new' %}">{% translate "See what changed" %}</a>
     </div>
     {% endif %}
     {% if disabled_module %}
     <div class="alert alert-warning d-print-none" role="status">
-      {% blocktranslate with modulo=disabled_module.label %}The {{ modulo }} module is turned off in this clinic: the team does not see it, only the system administrator.{% endblocktranslate %}
+      {% blocktranslate with module=disabled_module.label %}The {{ module }} module is turned off in this clinic: the team does not see it, only the system administrator.{% endblocktranslate %}
       {% if can.clinic.change %}<a href="{% url 'clinic_settings' %}">{% translate "Turn it on in the Clinic settings" %}</a>{% endif %}
     </div>
     {% endif %}

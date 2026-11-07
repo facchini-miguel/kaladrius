@@ -422,12 +422,12 @@ msgstr ""
 "Pacientes, profesionales, equipo y tablas base están siempre activos."
 
 #, python-format
-msgid "Choose a time zone of %(pais)s."
-msgstr "Elija una zona horaria de %(pais)s."
+msgid "Choose a time zone of %(country)s."
+msgstr "Elija una zona horaria de %(country)s."
 
 #, python-format
-msgid "%(modulo)s needs: %(precisa)s."
-msgstr "%(modulo)s necesita: %(precisa)s."
+msgid "%(module)s needs: %(needs)s."
+msgstr "%(module)s necesita: %(needs)s."
 
 msgid "Appointments start and end at multiples of this time."
 msgstr "Las citas comienzan y terminan en múltiplos de este tiempo."
@@ -437,35 +437,35 @@ msgstr "El fin de la agenda debe ser posterior al inicio."
 
 #, python-format
 msgid ""
-"The appointment on %(momento)s would fall outside the new hours or slot "
+"The appointment on %(when)s would fall outside the new hours or slot "
 "length. Adjust future appointments before changing the schedule."
 msgstr ""
-"La cita del %(momento)s quedaría fuera del nuevo horario o del nuevo "
+"La cita del %(when)s quedaría fuera del nuevo horario o del nuevo "
 "intervalo. Ajuste las citas futuras antes de cambiar la agenda."
 
 msgid "CRO, CRM, CREFITO, CRP…"
 msgstr "CRO, CRM, CREFITO, CRP…"
 
 #, python-format
-msgid "%(documento)s: invalid number."
-msgstr "%(documento)s: número no válido."
+msgid "%(document)s: invalid number."
+msgstr "%(document)s: número no válido."
 
 #, python-format
 msgid ""
-"Health records must be kept for at least %(anos)s years after the last entry "
-"and, for minors, until the patient turns %(idade)s, if later (%(fonte)s)."
+"Health records must be kept for at least %(years)s years after the last entry "
+"and, for minors, until the patient turns %(age)s, if later (%(source)s)."
 msgstr ""
-"La historia clínica debe conservarse por lo menos %(anos)s años después del "
+"La historia clínica debe conservarse por lo menos %(years)s años después del "
 "último registro y, de los menores de edad, hasta que el paciente cumpla "
-"%(idade)s años, si es más tarde (%(fonte)s)."
+"%(age)s años, si es más tarde (%(source)s)."
 
 #, python-format
 msgid ""
-"Health records must be kept for at least %(anos)s years after the last entry "
-"(%(fonte)s)."
+"Health records must be kept for at least %(years)s years after the last entry "
+"(%(source)s)."
 msgstr ""
-"La historia clínica debe conservarse por lo menos %(anos)s años después del "
-"último registro (%(fonte)s)."
+"La historia clínica debe conservarse por lo menos %(years)s años después del "
+"último registro (%(source)s)."
 
 msgid "How long health records must be kept is set by each state's law."
 msgstr ""
@@ -479,10 +479,10 @@ msgstr ""
 
 #, python-format
 msgid ""
-"How long health records must be kept follows %(fonte)s: check the current "
+"How long health records must be kept follows %(source)s: check the current "
 "period with the health authority."
 msgstr ""
-"El plazo de conservación de la historia clínica sigue %(fonte)s: confirme el "
+"El plazo de conservación de la historia clínica sigue %(source)s: confirme el "
 "plazo vigente con la autoridad de salud."
 
 msgid ""
@@ -759,8 +759,8 @@ msgid "Enter the area code and number (10 or 11 digits)."
 msgstr "Indique el código de área y el número (10 u 11 dígitos)."
 
 #, python-format
-msgid "Area code %(ddd)s does not exist."
-msgstr "El código de área %(ddd)s no existe."
+msgid "Area code %(area_code)s does not exist."
+msgstr "El código de área %(area_code)s no existe."
 
 msgid "With 11 digits, the number starts with 9 after the area code."
 msgstr "Con 11 dígitos, el número empieza con 9 después del código de área."
@@ -788,9 +788,9 @@ msgstr "Configuración de la clínica guardada."
 
 #, python-format
 msgid ""
-"Amounts are now shown in %(moeda)s. No amount already entered was converted."
+"Amounts are now shown in %(currency)s. No amount already entered was converted."
 msgstr ""
-"Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se "
+"Los valores ahora se muestran en %(currency)s. Ningún valor ya registrado se "
 "convirtió."
 
 msgid "FDI (11 to 48; baby teeth 51 to 85)"
@@ -970,8 +970,8 @@ msgid "The estimate has no amount to receive."
 msgstr "El presupuesto no tiene valor por cobrar."
 
 #, python-format
-msgid "Estimate no. %(numero)s"
-msgstr "Presupuesto n.º %(numero)s"
+msgid "Estimate no. %(number)s"
+msgstr "Presupuesto n.º %(number)s"
 
 msgid "Only an open estimate can be refused."
 msgstr "Solo un presupuesto abierto puede rechazarse."
@@ -1004,23 +1004,23 @@ msgid "Estimate marked as refused."
 msgstr "Presupuesto marcado como rechazado."
 
 #, python-format
-msgid "Procedure %(nome)s saved."
-msgstr "Procedimiento %(nome)s guardado."
+msgid "Procedure %(name)s saved."
+msgstr "Procedimiento %(name)s guardado."
 
 msgid "There is no commission to pay up to this date."
 msgstr "No hay comisión por pagar hasta esta fecha."
 
 #, python-format
-msgid "Commission of %(nome)s up to %(data)s"
-msgstr "Comisión de %(nome)s hasta el %(data)s"
+msgid "Commission of %(name)s up to %(date)s"
+msgstr "Comisión de %(name)s hasta el %(date)s"
 
 #, python-format
 msgid ""
 "This commission cannot be cancelled: the reversal of one of its receipts was "
-"already deducted in the commission up to %(data)s. Cancel that one first."
+"already deducted in the commission up to %(date)s. Cancel that one first."
 msgstr ""
 "Esta comisión no se puede cancelar: el reverso de uno de sus cobros ya se "
-"descontó en la comisión hasta %(data)s. Cancele aquella antes."
+"descontó en la comisión hasta %(date)s. Cancele aquella antes."
 
 msgid "Total amount"
 msgstr "Valor total"
@@ -1584,11 +1584,11 @@ msgstr "El valor descontado de la cuota debe ser mayor que cero."
 
 #, python-format
 msgid ""
-"The amount deducted (%(abatido)s) exceeds what is left of the installment "
-"(%(saldo)s)."
+"The amount deducted (%(deducted)s) exceeds what is left of the installment "
+"(%(balance)s)."
 msgstr ""
-"El valor descontado (%(abatido)s) supera lo que falta de la cuota "
-"(%(saldo)s)."
+"El valor descontado (%(deducted)s) supera lo que falta de la cuota "
+"(%(balance)s)."
 
 msgid "This payment was already reversed."
 msgstr "Este pago ya fue revertido."
@@ -1601,11 +1601,11 @@ msgstr "Esta cuenta tiene pagos. Revierta los pagos antes de cancelar."
 
 #, python-format
 msgid ""
-"Finance is closed up to %(ate)s: payments and reversals on or before that "
+"Finance is closed up to %(until)s: payments and reversals on or before that "
 "date cannot be recorded. Use a later date or ask the administrator to reopen "
 "the period."
 msgstr ""
-"El financiero está cerrado hasta el %(ate)s: los pagos y reversiones en esa "
+"El financiero está cerrado hasta el %(until)s: los pagos y reversiones en esa "
 "fecha o antes no pueden registrarse. Use una fecha posterior o pida al "
 "administrador que reabra el período."
 
@@ -1613,9 +1613,9 @@ msgid "Close up to yesterday at the latest: money is still moving today."
 msgstr "Cierre como máximo hasta ayer: hoy todavía hay movimiento."
 
 #, python-format
-msgid "Finance is already closed up to %(ate)s. To go back, reopen the period."
+msgid "Finance is already closed up to %(until)s. To go back, reopen the period."
 msgstr ""
-"El financiero ya está cerrado hasta el %(ate)s. Para volver, reabra el "
+"El financiero ya está cerrado hasta el %(until)s. Para volver, reabra el "
 "período."
 
 msgid "Finance is not closed."
@@ -1732,22 +1732,22 @@ msgid "Period reopened."
 msgstr "Período reabierto."
 
 #, python-format
-msgid "%(nome)s saved."
-msgstr "%(nome)s guardado."
+msgid "%(name)s saved."
+msgstr "%(name)s guardado."
 
 #, python-format
-msgid "Percentage of %(nome)s saved."
-msgstr "Porcentaje de %(nome)s guardado."
+msgid "Percentage of %(name)s saved."
+msgstr "Porcentaje de %(name)s guardado."
 
 msgid "Commission added to Payables."
 msgstr "Comisión registrada en Por pagar."
 
 #, python-format
 msgid ""
-"Statement imported: %(novas)s new transactions, %(repetidas)s already "
+"Statement imported: %(new_ones)s new transactions, %(repeated)s already "
 "imported."
 msgstr ""
-"Extracto importado: %(novas)s transacciones nuevas, %(repetidas)s ya "
+"Extracto importado: %(new_ones)s transacciones nuevas, %(repeated)s ya "
 "importadas."
 
 #, python-format
@@ -1766,11 +1766,11 @@ msgstr[1] ""
 
 #, python-format
 msgid ""
-"Warning: this file is from bank account %(nova)s, but the previous one "
-"imported into %(conta)s was from account %(antiga)s."
+"Warning: this file is from bank account %(new)s, but the previous one "
+"imported into %(account)s was from account %(old)s."
 msgstr ""
-"Atención: este archivo es de la cuenta %(nova)s en el banco, pero el "
-"anterior importado en %(conta)s era de la cuenta %(antiga)s."
+"Atención: este archivo es de la cuenta %(new)s en el banco, pero el "
+"anterior importado en %(account)s era de la cuenta %(old)s."
 
 #, python-format
 msgid "%(n)s transactions reconciled."
@@ -1783,8 +1783,8 @@ msgid "Entry created and reconciled."
 msgstr "Registro creado y conciliado."
 
 #, python-format
-msgid "For example: %(tipos)s."
-msgstr "Por ejemplo: %(tipos)s."
+msgid "For example: %(kinds)s."
+msgstr "Por ejemplo: %(kinds)s."
 
 msgid "A health plan with this name already exists."
 msgstr "Ya existe un convenio con este nombre."
@@ -1805,8 +1805,8 @@ msgid "This card is already registered in this health plan."
 msgstr "Esta credencial ya está registrada en este convenio."
 
 #, python-format
-msgid "%(nome)s: invalid format. Example: %(exemplo)s."
-msgstr "%(nome)s: formato inválido. Ejemplo: %(exemplo)s."
+msgid "%(name)s: invalid format. Example: %(example)s."
+msgstr "%(name)s: formato inválido. Ejemplo: %(example)s."
 
 msgid "Insurer registration"
 msgstr "Registro de la aseguradora"
@@ -2231,30 +2231,30 @@ msgid "related people"
 msgstr "personas relacionadas"
 
 #, python-format
-msgid "Patient %(nome)s saved."
-msgstr "Paciente %(nome)s guardado."
+msgid "Patient %(name)s saved."
+msgstr "Paciente %(name)s guardado."
 
 msgid "Settle the patient's open entries before archiving them."
 msgstr "Resuelva las cuentas pendientes del paciente antes de archivarlo."
 
 #, python-format
 msgid ""
-"Patient %(nome)s archived. The history is kept, and the patient can be "
+"Patient %(name)s archived. The history is kept, and the patient can be "
 "restored from the patient list, under Status: Archived."
 msgstr ""
-"Paciente %(nome)s archivado. El historial sigue guardado y puede restaurarse "
+"Paciente %(name)s archivado. El historial sigue guardado y puede restaurarse "
 "en la lista de pacientes, en Situación: Archivados."
 
 #, python-format
-msgid "Patient %(nome)s restored."
-msgstr "Paciente %(nome)s restaurado."
+msgid "Patient %(name)s restored."
+msgstr "Paciente %(name)s restaurado."
 
 msgid "A patient with a medical record cannot be deleted."
 msgstr "Un paciente con historia clínica no puede eliminarse."
 
 #, python-format
-msgid "The data of patient code %(codigo)s was deleted."
-msgstr "Los datos del paciente de código %(codigo)s fueron eliminados."
+msgid "The data of patient code %(code)s was deleted."
+msgstr "Los datos del paciente de código %(code)s fueron eliminados."
 
 msgid "Related person saved."
 msgstr "Persona relacionada guardada."
@@ -2288,20 +2288,20 @@ msgid "practitioners"
 msgstr "profesionales"
 
 #, python-format
-msgid "Practitioner %(nome)s saved."
-msgstr "Profesional %(nome)s guardado."
+msgid "Practitioner %(name)s saved."
+msgstr "Profesional %(name)s guardado."
 
 #, python-format
 msgid ""
-"%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide "
+"%(name)s has linked records and cannot be deleted. Uncheck “active” to hide "
 "it."
 msgstr ""
-"%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque "
+"%(name)s tiene registros vinculados y no se puede eliminar. Desmarque "
 "“activo” para ocultarlo."
 
 #, python-format
-msgid "Practitioner %(nome)s deleted."
-msgstr "Profesional %(nome)s eliminado."
+msgid "Practitioner %(name)s deleted."
+msgstr "Profesional %(name)s eliminado."
 
 msgid "E.g.: 6-month check-up."
 msgstr "Ej.: revisión de 6 meses."
@@ -2316,20 +2316,20 @@ msgid "recalls"
 msgstr "recordatorios"
 
 #, python-format
-msgid "Recall for %(nome)s saved."
-msgstr "Recordatorio de %(nome)s guardado."
+msgid "Recall for %(name)s saved."
+msgstr "Recordatorio de %(name)s guardado."
 
 #, python-format
-msgid "Recall for %(nome)s marked as done."
-msgstr "Recordatorio de %(nome)s completado."
+msgid "Recall for %(name)s marked as done."
+msgstr "Recordatorio de %(name)s completado."
 
 #, python-format
-msgid "Recall for %(nome)s reopened."
-msgstr "Recordatorio de %(nome)s reabierto."
+msgid "Recall for %(name)s reopened."
+msgstr "Recordatorio de %(name)s reabierto."
 
 #, python-format
-msgid "Recall for %(nome)s deleted."
-msgstr "Recordatorio de %(nome)s eliminado."
+msgid "Recall for %(name)s deleted."
+msgstr "Recordatorio de %(name)s eliminado."
 
 msgid "Invalid parameters."
 msgstr "Parámetros no válidos."
@@ -2424,16 +2424,16 @@ msgid "Use times in steps of %(n)s minutes."
 msgstr "Use horarios de %(n)s en %(n)s minutos."
 
 #, python-format
-msgid "Outside the clinic's opening hours (%(inicio)s to %(fim)s)."
-msgstr "Fuera del horario de atención de la clínica (de %(inicio)s a %(fim)s)."
+msgid "Outside the clinic's opening hours (%(start)s to %(end)s)."
+msgstr "Fuera del horario de atención de la clínica (de %(start)s a %(end)s)."
 
 #, python-format
 msgid "and %(n)s more"
 msgstr "y %(n)s más"
 
 #, python-format
-msgid "Time conflict with: %(lista)s. Nothing was saved."
-msgstr "Conflicto de horario con: %(lista)s. No se guardó nada."
+msgid "Time conflict with: %(list)s. Nothing was saved."
+msgstr "Conflicto de horario con: %(list)s. No se guardó nada."
 
 msgctxt "appointment type"
 msgid "Available"
@@ -2541,20 +2541,20 @@ msgid ""
 msgstr "Este horario ya fue ocupado por otra cita. Cancele aquella antes."
 
 #, python-format
-msgid "Appointment type %(nome)s saved."
-msgstr "Tipo de atención %(nome)s guardado."
+msgid "Appointment type %(name)s saved."
+msgstr "Tipo de atención %(name)s guardado."
 
 #, python-format
 msgid ""
-"%(nome)s has been used in appointments and cannot be deleted. Uncheck "
+"%(name)s has been used in appointments and cannot be deleted. Uncheck "
 "“active” to hide it."
 msgstr ""
-"%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
+"%(name)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
 "ocultarlo."
 
 #, python-format
-msgid "Appointment type %(nome)s deleted."
-msgstr "Tipo de atención %(nome)s eliminado."
+msgid "Appointment type %(name)s deleted."
+msgstr "Tipo de atención %(name)s eliminado."
 
 msgid "birthday(s)"
 msgstr "cumpleaños"
@@ -2575,20 +2575,20 @@ msgid "Appointment changed."
 msgstr "Cita modificada."
 
 #, python-format
-msgid "%(nome)s: attendance mark undone."
-msgstr "%(nome)s: marca de asistencia deshecha."
+msgid "%(name)s: attendance mark undone."
+msgstr "%(name)s: marca de asistencia deshecha."
 
 #, python-format
-msgid "%(nome)s came."
-msgstr "%(nome)s asistió."
+msgid "%(name)s came."
+msgstr "%(name)s asistió."
 
 #, python-format
-msgid "%(nome)s missed the appointment."
-msgstr "%(nome)s faltó."
+msgid "%(name)s missed the appointment."
+msgstr "%(name)s faltó."
 
 #, python-format
-msgid "%(nome)s cancelled. The time slot is free."
-msgstr "%(nome)s canceló. El horario quedó libre."
+msgid "%(name)s cancelled. The time slot is free."
+msgstr "%(name)s canceló. El horario quedó libre."
 
 #, python-format
 msgid "Appointment deleted."
@@ -2679,16 +2679,16 @@ msgid "months' pay"
 msgstr "sueldos de los meses"
 
 #, python-format
-msgid "The total for %(nome)s must be greater than zero."
-msgstr "El total de %(nome)s debe ser mayor que cero."
+msgid "The total for %(name)s must be greater than zero."
+msgstr "El total de %(name)s debe ser mayor que cero."
 
 #, python-format
-msgid "Salary %(mes)s"
-msgstr "Salario %(mes)s"
+msgid "Salary %(month)s"
+msgstr "Salario %(month)s"
 
 #, python-format
-msgid "Salary %(salario)s + overtime %(extras)s − absences %(faltas)s."
-msgstr "Salario %(salario)s + horas extras %(extras)s − ausencias %(faltas)s."
+msgid "Salary %(salary)s + overtime %(overtime)s − absences %(absences)s."
+msgstr "Salario %(salary)s + horas extras %(overtime)s − ausencias %(absences)s."
 
 msgid "Pay saved."
 msgstr "Sueldos guardados."
@@ -2715,28 +2715,28 @@ msgid "The clinic needs at least one active administrator."
 msgstr "La clínica necesita al menos un administrador activo."
 
 #, python-format
-msgid "%(nome)s is now part of the team."
-msgstr "%(nome)s ahora forma parte del equipo."
+msgid "%(name)s is now part of the team."
+msgstr "%(name)s ahora forma parte del equipo."
 
 #, python-format
-msgid "%(nome)s's details saved."
-msgstr "Datos de %(nome)s guardados."
+msgid "%(name)s's details saved."
+msgstr "Datos de %(name)s guardados."
 
 #, python-format
 msgid ""
-"%(nome)s also has access to another clinic or to the platform: the password "
+"%(name)s also has access to another clinic or to the platform: the password "
 "can only be changed by the user or by support."
 msgstr ""
-"%(nome)s también tiene acceso a otra clínica o a la plataforma: la "
+"%(name)s también tiene acceso a otra clínica o a la plataforma: la "
 "contraseña solo puede cambiarla el propio usuario o el soporte."
 
 #, python-format
-msgid "New password set for %(nome)s."
-msgstr "Nueva contraseña de %(nome)s definida."
+msgid "New password set for %(name)s."
+msgstr "Nueva contraseña de %(name)s definida."
 
 #, python-format
-msgid "Two-step verification of %(nome)s removed."
-msgstr "Verificación en dos pasos de %(nome)s quitada."
+msgid "Two-step verification of %(name)s removed."
+msgstr "Verificación en dos pasos de %(name)s quitada."
 
 msgid "What's new"
 msgstr "Novedades"
@@ -2874,8 +2874,8 @@ msgid "Send the link"
 msgstr "Enviar el enlace"
 
 #, python-format
-msgid "Hello, %(nome)s."
-msgstr "Hola, %(nome)s."
+msgid "Hello, %(name)s."
+msgstr "Hola, %(name)s."
 
 msgid ""
 "Someone asked for a new password for your account. To create it, open the "
@@ -2885,8 +2885,8 @@ msgstr ""
 "enlace de abajo (vale por 1 hora y funciona una vez):"
 
 #, python-format
-msgid "Your username: %(usuario)s"
-msgstr "Su usuario: %(usuario)s"
+msgid "Your username: %(user)s"
+msgstr "Su usuario: %(user)s"
 
 msgid ""
 "If it was not you, ignore this e-mail: the current password still works."
@@ -2894,8 +2894,8 @@ msgstr ""
 "Si no fue usted, ignore este correo: la contraseña actual sigue valiendo."
 
 #, python-format
-msgid "%(sistema)s: create a new password"
-msgstr "%(sistema)s: crear una contraseña nueva"
+msgid "%(system)s: create a new password"
+msgstr "%(system)s: crear una contraseña nueva"
 
 msgid "Check your e-mail"
 msgstr "Revise su correo"
@@ -3155,17 +3155,17 @@ msgstr "Revise en el servidor:"
 
 #, python-format
 msgid ""
-"The last database backup was on %(momento)s: the daily backups have stopped."
+"The last database backup was on %(when)s: the daily backups have stopped."
 msgstr ""
-"La última copia de seguridad de la base de datos fue el %(momento)s: las "
+"La última copia de seguridad de la base de datos fue el %(when)s: las "
 "copias diarias se detuvieron."
 
 msgid "The server's health is not being collected."
 msgstr "La salud del servidor no se está recolectando."
 
 #, python-format
-msgid "The server health collection stopped at %(momento)s."
-msgstr "La recolección de la salud del servidor se detuvo el %(momento)s."
+msgid "The server health collection stopped at %(when)s."
+msgstr "La recolección de la salud del servidor se detuvo el %(when)s."
 
 msgid "The server is running out of:"
 msgstr "El servidor tiene recursos al límite:"
@@ -3186,18 +3186,18 @@ msgid "See the system health"
 msgstr "Ver la salud del sistema"
 
 #, python-format
-msgid "The system was updated to version %(versao_sistema)s."
-msgstr "El sistema se actualizó a la versión %(versao_sistema)s."
+msgid "The system was updated to version %(system_version)s."
+msgstr "El sistema se actualizó a la versión %(system_version)s."
 
 msgid "See what changed"
 msgstr "Vea qué cambió"
 
 #, python-format
 msgid ""
-"The %(modulo)s module is turned off in this clinic: the team does not see "
+"The %(module)s module is turned off in this clinic: the team does not see "
 "it, only the system administrator."
 msgstr ""
-"El módulo %(modulo)s está desactivado en esta clínica: el equipo no lo ve, "
+"El módulo %(module)s está desactivado en esta clínica: el equipo no lo ve, "
 "solo el administrador del sistema."
 
 msgid "Turn it on in the Clinic settings"
@@ -3251,9 +3251,9 @@ msgid "Patients booked today"
 msgstr "Pacientes con cita hoy"
 
 #, python-format
-msgid "Came: %(vieram)s · missed: %(faltaram)s · still to come: %(seguir)s"
+msgid "Came: %(came)s · missed: %(missing)s · still to come: %(next)s"
 msgstr ""
-"Asistieron: %(vieram)s · faltaron: %(faltaram)s · por venir: %(seguir)s"
+"Asistieron: %(came)s · faltaron: %(missing)s · por venir: %(next)s"
 
 #, python-format
 msgid "%(n)s already started without attendance marked"
@@ -3283,10 +3283,10 @@ msgid "Received today"
 msgstr "Cobrado hoy"
 
 #, python-format
-msgid "Still to receive today: %(valor)s (%(n)s installment)"
-msgid_plural "Still to receive today: %(valor)s (%(n)s installments)"
-msgstr[0] "Falta cobrar hoy: %(valor)s (%(n)s cuota)"
-msgstr[1] "Falta cobrar hoy: %(valor)s (%(n)s cuotas)"
+msgid "Still to receive today: %(amount)s (%(n)s installment)"
+msgid_plural "Still to receive today: %(amount)s (%(n)s installments)"
+msgstr[0] "Falta cobrar hoy: %(amount)s (%(n)s cuota)"
+msgstr[1] "Falta cobrar hoy: %(amount)s (%(n)s cuotas)"
 
 msgid "No open installment is due today."
 msgstr "Ninguna cuota pendiente vence hoy."
@@ -3301,8 +3301,8 @@ msgid "Month-to-date result"
 msgstr "Resultado del mes hasta hoy"
 
 #, python-format
-msgid "Received %(recebido)s − paid %(pago)s"
-msgstr "Cobrado %(recebido)s − pagado %(pago)s"
+msgid "Received %(received)s − paid %(paid)s"
+msgstr "Cobrado %(received)s − pagado %(paid)s"
 
 msgid "Same period last month:"
 msgstr "Mismo período del mes pasado:"
@@ -3372,8 +3372,8 @@ msgid "open"
 msgstr "abierta"
 
 #, python-format
-msgid "since %(hora)s"
-msgstr "desde las %(hora)s"
+msgid "since %(time)s"
+msgstr "desde las %(time)s"
 
 msgid "closed"
 msgstr "cerrada"
@@ -3389,8 +3389,8 @@ msgid "See all"
 msgstr "Ver todos"
 
 #, python-format
-msgid "since %(data)s"
-msgstr "desde el %(data)s"
+msgid "since %(date)s"
+msgstr "desde el %(date)s"
 
 msgctxt "recall"
 msgid "Mark as done"
@@ -3403,10 +3403,10 @@ msgid "Today's birthdays"
 msgstr "Cumpleaños de hoy"
 
 #, python-format
-msgid "%(idade)s year"
-msgid_plural "%(idade)s years"
-msgstr[0] "%(idade)s año"
-msgstr[1] "%(idade)s años"
+msgid "%(age)s year"
+msgid_plural "%(age)s years"
+msgstr[0] "%(age)s año"
+msgstr[1] "%(age)s años"
 
 msgid "Estimates expiring within 7 days"
 msgstr "Presupuestos que vencen en 7 días"
@@ -3418,8 +3418,8 @@ msgid "expires today"
 msgstr "vence hoy"
 
 #, python-format
-msgid "See what's new in version %(versao_sistema)s"
-msgstr "Vea las novedades de la versión %(versao_sistema)s"
+msgid "See what's new in version %(system_version)s"
+msgstr "Vea las novedades de la versión %(system_version)s"
 
 msgid "No clinic"
 msgstr "Sin clínica"
@@ -3468,8 +3468,8 @@ msgid "Approve estimate"
 msgstr "Aprobar presupuesto"
 
 #, python-format
-msgid "Estimate no. %(numero)s · %(nome)s · %(total)s"
-msgstr "Presupuesto n.º %(numero)s · %(nome)s · %(total)s"
+msgid "Estimate no. %(number)s · %(name)s · %(total)s"
+msgstr "Presupuesto n.º %(number)s · %(name)s · %(total)s"
 
 msgid ""
 "The estimate becomes a receivable, in the chosen installments, and can no "
@@ -3482,8 +3482,8 @@ msgid "Approve"
 msgstr "Aprobar"
 
 #, python-format
-msgid "valid until %(validade)s"
-msgstr "válido hasta el %(validade)s"
+msgid "valid until %(valid_until)s"
+msgstr "válido hasta el %(valid_until)s"
 
 msgid "Edit"
 msgstr "Editar"
@@ -3592,8 +3592,8 @@ msgid "Total received"
 msgstr "Total cobrado"
 
 #, python-format
-msgid "Commission (%(percentual)s%%)"
-msgstr "Comisión (%(percentual)s%%)"
+msgid "Commission (%(percentage)s%%)"
+msgstr "Comisión (%(percentage)s%%)"
 
 msgid "Reversals deducted (receipts already paid out and later reversed)"
 msgstr "Reversiones descontadas (cobros ya comisionados y luego revertidos)"
@@ -3627,12 +3627,12 @@ msgstr ""
 "Registros > Cuentas, con el tipo “Efectivo (caja)”."
 
 #, python-format
-msgid "The “%(conta)s” drawer is closed"
-msgstr "La caja “%(conta)s” está cerrada"
+msgid "The “%(account)s” drawer is closed"
+msgstr "La caja “%(account)s” está cerrada"
 
 #, python-format
-msgid "According to the system, the account has %(saldo)s."
-msgstr "Según el sistema, la cuenta tiene %(saldo)s."
+msgid "According to the system, the account has %(balance)s."
+msgstr "Según el sistema, la cuenta tiene %(balance)s."
 
 msgid "Open drawer"
 msgstr "Abrir caja"
@@ -3656,12 +3656,12 @@ msgid "Difference"
 msgstr "Diferencia"
 
 #, python-format
-msgid "Opened on %(momento)s by %(nome)s"
-msgstr "Abierta el %(momento)s por %(nome)s"
+msgid "Opened on %(when)s by %(name)s"
+msgstr "Abierta el %(when)s por %(name)s"
 
 #, python-format
-msgid "closed on %(momento)s by %(nome)s"
-msgstr "cerrada el %(momento)s por %(nome)s"
+msgid "closed on %(when)s by %(name)s"
+msgstr "cerrada el %(when)s por %(name)s"
 
 msgid "Closed"
 msgstr "Cerrada"
@@ -3793,8 +3793,8 @@ msgid "Finance closing"
 msgstr "Cierre del financiero"
 
 #, python-format
-msgid "Closed up to <strong>%(data)s</strong>."
-msgstr "Cerrado hasta el <strong>%(data)s</strong>."
+msgid "Closed up to <strong>%(date)s</strong>."
+msgstr "Cerrado hasta el <strong>%(date)s</strong>."
 
 msgid ""
 "Payments and reversals on or before that date can no longer be recorded, and "
@@ -3848,19 +3848,19 @@ msgid "COMMISSION STATEMENT"
 msgstr "EXTRACTO DE COMISIÓN"
 
 #, python-format
-msgid "receipts up to %(data)s"
-msgstr "cobros hasta el %(data)s"
+msgid "receipts up to %(date)s"
+msgstr "cobros hasta el %(date)s"
 
 #, python-format
-msgid "added on %(data)s"
-msgstr "registrada el %(data)s"
+msgid "added on %(date)s"
+msgstr "registrada el %(date)s"
 
 msgid "Pay commission"
 msgstr "Pagar comisión"
 
 #, python-format
-msgid "%(nome)s · receipts up to %(data)s"
-msgstr "%(nome)s · cobros hasta el %(data)s"
+msgid "%(name)s · receipts up to %(date)s"
+msgstr "%(name)s · cobros hasta el %(date)s"
 
 msgid ""
 "The commission becomes an expense in Payables, in the practitioner's name; "
@@ -3876,8 +3876,8 @@ msgid "Commission percentage"
 msgstr "Porcentaje de comisión"
 
 #, python-format
-msgid "Commission of %(nome)s"
-msgstr "Comisión de %(nome)s"
+msgid "Commission of %(name)s"
+msgstr "Comisión de %(name)s"
 
 msgid "The new percentage applies to receipts not yet paid out."
 msgstr "El nuevo porcentaje vale para los cobros aún no comisionados."
@@ -3966,8 +3966,8 @@ msgid "Back to the list"
 msgstr "Volver a la lista"
 
 #, python-format
-msgid "Cancelled on %(momento)s. Reason: %(motivo)s"
-msgstr "Cancelada el %(momento)s. Motivo: %(motivo)s"
+msgid "Cancelled on %(when)s. Reason: %(reason)s"
+msgstr "Cancelada el %(when)s. Motivo: %(reason)s"
 
 msgid "Paid"
 msgstr "Pagado"
@@ -4039,8 +4039,8 @@ msgid "No installments found."
 msgstr "Ninguna cuota encontrada."
 
 #, python-format
-msgid "Planning %(ano)s"
-msgstr "Planificación %(ano)s"
+msgid "Planning %(year)s"
+msgstr "Planificación %(year)s"
 
 msgid ""
 "The year's goal for each group of the chart of accounts, compared with what "
@@ -4067,8 +4067,8 @@ msgid "Save goals"
 msgstr "Guardar metas"
 
 #, python-format
-msgid "Copy the goals of %(ano_anterior)s"
-msgstr "Copiar las metas de %(ano_anterior)s"
+msgid "Copy the goals of %(previous_year)s"
+msgstr "Copiar las metas de %(previous_year)s"
 
 msgid ""
 "Leave a group without a goal blank. Copying only fills the groups that have "
@@ -4100,22 +4100,22 @@ msgstr "RECIBO"
 
 #, python-format
 msgid ""
-"We received from <strong>%(nome)s</strong> (%(sigla)s %(documento)s) the "
-"amount of <strong>%(valor)s</strong>,"
+"We received from <strong>%(name)s</strong> (%(abbreviation)s %(document)s) the "
+"amount of <strong>%(amount)s</strong>,"
 msgstr ""
-"Recibimos de <strong>%(nome)s</strong> (%(sigla)s %(documento)s) la suma de "
-"<strong>%(valor)s</strong>,"
+"Recibimos de <strong>%(name)s</strong> (%(abbreviation)s %(document)s) la suma de "
+"<strong>%(amount)s</strong>,"
 
 #, python-format
 msgid ""
-"We received from <strong>%(nome)s</strong> the amount of <strong>%(valor)s</"
+"We received from <strong>%(name)s</strong> the amount of <strong>%(amount)s</"
 "strong>,"
 msgstr ""
-"Recibimos de <strong>%(nome)s</strong> la suma de <strong>%(valor)s</strong>,"
+"Recibimos de <strong>%(name)s</strong> la suma de <strong>%(amount)s</strong>,"
 
 #, python-format
-msgid "for %(descricao)s (installment %(numero)s of %(total)s)"
-msgstr "en concepto de %(descricao)s (cuota %(numero)s de %(total)s)"
+msgid "for %(description)s (installment %(number)s of %(total)s)"
+msgstr "en concepto de %(description)s (cuota %(number)s de %(total)s)"
 
 #, python-format
 msgid "%(n)s card installment"
@@ -4127,20 +4127,20 @@ msgid "Interest and late fee included"
 msgstr "Intereses y multa incluidos"
 
 #, python-format
-msgid "Received by %(nome)s"
-msgstr "Cobrado por %(nome)s"
+msgid "Received by %(name)s"
+msgstr "Cobrado por %(name)s"
 
 #, python-format
-msgid "This receipt does not replace the tax document (%(documento)s)."
-msgstr "Este recibo no sustituye al comprobante fiscal (%(documento)s)."
+msgid "This receipt does not replace the tax document (%(document)s)."
+msgstr "Este recibo no sustituye al comprobante fiscal (%(document)s)."
 
 #, python-format
-msgid "installment %(numero)s of %(total)s"
-msgstr "cuota %(numero)s de %(total)s"
+msgid "installment %(number)s of %(total)s"
+msgstr "cuota %(number)s de %(total)s"
 
 #, python-format
-msgid "due on %(vencimento)s"
-msgstr "vence el %(vencimento)s"
+msgid "due on %(due_date)s"
+msgstr "vence el %(due_date)s"
 
 msgid "Installment amount"
 msgstr "Valor de la cuota"
@@ -4205,9 +4205,9 @@ msgstr "Por la fecha del pago, sin los revertidos ni los cancelados."
 
 #, python-format
 msgid ""
-"Finance closed up to %(data)s: up to that date the amounts no longer change."
+"Finance closed up to %(date)s: up to that date the amounts no longer change."
 msgstr ""
-"Financiero cerrado hasta el %(data)s: hasta esa fecha los valores ya no "
+"Financiero cerrado hasta el %(date)s: hasta esa fecha los valores ya no "
 "cambian."
 
 msgid "Interest and late fees received"
@@ -4217,16 +4217,16 @@ msgid "Discounts given"
 msgstr "Descuentos dados"
 
 #, python-format
-msgid "bank account %(conta)s"
-msgstr "cuenta %(conta)s en el banco"
+msgid "bank account %(account)s"
+msgstr "cuenta %(account)s en el banco"
 
 msgctxt "plural"
 msgid "Pending"
 msgstr "Pendientes"
 
 #, python-format
-msgid "Bank balance on %(data)s"
-msgstr "Saldo en el banco al %(data)s"
+msgid "Bank balance on %(date)s"
+msgstr "Saldo en el banco al %(date)s"
 
 msgid "System balance on the same date"
 msgstr "Saldo en el sistema en la misma fecha"
@@ -4325,8 +4325,8 @@ msgid "New supplier"
 msgstr "Nuevo proveedor"
 
 #, python-format
-msgid "Name, legal name or %(documentos)s"
-msgstr "Nombre, razón social o %(documentos)s"
+msgid "Name, legal name or %(documents)s"
+msgstr "Nombre, razón social o %(documents)s"
 
 msgid "Search supplier"
 msgstr "Buscar proveedor"
@@ -4419,41 +4419,41 @@ msgid "Previous"
 msgstr "Anterior"
 
 #, python-format
-msgid "Page %(numero)s of %(total)s"
-msgstr "Página %(numero)s de %(total)s"
+msgid "Page %(number)s of %(total)s"
+msgstr "Página %(number)s de %(total)s"
 
 msgid "Next"
 msgstr "Siguiente"
 
 #, python-format
-msgid "Type the name, code or %(documentos)s"
-msgstr "Escriba el nombre, código o %(documentos)s"
+msgid "Type the name, code or %(documents)s"
+msgstr "Escriba el nombre, código o %(documents)s"
 
 #, python-format
 msgid ""
-"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s day "
+"I certify that %(name)s was under my care on %(date)s and needs %(days)s day "
 "of leave from their activities, starting on that date."
 msgid_plural ""
-"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s "
+"I certify that %(name)s was under my care on %(date)s and needs %(days)s "
 "days of leave from their activities, starting on that date."
 msgstr[0] ""
-"Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita "
-"%(dias)s día de reposo de sus actividades, a partir de esa fecha."
+"Certifico que %(name)s estuvo bajo mi cuidado el %(date)s y necesita "
+"%(days)s día de reposo de sus actividades, a partir de esa fecha."
 msgstr[1] ""
-"Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita "
-"%(dias)s días de reposo de sus actividades, a partir de esa fecha."
+"Certifico que %(name)s estuvo bajo mi cuidado el %(date)s y necesita "
+"%(days)s días de reposo de sus actividades, a partir de esa fecha."
 
 #, python-format
 msgid ""
-"I certify that %(nome)s was seen at this clinic on %(data)s, from %(inicio)s "
-"to %(fim)s."
+"I certify that %(name)s was seen at this clinic on %(date)s, from %(start)s "
+"to %(end)s."
 msgstr ""
-"Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s, de las "
-"%(inicio)s a las %(fim)s."
+"Certifico que %(name)s fue atendido(a) en esta clínica el %(date)s, de las "
+"%(start)s a las %(end)s."
 
 #, python-format
-msgid "I certify that %(nome)s was seen at this clinic on %(data)s."
-msgstr "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s."
+msgid "I certify that %(name)s was seen at this clinic on %(date)s."
+msgstr "Certifico que %(name)s fue atendido(a) en esta clínica el %(date)s."
 
 msgid "Certificate"
 msgstr "Certificado"
@@ -4503,15 +4503,15 @@ msgid "Addendum"
 msgstr "Adenda"
 
 #, python-format
-msgid "Finalized in the system on %(momento)s."
-msgstr "Finalizada en el sistema el %(momento)s."
+msgid "Finalized in the system on %(when)s."
+msgstr "Finalizada en el sistema el %(when)s."
 
 msgid "appointment on"
 msgstr "cita del"
 
 #, python-format
-msgid "Finalized on %(momento)s"
-msgstr "Finalizada el %(momento)s"
+msgid "Finalized on %(when)s"
+msgstr "Finalizada el %(when)s"
 
 msgid "Draft"
 msgstr "Borrador"
@@ -4553,10 +4553,10 @@ msgid "Documents"
 msgstr "Documentos"
 
 #, python-format
-msgid "%(dias)s day"
-msgid_plural "%(dias)s days"
-msgstr[0] "%(dias)s día"
-msgstr[1] "%(dias)s días"
+msgid "%(days)s day"
+msgid_plural "%(days)s days"
+msgstr[0] "%(days)s día"
+msgstr[1] "%(days)s días"
 
 msgid "No document issued."
 msgstr "Ningún documento emitido."
@@ -4580,8 +4580,8 @@ msgid "ok"
 msgstr "ok"
 
 #, python-format
-msgid "load average: %(carga)s"
-msgstr "carga media: %(carga)s"
+msgid "load average: %(load)s"
+msgstr "carga media: %(load)s"
 
 msgid "24 hours"
 msgstr "24 horas"
@@ -4597,23 +4597,23 @@ msgstr ""
 "(kaladrius-health.timer); en desarrollo no hay recolección."
 
 #, python-format
-msgid "Collection stopped: the last sample is from %(momento)s."
-msgstr "La recolección se detuvo: la última muestra es del %(momento)s."
+msgid "Collection stopped: the last sample is from %(when)s."
+msgstr "La recolección se detuvo: la última muestra es del %(when)s."
 
 msgid "Swap"
 msgstr "Swap"
 
 #, python-format
-msgid "Last sample: %(momento)s."
-msgstr "Última muestra: %(momento)s."
+msgid "Last sample: %(when)s."
+msgstr "Última muestra: %(when)s."
 
 #, python-format
-msgid "Server up for %(tempo)s."
-msgstr "Servidor encendido hace %(tempo)s."
+msgid "Server up for %(duration)s."
+msgstr "Servidor encendido hace %(duration)s."
 
 #, python-format
-msgid "Network in the period: %(recebido)s received, %(enviado)s sent."
-msgstr "Red en el período: %(recebido)s recibidos, %(enviado)s enviados."
+msgid "Network in the period: %(received)s received, %(sent)s sent."
+msgstr "Red en el período: %(received)s recibidos, %(sent)s enviados."
 
 msgid "top"
 msgstr "tope"
@@ -4623,18 +4623,18 @@ msgstr "Pocas muestras para el gráfico."
 
 #, python-format
 msgid ""
-"In the period: processor averaging %(media)s%% with a peak of %(pico)s%%; "
-"memory peaking at %(memoria)s%% in use; swap peaking at %(swap)s%%."
+"In the period: processor averaging %(average)s%% with a peak of %(peak)s%%; "
+"memory peaking at %(memory)s%% in use; swap peaking at %(swap)s%%."
 msgstr ""
-"En el período: procesador con promedio de %(media)s%% y pico de %(pico)s%%; "
-"memoria con pico de %(memoria)s%% en uso; swap con pico de %(swap)s%%."
+"En el período: procesador con promedio de %(average)s%% y pico de %(peak)s%%; "
+"memoria con pico de %(memory)s%% en uso; swap con pico de %(swap)s%%."
 
 msgid "Containers"
 msgstr "Contenedores"
 
 #, python-format
-msgid "Database · %(tamanho)s"
-msgstr "Base de datos · %(tamanho)s"
+msgid "Database · %(size)s"
+msgstr "Base de datos · %(size)s"
 
 msgid "Largest tables"
 msgstr "Tablas más grandes"
@@ -4646,8 +4646,8 @@ msgid "Size"
 msgstr "Tamaño"
 
 #, python-format
-msgid "Last backup: %(momento)s (%(tamanho)s)."
-msgstr "Última copia de seguridad: %(momento)s (%(tamanho)s)."
+msgid "Last backup: %(when)s (%(size)s)."
+msgstr "Última copia de seguridad: %(when)s (%(size)s)."
 
 msgid "No backup recorded."
 msgstr "Ninguna copia de seguridad registrada."
@@ -4666,8 +4666,8 @@ msgid "Archive patient"
 msgstr "Archivar paciente"
 
 #, python-format
-msgid "Archive %(nome)s?"
-msgstr "¿Archivar a %(nome)s?"
+msgid "Archive %(name)s?"
+msgstr "¿Archivar a %(name)s?"
 
 msgid ""
 "The patient leaves the team's lists, search, schedule, birthdays and "
@@ -4714,17 +4714,17 @@ msgid "Delete patient"
 msgstr "Eliminar paciente"
 
 #, python-format
-msgid "Permanently delete %(nome)s?"
-msgstr "¿Eliminar definitivamente a %(nome)s?"
+msgid "Permanently delete %(name)s?"
+msgstr "¿Eliminar definitivamente a %(name)s?"
 
 #, python-format
 msgid ""
-"Use only when the patient asks for their data to be deleted (%(lei)s). To "
+"Use only when the patient asks for their data to be deleted (%(law)s). To "
 "take them out of day-to-day use, keep them archived. First, check that the "
 "clinic is not required to keep the care records."
 msgstr ""
 "Úselo solo cuando el propio paciente pida la eliminación de sus datos "
-"(%(lei)s). Para sacarlo del día a día, manténgalo archivado. Antes, "
+"(%(law)s). Para sacarlo del día a día, manténgalo archivado. Antes, "
 "verifique que la clínica no esté obligada a conservar los registros de "
 "atención."
 
@@ -4784,8 +4784,8 @@ msgid "Edit patient"
 msgstr "Editar paciente"
 
 #, python-format
-msgid "Edit %(nome)s"
-msgstr "Editar %(nome)s"
+msgid "Edit %(name)s"
+msgstr "Editar %(name)s"
 
 msgid "Identification"
 msgstr "Identificación"
@@ -4797,8 +4797,8 @@ msgid "Notes"
 msgstr "Observaciones"
 
 #, python-format
-msgid "Name, code or %(documentos)s"
-msgstr "Nombre, código o %(documentos)s"
+msgid "Name, code or %(documents)s"
+msgstr "Nombre, código o %(documents)s"
 
 msgctxt "plural"
 msgid "Active"
@@ -4886,12 +4886,12 @@ msgid "Print sheet"
 msgstr "Imprimir ficha"
 
 #, python-format
-msgid "Archived on %(momento)s."
-msgstr "Archivado el %(momento)s."
+msgid "Archived on %(when)s."
+msgstr "Archivado el %(when)s."
 
 #, python-format
-msgid "By %(nome)s."
-msgstr "Por %(nome)s."
+msgid "By %(name)s."
+msgstr "Por %(name)s."
 
 msgid ""
 "Only clinic administrators see this patient. Restore them to use them again "
@@ -4907,8 +4907,8 @@ msgid "New related person"
 msgstr "Nueva persona relacionada"
 
 #, python-format
-msgid "%(vinculo)s of"
-msgstr "%(vinculo)s de"
+msgid "%(membership)s of"
+msgstr "%(membership)s de"
 
 msgid "No related people."
 msgstr "Ninguna persona relacionada."
@@ -4970,8 +4970,8 @@ msgid "No recalls."
 msgstr "Ningún recordatorio."
 
 #, python-format
-msgid "Registered on %(criado)s · changed on %(alterado)s"
-msgstr "Registrado el %(criado)s · modificado el %(alterado)s"
+msgid "Registered on %(created)s · changed on %(changed)s"
+msgstr "Registrado el %(created)s · modificado el %(changed)s"
 
 msgid "Related person"
 msgstr "Persona relacionada"
@@ -5000,8 +5000,8 @@ msgid "Delete practitioner"
 msgstr "Eliminar profesional"
 
 #, python-format
-msgid "Delete %(nome)s?"
-msgstr "¿Eliminar %(nome)s?"
+msgid "Delete %(name)s?"
+msgstr "¿Eliminar %(name)s?"
 
 msgid ""
 "This action cannot be undone. To just hide the practitioner, edit and "
@@ -5026,8 +5026,8 @@ msgid "No practitioners yet."
 msgstr "Ningún profesional registrado."
 
 #, python-format
-msgid "Recalls on %(dia)s"
-msgstr "Recordatorios del %(dia)s"
+msgid "Recalls on %(day)s"
+msgstr "Recordatorios del %(day)s"
 
 msgid "No recalls on this day."
 msgstr "Ningún recordatorio en este día."
@@ -5039,8 +5039,8 @@ msgid "Delete recall"
 msgstr "Eliminar recordatorio"
 
 #, python-format
-msgid "Delete the recall for %(nome)s (%(data)s)?"
-msgstr "¿Eliminar el recordatorio de %(nome)s (%(data)s)?"
+msgid "Delete the recall for %(name)s (%(date)s)?"
+msgstr "¿Eliminar el recordatorio de %(name)s (%(date)s)?"
 
 msgid "This action cannot be undone."
 msgstr "Esta acción no se puede deshacer."
@@ -5128,10 +5128,10 @@ msgstr "Entrar nuevamente"
 
 #, python-format
 msgid ""
-"You were logged out after %(minutos)s minutes without use. Log in again to "
+"You were logged out after %(minutes)s minutes without use. Log in again to "
 "continue."
 msgstr ""
-"Salió del sistema después de %(minutos)s minutos sin uso. Ingrese de nuevo "
+"Salió del sistema después de %(minutes)s minutos sin uso. Ingrese de nuevo "
 "para continuar."
 
 msgid "Incorrect username or password."
@@ -5144,14 +5144,14 @@ msgid "Password"
 msgstr "Contraseña"
 
 #, python-format
-msgid "Birthdays on %(dia)s"
-msgstr "Cumpleaños del %(dia)s"
+msgid "Birthdays on %(day)s"
+msgstr "Cumpleaños del %(day)s"
 
 #, python-format
-msgid "turns %(idade)s"
-msgid_plural "turns %(idade)s"
-msgstr[0] "cumple %(idade)s año"
-msgstr[1] "cumple %(idade)s años"
+msgid "turns %(age)s"
+msgid_plural "turns %(age)s"
+msgstr[0] "cumple %(age)s año"
+msgstr[1] "cumple %(age)s años"
 
 msgid "No birthdays on this day."
 msgstr "Ningún cumpleaños en este día."
@@ -5160,15 +5160,15 @@ msgid "Delete appointment?"
 msgstr "¿Eliminar la cita?"
 
 #, python-format
-msgid "%(inicio)s to %(fim)s"
-msgstr "%(inicio)s a %(fim)s"
+msgid "%(start)s to %(end)s"
+msgstr "%(start)s a %(end)s"
 
 msgid "Only this one"
 msgstr "Solo esta"
 
 #, python-format
-msgid "This one and the next %(proximos)s of the same series"
-msgstr "Esta y las próximas %(proximos)s de la misma repetición"
+msgid "This one and the next %(following)s of the same series"
+msgstr "Esta y las próximas %(following)s de la misma repetición"
 
 msgid "Edit appointment"
 msgstr "Editar cita"
@@ -5301,8 +5301,8 @@ msgstr ""
 "contador."
 
 #, python-format
-msgid "Pay for %(mes)s"
-msgstr "Sueldos de %(mes)s"
+msgid "Pay for %(month)s"
+msgstr "Sueldos de %(month)s"
 
 msgid ""
 "One line per employee working in the month. Overtime = hours × hourly rate "
@@ -5426,12 +5426,12 @@ msgid "All modules"
 msgstr "Todos los módulos"
 
 #, python-format
-msgid "Version %(versao)s"
-msgstr "Versión %(versao)s"
+msgid "Version %(version)s"
+msgstr "Versión %(version)s"
 
 #, python-format
-msgid "Update proposed by %(origem)s (pull request #%(pr)s)"
-msgstr "Actualización propuesta por %(origem)s (pull request #%(pr)s)"
+msgid "Update proposed by %(origin)s (pull request #%(pr)s)"
+msgstr "Actualización propuesta por %(origin)s (pull request #%(pr)s)"
 
 msgid "No release notes yet."
 msgstr "Todavía no hay novedades registradas."
