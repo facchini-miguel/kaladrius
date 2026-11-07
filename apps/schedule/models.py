@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.isolation import ClinicModel, without_isolation
 from apps.core.ordering import ALPHABETICAL
 from apps.core.validators import validate_color
+from apps.core.values import spellings
 from apps.dentistry.teeth import APPOINTMENT_TYPES
 
 # Appointment types a new clinic starts with (decision 080): the dental module's for the
@@ -151,8 +152,11 @@ class Appointment(ClinicModel):
                     (TsTzRange("start", "end", RangeBoundary()), RangeOperators.OVERLAPS),
                     ("practitioner", RangeOperators.EQUAL),
                 ],
-                # A cancelled appointment does not hold the slot.
-                condition=~models.Q(status="desmarcou"),
+                # A cancelled appointment does not hold the slot, in either spelling while the
+                # stored values change (decision 197).
+                condition=~models.Q(
+                    status__in=spellings("schedule.Appointment.status", "desmarcou")
+                ),
                 violation_error_message=_("O profissional já tem um agendamento neste horário."),
             ),
         ]

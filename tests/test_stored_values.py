@@ -161,3 +161,23 @@ def test_audit_shows_the_label_of_either_spelling(appointment):
     with translation.override("pt-br"):
         ((_label, before, after),) = changed_fields(entry)
         assert (str(before), after) == ("Faltou", "?")
+
+
+def test_a_cancelled_appointment_frees_the_slot_in_either_spelling(appointment, clinic_a):
+    """The no-overlap constraint must hold while rows are converted, both ways."""
+    cancelled = Appointment.Status.CANCELLED.value
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE schedule_appointment SET status = %s WHERE id = %s",
+            [other_spelling("schedule.Appointment.status", cancelled), appointment.pk],
+        )
+    with use_clinic(clinic_a):
+        Appointment.objects.create(
+            practitioner=appointment.practitioner,
+            kind=appointment.kind,
+            start=appointment.start,
+            end=appointment.end,
+        )
+    sync_values()  # both now in the code's spelling: the cancelled one still frees the slot
+    appointment.refresh_from_db()
+    assert appointment.status == cancelled

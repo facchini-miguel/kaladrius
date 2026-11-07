@@ -97,6 +97,13 @@ def both_spellings(key, values):
     return sorted({*values, *mapping, *mapping.values()})
 
 
+def spellings(key, value):
+    """One value in both spellings, sorted: for a constraint's condition."""
+    mapping = VALUES[key]
+    other = mapping.get(value) or {e: p for p, e in mapping.items()}.get(value)
+    return sorted({value, other})
+
+
 def direction(mapping, current):
     """{value to convert: value of the running code} for a field whose code has the values
     `current`: back to Portuguese while the code is Portuguese, to English after."""
