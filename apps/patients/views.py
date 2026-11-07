@@ -175,7 +175,7 @@ def _patient_form(request, patient):
     form = PatientForm(request.POST or None, instance=patient, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         patient = form.save()
-        messages.success(request, _("Paciente %(nome)s salvo.") % {"nome": patient.name})
+        messages.success(request, _("Patient %(nome)s saved.") % {"nome": patient.name})
         return redirect("patients:record", pk=patient.pk)
     return render(request, "patients/form.html", {"form": form, "patient": patient})
 
@@ -193,9 +193,7 @@ def archive(request, pk):
     )
     if unpaid:
         if request.method == "POST":
-            messages.error(
-                request, _("Resolva as contas em aberto do paciente antes de arquivá-lo.")
-            )
+            messages.error(request, _("Settle the patient's open entries before archiving them."))
         return render(request, "patients/archive.html", {"patient": patient, "open_items": unpaid})
     if request.method == "POST":
         patient.archived = True
@@ -205,8 +203,8 @@ def archive(request, pk):
         messages.success(
             request,
             _(
-                "Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
-                "restaurado na lista de pacientes, em Situação: Arquivados."
+                "Patient %(nome)s archived. The history is kept, and the patient can be restored "
+                "from the patient list, under Status: Archived."
             )
             % {"nome": patient.name},
         )
@@ -221,7 +219,7 @@ def restore(request, pk):
         patient.archived = False
         patient.archived_at = patient.archived_by = None
         patient.save()
-        messages.success(request, _("Paciente %(nome)s restaurado.") % {"nome": patient.name})
+        messages.success(request, _("Patient %(nome)s restored.") % {"nome": patient.name})
     return redirect("patients:record", pk=patient.pk)
 
 
@@ -246,7 +244,7 @@ def delete_patient(request, pk):
     visits = Visit.objects.filter(patient=patient).count()
     if visits:
         if request.method == "POST":
-            messages.error(request, _("Paciente com prontuário não pode ser excluído."))
+            messages.error(request, _("A patient with a medical record cannot be deleted."))
         return render(request, "patients/delete.html", {**context, "visits": visits})
     if request.method == "POST":
         code = patient.pk
@@ -303,7 +301,7 @@ def delete_patient(request, pk):
             )
         messages.success(
             request,
-            _("Os dados do paciente de código %(codigo)s foram excluídos.") % {"codigo": code},
+            _("The data of patient code %(codigo)s was deleted.") % {"codigo": code},
         )
         return redirect(f"{reverse('patients:list')}?situacao=arquivados")
     return render(request, "patients/delete.html", context)
@@ -382,7 +380,7 @@ def _related_person_form(request, patient, instance):
     form = RelatedPersonForm(request.POST or None, instance=instance, patient=patient)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Pessoa relacionada salva."))
+        messages.success(request, _("Related person saved."))
         return redirect("patients:record", pk=patient.pk)
     # The patient chosen in the search box, shown again when the form comes back.
     if form.is_bound:
@@ -407,6 +405,6 @@ def remove_related_person(request, pk):
     if request.method == "POST":
         patient = related_person.patient_id
         related_person.delete()
-        messages.success(request, _("Pessoa relacionada removida."))
+        messages.success(request, _("Related person removed."))
         return redirect("patients:record", pk=patient)
     return redirect("patients:related_edit", pk=pk)

@@ -7,7 +7,11 @@ from . import releases
 @login_required
 def whats_new_list(request):
     versions = releases.for_audience("staff")
-    modules = sorted({(item.module, item.module_name) for _, items in versions for item in items})
+    # In the reader's language's order (the codes are the English names, decision 200).
+    modules = sorted(
+        {(item.module, item.module_name) for _, items in versions for item in items},
+        key=lambda pair: pair[1].lower(),
+    )
     module = request.GET.get("module", "")
     if module:
         versions = [

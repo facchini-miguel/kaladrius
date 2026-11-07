@@ -8,7 +8,7 @@
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:catalog' catalog %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:catalog' catalog %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

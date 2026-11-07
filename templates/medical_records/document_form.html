@@ -6,11 +6,11 @@
 {% block content %}
 <h1 class="h3 mb-1">{{ title }}</h1>
 <p class="text-body-secondary"><a href="{% url 'medical_records:visit' visit.pk %}">{{ visit.patient.name }} · {{ visit.date|date:"SHORT_DATETIME_FORMAT" }}</a></p>
-<p class="text-body-secondary small">{% translate "Depois de emitido, o documento não muda; ele fica guardado no prontuário e pode ser impresso de novo." %}</p>
+<p class="text-body-secondary small">{% translate "Once issued, the document does not change; it is kept in the medical record and can be printed again." %}</p>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Emitir" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' visit.pk %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Issue" %}</button>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' visit.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

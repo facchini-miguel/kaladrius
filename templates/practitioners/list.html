@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Profissionais" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Practitioners" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Profissionais" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Practitioners" %}</h1>
   {% if can.practitioners.create %}
-  <a class="btn btn-primary" href="{% url 'practitioners:new' %}">{% translate "Novo profissional" %}</a>
+  <a class="btn btn-primary" href="{% url 'practitioners:new' %}">{% translate "New practitioner" %}</a>
   {% endif %}
 </div>
 
@@ -15,12 +15,12 @@
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Nome" %}</th>
-        <th>{% translate "Registro" %}</th>
-        <th>{% translate "Cor" %}</th>
-        <th>{% translate "Usuário de acesso" %}</th>
-        <th>{% translate "Situação" %}</th>
-        <th class="text-end">{% translate "Ações" %}</th>
+        <th>{% translate "Name" %}</th>
+        <th>{% translate "Record" %}</th>
+        <th>{% translate "Color" %}</th>
+        <th>{% translate "Login user" %}</th>
+        <th>{% translate "Status" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -31,20 +31,20 @@
         <td><span class="color-swatch" style="background-color: {{ practitioner.color }}" title="{{ practitioner.color }}"></span></td>
         <td>{{ practitioner.user.username|default:"—" }}</td>
         <td>
-          {% if practitioner.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>
-          {% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}
+          {% if practitioner.active %}<span class="badge text-bg-success">{% translate "Active" %}</span>
+          {% else %}<span class="badge text-bg-secondary">{% translate "Inactive" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if can.practitioners.change %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' practitioner.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'practitioners:edit' practitioner.pk %}">{% translate "Edit" %}</a>
           {% endif %}
           {% if can.practitioners.delete %}
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' practitioner.pk %}">{% translate "Excluir" %}</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'practitioners:delete' practitioner.pk %}">{% translate "Delete" %}</a>
           {% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum profissional cadastrado." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No practitioners yet." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

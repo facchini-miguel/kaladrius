@@ -1,33 +1,33 @@
 {% extends "base.html" %}
 {% load i18n static formats %}
 
-{% block title %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
+{% block title %}{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-0">{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
+    <h1 class="h3 mb-0">{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %} <span class="fs-6 align-middle">{% include "estimates/_status.html" %}</span></h1>
     <span class="text-body-secondary">
       <a href="{% url 'patients:record' estimate.patient_id %}">{{ estimate.patient.name }}</a>
       {% if estimate.practitioner %} · {{ estimate.practitioner.name }}{% endif %}
       · {{ estimate.date|date:"SHORT_DATE_FORMAT" }}
-      · {% blocktranslate with validade=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}válido até {{ validade }}{% endblocktranslate %}
+      · {% blocktranslate with validade=estimate.valid_until|date:"SHORT_DATE_FORMAT" %}valid until {{ validade }}{% endblocktranslate %}
     </span>
   </div>
   <div class="d-flex flex-wrap gap-2">
-    <a class="btn btn-outline-secondary" href="{% url 'estimates:print' estimate.pk %}">{% translate "Imprimir" %}</a>
+    <a class="btn btn-outline-secondary" href="{% url 'estimates:print' estimate.pk %}">{% translate "Print" %}</a>
     {% if is_open and can.estimates.change %}
-    <a class="btn btn-outline-primary" href="{% url 'estimates:edit' estimate.pk %}">{% translate "Editar" %}</a>
-    <form method="post" action="{% url 'estimates:decline' estimate.pk %}">{% csrf_token %}<button type="submit" class="btn btn-outline-danger">{% translate "Recusar" %}</button></form>
+    <a class="btn btn-outline-primary" href="{% url 'estimates:edit' estimate.pk %}">{% translate "Edit" %}</a>
+    <form method="post" action="{% url 'estimates:decline' estimate.pk %}">{% csrf_token %}<button type="submit" class="btn btn-outline-danger">{% translate "Refuse" %}</button></form>
     {% endif %}
-    {% if can_approve %}<a class="btn btn-success" href="{% url 'estimates:approve' estimate.pk %}">{% translate "Aprovar" %}</a>{% endif %}
-    {% if estimate.entry_id and can.receiving.view %}<a class="btn btn-outline-success" href="{% url 'finance:entry' estimate.entry_id %}">{% translate "Ver em A receber" %}</a>{% endif %}
+    {% if can_approve %}<a class="btn btn-success" href="{% url 'estimates:approve' estimate.pk %}">{% translate "Approve" %}</a>{% endif %}
+    {% if estimate.entry_id and can.receiving.view %}<a class="btn btn-outline-success" href="{% url 'finance:entry' estimate.entry_id %}">{% translate "See in Receivables" %}</a>{% endif %}
   </div>
 </div>
 
 <div class="table-responsive">
   <table class="table align-middle bg-white">
-    <thead><tr><th>{% translate "Procedimento" %}</th>{% if show_teeth %}<th>{% translate "Dentes" %}</th><th>{% translate "Faces ou região" %}</th>{% endif %}<th class="text-end">{% translate "Qtd." %}</th><th class="text-end">{% translate "Valor unitário" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
+    <thead><tr><th>{% translate "Procedure" %}</th>{% if show_teeth %}<th>{% translate "Teeth" %}</th><th>{% translate "Surfaces or region" %}</th>{% endif %}<th class="text-end">{% translate "Qty." %}</th><th class="text-end">{% translate "Unit price" %}</th><th class="text-end">{% translate "Total" %}</th><th></th></tr></thead>
     <tbody>
       {% for item in estimate.items.all %}
       <tr>
@@ -39,16 +39,16 @@
         <td class="text-end">{{ item.quantity }}</td>
         <td class="text-end text-nowrap">{{ item.unit_price|currency }}</td>
         <td class="text-end text-nowrap">{{ item.total|currency }}</td>
-        <td class="text-end">{% if is_open and can.estimates.change %}{% if dentistry_enabled or not item.teeth and not item.faces %}<form method="post" action="{% url 'estimates:item_remove' estimate.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>{% endif %}{% endif %}</td>
+        <td class="text-end">{% if is_open and can.estimates.change %}{% if dentistry_enabled or not item.teeth and not item.faces %}<form method="post" action="{% url 'estimates:item_remove' estimate.pk item.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remove" %}</button></form>{% endif %}{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="{% if show_teeth %}7{% else %}5{% endif %}" class="text-body-secondary">{% translate "Nenhum procedimento ainda." %}</td></tr>
+      <tr><td colspan="{% if show_teeth %}7{% else %}5{% endif %}" class="text-body-secondary">{% translate "No procedures yet." %}</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>
       {% if estimate.discount %}
       <tr><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Subtotal" %}</td><td class="text-end text-nowrap">{{ estimate.subtotal|currency }}</td><td></td></tr>
-      <tr><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Desconto" %}</td><td class="text-end text-nowrap">− {{ estimate.discount|currency }}</td><td></td></tr>
+      <tr><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Discount" %}</td><td class="text-end text-nowrap">− {{ estimate.discount|currency }}</td><td></td></tr>
       {% endif %}
       <tr class="fw-semibold"><td colspan="{% if show_teeth %}5{% else %}3{% endif %}" class="text-end">{% translate "Total" %}</td><td class="text-end text-nowrap">{{ estimate.total|currency }}</td><td></td></tr>
     </tfoot>
@@ -57,13 +57,13 @@
 {% if estimate.notes %}<p class="text-body-secondary">{{ estimate.notes|linebreaksbr }}</p>{% endif %}
 
 {% if show_teeth and not dentistry_enabled %}
-<h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
+<h2 class="h6">{% translate "Teeth in the estimate" %}</h2>
 {% include "dentistry/_odontogram.html" with interactive=False %}
 {% endif %}
 
 {% if is_open and can.estimates.change %}
 <div class="card mb-3">
-  <div class="card-header">{% translate "Incluir procedimento" %}</div>
+  <div class="card-header">{% translate "Add procedure" %}</div>
   <div class="card-body">
     <form method="post" action="{% url 'estimates:item_add' estimate.pk %}" novalidate>
       {% csrf_token %}
@@ -78,13 +78,13 @@
         <div class="col-6 col-md-2">{% with field=item_form.quantity %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-6 col-md-3">{% with field=item_form.unit_price %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <p class="text-body-secondary small">{% if dentistry_enabled %}{% translate "Clique nos dentes do procedimento (a quantidade acompanha)." %} {% endif %}{% translate "Sem descrição ou valor, valem os da tabela de procedimentos." %}</p>
-      <button type="submit" class="btn btn-primary">{% translate "Incluir" %}</button>
+      <p class="text-body-secondary small">{% if dentistry_enabled %}{% translate "Click the procedure's teeth (the quantity follows)." %} {% endif %}{% translate "Without a description or price, the procedure price list's apply." %}</p>
+      <button type="submit" class="btn btn-primary">{% translate "Add" %}</button>
     </form>
   </div>
 </div>
 {% elif show_teeth and dentistry_enabled %}
-<h2 class="h6">{% translate "Dentes do orçamento" %}</h2>
+<h2 class="h6">{% translate "Teeth in the estimate" %}</h2>
 {% include "dentistry/_odontogram.html" with interactive=False %}
 {% endif %}
 
@@ -92,7 +92,7 @@
 <form method="post" action="{% url 'estimates:discount' estimate.pk %}" class="row g-2 align-items-end mb-3" style="max-width: 28rem;" novalidate>
   {% csrf_token %}
   <div class="col-8">{% with field=discount_form.discount %}{% include "includes/field.html" %}{% endwith %}</div>
-  <div class="col-4 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Aplicar" %}</button></div>
+  <div class="col-4 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Apply" %}</button></div>
 </form>
 {% endif %}
 {% endblock %}

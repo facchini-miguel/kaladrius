@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Fluxo de caixa" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Cash flow" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Fluxo de caixa" %}</h1>
+<h1 class="h3 mb-3">{% translate "Cash flow" %}</h1>
 {% include "finance/_period.html" with group=True %}
 
 <div class="row g-3 mb-3">
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo no início" %}</div><div class="fs-5">{{ flow.opening_balance|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Entradas (realizadas + previstas)" %}</div><div class="fs-5 text-success">{{ flow.totals.incoming|currency }} + {{ flow.totals.expected_incoming|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saídas (realizadas + previstas)" %}</div><div class="fs-5 text-danger">{{ flow.totals.outgoing|currency }} + {{ flow.totals.expected_outgoing|currency }}</div></div></div></div>
-  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Saldo previsto no fim" %}</div><div class="fs-5{% if flow.closing_balance < 0 %} text-danger{% endif %}">{{ flow.closing_balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Balance at the start" %}</div><div class="fs-5">{{ flow.opening_balance|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Money in (actual + expected)" %}</div><div class="fs-5 text-success">{{ flow.totals.incoming|currency }} + {{ flow.totals.expected_incoming|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Money out (actual + expected)" %}</div><div class="fs-5 text-danger">{{ flow.totals.outgoing|currency }} + {{ flow.totals.expected_outgoing|currency }}</div></div></div></div>
+  <div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Expected balance at the end" %}</div><div class="fs-5{% if flow.closing_balance < 0 %} text-danger{% endif %}">{{ flow.closing_balance|currency }}</div></div></div></div>
 </div>
 
 <div class="table-responsive">
   <table class="table table-sm table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% if by_month %}{% translate "Mês" %}{% else %}{% translate "Dia" %}{% endif %}</th>
-        <th class="text-end">{% translate "Entradas" %}</th>
-        <th class="text-end">{% translate "Saídas" %}</th>
-        <th class="text-end">{% translate "Entradas previstas" %}</th>
-        <th class="text-end">{% translate "Saídas previstas" %}</th>
-        <th class="text-end">{% translate "Saldo" %}</th>
+        <th>{% if by_month %}{% translate "Month" %}{% else %}{% translate "Day" %}{% endif %}</th>
+        <th class="text-end">{% translate "Money in" %}</th>
+        <th class="text-end">{% translate "Money out" %}</th>
+        <th class="text-end">{% translate "Expected in" %}</th>
+        <th class="text-end">{% translate "Expected out" %}</th>
+        <th class="text-end">{% translate "Balance" %}</th>
       </tr>
     </thead>
     <tbody>
       {% for row in flow.rows %}
       <tr>
-        <td class="text-nowrap">{% if by_month %}{{ row.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ row.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if row.late %} <span class="badge text-bg-danger">{% translate "em atraso" %}</span>{% endif %}</td>
+        <td class="text-nowrap">{% if by_month %}{{ row.date|date:"YEAR_MONTH_FORMAT" }}{% else %}{{ row.date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if row.late %} <span class="badge text-bg-danger">{% translate "overdue" %}</span>{% endif %}</td>
         <td class="text-end text-nowrap text-success">{% if row.incoming %}{{ row.incoming|currency }}{% endif %}</td>
         <td class="text-end text-nowrap text-danger">{% if row.outgoing %}{{ row.outgoing|currency }}{% endif %}</td>
         <td class="text-end text-nowrap text-body-secondary">{% if row.expected_incoming %}{{ row.expected_incoming|currency }}{% endif %}</td>
@@ -37,19 +37,19 @@
         <td class="text-end text-nowrap fw-semibold{% if row.balance < 0 %} text-danger{% endif %}">{{ row.balance|currency }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhuma movimentação no período." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No movement in the period." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-<p class="text-body-secondary small">{% translate "Realizado: pagamentos registrados, pela data do pagamento. Previsto: o que falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em atraso”). O saldo soma os dois a partir do saldo das contas no início do período." %}</p>
+<p class="text-body-secondary small">{% translate "Actual: recorded payments, by payment date. Expected: what is left of open installments, by due date (overdue ones are flagged “overdue”). The balance adds both to the accounts' balance at the start of the period." %}</p>
 
-<h2 class="h5 mt-4">{% translate "Saldo atual por conta" %}</h2>
+<h2 class="h5 mt-4">{% translate "Current balance per account" %}</h2>
 <div class="table-responsive" style="max-width: 32rem;">
   <table class="table table-sm bg-white">
     <tbody>
       {% for account, balance in accounts %}
-      <tr><td>{{ account.name }}{% if not account.active %} <span class="badge text-bg-secondary">{% translate "Inativa" %}</span>{% endif %}</td><td class="text-end{% if balance < 0 %} text-danger{% endif %}">{{ balance|currency }}</td></tr>
+      <tr><td>{{ account.name }}{% if not account.active %} <span class="badge text-bg-secondary">{% translate "Inactive" context "feminine" %}</span>{% endif %}</td><td class="text-end{% if balance < 0 %} text-danger{% endif %}">{{ balance|currency }}</td></tr>
       {% endfor %}
     </tbody>
   </table>

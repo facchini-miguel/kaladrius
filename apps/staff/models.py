@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.core.isolation import ClinicModel, WrongClinic
 from apps.core.ordering import ALPHABETICAL
@@ -23,22 +24,22 @@ DAYS_PER_MONTH = Decimal(30)
 
 
 class Employee(ClinicModel):
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)
+    name = models.CharField(_("name"), max_length=200, db_collation=ALPHABETICAL)
     # The country's employee document (decision 121); the name stayed from Brazil.
-    tax_id = models.CharField(_("documento"), max_length=20, blank=True)
-    job_title = models.CharField(_("cargo"), max_length=100, blank=True)
-    hired_on = models.DateField(_("admissão"), null=True, blank=True)
-    left_on = models.DateField(_("desligamento"), null=True, blank=True)
-    phone = models.CharField(_("telefone"), max_length=11, blank=True)
-    notes = models.TextField(_("observações"), blank=True)
-    active = models.BooleanField(_("ativo"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    tax_id = models.CharField(_("document"), max_length=20, blank=True)
+    job_title = models.CharField(_("job title"), max_length=100, blank=True)
+    hired_on = models.DateField(_("hiring date"), null=True, blank=True)
+    left_on = models.DateField(_("leaving date"), null=True, blank=True)
+    phone = models.CharField(_("phone"), max_length=11, blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+    active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "staff_employee"
-        verbose_name = _("funcionário")
-        verbose_name_plural = _("funcionários")
+        verbose_name = _("employee")
+        verbose_name_plural = _("employees")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
@@ -70,24 +71,24 @@ class Salary(ClinicModel):
         Employee,
         on_delete=models.CASCADE,
         related_name="salaries",
-        verbose_name=_("funcionário"),
+        verbose_name=_("employee"),
     )
-    amount = models.DecimalField(_("salário"), **MONEY)
-    effective_from = models.DateField(_("desde"))
+    amount = models.DecimalField(_("salary"), **MONEY)
+    effective_from = models.DateField(_("since"))
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "staff_salary"
-        verbose_name = _("salário")
-        verbose_name_plural = _("salários")
+        verbose_name = _("salary")
+        verbose_name_plural = _("salaries")
         ordering = ["-effective_from", "-pk"]
         constraints = [
             models.CheckConstraint(condition=Q(amount__gt=0), name="salary_amount_positive"),
@@ -108,32 +109,32 @@ class Payroll(ClinicModel):
         Employee,
         on_delete=models.PROTECT,
         related_name="payrolls",
-        verbose_name=_("funcionário"),
+        verbose_name=_("employee"),
     )
-    period = models.DateField(_("competência"), help_text=_("O primeiro dia do mês."))
-    salary = models.DecimalField(_("salário"), **MONEY)
+    period = models.DateField(_("month"), help_text=_("The first day of the month."))
+    salary = models.DecimalField(_("salary"), **MONEY)
     overtime_hours = models.DecimalField(
-        _("horas extras"),
+        _("overtime hours"),
         max_digits=6,
         decimal_places=2,
         default=Decimal(0),
     )
-    overtime_rate = models.DecimalField(_("valor da hora extra"), **MONEY, default=Decimal(0))
-    absences = models.PositiveSmallIntegerField(_("dias de falta"), default=0)
-    note = models.CharField(_("observação"), max_length=200, blank=True)
+    overtime_rate = models.DecimalField(_("overtime hourly rate"), **MONEY, default=Decimal(0))
+    absences = models.PositiveSmallIntegerField(_("days of absence"), default=0)
+    note = models.CharField(_("note"), max_length=200, blank=True)
     entry = models.OneToOneField(
         "finance.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="payroll",
-        verbose_name=_("conta a pagar"),
+        verbose_name=pgettext_lazy("account", "payable"),
     )
 
     class Meta:
         db_table = "staff_payroll"
-        verbose_name = _("folha do mês")
-        verbose_name_plural = _("folhas do mês")
+        verbose_name = _("month's pay")
+        verbose_name_plural = _("months' pay")
         ordering = ["-period", "employee__name"]
         constraints = [
             models.UniqueConstraint(

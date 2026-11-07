@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo convênio" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "New health plan" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo convênio" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "New health plan" %}{% endif %}</h1>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'health_plans:list' %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'health_plans:list' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

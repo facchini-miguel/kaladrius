@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Atendimento" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Visit" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
   <div>
-    <h1 class="h3 mb-1">{% translate "Atendimento" %}</h1>
+    <h1 class="h3 mb-1">{% translate "Visit" %}</h1>
     <div class="text-body-secondary">
       <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
       {% if visit %} · {{ visit.practitioner.name }}{% endif %}
-      {% if appointment %} · {% translate "agendamento de" %} {{ appointment.start|date:"SHORT_DATETIME_FORMAT" }}{% endif %}
+      {% if appointment %} · {% translate "appointment on" %} {{ appointment.start|date:"SHORT_DATETIME_FORMAT" }}{% endif %}
     </div>
   </div>
   {% if visit %}
   {% if visit.is_finalized %}
-  <span class="badge text-bg-success">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalizado em {{ momento }}{% endblocktranslate %}</span>
+  <span class="badge text-bg-success">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalized on {{ momento }}{% endblocktranslate %}</span>
   {% else %}
-  <span class="badge text-bg-warning">{% translate "Rascunho" %}</span>
+  <span class="badge text-bg-warning">{% translate "Draft" %}</span>
   {% endif %}
   {% endif %}
 </div>
 
-<p class="text-body-secondary small">{% translate "Prontuário: visível só para os profissionais da clínica (e o administrador do sistema) e guardado por 20 anos. Depois de finalizado, o atendimento não muda mais; correções são feitas por adendo." %}</p>
+<p class="text-body-secondary small">{% translate "Medical record: visible only to the clinic's practitioners (and the system administrator) and kept for 20 years. Once finalized, the visit no longer changes; corrections are made by addendum." %}</p>
 
 {% if editable %}
 <form method="post" style="max-width: 52rem;" novalidate>
@@ -30,9 +30,9 @@
   {% if appointment and not visit %}<input type="hidden" name="appointment" value="{{ appointment.pk }}">{% endif %}
   {% include "includes/form.html" %}
   <div class="d-flex flex-wrap gap-2">
-    <button type="submit" name="action" value="save" class="btn btn-primary">{% translate "Salvar rascunho" %}</button>
-    <button type="submit" name="action" value="finalize" class="btn btn-outline-success">{% translate "Salvar e finalizar" %}</button>
-    <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a>
+    <button type="submit" name="action" value="save" class="btn btn-primary">{% translate "Save draft" %}</button>
+    <button type="submit" name="action" value="finalize" class="btn btn-outline-success">{% translate "Save and finalize" %}</button>
+    <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Back to the patient record" %}</a>
   </div>
 </form>
 {% else %}
@@ -46,13 +46,13 @@
   </div>
 </div>
 {% if visit.is_finalized %}
-<p class="d-print-none"><a class="btn btn-outline-secondary btn-sm" href="{% url 'medical_records:print' visit.pk %}">{% translate "Imprimir atendimento" %}</a></p>
+<p class="d-print-none"><a class="btn btn-outline-secondary btn-sm" href="{% url 'medical_records:print' visit.pk %}">{% translate "Print visit" %}</a></p>
 {% else %}
-<p class="text-body-secondary small">{% translate "Rascunho de outro profissional: só quem escreveu pode alterar e finalizar." %}</p>
+<p class="text-body-secondary small">{% translate "Draft by another practitioner: only its author can change and finalize it." %}</p>
 {% endif %}
 
 {% if addenda %}
-<h2 class="h5 mt-4">{% translate "Adendos" %}</h2>
+<h2 class="h5 mt-4">{% translate "Addenda" %}</h2>
 {% for addendum in addenda %}
 <div class="card mb-2" style="max-width: 52rem;">
   <div class="card-body py-2">
@@ -67,39 +67,39 @@
 <form method="post" action="{% url 'medical_records:addendum' visit.pk %}" class="mt-3" style="max-width: 52rem;" novalidate>
   {% csrf_token %}
   {% with field=addendum_form.text %}{% include "includes/field.html" %}{% endwith %}
-  <button type="submit" class="btn btn-outline-primary">{% translate "Incluir adendo" %}</button>
+  <button type="submit" class="btn btn-outline-primary">{% translate "Add addendum" %}</button>
 </form>
 {% endif %}
-<p class="mt-3"><a href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a></p>
+<p class="mt-3"><a href="{% url 'patients:record' patient.pk %}">{% translate "Back to the patient record" %}</a></p>
 {% endif %}
 {% if visit %}
 <div class="card mt-4" style="max-width: 52rem;">
   <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-    {% translate "Documentos" %}
+    {% translate "Documents" %}
     {% if issues_documents %}
     <span class="d-flex gap-2">
-      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:certificate_new' visit.pk %}">{% translate "Emitir atestado" %}</a>
-      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:prescription_new' visit.pk %}">{% translate "Emitir receita" %}</a>
-      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:exam_request_new' visit.pk %}">{% translate "Pedir exames" %}</a>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:certificate_new' visit.pk %}">{% translate "Issue certificate" %}</a>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:prescription_new' visit.pk %}">{% translate "Issue prescription" %}</a>
+      <a class="btn btn-sm btn-outline-primary" href="{% url 'medical_records:exam_request_new' visit.pk %}">{% translate "Request exams" %}</a>
     </span>
     {% endif %}
   </div>
   <ul class="list-group list-group-flush">
     {% for certificate in certificates %}
-    <li class="list-group-item"><a href="{% url 'medical_records:certificate' certificate.pk %}">{% translate "Atestado" %} · {{ certificate.get_kind_display }}{% if certificate.days %} ({% blocktranslate count dias=certificate.days %}{{ dias }} dia{% plural %}{{ dias }} dias{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ certificate.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:certificate' certificate.pk %}">{% translate "Certificate" %} · {{ certificate.get_kind_display }}{% if certificate.days %} ({% blocktranslate count dias=certificate.days %}{{ dias }} day{% plural %}{{ dias }} days{% endblocktranslate %}){% endif %}</a> <span class="text-body-secondary small">{{ certificate.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% for prescription in prescriptions %}
-    <li class="list-group-item"><a href="{% url 'medical_records:prescription' prescription.pk %}">{% translate "Receita" context "prescrição" %}</a> <span class="text-body-secondary small">{{ prescription.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:prescription' prescription.pk %}">{% translate "Prescription" context "prescription" %}</a> <span class="text-body-secondary small">{{ prescription.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
     {% for exam_request in exam_requests %}
-    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' exam_request.pk %}">{% translate "Pedido de exames" %}</a> <span class="text-body-secondary small">{{ exam_request.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
+    <li class="list-group-item"><a href="{% url 'medical_records:exam_request' exam_request.pk %}">{% translate "Exam request" %}</a> <span class="text-body-secondary small">{{ exam_request.created_at|date:"SHORT_DATETIME_FORMAT" }}</span></li>
     {% endfor %}
-    {% if not certificates and not prescriptions and not exam_requests %}<li class="list-group-item text-body-secondary">{% translate "Nenhum documento emitido." %}</li>{% endif %}
+    {% if not certificates and not prescriptions and not exam_requests %}<li class="list-group-item text-body-secondary">{% translate "No document issued." %}</li>{% endif %}
   </ul>
 </div>
 
 <div class="card mt-3" style="max-width: 52rem;">
-  <div class="card-header">{% translate "Anexos" %}</div>
+  <div class="card-header">{% translate "Attachments" %}</div>
   <ul class="list-group list-group-flush">
     {% for attachment in attachments %}
     <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -108,22 +108,22 @@
         <span class="text-body-secondary small">{{ attachment.size|filesizeformat }} · {{ attachment.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ attachment.practitioner.name }}</span>
       </span>
       {% if can_remove_attachments and attachment.created_by_id == user.pk or can_remove_attachments and is_admin %}
-      <form method="post" action="{% url 'medical_records:attachment_remove' attachment.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remover" %}</button></form>
+      <form method="post" action="{% url 'medical_records:attachment_remove' attachment.pk %}">{% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger p-0">{% translate "remove" %}</button></form>
       {% endif %}
     </li>
     {% empty %}
-    <li class="list-group-item text-body-secondary">{% translate "Nenhum anexo." %}</li>
+    <li class="list-group-item text-body-secondary">{% translate "No attachment." %}</li>
     {% endfor %}
   </ul>
   <div class="card-body border-top">
     {% if user.demo %}
-    <p class="text-body-secondary mb-0">{% translate "Contas de demonstração não enviam anexos." %}</p>
+    <p class="text-body-secondary mb-0">{% translate "Demo accounts cannot upload attachments." %}</p>
     {% else %}
     <form method="post" action="{% url 'medical_records:attachment_upload' visit.pk %}" enctype="multipart/form-data" class="row g-2 align-items-end" novalidate>
       {% csrf_token %}
       <div class="col-md-5">{% with field=attachment_form.file %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-5">{% with field=attachment_form.description %}{% include "includes/field.html" %}{% endwith %}</div>
-      <div class="col-md-2 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Anexar" %}</button></div>
+      <div class="col-md-2 mb-3"><button type="submit" class="btn btn-outline-primary w-100">{% translate "Attach" %}</button></div>
     </form>
     {% endif %}
   </div>

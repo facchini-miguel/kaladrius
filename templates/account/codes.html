@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Códigos de recuperação" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Recovery codes" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Códigos de recuperação" %}</h1>
-{% if enabled %}<div class="alert alert-success">{% translate "Verificação em duas etapas ativada." %}</div>{% endif %}
-<p>{% translate "Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). Cada um entra uma vez no lugar do código do aplicativo, se o celular for perdido. Eles não aparecem de novo." %}</p>
+<h1 class="h3 mb-3">{% translate "Recovery codes" %}</h1>
+{% if enabled %}<div class="alert alert-success">{% translate "Two-step verification turned on." %}</div>{% endif %}
+<p>{% translate "Keep these codes in a safe place, away from the phone (print or write them down). Each one logs in once instead of the app's code, if the phone is lost. They are not shown again." %}</p>
 <ul class="list-unstyled font-monospace fs-5 row row-cols-2 g-2" style="max-width: 24rem;">
   {% for code in codes %}<li class="col">{{ code }}</li>{% endfor %}
 </ul>
 <p class="d-print-none">
-  <button type="button" class="btn btn-outline-secondary" data-print>{% translate "Imprimir" %}</button>
-  <a class="btn btn-primary" href="{% url 'home' %}">{% translate "Já guardei" %}</a>
+  <button type="button" class="btn btn-outline-secondary" data-print>{% translate "Print" %}</button>
+  <a class="btn btn-primary" href="{% url 'home' %}">{% translate "I have kept them" %}</a>
 </p>
 {% endblock %}

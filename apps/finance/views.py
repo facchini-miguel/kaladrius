@@ -174,9 +174,9 @@ def new_entry(request):
                 method=data["method"],
                 account=data["account"],
             )
-            messages.success(request, _("Lançamento criado e 1ª parcela recebida."))
+            messages.success(request, _("Entry created and 1st installment received."))
             return redirect("finance:receipt", pk=payment.pk)
-        messages.success(request, _("Lançamento criado."))
+        messages.success(request, _("Entry created."))
         return redirect("finance:entry", pk=entry.pk)
     if patient is None and form["patient"].value():
         patient = Patient.objects.filter(pk=form["patient"].value()).first()
@@ -215,7 +215,7 @@ def new_expense(request):
                 method=data["method"],
                 account=data["account"],
             )
-        messages.success(request, _("Despesa lançada."))
+        messages.success(request, _("Expense recorded."))
         return redirect("finance:entry", pk=entry.pk)
     return render(request, "finance/expense_form.html", {"form": form})
 
@@ -264,14 +264,14 @@ def cancel_entry(request, pk):
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
-            messages.success(request, _("Lançamento cancelado."))
+            messages.success(request, _("Entry cancelled."))
         return redirect("finance:entry", pk=entry.pk)
     return render(
         request,
         "finance/reason.html",
         {
             "form": form,
-            "title": _("Cancelar lançamento"),
+            "title": _("Cancel entry"),
             "subject": entry,
             "back_entry": entry.pk,
         },
@@ -288,7 +288,7 @@ def receive(request, pk):
     _require(request, installment.entry.kind, Action.CREATE)
     pay = installment.entry.kind == Entry.Kind.PAYABLE
     if installment.balance <= 0:
-        messages.info(request, _("Esta parcela já está paga."))
+        messages.info(request, _("This installment is already paid."))
         return redirect("finance:entry", pk=installment.entry_id)
     can_discount = can(request, Module.FINANCE, Action.CHANGE)
     default_account = FinancialAccount.objects.filter(
@@ -304,8 +304,8 @@ def receive(request, pk):
         can_give_discount=can_discount,
     )
     if pay:
-        form.fields["amount"].label = _("Valor pago")
-        form.fields["interest"].help_text = _("Já incluídos no valor pago.")
+        form.fields["amount"].label = _("Amount paid")
+        form.fields["interest"].help_text = _("Already included in the amount paid.")
     if request.method == "POST" and form.is_valid():
         data = {field: value for field, value in form.cleaned_data.items() if field in form.fields}
         data.setdefault("discount", 0)
@@ -315,7 +315,7 @@ def receive(request, pk):
         except ValidationError as error:
             form.add_error(None, error.messages[0])
         else:
-            messages.success(request, _("Pagamento registrado."))
+            messages.success(request, _("Payment recorded."))
             if pay:
                 return redirect("finance:entry", pk=installment.entry_id)
             return redirect("finance:receipt", pk=payment.pk)
@@ -370,14 +370,14 @@ def reverse_payment(request, pk):
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
-            messages.success(request, _("Pagamento estornado."))
+            messages.success(request, _("Payment reversed."))
         return redirect("finance:entry", pk=payment.installment.entry_id)
     return render(
         request,
         "finance/reason.html",
         {
             "form": form,
-            "title": _("Estornar pagamento"),
+            "title": _("Reverse payment"),
             # Not str(pagamento): that has the raw amount ("1350.00"), for the audit log.
             "subject": " · ".join(
                 [
@@ -442,7 +442,7 @@ def cash_register(request):
             except ValidationError as error:
                 messages.error(request, error.messages[0])
                 return redirect(f"{request.path}?account={account.pk}")
-            messages.success(request, _("Caixa aberto."))
+            messages.success(request, _("Drawer opened."))
             return redirect("finance:cash_detail", pk=new.pk)
     history = CashRegister.objects.filter(account=account).select_related("opened_by", "closed_by")[
         :30
@@ -494,7 +494,7 @@ def cash_movement_view(request, pk, kind):
         except ValidationError as error:
             form.add_error(None, error.messages[0])
         else:
-            messages.success(request, _("Movimento registrado."))
+            messages.success(request, _("Movement recorded."))
             return redirect("finance:cash_detail", pk=session.pk)
     return render(
         request,
@@ -511,7 +511,7 @@ def close_cash_register(request, pk):
     form = CloseCashRegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         services.close_register(session, user=request.user, **form.cleaned_data)
-        messages.success(request, _("Caixa fechado."))
+        messages.success(request, _("Drawer closed."))
         return redirect("finance:cash_detail", pk=session.pk)
     return render(
         request,
@@ -519,7 +519,7 @@ def close_cash_register(request, pk):
         {
             "cash_register": session,
             "form": form,
-            "title": _("Fechar caixa"),
+            "title": _("Close drawer"),
             "expected": services.register_summary(session)["expected"],
         },
     )
@@ -602,8 +602,8 @@ def planning(request):
             messages.success(
                 request,
                 ngettext(
-                    "%(n)s meta copiada do ano anterior.",
-                    "%(n)s metas copiadas do ano anterior.",
+                    "%(n)s goal copied from last year.",
+                    "%(n)s goals copied from last year.",
                     copied,
                 )
                 % {"n": copied},
@@ -611,7 +611,7 @@ def planning(request):
             return redirect(f"{reverse('finance:planning')}?year={year}")
         if form.is_valid():
             services.save_targets(year, form.paid_and_balance())
-            messages.success(request, _("Planejamento salvo."))
+            messages.success(request, _("Plan saved."))
             return redirect(f"{reverse('finance:planning')}?year={year}")
     data = services.planning(year)
     for section in data["sections"]:
@@ -652,12 +652,12 @@ def book_closing(request):
             try:
                 if action == "close":
                     services.close_books(request.clinic, data["until"], user=request.user)
-                    messages.success(request, _("Financeiro fechado."))
+                    messages.success(request, _("Finance closed."))
                 else:
                     services.reopen_books(
                         request.clinic, data["until"], reason=data["reason"], user=request.user
                     )
-                    messages.success(request, _("Período reaberto."))
+                    messages.success(request, _("Period reopened."))
             except ValidationError as error:
                 messages.error(request, error.messages[0])
         else:
@@ -702,7 +702,7 @@ def catalog_form(request, catalog, pk=None):
     form = form_class(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": form.instance.name})
+        messages.success(request, _("%(nome)s saved.") % {"nome": form.instance.name})
         return redirect("finance:catalog", catalog=catalog)
     return render(
         request,
@@ -753,7 +753,7 @@ def _group_form(request, instance):
     form = AccountGroupForm(request.POST or None, instance=instance)
     if request.method == "POST" and form.is_valid():
         group = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": group.name})
+        messages.success(request, _("%(nome)s saved.") % {"nome": group.name})
         return redirect("finance:chart_of_accounts")
     return render(request, "finance/group_form.html", {"form": form, "instance": instance})
 
@@ -818,7 +818,7 @@ def _supplier_form(request, instance):
     form = SupplierForm(request.POST or None, instance=instance, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         supplier = form.save()
-        messages.success(request, _("%(nome)s salvo.") % {"nome": supplier.name})
+        messages.success(request, _("%(nome)s saved.") % {"nome": supplier.name})
         return redirect("finance:supplier", pk=supplier.pk)
     return render(request, "finance/supplier_form.html", {"form": form, "instance": instance})
 
@@ -855,7 +855,7 @@ def commission_percentage(request, pk):
     form = CommissionPercentageForm(request.POST or None, instance=practitioner)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Percentual de %(nome)s salvo.") % {"nome": practitioner.name})
+        messages.success(request, _("Percentage of %(nome)s saved.") % {"nome": practitioner.name})
         return redirect("finance:commissions")
     return render(
         request,
@@ -881,7 +881,7 @@ def pay_commission(request, pk):
         except ValidationError as error:
             messages.error(request, error.messages[0])
             return redirect(f"{reverse('finance:commissions')}?until={until.isoformat()}")
-        messages.success(request, _("Comissão lançada em A pagar."))
+        messages.success(request, _("Commission added to Payables."))
         return redirect("finance:entry", pk=commission.entry_id)
     return render(
         request,
@@ -939,7 +939,10 @@ def statements(request):
             else:
                 messages.success(
                     request,
-                    _("Extrato importado: %(novas)s transações novas, %(repetidas)s já importadas.")
+                    _(
+                        "Statement imported: %(novas)s new transactions, %(repetidas)s already "
+                        "imported."
+                    )
                     % {
                         "novas": statement_import.new_transactions,
                         "repetidas": statement_import.duplicate_transactions,
@@ -949,10 +952,10 @@ def statements(request):
                     messages.warning(
                         request,
                         ngettext(
-                            "%(n)s linha do arquivo não tinha data ou valor legível e não foi "
-                            "importada. Confira no extrato do banco.",
-                            "%(n)s linhas do arquivo não tinham data ou valor legível e não "
-                            "foram importadas. Confira no extrato do banco.",
+                            "%(n)s line of the file had no readable date or amount and was not "
+                            "imported. Check it on the bank statement.",
+                            "%(n)s lines of the file had no readable date or amount and were not "
+                            "imported. Check them on the bank statement.",
                             statement_import.unreadable_transactions,
                         )
                         % {"n": statement_import.unreadable_transactions},
@@ -962,8 +965,8 @@ def statements(request):
                     messages.warning(
                         request,
                         _(
-                            "Atenção: este arquivo é da conta %(nova)s no banco, mas a anterior "
-                            "importada em %(conta)s era da conta %(antiga)s."
+                            "Warning: this file is from bank account %(nova)s, but the previous "
+                            "one imported into %(conta)s was from account %(antiga)s."
                         )
                         % {
                             "nova": statement_import.bank_account_number,
@@ -1023,7 +1026,7 @@ def _back_to_statement(bank_transaction):
 def statement_reconcile_unique(request, pk):
     statement_import = get_object_or_404(StatementImport.objects, pk=pk)
     done = reconciliation.reconcile_unique(statement_import, user=request.user)
-    messages.success(request, _("%(n)s transações conciliadas.") % {"n": done})
+    messages.success(request, _("%(n)s transactions reconciled.") % {"n": done})
     return redirect("finance:statement", pk=statement_import.pk)
 
 
@@ -1039,7 +1042,7 @@ def transaction_action(request, pk, action):
         elif action == "ignore":
             reason = request.POST.get("reason", "").strip()[:200]
             if not reason:
-                raise ValidationError(_("Informe o motivo para ignorar a transação."))
+                raise ValidationError(_("Enter the reason to ignore the transaction."))
             reconciliation.ignore(bank_transaction, reason=reason, user=request.user)
         else:
             reconciliation.undo(bank_transaction)
@@ -1062,7 +1065,7 @@ def transaction_entry(request, pk):
         except ValidationError as error:
             messages.error(request, error.messages[0])
         else:
-            messages.success(request, _("Lançamento criado e conciliado."))
+            messages.success(request, _("Entry created and reconciled."))
         return _back_to_statement(bank_transaction)
     return render(
         request, "finance/transaction_entry.html", {"form": form, "transaction": bank_transaction}

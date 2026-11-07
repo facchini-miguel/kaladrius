@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if estimate %}{% translate "Editar orçamento" %}{% else %}{% translate "Novo orçamento" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if estimate %}{% translate "Edit estimate" %}{% else %}{% translate "New estimate" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with numero=estimate.pk %}Orçamento nº {{ numero }}{% endblocktranslate %}{% else %}{% translate "Novo orçamento" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if estimate %}{% blocktranslate with numero=estimate.pk %}Estimate no. {{ numero }}{% endblocktranslate %}{% else %}{% translate "New estimate" %}{% endif %}</h1>
 <form method="post" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -15,7 +15,7 @@
     <div class="col-md-6">{% with field=form.valid_until %}{% include "includes/field.html" %}{% endwith %}</div>
   </div>
   {% with field=form.notes %}{% include "includes/field.html" %}{% endwith %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if estimate %}{% url 'estimates:detail' estimate.pk %}{% else %}{% url 'estimates:list' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% if estimate %}{% url 'estimates:detail' estimate.pk %}{% else %}{% url 'estimates:list' %}{% endif %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

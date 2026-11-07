@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Entrar" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Log in" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
@@ -12,33 +12,33 @@
         <h1 class="h4 mb-4 text-center">{{ system_name }}</h1>
 
         {% if idle %}
-        <div class="alert alert-info" role="status">{% blocktranslate %}Você saiu do sistema depois de {{ minutos }} minutos sem uso. Entre de novo para continuar.{% endblocktranslate %}</div>
+        <div class="alert alert-info" role="status">{% blocktranslate %}You were logged out after {{ minutos }} minutes without use. Log in again to continue.{% endblocktranslate %}</div>
         {% endif %}
         {% if address_locked %}
-        <div class="alert alert-danger" role="alert">{% translate "Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora." %}</div>
+        <div class="alert alert-danger" role="alert">{% translate "Too many wrong attempts from this address. Try again in 1 hour." %}</div>
         {% elif form.errors %}
-        <div class="alert alert-danger" role="alert">{% translate "Usuário ou senha incorretos." %}</div>
+        <div class="alert alert-danger" role="alert">{% translate "Incorrect username or password." %}</div>
         {% endif %}
         {% if next and user.is_authenticated %}
-        <div class="alert alert-warning" role="alert">{% translate "Você não tem permissão para acessar esta página." %}</div>
+        <div class="alert alert-warning" role="alert">{% translate "You do not have permission to access this page." %}</div>
         {% endif %}
 
         <form method="post" action="{% url 'login' %}">
           {% csrf_token %}
           <div class="mb-3">
-            <label for="id_username" class="form-label">{% translate "Usuário" %}</label>
+            <label for="id_username" class="form-label">{% translate "User" %}</label>
             <input type="text" name="username" id="id_username" class="form-control"
                    autocomplete="username" autofocus required value="{{ form.username.value|default:'' }}">
           </div>
           <div class="mb-4">
-            <label for="id_password" class="form-label">{% translate "Senha" %}</label>
+            <label for="id_password" class="form-label">{% translate "Password" %}</label>
             <input type="password" name="password" id="id_password" class="form-control"
                    autocomplete="current-password" required>
           </div>
           <input type="hidden" name="next" value="{{ next }}">
-          <button type="submit" class="btn btn-primary w-100">{% translate "Entrar" %}</button>
+          <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
         </form>
-        <p class="text-center small mt-3 mb-0">{% if recovery_by_email %}<a href="{% url 'account:recover' %}">{% translate "Esqueci minha senha" %}</a> · {% endif %}<a href="{% url 'privacy' %}">{% translate "Política de privacidade" %}</a></p>
+        <p class="text-center small mt-3 mb-0">{% if recovery_by_email %}<a href="{% url 'account:recover' %}">{% translate "Forgot my password" %}</a> · {% endif %}<a href="{% url 'privacy' %}">{% translate "Privacy policy" %}</a></p>
       </div>
     </div>
   </div>

@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Pagar comissão" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Pay commission" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% translate "Pagar comissão" %}</h1>
-<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculation.practitioner.name data=until|date:"SHORT_DATE_FORMAT" %}{{ nome }} · recebimentos até {{ data }}{% endblocktranslate %}</p>
+<h1 class="h3 mb-1">{% translate "Pay commission" %}</h1>
+<p class="text-body-secondary mb-3">{% blocktranslate with nome=calculation.practitioner.name data=until|date:"SHORT_DATE_FORMAT" %}{{ nome }} · receipts up to {{ data }}{% endblocktranslate %}</p>
 {% include "finance/_commission_items.html" with payments=calculation.credits reversal_deduction=calculation.debits received_amount=calculation.received_amount gross=calculation.gross amount=calculation.amount percentage=calculation.practitioner.commission_percentage %}
 <form method="post" class="row g-2 align-items-end" style="max-width: 40rem;" novalidate>
   {% csrf_token %}
   <div class="col-md-5">{% with field=form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
   <div class="col-md-7">{% with field=form.category %}{% include "includes/field.html" %}{% endwith %}</div>
-  <p class="text-body-secondary small">{% translate "A comissão vira uma despesa em A pagar, em nome do profissional; registre o pagamento lá. Cancelar essa despesa desfaz a comissão." %}</p>
-  <div><button type="submit" class="btn btn-success"{% if calculation.amount <= 0 %} disabled{% endif %}>{% translate "Lançar em A pagar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:commissions' %}?until={{ until|date:'Y-m-d' }}">{% translate "Cancelar" %}</a></div>
+  <p class="text-body-secondary small">{% translate "The commission becomes an expense in Payables, in the practitioner's name; record the payment there. Cancelling that expense undoes the commission." %}</p>
+  <div><button type="submit" class="btn btn-success"{% if calculation.amount <= 0 %} disabled{% endif %}>{% translate "Add to Payables" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:commissions' %}?until={{ until|date:'Y-m-d' }}">{% translate "Cancel" %}</a></div>
 </form>
 {% endblock %}

@@ -12,30 +12,30 @@ class Recall(ClinicModel):
         "patients.Patient",
         on_delete=models.PROTECT,
         related_name="recalls",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
-    date = models.DateField(_("data"))
+    date = models.DateField(_("date"))
     description = models.CharField(
-        _("descrição"),
+        _("description"),
         max_length=200,
-        help_text=_("Ex.: revisão de 6 meses."),
+        help_text=_("E.g.: 6-month check-up."),
     )
-    done = models.BooleanField(_("concluída"), default=False)
+    done = models.BooleanField(_("done"), default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "recalls_recall"
-        verbose_name = _("rechamada")
-        verbose_name_plural = _("rechamadas")
+        verbose_name = _("recall")
+        verbose_name_plural = _("recalls")
         ordering = ["date", "patient__name"]
         indexes = [models.Index(fields=["clinic", "date"], name="recall_clinic_date")]
 

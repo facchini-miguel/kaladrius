@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Planejamento" %} {{ year }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Planning" %} {{ year }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-  <h1 class="h3 mb-0">{% blocktranslate with ano=year %}Planejamento {{ ano }}{% endblocktranslate %}</h1>
+  <h1 class="h3 mb-0">{% blocktranslate with ano=year %}Planning {{ ano }}{% endblocktranslate %}</h1>
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="?year={{ previous_year }}">← {{ previous_year }}</a>
     <a class="btn btn-outline-secondary" href="?year={{ next_year }}">{{ next_year }} →</a>
   </div>
 </div>
-<p class="text-body-secondary small">{% translate "A meta de cada grupo do plano de contas para o ano, comparada com o que foi recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta proporcional aos dias do ano que já passaram." %}</p>
+<p class="text-body-secondary small">{% translate "The year's goal for each group of the chart of accounts, compared with what was received and paid (by payment date). “Expected so far” is the goal in proportion to the days of the year already gone." %}</p>
 
 <form method="post" novalidate>
   {% csrf_token %}
@@ -22,10 +22,10 @@
     <table class="table table-sm align-middle bg-white">
       <thead>
         <tr>
-          <th>{% translate "Grupo" %}</th>
-          <th class="text-end" style="width: 11rem;">{% translate "Meta do ano" %}</th>
-          <th class="text-end">{% translate "Esperado até hoje" %}</th>
-          <th class="text-end">{% translate "Realizado" %}</th>
+          <th>{% translate "Group" %}</th>
+          <th class="text-end" style="width: 11rem;">{% translate "Year's goal" %}</th>
+          <th class="text-end">{% translate "Expected so far" %}</th>
+          <th class="text-end">{% translate "Actual" %}</th>
           <th class="text-end">%</th>
         </tr>
       </thead>
@@ -43,10 +43,10 @@
           <td class="text-end">{% if row.percentage is not None %}<span class="badge {% if row.on_track %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ row.percentage }}%</span>{% endif %}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum grupo no plano de contas." %} <a href="{% url 'finance:chart_of_accounts' %}">{% translate "Plano de contas" %}</a></td></tr>
+        <tr><td colspan="5" class="text-body-secondary">{% translate "No groups in the chart of accounts." %} <a href="{% url 'finance:chart_of_accounts' %}">{% translate "Chart of accounts" %}</a></td></tr>
         {% endfor %}
         {% if section.ungrouped %}
-        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "Sem grupo" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ section.ungrouped|currency }}</td><td></td></tr>
+        <tr class="text-body-secondary"><td style="padding-left: 1rem;">{% translate "No group" %}</td><td></td><td></td><td class="text-end text-nowrap">{{ section.ungrouped|currency }}</td><td></td></tr>
         {% endif %}
       </tbody>
       <tfoot>
@@ -63,10 +63,10 @@
   {% endfor %}
   {% if can_change %}
   <div class="d-flex flex-wrap gap-2">
-    <button type="submit" class="btn btn-primary">{% translate "Salvar metas" %}</button>
-    {% if has_previous_targets %}<button type="submit" name="action" value="copy" class="btn btn-outline-secondary">{% blocktranslate with ano_anterior=previous_year %}Copiar as metas de {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
+    <button type="submit" class="btn btn-primary">{% translate "Save goals" %}</button>
+    {% if has_previous_targets %}<button type="submit" name="action" value="copy" class="btn btn-outline-secondary">{% blocktranslate with ano_anterior=previous_year %}Copy the goals of {{ ano_anterior }}{% endblocktranslate %}</button>{% endif %}
   </div>
-  <p class="text-body-secondary small mt-2">{% translate "Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar duas vezes a meta de um subgrupo." %}</p>
+  <p class="text-body-secondary small mt-2">{% translate "Leave a group without a goal blank. Copying only fills the groups that have no goal this year yet. The total adds the goals of the highest groups, without counting a subgroup's goal twice." %}</p>
   {% endif %}
 </form>
 {% endblock %}

@@ -1,18 +1,18 @@
 {% load i18n %}<div class="d-flex flex-wrap align-items-center gap-2 mb-3 pb-3 border-bottom">
-  <span class="me-1">{% translate "Situação:" %} <strong>{{ appointment.get_status_display }}</strong></span>
+  <span class="me-1">{% translate "Status:" %} <strong>{{ appointment.get_status_display }}</strong></span>
   {% url 'schedule:status' appointment.pk as status_url %}
   {% if appointment.attendance_markable %}
-  {% if appointment.status != "attended" %}<button type="button" class="btn btn-sm btn-outline-success" hx-post="{{ status_url }}" hx-vals='{"status": "attended"}' hx-target="#schedule-modal-content">✓ {% translate "Compareceu" %}</button>{% endif %}
-  {% if appointment.status != "missed" %}<button type="button" class="btn btn-sm btn-outline-danger" hx-post="{{ status_url }}" hx-vals='{"status": "missed"}' hx-target="#schedule-modal-content">✗ {% translate "Faltou" %}</button>{% endif %}
+  {% if appointment.status != "attended" %}<button type="button" class="btn btn-sm btn-outline-success" hx-post="{{ status_url }}" hx-vals='{"status": "attended"}' hx-target="#schedule-modal-content">✓ {% translate "Came" %}</button>{% endif %}
+  {% if appointment.status != "missed" %}<button type="button" class="btn btn-sm btn-outline-danger" hx-post="{{ status_url }}" hx-vals='{"status": "missed"}' hx-target="#schedule-modal-content">✗ {% translate "Missed" %}</button>{% endif %}
   {% endif %}
-  {% if appointment.status != "cancelled" %}<button type="button" class="btn btn-sm btn-outline-secondary" hx-post="{{ status_url }}" hx-vals='{"status": "cancelled"}' hx-target="#schedule-modal-content">{% translate "Desmarcou" %}</button>{% endif %}
-  {% if appointment.status != "booked" %}<button type="button" class="btn btn-sm btn-link" hx-post="{{ status_url }}" hx-vals='{"status": "booked"}' hx-target="#schedule-modal-content">{% translate "Desfazer marcação" %}</button>{% endif %}
+  {% if appointment.status != "cancelled" %}<button type="button" class="btn btn-sm btn-outline-secondary" hx-post="{{ status_url }}" hx-vals='{"status": "cancelled"}' hx-target="#schedule-modal-content">{% translate "Cancelled" context "appointment" %}</button>{% endif %}
+  {% if appointment.status != "booked" %}<button type="button" class="btn btn-sm btn-link" hx-post="{{ status_url }}" hx-vals='{"status": "booked"}' hx-target="#schedule-modal-content">{% translate "Undo mark" %}</button>{% endif %}
   {% if appointment.is_cancelled and can.schedule.create %}
   {# The cancelled appointment still covers the slot on the calendar: book the freed time from here. #}
-  <button type="button" class="btn btn-sm btn-primary" hx-get="{% url 'schedule:new' %}?practitioner={{ appointment.practitioner_id }}&amp;date={{ appointment.start|date:'Y-m-d' }}&amp;start={{ appointment.start|time:'H:i' }}&amp;end={{ appointment.end|time:'H:i' }}" hx-target="#schedule-modal-content">{% translate "Agendar outro paciente neste horário" %}</button>
+  <button type="button" class="btn btn-sm btn-primary" hx-get="{% url 'schedule:new' %}?practitioner={{ appointment.practitioner_id }}&amp;date={{ appointment.start|date:'Y-m-d' }}&amp;start={{ appointment.start|time:'H:i' }}&amp;end={{ appointment.end|time:'H:i' }}" hx-target="#schedule-modal-content">{% translate "Book another patient at this time" %}</button>
   {% endif %}
   {% if appointment.patient_id and can_open_record %}
-  {% if appointment.visit %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'medical_records:visit' appointment.visit.pk %}">{% translate "Abrir atendimento" %}</a>
-  {% else %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'medical_records:new' appointment.patient_id %}?appointment={{ appointment.pk }}">{% translate "Registrar atendimento" %}</a>{% endif %}
+  {% if appointment.visit %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'medical_records:visit' appointment.visit.pk %}">{% translate "Open visit" %}</a>
+  {% else %}<a class="btn btn-sm btn-outline-primary ms-auto" href="{% url 'medical_records:new' appointment.patient_id %}?appointment={{ appointment.pk }}">{% translate "Record visit" %}</a>{% endif %}
   {% endif %}
 </div>

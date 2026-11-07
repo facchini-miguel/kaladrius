@@ -1,19 +1,19 @@
 {% load i18n formats %}<div class="table-responsive"><table class="table table-sm align-middle bg-white">
-  <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Pagador" %}</th><th>{% translate "Lançamento" %}</th><th class="text-end">{% translate "Valor recebido" %}</th></tr></thead>
+  <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Payer" %}</th><th>{% translate "Entry" %}</th><th class="text-end">{% translate "Amount received" %}</th></tr></thead>
   <tbody>
     {% for payment in payments %}
     <tr><td class="text-nowrap">{{ payment.date|date:"SHORT_DATE_FORMAT" }}</td><td>{{ payment.installment.entry.payer_name }}</td><td>{{ payment.installment.entry.description }} ({{ payment.installment.number }})</td><td class="text-end text-nowrap">{{ payment.amount|currency }}</td></tr>
     {% empty %}
-    <tr><td colspan="4" class="text-body-secondary">{% translate "Nenhum recebimento." %}</td></tr>
+    <tr><td colspan="4" class="text-body-secondary">{% translate "No receipts." %}</td></tr>
     {% endfor %}
   </tbody>
-  <tfoot><tr class="fw-semibold"><td colspan="3" class="text-end">{% translate "Total recebido" %}</td><td class="text-end text-nowrap">{{ received_amount|currency }}</td></tr>
-  <tr class="fw-semibold"><td colspan="3" class="text-end">{% blocktranslate with percentual=percentage|floatformat:"-2" %}Comissão ({{ percentual }}%){% endblocktranslate %}</td><td class="text-end text-nowrap">{{ gross|currency }}</td></tr></tfoot>
+  <tfoot><tr class="fw-semibold"><td colspan="3" class="text-end">{% translate "Total received" %}</td><td class="text-end text-nowrap">{{ received_amount|currency }}</td></tr>
+  <tr class="fw-semibold"><td colspan="3" class="text-end">{% blocktranslate with percentual=percentage|floatformat:"-2" %}Commission ({{ percentual }}%){% endblocktranslate %}</td><td class="text-end text-nowrap">{{ gross|currency }}</td></tr></tfoot>
 </table></div>
 {% if reversal_deduction %}
-<h2 class="h6">{% translate "Estornos descontados (recebimentos já comissionados e depois estornados)" %}</h2>
+<h2 class="h6">{% translate "Reversals deducted (receipts already paid out and later reversed)" %}</h2>
 <div class="table-responsive"><table class="table table-sm align-middle bg-white">
-  <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Pagador" %}</th><th>{% translate "Lançamento" %}</th><th class="text-end">{% translate "Valor recebido" %}</th><th class="text-end">{% translate "Comissão descontada" %}</th></tr></thead>
+  <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Payer" %}</th><th>{% translate "Entry" %}</th><th class="text-end">{% translate "Amount received" %}</th><th class="text-end">{% translate "Commission deducted" %}</th></tr></thead>
   <tbody>
     {% for payment in reversal_deduction %}
     <tr><td class="text-nowrap">{{ payment.date|date:"SHORT_DATE_FORMAT" }}</td><td>{{ payment.installment.entry.payer_name }}</td><td>{{ payment.installment.entry.description }} ({{ payment.installment.number }})</td><td class="text-end text-nowrap">{{ payment.amount|currency }}</td><td class="text-end text-nowrap">− {{ payment.commission_returned|currency }}</td></tr>
@@ -21,4 +21,4 @@
   </tbody>
 </table></div>
 {% endif %}
-<p class="fs-5 fw-semibold text-end">{% translate "Comissão a pagar" %}: {{ amount|currency }}</p>
+<p class="fs-5 fw-semibold text-end">{% translate "Commission to pay" %}: {{ amount|currency }}</p>

@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Convênios" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Health plans" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Convênios" %}</h1>
-  {% if can.health_plans.create %}<a class="btn btn-primary" href="{% url 'health_plans:new' %}">{% translate "Novo convênio" %}</a>{% endif %}
+  <h1 class="h3 mb-0">{% translate "Health plans" %}</h1>
+  {% if can.health_plans.create %}<a class="btn btn-primary" href="{% url 'health_plans:new' %}">{% translate "New health plan" %}</a>{% endif %}
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Nome" %}</th>
+        <th>{% translate "Name" %}</th>
         {% if registration_label %}<th>{{ registration_label }}</th>{% endif %}
-        <th>{% translate "Telefone" %}</th>
-        <th class="text-end">{% translate "Pacientes" %}</th>
-        <th>{% translate "Situação" %}</th>
-        <th class="text-end">{% translate "Ações" %}</th>
+        <th>{% translate "Phone" %}</th>
+        <th class="text-end">{% translate "Patients" %}</th>
+        <th>{% translate "Status" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -27,14 +27,14 @@
         {% if registration_label %}<td>{{ health_plan.registration|default:"—" }}</td>{% endif %}
         <td class="text-nowrap">{{ health_plan.phone|phone|default:"—" }}</td>
         <td class="text-end">{{ health_plan.patient_count }}</td>
-        <td>{% if health_plan.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
-        <td class="text-end">{% if can.health_plans.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' health_plan.pk %}">{% translate "Editar" %}</a>{% endif %}</td>
+        <td>{% if health_plan.active %}<span class="badge text-bg-success">{% translate "Active" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inactive" %}</span>{% endif %}</td>
+        <td class="text-end">{% if can.health_plans.change %}<a class="btn btn-sm btn-outline-primary" href="{% url 'health_plans:edit' health_plan.pk %}">{% translate "Edit" %}</a>{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum convênio cadastrado." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No health plans registered." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-<p class="text-body-secondary small">{% translate "A carteirinha de cada paciente é cadastrada na ficha dele. Para deixar de aceitar um convênio sem perder o histórico, edite e desmarque “ativo”." %}</p>
+<p class="text-body-secondary small">{% translate "Each patient's card is registered on their record. To stop accepting a health plan without losing the history, edit it and uncheck “active”." %}</p>
 {% endblock %}

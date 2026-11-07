@@ -2,8 +2,8 @@
       hx-target="#schedule-modal-content" novalidate>
   {% csrf_token %}
   <div class="modal-header">
-    <h2 class="modal-title h5">{% if appointment.pk %}{% translate "Editar agendamento" %}{% else %}{% translate "Novo agendamento" %}{% endif %}</h2>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Fechar' %}"></button>
+    <h2 class="modal-title h5">{% if appointment.pk %}{% translate "Edit appointment" %}{% else %}{% translate "New appointment" %}{% endif %}</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate "Close" %}"></button>
   </div>
   <div class="modal-body">
     {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -18,7 +18,7 @@
       <div class="col-6 col-md-4">{% with field=form.start_time %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-6 col-md-4">{% with field=form.end_time %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-12">
-        {% translate "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)." as patient_help %}
+        {% translate "Optional. Without a patient, use the description (e.g.: “Meeting”, “Blocked”)." as patient_help %}
         {% include "includes/patient_search.html" with field=form.patient patient=appointment.patient help_text=patient_help %}
       </div>
       <div class="col-12">{% with field=form.description %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -30,9 +30,9 @@
   <div class="modal-footer">
     {% if appointment.pk and can.schedule.delete %}
     <button type="button" class="btn btn-outline-danger me-auto"
-            hx-get="{% url 'schedule:delete' appointment.pk %}" hx-target="#schedule-modal-content">{% translate "Excluir" %}</button>
+            hx-get="{% url 'schedule:delete' appointment.pk %}" hx-target="#schedule-modal-content">{% translate "Delete" %}</button>
     {% endif %}
-    <button type="button" class="btn btn-link" data-bs-dismiss="modal">{% translate "Cancelar" %}</button>
-    <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
+    <button type="button" class="btn btn-link" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
+    <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
   </div>
 </form>

@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{% if patient.pk %}{% translate "Editar paciente" %}{% else %}{% translate "Novo paciente" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if patient.pk %}{% translate "Edit patient" %}{% else %}{% translate "New patient" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Editar {{ nome }}{% endblocktranslate %}{% else %}{% translate "Novo paciente" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if patient.pk %}{% blocktranslate with nome=patient.name %}Edit {{ nome }}{% endblocktranslate %}{% else %}{% translate "New patient" %}{% endif %}</h1>
 
 <form method="post" novalidate id="patient-form">
   {% csrf_token %}
   {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
 
   <div class="card mb-3">
-    <div class="card-header">{% translate "Identificação" %}</div>
+    <div class="card-header">{% translate "Identification" %}</div>
     <div class="card-body row">
       <div class="col-12">{% with field=form.kind %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-6">{% with field=form.name %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -30,7 +30,7 @@
   </div>
 
   <div class="card mb-3">
-    <div class="card-header">{% translate "Contato" %}</div>
+    <div class="card-header">{% translate "Contact" %}</div>
     <div class="card-body row">
       <div class="col-md-3">{% with field=form.mobile_phone %}{% include "includes/field.html" %}{% endwith %}</div>
       <div class="col-md-3">{% with field=form.home_phone %}{% include "includes/field.html" %}{% endwith %}</div>
@@ -41,7 +41,7 @@
   </div>
 
   <div class="card mb-3">
-    <div class="card-header">{% translate "Endereço" %}</div>
+    <div class="card-header">{% translate "Address" %}</div>
     <div class="card-body row">
       <div class="col-md-2">{% with field=form.postal_code %}{% include "includes/field.html" %}{% endwith %}</div>
       {% if form.state %}
@@ -59,15 +59,15 @@
   </div>
 
   <div class="card mb-3">
-    <div class="card-header">{% translate "Observações" %}</div>
+    <div class="card-header">{% translate "Notes" %}</div>
     <div class="card-body">
       {% with field=form.notes %}{% include "includes/field.html" %}{% endwith %}
       {% with field=form.active %}{% include "includes/field.html" %}{% endwith %}
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% if patient.pk %}{% url 'patients:record' patient.pk %}{% else %}{% url 'patients:list' %}{% endif %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% if patient.pk %}{% url 'patients:record' patient.pk %}{% else %}{% url 'patients:list' %}{% endif %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}
 

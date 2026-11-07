@@ -10,7 +10,7 @@ Sistema de gestão para clínicas: agenda por profissional, cadastro de paciente
 
 [![CI](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml/badge.svg)](https://github.com/facchini-miguel/kaladrius/actions/workflows/ci.yml)
 
-**Versão atual: 0.66.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
+**Versão atual: 0.67.0** · [Novidades](releases.yaml) · [Todas as versões](https://github.com/facchini-miguel/kaladrius/releases)
 
 > Status: em desenvolvimento, em uso de demonstração. **Para conhecer, comece por https://www.facchini.eti.br/kaladrius/**: a página tem os acessos de demonstração de cada perfil (recepção, profissional, financeiro, administrador da clínica), as telas e todos os links. A demonstração roda no Google Cloud free tier, somente IPv6; veja [Produção de referência](https://kaladrius-docs.facchini.eti.br/pt-BR/project/production).
 
@@ -41,7 +41,7 @@ Acesse http://localhost:8000. A documentação da API fica em http://localhost:8
 |---|---|
 | Dados de teste (uma clínica, usuários, profissionais, 600 pacientes fictícios, 6 semanas de agenda e rechamadas) | `docker compose exec app python manage.py seed_sample_data` |
 | Compilar as traduções (depois de `git pull` ou de mudar textos; a imagem já faz isso no build) | `docker compose exec app python manage.py compilemessages` |
-| Extrair textos novos para tradução (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests` |
+| Extrair textos novos para tradução (`locale/*/LC_MESSAGES/django.po`) | `docker compose exec app python manage.py makemessages -l pt_BR -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs` |
 | Apagar os dados de teste (nunca toca em clínicas e usuários reais) | `docker compose exec app python manage.py remove_sample_data --confirm` |
 | Importar os dados do Odonto System antigo numa clínica nova | `docker compose exec -T app python manage.py import_legacy - --clinic "Nome" < dump.sql` |
 | Anonimizar os dados de uma clínica para usá-los como teste (irreversível) | `docker compose exec app python manage.py anonymize_clinic --clinic "Nome" --confirm` |

@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Arquivar paciente" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Archive patient" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Arquivar {{ nome }}?{% endblocktranslate %}</h1>
-<p>{% translate "O paciente sai das listas, da busca, da agenda, dos aniversariantes e das rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o histórico continuam guardados." %}</p>
-<p>{% translate "Só administradores da clínica veem os pacientes arquivados (na lista de pacientes, em Situação: Arquivados) e podem restaurá-los." %}</p>
+<h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Archive {{ nome }}?{% endblocktranslate %}</h1>
+<p>{% translate "The patient leaves the team's lists, search, schedule, birthdays and recalls. Nothing is deleted: appointments, recalls and history are kept." %}</p>
+<p>{% translate "Only clinic administrators see archived patients (in the patient list, under Status: Archived) and can restore them." %}</p>
 {% if open_items %}
 <div class="alert alert-warning">
-  {% translate "Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no financeiro e depois volte para arquivar." %}
+  {% translate "This patient still has open entries. Receive or cancel each one in Finance, then come back to archive." %}
 </div>
 <table class="table table-sm bg-white" style="max-width: 44rem;">
-  <thead><tr><th>{% translate "Lançamento" %}</th><th>{% translate "Vencimento" %}</th><th class="text-end">{% translate "Em aberto" context "valor" %}</th></tr></thead>
+  <thead><tr><th>{% translate "Entry" %}</th><th>{% translate "Due date" %}</th><th class="text-end">{% translate "Outstanding" context "amount" %}</th></tr></thead>
   <tbody>
     {% for installment in open_items %}
     <tr>
@@ -23,12 +23,12 @@
     {% endfor %}
   </tbody>
 </table>
-<a class="btn btn-link px-0" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a>
+<a class="btn btn-link px-0" href="{% url 'patients:record' patient.pk %}">{% translate "Back to the patient record" %}</a>
 {% else %}
 <form method="post">
   {% csrf_token %}
-  <button type="submit" class="btn btn-secondary">{% translate "Arquivar" %}</button>
-  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-secondary">{% translate "Archive" %}</button>
+  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% endif %}
 {% endblock %}

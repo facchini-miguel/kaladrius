@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Esqueci minha senha" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Forgot my password" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mt-5">
   <div class="col-sm-9 col-md-6 col-lg-4">
     <div class="card shadow-sm"><div class="card-body p-4">
-      <h1 class="h4 mb-3">{% translate "Esqueci minha senha" %}</h1>
-      <p class="text-body-secondary">{% translate "Informe o e-mail da sua conta. Se ele estiver cadastrado, você recebe um link para criar uma senha nova, que vale por 1 hora." %}</p>
+      <h1 class="h4 mb-3">{% translate "Forgot my password" %}</h1>
+      <p class="text-body-secondary">{% translate "Enter your account's e-mail. If it is registered, you get a link to create a new password, which works for 1 hour." %}</p>
       <form method="post" novalidate>
         {% csrf_token %}
         {% include "includes/form.html" %}
-        <button type="submit" class="btn btn-primary w-100">{% translate "Enviar o link" %}</button>
+        <button type="submit" class="btn btn-primary w-100">{% translate "Send the link" %}</button>
       </form>
-      <p class="text-center small mt-3 mb-0"><a href="{% url 'login' %}">{% translate "Voltar" %}</a></p>
+      <p class="text-center small mt-3 mb-0"><a href="{% url 'login' %}">{% translate "Back" %}</a></p>
     </div></div>
   </div>
 </div>

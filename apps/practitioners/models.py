@@ -13,15 +13,15 @@ from apps.core.validators import validate_color
 class Practitioner(ClinicModel):
     """A practitioner who sees patients (dentist, doctor, physiotherapist...)."""
 
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)
+    name = models.CharField(_("name"), max_length=200, db_collation=ALPHABETICAL)
     registration = models.CharField(
-        _("registro profissional"),
+        _("professional license"),
         max_length=30,
         blank=True,
         help_text=_("CRO, CRM, CREFITO, CRP…"),
     )
     color = models.CharField(
-        _("cor na agenda"),
+        _("schedule color"),
         max_length=7,
         default="#0d6efd",
         validators=[validate_color],
@@ -32,26 +32,26 @@ class Practitioner(ClinicModel):
         null=True,
         blank=True,
         related_name="practitioners",
-        verbose_name=_("usuário de acesso"),
-        help_text=_("Conta usada por este profissional para entrar no sistema (opcional)."),
+        verbose_name=_("login user"),
+        help_text=_("Account this practitioner uses to log in (optional)."),
     )
     # Share of what is received on this practitioner's receivables (0.19.0, decision 053).
     commission_percentage = models.DecimalField(
-        _("comissão (%)"),
+        _("commission (%)"),
         max_digits=5,
         decimal_places=2,
         default=Decimal("0"),
         validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
-        help_text=_("Percentual sobre o valor recebido dos lançamentos deste profissional."),
+        help_text=_("Percentage of the amount received on this practitioner's entries."),
     )
-    active = models.BooleanField(_("ativo"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "practitioners_practitioner"
-        verbose_name = _("profissional")
-        verbose_name_plural = _("profissionais")
+        verbose_name = _("practitioner")
+        verbose_name_plural = _("practitioners")
         ordering = ["name"]
         indexes = [models.Index(fields=["clinic", "name"], name="practitioner_clinic_name")]
         constraints = [

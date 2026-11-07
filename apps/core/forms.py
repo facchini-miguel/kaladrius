@@ -88,7 +88,7 @@ def document_field():
     """A document of the clinic's country, typed with or without punctuation (decision 121).
     The form names it and checks it (apps/core/identification.py)."""
     return forms.CharField(
-        label=_("Documento"),
+        label=_("Document"),
         max_length=25,
         required=False,
         widget=forms.TextInput(attrs={"autocomplete": "off"}),
@@ -120,24 +120,24 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
     """Specialties and general modules of the clinic (decision 092)."""
 
     modules = forms.MultipleChoiceField(
-        label=_("Especialidades"),
+        label=_("Specialties"),
         choices=_options(SPECIALTIES),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         help_text=_(
-            "Só Odontologia, só Medicina ou as duas juntas (ou nenhuma, em outra área da "
-            "saúde). Desativar não apaga o histórico."
+            "Dentistry only, Medicine only or both together (or neither, in another health "
+            "area). Turning one off erases no history."
         ),
     )
     general_modules = forms.MultipleChoiceField(
-        label=_("Módulos"),
+        label=_("Modules"),
         choices=_options(GENERAL_MODULES),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         help_text=_(
-            "Comuns às especialidades. Um módulo desligado sai do menu e das telas para toda "
-            "a equipe, e nada do que já foi registrado é apagado. Pacientes, profissionais, "
-            "equipe e tabelas base estão sempre ligados."
+            "Shared by the specialties. A module turned off leaves the menu and the screens "
+            "for the whole team, and nothing already recorded is erased. Patients, "
+            "practitioners, the team and the base tables are always on."
         ),
     )
 
@@ -196,7 +196,7 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
             if "time_zone" in self.changed_data:
                 self.add_error(
                     "time_zone",
-                    _("Escolha um fuso horário de %(pais)s.") % {"pais": country.name},
+                    _("Choose a time zone of %(pais)s.") % {"pais": country.name},
                 )
             else:
                 data["time_zone"] = country.time_zones[0]
@@ -233,7 +233,7 @@ class ClinicModulesForm(BootstrapForm, forms.ModelForm):
         for modulo, needs in missing(self._chosen()).items():
             self.add_error(
                 "general_modules",
-                _("%(modulo)s precisa de: %(precisa)s.")
+                _("%(modulo)s needs: %(precisa)s.")
                 % {
                     "modulo": ModuleCode(modulo).label,
                     "precisa": ", ".join(str(ModuleCode(p).label) for p in sorted(needs)),
@@ -279,7 +279,7 @@ class ClinicForm(ClinicModulesForm):
             "schedule_end": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
         }
         help_texts = {
-            "schedule_interval": _("Os agendamentos começam e terminam em múltiplos deste tempo."),
+            "schedule_interval": _("Appointments start and end at multiples of this time."),
         }
 
     def clean(self):
@@ -289,14 +289,14 @@ class ClinicForm(ClinicModulesForm):
         if None in (start, end, interval):
             return data
         if start >= end:
-            self.add_error("schedule_end", _("O fim da agenda deve ser depois do início."))
+            self.add_error("schedule_end", _("The schedule end must be after its start."))
             return data
         problem = self._appointment_outside(start, end, interval)
         if problem is not None:
             raise forms.ValidationError(
                 _(
-                    "O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
-                    "intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
+                    "The appointment on %(momento)s would fall outside the new hours or slot "
+                    "length. Adjust future appointments before changing the schedule."
                 )
                 % {"momento": date_format(problem, "SHORT_DATETIME_FORMAT")}
             )

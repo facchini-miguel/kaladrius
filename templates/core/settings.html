@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Configurações da clínica" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Clinic settings" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% translate "Configurações da clínica" %}</h1>
+<h1 class="h3 mb-4">{% translate "Clinic settings" %}</h1>
 
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
   <p class="text-body-secondary small">
-    {% translate "O horário e o intervalo valem para a grade da agenda e para os novos agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é recusada e a tela mostra qual." %}
+    {% translate "The hours and slot length apply to the schedule grid and to new appointments. If a future appointment would fall outside them, the change is refused and the screen shows which one." %}
   </p>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'home' %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'home' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

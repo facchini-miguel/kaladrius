@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Extrato bancário" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Bank statement" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Extrato bancário" %}</h1>
+<h1 class="h3 mb-3">{% translate "Bank statement" %}</h1>
 {% if can.finance.create %}
 <div class="card mb-4" style="max-width: 44rem;">
-  <div class="card-header">{% translate "Importar extrato (OFX)" %}</div>
+  <div class="card-header">{% translate "Import statement (OFX)" %}</div>
   <div class="card-body">
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
@@ -15,17 +15,17 @@
         <div class="col-md-5">{% with field=form.account %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-7">{% with field=form.file %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <p class="text-body-secondary small">{% translate "Transações já importadas antes são puladas, então pode importar períodos que se sobrepõem." %}</p>
-      <button type="submit" class="btn btn-primary">{% translate "Importar" %}</button>
+      <p class="text-body-secondary small">{% translate "Transactions imported before are skipped, so overlapping periods can be imported." %}</p>
+      <button type="submit" class="btn btn-primary">{% translate "Import" %}</button>
     </form>
   </div>
 </div>
 {% endif %}
 
-<h2 class="h5">{% translate "Importações" %}</h2>
+<h2 class="h5">{% translate "Imports" %}</h2>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Importado em" %}</th><th>{% translate "Conta" %}</th><th>{% translate "Período" %}</th><th>{% translate "Arquivo" %}</th><th class="text-end">{% translate "Novas" %}</th><th class="text-end">{% translate "Pendentes" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Imported at" %}</th><th>{% translate "Account" %}</th><th>{% translate "Period" %}</th><th>{% translate "File" %}</th><th class="text-end">{% translate "New" context "feminine plural" %}</th><th class="text-end">{% translate "Pending" context "plural" %}</th></tr></thead>
     <tbody>
       {% for statement_import in page %}
       <tr>
@@ -37,7 +37,7 @@
         <td class="text-end">{% if statement_import.pending %}<span class="badge text-bg-warning">{{ statement_import.pending }}</span>{% else %}<span class="badge text-bg-success">0</span>{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum extrato importado ainda." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No statement imported yet." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

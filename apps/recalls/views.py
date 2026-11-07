@@ -84,7 +84,7 @@ def _recall_form(request, recall, initial):
     form = RecallForm(request.POST or None, instance=recall, initial=initial, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Rechamada de %(nome)s salva.") % {"nome": recall.patient.name})
+        messages.success(request, _("Recall for %(nome)s saved.") % {"nome": recall.patient.name})
         return _back(request)
     patient = recall.patient if recall.patient_id else form["patient"].value()
     if patient and not hasattr(patient, "name"):
@@ -111,9 +111,9 @@ def complete(request, pk):
     recall.done = not recall.done
     recall.save(update_fields=["done", "updated_at"])
     if recall.done:
-        message = _("Rechamada de %(nome)s concluída.")
+        message = _("Recall for %(nome)s marked as done.")
     else:
-        message = _("Rechamada de %(nome)s reaberta.")
+        message = _("Recall for %(nome)s reopened.")
     messages.success(request, message % {"nome": recall.patient.name})
     return _back(request)
 
@@ -123,9 +123,7 @@ def delete_recall(request, pk):
     recall = get_object_or_404(Recall.objects.select_related("patient"), pk=pk)
     if request.method == "POST":
         recall.delete()
-        messages.success(
-            request, _("Rechamada de %(nome)s excluída.") % {"nome": recall.patient.name}
-        )
+        messages.success(request, _("Recall for %(nome)s deleted.") % {"nome": recall.patient.name})
         return _back(request)
     return render(request, "recalls/delete.html", {"recall": recall})
 
@@ -138,7 +136,7 @@ def summary(request):
     """Number of pending recalls per day, for the schedule day headers."""
     since, until = _date(request.GET.get("start", "")[:10]), _date(request.GET.get("end", "")[:10])
     if since is None or until is None or not 0 < (until - since).days <= 62:
-        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Invalid parameters.")}, status=400)
     counts = {}
     pending = Recall.objects.filter(
         done=False, date__gte=since, date__lt=until, patient__archived=False
@@ -152,6 +150,6 @@ def summary(request):
 def of_day(request):
     day = _date(request.GET.get("date"))
     if day is None:
-        return HttpResponse(_("Data inválida."), status=400)
+        return HttpResponse(_("Invalid date."), status=400)
     recalls = Recall.objects.filter(date=day, patient__archived=False).select_related("patient")
     return render(request, "recalls/_today.html", {"day": day, "recalls": recalls})

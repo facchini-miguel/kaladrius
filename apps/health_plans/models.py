@@ -9,26 +9,27 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.core.isolation import ClinicModel, WrongClinic
 from apps.core.ordering import ALPHABETICAL
 
 
 class HealthPlan(ClinicModel):
-    name = models.CharField(_("nome"), max_length=200, db_collation=ALPHABETICAL)
+    name = models.CharField(_("name"), max_length=200, db_collation=ALPHABETICAL)
     # The insurer's registry in the clinic's country: the ANS in Brazil, the Payer ID in the
     # United States (seguros.py).
-    registration = models.CharField(_("registro da operadora"), max_length=20, blank=True)
-    phone = models.CharField(_("telefone"), max_length=11, blank=True)
-    notes = models.TextField(_("observações"), blank=True)
-    active = models.BooleanField(_("ativo"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    registration = models.CharField(_("insurer registration"), max_length=20, blank=True)
+    phone = models.CharField(_("phone"), max_length=11, blank=True)
+    notes = models.TextField(_("notes"), blank=True)
+    active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "health_plans_health_plan"
-        verbose_name = _("convênio")
-        verbose_name_plural = _("convênios")
+        verbose_name = _("health plan")
+        verbose_name_plural = _("health plans")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
@@ -47,35 +48,35 @@ class MemberCard(ClinicModel):
         "patients.Patient",
         on_delete=models.PROTECT,
         related_name="member_cards",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
     health_plan = models.ForeignKey(
         HealthPlan,
         on_delete=models.PROTECT,
         related_name="member_cards",
-        verbose_name=_("convênio"),
+        verbose_name=_("health plan"),
     )
-    plan = models.CharField(_("plano"), max_length=100, blank=True)
-    number = models.CharField(_("número da carteirinha"), max_length=30)
+    plan = models.CharField(_("plan"), max_length=100, blank=True)
+    number = models.CharField(_("card number"), max_length=30)
     # Only where the country's cards have them (seguros.py): the group or policy number of
     # North American cards, the patient's code on a family card.
-    group = models.CharField(_("número do grupo"), max_length=30, blank=True)
-    member_code = models.CharField(_("código do beneficiário"), max_length=10, blank=True)
-    valid_until = models.DateField(_("validade"), null=True, blank=True)
+    group = models.CharField(_("group number"), max_length=30, blank=True)
+    member_code = models.CharField(_("beneficiary code"), max_length=10, blank=True)
+    valid_until = models.DateField(pgettext_lazy("noun", "valid until"), null=True, blank=True)
     holder = models.CharField(
-        _("titular"),
+        _("holder"),
         max_length=200,
         blank=True,
-        help_text=_("Se o paciente for dependente, o nome do titular do plano."),
+        help_text=_("If the patient is a dependent, the name of the plan holder."),
     )
-    active = models.BooleanField(_("ativa"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    active = models.BooleanField(pgettext_lazy("feminine", "active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "health_plans_member_card"
-        verbose_name = _("carteirinha")
-        verbose_name_plural = _("carteirinhas")
+        verbose_name = _("card")
+        verbose_name_plural = _("cards")
         ordering = ["-active", "health_plan__name"]
         constraints = [
             models.UniqueConstraint(

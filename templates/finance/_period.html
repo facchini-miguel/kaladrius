@@ -1,20 +1,20 @@
 {% load i18n %}<form method="get" class="row g-2 align-items-end mb-3">
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="since">{% translate "De" %}</label>
+    <label class="form-label small" for="since">{% translate "From" %}</label>
     <input type="date" id="since" name="since" value="{{ since|date:'Y-m-d' }}" class="form-control">
   </div>
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="until">{% translate "Até" %}</label>
+    <label class="form-label small" for="until">{% translate "To" %}</label>
     <input type="date" id="until" name="until" value="{{ until|date:'Y-m-d' }}" class="form-control">
   </div>
   {% if group %}
   <div class="col-6 col-md-3">
-    <label class="form-label small" for="group">{% translate "Agrupar por" %}</label>
+    <label class="form-label small" for="group">{% translate "Group by" %}</label>
     <select id="group" name="group" class="form-select">
-      <option value="day"{% if not by_month %} selected{% endif %}>{% translate "Dia" %}</option>
-      <option value="month"{% if by_month %} selected{% endif %}>{% translate "Mês" %}</option>
+      <option value="day"{% if not by_month %} selected{% endif %}>{% translate "Day" %}</option>
+      <option value="month"{% if by_month %} selected{% endif %}>{% translate "Month" %}</option>
     </select>
   </div>
   {% endif %}
-  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Ver" %}</button></div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "View" %}</button></div>
 </form>

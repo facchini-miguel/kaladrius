@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo grupo" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if instance.pk %}{{ instance.name }}{% else %}{% translate "New group" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "Novo grupo" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if instance.pk %}{{ instance.name }}{% else %}{% translate "New group" %}{% endif %}</h1>
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <p class="text-body-secondary small">{% translate "Para deixar de usar sem perder o histórico, desmarque “ativo”." %}</p>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:chart_of_accounts' %}">{% translate "Cancelar" %}</a>
+  <p class="text-body-secondary small">{% translate "To stop using it without losing the history, uncheck “active”." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:chart_of_accounts' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

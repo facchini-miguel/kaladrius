@@ -14,7 +14,7 @@ class LoginForm(AuthenticationForm):
     def clean(self):
         if self.request is not None and services.address_blocked(self.request):
             raise ValidationError(
-                _("Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."),
+                _("Too many wrong attempts from this address. Try again in 1 hour."),
                 code="address_locked",
             )
         return super().clean()
@@ -29,12 +29,12 @@ def _code_field(label):
 
 
 class CodeForm(BootstrapForm, forms.Form):
-    code = _code_field(_("Código"))
+    code = _code_field(_("Code"))
 
 
 class DisableTwoFactorForm(BootstrapForm, forms.Form):
-    password = forms.CharField(label=_("Sua senha"), widget=forms.PasswordInput)
-    code = _code_field(_("Código do aplicativo"))
+    password = forms.CharField(label=_("Your password"), widget=forms.PasswordInput)
+    code = _code_field(_("App code"))
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,9 +43,9 @@ class DisableTwoFactorForm(BootstrapForm, forms.Form):
     def clean(self):
         data = super().clean()
         if data.get("password") and not self.user.check_password(data["password"]):
-            self.add_error("password", _("Senha incorreta."))
+            self.add_error("password", _("Wrong password."))
         elif data.get("code") and not services.verify(self.user, data["code"]):
-            self.add_error("code", _("Código incorreto."))
+            self.add_error("code", _("Wrong code."))
         return data
 
 

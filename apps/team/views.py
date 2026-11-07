@@ -43,7 +43,7 @@ def new_member(request):
         with transaction.atomic():
             user = form.save()
         messages.success(
-            request, _("%(nome)s agora faz parte da equipe.") % {"nome": user.get_full_name()}
+            request, _("%(nome)s is now part of the team.") % {"nome": user.get_full_name()}
         )
         return redirect("team:list")
     return render(request, "team/new.html", {"form": form})
@@ -63,7 +63,7 @@ def edit_member(request, pk):
             if account is not None:
                 account.save()
         messages.success(
-            request, _("Dados de %(nome)s salvos.") % {"nome": user.get_full_name() or user}
+            request, _("%(nome)s's details saved.") % {"nome": user.get_full_name() or user}
         )
         return redirect("team:list")
     return render(
@@ -89,8 +89,8 @@ def password(request, pk):
         messages.error(
             request,
             _(
-                "%(nome)s também tem acesso a outra clínica ou à plataforma: "
-                "a senha só pode ser trocada pelo próprio usuário ou pelo suporte."
+                "%(nome)s also has access to another clinic or to the platform: the password can "
+                "only be changed by the user or by support."
             )
             % {"nome": user},
         )
@@ -100,7 +100,7 @@ def password(request, pk):
         form.save()
         messages.success(
             request,
-            _("Nova senha de %(nome)s definida.") % {"nome": user.get_full_name() or user},
+            _("New password set for %(nome)s.") % {"nome": user.get_full_name() or user},
         )
         return redirect("team:list")
     return render(request, "team/password.html", {"membership": membership, "form": form})
@@ -125,7 +125,7 @@ def two_factor(request, pk):
         )
         messages.success(
             request,
-            _("Verificação em duas etapas de %(nome)s removida.")
+            _("Two-step verification of %(nome)s removed.")
             % {"nome": user.get_full_name() or user},
         )
     return redirect("team:edit", pk=membership.pk)

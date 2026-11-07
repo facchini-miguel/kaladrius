@@ -64,7 +64,7 @@ def _employee_form(request, instance):
                     effective_from=form.cleaned_data["salary_since"],
                     created_by=request.user,
                 )
-        messages.success(request, _("%(nome)s salvo.") % {"nome": employee.name})
+        messages.success(request, _("%(nome)s saved.") % {"nome": employee.name})
         return redirect("staff:employee", pk=employee.pk)
     return render(request, "staff/form.html", {"form": form, "instance": instance})
 
@@ -105,7 +105,7 @@ def payroll(request):
                 for form in form_list:
                     form.save()
             if request.POST.get("action") != "lancar":
-                messages.success(request, _("Folha salva."))
+                messages.success(request, _("Pay saved."))
                 return redirect(url)
             if post_form.is_valid():
                 try:
@@ -121,8 +121,8 @@ def payroll(request):
                     messages.success(
                         request,
                         ngettext(
-                            "%(n)s conta a pagar criada no financeiro.",
-                            "%(n)s contas a pagar criadas no financeiro.",
+                            "%(n)s payable created in finance.",
+                            "%(n)s payables created in finance.",
                             posted,
                         )
                         % {"n": posted},

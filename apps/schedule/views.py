@@ -41,7 +41,7 @@ def _type_form(request, kind):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(
-            request, _("Tipo de atendimento %(nome)s salvo.") % {"nome": kind.display_name}
+            request, _("Appointment type %(nome)s saved.") % {"nome": kind.display_name}
         )
         return redirect("schedule:types")
     return render(request, "schedule/type_form.html", {"form": form, "kind": kind})
@@ -57,14 +57,14 @@ def delete_appointment_type(request, pk):
             messages.error(
                 request,
                 _(
-                    "%(nome)s já foi usado em agendamentos e não pode ser excluído. "
-                    "Desmarque “ativo” para escondê-lo."
+                    "%(nome)s has been used in appointments and cannot be deleted. Uncheck "
+                    "“active” to hide it."
                 )
                 % {"nome": kind.display_name},
             )
         else:
             messages.success(
-                request, _("Tipo de atendimento %(nome)s excluído.") % {"nome": kind.display_name}
+                request, _("Appointment type %(nome)s deleted.") % {"nome": kind.display_name}
             )
         return redirect("schedule:types")
     return render(request, "schedule/type_delete.html", {"kind": kind})
@@ -135,8 +135,8 @@ def calendar_view(request):
         # "Now" on the clinic's wall clock: the calendar runs in UTC mode (decision 117).
         "now": _clock(timezone.now()),
         "texts": {
-            "birthdays": _("aniversariante(s)"),
-            "recalls": _("rechamada(s) pendente(s)"),
+            "birthdays": _("birthday(s)"),
+            "recalls": _("pending recall(s)"),
         },
         "can": {
             "create": can(request, Module.SCHEDULE, Action.CREATE),
@@ -169,7 +169,7 @@ def events(request):
     period = _range(request)
     practitioner = request.GET.get("practitioner", "")
     if period is None or not practitioner.isdecimal():
-        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Invalid parameters.")}, status=400)
     start, end = period
     # The middle of the visible range falls inside the week (or month) on the screen; when the
     # range holds today, today: the day view, the first one on a phone, then opens on it.
@@ -235,12 +235,13 @@ def new_appointment(request):
             created_count = services.create(form.instance, form.intervals, request.user)
         except IntegrityError:
             form.add_error(
-                None, _("Outro agendamento acabou de ocupar este horário. Nada foi gravado.")
+                None, _("Another appointment has just taken this time slot. Nothing was saved.")
             )
         else:
             total = len(created_count)
             return _success_response(
-                ngettext("Agendamento criado.", "%(n)s agendamentos criados.", total) % {"n": total}
+                ngettext("Appointment created.", "%(n)s appointments created.", total)
+                % {"n": total}
             )
     return render(request, "schedule/_form.html", {"form": form, "appointment": form.instance})
 
@@ -262,18 +263,18 @@ def edit_appointment(request, pk):
                 form.save()
         except IntegrityError:
             form.add_error(
-                None, _("Outro agendamento acabou de ocupar este horário. Nada foi gravado.")
+                None, _("Another appointment has just taken this time slot. Nothing was saved.")
             )
         else:
-            return _success_response(_("Agendamento alterado."))
+            return _success_response(_("Appointment changed."))
     return render(request, "schedule/_form.html", {"form": form, "appointment": appointment})
 
 
 STATUS_MESSAGES = {
-    Appointment.Status.BOOKED: gettext_lazy("%(nome)s: marcação de presença desfeita."),
-    Appointment.Status.ATTENDED: gettext_lazy("%(nome)s compareceu."),
-    Appointment.Status.MISSED: gettext_lazy("%(nome)s faltou."),
-    Appointment.Status.CANCELLED: gettext_lazy("%(nome)s desmarcou. O horário ficou livre."),
+    Appointment.Status.BOOKED: gettext_lazy("%(nome)s: attendance mark undone."),
+    Appointment.Status.ATTENDED: gettext_lazy("%(nome)s came."),
+    Appointment.Status.MISSED: gettext_lazy("%(nome)s missed the appointment."),
+    Appointment.Status.CANCELLED: gettext_lazy("%(nome)s cancelled. The time slot is free."),
 }
 
 
@@ -320,7 +321,7 @@ def delete_appointment(request, pk):
             )
         total, _ = excluded.delete()
         return _success_response(
-            ngettext("Agendamento excluído.", "%(n)s agendamentos excluídos.", total) % {"n": total}
+            ngettext("Appointment deleted.", "%(n)s appointments deleted.", total) % {"n": total}
         )
     upcoming = 0
     if appointment.series:
@@ -353,7 +354,7 @@ def birthdays(request):
     """Number of birthdays per day in the period shown by the calendar."""
     period = _range(request)
     if period is None:
-        return JsonResponse({"error": _("Parâmetros inválidos.")}, status=400)
+        return JsonResponse({"error": _("Invalid parameters.")}, status=400)
     start = timezone.localdate(period[0])
     total_days = (timezone.localdate(period[1]) - start).days
     days = [start + datetime.timedelta(days=n) for n in range(total_days)]
@@ -367,7 +368,7 @@ def birthdays_on_day(request):
     try:
         day = datetime.date.fromisoformat(request.GET.get("date", ""))
     except ValueError:
-        return HttpResponse(_("Data inválida."), status=400)
+        return HttpResponse(_("Invalid date."), status=400)
     birthdays = [
         (patient, day.year - patient.birth_date.year) for patient in _birthdays_on([day])[day]
     ]

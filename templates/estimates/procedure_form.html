@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% if procedure.pk %}{{ procedure.name }}{% else %}{% translate "Novo procedimento" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if procedure.pk %}{{ procedure.name }}{% else %}{% translate "New procedure" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% if procedure.pk %}{{ procedure.name }}{% else %}{% translate "Novo procedimento" %}{% endif %}</h1>
+<h1 class="h3 mb-4">{% if procedure.pk %}{{ procedure.name }}{% else %}{% translate "New procedure" %}{% endif %}</h1>
 <form method="post" style="max-width: 32rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'estimates:procedures' %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'estimates:procedures' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

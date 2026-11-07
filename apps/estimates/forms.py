@@ -14,7 +14,7 @@ from .models import Estimate, EstimateItem, Procedure
 
 
 class ProcedureForm(BootstrapForm, forms.ModelForm):
-    amount = _money_field(_("Valor"))
+    amount = _money_field(_("Amount"))
 
     class Meta:
         model = Procedure
@@ -30,7 +30,7 @@ class ProcedureForm(BootstrapForm, forms.ModelForm):
         self.fields["code"].label = insurance.code_label()
         if self.encoding and self.encoding.example:
             self.fields["code"].widget.attrs["placeholder"] = self.encoding.example
-        self.fields["code"].help_text = _("Opcional. Vai para os orçamentos.")
+        self.fields["code"].help_text = _("Optional. It goes into the estimates.")
 
     def clean_code(self):
         code = (self.cleaned_data.get("code") or "").strip()
@@ -41,7 +41,7 @@ class ProcedureForm(BootstrapForm, forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data["name"]
         if Procedure.objects.filter(name=name).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(_("Já existe um procedimento com este nome."))
+            raise forms.ValidationError(_("A procedure with this name already exists."))
         return name
 
 
@@ -59,20 +59,20 @@ class EstimateForm(BootstrapForm, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["patient"].queryset = Patient.objects.filter(archived=False)
-        self.fields["patient"].error_messages["required"] = _("Escolha o paciente.")
+        self.fields["patient"].error_messages["required"] = _("Choose the patient.")
         self.fields["practitioner"].queryset = Practitioner.objects.filter(active=True)
 
     def clean(self):
         data = super().clean()
         if data.get("date") and data.get("valid_until") and data["valid_until"] < data["date"]:
-            self.add_error("valid_until", _("A validade não pode ser antes da data do orçamento."))
+            self.add_error("valid_until", _("The validity cannot be before the estimate date."))
         return data
 
 
 class EstimateItemForm(BootstrapForm, forms.ModelForm):
     """One line of the estimate; price and description come from the procedure if empty."""
 
-    unit_price = _money_field(_("Valor unitário"), required=False)
+    unit_price = _money_field(_("Unit price"), required=False)
 
     class Meta:
         model = EstimateItem
@@ -92,7 +92,7 @@ class EstimateItemForm(BootstrapForm, forms.ModelForm):
         parts = [p.strip() for p in (self.cleaned_data.get("teeth") or "").split(",")]
         teeth = sorted({int(p) for p in parts if p.isdecimal()})
         if any(d not in VALID_TEETH for d in teeth):
-            raise forms.ValidationError(_("Dente inválido."))
+            raise forms.ValidationError(_("Invalid tooth."))
         return ",".join(str(d) for d in teeth)
 
     def clean(self):
@@ -101,42 +101,44 @@ class EstimateItemForm(BootstrapForm, forms.ModelForm):
         if not self.dentistry and any(
             self.data.get(self.add_prefix(field), "").strip() for field in ("teeth", "faces")
         ):
-            raise forms.ValidationError(_("Habilite Odontologia para registrar dentes ou faces."))
+            raise forms.ValidationError(_("Enable Dentistry to record teeth or surfaces."))
         # The procedure's code is copied, like its description and price.
         self.instance.code = procedure.code if procedure else ""
         if not (data.get("description") or "").strip():
             if procedure is None:
-                self.add_error("description", _("Escolha um procedimento ou descreva o item."))
+                self.add_error("description", _("Choose a procedure or describe the item."))
             else:
                 data["description"] = procedure.name
         if data.get("unit_price") is None:
             if procedure is None:
-                self.add_error("unit_price", _("Informe o valor."))
+                self.add_error("unit_price", _("Enter the price."))
             else:
                 data["unit_price"] = procedure.amount
         return data
 
 
 class DiscountForm(BootstrapForm, forms.Form):
-    discount = _money_field(_("Desconto no total"), required=False)
+    discount = _money_field(_("Discount on the total"), required=False)
 
 
 class ApproveEstimateForm(BootstrapForm, forms.Form):
     installments = forms.IntegerField(
-        label=_("Número de parcelas"), min_value=1, max_value=48, initial=1
+        label=_("Number of installments"), min_value=1, max_value=48, initial=1
     )
     first_due_date = forms.DateField(
-        label=_("Vencimento da 1ª parcela"), widget=DATE_INPUT, initial=timezone.localdate
+        label=_("Due date of the 1st installment"), widget=DATE_INPUT, initial=timezone.localdate
     )
-    category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
-    received_now = forms.BooleanField(label=_("A 1ª parcela já foi paga agora"), required=False)
+    category = forms.ModelChoiceField(label=_("Category"), queryset=Category.objects.none())
+    received_now = forms.BooleanField(
+        label=_("The 1st installment has just been paid"), required=False
+    )
     method = forms.ChoiceField(
-        label=_("Forma de pagamento"),
+        label=_("Payment method"),
         choices=_methods_with_blank,
         required=False,
     )
     account = forms.ModelChoiceField(
-        label=_("Conta"), queryset=FinancialAccount.objects.none(), required=False
+        label=_("Account"), queryset=FinancialAccount.objects.none(), required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -151,5 +153,5 @@ class ApproveEstimateForm(BootstrapForm, forms.Form):
         if data.get("received_now"):
             for field in ("method", "account"):
                 if not data.get(field):
-                    self.add_error(field, _("Informe para registrar o pagamento."))
+                    self.add_error(field, _("Required to record the payment."))
         return data

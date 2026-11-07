@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Funcionários" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Employees" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% translate "Funcionários" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Employees" %}</h1>
   <div class="d-flex gap-2">
-    <a class="btn btn-outline-primary" href="{% url 'staff:payroll' %}">{% translate "Folha do mês" %}</a>
-    {% if can.staff.create %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "Novo funcionário" %}</a>{% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'staff:payroll' %}">{% translate "Month's pay" %}</a>
+    {% if can.staff.create %}<a class="btn btn-primary" href="{% url 'staff:new' %}">{% translate "New employee" %}</a>{% endif %}
   </div>
 </div>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Nome" %}</th><th>{% translate "Cargo" %}</th><th>{% translate "Admissão" %}</th><th class="text-end">{% translate "Salário atual" %}</th><th>{% translate "Situação" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Job title" %}</th><th>{% translate "Hired" %}</th><th class="text-end">{% translate "Current salary" %}</th><th>{% translate "Status" %}</th></tr></thead>
     <tbody>
       {% for employee in employees %}
       <tr>
@@ -21,13 +21,13 @@
         <td>{{ employee.job_title|default:"—" }}</td>
         <td>{{ employee.hired_on|date:"SHORT_DATE_FORMAT"|default:"—" }}</td>
         <td class="text-end text-nowrap">{{ employee.current_salary|currency|default:"—" }}</td>
-        <td>{% if employee.active %}<span class="badge text-bg-success">{% translate "Ativo" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inativo" %}</span>{% endif %}</td>
+        <td>{% if employee.active %}<span class="badge text-bg-success">{% translate "Active" %}</span>{% else %}<span class="badge text-bg-secondary">{% translate "Inactive" %}</span>{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhum funcionário cadastrado." %}</td></tr>
+      <tr><td colspan="5" class="text-body-secondary">{% translate "No employees registered." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-<p class="text-body-secondary small">{% translate "Salário, horas extras e faltas viram contas a pagar na folha do mês. Encargos, férias e 13º ficam com o contador." %}</p>
+<p class="text-body-secondary small">{% translate "Salary, overtime and absences become payables in the month's pay. Payroll taxes, vacations and the 13th salary stay with the accountant." %}</p>
 {% endblock %}

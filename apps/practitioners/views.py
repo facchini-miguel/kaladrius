@@ -30,7 +30,7 @@ def _practitioner_form(request, practitioner):
     form = PractitionerForm(request.POST or None, instance=practitioner, clinic=request.clinic)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, _("Profissional %(nome)s salvo.") % {"nome": practitioner.name})
+        messages.success(request, _("Practitioner %(nome)s saved.") % {"nome": practitioner.name})
         return redirect("practitioners:list")
     return render(request, "practitioners/form.html", {"form": form, "practitioner": practitioner})
 
@@ -44,15 +44,12 @@ def delete_practitioner(request, pk):
         except ProtectedError:
             messages.error(
                 request,
-                _(
-                    "%(nome)s tem registros ligados e não pode ser excluído. "
-                    "Desmarque “ativo” para escondê-lo."
-                )
+                _("%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide it.")
                 % {"nome": practitioner.name},
             )
         else:
             messages.success(
-                request, _("Profissional %(nome)s excluído.") % {"nome": practitioner.name}
+                request, _("Practitioner %(nome)s deleted.") % {"nome": practitioner.name}
             )
         return redirect("practitioners:list")
     return render(request, "practitioners/delete.html", {"practitioner": practitioner})

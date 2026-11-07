@@ -1,182 +1,171 @@
-# Kaladrius — Spanish translation (source: Portuguese).
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: Kaladrius\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 01:21-0300\n"
-"PO-Revision-Date: 2026-10-27 12:00-0300\n"
+"POT-Creation-Date: 2026-11-07 01:47-0300\n"
+"PO-Revision-Date: 2026-11-07 00:00-0300\n"
 "Last-Translator: Kaladrius\n"
-"Language-Team: Español\n"
+"Language-Team: es\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Conta"
+msgid "Account"
 msgstr "Cuenta"
 
-msgid ""
-"Muitas tentativas erradas a partir deste endereço. Tente de novo em 1 hora."
+msgid "Too many wrong attempts from this address. Try again in 1 hour."
 msgstr ""
 "Demasiados intentos erróneos desde esta dirección. Inténtelo de nuevo en 1 "
 "hora."
 
-msgid "Código"
+msgid "Code"
 msgstr "Código"
 
-#
-msgid "Sua senha"
+msgid "Your password"
 msgstr "Su contraseña"
 
-#
-msgid "Código do aplicativo"
+msgid "App code"
 msgstr "Código de la aplicación"
 
-#
-msgid "Senha incorreta."
+msgid "Wrong password."
 msgstr "Contraseña incorrecta."
 
-#
-msgid "Código incorreto."
+msgid "Wrong code."
 msgstr "Código incorrecto."
 
-msgid "usuário"
+msgid "user"
 msgstr "usuario"
 
-msgid "segredo"
+msgid "secret"
 msgstr "secreto"
 
-msgid "ativa"
+msgctxt "feminine"
+msgid "active"
 msgstr "activa"
 
-#
-msgid "ativada em"
+msgid "turned on at"
 msgstr "activada el"
 
-msgid "último passo"
+msgid "last step"
 msgstr "último paso"
 
-msgid "verificação em duas etapas"
+msgid "two-step verification"
 msgstr "verificación en dos pasos"
 
-msgid "verificações em duas etapas"
+msgid "two-step verifications"
 msgstr "verificaciones en dos pasos"
 
-msgid "resumo"
+msgid "digest"
 msgstr "resumen"
 
-#
-msgid "usado em"
+msgid "used at"
 msgstr "usado el"
 
-#
-msgid "código de recuperação"
+msgid "recovery code"
 msgstr "código de recuperación"
 
-#
-msgid "códigos de recuperação"
+msgid "recovery codes"
 msgstr "códigos de recuperación"
 
-msgid "Entre de novo com o usuário e a senha."
+msgid "Log in again with the username and password."
 msgstr "Ingrese de nuevo con el usuario y la contraseña."
 
-msgid "Muitos códigos errados. Entre de novo."
+msgid "Too many wrong codes. Log in again."
 msgstr "Demasiados códigos erróneos. Ingrese de nuevo."
 
-#
-msgid "Contas de demonstração não usam verificação em duas etapas."
+msgid "Demo accounts do not use two-step verification."
 msgstr "Las cuentas de demostración no usan verificación en dos pasos."
 
-msgid "Verificação em duas etapas desativada."
+msgid "Two-step verification turned off."
 msgstr "Verificación en dos pasos desactivada."
 
-msgid "Código incorreto. Confira a hora do celular e tente de novo."
+msgid "Wrong code. Check the phone's clock and try again."
 msgstr "Código incorrecto. Verifique la hora del celular e inténtelo de nuevo."
 
-msgid "Auditoria"
+msgid "Audit log"
 msgstr "Auditoría"
 
-msgid "Criou"
+msgid "Created"
 msgstr "Creó"
 
-msgid "Alterou"
+msgid "Changed"
 msgstr "Modificó"
 
-msgid "Excluiu"
+msgid "Deleted"
 msgstr "Eliminó"
 
-msgid "Visualizou"
+msgid "Viewed"
 msgstr "Consultó"
 
-msgid "Entrou no sistema"
+msgid "Logged in"
 msgstr "Inició sesión"
 
-msgid "Tentativa de entrada recusada"
+msgid "Login attempt refused"
 msgstr "Intento de acceso rechazado"
 
-msgid "Saiu do sistema"
+msgid "Logged out"
 msgstr "Cerró sesión"
 
-msgid "quando"
+msgid "when"
 msgstr "cuándo"
 
-msgid "clínica"
+msgid "clinic"
 msgstr "clínica"
 
-msgid "usuário (texto)"
+msgid "user (text)"
 msgstr "usuario (texto)"
 
-msgid "ação"
+msgid "action"
 msgstr "acción"
 
-msgid "tipo de registro"
+msgid "record type"
 msgstr "tipo de registro"
 
-msgid "código do registro"
+msgid "record code"
 msgstr "código del registro"
 
-msgid "registro"
+msgid "record"
 msgstr "registro"
 
-msgid "alterações"
+msgid "changes"
 msgstr "cambios"
 
 msgid "IP"
 msgstr "IP"
 
-msgid "registro de auditoria"
+msgid "audit entry"
 msgstr "registro de auditoría"
 
-msgid "registros de auditoria"
+msgid "audit entries"
 msgstr "registros de auditoría"
 
-msgid "senha"
+msgid "password"
 msgstr "contraseña"
 
-msgid "finalizado"
+msgid "finalized"
 msgstr "finalizado"
 
-msgid "(oculta)"
+msgid "(hidden)"
 msgstr "(oculta)"
 
-msgid "(alterada)"
+msgid "(changed)"
 msgstr "(cambiada)"
 
-msgid "sim"
+msgid "yes"
 msgstr "sí"
 
 msgid "- Select an option -"
 msgstr "- Seleccione una opción -"
 
-msgid "Núcleo"
+msgid "Core"
 msgstr "Núcleo"
 
-msgid "Brasil"
+msgid "Brazil"
 msgstr "Brasil"
 
-msgid "México"
+msgid "Mexico"
 msgstr "México"
 
 msgid "Argentina"
@@ -185,189 +174,271 @@ msgstr "Argentina"
 msgid "Chile"
 msgstr "Chile"
 
-msgid "Colômbia"
+msgid "Colombia"
 msgstr "Colombia"
 
 msgid "Peru"
 msgstr "Perú"
 
-msgid "Uruguai"
+msgid "Uruguay"
 msgstr "Uruguay"
 
-msgid "Paraguai"
+msgid "Paraguay"
 msgstr "Paraguay"
 
-msgid "Bolívia"
+msgid "Bolivia"
 msgstr "Bolivia"
 
-msgid "Equador"
+msgid "Ecuador"
 msgstr "Ecuador"
 
-msgid "Estados Unidos"
+msgid "United States"
 msgstr "Estados Unidos"
 
-msgid "Reino Unido"
+msgid "United Kingdom"
 msgstr "Reino Unido"
 
-msgid "Canadá"
+msgid "Canada"
 msgstr "Canadá"
 
-msgid "Austrália"
+msgid "Australia"
 msgstr "Australia"
 
-msgid "África do Sul"
+msgid "South Africa"
 msgstr "Sudáfrica"
 
-msgid "Informe o código de área e o número (10 dígitos)."
+msgid "Enter the area code and the number (10 digits)."
 msgstr "Indique el código de área y el número (10 dígitos)."
 
-msgid "Informe o número com o código de área (9 dígitos)."
+msgid "Enter the number with the area code (9 digits)."
 msgstr "Indique el número con el código de área (9 dígitos)."
 
-msgid "Informe o número com o código de área (8 ou 9 dígitos)."
+msgid "Enter the number with the area code (8 or 9 digits)."
 msgstr "Indique el número con el código de área (8 o 9 dígitos)."
 
-msgid "Informe o número com o código de área (8 dígitos)."
+msgid "Enter the number with the area code (8 digits)."
 msgstr "Indique el número con el código de área (8 dígitos)."
 
-msgid "Informe o número com o código de área (10 ou 11 dígitos com o 0)."
+msgid "Enter the number with the area code (10 or 11 digits with the 0)."
 msgstr "Indique el número con el código de área (10 u 11 dígitos con el 0)."
 
-msgid "Informe o número com o código de área (10 dígitos com o 0)."
+msgid "Enter the number with the area code (10 digits with the 0)."
 msgstr "Indique el número con el código de área (10 dígitos con el 0)."
 
-msgid "O CEP deve ter 8 dígitos."
+msgid "The postal code (CEP) must have 8 digits."
 msgstr "El código postal (CEP) debe tener 8 dígitos."
 
-msgid "O ZIP code tem 5 dígitos (ou 9, com a extensão)."
+msgid "The ZIP code has 5 digits (or 9, with the extension)."
 msgstr "El ZIP code tiene 5 dígitos (o 9, con la extensión)."
 
-msgid "O código postal canadense tem o formato A1A 1A1."
+msgid "The Canadian postal code has the format A1A 1A1."
 msgstr "El código postal canadiense tiene el formato A1A 1A1."
 
-msgid "Informe um postcode válido, como SW1A 1AA."
+msgid "Enter a valid postcode, such as SW1A 1AA."
 msgstr "Indique un postcode válido, como SW1A 1AA."
 
-msgid "O postcode australiano tem 4 dígitos."
+msgid "The Australian postcode has 4 digits."
 msgstr "El postcode australiano tiene 4 dígitos."
 
-msgid "O código postal sul-africano tem 4 dígitos."
+msgid "The South African postal code has 4 digits."
 msgstr "El código postal sudafricano tiene 4 dígitos."
 
-msgid "O código postal tem 5 dígitos."
+msgid "The postal code has 5 digits."
 msgstr "El código postal tiene 5 dígitos."
 
-msgid "O código postal argentino tem o formato C1425ABC (ou 4 dígitos)."
+msgid "The Argentine postal code has the format C1425ABC (or 4 digits)."
 msgstr "El código postal argentino tiene el formato C1425ABC (o 4 dígitos)."
 
-msgid "O código postal tem 7 dígitos."
+msgid "The postal code has 7 digits."
 msgstr "El código postal tiene 7 dígitos."
 
-msgid "O código postal tem 6 dígitos."
+msgid "The postal code has 6 digits."
 msgstr "El código postal tiene 6 dígitos."
 
-msgid "O código postal tem 6 dígitos (ou 4, no formato antigo)."
+msgid "The postal code has 6 digits (or 4, in the old format)."
 msgstr "El código postal tiene 6 dígitos (o 4, en el formato anterior)."
 
-msgid "Use até 9 letras ou números."
+msgid "Use up to 9 letters or numbers."
 msgstr "Use hasta 9 letras o números."
 
-msgid "CEP"
+msgid "Postal code (CEP)"
 msgstr "Código postal (CEP)"
 
-msgid "Código postal"
+msgid "Postal code"
 msgstr "Código postal"
 
-msgid "Real brasileiro"
+msgid "Brazilian real"
 msgstr "Real brasileño"
 
-msgid "Dólar americano"
+msgid "US dollar"
 msgstr "Dólar estadounidense"
 
 msgid "Euro"
 msgstr "Euro"
 
-msgid "Libra esterlina"
+msgid "Pound sterling"
 msgstr "Libra esterlina"
 
-msgid "Dólar canadense"
+msgid "Canadian dollar"
 msgstr "Dólar canadiense"
 
-msgid "Dólar australiano"
+msgid "Australian dollar"
 msgstr "Dólar australiano"
 
-msgid "Rand sul-africano"
+msgid "South African rand"
 msgstr "Rand sudafricano"
 
-msgid "Peso argentino"
+msgid "Argentine peso"
 msgstr "Peso argentino"
 
-msgid "Peso mexicano"
+msgid "Mexican peso"
 msgstr "Peso mexicano"
 
-msgid "Peso chileno"
+msgid "Chilean peso"
 msgstr "Peso chileno"
 
-msgid "Peso colombiano"
+msgid "Colombian peso"
 msgstr "Peso colombiano"
 
-msgid "Peso uruguaio"
+msgid "Uruguayan peso"
 msgstr "Peso uruguayo"
 
-msgid "Guarani paraguaio"
+msgid "Paraguayan guaraní"
 msgstr "Guaraní paraguayo"
 
-msgid "Sol peruano"
+msgid "Peruvian sol"
 msgstr "Sol peruano"
 
 msgid "Boliviano"
 msgstr "Boliviano"
 
-msgid "Documento"
+msgid "January"
+msgstr "enero"
+
+msgid "February"
+msgstr "febrero"
+
+msgid "March"
+msgstr "marzo"
+
+msgid "April"
+msgstr "abril"
+
+msgid "May"
+msgstr "mayo"
+
+msgid "June"
+msgstr "junio"
+
+msgid "July"
+msgstr "julio"
+
+msgid "August"
+msgstr "agosto"
+
+msgid "September"
+msgstr "septiembre"
+
+msgid "October"
+msgstr "octubre"
+
+msgid "November"
+msgstr "noviembre"
+
+msgid "December"
+msgstr "diciembre"
+
+msgctxt "alt. month"
+msgid "January"
+msgstr "enero"
+
+msgctxt "alt. month"
+msgid "February"
+msgstr "febrero"
+
+msgctxt "alt. month"
+msgid "March"
+msgstr "marzo"
+
+msgctxt "alt. month"
+msgid "April"
+msgstr "abril"
+
+msgctxt "alt. month"
+msgid "May"
+msgstr "mayo"
+
+msgctxt "alt. month"
+msgid "June"
+msgstr "junio"
+
+msgctxt "alt. month"
+msgid "July"
+msgstr "julio"
+
+msgctxt "alt. month"
+msgid "August"
+msgstr "agosto"
+
+msgctxt "alt. month"
+msgid "September"
+msgstr "septiembre"
+
+msgctxt "alt. month"
+msgid "October"
+msgstr "octubre"
+
+msgctxt "alt. month"
+msgid "November"
+msgstr "noviembre"
+
+msgctxt "alt. month"
+msgid "December"
+msgstr "diciembre"
+
+msgid "Document"
 msgstr "Documento"
 
-#
-msgid "Especialidades"
+msgid "Specialties"
 msgstr "Especialidades"
 
 msgid ""
-"Só Odontologia, só Medicina ou as duas juntas (ou nenhuma, em outra área da "
-"saúde). Desativar não apaga o histórico."
+"Dentistry only, Medicine only or both together (or neither, in another "
+"health area). Turning one off erases no history."
 msgstr ""
 "Solo Odontología, solo Medicina o las dos juntas (o ninguna, en otra área de "
 "la salud). Desactivar no borra el historial."
 
-#
-msgid "Módulos"
+msgid "Modules"
 msgstr "Módulos"
 
 msgid ""
-"Comuns às especialidades. Um módulo desligado sai do menu e das telas para "
-"toda a equipe, e nada do que já foi registrado é apagado. Pacientes, "
-"profissionais, equipe e tabelas base estão sempre ligados."
+"Shared by the specialties. A module turned off leaves the menu and the "
+"screens for the whole team, and nothing already recorded is erased. "
+"Patients, practitioners, the team and the base tables are always on."
 msgstr ""
 "Comunes a las especialidades. Un módulo desactivado sale del menú y de las "
 "pantallas para todo el equipo, y no se borra nada de lo ya registrado. "
 "Pacientes, profesionales, equipo y tablas base están siempre activos."
 
 #, python-format
-msgid "Escolha um fuso horário de %(pais)s."
+msgid "Choose a time zone of %(pais)s."
 msgstr "Elija una zona horaria de %(pais)s."
 
 #, python-format
-msgid "%(modulo)s precisa de: %(precisa)s."
+msgid "%(modulo)s needs: %(precisa)s."
 msgstr "%(modulo)s necesita: %(precisa)s."
 
-msgid "Os agendamentos começam e terminam em múltiplos deste tempo."
+msgid "Appointments start and end at multiples of this time."
 msgstr "Las citas comienzan y terminan en múltiplos de este tiempo."
 
-msgid "O fim da agenda deve ser depois do início."
+msgid "The schedule end must be after its start."
 msgstr "El fin de la agenda debe ser posterior al inicio."
 
 #, python-format
 msgid ""
-"O agendamento de %(momento)s ficaria fora do novo horário ou do novo "
-"intervalo. Ajuste os agendamentos futuros antes de mudar a agenda."
+"The appointment on %(momento)s would fall outside the new hours or slot "
+"length. Adjust future appointments before changing the schedule."
 msgstr ""
 "La cita del %(momento)s quedaría fuera del nuevo horario o del nuevo "
 "intervalo. Ajuste las citas futuras antes de cambiar la agenda."
@@ -376,14 +447,13 @@ msgid "CRO, CRM, CREFITO, CRP…"
 msgstr "CRO, CRM, CREFITO, CRP…"
 
 #, python-format
-msgid "%(documento)s: número inválido."
+msgid "%(documento)s: invalid number."
 msgstr "%(documento)s: número no válido."
 
 #, python-format
 msgid ""
-"O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
-"registro e, de menores de idade, até o paciente fazer %(idade)s anos, se for "
-"mais tarde (%(fonte)s)."
+"Health records must be kept for at least %(anos)s years after the last entry "
+"and, for minors, until the patient turns %(idade)s, if later (%(fonte)s)."
 msgstr ""
 "La historia clínica debe conservarse por lo menos %(anos)s años después del "
 "último registro y, de los menores de edad, hasta que el paciente cumpla "
@@ -391,245 +461,247 @@ msgstr ""
 
 #, python-format
 msgid ""
-"O prontuário deve ser guardado por pelo menos %(anos)s anos depois do último "
-"registro (%(fonte)s)."
+"Health records must be kept for at least %(anos)s years after the last entry "
+"(%(fonte)s)."
 msgstr ""
 "La historia clínica debe conservarse por lo menos %(anos)s años después del "
 "último registro (%(fonte)s)."
 
-msgid "O prazo de guarda do prontuário é definido pela lei de cada estado."
+msgid "How long health records must be kept is set by each state's law."
 msgstr ""
 "El plazo de conservación de la historia clínica lo fija la ley de cada "
 "estado."
 
-msgid "O prazo de guarda do prontuário é definido pela lei de cada província."
+msgid "How long health records must be kept is set by each province's law."
 msgstr ""
 "El plazo de conservación de la historia clínica lo fija la ley de cada "
 "provincia."
 
 #, python-format
 msgid ""
-"O prazo de guarda do prontuário segue %(fonte)s: confira o prazo atual com a "
-"autoridade de saúde."
+"How long health records must be kept follows %(fonte)s: check the current "
+"period with the health authority."
 msgstr ""
 "El plazo de conservación de la historia clínica sigue %(fonte)s: confirme el "
 "plazo vigente con la autoridad de salud."
 
 msgid ""
-"Confira com a autoridade de saúde do país o prazo de guarda do prontuário."
+"Check with the country's health authority how long health records must be "
+"kept."
 msgstr ""
 "Confirme con la autoridad de salud del país el plazo de conservación de la "
 "historia clínica."
 
-msgid "idioma"
+msgid "language"
 msgstr "idioma"
 
-msgid "Vazio: o idioma do navegador."
+msgid "Empty: the browser's language."
 msgstr "Vacío: el idioma del navegador."
 
-msgid "última versão vista nas novidades"
+msgid "last version seen in What's new"
 msgstr "última versión vista en Novedades"
 
-msgid "conta de demonstração"
+msgid "demo account"
 msgstr "cuenta de demostración"
 
-msgid "usuários"
+msgid "users"
 msgstr "usuarios"
 
-msgid "10 minutos"
+msgid "10 minutes"
 msgstr "10 minutos"
 
-msgid "15 minutos"
+msgid "15 minutes"
 msgstr "15 minutos"
 
-msgid "20 minutos"
+msgid "20 minutes"
 msgstr "20 minutos"
 
-msgid "30 minutos"
+msgid "30 minutes"
 msgstr "30 minutos"
 
-msgid "1 hora"
+msgid "1 hour"
 msgstr "1 hora"
 
-msgid "Odontologia"
+msgid "Dentistry"
 msgstr "Odontología"
 
-msgid "Medicina"
+msgid "Medicine"
 msgstr "Medicina"
 
-msgid "Outra área da saúde"
+msgid "Other health area"
 msgstr "Otra área de la salud"
 
-msgid "nome"
+msgid "name"
 msgstr "nombre"
 
-msgid "área principal"
+msgid "primary area"
 msgstr "área principal"
 
-#
 msgid ""
-"Define os tipos iniciais de atendimento. As especialidades e os módulos são "
-"escolhidos abaixo e podem ser usados juntos."
+"Sets the initial appointment types. The specialties and the modules are "
+"chosen below and can be used together."
 msgstr ""
 "Define los tipos iniciales de atención. Las especialidades y los módulos se "
 "eligen abajo y pueden usarse juntos."
 
-msgid "documento"
+msgid "document"
 msgstr "documento"
 
 msgid "e-mail"
 msgstr "correo electrónico"
 
-msgid "telefone"
+msgid "phone"
 msgstr "teléfono"
 
-msgid "endereço"
+msgid "address"
 msgstr "dirección"
 
-msgid "Rua, número, bairro, cidade/UF e CEP, como sai no recibo."
+msgid ""
+"Street, number, district, city/state and postal code, as printed on receipts."
 msgstr ""
 "Calle, número, barrio, ciudad/estado y código postal, como sale en el recibo."
 
-msgid "moeda"
+msgid "currency"
 msgstr "moneda"
 
 msgid ""
-"Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda "
-"a equipe e em qualquer idioma: nenhum valor já lançado é convertido."
+"The currency the clinic works in. It only changes how amounts are shown, for "
+"the whole team and in any language: no amount already entered is converted."
 msgstr ""
 "La moneda con que trabaja la clínica. Solo cambia cómo se muestran los "
 "valores, para todo el equipo y en cualquier idioma: ningún valor ya "
 "registrado se convierte."
 
-msgid "país"
+msgid "country"
 msgstr "país"
 
 msgid ""
-"Define o fuso horário disponível, o formato de telefones, códigos postais e "
-"datas em inglês, e a moeda sugerida."
+"Sets the available time zones, the format of phones, postal codes and "
+"English dates, and the suggested currency."
 msgstr ""
 "Define las zonas horarias disponibles, el formato de teléfonos, códigos "
 "postales y fechas en inglés, y la moneda sugerida."
 
-msgid "fuso horário"
+msgid "time zone"
 msgstr "zona horaria"
 
-msgid "Os horários da agenda e de todo o sistema seguem este fuso."
+msgid "The schedule and every time in the system follow this time zone."
 msgstr ""
 "Los horarios de la agenda y de todo el sistema siguen esta zona horaria."
 
-msgid "numeração dos dentes"
+msgid "tooth numbering"
 msgstr "numeración de los dientes"
 
 msgid ""
-"Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: "
-"os dentes já registrados continuam os mesmos."
+"How teeth appear on the dental chart and in estimates. It only changes the "
+"display: teeth already recorded stay the same."
 msgstr ""
 "Cómo aparecen los dientes en el odontograma y en los presupuestos. Solo "
 "cambia la visualización: los dientes ya registrados siguen siendo los mismos."
 
-#
 msgid ""
-"exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"
+"require two-step verification from whoever reaches the medical record or "
+"finance"
 msgstr ""
 "exigir verificación en dos pasos a quien accede a la historia clínica o al "
 "financiero"
 
 msgid ""
-"Profissionais com prontuário, administradores e o financeiro só usam o "
-"sistema depois de ativar o código do aplicativo autenticador. A recepção não "
-"é obrigada."
+"Practitioners with medical records, administrators and finance staff only "
+"use the system after turning on the authenticator app code. The front desk "
+"is not required."
 msgstr ""
 "Los profesionales con historia clínica, los administradores y el financiero "
 "solo usan el sistema después de activar el código de la aplicación "
 "autenticadora. La recepción no está obligada."
 
-msgid "início da agenda"
+msgid "schedule start"
 msgstr "inicio de la agenda"
 
-msgid "fim da agenda"
+msgid "schedule end"
 msgstr "fin de la agenda"
 
-msgid "duração de cada horário"
+msgid "length of each slot"
 msgstr "duración de cada horario"
 
-msgid "criada em"
+msgctxt "feminine"
+msgid "created at"
 msgstr "creada el"
 
-msgid "alterada em"
+msgctxt "feminine"
+msgid "changed at"
 msgstr "modificada el"
 
-msgid "clínicas"
+msgid "clinics"
 msgstr "clínicas"
 
-msgid "O início da agenda deve ser antes do fim."
+msgid "The schedule start must be before its end."
 msgstr "El inicio de la agenda debe ser anterior al fin."
 
-msgid "Agenda"
+msgid "Schedule"
 msgstr "Agenda"
 
-msgid "Prontuário"
+msgid "Medical record"
 msgstr "Historia clínica"
 
-msgid "Orçamentos"
+msgid "Estimates"
 msgstr "Presupuestos"
 
-msgid "Financeiro"
+msgid "Finance"
 msgstr "Financiero"
 
-msgid "Rechamadas"
+msgid "Recalls"
 msgstr "Recordatorios"
 
-msgid "Aniversariantes"
+msgid "Birthdays"
 msgstr "Cumpleaños"
 
-msgid "Convênios"
+msgid "Health plans"
 msgstr "Convenios"
 
-#
-msgid "Pessoal"
+msgid "Staff"
 msgstr "Personal"
 
-msgid "módulo"
+msgid "module"
 msgstr "módulo"
 
-msgid "ativo"
+msgid "active"
 msgstr "activo"
 
-msgid "módulo da clínica"
+msgid "clinic module"
 msgstr "módulo de la clínica"
 
-msgid "módulos da clínica"
+msgid "clinic modules"
 msgstr "módulos de la clínica"
 
-msgid "Administrador da clínica"
+msgid "Clinic administrator"
 msgstr "Administrador de la clínica"
 
-msgid "Recepção"
+msgid "Front desk"
 msgstr "Recepción"
 
-msgid "Profissional"
+msgid "Practitioner"
 msgstr "Profesional"
 
-msgid "perfil"
+msgid "role"
 msgstr "perfil"
 
-msgid "criado em"
+msgid "created at"
 msgstr "creado el"
 
-msgid "vínculo com clínica"
+msgid "clinic membership"
 msgstr "vínculo con clínica"
 
-msgid "vínculos com clínicas"
+msgid "clinic memberships"
 msgstr "vínculos con clínicas"
 
-msgid "Este usuário já está vinculado a esta clínica."
+msgid "This user is already a member of this clinic."
 msgstr "Este usuario ya está vinculado a esta clínica."
 
-msgid "arquivo"
+msgid "file"
 msgstr "archivo"
 
-msgid "tamanho (bytes)"
+msgid "size (bytes)"
 msgstr "tamaño (bytes)"
 
 msgid "backup"
@@ -638,1071 +710,1053 @@ msgstr "copia de seguridad"
 msgid "backups"
 msgstr "copias de seguridad"
 
-msgid "Módulo clínico desconhecido."
+msgid "Unknown clinical module."
 msgstr "Módulo clínico desconocido."
 
-#
-#
-msgid "Orçamentos e Pessoal precisam do Financeiro habilitado."
+msgid "Estimates and Staff need Finance turned on."
 msgstr "Presupuestos y Personal necesitan Financiero habilitado."
 
-msgid "Cadastre a clínica antes de configurar os módulos."
+msgid "Register the clinic before configuring modules."
 msgstr "Registre la clínica antes de configurar los módulos."
 
-msgid "Pacientes"
+msgid "Patients"
 msgstr "Pacientes"
 
-msgid "Profissionais"
+msgid "Practitioners"
 msgstr "Profesionales"
 
-msgid "Tabelas base"
+msgid "Base tables"
 msgstr "Tablas base"
 
-msgid "Usuários da clínica"
+msgid "Clinic users"
 msgstr "Usuarios de la clínica"
 
-msgid "Configurações da clínica"
+msgid "Clinic settings"
 msgstr "Configuración de la clínica"
 
-msgid "Recebimentos"
+msgid "Receipts"
 msgstr "Cobros"
 
-msgid "Ver"
+msgid "View"
 msgstr "Ver"
 
-msgid "Criar"
+msgid "Create"
 msgstr "Crear"
 
-msgid "Alterar"
+msgid "Change"
 msgstr "Modificar"
 
-msgid "Excluir"
+msgid "Delete"
 msgstr "Eliminar"
 
-msgid "CPF inválido."
+msgid "Invalid CPF."
 msgstr "CPF no válido."
 
-msgid "CNPJ inválido."
+msgid "Invalid CNPJ."
 msgstr "CNPJ no válido."
 
-msgid "Informe o DDD e o número (10 ou 11 dígitos)."
+msgid "Enter the area code and number (10 or 11 digits)."
 msgstr "Indique el código de área y el número (10 u 11 dígitos)."
 
 #, python-format
-msgid "O DDD %(ddd)s não existe."
+msgid "Area code %(ddd)s does not exist."
 msgstr "El código de área %(ddd)s no existe."
 
-msgid "Com 11 dígitos, o número começa com 9 depois do DDD."
+msgid "With 11 digits, the number starts with 9 after the area code."
 msgstr "Con 11 dígitos, el número empieza con 9 después del código de área."
 
-msgid "Bom dia"
+msgid "Good morning"
 msgstr "Buenos días"
 
-msgid "Boa tarde"
+msgid "Good afternoon"
 msgstr "Buenas tardes"
 
-msgid "Boa noite"
+msgid "Good evening"
 msgstr "Buenas noches"
 
-msgid "Clínica cadastrada. Agora cadastre a equipe em Cadastros > Equipe."
+msgid "Clinic registered. Now add the team in Records > Team."
 msgstr "Clínica registrada. Ahora registre al equipo en Registros > Equipo."
 
-msgid "Contas de demonstração não trocam a senha."
+msgid "Demo accounts cannot change their password."
 msgstr "Las cuentas de demostración no cambian la contraseña."
 
-msgid "Senha alterada."
+msgid "Password changed."
 msgstr "Contraseña cambiada."
 
-msgid "Configurações da clínica salvas."
+msgid "Clinic settings saved."
 msgstr "Configuración de la clínica guardada."
 
 #, python-format
 msgid ""
-"Os valores agora aparecem em %(moeda)s. Nenhum valor já lançado foi "
-"convertido."
+"Amounts are now shown in %(moeda)s. No amount already entered was converted."
 msgstr ""
 "Los valores ahora se muestran en %(moeda)s. Ningún valor ya registrado se "
 "convirtió."
 
-msgid "FDI (11 a 48; dentes de leite 51 a 85)"
+msgid "FDI (11 to 48; baby teeth 51 to 85)"
 msgstr "FDI (11 a 48; dientes de leche 51 a 85)"
 
-msgid "Universal, dos Estados Unidos (1 a 32; dentes de leite A a T)"
+msgid "Universal, United States (1 to 32; baby teeth A to T)"
 msgstr "Universal, de Estados Unidos (1 a 32; dientes de leche A a T)"
 
-msgid "Palmer (UR6, LL3; dentes de leite URE a LRE)"
+msgid "Palmer (UR6, LL3; baby teeth URE to LRE)"
 msgstr "Palmer (UR6, LL3; dientes de leche URE a LRE)"
 
-msgid "Numeração FDI."
+msgid "FDI numbering."
 msgstr "Numeración FDI."
 
-msgid "Numeração universal (Estados Unidos)."
+msgid "Universal numbering (United States)."
 msgstr "Numeración universal (Estados Unidos)."
 
 msgid ""
-"Notação de Palmer: UR superior direito, UL superior esquerdo, LL inferior "
-"esquerdo, LR inferior direito."
+"Palmer notation: UR upper right, UL upper left, LL lower left, LR lower "
+"right."
 msgstr ""
 "Notación de Palmer: UR superior derecho, UL superior izquierdo, LL inferior "
 "izquierdo, LR inferior derecho."
 
-msgid "Valor"
+msgid "Amount"
 msgstr "Valor"
 
-msgid "Opcional. Vai para os orçamentos."
+msgid "Optional. It goes into the estimates."
 msgstr "Opcional. Pasa a los presupuestos."
 
-msgid "Já existe um procedimento com este nome."
+msgid "A procedure with this name already exists."
 msgstr "Ya existe un procedimiento con este nombre."
 
-msgid "Escolha o paciente."
+msgid "Choose the patient."
 msgstr "Elija el paciente."
 
-msgid "A validade não pode ser antes da data do orçamento."
+msgid "The validity cannot be before the estimate date."
 msgstr "La validez no puede ser anterior a la fecha del presupuesto."
 
-msgid "Valor unitário"
+msgid "Unit price"
 msgstr "Valor unitario"
 
-msgid "Dente inválido."
+msgid "Invalid tooth."
 msgstr "Diente no válido."
 
-msgid "Habilite Odontologia para registrar dentes ou faces."
+msgid "Enable Dentistry to record teeth or surfaces."
 msgstr "Habilite Odontología para registrar dientes o caras."
 
-msgid "Escolha um procedimento ou descreva o item."
+msgid "Choose a procedure or describe the item."
 msgstr "Elija un procedimiento o describa el ítem."
 
-msgid "Informe o valor."
+msgid "Enter the price."
 msgstr "Indique el valor."
 
-msgid "Desconto no total"
+msgid "Discount on the total"
 msgstr "Descuento sobre el total"
 
-msgid "Número de parcelas"
+msgid "Number of installments"
 msgstr "Número de cuotas"
 
-msgid "Vencimento da 1ª parcela"
+msgid "Due date of the 1st installment"
 msgstr "Vencimiento de la 1.ª cuota"
 
-msgid "Categoria"
+msgid "Category"
 msgstr "Categoría"
 
-msgid "A 1ª parcela já foi paga agora"
+msgid "The 1st installment has just been paid"
 msgstr "La 1.ª cuota ya se pagó ahora"
 
-msgid "Forma de pagamento"
+msgid "Payment method"
 msgstr "Forma de pago"
 
-msgid "Informe para registrar o pagamento."
+msgid "Required to record the payment."
 msgstr "Indíquelo para registrar el pago."
 
-msgid "código"
+msgid "code"
 msgstr "código"
 
-msgid "valor"
+msgid "amount"
 msgstr "valor"
 
-msgid "categoria"
+msgid "category"
 msgstr "categoría"
 
-msgid "Categoria de receita usada quando o orçamento é aprovado."
+msgid "Income category used when the estimate is approved."
 msgstr "Categoría de ingreso usada cuando se aprueba el presupuesto."
 
-msgid "procedimento"
+msgid "procedure"
 msgstr "procedimiento"
 
-msgid "procedimentos"
+msgid "procedures"
 msgstr "procedimientos"
 
-msgctxt "orçamento"
-msgid "Em aberto"
+msgctxt "estimate"
+msgid "Open"
 msgstr "Abierto"
 
-msgid "Aprovado"
+msgid "Approved"
 msgstr "Aprobado"
 
-msgid "Recusado"
+msgid "Refused"
 msgstr "Rechazado"
 
-msgid "paciente"
+msgid "patient"
 msgstr "paciente"
 
-msgid "profissional"
+msgid "practitioner"
 msgstr "profesional"
 
-msgid "data"
+msgid "date"
 msgstr "fecha"
 
-msgid "válido até"
+msgid "valid until"
 msgstr "válido hasta"
 
-msgid "situação"
+msgid "status"
 msgstr "situación"
 
-msgid "desconto"
+msgid "discount"
 msgstr "descuento"
 
-msgid "observações"
+msgid "notes"
 msgstr "observaciones"
 
-msgid "lançamento a receber"
+msgid "receivable"
 msgstr "cuenta por cobrar"
 
-msgid "aprovado ou recusado em"
+msgid "approved or refused at"
 msgstr "aprobado o rechazado el"
 
-msgid "aprovado ou recusado por"
+msgid "approved or refused by"
 msgstr "aprobado o rechazado por"
 
-msgid "criado por"
+msgid "created by"
 msgstr "creado por"
 
-msgid "alterado em"
+msgid "changed at"
 msgstr "modificado el"
 
-msgid "orçamento"
+msgid "estimate"
 msgstr "presupuesto"
 
-msgid "orçamentos"
+msgid "estimates"
 msgstr "presupuestos"
 
-msgid "descrição"
+msgid "description"
 msgstr "descripción"
 
-msgid "dentes"
+msgid "teeth"
 msgstr "dientes"
 
-msgid "faces ou região"
+msgid "surfaces or region"
 msgstr "caras o región"
 
-msgid "Ex.: MOD, vestibular, arcada superior."
+msgid "E.g.: MOD, buccal, upper arch."
 msgstr "Ej.: MOD, vestibular, arcada superior."
 
-msgid "quantidade"
+msgid "quantity"
 msgstr "cantidad"
 
-msgid "valor unitário"
+msgid "unit price"
 msgstr "valor unitario"
 
-msgid "item do orçamento"
+msgid "estimate item"
 msgstr "ítem del presupuesto"
 
-msgid "itens do orçamento"
+msgid "estimate items"
 msgstr "ítems del presupuesto"
 
-msgid "Habilite Odontologia para alterar itens com dentes ou faces."
+msgid "Enable Dentistry to change items with teeth or surfaces."
 msgstr "Habilite Odontología para modificar elementos con dientes o caras."
 
-msgid "Só um orçamento em aberto pode ser aprovado."
+msgid "Only an open estimate can be approved."
 msgstr "Solo un presupuesto abierto puede aprobarse."
 
-msgid "O orçamento não tem valor a receber."
+msgid "The estimate has no amount to receive."
 msgstr "El presupuesto no tiene valor por cobrar."
 
 #, python-format
-msgid "Orçamento nº %(numero)s"
+msgid "Estimate no. %(numero)s"
 msgstr "Presupuesto n.º %(numero)s"
 
-msgid "Só um orçamento em aberto pode ser recusado."
+msgid "Only an open estimate can be refused."
 msgstr "Solo un presupuesto abierto puede rechazarse."
 
-msgid "Este orçamento já foi aprovado ou recusado."
+msgid "This estimate was already approved or refused."
 msgstr "Este presupuesto ya fue aprobado o rechazado."
 
-msgid "Orçamento criado. Agora inclua os procedimentos."
+msgid "Estimate created. Now add the procedures."
 msgstr "Presupuesto creado. Ahora agregue los procedimientos."
 
-msgid "Orçamento salvo."
+msgid "Estimate saved."
 msgstr "Presupuesto guardado."
 
-msgid "Item incluído."
+msgid "Item added."
 msgstr "Ítem agregado."
 
-msgid "Item removido."
+msgid "Item removed."
 msgstr "Ítem eliminado."
 
-msgid "O desconto passa do total do orçamento."
+msgid "The discount exceeds the estimate total."
 msgstr "El descuento supera el total del presupuesto."
 
-msgid "Desconto aplicado."
+msgid "Discount applied."
 msgstr "Descuento aplicado."
 
-msgid "Orçamento aprovado e lançado em A receber."
+msgid "Estimate approved and added to Receivables."
 msgstr "Presupuesto aprobado y registrado en Por cobrar."
 
-msgid "Orçamento marcado como recusado."
+msgid "Estimate marked as refused."
 msgstr "Presupuesto marcado como rechazado."
 
 #, python-format
-msgid "Procedimento %(nome)s salvo."
+msgid "Procedure %(nome)s saved."
 msgstr "Procedimiento %(nome)s guardado."
 
-msgid "Não há comissão a pagar até esta data."
+msgid "There is no commission to pay up to this date."
 msgstr "No hay comisión por pagar hasta esta fecha."
 
 #, python-format
-msgid "Comissão de %(nome)s até %(data)s"
+msgid "Commission of %(nome)s up to %(data)s"
 msgstr "Comisión de %(nome)s hasta el %(data)s"
 
 #, python-format
 msgid ""
-"Esta comissão não pode ser cancelada: o estorno de um recebimento dela já "
-"foi descontado na comissão até %(data)s. Cancele aquela antes."
+"This commission cannot be cancelled: the reversal of one of its receipts was "
+"already deducted in the commission up to %(data)s. Cancel that one first."
 msgstr ""
 "Esta comisión no se puede cancelar: el reverso de uno de sus cobros ya se "
 "descontó en la comisión hasta %(data)s. Cancele aquella antes."
 
-msgid "Valor total"
+msgid "Total amount"
 msgstr "Valor total"
 
-msgid "Parcelas mensais de mesmo valor. Parcelado no cartão é 1 parcela aqui."
+msgid ""
+"Monthly installments of the same amount. Card installments count as 1 "
+"installment here."
 msgstr ""
 "Cuotas mensuales del mismo valor. Las cuotas con tarjeta cuentan como 1 "
 "cuota aquí."
 
-msgid "Só se quem paga não for um paciente cadastrado."
+msgid "Only if the payer is not a registered patient."
 msgstr "Solo si quien paga no es un paciente registrado."
 
-msgid "Escolha o paciente ou informe quem paga."
+msgid "Choose the patient or enter who pays."
 msgstr "Elija el paciente o indique quién paga."
 
-msgid "Informe um valor maior que zero."
+msgid "Enter an amount greater than zero."
 msgstr "Indique un valor mayor que cero."
 
-msgid "O valor é"
+msgid "The amount is"
 msgstr "El valor es"
 
-msgid "o total, dividido nas parcelas"
+msgid "the total, split into the installments"
 msgstr "el total, dividido en las cuotas"
 
-msgid "de cada mês (conta fixa, como o aluguel)"
+msgid "per month (fixed bill, like rent)"
 msgstr "de cada mes (cuenta fija, como el alquiler)"
 
-msgid "Número de parcelas ou de meses"
+msgid "Number of installments or months"
 msgstr "Número de cuotas o de meses"
 
-msgid "A 1ª parcela já foi paga"
+msgid "The 1st installment is already paid"
 msgstr "La 1.ª cuota ya se pagó"
 
-#
-msgid "Fornecedor sem cadastro"
+msgid "Unregistered supplier"
 msgstr "Proveedor sin registro"
 
-msgid "Só para um pagamento avulso, sem cadastrar o fornecedor."
+msgid "Only for a one-off payment, without registering the supplier."
 msgstr "Solo para un pago suelto, sin registrar al proveedor."
 
-#
-msgid "Escolha o fornecedor ou informe para quem é."
+msgid "Choose the supplier or enter who it is for."
 msgstr "Elija el proveedor o indique para quién es."
 
-msgid "Telefone"
+msgid "Phone"
 msgstr "Teléfono"
 
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-#
-msgid "Já existe um fornecedor com este documento."
+msgid "A supplier with this document already exists."
 msgstr "Ya existe un proveedor con este documento."
 
-#
-msgid "Fechar até"
+msgid "Close up to"
 msgstr "Cerrar hasta"
 
-msgid "Último dia do período fechado (no máximo ontem)."
+msgid "Last day of the closed period (yesterday at the latest)."
 msgstr "Último día del período cerrado (como máximo ayer)."
 
-#
-msgid "Deixar fechado até"
+msgid "Keep closed up to"
 msgstr "Dejar cerrado hasta"
 
-msgid "Uma data anterior ao fechamento atual. Em branco, reabre tudo."
+msgid "A date before the current closing. Blank reopens everything."
 msgstr "Una fecha anterior al cierre actual. En blanco, reabre todo."
 
-msgid "Motivo"
+msgid "Reason"
 msgstr "Motivo"
 
-msgid "Valor recebido"
+msgid "Amount received"
 msgstr "Valor cobrado"
 
-msgid "Juros e multa"
+msgid "Interest and late fee"
 msgstr "Intereses y multa"
 
-msgid "Já incluídos no valor recebido."
+msgid "Already included in the amount received."
 msgstr "Ya incluidos en el valor cobrado."
 
-msgid "Desconto"
+msgid "Discount"
 msgstr "Descuento"
 
-msgid "Código da transação"
+msgid "Transaction code"
 msgstr "Código de la transacción"
 
-msgid "Grupo acima"
+msgid "Parent group"
 msgstr "Grupo superior"
 
-#
 msgid ""
-"Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1. Em branco: "
-"o próximo número."
+"Position inside the parent group (1, 2, 3…); builds numbers such as 2.1. "
+"Blank: the next number."
 msgstr ""
 "Posición dentro del grupo superior (1, 2, 3…); forma números como 2.1. En "
 "blanco: el número siguiente."
 
-msgid "O grupo acima precisa ser do mesmo tipo (receita ou despesa)."
+msgid "The parent group must be of the same type (income or expense)."
 msgstr "El grupo superior debe ser del mismo tipo (ingreso o gasto)."
 
-#
-msgid "Já existe um grupo com este nome neste lugar do plano."
+msgid "A group with this name already exists in this place of the chart."
 msgstr "Ya existe un grupo con este nombre en este lugar del plan."
 
-msgid "Grupo"
+msgid "Group"
 msgstr "Grupo"
 
-msgid "Onde a categoria fica no plano de contas (opcional)."
+msgid "Where the category sits in the chart of accounts (optional)."
 msgstr "Dónde queda la categoría en el plan de cuentas (opcional)."
 
-msgid "O grupo precisa ser do mesmo tipo da categoria."
+msgid "The group must be of the same type as the category."
 msgstr "El grupo debe ser del mismo tipo que la categoría."
 
-msgid "Já existe uma categoria com este nome."
+msgid "A category with this name already exists."
 msgstr "Ya existe una categoría con este nombre."
 
-#
-msgid "Já existe um centro de custo com este nome."
+msgid "A cost center with this name already exists."
 msgstr "Ya existe un centro de costo con este nombre."
 
-msgid "Saldo inicial"
+msgid "Initial balance"
 msgstr "Saldo inicial"
 
-msgid "Quanto havia na conta antes do primeiro lançamento no sistema."
+msgid "How much the account had before the first entry in the system."
 msgstr "Cuánto había en la cuenta antes del primer registro en el sistema."
 
-msgid "Já existe uma conta com este nome."
+msgid "An account with this name already exists."
 msgstr "Ya existe una cuenta con este nombre."
 
-msgid "Valor contado na gaveta"
+msgid "Amount counted in the drawer"
 msgstr "Valor contado en la caja"
 
-msgid "Conte o dinheiro antes de abrir o caixa."
+msgid "Count the money before opening the drawer."
 msgstr "Cuente el dinero antes de abrir la caja."
 
-msgid "Outra conta"
+msgid "Other account"
 msgstr "Otra cuenta"
 
 msgid ""
-"Ex.: depósito no Banco. Vazio: o dinheiro sai do sistema ou vem de fora."
+"E.g.: deposit into the Bank. Empty: the money leaves the system or comes "
+"from outside."
 msgstr ""
 "Ej.: depósito en el Banco. Vacío: el dinero sale del sistema o viene de "
 "afuera."
 
-msgid "Observação"
+msgid "Note"
 msgstr "Observación"
 
-msgid "Explique a diferença, se houver."
+msgid "Explain the difference, if any."
 msgstr "Explique la diferencia, si la hay."
 
-msgid "Vencimento"
+msgid "Due date"
 msgstr "Vencimiento"
 
-msgid "Arquivo OFX"
+msgid "OFX file"
 msgstr "Archivo OFX"
 
-msgid "Exporte no site ou aplicativo do banco, no formato OFX (Money)."
+msgid "Export it from the bank's website or app, in OFX (Money) format."
 msgstr ""
 "Expórtelo en el sitio o la aplicación del banco, en formato OFX (Money)."
 
-msgid "O arquivo passa de 5 MB."
+msgid "The file is larger than 5 MB."
 msgstr "El archivo supera los 5 MB."
 
-msgid "Descrição"
+msgid "Description"
 msgstr "Descripción"
 
-msgid "Pagador ou fornecedor"
+msgid "Payer or supplier"
 msgstr "Pagador o proveedor"
 
-msgid "Se ficar em branco, vale a descrição."
+msgid "If left blank, the description is used."
 msgstr "Si queda en blanco, vale la descripción."
 
-msgid "Dinheiro (caixa)"
+msgid "Cash (drawer)"
 msgstr "Efectivo (caja)"
 
-msgid "Banco"
+msgid "Bank"
 msgstr "Banco"
 
-msgid "Maquininha de cartão"
+msgid "Card machine"
 msgstr "Terminal de tarjetas"
 
-msgid "tipo"
+msgid "type"
 msgstr "tipo"
 
-msgid "saldo inicial"
+msgid "initial balance"
 msgstr "saldo inicial"
 
-msgid "conta"
+msgid "account"
 msgstr "cuenta"
 
-msgid "contas"
+msgid "accounts"
 msgstr "cuentas"
 
-msgid "Receita"
+msgid "Income"
 msgstr "Ingreso"
 
-msgid "Despesa"
+msgid "Expense"
 msgstr "Gasto"
 
-msgid "grupo acima"
+msgid "parent group"
 msgstr "grupo superior"
 
-msgid "Posição dentro do grupo acima (1, 2, 3…); forma números como 2.1."
+msgid ""
+"Position inside the parent group (1, 2, 3…); builds numbers such as 2.1."
 msgstr "Posición dentro del grupo superior (1, 2, 3…); forma números como 2.1."
 
-msgid "grupo contábil"
+msgid "account group"
 msgstr "grupo contable"
 
-msgid "grupos contábeis"
+msgid "account groups"
 msgstr "grupos contables"
 
-#
-msgid "grupo"
+msgid "group"
 msgstr "grupo"
 
-msgid "categorias"
+msgid "categories"
 msgstr "categorías"
 
-#
-msgid "centro de custo"
+msgid "cost center"
 msgstr "centro de costo"
 
-#
-msgid "centros de custo"
+msgid "cost centers"
 msgstr "centros de costo"
 
-msgid "Pessoa física"
+msgid "Individual"
 msgstr "Persona física"
 
-msgid "Pessoa jurídica"
+msgid "Company"
 msgstr "Persona jurídica"
 
-msgid "Para pessoa jurídica, o nome fantasia."
+msgid "For companies, the trade name."
 msgstr "Para personas jurídicas, el nombre comercial."
 
-msgid "razão social"
+msgid "company name"
 msgstr "razón social"
 
-#
-msgid "fornecedor"
+msgid "supplier"
 msgstr "proveedor"
 
-#
-msgid "fornecedores"
+msgid "suppliers"
 msgstr "proveedores"
 
-msgid "A receber"
+msgid "Receivables"
 msgstr "Por cobrar"
 
-msgid "A pagar"
+msgid "Payables"
 msgstr "Por pagar"
 
-msgid "pagador"
+msgid "payer"
 msgstr "pagador"
 
-msgid "Quem fez o atendimento (opcional)."
+msgid "Who saw the patient (optional)."
 msgstr "Quién hizo la atención (opcional)."
 
-msgid "valor total"
+msgid "total amount"
 msgstr "valor total"
 
-msgid "cancelado"
+msgid "cancelled"
 msgstr "cancelado"
 
-msgid "cancelado em"
+msgid "cancelled at"
 msgstr "cancelado el"
 
-msgid "cancelado por"
+msgid "cancelled by"
 msgstr "cancelado por"
 
-msgid "motivo do cancelamento"
+msgid "cancellation reason"
 msgstr "motivo de la cancelación"
 
-msgid "lançamento"
+msgid "entry"
 msgstr "cuenta"
 
-msgid "lançamentos"
+msgid "entries"
 msgstr "cuentas"
 
-msgid "número"
+msgid "number"
 msgstr "número"
 
-msgid "vencimento"
+msgid "due date"
 msgstr "vencimiento"
 
-msgid "parcela"
+msgid "installment"
 msgstr "cuota"
 
-msgid "parcelas"
+msgid "installments"
 msgstr "cuotas"
 
-msgid "Dinheiro"
+msgid "Cash"
 msgstr "Efectivo"
 
 msgid "Pix"
 msgstr "Pix"
 
-msgid "Cartão de débito"
+msgid "Debit card"
 msgstr "Tarjeta de débito"
 
-msgid "Cartão de crédito"
+msgid "Credit card"
 msgstr "Tarjeta de crédito"
 
-msgid "Transferência"
+msgid "Bank transfer"
 msgstr "Transferencia"
 
-msgid "Boleto"
+msgid "Boleto (bank slip)"
 msgstr "Boleto bancario"
 
-msgid "Cheque"
+msgid "Check"
 msgstr "Cheque"
 
-msgid "Carteira digital"
+msgid "Digital wallet"
 msgstr "Billetera digital"
 
-msgid "Débito automático"
+msgid "Direct debit"
 msgstr "Débito automático"
 
-msgid "Cartão HSA/FSA"
+msgid "HSA/FSA card"
 msgstr "Tarjeta HSA/FSA"
 
-msgid "Financiamento ao paciente"
+msgid "Patient financing"
 msgstr "Financiamiento al paciente"
 
-msgid "valor recebido"
+msgid "amount received"
 msgstr "valor cobrado"
 
-msgid "juros e multa"
+msgid "interest and late fee"
 msgstr "intereses y multa"
 
-msgid "forma de pagamento"
+msgid "payment method"
 msgstr "forma de pago"
 
-msgid "bandeira do cartão"
+msgid "card brand"
 msgstr "marca de la tarjeta"
 
-msgid "parcelas no cartão"
+msgid "card installments"
 msgstr "cuotas con tarjeta"
 
-msgid "código da transação (NSU)"
+msgid "transaction code (NSU)"
 msgstr "código de la transacción (NSU)"
 
-msgid "observação"
+msgid "note"
 msgstr "observación"
 
-msgid "estornado"
+msgid "reversed"
 msgstr "revertido"
 
-msgid "estornado em"
+msgid "reversed at"
 msgstr "revertido el"
 
-msgid "estornado por"
+msgid "reversed by"
 msgstr "revertido por"
 
-msgid "motivo do estorno"
+msgid "reversal reason"
 msgstr "motivo de la reversión"
 
-msgid "comissão"
+msgid "commission"
 msgstr "comisión"
 
-msgid "comissão que descontou o estorno"
+msgid "commission that deducted the reversal"
 msgstr "comisión que descontó la reversión"
 
-msgid "recebido por"
+msgid "received by"
 msgstr "cobrado por"
 
-msgid "pagamento"
+msgid "payment"
 msgstr "pago"
 
-msgid "pagamentos"
+msgid "payments"
 msgstr "pagos"
 
-msgid "aberto em"
+msgid "opened at"
 msgstr "abierta el"
 
-msgid "aberto por"
+msgid "opened by"
 msgstr "abierta por"
 
-msgid "valor contado na abertura"
+msgid "amount counted at opening"
 msgstr "valor contado en la apertura"
 
-msgid "fechado em"
+msgid "closed at"
 msgstr "cerrada el"
 
-msgid "fechado por"
+msgid "closed by"
 msgstr "cerrada por"
 
-msgid "valor esperado"
+msgid "expected amount"
 msgstr "valor esperado"
 
-msgid "valor contado no fechamento"
+msgid "amount counted at closing"
 msgstr "valor contado en el cierre"
 
-msgid "caixa"
+msgid "cash drawer"
 msgstr "caja"
 
-msgid "caixas"
+msgid "cash drawers"
 msgstr "cajas"
 
-msgid "Retirada (sangria)"
+msgid "Withdrawal"
 msgstr "Retiro"
 
-msgid "Reforço"
+msgid "Top-up"
 msgstr "Refuerzo"
 
-msgid "outra conta"
+msgid "other account"
 msgstr "otra cuenta"
 
 msgid ""
-"Para onde vai a retirada ou de onde vem o reforço (vazio: fora do sistema)."
+"Where the withdrawal goes or the top-up comes from (empty: outside the "
+"system)."
 msgstr ""
 "Adónde va el retiro o de dónde viene el refuerzo (vacío: fuera del sistema)."
 
-msgid "motivo"
+msgid "reason"
 msgstr "motivo"
 
-msgid "movimento de caixa"
+msgid "drawer movement"
 msgstr "movimiento de caja"
 
-msgid "movimentos de caixa"
+msgid "drawer movements"
 msgstr "movimientos de caja"
 
-msgid "recebimentos até"
+msgid "receipts up to"
 msgstr "cobros hasta"
 
-msgid "percentual"
+msgid "percentage"
 msgstr "porcentaje"
 
-msgid "comissão de estornos descontada"
+msgid "commission of reversals deducted"
 msgstr "comisión de reversiones descontada"
 
-msgid "valor da comissão"
+msgid "commission amount"
 msgstr "valor de la comisión"
 
-msgid "lançamento a pagar"
+msgid "payable"
 msgstr "cuenta por pagar"
 
-msgid "cancelada"
+msgctxt "feminine"
+msgid "cancelled"
 msgstr "cancelada"
 
-msgid "comissões"
+msgid "commissions"
 msgstr "comisiones"
 
-#
-msgid "ano"
+msgid "year"
 msgstr "año"
 
-msgid "meta"
+msgid "goal"
 msgstr "meta"
 
-#
-msgid "meta do planejamento"
+msgid "planning goal"
 msgstr "meta de la planificación"
 
-#
-msgid "metas do planejamento"
+msgid "planning goals"
 msgstr "metas de la planificación"
 
-#
-msgid "fechado até"
+msgid "closed up to"
 msgstr "cerrado hasta"
 
-#
-msgid "fechamento do financeiro"
+msgid "finance closing"
 msgstr "cierre del financiero"
 
-#
-msgid "fechamentos do financeiro"
+msgid "finance closings"
 msgstr "cierres del financiero"
 
-msgid "Aberto"
+msgid "Open"
 msgstr "Abierta"
 
-msgid "código do banco"
+msgid "bank code"
 msgstr "código del banco"
 
-msgid "conta no banco"
+msgid "bank account"
 msgstr "cuenta en el banco"
 
-msgid "início"
+msgid "start"
 msgstr "inicio"
 
-msgid "fim"
+msgid "end"
 msgstr "fin"
 
-msgid "saldo no banco"
+msgid "bank balance"
 msgstr "saldo en el banco"
 
-msgid "saldo em"
+msgid "balance on"
 msgstr "saldo al"
 
-msgid "transações novas"
+msgid "new transactions"
 msgstr "transacciones nuevas"
 
-msgid "transações já importadas"
+msgid "transactions already imported"
 msgstr "transacciones ya importadas"
 
-msgid "transações ilegíveis"
+msgid "unreadable transactions"
 msgstr "transacciones ilegibles"
 
 msgid ""
-"Linhas do arquivo sem data ou valor que dê para ler: não foram importadas."
+"Lines of the file without a readable date or amount: they were not imported."
 msgstr "Líneas del archivo sin fecha o importe legible: no se importaron."
 
-msgid "importado por"
+msgid "imported by"
 msgstr "importado por"
 
-msgid "importado em"
+msgid "imported at"
 msgstr "importado el"
 
-msgid "importação de extrato"
+msgid "statement import"
 msgstr "importación de extracto"
 
-msgid "importações de extrato"
+msgid "statement imports"
 msgstr "importaciones de extracto"
 
-msgid "Pendente"
+msgid "Pending"
 msgstr "Pendiente"
 
-msgid "Conciliada"
+msgid "Reconciled"
 msgstr "Conciliada"
 
-msgid "Ignorada"
+msgid "Ignored"
 msgstr "Ignorada"
 
-msgid "importação"
+msgid "import"
 msgstr "importación"
 
-msgid "identificador no banco"
+msgid "bank identifier"
 msgstr "identificador en el banco"
 
-msgid "Positivo: entrada; negativo: saída."
+msgid "Positive: money in; negative: money out."
 msgstr "Positivo: entrada; negativo: salida."
 
-msgid "tipo no banco"
+msgid "bank type"
 msgstr "tipo en el banco"
 
-msgid "movimento do caixa"
+msgctxt "of the drawer"
+msgid "drawer movement"
 msgstr "movimiento de caja"
 
-msgid "conciliado por"
+msgid "reconciled by"
 msgstr "conciliado por"
 
-msgid "conciliado em"
+msgid "reconciled at"
 msgstr "conciliado el"
 
-msgid "transação bancária"
+msgid "bank transaction"
 msgstr "transacción bancaria"
 
-msgid "transações bancárias"
+msgid "bank transactions"
 msgstr "transacciones bancarias"
 
-msgid "O arquivo não é um extrato OFX."
+msgid "The file is not an OFX statement."
 msgstr "El archivo no es un extracto OFX."
 
-msgid "O extrato não tem transações."
+msgid "The statement has no transactions."
 msgstr "El extracto no tiene transacciones."
 
-msgid "Esse lançamento já foi conciliado com outra transação."
+msgid "That entry was already reconciled with another transaction."
 msgstr "Ese registro ya fue conciliado con otra transacción."
 
-msgid "Esta transação já foi conciliada ou ignorada."
+msgid "This transaction was already reconciled or ignored."
 msgstr "Esta transacción ya fue conciliada o ignorada."
 
-msgid "Esse lançamento não corresponde a esta transação."
+msgid "That entry does not match this transaction."
 msgstr "Ese registro no corresponde a esta transacción."
 
-msgid "Este lançamento foi cancelado."
+msgid "This entry was cancelled."
 msgstr "Esta cuenta fue cancelada."
 
-msgid "O valor abatido da parcela precisa ser maior que zero."
+msgid "The amount deducted from the installment must be greater than zero."
 msgstr "El valor descontado de la cuota debe ser mayor que cero."
 
 #, python-format
 msgid ""
-"O valor abatido (%(abatido)s) passa do que falta na parcela (%(saldo)s)."
+"The amount deducted (%(abatido)s) exceeds what is left of the installment "
+"(%(saldo)s)."
 msgstr ""
 "El valor descontado (%(abatido)s) supera lo que falta de la cuota "
 "(%(saldo)s)."
 
-msgid "Este pagamento já foi estornado."
+msgid "This payment was already reversed."
 msgstr "Este pago ya fue revertido."
 
-msgid "Este lançamento já foi cancelado."
+msgid "This entry was already cancelled."
 msgstr "Este asiento ya fue cancelado."
 
-msgid ""
-"Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar."
+msgid "This entry has payments. Reverse the payments before cancelling."
 msgstr "Esta cuenta tiene pagos. Revierta los pagos antes de cancelar."
 
 #, python-format
 msgid ""
-"O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
-"antes dela não podem ser registrados. Use uma data posterior ou peça ao "
-"administrador para reabrir o período."
+"Finance is closed up to %(ate)s: payments and reversals on or before that "
+"date cannot be recorded. Use a later date or ask the administrator to reopen "
+"the period."
 msgstr ""
 "El financiero está cerrado hasta el %(ate)s: los pagos y reversiones en esa "
 "fecha o antes no pueden registrarse. Use una fecha posterior o pida al "
 "administrador que reabra el período."
 
-msgid "Feche no máximo até ontem: hoje ainda há movimento."
+msgid "Close up to yesterday at the latest: money is still moving today."
 msgstr "Cierre como máximo hasta ayer: hoy todavía hay movimiento."
 
 #, python-format
-msgid ""
-"O financeiro já está fechado até %(ate)s. Para voltar, reabra o período."
+msgid "Finance is already closed up to %(ate)s. To go back, reopen the period."
 msgstr ""
 "El financiero ya está cerrado hasta el %(ate)s. Para volver, reabra el "
 "período."
 
-#
-msgid "O financeiro não está fechado."
+msgid "Finance is not closed."
 msgstr "El financiero no está cerrado."
 
-msgid "Para reabrir, escolha uma data anterior ao fechamento atual."
+msgid "To reopen, choose a date before the current closing."
 msgstr "Para reabrir, elija una fecha anterior al cierre actual."
 
-#
-msgid "Informe o motivo da reabertura."
+msgid "Enter the reason for reopening."
 msgstr "Indique el motivo de la reapertura."
 
-msgid "Cancelada"
+msgctxt "feminine"
+msgid "Cancelled"
 msgstr "Cancelada"
 
-msgid "Paga"
+msgctxt "feminine"
+msgid "Paid"
 msgstr "Pagada"
 
-msgid "Vencida"
+msgctxt "feminine"
+msgid "Overdue"
 msgstr "Vencida"
 
-msgid "Paga em parte"
+msgid "Partly paid"
 msgstr "Pagada en parte"
 
-msgctxt "parcela"
-msgid "Em aberto"
+msgctxt "installment"
+msgid "Open"
 msgstr "Abierta"
 
-msgid "Sem centro de custo"
+msgid "No cost center"
 msgstr "Sin centro de costo"
 
-msgid "Sem grupo"
+msgid "No group"
 msgstr "Sin grupo"
 
-#
-msgid "Receitas"
+msgctxt "plural"
+msgid "Income"
 msgstr "Ingresos"
 
-#
-msgid "Despesas"
+msgid "Expenses"
 msgstr "Gastos"
 
-msgid "O caixa desta conta já está aberto."
+msgid "This account's drawer is already open."
 msgstr "La caja de esta cuenta ya está abierta."
 
-msgid "Este caixa já foi fechado."
+msgid "This drawer is already closed."
 msgstr "Esta caja ya se cerró."
 
-msgid "Escolha uma conta diferente da do caixa."
+msgid "Choose an account other than the drawer's."
 msgstr "Elija una cuenta distinta de la de la caja."
 
-msgid "A retirada passa do valor que deveria estar no caixa."
+msgid "The withdrawal exceeds what should be in the drawer."
 msgstr "El retiro supera lo que debería haber en la caja."
 
-msgid "Lançamento criado e 1ª parcela recebida."
+msgid "Entry created and 1st installment received."
 msgstr "Cuenta creada y 1.ª cuota cobrada."
 
-msgid "Lançamento criado."
+msgid "Entry created."
 msgstr "Cuenta creada."
 
-msgid "Despesa lançada."
+msgid "Expense recorded."
 msgstr "Gasto registrado."
 
-msgid "Lançamento cancelado."
+msgid "Entry cancelled."
 msgstr "Cuenta cancelada."
 
-msgid "Cancelar lançamento"
+msgid "Cancel entry"
 msgstr "Cancelar cuenta"
 
-msgid "Esta parcela já está paga."
+msgid "This installment is already paid."
 msgstr "Esta cuota ya está pagada."
 
-msgid "Valor pago"
+msgid "Amount paid"
 msgstr "Valor pagado"
 
-msgid "Já incluídos no valor pago."
+msgid "Already included in the amount paid."
 msgstr "Ya incluidos en el valor pagado."
 
-msgid "Pagamento registrado."
+msgid "Payment recorded."
 msgstr "Pago registrado."
 
-msgid "Pagamento estornado."
+msgid "Payment reversed."
 msgstr "Pago revertido."
 
-msgid "Estornar pagamento"
+msgid "Reverse payment"
 msgstr "Revertir pago"
 
-msgid "Caixa aberto."
+msgid "Drawer opened."
 msgstr "Caja abierta."
 
-msgid "Movimento registrado."
+msgid "Movement recorded."
 msgstr "Movimiento registrado."
 
-msgid "Caixa fechado."
+msgid "Drawer closed."
 msgstr "Caja cerrada."
 
-msgid "Fechar caixa"
+msgid "Close drawer"
 msgstr "Cerrar caja"
 
 #, python-format
-msgid "%(n)s meta copiada do ano anterior."
-msgid_plural "%(n)s metas copiadas do ano anterior."
+msgid "%(n)s goal copied from last year."
+msgid_plural "%(n)s goals copied from last year."
 msgstr[0] "%(n)s meta copiada del año anterior."
 msgstr[1] "%(n)s metas copiadas del año anterior."
 
-#
-msgid "Planejamento salvo."
+msgid "Plan saved."
 msgstr "Planificación guardada."
 
-#
-msgid "Financeiro fechado."
+msgid "Finance closed."
 msgstr "Financiero cerrado."
 
-#
-msgid "Período reaberto."
+msgid "Period reopened."
 msgstr "Período reabierto."
 
 #, python-format
-msgid "%(nome)s salvo."
+msgid "%(nome)s saved."
 msgstr "%(nome)s guardado."
 
 #, python-format
-msgid "Percentual de %(nome)s salvo."
+msgid "Percentage of %(nome)s saved."
 msgstr "Porcentaje de %(nome)s guardado."
 
-msgid "Comissão lançada em A pagar."
+msgid "Commission added to Payables."
 msgstr "Comisión registrada en Por pagar."
 
 #, python-format
 msgid ""
-"Extrato importado: %(novas)s transações novas, %(repetidas)s já importadas."
+"Statement imported: %(novas)s new transactions, %(repetidas)s already "
+"imported."
 msgstr ""
 "Extracto importado: %(novas)s transacciones nuevas, %(repetidas)s ya "
 "importadas."
 
 #, python-format
 msgid ""
-"%(n)s linha do arquivo não tinha data ou valor legível e não foi importada. "
-"Confira no extrato do banco."
+"%(n)s line of the file had no readable date or amount and was not imported. "
+"Check it on the bank statement."
 msgid_plural ""
-"%(n)s linhas do arquivo não tinham data ou valor legível e não foram "
-"importadas. Confira no extrato do banco."
+"%(n)s lines of the file had no readable date or amount and were not "
+"imported. Check them on the bank statement."
 msgstr[0] ""
 "%(n)s línea del archivo no tenía fecha o importe legible y no se importó. "
 "Revísela en el extracto del banco."
@@ -1712,2742 +1766,2676 @@ msgstr[1] ""
 
 #, python-format
 msgid ""
-"Atenção: este arquivo é da conta %(nova)s no banco, mas a anterior importada "
-"em %(conta)s era da conta %(antiga)s."
+"Warning: this file is from bank account %(nova)s, but the previous one "
+"imported into %(conta)s was from account %(antiga)s."
 msgstr ""
 "Atención: este archivo es de la cuenta %(nova)s en el banco, pero el "
 "anterior importado en %(conta)s era de la cuenta %(antiga)s."
 
 #, python-format
-msgid "%(n)s transações conciliadas."
+msgid "%(n)s transactions reconciled."
 msgstr "%(n)s transacciones conciliadas."
 
-msgid "Informe o motivo para ignorar a transação."
+msgid "Enter the reason to ignore the transaction."
 msgstr "Indique el motivo para ignorar la transacción."
 
-msgid "Lançamento criado e conciliado."
+msgid "Entry created and reconciled."
 msgstr "Registro creado y conciliado."
 
 #, python-format
-msgid "Por exemplo: %(tipos)s."
+msgid "For example: %(tipos)s."
 msgstr "Por ejemplo: %(tipos)s."
 
-#
-msgid "Já existe um convênio com este nome."
+msgid "A health plan with this name already exists."
 msgstr "Ya existe un convenio con este nombre."
 
-msgid "Use no máximo 20 caracteres."
+msgid "Use at most 20 characters."
 msgstr "Use como máximo 20 caracteres."
 
-#
-#
-msgid "Número da carteirinha"
+msgid "Card number"
 msgstr "Número de la credencial"
 
-#
-msgid "Número do grupo"
+msgid "Group number"
 msgstr "Número de grupo"
 
-msgid "Código do beneficiário"
+msgid "Beneficiary code"
 msgstr "Código del beneficiario"
 
-msgid "Esta carteirinha já está cadastrada neste convênio."
+msgid "This card is already registered in this health plan."
 msgstr "Esta credencial ya está registrada en este convenio."
 
 #, python-format
-msgid "%(nome)s: formato inválido. Exemplo: %(exemplo)s."
+msgid "%(nome)s: invalid format. Example: %(exemplo)s."
 msgstr "%(nome)s: formato inválido. Ejemplo: %(exemplo)s."
 
-msgid "Registro da operadora"
+msgid "Insurer registration"
 msgstr "Registro de la aseguradora"
 
-msgid "registro da operadora"
+msgid "insurer registration"
 msgstr "registro de la aseguradora"
 
-msgid "convênio"
+msgid "health plan"
 msgstr "convenio"
 
-msgid "convênios"
+msgid "health plans"
 msgstr "convenios"
 
-msgid "plano"
+msgid "plan"
 msgstr "plan"
 
-#
-msgid "número da carteirinha"
+msgid "card number"
 msgstr "número de la credencial"
 
-#
-msgid "número do grupo"
+msgid "group number"
 msgstr "número de grupo"
 
-msgid "código do beneficiário"
+msgid "beneficiary code"
 msgstr "código del beneficiario"
 
-#
-msgid "validade"
+msgctxt "noun"
+msgid "valid until"
 msgstr "validez"
 
-msgid "titular"
+msgid "holder"
 msgstr "titular"
 
-msgid "Se o paciente for dependente, o nome do titular do plano."
+msgid "If the patient is a dependent, the name of the plan holder."
 msgstr "Si el paciente es dependiente, el nombre del titular del plan."
 
-msgid "carteirinha"
+msgid "card"
 msgstr "credencial"
 
-msgid "carteirinhas"
+msgid "cards"
 msgstr "credenciales"
 
-msgid "Carteirinha salva."
+msgid "Card saved."
 msgstr "Credencial guardada."
 
-msgid "Ajuda"
+msgid "Help"
 msgstr "Ayuda"
 
-msgid "Importação do sistema antigo"
+msgid "Legacy system import"
 msgstr "Importación del sistema antiguo"
 
-msgid "Informe quantos dias de afastamento."
+msgid "Enter how many days of leave."
 msgstr "Indique cuántos días de reposo."
 
-msgid "O horário final precisa ser depois do inicial."
+msgid "The end time must be after the start time."
 msgstr "La hora final debe ser posterior a la inicial."
 
-msgid "Arquivo"
+msgid "File"
 msgstr "Archivo"
 
-msgid "PDF, JPG ou PNG, até 10 MB."
+msgid "PDF, JPG or PNG, up to 10 MB."
 msgstr "PDF, JPG o PNG, hasta 10 MB."
 
-msgid "Por exemplo: hemograma de março."
+msgid "For example: March blood count."
 msgstr "Por ejemplo: hemograma de marzo."
 
-msgid "O arquivo passa de 10 MB."
+msgid "The file is larger than 10 MB."
 msgstr "El archivo supera los 10 MB."
 
-msgid "Envie um arquivo PDF, JPG ou PNG."
+msgid "Send a PDF, JPG or PNG file."
 msgstr "Envíe un archivo PDF, JPG o PNG."
 
-msgid "agendamento"
+msgid "appointment"
 msgstr "cita"
 
-msgid "data do atendimento"
+msgid "visit date"
 msgstr "fecha de la consulta"
 
-msgid "queixa principal"
+msgid "chief complaint"
 msgstr "motivo de consulta"
 
-msgid "história da doença atual"
+msgid "history of present illness"
 msgstr "enfermedad actual"
 
-msgid "antecedentes"
+msgid "history"
 msgstr "antecedentes"
 
-msgid "Pessoais e familiares, medicamentos em uso, alergias."
+msgid "Personal and family, current medications, allergies."
 msgstr "Personales y familiares, medicamentos en uso, alergias."
 
-msgid "exame físico"
+msgid "physical examination"
 msgstr "examen físico"
 
-msgid "conduta e plano"
+msgid "management and plan"
 msgstr "conducta y plan"
 
-msgid "finalizado em"
+msgid "finalized on"
 msgstr "finalizada el"
 
-msgid "finalizado por"
+msgid "finalized by"
 msgstr "finalizado por"
 
-msgid "atendimento"
+msgid "visit"
 msgstr "consulta"
 
-msgid "atendimentos"
+msgid "visits"
 msgstr "consultas"
 
-msgid "adendo"
+msgid "addendum"
 msgstr "adenda"
 
-msgid "adendos"
+msgid "addenda"
 msgstr "adendas"
 
-msgid "Comparecimento"
+msgid "Attendance"
 msgstr "Asistencia"
 
-msgid "Afastamento"
+msgid "Leave from activities"
 msgstr "Reposo"
 
-msgid "das"
+msgid "from"
 msgstr "de las"
 
-msgid "às"
+msgid "to"
 msgstr "a las"
 
-msgid "dias de afastamento"
+msgid "days of leave"
 msgstr "días de reposo"
 
-msgid "Só para afastamento."
+msgid "Only for leave."
 msgstr "Solo para reposo."
 
-msgid "Aparece no atestado. Por exemplo: deve permanecer em repouso."
+msgid "Appears on the certificate. For example: must stay at rest."
 msgstr "Aparece en el certificado. Por ejemplo: debe guardar reposo."
 
-msgid "atestado"
+msgid "certificate"
 msgstr "certificado"
 
-msgid "atestados"
+msgid "certificates"
 msgstr "certificados"
 
-msgid "medicamentos e como usar"
+msgid "medicines and how to use them"
 msgstr "medicamentos y cómo usarlos"
 
-msgid "Um item por linha: medicamento, dose e como usar."
+msgid "One item per line: medicine, dose and how to use it."
 msgstr "Un ítem por línea: medicamento, dosis y cómo usarlo."
 
-msgctxt "prescrição"
-msgid "receita"
+msgctxt "prescription"
+msgid "prescription"
 msgstr "receta"
 
-msgctxt "prescrição"
-msgid "receitas"
+msgctxt "prescription"
+msgid "prescriptions"
 msgstr "recetas"
 
-msgid "exames"
+msgid "exams"
 msgstr "exámenes"
 
-msgid "Um exame por linha."
+msgid "One exam per line."
 msgstr "Un examen por línea."
 
-msgid "indicação clínica"
+msgid "clinical indication"
 msgstr "indicación clínica"
 
-msgid "Aparece no pedido."
+msgid "Appears on the request."
 msgstr "Aparece en la solicitud."
 
-msgid "pedido de exames"
+msgid "exam request"
 msgstr "solicitud de exámenes"
 
-msgid "pedidos de exames"
+msgid "exam requests"
 msgstr "solicitudes de exámenes"
 
-msgid "tamanho"
+msgid "size"
 msgstr "tamaño"
 
-msgid "conteúdo"
+msgid "content"
 msgstr "contenido"
 
-msgid "anexo"
+msgid "attachment"
 msgstr "adjunto"
 
-msgid "anexos"
+msgid "attachments"
 msgstr "adjuntos"
 
-msgid ""
-"Atendimento finalizado. A partir de agora, correções são feitas por adendo."
+msgid "Visit finalized. From now on, corrections are made by addendum."
 msgstr ""
 "Consulta finalizada. A partir de ahora, las correcciones se hacen por adenda."
 
-msgid "Atendimento salvo."
+msgid "Visit saved."
 msgstr "Consulta guardada."
 
-msgid "Atestado emitido."
+msgid "Certificate issued."
 msgstr "Certificado emitido."
 
-msgid "Emitir atestado"
+msgid "Issue certificate"
 msgstr "Emitir certificado"
 
-msgid "Receita emitida."
+msgid "Prescription issued."
 msgstr "Receta emitida."
 
-msgid "Emitir receita"
+msgid "Issue prescription"
 msgstr "Emitir receta"
 
-msgid "Adendo incluído."
+msgid "Addendum added."
 msgstr "Adenda agregada."
 
-msgid "Escreva o adendo."
+msgid "Write the addendum."
 msgstr "Escriba la adenda."
 
-msgid "Pedido de exames emitido."
+msgid "Exam request issued."
 msgstr "Solicitud de exámenes emitida."
 
-msgid "Pedir exames"
+msgid "Request exams"
 msgstr "Solicitar exámenes"
 
-msgid "Contas de demonstração não enviam anexos."
+msgid "Demo accounts cannot upload attachments."
 msgstr "Las cuentas de demostración no envían adjuntos."
 
-msgid "Anexo incluído."
+msgid "Attachment added."
 msgstr "Adjunto agregado."
 
-msgid "Anexo removido."
+msgid "Attachment removed."
 msgstr "Adjunto eliminado."
 
-msgid "Processador"
+msgid "Processor"
 msgstr "Procesador"
 
-msgid "em uso"
+msgid "in use"
 msgstr "en uso"
 
-msgid "tomado por outras máquinas"
+msgid "taken by other machines"
 msgstr "tomado por otras máquinas"
 
-msgid "Memória"
+msgid "Memory"
 msgstr "Memoria"
 
-msgid "memória em uso"
+msgid "memory in use"
 msgstr "memoria en uso"
 
-msgid "swap em uso"
+msgid "swap in use"
 msgstr "swap en uso"
 
-msgid "Disco"
+msgid "Disk"
 msgstr "Disco"
 
-msgid "Rede"
+msgid "Network"
 msgstr "Red"
 
-msgid "recebido por segundo"
+msgid "received per second"
 msgstr "recibido por segundo"
 
-msgid "enviado por segundo"
+msgid "sent per second"
 msgstr "enviado por segundo"
 
-msgid "UF"
+msgid "State"
 msgstr "Estado"
 
-msgid "Cidade"
+msgid "City"
 msgstr "Ciudad"
 
-msgid "Celular"
+msgid "Mobile"
 msgstr "Celular"
 
-msgid "Telefone residencial"
+msgid "Home phone"
 msgstr "Teléfono de casa"
 
-msgid "Telefone comercial"
+msgid "Work phone"
 msgstr "Teléfono del trabajo"
 
-msgid "A data de nascimento não pode estar no futuro."
+msgid "The birth date cannot be in the future."
 msgstr "La fecha de nacimiento no puede estar en el futuro."
 
 msgid ""
-"Este documento é de um paciente arquivado. Peça ao administrador da clínica "
-"para restaurá-lo."
+"This document belongs to an archived patient. Ask the clinic administrator "
+"to restore them."
 msgstr ""
 "Este documento es de un paciente archivado. Pida al administrador de la "
 "clínica que lo restaure."
 
-msgid "Já existe um paciente com este documento nesta clínica."
+msgid "A patient with this document already exists in this clinic."
 msgstr "Ya existe un paciente con este documento en esta clínica."
 
-msgid "A cidade não pertence à UF escolhida."
+msgid "The city is not in the chosen state."
 msgstr "La ciudad no pertenece al estado elegido."
 
-#
-msgid "Só para quem não é paciente da clínica."
+msgid "Only for someone who is not a patient of the clinic."
 msgstr "Solo para quien no es paciente de la clínica."
 
-#
-msgid "Escolha um paciente ou digite um nome, não os dois."
+msgid "Choose a patient or type a name, not both."
 msgstr "Elija un paciente o escriba un nombre, no ambos."
 
-#
-msgid "Escolha um paciente da clínica ou digite o nome."
+msgid "Choose a patient of the clinic or type the name."
 msgstr "Elija un paciente de la clínica o escriba el nombre."
 
-#
-msgid "Este vínculo já está cadastrado."
+msgid "This relationship is already registered."
 msgstr "Este vínculo ya está registrado."
 
-msgid "Feminino"
+msgid "Female"
 msgstr "Femenino"
 
-msgid "Masculino"
+msgid "Male"
 msgstr "Masculino"
 
-msgid "Outro"
+msgid "Other"
 msgstr "Otro"
 
-msgid "Pode ser digitado com ou sem pontuação."
+msgid "May be typed with or without punctuation."
 msgstr "Puede escribirse con o sin puntuación."
 
-msgid "RG"
+msgid "ID card (RG)"
 msgstr "Documento de identidad (RG)"
 
-msgid "inscrição estadual"
+msgid "state registration"
 msgstr "inscripción estatal"
 
-msgid "sexo"
+msgid "sex"
 msgstr "sexo"
 
-msgid "data de nascimento"
+msgid "birth date"
 msgstr "fecha de nacimiento"
 
-msgid "estado civil"
+msgid "marital status"
 msgstr "estado civil"
 
-msgid "profissão"
+msgid "occupation"
 msgstr "profesión"
 
-msgid "responsável"
+msgid "guardian"
 msgstr "responsable"
 
-msgid "Para menores de idade, por exemplo."
+msgid "For minors, for example."
 msgstr "Para menores de edad, por ejemplo."
 
-msgid "celular"
+msgid "mobile"
 msgstr "celular"
 
-msgid "Com DDD. A ficha abre a conversa direto no WhatsApp."
+msgid ""
+"With the area code. The patient record opens the chat straight in WhatsApp."
 msgstr ""
 "Con el código de área. La ficha abre la conversación directamente en "
 "WhatsApp."
 
-msgid "telefone residencial"
+msgid "home phone"
 msgstr "teléfono de casa"
 
-msgid "telefone comercial"
+msgid "work phone"
 msgstr "teléfono del trabajo"
 
-msgid "cidade"
+msgid "city"
 msgstr "ciudad"
 
-msgid "estado ou província"
+msgid "state or province"
 msgstr "estado o provincia"
 
-msgid "bairro"
+msgid "district"
 msgstr "barrio"
 
-msgid "Rua, avenida…"
+msgid "Street, avenue…"
 msgstr "Calle, avenida…"
 
-msgid "complemento"
+msgid "complement"
 msgstr "complemento"
 
-msgid "arquivado"
+msgid "archived"
 msgstr "archivado"
 
-msgid "arquivado em"
+msgid "archived at"
 msgstr "archivado el"
 
-msgid "arquivado por"
+msgid "archived by"
 msgstr "archivado por"
 
-msgid "cadastrado em"
+msgid "registered at"
 msgstr "registrado el"
 
-msgid "pacientes"
+msgid "patients"
 msgstr "pacientes"
 
-msgid "Mãe"
+msgid "Mother"
 msgstr "Madre"
 
-#
-msgid "Pai"
+msgid "Father"
 msgstr "Padre"
 
-#
-msgid "Responsável legal"
+msgid "Legal guardian"
 msgstr "Responsable legal"
 
-msgid "Cônjuge"
+msgid "Spouse"
 msgstr "Cónyuge"
 
-msgid "Filho(a)"
+msgid "Child"
 msgstr "Hijo(a)"
 
-msgid "Irmão(ã)"
+msgid "Sibling"
 msgstr "Hermano(a)"
 
-msgid "Avô/avó"
+msgid "Grandparent"
 msgstr "Abuelo(a)"
 
-msgid "Neto(a)"
+msgid "Grandchild"
 msgstr "Nieto(a)"
 
-#
-msgid "Outro parente"
+msgid "Other relative"
 msgstr "Otro pariente"
 
-#
-msgid "Contato de emergência"
+msgid "Emergency contact"
 msgstr "Contacto de emergencia"
 
-msgid "Contato"
+msgid "Contact"
 msgstr "Contacto"
 
-msgid "vínculo"
+msgid "relationship"
 msgstr "vínculo"
 
-#
-msgid "paciente da clínica"
+msgid "clinic patient"
 msgstr "paciente de la clínica"
 
-msgid "pessoa relacionada"
+msgid "related person"
 msgstr "persona relacionada"
 
-msgid "pessoas relacionadas"
+msgid "related people"
 msgstr "personas relacionadas"
 
 #, python-format
-msgid "Paciente %(nome)s salvo."
+msgid "Patient %(nome)s saved."
 msgstr "Paciente %(nome)s guardado."
 
-msgid "Resolva as contas em aberto do paciente antes de arquivá-lo."
+msgid "Settle the patient's open entries before archiving them."
 msgstr "Resuelva las cuentas pendientes del paciente antes de archivarlo."
 
 #, python-format
 msgid ""
-"Paciente %(nome)s arquivado. O histórico continua guardado e ele pode ser "
-"restaurado na lista de pacientes, em Situação: Arquivados."
+"Patient %(nome)s archived. The history is kept, and the patient can be "
+"restored from the patient list, under Status: Archived."
 msgstr ""
 "Paciente %(nome)s archivado. El historial sigue guardado y puede restaurarse "
 "en la lista de pacientes, en Situación: Archivados."
 
 #, python-format
-msgid "Paciente %(nome)s restaurado."
+msgid "Patient %(nome)s restored."
 msgstr "Paciente %(nome)s restaurado."
 
-msgid "Paciente com prontuário não pode ser excluído."
+msgid "A patient with a medical record cannot be deleted."
 msgstr "Un paciente con historia clínica no puede eliminarse."
 
 #, python-format
-msgid "Os dados do paciente de código %(codigo)s foram excluídos."
+msgid "The data of patient code %(codigo)s was deleted."
 msgstr "Los datos del paciente de código %(codigo)s fueron eliminados."
 
-#
-msgid "Pessoa relacionada salva."
+msgid "Related person saved."
 msgstr "Persona relacionada guardada."
 
-msgid "Pessoa relacionada removida."
+msgid "Related person removed."
 msgstr "Persona relacionada eliminada."
 
-msgid "Este usuário já está ligado a outro profissional desta clínica."
+msgid "This user is already linked to another practitioner in this clinic."
 msgstr "Este usuario ya está vinculado a otro profesional de esta clínica."
 
-msgid "registro profissional"
+msgid "professional license"
 msgstr "registro profesional"
 
-msgid "cor na agenda"
+msgid "schedule color"
 msgstr "color en la agenda"
 
-msgid "usuário de acesso"
+msgid "login user"
 msgstr "usuario de acceso"
 
-msgid "Conta usada por este profissional para entrar no sistema (opcional)."
+msgid "Account this practitioner uses to log in (optional)."
 msgstr "Cuenta que este profesional usa para entrar al sistema (opcional)."
 
-msgid "comissão (%)"
+msgid "commission (%)"
 msgstr "comisión (%)"
 
-msgid "Percentual sobre o valor recebido dos lançamentos deste profissional."
+msgid "Percentage of the amount received on this practitioner's entries."
 msgstr ""
 "Porcentaje sobre el valor cobrado de los registros de este profesional."
 
-msgid "profissionais"
+msgid "practitioners"
 msgstr "profesionales"
 
 #, python-format
-msgid "Profissional %(nome)s salvo."
+msgid "Practitioner %(nome)s saved."
 msgstr "Profesional %(nome)s guardado."
 
 #, python-format
 msgid ""
-"%(nome)s tem registros ligados e não pode ser excluído. Desmarque “ativo” "
-"para escondê-lo."
+"%(nome)s has linked records and cannot be deleted. Uncheck “active” to hide "
+"it."
 msgstr ""
 "%(nome)s tiene registros vinculados y no se puede eliminar. Desmarque "
 "“activo” para ocultarlo."
 
 #, python-format
-msgid "Profissional %(nome)s excluído."
+msgid "Practitioner %(nome)s deleted."
 msgstr "Profesional %(nome)s eliminado."
 
-msgid "Ex.: revisão de 6 meses."
+msgid "E.g.: 6-month check-up."
 msgstr "Ej.: revisión de 6 meses."
 
-msgid "concluída"
+msgid "done"
 msgstr "completado"
 
-msgid "rechamada"
+msgid "recall"
 msgstr "recordatorio"
 
-msgid "rechamadas"
+msgid "recalls"
 msgstr "recordatorios"
 
 #, python-format
-msgid "Rechamada de %(nome)s salva."
+msgid "Recall for %(nome)s saved."
 msgstr "Recordatorio de %(nome)s guardado."
 
 #, python-format
-msgid "Rechamada de %(nome)s concluída."
+msgid "Recall for %(nome)s marked as done."
 msgstr "Recordatorio de %(nome)s completado."
 
 #, python-format
-msgid "Rechamada de %(nome)s reaberta."
+msgid "Recall for %(nome)s reopened."
 msgstr "Recordatorio de %(nome)s reabierto."
 
 #, python-format
-msgid "Rechamada de %(nome)s excluída."
+msgid "Recall for %(nome)s deleted."
 msgstr "Recordatorio de %(nome)s eliminado."
 
-msgid "Parâmetros inválidos."
+msgid "Invalid parameters."
 msgstr "Parámetros no válidos."
 
-msgid "Data inválida."
+msgid "Invalid date."
 msgstr "Fecha no válida."
 
-msgid "Tabelas de referência"
+msgid "Reference tables"
 msgstr "Tablas de referencia"
 
-msgid "código IBGE"
+msgctxt "field"
+msgid "IBGE code"
 msgstr "código IBGE"
 
-msgid "sigla"
+msgid "abbreviation"
 msgstr "sigla"
 
-msgid "região"
+msgid "region"
 msgstr "región"
 
-msgid "UFs"
+msgid "states"
 msgstr "estados"
 
-msgid "cidades"
+msgid "cities"
 msgstr "ciudades"
 
 msgid "ISPB"
 msgstr "ISPB"
 
-msgid "nome curto"
+msgid "short name"
 msgstr "nombre corto"
 
-msgid "banco"
+msgid "bank"
 msgstr "banco"
 
-msgid "bancos"
+msgid "banks"
 msgstr "bancos"
 
-msgid "ordem"
+msgid "order"
 msgstr "orden"
 
-msgid "estados civis"
+msgid "marital statuses"
 msgstr "estados civiles"
 
-#
-msgid "bairros"
+msgid "neighborhoods"
 msgstr "barrios"
 
-msgid "logradouro"
+msgid "street"
 msgstr "calle"
 
-msgid "logradouros"
+msgid "streets"
 msgstr "calles"
 
-msgid "Já existe um tipo de atendimento com este nome."
+msgid "An appointment type with this name already exists."
 msgstr "Ya existe un tipo de atención con este nombre."
 
-msgid "Data"
+msgid "Date"
 msgstr "Fecha"
 
-msgctxt "hora"
-msgid "Início"
+msgctxt "time"
+msgid "Start"
 msgstr "Inicio"
 
-msgid "Fim"
+msgid "End"
 msgstr "Fin"
 
-msgid "Repetir por quantas semanas"
+msgid "Repeat for how many weeks"
 msgstr "Repetir durante cuántas semanas"
 
 msgid ""
-"1 = somente nesta data. Ex.: 4 cria o mesmo horário por 4 semanas seguidas."
+"1 = only on this date. E.g.: 4 creates the same time slot for 4 weeks in a "
+"row."
 msgstr ""
 "1 = solo en esta fecha. Ej.: 4 crea el mismo horario durante 4 semanas "
 "seguidas."
 
-msgid "Informe o paciente ou uma descrição."
+msgid "Enter the patient or a description."
 msgstr "Indique el paciente o una descripción."
 
 msgid ""
-"Este agendamento foi desmarcado. Para pôr outro paciente neste horário, use "
-"“Agendar outro paciente neste horário”."
+"This appointment was cancelled. To put another patient at this time, use "
+"“Book another patient at this time”."
 msgstr ""
 "Esta cita fue cancelada. Para poner otro paciente en este horario, use "
 "“Agendar otro paciente en este horario”."
 
-msgid "O fim deve ser depois do início."
+msgid "The end must be after the start."
 msgstr "El fin debe ser posterior al inicio."
 
 #, python-format
-msgid "Use horários de %(n)s em %(n)s minutos."
+msgid "Use times in steps of %(n)s minutes."
 msgstr "Use horarios de %(n)s en %(n)s minutos."
 
 #, python-format
-msgid "Fora do horário de atendimento da clínica (%(inicio)s às %(fim)s)."
+msgid "Outside the clinic's opening hours (%(inicio)s to %(fim)s)."
 msgstr "Fuera del horario de atención de la clínica (de %(inicio)s a %(fim)s)."
 
 #, python-format
-msgid "e mais %(n)s"
+msgid "and %(n)s more"
 msgstr "y %(n)s más"
 
 #, python-format
-msgid "Conflito de horário com: %(lista)s. Nada foi gravado."
+msgid "Time conflict with: %(lista)s. Nothing was saved."
 msgstr "Conflicto de horario con: %(lista)s. No se guardó nada."
 
-msgctxt "tipo de atendimento"
-msgid "Liberado"
+msgctxt "appointment type"
+msgid "Available"
 msgstr "Disponible"
 
-msgctxt "tipo de atendimento"
-msgid "Consulta"
+msgctxt "appointment type"
+msgid "Consultation"
 msgstr "Consulta"
 
-msgctxt "tipo de atendimento"
-msgid "Retorno"
+msgctxt "appointment type"
+msgid "Follow-up"
 msgstr "Control"
 
-msgctxt "tipo de atendimento"
-msgid "Exame"
+msgctxt "appointment type"
+msgid "Exam"
 msgstr "Examen"
 
-msgctxt "tipo de atendimento"
-msgid "Procedimento"
+msgctxt "appointment type"
+msgid "Procedure"
 msgstr "Procedimiento"
 
-msgctxt "tipo de atendimento"
-msgid "Atendimento de 15 em 15"
+msgctxt "appointment type"
+msgid "15-minute appointments"
 msgstr "Citas de 15 minutos"
 
-msgctxt "tipo de atendimento"
-msgid "Ocupado"
+msgctxt "appointment type"
+msgid "Busy"
 msgstr "Ocupado"
 
-msgctxt "tipo de atendimento"
-msgid "Cirurgia"
+msgctxt "appointment type"
+msgid "Surgery"
 msgstr "Cirugía"
 
-msgctxt "tipo de atendimento"
-msgid "Dentística"
+msgctxt "appointment type"
+msgid "Restorative dentistry"
 msgstr "Odontología restauradora"
 
-msgctxt "tipo de atendimento"
-msgid "Periodontia"
+msgctxt "appointment type"
+msgid "Periodontics"
 msgstr "Periodoncia"
 
-msgctxt "tipo de atendimento"
-msgid "Consulta inicial"
+msgctxt "appointment type"
+msgid "First visit"
 msgstr "Primera consulta"
 
-msgctxt "tipo de atendimento"
-msgid "Prótese"
+msgctxt "appointment type"
+msgid "Prosthodontics"
 msgstr "Prótesis"
 
-msgctxt "tipo de atendimento"
-msgid "Endodontia"
+msgctxt "appointment type"
+msgid "Endodontics"
 msgstr "Endodoncia"
 
-msgctxt "tipo de atendimento"
-msgid "Ortodontia"
+msgctxt "appointment type"
+msgid "Orthodontics"
 msgstr "Ortodoncia"
 
-msgid "cor"
+msgid "color"
 msgstr "color"
 
-msgid "tipo de atendimento"
+msgid "appointment type"
 msgstr "tipo de atención"
 
-msgid "tipos de atendimento"
+msgid "appointment types"
 msgstr "tipos de atención"
 
-msgid "Agendado"
+msgid "Booked"
 msgstr "Agendada"
 
-msgid "Compareceu"
+msgid "Came"
 msgstr "Asistió"
 
-msgid "Faltou"
+msgid "Missed"
 msgstr "Faltó"
 
-msgid "Desmarcou"
+msgctxt "appointment"
+msgid "Cancelled"
 msgstr "Canceló"
 
-msgid "série"
+msgid "series"
 msgstr "serie"
 
-msgid "agendamentos"
+msgid "appointments"
 msgstr "citas"
 
-msgid "O profissional já tem um agendamento neste horário."
+msgid "The practitioner already has an appointment at this time."
 msgstr "El profesional ya tiene una cita en este horario."
 
-msgid "Horário reservado"
+msgid "Reserved slot"
 msgstr "Horario reservado"
 
-msgid "Situação inválida."
+msgid "Invalid status."
 msgstr "Situación inválida."
 
-msgid "Só agendamentos com paciente têm situação."
+msgid "Only appointments with a patient have a status."
 msgstr "Solo las citas con paciente tienen situación."
 
-msgid ""
-"Comparecimento e falta só podem ser marcados a partir do dia do atendimento."
+msgid "Came or missed can only be marked from the day of the appointment on."
 msgstr ""
 "La asistencia y la falta solo se pueden marcar a partir del día de la cita."
 
 msgid ""
-"Este horário já foi ocupado por outro agendamento. Desmarque aquele antes."
+"This time slot has already been taken by another appointment. Cancel that "
+"one first."
 msgstr "Este horario ya fue ocupado por otra cita. Cancele aquella antes."
 
 #, python-format
-msgid "Tipo de atendimento %(nome)s salvo."
+msgid "Appointment type %(nome)s saved."
 msgstr "Tipo de atención %(nome)s guardado."
 
 #, python-format
 msgid ""
-"%(nome)s já foi usado em agendamentos e não pode ser excluído. Desmarque "
-"“ativo” para escondê-lo."
+"%(nome)s has been used in appointments and cannot be deleted. Uncheck "
+"“active” to hide it."
 msgstr ""
 "%(nome)s ya se usó en citas y no se puede eliminar. Desmarque “activo” para "
 "ocultarlo."
 
 #, python-format
-msgid "Tipo de atendimento %(nome)s excluído."
+msgid "Appointment type %(nome)s deleted."
 msgstr "Tipo de atención %(nome)s eliminado."
 
-msgid "aniversariante(s)"
+msgid "birthday(s)"
 msgstr "cumpleaños"
 
-msgid "rechamada(s) pendente(s)"
+msgid "pending recall(s)"
 msgstr "recordatorio(s) pendiente(s)"
 
-msgid "Outro agendamento acabou de ocupar este horário. Nada foi gravado."
+msgid "Another appointment has just taken this time slot. Nothing was saved."
 msgstr "Otra cita acaba de ocupar este horario. No se guardó nada."
 
 #, python-format
-msgid "Agendamento criado."
-msgid_plural "%(n)s agendamentos criados."
+msgid "Appointment created."
+msgid_plural "%(n)s appointments created."
 msgstr[0] "Cita creada."
 msgstr[1] "%(n)s citas creadas."
 
-msgid "Agendamento alterado."
+msgid "Appointment changed."
 msgstr "Cita modificada."
 
 #, python-format
-msgid "%(nome)s: marcação de presença desfeita."
+msgid "%(nome)s: attendance mark undone."
 msgstr "%(nome)s: marca de asistencia deshecha."
 
 #, python-format
-msgid "%(nome)s compareceu."
+msgid "%(nome)s came."
 msgstr "%(nome)s asistió."
 
 #, python-format
-msgid "%(nome)s faltou."
+msgid "%(nome)s missed the appointment."
 msgstr "%(nome)s faltó."
 
 #, python-format
-msgid "%(nome)s desmarcou. O horário ficou livre."
+msgid "%(nome)s cancelled. The time slot is free."
 msgstr "%(nome)s canceló. El horario quedó libre."
 
 #, python-format
-msgid "Agendamento excluído."
-msgid_plural "%(n)s agendamentos excluídos."
+msgid "Appointment deleted."
+msgid_plural "%(n)s appointments deleted."
 msgstr[0] "Cita eliminada."
 msgstr[1] "%(n)s citas eliminadas."
 
-#
-msgid "Salário"
+msgid "Salary"
 msgstr "Salario"
 
-msgid "Salário a partir de"
+msgid "Salary from"
 msgstr "Salario a partir de"
 
-#
-msgid "Novo salário"
+msgid "New salary"
 msgstr "Nuevo salario"
 
-#
-msgid "Só para um aumento ou mudança: o anterior fica no histórico."
+msgid "Only for a raise or change: the previous one stays in the history."
 msgstr "Solo para un aumento o cambio: el anterior queda en el historial."
 
-msgid "Em branco: a data de admissão ou hoje."
+msgid "Blank: the hiring date, or today."
 msgstr "En blanco: la fecha de ingreso u hoy."
 
-#
-msgid "Já existe um funcionário com este documento."
+msgid "An employee with this document already exists."
 msgstr "Ya existe un empleado con este documento."
 
-msgid "Informe a partir de quando vale o novo salário."
+msgid "Enter from when the new salary applies."
 msgstr "Indique desde cuándo vale el nuevo salario."
 
-#
-msgid "O desligamento não pode ser antes da admissão."
+msgid "The leaving date cannot be before the hiring date."
 msgstr "La baja no puede ser antes del ingreso."
 
-msgid "Horas extras"
+msgid "Overtime"
 msgstr "Horas extras"
 
-#
-msgid "Valor da hora extra"
+msgid "Overtime hourly rate"
 msgstr "Valor de la hora extra"
 
-msgid "No máximo 30 dias de falta."
+msgid "At most 30 days of absence."
 msgstr "Como máximo 30 días de ausencia."
 
-msgid "cargo"
+msgid "job title"
 msgstr "cargo"
 
-#
-msgid "admissão"
+msgid "hiring date"
 msgstr "ingreso"
 
-#
-msgid "desligamento"
+msgid "leaving date"
 msgstr "baja"
 
-#
-msgid "funcionário"
+msgid "employee"
 msgstr "empleado"
 
-#
-msgid "funcionários"
+msgid "employees"
 msgstr "empleados"
 
-#
-msgid "salário"
+msgid "salary"
 msgstr "salario"
 
-msgid "desde"
+msgid "since"
 msgstr "desde"
 
-#
-msgid "salários"
+msgid "salaries"
 msgstr "salarios"
 
-msgid "competência"
+msgid "month"
 msgstr "mes"
 
-msgid "O primeiro dia do mês."
+msgid "The first day of the month."
 msgstr "El primer día del mes."
 
-msgid "horas extras"
+msgid "overtime hours"
 msgstr "horas extras"
 
-#
-msgid "valor da hora extra"
+msgid "overtime hourly rate"
 msgstr "valor de la hora extra"
 
-#
-msgid "dias de falta"
+msgid "days of absence"
 msgstr "días de ausencia"
 
-#
-#
-msgid "conta a pagar"
+msgctxt "account"
+msgid "payable"
 msgstr "cuenta por pagar"
 
-#
-msgid "folha do mês"
+msgid "month's pay"
 msgstr "sueldos del mes"
 
-#
-msgid "folhas do mês"
+msgid "months' pay"
 msgstr "sueldos de los meses"
 
 #, python-format
-msgid "O total de %(nome)s precisa ser maior que zero."
+msgid "The total for %(nome)s must be greater than zero."
 msgstr "El total de %(nome)s debe ser mayor que cero."
 
 #, python-format
-msgid "Salário %(mes)s"
+msgid "Salary %(mes)s"
 msgstr "Salario %(mes)s"
 
 #, python-format
-msgid "Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s."
+msgid "Salary %(salario)s + overtime %(extras)s − absences %(faltas)s."
 msgstr "Salario %(salario)s + horas extras %(extras)s − ausencias %(faltas)s."
 
-#
-msgid "Folha salva."
+msgid "Pay saved."
 msgstr "Sueldos guardados."
 
 #, python-format
-msgid "%(n)s conta a pagar criada no financeiro."
-msgid_plural "%(n)s contas a pagar criadas no financeiro."
+msgid "%(n)s payable created in finance."
+msgid_plural "%(n)s payables created in finance."
 msgstr[0] "%(n)s cuenta por pagar creada en el financiero."
 msgstr[1] "%(n)s cuentas por pagar creadas en el financiero."
 
-msgid "Equipe"
+msgid "Team"
 msgstr "Equipo"
 
-msgid "Perfil"
+msgid "Role"
 msgstr "Perfil"
 
-msgid "Acesso a esta clínica liberado"
+msgid "Access to this clinic allowed"
 msgstr "Acceso a esta clínica habilitado"
 
-msgid "Você não pode alterar o próprio perfil."
+msgid "You cannot change your own role."
 msgstr "No puede cambiar su propio perfil."
 
-msgid "A clínica precisa de pelo menos um administrador ativo."
+msgid "The clinic needs at least one active administrator."
 msgstr "La clínica necesita al menos un administrador activo."
 
 #, python-format
-msgid "%(nome)s agora faz parte da equipe."
+msgid "%(nome)s is now part of the team."
 msgstr "%(nome)s ahora forma parte del equipo."
 
 #, python-format
-msgid "Dados de %(nome)s salvos."
+msgid "%(nome)s's details saved."
 msgstr "Datos de %(nome)s guardados."
 
 #, python-format
 msgid ""
-"%(nome)s também tem acesso a outra clínica ou à plataforma: a senha só pode "
-"ser trocada pelo próprio usuário ou pelo suporte."
+"%(nome)s also has access to another clinic or to the platform: the password "
+"can only be changed by the user or by support."
 msgstr ""
 "%(nome)s también tiene acceso a otra clínica o a la plataforma: la "
 "contraseña solo puede cambiarla el propio usuario o el soporte."
 
 #, python-format
-msgid "Nova senha de %(nome)s definida."
+msgid "New password set for %(nome)s."
 msgstr "Nueva contraseña de %(nome)s definida."
 
 #, python-format
-msgid "Verificação em duas etapas de %(nome)s removida."
+msgid "Two-step verification of %(nome)s removed."
 msgstr "Verificación en dos pasos de %(nome)s quitada."
 
-msgid "Novidades"
+msgid "What's new"
 msgstr "Novedades"
 
-msgid "Novo"
+msgid "New"
 msgstr "Nuevo"
 
-msgid "Melhoria"
+msgid "Improvement"
 msgstr "Mejora"
 
-msgid "Correção"
+msgid "Fix"
 msgstr "Corrección"
 
-msgid "Segurança"
+msgid "Security"
 msgstr "Seguridad"
 
-msgid "Acesso"
+msgid "Access"
 msgstr "Acceso"
 
-msgid "Cadastros"
+msgid "Records"
 msgstr "Registros"
 
-msgid "Clínica"
+msgid "Clinic"
 msgstr "Clínica"
 
-msgid "Clínicas"
+msgid "Clinics"
 msgstr "Clínicas"
 
-msgid "Documentação"
+msgid "Documentation"
 msgstr "Documentación"
 
-msgid "Geral"
+msgid "General"
 msgstr "General"
 
-msgid "Idioma"
+msgid "Language"
 msgstr "Idioma"
 
-msgid "Permissões"
+msgid "Permissions"
 msgstr "Permisos"
 
-msgid "Sistema"
+msgid "System"
 msgstr "Sistema"
 
-msgid "Tipos de atendimento"
+msgid "Appointment types"
 msgstr "Tipos de atención"
 
-msgid "Acesso negado"
+msgid "Access denied"
 msgstr "Acceso denegado"
 
 msgid ""
-"Você não tem permissão para acessar esta página. Se precisar desse acesso, "
-"fale com o administrador da clínica."
+"You do not have permission to access this page. If you need this access, "
+"talk to the clinic administrator."
 msgstr ""
 "No tiene permiso para acceder a esta página. Si necesita este acceso, hable "
 "con el administrador de la clínica."
 
-msgid "Voltar ao início"
+msgid "Back to home"
 msgstr "Volver al inicio"
 
-msgid "Página não encontrada"
+msgid "Page not found"
 msgstr "Página no encontrada"
 
-msgid "O endereço não existe ou o registro não pertence à clínica atual."
+msgid ""
+"The address does not exist or the record does not belong to the current "
+"clinic."
 msgstr "La dirección no existe o el registro no pertenece a la clínica actual."
 
-msgid "Verificação em duas etapas"
+msgid "Two-step verification"
 msgstr "Verificación en dos pasos"
 
 msgid ""
-"Digite o código de 6 números que aparece no aplicativo autenticador do seu "
-"celular. Sem o celular, use um dos códigos de recuperação."
+"Type the 6-digit code shown by the authenticator app on your phone. Without "
+"the phone, use one of the recovery codes."
 msgstr ""
 "Escriba el código de 6 números que aparece en la aplicación autenticadora de "
 "su celular. Sin el celular, use uno de los códigos de recuperación."
 
-msgid "Entrar"
+msgid "Log in"
 msgstr "Entrar"
 
-msgid "Voltar"
+msgid "Back"
 msgstr "Volver"
 
-#
-msgid "Códigos de recuperação"
+msgid "Recovery codes"
 msgstr "Códigos de recuperación"
 
-msgid "Verificação em duas etapas ativada."
+msgid "Two-step verification turned on."
 msgstr "Verificación en dos pasos activada."
 
 msgid ""
-"Guarde estes códigos num lugar seguro, fora do celular (imprima ou anote). "
-"Cada um entra uma vez no lugar do código do aplicativo, se o celular for "
-"perdido. Eles não aparecem de novo."
+"Keep these codes in a safe place, away from the phone (print or write them "
+"down). Each one logs in once instead of the app's code, if the phone is "
+"lost. They are not shown again."
 msgstr ""
 "Guarde estos códigos en un lugar seguro, fuera del celular (imprímalos o "
 "anótelos). Cada uno sirve una vez en lugar del código de la aplicación, si "
 "se pierde el celular. No vuelven a aparecer."
 
-msgid "Imprimir"
+msgid "Print"
 msgstr "Imprimir"
 
-msgid "Já guardei"
+msgid "I have kept them"
 msgstr "Ya los guardé"
 
-msgid "Nova senha"
+msgid "New password"
 msgstr "Nueva contraseña"
 
-msgid "Salvar"
+msgid "Save"
 msgstr "Guardar"
 
-msgid "Este link não vale mais: ele já foi usado ou passou de 1 hora."
+msgid ""
+"This link no longer works: it was already used or more than 1 hour went by."
 msgstr "Este enlace ya no vale: ya fue usado o pasó más de 1 hora."
 
-msgid "Pedir outro link"
+msgid "Ask for another link"
 msgstr "Pedir otro enlace"
 
-#
-#
-msgid "Senha salva"
+msgid "Password saved"
 msgstr "Contraseña guardada"
 
-msgid "Agora entre com a senha nova."
+msgid "Now log in with the new password."
 msgstr "Ahora ingrese con la contraseña nueva."
 
-msgid "Esqueci minha senha"
+msgid "Forgot my password"
 msgstr "Olvidé mi contraseña"
 
 msgid ""
-"Informe o e-mail da sua conta. Se ele estiver cadastrado, você recebe um "
-"link para criar uma senha nova, que vale por 1 hora."
+"Enter your account's e-mail. If it is registered, you get a link to create a "
+"new password, which works for 1 hour."
 msgstr ""
 "Informe el correo de su cuenta. Si está registrado, recibirá un enlace para "
 "crear una contraseña nueva, que vale por 1 hora."
 
-msgid "Enviar o link"
+msgid "Send the link"
 msgstr "Enviar el enlace"
 
 #, python-format
-msgid "Olá, %(nome)s."
+msgid "Hello, %(nome)s."
 msgstr "Hola, %(nome)s."
 
 msgid ""
-"Alguém pediu uma senha nova para a sua conta. Para criar a senha, abra o "
-"link abaixo (ele vale por 1 hora e funciona uma vez):"
+"Someone asked for a new password for your account. To create it, open the "
+"link below (it works once, for 1 hour):"
 msgstr ""
 "Alguien pidió una contraseña nueva para su cuenta. Para crearla, abra el "
 "enlace de abajo (vale por 1 hora y funciona una vez):"
 
 #, python-format
-msgid "Seu usuário: %(usuario)s"
+msgid "Your username: %(usuario)s"
 msgstr "Su usuario: %(usuario)s"
 
-msgid "Se não foi você, ignore este e-mail: a senha atual continua valendo."
+msgid ""
+"If it was not you, ignore this e-mail: the current password still works."
 msgstr ""
 "Si no fue usted, ignore este correo: la contraseña actual sigue valiendo."
 
 #, python-format
-msgid "%(sistema)s: criar uma senha nova"
+msgid "%(sistema)s: create a new password"
 msgstr "%(sistema)s: crear una contraseña nueva"
 
-msgid "Confira o seu e-mail"
+msgid "Check your e-mail"
 msgstr "Revise su correo"
 
 msgid ""
-"Se o e-mail estiver cadastrado, o link para criar uma senha nova chega em "
-"alguns minutos. Olhe também a caixa de spam."
+"If the e-mail is registered, the link to create a new password arrives in a "
+"few minutes. Also look in the spam folder."
 msgstr ""
 "Si el correo está registrado, el enlace para crear una contraseña nueva "
 "llega en algunos minutos. Mire también la carpeta de spam."
 
-#
-msgid "Voltar para entrar"
+msgid "Back to log in"
 msgstr "Volver a ingresar"
 
-msgid "Ativa"
+msgctxt "feminine"
+msgid "Active"
 msgstr "Activa"
 
 msgid ""
-"Ao entrar, depois da senha, o sistema pede o código do aplicativo "
-"autenticador."
+"When logging in, after the password, the system asks for the authenticator "
+"app's code."
 msgstr ""
 "Al ingresar, después de la contraseña, el sistema pide el código de la "
 "aplicación autenticadora."
 
 #, python-format
-msgid "Resta %(n)s código de recuperação sem uso."
-msgid_plural "Restam %(n)s códigos de recuperação sem uso."
+msgid "%(n)s unused recovery code left."
+msgid_plural "%(n)s unused recovery codes left."
 msgstr[0] "Queda %(n)s código de recuperación sin usar."
 msgstr[1] "Quedan %(n)s códigos de recuperación sin usar."
 
-msgid "Novos códigos de recuperação"
+msgid "New recovery codes"
 msgstr "Nuevos códigos de recuperación"
 
-msgid "Os códigos antigos param de funcionar."
+msgid "The old codes stop working."
 msgstr "Los códigos antiguos dejan de funcionar."
 
-msgid "Gerar novos códigos"
+msgid "Make new codes"
 msgstr "Generar nuevos códigos"
 
-#
-msgid "Desativar"
+msgid "Turn off"
 msgstr "Desactivar"
 
-msgid "Desativar a verificação em duas etapas"
+msgid "Turn off two-step verification"
 msgstr "Desactivar la verificación en dos pasos"
 
 msgid ""
-"A clínica exige a verificação em duas etapas de quem acessa o prontuário ou "
-"o financeiro, por isso ela não pode ser desativada."
+"The clinic requires two-step verification from whoever reaches the medical "
+"record or finance, so it cannot be turned off."
 msgstr ""
 "La clínica exige la verificación en dos pasos a quien accede a la historia "
 "clínica o al financiero, por eso no puede desactivarse."
 
 msgid ""
-"A clínica exige a verificação em duas etapas de quem acessa o prontuário ou "
-"o financeiro. Ative abaixo para continuar usando o sistema."
+"The clinic requires two-step verification from whoever reaches the medical "
+"record or finance. Turn it on below to keep using the system."
 msgstr ""
 "La clínica exige la verificación en dos pasos a quien accede a la historia "
 "clínica o al financiero. Actívela abajo para seguir usando el sistema."
 
 msgid ""
-"Além da senha, o sistema passa a pedir um código que muda a cada 30 "
-"segundos, gerado por um aplicativo no seu celular (Google Authenticator, "
-"Microsoft Authenticator, Authy, 2FAS ou outro). Quem descobrir a sua senha "
-"não entra sem o celular."
+"Besides the password, the system asks for a code that changes every 30 "
+"seconds, made by an app on your phone (Google Authenticator, Microsoft "
+"Authenticator, Authy, 2FAS or another). Whoever finds out your password "
+"cannot get in without the phone."
 msgstr ""
 "Además de la contraseña, el sistema pide un código que cambia cada 30 "
 "segundos, generado por una aplicación en su celular (Google Authenticator, "
 "Microsoft Authenticator, Authy, 2FAS u otra). Quien descubra su contraseña "
 "no entra sin el celular."
 
-msgid "Instale um aplicativo autenticador no celular."
+msgid "Install an authenticator app on the phone."
 msgstr "Instale una aplicación autenticadora en el celular."
 
-msgid "No aplicativo, adicione uma conta lendo este QR code:"
+msgid "In the app, add an account by reading this QR code:"
 msgstr "En la aplicación, agregue una cuenta leyendo este código QR:"
 
-msgid "Sem câmera? Digite esta chave no aplicativo:"
+msgid "No camera? Type this key in the app:"
 msgstr "¿Sin cámara? Escriba esta clave en la aplicación:"
 
-msgid "Gerar outra chave"
+msgid "Make another key"
 msgstr "Generar otra clave"
 
-msgid "Digite o código de 6 números que o aplicativo mostra:"
+msgid "Type the 6-digit code the app shows:"
 msgstr "Escriba el código de 6 números que muestra la aplicación:"
 
-#
-msgid "Ativar"
+msgid "Turn on"
 msgstr "Activar"
 
 msgid ""
-"Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros "
-"não podem ser alterados."
+"Who created, changed, deleted or viewed data in this clinic. Entries cannot "
+"be changed."
 msgstr ""
 "Quién creó, modificó, eliminó o consultó datos de esta clínica. Los "
 "registros no se pueden modificar."
 
-msgid "Usuário, registro ou código"
+msgid "User, record or code"
 msgstr "Usuario, registro o código"
 
-msgid "Buscar"
+msgid "Search"
 msgstr "Buscar"
 
-msgid "Ação"
+msgid "Action"
 msgstr "Acción"
 
-msgid "Todas as ações"
+msgid "All actions"
 msgstr "Todas las acciones"
 
-msgid "Tipo de registro"
+msgid "Record type"
 msgstr "Tipo de registro"
 
-msgid "Todos os tipos"
+msgid "All types"
 msgstr "Todos los tipos"
 
-msgid "De"
+msgid "From"
 msgstr "Desde"
 
-msgid "Até"
+msgid "To"
 msgstr "Hasta"
 
-msgid "Filtrar"
+msgid "Filter"
 msgstr "Filtrar"
 
-msgid "Quando"
+msgid "When"
 msgstr "Cuándo"
 
-msgid "Usuário"
+msgid "User"
 msgstr "Usuario"
 
-msgid "Registro"
+msgid "Record"
 msgstr "Registro"
 
-msgid "Detalhes"
+msgid "Details"
 msgstr "Detalles"
 
-msgid "sistema"
+msgid "system"
 msgstr "sistema"
 
 #, python-format
-msgid "%(total)s campo"
-msgid_plural "%(total)s campos"
+msgid "%(total)s field"
+msgid_plural "%(total)s fields"
 msgstr[0] "%(total)s campo"
 msgstr[1] "%(total)s campos"
 
-msgid "Nenhum registro encontrado."
+msgid "No entries found."
 msgstr "Ningún registro encontrado."
 
-#
-msgid "Mostrar a senha"
+msgid "Show the password"
 msgstr "Mostrar la contraseña"
 
-#
-msgid "Ocultar a senha"
+msgid "Hide the password"
 msgstr "Ocultar la contraseña"
 
 msgid ""
-"Por falta de uso, você vai sair do sistema em 2 minutos. Mexa o mouse, toque "
-"na tela ou use o teclado para continuar."
+"Without use, you will be logged out in 2 minutes. Move the mouse, touch the "
+"screen or use the keyboard to stay."
 msgstr ""
 "Por falta de uso, saldrá del sistema en 2 minutos. Mueva el mouse, toque la "
 "pantalla o use el teclado para continuar."
 
-msgid "Abrir menu"
+msgid "Open menu"
 msgstr "Abrir menú"
 
-msgid "Início"
+msgid "Home"
 msgstr "Inicio"
 
-msgid "Lista de pacientes"
+msgid "Patient list"
 msgstr "Lista de pacientes"
 
-msgid "Devedores"
+msgid "Debtors"
 msgstr "Deudores"
 
-msgid "Novo lançamento"
+msgid "New entry"
 msgstr "Nueva cuenta"
 
-msgid "Caixa do dia"
+msgid "Daily cash"
 msgstr "Caja del día"
 
-msgid "Nova despesa"
+msgid "New expense"
 msgstr "Nuevo gasto"
 
-msgid "Fluxo de caixa"
+msgid "Cash flow"
 msgstr "Flujo de caja"
 
-msgid "Extrato bancário"
+msgid "Bank statement"
 msgstr "Extracto bancario"
 
-msgid "Comissões"
+msgid "Commissions"
 msgstr "Comisiones"
 
-msgid "Relatórios"
+msgid "Reports"
 msgstr "Informes"
 
-#
-msgid "Planejamento"
+msgid "Planning"
 msgstr "Planificación"
 
-#
-msgid "Fechamento"
+msgid "Closing"
 msgstr "Cierre"
 
-#
-msgid "Folha do mês"
+msgid "Month's pay"
 msgstr "Sueldos del mes"
 
-#
-msgid "Funcionários"
+msgid "Employees"
 msgstr "Empleados"
 
-msgid "Tabela de procedimentos"
+msgid "Procedure price list"
 msgstr "Tabla de procedimientos"
 
-msgid "Cidades"
+msgid "Cities"
 msgstr "Ciudades"
 
-msgid "Bancos"
+msgid "Banks"
 msgstr "Bancos"
 
-#
-msgid "Plano de contas"
+msgid "Chart of accounts"
 msgstr "Plan de cuentas"
 
-msgid "Categorias"
+msgid "Categories"
 msgstr "Categorías"
 
-msgid "Contas"
+msgid "Accounts"
 msgstr "Cuentas"
 
-#
-msgid "Centros de custo"
+msgid "Cost centers"
 msgstr "Centros de costo"
 
-#
-msgid "Fornecedores"
+msgid "Suppliers"
 msgstr "Proveedores"
 
-msgid "Manual do usuário"
+msgid "User manual"
 msgstr "Manual del usuario"
 
-msgid "Saúde do sistema"
+msgid "System health"
 msgstr "Salud del sistema"
 
-msgid "Administração"
+msgid "Administration"
 msgstr "Administración"
 
-msgid "Painel do Django"
+msgid "Django admin"
 msgstr "Panel de Django"
 
-msgid "Trocar senha"
+msgid "Change password"
 msgstr "Cambiar contraseña"
 
-msgid "Sair"
+msgid "Log out"
 msgstr "Salir"
 
 msgid ""
-"Nenhum backup do banco foi registrado neste servidor: confira se os backups "
-"diários estão funcionando."
+"No database backup was recorded on this server: check that the daily backups "
+"are working."
 msgstr ""
 "No se registró ninguna copia de seguridad de la base en este servidor: "
 "verifique que las copias diarias estén funcionando."
 
-msgid "Veja no servidor:"
+msgid "Check on the server:"
 msgstr "Revise en el servidor:"
 
 #, python-format
 msgid ""
-"O último backup do banco foi em %(momento)s: os backups diários pararam."
+"The last database backup was on %(momento)s: the daily backups have stopped."
 msgstr ""
 "La última copia de seguridad de la base de datos fue el %(momento)s: las "
 "copias diarias se detuvieron."
 
-msgid "A saúde do servidor não está sendo coletada."
+msgid "The server's health is not being collected."
 msgstr "La salud del servidor no se está recolectando."
 
 #, python-format
-msgid "A coleta da saúde do servidor parou em %(momento)s."
+msgid "The server health collection stopped at %(momento)s."
 msgstr "La recolección de la salud del servidor se detuvo el %(momento)s."
 
-msgid "O servidor está com recursos no limite:"
+msgid "The server is running out of:"
 msgstr "El servidor tiene recursos al límite:"
 
-msgid "memória"
+msgid "memory"
 msgstr "memoria"
 
 msgid "swap"
 msgstr "swap"
 
-msgid "disco"
+msgid "disk"
 msgstr "disco"
 
-msgid "processador"
+msgid "processor"
 msgstr "procesador"
 
-msgid "Ver a saúde do sistema"
+msgid "See the system health"
 msgstr "Ver la salud del sistema"
 
 #, python-format
-msgid "O sistema foi atualizado para a versão %(versao_sistema)s."
+msgid "The system was updated to version %(versao_sistema)s."
 msgstr "El sistema se actualizó a la versión %(versao_sistema)s."
 
-msgid "Veja o que mudou"
+msgid "See what changed"
 msgstr "Vea qué cambió"
 
 #, python-format
 msgid ""
-"O módulo %(modulo)s está desligado nesta clínica: a equipe não o vê, só o "
-"administrador do sistema."
+"The %(modulo)s module is turned off in this clinic: the team does not see "
+"it, only the system administrator."
 msgstr ""
 "El módulo %(modulo)s está desactivado en esta clínica: el equipo no lo ve, "
 "solo el administrador del sistema."
 
-msgid "Ligar nas Configurações da clínica"
+msgid "Turn it on in the Clinic settings"
 msgstr "Activarlo en la Configuración de la clínica"
 
-msgid "versão"
+msgid "version"
 msgstr "versión"
 
-msgid "Desenvolvido por"
+msgid "Developed by"
 msgstr "Desarrollado por"
 
-msgid "Política de privacidade"
+msgid "Privacy policy"
 msgstr "Política de privacidad"
 
-msgid "Cancelar"
+msgid "Cancel"
 msgstr "Cancelar"
 
-msgid "Administrador da plataforma"
+msgid "Platform administrator"
 msgstr "Administrador de la plataforma"
 
-msgid "Buscar paciente"
+msgid "Search patient"
 msgstr "Buscar paciente"
 
-msgid "Novo paciente"
+msgid "New patient"
 msgstr "Nuevo paciente"
 
-msgid "Novo orçamento"
+msgid "New estimate"
 msgstr "Nuevo presupuesto"
 
-msgid "Receber"
+msgid "Receive"
 msgstr "Cobrar"
 
-msgid "Ainda não há clínica cadastrada."
+msgid "No clinic has been registered yet."
 msgstr "Todavía no hay ninguna clínica registrada."
 
-msgid "Cadastre a sua clínica."
+msgid "Register your clinic."
 msgstr "Registre su clínica."
 
-#
 msgid ""
-"Você não tem acesso a nenhuma clínica ativa: ainda não foi incluído na "
-"equipe ou o acesso foi retirado. Procure o administrador da sua clínica."
+"You have no access to any active clinic: either you have not been added to "
+"the team yet or your access was removed. Please contact your clinic's "
+"administrator."
 msgstr ""
 "No tiene acceso a ninguna clínica activa: todavía no fue incluido en el "
 "equipo o se le retiró el acceso. Consulte al administrador de su clínica."
 
-msgid "Resumo do dia"
+msgid "Summary of the day"
 msgstr "Resumen del día"
 
-msgid "Pacientes agendados hoje"
+msgid "Patients booked today"
 msgstr "Pacientes con cita hoy"
 
 #, python-format
-msgid ""
-"Compareceram: %(vieram)s · faltaram: %(faltaram)s · a seguir: %(seguir)s"
+msgid "Came: %(vieram)s · missed: %(faltaram)s · still to come: %(seguir)s"
 msgstr ""
 "Asistieron: %(vieram)s · faltaron: %(faltaram)s · por venir: %(seguir)s"
 
 #, python-format
-msgid "%(n)s já passou sem marcar presença"
-msgid_plural "%(n)s já passaram sem marcar presença"
+msgid "%(n)s already started without attendance marked"
+msgid_plural "%(n)s already started without attendance marked"
 msgstr[0] "%(n)s ya empezó sin marcar asistencia"
 msgstr[1] "%(n)s ya empezaron sin marcar asistencia"
 
-msgid "Faltas no mês"
+msgid "No-shows this month"
 msgstr "Faltas del mes"
 
 #, python-format
-msgid "de %(n)s atendimento com presença marcada"
-msgid_plural "de %(n)s atendimentos com presença marcada"
+msgid "of %(n)s appointment with attendance marked"
+msgid_plural "of %(n)s appointments with attendance marked"
 msgstr[0] "de %(n)s cita con asistencia marcada"
 msgstr[1] "de %(n)s citas con asistencia marcada"
 
-msgid "Marque quem compareceu ou faltou na agenda."
+msgid "Mark who came or missed on the schedule."
 msgstr "Marque en la agenda quién asistió o faltó."
 
 #, python-format
-msgid "%(n)s desmarcou hoje"
-msgid_plural "%(n)s desmarcaram hoje"
+msgid "%(n)s cancelled today"
+msgid_plural "%(n)s cancelled today"
 msgstr[0] "%(n)s canceló hoy"
 msgstr[1] "%(n)s cancelaron hoy"
 
-msgid "Recebido hoje"
+msgid "Received today"
 msgstr "Cobrado hoy"
 
 #, python-format
-msgid "Falta receber hoje: %(valor)s (%(n)s parcela)"
-msgid_plural "Falta receber hoje: %(valor)s (%(n)s parcelas)"
+msgid "Still to receive today: %(valor)s (%(n)s installment)"
+msgid_plural "Still to receive today: %(valor)s (%(n)s installments)"
 msgstr[0] "Falta cobrar hoy: %(valor)s (%(n)s cuota)"
 msgstr[1] "Falta cobrar hoy: %(valor)s (%(n)s cuotas)"
 
-msgid "Nenhuma parcela em aberto vence hoje."
+msgid "No open installment is due today."
 msgstr "Ninguna cuota pendiente vence hoy."
 
-msgid "Pago hoje"
+msgid "Paid today"
 msgstr "Pagado hoy"
 
-msgid "Resultado do dia:"
+msgid "Result of the day:"
 msgstr "Resultado del día:"
 
-msgid "Resultado do mês até hoje"
+msgid "Month-to-date result"
 msgstr "Resultado del mes hasta hoy"
 
 #, python-format
-msgid "Recebido %(recebido)s − pago %(pago)s"
+msgid "Received %(recebido)s − paid %(pago)s"
 msgstr "Cobrado %(recebido)s − pagado %(pago)s"
 
-msgid "Mesmo período do mês passado:"
+msgid "Same period last month:"
 msgstr "Mismo período del mes pasado:"
 
-msgid "Melhor que no mês passado"
+msgid "Better than last month"
 msgstr "Mejor que el mes pasado"
 
-msgid "Pior que no mês passado"
+msgid "Worse than last month"
 msgstr "Peor que el mes pasado"
 
-msgid "Vencido a receber"
+msgid "Overdue receivables"
 msgstr "Vencido por cobrar"
 
 #, python-format
-msgid "%(n)s parcela em atraso · ver devedores"
-msgid_plural "%(n)s parcelas em atraso · ver devedores"
+msgid "%(n)s overdue installment · see debtors"
+msgid_plural "%(n)s overdue installments · see debtors"
 msgstr[0] "%(n)s cuota atrasada · ver deudores"
 msgstr[1] "%(n)s cuotas atrasadas · ver deudores"
 
-msgid "A pagar em 7 dias"
+msgid "Payable within 7 days"
 msgstr "Por pagar en 7 días"
 
 #, python-format
-msgid "%(n)s conta, contando as atrasadas"
-msgid_plural "%(n)s contas, contando as atrasadas"
+msgid "%(n)s bill, including overdue ones"
+msgid_plural "%(n)s bills, including overdue ones"
 msgstr[0] "%(n)s cuenta, contando las atrasadas"
 msgstr[1] "%(n)s cuentas, contando las atrasadas"
 
-msgid "Saldo nas contas"
+msgid "Balance in the accounts"
 msgstr "Saldo en las cuentas"
 
-msgid "Caixa, bancos e demais contas"
+msgid "Cash drawer, banks and other accounts"
 msgstr "Caja, bancos y demás cuentas"
 
-msgid "Agenda de hoje"
+msgid "Today's schedule"
 msgstr "Agenda de hoy"
 
-msgid "Abrir na agenda"
+msgid "Open in the schedule"
 msgstr "Abrir en la agenda"
 
-msgid "Horário"
+msgid "Time"
 msgstr "Horario"
 
-msgid "Paciente"
+msgid "Patient"
 msgstr "Paciente"
 
-msgid "Situação"
+msgid "Status"
 msgstr "Situación"
 
-msgid "agora"
+msgid "now"
 msgstr "ahora"
 
-msgid "próximo"
+msgid "next"
 msgstr "siguiente"
 
-msgid "desfazer"
+msgid "undo"
 msgstr "deshacer"
 
-msgid "Nenhum agendamento para hoje."
+msgid "No appointments today."
 msgstr "No hay citas para hoy."
 
-msgid "Abrir"
+msgctxt "verb"
+msgid "Open"
 msgstr "Abrir"
 
-msgid "aberto"
+msgid "open"
 msgstr "abierta"
 
 #, python-format
-msgid "desde %(hora)s"
+msgid "since %(hora)s"
 msgstr "desde las %(hora)s"
 
-msgid "fechado"
+msgid "closed"
 msgstr "cerrada"
 
-msgid "Nenhum caixa aberto."
+msgid "No drawer open."
 msgstr "Ninguna caja abierta."
 
-msgid "Rechamadas para fazer"
+msgid "Recalls to make"
 msgstr "Recordatorios pendientes"
 
-msgid "Ver todas"
+msgctxt "feminine"
+msgid "See all"
 msgstr "Ver todos"
 
 #, python-format
-msgid "desde %(data)s"
+msgid "since %(data)s"
 msgstr "desde el %(data)s"
 
-msgid "Marcar como concluída"
+msgctxt "recall"
+msgid "Mark as done"
 msgstr "Marcar como completado"
 
-msgid "Nenhuma rechamada pendente para hoje."
+msgid "No pending recalls for today."
 msgstr "Ningún recordatorio pendiente para hoy."
 
-msgid "Aniversariantes de hoje"
+msgid "Today's birthdays"
 msgstr "Cumpleaños de hoy"
 
 #, python-format
-msgid "%(idade)s ano"
-msgid_plural "%(idade)s anos"
+msgid "%(idade)s year"
+msgid_plural "%(idade)s years"
 msgstr[0] "%(idade)s año"
 msgstr[1] "%(idade)s años"
 
-msgid "Orçamentos que vencem em 7 dias"
+msgid "Estimates expiring within 7 days"
 msgstr "Presupuestos que vencen en 7 días"
 
-msgid "Ver todos"
+msgid "See all"
 msgstr "Ver todos"
 
-msgid "vence hoje"
+msgid "expires today"
 msgstr "vence hoy"
 
 #, python-format
-msgid "Veja o que há de novo na versão %(versao_sistema)s"
+msgid "See what's new in version %(versao_sistema)s"
 msgstr "Vea las novedades de la versión %(versao_sistema)s"
 
-msgid "Sem clínica"
+msgid "No clinic"
 msgstr "Sin clínica"
 
-msgid "Nenhuma clínica disponível"
+msgid "No clinic available"
 msgstr "Ninguna clínica disponible"
 
-msgid "Cadastre sua clínica"
+msgid "Register your clinic"
 msgstr "Registre su clínica"
 
 msgid ""
-"Este sistema atende uma clínica. Informe os dados dela: eles aparecem na "
-"política de privacidade, nos recibos e nos orçamentos. O horário da agenda e "
-"o restante ficam em Configurações da clínica."
+"This system serves one clinic. Enter its details: they appear on the privacy "
+"policy, receipts and estimates. The schedule hours and the rest are in "
+"Clinic settings."
 msgstr ""
 "Este sistema atiende a una clínica. Ingrese sus datos: aparecen en la "
 "política de privacidad, en los recibos y en los presupuestos. El horario de "
 "la agenda y lo demás están en Configuración de la clínica."
 
-msgid "Cadastrar"
+msgid "Register"
 msgstr "Registrar"
 
 msgid ""
-"O horário e o intervalo valem para a grade da agenda e para os novos "
-"agendamentos. Se algum agendamento futuro ficar fora deles, a mudança é "
-"recusada e a tela mostra qual."
+"The hours and slot length apply to the schedule grid and to new "
+"appointments. If a future appointment would fall outside them, the change is "
+"refused and the screen shows which one."
 msgstr ""
 "El horario y el intervalo valen para la grilla de la agenda y para las "
 "nuevas citas. Si alguna cita futura quedara fuera, el cambio se rechaza y la "
 "pantalla muestra cuál."
 
-msgid "Odontograma"
+msgid "Dental chart"
 msgstr "Odontograma"
 
 msgid ""
-"Superior acima, inferior abaixo; dentes de leite nas linhas do meio. Direita "
-"do paciente à esquerda."
+"Upper teeth on top, lower below; baby teeth in the middle rows. Patient's "
+"right on the left."
 msgstr ""
 "Superiores arriba, inferiores abajo; dientes de leche en las filas del "
 "medio. Derecha del paciente a la izquierda."
 
-msgid "Vencido"
+msgid "Overdue"
 msgstr "Vencido"
 
-msgid "Aprovar orçamento"
+msgid "Approve estimate"
 msgstr "Aprobar presupuesto"
 
 #, python-format
-msgid "Orçamento nº %(numero)s · %(nome)s · %(total)s"
+msgid "Estimate no. %(numero)s · %(nome)s · %(total)s"
 msgstr "Presupuesto n.º %(numero)s · %(nome)s · %(total)s"
 
 msgid ""
-"O orçamento vira um lançamento a receber, nas parcelas escolhidas, e não "
-"pode mais ser alterado."
+"The estimate becomes a receivable, in the chosen installments, and can no "
+"longer be changed."
 msgstr ""
 "El presupuesto pasa a ser una cuenta por cobrar, en las cuotas elegidas, y "
 "ya no puede modificarse."
 
-msgid "Aprovar"
+msgid "Approve"
 msgstr "Aprobar"
 
 #, python-format
-msgid "válido até %(validade)s"
+msgid "valid until %(validade)s"
 msgstr "válido hasta el %(validade)s"
 
-msgid "Editar"
+msgid "Edit"
 msgstr "Editar"
 
-msgid "Recusar"
+msgid "Refuse"
 msgstr "Rechazar"
 
-msgid "Ver em A receber"
+msgid "See in Receivables"
 msgstr "Ver en Por cobrar"
 
-msgid "Procedimento"
+msgid "Procedure"
 msgstr "Procedimiento"
 
-msgid "Dentes"
+msgid "Teeth"
 msgstr "Dientes"
 
-msgid "Faces ou região"
+msgid "Surfaces or region"
 msgstr "Caras o región"
 
-msgid "Qtd."
+msgid "Qty."
 msgstr "Cant."
 
 msgid "Total"
 msgstr "Total"
 
-msgid "remover"
+msgid "remove"
 msgstr "quitar"
 
-msgid "Nenhum procedimento ainda."
+msgid "No procedures yet."
 msgstr "Ningún procedimiento todavía."
 
 msgid "Subtotal"
 msgstr "Subtotal"
 
-msgid "Dentes do orçamento"
+msgid "Teeth in the estimate"
 msgstr "Dientes del presupuesto"
 
-msgid "Incluir procedimento"
+msgid "Add procedure"
 msgstr "Agregar procedimiento"
 
-msgid "Clique nos dentes do procedimento (a quantidade acompanha)."
+msgid "Click the procedure's teeth (the quantity follows)."
 msgstr "Haga clic en los dientes del procedimiento (la cantidad acompaña)."
 
-msgid "Sem descrição ou valor, valem os da tabela de procedimentos."
+msgid "Without a description or price, the procedure price list's apply."
 msgstr "Sin descripción ni valor, valen los de la tabla de procedimientos."
 
-msgid "Incluir"
+msgid "Add"
 msgstr "Agregar"
 
-msgid "Aplicar"
+msgid "Apply"
 msgstr "Aplicar"
 
-msgid "Editar orçamento"
+msgid "Edit estimate"
 msgstr "Editar presupuesto"
 
-msgid "Nome do paciente"
+msgid "Patient name"
 msgstr "Nombre del paciente"
 
-msgid "Todos"
+msgid "All"
 msgstr "Todos"
 
-msgid "Nº"
+msgid "No."
 msgstr "N.º"
 
-msgid "Nenhum orçamento encontrado."
+msgid "No estimates found."
 msgstr "Ningún presupuesto encontrado."
 
-msgid "Imprimir ou salvar em PDF"
+msgid "Print or save as PDF"
 msgstr "Imprimir o guardar como PDF"
 
-msgid "ORÇAMENTO"
+msgid "ESTIMATE"
 msgstr "PRESUPUESTO"
 
-msgid "Novo procedimento"
+msgid "New procedure"
 msgstr "Nuevo procedimiento"
 
-msgid "Nome"
+msgid "Name"
 msgstr "Nombre"
 
-msgid "Ações"
+msgid "Actions"
 msgstr "Acciones"
 
-msgid "Ativo"
+msgid "Active"
 msgstr "Activo"
 
-msgid "Inativo"
+msgid "Inactive"
 msgstr "Inactivo"
 
-msgid "Nenhum procedimento cadastrado."
+msgctxt "registered"
+msgid "No procedures yet."
 msgstr "Ningún procedimiento registrado."
 
-msgid "Mudar o valor aqui não altera orçamentos já feitos."
+msgid "Changing a price here does not change estimates already made."
 msgstr "Cambiar el valor aquí no modifica los presupuestos ya hechos."
 
-msgid "Pagador"
+msgid "Payer"
 msgstr "Pagador"
 
-msgid "Lançamento"
+msgid "Entry"
 msgstr "Registro"
 
-msgid "Nenhum recebimento."
+msgid "No receipts."
 msgstr "Ningún cobro."
 
-msgid "Total recebido"
+msgid "Total received"
 msgstr "Total cobrado"
 
 #, python-format
-msgid "Comissão (%(percentual)s%%)"
+msgid "Commission (%(percentual)s%%)"
 msgstr "Comisión (%(percentual)s%%)"
 
-msgid ""
-"Estornos descontados (recebimentos já comissionados e depois estornados)"
+msgid "Reversals deducted (receipts already paid out and later reversed)"
 msgstr "Reversiones descontadas (cobros ya comisionados y luego revertidos)"
 
-msgid "Comissão descontada"
+msgid "Commission deducted"
 msgstr "Comisión descontada"
 
-msgid "Comissão a pagar"
+msgid "Commission to pay"
 msgstr "Comisión por pagar"
 
-msgid "Sem profissional"
+msgid "No practitioner"
 msgstr "Sin profesional"
 
-msgid "Nada no período."
+msgid "Nothing in the period."
 msgstr "Nada en el período."
 
-msgid "Agrupar por"
+msgid "Group by"
 msgstr "Agrupar por"
 
-msgid "Dia"
+msgid "Day"
 msgstr "Día"
 
-msgid "Mês"
+msgid "Month"
 msgstr "Mes"
 
 msgid ""
-"Nenhuma conta de dinheiro ativa. O administrador cadastra uma em Cadastros > "
-"Contas, com o tipo “Dinheiro (caixa)”."
+"No active cash account. The administrator adds one in Records > Accounts, "
+"with the type “Cash (drawer)”."
 msgstr ""
 "Ninguna cuenta de efectivo activa. El administrador registra una en "
 "Registros > Cuentas, con el tipo “Efectivo (caja)”."
 
 #, python-format
-msgid "O caixa “%(conta)s” está fechado"
+msgid "The “%(conta)s” drawer is closed"
 msgstr "La caja “%(conta)s” está cerrada"
 
 #, python-format
-msgid "Pelo sistema, a conta tem %(saldo)s."
+msgid "According to the system, the account has %(saldo)s."
 msgstr "Según el sistema, la cuenta tiene %(saldo)s."
 
-msgid "Abrir caixa"
+msgid "Open drawer"
 msgstr "Abrir caja"
 
-msgid "Caixas anteriores"
+msgid "Previous drawers"
 msgstr "Cajas anteriores"
 
-msgid "Aberto em"
+msgid "Opened at"
 msgstr "Abierta el"
 
-msgid "Fechado em"
+msgid "Closed at"
 msgstr "Cerrada el"
 
-msgid "Esperado"
+msgid "Expected"
 msgstr "Esperado"
 
-msgid "Contado"
+msgid "Counted"
 msgstr "Contado"
 
-msgid "Diferença"
+msgid "Difference"
 msgstr "Diferencia"
 
 #, python-format
-msgid "Aberto em %(momento)s por %(nome)s"
+msgid "Opened on %(momento)s by %(nome)s"
 msgstr "Abierta el %(momento)s por %(nome)s"
 
 #, python-format
-msgid "fechado em %(momento)s por %(nome)s"
+msgid "closed on %(momento)s by %(nome)s"
 msgstr "cerrada el %(momento)s por %(nome)s"
 
-msgid "Fechado"
+msgid "Closed"
 msgstr "Cerrada"
 
-msgid "Valor contado na abertura"
+msgid "Amount counted at opening"
 msgstr "Valor contado en la apertura"
 
-msgid "+ Recebimentos nesta conta"
+msgid "+ Received into this account"
 msgstr "+ Cobros en esta cuenta"
 
-msgid "− Despesas pagas por esta conta"
+msgid "− Expenses paid from this account"
 msgstr "− Gastos pagados con esta cuenta"
 
-msgid "+ Reforços"
+msgid "+ Top-ups"
 msgstr "+ Refuerzos"
 
-msgid "− Retiradas"
+msgid "− Withdrawals"
 msgstr "− Retiros"
 
-msgid "Deve haver na gaveta"
+msgid "Should be in the drawer"
 msgstr "Debería haber en la caja"
 
-msgid "Contado no fechamento"
+msgid "Counted at closing"
 msgstr "Contado en el cierre"
 
-msgid "Movimentação"
+msgid "Movements"
 msgstr "Movimientos"
 
-msgid "Nenhuma movimentação desde a abertura."
+msgid "No movements since opening."
 msgstr "Ningún movimiento desde la apertura."
 
 msgid ""
-"Entram aqui os pagamentos registrados nesta conta enquanto o caixa está "
-"aberto, pela hora do registro."
+"Payments registered into this account while the drawer is open come in here, "
+"by the time they were registered."
 msgstr ""
 "Aquí entran los pagos registrados en esta cuenta mientras la caja está "
 "abierta, por la hora del registro."
 
-msgid "Saldo no início"
+msgid "Balance at the start"
 msgstr "Saldo al inicio"
 
-msgid "Entradas (realizadas + previstas)"
+msgid "Money in (actual + expected)"
 msgstr "Ingresos (realizados + previstos)"
 
-msgid "Saídas (realizadas + previstas)"
+msgid "Money out (actual + expected)"
 msgstr "Egresos (realizados + previstos)"
 
-msgid "Saldo previsto no fim"
+msgid "Expected balance at the end"
 msgstr "Saldo previsto al final"
 
-msgid "Entradas"
+msgid "Money in"
 msgstr "Ingresos"
 
-msgid "Saídas"
+msgid "Money out"
 msgstr "Egresos"
 
-msgid "Entradas previstas"
+msgid "Expected in"
 msgstr "Ingresos previstos"
 
-msgid "Saídas previstas"
+msgid "Expected out"
 msgstr "Egresos previstos"
 
-msgid "Saldo"
+msgid "Balance"
 msgstr "Saldo"
 
-msgid "em atraso"
+msgid "overdue"
 msgstr "atrasado"
 
-msgid "Nenhuma movimentação no período."
+msgid "No movement in the period."
 msgstr "Ningún movimiento en el período."
 
 msgid ""
-"Realizado: pagamentos registrados, pela data do pagamento. Previsto: o que "
-"falta das parcelas em aberto, pelo vencimento (as vencidas aparecem como “em "
-"atraso”). O saldo soma os dois a partir do saldo das contas no início do "
-"período."
+"Actual: recorded payments, by payment date. Expected: what is left of open "
+"installments, by due date (overdue ones are flagged “overdue”). The balance "
+"adds both to the accounts' balance at the start of the period."
 msgstr ""
 "Realizado: pagos registrados, por la fecha del pago. Previsto: lo que falta "
 "de las cuotas abiertas, por el vencimiento (las vencidas aparecen como "
 "“atrasado”). El saldo suma ambos a partir del saldo de las cuentas al inicio "
 "del período."
 
-msgid "Saldo atual por conta"
+msgid "Current balance per account"
 msgstr "Saldo actual por cuenta"
 
-msgid "Inativa"
+msgctxt "feminine"
+msgid "Inactive"
 msgstr "Inactiva"
 
-msgid "Tipo"
+msgid "Type"
 msgstr "Tipo"
 
 msgid ""
-"O centro de custo diz para quem é cada receita ou despesa (um consultório, "
-"uma especialidade, o administrativo). Ele aparece nos lançamentos e nos "
-"relatórios assim que houver um cadastrado. Para deixar de usar sem perder o "
-"histórico, edite e desmarque “ativo”."
+"The cost center tells who each income or expense is for (a room, a "
+"specialty, the office). It shows up on entries and reports once there is one "
+"registered. To stop using one without losing the history, edit it and "
+"uncheck “active”."
 msgstr ""
 "El centro de costo indica para quién es cada ingreso o gasto (un "
 "consultorio, una especialidad, la administración). Aparece en los registros "
 "y en los informes en cuanto haya uno registrado. Para dejar de usarlo sin "
 "perder el historial, edítelo y desmarque “activo”."
 
-msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativa”."
+msgctxt "feminine"
+msgid ""
+"To stop using it without losing the history, edit it and uncheck “active”."
 msgstr ""
 "Para dejar de usarla sin perder el historial, edítela y desmarque “activa”."
 
-#
-msgid "Novo grupo"
+msgid "New group"
 msgstr "Nuevo grupo"
 
-#
-#
-msgid "Nova categoria"
+msgid "New category"
 msgstr "Nueva categoría"
 
 msgid ""
-"Os grupos organizam as categorias em árvore, e os relatórios somam cada "
-"grupo com os de baixo. Os lançamentos continuam indo nas categorias."
+"Groups arrange the categories as a tree, and the reports add each group up "
+"with the ones below it. Entries still go to the categories."
 msgstr ""
 "Los grupos organizan las categorías en árbol, y los informes suman cada "
 "grupo con los de abajo. Los registros siguen yendo en las categorías."
 
-#
-msgid "editar"
+msgid "edit"
 msgstr "editar"
 
-#
-msgid "Nada cadastrado."
+msgid "Nothing registered."
 msgstr "Nada registrado."
 
-#
-msgid "Fechamento do financeiro"
+msgid "Finance closing"
 msgstr "Cierre del financiero"
 
 #, python-format
-msgid "Fechado até <strong>%(data)s</strong>."
+msgid "Closed up to <strong>%(data)s</strong>."
 msgstr "Cerrado hasta el <strong>%(data)s</strong>."
 
 msgid ""
-"Pagamentos e estornos nessa data ou antes dela não podem mais ser "
-"registrados, e os relatórios desse período não mudam."
+"Payments and reversals on or before that date can no longer be recorded, and "
+"the reports of that period do not change."
 msgstr ""
 "Los pagos y reversiones en esa fecha o antes ya no pueden registrarse, y los "
 "informes de ese período no cambian."
 
-msgid "O financeiro está aberto: qualquer data aceita pagamentos e estornos."
+msgid "Finance is open: any date accepts payments and reversals."
 msgstr ""
 "El financiero está abierto: cualquier fecha acepta pagos y reversiones."
 
-msgid "Fechar"
+msgid "Close"
 msgstr "Cerrar"
 
 msgid ""
-"Feche um período depois de conferir o caixa e entregar os relatórios ao "
-"contador."
+"Close a period after checking the cash and handing the reports to the "
+"accountant."
 msgstr ""
 "Cierre un período después de revisar la caja y entregar los informes al "
 "contador."
 
-msgid "Reabrir"
+msgid "Reopen"
 msgstr "Reabrir"
 
-msgid "Só para corrigir um erro. O motivo fica no histórico e na auditoria."
+msgid ""
+"Only to fix a mistake. The reason stays in the history and in the audit log."
 msgstr ""
 "Solo para corregir un error. El motivo queda en el historial y en la "
 "auditoría."
 
-msgid "Histórico"
+msgid "History"
 msgstr "Historial"
 
-msgid "Quem"
+msgid "Who"
 msgstr "Quién"
 
-#
-msgid "Fechado até"
+msgid "Closed up to"
 msgstr "Cerrado hasta"
 
-#
-msgid "Nenhum fechamento ainda."
+msgid "No closing yet."
 msgstr "Ningún cierre todavía."
 
-msgid "Extrato da comissão"
+msgid "Commission statement"
 msgstr "Extracto de la comisión"
 
-msgid "CANCELADA"
+msgid "CANCELLED"
 msgstr "CANCELADA"
 
-msgid "EXTRATO DE COMISSÃO"
+msgid "COMMISSION STATEMENT"
 msgstr "EXTRACTO DE COMISIÓN"
 
 #, python-format
-msgid "recebimentos até %(data)s"
+msgid "receipts up to %(data)s"
 msgstr "cobros hasta el %(data)s"
 
 #, python-format
-msgid "lançada em %(data)s"
+msgid "added on %(data)s"
 msgstr "registrada el %(data)s"
 
-msgid "Pagar comissão"
+msgid "Pay commission"
 msgstr "Pagar comisión"
 
 #, python-format
-msgid "%(nome)s · recebimentos até %(data)s"
+msgid "%(nome)s · receipts up to %(data)s"
 msgstr "%(nome)s · cobros hasta el %(data)s"
 
 msgid ""
-"A comissão vira uma despesa em A pagar, em nome do profissional; registre o "
-"pagamento lá. Cancelar essa despesa desfaz a comissão."
+"The commission becomes an expense in Payables, in the practitioner's name; "
+"record the payment there. Cancelling that expense undoes the commission."
 msgstr ""
 "La comisión pasa a ser un gasto en Por pagar, a nombre del profesional; "
 "registre el pago allí. Cancelar ese gasto deshace la comisión."
 
-msgid "Lançar em A pagar"
+msgid "Add to Payables"
 msgstr "Registrar en Por pagar"
 
-msgid "Percentual de comissão"
+msgid "Commission percentage"
 msgstr "Porcentaje de comisión"
 
 #, python-format
-msgid "Comissão de %(nome)s"
+msgid "Commission of %(nome)s"
 msgstr "Comisión de %(nome)s"
 
-msgid "O novo percentual vale para os recebimentos ainda não comissionados."
+msgid "The new percentage applies to receipts not yet paid out."
 msgstr "El nuevo porcentaje vale para los cobros aún no comisionados."
 
-msgid "Recebimentos até"
+msgid "Receipts up to"
 msgstr "Cobros hasta"
 
-msgid "Percentual"
+msgid "Percentage"
 msgstr "Porcentaje"
 
-msgid "Recebido ainda não comissionado"
+msgid "Received, not yet paid out"
 msgstr "Cobrado aún no comisionado"
 
-msgid "Estornos a descontar"
+msgid "Reversals to deduct"
 msgstr "Reversiones por descontar"
 
-msgid "Pagar"
+msgid "Pay"
 msgstr "Pagar"
 
-msgid "Nenhum profissional com comissão."
+msgid "No practitioner with commission."
 msgstr "Ningún profesional con comisión."
 
-msgid "Sem percentual definido:"
+msgid "No percentage set:"
 msgstr "Sin porcentaje definido:"
 
 msgid ""
-"A comissão é o percentual do profissional sobre o valor recebido dos "
-"lançamentos a receber em que ele aparece. Lançamentos sem profissional não "
-"entram. Cada recebimento é comissionado uma vez só; se for estornado depois "
-"de pago ao profissional, a comissão dele é descontada no próximo pagamento."
+"The commission is the practitioner's percentage of the amount received on "
+"the receivables that name them. Entries without a practitioner do not count. "
+"Each receipt is paid out only once; if it is reversed after being paid to "
+"the practitioner, its commission is deducted from the next payment."
 msgstr ""
 "La comisión es el porcentaje del profesional sobre el valor cobrado de las "
 "cuentas por cobrar en que aparece. Los registros sin profesional no cuentan. "
 "Cada cobro se comisiona una sola vez; si se revierte después de pagado al "
 "profesional, su comisión se descuenta en el próximo pago."
 
-msgid "Comissões lançadas"
+msgid "Commissions added"
 msgstr "Comisiones registradas"
 
-msgid "Lançada em"
+msgid "Added on"
 msgstr "Registrada el"
 
-msgid "Extrato"
+msgid "Statement"
 msgstr "Extracto"
 
-msgid "Nenhuma comissão lançada ainda."
+msgid "No commission added yet."
 msgstr "Ninguna comisión registrada todavía."
 
-msgid "Total vencido"
+msgid "Total overdue"
 msgstr "Total vencido"
 
-msgid "A vencer"
+msgid "Not yet due"
 msgstr "Por vencer"
 
-msgid "Paciente ou pagador"
+msgid "Patient or payer"
 msgstr "Paciente o pagador"
 
 #, python-format
-msgid "%(n)s devedor"
-msgid_plural "%(n)s devedores"
+msgid "%(n)s debtor"
+msgid_plural "%(n)s debtors"
 msgstr[0] "%(n)s deudor"
 msgstr[1] "%(n)s deudores"
 
-msgid "Até 30 dias"
+msgid "Up to 30 days"
 msgstr "Hasta 30 días"
 
-msgid "31 a 60"
+msgid "31 to 60"
 msgstr "31 a 60"
 
-msgid "61 a 90"
+msgid "61 to 90"
 msgstr "61 a 90"
 
-msgid "Mais de 90"
+msgid "Over 90"
 msgstr "Más de 90"
 
-msgid "Mais antigo"
+msgid "Oldest"
 msgstr "Más antiguo"
 
-msgid "Ninguém está devendo."
+msgid "Nobody owes anything."
 msgstr "Nadie está debiendo."
 
-msgid "Cancelado"
+msgid "Cancelled"
 msgstr "Cancelada"
 
-msgid "Voltar à lista"
+msgid "Back to the list"
 msgstr "Volver a la lista"
 
 #, python-format
-msgid "Cancelado em %(momento)s. Motivo: %(motivo)s"
+msgid "Cancelled on %(momento)s. Reason: %(motivo)s"
 msgstr "Cancelada el %(momento)s. Motivo: %(motivo)s"
 
-msgid "Pago"
+msgid "Paid"
 msgstr "Pagado"
 
-msgid "Falta"
+msgid "Due"
 msgstr "Falta"
 
-msgid "Parcela"
+msgid "Installment"
 msgstr "Cuota"
 
-msgid "Pagamentos"
+msgid "Payments"
 msgstr "Pagos"
 
-msgid "recibo"
+msgid "receipt"
 msgstr "recibo"
 
-msgid "estornar"
+msgid "reverse"
 msgstr "revertir"
 
-msgid "Novo lançamento a receber"
+msgid "New receivable"
 msgstr "Nueva cuenta por cobrar"
 
 msgid ""
-"Para pagamento na hora: a 1ª parcela é registrada como paga e o recibo abre "
-"em seguida."
+"For payment on the spot: the 1st installment is recorded as paid and the "
+"receipt opens next."
 msgstr ""
 "Para pago en el momento: la 1.ª cuota se registra como pagada y el recibo se "
 "abre a continuación."
 
-#
-msgid "Cadastrar um fornecedor novo"
+msgid "Register a new supplier"
 msgstr "Registrar un proveedor nuevo"
 
 msgid ""
-"Exemplo: aluguel de 3.000 por 12 meses → valor 3.000, “de cada mês”, 12. "
-"Compra de 900 em 3 vezes → valor 900, “o total”, 3."
+"Example: rent of 3,000 for 12 months → amount 3,000, “per month”, 12. A 900 "
+"purchase in 3 installments → amount 900, “the total”, 3."
 msgstr ""
 "Ejemplo: alquiler de 3.000 durante 12 meses → valor 3.000, “de cada mes”, "
 "12. Compra de 900 en 3 cuotas → valor 900, “el total”, 3."
 
-#
-#
-msgid "Para deixar de usar sem perder o histórico, desmarque “ativo”."
+msgid "To stop using it without losing the history, uncheck “active”."
 msgstr "Para dejar de usarlo sin perder el historial, desmarque “activo”."
 
-msgid "Fornecedor ou descrição"
+msgid "Supplier or description"
 msgstr "Proveedor o descripción"
 
-msgid "Paciente, pagador ou descrição"
+msgid "Patient, payer or description"
 msgstr "Paciente, pagador o descripción"
 
-msgid "Em aberto"
+msgctxt "pending"
+msgid "Open"
 msgstr "Abiertas"
 
-msgid "Vencidas"
+msgctxt "feminine plural"
+msgid "Overdue"
 msgstr "Vencidas"
 
-msgid "Pagas"
+msgctxt "feminine plural"
+msgid "Paid"
 msgstr "Pagadas"
 
-msgid "Todas"
+msgctxt "feminine"
+msgid "All"
 msgstr "Todos"
 
-msgid "Fornecedor"
+msgid "Supplier"
 msgstr "Proveedor"
 
-msgid "Nenhuma parcela encontrada."
+msgid "No installments found."
 msgstr "Ninguna cuota encontrada."
 
 #, python-format
-msgid "Planejamento %(ano)s"
+msgid "Planning %(ano)s"
 msgstr "Planificación %(ano)s"
 
 msgid ""
-"A meta de cada grupo do plano de contas para o ano, comparada com o que foi "
-"recebido e pago (pela data do pagamento). “Esperado até hoje” é a meta "
-"proporcional aos dias do ano que já passaram."
+"The year's goal for each group of the chart of accounts, compared with what "
+"was received and paid (by payment date). “Expected so far” is the goal in "
+"proportion to the days of the year already gone."
 msgstr ""
 "La meta de cada grupo del plan de cuentas para el año, comparada con lo "
 "cobrado y pagado (por la fecha del pago). “Esperado hasta hoy” es la meta "
 "proporcional a los días del año ya transcurridos."
 
-#
-msgid "Meta do ano"
+msgid "Year's goal"
 msgstr "Meta del año"
 
-#
-msgid "Esperado até hoje"
+msgid "Expected so far"
 msgstr "Esperado hasta hoy"
 
-#
-msgid "Realizado"
+msgid "Actual"
 msgstr "Realizado"
 
-#
-#
-msgid "Nenhum grupo no plano de contas."
+msgid "No groups in the chart of accounts."
 msgstr "Ningún grupo en el plan de cuentas."
 
-#
-msgid "Salvar metas"
+msgid "Save goals"
 msgstr "Guardar metas"
 
 #, python-format
-msgid "Copiar as metas de %(ano_anterior)s"
+msgid "Copy the goals of %(ano_anterior)s"
 msgstr "Copiar las metas de %(ano_anterior)s"
 
 msgid ""
-"Deixe em branco o grupo sem meta. Copiar só preenche os grupos que ainda não "
-"têm meta neste ano. O total soma as metas dos grupos mais altos, sem contar "
-"duas vezes a meta de um subgrupo."
+"Leave a group without a goal blank. Copying only fills the groups that have "
+"no goal this year yet. The total adds the goals of the highest groups, "
+"without counting a subgroup's goal twice."
 msgstr ""
 "Deje en blanco el grupo sin meta. Copiar solo completa los grupos que aún no "
 "tienen meta este año. El total suma las metas de los grupos más altos, sin "
 "contar dos veces la meta de un subgrupo."
 
 msgid ""
-"Nada é apagado: o registro fica marcado, com o motivo, e aparece na "
-"auditoria."
+"Nothing is deleted: the record is marked, with the reason, and shows in the "
+"audit log."
 msgstr ""
 "No se borra nada: el registro queda marcado, con el motivo, y aparece en la "
 "auditoría."
 
-msgid "Recibo"
+msgid "Receipt"
 msgstr "Recibo"
 
-msgid "Voltar ao lançamento"
+msgid "Back to the entry"
 msgstr "Volver a la cuenta"
 
-msgid "ESTORNADO"
+msgid "REVERSED"
 msgstr "REVERTIDO"
 
-msgid "RECIBO"
+msgid "RECEIPT"
 msgstr "RECIBO"
 
 #, python-format
 msgid ""
-"Recebemos de <strong>%(nome)s</strong> (%(sigla)s %(documento)s) a quantia "
-"de <strong>%(valor)s</strong>,"
+"We received from <strong>%(nome)s</strong> (%(sigla)s %(documento)s) the "
+"amount of <strong>%(valor)s</strong>,"
 msgstr ""
 "Recibimos de <strong>%(nome)s</strong> (%(sigla)s %(documento)s) la suma de "
 "<strong>%(valor)s</strong>,"
 
 #, python-format
 msgid ""
-"Recebemos de <strong>%(nome)s</strong> a quantia de <strong>%(valor)s</"
+"We received from <strong>%(nome)s</strong> the amount of <strong>%(valor)s</"
 "strong>,"
 msgstr ""
 "Recibimos de <strong>%(nome)s</strong> la suma de <strong>%(valor)s</strong>,"
 
 #, python-format
-msgid "referente a %(descricao)s (parcela %(numero)s de %(total)s)"
+msgid "for %(descricao)s (installment %(numero)s of %(total)s)"
 msgstr "en concepto de %(descricao)s (cuota %(numero)s de %(total)s)"
 
 #, python-format
-msgid "%(n)s parcela no cartão"
-msgid_plural "%(n)s parcelas no cartão"
+msgid "%(n)s card installment"
+msgid_plural "%(n)s card installments"
 msgstr[0] "%(n)s cuota con tarjeta"
 msgstr[1] "%(n)s cuotas con tarjeta"
 
-msgid "Juros e multa incluídos"
+msgid "Interest and late fee included"
 msgstr "Intereses y multa incluidos"
 
 #, python-format
-msgid "Recebido por %(nome)s"
+msgid "Received by %(nome)s"
 msgstr "Cobrado por %(nome)s"
 
 #, python-format
-msgid "Este recibo não substitui o documento fiscal (%(documento)s)."
+msgid "This receipt does not replace the tax document (%(documento)s)."
 msgstr "Este recibo no sustituye al comprobante fiscal (%(documento)s)."
 
 #, python-format
-msgid "parcela %(numero)s de %(total)s"
+msgid "installment %(numero)s of %(total)s"
 msgstr "cuota %(numero)s de %(total)s"
 
 #, python-format
-msgid "vence em %(vencimento)s"
+msgid "due on %(vencimento)s"
 msgstr "vence el %(vencimento)s"
 
-msgid "Valor da parcela"
+msgid "Installment amount"
 msgstr "Valor de la cuota"
 
-msgid "Já pago"
+msgid "Already paid"
 msgstr "Ya pagado"
 
-msgid "Só para cartão"
+msgid "Cards only"
 msgstr "Solo para tarjeta"
 
 msgid ""
-"Parcelado no cartão: informe aqui o número de parcelas; para a clínica, a "
-"parcela fica paga. Nunca anote o número do cartão."
+"Card installments: enter the number of installments here; for the clinic, "
+"the installment is paid. Never write down the card number."
 msgstr ""
 "Cuotas con tarjeta: indique aquí el número de cuotas; para la clínica, la "
 "cuota queda pagada. Nunca anote el número de la tarjeta."
 
-msgid "Nunca anote o número do cartão."
+msgid "Never write down the card number."
 msgstr "Nunca anote el número de la tarjeta."
 
-msgid "Descontos só podem ser dados pelo administrador da clínica."
+msgid "Only the clinic administrator can give discounts."
 msgstr "Solo el administrador de la clínica puede dar descuentos."
 
-msgid "Registrar pagamento"
+msgid "Record payment"
 msgstr "Registrar pago"
 
-msgid "Relatórios financeiros"
+msgid "Financial reports"
 msgstr "Informes financieros"
 
-msgid "Recebido"
+msgid "Received"
 msgstr "Cobrado"
 
-msgid "Resultado"
+msgid "Result"
 msgstr "Resultado"
 
-msgid "Recebido por forma de pagamento"
+msgid "Received by payment method"
 msgstr "Cobrado por forma de pago"
 
-#
-msgid "Recebido por grupo do plano de contas"
+msgid "Received by account group"
 msgstr "Cobrado por grupo del plan de cuentas"
 
-#
-#
-msgid "Despesas pagas por grupo do plano de contas"
+msgid "Expenses paid by account group"
 msgstr "Gastos pagados por grupo del plan de cuentas"
 
-msgid "Recebido por categoria"
+msgid "Received by category"
 msgstr "Cobrado por categoría"
 
-msgid "Recebido por profissional"
+msgid "Received by practitioner"
 msgstr "Cobrado por profesional"
 
-msgid "Despesas pagas por categoria"
+msgid "Expenses paid by category"
 msgstr "Gastos pagados por categoría"
 
-#
-msgid "Recebido por centro de custo"
+msgid "Received by cost center"
 msgstr "Cobrado por centro de costo"
 
-#
-msgid "Despesas pagas por centro de custo"
+msgid "Expenses paid by cost center"
 msgstr "Gastos pagados por centro de costo"
 
-msgid "Pela data do pagamento, sem os estornados e os cancelados."
+msgid "By payment date, without reversed and cancelled ones."
 msgstr "Por la fecha del pago, sin los revertidos ni los cancelados."
 
 #, python-format
 msgid ""
-"Financeiro fechado até %(data)s: até essa data os valores não mudam mais."
+"Finance closed up to %(data)s: up to that date the amounts no longer change."
 msgstr ""
 "Financiero cerrado hasta el %(data)s: hasta esa fecha los valores ya no "
 "cambian."
 
-msgid "Juros e multa recebidos"
+msgid "Interest and late fees received"
 msgstr "Intereses y multas cobrados"
 
-msgid "Descontos dados"
+msgid "Discounts given"
 msgstr "Descuentos dados"
 
 #, python-format
-msgid "conta %(conta)s no banco"
+msgid "bank account %(conta)s"
 msgstr "cuenta %(conta)s en el banco"
 
-msgid "Pendentes"
+msgctxt "plural"
+msgid "Pending"
 msgstr "Pendientes"
 
 #, python-format
-msgid "Saldo no banco em %(data)s"
+msgid "Bank balance on %(data)s"
 msgstr "Saldo en el banco al %(data)s"
 
-msgid "Saldo no sistema na mesma data"
+msgid "System balance on the same date"
 msgstr "Saldo en el sistema en la misma fecha"
 
 #, python-format
-msgid "Conciliar %(n)s transação com correspondência única"
-msgid_plural "Conciliar %(n)s transações com correspondência única"
+msgid "Reconcile %(n)s transaction with a single match"
+msgid_plural "Reconcile %(n)s transactions with a single match"
 msgstr[0] "Conciliar %(n)s transacción con correspondencia única"
 msgstr[1] "Conciliar %(n)s transacciones con correspondencia única"
 
-msgid "Descrição no banco"
+msgid "Bank description"
 msgstr "Descripción en el banco"
 
-msgid "No sistema"
+msgid "In the system"
 msgstr "En el sistema"
 
-msgid "Lançamento correspondente"
+msgid "Matching entry"
 msgstr "Registro correspondiente"
 
-msgid "Conciliar"
+msgid "Reconcile"
 msgstr "Conciliar"
 
-msgid "Nada correspondente no sistema"
+msgid "Nothing matching in the system"
 msgstr "Nada correspondiente en el sistema"
 
-msgid "Criar lançamento"
+msgid "Create entry"
 msgstr "Crear registro"
 
-msgid "Motivo para ignorar"
+msgid "Reason to ignore"
 msgstr "Motivo para ignorar"
 
-msgid "Ignorar"
+msgid "Ignore"
 msgstr "Ignorar"
 
 msgid ""
-"Correspondência: pagamento ou recebimento nesta conta, com o mesmo valor, "
-"até 10 dias antes ou depois; ou depósito e retirada do caixa para esta "
-"conta. Repasses da maquininha, transferências entre contas e outros acertos "
-"podem ser ignorados com um motivo."
+"Match: a payment made or received in this account, with the same amount, up "
+"to 10 days before or after; or a cash drawer deposit or withdrawal to this "
+"account. Card machine settlements, transfers between accounts and other "
+"adjustments can be ignored with a reason."
 msgstr ""
 "Correspondencia: pago o cobro en esta cuenta, con el mismo valor, hasta 10 "
 "días antes o después; o depósito y retiro de la caja hacia esta cuenta. Las "
 "liquidaciones del terminal de tarjetas, las transferencias entre cuentas y "
 "otros ajustes pueden ignorarse con un motivo."
 
-msgid "Importar extrato (OFX)"
+msgid "Import statement (OFX)"
 msgstr "Importar extracto (OFX)"
 
 msgid ""
-"Transações já importadas antes são puladas, então pode importar períodos que "
-"se sobrepõem."
+"Transactions imported before are skipped, so overlapping periods can be "
+"imported."
 msgstr ""
 "Las transacciones ya importadas se omiten, así que puede importar períodos "
 "que se superponen."
 
-msgid "Importar"
+msgid "Import"
 msgstr "Importar"
 
-msgid "Importações"
+msgid "Imports"
 msgstr "Importaciones"
 
-msgid "Importado em"
+msgid "Imported at"
 msgstr "Importado el"
 
-msgid "Período"
+msgid "Period"
 msgstr "Período"
 
-msgid "Novas"
+msgctxt "feminine plural"
+msgid "New"
 msgstr "Nuevas"
 
-msgid "Nenhum extrato importado ainda."
+msgid "No statement imported yet."
 msgstr "Ningún extracto importado todavía."
 
-msgid "Dados"
+msgctxt "data"
+msgid "Details"
 msgstr "Datos"
 
-msgid "Razão social"
+msgid "Company name"
 msgstr "Razón social"
 
 msgid "E-mail"
 msgstr "Correo electrónico"
 
-msgid "em aberto, somando as parcelas ainda não pagas"
+msgid "outstanding, adding up the installments not paid yet"
 msgstr "pendiente, sumando las cuotas aún no pagadas"
 
-#
-msgid "Contas a pagar"
+msgctxt "accounts"
+msgid "Payables"
 msgstr "Cuentas por pagar"
 
-#
-msgid "Nenhuma conta deste fornecedor ainda."
+msgid "No bills from this supplier yet."
 msgstr "Aún no hay cuentas de este proveedor."
 
-#
-msgid "Novo fornecedor"
+msgid "New supplier"
 msgstr "Nuevo proveedor"
 
-#
 #, python-format
-msgid "Nome, razão social ou %(documentos)s"
+msgid "Name, legal name or %(documentos)s"
 msgstr "Nombre, razón social o %(documentos)s"
 
-#
-msgid "Buscar fornecedor"
+msgid "Search supplier"
 msgstr "Buscar proveedor"
 
-#
-msgid "Nenhum fornecedor encontrado."
+msgid "No suppliers found."
 msgstr "Ningún proveedor encontrado."
 
-#
-msgid "Para deixar de usar sem perder o histórico, edite e desmarque “ativo”."
+msgid ""
+"To stop using it without losing the history, edit it and uncheck “active”."
 msgstr ""
 "Para dejar de usarlo sin perder el historial, edítelo y desmarque “activo”."
 
 msgid ""
-"Cria um lançamento a receber já recebido nesta data e nesta conta, "
-"conciliado com a transação."
+"Creates a receivable already received on this date and in this account, "
+"reconciled with the transaction."
 msgstr ""
 "Crea una cuenta por cobrar ya cobrada en esta fecha y en esta cuenta, "
 "conciliada con la transacción."
 
 msgid ""
-"Cria uma despesa já paga nesta data e nesta conta, conciliada com a "
-"transação."
+"Creates an expense already paid on this date and from this account, "
+"reconciled with the transaction."
 msgstr ""
 "Crea un gasto ya pagado en esta fecha y en esta cuenta, conciliado con la "
 "transacción."
 
-msgid "Criar e conciliar"
+msgid "Create and reconcile"
 msgstr "Crear y conciliar"
 
-msgid "Carteirinha"
+msgid "Card"
 msgstr "Credencial"
 
-#
-msgid "Nova carteirinha"
+msgid "New card"
 msgstr "Nueva credencial"
 
-msgid "O convênio não está na lista?"
+msgid "Is the health plan not on the list?"
 msgstr "¿El convenio no está en la lista?"
 
-#
-msgid "Cadastre o convênio"
+msgid "Register the health plan"
 msgstr "Registre el convenio"
 
-#
-msgid "Novo convênio"
+msgid "New health plan"
 msgstr "Nuevo convenio"
 
-#
-msgid "Nenhum convênio cadastrado."
+msgid "No health plans registered."
 msgstr "Ningún convenio registrado."
 
-#
-#
 msgid ""
-"A carteirinha de cada paciente é cadastrada na ficha dele. Para deixar de "
-"aceitar um convênio sem perder o histórico, edite e desmarque “ativo”."
+"Each patient's card is registered on their record. To stop accepting a "
+"health plan without losing the history, edit it and uncheck “active”."
 msgstr ""
 "La credencial de cada paciente se registra en su ficha. Para dejar de "
 "aceptar un convenio sin perder el historial, edítelo y desmarque “activo”."
 
-msgid "Contato para assuntos de privacidade"
+msgid "Privacy contact"
 msgstr "Contacto para asuntos de privacidad"
 
-msgid "Fale com a clínica que atende você."
+msgid "Contact the clinic that treats you."
 msgstr "Hable con la clínica que lo atiende."
 
-msgid "País da clínica"
+msgid "Clinic's country"
 msgstr "País de la clínica"
 
 msgid ""
-"Esta política foi escrita para a lei brasileira. Para esta clínica valem a "
-"lei e a autoridade abaixo: as referências à LGPD e à ANPD correspondem a "
-"elas, e os direitos da seção 8 são exercidos nos termos dessa lei."
+"This policy was written for Brazilian law. For this clinic, the law and "
+"authority below apply: references to the LGPD and the ANPD correspond to "
+"them, and the rights in section 8 are exercised under that law."
 msgstr ""
 "Esta política se redactó para la ley brasileña. Para esta clínica rigen la "
 "ley y la autoridad indicadas abajo: las referencias a la LGPD y a la ANPD "
 "corresponden a ellas, y los derechos de la sección 8 se ejercen según esa "
 "ley."
 
-msgid "Lei de proteção de dados"
+msgid "Data protection law"
 msgstr "Ley de protección de datos"
 
-msgid "Autoridade"
+msgid "Authority"
 msgstr "Autoridad"
 
-msgid "Desligado nesta clínica: só o administrador do sistema vê"
+msgid "Turned off in this clinic: only the system administrator sees it"
 msgstr "Desactivado en esta clínica: solo el administrador del sistema lo ve"
 
-#
-msgid "desligado"
+msgid "off"
 msgstr "desactivado"
 
-msgid "Paginação"
+msgid "Pagination"
 msgstr "Paginación"
 
-msgid "Anterior"
+msgid "Previous"
 msgstr "Anterior"
 
 #, python-format
-msgid "Página %(numero)s de %(total)s"
+msgid "Page %(numero)s of %(total)s"
 msgstr "Página %(numero)s de %(total)s"
 
-msgid "Próxima"
+msgid "Next"
 msgstr "Siguiente"
 
 #, python-format
-msgid "Digite o nome, código ou %(documentos)s"
+msgid "Type the name, code or %(documentos)s"
 msgstr "Escriba el nombre, código o %(documentos)s"
 
 #, python-format
 msgid ""
-"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
-"%(data)s e necessita de %(dias)s dia de afastamento das suas atividades, a "
-"partir dessa data."
+"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s day "
+"of leave from their activities, starting on that date."
 msgid_plural ""
-"Atesto, para os devidos fins, que %(nome)s esteve sob meus cuidados em "
-"%(data)s e necessita de %(dias)s dias de afastamento das suas atividades, a "
-"partir dessa data."
+"I certify that %(nome)s was under my care on %(data)s and needs %(dias)s "
+"days of leave from their activities, starting on that date."
 msgstr[0] ""
 "Certifico que %(nome)s estuvo bajo mi cuidado el %(data)s y necesita "
 "%(dias)s día de reposo de sus actividades, a partir de esa fecha."
@@ -4457,188 +4445,186 @@ msgstr[1] ""
 
 #, python-format
 msgid ""
-"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
-"clínica em %(data)s, das %(inicio)s às %(fim)s."
+"I certify that %(nome)s was seen at this clinic on %(data)s, from %(inicio)s "
+"to %(fim)s."
 msgstr ""
 "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s, de las "
 "%(inicio)s a las %(fim)s."
 
 #, python-format
-msgid ""
-"Atesto, para os devidos fins, que %(nome)s esteve em atendimento nesta "
-"clínica em %(data)s."
+msgid "I certify that %(nome)s was seen at this clinic on %(data)s."
 msgstr "Certifico que %(nome)s fue atendido(a) en esta clínica el %(data)s."
 
-msgid "Atestado"
+msgid "Certificate"
 msgstr "Certificado"
 
-msgid "ATESTADO"
+msgid "MEDICAL CERTIFICATE"
 msgstr "CERTIFICADO MÉDICO"
 
 msgid ""
-"Depois de emitido, o documento não muda; ele fica guardado no prontuário e "
-"pode ser impresso de novo."
+"Once issued, the document does not change; it is kept in the medical record "
+"and can be printed again."
 msgstr ""
 "Una vez emitido, el documento no cambia; queda guardado en la historia "
 "clínica y puede imprimirse de nuevo."
 
-msgid "Emitir"
+msgid "Issue"
 msgstr "Emitir"
 
-msgid "Pedido de exames"
+msgid "Exam request"
 msgstr "Solicitud de exámenes"
 
-msgid "PEDIDO DE EXAMES"
+msgid "EXAM REQUEST"
 msgstr "SOLICITUD DE EXÁMENES"
 
-msgid "Solicito:"
+msgid "Please perform:"
 msgstr "Solicito:"
 
-msgid "Indicação clínica"
+msgid "Clinical indication"
 msgstr "Indicación clínica"
 
-msgctxt "prescrição"
-msgid "Receita"
+msgctxt "prescription"
+msgid "Prescription"
 msgstr "Receta"
 
-msgid "RECEITUÁRIO"
+msgid "PRESCRIPTION"
 msgstr "RECETA"
 
-msgid "Atendimento"
+msgid "Visit"
 msgstr "Consulta"
 
-msgid "PRONTUÁRIO"
+msgid "MEDICAL RECORD"
 msgstr "HISTORIA CLÍNICA"
 
-msgid "nascido(a) em"
+msgid "born on"
 msgstr "nacido(a) el"
 
-msgid "Adendo"
+msgid "Addendum"
 msgstr "Adenda"
 
 #, python-format
-msgid "Finalizado no sistema em %(momento)s."
+msgid "Finalized in the system on %(momento)s."
 msgstr "Finalizada en el sistema el %(momento)s."
 
-msgid "agendamento de"
+msgid "appointment on"
 msgstr "cita del"
 
 #, python-format
-msgid "Finalizado em %(momento)s"
+msgid "Finalized on %(momento)s"
 msgstr "Finalizada el %(momento)s"
 
-msgid "Rascunho"
+msgid "Draft"
 msgstr "Borrador"
 
 msgid ""
-"Prontuário: visível só para os profissionais da clínica (e o administrador "
-"do sistema) e guardado por 20 anos. Depois de finalizado, o atendimento não "
-"muda mais; correções são feitas por adendo."
+"Medical record: visible only to the clinic's practitioners (and the system "
+"administrator) and kept for 20 years. Once finalized, the visit no longer "
+"changes; corrections are made by addendum."
 msgstr ""
 "Historia clínica: visible solo para los profesionales de la clínica (y el "
 "administrador del sistema) y guardada por 20 años. Una vez finalizada, la "
 "consulta ya no cambia; las correcciones se hacen por adenda."
 
-msgid "Salvar rascunho"
+msgid "Save draft"
 msgstr "Guardar borrador"
 
-msgid "Salvar e finalizar"
+msgid "Save and finalize"
 msgstr "Guardar y finalizar"
 
-msgid "Voltar para a ficha"
+msgid "Back to the patient record"
 msgstr "Volver a la ficha"
 
-msgid "Imprimir atendimento"
+msgid "Print visit"
 msgstr "Imprimir consulta"
 
 msgid ""
-"Rascunho de outro profissional: só quem escreveu pode alterar e finalizar."
+"Draft by another practitioner: only its author can change and finalize it."
 msgstr ""
 "Borrador de otro profesional: solo quien lo escribió puede modificarlo y "
 "finalizarlo."
 
-msgid "Adendos"
+msgid "Addenda"
 msgstr "Adendas"
 
-msgid "Incluir adendo"
+msgid "Add addendum"
 msgstr "Agregar adenda"
 
-msgid "Documentos"
+msgid "Documents"
 msgstr "Documentos"
 
 #, python-format
-msgid "%(dias)s dia"
-msgid_plural "%(dias)s dias"
+msgid "%(dias)s day"
+msgid_plural "%(dias)s days"
 msgstr[0] "%(dias)s día"
 msgstr[1] "%(dias)s días"
 
-msgid "Nenhum documento emitido."
+msgid "No document issued."
 msgstr "Ningún documento emitido."
 
-msgid "Anexos"
+msgid "Attachments"
 msgstr "Adjuntos"
 
-msgid "Nenhum anexo."
+msgid "No attachment."
 msgstr "Ningún adjunto."
 
-msgid "Anexar"
+msgid "Attach"
 msgstr "Adjuntar"
 
-msgid "crítico"
+msgid "critical"
 msgstr "crítico"
 
-msgid "atenção"
+msgid "warning"
 msgstr "atención"
 
 msgid "ok"
 msgstr "ok"
 
 #, python-format
-msgid "carga média: %(carga)s"
+msgid "load average: %(carga)s"
 msgstr "carga media: %(carga)s"
 
-msgid "24 horas"
+msgid "24 hours"
 msgstr "24 horas"
 
-msgid "7 dias"
+msgid "7 days"
 msgstr "7 días"
 
 msgid ""
-"Ainda não há amostras. No servidor, a coleta roda a cada 5 minutos "
-"(kaladrius-health.timer); em desenvolvimento, não há coleta."
+"No samples yet. On the server, collection runs every 5 minutes (kaladrius-"
+"health.timer); in development there is no collection."
 msgstr ""
 "Todavía no hay muestras. En el servidor, la recolección corre cada 5 minutos "
 "(kaladrius-health.timer); en desarrollo no hay recolección."
 
 #, python-format
-msgid "A coleta parou: a última amostra é de %(momento)s."
+msgid "Collection stopped: the last sample is from %(momento)s."
 msgstr "La recolección se detuvo: la última muestra es del %(momento)s."
 
 msgid "Swap"
 msgstr "Swap"
 
 #, python-format
-msgid "Última amostra: %(momento)s."
+msgid "Last sample: %(momento)s."
 msgstr "Última muestra: %(momento)s."
 
 #, python-format
-msgid "Servidor ligado há %(tempo)s."
+msgid "Server up for %(tempo)s."
 msgstr "Servidor encendido hace %(tempo)s."
 
 #, python-format
-msgid "Rede no período: %(recebido)s recebidos, %(enviado)s enviados."
+msgid "Network in the period: %(recebido)s received, %(enviado)s sent."
 msgstr "Red en el período: %(recebido)s recibidos, %(enviado)s enviados."
 
-msgid "topo"
+msgid "top"
 msgstr "tope"
 
-msgid "Poucas amostras para o gráfico."
+msgid "Too few samples for the chart."
 msgstr "Pocas muestras para el gráfico."
 
 #, python-format
 msgid ""
-"No período: processador com média de %(media)s%% e pico de %(pico)s%%; "
-"memória com pico de %(memoria)s%% em uso; swap com pico de %(swap)s%%."
+"In the period: processor averaging %(media)s%% with a peak of %(pico)s%%; "
+"memory peaking at %(memoria)s%% in use; swap peaking at %(swap)s%%."
 msgstr ""
 "En el período: procesador con promedio de %(media)s%% y pico de %(pico)s%%; "
 "memoria con pico de %(memoria)s%% en uso; swap con pico de %(swap)s%%."
@@ -4647,96 +4633,95 @@ msgid "Containers"
 msgstr "Contenedores"
 
 #, python-format
-msgid "Banco de dados · %(tamanho)s"
+msgid "Database · %(tamanho)s"
 msgstr "Base de datos · %(tamanho)s"
 
-msgid "Maiores tabelas"
+msgid "Largest tables"
 msgstr "Tablas más grandes"
 
-msgid "Registros"
+msgid "Rows"
 msgstr "Registros"
 
-msgid "Tamanho"
+msgid "Size"
 msgstr "Tamaño"
 
 #, python-format
-msgid "Último backup: %(momento)s (%(tamanho)s)."
+msgid "Last backup: %(momento)s (%(tamanho)s)."
 msgstr "Última copia de seguridad: %(momento)s (%(tamanho)s)."
 
-msgid "Nenhum backup registrado."
+msgid "No backup recorded."
 msgstr "Ninguna copia de seguridad registrada."
 
 msgid ""
-"Os números vêm de comandos do Linux no servidor, a cada 5 minutos, e ficam "
-"guardados por 7 dias."
+"The numbers come from Linux commands on the server, every 5 minutes, and are "
+"kept for 7 days."
 msgstr ""
 "Los números vienen de comandos de Linux en el servidor, cada 5 minutos, y se "
 "guardan por 7 días."
 
-msgid "Para ver o relatório no terminal:"
+msgid "To see the report in the terminal:"
 msgstr "Para ver el informe en la terminal:"
 
-msgid "Arquivar paciente"
+msgid "Archive patient"
 msgstr "Archivar paciente"
 
 #, python-format
-msgid "Arquivar %(nome)s?"
+msgid "Archive %(nome)s?"
 msgstr "¿Archivar a %(nome)s?"
 
 msgid ""
-"O paciente sai das listas, da busca, da agenda, dos aniversariantes e das "
-"rechamadas da equipe. Nada é apagado: os agendamentos, as rechamadas e o "
-"histórico continuam guardados."
+"The patient leaves the team's lists, search, schedule, birthdays and "
+"recalls. Nothing is deleted: appointments, recalls and history are kept."
 msgstr ""
 "El paciente sale de las listas, la búsqueda, la agenda, los cumpleaños y los "
 "recordatorios del equipo. No se borra nada: las citas, los recordatorios y "
 "el historial se conservan."
 
 msgid ""
-"Só administradores da clínica veem os pacientes arquivados (na lista de "
-"pacientes, em Situação: Arquivados) e podem restaurá-los."
+"Only clinic administrators see archived patients (in the patient list, under "
+"Status: Archived) and can restore them."
 msgstr ""
 "Solo los administradores de la clínica ven los pacientes archivados (en la "
 "lista de pacientes, en Situación: Archivados) y pueden restaurarlos."
 
 msgid ""
-"Este paciente ainda tem contas em aberto. Receba ou cancele cada uma no "
-"financeiro e depois volte para arquivar."
+"This patient still has open entries. Receive or cancel each one in Finance, "
+"then come back to archive."
 msgstr ""
 "Este paciente todavía tiene cuentas pendientes. Cobre o anule cada una en "
 "Finanzas y después vuelva para archivar."
 
-msgctxt "valor"
-msgid "Em aberto"
+msgctxt "amount"
+msgid "Outstanding"
 msgstr "Pendiente"
 
-msgid "Arquivar"
+msgid "Archive"
 msgstr "Archivar"
 
 #, python-format
-msgid "%(total)s aniversariante (pacientes ativos)"
-msgid_plural "%(total)s aniversariantes (pacientes ativos)"
+msgid "%(total)s birthday (active patients)"
+msgid_plural "%(total)s birthdays (active patients)"
 msgstr[0] "%(total)s cumpleaños (pacientes activos)"
 msgstr[1] "%(total)s cumpleaños (pacientes activos)"
 
-msgid "Completa"
+msgid "Turns"
 msgstr "Cumple"
 
-msgid "Nenhum aniversariante neste mês."
+msgid "No birthdays this month."
 msgstr "Ningún cumpleaños en este mes."
 
-msgid "Excluir paciente"
+msgid "Delete patient"
 msgstr "Eliminar paciente"
 
 #, python-format
-msgid "Excluir definitivamente %(nome)s?"
+msgid "Permanently delete %(nome)s?"
 msgstr "¿Eliminar definitivamente a %(nome)s?"
 
 #, python-format
 msgid ""
-"Use só quando o próprio paciente pedir a exclusão dos seus dados (%(lei)s). "
-"Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica "
-"não é obrigada a guardar os registros de atendimento."
+"Use only when the patient asks for their data to be deleted (%(lei)s). To "
+"take them out of day-to-day use, keep them archived. First, check that the "
+"clinic is not required to keep the care records."
 msgstr ""
 "Úselo solo cuando el propio paciente pida la eliminación de sus datos "
 "(%(lei)s). Para sacarlo del día a día, manténgalo archivado. Antes, "
@@ -4745,13 +4730,11 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Este paciente tem prontuário (%(total)s atendimento), que a clínica precisa "
-"guardar, então ele não pode ser excluído definitivamente: mantenha-o "
-"arquivado."
+"This patient has a medical record (%(total)s visit), which the clinic must "
+"keep, so they cannot be permanently deleted: keep them archived."
 msgid_plural ""
-"Este paciente tem prontuário (%(total)s atendimentos), que a clínica precisa "
-"guardar, então ele não pode ser excluído definitivamente: mantenha-o "
-"arquivado."
+"This patient has a medical record (%(total)s visits), which the clinic must "
+"keep, so they cannot be permanently deleted: keep them archived."
 msgstr[0] ""
 "Este paciente tiene historia clínica (%(total)s atención), que la clínica "
 "debe conservar, así que no se puede eliminar definitivamente: manténgalo "
@@ -4761,830 +4744,694 @@ msgstr[1] ""
 "debe conservar, así que no se puede eliminar definitivamente: manténgalo "
 "archivado."
 
-msgid "Esta ação não pode ser desfeita:"
+msgid "This action cannot be undone:"
 msgstr "Esta acción no se puede deshacer:"
 
-msgid "o cadastro do paciente é apagado;"
+msgid "the patient's record is deleted;"
 msgstr "el registro del paciente se elimina;"
 
-msgid "os agendamentos continuam na agenda, mas sem o paciente;"
+msgid "appointments stay in the schedule, without the patient;"
 msgstr "las citas siguen en la agenda, pero sin el paciente;"
 
-msgid "as rechamadas do paciente são apagadas;"
+msgid "the patient's recalls are deleted;"
 msgstr "los recordatorios del paciente se eliminan;"
 
-#
-msgid "as carteirinhas de convênio do paciente são apagadas;"
+msgid "the patient's health plan cards are deleted;"
 msgstr "las credenciales de convenio del paciente se borran;"
 
 msgid ""
-"as pessoas relacionadas são apagadas, inclusive os vínculos de outros "
-"pacientes com ele;"
+"the related people are deleted, including other patients' links to them;"
 msgstr ""
 "las personas relacionadas se eliminan, incluidos los vínculos de otros "
 "pacientes con él;"
 
 msgid ""
-"a auditoria continua dizendo quem fez o quê e quando, mas sem os dados "
-"pessoais do paciente;"
+"the audit log still says who did what and when, without the patient's "
+"personal data;"
 msgstr ""
 "la auditoría sigue indicando quién hizo qué y cuándo, pero sin los datos "
 "personales del paciente;"
 
-msgid ""
-"os backups com os dados atuais são apagados automaticamente em até 30 dias."
+msgid "backups with the current data are deleted automatically within 30 days."
 msgstr ""
 "las copias de seguridad con los datos actuales se eliminan automáticamente "
 "en hasta 30 días."
 
-msgid "Excluir definitivamente"
+msgid "Delete permanently"
 msgstr "Eliminar definitivamente"
 
-msgid "Editar paciente"
+msgid "Edit patient"
 msgstr "Editar paciente"
 
 #, python-format
-msgid "Editar %(nome)s"
+msgid "Edit %(nome)s"
 msgstr "Editar %(nome)s"
 
-msgid "Identificação"
+msgid "Identification"
 msgstr "Identificación"
 
-msgid "Endereço"
+msgid "Address"
 msgstr "Dirección"
 
-msgid "Observações"
+msgid "Notes"
 msgstr "Observaciones"
 
 #, python-format
-msgid "Nome, código ou %(documentos)s"
+msgid "Name, code or %(documentos)s"
 msgstr "Nombre, código o %(documentos)s"
 
-msgid "Ativos"
+msgctxt "plural"
+msgid "Active"
 msgstr "Activos"
 
-msgid "Inativos"
+msgctxt "plural"
+msgid "Inactive"
 msgstr "Inactivos"
 
-msgid "Arquivados"
+msgctxt "plural"
+msgid "Archived"
 msgstr "Archivados"
 
 #, python-format
-msgid "%(total)s paciente"
-msgid_plural "%(total)s pacientes"
+msgid "%(total)s patient"
+msgid_plural "%(total)s patients"
 msgstr[0] "%(total)s paciente"
 msgstr[1] "%(total)s pacientes"
 
-msgid "Idade"
+msgid "Age"
 msgstr "Edad"
 
-msgid "Arquivado"
+msgid "Archived"
 msgstr "Archivado"
 
-msgid "Nenhum paciente encontrado."
+msgid "No patients found."
 msgstr "Ningún paciente encontrado."
 
-msgid "Ficha cadastral"
+msgid "Registration sheet"
 msgstr "Ficha de registro"
 
-msgid "FICHA CADASTRAL"
+msgid "REGISTRATION SHEET"
 msgstr "FICHA DE REGISTRO"
 
-msgid "Inscrição estadual"
+msgid "State registration"
 msgstr "Inscripción estatal"
 
-msgid "Nascimento"
+msgid "Birth date"
 msgstr "Nacimiento"
 
-msgid "Sexo"
+msgid "Sex"
 msgstr "Sexo"
 
-msgid "Estado civil"
+msgid "Marital status"
 msgstr "Estado civil"
 
-msgid "Profissão"
+msgid "Occupation"
 msgstr "Profesión"
 
-msgid "Responsável"
+msgid "Guardian"
 msgstr "Responsable"
 
-msgid "Residencial"
+msgctxt "phone"
+msgid "Home"
 msgstr "Casa"
 
-msgid "Comercial"
+msgid "Work"
 msgstr "Trabajo"
 
-#
-msgid "Convênio"
+msgid "Health plan"
 msgstr "Convenio"
 
-#
-msgid "Plano"
+msgid "Plan type"
 msgstr "Plan"
 
-#
-#
-msgid "Validade"
+msgid "Valid until"
 msgstr "Validez"
 
-#
-msgid "Titular"
+msgid "Holder"
 msgstr "Titular"
 
-msgid "Pessoas relacionadas"
+msgid "Related people"
 msgstr "Personas relacionadas"
 
-msgid "Vínculo"
+msgid "Relationship"
 msgstr "Vínculo"
 
-msgid "Assinatura do paciente ou responsável"
+msgid "Signature of the patient or guardian"
 msgstr "Firma del paciente o responsable"
 
-msgid "Restaurar"
+msgid "Restore"
 msgstr "Restaurar"
 
-#
-msgid "Imprimir ficha"
+msgid "Print sheet"
 msgstr "Imprimir ficha"
 
 #, python-format
-msgid "Arquivado em %(momento)s."
+msgid "Archived on %(momento)s."
 msgstr "Archivado el %(momento)s."
 
 #, python-format
-msgid "Por %(nome)s."
+msgid "By %(nome)s."
 msgstr "Por %(nome)s."
 
 msgid ""
-"Só administradores da clínica veem este paciente. Restaure para voltar a usá-"
-"lo na agenda e nas rechamadas."
+"Only clinic administrators see this patient. Restore them to use them again "
+"in the schedule and recalls."
 msgstr ""
 "Solo los administradores de la clínica ven este paciente. Restáurelo para "
 "volver a usarlo en la agenda y en los recordatorios."
 
-msgid "Contato e endereço"
+msgid "Contact and address"
 msgstr "Contacto y dirección"
 
-msgid "Nova pessoa relacionada"
+msgid "New related person"
 msgstr "Nueva persona relacionada"
 
 #, python-format
-msgid "%(vinculo)s de"
+msgid "%(vinculo)s of"
 msgstr "%(vinculo)s de"
 
-#
-msgid "Nenhuma pessoa relacionada."
+msgid "No related people."
 msgstr "Ninguna persona relacionada."
 
-msgid "Novo atendimento"
+msgid "New visit"
 msgstr "Nueva consulta"
 
-msgid "Finalizado"
+msgid "Finalized"
 msgstr "Finalizada"
 
-msgid "Nenhum atendimento registrado."
+msgid "No visit recorded."
 msgstr "Ninguna consulta registrada."
 
-msgid "Agendamentos"
+msgid "Appointments"
 msgstr "Citas"
 
 #, python-format
-msgid "%(total)s no total"
+msgid "%(total)s in total"
 msgstr "%(total)s en total"
 
-msgid "Próximos"
+msgid "Upcoming"
 msgstr "Próximas"
 
-msgid "Nenhum agendamento futuro."
+msgid "No upcoming appointments."
 msgstr "Ninguna cita futura."
 
-msgid "Anteriores (mais recentes primeiro)"
+msgid "Past (most recent first)"
 msgstr "Anteriores (las más recientes primero)"
 
-msgid "Nenhum agendamento anterior."
+msgid "No past appointments."
 msgstr "Ninguna cita anterior."
 
-msgid "Nenhum orçamento."
+msgid "No estimates."
 msgstr "Ningún presupuesto."
 
-#
-msgid "beneficiário"
+msgid "beneficiary"
 msgstr "beneficiario"
 
-msgctxt "carteirinha"
-msgid "Vencida"
+msgctxt "member card"
+msgid "Expired"
 msgstr "Vencida"
 
-msgid "Particular: nenhuma carteirinha de convênio."
+msgid "Private: no health plan card."
 msgstr "Particular: ninguna credencial de convenio."
 
-msgid "receber"
+msgid "receive"
 msgstr "cobrar"
 
-msgid "Últimos pagamentos"
+msgid "Latest payments"
 msgstr "Últimos pagos"
 
-msgid "Nova rechamada"
+msgid "New recall"
 msgstr "Nuevo recordatorio"
 
-msgid "Concluída"
+msgid "Done"
 msgstr "Completado"
 
-msgid "Nenhuma rechamada."
+msgid "No recalls."
 msgstr "Ningún recordatorio."
 
 #, python-format
-msgid "Cadastrado em %(criado)s · alterado em %(alterado)s"
+msgid "Registered on %(criado)s · changed on %(alterado)s"
 msgstr "Registrado el %(criado)s · modificado el %(alterado)s"
 
-msgid "Pessoa relacionada"
+msgid "Related person"
 msgstr "Persona relacionada"
 
-#
-msgid "Paciente da clínica"
+msgid "Clinic patient"
 msgstr "Paciente de la clínica"
 
 msgid ""
-"Se a pessoa for paciente da clínica, procure pelo nome; se não, preencha o "
-"nome abaixo."
+"If the person is a patient of the clinic, search by name; if not, fill in "
+"the name below."
 msgstr ""
 "Si la persona es paciente de la clínica, búsquela por el nombre; si no, "
 "complete el nombre abajo."
 
 msgid ""
-"O vínculo é só informação do cadastro: não dá acesso a nenhum dado do "
-"paciente."
+"The relationship is only registration information: it gives no access to any "
+"of the patient's data."
 msgstr ""
 "El vínculo es solo información del registro: no da acceso a ningún dato del "
 "paciente."
 
-#
-msgid "Remover"
+msgid "Remove"
 msgstr "Quitar"
 
-msgid "Excluir profissional"
+msgid "Delete practitioner"
 msgstr "Eliminar profesional"
 
 #, python-format
-msgid "Excluir %(nome)s?"
+msgid "Delete %(nome)s?"
 msgstr "¿Eliminar %(nome)s?"
 
 msgid ""
-"Esta ação não pode ser desfeita. Se quiser apenas esconder o profissional, "
-"edite e desmarque “ativo”."
+"This action cannot be undone. To just hide the practitioner, edit and "
+"uncheck “active”."
 msgstr ""
 "Esta acción no se puede deshacer. Si solo quiere ocultar al profesional, "
 "edítelo y desmarque “activo”."
 
-msgid "Editar profissional"
+msgid "Edit practitioner"
 msgstr "Editar profesional"
 
-msgid "Novo profissional"
+msgid "New practitioner"
 msgstr "Nuevo profesional"
 
-msgid "Cor"
+msgid "Color"
 msgstr "Color"
 
-msgid "Usuário de acesso"
+msgid "Login user"
 msgstr "Usuario de acceso"
 
-msgid "Nenhum profissional cadastrado."
+msgid "No practitioners yet."
 msgstr "Ningún profesional registrado."
 
 #, python-format
-msgid "Rechamadas de %(dia)s"
+msgid "Recalls on %(dia)s"
 msgstr "Recordatorios del %(dia)s"
 
-msgid "Nenhuma rechamada neste dia."
+msgid "No recalls on this day."
 msgstr "Ningún recordatorio en este día."
 
-msgid "Abrir em Rechamadas"
+msgid "Open in Recalls"
 msgstr "Abrir en Recordatorios"
 
-msgid "Excluir rechamada"
+msgid "Delete recall"
 msgstr "Eliminar recordatorio"
 
 #, python-format
-msgid "Excluir a rechamada de %(nome)s (%(data)s)?"
+msgid "Delete the recall for %(nome)s (%(data)s)?"
 msgstr "¿Eliminar el recordatorio de %(nome)s (%(data)s)?"
 
-msgid "Esta ação não pode ser desfeita."
+msgid "This action cannot be undone."
 msgstr "Esta acción no se puede deshacer."
 
-msgid "Editar rechamada"
+msgid "Edit recall"
 msgstr "Editar recordatorio"
 
-msgid "Concluídas"
+msgctxt "plural"
+msgid "Done"
 msgstr "Completados"
 
 #, python-format
-msgid "%(total)s rechamada"
-msgid_plural "%(total)s rechamadas"
+msgid "%(total)s recall"
+msgid_plural "%(total)s recalls"
 msgstr[0] "%(total)s recordatorio"
 msgstr[1] "%(total)s recordatorios"
 
-msgid "Atrasada"
+msgctxt "late"
+msgid "Overdue"
 msgstr "Atrasado"
 
-msgid "Hoje"
+msgid "Today"
 msgstr "Hoy"
 
-msgid "Concluir"
+msgid "Mark as done"
 msgstr "Completar"
 
-msgid "Nenhuma rechamada encontrada."
+msgid "No recalls found."
 msgstr "Ningún recordatorio encontrado."
 
-msgid "Instituições financeiras conforme a lista pública do Banco Central."
+msgid "Financial institutions from the Central Bank of Brazil's public list."
 msgstr ""
 "Instituciones financieras según la lista pública del Banco Central de Brasil."
 
-msgid "Nome ou código do banco"
+msgid "Bank name or code"
 msgstr "Nombre o código del banco"
 
-msgid "Nenhum banco encontrado."
+msgid "No banks found."
 msgstr "Ningún banco encontrado."
 
-msgid "Municípios brasileiros conforme o IBGE."
+msgid "Brazilian municipalities according to IBGE."
 msgstr "Municipios brasileños según el IBGE."
 
-msgid "Todas as UFs"
+msgid "All states"
 msgstr "Todos los estados"
 
-msgid "Nome da cidade"
+msgid "City name"
 msgstr "Nombre de la ciudad"
 
 #, python-format
-msgid "%(total)s cidade"
-msgid_plural "%(total)s cidades"
+msgid "%(total)s city"
+msgid_plural "%(total)s cities"
 msgstr[0] "%(total)s ciudad"
 msgstr[1] "%(total)s ciudades"
 
-msgid "Código IBGE"
+msgid "IBGE code"
 msgstr "Código IBGE"
 
-msgid "Nenhuma cidade encontrada."
+msgid "No cities found."
 msgstr "Ninguna ciudad encontrada."
 
-msgid "Selecione a cidade"
+msgid "Select the city"
 msgstr "Seleccione la ciudad"
 
-msgid "Acesso bloqueado"
+msgid "Access blocked"
 msgstr "Acceso bloqueado"
 
-msgid "Acesso bloqueado temporariamente"
+msgid "Access temporarily blocked"
 msgstr "Acceso bloqueado temporalmente"
 
 msgid ""
-"Foram feitas muitas tentativas de entrada com senha errada. Por segurança, "
-"este acesso ficará bloqueado por 1 hora. Se esqueceu a senha, fale com o "
-"administrador da clínica."
+"Too many login attempts with a wrong password. For security, this access "
+"will be blocked for 1 hour. If you forgot your password, talk to the clinic "
+"administrator."
 msgstr ""
 "Se hicieron demasiados intentos de acceso con una contraseña incorrecta. Por "
 "seguridad, este acceso quedará bloqueado durante 1 hora. Si olvidó su "
 "contraseña, hable con el administrador de la clínica."
 
-msgid "Você saiu do sistema."
+msgid "You have logged out."
 msgstr "Ha salido del sistema."
 
-msgid "Entrar novamente"
+msgid "Log in again"
 msgstr "Entrar nuevamente"
 
 #, python-format
 msgid ""
-"Você saiu do sistema depois de %(minutos)s minutos sem uso. Entre de novo "
-"para continuar."
+"You were logged out after %(minutos)s minutes without use. Log in again to "
+"continue."
 msgstr ""
 "Salió del sistema después de %(minutos)s minutos sin uso. Ingrese de nuevo "
 "para continuar."
 
-msgid "Usuário ou senha incorretos."
+msgid "Incorrect username or password."
 msgstr "Usuario o contraseña incorrectos."
 
-msgid "Você não tem permissão para acessar esta página."
+msgid "You do not have permission to access this page."
 msgstr "No tiene permiso para acceder a esta página."
 
-msgid "Senha"
+msgid "Password"
 msgstr "Contraseña"
 
 #, python-format
-msgid "Aniversariantes de %(dia)s"
+msgid "Birthdays on %(dia)s"
 msgstr "Cumpleaños del %(dia)s"
 
 #, python-format
-msgid "completa %(idade)s ano"
-msgid_plural "completa %(idade)s anos"
+msgid "turns %(idade)s"
+msgid_plural "turns %(idade)s"
 msgstr[0] "cumple %(idade)s año"
 msgstr[1] "cumple %(idade)s años"
 
-msgid "Nenhum aniversariante neste dia."
+msgid "No birthdays on this day."
 msgstr "Ningún cumpleaños en este día."
 
-msgid "Excluir agendamento?"
+msgid "Delete appointment?"
 msgstr "¿Eliminar la cita?"
 
 #, python-format
-msgid "%(inicio)s às %(fim)s"
+msgid "%(inicio)s to %(fim)s"
 msgstr "%(inicio)s a %(fim)s"
 
-msgid "Somente este"
+msgid "Only this one"
 msgstr "Solo esta"
 
 #, python-format
-msgid "Este e os próximos %(proximos)s da mesma repetição"
+msgid "This one and the next %(proximos)s of the same series"
 msgstr "Esta y las próximas %(proximos)s de la misma repetición"
 
-msgid "Editar agendamento"
+msgid "Edit appointment"
 msgstr "Editar cita"
 
-msgid "Novo agendamento"
+msgid "New appointment"
 msgstr "Nueva cita"
 
-msgid "Opcional. Sem paciente, use a descrição (ex.: “Reunião”, “Bloqueado”)."
+msgid ""
+"Optional. Without a patient, use the description (e.g.: “Meeting”, "
+"“Blocked”)."
 msgstr ""
 "Opcional. Sin paciente, use la descripción (ej.: “Reunión”, “Bloqueado”)."
 
-msgid "Situação:"
+msgid "Status:"
 msgstr "Situación:"
 
-msgid "Desfazer marcação"
+msgid "Undo mark"
 msgstr "Deshacer marca"
 
-msgid "Agendar outro paciente neste horário"
+msgid "Book another patient at this time"
 msgstr "Agendar otro paciente en este horario"
 
-msgid "Abrir atendimento"
+msgid "Open visit"
 msgstr "Abrir consulta"
 
-msgid "Registrar atendimento"
+msgid "Record visit"
 msgstr "Registrar consulta"
 
-msgid "Ir para a data"
+msgid "Go to date"
 msgstr "Ir a la fecha"
 
 msgid ""
-"Seu usuário ainda não está ligado a um cadastro de profissional ativo, então "
-"não há agenda para mostrar. Peça ao administrador da clínica para ligá-lo em "
-"Cadastros > Profissionais."
+"Your user is not linked to an active practitioner record yet, so there is no "
+"schedule to show. Ask the clinic administrator to link it in Records > "
+"Practitioners."
 msgstr ""
 "Su usuario aún no está vinculado a un registro de profesional activo, así "
 "que no hay agenda para mostrar. Pida al administrador de la clínica que lo "
 "vincule en Registros > Profesionales."
 
-msgid "Nenhum profissional ativo nesta clínica."
+msgid "No active practitioners in this clinic."
 msgstr "Ningún profesional activo en esta clínica."
 
-msgid "Cadastre um profissional"
+msgid "Add a practitioner"
 msgstr "Registre un profesional"
 
-msgid "para usar a agenda."
+msgid "to use the schedule."
 msgstr "para usar la agenda."
 
-msgid "Legenda dos tipos de atendimento"
+msgid "Appointment type legend"
 msgstr "Leyenda de los tipos de atención"
 
-msgid "✓ compareceu · ✗ faltou · riscado: desmarcou (horário livre)"
+msgid "✓ came · ✗ missed · struck through: cancelled (slot free)"
 msgstr "✓ asistió · ✗ faltó · tachado: canceló (horario libre)"
 
-#
-msgid ""
-"Clique ou toque em um horário livre (ou arraste sobre vários) para agendar."
+msgid "Click or tap a free time (or drag over several) to book."
 msgstr ""
 "Haga clic o toque un horario libre (o arrastre sobre varios) para agendar."
 
-msgid "Excluir tipo de atendimento"
+msgid "Delete appointment type"
 msgstr "Eliminar tipo de atención"
 
 msgid ""
-"Esta ação não pode ser desfeita. Se quiser apenas esconder o tipo, edite e "
-"desmarque “ativo”."
+"This action cannot be undone. To just hide the type, edit it and uncheck "
+"“active”."
 msgstr ""
 "Esta acción no se puede deshacer. Si solo quiere ocultar el tipo, edítelo y "
 "desmarque “activo”."
 
-msgid "Editar tipo de atendimento"
+msgid "Edit appointment type"
 msgstr "Editar tipo de atención"
 
-msgid "Novo tipo de atendimento"
+msgid "New appointment type"
 msgstr "Nuevo tipo de atención"
 
-msgid "Novo tipo"
+msgid "New type"
 msgstr "Nuevo tipo"
 
-msgid "A cor de cada tipo pinta os horários na agenda."
+msgid "Each type's color paints its slots in the schedule."
 msgstr "El color de cada tipo pinta sus horarios en la agenda."
 
-msgid "Nenhum tipo de atendimento cadastrado."
+msgid "No appointment types yet."
 msgstr "Ningún tipo de atención registrado."
 
-msgid "Cargo"
+msgid "Job title"
 msgstr "Cargo"
 
-#
-msgid "Admissão"
+msgid "Hired"
 msgstr "Ingreso"
 
-#
-msgid "Desligamento"
+msgid "Left"
 msgstr "Baja"
 
-msgid "Salário atual"
+msgid "Current salary"
 msgstr "Salario actual"
 
-#
-msgid "Histórico de salários"
+msgid "Salary history"
 msgstr "Historial de salarios"
 
-#
-msgid "Nenhum salário registrado."
+msgid "No salary registered."
 msgstr "Ningún salario registrado."
 
-msgid "Folhas"
+msgid "Monthly pay"
 msgstr "Sueldos"
 
-#
-msgid "Faltas"
+msgid "Absences"
 msgstr "Ausencias"
 
-#
-msgid "No financeiro"
+msgid "In finance"
 msgstr "En el financiero"
 
-msgid "Em preparo"
+msgid "Being prepared"
 msgstr "En preparación"
 
-#
-#
-msgid "Nenhuma folha ainda."
+msgid "No monthly pay yet."
 msgstr "Aún no hay sueldos."
 
-#
-#
-msgid "Novo funcionário"
+msgid "New employee"
 msgstr "Nuevo empleado"
 
-#
-#
-msgid "Nenhum funcionário cadastrado."
+msgid "No employees registered."
 msgstr "Ningún empleado registrado."
 
 msgid ""
-"Salário, horas extras e faltas viram contas a pagar na folha do mês. "
-"Encargos, férias e 13º ficam com o contador."
+"Salary, overtime and absences become payables in the month's pay. Payroll "
+"taxes, vacations and the 13th salary stay with the accountant."
 msgstr ""
 "Salario, horas extras y ausencias se convierten en cuentas por pagar en los "
 "sueldos del mes. Cargas sociales, vacaciones y aguinaldo quedan con el "
 "contador."
 
 #, python-format
-msgid "Folha de %(mes)s"
+msgid "Pay for %(mes)s"
 msgstr "Sueldos de %(mes)s"
 
 msgid ""
-"Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da "
-"hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. "
-"Encargos, férias e 13º ficam com o contador."
+"One line per employee working in the month. Overtime = hours × hourly rate "
+"(suggested: salary ÷ 220 × 1.5). Absences deduct salary ÷ 30 per day. "
+"Payroll taxes, vacations and the 13th salary stay with the accountant."
 msgstr ""
 "Una línea por empleado activo en el mes. Horas extras = cantidad × valor de "
 "la hora (sugerido: salario ÷ 220 × 1,5). Las ausencias descuentan salario ÷ "
 "30 por día. Cargas sociales, vacaciones y aguinaldo quedan con el contador."
 
-#
-msgid "Funcionário"
+msgid "Employee"
 msgstr "Empleado"
 
-#
-msgid "Valor da hora"
+msgid "Hourly rate"
 msgstr "Valor de la hora"
 
-msgid "Faltas (dias)"
+msgid "Absences (days)"
 msgstr "Ausencias (días)"
 
-#
-msgid "no financeiro"
+msgid "in finance"
 msgstr "en el financiero"
 
-#
-msgid "Nenhum funcionário com salário neste mês."
+msgid "No employee with a salary in this month."
 msgstr "Ningún empleado con salario en este mes."
 
-#
-#
-msgid "Cadastrar um funcionário"
+msgid "Register an employee"
 msgstr "Registrar un empleado"
 
-#
-msgid "Total do mês"
+msgid "Month's total"
 msgstr "Total del mes"
 
-#
-msgid "Lançar no financeiro"
+msgid "Launch into finance"
 msgstr "Registrar en el financiero"
 
 msgid ""
-"Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. "
-"Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta "
-"no financeiro."
+"Each line not launched yet becomes a payable in the employee's name. Once "
+"launched, the line no longer changes here; to redo it, cancel the payable in "
+"finance."
 msgstr ""
 "Cada línea aún no registrada se convierte en una cuenta por pagar a nombre "
 "del empleado. Una vez registrada, la línea ya no cambia aquí; para "
 "rehacerla, cancele la cuenta en el financiero."
 
-#
-msgid "Salvar e lançar no financeiro"
+msgid "Save and launch into finance"
 msgstr "Guardar y registrar en el financiero"
 
-msgid "Usuário:"
+msgid "User:"
 msgstr "Usuario:"
 
-msgid "Nesta clínica"
+msgid "In this clinic"
 msgstr "En esta clínica"
 
-msgid "Dados da conta"
+msgid "Account details"
 msgstr "Datos de la cuenta"
 
 msgid ""
-"Esta pessoa também tem acesso a outra clínica ou à plataforma. Nome, e-mail "
-"e senha só podem ser alterados por ela mesma ou pelo suporte."
+"This person also has access to another clinic or to the platform. Name, e-"
+"mail and password can only be changed by them or by support."
 msgstr ""
 "Esta persona también tiene acceso a otra clínica o a la plataforma. El "
 "nombre, el correo y la contraseña solo pueden cambiarlos ella misma o el "
 "soporte."
 
-msgid "Definir nova senha"
+msgid "Set new password"
 msgstr "Definir nueva contraseña"
 
 msgid ""
-"Se a pessoa perdeu o celular e os códigos de recuperação, remova a "
-"verificação: ela entra só com a senha e ativa de novo com um QR code novo."
+"If the person lost the phone and the recovery codes, remove the "
+"verification: they log in with the password only and turn it on again with a "
+"new QR code."
 msgstr ""
 "Si la persona perdió el celular y los códigos de recuperación, quite la "
 "verificación: ingresa solo con la contraseña y la activa de nuevo con un "
 "código QR nuevo."
 
-msgid "Remover a verificação em duas etapas"
+msgid "Remove two-step verification"
 msgstr "Quitar la verificación en dos pasos"
 
-msgid "Novo membro"
+msgid "New member"
 msgstr "Nuevo miembro"
 
-msgid "Último acesso"
+msgid "Last login"
 msgstr "Último acceso"
 
-msgid "você"
+msgid "you"
 msgstr "usted"
 
-msgid "nunca"
+msgid "never"
 msgstr "nunca"
 
-msgid "Sem acesso"
+msgid "No access"
 msgstr "Sin acceso"
 
-msgid "Nenhum membro na equipe."
+msgid "No team members."
 msgstr "Ningún miembro en el equipo."
 
 msgid ""
-"Para tirar alguém da equipe, edite e desmarque o acesso: o histórico de quem "
-"fez o quê é mantido."
+"To remove someone from the team, edit them and uncheck the access: the "
+"history of who did what is kept."
 msgstr ""
 "Para quitar a alguien del equipo, edítelo y desmarque el acceso: el "
 "historial de quién hizo qué se conserva."
 
-msgid "Novo membro da equipe"
+msgid "New team member"
 msgstr "Nuevo miembro del equipo"
 
 msgid ""
-"Passe a senha à pessoa e peça que ela a troque no primeiro acesso (menu com "
-"o nome dela › Trocar senha)."
+"Give the password to the person and ask them to change it on first login "
+"(menu with their name › Change password)."
 msgstr ""
 "Entregue la contraseña a la persona y pídale que la cambie en el primer "
 "acceso (menú con su nombre › Cambiar contraseña)."
 
-msgid "A pessoa sai do sistema nos aparelhos em que estiver conectada."
+msgid "The person is logged out on the devices where they are signed in."
 msgstr "La persona sale del sistema en los dispositivos donde esté conectada."
 
-msgid "Filtrar por módulo"
+msgid "Filter by module"
 msgstr "Filtrar por módulo"
 
-msgid "Todos os módulos"
+msgid "All modules"
 msgstr "Todos los módulos"
 
 #, python-format
-msgid "Versão %(versao)s"
+msgid "Version %(versao)s"
 msgstr "Versión %(versao)s"
 
 #, python-format
-msgid "Atualização proposta pelo %(origem)s (pull request #%(pr)s)"
+msgid "Update proposed by %(origem)s (pull request #%(pr)s)"
 msgstr "Actualización propuesta por %(origem)s (pull request #%(pr)s)"
 
-msgid "Nenhuma novidade registrada ainda."
+msgid "No release notes yet."
 msgstr "Todavía no hay novedades registradas."
-
-#
-#~ msgid "Registro na ANS"
-#~ msgstr "Registro en la ANS"
-
-#~ msgid "O registro na ANS tem 6 dígitos."
-#~ msgstr "El registro en la ANS tiene 6 dígitos."
-
-#
-#~ msgid "registro na ANS"
-#~ msgstr "registro en la ANS"
-
-#~ msgid "Os 6 dígitos do registro da operadora na ANS, se houver."
-#~ msgstr "Los 6 dígitos del registro de la operadora en la ANS, si lo hay."
-
-#~ msgid "CPF/CNPJ"
-#~ msgstr "CPF/CNPJ (identificación fiscal)"
-
-#~ msgid "CPF/CNPJ inválido."
-#~ msgstr "CPF/CNPJ no válido."
-
-#~ msgid "Somente números."
-#~ msgstr "Solo números."
-
-#~ msgid "CPF"
-#~ msgstr "CPF"
-
-#
-#
-#~ msgid "Já existe um funcionário com este CPF."
-#~ msgstr "Ya existe un empleado con este CPF."
-
-#~ msgid "CNPJ"
-#~ msgstr "CNPJ"
-
-#~ msgid "Nome, código ou CPF/CNPJ"
-#~ msgstr "Nombre, código o CPF/CNPJ"
-
-#~ msgid "Módulos clínicos"
-#~ msgstr "Módulos clínicos"
-
-#~ msgid ""
-#~ "Escolha uma área, ambas ou nenhuma. Agenda, pacientes, prontuário comum e "
-#~ "financeiro continuam disponíveis. Desativar não apaga o histórico."
-#~ msgstr ""
-#~ "Elija un área, ambas o ninguna. La agenda, los pacientes, la historia "
-#~ "clínica común y las finanzas siguen disponibles. Desactivar no borra el "
-#~ "historial."
-
-#~ msgid "área"
-#~ msgstr "área"
-
-#~ msgid ""
-#~ "Mostra as partes de cada área, como o odontograma nos orçamentos da "
-#~ "Odontologia. Trocar a área não apaga nada."
-#~ msgstr ""
-#~ "Muestra las partes de cada área, como el odontograma en los presupuestos "
-#~ "de Odontología. Cambiar el área no borra nada."
-
-#~ msgid "Documentação técnica"
-#~ msgstr "Documentación técnica"
-
-#~ msgid ""
-#~ "Documentação técnica: visível só para o superusuário, porque descreve a "
-#~ "infraestrutura do servidor."
-#~ msgstr ""
-#~ "Documentación técnica: visible solo para el superusuario, porque describe "
-#~ "la infraestructura del servidor."
-
-#~ msgid "Índice"
-#~ msgstr "Índice"
-
-#, python-format
-#~ msgid "Você está trabalhando na clínica %(nome)s."
-#~ msgstr "Está trabajando en la clínica %(nome)s."
-
-#~ msgid "Trocar de clínica"
-#~ msgstr "Cambiar de clínica"
-
-#~ msgid "Escolha a clínica"
-#~ msgstr "Elija la clínica"
-
-#~ msgid "Você é administrador da plataforma."
-#~ msgstr "Usted es administrador de la plataforma."
-
-#~ msgid "Escolha uma clínica para trabalhar."
-#~ msgstr "Elija una clínica para trabajar."
-
-#~ msgid "Escolher clínica"
-#~ msgstr "Elegir clínica"
-
-#~ msgid "Nenhuma clínica ativa disponível para você."
-#~ msgstr "Ninguna clínica activa disponible para usted."
-
-#~ msgid "Também tem acesso a outra clínica"
-#~ msgstr "También tiene acceso a otra clínica"
-
-#~ msgid "outras clínicas"
-#~ msgstr "otras clínicas"
-
-#, python-format
-#~ msgid "Bem-vindo(a), %(nome)s"
-#~ msgstr "Bienvenido(a), %(nome)s"
-
-#~ msgid "Clínica:"
-#~ msgstr "Clínica:"
-
-#~ msgid "Perfil:"
-#~ msgstr "Perfil:"

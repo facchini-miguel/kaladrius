@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Orçamentos" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Estimates" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% translate "Orçamentos" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Estimates" %}</h1>
   <div class="d-flex gap-2">
-    {% if can.catalogs.view %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Tabela de procedimentos" %}</a>{% endif %}
-    {% if can.estimates.create %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "Novo orçamento" %}</a>{% endif %}
+    {% if can.catalogs.view %}<a class="btn btn-outline-primary" href="{% url 'estimates:procedures' %}">{% translate "Procedure price list" %}</a>{% endif %}
+    {% if can.estimates.create %}<a class="btn btn-primary" href="{% url 'estimates:new' %}">{% translate "New estimate" %}</a>{% endif %}
   </div>
 </div>
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-md-6"><input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate "Patient name" %}" aria-label="{% translate "Search" %}"></div>
   <div class="col-6 col-md-3">
-    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
+    <select name="status" class="form-select" aria-label="{% translate "Status" %}">
       {% for value, name in statuses %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ name }}</option>{% endfor %}
-      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todos" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "All" %}</option>
     </select>
   </div>
-  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filter" %}</button></div>
 </form>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Nº" %}</th><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Profissional" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Situação" %}</th></tr></thead>
+    <thead><tr><th>{% translate "No." %}</th><th>{% translate "Date" %}</th><th>{% translate "Patient" %}</th><th>{% translate "Practitioner" %}</th><th class="text-end">{% translate "Total" %}</th><th>{% translate "Status" %}</th></tr></thead>
     <tbody>
       {% for estimate in page %}
       <tr>
@@ -35,7 +35,7 @@
         <td>{% include "estimates/_status.html" %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum orçamento encontrado." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No estimates found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

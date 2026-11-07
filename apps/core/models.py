@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from apps.dentistry.teeth import FDI, NUMBERINGS
 
@@ -20,26 +21,26 @@ class User(AbstractUser):
     """
 
     language = models.CharField(
-        _("idioma"),
+        _("language"),
         max_length=10,
         choices=settings.LANGUAGES,
         blank=True,
-        help_text=_("Vazio: o idioma do navegador."),
+        help_text=_("Empty: the browser's language."),
     )
     last_seen_version = models.CharField(
-        _("última versão vista nas novidades"),
+        _("last version seen in What's new"),
         max_length=20,
         blank=True,
         editable=False,
     )
     # Public demo login (0.32.0, decision 085): its password is published, so it cannot
     # change it (nobody locks the others out) nor upload attachments (no file hosting).
-    demo = models.BooleanField(_("conta de demonstração"), default=False, editable=False)
+    demo = models.BooleanField(_("demo account"), default=False, editable=False)
 
     class Meta:
         db_table = "core_user"
-        verbose_name = _("usuário")
-        verbose_name_plural = _("usuários")
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
 
     def save(self, *args, **kwargs):
         # A new person starts at the current version: "the system was updated" and forty
@@ -58,105 +59,108 @@ class Clinic(models.Model):
     """A clinic: the tenant that owns patients, schedules and the rest of the data."""
 
     INTERVALS = [
-        (10, _("10 minutos")),
-        (15, _("15 minutos")),
-        (20, _("20 minutos")),
-        (30, _("30 minutos")),
-        (60, _("1 hora")),
+        (10, _("10 minutes")),
+        (15, _("15 minutes")),
+        (20, _("20 minutes")),
+        (30, _("30 minutes")),
+        (60, _("1 hour")),
     ]
 
     class Area(models.TextChoices):
         """Primary area, kept for classification and the initial appointment types."""
 
-        DENTISTRY = "dentistry", _("Odontologia")
-        MEDICINE = "medicine", _("Medicina")
-        OTHER = "other", _("Outra área da saúde")
+        DENTISTRY = "dentistry", _("Dentistry")
+        MEDICINE = "medicine", _("Medicine")
+        OTHER = "other", _("Other health area")
 
-    name = models.CharField(_("nome"), max_length=200)
+    name = models.CharField(_("name"), max_length=200)
     area = models.CharField(
-        _("área principal"),
+        _("primary area"),
         max_length=20,
         choices=Area.choices,
         default=Area.DENTISTRY,
         help_text=_(
-            "Define os tipos iniciais de atendimento. As especialidades e os módulos são "
-            "escolhidos abaixo e podem ser usados juntos."
+            "Sets the initial appointment types. The specialties and the modules are chosen "
+            "below and can be used together."
         ),
     )
     # The country's tax document, an individual's or a company's (decision 121).
-    document = models.CharField(_("documento"), max_length=20, blank=True)
+    document = models.CharField(_("document"), max_length=20, blank=True)
     email = models.EmailField(_("e-mail"), blank=True)
-    phone = models.CharField(_("telefone"), max_length=20, blank=True)
+    phone = models.CharField(_("phone"), max_length=20, blank=True)
     address = models.CharField(
-        _("endereço"),
+        _("address"),
         max_length=250,
         blank=True,
-        help_text=_("Rua, número, bairro, cidade/UF e CEP, como sai no recibo."),
+        help_text=_(
+            "Street, number, district, city/state and postal code, as printed on receipts."
+        ),
     )
     currency = models.CharField(
-        _("moeda"),
+        _("currency"),
         max_length=3,
         choices=currencies.CHOICES,
         default=currencies.DEFAULT,
         help_text=_(
-            "Em que moeda a clínica trabalha. Muda só como os valores aparecem, para toda a "
-            "equipe e em qualquer idioma: nenhum valor já lançado é convertido."
+            "The currency the clinic works in. It only changes how amounts are shown, for the "
+            "whole team and in any language: no amount already entered is converted."
         ),
     )
     country = models.CharField(
-        _("país"),
+        _("country"),
         max_length=2,
         choices=countries.CHOICES,
         default=countries.DEFAULT,
         help_text=_(
-            "Define o fuso horário disponível, o formato de telefones, códigos postais e "
-            "datas em inglês, e a moeda sugerida."
+            "Sets the available time zones, the format of phones, postal codes and English "
+            "dates, and the suggested currency."
         ),
     )
     time_zone = models.CharField(
-        _("fuso horário"),
+        _("time zone"),
         max_length=40,
         choices=countries.TIME_ZONE_CHOICES,
         default=countries.DEFAULT_TIME_ZONE,
-        help_text=_("Os horários da agenda e de todo o sistema seguem este fuso."),
+        help_text=_("The schedule and every time in the system follow this time zone."),
     )
     tooth_numbering = models.CharField(
-        _("numeração dos dentes"),
+        _("tooth numbering"),
         max_length=10,
         choices=NUMBERINGS,
         default=FDI,
         help_text=_(
-            "Como os dentes aparecem no odontograma e nos orçamentos. Muda só a exibição: os "
-            "dentes já registrados continuam os mesmos."
+            "How teeth appear on the dental chart and in estimates. It only changes the "
+            "display: teeth already recorded stay the same."
         ),
     )
-    active = models.BooleanField(_("ativa"), default=True)
+    active = models.BooleanField(pgettext_lazy("feminine", "active"), default=True)
     require_two_factor = models.BooleanField(
-        _("exigir verificação em duas etapas de quem acessa o prontuário ou o financeiro"),
+        _("require two-step verification from whoever reaches the medical record or finance"),
         default=False,
         help_text=_(
-            "Profissionais com prontuário, administradores e o financeiro só usam o sistema "
-            "depois de ativar o código do aplicativo autenticador. A recepção não é obrigada."
+            "Practitioners with medical records, administrators and finance staff only use "
+            "the system after turning on the authenticator app code. The front desk is not "
+            "required."
         ),
     )
-    schedule_start = models.TimeField(_("início da agenda"), default=datetime.time(7, 30))
-    schedule_end = models.TimeField(_("fim da agenda"), default=datetime.time(20, 0))
+    schedule_start = models.TimeField(_("schedule start"), default=datetime.time(7, 30))
+    schedule_end = models.TimeField(_("schedule end"), default=datetime.time(20, 0))
     schedule_interval = models.PositiveSmallIntegerField(
-        _("duração de cada horário"), choices=INTERVALS, default=30
+        _("length of each slot"), choices=INTERVALS, default=30
     )
-    created_at = models.DateTimeField(_("criada em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterada em"), auto_now=True)
+    created_at = models.DateTimeField(pgettext_lazy("feminine", "created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(pgettext_lazy("feminine", "changed at"), auto_now=True)
 
     class Meta:
         db_table = "core_clinic"
-        verbose_name = _("clínica")
-        verbose_name_plural = _("clínicas")
+        verbose_name = _("clinic")
+        verbose_name_plural = _("clinics")
         ordering = ["name"]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(schedule_start__lt=models.F("schedule_end")),
                 name="clinic_schedule_start_before_end",
-                violation_error_message=_("O início da agenda deve ser antes do fim."),
+                violation_error_message=_("The schedule start must be before its end."),
             ),
         ]
 
@@ -209,16 +213,16 @@ class ModuleCode(models.TextChoices):
     log are the core: always on, so they are not listed here.
     """
 
-    DENTISTRY = "dentistry", _("Odontologia")
-    MEDICINE = "medicine", _("Medicina")
-    SCHEDULE = "schedule", _("Agenda")
-    MEDICAL_RECORDS = "medical_records", _("Prontuário")
-    ESTIMATES = "estimates", _("Orçamentos")
-    FINANCE = "finance", _("Financeiro")
-    RECALLS = "recalls", _("Rechamadas")
-    BIRTHDAYS = "birthdays", _("Aniversariantes")
-    HEALTH_PLANS = "health_plans", _("Convênios")
-    STAFF = "staff", _("Pessoal")
+    DENTISTRY = "dentistry", _("Dentistry")
+    MEDICINE = "medicine", _("Medicine")
+    SCHEDULE = "schedule", _("Schedule")
+    MEDICAL_RECORDS = "medical_records", _("Medical record")
+    ESTIMATES = "estimates", _("Estimates")
+    FINANCE = "finance", _("Finance")
+    RECALLS = "recalls", _("Recalls")
+    BIRTHDAYS = "birthdays", _("Birthdays")
+    HEALTH_PLANS = "health_plans", _("Health plans")
+    STAFF = "staff", _("Staff")
 
 
 SPECIALTIES = frozenset({ModuleCode.DENTISTRY, ModuleCode.MEDICINE})
@@ -232,13 +236,13 @@ DEPENDENCIES = {
 
 
 class ClinicModule(ClinicModel):
-    code = models.CharField(_("módulo"), max_length=20, choices=ModuleCode.choices)
-    active = models.BooleanField(_("ativo"), default=True)
+    code = models.CharField(_("module"), max_length=20, choices=ModuleCode.choices)
+    active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         db_table = "core_clinic_module"
-        verbose_name = _("módulo da clínica")
-        verbose_name_plural = _("módulos da clínica")
+        verbose_name = _("clinic module")
+        verbose_name_plural = _("clinic modules")
         ordering = ["code"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "code"], name="clinic_module_unique"),
@@ -258,11 +262,11 @@ class ClinicModule(ClinicModel):
 class Role(models.TextChoices):
     """A user's role inside one clinic. Permissions per role live in permissions.py."""
 
-    ADMIN = "admin", _("Administrador da clínica")
-    FRONT_DESK = "front_desk", _("Recepção")
-    PRACTITIONER = "practitioner", _("Profissional")
+    ADMIN = "admin", _("Clinic administrator")
+    FRONT_DESK = "front_desk", _("Front desk")
+    PRACTITIONER = "practitioner", _("Practitioner")
     # Finance only (0.35.0, decision 088): accounts, entries, cash desk, reports.
-    FINANCE = "finance", _("Financeiro")
+    FINANCE = "finance", _("Finance")
 
 
 class Membership(models.Model):
@@ -272,28 +276,28 @@ class Membership(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="memberships",
-        verbose_name=_("usuário"),
+        verbose_name=_("user"),
     )
     clinic = models.ForeignKey(
         Clinic,
         on_delete=models.CASCADE,
         related_name="memberships",
-        verbose_name=_("clínica"),
+        verbose_name=_("clinic"),
     )
-    role = models.CharField(_("perfil"), max_length=20, choices=Role.choices)
-    active = models.BooleanField(_("ativo"), default=True)
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
+    role = models.CharField(_("role"), max_length=20, choices=Role.choices)
+    active = models.BooleanField(_("active"), default=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     class Meta:
         db_table = "core_membership"
-        verbose_name = _("vínculo com clínica")
-        verbose_name_plural = _("vínculos com clínicas")
+        verbose_name = _("clinic membership")
+        verbose_name_plural = _("clinic memberships")
         ordering = ["clinic__name", "user__username"]
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "clinic"],
                 name="membership_unique_per_clinic",
-                violation_error_message=_("Este usuário já está vinculado a esta clínica."),
+                violation_error_message=_("This user is already a member of this clinic."),
             ),
         ]
 
@@ -308,9 +312,9 @@ class Backup(models.Model):
     how a failing backup gets noticed (the server has no e-mail or paid alerting).
     """
 
-    timestamp = models.DateTimeField(_("quando"), auto_now_add=True, db_index=True)
-    file = models.CharField(_("arquivo"), max_length=200)
-    size = models.PositiveBigIntegerField(_("tamanho (bytes)"))
+    timestamp = models.DateTimeField(_("when"), auto_now_add=True, db_index=True)
+    file = models.CharField(_("file"), max_length=200)
+    size = models.PositiveBigIntegerField(_("size (bytes)"))
 
     class Meta:
         verbose_name = _("backup")

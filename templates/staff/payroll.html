@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Folha do mês" %} {{ period|date:"m/Y" }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Month's pay" %} {{ period|date:"m/Y" }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-  <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Folha de {{ mes }}{% endblocktranslate %}</h1>
+  <h1 class="h3 mb-0">{% blocktranslate with mes=period|date:"m/Y" %}Pay for {{ mes }}{% endblocktranslate %}</h1>
   <div class="btn-group">
     <a class="btn btn-outline-secondary" href="?month={{ previous|date:'Y-m' }}">← {{ previous|date:"m/Y" }}</a>
     <a class="btn btn-outline-secondary" href="?month={{ following|date:'Y-m' }}">{{ following|date:"m/Y" }} →</a>
   </div>
 </div>
-<p class="text-body-secondary small">{% translate "Uma linha por funcionário ativo no mês. Horas extras = quantidade × valor da hora (sugerido: salário ÷ 220 × 1,5). Faltas descontam salário ÷ 30 por dia. Encargos, férias e 13º ficam com o contador." %}</p>
+<p class="text-body-secondary small">{% translate "One line per employee working in the month. Overtime = hours × hourly rate (suggested: salary ÷ 220 × 1.5). Absences deduct salary ÷ 30 per day. Payroll taxes, vacations and the 13th salary stay with the accountant." %}</p>
 
 <form method="post" novalidate>
   {% csrf_token %}
@@ -19,12 +19,12 @@
     <table class="table table-sm align-middle bg-white">
       <thead>
         <tr>
-          <th>{% translate "Funcionário" %}</th>
-          <th class="text-end">{% translate "Salário" %}</th>
-          <th style="width: 7rem;">{% translate "Horas extras" %}</th>
-          <th style="width: 9rem;">{% translate "Valor da hora" %}</th>
-          <th style="width: 6rem;">{% translate "Faltas (dias)" %}</th>
-          <th>{% translate "Observação" %}</th>
+          <th>{% translate "Employee" %}</th>
+          <th class="text-end">{% translate "Salary" %}</th>
+          <th style="width: 7rem;">{% translate "Overtime" %}</th>
+          <th style="width: 9rem;">{% translate "Hourly rate" %}</th>
+          <th style="width: 6rem;">{% translate "Absences (days)" %}</th>
+          <th>{% translate "Note" %}</th>
           <th class="text-end">{% translate "Total" %}</th>
         </tr>
       </thead>
@@ -42,32 +42,32 @@
           <td>{{ payslip.overtime_hours }}</td>
           <td class="text-nowrap">{{ payslip.overtime_rate|currency }}</td>
           <td>{{ payslip.absences }}</td>
-          <td>{{ payslip.note|default:"—" }}{% if payslip.is_posted %} · <a href="{% url 'finance:entry' payslip.entry_id %}">{% translate "no financeiro" %}</a>{% endif %}</td>
+          <td>{{ payslip.note|default:"—" }}{% if payslip.is_posted %} · <a href="{% url 'finance:entry' payslip.entry_id %}">{% translate "in finance" %}</a>{% endif %}</td>
           {% endif %}
           <td class="text-end text-nowrap fw-semibold">{{ payslip.total|currency }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum funcionário com salário neste mês." %} {% if can.staff.create %}<a href="{% url 'staff:new' %}">{% translate "Cadastrar um funcionário" %}</a>{% endif %}</td></tr>
+        <tr><td colspan="7" class="text-body-secondary">{% translate "No employee with a salary in this month." %} {% if can.staff.create %}<a href="{% url 'staff:new' %}">{% translate "Register an employee" %}</a>{% endif %}</td></tr>
         {% endfor %}
       </tbody>
       {% if rows %}
-      <tfoot><tr class="fw-semibold"><td colspan="6">{% translate "Total do mês" %}</td><td class="text-end text-nowrap">{{ total|currency }}</td></tr></tfoot>
+      <tfoot><tr class="fw-semibold"><td colspan="6">{% translate "Month's total" %}</td><td class="text-end text-nowrap">{{ total|currency }}</td></tr></tfoot>
       {% endif %}
     </table>
   </div>
   {% if can_change and pending %}
   <div class="d-flex flex-wrap gap-2 mb-4">
-    <button type="submit" class="btn btn-outline-primary">{% translate "Salvar" %}</button>
+    <button type="submit" class="btn btn-outline-primary">{% translate "Save" %}</button>
   </div>
   <div class="card" style="max-width: 40rem;">
-    <div class="card-header">{% translate "Lançar no financeiro" %}</div>
+    <div class="card-header">{% translate "Launch into finance" %}</div>
     <div class="card-body">
-      <p class="text-body-secondary small">{% translate "Cada linha ainda não lançada vira uma conta a pagar, em nome do funcionário. Depois de lançada, a linha não muda mais aqui; para refazer, cancele a conta no financeiro." %}</p>
+      <p class="text-body-secondary small">{% translate "Each line not launched yet becomes a payable in the employee's name. Once launched, the line no longer changes here; to redo it, cancel the payable in finance." %}</p>
       <div class="row">
         <div class="col-md-6">{% with field=post_form.category %}{% include "includes/field.html" %}{% endwith %}</div>
         <div class="col-md-6">{% with field=post_form.due_date %}{% include "includes/field.html" %}{% endwith %}</div>
       </div>
-      <button type="submit" name="action" value="lancar" class="btn btn-primary">{% translate "Salvar e lançar no financeiro" %}</button>
+      <button type="submit" name="action" value="lancar" class="btn btn-primary">{% translate "Save and launch into finance" %}</button>
     </div>
   </div>
   {% endif %}

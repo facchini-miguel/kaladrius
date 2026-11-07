@@ -15,7 +15,7 @@ class VisitForm(BootstrapForm, forms.ModelForm):
             # Before the mixin's __init__, so it gets the Bootstrap classes too.
             self.base_fields = {
                 "practitioner": forms.ModelChoiceField(
-                    queryset=practitioners, label=_("Profissional")
+                    queryset=practitioners, label=_("Practitioner")
                 ),
                 **self.base_fields,
             }
@@ -53,12 +53,12 @@ class CertificateForm(BootstrapForm, forms.ModelForm):
         data = super().clean()
         if data.get("kind") == Certificate.Kind.SICK_LEAVE:
             if not data.get("days"):
-                self.add_error("days", _("Informe quantos dias de afastamento."))
+                self.add_error("days", _("Enter how many days of leave."))
         else:
             data["days"] = None
         start, end = data.get("start_time"), data.get("end_time")
         if start and end and end <= start:
-            self.add_error("end_time", _("O horário final precisa ser depois do inicial."))
+            self.add_error("end_time", _("The end time must be after the start time."))
         return data
 
 
@@ -90,22 +90,22 @@ SIGNATURES = [
 
 
 class AttachmentForm(BootstrapForm, forms.Form):
-    file = forms.FileField(label=_("Arquivo"), help_text=_("PDF, JPG ou PNG, até 10 MB."))
+    file = forms.FileField(label=_("File"), help_text=_("PDF, JPG or PNG, up to 10 MB."))
     description = forms.CharField(
-        label=_("Descrição"),
+        label=_("Description"),
         max_length=200,
         required=False,
-        help_text=_("Por exemplo: hemograma de março."),
+        help_text=_("For example: March blood count."),
     )
 
     def clean_file(self):
         file = self.cleaned_data["file"]
         if file.size > MAX_ATTACHMENT_SIZE:
-            raise forms.ValidationError(_("O arquivo passa de 10 MB."))
+            raise forms.ValidationError(_("The file is larger than 10 MB."))
         start = file.read(8)
         file.seek(0)
         kind = next((kind for signature, kind in SIGNATURES if start.startswith(signature)), None)
         if kind is None:
-            raise forms.ValidationError(_("Envie um arquivo PDF, JPG ou PNG."))
+            raise forms.ValidationError(_("Send a PDF, JPG or PNG file."))
         file.checked_kind = kind
         return file

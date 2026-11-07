@@ -1,57 +1,57 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Pacientes" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Patients" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Pacientes" %}</h1>
+  <h1 class="h3 mb-0">{% translate "Patients" %}</h1>
   {% if can.patients.create %}
-  <a class="btn btn-primary" href="{% url 'patients:new' %}">{% translate "Novo paciente" %}</a>
+  <a class="btn btn-primary" href="{% url 'patients:new' %}">{% translate "New patient" %}</a>
   {% endif %}
 </div>
 
-{% document_label "patient" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Nome, código ou {{ documentos }}{% endblocktranslate %}
+{% document_label "patient" "company" as documents %}{% blocktranslate with documentos=documents asvar search_hint %}Name, code or {{ documentos }}{% endblocktranslate %}
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
     <input type="search" name="q" value="{{ search }}" class="form-control" autofocus
-           placeholder="{{ search_hint }}" aria-label="{% translate 'Buscar paciente' %}">
+           placeholder="{{ search_hint }}" aria-label="{% translate "Search patient" %}">
   </div>
   <div class="col-6 col-md-2">
-    <select name="kind" class="form-select" aria-label="{% translate 'Tipo' %}">
-      <option value="">{% translate "Todos os tipos" %}</option>
+    <select name="kind" class="form-select" aria-label="{% translate "Type" %}">
+      <option value="">{% translate "All types" %}</option>
       {% for value, label in types %}
       <option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">
-    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="active"{% if status == "active" %} selected{% endif %}>{% translate "Ativos" %}</option>
-      <option value="inactive"{% if status == "inactive" %} selected{% endif %}>{% translate "Inativos" %}</option>
-      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todos" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate "Status" %}">
+      <option value="active"{% if status == "active" %} selected{% endif %}>{% translate "Active" context "plural" %}</option>
+      <option value="inactive"{% if status == "inactive" %} selected{% endif %}>{% translate "Inactive" context "plural" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "All" %}</option>
       {% if can.patients.delete %}
-      <option value="archived"{% if status == "archived" %} selected{% endif %}>{% translate "Arquivados" %}</option>
+      <option value="archived"{% if status == "archived" %} selected{% endif %}>{% translate "Archived" context "plural" %}</option>
       {% endif %}
     </select>
   </div>
   <div class="col-md-2">
-    <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
+    <button type="submit" class="btn btn-primary w-100">{% translate "Search" %}</button>
   </div>
 </form>
 
-<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} paciente{% plural %}{{ total }} pacientes{% endblocktranslate %}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} patient{% plural %}{{ total }} patients{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Código" %}</th>
-        <th>{% translate "Nome" %}</th>
+        <th>{% translate "Code" %}</th>
+        <th>{% translate "Name" %}</th>
         <th>{% document_label "patient" "company" %}</th>
-        <th>{% translate "Telefone" %}</th>
-        <th>{% translate "Cidade" %}</th>
-        <th>{% translate "Idade" %}</th>
-        <th class="text-end">{% translate "Ações" %}</th>
+        <th>{% translate "Phone" %}</th>
+        <th>{% translate "City" %}</th>
+        <th>{% translate "Age" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -61,8 +61,8 @@
         <td>
           <a href="{% url 'patients:record' patient.pk %}">{{ patient.name }}</a>
           {% if patient.kind == "company" %}<span class="badge text-bg-info ms-1">PJ</span>{% endif %}
-          {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inativo" %}</span>{% endif %}
-          {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Arquivado" %}</span>{% endif %}
+          {% if not patient.active %}<span class="badge text-bg-secondary ms-1">{% translate "Inactive" %}</span>{% endif %}
+          {% if patient.archived %}<span class="badge text-bg-dark ms-1">{% translate "Archived" %}</span>{% endif %}
         </td>
         <td class="text-nowrap">{{ patient.tax_id|document:patient.document_role|default:"—" }}</td>
         <td class="text-nowrap">{{ patient.main_phone|phone|default:"—" }}</td>
@@ -70,19 +70,19 @@
         <td>{% if patient.age is not None %}{{ patient.age }}{% else %}—{% endif %}</td>
         <td class="text-end text-nowrap">
           {% if patient.archived %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "Ver" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:record' patient.pk %}">{% translate "View" %}</a>
           {% else %}
           {% if can.patients.change %}
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' patient.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'patients:edit' patient.pk %}">{% translate "Edit" %}</a>
           {% endif %}
           {% if can.patients.delete %}
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' patient.pk %}">{% translate "Arquivar" %}</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'patients:archive' patient.pk %}">{% translate "Archive" %}</a>
           {% endif %}
           {% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhum paciente encontrado." %}</td></tr>
+      <tr><td colspan="7" class="text-body-secondary">{% translate "No patients found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

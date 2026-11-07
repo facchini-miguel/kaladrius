@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Página não encontrada" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Page not found" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Página não encontrada" %}</h1>
-<p>{% translate "O endereço não existe ou o registro não pertence à clínica atual." %}</p>
-<p><a href="{% url 'home' %}">{% translate "Voltar ao início" %}</a></p>
+<h1 class="h3 mb-3">{% translate "Page not found" %}</h1>
+<p>{% translate "The address does not exist or the record does not belong to the current clinic." %}</p>
+<p><a href="{% url 'home' %}">{% translate "Back to home" %}</a></p>
 {% endblock %}

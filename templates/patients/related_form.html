@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Pessoa relacionada" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Related person" %} · {{ patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% if instance.pk %}{% translate "Pessoa relacionada" %}{% else %}{% translate "Nova pessoa relacionada" %}{% endif %}</h1>
+<h1 class="h3 mb-1">{% if instance.pk %}{% translate "Related person" %}{% else %}{% translate "New related person" %}{% endif %}</h1>
 <p class="text-body-secondary mb-4">{{ patient.name }}</p>
 <form method="post" style="max-width: 36rem;" novalidate>
   {% csrf_token %}
   {% with field=form.relationship %}{% include "includes/field.html" %}{% endwith %}
-  {% translate "Paciente da clínica" as label %}{% translate "Se a pessoa for paciente da clínica, procure pelo nome; se não, preencha o nome abaixo." as help_text %}
+  {% translate "Clinic patient" as label %}{% translate "If the person is a patient of the clinic, search by name; if not, fill in the name below." as help_text %}
   {% include "includes/patient_search.html" with field=form.other_patient patient=other label=label help_text=help_text %}
   {% with field=form.name %}{% include "includes/field.html" %}{% endwith %}
   {% with field=form.phone %}{% include "includes/field.html" %}{% endwith %}
   {% with field=form.note %}{% include "includes/field.html" %}{% endwith %}
-  <p class="text-body-secondary small">{% translate "O vínculo é só informação do cadastro: não dá acesso a nenhum dado do paciente." %}</p>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
+  <p class="text-body-secondary small">{% translate "The relationship is only registration information: it gives no access to any of the patient's data." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% if instance.pk %}
 <form method="post" action="{% url 'patients:related_remove' instance.pk %}" class="mt-3">
   {% csrf_token %}
-  <button type="submit" class="btn btn-outline-danger btn-sm">{% translate "Remover" %}</button>
+  <button type="submit" class="btn btn-outline-danger btn-sm">{% translate "Remove" %}</button>
 </form>
 {% endif %}
 {% endblock %}

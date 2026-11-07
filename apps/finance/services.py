@@ -84,15 +84,20 @@ def receive(installment, *, user, **fields):
         Installment.objects.select_for_update().select_related("entry").get(pk=installment.pk)
     )
     if installment.entry.cancelled:
-        raise ValidationError(_("Este lançamento foi cancelado."))
+        raise ValidationError(_("This entry was cancelled."))
     payment = Payment(clinic=installment.clinic, installment=installment, created_by=user, **fields)
     check_period(payment.clinic_id, payment.date)
     _paid, balance = installment.paid_and_balance()
     if payment.principal <= 0:
-        raise ValidationError(_("O valor abatido da parcela precisa ser maior que zero."))
+        raise ValidationError(
+            _("The amount deducted from the installment must be greater than zero.")
+        )
     if payment.principal > balance:
         raise ValidationError(
-            _("O valor abatido (%(abatido)s) passa do que falta na parcela (%(saldo)s).")
+            _(
+                "The amount deducted (%(abatido)s) exceeds what is left of the installment "
+                "(%(saldo)s)."
+            )
             % {"abatido": payment.principal, "saldo": balance}
         )
     payment.save()
@@ -103,7 +108,7 @@ def receive(installment, *, user, **fields):
 def reverse_payment(payment, *, reason, user):
     payment = Payment.objects.select_for_update().get(pk=payment.pk)
     if payment.reversed:
-        raise ValidationError(_("Este pagamento já foi estornado."))
+        raise ValidationError(_("This payment was already reversed."))
     check_period(payment.clinic_id, payment.date)
     payment.reversed = True
     payment.reversed_at = timezone.now()
@@ -131,11 +136,9 @@ def cancel(entry, *, reason, user):
     """
     entry = Entry.objects.select_for_update().get(pk=entry.pk)
     if entry.cancelled:
-        raise ValidationError(_("Este lançamento já foi cancelado."))
+        raise ValidationError(_("This entry was already cancelled."))
     if Payment.objects.filter(installment__entry=entry, reversed=False).exists():
-        raise ValidationError(
-            _("Este lançamento tem pagamentos. Estorne os pagamentos antes de cancelar.")
-        )
+        raise ValidationError(_("This entry has payments. Reverse the payments before cancelling."))
     commission = Commission.objects.filter(entry=entry, cancelled=False).first()
     if commission is not None:
         commissions.release(commission)  # raises ValidationError when it cannot be undone
@@ -165,9 +168,9 @@ def check_period(clinic_id, date):
     if until is not None and date <= until:
         raise ValidationError(
             _(
-                "O financeiro está fechado até %(ate)s: pagamentos e estornos nessa data ou "
-                "antes dela não podem ser registrados. Use uma data posterior ou peça ao "
-                "administrador para reabrir o período."
+                "Finance is closed up to %(ate)s: payments and reversals on or before that date "
+                "cannot be recorded. Use a later date or ask the administrator to reopen the "
+                "period."
             )
             % {"ate": date_format(until, "SHORT_DATE_FORMAT")}
         )
@@ -178,11 +181,13 @@ def close_books(clinic, until, *, user):
     """Close the books up to `ate` (at most yesterday: today's cash is still moving)."""
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     if until >= timezone.localdate():
-        raise ValidationError(_("Feche no máximo até ontem: hoje ainda há movimento."))
+        raise ValidationError(
+            _("Close up to yesterday at the latest: money is still moving today.")
+        )
     current = closed_until(clinic.pk)
     if current is not None and until <= current:
         raise ValidationError(
-            _("O financeiro já está fechado até %(ate)s. Para voltar, reabra o período.")
+            _("Finance is already closed up to %(ate)s. To go back, reopen the period.")
             % {"ate": date_format(current, "SHORT_DATE_FORMAT")}
         )
     return BookClosing.objects.create(clinic=clinic, until=until, created_by=user)
@@ -194,11 +199,11 @@ def reopen_books(clinic, until, *, reason, user):
     Clinic.objects.select_for_update().get(pk=clinic.pk)
     current = closed_until(clinic.pk)
     if current is None:
-        raise ValidationError(_("O financeiro não está fechado."))
+        raise ValidationError(_("Finance is not closed."))
     if until is not None and until >= current:
-        raise ValidationError(_("Para reabrir, escolha uma data anterior ao fechamento atual."))
+        raise ValidationError(_("To reopen, choose a date before the current closing."))
     if not reason.strip():
-        raise ValidationError(_("Informe o motivo da reabertura."))
+        raise ValidationError(_("Enter the reason for reopening."))
     return BookClosing.objects.create(
         clinic=clinic, until=until, reason=reason.strip(), created_by=user
     )
@@ -208,14 +213,14 @@ def status(installment, today=None):
     """Status of an installment annotated with com_saldo() (code, label)."""
     today = today or timezone.localdate()
     if installment.entry.cancelled:
-        return "cancelled", _("Cancelada")
+        return "cancelled", pgettext("feminine", "Cancelled")
     if installment.balance <= 0:
-        return "paid", _("Paga")
+        return "paid", pgettext("feminine", "Paid")
     if installment.due_date < today:
-        return "overdue", _("Vencida")
+        return "overdue", pgettext("feminine", "Overdue")
     if installment.paid > 0:
-        return "partial", _("Paga em parte")
-    return "open", pgettext("parcela", "Em aberto")
+        return "partial", _("Partly paid")
+    return "open", pgettext("installment", "Open")
 
 
 def debtors(today=None):
@@ -449,7 +454,7 @@ def report(since, until):
     groups = AccountGroup.objects.exists()
     # Cost centers (decision 095) only once the clinic has registered one.
     cost_centers = CostCenter.objects.exists()
-    no_cost_center = {None: _("Sem centro de custo")}
+    no_cost_center = {None: _("No cost center")}
     cost_center = "installment__entry__cost_center__name"
     return {
         "groups": groups,
@@ -536,7 +541,7 @@ def tree_by_group(payments, kind):
         if totals[group.pk]
     ]
     if ungrouped:
-        rows.append((0, _("Sem grupo"), ungrouped))
+        rows.append((0, _("No group"), ungrouped))
     return rows
 
 
@@ -566,8 +571,8 @@ def planning(year, today=None):
     payments = valid_payments().filter(date__year=year)
     sections = []
     for kind, label, entries in (
-        (Category.Kind.INCOME, _("Receitas"), Entry.Kind.RECEIVABLE),
-        (Category.Kind.EXPENSE, _("Despesas"), Entry.Kind.PAYABLE),
+        (Category.Kind.INCOME, pgettext("plural", "Income"), Entry.Kind.RECEIVABLE),
+        (Category.Kind.EXPENSE, _("Expenses"), Entry.Kind.PAYABLE),
     ):
         groups, totals, ungrouped = totals_by_group(
             payments.filter(installment__entry__kind=entries), kind
@@ -645,7 +650,7 @@ def open_cash_register(account):
 @transaction.atomic
 def open_register(account, *, amount, user):
     if open_cash_register(account) is not None:
-        raise ValidationError(_("O caixa desta conta já está aberto."))
+        raise ValidationError(_("This account's drawer is already open."))
     return CashRegister.objects.create(
         clinic=account.clinic, account=account, opening_amount=amount, opened_by=user
     )
@@ -696,14 +701,14 @@ def register_summary(cash_register):
 def move_cash(cash_register, *, kind, amount, reason, user, other_account=None):
     cash_register = CashRegister.objects.select_for_update().get(pk=cash_register.pk)
     if not cash_register.is_open:
-        raise ValidationError(_("Este caixa já foi fechado."))
+        raise ValidationError(_("This drawer is already closed."))
     if other_account is not None and other_account.pk == cash_register.account_id:
-        raise ValidationError(_("Escolha uma conta diferente da do caixa."))
+        raise ValidationError(_("Choose an account other than the drawer's."))
     if (
         kind == CashMovement.Kind.WITHDRAWAL
         and amount > register_summary(cash_register)["expected"]
     ):
-        raise ValidationError(_("A retirada passa do valor que deveria estar no caixa."))
+        raise ValidationError(_("The withdrawal exceeds what should be in the drawer."))
     return CashMovement.objects.create(
         clinic=cash_register.clinic,
         cash_register=cash_register,
@@ -719,7 +724,7 @@ def move_cash(cash_register, *, kind, amount, reason, user, other_account=None):
 def close_register(cash_register, *, counted_amount, note, user):
     cash_register = CashRegister.objects.select_for_update().get(pk=cash_register.pk)
     if not cash_register.is_open:
-        raise ValidationError(_("Este caixa já foi fechado."))
+        raise ValidationError(_("This drawer is already closed."))
     cash_register.expected_amount = register_summary(cash_register)["expected"]
     cash_register.counted_amount = counted_amount
     cash_register.note = note

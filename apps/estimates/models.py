@@ -35,25 +35,25 @@ validade_padrao = default_valid_until
 class Procedure(ClinicModel):
     """An item of the clinic's price list (cleaning, filling, root canal...)."""
 
-    name = models.CharField(_("nome"), max_length=120, db_collation=ALPHABETICAL)
+    name = models.CharField(_("name"), max_length=120, db_collation=ALPHABETICAL)
     # In the country's procedure coding: TUSS, CDT, ADA item number... (decision 125).
-    code = models.CharField(_("código"), max_length=20, blank=True)
-    amount = models.DecimalField(_("valor"), **MONEY)
+    code = models.CharField(_("code"), max_length=20, blank=True)
+    amount = models.DecimalField(_("amount"), **MONEY)
     category = models.ForeignKey(
         "finance.Category",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("categoria"),
-        help_text=_("Categoria de receita usada quando o orçamento é aprovado."),
+        verbose_name=_("category"),
+        help_text=_("Income category used when the estimate is approved."),
     )
-    active = models.BooleanField(_("ativo"), default=True)
+    active = models.BooleanField(_("active"), default=True)
 
     class Meta:
         db_table = "estimates_procedure"
-        verbose_name = _("procedimento")
-        verbose_name_plural = _("procedimentos")
+        verbose_name = _("procedure")
+        verbose_name_plural = _("procedures")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(fields=["clinic", "name"], name="procedure_unique"),
@@ -68,15 +68,15 @@ class Procedure(ClinicModel):
 
 class Estimate(ClinicModel):
     class Status(models.TextChoices):
-        OPEN = "open", pgettext_lazy("orçamento", "Em aberto")
-        APPROVED = "approved", _("Aprovado")
-        REFUSED = "refused", _("Recusado")
+        OPEN = "open", pgettext_lazy("estimate", "Open")
+        APPROVED = "approved", _("Approved")
+        REFUSED = "refused", _("Refused")
 
     patient = models.ForeignKey(
         "patients.Patient",
         on_delete=models.PROTECT,
         related_name="estimates",
-        verbose_name=_("paciente"),
+        verbose_name=_("patient"),
     )
     practitioner = models.ForeignKey(
         "practitioners.Practitioner",
@@ -84,34 +84,34 @@ class Estimate(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("profissional"),
+        verbose_name=_("practitioner"),
     )
-    date = models.DateField(_("data"), default=timezone.localdate)
-    valid_until = models.DateField(_("válido até"), default=default_valid_until)
+    date = models.DateField(_("date"), default=timezone.localdate)
+    valid_until = models.DateField(_("valid until"), default=default_valid_until)
     status = models.CharField(
-        _("situação"),
+        _("status"),
         max_length=10,
         choices=Status.choices,
         default=Status.OPEN,
     )
-    discount = models.DecimalField(_("desconto"), default=Decimal("0.00"), **MONEY)
-    notes = models.TextField(_("observações"), blank=True)
+    discount = models.DecimalField(_("discount"), default=Decimal("0.00"), **MONEY)
+    notes = models.TextField(_("notes"), blank=True)
     entry = models.OneToOneField(
         "finance.Entry",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="estimate",
-        verbose_name=_("lançamento a receber"),
+        verbose_name=_("receivable"),
     )
-    decided_at = models.DateTimeField(_("aprovado ou recusado em"), null=True, blank=True)
+    decided_at = models.DateTimeField(_("approved or refused at"), null=True, blank=True)
     decided_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("aprovado ou recusado por"),
+        verbose_name=_("approved or refused by"),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -119,15 +119,15 @@ class Estimate(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("criado por"),
+        verbose_name=_("created by"),
     )
-    created_at = models.DateTimeField(_("criado em"), auto_now_add=True)
-    updated_at = models.DateTimeField(_("alterado em"), auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("changed at"), auto_now=True)
 
     class Meta:
         db_table = "estimates_estimate"
-        verbose_name = _("orçamento")
-        verbose_name_plural = _("orçamentos")
+        verbose_name = _("estimate")
+        verbose_name_plural = _("estimates")
         ordering = ["-date", "-pk"]
         constraints = [
             models.CheckConstraint(
@@ -161,7 +161,7 @@ class EstimateItem(ClinicModel):
         Estimate,
         on_delete=models.CASCADE,
         related_name="items",
-        verbose_name=_("orçamento"),
+        verbose_name=_("estimate"),
     )
     procedure = models.ForeignKey(
         Procedure,
@@ -169,25 +169,25 @@ class EstimateItem(ClinicModel):
         null=True,
         blank=True,
         related_name="+",
-        verbose_name=_("procedimento"),
+        verbose_name=_("procedure"),
     )
-    description = models.CharField(_("descrição"), max_length=200)
-    code = models.CharField(_("código"), max_length=20, blank=True)  # copied, like descricao
+    description = models.CharField(_("description"), max_length=200)
+    code = models.CharField(_("code"), max_length=20, blank=True)  # copied, like descricao
     # FDI tooth numbers separated by commas ("11,12"); empty for the whole mouth.
-    teeth = models.CharField(_("dentes"), max_length=200, blank=True)
+    teeth = models.CharField(_("teeth"), max_length=200, blank=True)
     faces = models.CharField(
-        _("faces ou região"),
+        _("surfaces or region"),
         max_length=60,
         blank=True,
-        help_text=_("Ex.: MOD, vestibular, arcada superior."),
+        help_text=_("E.g.: MOD, buccal, upper arch."),
     )
-    quantity = models.PositiveSmallIntegerField(_("quantidade"), default=1)
-    unit_price = models.DecimalField(_("valor unitário"), **MONEY)
+    quantity = models.PositiveSmallIntegerField(_("quantity"), default=1)
+    unit_price = models.DecimalField(_("unit price"), **MONEY)
 
     class Meta:
         db_table = "estimates_estimate_item"
-        verbose_name = _("item do orçamento")
-        verbose_name_plural = _("itens do orçamento")
+        verbose_name = _("estimate item")
+        verbose_name_plural = _("estimate items")
         ordering = ["pk"]
         constraints = [
             models.CheckConstraint(
@@ -215,7 +215,7 @@ class EstimateItem(ClinicModel):
         # The view sets the flag only for the system administrator (decision 115).
         allowed = getattr(self, "dentistry_off_allowed", False)
         if dental and not clinic.dentistry and not allowed:
-            raise ValidationError(_("Habilite Odontologia para alterar itens com dentes ou faces."))
+            raise ValidationError(_("Enable Dentistry to change items with teeth or surfaces."))
 
     @transaction.atomic
     def save(self, *args, **kwargs):

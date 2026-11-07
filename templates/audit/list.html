@@ -1,45 +1,45 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Auditoria" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Audit log" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-1">{% translate "Auditoria" %}</h1>
-<p class="text-body-secondary">{% translate "Quem criou, alterou, excluiu ou consultou dados desta clínica. Os registros não podem ser alterados." %}</p>
+<h1 class="h3 mb-1">{% translate "Audit log" %}</h1>
+<p class="text-body-secondary">{% translate "Who created, changed, deleted or viewed data in this clinic. Entries cannot be changed." %}</p>
 
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-3"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Usuário, registro ou código' %}" aria-label="{% translate 'Buscar' %}"></div>
+  <div class="col-md-3"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate "User, record or code" %}" aria-label="{% translate "Search" %}"></div>
   <div class="col-6 col-md-2">
-    <select name="action" class="form-select" aria-label="{% translate 'Ação' %}">
-      <option value="">{% translate "Todas as ações" %}</option>
+    <select name="action" class="form-select" aria-label="{% translate "Action" %}">
+      <option value="">{% translate "All actions" %}</option>
       {% for value, label in actions %}<option value="{{ value }}"{% if filters.action == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-6 col-md-2">
-    <select name="model_name" class="form-select" aria-label="{% translate 'Tipo de registro' %}">
-      <option value="">{% translate "Todos os tipos" %}</option>
+    <select name="model_name" class="form-select" aria-label="{% translate "Record type" %}">
+      <option value="">{% translate "All types" %}</option>
       {% for item in model_names %}<option value="{{ item }}"{% if filters.model_name == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
-  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
-  <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate "From" %}" title="{% translate "From" %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate "To" %}" title="{% translate "To" %}"></div>
+  <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">{% translate "Filter" %}</button></div>
 </form>
 
 <div class="table-responsive">
   <table class="table table-sm align-middle bg-white">
-    <thead><tr><th>{% translate "Quando" %}</th><th>{% translate "Usuário" %}</th><th>{% translate "Ação" %}</th><th>{% translate "Registro" %}</th><th>{% translate "Detalhes" %}</th>{% if not user.demo %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
+    <thead><tr><th>{% translate "When" %}</th><th>{% translate "User" %}</th><th>{% translate "Action" %}</th><th>{% translate "Record" %}</th><th>{% translate "Details" %}</th>{% if not user.demo %}<th>{% translate "IP" %}</th>{% endif %}</tr></thead>
     <tbody>
       {% for record in page %}
       <tr>
         <td class="text-nowrap">{{ record.timestamp|date:"SHORT_DATETIME_FORMAT" }}</td>
-        <td>{% if record.user_name %}{{ record.user_name }}{% else %}{% translate "sistema" %}{% endif %}</td>
+        <td>{% if record.user_name %}{{ record.user_name }}{% else %}{% translate "system" %}{% endif %}</td>
         <td>{{ record.get_action_display }}</td>
         <td>{% if record.model_name %}<span class="text-body-secondary">{{ record.model_name }} {{ record.object_id }}:</span> {% endif %}{{ record.object_repr }}</td>
         <td>
           {% if record.changes %}
           <details>
-            <summary>{% blocktranslate count total=record.changes|length %}{{ total }} campo{% plural %}{{ total }} campos{% endblocktranslate %}</summary>
+            <summary>{% blocktranslate count total=record.changes|length %}{{ total }} field{% plural %}{{ total }} fields{% endblocktranslate %}</summary>
             <ul class="small mb-0">
               {% for label, before, after in record.fields %}
               <li><strong>{{ label }}</strong>: {{ before|default_if_none:"—" }} → {{ after|default_if_none:"—" }}</li>
@@ -51,7 +51,7 @@
         {% if not user.demo %}<td class="small text-body-secondary">{{ record.ip|default:"" }}</td>{% endif %}
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-body-secondary">{% translate "Nenhum registro encontrado." %}</td></tr>
+      <tr><td colspan="6" class="text-body-secondary">{% translate "No entries found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -35,7 +35,7 @@ class CodeFormat:
         code = re.sub(r"[\s.\-/]", "", value or "").upper()
         if code and self.default and not re.fullmatch(self.default, code):
             raise ValidationError(
-                _("%(nome)s: formato inválido. Exemplo: %(exemplo)s.")
+                _("%(nome)s: invalid format. Example: %(exemplo)s.")
                 % {"nome": self.name, "exemplo": self.example}
             )
         return code
@@ -115,10 +115,10 @@ def with_local_name(label, local):
 def registration_label(country=None):
     """ "Registro da operadora (ANS)", or "" where the country has no insurer registry."""
     registration = for_country(country).registration
-    return with_local_name(_("Registro da operadora"), registration.name) if registration else ""
+    return with_local_name(_("Insurer registration"), registration.name) if registration else ""
 
 
 def code_label(country=None):
     """ "Código (TUSS)", or just "Código" where the country has no single coding."""
     procedure = for_country(country).procedure
-    return with_local_name(_("Código"), procedure.name if procedure else "")
+    return with_local_name(_("Code"), procedure.name if procedure else "")

@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Bancos" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Banks" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Bancos" %}</h1>
-<p class="text-body-secondary">{% translate "Instituições financeiras conforme a lista pública do Banco Central." %}</p>
+<h1 class="h3 mb-3">{% translate "Banks" %}</h1>
+<p class="text-body-secondary">{% translate "Financial institutions from the Central Bank of Brazil's public list." %}</p>
 
 <form method="get" class="row g-2 mb-3">
   <div class="col-sm-9">
-    <input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate 'Nome ou código do banco' %}" aria-label="{% translate 'Nome ou código do banco' %}">
+    <input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% translate "Bank name or code" %}" aria-label="{% translate "Bank name or code" %}">
   </div>
   <div class="col-sm-3">
-    <button type="submit" class="btn btn-primary w-100">{% translate "Buscar" %}</button>
+    <button type="submit" class="btn btn-primary w-100">{% translate "Search" %}</button>
   </div>
 </form>
 
 <div class="table-responsive">
   <table class="table table-sm table-hover bg-white">
-    <thead><tr><th>{% translate "Código" %}</th><th>{% translate "Nome" %}</th><th>{% translate "ISPB" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Code" %}</th><th>{% translate "Name" %}</th><th>{% translate "ISPB" %}</th></tr></thead>
     <tbody>
       {% for database in page %}
       <tr>
@@ -27,7 +27,7 @@
         <td>{{ database.ispb }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="3" class="text-body-secondary">{% translate "Nenhum banco encontrado." %}</td></tr>
+      <tr><td colspan="3" class="text-body-secondary">{% translate "No banks found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

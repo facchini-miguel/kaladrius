@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Atendimento" %} · {{ visit.patient.name }} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Visit" %} · {{ visit.patient.name }} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex gap-2 mb-3 d-print-none">
-  <button type="button" class="btn btn-primary" data-print>{% translate "Imprimir ou salvar em PDF" %}</button>
-  <a class="btn btn-link" href="{% url 'medical_records:visit' visit.pk %}">{% translate "Voltar" %}</a>
+  <button type="button" class="btn btn-primary" data-print>{% translate "Print or save as PDF" %}</button>
+  <a class="btn btn-link" href="{% url 'medical_records:visit' visit.pk %}">{% translate "Back" %}</a>
 </div>
 <div class="receipt bg-white border rounded p-4" style="max-width: 56rem;">
-  {% translate "PRONTUÁRIO" as document_title %}
+  {% translate "MEDICAL RECORD" as document_title %}
   {% include "medical_records/_header.html" with document_date=visit.date %}
-  <p class="mb-1"><strong>{% translate "Paciente" %}:</strong> {{ visit.patient.name }}{% if visit.patient.birth_date %} · {% translate "nascido(a) em" %} {{ visit.patient.birth_date|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
-  <p><strong>{% translate "Atendimento" %}:</strong> {{ visit.date|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</p>
+  <p class="mb-1"><strong>{% translate "Patient" %}:</strong> {{ visit.patient.name }}{% if visit.patient.birth_date %} · {% translate "born on" %} {{ visit.patient.birth_date|date:"SHORT_DATE_FORMAT" }}{% endif %}</p>
+  <p><strong>{% translate "Visit" %}:</strong> {{ visit.date|date:"SHORT_DATETIME_FORMAT" }} · {{ visit.practitioner.name }}</p>
   {% for label, value in fields %}{% if value %}
   <h2 class="h6 fw-semibold mt-3 mb-1">{{ label|capfirst }}</h2>
   <div>{{ value|linebreaksbr }}</div>
   {% endif %}{% endfor %}
   {% for addendum in addenda %}
-  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Adendo" %} · {{ addendum.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ addendum.practitioner.name }}</h2>
+  <h2 class="h6 fw-semibold mt-3 mb-1">{% translate "Addendum" %} · {{ addendum.created_at|date:"SHORT_DATETIME_FORMAT" }} · {{ addendum.practitioner.name }}</h2>
   <div>{{ addendum.text|linebreaksbr }}</div>
   {% endfor %}
-  <p class="small text-body-secondary mt-3">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalizado no sistema em {{ momento }}.{% endblocktranslate %}</p>
+  <p class="small text-body-secondary mt-3">{% blocktranslate with momento=visit.finalized_at|date:"SHORT_DATETIME_FORMAT" %}Finalized in the system on {{ momento }}.{% endblocktranslate %}</p>
   {% include "medical_records/_signature.html" with practitioner=visit.practitioner %}
 </div>
 {% endblock %}

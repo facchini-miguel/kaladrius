@@ -24,14 +24,14 @@ docker compose exec app python manage.py makemigrations --check
 
 ## Conventions
 
-- **Names in English** in new code (`Patient`, `Appointment`), **comments in English**; screen texts in Portuguese, inside `_()`. Older fields and functions still have Portuguese names (being renamed, decision 157).
-- **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`). Each app keeps its Portuguese **label** (`label = "pacientes"` in `apps.py`), the name the database tables, the migrations and the permissions know it by, and migration files keep their names: production has them recorded (decision 145).
+- **Every name in English**: code, comments, codes stored in the database, URLs, API fields (decisions 144 to 200). A new app is born in English: its folder, its `label` (the same as the folder), models, fields and migrations (decision 193).
+- **App folders and modules named in English** (`apps/patients/`, `apps/core/countries.py`); each app's `label` is its folder's name (decision 195). The names of the old migration files stay as they were.
 - **Management commands named in English**, options included (`python manage.py seed_sample_data --patients 50`) (decision 148).
 - **Templates named in English**, in a folder named after their app (`templates/patients/record.html`, `templates/finance/cash_flow.html`); Django's own names stay (`base.html`, `403.html`, `registration/login.html`) (decision 146).
 - **Test files named in English**, after what they test (`tests/test_patients.py`, `tests/test_schedule.py`), even when the module they test has a Portuguese name (decision 144). So are the test functions, saying what they check (`test_duplicate_cpf_refused_in_same_clinic_but_allowed_in_another`); the texts a test looks for on the screen stay in Portuguese (decision 181). The fixtures, helpers and variables of the tests are in English too (`clinic_a`, `create_user`, `client_for`, `scenario`; decision 188), while the fictitious data stays in Portuguese (`"Maria Paciente"`).
-- **Every text on screen** is written in Portuguese in the code and translated in `locale/en` and `locale/es`:
+- **Every text on screen** is written in English in the code, inside `_()` or `{% translate %}`, and translated in `locale/pt_BR` and `locale/es` (decision 200; the default language is still Brazilian Portuguese):
   ```bash
-  docker compose exec app python manage.py makemessages -l en -l es --no-location --ignore=staticfiles --ignore=tests
+  docker compose exec app python manage.py makemessages -l pt_BR -l es --no-location --ignore=staticfiles --ignore=tests --ignore=docs
   ```
 - **Documentation in three languages:** everything is in this site (`docs/`): a change to a page in `docs/docs/` also changes the same page in `docs/i18n/pt-BR/` and `docs/i18n/es/`, in the same commit.
 - **No inline JavaScript** (the Content Security Policy blocks it): scripts go in `static/js/`.

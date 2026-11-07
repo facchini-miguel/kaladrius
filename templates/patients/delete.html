@@ -1,33 +1,33 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Excluir paciente" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Delete patient" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Excluir definitivamente {{ nome }}?{% endblocktranslate %}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with nome=patient.name %}Permanently delete {{ nome }}?{% endblocktranslate %}</h1>
 <div class="alert alert-warning">
-  {% blocktranslate with lei=law.short_name %}Use só quando o próprio paciente pedir a exclusão dos seus dados ({{ lei }}). Para tirá-lo do dia a dia, mantenha-o arquivado. Antes, confira se a clínica não é obrigada a guardar os registros de atendimento.{% endblocktranslate %} {{ retention_period }}
+  {% blocktranslate with lei=law.short_name %}Use only when the patient asks for their data to be deleted ({{ lei }}). To take them out of day-to-day use, keep them archived. First, check that the clinic is not required to keep the care records.{% endblocktranslate %} {{ retention_period }}
 </div>
 {% if visits %}
 <div class="alert alert-danger">
-  {% blocktranslate count total=visits %}Este paciente tem prontuário ({{ total }} atendimento), que a clínica precisa guardar, então ele não pode ser excluído definitivamente: mantenha-o arquivado.{% plural %}Este paciente tem prontuário ({{ total }} atendimentos), que a clínica precisa guardar, então ele não pode ser excluído definitivamente: mantenha-o arquivado.{% endblocktranslate %} {{ retention_period }}
+  {% blocktranslate count total=visits %}This patient has a medical record ({{ total }} visit), which the clinic must keep, so they cannot be permanently deleted: keep them archived.{% plural %}This patient has a medical record ({{ total }} visits), which the clinic must keep, so they cannot be permanently deleted: keep them archived.{% endblocktranslate %} {{ retention_period }}
 </div>
-<a class="btn btn-link px-0" href="{% url 'patients:record' patient.pk %}">{% translate "Voltar para a ficha" %}</a>
+<a class="btn btn-link px-0" href="{% url 'patients:record' patient.pk %}">{% translate "Back to the patient record" %}</a>
 {% else %}
-<p>{% translate "Esta ação não pode ser desfeita:" %}</p>
+<p>{% translate "This action cannot be undone:" %}</p>
 <ul>
-  <li>{% translate "o cadastro do paciente é apagado;" %}</li>
-  <li>{% translate "os agendamentos continuam na agenda, mas sem o paciente;" %}</li>
-  <li>{% translate "as rechamadas do paciente são apagadas;" %}</li>
-  <li>{% translate "as carteirinhas de convênio do paciente são apagadas;" %}</li>
-  <li>{% translate "as pessoas relacionadas são apagadas, inclusive os vínculos de outros pacientes com ele;" %}</li>
-  <li>{% translate "a auditoria continua dizendo quem fez o quê e quando, mas sem os dados pessoais do paciente;" %}</li>
-  <li>{% translate "os backups com os dados atuais são apagados automaticamente em até 30 dias." %}</li>
+  <li>{% translate "the patient's record is deleted;" %}</li>
+  <li>{% translate "appointments stay in the schedule, without the patient;" %}</li>
+  <li>{% translate "the patient's recalls are deleted;" %}</li>
+  <li>{% translate "the patient's health plan cards are deleted;" %}</li>
+  <li>{% translate "the related people are deleted, including other patients' links to them;" %}</li>
+  <li>{% translate "the audit log still says who did what and when, without the patient's personal data;" %}</li>
+  <li>{% translate "backups with the current data are deleted automatically within 30 days." %}</li>
 </ul>
 <form method="post">
   {% csrf_token %}
-  <button type="submit" class="btn btn-danger">{% translate "Excluir definitivamente" %}</button>
-  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancelar" %}</a>
+  <button type="submit" class="btn btn-danger">{% translate "Delete permanently" %}</button>
+  <a class="btn btn-link" href="{% url 'patients:record' patient.pk %}">{% translate "Cancel" %}</a>
 </form>
 {% endif %}
 {% endblock %}

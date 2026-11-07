@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Percentual de comissão" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Commission percentage" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-4">{% blocktranslate with nome=practitioner.name %}Comissão de {{ nome }}{% endblocktranslate %}</h1>
+<h1 class="h3 mb-4">{% blocktranslate with nome=practitioner.name %}Commission of {{ nome }}{% endblocktranslate %}</h1>
 <form method="post" style="max-width: 24rem;" novalidate>
   {% csrf_token %}
   {% include "includes/form.html" %}
-  <p class="text-body-secondary small">{% translate "O novo percentual vale para os recebimentos ainda não comissionados." %}</p>
-  <button type="submit" class="btn btn-primary">{% translate "Salvar" %}</button>
-  <a class="btn btn-link" href="{% url 'finance:commissions' %}">{% translate "Cancelar" %}</a>
+  <p class="text-body-secondary small">{% translate "The new percentage applies to receipts not yet paid out." %}</p>
+  <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+  <a class="btn btn-link" href="{% url 'finance:commissions' %}">{% translate "Cancel" %}</a>
 </form>
 {% endblock %}

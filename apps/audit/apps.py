@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 class AuditConfig(AppConfig):
     name = "apps.audit"
     label = "audit"
-    verbose_name = _("Auditoria")
+    verbose_name = _("Audit log")
 
     def ready(self):
         from . import signals  # noqa: F401  (connects the signal handlers)

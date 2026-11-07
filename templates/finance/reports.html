@@ -1,44 +1,44 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% translate "Relatórios" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Reports" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-3">{% translate "Relatórios financeiros" %}</h1>
+<h1 class="h3 mb-3">{% translate "Financial reports" %}</h1>
 {% include "finance/_period.html" %}
 
 <div class="row g-3 mb-4">
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Recebido" %}</div><div class="fs-5 text-success">{{ report.total_received|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Pago" %}</div><div class="fs-5 text-danger">{{ report.total_paid|currency }}</div></div></div></div>
-  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Resultado" %}</div><div class="fs-5{% if report.result < 0 %} text-danger{% endif %}">{{ report.result|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Received" %}</div><div class="fs-5 text-success">{{ report.total_received|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Paid" %}</div><div class="fs-5 text-danger">{{ report.total_paid|currency }}</div></div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body"><div class="text-body-secondary small">{% translate "Result" %}</div><div class="fs-5{% if report.result < 0 %} text-danger{% endif %}">{{ report.result|currency }}</div></div></div></div>
 </div>
 
 <div class="row g-4">
-  {% translate "Recebido por forma de pagamento" as title1 %}
+  {% translate "Received by payment method" as title1 %}
   {% include "finance/_group.html" with title=title1 rows=report.by_method total=report.total_received %}
   {% if report.groups %}
-  {% translate "Recebido por grupo do plano de contas" as title_g1 %}
+  {% translate "Received by account group" as title_g1 %}
   {% include "finance/_tree.html" with title=title_g1 rows=report.by_group total=report.total_received %}
-  {% translate "Despesas pagas por grupo do plano de contas" as title_g2 %}
+  {% translate "Expenses paid by account group" as title_g2 %}
   {% include "finance/_tree.html" with title=title_g2 rows=report.expenses_by_group total=report.total_paid %}
   {% endif %}
-  {% translate "Recebido por categoria" as title2 %}
+  {% translate "Received by category" as title2 %}
   {% include "finance/_group.html" with title=title2 rows=report.by_category total=report.total_received %}
-  {% translate "Recebido por profissional" as title3 %}
+  {% translate "Received by practitioner" as title3 %}
   {% include "finance/_group.html" with title=title3 rows=report.by_practitioner total=report.total_received %}
-  {% translate "Despesas pagas por categoria" as title4 %}
+  {% translate "Expenses paid by category" as title4 %}
   {% include "finance/_group.html" with title=title4 rows=report.expenses_by_category total=report.total_paid %}
   {% if report.centers %}
-  {% translate "Recebido por centro de custo" as title5 %}
+  {% translate "Received by cost center" as title5 %}
   {% include "finance/_group.html" with title=title5 rows=report.by_center total=report.total_received %}
-  {% translate "Despesas pagas por centro de custo" as title6 %}
+  {% translate "Expenses paid by cost center" as title6 %}
   {% include "finance/_group.html" with title=title6 rows=report.expenses_by_center total=report.total_paid %}
   {% endif %}
 </div>
 <p class="text-body-secondary small mt-3">
-  {% translate "Pela data do pagamento, sem os estornados e os cancelados." %}
-  {% if closed_until %}{% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Financeiro fechado até {{ data }}: até essa data os valores não mudam mais.{% endblocktranslate %}{% endif %}
-  {% if report.interest %}{% translate "Juros e multa recebidos" %}: {{ report.interest|currency }}.{% endif %}
-  {% if report.discounts %}{% translate "Descontos dados" %}: {{ report.discounts|currency }}.{% endif %}
+  {% translate "By payment date, without reversed and cancelled ones." %}
+  {% if closed_until %}{% blocktranslate with data=closed_until|date:"SHORT_DATE_FORMAT" %}Finance closed up to {{ data }}: up to that date the amounts no longer change.{% endblocktranslate %}{% endif %}
+  {% if report.interest %}{% translate "Interest and late fees received" %}: {{ report.interest|currency }}.{% endif %}
+  {% if report.discounts %}{% translate "Discounts given" %}: {{ report.discounts|currency }}.{% endif %}
 </p>
 {% endblock %}

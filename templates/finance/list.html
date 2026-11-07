@@ -1,47 +1,47 @@
 {% extends "base.html" %}
 {% load i18n formats %}
 
-{% block title %}{% if payable %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %} · {{ system_name }}{% endblock %}
+{% block title %}{% if payable %}{% translate "Payables" %}{% else %}{% translate "Receivables" %}{% endif %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-  <h1 class="h3 mb-0">{% if payable %}{% translate "A pagar" %}{% else %}{% translate "A receber" %}{% endif %}</h1>
+  <h1 class="h3 mb-0">{% if payable %}{% translate "Payables" %}{% else %}{% translate "Receivables" %}{% endif %}</h1>
   <div class="d-flex gap-2">
     {% if payable %}
-    {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:expense_new' %}">{% translate "Nova despesa" %}</a>{% endif %}
+    {% if can.finance.create %}<a class="btn btn-primary" href="{% url 'finance:expense_new' %}">{% translate "New expense" %}</a>{% endif %}
     {% else %}
-    <a class="btn btn-outline-primary" href="{% url 'finance:debtors' %}">{% translate "Devedores" %}</a>
-    {% if can.receiving.create %}<a class="btn btn-primary" href="{% url 'finance:entry_new' %}">{% translate "Novo lançamento" %}</a>{% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'finance:debtors' %}">{% translate "Debtors" %}</a>
+    {% if can.receiving.create %}<a class="btn btn-primary" href="{% url 'finance:entry_new' %}">{% translate "New entry" %}</a>{% endif %}
     {% endif %}
   </div>
 </div>
 
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
-    <input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% if payable %}{% translate 'Fornecedor ou descrição' %}{% else %}{% translate 'Paciente, pagador ou descrição' %}{% endif %}" aria-label="{% translate 'Buscar' %}">
+    <input type="search" name="q" value="{{ search }}" class="form-control" placeholder="{% if payable %}{% translate "Supplier or description" %}{% else %}{% translate "Patient, payer or description" %}{% endif %}" aria-label="{% translate "Search" %}">
   </div>
   <div class="col-6 col-md-3">
-    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="open"{% if status == "open" %} selected{% endif %}>{% translate "Em aberto" %}</option>
-      <option value="overdue"{% if status == "overdue" %} selected{% endif %}>{% translate "Vencidas" %}</option>
-      <option value="paid"{% if status == "paid" %} selected{% endif %}>{% translate "Pagas" %}</option>
-      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "Todas" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate "Status" %}">
+      <option value="open"{% if status == "open" %} selected{% endif %}>{% translate "Open" context "pending" %}</option>
+      <option value="overdue"{% if status == "overdue" %} selected{% endif %}>{% translate "Overdue" context "feminine plural" %}</option>
+      <option value="paid"{% if status == "paid" %} selected{% endif %}>{% translate "Paid" context "feminine plural" %}</option>
+      <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "All" context "feminine" %}</option>
     </select>
   </div>
-  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+  <div class="col-6 col-md-3"><button type="submit" class="btn btn-primary w-100">{% translate "Filter" %}</button></div>
 </form>
 
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
     <thead>
       <tr>
-        <th>{% translate "Vencimento" %}</th>
-        <th>{% if payable %}{% translate "Fornecedor" %}{% else %}{% translate "Paciente ou pagador" %}{% endif %}</th>
-        <th>{% translate "Descrição" %}</th>
-        <th class="text-end">{% translate "Valor" %}</th>
-        <th class="text-end">{% translate "Falta" %}</th>
-        <th>{% translate "Situação" %}</th>
-        <th class="text-end">{% translate "Ações" %}</th>
+        <th>{% translate "Due date" %}</th>
+        <th>{% if payable %}{% translate "Supplier" %}{% else %}{% translate "Patient or payer" %}{% endif %}</th>
+        <th>{% translate "Description" %}</th>
+        <th class="text-end">{% translate "Amount" %}</th>
+        <th class="text-end">{% translate "Due" %}</th>
+        <th>{% translate "Status" %}</th>
+        <th class="text-end">{% translate "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -59,13 +59,13 @@
         <td>{% include "finance/_status.html" with status=installment.status %}</td>
         <td class="text-end text-nowrap">
           {% if installment.balance > 0 and not installment.entry.cancelled %}
-          {% if payable and can.finance.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Pagar" %}</a>
-          {% elif not payable and can.receiving.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Receber" %}</a>{% endif %}
+          {% if payable and can.finance.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Pay" %}</a>
+          {% elif not payable and can.receiving.create %}<a class="btn btn-sm btn-success" href="{% url 'finance:receive_installment' installment.pk %}">{% translate "Receive" %}</a>{% endif %}
           {% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="7" class="text-body-secondary">{% translate "Nenhuma parcela encontrada." %}</td></tr>
+      <tr><td colspan="7" class="text-body-secondary">{% translate "No installments found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

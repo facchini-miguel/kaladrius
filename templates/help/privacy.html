@@ -7,7 +7,7 @@
 <div class="mx-auto" style="max-width: 52rem;">
   <div class="card mb-4">
     <div class="card-body">
-      <div class="text-body-secondary small">{% translate "Contato para assuntos de privacidade" %}</div>
+      <div class="text-body-secondary small">{% translate "Privacy contact" %}</div>
       {% if clinic %}
       <div class="fs-5 fw-semibold">{{ clinic.name }}</div>
       {% if clinic.document %}<div class="small">{{ clinic.document_abbreviation }}: {{ clinic.written_document }}</div>{% endif %}
@@ -15,18 +15,18 @@
       {% if clinic.phone %}<div>{{ clinic.phone }}</div>{% endif %}
       {% if clinic.address %}<div class="small">{{ clinic.address }}</div>{% endif %}
       {% else %}
-      <div>{% translate "Fale com a clínica que atende você." %}</div>
+      <div>{% translate "Contact the clinic that treats you." %}</div>
       {% endif %}
     </div>
   </div>
   {% if law %}
   <div class="card border-primary mb-4">
     <div class="card-body">
-      <h2 class="h5">{% translate "País da clínica" %}: {{ country }}</h2>
-      <p>{% translate "Esta política foi escrita para a lei brasileira. Para esta clínica valem a lei e a autoridade abaixo: as referências à LGPD e à ANPD correspondem a elas, e os direitos da seção 8 são exercidos nos termos dessa lei." %}</p>
+      <h2 class="h5">{% translate "Clinic's country" %}: {{ country }}</h2>
+      <p>{% translate "This policy was written for Brazilian law. For this clinic, the law and authority below apply: references to the LGPD and the ANPD correspond to them, and the rights in section 8 are exercised under that law." %}</p>
       <ul class="mb-0">
-        <li>{% translate "Lei de proteção de dados" %}: {{ law.name }}</li>
-        {% if law.authority %}<li>{% translate "Autoridade" %}: {% if law.site %}<a href="{{ law.site }}" rel="noopener">{{ law.authority }}</a>{% else %}{{ law.authority }}{% endif %}</li>{% endif %}
+        <li>{% translate "Data protection law" %}: {{ law.name }}</li>
+        {% if law.authority %}<li>{% translate "Authority" %}: {% if law.site %}<a href="{{ law.site }}" rel="noopener">{{ law.authority }}</a>{% else %}{{ law.authority }}{% endif %}</li>{% endif %}
         <li>{{ retention_period }}</li>
       </ul>
     </div>

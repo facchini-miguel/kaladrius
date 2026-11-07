@@ -95,18 +95,18 @@ def _shown(choice, value):
 # Changes logged by hand, not a field's: their names and values, by the codes of decision 199
 # and the Portuguese words entries stored before it.
 EXTRA_LABELS = {
-    "password": _("senha"),
-    "senha": _("senha"),
-    "finalized": _("finalizado"),
-    "finalizado": _("finalizado"),
+    "password": _("password"),
+    "senha": _("password"),
+    "finalized": _("finalized"),
+    "finalizado": _("finalized"),
 }
 EXTRA_VALUES = {
-    "hidden": _("(oculta)"),
-    "(oculta)": _("(oculta)"),
-    "changed": _("(alterada)"),
-    "(alterada)": _("(alterada)"),
-    "yes": _("sim"),
-    "sim": _("sim"),
+    "hidden": _("(hidden)"),
+    "(oculta)": _("(hidden)"),
+    "changed": _("(changed)"),
+    "(alterada)": _("(changed)"),
+    "yes": _("yes"),
+    "sim": _("yes"),
 }
 
 

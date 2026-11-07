@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 {% load i18n %}
 
-{% block title %}{% translate "Rechamadas" %} · {{ system_name }}{% endblock %}
+{% block title %}{% translate "Recalls" %} · {{ system_name }}{% endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h3 mb-0">{% translate "Rechamadas" %}</h1>
-  {% if can.recalls.create %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "Nova rechamada" %}</a>{% endif %}
+  <h1 class="h3 mb-0">{% translate "Recalls" %}</h1>
+  {% if can.recalls.create %}<a class="btn btn-primary" href="{% url 'recalls:new' %}">{% translate "New recall" %}</a>{% endif %}
 </div>
 
 <form method="get" class="row g-2 mb-3">
-  <div class="col-md-4"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Nome do paciente' %}" aria-label="{% translate 'Nome do paciente' %}"></div>
+  <div class="col-md-4"><input type="search" name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate "Patient name" %}" aria-label="{% translate "Patient name" %}"></div>
   <div class="col-6 col-md-2">
-    <select name="status" class="form-select" aria-label="{% translate 'Situação' %}">
-      <option value="pending"{% if filters.status == "pending" %} selected{% endif %}>{% translate "Pendentes" %}</option>
-      <option value="done"{% if filters.status == "done" %} selected{% endif %}>{% translate "Concluídas" %}</option>
-      <option value="all"{% if filters.status == "all" %} selected{% endif %}>{% translate "Todas" %}</option>
+    <select name="status" class="form-select" aria-label="{% translate "Status" %}">
+      <option value="pending"{% if filters.status == "pending" %} selected{% endif %}>{% translate "Pending" context "plural" %}</option>
+      <option value="done"{% if filters.status == "done" %} selected{% endif %}>{% translate "Done" context "plural" %}</option>
+      <option value="all"{% if filters.status == "all" %} selected{% endif %}>{% translate "All" context "feminine" %}</option>
     </select>
   </div>
-  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate 'De' %}" title="{% translate 'De' %}"></div>
-  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate 'Até' %}" title="{% translate 'Até' %}"></div>
-  <div class="col-6 col-md-2"><button type="submit" class="btn btn-primary w-100">{% translate "Filtrar" %}</button></div>
+  <div class="col-6 col-md-2"><input type="date" name="since" value="{{ filters.since }}" class="form-control" aria-label="{% translate "From" %}" title="{% translate "From" %}"></div>
+  <div class="col-6 col-md-2"><input type="date" name="until" value="{{ filters.until }}" class="form-control" aria-label="{% translate "To" %}" title="{% translate "To" %}"></div>
+  <div class="col-6 col-md-2"><button type="submit" class="btn btn-primary w-100">{% translate "Filter" %}</button></div>
 </form>
 
-<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} rechamada{% plural %}{{ total }} rechamadas{% endblocktranslate %}</p>
+<p class="text-body-secondary small">{% blocktranslate count total=page.paginator.count %}{{ total }} recall{% plural %}{{ total }} recalls{% endblocktranslate %}</p>
 <div class="table-responsive">
   <table class="table table-hover align-middle bg-white">
-    <thead><tr><th>{% translate "Data" %}</th><th>{% translate "Paciente" %}</th><th>{% translate "Descrição" %}</th><th>{% translate "Situação" %}</th><th class="text-end">{% translate "Ações" %}</th></tr></thead>
+    <thead><tr><th>{% translate "Date" %}</th><th>{% translate "Patient" %}</th><th>{% translate "Description" %}</th><th>{% translate "Status" %}</th><th class="text-end">{% translate "Actions" %}</th></tr></thead>
     <tbody>
       {% for recall in page %}
       <tr>
@@ -34,24 +34,24 @@
         <td><a href="{% url 'patients:record' recall.patient_id %}">{{ recall.patient.name }}</a></td>
         <td>{{ recall.description }}</td>
         <td>
-          {% if recall.done %}<span class="badge text-bg-success">{% translate "Concluída" %}</span>
-          {% elif recall.date < today %}<span class="badge text-bg-danger">{% translate "Atrasada" %}</span>
-          {% elif recall.date == today %}<span class="badge text-bg-warning">{% translate "Hoje" %}</span>
-          {% else %}<span class="badge text-bg-secondary">{% translate "Pendente" %}</span>{% endif %}
+          {% if recall.done %}<span class="badge text-bg-success">{% translate "Done" %}</span>
+          {% elif recall.date < today %}<span class="badge text-bg-danger">{% translate "Overdue" context "late" %}</span>
+          {% elif recall.date == today %}<span class="badge text-bg-warning">{% translate "Today" %}</span>
+          {% else %}<span class="badge text-bg-secondary">{% translate "Pending" %}</span>{% endif %}
         </td>
         <td class="text-end text-nowrap">
           {% if can.recalls.change %}
           <form method="post" action="{% url 'recalls:complete' recall.pk %}" class="d-inline">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button type="submit" class="btn btn-sm btn-outline-success">{% if recall.done %}{% translate "Reabrir" %}{% else %}{% translate "Concluir" %}{% endif %}</button>
+            <button type="submit" class="btn btn-sm btn-outline-success">{% if recall.done %}{% translate "Reopen" %}{% else %}{% translate "Mark as done" %}{% endif %}</button>
           </form>
-          <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' recall.pk %}">{% translate "Editar" %}</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'recalls:edit' recall.pk %}">{% translate "Edit" %}</a>
           {% endif %}
-          {% if can.recalls.delete %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' recall.pk %}">{% translate "Excluir" %}</a>{% endif %}
+          {% if can.recalls.delete %}<a class="btn btn-sm btn-outline-danger" href="{% url 'recalls:delete' recall.pk %}">{% translate "Delete" %}</a>{% endif %}
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="5" class="text-body-secondary">{% translate "Nenhuma rechamada encontrada." %}</td></tr>
+      <tr><td colspan="5" class="text-body-secondary">{% translate "No recalls found." %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

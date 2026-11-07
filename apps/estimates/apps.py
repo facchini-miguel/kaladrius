@@ -5,4 +5,4 @@ from django.utils.translation import gettext_lazy as _
 class EstimatesConfig(AppConfig):
     name = "apps.estimates"
     label = "estimates"
-    verbose_name = _("Orçamentos")
+    verbose_name = _("Estimates")

@@ -29,15 +29,13 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
 
     tax_id = document_field()  # the country's employee document (decision 121)
     phone = forms.CharField(
-        label=_("Telefone"),
+        label=_("Phone"),
         max_length=16,
         required=False,
         widget=forms.TextInput({"inputmode": "tel"}),
     )
-    salary = _money(_("Salário"), required=False)
-    salary_since = forms.DateField(
-        label=_("Salário a partir de"), widget=DATE_INPUT, required=False
-    )
+    salary = _money(_("Salary"), required=False)
+    salary_since = forms.DateField(label=_("Salary from"), widget=DATE_INPUT, required=False)
 
     class Meta:
         model = Employee
@@ -67,20 +65,20 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
             self.fields["tax_id"].label = self.document.abbreviation
             self.fields["tax_id"].widget.attrs["placeholder"] = self.document.example
         if self.instance.pk:
-            self.fields["salary"].label = _("Novo salário")
+            self.fields["salary"].label = _("New salary")
             self.fields["salary"].help_text = _(
-                "Só para um aumento ou mudança: o anterior fica no histórico."
+                "Only for a raise or change: the previous one stays in the history."
             )
         else:
             self.fields["salary"].required = True
-            self.fields["salary_since"].help_text = _("Em branco: a data de admissão ou hoje.")
+            self.fields["salary_since"].help_text = _("Blank: the hiring date, or today.")
 
     def clean_tax_id(self):
         tax_id = identification.clean_value(
             self.cleaned_data.get("tax_id"), [self.document], self.document.abbreviation
         )
         if tax_id and Employee.objects.filter(tax_id=tax_id).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(_("Já existe um funcionário com este documento."))
+            raise forms.ValidationError(_("An employee with this document already exists."))
         return tax_id
 
     def clean_phone(self):
@@ -90,15 +88,15 @@ class EmployeeForm(BootstrapForm, forms.ModelForm):
         data = super().clean()
         salary = data.get("salary")
         if salary is not None and salary <= 0:
-            self.add_error("salary", _("Informe um valor maior que zero."))
+            self.add_error("salary", _("Enter an amount greater than zero."))
         if salary and not data.get("salary_since"):
             if self.instance.pk:
-                self.add_error("salary_since", _("Informe a partir de quando vale o novo salário."))
+                self.add_error("salary_since", _("Enter from when the new salary applies."))
             else:
                 data["salary_since"] = data.get("hired_on") or timezone.localdate()
         hired_on, left_on = data.get("hired_on"), data.get("left_on")
         if hired_on and left_on and left_on < hired_on:
-            self.add_error("left_on", _("O desligamento não pode ser antes da admissão."))
+            self.add_error("left_on", _("The leaving date cannot be before the hiring date."))
         return data
 
 
@@ -106,9 +104,9 @@ class PayrollForm(BootstrapForm, forms.ModelForm):
     """One employee's line of the month: overtime, absences and a note."""
 
     overtime_hours = LocalizedDecimalField(
-        label=_("Horas extras"), max_digits=6, decimal_places=2, min_value=0, localize=True
+        label=_("Overtime"), max_digits=6, decimal_places=2, min_value=0, localize=True
     )
-    overtime_rate = _money(_("Valor da hora extra"), required=True)
+    overtime_rate = _money(_("Overtime hourly rate"), required=True)
 
     class Meta:
         model = Payroll
@@ -123,13 +121,13 @@ class PayrollForm(BootstrapForm, forms.ModelForm):
     def clean_absences(self):
         absences = self.cleaned_data["absences"]
         if absences > 30:
-            raise forms.ValidationError(_("No máximo 30 dias de falta."))
+            raise forms.ValidationError(_("At most 30 days of absence."))
         return absences
 
 
 class PostPayrollForm(BootstrapForm, forms.Form):
-    category = forms.ModelChoiceField(label=_("Categoria"), queryset=Category.objects.none())
-    due_date = forms.DateField(label=_("Vencimento"), widget=DATE_INPUT)
+    category = forms.ModelChoiceField(label=_("Category"), queryset=Category.objects.none())
+    due_date = forms.DateField(label=_("Due date"), widget=DATE_INPUT)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

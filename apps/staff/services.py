@@ -60,16 +60,16 @@ def post_payroll(payrolls, *, category, due_date, user):
             continue
         if payroll.total <= 0:
             raise ValidationError(
-                _("O total de %(nome)s precisa ser maior que zero.") % {"nome": payroll.employee}
+                _("The total for %(nome)s must be greater than zero.") % {"nome": payroll.employee}
             )
         month = f"{payroll.period:%m/%Y}"
         payroll.entry = finance_services.create_entry(
             clinic=payroll.employee.clinic,
             kind=Entry.Kind.PAYABLE,
             payer=payroll.employee.name,
-            description=_("Salário %(mes)s") % {"mes": month},
+            description=_("Salary %(mes)s") % {"mes": month},
             category=category,
-            notes=_("Salário %(salario)s + horas extras %(extras)s − faltas %(faltas)s.")
+            notes=_("Salary %(salario)s + overtime %(extras)s − absences %(faltas)s.")
             % {
                 "salario": payroll.salary,
                 "extras": payroll.overtime_amount,

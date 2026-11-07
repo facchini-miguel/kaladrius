@@ -13,7 +13,7 @@ class HealthPlanForm(BootstrapForm, forms.ModelForm):
     # whose insurers have a registry (decision 125).
     registration = forms.CharField(max_length=30, required=False)
     phone = forms.CharField(
-        label=_("Telefone"),
+        label=_("Phone"),
         max_length=16,
         required=False,
         widget=forms.TextInput({"inputmode": "tel"}),
@@ -30,7 +30,7 @@ class HealthPlanForm(BootstrapForm, forms.ModelForm):
             self.instance.clinic = clinic
         for_country = insurance.for_country(clinic.country)
         if for_country.kinds:
-            self.fields["name"].help_text = _("Por exemplo: %(tipos)s.") % {
+            self.fields["name"].help_text = _("For example: %(tipos)s.") % {
                 "tipos": for_country.kinds
             }
         self.registration = for_country.registration
@@ -44,13 +44,13 @@ class HealthPlanForm(BootstrapForm, forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
         if HealthPlan.objects.filter(name__iexact=name).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(_("Já existe um convênio com este nome."))
+            raise forms.ValidationError(_("A health plan with this name already exists."))
         return name
 
     def clean_registration(self):
         registration = self.registration.clean_value(self.cleaned_data.get("registration"))
         if len(registration) > 20:
-            raise forms.ValidationError(_("Use no máximo 20 caracteres."))
+            raise forms.ValidationError(_("Use at most 20 characters."))
         return registration
 
     def clean_phone(self):
@@ -80,11 +80,11 @@ class MemberCardForm(BootstrapForm, forms.ModelForm):
         # The card's fields and their local names in the clinic's country (decision 125).
         for_country = insurance.for_country(patient.clinic.country)
         self.fields["number"].label = insurance.with_local_name(
-            _("Número da carteirinha"), for_country.number
+            _("Card number"), for_country.number
         )
         for field, local, label in (
-            ("group", for_country.group, _("Número do grupo")),
-            ("member_code", for_country.member_code, _("Código do beneficiário")),
+            ("group", for_country.group, _("Group number")),
+            ("member_code", for_country.member_code, _("Beneficiary code")),
         ):
             if local or getattr(self.instance, field):
                 self.fields[field].label = insurance.with_local_name(label, local)
@@ -108,5 +108,5 @@ class MemberCardForm(BootstrapForm, forms.ModelForm):
             .exclude(pk=self.instance.pk)
             .exists()
         ):
-            self.add_error("number", _("Esta carteirinha já está cadastrada neste convênio."))
+            self.add_error("number", _("This card is already registered in this health plan."))
         return data
